@@ -84,7 +84,6 @@ export const DateHistogram: FC<DateHistogramProps> = ({ field }) => {
     const diff = new Date(max).getTime() - new Date(min).getTime();
 
     const buckets = Math.ceil(diff / (1000 * 60 * 60 * 24));
-    console.log('overall', buckets);
 
     if (buckets === 1) return 24 * 60;
     return buckets > 5 ? 1 : 24;
@@ -165,7 +164,7 @@ export const DateHistogram: FC<DateHistogramProps> = ({ field }) => {
         view.addSignalListener('brushX', function (event, item) {
           if (item.date) {
             dispatch(
-              `@timestamp >= "${new Date(item.date[0]).toISOString()}" AND @timestamp < "${new Date(
+              `${field} >= "${new Date(item.date[0]).toISOString()}" AND ${field} < "${new Date(
                 item.date[1]
               ).toISOString()}"`
             );
