@@ -7,10 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export * from './trigger';
-export * from './row_click_trigger';
-export * from './default_trigger';
-export * from './visualize_field_trigger';
-export * from './visualize_geo_field_trigger';
-export * from './dashboard_app_panel_trigger';
-export * from './alert_rule_trigger';
+import { Trigger } from '.';
+
+export const alertRuleTrigger: Trigger = {
+  id: 'alertRule',
+  title:'alert rule trigger',
+  description: 'alert rule trigger',
+};

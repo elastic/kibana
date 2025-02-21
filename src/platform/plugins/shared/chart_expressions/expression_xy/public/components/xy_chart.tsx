@@ -118,6 +118,7 @@ import './xy_chart.scss';
 import { TooltipHeader } from './tooltip';
 import { LegendColorPickerWrapperContext, LegendColorPickerWrapper } from './legend_color_picker';
 import { createSplitPoint, getTooltipActions, getXSeriesPoint } from './tooltip/tooltip_actions';
+import { on } from 'events';
 
 declare global {
   interface Window {
@@ -140,6 +141,7 @@ export type XYChartRenderProps = Omit<XYChartProps, 'canNavigateToLens'> & {
   interactive?: boolean;
   onClickValue: (data: FilterEvent['data']) => void;
   onClickMultiValue: (data: MultiFilterEvent['data']) => void;
+  onCreateAlertRule: (data: MultiFilterEvent['data']) => void,
   layerCellValueActions: LayerCellValueActions;
   onSelectRange: (data: BrushEvent['data']) => void;
   renderMode: RenderMode;
@@ -203,6 +205,7 @@ export function XYChart({
   minInterval,
   onClickValue,
   onClickMultiValue,
+  onCreateAlertRule,
   layerCellValueActions,
   onSelectRange,
   setChartSize,
@@ -786,6 +789,7 @@ export function XYChart({
             actions={getTooltipActions(
               dataLayers,
               onClickMultiValue,
+              onCreateAlertRule,
               fieldFormats,
               formattedDatatables,
               xAxisFormatter,

@@ -1402,11 +1402,19 @@ export interface LensTableRowContextMenuEvent {
   data: RowClickContext['data'];
 }
 
+export interface LensAlertRulesEvent {
+  name: 'alertRule';
+  data: unknown;
+}
+
+
+
 export type TriggerEvent =
   | BrushTriggerEvent
   | ClickTriggerEvent
   | MultiClickTriggerEvent
-  | LensTableRowContextMenuEvent;
+  | LensTableRowContextMenuEvent 
+  | LensAlertRulesEvent
 
 export function isLensFilterEvent(event: ExpressionRendererEvent): event is ClickTriggerEvent {
   return event.name === 'filter';
@@ -1432,6 +1440,12 @@ export function isLensTableRowContextMenuClickEvent(
   event: ExpressionRendererEvent
 ): event is LensTableRowContextMenuEvent {
   return event.name === 'tableRowContextMenuClick';
+}
+
+export function isLensAlertRule(
+  event: ExpressionRendererEvent
+): event is LensAlertRulesEvent {
+  return event.name === 'alertRule';
 }
 
 /**
