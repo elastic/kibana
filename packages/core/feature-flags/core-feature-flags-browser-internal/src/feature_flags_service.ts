@@ -154,7 +154,8 @@ export class FeatureFlagsService {
         Won't hold the page load any longer.
         Feature flags will return the provided fallbacks until the provider is eventually initialized.`;
         this.logger.warn(msg);
-        apm.captureError(msg);
+        // Flag the transaction as slow so that we can quantify how often it happens
+        apm.getCurrentTransaction()?.addLabels({ slow_setup: true });
       }),
     ]);
     clearTimeout(timeoutId);
