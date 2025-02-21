@@ -296,7 +296,6 @@ export class Authenticator {
    */
   async login(request: KibanaRequest, attempt: ProviderLoginAttempt) {
     assertLoginAttempt(attempt);
-    console.log('KURT LOGIN IN AUTHENTICATOR');
 
     const { value: existingSessionValue } = await this.getSessionValue(request);
 
@@ -330,14 +329,11 @@ export class Authenticator {
         existingSessionValue?.provider.name === providerName &&
         existingSessionValue?.provider.type === provider.type;
 
-      // TODO KCG Call SAML provider to login
       const authenticationResult = await provider.login(
         request,
         attempt.value,
         ownsSession ? existingSessionValue!.state : null
       );
-
-      console.log('Kurt SAML Authc Result: ', authenticationResult);
 
       if (!authenticationResult.notHandled()) {
         const sessionUpdateResult = await this.updateSessionValue(request, {
@@ -366,8 +362,6 @@ export class Authenticator {
    * @param request Request instance.
    */
   async authenticate(request: KibanaRequest): Promise<AuthenticationResult> {
-    // TODO KCG is the kickoff method?
-    console.log('KURT AUTHENTICATE IN AUTHENTICATOR');
     const existingSession = await this.getSessionValue(request);
 
     if (this.shouldRedirectToLoginSelector(request, existingSession.value)) {
@@ -419,14 +413,6 @@ export class Authenticator {
       );
 
       if (!authenticationResult.notHandled()) {
-        if (provider.type === SAMLAuthenticationProvider.type) {
-          const authenticationResult2 = authenticationResult;
-          authenticationResult.state = {
-            ...authenticationResult.state,
-            ...existingSession.value?.state,
-          };
-        }
-
         const sessionUpdateResult = await this.updateSessionValue(request, {
           provider: { type: provider.type, name: providerName },
           authenticationResult,
@@ -894,8 +880,6 @@ export class Authenticator {
         );
       }
     } else if (authenticationResult.shouldUpdateState()) {
-      console.log('Existing session:', existingSessionValue);
-      // TODO KCG Here is where state can be modified during an update of session value, possibly some logic? State contains requestIds
       newSessionValue = await this.session.update(request, {
         ...existingSessionValue,
         userProfileId,

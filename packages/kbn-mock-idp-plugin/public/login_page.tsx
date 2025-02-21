@@ -42,6 +42,9 @@ export const LoginPage = () => {
       if (!values.role) {
         return;
       }
+      // delay the following statement for 10 seconds
+      await new Promise((resolve) => setTimeout(resolve, 10000));
+
       await switchCurrentUser({
         username: sanitizeUsername(values.full_name),
         full_name: values.full_name,
