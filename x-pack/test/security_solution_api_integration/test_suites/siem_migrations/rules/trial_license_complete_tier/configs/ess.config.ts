@@ -6,6 +6,8 @@
  */
 
 import { FtrConfigProviderContext } from '@kbn/test';
+import { PRECONFIGURED_BEDROCK_ACTION } from '../../../../../config/shared';
+
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const functionalConfig = await readConfigFile(
     require.resolve('../../../../../config/ess/config.base.trial')
@@ -22,19 +24,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
       ...defaultConfig.kbnTestServer,
       serverArgs: [
         ...defaultConfig.kbnTestServer.serverArgs,
-        `--xpack.actions.preconfigured=${JSON.stringify({
-          'preconfigured-bedrock': {
-            name: 'preconfigured-bedrock',
-            actionTypeId: '.bedrock',
-            config: {
-              apiUrl: 'https://example.com',
-            },
-            secrets: {
-              username: 'elastic',
-              password: 'elastic',
-            },
-          },
-        })}`,
+        `--xpack.actions.preconfigured=${JSON.stringify(PRECONFIGURED_BEDROCK_ACTION)}`,
       ],
     },
   };
