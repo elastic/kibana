@@ -5,44 +5,21 @@
  * 2.0.
  */
 
-import * as Url from 'url';
 import {
   getEsArchiver,
   getEsClient,
   getKbnClient,
-  ScoutTestConfig,
   getLogger,
   tags,
+  scoutApiTestConfig,
 } from '@kbn/scout';
-
-import { kbnTestConfig, esTestConfig } from '@kbn/test';
 
 describe(`${tags.DEPLOYMENT_AGNOSTIC.join(',')}`, () => {
   describe(`maps_telemetry`, () => {
     const log = getLogger();
-    const testConfig: ScoutTestConfig = {
-      serverless: false,
-      isCloud: false,
-      license: 'trial',
-      hosts: {
-        kibana: Url.format({
-          protocol: kbnTestConfig.getUrlParts().protocol,
-          hostname: kbnTestConfig.getUrlParts().hostname,
-          port: kbnTestConfig.getUrlParts().port,
-        }),
-        elasticsearch: Url.format({
-          protocol: esTestConfig.getUrlParts().protocol,
-          hostname: esTestConfig.getUrlParts().hostname,
-          port: esTestConfig.getUrlParts().port,
-        }),
-      },
-      auth: {
-        username: 'elastic',
-        password: 'changeme',
-      },
-    };
-    const kbnClient = getKbnClient(testConfig, log);
-    const esClient = getEsClient(testConfig, log);
+
+    const kbnClient = getKbnClient(scoutApiTestConfig, log);
+    const esClient = getEsClient(scoutApiTestConfig, log);
     const esArchiver = getEsArchiver(esClient, kbnClient, log);
 
     beforeAll(async () => {

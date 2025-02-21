@@ -6,3 +6,29 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
+
+import Url from 'url';
+import { esTestConfig, kbnTestConfig } from '@kbn/test';
+import type { ScoutTestConfig } from '../..';
+
+export const scoutApiTestConfig: ScoutTestConfig = {
+  serverless: false,
+  isCloud: false,
+  license: 'trial',
+  hosts: {
+    kibana: Url.format({
+      protocol: kbnTestConfig.getUrlParts().protocol,
+      hostname: kbnTestConfig.getUrlParts().hostname,
+      port: kbnTestConfig.getUrlParts().port,
+    }),
+    elasticsearch: Url.format({
+      protocol: esTestConfig.getUrlParts().protocol,
+      hostname: esTestConfig.getUrlParts().hostname,
+      port: esTestConfig.getUrlParts().port,
+    }),
+  },
+  auth: {
+    username: 'elastic',
+    password: 'changeme',
+  },
+};
