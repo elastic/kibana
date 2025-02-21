@@ -75,8 +75,10 @@ export const EntityStoreEnablementModal: React.FC<EntityStoreEnablementModalProp
       ? enablements.riskScore || enablements.entityStore // If both are disabled, check their enablements
       : riskScore.disabled
       ? enablements.entityStore // If riskScore is disabled, check entityStore
-      : enablements.riskScore; // Otherwise, check riskScore
-      
+      : entityStore.disabled
+      ? enablements.riskScore // If entityStore is disabled, check riskScore
+      : enablements.riskScore || enablements.entityStore; // Otherwise, check both
+
   const { AdditionalChargesMessage } = useContractComponents();
 
   if (!visible) {
