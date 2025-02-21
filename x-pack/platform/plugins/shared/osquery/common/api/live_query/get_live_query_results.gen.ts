@@ -24,6 +24,9 @@ import {
   SortOrderOrUndefined,
 } from '../model/schema/common_attributes.gen';
 
+/**
+ * The query parameters for getting live query results.
+ */
 export type GetLiveQueryResultsRequestQuery = z.infer<typeof GetLiveQueryResultsRequestQuery>;
 export const GetLiveQueryResultsRequestQuery = z.object({
   kuery: KueryOrUndefined.optional(),
@@ -32,3 +35,9 @@ export const GetLiveQueryResultsRequestQuery = z.object({
   sort: SortOrUndefined.optional(),
   sortOrder: SortOrderOrUndefined.optional(),
 });
+
+/**
+ * The response for getting live query results.
+ */
+export type GetLiveQueryResultsResponse = z.infer<typeof GetLiveQueryResultsResponse>;
+export const GetLiveQueryResultsResponse = z.object({});
