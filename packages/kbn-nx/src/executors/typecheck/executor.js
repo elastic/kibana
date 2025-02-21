@@ -28,7 +28,7 @@ module.exports = async function typecheckExecutor(options, context) {
       [pathToTsc, '--build', pathToProject, '--pretty'],
       {
         env: {
-          NODE_OPTIONS: '--max-old-space-size=4096',
+          NODE_OPTIONS: '--max-old-space-size=8096',
         },
         cwd: REPO_ROOT,
         stdio: 'inherit',
