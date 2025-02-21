@@ -26,7 +26,7 @@ import { forceHTMLElementOffsetWidth } from '../../../../components/effected_pol
 import type { PolicyData, TrustedAppConditionEntry } from '../../../../../../common/endpoint/types';
 
 import { EndpointDocGenerator } from '../../../../../../common/endpoint/generate_data';
-import { createHttpFetchError } from '@kbn/core-http-browser-mocks';
+import type { IHttpFetchError } from '@kbn/core-http-browser';
 
 jest.mock('../../../../../common/hooks/use_license', () => {
   const licenseServiceInstance = {
@@ -197,7 +197,7 @@ describe('Trusted apps form', () => {
 
   it('should display form submission errors', () => {
     const message = 'oh oh - failed';
-    formProps.error = createHttpFetchError(message);
+    formProps.error = new Error(message) as IHttpFetchError;
     render();
 
     expect(renderResult.getByTestId(`${formPrefix}-submitError`).textContent).toMatch(message);

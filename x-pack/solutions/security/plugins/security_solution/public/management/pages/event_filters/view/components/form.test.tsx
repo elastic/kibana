@@ -31,7 +31,7 @@ import {
   FILTER_PROCESS_DESCENDANTS_TAG,
   GLOBAL_ARTIFACT_TAG,
 } from '../../../../../../common/endpoint/service/artifacts/constants';
-import { createHttpFetchError } from '@kbn/core-http-browser-mocks';
+import type { IHttpFetchError } from '@kbn/core-http-browser';
 
 jest.mock('../../../../../common/lib/kibana');
 jest.mock('../../../../../common/containers/source');
@@ -907,7 +907,7 @@ describe('Event filter form', () => {
 
     it('should display form submission errors', () => {
       const message = 'oh oh - error';
-      formProps.error = createHttpFetchError(message);
+      formProps.error = new Error(message) as IHttpFetchError;
       const { getByTestId } = render();
 
       expect(getByTestId('eventFilters-form-submitError').textContent).toMatch(message);

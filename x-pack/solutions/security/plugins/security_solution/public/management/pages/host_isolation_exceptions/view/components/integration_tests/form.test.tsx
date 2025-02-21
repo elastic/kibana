@@ -25,9 +25,8 @@ import {
   isEffectedPolicySelected,
 } from '../../../../../components/effected_policy_select/test_utils';
 import { BY_POLICY_ARTIFACT_TAG_PREFIX } from '../../../../../../../common/endpoint/service/artifacts';
-import type { HttpFetchOptionsWithPath } from '@kbn/core/public';
+import type { HttpFetchOptionsWithPath, IHttpFetchError } from '@kbn/core/public';
 import { testIdPrefix } from '../form';
-import { createHttpFetchError } from '@kbn/core-http-browser-mocks';
 
 jest.mock('../../../../../../common/components/user_privileges');
 
@@ -300,8 +299,9 @@ describe('When on the host isolation exceptions entry form', () => {
     // FIXME:PT not sure why this test is not working but I have spent several hours now on it and can't
     //          figure it out. Skipping for now and will try to come back to it.
     it.skip('should display form submission errors', async () => {
+      const error = new Error('oh oh - error') as IHttpFetchError;
       exceptionsApiMock.responseProvider.exceptionUpdate.mockImplementation(() => {
-        throw createHttpFetchError('oh oh - error');
+        throw error;
       });
 
       const { getByTestId } = await render();
