@@ -275,7 +275,8 @@ xpack.dataUsage.enableExperimental: ['dataUsageDisabled']
 xpack.stack_connectors.enableExperimental: ['inferenceConnectorOff']
 
 # This is the definition introducing pre-configured Kibana Connector for Elastic default LLM
-Elastic-Inference-Rainbow-Sprinkles:
+xpack.actions.preconfigured:
+  Elastic-Inference-Rainbow-Sprinkles:
     name: Elastic-Inference-Rainbow-Sprinkles
     actionTypeId: .inference
     exposeConfig: true

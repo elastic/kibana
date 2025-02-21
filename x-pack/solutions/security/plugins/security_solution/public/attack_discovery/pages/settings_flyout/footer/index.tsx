@@ -9,7 +9,7 @@ import { EuiButton, EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, useEuiTheme } fro
 import { css } from '@emotion/react';
 import React from 'react';
 
-import * as i18n from '../../header/settings_modal/translations';
+import * as i18n from './translations';
 
 interface Props {
   closeModal: () => void;

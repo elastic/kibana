@@ -48,7 +48,7 @@ export const AssetInventorySearchBar = ({
       <div css={getContainerStyle(euiTheme)}>
         <SearchBar
           appName="Asset Inventory"
-          showFilterBar={true}
+          showFilterBar={false}
           showQueryInput={true}
           showDatePicker={false}
           isLoading={loading}

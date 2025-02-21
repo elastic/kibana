@@ -16,7 +16,7 @@ import {
   HasUniqueId,
 } from '@kbn/presentation-publishing';
 import { Action, IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
-import { skip } from 'rxjs';
+import { map, skip } from 'rxjs';
 
 import { dashboardExpandPanelActionStrings } from './_dashboard_actions_strings';
 import { ACTION_EXPAND_PANEL, DASHBOARD_ACTION_GROUP } from './constants';
@@ -52,14 +52,13 @@ export class ExpandPanelAction implements Action<EmbeddableApiContext> {
     return apiHasParentApi(embeddable) && apiCanExpandPanels(embeddable.parentApi);
   }
 
-  public subscribeToCompatibilityChanges(
-    { embeddable }: EmbeddableApiContext,
-    onChange: (isCompatible: boolean, action: ExpandPanelAction) => void
-  ) {
-    if (!isApiCompatible(embeddable)) return;
-    return embeddable.parentApi.expandedPanelId$.pipe(skip(1)).subscribe(() => {
-      onChange(isApiCompatible(embeddable), this);
-    });
+  public getCompatibilityChangesSubject({ embeddable }: EmbeddableApiContext) {
+    return isApiCompatible(embeddable)
+      ? embeddable.parentApi.expandedPanelId$.pipe(
+          skip(1),
+          map(() => undefined)
+        )
+      : undefined;
   }
 
   public async execute({ embeddable }: EmbeddableApiContext) {

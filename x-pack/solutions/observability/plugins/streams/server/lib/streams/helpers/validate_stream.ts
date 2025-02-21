@@ -8,6 +8,7 @@
 import {
   StreamDefinition,
   WiredStreamDefinition,
+  isGroupStreamDefinition,
   isIlmLifecycle,
   isIngestStreamDefinition,
   isInheritLifecycle,
@@ -72,6 +73,14 @@ export function validateStreamTypeChanges(
 
   if (fromWiredToUnwired) {
     throw new MalformedStreamError('Cannot change wired stream to unwired stream');
+  }
+
+  const fromIngestToGroup =
+    isGroupStreamDefinition(nextStreamDefinition) &&
+    isIngestStreamDefinition(currentStreamDefinition);
+
+  if (fromIngestToGroup) {
+    throw new MalformedStreamError('Cannot change ingest stream to group stream');
   }
 }
 

@@ -23,6 +23,7 @@ import {
   FrequentCompatibilityChangeAction,
   IncompatibleActionError,
 } from '@kbn/ui-actions-plugin/public';
+import { map } from 'rxjs';
 import { ACTION_EDIT_PANEL } from './constants';
 
 export type EditPanelActionApi = CanAccessViewMode & HasEditCapabilities;
@@ -50,18 +51,10 @@ export class EditPanelAction
     });
   }
 
-  public subscribeToCompatibilityChanges(
-    { embeddable }: EmbeddableApiContext,
-    onChange: (isCompatible: boolean, action: Action<EmbeddableApiContext>) => void
-  ) {
-    if (!isApiCompatible(embeddable)) return;
-    return getViewModeSubject(embeddable)?.subscribe((viewMode) => {
-      if (viewMode === 'edit' && isApiCompatible(embeddable) && embeddable.isEditingEnabled()) {
-        onChange(true, this);
-        return;
-      }
-      onChange(false, this);
-    });
+  public getCompatibilityChangesSubject({ embeddable }: EmbeddableApiContext) {
+    return isApiCompatible(embeddable)
+      ? getViewModeSubject(embeddable)?.pipe(map(() => undefined))
+      : undefined;
   }
 
   public couldBecomeCompatible({ embeddable }: EmbeddableApiContext) {

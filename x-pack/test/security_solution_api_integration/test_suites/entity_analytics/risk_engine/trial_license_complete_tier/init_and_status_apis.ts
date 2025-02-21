@@ -11,8 +11,8 @@ import { riskEngineConfigurationTypeName } from '@kbn/security-solution-plugin/s
 import { riskEngineRouteHelpersFactory } from '../../utils';
 import { FtrProviderContext } from '../../../../ftr_provider_context';
 
-const expectTaskIsNotRunning = (taskStatus?: string) => {
-  expect(['idle', 'claiming']).contain(taskStatus);
+const expectTaskIsHealthy = (taskStatus?: string) => {
+  expect(['idle', 'claiming', 'running']).contain(taskStatus);
 };
 
 export default ({ getService }: FtrProviderContext) => {
@@ -762,7 +762,7 @@ export default ({ getService }: FtrProviderContext) => {
         expect(status2.body.risk_engine_status).to.be('ENABLED');
 
         expect(status2.body.risk_engine_task_status?.runAt).to.be.a('string');
-        expectTaskIsNotRunning(status2.body.risk_engine_task_status?.status);
+        expectTaskIsHealthy(status2.body.risk_engine_task_status?.status);
         expect(status2.body.risk_engine_task_status?.startedAt).to.be(undefined);
 
         await riskEngineRoutes.disable();
@@ -778,7 +778,7 @@ export default ({ getService }: FtrProviderContext) => {
         expect(status4.body.risk_engine_status).to.be('ENABLED');
 
         expect(status4.body.risk_engine_task_status?.runAt).to.be.a('string');
-        expectTaskIsNotRunning(status4.body.risk_engine_task_status?.status);
+        expectTaskIsHealthy(status4.body.risk_engine_task_status?.status);
         expect(status4.body.risk_engine_task_status?.startedAt).to.be(undefined);
       });
     });

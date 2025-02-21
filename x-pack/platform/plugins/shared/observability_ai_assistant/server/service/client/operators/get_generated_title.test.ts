@@ -4,9 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { filter, lastValueFrom, of, throwError, toArray } from 'rxjs';
+import { filter, lastValueFrom, of, throwError } from 'rxjs';
 import { ChatCompleteResponse } from '@kbn/inference-common';
-import { Message, MessageRole, StreamingChatResponseEventType } from '../../../../common';
+import { Message, MessageRole } from '../../../../common';
 import { LangTracer } from '../instrumentation/lang_tracer';
 import { TITLE_CONVERSATION_FUNCTION_NAME, getGeneratedTitle } from './get_generated_title';
 
@@ -116,44 +116,6 @@ describe('getGeneratedTitle', () => {
     expect(await testTitle(`"My title"`)).toEqual('My title');
     expect(await testTitle(`'My title'`)).toEqual('My title');
     expect(await testTitle(`"User's request for a title"`)).toEqual(`User's request for a title`);
-  });
-
-  it('ignores token count events and still passes them through', async () => {
-    const { title$ } = callGenerateTitle([
-      {
-        content: '',
-        toolCalls: [
-          {
-            toolCallId: 'test_id',
-            function: {
-              name: 'title_conversation',
-              arguments: {
-                title: 'My title',
-              },
-            },
-          },
-        ],
-        tokens: {
-          completion: 10,
-          prompt: 10,
-          total: 10,
-        },
-      },
-    ]);
-
-    const events = await lastValueFrom(title$.pipe(toArray()));
-
-    expect(events).toEqual([
-      'My title',
-      {
-        tokens: {
-          completion: 10,
-          prompt: 10,
-          total: 10,
-        },
-        type: StreamingChatResponseEventType.TokenCount,
-      },
-    ]);
   });
 
   it('handles errors in chat and falls back to the default title', async () => {

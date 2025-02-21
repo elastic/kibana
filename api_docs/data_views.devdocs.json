@@ -13997,10 +13997,6 @@
                 "path": "x-pack/solutions/security/plugins/security_solution/public/sourcerer/containers/create_sourcerer_data_view.ts"
               },
               {
-                "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/public/asset_inventory/components/filters/filters.tsx"
-              },
-              {
                 "plugin": "timelines",
                 "path": "x-pack/platform/plugins/shared/timelines/server/search_strategy/index_fields/index.ts"
               },

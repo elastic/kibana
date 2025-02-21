@@ -13,7 +13,6 @@ import { Readable } from 'stream';
 import { AssistantScope } from '@kbn/ai-assistant-common';
 import { aiAssistantSimulatedFunctionCalling } from '../..';
 import { createFunctionResponseMessage } from '../../../common/utils/create_function_response_message';
-import { withoutTokenCountEvents } from '../../../common/utils/without_token_count_events';
 import { LangTracer } from '../../service/client/instrumentation/lang_tracer';
 import { flushBuffer } from '../../service/util/flush_buffer';
 import { observableIntoOpenAIStream } from '../../service/util/observable_into_openai_stream';
@@ -203,16 +202,14 @@ const chatRecallRoute = createObservabilityAIAssistantServerRoute({
       recallAndScore({
         analytics: (await resources.plugins.core.start()).analytics,
         chat: (name, params) =>
-          client
-            .chat(name, {
-              ...params,
-              stream: true,
-              connectorId,
-              simulateFunctionCalling,
-              signal,
-              tracer: new LangTracer(otelContext.active()),
-            })
-            .pipe(withoutTokenCountEvents()),
+          client.chat(name, {
+            ...params,
+            stream: true,
+            connectorId,
+            simulateFunctionCalling,
+            signal,
+            tracer: new LangTracer(otelContext.active()),
+          }),
         context,
         logger: resources.logger,
         messages: [],

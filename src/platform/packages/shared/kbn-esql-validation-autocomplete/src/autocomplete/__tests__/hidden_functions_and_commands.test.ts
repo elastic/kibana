@@ -8,6 +8,7 @@
  */
 
 import { setTestFunctions } from '../../shared/test_functions';
+import { FunctionDefinitionTypes } from '../../definitions/types';
 import { setup } from './helpers';
 
 describe('hidden commands', () => {
@@ -28,7 +29,7 @@ describe('hidden functions', () => {
   it('does not suggest hidden scalar functions', async () => {
     setTestFunctions([
       {
-        type: 'scalar',
+        type: FunctionDefinitionTypes.SCALAR,
         name: 'HIDDEN_FUNCTION',
         description: 'This is a hidden function',
         signatures: [{ params: [], returnType: 'text' }],
@@ -36,7 +37,7 @@ describe('hidden functions', () => {
         ignoreAsSuggestion: true,
       },
       {
-        type: 'scalar',
+        type: FunctionDefinitionTypes.SCALAR,
         name: 'VISIBLE_FUNCTION',
         description: 'This is a visible function',
         signatures: [{ params: [], returnType: 'text' }],
@@ -54,7 +55,7 @@ describe('hidden functions', () => {
   it('does not suggest hidden agg functions', async () => {
     setTestFunctions([
       {
-        type: 'agg',
+        type: FunctionDefinitionTypes.AGG,
         name: 'HIDDEN_FUNCTION',
         description: 'This is a hidden function',
         signatures: [{ params: [], returnType: 'text' }],
@@ -62,7 +63,7 @@ describe('hidden functions', () => {
         ignoreAsSuggestion: true,
       },
       {
-        type: 'agg',
+        type: FunctionDefinitionTypes.AGG,
         name: 'VISIBLE_FUNCTION',
         description: 'This is a visible function',
         signatures: [{ params: [], returnType: 'text' }],
@@ -80,7 +81,7 @@ describe('hidden functions', () => {
   it('does not suggest hidden operators', async () => {
     setTestFunctions([
       {
-        type: 'operator',
+        type: FunctionDefinitionTypes.OPERATOR,
         name: 'HIDDEN_OPERATOR',
         description: 'This is a hidden function',
         supportedCommands: ['eval', 'where', 'row', 'sort'],
@@ -97,7 +98,7 @@ describe('hidden functions', () => {
         ],
       },
       {
-        type: 'operator',
+        type: FunctionDefinitionTypes.OPERATOR,
         name: 'VISIBLE_OPERATOR',
         description: 'This is a visible function',
         supportedCommands: ['eval', 'where', 'row', 'sort'],

@@ -34,9 +34,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         port: proxy.getPort(),
       });
 
-      void proxy
-        .intercept('conversation', () => true, 'Hello from LLM Proxy')
-        .completeAfterIntercept();
+      void proxy.interceptConversation('Hello from LLM Proxy');
 
       const alertsResponseBody = await invokeChatCompleteWithFunctionRequest({
         connectorId,

@@ -22,6 +22,7 @@ import {
 } from '@kbn/expandable-flyout';
 import { useRuleDetails } from '../../rule_details/hooks/use_rule_details';
 import { useBasicDataFromDetailsData } from '../../document_details/shared/hooks/use_basic_data_from_details_data';
+import { useEventDetails } from '../../document_details/shared/hooks/use_event_details';
 import { DocumentDetailsRightPanelKey } from '../../document_details/shared/constants/panel_keys';
 import { RulePanelKey } from '../../rule_details/right';
 import { NetworkPanelKey } from '../../network_details';
@@ -32,6 +33,7 @@ import {
   NETWORK_HISTORY_ROW_TEST_ID,
   RULE_HISTORY_ROW_TEST_ID,
   USER_HISTORY_ROW_TEST_ID,
+  HISTORY_ROW_LOADING_TEST_ID,
 } from './test_ids';
 import { HostPanelKey, UserPanelKey } from '../../entity_details/shared/constants';
 
@@ -45,6 +47,7 @@ jest.mock('@kbn/expandable-flyout', () => ({
 jest.mock('../../../detection_engine/rule_management/logic/use_rule_with_fallback');
 jest.mock('../../document_details/shared/hooks/use_basic_data_from_details_data');
 jest.mock('../../rule_details/hooks/use_rule_details');
+jest.mock('../../document_details/shared/hooks/use_event_details');
 
 const flyoutContextValue = {
   openFlyout: jest.fn(),
@@ -112,6 +115,12 @@ describe('FlyoutHistoryRow', () => {
     jest.mocked(useRuleDetails).mockReturnValue({
       ...mockedRuleResponse,
       rule: { name: 'rule name' } as RuleResponse,
+      loading: false,
+    });
+    (useEventDetails as jest.Mock).mockReturnValue({
+      dataFormattedForFieldBrowser: {},
+      getFieldsData: jest.fn(),
+      loading: false,
     });
     (useBasicDataFromDetailsData as jest.Mock).mockReturnValue({ isAlert: false });
   });
@@ -182,6 +191,11 @@ describe('FlyoutHistoryRow', () => {
 describe('DocumentDetailsHistoryRow', () => {
   beforeEach(() => {
     jest.mocked(useExpandableFlyoutApi).mockReturnValue(flyoutContextValue);
+    (useEventDetails as jest.Mock).mockReturnValue({
+      dataFormattedForFieldBrowser: {},
+      getFieldsData: jest.fn(),
+      loading: false,
+    });
   });
 
   it('should render alert title when isAlert is true and rule name is defined', () => {
@@ -289,6 +303,22 @@ describe('GenericHistoryRow', () => {
     );
     expect(getByTestId(`${0}-${GENERIC_HISTORY_ROW_TEST_ID}`)).toHaveTextContent('Row name: title');
     fireEvent.click(getByTestId(`${0}-${GENERIC_HISTORY_ROW_TEST_ID}`));
+  });
+
+  it('should render empty context menu item when isLoading is true', () => {
+    const { getByTestId } = render(
+      <TestProviders>
+        <GenericHistoryRow
+          item={rowItems.host}
+          name="Row name"
+          icon={'user'}
+          title="title"
+          index={0}
+          isLoading
+        />
+      </TestProviders>
+    );
+    expect(getByTestId(HISTORY_ROW_LOADING_TEST_ID)).toBeInTheDocument();
   });
 
   it('should open the flyout when clicked', () => {

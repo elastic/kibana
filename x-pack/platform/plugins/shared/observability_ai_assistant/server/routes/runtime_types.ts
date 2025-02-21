@@ -7,9 +7,7 @@
 import * as t from 'io-ts';
 import { toBooleanRt } from '@kbn/io-ts-utils';
 import {
-  type Conversation,
   type ConversationCreateRequest,
-  type ConversationRequestBase,
   type ConversationUpdateRequest,
   type Message,
   MessageRole,
@@ -57,17 +55,12 @@ const tokenCountRt = t.type({
   total: t.number,
 });
 
-export const baseConversationRt: t.Type<ConversationRequestBase> = t.intersection([
+export const conversationCreateRt: t.Type<ConversationCreateRequest> = t.intersection([
   t.type({
     '@timestamp': t.string,
-    conversation: t.intersection([
-      t.type({
-        title: t.string,
-      }),
-      t.partial({
-        token_count: tokenCountRt,
-      }),
-    ]),
+    conversation: t.type({
+      title: t.string,
+    }),
     messages: t.array(messageRt),
     labels: t.record(t.string, t.string),
     numeric_labels: t.record(t.string, t.number),
@@ -84,17 +77,8 @@ export const assistantScopeType = t.union([
   t.literal('all'),
 ]);
 
-export const conversationCreateRt: t.Type<ConversationCreateRequest> = t.intersection([
-  baseConversationRt,
-  t.type({
-    conversation: t.type({
-      title: t.string,
-    }),
-  }),
-]);
-
 export const conversationUpdateRt: t.Type<ConversationUpdateRequest> = t.intersection([
-  baseConversationRt,
+  conversationCreateRt,
   t.type({
     conversation: t.intersection([
       t.type({
@@ -102,31 +86,10 @@ export const conversationUpdateRt: t.Type<ConversationUpdateRequest> = t.interse
         title: t.string,
       }),
       t.partial({
-        token_count: tokenCountRt,
+        token_count: tokenCountRt, // deprecated, but kept for backwards compatibility
       }),
     ]),
   }),
-]);
-
-export const conversationRt: t.Type<Conversation> = t.intersection([
-  baseConversationRt,
-  t.intersection([
-    t.type({
-      namespace: t.string,
-      conversation: t.intersection([
-        t.type({
-          id: t.string,
-          last_updated: t.string,
-        }),
-        t.partial({
-          token_count: tokenCountRt,
-        }),
-      ]),
-    }),
-    t.partial({
-      user: t.intersection([t.type({ name: t.string }), t.partial({ id: t.string })]),
-    }),
-  ]),
 ]);
 
 export const functionRt = t.intersection([

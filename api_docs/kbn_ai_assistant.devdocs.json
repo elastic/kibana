@@ -39,9 +39,7 @@
             "section": "def-public.UseKnowledgeBaseResult",
             "text": "UseKnowledgeBaseResult"
           },
-          "; showLinkToConversationsApp: boolean; onConversationUpdate: (conversation: { conversation: { id: string; title: string; last_updated: string; token_count?: ",
-          "TokenCount",
-          " | undefined; }; }) => void; onToggleFlyoutPositionMode?: ((flyoutPositionMode: ",
+          "; showLinkToConversationsApp: boolean; onConversationUpdate: (conversation: { conversation: { id: string; title: string; last_updated: string; }; }) => void; onToggleFlyoutPositionMode?: ((flyoutPositionMode: ",
           {
             "pluginId": "@kbn/ai-assistant",
             "scope": "public",
@@ -205,9 +203,7 @@
                 "label": "onConversationUpdate",
                 "description": [],
                 "signature": [
-                  "(conversation: { conversation: { id: string; title: string; last_updated: string; token_count?: ",
-                  "TokenCount",
-                  " | undefined; }; }) => void"
+                  "(conversation: { conversation: { id: string; title: string; last_updated: string; }; }) => void"
                 ],
                 "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/chat/chat_body.tsx",
                 "deprecated": false,
@@ -232,9 +228,7 @@
                         "label": "conversation",
                         "description": [],
                         "signature": [
-                          "{ id: string; title: string; last_updated: string; token_count?: ",
-                          "TokenCount",
-                          " | undefined; }"
+                          "{ id: string; title: string; last_updated: string; }"
                         ],
                         "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/chat/chat_body.tsx",
                         "deprecated": false,

@@ -9,7 +9,7 @@
 
 import { EuiBadge, EuiNotificationBadge, EuiToolTip, useEuiTheme } from '@elastic/eui';
 import React, { useEffect, useMemo, useState } from 'react';
-import { Subscription } from 'rxjs';
+import { Subscription, switchMap } from 'rxjs';
 
 import { uiActions } from '../../kibana_services';
 import {
@@ -86,11 +86,20 @@ export const usePresentationPanelHeaderActions = <
       );
       if (canceled) return;
       for (const badge of frequentlyChangingBadges) {
-        subscriptions.add(
-          badge.subscribeToCompatibilityChanges(apiContext, (isCompatible, action) =>
-            handleActionCompatibilityChange('badge', isCompatible, action as AnyApiAction)
+        const compatibilitySubject = badge
+          .getCompatibilityChangesSubject(apiContext)
+          ?.pipe(
+            switchMap(async () => {
+              return await badge.isCompatible({
+                ...apiContext,
+                trigger: panelBadgeTrigger,
+              });
+            })
           )
-        );
+          .subscribe(async (isCompatible) => {
+            handleActionCompatibilityChange('badge', isCompatible, badge as AnyApiAction);
+          });
+        subscriptions.add(compatibilitySubject);
       }
 
       // subscribe to any frequently changing notification actions
@@ -101,12 +110,26 @@ export const usePresentationPanelHeaderActions = <
         );
       if (canceled) return;
       for (const notification of frequentlyChangingNotifications) {
-        if (!disabledNotifications.includes(notification.id))
-          subscriptions.add(
-            notification.subscribeToCompatibilityChanges(apiContext, (isCompatible, action) =>
-              handleActionCompatibilityChange('notification', isCompatible, action as AnyApiAction)
+        if (!disabledNotifications.includes(notification.id)) {
+          const compatibilitySubject = notification
+            .getCompatibilityChangesSubject(apiContext)
+            ?.pipe(
+              switchMap(async () => {
+                return await notification.isCompatible({
+                  ...apiContext,
+                  trigger: panelNotificationTrigger,
+                });
+              })
             )
-          );
+            .subscribe(async (isCompatible) => {
+              handleActionCompatibilityChange(
+                'notification',
+                isCompatible,
+                notification as AnyApiAction
+              );
+            });
+          subscriptions.add(compatibilitySubject);
+        }
       }
     })();
 

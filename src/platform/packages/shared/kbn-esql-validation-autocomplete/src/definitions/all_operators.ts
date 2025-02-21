@@ -8,7 +8,12 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { FunctionDefinition, FunctionParameterType, FunctionReturnType } from './types';
+import {
+  type FunctionDefinition,
+  type FunctionParameterType,
+  type FunctionReturnType,
+  FunctionDefinitionTypes,
+} from './types';
 import { operatorFunctionDefinitions } from './generated/operators';
 type MathFunctionSignature = [FunctionParameterType, FunctionParameterType, FunctionReturnType];
 
@@ -57,7 +62,7 @@ function createComparisonDefinition(
   });
 
   return {
-    type: 'operator' as const,
+    type: FunctionDefinitionTypes.OPERATOR,
     name,
     description,
     supportedCommands: ['eval', 'where', 'row', 'sort'],
@@ -204,7 +209,7 @@ export const logicalOperators: FunctionDefinition[] = [
     }),
   },
 ].map(({ name, description }) => ({
-  type: 'operator' as const,
+  type: FunctionDefinitionTypes.OPERATOR,
   name,
   description,
   supportedCommands: ['eval', 'where', 'row', 'sort'],
@@ -234,7 +239,7 @@ const nullFunctions: FunctionDefinition[] = [
     }),
   },
 ].map<FunctionDefinition>(({ name, description }) => ({
-  type: 'operator',
+  type: FunctionDefinitionTypes.OPERATOR,
   name,
   description,
   supportedCommands: ['eval', 'where', 'row', 'sort'],
@@ -248,7 +253,7 @@ const nullFunctions: FunctionDefinition[] = [
 
 const otherDefinitions: FunctionDefinition[] = [
   {
-    type: 'operator' as const,
+    type: FunctionDefinitionTypes.OPERATOR,
     name: 'not',
     description: i18n.translate('kbn-esql-validation-autocomplete.esql.definition.notDoc', {
       defaultMessage: 'Not',
@@ -263,7 +268,7 @@ const otherDefinitions: FunctionDefinition[] = [
     ],
   },
   {
-    type: 'operator' as const,
+    type: FunctionDefinitionTypes.OPERATOR,
     name: '=',
     description: i18n.translate('kbn-esql-validation-autocomplete.esql.definition.assignDoc', {
       defaultMessage: 'Assign (=)',
@@ -290,7 +295,7 @@ const otherDefinitions: FunctionDefinition[] = [
     ],
   },
   {
-    type: 'operator' as const,
+    type: FunctionDefinitionTypes.OPERATOR,
     name: 'as',
     description: i18n.translate('kbn-esql-validation-autocomplete.esql.definition.asDoc', {
       defaultMessage: 'Rename as (AS)',
@@ -308,7 +313,7 @@ const otherDefinitions: FunctionDefinition[] = [
     ],
   },
   {
-    type: 'operator' as const,
+    type: FunctionDefinitionTypes.OPERATOR,
     name: 'where',
     description: i18n.translate('kbn-esql-validation-autocomplete.esql.definition.whereDoc', {
       defaultMessage: 'WHERE operator',
@@ -328,7 +333,7 @@ const otherDefinitions: FunctionDefinition[] = [
   {
     // TODO — this shouldn't be a function or an operator...
     name: 'info',
-    type: 'operator',
+    type: FunctionDefinitionTypes.OPERATOR,
     description: i18n.translate('kbn-esql-validation-autocomplete.esql.definition.infoDoc', {
       defaultMessage: 'Show information about the current ES node',
     }),

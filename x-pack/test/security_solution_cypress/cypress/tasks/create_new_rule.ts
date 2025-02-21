@@ -147,6 +147,7 @@ import {
   ACTIONS_ALERTS_TIMEFRAME_START_INPUT,
   ACTIONS_ALERTS_TIMEFRAME_END_INPUT,
   ACTIONS_ALERTS_TIMEFRAME_TIMEZONE_INPUT,
+  CASES_SYSTEM_ACTION_BTN,
 } from '../screens/common/rule_actions';
 import { fillIndexConnectorForm, fillEmailConnectorForm } from './common/rule_actions';
 import { TOAST_ERROR } from '../screens/shared';
@@ -538,6 +539,10 @@ export const fillRuleAction = (actions: Actions) => {
         break;
     }
   });
+};
+
+export const createCasesAction = () => {
+  cy.get(CASES_SYSTEM_ACTION_BTN).click();
 };
 
 export const fillRuleActionFilters = (alertsFilter: AlertsFilter) => {

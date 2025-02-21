@@ -836,9 +836,7 @@
             "label": "conversation",
             "description": [],
             "signature": [
-              "{ id: string; title: string; last_updated: string; token_count?: ",
-              "TokenCount",
-              " | undefined; }"
+              "{ id: string; title: string; last_updated: string; }"
             ],
             "path": "x-pack/platform/plugins/shared/observability_ai_assistant/common/types.ts",
             "deprecated": false,
@@ -2765,11 +2763,7 @@
               "TypeC",
               "<{ conversation: ",
               "Type",
-              "<",
-              "ConversationRequestBase",
-              ", ",
-              "ConversationRequestBase",
-              ", unknown>; }>; }>, ",
+              "<ConversationRequestBase, ConversationRequestBase, unknown>; }>; }>, ",
               "ObservabilityAIAssistantRouteHandlerResources",
               ", ",
               {
@@ -3751,11 +3745,7 @@
               "TypeC",
               "<{ conversation: ",
               "Type",
-              "<",
-              "ConversationRequestBase",
-              ", ",
-              "ConversationRequestBase",
-              ", unknown>; }>; }>, ",
+              "<ConversationRequestBase, ConversationRequestBase, unknown>; }>; }>, ",
               "ObservabilityAIAssistantRouteHandlerResources",
               ", ",
               {
@@ -5462,11 +5452,7 @@
           "TypeC",
           "<{ conversation: ",
           "Type",
-          "<",
-          "ConversationRequestBase",
-          ", ",
-          "ConversationRequestBase",
-          ", unknown>; }>; }>, ",
+          "<ConversationRequestBase, ConversationRequestBase, unknown>; }>; }>, ",
           "ObservabilityAIAssistantRouteHandlerResources",
           ", ",
           {
@@ -6669,11 +6655,7 @@
           "TypeC",
           "<{ conversation: ",
           "Type",
-          "<",
-          "ConversationRequestBase",
-          ", ",
-          "ConversationRequestBase",
-          ", unknown>; }>; }>, ",
+          "<ConversationRequestBase, ConversationRequestBase, unknown>; }>; }>, ",
           "ObservabilityAIAssistantRouteHandlerResources",
           ", ",
           {
@@ -8171,14 +8153,6 @@
                 "pluginId": "observabilityAIAssistant",
                 "scope": "common",
                 "docId": "kibObservabilityAIAssistantPluginApi",
-                "section": "def-common.TokenCountEvent",
-                "text": "TokenCountEvent"
-              },
-              " | ",
-              {
-                "pluginId": "observabilityAIAssistant",
-                "scope": "common",
-                "docId": "kibObservabilityAIAssistantPluginApi",
                 "section": "def-common.BufferFlushEvent",
                 "text": "BufferFlushEvent"
               },
@@ -8417,14 +8391,6 @@
                 "docId": "kibObservabilityAIAssistantPluginApi",
                 "section": "def-common.ChatCompletionMessageEvent",
                 "text": "ChatCompletionMessageEvent"
-              },
-              " | ",
-              {
-                "pluginId": "observabilityAIAssistant",
-                "scope": "common",
-                "docId": "kibObservabilityAIAssistantPluginApi",
-                "section": "def-common.TokenCountEvent",
-                "text": "TokenCountEvent"
               },
               "> : Promise<",
               {
@@ -8794,9 +8760,7 @@
             "label": "create",
             "description": [],
             "signature": [
-              "(conversation: ",
-              "ConversationRequestBase",
-              ") => Promise<",
+              "(conversation: ConversationRequestBase) => Promise<",
               {
                 "pluginId": "observabilityAIAssistant",
                 "scope": "common",
@@ -10045,11 +10009,7 @@
           "TypeC",
           "<{ conversation: ",
           "Type",
-          "<",
-          "ConversationRequestBase",
-          ", ",
-          "ConversationRequestBase",
-          ", unknown>; }>; }>, ",
+          "<ConversationRequestBase, ConversationRequestBase, unknown>; }>; }>, ",
           "ObservabilityAIAssistantRouteHandlerResources",
           ", ",
           {
@@ -11101,9 +11061,7 @@
             "label": "conversation",
             "description": [],
             "signature": [
-              "{ id: string; title: string; last_updated: string; token_count?: ",
-              "TokenCount",
-              " | undefined; }"
+              "{ id: string; title: string; last_updated: string; }"
             ],
             "path": "x-pack/platform/plugins/shared/observability_ai_assistant/common/types.ts",
             "deprecated": false,
@@ -11860,9 +11818,7 @@
             "section": "def-common.StreamingChatResponseEventType",
             "text": "StreamingChatResponseEventType"
           },
-          ".ConversationCreate; } & { conversation: { id: string; title: string; last_updated: string; token_count?: ",
-          "TokenCount",
-          " | undefined; }; }"
+          ".ConversationCreate; } & { conversation: { id: string; title: string; last_updated: string; }; }"
         ],
         "path": "x-pack/platform/plugins/shared/observability_ai_assistant/common/conversation_complete.ts",
         "deprecated": false,
@@ -11885,9 +11841,7 @@
             "section": "def-common.Conversation",
             "text": "Conversation"
           },
-          ", \"namespace\" | \"user\" | \"conversation\"> & { conversation: { title: string; token_count?: ",
-          "TokenCount",
-          " | undefined; id?: string | undefined; }; }"
+          ", \"namespace\" | \"user\" | \"conversation\"> & { conversation: { title: string; id?: string | undefined; }; }"
         ],
         "path": "x-pack/platform/plugins/shared/observability_ai_assistant/common/types.ts",
         "deprecated": false,
@@ -11910,9 +11864,7 @@
             "section": "def-common.StreamingChatResponseEventType",
             "text": "StreamingChatResponseEventType"
           },
-          ".ConversationUpdate; } & { conversation: { id: string; title: string; last_updated: string; token_count?: ",
-          "TokenCount",
-          " | undefined; }; }"
+          ".ConversationUpdate; } & { conversation: { id: string; title: string; last_updated: string; }; }"
         ],
         "path": "x-pack/platform/plugins/shared/observability_ai_assistant/common/conversation_complete.ts",
         "deprecated": false,
@@ -12010,14 +11962,6 @@
             "pluginId": "observabilityAIAssistant",
             "scope": "common",
             "docId": "kibObservabilityAIAssistantPluginApi",
-            "section": "def-common.TokenCountEvent",
-            "text": "TokenCountEvent"
-          },
-          " | ",
-          {
-            "pluginId": "observabilityAIAssistant",
-            "scope": "common",
-            "docId": "kibObservabilityAIAssistantPluginApi",
             "section": "def-common.BufferFlushEvent",
             "text": "BufferFlushEvent"
           }
@@ -12079,40 +12023,9 @@
             "pluginId": "observabilityAIAssistant",
             "scope": "common",
             "docId": "kibObservabilityAIAssistantPluginApi",
-            "section": "def-common.TokenCountEvent",
-            "text": "TokenCountEvent"
-          },
-          " | ",
-          {
-            "pluginId": "observabilityAIAssistant",
-            "scope": "common",
-            "docId": "kibObservabilityAIAssistantPluginApi",
             "section": "def-common.BufferFlushEvent",
             "text": "BufferFlushEvent"
           }
-        ],
-        "path": "x-pack/platform/plugins/shared/observability_ai_assistant/common/conversation_complete.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "observabilityAIAssistant",
-        "id": "def-common.TokenCountEvent",
-        "type": "Type",
-        "tags": [],
-        "label": "TokenCountEvent",
-        "description": [],
-        "signature": [
-          "{ type: ",
-          {
-            "pluginId": "observabilityAIAssistant",
-            "scope": "common",
-            "docId": "kibObservabilityAIAssistantPluginApi",
-            "section": "def-common.StreamingChatResponseEventType",
-            "text": "StreamingChatResponseEventType"
-          },
-          ".TokenCount; } & { tokens: { completion: number; prompt: number; total: number; }; }"
         ],
         "path": "x-pack/platform/plugins/shared/observability_ai_assistant/common/conversation_complete.ts",
         "deprecated": false,

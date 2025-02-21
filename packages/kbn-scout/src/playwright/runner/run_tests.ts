@@ -8,6 +8,9 @@
  */
 
 import { resolve } from 'path';
+import { exec } from 'child_process';
+import { promisify } from 'util';
+const execPromise = promisify(exec);
 
 import { ToolingLog } from '@kbn/tooling-log';
 import { withProcRunner } from '@kbn/dev-proc-runner';
@@ -28,7 +31,21 @@ export async function runTests(log: ToolingLog, options: RunTestsOptions) {
   const playwrightGrepTag = getPlaywrightGrepTag(config);
   const playwrightConfigPath = options.configPath;
 
+  const cmd = resolve(REPO_ROOT, './node_modules/.bin/playwright');
+  const cmdArgs = ['test', `--config=${playwrightConfigPath}`, `--grep=${playwrightGrepTag}`];
+
   await withProcRunner(log, async (procs) => {
+    log.info(`scout: Validate Playwright config has tests`);
+    try {
+      // '--list' flag tells Playwright to collect all the tests, but do not run it
+      const result = await execPromise(`${cmd} ${cmdArgs.join(' ')} --list`);
+      const lastLine = result.stdout.trim().split('\n').pop();
+      log.info(`scout: ${lastLine}`);
+    } catch (err) {
+      log.error(`scout: No tests found in [${playwrightConfigPath}]`);
+      process.exit(2); // code "2" means no tests found
+    }
+
     const abortCtrl = new AbortController();
 
     const onEarlyExit = (msg: string) => {
@@ -60,13 +77,8 @@ export async function runTests(log: ToolingLog, options: RunTestsOptions) {
 
       // Running 'npx playwright test --config=${playwrightConfigPath}'
       await procs.run(`playwright`, {
-        cmd: resolve(REPO_ROOT, './node_modules/.bin/playwright'),
-        args: [
-          'test',
-          `--config=${playwrightConfigPath}`,
-          `--grep=${playwrightGrepTag}`,
-          ...(options.headed ? ['--headed'] : []),
-        ],
+        cmd,
+        args: [...cmdArgs, ...(options.headed ? ['--headed'] : [])],
         cwd: resolve(REPO_ROOT),
         env: {
           ...process.env,
