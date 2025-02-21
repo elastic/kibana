@@ -6,7 +6,7 @@
  */
 
 import moment from 'moment';
-import React from 'react';
+import React, { useMemo } from 'react';
 import { lastValueFrom } from 'rxjs';
 import { getCalculateAutoTimeExpression } from '@kbn/data-plugin/common';
 import { IKibanaSearchRequest, IKibanaSearchResponse } from '@kbn/search-types';
@@ -48,7 +48,10 @@ export function IngestionRate({
     },
   } = useKibana();
   const { timeRange, setTimeRange } = useDateRange({ data });
-  const calcAutoInterval = getCalculateAutoTimeExpression((key) => core.uiSettings.get(key));
+  const calcAutoInterval = useMemo(
+    () => getCalculateAutoTimeExpression((key) => core.uiSettings.get(key)),
+    [core.uiSettings]
+  );
 
   const {
     loading: isLoadingIngestionRate,
