@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import {
+import type {
   IndicesIndexSettings,
   MappingTypeMapping,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import {
+import type {
   IngestPipelineWrapper,
   InitializeImportResponse,
   ImportDoc,

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { IScopedClusterClient } from '@kbn/core/server';
+import type { IScopedClusterClient } from '@kbn/core/server';
 import type {
   BulkRequest,
   IndicesCreateRequest,
@@ -13,7 +13,7 @@ import type {
   MappingTypeMapping,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { INDEX_META_DATA_CREATED_BY } from '../common/constants';
-import {
+import type {
   ImportResponse,
   ImportFailure,
   InputData,
