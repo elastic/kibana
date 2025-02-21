@@ -252,7 +252,7 @@ export class AutomaticAgentUpgradeTask {
   }
 
   private getOnOrUpdatingToVersionKuery(agentPolicy: AgentPolicy, version: string) {
-    const updatingToKuery = `(status:updating AND upgrade_details.target_version:${version} AND NOT upgrade_details.state:UPG_FAILED)`;
+    const updatingToKuery = `(upgrade_details.target_version:${version} AND NOT upgrade_details.state:UPG_FAILED)`;
     return `policy_id:${agentPolicy.id} AND (agent.version:${version} OR ${updatingToKuery})`;
   }
 
@@ -372,7 +372,8 @@ export class AutomaticAgentUpgradeTask {
     return (
       isAgentUpgradeable(agent) &&
       (agent.status !== 'updating' ||
-        (agent.agent.version === version && AgentStatusKueryHelper.isStuckInUpdating(agent))) &&
+        (AgentStatusKueryHelper.isStuckInUpdating(agent) &&
+          agent.upgrade_details?.target_version === version)) &&
       semverGt(version, agent.agent.version)
     );
   }
