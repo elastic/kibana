@@ -233,7 +233,13 @@ export const DataStreamReindexFlyout: React.FunctionComponent<Props> = ({
             />
           );
         }
-        return <MigrationCompletedFlyoutStep meta={meta} resolutionType={resolutionType} />;
+        return (
+          <MigrationCompletedFlyoutStep
+            meta={meta}
+            resolutionType={resolutionType}
+            closeFlyout={closeFlyout}
+          />
+        );
       }
     }
   }, [

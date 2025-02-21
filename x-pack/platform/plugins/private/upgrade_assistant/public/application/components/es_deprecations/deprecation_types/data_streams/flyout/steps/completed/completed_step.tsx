@@ -7,7 +7,15 @@
 
 import React from 'react';
 
-import { EuiFlyoutBody, EuiSpacer, EuiTitle } from '@elastic/eui';
+import {
+  EuiFlyoutBody,
+  EuiSpacer,
+  EuiTitle,
+  EuiFlyoutFooter,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiButtonEmpty,
+} from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type {
   DataStreamMetadata,
@@ -17,11 +25,13 @@ import type {
 interface Props {
   meta: DataStreamMetadata;
   resolutionType?: DataStreamResolutionType;
+  closeFlyout: () => void;
 }
 
 export const MigrationCompletedFlyoutStep: React.FunctionComponent<Props> = ({
   meta,
   resolutionType,
+  closeFlyout,
 }: Props) => {
   return (
     <>
@@ -43,6 +53,18 @@ export const MigrationCompletedFlyoutStep: React.FunctionComponent<Props> = ({
           />
         </p>
       </EuiFlyoutBody>
+      <EuiFlyoutFooter>
+        <EuiFlexGroup justifyContent="spaceBetween">
+          <EuiFlexItem grow={false}>
+            <EuiButtonEmpty iconType="cross" onClick={closeFlyout} flush="left">
+              <FormattedMessage
+                id="xpack.upgradeAssistant.dataStream.migration.flyout.completedStep.closeButtonLabel"
+                defaultMessage="Close"
+              />
+            </EuiButtonEmpty>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiFlyoutFooter>
     </>
   );
 };
