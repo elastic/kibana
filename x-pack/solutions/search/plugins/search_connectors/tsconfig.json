@@ -19,5 +19,14 @@
     "@kbn/config-schema",
     "@kbn/core-http-browser",
     "@kbn/search-connectors",
+    "@kbn/task-manager-plugin",
+    "@kbn/fleet-plugin",
+    "@kbn/core-saved-objects-api-server",
+    "@kbn/core-elasticsearch-client-server-mocks",
+    "@kbn/logging-mocks",
+    "@kbn/core-elasticsearch-server",
+    "@kbn/licensing-plugin",
+    "@kbn/core-saved-objects-server",
+    "@kbn/cloud-plugin",
   ]
 }

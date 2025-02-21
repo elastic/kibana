@@ -14,8 +14,6 @@ import { App } from './app';
 import { remoteClustersStore } from './store';
 import { AppContextProvider } from './app_context';
 
-import './_hacks.scss';
-
 const AppWithExecutionContext = ({ history, executionContext }) => {
   useExecutionContext(executionContext, {
     type: 'application',

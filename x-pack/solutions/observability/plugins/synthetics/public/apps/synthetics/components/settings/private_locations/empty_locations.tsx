@@ -13,7 +13,10 @@ import { useDispatch } from 'react-redux';
 import { NoPermissionsTooltip } from '../../common/components/permissions';
 import { useSyntheticsSettingsContext } from '../../../contexts';
 import { PRIVATE_LOCATIOSN_ROUTE } from '../../../../../../common/constants';
-import { setAddingNewPrivateLocation, setManageFlyoutOpen } from '../../../state/private_locations';
+import {
+  setIsCreatePrivateLocationFlyoutVisible,
+  setManageFlyoutOpen,
+} from '../../../state/private_locations/actions';
 
 export const EmptyLocations = ({
   inFlyout = true,
@@ -64,7 +67,7 @@ export const EmptyLocations = ({
               onClick={() => {
                 setIsAddingNew?.(true);
                 dispatch(setManageFlyoutOpen(true));
-                dispatch(setAddingNewPrivateLocation(true));
+                dispatch(setIsCreatePrivateLocationFlyoutVisible(true));
               }}
             >
               {ADD_LOCATION}

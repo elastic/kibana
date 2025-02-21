@@ -50,7 +50,7 @@ export interface APMChartSpec<
   data: TCoordinate[];
   legendValue?: string;
   type: string;
-  color: string | SeriesColorsArray | SeriesColorAccessorFn;
+  color?: string | SeriesColorsArray | SeriesColorAccessorFn;
   areaColor?: string;
   fit?: Exclude<Fit, 'explicit'> | FitConfig;
   stackAccessors?: Accessor;

@@ -47,7 +47,7 @@
     "@kbn/core-deprecations-common",
     "@kbn/core-deprecations-server",
     "@kbn/management-settings-ids",
-    "@kbn/observability-logs-overview",
+    "@kbn/logs-overview",
     "@kbn/charts-plugin",
     "@kbn/core-ui-settings-common",
     "@kbn/field-formats-plugin",
@@ -57,5 +57,6 @@
     "@kbn/spaces-plugin",
     "@kbn/analytics",
     "@kbn/usage-collection-plugin",
+    "@kbn/deeplinks-management",
   ]
 }

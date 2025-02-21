@@ -59,30 +59,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     describe('by-value', () => {
-      it('creates new tsvb embeddable', async () => {
-        const originalEmbeddableCount = await canvas.getEmbeddableCount();
-        await canvas.createNewVis('metrics');
-        await visualize.saveVisualizationAndReturn();
-        await retry.try(async () => {
-          const embeddableCount = await canvas.getEmbeddableCount();
-          expect(embeddableCount).to.eql(originalEmbeddableCount + 1);
-        });
-      });
-
-      it('edits tsvb by-value embeddable', async () => {
-        const originalEmbeddableCount = await canvas.getEmbeddableCount();
-        await dashboardPanelActions.clickEdit();
-        await visualize.saveVisualizationAndReturn();
-        await retry.try(async () => {
-          const embeddableCount = await canvas.getEmbeddableCount();
-          expect(embeddableCount).to.eql(originalEmbeddableCount);
-        });
-        await canvas.deleteSelectedElement();
-      });
-
       it('creates new vega embeddable', async () => {
         const originalEmbeddableCount = await canvas.getEmbeddableCount();
-        await canvas.createNewVis('vega');
+        await canvas.addNewPanel('Custom visualization');
         await visualize.saveVisualizationAndReturn();
         await retry.try(async () => {
           const embeddableCount = await canvas.getEmbeddableCount();

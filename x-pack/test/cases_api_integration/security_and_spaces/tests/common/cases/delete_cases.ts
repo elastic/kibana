@@ -29,7 +29,7 @@ import {
   getComment,
   getCase,
   superUserSpace1Auth,
-  getCaseUserActions,
+  findCaseUserActions,
   deleteAllCaseItems,
   createAndUploadFile,
   deleteAllFiles,
@@ -100,11 +100,17 @@ export default ({ getService }: FtrProviderContext): void => {
 
       await deleteCases({ supertest, caseIDs: [case1.id, case2.id] });
 
-      const userActionsCase1 = await getCaseUserActions({ supertest, caseID: case1.id });
-      expect(userActionsCase1.length).to.be(0);
+      await findCaseUserActions({
+        supertest,
+        caseID: case1.id,
+        expectedHttpCode: 404,
+      });
 
-      const userActionsCase2 = await getCaseUserActions({ supertest, caseID: case2.id });
-      expect(userActionsCase2.length).to.be(0);
+      await findCaseUserActions({
+        supertest,
+        caseID: case2.id,
+        expectedHttpCode: 404,
+      });
     });
 
     it(`should delete a case's comments and user actions when that case gets deleted`, async () => {
@@ -131,15 +137,13 @@ export default ({ getService }: FtrProviderContext): void => {
         expectedHttpCode: 404,
       });
 
-      const userActions = await getCaseUserActions({ supertest, caseID: postedCase.id });
-      expect(userActions.length).to.be(0);
+      await findCaseUserActions({ supertest, caseID: postedCase.id, expectedHttpCode: 404 });
     });
 
     it('should delete all user actions when deleting a case', async () => {
       const postedCase = await createCase(supertest, getPostCaseRequest());
       await deleteCases({ supertest, caseIDs: [postedCase.id] });
-      const userActions = await getCaseUserActions({ supertest, caseID: postedCase.id });
-      expect(userActions.length).to.be(0);
+      await findCaseUserActions({ supertest, caseID: postedCase.id, expectedHttpCode: 404 });
     });
 
     it('unhappy path - 404s when case is not there', async () => {

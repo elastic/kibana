@@ -19,7 +19,11 @@ export const StatusBadge = ({
   summaryError?: PingError;
 }) => {
   const theme = useEuiTheme();
-  const dangerBehindText = theme.euiTheme.colors.textDanger;
+  const isAmsterdam = theme.euiTheme.themeName === 'EUI_THEME_AMSTERDAM';
+
+  const dangerBehindText = isAmsterdam
+    ? theme.euiTheme.colors.vis.euiColorVisBehindText9
+    : theme.euiTheme.colors.vis.euiColorVis6;
 
   if (status === STATUS.UP) {
     return (

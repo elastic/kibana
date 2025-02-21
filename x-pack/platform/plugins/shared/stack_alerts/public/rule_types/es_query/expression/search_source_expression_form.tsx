@@ -350,7 +350,7 @@ export const SearchSourceExpressionForm = (props: SearchSourceExpressionFormProp
             onClearSavedQuery={onClearSavedQuery}
             onSavedQueryUpdated={onSavedQuery}
             onSaved={onSavedQuery}
-            saveQueryMenuVisibility="allowed_by_app_privilege"
+            allowSavingQueries
             showQueryInput
             showFilterBar
             showDatePicker={false}

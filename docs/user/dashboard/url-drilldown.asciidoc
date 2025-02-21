@@ -17,11 +17,12 @@ In addition to  https://ela.st/handlebars-helpers[built-in] Handlebars helpers, 
 
 Refer to Handlebars https://ela.st/handlebars-docs#expressions[documentation] to learn about advanced use cases.
 
-|===
-|Custom helper |Use case
+[discrete]
+==== Custom helpers
 
-|json
-a|Serialize variables in JSON format.
+**json**
+
+Serialize variables in JSON format.
 
 Example:
 
@@ -29,9 +30,9 @@ Example:
 `{{json event.key event.value}}` +
 `{{json filters=context.panel.filters}}`
 
+**rison**
 
-|rison
-a|Serialize variables in https://github.com/w33ble/rison-node[rison] format. Rison is a common format for {kib} apps for storing state in the URL.
+Serialize variables in https://github.com/w33ble/rison-node[rison] format. Rison is a common format for {kib} apps for storing state in the URL.
 
 Example:
 
@@ -39,106 +40,96 @@ Example:
 `{{rison event.key event.value}}` +
 `{{rison filters=context.panel.filters}}`
 
+**date**
 
-|date
-a|Format dates. Supports relative dates expressions (for example,  "now-15d"). Refer to the https://momentjs.com/docs/#/displaying/format/[moment] docs for different formatting options.
+Format dates. Supports relative dates expressions (for example,  "now-15d"). Refer to the https://momentjs.com/docs/#/displaying/format/[moment] docs for different formatting options.
 
 Example:
 
 `{{date event.from “YYYY MM DD”}}` +
-`{{date “now-15d”}}` + 
+`{{date “now-15d”}}` +
 `{{date “now/d” roundUp=true}}`
 
-|formatNumber
-a|Format numbers. Numbers can be formatted to look like currency, percentages, times or numbers with decimal places, thousands, and abbreviations.
-Refer to the http://numeraljs.com/#format[numeral.js] for different formatting options. 
+**formatNumber**
 
-Example:
+Format numbers. Numbers can be formatted to look like currency, percentages, times or numbers with decimal places, thousands, and abbreviations.
+Refer to the http://numeraljs.com/#format[numeral.js] for different formatting options.
 
-`{{formatNumber event.value "0.0"}}`
+Example: `{{formatNumber event.value "0.0"}}`
 
-|lowercase
-a|Converts a string to lower case.
+**lowercase**
 
-Example:
+Converts a string to lower case.
 
-`{{lowercase event.value}}`
+Example: `{{lowercase event.value}}`
 
-|uppercase
-a|Converts a string to upper case.
+**uppercase**
 
-Example:
+Converts a string to upper case.
 
-`{{uppercase event.value}}`
+Example: `{{uppercase event.value}}`
 
-|trim
-a|Removes leading and trailing spaces from a string.
+**trim**
 
-Example:
+Removes leading and trailing spaces from a string.
 
-`{{trim event.value}}`
+Example: `{{trim event.value}}`
 
-|trimLeft
-a|Removes leading spaces from a string.
+**trimLeft**
 
-Example:
+Removes leading spaces from a string.
 
-`{{trimLeft event.value}}`
+Example: `{{trimLeft event.value}}`
 
-|trimRight
-a|Removes trailing spaces from a string.
+**trimRight**
 
-Example:
+Removes trailing spaces from a string.
 
-`{{trimRight event.value}}`
+Example: `{{trimRight event.value}}`
 
-|mid
-a|Extracts a substring from a string by start position and number of characters to extract.
+**mid**
 
-Example:
+Extracts a substring from a string by start position and number of characters to extract.
 
-`{{mid event.value 3 5}}` - extracts five characters starting from a third character. 
+Example: `{{mid event.value 3 5}}` - extracts five characters starting from a third character.
 
-|left
-a|Extracts a number of characters from a string (starting from left).
+**left**
 
-Example:
+Extracts a number of characters from a string (starting from left).
 
-`{{left event.value 3}}`
+Example: `{{left event.value 3}}`
 
-|right
-a|Extracts a number of characters from a string (starting from right).
+**right**
 
-Example:
+Extracts a number of characters from a string (starting from right).
 
-`{{right event.value 3}}`
+Example: `{{right event.value 3}}`
 
-|concat
-a|Concatenates two or more strings.
+**concat**
 
-Example:
+Concatenates two or more strings.
 
-`{{concat event.value "," event.key}}`
+Example: `{{concat event.value "," event.key}}`
 
-|replace
-a|Replaces all substrings within a string.
+**replace**
 
-Example:
+Replaces all substrings within a string.
 
-`{{replace event.value "stringToReplace" "stringToReplaceWith"}}`
+Example: `{{replace event.value "stringToReplace" "stringToReplaceWith"}}`
 
-|split
-a|Splits a string using a provided splitter.
+**split**
 
-Example:
+Splits a string using a provided splitter.
 
-`{{split event.value ","}}`
+Example: `{{split event.value ","}}`
 
-|encodeURIComponent
-a|Escapes string using built in `encodeURIComponent` function.
+**encodeURIComponent**
 
-|encodeURIQuery
-a|Escapes string using built in `encodeURIComponent` function, while keeping "@", ":", "$", ",", and ";" characters as is.
+Escapes string using built in `encodeURIComponent` function.
+
+**encodeURIQuery**
+
+Escapes string using built in `encodeURIComponent` function, while keeping "@", ":", "$", ",", and ";" characters as is.
 
 |===
 
@@ -235,7 +226,7 @@ Example:
 
 Note:
 
-`{{event.value}}` is a shorthand for `{{event.points.[0].value}}` + 
+`{{event.value}}` is a shorthand for `{{event.points.[0].value}}` +
 `{{event.key}}` is a shorthand for `{{event.points.[0].key}}`
 
 | *Row click*

@@ -31,6 +31,7 @@ export type {
   CspBenchmarksPage,
   CloudSecurityPosturePageId,
 } from './types/navigation';
+export type { MisconfigurationEvaluationStatus } from './types/misconfigurations';
 export * from './constants';
 export {
   extractErrorMessage,

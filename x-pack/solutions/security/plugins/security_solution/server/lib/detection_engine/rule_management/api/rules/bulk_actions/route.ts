@@ -5,12 +5,11 @@
  * 2.0.
  */
 
-import type { IKibanaResponse, Logger } from '@kbn/core/server';
+import type { IKibanaResponse } from '@kbn/core/server';
 import { AbortError } from '@kbn/kibana-utils-plugin/common';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
 import type { BulkActionSkipResult } from '@kbn/alerting-plugin/common';
-import type { ConfigType } from '../../../../../../config';
 import type { PerformRulesBulkActionResponse } from '../../../../../../../common/api/detection_engine/rule_management';
 import {
   BulkActionTypeEnum,
@@ -53,9 +52,7 @@ const MAX_ROUTE_CONCURRENCY = 5;
 
 export const performBulkActionRoute = (
   router: SecuritySolutionPluginRouter,
-  config: ConfigType,
-  ml: SetupPlugins['ml'],
-  logger: Logger
+  ml: SetupPlugins['ml']
 ) => {
   router.versioned
     .post({
@@ -287,7 +284,7 @@ export const performBulkActionRoute = (
                 exporter,
                 request,
                 actionsClient,
-                config.experimentalFeatures.prebuiltRulesCustomizationEnabled
+                detectionRulesClient.getRuleCustomizationStatus().isRulesCustomizationEnabled
               );
 
               const responseBody = `${exported.rulesNdjson}${exported.exceptionLists}${exported.actionConnectors}${exported.exportDetails}`;
@@ -301,10 +298,9 @@ export const performBulkActionRoute = (
               });
             }
 
-            // will be processed only when isDryRun === true
-            // during dry run only validation is getting performed and rule is not saved in ES
             case BulkActionTypeEnum.edit: {
               if (isDryRun) {
+                // during dry run only validation is getting performed and rule is not saved in ES
                 const bulkActionOutcome = await initPromisePool({
                   concurrency: MAX_RULES_TO_UPDATE_IN_PARALLEL,
                   items: rules,
@@ -313,7 +309,7 @@ export const performBulkActionRoute = (
                       mlAuthz,
                       rule,
                       edit: body.edit,
-                      experimentalFeatures: config.experimentalFeatures,
+                      ruleCustomizationStatus: detectionRulesClient.getRuleCustomizationStatus(),
                     });
 
                     return rule;
@@ -332,7 +328,7 @@ export const performBulkActionRoute = (
                   rules,
                   actions: body.edit,
                   mlAuthz,
-                  experimentalFeatures: config.experimentalFeatures,
+                  ruleCustomizationStatus: detectionRulesClient.getRuleCustomizationStatus(),
                 });
                 updated = bulkEditResult.rules;
                 skipped = bulkEditResult.skipped;
@@ -348,7 +344,6 @@ export const performBulkActionRoute = (
                 rulesClient,
                 mlAuthz,
                 runPayload: body.run,
-                experimentalFeatures: config.experimentalFeatures,
               });
               errors.push(...bulkActionErrors);
               updated = backfilled.filter((rule): rule is RuleAlertType => rule !== null);

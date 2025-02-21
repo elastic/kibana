@@ -9,6 +9,7 @@ import React from 'react';
 import { ThemeProvider, css } from '@emotion/react';
 import { Story } from '@storybook/react';
 import { Writable } from '@kbn/utility-types';
+import { GlobalStylesStorybookDecorator } from '../../.storybook/decorators';
 import type {
   EdgeViewModel,
   LabelNodeViewModel,
@@ -24,6 +25,7 @@ export default {
   argTypes: {
     interactive: { control: 'boolean', defaultValue: true },
   },
+  decorators: [GlobalStylesStorybookDecorator],
 };
 
 interface GraphData {

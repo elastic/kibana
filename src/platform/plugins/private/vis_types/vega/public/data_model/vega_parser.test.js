@@ -10,12 +10,15 @@
 import { of } from 'rxjs';
 import { cloneDeep } from 'lodash';
 import 'jest-canvas-mock';
-import { euiThemeVars } from '@kbn/ui-theme';
 import { TimeCache } from './time_cache';
 import { VegaParser } from './vega_parser';
 import { bypassExternalUrlCheck } from '../vega_view/vega_base_view';
+import { VegaThemeColors } from './utils';
+import { DEFAULT_EMS_DARKMAP_ID } from '@kbn/maps-ems-plugin/common';
 
 jest.mock('../services');
+
+const theme = { name: 'borealis', darkMode: false };
 
 describe(`VegaParser.parseAsync`, () => {
   function check(spec, useResize, expectedSpec, warnCount) {
@@ -33,7 +36,7 @@ describe(`VegaParser.parseAsync`, () => {
           },
         };
       };
-      const vp = new VegaParser(spec, searchApiStub, 0, 0, mockGetServiceSettings);
+      const vp = new VegaParser(spec, searchApiStub, 0, 0, mockGetServiceSettings, theme);
       await vp.parseAsync();
       expect(vp.warnings).toHaveLength(warnCount || 0);
       expect(vp.useResize).toEqual(useResize);
@@ -42,7 +45,7 @@ describe(`VegaParser.parseAsync`, () => {
   }
 
   test(`should throw an error in case of $spec is not defined`, async () => {
-    const vp = new VegaParser('{}');
+    const vp = new VegaParser('{}', undefined, undefined, undefined, undefined, theme);
 
     await vp.parseAsync();
 
@@ -87,11 +90,18 @@ describe(`VegaParser.parseAsync`, () => {
   );
 
   test(`should return a specific error in case of $schema URL not valid`, async () => {
-    const vp = new VegaParser({
-      $schema: 'https://vega.github.io/schema/vega-lite/v4.jsonanythingtobreakthis',
-      mark: 'circle',
-      encoding: { row: { field: 'a' } },
-    });
+    const vp = new VegaParser(
+      {
+        $schema: 'https://vega.github.io/schema/vega-lite/v4.jsonanythingtobreakthis',
+        mark: 'circle',
+        encoding: { row: { field: 'a' } },
+      },
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      theme
+    );
 
     await vp.parseAsync();
 
@@ -104,7 +114,7 @@ describe(`VegaParser.parseAsync`, () => {
 describe(`VegaParser._setDefaultValue`, () => {
   function check(spec, expected, ...params) {
     return () => {
-      const vp = new VegaParser(spec);
+      const vp = new VegaParser(spec, undefined, undefined, undefined, undefined, theme);
       vp._setDefaultValue(...params);
       expect(vp.spec).toEqual(expected);
       expect(vp.warnings).toHaveLength(0);
@@ -119,7 +129,7 @@ describe(`VegaParser._setDefaultValue`, () => {
 describe(`VegaParser._setDefaultColors`, () => {
   function check(spec, isVegaLite, expected) {
     return () => {
-      const vp = new VegaParser(spec);
+      const vp = new VegaParser(spec, undefined, undefined, undefined, undefined, theme);
       vp.isVegaLite = isVegaLite;
       vp._setDefaultColors();
       expect(vp.spec).toEqual(expected);
@@ -132,29 +142,26 @@ describe(`VegaParser._setDefaultColors`, () => {
     check({}, true, {
       config: {
         axis: {
-          domainColor: euiThemeVars.euiColorChartLines,
-          gridColor: euiThemeVars.euiColorChartLines,
-          tickColor: euiThemeVars.euiColorChartLines,
+          domainColor: VegaThemeColors.borealis.light.grid,
+          gridColor: VegaThemeColors.borealis.light.grid,
+          tickColor: VegaThemeColors.borealis.light.grid,
         },
         background: 'transparent',
         range: { category: { scheme: 'elastic' } },
-        mark: { color: '#54B399' },
+        mark: { color: VegaThemeColors.borealis.light.default },
         style: {
           'group-title': {
-            fill: euiThemeVars.euiColorDarkestShade,
+            fill: VegaThemeColors.borealis.light.title,
           },
           'guide-label': {
-            fill: euiThemeVars.euiColorDarkShade,
+            fill: VegaThemeColors.borealis.light.label,
           },
           'guide-title': {
-            fill: euiThemeVars.euiColorDarkestShade,
+            fill: VegaThemeColors.borealis.light.title,
           },
           'group-subtitle': {
-            fill: euiThemeVars.euiColorDarkestShade,
+            fill: VegaThemeColors.borealis.light.title,
           },
-        },
-        title: {
-          color: euiThemeVars.euiColorDarkestShade,
         },
       },
     })
@@ -165,37 +172,34 @@ describe(`VegaParser._setDefaultColors`, () => {
     check({}, false, {
       config: {
         axis: {
-          domainColor: euiThemeVars.euiColorChartLines,
-          gridColor: euiThemeVars.euiColorChartLines,
-          tickColor: euiThemeVars.euiColorChartLines,
+          domainColor: VegaThemeColors.borealis.light.grid,
+          gridColor: VegaThemeColors.borealis.light.grid,
+          tickColor: VegaThemeColors.borealis.light.grid,
         },
         background: 'transparent',
         range: { category: { scheme: 'elastic' } },
-        arc: { fill: '#54B399' },
-        area: { fill: '#54B399' },
-        line: { stroke: '#54B399' },
-        path: { stroke: '#54B399' },
-        rect: { fill: '#54B399' },
-        rule: { stroke: '#54B399' },
-        shape: { stroke: '#54B399' },
-        symbol: { fill: '#54B399' },
-        trail: { fill: '#54B399' },
+        arc: { fill: VegaThemeColors.borealis.light.default },
+        area: { fill: VegaThemeColors.borealis.light.default },
+        line: { stroke: VegaThemeColors.borealis.light.default },
+        path: { stroke: VegaThemeColors.borealis.light.default },
+        rect: { fill: VegaThemeColors.borealis.light.default },
+        rule: { stroke: VegaThemeColors.borealis.light.default },
+        shape: { stroke: VegaThemeColors.borealis.light.default },
+        symbol: { fill: VegaThemeColors.borealis.light.default },
+        trail: { fill: VegaThemeColors.borealis.light.default },
         style: {
           'group-title': {
-            fill: euiThemeVars.euiColorDarkestShade,
+            fill: VegaThemeColors.borealis.light.title,
           },
           'guide-label': {
-            fill: euiThemeVars.euiColorDarkShade,
+            fill: VegaThemeColors.borealis.light.label,
           },
           'guide-title': {
-            fill: euiThemeVars.euiColorDarkestShade,
+            fill: VegaThemeColors.borealis.light.title,
           },
           'group-subtitle': {
-            fill: euiThemeVars.euiColorDarkestShade,
+            fill: VegaThemeColors.borealis.light.title,
           },
-        },
-        title: {
-          color: euiThemeVars.euiColorDarkestShade,
         },
       },
     })
@@ -235,7 +239,7 @@ describe('VegaParser._resolveEsQueries', () => {
           return { min: 123456, max: 654321 };
         }
       })();
-      const vp = new VegaParser(spec, searchApiStub, tc, 0, mockGetServiceSettings);
+      const vp = new VegaParser(spec, searchApiStub, tc, 0, mockGetServiceSettings, theme);
       await vp._resolveDataUrls();
 
       expect(vp.spec).toEqual(expected);
@@ -293,7 +297,14 @@ describe('VegaParser._resolveEsQueries', () => {
 describe('VegaParser.parseSchema', () => {
   function check(schema, isVegaLite) {
     return () => {
-      const vp = new VegaParser({ $schema: schema });
+      const vp = new VegaParser(
+        { $schema: schema },
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        theme
+      );
       expect(vp.parseSchema(vp.spec).isVegaLite).toBe(isVegaLite);
     };
   }
@@ -324,7 +335,14 @@ describe('VegaParser.parseSchema', () => {
 describe('VegaParser._parseTooltips', () => {
   function check(tooltips, position, padding, centerOnMark, textTruncate = false) {
     return () => {
-      const vp = new VegaParser(tooltips !== undefined ? { config: { kibana: { tooltips } } } : {});
+      const vp = new VegaParser(
+        tooltips !== undefined ? { config: { kibana: { tooltips } } } : {},
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        theme
+      );
       vp._config = vp._parseConfig();
       if (position === undefined) {
         // error
@@ -359,7 +377,7 @@ describe('VegaParser._parseTooltips', () => {
 describe('VegaParser._parseMapConfig', () => {
   function check(config, expected, warnCount) {
     return () => {
-      const vp = new VegaParser();
+      const vp = new VegaParser(undefined, undefined, undefined, undefined, undefined, theme);
       vp._config = config;
       expect(vp._parseMapConfig()).toEqual(expected);
       expect(vp.warnings).toHaveLength(warnCount);
@@ -387,14 +405,14 @@ describe('VegaParser._parseMapConfig', () => {
     check(
       {
         mapStyle: true,
-        emsTileServiceId: 'dark_map',
+        emsTileServiceId: DEFAULT_EMS_DARKMAP_ID,
       },
       {
         delayRepaint: true,
         latitude: 0,
         longitude: 0,
         mapStyle: true,
-        emsTileServiceId: 'dark_map',
+        emsTileServiceId: DEFAULT_EMS_DARKMAP_ID,
         zoomControl: true,
         scrollWheelZoom: false,
       },
@@ -432,7 +450,7 @@ describe('VegaParser._parseConfig', () => {
   function check(spec, expectedConfig, expectedSpec, warnCount) {
     return async () => {
       expectedSpec = expectedSpec || cloneDeep(spec);
-      const vp = new VegaParser(spec);
+      const vp = new VegaParser(spec, undefined, undefined, undefined, undefined, theme);
       const config = await vp._parseConfig();
       expect(config).toEqual(expectedConfig);
       expect(vp.spec).toEqual(expectedSpec);
@@ -450,7 +468,7 @@ describe('VegaParser._compileWithAutosize', () => {
   function check(spec, useResize, expectedSpec, warnCount) {
     return async () => {
       expectedSpec = expectedSpec || cloneDeep(spec);
-      const vp = new VegaParser(spec);
+      const vp = new VegaParser(spec, undefined, undefined, undefined, undefined, theme);
       vp._compileWithAutosize();
       expect(vp.useResize).toEqual(useResize);
       expect(vp.spec).toEqual(expectedSpec);

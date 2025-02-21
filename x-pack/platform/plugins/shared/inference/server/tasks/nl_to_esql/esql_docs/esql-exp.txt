@@ -21,6 +21,6 @@ ROW d = 5.0
 ```
 
 ```esql
-ROW value = 2.0
-| EVAL result = EXP(value)
+FROM geo
+| EVAL exp = EXP(x)
 ```

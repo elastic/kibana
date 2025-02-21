@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import { StreamDefinition, isIngestStream, isWiredStream } from '@kbn/streams-schema';
+import { StreamDefinition, isUnwiredStreamDefinition } from '@kbn/streams-schema';
 
-export function getIndexPatterns(definition: StreamDefinition | undefined) {
-  if (!definition) {
+export function getIndexPatterns(stream: StreamDefinition | undefined) {
+  if (!stream) {
     return undefined;
   }
-  if (!isWiredStream(definition) && isIngestStream(definition)) {
-    return [definition.name as string];
+  if (!isUnwiredStreamDefinition(stream)) {
+    return [stream.name];
   }
-  const isRoot = definition.name.indexOf('.') === -1;
-  const dataStreamOfDefinition = definition.name;
+  const isRoot = stream.name.indexOf('.') === -1;
+  const dataStreamOfDefinition = stream.name;
   return isRoot
     ? [dataStreamOfDefinition, `${dataStreamOfDefinition}.*`]
     : [`${dataStreamOfDefinition}*`];

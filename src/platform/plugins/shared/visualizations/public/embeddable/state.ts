@@ -9,8 +9,7 @@
 
 import type { SerializedSearchSourceFields } from '@kbn/data-plugin/public';
 import { extractSearchSourceReferences } from '@kbn/data-plugin/public';
-import { SerializedPanelState } from '@kbn/presentation-containers';
-import { SerializedTitles } from '@kbn/presentation-publishing';
+import { SerializedTitles, SerializedPanelState } from '@kbn/presentation-publishing';
 import { cloneDeep, isEmpty, omit } from 'lodash';
 import { Reference } from '../../common/content_management';
 import {
@@ -31,13 +30,11 @@ import {
 import { getSavedVisualization } from '../utils/saved_visualize_utils';
 import type { SerializedVis } from '../vis';
 import {
-  isVisualizeSavedObjectState,
   VisualizeSavedObjectInputState,
   VisualizeSerializedState,
   VisualizeRuntimeState,
   VisualizeSavedVisInputState,
   ExtraSavedObjectProperties,
-  isVisualizeRuntimeState,
 } from './types';
 
 export const deserializeState = async (
@@ -50,15 +47,24 @@ export const deserializeState = async (
       },
     } as VisualizeRuntimeState;
   let serializedState = cloneDeep(state.rawState);
-  if (isVisualizeSavedObjectState(serializedState)) {
-    serializedState = await deserializeSavedObjectState(serializedState);
-  } else if (isVisualizeRuntimeState(serializedState)) {
+  if ((serializedState as VisualizeSavedObjectInputState).savedObjectId) {
+    serializedState = await deserializeSavedObjectState(
+      serializedState as VisualizeSavedObjectInputState
+    );
+  } else if ((serializedState as VisualizeRuntimeState).serializedVis) {
+    // TODO remove once embeddable only exposes SerializedState
+    // Canvas passes incoming embeddable state in getSerializedStateForChild
+    // without this early return, serializedVis gets replaced in deserializeSavedVisState
+    // and breaks adding a new by-value embeddable in Canvas
     return serializedState as VisualizeRuntimeState;
   }
 
   const references: Reference[] = state.references ?? [];
 
-  const deserializedSavedVis = deserializeSavedVisState(serializedState, references);
+  const deserializedSavedVis = deserializeSavedVisState(
+    serializedState as VisualizeSavedVisInputState,
+    references
+  );
 
   return {
     ...serializedState,

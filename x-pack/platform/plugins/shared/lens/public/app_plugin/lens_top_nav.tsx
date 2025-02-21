@@ -453,9 +453,11 @@ export const LensTopNavMenu = ({
   const { AggregateQueryTopNavMenu } = navigation.ui;
   const { from, to } = data.query.timefilter.timefilter.getTime();
 
-  const savingToLibraryPermitted = Boolean(isSaveable && application.capabilities.visualize.save);
+  const savingToLibraryPermitted = Boolean(
+    isSaveable && application.capabilities.visualize_v2.save
+  );
   const savingToDashboardPermitted = Boolean(
-    isSaveable && application.capabilities.dashboard?.showWriteControls
+    isSaveable && application.capabilities.dashboard_v2?.showWriteControls
   );
 
   const defaultLensTitle = i18n.translate('xpack.lens.app.share.defaultDashboardTitle', {
@@ -541,7 +543,9 @@ export const LensTopNavMenu = ({
 
     const hasData = Boolean(activeData && Object.keys(activeData).length);
     const csvEnabled = Boolean(isSaveable && hasData);
-    const shareUrlEnabled = Boolean(application.capabilities.visualize.createShortUrl && hasData);
+    const shareUrlEnabled = Boolean(
+      application.capabilities.visualize_v2.createShortUrl && hasData
+    );
 
     const showShareMenu = csvEnabled || shareUrlEnabled;
     const baseMenuEntries = getLensTopNavConfig({
@@ -1100,11 +1104,7 @@ export const LensTopNavMenu = ({
       setMenuMountPoint={setHeaderActionMenu}
       popoverBreakpoints={['xs', 's', 'm']}
       config={topNavConfig}
-      saveQueryMenuVisibility={
-        application.capabilities.visualize.saveQuery
-          ? 'allowed_by_app_privilege'
-          : 'globally_managed'
-      }
+      allowSavingQueries
       badges={
         managed
           ? [

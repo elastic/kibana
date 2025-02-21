@@ -12,6 +12,8 @@ import { capitalize, get, omit } from 'lodash';
 import type { Moment } from 'moment';
 import moment from 'moment';
 
+import { css } from '@emotion/react';
+
 import type {
   CommentsArray,
   Comment,
@@ -74,6 +76,10 @@ export const formatOperatingSystems = (osTypes: string[]): string => {
     .join(', ');
 };
 
+const commentCss = css`
+  white-space: pre-wrap;
+`;
+
 /**
  * Formats ExceptionItem.comments into EuiCommentList format
  *
@@ -85,7 +91,11 @@ export const getFormattedComments = (comments: CommentsArray): EuiCommentProps[]
     timestamp: moment(commentItem.created_at).format('on MMM Do YYYY @ HH:mm:ss'),
     event: i18n.COMMENT_EVENT,
     timelineAvatar: <EuiAvatar size="l" name={commentItem.created_by.toUpperCase()} />,
-    children: <EuiText size="s">{commentItem.comment}</EuiText>,
+    children: (
+      <EuiText size="s" css={commentCss}>
+        {commentItem.comment}
+      </EuiText>
+    ),
     actions: (
       <WithCopyToClipboard
         data-test-subj="copy-to-clipboard"

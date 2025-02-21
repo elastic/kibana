@@ -53,6 +53,11 @@ const SystemLogsStateSchema = schema.object({
   namespace: schema.string(),
 });
 
+const LogsDetectLoadingStepPayloadSchema = schema.object({
+  os: schema.string(),
+  arch: schema.string(),
+});
+
 const ElasticAgentStepPayloadSchema = schema.object({
   agentId: schema.string(),
 });
@@ -128,7 +133,11 @@ export const observabilityOnboardingFlow: SavedObjectsType = {
               status: schema.string(),
               message: schema.maybe(schema.string()),
               payload: schema.maybe(
-                schema.oneOf([ElasticAgentStepPayloadSchema, InstallIntegrationsStepPayloadSchema])
+                schema.oneOf([
+                  ElasticAgentStepPayloadSchema,
+                  InstallIntegrationsStepPayloadSchema,
+                  LogsDetectLoadingStepPayloadSchema,
+                ])
               ),
             })
           ),

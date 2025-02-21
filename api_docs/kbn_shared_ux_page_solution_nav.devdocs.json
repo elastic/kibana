@@ -2,26 +2,10 @@
   "id": "@kbn/shared-ux-page-solution-nav",
   "client": {
     "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
-    "objects": []
-  },
-  "server": {
-    "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
-    "objects": []
-  },
-  "common": {
-    "classes": [],
     "functions": [
       {
         "parentPluginId": "@kbn/shared-ux-page-solution-nav",
-        "id": "def-common.SolutionNav",
+        "id": "def-public.SolutionNav",
         "type": "Function",
         "tags": [],
         "label": "SolutionNav",
@@ -32,9 +16,9 @@
           "({ children, headingProps, icon, isOpenOnDesktop, items, mobileBreakpoints, closeFlyoutButtonPosition, name, onCollapse, canBeCollapsed, ...rest }: ",
           {
             "pluginId": "@kbn/shared-ux-page-solution-nav",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnSharedUxPageSolutionNavPluginApi",
-            "section": "def-common.SolutionNavProps",
+            "section": "def-public.SolutionNavProps",
             "text": "SolutionNavProps"
           },
           ") => React.JSX.Element"
@@ -45,7 +29,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/shared-ux-page-solution-nav",
-            "id": "def-common.SolutionNav.$1",
+            "id": "def-public.SolutionNav.$1",
             "type": "CompoundType",
             "tags": [],
             "label": "{\n  children,\n  headingProps,\n  icon,\n  isOpenOnDesktop = false,\n  items,\n  mobileBreakpoints = ['xs', 's'],\n  closeFlyoutButtonPosition = 'outside',\n  name,\n  onCollapse,\n  canBeCollapsed = true,\n  ...rest\n}",
@@ -53,9 +37,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/shared-ux-page-solution-nav",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnSharedUxPageSolutionNavPluginApi",
-                "section": "def-common.SolutionNavProps",
+                "section": "def-public.SolutionNavProps",
                 "text": "SolutionNavProps"
               }
             ],
@@ -70,7 +54,7 @@
       },
       {
         "parentPluginId": "@kbn/shared-ux-page-solution-nav",
-        "id": "def-common.withSolutionNav",
+        "id": "def-public.withSolutionNav",
         "type": "Function",
         "tags": [],
         "label": "withSolutionNav",
@@ -86,7 +70,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/shared-ux-page-solution-nav",
-            "id": "def-common.withSolutionNav.$1",
+            "id": "def-public.withSolutionNav.$1",
             "type": "CompoundType",
             "tags": [],
             "label": "WrappedComponent",
@@ -109,7 +93,7 @@
     "misc": [
       {
         "parentPluginId": "@kbn/shared-ux-page-solution-nav",
-        "id": "def-common.SolutionNavProps",
+        "id": "def-public.SolutionNavProps",
         "type": "Type",
         "tags": [],
         "label": "SolutionNavProps",
@@ -131,6 +115,22 @@
         "initialIsOpen": false
       }
     ],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
     "objects": []
   }
 }

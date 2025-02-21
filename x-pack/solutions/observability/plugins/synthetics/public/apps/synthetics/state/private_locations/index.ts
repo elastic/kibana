@@ -6,62 +6,69 @@
  */
 
 import { createReducer } from '@reduxjs/toolkit';
-import { SyntheticsPrivateLocations } from '../../../../../common/runtime_types';
-import { AgentPolicyInfo } from '../../../../../common/types';
-import { IHttpSerializedFetchError } from '..';
-import {
-  getAgentPoliciesAction,
-  setAddingNewPrivateLocation,
-  getPrivateLocationsAction,
-} from './actions';
+import { PrivateLocation, SyntheticsPrivateLocations } from '../../../../../common/runtime_types';
+import { createPrivateLocationAction, deletePrivateLocationAction } from './actions';
+import { setIsCreatePrivateLocationFlyoutVisible, getPrivateLocationsAction } from './actions';
+import { IHttpSerializedFetchError } from '../utils/http_error';
 
-export interface AgentPoliciesState {
-  data: AgentPolicyInfo[] | null;
-  privateLocations?: SyntheticsPrivateLocations | null;
+export interface PrivateLocationsState {
+  data?: SyntheticsPrivateLocations | null;
   loading: boolean;
-  fetchLoading?: boolean;
+  createLoading?: boolean;
+  deleteLoading?: boolean;
   error: IHttpSerializedFetchError | null;
   isManageFlyoutOpen?: boolean;
-  isAddingNewPrivateLocation?: boolean;
+  isCreatePrivateLocationFlyoutVisible?: boolean;
+  newLocation?: PrivateLocation;
 }
 
-const initialState: AgentPoliciesState = {
+const initialState: PrivateLocationsState = {
   data: null,
   loading: false,
   error: null,
   isManageFlyoutOpen: false,
-  isAddingNewPrivateLocation: false,
+  isCreatePrivateLocationFlyoutVisible: false,
+  createLoading: false,
 };
 
-export const agentPoliciesReducer = createReducer(initialState, (builder) => {
+export const privateLocationsStateReducer = createReducer(initialState, (builder) => {
   builder
-    .addCase(getAgentPoliciesAction.get, (state) => {
+    .addCase(getPrivateLocationsAction.get, (state) => {
       state.loading = true;
     })
-    .addCase(getAgentPoliciesAction.success, (state, action) => {
+    .addCase(getPrivateLocationsAction.success, (state, action) => {
       state.data = action.payload;
       state.loading = false;
     })
-    .addCase(getAgentPoliciesAction.fail, (state, action) => {
+    .addCase(getPrivateLocationsAction.fail, (state, action) => {
       state.error = action.payload;
       state.loading = false;
     })
-    .addCase(getPrivateLocationsAction.get, (state) => {
-      state.fetchLoading = true;
+    .addCase(createPrivateLocationAction.get, (state) => {
+      state.createLoading = true;
     })
-    .addCase(getPrivateLocationsAction.success, (state, action) => {
-      state.privateLocations = action.payload;
-      state.fetchLoading = false;
+    .addCase(createPrivateLocationAction.success, (state, action) => {
+      state.newLocation = action.payload;
+      state.createLoading = false;
+      state.data = null;
+      state.isCreatePrivateLocationFlyoutVisible = false;
     })
-    .addCase(getPrivateLocationsAction.fail, (state, action) => {
+    .addCase(createPrivateLocationAction.fail, (state, action) => {
       state.error = action.payload;
-      state.fetchLoading = false;
+      state.createLoading = false;
     })
-    .addCase(setAddingNewPrivateLocation, (state, action) => {
-      state.isAddingNewPrivateLocation = action.payload;
+    .addCase(deletePrivateLocationAction.get, (state) => {
+      state.deleteLoading = true;
+    })
+    .addCase(deletePrivateLocationAction.success, (state, action) => {
+      state.deleteLoading = false;
+      state.data = null;
+    })
+    .addCase(deletePrivateLocationAction.fail, (state, action) => {
+      state.error = action.payload;
+      state.deleteLoading = false;
+    })
+    .addCase(setIsCreatePrivateLocationFlyoutVisible, (state, action) => {
+      state.isCreatePrivateLocationFlyoutVisible = action.payload;
     });
 });
-
-export * from './actions';
-export * from './effects';
-export * from './selectors';

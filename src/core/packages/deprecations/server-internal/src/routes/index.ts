@@ -9,6 +9,7 @@
 
 import type { InternalHttpServiceSetup } from '@kbn/core-http-server-internal';
 import { InternalCoreUsageDataSetup } from '@kbn/core-usage-data-base-server-internal';
+import { Logger } from '@kbn/logging';
 import type { InternalDeprecationRequestHandlerContext } from '../internal_types';
 import { registerGetRoute } from './get';
 import { registerMarkAsResolvedRoute } from './resolve_deprecated_api';
@@ -17,13 +18,15 @@ import { registerApiDeprecationsPostValidationHandler } from './post_validation_
 export function registerRoutes({
   http,
   coreUsageData,
+  logger,
 }: {
   http: InternalHttpServiceSetup;
   coreUsageData: InternalCoreUsageDataSetup;
+  logger: Logger;
 }) {
   const router = http.createRouter<InternalDeprecationRequestHandlerContext>('/api/deprecations');
   registerGetRoute(router);
 
-  registerApiDeprecationsPostValidationHandler({ http, coreUsageData });
+  registerApiDeprecationsPostValidationHandler({ http, coreUsageData, logger });
   registerMarkAsResolvedRoute(router, { coreUsageData });
 }

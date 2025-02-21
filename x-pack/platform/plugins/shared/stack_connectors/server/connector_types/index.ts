@@ -121,7 +121,7 @@ export function registerConnectorTypes({
   if (experimentalFeatures.crowdstrikeConnectorOn) {
     actions.registerSubActionConnectorType(getCrowdstrikeConnectorType(experimentalFeatures));
   }
-  if (experimentalFeatures.inferenceConnectorOn) {
+  if (!experimentalFeatures.inferenceConnectorOff) {
     actions.registerSubActionConnectorType(getInferenceConnectorType());
   }
   if (experimentalFeatures.microsoftDefenderEndpointOn) {

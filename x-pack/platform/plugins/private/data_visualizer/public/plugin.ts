@@ -21,6 +21,7 @@ import type {
   DataVisualizerStartDependencies,
 } from './application/common/types/data_visualizer_plugin';
 import { registerEmbeddables } from './application/index_data_visualizer/embeddables/field_stats';
+import { registerUiActions } from './register_ui_actions';
 export type DataVisualizerPluginSetup = ReturnType<DataVisualizerPlugin['setup']>;
 export type DataVisualizerPluginStart = ReturnType<DataVisualizerPlugin['start']>;
 
@@ -66,6 +67,11 @@ export class DataVisualizerPlugin
 
   public start(core: CoreStart, plugins: DataVisualizerStartDependencies) {
     setStartServices(core, plugins);
+
+    if (plugins.uiActions) {
+      registerUiActions(core, plugins);
+    }
+
     const {
       getFileDataVisualizerComponent,
       getIndexDataVisualizerComponent,

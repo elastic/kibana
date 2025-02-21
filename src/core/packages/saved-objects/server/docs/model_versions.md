@@ -2,25 +2,36 @@
 
 ## Table of contents
 
-- [Introduction](#introduction)
-- [What are model versions trying to solve?](#what-are-model-versions-trying-to-solve)
-- [Defining model versions](#defining-model-versions)
-- [Structure of a model version](#structure-of-a-model-version)
-  - [changes](#changes)
-  - [schemas](#schemas)
-- [Examples](#use-case-examples) 
-  - [Adding a non-indexed field without default value](#adding-a-non-indexed-field-without-default-value) 
-  - [Adding an indexed field without default value](#adding-an-indexed-field-without-default-value)
-  - [Adding an indexed field with a default value](#adding-an-indexed-field-with-a-default-value)
-  - [Removing an existing field](#removing-an-existing-field)
-- [Testing model versions](#testing-model-versions)
-  - [Tooling for unit tests](#tooling-for-unit-tests)
-    - [Model version test migrator](#model-version-test-migrator)
-  - [Tooling for integration tests](#tooling-for-integration-tests)
-    - [Model version test bed](#model-version-test-bed)
-- [Limitations and edge cases in serverless environments](#limitations-and-edge-cases-in-serverless-environments)
-  - [Using the fields option of the find api](#using-the-fields-option-of-the-find-savedobjects-api)
-  - [Using update with dynamically backfilled fields](#using-update-with-dynamically-backfilled-fields)
+- [savedObjects: Model Version API](#savedobjects-model-version-api)
+  - [Table of contents](#table-of-contents)
+  - [Introduction](#introduction)
+  - [What are model versions trying to solve?](#what-are-model-versions-trying-to-solve)
+    - [1. SO type versioning was tightly coupled to stack versioning](#1-so-type-versioning-was-tightly-coupled-to-stack-versioning)
+    - [2. The current migrations API is unsafe for the zero-downtime and backward-compatible requirements](#2-the-current-migrations-api-is-unsafe-for-the-zero-downtime-and-backward-compatible-requirements)
+  - [Defining model versions](#defining-model-versions)
+  - [Structure of a model version](#structure-of-a-model-version)
+    - [changes](#changes)
+      - [- mappings\_addition](#--mappings_addition)
+      - [- mappings\_deprecation](#--mappings_deprecation)
+      - [- data\_backfill](#--data_backfill)
+      - [- data\_removal](#--data_removal)
+      - [- unsafe\_transform](#--unsafe_transform)
+    - [schemas](#schemas)
+      - [forwardCompatibility](#forwardcompatibility)
+      - [create](#create)
+  - [Use-case examples](#use-case-examples)
+    - [Adding a non-indexed field without default value](#adding-a-non-indexed-field-without-default-value)
+    - [Adding an indexed field without default value](#adding-an-indexed-field-without-default-value)
+    - [Adding an indexed field with a default value](#adding-an-indexed-field-with-a-default-value)
+    - [Removing an existing field](#removing-an-existing-field)
+  - [Testing model versions](#testing-model-versions)
+    - [Tooling for unit tests](#tooling-for-unit-tests)
+      - [Model version test migrator](#model-version-test-migrator)
+    - [Tooling for integration tests](#tooling-for-integration-tests)
+      - [Model version test bed](#model-version-test-bed)
+  - [Limitations and edge cases in serverless environments](#limitations-and-edge-cases-in-serverless-environments)
+    - [Using the `fields` option of the `find` savedObjects API](#using-the-fields-option-of-the-find-savedobjects-api)
+    - [Using `bulkUpdate` for fields with large `json` blobs](#using-bulkupdate-for-fields-with-large-json-blobs)
 
 ## Introduction
 
@@ -70,10 +81,10 @@ unsafe given our backward compatibility requirements.
 
 ## Defining model versions
 
-As for old migrations, model versions are bound to a given [savedObject type](https://github.com/elastic/kibana/blob/9b330e493216e8dde3166451e4714966f63f5ab7/src/core/packages/saved-objects/server/src/saved_objects_type.ts#L22-L27)
+As for old migrations, model versions are bound to a given [savedObject type](https://github.com/elastic/kibana/blob/f0eb5d695745f1f3a19ae6392618d1826ce29ce2/src/core/packages/saved-objects/server/src/saved_objects_type.ts#L23-L27)
 
-When registering a SO type, a new [modelVersions](https://github.com/elastic/kibana/blob/9a6a2ccdff619f827b31c40dd9ed30cb27203da7/src/core/packages/saved-objects/server/src/saved_objects_type.ts#L138-L177)
-property is available. This attribute is a map of [SavedObjectsModelVersion](https://github.com/elastic/kibana/blob/9a6a2ccdff619f827b31c40dd9ed30cb27203da7/src/core/packages/saved-objects/server/src/model_version/model_version.ts#L12-L20)
+When registering a SO type, a new [modelVersions](https://github.com/elastic/kibana/blob/f0eb5d695745f1f3a19ae6392618d1826ce29ce2/src/core/packages/saved-objects/server/src/saved_objects_type.ts#L149-L188)
+property is available. This attribute is a map of [SavedObjectsModelVersion](https://github.com/elastic/kibana/blob/f0eb5d695745f1f3a19ae6392618d1826ce29ce2/src/core/packages/saved-objects/server/src/model_version/model_version.ts#L13-L21)
 which is the top-level type/container to define model versions.
 
 This map follows a similar `{ [version number] => version definition }` format as the old migration map, however 
@@ -113,7 +124,7 @@ const myType: SavedObjectsType = {
 
 ## Structure of a model version
 
-[Model versions](https://github.com/elastic/kibana/blob/9b330e493216e8dde3166451e4714966f63f5ab7/src/core/packages/saved-objects/server/src/model_version/model_version.ts#L12-L20)
+[Model versions](https://github.com/elastic/kibana/blob/f0eb5d695745f1f3a19ae6392618d1826ce29ce2/src/core/packages/saved-objects/server/src/model_version/model_version.ts#L13-L21)
 are not just functions as the previous migrations were, but structured objects describing how the version behaves and what changed since the last one.
 
 *A base example of what a model version can look like:*
@@ -175,7 +186,7 @@ It's currently composed of two main properties:
 
 ### changes
 
-[link to the TS doc for `changes`](https://github.com/elastic/kibana/blob/9b330e493216e8dde3166451e4714966f63f5ab7/src/core/packages/saved-objects/server/src/model_version/model_version.ts#L21-L51)
+[link to the TS doc for `changes`](https://github.com/elastic/kibana/blob/f0eb5d695745f1f3a19ae6392618d1826ce29ce2/src/core/packages/saved-objects/server/src/model_version/model_version.ts#L22-L73)
 
 Describes the list of changes applied during this version. 
 
@@ -281,7 +292,7 @@ let change: SavedObjectsModelUnsafeTransformChange = {
 
 ### schemas
 
-[link to the TS doc for `schemas`](https://github.com/elastic/kibana/blob/9b330e493216e8dde3166451e4714966f63f5ab7/src/core/packages/saved-objects/server/src/model_version/schemas.ts#L11-L16)
+[link to the TS doc for `schemas`](https://github.com/elastic/kibana/blob/f0eb5d695745f1f3a19ae6392618d1826ce29ce2/src/core/packages/saved-objects/server/src/model_version/schemas.ts#L13-L18)
 
 The schemas associated with this version. Schemas are used to validate or convert SO documents at various
 stages of their lifecycle.
@@ -335,7 +346,7 @@ const versionSchema: SavedObjectModelVersionEvictionFn = (attributes) => {
 
 #### create
 
-This is a direct replacement for [the old SavedObjectType.schemas](https://github.com/elastic/kibana/blob/9b330e493216e8dde3166451e4714966f63f5ab7/src/core/packages/saved-objects/server/src/saved_objects_type.ts#L75-L82)
+This is a direct replacement for [the old SavedObjectType.schemas](https://github.com/elastic/kibana/blob/f0eb5d695745f1f3a19ae6392618d1826ce29ce2/src/core/packages/saved-objects/server/src/saved_objects_type.ts#L85-L93)
 definition, now directly included in the model version definition.
 
 As a refresher the `create` schema is a `@kbn/config-schema` object-type schema, and is used to validate the properties of the document

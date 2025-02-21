@@ -10,6 +10,7 @@ import { useDispatch } from 'react-redux';
 import type { CaseViewRefreshPropInterface } from '@kbn/cases-plugin/common';
 import { CaseMetricsFeature } from '@kbn/cases-plugin/common';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
+import { DetectionEngineAlertsTable } from '../../detections/components/alerts_table';
 import { CaseDetailsRefreshContext } from '../../common/components/endpoint';
 import { DocumentDetailsRightPanelKey } from '../../flyout/document_details/shared/constants/panel_keys';
 import { RulePanelKey } from '../../flyout/rule_details/right';
@@ -21,6 +22,7 @@ import { SecuritySolutionPageWrapper } from '../../common/components/page_wrappe
 import { getEndpointDetailsPath } from '../../management/common/routing';
 import { SpyRoute } from '../../common/utils/route/spy_routes';
 import { useInsertTimeline } from '../components/use_insert_timeline';
+import { useUserPrivileges } from '../../common/components/user_privileges';
 import * as timelineMarkdownPlugin from '../../common/components/markdown_editor/plugins/timeline';
 import { useFetchAlertData } from './use_fetch_alert_data';
 import { useUpsellingMessage } from '../../common/hooks/use_upselling';
@@ -33,6 +35,9 @@ const CaseContainerComponent: React.FC = () => {
   const userCasesPermissions = cases.helpers.canUseCases([APP_ID]);
   const dispatch = useDispatch();
   const { openFlyout } = useExpandableFlyoutApi();
+  const {
+    timelinePrivileges: { read: canSeeTimeline },
+  } = useUserPrivileges();
 
   const interactionsUpsellingMessage = useUpsellingMessage('investigation_guide_interactions');
 
@@ -129,7 +134,10 @@ const CaseContainerComponent: React.FC = () => {
             editor_plugins: {
               parsingPlugin: timelineMarkdownPlugin.parser,
               processingPluginRenderer: timelineMarkdownPlugin.renderer,
-              uiPlugin: timelineMarkdownPlugin.plugin({ interactionsUpsellingMessage }),
+              uiPlugin: timelineMarkdownPlugin.plugin({
+                interactionsUpsellingMessage,
+                canSeeTimeline,
+              }),
             },
             hooks: {
               useInsertTimeline,
@@ -138,6 +146,7 @@ const CaseContainerComponent: React.FC = () => {
           useFetchAlertData,
           onAlertsTableLoaded,
           permissions: userCasesPermissions,
+          renderAlertsTable: (props) => <DetectionEngineAlertsTable {...props} />,
         })}
       </CaseDetailsRefreshContext.Provider>
       <SpyRoute pageName={SecurityPageName.case} />

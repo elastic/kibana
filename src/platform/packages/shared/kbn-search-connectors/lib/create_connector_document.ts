@@ -43,6 +43,7 @@ export function createConnectorDocument({
     configuration: configuration || {},
     custom_scheduling: {},
     description: null,
+    deleted: false,
     error: null,
     features: features || null,
     filtering: [

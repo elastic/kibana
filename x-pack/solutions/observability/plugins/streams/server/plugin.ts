@@ -23,6 +23,8 @@ import {
   StreamsServer,
 } from './types';
 import { AssetService } from './lib/streams/assets/asset_service';
+import { RouteHandlerScopedClients } from './routes/types';
+import { StreamsService } from './lib/streams/service';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface StreamsPluginSetup {}
@@ -46,8 +48,10 @@ export class StreamsPlugin
   public config: StreamsConfig;
   public logger: Logger;
   public server?: StreamsServer;
+  private isDev: boolean;
 
   constructor(context: PluginInitializerContext<StreamsConfig>) {
+    this.isDev = context.env.mode.dev;
     this.config = context.config.get();
     this.logger = context.logger.get();
   }
@@ -62,22 +66,35 @@ export class StreamsPlugin
     } as StreamsServer;
 
     const assetService = new AssetService(core, this.logger);
+    const streamsService = new StreamsService(core, this.logger);
 
     registerRoutes({
       repository: streamsRouteRepository,
       dependencies: {
         assets: assetService,
         server: this.server,
-        getScopedClients: async ({ request }: { request: KibanaRequest }) => {
-          const [coreStart] = await core.getStartServices();
-          const assetClient = await assetService.getClientWithRequest({ request });
+        getScopedClients: async ({
+          request,
+        }: {
+          request: KibanaRequest;
+        }): Promise<RouteHandlerScopedClients> => {
+          const [[coreStart, pluginsStart], assetClient] = await Promise.all([
+            core.getStartServices(),
+            assetService.getClientWithRequest({ request }),
+          ]);
+
+          const streamsClient = await streamsService.getClientWithRequest({ request, assetClient });
+
           const scopedClusterClient = coreStart.elasticsearch.client.asScoped(request);
           const soClient = coreStart.savedObjects.getScopedClient(request);
-          return { scopedClusterClient, soClient, assetClient };
+          const inferenceClient = pluginsStart.inference.getClient({ request });
+
+          return { scopedClusterClient, soClient, assetClient, streamsClient, inferenceClient };
         },
       },
       core,
       logger: this.logger,
+      runDevModeChecks: this.isDev,
     });
 
     return {};

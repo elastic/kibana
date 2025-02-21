@@ -167,6 +167,17 @@ EOF
   export TEST_FAILURES_ES_PASSWORD
 }
 
+# Scout reporter settings
+{
+  export SCOUT_REPORTER_ENABLED="${SCOUT_REPORTER_ENABLED:-false}"
+
+  SCOUT_REPORTER_ES_URL="$(vault_get scout/reporter/cluster-credentials es-url)"
+  export SCOUT_REPORTER_ES_URL
+
+  SCOUT_REPORTER_ES_API_KEY="$(vault_get scout/reporter/cluster-credentials es-api-key)"
+  export SCOUT_REPORTER_ES_API_KEY
+}
+
 # Setup Bazel Remote/Local Cache Credentials
 {
   BAZEL_LOCAL_DEV_CACHE_CREDENTIALS_FILE="$HOME/.kibana-ci-bazel-remote-cache-local-dev.json"

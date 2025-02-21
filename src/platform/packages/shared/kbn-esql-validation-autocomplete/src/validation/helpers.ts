@@ -11,9 +11,13 @@ import type {
   ESQLAst,
   ESQLAstItem,
   ESQLAstMetricsCommand,
+  ESQLAstQueryExpression,
+  ESQLColumn,
   ESQLMessage,
   ESQLSingleAstItem,
+  ESQLSource,
 } from '@kbn/esql-ast';
+import { mutate, synth } from '@kbn/esql-ast';
 import { FunctionDefinition } from '../definitions/types';
 import { getAllArrayTypes, getAllArrayValues } from '../shared/helpers';
 import { getMessageFromId } from './errors';
@@ -22,11 +26,44 @@ import type { ESQLPolicy, ReferenceMaps } from './types';
 export function buildQueryForFieldsFromSource(queryString: string, ast: ESQLAst) {
   const firstCommand = ast[0];
   if (!firstCommand) return '';
+
+  const sources: ESQLSource[] = [];
+  const metadataFields: ESQLColumn[] = [];
+
   if (firstCommand.name === 'metrics') {
     const metrics = firstCommand as ESQLAstMetricsCommand;
-    return `FROM ${metrics.sources.map((source) => source.name).join(', ')}`;
+
+    sources.push(...metrics.sources);
+  } else if (firstCommand.name === 'from') {
+    const fromSources = mutate.commands.from.sources.list(firstCommand as any);
+    const fromMetadataColumns = [...mutate.commands.from.metadata.list(firstCommand as any)].map(
+      ([column]) => column
+    );
+
+    sources.push(...fromSources);
+    if (fromMetadataColumns.length) metadataFields.push(...fromMetadataColumns);
   }
-  return queryString.substring(0, firstCommand.location.max + 1);
+
+  const joinSummary = mutate.commands.join.summarize({
+    type: 'query',
+    commands: ast,
+  } as ESQLAstQueryExpression);
+  const joinIndices = joinSummary.map(({ target: { index } }) => index);
+
+  if (joinIndices.length > 0) {
+    sources.push(...joinIndices);
+  }
+
+  if (sources.length === 0) {
+    return queryString.substring(0, firstCommand.location.max + 1);
+  }
+
+  const from =
+    metadataFields.length > 0
+      ? synth.cmd`FROM ${sources} METADATA ${metadataFields}`
+      : synth.cmd`FROM ${sources}`;
+
+  return from.toString();
 }
 
 export function buildQueryForFieldsInPolicies(policies: ESQLPolicy[]) {

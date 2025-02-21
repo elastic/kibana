@@ -8,6 +8,8 @@ import {
   EuiButton,
   EuiButtonEmpty,
   EuiFlexGroup,
+  EuiListGroup,
+  EuiListGroupItem,
   EuiModal,
   EuiModalBody,
   EuiModalFooter,
@@ -17,20 +19,24 @@ import {
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { useAbortController } from '@kbn/observability-utils-browser/hooks/use_abort_controller';
 import React from 'react';
+import { isDescendantOf } from '@kbn/streams-schema';
+import { useAbortController } from '@kbn/react-hooks';
 import { useKibana } from '../../hooks/use_kibana';
+import { useStreamsAppRouter } from '../../hooks/use_streams_app_router';
 
 export function StreamDeleteModal({
   closeModal,
   clearChildUnderEdit,
   refreshDefinition,
-  id,
+  name,
+  availableStreams,
 }: {
   closeModal: () => void;
   clearChildUnderEdit: () => void;
   refreshDefinition: () => void;
-  id: string;
+  name: string;
+  availableStreams: string[];
 }) {
   const {
     core: { notifications },
@@ -40,9 +46,13 @@ export function StreamDeleteModal({
       },
     },
   } = useKibana();
+  const router = useStreamsAppRouter();
   const abortController = useAbortController();
   const [deleteInProgress, setDeleteInProgress] = React.useState(false);
   const modalTitleId = useGeneratedHtmlId();
+  const streamsToBeDeleted = availableStreams.filter(
+    (stream) => stream === name || isDescendantOf(name, stream)
+  );
   return (
     <EuiModal aria-labelledby={modalTitleId} onClose={closeModal}>
       <EuiModalHeader>
@@ -54,12 +64,40 @@ export function StreamDeleteModal({
       </EuiModalHeader>
 
       <EuiModalBody>
-        <EuiText>
-          {i18n.translate('xpack.streams.streamDetailRouting.deleteModalDescription', {
-            defaultMessage:
-              'Deleting this stream will remove all of its children and the data will no longer be routed. All existing data will be removed as well.',
-          })}
-        </EuiText>
+        <EuiFlexGroup direction="column" gutterSize="m">
+          <EuiText>
+            {i18n.translate('xpack.streams.streamDetailRouting.deleteModalDescription', {
+              defaultMessage:
+                'Deleting this stream will remove all of its children and the data will no longer be routed. All existing data will be removed as well.',
+            })}
+          </EuiText>
+          {streamsToBeDeleted.length > 1 && (
+            <>
+              <EuiText>
+                {i18n.translate('xpack.streams.streamDetailRouting.deleteModalStreams', {
+                  defaultMessage: 'The following streams will be deleted:',
+                })}
+              </EuiText>
+              <EuiListGroup flush={true} maxWidth={false}>
+                {streamsToBeDeleted.map((stream) => (
+                  <li key={stream}>
+                    <EuiListGroupItem
+                      target="_blank"
+                      href={router.link('/{key}/{tab}/{subtab}', {
+                        path: {
+                          key: stream,
+                          tab: 'management',
+                          subtab: 'route',
+                        },
+                      })}
+                      label={stream}
+                    />
+                  </li>
+                ))}
+              </EuiListGroup>
+            </>
+          )}
+        </EuiFlexGroup>
       </EuiModalBody>
 
       <EuiModalFooter>
@@ -79,11 +117,11 @@ export function StreamDeleteModal({
             onClick={async () => {
               try {
                 setDeleteInProgress(true);
-                await streamsRepositoryClient.fetch('DELETE /api/streams/{id}', {
+                await streamsRepositoryClient.fetch('DELETE /api/streams/{name}', {
                   signal: abortController.signal,
                   params: {
                     path: {
-                      id,
+                      name,
                     },
                   },
                 });
@@ -102,7 +140,7 @@ export function StreamDeleteModal({
                   title: i18n.translate('xpack.streams.failedToDelete', {
                     defaultMessage: 'Failed to delete stream {id}',
                     values: {
-                      id,
+                      id: name,
                     },
                   }),
                 });

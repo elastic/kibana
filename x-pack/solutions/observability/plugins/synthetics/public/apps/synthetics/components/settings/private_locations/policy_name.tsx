@@ -11,7 +11,7 @@ import { useSelector } from 'react-redux';
 import { i18n } from '@kbn/i18n';
 import { useSyntheticsSettingsContext } from '../../../contexts';
 import { useFleetPermissions } from '../../../hooks';
-import { selectAgentPolicies } from '../../../state/private_locations';
+import { selectAgentPolicies } from '../../../state/agent_policies';
 
 export const PolicyName = ({ agentPolicyId }: { agentPolicyId: string }) => {
   const { canReadAgentPolicies } = useFleetPermissions();

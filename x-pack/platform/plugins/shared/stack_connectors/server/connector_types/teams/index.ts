@@ -23,7 +23,7 @@ import {
   AlertingConnectorFeatureId,
   UptimeConnectorFeatureId,
   SecurityConnectorFeatureId,
-} from '@kbn/actions-plugin/common/types';
+} from '@kbn/actions-plugin/common';
 import { getRetryAfterIntervalFromHeaders } from '../lib/http_response_retry_header';
 import { isOk, promiseResult, Result } from '../lib/result_type';
 

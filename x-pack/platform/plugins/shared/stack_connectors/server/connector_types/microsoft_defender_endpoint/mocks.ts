@@ -10,6 +10,8 @@ import { actionsConfigMock } from '@kbn/actions-plugin/server/actions_config.moc
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { actionsMock } from '@kbn/actions-plugin/server/mocks';
 import { ConnectorUsageCollector } from '@kbn/actions-plugin/server/usage';
+import { ConnectorToken } from '@kbn/actions-plugin/server/types';
+import { ConnectorTokenClient } from '@kbn/actions-plugin/server/lib/connector_token_client';
 import {
   MicrosoftDefenderEndpointConfig,
   MicrosoftDefenderEndpointMachine,
@@ -26,10 +28,72 @@ import {
 
 export interface CreateMicrosoftDefenderConnectorMockResponse {
   options: ServiceParams<MicrosoftDefenderEndpointConfig, MicrosoftDefenderEndpointSecrets>;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   apiMock: { [msApiRoute: string]: (...args: any) => any | Promise<any> };
   instanceMock: ConnectorInstanceMock<MicrosoftDefenderEndpointConnector>;
   usageCollector: ConnectorUsageCollector;
 }
+
+const createConnectorTokenMock = (overrides: Partial<ConnectorToken> = {}): ConnectorToken => {
+  const expiresAt = new Date();
+  expiresAt.setMinutes(expiresAt.getMinutes() + 30);
+
+  return {
+    id: '1',
+    connectorId: '123',
+    tokenType: 'access_token',
+    token: 'testtokenvalue',
+    expiresAt: expiresAt.toISOString(),
+    createdAt: '2025-01-16T13:02:43.494Z',
+    updatedAt: '2025-01-16T13:02:43.494Z',
+    ...overrides,
+  };
+};
+
+const applyConnectorTokenClientInstanceMock = (
+  connectorTokenClient: ConnectorTokenClient
+): void => {
+  // Make connector token client a mocked class instance
+  let cachedTokenMock: ConnectorToken | null = null;
+
+  jest.spyOn(connectorTokenClient, 'updateOrReplace');
+  jest
+    .spyOn(connectorTokenClient, 'create')
+    .mockImplementation(
+      async ({ connectorId, token, expiresAtMillis: expiresAt, tokenType = 'access_token' }) => {
+        cachedTokenMock = createConnectorTokenMock({
+          connectorId,
+          token,
+          expiresAt,
+          tokenType,
+        });
+        return cachedTokenMock;
+      }
+    );
+  jest
+    .spyOn(connectorTokenClient, 'update')
+    .mockImplementation(
+      async ({ token, expiresAtMillis: expiresAt, tokenType = 'access_token' }) => {
+        if (cachedTokenMock) {
+          cachedTokenMock = {
+            ...cachedTokenMock,
+            token,
+            expiresAt,
+            tokenType,
+          };
+        }
+
+        return cachedTokenMock;
+      }
+    );
+  jest.spyOn(connectorTokenClient, 'get').mockImplementation(async () => {
+    return { hasErrors: !cachedTokenMock, connectorToken: cachedTokenMock };
+  });
+  jest.spyOn(connectorTokenClient, 'deleteConnectorTokens').mockImplementation(async () => {
+    cachedTokenMock = null;
+    return [];
+  });
+};
 
 const createMicrosoftDefenderConnectorMock = (): CreateMicrosoftDefenderConnectorMockResponse => {
   const apiUrl = 'https://api.mock__microsoft.com';
@@ -78,6 +142,14 @@ const createMicrosoftDefenderConnectorMock = (): CreateMicrosoftDefenderConnecto
         '@odata.count': 1,
         value: [createMicrosoftMachineAction()],
       }),
+
+    // Machine List
+    [`${apiUrl}/api/machines`]: () =>
+      createAxiosResponseMock({
+        '@odata.context': 'https://api-us3.securitycenter.microsoft.com/api/$metadata#Machines',
+        '@odata.count': 1,
+        value: [createMicrosoftMachineMock()],
+      }),
   };
 
   instanceMock.request.mockImplementation(
@@ -93,6 +165,8 @@ const createMicrosoftDefenderConnectorMock = (): CreateMicrosoftDefenderConnecto
       throw new Error(`API mock for [${url}] not implemented!!`);
     }
   );
+
+  applyConnectorTokenClientInstanceMock(options.services.connectorTokenClient);
 
   return {
     options,
@@ -167,4 +241,6 @@ export const microsoftDefenderEndpointConnectorMocks = Object.freeze({
   create: createMicrosoftDefenderConnectorMock,
   createMachineMock: createMicrosoftMachineMock,
   createMachineActionMock: createMicrosoftMachineAction,
+  applyConnectorTokenClientMock: applyConnectorTokenClientInstanceMock,
+  createConnectorToken: createConnectorTokenMock,
 });

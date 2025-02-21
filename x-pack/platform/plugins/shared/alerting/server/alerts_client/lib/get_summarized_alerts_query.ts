@@ -41,7 +41,6 @@ import { FormatAlert } from '../../types';
 import { expandFlattenedAlert } from './format_alert';
 import { injectAnalyzeWildcard } from './inject_analyze_wildcard';
 
-const MAX_ALERT_DOCS_TO_RETURN = 100;
 enum AlertTypes {
   NEW = 0,
   ONGOING,
@@ -53,6 +52,7 @@ const getLifecycleAlertsQueryByExecutionUuid = ({
   ruleId,
   excludedAlertInstanceIds,
   alertsFilter,
+  maxAlertLimit,
 }: GetLifecycleAlertsQueryByExecutionUuidParams): Array<SearchRequest['body']> => {
   // lifecycle alerts assign a different action to an alert depending
   // on whether it is new/ongoing/recovered. query for each action in order
@@ -65,6 +65,7 @@ const getLifecycleAlertsQueryByExecutionUuid = ({
       excludedAlertInstanceIds,
       action: 'open',
       alertsFilter,
+      maxAlertLimit,
     }),
     getQueryByExecutionUuid({
       executionUuid,
@@ -72,6 +73,7 @@ const getLifecycleAlertsQueryByExecutionUuid = ({
       excludedAlertInstanceIds,
       action: 'active',
       alertsFilter,
+      maxAlertLimit,
     }),
     getQueryByExecutionUuid({
       executionUuid,
@@ -79,6 +81,7 @@ const getLifecycleAlertsQueryByExecutionUuid = ({
       excludedAlertInstanceIds,
       action: 'close',
       alertsFilter,
+      maxAlertLimit,
     }),
   ];
 };
@@ -89,6 +92,7 @@ const getLifecycleAlertsQueryByTimeRange = ({
   ruleId,
   excludedAlertInstanceIds,
   alertsFilter,
+  maxAlertLimit,
 }: GetLifecycleAlertsQueryByTimeRangeParams): Array<SearchRequest['body']> => {
   return [
     getQueryByTimeRange({
@@ -98,6 +102,7 @@ const getLifecycleAlertsQueryByTimeRange = ({
       excludedAlertInstanceIds,
       type: AlertTypes.NEW,
       alertsFilter,
+      maxAlertLimit,
     }),
     getQueryByTimeRange({
       start,
@@ -106,6 +111,7 @@ const getLifecycleAlertsQueryByTimeRange = ({
       excludedAlertInstanceIds,
       type: AlertTypes.ONGOING,
       alertsFilter,
+      maxAlertLimit,
     }),
     getQueryByTimeRange({
       start,
@@ -114,6 +120,7 @@ const getLifecycleAlertsQueryByTimeRange = ({
       excludedAlertInstanceIds,
       type: AlertTypes.RECOVERED,
       alertsFilter,
+      maxAlertLimit,
     }),
   ];
 };
@@ -124,6 +131,7 @@ const getQueryByExecutionUuid = ({
   excludedAlertInstanceIds,
   action,
   alertsFilter,
+  maxAlertLimit,
 }: GetQueryByExecutionUuidParams): SearchRequest['body'] => {
   const filter: QueryDslQueryContainer[] = [
     {
@@ -170,7 +178,7 @@ const getQueryByExecutionUuid = ({
   }
 
   return {
-    size: MAX_ALERT_DOCS_TO_RETURN,
+    size: maxAlertLimit,
     track_total_hits: true,
     query: {
       bool: {
@@ -187,6 +195,7 @@ const getQueryByTimeRange = ({
   excludedAlertInstanceIds,
   type,
   alertsFilter,
+  maxAlertLimit,
 }: GetQueryByTimeRangeParams<AlertTypes>): SearchRequest['body'] => {
   // base query filters the alert documents for a rule by the given time range
   let filter: QueryDslQueryContainer[] = [
@@ -267,7 +276,7 @@ const getQueryByTimeRange = ({
   }
 
   return {
-    size: MAX_ALERT_DOCS_TO_RETURN,
+    size: maxAlertLimit,
     track_total_hits: true,
     query: {
       bool: {
@@ -282,6 +291,7 @@ export const getQueryByScopedQueries = ({
   ruleId,
   action,
   maintenanceWindows,
+  maxAlertLimit,
 }: GetQueryByScopedQueriesParams): SearchRequest['body'] => {
   const filters: QueryDslQueryContainer[] = [
     {
@@ -330,7 +340,7 @@ export const getQueryByScopedQueries = ({
       aggs: {
         alertId: {
           top_hits: {
-            size: MAX_ALERT_DOCS_TO_RETURN,
+            size: maxAlertLimit,
             _source: {
               includes: [ALERT_UUID],
             },
@@ -460,6 +470,7 @@ const getLifecycleAlertsQueries = ({
   ruleId,
   excludedAlertInstanceIds,
   alertsFilter,
+  maxAlertLimit,
 }: GetAlertsQueryParams): Array<SearchRequest['body']> => {
   let queryBodies;
   if (!!executionUuid) {
@@ -468,6 +479,7 @@ const getLifecycleAlertsQueries = ({
       ruleId,
       excludedAlertInstanceIds,
       alertsFilter,
+      maxAlertLimit,
     });
   } else {
     queryBodies = getLifecycleAlertsQueryByTimeRange({
@@ -476,6 +488,7 @@ const getLifecycleAlertsQueries = ({
       ruleId,
       excludedAlertInstanceIds,
       alertsFilter,
+      maxAlertLimit,
     });
   }
 
@@ -489,6 +502,7 @@ const getContinualAlertsQuery = ({
   ruleId,
   excludedAlertInstanceIds,
   alertsFilter,
+  maxAlertLimit,
 }: GetAlertsQueryParams): SearchRequest['body'] => {
   let queryBody;
   if (!!executionUuid) {
@@ -497,6 +511,7 @@ const getContinualAlertsQuery = ({
       ruleId,
       excludedAlertInstanceIds,
       alertsFilter,
+      maxAlertLimit,
     });
   } else {
     queryBody = getQueryByTimeRange({
@@ -505,6 +520,7 @@ const getContinualAlertsQuery = ({
       ruleId,
       excludedAlertInstanceIds,
       alertsFilter,
+      maxAlertLimit,
     });
   }
 
@@ -516,12 +532,14 @@ const getMaintenanceWindowAlertsQuery = ({
   ruleId,
   action,
   maintenanceWindows,
+  maxAlertLimit,
 }: GetMaintenanceWindowAlertsQueryParams): SearchRequest['body'] => {
   return getQueryByScopedQueries({
     executionUuid,
     ruleId,
     action,
     maintenanceWindows,
+    maxAlertLimit,
   });
 };
 

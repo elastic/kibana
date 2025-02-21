@@ -17,9 +17,10 @@ import type { ReactEmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import { i18n } from '@kbn/i18n';
 import {
   apiHasExecutionContext,
+  apiPublishesFilters,
   fetch$,
   initializeTimeRange,
-  initializeTitles,
+  initializeTitleManager,
   useBatchedPublishingSubjects,
 } from '@kbn/presentation-publishing';
 
@@ -63,13 +64,8 @@ export const getLogRateAnalysisEmbeddableFactory = (
     buildEmbeddable: async (state, buildApi, uuid, parentApi) => {
       const [coreStart, pluginStart] = await getStartServices();
 
-      const {
-        api: timeRangeApi,
-        comparators: timeRangeComparators,
-        serialize: serializeTimeRange,
-      } = initializeTimeRange(state);
-
-      const { titlesApi, titleComparators, serializeTitles } = initializeTitles(state);
+      const timeRangeManager = initializeTimeRange(state);
+      const titleManager = initializeTitleManager(state);
 
       const {
         logRateAnalysisControlsApi,
@@ -77,8 +73,8 @@ export const getLogRateAnalysisEmbeddableFactory = (
         logRateAnalysisControlsComparators,
       } = initializeLogRateAnalysisControls(state);
 
-      const dataLoading = new BehaviorSubject<boolean | undefined>(true);
-      const blockingError = new BehaviorSubject<Error | undefined>(undefined);
+      const dataLoading$ = new BehaviorSubject<boolean | undefined>(true);
+      const blockingError$ = new BehaviorSubject<Error | undefined>(undefined);
 
       const dataViews$ = new BehaviorSubject<DataView[] | undefined>([
         await pluginStart.data.dataViews.get(
@@ -86,10 +82,11 @@ export const getLogRateAnalysisEmbeddableFactory = (
         ),
       ]);
 
+      const filtersApi = apiPublishesFilters(parentApi) ? parentApi : undefined;
       const api = buildApi(
         {
-          ...timeRangeApi,
-          ...titlesApi,
+          ...timeRangeManager.api,
+          ...titleManager.api,
           ...logRateAnalysisControlsApi,
           getTypeDisplayName: () =>
             i18n.translate('xpack.aiops.logRateAnalysis.typeDisplayName', {
@@ -118,9 +115,9 @@ export const getLogRateAnalysisEmbeddableFactory = (
               return Promise.reject();
             }
           },
-          dataLoading,
-          blockingError,
-          dataViews: dataViews$,
+          dataLoading$,
+          blockingError$,
+          dataViews$,
           serializeState: () => {
             const dataViewId = logRateAnalysisControlsApi.dataViewId.getValue();
             const references: Reference[] = dataViewId
@@ -135,8 +132,8 @@ export const getLogRateAnalysisEmbeddableFactory = (
             return {
               rawState: {
                 timeRange: undefined,
-                ...serializeTitles(),
-                ...serializeTimeRange(),
+                ...titleManager.serialize(),
+                ...timeRangeManager.serialize(),
                 ...serializeLogRateAnalysisChartState(),
               },
               references,
@@ -144,8 +141,8 @@ export const getLogRateAnalysisEmbeddableFactory = (
           },
         },
         {
-          ...timeRangeComparators,
-          ...titleComparators,
+          ...timeRangeManager.comparators,
+          ...titleManager.comparators,
           ...logRateAnalysisControlsComparators,
         }
       );
@@ -155,9 +152,9 @@ export const getLogRateAnalysisEmbeddableFactory = (
         pluginStart
       );
 
-      const onLoading = (v: boolean) => dataLoading.next(v);
-      const onRenderComplete = () => dataLoading.next(false);
-      const onError = (error: Error) => blockingError.next(error);
+      const onLoading = (v: boolean) => dataLoading$.next(v);
+      const onRenderComplete = () => dataLoading$.next(false);
+      const onError = (error: Error) => blockingError$.next(error);
 
       return {
         api,
@@ -195,6 +192,7 @@ export const getLogRateAnalysisEmbeddableFactory = (
 
           return (
             <LogRateAnalysisEmbeddableWrapper
+              filtersApi={filtersApi}
               dataViewId={dataViewId}
               timeRange={timeRange}
               onLoading={onLoading}

@@ -6,19 +6,10 @@
  */
 
 import React from 'react';
-import { euiThemeVars } from '@kbn/ui-theme';
-import { EuiFormRow, EuiToolTip } from '@elastic/eui';
+import { EuiFormRow, EuiToolTip, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { MbValidatedColorPicker } from './mb_validated_color_picker';
-import { OTHER_CATEGORY_LABEL, OTHER_CATEGORY_DEFAULT_COLOR } from '../../style_util';
-
-const OTHER_CATEGORY_SWATCHES = [
-  euiThemeVars.euiColorLightestShade,
-  euiThemeVars.euiColorLightShade,
-  euiThemeVars.euiColorMediumShade,
-  euiThemeVars.euiColorDarkShade,
-  euiThemeVars.euiColorDarkestShade,
-];
+import { OTHER_CATEGORY_DEFAULT_COLOR, OTHER_CATEGORY_LABEL } from '../../style_util';
 
 interface Props {
   onChange: (color: string) => void;
@@ -26,6 +17,16 @@ interface Props {
 }
 
 export function OtherCategoryColorPicker(props: Props) {
+  const { euiTheme } = useEuiTheme();
+
+  const OTHER_CATEGORY_SWATCHES = [
+    euiTheme.colors.textInverse,
+    euiTheme.colors.textDisabled,
+    euiTheme.colors.textSubdued,
+    euiTheme.colors.textParagraph,
+    euiTheme.colors.textHeading,
+  ];
+
   return (
     <EuiFormRow>
       <EuiToolTip

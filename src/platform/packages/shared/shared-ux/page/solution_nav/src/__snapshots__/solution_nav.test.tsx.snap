@@ -10,7 +10,18 @@ exports[`SolutionNav accepts EuiSideNavProps 1`] = `
     paddingSize="none"
     title={
       <EuiTitle
-        className="kbnSolutionNav__title"
+        css={
+          Object {
+            "map": undefined,
+            "name": "y6v9s0",
+            "next": undefined,
+            "styles": "
+        display: inline-flex;
+        align-items: center;
+      ",
+            "toString": [Function],
+          }
+        }
         id="SolutionNav_generated-id_heading"
         size="xs"
       >
@@ -102,7 +113,18 @@ exports[`SolutionNav accepts EuiSideNavProps 1`] = `
     className="kbnSolutionNav kbnSolutionNav--hidden"
   >
     <EuiTitle
-      className="kbnSolutionNav__title"
+      css={
+        Object {
+          "map": undefined,
+          "name": "y6v9s0",
+          "next": undefined,
+          "styles": "
+        display: inline-flex;
+        align-items: center;
+      ",
+          "toString": [Function],
+        }
+      }
       id="SolutionNav_generated-id_heading"
       size="xs"
     >
@@ -201,7 +223,18 @@ exports[`SolutionNav accepts canBeCollapsed prop 1`] = `
     paddingSize="none"
     title={
       <EuiTitle
-        className="kbnSolutionNav__title"
+        css={
+          Object {
+            "map": undefined,
+            "name": "y6v9s0",
+            "next": undefined,
+            "styles": "
+        display: inline-flex;
+        align-items: center;
+      ",
+            "toString": [Function],
+          }
+        }
         id="SolutionNav_generated-id_heading"
         size="xs"
       >
@@ -292,7 +325,18 @@ exports[`SolutionNav accepts canBeCollapsed prop 1`] = `
     className="kbnSolutionNav kbnSolutionNav--hidden"
   >
     <EuiTitle
-      className="kbnSolutionNav__title"
+      css={
+        Object {
+          "map": undefined,
+          "name": "y6v9s0",
+          "next": undefined,
+          "styles": "
+        display: inline-flex;
+        align-items: center;
+      ",
+          "toString": [Function],
+        }
+      }
       id="SolutionNav_generated-id_heading"
       size="xs"
     >
@@ -390,7 +434,18 @@ exports[`SolutionNav accepts canBeCollapsed prop 2`] = `
     paddingSize="none"
     title={
       <EuiTitle
-        className="kbnSolutionNav__title"
+        css={
+          Object {
+            "map": undefined,
+            "name": "y6v9s0",
+            "next": undefined,
+            "styles": "
+        display: inline-flex;
+        align-items: center;
+      ",
+            "toString": [Function],
+          }
+        }
         id="SolutionNav_generated-id_heading"
         size="xs"
       >
@@ -481,7 +536,18 @@ exports[`SolutionNav accepts canBeCollapsed prop 2`] = `
     className="kbnSolutionNav"
   >
     <EuiTitle
-      className="kbnSolutionNav__title"
+      css={
+        Object {
+          "map": undefined,
+          "name": "y6v9s0",
+          "next": undefined,
+          "styles": "
+        display: inline-flex;
+        align-items: center;
+      ",
+          "toString": [Function],
+        }
+      }
       id="SolutionNav_generated-id_heading"
       size="xs"
     >
@@ -576,7 +642,18 @@ exports[`SolutionNav heading accepts more headingProps 1`] = `
     paddingSize="none"
     title={
       <EuiTitle
-        className="kbnSolutionNav__title"
+        css={
+          Object {
+            "map": undefined,
+            "name": "y6v9s0",
+            "next": undefined,
+            "styles": "
+        display: inline-flex;
+        align-items: center;
+      ",
+            "toString": [Function],
+          }
+        }
         id="testID"
         size="xs"
       >
@@ -607,7 +684,18 @@ exports[`SolutionNav heading accepts more headingProps 1`] = `
     className="kbnSolutionNav kbnSolutionNav--hidden"
   >
     <EuiTitle
-      className="kbnSolutionNav__title"
+      css={
+        Object {
+          "map": undefined,
+          "name": "y6v9s0",
+          "next": undefined,
+          "styles": "
+        display: inline-flex;
+        align-items: center;
+      ",
+          "toString": [Function],
+        }
+      }
       id="testID"
       size="xs"
     >
@@ -646,7 +734,18 @@ exports[`SolutionNav renders 1`] = `
     paddingSize="none"
     title={
       <EuiTitle
-        className="kbnSolutionNav__title"
+        css={
+          Object {
+            "map": undefined,
+            "name": "y6v9s0",
+            "next": undefined,
+            "styles": "
+        display: inline-flex;
+        align-items: center;
+      ",
+            "toString": [Function],
+          }
+        }
         id="SolutionNav_generated-id_heading"
         size="xs"
       >
@@ -737,7 +836,18 @@ exports[`SolutionNav renders 1`] = `
     className="kbnSolutionNav kbnSolutionNav--hidden"
   >
     <EuiTitle
-      className="kbnSolutionNav__title"
+      css={
+        Object {
+          "map": undefined,
+          "name": "y6v9s0",
+          "next": undefined,
+          "styles": "
+        display: inline-flex;
+        align-items: center;
+      ",
+          "toString": [Function],
+        }
+      }
       id="SolutionNav_generated-id_heading"
       size="xs"
     >
@@ -835,13 +945,35 @@ exports[`SolutionNav renders with icon 1`] = `
     paddingSize="none"
     title={
       <EuiTitle
-        className="kbnSolutionNav__title"
+        css={
+          Object {
+            "map": undefined,
+            "name": "y6v9s0",
+            "next": undefined,
+            "styles": "
+        display: inline-flex;
+        align-items: center;
+      ",
+            "toString": [Function],
+          }
+        }
         id="SolutionNav_generated-id_heading"
         size="xs"
       >
         <h2>
           <KibanaSolutionAvatar
-            className="kbnSolutionNav__titleAvatar"
+            css={
+              Object {
+                "map": undefined,
+                "name": "cmwv0a",
+                "next": undefined,
+                "styles": "
+              margin-right: 12px;
+              align-self: flex-start;
+            ",
+                "toString": [Function],
+              }
+            }
             iconType="logoElastic"
             name="Solution"
           />
@@ -931,13 +1063,35 @@ exports[`SolutionNav renders with icon 1`] = `
     className="kbnSolutionNav kbnSolutionNav--hidden"
   >
     <EuiTitle
-      className="kbnSolutionNav__title"
+      css={
+        Object {
+          "map": undefined,
+          "name": "y6v9s0",
+          "next": undefined,
+          "styles": "
+        display: inline-flex;
+        align-items: center;
+      ",
+          "toString": [Function],
+        }
+      }
       id="SolutionNav_generated-id_heading"
       size="xs"
     >
       <h2>
         <KibanaSolutionAvatar
-          className="kbnSolutionNav__titleAvatar"
+          css={
+            Object {
+              "map": undefined,
+              "name": "cmwv0a",
+              "next": undefined,
+              "styles": "
+              margin-right: 12px;
+              align-self: flex-start;
+            ",
+              "toString": [Function],
+            }
+          }
           iconType="logoElastic"
           name="Solution"
         />

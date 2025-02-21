@@ -18,6 +18,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiFieldSearch,
+  useEuiTheme,
 } from '@elastic/eui';
 import { fromKueryExpression } from '@kbn/es-query';
 import {
@@ -42,6 +43,7 @@ export interface ConnectorRulesListProps {
 
 export const ConnectorRulesList = (props: ConnectorRulesListProps) => {
   const { connector } = props;
+  const { euiTheme } = useEuiTheme();
 
   const {
     application: { getUrlForApp },
@@ -192,7 +194,7 @@ export const ConnectorRulesList = (props: ConnectorRulesListProps) => {
         render: (_, rule: Rule) => {
           return (
             rule.lastRun && (
-              <EuiHealth color={getRuleHealthColor(rule) || 'default'}>
+              <EuiHealth color={getRuleHealthColor(rule, euiTheme) || 'default'}>
                 {rulesLastRunOutcomeTranslationMapping[rule.lastRun.outcome]}
               </EuiHealth>
             )
@@ -200,7 +202,7 @@ export const ConnectorRulesList = (props: ConnectorRulesListProps) => {
         },
       },
     ];
-  }, [ruleTypesState, tagPopoverOpenId, getUrlForApp, onSetTagPopoverOpenId]);
+  }, [ruleTypesState, tagPopoverOpenId, getUrlForApp, onSetTagPopoverOpenId, euiTheme]);
 
   const onChange = useCallback((e: ChangeEvent<HTMLInputElement>) => {
     setSearchText(e.target.value);

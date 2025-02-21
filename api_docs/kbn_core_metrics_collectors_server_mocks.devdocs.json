@@ -22,7 +22,7 @@
           "() => ",
           "OpsProcessMetrics"
         ],
-        "path": "packages/core/metrics/core-metrics-collectors-server-mocks/src/process.mocks.ts",
+        "path": "src/core/packages/metrics/collectors-server-mocks/src/process.mocks.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [],
@@ -41,7 +41,7 @@
         "tags": [],
         "label": "collectorMock",
         "description": [],
-        "path": "packages/core/metrics/core-metrics-collectors-server-mocks/src/mocks.ts",
+        "path": "src/core/packages/metrics/collectors-server-mocks/src/mocks.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -57,7 +57,7 @@
               "MetricsCollector",
               "<any>>"
             ],
-            "path": "packages/core/metrics/core-metrics-collectors-server-mocks/src/mocks.ts",
+            "path": "src/core/packages/metrics/collectors-server-mocks/src/mocks.ts",
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -74,7 +74,7 @@
               "() => ",
               "OpsProcessMetrics"
             ],
-            "path": "packages/core/metrics/core-metrics-collectors-server-mocks/src/mocks.ts",
+            "path": "src/core/packages/metrics/collectors-server-mocks/src/mocks.ts",
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -90,7 +90,7 @@
         "tags": [],
         "label": "metricsCollectorMock",
         "description": [],
-        "path": "packages/core/metrics/core-metrics-collectors-server-mocks/src/collector.mock.ts",
+        "path": "src/core/packages/metrics/collectors-server-mocks/src/collector.mock.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -106,7 +106,7 @@
               "MetricsCollector",
               "<T>>"
             ],
-            "path": "packages/core/metrics/core-metrics-collectors-server-mocks/src/collector.mock.ts",
+            "path": "src/core/packages/metrics/collectors-server-mocks/src/collector.mock.ts",
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -121,7 +121,7 @@
                 "signature": [
                   "any"
                 ],
-                "path": "packages/core/metrics/core-metrics-collectors-server-mocks/src/collector.mock.ts",
+                "path": "src/core/packages/metrics/collectors-server-mocks/src/collector.mock.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -137,7 +137,7 @@
         "tags": [],
         "label": "mocked",
         "description": [],
-        "path": "packages/core/metrics/core-metrics-collectors-server-mocks/src/event_loop_delays_monitor.mocks.ts",
+        "path": "src/core/packages/metrics/collectors-server-mocks/src/event_loop_delays_monitor.mocks.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -154,7 +154,7 @@
               ">) => ",
               "IntervalHistogram"
             ],
-            "path": "packages/core/metrics/core-metrics-collectors-server-mocks/src/event_loop_delays_monitor.mocks.ts",
+            "path": "src/core/packages/metrics/collectors-server-mocks/src/event_loop_delays_monitor.mocks.ts",
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -169,7 +169,7 @@
                 "signature": [
                   "{ fromTimestamp?: string | undefined; lastUpdatedAt?: string | undefined; min?: number | undefined; max?: number | undefined; mean?: number | undefined; exceeds?: number | undefined; stddev?: number | undefined; percentiles?: { 50: number; 75: number; 95: number; 99: number; } | undefined; }"
                 ],
-                "path": "packages/core/metrics/core-metrics-collectors-server-mocks/src/event_loop_delays_monitor.mocks.ts",
+                "path": "src/core/packages/metrics/collectors-server-mocks/src/event_loop_delays_monitor.mocks.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -186,7 +186,7 @@
               "() => ",
               "EventLoopDelaysMonitor"
             ],
-            "path": "packages/core/metrics/core-metrics-collectors-server-mocks/src/event_loop_delays_monitor.mocks.ts",
+            "path": "src/core/packages/metrics/collectors-server-mocks/src/event_loop_delays_monitor.mocks.ts",
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],

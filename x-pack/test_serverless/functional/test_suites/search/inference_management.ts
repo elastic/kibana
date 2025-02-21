@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type * as estypes from '@elastic/elasticsearch/lib/api/types';
 
 import { testHasEmbeddedConsole } from './embedded_console';
 
@@ -101,6 +101,12 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     describe('create inference flyout', () => {
       it('renders successfully', async () => {
         await pageObjects.svlSearchInferenceManagementPage.AddInferenceFlyout.expectInferenceEndpointToBeVisible();
+      });
+    });
+
+    describe('edit inference flyout', () => {
+      it('renders successfully', async () => {
+        await pageObjects.svlSearchInferenceManagementPage.EditInferenceFlyout.expectEditInferenceEndpointFlyoutToBeVisible();
       });
     });
 

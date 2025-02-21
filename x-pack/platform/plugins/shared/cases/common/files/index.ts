@@ -8,7 +8,7 @@
 import * as rt from 'io-ts';
 import { isEmpty } from 'lodash';
 import { OWNERS } from '../constants';
-import type { HttpApiTagOperation, Owner } from '../constants/types';
+import type { HttpApiPrivilegeOperation, Owner } from '../constants/types';
 
 /**
  * This type is only used to validate for deletion, it does not check all the fields that should exist in the file
@@ -22,7 +22,10 @@ export type CaseFileMetadataForDeletion = rt.TypeOf<typeof CaseFileMetadataForDe
 
 const FILE_KIND_DELIMITER = 'FilesCases';
 
-export const constructFilesHttpOperationTag = (owner: Owner, operation: HttpApiTagOperation) => {
+export const constructFilesHttpOperationPrivilege = (
+  owner: Owner,
+  operation: HttpApiPrivilegeOperation
+) => {
   return `${owner}${FILE_KIND_DELIMITER}${operation}`;
 };
 

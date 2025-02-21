@@ -72,7 +72,8 @@ describe('NotesTabContentComponent', () => {
     jest.clearAllMocks();
     (useIsExperimentalFeatureEnabled as jest.Mock).mockReturnValue(false);
     (useUserPrivileges as jest.Mock).mockReturnValue({
-      kibanaSecuritySolutionsPrivileges: { crud: true },
+      notesPrivileges: { crud: true },
+      timelinePrivileges: { crud: true },
     });
   });
 

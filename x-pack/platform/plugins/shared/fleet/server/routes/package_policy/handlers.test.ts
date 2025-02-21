@@ -403,9 +403,6 @@ describe('When calling package policy', () => {
         inputs: [],
       });
       jest.spyOn(licenseService, 'hasAtLeast').mockReturnValue(true);
-      jest
-        .spyOn(appContextService, 'getExperimentalFeatures')
-        .mockReturnValue({ enableReusableIntegrationPolicies: true } as any);
       const request = getUpdateKibanaRequest({ policy_ids: ['1', '2'] } as any);
 
       await expect(() => routeHandler(context, request, response)).rejects.toThrow(

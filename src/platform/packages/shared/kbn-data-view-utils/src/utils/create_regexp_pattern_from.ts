@@ -7,12 +7,31 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export const createRegExpPatternFrom = (basePatterns: string | string[]) => {
-  const patterns = Array.isArray(basePatterns) ? basePatterns : [basePatterns];
-  // Create the base patterns union with strict boundaries
-  const basePatternGroup = `[^,\\s]*(\\b|_)(${patterns.join('|')})(\\b|_)([^,\\s]*)?`;
-  // Apply base patterns union for local and remote clusters
-  const localAndRemotePatternGroup = `((${basePatternGroup})|([^:,\\s]*:${basePatternGroup}))`;
-  // Handle trailing comma and multiple pattern concatenation
-  return new RegExp(`^${localAndRemotePatternGroup}(,${localAndRemotePatternGroup})*(,$|$)`, 'i');
+import { escapeRegExp } from 'lodash';
+
+type Selector = 'data' | 'failures' | '*';
+
+export const createRegExpPatternFrom = (basePatterns: string | string[], selector: Selector) => {
+  const normalizedBasePatterns = normalizeBasePatterns(basePatterns);
+
+  const indexNames = `(?:${normalizedBasePatterns.join('|')})`;
+  const selectorsSuffix = `(?:::(?:${escapeRegExp(selector)}))${
+    isDefaultSelector(selector) ? '?' : ''
+  }`;
+
+  return new RegExp(
+    `^(?:${optionalRemoteCluster}${optionalIndexNamePrefix}${indexNames}${optionalIndexNameSuffix}${selectorsSuffix},?)+$`,
+    'i'
+  );
 };
+
+const normalizeBasePatterns = (basePatterns: string | string[]): string[] =>
+  (Array.isArray(basePatterns) ? basePatterns : [basePatterns]).map(escapeRegExp);
+
+const isDefaultSelector = (selector: Selector): boolean => selector === 'data';
+
+const nameCharacters = '[^:,\\s]+';
+const segmentBoundary = '(?:\\b|_)';
+const optionalRemoteCluster = `(?:${nameCharacters}:)?`;
+const optionalIndexNamePrefix = `(?:${nameCharacters}${segmentBoundary})?`;
+const optionalIndexNameSuffix = `(?:${segmentBoundary}${nameCharacters})?`;

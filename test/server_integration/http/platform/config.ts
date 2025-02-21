@@ -7,12 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { ScoutTestRunConfigCategory } from '@kbn/scout-info';
 import { FtrConfigProviderContext } from '@kbn/test';
 
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const httpConfig = await readConfigFile(require.resolve('../../config.base.js'));
 
   return {
+    testConfigCategory: ScoutTestRunConfigCategory.UI_TEST,
     testFiles: [require.resolve('./cache'), require.resolve('./headers')],
     services: httpConfig.get('services'),
     servers: httpConfig.get('servers'),

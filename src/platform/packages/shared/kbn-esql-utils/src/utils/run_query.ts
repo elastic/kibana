@@ -15,6 +15,7 @@ import type { TimeRange } from '@kbn/es-query';
 import { esFieldTypeToKibanaFieldType } from '@kbn/field-types';
 import type { ESQLColumn, ESQLSearchResponse, ESQLSearchParams } from '@kbn/es-types';
 import { lastValueFrom } from 'rxjs';
+import { type ESQLControlVariable, ESQLVariableType } from '@kbn/esql-validation-autocomplete';
 
 export const hasStartEndParams = (query: string) => /\?_tstart|\?_tend/i.test(query);
 
@@ -24,7 +25,7 @@ export const getStartEndParams = (query: string, time?: TimeRange) => {
   if (time && (startNamedParams || endNamedParams)) {
     const timeParams = {
       start: startNamedParams ? dateMath.parse(time.from)?.toISOString() : undefined,
-      end: endNamedParams ? dateMath.parse(time.to)?.toISOString() : undefined,
+      end: endNamedParams ? dateMath.parse(time.to, { roundUp: true })?.toISOString() : undefined,
     };
     const namedParams = [];
     if (timeParams?.start) {
@@ -36,6 +37,24 @@ export const getStartEndParams = (query: string, time?: TimeRange) => {
     return namedParams;
   }
   return [];
+};
+
+export const getNamedParams = (
+  query: string,
+  timeRange?: TimeRange,
+  variables?: ESQLControlVariable[]
+) => {
+  const namedParams: ESQLSearchParams['params'] = getStartEndParams(query, timeRange);
+  if (variables?.length) {
+    variables?.forEach(({ key, value, type }) => {
+      if (type === ESQLVariableType.FIELDS || type === ESQLVariableType.FUNCTIONS) {
+        namedParams.push({ [key]: { identifier: value } });
+      } else {
+        namedParams.push({ [key]: value });
+      }
+    });
+  }
+  return namedParams;
 };
 
 export function formatESQLColumns(columns: ESQLColumn[]): DatatableColumn[] {
@@ -126,6 +145,7 @@ export async function getESQLResults({
   filter,
   dropNullColumns,
   timeRange,
+  variables,
 }: {
   esqlQuery: string;
   search: ISearchGeneric;
@@ -133,11 +153,12 @@ export async function getESQLResults({
   filter?: unknown;
   dropNullColumns?: boolean;
   timeRange?: TimeRange;
+  variables?: ESQLControlVariable[];
 }): Promise<{
   response: ESQLSearchResponse;
   params: ESQLSearchParams;
 }> {
-  const namedParams = getStartEndParams(esqlQuery, timeRange);
+  const namedParams = getNamedParams(esqlQuery, timeRange, variables);
   const result = await lastValueFrom(
     search(
       {

@@ -21,6 +21,7 @@ import type { OnboardingCardId } from '../../constants';
 import type { CheckCompleteResult } from '../../types';
 import { CARD_COMPLETE_BADGE, EXPAND_CARD_BUTTON_LABEL } from './translations';
 import { useCardPanelStyles } from './onboarding_card_panel.styles';
+import { useDelayedVisibility } from './hooks/use_delayed_visibility';
 
 interface OnboardingCardPanelProps {
   id: OnboardingCardId;
@@ -48,6 +49,7 @@ export const OnboardingCardPanel = React.memo<PropsWithChildren<OnboardingCardPa
       'onboardingCardPanel-expanded': isExpanded,
       'onboardingCardPanel-completed': isComplete,
     });
+    const isContentVisible = useDelayedVisibility({ isExpanded });
 
     return (
       <EuiPanel
@@ -102,7 +104,7 @@ export const OnboardingCardPanel = React.memo<PropsWithChildren<OnboardingCardPa
           </EuiFlexItem>
         </EuiFlexGroup>
         <div className="onboardingCardContentWrapper">
-          <div className="onboardingCardContent">{children}</div>
+          <div className="onboardingCardContent">{isContentVisible ? children : null}</div>
         </div>
       </EuiPanel>
     );

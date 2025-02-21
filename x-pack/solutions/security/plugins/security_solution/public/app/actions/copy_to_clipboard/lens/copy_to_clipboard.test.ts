@@ -63,7 +63,7 @@ describe('createCopyToClipboardLensAction', () => {
   });
 
   it('should return display name', () => {
-    expect(copyToClipboardAction.getDisplayName(context)).toEqual('Copy to Clipboard');
+    expect(copyToClipboardAction.getDisplayName(context)).toEqual('Copy to clipboard');
   });
 
   it('should return icon type', () => {
@@ -77,7 +77,7 @@ describe('createCopyToClipboardLensAction', () => {
           ...context,
           embeddable: {
             ...getMockLensApi(),
-            blockingError: new BehaviorSubject(new Error('some error')),
+            blockingError$: new BehaviorSubject(new Error('some error')),
           },
         })
       ).toEqual(false);

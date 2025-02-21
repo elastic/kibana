@@ -19,7 +19,7 @@ import { bulkUpdateRulesRoute } from './route';
 import type { BulkError } from '../../../../routes/utils';
 import { getCreateRulesSchemaMock } from '../../../../../../../common/api/detection_engine/model/rule_schema/mocks';
 import { getQueryRuleParams } from '../../../../rule_schema/mocks';
-import { loggingSystemMock } from '@kbn/core/server/mocks';
+import { loggingSystemMock, docLinksServiceMock } from '@kbn/core/server/mocks';
 import { HttpAuthzError } from '../../../../../machine_learning/validation';
 
 describe('Bulk update rules route', () => {
@@ -30,13 +30,14 @@ describe('Bulk update rules route', () => {
     server = serverMock.create();
     ({ clients, context } = requestContextMock.createTools());
     const logger = loggingSystemMock.createLogger();
+    const docLinks = docLinksServiceMock.createSetupContract();
 
     clients.rulesClient.find.mockResolvedValue(getFindResultWithSingleHit());
     clients.rulesClient.update.mockResolvedValue(getRuleMock(getQueryRuleParams()));
     clients.detectionRulesClient.updateRule.mockResolvedValue(getRulesSchemaMock());
     clients.appClient.getSignalsIndex.mockReturnValue('.siem-signals-test-index');
 
-    bulkUpdateRulesRoute(server.router, logger);
+    bulkUpdateRulesRoute(server.router, logger, docLinks);
   });
 
   describe('status codes', () => {

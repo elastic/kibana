@@ -88,12 +88,12 @@ export const NextSteps = ({
     });
 
   const connectorCards = packagePolicy.inputs
-    .filter((input) => !!input?.vars?.connector_id.value || !!input?.vars?.connector_name.value)
+    .filter((input) => !!input?.vars?.connector_id?.value || !!input?.vars?.connector_name?.value)
     .map((input, index) => {
       return (
         <EuiFlexItem key={index}>
           <EuiCard
-            data-test-subj={`agentlessStepConfirmData.connectorCard.${input?.vars?.connector_name.value}`}
+            data-test-subj={`agentlessStepConfirmData.connectorCard.${input?.vars?.connector_name?.value}`}
             title={`${input?.vars?.connector_name.value}`}
             description={i18n.translate(
               'xpack.fleet.agentlessStepConfirmData.connectorCard.description',
@@ -103,8 +103,8 @@ export const NextSteps = ({
             )}
             onClick={() => {
               application.navigateToApp(ELASTICSEARCH_PLUGIN_ID, {
-                path: input?.vars?.connector_id.value
-                  ? `content/connectors/${input?.vars?.connector_id.value}`
+                path: input?.vars?.connector_id?.value
+                  ? `content/connectors/${input?.vars?.connector_id?.value}`
                   : `content/connectors`,
               });
             }}
@@ -132,7 +132,7 @@ export const NextSteps = ({
   return (
     <>
       <EuiSpacer size="m" />
-      {nextStepsCards.length > 0 && (
+      {(nextStepsCards.length > 0 || connectorCards.length > 0) && (
         <EuiFlexGroup alignItems="center" direction="row" wrap={true}>
           {nextStepsCards}
           {connectorCards}

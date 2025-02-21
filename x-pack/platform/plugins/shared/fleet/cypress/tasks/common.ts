@@ -80,6 +80,10 @@ const disableNewFeaturesTours = (window: Window) => {
   });
 };
 
+const disableFleetTours = (window: Window) => {
+  window.localStorage.setItem('fleet.autoUpgradeAgentsTour', JSON.stringify({ active: false }));
+};
+
 export const waitForPageToBeLoaded = () => {
   cy.get(LOADING_INDICATOR_HIDDEN).should('exist');
   cy.get(LOADING_INDICATOR).should('not.exist');
@@ -115,6 +119,7 @@ export const visit = (url: string, options: Partial<Cypress.VisitOptions> = {}, 
       options.onBeforeLoad?.(win);
 
       disableNewFeaturesTours(win);
+      disableFleetTours(win);
     },
     onLoad: (win) => {
       options.onLoad?.(win);

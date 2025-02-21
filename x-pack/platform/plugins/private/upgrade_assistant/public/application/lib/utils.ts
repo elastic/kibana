@@ -9,7 +9,7 @@ import { pipe } from 'fp-ts/lib/pipeable';
 import { tryCatch, fold } from 'fp-ts/lib/Either';
 
 import { DEPRECATION_WARNING_UPPER_LIMIT } from '../../../common/constants';
-import { ReindexStep } from '../../../common/types';
+import { ReindexStep, DataStreamReindexStatus } from '../../../common/types';
 
 export const validateRegExpString = (s: string) =>
   pipe(
@@ -78,21 +78,56 @@ export const getReindexProgressLabel = (
       percentsComplete = hasExistingAliases ? 85 : 90;
       break;
     }
-    case ReindexStep.aliasCreated: {
+    case ReindexStep.indexSettingsRestored: {
       // step 4 completed
+      percentsComplete = hasExistingAliases ? 87 : 92;
+      break;
+    }
+    case ReindexStep.aliasCreated: {
+      // step 5 completed
       percentsComplete = hasExistingAliases ? 90 : 95;
       break;
     }
     case ReindexStep.originalIndexDeleted: {
-      // step 5 completed
+      // step 6 completed
       percentsComplete = hasExistingAliases ? 95 : 100;
       break;
     }
     case ReindexStep.existingAliasesUpdated: {
-      // step 6 completed, 100% progress
+      // step 7 completed, 100% progress
       percentsComplete = 100;
       break;
     }
   }
+  return `${percentsComplete}%`;
+};
+
+export const getDataStreamReindexProgress = (
+  status: DataStreamReindexStatus,
+  reindexTaskPercComplete: number | null
+): number => {
+  switch (status) {
+    case DataStreamReindexStatus.notStarted:
+      return 0;
+
+    case DataStreamReindexStatus.fetchFailed:
+    case DataStreamReindexStatus.failed:
+    case DataStreamReindexStatus.cancelled:
+    case DataStreamReindexStatus.inProgress: {
+      return reindexTaskPercComplete !== null ? Math.round(reindexTaskPercComplete * 100) : 0;
+    }
+    case DataStreamReindexStatus.completed: {
+      return 100;
+    }
+  }
+
+  return 0;
+};
+
+export const getDataStreamReindexProgressLabel = (
+  status: DataStreamReindexStatus,
+  reindexTaskPercComplete: number | null
+): string => {
+  const percentsComplete = getDataStreamReindexProgress(status, reindexTaskPercComplete);
   return `${percentsComplete}%`;
 };

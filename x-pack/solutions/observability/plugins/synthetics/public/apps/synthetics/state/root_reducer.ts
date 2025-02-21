@@ -21,7 +21,7 @@ import {
   SettingsState,
 } from './settings';
 import { elasticsearchReducer, QueriesState } from './elasticsearch';
-import { agentPoliciesReducer, AgentPoliciesState } from './private_locations';
+import { PrivateLocationsState, privateLocationsStateReducer } from './private_locations';
 import { networkEventsReducer, NetworkEventsState } from './network_events';
 import { monitorDetailsReducer, MonitorDetailsState } from './monitor_details';
 import { uiReducer, UiState } from './ui';
@@ -31,47 +31,50 @@ import { serviceLocationsReducer, ServiceLocationsState } from './service_locati
 import { monitorOverviewReducer, MonitorOverviewState } from './overview';
 import { BrowserJourneyState } from './browser_journey/models';
 import { monitorStatusHeatmapReducer, MonitorStatusHeatmap } from './status_heatmap';
+import { agentPoliciesReducer, AgentPoliciesState } from './agent_policies';
 
 export interface SyntheticsAppState {
-  ui: UiState;
-  settings: SettingsState;
-  elasticsearch: QueriesState;
-  monitorList: MonitorListState;
-  overview: MonitorOverviewState;
-  certificates: CertificatesState;
-  globalParams: GlobalParamsState;
-  networkEvents: NetworkEventsState;
   agentPolicies: AgentPoliciesState;
-  manualTestRuns: ManualTestRunsState;
-  monitorDetails: MonitorDetailsState;
   browserJourney: BrowserJourneyState;
+  certificates: CertificatesState;
   certsList: CertsListState;
   defaultAlerting: DefaultAlertingState;
   dynamicSettings: DynamicSettingsState;
-  serviceLocations: ServiceLocationsState;
-  overviewStatus: OverviewStatusStateReducer;
-  syntheticsEnablement: SyntheticsEnablementState;
+  elasticsearch: QueriesState;
+  globalParams: GlobalParamsState;
+  manualTestRuns: ManualTestRunsState;
+  monitorDetails: MonitorDetailsState;
+  monitorList: MonitorListState;
   monitorStatusHeatmap: MonitorStatusHeatmap;
+  networkEvents: NetworkEventsState;
+  overview: MonitorOverviewState;
+  overviewStatus: OverviewStatusStateReducer;
+  privateLocations: PrivateLocationsState;
+  serviceLocations: ServiceLocationsState;
+  settings: SettingsState;
+  syntheticsEnablement: SyntheticsEnablementState;
+  ui: UiState;
 }
 
 export const rootReducer = combineReducers<SyntheticsAppState>({
-  ui: uiReducer,
-  settings: settingsReducer,
-  monitorList: monitorListReducer,
-  overview: monitorOverviewReducer,
-  globalParams: globalParamsReducer,
-  networkEvents: networkEventsReducer,
-  elasticsearch: elasticsearchReducer,
   agentPolicies: agentPoliciesReducer,
-  monitorDetails: monitorDetailsReducer,
   browserJourney: browserJourneyReducer,
-  manualTestRuns: manualTestRunsReducer,
-  overviewStatus: overviewStatusReducer,
-  defaultAlerting: defaultAlertingReducer,
-  dynamicSettings: dynamicSettingsReducer,
-  serviceLocations: serviceLocationsReducer,
-  syntheticsEnablement: syntheticsEnablementReducer,
   certificates: certificatesReducer,
   certsList: certsListReducer,
+  defaultAlerting: defaultAlertingReducer,
+  dynamicSettings: dynamicSettingsReducer,
+  elasticsearch: elasticsearchReducer,
+  globalParams: globalParamsReducer,
+  manualTestRuns: manualTestRunsReducer,
+  monitorDetails: monitorDetailsReducer,
+  monitorList: monitorListReducer,
   monitorStatusHeatmap: monitorStatusHeatmapReducer,
+  networkEvents: networkEventsReducer,
+  overview: monitorOverviewReducer,
+  overviewStatus: overviewStatusReducer,
+  privateLocations: privateLocationsStateReducer,
+  serviceLocations: serviceLocationsReducer,
+  settings: settingsReducer,
+  syntheticsEnablement: syntheticsEnablementReducer,
+  ui: uiReducer,
 });

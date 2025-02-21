@@ -65,7 +65,7 @@ export const getEntityIndexStatus = async ({
 export type MappingProperties = NonNullable<MappingTypeMapping['properties']>;
 
 export const generateIndexMappings = (
-  description: EntityEngineInstallationDescriptor
+  description: Pick<EntityEngineInstallationDescriptor, 'fields' | 'identityField'>
 ): MappingTypeMapping => {
   const identityFieldMappings: MappingProperties = {
     [description.identityField]: {

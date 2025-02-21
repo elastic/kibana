@@ -10,10 +10,6 @@ import { IScopedClusterClient } from '@kbn/core/server';
 
 import { fetchConnectorByIndexName } from '@kbn/search-connectors';
 
-import { ENTERPRISE_SEARCH_CONNECTOR_CRAWLER_SERVICE_TYPE } from '../../../common/constants';
-
-import { fetchCrawlerByIndexName } from '../crawler/fetch_crawlers';
-
 import { fetchIndex } from './fetch_index';
 
 jest.mock('@kbn/search-connectors', () => ({
@@ -27,10 +23,6 @@ jest.mock('@kbn/search-connectors', () => ({
     SUSPENDED: 'suspended',
   },
   fetchConnectorByIndexName: jest.fn(),
-}));
-
-jest.mock('../crawler/fetch_crawlers', () => ({
-  fetchCrawlerByIndexName: jest.fn(),
 }));
 
 describe('fetchIndex lib function', () => {
@@ -103,7 +95,6 @@ describe('fetchIndex lib function', () => {
         index_name: { aliases: [], data: 'full index' },
       })
     );
-    (fetchCrawlerByIndexName as jest.Mock).mockImplementationOnce(() => Promise.resolve(undefined));
     (fetchConnectorByIndexName as jest.Mock).mockImplementationOnce(() =>
       Promise.resolve(undefined)
     );
@@ -139,69 +130,6 @@ describe('fetchIndex lib function', () => {
       ...result,
       connector: { doc: 'doc', service_type: 'some-service-type' },
       has_pending_syncs: true,
-    });
-  });
-
-  it('should return data and stats for index and crawler if crawler is present', async () => {
-    mockClient.asCurrentUser.indices.get.mockImplementation(() =>
-      Promise.resolve({
-        index_name: { aliases: [], data: 'full index' },
-      })
-    );
-    (fetchCrawlerByIndexName as jest.Mock).mockImplementationOnce(() =>
-      Promise.resolve({
-        id: '1234',
-      })
-    );
-    (fetchConnectorByIndexName as jest.Mock).mockImplementationOnce(() =>
-      Promise.resolve(undefined)
-    );
-    mockClient.asCurrentUser.indices.stats.mockImplementation(() => Promise.resolve(statsResponse));
-
-    await expect(
-      fetchIndex(mockClient as unknown as IScopedClusterClient, 'index_name')
-    ).resolves.toEqual({
-      ...result,
-      crawler: {
-        id: '1234',
-      },
-    });
-  });
-
-  it('should return data and stats for index and crawler if a crawler registered as a connector is present', async () => {
-    mockClient.asCurrentUser.count.mockReturnValue({ count: 0 });
-    mockClient.asCurrentUser.search.mockReturnValue({
-      hits: {
-        hits: [{ _source: { status: 'in_progress' } }, { _source: { status: 'completed' } }],
-      },
-    });
-    mockClient.asCurrentUser.indices.get.mockImplementation(() =>
-      Promise.resolve({
-        index_name: { aliases: [], data: 'full index' },
-      })
-    );
-    (fetchCrawlerByIndexName as jest.Mock).mockImplementationOnce(() =>
-      Promise.resolve({
-        id: '1234',
-      })
-    );
-    (fetchConnectorByIndexName as jest.Mock).mockImplementationOnce(() =>
-      Promise.resolve({
-        doc: 'doc',
-        service_type: ENTERPRISE_SEARCH_CONNECTOR_CRAWLER_SERVICE_TYPE,
-      })
-    );
-    mockClient.asCurrentUser.indices.stats.mockImplementation(() => Promise.resolve(statsResponse));
-
-    await expect(
-      fetchIndex(mockClient as unknown as IScopedClusterClient, 'index_name')
-    ).resolves.toEqual({
-      ...result,
-      connector: { doc: 'doc', service_type: ENTERPRISE_SEARCH_CONNECTOR_CRAWLER_SERVICE_TYPE },
-      count: 0,
-      crawler: { id: '1234' },
-      has_in_progress_syncs: true,
-      has_pending_syncs: false,
     });
   });
 

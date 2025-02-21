@@ -10,7 +10,7 @@ import { SupertestWithRoleScopeType } from '@kbn/test-suites-xpack/api_integrati
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 // To test setting validations we are using the existing 'defaultColumns' setting that is available in all serverless projects
-// (See list of common serverless settings in /packages/serverless/settings/common/index.ts)
+// (See list of common serverless settings in /src/platform/packages/private/serverless/settings/common/index.ts)
 // The 'defaultColumns' setting is of type array of strings
 const DEFAULT_COLUMNS_SETTING = 'defaultColumns';
 

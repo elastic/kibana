@@ -14,13 +14,13 @@ paths:
         - name: id
           in: query
           required: false
-          description: Exception list's identifier generated upon creation
+          description: Exception list's identifier generated upon creation.
           schema:
             $ref: '../model/exception_list_common.schema.yaml#/components/schemas/ExceptionListId'
         - name: list_id
           in: query
           required: false
-          description: Exception list's human readable identifier
+          description: Exception list's human readable identifier.
           schema:
             $ref: '../model/exception_list_common.schema.yaml#/components/schemas/ExceptionListHumanId'
         - name: namespace_type
@@ -29,12 +29,18 @@ paths:
           schema:
             $ref: '../model/exception_list_common.schema.yaml#/components/schemas/ExceptionNamespaceType'
             default: single
+          examples:
+            single:
+              value: single
+            agnostic:
+              value: agnostic
         - name: filter
           in: query
           required: false
           description: Search filter clause
           schema:
             type: string
+            example: exception-list-agnostic.attributes.tags:"policy:policy-1" OR exception-list-agnostic.attributes.tags:"policy:all"
       responses:
         200:
           description: Successful response
@@ -55,6 +61,13 @@ paths:
                   total:
                     type: integer
                     minimum: 0
+              examples:
+                summary:
+                  value:
+                    windows: 0
+                    linux: 0
+                    macos: 0
+                    total: 0
         400:
           description: Invalid input data response
           content:
@@ -63,27 +76,55 @@ paths:
                 oneOf:
                   - $ref: '../../../../../../../src/platform/packages/shared/kbn-openapi-common/schemas/error_responses.schema.yaml#/components/schemas/PlatformErrorResponse'
                   - $ref: '../../../../../../../src/platform/packages/shared/kbn-openapi-common/schemas/error_responses.schema.yaml#/components/schemas/SiemErrorResponse'
+              examples:
+                badRequest:
+                  value:
+                    statusCode: 400
+                    error: Bad Request
+                    message: "[request query]: namespace_type.0: Invalid enum value. Expected 'agnostic' | 'single', received 'blob'"
         401:
           description: Unsuccessful authentication response
           content:
             application/json:
               schema:
                 $ref: '../../../../../../../src/platform/packages/shared/kbn-openapi-common/schemas/error_responses.schema.yaml#/components/schemas/PlatformErrorResponse'
+              examples:
+                unauthorized:
+                  value:
+                    statusCode: 401
+                    error: Unauthorized
+                    message: '[security_exception\n\tRoot causes:\n\t\tsecurity_exception: unable to authenticate user [elastic] for REST request [/_security/_authenticate]]: unable to authenticate user [elastic] for REST request [/_security/_authenticate]'
         403:
           description: Not enough privileges response
           content:
             application/json:
               schema:
                 $ref: '../../../../../../../src/platform/packages/shared/kbn-openapi-common/schemas/error_responses.schema.yaml#/components/schemas/PlatformErrorResponse'
+              examples:
+                forbidden:
+                  value:
+                    statusCode: 403
+                    error: Forbidden
+                    message: 'API [GET /api/exception_lists/summary?list_id=simple_list&namespace_type=agnostic] is unauthorized for user, this action is granted by the Kibana privileges [lists-summary]'
         404:
           description: Exception list not found response
           content:
             application/json:
               schema:
                 $ref: '../../../../../../../src/platform/packages/shared/kbn-openapi-common/schemas/error_responses.schema.yaml#/components/schemas/SiemErrorResponse'
+              examples:
+                notFound:
+                  value:
+                    message": 'exception list id: "foo" does not exist'
+                    status_code": 404
         500:
           description: Internal server error response
           content:
             application/json:
               schema:
                 $ref: '../../../../../../../src/platform/packages/shared/kbn-openapi-common/schemas/error_responses.schema.yaml#/components/schemas/SiemErrorResponse'
+              examples:
+                serverError:
+                  value:
+                    message: Internal Server Error
+                    status_code: 500

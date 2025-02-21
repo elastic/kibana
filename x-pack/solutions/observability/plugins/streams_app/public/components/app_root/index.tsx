@@ -25,19 +25,23 @@ export function AppRoot({
   pluginsStart,
   services,
   appMountParameters,
+  isServerless,
 }: {
   coreStart: CoreStart;
   pluginsStart: StreamsAppStartDependencies;
   services: StreamsAppServices;
+  isServerless: boolean;
 } & { appMountParameters: AppMountParameters }) {
   const { history } = appMountParameters;
 
   const context = {
+    appParams: appMountParameters,
     core: coreStart,
     dependencies: {
       start: pluginsStart,
     },
     services,
+    isServerless,
   };
 
   return (

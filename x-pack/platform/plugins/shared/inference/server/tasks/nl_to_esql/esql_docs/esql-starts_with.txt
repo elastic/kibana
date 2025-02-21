@@ -18,7 +18,7 @@ This is a string expression that will be checked if it is the starting sequence 
 
 ## Examples
 
-The following example checks if the `last_name` of employees starts with the letter "B":
+This example checks if the last name of employee records starts with "B":
 
 ```esql
 FROM employees

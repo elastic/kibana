@@ -5,23 +5,23 @@
  * 2.0.
  */
 
-import { StreamDefinition } from '@kbn/streams-schema';
+import { IngestStreamDefinition } from '@kbn/streams-schema';
 import { ASSET_VERSION } from '../../../../common/constants';
 import { conditionToPainless } from '../helpers/condition_to_painless';
 import { getReroutePipelineName } from './name';
 
 interface GenerateReroutePipelineParams {
-  definition: StreamDefinition;
+  definition: IngestStreamDefinition;
 }
 
-export async function generateReroutePipeline({ definition }: GenerateReroutePipelineParams) {
+export function generateReroutePipeline({ definition }: GenerateReroutePipelineParams) {
   return {
     id: getReroutePipelineName(definition.name),
-    processors: definition.stream.ingest.routing.map((child) => {
+    processors: definition.ingest.routing.map((child) => {
       return {
         reroute: {
-          destination: child.name,
-          if: conditionToPainless(child.condition),
+          destination: child.destination,
+          if: conditionToPainless(child.if),
         },
       };
     }),

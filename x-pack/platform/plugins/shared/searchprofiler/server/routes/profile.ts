@@ -98,9 +98,7 @@ export const register = ({ router, getLicenseStatus, log }: RouteDependencies) =
 
       try {
         const client = (await ctx.core).elasticsearch.client.asCurrentUser;
-        const resp = await client.cat.indices({ format: 'json' });
-
-        const hasIndices = resp.length > 0;
+        const hasIndices = await client.indices.exists({ index: '*,*:*' });
 
         return response.ok({
           body: {

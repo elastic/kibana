@@ -15,7 +15,6 @@ import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 import { Router } from '@kbn/shared-ux-router';
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { OBSERVABILITY_ONBOARDING_TELEMETRY_EVENT } from '../../common/telemetry_events';
 import { AppContext, ConfigSchema, ObservabilityOnboardingAppServices } from '..';
 import { ObservabilityOnboardingHeaderActionMenu } from './shared/header_action_menu';
 import {
@@ -52,10 +51,6 @@ export function ObservabilityOnboardingAppRoot({
     config,
     context,
   };
-
-  core.analytics.reportEvent(OBSERVABILITY_ONBOARDING_TELEMETRY_EVENT.eventType, {
-    uses_legacy_onboarding_page: false,
-  });
 
   return (
     <KibanaRenderContextProvider {...core}>

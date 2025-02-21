@@ -6,14 +6,15 @@
  */
 
 import { waitForPluginInitialized } from '../../cloud_security_posture_api/utils';
-import type { FtrProviderContext } from '../ftr_provider_context';
+import type { SecurityTelemetryFtrProviderContext } from '../config';
 
 // eslint-disable-next-line import/no-default-export
-export default function ({ getPageObjects, getService }: FtrProviderContext) {
+export default function ({ getPageObjects, getService }: SecurityTelemetryFtrProviderContext) {
   const retry = getService('retry');
   const logger = getService('log');
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
+  const ebtUIHelper = getService('kibana_ebt_ui');
   const pageObjects = getPageObjects([
     'common',
     'header',
@@ -49,8 +50,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       );
 
       await alertsPage.waitForListToHaveAlerts();
-
-      await alertsPage.flyout.expandVisualizations();
+      await ebtUIHelper.setOptIn(true); // starts the recording of events from this moment
     });
 
     after(async () => {
@@ -63,12 +63,15 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     it('expanded flyout - filter by node', async () => {
+      await alertsPage.flyout.expandVisualizations();
+
       await alertsPage.flyout.assertGraphPreviewVisible();
       await alertsPage.flyout.assertGraphNodesNumber(3);
 
       await expandedFlyoutGraph.expandGraph();
       await expandedFlyoutGraph.waitGraphIsLoaded();
       await expandedFlyoutGraph.assertGraphNodesNumber(3);
+      await expandedFlyoutGraph.toggleSearchBar();
 
       // Show actions by entity
       await expandedFlyoutGraph.showActionsByEntity('admin@example.com');
@@ -110,6 +113,30 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         'actor.entity.id: admin@example.com OR target.entity.id: admin@example.com OR related.entity: admin@example.com OR event.action: google.iam.admin.v1.CreateRole'
       );
 
+      // Hide events with the same action
+      await expandedFlyoutGraph.hideEventsOfSameAction(
+        'a(admin@example.com)-b(projects/your-project-id/roles/customRole)label(google.iam.admin.v1.CreateRole)outcome(success)'
+      );
+      await expandedFlyoutGraph.expectFilterTextEquals(
+        0,
+        'actor.entity.id: admin@example.com OR target.entity.id: admin@example.com OR related.entity: admin@example.com'
+      );
+      await expandedFlyoutGraph.expectFilterPreviewEquals(
+        0,
+        'actor.entity.id: admin@example.com OR target.entity.id: admin@example.com OR related.entity: admin@example.com'
+      );
+
+      // Hide actions on entity
+      await expandedFlyoutGraph.hideActionsOnEntity('admin@example.com');
+      await expandedFlyoutGraph.expectFilterTextEquals(
+        0,
+        'actor.entity.id: admin@example.com OR related.entity: admin@example.com'
+      );
+      await expandedFlyoutGraph.expectFilterPreviewEquals(
+        0,
+        'actor.entity.id: admin@example.com OR related.entity: admin@example.com'
+      );
+
       // Clear filters
       await expandedFlyoutGraph.clearAllFilters();
 
@@ -123,6 +150,13 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await expandedFlyoutGraph.assertGraphNodesNumber(5);
 
       // Open timeline
+      await expandedFlyoutGraph.clickOnInvestigateInTimelineButton();
+      await timelinePage.ensureTimelineIsOpen();
+      await timelinePage.waitForEvents();
+      await timelinePage.closeTimeline();
+
+      // Test query bar
+      await expandedFlyoutGraph.setKqlQuery('cannotFindThis');
       await expandedFlyoutGraph.clickOnInvestigateInTimelineButton();
       await timelinePage.ensureTimelineIsOpen();
       await timelinePage.waitForEvents();

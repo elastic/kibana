@@ -20,14 +20,18 @@ describe('agentStatusesToSummary', () => {
         enrolling: 7,
         unenrolling: 8,
         unenrolled: 9,
+        orphaned: 0,
+        uninstalled: 0,
       })
     ).toEqual({
       healthy: 1,
       unhealthy: 5,
+      orphaned: 0,
       inactive: 4,
       offline: 5,
       updating: 21,
       unenrolled: 9,
+      uninstalled: 0,
     });
   });
 });

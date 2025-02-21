@@ -27,12 +27,12 @@ export const configDeprecationProvider: ConfigDeprecationProvider = ({
   unusedFromRoot('data.search.sessions.notTouchedInProgressTimeout', { level }),
 
   // Search sessions config deprecations
-  deprecateFromRoot('data.search.sessions.enabled', '9.0.0', { level }),
-  deprecateFromRoot('data.search.sessions.notTouchedTimeout', '9.0.0', { level }),
-  deprecateFromRoot('data.search.sessions.maxUpdateRetries', '9.0.0', { level }),
-  deprecateFromRoot('data.search.sessions.defaultExpiration', '9.0.0', { level }),
-  deprecateFromRoot('data.search.sessions.management.maxSessions', '9.0.0', { level }),
-  deprecateFromRoot('data.search.sessions.management.refreshInterval', '9.0.0', { level }),
-  deprecateFromRoot('data.search.sessions.management.refreshTimeout', '9.0.0', { level }),
-  deprecateFromRoot('data.search.sessions.management.expiresSoonWarning', '9.0.0', { level }),
+  deprecateFromRoot('data.search.sessions.enabled', '9.1.0', { level }),
+  deprecateFromRoot('data.search.sessions.notTouchedTimeout', '9.1.0', { level }),
+  deprecateFromRoot('data.search.sessions.maxUpdateRetries', '9.1.0', { level }),
+  deprecateFromRoot('data.search.sessions.defaultExpiration', '9.1.0', { level }),
+  deprecateFromRoot('data.search.sessions.management.maxSessions', '9.1.0', { level }),
+  deprecateFromRoot('data.search.sessions.management.refreshInterval', '9.1.0', { level }),
+  deprecateFromRoot('data.search.sessions.management.refreshTimeout', '9.1.0', { level }),
+  deprecateFromRoot('data.search.sessions.management.expiresSoonWarning', '9.1.0', { level }),
 ];

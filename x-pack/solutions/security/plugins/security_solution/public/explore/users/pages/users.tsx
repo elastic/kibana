@@ -6,13 +6,14 @@
  */
 
 import { EuiSpacer, EuiWindowEvent } from '@elastic/eui';
-import styled from 'styled-components';
+import styled from '@emotion/styled';
 import { noop } from 'lodash/fp';
 import React, { useCallback, useMemo, useRef } from 'react';
 import { useParams } from 'react-router-dom';
 import type { Filter } from '@kbn/es-query';
 import { isTab } from '@kbn/timelines-plugin/public';
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
+import { LastEventIndexKey } from '@kbn/timelines-plugin/common';
 import { InputsModelId } from '../../../common/store/inputs/constants';
 import { SecurityPageName } from '../../../app/types';
 import { FiltersGlobal } from '../../../common/components/filters_global';
@@ -42,7 +43,7 @@ import { useSourcererDataView } from '../../../sourcerer/containers';
 import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
 import { useInvalidFilterQuery } from '../../../common/hooks/use_invalid_filter_query';
 import { UsersKpiComponent } from '../components/kpi_users';
-import { LastEventIndexKey, RiskScoreEntity } from '../../../../common/search_strategy';
+import { EntityType } from '../../../../common/entity_analytics/types';
 import { generateSeverityFilter } from '../../hosts/store/helpers';
 import { UsersTableType } from '../store/model';
 import { hasMlUserPermissions } from '../../../../common/machine_learning/has_ml_user_permissions';
@@ -91,7 +92,7 @@ const UsersComponent = () => {
     }
 
     if (tabName === UsersTableType.risk) {
-      const severityFilter = generateSeverityFilter(severitySelection, RiskScoreEntity.user);
+      const severityFilter = generateSeverityFilter(severitySelection, EntityType.user);
 
       return [...severityFilter, ...globalFilters];
     }

@@ -109,7 +109,7 @@ export const RuleEventLogListKPI = (props: RuleEventLogListKPIProps) => {
       });
       setKpi(newKpi);
     } catch (e) {
-      if (e.body.statusCode === 413) {
+      if (e.body?.statusCode === 413) {
         return;
       }
       toasts.addDanger({

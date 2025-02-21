@@ -105,6 +105,8 @@ import {
   MAX_CONCURRENT_PACKAGE_ASSETS,
 } from '../constants';
 
+import { inputNotAllowedInAgentless } from '../../common/services/agentless_policy_helper';
+
 import { createSoFindIterable } from './utils/create_so_find_iterable';
 
 import type { FleetAuthzRouteConfig } from './security';
@@ -149,7 +151,10 @@ import {
 import { getPackageAssetsMap } from './epm/packages/get';
 import { validateAgentPolicyOutputForIntegration } from './agent_policies/outputs_helpers';
 import type { PackagePolicyClientFetchAllItemIdsOptions } from './package_policy_service';
-import { validatePolicyNamespaceForSpace } from './spaces/policy_namespaces';
+import {
+  validateAdditionalDatastreamsPermissionsForSpace,
+  validatePolicyNamespaceForSpace,
+} from './spaces/policy_namespaces';
 import { isSpaceAwarenessEnabled, isSpaceAwarenessMigrationPending } from './spaces/helpers';
 import { updatePackagePolicySpaces } from './spaces/package_policy';
 import { runWithCache } from './epm/packages/cache';
@@ -295,6 +300,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
         await validateAgentPolicyOutputForIntegration(
           soClient,
           agentPolicy,
+          packagePolicy,
           enrichedPackagePolicy.package?.name
         );
       }
@@ -316,6 +322,10 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
         spaceId: soClient.getCurrentNamespace(),
       });
     }
+    await validateAdditionalDatastreamsPermissionsForSpace({
+      additionalDatastreamsPermissions: enrichedPackagePolicy.additional_datastreams_permissions,
+      spaceId: soClient.getCurrentNamespace(),
+    });
 
     let elasticsearchPrivileges: NonNullable<PackagePolicy['elasticsearch']>['privileges'];
     let inputs = getInputsWithStreamIds(enrichedPackagePolicy, packagePolicyId);
@@ -518,7 +528,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
 
     const agentPolicyIds = new Set(packagePolicies.flatMap((pkgPolicy) => pkgPolicy.policy_ids));
 
-    const agentPolicies = await agentPolicyService.getByIDs(soClient, [...agentPolicyIds]);
+    const agentPolicies = await agentPolicyService.getByIds(soClient, [...agentPolicyIds]);
     const agentPoliciesIndexById = indexBy('id', agentPolicies);
     for (const agentPolicy of agentPolicies) {
       validateIsNotHostedPolicy(agentPolicy, options?.force);
@@ -939,6 +949,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     const logger = appContextService.getLogger();
 
     this.keepPolicyIdInSync(packagePolicyUpdate);
+    await preflightCheckPackagePolicy(soClient, packagePolicyUpdate);
 
     let enrichedPackagePolicy: UpdatePackagePolicy;
     let secretReferences: PolicySecretReference[] | undefined;
@@ -946,7 +957,6 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
 
     try {
       logger.debug(`Starting update of package policy ${id}`);
-      await preflightCheckPackagePolicy(soClient, packagePolicyUpdate);
       enrichedPackagePolicy = await packagePolicyService.runExternalCallbacks(
         'packagePolicyUpdate',
         packagePolicyUpdate,
@@ -988,6 +998,10 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
         spaceId: soClient.getCurrentNamespace(),
       });
     }
+    await validateAdditionalDatastreamsPermissionsForSpace({
+      additionalDatastreamsPermissions: enrichedPackagePolicy.additional_datastreams_permissions,
+      spaceId: soClient.getCurrentNamespace(),
+    });
 
     // eslint-disable-next-line prefer-const
     let { version, ...restOfPackagePolicy } = packagePolicy;
@@ -1117,24 +1131,25 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     // Bump revision of all associated agent policies (old and new)
     const associatedPolicyIds = new Set([...oldPackagePolicy.policy_ids, ...newPolicy.policy_ids]);
     logger.debug(`Bumping revision of associated agent policies ${associatedPolicyIds}`);
-    const bumpPromises = [];
-    for (const policyId of associatedPolicyIds) {
-      // Check if the agent policy is in both old and updated package policies
-      const assignedInOldPolicy = oldPackagePolicy.policy_ids.includes(policyId);
-      const assignedInNewPolicy = newPolicy.policy_ids.includes(policyId);
+    const bumpPromise = pMap(
+      associatedPolicyIds,
+      (policyId) => {
+        // Check if the agent policy is in both old and updated package policies
+        const assignedInOldPolicy = oldPackagePolicy.policy_ids.includes(policyId);
+        const assignedInNewPolicy = newPolicy.policy_ids.includes(policyId);
 
-      // Remove protection if policy is unassigned (in old but not in updated) or policy is assigned (in updated but not in old)
-      const removeProtection =
-        (assignedInOldPolicy && !assignedInNewPolicy) ||
-        (!assignedInOldPolicy && assignedInNewPolicy);
+        // Remove protection if policy is unassigned (in old but not in updated) or policy is assigned (in updated but not in old)
+        const removeProtection =
+          (assignedInOldPolicy && !assignedInNewPolicy) ||
+          (!assignedInOldPolicy && assignedInNewPolicy);
 
-      bumpPromises.push(
-        agentPolicyService.bumpRevision(soClient, esClient, policyId, {
+        return agentPolicyService.bumpRevision(soClient, esClient, policyId, {
           user: options?.user,
           removeProtection,
-        })
-      );
-    }
+        });
+      },
+      { concurrency: MAX_CONCURRENT_AGENT_POLICIES_OPERATIONS }
+    );
 
     const assetRemovePromise = removeOldAssets({
       soClient,
@@ -1145,7 +1160,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       ? deleteSecrets({ esClient, soClient, ids: secretsToDelete.map((s) => s.id) })
       : Promise.resolve();
 
-    await Promise.all([...bumpPromises, assetRemovePromise, deleteSecretsPromise]);
+    await Promise.all([bumpPromise, assetRemovePromise, deleteSecretsPromise]);
 
     sendUpdatePackagePolicyTelemetryEvent(soClient, [packagePolicyUpdate], [oldPackagePolicy]);
 
@@ -1551,7 +1566,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
         return acc;
       }, new Set());
 
-      const agentPolicies = await agentPolicyService.getByIDs(soClient, uniquePolicyIdsR);
+      const agentPolicies = await agentPolicyService.getByIds(soClient, uniquePolicyIdsR);
 
       for (const policyId of uniquePolicyIdsR) {
         const agentPolicy = agentPolicies.find((p) => p.id === policyId);
@@ -1911,17 +1926,23 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
               i.type === input.type &&
               (!input.policy_template || input.policy_template === i.policy_template)
           );
+          // disable some inputs in case of agentless integration
+          const enabled = inputNotAllowedInAgentless(input.type, newPolicy?.supports_agentless)
+            ? false
+            : input.enabled;
+
           return {
             ...defaultInput,
-            enabled: input.enabled,
+            enabled,
             type: input.type,
             // to propagate "enabled: false" to streams
             streams: defaultInput?.streams?.map((stream) => ({
               ...stream,
-              enabled: input.enabled,
+              enabled,
             })),
           } as NewPackagePolicyInput;
         });
+
         newPackagePolicy = {
           ...newPP,
           name: newPolicy.name,
@@ -1938,6 +1959,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
           inputs: newPolicy.inputs[0]?.streams ? newPolicy.inputs : inputs,
           vars: newPolicy.vars || newPP.vars,
           supports_agentless: newPolicy.supports_agentless,
+          additional_datastreams_permissions: newPolicy.additional_datastreams_permissions,
         };
       }
     }
@@ -2211,6 +2233,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
                 await validateAgentPolicyOutputForIntegration(
                   soClient,
                   agentPolicy,
+                  packagePolicy,
                   packagePolicy.package.name,
                   false
                 );

@@ -15,7 +15,8 @@ import { useToasts } from '../common/lib/kibana';
 jest.mock('./api');
 jest.mock('../common/lib/kibana');
 
-describe('useGetActionLicense', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/207404
+describe.skip('useGetActionLicense', () => {
   const abortCtrl = new AbortController();
   let appMockRenderer: AppMockRenderer;
   beforeEach(() => {

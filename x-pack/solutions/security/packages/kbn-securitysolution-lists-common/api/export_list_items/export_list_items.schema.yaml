@@ -1,6 +1,6 @@
 openapi: 3.0.0
 info:
-  title: Export list items API endpoint
+  title: Export value list items API endpoint
   version: '2023-10-31'
 paths:
   /api/lists/items/_export:
@@ -8,13 +8,13 @@ paths:
       x-labels: [serverless, ess]
       operationId: ExportListItems
       x-codegen-enabled: true
-      summary: Export list items
-      description: Export list item values from the specified list.
+      summary: Export value list items
+      description: Export list item values from the specified value list.
       parameters:
         - name: list_id
           in: query
           required: true
-          description: List's id to export
+          description: Value list's `id` to export.
           schema:
             $ref: '../model/list_common.schema.yaml#/components/schemas/ListId'
       responses:
@@ -26,6 +26,16 @@ paths:
                 type: string
                 format: binary
                 description: A `.txt` file containing list items from the specified list
+                example: |
+                  127.0.0.1
+                  127.0.0.2
+                  127.0.0.3
+                  127.0.0.4
+                  127.0.0.5
+                  127.0.0.6
+                  127.0.0.7
+                  127.0.0.8
+                  127.0.0.9
         400:
           description: Invalid input data response
           content:
@@ -34,18 +44,35 @@ paths:
                 oneOf:
                   - $ref: '../../../../../../../src/platform/packages/shared/kbn-openapi-common/schemas/error_responses.schema.yaml#/components/schemas/PlatformErrorResponse'
                   - $ref: '../../../../../../../src/platform/packages/shared/kbn-openapi-common/schemas/error_responses.schema.yaml#/components/schemas/SiemErrorResponse'
+              examples:
+                badRequest:
+                  value:
+                    statusCode: 400
+                    error: 'Bad Request","message":"[request query]: list_id: Required'
         401:
           description: Unsuccessful authentication response
           content:
             application/json:
               schema:
                 $ref: '../../../../../../../src/platform/packages/shared/kbn-openapi-common/schemas/error_responses.schema.yaml#/components/schemas/PlatformErrorResponse'
+              examples:
+                unauthorized:
+                  value:
+                    statusCode: 401
+                    error: Unauthorized
+                    message: '[security_exception\n\tRoot causes:\n\t\tsecurity_exception: unable to authenticate user [elastic] for REST request [/_security/_authenticate]]: unable to authenticate user [elastic] for REST request [/_security/_authenticate]'
         403:
           description: Not enough privileges response
           content:
             application/json:
               schema:
                 $ref: '../../../../../../../src/platform/packages/shared/kbn-openapi-common/schemas/error_responses.schema.yaml#/components/schemas/PlatformErrorResponse'
+              examples:
+                forbidden:
+                  value:
+                    statusCode: 403
+                    error: Forbidden
+                    message: 'API [POST /api/lists/items/_export?list_id=ips.txt] is unauthorized for user, this action is granted by the Kibana privileges [lists-read]'
         404:
           description: List not found response
           content:
@@ -58,3 +85,8 @@ paths:
             application/json:
               schema:
                 $ref: '../../../../../../../src/platform/packages/shared/kbn-openapi-common/schemas/error_responses.schema.yaml#/components/schemas/SiemErrorResponse'
+              examples:
+                serverError:
+                  value:
+                    message: Internal Server Error
+                    status_code: 500

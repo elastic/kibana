@@ -99,13 +99,15 @@ export const IndexEntryEditor: React.FC<Props> = React.memo(
     const { data: kbIndices } = useKnowledgeBaseIndices({
       http,
     });
-    const indexOptions = useMemo(() => {
-      return kbIndices?.indices.map((index) => ({
-        'data-test-subj': index,
-        label: index,
-        value: index,
-      }));
-    }, [kbIndices?.indices]);
+    const indexOptions = useMemo(
+      () =>
+        Object.keys(kbIndices ?? {}).map((index) => ({
+          'data-test-subj': index,
+          label: index,
+          value: index,
+        })),
+      [kbIndices]
+    );
 
     const { value: isMissingIndex } = useAsync(async () => {
       if (!entry?.index?.length) return false;
@@ -123,14 +125,12 @@ export const IndexEntryEditor: React.FC<Props> = React.memo(
 
     const fieldOptions = useMemo(
       () =>
-        indexFields?.value
-          ?.filter((field) => field.esTypes?.includes('semantic_text'))
-          .map((field) => ({
-            'data-test-subj': field.name,
-            label: field.name,
-            value: field.name,
-          })) ?? [],
-      [indexFields?.value]
+        kbIndices?.[entry?.index ?? '']?.map((field) => ({
+          'data-test-subj': field,
+          label: field,
+          value: field,
+        })) ?? [],
+      [entry?.index, kbIndices]
     );
 
     const outputFieldOptions = useMemo(

@@ -923,7 +923,7 @@
                 "signature": [
                   "string | number | boolean | React.ReactElement<any, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | null | undefined"
                 ],
-                "path": "packages/react/kibana_mount/to_mount_point.tsx",
+                "path": "src/platform/packages/shared/react/kibana_mount/to_mount_point.tsx",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -951,7 +951,7 @@
                   "UserProfileService",
                   ", \"getUserProfile$\"> | undefined; }"
                 ],
-                "path": "packages/react/kibana_mount/to_mount_point.tsx",
+                "path": "src/platform/packages/shared/react/kibana_mount/to_mount_point.tsx",
                 "deprecated": false,
                 "trackAdoption": false
               }

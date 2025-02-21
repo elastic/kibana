@@ -125,36 +125,34 @@ export const incrementCounterInternal = async <T>(
     refresh,
     require_alias: true,
     _source: true,
-    body: {
-      script: {
-        source: `
-              for (int i = 0; i < params.counterFieldNames.length; i++) {
-                def counterFieldName = params.counterFieldNames[i];
-                def count = params.counts[i];
+    script: {
+      source: `
+        for (int i = 0; i < params.counterFieldNames.length; i++) {
+          def counterFieldName = params.counterFieldNames[i];
+          def count = params.counts[i];
 
-                if (ctx._source[params.type][counterFieldName] == null) {
-                  ctx._source[params.type][counterFieldName] = count;
-                }
-                else {
-                  ctx._source[params.type][counterFieldName] += count;
-                }
-              }
-              ctx._source.updated_at = params.time;
-            `,
-        lang: 'painless',
-        params: {
-          counts: normalizedCounterFields.map(
-            (normalizedCounterField) => normalizedCounterField.incrementBy
-          ),
-          counterFieldNames: normalizedCounterFields.map(
-            (normalizedCounterField) => normalizedCounterField.fieldName
-          ),
-          time,
-          type,
-        },
+          if (ctx._source[params.type][counterFieldName] == null) {
+            ctx._source[params.type][counterFieldName] = count;
+          }
+          else {
+            ctx._source[params.type][counterFieldName] += count;
+          }
+        }
+        ctx._source.updated_at = params.time;
+      `,
+      lang: 'painless',
+      params: {
+        counts: normalizedCounterFields.map(
+          (normalizedCounterField) => normalizedCounterField.incrementBy
+        ),
+        counterFieldNames: normalizedCounterFields.map(
+          (normalizedCounterField) => normalizedCounterField.fieldName
+        ),
+        time,
+        type,
       },
-      upsert: raw._source,
     },
+    upsert: raw._source,
   });
 
   const { originId } = body.get?._source ?? {};

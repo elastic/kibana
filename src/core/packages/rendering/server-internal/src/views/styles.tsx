@@ -49,7 +49,7 @@ const InlineStyles: FC<{ darkMode: boolean; themeName: ThemeName }> = ({ darkMod
   const themeStyles = getThemeStyles(themeName);
 
   // must be kept in sync with
-  // packages/core/apps/core-apps-server-internal/assets/legacy_theme.js
+  // src/core/packages/apps/server-internal/assets/legacy_theme.js
   /* eslint-disable react/no-danger */
   return (
     <style

@@ -1,7 +1,7 @@
 [[prebuilt-packs]]
 == Prebuilt packs reference
 
-This section lists all prebuilt packs available for Osquery Manager. 
+This section lists all prebuilt packs available for Osquery Manager.
 Each pack is also available as a saved object, with the name `Pack: <pack-name>`.
 
 For more information, refer to <<osquery-prebuilt-packs>>.
@@ -21,10 +21,7 @@ For more information, refer to <<osquery-prebuilt-packs>>.
 |8.2
 
 |`it-compliance`
-a|Identify outdated and vulnerable software.
-
-Dashboard: `[Osquery Manager] Compliance pack`
-
+|Identify outdated and vulnerable software. Dashboard: `[Osquery Manager] Compliance pack`
 |https://github.com/osquery/osquery/tree/master/packs[Osquery]
 |8.2
 
@@ -34,10 +31,7 @@ Dashboard: `[Osquery Manager] Compliance pack`
 |8.2
 
 |`ossec-rootkit`
-a|Run rootkit detection queries to monitor for compromise.
-
-Dashboard: `[Osquery Manager] OSSEC rootkit pack`
-
+|Run rootkit detection queries to monitor for compromise. Dashboard: `[Osquery Manager] OSSEC rootkit pack`
 |https://github.com/osquery/osquery/tree/master/packs[Osquery]
 |8.2
 

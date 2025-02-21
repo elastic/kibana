@@ -7,7 +7,7 @@
 
 import { ElasticsearchClient } from '@kbn/core/server';
 import { SLODefinition } from '../../../../domain/models';
-import { SLO_SUMMARY_DESTINATION_INDEX_PATTERN } from '../../../../../common/constants';
+import { SUMMARY_DESTINATION_INDEX_PATTERN } from '../../../../../common/constants';
 import { EsSummaryDocument } from '../../../../services/summary_transform_generator/helpers/create_temp_summary';
 
 export async function getSloSummary(
@@ -17,7 +17,7 @@ export async function getSloSummary(
 ) {
   try {
     const res = await esClient.search<EsSummaryDocument>({
-      index: SLO_SUMMARY_DESTINATION_INDEX_PATTERN,
+      index: SUMMARY_DESTINATION_INDEX_PATTERN,
       body: {
         query: {
           bool: {

@@ -8,11 +8,12 @@
  */
 
 import { isNotFoundFromUnsupportedServer } from '@kbn/core-elasticsearch-server-internal';
-import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
+import { SavedObjectsErrorHelpers, SavedObjectsRawDocSource } from '@kbn/core-saved-objects-server';
 import {
   SavedObjectsRemoveReferencesToOptions,
   SavedObjectsRemoveReferencesToResponse,
 } from '@kbn/core-saved-objects-api-server';
+import { SavedObjectsUtils } from '@kbn/core-saved-objects-utils-server';
 import { getSearchDsl } from '../search';
 import type { ApiExecutionContext } from './types';
 
@@ -24,7 +25,7 @@ export interface PerformRemoveReferencesToParams {
 
 export const performRemoveReferencesTo = async <T>(
   { type, id, options }: PerformRemoveReferencesToParams,
-  { registry, helpers, client, mappings, extensions = {} }: ApiExecutionContext
+  { registry, helpers, client, mappings, serializer, extensions = {} }: ApiExecutionContext
 ): Promise<SavedObjectsRemoveReferencesToResponse> => {
   const { common: commonHelper } = helpers;
   const { securityExtension } = extensions;
@@ -32,7 +33,28 @@ export const performRemoveReferencesTo = async <T>(
   const namespace = commonHelper.getCurrentNamespace(options.namespace);
   const { refresh = true } = options;
 
-  await securityExtension?.authorizeRemoveReferences({ namespace, object: { type, id } });
+  if (securityExtension) {
+    let name;
+
+    if (securityExtension.includeSavedObjectNames()) {
+      const nameAttribute = registry.getNameAttribute(type);
+
+      const savedObjectResponse = await client.get<SavedObjectsRawDocSource>(
+        {
+          index: commonHelper.getIndexForType(type),
+          id: serializer.generateRawId(namespace, type, id),
+          _source_includes: SavedObjectsUtils.getIncludedNameFields(type, nameAttribute),
+        },
+        { ignore: [404], meta: true }
+      );
+
+      const saveObject = { attributes: savedObjectResponse.body._source?.[type] };
+
+      name = SavedObjectsUtils.getName(nameAttribute, saveObject);
+    }
+
+    await securityExtension.authorizeRemoveReferences({ namespace, object: { type, id, name } });
+  }
 
   const allTypes = registry.getAllTypes().map((t) => t.name);
 
@@ -43,32 +65,30 @@ export const performRemoveReferencesTo = async <T>(
     {
       index: targetIndices,
       refresh,
-      body: {
-        script: {
-          source: `
-              if (ctx._source.containsKey('references')) {
-                def items_to_remove = [];
-                for (item in ctx._source.references) {
-                  if ( (item['type'] == params['type']) && (item['id'] == params['id']) ) {
-                    items_to_remove.add(item);
-                  }
-                }
-                ctx._source.references.removeAll(items_to_remove);
+      script: {
+        source: `
+          if (ctx._source.containsKey('references')) {
+            def items_to_remove = [];
+            for (item in ctx._source.references) {
+              if ( (item['type'] == params['type']) && (item['id'] == params['id']) ) {
+                items_to_remove.add(item);
               }
-            `,
-          params: {
-            type,
-            id,
-          },
-          lang: 'painless',
+            }
+            ctx._source.references.removeAll(items_to_remove);
+          }
+        `,
+        params: {
+          type,
+          id,
         },
-        conflicts: 'proceed',
-        ...getSearchDsl(mappings, registry, {
-          namespaces: namespace ? [namespace] : undefined,
-          type: allTypes,
-          hasReference: { type, id },
-        }),
+        lang: 'painless',
       },
+      conflicts: 'proceed',
+      ...(getSearchDsl(mappings, registry, {
+        namespaces: namespace ? [namespace] : undefined,
+        type: allTypes,
+        hasReference: { type, id },
+      }) as Omit<ReturnType<typeof getSearchDsl>, 'sort'>), // TS is complaining and it's unlikely that we sort here
     },
     { ignore: [404], meta: true }
   );

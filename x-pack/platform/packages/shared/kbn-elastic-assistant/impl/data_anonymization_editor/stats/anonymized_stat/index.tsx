@@ -5,11 +5,10 @@
  * 2.0.
  */
 
-import { EuiStat, EuiText, EuiToolTip } from '@elastic/eui';
+import { EuiStat, EuiText, EuiToolTip, useEuiTheme } from '@elastic/eui';
 import React, { useMemo } from 'react';
 
 import { css } from '@emotion/react';
-import { euiThemeVars } from '@kbn/ui-theme';
 import { getColor, getTooltipContent } from './helpers';
 import { TITLE_SIZE } from '../constants';
 import * as i18n from './translations';
@@ -27,8 +26,9 @@ const AnonymizedStatComponent: React.FC<Props> = ({
   isDataAnonymizable,
   inline,
   titleSize = TITLE_SIZE,
-  gap = euiThemeVars.euiSizeXS,
+  gap,
 }) => {
+  const { euiTheme } = useEuiTheme();
   const color = useMemo(() => getColor(isDataAnonymizable), [isDataAnonymizable]);
 
   const tooltipContent = useMemo(
@@ -53,7 +53,7 @@ const AnonymizedStatComponent: React.FC<Props> = ({
             ? css`
                 display: flex;
                 align-items: center;
-                gap: ${gap};
+                gap: ${gap || euiTheme.size.xs};
               `
             : null
         }

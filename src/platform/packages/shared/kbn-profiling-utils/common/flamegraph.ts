@@ -47,7 +47,6 @@ export interface BaseFlameGraph {
   /** sampling rate */
   SamplingRate: number;
   TotalSamples: number;
-  TotalCPU: number;
   SelfCPU: number;
   AnnualCO2TonsExclusive: number[];
   AnnualCO2TonsInclusive: number[];
@@ -125,7 +124,6 @@ export function createFlameGraph(
     TotalSeconds: base.TotalSeconds,
     TotalSamples: base.TotalSamples,
     SelfCPU: base.SelfCPU,
-    TotalCPU: base.TotalCPU,
     SelfAnnualCO2KgsItems: base.AnnualCO2TonsExclusive.map(convertTonsToKgs),
     TotalAnnualCO2KgsItems: base.AnnualCO2TonsInclusive.map(convertTonsToKgs),
     SelfAnnualCostsUSDItems: base.AnnualCostsUSDExclusive,

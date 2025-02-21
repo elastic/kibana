@@ -16,6 +16,7 @@ import type {
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type {
   ApiConfig,
+  ContentReferencesStore,
   DefendInsight,
   DefendInsightGenerationInterval,
   DefendInsightsPostRequestBody,
@@ -107,6 +108,7 @@ export function getAssistantToolParams({
   langSmithProject,
   langSmithApiKey,
   logger,
+  contentReferencesStore,
   latestReplacements,
   onNewReplacements,
   request,
@@ -122,6 +124,7 @@ export function getAssistantToolParams({
   langSmithProject?: string;
   langSmithApiKey?: string;
   logger: Logger;
+  contentReferencesStore: ContentReferencesStore | undefined;
   latestReplacements: Replacements;
   onNewReplacements: (newReplacements: Replacements) => void;
   request: KibanaRequest<unknown, unknown, DefendInsightsPostRequestBody>;
@@ -133,6 +136,7 @@ export function getAssistantToolParams({
   langChainTimeout: number;
   llm: ActionsClientLlm;
   logger: Logger;
+  contentReferencesStore: ContentReferencesStore | undefined;
   replacements: Replacements;
   onNewReplacements: (newReplacements: Replacements) => void;
   request: KibanaRequest<unknown, unknown, DefendInsightsPostRequestBody>;
@@ -169,6 +173,7 @@ export function getAssistantToolParams({
     langChainTimeout,
     llm,
     logger,
+    contentReferencesStore,
     onNewReplacements,
     request,
     modelExists: false,

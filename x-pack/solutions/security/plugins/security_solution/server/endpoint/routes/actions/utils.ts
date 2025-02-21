@@ -29,51 +29,61 @@ const COMMANDS_WITH_ACCESS_TO_FILES: CommandsWithFileAccess = deepFreeze<Command
     endpoint: true,
     sentinel_one: true,
     crowdstrike: false,
+    microsoft_defender_endpoint: false,
   },
   execute: {
     endpoint: true,
     sentinel_one: false,
     crowdstrike: false,
+    microsoft_defender_endpoint: false,
   },
   'running-processes': {
     endpoint: false,
     sentinel_one: true,
     crowdstrike: false,
+    microsoft_defender_endpoint: false,
   },
   upload: {
     endpoint: false,
     sentinel_one: false,
     crowdstrike: false,
+    microsoft_defender_endpoint: false,
   },
   scan: {
     endpoint: false,
     sentinel_one: false,
     crowdstrike: false,
+    microsoft_defender_endpoint: false,
   },
   isolate: {
     endpoint: false,
     sentinel_one: false,
     crowdstrike: false,
+    microsoft_defender_endpoint: false,
   },
   unisolate: {
     endpoint: false,
     sentinel_one: false,
     crowdstrike: false,
+    microsoft_defender_endpoint: false,
   },
   'kill-process': {
     endpoint: false,
     sentinel_one: false,
     crowdstrike: false,
+    microsoft_defender_endpoint: false,
   },
   'suspend-process': {
     endpoint: false,
     sentinel_one: false,
     crowdstrike: false,
+    microsoft_defender_endpoint: false,
   },
   runscript: {
     endpoint: false,
     sentinel_one: false,
     crowdstrike: false,
+    microsoft_defender_endpoint: false,
   },
 });
 

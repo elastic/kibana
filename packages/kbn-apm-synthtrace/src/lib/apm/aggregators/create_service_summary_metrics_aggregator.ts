@@ -23,7 +23,7 @@ export function createServiceSummaryMetricsAggregator(flushInterval: string) {
     {
       filter: () => true,
       getAggregateKey: (event) => {
-        // see https://github.com/elastic/apm-server/blob/main/x-pack/apm-server/aggregation/txmetrics/aggregator.go
+        // see https://github.com/elastic/apm-server/blob/8.10/x-pack/apm-server/aggregation/txmetrics/aggregator.go
         return hashKeysOf(event, KEY_FIELDS);
       },
       flushInterval,

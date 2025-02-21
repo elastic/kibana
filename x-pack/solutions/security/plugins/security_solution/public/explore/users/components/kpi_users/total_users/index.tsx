@@ -5,38 +5,42 @@
  * 2.0.
  */
 
-import { euiPaletteColorBlind } from '@elastic/eui';
-import React from 'react';
+import React, { useMemo } from 'react';
+import { useEuiTheme } from '@elastic/eui';
 import type { StatItems } from '../../../../components/stat_items';
 import { KpiBaseComponent } from '../../../../components/kpi';
 import { kpiTotalUsersMetricLensAttributes } from '../../../../../common/components/visualization_actions/lens_attributes/users/kpi_total_users_metric';
-import { kpiTotalUsersAreaLensAttributes } from '../../../../../common/components/visualization_actions/lens_attributes/users/kpi_total_users_area';
+import { getKpiTotalUsersAreaLensAttributes } from '../../../../../common/components/visualization_actions/lens_attributes/users/kpi_total_users_area';
 import * as i18n from './translations';
 import type { UsersKpiProps } from '../types';
 
-const euiVisColorPalette = euiPaletteColorBlind();
-const euiColorVis1 = euiVisColorPalette[1];
-
-export const usersStatItems: Readonly<StatItems[]> = [
-  {
-    key: 'users',
-    fields: [
+export const useGetUsersStatItems: () => Readonly<StatItems[]> = () => {
+  const { euiTheme } = useEuiTheme();
+  return useMemo(
+    () => [
       {
         key: 'users',
-        color: euiColorVis1,
-        icon: 'storage',
-        lensAttributes: kpiTotalUsersMetricLensAttributes,
+        fields: [
+          {
+            key: 'users',
+            color: euiTheme.colors.vis.euiColorVis0,
+            icon: 'storage',
+            lensAttributes: kpiTotalUsersMetricLensAttributes,
+          },
+        ],
+        enableAreaChart: true,
+        description: i18n.USERS,
+        getAreaChartLensAttributes: getKpiTotalUsersAreaLensAttributes,
       },
     ],
-    enableAreaChart: true,
-    description: i18n.USERS,
-    areaChartLensAttributes: kpiTotalUsersAreaLensAttributes,
-  },
-];
+    [euiTheme.colors.vis.euiColorVis0]
+  );
+};
 
 const ID = 'TotalUsersKpiQuery';
 
 const TotalUsersKpiComponent: React.FC<UsersKpiProps> = ({ from, to }) => {
+  const usersStatItems = useGetUsersStatItems();
   return <KpiBaseComponent id={ID} statItems={usersStatItems} from={from} to={to} />;
 };
 

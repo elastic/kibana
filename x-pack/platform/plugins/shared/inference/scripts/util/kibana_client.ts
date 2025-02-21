@@ -212,10 +212,10 @@ export class KibanaClient {
         return this.axios
           .post(
             this.getUrl({
-              pathname: `/internal/inference/chat_complete/stream`,
+              pathname: `/internal/inference/chat_complete`,
             }),
             body,
-            { responseType: 'stream', timeout: NaN }
+            { timeout: NaN }
           )
           .then((response) => {
             return response.data;

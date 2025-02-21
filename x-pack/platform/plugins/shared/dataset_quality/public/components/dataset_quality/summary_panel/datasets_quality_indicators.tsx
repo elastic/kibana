@@ -26,23 +26,14 @@ import {
   summaryPanelQualityText,
   summaryPanelQualityTooltipText,
 } from '../../../../common/translations';
-import { mapPercentagesToQualityCounts } from '../../quality_indicator';
 import { useDatasetQualityFilters } from '../../../hooks/use_dataset_quality_filters';
 import { VerticalRule } from '../../common/vertical_rule';
 
 export function DatasetsQualityIndicators() {
   const { onPageReady } = usePerformanceContext();
   const { timeRange } = useDatasetQualityFilters();
-  const {
-    datasetsQuality,
-    isDatasetsQualityLoading,
-    datasetsActivity,
-    numberOfDatasets,
-    numberOfDocuments,
-  } = useSummaryPanelContext();
-  const qualityCounts = mapPercentagesToQualityCounts(datasetsQuality.percentages);
-  const datasetsWithoutIgnoredField =
-    datasetsActivity.total > 0 ? datasetsActivity.total - datasetsQuality.percentages.length : 0;
+  const { datasetsQuality, isDatasetsQualityLoading, numberOfDatasets, numberOfDocuments } =
+    useSummaryPanelContext();
 
   if (!isDatasetsQualityLoading && (numberOfDatasets || numberOfDocuments)) {
     onPageReady({
@@ -72,21 +63,21 @@ export function DatasetsQualityIndicators() {
         </EuiFlexGroup>
         <EuiFlexGroup gutterSize="m" alignItems="flexEnd">
           <QualityIndicator
-            value={qualityCounts.poor}
+            value={datasetsQuality.poor}
             quality="danger"
             description={summaryPanelQualityPoorText}
             isLoading={isDatasetsQualityLoading}
           />
           <VerticalRule />
           <QualityIndicator
-            value={qualityCounts.degraded}
+            value={datasetsQuality.degraded}
             quality="warning"
             description={summaryPanelQualityDegradedText}
             isLoading={isDatasetsQualityLoading}
           />
           <VerticalRule />
           <QualityIndicator
-            value={qualityCounts.good + datasetsWithoutIgnoredField}
+            value={datasetsQuality.good}
             quality="success"
             description={summaryPanelQualityGoodText}
             isLoading={isDatasetsQualityLoading}

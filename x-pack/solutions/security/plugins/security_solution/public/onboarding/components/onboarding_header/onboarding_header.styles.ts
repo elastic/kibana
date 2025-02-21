@@ -16,7 +16,7 @@ export const useOnboardingHeaderStyles = () => {
       width: calc(${PAGE_CONTENT_WIDTH} / 2);
     }
     .onboardingHeaderGreetings {
-      color: ${euiTheme.colors.darkShade};
+      color: ${euiTheme.colors.textSubdued};
     }
     .onboardingHeaderTopicSelector {
       width: calc(${PAGE_CONTENT_WIDTH} / 3);

@@ -38,6 +38,7 @@ export const ChartSwitchPopover = memo(function ChartSwitchPopover(
         initialFocus=".lnsChartSwitch__popoverPanel"
         panelClassName="lnsChartSwitch__popoverPanel"
         panelPaddingSize="none"
+        repositionOnScroll
         button={
           <ChartSwitchTrigger
             icon={icon}

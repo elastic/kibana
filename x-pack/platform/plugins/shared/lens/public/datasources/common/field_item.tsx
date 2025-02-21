@@ -264,6 +264,7 @@ export function InnerFieldItem(props: FieldItemProps) {
             order={order}
             onDragStart={closePopover}
             dataTestSubj={`lnsFieldListPanelField-${field.name}`}
+            dragClassName="unifiedFieldListItemButton__dragging"
           >
             {isTextBasedColumnField(field) ? (
               <FieldItemButton<DatatableColumn>
@@ -389,7 +390,7 @@ function getExploreInDiscover({
     getEsQueryConfig(services.uiSettings)
   );
   const discoverLocator = services.share?.url.locators.get('DISCOVER_APP_LOCATOR');
-  if (!discoverLocator || !services.application.capabilities.discover.show) {
+  if (!discoverLocator || !services.application.capabilities.discover_v2.show) {
     return;
   }
   return discoverLocator.getRedirectUrl({

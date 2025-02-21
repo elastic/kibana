@@ -21,6 +21,13 @@ export const ANONYMIZATION = i18n.translate(
   }
 );
 
+export const CLOSE = i18n.translate(
+  'xpack.elasticAssistant.assistant.assistantHeader.closeButtonLabel',
+  {
+    defaultMessage: 'Close',
+  }
+);
+
 export const KNOWLEDGE_BASE = i18n.translate(
   'xpack.elasticAssistant.assistant.settings.knowledgeBase',
   {
@@ -53,6 +60,27 @@ export const SHOW_REAL_VALUES = i18n.translate(
   'xpack.elasticAssistant.assistant.settings.showAnonymizedToggleRealValuesLabel',
   {
     defaultMessage: 'Show real values',
+  }
+);
+
+export const ANONYMIZE_VALUES = i18n.translate(
+  'xpack.elasticAssistant.assistant.settings.anonymizeValues',
+  {
+    defaultMessage: 'Show anonymized values',
+  }
+);
+
+export const SHOW_CITATIONS = i18n.translate(
+  'xpack.elasticAssistant.assistant.settings.showCitationsLabel',
+  {
+    defaultMessage: 'Show citations',
+  }
+);
+
+export const CHAT_OPTIONS = i18n.translate(
+  'xpack.elasticAssistant.assistant.settings.chatOptions.label',
+  {
+    defaultMessage: 'Chat options',
   }
 );
 

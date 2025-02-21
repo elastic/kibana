@@ -25,11 +25,11 @@ import {
   ESQLParamLiteral,
   ESQLProperNode,
 } from '@kbn/esql-ast/src/types';
-import { aggregationFunctionDefinitions } from '../definitions/generated/aggregation_functions';
-import { builtinFunctions } from '../definitions/builtin';
+import { aggFunctionDefinitions } from '../definitions/generated/aggregation_functions';
+import { operatorsDefinitions } from '../definitions/all_operators';
 import { commandDefinitions } from '../definitions/commands';
 import { scalarFunctionDefinitions } from '../definitions/generated/scalar_functions';
-import { groupingFunctionDefinitions } from '../definitions/grouping';
+import { groupingFunctionDefinitions } from '../definitions/generated/grouping_functions';
 import { getTestFunctions } from './test_functions';
 import { getFunctionSignatures } from '../definitions/helpers';
 import { timeUnits } from '../definitions/literals';
@@ -50,6 +50,7 @@ import {
   FunctionReturnType,
   ArrayType,
   SupportedDataType,
+  FunctionDefinitionTypes,
 } from '../definitions/types';
 import type { ESQLRealField, ESQLVariable, ReferenceMaps } from '../validation/types';
 import { removeMarkerArgFromArgsList } from './context';
@@ -84,10 +85,6 @@ export function isColumnItem(arg: ESQLAstItem): arg is ESQLColumn {
   return isSingleItem(arg) && arg.type === 'column';
 }
 
-export function isIdentifier(arg: ESQLAstItem): arg is ESQLIdentifier {
-  return isSingleItem(arg) && arg.type === 'identifier';
-}
-
 export function isLiteralItem(arg: ESQLAstItem): arg is ESQLLiteral {
   return isSingleItem(arg) && arg.type === 'literal';
 }
@@ -120,7 +117,7 @@ export function isMathFunction(query: string, offset: number) {
   const [opString] = queryTrimmed.split(' ').reverse();
   // compare last char for all math functions
   // limit only to 2 chars operators
-  const fns = builtinFunctions.filter(({ name }) => name.length < 3).map(({ name }) => name);
+  const fns = operatorsDefinitions.filter(({ name }) => name.length < 3).map(({ name }) => name);
   const tokenMatch = fns.some((op) => opString === op);
   // there's a match, that's good
   if (tokenMatch) {
@@ -147,10 +144,10 @@ let commandLookups: Map<string, CommandDefinition<string>> | undefined;
 function buildFunctionLookup() {
   // we always refresh if we have test functions
   if (!fnLookups || getTestFunctions().length) {
-    fnLookups = builtinFunctions
+    fnLookups = operatorsDefinitions
       .concat(
         scalarFunctionDefinitions,
-        aggregationFunctionDefinitions,
+        aggFunctionDefinitions,
         groupingFunctionDefinitions,
         getTestFunctions()
       )
@@ -418,8 +415,8 @@ export function getAllArrayTypes(
   return types;
 }
 
-export function inKnownTimeInterval(item: ESQLTimeInterval): boolean {
-  return timeUnits.some((unit) => unit === item.unit.toLowerCase());
+export function inKnownTimeInterval(timeIntervalUnit: string): boolean {
+  return timeUnits.some((unit) => unit === timeIntervalUnit.toLowerCase());
 }
 
 /**
@@ -468,7 +465,7 @@ export function checkFunctionArgMatchesDefinition(
     }
   }
   if (arg.type === 'timeInterval') {
-    return argType === 'time_literal' && inKnownTimeInterval(arg);
+    return argType === 'time_literal' && inKnownTimeInterval(arg.unit);
   }
   if (arg.type === 'column') {
     const hit = getColumnForASTNode(arg, references);
@@ -656,7 +653,7 @@ export function shouldBeQuotedText(
 }
 
 export const isAggFunction = (arg: ESQLFunction): boolean =>
-  getFunctionDefinition(arg.name)?.type === 'agg';
+  getFunctionDefinition(arg.name)?.type === FunctionDefinitionTypes.AGG;
 
 export const isParam = (x: unknown): x is ESQLParamLiteral =>
   !!x &&

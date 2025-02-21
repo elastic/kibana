@@ -23,8 +23,7 @@
       "kibanaReact",
       "cloud",
       "security",
-      "licensing",
-      "kubernetesSecurity"
+      "licensing"
     ],
     "optionalPlugins": [
       "usageCollection"

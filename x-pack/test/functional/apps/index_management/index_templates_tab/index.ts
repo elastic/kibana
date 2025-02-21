@@ -10,5 +10,6 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 export default ({ loadTestFile }: FtrProviderContext) => {
   describe('Index Management: index templates tab', function () {
     loadTestFile(require.resolve('./index_template_tab'));
+    loadTestFile(require.resolve('./index_template_list'));
   });
 };

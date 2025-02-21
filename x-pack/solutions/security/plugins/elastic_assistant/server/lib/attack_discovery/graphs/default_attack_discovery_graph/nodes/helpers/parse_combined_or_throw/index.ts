@@ -8,9 +8,10 @@
 import type { Logger } from '@kbn/core/server';
 import type { AttackDiscovery } from '@kbn/elastic-assistant-common';
 
+import { GenerationPrompts } from '../prompts';
 import { addTrailingBackticksIfNecessary } from '../add_trailing_backticks_if_necessary';
 import { extractJson } from '../extract_json';
-import { AttackDiscoveriesGenerationSchema } from '../../generate/schema';
+import { getAttackDiscoveriesGenerationSchema } from '../../generate/schema';
 
 export const parseCombinedOrThrow = ({
   combinedResponse,
@@ -18,6 +19,7 @@ export const parseCombinedOrThrow = ({
   llmType,
   logger,
   nodeName,
+  prompts,
 }: {
   /** combined responses that maybe valid JSON */
   combinedResponse: string;
@@ -25,6 +27,7 @@ export const parseCombinedOrThrow = ({
   nodeName: string;
   llmType: string;
   logger?: Logger;
+  prompts: GenerationPrompts;
 }): AttackDiscovery[] => {
   const timestamp = new Date().toISOString();
 
@@ -42,7 +45,7 @@ export const parseCombinedOrThrow = ({
       `${nodeName} node is validating combined response (${llmType}) from attempt ${generationAttempts}`
   );
 
-  const validatedResponse = AttackDiscoveriesGenerationSchema.parse(unvalidatedParsed);
+  const validatedResponse = getAttackDiscoveriesGenerationSchema(prompts).parse(unvalidatedParsed);
 
   logger?.debug(
     () =>

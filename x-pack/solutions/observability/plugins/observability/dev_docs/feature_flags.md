@@ -11,6 +11,6 @@ if (core.uiSettings.get(myFeatureEnabled)) {
 }
 ```
 
-In order for telemetry to be collected, the keys and types need to be added in [src/platform/plugins/private/kibana_usage_collection/server/collectors/management/schema.ts](../../../../../src/platform/plugins/private/kibana_usage_collection/server/collectors/management/schema.ts) and [src/platform/plugins/private/kibana_usage_collection/server/collectors/management/types.ts](../../../../src/platform/plugins/private/kibana_usage_collection/server/collectors/management/types.ts).
+In order for telemetry to be collected, the keys and types need to be added in [src/platform/plugins/private/kibana_usage_collection/server/collectors/management/schema.ts](../../../../../../src/platform/plugins/private/kibana_usage_collection/server/collectors/management/schema.ts) and [src/platform/plugins/private/kibana_usage_collection/server/collectors/management/types.ts](../../../../../../src/platform/plugins/private/kibana_usage_collection/server/collectors/management/types.ts).
 
 Settings can be managed in Kibana under Stack Management > Advanced Settings > Observability.

@@ -12,6 +12,7 @@ import {
   EuiBasicTableColumn,
   EuiLoadingChart,
   EuiTableSortingType,
+  useEuiTheme,
 } from '@elastic/eui';
 import numeral from '@elastic/numeral';
 import { i18n } from '@kbn/i18n';
@@ -32,11 +33,6 @@ import { formatDuration } from './lib/format_duration';
 import { MetricWithSparkline } from './metric_with_sparkline';
 import type { BucketSize } from '../../../helpers/calculate_bucket_size';
 
-const COLOR_ORANGE = 7;
-const COLOR_BLUE = 1;
-const COLOR_GREEN = 0;
-const COLOR_PURPLE = 3;
-
 interface Props {
   bucketSize: BucketSize;
 }
@@ -51,6 +47,7 @@ const bytesPerSecondFormatter = (value: NumberOrNull) =>
   value === null ? '' : numeral(value).format('0b') + '/s';
 
 export function MetricsSection({ bucketSize }: Props) {
+  const { euiTheme } = useEuiTheme();
   const { forceUpdate, hasDataMap } = useHasData();
   const { relativeStart, relativeEnd, absoluteStart, absoluteEnd, lastUpdated } =
     useDatePickerContext();
@@ -67,6 +64,7 @@ export function MetricsSection({ bucketSize }: Props) {
       });
     }
     // `forceUpdate` and `lastUpdated` should trigger a reload
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     bucketSize,
     relativeStart,
@@ -140,7 +138,7 @@ export function MetricsSection({ bucketSize }: Props) {
           value={value}
           formatter={percentFormatter}
           timeseries={record.timeseries}
-          color={COLOR_ORANGE}
+          color={euiTheme.colors.vis.euiColorVis0}
         />
       ),
     },
@@ -156,7 +154,7 @@ export function MetricsSection({ bucketSize }: Props) {
           value={value}
           formatter={numberFormatter}
           timeseries={record.timeseries}
-          color={COLOR_BLUE}
+          color={euiTheme.colors.vis.euiColorVis1}
         />
       ),
     },
@@ -170,7 +168,7 @@ export function MetricsSection({ bucketSize }: Props) {
           value={value}
           formatter={bytesPerSecondFormatter}
           timeseries={record.timeseries}
-          color={COLOR_GREEN}
+          color={euiTheme.colors.vis.euiColorVis2}
         />
       ),
     },
@@ -184,7 +182,7 @@ export function MetricsSection({ bucketSize }: Props) {
           value={value}
           formatter={bytesPerSecondFormatter}
           timeseries={record.timeseries}
-          color={COLOR_PURPLE}
+          color={euiTheme.colors.vis.euiColorVis3}
         />
       ),
     },

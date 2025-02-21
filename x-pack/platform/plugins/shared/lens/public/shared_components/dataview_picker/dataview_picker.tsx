@@ -46,6 +46,7 @@ export function ChangeIndexPattern({
       panelProps={{
         ['data-test-subj']: 'lnsChangeIndexPatternPopover',
       }}
+      repositionOnScroll
       isOpen={isPopoverOpen}
       closePopover={() => setPopoverIsOpen(false)}
       display="block"

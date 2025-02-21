@@ -10,7 +10,6 @@ import type {
   InferenceInferenceEndpoint,
   InferenceTaskType,
 } from '@elastic/elasticsearch/lib/api/types';
-import type { InferenceAPIConfigResponse } from '@kbn/ml-trained-models-utils';
 import type { RouteInitialization } from '../types';
 import { createInferenceSchema } from './schemas/inference_schema';
 import { modelsProvider } from '../models/model_management';
@@ -85,15 +84,12 @@ export function inferenceModelRoutes(
     .addVersion(
       {
         version: '1',
-        validate: {},
+        validate: false,
       },
       routeGuard.fullLicenseAPIGuard(async ({ client, response }) => {
         try {
-          const body = await client.asCurrentUser.transport.request<{
-            models: InferenceAPIConfigResponse[];
-          }>({
-            method: 'GET',
-            path: `/_inference/_all`,
+          const body = await client.asCurrentUser.inference.get({
+            inference_id: '_all',
           });
           return response.ok({
             body,

@@ -15,6 +15,11 @@
       ],
       "ignore_unavailable": "__flag__",
       "local": "__flag__",
+      "master_timeout": [
+        "30s",
+        "-1",
+        "0"
+      ],
       "preference": "",
       "routing": ""
     },

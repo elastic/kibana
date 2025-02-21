@@ -94,7 +94,9 @@ describe('ALL - Saved queries', { tags: ['@ess', '@serverless'] }, () => {
       cy.get('[data-popover-open="true"]').should('be.visible');
       cy.getBySel('dataGridColumnSelectorColumnItem-osquery.cmdline').click();
       cy.getBySel('dataGridColumnSelectorColumnItem-osquery.cwd').click();
-      cy.getBySel('dataGridColumnSelectorColumnItem-osquery.disk_bytes_written.number').click();
+      cy.get(
+        '[data-test-subj^="dataGridColumnSelectorColumnItem-osquery.disk_bytes_written"]'
+      ).click();
       cy.getBySel('dataGridColumnSelectorButton').click();
       cy.get('[data-popover-open="true"]').should('not.exist');
       cy.getBySel(RESULTS_TABLE_COLUMNS_BUTTON).should('have.text', 'Columns35');

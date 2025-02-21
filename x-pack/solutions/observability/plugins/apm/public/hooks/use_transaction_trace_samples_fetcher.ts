@@ -61,6 +61,7 @@ export function useTransactionTraceSamplesFetcher({
     },
     // the samples should not be refetched if the transactionId or traceId changes
 
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [
       environment,
       kuery,

@@ -30,6 +30,8 @@ export const createChunkFiles = async ({
   const searchRes = await client.search({
     index,
     size: 10000,
+    // includes inference field meta info in source
+    fields: ['_inference_fields'],
     query: {
       bool: {
         must: [{ term: { product_name: productName } }],

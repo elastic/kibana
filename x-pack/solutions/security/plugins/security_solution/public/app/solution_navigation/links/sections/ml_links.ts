@@ -12,7 +12,7 @@ import {
 } from '@kbn/security-solution-navigation';
 import { MACHINE_LEARNING_PATH } from '../../../../../common/constants';
 import type { LinkItem } from '../../../../common/links/types';
-import { SERVER_APP_ID } from '../../../../../common';
+import { SECURITY_FEATURE_ID } from '../../../../../common';
 import type { SolutionLinkCategory, SolutionNavLink } from '../../../../common/links';
 import {
   IconLensLazy,
@@ -39,7 +39,7 @@ export const mlAppLink: LinkItem = {
   id: SecurityPageName.mlLanding,
   title: i18n.ML_TITLE,
   path: MACHINE_LEARNING_PATH,
-  capabilities: [[`${SERVER_APP_ID}.show`, `ml.canGetJobs`]],
+  capabilities: [[`${SECURITY_FEATURE_ID}.show`, `ml.canGetJobs`]],
   globalSearchKeywords: [i18n.ML_KEYWORD],
   hideTimeline: true,
   skipUrlState: true,

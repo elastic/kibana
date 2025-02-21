@@ -8,7 +8,7 @@
 import {
   MlGetTrainedModelsStatsRequest,
   MlGetTrainedModelsRequest,
-} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+} from '@elastic/elasticsearch/lib/api/types';
 import { MlTrainedModels } from '@kbn/ml-plugin/server';
 
 import { MlModelDeploymentStatus, MlModelDeploymentState } from '../../../common/types/ml';

@@ -9,6 +9,7 @@
 
 import { schema, TypeOf, offeringBasedSchema } from '@kbn/config-schema';
 import type { ServiceConfigDescriptor } from '@kbn/core-base-server-internal';
+import { DEFAULT_THEME_NAME } from '@kbn/core-ui-settings-common';
 import { ConfigDeprecationProvider } from '@kbn/config';
 
 const deprecations: ConfigDeprecationProvider = ({ unused, renameFromRoot }) => [
@@ -16,12 +17,22 @@ const deprecations: ConfigDeprecationProvider = ({ unused, renameFromRoot }) => 
   renameFromRoot('server.defaultRoute', 'uiSettings.overrides.defaultRoute', { level: 'warning' }),
 ];
 
+export const defaultThemeSchema = schema.oneOf([
+  // TODO: Remove amsterdam theme
+  // https://github.com/elastic/eui-private/issues/170
+  schema.literal('amsterdam'),
+  schema.literal('borealis'),
+  // Allow experimental themes
+  schema.string(),
+]);
+
 const configSchema = schema.object({
   overrides: schema.object({}, { unknowns: 'allow' }),
   publicApiEnabled: offeringBasedSchema({ serverless: schema.boolean({ defaultValue: false }) }),
   experimental: schema.maybe(
     schema.object({
       themeSwitcherEnabled: schema.maybe(schema.boolean({ defaultValue: false })),
+      defaultTheme: schema.maybe(schema.string({ defaultValue: DEFAULT_THEME_NAME })),
     })
   ),
 });

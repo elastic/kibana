@@ -6,11 +6,13 @@
  */
 
 import { entitiesRoutes } from './entities/route';
+import { entityDefinitionsRoutes } from './entity_definition/get_entity_definitions';
 import { hasDataRoutes } from './has_data/route';
 
 export function getGlobalInventoryServerRouteRepository() {
   return {
     ...entitiesRoutes,
+    ...entityDefinitionsRoutes,
     ...hasDataRoutes,
   };
 }

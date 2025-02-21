@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { GlobalDataTag } from '../../../common/types';
+import type { AgentlessPolicy, GlobalDataTag } from '../../../common/types';
 
 import { AgentPolicyBaseSchema } from './agent_policy';
 
@@ -90,6 +90,57 @@ describe('AgentPolicyBaseSchema', () => {
       expect(() => {
         AgentPolicyBaseSchema.global_data_tags.validate(tags);
       }).not.toThrow();
+    });
+
+    it('should not throw an error if provided with empty agentless resources', () => {
+      const agentless: AgentlessPolicy = {};
+
+      expect(() => {
+        AgentPolicyBaseSchema.agentless.validate(agentless);
+      }).not.toThrow();
+    });
+
+    it('should not throw an error if provided with valid agentless resources', () => {
+      const agentless: AgentlessPolicy = {
+        resources: {
+          requests: {
+            memory: '1Gi',
+            cpu: '1',
+          },
+        },
+      };
+
+      expect(() => {
+        AgentPolicyBaseSchema.agentless.validate(agentless);
+      }).not.toThrow();
+    });
+
+    it('should throw an error if provided with invalid agentless memory', () => {
+      const agentless: AgentlessPolicy = {
+        resources: {
+          requests: {
+            memory: '1',
+          },
+        },
+      };
+
+      expect(() => {
+        AgentPolicyBaseSchema.agentless.validate(agentless);
+      }).toThrow();
+    });
+
+    it('should throw an error if provided with invalid agentless CPU', () => {
+      const agentless: AgentlessPolicy = {
+        resources: {
+          requests: {
+            cpu: '1CPU',
+          },
+        },
+      };
+
+      expect(() => {
+        AgentPolicyBaseSchema.agentless.validate(agentless);
+      }).toThrow();
     });
   });
 });

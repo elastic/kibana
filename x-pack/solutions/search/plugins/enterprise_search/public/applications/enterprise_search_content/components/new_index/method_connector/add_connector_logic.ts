@@ -9,9 +9,8 @@ import { kea, MakeLogicType } from 'kea';
 
 import { ErrorCode } from '../../../../../../common/types/error_codes';
 
-import { generateEncodedPath } from '../../../../app_search/utils/encode_path_params';
-
 import { Actions } from '../../../../shared/api_logic/create_api_logic';
+import { generateEncodedPath } from '../../../../shared/encode_path_params';
 import { KibanaLogic } from '../../../../shared/kibana';
 import {
   AddConnectorApiLogic,

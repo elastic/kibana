@@ -17,12 +17,16 @@
       "unifiedSearch",
       "share",
       "savedObjectsTagging",
-      "navigation"
+      "navigation",
+      "fieldsMetadata",
+      "datasetQuality"
     ],
     "requiredBundles": [
       "kibanaReact"
     ],
-    "optionalPlugins": [],
+    "optionalPlugins": [
+      "observabilityAIAssistant"
+    ],
     "extraPublicDirs": []
   }
 }

@@ -223,7 +223,7 @@ export interface GetModelDownloadConfigOptions {
 }
 
 export interface LocalInferenceServiceSettings {
-  service: 'elser' | 'elasticsearch';
+  service: 'elasticsearch';
   service_settings: {
     num_allocations: number;
     num_threads: number;

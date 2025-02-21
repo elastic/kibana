@@ -1364,5 +1364,117 @@ export default ({ getService }: FtrProviderContext) => {
         });
       });
     });
+
+    describe('preview logged requests', () => {
+      const rule: NewTermsRuleCreateProps = {
+        ...getCreateNewTermsRulesSchemaMock('rule-1', true),
+        index: ['new_terms'],
+        new_terms_fields: ['host.name', 'host.ip'],
+        from: ruleExecutionStart,
+        history_window_start: historicalWindowStart,
+        query: '*',
+      };
+
+      it('should not return requests property when not enabled', async () => {
+        const { logs } = await previewRule({
+          supertest,
+          rule,
+        });
+
+        expect(logs[0].requests).toEqual(undefined);
+      });
+
+      it('should return requests property when enable_logged_requests set to true for single new term field', async () => {
+        // historical window documents
+        const historicalDocuments = [
+          {
+            host: { name: 'host-0', ip: '127.0.0.1' },
+          },
+          {
+            host: { name: 'host-1', ip: '127.0.0.2' },
+          },
+        ];
+
+        // rule execution documents
+        const ruleExecutionDocuments = [
+          {
+            host: { name: 'host-0', ip: '127.0.0.2' },
+          },
+          {
+            host: { name: 'host-2', ip: '127.0.0.1' },
+          },
+        ];
+
+        const testId = await newTermsTestExecutionSetup({
+          historicalDocuments,
+          ruleExecutionDocuments,
+        });
+
+        const { logs } = await previewRule({
+          supertest,
+          rule: { ...rule, query: `id: "${testId}"`, new_terms_fields: ['host.name'] },
+          enableLoggedRequests: true,
+        });
+
+        expect(logs[0].requests?.length).toEqual(4);
+        const requests = logs[0].requests ?? [];
+
+        expect(requests[0].description).toBe('Find all values');
+        expect(requests[0].request_type).toBe('findAllTerms');
+
+        expect(requests[1].description).toBe('Find new values');
+        expect(requests[1].request_type).toBe('findNewTerms');
+
+        expect(requests[2].description).toBe('Find documents associated with new values');
+        expect(requests[2].request_type).toBe('findDocuments');
+
+        expect(requests[3].description).toBe('Find all values after host.name: host-2');
+      });
+
+      it('should return requests property when enable_logged_requests set to true for multiple fields', async () => {
+        // historical window documents
+        const historicalDocuments = [
+          {
+            host: { name: 'host-0', ip: '127.0.0.1' },
+          },
+          {
+            host: { name: 'host-1', ip: '127.0.0.2' },
+          },
+        ];
+
+        // rule execution documents
+        const ruleExecutionDocuments = [
+          {
+            host: { name: 'host-0', ip: '127.0.0.2' },
+          },
+          {
+            host: { name: 'host-1', ip: '127.0.0.1' },
+          },
+        ];
+
+        const testId = await newTermsTestExecutionSetup({
+          historicalDocuments,
+          ruleExecutionDocuments,
+        });
+
+        const { logs } = await previewRule({
+          supertest,
+          rule: { ...rule, query: `id: "${testId}"` },
+          enableLoggedRequests: true,
+        });
+
+        expect(logs[0].requests?.length).toEqual(4);
+        const requests = logs[0].requests ?? [];
+
+        expect(requests[0].description).toBe('Find all values');
+        expect(requests[0].request_type).toBe('findAllTerms');
+
+        expect(requests[1].description).toBe('Find new values');
+        expect(requests[1].request_type).toBe('findNewTerms');
+
+        expect(requests[2].description).toBe('Find documents associated with new values');
+        expect(requests[2].request_type).toBe('findDocuments');
+      });
+    });
   });
 };

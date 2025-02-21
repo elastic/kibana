@@ -19,7 +19,7 @@ import { fetchAliasIndices } from '../../lib/search_applications/fetch_alias_ind
 import { fetchIndicesStats } from '../../lib/search_applications/fetch_indices_stats';
 
 import { fetchSearchApplicationFieldCapabilities } from '../../lib/search_applications/field_capabilities';
-import { RouteDependencies } from '../../plugin';
+import type { RouteDependencies } from '../../types';
 
 import { createError } from '../../utils/create_error';
 import { elasticsearchErrorHandler } from '../../utils/elasticsearch_error_handler';

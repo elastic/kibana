@@ -31,8 +31,10 @@ export function register(router: FilesRouter) {
     {
       path: FILES_API_ROUTES.metrics,
       validate: {},
-      options: {
-        tags: [`access:${FILES_MANAGE_PRIVILEGE}`],
+      security: {
+        authz: {
+          requiredPrivileges: [FILES_MANAGE_PRIVILEGE],
+        },
       },
     },
     handler

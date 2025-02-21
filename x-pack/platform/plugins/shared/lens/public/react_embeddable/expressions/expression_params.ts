@@ -149,6 +149,7 @@ export async function getExpressionRendererParams(
     onData = noop,
     logError,
     api,
+    renderMode,
     addUserMessages,
     updateBlockingErrors,
     searchContext,
@@ -199,6 +200,7 @@ export async function getExpressionRendererParams(
       syncTooltips,
       searchSessionId,
       onRender$: onRender,
+      renderMode,
       handleEvent,
       onData$: onData,
       // Remove ES|QL query from it

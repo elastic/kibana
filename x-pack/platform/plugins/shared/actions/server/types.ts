@@ -102,6 +102,7 @@ export interface InMemoryConnector<
 > extends ActionResult {
   secrets: Secrets;
   config: Config;
+  exposeConfig?: boolean;
 }
 
 export type FindActionResult = ConnectorWithExtraFindData;
@@ -233,6 +234,7 @@ export interface ActionTaskParams extends SavedObjectAttributes {
   actionId: string;
   // Saved Objects won't allow us to enforce unknown rather than any
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   params: Record<string, any>;
   apiKey?: string;
   executionId?: string;

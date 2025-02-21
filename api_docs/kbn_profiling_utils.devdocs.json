@@ -1302,17 +1302,6 @@
           },
           {
             "parentPluginId": "@kbn/profiling-utils",
-            "id": "def-common.BaseFlameGraph.TotalCPU",
-            "type": "number",
-            "tags": [],
-            "label": "TotalCPU",
-            "description": [],
-            "path": "src/platform/packages/shared/kbn-profiling-utils/common/flamegraph.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/profiling-utils",
             "id": "def-common.BaseFlameGraph.SelfCPU",
             "type": "number",
             "tags": [],
@@ -1477,19 +1466,6 @@
                 "text": "Executable"
               },
               ">"
-            ],
-            "path": "src/platform/packages/shared/kbn-profiling-utils/common/stack_traces.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/profiling-utils",
-            "id": "def-common.DecodedStackTraceResponse.totalFrames",
-            "type": "number",
-            "tags": [],
-            "label": "totalFrames",
-            "description": [
-              "Total number of frames"
             ],
             "path": "src/platform/packages/shared/kbn-profiling-utils/common/stack_traces.ts",
             "deprecated": false,
@@ -2271,19 +2247,6 @@
             ],
             "signature": [
               "ProfilingExecutables | undefined"
-            ],
-            "path": "src/platform/packages/shared/kbn-profiling-utils/common/stack_traces.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/profiling-utils",
-            "id": "def-common.StackTraceResponse.total_frames",
-            "type": "number",
-            "tags": [],
-            "label": "['total_frames']",
-            "description": [
-              "total frames"
             ],
             "path": "src/platform/packages/shared/kbn-profiling-utils/common/stack_traces.ts",
             "deprecated": false,

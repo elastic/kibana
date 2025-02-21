@@ -54,10 +54,10 @@ const VIEW_DETAILS_LABEL = i18n.translate(
   }
 );
 
-const VIEW_IN_STREAM_LABEL = i18n.translate(
-  'xpack.infra.logs.analysis.logEntryExamplesViewInStreamLabel',
+const VIEW_IN_DISCOVER_LABEL = i18n.translate(
+  'xpack.infra.logs.analysis.logEntryExamplesViewInDiscoverLabel',
   {
-    defaultMessage: 'View in stream',
+    defaultMessage: 'View in Discover',
   }
 );
 
@@ -160,7 +160,7 @@ export const LogEntryExampleMessage: React.FunctionComponent<Props> = ({
         },
       },
       {
-        label: VIEW_IN_STREAM_LABEL,
+        label: VIEW_IN_DISCOVER_LABEL,
         onClick: viewInStreamLinkProps.onClick,
         href: viewInStreamLinkProps.href,
       },

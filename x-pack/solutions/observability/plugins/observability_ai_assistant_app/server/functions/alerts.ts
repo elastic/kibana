@@ -117,6 +117,7 @@ export function registerAlertsFunction({
               functionCall,
               functions: nextFunctions,
               signal,
+              stream: true,
             });
           },
         });

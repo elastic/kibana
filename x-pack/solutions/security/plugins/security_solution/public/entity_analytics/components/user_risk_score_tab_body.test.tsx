@@ -45,7 +45,7 @@ describe('All users query tab body', () => {
       isInspected: false,
       totalCount: 0,
       refetch: jest.fn(),
-      isModuleEnabled: true,
+      hasEngineBeenInstalled: true,
     });
     mockUseRiskScoreKpi.mockReturnValue({
       loading: false,

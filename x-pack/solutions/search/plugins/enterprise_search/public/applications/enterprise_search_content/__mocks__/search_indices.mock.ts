@@ -60,6 +60,7 @@ export const indices: ElasticsearchIndexWithIngestion[] = [
           name: '',
         },
       },
+      deleted: false,
       description: null,
       error: null,
       features: null,
@@ -189,6 +190,7 @@ export const indices: ElasticsearchIndexWithIngestion[] = [
           name: '',
         },
       },
+      deleted: false,
       description: null,
       error: null,
       features: null,
@@ -278,10 +280,6 @@ export const indices: ElasticsearchIndexWithIngestion[] = [
       sync_now: false,
     },
     count: 1,
-    crawler: {
-      id: '5',
-      index_name: 'connector-crawler',
-    },
     hidden: false,
     name: 'crawler',
     total: {

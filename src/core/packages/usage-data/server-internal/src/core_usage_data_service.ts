@@ -16,7 +16,7 @@ import type {
   AggregationsMultiBucketAggregateBase,
   AggregationsSingleBucketAggregateBase,
   SearchTotalHits,
-} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+} from '@elastic/elasticsearch/lib/api/types';
 import type { CoreContext, CoreService } from '@kbn/core-base-server-internal';
 import type { LoggingConfigType } from '@kbn/core-logging-server-internal';
 import type { Logger } from '@kbn/logging';
@@ -280,6 +280,7 @@ export class CoreUsageDataService
           rewriteBasePath: http.rewriteBasePath,
           keepaliveTimeout: http.keepaliveTimeout,
           socketTimeout: http.socketTimeout,
+          protocol: http.protocol,
           compression: {
             enabled: http.compression.enabled,
             referrerWhitelistConfigured: isConfigured.array(http.compression.referrerWhitelist),

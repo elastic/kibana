@@ -28,7 +28,6 @@
     "@kbn/test-jest-helpers",
     "@kbn/core-http-browser-mocks",
     "@kbn/i18n",
-    "@kbn/utility-types",
     "@kbn/analytics",
     "@kbn/es-ui-shared-plugin",
     "@kbn/i18n-react",
@@ -41,7 +40,6 @@
     "@kbn/unsaved-changes-prompt",
     "@kbn/shared-ux-table-persist",
     "@kbn/index-lifecycle-management-common-shared",
-    "@kbn/ui-theme",
   ],
   "exclude": [
     "target/**/*",

@@ -25,8 +25,9 @@ import { useAppContext } from '../../../../../app_context';
 import { serializeAsESLifecycle } from '../../../../../../../common/lib';
 import { getLifecycleValue } from '../../../../../lib/data_streams';
 import { TemplateDeserialized } from '../../../../../../../common';
-import { ILM_PAGES_POLICY_EDIT } from '../../../../../constants';
+import { ILM_PAGES_POLICY_EDIT, INGEST_PIPELINES_EDIT } from '../../../../../constants';
 import { useIlmLocator } from '../../../../../services/use_ilm_locator';
+import { useIngestPipelinesLocator } from '../../../../../services/use_ingest_pipeline_locator';
 import { allowAutoCreateRadioIds } from '../../../../../../../common/constants';
 import { indexModeLabels } from '../../../../../lib/index_mode_labels';
 
@@ -65,6 +66,13 @@ export const TabSummary: React.FunctionComponent<Props> = ({ templateDetails }) 
 
   const { history, core } = useAppContext();
   const ilmPolicyLink = useIlmLocator(ILM_PAGES_POLICY_EDIT, ilmPolicy?.name);
+
+  // Compute the linked ingest pipeline URL
+  const linkedIngestPipeline = templateDetails?.template?.settings?.index?.default_pipeline;
+  const linkedIngestPipelineUrl = useIngestPipelinesLocator(
+    INGEST_PIPELINES_EDIT,
+    linkedIngestPipeline
+  );
 
   return (
     <>
@@ -151,6 +159,25 @@ export const TabSummary: React.FunctionComponent<Props> = ({ templateDetails }) 
                   ) : (
                     i18nTexts.none
                   )}
+                </EuiDescriptionListDescription>
+              </>
+            )}
+
+            {linkedIngestPipeline && (
+              <>
+                <EuiDescriptionListTitle>
+                  <FormattedMessage
+                    id="xpack.idxMgmt.templateDetails.summaryTab.linkedIngestPipelineDescriptionListTitle"
+                    defaultMessage="Default pipeline"
+                  />
+                </EuiDescriptionListTitle>
+                <EuiDescriptionListDescription>
+                  <EuiLink
+                    onClick={() => core.application.navigateToUrl(linkedIngestPipelineUrl)}
+                    data-test-subj="linkedIngestPipeline"
+                  >
+                    {linkedIngestPipeline}
+                  </EuiLink>
                 </EuiDescriptionListDescription>
               </>
             )}

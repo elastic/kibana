@@ -60,7 +60,6 @@ import { EnrollmentTokenListPage } from './sections/agents/enrollment_token_list
 import { UninstallTokenListPage } from './sections/agents/uninstall_token_list_page';
 import { SettingsApp } from './sections/settings';
 import { DebugPage } from './sections/debug';
-import { ExperimentalFeaturesService } from './services';
 import { ErrorLayout, PermissionsError } from './layouts';
 
 const FEEDBACK_URL = 'https://ela.st/fleet-feedback';
@@ -307,8 +306,6 @@ export const AppRoutes = memo(
     const flyoutContext = useFlyoutContext();
     const fleetStatus = useFleetStatus();
 
-    const { agentTamperProtectionEnabled } = ExperimentalFeaturesService.get();
-
     const authz = useAuthz();
 
     return (
@@ -364,21 +361,19 @@ export const AppRoutes = memo(
               </AppLayout>
             )}
           </Route>
-          {agentTamperProtectionEnabled && (
-            <Route path={FLEET_ROUTING_PATHS.uninstall_tokens}>
-              {authz.fleet.allAgents ? (
-                <AppLayout setHeaderActionMenu={setHeaderActionMenu}>
-                  <UninstallTokenListPage />
-                </AppLayout>
-              ) : (
-                <AppLayout setHeaderActionMenu={setHeaderActionMenu}>
-                  <ErrorLayout isAddIntegrationsPath={false}>
-                    <PermissionsError error="MISSING_PRIVILEGES" requiredFleetRole="Agents All" />
-                  </ErrorLayout>
-                </AppLayout>
-              )}
-            </Route>
-          )}
+          <Route path={FLEET_ROUTING_PATHS.uninstall_tokens}>
+            {authz.fleet.allAgents ? (
+              <AppLayout setHeaderActionMenu={setHeaderActionMenu}>
+                <UninstallTokenListPage />
+              </AppLayout>
+            ) : (
+              <AppLayout setHeaderActionMenu={setHeaderActionMenu}>
+                <ErrorLayout isAddIntegrationsPath={false}>
+                  <PermissionsError error="MISSING_PRIVILEGES" requiredFleetRole="Agents All" />
+                </ErrorLayout>
+              </AppLayout>
+            )}
+          </Route>
           <Route path={FLEET_ROUTING_PATHS.data_streams}>
             <AppLayout setHeaderActionMenu={setHeaderActionMenu}>
               <DataStreamApp />

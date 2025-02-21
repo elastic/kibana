@@ -21,7 +21,7 @@ import { createEmbeddableStateTransferMock } from '@kbn/embeddable-plugin/public
 import { visualizeAppStateStub } from './stubs';
 
 describe('showPublicUrlSwitch', () => {
-  test('returns false if "visualize" app is not available', () => {
+  test('returns false if "visualize_v2" app is not available', () => {
     const anonymousUserCapabilities: Capabilities = {
       catalogue: {},
       management: {},
@@ -32,12 +32,12 @@ describe('showPublicUrlSwitch', () => {
     expect(result).toBe(false);
   });
 
-  test('returns false if "visualize" app is not accessible', () => {
+  test('returns false if "visualize_v2" app is not accessible', () => {
     const anonymousUserCapabilities: Capabilities = {
       catalogue: {},
       management: {},
       navLinks: {},
-      visualize: {
+      visualize_v2: {
         show: false,
       },
     };
@@ -46,12 +46,12 @@ describe('showPublicUrlSwitch', () => {
     expect(result).toBe(false);
   });
 
-  test('returns true if "visualize" app is not available an accessible', () => {
+  test('returns true if "visualize_v2" app is not available an accessible', () => {
     const anonymousUserCapabilities: Capabilities = {
       catalogue: {},
       management: {},
       navLinks: {},
-      visualize: {
+      visualize_v2: {
         show: true,
       },
     };

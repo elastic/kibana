@@ -12,12 +12,15 @@ import { appContextService } from '../app_context';
 import { agentPolicyService } from '../agent_policy';
 import { ensureDefaultEnrollmentAPIKeyForAgentPolicy } from '../api_keys';
 
+import { scheduleDeployAgentPoliciesTask } from '../agent_policies/deploy_agent_policies_task';
+
 import { ensureAgentPoliciesFleetServerKeysAndPolicies } from './fleet_server_policies_enrollment_keys';
 
 jest.mock('../app_context');
 jest.mock('../agent_policy');
 jest.mock('../api_keys');
 jest.mock('../agent_policies/bump_agent_policies_task');
+jest.mock('../agent_policies/deploy_agent_policies_task');
 
 const mockedEnsureDefaultEnrollmentAPIKeyForAgentPolicy = jest.mocked(
   ensureDefaultEnrollmentAPIKeyForAgentPolicy
@@ -29,9 +32,6 @@ describe('ensureAgentPoliciesFleetServerKeysAndPolicies', () => {
   beforeEach(() => {
     jest.mocked(appContextService).getSecurity.mockReturnValue({
       authc: { apiKeys: { areAPIKeysEnabled: async () => true } },
-    } as any);
-    jest.mocked(appContextService).getExperimentalFeatures.mockReturnValue({
-      asyncDeployPolicies: false,
     } as any);
 
     mockedEnsureDefaultEnrollmentAPIKeyForAgentPolicy.mockReset();
@@ -108,7 +108,9 @@ describe('ensureAgentPoliciesFleetServerKeysAndPolicies', () => {
     });
 
     expect(mockedEnsureDefaultEnrollmentAPIKeyForAgentPolicy).toBeCalledTimes(2);
-    expect(mockedAgentPolicyService.deployPolicies).toBeCalledWith(expect.anything(), ['policy2']);
+    expect(scheduleDeployAgentPoliciesTask).toBeCalledWith(undefined, [
+      { id: 'policy2', spaceId: undefined },
+    ]);
   });
 
   it('should do deploy policies never deployed', async () => {
@@ -132,36 +134,8 @@ describe('ensureAgentPoliciesFleetServerKeysAndPolicies', () => {
     });
 
     expect(mockedEnsureDefaultEnrollmentAPIKeyForAgentPolicy).toBeCalledTimes(2);
-    expect(mockedAgentPolicyService.deployPolicies).toBeCalledWith(expect.anything(), ['policy2']);
-  });
-
-  it('handle errors when deploying policies', async () => {
-    const logger = loggingSystemMock.createLogger();
-    const esClient = elasticsearchServiceMock.createInternalClient();
-    const soClient = savedObjectsClientMock.create();
-    mockedAgentPolicyService.getLatestFleetPolicy.mockImplementation(async (_, agentPolicyId) => {
-      if (agentPolicyId === 'policy1') {
-        return {
-          revision_idx: 1,
-        } as any;
-      }
-
-      return null;
-    });
-    mockedAgentPolicyService.deployPolicies.mockRejectedValue(new Error('test rejection'));
-
-    await ensureAgentPoliciesFleetServerKeysAndPolicies({
-      logger,
-      esClient,
-      soClient,
-    });
-
-    expect(mockedEnsureDefaultEnrollmentAPIKeyForAgentPolicy).toBeCalledTimes(2);
-    expect(mockedAgentPolicyService.deployPolicies).toBeCalledWith(expect.anything(), ['policy2']);
-
-    expect(logger.warn).toBeCalledWith(
-      'Error deploying policies: test rejection',
-      expect.anything()
-    );
+    expect(scheduleDeployAgentPoliciesTask).toBeCalledWith(undefined, [
+      { id: 'policy2', spaceId: undefined },
+    ]);
   });
 });

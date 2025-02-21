@@ -98,32 +98,20 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     describe('edit mode state', () => {
-      const addPanels = async () => {
-        // add an area chart by value
-        await dashboardAddPanel.clickEditorMenuButton();
-        await dashboardAddPanel.clickAggBasedVisualizations();
-        await visualize.clickAreaChart();
-        await visualize.clickNewSearch();
-        await visualize.saveVisualizationAndReturn();
-
-        // add a metric by reference
-        await dashboardAddPanel.addVisualization('Rendering-Test: metric');
-      };
-
       it('does not show unsaved changes badge when there are no unsaved changes', async () => {
         await testSubjects.missingOrFail('dashboardUnsavedChangesBadge');
       });
 
       it('shows the unsaved changes badge after adding panels', async () => {
         await dashboard.switchToEditMode();
-        await addPanels();
+        await dashboardAddPanel.addVisualization('Rendering-Test: metric');
         await header.waitUntilLoadingHasFinished();
         await testSubjects.existOrFail('dashboardUnsavedChangesBadge');
       });
 
       it('has correct number of panels', async () => {
         unsavedPanelCount = await dashboard.getPanelCount();
-        expect(unsavedPanelCount).to.eql(originalPanelCount + 2);
+        expect(unsavedPanelCount).to.eql(originalPanelCount + 1);
       });
 
       it('retains unsaved panel count after navigating to listing page and back', async () => {
@@ -150,7 +138,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       it('can discard changes', async () => {
         unsavedPanelCount = await dashboard.getPanelCount();
-        expect(unsavedPanelCount).to.eql(originalPanelCount + 2);
+        expect(unsavedPanelCount).to.eql(originalPanelCount + 1);
 
         await dashboard.clickDiscardChanges();
         const currentPanelCount = await dashboard.getPanelCount();
@@ -158,10 +146,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('resets to original panel count after switching to view mode and discarding changes', async () => {
-        await addPanels();
+        await dashboardAddPanel.addVisualization('Rendering-Test: metric');
         await header.waitUntilLoadingHasFinished();
         unsavedPanelCount = await dashboard.getPanelCount();
-        expect(unsavedPanelCount).to.eql(originalPanelCount + 2);
+        expect(unsavedPanelCount).to.eql(originalPanelCount + 1);
 
         await dashboard.clickCancelOutOfEditMode();
         await header.waitUntilLoadingHasFinished();
@@ -172,7 +160,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       it('does not show unsaved changes badge after saving', async () => {
         await dashboard.switchToEditMode();
-        await addPanels();
+        await dashboardAddPanel.addVisualization('Rendering-Test: metric');
         await header.waitUntilLoadingHasFinished();
         await dashboard.saveDashboard('Unsaved State Test');
         await header.waitUntilLoadingHasFinished();

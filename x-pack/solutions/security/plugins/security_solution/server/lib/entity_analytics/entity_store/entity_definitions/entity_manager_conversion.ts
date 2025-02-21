@@ -23,13 +23,17 @@ export const convertToEntityManagerDefinition = (
     indexPatterns: description.indexPatterns,
     identityFields: [description.identityField],
     displayNameTemplate: `{{${description.identityField}}}`,
+    filter: options.filter,
     metadata,
     latest: {
       timestampField: description.settings.timestampField,
       lookbackPeriod: description.settings.lookbackPeriod,
       settings: {
+        syncField: description.settings.timestampField,
         syncDelay: description.settings.syncDelay,
         frequency: description.settings.frequency,
+        timeout: description.settings.timeout,
+        docsPerSecond: description.settings.docsPerSecond,
       },
     },
     version: description.version,

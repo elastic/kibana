@@ -15,7 +15,8 @@ import { createAppMockRenderer } from '../common/mock';
 jest.mock('./api');
 jest.mock('../common/lib/kibana');
 
-describe('useGetCaseUsers', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/208380
+describe.skip('useGetCaseUsers', () => {
   let appMockRender: AppMockRenderer;
 
   beforeEach(() => {

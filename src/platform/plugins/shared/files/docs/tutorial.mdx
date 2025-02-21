@@ -74,7 +74,7 @@ import { FileKind } from '@kbn/files-plugin/common';
 export const PLUGIN_ID = 'filesExample';
 
 const httpTags = {
-  tags: [`access:${PLUGIN_ID}`], // ensure that only users with access to this plugin can files of this kind
+  requiredPrivileges: [PLUGIN_ID], // ensure that only users with the specified privilege can perform operations on files of this kind
 };
 
 export const exampleFileKind: FileKind = {

@@ -40,7 +40,7 @@ export const MonitorTestRunsCount = () => {
           dataType: 'synthetics',
           selectedMetricField: 'monitor_total_runs',
           name: labels.TEST_RUNS_LABEL,
-          color: euiTheme.colors.vis.euiColorVis1,
+          color: euiTheme.colors.vis.euiColorVis0,
         },
       ]}
     />

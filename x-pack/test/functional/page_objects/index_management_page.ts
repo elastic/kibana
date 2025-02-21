@@ -38,6 +38,17 @@ export function IndexManagementPageProvider({ getService }: FtrProviderContext) 
       await policyDetailsLinks[indexOfRow].click();
     },
 
+    async clickIndexTemplate(name: string): Promise<void> {
+      const indexTemplateLinks = await testSubjects.findAll('templateDetailsLink');
+
+      for (const link of indexTemplateLinks) {
+        if ((await link.getVisibleText()).includes(name)) {
+          await link.click();
+          return;
+        }
+      }
+    },
+
     async clickBulkEditDataRetention(dataStreamNames: string[]): Promise<void> {
       for (const dsName of dataStreamNames) {
         const checkbox = await testSubjects.find(`checkboxSelectRow-${dsName}`);
@@ -157,6 +168,7 @@ export function IndexManagementPageProvider({ getService }: FtrProviderContext) 
     async clickNextButton() {
       await testSubjects.click('nextButton');
     },
+
     indexDetailsPage: {
       async openIndexDetailsPage(indexOfRow: number) {
         const indexList = await testSubjects.findAll('indexTableIndexNameLink');
@@ -203,6 +215,10 @@ export function IndexManagementPageProvider({ getService }: FtrProviderContext) 
     async setCreateIndexName(value: string) {
       await testSubjects.existOrFail('createIndexNameFieldText');
       await testSubjects.setValue('createIndexNameFieldText', value);
+    },
+    async setCreateIndexMode(value: string) {
+      await testSubjects.existOrFail('indexModeField');
+      await testSubjects.selectValue('indexModeField', value);
     },
     async clickCreateIndexSaveButton() {
       await testSubjects.existOrFail('createIndexSaveButton');

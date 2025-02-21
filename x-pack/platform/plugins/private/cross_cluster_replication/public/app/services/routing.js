@@ -6,7 +6,7 @@
  */
 
 /**
- * This file based on guidance from https://github.com/elastic/eui/blob/master/wiki/react-router.md
+ * This file based on guidance from https://github.com/elastic/eui/blob/main/wiki/consuming-eui/react-router.md
  */
 
 import { stringify } from 'query-string';

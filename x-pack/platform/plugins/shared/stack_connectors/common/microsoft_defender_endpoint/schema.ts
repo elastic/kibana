@@ -37,6 +37,105 @@ export const AgentDetailsParamsSchema = schema.object({
   id: schema.string({ minLength: 1 }),
 });
 
+const MachineHealthStatusSchema = schema.oneOf([
+  schema.literal('Active'),
+  schema.literal('Inactive'),
+  schema.literal('ImpairedCommunication'),
+  schema.literal('NoSensorData'),
+  schema.literal('NoSensorDataImpairedCommunication'),
+  schema.literal('Unknown'),
+]);
+
+export const AgentListParamsSchema = schema.object({
+  computerDnsName: schema.maybe(
+    schema.oneOf([
+      schema.string({ minLength: 1 }),
+      schema.arrayOf(schema.string({ minLength: 1 }), { minSize: 1 }),
+    ])
+  ),
+  id: schema.maybe(
+    schema.oneOf([
+      schema.string({ minLength: 1 }),
+      schema.arrayOf(schema.string({ minLength: 1 }), { minSize: 1 }),
+    ])
+  ),
+  version: schema.maybe(
+    schema.oneOf([
+      schema.string({ minLength: 1 }),
+      schema.arrayOf(schema.string({ minLength: 1 }), { minSize: 1 }),
+    ])
+  ),
+  deviceValue: schema.maybe(
+    schema.oneOf([
+      schema.string({ minLength: 1 }),
+      schema.arrayOf(schema.string({ minLength: 1 }), { minSize: 1 }),
+    ])
+  ),
+  aaDeviceId: schema.maybe(
+    schema.oneOf([
+      schema.string({ minLength: 1 }),
+      schema.arrayOf(schema.string({ minLength: 1 }), { minSize: 1 }),
+    ])
+  ),
+  machineTags: schema.maybe(
+    schema.oneOf([
+      schema.string({ minLength: 1 }),
+      schema.arrayOf(schema.string({ minLength: 1 }), { minSize: 1 }),
+    ])
+  ),
+  lastSeen: schema.maybe(
+    schema.oneOf([
+      schema.string({ minLength: 1 }),
+      schema.arrayOf(schema.string({ minLength: 1 }), { minSize: 1 }),
+    ])
+  ),
+  exposureLevel: schema.maybe(
+    schema.oneOf([
+      schema.string({ minLength: 1 }),
+      schema.arrayOf(schema.string({ minLength: 1 }), { minSize: 1 }),
+    ])
+  ),
+  onboardingStatus: schema.maybe(
+    schema.oneOf([
+      schema.string({ minLength: 1 }),
+      schema.arrayOf(schema.string({ minLength: 1 }), { minSize: 1 }),
+    ])
+  ),
+  lastIpAddress: schema.maybe(
+    schema.oneOf([
+      schema.string({ minLength: 1 }),
+      schema.arrayOf(schema.string({ minLength: 1 }), { minSize: 1 }),
+    ])
+  ),
+  healthStatus: schema.maybe(
+    schema.oneOf([
+      MachineHealthStatusSchema,
+      schema.arrayOf(MachineHealthStatusSchema, { minSize: 1 }),
+    ])
+  ),
+  osPlatform: schema.maybe(
+    schema.oneOf([
+      schema.string({ minLength: 1 }),
+      schema.arrayOf(schema.string({ minLength: 1 }), { minSize: 1 }),
+    ])
+  ),
+  riskScore: schema.maybe(
+    schema.oneOf([
+      schema.string({ minLength: 1 }),
+      schema.arrayOf(schema.string({ minLength: 1 }), { minSize: 1 }),
+    ])
+  ),
+  rbacGroupId: schema.maybe(
+    schema.oneOf([
+      schema.string({ minLength: 1 }),
+      schema.arrayOf(schema.string({ minLength: 1 }), { minSize: 1 }),
+    ])
+  ),
+
+  page: schema.maybe(schema.number({ min: 1, defaultValue: 1 })),
+  pageSize: schema.maybe(schema.number({ min: 1, max: 1000, defaultValue: 20 })),
+});
+
 export const IsolateHostParamsSchema = schema.object({
   id: schema.string({ minLength: 1 }),
   comment: schema.string({ minLength: 1 }),
@@ -104,6 +203,8 @@ export const GetActionsParamsSchema = schema.object({
   ),
   page: schema.maybe(schema.number({ min: 1, defaultValue: 1 })),
   pageSize: schema.maybe(schema.number({ min: 1, max: 1000, defaultValue: 20 })),
+  sortField: schema.maybe(schema.string({ minLength: 1 })),
+  sortDirection: schema.maybe(schema.oneOf([schema.literal('asc'), schema.literal('desc')])),
 });
 
 // ----------------------------------

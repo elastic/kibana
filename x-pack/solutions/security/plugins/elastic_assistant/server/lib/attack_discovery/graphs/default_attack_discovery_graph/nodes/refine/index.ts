@@ -6,8 +6,9 @@
  */
 
 import type { ActionsClientLlm } from '@kbn/langchain/server';
-import type { Logger } from '@kbn/core/server';
+import { Logger } from '@kbn/core/server';
 
+import { GenerationPrompts } from '../helpers/prompts';
 import { discardPreviousRefinements } from './helpers/discard_previous_refinements';
 import { extractJson } from '../helpers/extract_json';
 import { getChainWithFormatInstructions } from '../helpers/get_chain_with_format_instructions';
@@ -24,9 +25,11 @@ import type { GraphState } from '../../types';
 export const getRefineNode = ({
   llm,
   logger,
+  prompts,
 }: {
   llm: ActionsClientLlm;
   logger?: Logger;
+  prompts: GenerationPrompts;
 }): ((state: GraphState) => Promise<GraphState>) => {
   const refine = async (state: GraphState): Promise<GraphState> => {
     logger?.debug(() => '---REFINE---');
@@ -34,6 +37,7 @@ export const getRefineNode = ({
     const {
       attackDiscoveryPrompt,
       combinedRefinements,
+      continuePrompt,
       generationAttempts,
       hallucinationFailures,
       maxGenerationAttempts,
@@ -51,11 +55,15 @@ export const getRefineNode = ({
       const query = getCombinedRefinePrompt({
         attackDiscoveryPrompt,
         combinedRefinements,
+        continuePrompt,
         refinePrompt,
         unrefinedResults,
       });
 
-      const { chain, formatInstructions, llmType } = getChainWithFormatInstructions(llm);
+      const { chain, formatInstructions, llmType } = getChainWithFormatInstructions({
+        llm,
+        prompts,
+      });
 
       logger?.debug(
         () => `refine node is invoking the chain (${llmType}), attempt ${generationAttempts}`
@@ -115,6 +123,7 @@ export const getRefineNode = ({
         llmType,
         logger,
         nodeName: 'refine',
+        prompts,
       });
 
       return {

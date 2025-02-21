@@ -57,6 +57,7 @@ export const getAllColumns = (
       fieldName: c.id,
       label: c.name,
       meta: c.meta,
+      ...(c.variable ? { variable: c.variable } : {}),
     })),
   ];
   const uniqueIds: string[] = [];

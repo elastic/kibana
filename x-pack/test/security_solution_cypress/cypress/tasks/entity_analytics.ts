@@ -5,10 +5,7 @@
  * 2.0.
  */
 
-import {
-  RISK_ENGINE_STATUS_URL,
-  RISK_SCORE_INDEX_STATUS_API_URL,
-} from '@kbn/security-solution-plugin/common/constants';
+import { RISK_ENGINE_STATUS_URL } from '@kbn/security-solution-plugin/common/constants';
 import { BASIC_TABLE_LOADING } from '../screens/common';
 import {
   ANOMALIES_TABLE_ROWS,
@@ -16,11 +13,8 @@ import {
   ANOMALIES_TABLE_NEXT_PAGE_BUTTON,
   OPEN_RISK_INFORMATION_FLYOUT_BUTTON,
 } from '../screens/entity_analytics';
-import { RISK_SCORE_STATUS } from '../screens/entity_analytics_management';
-import { ENTITY_ANALYTICS_URL, ENTITY_ANALYTICS_MANAGEMENT_URL } from '../urls/navigation';
+import { ENTITY_ANALYTICS_URL } from '../urls/navigation';
 import {
-  RISK_SCORE_UPDATE_CONFIRM,
-  RISK_SCORE_UPDATE_BUTTON,
   RISK_SCORE_SWITCH,
   RISK_PREVIEW_ERROR_BUTTON,
 } from '../screens/entity_analytics_management';
@@ -70,41 +64,8 @@ export const mockRiskEngineEnabled = () => {
     statusCode: 200,
     body: {
       risk_engine_status: 'ENABLED',
-      legacy_risk_engine_status: 'INSTALLED',
     },
   }).as('riskEngineStatus');
-
-  // mock the risk index status
-  cy.intercept('GET', `${RISK_SCORE_INDEX_STATUS_API_URL}?indexName=*&entity=*`, {
-    statusCode: 200,
-    body: {
-      isDeprecated: false,
-      isEnabled: true,
-    },
-  }).as('riskIndexStatus');
-};
-
-/**
- * @deprecated
- * At the moment there isn't a way to clean all assets created by the risk engine enablement.
- * We can't clean assets after each tests and we can't call this function from the `after` hook (cypress good practice).
- * Reintroduce this task when we can safely delete the risk engine data.
- *
- * Please use `mockRiskEngineEnabled` instead.
- */
-// const enableRiskEngine = () => {
-//   cy.visit(ENTITY_ANALYTICS_MANAGEMENT_URL);
-//   cy.get(RISK_SCORE_STATUS).should('have.text', 'Off');
-//   riskEngineStatusChange();
-//   cy.get(RISK_SCORE_STATUS).should('have.text', 'On');
-// };
-
-export const updateRiskEngine = () => {
-  cy.get(RISK_SCORE_UPDATE_BUTTON).click();
-};
-
-export const updateRiskEngineConfirm = () => {
-  cy.get(RISK_SCORE_UPDATE_CONFIRM).click();
 };
 
 export const previewErrorButtonClick = () => {
@@ -112,13 +73,6 @@ export const previewErrorButtonClick = () => {
 };
 
 export const openRiskInformationFlyout = () => cy.get(OPEN_RISK_INFORMATION_FLYOUT_BUTTON).click();
-
-export const upgradeRiskEngine = () => {
-  visitWithTimeRange(ENTITY_ANALYTICS_MANAGEMENT_URL);
-  updateRiskEngine();
-  updateRiskEngineConfirm();
-  cy.get(RISK_SCORE_STATUS).should('have.text', 'On');
-};
 
 export const openEntityStoreEnablementModal = () => {
   cy.get(ENTITY_STORE_ENABLEMENT_BUTTON).click();

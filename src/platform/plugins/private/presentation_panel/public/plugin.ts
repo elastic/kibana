@@ -15,7 +15,7 @@ import { SavedObjectTaggingOssPluginStart } from '@kbn/saved-objects-tagging-oss
 import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
 import { setKibanaServices } from './kibana_services';
-import { registerActions } from './panel_actions/panel_actions';
+import { registerActions } from './panel_actions/register_actions';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface PresentationPanelSetup {}

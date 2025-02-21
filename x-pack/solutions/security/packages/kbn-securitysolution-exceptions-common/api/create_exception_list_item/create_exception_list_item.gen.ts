@@ -27,6 +27,7 @@ import {
   ExceptionListItemOsTypeArray,
   ExceptionListItemTags,
   ExceptionListItemMeta,
+  ExceptionListItemExpireTime,
   ExceptionListItem,
 } from '../model/exception_list_common.gen';
 import { ExceptionListItemEntryArray } from '../model/exception_list_item_entry.gen';
@@ -53,7 +54,7 @@ export const CreateExceptionListItemRequestBody = z.object({
   os_types: ExceptionListItemOsTypeArray.optional().default([]),
   tags: ExceptionListItemTags.optional().default([]),
   meta: ExceptionListItemMeta.optional(),
-  expire_time: z.string().datetime().optional(),
+  expire_time: ExceptionListItemExpireTime.optional(),
   comments: CreateExceptionListItemCommentArray.optional().default([]),
 });
 export type CreateExceptionListItemRequestBodyInput = z.input<

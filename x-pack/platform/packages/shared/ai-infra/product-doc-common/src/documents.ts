@@ -18,14 +18,15 @@ interface SemanticTextArrayField {
 
 export interface ProductDocumentationAttributes {
   content_title: string;
-  content_body: SemanticTextField;
+  // backward compatibility for the legacy semantic_text mode
+  content_body: string | SemanticTextField;
   product_name: ProductName;
   root_type: string;
   slug: string;
   url: string;
   version: string;
   ai_subtitle: string;
-  ai_summary: SemanticTextField;
-  ai_questions_answered: SemanticTextArrayField;
+  ai_summary: string | SemanticTextField;
+  ai_questions_answered: string[] | SemanticTextArrayField;
   ai_tags: string[];
 }

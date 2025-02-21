@@ -8,7 +8,8 @@
     "public/**/*",
     "../../../../../typings/**/*",
     "public/**/*.json",
-    "server/**/*"
+    "server/**/*",
+    "e2e/**/*"
   ],
   "kbn_references": [
     "@kbn/core",
@@ -43,7 +44,8 @@
     "@kbn/server-route-repository-utils",
     "@kbn/core-application-browser",
     "@kbn/core-plugins-server",
-    "@kbn/logs-shared-plugin"
+    "@kbn/logs-shared-plugin",
+    "@kbn/tooling-log"
   ],
   "exclude": [
     "target/**/*"

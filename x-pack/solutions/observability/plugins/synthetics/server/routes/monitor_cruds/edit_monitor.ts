@@ -11,7 +11,7 @@ import { isEmpty } from 'lodash';
 import { invalidOriginError } from './add_monitor';
 import { InvalidLocationError } from '../../synthetics_service/project_monitor/normalizers/common_fields';
 import { AddEditMonitorAPI, CreateMonitorPayLoad } from './add_monitor/add_monitor_api';
-import { ELASTIC_MANAGED_LOCATIONS_DISABLED } from './add_monitor_project';
+import { ELASTIC_MANAGED_LOCATIONS_DISABLED } from './project_monitor/add_monitor_project';
 import { getDecryptedMonitor } from '../../saved_objects/synthetics_monitor';
 import { getPrivateLocations } from '../../synthetics_service/get_private_locations';
 import { mergeSourceMonitor } from './formatters/saved_object_to_monitor';

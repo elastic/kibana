@@ -134,7 +134,7 @@ describe('#updateObjectsSpaces', () => {
   /** Asserts that mget is called for the given objects */
   function expectMgetArgs(...objects: SavedObjectsUpdateObjectsSpacesObject[]) {
     const docs = objects.map(({ type, id }) => expect.objectContaining({ _id: `${type}:${id}` }));
-    expect(client.mget).toHaveBeenCalledWith({ body: { docs } }, expect.anything());
+    expect(client.mget).toHaveBeenCalledWith({ docs }, expect.anything());
   }
 
   /** Mocks the saved objects client so it returns the expected results */
@@ -153,14 +153,14 @@ describe('#updateObjectsSpaces', () => {
     });
   }
 
-  /** Asserts that mget is called for the given objects */
+  /** Asserts that bulk is called for the given objects */
   function expectBulkArgs(
     ...objectActions: Array<{
       object: { type: string; id: string; namespaces?: string[] };
       action: 'update' | 'delete';
     }>
   ) {
-    const body = objectActions.flatMap(
+    const operations = objectActions.flatMap(
       ({ object: { type, id, namespaces = expect.any(Array) }, action }) => {
         const operation = {
           [action]: {
@@ -174,7 +174,7 @@ describe('#updateObjectsSpaces', () => {
           : [operation]; // 'delete' only uses an operation
       }
     );
-    expect(client.bulk).toHaveBeenCalledWith(expect.objectContaining({ body }));
+    expect(client.bulk).toHaveBeenCalledWith(expect.objectContaining({ operations }));
   }
 
   beforeEach(() => {

@@ -52,7 +52,28 @@ export class LogsSynthtraceEsClient extends SynthtraceEsClient<LogDocument> {
     }
   }
 
-  async createComponentTemplate(name: string, mappings: MappingTypeMapping) {
+  async deleteIndexTemplate(name: IndexTemplateName) {
+    try {
+      await this.client.indices.deleteIndexTemplate({ name });
+      this.logger.info(`Index template successfully deleted: ${name}`);
+    } catch (err) {
+      this.logger.error(`Index template deletion failed: ${name} - ${err.message}`);
+    }
+  }
+
+  async createComponentTemplate({
+    name,
+    mappings,
+    dataStreamOptions,
+  }: {
+    name: string;
+    mappings?: MappingTypeMapping;
+    dataStreamOptions?: {
+      failure_store: {
+        enabled: boolean;
+      };
+    };
+  }) {
     const isTemplateExisting = await this.client.cluster.existsComponentTemplate({ name });
 
     if (isTemplateExisting) return this.logger.info(`Component template already exists: ${name}`);
@@ -61,7 +82,8 @@ export class LogsSynthtraceEsClient extends SynthtraceEsClient<LogDocument> {
       await this.client.cluster.putComponentTemplate({
         name,
         template: {
-          mappings,
+          ...((mappings && { mappings }) || {}),
+          ...((dataStreamOptions && { data_stream_options: dataStreamOptions }) || {}),
         },
       });
       this.logger.info(`Component template successfully created: ${name}`);
@@ -124,16 +146,27 @@ export class LogsSynthtraceEsClient extends SynthtraceEsClient<LogDocument> {
     }
   }
 
-  async createCustomPipeline(processors: IngestProcessorContainer[]) {
+  async createCustomPipeline(processors: IngestProcessorContainer[], id = LogsCustom) {
     try {
       this.client.ingest.putPipeline({
-        id: LogsCustom,
+        id,
         processors,
         version: 1,
       });
-      this.logger.info(`Custom pipeline created: ${LogsCustom}`);
+      this.logger.info(`Custom pipeline created: ${id}`);
     } catch (err) {
-      this.logger.error(`Custom pipeline creation failed: ${LogsCustom} - ${err.message}`);
+      this.logger.error(`Custom pipeline creation failed: ${id} - ${err.message}`);
+    }
+  }
+
+  async deleteCustomPipeline(id = LogsCustom) {
+    try {
+      this.client.ingest.deletePipeline({
+        id,
+      });
+      this.logger.info(`Custom pipeline deleted: ${id}`);
+    } catch (err) {
+      this.logger.error(`Custom pipeline deletion failed: ${id} - ${err.message}`);
     }
   }
 

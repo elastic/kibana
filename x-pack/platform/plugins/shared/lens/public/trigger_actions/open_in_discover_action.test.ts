@@ -135,4 +135,48 @@ describe('open in discover action', () => {
     expect(locator.getRedirectUrl).toHaveBeenCalledWith(viewUnderlyingDataArgs);
     expect(globalThis.open).toHaveBeenCalledWith(discoverUrl, '_blank');
   });
+
+  it('navigates to discover for an ES|QL chart but without the filters', async () => {
+    const viewUnderlyingDataArgs = {
+      dataViewSpec: { id: 'index-pattern-id' },
+      timeRange: {},
+      filters: [{ meta: { type: 'range' } }],
+      query: undefined,
+      columns: [],
+    };
+
+    const embeddable = {
+      ...compatibleEmbeddableApi,
+      getViewUnderlyingDataArgs: jest.fn(() => viewUnderlyingDataArgs),
+      isTextBasedLanguage: jest.fn(() => true),
+    };
+
+    const discoverUrl = 'https://discover-redirect-url';
+    const locator = {
+      getRedirectUrl: jest.fn(() => discoverUrl),
+    } as unknown as DiscoverAppLocator;
+
+    globalThis.open = jest.fn();
+
+    await createOpenInDiscoverAction(
+      locator,
+      {
+        get: () => ({
+          isTimeBased: () => true,
+          toSpec: () => ({ id: 'index-pattern-id' }),
+        }),
+      } as unknown as DataViewsService,
+      true
+    ).execute({
+      embeddable,
+    } as ActionExecutionContext<EmbeddableApiContext>);
+
+    expect(embeddable.getViewUnderlyingDataArgs).toHaveBeenCalled();
+    const viewUnderlyingDataArgsWithoutFilters = {
+      ...viewUnderlyingDataArgs,
+      filters: [],
+    };
+    expect(locator.getRedirectUrl).toHaveBeenCalledWith(viewUnderlyingDataArgsWithoutFilters);
+    expect(globalThis.open).toHaveBeenCalledWith(discoverUrl, '_blank');
+  });
 });

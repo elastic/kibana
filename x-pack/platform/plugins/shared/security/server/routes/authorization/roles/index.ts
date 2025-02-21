@@ -11,6 +11,7 @@ import { defineGetAllRolesRoutes } from './get_all';
 import { defineGetAllRolesBySpaceRoutes } from './get_all_by_space';
 import { defineBulkCreateOrUpdateRolesRoutes } from './post';
 import { definePutRolesRoutes } from './put';
+import { defineQueryRolesRoutes } from './query';
 import type { RouteDefinitionParams } from '../..';
 
 export function defineRolesRoutes(params: RouteDefinitionParams) {
@@ -20,4 +21,5 @@ export function defineRolesRoutes(params: RouteDefinitionParams) {
   definePutRolesRoutes(params);
   defineGetAllRolesBySpaceRoutes(params);
   defineBulkCreateOrUpdateRolesRoutes(params);
+  defineQueryRolesRoutes(params);
 }

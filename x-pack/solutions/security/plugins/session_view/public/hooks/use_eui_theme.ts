@@ -5,21 +5,21 @@
  * 2.0.
  */
 
-import { shade, useEuiTheme as useEuiThemeHook } from '@elastic/eui';
-import { euiLightVars, euiDarkVars } from '@kbn/ui-theme';
 import { useMemo } from 'react';
+import { useEuiTheme as useEuiThemeHook } from '@elastic/eui';
+
+// TODO: Borealis migration - euiLightVars and euiDarkVars are depricated.
+// Options: lock <EuiThemeProvider colorMode="dark"> or use hardcoded colors outside of theme colors
+import { euiLightVars, euiDarkVars } from '@kbn/ui-theme';
 
 type EuiThemeProps = Parameters<typeof useEuiThemeHook>;
 type ExtraEuiVars = {
-  // eslint-disable-next-line @typescript-eslint/naming-convention
-  euiColorVis6_asText: string;
-  buttonsBackgroundNormalDefaultPrimary: string;
   terminalOutputBackground: string;
   terminalOutputMarkerAccent: string;
   terminalOutputMarkerWarning: string;
   terminalOutputSliderBackground: string;
 };
-type EuiVars = typeof euiLightVars & ExtraEuiVars;
+type EuiVars = ExtraEuiVars;
 type EuiThemeReturn = ReturnType<typeof useEuiThemeHook> & { euiVars: EuiVars };
 
 // Not all Eui Tokens were fully migrated to @elastic/eui/useEuiTheme yet, so
@@ -29,24 +29,18 @@ export const useEuiTheme = (...props: EuiThemeProps): EuiThemeReturn => {
   const euiThemeHook = useEuiThemeHook(...props);
 
   const euiVars = useMemo(() => {
-    const themeVars = euiThemeHook.colorMode === 'DARK' ? euiDarkVars : euiLightVars;
-
     const extraEuiVars: ExtraEuiVars = {
-      // eslint-disable-next-line @typescript-eslint/naming-convention
-      euiColorVis6_asText: shade(themeVars.euiColorVis6, 0.335),
-      buttonsBackgroundNormalDefaultPrimary: '#006DE4',
       // Terminal Output Colors don't change with the theme
-      terminalOutputBackground: '#1d1e23',
+      terminalOutputBackground: '#1d1e23', // TODO: Borealis migration - replace with proper color token
       terminalOutputMarkerAccent: euiLightVars.euiColorAccent,
       terminalOutputMarkerWarning: euiDarkVars.euiColorWarning,
       terminalOutputSliderBackground: euiLightVars.euiColorDarkestShade,
     };
 
     return {
-      ...themeVars,
       ...extraEuiVars,
     };
-  }, [euiThemeHook.colorMode]);
+  }, []);
 
   return {
     ...euiThemeHook,

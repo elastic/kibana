@@ -17,6 +17,7 @@ import type {
   KafkaConnectionTypeType,
   AgentUpgradeDetails,
   OutputPreset,
+  AgentlessPolicy,
 } from '../../common/types';
 import type { AgentType, FleetServerAgentComponent } from '../../common/types/models';
 
@@ -65,6 +66,7 @@ export interface AgentPolicySOAttributes {
   agents?: number;
   overrides?: any | null;
   global_data_tags?: Array<{ name: string; value: string | number }>;
+  agentless?: AgentlessPolicy;
   version?: string;
 }
 
@@ -168,7 +170,11 @@ export interface OutputSoRemoteElasticsearchAttributes extends OutputSoBaseAttri
   service_token?: string;
   secrets?: {
     service_token?: { id: string };
+    kibana_api_key?: { id: string };
   };
+  sync_integrations?: boolean;
+  kibana_url?: string;
+  kibana_api_key?: string;
 }
 
 interface OutputSoLogstashAttributes extends OutputSoBaseAttributes {

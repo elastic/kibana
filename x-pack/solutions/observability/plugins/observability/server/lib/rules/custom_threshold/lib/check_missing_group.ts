@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { EsQueryConfig } from '@kbn/es-query';
@@ -16,6 +17,7 @@ import {
 } from '../../../../../common/custom_threshold_rule/types';
 import type { BucketKey } from './get_data';
 import { calculateCurrentTimeFrame, createBoolQuery } from './metric_query';
+import { isPopulatedObject } from './is_populated_object';
 
 export interface MissingGroupsRecord {
   key: string;
@@ -32,7 +34,8 @@ export const checkMissingGroups = async (
   logger: Logger,
   timeframe: { start: number; end: number },
   esQueryConfig: EsQueryConfig,
-  missingGroups: MissingGroupsRecord[] = []
+  missingGroups: MissingGroupsRecord[] = [],
+  runtimeMappings?: estypes.MappingRuntimeFields
 ): Promise<MissingGroupsRecord[]> => {
   if (missingGroups.length === 0) {
     return missingGroups;
@@ -65,6 +68,7 @@ export const checkMissingGroups = async (
         terminate_after: 1,
         track_total_hits: true,
         query,
+        ...(isPopulatedObject(runtimeMappings) ? { runtime_mappings: runtimeMappings } : {}),
       },
     ];
   });

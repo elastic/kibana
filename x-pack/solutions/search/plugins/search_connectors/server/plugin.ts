@@ -11,8 +11,8 @@ import { getConnectorTypes } from '../common/lib/connector_types';
 import type {
   SearchConnectorsPluginSetup as SearchConnectorsPluginSetup,
   SearchConnectorsPluginStart as SearchConnectorsPluginStart,
-  SetupDependencies,
-  StartDependencies,
+  SearchConnectorsPluginSetupDependencies,
+  SearchConnectorsPluginStartDependencies,
 } from './types';
 
 export class SearchConnectorsPlugin
@@ -20,8 +20,8 @@ export class SearchConnectorsPlugin
     Plugin<
       SearchConnectorsPluginSetup,
       SearchConnectorsPluginStart,
-      SetupDependencies,
-      StartDependencies
+      SearchConnectorsPluginSetupDependencies,
+      SearchConnectorsPluginStartDependencies
     >
 {
   private connectors: ConnectorServerSideDefinition[];
@@ -30,7 +30,12 @@ export class SearchConnectorsPlugin
     this.connectors = [];
   }
 
-  public setup({ getStartServices, http }: CoreSetup<StartDependencies>) {
+  public setup(
+    coreSetup: CoreSetup<SearchConnectorsPluginStartDependencies, SearchConnectorsPluginStart>,
+    plugins: SearchConnectorsPluginSetupDependencies
+  ) {
+    const http = coreSetup.http;
+
     this.connectors = getConnectorTypes(http.staticAssets);
 
     return {

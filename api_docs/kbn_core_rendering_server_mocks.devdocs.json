@@ -22,7 +22,7 @@
         "tags": [],
         "label": "renderingServiceMock",
         "description": [],
-        "path": "packages/core/rendering/core-rendering-server-mocks/src/rendering_service.mock.ts",
+        "path": "src/core/packages/rendering/server-mocks/src/rendering_service.mock.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -37,7 +37,7 @@
               "() => ",
               "RenderingServiceMock"
             ],
-            "path": "packages/core/rendering/core-rendering-server-mocks/src/rendering_service.mock.ts",
+            "path": "src/core/packages/rendering/server-mocks/src/rendering_service.mock.ts",
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -55,7 +55,7 @@
               "InternalRenderingServiceSetup",
               ">"
             ],
-            "path": "packages/core/rendering/core-rendering-server-mocks/src/rendering_service.mock.ts",
+            "path": "src/core/packages/rendering/server-mocks/src/rendering_service.mock.ts",
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -73,7 +73,7 @@
               "InternalRenderingServiceSetup",
               ">"
             ],
-            "path": "packages/core/rendering/core-rendering-server-mocks/src/rendering_service.mock.ts",
+            "path": "src/core/packages/rendering/server-mocks/src/rendering_service.mock.ts",
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],

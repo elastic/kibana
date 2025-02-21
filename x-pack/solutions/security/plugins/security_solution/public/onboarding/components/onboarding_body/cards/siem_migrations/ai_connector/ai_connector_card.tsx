@@ -15,8 +15,9 @@ import * as i18n from './translations';
 import { OnboardingCardContentPanel } from '../../common/card_content_panel';
 import { ConnectorCards } from '../../common/connectors/connector_cards';
 import { CardSubduedText } from '../../common/card_subdued_text';
+import { ConnectorsMissingPrivilegesCallOut } from '../../common/connectors/missing_privileges';
+import type { AIConnector } from '../../common/connectors/types';
 import type { AIConnectorCardMetadata } from './types';
-import { MissingPrivilegesCallOut } from '../../common/connectors/missing_privileges';
 
 export const AIConnectorCard: OnboardingCardComponent<AIConnectorCardMetadata> = ({
   checkCompleteMetadata,
@@ -24,16 +25,17 @@ export const AIConnectorCard: OnboardingCardComponent<AIConnectorCardMetadata> =
   setComplete,
 }) => {
   const { siemMigrations } = useKibana().services;
-  const [storedConnectorId, setStoredConnectorId] = useDefinedLocalStorage<string | null>(
+  const [storedConnectorId, setStoredConnectorId] = useDefinedLocalStorage<string | undefined>(
     siemMigrations.rules.connectorIdStorage.key,
-    null
+    undefined
   );
-  const setSelectedConnectorId = useCallback(
-    (connectorId: string) => {
-      setStoredConnectorId(connectorId);
+  const setSelectedConnector = useCallback(
+    (connector: AIConnector) => {
+      setStoredConnectorId(connector.id);
       setComplete(true);
+      siemMigrations.rules.telemetry.reportConnectorSelected({ connector });
     },
-    [setComplete, setStoredConnectorId]
+    [setComplete, setStoredConnectorId, siemMigrations]
   );
 
   if (!checkCompleteMetadata) {
@@ -57,14 +59,14 @@ export const AIConnectorCard: OnboardingCardComponent<AIConnectorCardMetadata> =
             <ConnectorCards
               canCreateConnectors={canCreateConnectors}
               connectors={connectors}
-              onConnectorSaved={checkComplete}
+              onNewConnectorSaved={checkComplete}
               selectedConnectorId={storedConnectorId}
-              setSelectedConnectorId={setSelectedConnectorId}
+              onConnectorSelected={setSelectedConnector}
             />
           </EuiFlexItem>
         </EuiFlexGroup>
       ) : (
-        <MissingPrivilegesCallOut />
+        <ConnectorsMissingPrivilegesCallOut level="read" />
       )}
     </OnboardingCardContentPanel>
   );

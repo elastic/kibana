@@ -220,7 +220,9 @@ export const deleteAllComments = async ({
 
   return comment;
 };
-
+/**
+ * remove this method and use findAttachments instead https://github.com/elastic/kibana/issues/208188
+ */
 export const getAllComments = async ({
   supertest,
   caseId,
@@ -233,7 +235,7 @@ export const getAllComments = async ({
   expectedHttpCode?: number;
 }): Promise<Attachments> => {
   const { body: comments } = await supertest
-    .get(`${getSpaceUrlPrefix(auth.space)}${CASES_URL}/${caseId}/comments`)
+    .get(`${getSpaceUrlPrefix(auth.space)}/api/cases_fixture/cases/${caseId}/comments`)
     .auth(auth.user.username, auth.user.password)
     .expect(expectedHttpCode);
 

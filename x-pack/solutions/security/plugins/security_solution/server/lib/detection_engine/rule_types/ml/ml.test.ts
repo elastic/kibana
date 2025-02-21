@@ -57,9 +57,11 @@ describe('ml_executor', () => {
       ruleType: mlCompleteRule.ruleConfig.ruleTypeId,
     });
     (findMlSignals as jest.Mock).mockResolvedValue({
-      _shards: {},
-      hits: {
-        hits: [],
+      anomalyResults: {
+        _shards: {},
+        hits: {
+          hits: [],
+        },
       },
     });
     (bulkCreateMlSignals as jest.Mock).mockResolvedValue({
@@ -97,7 +99,7 @@ describe('ml_executor', () => {
 
   it('should record a partial failure if Machine learning job summary was null', async () => {
     jobsSummaryMock.mockResolvedValue([]);
-    const response = await mlExecutor({
+    const { result } = await mlExecutor({
       completeRule: mlCompleteRule,
       tuple,
       ml: mlMock,
@@ -119,7 +121,7 @@ describe('ml_executor', () => {
     expect(ruleExecutionLogger.warn.mock.calls[0][0]).toContain(
       'Machine learning job(s) are not started'
     );
-    expect(response.warningMessages.length).toEqual(1);
+    expect(result.warningMessages.length).toEqual(1);
   });
 
   it('should record a partial failure if Machine learning job was not started', async () => {
@@ -131,7 +133,7 @@ describe('ml_executor', () => {
       },
     ]);
 
-    const response = await mlExecutor({
+    const { result } = await mlExecutor({
       completeRule: mlCompleteRule,
       tuple,
       ml: mlMock,
@@ -153,7 +155,7 @@ describe('ml_executor', () => {
     expect(ruleExecutionLogger.warn.mock.calls[0][0]).toContain(
       'Machine learning job(s) are not started'
     );
-    expect(response.warningMessages.length).toEqual(1);
+    expect(result.warningMessages.length).toEqual(1);
   });
 
   it('should report job missing errors as user errors', async () => {
@@ -161,7 +163,7 @@ describe('ml_executor', () => {
       message: 'my_test_job_name missing',
     });
 
-    const result = await mlExecutor({
+    const { result } = await mlExecutor({
       completeRule: mlCompleteRule,
       tuple,
       ml: mlMock,
@@ -194,7 +196,7 @@ describe('ml_executor', () => {
       }))
     );
 
-    const result = await mlExecutor({
+    const { result } = await mlExecutor({
       completeRule: mlCompleteRule,
       tuple,
       ml: mlMock,
@@ -220,7 +222,7 @@ describe('ml_executor', () => {
     );
   });
   it('should call scheduleNotificationResponseActionsService', async () => {
-    const result = await mlExecutor({
+    const { result } = await mlExecutor({
       completeRule: mlCompleteRule,
       tuple,
       ml: mlMock,

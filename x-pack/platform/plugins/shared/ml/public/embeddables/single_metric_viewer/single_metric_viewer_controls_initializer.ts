@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import type { StateComparators } from '@kbn/presentation-publishing';
-import type { TitlesApi } from '@kbn/presentation-publishing/interfaces/titles/titles_api';
+import type { StateComparators, TitlesApi } from '@kbn/presentation-publishing';
 import fastIsEqual from 'fast-deep-equal';
 import { BehaviorSubject } from 'rxjs';
 import type { JobId } from '../../../common/types/anomaly_detection_jobs';
@@ -42,7 +41,7 @@ export const initializeSingleMetricViewerControls = (
     functionDescription.next(update.functionDescription);
     selectedDetectorIndex.next(update.selectedDetectorIndex);
     selectedEntities.next(update.selectedEntities);
-    titlesApi.setPanelTitle(update.panelTitle);
+    titlesApi.setTitle(update.panelTitle);
   };
 
   const updateForecastId = (id: string | undefined) => {

@@ -69,13 +69,17 @@ export const getKuery = ({
             return AgentStatusKueryHelper.buildKueryForInactiveAgents();
           case 'unenrolled':
             return AgentStatusKueryHelper.buildKueryForUnenrolledAgents();
+          case 'orphaned':
+            return AgentStatusKueryHelper.buildKueryForOrphanedAgents();
+          case 'uninstalled':
+            return AgentStatusKueryHelper.buildKueryForUninstalledAgents();
         }
 
         return undefined;
       })
+
       .filter((statusKuery) => statusKuery !== undefined)
       .join(' or ');
-
     if (kueryBuilder) {
       kueryBuilder = `(${kueryBuilder}) and (${kueryStatus})`;
     } else {

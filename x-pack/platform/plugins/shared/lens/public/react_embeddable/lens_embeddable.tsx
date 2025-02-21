@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { ReactEmbeddableFactory } from '@kbn/embeddable-plugin/public';
+import { initializeTitleManager } from '@kbn/presentation-publishing';
 import { DOC_TYPE } from '../../common/constants';
 import {
   LensApi,
@@ -37,7 +38,7 @@ export const createLensEmbeddableFactory = (
      * final state will contain the attributes object
      */
     deserializeState: async ({ rawState, references }) =>
-      deserializeState(services.attributeService, rawState, references),
+      deserializeState(services, rawState, references),
     /**
      * This is called after the deserialize, so some assumptions can be made about its arguments:
      * @param state     the Lens "runtime" state, which means that 'attributes' is always present.
@@ -54,11 +55,13 @@ export const createLensEmbeddableFactory = (
      * @returns an object with the Lens API and the React component to render in the Embeddable
      */
     buildEmbeddable: async (initialState, buildApi, uuid, parentApi) => {
+      const titleManager = initializeTitleManager(initialState);
+
       /**
        * Observables and functions declared here are used internally to store mutating state values
        * This is an internal API not exposed outside of the embeddable.
        */
-      const internalApi = initializeInternalApi(initialState, parentApi, services);
+      const internalApi = initializeInternalApi(initialState, parentApi, titleManager, services);
 
       /**
        * Initialize various configurations required to build all the required
@@ -79,6 +82,7 @@ export const createLensEmbeddableFactory = (
         internalApi,
         stateConfig,
         parentApi,
+        titleManager,
         services
       );
 
@@ -111,7 +115,7 @@ export const createLensEmbeddableFactory = (
         getState,
         parentApi,
         searchContextConfig.api,
-        dashboardConfig.api,
+        titleManager.api.title$,
         internalApi,
         services
       );

@@ -8,7 +8,7 @@
  */
 
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
-import { useCallback, useMemo } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { isValidRowHeight } from '../utils/validate_row_height';
 import {
   DataGridOptionsRecord,
@@ -58,7 +58,7 @@ const resolveRowHeight = ({
     currentRowLines = configRowHeight;
   }
 
-  return currentRowLines;
+  return currentRowLines === 0 ? 1 : currentRowLines;
 };
 
 export const ROW_HEIGHT_STORAGE_KEY = 'dataGridRowHeight';
@@ -98,36 +98,23 @@ export const useRowHeight = ({
     });
   }, [configRowHeight, consumer, key, rowHeightState, storage]);
 
+  const [lineCountInput, setLineCountInput] = useState(
+    rowHeightLines < 0 ? configRowHeight : rowHeightLines
+  );
+
   const rowHeight = useMemo<RowHeightSettingsProps['rowHeight']>(() => {
-    switch (rowHeightLines) {
-      case ROWS_HEIGHT_OPTIONS.auto:
-        return RowHeightMode.auto;
-      case ROWS_HEIGHT_OPTIONS.single:
-        return RowHeightMode.single;
-      default:
-        return RowHeightMode.custom;
-    }
+    return rowHeightLines === ROWS_HEIGHT_OPTIONS.auto ? RowHeightMode.auto : RowHeightMode.custom;
   }, [rowHeightLines]);
 
   const onChangeRowHeight = useCallback(
     (newRowHeight: RowHeightSettingsProps['rowHeight']) => {
-      let newRowHeightLines: number;
-
-      switch (newRowHeight) {
-        case RowHeightMode.auto:
-          newRowHeightLines = ROWS_HEIGHT_OPTIONS.auto;
-          break;
-        case RowHeightMode.single:
-          newRowHeightLines = ROWS_HEIGHT_OPTIONS.single;
-          break;
-        default:
-          newRowHeightLines = configRowHeight;
-      }
+      const newRowHeightLines =
+        newRowHeight === RowHeightMode.auto ? ROWS_HEIGHT_OPTIONS.auto : lineCountInput;
 
       updateStoredRowHeight(newRowHeightLines, configRowHeight, storage, consumer, key);
       onUpdateRowHeight?.(newRowHeightLines);
     },
-    [configRowHeight, consumer, key, onUpdateRowHeight, storage]
+    [configRowHeight, consumer, key, onUpdateRowHeight, storage, lineCountInput]
   );
 
   const onChangeRowHeightLines = useCallback(
@@ -138,9 +125,16 @@ export const useRowHeight = ({
     [configRowHeight, consumer, key, onUpdateRowHeight, storage]
   );
 
+  useEffect(() => {
+    if (rowHeight === RowHeightMode.custom) {
+      setLineCountInput(rowHeightLines > 0 ? rowHeightLines : configRowHeight);
+    }
+  }, [rowHeightLines, configRowHeight, rowHeight]);
+
   return {
     rowHeight,
     rowHeightLines,
+    lineCountInput,
     onChangeRowHeight: onUpdateRowHeight ? onChangeRowHeight : undefined,
     onChangeRowHeightLines: onUpdateRowHeight ? onChangeRowHeightLines : undefined,
   };

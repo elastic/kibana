@@ -11,7 +11,9 @@
   },
   "include": [
     "**/*.ts",
-    "**/*.tsx"
+    "**/*.tsx",
+    // Emotion theme typing
+    "./emotion.d.ts"
   ],
   "kbn_references": [
     "@kbn/i18n",

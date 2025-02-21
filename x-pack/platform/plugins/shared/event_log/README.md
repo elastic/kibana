@@ -166,7 +166,11 @@ Below is a document in the expected structure, with descriptions of the fields:
             total_search_duration_ms: "total time spent performing ES searches as measured by Kibana; includes network latency and time spent serializing/deserializing request/response",
             total_indexing_duration_ms: "total time spent indexing documents during current rule execution cycle",
             total_enrichment_duration_ms: "total time spent enriching documents during current rule execution cycle",
-            execution_gap_duration_s: "duration in seconds of execution gap"
+            execution_gap_duration_s: "duration in seconds of execution gap",
+            gap_range: {
+              gte: "Gap range start date",
+              lte: "Gap range end date",
+            }
           }
         }
       }

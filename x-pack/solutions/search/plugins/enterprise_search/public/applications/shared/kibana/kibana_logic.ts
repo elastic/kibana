@@ -23,6 +23,7 @@ import {
 } from '@kbn/core/public';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 
+import { FleetStart } from '@kbn/fleet-plugin/public';
 import { GuidedOnboardingPluginStart } from '@kbn/guided-onboarding-plugin/public';
 import { IndexMappingProps } from '@kbn/index-management-shared-types';
 import { LensPublicStart } from '@kbn/lens-plugin/public';
@@ -32,7 +33,9 @@ import { ConnectorDefinition } from '@kbn/search-connectors';
 import { AuthenticatedUser, SecurityPluginStart } from '@kbn/security-plugin/public';
 import { SharePluginStart } from '@kbn/share-plugin/public';
 
-import { ClientConfigType, ProductAccess, ProductFeatures } from '../../../../common/types';
+import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
+
+import { ClientConfigType, ProductFeatures } from '../../../../common/types';
 import { ESConfig, UpdateSideNavDefinitionFn } from '../../../plugin';
 
 import { HttpLogic } from '../http';
@@ -52,6 +55,7 @@ export interface KibanaLogicProps {
   coreSecurity?: SecurityServiceStart;
   data?: DataPublicPluginStart;
   esConfig: ESConfig;
+  fleet?: FleetStart;
   getChromeStyle$: ChromeStart['getChromeStyle$'];
   getNavLinks: ChromeStart['navLinks']['getAll'];
   guidedOnboarding?: GuidedOnboardingPluginStart;
@@ -62,7 +66,6 @@ export interface KibanaLogicProps {
   lens?: LensPublicStart;
   ml?: MlPluginStart;
   navigateToUrl: RequiredFieldsOnly<ApplicationStart['navigateToUrl']>;
-  productAccess: ProductAccess;
   productFeatures: ProductFeatures;
   renderHeaderActions(HeaderActions?: FC): void;
   security?: SecurityPluginStart;
@@ -70,6 +73,7 @@ export interface KibanaLogicProps {
   setChromeIsVisible(isVisible: boolean): void;
   setDocTitle(title: string): void;
   share?: SharePluginStart;
+  uiActions: UiActionsStart;
   uiSettings?: IUiSettingsClient;
   updateSideNavDefinition: UpdateSideNavDefinitionFn;
 }
@@ -84,18 +88,20 @@ export interface KibanaValues {
   consolePlugin: ConsolePluginStart | null;
   data: DataPublicPluginStart | null;
   esConfig: ESConfig;
+  fleet: FleetStart | null;
   getChromeStyle$: ChromeStart['getChromeStyle$'];
   getNavLinks: ChromeStart['navLinks']['getAll'];
   guidedOnboarding: GuidedOnboardingPluginStart | null;
   history: ScopedHistory;
   indexMappingComponent: React.FC<IndexMappingProps> | null;
+  isAgentlessEnabled: boolean;
   isCloud: boolean;
+  isServerless: boolean;
   isSidebarEnabled: boolean;
   kibanaVersion: string | null;
   lens: LensPublicStart | null;
   ml: MlPluginStart | null;
   navigateToUrl(path: string, options?: CreateHrefOptions): Promise<void>;
-  productAccess: ProductAccess;
   productFeatures: ProductFeatures;
   renderHeaderActions(HeaderActions?: FC): void;
   security: SecurityPluginStart | null;
@@ -103,6 +109,7 @@ export interface KibanaValues {
   setChromeIsVisible(isVisible: boolean): void;
   setDocTitle(title: string): void;
   share: SharePluginStart | null;
+  uiActions: UiActionsStart | null;
   uiSettings: IUiSettingsClient | null;
   updateSideNavDefinition: UpdateSideNavDefinitionFn;
   user: AuthenticatedUser | null;
@@ -123,6 +130,7 @@ export const KibanaLogic = kea<MakeLogicType<KibanaValues>>({
     consolePlugin: [props.console || null, {}],
     data: [props.data || null, {}],
     esConfig: [props.esConfig || { elasticsearch_host: ELASTICSEARCH_URL_PLACEHOLDER }, {}],
+    fleet: [props.fleet || null, {}],
     getChromeStyle$: [props.getChromeStyle$, {}],
     getNavLinks: [props.getNavLinks, {}],
     guidedOnboarding: [props.guidedOnboarding || null, {}],
@@ -140,7 +148,6 @@ export const KibanaLogic = kea<MakeLogicType<KibanaValues>>({
       },
       {},
     ],
-    productAccess: [props.productAccess, {}],
     productFeatures: [props.productFeatures, {}],
     renderHeaderActions: [props.renderHeaderActions, {}],
     security: [props.security || null, {}],
@@ -148,6 +155,7 @@ export const KibanaLogic = kea<MakeLogicType<KibanaValues>>({
     setChromeIsVisible: [props.setChromeIsVisible, {}],
     setDocTitle: [props.setDocTitle, {}],
     share: [props.share || null, {}],
+    uiActions: [props.uiActions, {}],
     uiSettings: [props.uiSettings, {}],
     updateSideNavDefinition: [props.updateSideNavDefinition, {}],
     user: [
@@ -159,9 +167,19 @@ export const KibanaLogic = kea<MakeLogicType<KibanaValues>>({
     ],
   }),
   selectors: ({ selectors }) => ({
+    isAgentlessEnabled: [
+      () => [selectors.cloud, selectors.fleet],
+      (cloud?: CloudSetup & CloudStart, fleet?: FleetStart) =>
+        (cloud?.isCloudEnabled || cloud?.isServerlessEnabled) &&
+        fleet?.config?.agentless?.enabled === true,
+    ],
     isCloud: [
       () => [selectors.cloud],
       (cloud?: CloudSetup & CloudStart) => Boolean(cloud?.isCloudEnabled),
+    ],
+    isServerless: [
+      () => [selectors.cloud],
+      (cloud?: CloudSetup | CloudStart) => Boolean(cloud?.isServerlessEnabled),
     ],
   }),
 });

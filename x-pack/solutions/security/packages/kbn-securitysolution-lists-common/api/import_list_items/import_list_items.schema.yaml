@@ -1,6 +1,6 @@
 openapi: 3.0.0
 info:
-  title: Import list items API endpoint
+  title: Import value list items API endpoint
   version: '2023-10-31'
 paths:
   /api/lists/items/_import:
@@ -8,9 +8,9 @@ paths:
       x-labels: [serverless, ess]
       operationId: ImportListItems
       x-codegen-enabled: true
-      summary: Import list items
+      summary: Import value list items
       description: |
-        Import list items from a TXT or CSV file. The maximum file size is 9 million bytes.
+        Import value list items from a TXT or CSV file. The maximum file size is 9 million bytes.
 
         You can import items to a new or existing list.
       requestBody:
@@ -23,7 +23,17 @@ paths:
                 file:
                   type: string
                   format: binary
-                  description: A `.txt` or `.csv` file containing newline separated list items
+                  description: A `.txt` or `.csv` file containing newline separated list items.
+                  example: |
+                    127.0.0.1
+                    127.0.0.2
+                    127.0.0.3
+                    127.0.0.4
+                    127.0.0.5
+                    127.0.0.6
+                    127.0.0.7
+                    127.0.0.8
+                    127.0.0.9
       parameters:
         - name: list_id
           in: query
@@ -40,26 +50,43 @@ paths:
           description: |
             Type of the importing list.
 
-            Required when importing a new list that is `list_id` is not specified.
+            Required when importing a new list whose list `id` is not specified.
           schema:
             $ref: '../model/list_common.schema.yaml#/components/schemas/ListType'
+          examples:
+            ip:
+              value: ip
         - name: serializer
           in: query
           required: false
+          description: |
+            Determines how uploaded list item values are parsed. By default, list items are parsed using these named regex groups:
+
+            - `(?<value>.+)` - Single value item types, such as ip, long, date, keyword, and text.
+            - `(?<gte>.+)-(?<lte>.+)|(?<value>.+)` - Range value item types, such as `date_range`, `ip_range`, `double_range`, `float_range`, `integer_range`, and `long_range`.
           schema:
             type: string
+            example: (?<value>((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?).){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?))
         - name: deserializer
           in: query
           required: false
+          description: |
+            Determines how retrieved list item values are presented. By default list items are presented using these Handelbar expressions:
+
+            - `{{{value}}}` - Single value item types, such as `ip`, `long`, `date`, `keyword`, and `text`.
+            - `{{{gte}}}-{{{lte}}}` - Range value item types, such as `ip_range`, `double_range`, `float_range`, `integer_range`, and `long_range`.
+            - `{{{gte}}},{{{lte}}}` - Date range values.
           schema:
             type: string
+            example: '{{value}}'
         - name: refresh
           in: query
           required: false
-          description: Determines when changes made by the request are made visible to search
+          description: Determines when changes made by the request are made visible to search.
           schema:
             type: string
             enum: ['true', 'false', 'wait_for']
+            example: true
       responses:
         200:
           description: Successful response
@@ -67,6 +94,22 @@ paths:
             application/json:
               schema:
                 $ref: '../model/list_schemas.schema.yaml#/components/schemas/List'
+              examples:
+                ip:
+                  value:
+                    id: ip_list
+                    type: ip
+                    name: Simple list with an ip
+                    description: This list describes bad internet ip
+                    immutable: false
+                    '@timestamp': 2025-01-08T04:47:34.273Z
+                    version: 1
+                    _version: WzAsMV0=
+                    tie_breaker_id: f5508188-b1e9-4e6e-9662-d039a7d89899
+                    created_at: 2025-01-08T04:47:34.273Z
+                    created_by: elastic
+                    updated_at: 2025-01-08T04:47:34.273Z
+                    updated_by: elastic
         400:
           description: Invalid input data response
           content:
@@ -75,18 +118,35 @@ paths:
                 oneOf:
                   - $ref: '../../../../../../../src/platform/packages/shared/kbn-openapi-common/schemas/error_responses.schema.yaml#/components/schemas/PlatformErrorResponse'
                   - $ref: '../../../../../../../src/platform/packages/shared/kbn-openapi-common/schemas/error_responses.schema.yaml#/components/schemas/SiemErrorResponse'
+              examples:
+                badRequest:
+                  value:
+                    message: 'Either type or list_id need to be defined in the query'
+                    status_code: 400
         401:
           description: Unsuccessful authentication response
           content:
             application/json:
               schema:
                 $ref: '../../../../../../../src/platform/packages/shared/kbn-openapi-common/schemas/error_responses.schema.yaml#/components/schemas/PlatformErrorResponse'
+              examples:
+                unauthorized:
+                  value:
+                    statusCode: 401
+                    error: Unauthorized
+                    message: '[security_exception\n\tRoot causes:\n\t\tsecurity_exception: unable to authenticate user [elastic] for REST request [/_security/_authenticate]]: unable to authenticate user [elastic] for REST request [/_security/_authenticate]'
         403:
           description: Not enough privileges response
           content:
             application/json:
               schema:
                 $ref: '../../../../../../../src/platform/packages/shared/kbn-openapi-common/schemas/error_responses.schema.yaml#/components/schemas/PlatformErrorResponse'
+              examples:
+                forbidden:
+                  value:
+                    statusCode: 403
+                    error: Forbidden
+                    message: 'API [POST /api/lists/items/_import?list_id=ip_list] is unauthorized for user, this action is granted by the Kibana privileges [lists-all]'
         409:
           description: List with specified list_id does not exist response
           content:
@@ -99,3 +159,8 @@ paths:
             application/json:
               schema:
                 $ref: '../../../../../../../src/platform/packages/shared/kbn-openapi-common/schemas/error_responses.schema.yaml#/components/schemas/SiemErrorResponse'
+              examples:
+                serverError:
+                  value:
+                    message: Internal Server Error
+                    status_code: 500

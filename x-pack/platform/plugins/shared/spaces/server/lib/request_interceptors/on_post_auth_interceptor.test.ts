@@ -80,7 +80,7 @@ describe.skip('onPostAuthInterceptor', () => {
 
     const loggingMock = loggingSystemMock.create().asLoggerFactory().get('xpack', 'spaces');
 
-    const featuresPlugin = featuresPluginMock.createSetup();
+    const featuresPlugin = featuresPluginMock.createStart();
     featuresPlugin.getKibanaFeatures.mockReturnValue([
       {
         id: 'feature-1',
@@ -163,7 +163,7 @@ describe.skip('onPostAuthInterceptor', () => {
     initSpacesOnPostAuthRequestInterceptor({
       http: http as unknown as CoreSetup['http'],
       log: loggingMock,
-      features: featuresPlugin,
+      getFeatures: async () => featuresPlugin,
       getSpacesService: () => spacesServiceStart,
     });
 

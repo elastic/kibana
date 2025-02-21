@@ -92,6 +92,14 @@ const mockKibana = () => {
           get: () => 'http://localhost:5601',
         },
       },
+      docLinks: {
+        links: {
+          query: {},
+          observability: {
+            slo: 'dummy_link',
+          },
+        },
+      },
       dataViews: {
         create: jest.fn().mockResolvedValue({
           getIndexPattern: jest.fn().mockReturnValue('some-index'),

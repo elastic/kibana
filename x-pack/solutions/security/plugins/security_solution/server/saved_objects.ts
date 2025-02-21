@@ -7,6 +7,7 @@
 
 import type { CoreSetup } from '@kbn/core/server';
 
+import { promptType } from '@kbn/security-ai-prompts';
 import { protectionUpdatesNoteType } from './endpoint/lib/protection_updates_note/saved_object_mappings';
 import { noteType, pinnedEventType, timelineType } from './lib/timeline/saved_object_mappings';
 // eslint-disable-next-line no-restricted-imports
@@ -29,9 +30,25 @@ const types = [
   riskEngineConfigurationType,
   entityEngineDescriptorType,
   protectionUpdatesNoteType,
+  promptType,
 ];
 
 export const savedObjectTypes = types.map((type) => type.name);
+
+export const savedObjectTypesWithoutTimelineAndWithoutNotes = savedObjectTypes.filter((type) => {
+  switch (type) {
+    case noteType.name:
+    case pinnedEventType.name:
+    case timelineType.name:
+      return false;
+    default:
+      return true;
+  }
+});
+
+export const timelineSavedObjectTypes = [timelineType.name, pinnedEventType.name];
+
+export const notesSavedObjectTypes = [noteType.name];
 
 export const initSavedObjects = (savedObjects: CoreSetup['savedObjects']) => {
   types.forEach((type) => savedObjects.registerType(type));

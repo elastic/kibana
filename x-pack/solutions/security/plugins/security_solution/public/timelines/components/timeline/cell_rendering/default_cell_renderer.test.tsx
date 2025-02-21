@@ -62,7 +62,6 @@ describe('DefaultCellRenderer', () => {
               eventId={eventId}
               header={header}
               isDetails={isDetails}
-              isDraggable={true}
               isExpandable={isExpandable}
               isExpanded={isExpanded}
               linkValues={linkValues}
@@ -97,7 +96,6 @@ describe('DefaultCellRenderer', () => {
               eventId={eventId}
               header={header}
               isDetails={isDetails}
-              isDraggable={true}
               isExpandable={isExpandable}
               isExpanded={isExpanded}
               linkValues={linkValues}
@@ -119,7 +117,6 @@ describe('DefaultCellRenderer', () => {
       eventId,
       field: header,
       isDetails,
-      isDraggable: true,
       linkValues,
       rowRenderers: undefined,
       scopeId,
@@ -157,7 +154,6 @@ describe('host link rendering', () => {
               eventId="_id-123"
               header={hostNameHeader}
               isDetails={false}
-              isDraggable={true}
               isExpandable={false}
               isExpanded={false}
               isTimeline={isTimeline}
@@ -191,7 +187,6 @@ describe('host link rendering', () => {
               eventId="_id-123"
               header={hostNameHeader}
               isDetails={false}
-              isDraggable={true}
               isExpandable={false}
               isExpanded={false}
               isTimeline={isTimeline}
@@ -226,7 +221,6 @@ describe('host link rendering', () => {
               eventId="_id-123"
               header={timestampHeader}
               isDetails={false}
-              isDraggable={true}
               isExpandable={false}
               isExpanded={false}
               isTimeline={isTimeline}

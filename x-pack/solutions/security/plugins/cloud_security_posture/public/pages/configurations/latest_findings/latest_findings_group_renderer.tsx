@@ -14,7 +14,7 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { GroupPanelRenderer, GroupStatsItem, RawBucket } from '@kbn/grouping/src';
+import { GenericBuckets, GroupPanelRenderer, GroupStatsItem, RawBucket } from '@kbn/grouping/src';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { getAbbreviatedNumber } from '@kbn/cloud-security-posture-common';
@@ -31,10 +31,10 @@ import { NULL_GROUPING_MESSAGES, NULL_GROUPING_UNIT } from './constants';
 import { FINDINGS_GROUPING_COUNTER } from '../test_subjects';
 
 export const groupPanelRenderer: GroupPanelRenderer<FindingsGroupingAggregation> = (
-  selectedGroup,
-  bucket,
-  nullGroupMessage,
-  isLoading
+  selectedGroup: string,
+  bucket: RawBucket<FindingsGroupingAggregation>,
+  nullGroupMessage: string | undefined,
+  isLoading: boolean | undefined
 ) => {
   if (isLoading) {
     return <LoadingGroup />;
@@ -45,8 +45,24 @@ export const groupPanelRenderer: GroupPanelRenderer<FindingsGroupingAggregation>
     <NullGroup title={title} field={selectedGroup} unit={NULL_GROUPING_UNIT} />
   );
 
+  const getGroupPanelTitle = (aggregationField?: keyof FindingsGroupingAggregation) => {
+    const aggregationFieldValue = aggregationField
+      ? (bucket[aggregationField] as { buckets?: GenericBuckets[] })?.buckets?.[0]?.key
+      : null;
+
+    if (aggregationFieldValue) {
+      return (
+        <>
+          <strong>{aggregationFieldValue}</strong> - {bucket.key_as_string}
+        </>
+      );
+    }
+
+    return <strong>{bucket.key_as_string}</strong>;
+  };
+
   switch (selectedGroup) {
-    case FINDINGS_GROUPING_OPTIONS.RESOURCE_NAME:
+    case FINDINGS_GROUPING_OPTIONS.RESOURCE_ID:
       return nullGroupMessage ? (
         renderNullGroup(NULL_GROUPING_MESSAGES.RESOURCE_NAME)
       ) : (
@@ -66,7 +82,7 @@ export const groupPanelRenderer: GroupPanelRenderer<FindingsGroupingAggregation>
                     `}
                     title={bucket.resourceName?.buckets?.[0]?.key as string}
                   >
-                    <strong>{bucket.key_as_string}</strong> {bucket.resourceName?.buckets?.[0]?.key}
+                    {getGroupPanelTitle('resourceName')}
                   </EuiTextBlockTruncate>
                 </EuiText>
               </EuiFlexItem>
@@ -87,9 +103,7 @@ export const groupPanelRenderer: GroupPanelRenderer<FindingsGroupingAggregation>
           <EuiFlexItem>
             <EuiFlexGroup direction="column" gutterSize="none">
               <EuiFlexItem>
-                <EuiText size="s">
-                  <strong>{bucket.key_as_string}</strong>
-                </EuiText>
+                <EuiText size="s"> {getGroupPanelTitle()}</EuiText>
               </EuiFlexItem>
               <EuiFlexItem>
                 <EuiText size="xs" color="subdued">
@@ -101,7 +115,7 @@ export const groupPanelRenderer: GroupPanelRenderer<FindingsGroupingAggregation>
           </EuiFlexItem>
         </EuiFlexGroup>
       );
-    case FINDINGS_GROUPING_OPTIONS.CLOUD_ACCOUNT_NAME:
+    case FINDINGS_GROUPING_OPTIONS.CLOUD_ACCOUNT_ID:
       return nullGroupMessage ? (
         renderNullGroup(NULL_GROUPING_MESSAGES.CLOUD_ACCOUNT_NAME)
       ) : (
@@ -117,9 +131,7 @@ export const groupPanelRenderer: GroupPanelRenderer<FindingsGroupingAggregation>
           <EuiFlexItem>
             <EuiFlexGroup direction="column" gutterSize="none">
               <EuiFlexItem>
-                <EuiText size="s">
-                  <strong>{bucket.key_as_string}</strong>
-                </EuiText>
+                <EuiText size="s">{getGroupPanelTitle('accountName')}</EuiText>
               </EuiFlexItem>
               <EuiFlexItem>
                 <EuiText size="xs" color="subdued">
@@ -130,9 +142,9 @@ export const groupPanelRenderer: GroupPanelRenderer<FindingsGroupingAggregation>
           </EuiFlexItem>
         </EuiFlexGroup>
       );
-    case FINDINGS_GROUPING_OPTIONS.ORCHESTRATOR_CLUSTER_NAME:
+    case FINDINGS_GROUPING_OPTIONS.ORCHESTRATOR_CLUSTER_ID:
       return nullGroupMessage ? (
-        renderNullGroup(NULL_GROUPING_MESSAGES.ORCHESTRATOR_CLUSTER_NAME)
+        renderNullGroup(NULL_GROUPING_MESSAGES.ORCHESTRATOR_CLUSTER_ID)
       ) : (
         <EuiFlexGroup alignItems="center" gutterSize="m">
           {benchmarkId && (
@@ -146,9 +158,7 @@ export const groupPanelRenderer: GroupPanelRenderer<FindingsGroupingAggregation>
           <EuiFlexItem>
             <EuiFlexGroup direction="column" gutterSize="none">
               <EuiFlexItem>
-                <EuiText size="s">
-                  <strong>{bucket.key_as_string}</strong>
-                </EuiText>
+                <EuiText size="s">{getGroupPanelTitle('clusterName')}</EuiText>
               </EuiFlexItem>
               <EuiFlexItem>
                 <EuiText size="xs" color="subdued">
@@ -167,9 +177,7 @@ export const groupPanelRenderer: GroupPanelRenderer<FindingsGroupingAggregation>
           <EuiFlexItem>
             <EuiFlexGroup direction="column" gutterSize="none">
               <EuiFlexItem>
-                <EuiText size="s">
-                  <strong>{bucket.key_as_string}</strong>
-                </EuiText>
+                <EuiText size="s">{getGroupPanelTitle()}</EuiText>
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiFlexItem>

@@ -70,6 +70,26 @@
                     "path": "src/platform/packages/shared/content-management/content_insights/content_insights_public/src/client.ts",
                     "deprecated": false,
                     "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "@kbn/content-management-content-insights-public",
+                    "id": "def-public.ContentInsightsClient.Unnamed.$1.logger",
+                    "type": "Object",
+                    "tags": [],
+                    "label": "logger",
+                    "description": [],
+                    "signature": [
+                      {
+                        "pluginId": "@kbn/logging",
+                        "scope": "common",
+                        "docId": "kibKbnLoggingPluginApi",
+                        "section": "def-common.Logger",
+                        "text": "Logger"
+                      }
+                    ],
+                    "path": "src/platform/packages/shared/content-management/content_insights/content_insights_public/src/client.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
                   }
                 ]
               },

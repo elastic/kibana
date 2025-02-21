@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import type { ESSearchRequest, ESSearchResponse } from '@kbn/es-types';
+import type { SearchRequest as ESSearchRequest } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { ESSearchResponse } from '@kbn/es-types';
 import type { RuleExecutorServices } from '@kbn/alerting-plugin/server';
 import type { IUiSettingsClient } from '@kbn/core/server';
 import type { DataTier } from '@kbn/observability-shared-plugin/common';

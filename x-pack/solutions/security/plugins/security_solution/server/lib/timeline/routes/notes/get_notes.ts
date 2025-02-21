@@ -39,7 +39,7 @@ export const getNotesRoute = (
       path: NOTE_URL,
       security: {
         authz: {
-          requiredPrivileges: ['securitySolution'],
+          requiredPrivileges: ['notes_read'],
         },
       },
       access: 'public',

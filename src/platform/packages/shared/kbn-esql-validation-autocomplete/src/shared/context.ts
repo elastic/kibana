@@ -16,8 +16,10 @@ import {
   type ESQLCommandOption,
   type ESQLCommandMode,
   Walker,
+  isIdentifier,
 } from '@kbn/esql-ast';
 import { ENRICH_MODES } from '../definitions/settings';
+import { FunctionDefinitionTypes } from '../definitions/types';
 import { EDITOR_MARKER } from './constants';
 import {
   isOptionItem,
@@ -26,7 +28,6 @@ import {
   isSettingItem,
   pipePrecedesCurrentWord,
   getFunctionDefinition,
-  isIdentifier,
 } from './helpers';
 
 function findNode(nodes: ESQLAstItem[], offset: number): ESQLSingleAstItem | undefined {
@@ -86,7 +87,7 @@ function findCommandSubType<T extends ESQLCommandMode | ESQLCommandOption>(
   }
 }
 
-function isMarkerNode(node: ESQLSingleAstItem | undefined): boolean {
+export function isMarkerNode(node: ESQLSingleAstItem | undefined): boolean {
   return Boolean(
     node &&
       (isColumnItem(node) || isIdentifier(node) || isSourceItem(node)) &&
@@ -138,8 +139,8 @@ function isNotEnrichClauseAssigment(node: ESQLFunction, command: ESQLCommand) {
   return node.name !== '=' && command.name !== 'enrich';
 }
 
-function isBuiltinFunction(node: ESQLFunction) {
-  return getFunctionDefinition(node.name)?.type === 'builtin';
+function isOperator(node: ESQLFunction) {
+  return getFunctionDefinition(node.name)?.type === FunctionDefinitionTypes.OPERATOR;
 }
 
 /**
@@ -187,7 +188,7 @@ export function getAstContext(queryString: string, ast: ESQLAst, offset: number)
         // be handled as functions for the stats command.
         // I expect this to simplify once https://github.com/elastic/kibana/issues/195418
         // is complete
-        !(isBuiltinFunction(node) && command.name !== 'stats')
+        !(isOperator(node) && command.name !== 'stats')
       ) {
         // command ... fn( <here> )
         return { type: 'function' as const, command, node, option, setting };

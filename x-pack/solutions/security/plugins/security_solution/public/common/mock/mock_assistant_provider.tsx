@@ -61,6 +61,9 @@ export const MockAssistantProviderComponent: React.FC<Props> = ({
       navigateToApp={mockNavigateToApp}
       baseConversations={BASE_SECURITY_CONVERSATIONS}
       currentAppId={'test'}
+      productDocBase={{
+        installation: { getStatus: jest.fn(), install: jest.fn(), uninstall: jest.fn() },
+      }}
       userProfileService={mockUserProfileService}
       chrome={chrome}
     >

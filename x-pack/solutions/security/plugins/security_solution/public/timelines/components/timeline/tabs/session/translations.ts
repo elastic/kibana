@@ -20,3 +20,10 @@ export const CLOSE_SESSION = i18n.translate(
     defaultMessage: 'Close session viewer',
   }
 );
+
+export const FULL_SCREEN = i18n.translate(
+  'xpack.securitySolution.timeline.graphOverlay.fullScreenButton',
+  {
+    defaultMessage: 'Full screen',
+  }
+);

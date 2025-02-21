@@ -2,17 +2,15 @@
 
 set -euo pipefail
 
-source .buildkite/scripts/common/util.sh
+source .buildkite/scripts/steps/functional/common.sh
 
-.buildkite/scripts/bootstrap.sh
-.buildkite/scripts/download_build_artifacts.sh
-.buildkite/scripts/copy_es_snapshot_cache.sh
+export KIBANA_INSTALL_DIR=${KIBANA_BUILD_LOCATION}
 
 export JOB=kibana-profiling-cypress
 
 echo "--- Profiling Cypress Tests"
 
-cd "$XPACK_DIR"
+cd "$XPACK_DIR/solutions/observability/plugins/profiling/e2e"
 
-NODE_OPTIONS=--openssl-legacy-provider node solutions/observability/plugins/profiling/scripts/test/e2e.js \
-  --kibana-install-dir "$KIBANA_BUILD_LOCATION" \
+set +e
+yarn cypress:run; status=$?; yarn junit:merge || :; exit $status

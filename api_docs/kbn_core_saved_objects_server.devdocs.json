@@ -1593,8 +1593,10 @@
               "The objects to authorize"
             ],
             "signature": [
+              "WithAuditName",
+              "<",
               "SavedObjectReferenceWithContext",
-              "[]"
+              ">[]"
             ],
             "path": "src/core/packages/saved-objects/server/src/extensions/security.ts",
             "deprecated": false,
@@ -3774,6 +3776,24 @@
             "trackAdoption": false,
             "children": [],
             "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-server",
+            "id": "def-server.ISavedObjectsSecurityExtension.includeSavedObjectNames",
+            "type": "Function",
+            "tags": [],
+            "label": "includeSavedObjectNames",
+            "description": [
+              "\nRetrieves whether we need to include save objects names in the audit out"
+            ],
+            "signature": [
+              "() => boolean"
+            ],
+            "path": "src/core/packages/saved-objects/server/src/extensions/security.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -4613,6 +4633,40 @@
               }
             ],
             "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-server",
+            "id": "def-server.ISavedObjectTypeRegistry.getNameAttribute",
+            "type": "Function",
+            "tags": [],
+            "label": "getNameAttribute",
+            "description": [
+              "\nReturns the `nameAttribute` property for given type, or `unknown` if\nthe property/type is not registered."
+            ],
+            "signature": [
+              "(type: string) => string"
+            ],
+            "path": "src/core/packages/saved-objects/server/src/type_registry.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-saved-objects-server",
+                "id": "def-server.ISavedObjectTypeRegistry.getNameAttribute.$1",
+                "type": "string",
+                "tags": [],
+                "label": "type",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/core/packages/saved-objects/server/src/type_registry.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -4889,20 +4943,20 @@
                 "path": "src/core/packages/saved-objects/server-internal/src/routes/legacy_import_export/lib/import_dashboards.ts"
               },
               {
-                "plugin": "graph",
-                "path": "x-pack/plugins/graph/server/sample_data/logs.ts"
+                "plugin": "@kbn/core",
+                "path": "src/core/packages/saved-objects/browser-mocks/src/simple_saved_object.mock.ts"
               },
               {
                 "plugin": "graph",
-                "path": "x-pack/plugins/graph/server/sample_data/ecommerce.ts"
+                "path": "x-pack/platform/plugins/private/graph/server/sample_data/logs.ts"
               },
               {
                 "plugin": "graph",
-                "path": "x-pack/plugins/graph/server/sample_data/flights.ts"
+                "path": "x-pack/platform/plugins/private/graph/server/sample_data/ecommerce.ts"
               },
               {
-                "plugin": "@kbn/core-saved-objects-browser-mocks",
-                "path": "packages/core/saved-objects/core-saved-objects-browser-mocks/src/simple_saved_object.mock.ts"
+                "plugin": "graph",
+                "path": "x-pack/platform/plugins/private/graph/server/sample_data/flights.ts"
               },
               {
                 "plugin": "fleet",
@@ -4919,90 +4973,6 @@
               {
                 "plugin": "osquery",
                 "path": "x-pack/platform/plugins/shared/osquery/server/routes/pack/read_pack_route.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/host_risk_score_dashboards.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/host_risk_score_dashboards.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/host_risk_score_dashboards.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/host_risk_score_dashboards.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/host_risk_score_dashboards.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/host_risk_score_dashboards.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/host_risk_score_dashboards.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/host_risk_score_dashboards.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/host_risk_score_dashboards.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/host_risk_score_dashboards.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/user_risk_score_dashboards.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/user_risk_score_dashboards.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/user_risk_score_dashboards.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/user_risk_score_dashboards.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/user_risk_score_dashboards.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/user_risk_score_dashboards.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/user_risk_score_dashboards.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/user_risk_score_dashboards.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/user_risk_score_dashboards.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/user_risk_score_dashboards.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/user_risk_score_dashboards.ts"
               },
               {
                 "plugin": "alerting",
@@ -8789,6 +8759,22 @@
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-server",
+            "id": "def-server.SavedObjectsType.nameAttribute",
+            "type": "string",
+            "tags": [],
+            "label": "nameAttribute",
+            "description": [
+              "\nThe attribute path to the saved object's name"
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/core/packages/saved-objects/server/src/saved_objects_type.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-server",
             "id": "def-server.SavedObjectsType.hidden",
             "type": "boolean",
             "tags": [],
@@ -8983,24 +8969,12 @@
                 "path": "src/core/packages/usage-data/server-internal/src/saved_objects/core_usage_stats.ts"
               },
               {
-                "plugin": "dataViews",
-                "path": "src/platform/plugins/shared/data_views/server/saved_objects/data_views.ts"
+                "plugin": "spaces",
+                "path": "x-pack/platform/plugins/shared/spaces/server/saved_objects/saved_objects_service.ts"
               },
               {
-                "plugin": "data",
-                "path": "src/plugins/data/server/saved_objects/query.ts"
-              },
-              {
-                "plugin": "data",
-                "path": "src/plugins/data/server/saved_objects/search_telemetry.ts"
-              },
-              {
-                "plugin": "data",
-                "path": "src/plugins/data/server/search/saved_objects/search_session.ts"
-              },
-              {
-                "plugin": "graph",
-                "path": "x-pack/plugins/graph/server/saved_objects/graph_workspace.ts"
+                "plugin": "spaces",
+                "path": "x-pack/platform/plugins/shared/spaces/server/saved_objects/saved_objects_service.ts"
               },
               {
                 "plugin": "taskManager",
@@ -9011,24 +8985,28 @@
                 "path": "src/platform/plugins/shared/share/server/url_service/saved_objects/register_url_service_saved_object_type.ts"
               },
               {
-                "plugin": "lens",
-                "path": "x-pack/plugins/lens/server/saved_objects.ts"
-              },
-              {
-                "plugin": "spaces",
-                "path": "x-pack/platform/plugins/shared/spaces/server/saved_objects/saved_objects_service.ts"
-              },
-              {
-                "plugin": "spaces",
-                "path": "x-pack/platform/plugins/shared/spaces/server/saved_objects/saved_objects_service.ts"
-              },
-              {
                 "plugin": "actions",
                 "path": "x-pack/platform/plugins/shared/actions/server/saved_objects/index.ts"
               },
               {
                 "plugin": "actions",
                 "path": "x-pack/platform/plugins/shared/actions/server/saved_objects/index.ts"
+              },
+              {
+                "plugin": "dataViews",
+                "path": "src/platform/plugins/shared/data_views/server/saved_objects/data_views.ts"
+              },
+              {
+                "plugin": "data",
+                "path": "src/platform/plugins/shared/data/server/saved_objects/query.ts"
+              },
+              {
+                "plugin": "data",
+                "path": "src/platform/plugins/shared/data/server/saved_objects/search_telemetry.ts"
+              },
+              {
+                "plugin": "data",
+                "path": "src/platform/plugins/shared/data/server/search/saved_objects/search_session.ts"
               },
               {
                 "plugin": "alerting",
@@ -9051,8 +9029,8 @@
                 "path": "x-pack/platform/plugins/shared/ml/server/saved_objects/saved_objects.ts"
               },
               {
-                "plugin": "@kbn/core-saved-objects-migration-server-mocks",
-                "path": "packages/core/saved-objects/core-saved-objects-migration-server-mocks/src/kibana_migrator.mock.ts"
+                "plugin": "@kbn/core",
+                "path": "src/core/packages/saved-objects/migration-server-mocks/src/kibana_migrator.mock.ts"
               },
               {
                 "plugin": "savedSearch",
@@ -9069,6 +9047,14 @@
               {
                 "plugin": "canvas",
                 "path": "x-pack/platform/plugins/private/canvas/server/saved_objects/workpad_template.ts"
+              },
+              {
+                "plugin": "graph",
+                "path": "x-pack/platform/plugins/private/graph/server/saved_objects/graph_workspace.ts"
+              },
+              {
+                "plugin": "lens",
+                "path": "x-pack/platform/plugins/shared/lens/server/saved_objects.ts"
               },
               {
                 "plugin": "cases",
@@ -9152,7 +9138,7 @@
               },
               {
                 "plugin": "visualizations",
-                "path": "src/plugins/visualizations/server/saved_objects/visualization.ts"
+                "path": "src/platform/plugins/shared/visualizations/server/saved_objects/visualization.ts"
               },
               {
                 "plugin": "infra",
@@ -9176,7 +9162,7 @@
               },
               {
                 "plugin": "eventAnnotation",
-                "path": "src/plugins/event_annotation/server/saved_objects.ts"
+                "path": "src/platform/plugins/private/event_annotation/server/saved_objects.ts"
               },
               {
                 "plugin": "links",
@@ -9662,24 +9648,24 @@
                 "path": "src/core/packages/saved-objects/migration-server-internal/src/document_migrator/validate_migrations.ts"
               },
               {
-                "plugin": "data",
-                "path": "src/plugins/data/server/saved_objects/query.ts"
-              },
-              {
-                "plugin": "data",
-                "path": "src/plugins/data/server/saved_objects/kql_telemetry.ts"
-              },
-              {
-                "plugin": "data",
-                "path": "src/plugins/data/server/saved_objects/search_telemetry.ts"
-              },
-              {
-                "plugin": "data",
-                "path": "src/plugins/data/server/search/saved_objects/search_session.ts"
-              },
-              {
                 "plugin": "spaces",
                 "path": "x-pack/platform/plugins/shared/spaces/server/saved_objects/saved_objects_service.ts"
+              },
+              {
+                "plugin": "data",
+                "path": "src/platform/plugins/shared/data/server/saved_objects/query.ts"
+              },
+              {
+                "plugin": "data",
+                "path": "src/platform/plugins/shared/data/server/saved_objects/kql_telemetry.ts"
+              },
+              {
+                "plugin": "data",
+                "path": "src/platform/plugins/shared/data/server/saved_objects/search_telemetry.ts"
+              },
+              {
+                "plugin": "data",
+                "path": "src/platform/plugins/shared/data/server/search/saved_objects/search_session.ts"
               },
               {
                 "plugin": "dashboard",
@@ -9691,7 +9677,7 @@
               },
               {
                 "plugin": "visualizations",
-                "path": "src/plugins/visualizations/server/saved_objects/visualization.ts"
+                "path": "src/platform/plugins/shared/visualizations/server/saved_objects/visualization.ts"
               },
               {
                 "plugin": "cloudSecurityPosture",
@@ -9834,28 +9820,20 @@
                 "path": "src/core/packages/saved-objects/migration-server-internal/src/document_migrator/validate_migrations.ts"
               },
               {
+                "plugin": "actions",
+                "path": "x-pack/platform/plugins/shared/actions/server/saved_objects/index.ts"
+              },
+              {
+                "plugin": "actions",
+                "path": "x-pack/platform/plugins/shared/actions/server/saved_objects/index.ts"
+              },
+              {
                 "plugin": "dataViews",
                 "path": "src/platform/plugins/shared/data_views/server/saved_objects/data_views.ts"
               },
               {
                 "plugin": "data",
-                "path": "src/plugins/data/server/saved_objects/query.ts"
-              },
-              {
-                "plugin": "graph",
-                "path": "x-pack/plugins/graph/server/saved_objects/graph_workspace.ts"
-              },
-              {
-                "plugin": "lens",
-                "path": "x-pack/plugins/lens/server/saved_objects.ts"
-              },
-              {
-                "plugin": "actions",
-                "path": "x-pack/platform/plugins/shared/actions/server/saved_objects/index.ts"
-              },
-              {
-                "plugin": "actions",
-                "path": "x-pack/platform/plugins/shared/actions/server/saved_objects/index.ts"
+                "path": "src/platform/plugins/shared/data/server/saved_objects/query.ts"
               },
               {
                 "plugin": "alerting",
@@ -9876,6 +9854,14 @@
               {
                 "plugin": "canvas",
                 "path": "x-pack/platform/plugins/private/canvas/server/saved_objects/custom_element.ts"
+              },
+              {
+                "plugin": "graph",
+                "path": "x-pack/platform/plugins/private/graph/server/saved_objects/graph_workspace.ts"
+              },
+              {
+                "plugin": "lens",
+                "path": "x-pack/platform/plugins/shared/lens/server/saved_objects.ts"
               },
               {
                 "plugin": "cases",
@@ -9927,7 +9913,7 @@
               },
               {
                 "plugin": "visualizations",
-                "path": "src/plugins/visualizations/server/saved_objects/visualization.ts"
+                "path": "src/platform/plugins/shared/visualizations/server/saved_objects/visualization.ts"
               },
               {
                 "plugin": "@kbn/core",
@@ -10086,6 +10072,40 @@
             "path": "src/core/packages/saved-objects/server/src/saved_objects_type.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-server",
+            "id": "def-server.SavedObjectsType.getTitle",
+            "type": "Function",
+            "tags": [],
+            "label": "getTitle",
+            "description": [
+              "\nFunction returning the title to display in the management table.\nIf not defined, will use the object's type and id to generate a label."
+            ],
+            "signature": [
+              "((savedObject: Attributes) => string) | undefined"
+            ],
+            "path": "src/core/packages/saved-objects/server/src/saved_objects_type.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-saved-objects-server",
+                "id": "def-server.SavedObjectsType.getTitle.$1",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "savedObject",
+                "description": [],
+                "signature": [
+                  "Attributes"
+                ],
+                "path": "src/core/packages/saved-objects/server/src/saved_objects_type.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -11587,6 +11607,21 @@
         "label": "USAGE_COUNTERS_SAVED_OBJECT_INDEX",
         "description": [],
         "path": "src/core/packages/saved-objects/server/src/saved_objects_index_pattern.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-saved-objects-server",
+        "id": "def-server.WithAuditName",
+        "type": "Type",
+        "tags": [],
+        "label": "WithAuditName",
+        "description": [],
+        "signature": [
+          "T & { name?: string | undefined; }"
+        ],
+        "path": "src/core/packages/saved-objects/server/src/extensions/security.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

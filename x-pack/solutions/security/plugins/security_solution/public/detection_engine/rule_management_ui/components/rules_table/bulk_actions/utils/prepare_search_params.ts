@@ -10,7 +10,7 @@ import type { QueryOrIds } from '../../../../../rule_management/logic';
 import type { DryRunResult } from '../types';
 import type { FilterOptions } from '../../../../../rule_management/logic/types';
 
-import { BulkActionsDryRunErrCode } from '../../../../../../../common/constants';
+import { BulkActionsDryRunErrCodeEnum } from '../../../../../../../common/api/detection_engine';
 
 type PrepareSearchFilterProps =
   | { selectedRuleIds: string[]; dryRunResult?: DryRunResult }
@@ -39,17 +39,18 @@ export const prepareSearchParams = ({
   let modifiedFilterOptions = { ...props.filterOptions };
   dryRunResult?.ruleErrors.forEach(({ errorCode }) => {
     switch (errorCode) {
-      case BulkActionsDryRunErrCode.IMMUTABLE:
+      case BulkActionsDryRunErrCodeEnum.IMMUTABLE:
+      case BulkActionsDryRunErrCodeEnum.PREBUILT_CUSTOMIZATION_LICENSE:
         modifiedFilterOptions = { ...modifiedFilterOptions, showCustomRules: true };
         break;
-      case BulkActionsDryRunErrCode.MACHINE_LEARNING_INDEX_PATTERN:
-      case BulkActionsDryRunErrCode.MACHINE_LEARNING_AUTH:
+      case BulkActionsDryRunErrCodeEnum.MACHINE_LEARNING_INDEX_PATTERN:
+      case BulkActionsDryRunErrCodeEnum.MACHINE_LEARNING_AUTH:
         modifiedFilterOptions = {
           ...modifiedFilterOptions,
           excludeRuleTypes: [...(modifiedFilterOptions.excludeRuleTypes ?? []), 'machine_learning'],
         };
         break;
-      case BulkActionsDryRunErrCode.ESQL_INDEX_PATTERN:
+      case BulkActionsDryRunErrCodeEnum.ESQL_INDEX_PATTERN:
         modifiedFilterOptions = {
           ...modifiedFilterOptions,
           excludeRuleTypes: [...(modifiedFilterOptions.excludeRuleTypes ?? []), 'esql'],

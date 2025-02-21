@@ -14,7 +14,7 @@ import { User } from '../../../../common/lib/authentication/types';
 import { defaultUser, getPostCaseRequest, postCaseResp } from '../../../../common/lib/mock';
 import {
   deleteAllCaseItems,
-  getCaseUserActions,
+  findCaseUserActions,
   getSpaceUrlPrefix,
   removeServerGeneratedPropertiesFromCase,
   removeServerGeneratedPropertiesFromUserAction,
@@ -168,12 +168,12 @@ export default ({ getService }: FtrProviderContext): void => {
       const firstCase = createdCases.cases[0];
       const secondCase = createdCases.cases[1];
 
-      const firstCaseUserActions = await getCaseUserActions({
+      const { userActions: firstCaseUserActions } = await findCaseUserActions({
         supertest,
         caseID: firstCase.id,
       });
 
-      const secondCaseUserActions = await getCaseUserActions({
+      const { userActions: secondCaseUserActions } = await findCaseUserActions({
         supertest,
         caseID: secondCase.id,
       });
@@ -193,7 +193,6 @@ export default ({ getService }: FtrProviderContext): void => {
         action: 'create',
         type: 'create_case',
         created_by: defaultUser,
-        case_id: firstCase.id,
         comment_id: null,
         owner: 'securitySolutionFixture',
         payload: {
@@ -215,7 +214,6 @@ export default ({ getService }: FtrProviderContext): void => {
         action: 'create',
         type: 'create_case',
         created_by: defaultUser,
-        case_id: secondCase.id,
         comment_id: null,
         owner: 'securitySolutionFixture',
         payload: {

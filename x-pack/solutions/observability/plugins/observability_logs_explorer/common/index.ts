@@ -5,9 +5,5 @@
  * 2.0.
  */
 
-export {
-  OBSERVABILITY_LOGS_EXPLORER_URL_STATE_KEY,
-  logsExplorerUrlSchemaV1,
-  logsExplorerUrlSchemaV2,
-} from './url_schema';
-export { deepCompactObject } from './utils/deep_compact_object';
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface ObservabilityLogsExplorerConfig {}

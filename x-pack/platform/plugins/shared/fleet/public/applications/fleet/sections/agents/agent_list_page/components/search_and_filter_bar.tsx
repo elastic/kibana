@@ -210,8 +210,8 @@ export const SearchAndFilterBar: React.FunctionComponent<SearchAndFilterBarProps
                 </EuiFilterButton>
               </EuiFilterGroup>
             </EuiFlexItem>
-            {(authz.fleet.allAgents && selectionMode === 'manual' && selectedAgents.length) ||
-            (authz.fleet.allAgents && selectionMode === 'query' && nAgentsInTable > 0) ? (
+            {(selectionMode === 'manual' && selectedAgents.length) ||
+            (selectionMode === 'query' && nAgentsInTable > 0) ? (
               <EuiFlexItem grow={false}>
                 <AgentBulkActions
                   nAgentsInTable={nAgentsInTable}

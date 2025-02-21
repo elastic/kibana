@@ -64,7 +64,7 @@ For both of the above commands, it's crucial that you pass in `--config` to spec
 
 Read more about how the scripts work [here](../scripts/README.md).
 
-For a deeper dive, read more about the way functional tests and servers work [here](../packages/kbn-test/README.md).
+For a deeper dive, read more about the way functional tests and servers work [here](../packages/kbn-test/README.mdx).
 
 #### Running API integration tests
 
@@ -96,8 +96,8 @@ yarn test:jest_integration
 
 #### Running Reporting functional tests
 
-See [here](./test/functional/apps/dashboard/reporting/README.md) for more information on running reporting tests.
+See [here](./test/functional/apps/dashboard/group3/reporting/README.mdx) for more information on running reporting tests.
 
 #### Running Security Solution Cypress E2E/integration tests
 
-See [here](./solutions/security/plugins/security_solution/cypress/README.md) for information on running this test suite.
+See [here](./solutions/security/plugins/security_solution//public/management/cypress/README.md) for information on running this test suite.

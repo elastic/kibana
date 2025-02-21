@@ -269,8 +269,8 @@ export const TIMELINE_TEMPLATE_VALUE = '[data-test-subj="timelineTemplatePropert
 export const INTERVAL_TITLE = '[data-test-subj="intervalPropertyTitle"]';
 export const INTERVAL_VALUE = '[data-test-subj="intervalPropertyValue"]';
 
-export const FROM_TITLE = '[data-test-subj="fromPropertyTitle"]';
-export const FROM_VALUE = '[data-test-subj^="fromPropertyValue"]';
+export const LOOK_BACK_TITLE = '[data-test-subj="lookBackPropertyTitle"]';
+export const LOOK_BACK_VALUE = '[data-test-subj^="lookBackPropertyValue"]';
 
 export const INDEX_TITLE = '[data-test-subj="indexPropertyTitle"]';
 export const INDEX_VALUE_ITEM = '[data-test-subj="indexPropertyValueItem"]';

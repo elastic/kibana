@@ -128,6 +128,7 @@ export const EVENT_LOG_ACTIONS = {
   activeInstance: 'active-instance',
   executeTimeout: 'execute-timeout',
   untrackedInstance: 'untracked-instance',
+  gap: 'gap',
 };
 export const LEGACY_EVENT_LOG_ACTIONS = {
   resolvedInstance: 'resolved-instance',
@@ -532,6 +533,7 @@ export class AlertingPlugin {
       securityPluginStart: plugins.security,
       internalSavedObjectsRepository: core.savedObjects.createInternalRepository([
         RULE_SAVED_OBJECT_TYPE,
+        AD_HOC_RUN_SAVED_OBJECT_TYPE,
       ]),
       encryptedSavedObjectsClient,
       spaceIdToNamespace,
@@ -622,6 +624,7 @@ export class AlertingPlugin {
       spaceIdToNamespace,
       uiSettings: core.uiSettings,
       usageCounter: this.usageCounter,
+      getEventLogClient: (request: KibanaRequest) => plugins.eventLog.getClient(request),
       isServerless: this.isServerless,
     });
 

@@ -187,43 +187,19 @@
               " | undefined) => Promise<void>; }; chrome: { recentlyAccessed: { get$: () => ",
               "Observable",
               "<",
-              {
-                "pluginId": "@kbn/core-chrome-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreChromeBrowserPluginApi",
-                "section": "def-public.ChromeRecentlyAccessedHistoryItem",
-                "text": "ChromeRecentlyAccessedHistoryItem"
-              },
+              "ChromeRecentlyAccessedHistoryItem",
               "[]>; }; navLinks: { getNavLinks$: () => ",
               "Observable",
               "<readonly ",
-              {
-                "pluginId": "@kbn/core-chrome-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreChromeBrowserPluginApi",
-                "section": "def-public.ChromeNavLink",
-                "text": "ChromeNavLink"
-              },
+              "ChromeNavLink",
               "[]>; }; sideNav: { getIsCollapsed$: () => ",
               "Observable",
               "<boolean>; getPanelSelectedNode$: () => ",
               "Observable",
               "<",
-              {
-                "pluginId": "@kbn/core-chrome-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreChromeBrowserPluginApi",
-                "section": "def-public.PanelSelectedNode",
-                "text": "PanelSelectedNode"
-              },
+              "PanelSelectedNode",
               " | null>; setPanelSelectedNode(node: string | ",
-              {
-                "pluginId": "@kbn/core-chrome-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreChromeBrowserPluginApi",
-                "section": "def-public.PanelSelectedNode",
-                "text": "PanelSelectedNode"
-              },
+              "PanelSelectedNode",
               " | null): void; getIsFeedbackBtnVisible$: () => ",
               "Observable",
               "<boolean>; }; }; http: { basePath: ",
@@ -246,13 +222,7 @@
             "signature": [
               "Observable",
               "<",
-              {
-                "pluginId": "@kbn/core-chrome-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreChromeBrowserPluginApi",
-                "section": "def-public.ChromeProjectNavigationNode",
-                "text": "ChromeProjectNavigationNode"
-              },
+              "ChromeProjectNavigationNode",
               "[][]>"
             ],
             "path": "src/platform/packages/shared/shared-ux/chrome/navigation/src/types.ts",
@@ -299,13 +269,7 @@
             "signature": [
               "Observable",
               "<",
-              {
-                "pluginId": "@kbn/core-chrome-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreChromeBrowserPluginApi",
-                "section": "def-public.ChromeRecentlyAccessedHistoryItem",
-                "text": "ChromeRecentlyAccessedHistoryItem"
-              },
+              "ChromeRecentlyAccessedHistoryItem",
               "[]>"
             ],
             "path": "src/platform/packages/shared/shared-ux/chrome/navigation/src/types.ts",
@@ -367,13 +331,7 @@
             "signature": [
               "Observable",
               "<",
-              {
-                "pluginId": "@kbn/core-chrome-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreChromeBrowserPluginApi",
-                "section": "def-public.ChromeProjectNavigationNode",
-                "text": "ChromeProjectNavigationNode"
-              },
+              "ChromeProjectNavigationNode",
               "[][]>"
             ],
             "path": "src/platform/packages/shared/shared-ux/chrome/navigation/src/types.ts",
@@ -413,13 +371,7 @@
             "label": "selectedPanelNode",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/core-chrome-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreChromeBrowserPluginApi",
-                "section": "def-public.PanelSelectedNode",
-                "text": "PanelSelectedNode"
-              },
+              "PanelSelectedNode",
               " | null | undefined"
             ],
             "path": "src/platform/packages/shared/shared-ux/chrome/navigation/src/types.ts",
@@ -435,13 +387,7 @@
             "description": [],
             "signature": [
               "((node: ",
-              {
-                "pluginId": "@kbn/core-chrome-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreChromeBrowserPluginApi",
-                "section": "def-public.PanelSelectedNode",
-                "text": "PanelSelectedNode"
-              },
+              "PanelSelectedNode",
               " | null) => void) | undefined"
             ],
             "path": "src/platform/packages/shared/shared-ux/chrome/navigation/src/types.ts",
@@ -456,13 +402,7 @@
                 "label": "node",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "@kbn/core-chrome-browser",
-                    "scope": "public",
-                    "docId": "kibKbnCoreChromeBrowserPluginApi",
-                    "section": "def-public.PanelSelectedNode",
-                    "text": "PanelSelectedNode"
-                  },
+                  "PanelSelectedNode",
                   " | null"
                 ],
                 "path": "src/platform/packages/shared/shared-ux/chrome/navigation/src/types.ts",
@@ -531,13 +471,7 @@
             ],
             "signature": [
               "Pick<",
-              {
-                "pluginId": "@kbn/core-chrome-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreChromeBrowserPluginApi",
-                "section": "def-public.ChromeProjectNavigationNode",
-                "text": "ChromeProjectNavigationNode"
-              },
+              "ChromeProjectNavigationNode",
               ", \"id\" | \"children\" | \"path\" | \"sideNavStatus\" | \"deepLink\"> & { title: React.ReactNode; }"
             ],
             "path": "src/platform/packages/shared/shared-ux/chrome/navigation/src/ui/components/panel/types.ts",
@@ -554,13 +488,7 @@
               "Jagged array of active nodes that match the current URL location"
             ],
             "signature": [
-              {
-                "pluginId": "@kbn/core-chrome-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreChromeBrowserPluginApi",
-                "section": "def-public.ChromeProjectNavigationNode",
-                "text": "ChromeProjectNavigationNode"
-              },
+              "ChromeProjectNavigationNode",
               "[][]"
             ],
             "path": "src/platform/packages/shared/shared-ux/chrome/navigation/src/ui/components/panel/types.ts",
@@ -641,13 +569,7 @@
             "signature": [
               "Observable",
               "<",
-              {
-                "pluginId": "@kbn/core-chrome-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreChromeBrowserPluginApi",
-                "section": "def-public.NavigationTreeDefinitionUI",
-                "text": "NavigationTreeDefinitionUI"
-              },
+              "NavigationTreeDefinitionUI",
               ">"
             ],
             "path": "src/platform/packages/shared/shared-ux/chrome/navigation/src/ui/navigation.tsx",

@@ -11,16 +11,20 @@ import {
   Condition,
   FilterCondition,
   UnaryFilterCondition,
+  isAlwaysCondition,
   isAndCondition,
   isFilterCondition,
+  isNeverCondition,
   isOrCondition,
+  isUnaryFilterCondition,
 } from '@kbn/streams-schema';
 
 function safePainlessField(conditionOrField: FilterCondition | string) {
-  if (isFilterCondition(conditionOrField)) {
-    return `ctx.${conditionOrField.field.split('.').join('?.')}`;
+  if (typeof conditionOrField === 'string') {
+    return `ctx.${conditionOrField.split('.').join('?.')}`;
   }
-  return `ctx.${conditionOrField.split('.').join('?.')}`;
+
+  return `ctx.${conditionOrField.field.split('.').join('?.')}`;
 }
 
 function encodeValue(value: string | number | boolean) {
@@ -101,10 +105,6 @@ function unaryToPainless(condition: UnaryFilterCondition) {
   }
 }
 
-function isUnaryFilterCondition(subject: FilterCondition): subject is UnaryFilterCondition {
-  return !('value' in subject);
-}
-
 function extractAllFields(condition: Condition, fields: string[] = []): string[] {
   if (isFilterCondition(condition) && !isUnaryFilterCondition(condition)) {
     return uniq([...fields, condition.field]);
@@ -131,10 +131,26 @@ export function conditionToStatement(condition: Condition, nested = false): stri
     const or = condition.or.map((filter) => conditionToStatement(filter, true)).join(' || ');
     return nested ? `(${or})` : or;
   }
-  return 'false';
+  if (isAlwaysCondition(condition)) {
+    return `true;`;
+  }
+
+  if (isNeverCondition(condition)) {
+    return `false;`;
+  }
+
+  throw new Error('Unsupported condition');
 }
 
 export function conditionToPainless(condition: Condition): string {
+  if (isNeverCondition(condition)) {
+    return `return false`;
+  }
+
+  if (isAlwaysCondition(condition)) {
+    return `return true`;
+  }
+
   const fields = extractAllFields(condition);
   let fieldCheck = '';
   if (fields.length !== 0) {

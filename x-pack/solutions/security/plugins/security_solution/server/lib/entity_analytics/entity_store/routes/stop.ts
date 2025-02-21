@@ -10,6 +10,7 @@ import { buildSiemResponse } from '@kbn/lists-plugin/server/routes/utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
 
+import { EntityType } from '../../../../../common/search_strategy';
 import type { StopEntityEngineResponse } from '../../../../../common/api/entity_analytics/entity_store/engine/stop.gen';
 import { StopEntityEngineRequestParams } from '../../../../../common/api/entity_analytics/entity_store/engine/stop.gen';
 import { API_VERSIONS, APP_ID } from '../../../../../common/constants';
@@ -45,7 +46,9 @@ export const stopEntityEngineRoute = (
 
         try {
           const secSol = await context.securitySolution;
-          const engine = await secSol.getEntityStoreDataClient().stop(request.params.entityType);
+          const engine = await secSol
+            .getEntityStoreDataClient()
+            .stop(EntityType[request.params.entityType]);
 
           return response.ok({ body: { stopped: engine.status === ENGINE_STATUS.STOPPED } });
         } catch (e) {

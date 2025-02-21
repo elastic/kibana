@@ -112,6 +112,8 @@ describe('ResponseActionsClientImpl base class', () => {
       'getFile',
       'execute',
       'upload',
+      'getFileDownload',
+      'getFileInfo',
     ];
 
     it.each(methods)('should throw Not Supported error for %s()', async (method) => {
@@ -121,17 +123,6 @@ describe('ResponseActionsClientImpl base class', () => {
       await expect(responsePromise).rejects.toBeInstanceOf(ResponseActionsNotSupportedError);
       await expect(responsePromise).rejects.toHaveProperty('statusCode', 405);
     });
-
-    it.each(['getFileDownload', 'getFileInfo'])(
-      'should throw not implemented error for %s()',
-      async (method) => {
-        // @ts-expect-error ignoring input type to method since they all should throw
-        const responsePromise = baseClassMock[method]({});
-
-        await expect(responsePromise).rejects.toThrow(`Method ${method}() not implemented`);
-        await expect(responsePromise).rejects.toHaveProperty('statusCode', 501);
-      }
-    );
   });
 
   describe('#updateCases()', () => {
@@ -836,7 +827,13 @@ class MockClassWithExposedProtectedMembers extends ResponseActionsClientImpl {
     return super.writeActionResponseToEndpointIndex<TOutputContent>(options);
   }
 
-  public fetchAllPendingActions(): AsyncIterable<ResponseActionsClientPendingAction[]> {
-    return super.fetchAllPendingActions();
+  public fetchAllPendingActions<
+    TParameters extends EndpointActionDataParameterTypes = EndpointActionDataParameterTypes,
+    TOutputContent extends EndpointActionResponseDataOutput = EndpointActionResponseDataOutput,
+    TMeta extends {} = {}
+  >(): AsyncIterable<
+    Array<ResponseActionsClientPendingAction<TParameters, TOutputContent, TMeta>>
+  > {
+    return super.fetchAllPendingActions<TParameters, TOutputContent, TMeta>();
   }
 }

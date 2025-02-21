@@ -23,7 +23,7 @@
           "SavedObjectsMigrationLogger",
           ">"
         ],
-        "path": "packages/core/saved-objects/core-saved-objects-migration-server-mocks/src/migration.mocks.ts",
+        "path": "src/core/packages/saved-objects/migration-server-mocks/src/migration.mocks.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [],
@@ -40,7 +40,7 @@
         "signature": [
           "(fn: () => Promise<T>, options: { retryAttempts: number; retryDelayMs: number; }) => Promise<T>"
         ],
-        "path": "packages/core/saved-objects/core-saved-objects-migration-server-mocks/src/helpers/retry_async.ts",
+        "path": "src/core/packages/saved-objects/migration-server-mocks/src/helpers/retry_async.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -54,7 +54,7 @@
             "signature": [
               "() => Promise<T>"
             ],
-            "path": "packages/core/saved-objects/core-saved-objects-migration-server-mocks/src/helpers/retry_async.ts",
+            "path": "src/core/packages/saved-objects/migration-server-mocks/src/helpers/retry_async.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -66,7 +66,7 @@
             "tags": [],
             "label": "options",
             "description": [],
-            "path": "packages/core/saved-objects/core-saved-objects-migration-server-mocks/src/helpers/retry_async.ts",
+            "path": "src/core/packages/saved-objects/migration-server-mocks/src/helpers/retry_async.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -77,7 +77,7 @@
                 "tags": [],
                 "label": "retryAttempts",
                 "description": [],
-                "path": "packages/core/saved-objects/core-saved-objects-migration-server-mocks/src/helpers/retry_async.ts",
+                "path": "src/core/packages/saved-objects/migration-server-mocks/src/helpers/retry_async.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -88,7 +88,7 @@
                 "tags": [],
                 "label": "retryDelayMs",
                 "description": [],
-                "path": "packages/core/saved-objects/core-saved-objects-migration-server-mocks/src/helpers/retry_async.ts",
+                "path": "src/core/packages/saved-objects/migration-server-mocks/src/helpers/retry_async.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -110,7 +110,7 @@
         "tags": [],
         "label": "migrationMocks",
         "description": [],
-        "path": "packages/core/saved-objects/core-saved-objects-migration-server-mocks/src/migration.mocks.ts",
+        "path": "src/core/packages/saved-objects/migration-server-mocks/src/migration.mocks.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -126,7 +126,7 @@
               "SavedObjectMigrationContext",
               ">"
             ],
-            "path": "packages/core/saved-objects/core-saved-objects-migration-server-mocks/src/migration.mocks.ts",
+            "path": "src/core/packages/saved-objects/migration-server-mocks/src/migration.mocks.ts",
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -141,7 +141,7 @@
                 "signature": [
                   "{ migrationVersion?: string | undefined; convertToMultiNamespaceTypeVersion?: string | undefined; isSingleNamespaceType?: boolean | undefined; }"
                 ],
-                "path": "packages/core/saved-objects/core-saved-objects-migration-server-mocks/src/migration.mocks.ts",
+                "path": "src/core/packages/saved-objects/migration-server-mocks/src/migration.mocks.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -157,7 +157,7 @@
         "tags": [],
         "label": "mockKibanaMigrator",
         "description": [],
-        "path": "packages/core/saved-objects/core-saved-objects-migration-server-mocks/src/kibana_migrator.mock.ts",
+        "path": "src/core/packages/saved-objects/migration-server-mocks/src/kibana_migrator.mock.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -175,7 +175,7 @@
               "IKibanaMigrator",
               ">"
             ],
-            "path": "packages/core/saved-objects/core-saved-objects-migration-server-mocks/src/kibana_migrator.mock.ts",
+            "path": "src/core/packages/saved-objects/migration-server-mocks/src/kibana_migrator.mock.ts",
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -192,7 +192,7 @@
                   "SavedObjectsType",
                   "<any>[]; }"
                 ],
-                "path": "packages/core/saved-objects/core-saved-objects-migration-server-mocks/src/kibana_migrator.mock.ts",
+                "path": "src/core/packages/saved-objects/migration-server-mocks/src/kibana_migrator.mock.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }

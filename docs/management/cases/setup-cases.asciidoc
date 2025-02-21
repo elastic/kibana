@@ -1,20 +1,19 @@
 [[setup-cases]]
 == Configure access to cases
 
-:frontmatter-description: Learn about the {kib} feature privileges required to access cases. 
+:frontmatter-description: Learn about the {kib} feature privileges required to access cases.
 :frontmatter-tags-products: [kibana]
-:frontmatter-tags-content-type: [how-to] 
+:frontmatter-tags-content-type: [how-to]
 :frontmatter-tags-user-goals: [configure]
 
 To access cases in *{stack-manage-app}*, you must have the appropriate {kib}
 privileges:
 
-[options="header"]
-|=== 
+[discrete]
+=== Give full access to manage cases and settings
 
-| Action | {kib} privileges
-| Give full access to manage cases and settings
-a|
+**{kib} privileges**
+
 * `All` for the *Cases* feature under *Management*.
 * `All` for the *{connectors-feature}* feature under *Management*.
 
@@ -27,8 +26,12 @@ By default, `All` for the *Cases* feature includes authority to delete cases
 and comments, edit case settings, add case comments and attachments, and re-open cases unless you customize the sub-feature privileges.
 ====
 
-| Give assignee access to cases
-a| `All` for the *Cases* feature under *Management*.
+[discrete]
+=== Give assignee access to cases
+
+**{kib} privileges**
+
+* `All` for the *Cases* feature under *Management*.
 
 [NOTE]
 ====
@@ -38,18 +41,28 @@ least once, which creates a user profile.
 This privilege is also required to add <<cases-action-type,case actions>> to rules.
 ====
 
-| Give view-only access to cases
-a| `Read` for the *Cases* feature under *Management*.
+[discrete]
+=== Give view-only access to cases
+
+**{kib} privileges**
+
+* `Read` for the *Cases* feature under *Management*.
 
 NOTE: You can customize sub-feature privileges for deleting cases and comments, editing case settings, adding case comments and attachments, and re-opening cases.
 
-| Revoke all access to cases | `None` for the *Cases* feature under *Management*.
+[discrete]
+=== Revoke all access to cases
 
-|=== 
+**{kib} privileges**
+
+`None` for the *Cases* feature under *Management*.
+
+[discrete]
+=== More details
 
 For more details, refer to <<kibana-privileges>>.
 
 NOTE: If you are using an on-premises {kib} deployment and you want the email
 notifications and the external incident management systems to contain
-links back to {kib}, you must configure the 
+links back to {kib}, you must configure the
 <<server-publicBaseUrl,`server.publicBaseUrl`>> setting.

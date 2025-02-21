@@ -6,7 +6,6 @@
  */
 
 export * from './risk_weights';
-export * from './identifier_types';
 export * from './range';
 export * from './risk_levels';
 export * from './types';

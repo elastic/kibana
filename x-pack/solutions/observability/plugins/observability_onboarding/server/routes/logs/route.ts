@@ -19,8 +19,12 @@ import { hasLogMonitoringPrivileges } from '../../lib/api_key/has_log_monitoring
 
 const logMonitoringPrivilegesRoute = createObservabilityOnboardingServerRoute({
   endpoint: 'GET /internal/observability_onboarding/logs/setup/privileges',
-  options: { tags: [] },
-
+  security: {
+    authz: {
+      enabled: false,
+      reason: 'This route has custom authorization logic using Elasticsearch client',
+    },
+  },
   handler: async (resources): Promise<{ hasPrivileges: boolean }> => {
     const { context } = resources;
 
@@ -36,7 +40,12 @@ const logMonitoringPrivilegesRoute = createObservabilityOnboardingServerRoute({
 
 const installShipperSetupRoute = createObservabilityOnboardingServerRoute({
   endpoint: 'GET /internal/observability_onboarding/logs/setup/environment',
-  options: { tags: [] },
+  security: {
+    authz: {
+      enabled: false,
+      reason: "This route only reads cluster's metadata and does not require authorization",
+    },
+  },
   async handler(resources): Promise<{
     apiEndpoint: string;
     scriptDownloadUrl: string;
@@ -75,7 +84,12 @@ const installShipperSetupRoute = createObservabilityOnboardingServerRoute({
 
 const createAPIKeyRoute = createObservabilityOnboardingServerRoute({
   endpoint: 'POST /internal/observability_onboarding/otel/api_key',
-  options: { tags: [] },
+  security: {
+    authz: {
+      enabled: false,
+      reason: 'This route has custom authorization logic using Elasticsearch client',
+    },
+  },
   params: t.type({}),
   async handler(resources): Promise<{ apiKeyEncoded: string }> {
     const { context } = resources;
@@ -96,7 +110,12 @@ const createAPIKeyRoute = createObservabilityOnboardingServerRoute({
 
 const createFlowRoute = createObservabilityOnboardingServerRoute({
   endpoint: 'POST /internal/observability_onboarding/logs/flow',
-  options: { tags: [] },
+  security: {
+    authz: {
+      enabled: false,
+      reason: 'Authorization is checked by the Saved Object client and Elasticsearch client',
+    },
+  },
   params: t.type({
     body: t.intersection([
       t.type({

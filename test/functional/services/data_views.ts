@@ -94,6 +94,17 @@ export class DataViewsService extends FtrService {
   }
 
   /**
+   * Checks if currently selected Data View has managed badge
+   */
+  async isManaged() {
+    const dataView = await this.testSubjects.getAttribute('*dataView-switch-link', 'title');
+    await this.testSubjects.click('*dataView-switch-link');
+    const hasBadge = await this.testSubjects.exists(`dataViewItemManagedBadge-${dataView}`);
+    await this.testSubjects.click('*dataView-switch-link');
+    return hasBadge;
+  }
+
+  /**
    * Opens Create field flayout for the selected Data View
    */
   async clickAddFieldFromSearchBar() {

@@ -109,6 +109,8 @@ export const getAgentTypeName = (agentType: ResponseActionAgentType): string => 
       return 'SentinelOne';
     case 'crowdstrike':
       return 'Crowdstrike';
+    case 'microsoft_defender_endpoint':
+      return 'Microsoft Defender for Endpoint';
     default:
       return agentType;
   }

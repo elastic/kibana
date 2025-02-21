@@ -345,6 +345,7 @@ export const getHeatmapVisualization = ({
         yTitle: state.gridConfig.yTitle,
         // X-axis
         isXAxisLabelVisible: state.gridConfig.isXAxisLabelVisible,
+        xAxisLabelRotation: state.gridConfig.xAxisLabelRotation,
         isXAxisTitleVisible: state.gridConfig.isXAxisTitleVisible ?? false,
         xTitle: state.gridConfig.xTitle,
       }

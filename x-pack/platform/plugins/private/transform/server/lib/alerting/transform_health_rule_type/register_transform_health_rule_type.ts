@@ -22,13 +22,16 @@ import type { TransformHealthAlert } from '@kbn/alerts-as-data-utils';
 import { ALERT_REASON } from '@kbn/rule-data-utils';
 import { ES_FIELD_TYPES } from '@kbn/field-types';
 import {
+  transformHealthRuleParamsSchema,
+  type TransformHealthRuleParams,
+} from '@kbn/response-ops-rule-params/transform_health';
+import {
   PLUGIN,
   type TransformHealthStatus,
   TRANSFORM_RULE_TYPE,
   TRANSFORM_HEALTH_RESULTS,
+  TRANSFORM_HEALTH_CHECK_NAMES,
 } from '../../../../common/constants';
-import type { TransformHealthRuleParams } from './schema';
-import { transformHealthRuleParams } from './schema';
 import { transformHealthServiceProvider } from './transform_health_service';
 
 export interface BaseTransformAlertResponse {
@@ -74,6 +77,11 @@ interface RegisterParams {
   getFieldFormatsStart: () => FieldFormatsStart;
 }
 
+export interface TransformHealthAlertState extends RuleTypeState {
+  notStarted?: string[];
+  unhealthy?: string[];
+}
+
 export const TRANSFORM_HEALTH_AAD_INDEX_NAME = 'transform.health';
 
 export const TRANSFORM_HEALTH_AAD_CONFIG: IRuleTypeAlerts<TransformHealthAlert> = {
@@ -109,7 +117,7 @@ export function getTransformHealthRuleType(
 ): RuleType<
   TransformHealthRuleParams,
   never,
-  RuleTypeState,
+  TransformHealthAlertState,
   AlertInstanceState,
   TransformHealthAlertContext,
   TransformIssue,
@@ -123,11 +131,11 @@ export function getTransformHealthRuleType(
     }),
     actionGroups: [TRANSFORM_ISSUE_DETECTED],
     defaultActionGroupId: TRANSFORM_ISSUE,
-    validate: { params: transformHealthRuleParams },
+    validate: { params: transformHealthRuleParamsSchema },
     schemas: {
       params: {
         type: 'config-schema',
-        schema: transformHealthRuleParams,
+        schema: transformHealthRuleParamsSchema,
       },
     },
     actionVariables: {
@@ -162,6 +170,7 @@ export function getTransformHealthRuleType(
       const {
         services: { scopedClusterClient, alertsClient, uiSettingsClient },
         params,
+        state: previousState,
       } = options;
 
       if (!alertsClient) {
@@ -177,12 +186,24 @@ export function getTransformHealthRuleType(
         fieldFormatsRegistry,
       });
 
-      const executionResult = await transformHealthService.getHealthChecksResults(params);
+      const executionResult = await transformHealthService.getHealthChecksResults(
+        params,
+        previousState
+      );
 
       const unhealthyTests = executionResult.filter(({ isHealthy }) => !isHealthy);
 
+      const state: TransformHealthAlertState = {};
+
       if (unhealthyTests.length > 0) {
         unhealthyTests.forEach(({ name: alertInstanceName, context }) => {
+          switch (alertInstanceName) {
+            case TRANSFORM_HEALTH_CHECK_NAMES.notStarted.name:
+              state.notStarted = context.results.map((r) => r.transform_id);
+            case TRANSFORM_HEALTH_CHECK_NAMES.healthCheck.name:
+              state.unhealthy = context.results.map((r) => r.transform_id);
+          }
+
           alertsClient.report({
             id: alertInstanceName,
             actionGroup: TRANSFORM_ISSUE,
@@ -198,7 +219,9 @@ export function getTransformHealthRuleType(
       // Set context for recovered alerts
       for (const recoveredAlert of alertsClient.getRecoveredAlerts()) {
         const recoveredAlertId = recoveredAlert.alert.getId();
+
         const testResult = executionResult.find((v) => v.name === recoveredAlertId);
+
         if (testResult) {
           alertsClient.setAlertData({
             id: recoveredAlertId,
@@ -211,7 +234,7 @@ export function getTransformHealthRuleType(
         }
       }
 
-      return { state: {} };
+      return { state };
     },
   };
 }

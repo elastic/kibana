@@ -21,9 +21,8 @@ ROW a=[3, 5, 1]
 | EVAL max_a = MV_MAX(a)
 ```
 
-MV_MAX function can be used with any column type, including `keyword` columns. In such cases, it selects the last string, comparing their utf-8 representation byte by byte:
-
+**Retrieving the max value from a multivalued field**
 ```esql
-ROW a=["foo", "zoo", "bar"]
-| EVAL max_a = MV_MAX(a)
+FROM bag_of_numbers
+| EVAL max = MV_MAX(numbers)
 ```

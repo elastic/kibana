@@ -22,6 +22,7 @@ import { AlertsClientError } from '@kbn/alerting-plugin/server';
 import { ALERT_REASON, ALERT_URL } from '@kbn/rule-data-utils';
 import type { MlAnomalyDetectionAlert } from '@kbn/alerts-as-data-utils';
 import { ES_FIELD_TYPES } from '@kbn/field-types';
+import { mlAnomalyDetectionAlertParamsSchema } from '@kbn/response-ops-rule-params/anomaly_detection';
 import {
   ALERT_ANOMALY_DETECTION_JOB_ID,
   ALERT_ANOMALY_IS_INTERIM,
@@ -33,10 +34,7 @@ import {
 } from '../../../common/constants/alerts';
 import { PLUGIN_ID } from '../../../common/constants/app';
 import { MINIMUM_FULL_LICENSE } from '../../../common/license';
-import {
-  type MlAnomalyDetectionAlertParams,
-  mlAnomalyDetectionAlertParams,
-} from '../../routes/schemas/alerting_schema';
+import type { MlAnomalyDetectionAlertParams } from '../../routes/schemas/alerting_schema';
 import type { RegisterAlertParams } from './register_ml_alerts';
 import type { InfluencerAnomalyAlertDoc } from '../../../common/types/alerts';
 import { type RecordAnomalyAlertDoc } from '../../../common/types/alerts';
@@ -177,12 +175,12 @@ export function registerAnomalyDetectionAlertType({
     actionGroups: [THRESHOLD_MET_GROUP],
     defaultActionGroupId: ANOMALY_SCORE_MATCH_GROUP_ID,
     validate: {
-      params: mlAnomalyDetectionAlertParams,
+      params: mlAnomalyDetectionAlertParamsSchema,
     },
     schemas: {
       params: {
         type: 'config-schema',
-        schema: mlAnomalyDetectionAlertParams,
+        schema: mlAnomalyDetectionAlertParamsSchema,
       },
     },
     actionVariables: {

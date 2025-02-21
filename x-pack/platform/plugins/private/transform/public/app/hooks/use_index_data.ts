@@ -17,7 +17,7 @@ import {
   getFieldType,
   getDataGridSchemaFromKibanaFieldType,
   getDataGridSchemaFromESFieldType,
-  getFieldsFromKibanaDataView,
+  getPopulatedFieldsFromKibanaDataView,
   showDataGridColumnChartErrorMessageToast,
   useDataGrid,
   useRenderCellValue,
@@ -83,12 +83,11 @@ export const useIndexData = (options: UseIndexDataOptions): UseIndexDataReturnTy
     [baseFilterCriteria]
   );
 
-  const dataViewFields = useMemo(() => {
-    const allPopulatedFields = Array.isArray(populatedFields) ? populatedFields : [];
-    const allDataViewFields = getFieldsFromKibanaDataView(dataView);
-    return allPopulatedFields.filter((d) => allDataViewFields.includes(d)).sort();
+  const dataViewFields = useMemo(
+    () => getPopulatedFieldsFromKibanaDataView(dataView, populatedFields),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [populatedFields]);
+    [populatedFields]
+  );
 
   const columns: EuiDataGridColumn[] = useMemo(() => {
     let result: Array<{ id: string; schema: string | undefined }> = [];

@@ -151,6 +151,40 @@ describe('agentless_policy_helper', () => {
       expect(result).toBe(true);
     });
 
+    it('should return true if packageInfo is defined and selected integration only has agentless', () => {
+      const packageInfo = {
+        policy_templates: [
+          {
+            name: 'template1',
+            title: 'Template 1',
+            description: '',
+            deployment_modes: {
+              default: {
+                enabled: true,
+              },
+              agentless: {
+                enabled: true,
+              },
+            },
+          },
+          {
+            name: 'template2',
+            title: 'Template 2',
+            description: '',
+            deployment_modes: {
+              agentless: {
+                enabled: true,
+              },
+            },
+          },
+        ] as RegistryPolicyTemplate[],
+      };
+
+      const result = isOnlyAgentlessIntegration(packageInfo, 'template2');
+
+      expect(result).toBe(true);
+    });
+
     it('should return false if packageInfo is defined but has other deployment types', () => {
       const packageInfo = {
         policy_templates: [

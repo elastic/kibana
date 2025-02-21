@@ -20,7 +20,6 @@ import { ENTERPRISE_SEARCH_CONNECTOR_CRAWLER_SERVICE_TYPE } from '../../../commo
 
 import { ErrorCode } from '../../../common/types/error_codes';
 
-import { fetchCrawlerByIndexName } from '../crawler/fetch_crawlers';
 import { createIndex } from '../indices/create_index';
 import { generateApiKey } from '../indices/generate_api_key';
 import { getDefaultPipeline } from '../pipelines/get_default_pipeline';
@@ -53,11 +52,7 @@ export const addConnector = async (
         throw new Error(ErrorCode.CONNECTOR_DOCUMENT_ALREADY_EXISTS);
       }
     }
-    const crawler = await fetchCrawlerByIndexName(client, index);
 
-    if (crawler) {
-      throw new Error(ErrorCode.CRAWLER_ALREADY_EXISTS);
-    }
     await createIndex(client, index, input.language, false);
   }
 

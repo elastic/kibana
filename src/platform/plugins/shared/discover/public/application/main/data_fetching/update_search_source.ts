@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ISearchSource } from '@kbn/data-plugin/public';
-import { DataViewType, DataView } from '@kbn/data-views-plugin/public';
-import { Filter } from '@kbn/es-query';
+import type { ISearchSource } from '@kbn/data-plugin/public';
+import { DataViewType, type DataView } from '@kbn/data-views-plugin/public';
+import type { Filter, TimeRange } from '@kbn/es-query';
 import type { SortOrder } from '@kbn/saved-search-plugin/public';
 import { SORT_DEFAULT_ORDER_SETTING } from '@kbn/discover-utils';
 import { DiscoverServices } from '../../../build_services';
@@ -25,11 +25,13 @@ export function updateVolatileSearchSource(
     services,
     sort,
     customFilters,
+    inputTimeRange,
   }: {
     dataView: DataView;
     services: DiscoverServices;
     sort?: SortOrder[];
     customFilters: Filter[];
+    inputTimeRange?: TimeRange;
   }
 ) {
   const { uiSettings, data } = services;
@@ -48,7 +50,7 @@ export function updateVolatileSearchSource(
 
   if (dataView.type !== DataViewType.ROLLUP) {
     // Set the date range filter fields from timeFilter using the absolute format. Search sessions requires that it be converted from a relative range
-    const timeFilter = data.query.timefilter.timefilter.createFilter(dataView);
+    const timeFilter = data.query.timefilter.timefilter.createFilter(dataView, inputTimeRange);
     filters = timeFilter ? [...filters, timeFilter] : filters;
   }
 

@@ -87,7 +87,8 @@ const resolveDataView = ({
  *
  * @returns
  * A {@link DataViewBase} object, intentionally not typed as a complete {@link DataView} object
- * since only Security Solution uses an actual in-memory data view (when `featureIds = ['siem']).
+ * since only Security Solution uses an actual in-memory data view (when `ruleTypeIds` only contains
+ * siem rule types).
  * In all other cases the data view is computed from the index names and fields fetched from the
  * alerting APIs.
  */
@@ -109,7 +110,7 @@ export const useAlertsDataView = ({
   } = useFetchAlertsIndexNamesQuery(
     { http, ruleTypeIds },
     {
-      // Don't fetch index names when featureIds includes both Security Solution and other features
+      // Don't fetch index names when ruleTypeIds includes both Security Solution and other features
       enabled: !!ruleTypeIds.length && (isOnlySecurity || !includesSecurity),
     }
   );
@@ -133,7 +134,7 @@ export const useAlertsDataView = ({
       indexNames,
     },
     {
-      // Create data view only when featureIds = ['siem'] and indexNames have been fetched
+      // Create data view only when ruleTypeIds only includes siem rules and indexNames have been fetched
       enabled: isOnlySecurity && !!indexNames?.length,
     }
   );

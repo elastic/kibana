@@ -10,8 +10,8 @@
 import expect from '@kbn/expect';
 import chroma from 'chroma-js';
 import rison from '@kbn/rison';
-import { DEFAULT_PANEL_WIDTH } from '@kbn/dashboard-plugin/public/dashboard_constants';
-import type { SharedDashboardState } from '@kbn/dashboard-plugin/common';
+import { DEFAULT_PANEL_WIDTH } from '@kbn/dashboard-plugin/common/content_management/constants';
+import type { SharedDashboardState } from '@kbn/dashboard-plugin/public/dashboard_app/url/url_utils';
 import { PIE_CHART_VIS_NAME, AREA_CHART_VIS_NAME } from '../../../page_objects/dashboard_page';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
@@ -99,7 +99,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await queryBar.clickQuerySubmitButton();
 
       await visChart.openLegendOptionColorsForXY('Count', `[data-title="${visName}"]`);
-      const overwriteColor = '#d36086';
+      const overwriteColor = '#64d8d5';
       await visChart.selectNewLegendColorChoice(overwriteColor);
 
       await dashboard.saveDashboard(dashboardName, { saveAsNew: false });

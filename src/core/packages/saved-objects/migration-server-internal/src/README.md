@@ -144,7 +144,7 @@ able to successfully complete the migration once the cluster has enough heap.
 
 For more background information on the problem see the [saved object
 migrations
-RFC](https://github.com/elastic/kibana/blob/main/rfcs/text/0013_saved_object_migrations.md).
+RFC](https://github.com/elastic/kibana/blob/main/legacy_rfcs/text/0013_saved_object_migrations.md).
 
 # Algorithm steps
 

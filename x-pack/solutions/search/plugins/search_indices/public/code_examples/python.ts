@@ -23,11 +23,11 @@ export const PYTHON_INFO: CodeLanguage = {
   codeBlockLanguage: 'python',
 };
 
-const SERVERLESS_PYTHON_INSTALL_CMD = 'pip install elasticsearch';
+const PYTHON_INSTALL_CMD = 'pip install elasticsearch';
 
-export const PythonServerlessCreateIndexExamples: CreateIndexLanguageExamples = {
+export const PythonCreateIndexExamples: CreateIndexLanguageExamples = {
   default: {
-    installCommand: SERVERLESS_PYTHON_INSTALL_CMD,
+    installCommand: PYTHON_INSTALL_CMD,
     createIndex: ({
       elasticsearchURL,
       apiKey,
@@ -40,11 +40,16 @@ client = Elasticsearch(
 )
 
 client.indices.create(
-  index="${indexName ?? INDEX_PLACEHOLDER}"
+  index="${indexName ?? INDEX_PLACEHOLDER}",
+  mappings={
+        "properties": {
+            "text": {"type": "text"}
+        }
+    }
 )`,
   },
   dense_vector: {
-    installCommand: SERVERLESS_PYTHON_INSTALL_CMD,
+    installCommand: PYTHON_INSTALL_CMD,
     createIndex: ({
       elasticsearchURL,
       apiKey,
@@ -66,8 +71,30 @@ client.indices.create(
     }
 )`,
   },
+  semantic: {
+    installCommand: PYTHON_INSTALL_CMD,
+    createIndex: ({
+      elasticsearchURL,
+      apiKey,
+      indexName,
+    }: CodeSnippetParameters) => `from elasticsearch import Elasticsearch
+
+client = Elasticsearch(
+  "${elasticsearchURL}",
+  api_key="${apiKey ?? API_KEY_PLACEHOLDER}"
+)
+
+client.indices.create(
+  index="${indexName ?? INDEX_PLACEHOLDER}",
+  mappings={
+        "properties": {
+            "text": {"type": "semantic_text"}
+        }
+    }
+)`,
+  },
 };
-const serverlessIngestionCommand: IngestCodeSnippetFunction = ({
+const ingestionCommand: IngestCodeSnippetFunction = ({
   elasticsearchURL,
   apiKey,
   indexName,
@@ -86,7 +113,7 @@ docs = ${JSON.stringify(sampleDocuments, null, 4)}
 bulk_response = helpers.bulk(client, docs, index=index_name)
 print(bulk_response)`;
 
-const serverlessUpdateMappingsCommand: IngestCodeSnippetFunction = ({
+const updateMappingsCommand: IngestCodeSnippetFunction = ({
   elasticsearchURL,
   apiKey,
   indexName,
@@ -106,8 +133,8 @@ mapping_response = client.indices.put_mapping(index=index_name, body=mappings)
 print(mapping_response)
 `;
 
-export const PythonServerlessVectorsIngestDataExample: IngestDataCodeDefinition = {
-  installCommand: SERVERLESS_PYTHON_INSTALL_CMD,
-  ingestCommand: serverlessIngestionCommand,
-  updateMappingsCommand: serverlessUpdateMappingsCommand,
+export const PythonIngestDataExample: IngestDataCodeDefinition = {
+  installCommand: PYTHON_INSTALL_CMD,
+  ingestCommand: ingestionCommand,
+  updateMappingsCommand,
 };

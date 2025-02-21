@@ -226,6 +226,26 @@ paths:
       summary: Get running processes
       tags:
         - Security Endpoint Management API
+  /api/endpoint/action/runscript:
+    post:
+      description: Run a shell command on an endpoint.
+      operationId: RunScriptAction
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RunScriptRouteRequestBody'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+          description: OK
+      summary: Run a script
+      tags:
+        - Security Endpoint Management API
   /api/endpoint/action/scan:
     post:
       description: Scan a specific file or directory on an endpoint for malware.
@@ -480,15 +500,19 @@ components:
         - minLength: 1
           type: string
     AgentTypes:
+      description: The host agent type (optional). Defaults to endpoint.
       enum:
         - endpoint
         - sentinel_one
         - crowdstrike
+        - microsoft_defender_endpoint
       type: string
     AlertIds:
-      description: A list of alerts ids.
+      description: A list of alerts `id`s.
       items:
-        $ref: '#/components/schemas/NonEmptyString'
+        format: nonempty
+        minLength: 1
+        type: string
       minItems: 1
       type: array
     CaseIds:
@@ -498,6 +522,23 @@ components:
         type: string
       minItems: 1
       type: array
+    CloudFileScriptParameters:
+      type: object
+      properties:
+        cloudFile:
+          description: Script name in cloud storage.
+          minLength: 1
+          type: string
+        commandLine:
+          description: Command line arguments.
+          minLength: 1
+          type: string
+        timeout:
+          description: Timeout in seconds.
+          minimum: 1
+          type: integer
+      required:
+        - cloudFile
     Command:
       description: The command to be executed (cannot be an empty string)
       enum:
@@ -623,9 +664,56 @@ components:
           required:
             - parameters
     GetProcessesRouteRequestBody:
-      $ref: '#/components/schemas/NoParametersRequestSchema'
+      type: object
+      properties:
+        agent_type:
+          $ref: '#/components/schemas/AgentTypes'
+        alert_ids:
+          $ref: '#/components/schemas/AlertIds'
+        case_ids:
+          $ref: '#/components/schemas/CaseIds'
+        comment:
+          $ref: '#/components/schemas/Comment'
+        endpoint_ids:
+          $ref: '#/components/schemas/EndpointIds'
+        parameters:
+          $ref: '#/components/schemas/Parameters'
+      required:
+        - endpoint_ids
+    HostPathScriptParameters:
+      type: object
+      properties:
+        commandLine:
+          description: Command line arguments.
+          minLength: 1
+          type: string
+        hostPath:
+          description: Absolute or relative path of script on host machine.
+          minLength: 1
+          type: string
+        timeout:
+          description: Timeout in seconds.
+          minimum: 1
+          type: integer
+      required:
+        - hostPath
     IsolateRouteRequestBody:
-      $ref: '#/components/schemas/NoParametersRequestSchema'
+      type: object
+      properties:
+        agent_type:
+          $ref: '#/components/schemas/AgentTypes'
+        alert_ids:
+          $ref: '#/components/schemas/AlertIds'
+        case_ids:
+          $ref: '#/components/schemas/CaseIds'
+        comment:
+          $ref: '#/components/schemas/Comment'
+        endpoint_ids:
+          $ref: '#/components/schemas/EndpointIds'
+        parameters:
+          $ref: '#/components/schemas/Parameters'
+      required:
+        - endpoint_ids
     KillProcessRouteRequestBody:
       allOf:
         - type: object
@@ -705,33 +793,6 @@ components:
           type: string
       required:
         - hostStatuses
-    NonEmptyString:
-      description: A string that does not contain only whitespace characters
-      format: nonempty
-      minLength: 1
-      type: string
-    NoParametersRequestSchema:
-      type: object
-      properties:
-        body:
-          type: object
-          properties:
-            agent_type:
-              $ref: '#/components/schemas/AgentTypes'
-            alert_ids:
-              $ref: '#/components/schemas/AlertIds'
-            case_ids:
-              $ref: '#/components/schemas/CaseIds'
-            comment:
-              $ref: '#/components/schemas/Comment'
-            endpoint_ids:
-              $ref: '#/components/schemas/EndpointIds'
-            parameters:
-              $ref: '#/components/schemas/Parameters'
-          required:
-            - endpoint_ids
-      required:
-        - body
     Page:
       default: 1
       description: Page number
@@ -777,6 +838,36 @@ components:
       properties:
         note:
           type: string
+    RawScriptParameters:
+      type: object
+      properties:
+        commandLine:
+          description: Command line arguments.
+          minLength: 1
+          type: string
+        raw:
+          description: Raw script content.
+          minLength: 1
+          type: string
+        timeout:
+          description: Timeout in seconds.
+          minimum: 1
+          type: integer
+      required:
+        - raw
+    RunScriptRouteRequestBody:
+      type: object
+      properties:
+        parameters:
+          description: >-
+            Exactly one of 'Raw', 'HostPath', or 'CloudFile' must be provided.
+            CommandLine and Timeout are optional for all.
+          oneOf:
+            - $ref: '#/components/schemas/RawScriptParameters'
+            - $ref: '#/components/schemas/HostPathScriptParameters'
+            - $ref: '#/components/schemas/CloudFileScriptParameters'
+      required:
+        - parameters
     ScanRouteRequestBody:
       allOf:
         - type: object
@@ -856,7 +947,22 @@ components:
       minLength: 1
       type: array
     UnisolateRouteRequestBody:
-      $ref: '#/components/schemas/NoParametersRequestSchema'
+      type: object
+      properties:
+        agent_type:
+          $ref: '#/components/schemas/AgentTypes'
+        alert_ids:
+          $ref: '#/components/schemas/AlertIds'
+        case_ids:
+          $ref: '#/components/schemas/CaseIds'
+        comment:
+          $ref: '#/components/schemas/Comment'
+        endpoint_ids:
+          $ref: '#/components/schemas/EndpointIds'
+        parameters:
+          $ref: '#/components/schemas/Parameters'
+      required:
+        - endpoint_ids
     UploadRouteRequestBody:
       allOf:
         - type: object

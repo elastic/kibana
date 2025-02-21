@@ -6,6 +6,7 @@
  */
 
 import type { RuleResponse, RuleSource } from '../../../../../../common/api/detection_engine';
+import type { PrebuiltRulesCustomizationStatus } from '../../../../../../common/detection_engine/prebuilt_rules/prebuilt_rule_customization_status';
 import type { PrebuiltRuleAsset } from '../../../prebuilt_rules';
 import { calculateIsCustomized } from '../detection_rules_client/mergers/rule_source/calculate_is_customized';
 
@@ -24,12 +25,12 @@ export const calculateRuleSourceFromAsset = ({
   rule,
   assetWithMatchingVersion,
   isKnownPrebuiltRule,
-  isRuleCustomizationEnabled,
+  ruleCustomizationStatus,
 }: {
   rule: RuleResponse;
   assetWithMatchingVersion: PrebuiltRuleAsset | undefined;
   isKnownPrebuiltRule: boolean;
-  isRuleCustomizationEnabled: boolean;
+  ruleCustomizationStatus: PrebuiltRulesCustomizationStatus;
 }): RuleSource => {
   if (!isKnownPrebuiltRule) {
     return {
@@ -40,14 +41,14 @@ export const calculateRuleSourceFromAsset = ({
   if (assetWithMatchingVersion == null) {
     return {
       type: 'external',
-      is_customized: isRuleCustomizationEnabled ? true : false,
+      is_customized: ruleCustomizationStatus.isRulesCustomizationEnabled ? true : false,
     };
   }
 
   const isCustomized = calculateIsCustomized({
     baseRule: assetWithMatchingVersion,
     nextRule: rule,
-    isRuleCustomizationEnabled,
+    ruleCustomizationStatus,
   });
 
   return {

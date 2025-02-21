@@ -16,7 +16,7 @@ import {
 } from '@kbn/slo-schema';
 import { TransformGenerator, getElasticsearchQueryOrThrow } from '.';
 import {
-  SLO_DESTINATION_INDEX_NAME,
+  SLI_DESTINATION_INDEX_NAME,
   getSLOPipelineId,
   getSLOTransformId,
 } from '../../../common/constants';
@@ -26,8 +26,8 @@ import { InvalidTransformError } from '../../errors';
 import { getFilterRange, getTimesliceTargetComparator, parseIndex } from './common';
 
 export class ApmTransactionDurationTransformGenerator extends TransformGenerator {
-  constructor(spaceId: string, dataViewService: DataViewsService) {
-    super(spaceId, dataViewService);
+  constructor(spaceId: string, dataViewService: DataViewsService, isServerless: boolean) {
+    super(spaceId, dataViewService, isServerless);
   }
 
   public async getTransformParams(slo: SLODefinition): Promise<TransformPutTransformRequest> {
@@ -75,7 +75,9 @@ export class ApmTransactionDurationTransformGenerator extends TransformGenerator
   }
 
   private async buildSource(slo: SLODefinition, indicator: APMTransactionDurationIndicator) {
-    const queryFilter: estypes.QueryDslQueryContainer[] = [getFilterRange(slo, '@timestamp')];
+    const queryFilter: estypes.QueryDslQueryContainer[] = [
+      getFilterRange(slo, '@timestamp', this.isServerless),
+    ];
 
     if (indicator.params.service !== ALL_VALUE) {
       queryFilter.push({
@@ -133,7 +135,7 @@ export class ApmTransactionDurationTransformGenerator extends TransformGenerator
   private buildDestination(slo: SLODefinition) {
     return {
       pipeline: getSLOPipelineId(slo.id, slo.revision),
-      index: SLO_DESTINATION_INDEX_NAME,
+      index: SLI_DESTINATION_INDEX_NAME,
     };
   }
 

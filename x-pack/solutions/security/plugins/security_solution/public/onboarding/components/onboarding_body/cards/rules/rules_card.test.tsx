@@ -6,77 +6,71 @@
  */
 import React from 'react';
 import { render } from '@testing-library/react';
-import { RulesCard } from './rules_card';
 import { TestProviders } from '../../../../../common/mock';
+import { OnboardingContextProvider } from '../../../onboarding_context';
+import RulesCard from './rules_card';
+import { ExperimentalFeaturesService } from '../../../../../common/experimental_features_service';
+
+jest.mock('../../../../../common/experimental_features_service', () => ({
+  ExperimentalFeaturesService: { get: jest.fn() },
+}));
+const mockExperimentalFeatures = ExperimentalFeaturesService.get as jest.Mock;
+
+const mockSetComplete = jest.fn();
+const mockSetExpandedCardId = jest.fn();
+const mockIsCardComplete = jest.fn();
+const mockIsCardAvailable = jest.fn();
 
 const props = {
-  setComplete: jest.fn(),
+  setComplete: mockSetComplete,
   checkComplete: jest.fn(),
-  isCardComplete: jest.fn(),
+  isCardComplete: mockIsCardComplete,
+  setExpandedCardId: mockSetExpandedCardId,
+  isExpanded: true,
   isCardAvailable: jest.fn(),
-  setExpandedCardId: jest.fn(),
 };
 
 describe('RulesCard', () => {
   beforeEach(() => {
+    mockExperimentalFeatures.mockReturnValue({});
     jest.clearAllMocks();
   });
 
   it('description should be in the document', () => {
     const { getByTestId } = render(
       <TestProviders>
-        <RulesCard {...props} />
+        <OnboardingContextProvider spaceId="default">
+          <RulesCard {...props} />
+        </OnboardingContextProvider>
       </TestProviders>
     );
 
     expect(getByTestId('rulesCardDescription')).toBeInTheDocument();
   });
 
-  it('card callout should be rendered if integrations card is available but not complete', () => {
-    props.isCardAvailable.mockReturnValueOnce(true);
-    props.isCardComplete.mockReturnValueOnce(false);
-
-    const { getByText } = render(
-      <TestProviders>
-        <RulesCard {...props} />
-      </TestProviders>
-    );
-
-    expect(getByText('To add Elastic rules add integrations first.')).toBeInTheDocument();
-  });
-
   it('card callout should not be rendered if integrations card is not available', () => {
-    props.isCardAvailable.mockReturnValueOnce(false);
+    mockIsCardAvailable.mockReturnValueOnce(false);
 
     const { queryByText } = render(
       <TestProviders>
-        <RulesCard {...props} />
+        <OnboardingContextProvider spaceId="default">
+          <RulesCard {...props} />
+        </OnboardingContextProvider>
       </TestProviders>
     );
 
     expect(queryByText('To add Elastic rules add integrations first.')).not.toBeInTheDocument();
   });
 
-  it('card button should be disabled if integrations card is available but not complete', () => {
-    props.isCardAvailable.mockReturnValueOnce(true);
-    props.isCardComplete.mockReturnValueOnce(false);
+  it('renders an enabled button if integrations card is complete', () => {
+    mockIsCardAvailable.mockReturnValueOnce(true);
+    mockIsCardComplete.mockReturnValueOnce(true);
 
     const { getByTestId } = render(
       <TestProviders>
-        <RulesCard {...props} />
-      </TestProviders>
-    );
-
-    expect(getByTestId('rulesCardButton').querySelector('button')).toBeDisabled();
-  });
-
-  it('card button should be enabled if integrations card is complete', () => {
-    props.isCardAvailable.mockReturnValueOnce(true);
-    props.isCardComplete.mockReturnValueOnce(true);
-
-    const { getByTestId } = render(
-      <TestProviders>
-        <RulesCard {...props} />
+        <OnboardingContextProvider spaceId="default">
+          <RulesCard {...props} />
+        </OnboardingContextProvider>
       </TestProviders>
     );
 

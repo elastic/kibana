@@ -50,7 +50,7 @@ export function setupSavedObjects(
       getInAppUrl(obj) {
         return {
           path: getFullPath(obj.id),
-          uiCapabilitiesPath: 'maps.show',
+          uiCapabilitiesPath: 'maps_v2.show',
         };
       },
     },

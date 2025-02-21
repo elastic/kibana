@@ -56,7 +56,12 @@ import {
   packagePolicyToSimplifiedPackagePolicy,
 } from '../../../common/services/simplified_package_policy_helper';
 
-import type { SimplifiedPackagePolicy } from '../../../common/services/simplified_package_policy_helper';
+import type {
+  SimplifiedInputs,
+  SimplifiedPackagePolicy,
+} from '../../../common/services/simplified_package_policy_helper';
+
+import { validateAgentlessInputs } from '../../../common/services/agentless_policy_helper';
 
 import {
   isSimplifiedCreatePackagePolicyRequest,
@@ -339,6 +344,7 @@ export const updatePackagePolicyHandler: FleetRequestHandler<
   }
 
   try {
+    // simplified request
     const { force, package: pkg, ...body } = request.body;
     let newData: NewPackagePolicy;
 
@@ -354,12 +360,18 @@ export const updatePackagePolicyHandler: FleetRequestHandler<
         pkgName: pkg.name,
         pkgVersion: pkg.version,
       });
+
       newData = simplifiedPackagePolicytoNewPackagePolicy(
         body as unknown as SimplifiedPackagePolicy,
         pkgInfo,
         { experimental_data_stream_features: pkg.experimental_data_stream_features }
       );
+      validateAgentlessInputs(
+        body?.inputs as SimplifiedInputs,
+        body?.supports_agentless || newData.supports_agentless
+      );
     } else {
+      // complete request
       const { overrides, ...restOfBody } = body as TypeOf<
         typeof UpdatePackagePolicyRequestBodySchema
       >;
@@ -380,12 +392,17 @@ export const updatePackagePolicyHandler: FleetRequestHandler<
         package: pkg ?? packagePolicy.package,
         inputs: restOfBody.inputs ?? packagePolicyInputs,
         vars: restOfBody.vars ?? packagePolicy.vars,
+        supports_agentless: restOfBody.supports_agentless ?? packagePolicy.supports_agentless,
       } as NewPackagePolicy;
 
       if (overrides) {
         newData.overrides = overrides;
       }
     }
+    validateAgentlessInputs(
+      newData.inputs,
+      newData.supports_agentless || packagePolicy.supports_agentless
+    );
     newData.inputs = alignInputsAndStreams(newData.inputs);
 
     if (

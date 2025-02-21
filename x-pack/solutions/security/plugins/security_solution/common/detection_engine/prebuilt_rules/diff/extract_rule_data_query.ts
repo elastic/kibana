@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { Filter } from '@kbn/es-query';
 import type {
   EqlQueryLanguage,
   EsqlQueryLanguage,
@@ -48,7 +49,7 @@ export const extractInlineKqlQuery = (
     type: KqlQueryType.inline_query,
     query: query?.trim() ?? '',
     language: language ?? 'kuery',
-    filters: filters ?? [],
+    filters: normalizeFilterArray(filters),
   };
 };
 
@@ -65,7 +66,7 @@ export const extractRuleEqlQuery = (params: ExtractRuleEqlQueryParams): RuleEqlQ
   return {
     query: params.query.trim(),
     language: params.language,
-    filters: params.filters ?? [],
+    filters: normalizeFilterArray(params.filters),
     event_category_override: params.eventCategoryOverride,
     timestamp_field: params.timestampField,
     tiebreaker_field: params.tiebreakerField,
@@ -80,4 +81,23 @@ export const extractRuleEsqlQuery = (
     query: query.trim(),
     language,
   };
+};
+
+/**
+ * Removes the null `alias` field that gets appended from the internal kibana filter util for comparison
+ * Relevant issue: https://github.com/elastic/kibana/issues/202966
+ */
+const normalizeFilterArray = (filters: RuleFilterArray | undefined): RuleFilterArray => {
+  if (!filters?.length) {
+    return [];
+  }
+  return (filters as Filter[]).map((filter) => ({
+    ...filter,
+    meta: filter.meta
+      ? {
+          ...filter.meta,
+          alias: filter.meta.alias ?? undefined,
+        }
+      : undefined,
+  }));
 };

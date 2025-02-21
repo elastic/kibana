@@ -63,7 +63,7 @@ describe('createBenchmarkScoreIndex', () => {
   it('should create index template the correct index patter, index name and default ingest pipeline but without lifecycle in serverless', async () => {
     await createBenchmarkScoreIndex(
       mockEsClient,
-      { serverless: { enabled: true }, enabled: true },
+      { serverless: { enabled: true }, enabled: true, enableExperimental: [] },
       logger
     );
     expect(mockEsClient.indices.putIndexTemplate).toHaveBeenCalledTimes(1);
@@ -87,7 +87,7 @@ describe('createBenchmarkScoreIndex', () => {
 
     await createBenchmarkScoreIndex(
       mockEsClient,
-      { serverless: { enabled: true }, enabled: true },
+      { serverless: { enabled: true }, enabled: true, enableExperimental: [] },
       logger
     );
     expect(mockEsClient.indices.create).toHaveBeenCalledTimes(1);
@@ -102,7 +102,7 @@ describe('createBenchmarkScoreIndex', () => {
 
     await createBenchmarkScoreIndex(
       mockEsClient,
-      { serverless: { enabled: true }, enabled: true },
+      { serverless: { enabled: true }, enabled: true, enableExperimental: [] },
       logger
     );
     expect(mockEsClient.indices.create).toHaveBeenCalledTimes(0);

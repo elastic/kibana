@@ -892,13 +892,7 @@
           ],
           "signature": [
             "{ defaultSolution?: ",
-            {
-              "pluginId": "@kbn/core-chrome-browser",
-              "scope": "public",
-              "docId": "kibKbnCoreChromeBrowserPluginApi",
-              "section": "def-public.SolutionId",
-              "text": "SolutionId"
-            },
+            "SolutionId",
             " | undefined; }"
           ],
           "path": "x-pack/platform/plugins/shared/cloud/public/types.ts",
@@ -1211,13 +1205,7 @@
           ],
           "signature": [
             "{ defaultSolution?: ",
-            {
-              "pluginId": "@kbn/core-chrome-browser",
-              "scope": "public",
-              "docId": "kibKbnCoreChromeBrowserPluginApi",
-              "section": "def-public.SolutionId",
-              "text": "SolutionId"
-            },
+            "SolutionId",
             " | undefined; }"
           ],
           "path": "x-pack/platform/plugins/shared/cloud/server/plugin.ts",

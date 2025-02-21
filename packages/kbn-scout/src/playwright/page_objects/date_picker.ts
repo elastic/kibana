@@ -7,8 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ScoutPage } from '../fixtures/types';
-import { expect } from '..';
+import { ScoutPage, expect } from '..';
 
 export class DatePicker {
   constructor(private readonly page: ScoutPage) {}

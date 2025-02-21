@@ -23,7 +23,7 @@ import { performChecks } from '../../helpers';
 export const createKnowledgeBaseEntryRoute = (router: ElasticAssistantPluginRouter): void => {
   router.versioned
     .post({
-      access: 'internal',
+      access: 'public',
       path: ELASTIC_AI_ASSISTANT_KNOWLEDGE_BASE_ENTRIES_URL,
 
       security: {
@@ -34,7 +34,7 @@ export const createKnowledgeBaseEntryRoute = (router: ElasticAssistantPluginRout
     })
     .addVersion(
       {
-        version: API_VERSIONS.internal.v1,
+        version: API_VERSIONS.public.v1,
         validate: {
           request: {
             body: buildRouteValidationWithZod(KnowledgeBaseEntryCreateProps),

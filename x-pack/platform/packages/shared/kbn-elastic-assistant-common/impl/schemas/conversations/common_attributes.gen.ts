@@ -34,6 +34,151 @@ export const TraceData = z.object({
 });
 
 /**
+ * The basis of a content reference
+ */
+export type BaseContentReference = z.infer<typeof BaseContentReference>;
+export const BaseContentReference = z.object({
+  /**
+   * Id of the content reference
+   */
+  id: z.string(),
+  /**
+   * Type of the content reference
+   */
+  type: z.string(),
+});
+
+/**
+ * References a knowledge base entry
+ */
+export type KnowledgeBaseEntryContentReference = z.infer<typeof KnowledgeBaseEntryContentReference>;
+export const KnowledgeBaseEntryContentReference = BaseContentReference.merge(
+  z.object({
+    type: z.literal('KnowledgeBaseEntry'),
+    /**
+     * Id of the Knowledge Base Entry
+     */
+    knowledgeBaseEntryId: z.string(),
+    /**
+     * Name of the knowledge base entry
+     */
+    knowledgeBaseEntryName: z.string(),
+  })
+);
+
+/**
+ * References an ESQL query
+ */
+export type EsqlContentReference = z.infer<typeof EsqlContentReference>;
+export const EsqlContentReference = BaseContentReference.merge(
+  z.object({
+    type: z.literal('EsqlQuery'),
+    /**
+     * An ESQL query
+     */
+    query: z.string(),
+    /**
+     * Label of the query
+     */
+    label: z.string(),
+    /**
+     * Time range to select in the time picker.
+     */
+    timerange: z
+      .object({
+        from: z.string(),
+        to: z.string(),
+      })
+      .optional(),
+  })
+);
+
+/**
+ * References a security alert
+ */
+export type SecurityAlertContentReference = z.infer<typeof SecurityAlertContentReference>;
+export const SecurityAlertContentReference = BaseContentReference.merge(
+  z.object({
+    type: z.literal('SecurityAlert'),
+    /**
+     * ID of the Alert
+     */
+    alertId: z.string(),
+  })
+);
+
+/**
+ * References the security alerts page
+ */
+export type SecurityAlertsPageContentReference = z.infer<typeof SecurityAlertsPageContentReference>;
+export const SecurityAlertsPageContentReference = BaseContentReference.merge(
+  z.object({
+    type: z.literal('SecurityAlertsPage'),
+  })
+);
+
+/**
+ * References the product documentation
+ */
+export type ProductDocumentationContentReference = z.infer<
+  typeof ProductDocumentationContentReference
+>;
+export const ProductDocumentationContentReference = BaseContentReference.merge(
+  z.object({
+    type: z.literal('ProductDocumentation'),
+    /**
+     * Title of the documentation
+     */
+    title: z.string(),
+    /**
+     * URL to the documentation
+     */
+    url: z.string(),
+  })
+);
+
+/**
+ * A content reference
+ */
+export const ContentReferenceInternal = z.union([
+  KnowledgeBaseEntryContentReference,
+  SecurityAlertContentReference,
+  SecurityAlertsPageContentReference,
+  ProductDocumentationContentReference,
+  EsqlContentReference,
+]);
+
+export type ContentReference = z.infer<typeof ContentReferenceInternal>;
+export const ContentReference = ContentReferenceInternal as z.ZodType<ContentReference>;
+
+/**
+ * A union of all content reference types
+ */
+export type ContentReferences = z.infer<typeof ContentReferences>;
+export const ContentReferences = z
+  .object({})
+  .catchall(
+    z.union([
+      KnowledgeBaseEntryContentReference,
+      SecurityAlertContentReference,
+      SecurityAlertsPageContentReference,
+      ProductDocumentationContentReference,
+      EsqlContentReference,
+    ])
+  );
+
+/**
+ * Message metadata
+ */
+export type MessageMetadata = z.infer<typeof MessageMetadata>;
+export const MessageMetadata = z.object({
+  /**
+   * Data refered to by the message content.
+   */
+  contentReferences: ContentReferences.optional(),
+});
+
+/**
  * Replacements object used to anonymize/deanomymize messsages
  */
 export type Replacements = z.infer<typeof Replacements>;
@@ -103,6 +248,10 @@ export const Message = z.object({
    * trace Data
    */
   traceData: TraceData.optional(),
+  /**
+   * metadata
+   */
+  metadata: MessageMetadata.optional(),
 });
 
 export type ApiConfig = z.infer<typeof ApiConfig>;

@@ -20,6 +20,12 @@ const baseUrl = url.format({
   query: { rangeFrom: start, rangeTo: end },
 });
 
+const transactionTabPath = '/app/apm/services/sendotlp-synth/transactions/view';
+const transactionUrl = url.format({
+  pathname: transactionTabPath,
+  query: { rangeFrom: start, rangeTo: end, transactionName: 'parent-synth' },
+});
+
 describe('Service Overview', () => {
   before(() => {
     synthtraceOtel.index(
@@ -116,6 +122,13 @@ describe('Service Overview', () => {
 
       cy.contains('a', 'parent-synth').click();
       cy.contains('h5', 'parent-synth');
+    });
+    it('shows transaction summary', () => {
+      cy.visitKibana(transactionUrl);
+
+      cy.getByTestSubj('apmHttpInfoRequestMethod').should('exist');
+      cy.getByTestSubj('apmHttpInfoUrl').should('exist');
+      cy.getByTestSubj('apmHttpStatusBadge').should('exist');
     });
   });
 

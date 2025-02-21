@@ -146,9 +146,9 @@
               " & { solutionNav: ",
               {
                 "pluginId": "@kbn/shared-ux-page-solution-nav",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnSharedUxPageSolutionNavPluginApi",
-                "section": "def-common.SolutionNavProps",
+                "section": "def-public.SolutionNavProps",
                 "text": "SolutionNavProps"
               },
               "; }"

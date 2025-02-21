@@ -41,7 +41,7 @@ actions:
     update:
       description: >
         Alerting enables you to define rules, which detect complex conditions within your data.
-        When a condition is met, the rule tracks it as an alert and runs the actions that are defined in the rule. 
+        When a condition is met, the rule tracks it as an alert and runs the actions that are defined in the rule.
         Actions typically involve the use of connectors to interact with Kibana services or third party integrations.
       externalDocs:
         description: Alerting documentation
@@ -109,19 +109,19 @@ actions:
 # Examples that are not applicable to serverless
   - target: "$.paths['/api/spaces/_copy_saved_objects']['post']"
     description: "Add example to copy saved objects to space API"
-    update: 
-      requestBody: 
-        content: 
-          application/json; Elastic-Api-Version=2023-10-31: 
+    update:
+      requestBody:
+        content:
+          application/json:
             examples:
               copySavedObjectsRequestExample1:
                 $ref: "../examples/copy_saved_objects_request1.yaml"
               copySavedObjectsRequestExample2:
                 $ref: "../examples/copy_saved_objects_request2.yaml"
       responses:
-        200: 
-          content: 
-            application/json; Elastic-Api-Version=2023-10-31: 
+        200:
+          content:
+            application/json:
               examples:
                 copySavedObjectsResponseExample1:
                   $ref: "../examples/copy_saved_objects_response1.yaml"
@@ -133,19 +133,19 @@ actions:
                   $ref: "../examples/copy_saved_objects_response4.yaml"
   - target: "$.paths['/api/spaces/_resolve_copy_saved_objects_errors']['post']"
     description: "Add example to resolve copy saved objects to space conflicts API"
-    update: 
-      requestBody: 
-        content: 
-          application/json; Elastic-Api-Version=2023-10-31: 
+    update:
+      requestBody:
+        content:
+          application/json:
             examples:
               resolveCopySavedObjectsRequestExample1:
                 $ref: "../examples/resolve_copy_saved_objects_request1.yaml"
               resolveCopySavedObjectsRequestExample2:
                 $ref: "../examples/resolve_copy_saved_objects_request2.yaml"
       responses:
-        200: 
-          content: 
-            application/json; Elastic-Api-Version=2023-10-31: 
+        200:
+          content:
+            application/json:
               examples:
                 resolveCopySavedObjectsResponseExample1:
                   $ref: "../examples/copy_saved_objects_response1.yaml"
@@ -153,35 +153,35 @@ actions:
                   $ref: "../examples/copy_saved_objects_response2.yaml"
   - target: "$.paths['/api/spaces/_disable_legacy_url_aliases']['post']"
     description: "Add example to disable legacy URL aliases API"
-    update: 
-      requestBody: 
-        content: 
-          application/json; Elastic-Api-Version=2023-10-31: 
+    update:
+      requestBody:
+        content:
+          application/json:
             examples:
               disableLegacyURLRequestExample1:
                 $ref: "../examples/disable_legacy_url_request1.yaml"
   - target: "$.paths['/api/spaces/_update_objects_spaces']['post']"
     description: "Add example to update saved object spaces API"
-    update: 
-      requestBody: 
-        content: 
-          application/json; Elastic-Api-Version=2023-10-31: 
+    update:
+      requestBody:
+        content:
+          application/json:
             examples:
               updateObjectSpacesRequestExample1:
                 $ref: "../examples/update_saved_objects_spaces_request1.yaml"
       responses:
-        200: 
-          content: 
-            application/json; Elastic-Api-Version=2023-10-31: 
+        200:
+          content:
+            application/json:
               examples:
                 updateObjectSpacesResponseExample1:
                   $ref: "../examples/update_saved_objects_spaces_response1.yaml"
   - target: "$.paths['/api/security/role/{name}']['put']"
     description: "Add examples to create role API"
-    update: 
+    update:
       requestBody:
-        content: 
-          application/json; Elastic-Api-Version=2023-10-31: 
+        content:
+          application/json:
             examples:
               createRoleRequest1:
                 $ref: "../examples/create_role_request1.yaml"
@@ -197,7 +197,7 @@ actions:
       responses:
         200:
           content:
-            application/json; Elastic-Api-Version=2023-10-31:
+            application/json:
               examples:
                 getRoleResponse1:
                   $ref: '../examples/get_role_response1.yaml'
@@ -207,7 +207,7 @@ actions:
       responses:
         200:
           content:
-            application/json; Elastic-Api-Version=2023-10-31:
+            application/json:
               examples:
                 getRolesResponse1:
                   $ref: '../examples/get_roles_response1.yaml'

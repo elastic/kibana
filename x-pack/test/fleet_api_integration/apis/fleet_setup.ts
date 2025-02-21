@@ -9,7 +9,6 @@ import expect from '@kbn/expect';
 import { v4 as uuidV4 } from 'uuid';
 import { INGEST_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
 import { LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common/constants';
-import pRetry from 'p-retry';
 import { SearchTotalHits } from '@elastic/elasticsearch/lib/api/types';
 
 import { FtrProviderContext } from '../../api_integration/ftr_provider_context';
@@ -22,6 +21,7 @@ export default function (providerContext: FtrProviderContext) {
   const es = getService('es');
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
+  const retry = getService('retry');
 
   describe('fleet_setup', () => {
     skipIfNoDockerRegistry(providerContext);
@@ -120,8 +120,8 @@ export default function (providerContext: FtrProviderContext) {
       });
       it('should upgrade managed package policies', async () => {
         await apiClient.setup();
-
-        await pRetry(
+        await retry.tryWithRetries(
+          'Searching for managed package policies to be upgraded',
           async () => {
             const res = await es.search({
               index: INGEST_SAVED_OBJECT_INDEX,
@@ -150,7 +150,9 @@ export default function (providerContext: FtrProviderContext) {
             }
           },
           {
-            maxRetryTime: 20 * 1000,
+            retryCount: 15,
+            retryDelay: 5000,
+            timeout: 30_000,
           }
         );
       });

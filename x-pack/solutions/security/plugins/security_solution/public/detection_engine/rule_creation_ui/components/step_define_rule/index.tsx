@@ -93,6 +93,7 @@ import { usePersistentNewTermsState } from './use_persistent_new_terms_state';
 import { usePersistentAlertSuppressionState } from './use_persistent_alert_suppression_state';
 import { usePersistentThresholdState } from './use_persistent_threshold_state';
 import { usePersistentQuery } from './use_persistent_query';
+import { useUserPrivileges } from '../../../../common/components/user_privileges';
 import { usePersistentMachineLearningState } from './use_persistent_machine_learning_state';
 import { usePersistentThreatMatchState } from './use_persistent_threat_match_state';
 
@@ -191,6 +192,9 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
   const isThresholdRule = getIsThresholdRule(ruleType);
   const alertSuppressionUpsellingMessage = useUpsellingMessage('alert_suppression_rule_form');
   const { getFields, reset, setFieldValue } = form;
+  const {
+    timelinePrivileges: { read: canAttachTimelineTemplates },
+  } = useUserPrivileges();
 
   // Callback for when user toggles between Data Views and Index Patterns
   const onChangeDataSource = useCallback(
@@ -501,6 +505,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
             onSavedQueryError: handleSavedQueryError,
             defaultSavedQuery,
             onOpenTimeline,
+            bubbleSubmitEvent: true,
           } as QueryBarFieldProps
         }
       />
@@ -700,7 +705,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
             component={PickTimeline}
             componentProps={{
               idAria: 'detectionEngineStepDefineRuleTimeline',
-              isDisabled: isLoading,
+              isDisabled: isLoading || !canAttachTimelineTemplates,
               dataTestSubj: 'detectionEngineStepDefineRuleTimeline',
             }}
           />

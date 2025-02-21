@@ -11,8 +11,9 @@ import type { RiskScoreState } from '../../../entity_analytics/api/hooks/use_ris
 import type {
   HostItem,
   HostRiskScore,
-  RiskScoreEntity,
+  EntityType,
   UserRiskScore,
+  ServiceRiskScore,
 } from '../../../../common/search_strategy';
 import { HostPolicyResponseActionStatus, RiskSeverity } from '../../../../common/search_strategy';
 import { RiskCategories } from '../../../../common/entity_analytics/risk_engine';
@@ -86,7 +87,41 @@ const hostRiskScore: HostRiskScore = {
   oldestAlertTimestamp: '1989-11-08T23:00:00.000Z',
 };
 
-export const mockUserRiskScoreState: RiskScoreState<RiskScoreEntity.user> = {
+const serviceRiskScore: ServiceRiskScore = {
+  '@timestamp': '1989-11-08T23:00:00.000Z',
+  service: {
+    name: 'test',
+    risk: {
+      rule_risks: [],
+      calculated_score_norm: 70,
+      multipliers: [],
+      calculated_level: RiskSeverity.High,
+      '@timestamp': '',
+      id_field: '',
+      id_value: '',
+      calculated_score: 0,
+      category_1_count: 5,
+      category_1_score: 20,
+      category_2_count: 1,
+      category_2_score: 10,
+      notes: [],
+      inputs: [
+        {
+          id: '_id',
+          index: '_index',
+          category: RiskCategories.category_1,
+          description: 'Alert from Rule: My rule',
+          risk_score: 30,
+          timestamp: '2021-08-19T18:55:59.000Z',
+        },
+      ],
+    },
+  },
+  alertsCount: 0,
+  oldestAlertTimestamp: '1989-11-08T23:00:00.000Z',
+};
+
+export const mockUserRiskScoreState: RiskScoreState<EntityType.user> = {
   data: [userRiskScore],
   inspect: {
     dsl: [],
@@ -95,14 +130,13 @@ export const mockUserRiskScoreState: RiskScoreState<RiskScoreEntity.user> = {
   isInspected: false,
   refetch: () => {},
   totalCount: 0,
-  isModuleEnabled: true,
   isAuthorized: true,
-  isDeprecated: false,
+  hasEngineBeenInstalled: true,
   loading: false,
   error: undefined,
 };
 
-export const mockHostRiskScoreState: RiskScoreState<RiskScoreEntity.host> = {
+export const mockHostRiskScoreState: RiskScoreState<EntityType.host> = {
   data: [hostRiskScore],
   inspect: {
     dsl: [],
@@ -111,9 +145,23 @@ export const mockHostRiskScoreState: RiskScoreState<RiskScoreEntity.host> = {
   isInspected: false,
   refetch: () => {},
   totalCount: 0,
-  isModuleEnabled: true,
   isAuthorized: true,
-  isDeprecated: false,
+  hasEngineBeenInstalled: true,
+  loading: false,
+  error: undefined,
+};
+
+export const mockServiceRiskScoreState: RiskScoreState<EntityType.service> = {
+  data: [serviceRiskScore],
+  inspect: {
+    dsl: [],
+    response: [],
+  },
+  isInspected: false,
+  refetch: () => {},
+  totalCount: 0,
+  isAuthorized: true,
+  hasEngineBeenInstalled: true,
   loading: false,
   error: undefined,
 };

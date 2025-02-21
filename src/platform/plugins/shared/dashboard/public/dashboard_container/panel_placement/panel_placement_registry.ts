@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { i18n } from '@kbn/i18n';
 import { GetPanelPlacementSettings } from './types';
-import { panelPlacementStrings } from '../_dashboard_container_strings';
 
 const registry = new Map<string, GetPanelPlacementSettings<object>>();
 
@@ -17,7 +17,12 @@ export const registerDashboardPanelPlacementSetting = <SerializedState extends o
   getPanelPlacementSettings: GetPanelPlacementSettings<SerializedState>
 ) => {
   if (registry.has(embeddableType)) {
-    throw new Error(panelPlacementStrings.getPanelPlacementSettingsExistsError(embeddableType));
+    throw new Error(
+      i18n.translate('dashboard.panelPlacement.panelPlacementSettingsExistsError', {
+        defaultMessage: 'Panel placement settings for embeddable type {panelType} already exists',
+        values: { panelType: embeddableType },
+      })
+    );
   }
   registry.set(embeddableType, getPanelPlacementSettings as GetPanelPlacementSettings<object>);
 };

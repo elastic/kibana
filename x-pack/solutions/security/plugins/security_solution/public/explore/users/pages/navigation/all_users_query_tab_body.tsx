@@ -19,7 +19,6 @@ import { generateTablePaginationOptions } from '../../../components/paginated_ta
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import { usersSelectors } from '../../store';
 import { useQueryToggle } from '../../../../common/containers/query_toggle';
-import { useIsNewRiskScoreModuleInstalled } from '../../../../entity_analytics/api/hooks/use_risk_engine_status';
 
 const UsersTableManage = manageQuery(UsersTable);
 
@@ -43,8 +42,6 @@ export const AllUsersQueryTabBody = ({
 
   const getUsersSelector = useMemo(() => usersSelectors.allUsersSelector(), []);
   const { activePage, limit, sort } = useDeepEqualSelector((state) => getUsersSelector(state));
-  const { installed: isNewRiskScoreModuleInstalled, isLoading: riskScoreStatusLoading } =
-    useIsNewRiskScoreModuleInstalled();
 
   const {
     loading,
@@ -68,7 +65,7 @@ export const AllUsersQueryTabBody = ({
   });
 
   useEffect(() => {
-    if (!querySkip && !riskScoreStatusLoading) {
+    if (!querySkip) {
       search({
         filterQuery,
         defaultIndex: indexNames,
@@ -79,22 +76,9 @@ export const AllUsersQueryTabBody = ({
         },
         pagination: generateTablePaginationOptions(activePage, limit),
         sort,
-        isNewRiskScoreModuleInstalled,
       });
     }
-  }, [
-    search,
-    startDate,
-    endDate,
-    filterQuery,
-    indexNames,
-    querySkip,
-    activePage,
-    limit,
-    sort,
-    isNewRiskScoreModuleInstalled,
-    riskScoreStatusLoading,
-  ]);
+  }, [search, startDate, endDate, filterQuery, indexNames, querySkip, activePage, limit, sort]);
 
   return (
     <UsersTableManage

@@ -53,7 +53,6 @@ import { UninstallCommandFlyout } from '../../../../../../components';
 
 import type { ValidationResults } from '../agent_policy_validation';
 
-import { ExperimentalFeaturesService } from '../../../../services';
 import { useAgentPolicyFormContext } from '../agent_policy_form';
 import { policyHasEndpointSecurity as hasElasticDefend } from '../../../../../../../common/services';
 
@@ -121,15 +120,14 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
   // agent monitoring checkbox group can appear multiple times in the DOM, ids have to be unique to work correctly
   const monitoringCheckboxIdSuffix = Date.now();
 
-  const { agentTamperProtectionEnabled } = ExperimentalFeaturesService.get();
   const licenseService = useLicense();
   const [isUninstallCommandFlyoutOpen, setIsUninstallCommandFlyoutOpen] = useState(false);
   const policyHasElasticDefend = useMemo(() => hasElasticDefend(agentPolicy), [agentPolicy]);
-  const isManagedorAgentlessPolicy =
-    agentPolicy.is_managed === true || agentPolicy?.supports_agentless === true;
+  const isManagedPolicy = agentPolicy.is_managed === true;
+  const isManagedorAgentlessPolicy = isManagedPolicy || agentPolicy?.supports_agentless === true;
 
   const userHasAccessToAllPolicySpaces = useMemo(
-    () => 'space_ids' in agentPolicy && !agentPolicy.space_ids?.includes(UNKNOWN_SPACE),
+    () => ('space_ids' in agentPolicy ? !agentPolicy.space_ids?.includes(UNKNOWN_SPACE) : true),
     [agentPolicy]
   );
 
@@ -227,12 +225,7 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
   );
 
   const AgentTamperProtectionSection = useMemo(() => {
-    if (
-      agentTamperProtectionEnabled &&
-      licenseService.isPlatinum() &&
-      !agentPolicy.is_managed &&
-      !agentPolicy.supports_agentless
-    ) {
+    if (licenseService.isPlatinum() && !agentPolicy.is_managed && !agentPolicy.supports_agentless) {
       if (AgentTamperProtectionWrapper) {
         return (
           <Suspense fallback={null}>
@@ -245,7 +238,6 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
       return AgentTamperProtectionSectionContent;
     }
   }, [
-    agentTamperProtectionEnabled,
     licenseService,
     agentPolicy.is_managed,
     AgentTamperProtectionWrapper,
@@ -664,7 +656,7 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
           isDisabled={disabled}
         >
           <EuiSuperSelect
-            disabled={disabled || isManagedorAgentlessPolicy}
+            disabled={disabled || isManagedPolicy}
             valueOfSelected={agentPolicy.data_output_id || DEFAULT_SELECT_VALUE}
             fullWidth
             isLoading={isLoadingOptions}

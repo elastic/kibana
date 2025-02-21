@@ -7,7 +7,7 @@
 
 import { first, isEmpty } from 'lodash';
 import { SanitizedRule, RuleTypeParams } from '../../common/rule';
-import { isSnoozeActive } from './snooze/is_snooze_active';
+import { getActiveSnoozeIfExist } from './snooze/get_active_snooze_if_exist';
 
 type RuleSnoozeProps = Pick<SanitizedRule<RuleTypeParams>, 'muteAll' | 'snoozeSchedule'>;
 type ActiveSnoozes = Array<{ snoozeEndTime: Date; id: string; lastOccurrence?: Date }>;
@@ -19,7 +19,7 @@ export function getActiveSnoozes(rule: RuleSnoozeProps): ActiveSnoozes | null {
 
   return (
     rule.snoozeSchedule
-      .map((snooze) => isSnoozeActive(snooze))
+      .map((snooze) => getActiveSnoozeIfExist(snooze))
       .filter(Boolean)
       // Sort in descending snoozeEndTime order
       .sort((a, b) => b!.snoozeEndTime.getTime() - a!.snoozeEndTime.getTime()) as ActiveSnoozes

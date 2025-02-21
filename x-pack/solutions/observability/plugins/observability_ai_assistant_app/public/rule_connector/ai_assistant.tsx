@@ -6,6 +6,7 @@
  */
 
 import React, { lazy } from 'react';
+import { isEmpty } from 'lodash';
 import type {
   ActionTypeModel as ConnectorTypeModel,
   GenericValidationResult,
@@ -19,6 +20,7 @@ import {
   CONNECTOR_REQUIRED,
   CONNECTOR_TITLE,
   MESSAGE_REQUIRED,
+  STATUS_REQUIRED,
 } from './translations';
 
 export function getConnectorType(
@@ -35,19 +37,26 @@ export function getConnectorType(
     validateParams: async (
       actionParams: ObsAIAssistantActionParams
     ): Promise<GenericValidationResult<ObsAIAssistantActionParams>> => {
-      const validationResult = {
-        errors: { connector: new Array<string>(), message: new Array<string>() },
+      const validatePrompt = (prompt: { message: string; statuses: string[] }): string[] => {
+        const errors: string[] = [];
+
+        if (!prompt.message) {
+          errors.push(MESSAGE_REQUIRED);
+        }
+        if (isEmpty(prompt.statuses)) {
+          errors.push(STATUS_REQUIRED);
+        }
+
+        return errors;
       };
 
-      if (!actionParams.connector) {
-        validationResult.errors.connector.push(CONNECTOR_REQUIRED);
-      }
-
-      if (!actionParams.message) {
-        validationResult.errors.message.push(MESSAGE_REQUIRED);
-      }
-
-      return validationResult;
+      return {
+        errors: {
+          connector: actionParams.connector ? [] : [CONNECTOR_REQUIRED],
+          message: actionParams.message && !actionParams.prompts ? [MESSAGE_REQUIRED] : [],
+          prompts: actionParams.prompts?.map(validatePrompt) || [],
+        },
+      };
     },
     actionParamsFields: lazy(() =>
       import('./ai_assistant_params').then(({ default: ActionParamsFields }) => ({

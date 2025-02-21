@@ -65,3 +65,7 @@ class MyPlugin {
   }
 }
 ```
+
+### Local EBT shipper
+
+When developing any EBT events, sometimes, developers are not sure if their event will be as useful as they think. Setting the dev-only configuration `telemetry.localShipper: true`, all the EBT events will be indexed in the local ES under the indices `ebt-kibana-browser` and `ebt-kibana-server`.

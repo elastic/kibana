@@ -189,3 +189,15 @@ export const RULE_BACKFILLS_COLUMN_TOTAL = '[data-test-subj="rule-backfills-colu
 export const RULE_BACKFILLS_DELETE_BUTTON = '[data-test-subj="rule-backfills-delete-button"]';
 export const RULE_BACKFILLS_DELETE_MODAL = '[data-test-subj="rule-backfills-delete-modal"]';
 export const RULE_BACKFILL_DELETE_MODAL_CONFIRM_BUTTON = `${RULE_BACKFILLS_DELETE_MODAL} [data-test-subj="confirmModalConfirmButton"]`;
+
+// Rule gaps selectors
+export const RULE_GAPS_INFO = '[data-test-subj="rule-gaps-info"]';
+export const RULE_GAPS_TABLE = '[data-test-subj="rule-gaps-table"]';
+export const RULE_GAPS_STATUS_FILTER = '[data-test-subj="rule-gaps-status-filter"]';
+export const RULE_GAPS_DATE_FILTER_OPTION = `[data-test-subj="rule-gaps-status-filter-item"]`;
+export const RULE_GAPS_FILL_BUTTON =
+  '[data-test-subj="rule-gaps-table"] [data-test-subj="rule-gaps-fill-gap-button"]';
+export const RULE_GAPS_FILL_TOOLTIP = '[data-test-subj="rule-gaps-fill-gap-tooltip"]';
+export const RULE_GAPS_PROGRESS_BAR = '[data-test-subj="rule-gaps-progress-bar"]';
+export const RULE_GAPS_DATE_PICKER = '[data-test-subj="rule-gaps-date-picker"]';
+export const RULE_GAPS_DATE_PICKER_APPLY_REFRESH = `${RULE_GAPS_DATE_PICKER} .euiSuperUpdateButton`;

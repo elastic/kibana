@@ -8,7 +8,6 @@ import { pickBy } from 'lodash';
 import { withSecuritySpanSync } from '../../../../../utils/with_security_span';
 import type { PromisePoolError } from '../../../../../utils/promise_pool';
 import {
-  PickVersionValuesEnum,
   type PerformRuleUpgradeRequestBody,
   type PickVersionValues,
   type AllFieldsDiff,
@@ -26,7 +25,7 @@ import { getValueForField } from './get_value_for_field';
 interface CreateModifiedPrebuiltRuleAssetsProps {
   upgradeableRules: RuleTriad[];
   requestBody: PerformRuleUpgradeRequestBody;
-  prebuiltRulesCustomizationEnabled: boolean;
+  defaultPickVersion: PickVersionValues;
 }
 
 interface ProcessedRules {
@@ -37,12 +36,9 @@ interface ProcessedRules {
 export const createModifiedPrebuiltRuleAssets = ({
   upgradeableRules,
   requestBody,
-  prebuiltRulesCustomizationEnabled,
+  defaultPickVersion,
 }: CreateModifiedPrebuiltRuleAssetsProps) => {
   return withSecuritySpanSync(createModifiedPrebuiltRuleAssets.name, () => {
-    const defaultPickVersion = prebuiltRulesCustomizationEnabled
-      ? PickVersionValuesEnum.MERGED
-      : PickVersionValuesEnum.TARGET;
     const { pick_version: globalPickVersion = defaultPickVersion, mode } = requestBody;
 
     const { modifiedPrebuiltRuleAssets, processingErrors } =

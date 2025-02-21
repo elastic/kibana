@@ -12,6 +12,7 @@ import { inspect, format } from 'util';
 import { setTimeout as setTimer } from 'timers/promises';
 import * as Rx from 'rxjs';
 import apmNode from 'elastic-apm-node';
+import type { ApmBase } from '@elastic/apm-rum';
 import playwright, { ChromiumBrowser, Page, BrowserContext, CDPSession, Request } from 'playwright';
 import { asyncMap, asyncForEach } from '@kbn/std';
 import { ToolingLog } from '@kbn/tooling-log';
@@ -31,6 +32,13 @@ import type { JourneyConfig } from './journey_config';
 import { JourneyScreenshots } from './journey_screenshots';
 import { getNewPageObject } from '../services/page';
 import { getSynthtraceClient } from '../services/synthtrace';
+
+type WindowWithApmContext = Window & {
+  elasticApm?: ApmBase;
+  traceIdOverrideListenerAttached?: boolean;
+  journeyTraceId?: string;
+  journeyParentId?: string;
+};
 
 export class JourneyFtrHarness {
   private readonly screenshots: JourneyScreenshots;
@@ -161,6 +169,53 @@ export class JourneyFtrHarness {
 
     this.page = await this.context.newPage();
 
+    await this.interceptBrowserRequests(this.page);
+
+    const initializeApmInitListener = async () => {
+      await this.page?.evaluate(() => {
+        const win = window as WindowWithApmContext;
+
+        const attachTraceIdOverrideListener = () => {
+          if (win.traceIdOverrideListenerAttached) {
+            return;
+          }
+          win.traceIdOverrideListenerAttached = true;
+          win.elasticApm!.observe('transaction:start', (tx) => {
+            // private properties, bit of a hack
+            // @ts-expect-error
+            tx.traceId = win.journeyTraceId || tx.traceId;
+            // @ts-expect-error
+            tx.parentId = win.journeyParentId || tx.parentId;
+          });
+        };
+
+        if (win.elasticApm) {
+          attachTraceIdOverrideListener();
+        } else {
+          // attach trace listener as soon as elasticApm API is available
+          let originalValue: any;
+
+          Object.defineProperty(window, 'elasticApm', {
+            get() {
+              return originalValue;
+            },
+            set(newValue) {
+              originalValue = newValue;
+              attachTraceIdOverrideListener();
+            },
+            configurable: true,
+            enumerable: true,
+          });
+        }
+      });
+    };
+
+    this.page.on('framenavigated', () => {
+      initializeApmInitListener();
+    });
+
+    await initializeApmInitListener();
+
     if (!process.env.NO_BROWSER_LOG) {
       this.page.on('console', this.onConsoleEvent);
     }
@@ -168,7 +223,6 @@ export class JourneyFtrHarness {
     await this.sendCDPCommands(this.context, this.page);
 
     this.trackTelemetryRequests(this.page);
-    await this.interceptBrowserRequests(this.page);
   }
 
   private async runSynthtrace() {
@@ -382,9 +436,12 @@ export class JourneyFtrHarness {
     }
   }
 
+  private getCurrentSpanOrTransaction() {
+    return this.currentSpanStack.length ? this.currentSpanStack[0] : this.currentTransaction;
+  }
+
   private getCurrentTraceparent() {
-    return (this.currentSpanStack.length ? this.currentSpanStack[0] : this.currentTransaction)
-      ?.traceparent;
+    return this.getCurrentSpanOrTransaction()?.traceparent;
   }
 
   private async getBrowserInstance() {
@@ -514,6 +571,18 @@ export class JourneyFtrHarness {
       for (const step of steps) {
         it(step.name, async () => {
           await this.withSpan(`step: ${step.name}`, 'step', async () => {
+            await this.page?.evaluate(
+              ([traceId, parentId]) => {
+                const win = window as WindowWithApmContext;
+                win.journeyTraceId = traceId;
+                win.journeyParentId = parentId;
+              },
+              [
+                this.apm?.currentTraceIds['trace.id'],
+                this.apm?.currentTraceIds['span.id'] || this.apm?.currentTraceIds['transaction.id'],
+              ]
+            );
+
             try {
               await step.fn(this.getCtx());
               await this.onStepSuccess(step);

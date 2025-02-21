@@ -5,12 +5,10 @@
  * 2.0.
  */
 
-import Boom from '@hapi/boom';
 import { schema } from '@kbn/config-schema';
 
 import type { caseApiV1 } from '../../../../common/types/api';
 import type { caseDomainV1 } from '../../../../common/types/domain';
-import { getWarningHeader, logDeprecatedEndpoint } from '../utils';
 import { CASE_DETAILS_URL } from '../../../../common/constants';
 import { createCaseError } from '../../../common/error';
 import { createCasesRoute } from '../create_cases_route';
@@ -20,15 +18,9 @@ const params = {
   params: schema.object({
     case_id: schema.string(),
   }),
-  query: schema.object({
-    /**
-     * @deprecated since version 8.1.0
-     */
-    includeComments: schema.boolean({ defaultValue: true, meta: { deprecated: true } }),
-  }),
 };
 
-export const getCaseRoute = ({ isServerless }: { isServerless?: boolean }) =>
+export const getCaseRoute = () =>
   createCasesRoute({
     method: 'get',
     path: CASE_DETAILS_URL,
@@ -41,41 +33,23 @@ export const getCaseRoute = ({ isServerless }: { isServerless?: boolean }) =>
     },
     handler: async ({ context, request, response, logger, kibanaVersion }) => {
       try {
-        const isIncludeCommentsParamProvidedByTheUser =
-          request.url.searchParams.has('includeComments');
-
-        if (isServerless && isIncludeCommentsParamProvidedByTheUser) {
-          throw Boom.badRequest('includeComments is not supported');
-        }
-
-        if (isIncludeCommentsParamProvidedByTheUser) {
-          logDeprecatedEndpoint(
-            logger,
-            request.headers,
-            `The query parameter 'includeComments' of the get case API '${CASE_DETAILS_URL}' is deprecated`
-          );
-        }
-
         const caseContext = await context.cases;
         const casesClient = await caseContext.getCasesClient();
         const id = request.params.case_id;
 
         const res: caseDomainV1.Case = await casesClient.cases.get({
           id,
-          includeComments: request.query.includeComments,
+          includeComments: false,
         });
 
+        const { comments, ...caseWithoutComments } = res;
+
         return response.ok({
-          ...(isIncludeCommentsParamProvidedByTheUser && {
-            headers: {
-              ...getWarningHeader(kibanaVersion, 'Deprecated query parameter includeComments'),
-            },
-          }),
-          body: res,
+          body: caseWithoutComments,
         });
       } catch (error) {
         throw createCaseError({
-          message: `Failed to retrieve case in route case id: ${request.params.case_id} \ninclude comments: ${request.query.includeComments}: ${error}`,
+          message: `Failed to retrieve case in route case id: ${request.params.case_id} \n${error}`,
           error,
         });
       }
@@ -88,7 +62,15 @@ export const resolveCaseRoute = createCasesRoute({
   routerOptions: {
     access: 'internal',
   },
-  params,
+  params: {
+    ...params,
+    query: schema.object({
+      /**
+       * @deprecated since version 8.1.0
+       */
+      includeComments: schema.boolean({ defaultValue: true, meta: { deprecated: true } }),
+    }),
+  },
   handler: async ({ context, request, response }) => {
     try {
       const caseContext = await context.cases;

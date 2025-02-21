@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { expect, Page } from '@elastic/synthetics';
+import { Page } from '@elastic/synthetics';
 import { waitForLoadingToFinish } from '@kbn/ux-plugin/e2e/journeys/utils';
 
 export function utilsPageProvider({ page }: { page: Page }) {
@@ -19,7 +19,7 @@ export function utilsPageProvider({ page }: { page: Page }) {
 
     async assertText({ text }: { text: string }) {
       await page.waitForSelector(`text=${text}`);
-      expect(await page.$(`text=${text}`)).toBeTruthy();
+      await page.getByText(text).isVisible();
     },
 
     async fillByTestSubj(dataTestSubj: string, value: string) {

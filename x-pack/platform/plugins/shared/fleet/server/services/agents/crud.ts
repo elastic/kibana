@@ -266,6 +266,8 @@ export async function getAgentsByKuery(
     degraded: 0,
     enrolling: 0,
     unenrolling: 0,
+    orphaned: 0,
+    uninstalled: 0,
   };
 
   const queryAgents = async (from: number, size: number) => {

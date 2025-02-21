@@ -12,7 +12,7 @@ import { EuiCallOut, EuiLink, useEuiTheme } from '@elastic/eui';
 import type { ReactEmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import {
   initializeTimeRange,
-  initializeTitles,
+  initializeTitleManager,
   useFetchContext,
 } from '@kbn/presentation-publishing';
 import { LogStream } from '@kbn/logs-shared-plugin/public';
@@ -38,24 +38,24 @@ export function getLogStreamEmbeddableFactory(services: Services) {
     deserializeState: (state) => state.rawState,
     buildEmbeddable: async (state, buildApi) => {
       const timeRangeContext = initializeTimeRange(state);
-      const { titlesApi, titleComparators, serializeTitles } = initializeTitles(state);
+      const titleManager = initializeTitleManager(state);
 
       const api = buildApi(
         {
           ...timeRangeContext.api,
-          ...titlesApi,
+          ...titleManager.api,
           serializeState: () => {
             return {
               rawState: {
                 ...timeRangeContext.serialize(),
-                ...serializeTitles(),
+                ...titleManager.serialize(),
               },
             };
           },
         },
         {
           ...timeRangeContext.comparators,
-          ...titleComparators,
+          ...titleManager.comparators,
         }
       );
 

@@ -34,6 +34,7 @@ import { buildDataTableRecord } from '@kbn/discover-utils';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
 import type { DiscoverCustomizationId } from '../../../../customizations/customization_service';
 import { FieldListCustomization, SearchBarCustomization } from '../../../../customizations';
+import { InternalStateProvider } from '../../state_management/discover_internal_state_container';
 
 const mockSearchBarCustomization: SearchBarCustomization = {
   id: 'search_bar',
@@ -177,13 +178,13 @@ function getCompProps(options?: { hits?: DataTableRecord[] }): DiscoverSidebarRe
   };
 }
 
-function getAppStateContainer({ query }: { query?: Query | AggregateQuery }) {
-  const appStateContainer = getDiscoverStateMock({ isTimeBased: true }).appState;
-  appStateContainer.set({
+function getStateContainer({ query }: { query?: Query | AggregateQuery }) {
+  const stateContainer = getDiscoverStateMock({ isTimeBased: true });
+  stateContainer.appState.set({
     query: query ?? { query: '', language: 'lucene' },
     filters: [],
   });
-  return appStateContainer;
+  return stateContainer;
 }
 
 async function mountComponent(
@@ -192,7 +193,7 @@ async function mountComponent(
   services?: DiscoverServices
 ): Promise<ReactWrapper<DiscoverSidebarResponsiveProps>> {
   let comp: ReactWrapper<DiscoverSidebarResponsiveProps>;
-  const appState = getAppStateContainer(appStateParams);
+  const { appState, internalState } = getStateContainer(appStateParams);
   const mockedServices = services ?? createMockServices();
   mockedServices.data.dataViews.getIdsWithTitle = jest.fn(async () =>
     props.selectedDataView
@@ -208,7 +209,9 @@ async function mountComponent(
     comp = mountWithIntl(
       <KibanaContextProvider services={mockedServices}>
         <DiscoverAppStateProvider value={appState}>
-          <DiscoverSidebarResponsive {...props} />
+          <InternalStateProvider value={internalState}>
+            <DiscoverSidebarResponsive {...props} />
+          </InternalStateProvider>
         </DiscoverAppStateProvider>
       </KibanaContextProvider>
     );

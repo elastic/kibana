@@ -1,6 +1,6 @@
 openapi: 3.0.0
 info:
-  title: Read list API endpoint
+  title: Read value list API endpoint
   version: '2023-10-31'
 paths:
   /api/lists:
@@ -8,13 +8,12 @@ paths:
       x-labels: [serverless, ess]
       operationId: ReadList
       x-codegen-enabled: true
-      summary: Get list details
-      description: Get the details of a list using the list ID.
+      summary: Get value list details
+      description: Get the details of a value list using the list ID.
       parameters:
         - name: id
           in: query
           required: true
-          description: List's `id` value
           schema:
             $ref: '../model/list_common.schema.yaml#/components/schemas/ListId'
       responses:
@@ -24,6 +23,22 @@ paths:
             application/json:
               schema:
                 $ref: '../model/list_schemas.schema.yaml#/components/schemas/List'
+              examples:
+                ip:
+                  value:
+                    id: ip_list
+                    type: ip
+                    name: My bad ips
+                    description: This list describes bad internet ip
+                    immutable: false
+                    '@timestamp': 2025-01-08T04:47:34.273Z
+                    version: 1
+                    _version: WzEsMV0=
+                    tie_breaker_id: f5508188-b1e9-4e6e-9662-d039a7d89899
+                    created_at: 2025-01-08T04:47:34.273Z
+                    created_by: elastic
+                    updated_at: 2025-01-08T05:21:53.843Z
+                    updated_by: elastic
         400:
           description: Invalid input data response
           content:
@@ -32,27 +47,55 @@ paths:
                 oneOf:
                   - $ref: '../../../../../../../src/platform/packages/shared/kbn-openapi-common/schemas/error_responses.schema.yaml#/components/schemas/PlatformErrorResponse'
                   - $ref: '../../../../../../../src/platform/packages/shared/kbn-openapi-common/schemas/error_responses.schema.yaml#/components/schemas/SiemErrorResponse'
+              examples:
+                badRequest:
+                  value:
+                    statusCode: 400
+                    error: Bad Request
+                    message: '[request query]: id: Required'
         401:
           description: Unsuccessful authentication response
           content:
             application/json:
               schema:
                 $ref: '../../../../../../../src/platform/packages/shared/kbn-openapi-common/schemas/error_responses.schema.yaml#/components/schemas/PlatformErrorResponse'
+              examples:
+                unauthorized:
+                  value:
+                    statusCode: 401
+                    error: Unauthorized
+                    message: "[security_exception\n\tRoot causes:\n\t\tsecurity_exception: unable to authenticate user [elastic] for REST request [/_security/_authenticate]]: unable to authenticate user [elastic] for REST request [/_security/_authenticate]"
         403:
           description: Not enough privileges response
           content:
             application/json:
               schema:
                 $ref: '../../../../../../../src/platform/packages/shared/kbn-openapi-common/schemas/error_responses.schema.yaml#/components/schemas/PlatformErrorResponse'
+              examples:
+                forbidden:
+                  value:
+                    statusCode: 403
+                    error: Forbidden
+                    message: 'API [GET /api/lists?id=ip_list] is unauthorized for user, this action is granted by the Kibana privileges [lists-read]'
         404:
           description: List not found response
           content:
             application/json:
               schema:
                 $ref: '../../../../../../../src/platform/packages/shared/kbn-openapi-common/schemas/error_responses.schema.yaml#/components/schemas/SiemErrorResponse'
+              examples:
+                notFound:
+                  value:
+                    message: 'list id: \"foo\" not found'
+                    status_code: 404
         500:
           description: Internal server error response
           content:
             application/json:
               schema:
                 $ref: '../../../../../../../src/platform/packages/shared/kbn-openapi-common/schemas/error_responses.schema.yaml#/components/schemas/SiemErrorResponse'
+              examples:
+                serverError:
+                  value:
+                    message: Internal Server Error
+                    status_code: 500

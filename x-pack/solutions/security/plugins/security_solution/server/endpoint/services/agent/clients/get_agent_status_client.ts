@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { MicrosoftDefenderEndpointAgentStatusClient } from './microsoft_defender_endpoint';
 import { CrowdstrikeAgentStatusClient } from './crowdstrike/crowdstrike_agent_status_client';
 import { SentinelOneAgentStatusClient } from './sentinel_one/sentinel_one_agent_status_client';
 import type { AgentStatusClientInterface } from './lib/types';
@@ -30,6 +31,8 @@ export const getAgentStatusClient = (
       return new SentinelOneAgentStatusClient(constructorOptions);
     case 'crowdstrike':
       return new CrowdstrikeAgentStatusClient(constructorOptions);
+    case 'microsoft_defender_endpoint':
+      return new MicrosoftDefenderEndpointAgentStatusClient(constructorOptions);
     default:
       throw new UnsupportedAgentTypeError(
         `Agent type [${agentType}] does not support agent status`

@@ -11,3 +11,5 @@ export const GET_USER_PRIVILEGES_ROUTE = '/internal/search_indices/start_privile
 export const POST_CREATE_INDEX_ROUTE = '/internal/search_indices/indices/create';
 
 export const INDEX_DOCUMENT_ROUTE = '/internal/search_indices/{indexName}/documents/{id}';
+
+export const SEARCH_DOCUMENTS_ROUTE = '/internal/search_indices/{indexName}/documents/search';

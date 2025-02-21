@@ -12,6 +12,7 @@ import { EuiSwitch, EuiText } from '@elastic/eui';
 import { AggFunctionsMapping } from '@kbn/data-plugin/public';
 import { buildExpressionFunction } from '@kbn/expressions-plugin/public';
 import { COUNT_ID, COUNT_NAME } from '@kbn/lens-formula-docs';
+import { sanitazeESQLInput } from '@kbn/esql-utils';
 import { TimeScaleUnit } from '../../../../../common/expressions';
 import { OperationDefinition, ParamEditorProps } from '.';
 import { FieldBasedIndexPatternColumn, ValueFormatConfig } from './column_types';
@@ -184,6 +185,23 @@ export const countOperation: OperationDefinition<CountIndexPatternColumn, 'field
         ),
       },
     ];
+  },
+  getSerializedFormat: (column, columnId, indexPattern) => {
+    const field = indexPattern?.getFieldByName(column.sourceField);
+    return field?.format ?? { id: 'number' };
+  },
+  toESQL: (column, columnId, indexPattern) => {
+    if (column.params?.emptyAsNull === false || column.timeShift || column.filter) return;
+
+    const field = indexPattern.getFieldByName(column.sourceField);
+    let esql = '';
+    if (!field || field?.type === 'document') {
+      esql = `COUNT(*)`;
+    } else {
+      esql = `COUNT(${sanitazeESQLInput(field.name)})`;
+    }
+
+    return esql;
   },
   toEsAggsFn: (column, columnId, indexPattern) => {
     const field = indexPattern.getFieldByName(column.sourceField);

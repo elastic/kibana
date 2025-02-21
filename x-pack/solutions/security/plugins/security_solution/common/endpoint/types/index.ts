@@ -15,6 +15,7 @@ export * from './trusted_apps';
 export * from './utility_types';
 export * from './agents';
 export * from './sentinel_one';
+export * from './microsoft_defender_endpoint';
 export type { ConditionEntriesMap, ConditionEntry } from './exception_list_items';
 
 /**
@@ -972,6 +973,7 @@ export interface PolicyConfig {
     heartbeatinterval?: number;
   };
   global_manifest_version: 'latest' | string;
+  global_telemetry_enabled: boolean;
   windows: {
     advanced?: {
       [key: string]: unknown;

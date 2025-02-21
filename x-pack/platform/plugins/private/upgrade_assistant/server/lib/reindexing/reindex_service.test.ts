@@ -457,18 +457,17 @@ describe('reindexService', () => {
       // The more intricate details of how the settings are chosen are test separately.
       it('creates new index with settings and mappings and updates lastCompletedStep', async () => {
         actions.getFlatSettings.mockResolvedValueOnce(settingsMappings);
-        clusterClient.asCurrentUser.indices.create.mockResponse(
-          // @ts-expect-error not full interface
-          { acknowledged: true }
-        );
+        clusterClient.asCurrentUser.transport.request.mockResolvedValueOnce({ acknowledged: true });
         const updatedOp = await service.processNextStep(reindexOp);
         expect(updatedOp.attributes.lastCompletedStep).toEqual(ReindexStep.newIndexCreated);
-        expect(clusterClient.asCurrentUser.indices.create).toHaveBeenCalledWith({
-          index: 'myIndex-reindex-0',
+        expect(clusterClient.asCurrentUser.transport.request).toHaveBeenCalledWith({
+          method: 'POST',
+          path: `_create_from/myIndex/myIndex-reindex-0`,
           body: {
-            // index.blocks.write should be removed from the settings for the new index.
-            settings: { 'index.number_of_replicas': 7 },
-            mappings: settingsMappings.mappings,
+            settings_override: {
+              'index.number_of_replicas': 0,
+              'index.refresh_interval': -1,
+            },
           },
         });
       });
@@ -509,7 +508,7 @@ describe('reindexService', () => {
         // Original index should have been set back to allow reads.
         expect(clusterClient.asCurrentUser.indices.putSettings).toHaveBeenCalledWith({
           index: 'myIndex',
-          body: { blocks: { write: false } },
+          settings: { blocks: { write: false } },
         });
       });
     });
@@ -539,10 +538,9 @@ describe('reindexService', () => {
         expect(clusterClient.asCurrentUser.reindex).toHaveBeenLastCalledWith({
           refresh: true,
           wait_for_completion: false,
-          body: {
-            source: { index: 'myIndex' },
-            dest: { index: 'myIndex-reindex-0' },
-          },
+          source: { index: 'myIndex' },
+          dest: { index: 'myIndex-reindex-0' },
+          slices: 'auto',
         });
       });
 
@@ -725,6 +723,72 @@ describe('reindexService', () => {
           ...defaultAttributes,
           lastCompletedStep: ReindexStep.reindexCompleted,
           reindexOptions: { openAndClose: false },
+          backupSettings: {},
+        },
+      } as ReindexSavedObject;
+
+      it('restores the settings (both to null), and updates lastCompletedStep', async () => {
+        clusterClient.asCurrentUser.indices.putSettings.mockResponseOnce({ acknowledged: true });
+        const updatedOp = await service.processNextStep(reindexOp);
+        expect(updatedOp.attributes.lastCompletedStep).toEqual(ReindexStep.indexSettingsRestored);
+        expect(clusterClient.asCurrentUser.indices.putSettings).toHaveBeenCalledWith({
+          index: reindexOp.attributes.newIndexName,
+          settings: {
+            'index.number_of_replicas': null,
+            'index.refresh_interval': null,
+          },
+        });
+      });
+
+      it('restores the original settings, and updates lastCompletedStep', async () => {
+        clusterClient.asCurrentUser.indices.putSettings.mockResponseOnce({ acknowledged: true });
+        const reindexOpWithBackupSettings = {
+          ...reindexOp,
+          attributes: {
+            ...reindexOp.attributes,
+            backupSettings: {
+              'index.number_of_replicas': 7,
+              'index.refresh_interval': 1,
+            },
+          },
+        };
+        const updatedOp = await service.processNextStep(reindexOpWithBackupSettings);
+        expect(updatedOp.attributes.lastCompletedStep).toEqual(ReindexStep.indexSettingsRestored);
+        expect(clusterClient.asCurrentUser.indices.putSettings).toHaveBeenCalledWith({
+          index: reindexOp.attributes.newIndexName,
+          settings: {
+            'index.number_of_replicas': 7,
+            'index.refresh_interval': 1,
+          },
+        });
+      });
+
+      it('fails if the request is not acknowledged', async () => {
+        clusterClient.asCurrentUser.indices.putSettings.mockResponseOnce({ acknowledged: false });
+        const updatedOp = await service.processNextStep(reindexOp);
+        expect(updatedOp.attributes.lastCompletedStep).toEqual(ReindexStep.reindexCompleted);
+        expect(updatedOp.attributes.status).toEqual(ReindexStatus.failed);
+        expect(updatedOp.attributes.errorMessage).not.toBeNull();
+        expect(log.error).toHaveBeenCalledWith(expect.any(String));
+      });
+
+      it('fails if the request fails', async () => {
+        clusterClient.asCurrentUser.indices.putSettings.mockRejectedValueOnce(new Error('blah!'));
+        const updatedOp = await service.processNextStep(reindexOp);
+        expect(updatedOp.attributes.lastCompletedStep).toEqual(ReindexStep.reindexCompleted);
+        expect(updatedOp.attributes.status).toEqual(ReindexStatus.failed);
+        expect(updatedOp.attributes.errorMessage).not.toBeNull();
+        expect(log.error).toHaveBeenCalledWith(expect.any(String));
+      });
+    });
+
+    describe('indexSettingsRestored', () => {
+      const reindexOp = {
+        id: '1',
+        attributes: {
+          ...defaultAttributes,
+          lastCompletedStep: ReindexStep.indexSettingsRestored,
+          reindexOptions: { openAndClose: false },
         },
       } as ReindexSavedObject;
 
@@ -734,14 +798,35 @@ describe('reindexService', () => {
         const updatedOp = await service.processNextStep(reindexOp);
         expect(updatedOp.attributes.lastCompletedStep).toEqual(ReindexStep.aliasCreated);
         expect(clusterClient.asCurrentUser.indices.updateAliases).toHaveBeenCalledWith({
-          body: {
-            actions: [
-              { add: { index: 'myIndex-reindex-0', alias: 'myIndex' } },
-              { remove_index: { index: 'myIndex' } },
-            ],
-          },
+          actions: [
+            { add: { index: 'myIndex-reindex-0', alias: 'myIndex', is_hidden: false } },
+            { remove_index: { index: 'myIndex' } },
+          ],
         });
       });
+
+      it.each([true, 'true'])(
+        'switches aliases, passing on hidden status of index to alias if defined (hidden value: %p)',
+        async (hidden) => {
+          clusterClient.asCurrentUser.indices.getAlias.mockResponseOnce({
+            myIndex: { aliases: {} },
+          });
+          clusterClient.asCurrentUser.indices.getSettings.mockResponseOnce({
+            myIndex: { settings: { index: { hidden } } },
+          });
+          clusterClient.asCurrentUser.indices.updateAliases.mockResponseOnce({
+            acknowledged: true,
+          });
+          const updatedOp = await service.processNextStep(reindexOp);
+          expect(updatedOp.attributes.lastCompletedStep).toEqual(ReindexStep.aliasCreated);
+          expect(clusterClient.asCurrentUser.indices.updateAliases).toHaveBeenCalledWith({
+            actions: [
+              { add: { index: 'myIndex-reindex-0', alias: 'myIndex', is_hidden: true } },
+              { remove_index: { index: 'myIndex' } },
+            ],
+          });
+        }
+      );
 
       it('moves existing aliases over to new index', async () => {
         clusterClient.asCurrentUser.indices.getAlias.mockResponseOnce({
@@ -749,6 +834,7 @@ describe('reindexService', () => {
             aliases: {
               myAlias: {},
               myFilteredAlias: { filter: { term: { https: true } } },
+              myHiddenAlias: { is_hidden: true },
             },
           },
         });
@@ -758,27 +844,32 @@ describe('reindexService', () => {
         const updatedOp = await service.processNextStep(reindexOp);
         expect(updatedOp.attributes.lastCompletedStep).toEqual(ReindexStep.aliasCreated);
         expect(clusterClient.asCurrentUser.indices.updateAliases).toHaveBeenCalledWith({
-          body: {
-            actions: [
-              { add: { index: 'myIndex-reindex-0', alias: 'myIndex' } },
-              { remove_index: { index: 'myIndex' } },
-              { add: { index: 'myIndex-reindex-0', alias: 'myAlias' } },
-              {
-                add: {
-                  index: 'myIndex-reindex-0',
-                  alias: 'myFilteredAlias',
-                  filter: { term: { https: true } },
-                },
+          actions: [
+            { add: { index: 'myIndex-reindex-0', alias: 'myIndex', is_hidden: false } },
+            { remove_index: { index: 'myIndex' } },
+            { add: { index: 'myIndex-reindex-0', alias: 'myAlias' } },
+            {
+              add: {
+                index: 'myIndex-reindex-0',
+                alias: 'myFilteredAlias',
+                filter: { term: { https: true } },
               },
-            ],
-          },
+            },
+            {
+              add: {
+                index: 'myIndex-reindex-0',
+                alias: 'myHiddenAlias',
+                is_hidden: true,
+              },
+            },
+          ],
         });
       });
 
       it('fails if switching aliases is not acknowledged', async () => {
         clusterClient.asCurrentUser.indices.updateAliases.mockResponseOnce({ acknowledged: false });
         const updatedOp = await service.processNextStep(reindexOp);
-        expect(updatedOp.attributes.lastCompletedStep).toEqual(ReindexStep.reindexCompleted);
+        expect(updatedOp.attributes.lastCompletedStep).toEqual(ReindexStep.indexSettingsRestored);
         expect(updatedOp.attributes.status).toEqual(ReindexStatus.failed);
         expect(updatedOp.attributes.errorMessage).not.toBeNull();
         expect(log.error).toHaveBeenCalledWith(expect.any(String));
@@ -787,7 +878,7 @@ describe('reindexService', () => {
       it('fails if switching aliases fails', async () => {
         clusterClient.asCurrentUser.indices.updateAliases.mockRejectedValueOnce(new Error('blah!'));
         const updatedOp = await service.processNextStep(reindexOp);
-        expect(updatedOp.attributes.lastCompletedStep).toEqual(ReindexStep.reindexCompleted);
+        expect(updatedOp.attributes.lastCompletedStep).toEqual(ReindexStep.indexSettingsRestored);
         expect(updatedOp.attributes.status).toEqual(ReindexStatus.failed);
         expect(updatedOp.attributes.errorMessage).not.toBeNull();
         expect(log.error).toHaveBeenCalledWith(expect.any(String));

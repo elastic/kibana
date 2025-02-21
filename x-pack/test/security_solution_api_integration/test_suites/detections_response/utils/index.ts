@@ -12,7 +12,6 @@ export * from './data_generator';
 export * from './telemetry';
 export * from './event_log';
 export * from './machine_learning';
-export * from './indices';
 
 export * from './binary_to_string';
 export * from './get_index_name_from_load';
@@ -25,3 +24,4 @@ export * from './get_detection_metrics_from_body';
 export * from './get_stats_url';
 export * from './combine_to_ndjson';
 export * from './set_advanced_settings';
+export * from './runtime';

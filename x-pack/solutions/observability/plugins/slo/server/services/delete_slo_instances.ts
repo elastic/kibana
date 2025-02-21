@@ -8,8 +8,8 @@
 import { ElasticsearchClient } from '@kbn/core/server';
 import { ALL_VALUE, DeleteSLOInstancesParams } from '@kbn/slo-schema';
 import {
-  SLO_DESTINATION_INDEX_PATTERN,
-  SLO_SUMMARY_DESTINATION_INDEX_PATTERN,
+  SLI_DESTINATION_INDEX_PATTERN,
+  SUMMARY_DESTINATION_INDEX_PATTERN,
 } from '../../common/constants';
 import { IllegalArgumentError } from '../errors';
 
@@ -31,7 +31,7 @@ export class DeleteSLOInstances {
   // Delete rollup data when excluding rollup data is not explicitly requested
   private async deleteRollupData(list: List): Promise<void> {
     await this.esClient.deleteByQuery({
-      index: SLO_DESTINATION_INDEX_PATTERN,
+      index: SLI_DESTINATION_INDEX_PATTERN,
       wait_for_completion: false,
       query: {
         bool: {
@@ -52,7 +52,7 @@ export class DeleteSLOInstances {
 
   private async deleteSummaryData(list: List): Promise<void> {
     await this.esClient.deleteByQuery({
-      index: SLO_SUMMARY_DESTINATION_INDEX_PATTERN,
+      index: SUMMARY_DESTINATION_INDEX_PATTERN,
       refresh: true,
       query: {
         bool: {

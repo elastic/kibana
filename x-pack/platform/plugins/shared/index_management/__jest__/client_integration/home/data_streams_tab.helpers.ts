@@ -38,6 +38,7 @@ export interface DataStreamsTabTestBed extends TestBed<TestSubjects> {
     clickEditDataRetentionButton: () => void;
     clickDetailPanelIndexTemplateLink: () => void;
     clickManageDataStreamsButton: () => void;
+    clickBulkDeleteDataStreamsButton: () => void;
     clickBulkEditDataRetentionButton: () => void;
   };
   findDeleteActionAt: (index: number) => ReactWrapper;
@@ -181,14 +182,10 @@ export const setup = async (
   };
 
   const clickConfirmDelete = async () => {
-    const modal = document.body.querySelector('[data-test-subj="deleteDataStreamsConfirmation"]');
-    const confirmButton: HTMLButtonElement | null = modal!.querySelector(
-      '[data-test-subj="confirmModalConfirmButton"]'
-    );
-
     await act(async () => {
-      confirmButton!.click();
+      testBed.find('confirmModalConfirmButton').simulate('click');
     });
+    testBed.component.update();
   };
 
   const clickDeleteDataStreamButton = () => {
@@ -216,7 +213,13 @@ export const setup = async (
     testBed.find('dataStreamActionsPopoverButton').simulate('click');
   };
 
+  const clickBulkDeleteDataStreamsButton = () => {
+    testBed.find('dataStreamActionsPopoverButton').simulate('click');
+    testBed.find('deleteDataStreamsButton').simulate('click');
+  };
+
   const clickBulkEditDataRetentionButton = () => {
+    testBed.find('dataStreamActionsPopoverButton').simulate('click');
     testBed.find('bulkEditDataRetentionButton').simulate('click');
   };
 
@@ -269,6 +272,7 @@ export const setup = async (
       clickEditDataRetentionButton,
       clickDetailPanelIndexTemplateLink,
       clickManageDataStreamsButton,
+      clickBulkDeleteDataStreamsButton,
       clickBulkEditDataRetentionButton,
     },
     findDeleteActionAt,

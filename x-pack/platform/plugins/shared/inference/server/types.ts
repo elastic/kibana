@@ -11,6 +11,7 @@ import type {
 } from '@kbn/actions-plugin/server';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { BoundChatCompleteOptions } from '@kbn/inference-common';
+import type { InferenceChatModel, InferenceChatModelParams } from '@kbn/inference-langchain';
 import type { InferenceClient, BoundInferenceClient } from './inference_client';
 
 /* eslint-disable @typescript-eslint/no-empty-interface*/
@@ -93,4 +94,38 @@ export interface InferenceServerStart {
   getClient: <T extends InferenceClientCreateOptions>(
     options: T
   ) => T extends InferenceBoundClientCreateOptions ? BoundInferenceClient : InferenceClient;
+
+  /**
+   * Creates a langchain {@link InferenceChatModel} that will be using the inference framework
+   * under the hood.
+   *
+   * @example
+   * ```ts
+   * const chatModel = await myStartDeps.inference.getChatModel({
+   *   request,
+   *   connectorId: 'my-connector-id',
+   *   chatModelOptions: {
+   *    temperature: 0.3,
+   *   }
+   * });
+   */
+  getChatModel: (options: CreateChatModelOptions) => Promise<InferenceChatModel>;
+}
+
+/**
+ * Options to create an inference chat model using the {@link InferenceServerStart.getChatModel} API.
+ */
+export interface CreateChatModelOptions {
+  /**
+   * The request to scope the client to.
+   */
+  request: KibanaRequest;
+  /**
+   * The id of the GenAI connector to use.
+   */
+  connectorId: string;
+  /**
+   * Additional parameters to be passed down to the model constructor.
+   */
+  chatModelOptions: Omit<InferenceChatModelParams, 'connector' | 'chatComplete' | 'logger'>;
 }

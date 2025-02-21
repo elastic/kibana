@@ -7,6 +7,7 @@
 
 import { PassThrough } from 'stream';
 import { loggerMock } from '@kbn/logging-mocks';
+import { lastValueFrom, toArray } from 'rxjs';
 import type { InferenceExecutor } from '../../utils/inference_executor';
 import { MessageRole, ToolChoiceType } from '@kbn/inference-common';
 import { bedrockClaudeAdapter } from './bedrock_claude_adapter';
@@ -429,6 +430,65 @@ describe('bedrockClaudeAdapter', () => {
           signal: abortController.signal,
         }),
       });
+    });
+
+    it('propagates the temperature parameter', () => {
+      bedrockClaudeAdapter.chatComplete({
+        logger,
+        executor: executorMock,
+        messages: [{ role: MessageRole.User, content: 'question' }],
+        temperature: 0.9,
+      });
+
+      expect(executorMock.invoke).toHaveBeenCalledTimes(1);
+      expect(executorMock.invoke).toHaveBeenCalledWith({
+        subAction: 'invokeStream',
+        subActionParams: expect.objectContaining({
+          temperature: 0.9,
+        }),
+      });
+    });
+
+    it('propagates the modelName parameter', () => {
+      bedrockClaudeAdapter.chatComplete({
+        logger,
+        executor: executorMock,
+        messages: [{ role: MessageRole.User, content: 'question' }],
+        modelName: 'claude-opus-3.5',
+      });
+
+      expect(executorMock.invoke).toHaveBeenCalledTimes(1);
+      expect(executorMock.invoke).toHaveBeenCalledWith({
+        subAction: 'invokeStream',
+        subActionParams: expect.objectContaining({
+          model: 'claude-opus-3.5',
+        }),
+      });
+    });
+
+    it('throws an error if the connector response is in error', async () => {
+      executorMock.invoke.mockImplementation(async () => {
+        return {
+          actionId: 'actionId',
+          status: 'error',
+          serviceMessage: 'something went wrong',
+          data: undefined,
+        };
+      });
+
+      await expect(
+        lastValueFrom(
+          bedrockClaudeAdapter
+            .chatComplete({
+              logger,
+              executor: executorMock,
+              messages: [{ role: MessageRole.User, content: 'Hello' }],
+            })
+            .pipe(toArray())
+        )
+      ).rejects.toThrowErrorMatchingInlineSnapshot(
+        `"Error calling connector: something went wrong"`
+      );
     });
   });
 });

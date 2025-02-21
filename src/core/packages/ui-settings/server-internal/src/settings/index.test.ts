@@ -12,20 +12,25 @@ import { getDateFormatSettings } from './date_formats';
 import { getMiscUiSettings } from './misc';
 import { getNotificationsSettings } from './notifications';
 import { getThemeSettings } from './theme';
-import { getCoreSettings } from '.';
+import { getCoreSettings, type GetCoreSettingsOptions } from '.';
 import { getStateSettings } from './state';
 import { getAnnouncementsSettings } from './announcements';
 
+const defaultOptions: GetCoreSettingsOptions = {
+  isDist: true,
+  isThemeSwitcherEnabled: undefined,
+};
+
 describe('getCoreSettings', () => {
   it('should not have setting overlaps', () => {
-    const coreSettingsLength = Object.keys(getCoreSettings()).length;
+    const coreSettingsLength = Object.keys(getCoreSettings(defaultOptions)).length;
     const summedLength = [
       getAccessibilitySettings(),
       getAnnouncementsSettings(),
       getDateFormatSettings(),
       getMiscUiSettings(),
       getNotificationsSettings(),
-      getThemeSettings(),
+      getThemeSettings(defaultOptions),
       getStateSettings(),
     ].reduce((sum, settings) => sum + Object.keys(settings).length, 0);
 

@@ -11,6 +11,7 @@ import {
   type DataFrameAnalysisConfigType,
   DATA_FRAME_TASK_STATE,
 } from '@kbn/ml-data-frame-analytics-utils';
+import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import { useMlApi } from '../../../../../contexts/kibana';
 import type {
   GetDataFrameAnalyticsStatsResponseError,
@@ -27,6 +28,8 @@ import {
   isDataFrameAnalyticsStopped,
 } from '../../components/analytics_list/common';
 import type { AnalyticStatsBarStats } from '../../../../../components/stats_bar';
+import { DFA_SAVED_OBJECT_TYPE } from '../../../../../../../common/types/saved_objects';
+import { useCanManageSpacesAndSavedObjects } from '../../../../../hooks/use_spaces';
 
 export const isGetDataFrameAnalyticsStatsResponseOk = (
   arg: any
@@ -38,7 +41,7 @@ export const isGetDataFrameAnalyticsStatsResponseOk = (
   );
 };
 
-export type GetAnalytics = (forceRefresh?: boolean) => void;
+export type GetAnalytics = (forceRefresh?: boolean, nullableAnalyticsId?: string | null) => void;
 
 /**
  * Gets initial object for analytics stats.
@@ -117,10 +120,11 @@ export const useGetAnalytics = (
   blockRefresh: boolean
 ): GetAnalytics => {
   const mlApi = useMlApi();
+  const canManageSpacesAndSavedObjects = useCanManageSpacesAndSavedObjects();
 
   let concurrentLoads = 0;
 
-  const getAnalytics = async (forceRefresh = false) => {
+  const getAnalytics = async (forceRefresh = false, nullableAnalyticsId?: string | null) => {
     if (forceRefresh === true || blockRefresh === false) {
       refreshAnalyticsList$.next(REFRESH_ANALYTICS_LIST_STATE.LOADING);
       concurrentLoads++;
@@ -129,10 +133,21 @@ export const useGetAnalytics = (
         return;
       }
 
-      try {
-        const analyticsConfigs = await mlApi.dataFrameAnalytics.getDataFrameAnalytics();
-        const analyticsStats = await mlApi.dataFrameAnalytics.getDataFrameAnalyticsStats();
+      const analyticsId = nullableAnalyticsId ?? undefined;
 
+      try {
+        const analyticsConfigs = await mlApi.dataFrameAnalytics.getDataFrameAnalytics(analyticsId);
+        const analyticsStats = await mlApi.dataFrameAnalytics.getDataFrameAnalyticsStats(
+          analyticsId
+        );
+
+        let savedObjectsSpaces: Record<string, string[]> = {};
+        if (canManageSpacesAndSavedObjects && mlApi.savedObjects.jobsSpaces) {
+          const results = await mlApi.savedObjects.jobsSpaces();
+          if (isPopulatedObject(results, [DFA_SAVED_OBJECT_TYPE])) {
+            savedObjectsSpaces = results[DFA_SAVED_OBJECT_TYPE];
+          }
+        }
         const analyticsStatsResult = isGetDataFrameAnalyticsStatsResponseOk(analyticsStats)
           ? getAnalyticsJobsStats(analyticsStats)
           : undefined;
@@ -164,6 +179,7 @@ export const useGetAnalytics = (
               mode: DATA_FRAME_MODE.BATCH,
               state: stats.state,
               stats,
+              spaces: savedObjectsSpaces[config.id],
             });
             return reducedtableRows;
           },

@@ -168,6 +168,17 @@ export type TrainedModelDeploymentStatsResponse = estypes.MlTrainedModelDeployme
   };
 };
 
+export interface StartTrainedModelDeploymentResponse {
+  // TODO update types in elasticsearch-specification
+  assignment: estypes.MlStartTrainedModelDeploymentResponse['assignment'] & {
+    adaptive_allocations?: {
+      enabled: boolean;
+      min_number_of_allocations?: number;
+      max_number_of_allocations?: number;
+    };
+  };
+}
+
 export interface AllocatedModel {
   key: string;
   deployment_id: string;
@@ -324,6 +335,10 @@ interface BaseModelItem {
    * Indices with associated pipelines that have inference processors utilizing the model deployments.
    */
   indices?: string[];
+  /**
+   * Spaces associated with the model
+   */
+  spaces?: string[];
 }
 
 /** Common properties for existing NLP models and NLP model download configs */

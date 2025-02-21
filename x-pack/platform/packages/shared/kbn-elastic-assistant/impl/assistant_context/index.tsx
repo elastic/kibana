@@ -15,6 +15,7 @@ import useSessionStorage from 'react-use/lib/useSessionStorage';
 import type { DocLinksStart } from '@kbn/core-doc-links-browser';
 import { AssistantFeatures, defaultAssistantFeatures } from '@kbn/elastic-assistant-common';
 import { ChromeStart, NavigateToAppOptions, UserProfileService } from '@kbn/core/public';
+import type { ProductDocBasePluginStart } from '@kbn/product-doc-base-plugin/public';
 import { useQuery } from '@tanstack/react-query';
 import { updatePromptContexts } from './helpers';
 import type {
@@ -33,10 +34,12 @@ import { CodeBlockDetails } from '../assistant/use_conversation/helpers';
 import { PromptContextTemplate } from '../assistant/prompt_context/types';
 import { KnowledgeBaseConfig, TraceOptions } from '../assistant/types';
 import {
+  CONTENT_REFERENCES_VISIBLE_LOCAL_STORAGE_KEY,
   DEFAULT_ASSISTANT_NAMESPACE,
   DEFAULT_KNOWLEDGE_BASE_SETTINGS,
   KNOWLEDGE_BASE_LOCAL_STORAGE_KEY,
   LAST_CONVERSATION_ID_LOCAL_STORAGE_KEY,
+  SHOW_ANONYMIZED_VALUES_LOCAL_STORAGE_KEY,
   STREAMING_LOCAL_STORAGE_KEY,
   TRACE_OPTIONS_SESSION_STORAGE_KEY,
 } from './constants';
@@ -78,6 +81,7 @@ export interface AssistantProviderProps {
   title?: string;
   toasts?: IToasts;
   currentAppId: string;
+  productDocBase: ProductDocBasePluginStart;
   userProfileService: UserProfileService;
   chrome: ChromeStart;
 }
@@ -113,6 +117,10 @@ export interface UseAssistantContext {
   nameSpace: string;
   registerPromptContext: RegisterPromptContext;
   selectedSettingsTab: SettingsTabs | null;
+  contentReferencesVisible: boolean;
+  showAnonymizedValues: boolean;
+  setShowAnonymizedValues: React.Dispatch<React.SetStateAction<boolean>>;
+  setContentReferencesVisible: React.Dispatch<React.SetStateAction<boolean>>;
   setAssistantStreamingEnabled: React.Dispatch<React.SetStateAction<boolean | undefined>>;
   setKnowledgeBase: React.Dispatch<React.SetStateAction<KnowledgeBaseConfig | undefined>>;
   setLastConversationId: React.Dispatch<React.SetStateAction<string | undefined>>;
@@ -131,6 +139,7 @@ export interface UseAssistantContext {
   unRegisterPromptContext: UnRegisterPromptContext;
   currentAppId: string;
   codeBlockRef: React.MutableRefObject<(codeBlock: string) => void>;
+  productDocBase: ProductDocBasePluginStart;
   userProfileService: UserProfileService;
   chrome: ChromeStart;
 }
@@ -153,6 +162,7 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
   baseConversations,
   navigateToApp,
   nameSpace = DEFAULT_ASSISTANT_NAMESPACE,
+  productDocBase,
   title = DEFAULT_ASSISTANT_TITLE,
   toasts,
   currentAppId,
@@ -191,6 +201,24 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
   const [localStorageStreaming, setLocalStorageStreaming] = useLocalStorage<boolean>(
     `${nameSpace}.${STREAMING_LOCAL_STORAGE_KEY}`,
     true
+  );
+
+  /**
+   * Local storage for content references configuration, prefixed by assistant nameSpace
+   */
+  // can be undefined from localStorage, if not defined, default to true
+  const [contentReferencesVisible, setContentReferencesVisible] = useLocalStorage<boolean>(
+    `${nameSpace}.${CONTENT_REFERENCES_VISIBLE_LOCAL_STORAGE_KEY}`,
+    true
+  );
+
+  /**
+   * Local storage for anonymized values, prefixed by assistant nameSpace
+   */
+  // can be undefined from localStorage, if not defined, default to false
+  const [showAnonymizedValues, setShowAnonymizedValues] = useLocalStorage<boolean>(
+    `${nameSpace}.${SHOW_ANONYMIZED_VALUES_LOCAL_STORAGE_KEY}`,
+    false
   );
 
   /**
@@ -269,7 +297,7 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
   // Fetch assistant capabilities
   const { data: assistantFeatures } = useCapabilities({ http, toasts });
 
-  const value = useMemo(
+  const value: UseAssistantContext = useMemo(
     () => ({
       actionTypeRegistry,
       alertsIndexPattern,
@@ -291,12 +319,21 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
       promptContexts,
       navigateToApp,
       nameSpace,
+      productDocBase,
       registerPromptContext,
       selectedSettingsTab,
       // can be undefined from localStorage, if not defined, default to true
       assistantStreamingEnabled: localStorageStreaming ?? true,
       setAssistantStreamingEnabled: setLocalStorageStreaming,
       setKnowledgeBase: setLocalStorageKnowledgeBase,
+      contentReferencesVisible: contentReferencesVisible ?? true,
+      setContentReferencesVisible: setContentReferencesVisible as React.Dispatch<
+        React.SetStateAction<boolean>
+      >,
+      showAnonymizedValues: showAnonymizedValues ?? false,
+      setShowAnonymizedValues: setShowAnonymizedValues as React.Dispatch<
+        React.SetStateAction<boolean>
+      >,
       setSelectedSettingsTab,
       setShowAssistantOverlay,
       setTraceOptions: setSessionStorageTraceOptions,
@@ -331,11 +368,16 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
       promptContexts,
       navigateToApp,
       nameSpace,
+      productDocBase,
       registerPromptContext,
       selectedSettingsTab,
       localStorageStreaming,
       setLocalStorageStreaming,
       setLocalStorageKnowledgeBase,
+      showAnonymizedValues,
+      setShowAnonymizedValues,
+      contentReferencesVisible,
+      setContentReferencesVisible,
       setSessionStorageTraceOptions,
       showAssistantOverlay,
       title,

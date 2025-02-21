@@ -41,3 +41,6 @@ export const VISUALIZE_DESCRIPTION = i18n.translate(
     defaultMessage: 'Manage visualization library. Create, edit, and share visualizations.',
   }
 );
+export const MONITORING_TITLE = i18n.translate('xpack.securitySolution.navLinks.monitoring.title', {
+  defaultMessage: 'Stack Monitoring',
+});

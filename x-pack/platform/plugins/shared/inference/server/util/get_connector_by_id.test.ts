@@ -78,6 +78,10 @@ describe('getConnectorById', () => {
         id: 'my-id',
         name: 'My Name',
         actionTypeId: InferenceConnectorType.OpenAI,
+        config: {
+          propA: 'foo',
+          propB: 42,
+        },
       })
     );
 
@@ -87,6 +91,10 @@ describe('getConnectorById', () => {
       connectorId: 'my-id',
       name: 'My Name',
       type: InferenceConnectorType.OpenAI,
+      config: {
+        propA: 'foo',
+        propB: 42,
+      },
     });
   });
 });

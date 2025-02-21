@@ -12,7 +12,7 @@
     "id": "enterpriseSearch",
     "server": true,
     "browser": true,
-    "configPath": ["enterpriseSearch"],
+    "configPath": ["xpack", "search"],
     "requiredPlugins": [
       "data",
       "features",
@@ -42,7 +42,9 @@
       "charts",
       "cloud",
       "lens",
-      "share"
+      "share",
+      "fleet",
+      "searchIndices"
     ],
     "requiredBundles": ["kibanaReact"]
   }

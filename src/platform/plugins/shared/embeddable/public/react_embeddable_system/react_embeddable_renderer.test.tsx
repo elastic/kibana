@@ -189,7 +189,7 @@ describe('react embeddable renderer', () => {
         type: 'test',
         uuid: '12345',
         parentApi: expect.any(Object),
-        unsavedChanges: expect.any(Object),
+        unsavedChanges$: expect.any(Object),
         serializeState: expect.any(Function),
         resetUnsavedChanges: expect.any(Function),
         snapshotRuntimeState: expect.any(Function),
@@ -296,7 +296,7 @@ describe('reactEmbeddable phase events', () => {
       ...testEmbeddableFactory,
       type: 'loadClicker',
       buildEmbeddable: async (state, registerApi) => {
-        const dataLoading = new BehaviorSubject<boolean | undefined>(true);
+        const dataLoading$ = new BehaviorSubject<boolean | undefined>(true);
         const api = registerApi(
           {
             serializeState: () => ({
@@ -305,7 +305,7 @@ describe('reactEmbeddable phase events', () => {
                 bork: state.bork,
               },
             }),
-            dataLoading,
+            dataLoading$,
           },
           {
             name: [new BehaviorSubject<string>(state.name), () => {}],
@@ -318,7 +318,7 @@ describe('reactEmbeddable phase events', () => {
               <div data-test-subj="superTestEmbeddable">
                 SUPER TEST COMPONENT, name: {state.name} bork: {state.bork}
               </div>
-              <button data-test-subj="clickToStopLoading" onClick={() => dataLoading.next(false)}>
+              <button data-test-subj="clickToStopLoading" onClick={() => dataLoading$.next(false)}>
                 Done loading
               </button>
             </>

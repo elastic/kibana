@@ -9,6 +9,7 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { EditDashboard, UnlinkDashboard, LinkDashboard } from '.';
 import { useTabSwitcherContext } from '../../../hooks/use_tab_switcher';
+import * as fetchCustomDashboards from '../../../hooks/use_fetch_custom_dashboards';
 import * as hooks from '../../../hooks/use_saved_objects_permissions';
 
 const TEST_CURRENT_DASHBOARD = {
@@ -114,34 +115,61 @@ describe('Custom Dashboards Actions', () => {
     expect(screen.getByTestId('infraLinkDashboardMenu')).toBeDisabled();
     expect(screen.getByTestId('infraLinkDashboardMenu')).toHaveTextContent('Link new dashboard');
   });
-  it('should render the unlink dashboard action when the user can unlink a dashboard', () => {
-    jest.spyOn(hooks, 'useSavedObjectUserPermissions').mockImplementation(() => ({
-      canSave: true,
-      canDelete: true,
-    }));
-    render(
-      <UnlinkDashboard
-        onRefresh={() => {}}
-        assetType="host"
-        currentDashboard={TEST_CURRENT_DASHBOARD}
-      />
-    );
-    expect(screen.getByTestId('infraUnLinkDashboardMenu')).not.toBeDisabled();
-    expect(screen.getByTestId('infraUnLinkDashboardMenu')).toHaveTextContent('Unlink dashboard');
-  });
-  it('should render the unlink dashboard action when the user cannot unlink a dashboard', () => {
-    jest.spyOn(hooks, 'useSavedObjectUserPermissions').mockImplementation(() => ({
-      canSave: true,
-      canDelete: false,
-    }));
-    render(
-      <UnlinkDashboard
-        onRefresh={() => {}}
-        assetType="host"
-        currentDashboard={TEST_CURRENT_DASHBOARD}
-      />
-    );
-    expect(screen.getByTestId('infraUnLinkDashboardMenu')).toBeDisabled();
-    expect(screen.getByTestId('infraUnLinkDashboardMenu')).toHaveTextContent('Unlink dashboard');
+
+  describe('UnlinkDashboard', () => {
+    const fetchCustomDashboardsSpy = jest.spyOn(fetchCustomDashboards, 'useFetchCustomDashboards');
+
+    beforeEach(() => {
+      // provide mock for invocation to fetch custom dashboards
+      fetchCustomDashboardsSpy.mockReturnValue({
+        dashboards: [
+          {
+            id: 'test-so-id',
+            dashboardSavedObjectId: 'test-dashboard-id',
+            assetType: 'host',
+            dashboardFilterAssetIdEnabled: true,
+          },
+        ],
+        loading: false,
+        error: null,
+        // @ts-expect-error we provide a mock function as we don't need to test the actual implementation
+        refetch: jest.fn(),
+      });
+    });
+
+    afterEach(() => {
+      fetchCustomDashboardsSpy.mockClear();
+    });
+
+    it('should render the unlink dashboard action when the user can unlink a dashboard', () => {
+      jest.spyOn(hooks, 'useSavedObjectUserPermissions').mockImplementation(() => ({
+        canSave: true,
+        canDelete: true,
+      }));
+      render(
+        <UnlinkDashboard
+          onRefresh={() => {}}
+          assetType="host"
+          currentDashboard={TEST_CURRENT_DASHBOARD}
+        />
+      );
+      expect(screen.getByTestId('infraUnLinkDashboardMenu')).not.toBeDisabled();
+      expect(screen.getByTestId('infraUnLinkDashboardMenu')).toHaveTextContent('Unlink dashboard');
+    });
+    it('should render the unlink dashboard action when the user cannot unlink a dashboard', () => {
+      jest.spyOn(hooks, 'useSavedObjectUserPermissions').mockImplementation(() => ({
+        canSave: true,
+        canDelete: false,
+      }));
+      render(
+        <UnlinkDashboard
+          onRefresh={() => {}}
+          assetType="host"
+          currentDashboard={TEST_CURRENT_DASHBOARD}
+        />
+      );
+      expect(screen.getByTestId('infraUnLinkDashboardMenu')).toBeDisabled();
+      expect(screen.getByTestId('infraUnLinkDashboardMenu')).toHaveTextContent('Unlink dashboard');
+    });
   });
 });

@@ -56,12 +56,12 @@ export const NotesDetails = memo(() => {
   const { addError: addErrorToast } = useAppToasts();
   const dispatch = useDispatch();
   const { eventId, dataFormattedForFieldBrowser } = useDocumentDetailsContext();
-  const { kibanaSecuritySolutionsPrivileges } = useUserPrivileges();
+  const { notesPrivileges } = useUserPrivileges();
   const { basicAlertData: basicData } = useInvestigationGuide({
     dataFormattedForFieldBrowser,
   });
 
-  const canCreateNotes = kibanaSecuritySolutionsPrivileges.crud;
+  const canCreateNotes = notesPrivileges.crud;
 
   // will drive the value we send to the AddNote component
   // if true (timeline is saved and the user kept the checkbox checked) we'll send the timelineId to the AddNote component

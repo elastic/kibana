@@ -30,7 +30,7 @@
     "patterns": [
       "_nodes/{node_id}/shutdown"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current",
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/{branch}/delete-shutdown.html",
     "availability": {
       "stack": true,
       "serverless": false

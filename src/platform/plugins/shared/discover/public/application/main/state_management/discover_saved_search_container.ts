@@ -7,18 +7,20 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { v4 as uuidv4 } from 'uuid';
 import { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { BehaviorSubject } from 'rxjs';
 import { cloneDeep } from 'lodash';
-import { COMPARE_ALL_OPTIONS, FilterCompareOptions } from '@kbn/es-query';
+import { COMPARE_ALL_OPTIONS, FilterCompareOptions, updateFilterReferences } from '@kbn/es-query';
 import type { SearchSourceFields } from '@kbn/data-plugin/common';
-import type { DataView } from '@kbn/data-views-plugin/common';
+import type { DataView, DataViewSpec } from '@kbn/data-views-plugin/common';
 import {
   canImportVisContext,
   UnifiedHistogramVisContext,
 } from '@kbn/unified-histogram-plugin/public';
 import { SavedObjectSaveOpts } from '@kbn/saved-objects-plugin/public';
 import { isEqual, isFunction } from 'lodash';
+import { i18n } from '@kbn/i18n';
 import { VIEW_MODE } from '../../../../common/constants';
 import { restoreStateFromSavedSearch } from '../../../services/saved_searches/restore_from_saved_search';
 import { updateSavedSearch } from './utils/update_saved_search';
@@ -28,6 +30,7 @@ import { DiscoverAppState, isEqualFilters } from './discover_app_state_container
 import { DiscoverServices } from '../../../build_services';
 import { getStateDefaults } from './utils/get_state_defaults';
 import type { DiscoverGlobalStateContainer } from './discover_global_state_container';
+import type { DiscoverInternalStateContainer } from './discover_internal_state_container';
 
 const FILTERS_COMPARE_OPTIONS: FilterCompareOptions = {
   ...COMPARE_ALL_OPTIONS,
@@ -91,7 +94,7 @@ export interface DiscoverSavedSearchContainer {
    * @param id
    * @param dataView
    */
-  load: (id: string, dataView?: DataView) => Promise<SavedSearch>;
+  load: (id: string) => Promise<SavedSearch>;
   /**
    * Initialize a new saved search
    * Resets the initial and current state of the saved search
@@ -136,9 +139,11 @@ export interface DiscoverSavedSearchContainer {
 export function getSavedSearchContainer({
   services,
   globalStateContainer,
+  internalStateContainer,
 }: {
   services: DiscoverServices;
   globalStateContainer: DiscoverGlobalStateContainer;
+  internalStateContainer: DiscoverInternalStateContainer;
 }): DiscoverSavedSearchContainer {
   const initialSavedSearch = services.savedSearch.getNew();
   const savedSearchInitial$ = new BehaviorSubject(initialSavedSearch);
@@ -176,18 +181,54 @@ export function getSavedSearchContainer({
 
   const persist = async (nextSavedSearch: SavedSearch, saveOptions?: SavedObjectSaveOpts) => {
     addLog('[savedSearch] persist', { nextSavedSearch, saveOptions });
+
+    const dataView = nextSavedSearch.searchSource.getField('index');
+    const profileDataViewIds = internalStateContainer.getState().defaultProfileAdHocDataViewIds;
+    let replacementDataView: DataView | undefined;
+
+    // If the Discover session is using a default profile ad hoc data view,
+    // we copy it with a new ID to avoid conflicts with the profile defaults
+    if (dataView?.id && profileDataViewIds.includes(dataView.id)) {
+      const replacementSpec: DataViewSpec = {
+        ...dataView.toSpec(),
+        id: uuidv4(),
+        name: i18n.translate('discover.savedSearch.defaultProfileDataViewCopyName', {
+          defaultMessage: '{dataViewName} ({discoverSessionTitle})',
+          values: {
+            dataViewName: dataView.name ?? dataView.getIndexPattern(),
+            discoverSessionTitle: nextSavedSearch.title,
+          },
+        }),
+      };
+
+      // Skip field list fetching since the existing data view already has the fields
+      replacementDataView = await services.dataViews.create(replacementSpec, true);
+    }
+
     updateSavedSearch({
       savedSearch: nextSavedSearch,
       globalStateContainer,
       services,
       useFilterAndQueryServices: true,
+      dataView: replacementDataView,
     });
+
+    const currentFilters = nextSavedSearch.searchSource.getField('filter');
+
+    // If the data view was replaced, we need to update the filter references
+    if (dataView?.id && replacementDataView?.id && Array.isArray(currentFilters)) {
+      nextSavedSearch.searchSource.setField(
+        'filter',
+        updateFilterReferences(currentFilters, dataView.id, replacementDataView.id)
+      );
+    }
 
     const id = await services.savedSearch.save(nextSavedSearch, saveOptions || {});
 
     if (id) {
       set(nextSavedSearch);
     }
+
     return { id };
   };
 
@@ -266,18 +307,16 @@ export function getSavedSearchContainer({
     addLog('[savedSearch] updateVisContext done', nextSavedSearch);
   };
 
-  const load = async (id: string, dataView: DataView | undefined): Promise<SavedSearch> => {
-    addLog('[savedSearch] load', { id, dataView });
+  const load = async (id: string): Promise<SavedSearch> => {
+    addLog('[savedSearch] load', { id });
 
     const loadedSavedSearch = await services.savedSearch.get(id);
 
-    if (!loadedSavedSearch.searchSource.getField('index') && dataView) {
-      loadedSavedSearch.searchSource.setField('index', dataView);
-    }
     restoreStateFromSavedSearch({
       savedSearch: loadedSavedSearch,
       timefilter: services.timefilter,
     });
+
     return set(loadedSavedSearch);
   };
 

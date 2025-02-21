@@ -5,44 +5,22 @@
  * 2.0.
  */
 
-import { expect, Page } from '@playwright/test';
+import { expect, type Page, type Locator } from '@playwright/test';
 
 export class KubernetesOverviewDashboardPage {
   page: Page;
 
+  private readonly nodesPanelChart: Locator;
+
   constructor(page: Page) {
     this.page = page;
+
+    this.nodesPanelChart = this.page
+      .locator(`#panel-7116207b-48ce-4d93-9fbd-26d73af1c185`)
+      .getByTestId('xyVisChart');
   }
 
-  private readonly nodesPanelHeader = () => this.page.getByTestId('embeddablePanelHeading-Nodes');
-
-  private readonly nodesInspectorButton = () =>
-    this.page
-      .getByTestId('embeddablePanelHoverActions-Nodes')
-      .getByTestId('embeddablePanelAction-openInspector');
-
-  private readonly nodesInspectorTableNoResults = () =>
-    this.page.getByTestId('inspectorTable').getByText('No items found');
-
-  private readonly nodesInspectorTableStatusTableCells = () =>
-    this.page.getByTestId('inspectorTable').getByText('Status');
-
-  public async assertNodesNoResultsNotVisible() {
-    await expect(
-      this.nodesInspectorTableNoResults(),
-      'Nodes "No results" message should not be visible'
-    ).toBeHidden();
-  }
-
-  public async openNodesInspector() {
-    await this.nodesPanelHeader().hover();
-    await this.nodesInspectorButton().click();
-  }
-
-  public async assetNodesInspectorStatusTableCells() {
-    await expect(
-      this.nodesInspectorTableStatusTableCells(),
-      'Status table cell should exist'
-    ).toBeVisible();
+  async assertNodesPanelNotEmpty() {
+    await expect(this.nodesPanelChart).toBeVisible();
   }
 }

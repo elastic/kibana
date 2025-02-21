@@ -29,7 +29,7 @@ function getDefaultProps({
   // provide a valid expression to render
   internalApi.updateExpressionParams(getValidExpressionParams());
   return {
-    internalApi: getLensInternalApiMock(internalApiOverrides),
+    internalApi,
     api: getLensApiMock(apiOverrides),
     onUnmount: jest.fn(),
   };

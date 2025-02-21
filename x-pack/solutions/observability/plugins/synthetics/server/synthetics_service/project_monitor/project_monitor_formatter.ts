@@ -148,7 +148,7 @@ export class ProjectMonitorFormatter {
         (monitorObj) => monitorObj[ConfigKey.JOURNEY_ID] === monitor.id
       );
 
-      const normM = await this.validateProjectMonitor({
+      const normM = this.validateProjectMonitor({
         monitor,
         publicLocations: this.publicLocations,
         privateLocations: this.privateLocations,
@@ -189,7 +189,7 @@ export class ProjectMonitorFormatter {
     ]);
   };
 
-  validateProjectMonitor = async ({
+  validateProjectMonitor = ({
     monitor,
     publicLocations,
     privateLocations,

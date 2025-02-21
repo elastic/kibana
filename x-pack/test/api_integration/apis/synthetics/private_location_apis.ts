@@ -21,6 +21,7 @@ export default function ({ getService }: FtrProviderContext) {
   describe('PrivateLocationAPI', function () {
     this.tags('skipCloud');
     const supertestWithoutAuth = getService('supertestWithoutAuth');
+    const supertest = getService('supertest');
 
     const kServer = getService('kibanaServer');
 
@@ -131,6 +132,65 @@ export default function ({ getService }: FtrProviderContext) {
 
         expect(deleteResponse.status).to.be(200);
       }
+    });
+
+    it('can create private location in multiple spaces', async () => {
+      const apiResponse = await testPrivateLocations.addFleetPolicy();
+      const agentPolicyId = apiResponse.body.item.id;
+
+      const { SPACE_ID } = await monitorTestService.addsNewSpace([
+        'minimal_all',
+        'can_manage_private_locations',
+      ]);
+
+      const location: Omit<PrivateLocation, 'id'> = {
+        label: 'Test private location 11',
+        agentPolicyId: agentPolicyId!,
+        geo: {
+          lat: 0,
+          lon: 0,
+        },
+        spaces: [SPACE_ID, 'default'],
+      };
+      const response = await supertest
+        .post(SYNTHETICS_API_URLS.PRIVATE_LOCATIONS)
+        .set('kbn-xsrf', 'true')
+        .send(location);
+
+      expect(response.status).to.be(200);
+    });
+
+    it('validation errors works in multiple spaces as well', async () => {
+      const apiResponse = await testPrivateLocations.addFleetPolicy();
+      const agentPolicyId = apiResponse.body.item.id;
+
+      const { username, password, SPACE_ID } = await monitorTestService.addsNewSpace([
+        'minimal_all',
+        'can_manage_private_locations',
+      ]);
+
+      const location: Omit<PrivateLocation, 'id'> = {
+        label: 'Test private location 12',
+        agentPolicyId: agentPolicyId!,
+        geo: {
+          lat: 0,
+          lon: 0,
+        },
+        spaces: [SPACE_ID, 'default'],
+      };
+      const response = await supertest
+        .post(SYNTHETICS_API_URLS.PRIVATE_LOCATIONS)
+        .set('kbn-xsrf', 'true')
+        .send(location);
+
+      expect(response.status).to.be(200);
+
+      const response1 = await supertestWithoutAuth
+        .post(SYNTHETICS_API_URLS.PRIVATE_LOCATIONS)
+        .auth(username, password)
+        .set('kbn-xsrf', 'true')
+        .send({ ...location, spaces: [SPACE_ID] });
+      expect(response1.status).to.be(400);
     });
   });
 }

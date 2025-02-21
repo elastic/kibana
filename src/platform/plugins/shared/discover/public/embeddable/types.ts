@@ -13,11 +13,11 @@ import { HasInspectorAdapters } from '@kbn/inspector-plugin/public';
 import {
   EmbeddableApiContext,
   HasEditCapabilities,
-  HasInPlaceLibraryTransforms,
+  HasLibraryTransforms,
   PublishesBlockingError,
   PublishesDataLoading,
   PublishesSavedObjectId,
-  PublishesWritablePanelTitle,
+  PublishesWritableTitle,
   PublishesWritableUnifiedSearch,
   PublishingSubject,
   SerializedTimeRange,
@@ -64,6 +64,7 @@ export type SearchEmbeddableSerializedAttributes = Omit<
 // These are options that are not persisted in the saved object, but can be used by solutions
 // when utilising the SavedSearchComponent package outside of dashboard contexts.
 export interface NonPersistedDisplayOptions {
+  solutionNavIdOverride?: 'oblt' | 'security' | 'search';
   enableDocumentViewer?: boolean;
   enableFilters?: boolean;
 }
@@ -99,11 +100,11 @@ export type SearchEmbeddableApi = DefaultEmbeddableApi<
   PublishesSavedObjectId &
   PublishesDataLoading &
   PublishesBlockingError &
-  PublishesWritablePanelTitle &
+  PublishesWritableTitle &
   PublishesSavedSearch &
   PublishesWritableDataViews &
   PublishesWritableUnifiedSearch &
-  HasInPlaceLibraryTransforms &
+  HasLibraryTransforms &
   HasTimeRange &
   HasInspectorAdapters &
   Partial<HasEditCapabilities & PublishesSavedObjectId>;

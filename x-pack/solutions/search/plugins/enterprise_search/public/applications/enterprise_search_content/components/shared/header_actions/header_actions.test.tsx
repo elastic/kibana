@@ -5,13 +5,11 @@
  * 2.0.
  */
 
-import { apiIndex, connectorIndex, crawlerIndex } from '../../../__mocks__/view_index.mock';
+import { apiIndex, connectorIndex } from '../../../__mocks__/view_index.mock';
 
 import React from 'react';
 
 import { SearchPlaygroundPopover } from '../../search_index/components/header_actions/search_playground_popover';
-
-import { CrawlerStatusIndicator } from '../crawler_status_indicator/crawler_status_indicator';
 
 import { getHeaderActions } from './header_actions';
 import { SyncsContextMenu } from './syncs_context_menu';
@@ -26,12 +24,6 @@ describe('Header Actions', () => {
     expect(getHeaderActions(connectorIndex)).toEqual([
       <SyncsContextMenu />,
       <SearchPlaygroundPopover indexName="connector" ingestionMethod="connector" />,
-    ]);
-  });
-  it('renders crawler index', () => {
-    expect(getHeaderActions(crawlerIndex)).toEqual([
-      <CrawlerStatusIndicator />,
-      <SearchPlaygroundPopover indexName="crawler" ingestionMethod="crawler" />,
     ]);
   });
 });

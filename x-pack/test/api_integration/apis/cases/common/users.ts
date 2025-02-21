@@ -9,18 +9,23 @@ import { User } from '../../../../cases_api_integration/common/lib/authenticatio
 import {
   casesAll,
   casesV2All,
+  casesV3All,
+  casesV3NoAssignee,
+  casesV3ReadAndAssignee,
   casesNoDelete,
   casesOnlyDelete,
   casesOnlyReadDelete,
   casesRead,
   obsCasesAll,
   obsCasesV2All,
+  obsCasesV3All,
   obsCasesNoDelete,
   obsCasesOnlyDelete,
   obsCasesOnlyReadDelete,
   obsCasesRead,
   secAll,
   secCasesV2All,
+  secCasesV3All,
   secAllCasesNoDelete,
   secAllCasesNone,
   secAllCasesOnlyDelete,
@@ -71,6 +76,12 @@ export const secCasesV2AllUser: User = {
   username: 'sec_cases_v2_all_user_api_int',
   password: 'password',
   roles: [secCasesV2All.name],
+};
+
+export const secCasesV3AllUser: User = {
+  username: 'sec_cases_v3_all_user_api_int',
+  password: 'password',
+  roles: [secCasesV3All.name],
 };
 
 export const secCasesV2NoReopenWithCreateCommentUser: User = {
@@ -161,6 +172,24 @@ export const casesV2AllUser: User = {
   roles: [casesV2All.name],
 };
 
+export const casesV3AllUser: User = {
+  username: 'cases_v3_all_user_api_int',
+  password: 'password',
+  roles: [casesV3All.name],
+};
+
+export const casesV3NoAssigneeUser: User = {
+  username: 'cases_v3_no_assignee_user_api_int',
+  password: 'password',
+  roles: [casesV3NoAssignee.name],
+};
+
+export const casesV3ReadAndAssignUser: User = {
+  username: 'cases_v3_read_and_assignee_user_api_int',
+  password: 'password',
+  roles: [casesV3ReadAndAssignee.name],
+};
+
 export const casesV2NoReopenWithCreateCommentUser: User = {
   username: 'cases_v2_no_reopen_with_create_comment_user_api_int',
   password: 'password',
@@ -213,6 +242,12 @@ export const obsCasesV2AllUser: User = {
   roles: [obsCasesV2All.name],
 };
 
+export const obsCasesV3AllUser: User = {
+  username: 'obs_cases_v3_all_user_api_int',
+  password: 'password',
+  roles: [obsCasesV3All.name],
+};
+
 export const obsCasesV2NoReopenWithCreateCommentUser: User = {
   username: 'obs_cases_v2_no_reopen_with_create_comment_user_api_int',
   password: 'password',
@@ -253,6 +288,7 @@ export const users = [
   secAllCasesNoDeleteUser,
   secAllUser,
   secCasesV2AllUser,
+  secCasesV3AllUser,
   secCasesV2NoReopenWithCreateCommentUser,
   secCasesV2NoCreateCommentWithReopenUser,
   secAllSpace1User,
@@ -267,6 +303,9 @@ export const users = [
   casesNoDeleteUser,
   casesAllUser,
   casesV2AllUser,
+  casesV3AllUser,
+  casesV3NoAssigneeUser,
+  casesV3ReadAndAssignUser,
   casesV2NoReopenWithCreateCommentUser,
   casesV2NoCreateCommentWithReopenUser,
   casesReadUser,
@@ -275,6 +314,7 @@ export const users = [
   obsCasesNoDeleteUser,
   obsCasesAllUser,
   obsCasesV2AllUser,
+  obsCasesV3AllUser,
   obsCasesV2NoReopenWithCreateCommentUser,
   obsCasesV2NoCreateCommentWithReopenUser,
   obsCasesReadUser,

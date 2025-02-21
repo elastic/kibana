@@ -19,7 +19,7 @@ import {
   UnifiedHistogramVisContext,
 } from '@kbn/unified-histogram-plugin/public';
 import { isEqual } from 'lodash';
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   debounceTime,
   distinctUntilChanged,
@@ -28,13 +28,15 @@ import {
   merge,
   Observable,
   pairwise,
+  skip,
   startWith,
 } from 'rxjs';
 import useObservable from 'react-use/lib/useObservable';
 import type { RequestAdapter } from '@kbn/inspector-plugin/common';
-import type { DatatableColumn } from '@kbn/expressions-plugin/common';
+import type { Datatable, DatatableColumn } from '@kbn/expressions-plugin/common';
 import type { SavedSearch } from '@kbn/saved-search-plugin/common';
-import { Filter } from '@kbn/es-query';
+import { Filter, isOfAggregateQueryType } from '@kbn/es-query';
+import { ESQL_TABLE_TYPE } from '@kbn/data-plugin/common';
 import { useDiscoverCustomization } from '../../../../customizations';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { FetchStatus } from '../../../types';
@@ -217,14 +219,9 @@ export const useDiscoverHistogram = ({
    * Request params
    */
   const { query, filters } = useQuerySubscriber({ data: services.data });
+  const requestParams = useInternalStateSelector((state) => state.dataRequestParams);
   const customFilters = useInternalStateSelector((state) => state.customFilters);
-  const timefilter = services.data.query.timefilter.timefilter;
-  const timeRange = timefilter.getAbsoluteTime();
-  const relativeTimeRange = useObservable(
-    timefilter.getTimeUpdate$().pipe(map(() => timefilter.getTime())),
-    timefilter.getTime()
-  );
-
+  const { timeRangeRelative: relativeTimeRange, timeRangeAbsolute: timeRange } = requestParams;
   // When in ES|QL mode, update the data view, query, and
   // columns only when documents are done fetching so the Lens suggestions
   // don't frequently change, such as when the user modifies the table
@@ -245,6 +242,7 @@ export const useDiscoverHistogram = ({
     dataView: esqlDataView,
     query: esqlQuery,
     columns: esqlColumns,
+    table,
   } = useObservable(esqlFetchComplete$, initialEsqlProps);
 
   useEffect(() => {
@@ -254,9 +252,7 @@ export const useDiscoverHistogram = ({
     }
 
     const fetchStart = stateContainer.dataState.fetchChart$.subscribe(() => {
-      if (!skipRefetch.current) {
-        setIsSuggestionLoading(true);
-      }
+      setIsSuggestionLoading(true);
     });
     const fetchComplete = esqlFetchComplete$.subscribe(() => {
       setIsSuggestionLoading(false);
@@ -271,18 +267,6 @@ export const useDiscoverHistogram = ({
   /**
    * Data fetching
    */
-
-  const skipRefetch = useRef<boolean>();
-
-  // Skip refetching when showing the chart since Lens will
-  // automatically fetch when the chart is shown
-  useEffect(() => {
-    if (skipRefetch.current === undefined) {
-      skipRefetch.current = false;
-    } else {
-      skipRefetch.current = !hideChart;
-    }
-  }, [hideChart]);
 
   // Handle unified histogram refetching
   useEffect(() => {
@@ -309,18 +293,14 @@ export const useDiscoverHistogram = ({
     }
 
     const subscription = fetchChart$.subscribe((source) => {
-      if (!skipRefetch.current) {
-        if (source === 'discover') addLog('Unified Histogram - Discover refetch');
-        if (source === 'lens') addLog('Unified Histogram - Lens suggestion refetch');
-        unifiedHistogram.refetch();
-      }
-
-      skipRefetch.current = false;
+      if (source === 'discover') addLog('Unified Histogram - Discover refetch');
+      if (source === 'lens') addLog('Unified Histogram - Lens suggestion refetch');
+      unifiedHistogram.fetch();
     });
 
-    // triggering the initial request for total hits hook
-    if (!isEsqlMode && !skipRefetch.current) {
-      unifiedHistogram.refetch();
+    // triggering the initial chart request
+    if (!isEsqlMode) {
+      unifiedHistogram.fetch();
     }
 
     return () => {
@@ -402,6 +382,7 @@ export const useDiscoverHistogram = ({
     timeRange: timeRangeMemoized,
     relativeTimeRange,
     columns: isEsqlMode ? esqlColumns : undefined,
+    table: isEsqlMode ? table : undefined,
     onFilter: histogramCustomization?.onFilter,
     onBrushEnd: histogramCustomization?.onBrushEnd,
     withDefaultActions: histogramCustomization?.withDefaultActions,
@@ -500,7 +481,10 @@ const createTotalHitsObservable = (state$?: Observable<UnifiedHistogramState>) =
 const createCurrentSuggestionObservable = (state$: Observable<UnifiedHistogramState>) => {
   return state$.pipe(
     map((state) => state.currentSuggestionContext),
-    distinctUntilChanged(isEqual)
+    distinctUntilChanged(isEqual),
+    // Skip the first emission since it's the
+    // initial state and doesn't need a refetch
+    skip(1)
   );
 };
 
@@ -512,11 +496,23 @@ function getUnifiedHistogramPropsForEsql({
   savedSearch: SavedSearch;
 }) {
   const columns = documentsValue?.esqlQueryColumns || EMPTY_ESQL_COLUMNS;
+  const query = savedSearch.searchSource.getField('query');
+  const isEsqlMode = isOfAggregateQueryType(query);
+  const table: Datatable | undefined =
+    isEsqlMode && documentsValue?.result
+      ? {
+          type: 'datatable',
+          rows: documentsValue.result.map((r) => r.raw),
+          columns,
+          meta: { type: ESQL_TABLE_TYPE },
+        }
+      : undefined;
 
   const nextProps = {
     dataView: savedSearch.searchSource.getField('index')!,
     query: savedSearch.searchSource.getField('query'),
     columns,
+    table,
   };
 
   addLog('[UnifiedHistogram] delayed next props for ES|QL', nextProps);

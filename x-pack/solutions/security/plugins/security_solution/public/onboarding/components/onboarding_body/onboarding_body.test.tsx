@@ -107,6 +107,11 @@ describe('OnboardingBody Component', () => {
         return <div>{'Card 1 Content'}</div>;
       });
 
+      mockUseExpandedCard.mockReturnValueOnce({
+        expandedCardId: 'card-1',
+        setExpandedCardId: mockSetExpandedCardId,
+      });
+
       render(<OnboardingBody />);
       act(() => {
         fireEvent.click(screen.getByText('Card 1'));
@@ -124,6 +129,11 @@ describe('OnboardingBody Component', () => {
       mockComponent.mockImplementationOnce(function Component({ setComplete }) {
         setComplete(false);
         return <div>{'Card 1 Content'}</div>;
+      });
+
+      mockUseExpandedCard.mockReturnValueOnce({
+        expandedCardId: 'card-1',
+        setExpandedCardId: mockSetExpandedCardId,
       });
 
       render(<OnboardingBody />);

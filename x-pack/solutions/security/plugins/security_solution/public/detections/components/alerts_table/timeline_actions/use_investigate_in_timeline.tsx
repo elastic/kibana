@@ -32,6 +32,7 @@ import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import { useStartTransaction } from '../../../../common/lib/apm/use_start_transaction';
 import { ALERTS_ACTIONS } from '../../../../common/lib/apm/user_actions';
 import { defaultUdtHeaders } from '../../../../timelines/components/timeline/body/column_headers/default_headers';
+import { useUserPrivileges } from '../../../../common/components/user_privileges';
 
 interface UseInvestigateInTimelineActionProps {
   ecsRowData?: Ecs | Ecs[] | null;
@@ -189,17 +190,24 @@ export const useInvestigateInTimeline = ({
     getExceptionFilter,
   ]);
 
+  const {
+    timelinePrivileges: { read: canInvestigateInTimeline },
+  } = useUserPrivileges();
+
   const investigateInTimelineActionItems = useMemo(
-    () => [
-      {
-        key: 'investigate-in-timeline-action-item',
-        'data-test-subj': 'investigate-in-timeline-action-item',
-        disabled: ecsRowData == null,
-        onClick: investigateInTimelineAlertClick,
-        name: ACTION_INVESTIGATE_IN_TIMELINE,
-      },
-    ],
-    [ecsRowData, investigateInTimelineAlertClick]
+    () =>
+      canInvestigateInTimeline
+        ? [
+            {
+              key: 'investigate-in-timeline-action-item',
+              'data-test-subj': 'investigate-in-timeline-action-item',
+              disabled: ecsRowData == null,
+              onClick: investigateInTimelineAlertClick,
+              name: ACTION_INVESTIGATE_IN_TIMELINE,
+            },
+          ]
+        : [],
+    [ecsRowData, investigateInTimelineAlertClick, canInvestigateInTimeline]
   );
 
   return {

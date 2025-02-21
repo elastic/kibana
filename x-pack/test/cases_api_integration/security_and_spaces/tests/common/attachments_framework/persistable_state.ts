@@ -29,7 +29,7 @@ import {
   getReferenceFromEsResponse,
   bulkCreateAttachments,
   updateComment,
-  getCaseUserActions,
+  findCaseUserActions,
 } from '../../../../common/lib/api';
 
 // eslint-disable-next-line import/no-default-export
@@ -74,7 +74,7 @@ export default ({ getService }: FtrProviderContext): void => {
           params: persistableStateAttachment,
         });
 
-        const userActions = await getCaseUserActions({ supertest, caseID: postedCase.id });
+        const { userActions } = await findCaseUserActions({ supertest, caseID: postedCase.id });
         const commentUserAction = userActions[1];
 
         expect(commentUserAction.type).to.eql('comment');
@@ -123,13 +123,13 @@ export default ({ getService }: FtrProviderContext): void => {
           params: persistableStateAttachment,
         });
 
-        const userActions = await getCaseUserActions({ supertest, caseID: postedCase.id });
+        const { userActions } = await findCaseUserActions({ supertest, caseID: postedCase.id });
         const createCommentUserAction = userActions[1];
 
         const esResponse = await getSOFromKibanaIndex({
           es,
           soType: CASE_USER_ACTION_SAVED_OBJECT,
-          soId: createCommentUserAction.action_id,
+          soId: createCommentUserAction.id,
         });
 
         const commentOnES =

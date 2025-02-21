@@ -10,14 +10,15 @@ import { DEFAULT_FILTER_OPTIONS, DEFAULT_QUERY_PARAMS } from './constants';
 import { useGetCases } from './use_get_cases';
 import * as api from './api';
 import type { AppMockRenderer } from '../common/mock';
-import { createAppMockRenderer } from '../common/mock';
+import { createAppMockRenderer, allCasesCapabilities } from '../common/mock';
 import { useToasts } from '../common/lib/kibana/hooks';
 import { OWNERS } from '../../common/constants';
 
 jest.mock('./api');
 jest.mock('../common/lib/kibana/hooks');
 
-describe('useGetCases', () => {
+// Failing: See https://github.com/elastic/kibana/issues/207955
+describe.skip('useGetCases', () => {
   const abortCtrl = new AbortController();
   const addSuccess = jest.fn();
   (useToasts as jest.Mock).mockReturnValue({ addSuccess, addError: jest.fn() });
@@ -69,24 +70,9 @@ describe('useGetCases', () => {
 
     appMockRender.coreStart.application.capabilities = {
       ...appMockRender.coreStart.application.capabilities,
-      observabilityCasesV2: {
-        create_cases: true,
-        read_cases: true,
-        update_cases: true,
-        push_cases: true,
-        cases_connectors: true,
-        delete_cases: true,
-        cases_settings: true,
-      },
-      securitySolutionCasesV2: {
-        create_cases: true,
-        read_cases: true,
-        update_cases: true,
-        push_cases: true,
-        cases_connectors: true,
-        delete_cases: true,
-        cases_settings: true,
-      },
+      generalCasesV3: allCasesCapabilities(),
+      observabilityCasesV3: allCasesCapabilities(),
+      securitySolutionCasesV3: allCasesCapabilities(),
     };
 
     const spyOnGetCases = jest.spyOn(api, 'getCases');
@@ -107,6 +93,12 @@ describe('useGetCases', () => {
 
   it('should set only the available owners when no owner is provided', async () => {
     appMockRender = createAppMockRenderer({ owner: [] });
+
+    appMockRender.coreStart.application.capabilities = {
+      ...appMockRender.coreStart.application.capabilities,
+      generalCasesV3: allCasesCapabilities(),
+    };
+
     const spyOnGetCases = jest.spyOn(api, 'getCases');
 
     renderHook(() => useGetCases(), {

@@ -10,6 +10,15 @@ import type { Logger } from '@kbn/core/server';
 import { parseCombinedOrThrow } from '.';
 import { getRawAttackDiscoveriesMock } from '../../../../../../../__mocks__/raw_attack_discoveries';
 
+const prompts = {
+  detailsMarkdown: '',
+  entitySummaryMarkdown: '',
+  mitreAttackTactics: '',
+  summaryMarkdown: '',
+  title: '',
+  insights: '',
+};
+
 describe('parseCombinedOrThrow', () => {
   const mockLogger: Logger = {
     debug: jest.fn(),
@@ -28,6 +37,7 @@ describe('parseCombinedOrThrow', () => {
     nodeName,
     llmType,
     logger: mockLogger,
+    prompts,
   };
 
   it('returns an Attack discovery for each insight in a valid combined response', () => {
