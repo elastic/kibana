@@ -370,7 +370,7 @@ describe('autocomplete', () => {
     );
 
     // ENRICH policy ON
-    testSuggestions('FROM index1 | ENRICH policy O/', ['ON $0', 'WITH $0', '| ']);
+    testSuggestions('FROM index1 | ENRICH policy O/', ['ON ', 'WITH ', '| ']);
 
     // ENRICH policy ON field
     testSuggestions(
@@ -737,10 +737,7 @@ describe('autocomplete', () => {
           .map(attachTriggerCommand)
           .map((s) => ({ ...s, rangeToReplace: { start: 17, end: 20 } }))
       );
-      testSuggestions(
-        'FROM a | ENRICH policy /',
-        ['ON $0', 'WITH $0', '| '].map(attachTriggerCommand)
-      );
+      testSuggestions('FROM a | ENRICH policy /', ['ON ', 'WITH ', '| '].map(attachTriggerCommand));
 
       testSuggestions(
         'FROM a | ENRICH policy ON /',
@@ -750,19 +747,19 @@ describe('autocomplete', () => {
       );
       testSuggestions(
         'FROM a | ENRICH policy ON @timestamp /',
-        ['WITH $0', '| '].map(attachTriggerCommand)
+        ['WITH ', '| '].map(attachTriggerCommand)
       );
       // nothing fancy with this field list
       testSuggestions('FROM a | ENRICH policy ON @timestamp WITH /', [
         'var0 = ',
-        ...getPolicyFields('policy').map((name) => ({ text: name, command: undefined })),
+        ...getPolicyFields('policy').map(attachTriggerCommand),
       ]);
       describe('replacement range', () => {
         testSuggestions('FROM a | ENRICH policy ON @timestamp WITH othe/', [
           'var0 = ',
           ...getPolicyFields('policy').map((name) => ({
             text: name,
-            command: undefined,
+            command: TRIGGER_SUGGESTION_COMMAND,
             rangeToReplace: { start: 43, end: 47 },
           })),
         ]);
@@ -770,7 +767,7 @@ describe('autocomplete', () => {
           'FROM a | ENRICH policy ON @timestamp WITH var0 = othe/',
           getPolicyFields('policy').map((name) => ({
             text: name,
-            command: undefined,
+            command: TRIGGER_SUGGESTION_COMMAND,
             rangeToReplace: { start: 50, end: 54 },
           }))
         );

@@ -31,16 +31,16 @@ export const getPosition = (
   command: ESQLCommand<'enrich'>
 ): Position | undefined => {
   if (command.args.length < 2) {
-    if (innerText.match(/(:\S*|ENRICH\s+)$/i)) {
-      return Position.POLICY;
-    }
     if (innerText.match(/_[^:\s]*$/)) {
       return Position.MODE;
+    }
+    if (innerText.match(/(:|ENRICH\s+)\S*$/i)) {
+      return Position.POLICY;
     }
     if (innerText.match(/:\s+$/)) {
       return undefined;
     }
-    if (innerText.match(/\s+$/)) {
+    if (innerText.match(/\s+\S*$/)) {
       return Position.AFTER_POLICY;
     }
   }
@@ -56,7 +56,7 @@ export const getPosition = (
   }
 
   if (isSingleItem(lastArg) && lastArg.name === 'with') {
-    if (innerText.match(/[,|with]\s+$/i)) {
+    if (innerText.match(/[,|with]\s+\S*$/i)) {
       return Position.WITH_NEW_CLAUSE;
     }
     if (innerText.match(/[,|with]\s+\S+\s*=\s*\S+\s+$/i)) {
@@ -65,7 +65,7 @@ export const getPosition = (
     if (innerText.match(/[,|with]\s+\S+\s+$/i)) {
       return Position.WITH_AFTER_FIRST_WORD;
     }
-    if (innerText.match(/=\s+$/i)) {
+    if (innerText.match(/=\s+\S*$/i)) {
       return Position.WITH_AFTER_ASSIGNMENT;
     }
   }
