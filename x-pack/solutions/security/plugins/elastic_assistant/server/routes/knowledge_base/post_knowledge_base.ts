@@ -69,6 +69,7 @@ export const postKnowledgeBaseRoute = (router: ElasticAssistantPluginRouter) => 
           }
 
           await knowledgeBaseDataClient.setupKnowledgeBase({
+            request,
             soClient,
             ignoreSecurityLabs,
           });

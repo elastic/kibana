@@ -11,6 +11,7 @@ import {
   SearchTotalHits,
   QueryDslQueryContainer,
 } from '@elastic/elasticsearch/lib/api/types';
+import numeral from '@elastic/numeral';
 import type { MlPluginSetup } from '@kbn/ml-plugin/server';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import { Document } from 'langchain/document';
@@ -228,25 +229,22 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
     this.options.logger.debug(`Deploying ELSER model '${elserId}'...`);
     const esClient = await this.options.elasticsearchClientPromise;
     const inferenceId = await this.getInferenceEndpointId();
-    const inferenceExists = await this.isInferenceEndpointExists(inferenceId);
 
     // Don't try to create the inference endpoint for ELASTICSEARCH_ELSER_INFERENCE_ID
     if (inferenceId === ASSISTANT_ELSER_INFERENCE_ID) {
-      if (inferenceExists) {
-        try {
-          await esClient.inference.delete({
-            inference_id: ASSISTANT_ELSER_INFERENCE_ID,
-            // it's being used in the mapping so we need to force delete
-            force: true,
-          });
-          this.options.logger.debug(
-            `Deleted existing inference endpoint for ELSER model '${elserId}'`
-          );
-        } catch (error) {
-          this.options.logger.error(
-            `Error deleting inference endpoint for ELSER model '${elserId}':\n${error}`
-          );
-        }
+      try {
+        await esClient.inference.delete({
+          inference_id: ASSISTANT_ELSER_INFERENCE_ID,
+          // it's being used in the mapping so we need to force delete
+          force: true,
+        });
+        this.options.logger.debug(
+          `Deleted existing inference endpoint for ELSER model '${elserId}'`
+        );
+      } catch (error) {
+        this.options.logger.error(
+          `Error deleting inference endpoint for ELSER model '${elserId}':\n${error}`
+        );
       }
 
       try {
@@ -296,9 +294,11 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
   public setupKnowledgeBase = async ({
     soClient,
     ignoreSecurityLabs = false,
+    request,
   }: {
     soClient: SavedObjectsClientContract;
     ignoreSecurityLabs?: boolean;
+    request: KibanaRequest;
   }): Promise<void> => {
     if (this.options.getIsKBSetupInProgress()) {
       this.options.logger.debug('Knowledge Base setup already in progress');
@@ -325,22 +325,15 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
           `Removed ${legacyESQL?.total} ESQL knowledge base docs from knowledge base data stream: ${this.indexTemplateAndPattern.alias}.`
         );
       }
-      // Delete any existing Security Labs content
-      const securityLabsDocs = await esClient.deleteByQuery({
-        index: this.indexTemplateAndPattern.alias,
-        query: {
-          bool: {
-            must: [{ terms: { kb_resource: [SECURITY_LABS_RESOURCE] } }],
-          },
-        },
-      });
-      if (securityLabsDocs?.total) {
-        this.options.logger.info(
-          `Removed ${securityLabsDocs?.total} Security Labs knowledge base docs from knowledge base data stream: ${this.indexTemplateAndPattern.alias}.`
-        );
-      }
     } catch (e) {
       this.options.logger.info('No legacy ESQL or Security Labs knowledge base docs to delete');
+    }
+
+    const mlSystemProvider = this.options.ml.mlSystemProvider(request, soClient);
+    const mlSystemInfo = await mlSystemProvider.mlInfo();
+
+    if (numeral(mlSystemInfo.limits.effective_max_model_memory_limit) < numeral('4000mb')) {
+      throw new Error('Effective max model memory limit is less than 4000mb, cannot install ELSER');
     }
 
     try {
@@ -377,6 +370,24 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
       if (!ignoreSecurityLabs) {
         const labsDocsLoaded = await this.isSecurityLabsDocsLoaded();
         if (!labsDocsLoaded) {
+          // Delete any existing Security Labs content
+          const securityLabsDocs = await (
+            await this.options.elasticsearchClientPromise
+          ).deleteByQuery({
+            index: this.indexTemplateAndPattern.alias,
+            query: {
+              bool: {
+                must: [{ terms: { kb_resource: [SECURITY_LABS_RESOURCE] } }],
+              },
+            },
+          });
+
+          if (securityLabsDocs?.total) {
+            this.options.logger.info(
+              `Removed ${securityLabsDocs?.total} Security Labs knowledge base docs from knowledge base data stream: ${this.indexTemplateAndPattern.alias}.`
+            );
+          }
+
           this.options.logger.debug(`Loading Security Labs KB docs...`);
           await loadSecurityLabs(this, this.options.logger);
         } else {
