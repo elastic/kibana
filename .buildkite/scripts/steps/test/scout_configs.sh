@@ -18,10 +18,26 @@ export JOB="$SCOUT_CONFIG_GROUP_KEY"
 
 FAILED_CONFIGS_KEY="${BUILDKITE_STEP_ID}${SCOUT_CONFIG_GROUP_KEY}"
 
+configs=""
+
 echo "--- downloading scout test configuration"
 download_artifact scout_test_configs.json .
-configs=$(jq -r '.[env.SCOUT_CONFIG_GROUP_KEY].configs[]' scout_test_configs.json)
 group=$(jq -r '.[env.SCOUT_CONFIG_GROUP_KEY].group' scout_test_configs.json)
+
+# The first retry should only run the configs that failed in the previous attempt
+# Any subsequent retries, which would generally only happen by someone clicking the button in the UI, will run everything
+if [[ ! "$configs" && "${BUILDKITE_RETRY_COUNT:-0}" == "1" ]]; then
+  configs=$(buildkite-agent meta-data get "$FAILED_CONFIGS_KEY" --default '')
+  if [[ "$configs" ]]; then
+    echo "--- Retrying only failed configs"
+    echo "$configs"
+  fi
+fi
+
+if [ "$configs" == "" ] && [ "$SCOUT_CONFIG_GROUP_KEY" != "" ]; then
+  echo "--- Loading all the config files for $SCOUT_CONFIG_GROUP_KEY plugin"
+  configs=$(jq -r '.[env.SCOUT_CONFIG_GROUP_KEY].configs[]' scout_test_configs.json)
+fi
 
 if [ "$configs" == "" ]; then
   echo "unable to determine configs to run"
@@ -88,7 +104,7 @@ fi
 if [[ ${#configWithoutTests[@]} -gt 0 ]]; then
   echo "⚠️ Configs with no tests:"
   printf '%s\n' "${configWithoutTests[@]}"
-  buildkite-agent meta-data set "$FAILED_CONFIGS_KEY" "$configWithoutTests"
+  # add annotation to the build
 fi
 
 if [[ ${#failedConfigs[@]} -gt 0 ]]; then
