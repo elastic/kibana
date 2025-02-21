@@ -52,6 +52,7 @@ import { getRuleTagsRoute } from './rule/apis/tags/get_rule_tags';
 import { getScheduleFrequencyRoute } from './rule/apis/get_schedule_frequency';
 import { bulkUntrackAlertsRoute } from './rule/apis/bulk_untrack';
 import { bulkUntrackAlertsByQueryRoute } from './rule/apis/bulk_untrack_by_query';
+import { getAlertDeletionPreviewRoute } from './alert_deletion/get_alert_deletion_preview_route';
 
 import { createMaintenanceWindowRoute } from './maintenance_window/apis/create/create_maintenance_window_route';
 import { getMaintenanceWindowRoute } from './maintenance_window/apis/get/get_maintenance_window_route';
@@ -136,6 +137,7 @@ export function defineRoutes(opts: RouteOptions) {
   bulkUntrackAlertsByQueryRoute(router, licenseState);
   muteAlertRoute(router, licenseState);
   unmuteAlertRoute(router, licenseState);
+  getAlertDeletionPreviewRoute(router, licenseState);
 
   // Maintenance Window APIs
   createMaintenanceWindowRoute(router, licenseState);

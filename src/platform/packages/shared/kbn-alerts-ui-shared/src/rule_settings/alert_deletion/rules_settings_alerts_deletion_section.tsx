@@ -22,7 +22,9 @@ import {
   EuiPanel,
 } from '@elastic/eui';
 import type { RulesSettingsAlertDeletionProperties } from '@kbn/alerting-types/rule_settings';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import * as i18n from './translations';
+import { useFetchAlertsDeletionPreview } from '../../common/hooks/alert_deletion/use_fetch_alert_deletion_preview';
 
 interface Props {
   onChange: (key: keyof RulesSettingsAlertDeletionProperties, value: number | boolean) => void;
@@ -32,6 +34,10 @@ interface Props {
 }
 export const RulesSettingsAlertsDeletionSection = memo((props: Props) => {
   const { onChange, settings, hasError, canWrite } = props;
+
+  const { http } = useKibana().services;
+  console.log('doing it');
+  const data = useFetchAlertsDeletionPreview({ http, enabled: true, onSuccess: () => {} });
 
   if (hasError || !settings) {
     return (

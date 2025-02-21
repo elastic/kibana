@@ -6,11 +6,12 @@
  */
 import { schema } from '@kbn/config-schema';
 
+// TODO: add descriptions
 export const alertDeletionPreviewSchema = schema.object({
-  isActiveAlertsDeletionEnabled: schema.boolean(),
-  isInactiveAlertsDeletionEnabled: schema.boolean(),
-  activeAlertsDeletionThreshold: schema.number({ min: 1 }),
-  inactiveAlertsDeletionThreshold: schema.number({ min: 1 }),
+  is_active_alerts_deletion_enabled: schema.boolean(),
+  is_inactive_alerts_deletion_enabled: schema.boolean(),
+  active_alerts_deletion_threshold: schema.number({ min: 1 }),
+  inactive_alerts_deletion_threshold: schema.number({ min: 1 }),
 });
 
 export const alertDeletionPreviewResponseSchema = schema.object({
