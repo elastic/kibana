@@ -18,6 +18,7 @@ import { useKibana } from '../../common/lib/kibana';
 import { DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID, DataViewPickerScopeName } from '../constants';
 import { createDataViewSelectedListener } from '../redux/listeners/data_view_selected';
 import { createInitListener } from '../redux/listeners/init_listener';
+import { useEnableExperimental } from '../../common/hooks/use_experimental_features';
 
 type OriginalListener = Parameters<typeof originalAddListener>[0];
 
@@ -38,8 +39,15 @@ const removeListener = <T extends AnyAction>(listener: Listener<T>) =>
 export const useInitDataViewPicker = () => {
   const dispatch = useDispatch();
   const services = useKibana().services;
+  const { newDataViewPickerEnabled } = useEnableExperimental();
+
+  console.log(' newDataViewPickerEnabled', newDataViewPickerEnabled);
 
   useEffect(() => {
+    if (!newDataViewPickerEnabled) {
+      return;
+    }
+
     const dataViewsLoadingListener = createInitListener({
       dataViews: services.dataViews,
     });
@@ -69,5 +77,5 @@ export const useInitDataViewPicker = () => {
       dispatch(removeListener(dataViewsLoadingListener));
       dispatch(removeListener(dataViewSelectedListener));
     };
-  }, [dispatch, services.dataViews]);
+  }, [dispatch, newDataViewPickerEnabled, services.dataViews]);
 };
