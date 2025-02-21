@@ -726,7 +726,7 @@
                 "section": "def-common.Filter",
                 "text": "Filter"
               },
-              "[]) => void) | undefined; }"
+              "[]) => void) | undefined; bubbleSubmitEvent?: boolean | undefined; }"
             ],
             "path": "src/platform/plugins/shared/unified_search/public/search_bar/index.tsx",
             "deprecated": false,
