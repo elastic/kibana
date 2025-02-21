@@ -19,6 +19,7 @@ import {
   EXTERNAL_LINK_TYPE,
   LinksLayoutType,
   LINKS_VERTICAL_LAYOUT,
+  LinksTextOverflowType,
 } from '../../../common/content_management';
 import { coreServices, trackUiMetric } from '../../services/kibana_services';
 import { ResolvedLink } from '../../types';
@@ -26,9 +27,11 @@ import { ResolvedLink } from '../../types';
 export const ExternalLinkComponent = ({
   link,
   layout,
+  textOverflow,
 }: {
   link: ResolvedLink;
   layout: LinksLayoutType;
+  textOverflow: LinksTextOverflowType;
 }) => {
   const linkOptions = useMemo(() => {
     return {
@@ -49,6 +52,7 @@ export const ExternalLinkComponent = ({
     <EuiListGroupItem
       size="s"
       external
+      wrapText={textOverflow === 'textOverflowWrap'}
       color="text"
       isDisabled={Boolean(link.error)}
       className={'linksPanelLink'}

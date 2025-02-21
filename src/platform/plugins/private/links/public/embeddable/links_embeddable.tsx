@@ -26,6 +26,8 @@ import {
   LinksLayoutType,
   LINKS_HORIZONTAL_LAYOUT,
   LINKS_VERTICAL_LAYOUT,
+  LinksTextOverflowType,
+  LINK_TEXT_OVERFLOW_ELLIPSIS,
 } from '../../common/content_management';
 import { DashboardLinkComponent } from '../components/dashboard_link/dashboard_link_component';
 import { ExternalLinkComponent } from '../components/external_link/external_link_component';
@@ -89,6 +91,7 @@ export const getLinksEmbeddableFactory = () => {
         hidePanelTitles,
         links: resolvedLinks,
         layout: attributesWithInjectedIds.layout,
+        textOverflow: attributesWithInjectedIds.textOverflow,
         defaultPanelTitle: attributesWithInjectedIds.title,
         defaultPanelDescription: attributesWithInjectedIds.description,
       };
@@ -102,6 +105,9 @@ export const getLinksEmbeddableFactory = () => {
       const defaultTitle$ = new BehaviorSubject<string | undefined>(state.defaultPanelTitle);
       const defaultDescription$ = new BehaviorSubject<string | undefined>(
         state.defaultPanelDescription
+      );
+      const textOverflow$ = new BehaviorSubject<LinksTextOverflowType | undefined>(
+        state.textOverflow
       );
       const savedObjectId$ = new BehaviorSubject(state.savedObjectId);
       const isByReference = Boolean(state.savedObjectId);
@@ -198,6 +204,7 @@ export const getLinksEmbeddableFactory = () => {
             layout$.next(newState.layout);
             defaultTitle$.next(newState.defaultPanelTitle);
             defaultDescription$.next(newState.defaultPanelDescription);
+            textOverflow$.next(newState.textOverflow);
           },
         },
         {
@@ -208,6 +215,11 @@ export const getLinksEmbeddableFactory = () => {
             (nextLayout?: LinksLayoutType) => layout$.next(nextLayout ?? LINKS_VERTICAL_LAYOUT),
           ],
           error: [blockingError$, (nextError?: Error) => blockingError$.next(nextError)],
+          textOverflow: [
+            textOverflow$,
+            (nextTextOverflow?: LinksTextOverflowType) =>
+              textOverflow$.next(nextTextOverflow ?? LINK_TEXT_OVERFLOW_ELLIPSIS),
+          ],
           defaultPanelDescription: [
             defaultDescription$,
             (nextDescription?: string) => defaultDescription$.next(nextDescription),
@@ -218,8 +230,11 @@ export const getLinksEmbeddableFactory = () => {
       );
 
       const Component = () => {
-        const [links, layout] = useBatchedOptionalPublishingSubjects(links$, layout$);
-
+        const [links, layout, textOverflow] = useBatchedOptionalPublishingSubjects(
+          links$,
+          layout$,
+          textOverflow$
+        );
         const linkItems: { [id: string]: { id: string; content: JSX.Element } } = useMemo(() => {
           if (!links) return {};
           return links.reduce((prev, currentLink) => {
@@ -233,6 +248,7 @@ export const getLinksEmbeddableFactory = () => {
                       key={currentLink.id}
                       link={currentLink}
                       layout={layout ?? LINKS_VERTICAL_LAYOUT}
+                      textOverflow={textOverflow ?? LINK_TEXT_OVERFLOW_ELLIPSIS}
                       parentApi={parentApi as LinksParentApi}
                     />
                   ) : (
@@ -240,12 +256,13 @@ export const getLinksEmbeddableFactory = () => {
                       key={currentLink.id}
                       link={currentLink}
                       layout={layout ?? LINKS_VERTICAL_LAYOUT}
+                      textOverflow={textOverflow ?? LINK_TEXT_OVERFLOW_ELLIPSIS}
                     />
                   ),
               },
             };
           }, {});
-        }, [links, layout]);
+        }, [links, layout, textOverflow]);
         return (
           <EuiPanel
             className={`linksComponent ${

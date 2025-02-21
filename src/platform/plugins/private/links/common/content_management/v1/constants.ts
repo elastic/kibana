@@ -18,3 +18,9 @@ export const EXTERNAL_LINK_TYPE = 'externalLink';
  */
 export const LINKS_HORIZONTAL_LAYOUT = 'horizontal';
 export const LINKS_VERTICAL_LAYOUT = 'vertical';
+
+/**
+ * Text overflow options
+ */
+export const LINK_TEXT_OVERFLOW_WRAP = 'textOverflowWrap';
+export const LINK_TEXT_OVERFLOW_ELLIPSIS = 'textOverflowEllipsis';
