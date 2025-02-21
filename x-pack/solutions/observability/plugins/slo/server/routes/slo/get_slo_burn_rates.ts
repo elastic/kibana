@@ -6,7 +6,6 @@
  */
 
 import { getSLOBurnRatesParamsSchema } from '@kbn/slo-schema';
-import { executeWithErrorHandler } from '../../errors';
 import { getBurnRates } from '../../services/get_burn_rates';
 import { createSloServerRoute } from '../create_slo_server_route';
 import { assertPlatinumLicense } from './utils/assert_platinum_license';
@@ -30,19 +29,17 @@ export const getSloBurnRates = createSloServerRoute({
     const soClient = (await context.core).savedObjects.client;
     const { instanceId, windows, remoteName } = params.body;
 
-    return await executeWithErrorHandler(() =>
-      getBurnRates({
-        instanceId,
-        spaceId,
-        windows,
-        remoteName,
-        sloId: params.path.id,
-        services: {
-          soClient,
-          esClient,
-          logger,
-        },
-      })
-    );
+    return await getBurnRates({
+      instanceId,
+      spaceId,
+      windows,
+      remoteName,
+      sloId: params.path.id,
+      services: {
+        soClient,
+        esClient,
+        logger,
+      },
+    });
   },
 });

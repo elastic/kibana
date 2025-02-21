@@ -4,17 +4,75 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useMemo } from 'react';
-import { AlertConsumers, SLO_BURN_RATE_RULE_TYPE_ID } from '@kbn/rule-data-utils';
+import React, { useEffect, useMemo, useRef } from 'react';
+import {
+  ALERT_DURATION,
+  ALERT_REASON,
+  ALERT_RULE_NAME,
+  ALERT_STATUS,
+  SLO_BURN_RATE_RULE_TYPE_ID,
+  AlertConsumers,
+} from '@kbn/rule-data-utils';
 import type { TimeRange } from '@kbn/es-query';
 import { ALL_VALUE } from '@kbn/slo-schema';
-import { AlertsTableStateProps } from '@kbn/triggers-actions-ui-plugin/public/application/sections/alerts_table/alerts_table_state';
-import { SloEmbeddableDeps } from '../types';
+import type {
+  AlertsTableProps,
+  AlertsTableImperativeApi,
+} from '@kbn/response-ops-alerts-table/types';
+import { ObservabilityAlertsTable } from '@kbn/observability-plugin/public';
+import { EuiDataGridColumn } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import type { SloItem } from '../types';
-import { SLO_ALERTS_TABLE_CONFIG_ID } from '../../constants';
+import { SloEmbeddableDeps } from '../types';
 
 const ALERTS_PER_PAGE = 10;
 const ALERTS_TABLE_ID = 'xpack.observability.sloAlertsEmbeddable.alert.table';
+/**
+ * columns implements a subset of `EuiDataGrid`'s `EuiDataGridColumn` interface,
+ * plus additional TGrid column properties
+ */
+const columns: Array<Pick<EuiDataGridColumn, 'display' | 'displayAsText' | 'id' | 'initialWidth'>> =
+  [
+    {
+      displayAsText: i18n.translate(
+        'xpack.slo.sloAlertsEmbeddable.alertsTGrid.statusColumnDescription',
+        {
+          defaultMessage: 'Status',
+        }
+      ),
+      id: ALERT_STATUS,
+      initialWidth: 110,
+    },
+    {
+      displayAsText: i18n.translate(
+        'xpack.slo.sloAlertsEmbeddable.alertsTGrid.durationColumnDescription',
+        {
+          defaultMessage: 'Duration',
+        }
+      ),
+      id: ALERT_DURATION,
+      initialWidth: 116,
+    },
+    {
+      displayAsText: i18n.translate(
+        'xpack.slo.sloAlertsEmbeddable.alertsTGrid.sloColumnDescription',
+        {
+          defaultMessage: 'Rule name',
+        }
+      ),
+      id: ALERT_RULE_NAME,
+      initialWidth: 110,
+    },
+    {
+      displayAsText: i18n.translate(
+        'xpack.slo.sloAlertsEmbeddable.alertsTGrid.reasonColumnDescription',
+        {
+          defaultMessage: 'Reason',
+        }
+      ),
+      id: ALERT_REASON,
+    },
+  ];
 
 interface Props {
   deps: SloEmbeddableDeps;
@@ -58,7 +116,7 @@ export const useSloAlertsQuery = (
   showAllGroupByInstances?: boolean
 ) => {
   return useMemo(() => {
-    const query: AlertsTableStateProps['query'] = {
+    const query: AlertsTableProps['query'] = {
       bool: {
         filter: [
           {
@@ -90,34 +148,32 @@ export const useSloAlertsQuery = (
 
 export function SloAlertsTable({
   slos,
-  deps,
   timeRange,
   onLoaded,
   lastReloadRequestTime,
   showAllGroupByInstances,
 }: Props) {
-  const {
-    triggersActionsUi: { alertsTableConfigurationRegistry, getAlertsStateTable: AlertsStateTable },
-    observability: { observabilityRuleTypeRegistry },
-  } = deps;
+  const ref = useRef<AlertsTableImperativeApi>(null);
+
+  useEffect(() => {
+    ref.current?.refresh();
+  }, [lastReloadRequestTime]);
+
   return (
-    <AlertsStateTable
-      query={useSloAlertsQuery(slos, timeRange, showAllGroupByInstances)}
-      alertsTableConfigurationRegistry={alertsTableConfigurationRegistry}
-      configurationId={SLO_ALERTS_TABLE_CONFIG_ID}
+    <ObservabilityAlertsTable
+      ref={ref}
+      id={ALERTS_TABLE_ID}
       ruleTypeIds={[SLO_BURN_RATE_RULE_TYPE_ID]}
       consumers={[AlertConsumers.SLO, AlertConsumers.ALERTS, AlertConsumers.OBSERVABILITY]}
+      query={useSloAlertsQuery(slos, timeRange, showAllGroupByInstances)}
+      columns={columns}
       hideLazyLoader
-      id={ALERTS_TABLE_ID}
       initialPageSize={ALERTS_PER_PAGE}
-      showAlertStatusWithFlapping
       onLoaded={() => {
         if (onLoaded) {
           onLoaded();
         }
       }}
-      lastReloadRequestTime={lastReloadRequestTime}
-      cellContext={{ observabilityRuleTypeRegistry }}
     />
   );
 }

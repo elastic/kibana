@@ -9,8 +9,7 @@ import { catchError, mergeMap, Observable, of, tap, from } from 'rxjs';
 import { Logger } from '@kbn/logging';
 import { ChatCompleteResponse } from '@kbn/inference-common';
 import type { ObservabilityAIAssistantClient } from '..';
-import { Message, MessageRole, StreamingChatResponseEventType } from '../../../../common';
-import { TokenCountEvent } from '../../../../common/conversation_complete';
+import { Message, MessageRole } from '../../../../common';
 import { LangTracer } from '../instrumentation/lang_tracer';
 
 export const TITLE_CONVERSATION_FUNCTION_NAME = 'title_conversation';
@@ -33,26 +32,19 @@ export function getGeneratedTitle({
   chat: ChatFunctionWithoutConnectorAndTokenCount;
   logger: Pick<Logger, 'debug' | 'error'>;
   tracer: LangTracer;
-}): Observable<string | TokenCountEvent> {
+}): Observable<string> {
   return from(
     chat('generate_title', {
+      systemMessage:
+        'You are a helpful assistant for Elastic Observability. Assume the following message is the start of a conversation between you and a user; give this conversation a title based on the content below. DO NOT UNDER ANY CIRCUMSTANCES wrap this title in single or double quotes. This title is shown in a list of conversations to the user, so title it for the user, not for you.',
       messages: [
-        {
-          '@timestamp': new Date().toString(),
-          message: {
-            role: MessageRole.System,
-            content: `You are a helpful assistant for Elastic Observability. Assume the following message is the start of a conversation between you and a user; give this conversation a title based on the content below. DO NOT UNDER ANY CIRCUMSTANCES wrap this title in single or double quotes. This title is shown in a list of conversations to the user, so title it for the user, not for you.`,
-          },
-        },
         {
           '@timestamp': new Date().toISOString(),
           message: {
             role: MessageRole.User,
-            content: messages
-              .filter((msg) => msg.message.role !== MessageRole.System)
-              .reduce((acc, curr) => {
-                return `${acc} ${curr.message.role}: ${curr.message.content}`;
-              }, 'Generate a title, using the title_conversation_function, based on the following conversation:\n\n'),
+            content: messages.reduce((acc, curr) => {
+              return `${acc} ${curr.message.role}: ${curr.message.content}`;
+            }, 'Generate a title, using the title_conversation_function, based on the following conversation:\n\n'),
           },
         },
       ],
@@ -91,21 +83,7 @@ export function getGeneratedTitle({
       // - JustTextWithoutQuotes => Captures: JustTextWithoutQuotes
       title = title.replace(/^"(.*)"$/g, '$1').replace(/^'(.*)'$/g, '$1');
 
-      const tokenCount: TokenCountEvent | undefined = response.tokens
-        ? {
-            type: StreamingChatResponseEventType.TokenCount,
-            tokens: {
-              completion: response.tokens.completion,
-              prompt: response.tokens.prompt,
-              total: response.tokens.total,
-            },
-          }
-        : undefined;
-
-      const events: Array<string | TokenCountEvent> = [title];
-      if (tokenCount) events.push(tokenCount);
-
-      return from(events); // Emit each event separately
+      return of(title);
     }),
     tap((event) => {
       if (typeof event === 'string') {

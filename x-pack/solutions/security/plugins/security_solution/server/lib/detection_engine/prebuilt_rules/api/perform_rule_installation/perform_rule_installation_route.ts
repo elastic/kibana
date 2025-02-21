@@ -26,8 +26,12 @@ import { createPrebuiltRules } from '../../logic/rule_objects/create_prebuilt_ru
 import { createPrebuiltRuleObjectsClient } from '../../logic/rule_objects/prebuilt_rule_objects_client';
 import { fetchRuleVersionsTriad } from '../../logic/rule_versions/fetch_rule_versions_triad';
 import { performTimelinesInstallation } from '../../logic/perform_timelines_installation';
-import { PREBUILT_RULES_OPERATION_SOCKET_TIMEOUT_MS } from '../../constants';
+import {
+  PREBUILT_RULES_OPERATION_SOCKET_TIMEOUT_MS,
+  PREBUILT_RULES_OPERATION_CONCURRENCY,
+} from '../../constants';
 import { getRuleGroups } from '../../model/rule_groups/get_rule_groups';
+import { routeLimitedConcurrencyTag } from '../../../../../utils/route_limited_concurrency_tag';
 
 export const performRuleInstallationRoute = (router: SecuritySolutionPluginRouter) => {
   router.versioned
@@ -40,6 +44,7 @@ export const performRuleInstallationRoute = (router: SecuritySolutionPluginRoute
         },
       },
       options: {
+        tags: [routeLimitedConcurrencyTag(PREBUILT_RULES_OPERATION_CONCURRENCY)],
         timeout: {
           idleSocket: PREBUILT_RULES_OPERATION_SOCKET_TIMEOUT_MS,
         },

@@ -68,7 +68,6 @@ describe('combineRenderers', () => {
   });
 
   describe('renderRow', () => {
-    const isDraggable = false;
     const scopeId = TimelineId.test;
 
     it('renders `a` and `b` when `a` is an instance and `b` is an instance', () => {
@@ -78,20 +77,17 @@ describe('combineRenderers', () => {
       combineRenderers({ a, b, id: a.id }).renderRow({
         contextId,
         data,
-        isDraggable: false,
         scopeId,
       });
 
       expect(a.renderRow).toBeCalledWith({
         contextId,
         data,
-        isDraggable,
         scopeId,
       });
       expect(b.renderRow).toBeCalledWith({
         contextId,
         data,
-        isDraggable,
         scopeId,
       });
     });
@@ -103,14 +99,12 @@ describe('combineRenderers', () => {
       combineRenderers({ a, b, id: a.id }).renderRow({
         contextId,
         data,
-        isDraggable,
         scopeId,
       });
 
       expect(a.renderRow).toBeCalledWith({
         contextId,
         data,
-        isDraggable,
         scopeId,
       });
       expect(b.renderRow).not.toBeCalled();
@@ -123,7 +117,6 @@ describe('combineRenderers', () => {
       combineRenderers({ a, b, id: a.id }).renderRow({
         contextId,
         data,
-        isDraggable,
         scopeId,
       });
 
@@ -131,7 +124,6 @@ describe('combineRenderers', () => {
       expect(b.renderRow).toBeCalledWith({
         contextId,
         data,
-        isDraggable,
         scopeId,
       });
     });

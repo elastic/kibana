@@ -30,3 +30,4 @@ export { AxisLabelOrientationSelector } from './axis/orientation/axis_label_orie
 export * from './static_header';
 export * from './vis_label';
 export { ExperimentalBadge } from './experimental_badge';
+export type { AxesSettingsConfigKeys } from './axis/types';

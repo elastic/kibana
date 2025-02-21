@@ -72,7 +72,7 @@ export function getConnectionStats({
       const { stats: statsA, ...itemA } = a;
       const { stats: statsB, ...itemB } = b;
 
-      return merge({}, itemA, itemB, { stats: statsA.concat(statsB) });
+      return { ...merge({}, itemA, itemB), stats: statsA.concat(statsB) };
     });
 
     const statsItems = statsJoinedById.map((item) => {

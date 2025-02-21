@@ -3789,14 +3789,6 @@
                 "path": "x-pack/solutions/observability/plugins/observability/server/lib/annotations/register_annotation_apis.ts"
               },
               {
-                "plugin": "triggersActionsUi",
-                "path": "x-pack/platform/plugins/shared/triggers_actions_ui/server/routes/health.ts"
-              },
-              {
-                "plugin": "triggersActionsUi",
-                "path": "x-pack/platform/plugins/shared/triggers_actions_ui/server/routes/config.ts"
-              },
-              {
                 "plugin": "metricsDataAccess",
                 "path": "x-pack/solutions/observability/plugins/metrics_data_access/server/lib/adapters/framework/kibana_framework_adapter.ts"
               },
@@ -3807,6 +3799,14 @@
               {
                 "plugin": "searchprofiler",
                 "path": "x-pack/platform/plugins/shared/searchprofiler/server/routes/profile.ts"
+              },
+              {
+                "plugin": "triggersActionsUi",
+                "path": "x-pack/platform/plugins/shared/triggers_actions_ui/server/routes/health.ts"
+              },
+              {
+                "plugin": "triggersActionsUi",
+                "path": "x-pack/platform/plugins/shared/triggers_actions_ui/server/routes/config.ts"
               },
               {
                 "plugin": "stackConnectors",
@@ -3987,6 +3987,10 @@
               {
                 "plugin": "enterpriseSearch",
                 "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/enterprise_search/config_data.ts"
+              },
+              {
+                "plugin": "enterpriseSearch",
+                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/enterprise_search/connectors.ts"
               },
               {
                 "plugin": "enterpriseSearch",
@@ -5913,6 +5917,14 @@
                 "path": "x-pack/solutions/observability/plugins/observability/server/lib/annotations/register_annotation_apis.ts"
               },
               {
+                "plugin": "metricsDataAccess",
+                "path": "x-pack/solutions/observability/plugins/metrics_data_access/server/lib/adapters/framework/kibana_framework_adapter.ts"
+              },
+              {
+                "plugin": "searchprofiler",
+                "path": "x-pack/platform/plugins/shared/searchprofiler/server/routes/profile.ts"
+              },
+              {
                 "plugin": "triggersActionsUi",
                 "path": "x-pack/platform/plugins/shared/triggers_actions_ui/server/data/routes/time_series_query.ts"
               },
@@ -5923,14 +5935,6 @@
               {
                 "plugin": "triggersActionsUi",
                 "path": "x-pack/platform/plugins/shared/triggers_actions_ui/server/data/routes/indices.ts"
-              },
-              {
-                "plugin": "metricsDataAccess",
-                "path": "x-pack/solutions/observability/plugins/metrics_data_access/server/lib/adapters/framework/kibana_framework_adapter.ts"
-              },
-              {
-                "plugin": "searchprofiler",
-                "path": "x-pack/platform/plugins/shared/searchprofiler/server/routes/profile.ts"
               },
               {
                 "plugin": "stackConnectors",
@@ -10703,27 +10707,7 @@
               },
               {
                 "plugin": "security",
-                "path": "x-pack/platform/plugins/shared/security/server/routes/authorization/reset_session_page.ts"
-              },
-              {
-                "plugin": "security",
-                "path": "x-pack/platform/plugins/shared/security/server/routes/views/capture_url.ts"
-              },
-              {
-                "plugin": "security",
-                "path": "x-pack/platform/plugins/shared/security/server/routes/views/logged_out.ts"
-              },
-              {
-                "plugin": "security",
                 "path": "x-pack/platform/plugins/shared/security/server/routes/views/login.ts"
-              },
-              {
-                "plugin": "security",
-                "path": "x-pack/platform/plugins/shared/security/server/routes/views/login.ts"
-              },
-              {
-                "plugin": "security",
-                "path": "x-pack/platform/plugins/shared/security/server/routes/views/logout.ts"
               },
               {
                 "plugin": "security",
@@ -13529,6 +13513,10 @@
               {
                 "plugin": "securitySolution",
                 "path": "x-pack/solutions/security/plugins/security_solution/server/lib/siem_migrations/rules/api/get_integrations.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/siem_migrations/rules/api/privileges/get_missing_privileges.ts"
               },
               {
                 "plugin": "securitySolution",

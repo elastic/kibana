@@ -16,6 +16,7 @@ interface Props {
   onClose?: () => void;
   setUploadResults?: (results: FileUploadResults) => void;
   autoAddInference?: string;
+  autoCreateDataView?: boolean;
   indexSettings?: IndicesIndexSettings;
 }
 
@@ -23,12 +24,14 @@ export const FileUploadLiteFlyoutContents: FC<Props> = ({
   onClose,
   setUploadResults,
   autoAddInference,
+  autoCreateDataView,
   indexSettings,
 }) => {
   const Wrapper = getFileDataVisualizerLiteWrapper(
     undefined,
     setUploadResults,
     autoAddInference,
+    autoCreateDataView,
     indexSettings,
     onClose
   );

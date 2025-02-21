@@ -151,7 +151,10 @@ import {
 import { getPackageAssetsMap } from './epm/packages/get';
 import { validateAgentPolicyOutputForIntegration } from './agent_policies/outputs_helpers';
 import type { PackagePolicyClientFetchAllItemIdsOptions } from './package_policy_service';
-import { validatePolicyNamespaceForSpace } from './spaces/policy_namespaces';
+import {
+  validateAdditionalDatastreamsPermissionsForSpace,
+  validatePolicyNamespaceForSpace,
+} from './spaces/policy_namespaces';
 import { isSpaceAwarenessEnabled, isSpaceAwarenessMigrationPending } from './spaces/helpers';
 import { updatePackagePolicySpaces } from './spaces/package_policy';
 import { runWithCache } from './epm/packages/cache';
@@ -319,6 +322,10 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
         spaceId: soClient.getCurrentNamespace(),
       });
     }
+    await validateAdditionalDatastreamsPermissionsForSpace({
+      additionalDatastreamsPermissions: enrichedPackagePolicy.additional_datastreams_permissions,
+      spaceId: soClient.getCurrentNamespace(),
+    });
 
     let elasticsearchPrivileges: NonNullable<PackagePolicy['elasticsearch']>['privileges'];
     let inputs = getInputsWithStreamIds(enrichedPackagePolicy, packagePolicyId);
@@ -991,6 +998,10 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
         spaceId: soClient.getCurrentNamespace(),
       });
     }
+    await validateAdditionalDatastreamsPermissionsForSpace({
+      additionalDatastreamsPermissions: enrichedPackagePolicy.additional_datastreams_permissions,
+      spaceId: soClient.getCurrentNamespace(),
+    });
 
     // eslint-disable-next-line prefer-const
     let { version, ...restOfPackagePolicy } = packagePolicy;
@@ -1948,6 +1959,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
           inputs: newPolicy.inputs[0]?.streams ? newPolicy.inputs : inputs,
           vars: newPolicy.vars || newPP.vars,
           supports_agentless: newPolicy.supports_agentless,
+          additional_datastreams_permissions: newPolicy.additional_datastreams_permissions,
         };
       }
     }

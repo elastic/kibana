@@ -40,6 +40,7 @@ export const prepareSearchParams = ({
   dryRunResult?.ruleErrors.forEach(({ errorCode }) => {
     switch (errorCode) {
       case BulkActionsDryRunErrCodeEnum.IMMUTABLE:
+      case BulkActionsDryRunErrCodeEnum.PREBUILT_CUSTOMIZATION_LICENSE:
         modifiedFilterOptions = { ...modifiedFilterOptions, showCustomRules: true };
         break;
       case BulkActionsDryRunErrCodeEnum.MACHINE_LEARNING_INDEX_PATTERN:

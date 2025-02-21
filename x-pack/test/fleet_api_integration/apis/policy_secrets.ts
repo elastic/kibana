@@ -239,7 +239,8 @@ export default function (providerContext: FtrProviderContext) {
             disk_queue_encryption_enabled: true,
           },
           secrets: { password: 'pass' },
-        });
+        })
+        .expect(200);
 
       return res.body.item;
     };
@@ -1174,8 +1175,9 @@ export default function (providerContext: FtrProviderContext) {
         expect(fullAgentPolicy.secret_references).to.eql([{ id: passwordSecretId }]);
 
         const output = Object.entries(fullAgentPolicy.outputs)[0][1];
+
         // @ts-expect-error
-        expect(output.secrets.password.id).to.eql(passwordSecretId);
+        expect(output?.secrets?.password?.id).to.eql(passwordSecretId);
 
         // delete output with secret
         await supertest

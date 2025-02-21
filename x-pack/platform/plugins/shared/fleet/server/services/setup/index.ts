@@ -8,3 +8,5 @@
 export { upgradePackageInstallVersion } from './upgrade_package_install_version';
 export { upgradeAgentPolicySchemaVersion } from './upgrade_agent_policy_schema_version';
 export { ensureAgentPoliciesFleetServerKeysAndPolicies } from './fleet_server_policies_enrollment_keys';
+export { updateDeprecatedComponentTemplates } from './update_deprecated_component_templates';
+export { createOrUpdateFleetSyncedIntegrationsIndex } from './fleet_synced_integrations';

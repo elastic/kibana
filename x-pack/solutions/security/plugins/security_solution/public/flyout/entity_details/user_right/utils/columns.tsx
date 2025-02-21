@@ -34,10 +34,7 @@ const fieldColumn: EuiBasicTableColumn<ManagedUserTable> = {
   render: (label: string, { field }) => <FieldColumn label={label} field={field ?? ''} />,
 };
 
-export const getManagedUserTableColumns = (
-  contextID: string,
-  isDraggable: boolean
-): ManagedUsersTableColumns => [
+export const getManagedUserTableColumns = (contextID: string): ManagedUsersTableColumns => [
   fieldColumn,
   {
     name: i18n.VALUES_COLUMN_TITLE,
@@ -48,7 +45,6 @@ export const getManagedUserTableColumns = (
           rowItems={value.map(() => value.toString())}
           attrName={field}
           idPrefix={contextID ? `managedUser-${contextID}` : 'managedUser'}
-          isDraggable={isDraggable}
         />
       ) : (
         defaultToEmptyTag(value)

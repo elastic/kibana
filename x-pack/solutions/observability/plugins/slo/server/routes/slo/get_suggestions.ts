@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { executeWithErrorHandler } from '../../errors';
 import { GetSLOSuggestions } from '../../services/get_slo_suggestions';
 import { createSloServerRoute } from '../create_slo_server_route';
 import { assertPlatinumLicense } from './utils/assert_platinum_license';
@@ -23,6 +22,6 @@ export const getSLOSuggestionsRoute = createSloServerRoute({
 
     const soClient = (await context.core).savedObjects.client;
     const getSLOSuggestions = new GetSLOSuggestions(soClient);
-    return await executeWithErrorHandler(() => getSLOSuggestions.execute());
+    return await getSLOSuggestions.execute();
   },
 });

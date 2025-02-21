@@ -24,7 +24,10 @@ function generateId(length: number = LONG_ID_LENGTH) {
 }
 
 function generateIdWithSeed(seed: string, length: number = LONG_ID_LENGTH) {
-  return seed?.padStart(length, '0');
+  // this is needed to sanitize errors like "No handler for /order/{id}",
+  // as encodeURIComponent is not enough and can cause errors in the client
+  const encodedSeed = seed.replace(/[/]/g, '_').replace(/[{}]/g, '');
+  return encodedSeed?.padStart(length, '0');
 }
 
 export function generateShortId() {

@@ -23,6 +23,10 @@ const EmbedTabContent: NonNullable<IEmbedTab['content']> = ({ state, dispatch })
     objectType,
     objectTypeMeta,
     isDirty,
+    allowShortUrl,
+    anonymousAccess,
+    urlService,
+    shareableUrlLocatorParams,
   } = useShareTabsContext()!;
 
   return (
@@ -34,6 +38,10 @@ const EmbedTabContent: NonNullable<IEmbedTab['content']> = ({ state, dispatch })
         objectType,
         objectConfig: objectTypeMeta?.config?.embed,
         isDirty,
+        anonymousAccess,
+        allowShortUrl,
+        urlService,
+        shareableUrlLocatorParams,
       }}
     />
   );

@@ -289,12 +289,16 @@ export function AddCisIntegrationFormPageProvider({
     await radio.click();
   };
 
+  const getSetupTechnologyRadio = async (setupTechnology: 'agentless' | 'agent-based') => {
+    const radioGroup = await testSubjects.find(testSubjectIds.SETUP_TECHNOLOGY_SELECTOR);
+    return await radioGroup.findByCssSelector(`input[value='${setupTechnology}']`);
+  };
+
   const showSetupTechnologyComponent = async () => {
     return await testSubjects.exists(testSubjectIds.SETUP_TECHNOLOGY_SELECTOR);
   };
 
   const selectAwsCredentials = async (credentialType: 'direct' | 'temporary') => {
-    await clickOptionButton(AWS_CREDENTIAL_SELECTOR);
     await selectValue(
       AWS_CREDENTIAL_SELECTOR,
       credentialType === 'direct' ? 'direct_access_keys' : 'temporary_keys'
@@ -415,7 +419,7 @@ export function AddCisIntegrationFormPageProvider({
 
     await clickOptionButton(testSubjectIds.CIS_AWS_OPTION_TEST_ID);
 
-    await clickOptionButton(testSubjectIds.SETUP_TECHNOLOGY_SELECTOR_AGENTLESS_RADIO);
+    await selectSetupTechnology('agentless');
     await selectValue(testSubjectIds.AWS_CREDENTIAL_SELECTOR, 'direct_access_keys');
     await fillInTextField(testSubjectIds.DIRECT_ACCESS_KEY_ID_TEST_ID, directAccessKeyId);
     await fillInTextField(testSubjectIds.DIRECT_ACCESS_SECRET_KEY_TEST_ID, directAccessSecretKey);
@@ -427,7 +431,7 @@ export function AddCisIntegrationFormPageProvider({
 
     await clickOptionButton(testSubjectIds.CIS_GCP_OPTION_TEST_ID);
     await clickOptionButton(testSubjectIds.GCP_SINGLE_ACCOUNT_TEST_ID);
-    await clickOptionButton(testSubjectIds.SETUP_TECHNOLOGY_SELECTOR_AGENTLESS_RADIO);
+    await selectSetupTechnology('agentless');
     await fillInTextField(testSubjectIds.PRJ_ID_TEST_ID, projectId);
     await fillInTextField(testSubjectIds.CREDENTIALS_JSON_TEST_ID, credentialJson);
   };
@@ -452,6 +456,8 @@ export function AddCisIntegrationFormPageProvider({
     await navigateToAddIntegrationCspmPage();
     await PageObjects.header.waitUntilLoadingHasFinished();
 
+    await inputIntegrationName(`cloud_security_posture-${new Date().toISOString()}`);
+
     await fillOutForm(cloudProvider);
 
     // Click Save Button to create the Integration then navigate to Integration Policies Tab Page
@@ -468,6 +474,12 @@ export function AddCisIntegrationFormPageProvider({
 
     // Fill out form to edit an agentless integration
     await fillInTextField(testSubjectId, value);
+
+    // TechDebt: This is a workaround to ensure the form is saved
+    // const agentlessRadio = await getSetupTechnologyRadio('agentless');
+    // const agentBasedRadio = await getSetupTechnologyRadio('agent-based');
+    // expect(await agentlessRadio.isEnabled()).to.be(true);
+    // expect(agentBasedRadio.isEnabled()).to.be(true);
 
     // Clicking Save Button updates and navigates to Integration Policies Tab Page
     await clickSaveIntegrationButton();
@@ -559,6 +571,7 @@ export function AddCisIntegrationFormPageProvider({
     clickOptionButton,
     selectAwsCredentials,
     selectSetupTechnology,
+    getSetupTechnologyRadio,
     clickSaveButton,
     clickSaveIntegrationButton,
     clickAccordianButton,

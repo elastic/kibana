@@ -19,6 +19,7 @@ import {
   getFunctionSignaturesByReturnType,
   setup,
 } from './helpers';
+import { FULL_TEXT_SEARCH_FUNCTIONS } from '../../shared/constants';
 
 describe('WHERE <expression>', () => {
   const allEvalFns = getFunctionSignaturesByReturnType('where', 'any', {
@@ -40,7 +41,7 @@ describe('WHERE <expression>', () => {
           .map((name) => `${name} `)
           .map(attachTriggerCommand),
         attachTriggerCommand('var0 '),
-        ...allEvalFns.filter((fn) => fn.label !== 'QSTR'),
+        ...allEvalFns.filter((fn) => fn.label !== 'QSTR' && fn.label !== 'KQL'),
       ],
       {
         callbacks: {
@@ -60,7 +61,7 @@ describe('WHERE <expression>', () => {
           'where',
           'boolean',
           {
-            builtin: true,
+            operators: true,
           },
           undefined,
           ['and', 'or', 'not']
@@ -122,7 +123,7 @@ describe('WHERE <expression>', () => {
           ...getFunctionSignaturesByReturnType('where', 'any', { scalar: true }),
         ]);
         await assertSuggestions(`from a | where keywordField >= keywordField ${op} doubleField /`, [
-          ...getFunctionSignaturesByReturnType('where', 'boolean', { builtin: true }, ['double']),
+          ...getFunctionSignaturesByReturnType('where', 'boolean', { operators: true }, ['double']),
         ]);
         await assertSuggestions(
           `from a | where keywordField >= keywordField ${op} doubleField == /`,
@@ -136,13 +137,34 @@ describe('WHERE <expression>', () => {
       }
     });
 
+    test('filters suggestions based on previous commands', async () => {
+      const { assertSuggestions } = await setup();
+
+      await assertSuggestions('from a | where / | limit 3', [
+        ...getFieldNamesByType('any')
+          .map((field) => `${field} `)
+          .map(attachTriggerCommand),
+        ...allEvalFns,
+      ]);
+
+      await assertSuggestions('from a | limit 3 | where / ', [
+        ...getFieldNamesByType('any')
+          .map((field) => `${field} `)
+          .map(attachTriggerCommand),
+        ...allEvalFns.filter((fn) => !FULL_TEXT_SEARCH_FUNCTIONS.includes(fn.label!.toLowerCase())),
+      ]);
+    });
+
     test('suggests operators after a field name', async () => {
       const { assertSuggestions } = await setup();
 
       await assertSuggestions('from a | stats a=avg(doubleField) | where a /', [
-        ...getFunctionSignaturesByReturnType('where', 'any', { builtin: true, skipAssign: true }, [
-          'double',
-        ]),
+        ...getFunctionSignaturesByReturnType(
+          'where',
+          'any',
+          { operators: true, skipAssign: true },
+          ['double']
+        ),
       ]);
     });
 
@@ -194,8 +216,8 @@ describe('WHERE <expression>', () => {
       const { assertSuggestions } = await setup();
 
       await assertSuggestions('from a | where log10(doubleField) /', [
-        ...getFunctionSignaturesByReturnType('where', 'double', { builtin: true }, ['double']),
-        ...getFunctionSignaturesByReturnType('where', 'boolean', { builtin: true }, ['double']),
+        ...getFunctionSignaturesByReturnType('where', 'double', { operators: true }, ['double']),
+        ...getFunctionSignaturesByReturnType('where', 'boolean', { operators: true }, ['double']),
       ]);
     });
 
@@ -221,7 +243,7 @@ describe('WHERE <expression>', () => {
         ...getFunctionSignaturesByReturnType(
           'where',
           'boolean',
-          { builtin: true },
+          { operators: true },
           ['boolean'],
           [':']
         ),
@@ -302,7 +324,7 @@ describe('WHERE <expression>', () => {
         ...getFunctionSignaturesByReturnType(
           'where',
           'any',
-          { builtin: true, skipAssign: true },
+          { operators: true, skipAssign: true },
           ['double'],
           [':']
         ),
@@ -389,7 +411,7 @@ describe('WHERE <expression>', () => {
           kind: 'Issue',
           detail: 'Click to create',
           command: { id: 'esql.control.values.create', title: 'Click to create' },
-          sortText: '11A',
+          sortText: '11',
           rangeToReplace: { start: 31, end: 31 },
         });
       });

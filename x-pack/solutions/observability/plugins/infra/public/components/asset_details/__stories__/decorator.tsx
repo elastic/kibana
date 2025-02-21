@@ -66,7 +66,7 @@ export const DecorateWithKibanaContext: DecoratorFn = (story) => {
         },
       },
       setBreadcrumbs: () => {},
-      setBreadcrumbsAppendExtension: () => {},
+      setBreadcrumbsAppendExtension: () => () => {},
     },
     data: {
       search: {
@@ -99,7 +99,6 @@ export const DecorateWithKibanaContext: DecoratorFn = (story) => {
     },
     triggersActionsUi: {
       getAlertSummaryWidget: () => <></>,
-      getAlertsStateTable: () => <></>,
     },
     charts: {
       theme: {

@@ -25,6 +25,8 @@ export const CellActions: React.FC<CellActionsProps> = ({
   disabledActionTypes = [],
   metadata,
   className,
+  extraActionsIconType,
+  extraActionsColor,
 }) => {
   const nodeRef = useRef<HTMLDivElement | null>(null);
 
@@ -83,6 +85,8 @@ export const CellActions: React.FC<CellActionsProps> = ({
           showActionTooltips={showActionTooltips}
           visibleCellActions={visibleCellActions}
           disabledActionTypes={disabledActionTypes}
+          extraActionsIconType={extraActionsIconType}
+          extraActionsColor={extraActionsColor}
         />
       </EuiFlexItem>
     </EuiFlexGroup>

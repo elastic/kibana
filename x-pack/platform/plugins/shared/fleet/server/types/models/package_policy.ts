@@ -182,6 +182,17 @@ export const PackagePolicyBaseSchema = {
       })
     )
   ),
+  additional_datastreams_permissions: schema.maybe(
+    schema.oneOf([
+      schema.literal(null),
+      schema.arrayOf(schema.string(), {
+        validate: validateAdditionalDatastreamsPermissions,
+        meta: {
+          description: 'Additional datastream permissions, that will be added to the agent policy.',
+        },
+      }),
+    ])
+  ),
 };
 
 export const NewPackagePolicySchema = schema.object({
@@ -288,6 +299,17 @@ export const SimplifiedPackagePolicyInputsSchema = schema.maybe(
   )
 );
 
+const VALIDATE_DATASTREAMS_PERMISSION_REGEX =
+  /^(logs)|(metrics)|(traces)|(synthetics)|(profiling)-(.*)$/;
+
+function validateAdditionalDatastreamsPermissions(values: string[]) {
+  for (const val of values) {
+    if (!val.match(VALIDATE_DATASTREAMS_PERMISSION_REGEX)) {
+      return `${val} is not a valid datastream permissions, it should match logs|metrics|traces|synthetics|profiling)-*`;
+    }
+  }
+}
+
 export const SimplifiedPackagePolicyBaseSchema = schema.object({
   id: schema.maybe(schema.string()),
   name: schema.string(),
@@ -305,6 +327,17 @@ export const SimplifiedPackagePolicyBaseSchema = schema.object({
         },
       })
     )
+  ),
+  additional_datastreams_permissions: schema.maybe(
+    schema.oneOf([
+      schema.literal(null),
+      schema.arrayOf(schema.string(), {
+        validate: validateAdditionalDatastreamsPermissions,
+        meta: {
+          description: 'Additional datastream permissions, that will be added to the agent policy.',
+        },
+      }),
+    ])
   ),
 });
 

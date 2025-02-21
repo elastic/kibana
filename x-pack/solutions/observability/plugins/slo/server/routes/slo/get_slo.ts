@@ -6,7 +6,6 @@
  */
 
 import { getSLOParamsSchema } from '@kbn/slo-schema';
-import { executeWithErrorHandler } from '../../errors';
 import {
   DefaultBurnRatesClient,
   DefaultSummaryClient,
@@ -40,8 +39,6 @@ export const getSLORoute = createSloServerRoute({
     const definitionClient = new SloDefinitionClient(repository, esClient, logger);
     const getSLO = new GetSLO(definitionClient, summaryClient);
 
-    return await executeWithErrorHandler(() =>
-      getSLO.execute(params.path.id, spaceId, params.query)
-    );
+    return await getSLO.execute(params.path.id, spaceId, params.query);
   },
 });
