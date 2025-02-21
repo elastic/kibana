@@ -87,7 +87,7 @@ export interface FieldConfiguration {
   /**
    * Popularity - used for discover
    */
-  popularity?: number | string; // `string` comes from the form input value
+  popularity?: number;
 }
 
 /**

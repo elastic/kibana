@@ -493,7 +493,7 @@ export class DataView extends AbstractDataView implements DataViewBase {
         esTypes: [fieldType],
         aggregatable: true,
         searchable: true,
-        count: Number(config.popularity) || 0,
+        count: config.popularity ?? 0,
         readFromDocValues: false,
       });
     }
@@ -503,10 +503,7 @@ export class DataView extends AbstractDataView implements DataViewBase {
     this.setFieldCustomDescription(fieldName, config.customDescription);
 
     if (config.popularity || config.popularity === null) {
-      this.setFieldCount(
-        fieldName,
-        typeof config.popularity === 'string' ? Number(config.popularity) : config.popularity
-      );
+      this.setFieldCount(fieldName, config.popularity);
     }
 
     if (config.format) {

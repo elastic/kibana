@@ -833,6 +833,16 @@ export class DataViewsService {
       ? JSON.parse(runtimeFieldMap)
       : {};
 
+    if (parsedFieldAttrs) {
+      Object.keys(parsedFieldAttrs).forEach((fieldName) => {
+        const parsedFieldAttr = parsedFieldAttrs?.[fieldName];
+        // Because of https://github.com/elastic/kibana/issues/211109 bug, the persisted "count" data can be polluted and have string type.
+        if (parsedFieldAttr && typeof parsedFieldAttr.count === 'string') {
+          parsedFieldAttr.count = Number(parsedFieldAttr.count) || 0;
+        }
+      });
+    }
+
     return {
       id,
       version,
@@ -905,19 +915,6 @@ export class DataViewsService {
     refreshFields: boolean = false
   ): Promise<DataView> => {
     const spec = this.savedObjectToSpec(savedObject);
-    spec.fieldAttrs = savedObject.attributes.fieldAttrs
-      ? JSON.parse(savedObject.attributes.fieldAttrs)
-      : {};
-
-    if (spec.fieldAttrs) {
-      Object.keys(spec.fieldAttrs).forEach((fieldName) => {
-        const fieldAttrs = spec.fieldAttrs?.[fieldName];
-        // Because of https://github.com/elastic/kibana/issues/211109 bug, the persisted "count" might be a string.
-        if (fieldAttrs && typeof fieldAttrs.count === 'string') {
-          fieldAttrs.count = Number(fieldAttrs.count) || 0;
-        }
-      });
-    }
 
     let fields: Record<string, FieldSpec> = {};
     let indices: string[] = [];
