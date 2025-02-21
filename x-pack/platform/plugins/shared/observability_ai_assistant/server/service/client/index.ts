@@ -469,6 +469,11 @@ export class ObservabilityAIAssistantClient {
       functionCalling: (simulateFunctionCalling ? 'simulated' : 'auto') as FunctionCallingMode,
     };
 
+    this.dependencies.logger.debug(
+      () =>
+        `Calling inference client with for name: "${name}" with options: ${JSON.stringify(options)}`
+    );
+
     if (stream) {
       return defer(() =>
         this.dependencies.inferenceClient.chatComplete({
