@@ -318,8 +318,8 @@ src/core/packages/status/server-internal @elastic/kibana-core
 src/core/packages/status/server-mocks @elastic/kibana-core
 src/core/packages/test-helpers/deprecations-getters @elastic/kibana-core
 src/core/packages/test-helpers/http-setup-browser @elastic/kibana-core
-src/dev/packages/core-test-helpers-kbn-server @elastic/kibana-core
-src/dev/packages/core-test-helpers-model-versions @elastic/kibana-core
+src/core/test-helpers/kbn-server @elastic/kibana-core
+src/core/test-helpers/model-versions @elastic/kibana-core
 src/core/packages/test-helpers/so-type-serializer @elastic/kibana-core
 src/core/packages/test-helpers/test-utils @elastic/kibana-core
 src/core/packages/theme/browser @elastic/kibana-core
@@ -1961,7 +1961,6 @@ x-pack/plugins/osquery @elastic/security-defend-workflows
 
 # Cloud Security Posture
 x-pack/packages/kbn-cloud-security-posture @elastic/kibana-cloud-security-posture
-<<<<<<< HEAD
 /x-pack/test_serverless/functional/test_suites/security/config.cloud_security_posture.* @elastic/kibana-cloud-security-posture
 /x-pack/solutions/security/plugins/security_solution/public/cloud_security_posture @elastic/kibana-cloud-security-posture
 /x-pack/test/api_integration/apis/cloud_security_posture/ @elastic/kibana-cloud-security-posture
@@ -1978,42 +1977,6 @@ x-pack/packages/kbn-cloud-security-posture @elastic/kibana-cloud-security-postur
 /x-pack/solutions/security/plugins/security_solution/public/cloud_security_posture @elastic/kibana-cloud-security-posture
 /x-pack/test/security_solution_cypress/cypress/e2e/cloud_security_posture/misconfiguration_contextual_flyout.cy.ts @elastic/kibana-cloud-security-posture
 /x-pack/test/security_solution_cypress/cypress/e2e/cloud_security_posture/vulnerabilities_contextual_flyout.cy.ts @elastic/kibana-cloud-security-posture
-=======
-## Plugins
-x-pack/plugins/cloud_defend @elastic/kibana-cloud-security-posture
-x-pack/plugins/cloud_security_posture @elastic/kibana-cloud-security-posture
-x-pack/plugins/kubernetes_security @elastic/kibana-cloud-security-posture
-## Security Solution sub teams
-x-pack/solutions/security/plugins/security_solution/public/common/components/sessions_viewer @elastic/kibana-cloud-security-posture
-x-pack/solutions/security/plugins/security_solution/public/cloud_defend @elastic/kibana-cloud-security-posture
-x-pack/solutions/security/plugins/security_solution/public/cloud_security_posture @elastic/kibana-cloud-security-posture
-x-pack/solutions/security/plugins/security_solution/public/kubernetes @elastic/kibana-cloud-security-posture
-x-pack/solutions/security/plugins/security_solution/server/lib/asset_inventory @elastic/kibana-cloud-security-posture
-
-## Fleet plugin (co-owned with Fleet team)
-x-pack/platform/plugins/shared/fleet/public/components/cloud_security_posture @elastic/fleet @elastic/kibana-cloud-security-posture
-x-pack/platform/plugins/shared/fleet/public/applications/fleet/sections/agent_policy/create_package_policy_page/single_page_layout/components/cloud_security_posture @elastic/fleet @elastic/kibana-cloud-security-posture
-x-pack/platform/plugins/shared/fleet/public/applications/fleet/sections/agent_policy/create_package_policy_page/single_page_layout/hooks/setup_technology.* @elastic/fleet @elastic/kibana-cloud-security-posture
-x-pack/platform/plugins/shared/fleet/public/applications/integrations/sections/epm/screens/detail/components/cloud_posture_third_party_support_callout.* @elastic/fleet @elastic/kibana-cloud-security-posture
-## Kubernetes Security tests
-x-pack/test/functional/es_archives/kubernetes_security @elastic/kibana-cloud-security-posture
-x-pack/test/kubernetes_security @elastic/kibana-cloud-security-posture
-## SessionView tests
-x-pack/test/functional/es_archives/session_view @elastic/kibana-cloud-security-posture
-x-pack/test/session_view @elastic/kibana-cloud-security-posture # Assigned per https://github.com/elastic/kibana/blob/main/api_docs/session_view.mdx#L18
-## CSP tests
-x-pack/test/api_integration/apis/cloud_security_posture/ @elastic/kibana-cloud-security-posture
-x-pack/test/cloud_security_posture_functional/ @elastic/kibana-cloud-security-posture
-x-pack/test/cloud_security_posture_api/ @elastic/kibana-cloud-security-posture
-## CSP Serverless tests
-x-pack/test_serverless/functional/test_suites/security/config.cloud_security_posture.* @elastic/kibana-cloud-security-posture
-x-pack/test_serverless/functional/test_suites/security/ftr/cloud_security_posture/ @elastic/kibana-cloud-security-posture
-x-pack/test_serverless/api_integration/test_suites/security/cloud_security_posture/ @elastic/kibana-cloud-security-posture
-## CSP e2e tests
-x-pack/test/security_solution_cypress/cypress/e2e/cloud_security_posture/misconfiguration_contextual_flyout.cy.ts @elastic/kibana-cloud-security-posture
-x-pack/test/security_solution_cypress/cypress/e2e/cloud_security_posture/vulnerabilities_contextual_flyout.cy.ts @elastic/kibana-cloud-security-posture
-x-pack/test/security_solution_cypress/cypress/e2e/asset_inventory @elastic/kibana-cloud-security-posture
->>>>>>> f5c9529e37e (Deprecate universal entity)
 
 # Security Solution onboarding tour
 /x-pack/solutions/security/plugins/security_solution/public/common/components/guided_onboarding @elastic/security-threat-hunting-explore
