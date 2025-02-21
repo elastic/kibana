@@ -33,6 +33,7 @@ describe('SAMLAuthenticationProvider', () => {
   >;
 
   const mockSAMLSet1 = mockSAMLResponses.set1;
+  const mockSAMLSet2 = mockSAMLResponses.set2;
 
   beforeEach(() => {
     mockOptions = mockAuthenticationProviderOptions({ name: 'saml' });
@@ -343,6 +344,89 @@ describe('SAMLAuthenticationProvider', () => {
           content: mockSAMLSet1.samlResponse,
           realm: 'test-realm',
         },
+      });
+    });
+
+    describe('Multiple "concurrent" login requests', () => {
+      it('should succeed with multiple login calls', async () => {
+        const request = httpServerMock.createKibanaRequest();
+
+        mockOptions.client.asInternalUser.transport.request.mockResolvedValue({
+          access_token: 'some-token',
+          refresh_token: 'some-refresh-token',
+          realm: 'test-realm',
+          authentication: mockUser,
+        });
+
+        await Promise.all([
+          provider.login(
+            request,
+            {
+              type: SAMLLogin.LoginWithSAMLResponse,
+              samlResponse: mockSAMLSet1.samlResponse,
+            },
+            {
+              requestIds: [mockSAMLSet1.requestId],
+              redirectURL: '/test-base-path/some-path#some-app',
+              realm: 'test-realm',
+            }
+          ),
+          provider.login(
+            request,
+            {
+              type: SAMLLogin.LoginWithSAMLResponse,
+              samlResponse: mockSAMLSet2.samlResponse,
+            },
+            {
+              requestIds: [mockSAMLSet2.requestId],
+              redirectURL: '/test-base-path/some-other-path#some-other-app',
+              realm: 'test-realm',
+            }
+          ),
+        ]).then((results) => {
+          expect(results).toEqual([
+            AuthenticationResult.redirectTo('/test-base-path/some-path#some-app', {
+              userProfileGrant: { type: 'accessToken', accessToken: 'some-token' },
+              state: {
+                accessToken: 'some-token',
+                refreshToken: 'some-refresh-token',
+                realm: 'test-realm',
+              },
+              user: mockUser,
+            }),
+            AuthenticationResult.redirectTo('/test-base-path/some-other-path#some-other-app', {
+              userProfileGrant: { type: 'accessToken', accessToken: 'some-token' },
+              state: {
+                accessToken: 'some-token',
+                refreshToken: 'some-refresh-token',
+                realm: 'test-realm',
+              },
+              user: mockUser,
+            }),
+          ]);
+        });
+
+        expect(mockOptions.client.asInternalUser.transport.request).toHaveBeenCalledTimes(2);
+
+        expect(mockOptions.client.asInternalUser.transport.request).toHaveBeenCalledWith({
+          method: 'POST',
+          path: '/_security/saml/authenticate',
+          body: {
+            ids: [mockSAMLSet1.requestId],
+            content: mockSAMLSet1.samlResponse,
+            realm: 'test-realm',
+          },
+        });
+
+        expect(mockOptions.client.asInternalUser.transport.request).toHaveBeenCalledWith({
+          method: 'POST',
+          path: '/_security/saml/authenticate',
+          body: {
+            ids: [mockSAMLSet2.requestId],
+            content: mockSAMLSet2.samlResponse,
+            realm: 'test-realm',
+          },
+        });
       });
     });
 
