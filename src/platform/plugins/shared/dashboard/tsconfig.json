@@ -84,7 +84,8 @@
     "@kbn/esql-variables-types",
     "@kbn/grid-layout",
     "@kbn/esql-validation-autocomplete",
-    "@kbn/ui-actions-browser"
+    "@kbn/ui-actions-browser",
+    "@kbn/react-dom"
   ],
   "exclude": ["target/**/*"]
 }
