@@ -120,7 +120,8 @@
     "@kbn/core-plugins-server",
     "@kbn/config",
     "@kbn/response-ops-rule-params",
-    "@kbn/charts-theme"
+    "@kbn/charts-theme",
+    "@kbn/core-test-helpers-model-versions"
   ],
   "exclude": ["target/**/*"]
 }
