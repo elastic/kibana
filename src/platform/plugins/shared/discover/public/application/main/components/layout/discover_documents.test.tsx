@@ -29,10 +29,15 @@ import { createCustomizationService } from '../../../../customizations/customiza
 import { DiscoverGrid } from '../../../../components/discover_grid';
 import { createDataViewDataSource } from '../../../../../common/data_sources';
 import { createContextAwarenessMocks } from '../../../../context_awareness/__mocks__';
+import type { ProfilesManager } from '../../../../context_awareness';
 
 const customisationService = createCustomizationService();
 
-async function mountComponent(fetchStatus: FetchStatus, hits: EsHitRecord[]) {
+async function mountComponent(
+  fetchStatus: FetchStatus,
+  hits: EsHitRecord[],
+  profilesManager?: ProfilesManager
+) {
   const services = discoverServiceMock;
 
   services.data.query.timefilter.timefilter.getTime = () => {
@@ -69,7 +74,9 @@ async function mountComponent(fetchStatus: FetchStatus, hits: EsHitRecord[]) {
   };
 
   const component = mountWithIntl(
-    <KibanaContextProvider services={services}>
+    <KibanaContextProvider
+      services={{ ...services, profilesManager: profilesManager ?? services.profilesManager }}
+    >
       <DiscoverCustomizationProvider value={customisationService}>
         <DiscoverMainProvider value={stateContainer}>
           <EuiProvider>
@@ -171,15 +178,17 @@ describe('Discover documents layout', () => {
       ]);
     });
 
-    xit('should pass pagination mode from profile', async () => {
-      const { dataSourceProfileProviderMock } = createContextAwarenessMocks();
+    it('should pass pagination mode from profile', async () => {
+      const { profilesManagerMock, dataSourceProfileServiceMock, dataSourceProfileProviderMock } =
+        createContextAwarenessMocks();
       jest.spyOn(dataSourceProfileProviderMock.profile, 'getPaginationConfig').mockReturnValue({
-        paginationMode: 'loadMore',
+        paginationMode: 'singlePage',
       });
-      // Unsure how to pass this mock to the component
-      const component = await mountComponent(FetchStatus.COMPLETE, esHitsMock);
+
+      await profilesManagerMock.resolveDataSourceProfile(dataSourceProfileServiceMock);
+      const component = await mountComponent(FetchStatus.COMPLETE, esHitsMock, profilesManagerMock);
       const discoverGridComponent = component.find(DiscoverGrid);
-      expect(discoverGridComponent.prop('paginationMode')).toEqual('loadMore');
+      expect(discoverGridComponent.prop('paginationMode')).toEqual('singlePage');
     });
   });
 });
