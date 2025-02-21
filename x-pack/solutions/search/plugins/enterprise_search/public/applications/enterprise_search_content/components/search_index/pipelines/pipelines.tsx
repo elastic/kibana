@@ -203,7 +203,7 @@ export const SearchIndexPipelines: React.FC = () => {
                     </EuiBadge>
                   </EuiFlexItem>
                   <EuiFlexItem grow={false}>
-                    <ManageCustomPipelineActions buttonRef={buttonRef}/>
+                    <ManageCustomPipelineActions buttonRef={buttonRef} />
                   </EuiFlexItem>
                 </EuiFlexGroup>
               ) : (

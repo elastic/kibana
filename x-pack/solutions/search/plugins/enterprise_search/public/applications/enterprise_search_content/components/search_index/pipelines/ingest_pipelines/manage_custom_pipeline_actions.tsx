@@ -21,10 +21,10 @@ const revertContextMenuItemCSS = css`
 `;
 
 interface ManageCustomPipelineProps {
-  buttonRef: MutableRefObject<HTMLButtonElement | null>
+  buttonRef: MutableRefObject<HTMLButtonElement | null>;
 }
 
-export const ManageCustomPipelineActions: React.FC<ManageCustomPipelineProps> = ({buttonRef}) => {
+export const ManageCustomPipelineActions: React.FC<ManageCustomPipelineProps> = ({ buttonRef }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const { openDeleteModal } = useActions(PipelinesLogic);
 
@@ -36,7 +36,13 @@ export const ManageCustomPipelineActions: React.FC<ManageCustomPipelineProps> = 
   return (
     <EuiPopover
       button={
-        <EuiButtonEmpty buttonRef = {buttonRef} size="s" iconType="arrowDown" iconSide="right" onClick={onButtonClick}>
+        <EuiButtonEmpty
+          buttonRef={buttonRef}
+          size="s"
+          iconType="arrowDown"
+          iconSide="right"
+          onClick={onButtonClick}
+        >
           {i18n.translate(
             'xpack.enterpriseSearch.content.indices.pipelines.ingestionPipeline.manageButton',
             { defaultMessage: 'Manage' }
