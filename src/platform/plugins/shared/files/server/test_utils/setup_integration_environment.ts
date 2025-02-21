@@ -97,7 +97,7 @@ export async function setupIntegrationEnvironment() {
   /**
    * Register a test file type
    */
-  const testHttpConfig = { tags: ['access:myapp'] };
+  const testHttpConfig = { requiredPrivileges: ['myapp'] };
   const myFileKind = {
     id: fileKind,
     blobStoreSettings: {

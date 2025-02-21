@@ -112,11 +112,7 @@ export const createAppContextStartContractMock = (
     securitySetup: securityMock.createSetup(),
     securityStart: securityMock.createStart(),
     logger: loggingSystemMock.create().get(),
-    experimentalFeatures: {
-      agentTamperProtectionEnabled: true,
-      diagnosticFileUploadEnabled: true,
-      enableReusableIntegrationPolicies: true,
-    } as ExperimentalFeatures,
+    experimentalFeatures: {} as ExperimentalFeatures,
     isProductionMode: true,
     configInitialValue: {
       agents: { enabled: true, elasticsearch: {} },
@@ -144,6 +140,7 @@ export const createAppContextStartContractMock = (
       : {}),
     unenrollInactiveAgentsTask: {} as any,
     deleteUnenrolledAgentsTask: {} as any,
+    syncIntegrationsTask: {} as any,
   };
 };
 
@@ -294,6 +291,7 @@ export const createFleetStartContractMock = (): DeeplyMockedKeys<FleetStartContr
 
   const startContract: DeeplyMockedKeys<FleetStartContract> = {
     fleetSetupCompleted: jest.fn(async () => {}),
+    agentless: { enabled: false },
     authz: { fromRequest: jest.fn(async (_) => fleetAuthzMock) },
     packageService: createMockPackageService(),
     agentService: createMockAgentService(),

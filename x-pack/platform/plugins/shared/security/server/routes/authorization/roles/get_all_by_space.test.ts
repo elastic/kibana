@@ -179,7 +179,7 @@ describe('GET all roles by space id', () => {
       });
 
       if (apiResponse) {
-        mockCoreContext.elasticsearch.client.asCurrentUser.security.getRole.mockResponseImplementation(
+        mockCoreContext.elasticsearch.client.asCurrentUser.security.queryRole.mockResponseImplementation(
           (() => ({ body: apiResponse() })) as any
         );
       }
@@ -203,7 +203,7 @@ describe('GET all roles by space id', () => {
 
       if (apiResponse) {
         expect(
-          mockCoreContext.elasticsearch.client.asCurrentUser.security.getRole
+          mockCoreContext.elasticsearch.client.asCurrentUser.security.queryRole
         ).toHaveBeenCalled();
       }
       expect(mockLicensingContext.license.check).toHaveBeenCalledWith('security', 'basic');
@@ -226,24 +226,29 @@ describe('GET all roles by space id', () => {
 
     getRolesTest(`returns error if we have empty resources`, {
       apiResponse: () => ({
-        first_role: {
-          cluster: [],
-          indices: [],
-          applications: [
-            {
-              application,
-              privileges: ['read'],
-              resources: [],
+        total: 1,
+        count: 1,
+        roles: [
+          {
+            name: 'first_role',
+            cluster: [],
+            indices: [],
+            applications: [
+              {
+                application,
+                privileges: ['read'],
+                resources: [],
+              },
+            ],
+            run_as: [],
+            metadata: {
+              _reserved: true,
             },
-          ],
-          run_as: [],
-          metadata: {
-            _reserved: true,
+            transient_metadata: {
+              enabled: true,
+            },
           },
-          transient_metadata: {
-            enabled: true,
-          },
-        },
+        ],
       }),
       asserts: {
         statusCode: 500,
@@ -255,29 +260,34 @@ describe('GET all roles by space id', () => {
   describe('success', () => {
     getRolesTest(`returns empty roles list if there is no space match`, {
       apiResponse: () => ({
-        first_role: {
-          cluster: ['manage_watcher'],
-          indices: [
-            {
-              names: ['.kibana*'],
-              privileges: ['read', 'view_index_metadata'],
+        total: 1,
+        count: 1,
+        roles: [
+          {
+            name: 'first_role',
+            cluster: ['manage_watcher'],
+            indices: [
+              {
+                names: ['.kibana*'],
+                privileges: ['read', 'view_index_metadata'],
+              },
+            ],
+            applications: [
+              {
+                application,
+                privileges: ['space_all', 'space_read'],
+                resources: ['space:marketing', 'space:sales'],
+              },
+            ],
+            run_as: ['other_user'],
+            metadata: {
+              _reserved: true,
             },
-          ],
-          applications: [
-            {
-              application,
-              privileges: ['space_all', 'space_read'],
-              resources: ['space:marketing', 'space:sales'],
+            transient_metadata: {
+              enabled: true,
             },
-          ],
-          run_as: ['other_user'],
-          metadata: {
-            _reserved: true,
           },
-          transient_metadata: {
-            enabled: true,
-          },
-        },
+        ],
       }),
       asserts: {
         statusCode: 200,
@@ -287,48 +297,54 @@ describe('GET all roles by space id', () => {
 
     getRolesTest(`returns roles for matching space`, {
       apiResponse: () => ({
-        first_role: {
-          description: 'first role description',
-          cluster: [],
-          indices: [],
-          applications: [
-            {
-              application,
-              privileges: ['space_all', 'space_read'],
-              resources: ['space:marketing', 'space:sales'],
+        total: 2,
+        count: 2,
+        roles: [
+          {
+            name: 'first_role',
+            description: 'first role description',
+            cluster: [],
+            indices: [],
+            applications: [
+              {
+                application,
+                privileges: ['space_all', 'space_read'],
+                resources: ['space:marketing', 'space:sales'],
+              },
+              {
+                application,
+                privileges: ['space_read'],
+                resources: ['space:engineering'],
+              },
+            ],
+            run_as: [],
+            metadata: {
+              _reserved: true,
             },
-            {
-              application,
-              privileges: ['space_read'],
-              resources: ['space:engineering'],
+            transient_metadata: {
+              enabled: true,
             },
-          ],
-          run_as: [],
-          metadata: {
-            _reserved: true,
           },
-          transient_metadata: {
-            enabled: true,
-          },
-        },
-        second_role: {
-          cluster: [],
-          indices: [],
-          applications: [
-            {
-              application,
-              privileges: ['space_all', 'space_read'],
-              resources: ['space:marketing', 'space:sales'],
+          {
+            name: 'second_role',
+            cluster: [],
+            indices: [],
+            applications: [
+              {
+                application,
+                privileges: ['space_all', 'space_read'],
+                resources: ['space:marketing', 'space:sales'],
+              },
+            ],
+            run_as: [],
+            metadata: {
+              _reserved: true,
             },
-          ],
-          run_as: [],
-          metadata: {
-            _reserved: true,
+            transient_metadata: {
+              enabled: true,
+            },
           },
-          transient_metadata: {
-            enabled: true,
-          },
-        },
+        ],
       }),
       spaceId: 'engineering',
       asserts: {
@@ -369,43 +385,49 @@ describe('GET all roles by space id', () => {
 
     getRolesTest(`returns roles with access to all spaces`, {
       apiResponse: () => ({
-        first_role: {
-          description: 'first role description',
-          cluster: [],
-          indices: [],
-          applications: [
-            {
-              application,
-              privileges: ['all', 'read'],
-              resources: ['*'],
+        total: 2,
+        count: 2,
+        roles: [
+          {
+            name: 'first_role',
+            description: 'first role description',
+            cluster: [],
+            indices: [],
+            applications: [
+              {
+                application,
+                privileges: ['all', 'read'],
+                resources: ['*'],
+              },
+            ],
+            run_as: [],
+            metadata: {
+              _reserved: true,
             },
-          ],
-          run_as: [],
-          metadata: {
-            _reserved: true,
-          },
-          transient_metadata: {
-            enabled: true,
-          },
-        },
-        second_role: {
-          cluster: [],
-          indices: [],
-          applications: [
-            {
-              application,
-              privileges: ['space_all', 'space_read'],
-              resources: ['space:marketing', 'space:sales'],
+            transient_metadata: {
+              enabled: true,
             },
-          ],
-          run_as: [],
-          metadata: {
-            _reserved: true,
           },
-          transient_metadata: {
-            enabled: true,
+          {
+            name: 'second_role',
+            cluster: [],
+            indices: [],
+            applications: [
+              {
+                application,
+                privileges: ['space_all', 'space_read'],
+                resources: ['space:marketing', 'space:sales'],
+              },
+            ],
+            run_as: [],
+            metadata: {
+              _reserved: true,
+            },
+            transient_metadata: {
+              enabled: true,
+            },
           },
-        },
+        ],
       }),
       asserts: {
         statusCode: 200,
@@ -440,46 +462,53 @@ describe('GET all roles by space id', () => {
 
     getRolesTest(`filters roles with reserved only privileges`, {
       apiResponse: () => ({
-        first_role: {
-          description: 'first role description',
-          cluster: [],
-          indices: [],
-          applications: [],
-          run_as: [],
-          metadata: {
-            _reserved: true,
-          },
-          transient_metadata: {
-            enabled: true,
-          },
-        },
-        second_role: {
-          cluster: [],
-          indices: [],
-          applications: [
-            {
-              application,
-              privileges: ['space_all', 'space_read'],
-              resources: ['space:marketing', 'space:sales'],
+        total: 3,
+        count: 3,
+        roles: [
+          {
+            name: 'first_role',
+            description: 'first role description',
+            cluster: [],
+            indices: [],
+            applications: [],
+            run_as: [],
+            metadata: {
+              _reserved: true,
             },
-          ],
-          run_as: [],
-          metadata: {
-            _reserved: true,
+            transient_metadata: {
+              enabled: true,
+            },
           },
-          transient_metadata: {
-            enabled: true,
+          {
+            name: 'second_role',
+            cluster: [],
+            indices: [],
+            applications: [
+              {
+                application,
+                privileges: ['space_all', 'space_read'],
+                resources: ['space:marketing', 'space:sales'],
+              },
+            ],
+            run_as: [],
+            metadata: {
+              _reserved: true,
+            },
+            transient_metadata: {
+              enabled: true,
+            },
           },
-        },
-        third_role: {
-          cluster: [],
-          indices: [],
-          applications: [],
-          run_as: [],
-          transient_metadata: {
-            enabled: true,
+          {
+            name: 'third_role',
+            cluster: [],
+            indices: [],
+            applications: [],
+            run_as: [],
+            transient_metadata: {
+              enabled: true,
+            },
           },
-        },
+        ],
       }),
       spaceId: 'marketing',
       asserts: {
@@ -517,20 +546,25 @@ describe('GET all roles by space id', () => {
 
   getRolesTest(`replaces privileges of deprecated features by default`, {
     apiResponse: () => ({
-      first_role: {
-        cluster: [],
-        indices: [],
-        applications: [
-          {
-            application,
-            privileges: ['feature_alpha.read'],
-            resources: ['*'],
-          },
-        ],
-        run_as: [],
-        metadata: { _reserved: true },
-        transient_metadata: { enabled: true },
-      },
+      total: 1,
+      count: 1,
+      roles: [
+        {
+          name: 'first_role',
+          cluster: [],
+          indices: [],
+          applications: [
+            {
+              application,
+              privileges: ['feature_alpha.read'],
+              resources: ['*'],
+            },
+          ],
+          run_as: [],
+          metadata: { _reserved: true },
+          transient_metadata: { enabled: true },
+        },
+      ],
     }),
     asserts: {
       statusCode: 200,

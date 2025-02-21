@@ -42,7 +42,7 @@ export const TemplateTable: React.FunctionComponent<Props> = ({
   const { uiMetricService } = useServices();
   const [selection, setSelection] = useState<TemplateListItem[]>([]);
   const [templatesToDelete, setTemplatesToDelete] = useState<
-    Array<{ name: string; isLegacy?: boolean }>
+    Array<{ name: string; isLegacy?: boolean; type?: string }>
   >([]);
 
   const columns: Array<EuiBasicTableColumn<TemplateListItem>> = [
@@ -182,8 +182,8 @@ export const TemplateTable: React.FunctionComponent<Props> = ({
           icon: 'trash',
           color: 'danger',
           type: 'icon',
-          onClick: ({ name, _kbnMeta: { isLegacy } }: TemplateListItem) => {
-            setTemplatesToDelete([{ name, isLegacy }]);
+          onClick: ({ name, _kbnMeta: { isLegacy, type } }: TemplateListItem) => {
+            setTemplatesToDelete([{ name, isLegacy, type }]);
           },
           isPrimary: true,
           enabled: ({ _kbnMeta: { type } }: TemplateListItem) => type !== 'cloudManaged',
@@ -233,9 +233,10 @@ export const TemplateTable: React.FunctionComponent<Props> = ({
           data-test-subj="deleteTemplatesButton"
           onClick={() =>
             setTemplatesToDelete(
-              selection.map(({ name, _kbnMeta: { isLegacy } }: TemplateListItem) => ({
+              selection.map(({ name, _kbnMeta: { isLegacy, type } }: TemplateListItem) => ({
                 name,
                 isLegacy,
+                type,
               }))
             )
           }

@@ -71,9 +71,17 @@ export const AlertStatusCodec = t.interface({
   pendingConfigs: t.record(t.string, AlertPendingStatusMetaDataCodec),
   enabledMonitorQueryIds: t.array(t.string),
   staleDownConfigs: t.record(t.string, StaleAlertStatusMetaDataCodec),
+  maxPeriod: t.number,
 });
 
 export type StaleDownConfig = t.TypeOf<typeof StaleAlertStatusMetaDataCodec>;
 export type AlertStatusMetaData = t.TypeOf<typeof AlertStatusMetaDataCodec>;
 export type AlertOverviewStatus = t.TypeOf<typeof AlertStatusCodec>;
+export type StatusRuleInspect = AlertOverviewStatus & {
+  monitors: Array<{
+    id: string;
+    name: string;
+    type: string;
+  }>;
+};
 export type AlertStatusConfigs = Record<string, AlertStatusMetaData>;

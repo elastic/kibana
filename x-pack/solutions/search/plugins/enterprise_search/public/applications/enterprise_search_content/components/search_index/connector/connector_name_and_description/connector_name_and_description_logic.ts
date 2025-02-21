@@ -20,7 +20,7 @@ import {
   CachedFetchIndexApiLogicActions,
 } from '../../../../api/index/cached_fetch_index_api_logic';
 import { FetchIndexApiResponse } from '../../../../api/index/fetch_index_api_logic';
-import { isConnectorIndex, isCrawlerIndex } from '../../../../utils/indices';
+import { isConnectorIndex } from '../../../../utils/indices';
 
 type NameAndDescription = Partial<Pick<Connector, 'name' | 'description'>>;
 
@@ -66,9 +66,7 @@ export const ConnectorNameAndDescriptionLogic = kea<
   },
   events: ({ actions, values }) => ({
     afterMount: () =>
-      actions.setNameAndDescription(
-        isConnectorIndex(values.index) || isCrawlerIndex(values.index) ? values.index.connector : {}
-      ),
+      actions.setNameAndDescription(isConnectorIndex(values.index) ? values.index.connector : {}),
   }),
   listeners: ({ actions, values }) => ({
     fetchIndexApiSuccess: (index) => {
@@ -77,7 +75,7 @@ export const ConnectorNameAndDescriptionLogic = kea<
       }
     },
     saveNameAndDescription: () => {
-      if (isConnectorIndex(values.index) || isCrawlerIndex(values.index)) {
+      if (isConnectorIndex(values.index)) {
         actions.makeRequest({
           connectorId: values.index.connector.id,
           ...values.localNameAndDescription,

@@ -52,10 +52,6 @@ We used to write RFCs in `md` format and keep them in the repository, but we hav
 
 Contains our two license header texts, one for the Elastic license and one for the Elastic+SSPL license. All code files inside x-pack should have the Elastic license text at the top, all code files outside x-pack should contain the other. If you have your environment set up to auto-fix on save, eslint should take care of adding it for you. If you don't have it, ci will fail. Can be ignored for the most part, this rarely changes.
 
-## [packages](https://github.com/elastic/kibana/tree/main/packages)
-
-The packages folder contains a mixture of build-time related code (like the [code needed to build the api docs](https://github.com/elastic/kibana/tree/main/packages/kbn-docs-utils)), as well as static code that some plugins rely on (like the [kbn-monaco package](https://github.com/elastic/kibana/tree/main/src/platform/packages/shared/kbn-monaco)). <DocLink id="kibPlatformIntro" section="1000-foot-view" text="This document"/> covers how packages differ from plugins.
-
 ## [plugins](https://github.com/elastic/kibana/tree/main/plugins)
 
 This is an empty folder in GitHub. It's where third party developers should put their plugin folders. Internal developers can ignore this folder.
@@ -83,13 +79,15 @@ This code primarily belongs to the Core team and contains the plugin infrastruct
 
 ### [src/dev](https://github.com/elastic/kibana/tree/main/src/dev)
 
-Maintained by the Operations team, this code contains build and development tooling related code. This folder existed before `packages`, so contains mostly older code that hasn't been migrated to packages. Prefer creating a `package` if possible. Can be ignored for the most part if you are not on the Ops team. 
+Maintained by the Operations team, this code contains build and development tooling related code. This folder existed before `packages`, so contains mostly older code that hasn't been migrated to packages. Prefer creating a `package` if possible. Can be ignored for the most part if you are not on the Ops team.
 
-### [src/plugins](https://github.com/elastic/kibana/tree/main/src/plugins)
+### [src/platform](https://github.com/elastic/kibana/tree/main/src/platform)
 
-Contains all of our Basic-licensed plugins. Most folders in this directory will contain `README.md` files explaining what they do. If there are none, you can look at the `owner.gitHub` field inside all `kibana.json`s that will tell you which team to get in touch with for questions.
+Contains the Basic-licensed code that is common to all Kibana solutions. The code is organised in modules, that can be either [plugins](https://github.com/elastic/kibana/tree/main/src/platform/plugins) or [packages](https://github.com/elastic/kibana/tree/main/src/platform/packages). <DocLink id="kibPlatformIntro" section="1000-foot-view" text="This document"/> covers how packages differ from plugins.
 
-Note that as plugins can be nested, each folder in this directory may contain multiple plugins.
+### [src/platform/plugins](https://github.com/elastic/kibana/tree/main/src/platform/plugins)
+
+Contains Basic-licensed plugins that are common to all Kibana solutions. They are organized according to their _visibility_: Thy can be [shared](https://github.com/elastic/kibana/tree/main/src/platform/plugins/shared) or [private](https://github.com/elastic/kibana/tree/main/src/platform/plugins/private) (aka not accessible from solutions).
 
 ## [test](https://github.com/elastic/kibana/tree/main/test)
 
@@ -99,13 +97,18 @@ Contains functional tests and related FTR (functional test runner) code for the 
 
 Maintained by Ops and Core, this contains global typings for dependencies that do not provide their own types, or don't have types available via [DefinitelyTyped](https://definitelytyped.org). This directory is intended to be minimal; types should only be added here as a last resort.
 
-## [vars](https://github.com/elastic/kibana/tree/main/vars)
-
-A bunch of groovy scripts maintained by the Operations team.
-
 ## [x-pack](https://github.com/elastic/kibana/tree/main/x-pack)
 
-Contains all code and infrasturcture that powers our gold+ (non-basic) features that are provided under a more restrictive license.
+Contains all code and infrasturcture that powers our gold+ (non-basic) features that are provided under a more restrictive license. The code is organized in the following subfolders:
+
+## [x-pack/platform](https://github.com/elastic/kibana/tree/main/x-pack/platform)
+
+Contains all of the gold+ (non-basic) modules that are common to all Kibana solutions. Like the `src/platform` code, it is organized in modules that can be either plugins or packages, and in turn, these plugins are organized according to their visibility.
+
+## [x-pack/solutions](https://github.com/elastic/kibana/tree/main/x-pack/solutions)
+
+Contains all of the code that is specific to each Kibana solution. At the moment, we have a folder for [observability](https://github.com/elastic/kibana/tree/main/x-pack/solutions/observability), another for [security](https://github.com/elastic/kibana/tree/main/x-pack/solutions/security), and another for [search](https://github.com/elastic/kibana/tree/main/x-pack/solutions/search). These folders contain the modules that belong to each solution, and these modules are also categorised as plugins or packages.
+Unlike the `src/platform` and the `x-pack/platform` code, the solution-specific modules are `private` by definition, aka they cannot be accessed from platform nor from other solutions.
 
 ### [x-pack/build_chromium](https://github.com/elastic/kibana/tree/main/x-pack/build_chromium)
 
@@ -130,7 +133,3 @@ Maintained by the Ops team, this folder contains some scripts for running x-pack
 ### [x-pack/test](https://github.com/elastic/kibana/tree/main/x-pack/test)
 
 Functional tests for our gold+ features.
-
-
-
-

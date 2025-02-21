@@ -689,7 +689,7 @@ export const getAllFieldTypesFromState = (allFields: Fields): DataType[] => {
 };
 
 export function isSemanticTextField(field: Partial<Field>): field is SemanticTextField {
-  return Boolean(field.inference_id && field.type === 'semantic_text');
+  return field.type === 'semantic_text';
 }
 
 /**

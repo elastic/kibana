@@ -82,7 +82,7 @@ describe('LogstashAgentMonitoring', () => {
         {} as any
       );
       const { args } = searchMock.firstCall;
-      const [{ body }] = args;
+      const [body] = args;
 
       expect(body.from).toEqual(0);
       expect(body.size).toEqual(10000);
@@ -125,7 +125,7 @@ describe('LogstashAgentMonitoring', () => {
         {} as any
       );
       const { args } = searchMock.firstCall;
-      const [{ body }] = args;
+      const [body] = args;
       expect(body.query).toEqual(expected);
     });
   });

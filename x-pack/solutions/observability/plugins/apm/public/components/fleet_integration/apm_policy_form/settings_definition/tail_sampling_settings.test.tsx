@@ -7,7 +7,7 @@
 import { getTailSamplingSettings, isTailBasedSamplingValid } from './tail_sampling_settings';
 
 const DOCS_LINK =
-  'https://www.elastic.co/guide/en/apm/guide/master/configure-tail-based-sampling.html';
+  'https://www.elastic.co/guide/en/apm/guide/current/configure-tail-based-sampling.html';
 
 describe('tail_sampling_settings - isTailBasedSamplingFormValid', () => {
   it('return true when tail_sampling_interval is greater than 1s', () => {

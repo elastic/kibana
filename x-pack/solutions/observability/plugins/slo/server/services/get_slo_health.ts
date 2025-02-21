@@ -17,7 +17,7 @@ import moment from 'moment';
 import {
   getSLOSummaryTransformId,
   getSLOTransformId,
-  SLO_SUMMARY_DESTINATION_INDEX_PATTERN,
+  SUMMARY_DESTINATION_INDEX_PATTERN,
 } from '../../common/constants';
 import { SLODefinition } from '../domain/models';
 import { HealthStatus, State } from '../domain/models/health';
@@ -70,7 +70,7 @@ export class GetSLOHealth {
     filteredList: Array<{ sloId: string; sloInstanceId: string; sloRevision: number }>
   ) {
     const summaryDocs = await this.esClient.search<EsSummaryDocument>({
-      index: SLO_SUMMARY_DESTINATION_INDEX_PATTERN,
+      index: SUMMARY_DESTINATION_INDEX_PATTERN,
       query: {
         bool: {
           should: filteredList.map((item) => ({

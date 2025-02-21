@@ -20,7 +20,7 @@ describe('Index settings deprecation flyout', () => {
   let testBed: ElasticsearchTestBed;
   let httpRequestsMockHelpers: ReturnType<typeof setupEnvironment>['httpRequestsMockHelpers'];
   let httpSetup: ReturnType<typeof setupEnvironment>['httpSetup'];
-  const indexSettingDeprecation = esDeprecationsMockResponse.deprecations[1];
+  const indexSettingDeprecation = esDeprecationsMockResponse.migrationsDeprecations[1];
   beforeEach(async () => {
     const mockEnvironment = setupEnvironment();
     httpRequestsMockHelpers = mockEnvironment.httpRequestsMockHelpers;

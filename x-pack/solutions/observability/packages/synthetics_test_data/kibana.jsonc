@@ -3,5 +3,6 @@
   "id": "@kbn/observability-synthetics-test-data",
   "owner": "@elastic/obs-ux-management-team",
   "group": "observability",
-  "visibility": "private"
+  "visibility": "private",
+  "devOnly": true
 }

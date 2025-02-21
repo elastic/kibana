@@ -135,7 +135,7 @@ export const MetricsExplorerChartContextMenu: React.FC<Props> = ({
       ]
     : [];
 
-  const openInVisualize = uiCapabilities?.visualize?.show
+  const openInVisualize = uiCapabilities?.visualize_v2?.show
     ? [
         {
           name: i18n.translate('xpack.infra.metricsExplorer.openInTSVB', {

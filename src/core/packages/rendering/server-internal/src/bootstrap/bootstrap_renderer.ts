@@ -8,11 +8,12 @@
  */
 
 import { createHash } from 'crypto';
+import { BehaviorSubject } from 'rxjs';
 import { PackageInfo } from '@kbn/config';
 import type { KibanaRequest, HttpAuth } from '@kbn/core-http-server';
 import {
   type DarkModeValue,
-  DEFAULT_THEME_NAME,
+  type ThemeName,
   parseDarkModeValue,
 } from '@kbn/core-ui-settings-common';
 import type { IUiSettingsClient } from '@kbn/core-ui-settings-server';
@@ -34,6 +35,7 @@ interface FactoryOptions {
   uiPlugins: UiPlugins;
   auth: HttpAuth;
   userSettingsService?: InternalUserSettingsServiceSetup;
+  themeName$: BehaviorSubject<ThemeName>;
 }
 
 interface RenderedOptions {
@@ -53,6 +55,7 @@ export const bootstrapRendererFactory: BootstrapRendererFactory = ({
   uiPlugins,
   auth,
   userSettingsService,
+  themeName$,
 }) => {
   const isAuthenticated = (request: KibanaRequest) => {
     const { status: authStatus } = auth.get(request);
@@ -62,11 +65,7 @@ export const bootstrapRendererFactory: BootstrapRendererFactory = ({
 
   return async function bootstrapRenderer({ uiSettingsClient, request, isAnonymousPage = false }) {
     let darkMode: DarkModeValue = false;
-    let themeName: string = DEFAULT_THEME_NAME;
-
-    if (packageInfo.buildFlavor !== 'serverless') {
-      themeName = 'borealis';
-    }
+    const themeName = themeName$.getValue();
 
     try {
       const authenticated = isAuthenticated(request);
@@ -79,8 +78,6 @@ export const bootstrapRendererFactory: BootstrapRendererFactory = ({
         } else {
           darkMode = parseDarkModeValue(await uiSettingsClient.get('theme:darkMode'));
         }
-
-        themeName = await uiSettingsClient.get('theme:name');
       }
     } catch (e) {
       // just use the default values in case of connectivity issues with ES

@@ -76,7 +76,7 @@ export class Client {
     this.log = options.log;
   }
   /**
-   * Create a new list.
+   * Create a new value list.
    */
   async createList(props: CreateListProps) {
     this.log.info(`${new Date().toISOString()} Calling API CreateList`);
@@ -107,9 +107,9 @@ export class Client {
       .catch(catchAxiosErrorFormatAndThrow);
   }
   /**
-    * Create a list item and associate it with the specified list.
+    * Create a value list item and associate it with the specified value list.
 
-All list items in the same list must be the same type. For example, each list item in an `ip` list must define a specific IP address.
+All value list items in the same list must be the same type. For example, each list item in an `ip` list must define a specific IP address.
 > info
 > Before creating a list item, you must create a list.
 
@@ -128,7 +128,7 @@ All list items in the same list must be the same type. For example, each list it
       .catch(catchAxiosErrorFormatAndThrow);
   }
   /**
-    * Delete a list using the list ID.
+    * Delete a value list using the list ID.
 > info
 > When you delete a list, all of its list items are also deleted.
 
@@ -163,7 +163,7 @@ All list items in the same list must be the same type. For example, each list it
       .catch(catchAxiosErrorFormatAndThrow);
   }
   /**
-   * Delete a list item using its `id`, or its `list_id` and `value` fields.
+   * Delete a value list item using its `id`, or its `list_id` and `value` fields.
    */
   async deleteListItem(props: DeleteListItemProps) {
     this.log.info(`${new Date().toISOString()} Calling API DeleteListItem`);
@@ -180,7 +180,7 @@ All list items in the same list must be the same type. For example, each list it
       .catch(catchAxiosErrorFormatAndThrow);
   }
   /**
-   * Export list item values from the specified list.
+   * Export list item values from the specified value list.
    */
   async exportListItems(props: ExportListItemsProps) {
     this.log.info(`${new Date().toISOString()} Calling API ExportListItems`);
@@ -197,7 +197,7 @@ All list items in the same list must be the same type. For example, each list it
       .catch(catchAxiosErrorFormatAndThrow);
   }
   /**
-   * Get all list items in the specified list.
+   * Get all value list items in the specified list.
    */
   async findListItems(props: FindListItemsProps) {
     this.log.info(`${new Date().toISOString()} Calling API FindListItems`);
@@ -214,7 +214,7 @@ All list items in the same list must be the same type. For example, each list it
       .catch(catchAxiosErrorFormatAndThrow);
   }
   /**
-   * Get a paginated subset of lists. By default, the first page is returned, with 20 results per page.
+   * Get a paginated subset of value lists. By default, the first page is returned, with 20 results per page.
    */
   async findLists(props: FindListsProps) {
     this.log.info(`${new Date().toISOString()} Calling API FindLists`);
@@ -231,7 +231,7 @@ All list items in the same list must be the same type. For example, each list it
       .catch(catchAxiosErrorFormatAndThrow);
   }
   /**
-    * Import list items from a TXT or CSV file. The maximum file size is 9 million bytes.
+    * Import value list items from a TXT or CSV file. The maximum file size is 9 million bytes.
 
 You can import items to a new or existing list.
 
@@ -251,7 +251,7 @@ You can import items to a new or existing list.
       .catch(catchAxiosErrorFormatAndThrow);
   }
   /**
-   * Update specific fields of an existing list using the list ID.
+   * Update specific fields of an existing list using the list `id`.
    */
   async patchList(props: PatchListProps) {
     this.log.info(`${new Date().toISOString()} Calling API PatchList`);
@@ -267,7 +267,7 @@ You can import items to a new or existing list.
       .catch(catchAxiosErrorFormatAndThrow);
   }
   /**
-   * Update specific fields of an existing list item using the list item ID.
+   * Update specific fields of an existing value list item using the item `id`.
    */
   async patchListItem(props: PatchListItemProps) {
     this.log.info(`${new Date().toISOString()} Calling API PatchListItem`);
@@ -283,7 +283,7 @@ You can import items to a new or existing list.
       .catch(catchAxiosErrorFormatAndThrow);
   }
   /**
-   * Get the details of a list using the list ID.
+   * Get the details of a value list using the list ID.
    */
   async readList(props: ReadListProps) {
     this.log.info(`${new Date().toISOString()} Calling API ReadList`);
@@ -315,7 +315,7 @@ You can import items to a new or existing list.
       .catch(catchAxiosErrorFormatAndThrow);
   }
   /**
-   * Get the details of a list item.
+   * Get the details of a value list item.
    */
   async readListItem(props: ReadListItemProps) {
     this.log.info(`${new Date().toISOString()} Calling API ReadListItem`);
@@ -344,7 +344,7 @@ You can import items to a new or existing list.
       .catch(catchAxiosErrorFormatAndThrow);
   }
   /**
-    * Update a list using the list ID. The original list is replaced, and all unspecified fields are deleted.
+    * Update a value list using the list `id`. The original list is replaced, and all unspecified fields are deleted.
 > info
 > You cannot modify the `id` value.
 
@@ -363,7 +363,7 @@ You can import items to a new or existing list.
       .catch(catchAxiosErrorFormatAndThrow);
   }
   /**
-    * Update a list item using the list item ID. The original list item is replaced, and all unspecified fields are deleted.
+    * Update a value list item using the list item ID. The original list item is replaced, and all unspecified fields are deleted.
 > info
 > You cannot modify the `id` value.
 

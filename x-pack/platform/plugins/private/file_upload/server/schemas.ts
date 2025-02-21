@@ -30,6 +30,13 @@ export const importFileQuerySchema = schema.object({
   id: schema.maybe(schema.string()),
 });
 
+const ingestPipeline = schema.maybe(
+  schema.object({
+    id: schema.maybe(schema.string()),
+    pipeline: schema.maybe(schema.any()),
+  })
+);
+
 export const importFileBodySchema = schema.object({
   index: schema.string(),
   data: schema.arrayOf(schema.any()),
@@ -37,12 +44,8 @@ export const importFileBodySchema = schema.object({
   /** Mappings */
   mappings: schema.any(),
   /** Ingest pipeline definition */
-  ingestPipeline: schema.maybe(
-    schema.object({
-      id: schema.maybe(schema.string()),
-      pipeline: schema.maybe(schema.any()),
-    })
-  ),
+  ingestPipeline,
+  createPipelines: schema.maybe(schema.arrayOf(ingestPipeline)),
 });
 
 export const runtimeMappingsSchema = schema.object(

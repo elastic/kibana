@@ -37,9 +37,10 @@ export const RulePreviewParams = z.object({
 
 export type RulePreviewLoggedRequest = z.infer<typeof RulePreviewLoggedRequest>;
 export const RulePreviewLoggedRequest = z.object({
-  request: NonEmptyString,
+  request: NonEmptyString.optional(),
   description: NonEmptyString.optional(),
   duration: z.number().int().optional(),
+  request_type: NonEmptyString.optional(),
 });
 
 export type RulePreviewLogs = z.infer<typeof RulePreviewLogs>;

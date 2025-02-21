@@ -7,11 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import {
-  HasSerializableState,
-  HasSnapshottableState,
-  SerializedPanelState,
-} from '@kbn/presentation-containers';
 import { DefaultPresentationPanelApi } from '@kbn/presentation-panel-plugin/public/panel_component/types';
 import {
   CanLockHoverActions,
@@ -19,6 +14,9 @@ import {
   PublishesPhaseEvents,
   PublishesUnsavedChanges,
   StateComparators,
+  HasSerializableState,
+  HasSnapshottableState,
+  SerializedPanelState,
 } from '@kbn/presentation-publishing';
 import { MaybePromise } from '@kbn/utility-types';
 import React from 'react';

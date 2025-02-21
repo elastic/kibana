@@ -8,6 +8,7 @@
 import { HttpSetup } from '@kbn/core-http-browser';
 
 import { getKnowledgeBaseIndices, getKnowledgeBaseStatus, postKnowledgeBase } from './api';
+import { API_VERSIONS } from '@kbn/spaces-plugin/common';
 
 jest.mock('@kbn/core-http-browser');
 
@@ -30,11 +31,11 @@ describe('API tests', () => {
       await getKnowledgeBaseStatus(knowledgeBaseArgs);
 
       expect(mockHttp.fetch).toHaveBeenCalledWith(
-        '/internal/elastic_assistant/knowledge_base/a-resource',
+        '/api/security_ai_assistant/knowledge_base/a-resource',
         {
           method: 'GET',
           signal: undefined,
-          version: '1',
+          version: API_VERSIONS.public.v1,
         }
       );
     });
@@ -55,11 +56,11 @@ describe('API tests', () => {
       await postKnowledgeBase(knowledgeBaseArgs);
 
       expect(mockHttp.fetch).toHaveBeenCalledWith(
-        '/internal/elastic_assistant/knowledge_base/a-resource',
+        '/api/security_ai_assistant/knowledge_base/a-resource',
         {
           method: 'POST',
           signal: undefined,
-          version: '1',
+          version: API_VERSIONS.public.v1,
         }
       );
     });

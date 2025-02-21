@@ -6,7 +6,6 @@
  */
 
 import { sum, round } from 'lodash';
-import { euiLightVars as theme } from '@kbn/ui-theme';
 import { kqlQuery, rangeQuery } from '@kbn/observability-plugin/server';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { isFiniteNumber } from '../../../../../../common/utils/is_finite_number';
@@ -23,7 +22,6 @@ import {
   SERVICE_NAME,
 } from '../../../../../../common/es_fields/apm';
 import { getBucketSize } from '../../../../../../common/utils/get_bucket_size';
-import { getVizColorForIndex } from '../../../../../../common/viz_colors';
 import { JAVA_AGENT_NAMES } from '../../../../../../common/agent_name';
 import {
   environmentQuery,
@@ -179,7 +177,6 @@ export async function fetchAndTransformGcMetrics({
       title: label,
       key: label,
       type: chartBase.type,
-      color: getVizColorForIndex(i, theme),
       overallValue,
       data,
     };

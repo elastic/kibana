@@ -18,10 +18,12 @@ export const renderApp = ({
   pluginsStart,
   services,
   appMountParameters,
+  isServerless,
 }: {
   coreStart: CoreStart;
   pluginsStart: StreamsAppStartDependencies;
   services: StreamsAppServices;
+  isServerless: boolean;
 } & { appMountParameters: AppMountParameters }) => {
   const { element } = appMountParameters;
 
@@ -38,6 +40,7 @@ export const renderApp = ({
         coreStart={coreStart}
         pluginsStart={pluginsStart}
         services={services}
+        isServerless={isServerless}
       />
     </KibanaRenderContextProvider>,
     element

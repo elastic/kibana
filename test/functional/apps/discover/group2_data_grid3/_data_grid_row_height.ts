@@ -53,13 +53,15 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await dataGrid.clickGridSettings();
       expect(await dataGrid.getCurrentRowHeightValue()).to.be('Custom');
 
-      await dataGrid.changeRowHeightValue('Single');
+      await testSubjects.missingOrFail('resetDisplaySelector');
+
+      await dataGrid.changeRowHeightValue('Auto');
 
       // toggle the popover
       await dataGrid.clickGridSettings();
       await dataGrid.clickGridSettings();
 
-      expect(await dataGrid.getCurrentRowHeightValue()).to.be('Single');
+      expect(await dataGrid.getCurrentRowHeightValue()).to.be('Auto');
 
       // we hide "Reset to default" action in Discover
       await testSubjects.missingOrFail('resetDisplaySelector');
@@ -67,28 +69,22 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await dataGrid.changeRowHeightValue('Custom');
 
       expect(await dataGrid.getCurrentRowHeightValue()).to.be('Custom');
-
-      await testSubjects.missingOrFail('resetDisplaySelector');
-
-      await dataGrid.changeRowHeightValue('Auto fit');
-
-      expect(await dataGrid.getCurrentRowHeightValue()).to.be('Auto fit');
     });
 
     it('should persist the row height selection after reloading the page', async () => {
       await dataGrid.clickGridSettings();
-      expect(await dataGrid.getCurrentRowHeightValue()).to.be('Auto fit');
+      expect(await dataGrid.getCurrentRowHeightValue()).to.be('Custom');
 
-      await dataGrid.changeRowHeightValue('Single');
+      await dataGrid.changeRowHeightValue('Auto');
 
-      expect(await dataGrid.getCurrentRowHeightValue()).to.be('Single');
+      expect(await dataGrid.getCurrentRowHeightValue()).to.be('Auto');
 
       await browser.refresh();
 
       await discover.waitUntilSearchingHasFinished();
       await dataGrid.clickGridSettings();
 
-      expect(await dataGrid.getCurrentRowHeightValue()).to.be('Single');
+      expect(await dataGrid.getCurrentRowHeightValue()).to.be('Auto');
     });
 
     it('should use the default header row height', async () => {
@@ -103,13 +99,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await dataGrid.clickGridSettings();
       expect(await dataGrid.getCurrentHeaderRowHeightValue()).to.be('Custom');
 
-      await dataGrid.changeHeaderRowHeightValue('Single');
+      await dataGrid.changeHeaderRowHeightValue('Auto');
 
       // toggle the popover
       await dataGrid.clickGridSettings();
       await dataGrid.clickGridSettings();
 
-      expect(await dataGrid.getCurrentHeaderRowHeightValue()).to.be('Single');
+      expect(await dataGrid.getCurrentHeaderRowHeightValue()).to.be('Auto');
 
       // we hide "Reset to default" action in Discover
       await testSubjects.missingOrFail('resetDisplaySelector');
@@ -117,28 +113,22 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await dataGrid.changeHeaderRowHeightValue('Custom');
 
       expect(await dataGrid.getCurrentHeaderRowHeightValue()).to.be('Custom');
-
-      await testSubjects.missingOrFail('resetDisplaySelector');
-
-      await dataGrid.changeHeaderRowHeightValue('Auto fit');
-
-      expect(await dataGrid.getCurrentHeaderRowHeightValue()).to.be('Auto fit');
     });
 
     it('should persist the header row height selection after reloading the page', async () => {
       await dataGrid.clickGridSettings();
-      expect(await dataGrid.getCurrentHeaderRowHeightValue()).to.be('Auto fit');
+      expect(await dataGrid.getCurrentHeaderRowHeightValue()).to.be('Custom');
 
-      await dataGrid.changeHeaderRowHeightValue('Single');
+      await dataGrid.changeHeaderRowHeightValue('Auto');
 
-      expect(await dataGrid.getCurrentHeaderRowHeightValue()).to.be('Single');
+      expect(await dataGrid.getCurrentHeaderRowHeightValue()).to.be('Auto');
 
       await browser.refresh();
 
       await discover.waitUntilSearchingHasFinished();
       await dataGrid.clickGridSettings();
 
-      expect(await dataGrid.getCurrentHeaderRowHeightValue()).to.be('Single');
+      expect(await dataGrid.getCurrentHeaderRowHeightValue()).to.be('Auto');
     });
   });
 }

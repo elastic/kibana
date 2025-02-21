@@ -8,6 +8,7 @@
 import { useCallback } from 'react';
 import { useDispatch } from 'react-redux';
 import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
+import { useUserPrivileges } from '../../common/components/user_privileges';
 import { fetchNotesByDocumentIds } from '../store/notes.slice';
 
 export interface UseFetchNotesResult {
@@ -25,16 +26,19 @@ export const useFetchNotes = (): UseFetchNotesResult => {
   const securitySolutionNotesDisabled = useIsExperimentalFeatureEnabled(
     'securitySolutionNotesDisabled'
   );
+  const {
+    notesPrivileges: { read: canReadNotes },
+  } = useUserPrivileges();
   const onLoad = useCallback(
     (events: Array<Partial<{ _id: string }>>) => {
-      if (securitySolutionNotesDisabled || events.length === 0) return;
+      if (!canReadNotes || securitySolutionNotesDisabled || events.length === 0) return;
 
       const eventIds: string[] = events
         .map((event) => event._id)
         .filter((id) => id != null) as string[];
       dispatch(fetchNotesByDocumentIds({ documentIds: eventIds }));
     },
-    [dispatch, securitySolutionNotesDisabled]
+    [dispatch, securitySolutionNotesDisabled, canReadNotes]
   );
 
   return { onLoad };

@@ -24,7 +24,6 @@
     "@kbn/i18n-react",
     "@kbn/kibana-react-plugin",
     "@kbn/shared-svg",
-    "@kbn/ui-theme",
     "@kbn/analytics",
   ]
 }

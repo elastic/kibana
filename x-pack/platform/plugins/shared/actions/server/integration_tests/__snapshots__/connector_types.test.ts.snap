@@ -74,6 +74,63 @@ Object {
       ],
       "type": "any",
     },
+    "telemetryMetadata": Object {
+      "flags": Object {
+        "default": [Function],
+        "error": [Function],
+        "presence": "optional",
+      },
+      "keys": Object {
+        "aggregateBy": Object {
+          "flags": Object {
+            "default": [Function],
+            "error": [Function],
+            "presence": "optional",
+          },
+          "metas": Array [
+            Object {
+              "x-oas-optional": true,
+            },
+          ],
+          "rules": Array [
+            Object {
+              "args": Object {
+                "method": [Function],
+              },
+              "name": "custom",
+            },
+          ],
+          "type": "string",
+        },
+        "pluginId": Object {
+          "flags": Object {
+            "default": [Function],
+            "error": [Function],
+            "presence": "optional",
+          },
+          "metas": Array [
+            Object {
+              "x-oas-optional": true,
+            },
+          ],
+          "rules": Array [
+            Object {
+              "args": Object {
+                "method": [Function],
+              },
+              "name": "custom",
+            },
+          ],
+          "type": "string",
+        },
+      },
+      "metas": Array [
+        Object {
+          "x-oas-optional": true,
+        },
+      ],
+      "type": "object",
+    },
     "timeout": Object {
       "flags": Object {
         "default": [Function],
@@ -194,6 +251,63 @@ Object {
         },
       ],
       "type": "any",
+    },
+    "telemetryMetadata": Object {
+      "flags": Object {
+        "default": [Function],
+        "error": [Function],
+        "presence": "optional",
+      },
+      "keys": Object {
+        "aggregateBy": Object {
+          "flags": Object {
+            "default": [Function],
+            "error": [Function],
+            "presence": "optional",
+          },
+          "metas": Array [
+            Object {
+              "x-oas-optional": true,
+            },
+          ],
+          "rules": Array [
+            Object {
+              "args": Object {
+                "method": [Function],
+              },
+              "name": "custom",
+            },
+          ],
+          "type": "string",
+        },
+        "pluginId": Object {
+          "flags": Object {
+            "default": [Function],
+            "error": [Function],
+            "presence": "optional",
+          },
+          "metas": Array [
+            Object {
+              "x-oas-optional": true,
+            },
+          ],
+          "rules": Array [
+            Object {
+              "args": Object {
+                "method": [Function],
+              },
+              "name": "custom",
+            },
+          ],
+          "type": "string",
+        },
+      },
+      "metas": Array [
+        Object {
+          "x-oas-optional": true,
+        },
+      ],
+      "type": "object",
     },
     "timeout": Object {
       "flags": Object {
@@ -434,6 +548,63 @@ Object {
         },
       ],
       "type": "string",
+    },
+    "telemetryMetadata": Object {
+      "flags": Object {
+        "default": [Function],
+        "error": [Function],
+        "presence": "optional",
+      },
+      "keys": Object {
+        "aggregateBy": Object {
+          "flags": Object {
+            "default": [Function],
+            "error": [Function],
+            "presence": "optional",
+          },
+          "metas": Array [
+            Object {
+              "x-oas-optional": true,
+            },
+          ],
+          "rules": Array [
+            Object {
+              "args": Object {
+                "method": [Function],
+              },
+              "name": "custom",
+            },
+          ],
+          "type": "string",
+        },
+        "pluginId": Object {
+          "flags": Object {
+            "default": [Function],
+            "error": [Function],
+            "presence": "optional",
+          },
+          "metas": Array [
+            Object {
+              "x-oas-optional": true,
+            },
+          ],
+          "rules": Array [
+            Object {
+              "args": Object {
+                "method": [Function],
+              },
+              "name": "custom",
+            },
+          ],
+          "type": "string",
+        },
+      },
+      "metas": Array [
+        Object {
+          "x-oas-optional": true,
+        },
+      ],
+      "type": "object",
     },
     "temperature": Object {
       "flags": Object {
@@ -840,6 +1011,63 @@ Object {
       ],
       "type": "string",
     },
+    "telemetryMetadata": Object {
+      "flags": Object {
+        "default": [Function],
+        "error": [Function],
+        "presence": "optional",
+      },
+      "keys": Object {
+        "aggregateBy": Object {
+          "flags": Object {
+            "default": [Function],
+            "error": [Function],
+            "presence": "optional",
+          },
+          "metas": Array [
+            Object {
+              "x-oas-optional": true,
+            },
+          ],
+          "rules": Array [
+            Object {
+              "args": Object {
+                "method": [Function],
+              },
+              "name": "custom",
+            },
+          ],
+          "type": "string",
+        },
+        "pluginId": Object {
+          "flags": Object {
+            "default": [Function],
+            "error": [Function],
+            "presence": "optional",
+          },
+          "metas": Array [
+            Object {
+              "x-oas-optional": true,
+            },
+          ],
+          "rules": Array [
+            Object {
+              "args": Object {
+                "method": [Function],
+              },
+              "name": "custom",
+            },
+          ],
+          "type": "string",
+        },
+      },
+      "metas": Array [
+        Object {
+          "x-oas-optional": true,
+        },
+      ],
+      "type": "object",
+    },
     "temperature": Object {
       "flags": Object {
         "default": [Function],
@@ -1200,6 +1428,63 @@ Object {
       ],
       "type": "string",
     },
+    "telemetryMetadata": Object {
+      "flags": Object {
+        "default": [Function],
+        "error": [Function],
+        "presence": "optional",
+      },
+      "keys": Object {
+        "aggregateBy": Object {
+          "flags": Object {
+            "default": [Function],
+            "error": [Function],
+            "presence": "optional",
+          },
+          "metas": Array [
+            Object {
+              "x-oas-optional": true,
+            },
+          ],
+          "rules": Array [
+            Object {
+              "args": Object {
+                "method": [Function],
+              },
+              "name": "custom",
+            },
+          ],
+          "type": "string",
+        },
+        "pluginId": Object {
+          "flags": Object {
+            "default": [Function],
+            "error": [Function],
+            "presence": "optional",
+          },
+          "metas": Array [
+            Object {
+              "x-oas-optional": true,
+            },
+          ],
+          "rules": Array [
+            Object {
+              "args": Object {
+                "method": [Function],
+              },
+              "name": "custom",
+            },
+          ],
+          "type": "string",
+        },
+      },
+      "metas": Array [
+        Object {
+          "x-oas-optional": true,
+        },
+      ],
+      "type": "object",
+    },
     "temperature": Object {
       "flags": Object {
         "default": [Function],
@@ -1419,6 +1704,63 @@ Object {
         },
       ],
       "type": "any",
+    },
+    "telemetryMetadata": Object {
+      "flags": Object {
+        "default": [Function],
+        "error": [Function],
+        "presence": "optional",
+      },
+      "keys": Object {
+        "aggregateBy": Object {
+          "flags": Object {
+            "default": [Function],
+            "error": [Function],
+            "presence": "optional",
+          },
+          "metas": Array [
+            Object {
+              "x-oas-optional": true,
+            },
+          ],
+          "rules": Array [
+            Object {
+              "args": Object {
+                "method": [Function],
+              },
+              "name": "custom",
+            },
+          ],
+          "type": "string",
+        },
+        "pluginId": Object {
+          "flags": Object {
+            "default": [Function],
+            "error": [Function],
+            "presence": "optional",
+          },
+          "metas": Array [
+            Object {
+              "x-oas-optional": true,
+            },
+          ],
+          "rules": Array [
+            Object {
+              "args": Object {
+                "method": [Function],
+              },
+              "name": "custom",
+            },
+          ],
+          "type": "string",
+        },
+      },
+      "metas": Array [
+        Object {
+          "x-oas-optional": true,
+        },
+      ],
+      "type": "object",
     },
   },
   "type": "object",
@@ -3430,6 +3772,62 @@ Object {
 exports[`Connector type config checks detect connector type changes for: .crowdstrike 4`] = `
 Object {
   "flags": Object {
+    "error": [Function],
+  },
+  "metas": Array [
+    Object {
+      "x-oas-any-type": true,
+    },
+  ],
+  "type": "any",
+}
+`;
+
+exports[`Connector type config checks detect connector type changes for: .crowdstrike 5`] = `
+Object {
+  "flags": Object {
+    "error": [Function],
+  },
+  "metas": Array [
+    Object {
+      "x-oas-any-type": true,
+    },
+  ],
+  "type": "any",
+}
+`;
+
+exports[`Connector type config checks detect connector type changes for: .crowdstrike 6`] = `
+Object {
+  "flags": Object {
+    "error": [Function],
+  },
+  "metas": Array [
+    Object {
+      "x-oas-any-type": true,
+    },
+  ],
+  "type": "any",
+}
+`;
+
+exports[`Connector type config checks detect connector type changes for: .crowdstrike 7`] = `
+Object {
+  "flags": Object {
+    "error": [Function],
+  },
+  "metas": Array [
+    Object {
+      "x-oas-any-type": true,
+    },
+  ],
+  "type": "any",
+}
+`;
+
+exports[`Connector type config checks detect connector type changes for: .crowdstrike 8`] = `
+Object {
+  "flags": Object {
     "default": Object {
       "special": "deep",
     },
@@ -3456,7 +3854,7 @@ Object {
 }
 `;
 
-exports[`Connector type config checks detect connector type changes for: .crowdstrike 5`] = `
+exports[`Connector type config checks detect connector type changes for: .crowdstrike 9`] = `
 Object {
   "flags": Object {
     "default": Object {
@@ -3499,7 +3897,7 @@ Object {
 }
 `;
 
-exports[`Connector type config checks detect connector type changes for: .crowdstrike 6`] = `
+exports[`Connector type config checks detect connector type changes for: .crowdstrike 10`] = `
 Object {
   "flags": Object {
     "default": Object {
@@ -4514,6 +4912,63 @@ Object {
       ],
       "type": "array",
     },
+    "telemetryMetadata": Object {
+      "flags": Object {
+        "default": [Function],
+        "error": [Function],
+        "presence": "optional",
+      },
+      "keys": Object {
+        "aggregateBy": Object {
+          "flags": Object {
+            "default": [Function],
+            "error": [Function],
+            "presence": "optional",
+          },
+          "metas": Array [
+            Object {
+              "x-oas-optional": true,
+            },
+          ],
+          "rules": Array [
+            Object {
+              "args": Object {
+                "method": [Function],
+              },
+              "name": "custom",
+            },
+          ],
+          "type": "string",
+        },
+        "pluginId": Object {
+          "flags": Object {
+            "default": [Function],
+            "error": [Function],
+            "presence": "optional",
+          },
+          "metas": Array [
+            Object {
+              "x-oas-optional": true,
+            },
+          ],
+          "rules": Array [
+            Object {
+              "args": Object {
+                "method": [Function],
+              },
+              "name": "custom",
+            },
+          ],
+          "type": "string",
+        },
+      },
+      "metas": Array [
+        Object {
+          "x-oas-optional": true,
+        },
+      ],
+      "type": "object",
+    },
     "temperature": Object {
       "flags": Object {
         "default": [Function],
@@ -4675,6 +5130,63 @@ Object {
       ],
       "type": "array",
     },
+    "telemetryMetadata": Object {
+      "flags": Object {
+        "default": [Function],
+        "error": [Function],
+        "presence": "optional",
+      },
+      "keys": Object {
+        "aggregateBy": Object {
+          "flags": Object {
+            "default": [Function],
+            "error": [Function],
+            "presence": "optional",
+          },
+          "metas": Array [
+            Object {
+              "x-oas-optional": true,
+            },
+          ],
+          "rules": Array [
+            Object {
+              "args": Object {
+                "method": [Function],
+              },
+              "name": "custom",
+            },
+          ],
+          "type": "string",
+        },
+        "pluginId": Object {
+          "flags": Object {
+            "default": [Function],
+            "error": [Function],
+            "presence": "optional",
+          },
+          "metas": Array [
+            Object {
+              "x-oas-optional": true,
+            },
+          ],
+          "rules": Array [
+            Object {
+              "args": Object {
+                "method": [Function],
+              },
+              "name": "custom",
+            },
+          ],
+          "type": "string",
+        },
+      },
+      "metas": Array [
+        Object {
+          "x-oas-optional": true,
+        },
+      ],
+      "type": "object",
+    },
     "temperature": Object {
       "flags": Object {
         "default": [Function],
@@ -4814,6 +5326,63 @@ Object {
         },
       ],
       "type": "string",
+    },
+    "telemetryMetadata": Object {
+      "flags": Object {
+        "default": [Function],
+        "error": [Function],
+        "presence": "optional",
+      },
+      "keys": Object {
+        "aggregateBy": Object {
+          "flags": Object {
+            "default": [Function],
+            "error": [Function],
+            "presence": "optional",
+          },
+          "metas": Array [
+            Object {
+              "x-oas-optional": true,
+            },
+          ],
+          "rules": Array [
+            Object {
+              "args": Object {
+                "method": [Function],
+              },
+              "name": "custom",
+            },
+          ],
+          "type": "string",
+        },
+        "pluginId": Object {
+          "flags": Object {
+            "default": [Function],
+            "error": [Function],
+            "presence": "optional",
+          },
+          "metas": Array [
+            Object {
+              "x-oas-optional": true,
+            },
+          ],
+          "rules": Array [
+            Object {
+              "args": Object {
+                "method": [Function],
+              },
+              "name": "custom",
+            },
+          ],
+          "type": "string",
+        },
+      },
+      "metas": Array [
+        Object {
+          "x-oas-optional": true,
+        },
+      ],
+      "type": "object",
     },
     "temperature": Object {
       "flags": Object {
@@ -5071,6 +5640,63 @@ Object {
       ],
       "type": "string",
     },
+    "telemetryMetadata": Object {
+      "flags": Object {
+        "default": [Function],
+        "error": [Function],
+        "presence": "optional",
+      },
+      "keys": Object {
+        "aggregateBy": Object {
+          "flags": Object {
+            "default": [Function],
+            "error": [Function],
+            "presence": "optional",
+          },
+          "metas": Array [
+            Object {
+              "x-oas-optional": true,
+            },
+          ],
+          "rules": Array [
+            Object {
+              "args": Object {
+                "method": [Function],
+              },
+              "name": "custom",
+            },
+          ],
+          "type": "string",
+        },
+        "pluginId": Object {
+          "flags": Object {
+            "default": [Function],
+            "error": [Function],
+            "presence": "optional",
+          },
+          "metas": Array [
+            Object {
+              "x-oas-optional": true,
+            },
+          ],
+          "rules": Array [
+            Object {
+              "args": Object {
+                "method": [Function],
+              },
+              "name": "custom",
+            },
+          ],
+          "type": "string",
+        },
+      },
+      "metas": Array [
+        Object {
+          "x-oas-optional": true,
+        },
+      ],
+      "type": "object",
+    },
     "temperature": Object {
       "flags": Object {
         "default": [Function],
@@ -5237,6 +5863,63 @@ Object {
         },
       ],
       "type": "string",
+    },
+    "telemetryMetadata": Object {
+      "flags": Object {
+        "default": [Function],
+        "error": [Function],
+        "presence": "optional",
+      },
+      "keys": Object {
+        "aggregateBy": Object {
+          "flags": Object {
+            "default": [Function],
+            "error": [Function],
+            "presence": "optional",
+          },
+          "metas": Array [
+            Object {
+              "x-oas-optional": true,
+            },
+          ],
+          "rules": Array [
+            Object {
+              "args": Object {
+                "method": [Function],
+              },
+              "name": "custom",
+            },
+          ],
+          "type": "string",
+        },
+        "pluginId": Object {
+          "flags": Object {
+            "default": [Function],
+            "error": [Function],
+            "presence": "optional",
+          },
+          "metas": Array [
+            Object {
+              "x-oas-optional": true,
+            },
+          ],
+          "rules": Array [
+            Object {
+              "args": Object {
+                "method": [Function],
+              },
+              "name": "custom",
+            },
+          ],
+          "type": "string",
+        },
+      },
+      "metas": Array [
+        Object {
+          "x-oas-optional": true,
+        },
+      ],
+      "type": "object",
     },
     "temperature": Object {
       "flags": Object {
@@ -6589,6 +7272,2733 @@ Object {
 }
 `;
 
+exports[`Connector type config checks detect connector type changes for: .microsoft_defender_endpoint 1`] = `
+Object {
+  "flags": Object {
+    "default": Object {
+      "special": "deep",
+    },
+    "error": [Function],
+    "presence": "optional",
+  },
+  "keys": Object {
+    "id": Object {
+      "flags": Object {
+        "error": [Function],
+      },
+      "metas": Array [
+        Object {
+          "x-oas-min-length": 1,
+        },
+      ],
+      "rules": Array [
+        Object {
+          "args": Object {
+            "method": [Function],
+          },
+          "name": "custom",
+        },
+        Object {
+          "args": Object {
+            "method": [Function],
+          },
+          "name": "custom",
+        },
+      ],
+      "type": "string",
+    },
+  },
+  "type": "object",
+}
+`;
+
+exports[`Connector type config checks detect connector type changes for: .microsoft_defender_endpoint 2`] = `
+Object {
+  "flags": Object {
+    "default": Object {
+      "special": "deep",
+    },
+    "error": [Function],
+    "presence": "optional",
+  },
+  "keys": Object {
+    "aaDeviceId": Object {
+      "flags": Object {
+        "default": [Function],
+        "error": [Function],
+        "presence": "optional",
+      },
+      "matches": Array [
+        Object {
+          "schema": Object {
+            "flags": Object {
+              "error": [Function],
+            },
+            "metas": Array [
+              Object {
+                "x-oas-min-length": 1,
+              },
+            ],
+            "rules": Array [
+              Object {
+                "args": Object {
+                  "method": [Function],
+                },
+                "name": "custom",
+              },
+              Object {
+                "args": Object {
+                  "method": [Function],
+                },
+                "name": "custom",
+              },
+            ],
+            "type": "string",
+          },
+        },
+        Object {
+          "schema": Object {
+            "flags": Object {
+              "error": [Function],
+            },
+            "items": Array [
+              Object {
+                "flags": Object {
+                  "error": [Function],
+                  "presence": "optional",
+                },
+                "metas": Array [
+                  Object {
+                    "x-oas-min-length": 1,
+                  },
+                ],
+                "rules": Array [
+                  Object {
+                    "args": Object {
+                      "method": [Function],
+                    },
+                    "name": "custom",
+                  },
+                  Object {
+                    "args": Object {
+                      "method": [Function],
+                    },
+                    "name": "custom",
+                  },
+                ],
+                "type": "string",
+              },
+            ],
+            "rules": Array [
+              Object {
+                "args": Object {
+                  "limit": 1,
+                },
+                "name": "min",
+              },
+            ],
+            "type": "array",
+          },
+        },
+      ],
+      "metas": Array [
+        Object {
+          "x-oas-optional": true,
+        },
+      ],
+      "type": "alternatives",
+    },
+    "computerDnsName": Object {
+      "flags": Object {
+        "default": [Function],
+        "error": [Function],
+        "presence": "optional",
+      },
+      "matches": Array [
+        Object {
+          "schema": Object {
+            "flags": Object {
+              "error": [Function],
+            },
+            "metas": Array [
+              Object {
+                "x-oas-min-length": 1,
+              },
+            ],
+            "rules": Array [
+              Object {
+                "args": Object {
+                  "method": [Function],
+                },
+                "name": "custom",
+              },
+              Object {
+                "args": Object {
+                  "method": [Function],
+                },
+                "name": "custom",
+              },
+            ],
+            "type": "string",
+          },
+        },
+        Object {
+          "schema": Object {
+            "flags": Object {
+              "error": [Function],
+            },
+            "items": Array [
+              Object {
+                "flags": Object {
+                  "error": [Function],
+                  "presence": "optional",
+                },
+                "metas": Array [
+                  Object {
+                    "x-oas-min-length": 1,
+                  },
+                ],
+                "rules": Array [
+                  Object {
+                    "args": Object {
+                      "method": [Function],
+                    },
+                    "name": "custom",
+                  },
+                  Object {
+                    "args": Object {
+                      "method": [Function],
+                    },
+                    "name": "custom",
+                  },
+                ],
+                "type": "string",
+              },
+            ],
+            "rules": Array [
+              Object {
+                "args": Object {
+                  "limit": 1,
+                },
+                "name": "min",
+              },
+            ],
+            "type": "array",
+          },
+        },
+      ],
+      "metas": Array [
+        Object {
+          "x-oas-optional": true,
+        },
+      ],
+      "type": "alternatives",
+    },
+    "deviceValue": Object {
+      "flags": Object {
+        "default": [Function],
+        "error": [Function],
+        "presence": "optional",
+      },
+      "matches": Array [
+        Object {
+          "schema": Object {
+            "flags": Object {
+              "error": [Function],
+            },
+            "metas": Array [
+              Object {
+                "x-oas-min-length": 1,
+              },
+            ],
+            "rules": Array [
+              Object {
+                "args": Object {
+                  "method": [Function],
+                },
+                "name": "custom",
+              },
+              Object {
+                "args": Object {
+                  "method": [Function],
+                },
+                "name": "custom",
+              },
+            ],
+            "type": "string",
+          },
+        },
+        Object {
+          "schema": Object {
+            "flags": Object {
+              "error": [Function],
+            },
+            "items": Array [
+              Object {
+                "flags": Object {
+                  "error": [Function],
+                  "presence": "optional",
+                },
+                "metas": Array [
+                  Object {
+                    "x-oas-min-length": 1,
+                  },
+                ],
+                "rules": Array [
+                  Object {
+                    "args": Object {
+                      "method": [Function],
+                    },
+                    "name": "custom",
+                  },
+                  Object {
+                    "args": Object {
+                      "method": [Function],
+                    },
+                    "name": "custom",
+                  },
+                ],
+                "type": "string",
+              },
+            ],
+            "rules": Array [
+              Object {
+                "args": Object {
+                  "limit": 1,
+                },
+                "name": "min",
+              },
+            ],
+            "type": "array",
+          },
+        },
+      ],
+      "metas": Array [
+        Object {
+          "x-oas-optional": true,
+        },
+      ],
+      "type": "alternatives",
+    },
+    "exposureLevel": Object {
+      "flags": Object {
+        "default": [Function],
+        "error": [Function],
+        "presence": "optional",
+      },
+      "matches": Array [
+        Object {
+          "schema": Object {
+            "flags": Object {
+              "error": [Function],
+            },
+            "metas": Array [
+              Object {
+                "x-oas-min-length": 1,
+              },
+            ],
+            "rules": Array [
+              Object {
+                "args": Object {
+                  "method": [Function],
+                },
+                "name": "custom",
+              },
+              Object {
+                "args": Object {
+                  "method": [Function],
+                },
+                "name": "custom",
+              },
+            ],
+            "type": "string",
+          },
+        },
+        Object {
+          "schema": Object {
+            "flags": Object {
+              "error": [Function],
+            },
+            "items": Array [
+              Object {
+                "flags": Object {
+                  "error": [Function],
+                  "presence": "optional",
+                },
+                "metas": Array [
+                  Object {
+                    "x-oas-min-length": 1,
+                  },
+                ],
+                "rules": Array [
+                  Object {
+                    "args": Object {
+                      "method": [Function],
+                    },
+                    "name": "custom",
+                  },
+                  Object {
+                    "args": Object {
+                      "method": [Function],
+                    },
+                    "name": "custom",
+                  },
+                ],
+                "type": "string",
+              },
+            ],
+            "rules": Array [
+              Object {
+                "args": Object {
+                  "limit": 1,
+                },
+                "name": "min",
+              },
+            ],
+            "type": "array",
+          },
+        },
+      ],
+      "metas": Array [
+        Object {
+          "x-oas-optional": true,
+        },
+      ],
+      "type": "alternatives",
+    },
+    "healthStatus": Object {
+      "flags": Object {
+        "default": [Function],
+        "error": [Function],
+        "presence": "optional",
+      },
+      "matches": Array [
+        Object {
+          "schema": Object {
+            "flags": Object {
+              "error": [Function],
+            },
+            "matches": Array [
+              Object {
+                "schema": Object {
+                  "allow": Array [
+                    "Active",
+                  ],
+                  "flags": Object {
+                    "error": [Function],
+                    "only": true,
+                  },
+                  "type": "any",
+                },
+              },
+              Object {
+                "schema": Object {
+                  "allow": Array [
+                    "Inactive",
+                  ],
+                  "flags": Object {
+                    "error": [Function],
+                    "only": true,
+                  },
+                  "type": "any",
+                },
+              },
+              Object {
+                "schema": Object {
+                  "allow": Array [
+                    "ImpairedCommunication",
+                  ],
+                  "flags": Object {
+                    "error": [Function],
+                    "only": true,
+                  },
+                  "type": "any",
+                },
+              },
+              Object {
+                "schema": Object {
+                  "allow": Array [
+                    "NoSensorData",
+                  ],
+                  "flags": Object {
+                    "error": [Function],
+                    "only": true,
+                  },
+                  "type": "any",
+                },
+              },
+              Object {
+                "schema": Object {
+                  "allow": Array [
+                    "NoSensorDataImpairedCommunication",
+                  ],
+                  "flags": Object {
+                    "error": [Function],
+                    "only": true,
+                  },
+                  "type": "any",
+                },
+              },
+              Object {
+                "schema": Object {
+                  "allow": Array [
+                    "Unknown",
+                  ],
+                  "flags": Object {
+                    "error": [Function],
+                    "only": true,
+                  },
+                  "type": "any",
+                },
+              },
+            ],
+            "type": "alternatives",
+          },
+        },
+        Object {
+          "schema": Object {
+            "flags": Object {
+              "error": [Function],
+            },
+            "items": Array [
+              Object {
+                "flags": Object {
+                  "error": [Function],
+                  "presence": "optional",
+                },
+                "matches": Array [
+                  Object {
+                    "schema": Object {
+                      "allow": Array [
+                        "Active",
+                      ],
+                      "flags": Object {
+                        "error": [Function],
+                        "only": true,
+                      },
+                      "type": "any",
+                    },
+                  },
+                  Object {
+                    "schema": Object {
+                      "allow": Array [
+                        "Inactive",
+                      ],
+                      "flags": Object {
+                        "error": [Function],
+                        "only": true,
+                      },
+                      "type": "any",
+                    },
+                  },
+                  Object {
+                    "schema": Object {
+                      "allow": Array [
+                        "ImpairedCommunication",
+                      ],
+                      "flags": Object {
+                        "error": [Function],
+                        "only": true,
+                      },
+                      "type": "any",
+                    },
+                  },
+                  Object {
+                    "schema": Object {
+                      "allow": Array [
+                        "NoSensorData",
+                      ],
+                      "flags": Object {
+                        "error": [Function],
+                        "only": true,
+                      },
+                      "type": "any",
+                    },
+                  },
+                  Object {
+                    "schema": Object {
+                      "allow": Array [
+                        "NoSensorDataImpairedCommunication",
+                      ],
+                      "flags": Object {
+                        "error": [Function],
+                        "only": true,
+                      },
+                      "type": "any",
+                    },
+                  },
+                  Object {
+                    "schema": Object {
+                      "allow": Array [
+                        "Unknown",
+                      ],
+                      "flags": Object {
+                        "error": [Function],
+                        "only": true,
+                      },
+                      "type": "any",
+                    },
+                  },
+                ],
+                "type": "alternatives",
+              },
+            ],
+            "rules": Array [
+              Object {
+                "args": Object {
+                  "limit": 1,
+                },
+                "name": "min",
+              },
+            ],
+            "type": "array",
+          },
+        },
+      ],
+      "metas": Array [
+        Object {
+          "x-oas-optional": true,
+        },
+      ],
+      "type": "alternatives",
+    },
+    "id": Object {
+      "flags": Object {
+        "default": [Function],
+        "error": [Function],
+        "presence": "optional",
+      },
+      "matches": Array [
+        Object {
+          "schema": Object {
+            "flags": Object {
+              "error": [Function],
+            },
+            "metas": Array [
+              Object {
+                "x-oas-min-length": 1,
+              },
+            ],
+            "rules": Array [
+              Object {
+                "args": Object {
+                  "method": [Function],
+                },
+                "name": "custom",
+              },
+              Object {
+                "args": Object {
+                  "method": [Function],
+                },
+                "name": "custom",
+              },
+            ],
+            "type": "string",
+          },
+        },
+        Object {
+          "schema": Object {
+            "flags": Object {
+              "error": [Function],
+            },
+            "items": Array [
+              Object {
+                "flags": Object {
+                  "error": [Function],
+                  "presence": "optional",
+                },
+                "metas": Array [
+                  Object {
+                    "x-oas-min-length": 1,
+                  },
+                ],
+                "rules": Array [
+                  Object {
+                    "args": Object {
+                      "method": [Function],
+                    },
+                    "name": "custom",
+                  },
+                  Object {
+                    "args": Object {
+                      "method": [Function],
+                    },
+                    "name": "custom",
+                  },
+                ],
+                "type": "string",
+              },
+            ],
+            "rules": Array [
+              Object {
+                "args": Object {
+                  "limit": 1,
+                },
+                "name": "min",
+              },
+            ],
+            "type": "array",
+          },
+        },
+      ],
+      "metas": Array [
+        Object {
+          "x-oas-optional": true,
+        },
+      ],
+      "type": "alternatives",
+    },
+    "lastIpAddress": Object {
+      "flags": Object {
+        "default": [Function],
+        "error": [Function],
+        "presence": "optional",
+      },
+      "matches": Array [
+        Object {
+          "schema": Object {
+            "flags": Object {
+              "error": [Function],
+            },
+            "metas": Array [
+              Object {
+                "x-oas-min-length": 1,
+              },
+            ],
+            "rules": Array [
+              Object {
+                "args": Object {
+                  "method": [Function],
+                },
+                "name": "custom",
+              },
+              Object {
+                "args": Object {
+                  "method": [Function],
+                },
+                "name": "custom",
+              },
+            ],
+            "type": "string",
+          },
+        },
+        Object {
+          "schema": Object {
+            "flags": Object {
+              "error": [Function],
+            },
+            "items": Array [
+              Object {
+                "flags": Object {
+                  "error": [Function],
+                  "presence": "optional",
+                },
+                "metas": Array [
+                  Object {
+                    "x-oas-min-length": 1,
+                  },
+                ],
+                "rules": Array [
+                  Object {
+                    "args": Object {
+                      "method": [Function],
+                    },
+                    "name": "custom",
+                  },
+                  Object {
+                    "args": Object {
+                      "method": [Function],
+                    },
+                    "name": "custom",
+                  },
+                ],
+                "type": "string",
+              },
+            ],
+            "rules": Array [
+              Object {
+                "args": Object {
+                  "limit": 1,
+                },
+                "name": "min",
+              },
+            ],
+            "type": "array",
+          },
+        },
+      ],
+      "metas": Array [
+        Object {
+          "x-oas-optional": true,
+        },
+      ],
+      "type": "alternatives",
+    },
+    "lastSeen": Object {
+      "flags": Object {
+        "default": [Function],
+        "error": [Function],
+        "presence": "optional",
+      },
+      "matches": Array [
+        Object {
+          "schema": Object {
+            "flags": Object {
+              "error": [Function],
+            },
+            "metas": Array [
+              Object {
+                "x-oas-min-length": 1,
+              },
+            ],
+            "rules": Array [
+              Object {
+                "args": Object {
+                  "method": [Function],
+                },
+                "name": "custom",
+              },
+              Object {
+                "args": Object {
+                  "method": [Function],
+                },
+                "name": "custom",
+              },
+            ],
+            "type": "string",
+          },
+        },
+        Object {
+          "schema": Object {
+            "flags": Object {
+              "error": [Function],
+            },
+            "items": Array [
+              Object {
+                "flags": Object {
+                  "error": [Function],
+                  "presence": "optional",
+                },
+                "metas": Array [
+                  Object {
+                    "x-oas-min-length": 1,
+                  },
+                ],
+                "rules": Array [
+                  Object {
+                    "args": Object {
+                      "method": [Function],
+                    },
+                    "name": "custom",
+                  },
+                  Object {
+                    "args": Object {
+                      "method": [Function],
+                    },
+                    "name": "custom",
+                  },
+                ],
+                "type": "string",
+              },
+            ],
+            "rules": Array [
+              Object {
+                "args": Object {
+                  "limit": 1,
+                },
+                "name": "min",
+              },
+            ],
+            "type": "array",
+          },
+        },
+      ],
+      "metas": Array [
+        Object {
+          "x-oas-optional": true,
+        },
+      ],
+      "type": "alternatives",
+    },
+    "machineTags": Object {
+      "flags": Object {
+        "default": [Function],
+        "error": [Function],
+        "presence": "optional",
+      },
+      "matches": Array [
+        Object {
+          "schema": Object {
+            "flags": Object {
+              "error": [Function],
+            },
+            "metas": Array [
+              Object {
+                "x-oas-min-length": 1,
+              },
+            ],
+            "rules": Array [
+              Object {
+                "args": Object {
+                  "method": [Function],
+                },
+                "name": "custom",
+              },
+              Object {
+                "args": Object {
+                  "method": [Function],
+                },
+                "name": "custom",
+              },
+            ],
+            "type": "string",
+          },
+        },
+        Object {
+          "schema": Object {
+            "flags": Object {
+              "error": [Function],
+            },
+            "items": Array [
+              Object {
+                "flags": Object {
+                  "error": [Function],
+                  "presence": "optional",
+                },
+                "metas": Array [
+                  Object {
+                    "x-oas-min-length": 1,
+                  },
+                ],
+                "rules": Array [
+                  Object {
+                    "args": Object {
+                      "method": [Function],
+                    },
+                    "name": "custom",
+                  },
+                  Object {
+                    "args": Object {
+                      "method": [Function],
+                    },
+                    "name": "custom",
+                  },
+                ],
+                "type": "string",
+              },
+            ],
+            "rules": Array [
+              Object {
+                "args": Object {
+                  "limit": 1,
+                },
+                "name": "min",
+              },
+            ],
+            "type": "array",
+          },
+        },
+      ],
+      "metas": Array [
+        Object {
+          "x-oas-optional": true,
+        },
+      ],
+      "type": "alternatives",
+    },
+    "onboardingStatus": Object {
+      "flags": Object {
+        "default": [Function],
+        "error": [Function],
+        "presence": "optional",
+      },
+      "matches": Array [
+        Object {
+          "schema": Object {
+            "flags": Object {
+              "error": [Function],
+            },
+            "metas": Array [
+              Object {
+                "x-oas-min-length": 1,
+              },
+            ],
+            "rules": Array [
+              Object {
+                "args": Object {
+                  "method": [Function],
+                },
+                "name": "custom",
+              },
+              Object {
+                "args": Object {
+                  "method": [Function],
+                },
+                "name": "custom",
+              },
+            ],
+            "type": "string",
+          },
+        },
+        Object {
+          "schema": Object {
+            "flags": Object {
+              "error": [Function],
+            },
+            "items": Array [
+              Object {
+                "flags": Object {
+                  "error": [Function],
+                  "presence": "optional",
+                },
+                "metas": Array [
+                  Object {
+                    "x-oas-min-length": 1,
+                  },
+                ],
+                "rules": Array [
+                  Object {
+                    "args": Object {
+                      "method": [Function],
+                    },
+                    "name": "custom",
+                  },
+                  Object {
+                    "args": Object {
+                      "method": [Function],
+                    },
+                    "name": "custom",
+                  },
+                ],
+                "type": "string",
+              },
+            ],
+            "rules": Array [
+              Object {
+                "args": Object {
+                  "limit": 1,
+                },
+                "name": "min",
+              },
+            ],
+            "type": "array",
+          },
+        },
+      ],
+      "metas": Array [
+        Object {
+          "x-oas-optional": true,
+        },
+      ],
+      "type": "alternatives",
+    },
+    "osPlatform": Object {
+      "flags": Object {
+        "default": [Function],
+        "error": [Function],
+        "presence": "optional",
+      },
+      "matches": Array [
+        Object {
+          "schema": Object {
+            "flags": Object {
+              "error": [Function],
+            },
+            "metas": Array [
+              Object {
+                "x-oas-min-length": 1,
+              },
+            ],
+            "rules": Array [
+              Object {
+                "args": Object {
+                  "method": [Function],
+                },
+                "name": "custom",
+              },
+              Object {
+                "args": Object {
+                  "method": [Function],
+                },
+                "name": "custom",
+              },
+            ],
+            "type": "string",
+          },
+        },
+        Object {
+          "schema": Object {
+            "flags": Object {
+              "error": [Function],
+            },
+            "items": Array [
+              Object {
+                "flags": Object {
+                  "error": [Function],
+                  "presence": "optional",
+                },
+                "metas": Array [
+                  Object {
+                    "x-oas-min-length": 1,
+                  },
+                ],
+                "rules": Array [
+                  Object {
+                    "args": Object {
+                      "method": [Function],
+                    },
+                    "name": "custom",
+                  },
+                  Object {
+                    "args": Object {
+                      "method": [Function],
+                    },
+                    "name": "custom",
+                  },
+                ],
+                "type": "string",
+              },
+            ],
+            "rules": Array [
+              Object {
+                "args": Object {
+                  "limit": 1,
+                },
+                "name": "min",
+              },
+            ],
+            "type": "array",
+          },
+        },
+      ],
+      "metas": Array [
+        Object {
+          "x-oas-optional": true,
+        },
+      ],
+      "type": "alternatives",
+    },
+    "page": Object {
+      "flags": Object {
+        "default": [Function],
+        "error": [Function],
+        "presence": "optional",
+      },
+      "metas": Array [
+        Object {
+          "x-oas-optional": true,
+        },
+      ],
+      "rules": Array [
+        Object {
+          "args": Object {
+            "limit": 1,
+          },
+          "name": "min",
+        },
+      ],
+      "type": "number",
+    },
+    "pageSize": Object {
+      "flags": Object {
+        "default": [Function],
+        "error": [Function],
+        "presence": "optional",
+      },
+      "metas": Array [
+        Object {
+          "x-oas-optional": true,
+        },
+      ],
+      "rules": Array [
+        Object {
+          "args": Object {
+            "limit": 1,
+          },
+          "name": "min",
+        },
+        Object {
+          "args": Object {
+            "limit": 1000,
+          },
+          "name": "max",
+        },
+      ],
+      "type": "number",
+    },
+    "rbacGroupId": Object {
+      "flags": Object {
+        "default": [Function],
+        "error": [Function],
+        "presence": "optional",
+      },
+      "matches": Array [
+        Object {
+          "schema": Object {
+            "flags": Object {
+              "error": [Function],
+            },
+            "metas": Array [
+              Object {
+                "x-oas-min-length": 1,
+              },
+            ],
+            "rules": Array [
+              Object {
+                "args": Object {
+                  "method": [Function],
+                },
+                "name": "custom",
+              },
+              Object {
+                "args": Object {
+                  "method": [Function],
+                },
+                "name": "custom",
+              },
+            ],
+            "type": "string",
+          },
+        },
+        Object {
+          "schema": Object {
+            "flags": Object {
+              "error": [Function],
+            },
+            "items": Array [
+              Object {
+                "flags": Object {
+                  "error": [Function],
+                  "presence": "optional",
+                },
+                "metas": Array [
+                  Object {
+                    "x-oas-min-length": 1,
+                  },
+                ],
+                "rules": Array [
+                  Object {
+                    "args": Object {
+                      "method": [Function],
+                    },
+                    "name": "custom",
+                  },
+                  Object {
+                    "args": Object {
+                      "method": [Function],
+                    },
+                    "name": "custom",
+                  },
+                ],
+                "type": "string",
+              },
+            ],
+            "rules": Array [
+              Object {
+                "args": Object {
+                  "limit": 1,
+                },
+                "name": "min",
+              },
+            ],
+            "type": "array",
+          },
+        },
+      ],
+      "metas": Array [
+        Object {
+          "x-oas-optional": true,
+        },
+      ],
+      "type": "alternatives",
+    },
+    "riskScore": Object {
+      "flags": Object {
+        "default": [Function],
+        "error": [Function],
+        "presence": "optional",
+      },
+      "matches": Array [
+        Object {
+          "schema": Object {
+            "flags": Object {
+              "error": [Function],
+            },
+            "metas": Array [
+              Object {
+                "x-oas-min-length": 1,
+              },
+            ],
+            "rules": Array [
+              Object {
+                "args": Object {
+                  "method": [Function],
+                },
+                "name": "custom",
+              },
+              Object {
+                "args": Object {
+                  "method": [Function],
+                },
+                "name": "custom",
+              },
+            ],
+            "type": "string",
+          },
+        },
+        Object {
+          "schema": Object {
+            "flags": Object {
+              "error": [Function],
+            },
+            "items": Array [
+              Object {
+                "flags": Object {
+                  "error": [Function],
+                  "presence": "optional",
+                },
+                "metas": Array [
+                  Object {
+                    "x-oas-min-length": 1,
+                  },
+                ],
+                "rules": Array [
+                  Object {
+                    "args": Object {
+                      "method": [Function],
+                    },
+                    "name": "custom",
+                  },
+                  Object {
+                    "args": Object {
+                      "method": [Function],
+                    },
+                    "name": "custom",
+                  },
+                ],
+                "type": "string",
+              },
+            ],
+            "rules": Array [
+              Object {
+                "args": Object {
+                  "limit": 1,
+                },
+                "name": "min",
+              },
+            ],
+            "type": "array",
+          },
+        },
+      ],
+      "metas": Array [
+        Object {
+          "x-oas-optional": true,
+        },
+      ],
+      "type": "alternatives",
+    },
+    "version": Object {
+      "flags": Object {
+        "default": [Function],
+        "error": [Function],
+        "presence": "optional",
+      },
+      "matches": Array [
+        Object {
+          "schema": Object {
+            "flags": Object {
+              "error": [Function],
+            },
+            "metas": Array [
+              Object {
+                "x-oas-min-length": 1,
+              },
+            ],
+            "rules": Array [
+              Object {
+                "args": Object {
+                  "method": [Function],
+                },
+                "name": "custom",
+              },
+              Object {
+                "args": Object {
+                  "method": [Function],
+                },
+                "name": "custom",
+              },
+            ],
+            "type": "string",
+          },
+        },
+        Object {
+          "schema": Object {
+            "flags": Object {
+              "error": [Function],
+            },
+            "items": Array [
+              Object {
+                "flags": Object {
+                  "error": [Function],
+                  "presence": "optional",
+                },
+                "metas": Array [
+                  Object {
+                    "x-oas-min-length": 1,
+                  },
+                ],
+                "rules": Array [
+                  Object {
+                    "args": Object {
+                      "method": [Function],
+                    },
+                    "name": "custom",
+                  },
+                  Object {
+                    "args": Object {
+                      "method": [Function],
+                    },
+                    "name": "custom",
+                  },
+                ],
+                "type": "string",
+              },
+            ],
+            "rules": Array [
+              Object {
+                "args": Object {
+                  "limit": 1,
+                },
+                "name": "min",
+              },
+            ],
+            "type": "array",
+          },
+        },
+      ],
+      "metas": Array [
+        Object {
+          "x-oas-optional": true,
+        },
+      ],
+      "type": "alternatives",
+    },
+  },
+  "type": "object",
+}
+`;
+
+exports[`Connector type config checks detect connector type changes for: .microsoft_defender_endpoint 3`] = `
+Object {
+  "flags": Object {
+    "default": Object {
+      "special": "deep",
+    },
+    "error": [Function],
+    "presence": "optional",
+  },
+  "keys": Object {
+    "comment": Object {
+      "flags": Object {
+        "error": [Function],
+      },
+      "metas": Array [
+        Object {
+          "x-oas-min-length": 1,
+        },
+      ],
+      "rules": Array [
+        Object {
+          "args": Object {
+            "method": [Function],
+          },
+          "name": "custom",
+        },
+        Object {
+          "args": Object {
+            "method": [Function],
+          },
+          "name": "custom",
+        },
+      ],
+      "type": "string",
+    },
+    "id": Object {
+      "flags": Object {
+        "error": [Function],
+      },
+      "metas": Array [
+        Object {
+          "x-oas-min-length": 1,
+        },
+      ],
+      "rules": Array [
+        Object {
+          "args": Object {
+            "method": [Function],
+          },
+          "name": "custom",
+        },
+        Object {
+          "args": Object {
+            "method": [Function],
+          },
+          "name": "custom",
+        },
+      ],
+      "type": "string",
+    },
+  },
+  "type": "object",
+}
+`;
+
+exports[`Connector type config checks detect connector type changes for: .microsoft_defender_endpoint 4`] = `
+Object {
+  "flags": Object {
+    "default": Object {
+      "special": "deep",
+    },
+    "error": [Function],
+    "presence": "optional",
+  },
+  "keys": Object {
+    "comment": Object {
+      "flags": Object {
+        "error": [Function],
+      },
+      "metas": Array [
+        Object {
+          "x-oas-min-length": 1,
+        },
+      ],
+      "rules": Array [
+        Object {
+          "args": Object {
+            "method": [Function],
+          },
+          "name": "custom",
+        },
+        Object {
+          "args": Object {
+            "method": [Function],
+          },
+          "name": "custom",
+        },
+      ],
+      "type": "string",
+    },
+    "id": Object {
+      "flags": Object {
+        "error": [Function],
+      },
+      "metas": Array [
+        Object {
+          "x-oas-min-length": 1,
+        },
+      ],
+      "rules": Array [
+        Object {
+          "args": Object {
+            "method": [Function],
+          },
+          "name": "custom",
+        },
+        Object {
+          "args": Object {
+            "method": [Function],
+          },
+          "name": "custom",
+        },
+      ],
+      "type": "string",
+    },
+  },
+  "type": "object",
+}
+`;
+
+exports[`Connector type config checks detect connector type changes for: .microsoft_defender_endpoint 5`] = `
+Object {
+  "flags": Object {
+    "default": Object {
+      "special": "deep",
+    },
+    "error": [Function],
+    "presence": "optional",
+  },
+  "keys": Object {},
+  "type": "object",
+}
+`;
+
+exports[`Connector type config checks detect connector type changes for: .microsoft_defender_endpoint 6`] = `
+Object {
+  "flags": Object {
+    "default": Object {
+      "special": "deep",
+    },
+    "error": [Function],
+    "presence": "optional",
+  },
+  "keys": Object {
+    "creationDateTimeUtc": Object {
+      "flags": Object {
+        "default": [Function],
+        "error": [Function],
+        "presence": "optional",
+      },
+      "matches": Array [
+        Object {
+          "schema": Object {
+            "flags": Object {
+              "error": [Function],
+            },
+            "metas": Array [
+              Object {
+                "x-oas-min-length": 1,
+              },
+            ],
+            "rules": Array [
+              Object {
+                "args": Object {
+                  "method": [Function],
+                },
+                "name": "custom",
+              },
+              Object {
+                "args": Object {
+                  "method": [Function],
+                },
+                "name": "custom",
+              },
+            ],
+            "type": "string",
+          },
+        },
+        Object {
+          "schema": Object {
+            "flags": Object {
+              "error": [Function],
+            },
+            "items": Array [
+              Object {
+                "flags": Object {
+                  "error": [Function],
+                  "presence": "optional",
+                },
+                "metas": Array [
+                  Object {
+                    "x-oas-min-length": 1,
+                  },
+                ],
+                "rules": Array [
+                  Object {
+                    "args": Object {
+                      "method": [Function],
+                    },
+                    "name": "custom",
+                  },
+                  Object {
+                    "args": Object {
+                      "method": [Function],
+                    },
+                    "name": "custom",
+                  },
+                ],
+                "type": "string",
+              },
+            ],
+            "rules": Array [
+              Object {
+                "args": Object {
+                  "limit": 1,
+                },
+                "name": "min",
+              },
+            ],
+            "type": "array",
+          },
+        },
+      ],
+      "metas": Array [
+        Object {
+          "x-oas-optional": true,
+        },
+      ],
+      "type": "alternatives",
+    },
+    "id": Object {
+      "flags": Object {
+        "default": [Function],
+        "error": [Function],
+        "presence": "optional",
+      },
+      "matches": Array [
+        Object {
+          "schema": Object {
+            "flags": Object {
+              "error": [Function],
+            },
+            "metas": Array [
+              Object {
+                "x-oas-min-length": 1,
+              },
+            ],
+            "rules": Array [
+              Object {
+                "args": Object {
+                  "method": [Function],
+                },
+                "name": "custom",
+              },
+              Object {
+                "args": Object {
+                  "method": [Function],
+                },
+                "name": "custom",
+              },
+            ],
+            "type": "string",
+          },
+        },
+        Object {
+          "schema": Object {
+            "flags": Object {
+              "error": [Function],
+            },
+            "items": Array [
+              Object {
+                "flags": Object {
+                  "error": [Function],
+                  "presence": "optional",
+                },
+                "metas": Array [
+                  Object {
+                    "x-oas-min-length": 1,
+                  },
+                ],
+                "rules": Array [
+                  Object {
+                    "args": Object {
+                      "method": [Function],
+                    },
+                    "name": "custom",
+                  },
+                  Object {
+                    "args": Object {
+                      "method": [Function],
+                    },
+                    "name": "custom",
+                  },
+                ],
+                "type": "string",
+              },
+            ],
+            "rules": Array [
+              Object {
+                "args": Object {
+                  "limit": 1,
+                },
+                "name": "min",
+              },
+            ],
+            "type": "array",
+          },
+        },
+      ],
+      "metas": Array [
+        Object {
+          "x-oas-optional": true,
+        },
+      ],
+      "type": "alternatives",
+    },
+    "machineId": Object {
+      "flags": Object {
+        "default": [Function],
+        "error": [Function],
+        "presence": "optional",
+      },
+      "matches": Array [
+        Object {
+          "schema": Object {
+            "flags": Object {
+              "error": [Function],
+            },
+            "metas": Array [
+              Object {
+                "x-oas-min-length": 1,
+              },
+            ],
+            "rules": Array [
+              Object {
+                "args": Object {
+                  "method": [Function],
+                },
+                "name": "custom",
+              },
+              Object {
+                "args": Object {
+                  "method": [Function],
+                },
+                "name": "custom",
+              },
+            ],
+            "type": "string",
+          },
+        },
+        Object {
+          "schema": Object {
+            "flags": Object {
+              "error": [Function],
+            },
+            "items": Array [
+              Object {
+                "flags": Object {
+                  "error": [Function],
+                  "presence": "optional",
+                },
+                "metas": Array [
+                  Object {
+                    "x-oas-min-length": 1,
+                  },
+                ],
+                "rules": Array [
+                  Object {
+                    "args": Object {
+                      "method": [Function],
+                    },
+                    "name": "custom",
+                  },
+                  Object {
+                    "args": Object {
+                      "method": [Function],
+                    },
+                    "name": "custom",
+                  },
+                ],
+                "type": "string",
+              },
+            ],
+            "rules": Array [
+              Object {
+                "args": Object {
+                  "limit": 1,
+                },
+                "name": "min",
+              },
+            ],
+            "type": "array",
+          },
+        },
+      ],
+      "metas": Array [
+        Object {
+          "x-oas-optional": true,
+        },
+      ],
+      "type": "alternatives",
+    },
+    "page": Object {
+      "flags": Object {
+        "default": [Function],
+        "error": [Function],
+        "presence": "optional",
+      },
+      "metas": Array [
+        Object {
+          "x-oas-optional": true,
+        },
+      ],
+      "rules": Array [
+        Object {
+          "args": Object {
+            "limit": 1,
+          },
+          "name": "min",
+        },
+      ],
+      "type": "number",
+    },
+    "pageSize": Object {
+      "flags": Object {
+        "default": [Function],
+        "error": [Function],
+        "presence": "optional",
+      },
+      "metas": Array [
+        Object {
+          "x-oas-optional": true,
+        },
+      ],
+      "rules": Array [
+        Object {
+          "args": Object {
+            "limit": 1,
+          },
+          "name": "min",
+        },
+        Object {
+          "args": Object {
+            "limit": 1000,
+          },
+          "name": "max",
+        },
+      ],
+      "type": "number",
+    },
+    "requestor": Object {
+      "flags": Object {
+        "default": [Function],
+        "error": [Function],
+        "presence": "optional",
+      },
+      "matches": Array [
+        Object {
+          "schema": Object {
+            "flags": Object {
+              "error": [Function],
+            },
+            "metas": Array [
+              Object {
+                "x-oas-min-length": 1,
+              },
+            ],
+            "rules": Array [
+              Object {
+                "args": Object {
+                  "method": [Function],
+                },
+                "name": "custom",
+              },
+              Object {
+                "args": Object {
+                  "method": [Function],
+                },
+                "name": "custom",
+              },
+            ],
+            "type": "string",
+          },
+        },
+        Object {
+          "schema": Object {
+            "flags": Object {
+              "error": [Function],
+            },
+            "items": Array [
+              Object {
+                "flags": Object {
+                  "error": [Function],
+                  "presence": "optional",
+                },
+                "metas": Array [
+                  Object {
+                    "x-oas-min-length": 1,
+                  },
+                ],
+                "rules": Array [
+                  Object {
+                    "args": Object {
+                      "method": [Function],
+                    },
+                    "name": "custom",
+                  },
+                  Object {
+                    "args": Object {
+                      "method": [Function],
+                    },
+                    "name": "custom",
+                  },
+                ],
+                "type": "string",
+              },
+            ],
+            "rules": Array [
+              Object {
+                "args": Object {
+                  "limit": 1,
+                },
+                "name": "min",
+              },
+            ],
+            "type": "array",
+          },
+        },
+      ],
+      "metas": Array [
+        Object {
+          "x-oas-optional": true,
+        },
+      ],
+      "type": "alternatives",
+    },
+    "sortDirection": Object {
+      "flags": Object {
+        "default": [Function],
+        "error": [Function],
+        "presence": "optional",
+      },
+      "matches": Array [
+        Object {
+          "schema": Object {
+            "allow": Array [
+              "asc",
+            ],
+            "flags": Object {
+              "error": [Function],
+              "only": true,
+            },
+            "type": "any",
+          },
+        },
+        Object {
+          "schema": Object {
+            "allow": Array [
+              "desc",
+            ],
+            "flags": Object {
+              "error": [Function],
+              "only": true,
+            },
+            "type": "any",
+          },
+        },
+      ],
+      "metas": Array [
+        Object {
+          "x-oas-optional": true,
+        },
+      ],
+      "type": "alternatives",
+    },
+    "sortField": Object {
+      "flags": Object {
+        "default": [Function],
+        "error": [Function],
+        "presence": "optional",
+      },
+      "metas": Array [
+        Object {
+          "x-oas-min-length": 1,
+        },
+        Object {
+          "x-oas-optional": true,
+        },
+      ],
+      "rules": Array [
+        Object {
+          "args": Object {
+            "method": [Function],
+          },
+          "name": "custom",
+        },
+        Object {
+          "args": Object {
+            "method": [Function],
+          },
+          "name": "custom",
+        },
+      ],
+      "type": "string",
+    },
+    "status": Object {
+      "flags": Object {
+        "default": [Function],
+        "error": [Function],
+        "presence": "optional",
+      },
+      "matches": Array [
+        Object {
+          "schema": Object {
+            "flags": Object {
+              "error": [Function],
+            },
+            "matches": Array [
+              Object {
+                "schema": Object {
+                  "allow": Array [
+                    "Pending",
+                  ],
+                  "flags": Object {
+                    "error": [Function],
+                    "only": true,
+                  },
+                  "type": "any",
+                },
+              },
+              Object {
+                "schema": Object {
+                  "allow": Array [
+                    "InProgress",
+                  ],
+                  "flags": Object {
+                    "error": [Function],
+                    "only": true,
+                  },
+                  "type": "any",
+                },
+              },
+              Object {
+                "schema": Object {
+                  "allow": Array [
+                    "Succeeded",
+                  ],
+                  "flags": Object {
+                    "error": [Function],
+                    "only": true,
+                  },
+                  "type": "any",
+                },
+              },
+              Object {
+                "schema": Object {
+                  "allow": Array [
+                    "Failed",
+                  ],
+                  "flags": Object {
+                    "error": [Function],
+                    "only": true,
+                  },
+                  "type": "any",
+                },
+              },
+              Object {
+                "schema": Object {
+                  "allow": Array [
+                    "TimeOut",
+                  ],
+                  "flags": Object {
+                    "error": [Function],
+                    "only": true,
+                  },
+                  "type": "any",
+                },
+              },
+              Object {
+                "schema": Object {
+                  "allow": Array [
+                    "Cancelled",
+                  ],
+                  "flags": Object {
+                    "error": [Function],
+                    "only": true,
+                  },
+                  "type": "any",
+                },
+              },
+            ],
+            "type": "alternatives",
+          },
+        },
+        Object {
+          "schema": Object {
+            "flags": Object {
+              "error": [Function],
+            },
+            "items": Array [
+              Object {
+                "flags": Object {
+                  "error": [Function],
+                  "presence": "optional",
+                },
+                "matches": Array [
+                  Object {
+                    "schema": Object {
+                      "allow": Array [
+                        "Pending",
+                      ],
+                      "flags": Object {
+                        "error": [Function],
+                        "only": true,
+                      },
+                      "type": "any",
+                    },
+                  },
+                  Object {
+                    "schema": Object {
+                      "allow": Array [
+                        "InProgress",
+                      ],
+                      "flags": Object {
+                        "error": [Function],
+                        "only": true,
+                      },
+                      "type": "any",
+                    },
+                  },
+                  Object {
+                    "schema": Object {
+                      "allow": Array [
+                        "Succeeded",
+                      ],
+                      "flags": Object {
+                        "error": [Function],
+                        "only": true,
+                      },
+                      "type": "any",
+                    },
+                  },
+                  Object {
+                    "schema": Object {
+                      "allow": Array [
+                        "Failed",
+                      ],
+                      "flags": Object {
+                        "error": [Function],
+                        "only": true,
+                      },
+                      "type": "any",
+                    },
+                  },
+                  Object {
+                    "schema": Object {
+                      "allow": Array [
+                        "TimeOut",
+                      ],
+                      "flags": Object {
+                        "error": [Function],
+                        "only": true,
+                      },
+                      "type": "any",
+                    },
+                  },
+                  Object {
+                    "schema": Object {
+                      "allow": Array [
+                        "Cancelled",
+                      ],
+                      "flags": Object {
+                        "error": [Function],
+                        "only": true,
+                      },
+                      "type": "any",
+                    },
+                  },
+                ],
+                "type": "alternatives",
+              },
+            ],
+            "rules": Array [
+              Object {
+                "args": Object {
+                  "limit": 1,
+                },
+                "name": "min",
+              },
+            ],
+            "type": "array",
+          },
+        },
+      ],
+      "metas": Array [
+        Object {
+          "x-oas-optional": true,
+        },
+      ],
+      "type": "alternatives",
+    },
+    "type": Object {
+      "flags": Object {
+        "default": [Function],
+        "error": [Function],
+        "presence": "optional",
+      },
+      "matches": Array [
+        Object {
+          "schema": Object {
+            "flags": Object {
+              "error": [Function],
+            },
+            "matches": Array [
+              Object {
+                "schema": Object {
+                  "allow": Array [
+                    "RunAntiVirusScan",
+                  ],
+                  "flags": Object {
+                    "error": [Function],
+                    "only": true,
+                  },
+                  "type": "any",
+                },
+              },
+              Object {
+                "schema": Object {
+                  "allow": Array [
+                    "Offboard",
+                  ],
+                  "flags": Object {
+                    "error": [Function],
+                    "only": true,
+                  },
+                  "type": "any",
+                },
+              },
+              Object {
+                "schema": Object {
+                  "allow": Array [
+                    "LiveResponse",
+                  ],
+                  "flags": Object {
+                    "error": [Function],
+                    "only": true,
+                  },
+                  "type": "any",
+                },
+              },
+              Object {
+                "schema": Object {
+                  "allow": Array [
+                    "CollectInvestigationPackage",
+                  ],
+                  "flags": Object {
+                    "error": [Function],
+                    "only": true,
+                  },
+                  "type": "any",
+                },
+              },
+              Object {
+                "schema": Object {
+                  "allow": Array [
+                    "Isolate",
+                  ],
+                  "flags": Object {
+                    "error": [Function],
+                    "only": true,
+                  },
+                  "type": "any",
+                },
+              },
+              Object {
+                "schema": Object {
+                  "allow": Array [
+                    "Unisolate",
+                  ],
+                  "flags": Object {
+                    "error": [Function],
+                    "only": true,
+                  },
+                  "type": "any",
+                },
+              },
+              Object {
+                "schema": Object {
+                  "allow": Array [
+                    "StopAndQuarantineFile",
+                  ],
+                  "flags": Object {
+                    "error": [Function],
+                    "only": true,
+                  },
+                  "type": "any",
+                },
+              },
+              Object {
+                "schema": Object {
+                  "allow": Array [
+                    "RestrictCodeExecution",
+                  ],
+                  "flags": Object {
+                    "error": [Function],
+                    "only": true,
+                  },
+                  "type": "any",
+                },
+              },
+              Object {
+                "schema": Object {
+                  "allow": Array [
+                    "UnrestrictCodeExecution",
+                  ],
+                  "flags": Object {
+                    "error": [Function],
+                    "only": true,
+                  },
+                  "type": "any",
+                },
+              },
+            ],
+            "type": "alternatives",
+          },
+        },
+        Object {
+          "schema": Object {
+            "flags": Object {
+              "error": [Function],
+            },
+            "items": Array [
+              Object {
+                "flags": Object {
+                  "error": [Function],
+                  "presence": "optional",
+                },
+                "matches": Array [
+                  Object {
+                    "schema": Object {
+                      "allow": Array [
+                        "RunAntiVirusScan",
+                      ],
+                      "flags": Object {
+                        "error": [Function],
+                        "only": true,
+                      },
+                      "type": "any",
+                    },
+                  },
+                  Object {
+                    "schema": Object {
+                      "allow": Array [
+                        "Offboard",
+                      ],
+                      "flags": Object {
+                        "error": [Function],
+                        "only": true,
+                      },
+                      "type": "any",
+                    },
+                  },
+                  Object {
+                    "schema": Object {
+                      "allow": Array [
+                        "LiveResponse",
+                      ],
+                      "flags": Object {
+                        "error": [Function],
+                        "only": true,
+                      },
+                      "type": "any",
+                    },
+                  },
+                  Object {
+                    "schema": Object {
+                      "allow": Array [
+                        "CollectInvestigationPackage",
+                      ],
+                      "flags": Object {
+                        "error": [Function],
+                        "only": true,
+                      },
+                      "type": "any",
+                    },
+                  },
+                  Object {
+                    "schema": Object {
+                      "allow": Array [
+                        "Isolate",
+                      ],
+                      "flags": Object {
+                        "error": [Function],
+                        "only": true,
+                      },
+                      "type": "any",
+                    },
+                  },
+                  Object {
+                    "schema": Object {
+                      "allow": Array [
+                        "Unisolate",
+                      ],
+                      "flags": Object {
+                        "error": [Function],
+                        "only": true,
+                      },
+                      "type": "any",
+                    },
+                  },
+                  Object {
+                    "schema": Object {
+                      "allow": Array [
+                        "StopAndQuarantineFile",
+                      ],
+                      "flags": Object {
+                        "error": [Function],
+                        "only": true,
+                      },
+                      "type": "any",
+                    },
+                  },
+                  Object {
+                    "schema": Object {
+                      "allow": Array [
+                        "RestrictCodeExecution",
+                      ],
+                      "flags": Object {
+                        "error": [Function],
+                        "only": true,
+                      },
+                      "type": "any",
+                    },
+                  },
+                  Object {
+                    "schema": Object {
+                      "allow": Array [
+                        "UnrestrictCodeExecution",
+                      ],
+                      "flags": Object {
+                        "error": [Function],
+                        "only": true,
+                      },
+                      "type": "any",
+                    },
+                  },
+                ],
+                "type": "alternatives",
+              },
+            ],
+            "rules": Array [
+              Object {
+                "args": Object {
+                  "limit": 1,
+                },
+                "name": "min",
+              },
+            ],
+            "type": "array",
+          },
+        },
+      ],
+      "metas": Array [
+        Object {
+          "x-oas-optional": true,
+        },
+      ],
+      "type": "alternatives",
+    },
+  },
+  "type": "object",
+}
+`;
+
+exports[`Connector type config checks detect connector type changes for: .microsoft_defender_endpoint 7`] = `
+Object {
+  "flags": Object {
+    "default": Object {
+      "special": "deep",
+    },
+    "error": [Function],
+    "presence": "optional",
+  },
+  "keys": Object {
+    "apiUrl": Object {
+      "flags": Object {
+        "error": [Function],
+      },
+      "metas": Array [
+        Object {
+          "x-oas-min-length": 1,
+        },
+      ],
+      "rules": Array [
+        Object {
+          "args": Object {
+            "method": [Function],
+          },
+          "name": "custom",
+        },
+        Object {
+          "args": Object {
+            "method": [Function],
+          },
+          "name": "custom",
+        },
+      ],
+      "type": "string",
+    },
+    "clientId": Object {
+      "flags": Object {
+        "error": [Function],
+      },
+      "metas": Array [
+        Object {
+          "x-oas-min-length": 1,
+        },
+      ],
+      "rules": Array [
+        Object {
+          "args": Object {
+            "method": [Function],
+          },
+          "name": "custom",
+        },
+        Object {
+          "args": Object {
+            "method": [Function],
+          },
+          "name": "custom",
+        },
+      ],
+      "type": "string",
+    },
+    "oAuthScope": Object {
+      "flags": Object {
+        "error": [Function],
+      },
+      "metas": Array [
+        Object {
+          "x-oas-min-length": 1,
+        },
+      ],
+      "rules": Array [
+        Object {
+          "args": Object {
+            "method": [Function],
+          },
+          "name": "custom",
+        },
+        Object {
+          "args": Object {
+            "method": [Function],
+          },
+          "name": "custom",
+        },
+      ],
+      "type": "string",
+    },
+    "oAuthServerUrl": Object {
+      "flags": Object {
+        "error": [Function],
+      },
+      "metas": Array [
+        Object {
+          "x-oas-min-length": 1,
+        },
+      ],
+      "rules": Array [
+        Object {
+          "args": Object {
+            "method": [Function],
+          },
+          "name": "custom",
+        },
+        Object {
+          "args": Object {
+            "method": [Function],
+          },
+          "name": "custom",
+        },
+      ],
+      "type": "string",
+    },
+    "tenantId": Object {
+      "flags": Object {
+        "error": [Function],
+      },
+      "metas": Array [
+        Object {
+          "x-oas-min-length": 1,
+        },
+      ],
+      "rules": Array [
+        Object {
+          "args": Object {
+            "method": [Function],
+          },
+          "name": "custom",
+        },
+        Object {
+          "args": Object {
+            "method": [Function],
+          },
+          "name": "custom",
+        },
+      ],
+      "type": "string",
+    },
+  },
+  "type": "object",
+}
+`;
+
+exports[`Connector type config checks detect connector type changes for: .microsoft_defender_endpoint 8`] = `
+Object {
+  "flags": Object {
+    "default": Object {
+      "special": "deep",
+    },
+    "error": [Function],
+    "presence": "optional",
+  },
+  "keys": Object {
+    "clientSecret": Object {
+      "flags": Object {
+        "error": [Function],
+      },
+      "metas": Array [
+        Object {
+          "x-oas-min-length": 1,
+        },
+      ],
+      "rules": Array [
+        Object {
+          "args": Object {
+            "method": [Function],
+          },
+          "name": "custom",
+        },
+        Object {
+          "args": Object {
+            "method": [Function],
+          },
+          "name": "custom",
+        },
+      ],
+      "type": "string",
+    },
+  },
+  "type": "object",
+}
+`;
+
+exports[`Connector type config checks detect connector type changes for: .microsoft_defender_endpoint 9`] = `
+Object {
+  "flags": Object {
+    "default": Object {
+      "special": "deep",
+    },
+    "error": [Function],
+    "presence": "optional",
+  },
+  "keys": Object {
+    "subAction": Object {
+      "flags": Object {
+        "error": [Function],
+      },
+      "rules": Array [
+        Object {
+          "args": Object {
+            "method": [Function],
+          },
+          "name": "custom",
+        },
+      ],
+      "type": "string",
+    },
+    "subActionParams": Object {
+      "flags": Object {
+        "default": Object {
+          "special": "deep",
+        },
+        "error": [Function],
+        "presence": "optional",
+        "unknown": true,
+      },
+      "keys": Object {},
+      "preferences": Object {
+        "stripUnknown": Object {
+          "objects": false,
+        },
+      },
+      "type": "object",
+    },
+  },
+  "type": "object",
+}
+`;
+
 exports[`Connector type config checks detect connector type changes for: .observability-ai-assistant 1`] = `
 Object {
   "flags": Object {
@@ -6757,30 +10167,73 @@ Object {
       ],
       "type": "string",
     },
-    "message": Object {
+    "prompts": Object {
       "flags": Object {
         "error": [Function],
       },
-      "metas": Array [
+      "items": Array [
         Object {
-          "x-oas-min-length": 1,
+          "flags": Object {
+            "default": Object {
+              "special": "deep",
+            },
+            "error": [Function],
+            "presence": "optional",
+          },
+          "keys": Object {
+            "message": Object {
+              "flags": Object {
+                "error": [Function],
+              },
+              "metas": Array [
+                Object {
+                  "x-oas-min-length": 1,
+                },
+              ],
+              "rules": Array [
+                Object {
+                  "args": Object {
+                    "method": [Function],
+                  },
+                  "name": "custom",
+                },
+                Object {
+                  "args": Object {
+                    "method": [Function],
+                  },
+                  "name": "custom",
+                },
+              ],
+              "type": "string",
+            },
+            "statuses": Object {
+              "flags": Object {
+                "error": [Function],
+              },
+              "items": Array [
+                Object {
+                  "flags": Object {
+                    "error": [Function],
+                    "presence": "optional",
+                  },
+                  "rules": Array [
+                    Object {
+                      "args": Object {
+                        "method": [Function],
+                      },
+                      "name": "custom",
+                    },
+                  ],
+                  "type": "string",
+                },
+              ],
+              "type": "array",
+            },
+          },
+          "type": "object",
         },
       ],
-      "rules": Array [
-        Object {
-          "args": Object {
-            "method": [Function],
-          },
-          "name": "custom",
-        },
-        Object {
-          "args": Object {
-            "method": [Function],
-          },
-          "name": "custom",
-        },
-      ],
-      "type": "string",
+      "type": "array",
     },
     "rule": Object {
       "flags": Object {

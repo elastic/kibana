@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 import { AxiosError, AxiosInstance, AxiosResponse } from 'axios';
 import { TypeOf } from '@kbn/config-schema';
 import { Logger } from '@kbn/core/server';

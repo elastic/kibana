@@ -8,7 +8,7 @@ import { EuiButtonIcon, EuiContextMenu, EuiPopover } from '@elastic/eui';
 import { buildContextMenuForActions } from '@kbn/ui-actions-plugin/public';
 
 import React, { useCallback, useMemo, useState } from 'react';
-import styled from 'styled-components';
+import styled from '@emotion/styled';
 
 import useAsync from 'react-use/lib/useAsync';
 import { InputsModelId } from '../../store/inputs/constants';
@@ -31,7 +31,7 @@ const Wrapper = styled.div`
     z-index: 1;
   }
   &.histogram-viz-actions {
-    padding: ${({ theme }) => theme.eui.euiSizeS};
+    padding: ${({ theme }) => theme.euiTheme.size.s};
   }
 `;
 

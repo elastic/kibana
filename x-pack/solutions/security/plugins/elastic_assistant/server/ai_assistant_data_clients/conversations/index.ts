@@ -18,6 +18,15 @@ import { getConversation } from './get_conversation';
 import { deleteConversation } from './delete_conversation';
 import { appendConversationMessages } from './append_conversation_messages';
 import { AIAssistantDataClient, AIAssistantDataClientParams } from '..';
+
+/**
+ * Params for when creating ConversationDataClient in Request Context Factory. Useful if needing to modify
+ * configuration after initial plugin start
+ */
+export interface GetAIAssistantConversationsDataClientParams {
+  contentReferencesEnabled?: boolean;
+}
+
 export class AIAssistantConversationsDataClient extends AIAssistantDataClient {
   constructor(public readonly options: AIAssistantDataClientParams) {
     super(options);

@@ -19,11 +19,11 @@ export const JAVASCRIPT_INFO: CodeLanguage = {
   codeBlockLanguage: 'javascript',
 };
 
-const SERVERLESS_INSTALL_CMD = `npm install @elastic/elasticsearch`;
+const INSTALL_CMD = `npm install @elastic/elasticsearch`;
 
-export const JavascriptServerlessCreateIndexExamples: CreateIndexLanguageExamples = {
+export const JavascriptCreateIndexExamples: CreateIndexLanguageExamples = {
   default: {
-    installCommand: SERVERLESS_INSTALL_CMD,
+    installCommand: INSTALL_CMD,
     createIndex: ({
       elasticsearchURL,
       apiKey,
@@ -39,10 +39,15 @@ const client = new Client({
 
 client.indices.create({
   index: "${indexName ?? INDEX_PLACEHOLDER}",
+  mappings: {
+    properties: {
+      text: { type: "text"}
+    },
+  },
 });`,
   },
   dense_vector: {
-    installCommand: SERVERLESS_INSTALL_CMD,
+    installCommand: INSTALL_CMD,
     createIndex: ({
       elasticsearchURL,
       apiKey,
@@ -66,10 +71,34 @@ client.indices.create({
   },
 });`,
   },
+  semantic: {
+    installCommand: INSTALL_CMD,
+    createIndex: ({
+      elasticsearchURL,
+      apiKey,
+      indexName,
+    }) => `import { Client } from "@elastic/elasticsearch"
+
+const client = new Client({
+  node: '${elasticsearchURL}',
+  auth: {
+    apiKey: "${apiKey ?? API_KEY_PLACEHOLDER}"
+  }
+});
+
+client.indices.create({
+  index: "${indexName ?? INDEX_PLACEHOLDER}",
+  mappings: {
+    properties: {
+      text: { type: "semantic_text"}
+    },
+  },
+});`,
+  },
 };
 
-export const JSServerlessIngestVectorDataExample: IngestDataCodeDefinition = {
-  installCommand: SERVERLESS_INSTALL_CMD,
+export const JSIngestDataExample: IngestDataCodeDefinition = {
+  installCommand: INSTALL_CMD,
   ingestCommand: ({
     apiKey,
     elasticsearchURL,

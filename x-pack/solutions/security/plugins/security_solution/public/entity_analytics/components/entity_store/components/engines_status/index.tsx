@@ -12,33 +12,40 @@ import {
   EuiSpacer,
   EuiButtonEmpty,
   EuiFlexItem,
-  EuiTitle,
   EuiFlexGroup,
   EuiCallOut,
 } from '@elastic/eui';
-import { capitalize } from 'lodash/fp';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
+import { useStoreEntityTypes } from '../../../../hooks/use_enabled_entity_types';
 import { useErrorToast } from '../../../../../common/hooks/use_error_toast';
 import { downloadBlob } from '../../../../../common/utils/download_blob';
 import { EngineComponentsStatusTable } from './components/engine_components_status';
 import { useEntityStoreStatus } from '../../hooks/use_entity_store';
+import { isEngineLoading } from './helpers';
+import { EngineStatusHeader } from './components/engine_status_header';
+import { EngineStatusHeaderAction } from './components/engine_status_header_action';
 
 const FILE_NAME = 'engines_status.json';
 
+const errorMessage = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.entityStore.enginesStatus.queryError',
+  {
+    defaultMessage: 'There was an error loading the engine status',
+  }
+);
+
 export const EngineStatus: React.FC = () => {
-  const { data, isLoading, error } = useEntityStoreStatus({ withComponents: true });
+  const {
+    data,
+    isLoading: isStatusAPILoading,
+    error,
+  } = useEntityStoreStatus({ withComponents: true });
+  const enabledEntityTypes = useStoreEntityTypes();
 
   const downloadJson = () => {
     downloadBlob(new Blob([JSON.stringify(data)]), FILE_NAME);
   };
-
-  const errorMessage = i18n.translate(
-    'xpack.securitySolution.entityAnalytics.entityStore.enginesStatus.queryError',
-    {
-      defaultMessage: 'There was an error loading the engine status',
-    }
-  );
 
   useErrorToast(errorMessage, error);
 
@@ -46,7 +53,7 @@ export const EngineStatus: React.FC = () => {
     return <EuiCallOut title={errorMessage} color="danger" iconType="alert" />;
   }
 
-  if (!data || isLoading) return <EuiLoadingSpinner size="xl" />;
+  if (!data || isStatusAPILoading) return <EuiLoadingSpinner size="xl" />;
 
   if (data.engines.length === 0) {
     return (
@@ -56,6 +63,11 @@ export const EngineStatus: React.FC = () => {
       />
     );
   }
+
+  const enginesStatusData = enabledEntityTypes.map((type) => ({
+    type,
+    engine: data.engines.find((e) => e.type === type),
+  }));
 
   return (
     <EuiFlexGroup direction="column" gutterSize="none">
@@ -74,29 +86,23 @@ export const EngineStatus: React.FC = () => {
         </EuiFlexItem>
       )}
       <EuiFlexItem>
-        {(data?.engines ?? []).map((engine) => (
-          <Fragment key={engine.type}>
-            <EuiTitle size="s">
-              <h4>
-                <FormattedMessage
-                  id="xpack.securitySolution.entityAnalytics.entityStore.enginesStatus.title"
-                  defaultMessage="{type} Store"
-                  values={{
-                    type: capitalize(engine.type),
-                  }}
-                />
-              </h4>
-            </EuiTitle>
-
-            <EuiSpacer size="s" />
-
-            <EuiPanel hasShadow={false} hasBorder={false}>
-              {engine.components && <EngineComponentsStatusTable components={engine.components} />}
-            </EuiPanel>
-
-            <EuiSpacer size="xl" />
-          </Fragment>
-        ))}
+        {enginesStatusData.map(({ engine, type }) => {
+          return (
+            <Fragment key={type}>
+              <EngineStatusHeader
+                entityType={type}
+                actionButton={<EngineStatusHeaderAction engine={engine} type={type} />}
+              />
+              <EuiSpacer size="s" />
+              <EuiPanel hasShadow={false} hasBorder={false}>
+                {engine && !isEngineLoading(engine.status) && engine.components && (
+                  <EngineComponentsStatusTable components={engine.components} />
+                )}
+              </EuiPanel>
+              <EuiSpacer size="xl" />
+            </Fragment>
+          );
+        })}
       </EuiFlexItem>
     </EuiFlexGroup>
   );

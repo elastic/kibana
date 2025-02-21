@@ -50,6 +50,7 @@ export {
   type UnvalidatedToolCall,
   type ToolChoice,
 } from './tools';
+export type { ChatCompleteMetadata, ConnectorTelemetryMetadata } from './metadata';
 export {
   isChatCompletionChunkEvent,
   isChatCompletionEvent,

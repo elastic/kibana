@@ -11,6 +11,7 @@ import type { XYBrushEvent } from '@elastic/charts';
 import { EuiPanel, EuiSpacer, EuiTab, EuiTabs } from '@elastic/eui';
 import { omit } from 'lodash';
 import { useHistory } from 'react-router-dom';
+import { usePerformanceContext } from '@kbn/ebt-tools';
 import { maybe } from '../../../../common/utils/maybe';
 import { useLegacyUrlParams } from '../../../context/url_params_context/use_url_params';
 import { useAnyOfApmParams } from '../../../hooks/use_apm_params';
@@ -47,6 +48,7 @@ export function TransactionDetailsTabs() {
 
   const isCriticalPathFeatureEnabled = useCriticalPathFeatureEnabledSetting();
   const isTransactionProfilingEnabled = useTransactionProfilingSetting();
+  const { onPageReady } = usePerformanceContext();
 
   const availableTabs = useMemo(() => {
     const tabs = [traceSamplesTab, latencyCorrelationsTab, failedTransactionsCorrelationsTab];
@@ -68,7 +70,7 @@ export function TransactionDetailsTabs() {
   const { component: TabContent } =
     availableTabs.find((tab) => tab.key === currentTab) ?? traceSamplesTab;
 
-  const { environment, kuery, transactionName } = query;
+  const { environment, kuery, transactionName, rangeFrom, rangeTo } = query;
 
   const traceSamplesFetchResult = useTransactionTraceSamplesFetcher({
     transactionName,
@@ -89,6 +91,21 @@ export function TransactionDetailsTabs() {
     // Switch back to the 'trace samples' tab
     setCurrentTab(traceSamplesTabKey);
   }, [traceSamplesTabKey]);
+
+  useEffect(() => {
+    if (traceSamplesFetchResult.status === FETCH_STATUS.SUCCESS) {
+      onPageReady({
+        meta: {
+          rangeFrom,
+          rangeTo,
+        },
+        customMetrics: {
+          key1: 'traceDocsTotal',
+          value1: traceSamplesFetchResult.data?.traceSamples?.length ?? 0,
+        },
+      });
+    }
+  }, [traceSamplesFetchResult, onPageReady, rangeFrom, rangeTo]);
 
   useEffect(() => {
     const selectedSample = traceSamplesFetchResult.data?.traceSamples.find(

@@ -15,20 +15,14 @@
  */
 
 import { z } from '@kbn/zod';
+import { isNonEmptyString } from '@kbn/zod-helpers';
 
 import { AlertIds } from '../../model/alert.gen';
-import { NonEmptyString } from '../../model/primitives.gen';
 
 export type AlertAssignees = z.infer<typeof AlertAssignees>;
 export const AlertAssignees = z.object({
-  /**
-   * A list of users ids to assign.
-   */
-  add: z.array(NonEmptyString),
-  /**
-   * A list of users ids to unassign.
-   */
-  remove: z.array(NonEmptyString),
+  add: z.array(z.string().min(1).superRefine(isNonEmptyString)),
+  remove: z.array(z.string().min(1).superRefine(isNonEmptyString)),
 });
 
 export type SetAlertAssigneesRequestBody = z.infer<typeof SetAlertAssigneesRequestBody>;
@@ -37,9 +31,6 @@ export const SetAlertAssigneesRequestBody = z.object({
    * Details about the assignees to assign and unassign.
    */
   assignees: AlertAssignees,
-  /**
-   * List of alerts ids to assign and unassign passed assignees.
-   */
   ids: AlertIds,
 });
 export type SetAlertAssigneesRequestBodyInput = z.input<typeof SetAlertAssigneesRequestBody>;

@@ -26,6 +26,7 @@ export const PolicyLink = ({ name }: { name: string }) => {
     return ilmLocator?.getLocation({ page: 'policy_edit', policyName: name });
     // FIXME: Dario thinks there is a better way to do this but
     // he's getting tired and maybe the Synthetics folks can fix it
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [name]);
 
   if (!data) {

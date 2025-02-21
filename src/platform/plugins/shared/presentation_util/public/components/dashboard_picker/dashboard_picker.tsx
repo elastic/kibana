@@ -123,7 +123,9 @@ export function DashboardPicker({ isDisabled, onChange, idsToOmit }: DashboardPi
             <EuiText
               size="s"
               css={css`
-                color: ${selectedDashboard ? euiTheme.colors.text : euiTheme.colors.disabledText};
+                color: ${selectedDashboard
+                  ? euiTheme.colors.textParagraph
+                  : euiTheme.colors.textDisabled};
               `}
             >
               {selectedDashboard?.label ??

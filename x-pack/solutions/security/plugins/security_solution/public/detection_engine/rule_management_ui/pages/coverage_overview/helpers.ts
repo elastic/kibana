@@ -10,15 +10,6 @@ import type {
   CoverageOverviewRuleActivity,
   CoverageOverviewRuleSource,
 } from '../../../../../common/api/detection_engine';
-import { coverageOverviewCardColorThresholds } from './constants';
-
-export const getCardBackgroundColor = (value: number) => {
-  for (const { threshold, color } of coverageOverviewCardColorThresholds) {
-    if (value >= threshold) {
-      return color;
-    }
-  }
-};
 
 export const extractSelected = <
   T extends CoverageOverviewRuleSource | CoverageOverviewRuleActivity

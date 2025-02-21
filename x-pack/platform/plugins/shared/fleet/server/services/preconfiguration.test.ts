@@ -468,8 +468,10 @@ describe('policy preconfiguration', () => {
           ],
           name: 'Test package',
           namespace: 'default',
+          output_id: undefined,
           package: { name: 'test_package', title: 'test_package', version: '3.0.0' },
           policy_id: 'test-id',
+          supports_agentless: undefined,
           vars: undefined,
         }),
         expect.objectContaining({ id: 'test-1' })

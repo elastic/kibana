@@ -16,7 +16,7 @@ import {
   areTriggersDisabled,
   getUnchangingComparator,
   initializeTimeRange,
-  initializeTitles,
+  initializeTitleManager,
   useBatchedPublishingSubjects,
 } from '@kbn/presentation-publishing';
 import { BehaviorSubject } from 'rxjs';
@@ -79,19 +79,17 @@ export const mapEmbeddableFactory: ReactEmbeddableFactory<
     const sharingSavedObjectProps = savedMap.getSharingSavedObjectProps();
     const spaces = getSpacesApi();
     const controlledBy = getControlledBy(uuid);
-    const title = initializeTitles(state);
+    const titleManager = initializeTitleManager(state);
     const timeRange = initializeTimeRange(state);
     const dynamicActionsApi = getEmbeddableEnhanced()?.initializeReactEmbeddableDynamicActions(
       uuid,
-      () => title.titlesApi.panelTitle.getValue(),
+      () => titleManager.api.title$.getValue(),
       state
     );
     const maybeStopDynamicActions = dynamicActionsApi?.startDynamicActions();
 
-    const defaultPanelTitle$ = new BehaviorSubject<string | undefined>(
-      savedMap.getAttributes().title
-    );
-    const defaultPanelDescription$ = new BehaviorSubject<string | undefined>(
+    const defaultTitle$ = new BehaviorSubject<string | undefined>(savedMap.getAttributes().title);
+    const defaultDescription$ = new BehaviorSubject<string | undefined>(
       savedMap.getAttributes().description
     );
     const reduxSync = initializeReduxSync({
@@ -114,7 +112,7 @@ export const mapEmbeddableFactory: ReactEmbeddableFactory<
       return {
         ...state,
         ...timeRange.serialize(),
-        ...title.serializeTitles(),
+        ...titleManager.serialize(),
         ...(dynamicActionsApi?.serializeDynamicActions() ?? {}),
         ...crossPanelActions.serialize(),
         ...reduxSync.serialize(),
@@ -156,11 +154,11 @@ export const mapEmbeddableFactory: ReactEmbeddableFactory<
 
     api = buildApi(
       {
-        defaultPanelTitle: defaultPanelTitle$,
-        defaultPanelDescription: defaultPanelDescription$,
+        defaultTitle$,
+        defaultDescription$,
         ...timeRange.api,
         ...(dynamicActionsApi?.dynamicActionsApi ?? {}),
-        ...title.titlesApi,
+        ...titleManager.api,
         ...reduxSync.api,
         ...initializeEditApi(uuid, getState, parentApi, state.savedObjectId),
         ...initializeLibraryTransforms(savedMap, serializeState),
@@ -172,7 +170,7 @@ export const mapEmbeddableFactory: ReactEmbeddableFactory<
       },
       {
         ...timeRange.comparators,
-        ...title.titleComparators,
+        ...titleManager.comparators,
         ...(dynamicActionsApi?.dynamicActionsComparator ?? {
           enhancements: getUnchangingComparator(),
         }),
@@ -200,13 +198,12 @@ export const mapEmbeddableFactory: ReactEmbeddableFactory<
     return {
       api,
       Component: () => {
-        const [defaultPanelTitle, panelTitle, defaultPanelDescription, panelDescription] =
-          useBatchedPublishingSubjects(
-            defaultPanelTitle$,
-            title.titlesApi.panelTitle,
-            defaultPanelDescription$,
-            title.titlesApi.panelDescription
-          );
+        const [defaultTitle, title, defaultDescription, description] = useBatchedPublishingSubjects(
+          defaultTitle$,
+          titleManager.api.title$,
+          defaultDescription$,
+          titleManager.api.description$
+        );
 
         useEffect(() => {
           return () => {
@@ -250,8 +247,8 @@ export const mapEmbeddableFactory: ReactEmbeddableFactory<
                   ? parentApi.getTooltipRenderer()
                   : undefined
               }
-              title={panelTitle ?? defaultPanelTitle}
-              description={panelDescription ?? defaultPanelDescription}
+              title={title ?? defaultTitle}
+              description={description ?? defaultDescription}
               waitUntilTimeLayersLoad$={waitUntilTimeLayersLoad$(savedMap.getStore())}
               isSharable={
                 isMapRendererApi(parentApi) && typeof parentApi.isSharable === 'boolean'

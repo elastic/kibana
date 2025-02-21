@@ -38,10 +38,13 @@ export function createChatCompleteApi({ request, actions, logger }: CreateChatCo
     messages,
     toolChoice,
     tools,
+    temperature,
     system,
     functionCalling,
+    modelName,
     stream,
     abortSignal,
+    metadata,
   }: ChatCompleteOptions<ToolOptions, boolean>): ChatCompleteCompositeResponse<
     ToolOptions,
     boolean
@@ -80,9 +83,12 @@ export function createChatCompleteApi({ request, actions, logger }: CreateChatCo
           messages,
           toolChoice,
           tools,
+          temperature,
           logger,
           functionCalling,
+          modelName,
           abortSignal,
+          metadata,
         });
       }),
       chunksIntoMessage({

@@ -98,7 +98,6 @@ export function register(fileKindRouter: FileKindRouter, fileKind: FileKind) {
           ...rt,
         },
         options: {
-          tags: fileKind.http.create.tags,
           body: {
             output: 'stream',
             parse: false,
@@ -109,6 +108,11 @@ export function register(fileKindRouter: FileKindRouter, fileKind: FileKind) {
             // size of the HTTP request body, but the file service will throw
             // 413 errors if the file size is larger than expected.
             maxBytes: 10 * 1024 * 1024 * 1024,
+          },
+        },
+        security: {
+          authz: {
+            requiredPrivileges: fileKind.http.create.requiredPrivileges,
           },
         },
       },

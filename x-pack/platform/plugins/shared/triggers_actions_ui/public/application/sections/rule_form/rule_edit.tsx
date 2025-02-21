@@ -348,7 +348,7 @@ export const RuleEdit = <
                     <EuiFlexItem grow={false}>
                       <EuiButton
                         fill
-                        color="success"
+                        color="primary"
                         data-test-subj="saveEditedRuleButton"
                         type="submit"
                         iconType="check"

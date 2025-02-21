@@ -26,6 +26,7 @@ export const API_HEADERS = Object.freeze({
 });
 
 export const INTERNAL_CLOUD_CONNECTORS = ['Elastic-Cloud-SMTP'];
+export const INTERNAL_INFERENCE_CONNECTORS = ['Elastic-Inference-Rainbow-Sprinkles'];
 
 export const rootRequest = <T = unknown>({
   headers: optionHeaders = {},
@@ -105,7 +106,10 @@ export const deleteConnectors = () => {
           return connector.id;
         });
         ids.forEach((id) => {
-          if (!INTERNAL_CLOUD_CONNECTORS.includes(id)) {
+          if (
+            !INTERNAL_CLOUD_CONNECTORS.includes(id) &&
+            !INTERNAL_INFERENCE_CONNECTORS.includes(id)
+          ) {
             rootRequest({
               method: 'DELETE',
               url: spaceId

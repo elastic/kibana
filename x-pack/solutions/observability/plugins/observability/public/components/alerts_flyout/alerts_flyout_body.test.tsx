@@ -10,7 +10,6 @@ import * as useUiSettingHook from '@kbn/kibana-react-plugin/public/ui_settings/u
 import { createObservabilityRuleTypeRegistryMock } from '../../rules/observability_rule_type_registry_mock';
 import { AlertsFlyoutBody } from './alerts_flyout_body';
 import { inventoryThresholdAlertEs } from '../../rules/fixtures/example_alerts';
-import { parseAlert } from '../../pages/alerts/helpers/parse_alert';
 import { RULE_DETAILS_PAGE_ID } from '../../pages/rule_details/constants';
 import { fireEvent } from '@testing-library/react';
 import { kibanaStartMock } from '../../utils/kibana_react.mock';
@@ -34,9 +33,12 @@ describe('AlertsFlyoutBody', () => {
   let flyout: ReturnType<typeof render>;
 
   const setup = (id: string) => {
-    const alert = parseAlert(observabilityRuleTypeRegistryMock)(inventoryThresholdAlertEs);
     flyout = render(
-      <AlertsFlyoutBody rawAlert={inventoryThresholdAlertEs} alert={alert} id={id} />
+      <AlertsFlyoutBody
+        tableId={id}
+        alert={inventoryThresholdAlertEs}
+        observabilityRuleTypeRegistry={observabilityRuleTypeRegistryMock}
+      />
     );
   };
 

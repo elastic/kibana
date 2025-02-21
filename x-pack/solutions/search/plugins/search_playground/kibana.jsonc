@@ -26,6 +26,7 @@
       "security",
       "stackConnectors",
       "triggersActionsUi",
+      "uiActions"
     ],
     "optionalPlugins": [
       "cloud",
@@ -35,7 +36,8 @@
     ],
     "requiredBundles": [
       "kibanaReact",
-      "unifiedDocViewer"
+      "unifiedDocViewer",
+      "esUiShared"
     ]
   }
 }

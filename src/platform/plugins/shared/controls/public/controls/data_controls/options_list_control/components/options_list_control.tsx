@@ -58,12 +58,12 @@ export const OptionsListControl = ({
     stateManager.selectedOptions,
     api.invalidSelections$,
     api.field$,
-    api.dataLoading,
-    api.panelTitle,
+    api.dataLoading$,
+    api.title$,
     api.fieldFormatter
   );
 
-  const [defaultPanelTitle] = useBatchedOptionalPublishingSubjects(api.defaultPanelTitle);
+  const [defaultPanelTitle] = useBatchedOptionalPublishingSubjects(api.defaultTitle$);
 
   const delimiter = useMemo(() => OptionsListStrings.control.getSeparator(field?.type), [field]);
 

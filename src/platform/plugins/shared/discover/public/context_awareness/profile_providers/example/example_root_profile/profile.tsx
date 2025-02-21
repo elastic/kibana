@@ -25,6 +25,7 @@ export const createExampleRootProfileProvider = (): RootProfileProvider => ({
   isExperimental: true,
   profile: {
     getRenderAppWrapper,
+    getDefaultAdHocDataViews,
     getCellRenderers: (prev) => (params) => ({
       ...prev(params),
       '@timestamp': (props) => {
@@ -112,7 +113,7 @@ export const createExampleRootProfileProvider = (): RootProfileProvider => ({
 export const createExampleSolutionViewRootProfileProvider = (): RootProfileProvider => ({
   profileId: 'example-solution-view-root-profile',
   isExperimental: true,
-  profile: { getRenderAppWrapper },
+  profile: { getRenderAppWrapper, getDefaultAdHocDataViews },
   resolve: (params) => ({
     isMatch: true,
     context: { solutionType: params.solutionNavId as SolutionType },
@@ -151,3 +152,15 @@ const getRenderAppWrapper: RootProfileProvider['profile']['getRenderAppWrapper']
       </PrevWrapper>
     );
   };
+
+const getDefaultAdHocDataViews: RootProfileProvider['profile']['getDefaultAdHocDataViews'] =
+  (prev) => () =>
+    [
+      ...prev(),
+      {
+        id: 'example-root-profile-ad-hoc-data-view',
+        name: 'Example profile data view',
+        title: 'my-example-*',
+        timeFieldName: '@timestamp',
+      },
+    ];

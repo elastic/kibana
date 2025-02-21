@@ -40,7 +40,7 @@ interface Props {
   addFilters: ((filters: Filter[], actionId: string) => Promise<void>) | null;
   getFilterActions?: () => Promise<Action[]>;
   getActionContext?: () => ActionExecutionContext;
-  onSingleValueTrigger?: (actionId: string, key: string, value: RawValue) => void;
+  onSingleValueTrigger?: (actionId: string, key: string, value: RawValue) => Promise<void>;
   showFilterActions: (view: ReactNode) => void;
 }
 

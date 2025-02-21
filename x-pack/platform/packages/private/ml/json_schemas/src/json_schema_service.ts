@@ -46,6 +46,8 @@ export class JsonSchemaService {
       '..',
       '..',
       '..',
+      '..',
+      '..',
       'elasticsearch-specification',
       'output',
       'openapi',

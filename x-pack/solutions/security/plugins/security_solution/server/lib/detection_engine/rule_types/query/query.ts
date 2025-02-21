@@ -34,6 +34,7 @@ export const queryExecutor = async ({
   bucketHistory,
   scheduleNotificationResponseActionsService,
   licensing,
+  isLoggedRequestsEnabled,
 }: {
   runOpts: RunOpts<UnifiedQueryRuleParams>;
   experimentalFeatures: ExperimentalFeatures;
@@ -44,6 +45,7 @@ export const queryExecutor = async ({
   bucketHistory?: BucketHistory[];
   scheduleNotificationResponseActionsService: CreateRuleOptions['scheduleNotificationResponseActionsService'];
   licensing: LicensingPluginSetup;
+  isLoggedRequestsEnabled: boolean;
 }) => {
   const completeRule = runOpts.completeRule;
   const ruleParams = completeRule.ruleParams;
@@ -77,6 +79,7 @@ export const queryExecutor = async ({
             groupByFields: ruleParams.alertSuppression.groupBy,
             eventsTelemetry,
             experimentalFeatures,
+            isLoggedRequestsEnabled,
           })
         : {
             ...(await searchAfterAndBulkCreate({
@@ -95,8 +98,9 @@ export const queryExecutor = async ({
               runtimeMappings: runOpts.runtimeMappings,
               primaryTimestamp: runOpts.primaryTimestamp,
               secondaryTimestamp: runOpts.secondaryTimestamp,
+              isLoggedRequestsEnabled,
             })),
-            state: {},
+            state: { isLoggedRequestsEnabled },
           };
 
     scheduleNotificationResponseActionsService({

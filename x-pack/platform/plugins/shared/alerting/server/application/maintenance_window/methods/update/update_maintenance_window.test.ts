@@ -38,6 +38,7 @@ const updatedAttributes = {
     dtstart: '2023-03-26T00:00:00.000Z',
     freq: Frequency.WEEKLY,
     count: 2,
+    byweekday: ['-1MO', 'WE'],
   },
 };
 
@@ -110,8 +111,8 @@ describe('MaintenanceWindowClient - update', () => {
       {
         ...updatedAttributes,
         events: [
-          { gte: '2023-03-26T00:00:00.000Z', lte: '2023-03-26T02:00:00.000Z' },
-          { gte: '2023-04-01T23:00:00.000Z', lte: '2023-04-02T01:00:00.000Z' }, // Daylight savings
+          { gte: '2023-03-26T23:00:00.000Z', lte: '2023-03-27T01:00:00.000Z' },
+          { gte: '2023-03-28T23:00:00.000Z', lte: '2023-03-29T01:00:00.000Z' }, // Daylight savings
         ],
         expirationDate: moment(new Date(secondTimestamp)).tz('UTC').add(1, 'year').toISOString(),
         createdAt: '2023-02-26T00:00:00.000Z',

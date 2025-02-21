@@ -11,12 +11,12 @@ import React, { useImperativeHandle } from 'react';
 import { BehaviorSubject } from 'rxjs';
 
 import { setMockedPresentationUtilServices } from '@kbn/presentation-util-plugin/public/mocks';
-import { uiActionsService } from '@kbn/presentation-util-plugin/public/services/kibana_services';
 import { render, waitFor } from '@testing-library/react';
+import { Action } from '@kbn/ui-actions-plugin/public';
 
 import type { ControlLabelPosition, ControlWidth } from '../../../common';
+import { uiActionsService } from '../../services/kibana_services';
 import { ControlPanel } from './control_panel';
-import { Action } from '@kbn/ui-actions-plugin/public';
 
 describe('render', () => {
   let mockApi = {};

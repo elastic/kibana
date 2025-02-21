@@ -12,7 +12,12 @@ import type { Logger } from '@kbn/core/server';
 
 import { appContextService } from '../../server/services/app_context';
 
-import { verifyAllTestPackages } from './verify_test_packages';
+import {
+  getAllTestPackagesPaths,
+  getAllTestPackagesZip,
+  verifyTestPackage,
+  verifyTestPackageFromPath,
+} from './verify_test_packages';
 
 jest.mock('../../server/services/app_context');
 
@@ -23,15 +28,21 @@ mockedAppContextService.getSecuritySetup.mockImplementation(() => ({
 
 let mockedLogger: jest.Mocked<Logger>;
 
-// FLAKY: https://github.com/elastic/kibana/issues/200787
-describe.skip('Test packages', () => {
+describe('Test packages', () => {
   beforeEach(() => {
     mockedLogger = loggerMock.create();
     mockedAppContextService.getLogger.mockReturnValue(mockedLogger);
   });
 
-  test('All test packages should be valid (node scripts/verify_test_packages) ', async () => {
-    const { errors } = await verifyAllTestPackages();
-    expect(errors).toEqual([]);
-  });
+  for (const zip of getAllTestPackagesZip()) {
+    test(`${zip} should be a valid package`, async () => {
+      await verifyTestPackage(zip);
+    });
+  }
+
+  for (const { topLevelDir, paths } of getAllTestPackagesPaths()) {
+    test(`${topLevelDir} should be a valid package`, async () => {
+      await verifyTestPackageFromPath(paths, topLevelDir);
+    });
+  }
 });

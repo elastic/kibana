@@ -23,7 +23,7 @@
     "@kbn/es-query",
     "@kbn/data-plugin",
     "@kbn/discover-plugin",
-    "@kbn/presentation-containers",
     "@kbn/i18n",
+    "@kbn/presentation-publishing",
   ]
 }

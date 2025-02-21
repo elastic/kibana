@@ -205,7 +205,11 @@ export const mockAboutStepRule = (): AboutStepRule => ({
   name: 'Query with rule-id',
   description: '24/7',
   riskScore: { value: 21, mapping: [], isMappingChecked: false },
-  severity: { value: 'low', mapping: fillEmptySeverityMappings([]), isMappingChecked: false },
+  severity: {
+    value: 'low',
+    mapping: fillEmptySeverityMappings([]),
+    isMappingChecked: false,
+  },
   references: ['www.test.co'],
   falsePositives: ['test'],
   tags: ['tag1', 'tag2'],

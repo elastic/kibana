@@ -32,6 +32,7 @@ export const dataStreamStatRt = rt.intersection([
     lastActivity: rt.number,
     integration: rt.string,
     totalDocs: rt.number,
+    creationDate: rt.number,
   }),
 ]);
 
@@ -55,6 +56,12 @@ export const getDataStreamDegradedDocsResponseRt = rt.type({
 });
 
 export type DataStreamDegradedDocsResponse = rt.TypeOf<typeof getDataStreamDegradedDocsResponseRt>;
+
+export const getDataStreamFailedDocsResponseRt = rt.type({
+  failedDocs: rt.array(dataStreamDocsStatRt),
+});
+
+export type DataStreamFailedDocsResponse = rt.TypeOf<typeof getDataStreamFailedDocsResponseRt>;
 
 export const integrationDashboardRT = rt.type({
   id: rt.string,
@@ -114,18 +121,55 @@ export const getIntegrationsResponseRt = rt.exact(
 
 export type IntegrationsResponse = rt.TypeOf<typeof getIntegrationsResponseRt>;
 
-export const degradedFieldRt = rt.type({
-  name: rt.string,
+export const qualityIssueBaseRT = rt.type({
   count: rt.number,
-  lastOccurrence: rt.union([rt.null, rt.number]),
+  lastOccurrence: rt.union([rt.undefined, rt.null, rt.number]),
   timeSeries: rt.array(
     rt.type({
       x: rt.number,
       y: rt.number,
     })
   ),
-  indexFieldWasLastPresentIn: rt.string,
 });
+
+export const qualityIssueRT = rt.intersection([
+  qualityIssueBaseRT,
+  rt.partial({
+    indexFieldWasLastPresentIn: rt.string,
+  }),
+  rt.type({
+    name: rt.string,
+    type: rt.keyof({
+      degraded: null,
+      failed: null,
+    }),
+  }),
+]);
+
+export type QualityIssue = rt.TypeOf<typeof qualityIssueRT>;
+
+export type FailedDocsDetails = rt.TypeOf<typeof qualityIssueBaseRT>;
+
+export const failedDocsErrorRt = rt.type({
+  message: rt.string,
+  type: rt.string,
+});
+
+export type FailedDocsError = rt.TypeOf<typeof failedDocsErrorRt>;
+
+export const failedDocsErrorsRt = rt.type({
+  errors: rt.array(failedDocsErrorRt),
+});
+
+export type FailedDocsErrorsResponse = rt.TypeOf<typeof failedDocsErrorsRt>;
+
+export const degradedFieldRt = rt.intersection([
+  qualityIssueBaseRT,
+  rt.type({
+    name: rt.string,
+    indexFieldWasLastPresentIn: rt.string,
+  }),
+]);
 
 export type DegradedField = rt.TypeOf<typeof degradedFieldRt>;
 
@@ -193,6 +237,7 @@ export type DataStreamSettings = rt.TypeOf<typeof dataStreamSettingsRt>;
 export const dataStreamDetailsRt = rt.partial({
   lastActivity: rt.number,
   degradedDocsCount: rt.number,
+  failedDocsCount: rt.number,
   docsCount: rt.number,
   sizeBytes: rt.number,
   services: rt.record(rt.string, rt.array(rt.string)),

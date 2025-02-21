@@ -376,6 +376,8 @@ export class AlertsClient<
       throw new Error(`Must specify either execution UUID or time range for AAD alert query.`);
     }
 
+    const maxAlertLimit = this.legacyAlertsClient.getMaxAlertLimit();
+
     const getQueryParams = {
       executionUuid,
       start,
@@ -383,6 +385,7 @@ export class AlertsClient<
       ruleId,
       excludedAlertInstanceIds,
       alertsFilter,
+      maxAlertLimit,
     };
 
     const formatAlert = this.ruleType.alerts?.formatAlert;
@@ -641,12 +644,14 @@ export class AlertsClient<
       );
     }
     const isLifecycleAlert = this.ruleType.autoRecoverAlerts ?? false;
+    const maxAlertLimit = this.legacyAlertsClient.getMaxAlertLimit();
 
     const query = getMaintenanceWindowAlertsQuery({
       executionUuid,
       ruleId,
       maintenanceWindows,
       action: isLifecycleAlert ? 'open' : undefined,
+      maxAlertLimit,
     });
 
     const response = await this.search<ScopedQueryAggregationResult>(query);

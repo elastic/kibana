@@ -8,20 +8,20 @@
 import {
   CaseFileMetadataForDeletionRt,
   constructFileKindIdByOwner,
-  constructFilesHttpOperationTag,
+  constructFilesHttpOperationPrivilege,
   constructOwnerFromFileKind,
 } from '.';
 import { APP_ID, OBSERVABILITY_OWNER, SECURITY_SOLUTION_OWNER } from '../constants';
-import { HttpApiTagOperation } from '../constants/types';
+import { HttpApiPrivilegeOperation } from '../constants/types';
 
 describe('files index', () => {
-  describe('constructFilesHttpOperationTag', () => {
+  describe('constructFilesHttpOperationPrivilege', () => {
     it.each([
-      [SECURITY_SOLUTION_OWNER, HttpApiTagOperation.Read, 'securitySolutionFilesCasesRead'],
-      [OBSERVABILITY_OWNER, HttpApiTagOperation.Create, 'observabilityFilesCasesCreate'],
-      [APP_ID, HttpApiTagOperation.Delete, 'casesFilesCasesDelete'],
+      [SECURITY_SOLUTION_OWNER, HttpApiPrivilegeOperation.Read, 'securitySolutionFilesCasesRead'],
+      [OBSERVABILITY_OWNER, HttpApiPrivilegeOperation.Create, 'observabilityFilesCasesCreate'],
+      [APP_ID, HttpApiPrivilegeOperation.Delete, 'casesFilesCasesDelete'],
     ])('builds the tag for owner: %p operation: %p tag: %p', (owner, operation, tag) => {
-      expect(constructFilesHttpOperationTag(owner, operation)).toEqual(tag);
+      expect(constructFilesHttpOperationPrivilege(owner, operation)).toEqual(tag);
     });
   });
 

@@ -8,17 +8,17 @@
 import { ElasticsearchClient, IBasePath, IScopedClusterClient, Logger } from '@kbn/core/server';
 import { resetSLOResponseSchema } from '@kbn/slo-schema';
 import {
-  SLO_DESTINATION_INDEX_PATTERN,
+  SLI_DESTINATION_INDEX_PATTERN,
   SLO_MODEL_VERSION,
-  SLO_SUMMARY_DESTINATION_INDEX_PATTERN,
-  SLO_SUMMARY_TEMP_INDEX_NAME,
+  SUMMARY_DESTINATION_INDEX_PATTERN,
+  SUMMARY_TEMP_INDEX_NAME,
   getSLOPipelineId,
   getSLOSummaryPipelineId,
   getSLOSummaryTransformId,
   getSLOTransformId,
 } from '../../common/constants';
-import { getSLOPipelineTemplate } from '../assets/ingest_templates/slo_pipeline_template';
-import { getSLOSummaryPipelineTemplate } from '../assets/ingest_templates/slo_summary_pipeline_template';
+import { getSLIPipelineTemplate } from '../assets/ingest_templates/sli_pipeline_template';
+import { getSummaryPipelineTemplate } from '../assets/ingest_templates/summary_pipeline_template';
 import { retryTransientEsErrors } from '../utils/retry';
 import { SLORepository } from './slo_repository';
 import { createTempSummaryDocument } from './summary_transform_generator/helpers/create_temp_summary';
@@ -56,7 +56,7 @@ export class ResetSLO {
       await retryTransientEsErrors(
         () =>
           this.scopedClusterClient.asSecondaryAuthUser.ingest.putPipeline(
-            getSLOPipelineTemplate(slo)
+            getSLIPipelineTemplate(slo)
           ),
         { logger: this.logger }
       );
@@ -67,7 +67,7 @@ export class ResetSLO {
       await retryTransientEsErrors(
         () =>
           this.scopedClusterClient.asSecondaryAuthUser.ingest.putPipeline(
-            getSLOSummaryPipelineTemplate(slo, this.spaceId, this.basePath)
+            getSummaryPipelineTemplate(slo, this.spaceId, this.basePath)
           ),
         { logger: this.logger }
       );
@@ -78,7 +78,7 @@ export class ResetSLO {
       await retryTransientEsErrors(
         () =>
           this.esClient.index({
-            index: SLO_SUMMARY_TEMP_INDEX_NAME,
+            index: SUMMARY_TEMP_INDEX_NAME,
             id: `slo-${slo.id}`,
             document: createTempSummaryDocument(slo, this.spaceId, this.basePath),
             refresh: true,
@@ -124,7 +124,7 @@ export class ResetSLO {
    */
   private async deleteRollupData(sloId: string): Promise<void> {
     await this.esClient.deleteByQuery({
-      index: SLO_DESTINATION_INDEX_PATTERN,
+      index: SLI_DESTINATION_INDEX_PATTERN,
       refresh: true,
       query: {
         bool: {
@@ -142,7 +142,7 @@ export class ResetSLO {
    */
   private async deleteSummaryData(sloId: string): Promise<void> {
     await this.esClient.deleteByQuery({
-      index: SLO_SUMMARY_DESTINATION_INDEX_PATTERN,
+      index: SUMMARY_DESTINATION_INDEX_PATTERN,
       refresh: true,
       query: {
         bool: {

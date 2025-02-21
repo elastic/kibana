@@ -98,6 +98,10 @@ export class SavedObjectTypeRegistry implements ISavedObjectTypeRegistry {
   public isImportableAndExportable(type: string) {
     return this.types.get(type)?.management?.importableAndExportable ?? false;
   }
+
+  public getNameAttribute(type: string) {
+    return this.types.get(type)?.nameAttribute || 'unknown';
+  }
 }
 
 const validateType = ({ name, management, hidden, hiddenFromHttpApis }: SavedObjectsType) => {

@@ -14,7 +14,20 @@ export interface RuleMigrationStats extends RuleMigrationTaskStats {
   number: number;
 }
 
-export interface RetryRuleMigrationFilter {
-  failed?: boolean;
-  notFullyTranslated?: boolean;
+export enum AuthorFilter {
+  ELASTIC = 'elastic',
+  CUSTOM = 'custom',
+}
+
+export enum StatusFilter {
+  INSTALLED = 'installed',
+  TRANSLATED = 'translated',
+  PARTIALLY_TRANSLATED = 'partially_translated',
+  UNTRANSLATABLE = 'untranslatable',
+  FAILED = 'failed',
+}
+
+export interface FilterOptions {
+  status?: StatusFilter;
+  author?: AuthorFilter;
 }

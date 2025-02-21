@@ -191,7 +191,6 @@ export class DatasourceComponent extends PureComponent {
                     size="s"
                     onClick={this.save}
                     fill
-                    color="success"
                     data-test-subj="canvasSaveDatasourceButton"
                   >
                     {strings.getSaveButtonLabel()}

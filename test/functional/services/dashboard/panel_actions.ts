@@ -19,9 +19,7 @@ const CUSTOMIZE_PANEL_DATA_TEST_SUBJ = 'embeddablePanelAction-ACTION_CUSTOMIZE_P
 const OPEN_CONTEXT_MENU_ICON_DATA_TEST_SUBJ = 'embeddablePanelToggleMenuIcon';
 const OPEN_INSPECTOR_TEST_SUBJ = 'embeddablePanelAction-openInspector';
 const COPY_PANEL_TO_DATA_TEST_SUBJ = 'embeddablePanelAction-copyToDashboard';
-const LEGACY_SAVE_TO_LIBRARY_TEST_SUBJ = 'embeddablePanelAction-legacySaveToLibrary';
 const SAVE_TO_LIBRARY_TEST_SUBJ = 'embeddablePanelAction-saveToLibrary';
-const LEGACY_UNLINK_FROM_LIBRARY_TEST_SUBJ = 'embeddablePanelAction-legacyUnlinkFromLibrary';
 const UNLINK_FROM_LIBRARY_TEST_SUBJ = 'embeddablePanelAction-unlinkFromLibrary';
 const CONVERT_TO_LENS_TEST_SUBJ = 'embeddablePanelAction-ACTION_EDIT_IN_LENS';
 
@@ -178,7 +176,6 @@ export class DashboardPanelActionsService extends FtrService {
 
   async clickExpandPanelToggle() {
     this.log.debug(`clickExpandPanelToggle`);
-    await this.openContextMenu();
     await this.clickPanelAction(TOGGLE_EXPAND_PANEL_DATA_TEST_SUBJ);
   }
 
@@ -240,29 +237,11 @@ export class DashboardPanelActionsService extends FtrService {
     return response;
   }
 
-  async legacyUnlinkFromLibrary(title = '') {
-    this.log.debug(`legacyUnlinkFromLibrary(${title}`);
-    await this.clickPanelActionByTitle(LEGACY_UNLINK_FROM_LIBRARY_TEST_SUBJ, title);
-    await this.testSubjects.existOrFail('unlinkPanelSuccess');
-    await this.expectNotLinkedToLibrary(title, true);
-  }
-
   async unlinkFromLibrary(title = '') {
     this.log.debug(`unlinkFromLibrary(${title})`);
     await this.clickPanelActionByTitle(UNLINK_FROM_LIBRARY_TEST_SUBJ, title);
     await this.testSubjects.existOrFail('unlinkPanelSuccess');
     await this.expectNotLinkedToLibrary(title);
-  }
-
-  async legacySaveToLibrary(newTitle = '', oldTitle = '') {
-    this.log.debug(`legacySaveToLibrary(${newTitle},${oldTitle})`);
-    await this.clickPanelActionByTitle(LEGACY_SAVE_TO_LIBRARY_TEST_SUBJ, oldTitle);
-    await this.testSubjects.setValue('savedObjectTitle', newTitle, {
-      clearWithKeyboard: true,
-    });
-    await this.testSubjects.clickWhenNotDisabledWithoutRetry('confirmSaveSavedObjectButton');
-    await this.testSubjects.existOrFail('addPanelToLibrarySuccess');
-    await this.expectLinkedToLibrary(newTitle, true);
   }
 
   async saveToLibrary(newTitle = '', oldTitle = '') {
@@ -413,27 +392,19 @@ export class DashboardPanelActionsService extends FtrService {
     return await this.convertToLens(wrapper);
   }
 
-  async expectLinkedToLibrary(title = '', legacy?: boolean) {
+  async expectLinkedToLibrary(title = '') {
     this.log.debug(`expectLinkedToLibrary(${title})`);
     const isViewMode = await this.dashboard.getIsInViewMode();
     if (isViewMode) await this.dashboard.switchToEditMode();
-    if (legacy) {
-      await this.expectExistsPanelAction(LEGACY_UNLINK_FROM_LIBRARY_TEST_SUBJ, title);
-    } else {
-      await this.expectExistsPanelAction(UNLINK_FROM_LIBRARY_TEST_SUBJ, title);
-    }
+    await this.expectExistsPanelAction(UNLINK_FROM_LIBRARY_TEST_SUBJ, title);
     if (isViewMode) await this.dashboard.clickCancelOutOfEditMode();
   }
 
-  async expectNotLinkedToLibrary(title = '', legacy?: boolean) {
+  async expectNotLinkedToLibrary(title = '') {
     this.log.debug(`expectNotLinkedToLibrary(${title})`);
     const isViewMode = await this.dashboard.getIsInViewMode();
     if (isViewMode) await this.dashboard.switchToEditMode();
-    if (legacy) {
-      await this.expectExistsPanelAction(LEGACY_SAVE_TO_LIBRARY_TEST_SUBJ, title);
-    } else {
-      await this.expectExistsPanelAction(SAVE_TO_LIBRARY_TEST_SUBJ, title);
-    }
+    await this.expectExistsPanelAction(SAVE_TO_LIBRARY_TEST_SUBJ, title);
     if (isViewMode) await this.dashboard.clickCancelOutOfEditMode();
   }
 }

@@ -13,6 +13,7 @@ import * as actions from '../actions';
 import { coreMock } from '@kbn/core/public/mocks';
 import { InvestigateInTimelineAction } from './investigate_in_timeline_action';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
+import { useUserPrivileges } from '../../../../common/components/user_privileges';
 
 const ecsRowData: Ecs = {
   _id: '1',
@@ -28,6 +29,7 @@ const ecsRowData: Ecs = {
   },
 };
 
+jest.mock('../../../../common/components/user_privileges');
 jest.mock('../../../../common/lib/kibana');
 jest.mock('../../../../common/lib/apm/use_start_transaction');
 jest.mock('../../../../common/hooks/use_app_toasts');
@@ -47,6 +49,12 @@ const mockSendAlertToTimeline = jest.spyOn(actions, 'sendAlertToTimelineAction')
 });
 (useAppToasts as jest.Mock).mockReturnValue({
   addError: jest.fn(),
+});
+(useUserPrivileges as jest.Mock).mockReturnValue({
+  timelinePrivileges: {
+    crud: true,
+    read: true,
+  },
 });
 
 const props = {
@@ -78,5 +86,19 @@ describe('use investigate in timeline hook', () => {
       fireEvent.click(wrapper.getByTestId('send-alert-to-timeline-button'));
     });
     expect(mockSendAlertToTimeline).toHaveBeenCalledTimes(1);
+  });
+  test('it disables the button when the user does not have access to timeline', () => {
+    (useUserPrivileges as jest.Mock).mockReturnValue({
+      timelinePrivileges: {
+        read: false,
+      },
+    });
+
+    const wrapper = render(
+      <TestProviders>
+        <InvestigateInTimelineAction {...props} />
+      </TestProviders>
+    );
+    expect(wrapper.getByTestId('send-alert-to-timeline-button')).toBeDisabled();
   });
 });

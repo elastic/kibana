@@ -193,6 +193,7 @@ describe('schema validation', () => {
         map: [],
         index_pattern: [],
         ml_module: [],
+        security_ai_prompt: [],
         security_rule: [],
         tag: [],
         csp_rule_template: [],
@@ -507,6 +508,53 @@ describe('schema validation', () => {
   it('get package info should return valid response', async () => {
     const expectedResponse: GetInfoResponse = {
       item: packageInfo,
+      metadata: {
+        has_policies: true,
+      },
+    };
+    (getInfoHandler as jest.Mock).mockImplementation((ctx, request, res) => {
+      return res.ok({ body: expectedResponse });
+    });
+    await getInfoHandler(context, {} as any, response);
+
+    expect(response.ok).toHaveBeenCalledWith({
+      body: expectedResponse,
+    });
+    const validationResp = GetInfoResponseSchema.validate(expectedResponse);
+    expect(validationResp).toEqual(expectedResponse);
+  });
+
+  it('get package info should return valid response with new type', async () => {
+    const expectedResponse: GetInfoResponse = {
+      item: {
+        ...packageInfo,
+        type: 'new_type',
+        installationInfo: {
+          ...(packageInfo as any).installationInfo,
+          installed_kibana: [
+            ...(packageInfo as any).installationInfo.installed_kibana,
+            {
+              id: 'id',
+              originId: 'originId',
+              type: 'new_type',
+            },
+          ],
+        },
+        unknown: 'test',
+        conditions: {
+          other: 'test',
+        },
+        owner: {
+          other: 'test',
+        },
+        source: {
+          other: 'test',
+          license: 'basic',
+        },
+        discovery: {
+          other: 'test',
+        },
+      } as any,
       metadata: {
         has_policies: true,
       },

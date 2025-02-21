@@ -7,7 +7,7 @@
 import React from 'react';
 import { shallow } from 'enzyme';
 import type { Capabilities } from '@kbn/core/public';
-import { CASES_FEATURE_ID, SERVER_APP_ID } from '../common/constants';
+import { CASES_FEATURE_ID, SECURITY_FEATURE_ID } from '../common/constants';
 import { mockEcsDataWithAlert } from './common/mock';
 import { ALERT_RULE_UUID, ALERT_RULE_NAME, ALERT_RULE_PARAMETERS } from '@kbn/rule-data-utils';
 import {
@@ -87,7 +87,7 @@ describe('#getSubPluginRoutesByCapabilities', () => {
     const routes = getSubPluginRoutesByCapabilities(
       mockSubPlugins,
       set(mockServices, 'application.capabilities', {
-        [SERVER_APP_ID]: { show: true, crud: false },
+        [SECURITY_FEATURE_ID]: { show: true, crud: false },
         [CASES_FEATURE_ID]: noCasesCapabilities(),
       })
     );
@@ -107,7 +107,7 @@ describe('#getSubPluginRoutesByCapabilities', () => {
     const routes = getSubPluginRoutesByCapabilities(
       mockSubPlugins,
       set(mockServices, 'application.capabilities', {
-        [SERVER_APP_ID]: { show: false, crud: false },
+        [SECURITY_FEATURE_ID]: { show: false, crud: false },
         [CASES_FEATURE_ID]: readCasesCapabilities(),
       })
     );
@@ -126,7 +126,7 @@ describe('#getSubPluginRoutesByCapabilities', () => {
     const routes = getSubPluginRoutesByCapabilities(
       mockSubPlugins,
       set(mockServices, 'application.capabilities', {
-        [SERVER_APP_ID]: { show: false, crud: false },
+        [SECURITY_FEATURE_ID]: { show: false, crud: false },
         [CASES_FEATURE_ID]: noCasesCapabilities(),
       })
     );
@@ -157,7 +157,7 @@ describe('#isSubPluginAvailable', () => {
   it('plugin outsides of cases should be available if siem privilege is all and independently of cases privileges', () => {
     expect(
       isSubPluginAvailable('pluginKey', {
-        [SERVER_APP_ID]: { show: true, crud: true },
+        [SECURITY_FEATURE_ID]: { show: true, crud: true },
         [CASES_FEATURE_ID]: noCasesCapabilities(),
       } as unknown as Capabilities)
     ).toBeTruthy();
@@ -166,7 +166,7 @@ describe('#isSubPluginAvailable', () => {
   it('plugin outsides of cases should be available if siem privilege is read and independently of cases privileges', () => {
     expect(
       isSubPluginAvailable('pluginKey', {
-        [SERVER_APP_ID]: { show: true, crud: false },
+        [SECURITY_FEATURE_ID]: { show: true, crud: false },
         [CASES_FEATURE_ID]: noCasesCapabilities(),
       } as unknown as Capabilities)
     ).toBeTruthy();
@@ -175,7 +175,7 @@ describe('#isSubPluginAvailable', () => {
   it('plugin outsides of cases should NOT be available if siem privilege is none and independently of cases privileges', () => {
     expect(
       isSubPluginAvailable('pluginKey', {
-        [SERVER_APP_ID]: { show: false, crud: false },
+        [SECURITY_FEATURE_ID]: { show: false, crud: false },
         [CASES_FEATURE_ID]: noCasesCapabilities(),
       } as unknown as Capabilities)
     ).toBeFalsy();
@@ -184,7 +184,7 @@ describe('#isSubPluginAvailable', () => {
   it('cases plugin should be available if cases privilege is all and independently of siem privileges', () => {
     expect(
       isSubPluginAvailable('cases', {
-        [SERVER_APP_ID]: { show: false, crud: false },
+        [SECURITY_FEATURE_ID]: { show: false, crud: false },
         [CASES_FEATURE_ID]: allCasesCapabilities(),
       } as unknown as Capabilities)
     ).toBeTruthy();
@@ -193,7 +193,7 @@ describe('#isSubPluginAvailable', () => {
   it('cases plugin should be available if cases privilege is read and independently of siem privileges', () => {
     expect(
       isSubPluginAvailable('cases', {
-        [SERVER_APP_ID]: { show: false, crud: false },
+        [SECURITY_FEATURE_ID]: { show: false, crud: false },
         [CASES_FEATURE_ID]: readCasesCapabilities(),
       } as unknown as Capabilities)
     ).toBeTruthy();
@@ -202,7 +202,7 @@ describe('#isSubPluginAvailable', () => {
   it('cases plugin should NOT be available if cases privilege is none independently of siem privileges', () => {
     expect(
       isSubPluginAvailable('pluginKey', {
-        [SERVER_APP_ID]: { show: false, crud: false },
+        [SECURITY_FEATURE_ID]: { show: false, crud: false },
         [CASES_FEATURE_ID]: noCasesCapabilities(),
       } as unknown as Capabilities)
     ).toBeFalsy();

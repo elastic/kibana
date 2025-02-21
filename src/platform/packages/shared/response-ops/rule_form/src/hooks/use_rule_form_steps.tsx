@@ -18,6 +18,8 @@ import {
   RULE_FORM_PAGE_RULE_ACTIONS_TITLE,
   RULE_FORM_PAGE_RULE_DEFINITION_TITLE,
   RULE_FORM_PAGE_RULE_DETAILS_TITLE,
+  RULE_FORM_PAGE_RULE_DEFINITION_TITLE_SHORT,
+  RULE_FORM_PAGE_RULE_DETAILS_TITLE_SHORT,
 } from '../translations';
 import { hasActionsError, hasActionsParamsErrors, hasParamsErrors } from '../validation';
 import { RuleFormStepId } from '../constants';
@@ -27,6 +29,7 @@ interface UseRuleFormStepsOptions {
   touchedSteps: Record<RuleFormStepId, boolean>;
   /* Used to track the current step in horizontal steps, not used for vertical steps */
   currentStep?: RuleFormStepId;
+  shortTitles?: boolean;
 }
 
 /**
@@ -69,7 +72,11 @@ const getStepStatus = ({
 };
 
 // Create a common hook for both horizontal and vertical steps
-const useCommonRuleFormSteps = ({ touchedSteps, currentStep }: UseRuleFormStepsOptions) => {
+const useCommonRuleFormSteps = ({
+  touchedSteps,
+  currentStep,
+  shortTitles,
+}: UseRuleFormStepsOptions) => {
   const {
     plugins: { application },
     baseErrors = {},
@@ -132,7 +139,9 @@ const useCommonRuleFormSteps = ({ touchedSteps, currentStep }: UseRuleFormStepsO
   const steps = useMemo(
     () => ({
       [RuleFormStepId.DEFINITION]: {
-        title: RULE_FORM_PAGE_RULE_DEFINITION_TITLE,
+        title: shortTitles
+          ? RULE_FORM_PAGE_RULE_DEFINITION_TITLE_SHORT
+          : RULE_FORM_PAGE_RULE_DEFINITION_TITLE,
         status: ruleDefinitionStatus,
         children: <RuleDefinition />,
       },
@@ -140,28 +149,18 @@ const useCommonRuleFormSteps = ({ touchedSteps, currentStep }: UseRuleFormStepsO
         ? {
             title: RULE_FORM_PAGE_RULE_ACTIONS_TITLE,
             status: actionsStatus,
-            children: (
-              <>
-                <RuleActions />
-                <EuiSpacer />
-                <EuiHorizontalRule margin="none" />
-              </>
-            ),
+            children: <RuleActions />,
           }
         : null,
       [RuleFormStepId.DETAILS]: {
-        title: RULE_FORM_PAGE_RULE_DETAILS_TITLE,
+        title: shortTitles
+          ? RULE_FORM_PAGE_RULE_DETAILS_TITLE_SHORT
+          : RULE_FORM_PAGE_RULE_DETAILS_TITLE,
         status: ruleDetailsStatus,
-        children: (
-          <>
-            <RuleDetails />
-            <EuiSpacer />
-            <EuiHorizontalRule margin="none" />
-          </>
-        ),
+        children: <RuleDetails />,
       },
     }),
-    [ruleDefinitionStatus, canReadConnectors, actionsStatus, ruleDetailsStatus]
+    [ruleDefinitionStatus, canReadConnectors, actionsStatus, ruleDetailsStatus, shortTitles]
   );
 
   const stepOrder: RuleFormStepId[] = useMemo(
@@ -199,7 +198,7 @@ export const useRuleFormSteps: () => RuleFormVerticalSteps = () => {
 
   const mappedSteps = useMemo(() => {
     return stepOrder
-      .map((stepId) => {
+      .map((stepId, index) => {
         const step = steps[stepId];
         return step
           ? {
@@ -216,6 +215,12 @@ export const useRuleFormSteps: () => RuleFormVerticalSteps = () => {
                   stepId={stepId}
                 >
                   {step.children}
+                  {index > 0 && (
+                    <>
+                      <EuiSpacer />
+                      <EuiHorizontalRule margin="none" />
+                    </>
+                  )}
                 </ReportOnBlur>
               ),
             }
@@ -235,8 +240,10 @@ interface RuleFormHorizontalSteps {
   hasNextStep: boolean;
   hasPreviousStep: boolean;
 }
-export const useRuleFormHorizontalSteps: () => RuleFormHorizontalSteps = () => {
-  const [currentStep, setCurrentStep] = useState<RuleFormStepId>(STEP_ORDER[0]);
+export const useRuleFormHorizontalSteps: (
+  initialStep?: RuleFormStepId
+) => RuleFormHorizontalSteps = (initialStep = STEP_ORDER[0]) => {
+  const [currentStep, setCurrentStep] = useState<RuleFormStepId>(initialStep);
   const [touchedSteps, setTouchedSteps] = useState<Record<RuleFormStepId, boolean>>(
     STEP_ORDER.reduce(
       (result, stepId) => ({ ...result, [stepId]: false }),
@@ -247,6 +254,7 @@ export const useRuleFormHorizontalSteps: () => RuleFormHorizontalSteps = () => {
   const { steps, stepOrder } = useCommonRuleFormSteps({
     touchedSteps,
     currentStep,
+    shortTitles: true,
   });
 
   // Determine current navigation position

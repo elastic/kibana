@@ -7,17 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { KbnClient, createEsClientForTesting } from '@kbn/test';
-import type { ToolingLog } from '@kbn/tooling-log';
-import { ScoutTestConfig } from '../../types';
-import { serviceLoadedMsg } from '../../playwright/utils';
+import { createEsClientForTesting, KbnClient } from '@kbn/test';
+import { ToolingLog } from '@kbn/tooling-log';
+import { ScoutLogger } from './logger';
+import { ScoutTestConfig, EsClient } from '../../types';
 
 interface ClientOptions {
   serviceName: string;
   url: string;
   username: string;
   password: string;
-  log: ToolingLog;
+  log: ScoutLogger | ToolingLog;
 }
 
 function createClientUrlWithAuth({ serviceName, url, username, password, log }: ClientOptions) {
@@ -25,34 +25,48 @@ function createClientUrlWithAuth({ serviceName, url, username, password, log }: 
   clientUrl.username = username;
   clientUrl.password = password;
 
-  log.debug(serviceLoadedMsg(`${serviceName}client`));
+  if (log instanceof ScoutLogger) {
+    log.serviceLoaded(`${serviceName}Client`);
+  }
+
   return clientUrl.toString();
 }
 
-export function createEsClient(config: ScoutTestConfig, log: ToolingLog) {
-  const { username, password } = config.auth;
-  const elasticsearchUrl = createClientUrlWithAuth({
-    serviceName: 'Es',
-    url: config.hosts.elasticsearch,
-    username,
-    password,
-    log,
-  });
+let esClientInstance: EsClient | null = null;
+let kbnClientInstance: KbnClient | null = null;
 
-  return createEsClientForTesting({
-    esUrl: elasticsearchUrl,
-    authOverride: { username, password },
-  });
+export function getEsClient(config: ScoutTestConfig, log: ScoutLogger | ToolingLog) {
+  if (!esClientInstance) {
+    const { username, password } = config.auth;
+    const elasticsearchUrl = createClientUrlWithAuth({
+      serviceName: 'es',
+      url: config.hosts.elasticsearch,
+      username,
+      password,
+      log,
+    });
+
+    esClientInstance = createEsClientForTesting({
+      esUrl: elasticsearchUrl,
+      authOverride: { username, password },
+    });
+  }
+
+  return esClientInstance;
 }
 
-export function createKbnClient(config: ScoutTestConfig, log: ToolingLog) {
-  const kibanaUrl = createClientUrlWithAuth({
-    serviceName: 'Kbn',
-    url: config.hosts.kibana,
-    username: config.auth.username,
-    password: config.auth.password,
-    log,
-  });
+export function getKbnClient(config: ScoutTestConfig, log: ScoutLogger) {
+  if (!kbnClientInstance) {
+    const kibanaUrl = createClientUrlWithAuth({
+      serviceName: 'kbn',
+      url: config.hosts.kibana,
+      username: config.auth.username,
+      password: config.auth.password,
+      log,
+    });
 
-  return new KbnClient({ log, url: kibanaUrl });
+    kbnClientInstance = new KbnClient({ log, url: kibanaUrl });
+  }
+
+  return kbnClientInstance;
 }

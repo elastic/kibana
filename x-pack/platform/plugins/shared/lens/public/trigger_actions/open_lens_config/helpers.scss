@@ -3,7 +3,7 @@
   clip-path: polygon(-100% 0, 100% 0, 100% 100%, -100% 100%);
   max-inline-size: $euiSizeXXL * 20;
   min-inline-size: $euiSizeXXL * 8;
-  background: $euiColorLightestShade;
+  background: $euiColorBackgroundBaseSubdued;
   @include euiBreakpoint('xs', 's', 'm') {
     clip-path: none;
   }

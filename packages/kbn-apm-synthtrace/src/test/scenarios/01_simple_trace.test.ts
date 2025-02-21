@@ -95,6 +95,8 @@ describe('simple trace', () => {
       'container.id': 'instance-1',
       'event.outcome': 'success',
       'host.name': 'instance-1',
+      'http.request.method': 'GET',
+      'http.response.status_code': 200,
       'processor.event': 'transaction',
       'processor.name': 'transaction',
       'service.environment': 'production',
@@ -107,6 +109,7 @@ describe('simple trace', () => {
       'transaction.name': 'GET /api/product/list',
       'transaction.type': 'request',
       'transaction.sampled': true,
+      'url.full': 'elastic.co',
     });
   });
 

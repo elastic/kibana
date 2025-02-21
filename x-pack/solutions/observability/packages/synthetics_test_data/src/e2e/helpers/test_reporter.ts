@@ -52,9 +52,10 @@ export class TestReporter implements Reporter {
     succeeded: 0,
     failed: 0,
     skipped: 0,
+    pending: 0,
   };
 
-  journeys: Map<string, Array<StepEndResult & { name: string }>> = new Map();
+  journeys: Map<string, Step[]> = new Map();
 
   constructor(options: ReporterOptions = {}) {}
 
@@ -67,9 +68,9 @@ export class TestReporter implements Reporter {
   }
 
   onStepEnd(journey: Journey, step: Step, result: StepEndResult) {
-    const { status, end, start, error } = result;
+    const { status, error, duration } = step;
     const message = `${symbols[status]}  Step: '${step.name}' ${status} (${renderDuration(
-      (end - start) * 1000
+      duration * 1000
     )} ms)`;
     this.write(indent(message));
     if (error) {
@@ -79,16 +80,16 @@ export class TestReporter implements Reporter {
     if (!this.journeys.has(journey.name)) {
       this.journeys.set(journey.name, []);
     }
-    this.journeys.get(journey.name)?.push({ name: step.name, ...result });
+    this.journeys.get(journey.name)?.push(step);
   }
 
-  async onJourneyEnd(journey: Journey, { error, start, end, status }: JourneyEndResult) {
+  async onJourneyEnd({ status, duration, error }: Journey, _result: JourneyEndResult) {
     const { failed, succeeded, skipped } = this.metrics;
     const total = failed + succeeded + skipped;
     if (total === 0 && error) {
       this.write(renderError(error));
     }
-    const message = `${symbols[status]} Took  (${renderDuration(end - start)} seconds)`;
+    const message = `${symbols[status]} Took  (${renderDuration(duration)} seconds)`;
     this.write(message);
 
     await fs.promises.mkdir('.journeys/failed_steps', { recursive: true });
@@ -117,9 +118,9 @@ export class TestReporter implements Reporter {
           const name = red(`Journey: ${journeyName} 🥵`);
           this.write(`\n+++ ${name}`);
           steps.forEach((stepResult) => {
-            const { status, end, start, error, name: stepName } = stepResult;
+            const { status, duration, error, name: stepName } = stepResult;
             const message = `${symbols[status]}  Step: '${stepName}' ${status} (${renderDuration(
-              (end - start) * 1000
+              duration * 1000
             )} ms)`;
             this.write(indent(message));
             if (error) {
@@ -180,6 +181,7 @@ function indent(lines: string, tab = '   ') {
 const NO_UTF8_SUPPORT = process.platform === 'win32';
 const symbols = {
   warning: yellow(NO_UTF8_SUPPORT ? '!' : '⚠'),
+  pending: yellow(NO_UTF8_SUPPORT ? '!' : '⚠'),
   skipped: cyan('-'),
   progress: cyan('>'),
   succeeded: green(NO_UTF8_SUPPORT ? 'ok' : '✓'),

@@ -139,7 +139,7 @@ export interface RouterRoute {
     req: Request,
     responseToolkit: ResponseToolkit
   ) => Promise<ResponseObject | Boom.Boom<any>>;
-  isVersioned: false;
+  isVersioned: boolean;
 }
 
 /** @public */

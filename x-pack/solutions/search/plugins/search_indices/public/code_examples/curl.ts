@@ -23,7 +23,16 @@ export const CurlCreateIndexExamples: CreateIndexLanguageExamples = {
       indexName ?? INDEX_PLACEHOLDER
     }' \
 --header 'Authorization: ApiKey ${apiKey ?? API_KEY_PLACEHOLDER}' \
---header 'Content-Type: application/json'`,
+--header 'Content-Type: application/json
+--data-raw '{
+  "mappings": {
+    "properties":{
+      "text":{
+        "type":"text"
+      }
+    }
+  }
+}'`,
   },
   dense_vector: {
     createIndex: ({ elasticsearchURL, apiKey, indexName }) => `curl PUT '${elasticsearchURL}/${
@@ -45,9 +54,25 @@ export const CurlCreateIndexExamples: CreateIndexLanguageExamples = {
   }
 }'`,
   },
+  semantic: {
+    createIndex: ({ elasticsearchURL, apiKey, indexName }) => `curl PUT '${elasticsearchURL}/${
+      indexName ?? INDEX_PLACEHOLDER
+    }' \
+--header 'Authorization: ApiKey ${apiKey ?? API_KEY_PLACEHOLDER}' \
+--header 'Content-Type: application/json
+--data-raw '{
+  "mappings": {
+    "properties":{
+      "text":{
+        "type":"semantic_text"
+      }
+    }
+  }
+}'`,
+  },
 };
 
-export const CurlVectorsIngestDataExample: IngestDataCodeDefinition = {
+export const CurlIngestDataExample: IngestDataCodeDefinition = {
   ingestCommand: ({ elasticsearchURL, apiKey, indexName, sampleDocuments }) => {
     let result = `curl -X POST "${elasticsearchURL}/_bulk?pretty" \
 --header 'Authorization: ApiKey ${apiKey ?? API_KEY_PLACEHOLDER}' \

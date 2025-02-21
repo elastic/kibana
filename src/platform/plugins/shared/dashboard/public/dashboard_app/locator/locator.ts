@@ -16,7 +16,7 @@ import type { LocatorDefinition, LocatorPublic } from '@kbn/share-plugin/public'
 import type { GlobalQueryStateFromUrl } from '@kbn/data-plugin/public';
 
 import { DASHBOARD_APP_LOCATOR } from '@kbn/deeplinks-analytics';
-import { DASHBOARD_APP_ID, SEARCH_SESSION_ID } from '../../dashboard_constants';
+import { DASHBOARD_APP_ID, SEARCH_SESSION_ID } from '../../plugin_constants';
 import { DashboardLocatorParams } from '../..';
 
 /**

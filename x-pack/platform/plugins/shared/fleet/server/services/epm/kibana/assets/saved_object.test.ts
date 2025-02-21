@@ -19,6 +19,9 @@ describe('getSpaceAwareSaveobjectsClients', () => {
     const mockedSavedObjectTagging = {
       createInternalAssignmentService: jest.fn(),
       createTagClient: jest.fn(),
+      getTagsFromReferences: jest.fn(),
+      convertTagNameToId: jest.fn(),
+      replaceTagReferences: jest.fn(),
     };
 
     const scoppedSoClient = savedObjectsClientMock.create();

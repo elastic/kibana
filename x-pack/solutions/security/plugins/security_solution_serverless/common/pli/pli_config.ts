@@ -28,7 +28,9 @@ export const PLI_PRODUCT_FEATURES: PliProductFeatures = {
       ProductFeatureKey.threatIntelligence,
       ProductFeatureKey.casesConnectors,
       ProductFeatureKey.externalRuleActions,
-      ProductFeatureKey.integrationAssistant,
+      ProductFeatureKey.automaticImport,
+      ProductFeatureKey.prebuiltRuleCustomization,
+      ProductFeatureKey.siemMigrations,
     ],
   },
   endpoint: {

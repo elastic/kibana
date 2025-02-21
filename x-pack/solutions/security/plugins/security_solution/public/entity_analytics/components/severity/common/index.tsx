@@ -6,32 +6,36 @@
  */
 
 import React from 'react';
-
-import { EuiHealth, EuiTextColor, transparentize } from '@elastic/eui';
-
-import styled, { css } from 'styled-components';
-import { euiLightVars } from '@kbn/ui-theme';
+import { EuiHealth, EuiTextColor, useEuiTheme } from '@elastic/eui';
+import styled from '@emotion/styled';
+import { css } from '@emotion/react';
 
 import { RISK_SEVERITY_COLOUR } from '../../../common/utils';
 import { HoverPopover } from '../../../../common/components/hover_popover';
 import type { RiskSeverity } from '../../../../../common/search_strategy';
 
-const RiskBadge = styled.div<{ $severity: RiskSeverity; $hideBackgroundColor: boolean }>`
-  ${({ theme, $severity, $hideBackgroundColor }) => css`
+const RiskBadge = styled('div', {
+  shouldForwardProp: (prop) => !['severity', 'hideBackgroundColor'].includes(prop),
+})<{
+  severity: RiskSeverity;
+  hideBackgroundColor: boolean;
+}>`
+  ${({ theme: { euiTheme }, color, severity, hideBackgroundColor }) => css`
     width: fit-content;
-    padding-right: ${theme.eui.euiSizeS};
-    padding-left: ${theme.eui.euiSizeXS};
+    padding-right: ${euiTheme.size.s};
+    padding-left: ${euiTheme.size.xs};
 
-    ${($severity === 'Critical' || $severity === 'High') &&
-    !$hideBackgroundColor &&
+    ${(severity === 'Critical' || severity === 'High') &&
+    !hideBackgroundColor &&
     css`
-      background-color: ${transparentize(theme.eui.euiColorDanger, 0.2)};
+      background-color: ${color};
       border-radius: 999px; // pill shaped
     `};
   `}
 `;
+
 const TooltipContainer = styled.div`
-  padding: ${({ theme }) => theme.eui.euiSizeS};
+  padding: ${({ theme: { euiTheme } }) => euiTheme.size.s};
 `;
 
 export const RiskScoreLevel: React.FC<{
@@ -68,18 +72,23 @@ const RiskScoreBadge: React.FC<{
   severity: RiskSeverity;
   hideBackgroundColor?: boolean;
   ['data-test-subj']?: string;
-}> = React.memo(({ severity, hideBackgroundColor = false, 'data-test-subj': dataTestSubj }) => (
-  <RiskBadge
-    color={euiLightVars.euiColorDanger}
-    $severity={severity}
-    $hideBackgroundColor={hideBackgroundColor}
-    data-test-subj={dataTestSubj ?? 'risk-score'}
-  >
-    <EuiTextColor color="default">
-      <EuiHealth className="eui-alignMiddle" color={RISK_SEVERITY_COLOUR[severity]}>
-        {severity}
-      </EuiHealth>
-    </EuiTextColor>
-  </RiskBadge>
-));
+}> = React.memo(({ severity, hideBackgroundColor = false, 'data-test-subj': dataTestSubj }) => {
+  const { euiTheme } = useEuiTheme();
+  // TODO: use riskSeverity hook when palette agreed.
+  // https://github.com/elastic/security-team/issues/11516 hook - https://github.com/elastic/kibana/pull/206276
+  return (
+    <RiskBadge
+      color={euiTheme.colors.backgroundBaseDanger}
+      severity={severity}
+      hideBackgroundColor={hideBackgroundColor}
+      data-test-subj={dataTestSubj ?? 'risk-score'}
+    >
+      <EuiTextColor color="default">
+        <EuiHealth className="eui-alignMiddle" color={RISK_SEVERITY_COLOUR[severity]}>
+          {severity}
+        </EuiHealth>
+      </EuiTextColor>
+    </RiskBadge>
+  );
+});
 RiskScoreBadge.displayName = 'RiskScoreBadge';

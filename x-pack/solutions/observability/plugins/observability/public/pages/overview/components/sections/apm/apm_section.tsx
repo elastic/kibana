@@ -15,13 +15,12 @@ import {
   XYBrushEvent,
 } from '@elastic/charts';
 import { timeFormatter } from '@elastic/charts/dist/utils/data/formatters';
-import { EuiFlexGroup, EuiFlexItem, EuiToolTip, EuiIcon } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiToolTip, EuiIcon, useEuiTheme } from '@elastic/eui';
 import numeral from '@elastic/numeral';
 import { i18n } from '@kbn/i18n';
 import moment from 'moment';
-import React, { useContext } from 'react';
+import React from 'react';
 import { useHistory } from 'react-router-dom';
-import { ThemeContext } from 'styled-components';
 import { useChartThemes, FETCH_STATUS, useFetcher } from '@kbn/observability-shared-plugin/public';
 import { useDatePickerContext } from '../../../../../hooks/use_date_picker_context';
 import { SectionContainer } from '../section_container';
@@ -54,7 +53,7 @@ function formatTpmStat(value?: number) {
 }
 
 export function APMSection({ bucketSize }: Props) {
-  const theme = useContext(ThemeContext);
+  const { euiTheme } = useEuiTheme();
   const chartThemes = useChartThemes();
   const history = useHistory();
   const { forceUpdate, hasDataMap } = useHasData();
@@ -73,6 +72,7 @@ export function APMSection({ bucketSize }: Props) {
     },
     // `forceUpdate` and `lastUpdated` should trigger a reload
 
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [bucketSize, relativeStart, relativeEnd, absoluteStart, absoluteEnd, forceUpdate, lastUpdated]
   );
 
@@ -90,8 +90,6 @@ export function APMSection({ bucketSize }: Props) {
     : niceTimeFormatter([min, max]);
 
   const isLoading = status === FETCH_STATUS.LOADING;
-
-  const transactionsColor = theme.eui.euiColorVis1;
 
   return (
     <SectionContainer
@@ -141,7 +139,7 @@ export function APMSection({ bucketSize }: Props) {
               </EuiToolTip>
             }
             isLoading={isLoading}
-            color={transactionsColor}
+            // color={transactionsColor}
           />
         </EuiFlexItem>
       </EuiFlexGroup>
@@ -163,7 +161,7 @@ export function APMSection({ bucketSize }: Props) {
               yScaleType={ScaleType.Linear}
               xAccessor={'x'}
               yAccessors={['y']}
-              color={transactionsColor}
+              color={euiTheme.colors.vis.euiColorVis0}
             />
             <Axis
               id="y-axis"

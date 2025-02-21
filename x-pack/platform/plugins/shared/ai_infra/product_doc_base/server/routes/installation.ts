@@ -6,6 +6,7 @@
  */
 
 import type { IRouter } from '@kbn/core/server';
+import { ApiPrivileges } from '@kbn/security-authorization-core-common';
 import {
   INSTALLATION_STATUS_API_PATH,
   INSTALL_ALL_API_PATH,
@@ -32,7 +33,7 @@ export const registerInstallationRoutes = ({
       },
       security: {
         authz: {
-          requiredPrivileges: ['manage_llm_product_doc'],
+          requiredPrivileges: [ApiPrivileges.manage('llm_product_doc')],
         },
       },
     },
@@ -60,7 +61,7 @@ export const registerInstallationRoutes = ({
       },
       security: {
         authz: {
-          requiredPrivileges: ['manage_llm_product_doc'],
+          requiredPrivileges: [ApiPrivileges.manage('llm_product_doc')],
         },
       },
     },
@@ -93,7 +94,7 @@ export const registerInstallationRoutes = ({
       },
       security: {
         authz: {
-          requiredPrivileges: ['manage_llm_product_doc'],
+          requiredPrivileges: [ApiPrivileges.manage('llm_product_doc')],
         },
       },
     },

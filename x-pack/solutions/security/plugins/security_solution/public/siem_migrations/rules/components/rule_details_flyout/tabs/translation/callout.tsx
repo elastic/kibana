@@ -10,29 +10,37 @@ import React from 'react';
 import type { IconType } from '@elastic/eui';
 import { EuiCallOut } from '@elastic/eui';
 import {
-  RuleMigrationTranslationResultEnum,
+  type RuleMigration,
   type RuleMigrationTranslationResult,
 } from '../../../../../../../common/siem_migrations/model/rule_migration.gen';
 import * as i18n from './translations';
 
+type RuleMigrationTranslationCallOutMode = RuleMigrationTranslationResult | 'mapped';
+
 const getCallOutInfo = (
-  translationResult: RuleMigrationTranslationResult
+  mode: RuleMigrationTranslationCallOutMode
 ): { title: string; message?: string; icon: IconType; color: 'success' | 'warning' | 'danger' } => {
-  switch (translationResult) {
-    case RuleMigrationTranslationResultEnum.full:
+  switch (mode) {
+    case 'mapped':
+      return {
+        title: i18n.CALLOUT_MAPPED_TRANSLATED_RULE_TITLE,
+        icon: 'checkInCircleFilled',
+        color: 'success',
+      };
+    case 'full':
       return {
         title: i18n.CALLOUT_TRANSLATED_RULE_TITLE,
         icon: 'checkInCircleFilled',
         color: 'success',
       };
-    case RuleMigrationTranslationResultEnum.partial:
+    case 'partial':
       return {
         title: i18n.CALLOUT_PARTIALLY_TRANSLATED_RULE_TITLE,
         message: i18n.CALLOUT_PARTIALLY_TRANSLATED_RULE_DESCRIPTION,
         icon: 'warningFilled',
         color: 'warning',
       };
-    case RuleMigrationTranslationResultEnum.untranslatable:
+    case 'untranslatable':
       return {
         title: i18n.CALLOUT_NOT_TRANSLATED_RULE_TITLE,
         message: i18n.CALLOUT_NOT_TRANSLATED_RULE_DESCRIPTION,
@@ -43,23 +51,29 @@ const getCallOutInfo = (
 };
 
 export interface TranslationCallOutProps {
-  translationResult: RuleMigrationTranslationResult;
+  ruleMigration: RuleMigration;
 }
 
-export const TranslationCallOut: FC<TranslationCallOutProps> = React.memo(
-  ({ translationResult }) => {
-    const { title, message, icon, color } = getCallOutInfo(translationResult);
-
-    return (
-      <EuiCallOut
-        color={color}
-        title={title}
-        iconType={icon}
-        data-test-subj={`ruleMigrationCallOut-${translationResult}`}
-      >
-        {message}
-      </EuiCallOut>
-    );
+export const TranslationCallOut: FC<TranslationCallOutProps> = React.memo(({ ruleMigration }) => {
+  if (!ruleMigration.translation_result) {
+    return null;
   }
-);
+
+  const mode = ruleMigration.elastic_rule?.prebuilt_rule_id
+    ? 'mapped'
+    : ruleMigration.translation_result;
+  const { title, message, icon, color } = getCallOutInfo(mode);
+
+  return (
+    <EuiCallOut
+      color={color}
+      title={title}
+      iconType={icon}
+      size={'s'}
+      data-test-subj={`ruleMigrationCallOut-${mode}`}
+    >
+      {message}
+    </EuiCallOut>
+  );
+});
 TranslationCallOut.displayName = 'TranslationCallOut';

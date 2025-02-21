@@ -7,6 +7,7 @@
 
 import type {
   IndicesIndexSettings,
+  IngestDeletePipelineResponse,
   MappingTypeMapping,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
@@ -43,8 +44,14 @@ export interface IImporter {
     index: string,
     settings: IndicesIndexSettings,
     mappings: MappingTypeMapping,
-    pipeline: IngestPipeline | undefined
+    pipeline: IngestPipeline | undefined,
+    createPipelines?: IngestPipeline[]
   ): Promise<ImportResponse>;
+  initializeWithoutCreate(
+    index: string,
+    mappings: MappingTypeMapping,
+    pipeline: IngestPipeline | undefined
+  ): void;
   import(
     id: string,
     index: string,
@@ -55,4 +62,5 @@ export interface IImporter {
   getIndex(): string | undefined;
   getTimeField(): string | undefined;
   previewIndexTimeRange(): Promise<{ start: number | null; end: number | null }>;
+  deletePipelines(pipelineIds: string[]): Promise<IngestDeletePipelineResponse[]>;
 }

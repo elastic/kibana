@@ -8,6 +8,7 @@
  */
 import React, { useEffect, useRef, useState, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
+import { css } from '@emotion/react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -20,11 +21,11 @@ import {
   EuiHighlight,
   EuiSpacer,
   EuiLink,
+  useEuiTheme,
+  euiScrollBarStyles,
 } from '@elastic/eui';
 import { getFilteredGroups } from '../../utils/get_filtered_groups';
 import type { LanguageDocumentationSections } from '../../types';
-
-import '../shared/documentation.scss';
 
 interface DocumentationProps {
   language: string;
@@ -41,6 +42,8 @@ function DocumentationContent({
   searchInDescription,
   linkToDocumentation,
 }: DocumentationProps) {
+  const theme = useEuiTheme();
+  const scrollBarStyles = euiScrollBarStyles(theme);
   const [selectedSection, setSelectedSection] = useState<string | undefined>();
   const scrollTargets = useRef<Record<string, HTMLElement>>({});
 
@@ -59,7 +62,9 @@ function DocumentationContent({
   return (
     <>
       <EuiPopoverTitle
-        className="documentation__docsHeader"
+        css={css`
+          margin: 0;
+        `}
         paddingSize="m"
         data-test-subj="language-documentation-title"
       >
@@ -87,19 +92,47 @@ function DocumentationContent({
         </EuiFlexGroup>
       </EuiPopoverTitle>
       <EuiFlexGroup
-        className="documentation__docsContent"
+        css={css`
+          .documentation__docs--overlay & {
+            height: 40vh;
+            width: min(75vh, 90vw);
+          }
+          .documentation__docs--inline & {
+            flex: 1;
+            min-height: 0;
+          }
+          & > * + * {
+            border-left: ${theme.euiTheme.border.thin};
+          }
+        `}
         gutterSize="none"
         responsive={false}
         alignItems="stretch"
       >
-        <EuiFlexItem className="documentation__docsSidebar" grow={1}>
+        <EuiFlexItem
+          css={css`
+            background-color: ${theme.euiTheme.colors.backgroundBaseDisabled};
+          `}
+          grow={1}
+        >
           <EuiFlexGroup
-            className="documentation__docsSidebarInner"
+            css={css`
+              min-height: 0;
+
+              & > * + * {
+                border-top: ${theme.euiTheme.border.thin};
+              }
+            `}
             direction="column"
             gutterSize="none"
             responsive={false}
           >
-            <EuiFlexItem className="documentation__docsSearch" grow={false}>
+            <EuiFlexItem
+              css={css`
+                padding: ${theme.euiTheme.size.base};
+              `}
+              grow={false}
+            >
               <EuiFieldSearch
                 value={searchText}
                 onChange={(e) => {
@@ -111,14 +144,30 @@ function DocumentationContent({
                 })}
               />
             </EuiFlexItem>
-            <EuiFlexItem className="documentation__docsNav">
+            <EuiFlexItem
+              css={css`
+                ${scrollBarStyles}
+                overflow-y: auto;
+              `}
+            >
               {filteredGroups?.map((helpGroup, index) => {
                 return (
-                  <nav className="documentation__docsNavGroup" key={helpGroup.label}>
+                  <nav
+                    key={helpGroup.label}
+                    css={css`
+                      padding: ${theme.euiTheme.size.base};
+
+                      & + & {
+                        border-top: ${theme.euiTheme.border.thin};
+                      }
+                    `}
+                  >
                     <EuiTitle size="xxs" data-test-subj="language-documentation-navigation-title">
                       <h6>
                         <EuiLink
-                          className="documentation__docsNavGroupLink"
+                          css={css`
+                            font-weight: inherit;
+                          `}
                           color="text"
                           onClick={() => {
                             setSelectedSection(helpGroup.label);
@@ -157,10 +206,16 @@ function DocumentationContent({
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>
-        <EuiFlexItem className="documentation__docsText" grow={2}>
+        <EuiFlexItem
+          grow={2}
+          css={css`
+            padding: ${theme.euiTheme.size.base};
+            ${scrollBarStyles}
+            overflow-y: auto;
+          `}
+        >
           <EuiText size="s">
             <section
-              className="documentation__docsTextIntro"
               ref={(el) => {
                 if (el && sections?.groups?.length) {
                   scrollTargets.current[sections.groups[0].label] = el;
@@ -172,7 +227,11 @@ function DocumentationContent({
             {sections?.groups.slice(1).map((helpGroup, index) => {
               return (
                 <section
-                  className="documentation__docsTextGroup"
+                  css={css`
+                    border-top: ${theme.euiTheme.border.thin};
+                    padding-top: ${theme.euiTheme.size.xxl};
+                    margin-top: ${theme.euiTheme.size.xxl};
+                  `}
                   key={helpGroup.label}
                   ref={(el) => {
                     if (el) {
@@ -187,7 +246,9 @@ function DocumentationContent({
                   {sections?.groups[index + 1].items.map((helpItem) => {
                     return (
                       <article
-                        className="documentation__docsTextItem"
+                        css={css`
+                          margin-top: ${theme.euiTheme.size.xxl};
+                        `}
                         key={helpItem.label}
                         ref={(el) => {
                           if (el) {

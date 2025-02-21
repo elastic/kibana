@@ -10,18 +10,16 @@ import { i18n } from '@kbn/i18n';
 import {
   AI_SEARCH_PLUGIN,
   ANALYTICS_PLUGIN,
-  APP_SEARCH_PLUGIN,
   ENTERPRISE_SEARCH_CONTENT_PLUGIN,
   SEARCH_EXPERIENCES_PLUGIN,
   SEARCH_PRODUCT_NAME,
   SEMANTIC_SEARCH_PLUGIN,
   VECTOR_SEARCH_PLUGIN,
-  WORKPLACE_SEARCH_PLUGIN,
 } from '../../../../common/constants';
 
 /**
  * Generate a document title that generally follows our breadcrumb trails
- * https://github.com/elastic/kibana/blob/main/docs/development/core/public/kibana-plugin-core-public.chromedoctitle.md
+ * https://github.com/elastic/kibana/blob/8.0/docs/development/core/public/kibana-plugin-core-public.chromedoctitle.md
  */
 
 type Title = string[];
@@ -48,12 +46,6 @@ export const elasticsearchTitle = (page: Title = []) =>
       defaultMessage: 'Getting started with Elasticsearch',
     }),
   ]);
-
-export const appSearchTitle = (page: Title = []) =>
-  generateTitle([...page, APP_SEARCH_PLUGIN.NAME]);
-
-export const workplaceSearchTitle = (page: Title = []) =>
-  generateTitle([...page, WORKPLACE_SEARCH_PLUGIN.NAME]);
 
 export const searchExperiencesTitle = (page: Title = []) =>
   generateTitle([...page, SEARCH_EXPERIENCES_PLUGIN.NAME]);

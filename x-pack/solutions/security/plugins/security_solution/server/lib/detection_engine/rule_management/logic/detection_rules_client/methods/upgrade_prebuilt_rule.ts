@@ -18,6 +18,7 @@ import { applyRuleUpdate } from '../mergers/apply_rule_update';
 import { ClientError, validateMlAuth } from '../utils';
 import { createRule } from './create_rule';
 import { getRuleByRuleId } from './get_rule_by_rule_id';
+import type { PrebuiltRulesCustomizationStatus } from '../../../../../../../common/detection_engine/prebuilt_rules/prebuilt_rule_customization_status';
 
 export const upgradePrebuiltRule = async ({
   actionsClient,
@@ -25,14 +26,14 @@ export const upgradePrebuiltRule = async ({
   ruleAsset,
   mlAuthz,
   prebuiltRuleAssetClient,
-  isRuleCustomizationEnabled,
+  ruleCustomizationStatus,
 }: {
   actionsClient: ActionsClient;
   rulesClient: RulesClient;
   ruleAsset: PrebuiltRuleAsset;
   mlAuthz: MlAuthz;
   prebuiltRuleAssetClient: IPrebuiltRuleAssetsClient;
-  isRuleCustomizationEnabled: boolean;
+  ruleCustomizationStatus: PrebuiltRulesCustomizationStatus;
 }): Promise<RuleResponse> => {
   await validateMlAuth(mlAuthz, ruleAsset.type);
 
@@ -75,7 +76,7 @@ export const upgradePrebuiltRule = async ({
     prebuiltRuleAssetClient,
     existingRule,
     ruleUpdate: ruleAsset,
-    isRuleCustomizationEnabled,
+    ruleCustomizationStatus,
   });
 
   const updatedInternalRule = await rulesClient.update({

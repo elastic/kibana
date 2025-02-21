@@ -10,21 +10,25 @@ import React, { useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { SECURITY_SOLUTION_OWNER } from '@kbn/cases-plugin/common';
-import type { CasesService } from '@kbn/triggers-actions-ui-plugin/public/application/sections/alerts_table/types';
 import { i18n } from '@kbn/i18n';
 import { get } from 'lodash/fp';
 import { ALERT_RULE_NAME } from '@kbn/rule-data-utils';
+import type { CasesPublicStart } from '@kbn/cases-plugin/public';
 import { useRiskInputActions } from './use_risk_input_actions';
 import type { InputAlert } from '../../../hooks/use_risk_contributing_alerts';
+import { useUserPrivileges } from '../../../../common/components/user_privileges';
 
 export const useRiskInputActionsPanels = (inputs: InputAlert[], closePopover: () => void) => {
-  const { cases: casesService } = useKibana<{ cases?: CasesService }>().services;
+  const { cases: casesService } = useKibana<{ cases?: CasesPublicStart }>().services;
   const { addToExistingCase, addToNewCaseClick, addToNewTimeline } = useRiskInputActions(
     inputs,
     closePopover
   );
   const userCasesPermissions = casesService?.helpers.canUseCases([SECURITY_SOLUTION_OWNER]);
   const hasCasesPermissions = userCasesPermissions?.create && userCasesPermissions?.read;
+  const {
+    timelinePrivileges: { read: canAddToTimeline },
+  } = useUserPrivileges();
 
   return useMemo(() => {
     const timelinePanel = {
@@ -68,33 +72,42 @@ export const useRiskInputActionsPanels = (inputs: InputAlert[], closePopover: ()
           />
         ),
         id: 0,
-        items: hasCasesPermissions
-          ? [
-              timelinePanel,
-              {
-                name: (
-                  <FormattedMessage
-                    id="xpack.securitySolution.flyout.entityDetails.riskInputs.actions.addToNewCase"
-                    defaultMessage="Add to new case"
-                  />
-                ),
+        items: [
+          ...(canAddToTimeline ? [timelinePanel] : []),
+          ...(hasCasesPermissions
+            ? [
+                {
+                  name: (
+                    <FormattedMessage
+                      id="xpack.securitySolution.flyout.entityDetails.riskInputs.actions.addToNewCase"
+                      defaultMessage="Add to new case"
+                    />
+                  ),
 
-                onClick: addToNewCaseClick,
-              },
+                  onClick: addToNewCaseClick,
+                },
 
-              {
-                name: (
-                  <FormattedMessage
-                    id="xpack.securitySolution.flyout.entityDetails.riskInputs.actions.addToExistingCase"
-                    defaultMessage="Add to existing case"
-                  />
-                ),
+                {
+                  name: (
+                    <FormattedMessage
+                      id="xpack.securitySolution.flyout.entityDetails.riskInputs.actions.addToExistingCase"
+                      defaultMessage="Add to existing case"
+                    />
+                  ),
 
-                onClick: addToExistingCase,
-              },
-            ]
-          : [timelinePanel],
+                  onClick: addToExistingCase,
+                },
+              ]
+            : []),
+        ],
       },
     ];
-  }, [addToExistingCase, addToNewCaseClick, addToNewTimeline, inputs, hasCasesPermissions]);
+  }, [
+    addToExistingCase,
+    addToNewCaseClick,
+    addToNewTimeline,
+    inputs,
+    hasCasesPermissions,
+    canAddToTimeline,
+  ]);
 };

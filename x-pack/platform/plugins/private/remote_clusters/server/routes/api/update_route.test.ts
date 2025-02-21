@@ -11,7 +11,7 @@ import { httpServerMock, httpServiceMock, coreMock } from '@kbn/core/server/mock
 
 import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 
-import { API_BASE_PATH } from '../../../common/constants';
+import { API_BASE_PATH, SECURITY_MODEL } from '../../../common/constants';
 
 import { handleEsError } from '../../shared_imports';
 
@@ -127,7 +127,7 @@ describe('UPDATE remote clusters', () => {
         seeds: ['127.0.0.1:9300'],
         skipUnavailable: true,
         mode: 'sniff',
-        securityModel: 'certificate',
+        securityModel: SECURITY_MODEL.CERTIFICATE,
       });
 
       expect(remoteInfoMockFn).toHaveBeenCalledWith();
@@ -141,8 +141,83 @@ describe('UPDATE remote clusters', () => {
                   skip_unavailable: true,
                   mode: 'sniff',
                   node_connections: null,
-                  proxy_address: null,
-                  proxy_socket_connections: null,
+                },
+              },
+            },
+          },
+        },
+      });
+    });
+
+    test('updates remote cluster with mode change', async () => {
+      remoteInfoMockFn.mockResponseOnce({
+        test: {
+          connected: true,
+          mode: 'sniff',
+          seeds: ['127.0.0.1:9300'],
+          num_nodes_connected: 1,
+          max_connections_per_cluster: 3,
+          initial_connect_timeout: '30s',
+          skip_unavailable: false,
+        },
+      });
+      putSettingsMockFn.mockResponseOnce({
+        acknowledged: true,
+        persistent: {
+          cluster: {
+            remote: {
+              test: {
+                connected: true,
+                proxy_address: '127.0.0.1:9300',
+                initial_connect_timeout: '30s',
+                skip_unavailable: true,
+                mode: 'proxy',
+                proxy_socket_connections: 18,
+              },
+            },
+          },
+        },
+        transient: {},
+      });
+
+      const mockRequest = createMockRequest({
+        proxyAddress: '127.0.0.1:9300',
+        skipUnavailable: true,
+        mode: 'proxy',
+        proxySocketConnections: 18,
+      });
+
+      const response = await handler(
+        coreMock.createCustomRequestHandlerContext(mockContext),
+        mockRequest,
+        kibanaResponseFactory
+      );
+
+      expect(response.status).toBe(200);
+      expect(response.payload).toEqual({
+        initialConnectTimeout: '30s',
+        isConfiguredByNode: false,
+        isConnected: true,
+        proxyAddress: '127.0.0.1:9300',
+        name: 'test',
+        skipUnavailable: true,
+        mode: 'proxy',
+        securityModel: SECURITY_MODEL.CERTIFICATE,
+      });
+
+      expect(remoteInfoMockFn).toHaveBeenCalledWith();
+      expect(putSettingsMockFn).toHaveBeenCalledWith({
+        body: {
+          persistent: {
+            cluster: {
+              remote: {
+                test: {
+                  proxy_address: '127.0.0.1:9300',
+                  skip_unavailable: true,
+                  mode: 'proxy',
+                  proxy_socket_connections: 18,
+                  node_connections: null,
+                  seeds: null,
                   server_name: null,
                 },
               },
@@ -207,7 +282,7 @@ describe('UPDATE remote clusters', () => {
         name: 'test',
         skipUnavailable: true,
         mode: 'proxy',
-        securityModel: 'certificate',
+        securityModel: SECURITY_MODEL.CERTIFICATE,
       });
 
       expect(remoteInfoMockFn).toHaveBeenCalledWith();
@@ -220,8 +295,6 @@ describe('UPDATE remote clusters', () => {
                   proxy_address: '127.0.0.1:9300',
                   skip_unavailable: true,
                   mode: 'proxy',
-                  node_connections: null,
-                  seeds: null,
                   proxy_socket_connections: 18,
                   server_name: null,
                   proxy: null,
@@ -301,9 +374,6 @@ describe('UPDATE remote clusters', () => {
                   skip_unavailable: false,
                   mode: 'sniff',
                   node_connections: null,
-                  proxy_address: null,
-                  proxy_socket_connections: null,
-                  server_name: null,
                 },
               },
             },

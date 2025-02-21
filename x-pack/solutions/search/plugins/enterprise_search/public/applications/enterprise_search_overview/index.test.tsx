@@ -12,19 +12,17 @@ import React from 'react';
 import { shallow } from 'enzyme';
 
 import { ProductSelector } from './components/product_selector';
-import { SetupGuide } from './components/setup_guide';
 
 import { EnterpriseSearchOverview } from '.';
 
 describe('EnterpriseSearchOverview', () => {
-  it('renders the Setup Guide and Product Selector', () => {
+  it('renders the Product Selector', () => {
     setMockValues({
       errorConnectingMessage: '',
       config: { host: 'localhost' },
     });
     const wrapper = shallow(<EnterpriseSearchOverview />);
 
-    expect(wrapper.find(SetupGuide)).toHaveLength(1);
     expect(wrapper.find(ProductSelector)).toHaveLength(1);
   });
 });

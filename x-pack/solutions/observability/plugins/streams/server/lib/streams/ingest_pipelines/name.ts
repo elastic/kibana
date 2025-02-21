@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-export function getProcessingPipelineName(id: string) {
-  return `${id}@stream.processing`;
+export function getProcessingPipelineName(name: string) {
+  return `${name}@stream.processing`;
 }
 
-export function getReroutePipelineName(id: string) {
-  return `${id}@stream.reroutes`;
+export function getReroutePipelineName(name: string) {
+  return `${name}@stream.reroutes`;
 }

@@ -90,6 +90,34 @@ ensure_argument "$kibana_api_endpoint" "--kibana-url"
 ensure_argument "$onboarding_flow_id" "--id"
 ensure_argument "$elastic_agent_version" "--ea-version"
 
+update_step_progress() {
+  local STEPNAME="$1"
+  local STATUS="$2" # "incomplete" | "complete" | "disabled" | "loading" | "warning" | "danger" | "current"
+  local MESSAGE=${3:-}
+  local PAYLOAD=${4:-}
+  local data=""
+
+  MESSAGE=$(echo "$MESSAGE" | sed 's/"/\\"/g')
+
+  if [ -z "$PAYLOAD" ]; then
+    data="{\"status\":\"${STATUS}\", \"message\":\"${MESSAGE}\"}"
+  else
+    data="{\"status\":\"${STATUS}\", \"message\":\"${MESSAGE}\", \"payload\":${PAYLOAD}}"
+  fi
+  curl --request POST \
+    --url "${kibana_api_endpoint}/internal/observability_onboarding/flow/${onboarding_flow_id}/step/${STEPNAME}" \
+    --header "Authorization: ApiKey ${install_api_key_encoded}" \
+    --header "Content-Type: application/json" \
+    --header "kbn-xsrf: true" \
+    --header "x-elastic-internal-origin: Kibana" \
+    --data "$data" \
+    --output /dev/null \
+    --no-progress-meter \
+    --fail
+}
+
+update_step_progress "logs-detect" "initialize"
+
 known_integrations_list_string=""
 selected_known_integrations_array=()
 detected_patterns=()
@@ -122,33 +150,11 @@ elif [ "${OS}" == "Darwin" ]; then
   fi
   elastic_agent_config_path=/Library/Elastic/Agent/elastic-agent.yml
 else
+  update_step_progress "logs-detect" "danger" "Unable to run auto-detect script on ${os} (${arch})"
   fail "This script is only supported on Linux and macOS"
 fi
 
 elastic_agent_artifact_name="elastic-agent-${elastic_agent_version}-${os}-${arch}"
-
-update_step_progress() {
-  local STEPNAME="$1"
-  local STATUS="$2" # "incomplete" | "complete" | "disabled" | "loading" | "warning" | "danger" | "current"
-  local MESSAGE=${3:-}
-  local PAYLOAD=${4:-}
-  local data=""
-  if [ -z "$PAYLOAD" ]; then
-    data="{\"status\":\"${STATUS}\", \"message\":\"${MESSAGE}\"}"
-  else
-    data="{\"status\":\"${STATUS}\", \"message\":\"${MESSAGE}\", \"payload\":${PAYLOAD}}"
-  fi
-  curl --request POST \
-    --url "${kibana_api_endpoint}/internal/observability_onboarding/flow/${onboarding_flow_id}/step/${STEPNAME}" \
-    --header "Authorization: ApiKey ${install_api_key_encoded}" \
-    --header "Content-Type: application/json" \
-    --header "kbn-xsrf: true" \
-    --header "x-elastic-internal-origin: Kibana" \
-    --data "$data" \
-    --output /dev/null \
-    --no-progress-meter \
-    --fail
-}
 
 download_elastic_agent() {
   local download_url="https://artifacts.elastic.co/downloads/beats/elastic-agent/${elastic_agent_artifact_name}.tar.gz"
@@ -244,7 +250,7 @@ backup_elastic_agent_config() {
       if [ "$?" -eq 0 ]; then
         printf "\n\e[32;1m✓\e[0m %s \e[36m%s\e[0m\n" "Backup saved to" "$backup_path"
       else
-        update_step_progress "ea-config" "warning" "Failed to backup existing configuration"
+        update_step_progress "ea-config" "danger" "Failed to backup existing configuration"
         fail "Failed to backup existing config - Try manually creating a backup or delete your existing config before re-running this script"
       fi
     else
@@ -289,7 +295,7 @@ install_integrations() {
   if [ "$?" -eq 0 ]; then
     printf "\n\e[32;1m✓\e[0m %s\n" "Integrations installed"
   else
-    update_step_progress "ea-config" "warning" "Failed to install integrations"
+    update_step_progress "install-integrations" "danger" "Failed to install integrations"
     fail "Failed to install integrations"
   fi
 }
@@ -318,7 +324,7 @@ apply_elastic_agent_config() {
 
     update_step_progress "ea-config" "complete"
   else
-    update_step_progress "ea-config" "warning" "Failed to configure Elastic Agent"
+    update_step_progress "ea-config" "danger" "Failed to configure Elastic Agent"
     fail "Failed to configure Elastic Agent"
   fi
 }
@@ -588,7 +594,7 @@ generate_custom_integration_name() {
 }
 
 printf "\e[1m%s\e[0m\n" "Looking for log files..."
-update_step_progress "logs-detect" "loading"
+update_step_progress "logs-detect" "loading" "" "{\"os\": \"${os}\", \"arch\": \"${arch}\"}"
 detect_known_integrations
 
 # Check if LSOF_PATH is executable
@@ -596,6 +602,7 @@ if [ -x "$LSOF_PATH" ]; then
   read_open_log_file_list
   build_unknown_log_file_patterns
 else
+  update_step_progress "logs-detect" "warning" "lsof is not available on the host"
   echo -e "\nlsof is required to detect custom log files. Looking for known integrations only."
 fi
 

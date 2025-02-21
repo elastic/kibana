@@ -3,5 +3,6 @@
   "id": "@kbn/shared-ux-page-analytics-no-data-mocks",
   "owner": "@elastic/appex-sharedux",
   "group": "platform",
-  "visibility": "private"
+  "visibility": "private",
+  "devOnly": true
 }

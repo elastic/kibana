@@ -69,7 +69,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('shows sort by dataset name and show namespace', async () => {
       const cols = await PageObjects.datasetQuality.parseDatasetTable();
-      const datasetNameCol = cols['Data Set Name'];
+      const datasetNameCol = cols[PageObjects.datasetQuality.texts.datasetNameColumn];
       await datasetNameCol.sort('descending');
       const datasetNameColCellTexts = await datasetNameCol.getCellTexts();
       expect(datasetNameColCellTexts).to.eql(
@@ -91,7 +91,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('shows the last activity', async () => {
       const cols = await PageObjects.datasetQuality.parseDatasetTable();
-      const lastActivityCol = cols['Last Activity'];
+      const lastActivityCol = cols[PageObjects.datasetQuality.texts.datasetLastActivityColumn];
       const activityCells = await lastActivityCol.getCellTexts();
       const lastActivityCell = activityCells[activityCells.length - 1];
       const restActivityCells = activityCells.slice(0, -1);
@@ -109,7 +109,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('shows degraded docs percentage', async () => {
       const cols = await PageObjects.datasetQuality.parseDatasetTable();
 
-      const degradedDocsCol = cols['Degraded Docs (%)'];
+      const degradedDocsCol = cols[PageObjects.datasetQuality.texts.datasetDegradedDocsColumn];
       const degradedDocsColCellTexts = await degradedDocsCol.getCellTexts();
       expect(degradedDocsColCellTexts).to.eql(['0%', '0%', '0%', '100%']);
     });
@@ -127,7 +127,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('shows dataset from integration', async () => {
       const cols = await PageObjects.datasetQuality.parseDatasetTable();
-      const datasetNameCol = cols['Data Set Name'];
+      const datasetNameCol = cols[PageObjects.datasetQuality.texts.datasetNameColumn];
 
       const datasetNameColCellTexts = await datasetNameCol.getCellTexts();
 
@@ -137,7 +137,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('goes to log explorer page when opened', async () => {
       const rowIndexToOpen = 1;
       const cols = await PageObjects.datasetQuality.parseDatasetTable();
-      const datasetNameCol = cols['Data Set Name'];
+      const datasetNameCol = cols[PageObjects.datasetQuality.texts.datasetNameColumn];
       const actionsCol = cols.Actions;
 
       const datasetName = (await datasetNameCol.getCellTexts())[rowIndexToOpen];
@@ -155,7 +155,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('hides inactive datasets', async () => {
       // Get number of rows with Last Activity not equal to "No activity in the selected timeframe"
       const cols = await PageObjects.datasetQuality.parseDatasetTable();
-      const lastActivityCol = cols['Last Activity'];
+      const lastActivityCol = cols[PageObjects.datasetQuality.texts.datasetLastActivityColumn];
       const lastActivityColCellTexts = await lastActivityCol.getCellTexts();
       const activeDatasets = lastActivityColCellTexts.filter(
         (activity) => activity !== PageObjects.datasetQuality.texts.noActivityText

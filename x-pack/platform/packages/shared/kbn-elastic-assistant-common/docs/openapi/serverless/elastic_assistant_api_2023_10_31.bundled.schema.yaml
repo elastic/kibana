@@ -418,6 +418,353 @@ paths:
       tags:
         - Security AI Assistant API
         - Conversation API
+  /api/security_ai_assistant/knowledge_base/{resource}:
+    get:
+      description: Read a single KB
+      operationId: ReadKnowledgeBase
+      parameters:
+        - description: The KnowledgeBase `resource` value.
+          in: path
+          name: resource
+          schema:
+            type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  elser_exists:
+                    type: boolean
+                  index_exists:
+                    type: boolean
+                  is_setup_available:
+                    type: boolean
+                  is_setup_in_progress:
+                    type: boolean
+                  pipeline_exists:
+                    type: boolean
+                  security_labs_exists:
+                    type: boolean
+                  user_data_exists:
+                    type: boolean
+          description: Indicates a successful call.
+        '400':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                  message:
+                    type: string
+                  statusCode:
+                    type: number
+          description: Generic Error
+      summary: Read a KnowledgeBase
+      tags:
+        - Security AI Assistant API
+        - KnowledgeBase API
+    post:
+      description: Create a KnowledgeBase
+      operationId: CreateKnowledgeBase
+      parameters:
+        - description: The KnowledgeBase `resource` value.
+          in: path
+          name: resource
+          schema:
+            type: string
+        - description: Optional ELSER modelId to use when setting up the Knowledge Base
+          in: query
+          name: modelId
+          required: false
+          schema:
+            type: string
+        - description: >-
+            Indicates whether we should or should not install Security Labs docs
+            when setting up the Knowledge Base
+          in: query
+          name: ignoreSecurityLabs
+          required: false
+          schema:
+            default: false
+            type: boolean
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/KnowledgeBaseResponse'
+          description: Indicates a successful call.
+        '400':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                  message:
+                    type: string
+                  statusCode:
+                    type: number
+          description: Generic Error
+      summary: Create a KnowledgeBase
+      tags:
+        - Security AI Assistant API
+        - KnowledgeBase API
+  /api/security_ai_assistant/knowledge_base/entries:
+    post:
+      description: Create a Knowledge Base Entry
+      operationId: CreateKnowledgeBaseEntry
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/KnowledgeBaseEntryCreateProps'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/KnowledgeBaseEntryResponse'
+          description: Successful request returning Knowledge Base Entries
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/KnowledgeBaseEntryErrorSchema'
+          description: Generic Error
+      summary: Create a Knowledge Base Entry
+      tags:
+        - Security AI Assistant API
+        - Knowledge Base Entries API
+  /api/security_ai_assistant/knowledge_base/entries/_bulk_action:
+    post:
+      description: >-
+        The bulk action is applied to all Knowledge Base Entries that match the
+        filter or to the list of Knowledge Base Entries by their IDs
+      operationId: PerformKnowledgeBaseEntryBulkAction
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                create:
+                  items:
+                    $ref: '#/components/schemas/KnowledgeBaseEntryCreateProps'
+                  type: array
+                delete:
+                  type: object
+                  properties:
+                    ids:
+                      description: Array of Knowledge base Entry IDs
+                      items:
+                        type: string
+                      minItems: 1
+                      type: array
+                    query:
+                      description: Query to filter Knowledge Base Entries
+                      type: string
+                update:
+                  items:
+                    $ref: '#/components/schemas/KnowledgeBaseEntryUpdateProps'
+                  type: array
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/KnowledgeBaseEntryBulkCrudActionResponse'
+          description: Successful bulk operation request
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/KnowledgeBaseEntryErrorSchema'
+          description: Generic Error
+      summary: Applies a bulk action to multiple Knowledge Base Entries
+      tags:
+        - Security AI Assistant API
+        - Knowledge Base Entries Bulk API
+  /api/security_ai_assistant/knowledge_base/entries/_find:
+    get:
+      description: Finds Knowledge Base Entries that match the given query.
+      operationId: FindKnowledgeBaseEntries
+      parameters:
+        - in: query
+          name: fields
+          required: false
+          schema:
+            items:
+              type: string
+            type: array
+        - description: Search query
+          in: query
+          name: filter
+          required: false
+          schema:
+            type: string
+        - description: Field to sort by
+          in: query
+          name: sort_field
+          required: false
+          schema:
+            $ref: '#/components/schemas/FindKnowledgeBaseEntriesSortField'
+        - description: Sort order
+          in: query
+          name: sort_order
+          required: false
+          schema:
+            $ref: '#/components/schemas/SortOrder'
+        - description: Page number
+          in: query
+          name: page
+          required: false
+          schema:
+            default: 1
+            minimum: 1
+            type: integer
+        - description: Knowledge Base Entries per page
+          in: query
+          name: per_page
+          required: false
+          schema:
+            default: 20
+            minimum: 0
+            type: integer
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    items:
+                      $ref: '#/components/schemas/KnowledgeBaseEntryResponse'
+                    type: array
+                  page:
+                    type: integer
+                  perPage:
+                    type: integer
+                  total:
+                    type: integer
+                required:
+                  - page
+                  - perPage
+                  - total
+                  - data
+          description: Successful response
+        '400':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                  message:
+                    type: string
+                  statusCode:
+                    type: number
+          description: Generic Error
+      summary: Finds Knowledge Base Entries that match the given query.
+      tags:
+        - Security AI Assistant API
+        - Knowledge Base Entries API
+  /api/security_ai_assistant/knowledge_base/entries/{id}:
+    delete:
+      description: Deletes a single Knowledge Base Entry using the `id` field
+      operationId: DeleteKnowledgeBaseEntry
+      parameters:
+        - description: The Knowledge Base Entry's `id` value
+          in: path
+          name: id
+          required: true
+          schema:
+            $ref: '#/components/schemas/NonEmptyString'
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeleteResponseFields'
+          description: Successful request returning the deleted Knowledge Base Entry's ID
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/KnowledgeBaseEntryErrorSchema'
+          description: Generic Error
+      summary: Deletes a single Knowledge Base Entry using the `id` field
+      tags:
+        - Security AI Assistant API
+        - Knowledge Base Entries API
+    get:
+      description: Read a Knowledge Base Entry
+      operationId: ReadKnowledgeBaseEntry
+      parameters:
+        - description: The Knowledge Base Entry's `id` value.
+          in: path
+          name: id
+          required: true
+          schema:
+            $ref: '#/components/schemas/NonEmptyString'
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/KnowledgeBaseEntryResponse'
+          description: Successful request returning a Knowledge Base Entry
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/KnowledgeBaseEntryErrorSchema'
+          description: Generic Error
+      summary: Read a Knowledge Base Entry
+      tags:
+        - Security AI Assistant API
+        - Knowledge Base Entries API
+    put:
+      description: Update a Knowledge Base Entry
+      operationId: UpdateKnowledgeBaseEntry
+      parameters:
+        - description: The Knowledge Base Entry's `id` value
+          in: path
+          name: id
+          required: true
+          schema:
+            $ref: '#/components/schemas/NonEmptyString'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/KnowledgeBaseEntryUpdateProps'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/KnowledgeBaseEntryResponse'
+          description: Successful request returning the updated Knowledge Base Entry
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/KnowledgeBaseEntryErrorSchema'
+          description: Generic Error
+      summary: Update a Knowledge Base Entry
+      tags:
+        - Security AI Assistant API
+        - Knowledge Base Entries API
   /api/security_ai_assistant/prompts/_bulk_action:
     post:
       description: >-
@@ -709,6 +1056,19 @@ components:
       required:
         - connectorId
         - actionTypeId
+    BaseContentReference:
+      description: The basis of a content reference
+      type: object
+      properties:
+        id:
+          description: Id of the content reference
+          type: string
+        type:
+          description: Type of the content reference
+          type: string
+      required:
+        - id
+        - type
     BulkCrudActionSummary:
       type: object
       properties:
@@ -780,6 +1140,17 @@ components:
         - user
         - assistant
       type: string
+    ContentReferences:
+      additionalProperties:
+        oneOf:
+          - $ref: '#/components/schemas/KnowledgeBaseEntryContentReference'
+          - $ref: '#/components/schemas/SecurityAlertContentReference'
+          - $ref: '#/components/schemas/SecurityAlertsPageContentReference'
+          - $ref: '#/components/schemas/ProductDocumentationContentReference'
+          - $ref: '#/components/schemas/EsqlContentReference'
+            additionalProperties: false
+      description: A union of all content reference types
+      type: object
     ConversationCategory:
       description: The conversation category.
       enum:
@@ -919,6 +1290,146 @@ components:
           type: string
       required:
         - id
+    DeleteResponseFields:
+      type: object
+      properties:
+        id:
+          $ref: '#/components/schemas/NonEmptyString'
+      required:
+        - id
+    DocumentEntry:
+      allOf:
+        - type: object
+          properties:
+            name:
+              description: Name of the Knowledge Base Entry
+              type: string
+            namespace:
+              description: Kibana Space, defaults to 'default' space
+              type: string
+            users:
+              description: >-
+                Users who have access to the Knowledge Base Entry, defaults to
+                current user. Empty array provides access to all users.
+              items:
+                $ref: '#/components/schemas/User'
+              type: array
+          required:
+            - name
+            - namespace
+            - users
+        - $ref: '#/components/schemas/ResponseFields'
+        - $ref: '#/components/schemas/DocumentEntryResponseFields'
+    DocumentEntryCreateFields:
+      allOf:
+        - type: object
+          properties:
+            name:
+              description: Name of the Knowledge Base Entry
+              type: string
+            namespace:
+              description: Kibana Space, defaults to 'default' space
+              type: string
+            users:
+              description: >-
+                Users who have access to the Knowledge Base Entry, defaults to
+                current user. Empty array provides access to all users.
+              items:
+                $ref: '#/components/schemas/User'
+              type: array
+          required:
+            - name
+        - $ref: '#/components/schemas/DocumentEntryRequiredFields'
+        - $ref: '#/components/schemas/DocumentEntryOptionalFields'
+    DocumentEntryOptionalFields:
+      type: object
+      properties:
+        required:
+          description: Whether this resource should always be included, defaults to false
+          type: boolean
+        vector:
+          $ref: '#/components/schemas/Vector'
+    DocumentEntryRequiredFields:
+      type: object
+      properties:
+        kbResource:
+          description: >-
+            Knowledge Base resource name for grouping entries, e.g. 'esql',
+            'lens-docs', etc
+          type: string
+        source:
+          description: Source document name or filepath
+          type: string
+        text:
+          description: Knowledge Base Entry content
+          type: string
+        type:
+          description: Entry type
+          enum:
+            - document
+          type: string
+      required:
+        - type
+        - kbResource
+        - source
+        - text
+    DocumentEntryResponseFields:
+      allOf:
+        - $ref: '#/components/schemas/DocumentEntryRequiredFields'
+        - $ref: '#/components/schemas/DocumentEntryOptionalFields'
+    DocumentEntryUpdateFields:
+      allOf:
+        - type: object
+          properties:
+            id:
+              $ref: '#/components/schemas/NonEmptyString'
+            name:
+              description: Name of the Knowledge Base Entry
+              type: string
+            namespace:
+              description: Kibana Space, defaults to 'default' space
+              type: string
+            users:
+              description: >-
+                Users who have access to the Knowledge Base Entry, defaults to
+                current user. Empty array provides access to all users.
+              items:
+                $ref: '#/components/schemas/User'
+              type: array
+          required:
+            - id
+        - $ref: '#/components/schemas/DocumentEntryCreateFields'
+    EsqlContentReference:
+      allOf:
+        - $ref: '#/components/schemas/BaseContentReference'
+        - type: object
+          properties:
+            label:
+              description: Label of the query
+              type: string
+            query:
+              description: An ESQL query
+              type: string
+            timerange:
+              description: Time range to select in the time picker.
+              type: object
+              properties:
+                from:
+                  type: string
+                to:
+                  type: string
+              required:
+                - from
+                - to
+            type:
+              enum:
+                - EsqlQuery
+              type: string
+          required:
+            - type
+            - query
+            - label
+      description: References an ESQL query
     FindAnonymizationFieldsSortField:
       enum:
         - created_at
@@ -934,6 +1445,13 @@ components:
         - title
         - updated_at
       type: string
+    FindKnowledgeBaseEntriesSortField:
+      enum:
+        - created_at
+        - is_default
+        - title
+        - updated_at
+      type: string
     FindPromptsSortField:
       enum:
         - created_at
@@ -941,6 +1459,290 @@ components:
         - name
         - updated_at
       type: string
+    IndexEntry:
+      allOf:
+        - type: object
+          properties:
+            name:
+              description: Name of the Knowledge Base Entry
+              type: string
+            namespace:
+              description: Kibana Space, defaults to 'default' space
+              type: string
+            users:
+              description: >-
+                Users who have access to the Knowledge Base Entry, defaults to
+                current user. Empty array provides access to all users.
+              items:
+                $ref: '#/components/schemas/User'
+              type: array
+          required:
+            - name
+            - namespace
+            - users
+        - $ref: '#/components/schemas/ResponseFields'
+        - $ref: '#/components/schemas/IndexEntryResponseFields'
+    IndexEntryCreateFields:
+      allOf:
+        - type: object
+          properties:
+            name:
+              description: Name of the Knowledge Base Entry
+              type: string
+            namespace:
+              description: Kibana Space, defaults to 'default' space
+              type: string
+            users:
+              description: >-
+                Users who have access to the Knowledge Base Entry, defaults to
+                current user. Empty array provides access to all users.
+              items:
+                $ref: '#/components/schemas/User'
+              type: array
+          required:
+            - name
+        - $ref: '#/components/schemas/IndexEntryRequiredFields'
+        - $ref: '#/components/schemas/IndexEntryOptionalFields'
+    IndexEntryOptionalFields:
+      type: object
+      properties:
+        inputSchema:
+          $ref: '#/components/schemas/InputSchema'
+        outputFields:
+          description: >-
+            Fields to extract from the query result, defaults to all fields if
+            not provided or empty
+          items:
+            type: string
+          type: array
+    IndexEntryRequiredFields:
+      type: object
+      properties:
+        description:
+          description: >-
+            Description for when this index or data stream should be queried for
+            Knowledge Base content. Passed to the LLM as a tool description
+          type: string
+        field:
+          description: Field to query for Knowledge Base content
+          type: string
+        index:
+          description: Index or Data Stream to query for Knowledge Base content
+          type: string
+        queryDescription:
+          description: >-
+            Description of query field used to fetch Knowledge Base content.
+            Passed to the LLM as part of the tool input schema
+          type: string
+        type:
+          description: Entry type
+          enum:
+            - index
+          type: string
+      required:
+        - type
+        - index
+        - field
+        - description
+        - queryDescription
+    IndexEntryResponseFields:
+      allOf:
+        - $ref: '#/components/schemas/IndexEntryRequiredFields'
+        - $ref: '#/components/schemas/IndexEntryOptionalFields'
+    IndexEntryUpdateFields:
+      allOf:
+        - type: object
+          properties:
+            id:
+              $ref: '#/components/schemas/NonEmptyString'
+            name:
+              description: Name of the Knowledge Base Entry
+              type: string
+            namespace:
+              description: Kibana Space, defaults to 'default' space
+              type: string
+            users:
+              description: >-
+                Users who have access to the Knowledge Base Entry, defaults to
+                current user. Empty array provides access to all users.
+              items:
+                $ref: '#/components/schemas/User'
+              type: array
+          required:
+            - id
+        - $ref: '#/components/schemas/IndexEntryCreateFields'
+    InputSchema:
+      description: >-
+        Array of objects defining the input schema, allowing the LLM to extract
+        structured data to be used in retrieval
+      items:
+        type: object
+        properties:
+          description:
+            description: Description of the field
+            type: string
+          fieldName:
+            description: Name of the field
+            type: string
+          fieldType:
+            description: Type of the field
+            type: string
+        required:
+          - fieldName
+          - fieldType
+          - description
+      type: array
+    KnowledgeBaseEntryBulkActionSkipReason:
+      enum:
+        - KNOWLEDGE_BASE_ENTRY_NOT_MODIFIED
+      type: string
+    KnowledgeBaseEntryBulkActionSkipResult:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        skip_reason:
+          $ref: '#/components/schemas/KnowledgeBaseEntryBulkActionSkipReason'
+      required:
+        - id
+        - skip_reason
+    KnowledgeBaseEntryBulkCrudActionResponse:
+      type: object
+      properties:
+        attributes:
+          type: object
+          properties:
+            errors:
+              items:
+                $ref: '#/components/schemas/NormalizedKnowledgeBaseEntryError'
+              type: array
+            results:
+              $ref: '#/components/schemas/KnowledgeBaseEntryBulkCrudActionResults'
+            summary:
+              $ref: '#/components/schemas/KnowledgeBaseEntryBulkCrudActionSummary'
+          required:
+            - results
+            - summary
+        knowledgeBaseEntriesCount:
+          type: integer
+        message:
+          type: string
+        statusCode:
+          type: integer
+        success:
+          type: boolean
+      required:
+        - attributes
+    KnowledgeBaseEntryBulkCrudActionResults:
+      type: object
+      properties:
+        created:
+          items:
+            $ref: '#/components/schemas/KnowledgeBaseEntryResponse'
+          type: array
+        deleted:
+          items:
+            type: string
+          type: array
+        skipped:
+          items:
+            $ref: '#/components/schemas/KnowledgeBaseEntryBulkActionSkipResult'
+          type: array
+        updated:
+          items:
+            $ref: '#/components/schemas/KnowledgeBaseEntryResponse'
+          type: array
+      required:
+        - updated
+        - created
+        - deleted
+        - skipped
+    KnowledgeBaseEntryBulkCrudActionSummary:
+      type: object
+      properties:
+        failed:
+          type: integer
+        skipped:
+          type: integer
+        succeeded:
+          type: integer
+        total:
+          type: integer
+      required:
+        - failed
+        - skipped
+        - succeeded
+        - total
+    KnowledgeBaseEntryContentReference:
+      allOf:
+        - $ref: '#/components/schemas/BaseContentReference'
+        - type: object
+          properties:
+            knowledgeBaseEntryId:
+              description: Id of the Knowledge Base Entry
+              type: string
+            knowledgeBaseEntryName:
+              description: Name of the knowledge base entry
+              type: string
+            type:
+              enum:
+                - KnowledgeBaseEntry
+              type: string
+          required:
+            - type
+            - knowledgeBaseEntryId
+            - knowledgeBaseEntryName
+      description: References a knowledge base entry
+    KnowledgeBaseEntryCreateProps:
+      anyOf:
+        - $ref: '#/components/schemas/DocumentEntryCreateFields'
+        - $ref: '#/components/schemas/IndexEntryCreateFields'
+      discriminator:
+        propertyName: type
+    KnowledgeBaseEntryDetailsInError:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+      required:
+        - id
+    KnowledgeBaseEntryErrorSchema:
+      additionalProperties: false
+      type: object
+      properties:
+        error:
+          type: string
+        message:
+          type: string
+        statusCode:
+          type: number
+      required:
+        - statusCode
+        - error
+        - message
+    KnowledgeBaseEntryResponse:
+      anyOf:
+        - $ref: '#/components/schemas/DocumentEntry'
+        - $ref: '#/components/schemas/IndexEntry'
+      discriminator:
+        propertyName: type
+    KnowledgeBaseEntryUpdateProps:
+      anyOf:
+        - $ref: '#/components/schemas/DocumentEntryUpdateFields'
+        - $ref: '#/components/schemas/IndexEntryUpdateFields'
+      discriminator:
+        propertyName: type
+    KnowledgeBaseResponse:
+      description: AI assistant KnowledgeBase.
+      type: object
+      properties:
+        success:
+          description: Identify the success of the method execution.
+          type: boolean
     Message:
       description: AI assistant conversation message.
       type: object
@@ -951,6 +1753,9 @@ components:
         isError:
           description: Is error message.
           type: boolean
+        metadata:
+          $ref: '#/components/schemas/MessageMetadata'
+          description: metadata
         reader:
           $ref: '#/components/schemas/Reader'
           description: Message content.
@@ -970,6 +1775,13 @@ components:
     MessageData:
       additionalProperties: true
       type: object
+    MessageMetadata:
+      description: Message metadata
+      type: object
+      properties:
+        contentReferences:
+          $ref: '#/components/schemas/ContentReferences'
+          description: Data refered to by the message content.
     MessageRole:
       description: Message role.
       enum:
@@ -999,6 +1811,23 @@ components:
         - message
         - status_code
         - anonymization_fields
+    NormalizedKnowledgeBaseEntryError:
+      type: object
+      properties:
+        err_code:
+          type: string
+        knowledgeBaseEntries:
+          items:
+            $ref: '#/components/schemas/KnowledgeBaseEntryDetailsInError'
+          type: array
+        message:
+          type: string
+        statusCode:
+          type: integer
+      required:
+        - message
+        - statusCode
+        - knowledgeBaseEntries
     NormalizedPromptError:
       type: object
       properties:
@@ -1016,6 +1845,26 @@ components:
         - message
         - status_code
         - prompts
+    ProductDocumentationContentReference:
+      allOf:
+        - $ref: '#/components/schemas/BaseContentReference'
+        - type: object
+          properties:
+            title:
+              description: Title of the documentation
+              type: string
+            type:
+              enum:
+                - ProductDocumentation
+              type: string
+            url:
+              description: URL to the documentation
+              type: string
+          required:
+            - type
+            - title
+            - url
+      description: References the product documentation
     PromptCreateProps:
       type: object
       properties:
@@ -1204,6 +2053,57 @@ components:
         type: string
       description: Replacements object used to anonymize/deanomymize messsages
       type: object
+    ResponseFields:
+      type: object
+      properties:
+        createdAt:
+          description: Time the Knowledge Base Entry was created
+          type: string
+        createdBy:
+          description: User who created the Knowledge Base Entry
+          type: string
+        id:
+          $ref: '#/components/schemas/NonEmptyString'
+        updatedAt:
+          description: Time the Knowledge Base Entry was last updated
+          type: string
+        updatedBy:
+          description: User who last updated the Knowledge Base Entry
+          type: string
+      required:
+        - id
+        - createdAt
+        - createdBy
+        - updatedAt
+        - updatedBy
+    SecurityAlertContentReference:
+      allOf:
+        - $ref: '#/components/schemas/BaseContentReference'
+        - type: object
+          properties:
+            alertId:
+              description: ID of the Alert
+              type: string
+            type:
+              enum:
+                - SecurityAlert
+              type: string
+          required:
+            - type
+            - alertId
+      description: References a security alert
+    SecurityAlertsPageContentReference:
+      allOf:
+        - $ref: '#/components/schemas/BaseContentReference'
+        - type: object
+          properties:
+            type:
+              enum:
+                - SecurityAlertsPage
+              type: string
+          required:
+            - type
+      description: References the security alerts page
     SortOrder:
       enum:
         - asc
@@ -1229,6 +2129,23 @@ components:
         name:
           description: User name
           type: string
+    Vector:
+      description: >-
+        Object containing Knowledge Base Entry text embeddings and modelId used
+        to create the embeddings
+      type: object
+      properties:
+        modelId:
+          description: ID of the model used to create the embeddings
+          type: string
+        tokens:
+          additionalProperties:
+            type: number
+          description: Tokens with their corresponding values
+          type: object
+      required:
+        - modelId
+        - tokens
   securitySchemes:
     BasicAuth:
       scheme: basic

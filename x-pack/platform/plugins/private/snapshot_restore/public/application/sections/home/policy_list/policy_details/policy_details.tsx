@@ -253,6 +253,7 @@ export const PolicyDetails: React.FunctionComponent<Props> = ({
                                       );
                                     },
                                     disabled: Boolean(policyDetails.policy.inProgress),
+                                    'data-test-subj': 'policyActionMenuRunPolicy',
                                   },
                                   {
                                     name: i18n.translate(

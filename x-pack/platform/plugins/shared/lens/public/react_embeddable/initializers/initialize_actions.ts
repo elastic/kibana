@@ -16,6 +16,7 @@ import {
   isOfQueryType,
 } from '@kbn/es-query';
 import {
+  PublishesTitle,
   PublishingSubject,
   StateComparators,
   apiPublishesUnifiedSearch,
@@ -65,7 +66,7 @@ function getViewUnderlyingDataArgs({
     canOpenVisualizations: boolean;
     canSaveDashboards: boolean;
     navLinks: Capabilities['navLinks'];
-    discover: Capabilities['discover'];
+    discover_v2: Capabilities['discover_v2'];
   };
   query: Array<Query | AggregateQuery>;
   filters: Filter[];
@@ -186,11 +187,11 @@ function loadViewUnderlyingDataArgs(
     activeVisualizationState,
     activeData,
     capabilities: {
-      canSaveDashboards: Boolean(capabilities.dashboard?.showWriteControls),
-      canSaveVisualizations: Boolean(capabilities.visualize.save),
-      canOpenVisualizations: Boolean(capabilities.visualize.show),
+      canSaveDashboards: Boolean(capabilities.dashboard_v2?.showWriteControls),
+      canSaveVisualizations: Boolean(capabilities.visualize_v2.save),
+      canOpenVisualizations: Boolean(capabilities.visualize_v2.show),
       navLinks: capabilities.navLinks,
-      discover: capabilities.discover,
+      discover_v2: capabilities.discover_v2,
     },
     query: mergedSearchContext.query,
     filters: mergedSearchContext.filters || [],
@@ -241,7 +242,7 @@ export function initializeActionApi(
   getLatestState: GetStateType,
   parentApi: unknown,
   searchContextApi: { timeRange$: PublishingSubject<TimeRange | undefined> },
-  titleApi: { panelTitle: PublishingSubject<string | undefined> },
+  title$: PublishesTitle['title$'],
   internalApi: LensInternalApi,
   services: LensEmbeddableStartServices
 ): {
@@ -252,7 +253,7 @@ export function initializeActionApi(
 } {
   const dynamicActionsApi = services.embeddableEnhanced?.initializeReactEmbeddableDynamicActions(
     uuid,
-    () => titleApi.panelTitle.getValue(),
+    () => title$.getValue(),
     initialState
   );
   const maybeStopDynamicActions = dynamicActionsApi?.startDynamicActions();

@@ -22,7 +22,7 @@ import { letBrowserHandleEvent } from './link_events';
  * Generates either an EuiLink or EuiButton with a React-Router-ified link
  *
  * Based off of EUI's recommendations for handling React Router:
- * https://github.com/elastic/eui/blob/master/wiki/react-router.md#react-router-51
+ * https://github.com/elastic/eui/blob/main/wiki/consuming-eui/react-router.md#react-router-51
  */
 
 type IEuiReactRouterProps = PropsWithChildren<{

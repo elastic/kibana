@@ -5,10 +5,12 @@
  * 2.0.
  */
 
+import { EuiSpacer } from '@elastic/eui';
+import styled from '@emotion/styled';
 import type { HttpStart } from '@kbn/core-http-browser';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import { MANAGEMENT_APP_LOCATOR } from '@kbn/deeplinks-management/constants';
 import { buildEsQuery, Filter, Query } from '@kbn/es-query';
-import styled from '@emotion/styled';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { LogsDataAccessPluginStart } from '@kbn/logs-data-access-plugin/public';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
@@ -17,7 +19,11 @@ import { noop } from 'lodash';
 import React, { useCallback, useEffect, useMemo } from 'react';
 import usePrevious from 'react-use/lib/usePrevious';
 import { LogEntryCursor } from '../../../common/log_entry';
-import { defaultLogViewsStaticConfig, LogViewReference } from '../../../common/log_views';
+import {
+  defaultLogViewsStaticConfig,
+  logSourcesKibanaAdvancedSettingRT,
+  LogViewReference,
+} from '../../../common/log_views';
 import { BuiltEsQuery, useLogStream } from '../../containers/logs/log_stream';
 import { useLogView } from '../../hooks/use_log_view';
 import { LogViewsClient } from '../../services/log_views';
@@ -25,6 +31,7 @@ import { LogColumnRenderConfiguration } from '../../utils/log_column_render_conf
 import { useKibanaQuerySettings } from '../../utils/use_kibana_query_settings';
 import { useLogEntryFlyout } from '../logging/log_entry_flyout';
 import { ScrollableLogTextStreamView, VisibleInterval } from '../logging/log_text_stream';
+import { LegacyLogViewCallout } from './legacy_log_view_callout';
 import { LogStreamErrorBoundary } from './log_stream_error_boundary';
 
 interface LogStreamPluginDeps {
@@ -117,12 +124,17 @@ export const LogStreamContent = ({
   const {
     services: { http, data, share, logsDataAccess },
   } = useKibana<LogStreamPluginDeps>();
+
+  const upgradeAssistantUrl = share.url.locators
+    .get(MANAGEMENT_APP_LOCATOR)
+    ?.useUrl({ sectionId: 'stack', appId: 'upgrade_assistant/kibana_deprecations' });
+
   if (http == null || data == null || share == null || logsDataAccess == null) {
     throw new Error(
       `<LogStream /> cannot access kibana core services.
 
 Ensure the component is mounted within kibana-react's <KibanaContextProvider> hierarchy.
-Read more at https://github.com/elastic/kibana/blob/main/src/plugins/kibana_react/README.md"
+Read more at https://github.com/elastic/kibana/blob/main/src/platform/plugins/shared/kibana_react/README.md"
 `
     );
   }
@@ -148,10 +160,18 @@ Read more at https://github.com/elastic/kibana/blob/main/src/plugins/kibana_reac
     isLoading: isLoadingLogView,
     load: loadLogView,
     resolvedLogView,
+    logView: currentLogView,
   } = useLogView({
     initialLogViewReference: logView,
     logViews,
   });
+
+  const isLegacyLogView = useMemo(
+    () =>
+      currentLogView != null &&
+      !logSourcesKibanaAdvancedSettingRT.is(currentLogView?.attributes.logIndices),
+    [currentLogView]
+  );
 
   const parsedQuery = useMemo<BuiltEsQuery | undefined>(() => {
     if (typeof query === 'object' && 'bool' in query) {
@@ -270,35 +290,44 @@ Read more at https://github.com/elastic/kibana/blob/main/src/plugins/kibana_reac
   );
 
   return (
-    <ScrollableLogTextStreamView
-      target={center ? center : entries.length ? entries[entries.length - 1].cursor : null}
-      columnConfigurations={columnConfigurations}
-      items={streamItems}
-      scale="medium"
-      wrap={true}
-      isReloading={isReloading}
-      isLoadingMore={isLoadingMore}
-      isStreaming={isStreaming}
-      hasMoreBeforeStart={hasMoreBefore}
-      hasMoreAfterEnd={hasMoreAfter}
-      lastLoadedTime={lastLoadedTime}
-      jumpToTarget={noop}
-      reportVisibleInterval={handlePagination}
-      reloadItems={fetchEntries}
-      onOpenLogEntryFlyout={showFlyoutAction ? openLogEntryFlyout : undefined}
-      highlightedItem={highlight ?? null}
-      currentHighlightKey={null}
-      startDateExpression={startDateExpression}
-      endDateExpression={endDateExpression}
-      updateDateRange={noop}
-      startLiveStreaming={noop}
-      hideScrollbar={false}
-    />
+    <>
+      {isLegacyLogView ? (
+        <>
+          <LegacyLogViewCallout upgradeAssistantUrl={upgradeAssistantUrl} />
+          <EuiSpacer size="s" />
+        </>
+      ) : null}
+      <ScrollableLogTextStreamView
+        target={center ? center : entries.length ? entries[entries.length - 1].cursor : null}
+        columnConfigurations={columnConfigurations}
+        items={streamItems}
+        scale="medium"
+        wrap={true}
+        isReloading={isReloading}
+        isLoadingMore={isLoadingMore}
+        isStreaming={isStreaming}
+        hasMoreBeforeStart={hasMoreBefore}
+        hasMoreAfterEnd={hasMoreAfter}
+        lastLoadedTime={lastLoadedTime}
+        jumpToTarget={noop}
+        reportVisibleInterval={handlePagination}
+        reloadItems={fetchEntries}
+        onOpenLogEntryFlyout={showFlyoutAction ? openLogEntryFlyout : undefined}
+        highlightedItem={highlight ?? null}
+        currentHighlightKey={null}
+        startDateExpression={startDateExpression}
+        endDateExpression={endDateExpression}
+        updateDateRange={noop}
+        startLiveStreaming={noop}
+        hideScrollbar={false}
+      />
+    </>
   );
 };
 
 const LogStreamContainer = styled.div`
   display: flex;
+  flex-direction: column;
   background-color: ${(props) => props.theme.euiTheme.colors.emptyShade};
 `;
 

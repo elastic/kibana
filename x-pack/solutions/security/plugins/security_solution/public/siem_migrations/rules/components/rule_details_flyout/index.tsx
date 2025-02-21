@@ -27,6 +27,7 @@ import {
 } from '@elastic/eui';
 import type { EuiTabbedContentTab, EuiTabbedContentProps, EuiFlyoutProps } from '@elastic/eui';
 
+import { RuleTranslationResult } from '../../../../../common/siem_migrations/constants';
 import type { RuleMigration } from '../../../../../common/siem_migrations/model/rule_migration.gen';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import {
@@ -46,7 +47,8 @@ import {
   convertMigrationCustomRuleToSecurityRulePayload,
   isMigrationCustomRule,
 } from '../../../../../common/siem_migrations/rules/utils';
-import { useUpdateMigrationRules } from '../../logic/use_update_migration_rules';
+import { useUpdateMigrationRule } from '../../logic/use_update_migration_rule';
+import { UpdatedByLabel } from './updated_by';
 
 /*
  * Fixes tabs to the top and allows the content to scroll.
@@ -91,36 +93,33 @@ export const MigrationRuleDetailsFlyout: React.FC<MigrationRuleDetailsFlyoutProp
 
     const { expandedOverviewSections, toggleOverviewSection } = useOverviewTabSections();
 
-    const { mutateAsync: updateMigrationRules } = useUpdateMigrationRules(
-      ruleMigration.migration_id
-    );
+    const { mutateAsync: updateMigrationRule } = useUpdateMigrationRule(ruleMigration);
 
     const [isUpdating, setIsUpdating] = useState(false);
     const isLoading = isDataLoading || isUpdating;
 
     const handleTranslationUpdate = useCallback(
       async (ruleName: string, ruleQuery: string) => {
-        if (!ruleMigration || isLoading) {
+        if (isLoading) {
           return;
         }
         setIsUpdating(true);
         try {
-          await updateMigrationRules([
-            {
-              id: ruleMigration.id,
-              elastic_rule: {
-                title: ruleName,
-                query: ruleQuery,
-              },
+          await updateMigrationRule({
+            id: ruleMigration.id,
+            elastic_rule: {
+              title: ruleName,
+              query: ruleQuery,
+              query_language: 'esql',
             },
-          ]);
+          });
         } catch (error) {
           addError(error, { title: logicI18n.UPDATE_MIGRATION_RULES_FAILURE });
         } finally {
           setIsUpdating(false);
         }
       },
-      [addError, ruleMigration, isLoading, updateMigrationRules]
+      [isLoading, updateMigrationRule, ruleMigration, addError]
     );
 
     const ruleDetailsToOverview = useMemo(() => {
@@ -137,13 +136,11 @@ export const MigrationRuleDetailsFlyout: React.FC<MigrationRuleDetailsFlyoutProp
         name: i18n.TRANSLATION_TAB_LABEL,
         content: (
           <TabContentPadding>
-            {ruleMigration && (
-              <TranslationTab
-                ruleMigration={ruleMigration}
-                matchedPrebuiltRule={matchedPrebuiltRule}
-                onTranslationUpdate={handleTranslationUpdate}
-              />
-            )}
+            <TranslationTab
+              ruleMigration={ruleMigration}
+              matchedPrebuiltRule={matchedPrebuiltRule}
+              onTranslationUpdate={handleTranslationUpdate}
+            />
           </TabContentPadding>
         ),
       }),
@@ -170,8 +167,15 @@ export const MigrationRuleDetailsFlyout: React.FC<MigrationRuleDetailsFlyoutProp
             )}
           </TabContentPadding>
         ),
+        disabled: ruleMigration.translation_result === RuleTranslationResult.UNTRANSLATABLE,
       }),
-      [ruleDetailsToOverview, size, expandedOverviewSections, toggleOverviewSection]
+      [
+        ruleDetailsToOverview,
+        size,
+        expandedOverviewSections,
+        toggleOverviewSection,
+        ruleMigration.translation_result,
+      ]
     );
 
     const summaryTab: EuiTabbedContentTab = useMemo(
@@ -233,13 +237,21 @@ export const MigrationRuleDetailsFlyout: React.FC<MigrationRuleDetailsFlyoutProp
           <EuiTitle size="m">
             <h2 id={migrationsRulesFlyoutTitleId}>
               {ruleDetailsToOverview?.name ??
-                ruleMigration?.original_rule.title ??
+                ruleMigration.original_rule.title ??
                 i18n.UNKNOWN_MIGRATION_RULE_TITLE}
             </h2>
           </EuiTitle>
-          <EuiSpacer size="l" />
+          <EuiSpacer size="s" />
+          <UpdatedByLabel ruleMigration={ruleMigration} />
         </EuiFlyoutHeader>
-        <EuiFlyoutBody>
+        <EuiFlyoutBody
+          // EUI TODO: We need to set transform to 'none' to avoid drag/drop issues in the flyout caused by the
+          // `transform: translateZ(0)` workaround for the mask image bug in Chromium.
+          // https://github.com/elastic/eui/pull/7855.
+          // We need to remove this workaround once it is fixed in EUI:
+          // https://github.com/elastic/eui/issues/8269.
+          css={{ '.euiFlyoutBody__overflow': { transform: 'none' } }}
+        >
           <EuiSkeletonLoading
             isLoading={isLoading}
             loadingContent={
@@ -255,7 +267,7 @@ export const MigrationRuleDetailsFlyout: React.FC<MigrationRuleDetailsFlyoutProp
           <EuiFlexGroup justifyContent="spaceBetween">
             <EuiFlexItem grow={false}>
               <EuiButtonEmpty onClick={closeFlyout} flush="left">
-                {i18n.DISMISS_BUTTON_LABEL}
+                {i18n.CLOSE_BUTTON_LABEL}
               </EuiButtonEmpty>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>{ruleActions}</EuiFlexItem>

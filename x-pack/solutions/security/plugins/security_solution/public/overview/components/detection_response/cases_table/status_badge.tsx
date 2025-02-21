@@ -18,11 +18,11 @@ interface Props {
 
 const statuses = {
   [CaseStatuses.open]: {
-    color: 'primary',
+    color: 'success',
     label: i18n.STATUS_OPEN,
   },
   [CaseStatuses['in-progress']]: {
-    color: 'warning',
+    color: 'primary',
     label: i18n.STATUS_IN_PROGRESS,
   },
   [CaseStatuses.closed]: {

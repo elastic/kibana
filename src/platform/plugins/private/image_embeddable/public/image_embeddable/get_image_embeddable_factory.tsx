@@ -15,7 +15,7 @@ import { EmbeddableEnhancedPluginStart } from '@kbn/embeddable-enhanced-plugin/p
 import { ReactEmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { PresentationContainer } from '@kbn/presentation-containers';
-import { getUnchangingComparator, initializeTitles } from '@kbn/presentation-publishing';
+import { getUnchangingComparator, initializeTitleManager } from '@kbn/presentation-publishing';
 
 import { IMAGE_CLICK_TRIGGER } from '../actions';
 import { openImageEditor } from '../components/image_editor/open_image_editor';
@@ -38,11 +38,11 @@ export const getImageEmbeddableFactory = ({
     type: IMAGE_EMBEDDABLE_TYPE,
     deserializeState: (state) => state.rawState,
     buildEmbeddable: async (initialState, buildApi, uuid) => {
-      const { titlesApi, titleComparators, serializeTitles } = initializeTitles(initialState);
+      const titleManager = initializeTitleManager(initialState);
 
       const dynamicActionsApi = embeddableEnhanced?.initializeReactEmbeddableDynamicActions(
         uuid,
-        () => titlesApi.panelTitle.getValue(),
+        () => titleManager.api.title$.getValue(),
         initialState
       );
       // if it is provided, start the dynamic actions manager
@@ -54,9 +54,9 @@ export const getImageEmbeddableFactory = ({
 
       const embeddable = buildApi(
         {
-          ...titlesApi,
+          ...titleManager.api,
           ...(dynamicActionsApi?.dynamicActionsApi ?? {}),
-          dataLoading: dataLoading$,
+          dataLoading$,
           supportedTriggers: () => [IMAGE_CLICK_TRIGGER],
           onEdit: async () => {
             try {
@@ -77,7 +77,7 @@ export const getImageEmbeddableFactory = ({
           serializeState: () => {
             return {
               rawState: {
-                ...serializeTitles(),
+                ...titleManager.serialize(),
                 ...(dynamicActionsApi?.serializeDynamicActions() ?? {}),
                 imageConfig: imageConfig$.getValue(),
               },
@@ -85,7 +85,7 @@ export const getImageEmbeddableFactory = ({
           },
         },
         {
-          ...titleComparators,
+          ...titleManager.comparators,
           ...(dynamicActionsApi?.dynamicActionsComparator ?? {
             enhancements: getUnchangingComparator(),
           }),

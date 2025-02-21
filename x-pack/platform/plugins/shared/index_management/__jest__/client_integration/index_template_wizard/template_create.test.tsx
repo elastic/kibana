@@ -8,7 +8,7 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 
-import { API_BASE_PATH } from '../../../common/constants';
+import { API_BASE_PATH, LOOKUP_INDEX_MODE } from '../../../common/constants';
 import { setupEnvironment } from '../helpers';
 
 import {
@@ -298,7 +298,11 @@ describe('<TemplateCreate />', () => {
       beforeEach(async () => {
         const { actions } = testBed;
         // Logistics
-        await actions.completeStepOne({ name: TEMPLATE_NAME, indexPatterns: ['index1'] });
+        await actions.completeStepOne({
+          name: TEMPLATE_NAME,
+          indexPatterns: ['index1'],
+          indexMode: LOOKUP_INDEX_MODE,
+        });
         // Component templates
         await actions.completeStepTwo();
       });
@@ -315,7 +319,7 @@ describe('<TemplateCreate />', () => {
 
         expect(exists('indexModeCallout')).toBe(true);
         expect(find('indexModeCallout').text()).toContain(
-          'The index.mode setting has been set to Standard within the Logistics step.'
+          'The index.mode setting has been set to Lookup within the Logistics step.'
         );
       });
 
@@ -325,6 +329,17 @@ describe('<TemplateCreate />', () => {
         await actions.completeStepThree('{ invalidJsonString ');
 
         expect(form.getErrorsMessages()).toContain('Invalid JSON format.');
+      });
+
+      it('should not allow setting number_of_shards to a value different from 1 for Lookup index mode', async () => {
+        // The Lookup index mode was already selected in the first (Logistics) step
+        const { form, actions } = testBed;
+
+        await actions.completeStepThree('{ "index.number_of_shards": 2 }');
+
+        expect(form.getErrorsMessages()).toContain(
+          'Number of shards for lookup index mode can only be 1 or unset.'
+        );
       });
     });
 
@@ -476,8 +491,8 @@ describe('<TemplateCreate />', () => {
           body: JSON.stringify({
             name: 'my_logs_template',
             indexPatterns: ['logs-*-*'],
-            allowAutoCreate: 'NO_OVERWRITE',
             indexMode: 'logsdb',
+            allowAutoCreate: 'NO_OVERWRITE',
             dataStream: {},
             _kbnMeta: {
               type: 'default',
@@ -622,8 +637,8 @@ describe('<TemplateCreate />', () => {
           body: JSON.stringify({
             name: TEMPLATE_NAME,
             indexPatterns: DEFAULT_INDEX_PATTERNS,
-            allowAutoCreate: 'TRUE',
             indexMode: 'time_series',
+            allowAutoCreate: 'TRUE',
             dataStream: {},
             _kbnMeta: {
               type: 'default',

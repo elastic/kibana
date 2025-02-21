@@ -19,7 +19,8 @@ export const useRiskDonutChartData = (
 ): [DonutChartProps['data'], LegendItem[], number] => {
   const [donutChartData, legendItems, total] = useMemo(() => {
     const severities = Object.keys(RISK_SEVERITY_COLOUR) as RiskSeverity[];
-
+    // TODO: Borealis theme migration, when severity palette agreed, update RISK_SEVERITY_COLOUR to use shared hook from security colors:
+    // https://github.com/elastic/security-team/issues/11516 hook - https://github.com/elastic/kibana/pull/206276
     return [
       severities.map((status) => ({
         key: status,

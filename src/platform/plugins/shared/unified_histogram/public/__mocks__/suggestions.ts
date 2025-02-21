@@ -185,12 +185,12 @@ export const histogramESQLSuggestionMock = {
       '662552df-2cdc-4539-bf3b-73b9f827252c': {
         index: 'e3465e67bdeced2befff9f9dca7ecf9c48504cad68a10efd881f4c7dd5ade28a',
         query: {
-          esql: 'from kibana_sample_data_logs | limit 10 | EVAL timestamp=DATE_TRUNC(30 second, @timestamp) | stats results = count(*) by timestamp | rename timestamp as `@timestamp every 30 second`',
+          esql: 'from kibana_sample_data_logs | limit 10 | EVAL timestamp=DATE_TRUNC(30 second, @timestamp) | stats results = count(*) by timestamp',
         },
         columns: [
           {
-            columnId: '@timestamp every 30 second',
-            fieldName: '@timestamp every 30 second',
+            columnId: 'timestamp',
+            fieldName: 'timestamp',
             meta: {
               type: 'date',
             },

@@ -18,7 +18,7 @@ import type {
   Logger,
 } from '@kbn/core/server';
 import assert from 'assert';
-import type { Stored } from '../types';
+import type { Stored, SiemRuleMigrationsClientDependencies } from '../types';
 import type { IndexNameProvider } from './rule_migrations_data_client';
 
 const DEFAULT_PIT_KEEP_ALIVE: Duration = '30s' as const;
@@ -30,7 +30,8 @@ export class RuleMigrationsDataBaseClient {
     protected getIndexName: IndexNameProvider,
     protected currentUser: AuthenticatedUser,
     protected esScopedClient: IScopedClusterClient,
-    protected logger: Logger
+    protected logger: Logger,
+    protected dependencies: SiemRuleMigrationsClientDependencies
   ) {
     this.esClient = esScopedClient.asInternalUser;
   }
@@ -40,11 +41,16 @@ export class RuleMigrationsDataBaseClient {
       return this.currentUser.profile_uid;
     }
     const username = this.currentUser.username;
-    const users = await this.esScopedClient.asCurrentUser.security.getUser({
-      username,
-      with_profile_uid: true,
-    });
-    return users[username].profile_uid;
+    try {
+      const users = await this.esScopedClient.asCurrentUser.security.getUser({
+        username,
+        with_profile_uid: true,
+      });
+      return users[username].profile_uid;
+    } catch (error) {
+      this.logger.error(`Error getting profile_uid for user ${username}: ${error}`);
+      return username;
+    }
   }
 
   protected processResponseHits<T extends object>(

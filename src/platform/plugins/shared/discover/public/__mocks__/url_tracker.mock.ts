@@ -9,8 +9,9 @@
 
 import { UrlTracker } from '../build_services';
 
-export const urlTrackerMock = {
-  setTrackedUrl: jest.fn(),
-  restorePreviousUrl: jest.fn(),
-  setTrackingEnabled: jest.fn(),
-} as UrlTracker;
+export const createUrlTrackerMock = () =>
+  ({
+    setTrackedUrl: jest.fn(),
+    restorePreviousUrl: jest.fn(),
+    setTrackingEnabled: jest.fn(),
+  } as UrlTracker);

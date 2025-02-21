@@ -17,7 +17,8 @@ import { omit } from 'lodash';
 const Wrapper = ({ children }: React.PropsWithChildren) =>
   React.createElement(WrappedHelper, null, children);
 
-describe('useMonitorStatusData', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/204152
+describe.skip('useMonitorStatusData', () => {
   let dispatchMock: jest.Mock;
   beforeEach(() => {
     dispatchMock = jest.fn();

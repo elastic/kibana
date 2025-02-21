@@ -11,6 +11,7 @@ import { ExecutionContextStart } from '@kbn/core/public';
 export interface Context {
   isCloudEnabled: boolean;
   cloudBaseUrl: string;
+  cloudDeploymentUrl: string;
   executionContext: ExecutionContextStart;
   canUseAPIKeyTrustModel: boolean;
 }

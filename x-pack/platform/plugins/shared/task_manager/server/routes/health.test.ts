@@ -36,9 +36,11 @@ const { summarizeMonitoringStats } = jest.requireMock('../monitoring');
 const mockUsageCountersSetup = usageCountersServiceMock.createSetupContract();
 const mockUsageCounter = mockUsageCountersSetup.createUsageCounter('test');
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const createMockClusterClient = (response: any) => {
   const mockScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   mockScopedClusterClient.asCurrentUser.security.hasPrivileges.mockResponse(response as any);
 
   const mockClusterClient = elasticsearchServiceMock.createClusterClient();

@@ -166,6 +166,7 @@ export function MobileCrashesOverview() {
     },
     // only fetches agg results when requestId changes
 
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [requestId],
     { preservePreviousData: false }
   );

@@ -32,7 +32,7 @@ export const IndicatorFieldLabel: VFC<IndicatorFieldLabelProps> = ({ field }) =>
 /** This translates the field name using kbn-i18n */
 export const translateFieldLabel = (field: string) => {
   // This switch is necessary as i18n id cannot be dynamic, see:
-  // https://github.com/elastic/kibana/blob/main/src/dev/i18n/README.md
+  // https://github.com/elastic/kibana/blob/main/src/dev/i18n_tools/README.md
   switch (field) {
     case RawIndicatorFieldId.TimeStamp: {
       return TIMESTAMP;

@@ -48,7 +48,6 @@ import {
   useGetSettingsQuery,
 } from '../../../../hooks';
 import { INTEGRATIONS_ROUTING_PATHS } from '../../../../constants';
-import { ExperimentalFeaturesService } from '../../../../services';
 import {
   useGetPackageInfoByKeyQuery,
   useLink,
@@ -162,8 +161,6 @@ export function Detail() {
 
   const services = useStartServices();
   const isCloud = !!services?.cloud?.cloudId;
-  const { createPackagePolicyMultiPageLayout: isExperimentalAddIntegrationPageEnabled } =
-    ExperimentalFeaturesService.get();
   const agentPolicyIdFromContext = getAgentPolicyId();
   const isOverviewPage = panel === 'overview';
 
@@ -412,7 +409,6 @@ export function Detail() {
         currentPath,
         integration,
         isCloud,
-        isExperimentalAddIntegrationPageEnabled,
         isFirstTimeAgentUser,
         isGuidedOnboardingActive,
         pkgkey,
@@ -445,7 +441,6 @@ export function Detail() {
       history,
       integration,
       isCloud,
-      isExperimentalAddIntegrationPageEnabled,
       isFirstTimeAgentUser,
       isGuidedOnboardingActive,
       onboardingAppId,

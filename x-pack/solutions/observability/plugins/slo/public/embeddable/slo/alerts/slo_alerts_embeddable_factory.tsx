@@ -13,7 +13,7 @@ import { Storage } from '@kbn/kibana-utils-plugin/public';
 import {
   FetchContext,
   fetch$,
-  initializeTitles,
+  initializeTitleManager,
   useBatchedPublishingSubjects,
   useFetchContext,
 } from '@kbn/presentation-publishing';
@@ -27,6 +27,7 @@ import { SLOPublicPluginsStart, SLORepositoryClient } from '../../../types';
 import { SLO_ALERTS_EMBEDDABLE_ID } from './constants';
 import { SloAlertsWrapper } from './slo_alerts_wrapper';
 import { SloAlertsApi, SloAlertsEmbeddableState } from './types';
+import { openSloConfiguration } from './slo_alerts_open_configuration';
 const history = createBrowserHistory();
 const queryClient = new QueryClient();
 
@@ -59,8 +60,6 @@ export function getAlertsEmbeddableFactory({
       const deps = { ...coreStart, ...pluginsStart };
       async function onEdit() {
         try {
-          const { openSloConfiguration } = await import('./slo_alerts_open_configuration');
-
           const result = await openSloConfiguration(
             coreStart,
             pluginsStart,
@@ -73,15 +72,15 @@ export function getAlertsEmbeddableFactory({
         }
       }
 
-      const { titlesApi, titleComparators, serializeTitles } = initializeTitles(state);
+      const titleManager = initializeTitleManager(state);
       const defaultTitle$ = new BehaviorSubject<string | undefined>(getAlertsPanelTitle());
       const slos$ = new BehaviorSubject(state.slos);
       const showAllGroupByInstances$ = new BehaviorSubject(state.showAllGroupByInstances);
       const reload$ = new Subject<FetchContext>();
       const api = buildApi(
         {
-          ...titlesApi,
-          defaultPanelTitle: defaultTitle$,
+          ...titleManager.api,
+          defaultTitle$,
           getTypeDisplayName: () =>
             i18n.translate('xpack.slo.editSloAlertswEmbeddable.typeDisplayName', {
               defaultMessage: 'configuration',
@@ -93,7 +92,7 @@ export function getAlertsEmbeddableFactory({
           serializeState: () => {
             return {
               rawState: {
-                ...serializeTitles(),
+                ...titleManager.serialize(),
                 slos: slos$.getValue(),
                 showAllGroupByInstances: showAllGroupByInstances$.getValue(),
               },
@@ -116,7 +115,7 @@ export function getAlertsEmbeddableFactory({
             showAllGroupByInstances$,
             (value) => showAllGroupByInstances$.next(value),
           ],
-          ...titleComparators,
+          ...titleManager.comparators,
         }
       );
 

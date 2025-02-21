@@ -77,7 +77,7 @@ const ExpressionsExplorer = ({
                     demonstrated. You can read more about it{' '}
                     <EuiLink
                       href={
-                        'https://github.com/elastic/kibana/blob/main/src/plugins/expressions/README.asciidoc'
+                        'https://github.com/elastic/kibana/blob/main/src/platform/plugins/shared/expressions/README.asciidoc'
                       }
                     >
                       here

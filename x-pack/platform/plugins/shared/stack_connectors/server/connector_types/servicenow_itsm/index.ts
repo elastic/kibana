@@ -18,7 +18,7 @@ import {
   CasesConnectorFeatureId,
   UptimeConnectorFeatureId,
   SecurityConnectorFeatureId,
-} from '@kbn/actions-plugin/common/types';
+} from '@kbn/actions-plugin/common';
 import { validate } from '../lib/servicenow/validators';
 import {
   ExecutorParamsSchemaITSM,

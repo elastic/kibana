@@ -43,7 +43,40 @@ export {
   ResolveLogViewError,
 } from './log_views/errors';
 
-export * from './log_entry';
+export type {
+  LogEntryTime,
+  LogMessageConstantPart,
+  LogMessageFieldPart,
+  LogMessagePart,
+  LogTimestampColumn,
+  LogFieldColumn,
+  LogMessageColumn,
+  LogColumn,
+  LogEntryContext,
+  LogEntryField,
+  LogEntry,
+  LogEntryCursor,
+  LogEntryBeforeCursor,
+  LogEntryAfterCursor,
+  LogEntryAroundCursor,
+} from './log_entry';
+export {
+  logMessageConstantPartRT,
+  logMessageFieldPartRT,
+  logMessagePartRT,
+  logTimestampColumnRT,
+  logFieldColumnRT,
+  logMessageColumnRT,
+  logColumnRT,
+  logEntryContextRT,
+  logEntryFieldRT,
+  logEntryRT,
+  logEntryCursorRT,
+  logEntryBeforeCursorRT,
+  logEntryAfterCursorRT,
+  logEntryAroundCursorRT,
+  getLogEntryCursorFromHit,
+} from './log_entry';
 
 export { convertISODateToNanoPrecision } from './utils';
 

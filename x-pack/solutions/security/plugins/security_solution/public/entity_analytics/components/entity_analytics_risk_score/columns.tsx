@@ -9,18 +9,25 @@ import type { SyntheticEvent } from 'react';
 import React from 'react';
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import { EuiLink } from '@elastic/eui';
-import styled from 'styled-components';
+import styled from '@emotion/styled';
+import { get } from 'lodash/fp';
+
+import { EntityTypeToIdentifierField } from '../../../../common/entity_analytics/types';
 import { getEmptyTagValue } from '../../../common/components/empty_value';
-import { HostDetailsLink, UserDetailsLink } from '../../../common/components/links';
+import { EntityDetailsLink } from '../../../common/components/links';
 import { RiskScoreLevel } from '../severity/common';
 import { CELL_ACTIONS_TELEMETRY } from '../risk_score/constants';
 import type {
-  HostRiskScore,
+  EntityRiskScore,
   Maybe,
   RiskSeverity,
-  UserRiskScore,
+  EntityType,
 } from '../../../../common/search_strategy';
-import { RiskScoreEntity, RiskScoreFields } from '../../../../common/search_strategy';
+import {
+  EntityTypeToLevelField,
+  EntityTypeToScoreField,
+  RiskScoreFields,
+} from '../../../../common/search_strategy';
 import * as i18n from './translations';
 import { FormattedCount } from '../../../common/components/formatted_number';
 import {
@@ -32,156 +39,144 @@ import {
 import { FormattedRelativePreferenceDate } from '../../../common/components/formatted_date';
 import { formatRiskScore } from '../../common';
 
-type HostRiskScoreColumns = Array<EuiBasicTableColumn<HostRiskScore & UserRiskScore>>;
-
 const StyledCellActions = styled(SecurityCellActions)`
-  padding-left: ${({ theme }) => theme.eui.euiSizeS};
+  padding-left: ${({ theme: { euiTheme } }) => euiTheme.size.s};
 `;
 
 type OpenEntityOnAlertsPage = (entityName: string) => void;
 type OpenEntityOnExpandableFlyout = (entityName: string) => void;
 
-export const getRiskScoreColumns = (
-  riskEntity: RiskScoreEntity,
+export const getRiskScoreColumns = <E extends EntityType>(
+  entityType: E,
   openEntityOnAlertsPage: OpenEntityOnAlertsPage,
   openEntityOnExpandableFlyout: OpenEntityOnExpandableFlyout
-): HostRiskScoreColumns => [
-  {
-    field: riskEntity === RiskScoreEntity.host ? 'host.name' : 'user.name',
-    name: i18n.ENTITY_NAME(riskEntity),
-    truncateText: false,
-    mobileOptions: { show: true },
-    className: 'inline-actions-table-cell',
-    render: (entityName: string) => {
-      const onEntityDetailsLinkClick = (e: SyntheticEvent) => {
-        e.preventDefault();
-        openEntityOnExpandableFlyout(entityName);
-      };
+): Array<EuiBasicTableColumn<EntityRiskScore<E>>> => {
+  const fieldName = EntityTypeToIdentifierField[entityType];
+  const getEntityName = get(fieldName);
+  const getEntityDetailsLinkComponent = (entityName: string) => {
+    const onEntityDetailsLinkClick: (e: SyntheticEvent) => void = (e) => {
+      e.preventDefault();
+      openEntityOnExpandableFlyout(entityName);
+    };
 
-      if (entityName != null && entityName.length > 0) {
-        return riskEntity === RiskScoreEntity.host ? (
-          <>
-            <HostDetailsLink hostName={entityName} onClick={onEntityDetailsLinkClick} />
-            <StyledCellActions
-              data={{
-                value: entityName,
-                field: 'host.name',
-              }}
-              triggerId={SecurityCellActionsTrigger.DEFAULT}
-              mode={CellActionsMode.INLINE}
-              visibleCellActions={2}
-              disabledActionTypes={[
-                SecurityCellActionType.FILTER,
-                SecurityCellActionType.SHOW_TOP_N,
-              ]}
-              metadata={{
-                telemetry: CELL_ACTIONS_TELEMETRY,
-              }}
-            />
-          </>
-        ) : (
-          <>
-            <UserDetailsLink userName={entityName} onClick={onEntityDetailsLinkClick} />
+    return (
+      <EntityDetailsLink
+        entityType={entityType}
+        entityName={entityName}
+        onClick={onEntityDetailsLinkClick}
+      />
+    );
+  };
 
-            <StyledCellActions
-              data={{
-                value: entityName,
-                field: 'user.name',
-              }}
-              triggerId={SecurityCellActionsTrigger.DEFAULT}
-              mode={CellActionsMode.INLINE}
-              disabledActionTypes={[
-                SecurityCellActionType.FILTER,
-                SecurityCellActionType.SHOW_TOP_N,
-              ]}
-            />
-          </>
-        );
-      }
-      return getEmptyTagValue();
-    },
-  },
+  return [
+    {
+      field: fieldName,
+      name: i18n.ENTITY_NAME(entityType),
+      truncateText: false,
+      mobileOptions: { show: true },
+      className: 'inline-actions-table-cell',
+      render: (entityName: string) => {
+        if (entityName != null && entityName.length > 0) {
+          return (
+            <>
+              {getEntityDetailsLinkComponent(entityName)}
 
-  {
-    field: RiskScoreFields.timestamp,
-    name: i18n.LAST_UPDATED,
-    truncateText: false,
-    mobileOptions: { show: true },
-    sortable: true,
-    width: '20%',
-    render: (lastSeen: Maybe<string>) => {
-      if (lastSeen != null) {
-        return <FormattedRelativePreferenceDate value={lastSeen} />;
-      }
-      return getEmptyTagValue();
+              <StyledCellActions
+                data={{
+                  value: entityName,
+                  field: fieldName,
+                }}
+                triggerId={SecurityCellActionsTrigger.DEFAULT}
+                mode={CellActionsMode.INLINE}
+                visibleCellActions={2}
+                disabledActionTypes={[
+                  SecurityCellActionType.FILTER,
+                  SecurityCellActionType.SHOW_TOP_N,
+                ]}
+                metadata={{
+                  telemetry: CELL_ACTIONS_TELEMETRY,
+                }}
+              />
+            </>
+          );
+        }
+        return getEmptyTagValue();
+      },
     },
-  },
-  {
-    field:
-      riskEntity === RiskScoreEntity.host
-        ? RiskScoreFields.hostRiskScore
-        : RiskScoreFields.userRiskScore,
-    width: '15%',
-    name: i18n.RISK_SCORE_TITLE(riskEntity),
-    truncateText: true,
-    mobileOptions: { show: true },
-    render: (riskScore: number) => {
-      if (riskScore != null) {
-        return (
-          <span data-test-subj="risk-score-truncate" title={`${riskScore}`}>
-            {formatRiskScore(riskScore)}
-          </span>
-        );
-      }
-      return getEmptyTagValue();
+
+    {
+      field: RiskScoreFields.timestamp,
+      name: i18n.LAST_UPDATED,
+      truncateText: false,
+      mobileOptions: { show: true },
+      sortable: true,
+      width: '20%',
+      render: (lastSeen: Maybe<string>) => {
+        if (lastSeen != null) {
+          return <FormattedRelativePreferenceDate value={lastSeen} />;
+        }
+        return getEmptyTagValue();
+      },
     },
-  },
-  {
-    field:
-      riskEntity === RiskScoreEntity.host ? RiskScoreFields.hostRisk : RiskScoreFields.userRisk,
-    width: '25%',
-    name: i18n.ENTITY_RISK_LEVEL(riskEntity),
-    truncateText: false,
-    mobileOptions: { show: true },
-    render: (risk: RiskSeverity) => {
-      if (risk != null) {
-        return <RiskScoreLevel severity={risk} />;
-      }
-      return getEmptyTagValue();
+    {
+      field: EntityTypeToScoreField[entityType],
+      width: '15%',
+      name: i18n.RISK_SCORE_TITLE(entityType),
+      truncateText: true,
+      mobileOptions: { show: true },
+      render: (riskScore: number) => {
+        if (riskScore != null) {
+          return (
+            <span data-test-subj="risk-score-truncate" title={`${riskScore}`}>
+              {formatRiskScore(riskScore)}
+            </span>
+          );
+        }
+        return getEmptyTagValue();
+      },
     },
-  },
-  {
-    field: RiskScoreFields.alertsCount,
-    width: '10%',
-    name: i18n.ALERTS,
-    truncateText: false,
-    mobileOptions: { show: true },
-    className: 'inline-actions-table-cell',
-    render: (alertCount: number, risk) => (
-      <>
-        <EuiLink
-          data-test-subj="risk-score-alerts"
-          disabled={alertCount === 0}
-          onClick={() =>
-            openEntityOnAlertsPage(
-              riskEntity === RiskScoreEntity.host ? risk.host.name : risk.user.name
-            )
-          }
-        >
-          <FormattedCount count={alertCount} />
-        </EuiLink>
-        <StyledCellActions
-          data={{
-            value: riskEntity === RiskScoreEntity.host ? risk.host.name : risk.user.name,
-            field: riskEntity === RiskScoreEntity.host ? 'host.name' : 'user.name',
-          }}
-          mode={CellActionsMode.INLINE}
-          triggerId={SecurityCellActionsTrigger.ALERTS_COUNT}
-          metadata={{
-            andFilters: [{ field: 'kibana.alert.workflow_status', value: 'open' }],
-          }}
-        />
-      </>
-    ),
-  },
-];
+    {
+      field: EntityTypeToLevelField[entityType],
+      width: '25%',
+      name: i18n.ENTITY_RISK_LEVEL(entityType),
+      truncateText: false,
+      mobileOptions: { show: true },
+      render: (risk: RiskSeverity) => {
+        if (risk != null) {
+          return <RiskScoreLevel severity={risk} />;
+        }
+        return getEmptyTagValue();
+      },
+    },
+    {
+      field: RiskScoreFields.alertsCount,
+      width: '10%',
+      name: i18n.ALERTS,
+      truncateText: false,
+      mobileOptions: { show: true },
+      className: 'inline-actions-table-cell',
+      render: (alertCount: number, risk) => (
+        <>
+          <EuiLink
+            data-test-subj="risk-score-alerts"
+            disabled={alertCount === 0}
+            onClick={() => openEntityOnAlertsPage(getEntityName(risk))}
+          >
+            <FormattedCount count={alertCount} />
+          </EuiLink>
+          <StyledCellActions
+            data={{
+              value: getEntityName(risk),
+              field: fieldName,
+            }}
+            mode={CellActionsMode.INLINE}
+            triggerId={SecurityCellActionsTrigger.ALERTS_COUNT}
+            metadata={{
+              andFilters: [{ field: 'kibana.alert.workflow_status', value: 'open' }],
+            }}
+          />
+        </>
+      ),
+    },
+  ];
+};

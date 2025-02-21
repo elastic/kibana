@@ -201,7 +201,7 @@ export const RuleEventLogListTable = <T extends RuleEventLogListOptions>(
 
   const onError = useCallback<NonNullable<UseLoadRuleEventLogsProps['onError']>>(
     (e) => {
-      if (e.body.statusCode === 413) {
+      if (e.body?.statusCode === 413) {
         return;
       }
       notifications.toasts.addDanger({

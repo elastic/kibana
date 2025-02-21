@@ -19,7 +19,7 @@ export const visualizeTSVBAction = (application: ApplicationStart) =>
       i18n.translate('xpack.lens.visualizeTSVBLegend', {
         defaultMessage: 'Visualize TSVB chart',
       }),
-    isCompatible: async () => !!application.capabilities.visualize.show,
+    isCompatible: async () => !!application.capabilities.visualize_v2.show,
     execute: async (context: { [key: string]: VisualizeEditorContext }) => {
       const table = Object.values(context.layers);
       const payload = {

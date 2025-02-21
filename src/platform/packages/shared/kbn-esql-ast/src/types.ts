@@ -193,8 +193,9 @@ export interface ESQLOrderExpression extends ESQLAstBaseItem {
   args: [field: ESQLAstItem];
 }
 
-export interface ESQLBinaryExpression
-  extends ESQLFunction<'binary-expression', BinaryExpressionOperator> {
+export interface ESQLBinaryExpression<
+  Name extends BinaryExpressionOperator = BinaryExpressionOperator
+> extends ESQLFunction<'binary-expression', Name> {
   subtype: 'binary-expression';
   args: [ESQLAstItem, ESQLAstItem];
 }
@@ -204,13 +205,15 @@ export type BinaryExpressionOperator =
   | BinaryExpressionAssignmentOperator
   | BinaryExpressionComparisonOperator
   | BinaryExpressionRegexOperator
-  | BinaryExpressionRenameOperator;
+  | BinaryExpressionRenameOperator
+  | BinaryExpressionWhereOperator;
 
 export type BinaryExpressionArithmeticOperator = '+' | '-' | '*' | '/' | '%';
 export type BinaryExpressionAssignmentOperator = '=';
 export type BinaryExpressionComparisonOperator = '==' | '=~' | '!=' | '<' | '<=' | '>' | '>=';
 export type BinaryExpressionRegexOperator = 'like' | 'not_like' | 'rlike' | 'not_rlike';
 export type BinaryExpressionRenameOperator = 'as';
+export type BinaryExpressionWhereOperator = 'where';
 
 // from https://github.com/elastic/elasticsearch/blob/122e7288200ee03e9087c98dff6cebbc94e774aa/docs/reference/esql/functions/kibana/inline_cast.json
 export type InlineCastingType =

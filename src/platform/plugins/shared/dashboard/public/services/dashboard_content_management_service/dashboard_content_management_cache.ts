@@ -9,7 +9,9 @@
 
 import LRUCache from 'lru-cache';
 import type { DashboardGetOut } from '../../../server/content_management';
-import { DASHBOARD_CACHE_SIZE, DASHBOARD_CACHE_TTL } from '../../dashboard_constants';
+
+const DASHBOARD_CACHE_SIZE = 20; // only store a max of 20 dashboards
+const DASHBOARD_CACHE_TTL = 1000 * 60 * 5; // time to live = 5 minutes
 
 export class DashboardContentManagementCache {
   private cache: LRUCache<string, DashboardGetOut>;

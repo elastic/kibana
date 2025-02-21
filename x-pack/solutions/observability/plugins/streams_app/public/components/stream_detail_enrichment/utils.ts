@@ -5,23 +5,24 @@
  * 2.0.
  */
 
-import {
-  DissectProcessingDefinition,
-  GrokProcessingDefinition,
-  ProcessingDefinition,
-  ProcessorType,
-  isCompleteCondition,
-  isDissectProcessor,
-  isGrokProcessor,
-} from '@kbn/streams-schema';
-import { isEmpty } from 'lodash';
-import { DissectFormState, GrokFormState, ProcessorDefinition, ProcessorFormState } from './types';
+/* eslint-disable @typescript-eslint/naming-convention */
 
-const defaultCondition: ProcessingDefinition['condition'] = {
-  field: '',
-  operator: 'eq',
-  value: '',
-};
+import {
+  ProcessorDefinition,
+  ProcessorDefinitionWithId,
+  ProcessorType,
+  getProcessorType,
+} from '@kbn/streams-schema';
+import { htmlIdGenerator } from '@elastic/eui';
+import { isEmpty } from 'lodash';
+import {
+  DissectFormState,
+  ProcessorDefinitionWithUIAttributes,
+  GrokFormState,
+  ProcessorFormState,
+  WithUIAttributes,
+} from './types';
+import { ALWAYS_CONDITION } from '../../util/condition';
 
 const defaultGrokProcessorFormState: GrokFormState = {
   type: 'grok',
@@ -30,7 +31,7 @@ const defaultGrokProcessorFormState: GrokFormState = {
   pattern_definitions: {},
   ignore_failure: true,
   ignore_missing: true,
-  condition: defaultCondition,
+  if: ALWAYS_CONDITION,
 };
 
 const defaultDissectProcessorFormState: DissectFormState = {
@@ -39,7 +40,7 @@ const defaultDissectProcessorFormState: DissectFormState = {
   pattern: '',
   ignore_failure: true,
   ignore_missing: true,
-  condition: defaultCondition,
+  if: ALWAYS_CONDITION,
 };
 
 const defaultProcessorFormStateByType: Record<ProcessorType, ProcessorFormState> = {
@@ -49,63 +50,59 @@ const defaultProcessorFormStateByType: Record<ProcessorType, ProcessorFormState>
 
 export const getDefaultFormState = (
   type: ProcessorType,
-  processor?: ProcessorDefinition
+  processor?: ProcessorDefinitionWithUIAttributes
 ): ProcessorFormState => {
   if (!processor) return defaultProcessorFormStateByType[type];
 
-  let configValues: ProcessorFormState = defaultProcessorFormStateByType[type];
+  if (isGrokProcessor(processor)) {
+    const { grok } = processor;
 
-  if (isGrokProcessor(processor.config)) {
-    const { grok } = processor.config;
-
-    configValues = structuredClone({
+    return structuredClone({
       ...grok,
       type: 'grok',
       patterns: grok.patterns.map((pattern) => ({ value: pattern })),
     });
   }
 
-  if (isDissectProcessor(processor.config)) {
-    const { dissect } = processor.config;
+  if (isDissectProcessor(processor)) {
+    const { dissect } = processor;
 
-    configValues = structuredClone({
+    return structuredClone({
       ...dissect,
       type: 'dissect',
     });
   }
 
-  return {
-    condition: processor.condition || defaultCondition,
-    ...configValues,
-  };
+  throw new Error(`Default state not found for unsupported processor type: ${type}`);
 };
 
-export const convertFormStateToProcessing = (
-  formState: ProcessorFormState
-): ProcessingDefinition => {
+export const convertFormStateToProcessor = (formState: ProcessorFormState): ProcessorDefinition => {
   if (formState.type === 'grok') {
-    const { condition, patterns, ...grokConfig } = formState;
+    const { patterns, field, pattern_definitions, ignore_failure, ignore_missing } = formState;
 
     return {
-      condition: isCompleteCondition(condition) ? condition : undefined,
-      config: {
-        grok: {
-          patterns: patterns
-            .filter(({ value }) => value.trim().length > 0)
-            .map(({ value }) => value),
-          ...grokConfig,
-        },
+      grok: {
+        if: formState.if,
+        patterns: patterns.filter(({ value }) => value.trim().length > 0).map(({ value }) => value),
+        field,
+        pattern_definitions,
+        ignore_failure,
+        ignore_missing,
       },
     };
   }
 
   if (formState.type === 'dissect') {
-    const { condition, ...dissectConfig } = formState;
+    const { field, pattern, append_separator, ignore_failure, ignore_missing } = formState;
 
     return {
-      condition: isCompleteCondition(condition) ? condition : undefined,
-      config: {
-        dissect: dissectConfig,
+      dissect: {
+        if: formState.if,
+        field,
+        pattern,
+        append_separator: isEmpty(append_separator) ? undefined : append_separator,
+        ignore_failure,
+        ignore_missing,
       },
     };
   }
@@ -113,25 +110,44 @@ export const convertFormStateToProcessing = (
   throw new Error('Cannot convert form state to processing: unknown type.');
 };
 
-export const isCompleteGrokDefinition = (processing: GrokProcessingDefinition) => {
-  const { patterns } = processing.grok;
+const createProcessorGuardByType =
+  <TProcessorType extends ProcessorType>(type: TProcessorType) =>
+  (
+    processor: ProcessorDefinitionWithUIAttributes
+  ): processor is WithUIAttributes<
+    Extract<ProcessorDefinition, { [K in TProcessorType]: unknown }>
+  > =>
+    processor.type === type;
 
-  return !isEmpty(patterns);
+export const isGrokProcessor = createProcessorGuardByType('grok');
+export const isDissectProcessor = createProcessorGuardByType('dissect');
+
+const createId = htmlIdGenerator();
+const toUIDefinition = <TProcessorDefinition extends ProcessorDefinition>(
+  processor: TProcessorDefinition,
+  uiAttributes: Partial<Pick<WithUIAttributes<TProcessorDefinition>, 'status'>> = {}
+): ProcessorDefinitionWithUIAttributes => ({
+  id: createId(),
+  status: 'saved',
+  type: getProcessorType(processor),
+  ...uiAttributes,
+  ...processor,
+});
+
+const toAPIDefinition = (processor: ProcessorDefinitionWithUIAttributes): ProcessorDefinition => {
+  const { id, status, type, ...processorConfig } = processor;
+  return processorConfig;
 };
 
-export const isCompleteDissectDefinition = (processing: DissectProcessingDefinition) => {
-  const { pattern } = processing.dissect;
-
-  return !isEmpty(pattern);
+const toSimulateDefinition = (
+  processor: ProcessorDefinitionWithUIAttributes
+): ProcessorDefinitionWithId => {
+  const { status, type, ...processorConfig } = processor;
+  return processorConfig;
 };
 
-export const isCompleteProcessingDefinition = (processing: ProcessingDefinition) => {
-  if (isGrokProcessor(processing.config)) {
-    return isCompleteGrokDefinition(processing.config);
-  }
-  if (isDissectProcessor(processing.config)) {
-    return isCompleteDissectDefinition(processing.config);
-  }
-
-  return false;
+export const processorConverter = {
+  toAPIDefinition,
+  toSimulateDefinition,
+  toUIDefinition,
 };

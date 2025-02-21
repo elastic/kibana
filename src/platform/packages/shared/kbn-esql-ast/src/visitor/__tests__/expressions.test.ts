@@ -159,10 +159,38 @@ test('"visitLiteral" takes over all literal visits', () => {
   expect(text).toBe('FROM E | STATS <LITERAL>, <LITERAL>, E, E | LIMIT <LITERAL>');
 });
 
+test('"visitExpression" does visit WHERE clause args', () => {
+  const { ast } = parse(`
+    FROM index
+      | STATS 1 WHERE 2
+      | LIMIT 123
+  `);
+  const visitor = new Visitor()
+    .on('visitLiteralExpression', (ctx) => {
+      return '<LITERAL>';
+    })
+    .on('visitFunctionCallExpression', (ctx) => {
+      return `${ctx.node.name}(${[...ctx.visitArguments(undefined)].join(', ')})`;
+    })
+    .on('visitExpression', (ctx) => {
+      return 'E';
+    })
+    .on('visitCommand', (ctx) => {
+      const args = [...ctx.visitArguments()].join(', ');
+      return `${ctx.name()}${args ? ` ${args}` : ''}`;
+    })
+    .on('visitQuery', (ctx) => {
+      return [...ctx.visitCommands()].join(' | ');
+    });
+  const text = visitor.visitQuery(ast);
+
+  expect(text).toBe('FROM E | STATS where(<LITERAL>, <LITERAL>) | LIMIT <LITERAL>');
+});
+
 test('"visitExpression" does visit identifier nodes', () => {
   const { ast } = parse(`
     FROM index
-      | RIGHT JOIN a AS b ON c
+      | RIGHT JOIN a ON c
   `);
   const expressions: string[] = [];
   new Visitor()
@@ -178,5 +206,5 @@ test('"visitExpression" does visit identifier nodes', () => {
     })
     .visitQuery(ast);
 
-  expect(expressions.sort()).toEqual(['a', 'as', 'b', 'index']);
+  expect(expressions.sort()).toEqual(['a', 'index']);
 });

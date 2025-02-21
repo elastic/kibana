@@ -7,9 +7,22 @@
 
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
-export const logEsqlRequest = (esqlRequest: {
-  query: string;
-  filter: QueryDslQueryContainer;
-}): string => {
-  return `POST _query\n${JSON.stringify(esqlRequest, null, 2)}`;
+export const logEsqlRequest = (
+  requestBody: {
+    query: string;
+    filter: QueryDslQueryContainer;
+  },
+  requestQueryParams?: { drop_null_columns?: boolean }
+): string => {
+  const urlParams = Object.entries(requestQueryParams ?? {})
+    .reduce<string[]>((acc, [key, value]) => {
+      if (value != null) {
+        acc.push(`${key}=${value}`);
+      }
+
+      return acc;
+    }, [])
+    .join('&');
+
+  return `POST _query${urlParams ? `?${urlParams}` : ''}\n${JSON.stringify(requestBody, null, 2)}`;
 };

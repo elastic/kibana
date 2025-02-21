@@ -25,6 +25,7 @@ export const useSnapShotCount = () => {
     // FIXME: Dario thinks there is a better way to do this but
     // he's getting tired and maybe the Uptime folks can fix it
 
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [dateRangeStart, dateRangeEnd, esKuery, lastRefresh, query]
   );
 

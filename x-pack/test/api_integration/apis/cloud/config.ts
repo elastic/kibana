@@ -12,7 +12,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
 
   return {
     ...baseIntegrationTestsConfig.getAll(),
-    testFiles: [require.resolve('.')],
+    testFiles: [require.resolve('./tests/set_cloud_data_route')],
     kbnTestServer: {
       ...baseIntegrationTestsConfig.get('kbnTestServer'),
       serverArgs: [

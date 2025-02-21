@@ -47,7 +47,7 @@ describe('AccountsEvaluatedWidget', () => {
         'cloud.provider': 'aws',
         'rule.benchmark.posture_type': 'cspm',
       },
-      ['cloud.account.name']
+      ['cloud.account.id']
     );
   });
 
@@ -64,7 +64,7 @@ describe('AccountsEvaluatedWidget', () => {
       {
         'rule.benchmark.id': 'cis_k8s',
       },
-      ['orchestrator.cluster.name']
+      ['orchestrator.cluster.id']
     );
   });
 });

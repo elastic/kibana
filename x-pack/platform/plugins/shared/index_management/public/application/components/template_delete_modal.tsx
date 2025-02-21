@@ -6,10 +6,11 @@
  */
 
 import React, { Fragment, useState } from 'react';
-import { EuiConfirmModal, EuiCallOut, EuiCheckbox, EuiBadge } from '@elastic/eui';
+import { EuiConfirmModal, EuiCallOut, EuiCheckbox, EuiBadge, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
+import { DeleteManagedAssetsCallout } from '@kbn/delete-managed-asset-callout';
 import { deleteTemplates } from '../services/api';
 import { notificationService } from '../services/notification';
 
@@ -17,7 +18,7 @@ export const TemplateDeleteModal = ({
   templatesToDelete,
   callback,
 }: {
-  templatesToDelete: Array<{ name: string; isLegacy?: boolean }>;
+  templatesToDelete: Array<{ name: string; isLegacy?: boolean; type?: string }>;
   callback: (data?: { hasDeletedTemplates: boolean }) => void;
 }) => {
   const [isDeleteConfirmed, setIsDeleteConfirmed] = useState<boolean>(false);
@@ -25,6 +26,9 @@ export const TemplateDeleteModal = ({
   const numTemplatesToDelete = templatesToDelete.length;
 
   const hasSystemTemplate = Boolean(templatesToDelete.find(({ name }) => name.startsWith('.')));
+  const managedTemplatesToDelete = templatesToDelete.filter(
+    ({ type }) => type === 'managed'
+  ).length;
 
   const handleDeleteTemplates = () => {
     deleteTemplates(templatesToDelete).then(({ data: { templatesDeleted, errors }, error }) => {
@@ -109,6 +113,17 @@ export const TemplateDeleteModal = ({
       confirmButtonDisabled={hasSystemTemplate ? !isDeleteConfirmed : false}
     >
       <Fragment>
+        {managedTemplatesToDelete > 0 && (
+          <>
+            <DeleteManagedAssetsCallout
+              assetName={i18n.translate('xpack.idxMgmt.deleteTemplatesModal.assetName', {
+                defaultMessage: 'index templates',
+              })}
+            />
+
+            <EuiSpacer size="m" />
+          </>
+        )}
         <p>
           <FormattedMessage
             id="xpack.idxMgmt.deleteTemplatesModal.deleteDescription"
@@ -118,9 +133,20 @@ export const TemplateDeleteModal = ({
         </p>
 
         <ul>
-          {templatesToDelete.map(({ name }) => (
+          {templatesToDelete.map(({ name, type }) => (
             <li key={name}>
               {name}
+              {type === 'managed' && (
+                <>
+                  {' '}
+                  <EuiBadge color="hollow">
+                    <FormattedMessage
+                      id="xpack.idxMgmt.deleteTemplatesModal.managedTemplateLabel"
+                      defaultMessage="Managed"
+                    />
+                  </EuiBadge>
+                </>
+              )}
               {name.startsWith('.') ? (
                 <Fragment>
                   {' '}

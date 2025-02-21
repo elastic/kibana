@@ -45,10 +45,10 @@ import {
   RuleEsqlQuery,
   RuleKqlQuery,
   RuleNameOverrideObject,
-  RuleSchedule,
   TimelineTemplateReference,
   TimestampOverrideObject,
 } from './diffable_field_types';
+import { RuleSchedule } from '../../../../model/rule_schema/rule_schedule';
 
 export type DiffableCommonFields = z.infer<typeof DiffableCommonFields>;
 export const DiffableCommonFields = z.object({

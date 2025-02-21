@@ -278,7 +278,7 @@ experimental[] To enable *Maps*, the graph must specify `type=map` in the host c
       "mapStyle": false,
 
       // When 'mapStyle' is 'undefined' or 'true', sets the EMS-layer for the map.
-      // May either be: "road_map", "road_map_desaturated", "dark_map".
+      // May either be: "road_map", "road_map_desaturated", "dark_map", "road_map_desaturated_v9", "dark_map_v9".
       // If 'emsTileServiceId' is 'undefined', it falls back to the auto-switch-dark-light behavior.
       "emsTileServiceId": "road_map",
 

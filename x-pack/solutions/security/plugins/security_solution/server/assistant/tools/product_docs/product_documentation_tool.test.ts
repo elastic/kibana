@@ -12,7 +12,15 @@ import type { KibanaRequest } from '@kbn/core-http-server';
 import type { ExecuteConnectorRequestBody } from '@kbn/elastic-assistant-common/impl/schemas/actions_connector/post_actions_connector_execute_route.gen';
 import { loggerMock } from '@kbn/logging-mocks';
 import { PRODUCT_DOCUMENTATION_TOOL } from './product_documentation_tool';
-import type { LlmTasksPluginStart } from '@kbn/llm-tasks-plugin/server';
+import type {
+  LlmTasksPluginStart,
+  RetrieveDocumentationResultDoc,
+} from '@kbn/llm-tasks-plugin/server';
+import type {
+  ContentReferencesStore,
+  ProductDocumentationContentReference,
+} from '@kbn/elastic-assistant-common';
+import { newContentReferencesStoreMock } from '@kbn/elastic-assistant-common/impl/content_references/content_references_store/__mocks__/content_references_store.mock';
 
 describe('ProductDocumentationTool', () => {
   const chain = {} as RetrievalQAChain;
@@ -27,6 +35,7 @@ describe('ProductDocumentationTool', () => {
     retrieveDocumentationAvailable: jest.fn(),
   } as LlmTasksPluginStart;
   const connectorId = 'fake-connector';
+  const contentReferencesStore = newContentReferencesStoreMock();
   const defaultArgs = {
     chain,
     esClient,
@@ -35,6 +44,7 @@ describe('ProductDocumentationTool', () => {
     llmTasks,
     connectorId,
     isEnabledKnowledgeBase: true,
+    contentReferencesStore,
   };
   beforeEach(() => {
     jest.clearAllMocks();
@@ -86,7 +96,81 @@ describe('ProductDocumentationTool', () => {
         max: 3,
         connectorId: 'fake-connector',
         request,
-        functionCalling: 'native',
+        functionCalling: 'auto',
+      });
+    });
+
+    it('includes citations', async () => {
+      const tool = PRODUCT_DOCUMENTATION_TOOL.getTool(defaultArgs) as DynamicStructuredTool;
+
+      (retrieveDocumentation as jest.Mock).mockResolvedValue({
+        documents: [
+          {
+            title: 'exampleTitle',
+            url: 'exampleUrl',
+            content: 'exampleContent',
+            summarized: false,
+          },
+        ] as RetrieveDocumentationResultDoc[],
+      });
+
+      (contentReferencesStore.add as jest.Mock).mockImplementation(
+        (creator: Parameters<ContentReferencesStore['add']>[0]) => {
+          const reference = creator({ id: 'exampleContentReferenceId' });
+          expect(reference.type).toEqual('ProductDocumentation');
+          expect((reference as ProductDocumentationContentReference).title).toEqual('exampleTitle');
+          expect((reference as ProductDocumentationContentReference).url).toEqual('exampleUrl');
+          return reference;
+        }
+      );
+
+      const result = await tool.func({ query: 'What is Kibana Security?', product: 'kibana' });
+
+      expect(result).toEqual({
+        content: {
+          documents: [
+            {
+              citation: '{reference(exampleContentReferenceId)}',
+              content: 'exampleContent',
+              title: 'exampleTitle',
+              url: 'exampleUrl',
+              summarized: false,
+            },
+          ],
+        },
+      });
+    });
+
+    it('does not include citations if contentReferencesStore is false', async () => {
+      const tool = PRODUCT_DOCUMENTATION_TOOL.getTool({
+        ...defaultArgs,
+        contentReferencesStore: undefined,
+      }) as DynamicStructuredTool;
+
+      (retrieveDocumentation as jest.Mock).mockResolvedValue({
+        documents: [
+          {
+            title: 'exampleTitle',
+            url: 'exampleUrl',
+            content: 'exampleContent',
+            summarized: false,
+          },
+        ] as RetrieveDocumentationResultDoc[],
+      });
+
+      const result = await tool.func({ query: 'What is Kibana Security?', product: 'kibana' });
+
+      expect(result).toEqual({
+        content: {
+          documents: [
+            {
+              content: 'exampleContent',
+              title: 'exampleTitle',
+              url: 'exampleUrl',
+              summarized: false,
+            },
+          ],
+        },
       });
     });
   });

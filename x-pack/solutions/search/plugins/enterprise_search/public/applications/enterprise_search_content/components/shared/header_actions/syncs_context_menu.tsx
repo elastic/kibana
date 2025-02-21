@@ -25,7 +25,6 @@ import { i18n } from '@kbn/i18n';
 import { ConnectorStatus, IngestionStatus } from '@kbn/search-connectors';
 
 import { Status } from '../../../../../../common/types/api';
-import { HttpLogic } from '../../../../shared/http';
 import { KibanaLogic } from '../../../../shared/kibana';
 import { CancelSyncsApiLogic } from '../../../api/connector/cancel_syncs_api_logic';
 import { ConnectorViewLogic } from '../../connector_detail/connector_view_logic';
@@ -39,14 +38,13 @@ export interface SyncsContextMenuProps {
 }
 
 export const SyncsContextMenu: React.FC<SyncsContextMenuProps> = ({ disabled = false }) => {
-  const { config, productFeatures } = useValues(KibanaLogic);
+  const { productFeatures, isAgentlessEnabled } = useValues(KibanaLogic);
   const { ingestionStatus, isCanceling, isSyncing, isWaitingForSync } = useValues(IndexViewLogic);
   const { connector, hasDocumentLevelSecurityFeature, hasIncrementalSyncFeature } =
     useValues(ConnectorViewLogic);
   const { status } = useValues(CancelSyncsApiLogic);
   const { startSync, startIncrementalSync, startAccessControlSync, cancelSyncs } =
     useActions(SyncsLogic);
-  const { errorConnectingMessage } = useValues(HttpLogic);
 
   const [isPopoverOpen, setPopover] = useState(false);
   const togglePopover = () => setPopover(!isPopoverOpen);
@@ -80,9 +78,8 @@ export const SyncsContextMenu: React.FC<SyncsContextMenuProps> = ({ disabled = f
   const shouldShowIncrementalSync =
     productFeatures.hasIncrementalSyncEnabled && hasIncrementalSyncFeature;
 
-  const isEnterpriseSearchNotAvailable = Boolean(config.host && errorConnectingMessage);
   const isSyncsDisabled =
-    (connector?.is_native && isEnterpriseSearchNotAvailable) ||
+    (connector?.is_native && !isAgentlessEnabled) ||
     ingestionStatus === IngestionStatus.INCOMPLETE ||
     !connector?.index_name;
 

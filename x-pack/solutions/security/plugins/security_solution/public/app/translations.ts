@@ -104,7 +104,7 @@ export const EXCEPTIONS = i18n.translate('xpack.securitySolution.navigation.exce
 export const SIEM_MIGRATIONS_RULES = i18n.translate(
   'xpack.securitySolution.navigation.siemMigrationsRules',
   {
-    defaultMessage: 'SIEM Rules Migrations',
+    defaultMessage: 'SIEM Rule Migrations',
   }
 );
 

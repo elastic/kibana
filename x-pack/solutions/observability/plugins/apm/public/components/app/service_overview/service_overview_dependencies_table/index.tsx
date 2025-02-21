@@ -9,8 +9,9 @@ import { EuiIconTip } from '@elastic/eui';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { i18n } from '@kbn/i18n';
 import type { ReactNode } from 'react';
-import React from 'react';
-import { useUiTracker } from '@kbn/observability-shared-plugin/public';
+import React, { useEffect, useRef } from 'react';
+import { FETCH_STATUS, useUiTracker } from '@kbn/observability-shared-plugin/public';
+import { usePerformanceContext } from '@kbn/ebt-tools';
 import { isTimeComparison } from '../../../shared/time_comparison/get_comparison_options';
 import { getNodeName, NodeType } from '../../../../../common/connections';
 import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
@@ -26,6 +27,7 @@ interface ServiceOverviewDependenciesTableProps {
   link?: ReactNode;
   showPerPageOptions?: boolean;
   showSparkPlots?: boolean;
+  onLoadTable?: () => void;
 }
 
 export function ServiceOverviewDependenciesTable({
@@ -33,6 +35,7 @@ export function ServiceOverviewDependenciesTable({
   link,
   showPerPageOptions = true,
   showSparkPlots,
+  onLoadTable,
 }: ServiceOverviewDependenciesTableProps) {
   const {
     query: {
@@ -50,9 +53,9 @@ export function ServiceOverviewDependenciesTable({
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 
   const { serviceName, transactionType } = useApmServiceContext();
-
+  const { onPageReady } = usePerformanceContext();
   const trackEvent = useUiTracker();
-
+  const hasTableLoaded = useRef(false);
   const { data, status } = useFetcher(
     (callApmApi) => {
       if (!start || !end) {
@@ -74,6 +77,24 @@ export function ServiceOverviewDependenciesTable({
     },
     [start, end, serviceName, environment, offset, comparisonEnabled]
   );
+
+  useEffect(() => {
+    // this component is used both for the service overview tab and the transactions tab,
+    // onLoadTable will be defined if it's the service overview tab
+    if (status === FETCH_STATUS.SUCCESS && !hasTableLoaded.current) {
+      if (onLoadTable) {
+        onLoadTable();
+      } else {
+        onPageReady({
+          meta: {
+            rangeFrom,
+            rangeTo,
+          },
+        });
+      }
+      hasTableLoaded.current = true;
+    }
+  }, [status, onLoadTable, onPageReady, rangeFrom, rangeTo]);
 
   const dependencies =
     data?.serviceDependencies.map((dependency) => {

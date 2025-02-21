@@ -62,6 +62,18 @@
           "InventoryRouteHandlerResources",
           ", { hasData: boolean; }, ",
           "InventoryRouteCreateOptions",
+          ">; \"GET /internal/inventory/entity/definitions/sources\": ",
+          {
+            "pluginId": "@kbn/server-route-repository-utils",
+            "scope": "common",
+            "docId": "kibKbnServerRouteRepositoryUtilsPluginApi",
+            "section": "def-common.ServerRoute",
+            "text": "ServerRoute"
+          },
+          "<\"GET /internal/inventory/entity/definitions/sources\", undefined, ",
+          "InventoryRouteHandlerResources",
+          ", { definitionIndexPatterns: Record<string, string[]>; }, ",
+          "InventoryRouteCreateOptions",
           ">; \"GET /internal/inventory/entities/types\": ",
           {
             "pluginId": "@kbn/server-route-repository-utils",

@@ -7,14 +7,13 @@
 
 import { QueryDslBoolQuery } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient } from '@kbn/core/server';
+import { extractIndexNameFromBackingIndex } from '../../../common/utils';
 import { DataStreamDocsStat } from '../../../common/api_types';
 import { createDatasetQualityESClient } from '../../utils';
 import { rangeQuery } from '../../utils/queries';
 
 interface Dataset {
-  type: string;
   dataset: string;
-  namespace: string;
 }
 
 const SIZE_LIMIT = 10000;
@@ -37,11 +36,7 @@ export async function getAggregatedDatasetPaginatedResults(options: {
       composite: {
         ...(afterKey ? { after: afterKey } : {}),
         size: SIZE_LIMIT,
-        sources: [
-          { type: { terms: { field: 'data_stream.type' } } },
-          { dataset: { terms: { field: 'data_stream.dataset' } } },
-          { namespace: { terms: { field: 'data_stream.namespace' } } },
-        ],
+        sources: [{ dataset: { terms: { field: '_index' } } }],
       },
     },
   });
@@ -65,7 +60,7 @@ export async function getAggregatedDatasetPaginatedResults(options: {
 
   const currResults =
     response.aggregations?.datasets.buckets.map((bucket) => ({
-      dataset: `${bucket.key.type}-${bucket.key.dataset}-${bucket.key.namespace}`,
+      dataset: bucket.key.dataset as string,
       count: bucket.doc_count,
     })) ?? [];
 
@@ -82,13 +77,17 @@ export async function getAggregatedDatasetPaginatedResults(options: {
       end,
       after:
         (response.aggregations?.datasets.after_key as {
-          type: string;
           dataset: string;
-          namespace: string;
         }) || after,
       prevResults: results,
     });
   }
 
-  return results;
+  return Object.entries(
+    results.reduce((acc, curr) => {
+      const dataset = extractIndexNameFromBackingIndex(curr.dataset);
+      acc[dataset] = (acc[dataset] ?? 0) + curr.count;
+      return acc;
+    }, {} as Record<string, number>)
+  ).map(([dataset, count]) => ({ dataset, count }));
 }

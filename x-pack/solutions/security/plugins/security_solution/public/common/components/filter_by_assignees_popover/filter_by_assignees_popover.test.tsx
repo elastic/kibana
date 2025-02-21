@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render } from '@testing-library/react';
+import { render, fireEvent } from '@testing-library/react';
 
 import { FilterByAssigneesPopover } from './filter_by_assignees_popover';
 import { TestProviders } from '../../mock';
@@ -110,14 +110,14 @@ describe('<FilterByAssigneesPopover />', () => {
     const onUsersChangeMock = jest.fn();
     const { getByTestId, getByText } = renderFilterByAssigneesPopover([], onUsersChangeMock);
 
-    getByTestId(FILTER_BY_ASSIGNEES_BUTTON).click();
+    fireEvent.click(getByTestId(FILTER_BY_ASSIGNEES_BUTTON));
 
-    getByText('User 1').click();
-    getByText('User 2').click();
-    getByText('User 3').click();
-    getByText('User 3').click();
-    getByText('User 2').click();
-    getByText('User 1').click();
+    fireEvent.click(getByText('User 1'));
+    fireEvent.click(getByText('User 2'));
+    fireEvent.click(getByText('User 3'));
+    fireEvent.click(getByText('User 3'));
+    fireEvent.click(getByText('User 2'));
+    fireEvent.click(getByText('User 1'));
 
     expect(onUsersChangeMock).toHaveBeenCalledTimes(6);
     expect(onUsersChangeMock.mock.calls).toEqual([

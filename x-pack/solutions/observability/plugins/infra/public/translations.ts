@@ -35,7 +35,7 @@ export const metricsTitle = i18n.translate('xpack.infra.header.infrastructureTit
 });
 
 export const inventoryTitle = i18n.translate('xpack.infra.metrics.infrastructureInventoryTitle', {
-  defaultMessage: 'Infrastructure inventory',
+  defaultMessage: 'Infrastructure Inventory',
 });
 
 export const metricsExplorerTitle = i18n.translate('xpack.infra.metrics.metricsExplorerTitle', {

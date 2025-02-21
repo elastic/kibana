@@ -15,6 +15,7 @@ import {
   generateLongId,
   generateShortId,
   Instance,
+  LogDocument,
 } from '@kbn/apm-synthtrace-client';
 import { Scenario } from '../cli/scenario';
 import { getSynthtraceEnvironment } from '../lib/utils/get_synthtrace_environment';
@@ -26,7 +27,7 @@ const ENVIRONMENT = getSynthtraceEnvironment(__filename);
 const alwaysSpikeTransactionName = 'GET /always-spike';
 const sometimesSpikeTransactionName = 'GET /sometimes-spike';
 
-const scenario: Scenario<ApmFields> = async ({ logger, ...runOptions }) => {
+const scenario: Scenario<LogDocument | ApmFields> = async ({ logger, ...runOptions }) => {
   const { isLogsDb } = parseLogsScenarioOpts(runOptions.scenarioOpts);
 
   return {

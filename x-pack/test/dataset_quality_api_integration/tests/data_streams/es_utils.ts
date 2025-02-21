@@ -22,15 +22,13 @@ export async function addIntegrationToLogIndexTemplate({
 
   await esClient.indices.putIndexTemplate({
     name: 'logs',
-    body: {
-      ...indexTemplates[0].index_template,
-      _meta: {
-        ...indexTemplates[0].index_template._meta,
-        package: {
-          name,
-        },
-        managed_by: managedBy,
+    ...indexTemplates[0].index_template,
+    _meta: {
+      ...indexTemplates[0].index_template._meta,
+      package: {
+        name,
       },
+      managed_by: managedBy,
     },
   });
 }
@@ -42,13 +40,11 @@ export async function cleanLogIndexTemplate({ esClient }: { esClient: Client }) 
 
   await esClient.indices.putIndexTemplate({
     name: 'logs',
-    body: {
-      ...indexTemplates[0].index_template,
-      _meta: {
-        ...indexTemplates[0].index_template._meta,
-        package: undefined,
-        managed_by: undefined,
-      },
+    ...indexTemplates[0].index_template,
+    _meta: {
+      ...indexTemplates[0].index_template._meta,
+      package: undefined,
+      managed_by: undefined,
     },
   });
 }

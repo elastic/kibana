@@ -14,6 +14,7 @@ import { FtrService } from '../ftr_provider_context';
 export class ESQLService extends FtrService {
   private readonly retry = this.ctx.getService('retry');
   private readonly testSubjects = this.ctx.getService('testSubjects');
+  private readonly monacoEditor = this.ctx.getService('monacoEditor');
 
   /** Ensures that the ES|QL code editor is loaded with a given statement */
   public async expectEsqlStatement(statement: string) {
@@ -109,5 +110,22 @@ export class ESQLService extends FtrService {
     await this.retry.waitFor('quick reference to appear', async () => {
       return await this.isOpenQuickReferenceFlyout();
     });
+  }
+
+  public async waitESQLEditorLoaded(editorSubjId = 'ESQLEditor') {
+    await this.monacoEditor.waitCodeEditorReady(editorSubjId);
+  }
+
+  public async getEsqlEditorQuery() {
+    return await this.monacoEditor.getCodeEditorValue();
+  }
+
+  public async setEsqlEditorQuery(query: string) {
+    await this.monacoEditor.setCodeEditorValue(query);
+  }
+
+  public async typeEsqlEditorQuery(query: string, editorSubjId = 'ESQLEditor') {
+    await this.setEsqlEditorQuery(''); // clear the default query
+    await this.monacoEditor.typeCodeEditorValue(query, editorSubjId);
   }
 }

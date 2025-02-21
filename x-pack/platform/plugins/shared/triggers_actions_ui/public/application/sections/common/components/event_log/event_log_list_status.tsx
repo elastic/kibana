@@ -6,7 +6,7 @@
  */
 
 import React, { useMemo } from 'react';
-import { EuiIcon } from '@elastic/eui';
+import { EuiIcon, useEuiTheme } from '@elastic/eui';
 import { RuleAlertingOutcome } from '@kbn/alerting-plugin/common';
 import {
   RULE_LAST_RUN_OUTCOME_SUCCEEDED,
@@ -30,13 +30,6 @@ const iconStyles = {
   marginRight: '8px',
 };
 
-const STATUS_TO_COLOR: Record<RuleAlertingOutcome, string> = {
-  success: 'success',
-  failure: 'danger',
-  unknown: 'gray',
-  warning: 'warning',
-};
-
 const STATUS_TO_OUTCOME: Record<RuleAlertingOutcome, string> = {
   success: RULE_LAST_RUN_OUTCOME_SUCCEEDED,
   failure: RULE_LAST_RUN_OUTCOME_FAILED,
@@ -45,7 +38,14 @@ const STATUS_TO_OUTCOME: Record<RuleAlertingOutcome, string> = {
 };
 
 export const EventLogListStatus = (props: EventLogListStatusProps) => {
+  const { euiTheme } = useEuiTheme();
   const { status, useExecutionStatus = true } = props;
+  const STATUS_TO_COLOR: Record<RuleAlertingOutcome, string> = {
+    success: euiTheme.colors.success,
+    failure: euiTheme.colors.danger,
+    unknown: euiTheme.colors.mediumShade,
+    warning: euiTheme.colors.warning,
+  };
   const color = STATUS_TO_COLOR[status] || 'gray';
 
   const statusString = useMemo(() => {

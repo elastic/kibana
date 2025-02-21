@@ -103,6 +103,7 @@ export const defaultConfig: ScoutServerConfig = {
     sourceArgs: ['--no-base-path', '--env.name=development'],
     serverArgs: [
       `--server.port=${servers.kibana.port}`,
+      `--server.prototypeHardening=true`,
       '--status.allowAnonymous=true',
       // We shouldn't embed credentials into the URL since Kibana requests to Elasticsearch should
       // either include `kibanaServerTestUser` credentials, or credentials provided by the test

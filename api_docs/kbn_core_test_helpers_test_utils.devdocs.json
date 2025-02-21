@@ -151,13 +151,7 @@
           ">; getImporter: () => jest.Mocked<",
           "ISavedObjectsImporter",
           ">; }; elasticsearch: { client: ",
-          {
-            "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-            "scope": "server",
-            "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-            "section": "def-server.ScopedClusterClientMock",
-            "text": "ScopedClusterClientMock"
-          },
+          "ScopedClusterClientMock",
           "; }; uiSettings: { client: jest.Mocked<",
           "IUiSettingsClient",
           ">; }; deprecations: { client: jest.Mocked<",

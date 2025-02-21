@@ -8,3 +8,20 @@
 export interface ElasticsearchConfigType {
   elasticsearch_url?: string;
 }
+
+export type SolutionType = 'search' | 'elasticsearch' | 'observability' | 'security';
+export interface CloudDataAttributes {
+  onboardingData: {
+    solutionType?: SolutionType;
+    token: string;
+    security?: CloudSecurityAnswer;
+  };
+}
+
+export interface CloudSecurityAnswer {
+  useCase: 'siem' | 'cloud' | 'edr' | 'other';
+  migration?: {
+    value: boolean;
+    type?: 'splunk' | 'other';
+  };
+}

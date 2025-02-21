@@ -774,9 +774,10 @@ describe('Test discover state actions', () => {
     savedSearchWithQuery.searchSource.setField('filter', filters);
     const { state } = await getState('/', { savedSearch: savedSearchWithQuery });
     state.globalState?.set({ filters });
+    state.appState.set({ query });
     await state.actions.transitionFromDataViewToESQL(dataViewMock);
     expect(state.appState.getState().query).toStrictEqual({
-      esql: 'FROM the-data-view-title | LIMIT 10',
+      esql: 'FROM the-data-view-title | WHERE KQL("""foo: \'bar\'""") | LIMIT 10',
     });
     expect(state.globalState?.get?.()?.filters).toStrictEqual([]);
     expect(state.appState.getState().filters).toStrictEqual([]);

@@ -410,7 +410,7 @@ EOF`}
                     <EuiLink
                       data-test-subj="profilingAddDataViewInstructionsHereLink"
                       target="_blank"
-                      href={`https://www.elastic.co/guide/en/kibana/master/api-keys.html`}
+                      href={`https://www.elastic.co/guide/en/kibana/current/api-keys.html`}
                     >
                       {i18n.translate('xpack.profiling.tabs.symbols.step2.instructions', {
                         defaultMessage: 'Instructions here',

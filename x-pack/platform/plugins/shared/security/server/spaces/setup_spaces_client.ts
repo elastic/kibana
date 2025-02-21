@@ -6,6 +6,7 @@
  */
 
 import { type AuthenticatedUser, type KibanaRequest, SavedObjectsClient } from '@kbn/core/server';
+import type { ISavedObjectTypeRegistry } from '@kbn/core-saved-objects-server';
 import type {
   AuditServiceSetup,
   AuthorizationServiceSetup,
@@ -20,9 +21,16 @@ interface Deps {
   authz: AuthorizationServiceSetup;
   spaces?: SpacesPluginSetup;
   getCurrentUser: (request: KibanaRequest) => AuthenticatedUser | null;
+  getTypeRegistry: () => Promise<ISavedObjectTypeRegistry>;
 }
 
-export const setupSpacesClient = ({ audit, authz, spaces, getCurrentUser }: Deps) => {
+export const setupSpacesClient = ({
+  audit,
+  authz,
+  spaces,
+  getCurrentUser,
+  getTypeRegistry,
+}: Deps) => {
   if (!spaces) {
     return;
   }
@@ -51,7 +59,8 @@ export const setupSpacesClient = ({ audit, authz, spaces, getCurrentUser }: Deps
       authz,
       audit.asScoped(request),
       SavedObjectsClient.errors,
-      securityExtension
+      securityExtension,
+      getTypeRegistry
     );
   });
 };

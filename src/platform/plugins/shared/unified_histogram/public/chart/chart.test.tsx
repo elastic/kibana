@@ -19,7 +19,7 @@ import type { ReactWrapper } from 'enzyme';
 import { unifiedHistogramServicesMock } from '../__mocks__/services';
 import { getLensVisMock } from '../__mocks__/lens_vis';
 import { searchSourceInstanceMock } from '@kbn/data-plugin/common/search/search_source/mocks';
-import { of } from 'rxjs';
+import { Subject, of } from 'rxjs';
 import { dataViewWithTimefieldMock } from '../__mocks__/data_view_with_timefield';
 import { dataViewMock } from '../__mocks__/data_view';
 import { BreakdownFieldSelector } from './breakdown_field_selector';
@@ -66,7 +66,7 @@ async function mountComponent({
   const services = {
     ...unifiedHistogramServicesMock,
     capabilities: {
-      dashboard: {
+      dashboard_v2: {
         showWriteControls: hasDashboardPermissions ?? true,
       },
     } as unknown as Capabilities,
@@ -135,6 +135,7 @@ async function mountComponent({
     withDefaultActions: undefined,
     isChartAvailable: checkChartAvailability({ chart, dataView, isPlainRecord }),
     renderCustomChartToggleActions: customToggle ? () => customToggle : undefined,
+    input$: new Subject(),
   };
 
   let instance: ReactWrapper = {} as ReactWrapper;
@@ -142,6 +143,7 @@ async function mountComponent({
     instance = mountWithIntl(<Chart {...props} />);
     // wait for initial async loading to complete
     await new Promise((r) => setTimeout(r, 0));
+    props.input$?.next({ type: 'fetch' });
     instance.update();
   });
   return instance;

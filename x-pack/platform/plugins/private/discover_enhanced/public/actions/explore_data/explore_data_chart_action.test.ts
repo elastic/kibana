@@ -67,14 +67,14 @@ const setup = (
 
   const embeddable = {
     type: 'anyEmbeddable',
-    dataViews: new BehaviorSubject<undefined | DataView[]>([
+    dataViews$: new BehaviorSubject<undefined | DataView[]>([
       {
         id: 'index-ptr-foo',
       } as DataView,
     ]),
     filters$: new BehaviorSubject<Filter[]>([]),
     parentApi: {
-      viewMode: new BehaviorSubject<ViewMode>('view'),
+      viewMode$: new BehaviorSubject<ViewMode>('view'),
     },
   };
 
@@ -130,7 +130,7 @@ describe('"Explore underlying data" panel action', () => {
 
     test('returns false if embeddable has more than one data view', async () => {
       const { action, embeddable, context } = setup();
-      embeddable.dataViews = new BehaviorSubject<undefined | DataView[]>([
+      embeddable.dataViews$ = new BehaviorSubject<undefined | DataView[]>([
         {
           id: 'index-ptr-foo',
         } as DataView,
@@ -147,7 +147,7 @@ describe('"Explore underlying data" panel action', () => {
     test('returns false if embeddable does not have data views', async () => {
       const { action, embeddable, context } = setup();
       // @ts-expect-error
-      embeddable.dataViews = undefined;
+      embeddable.dataViews$ = undefined;
 
       const isCompatible = await action.isCompatible(context);
 
@@ -156,7 +156,7 @@ describe('"Explore underlying data" panel action', () => {
 
     test('returns false if embeddable data views are empty', async () => {
       const { action, embeddable, context } = setup();
-      embeddable.dataViews = new BehaviorSubject<undefined | DataView[]>([]);
+      embeddable.dataViews$ = new BehaviorSubject<undefined | DataView[]>([]);
 
       const isCompatible = await action.isCompatible(context);
 
@@ -166,7 +166,7 @@ describe('"Explore underlying data" panel action', () => {
     test('returns false if dashboard is in edit mode', async () => {
       const { action, embeddable, context } = setup();
       if (embeddable.parentApi) {
-        embeddable.parentApi.viewMode = new BehaviorSubject<ViewMode>('edit');
+        embeddable.parentApi.viewMode$ = new BehaviorSubject<ViewMode>('edit');
       }
       const isCompatible = await action.isCompatible(context);
 
@@ -177,7 +177,7 @@ describe('"Explore underlying data" panel action', () => {
       const { action, context, core } = setup();
 
       core.application.capabilities = { ...core.application.capabilities };
-      (core.application.capabilities as any).discover = {
+      (core.application.capabilities as any).discover_v2 = {
         show: false,
       };
 

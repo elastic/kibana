@@ -52,6 +52,12 @@ const strings = {
           defaultMessage: 'Temporary',
         }),
     },
+    managed: {
+      getManagedDataviewLabel: () =>
+        i18n.translate('unifiedSearch.query.queryBar.indexPattern.managedDataviewLabel', {
+          defaultMessage: 'Managed',
+        }),
+    },
     search: {
       getSearchPlaceholder: () =>
         i18n.translate('unifiedSearch.query.queryBar.indexPattern.findDataView', {
@@ -63,6 +69,7 @@ const strings = {
 
 export interface DataViewListItemEnhanced extends DataViewListItem {
   isAdhoc?: boolean;
+  isManaged?: boolean;
 }
 
 export interface DataViewsListProps {
@@ -131,7 +138,7 @@ export function DataViewsList({
       data-test-subj="indexPattern-switcher"
       searchable
       singleSelection="always"
-      options={sortedDataViewsList?.map(({ title, id, name, isAdhoc }) => ({
+      options={sortedDataViewsList?.map(({ title, id, name, isAdhoc, isManaged }) => ({
         key: id,
         label: name ? name : title,
         value: id,
@@ -139,6 +146,10 @@ export function DataViewsList({
         append: isAdhoc ? (
           <EuiBadge color="hollow" data-test-subj={`dataViewItemTempBadge-${name}`}>
             {strings.editorAndPopover.adhoc.getTemporaryDataviewLabel()}
+          </EuiBadge>
+        ) : isManaged ? (
+          <EuiBadge color="hollow" data-test-subj={`dataViewItemManagedBadge-${name}`}>
+            {strings.editorAndPopover.managed.getManagedDataviewLabel()}
           </EuiBadge>
         ) : null,
       }))}
@@ -151,9 +162,12 @@ export function DataViewsList({
       searchProps={{
         id: searchListInputId,
         compressed: true,
-        autoFocus: true,
         placeholder: strings.editorAndPopover.search.getSearchPlaceholder(),
         'data-test-subj': 'indexPattern-switcher--input',
+        autoFocus: false, // focused manually below - see https://github.com/elastic/eui/issues/8287
+        inputRef: (ref) => {
+          ref?.focus({ preventScroll: true });
+        },
         ...(selectableProps ? selectableProps.searchProps : undefined),
       }}
     >

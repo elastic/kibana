@@ -18,7 +18,8 @@ import userEvent from '@testing-library/user-event';
 import { customFieldsConfigurationMock } from '../../containers/mock';
 import type { FormState } from '../configure_cases/flyout';
 
-describe('CustomFieldsForm ', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/208415
+describe.skip('CustomFieldsForm ', () => {
   let appMockRender: AppMockRenderer;
   const onChange = jest.fn();
 

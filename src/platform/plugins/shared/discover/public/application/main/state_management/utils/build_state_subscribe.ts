@@ -85,10 +85,9 @@ export const buildStateSubscribe =
       }
     }
 
-    const { hideChart, interval, breakdownField, sampleSize, sort, dataSource } = prevState;
+    const { interval, breakdownField, sampleSize, sort, dataSource } = prevState;
     // Cast to boolean to avoid false positives when comparing
     // undefined and false, which would trigger a refetch
-    const chartDisplayChanged = Boolean(nextState.hideChart) !== Boolean(hideChart);
     const chartIntervalChanged = nextState.interval !== interval && !isEsqlMode;
     const breakdownFieldChanged = nextState.breakdownField !== breakdownField;
     const sampleSizeChanged = nextState.sampleSize !== sampleSize;
@@ -103,10 +102,13 @@ export const buildStateSubscribe =
         ? nextState.dataSource.dataViewId
         : undefined;
 
-      const { dataView: nextDataView, fallback } = await loadAndResolveDataView(
-        { id: dataViewId, savedSearch, isEsqlMode },
-        { internalStateContainer: internalState, services }
-      );
+      const { dataView: nextDataView, fallback } = await loadAndResolveDataView({
+        dataViewId,
+        savedSearch,
+        isEsqlMode,
+        internalStateContainer: internalState,
+        services,
+      });
 
       // If the requested data view is not found, don't try to load it,
       // and instead reset the app state to the fallback data view
@@ -137,7 +139,6 @@ export const buildStateSubscribe =
     }
 
     if (
-      chartDisplayChanged ||
       chartIntervalChanged ||
       breakdownFieldChanged ||
       sampleSizeChanged ||
@@ -146,7 +147,6 @@ export const buildStateSubscribe =
       queryChanged
     ) {
       const logData = {
-        chartDisplayChanged: logEntry(chartDisplayChanged, hideChart, nextState.hideChart),
         chartIntervalChanged: logEntry(chartIntervalChanged, interval, nextState.interval),
         breakdownFieldChanged: logEntry(
           breakdownFieldChanged,

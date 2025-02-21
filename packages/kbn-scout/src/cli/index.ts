@@ -10,12 +10,19 @@ import { RunWithCommands } from '@kbn/dev-cli-runner';
 import { cli as reportingCLI } from '@kbn/scout-reporting';
 import { startServer } from './start_server';
 import { runTests } from './run_tests';
+import { discoverPlaywrightConfigs } from './config_discovery';
 
 export async function run() {
   await new RunWithCommands(
     {
       description: 'Scout CLI',
     },
-    [startServer, runTests, reportingCLI.initializeReportDatastream, reportingCLI.uploadEvents]
+    [
+      startServer,
+      runTests,
+      discoverPlaywrightConfigs,
+      reportingCLI.initializeReportDatastream,
+      reportingCLI.uploadEvents,
+    ]
   ).execute();
 }

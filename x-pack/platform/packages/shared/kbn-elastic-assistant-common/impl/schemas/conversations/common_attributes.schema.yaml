@@ -18,6 +18,149 @@ components:
           type: string
           description: Could be any string, not necessarily a UUID
 
+    BaseContentReference:
+      type: object
+      description: The basis of a content reference
+      required:
+        - 'id'
+        - 'type'
+      properties:
+        id: 
+          type: string
+          description: Id of the content reference
+        type: 
+          type: string
+          description: Type of the content reference
+
+    KnowledgeBaseEntryContentReference:
+      description: References a knowledge base entry
+      allOf:
+        - $ref: '#/components/schemas/BaseContentReference'
+        - type: object
+          required:
+            - 'type'
+            - 'knowledgeBaseEntryId'
+            - 'knowledgeBaseEntryName'
+          properties:
+            type: 
+              type: string
+              enum: [KnowledgeBaseEntry]
+            knowledgeBaseEntryId:
+              description: Id of the Knowledge Base Entry
+              type: string
+            knowledgeBaseEntryName:
+              description: Name of the knowledge base entry
+              type: string
+
+    EsqlContentReference:
+      description: References an ESQL query
+      allOf:
+        - $ref: '#/components/schemas/BaseContentReference'
+        - type: object
+          required:
+            - 'type'
+            - 'query'
+            - 'label'
+          properties:
+            type: 
+              type: string
+              enum: [EsqlQuery]
+            query:
+              description: An ESQL query
+              type: string
+            label:
+              description: Label of the query
+              type: string
+            timerange:
+                description: Time range to select in the time picker.
+                type: object
+                required:
+                  - 'from'
+                  - 'to'
+                properties:
+                  from:
+                    type: string
+                  to:
+                    type: string
+
+    SecurityAlertContentReference:
+      description: References a security alert
+      allOf:
+        - $ref: '#/components/schemas/BaseContentReference'
+        - type: object
+          required:
+            - 'type'
+            - 'alertId'
+          properties:
+            type: 
+              type: string
+              enum: [SecurityAlert]
+            alertId:
+              description: ID of the Alert
+              type: string
+
+    SecurityAlertsPageContentReference:
+      description: References the security alerts page
+      allOf:
+        - $ref: '#/components/schemas/BaseContentReference'
+        - type: object
+          required:
+            - 'type'
+          properties:
+            type: 
+              type: string
+              enum: [SecurityAlertsPage]
+
+    ProductDocumentationContentReference:
+        description: References the product documentation
+        allOf:
+        - $ref: '#/components/schemas/BaseContentReference'
+        - type: object
+          required:
+            - 'type'
+            - 'title'
+            - 'url'
+          properties:
+            type: 
+              type: string
+              enum: [ProductDocumentation]
+            title:
+              description: Title of the documentation
+              type: string
+            url:
+              description: URL to the documentation
+              type: string
+
+    ContentReference:
+      description: A content reference
+      oneOf:
+        - $ref: '#/components/schemas/KnowledgeBaseEntryContentReference'
+        - $ref: '#/components/schemas/SecurityAlertContentReference'
+        - $ref: '#/components/schemas/SecurityAlertsPageContentReference'
+        - $ref: '#/components/schemas/ProductDocumentationContentReference'
+        - $ref: '#/components/schemas/EsqlContentReference'
+          additionalProperties: false
+
+    ContentReferences:
+      description: A union of all content reference types
+      additionalProperties:
+        oneOf:
+          - $ref: '#/components/schemas/KnowledgeBaseEntryContentReference'
+          - $ref: '#/components/schemas/SecurityAlertContentReference'
+          - $ref: '#/components/schemas/SecurityAlertsPageContentReference'
+          - $ref: '#/components/schemas/ProductDocumentationContentReference'
+          - $ref: '#/components/schemas/EsqlContentReference'
+            additionalProperties: false
+      type: object
+
+    MessageMetadata:
+      type: object
+      description: Message metadata
+      properties:
+        contentReferences: 
+          $ref: '#/components/schemas/ContentReferences'
+          description: Data refered to by the message content.
+
     Replacements:
       type: object
       additionalProperties:
@@ -85,6 +228,9 @@ components:
         traceData:
           $ref: '#/components/schemas/TraceData'
           description: trace Data
+        metadata:
+          $ref: '#/components/schemas/MessageMetadata'
+          description: metadata
 
     ApiConfig:
       type: object

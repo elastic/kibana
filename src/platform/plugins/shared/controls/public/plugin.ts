@@ -8,17 +8,16 @@
  */
 
 import type { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
-import { PANEL_HOVER_TRIGGER } from '@kbn/embeddable-plugin/public';
-
-import { ClearControlAction } from './actions/clear_control_action';
-import { DeleteControlAction } from './actions/delete_control_action';
-import { EditControlAction } from './actions/edit_control_action';
 import { registerControlGroupEmbeddable } from './control_group/register_control_group_embeddable';
 import { registerOptionsListControl } from './controls/data_controls/options_list_control/register_options_list_control';
 import { registerRangeSliderControl } from './controls/data_controls/range_slider/register_range_slider_control';
 import { registerTimeSliderControl } from './controls/timeslider_control/register_timeslider_control';
-import { setKibanaServices, untilPluginStartServicesReady } from './services/kibana_services';
+import { registerESQLControl } from './controls/esql_control/register_esql_control';
+
+import { setKibanaServices } from './services/kibana_services';
+
 import type { ControlsPluginSetupDeps, ControlsPluginStartDeps } from './types';
+import { registerActions } from './actions/register_actions';
 
 export class ControlsPlugin
   implements Plugin<void, void, ControlsPluginSetupDeps, ControlsPluginStartDeps>
@@ -33,25 +32,13 @@ export class ControlsPlugin
     registerOptionsListControl();
     registerRangeSliderControl();
     registerTimeSliderControl();
+    registerESQLControl();
   }
 
   public start(coreStart: CoreStart, startPlugins: ControlsPluginStartDeps) {
-    const { uiActions } = startPlugins;
     setKibanaServices(coreStart, startPlugins);
 
-    untilPluginStartServicesReady().then(() => {
-      const deleteControlAction = new DeleteControlAction();
-      uiActions.registerAction(deleteControlAction);
-      uiActions.attachAction(PANEL_HOVER_TRIGGER, deleteControlAction.id);
-
-      const editControlAction = new EditControlAction();
-      uiActions.registerAction(editControlAction);
-      uiActions.attachAction(PANEL_HOVER_TRIGGER, editControlAction.id);
-
-      const clearControlAction = new ClearControlAction();
-      uiActions.registerAction(clearControlAction);
-      uiActions.attachAction(PANEL_HOVER_TRIGGER, clearControlAction.id);
-    });
+    registerActions(startPlugins.uiActions);
   }
 
   public stop() {}

@@ -26,20 +26,34 @@ export function createTransformGenerators(
   return {
     'sli.apm.transactionDuration': new ApmTransactionDurationTransformGenerator(
       spaceId,
-      dataViewsService
+      dataViewsService,
+      isServerless
     ),
     'sli.apm.transactionErrorRate': new ApmTransactionErrorRateTransformGenerator(
       spaceId,
-      dataViewsService
+      dataViewsService,
+      isServerless
     ),
     'sli.synthetics.availability': new SyntheticsAvailabilityTransformGenerator(
       spaceId,
       dataViewsService,
       isServerless
     ),
-    'sli.kql.custom': new KQLCustomTransformGenerator(spaceId, dataViewsService),
-    'sli.metric.custom': new MetricCustomTransformGenerator(spaceId, dataViewsService),
-    'sli.histogram.custom': new HistogramTransformGenerator(spaceId, dataViewsService),
-    'sli.metric.timeslice': new TimesliceMetricTransformGenerator(spaceId, dataViewsService),
+    'sli.kql.custom': new KQLCustomTransformGenerator(spaceId, dataViewsService, isServerless),
+    'sli.metric.custom': new MetricCustomTransformGenerator(
+      spaceId,
+      dataViewsService,
+      isServerless
+    ),
+    'sli.histogram.custom': new HistogramTransformGenerator(
+      spaceId,
+      dataViewsService,
+      isServerless
+    ),
+    'sli.metric.timeslice': new TimesliceMetricTransformGenerator(
+      spaceId,
+      dataViewsService,
+      isServerless
+    ),
   };
 }

@@ -8,9 +8,9 @@
 import { i18n } from '@kbn/i18n';
 import { monaco } from '@kbn/monaco';
 import {
-  getPanelTitle,
+  getTitle,
   isEmbeddableApiContext,
-  type PublishesPanelTitle,
+  type PublishesTitle,
 } from '@kbn/presentation-publishing';
 import {
   ChartActionContext,
@@ -94,7 +94,7 @@ const getEventScopeFromRowClickTriggerContext = (
   ctx: RowClickContext
 ): RowClickTriggerEventScope => {
   const { data } = ctx;
-  const api = ctx.embeddable as Partial<PublishesPanelTitle>;
+  const api = ctx.embeddable as Partial<PublishesTitle>;
 
   const { rowIndex } = data;
   const columns = data.columns || data.table.columns.map(({ id }) => id);
@@ -107,7 +107,7 @@ const getEventScopeFromRowClickTriggerContext = (
     const column = data.table.columns.find(({ id }) => id === columnId);
     if (!column) {
       // This should never happen, but in case it does we log data necessary for debugging.
-      const title = getPanelTitle(api);
+      const title = getTitle(api);
       // eslint-disable-next-line no-console
       console.error(data, title ? `Embeddable [${title}]` : null);
       throw new Error('Could not find a datatable column.');

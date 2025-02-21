@@ -235,6 +235,8 @@ describe('schema validation', () => {
         degraded: 1,
         unenrolling: 1,
         enrolling: 1,
+        orphaned: 1,
+        uninstalled: 1,
       },
     };
     (getAgentsHandler as jest.Mock).mockImplementation((ctx, request, res) => {

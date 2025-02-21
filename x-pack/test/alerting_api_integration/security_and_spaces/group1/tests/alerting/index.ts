@@ -23,6 +23,7 @@ export default function alertingTests({ loadTestFile, getService }: FtrProviderC
       loadTestFile(require.resolve('./backfill'));
       loadTestFile(require.resolve('./find'));
       loadTestFile(require.resolve('./find_internal'));
+      loadTestFile(require.resolve('./gap'));
     });
   });
 }

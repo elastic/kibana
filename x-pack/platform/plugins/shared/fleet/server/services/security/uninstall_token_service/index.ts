@@ -520,9 +520,7 @@ export class UninstallTokenService implements UninstallTokenServiceInterface {
     policyIds: string[],
     force: boolean = false
   ): Promise<void> {
-    const { agentTamperProtectionEnabled } = appContextService.getExperimentalFeatures();
-
-    if (!agentTamperProtectionEnabled || !policyIds.length) {
+    if (!policyIds.length) {
       return;
     }
 

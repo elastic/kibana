@@ -104,10 +104,24 @@ export const performBulkGet = async <T>(
       if (spacesExtension && namespaces?.includes(ALL_NAMESPACES_STRING)) {
         namespaces = await getAvailableSpaces();
       }
+
+      const getFields = (savedObjectFields?: string[]) => {
+        const isEmpty = !savedObjectFields || savedObjectFields.length === 0;
+
+        if (securityExtension && securityExtension.includeSavedObjectNames() && !isEmpty) {
+          const nameAttribute = registry.getNameAttribute(type);
+          const nameFields = nameAttribute !== 'unknown' ? [nameAttribute] : ['name', 'title'];
+
+          return [...savedObjectFields, ...nameFields];
+        }
+
+        return fields;
+      };
+
       return right({
         type,
         id,
-        fields,
+        fields: getFields(fields),
         namespaces,
         esRequestIndex: bulkGetRequestIndexCounter++,
       });
@@ -170,6 +184,17 @@ export const performBulkGet = async <T>(
     // @ts-expect-error MultiGetHit._source is optional
     const docNotFound = !doc?.found || !rawDocExistsInNamespaces(registry, doc, namespaces);
 
+    const savedObject = docNotFound
+      ? ({
+          id,
+          type,
+          error: errorContent(SavedObjectsErrorHelpers.createGenericNotFoundError(type, id)),
+        } as any as SavedObject<T>)
+      : // @ts-expect-error MultiGetHit._source is optional
+        getSavedObjectFromSource(registry, type, id, doc, {
+          migrationVersionCompatibility,
+        });
+
     authObjects.push({
       type,
       id,
@@ -177,20 +202,12 @@ export const performBulkGet = async <T>(
       // @ts-expect-error MultiGetHit._source is optional
       existingNamespaces: doc?._source?.namespaces ?? [],
       error: docNotFound,
+      name: !docNotFound
+        ? SavedObjectsUtils.getName(registry.getNameAttribute(type), savedObject)
+        : undefined,
     });
 
-    if (docNotFound) {
-      return {
-        id,
-        type,
-        error: errorContent(SavedObjectsErrorHelpers.createGenericNotFoundError(type, id)),
-      } as any as SavedObject<T>;
-    }
-
-    // @ts-expect-error MultiGetHit._source is optional
-    return getSavedObjectFromSource(registry, type, id, doc, {
-      migrationVersionCompatibility,
-    });
+    return savedObject;
   });
 
   const authorizationResult = await securityExtension?.authorizeBulkGet({

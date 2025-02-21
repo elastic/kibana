@@ -145,6 +145,7 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
           data-popover-open={isPopoverOpen}
           onClick={onButtonClick}
           isDisabled={disabled}
+          color={isPopoverOpen ? 'primary' : 'text'}
         />
       </EuiToolTip>
     );

@@ -5,13 +5,7 @@
  * 2.0.
  */
 import { Chart, Metric, MetricTrendShape, Settings } from '@elastic/charts';
-import {
-  EuiPanel,
-  EuiSpacer,
-  EuiThemeComputed,
-  euiPaletteColorBlindBehindText,
-  useEuiTheme,
-} from '@elastic/eui';
+import { EuiPanel, EuiSpacer, EuiThemeComputed, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -43,19 +37,27 @@ const METRIC_ITEM_HEIGHT = 160;
 
 export const getColor = (euiTheme: EuiThemeComputed, isEnabled: boolean, status?: string) => {
   if (!isEnabled) {
-    return euiTheme.colors.lightestShade;
+    return euiTheme.colors.backgroundBaseDisabled;
   }
   const isAmsterdam = euiTheme.flags.hasVisColorAdjustment;
 
+  // make sure these are synced with slo card colors while making changes
+
   switch (status) {
     case 'down':
-      return isAmsterdam ? euiPaletteColorBlindBehindText()[9] : euiTheme.colors.danger;
+      return isAmsterdam
+        ? euiTheme.colors.vis.euiColorVisBehindText9
+        : euiTheme.colors.backgroundBaseDanger;
     case 'up':
-      return isAmsterdam ? euiPaletteColorBlindBehindText()[0] : euiTheme.colors.success;
+      return isAmsterdam
+        ? euiTheme.colors.vis.euiColorVisBehindText0
+        : euiTheme.colors.backgroundBaseSuccess;
     case 'unknown':
-      return euiTheme.colors.ghost;
+      return euiTheme.colors.backgroundBasePlain;
     default:
-      return isAmsterdam ? euiPaletteColorBlindBehindText()[0] : euiTheme.colors.success;
+      return isAmsterdam
+        ? euiTheme.colors.vis.euiColorVisBehindText0
+        : euiTheme.colors.backgroundBaseSuccess;
   }
 };
 

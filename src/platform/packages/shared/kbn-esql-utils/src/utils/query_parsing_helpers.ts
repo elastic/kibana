@@ -15,6 +15,8 @@ import type {
   ESQLSingleAstItem,
   ESQLCommandOption,
 } from '@kbn/esql-ast';
+import type { ESQLControlVariable } from '@kbn/esql-validation-autocomplete';
+import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 
 const DEFAULT_ESQL_LIMIT = 1000;
 
@@ -146,4 +148,55 @@ export const getQueryColumnsFromESQLQuery = (esql: string): string[] => {
   });
 
   return columns.map((column) => column.name);
+};
+
+export const getESQLQueryVariables = (esql: string): string[] => {
+  const { root } = parse(esql);
+  const usedVariablesInQuery = Walker.params(root);
+  return usedVariablesInQuery.map((v) => v.text.replace('?', ''));
+};
+
+/**
+ * This function is used to map the variables to the columns in the datatable
+ * @param esql:string
+ * @param variables:ESQLControlVariable[]
+ * @param columns:DatatableColumn[]
+ * @returns DatatableColumn[]
+ */
+export const mapVariableToColumn = (
+  esql: string,
+  variables: ESQLControlVariable[],
+  columns: DatatableColumn[]
+): DatatableColumn[] => {
+  if (!variables.length) {
+    return columns;
+  }
+  const usedVariablesInQuery = getESQLQueryVariables(esql);
+  const uniqueVariablesInQyery = new Set<string>(usedVariablesInQuery);
+
+  columns.map((column) => {
+    if (variables.some((variable) => variable.value === column.id)) {
+      const potentialColumnVariables = variables.filter((variable) => variable.value === column.id);
+      const variable = potentialColumnVariables.find((v) => uniqueVariablesInQyery.has(v.key));
+      column.variable = variable?.key ?? '';
+    }
+  });
+  return columns;
+};
+
+export const getValuesFromQueryField = (queryString: string) => {
+  const validQuery = `${queryString} ""`;
+  const { root } = parse(validQuery);
+  const lastCommand = root.commands[root.commands.length - 1];
+  const columns: ESQLColumn[] = [];
+
+  walk(lastCommand, {
+    visitColumn: (node) => columns.push(node),
+  });
+
+  const column = Walker.match(lastCommand, { type: 'column' });
+
+  if (column) {
+    return `${column.name}`;
+  }
 };

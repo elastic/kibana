@@ -7,17 +7,13 @@
 
 import { schema } from '@kbn/config-schema';
 
-import { AS_TELEMETRY_NAME } from '../../collectors/app_search/telemetry';
 import { ES_TELEMETRY_NAME } from '../../collectors/enterprise_search/telemetry';
 import { incrementUICounter } from '../../collectors/lib/telemetry';
-import { WS_TELEMETRY_NAME } from '../../collectors/workplace_search/telemetry';
 
-import { RouteDependencies } from '../../plugin';
+import type { RouteDependencies } from '../../types';
 
 const productToTelemetryMap = {
   enterprise_search: ES_TELEMETRY_NAME,
-  app_search: AS_TELEMETRY_NAME,
-  workplace_search: WS_TELEMETRY_NAME,
 };
 
 export function registerTelemetryRoute({ router, getSavedObjectsService }: RouteDependencies) {
@@ -26,11 +22,7 @@ export function registerTelemetryRoute({ router, getSavedObjectsService }: Route
       path: '/internal/enterprise_search/stats',
       validate: {
         body: schema.object({
-          product: schema.oneOf([
-            schema.literal('app_search'),
-            schema.literal('workplace_search'),
-            schema.literal('enterprise_search'),
-          ]),
+          product: schema.oneOf([schema.literal('enterprise_search')]),
           action: schema.oneOf([
             schema.literal('viewed'),
             schema.literal('clicked'),

@@ -408,8 +408,8 @@ describe('createCommentUserActionBuilder', () => {
         ...builderArgs,
         caseData: {
           ...builderArgs.caseData,
-          comments: [alertComment],
         },
+        attachments: [alertComment],
         userAction,
       });
 
@@ -432,8 +432,8 @@ describe('createCommentUserActionBuilder', () => {
         ...builderArgs,
         caseData: {
           ...builderArgs.caseData,
-          comments: [alertComment],
         },
+        attachments: [alertComment],
         userAction,
       });
 
@@ -465,8 +465,8 @@ describe('createCommentUserActionBuilder', () => {
         ...builderArgs,
         caseData: {
           ...builderArgs.caseData,
-          comments: [alertComment],
         },
+        attachments: [alertComment],
         userAction,
       });
 
@@ -501,14 +501,14 @@ describe('createCommentUserActionBuilder', () => {
         ...builderArgs,
         caseData: {
           ...builderArgs.caseData,
-          comments: [
-            {
-              ...alertComment,
-              alertId: ['alert-id-1', 'alert-id-2'],
-              index: ['alert-index-1', 'alert-index-2'],
-            },
-          ],
         },
+        attachments: [
+          {
+            ...alertComment,
+            alertId: ['alert-id-1', 'alert-id-2'],
+            index: ['alert-index-1', 'alert-index-2'],
+          },
+        ],
         userAction,
       });
 
@@ -528,14 +528,14 @@ describe('createCommentUserActionBuilder', () => {
         ...builderArgs,
         caseData: {
           ...builderArgs.caseData,
-          comments: [
-            {
-              ...alertComment,
-              alertId: ['alert-id-1', 'alert-id-2'],
-              index: ['alert-index-1', 'alert-index-2'],
-            },
-          ],
         },
+        attachments: [
+          {
+            ...alertComment,
+            alertId: ['alert-id-1', 'alert-id-2'],
+            index: ['alert-index-1', 'alert-index-2'],
+          },
+        ],
         userAction,
       });
 
@@ -564,14 +564,14 @@ describe('createCommentUserActionBuilder', () => {
         ...builderArgs,
         caseData: {
           ...builderArgs.caseData,
-          comments: [
-            {
-              ...alertComment,
-              alertId: ['alert-id-1', 'alert-id-2'],
-              index: ['alert-index-1', 'alert-index-2'],
-            },
-          ],
         },
+        attachments: [
+          {
+            ...alertComment,
+            alertId: ['alert-id-1', 'alert-id-2'],
+            index: ['alert-index-1', 'alert-index-2'],
+          },
+        ],
         userAction,
       });
 
@@ -595,8 +595,8 @@ describe('createCommentUserActionBuilder', () => {
         ...builderArgs,
         caseData: {
           ...builderArgs.caseData,
-          comments: [hostIsolationComment()],
         },
+        attachments: [hostIsolationComment()],
         userAction,
       });
 
@@ -623,8 +623,8 @@ describe('createCommentUserActionBuilder', () => {
         ...builderArgs,
         caseData: {
           ...builderArgs.caseData,
-          comments: [hostIsolationComment({ createdBy })],
         },
+        attachments: [hostIsolationComment({ createdBy })],
         userAction,
       });
 
@@ -663,17 +663,17 @@ describe('createCommentUserActionBuilder', () => {
           externalReferenceAttachmentTypeRegistry,
           caseData: {
             ...builderArgs.caseData,
-            comments: [
-              {
-                ...externalReferenceAttachment,
-                createdBy: {
-                  username: damagedRaccoon.user.username,
-                  fullName: damagedRaccoon.user.full_name,
-                  email: damagedRaccoon.user.email,
-                },
-              },
-            ],
           },
+          attachments: [
+            {
+              ...externalReferenceAttachment,
+              createdBy: {
+                username: damagedRaccoon.user.username,
+                fullName: damagedRaccoon.user.full_name,
+                email: damagedRaccoon.user.email,
+              },
+            },
+          ],
           userAction,
         });
 
@@ -696,8 +696,8 @@ describe('createCommentUserActionBuilder', () => {
           externalReferenceAttachmentTypeRegistry,
           caseData: {
             ...builderArgs.caseData,
-            comments: [externalReferenceAttachment],
           },
+          attachments: [externalReferenceAttachment],
           userAction,
         });
 
@@ -720,8 +720,8 @@ describe('createCommentUserActionBuilder', () => {
           externalReferenceAttachmentTypeRegistry,
           caseData: {
             ...builderArgs.caseData,
-            comments: [externalReferenceAttachment],
           },
+          attachments: [externalReferenceAttachment],
           userAction,
         });
 
@@ -780,8 +780,8 @@ describe('createCommentUserActionBuilder', () => {
           persistableStateAttachmentTypeRegistry,
           caseData: {
             ...builderArgs.caseData,
-            comments: [attachment01],
           },
+          attachments: [attachment01],
           userAction,
         });
 
@@ -809,8 +809,8 @@ describe('createCommentUserActionBuilder', () => {
           persistableStateAttachmentTypeRegistry,
           caseData: {
             ...builderArgs.caseData,
-            comments: [attachment02],
           },
+          attachments: [attachment02],
           userAction,
         });
 
@@ -832,8 +832,8 @@ describe('createCommentUserActionBuilder', () => {
           persistableStateAttachmentTypeRegistry,
           caseData: {
             ...builderArgs.caseData,
-            comments: [persistableStateAttachment],
           },
+          attachments: [persistableStateAttachment],
           userAction,
         });
 
@@ -856,8 +856,8 @@ describe('createCommentUserActionBuilder', () => {
           persistableStateAttachmentTypeRegistry,
           caseData: {
             ...builderArgs.caseData,
-            comments: [persistableStateAttachment],
           },
+          attachments: [persistableStateAttachment],
           userAction,
         });
 
@@ -915,8 +915,8 @@ describe('createCommentUserActionBuilder', () => {
         externalReferenceAttachmentTypeRegistry,
         caseData: {
           ...builderArgs.caseData,
-          comments: [externalReferenceAttachment],
         },
+        attachments: [externalReferenceAttachment],
         userAction,
       });
 
@@ -962,8 +962,8 @@ describe('createCommentUserActionBuilder', () => {
         externalReferenceAttachmentTypeRegistry,
         caseData: {
           ...builderArgs.caseData,
-          comments: [externalReferenceAttachment],
         },
+        attachments: [externalReferenceAttachment],
         userAction,
       });
 
@@ -1018,8 +1018,8 @@ describe('createCommentUserActionBuilder', () => {
         externalReferenceAttachmentTypeRegistry,
         caseData: {
           ...builderArgs.caseData,
-          comments: [externalReferenceAttachment],
         },
+        attachments: [externalReferenceAttachment],
         userAction,
       });
 
@@ -1073,8 +1073,8 @@ describe('createCommentUserActionBuilder', () => {
         externalReferenceAttachmentTypeRegistry,
         caseData: {
           ...builderArgs.caseData,
-          comments: [externalReferenceAttachment],
         },
+        attachments: [externalReferenceAttachment],
         userAction,
       });
 
@@ -1149,8 +1149,8 @@ describe('createCommentUserActionBuilder', () => {
         externalReferenceAttachmentTypeRegistry,
         caseData: {
           ...builderArgs.caseData,
-          comments: [externalReferenceAttachment],
         },
+        attachments: [externalReferenceAttachment],
         userAction,
       });
 
@@ -1200,8 +1200,8 @@ describe('createCommentUserActionBuilder', () => {
         externalReferenceAttachmentTypeRegistry,
         caseData: {
           ...builderArgs.caseData,
-          comments: [externalReferenceAttachment],
         },
+        attachments: [externalReferenceAttachment],
         userAction,
       });
 

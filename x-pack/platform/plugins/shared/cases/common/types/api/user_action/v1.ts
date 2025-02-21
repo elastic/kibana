@@ -15,6 +15,7 @@ import {
   CaseUserActionBasicRt,
   UserActionsRt,
 } from '../../domain/user_action/v1';
+import type { Attachments } from '../../domain';
 
 export type UserActionWithResponse<T> = T & { id: string; version: string } & rt.TypeOf<
     typeof CaseUserActionInjectedIdsRt
@@ -85,3 +86,7 @@ export const UserActionFindResponseRt = rt.strict({
 });
 
 export type UserActionFindResponse = rt.TypeOf<typeof UserActionFindResponseRt>;
+
+export interface UserActionInternalFindResponse extends UserActionFindResponse {
+  latestAttachments: Attachments;
+}

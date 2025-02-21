@@ -13,33 +13,27 @@ import { isMultiFieldKey } from '@kbn/data-plugin/common';
 /**
  * Get the stringified version of all the categories that needs to be colored in the chart.
  * Multifield keys will return as array of string and simple fields (numeric, string) will be returned as a plain unformatted string.
+ *
+ * Note: This does **NOT** support transposed columns
  */
 export function getColorCategories(
-  rows: DatatableRow[],
+  rows: DatatableRow[] = [],
   accessor?: string,
-  isTransposed?: boolean,
   exclude?: any[]
 ): Array<string | string[]> {
-  const ids = isTransposed
-    ? Object.keys(rows[0]).filter((key) => accessor && key.endsWith(accessor))
-    : accessor
-    ? [accessor]
-    : [];
+  if (!accessor) return [];
 
   return rows
-    .flatMap((r) =>
-      ids
-        .map((id) => r[id])
-        .filter((v) => !(v === undefined || exclude?.includes(v)))
-        .map((v) => {
-          // The categories needs to be stringified in their unformatted version.
-          // We can't distinguish between a number and a string from a text input and the match should
-          // work with both numeric field values and string values.
-          const key = (isMultiFieldKey(v) ? v.keys : [v]).map(String);
-          const stringifiedKeys = key.join(',');
-          return { key, stringifiedKeys };
-        })
-    )
+    .filter(({ [accessor]: v }) => !(v === undefined || exclude?.includes(v)))
+    .map((r) => {
+      const v = r[accessor];
+      // The categories needs to be stringified in their unformatted version.
+      // We can't distinguish between a number and a string from a text input and the match should
+      // work with both numeric field values and string values.
+      const key = (isMultiFieldKey(v) ? v.keys : [v]).map(String);
+      const stringifiedKeys = key.join(',');
+      return { key, stringifiedKeys };
+    })
     .reduce<{ keys: Set<string>; categories: Array<string | string[]> }>(
       (acc, { key, stringifiedKeys }) => {
         if (!acc.keys.has(stringifiedKeys)) {

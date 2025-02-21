@@ -55,6 +55,7 @@ interface Props {
   end: string;
   saveTableOptionsToUrl?: boolean;
   showSparkPlots?: boolean;
+  onLoadTable?: () => void;
 }
 
 export function TransactionsTable({
@@ -69,6 +70,7 @@ export function TransactionsTable({
   start,
   end,
   saveTableOptionsToUrl = false,
+  onLoadTable,
   showSparkPlots,
 }: Props) {
   const { link } = useApmRouter();
@@ -89,7 +91,7 @@ export function TransactionsTable({
   const shouldShowSparkPlots = showSparkPlots ?? !isLarge;
   const { transactionType, serviceName } = useApmServiceContext();
   const [searchQuery, setSearchQueryDebounced] = useStateDebounced('');
-
+  const [hasTableLoaded, setHasTableLoaded] = useState(false);
   const [renderedItems, setRenderedItems] = useState<ApiResponse['transactionGroups']>([]);
 
   const { mainStatistics, mainStatisticsStatus, detailedStatistics, detailedStatisticsStatus } =
@@ -106,6 +108,18 @@ export function TransactionsTable({
       start,
       transactionType,
     });
+
+  useEffect(() => {
+    if (
+      mainStatisticsStatus === FETCH_STATUS.SUCCESS &&
+      detailedStatisticsStatus === FETCH_STATUS.SUCCESS &&
+      onLoadTable &&
+      !hasTableLoaded
+    ) {
+      onLoadTable();
+      setHasTableLoaded(true);
+    }
+  }, [mainStatisticsStatus, detailedStatisticsStatus, onLoadTable, hasTableLoaded]);
 
   const columns = useMemo(() => {
     return getColumns({
@@ -369,6 +383,7 @@ function useTableData({
     },
     // only fetches detailed statistics when `currentPageItems` is updated.
 
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [mainStatistics.requestId, currentPageItems, offset, comparisonEnabled],
     { preservePreviousData: false }
   );

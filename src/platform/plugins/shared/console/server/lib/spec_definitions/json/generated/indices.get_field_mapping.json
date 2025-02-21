@@ -24,7 +24,7 @@
       "_mapping/field/{fields}",
       "{index}/_mapping/field/{fields}"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/indices-get-field-mapping.html",
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/{branch}/indices-get-field-mapping.html",
     "availability": {
       "stack": true,
       "serverless": false

@@ -193,20 +193,20 @@ export const RuleDefinition = () => {
   return (
     <EuiSplitPanel.Outer hasBorder hasShadow={false} data-test-subj="ruleDefinition">
       <EuiSplitPanel.Inner color="subdued">
-        <EuiFlexGroup gutterSize="s">
+        <EuiFlexGroup gutterSize="s" className="ruleDefinitionHeader">
           <EuiFlexItem grow={false} data-test-subj="ruleDefinitionHeaderRuleTypeName">
-            <EuiText size="xs">
+            <EuiText size="xs" className="ruleDefinitionHeaderRuleTypeName">
               <strong>{selectedRuleType.name}</strong>
             </EuiText>
           </EuiFlexItem>
           <EuiFlexItem grow={false} data-test-subj="ruleDefinitionHeaderRuleTypeDescription">
-            <EuiText size="xs">
+            <EuiText size="xs" className="ruleDefinitionHeaderRuleTypeDescription">
               <p>{selectedRuleTypeModel.description}</p>
             </EuiText>
           </EuiFlexItem>
           {docsUrl && (
             <EuiFlexItem grow={false}>
-              <EuiText size="xs">
+              <EuiText size="xs" className="ruleDefinitionHeaderDocsLink">
                 <EuiLink
                   href={docsUrl}
                   target="_blank"

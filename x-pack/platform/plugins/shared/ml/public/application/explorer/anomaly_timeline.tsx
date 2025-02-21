@@ -115,7 +115,7 @@ export const AnomalyTimeline: FC<AnomalyTimelineProps> = React.memo(
 
     const [isMenuOpen, setIsMenuOpen] = useState(false);
 
-    const canEditDashboards = capabilities.dashboard?.createNew ?? false;
+    const canEditDashboards = capabilities.dashboard_v2?.createNew ?? false;
 
     const timeBuckets = useTimeBuckets(uiSettings);
 

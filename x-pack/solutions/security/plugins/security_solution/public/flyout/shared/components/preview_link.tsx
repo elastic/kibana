@@ -17,7 +17,7 @@ import {
   IP_FIELD_TYPE,
 } from '../../../timelines/components/timeline/body/renderers/constants';
 import { useKibana } from '../../../common/lib/kibana';
-import { FLYOUT_PREVIEW_LINK_TEST_ID } from '../../document_details/shared/components/test_ids';
+import { FLYOUT_PREVIEW_LINK_TEST_ID } from './test_ids';
 import { HostPreviewPanelKey } from '../../entity_details/host_right';
 import { HOST_PREVIEW_BANNER } from '../../document_details/right/components/host_entity_overview';
 import { UserPreviewPanelKey } from '../../entity_details/user_right';

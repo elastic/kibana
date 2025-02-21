@@ -24,7 +24,7 @@
     - 'x-pack/solutions/observability/plugins/synthetics/**/*.*'
     - 'x-pack/solutions/observability/plugins/exploratory_view/**/*.*'
 - 'Team:Obs AI Assistant':
-    - 'x-pack/platform/plugins/shared/observability_solution/observability_ai_assistant/**/*.*'
+    - 'x-pack/platform/plugins/shared/observability_ai_assistant/**/*.*'
     - 'x-pack/plugins/observability_solution/observability_ai_assistant_*/**/*.*'
     - 'x-pack/test/observability_ai_assistant_api_integration/**/*.*'
     - 'x-pack/test/observability_ai_assistant_functional/**/*.*'

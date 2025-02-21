@@ -34,8 +34,8 @@ describe('getContextScopeValues()', () => {
         }),
         timeRange$: new BehaviorSubject({ from: 'FROM', to: 'TO' }),
       },
-      panelTitle: new BehaviorSubject('title1'),
-      savedObjectId: new BehaviorSubject('1234'),
+      title$: new BehaviorSubject('title1'),
+      savedObjectId$: new BehaviorSubject('1234'),
       uuid: 'test',
     };
     expect(getContextScopeValues({ embeddable: embeddableApi })).toEqual({
@@ -66,7 +66,7 @@ describe('getContextScopeValues()', () => {
 
   test('returns a single index pattern from output', () => {
     const embeddableApi = {
-      dataViews: new BehaviorSubject([{ id: 'xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx' }]),
+      dataViews$: new BehaviorSubject([{ id: 'xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx' }]),
     };
     expect(getContextScopeValues({ embeddable: embeddableApi })).toEqual({
       panel: {
@@ -77,7 +77,7 @@ describe('getContextScopeValues()', () => {
 
   test('returns multiple index patterns from output', () => {
     const embeddableApi = {
-      dataViews: new BehaviorSubject([
+      dataViews$: new BehaviorSubject([
         { id: 'xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx' },
         { id: 'yyyyyyyy-yyyy-yyyy-yyyy-yyyyyyyyyyyy' },
       ]),

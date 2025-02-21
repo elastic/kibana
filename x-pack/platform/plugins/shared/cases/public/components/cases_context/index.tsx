@@ -100,6 +100,7 @@ export const CasesProvider: FC<
         update: permissions.update,
         reopenCase: permissions.reopenCase,
         createComment: permissions.createComment,
+        assign: permissions.assign,
       },
       basePath,
       /**
@@ -131,6 +132,7 @@ export const CasesProvider: FC<
       permissions.update,
       permissions.reopenCase,
       permissions.createComment,
+      permissions.assign,
     ]
   );
 
@@ -148,7 +150,7 @@ export const CasesProvider: FC<
         );
       } else {
         throw new Error(
-          'Invalid owner provided to cases context. See https://github.com/elastic/kibana/blob/main/x-pack/plugins/cases/README.md#casescontext-setup'
+          'Invalid owner provided to cases context. See https://github.com/elastic/kibana/blob/main/x-pack/platform/plugins/shared/cases/README.md#casescontext-setup'
         );
       }
     },

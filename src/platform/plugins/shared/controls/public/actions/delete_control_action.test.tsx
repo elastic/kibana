@@ -17,7 +17,7 @@ import { coreServices } from '../services/kibana_services';
 import { DeleteControlAction } from './delete_control_action';
 
 const dashboardApi = {
-  viewMode: new BehaviorSubject<ViewMode>('view'),
+  viewMode$: new BehaviorSubject<ViewMode>('view'),
 };
 const controlGroupApi = getMockedControlGroupApi(dashboardApi, {
   removePanel: jest.fn(),

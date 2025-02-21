@@ -16,16 +16,26 @@ import {
   mockAnonymizedAlertsReplacements,
 } from '../../../../evaluation/__mocks__/mock_anonymized_alerts';
 import { getChainWithFormatInstructions } from '../helpers/get_chain_with_format_instructions';
-import { getDefaultAttackDiscoveryPrompt } from '../helpers/get_default_attack_discovery_prompt';
-import { getDefaultRefinePrompt } from './helpers/get_default_refine_prompt';
 import { GraphState } from '../../types';
 import {
   getParsedAttackDiscoveriesMock,
   getRawAttackDiscoveriesMock,
 } from '../../../../../../__mocks__/raw_attack_discoveries';
+import {
+  ATTACK_DISCOVERY_CONTINUE,
+  ATTACK_DISCOVERY_DEFAULT,
+  ATTACK_DISCOVERY_REFINE,
+} from '../../../../../prompt/prompts';
 
 const attackDiscoveryTimestamp = '2024-10-11T17:55:59.702Z';
-
+const prompts = {
+  detailsMarkdown: '',
+  entitySummaryMarkdown: '',
+  mitreAttackTactics: '',
+  summaryMarkdown: '',
+  title: '',
+  insights: '',
+};
 export const mockUnrefinedAttackDiscoveries: AttackDiscovery[] = [
   {
     title: 'unrefinedTitle1',
@@ -67,10 +77,11 @@ let mockLlm: ActionsClientLlm;
 
 const initialGraphState: GraphState = {
   attackDiscoveries: null,
-  attackDiscoveryPrompt: getDefaultAttackDiscoveryPrompt(),
+  attackDiscoveryPrompt: ATTACK_DISCOVERY_DEFAULT,
   anonymizedAlerts: [...mockAnonymizedAlerts],
   combinedGenerations: 'gen1',
   combinedRefinements: '',
+  continuePrompt: ATTACK_DISCOVERY_CONTINUE,
   errors: [],
   generationAttempts: 1,
   generations: ['gen1'],
@@ -79,7 +90,7 @@ const initialGraphState: GraphState = {
   maxHallucinationFailures: 5,
   maxRepeatedGenerations: 3,
   refinements: [],
-  refinePrompt: getDefaultRefinePrompt(),
+  refinePrompt: ATTACK_DISCOVERY_REFINE,
   replacements: {
     ...mockAnonymizedAlertsReplacements,
   },
@@ -106,17 +117,20 @@ describe('getRefineNode', () => {
     const refineNode = getRefineNode({
       llm: mockLlm,
       logger: mockLogger,
+      prompts,
     });
 
     expect(typeof refineNode).toBe('function');
   });
 
   it('invokes the chain with the unrefinedResults from state and format instructions', async () => {
-    const mockInvoke = getChainWithFormatInstructions(mockLlm).chain.invoke as jest.Mock;
+    const mockInvoke = getChainWithFormatInstructions({ llm: mockLlm, prompts }).chain
+      .invoke as jest.Mock;
 
     const refineNode = getRefineNode({
       llm: mockLlm,
       logger: mockLogger,
+      prompts,
     });
 
     await refineNode(initialGraphState);
@@ -125,7 +139,7 @@ describe('getRefineNode', () => {
       format_instructions: ['mock format instructions'],
       query: `${initialGraphState.attackDiscoveryPrompt}
 
-${getDefaultRefinePrompt()}
+${ATTACK_DISCOVERY_REFINE}
 
 \"\"\"
 ${JSON.stringify(initialGraphState.unrefinedResults, null, 2)}
@@ -140,7 +154,7 @@ ${JSON.stringify(initialGraphState.unrefinedResults, null, 2)}
       'You asked for some JSON, here it is:\n```json\n{"key": "value"}\n```\nI hope that works for you.';
 
     const mockLlmWithResponse = new FakeLLM({ response }) as unknown as ActionsClientLlm;
-    const mockInvoke = getChainWithFormatInstructions(mockLlmWithResponse).chain
+    const mockInvoke = getChainWithFormatInstructions({ llm: mockLlmWithResponse, prompts }).chain
       .invoke as jest.Mock;
 
     mockInvoke.mockResolvedValue(response);
@@ -148,6 +162,7 @@ ${JSON.stringify(initialGraphState.unrefinedResults, null, 2)}
     const refineNode = getRefineNode({
       llm: mockLlm,
       logger: mockLogger,
+      prompts,
     });
 
     const state = await refineNode(initialGraphState);
@@ -170,14 +185,15 @@ ${JSON.stringify(initialGraphState.unrefinedResults, null, 2)}
     const mockLlmWithHallucination = new FakeLLM({
       response: hallucinatedResponse,
     }) as unknown as ActionsClientLlm;
-    const mockInvoke = getChainWithFormatInstructions(mockLlmWithHallucination).chain
-      .invoke as jest.Mock;
+    const mockInvoke = getChainWithFormatInstructions({ llm: mockLlmWithHallucination, prompts })
+      .chain.invoke as jest.Mock;
 
     mockInvoke.mockResolvedValue(hallucinatedResponse);
 
     const refineNode = getRefineNode({
       llm: mockLlmWithHallucination,
       logger: mockLogger,
+      prompts,
     });
 
     const withPreviousGenerations = {
@@ -203,14 +219,17 @@ ${JSON.stringify(initialGraphState.unrefinedResults, null, 2)}
     const mockLlmWithRepeatedGenerations = new FakeLLM({
       response: repeatedResponse,
     }) as unknown as ActionsClientLlm;
-    const mockInvoke = getChainWithFormatInstructions(mockLlmWithRepeatedGenerations).chain
-      .invoke as jest.Mock;
+    const mockInvoke = getChainWithFormatInstructions({
+      llm: mockLlmWithRepeatedGenerations,
+      prompts,
+    }).chain.invoke as jest.Mock;
 
     mockInvoke.mockResolvedValue(repeatedResponse);
 
     const refineNode = getRefineNode({
       llm: mockLlmWithRepeatedGenerations,
       logger: mockLogger,
+      prompts,
     });
 
     const withPreviousGenerations = {
@@ -236,7 +255,7 @@ ${JSON.stringify(initialGraphState.unrefinedResults, null, 2)}
     const mockLlmWithResponse = new FakeLLM({
       response,
     }) as unknown as ActionsClientLlm;
-    const mockInvoke = getChainWithFormatInstructions(mockLlmWithResponse).chain
+    const mockInvoke = getChainWithFormatInstructions({ llm: mockLlmWithResponse, prompts }).chain
       .invoke as jest.Mock;
 
     mockInvoke.mockResolvedValue(response);
@@ -244,6 +263,7 @@ ${JSON.stringify(initialGraphState.unrefinedResults, null, 2)}
     const refineNode = getRefineNode({
       llm: mockLlmWithResponse,
       logger: mockLogger,
+      prompts,
     });
 
     const withPreviousGenerations = {
@@ -275,7 +295,7 @@ ${JSON.stringify(initialGraphState.unrefinedResults, null, 2)}
     const mockLlmWithResponse = new FakeLLM({
       response: secondResponse,
     }) as unknown as ActionsClientLlm;
-    const mockInvoke = getChainWithFormatInstructions(mockLlmWithResponse).chain
+    const mockInvoke = getChainWithFormatInstructions({ llm: mockLlmWithResponse, prompts }).chain
       .invoke as jest.Mock;
 
     mockInvoke.mockResolvedValue(secondResponse);
@@ -283,6 +303,7 @@ ${JSON.stringify(initialGraphState.unrefinedResults, null, 2)}
     const refineNode = getRefineNode({
       llm: mockLlmWithResponse,
       logger: mockLogger,
+      prompts,
     });
 
     const withPreviousGenerations = {
@@ -309,7 +330,7 @@ ${JSON.stringify(initialGraphState.unrefinedResults, null, 2)}
     const mockLlmWithResponse = new FakeLLM({
       response,
     }) as unknown as ActionsClientLlm;
-    const mockInvoke = getChainWithFormatInstructions(mockLlmWithResponse).chain
+    const mockInvoke = getChainWithFormatInstructions({ llm: mockLlmWithResponse, prompts }).chain
       .invoke as jest.Mock;
 
     mockInvoke.mockResolvedValue(response);
@@ -317,6 +338,7 @@ ${JSON.stringify(initialGraphState.unrefinedResults, null, 2)}
     const refineNode = getRefineNode({
       llm: mockLlmWithResponse,
       logger: mockLogger,
+      prompts,
     });
 
     const withPreviousGenerations = {

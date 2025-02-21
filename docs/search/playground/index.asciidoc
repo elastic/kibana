@@ -4,8 +4,8 @@
 
 preview::[]
 
-// Variable (attribute) definition 
-:x:                    Playground 
+// Variable (attribute) definition
+:x:                    Playground
 
 Use {x} to combine your Elasticsearch data with the power of large language models (LLMs) for retrieval augmented generation (RAG).
 The chat interface translates your natural language questions into {es} queries, retrieves the most relevant results from your {es} documents, and passes those documents to the LLM to generate tailored responses.
@@ -66,37 +66,19 @@ To use {x}, you'll need the following:
 ** See <<playground-getting-started-ingest, ingest data>> if you'd like to ingest sample data.
 3. An account with a *supported LLM provider*. {x} supports the following:
 +
-[cols="2a,2a,1a", options="header"]
-|===
-| Provider | Models | Notes
-
-| *Amazon Bedrock*
-a|
-* Anthropic: Claude 3.5 Sonnet
-* Anthropic: Claude 3 Haiku
-a|
-
-| *OpenAI*
-a|
-* GPT-3 turbo
-* GPT-4 turbo
-* GPT-4 omni
-a|
-
-| *Azure OpenAI*
-a|
-* GPT-3 turbo
-* GPT-4 turbo
-a|
-Buffers responses in large chunks
-
-| *Google*
-a|
-* Google Gemini 1.5 Pro
-* Google Gemini 1.5 Flash
-a|
-
-|===
+** *Amazon Bedrock*
+*** Anthropic: Claude 3.5 Sonnet
+*** Anthropic: Claude 3 Haiku
+** *OpenAI*
+*** GPT-3 turbo
+*** GPT-4 turbo
+*** GPT-4 omni
+** *Azure OpenAI* (note: Buffers responses in large chunks)
+*** GPT-3 turbo
+*** GPT-4 turbo
+** *Google*
+***  Google Gemini 1.5 Pro
+***  Google Gemini 1.5 Flash
 
 [[playground-local-llms]]
 [TIP]
@@ -171,7 +153,7 @@ POST /_bulk
 ----
 ==============
 
-We've also provided some Jupyter notebooks to easily ingest sample data into {es}. 
+We've also provided some Jupyter notebooks to easily ingest sample data into {es}.
 Find these in the https://github.com/elastic/elasticsearch-labs/blob/main/notebooks/ingestion-and-chunking[elasticsearch-labs] repository.
 These notebooks use the official {es} Python client.
 

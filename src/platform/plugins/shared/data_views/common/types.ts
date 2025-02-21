@@ -324,6 +324,8 @@ export interface GetFieldsOptions {
   forceRefresh?: boolean;
   fieldTypes?: string[];
   includeEmptyFields?: boolean;
+  abortSignal?: AbortSignal;
+  runtimeMappings?: estypes.MappingRuntimeFields;
 }
 
 /**

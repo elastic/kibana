@@ -11,6 +11,7 @@ import { pick } from 'lodash';
 import { ReactFlow, Controls, Background } from '@xyflow/react';
 import { Story } from '@storybook/react';
 import { NodeViewModel } from '../types';
+import { GlobalStylesStorybookDecorator } from '../../../.storybook/decorators';
 import { HexagonNode, PentagonNode, EllipseNode, RectangleNode, DiamondNode, LabelNode } from '.';
 
 import '@xyflow/react/dist/style.css';
@@ -29,6 +30,7 @@ export default {
     },
     expandButtonClick: { action: 'expandButtonClick' },
   },
+  decorators: [GlobalStylesStorybookDecorator],
 };
 
 const nodeTypes = {

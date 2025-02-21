@@ -58,6 +58,7 @@ export class SearchIndicesPlugin
         };
         return renderApp(ElasticsearchStartPage, coreStart, startDeps, element, queryClient);
       },
+      visibleIn: [],
     });
     core.application.register({
       id: INDICES_APP_ID,
@@ -69,6 +70,7 @@ export class SearchIndicesPlugin
           title: i18n.translate('xpack.searchIndices.elasticsearchIndices.createIndexTitle', {
             defaultMessage: 'Create index',
           }),
+          visibleIn: ['globalSearch'],
         },
       ],
       title: i18n.translate('xpack.searchIndices.elasticsearchIndices.startAppTitle', {
@@ -84,6 +86,7 @@ export class SearchIndicesPlugin
         };
         return renderApp(SearchIndicesRouter, coreStart, startDeps, element, queryClient);
       },
+      visibleIn: [],
     });
 
     registerLocators(plugins.share);

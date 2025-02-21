@@ -45,14 +45,14 @@ export const TimelineControlColumnCellRender = memo(function TimelineControlColu
       onRowSelected={noOp}
       onRuleChange={noOp}
       showCheckboxes={false}
-      showNotes={true}
+      showNotes={props.showNotes}
       timelineId={props.timelineId}
       ariaRowindex={rowIndex}
       checked={false}
       loadingEventIds={props.loadingEventIds}
       toggleShowNotes={props.toggleShowNotes}
       disableExpandAction
-      disablePinAction={false}
+      disablePinAction={props.disablePinAction}
     />
   );
 });

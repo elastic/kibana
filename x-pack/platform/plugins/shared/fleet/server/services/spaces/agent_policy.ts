@@ -11,7 +11,6 @@ import type { SortResults } from '@elastic/elasticsearch/lib/api/types';
 
 import {
   AGENTS_INDEX,
-  AGENT_ACTIONS_INDEX,
   AGENT_POLICY_SAVED_OBJECT_TYPE,
   PACKAGE_POLICY_SAVED_OBJECT_TYPE,
   SO_SEARCH_LIMIT,
@@ -197,24 +196,6 @@ export async function updateAgentPolicySpaces({
 
         const lastAgent = agents[agents.length - 1];
         searchAfter = lastAgent.sort;
-
-        await esClient.updateByQuery({
-          index: AGENT_ACTIONS_INDEX,
-          query: {
-            bool: {
-              must: {
-                terms: {
-                  agents: agents.map(({ id }) => id),
-                },
-              },
-            },
-          },
-          script: `ctx._source.namespaces = [${newSpaceIds
-            .map((spaceId) => `"${spaceId}"`)
-            .join(',')}]`,
-          ignore_unavailable: true,
-          refresh: true,
-        });
       }
     } finally {
       await closePointInTime(esClient, pitId);

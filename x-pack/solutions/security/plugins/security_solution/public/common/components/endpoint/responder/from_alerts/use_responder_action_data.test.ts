@@ -110,12 +110,7 @@ describe('use responder action data hooks', () => {
         expect(onClickMock).not.toHaveBeenCalled();
       });
 
-      it.each([
-        // FIXME:PT temporary change. Tests for MS defender will be in PR https://github.com/elastic/kibana/pull/205012
-        ...RESPONSE_ACTION_AGENT_TYPE.filter(
-          (agentType) => agentType !== 'microsoft_defender_endpoint'
-        ),
-      ])(
+      it.each([...RESPONSE_ACTION_AGENT_TYPE])(
         'should show action disabled with tooltip for %s if agent id field is missing',
         (agentType) => {
           const agentTypeField = RESPONSE_ACTIONS_ALERT_AGENT_ID_FIELDS[agentType][0];

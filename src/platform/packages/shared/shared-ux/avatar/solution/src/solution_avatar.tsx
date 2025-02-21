@@ -7,14 +7,21 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import './solution_avatar.scss';
-
+import { css } from '@emotion/react';
 import React from 'react';
-import classNames from 'classnames';
 
-import { DistributiveOmit, EuiAvatar, EuiAvatarProps, IconType } from '@elastic/eui';
+import {
+  DistributiveOmit,
+  EuiAvatar,
+  EuiAvatarProps,
+  IconType,
+  useEuiShadow,
+  useEuiTheme,
+} from '@elastic/eui';
 
 import { SolutionNameType } from './types';
+
+import textureImage from './assets/texture.svg';
 
 export type KnownSolutionProps = DistributiveOmit<EuiAvatarProps, 'size' | 'name' | 'iconType'> & {
   /**
@@ -56,16 +63,27 @@ export const KibanaSolutionAvatar = (props: KibanaSolutionAvatarProps) => {
     icon.iconType = `logo${props.name.replace(/\s+/g, '')}`;
   }
 
+  const { euiTheme } = useEuiTheme();
+  const styles = {
+    base: css(useEuiShadow('s')),
+    xxl: css`
+      ${useEuiShadow('m')};
+      line-height: calc(${euiTheme.size.xs} * 25);
+      width: calc(${euiTheme.size.xs} * 25);
+      height: calc(${euiTheme.size.xs} * 25);
+      border-radius: calc(${euiTheme.size.xs} * 25);
+      display: inline-block;
+      background: ${euiTheme.colors.backgroundBasePlain} url(${textureImage}) no-repeat;
+      background-size: cover, 125%;
+      text-align: center;
+    `,
+  };
+
   return (
     // @ts-ignore Complains about ExclusiveUnion between `iconSize` and `iconType`, but works fine
     <EuiAvatar
-      className={classNames(
-        'kbnSolutionAvatar',
-        {
-          [`kbnSolutionAvatar--${size}`]: size,
-        },
-        className
-      )}
+      css={[styles.base, size === 'xxl' && styles.xxl]}
+      className={className}
       size={size === 'xxl' ? 'xl' : size}
       iconSize={size}
       color="plain"

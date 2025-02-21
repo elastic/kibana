@@ -104,6 +104,12 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
     });
 
+    describe('edit inference flyout', () => {
+      it('renders successfully', async () => {
+        await pageObjects.svlSearchInferenceManagementPage.EditInferenceFlyout.expectEditInferenceEndpointFlyoutToBeVisible();
+      });
+    });
+
     it('has embedded dev console', async () => {
       await testHasEmbeddedConsole(pageObjects);
     });

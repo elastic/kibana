@@ -20,7 +20,8 @@
       "cloud",
       "console",
       "usageCollection",
-      "serverless"
+      "serverless",
+      "searchNavigation"
     ],
     "requiredBundles": [
       "kibanaReact",

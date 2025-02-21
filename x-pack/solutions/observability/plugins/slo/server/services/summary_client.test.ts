@@ -7,7 +7,7 @@
 
 import { ElasticsearchClientMock, elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import moment from 'moment';
-import { SLO_DESTINATION_INDEX_PATTERN } from '../../common/constants';
+import { SLI_DESTINATION_INDEX_PATTERN } from '../../common/constants';
 import { Duration, DurationUnit } from '../domain/models';
 import { BurnRatesClient } from './burn_rates_client';
 import { createSLO } from './fixtures/slo';
@@ -59,7 +59,7 @@ describe('SummaryClient', () => {
 
         expect(result).toMatchSnapshot();
         expect(esClientMock.search.mock.calls[0][0]).toEqual({
-          index: SLO_DESTINATION_INDEX_PATTERN,
+          index: SLI_DESTINATION_INDEX_PATTERN,
           size: 0,
           query: {
             bool: {
@@ -93,7 +93,7 @@ describe('SummaryClient', () => {
         await summaryClient.computeSummary({ slo });
 
         expect(esClientMock.search.mock.calls[0][0]).toEqual({
-          index: SLO_DESTINATION_INDEX_PATTERN,
+          index: SLI_DESTINATION_INDEX_PATTERN,
           size: 0,
           query: {
             bool: {
@@ -137,7 +137,7 @@ describe('SummaryClient', () => {
 
         expect(result).toMatchSnapshot();
         expect(esClientMock.search.mock.calls[0][0]).toEqual({
-          index: SLO_DESTINATION_INDEX_PATTERN,
+          index: SLI_DESTINATION_INDEX_PATTERN,
           size: 0,
           query: {
             bool: {
@@ -179,7 +179,7 @@ describe('SummaryClient', () => {
         expect(result).toMatchSnapshot();
 
         expect(esClientMock.search.mock.calls[0][0]).toEqual({
-          index: SLO_DESTINATION_INDEX_PATTERN,
+          index: SLI_DESTINATION_INDEX_PATTERN,
           size: 0,
           query: {
             bool: {

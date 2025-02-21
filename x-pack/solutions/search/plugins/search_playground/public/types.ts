@@ -12,7 +12,7 @@ import {
   Uuid,
 } from '@elastic/elasticsearch/lib/api/types';
 import type { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
-import React, { ComponentType } from 'react';
+import React from 'react';
 import type { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
 import type { CloudSetup, CloudStart } from '@kbn/cloud-plugin/public';
 import type { TriggersAndActionsUIPublicPluginStart } from '@kbn/triggers-actions-ui-plugin/public';
@@ -23,7 +23,13 @@ import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { SearchNavigationPluginStart } from '@kbn/search-navigation/public';
 import type { SecurityPluginStart } from '@kbn/security-plugin/public';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
-import type { ChatRequestData, MessageRole } from '../common/types';
+import type {
+  ActionConnector,
+  UserConfiguredActionConnector,
+} from '@kbn/alerts-ui-shared/src/common/types';
+import type { ServiceProviderKeys } from '@kbn/inference-endpoint-ui-common';
+import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import type { ChatRequestData, MessageRole, LLMs } from '../common/types';
 
 export * from '../common/types';
 
@@ -54,6 +60,7 @@ export interface AppPluginStartDependencies {
   searchNavigation?: SearchNavigationPluginStart;
   security: SecurityPluginStart;
   licensing: LicensingPluginStart;
+  uiActions: UiActionsStart;
 }
 
 export type AppServicesContext = CoreStart & AppPluginStartDependencies;
@@ -217,7 +224,13 @@ export interface LLMModel {
   connectorId: string;
   connectorName: string;
   connectorType: string;
-  icon: ComponentType;
+  icon: string;
   disabled: boolean;
   promptTokenLimit?: number;
 }
+
+export type { ActionConnector, UserConfiguredActionConnector };
+export type InferenceActionConnector = ActionConnector & {
+  config: { provider: ServiceProviderKeys; inferenceId: string };
+};
+export type PlaygroundConnector = ActionConnector & { title: string; type: LLMs };

@@ -18,7 +18,7 @@ import {
 } from '../../../../hooks';
 import { LICENCE_FOR_PER_POLICY_OUTPUT } from '../../../../../../../common/constants';
 import {
-  getAllowedOutputTypeForPolicy,
+  getAllowedOutputTypesForAgentPolicy,
   policyHasFleetServer,
   policyHasSyntheticsIntegration,
 } from '../../../../../../../common/services';
@@ -64,12 +64,13 @@ export function useOutputOptions(agentPolicy: Partial<NewAgentPolicy | AgentPoli
   const licenseService = useLicense();
 
   // Allow changing output when agent policy has fleet server or synthetics integrations
+  // regardless of license level
   const isPolicyPerOutputAllowed =
     licenseService.hasAtLeast(LICENCE_FOR_PER_POLICY_OUTPUT) ||
     policyHasFleetServer(agentPolicy as AgentPolicy) ||
     policyHasSyntheticsIntegration(agentPolicy as AgentPolicy);
   const allowedOutputTypes = useMemo(
-    () => getAllowedOutputTypeForPolicy(agentPolicy as AgentPolicy),
+    () => getAllowedOutputTypesForAgentPolicy(agentPolicy as AgentPolicy),
     [agentPolicy]
   );
 
@@ -90,7 +91,7 @@ export function useOutputOptions(agentPolicy: Partial<NewAgentPolicy | AgentPoli
     const defaultOutputDisabledMessage = defaultOutputDisabled ? (
       <FormattedMessage
         id="xpack.fleet.agentPolicyForm.outputOptionDisableOutputTypeText"
-        defaultMessage="{outputType} output for agent integration is not supported for Fleet Server, Synthetics or APM."
+        defaultMessage="{outputType} output for agent integration is not supported for this policy."
         values={{
           outputType: defaultOutput.type,
         }}
@@ -110,7 +111,7 @@ export function useOutputOptions(agentPolicy: Partial<NewAgentPolicy | AgentPoli
             isOutputTypeUnsupported ? (
               <FormattedMessage
                 id="xpack.fleet.agentPolicyForm.outputOptionDisabledTypeNotSupportedText"
-                defaultMessage="{outputType} output for agent integration is not supported for Fleet Server, Synthetics or APM."
+                defaultMessage="{outputType} output for agent integration is not supported for this policy."
                 values={{
                   outputType: item.type,
                 }}

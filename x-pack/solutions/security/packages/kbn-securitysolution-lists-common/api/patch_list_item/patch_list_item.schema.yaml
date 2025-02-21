@@ -1,6 +1,6 @@
 openapi: 3.0.0
 info:
-  title: Patch list item API endpoint
+  title: Patch value list item API endpoint
   version: '2023-10-31'
 paths:
   /api/lists/items:
@@ -8,10 +8,10 @@ paths:
       x-labels: [serverless, ess]
       operationId: PatchListItem
       x-codegen-enabled: true
-      summary: Patch a list item
-      description: Update specific fields of an existing list item using the list item ID.
+      summary: Patch a value list item
+      description: Update specific fields of an existing value list item using the item `id`.
       requestBody:
-        description: List item's properties
+        description: Value list item's properties
         required: true
         content:
           application/json:
@@ -25,16 +25,19 @@ paths:
                 meta:
                   $ref: '../model/list_common.schema.yaml#/components/schemas/ListItemMetadata'
                 _version:
-                  type: string
+                  $ref: '../model/list_common.schema.yaml#/components/schemas/ListVersionId'
                 refresh:
                   type: string
                   enum:
                     - 'true'
                     - 'false'
                     - wait_for
-                  description: Determines when changes made by the request are made visible to search
+                  description: Determines when changes made by the request are made visible to search.
               required:
                 - id
+              example:
+                id: pd1WRJQBs4HAK3VQeHFI
+                value: 255.255.255.255
       responses:
         200:
           description: Successful response
@@ -42,6 +45,20 @@ paths:
             application/json:
               schema:
                 $ref: '../model/list_schemas.schema.yaml#/components/schemas/ListItem'
+              examples:
+                ipItem:
+                  value:
+                    id: pd1WRJQBs4HAK3VQeHFI
+                    type: ip
+                    list_id: ip_list
+                    value: '255.255.255.255'
+                    '@timestamp': 2025-01-08T05:15:05.159Z
+                    _version: WzE5LDFd
+                    tie_breaker_id: eee41dc7-1666-4876-982f-8b0f7b59eca3
+                    created_at: 2025-01-08T05:15:05.159Z
+                    created_by: elastic
+                    updated_at: 2025-01-08T05:23:37.602Z
+                    updated_by: elastic
         400:
           description: Invalid input data response
           content:
@@ -50,27 +67,54 @@ paths:
                 oneOf:
                   - $ref: '../../../../../../../src/platform/packages/shared/kbn-openapi-common/schemas/error_responses.schema.yaml#/components/schemas/PlatformErrorResponse'
                   - $ref: '../../../../../../../src/platform/packages/shared/kbn-openapi-common/schemas/error_responses.schema.yaml#/components/schemas/SiemErrorResponse'
+              examples:
+                badRequest:
+                  value:
+                    message: '{"took":15,"timed_out":false,"total":1,"updated":0,"deleted":0,"batches":1,"version_conflicts":0,"noops":0,"retries":{"bulk":0,"search":0},"throttled_millis":0,"requests_per_second":-1,"throttled_until_millis":0,"failures":[{"index":".ds-.items-default-2025.01.09-000001","id":"ip_item","cause":{"type":"document_parsing_exception","reason":"[1:107] failed to parse field [ip] of type [ip] in document with id ip_item. Preview of fields value: 2","caused_by":{"type":"illegal_argument_exception","reason":"2 is not an IP string literal."}},"status":400}]}'
+                    status_code: 400
         401:
           description: Unsuccessful authentication response
           content:
             application/json:
               schema:
                 $ref: '../../../../../../../src/platform/packages/shared/kbn-openapi-common/schemas/error_responses.schema.yaml#/components/schemas/PlatformErrorResponse'
+              examples:
+                unauthorized:
+                  value:
+                    statusCode: 401
+                    error: Unauthorized
+                    message: '[security_exception\n\tRoot causes:\n\t\tsecurity_exception: unable to authenticate user [elastic] for REST request [/_security/_authenticate]]: unable to authenticate user [elastic] for REST request [/_security/_authenticate]'
         403:
           description: Not enough privileges response
           content:
             application/json:
               schema:
                 $ref: '../../../../../../../src/platform/packages/shared/kbn-openapi-common/schemas/error_responses.schema.yaml#/components/schemas/PlatformErrorResponse'
+              examples:
+                forbidden:
+                  value:
+                    statusCode: 403
+                    error: Forbidden
+                    message: 'API [PATCH /api/lists/items] is unauthorized for user, this action is granted by the Kibana privileges [lists-all]'
         404:
           description: List item not found response
           content:
             application/json:
               schema:
                 $ref: '../../../../../../../src/platform/packages/shared/kbn-openapi-common/schemas/error_responses.schema.yaml#/components/schemas/SiemErrorResponse'
+              examples:
+                notFound:
+                  value:
+                    message: 'list item id: \"foo\" not found'
+                    status_code: 404
         500:
           description: Internal server error response
           content:
             application/json:
               schema:
                 $ref: '../../../../../../../src/platform/packages/shared/kbn-openapi-common/schemas/error_responses.schema.yaml#/components/schemas/SiemErrorResponse'
+              examples:
+                serverError:
+                  value:
+                    message: Internal Server Error
+                    status_code: 500

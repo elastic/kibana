@@ -126,16 +126,16 @@ export interface UnifiedHistogramBreakdownContext {
 }
 
 /**
- * Message to refetch the chart and total hits
+ * Message to fetch the chart and total hits
  */
-export interface UnifiedHistogramRefetchMessage {
-  type: 'refetch';
+export interface UnifiedHistogramFetchMessage {
+  type: 'fetch';
 }
 
 /**
  * Unified histogram input message
  */
-export type UnifiedHistogramInputMessage = UnifiedHistogramRefetchMessage;
+export type UnifiedHistogramInputMessage = UnifiedHistogramFetchMessage;
 
 /**
  * Unified histogram input observable

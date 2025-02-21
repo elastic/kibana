@@ -26,7 +26,7 @@ describe('sanitizeOptions', () => {
     interval: 1,
     until: new Date('February 25, 2022 03:24:00'),
     count: 3,
-    tzid: 'foobar',
+    tzid: 'UTC',
   };
 
   it('happy path', () => {
@@ -41,8 +41,15 @@ describe('sanitizeOptions', () => {
   });
 
   it('throws an error when tzid is missing', () => {
-    expect(() => sanitizeOptions({ ...options, tzid: '' })).toThrowError(
+    // @ts-expect-error
+    expect(() => sanitizeOptions({ ...options, tzid: null })).toThrowError(
       'Cannot create RRule: tzid is required'
+    );
+  });
+
+  it('throws an error when tzid is invalid', () => {
+    expect(() => sanitizeOptions({ ...options, tzid: 'invalid' })).toThrowError(
+      'Cannot create RRule: tzid is invalid'
     );
   });
 

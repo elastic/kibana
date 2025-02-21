@@ -125,7 +125,7 @@ export function PromptEditor({
       setMode('prompt');
       onSendTelemetry({
         type: ObservabilityAIAssistantTelemetryEventType.UserSentPromptInChat,
-        payload: { ...message, scopes },
+        payload: { scopes },
       });
     } catch (_) {
       setInnerMessage(oldMessage);

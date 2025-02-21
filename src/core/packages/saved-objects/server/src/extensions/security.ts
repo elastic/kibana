@@ -66,6 +66,8 @@ export interface AuthorizeObject {
   type: string;
   /** The id of the object */
   id: string;
+  /** The name of the object */
+  name?: string;
 }
 
 /**
@@ -259,7 +261,7 @@ export type AuthorizeOpenPointInTimeParams = AuthorizeFindParams;
  */
 export interface AuthorizeAndRedactMultiNamespaceReferencesParams extends AuthorizeParams {
   /** The objects to authorize */
-  objects: SavedObjectReferenceWithContext[];
+  objects: Array<WithAuditName<SavedObjectReferenceWithContext>>;
   /**
    * options for the operation
    * - purpose: 'collectMultiNamespaceReferences' or 'updateObjectsSpaces'
@@ -321,6 +323,8 @@ export interface RedactNamespacesParams<T, A extends string> {
    */
   typeMap: AuthorizationTypeMap<A>;
 }
+
+export type WithAuditName<T> = T & { name?: string };
 
 /**
  * The ISavedObjectsSecurityExtension interface defines the functions of a saved objects repository security extension.
@@ -520,4 +524,9 @@ export interface ISavedObjectsSecurityExtension {
    * Retrieves the current user from the request context if available
    */
   getCurrentUser: () => AuthenticatedUser | null;
+
+  /**
+   * Retrieves whether we need to include save objects names in the audit out
+   */
+  includeSavedObjectNames: () => boolean;
 }

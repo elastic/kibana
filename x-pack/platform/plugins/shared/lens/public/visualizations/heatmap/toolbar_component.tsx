@@ -19,13 +19,15 @@ import {
   ValueLabelsSettings,
   ToolbarTitleSettings,
   AxisTicksSettings,
+  AxisLabelOrientationSelector,
+  allowedOrientations,
 } from '../../shared_components';
+import type { Orientation } from '../../shared_components';
 import type { HeatmapVisualizationState } from './types';
 import { getDefaultVisualValuesForLayer } from '../../shared_components/datasource_default_values';
-import './toolbar_component.scss';
 
 const PANEL_STYLE = {
-  width: '460px',
+  width: '500px',
 };
 
 const legendOptions: Array<{ id: string; value: 'auto' | 'show' | 'hide'; label: string }> = [
@@ -58,6 +60,8 @@ export const HeatmapToolbar = memo(
     const legendSize = state?.legend.legendSize;
 
     const [hadAutoLegendSize] = useState(() => legendSize === LegendSize.AUTO);
+
+    const isXAxisLabelVisible = state?.gridConfig.isXAxisLabelVisible;
 
     return (
       <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
@@ -99,7 +103,7 @@ export const HeatmapToolbar = memo(
                 groupPosition="left"
                 isDisabled={!Boolean(state?.yAccessor)}
                 buttonDataTestSubj="lnsHeatmapVerticalAxisButton"
-                panelClassName="lnsVisToolbarAxis__popover"
+                panelStyle={PANEL_STYLE}
               >
                 <ToolbarTitleSettings
                   settingId="yLeft"
@@ -146,6 +150,7 @@ export const HeatmapToolbar = memo(
                 groupPosition="center"
                 isDisabled={!Boolean(state?.xAccessor)}
                 buttonDataTestSubj="lnsHeatmapHorizontalAxisButton"
+                panelStyle={PANEL_STYLE}
               >
                 <ToolbarTitleSettings
                   settingId="x"
@@ -173,8 +178,26 @@ export const HeatmapToolbar = memo(
                       },
                     });
                   }}
-                  isAxisLabelVisible={state?.gridConfig.isXAxisLabelVisible}
+                  isAxisLabelVisible={isXAxisLabelVisible}
                 />
+                {isXAxisLabelVisible && (
+                  <AxisLabelOrientationSelector
+                    axis="x"
+                    selectedLabelOrientation={
+                      allowedOrientations.includes(
+                        state.gridConfig.xAxisLabelRotation as Orientation
+                      )
+                        ? (state.gridConfig.xAxisLabelRotation as Orientation)
+                        : 0 // Default to 0 if the value is not valid
+                    }
+                    setLabelOrientation={(orientation) => {
+                      setState({
+                        ...state,
+                        gridConfig: { ...state.gridConfig, xAxisLabelRotation: orientation },
+                      });
+                    }}
+                  />
+                )}
               </ToolbarPopover>
             </TooltipWrapper>
           </EuiFlexGroup>

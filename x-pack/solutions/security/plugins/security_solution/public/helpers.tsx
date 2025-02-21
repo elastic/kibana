@@ -24,7 +24,6 @@ import {
   DASHBOARDS_PATH,
   EXCEPTIONS_PATH,
   RULES_PATH,
-  SERVER_APP_ID,
   THREAT_INTELLIGENCE_PATH,
 } from '../common/constants';
 import type {
@@ -39,6 +38,7 @@ import { CASES_SUB_PLUGIN_KEY } from './types';
 import { timelineActions } from './timelines/store';
 import { TimelineId } from '../common/types';
 import { SourcererScopeName } from './sourcerer/store/model';
+import { hasAccessToSecuritySolution } from './helpers_access';
 
 export const parseRoute = (location: Pick<Location, 'hash' | 'pathname' | 'search'>) => {
   if (!isEmpty(location.hash)) {
@@ -234,7 +234,7 @@ export const isSubPluginAvailable = (pluginKey: string, capabilities: Capabiliti
   if (CASES_SUB_PLUGIN_KEY === pluginKey) {
     return capabilities[CASES_FEATURE_ID].read_cases === true;
   }
-  return capabilities[SERVER_APP_ID].show === true;
+  return hasAccessToSecuritySolution(capabilities);
 };
 
 const siemSignalsFieldMappings: Record<string, string> = {

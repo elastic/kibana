@@ -97,6 +97,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             lon: 0,
           },
           agentPolicyId: testFleetPolicyID,
+          spaces: ['default'],
         },
       ];
 
@@ -115,6 +116,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           lat: 0,
           lon: 0,
         },
+        spaces: ['default'],
       };
 
       newMonitor.name = invalidName;
@@ -123,7 +125,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         .post(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS)
         .set(editorUser.apiKeyHeader)
         .set(samlAuth.getInternalRequestHeader())
-        .send({ ...newMonitor, locations: [location] })
+        .send({ ...newMonitor, locations: [omit(location, 'spaces')] })
         .expect(400);
 
       expect(apiResponse.body).eql({

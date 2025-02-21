@@ -25,6 +25,7 @@ export const chatCompleteSuite = (
           .set('kbn-xsrf', 'kibana')
           .send({
             connectorId,
+            temperature: 0.1,
             system: 'Please answer the user question',
             messages: [{ role: 'user', content: '2+2 ?' }],
           })
@@ -154,6 +155,7 @@ export const chatCompleteSuite = (
           .set('kbn-xsrf', 'kibana')
           .send({
             connectorId,
+            temperature: 0.1,
             system: 'Please answer the user question',
             messages: [{ role: 'user', content: '2+2 ?' }],
           })

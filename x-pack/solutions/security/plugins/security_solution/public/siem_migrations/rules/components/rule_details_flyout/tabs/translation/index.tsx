@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React from 'react';
 import {
   EuiAccordion,
   EuiBadge,
+  EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
   EuiSpacer,
@@ -18,16 +19,17 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/css';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { RuleTranslationResult } from '../../../../../../../common/siem_migrations/constants';
 import type { RuleResponse } from '../../../../../../../common/api/detection_engine';
 import type { RuleMigration } from '../../../../../../../common/siem_migrations/model/rule_migration.gen';
 import { TranslationTabHeader } from './header';
-import { MigrationRuleQuery } from './migration_rule_query';
 import * as i18n from './translations';
 import {
   convertTranslationResultIntoColor,
   convertTranslationResultIntoText,
 } from '../../../../utils/translation_results';
 import { TranslationCallOut } from './callout';
+import { OriginalRuleQuery, TranslatedRuleQuery } from './query_details';
 
 interface TranslationTabProps {
   ruleMigration: RuleMigration;
@@ -40,24 +42,13 @@ export const TranslationTab: React.FC<TranslationTabProps> = React.memo(
     const { euiTheme } = useEuiTheme();
 
     const isInstalled = !!ruleMigration.elastic_rule?.id;
-    const canEdit = !matchedPrebuiltRule && !isInstalled;
-
-    const ruleName = matchedPrebuiltRule?.name ?? ruleMigration.elastic_rule?.title;
-    const originalQuery = ruleMigration.original_rule.query;
-    const elasticQuery = useMemo(() => {
-      let query = ruleMigration.elastic_rule?.query;
-      if (matchedPrebuiltRule && matchedPrebuiltRule.type !== 'machine_learning') {
-        query = matchedPrebuiltRule.query;
-      }
-      return query ?? '';
-    }, [matchedPrebuiltRule, ruleMigration.elastic_rule?.query]);
 
     return (
       <>
         <EuiSpacer size="m" />
         {ruleMigration.translation_result && !isInstalled && (
           <>
-            <TranslationCallOut translationResult={ruleMigration.translation_result} />
+            <TranslationCallOut ruleMigration={ruleMigration} />
             <EuiSpacer size="m" />
           </>
         )}
@@ -85,7 +76,7 @@ export const TranslationTab: React.FC<TranslationTabProps> = React.memo(
                     <EuiBadge
                       color={convertTranslationResultIntoColor(ruleMigration.translation_result)}
                       onClick={() => {}}
-                      onClickAriaLabel={'Click to update translation status'}
+                      onClickAriaLabel={'Translation status badge'}
                     >
                       {isInstalled
                         ? i18n.INSTALLED_LABEL
@@ -97,12 +88,7 @@ export const TranslationTab: React.FC<TranslationTabProps> = React.memo(
               <EuiSplitPanel.Inner grow>
                 <EuiFlexGroup gutterSize="s" alignItems="flexStart">
                   <EuiFlexItem grow={1}>
-                    <MigrationRuleQuery
-                      title={i18n.SPLUNK_QUERY_TITLE}
-                      ruleName={ruleMigration.original_rule.title}
-                      query={originalQuery}
-                      canEdit={false}
-                    />
+                    <OriginalRuleQuery ruleMigration={ruleMigration} />
                   </EuiFlexItem>
                   <EuiFlexItem
                     grow={0}
@@ -112,11 +98,9 @@ export const TranslationTab: React.FC<TranslationTabProps> = React.memo(
                     `}
                   />
                   <EuiFlexItem grow={1}>
-                    <MigrationRuleQuery
-                      title={i18n.ESQL_TRANSLATION_TITLE}
-                      ruleName={ruleName}
-                      query={elasticQuery}
-                      canEdit={canEdit}
+                    <TranslatedRuleQuery
+                      ruleMigration={ruleMigration}
+                      matchedPrebuiltRule={matchedPrebuiltRule}
                       onTranslationUpdate={onTranslationUpdate}
                     />
                   </EuiFlexItem>
@@ -125,6 +109,19 @@ export const TranslationTab: React.FC<TranslationTabProps> = React.memo(
             </EuiSplitPanel.Outer>
           </EuiFlexItem>
         </EuiAccordion>
+        {ruleMigration.translation_result === RuleTranslationResult.FULL && (
+          <>
+            <EuiSpacer size="m" />
+            <EuiCallOut
+              color={'primary'}
+              title={i18n.CALLOUT_TRANSLATED_RULE_INFO_TITLE}
+              iconType={'iInCircle'}
+              size={'s'}
+            >
+              {i18n.CALLOUT_TRANSLATED_RULE_INFO_DESCRIPTION}
+            </EuiCallOut>
+          </>
+        )}
       </>
     );
   }

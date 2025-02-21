@@ -25,6 +25,7 @@ export const request = <T = unknown>({
     ...options,
   });
 };
+export const INTERNAL_INFERENCE_CONNECTORS = ['Elastic-Inference-Rainbow-Sprinkles'];
 export const INTERNAL_CLOUD_CONNECTORS = ['Elastic-Cloud-SMTP'];
 
 export const getConnectors = () =>
@@ -48,7 +49,10 @@ export const deleteConnectors = () => {
         return connector.id;
       });
       ids.forEach((id) => {
-        if (!INTERNAL_CLOUD_CONNECTORS.includes(id)) {
+        if (
+          !INTERNAL_CLOUD_CONNECTORS.includes(id) &&
+          !INTERNAL_INFERENCE_CONNECTORS.includes(id)
+        ) {
           request({
             method: 'DELETE',
             url: `api/actions/connector/${id}`,

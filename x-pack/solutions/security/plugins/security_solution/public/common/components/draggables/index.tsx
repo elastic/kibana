@@ -5,23 +5,21 @@
  * 2.0.
  */
 
-import { EuiBadge, EuiToolTip } from '@elastic/eui';
 import type { IconType, ToolTipPositions } from '@elastic/eui';
+import { EuiBadge, EuiToolTip } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
-import styled from 'styled-components';
+import styled from '@emotion/styled';
 
 import type { DraggableWrapperProps } from '../drag_and_drop/draggable_wrapper';
-import { DragEffects, DraggableWrapper } from '../drag_and_drop/draggable_wrapper';
+import { DraggableWrapper } from '../drag_and_drop/draggable_wrapper';
 import { escapeDataProviderId } from '../drag_and_drop/helpers';
 import { getEmptyStringTag } from '../empty_value';
 import type { DataProvider } from '../../../timelines/components/timeline/data_providers/data_provider';
 import { IS_OPERATOR } from '../../../timelines/components/timeline/data_providers/data_provider';
-import { Provider } from '../../../timelines/components/timeline/data_providers/provider';
 
 export interface DefaultDraggableType {
   hideTopN?: boolean;
   id: string;
-  isDraggable?: boolean;
   fieldType?: string;
   isAggregatable?: boolean;
   field: string;
@@ -87,7 +85,6 @@ Content.displayName = 'Content';
  * that's only displayed when the specified value is non-`null`.
  *
  * @param id - a unique draggable id, which typically follows the format `${contextId}-${eventId}-${field}-${value}`
- * @param isDraggable - optional prop to disable drag & drop and  it will defaulted to true
  * @param field - the name of the field, e.g. `network.transport`
  * @param value - value of the field e.g. `tcp`
  * @param name - defaulting to `field`, this optional human readable name is used by the `DataProvider` that represents the data
@@ -102,7 +99,6 @@ export const DefaultDraggable = React.memo<DefaultDraggableType>(
   ({
     hideTopN = false,
     id,
-    isDraggable = true,
     field,
     fieldType = '',
     isAggregatable = false,
@@ -133,21 +129,16 @@ export const DefaultDraggable = React.memo<DefaultDraggableType>(
     );
 
     const renderCallback = useCallback<DraggableWrapperProps['render']>(
-      (dataProvider, _, snapshot) =>
-        snapshot.isDragging ? (
-          <DragEffects>
-            <Provider dataProvider={dataProvider} />
-          </DragEffects>
-        ) : (
-          <Content
-            field={field}
-            tooltipContent={tooltipContent}
-            tooltipPosition={tooltipPosition}
-            value={value}
-          >
-            {children}
-          </Content>
-        ),
+      () => (
+        <Content
+          field={field}
+          tooltipContent={tooltipContent}
+          tooltipPosition={tooltipPosition}
+          value={value}
+        >
+          {children}
+        </Content>
+      ),
       [children, field, tooltipContent, tooltipPosition, value]
     );
 
@@ -159,7 +150,6 @@ export const DefaultDraggable = React.memo<DefaultDraggableType>(
         fieldType={fieldType}
         isAggregatable={isAggregatable}
         hideTopN={hideTopN}
-        isDraggable={isDraggable}
         render={renderCallback}
         scopeId={scopeId}
         truncate={truncate}
@@ -180,7 +170,6 @@ export type BadgeDraggableType = Omit<DefaultDraggableType, 'id'> & {
   contextId: string;
   eventId: string;
   iconType?: IconType;
-  color?: string;
 };
 
 /**
@@ -191,9 +180,7 @@ export type BadgeDraggableType = Omit<DefaultDraggableType, 'id'> & {
  * @param field - the name of the field, e.g. `network.transport`
  * @param value - value of the field e.g. `tcp`
  * @param iconType -the (optional) type of icon e.g. `snowflake` to display on the badge
- * @param isDraggable
  * @param name - defaulting to `field`, this optional human readable name is used by the `DataProvider` that represents the data
- * @param color - defaults to `hollow`, optionally overwrite the color of the badge icon
  * @param children - defaults to displaying `value`, this allows an arbitrary visualization to be displayed in lieu of the default behavior
  * @param tooltipContent - defaults to displaying `field`, pass `null` to
  * prevent a tooltip from being displayed, or pass arbitrary content
@@ -205,11 +192,9 @@ const DraggableBadgeComponent: React.FC<BadgeDraggableType> = ({
   field,
   value,
   iconType,
-  isDraggable,
   isAggregatable,
   fieldType,
   name,
-  color = 'hollow',
   children,
   scopeId,
   tooltipContent,
@@ -218,7 +203,6 @@ const DraggableBadgeComponent: React.FC<BadgeDraggableType> = ({
   value != null ? (
     <DefaultDraggable
       id={`draggable-badge-default-draggable-${contextId}-${eventId}-${field}-${value}`}
-      isDraggable={isDraggable}
       isAggregatable={isAggregatable}
       fieldType={fieldType}
       field={field}
@@ -228,7 +212,7 @@ const DraggableBadgeComponent: React.FC<BadgeDraggableType> = ({
       tooltipContent={tooltipContent}
       queryValue={queryValue}
     >
-      <Badge iconType={iconType} color={color} title="">
+      <Badge iconType={iconType} color="hollow" title="">
         {children ? children : value !== '' ? value : getEmptyStringTag()}
       </Badge>
     </DefaultDraggable>

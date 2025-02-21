@@ -19,6 +19,7 @@ import { generateDataProvider } from '../utils/data_provider';
 import { fieldAndValueValid, getIndicatorFieldAndValue } from '../../indicators/utils/field_value';
 import { Indicator } from '../../../../common/types/indicator';
 import { useKibana } from '../../../hooks/use_kibana';
+import { useSecurityContext } from '../../../hooks/use_security_context';
 import { useStyles } from './styles';
 import { useAddToTimeline } from '../hooks/use_add_to_timeline';
 import { TITLE } from './translations';
@@ -62,9 +63,10 @@ export const AddToTimelineButtonIcon: VFC<AddToTimelineProps> = ({
 }) => {
   const addToTimelineButton =
     useKibana().services.timelines.getHoverActions().getAddToTimelineButton;
+  const securitySolutionContext = useSecurityContext();
 
   const { addToTimelineProps } = useAddToTimeline({ indicator: data, field });
-  if (!addToTimelineProps) {
+  if (!securitySolutionContext?.hasAccessToTimeline || !addToTimelineProps) {
     return null;
   }
 
@@ -91,7 +93,7 @@ export const AddToTimelineButtonEmpty: VFC<AddToTimelineProps> = ({
   'data-test-subj': dataTestSubj,
 }) => {
   const styles = useStyles();
-
+  const securitySolutionContext = useSecurityContext();
   const buttonRef = useRef<HTMLButtonElement>(null);
 
   const { timelines, analytics, i18n: i18nStart, theme } = useKibana().services;
@@ -101,7 +103,7 @@ export const AddToTimelineButtonEmpty: VFC<AddToTimelineProps> = ({
   const { key, value } =
     typeof data === 'string' ? { key: field, value: data } : getIndicatorFieldAndValue(data, field);
 
-  if (!fieldAndValueValid(key, value)) {
+  if (!securitySolutionContext?.hasAccessToTimeline || !fieldAndValueValid(key, value)) {
     return null;
   }
 
@@ -152,7 +154,7 @@ export const AddToTimelineContextMenu: VFC<AddToTimelineProps> = ({
   'data-test-subj': dataTestSubj,
 }) => {
   const styles = useStyles();
-
+  const securitySolutionContext = useSecurityContext();
   const contextMenuRef = useRef<HTMLButtonElement>(null);
 
   const { timelines, analytics, i18n: i18nStart, theme } = useKibana().services;
@@ -163,7 +165,7 @@ export const AddToTimelineContextMenu: VFC<AddToTimelineProps> = ({
   const { key, value } =
     typeof data === 'string' ? { key: field, value: data } : getIndicatorFieldAndValue(data, field);
 
-  if (!fieldAndValueValid(key, value)) {
+  if (!securitySolutionContext?.hasAccessToTimeline || !fieldAndValueValid(key, value)) {
     return null;
   }
 
@@ -213,9 +215,10 @@ export const AddToTimelineCellAction: VFC<AddToTimelineCellActionProps> = ({
 }) => {
   const addToTimelineButton =
     useKibana().services.timelines.getHoverActions().getAddToTimelineButton;
+  const securitySolutionContext = useSecurityContext();
 
   const { addToTimelineProps } = useAddToTimeline({ indicator: data, field });
-  if (!addToTimelineProps) {
+  if (!securitySolutionContext?.hasAccessToTimeline || !addToTimelineProps) {
     return null;
   }
   addToTimelineProps.Component = Component;

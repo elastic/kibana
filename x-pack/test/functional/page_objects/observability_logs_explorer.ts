@@ -4,14 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import expect from '@kbn/expect';
-import {
-  OBSERVABILITY_LOGS_EXPLORER_URL_STATE_KEY,
-  logsExplorerUrlSchemaV2,
-} from '@kbn/observability-logs-explorer-plugin/common';
-import rison from '@kbn/rison';
-import querystring from 'querystring';
-import { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
+
 import { FtrProviderContext } from '../ftr_provider_context';
 
 export interface IntegrationPackage {
@@ -105,26 +98,13 @@ const packages: IntegrationPackage[] = [
 const initialPackages = packages.slice(0, 3);
 const additionalPackages = packages.slice(3);
 
-const defaultPageState: logsExplorerUrlSchemaV2.UrlSchema = {
-  v: 2,
-  time: {
-    from: '2023-08-03T10:24:14.035Z',
-    to: '2023-08-03T10:24:14.091Z',
-    mode: 'absolute',
-  },
-};
-
 export function ObservabilityLogsExplorerPageObject({
   getPageObjects,
   getService,
 }: FtrProviderContext) {
-  const PageObjects = getPageObjects(['common']);
   const es = getService('es');
   const log = getService('log');
-  const queryBar = getService('queryBar');
   const supertest = getService('supertest');
-  const testSubjects = getService('testSubjects');
-  const toasts = getService('toasts');
 
   return {
     uninstallPackage: ({ name, version }: IntegrationPackage) => {
@@ -206,236 +186,6 @@ export function ObservabilityLogsExplorerPageObject({
           additionalPackages.map((pkg: IntegrationPackage) => this.uninstallPackage(pkg))
         );
       };
-    },
-
-    async navigateTo({
-      pageState,
-    }: {
-      pageState?: logsExplorerUrlSchemaV2.UrlSchema;
-    } = {}) {
-      const queryStringParams = querystring.stringify({
-        [OBSERVABILITY_LOGS_EXPLORER_URL_STATE_KEY]: rison.encode(
-          logsExplorerUrlSchemaV2.urlSchemaRT.encode({
-            ...defaultPageState,
-            ...pageState,
-          })
-        ),
-      });
-
-      return await PageObjects.common.navigateToUrlWithBrowserHistory(
-        'observabilityLogsExplorer',
-        '/',
-        queryStringParams,
-        {
-          // the check sometimes is too slow for the page so it misses the point
-          // in time before the app rewrites the URL
-          ensureCurrentUrl: false,
-        }
-      );
-    },
-
-    async navigateToWithUncheckedState({
-      pageState: uncheckedPageState,
-    }: {
-      pageState?: {};
-    } = {}) {
-      const queryStringParams = querystring.stringify({
-        [OBSERVABILITY_LOGS_EXPLORER_URL_STATE_KEY]: rison.encode({
-          ...uncheckedPageState,
-        }),
-      });
-
-      log.info('queryStringParams');
-
-      return await PageObjects.common.navigateToUrlWithBrowserHistory(
-        'observabilityLogsExplorer',
-        '/',
-        queryStringParams,
-        {
-          // the check sometimes is too slow for the page so it misses the point
-          // in time before the app rewrites the URL
-          ensureCurrentUrl: false,
-        }
-      );
-    },
-
-    getDataSourceSelector() {
-      return testSubjects.find('dataSourceSelectorPopover');
-    },
-
-    getDataSourceSelectorButton() {
-      return testSubjects.find('dataSourceSelectorPopoverButton', 120000); // Increase timeout if refresh takes longer before opening the selector
-    },
-
-    getDataSourceSelectorContent() {
-      return testSubjects.find('dataSourceSelectorContent');
-    },
-
-    getDataSourceSelectorSearchControls() {
-      return testSubjects.find('dataSourceSelectorSearchControls');
-    },
-
-    getIntegrationsContextMenu() {
-      return testSubjects.find('integrationsContextMenu');
-    },
-
-    getIntegrationsTab() {
-      return testSubjects.find('dataSourceSelectorIntegrationsTab');
-    },
-
-    getUncategorizedContextMenu() {
-      return testSubjects.find('uncategorizedContextMenu');
-    },
-
-    getUncategorizedTab() {
-      return testSubjects.find('dataSourceSelectorUncategorizedTab');
-    },
-
-    getDataViewsContextMenu() {
-      return testSubjects.find('dataViewsContextMenu');
-    },
-
-    getDataViewsTab() {
-      return testSubjects.find('dataSourceSelectorDataViewsTab');
-    },
-
-    async changeDataViewTypeFilter(type: 'All' | 'Logs') {
-      const menuButton = await testSubjects.find(
-        'logsExplorerDataSourceSelectorDataViewTypeButton'
-      );
-      await menuButton.click();
-      const targetOption = await testSubjects.find(
-        `logsExplorerDataSourceSelectorDataViewType${type}`
-      );
-      await targetOption.click();
-    },
-
-    getPanelTitle(contextMenu: WebElementWrapper) {
-      return contextMenu.findByClassName('euiContextMenuPanel__title');
-    },
-
-    async getDataSourceSelectorButtonText() {
-      const button = await this.getDataSourceSelectorButton();
-      return button.getVisibleText();
-    },
-
-    getPanelEntries(contextMenu: WebElementWrapper) {
-      return contextMenu.findAllByCssSelector(
-        'button.euiContextMenuItem:not([disabled]):not([data-test-subj="contextMenuPanelTitleButton"])',
-        2000
-      );
-    },
-
-    getAllLogsButton() {
-      return testSubjects.find('dataSourceSelectorShowAllLogs');
-    },
-
-    getUnmanagedDatasetsButton() {
-      return testSubjects.find('unmanagedDatasets');
-    },
-
-    async getIntegrations() {
-      const menu = await this.getIntegrationsContextMenu();
-
-      const nodes = await menu.findAllByCssSelector('[data-test-subj*="integration-"]', 2000);
-      const integrations = await Promise.all(nodes.map((node) => node.getVisibleText()));
-
-      return {
-        nodes,
-        integrations,
-      };
-    },
-
-    async openDataSourceSelector() {
-      const button = await this.getDataSourceSelectorButton();
-      return button.click();
-    },
-
-    async closeDataSourceSelector() {
-      const button = await this.getDataSourceSelectorButton();
-      const isOpen = await testSubjects.exists('dataSourceSelectorContent');
-
-      if (isOpen) return button.click();
-    },
-
-    async clickSortButtonBy(direction: 'asc' | 'desc') {
-      const titleMap = {
-        asc: 'Ascending',
-        desc: 'Descending',
-      };
-      const searchControlsContainer = await this.getDataSourceSelectorSearchControls();
-      const sortingButton = await searchControlsContainer.findByCssSelector(
-        `[title=${titleMap[direction]}]`
-      );
-
-      return sortingButton.click();
-    },
-
-    async getSearchFieldValue() {
-      const searchControlsContainer = await this.getDataSourceSelectorSearchControls();
-      const searchField = await searchControlsContainer.findByCssSelector('input[type=search]');
-
-      return searchField.getAttribute('value');
-    },
-
-    async typeSearchFieldWith(name: string) {
-      const searchControlsContainer = await this.getDataSourceSelectorSearchControls();
-      const searchField = await searchControlsContainer.findByCssSelector('input[type=search]');
-
-      await searchField.clearValueWithKeyboard();
-      return searchField.type(name, { charByChar: true });
-    },
-
-    async clearSearchField() {
-      const searchControlsContainer = await this.getDataSourceSelectorSearchControls();
-      const searchField = await searchControlsContainer.findByCssSelector('input[type=search]');
-
-      return searchField.clearValueWithKeyboard();
-    },
-
-    async assertRestoreFailureToastExist() {
-      const successToast = await toasts.getElementByIndex(1);
-      expect(await successToast.getVisibleText()).to.contain('Error restoring state from URL');
-    },
-
-    assertLoadingSkeletonExists() {
-      return testSubjects.existOrFail('dataSourceSelectorSkeleton');
-    },
-
-    async assertListStatusEmptyPromptExistsWithTitle(title: string) {
-      const [listStatus] = await testSubjects.findAll('dataSourceSelectorListStatusEmptyPrompt');
-      const promptTitle = await listStatus.findByTagName('h2');
-
-      expect(await promptTitle.getVisibleText()).to.be(title);
-    },
-
-    async assertListStatusErrorPromptExistsWithTitle(title: string) {
-      const listStatus = await testSubjects.find('dataSourceSelectorListStatusErrorPrompt');
-      const promptTitle = await listStatus.findByTagName('h2');
-
-      expect(await promptTitle.getVisibleText()).to.be(title);
-    },
-
-    getHeaderMenu() {
-      return testSubjects.find('logsExplorerHeaderMenu');
-    },
-
-    getDiscoverFallbackLink() {
-      return testSubjects.find('logsExplorerDiscoverFallbackLink');
-    },
-
-    getOnboardingLink() {
-      return testSubjects.find('logsExplorerOnboardingLink');
-    },
-
-    // Query Bar
-    getQueryBarValue() {
-      return queryBar.getQueryString();
-    },
-
-    async submitQuery(query: string) {
-      await queryBar.setQuery(query);
-      await queryBar.clickQuerySubmitButton();
     },
   };
 }

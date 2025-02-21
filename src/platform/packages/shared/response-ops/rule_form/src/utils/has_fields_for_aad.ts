@@ -9,7 +9,6 @@
 
 import { AlertConsumers, RuleCreationValidConsumer } from '@kbn/rule-data-utils';
 import { RuleTypeWithDescription } from '../common/types';
-import { DEFAULT_VALID_CONSUMERS, MULTI_CONSUMER_RULE_TYPE_IDS } from '../constants';
 
 export const hasFieldsForAad = ({
   ruleType,
@@ -26,11 +25,5 @@ export const hasFieldsForAad = ({
       ruleType.hasAlertsMappings
     : false;
 
-  if (MULTI_CONSUMER_RULE_TYPE_IDS.includes(ruleType.id)) {
-    return !!(
-      (validConsumers || DEFAULT_VALID_CONSUMERS).includes(consumer as RuleCreationValidConsumer) &&
-      hasAlertHasData
-    );
-  }
   return !!hasAlertHasData;
 };

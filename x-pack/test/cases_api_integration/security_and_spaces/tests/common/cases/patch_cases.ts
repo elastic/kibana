@@ -38,7 +38,7 @@ import {
   superUserSpace1Auth,
   delay,
   calculateDuration,
-  getCaseUserActions,
+  findCaseUserActions,
   removeServerGeneratedPropertiesFromUserAction,
   createConfiguration,
   getConfigurationRequest,
@@ -138,7 +138,7 @@ export default ({ getService }: FtrProviderContext): void => {
           },
         });
 
-        const userActions = await getCaseUserActions({ supertest, caseID: postedCase.id });
+        const { userActions } = await findCaseUserActions({ supertest, caseID: postedCase.id });
         const statusUserAction = removeServerGeneratedPropertiesFromUserAction(userActions[1]);
         const data = removeServerGeneratedPropertiesFromCase(patchedCases[0]);
         const { duration, ...dataWithoutDuration } = data;
@@ -156,7 +156,6 @@ export default ({ getService }: FtrProviderContext): void => {
           action: 'update',
           created_by: defaultUser,
           payload: { status: CaseStatuses.closed },
-          case_id: postedCase.id,
           comment_id: null,
           owner: 'securitySolutionFixture',
         });
@@ -177,7 +176,7 @@ export default ({ getService }: FtrProviderContext): void => {
           },
         });
 
-        const userActions = await getCaseUserActions({ supertest, caseID: postedCase.id });
+        const { userActions } = await findCaseUserActions({ supertest, caseID: postedCase.id });
         const statusUserAction = removeServerGeneratedPropertiesFromUserAction(userActions[1]);
         const data = removeServerGeneratedPropertiesFromCase(patchedCases[0]);
 
@@ -192,7 +191,6 @@ export default ({ getService }: FtrProviderContext): void => {
           action: 'update',
           created_by: defaultUser,
           payload: { status: CaseStatuses['in-progress'] },
-          case_id: postedCase.id,
           comment_id: null,
           owner: 'securitySolutionFixture',
         });

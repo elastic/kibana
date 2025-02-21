@@ -11,10 +11,10 @@ import { ITagsCache, ITagInternalClient } from '../services';
 import { StartServices } from '../types';
 import {
   getTagIdsFromReferences,
-  updateTagsReferences,
+  replaceTagReferences,
   convertTagNameToId,
   getTag,
-} from '../utils';
+} from '../../common';
 import { getComponents } from './components';
 import { buildGetTableColumnDefinition } from './get_table_column_definition';
 import { buildGetSearchBarFilter } from './get_search_bar_filter';
@@ -51,7 +51,7 @@ export const getUiApi = ({
     convertNameToReference: buildConvertNameToReference({ cache }),
     getTagIdsFromReferences,
     getTagIdFromName: (tagName: string) => convertTagNameToId(tagName, cache.getState()),
-    updateTagsReferences,
+    updateTagsReferences: replaceTagReferences,
     getTag: (tagId: string) => getTag(tagId, cache.getState()),
     getTagList,
   };

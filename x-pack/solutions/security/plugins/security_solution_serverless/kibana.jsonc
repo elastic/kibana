@@ -29,7 +29,7 @@
     ],
     "optionalPlugins": [
       "securitySolutionEss",
-      "integrationAssistant"
+      "automaticImport"
     ]
   }
 }

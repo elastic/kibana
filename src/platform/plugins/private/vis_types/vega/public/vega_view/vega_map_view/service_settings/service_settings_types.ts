@@ -61,7 +61,7 @@ export interface IServiceSettings {
     isDarkMode: boolean
   ): any;
 
-  getDefaultTmsLayer(isDarkMode: boolean): Promise<string>;
+  getDefaultTmsLayer(isDarkMode: boolean, themeName: string): Promise<string>;
   getTmsService(id: string): Promise<TMSService | undefined>;
   getMapConfig(): MapConfig;
   getTileMapConfig(): TileMapConfig;

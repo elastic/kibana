@@ -21,6 +21,9 @@ const TOOL_NAME = 'NaturalLanguageESQLTool';
 const toolDetails = {
   id: 'nl-to-esql-tool',
   name: TOOL_NAME,
+  // note: this description is overwritten when `getTool` is called
+  // local definitions exist ../elastic_assistant/server/lib/prompt/tool_prompts.ts
+  // local definitions can be overwritten by security-ai-prompt integration definitions
   description: `You MUST use the "${TOOL_NAME}" function when the user wants to:
   - breakdown or filter ES|QL queries that are displayed on the current page
   - convert queries from another language to ES|QL
@@ -48,7 +51,7 @@ export const NL_TO_ESQL_TOOL: AssistantTool = {
           client: inference.getClient({ request }),
           connectorId,
           input: question,
-          ...(isOssModel ? { functionCalling: 'simulated' } : {}),
+          functionCalling: 'auto',
           logger,
         })
       );
@@ -57,7 +60,8 @@ export const NL_TO_ESQL_TOOL: AssistantTool = {
     return new DynamicStructuredTool({
       name: toolDetails.name,
       description:
-        toolDetails.description + (isOssModel ? getPromptSuffixForOssModel(TOOL_NAME) : ''),
+        (params.description || toolDetails.description) +
+        (isOssModel ? getPromptSuffixForOssModel(TOOL_NAME) : ''),
       schema: z.object({
         question: z.string().describe(`The user's exact question about ESQL`),
       }),
