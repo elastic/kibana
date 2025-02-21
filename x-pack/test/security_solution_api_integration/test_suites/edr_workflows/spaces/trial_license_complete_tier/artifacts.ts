@@ -106,6 +106,28 @@ export default function ({ getService }: FtrProviderContext) {
             );
           });
 
+          it('should add active owner space id when item is created even if payload has a owner space id tag', async () => {
+            const { body } = await adminSupertest
+              .post(addSpaceIdToPath('/', dataSpaceA.spaceId, EXCEPTION_LIST_ITEM_URL))
+              .set('elastic-api-version', '2023-10-31')
+              .set('x-elastic-internal-origin', 'kibana')
+              .set('kbn-xsrf', 'true')
+              .on('error', createSupertestErrorLogger(log))
+              .send(
+                exceptionItemToCreateExceptionItem({
+                  ...itemDataSpaceA.artifact,
+                  tags: [buildSpaceOwnerIdTag('foo')],
+                  item_id: '',
+                })
+              )
+              .expect(200);
+
+            expect((body as ExceptionListItemSchema).tags).to.eql([
+              buildSpaceOwnerIdTag('foo'),
+              buildSpaceOwnerIdTag(dataSpaceA.spaceId),
+            ]);
+          });
+
           it('should not add owner space id during artifact update if one is already present', async () => {
             const { body } = await adminSupertest
               .put(addSpaceIdToPath('/', dataSpaceA.spaceId, EXCEPTION_LIST_ITEM_URL))
