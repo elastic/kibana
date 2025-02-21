@@ -34,3 +34,6 @@ export const CreatePacksRequestBody = z.object({
   shards: Shards.optional(),
   queries: ObjectQueries.optional(),
 });
+
+export type CreatePacksResponse = z.infer<typeof CreatePacksResponse>;
+export const CreatePacksResponse = z.object({});

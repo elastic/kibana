@@ -36,6 +36,9 @@ export const AgentSelection = z.object({
 export type AgentSelectionOrUndefined = z.infer<typeof AgentSelectionOrUndefined>;
 export const AgentSelectionOrUndefined = AgentSelection.nullable();
 
+/**
+ * The pack description.
+ */
 export type Description = z.infer<typeof Description>;
 export const Description = z.string();
 
@@ -93,6 +96,9 @@ export const Removed = z.boolean();
 export type RemovedOrUndefined = z.infer<typeof RemovedOrUndefined>;
 export const RemovedOrUndefined = Removed.nullable();
 
+/**
+ * The pack name.
+ */
 export type PackName = z.infer<typeof PackName>;
 export const PackName = z.string();
 
@@ -114,12 +120,18 @@ export const PackId = z.string();
 export type PackIdOrUndefined = z.infer<typeof PackIdOrUndefined>;
 export const PackIdOrUndefined = PackId.nullable();
 
+/**
+ * Enables the pack.
+ */
 export type Enabled = z.infer<typeof Enabled>;
 export const Enabled = z.boolean();
 
 export type EnabledOrUndefined = z.infer<typeof EnabledOrUndefined>;
 export const EnabledOrUndefined = Enabled.nullable();
 
+/**
+ * A list of agents policy IDs.
+ */
 export type PolicyIds = z.infer<typeof PolicyIds>;
 export const PolicyIds = z.array(z.string());
 
@@ -188,6 +200,9 @@ export const ObjectQueriesItem = z.object({
   snapshot: SnapshotOrUndefined.optional(),
 });
 
+/**
+ * An object of queries.
+ */
 export type ObjectQueries = z.infer<typeof ObjectQueries>;
 export const ObjectQueries = z.object({}).catchall(ObjectQueriesItem);
 
@@ -227,6 +242,9 @@ export const SortOrUndefined = z.string().nullable();
 export type SortOrderOrUndefined = z.infer<typeof SortOrderOrUndefined>;
 export const SortOrderOrUndefined = z.union([z.string().nullable(), z.unknown()]);
 
+/**
+ * An object with shard configuration for policies included in the pack. For each policy, set the shard configuration to a percentage (1–100) of target hosts.
+ */
 export type Shards = z.infer<typeof Shards>;
 export const Shards = z.object({}).catchall(z.number());
 

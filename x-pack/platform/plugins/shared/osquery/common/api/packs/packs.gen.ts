@@ -17,8 +17,8 @@
 import { z } from '@kbn/zod';
 
 import { FindPacksRequestQuery, FindPacksResponse } from './find_packs.gen';
-import { CreatePacksRequestBody } from './create_pack.gen';
-import { DefaultSuccessResponse, PackId } from '../model/schema/common_attributes.gen';
+import { CreatePacksRequestBody, CreatePacksResponse } from './create_pack.gen';
+import { PackId, DefaultSuccessResponse } from '../model/schema/common_attributes.gen';
 import { UpdatePacksRequestBody } from './update_packs.gen';
 
 export type OsqueryCreatePacksRequestBody = z.infer<typeof OsqueryCreatePacksRequestBody>;
@@ -26,7 +26,7 @@ export const OsqueryCreatePacksRequestBody = CreatePacksRequestBody;
 export type OsqueryCreatePacksRequestBodyInput = z.input<typeof OsqueryCreatePacksRequestBody>;
 
 export type OsqueryCreatePacksResponse = z.infer<typeof OsqueryCreatePacksResponse>;
-export const OsqueryCreatePacksResponse = DefaultSuccessResponse;
+export const OsqueryCreatePacksResponse = CreatePacksResponse;
 
 export type OsqueryDeletePacksRequestParams = z.infer<typeof OsqueryDeletePacksRequestParams>;
 export const OsqueryDeletePacksRequestParams = z.object({
