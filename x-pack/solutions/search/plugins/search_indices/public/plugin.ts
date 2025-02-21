@@ -88,6 +88,24 @@ export class SearchIndicesPlugin
       },
       visibleIn: [],
     });
+    core.application.register({
+      id: 'searchIndexManagement',
+      appRoute: '/app/elasticsearch/index_management',
+      title: 'Search Index management',
+      async mount({ element, history }) {
+        // return plugins.indexManagement.managementApp(element, ()=>{},history);
+        const { renderIndexManagementApp } = await import('./index_management_application');
+        // const { IndexManagementIndicesRouter } = await import('./components/idxManagement_router');
+        // const [coreStart, depsStart] = await core.getStartServices();
+        // const startDeps: SearchIndicesServicesContextDeps = {
+        //   ...depsStart,
+        //   history,
+        // };
+        // const App = depsStart.indexManagement.getIndexManagementComponent({history: startDeps.history})
+        return renderIndexManagementApp(element, {core, history, indexManagement:plugins.indexManagement });
+      },
+      visibleIn: [],
+    });
 
     registerLocators(plugins.share);
 

@@ -29,7 +29,7 @@ export const homeSections = [
   Section.EnrichPolicies,
 ];
 
-interface MatchParams {
+export interface MatchParams {
   section: Section;
 }
 

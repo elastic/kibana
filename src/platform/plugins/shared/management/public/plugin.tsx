@@ -131,6 +131,7 @@ export class ManagementPlugin
               const [, ...trailingBreadcrumbs] = newBreadcrumbs;
               deps.serverless.setBreadcrumbs(trailingBreadcrumbs);
             } else {
+              console.log('here', newBreadcrumbs);
               coreStart.chrome.setBreadcrumbs(newBreadcrumbs, {
                 project: { value: newBreadcrumbs, absolute: true },
               });

@@ -39,6 +39,7 @@ export interface IndexManagementPluginSetup {
   apiService: PublicApiServiceSetup;
   extensionsService: ExtensionsSetup;
   locator?: IndexManagementLocator;
+  managementApp?: any;
 }
 
 export interface IndexManagementPluginStart {
@@ -49,6 +50,9 @@ export interface IndexManagementPluginStart {
   getIndexSettingsComponent: (deps: {
     history: ScopedHistory<unknown>;
   }) => React.FC<IndexSettingProps>;
+  getIndexManagementComponent:(deps: {
+    history: ScopedHistory<unknown>;
+  }) => React.FC<{}>;
 }
 
 export interface Index {

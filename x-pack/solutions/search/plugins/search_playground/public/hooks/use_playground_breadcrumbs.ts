@@ -27,8 +27,8 @@ export const usePlaygroundBreadcrumbs = () => {
             defaultMessage: 'Playground',
           }),
         },
-      ],
-      { forClassicChromeStyle: true }
+      ]
+      ,{ forClassicChromeStyle: true }
     );
 
     return () => {

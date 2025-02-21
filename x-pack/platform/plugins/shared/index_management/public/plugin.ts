@@ -16,6 +16,7 @@ import {
   PluginInitializerContext,
   ScopedHistory,
   Capabilities,
+  ChromeBreadcrumb,
 } from '@kbn/core/public';
 import {
   IndexManagementPluginSetup,
@@ -34,6 +35,8 @@ import { IndexMapping } from './application/sections/home/index_list/details_pag
 import { PublicApiService } from './services/public_api_service';
 import { IndexSettings } from './application/sections/home/index_list/details_page/with_context_components/index_settings_embeddable';
 import { IndexManagementLocatorDefinition } from './locator';
+import { IndexManagementHome } from './application/sections/home';
+import { IndexManagementHomeEmbeddable } from './application/sections/home/index_list/details_page/with_context_components/home_page_embeddable';
 
 export class IndexMgmtUIPlugin
   implements
@@ -145,6 +148,23 @@ export class IndexMgmtUIPlugin
       apiService: new PublicApiService(coreSetup.http),
       extensionsService: this.extensionsService.setup(),
       locator: this.locator,
+      managementApp: async (element: HTMLElement, setBreadcrumbs:(newBreadCrumbs:ChromeBreadcrumb[] )=> void, history: ScopedHistory) => {
+        const { mountIndexManagementSection } = await import(
+          './application/mount_management_search_indices'
+        );
+        return mountIndexManagementSection({
+          coreSetup,
+          usageCollection,
+          params: {element, setBreadcrumbs, history},
+          extensionsService: this.extensionsService,
+          isFleetEnabled: Boolean(fleet),
+          kibanaVersion: this.kibanaVersion,
+          config: this.config,
+          cloud,
+          canUseSyntheticSource: this.canUseSyntheticSource,
+        });
+      }
+
     };
   }
 
@@ -235,6 +255,60 @@ export class IndexMgmtUIPlugin
           return IndexSettings({ dependencies: appDependencies, core: coreStart, ...props });
         };
       },
+      getIndexManagementComponent: (deps: { history: ScopedHistory<unknown> }) =>{
+                const { docLinks, fatalErrors, application, uiSettings, executionContext, settings, http } =
+          coreStart;
+        const { url } = share;
+        const appDependencies = {
+          core: {
+            fatalErrors,
+            getUrlForApp: application.getUrlForApp,
+            executionContext,
+            application,
+            http,
+          },
+          plugins: {
+            usageCollection,
+            isFleetEnabled: Boolean(fleet),
+            share,
+            cloud,
+            console,
+            ml,
+            licensing,
+          },
+          services: {
+            extensionsService: this.extensionsService,
+          },
+          config: this.config,
+          history: deps.history,
+          setBreadcrumbs: undefined as any, // breadcrumbService.setBreadcrumbs,
+          uiSettings,
+          settings,
+          url,
+          docLinks,
+          kibanaVersion: this.kibanaVersion,
+          theme$: coreStart.theme.theme$,
+        };
+        return (props: any) => {
+          return IndexManagementHomeEmbeddable({ dependencies: appDependencies, core: coreStart, ...props });
+        };
+      },
+      // getIndexManagementComponent: async (element: HTMLElement, setBreadcrumbs:()=> void, history: ScopedHistory) => {
+      //   const { mountIndexManagementSection } = await import(
+      //     './application/mount_management_search_indices'
+      //   );
+      //   return mountIndexManagementSection({
+      //     coreSetup,
+      //     usageCollection,
+      //     params: {element, setBreadcrumbs, history},
+      //     extensionsService: this.extensionsService,
+      //     isFleetEnabled: Boolean(fleet),
+      //     kibanaVersion: this.kibanaVersion,
+      //     config: this.config,
+      //     cloud,
+      //     canUseSyntheticSource: this.canUseSyntheticSource,
+      //   });
+      // }
     };
   }
   public stop() {

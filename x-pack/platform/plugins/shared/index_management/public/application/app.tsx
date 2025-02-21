@@ -31,6 +31,7 @@ export const App = ({ history }: { history: ScopedHistory }) => {
     () => services.uiMetricService.trackMetric(METRIC_TYPE.LOADED, UIM_APP_LOAD),
     [services.uiMetricService]
   );
+  console.log("/:section(${homeSections.join('|')})", homeSections.join('|'));
 
   return (
     <Router history={history}>
