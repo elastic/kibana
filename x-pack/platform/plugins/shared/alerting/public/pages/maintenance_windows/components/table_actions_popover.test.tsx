@@ -7,10 +7,28 @@
 
 import { fireEvent } from '@testing-library/react';
 import React from 'react';
+import userEvent from '@testing-library/user-event';
 
 import { AppMockRenderer, createAppMockRenderer } from '../../../lib/test_utils';
 import { TableActionsPopover } from './table_actions_popover';
 import { MaintenanceWindowStatus } from '../../../../common';
+
+const mockAddSuccess = jest.fn();
+jest.mock('../../../utils/kibana_react', () => {
+  const originalModule = jest.requireActual('../../../utils/kibana_react');
+  return {
+    ...originalModule,
+    useKibana: () => {
+      const { services } = originalModule.useKibana();
+      return {
+        services: {
+          ...services,
+          notifications: { toasts: { addSuccess: mockAddSuccess } },
+        },
+      };
+    },
+  };
+});
 
 describe('TableActionsPopover', () => {
   let appMockRenderer: AppMockRenderer;
@@ -102,5 +120,34 @@ describe('TableActionsPopover', () => {
     );
     fireEvent.click(result.getByTestId('table-actions-icon-button'));
     expect(result.getByTestId('table-actions-unarchive')).toBeInTheDocument();
+  });
+
+  test('it shows the success toast when maintenance window id is copied', async () => {
+    Object.assign(navigator, {
+      clipboard: {
+        writeText: jest.fn().mockResolvedValue(''),
+      },
+    });
+
+    const result = appMockRenderer.render(
+      <TableActionsPopover
+        id={'123'}
+        isLoading={false}
+        status={MaintenanceWindowStatus.Archived}
+        onEdit={() => {}}
+        onCancel={() => {}}
+        onArchive={() => {}}
+        onCancelAndArchive={() => {}}
+      />
+    );
+
+    await userEvent.click(await result.findByTestId('table-actions-icon-button'));
+    expect(await result.findByTestId('table-actions-copy-id')).toBeInTheDocument();
+
+    await userEvent.click(await result.findByTestId('table-actions-copy-id'));
+    expect(navigator.clipboard.writeText).toHaveBeenCalledWith('123');
+    expect(mockAddSuccess).toBeCalledWith('Copied maintenance window ID to clipboard');
+
+    Object.assign(navigator, global.window.navigator.clipboard);
   });
 });

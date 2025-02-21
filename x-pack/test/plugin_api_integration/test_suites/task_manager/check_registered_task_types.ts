@@ -175,6 +175,7 @@ export default function ({ getService }: FtrProviderContext) {
         'security:telemetry-prebuilt-rule-alerts',
         'security:telemetry-timelines',
         'session_cleanup',
+        'slo:temp-summary-cleanup-task',
         'task_manager:delete_inactive_background_task_nodes',
         'task_manager:mark_removed_tasks_as_unrecognized',
       ]);
