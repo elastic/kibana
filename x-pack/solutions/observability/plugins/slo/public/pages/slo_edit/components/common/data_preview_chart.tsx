@@ -27,12 +27,13 @@ import {
   EuiLoadingChart,
   EuiPanel,
   EuiSpacer,
-  EuiTitle
+  EuiTitle,
 } from '@elastic/eui';
 import numeral from '@elastic/numeral';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { max, min } from 'lodash';
+import { GetPreviewDataResponse } from '@kbn/slo-schema';
+import { map, max, min, values } from 'lodash';
 import moment from 'moment';
 import React, { useState } from 'react';
 import { useFormContext } from 'react-hook-form';
@@ -85,7 +86,7 @@ export function DataPreviewChart({
 
   const isMoreThan100 =
     !ignoreMoreThan100 &&
-    previewData?.results?.find((row) => row.sliValue && row.sliValue > 1) != null;
+    previewData?.results.some((datum) => datum.sliValue && datum.sliValue > 1);
 
   const baseTheme = charts.theme.useChartsBaseTheme();
   const dateFormat = uiSettings.get('dateFormat');
@@ -94,17 +95,7 @@ export function DataPreviewChart({
       ? formatPattern
       : (uiSettings.get('format:percent:defaultPattern') as string);
 
-  // map values to row.sliValue and filter out no data values
-  const values = (previewData?.results ?? []).map((row) => row.sliValue);
-  const maxValue = max(values);
-  const minValue = min(values);
-  const domain = {
-    fit: true,
-    min:
-      threshold != null && minValue != null && threshold < minValue ? threshold : minValue || NaN,
-    max:
-      threshold != null && maxValue != null && threshold > maxValue ? threshold : maxValue || NaN,
-  };
+  const { maxValue, minValue, domain } = getChartDomain(previewData, threshold);
 
   const title = (
     <>
@@ -149,7 +140,7 @@ export function DataPreviewChart({
         style={{
           line: {
             strokeWidth: 2,
-            stroke: thresholdColor || '#000',
+            stroke: thresholdColor ?? '#000',
             opacity: 1,
           },
         }}
@@ -159,16 +150,13 @@ export function DataPreviewChart({
           {
             coordinates:
               thresholdDirection === 'above'
-                ? {
-                    y0: threshold,
-                    y1: maxValue,
-                  }
+                ? { y0: threshold, y1: maxValue }
                 : { y0: minValue, y1: threshold },
             details: thresholdMessage,
           },
         ]}
         id="thresholdShade"
-        style={{ fill: thresholdColor || '#000', opacity: 0.1 }}
+        style={{ fill: thresholdColor ?? '#000', opacity: 0.1 }}
       />
     </>
   );
@@ -329,8 +317,7 @@ export function DataPreviewChart({
                   events: datum.events,
                 }))}
               />
-
-              {Object.keys(previewData?.groups ?? {}).map((group) => (
+              {map(previewData?.groups, (data, group) => (
                 <AreaSeries
                   key={group}
                   id={group}
@@ -338,9 +325,7 @@ export function DataPreviewChart({
                   yScaleType={ScaleType.Linear}
                   xAccessor="date"
                   yAccessors={['value']}
-                  // stackAccessors={[0]}
-                  // @ts-ignore
-                  data={previewData!.groups[group].map((datum) => ({
+                  data={data.map((datum) => ({
                     date: new Date(datum.date).getTime(),
                     value: datum.sliValue && datum.sliValue >= 0 ? datum.sliValue : null,
                     events: datum.events,
@@ -353,4 +338,19 @@ export function DataPreviewChart({
       </EuiFormRow>
     </EuiFlexItem>
   );
+}
+
+function getChartDomain(previewData?: GetPreviewDataResponse, threshold?: number) {
+  const allGroupsValues = map(previewData?.results, (datum) => datum.sliValue);
+  const groupsValues = values(previewData?.groups)
+    .flat()
+    .map((datum) => datum.sliValue);
+  const maxValue = max(allGroupsValues.concat(groupsValues));
+  const minValue = min(allGroupsValues.concat(groupsValues));
+  const domain = {
+    fit: true,
+    min: min([threshold, minValue]) ?? NaN,
+    max: max([threshold, maxValue]) ?? NaN,
+  };
+  return { maxValue, minValue, domain };
 }
