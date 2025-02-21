@@ -38,7 +38,10 @@ export async function runTests(log: ToolingLog, options: RunTestsOptions) {
     log.info(`scout: Validate Playwright config has tests`);
     try {
       // '--list' flag tells Playwright to collect all the tests, but do not run it
-      const result = await execPromise(`${cmd} ${cmdArgs.join(' ')} --list`);
+      // We disable scout reporter explicitly to avoid creating directories and collecting stats
+      const result = await execPromise(
+        `SCOUT_REPORTER_ENABLED=false ${cmd} ${cmdArgs.join(' ')} --list`
+      );
       const lastLine = result.stdout.trim().split('\n').pop();
       log.info(`scout: ${lastLine}`);
     } catch (err) {
