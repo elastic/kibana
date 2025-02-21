@@ -103,8 +103,7 @@ fi
 
 if [[ ${#configWithoutTests[@]} -gt 0 ]]; then
   echo "⚠️ Configs with no tests:"
-  printf '%s\n' "${configWithoutTests[@]}"
-  # add annotation to the build
+  printf "%s\n" "${configWithoutTests[@]}" | buildkite-agent annotate --style "warning" --context "no-tests"
 fi
 
 if [[ ${#failedConfigs[@]} -gt 0 ]]; then
