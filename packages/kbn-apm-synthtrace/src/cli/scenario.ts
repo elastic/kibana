@@ -20,6 +20,7 @@ import { Logger } from '../lib/utils/create_logger';
 import { ScenarioReturnType } from '../lib/utils/with_client';
 import { RunOptions } from './utils/parse_run_cli_flags';
 import { EntitiesSynthtraceKibanaClient } from '../lib/entities/entities_synthtrace_kibana_client';
+import { StreamsSynthtraceClient } from '../lib/streams/streams_synthtrace_client';
 
 interface EsClients {
   apmEsClient: ApmSynthtraceEsClient;
@@ -28,6 +29,7 @@ interface EsClients {
   syntheticsEsClient: SyntheticsSynthtraceEsClient;
   otelEsClient: OtelSynthtraceEsClient;
   entitiesEsClient: EntitiesSynthtraceEsClient;
+  streamsClient: StreamsSynthtraceClient;
 }
 
 interface KibanaClients {

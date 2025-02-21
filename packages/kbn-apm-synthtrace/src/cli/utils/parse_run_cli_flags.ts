@@ -47,8 +47,8 @@ export function parseRunCliFlags(flags: RunCliFlags) {
 
   let parsedLogLevel = LogLevel.info;
   switch (logLevel) {
-    case 'trace':
-      parsedLogLevel = LogLevel.trace;
+    case 'verbose':
+      parsedLogLevel = LogLevel.verbose;
       break;
 
     case 'info':

@@ -11,6 +11,8 @@
     "@kbn/dev-utils",
     "@kbn/elastic-agent-utils",
     "@kbn/zod",
+    "@kbn/sample-log-parser",
+    "@kbn/tooling-log",
   ],
   "exclude": [
     "target/**/*",

@@ -16,6 +16,8 @@ import { LogLevel } from '../../..';
 import { bootstrap } from './bootstrap';
 import { RunOptions } from './parse_run_cli_flags';
 import { WorkerData } from './synthtrace_worker';
+import { getScenario } from './get_scenario';
+import { StreamManager } from './stream_manager';
 
 export async function startHistoricalDataUpload({
   runOptions,
@@ -26,7 +28,29 @@ export async function startHistoricalDataUpload({
   from: Date;
   to: Date;
 }) {
-  const { logger, esUrl, version, kibanaUrl } = await bootstrap(runOptions);
+  const { logger, clients } = await bootstrap(runOptions);
+
+  const file = runOptions.file;
+
+  const scenario = await logger.perf('get_scenario', async () => {
+    const fn = await getScenario({ file, logger });
+    return fn({
+      ...runOptions,
+      logger,
+    });
+  });
+
+  const streamManager = new StreamManager(async () => {
+    if (scenario.teardown) {
+      await scenario.teardown(clients);
+    }
+  });
+
+  if (scenario.bootstrap) {
+    await scenario.bootstrap(clients);
+  }
+
+  streamManager.init();
 
   const cores = cpus().length;
 
@@ -53,11 +77,6 @@ export async function startHistoricalDataUpload({
   }
 
   logger.info(`Generating data from ${from.toISOString()} to ${rangeEnd.toISOString()}`);
-
-  interface WorkerMessages {
-    log: LogLevel;
-    args: any[];
-  }
 
   function rangeStep(interval: number) {
     if (from > rangeEnd) return moment(from).subtract(interval, 'ms').toDate();
@@ -91,29 +110,26 @@ export async function startHistoricalDataUpload({
         bucketFrom,
         bucketTo,
         workerId: workerIndex.toString(),
-        esUrl,
-        version,
-        kibanaUrl,
       };
       const worker = new Worker(Path.join(__dirname, './worker.js'), {
         workerData,
       });
-      worker.on('message', (message: WorkerMessages) => {
-        switch (message.log) {
+      worker.on('message', ([logLevel, msg]: [string, string]) => {
+        switch (logLevel) {
           case LogLevel.debug:
-            logger.debug.apply({}, message.args);
+            logger.debug(msg);
             return;
           case LogLevel.info:
-            logger.info.apply({}, message.args);
+            logger.info(msg);
             return;
-          case LogLevel.trace:
-            logger.debug.apply({}, message.args);
+          case LogLevel.verbose:
+            logger.verbose(msg);
             return;
           case LogLevel.error:
-            logger.error.apply({}, message.args);
+            logger.error(msg);
             return;
           default:
-            logger.info(message);
+            logger.info(msg);
         }
       });
       worker.on('error', (message) => {

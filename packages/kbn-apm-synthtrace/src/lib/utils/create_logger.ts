@@ -7,50 +7,34 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { ToolingLog, Writer } from '@kbn/tooling-log';
 import { logPerf } from './log_perf';
 
 export enum LogLevel {
-  trace = 0,
-  debug = 1,
-  info = 2,
-  error = 3,
+  verbose = 'verbose',
+  debug = 'debug',
+  info = 'info',
+  warn = 'warning',
+  error = 'error',
 }
 
-function getTimeString() {
-  return `[${new Date().toLocaleTimeString()}]`;
-}
+export function createLogger(logLevel: LogLevel, writer?: Writer): Logger {
+  const log = new ToolingLog({
+    level: logLevel,
+    writeTo: writer ? { write: () => true } : process.stdout,
+  }) as Logger;
 
-export function createLogger(logLevel: LogLevel) {
-  const logger: Logger = {
-    perf: (name, callback) => {
-      return logPerf(logger, logLevel, name, callback);
-    },
-    debug: (...args: any[]) => {
-      if (logLevel <= LogLevel.debug) {
-        // eslint-disable-next-line no-console
-        console.debug(getTimeString(), ...args);
-      }
-    },
-    info: (...args: any[]) => {
-      if (logLevel <= LogLevel.info) {
-        // eslint-disable-next-line no-console
-        console.log(getTimeString(), ...args);
-      }
-    },
-    error: (...args: any[]) => {
-      if (logLevel <= LogLevel.error) {
-        // eslint-disable-next-line no-console
-        console.log(getTimeString(), ...args);
-      }
-    },
+  if (writer) {
+    log.setWriters([writer]);
+  }
+
+  log.perf = (name: string, callback: () => any) => {
+    return logPerf(log, logLevel, name, callback);
   };
 
-  return logger;
+  return log;
 }
 
-export interface Logger {
+export type Logger = ToolingLog & {
   perf: <T>(name: string, cb: () => T) => T;
-  debug: (...args: any[]) => void;
-  info: (...args: any[]) => void;
-  error: (...args: any[]) => void;
-}
+};
