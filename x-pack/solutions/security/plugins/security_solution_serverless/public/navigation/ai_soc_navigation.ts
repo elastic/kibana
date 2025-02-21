@@ -57,6 +57,6 @@ export const applyAiSocNavigation = (
       defaultIsCollapsed: false,
       isCollapsible: false,
     };
-    draft.body = [aiGroup];
+    draft.body.push(aiGroup);
   }
 };
