@@ -347,9 +347,9 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       });
     },
 
-    async waitForWorkspaceWithVisualization() {
+    async waitForDatatableVisualization() {
       await retry.try(async () => {
-        await testSubjects.existOrFail(`lnsVisualizationContainer`);
+        await testSubjects.existOrFail(`lnsDataTableContainer`);
       });
     },
 
@@ -1561,7 +1561,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     async waitForVisualization(visDataTestSubj?: string) {
       async function getRenderingCount() {
         const visualizationContainer = await testSubjects.find(
-          visDataTestSubj || 'lnsVisualizationContainer'
+          visDataTestSubj || 'lnsDataTableContainer'
         );
         const renderingCount = await visualizationContainer.getAttribute('data-rendering-count');
         return Number(renderingCount);

@@ -563,7 +563,7 @@ export function MachineLearningDataVisualizerTableProvider(
         await testSubjects.clickWhenNotDisabledWithoutRetry(
           this.rowSelector(fieldName, 'dataVisualizerActionViewInLensButton')
         );
-        await testSubjects.existOrFail(visualizationContainer ?? 'lnsVisualizationContainer', {
+        await testSubjects.existOrFail(visualizationContainer ?? 'lnsDataTableContainer', {
           timeout: 15 * 1000,
         });
       });

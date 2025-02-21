@@ -49,7 +49,6 @@ export const DropIllustration = ({ title, titleId, ...props }: Omit<EuiIconProps
             animation: ${pulseContinuous} 1.5s ease-in-out 0s infinite normal forwards !important;
           }
         `}
-        id="lnsDropIllustrationArrow"
         d="M84.688 156.577v-31.021c0-1.17.853-2.118 1.906-2.118s1.906.948 1.906 2.118v31.021l15.617-15.617a1.912 1.912 0 0 1 2.662.034 1.912 1.912 0 0 1 .034 2.662l-16.175 16.175a5.696 5.696 0 0 1-3.525 1.652c-.338.107-.7.107-1.039 0a5.699 5.699 0 0 1-3.524-1.652l-16.175-16.175a1.909 1.909 0 0 1 1.358-3.22 1.91 1.91 0 0 1 1.338.524l15.617 15.617Z"
       />
     </svg>
