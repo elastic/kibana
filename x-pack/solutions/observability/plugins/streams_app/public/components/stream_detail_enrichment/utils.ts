@@ -124,25 +124,22 @@ export const isDissectProcessor = createProcessorGuardByType('dissect');
 
 const createId = htmlIdGenerator();
 const toUIDefinition = <TProcessorDefinition extends ProcessorDefinition>(
-  processor: TProcessorDefinition,
-  uiAttributes: Partial<Pick<WithUIAttributes<TProcessorDefinition>, 'status'>> = {}
+  processor: TProcessorDefinition
 ): ProcessorDefinitionWithUIAttributes => ({
   id: createId(),
-  status: 'saved',
   type: getProcessorType(processor),
-  ...uiAttributes,
   ...processor,
 });
 
 const toAPIDefinition = (processor: ProcessorDefinitionWithUIAttributes): ProcessorDefinition => {
-  const { id, status, type, ...processorConfig } = processor;
+  const { id, type, ...processorConfig } = processor;
   return processorConfig;
 };
 
 const toSimulateDefinition = (
   processor: ProcessorDefinitionWithUIAttributes
 ): ProcessorDefinitionWithId => {
-  const { status, type, ...processorConfig } = processor;
+  const { type, ...processorConfig } = processor;
   return processorConfig;
 };
 

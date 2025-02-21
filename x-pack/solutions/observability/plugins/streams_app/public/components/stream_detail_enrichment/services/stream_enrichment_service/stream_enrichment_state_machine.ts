@@ -4,16 +4,15 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { MachineImplementationsFrom, assign, enqueueActions, setup } from 'xstate5';
+import { MachineImplementationsFrom, assign, enqueueActions, setup, stopChild } from 'xstate5';
 import { getPlaceholderFor } from '@kbn/xstate-utils';
 import {
   IngestStreamGetResponse,
-  ProcessorDefinition,
   WiredStreamGetResponse,
-  getProcessorType,
   isRootStreamDefinition,
   isWiredStreamGetResponse,
 } from '@kbn/streams-schema';
+import { htmlIdGenerator } from '@elastic/eui';
 import {
   StreamEnrichmentContext,
   StreamEnrichmentEvent,
@@ -27,8 +26,11 @@ import {
   createUpsertStreamFailureNofitier,
   createUpsertStreamSuccessNofitier,
 } from './upsert_stream';
+import { processorMachine } from './processor_state_machine';
 
-export const streamEnrichmentService = setup({
+const createId = htmlIdGenerator();
+
+export const streamEnrichmentActor = setup({
   types: {
     input: {} as StreamEnrichmentInput,
     context: {} as StreamEnrichmentContext,
@@ -36,6 +38,7 @@ export const streamEnrichmentService = setup({
   },
   actors: {
     upsertStream: getPlaceholderFor(createUpsertStreamActor),
+    processorMachine,
   },
   actions: {
     notifyUpsertStreamSuccess: getPlaceholderFor(createUpsertStreamSuccessNofitier),
@@ -44,8 +47,19 @@ export const streamEnrichmentService = setup({
     storeDefinition: assign((_, params: { definition: IngestStreamGetResponse }) => ({
       definition: params.definition,
     })),
-    setupProcessors: assign((_, params: { definition: IngestStreamGetResponse }) => {
-      const processors = createProcessorsList(params.definition.stream.ingest.processing);
+    setupProcessors: assign(({ spawn, self }, params: { definition: IngestStreamGetResponse }) => {
+      const processors = params.definition.stream.ingest.processing.map((proc) => {
+        const processor = processorConverter.toUIDefinition(proc);
+        return spawn('processorMachine', {
+          id: processor.id,
+          input: {
+            parentRef: self,
+            processor,
+          },
+          syncSnapshot: true,
+        });
+      });
+
       return {
         initialProcessors: processors,
         processors,
@@ -54,40 +68,48 @@ export const streamEnrichmentService = setup({
     setupFields: assign((_, params: { definition: WiredStreamGetResponse }) => ({
       fields: params.definition.stream.ingest.wired.fields,
     })),
-    addProcessor: assign(({ context }, params: StreamEnrichmentEventByType<'processors.add'>) => ({
-      processors: context.processors.concat(
-        processorConverter.toUIDefinition(params.processor, { status: 'draft' })
-      ),
-    })),
+    addProcessor: assign(
+      ({ context, spawn, self }, { processor }: StreamEnrichmentEventByType<'processors.add'>) => {
+        const id = createId();
+        return {
+          processors: context.processors.concat(
+            spawn('processorMachine', {
+              id,
+              input: {
+                parentRef: self,
+                processor: { ...processor, id },
+                isNew: true,
+              },
+              syncSnapshot: true,
+            })
+          ),
+        };
+      }
+    ),
+    stopProcessor: stopChild(
+      (_, params: StreamEnrichmentEventByType<'processor.delete'>) => params.id
+    ),
     deleteProcessor: assign(
-      ({ context }, params: StreamEnrichmentEventByType<'processors.delete'>) => ({
+      ({ context }, params: StreamEnrichmentEventByType<'processor.delete'>) => ({
         processors: context.processors.filter((proc) => proc.id !== params.id),
       })
     ),
     reorderProcessors: assign((_, params: StreamEnrichmentEventByType<'processors.reorder'>) => ({
       processors: params.processors,
     })),
-    updateProcessor: assign(
-      ({ context }, params: StreamEnrichmentEventByType<'processors.update'>) => ({
-        processors: context.processors.map((proc) =>
-          proc.id === params.id
-            ? {
-                ...params.processorUpdate,
-                id: params.id,
-                type: getProcessorType(params.processorUpdate),
-                status: params.status,
-              }
-            : proc
-        ),
-      })
-    ),
+    reassignProcessors: assign(({ context }) => ({
+      processors: [...context.processors],
+    })),
     deriveStagedChangesFlag: assign(({ context }) => {
       const { initialProcessors, processors } = context;
       return {
         hasStagedChanges:
-          initialProcessors.length !== processors.length || // Processor count changed, a processor might be deleted
-          processors.some((processor) => ['draft', 'updated'].includes(processor.status)) || // New or updated processors
-          processors.some((processor, pos) => initialProcessors[pos].id !== processor.id), // Processor order changed
+          initialProcessors.length !== processors.length || // Deleted/New processors
+          processors.some((processor) => {
+            const state = processor.getSnapshot();
+            return state.matches('staged') || state.matches({ persisted: 'updated' });
+          }) || // New/updated/deleted processors
+          processors.some((processor, pos) => initialProcessors[pos]?.id !== processor.id), // Processor order changed
       };
     }),
   },
@@ -98,7 +120,7 @@ export const streamEnrichmentService = setup({
     isWiredStream: ({ context }) => isWiredStreamGetResponse(context.definition),
   },
 }).createMachine({
-  /** @xstate-layout N4IgpgJg5mDOIC5RgHYCcCWBjAFgZQBc0wBDAWwGJYjSyA6YrMDAN0gG0AGAXUVAAcA9rAwEMglHxAAPRABYATABoQAT0QA2AJwBWOloDsAZjlGAjGYMbLZowF87K1JlyFi5OhhSiMJADYYAF5eUBRcvEggQiJiElKyCHJaGvoaBgpanHLWBpwKOkYq6ghmnDoAHHScukZahmba5VoOTujY+DQeXj7+QSFhZhECwj5xkQk6nCkmCgra6RpJOjpFiAZmCnRyBjuLNrrlci3gba6d9MSwgn5sEADCOBh+EG60VOcMcGAE4VLRo5JxogLGY5HQ0lpFHkzMkDFpVghymY6DoFJxODDyjotAo5BUdMdnO1Xh5Ltdbg8ni9zu93PQAK78CAkAhgX6Rf6xQGgBIKdJ0IxGbFGdGTLQi8oIoz5cFacoaMo1OVyQ6E04dOmfK43SCU54k+gQDCwfh+EiqEIABTQgiYsCuaFgFH4NrtDtgdBIEAg7OGMXE3JkwLylV0ZgKfNy+SyCJ0GlD5QMFVqcPlSTVLg1tC15N1j31HyNJrNFpQUGttrg7udrqrgkddAgYD83zZPD+Iy58WDClDOnD0p2eUmcgRcjxKKR0rMTQMSMU9kcJ0zBpzOvu+epmqLpvNVtr9vrTpdlcPDeI9abaF9UU7Ae7CGSnHBCkFdQxxj5hTUiGlm0skzYkiOhWEKGbEh8ZLrnqW7ZjuJb7qe1Ynm6R50IyzKsjenL3kCJQhvo-YRkO0ajj+JRynQViJoYxhGOsvbgWcmpQRSm6rvBe5lngGBkPSZpcnQLAYGAADuAAiLIkNaYDCWJVC8fxLIBkJIkSa2WCshAABiInPLA2F3mMPKIHUmyGOU5SCnOpQaBo37FImehNEY5QhrUIE4kxWaknAuYblSHHGrupZQDxfECSpcnqaymmQLpzYQE6IgRcpEiqWJkkENJxDRYZ-rGUG+EWAK1iLAsVjLAYCLlDKtRGIsGTVPGi6tCuHwYcp3E0hAEhgJ4KAsIIADW-VEsx2adWI3V0ggXhDVgaUoOE+UAg+fKbIKwqitUEpSlYdCYiB462DC9HeauU0hAaFBgGgNpoHQu4EAAZvW9DjT5DJMl1YXnHNg22ktK3thyRmBryGibUK4o7bDkrkUkKQKtsc6cCK2zaASxwoIITbwJEn0Gh2BUQ4gAC0GgIuTr50K+FgquOrkgfkF0dd43hiL0gSQCTa14SKehzLoCgwuOkK1DVljgrk1RaOGvYZGzmrdFzATBGWfNdnhaJgosiwFCLTQxuRFizPoIqlG5Gzy+UyvZqxeaBecWu4SZCAMQKrmviYkJYkkCKLHT8ZYhY8t2ZY9u+dqbHO9uwUIWWFaoY6ruFQkWJ6BoOh4km6RyBsnAI8U8wCuKSbo3MIEwlHFx+dB7GFgnXFhYpkWFTh6drAqXu1YKSQqjn8LkcYBh0C56yJliaMGLXa6xwW8fFi34VKYJ0VZTlslqWnZOIkXvc+wP-vD455hbEOdnpOG1hHEuROQfXC+wR4nGhav7coBlMVgHFOl6UlXeD4Nhwi2JCTGbkGpxmquRKyRh9BDhDIYOozR77qkuj9aaf06RAJ1lZFEMJUSQmsKiWqZFiiQnBBsPEMJ8hJFqtjNqEEWJP0gAAJUEIIAgxMwakwfFZPQcYMhCgajiZYCIzbInjBiWo9DRZxgcA4IAA */
+  /** @xstate-layout N4IgpgJg5mDOIC5RgHYCcCWBjAFgZQBc0wBDAWwGJYjSyA6YrMDAN0gG0AGAXUVAAcA9rAwEMglHxAAPRAA4ATABoQAT3kBOACx05AVg0KNANgDspgMxatARgC+dlaky5CxcnQA2GaqgwooADFBNAARMAAzf1FxFABhHBIAuCoaD0ZmNgguXiQQIRExCSlZBEUVdQRTDTk6LU5jBTkLfVN9Y3tHcHRsfDT6aLESbwAvfygKHKkCmOK80osNPTqGpua5Yz1WrQrEExs6Tn05DU49Tg02i4cnHtd+ukGMYYwxgMmbXIFhWcl5xEWy3qjTk602212ZRstWMFiaFwUpmMWlhchu3RcfXc9GIsEEniyCQwnggbloqWxDDgYAIUzyMyKf1ACyWKxBYK2elMOzUexsnDonNOcJsizM6OcvTJ6Tg+MJOGJpP6FNodAArvwICQCGA6d9CrESogFI06BYLAY4Rp+RZOJweZU5ActBpXa6LXpjHJrBK7ljVbi5ZAiSTpfQID5+J4SKpxgAFNCCJiwPFoWAUfiJ5Op2B0EgQbI8aY-RlGhAWMx0Dpw4ycCzchRbC2QmzGU66BRaPSNjp6LTehS+zFhql4gnBhWhh4R2BRmPxrNwHMZxcpkK54ghCBgNB6-Ilw3-BBGDR0JrnNtI6FbGwtz2mOrQoz20ycBRGPRDqUPQPjiAhpVKRnOdYwCBMkyXdcVwgtc0DobdPBpXUi3pA85mZAFK2rBRoVFSwOlMFtbAfM5QXNC49FtF0v3uSlf3lRUR2A6NQKgcDsygzMYNTOhcCSGA9wZQ8MPLLDRRwp16wrGxCN5BBxIFWsuQtV8DBNUwaP9GUxwYqcgMjFjxjwDAyDVaNGToFgMDAAB3UJtRIBMwCs2yqBMsztViSzrLspCsB1CBAmsklYEEtCmRkAELAOZEGjfE1mnqW85JsV0H0sTgkU9btWxsQcuklWiA1lP8AKYgz5wCYzTPMryXN8nV-MgIKwBCtyas8iRvNs+yCEc4h6rCg10Mi8tzkOBRzWML0rHtJ09BbbQH0mo4FDODQ4S0FpNJHDUtTEKrlQgCQwEeFAWEEABrU7Cq0+g9s8w7sQQfwLqwTqUByIbfjLE0FDNC0NqMG07QdAFJsOO031BMilhNHaHgeg6oDDCgd0TOC5wICIQnoW7ds1R6Uf6F7zqTD6vpQ-UfqPQxITMYw2RNGS4UWGoHC6FBBG3eA8nx-pi2GiLSgAWmMSExchqHpelj0EcpbxfBQcZgjCSIngkBJ+LgQWaZE85ljrU5+yN7lTC5SELVqLtotMRE5AuRZ5dVJ4XjeKBddLI8-sFRZVqdORVLBhBrQOI41K2zabD0T8Cr9Ed6InRiBdQoWyz0ZLKjy806H5LktCRLa320Z3tKDf9J0A1VmMqtjVxzT3hNG1KdGi5EY-BY5LBbJ1TxWpFMtrSwNFLnESt0quPBr1jqo8r3qfn0bXR7gw6AywOC7MTs4VH0dy7K6cKpn9zaq6+rev65yfMbkbShsAvFsos176Ob1KI2cxd8Tivk-02dDKqifD63UGpgCaoFYKEBeYLybqUDotRo4EVfNadaygUpLGWE6Ww1gkSXAsLvJGRkU4wNvogLQaCs5IjXucTgMkcL1HPF-cekAABKghBAEDDDfYWiALZyRwtCM8tpTD8hEaIxQHM7BAA */
   id: 'enrichStream',
   context: ({ input }) => ({
     definition: input.definition,
@@ -161,12 +183,6 @@ export const streamEnrichmentService = setup({
                 { type: 'deriveStagedChangesFlag' },
               ],
             },
-            'processors.delete': {
-              actions: [
-                { type: 'deleteProcessor', params: ({ event }) => event },
-                { type: 'deriveStagedChangesFlag' },
-              ],
-            },
             'processors.reorder': {
               guard: 'hasMultipleProcessors',
               actions: [
@@ -174,11 +190,15 @@ export const streamEnrichmentService = setup({
                 { type: 'deriveStagedChangesFlag' },
               ],
             },
-            'processors.update': {
+            'processor.delete': {
               actions: [
-                { type: 'updateProcessor', params: ({ event }) => event },
+                { type: 'stopProcessor', params: ({ event }) => event },
+                { type: 'deleteProcessor', params: ({ event }) => event },
                 { type: 'deriveStagedChangesFlag' },
               ],
+            },
+            'processor.change': {
+              actions: [{ type: 'reassignProcessors' }, { type: 'deriveStagedChangesFlag' }],
             },
           },
         },
@@ -201,7 +221,6 @@ export const streamEnrichmentService = setup({
       on: {
         'stream.reset': {
           target: 'initializing',
-          reenter: true,
         },
         'stream.update': {
           guard: 'hasStagedChanges',
@@ -214,7 +233,7 @@ export const streamEnrichmentService = setup({
         src: 'upsertStream',
         input: ({ context }) => ({
           definition: context.definition,
-          processors: context.processors,
+          processors: context.processors.map((proc) => proc.getSnapshot().context.processor),
           fields: context.fields,
         }),
         onDone: {
@@ -233,12 +252,12 @@ export const streamEnrichmentService = setup({
   },
 });
 
-export const createCategorizeLogsServiceImplementations = ({
+export const createStreamEnrichmentActorImplementations = ({
   refreshDefinition,
   streamsRepositoryClient,
   toasts,
 }: StreamEnrichmentServiceDependencies): MachineImplementationsFrom<
-  typeof streamEnrichmentService
+  typeof streamEnrichmentActor
 > => ({
   actors: {
     upsertStream: createUpsertStreamActor({ streamsRepositoryClient }),
@@ -249,7 +268,3 @@ export const createCategorizeLogsServiceImplementations = ({
     notifyUpsertStreamFailure: createUpsertStreamFailureNofitier({ toasts }),
   },
 });
-
-const createProcessorsList = (processors: ProcessorDefinition[]) => {
-  return processors.map((processor) => processorConverter.toUIDefinition(processor));
-};

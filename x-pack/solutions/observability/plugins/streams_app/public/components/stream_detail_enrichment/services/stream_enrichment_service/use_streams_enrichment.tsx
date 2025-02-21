@@ -9,8 +9,8 @@ import React, { useEffect, useMemo } from 'react';
 import { createActorContext } from '@xstate5/react';
 import { createConsoleInspector } from '@kbn/xstate-utils';
 import {
-  streamEnrichmentService,
-  createCategorizeLogsServiceImplementations,
+  streamEnrichmentActor,
+  createStreamEnrichmentActorImplementations,
 } from './stream_enrichment_state_machine';
 import {
   StreamEnrichmentEventParams,
@@ -20,25 +20,19 @@ import {
 
 const consoleInspector = createConsoleInspector();
 
-const StreamEnrichmentContext = createActorContext(streamEnrichmentService);
+const StreamEnrichmentContext = createActorContext(streamEnrichmentActor);
 
 export const useStreamsEnrichmentSelector = StreamEnrichmentContext.useSelector;
 
-export type StreamsEnrichmentEvents = ReturnType<typeof useStreamsEnrichmentEvents>;
+export type StreamEnrichmentEvents = ReturnType<typeof useStreamEnrichmentEvents>;
 
-export const useStreamsEnrichmentEvents = () => {
+export const useStreamEnrichmentEvents = () => {
   const service = StreamEnrichmentContext.useActorRef();
 
   return useMemo(
     () => ({
       addProcessor: (params: StreamEnrichmentEventParams<'processors.add'>) => {
         service.send({ type: 'processors.add', ...params });
-      },
-      updateProcessor: (params: StreamEnrichmentEventParams<'processors.update'>) => {
-        service.send({ type: 'processors.update', ...params });
-      },
-      deleteProcessor: (params: StreamEnrichmentEventParams<'processors.delete'>) => {
-        service.send({ type: 'processors.delete', ...params });
       },
       reorderProcessors: (params: StreamEnrichmentEventParams<'processors.reorder'>) => {
         service.send({ type: 'processors.reorder', ...params });
@@ -61,7 +55,7 @@ export const StreamEnrichmentContextProvider = ({
 }: React.PropsWithChildren<StreamEnrichmentServiceDependencies & StreamEnrichmentInput>) => {
   return (
     <StreamEnrichmentContext.Provider
-      logic={streamEnrichmentService.provide(createCategorizeLogsServiceImplementations(deps))}
+      logic={streamEnrichmentActor.provide(createStreamEnrichmentActorImplementations(deps))}
       options={{
         inspect: consoleInspector,
         input: {

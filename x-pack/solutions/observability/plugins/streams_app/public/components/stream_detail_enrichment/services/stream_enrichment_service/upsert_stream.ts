@@ -5,18 +5,21 @@
  * 2.0.
  */
 
-import { FieldDefinition, IngestUpsertRequest } from '@kbn/streams-schema';
+import { FieldDefinition, IngestStreamGetResponse, IngestUpsertRequest } from '@kbn/streams-schema';
 import { ErrorActorEvent, fromPromise } from 'xstate5';
 import { errors as esErrors } from '@elastic/elasticsearch';
 import { APIReturnType } from '@kbn/streams-plugin/public/api';
 import { IToasts } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
-import { StreamEnrichmentContext, StreamEnrichmentServiceDependencies } from './types';
+import { StreamEnrichmentServiceDependencies } from './types';
 import { processorConverter } from '../../utils';
+import { ProcessorDefinitionWithUIAttributes } from '../../types';
 
 type UpsertStreamResponse = APIReturnType<'PUT /api/streams/{name}/_ingest'>;
 
-interface UpsertStreamInput extends Pick<StreamEnrichmentContext, 'definition' | 'processors'> {
+interface UpsertStreamInput {
+  definition: IngestStreamGetResponse;
+  processors: ProcessorDefinitionWithUIAttributes[];
   fields?: FieldDefinition;
 }
 
