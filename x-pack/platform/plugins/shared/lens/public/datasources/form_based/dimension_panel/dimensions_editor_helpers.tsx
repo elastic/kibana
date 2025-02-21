@@ -153,7 +153,7 @@ export const CalloutWarning = ({
     return (
       <>
         <EuiCallOut
-          css={DimensionEditorWarningStyles}
+          css={dimensionEditorWarningStyles}
           size="s"
           title={i18n.translate('xpack.lens.indexPattern.staticValueWarning', {
             defaultMessage: 'Static value currently applied',
@@ -173,7 +173,7 @@ export const CalloutWarning = ({
   return (
     <>
       <EuiCallOut
-        css={DimensionEditorWarningStyles}
+        css={dimensionEditorWarningStyles}
         size="s"
         title={i18n.translate('xpack.lens.indexPattern.formulaWarning', {
           defaultMessage: 'Formula currently applied',
@@ -252,7 +252,7 @@ export const DimensionEditorButtonGroups = ({
   );
 };
 
-const DimensionEditorWarningStyles = ({ euiTheme }: UseEuiTheme) => {
+const dimensionEditorWarningStyles = ({ euiTheme }: UseEuiTheme) => {
   return `
     margin-bottom: ${euiTheme.size.base};
     margin-top: ${euiTheme.size.s};

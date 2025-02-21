@@ -53,7 +53,7 @@ export function GeoFieldWorkspacePanel(props: Props) {
           </h2>
           <GlobeIllustration aria-hidden={true} css={promptIllustrationStyle} />
           <Droppable
-            css={DroppableStyles}
+            css={droppableStyles}
             dataTestSubj="lnsGeoFieldWorkspace"
             dropTypes={['field_add']}
             order={dragDropOrder}
@@ -75,7 +75,7 @@ export function GeoFieldWorkspacePanel(props: Props) {
   );
 }
 
-const DroppableStyles = ({ euiTheme }: UseEuiTheme) => {
+const droppableStyles = ({ euiTheme }: UseEuiTheme) => {
   return `
     padding: ${euiTheme.size.xxl} ${euiTheme.size.xxxl};
     border: ${euiTheme.border.thin};

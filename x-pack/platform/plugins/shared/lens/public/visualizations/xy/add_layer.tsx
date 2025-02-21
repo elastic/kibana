@@ -279,14 +279,14 @@ const ChartOptionWrapper = ({
       data-test-subj={`lnsXY_seriesType-${type}`}
       onClick={onClick}
       className="euiContextMenuItem"
-      css={ChartOptionWrapperStyles}
+      css={chartOptionWrapperStyles}
     >
       <ChartOption option={{ icon, label, description }} />
     </button>
   );
 };
 
-const ChartOptionWrapperStyles = ({ euiTheme }: UseEuiTheme) => `
+const chartOptionWrapperStyles = ({ euiTheme }: UseEuiTheme) => `
     padding: ${euiTheme.size.s};
     border-bottom: ${euiTheme.border.thin};
     border-bottom-color: ${euiTheme.colors.backgroundBaseSubdued};

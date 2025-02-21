@@ -8,7 +8,7 @@
 import { UseEuiTheme } from '@elastic/eui';
 
 // styles needed to display extra drop targets that are outside of the config panel main area while also allowing to scroll vertically
-export const InlineFlyoutStyles = ({ euiTheme }: UseEuiTheme) => `
+export const inlineFlyoutStyles = ({ euiTheme }: UseEuiTheme) => `
   clip-path: polygon(-100% 0, 100% 0, 100% 100%, -100% 100%);
   max-inline-size: 640px;
   min-inline-size: 256px;

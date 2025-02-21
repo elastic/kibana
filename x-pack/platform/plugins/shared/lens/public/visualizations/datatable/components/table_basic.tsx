@@ -507,7 +507,7 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
   if (isEmpty) {
     return (
       <div
-        css={DatatableContainerStyles}
+        css={datatableContainerStyles}
         className="eui-scrollBar"
         data-test-subj="lnsVisualizationContainer"
       >
@@ -524,7 +524,7 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
 
   return (
     <div
-      css={DatatableContainerStyles}
+      css={datatableContainerStyles}
       className="eui-scrollBar"
       data-test-subj="lnsVisualizationContainer"
     >
@@ -576,7 +576,7 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
   );
 };
 
-const DatatableContainerStyles = css`
+const datatableContainerStyles = css`
   height: 100%;
   overflow: auto hidden;
   user-select: text;

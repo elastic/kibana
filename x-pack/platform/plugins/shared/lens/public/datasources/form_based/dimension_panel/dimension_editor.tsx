@@ -534,7 +534,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
         isActive,
         size: 's',
         isDisabled: !!disabledStatus,
-        css: OperationsButtonStyles,
+        css: operationsButtonStyles,
         'data-test-subj': `lns-indexPatternDimension-${operationType}${
           compatibleWithCurrentField ? '' : ' incompatible'
         }`,
@@ -811,7 +811,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
         fullWidth
       >
         <EuiListGroup
-          css={sideNavItems.length > 3 ? OperationsTwoColumnsStyles : undefined}
+          css={sideNavItems.length > 3 ? operationsTwoColumnsStyles : undefined}
           gutterSize="none"
           color="primary"
           listItems={
@@ -1291,7 +1291,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
   );
 }
 
-const OperationsTwoColumnsStyles = ({ euiTheme }: UseEuiTheme) => {
+const operationsTwoColumnsStyles = ({ euiTheme }: UseEuiTheme) => {
   return `
     display: block;
     column-count: 2;
@@ -1299,7 +1299,7 @@ const OperationsTwoColumnsStyles = ({ euiTheme }: UseEuiTheme) => {
   `;
 };
 
-export const OperationsButtonStyles = ({ euiTheme }: UseEuiTheme) => {
+export const operationsButtonStyles = ({ euiTheme }: UseEuiTheme) => {
   return `
     > button {
       padding-top: 0;
