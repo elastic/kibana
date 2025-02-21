@@ -255,7 +255,8 @@ export function ChatBody({
     const deserializedMessages = (conversation.value?.messages ?? messages).map(deserializeMessage);
 
     const content = JSON.stringify({
-      title: initialTitle,
+      title: conversation.value?.conversation.title || initialTitle,
+      systemMessage: conversation.value?.systemMessage,
       messages: deserializedMessages,
     });
 

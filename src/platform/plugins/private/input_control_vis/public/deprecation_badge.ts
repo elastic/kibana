@@ -19,6 +19,7 @@ import {
 import { Action } from '@kbn/ui-actions-plugin/public';
 import { apiHasVisualizeConfig, HasVisualizeConfig } from '@kbn/visualizations-plugin/public';
 
+import { map } from 'rxjs';
 import { INPUT_CONTROL_VIS_TYPE } from './input_control_vis_type';
 
 const ACTION_DEPRECATION_BADGE = 'ACTION_INPUT_CONTROL_DEPRECATION_BADGE';
@@ -66,14 +67,10 @@ export class InputControlDeprecationBadge implements Action<EmbeddableApiContext
     return isApiCompatible(embeddable) && embeddable.getVis().type.name === INPUT_CONTROL_VIS_TYPE;
   }
 
-  public subscribeToCompatibilityChanges(
-    { embeddable }: EmbeddableApiContext,
-    onChange: (isCompatible: boolean, action: Action<EmbeddableApiContext>) => void
-  ) {
-    if (!isApiCompatible(embeddable)) return;
-    return getViewModeSubject(embeddable)?.subscribe(() => {
-      onChange(compatibilityCheck(embeddable), this);
-    });
+  public getCompatibilityChangesSubject({ embeddable }: EmbeddableApiContext) {
+    return isApiCompatible(embeddable)
+      ? getViewModeSubject(embeddable)?.pipe(map(() => undefined))
+      : undefined;
   }
 
   public async execute() {
