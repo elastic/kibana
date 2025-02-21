@@ -103,7 +103,7 @@ function getSaveButtonMeta({
   }
 }
 
-const navItemWithDividerStyles = (euiThemeContext: UseEuiTheme) => css`
+const NavItemWithDividerStyles = (euiThemeContext: UseEuiTheme) => css`
   ${useEuiBreakpoint(['m', 'l', 'xl'])} {
     margin-right: ${euiThemeContext.euiTheme.size.m};
     position: relative;
@@ -177,7 +177,7 @@ function getLensTopNavConfig(options: {
         values: { contextOriginatingApp },
       }),
       disableButton: !actions.goBack.enabled,
-      css: navItemWithDividerStyles,
+      css: NavItemWithDividerStyles,
     });
   }
 
@@ -195,7 +195,7 @@ function getLensTopNavConfig(options: {
       tooltip: actions.getUnderlyingDataUrl.tooltip,
       target: '_blank',
       href: actions.getUnderlyingDataUrl.getLink?.(),
-      css: navItemWithDividerStyles,
+      css: NavItemWithDividerStyles,
     });
   }
 
@@ -235,7 +235,7 @@ function getLensTopNavConfig(options: {
     description: i18n.translate('xpack.lens.app.settingsAriaLabel', {
       defaultMessage: 'Open the Lens settings menu',
     }),
-    css: navItemWithDividerStyles,
+    css: NavItemWithDividerStyles,
   });
 
   if (actions.cancel.visible) {

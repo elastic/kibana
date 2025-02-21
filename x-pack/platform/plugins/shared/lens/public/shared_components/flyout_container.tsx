@@ -21,7 +21,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { DONT_CLOSE_DIMENSION_CONTAINER_ON_CLICK_CLASS } from '../utils';
-import { flyoutContainerStyles } from './flyout.styles';
+import { FlyoutContainerStyles } from './flyout.styles';
 
 function fromExcludedClickTarget(event: Event) {
   for (
@@ -104,7 +104,7 @@ export function FlyoutContainer({
           role="dialog"
           aria-labelledby="lnsDimensionContainerTitle"
           css={[
-            flyoutContainerStyles,
+            FlyoutContainerStyles,
             css`
               box-shadow: ${isInlineEditing ? 'none !important' : 'inherit'};
             `,
