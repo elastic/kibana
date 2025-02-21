@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-export const LATEST_FINDINGS_CONTAINER = 'latest_findings_container';
-export const LATEST_FINDINGS_TABLE = 'latest_findings_table';
+import type { CspBenchmarkRuleMetadata } from '../schema/rules/latest';
 
-export const FINDINGS_GROUPING_COUNTER = 'findings_grouping_counter';
+export type BenchmarkId = CspBenchmarkRuleMetadata['benchmark']['id'];
+export type BenchmarkName = CspBenchmarkRuleMetadata['benchmark']['name'];
