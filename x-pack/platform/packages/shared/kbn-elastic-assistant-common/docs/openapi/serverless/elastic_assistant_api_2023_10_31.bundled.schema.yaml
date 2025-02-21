@@ -736,14 +736,6 @@ paths:
       description: Update a Knowledge Base Entry
       operationId: UpdateKnowledgeBaseEntry
       parameters:
-        - description: >-
-            Whether to duplicate the entry on privacy change. Works only when
-            making global entry private.
-          in: query
-          name: duplicate_on_privacy_change
-          required: false
-          schema:
-            type: boolean
         - description: The Knowledge Base Entry's `id` value
           in: path
           name: id
@@ -1312,6 +1304,10 @@ components:
             name:
               description: Name of the Knowledge Base Entry
               type: string
+          required:
+            - name
+        - type: object
+          properties:
             namespace:
               description: Kibana Space, defaults to 'default' space
               type: string
@@ -1324,8 +1320,18 @@ components:
               nullable: true
               type: array
           required:
-            - name
             - namespace
+            - users
+        - type: object
+          properties:
+            users:
+              description: >-
+                Users who have access to the Knowledge Base Entry, defaults to
+                current user. Empty array provides access to all users.
+              items:
+                $ref: '#/components/schemas/User'
+              type: array
+          required:
             - users
         - $ref: '#/components/schemas/ResponseFields'
         - $ref: '#/components/schemas/DocumentEntryResponseFields'
@@ -1474,6 +1480,10 @@ components:
             name:
               description: Name of the Knowledge Base Entry
               type: string
+          required:
+            - name
+        - type: object
+          properties:
             namespace:
               description: Kibana Space, defaults to 'default' space
               type: string
@@ -1486,8 +1496,18 @@ components:
               nullable: true
               type: array
           required:
-            - name
             - namespace
+            - users
+        - type: object
+          properties:
+            users:
+              description: >-
+                Users who have access to the Knowledge Base Entry, defaults to
+                current user. Empty array provides access to all users.
+              items:
+                $ref: '#/components/schemas/User'
+              type: array
+          required:
             - users
         - $ref: '#/components/schemas/ResponseFields'
         - $ref: '#/components/schemas/IndexEntryResponseFields'
@@ -1755,10 +1775,10 @@ components:
         propertyName: type
     KnowledgeBaseResource:
       description: >-
-        Knowledge Base resource name for grouping entries, e.g. 'esql', 'user',
-        etc
+        Knowledge Base resource name for grouping entries, e.g. 'security_labs',
+        'user', etc
       enum:
-        - esql
+        - security_labs
         - user
       type: string
     KnowledgeBaseResponse:
