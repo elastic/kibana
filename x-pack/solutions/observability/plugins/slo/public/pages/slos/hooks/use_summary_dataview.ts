@@ -7,7 +7,7 @@
 
 import { useFetcher } from '@kbn/observability-shared-plugin/public';
 import { useEffect, useState } from 'react';
-import { getListOfSloSummaryIndices } from '../../../../common/summary_indices';
+import { getSLOSummaryIndices } from '../../../../common/get_slo_summary_indices';
 import { useCreateDataView } from '../../../hooks/use_create_data_view';
 import { useKibana } from '../../../hooks/use_kibana';
 import { useGetSettings } from '../../slo_settings/hooks/use_get_settings';
@@ -23,8 +23,8 @@ export const useSloSummaryDataView = () => {
 
   useEffect(() => {
     if (settings && remoteClusters) {
-      const summaryIndices = getListOfSloSummaryIndices(settings, remoteClusters);
-      setIndexPattern(summaryIndices);
+      const summaryIndices = getSLOSummaryIndices(settings, remoteClusters);
+      setIndexPattern(summaryIndices.join(','));
     }
   }, [settings, remoteClusters]);
 
