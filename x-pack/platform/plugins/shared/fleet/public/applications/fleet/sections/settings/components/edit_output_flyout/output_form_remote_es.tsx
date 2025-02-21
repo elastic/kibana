@@ -23,6 +23,7 @@ import { ExperimentalFeaturesService } from '../../../../services';
 
 import type { OutputFormInputsType } from './use_output_form';
 import { SecretFormRow } from './output_form_secret_form_row';
+import { SSLFormSection } from './ssl_form_section';
 
 interface Props {
   inputs: OutputFormInputsType;
@@ -30,13 +31,20 @@ interface Props {
   onToggleSecretStorage: (secretEnabled: boolean) => void;
 }
 
+export interface IsConvertedToSecret {
+  sslKey: boolean;
+  serviceToken: boolean;
+  kibanaAPIKey: boolean;
+}
+
 export const OutputFormRemoteEsSection: React.FunctionComponent<Props> = (props) => {
   const { inputs, useSecretsStorage, onToggleSecretStorage } = props;
-  const [isConvertedToSecret, setIsConvertedToSecret] = React.useState({
+  const [isConvertedToSecret, setIsConvertedToSecret] = React.useState<IsConvertedToSecret>({
     serviceToken: false,
     kibanaAPIKey: false,
+    sslKey: false,
   });
-  const { enableSyncIntegrationsOnRemote } = ExperimentalFeaturesService.get();
+  const { enableSyncIntegrationsOnRemote, enableSSLSecrets } = ExperimentalFeaturesService.get();
 
   const [isFirstLoad, setIsFirstLoad] = React.useState(true);
 
@@ -57,10 +65,19 @@ export const OutputFormRemoteEsSection: React.FunctionComponent<Props> = (props)
         inputs.kibanaAPIKeyInput.clear();
         isKibanaAPIKeySecret = true;
       }
+      let isSslKeySecretInput = false;
+      if (enableSSLSecrets) {
+        if (inputs.sslKeyInput.value && !inputs.sslKeySecretInput.value) {
+          inputs.sslKeySecretInput.setValue(inputs.sslKeyInput.value);
+          inputs.sslKeyInput.clear();
+          isSslKeySecretInput = true;
+        }
+      }
       setIsConvertedToSecret({
         ...isConvertedToSecret,
         serviceToken: isServiceTokenSecret,
         kibanaAPIKey: isKibanaAPIKeySecret,
+        sslKey: isSslKeySecretInput,
       });
     }
   }, [
@@ -72,17 +89,27 @@ export const OutputFormRemoteEsSection: React.FunctionComponent<Props> = (props)
     isFirstLoad,
     setIsFirstLoad,
     isConvertedToSecret,
+    inputs.sslKeyInput,
+    inputs.sslKeySecretInput,
+    enableSSLSecrets,
   ]);
 
   const onToggleSecretAndClearValue = (secretEnabled: boolean) => {
     if (secretEnabled) {
       inputs.serviceTokenInput.clear();
       inputs.kibanaAPIKeyInput.clear();
+      if (enableSSLSecrets) inputs.sslKeyInput.clear();
     } else {
       inputs.serviceTokenSecretInput.setValue('');
       inputs.kibanaAPIKeySecretInput.setValue('');
+      if (enableSSLSecrets) inputs.sslKeyInput.setValue('');
     }
-    setIsConvertedToSecret({ ...isConvertedToSecret, serviceToken: false, kibanaAPIKey: false });
+    setIsConvertedToSecret({
+      ...isConvertedToSecret,
+      serviceToken: false,
+      kibanaAPIKey: false,
+      sslKey: false,
+    });
     onToggleSecretStorage(secretEnabled);
   };
 
@@ -153,6 +180,13 @@ export const OutputFormRemoteEsSection: React.FunctionComponent<Props> = (props)
           />
         </SecretFormRow>
       )}
+      <EuiSpacer size="m" />
+      <SSLFormSection
+        inputs={inputs}
+        useSecretsStorage={enableSSLSecrets && useSecretsStorage}
+        isConvertedToSecret={isConvertedToSecret.sslKey}
+        onToggleSecretAndClearValue={onToggleSecretAndClearValue}
+      />
       <EuiSpacer size="m" />
       <EuiCallOut
         title={
@@ -279,9 +313,9 @@ export const OutputFormRemoteEsSection: React.FunctionComponent<Props> = (props)
             <EuiCodeBlock isCopyable={true}>
               {` POST /_security/api_key
    {
-     "name": "integration_sync_api_key", 
+     "name": "integration_sync_api_key",
      "role_descriptors": {
-       "integration_writer": { 
+       "integration_writer": {
          "cluster": [],
         "indices":[],
         "applications": [{
