@@ -36,6 +36,7 @@ components:
 
 
     Description:
+      description: 'The pack description.'
       type: string
 
     DescriptionOrUndefined:
@@ -92,6 +93,7 @@ components:
       nullable: true
 
     PackName:
+      description: 'The pack name.'
       type: string
 
     SavedQueryId:
@@ -112,6 +114,7 @@ components:
       nullable: true
 
     Enabled:
+      description: 'Enables the pack.'
       type: boolean
 
     EnabledOrUndefined:
@@ -119,6 +122,7 @@ components:
       nullable: true
 
     PolicyIds:
+      description: 'A list of agents policy IDs.'
       type: array
       items:
         type: string
@@ -221,6 +225,7 @@ components:
 
     ObjectQueries:
       type: object
+      description: 'An object of queries.'
       additionalProperties:
         $ref: '#/components/schemas/ObjectQueriesItem'
 
@@ -263,6 +268,7 @@ components:
 
     Shards:
       type: object
+      description: 'An object with shard configuration for policies included in the pack. For each policy, set the shard configuration to a percentage (1–100) of target hosts.'
       additionalProperties:
         type: number
 

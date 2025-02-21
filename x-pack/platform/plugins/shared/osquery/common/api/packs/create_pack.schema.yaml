@@ -7,6 +7,28 @@ components:
   schemas:
     CreatePacksRequestBody:
       type: object
+      example:
+        name: "my_pack"
+        description: "My pack"
+        enabled: true,
+        policy_ids:
+          - "my_policy_id"
+          - "fleet-server-policy"
+        shards:
+          my_policy_id: 35,
+          fleet-server-policy: 58
+        queries:
+          my_query:
+            query: "SELECT * FROM listening_ports;"
+            interval: 60
+            timeout: 120
+            ecs_mapping:
+              client.port:
+                field: "port"
+              tags:
+                value:
+                  - "tag1"
+                  - "tag2"
       properties:
         name:
           $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/PackName'
@@ -21,3 +43,8 @@ components:
         queries:
           $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/ObjectQueries'
 
+    CreatePacksResponse:
+      type: object
+      properties: { }
+      example:
+        data: { }

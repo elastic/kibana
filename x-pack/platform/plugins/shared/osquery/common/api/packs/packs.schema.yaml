@@ -41,7 +41,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/DefaultSuccessResponse'
+                $ref: './create_pack.schema.yaml#/components/schemas/CreatePacksResponse'
   /api/osquery/packs/{id}:
     get:
       summary: Get pack details
