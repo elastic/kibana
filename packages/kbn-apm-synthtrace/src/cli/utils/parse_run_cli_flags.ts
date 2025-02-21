@@ -59,6 +59,10 @@ export function parseRunCliFlags(flags: RunCliFlags) {
       parsedLogLevel = LogLevel.debug;
       break;
 
+    case 'warn':
+      parsedLogLevel = LogLevel.warn;
+      break;
+
     case 'error':
       parsedLogLevel = LogLevel.error;
       break;

@@ -99,17 +99,46 @@ Via the CLI, you can run scenarios, either using a fixed time range or continuou
 
 For live data ingestion:
 
-```
+```sh
 node scripts/synthtrace simple_trace.ts --target=http://admin:changeme@localhost:9200 --live
 ```
 
 For a fixed time window:
 
-```
+```sh
 node scripts/synthtrace simple_trace.ts --target=http://admin:changeme@localhost:9200 --from=now-24h --to=now
 ```
 
 The script will try to automatically find bootstrapped APM indices. **If these indices do not exist, the script will exit with an error. It will not bootstrap the indices itself.**
+
+#### Local Development
+
+When running the CLI locally, you can simply use the following command to ingest data to a locally running Elasticsearch and Kibana instance:
+
+```sh
+node scripts/synthtrace simple_trace.ts
+```
+_Assuming both Elasticsearch and Kibana are running on the default localhost ports with default credentials._
+
+#### A note when Kibana URL differs from Elasticsearch URL
+
+If the Kibana URL differs from the Elasticsearch URL in protocol or hostname, you should explicitly pass the `--kibana` option to the CLI along with `--target`.
+
+For example when running ES (with ssl) and Kibana (without ssl) locally in Serverless mode, it's recommended to provide both `--target` and `--kibana` options as the auto-discovered Kibana URL might not be correct in this case.
+Also use `localhost` instead of `127.0.0.1` as the hostname as `127.0.0.1` will likely not work with self-signed certificates.  
+
+```sh
+node scripts/synthtrace simple_trace.ts --target=https://elastic_serverless:changeme@localhost:9200 --kibana=http://elastic_serverless:changeme@localhost:5601
+```
+
+#### Using CLI for Elastic Cloud URLs
+
+If you are ingesting data to Elastic Cloud, you can pass the `--target` option with the Elastic Cloud URL. The CLI will infer the Kibana URL from the Elasticsearch URL. 
+Or you can pass only `--kibana` and the CLI will infer the Elasticsearch URL from the Kibana URL. Or pass both if URLs are not in default scheme.
+
+```sh
+node scripts/synthtrace simple_trace.ts --target=https://<username>:<password>@your-cloud-cluster.kb.us-west2.gcp.elastic-cloud.com/
+```
 
 ### Understanding Scenario Files
 
