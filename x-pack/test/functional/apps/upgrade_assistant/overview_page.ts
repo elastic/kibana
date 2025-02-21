@@ -34,18 +34,17 @@ export default function upgradeAssistantOverviewPageFunctionalTests({
       await testSubjects.exists('overview');
     });
 
-    // it('Should render overview upgrade steps', async () => {
-    // // step 1
-    // await testSubjects.exists('backupStep-incomplete');
-    // // step 2: migrateSystemIndicesStep only enabled during x.last versions
-    // await testSubjects.missingOrFail('migrateSystemIndicesStep-incomplete');
-    // await testSubjects.missingOrFail('migrateSystemIndicesStep-complete');
-    // // step 3
-    // await testSubjects.exists('fixIssuesStep-incomplete');
-    // // step 4
-    // await testSubjects.exists('logsStep-incomplete');
-    // // step 5
-    // await testSubjects.exists('upgradeStep');
-    // });
+    it('Should render overview upgrade steps', async () => {
+      // step 1
+      await testSubjects.exists('backupStep-incomplete');
+      // step 2
+      await testSubjects.missingOrFail('migrateSystemIndicesStep-incomplete');
+      // step 3
+      await testSubjects.exists('fixIssuesStep-incomplete');
+      // step 4
+      await testSubjects.exists('logsStep-incomplete');
+      // step 5
+      await testSubjects.exists('upgradeStep');
+    });
   });
 }
