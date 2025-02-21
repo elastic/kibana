@@ -5,11 +5,17 @@
  * 2.0.
  */
 
-export { alertDeletionPreviewSchema, alertDeletionPreviewResponseSchema } from './schemas/latest';
-export type { AlertDeletionPreviewResponse } from './types/latest';
+export {
+  alertDeletionPreviewQuerySchema,
+  alertDeletionPreviewResponseSchema,
+} from './schemas/latest';
+export type { AlertDeletionPreviewQuery, AlertDeletionPreviewResponse } from './types/latest';
 
 export {
-  alertDeletionPreviewSchema as alertDeletionPreviewSchemaV1,
+  alertDeletionPreviewQuerySchema as alertDeletionPreviewQuerySchemaV1,
   alertDeletionPreviewResponseSchema as alertDeletionPreviewResponseSchemaV1,
 } from './schemas/v1';
-export type { AlertDeletionPreviewResponse as AlertDeletionPreviewResponseV1 } from './types/v1';
+export type {
+  AlertDeletionPreviewQuery as AlertDeletionPreviewQueryV1,
+  AlertDeletionPreviewResponse as AlertDeletionPreviewResponseV1,
+} from './types/v1';

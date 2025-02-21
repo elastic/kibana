@@ -5,6 +5,8 @@
  * 2.0.
  */
 
-export { transformAlertDeletionPreviewToResponse } from './transform_alert_deletion_preview_to_response/latest';
+export { transformAlertDeletionPreviewToResponse } from './transform_response/latest';
+export { transformRequestToAlertDeletionPreview } from './transform_request/latest';
 
-export { transformAlertDeletionPreviewToResponse as transformAlertDeletionPreviewToResponseV1 } from './transform_alert_deletion_preview_to_response/v1';
+export { transformAlertDeletionPreviewToResponse as transformAlertDeletionPreviewToResponseV1 } from './transform_response/v1';
+export { transformRequestToAlertDeletionPreview as transformRequestToAlertDeletionPreviewV1 } from './transform_request/v1';

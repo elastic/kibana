@@ -7,4 +7,4 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { fetchAlertDeletionPreview } from './fetch_alert_deletion_preview';
+export * from './fetch_alert_deletion_preview';

@@ -20,13 +20,11 @@ interface Props {
 export const useFetchAlertsDeletionSettings = (props: Props) => {
   const { http, enabled, onSuccess } = props;
 
-  const queryFn = () => {
-    return fetchAlertDeletionSettings({ http });
-  };
-
   const { data, isFetching, isError, isLoadingError, isLoading, isInitialLoading } = useQuery({
     queryKey: ['fetchAlertDeletionSettings'],
-    queryFn,
+    queryFn: () => {
+      return fetchAlertDeletionSettings({ http });
+    },
     onSuccess,
     enabled,
     refetchOnWindowFocus: false,

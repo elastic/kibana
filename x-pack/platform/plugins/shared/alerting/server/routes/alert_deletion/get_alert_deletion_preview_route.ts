@@ -10,8 +10,11 @@ import { ILicenseState } from '../../lib';
 import { AlertingRequestHandlerContext, INTERNAL_BASE_ALERTING_API_PATH } from '../../types';
 import { verifyAccessAndContext } from '../lib';
 import { API_PRIVILEGES } from '../../../common';
-import { AlertDeletionPreviewResponseV1, alertDeletionPreviewSchemaV1 } from './shared';
-import { transformAlertDeletionPreviewToResponse } from './transforms';
+import { AlertDeletionPreviewResponseV1, alertDeletionPreviewQuerySchemaV1 } from './shared';
+import {
+  transformAlertDeletionPreviewToResponse,
+  transformRequestToAlertDeletionPreviewV1,
+} from './transforms';
 
 export const getAlertDeletionPreviewRoute = (
   router: IRouter<AlertingRequestHandlerContext>,
@@ -21,7 +24,7 @@ export const getAlertDeletionPreviewRoute = (
     {
       path: `${INTERNAL_BASE_ALERTING_API_PATH}/alert_deletion/preview`,
       validate: {
-        query: alertDeletionPreviewSchemaV1,
+        query: alertDeletionPreviewQuerySchemaV1,
       },
       security: {
         authz: {
@@ -34,17 +37,17 @@ export const getAlertDeletionPreviewRoute = (
     },
     router.handleLegacyErrors(
       verifyAccessAndContext(licenseState, async function (context, req, res) {
-        console.log('********************* running');
         const alertingContext = await context.alerting;
-        console.log(2);
-        const alertDeletionClient = await alertingContext.getAlertDeletionClient();
-        console.log(3);
+        const alertDeletionClient = alertingContext.getAlertDeletionClient();
         const rulesClient = await alertingContext.getRulesClient();
-        console.log(4);
         const spaceId = rulesClient.getSpaceId();
-        console.log({ spaceId });
+        const settings = transformRequestToAlertDeletionPreviewV1(req.query);
 
-        const affectedAlertCount = await alertDeletionClient.previewTask(req.query, spaceId);
+        // TODO: clarify what happens when spaceId is undefined
+        const affectedAlertCount = await alertDeletionClient.previewTask(
+          settings,
+          spaceId || 'default'
+        );
         const response: AlertDeletionPreviewResponseV1 = transformAlertDeletionPreviewToResponse({
           affectedAlertCount,
         });

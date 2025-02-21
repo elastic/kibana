@@ -49,8 +49,8 @@ export const ALERT_DELETION_LAST_RUN = i18n.translate(`${PREFIX}.lastRun`, {
   defaultMessage: `Current settings would delete N alerts in total.`,
 });
 
-export const ALERT_DELETION_AFFECTED_ALERTS = (affectedAlerts: number) =>
+export const ALERT_DELETION_AFFECTED_ALERTS = (affectedAlertsCount: number) =>
   i18n.translate(`${PREFIX}.affectedAlerts`, {
-    defaultMessage: `{affectedAlerts} alerts would be deleted with the current settings.`,
-    values: { affectedAlerts },
+    defaultMessage: `{affectedAlertsCount} alerts would be deleted with the current settings.`,
+    values: { affectedAlertsCount },
   });
