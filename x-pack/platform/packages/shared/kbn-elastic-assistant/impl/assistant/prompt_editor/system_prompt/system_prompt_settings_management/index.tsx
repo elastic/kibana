@@ -59,6 +59,7 @@ const SystemPromptSettingsManagementComponent = ({ connectors, defaultConnector 
     data: conversations,
     isFetched: conversationsLoaded,
     refetch: refetchConversations,
+    setPaginationObserver,
   } = useFetchCurrentUserConversations({
     http,
     isAssistantEnabled,
@@ -241,6 +242,7 @@ const SystemPromptSettingsManagementComponent = ({ connectors, defaultConnector 
           onSystemPromptSelect={onSystemPromptSelect}
           resetSettings={onCancelClick}
           selectedSystemPrompt={selectedSystemPrompt}
+          setPaginationObserver={setPaginationObserver}
           systemPromptSettings={systemPromptSettings}
         />
       </Flyout>

@@ -17,5 +17,6 @@ export interface SystemPromptSettingsProps {
   onSystemPromptSelect: (systemPrompt?: SystemPromptSettings | string) => void;
   resetSettings?: () => void;
   selectedSystemPrompt: SystemPromptSettings | undefined;
+  setPaginationObserver: (ref: HTMLDivElement) => void;
   systemPromptSettings: SystemPromptSettings[];
 }

@@ -26,6 +26,7 @@ export const SystemPromptSettings: React.FC<SystemPromptSettingsProps> = React.m
     resetSettings,
     selectedSystemPrompt,
     systemPromptSettings,
+    setPaginationObserver,
   }) => {
     return (
       <>
@@ -45,6 +46,7 @@ export const SystemPromptSettings: React.FC<SystemPromptSettingsProps> = React.m
           onSystemPromptSelect={onSystemPromptSelect}
           resetSettings={resetSettings}
           selectedSystemPrompt={selectedSystemPrompt}
+          setPaginationObserver={setPaginationObserver}
           systemPromptSettings={systemPromptSettings}
         />
       </>

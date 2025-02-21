@@ -32,6 +32,7 @@ interface Props {
   onSystemPromptSelect: (systemPrompt?: SystemPromptSettings | string) => void;
   resetSettings?: () => void;
   selectedSystemPrompt: SystemPromptSettings | undefined;
+  setPaginationObserver: (ref: HTMLDivElement) => void;
   systemPromptSettings: SystemPromptSettings[];
 }
 
@@ -47,6 +48,7 @@ export const SystemPromptEditorComponent: React.FC<Props> = ({
   onSystemPromptSelect,
   resetSettings,
   selectedSystemPrompt,
+  setPaginationObserver,
   systemPromptSettings,
 }) => {
   const disableFields = useMemo(
@@ -108,6 +110,7 @@ export const SystemPromptEditorComponent: React.FC<Props> = ({
           isDisabled={disableFields}
           onConversationSelectionChange={onConversationSelectionChange}
           selectedConversations={selectedConversations}
+          setPaginationObserver={setPaginationObserver}
         />
       </EuiFormRow>
 

@@ -27,6 +27,7 @@ interface Props {
   refetchPrompts?: (
     options?: RefetchOptions & RefetchQueryFilters<unknown>
   ) => Promise<QueryObserverResult<unknown, unknown>>;
+  setPaginationObserver: (ref: HTMLDivElement) => void;
 }
 
 /**
@@ -42,6 +43,7 @@ export const AssistantSettingsModal: React.FC<Props> = React.memo(
     conversationsLoaded,
     refetchCurrentUserConversations,
     refetchPrompts,
+    setPaginationObserver,
   }) => {
     const { toasts } = useAssistantContext();
 
@@ -80,6 +82,7 @@ export const AssistantSettingsModal: React.FC<Props> = React.memo(
           onSave={handleSave}
           conversations={conversations}
           conversationsLoaded={conversationsLoaded}
+          setPaginationObserver={setPaginationObserver}
         />
       )
     );

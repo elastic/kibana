@@ -56,6 +56,7 @@ interface OwnProps {
   refetchPrompts?: (
     options?: RefetchOptions & RefetchQueryFilters<unknown>
   ) => Promise<QueryObserverResult<unknown, unknown>>;
+  setPaginationObserver: (ref: HTMLDivElement) => void;
 }
 
 type Props = OwnProps;
@@ -85,6 +86,7 @@ export const AssistantHeader: React.FC<Props> = ({
   onConversationCreate,
   isAssistantEnabled,
   refetchPrompts,
+  setPaginationObserver,
 }) => {
   const { euiTheme } = useEuiTheme();
 
@@ -125,6 +127,7 @@ export const AssistantHeader: React.FC<Props> = ({
               conversationsLoaded={conversationsLoaded}
               refetchCurrentUserConversations={refetchCurrentUserConversations}
               refetchPrompts={refetchPrompts}
+              setPaginationObserver={setPaginationObserver}
             />
           </EuiFlexItem>
 

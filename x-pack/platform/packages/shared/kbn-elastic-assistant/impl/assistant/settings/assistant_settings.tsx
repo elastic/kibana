@@ -45,6 +45,7 @@ interface Props {
   onConversationSelected: ({ cId }: { cId: string }) => void;
   conversations: Record<string, Conversation>;
   conversationsLoaded: boolean;
+  setPaginationObserver: (ref: HTMLDivElement) => void;
 }
 
 /**
@@ -52,7 +53,14 @@ interface Props {
  * anonymization, knowledge base, and evaluation via the `isModelEvaluationEnabled` feature flag.
  */
 export const AssistantSettings: React.FC<Props> = React.memo(
-  ({ defaultConnector, onClose, onSave, conversations, conversationsLoaded }) => {
+  ({
+    defaultConnector,
+    onClose,
+    onSave,
+    conversations,
+    conversationsLoaded,
+    setPaginationObserver,
+  }) => {
     const {
       currentAppId,
       http,
@@ -178,6 +186,7 @@ export const AssistantSettings: React.FC<Props> = React.memo(
                     onSystemPromptSelect={onSystemPromptSelect}
                     resetSettings={onCancelSystemPrompt}
                     selectedSystemPrompt={selectedSystemPrompt}
+                    setPaginationObserver={setPaginationObserver}
                     systemPromptSettings={systemPromptSettings}
                   />
                 )}
