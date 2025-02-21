@@ -22,7 +22,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/DefaultSuccessResponse'
+                $ref: './find_packs.schema.yaml#/components/schemas/FindPacksResponse'
     post:
       summary: Create a pack
       description: Create a query pack.

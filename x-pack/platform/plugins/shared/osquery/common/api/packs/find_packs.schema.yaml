@@ -7,6 +7,11 @@ components:
   schemas:
     FindPacksRequestQuery:
       type: object
+      example:
+        page: 1
+        pageSize: 10
+        sort: 'createdAt'
+        sortOrder: 'desc'
       properties:
         page:
           $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/PageOrUndefined'
@@ -16,3 +21,31 @@ components:
           $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/SortOrUndefined'
         sortOrder:
           $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/SortOrderOrUndefined'
+    FindPacksResponse:
+      type: object
+      properties: { }
+      example:
+        page: 1
+        pageSize: 10
+        total: 1
+        data:
+          - type: 'osquery-pack'
+            id: '42ba9c50-0cc5-11ed-aa1d-2b27890bc90d'
+            namespaces:
+              - 'default'
+            attributes:
+              name: 'My Pack'
+              queries:
+                - query: 'select * from uptime;'
+                  interval: '3600'
+                  id: 'uptime'
+                  ecs_mapping:
+                    - host.uptime:
+                        field: 'total_seconds'
+              enabled: true
+              created_at: '2023-10-31T00:00:00Z'
+              updated_at: '2023-10-31T00:00:00Z'
+              created_by: 'elastic'
+              updated_by: 'elastic'
+              description: 'My pack description'
+        policy_ids: []
