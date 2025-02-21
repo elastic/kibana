@@ -10,7 +10,7 @@
 import React, { type FC } from 'react';
 import { TabbedModal, type IModalTabDeclaration } from '@kbn/shared-ux-tabbed-modal';
 
-import { ShareMenuProvider, useShareTabsContext, type IShareContext } from './context';
+import { ShareMenuProvider, useShareContext, type IShareContext } from './context';
 import { linkTab, embedTab, exportTab } from './tabs';
 
 export const ShareMenu: FC<{ shareContext: IShareContext }> = ({ shareContext }) => {
@@ -23,7 +23,7 @@ export const ShareMenu: FC<{ shareContext: IShareContext }> = ({ shareContext })
 
 // this file is intended to replace share_context_menu
 export const ShareMenuTabs = () => {
-  const shareContext = useShareTabsContext();
+  const shareContext = useShareContext();
 
   const { objectTypeMeta, onClose, shareMenuItems, anchorElement } = shareContext;
 

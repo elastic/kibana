@@ -29,34 +29,41 @@ export const ShareMenuProvider = ({
   return <ShareTabsContext.Provider value={shareContext}>{children}</ShareTabsContext.Provider>;
 };
 
-export const useShareTabsContext = <T extends ShareTypes>(
-  shareType?: T,
-  groupId?: T extends 'integration' ? string : never
-) => {
+export const useShareContext = () => {
   const context = useContext(ShareTabsContext);
 
   if (!context) {
     throw new Error(
-      'Failed to call `useShareTabsContext` because the context from ShareMenuProvider is missing. Ensure the component or React root is wrapped with ShareMenuProvider'
+      'Failed to call `useShareContext` because the context from ShareMenuProvider is missing. Ensure the component or React root is wrapped with ShareMenuProvider'
     );
   }
 
+  return context;
+};
+
+export const useShareTabsContext = <
+  T extends Exclude<ShareTypes, 'legacy'>,
+  G extends T extends 'integration' ? string : never
+>(
+  shareType: T,
+  groupId?: G
+) => {
+  const context = useShareContext();
+
   const { shareMenuItems, objectTypeMeta, ...rest } = context;
 
-  let shareTypeImplementations = shareMenuItems;
-
-  if (shareType) {
-    // only integration share types can have multiple implementations
-    shareTypeImplementations = (
-      shareType === 'integration' ? Array.prototype.filter : Array.prototype.find
-    ).call(shareMenuItems, (item) => item.shareType === shareType && item?.groupId === groupId);
-  }
+  // the integration share type can have multiple implementations
+  const shareTypeImplementations: T extends 'integration'
+    ? Array<Extract<ShareConfigs, { shareType: T; groupId?: G }>>
+    : Extract<ShareConfigs, { shareType: T }> = (
+    shareType === 'integration' ? Array.prototype.filter : Array.prototype.find
+  ).call(shareMenuItems, (item) => item.shareType === shareType && item?.groupId === groupId);
 
   return {
     ...rest,
     objectTypeMeta: {
       ...objectTypeMeta,
-      config: shareType ? objectTypeMeta.config[shareType] ?? {} : objectTypeMeta.config,
+      config: objectTypeMeta.config[shareType],
     },
     shareMenuItems: shareTypeImplementations,
   };
