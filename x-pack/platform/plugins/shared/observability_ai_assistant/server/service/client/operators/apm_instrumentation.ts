@@ -18,9 +18,8 @@ import {
   finalize,
 } from 'rxjs';
 import type { StreamingChatResponseEvent } from '../../../../common/conversation_complete';
-import { extractTokenCount } from './extract_token_count';
 
-export function instrumentAndCountTokens<T extends StreamingChatResponseEvent>(
+export function apmInstrumentation<T extends StreamingChatResponseEvent>(
   name: string
 ): OperatorFunction<T, T> {
   return (source$) => {
@@ -35,19 +34,9 @@ export function instrumentAndCountTokens<T extends StreamingChatResponseEvent>(
 
     const shared$ = source$.pipe(shareReplay());
 
-    let tokenCount = {
-      prompt: 0,
-      completion: 0,
-      total: 0,
-    };
-
     return merge(
       shared$,
       shared$.pipe(
-        extractTokenCount(),
-        tap((nextTokenCount) => {
-          tokenCount = nextTokenCount;
-        }),
         last(),
         tap(() => {
           span?.setOutcome('success');
@@ -57,11 +46,6 @@ export function instrumentAndCountTokens<T extends StreamingChatResponseEvent>(
           return throwError(() => error);
         }),
         finalize(() => {
-          span?.addLabels({
-            tokenCountPrompt: tokenCount.prompt,
-            tokenCountCompletion: tokenCount.completion,
-            tokenCountTotal: tokenCount.total,
-          });
           span?.end();
         }),
         ignoreElements()
