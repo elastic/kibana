@@ -5117,11 +5117,11 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-test-helpers-kbn-server@link:src/dev/packages/core-test-helpers-kbn-server":
+"@kbn/core-test-helpers-kbn-server@link:src/core/test-helpers/kbn-server":
   version "0.0.0"
   uid ""
 
-"@kbn/core-test-helpers-model-versions@link:src/dev/packages/core-test-helpers-model-versions":
+"@kbn/core-test-helpers-model-versions@link:src/core/test-helpers/model-versions":
   version "0.0.0"
   uid ""
 
@@ -7665,11 +7665,15 @@
   version "0.0.0"
   uid ""
 
-"@kbn/streams-app-plugin@link:x-pack/solutions/observability/plugins/streams_app":
+"@kbn/streams-app-plugin@link:x-pack/platform/plugins/shared/streams_app":
   version "0.0.0"
   uid ""
 
-"@kbn/streams-plugin@link:x-pack/solutions/observability/plugins/streams":
+"@kbn/streams-app-wrapper-plugin@link:x-pack/solutions/observability/plugins/observability_streams_wrapper":
+  version "0.0.0"
+  uid ""
+
+"@kbn/streams-plugin@link:x-pack/platform/plugins/shared/streams":
   version "0.0.0"
   uid ""
 
@@ -7914,6 +7918,14 @@
   uid ""
 
 "@kbn/unified-search-plugin@link:src/platform/plugins/shared/unified_search":
+  version "0.0.0"
+  uid ""
+
+"@kbn/unified-tabs-examples-plugin@link:examples/unified_tabs_examples":
+  version "0.0.0"
+  uid ""
+
+"@kbn/unified-tabs@link:src/platform/packages/shared/kbn-unified-tabs":
   version "0.0.0"
   uid ""
 
@@ -8911,10 +8923,10 @@
   resolved "https://registry.yarnpkg.com/@open-draft/until/-/until-2.1.0.tgz#0acf32f470af2ceaf47f095cdecd40d68666efda"
   integrity sha512-U69T3ItWHvLwGg5eJ0n3I62nWuE6ilHlmz7zM0npLBRvPRd7e6NYmg54vvRtP5mZG7kZqZCFVdsTWo7BPtBujg==
 
-"@openfeature/core@^1.7.0":
-  version "1.7.1"
-  resolved "https://registry.yarnpkg.com/@openfeature/core/-/core-1.7.1.tgz#d81aecce13184fdbd1e59ac76d857b0eed97a50d"
-  integrity sha512-6w3MvNp8aR3BZRxafKunS76I2FGzDL/ehmbzgRTjh2ohWGnfIgOV2IpG1UFMpPRu1qw0KazwvqXowqec5DKSeQ==
+"@openfeature/core@^1.7.1":
+  version "1.7.2"
+  resolved "https://registry.yarnpkg.com/@openfeature/core/-/core-1.7.2.tgz#b2663f7beb93310dfeef003509cb140e33790fb7"
+  integrity sha512-pbpREdO/8D6ocFYWIzAJ24iJ1td04Anl+TehUzx9r1xR8vKJab+O4TlC/XP7s9JuD5hRPBfmo5gDha/KWVSG4A==
 
 "@openfeature/launchdarkly-client-provider@^0.3.1":
   version "0.3.1"
@@ -13322,10 +13334,10 @@
     use-isomorphic-layout-effect "^1.1.2"
     use-sync-external-store "^1.0.0"
 
-"@xstate5/react@npm:@xstate/react@^4.1.2":
-  version "4.1.2"
-  resolved "https://registry.yarnpkg.com/@xstate/react/-/react-4.1.2.tgz#4bfcdf2d9e9ef1eaea7388d1896649345e6679cd"
-  integrity sha512-orAidFrKCrU0ZwN5l/ABPlBfW2ziRDT2RrYoktRlZ0WRoLvA2E/uAC1JpZt43mCLtc8jrdwYCgJiqx1V8NvGTw==
+"@xstate5/react@npm:@xstate/react@^5.0.2":
+  version "5.0.2"
+  resolved "https://registry.yarnpkg.com/@xstate/react/-/react-5.0.2.tgz#92185d20efedac97350c996cda29749c2e3fdbf1"
+  integrity sha512-x5GOrE0ZYjU2ba986u0CCp7SaPwzElSn1SW0mZ9MuBgsZ+BW7vTLVOvGmURynwojdso8d6nVbK3c2+MRVqGVgA==
   dependencies:
     use-isomorphic-layout-effect "^1.1.2"
     use-sync-external-store "^1.2.0"
@@ -34066,15 +34078,15 @@ xpath@^0.0.33:
   resolved "https://registry.yarnpkg.com/xpath/-/xpath-0.0.33.tgz#5136b6094227c5df92002e7c3a13516a5074eb07"
   integrity sha512-NNXnzrkDrAzalLhIUc01jO2mOzXGXh1JwPgkihcLLzw98c0WgYDmmjSh1Kl3wzaxSVWMuA+fe0WTWOBDWCBmNA==
 
-"xstate5@npm:xstate@^5.18.1", xstate@^5.18.1:
-  version "5.18.1"
-  resolved "https://registry.yarnpkg.com/xstate/-/xstate-5.18.1.tgz#c4d43ceaba6e6c31705d36bd96e285de4be4f7f4"
-  integrity sha512-m02IqcCQbaE/kBQLunwub/5i8epvkD2mFutnL17Oeg1eXTShe1sRF4D5mhv1dlaFO4vbW5gRGRhraeAD5c938g==
+"xstate5@npm:xstate@^5.19.2", xstate@^5.19.2:
+  version "5.19.2"
+  resolved "https://registry.yarnpkg.com/xstate/-/xstate-5.19.2.tgz#db3f1ee614bbb6a49ad3f0c96ddbf98562d456ba"
+  integrity sha512-B8fL2aP0ogn5aviAXFzI5oZseAMqN00fg/TeDa3ZtatyDcViYLIfuQl4y8qmHCiKZgGEzmnTyNtNQL9oeJE2gw==
 
-xstate@^4.38.2:
-  version "4.38.2"
-  resolved "https://registry.yarnpkg.com/xstate/-/xstate-4.38.2.tgz#1b74544fc9c8c6c713ba77f81c6017e65aa89804"
-  integrity sha512-Fba/DwEPDLneHT3tbJ9F3zafbQXszOlyCJyQqqdzmtlY/cwE2th462KK48yaANf98jHlP6lJvxfNtN0LFKXPQg==
+xstate@^4.38.3:
+  version "4.38.3"
+  resolved "https://registry.yarnpkg.com/xstate/-/xstate-4.38.3.tgz#4e15e7ad3aa0ca1eea2010548a5379966d8f1075"
+  integrity sha512-SH7nAaaPQx57dx6qvfcIgqKRXIh4L0A1iYEqim4s1u7c9VoCgzZc+63FY90AKU4ZzOC2cfJzTnpO4zK7fCUzzw==
 
 "xtend@>=4.0.0 <4.1.0-0", xtend@^4.0.0, xtend@^4.0.1, xtend@^4.0.2, xtend@~4.0.1:
   version "4.0.2"
