@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef } from 'react';
 
 import { useActions, useValues } from 'kea';
 
@@ -65,6 +65,16 @@ export const SearchIndexPipelines: React.FC = () => {
   const { makeRequest: revertPipeline } = useActions(RevertConnectorPipelineApilogic);
   const apiIndex = isApiIndex(index);
   const extractionDisabled = getContentExtractionDisabled(index);
+  const buttonRef = useRef<HTMLButtonElement | null>(null);
+
+  const onCloseHandler = () => {
+    closeDeleteModal();
+    setTimeout(() => {
+      if (buttonRef.current) {
+        buttonRef.current.focus();
+      }
+    }, 300);
+  };
 
   useEffect(() => {
     if (index) {
@@ -193,7 +203,7 @@ export const SearchIndexPipelines: React.FC = () => {
                     </EuiBadge>
                   </EuiFlexItem>
                   <EuiFlexItem grow={false}>
-                    <ManageCustomPipelineActions />
+                    <ManageCustomPipelineActions buttonRef={buttonRef}/>
                   </EuiFlexItem>
                 </EuiFlexGroup>
               ) : (
@@ -279,7 +289,7 @@ export const SearchIndexPipelines: React.FC = () => {
             }
           )}
           isLoading={revertStatus === Status.LOADING}
-          onCancel={closeDeleteModal}
+          onCancel={onCloseHandler}
           onConfirm={() => revertPipeline({ indexName })}
           cancelButtonText={CANCEL_BUTTON_LABEL}
           confirmButtonText={i18n.translate(
