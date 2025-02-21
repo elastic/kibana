@@ -15,11 +15,12 @@ import {
 } from '@kbn/discover-utils';
 import { DocumentProfileProvider, DocumentType } from '../../../../profiles';
 import { ProfileProviderServices } from '../../../profile_provider_services';
-import { getDocViewer } from '../../traces_data_source_profile/accessors/get_doc_viewer';
+import { getDocViewer } from './accessors';
 
 export const createObservabilityTracesSpanDocumentProfileProvider = (
   services: ProfileProviderServices
 ): DocumentProfileProvider => ({
+  isExperimental: true,
   profileId: 'obs-traces-span-document-profile',
   profile: {
     getDocViewer,
