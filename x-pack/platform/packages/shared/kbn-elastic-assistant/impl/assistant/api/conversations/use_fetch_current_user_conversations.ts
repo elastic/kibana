@@ -7,6 +7,7 @@
 
 import { HttpSetup } from '@kbn/core/public';
 import {
+  InfiniteData,
   QueryObserverResult,
   RefetchOptions,
   RefetchQueryFilters,
@@ -16,7 +17,6 @@ import {
   API_VERSIONS,
   ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL_FIND,
 } from '@kbn/elastic-assistant-common';
-import { InfiniteData } from '@tanstack/query-core/src/types';
 import { useCallback, useEffect, useRef } from 'react';
 import { Conversation } from '../../../assistant_context/types';
 

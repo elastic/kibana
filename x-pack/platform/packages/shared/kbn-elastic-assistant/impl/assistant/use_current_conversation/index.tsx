@@ -6,9 +6,13 @@
  */
 
 import { Dispatch, SetStateAction, useCallback, useEffect, useMemo, useState } from 'react';
-import { QueryObserverResult, RefetchOptions, RefetchQueryFilters } from '@tanstack/react-query';
+import {
+  InfiniteData,
+  QueryObserverResult,
+  RefetchOptions,
+  RefetchQueryFilters,
+} from '@tanstack/react-query';
 import { ApiConfig, PromptResponse } from '@kbn/elastic-assistant-common';
-import { InfiniteData } from '@tanstack/query-core/src/types';
 import { LastConversation } from '../../assistant_context';
 import { FetchConversationsResponse } from '../api';
 import { AIConnector } from '../../connectorland/connector_selector';

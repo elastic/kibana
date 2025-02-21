@@ -14,8 +14,7 @@ import {
 } from '@kbn/elastic-assistant-common';
 import { HttpSetup } from '@kbn/core-http-browser';
 import { PerformPromptsBulkActionRequestBody as PromptsPerformBulkActionRequestBody } from '@kbn/elastic-assistant-common/impl/schemas/prompts/bulk_crud_prompts_route.gen';
-import { QueryObserverResult } from '@tanstack/react-query';
-import { InfiniteData } from '@tanstack/query-core/src/types';
+import { InfiniteData, QueryObserverResult } from '@tanstack/react-query';
 import { AIConnector } from '../../../connectorland/connector_selector';
 import { getConversationApiConfig } from '../../use_conversation/helpers';
 import {
