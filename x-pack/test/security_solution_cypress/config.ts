@@ -46,8 +46,8 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         '--xpack.ruleRegistry.unsafe.legacyMultiTenancy.enabled=true',
         `--xpack.securitySolution.enableExperimental=${JSON.stringify([
           'alertSuppressionForSequenceEqlRuleEnabled',
-          'assetInventoryUXEnabled',
         ])}`,
+        '--uiSettings.overrides.securitySolution:enableAssetInventory=true',
         // mock cloud to enable the guided onboarding tour in e2e tests
         '--xpack.cloud.id=test',
         `--home.disableWelcomeScreen=true`,
