@@ -102,6 +102,7 @@ export class RuleMigrationsTaskClient {
     const stats = { completed: 0, failed: 0 };
     const telemetryClient = new SiemMigrationTelemetryClient(
       this.dependencies.telemetry,
+      this.logger,
       migrationId,
       model.model
     );
