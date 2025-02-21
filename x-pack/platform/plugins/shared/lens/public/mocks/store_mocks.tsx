@@ -19,21 +19,15 @@ import { mockVisualizationMap } from './visualization_mock';
 import { mockDatasourceMap } from './datasource_mock';
 import { makeDefaultServices } from './services_mock';
 
-export const mockStoreDeps = (
-  {
-    lensServices = makeDefaultServices(),
-    datasourceMap = mockDatasourceMap(),
-    visualizationMap = mockVisualizationMap(),
-  }: {
-    lensServices?: LensAppServices;
-    datasourceMap?: DatasourceMap;
-    visualizationMap?: VisualizationMap;
-  } = {
-    lensServices: makeDefaultServices(),
-    datasourceMap: mockDatasourceMap(),
-    visualizationMap: mockVisualizationMap(),
-  }
-) => ({
+export const mockStoreDeps = ({
+  lensServices = makeDefaultServices(),
+  datasourceMap = mockDatasourceMap(),
+  visualizationMap = mockVisualizationMap(),
+}: {
+  lensServices?: LensAppServices;
+  datasourceMap?: DatasourceMap;
+  visualizationMap?: VisualizationMap;
+} = {}) => ({
   datasourceMap,
   visualizationMap,
   lensServices,
@@ -102,12 +96,10 @@ export const renderWithReduxStore = (
 
 export function makeLensStore({
   preloadedState,
-  dispatch,
   storeDeps = mockStoreDeps(),
 }: {
   storeDeps?: LensStoreDeps;
   preloadedState?: Partial<LensAppState>;
-  dispatch?: jest.Mock;
 }) {
   const data = storeDeps.lensServices.data;
   const store = makeConfigureStore(storeDeps, {
@@ -120,8 +112,7 @@ export function makeLensStore({
     },
   } as unknown as PreloadedState<LensState>);
 
-  const origDispatch = store.dispatch;
-  store.dispatch = jest.fn(dispatch || origDispatch);
+  store.dispatch = jest.spyOn(store, 'dispatch') as jest.Mock;
   return { store, deps: storeDeps };
 }
 
@@ -131,21 +122,7 @@ export interface MountStoreProps {
   dispatch?: jest.Mock;
 }
 
-export const mountWithProvider = async (
-  component: React.ReactElement,
-  store?: MountStoreProps,
-  options?: {
-    wrappingComponent?: React.FC<PropsWithChildren<{}>>;
-    wrappingComponentProps?: Record<string, unknown>;
-    attachTo?: HTMLElement;
-  }
-) => {
-  const { mountArgs, lensStore, deps } = getMountWithProviderParams(component, store, options);
-  const instance = mountWithProviders(mountArgs.component, mountArgs.options);
-  return { instance, lensStore, deps };
-};
-
-const getMountWithProviderParams = (
+export const mountWithReduxStore = async (
   component: React.ReactElement,
   store?: MountStoreProps,
   options?: {
@@ -159,31 +136,19 @@ const getMountWithProviderParams = (
   let wrappingComponent: React.FC<PropsWithChildren<{}>> = ({ children }) => (
     <Provider store={lensStore}>{children}</Provider>
   );
-
-  let restOptions: {
-    attachTo?: HTMLElement | undefined;
-  } = {};
-  if (options) {
-    const { wrappingComponent: _wrappingComponent, wrappingComponentProps, ...rest } = options;
-    restOptions = rest;
-
-    if (_wrappingComponent) {
-      wrappingComponent = ({ children }) => {
-        return _wrappingComponent({
-          ...wrappingComponentProps,
-          children: <Provider store={lensStore}>{children}</Provider>,
-        });
-      };
-    }
+ if (options?.wrappingComponent) {
+    wrappingComponent = ({ children }) => {
+      return options?.wrappingComponent?.({
+        ...options?.wrappingComponentProps,
+        children: wrappingComponent({ children }),
+      });
+    };
   }
 
-  const mountArgs = {
-    component,
-    options: {
+  const instance = mountWithProviders(component, {
+      ...options,
       wrappingComponent,
-      ...restOptions,
-    } as unknown as ReactWrapper,
-  };
+    } as unknown as ReactWrapper);
 
-  return { mountArgs, lensStore, deps };
+  return { instance, lensStore, deps };
 };
