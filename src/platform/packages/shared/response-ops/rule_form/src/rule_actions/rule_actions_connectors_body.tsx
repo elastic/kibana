@@ -126,7 +126,13 @@ export const RuleActionsConnectorsBody = ({
   const availableConnectors = useMemo(() => {
     return connectors.filter(({ actionTypeId }) => {
       const actionType = connectorTypes.find(({ id }) => id === actionTypeId);
-      const actionTypeModel = actionTypeRegistry.get(actionTypeId);
+      let actionTypeModel;
+      try {
+        actionTypeModel = actionTypeRegistry.get(actionTypeId);
+        if (!actionTypeModel) return false;
+      } catch (e) {
+        return false;
+      }
 
       if (!actionType) {
         return false;
@@ -343,7 +349,13 @@ export const RuleActionsConnectorsBody = ({
       <EuiFlexGroup direction="column">
         {filteredConnectors.map((connector) => {
           const { id, actionTypeId, name } = connector;
-          const actionTypeModel = actionTypeRegistry.get(actionTypeId);
+          let actionTypeModel;
+          try {
+            actionTypeModel = actionTypeRegistry.get(actionTypeId);
+            if (!actionTypeModel) return null;
+          } catch (e) {
+            return null;
+          }
           const actionType = connectorTypes.find((item) => item.id === actionTypeId);
 
           if (!actionType) {
