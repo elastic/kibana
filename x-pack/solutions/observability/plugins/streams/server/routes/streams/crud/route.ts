@@ -164,6 +164,13 @@ export const editStreamRoute = createServerRoute({
       throw badRequest('Cannot create wired stream due to unsupported root stream');
     }
 
+    if (
+      isGroupStreamDefinition({ ...params.body.stream, name: params.path.name }) &&
+      params.path.name.startsWith('logs.')
+    ) {
+      throw badRequest('A group stream name can not start with [logs.]');
+    }
+
     const body = isGroupStreamDefinitionBase(params.body.stream)
       ? {
           ...params.body,
