@@ -16,9 +16,16 @@
 
 import { z } from '@kbn/zod';
 
-import { FindPacksRequestQuery, FindPacksResponse, FindPackResponse } from './find_packs.gen';
+import {
+  PageOrUndefined,
+  PageSizeOrUndefined,
+  SortOrUndefined,
+  SortOrderOrUndefined,
+  PackId,
+  DefaultSuccessResponse,
+} from '../model/schema/common_attributes.gen';
+import { FindPacksResponse, FindPackResponse } from './find_packs.gen';
 import { CreatePacksRequestBody, CreatePacksResponse } from './create_pack.gen';
-import { PackId, DefaultSuccessResponse } from '../model/schema/common_attributes.gen';
 import { UpdatePacksRequestBody, UpdatePacksResponse } from './update_packs.gen';
 
 export type OsqueryCreatePacksRequestBody = z.infer<typeof OsqueryCreatePacksRequestBody>;
@@ -38,7 +45,10 @@ export type OsqueryDeletePacksResponse = z.infer<typeof OsqueryDeletePacksRespon
 export const OsqueryDeletePacksResponse = DefaultSuccessResponse;
 export type OsqueryFindPacksRequestQuery = z.infer<typeof OsqueryFindPacksRequestQuery>;
 export const OsqueryFindPacksRequestQuery = z.object({
-  query: FindPacksRequestQuery,
+  page: PageOrUndefined.optional(),
+  pageSize: PageSizeOrUndefined.optional(),
+  sort: SortOrUndefined.optional(),
+  sortOrder: SortOrderOrUndefined.optional(),
 });
 export type OsqueryFindPacksRequestQueryInput = z.input<typeof OsqueryFindPacksRequestQuery>;
 

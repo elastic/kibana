@@ -17,12 +17,15 @@
 import { z } from '@kbn/zod';
 
 import {
-  FindSavedQueryRequestQuery,
-  FindSavedQueryResponse,
-  FindSavedQueryDetailResponse,
-} from './find_saved_query.gen';
+  PageOrUndefined,
+  PageSizeOrUndefined,
+  SortOrUndefined,
+  SortOrderOrUndefined,
+  SavedQueryId,
+  DefaultSuccessResponse,
+} from '../model/schema/common_attributes.gen';
+import { FindSavedQueryResponse, FindSavedQueryDetailResponse } from './find_saved_query.gen';
 import { CreateSavedQueryRequestBody, CreateSavedQueryResponse } from './create_saved_query.gen';
-import { SavedQueryId, DefaultSuccessResponse } from '../model/schema/common_attributes.gen';
 import { UpdateSavedQueryRequestBody, UpdateSavedQueryResponse } from './update_saved_query.gen';
 
 export type OsqueryCreateSavedQueryRequestBody = z.infer<typeof OsqueryCreateSavedQueryRequestBody>;
@@ -50,7 +53,10 @@ export type OsqueryFindSavedQueriesRequestQuery = z.infer<
   typeof OsqueryFindSavedQueriesRequestQuery
 >;
 export const OsqueryFindSavedQueriesRequestQuery = z.object({
-  query: FindSavedQueryRequestQuery,
+  page: PageOrUndefined.optional(),
+  pageSize: PageSizeOrUndefined.optional(),
+  sort: SortOrUndefined.optional(),
+  sortOrder: SortOrderOrUndefined.optional(),
 });
 export type OsqueryFindSavedQueriesRequestQueryInput = z.input<
   typeof OsqueryFindSavedQueriesRequestQuery

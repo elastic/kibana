@@ -59,7 +59,7 @@ export type VersionOrUndefined = z.infer<typeof VersionOrUndefined>;
 export const VersionOrUndefined = Version.nullable();
 
 /**
- *  An interval, in seconds, on which to run the query.
+ * An interval, in seconds, on which to run the query.
  */
 export type Interval = z.infer<typeof Interval>;
 export const Interval = z.string();

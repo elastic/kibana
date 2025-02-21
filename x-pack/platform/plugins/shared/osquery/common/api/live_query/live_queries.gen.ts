@@ -17,15 +17,15 @@
 import { z } from '@kbn/zod';
 
 import {
-  FindLiveQueryRequestQuery,
-  FindLiveQueryResponse,
-  FindLiveQueryDetailsResponse,
-} from './find_live_query.gen';
+  KueryOrUndefined,
+  PageOrUndefined,
+  PageSizeOrUndefined,
+  SortOrUndefined,
+  SortOrderOrUndefined,
+} from '../model/schema/common_attributes.gen';
+import { FindLiveQueryResponse, FindLiveQueryDetailsResponse } from './find_live_query.gen';
 import { CreateLiveQueryRequestBody, CreateLiveQueryResponse } from './create_live_query.gen';
-import {
-  GetLiveQueryResultsRequestQuery,
-  GetLiveQueryResultsResponse,
-} from './get_live_query_results.gen';
+import { GetLiveQueryResultsResponse } from './get_live_query_results.gen';
 
 export type OsqueryCreateLiveQueryRequestBody = z.infer<typeof OsqueryCreateLiveQueryRequestBody>;
 export const OsqueryCreateLiveQueryRequestBody = CreateLiveQueryRequestBody;
@@ -37,7 +37,11 @@ export type OsqueryCreateLiveQueryResponse = z.infer<typeof OsqueryCreateLiveQue
 export const OsqueryCreateLiveQueryResponse = CreateLiveQueryResponse;
 export type OsqueryFindLiveQueriesRequestQuery = z.infer<typeof OsqueryFindLiveQueriesRequestQuery>;
 export const OsqueryFindLiveQueriesRequestQuery = z.object({
-  query: FindLiveQueryRequestQuery,
+  kuery: KueryOrUndefined.optional(),
+  page: PageOrUndefined.optional(),
+  pageSize: PageSizeOrUndefined.optional(),
+  sort: SortOrUndefined.optional(),
+  sortOrder: SortOrderOrUndefined.optional(),
 });
 export type OsqueryFindLiveQueriesRequestQueryInput = z.input<
   typeof OsqueryFindLiveQueriesRequestQuery
@@ -45,15 +49,6 @@ export type OsqueryFindLiveQueriesRequestQueryInput = z.input<
 
 export type OsqueryFindLiveQueriesResponse = z.infer<typeof OsqueryFindLiveQueriesResponse>;
 export const OsqueryFindLiveQueriesResponse = FindLiveQueryResponse;
-export type OsqueryGetLiveQueryDetailsRequestQuery = z.infer<
-  typeof OsqueryGetLiveQueryDetailsRequestQuery
->;
-export const OsqueryGetLiveQueryDetailsRequestQuery = z.object({
-  query: z.object({}),
-});
-export type OsqueryGetLiveQueryDetailsRequestQueryInput = z.input<
-  typeof OsqueryGetLiveQueryDetailsRequestQuery
->;
 
 export type OsqueryGetLiveQueryDetailsRequestParams = z.infer<
   typeof OsqueryGetLiveQueryDetailsRequestParams
@@ -71,7 +66,11 @@ export type OsqueryGetLiveQueryResultsRequestQuery = z.infer<
   typeof OsqueryGetLiveQueryResultsRequestQuery
 >;
 export const OsqueryGetLiveQueryResultsRequestQuery = z.object({
-  query: GetLiveQueryResultsRequestQuery,
+  kuery: KueryOrUndefined.optional(),
+  page: PageOrUndefined.optional(),
+  pageSize: PageSizeOrUndefined.optional(),
+  sort: SortOrUndefined.optional(),
+  sortOrder: SortOrderOrUndefined.optional(),
 });
 export type OsqueryGetLiveQueryResultsRequestQueryInput = z.input<
   typeof OsqueryGetLiveQueryResultsRequestQuery

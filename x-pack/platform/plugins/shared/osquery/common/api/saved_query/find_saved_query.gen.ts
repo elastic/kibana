@@ -16,21 +16,6 @@
 
 import { z } from '@kbn/zod';
 
-import {
-  PageOrUndefined,
-  PageSizeOrUndefined,
-  SortOrUndefined,
-  SortOrderOrUndefined,
-} from '../model/schema/common_attributes.gen';
-
-export type FindSavedQueryRequestQuery = z.infer<typeof FindSavedQueryRequestQuery>;
-export const FindSavedQueryRequestQuery = z.object({
-  page: PageOrUndefined.optional(),
-  pageSize: PageSizeOrUndefined.optional(),
-  sort: SortOrUndefined.optional(),
-  sortOrder: SortOrderOrUndefined.optional(),
-});
-
 export type FindSavedQueryResponse = z.infer<typeof FindSavedQueryResponse>;
 export const FindSavedQueryResponse = z.object({});
 

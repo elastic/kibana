@@ -11,11 +11,31 @@ paths:
       x-codegen-enabled: true
       x-labels: [serverless, ess]
       parameters:
-        - name: query
+        - name: kuery
           in: query
-          required: true
+          required: false
           schema:
-            $ref: './find_live_query.schema.yaml#/components/schemas/FindLiveQueryRequestQuery'
+            $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/KueryOrUndefined'
+        - name: page
+          in: query
+          required: false
+          schema:
+            $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/PageOrUndefined'
+        - name: pageSize
+          in: query
+          required: false
+          schema:
+            $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/PageSizeOrUndefined'
+        - name: sort
+          in: query
+          required: false
+          schema:
+            $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/SortOrUndefined'
+        - name: sortOrder
+          in: query
+          required: false
+          schema:
+            $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/SortOrderOrUndefined'
       responses:
         '200':
           description: OK
@@ -59,13 +79,6 @@ paths:
             description: 'The ID of the live query result you want to retrieve.'
             type: string
             example: '3c42c847-eb30-4452-80e0-728584042334'
-        - name: query
-          in: query
-          schema:
-            description: 'Additional query parameters.'
-            type: object
-            example: { }
-            additionalProperties: true
       responses:
         '200':
           description: OK
@@ -96,11 +109,31 @@ paths:
             example: '609c4c66-ba3d-43fa-afdd-53e244577aa0'
             description: 'The ID of the query action that generated the live query results.'
             type: string
-        - name: query
+        - name: kuery
           in: query
-          required: true
+          required: false
           schema:
-            $ref: './get_live_query_results.schema.yaml#/components/schemas/GetLiveQueryResultsRequestQuery'
+            $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/KueryOrUndefined'
+        - name: page
+          in: query
+          required: false
+          schema:
+            $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/PageOrUndefined'
+        - name: pageSize
+          in: query
+          required: false
+          schema:
+            $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/PageSizeOrUndefined'
+        - name: sort
+          in: query
+          required: false
+          schema:
+            $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/SortOrUndefined'
+        - name: sortOrder
+          in: query
+          required: false
+          schema:
+            $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/SortOrderOrUndefined'
       responses:
         '200':
           description: OK

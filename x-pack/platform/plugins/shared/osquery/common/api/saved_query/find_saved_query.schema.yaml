@@ -5,23 +5,6 @@ info:
 paths: { }
 components:
   schemas:
-    FindSavedQueryRequestQuery:
-      type: object
-      example:
-        page: 1
-        pageSize: 10
-        sort: 'createdAt'
-        sortOrder: 'desc'
-      properties:
-        page:
-          $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/PageOrUndefined'
-        pageSize:
-          $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/PageSizeOrUndefined'
-        sort:
-          $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/SortOrUndefined'
-        sortOrder:
-          $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/SortOrderOrUndefined'
-
     FindSavedQueryResponse:
         type: object
         properties: { }

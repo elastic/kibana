@@ -11,11 +11,26 @@ paths:
       x-codegen-enabled: true
       x-labels: [serverless, ess]
       parameters:
-        - name: query
+        - name: page
           in: query
-          required: true
+          required: false
           schema:
-            $ref: './find_saved_query.schema.yaml#/components/schemas/FindSavedQueryRequestQuery'
+            $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/PageOrUndefined'
+        - name: pageSize
+          in: query
+          required: false
+          schema:
+            $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/PageSizeOrUndefined'
+        - name: sort
+          in: query
+          required: false
+          schema:
+            $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/SortOrUndefined'
+        - name: sortOrder
+          in: query
+          required: false
+          schema:
+            $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/SortOrderOrUndefined'
       responses:
         '200':
           description: OK

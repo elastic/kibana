@@ -7,10 +7,12 @@ components:
   schemas:
     QueryId:
       description: 'The ID of the query.'
+      example: '3c42c847-eb30-4452-80e0-728584042334'
       type: string
 
     PackDescription:
       description: 'The pack description.'
+      example: 'Pack description'
       type: string
 
     PackDescriptionOrUndefined:
@@ -20,6 +22,7 @@ components:
 
     Platform:
       description: 'Restricts the query to a specified platform. The default is all platforms. To specify multiple platforms, use commas. For example, linux,darwin.'
+      example: 'linux,darwin'
       type: string
 
     PlatformOrUndefined:
@@ -29,6 +32,7 @@ components:
 
     Query:
       description: 'The SQL query you want to run.'
+      example: 'select * from uptime;'
       type: string
 
     QueryOrUndefined:
@@ -37,6 +41,7 @@ components:
 
     Version:
       description: 'Uses the Osquery versions greater than or equal to the specified version string.'
+      example: '1.0.0'
       type: string
 
     VersionOrUndefined:
@@ -44,7 +49,8 @@ components:
       nullable: true
 
     Interval:
-      description: ' An interval, in seconds, on which to run the query.'
+      description: 'An interval, in seconds, on which to run the query.'
+      example: '60'
       type: string
 
     IntervalOrUndefined:
@@ -53,6 +59,7 @@ components:
 
     Snapshot:
       description: 'Indicates whether the query is a snapshot.'
+      example: true
       type: boolean
 
     SnapshotOrUndefined:
@@ -61,6 +68,7 @@ components:
 
     Removed:
       description: 'Indicates whether the query is removed.'
+      example: false
       type: boolean
 
     RemovedOrUndefined:
@@ -82,6 +90,7 @@ components:
 
     SavedQueryDescription:
       description: 'The saved query description.'
+      example: 'Saved query description'
       type: string
 
     SavedQueryDescriptionOrUndefined:
@@ -100,6 +109,7 @@ components:
 
     Enabled:
       description: 'Enables the pack.'
+      example: true
       type: boolean
 
     EnabledOrUndefined:
@@ -108,6 +118,9 @@ components:
 
     PolicyIds:
       description: 'A list of agents policy IDs.'
+      example:
+        - "policyId1"
+        - "policyId2"
       type: array
       items:
         type: string
@@ -121,9 +134,11 @@ components:
       properties:
         field:
           description: 'The ECS field to map to.'
+          example: 'host.uptime'
           type: string
         value:
           description: 'The value to map to the ECS field.'
+          example: 'total_seconds'
           oneOf:
             - type: string
             - type: array
@@ -132,6 +147,9 @@ components:
 
     ECSMapping:
       description: 'Map osquery results columns or static values to Elastic Common Schema (ECS) fields'
+      example:
+        host.uptime:
+          field: 'total_seconds'
       type: object
       additionalProperties:
         $ref: '#/components/schemas/ECSMappingItem'
@@ -202,34 +220,41 @@ components:
 
     KueryOrUndefined:
       description: 'The kuery to filter the results by.'
+      example: 'agent.id: 16d7caf5-efd2-4212-9b62-73dafc91fa13'
       type: string
       nullable: true
 
     PageOrUndefined:
       description: 'The page number to return. The default is 1.'
+      example: 1
       type: integer
       nullable: true
 
     PageSizeOrUndefined:
       description: 'The number of results to return per page. The default is 20.'
+      example: 20
       type: integer
       nullable: true
 
     SortOrUndefined:
       description: 'The field that is used to sort the results. Options include createdAt or updatedAt. The default is createdAt.'
+      example: 'createdAt'
       type: string
       nullable: true
 
     SortOrderOrUndefined:
       description: 'Specified the sort order. Options include desc or asc. The default is desc.'
+      example: 'desc'
       oneOf:
         - type: string
           nullable: true
         - enum: [ asc, desc ]
 
     Shards:
-      type: object
       description: 'An object with shard configuration for policies included in the pack. For each policy, set the shard configuration to a percentage (1–100) of target hosts.'
+      example:
+        policy_id: 50
+      type: object
       additionalProperties:
         type: number
 
