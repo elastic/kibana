@@ -53,7 +53,8 @@
     "@kbn/share-plugin",
     "@kbn/analytics",
     "@kbn/response-ops-rule-form",
-    "@kbn/charts-plugin"
+    "@kbn/charts-plugin",
+    "@kbn/fields-metadata-plugin"
   ],
   "exclude": ["target/**/*"]
 }
