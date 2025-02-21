@@ -14,8 +14,7 @@ import type { FtrProviderContext } from '../../ftr_provider_context';
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
 
-  // Failing: See https://github.com/elastic/kibana/issues/208138
-  describe.skip('search', () => {
+  describe('search', () => {
     describe('ES|QL', () => {
       it(`should return getColumns response in expected shape`, async () => {
         const resp = await supertest
@@ -37,6 +36,7 @@ export default function ({ getService }: FtrProviderContext) {
               type: 'geo_point',
             },
           ],
+          is_partial: false,
           values: [],
         });
       });
@@ -77,6 +77,7 @@ export default function ({ getService }: FtrProviderContext) {
               type: 'date',
             },
           ],
+          is_partial: false,
           values: [['POINT (-120.9871642 38.68407028)', '2015-09-20T00:00:00.000Z']],
         });
       });
