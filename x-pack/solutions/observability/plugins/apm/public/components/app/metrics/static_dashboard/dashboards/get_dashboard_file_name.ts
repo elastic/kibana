@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import type { ElasticAgentName, OpenTelemetryAgentName } from '@kbn/elastic-agent-utils';
-import { ELASTIC_AGENT_NAMES } from '@kbn/elastic-agent-utils';
-import { OPEN_TELEMETRY_BASE_AGENT_NAMES } from '@kbn/elastic-agent-utils/src/agent_names';
+import {
+  isElasticAgentName,
+  isOpenTelemetryAgentName,
+} from '@kbn/elastic-agent-utils/src/agent_guards';
 
 interface DashboardFileNamePartsProps {
   agentName?: string;
@@ -23,29 +24,19 @@ export interface DashboardFileParts extends SdkNameAndLanguage {
   dataFormat: 'otel_native' | 'classic_apm';
 }
 
-const ElasticAgentNamesSet = new Set(ELASTIC_AGENT_NAMES);
-const OpenTelemetryBaseSet = new Set(OPEN_TELEMETRY_BASE_AGENT_NAMES);
-
-const isElasticAgent = (agentName: string): agentName is ElasticAgentName => {
-  return ElasticAgentNamesSet.has(agentName as ElasticAgentName) === true;
-};
-
-const isOpenTelemetry = (agentNameBase: string): agentNameBase is OpenTelemetryAgentName => {
-  return OpenTelemetryBaseSet.has(agentNameBase as OpenTelemetryAgentName) === true;
-};
-
-// We use the language name in the file name so we want to have a valid filename and to lowercase it
+// We use the language name in the filename so we want to have a valid filename
+// Example swift/iOS -> swift_ios : lowercased and '/' is replaces by '_'
 const standardizeLanguageName = (languageName?: string) =>
   languageName ? languageName.toLowerCase().replace('/', '_') : undefined;
 
 const getSdkNameAndLanguage = (agentName: string): SdkNameAndLanguage => {
   const LANGUAGE_INDEX = 1;
-  if (isElasticAgent(agentName)) {
+  if (isElasticAgentName(agentName)) {
     return { sdkName: 'apm', language: standardizeLanguageName(agentName) };
   }
   const agentNameParts = agentName.split('/');
 
-  if (isOpenTelemetry(agentNameParts[0].toLocaleLowerCase() as OpenTelemetryAgentName)) {
+  if (isOpenTelemetryAgentName(agentName)) {
     if (agentNameParts[agentNameParts.length - 1] === 'elastic') {
       return { sdkName: 'edot', language: standardizeLanguageName(agentNameParts[LANGUAGE_INDEX]) };
     }
