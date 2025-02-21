@@ -165,8 +165,7 @@ export async function getFullAgentPolicy(
         acc[getOutputIdForAgentPolicy(output)] = transformOutputToFullPolicyOutput(
           output,
           output.proxy_id ? proxies.find((proxy) => output.proxy_id === proxy.id) : undefined,
-          standalone,
-          fleetServerHost
+          standalone
         );
         return acc;
       }, {}),
@@ -333,7 +332,6 @@ export async function getFullAgentPolicy(
   if (agentPolicy.overrides) {
     return deepMerge<FullAgentPolicy>(fullAgentPolicy, agentPolicy.overrides);
   }
-  console.log('##', fullAgentPolicy);
   return fullAgentPolicy;
 }
 
@@ -409,8 +407,7 @@ function generateSSLConfigForFleetServerInput(fleetServerHost: FleetServerHost) 
 export function transformOutputToFullPolicyOutput(
   output: Output,
   proxy?: FleetProxy,
-  standalone = false,
-  fleetServerHost?: FleetServerHost
+  standalone = false
 ): FullAgentPolicyOutput {
   const {
     config_yaml,
@@ -583,11 +580,11 @@ export function transformOutputToFullPolicyOutput(
 
 // Generate the SSL configs for fleet server connection to ES
 // Corresponding to --fleet-server-es-ca, --fleet-server-es-cert, --fleet-server-es-cert-key cli options
-function generateFleetServerOutputSSLConfig(fleetServerHost: FleetServerHost) {
-  let outputConfig: Partial<FullAgentPolicyOutput> = {};
-  outputConfig = {
-    type: 'elasticsearch',
-  };
+// This function generates a `bootstrap output` to be sent directly to elastic-agent
+function generateFleetServerOutputSSLConfig(fleetServerHost: FleetServerHost): {
+  [key: string]: FullAgentPolicyOutput;
+} {
+  const outputConfig: FullAgentPolicyOutput = { type: 'elasticsearch' };
 
   if (fleetServerHost?.ssl) {
     outputConfig.ssl = {
@@ -611,7 +608,7 @@ function generateFleetServerOutputSSLConfig(fleetServerHost: FleetServerHost) {
         }),
     };
   }
-  return { [`fleetserver-${fleetServerHost?.id}`]: outputConfig };
+  return { [`fleetserver-output-${fleetServerHost?.id}`]: outputConfig };
 }
 
 export function getFullMonitoringSettings(
