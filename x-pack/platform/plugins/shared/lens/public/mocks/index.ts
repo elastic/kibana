@@ -25,7 +25,7 @@ export {
   mockDatasourceStates,
   defaultState,
   makeLensStore,
-  mountWithProvider,
+  mountWithReduxStore,
   renderWithReduxStore,
 } from './store_mocks';
 export { lensPluginMock } from './lens_plugin_mock';
