@@ -96,7 +96,9 @@ const EditRulePageComponent: FC<{ rule: RuleResponse }> = ({ rule }) => {
     usePrebuiltRulesCustomizationStatus();
   const canEditRule = isRulesCustomizationEnabled || !rule.immutable;
 
-  const prebuiltCustomizationUpsellingMessage = usePrebuiltRuleCustomizationUpsellingMessage();
+  const prebuiltCustomizationUpsellingMessage = usePrebuiltRuleCustomizationUpsellingMessage(
+    'prebuilt_rule_customization_description'
+  );
 
   const { detailName: ruleId } = useParams<{ detailName: string }>();
 
