@@ -70,7 +70,7 @@ export const RulesWithGapsOverviewPanel = () => {
   const handleShowRulesWithGapsFilterButtonClick = () => {
     if (!showRulesWithGaps) {
       telemetry.reportEvent(ManualRuleRunEventTypes.ShowOnlyRulesWithGaps, {
-        dateRange: gapSearchRange,
+        dateRange: gapSearchRange ?? defaultRangeValue,
       });
     }
     setFilterOptions({
