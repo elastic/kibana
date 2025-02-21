@@ -35,3 +35,6 @@ export const FindLiveQueryRequestQuery = z.object({
 
 export type FindLiveQueryResponse = z.infer<typeof FindLiveQueryResponse>;
 export const FindLiveQueryResponse = z.object({});
+
+export type FindLiveQueryDetailsResponse = z.infer<typeof FindLiveQueryDetailsResponse>;
+export const FindLiveQueryDetailsResponse = z.object({});

@@ -17,7 +17,7 @@
 import { z } from '@kbn/zod';
 
 /**
- * The ID of the object.
+ * The ID of the query.
  */
 export type Id = z.infer<typeof Id>;
 export const Id = z.string();
