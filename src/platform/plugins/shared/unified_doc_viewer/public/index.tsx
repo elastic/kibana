@@ -34,5 +34,6 @@ export type { LogsOverviewProps as UnifiedDocViewerLogsOverviewProps } from './c
 export { UnifiedDocViewerLogsOverview } from './components/lazy_doc_viewer_logs_overview';
 
 export { UnifiedDocViewerTracesOverview } from './components/lazy_doc_viewer_traces_overview';
+export { UnifiedDocViewerObservabilityTracesSpanOverview } from './components/observability/traces/doc_viewer_span_overview/lazy_doc_viewer_obs_traces_span_overview';
 
 export const plugin = () => new UnifiedDocViewerPublicPlugin();
