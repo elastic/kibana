@@ -29,10 +29,11 @@ import { useMlKibana } from '../contexts/kibana';
 
 interface DeleteModelsModalProps {
   models: TrainedModelUIItem[];
-  onClose: (refreshList?: boolean, deleteSucceeded?: boolean) => void;
+  onClose: () => void;
+  onDelete: (refreshList?: boolean) => void;
 }
 
-export const DeleteModelsModal: FC<DeleteModelsModalProps> = ({ models, onClose }) => {
+export const DeleteModelsModal: FC<DeleteModelsModalProps> = ({ models, onClose, onDelete }) => {
   const {
     services: {
       mlServices: { trainedModelsService },
@@ -69,7 +70,7 @@ export const DeleteModelsModal: FC<DeleteModelsModalProps> = ({ models, onClose 
         with_pipelines: deletePipelines,
         force: pipelinesCount > 0,
       });
-      onClose(false, true);
+      onDelete();
     } catch {
       setIsDeleting(false);
     }
@@ -79,7 +80,7 @@ export const DeleteModelsModal: FC<DeleteModelsModalProps> = ({ models, onClose 
 
   return canDeleteModel ? (
     <EuiModal
-      onClose={onClose.bind(null, false, false)}
+      onClose={onClose.bind(null)}
       initialFocus="[name=cancelModelDeletion]"
       data-test-subj="mlModelsDeleteModal"
     >
@@ -182,7 +183,7 @@ export const DeleteModelsModal: FC<DeleteModelsModalProps> = ({ models, onClose 
       </EuiModalBody>
 
       <EuiModalFooter>
-        <EuiButtonEmpty onClick={onClose.bind(null, false, false)} name="cancelModelDeletion">
+        <EuiButtonEmpty onClick={onClose.bind(null)} name="cancelModelDeletion">
           <FormattedMessage
             id="xpack.ml.trainedModels.modelsList.deleteModal.cancelButtonLabel"
             defaultMessage="Cancel"
@@ -208,7 +209,8 @@ export const DeleteModelsModal: FC<DeleteModelsModalProps> = ({ models, onClose 
       ids={modelIds}
       mlSavedObjectType="trained-model"
       canDeleteCallback={setCanDeleteModel.bind(null, true)}
-      onCloseCallback={onClose.bind(null, true)}
+      onCloseCallback={onClose.bind(null)}
+      onUntagCallback={onDelete.bind(null, true)}
       refreshJobsCallback={() => {}}
       hasManagedJob={false}
     />
