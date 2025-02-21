@@ -30,7 +30,7 @@ paths-ignore:
   - legacy_rfcs
   - oas_docs
   - packages/*/scripts
-  - src/dev/packages/core-test-helpers-kbn-server
+  - src/core/test-helpers/kbn-server
   - packages/kbn-ambient-*-types
   - packages/kbn-apm-synthtrace
   - packages/kbn-axe-config
