@@ -34,9 +34,5 @@ export const CustomizedPrebuiltRuleBadge: React.FC<CustomizedPrebuiltRuleBadgePr
     return null;
   }
 
-  return (
-    <EuiBadge data-test-subj="modified-prebuilt-rule-badge" color="hollow">
-      {i18n.MODIFIED_PREBUILT_RULE_LABEL}
-    </EuiBadge>
-  );
+  return <EuiBadge color="hollow">{i18n.MODIFIED_PREBUILT_RULE_LABEL}</EuiBadge>;
 };
