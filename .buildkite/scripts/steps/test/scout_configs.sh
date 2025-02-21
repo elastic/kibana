@@ -58,8 +58,11 @@ while read -r config_path; do
   for mode in $RUN_MODE_LIST; do
     echo "--- Running tests: $config_path ($mode)"
 
+    # prevent non-zero exit code from breaking the loop
+    set +e;
     node scripts/scout run-tests "$mode" --config "$config_path" --kibana-install-dir "$KIBANA_BUILD_LOCATION"
     EXIT_CODE=$?
+    set -e;
 
     if [[ $EXIT_CODE -eq 2 ]]; then
       configWithoutTests+=("$config_path ($mode) ⚠️ No tests found")
