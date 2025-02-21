@@ -20,7 +20,6 @@ import {
 import type { ApmPluginStartDeps } from '../../../plugin';
 import { useAnyOfApmParams } from '../../../hooks/use_apm_params';
 import { SERVICE_ENVIRONMENT, SERVICE_NAME } from '../../../../common/es_fields/apm';
-import { getEnvironmentKuery } from '../../../../common/environment_filter_values';
 import { push } from '../../shared/links/url_helpers';
 
 export const ALERT_STATUS_ALL = 'all';
@@ -53,8 +52,7 @@ export function AlertsOverview() {
 
   const useToasts = () => notifications!.toasts;
 
-  const apmFilters: Filter[] = useMemo(() => {
-    const environmentKuery = getEnvironmentKuery(environment);
+  const apmFilters = useMemo(() => {
     const filters: Filter[] = [
       {
         query: {
@@ -66,11 +64,11 @@ export function AlertsOverview() {
       },
     ];
 
-    if (environmentKuery) {
+    if (environment) {
       filters.push({
         query: {
           match_phrase: {
-            [SERVICE_ENVIRONMENT]: environmentKuery,
+            [SERVICE_ENVIRONMENT]: environment,
           },
         },
         meta: {},
@@ -101,7 +99,7 @@ export function AlertsOverview() {
               onEsQueryChange={setEsQuery}
               rangeTo={rangeTo}
               rangeFrom={rangeFrom}
-              disableLocalStorageSync={true}
+              disableLocalStorageSync
               services={{
                 timeFilterService,
                 AlertsSearchBar,

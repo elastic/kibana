@@ -19,6 +19,7 @@ import { ObservabilityAlertSearchBarProps, Services } from './types';
 
 const getAlertsSearchBarMock = jest.fn();
 const ALERT_SEARCH_BAR_DATA_TEST_SUBJ = 'alerts-search-bar';
+const ALERT_UUID = '413a9631-1a29-4344-a8b4-9a1dc23421ee';
 
 describe('ObservabilityAlertSearchBar', () => {
   const { http, data, dataViews, notifications, spaces } = kibanaStartMock.startContract().services;
@@ -97,7 +98,7 @@ describe('ObservabilityAlertSearchBar', () => {
       {
         query: {
           match_phrase: {
-            'kibana.alert.rule.uuid': '413a9631-1a29-4344-a8b4-9a1dc23421ee',
+            'kibana.alert.rule.uuid': 'ALERT_UUID',
           },
         },
         meta: {},
@@ -128,7 +129,7 @@ describe('ObservabilityAlertSearchBar', () => {
           },
           {
             match_phrase: {
-              'kibana.alert.rule.uuid': '413a9631-1a29-4344-a8b4-9a1dc23421ee',
+              'kibana.alert.rule.uuid': 'ALERT_UUID',
             },
           },
         ],
@@ -149,7 +150,7 @@ describe('ObservabilityAlertSearchBar', () => {
       {
         query: {
           match_phrase: {
-            'kibana.alert.rule.uuid': '413a9631-1a29-4344-a8b4-9a1dc23421ee',
+            'kibana.alert.rule.uuid': 'ALERT_UUID',
           },
         },
         meta: {},
@@ -180,7 +181,7 @@ describe('ObservabilityAlertSearchBar', () => {
           },
           {
             match_phrase: {
-              'kibana.alert.rule.uuid': '413a9631-1a29-4344-a8b4-9a1dc23421ee',
+              'kibana.alert.rule.uuid': 'ALERT_UUID',
             },
           },
         ],
