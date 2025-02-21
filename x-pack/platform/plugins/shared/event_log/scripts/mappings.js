@@ -98,8 +98,8 @@ exports.EcsCustomPropertyMappings = {
             properties: {
               num_deleted: {
                 type: 'long',
-              }
-            }
+              },
+            },
           },
           rule: {
             properties: {

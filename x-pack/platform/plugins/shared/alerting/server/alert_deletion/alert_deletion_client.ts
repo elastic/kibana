@@ -16,18 +16,18 @@ import {
   TaskManagerStartContract,
   ConcreteTaskInstance,
 } from '@kbn/task-manager-plugin/server';
-import {
-  RULES_SETTINGS_SAVED_OBJECT_TYPE,
-  RuleTypeRegistry,
-  RulesSettingsAlertDeletionProperties,
-} from '../types';
 import { SpacesPluginStart } from '@kbn/spaces-plugin/server';
-import { GetAlertIndicesAlias, spaceIdToNamespace } from '../lib';
 import { IEventLogger, millisToNanos } from '@kbn/event-log-plugin/server';
 import { ALERT_INSTANCE_ID, ALERT_RULE_UUID, SPACE_IDS } from '@kbn/rule-data-utils';
 import { omitBy } from 'lodash';
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
+import { GetAlertIndicesAlias, spaceIdToNamespace } from '../lib';
+import {
+  RULES_SETTINGS_SAVED_OBJECT_TYPE,
+  RuleTypeRegistry,
+  RulesSettingsAlertDeletionProperties,
+} from '../types';
 import { EVENT_LOG_ACTIONS } from '../plugin';
 
 export const ALERT_DELETION_TASK_TYPE = 'alert-deletion';
