@@ -549,7 +549,6 @@ for (const flattened of [true, false]) {
         [ALERT_FLAPPING_HISTORY]: [],
         [ALERT_MAINTENANCE_WINDOW_IDS]: [],
         [ALERT_PENDING_RECOVERED_COUNT]: 0,
-        [ALERT_PENDING_RECOVERED_COUNT]: 0,
         [ALERT_PREVIOUS_ACTION_GROUP]: 'error',
         [ALERT_STATUS]: 'active',
         [ALERT_WORKFLOW_STATUS]: 'open',
