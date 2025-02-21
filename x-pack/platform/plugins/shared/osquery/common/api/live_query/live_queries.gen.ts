@@ -17,8 +17,8 @@
 import { z } from '@kbn/zod';
 
 import { FindLiveQueryRequestQuery, FindLiveQueryResponse } from './find_live_query.gen';
-import { CreateLiveQueryRequestBody } from './create_live_query.gen';
-import { DefaultSuccessResponse, Id } from '../model/schema/common_attributes.gen';
+import { CreateLiveQueryRequestBody, CreateLiveQueryResponse } from './create_live_query.gen';
+import { Id, DefaultSuccessResponse } from '../model/schema/common_attributes.gen';
 import { GetLiveQueryResultsRequestQuery } from './get_live_query_results.gen';
 
 export type OsqueryCreateLiveQueryRequestBody = z.infer<typeof OsqueryCreateLiveQueryRequestBody>;
@@ -28,7 +28,7 @@ export type OsqueryCreateLiveQueryRequestBodyInput = z.input<
 >;
 
 export type OsqueryCreateLiveQueryResponse = z.infer<typeof OsqueryCreateLiveQueryResponse>;
-export const OsqueryCreateLiveQueryResponse = DefaultSuccessResponse;
+export const OsqueryCreateLiveQueryResponse = CreateLiveQueryResponse;
 export type OsqueryFindLiveQueriesRequestQuery = z.infer<typeof OsqueryFindLiveQueriesRequestQuery>;
 export const OsqueryFindLiveQueriesRequestQuery = z.object({
   query: FindLiveQueryRequestQuery,

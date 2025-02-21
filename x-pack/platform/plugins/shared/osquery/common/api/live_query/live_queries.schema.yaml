@@ -42,7 +42,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/DefaultSuccessResponse'
+                $ref: './create_live_query.schema.yaml#/components/schemas/CreateLiveQueryResponse'
 
   /api/osquery/live_queries/{id}:
     get:

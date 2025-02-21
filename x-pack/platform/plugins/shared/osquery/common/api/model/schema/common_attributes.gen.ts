@@ -16,6 +16,9 @@
 
 import { z } from '@kbn/zod';
 
+/**
+ * The ID of the object.
+ */
 export type Id = z.infer<typeof Id>;
 export const Id = z.string();
 
@@ -39,18 +42,27 @@ export const Description = z.string();
 export type DescriptionOrUndefined = z.infer<typeof DescriptionOrUndefined>;
 export const DescriptionOrUndefined = Description.nullable();
 
+/**
+ * Restricts the query to a specified platform. The default is all platforms. To specify multiple platforms, use commas. For example, linux,darwin.
+ */
 export type Platform = z.infer<typeof Platform>;
 export const Platform = z.string();
 
 export type PlatformOrUndefined = z.infer<typeof PlatformOrUndefined>;
 export const PlatformOrUndefined = Platform.nullable();
 
+/**
+ * The SQL query you want to run.
+ */
 export type Query = z.infer<typeof Query>;
 export const Query = z.string();
 
 export type QueryOrUndefined = z.infer<typeof QueryOrUndefined>;
 export const QueryOrUndefined = Query.nullable();
 
+/**
+ * Uses the Osquery versions greater than or equal to the specified version string.
+ */
 export type Version = z.infer<typeof Version>;
 export const Version = z.string();
 
@@ -63,12 +75,18 @@ export const Interval = z.string();
 export type IntervalOrUndefined = z.infer<typeof IntervalOrUndefined>;
 export const IntervalOrUndefined = Interval.nullable();
 
+/**
+ * Indicates whether the query is a snapshot.
+ */
 export type Snapshot = z.infer<typeof Snapshot>;
 export const Snapshot = z.boolean();
 
 export type SnapshotOrUndefined = z.infer<typeof SnapshotOrUndefined>;
 export const SnapshotOrUndefined = Snapshot.nullable();
 
+/**
+ * Indicates whether the query is removed.
+ */
 export type Removed = z.infer<typeof Removed>;
 export const Removed = z.boolean();
 
@@ -78,12 +96,18 @@ export const RemovedOrUndefined = Removed.nullable();
 export type PackName = z.infer<typeof PackName>;
 export const PackName = z.string();
 
+/**
+ * The ID of a saved query.
+ */
 export type SavedQueryId = z.infer<typeof SavedQueryId>;
 export const SavedQueryId = z.string();
 
 export type SavedQueryIdOrUndefined = z.infer<typeof SavedQueryIdOrUndefined>;
 export const SavedQueryIdOrUndefined = SavedQueryId.nullable();
 
+/**
+ * The ID of the pack you want to run.
+ */
 export type PackId = z.infer<typeof PackId>;
 export const PackId = z.string();
 
@@ -113,10 +137,19 @@ export const ExecutionContextOrUndefined = ExecutionContext.nullable();
 
 export type ECSMappingItem = z.infer<typeof ECSMappingItem>;
 export const ECSMappingItem = z.object({
+  /**
+   * The ECS field to map to.
+   */
   field: z.string().optional(),
+  /**
+   * The value to map to the ECS field.
+   */
   value: z.union([z.string(), z.array(z.string())]).optional(),
 });
 
+/**
+ * Map osquery results columns or static values to Elastic Common Schema (ECS) fields
+ */
 export type ECSMapping = z.infer<typeof ECSMapping>;
 export const ECSMapping = z.object({}).catchall(ECSMappingItem);
 
@@ -137,6 +170,9 @@ export const ArrayQueriesItem = z.object({
   snapshot: SnapshotOrUndefined.optional(),
 });
 
+/**
+ * An array of queries to run.
+ */
 export type ArrayQueries = z.infer<typeof ArrayQueries>;
 export const ArrayQueries = z.array(ArrayQueriesItem);
 

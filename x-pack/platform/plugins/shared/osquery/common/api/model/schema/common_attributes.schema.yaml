@@ -6,6 +6,7 @@ paths: { }
 components:
   schemas:
     Id:
+      description: 'The ID of the object.'
       type: string
     IdOrUndefined:
       $ref: '#/components/schemas/Id'
@@ -43,6 +44,7 @@ components:
 
 
     Platform:
+      description: 'Restricts the query to a specified platform. The default is all platforms. To specify multiple platforms, use commas. For example, linux,darwin.'
       type: string
 
     PlatformOrUndefined:
@@ -51,6 +53,7 @@ components:
 
 
     Query:
+      description: 'The SQL query you want to run.'
       type: string
 
     QueryOrUndefined:
@@ -58,6 +61,7 @@ components:
       nullable: true
 
     Version:
+      description: 'Uses the Osquery versions greater than or equal to the specified version string.'
       type: string
 
     VersionOrUndefined:
@@ -72,6 +76,7 @@ components:
       nullable: true
 
     Snapshot:
+      description: 'Indicates whether the query is a snapshot.'
       type: boolean
 
     SnapshotOrUndefined:
@@ -79,6 +84,7 @@ components:
       nullable: true
 
     Removed:
+      description: 'Indicates whether the query is removed.'
       type: boolean
 
     RemovedOrUndefined:
@@ -89,6 +95,7 @@ components:
       type: string
 
     SavedQueryId:
+      description: 'The ID of a saved query.'
       type: string
 
     SavedQueryIdOrUndefined:
@@ -97,6 +104,7 @@ components:
 
 
     PackId:
+      description: 'The ID of the pack you want to run.'
       type: string
 
     PackIdOrUndefined:
@@ -139,8 +147,10 @@ components:
       type: object
       properties:
         field:
+          description: 'The ECS field to map to.'
           type: string
         value:
+          description: 'The value to map to the ECS field.'
           oneOf:
             - type: string
             - type: array
@@ -148,6 +158,7 @@ components:
                 type: string
 
     ECSMapping:
+      description: 'Map osquery results columns or static values to Elastic Common Schema (ECS) fields'
       type: object
       additionalProperties:
         $ref: '#/components/schemas/ECSMappingItem'
@@ -184,6 +195,7 @@ components:
 
     ArrayQueries:
       type: array
+      description: 'An array of queries to run.'
       items:
         $ref: '#/components/schemas/ArrayQueriesItem'
 
