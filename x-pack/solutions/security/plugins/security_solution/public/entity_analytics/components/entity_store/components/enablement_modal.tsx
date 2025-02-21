@@ -69,12 +69,11 @@ export const EntityStoreEnablementModal: React.FC<EntityStoreEnablementModalProp
   const { data: entityEnginePrivileges, isLoading: isLoadingEntityEnginePrivileges } =
     useEntityEnginePrivileges();
   const riskEnginePrivileges = useMissingRiskEnginePrivileges();
-  const enablementOptions =
-  !riskScore.disabled 
+  const enablementOptions = !riskScore.disabled
     ? enablements.entityStore // If riskScore is already enabled, check entityStore toggle button
-    : !entityStore.disabled 
-      ? enablements.riskScore // If entityStore already enabled, check riskScore toggle button
-      : enablements.riskScore || enablements.entityStore; // If both are disabled, check their enablements
+    : !entityStore.disabled
+    ? enablements.riskScore // If entityStore already enabled, check riskScore toggle button
+    : enablements.riskScore || enablements.entityStore; // If both are disabled, check their enablements
   const { AdditionalChargesMessage } = useContractComponents();
 
   if (!visible) {
