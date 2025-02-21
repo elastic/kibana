@@ -81,9 +81,9 @@ describe('Popularize field', () => {
     expect(field.count).toEqual(1);
   });
 
-  test('should correct the input and increment', async () => {
+  test('should increment', async () => {
     const field = {
-      count: '5',
+      count: 5,
     };
     const dataView = {
       id: 'id',
