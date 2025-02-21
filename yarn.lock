@@ -5110,11 +5110,11 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-test-helpers-kbn-server@link:src/dev/packages/core-test-helpers-kbn-server":
+"@kbn/core-test-helpers-kbn-server@link:src/core/test-helpers/kbn-server":
   version "0.0.0"
   uid ""
 
-"@kbn/core-test-helpers-model-versions@link:src/dev/packages/core-test-helpers-model-versions":
+"@kbn/core-test-helpers-model-versions@link:src/core/test-helpers/model-versions":
   version "0.0.0"
   uid ""
 
