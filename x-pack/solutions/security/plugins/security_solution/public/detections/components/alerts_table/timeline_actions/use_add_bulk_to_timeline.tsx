@@ -13,11 +13,14 @@ import { getEsQueryConfig } from '@kbn/data-plugin/public';
 import type { BulkActionsConfig } from '@kbn/response-ops-alerts-table/types';
 import { dataTableActions, TableId, tableDefaults } from '@kbn/securitysolution-data-table';
 import type { RunTimeMappings } from '@kbn/timelines-plugin/common/search_strategy';
+import { useEnableExperimental } from '../../../../common/hooks/use_experimental_features';
+import { useSelectedPatterns } from '../../../../data_view_picker/hooks/use_selected_patterns';
+import { useBrowserFields } from '../../../../data_view_picker/hooks/use_browser_fields';
+import { useDataView } from '../../../../data_view_picker/hooks/use_data_view';
 import type { CustomBulkAction } from '../../../../../common/types';
 import { combineQueries } from '../../../../common/lib/kuery';
 import { useKibana } from '../../../../common/lib/kibana';
 import { BULK_ADD_TO_TIMELINE_LIMIT } from '../../../../../common/constants';
-import { useSourcererDataView } from '../../../../sourcerer/containers';
 import type { TimelineArgs } from '../../../../timelines/containers';
 import { useTimelineEventsHandler } from '../../../../timelines/containers';
 import { eventsViewerSelector } from '../../../../common/components/events_viewer/selectors';
@@ -31,6 +34,7 @@ import { sendBulkEventsToTimelineAction } from '../actions';
 import type { CreateTimelineProps } from '../types';
 import type { SourcererScopeName } from '../../../../sourcerer/store/model';
 import type { Direction } from '../../../../../common/search_strategy';
+import { useSourcererDataView } from '../../../../sourcerer/containers';
 
 const { setEventsLoading, setSelected } = dataTableActions;
 
@@ -62,8 +66,13 @@ export const useAddBulkToTimelineAction = ({
   scopeId,
 }: UseAddBulkToTimelineActionProps) => {
   const [disableActionOnSelectAll, setDisabledActionOnSelectAll] = useState(false);
+  const { newDataViewPickerEnabled } = useEnableExperimental();
 
-  const {
+  const { dataView: experimentalDataView } = useDataView(scopeId);
+  const experimentalBrowserFields = useBrowserFields(scopeId);
+  const experimentalSelectedPatterns = useSelectedPatterns(scopeId);
+
+  let {
     browserFields,
     dataViewId,
     sourcererDataView,
@@ -71,6 +80,14 @@ export const useAddBulkToTimelineAction = ({
     // in order to include the exclude filters in the search that are not stored in the timeline
     selectedPatterns,
   } = useSourcererDataView(scopeId);
+
+  if (newDataViewPickerEnabled) {
+    dataViewId = experimentalDataView.id ?? '';
+    browserFields = experimentalBrowserFields;
+    sourcererDataView = experimentalDataView;
+    selectedPatterns = experimentalSelectedPatterns;
+  }
+
   const dispatch = useDispatch();
   const { uiSettings } = useKibana().services;
 

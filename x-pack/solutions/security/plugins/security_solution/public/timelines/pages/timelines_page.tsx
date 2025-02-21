@@ -16,15 +16,26 @@ import { useUserPrivileges } from '../../common/components/user_privileges';
 import { StatefulOpenTimeline } from '../components/open_timeline';
 import * as i18n from './translations';
 import { SecurityPageName } from '../../app/types';
-import { useSourcererDataView } from '../../sourcerer/containers';
 import { EmptyPrompt } from '../../common/components/empty_prompt';
 import { SecurityRoutePageWrapper } from '../../common/components/security_route_page_wrapper';
+import { useDataView } from '../../data_view_picker/hooks/use_data_view';
+import { DataViewPickerScopeName } from '../../data_view_picker/constants';
+import { useSourcererDataView } from '../../sourcerer/containers';
+import { useEnableExperimental } from '../../common/hooks/use_experimental_features';
 
 export const DEFAULT_SEARCH_RESULTS_PER_PAGE = 10;
 
 export const TimelinesPage = React.memo(() => {
   const { tabName } = useParams<{ pageName: SecurityPageName; tabName: string }>();
-  const { indicesExist } = useSourcererDataView();
+
+  const { newDataViewPickerEnabled } = useEnableExperimental();
+  let { indicesExist } = useSourcererDataView();
+  const { indicesExist: experimentalIndicesExist } = useDataView(DataViewPickerScopeName.default);
+
+  if (newDataViewPickerEnabled) {
+    indicesExist = experimentalIndicesExist;
+  }
+
   const {
     timelinePrivileges: { crud: canWriteTimeline },
   } = useUserPrivileges();

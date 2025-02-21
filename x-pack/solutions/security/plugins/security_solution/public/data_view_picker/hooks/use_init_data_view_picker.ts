@@ -41,8 +41,6 @@ export const useInitDataViewPicker = () => {
   const services = useKibana().services;
   const { newDataViewPickerEnabled } = useEnableExperimental();
 
-  console.log(' newDataViewPickerEnabled', newDataViewPickerEnabled);
-
   useEffect(() => {
     if (!newDataViewPickerEnabled) {
       return;
