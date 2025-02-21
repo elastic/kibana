@@ -71,7 +71,7 @@ describe('<FieldEditorFlyoutContent />', () => {
     expect(find('nameField.input').props().value).toBe(fieldToCreate.name);
     expect(find('typeField').props().value).toBe(fieldToCreate.type);
     expect(find('scriptField').props().value).toBe(fieldToCreate.script.source);
-    expect(find('editorFieldCount').props().value).toBe(fieldToCreate.popularity);
+    expect(find('editorFieldCount').props().value).toBe(fieldToCreate.popularity.toString());
   });
 
   test('should accept an "onSave" prop', async () => {
