@@ -10,7 +10,6 @@ import { FtrProviderContext } from '../../../../ftr_provider_context';
 import { defaultOriginalRule, migrationRulesRouteHelpersFactory } from '../../utils';
 
 export default ({ getService }: FtrProviderContext) => {
-  const es = getService('es');
   const supertest = getService('supertest');
   const migrationRulesRoutes = migrationRulesRouteHelpersFactory(supertest);
 

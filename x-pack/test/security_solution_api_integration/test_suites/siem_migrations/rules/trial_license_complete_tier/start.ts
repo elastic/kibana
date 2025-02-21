@@ -14,7 +14,6 @@ import {
 } from '../../utils';
 
 export default ({ getService }: FtrProviderContext) => {
-  const es = getService('es');
   const supertest = getService('supertest');
   const migrationRulesRoutes = migrationRulesRouteHelpersFactory(supertest);
 
