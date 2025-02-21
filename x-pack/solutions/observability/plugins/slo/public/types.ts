@@ -49,9 +49,9 @@ import type {
   UsageCollectionStart,
 } from '@kbn/usage-collection-plugin/public';
 import { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin-types-public';
+import { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
 import type { SLORouteRepository } from '../server/routes/get_slo_server_route_repository';
 import { SLOPlugin } from './plugin';
-import { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
 
 export type SLORepositoryClient = RouteRepositoryClient<SLORouteRepository, DefaultClientOptions>;
 

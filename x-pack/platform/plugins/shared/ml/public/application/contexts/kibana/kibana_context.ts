@@ -33,8 +33,8 @@ import type { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import type { FieldFormatsRegistry } from '@kbn/field-formats-plugin/common';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
+import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
 import type { MlServicesContext } from '../../app';
-import { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
 
 interface StartPlugins {
   cases?: CasesPublicStart;
