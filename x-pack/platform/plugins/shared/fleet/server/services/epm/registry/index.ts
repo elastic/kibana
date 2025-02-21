@@ -126,6 +126,7 @@ async function _fetchFindLatestPackage(
 
         if (
           bundledPackage &&
+          latestPackageFromRegistry &&
           semverGte(bundledPackage.version, latestPackageFromRegistry.version)
         ) {
           return bundledPackage;
