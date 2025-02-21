@@ -28,6 +28,7 @@ interface Props {
     from: Date;
     to: Date;
   };
+  groupBy?: string[];
 }
 
 export function useGetPreviewData({
@@ -37,11 +38,19 @@ export function useGetPreviewData({
   objective,
   groupings,
   remoteName,
+  groupBy,
 }: Props): UseGetPreviewData {
   const { sloClient } = usePluginContext();
 
   const { isInitialLoading, isLoading, isError, isSuccess, data } = useQuery({
-    queryKey: sloKeys.preview(indicator, range, groupings),
+    queryKey: sloKeys.preview({
+      range,
+      indicator,
+      objective,
+      groupings,
+      remoteName,
+      groupBy,
+    }),
     queryFn: async ({ signal }) => {
       const response = await sloClient.fetch('POST /internal/observability/slos/_preview', {
         params: {
@@ -54,6 +63,7 @@ export function useGetPreviewData({
             groupings,
             remoteName,
             objective,
+            groupBy,
           },
         },
         signal,
