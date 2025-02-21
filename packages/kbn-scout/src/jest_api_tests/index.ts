@@ -9,7 +9,7 @@
 
 import Url from 'url';
 import { esTestConfig, kbnTestConfig } from '@kbn/test';
-import type { ScoutTestConfig } from '../..';
+import { getEsArchiver, getEsClient, getKbnClient, getLogger, ScoutTestConfig } from '../..';
 
 export const scoutApiTestConfig: ScoutTestConfig = {
   serverless: false,
@@ -32,3 +32,13 @@ export const scoutApiTestConfig: ScoutTestConfig = {
     password: 'changeme',
   },
 };
+
+const log = getLogger();
+const kbnClient = getKbnClient(scoutApiTestConfig, log);
+const esClient = getEsClient(scoutApiTestConfig, log);
+
+export const clients = () => ({
+  kbnClient,
+  esClient,
+  esArchiver: getEsArchiver(esClient, kbnClient, log),
+});

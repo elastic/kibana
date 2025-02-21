@@ -50,4 +50,4 @@ export type { Locator } from 'playwright/test';
 
 export { measurePerformance, measurePerformanceAsync } from './src/common';
 
-export { scoutApiTestConfig } from './src/jest_api_tests';
+export { scoutApiTestConfig, clients } from './src/jest_api_tests';

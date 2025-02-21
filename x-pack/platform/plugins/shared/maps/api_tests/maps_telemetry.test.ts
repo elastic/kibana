@@ -5,32 +5,21 @@
  * 2.0.
  */
 
-import {
-  getEsArchiver,
-  getEsClient,
-  getKbnClient,
-  getLogger,
-  tags,
-  scoutApiTestConfig,
-} from '@kbn/scout';
+import { tags, clients } from '@kbn/scout';
+import { ES_ARCHIVES, KBN_ARCHIVES } from './fixtures/constants';
 
 describe(`${tags.DEPLOYMENT_AGNOSTIC.join(',')}`, () => {
   describe(`maps_telemetry`, () => {
-    const log = getLogger();
-
-    const kbnClient = getKbnClient(scoutApiTestConfig, log);
-    const esClient = getEsClient(scoutApiTestConfig, log);
-    const esArchiver = getEsArchiver(esClient, kbnClient, log);
-
+    const { kbnClient, esArchiver } = clients();
     beforeAll(async () => {
-      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/logstash_functional');
-      await kbnClient.importExport.load('x-pack/test/functional/fixtures/kbn_archiver/maps.json');
-      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/maps/data');
+      await esArchiver.loadIfNeeded(ES_ARCHIVES.LOGSTASH);
+      await kbnClient.importExport.load(KBN_ARCHIVES.MAPS);
+      await esArchiver.loadIfNeeded(ES_ARCHIVES.MAPS_DATA);
     });
     afterAll(async () => {
-      await esArchiver.unload('x-pack/test/functional/es_archives/logstash_functional');
-      await esArchiver.unload('x-pack/test/functional/es_archives/maps/data');
-      await kbnClient.importExport.unload('x-pack/test/functional/fixtures/kbn_archiver/maps.json');
+      await esArchiver.unload(ES_ARCHIVES.LOGSTASH);
+      await esArchiver.unload(ES_ARCHIVES.MAPS_DATA);
+      await kbnClient.importExport.unload(KBN_ARCHIVES.MAPS);
     });
 
     it('should return the correct telemetry values for map saved objects', async () => {
