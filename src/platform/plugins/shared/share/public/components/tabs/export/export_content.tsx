@@ -31,14 +31,14 @@ import { ExportShareConfig } from '../../../types';
 
 type ExportProps = Pick<IShareContext, 'isDirty' | 'objectId' | 'objectType' | 'onClose'> & {
   layoutOption?: 'print';
-  aggregateReportTypes: ExportShareConfig[];
+  aggregateExportTypes: ExportShareConfig[];
   intl: InjectedIntl;
   publicAPIEnabled: boolean;
 };
 
 const ExportContentUi = ({
   isDirty,
-  aggregateReportTypes,
+  aggregateExportTypes,
   intl,
   onClose,
   publicAPIEnabled,
@@ -47,7 +47,7 @@ const ExportContentUi = ({
   const [usePrintLayout, setPrintLayout] = useState(false);
 
   const radioOptions = useMemo(() => {
-    return aggregateReportTypes.reduce<EuiRadioGroupOption[]>((acc, { id, config }) => {
+    return aggregateExportTypes.reduce<EuiRadioGroupOption[]>((acc, { id, config }) => {
       acc.push({
         id: config.exportType,
         label: config.label,
@@ -56,7 +56,7 @@ const ExportContentUi = ({
 
       return acc;
     }, []);
-  }, [aggregateReportTypes]);
+  }, [aggregateExportTypes]);
 
   const [selectedRadio, setSelectedRadio] = useState(radioOptions[0].id);
 
@@ -71,8 +71,8 @@ const ExportContentUi = ({
       renderLayoutOptionSwitch,
     },
   } = useMemo(() => {
-    return aggregateReportTypes?.find(({ config }) => config.exportType === selectedRadio)!;
-  }, [selectedRadio, aggregateReportTypes]);
+    return aggregateExportTypes?.find(({ config }) => config.exportType === selectedRadio)!;
+  }, [selectedRadio, aggregateExportTypes]);
 
   const handlePrintLayoutChange = useCallback(
     (evt: EuiSwitchEvent) => {

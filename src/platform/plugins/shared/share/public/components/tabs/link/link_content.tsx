@@ -21,7 +21,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useCallback, useState, useRef, useEffect } from 'react';
 import type { IShareContext } from '../../context';
-import type { LinkShare, LinkShareUIConfig } from '../../../types';
+import type { LinkShareConfig, LinkShareUIConfig } from '../../../types';
 
 type LinkProps = Pick<
   IShareContext,
@@ -31,10 +31,10 @@ type LinkProps = Pick<
   | 'shareableUrl'
   | 'shareableUrlLocatorParams'
   | 'allowShortUrl'
-> & {
-  objectConfig: LinkShareUIConfig;
-  shortUrlService: ReturnType<LinkShare['config']>['shortUrlService'];
-};
+> &
+  LinkShareConfig['config'] & {
+    objectConfig?: LinkShareUIConfig;
+  };
 
 interface UrlParams {
   [extensionName: string]: {
@@ -45,7 +45,7 @@ interface UrlParams {
 export const LinkContent = ({
   isDirty,
   objectType,
-  objectConfig,
+  objectConfig = {},
   shareableUrl,
   shortUrlService,
   shareableUrlLocatorParams,
