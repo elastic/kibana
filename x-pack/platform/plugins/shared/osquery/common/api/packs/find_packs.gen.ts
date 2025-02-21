@@ -30,3 +30,6 @@ export const FindPacksRequestQuery = z.object({
   sort: SortOrUndefined.optional(),
   sortOrder: SortOrderOrUndefined.optional(),
 });
+
+export type FindPacksResponse = z.infer<typeof FindPacksResponse>;
+export const FindPacksResponse = z.object({});
