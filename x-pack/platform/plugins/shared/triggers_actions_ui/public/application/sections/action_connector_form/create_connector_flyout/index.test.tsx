@@ -424,6 +424,36 @@ describe('CreateConnectorFlyout', () => {
     });
   });
 
+  describe('Filters', () => {
+    it('does display search field', async () => {
+      const { getByTestId } = appMockRenderer.render(
+        <CreateConnectorFlyout
+          actionTypeRegistry={actionTypeRegistry}
+          onClose={onClose}
+          onConnectorCreated={onConnectorCreated}
+          onTestConnector={onTestConnector}
+        />
+      );
+      await act(() => Promise.resolve());
+
+      expect(getByTestId('createConnectorsModalSearch')).toBeInTheDocument();
+    });
+
+    it('does display compatibility filter', async () => {
+      const { getByTestId } = appMockRenderer.render(
+        <CreateConnectorFlyout
+          actionTypeRegistry={actionTypeRegistry}
+          onClose={onClose}
+          onConnectorCreated={onConnectorCreated}
+          onTestConnector={onTestConnector}
+        />
+      );
+      await act(() => Promise.resolve());
+
+      expect(getByTestId('compatibilityFilterBtn')).toBeInTheDocument();
+    });
+  });
+
   describe('Submitting', () => {
     it('creates a connector correctly', async () => {
       const { getByTestId, queryByTestId } = appMockRenderer.render(
