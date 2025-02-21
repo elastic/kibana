@@ -10,6 +10,10 @@ import { cleanMarkdown, generateAssistantComment } from '../../../../../util/com
 import type { EsqlKnowledgeBase } from '../../../../../util/esql_knowledge_base';
 import type { GraphNode } from '../../types';
 import { ESQL_SYNTAX_TRANSLATION_PROMPT } from './prompts';
+import {
+  getElasticRiskScoreFromOriginalRule,
+  getElasticSeverityFromOriginalRule,
+} from './severity';
 
 interface GetTranslateRuleNodeParams {
   esqlKnowledgeBase: EsqlKnowledgeBase;
@@ -48,6 +52,8 @@ export const getTranslateRuleNode = ({
         integration_ids: [integrationId],
         query: esqlQuery,
         query_language: 'esql',
+        risk_score: getElasticRiskScoreFromOriginalRule(state.original_rule),
+        severity: getElasticSeverityFromOriginalRule(state.original_rule),
       },
     };
   };
