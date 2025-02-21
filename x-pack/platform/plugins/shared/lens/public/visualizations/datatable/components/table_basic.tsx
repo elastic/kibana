@@ -509,7 +509,7 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
       <div
         css={DatatableContainerStyles}
         className="eui-scrollBar"
-        data-test-subj="lnsDataTableContainer"
+        data-test-subj="lnsVisualizationContainer"
       >
         <EmptyPlaceholder icon={IconChartDatatable} />
       </div>
@@ -526,7 +526,7 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
     <div
       css={DatatableContainerStyles}
       className="eui-scrollBar"
-      data-test-subj="lnsDataTableContainer"
+      data-test-subj="lnsVisualizationContainer"
     >
       <DataContext.Provider
         value={{

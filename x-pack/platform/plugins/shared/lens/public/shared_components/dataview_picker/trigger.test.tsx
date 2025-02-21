@@ -10,6 +10,7 @@ import { screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { TriggerButton } from './trigger';
 import { renderWithProviders } from '../../test_utils/test_utils';
+import * as ToolbarButtonFile from './toolbar_button';
 
 describe('TriggerButton', () => {
   describe('base version (no icons)', () => {
@@ -47,7 +48,8 @@ describe('TriggerButton', () => {
       expect(toggleFn).toHaveBeenCalled();
     });
 
-    it.skip('should render the main label as red if missing', () => {
+    it('should render the main label as red if missing', () => {
+      const ToolbarButtonSpy = jest.spyOn(ToolbarButtonFile, 'ToolbarButton');
       renderWithProviders(
         <TriggerButton
           togglePopover={jest.fn()}
@@ -57,8 +59,10 @@ describe('TriggerButton', () => {
           isMissingCurrent
         />
       );
-      // EUI danger red: rgb(167, 22, 39)
-      expect(screen.getByTestId('test-id')).toHaveStyle({ color: 'rgb(167, 22, 39)' });
+      expect(ToolbarButtonSpy).toHaveBeenCalledWith(
+        expect.objectContaining({ color: 'danger' }),
+        {}
+      );
     });
   });
 
