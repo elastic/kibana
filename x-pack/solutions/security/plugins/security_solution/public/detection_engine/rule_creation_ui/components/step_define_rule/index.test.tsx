@@ -838,12 +838,9 @@ describe('StepDefineRule', () => {
             saved_id: null,
           },
         };
-        const { rerender } = render(
-          <TestForm formProps={{ isQueryBarValid: false }} initialState={initialState} />,
-          {
-            wrapper: TestProviders,
-          }
-        );
+        render(<TestForm formProps={{ isQueryBarValid: false }} initialState={initialState} />, {
+          wrapper: TestProviders,
+        });
 
         await submitForm();
 
