@@ -21,7 +21,7 @@ import {
   UseEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { flyoutContainerStyles } from './flyout.styles';
+import { FlyoutContainerStyles } from './flyout.styles';
 
 const DEFAULT_TITLE = i18n.translate('xpack.lens.colorSiblingFlyoutTitle', {
   defaultMessage: 'Color',
@@ -75,7 +75,7 @@ export function SettingWithSiblingFlyout({
                 role="dialog"
                 aria-labelledby="lnsSettingWithSiblingFlyoutTitle"
                 data-test-subj={dataTestSubj}
-                css={[flyoutContainerStyles, siblingFlyoutContainerStyles.self]}
+                css={[FlyoutContainerStyles, siblingFlyoutContainerStyles.self]}
               >
                 <EuiFlyoutHeader hasBorder css={siblingFlyoutContainerStyles.header}>
                   <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>

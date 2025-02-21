@@ -32,7 +32,7 @@ import { RangeTypeLens, isValidRange } from './ranges';
 import { FROM_PLACEHOLDER, TO_PLACEHOLDER, TYPING_DEBOUNCE_TIME } from './constants';
 import { LabelInput } from '../shared_components';
 import { isValidNumber } from '../helpers';
-import { draggablePopoverButtonStyles } from '../filters/filter_popover';
+import { DraggablePopoverButtonStyles } from '../filters/filter_popover';
 
 const generateId = htmlIdGenerator();
 
@@ -308,7 +308,7 @@ export const AdvancedRangeEditor = ({
                     color="text"
                     onClick={() => changeActiveRange(range.id)}
                     data-test-subj="dataView-ranges-popover-trigger"
-                    css={draggablePopoverButtonStyles}
+                    css={DraggablePopoverButtonStyles}
                   >
                     <EuiText
                       size="s"

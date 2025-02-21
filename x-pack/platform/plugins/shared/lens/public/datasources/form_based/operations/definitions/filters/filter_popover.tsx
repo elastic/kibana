@@ -101,7 +101,7 @@ export const FilterPopover = ({
   );
 };
 
-export const draggablePopoverButtonStyles = ({ euiTheme }: UseEuiTheme) => {
+export const DraggablePopoverButtonStyles = ({ euiTheme }: UseEuiTheme) => {
   const euiFontSize = useEuiFontSize('s');
   return `
     ${euiTextBreakWord()};
