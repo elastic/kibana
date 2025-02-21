@@ -27,11 +27,13 @@ const { useGlobalFlyout } = GlobalFlyout;
 interface TableRowProps {
   deprecation: EnrichedDeprecationInfo;
   rowFieldNames: DeprecationTableColumns[];
+  mustOpenFlyout: boolean;
 }
 
 const DataStreamTableRowCells: React.FunctionComponent<TableRowProps> = ({
   rowFieldNames,
   deprecation,
+  mustOpenFlyout,
 }) => {
   const [showFlyout, setShowFlyout] = useState(false);
   const dataStreamContext = useDataStreamMigrationContext();
@@ -69,6 +71,12 @@ const DataStreamTableRowCells: React.FunctionComponent<TableRowProps> = ({
       uiMetricService.trackUiMetric(METRIC_TYPE.CLICK, UIM_DATA_STREAM_REINDEX_OPEN_FLYOUT_CLICK);
     }
   }, [showFlyout]);
+
+  useEffect(() => {
+    if (mustOpenFlyout) {
+      setShowFlyout(true);
+    }
+  }, [mustOpenFlyout]);
 
   return (
     <>

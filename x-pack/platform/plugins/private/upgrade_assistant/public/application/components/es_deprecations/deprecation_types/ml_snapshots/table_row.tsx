@@ -22,11 +22,14 @@ interface TableRowProps {
   deprecation: EnrichedDeprecationInfo;
   rowFieldNames: DeprecationTableColumns[];
   mlUpgradeModeEnabled: boolean;
+
+  mustOpenFlyout: boolean;
 }
 
 export const MlSnapshotsTableRowCells: React.FunctionComponent<TableRowProps> = ({
   rowFieldNames,
   deprecation,
+  mustOpenFlyout,
 }) => {
   const [showFlyout, setShowFlyout] = useState(false);
   const snapshotState = useMlSnapshotContext();
@@ -58,6 +61,12 @@ export const MlSnapshotsTableRowCells: React.FunctionComponent<TableRowProps> = 
       });
     }
   }, [snapshotState, addContentToGlobalFlyout, showFlyout, deprecation, closeFlyout]);
+
+  useEffect(() => {
+    if (mustOpenFlyout) {
+      setShowFlyout(true);
+    }
+  }, [mustOpenFlyout]);
 
   return (
     <>
