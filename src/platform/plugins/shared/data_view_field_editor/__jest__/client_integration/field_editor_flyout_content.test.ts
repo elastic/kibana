@@ -172,6 +172,26 @@ describe('<FieldEditorFlyoutContent />', () => {
         script: { source: 'echo("hello")' },
         format: null,
       });
+
+      await toggleFormRow('popularity');
+      await fields.updatePopularity('5');
+
+      await waitForUpdates();
+
+      await act(async () => {
+        find('fieldSaveButton').simulate('click');
+        jest.advanceTimersByTime(0); // advance timers to allow the form to validate
+      });
+
+      fieldReturned = onSave.mock.calls[onSave.mock.calls.length - 1][0];
+
+      expect(fieldReturned).toEqual({
+        name: 'someName',
+        type: 'date',
+        script: { source: 'echo("hello")' },
+        format: null,
+        popularity: 5,
+      });
     });
 
     test('should not block validation if no documents could be fetched from server', async () => {
