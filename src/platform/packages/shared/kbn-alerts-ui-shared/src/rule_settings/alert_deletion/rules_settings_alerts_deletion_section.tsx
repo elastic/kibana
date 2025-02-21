@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { memo } from 'react';
+import React from 'react';
 import {
   EuiDescribedFormGroup,
   EuiEmptyPrompt,
@@ -19,19 +19,37 @@ import {
   EuiSpacer,
   EuiSwitch,
   EuiText,
+  EuiPanel,
+  EuiSkeletonRectangle,
 } from '@elastic/eui';
 import type { RulesSettingsAlertDeletionProperties } from '@kbn/alerting-types/rule_settings';
+import type { HttpStart } from '@kbn/core/public';
 import * as i18n from './translations';
+import { useFetchAlertsDeletionPreview } from '../../common/hooks/alert_deletion/use_fetch_alert_deletion_preview';
 
 interface Props {
   onChange: (key: keyof RulesSettingsAlertDeletionProperties, value: number | boolean) => void;
   settings?: RulesSettingsAlertDeletionProperties;
   canWrite: boolean;
   hasError: boolean;
+  http: HttpStart;
 }
-export const RulesSettingsAlertsDeletionSection = memo((props: Props) => {
-  const { onChange, settings, hasError, canWrite } = props;
+export const RulesSettingsAlertsDeletionSection = (props: Props) => {
+  const { onChange, settings, hasError, canWrite, http } = props;
 
+  // TODO: debounce needed?
+  const {
+    isLoading: isLoadingPreview,
+    isValid: isValidPreview,
+    data: previewData,
+  } = useFetchAlertsDeletionPreview({
+    http,
+    enabled: true,
+    settings,
+  });
+
+  // TODO: initial fetching must be done here
+  // TODO: error
   if (hasError || !settings) {
     return (
       <EuiEmptyPrompt
@@ -123,12 +141,23 @@ export const RulesSettingsAlertsDeletionSection = memo((props: Props) => {
           </EuiFlexItem>
         </EuiFlexGroup>
 
-        {/* // TODO: https://github.com/elastic/kibana/issues/209266
-        <EuiSpacer size="m" />
-        <EuiPanel borderRadius="none" color="subdued">
-          {ALERT_DELETION_LAST_RUN}
-        </EuiPanel> */}
+        {isValidPreview && (
+          <>
+            <EuiSpacer size="m" />
+            <EuiSkeletonRectangle
+              isLoading={isLoadingPreview}
+              contentAriaLabel={i18n.ALERT_DELETION_AFFECTED_ALERTS_ARIA}
+              width={'100%'}
+              height={48}
+              borderRadius="none"
+            >
+              <EuiPanel borderRadius="none" color="subdued">
+                {i18n.ALERT_DELETION_AFFECTED_ALERTS(previewData!.affectedAlertCount)}
+              </EuiPanel>
+            </EuiSkeletonRectangle>
+          </>
+        )}
       </EuiDescribedFormGroup>
     </EuiForm>
   );
-});
+};

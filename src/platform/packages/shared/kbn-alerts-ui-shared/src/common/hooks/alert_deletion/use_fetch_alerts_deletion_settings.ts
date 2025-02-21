@@ -10,7 +10,7 @@
 import { useQuery } from '@tanstack/react-query';
 import type { HttpStart } from '@kbn/core-http-browser';
 import type { RulesSettingsAlertDeletion } from '@kbn/alerting-types/rule_settings';
-import { fetchAlertsDeletionSettings } from '../apis/fetch_alerts_deletion_settings';
+import { fetchAlertDeletionSettings } from '../../apis/alert_deletion_settings';
 
 interface Props {
   http: HttpStart;
@@ -20,13 +20,11 @@ interface Props {
 export const useFetchAlertsDeletionSettings = (props: Props) => {
   const { http, enabled, onSuccess } = props;
 
-  const queryFn = () => {
-    return fetchAlertsDeletionSettings({ http });
-  };
-
   const { data, isFetching, isError, isLoadingError, isLoading, isInitialLoading } = useQuery({
     queryKey: ['fetchAlertDeletionSettings'],
-    queryFn,
+    queryFn: () => {
+      return fetchAlertDeletionSettings({ http });
+    },
     onSuccess,
     enabled,
     refetchOnWindowFocus: false,
