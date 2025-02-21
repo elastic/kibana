@@ -150,7 +150,7 @@ describe('Panel', () => {
       expect(queryByTestId(/sideNavPanel/)).toBeVisible();
 
       // close the panel
-      (await findByTestId(/nav-item-id-group1/)).click();
+      await userEvent.click(await findByTestId(/nav-item-id-group1/));
       expect(queryByTestId(/sideNavPanel/)).toBeNull();
     });
 
