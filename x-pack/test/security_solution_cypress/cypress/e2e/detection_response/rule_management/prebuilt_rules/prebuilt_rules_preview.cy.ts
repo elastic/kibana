@@ -73,7 +73,7 @@ import { enableRules, waitForRulesToFinishExecution } from '../../../../tasks/ap
 const PREVIEW_TABS = {
   OVERVIEW: 'Overview',
   JSON_VIEW: 'JSON view',
-  UPDATES: 'Updates', // Currently open by default on upgrade
+  UPDATES: 'Elastic update overview', // Currently open by default on upgrade
 };
 
 describe(
