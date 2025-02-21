@@ -109,7 +109,7 @@ export const getPrebuiltNewTermsRuleSpecificFieldsMock = (): NewTermsRuleCreateF
   query: 'user.name: *',
   language: 'kuery',
   new_terms_fields: ['user.name'],
-  history_window_start: 'now-14d',
+  history_window_start: 'now-1h',
 });
 
 export const getPrebuiltEsqlRuleSpecificFieldsMock = (): EsqlRuleCreateFields => ({
