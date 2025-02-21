@@ -32,17 +32,14 @@ import {
   isOptionItem,
   isRestartingExpression,
   isSourceCommand,
-  isSourceItem,
   isTimeIntervalItem,
   getAllFunctions,
   isSingleItem,
   nonNullable,
   getColumnExists,
   findPreviousWord,
-  noCaseCompare,
   correctQuerySyntax,
   getColumnByName,
-  findFinalWord,
   getAllCommands,
   getExpressionType,
 } from '../shared/helpers';
@@ -56,7 +53,6 @@ import {
   pipeCompleteItem,
 } from './complete_items';
 import {
-  buildFieldsDefinitions,
   buildPoliciesDefinitions,
   getNewVariableSuggestion,
   getFunctionSuggestions,
@@ -1245,76 +1241,6 @@ async function getOptionArgsSuggestions(
   const fieldsMap = await getFieldsMaps();
   const anyVariables = collectVariables(commands, fieldsMap, innerText);
 
-  if (command.name === 'enrich') {
-    if (option.name === 'with') {
-      const policyName = isSourceItem(command.args[0]) ? command.args[0].name : undefined;
-      if (policyName) {
-        const policyMetadata = await getPolicyMetadata(policyName);
-        const anyEnhancedVariables = collectVariables(
-          commands,
-          appendEnrichFields(fieldsMap, policyMetadata),
-          innerText
-        );
-
-        if (isNewExpression || noCaseCompare(findPreviousWord(innerText), 'WITH')) {
-          suggestions.push(getNewVariableSuggestion(findNewVariable(anyEnhancedVariables)));
-        }
-
-        // make sure to remove the marker arg from the assign fn
-        const assignFn = isAssignment(lastArg)
-          ? (removeMarkerArgFromArgsList(lastArg) as ESQLFunction)
-          : undefined;
-
-        if (policyMetadata) {
-          if (isNewExpression || (assignFn && !isAssignmentComplete(assignFn))) {
-            // ... | ENRICH ... WITH a =
-            // ... | ENRICH ... WITH b
-            const fieldSuggestions = buildFieldsDefinitions(policyMetadata.enrichFields);
-            // in this case, we don't want to open the suggestions menu when the field is accepted
-            // because we're keeping the suggestions simple here for now. Could always revisit.
-            fieldSuggestions.forEach((s) => (s.command = undefined));
-
-            // attach the replacement range if needed
-            const lastWord = findFinalWord(innerText);
-            if (lastWord) {
-              // ENRICH ... WITH a <suggest>
-              const rangeToReplace = {
-                start: innerText.length - lastWord.length + 1,
-                end: innerText.length + 1,
-              };
-              fieldSuggestions.forEach((s) => (s.rangeToReplace = rangeToReplace));
-            }
-            suggestions.push(...fieldSuggestions);
-          }
-        }
-
-        if (
-          assignFn &&
-          hasSameArgBothSides(assignFn) &&
-          !isNewExpression &&
-          !isIncompleteItem(assignFn)
-        ) {
-          // ... | ENRICH ... WITH a
-          // effectively only assign will apper
-          suggestions.push(
-            ...pushItUpInTheList(getOperatorSuggestions({ command: command.name }), true)
-          );
-        }
-
-        if (
-          assignFn &&
-          (isAssignmentComplete(assignFn) || hasSameArgBothSides(assignFn)) &&
-          !isNewExpression
-        ) {
-          suggestions.push(
-            ...getFinalSuggestions({
-              comma: true,
-            })
-          );
-        }
-      }
-    }
-  }
   if (command.name === 'rename') {
     if (option.args.length < 2) {
       suggestions.push(...buildVariablesDefinitions([findNewVariable(anyVariables)]));
