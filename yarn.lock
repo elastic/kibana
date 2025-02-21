@@ -5473,7 +5473,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/ecs-data-quality-dashboard@link:x-pack/solutions/security/packages/ecs_data_quality_dashboard":
+"@kbn/ecs-data-quality-dashboard@link:x-pack/solutions/security/packages/ecs-data-quality-dashboard":
   version "0.0.0"
   uid ""
 
@@ -6277,11 +6277,11 @@
   version "0.0.0"
   uid ""
 
-"@kbn/management-settings-application@link:src/platform/packages/private/kbn-management/settings/application":
+"@kbn/management-settings-application@link:src/platform/packages/shared/kbn-management/settings/application":
   version "0.0.0"
   uid ""
 
-"@kbn/management-settings-components-field-category@link:src/platform/packages/private/kbn-management/settings/components/field_category":
+"@kbn/management-settings-components-field-category@link:src/platform/packages/shared/kbn-management/settings/components/field_category":
   version "0.0.0"
   uid ""
 
@@ -6293,7 +6293,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/management-settings-components-form@link:src/platform/packages/private/kbn-management/settings/components/form":
+"@kbn/management-settings-components-form@link:src/platform/packages/shared/kbn-management/settings/components/form":
   version "0.0.0"
   uid ""
 
@@ -6317,7 +6317,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/management-storybook-config@link:packages/kbn-management/storybook/config":
+"@kbn/management-storybook-config@link:src/platform/packages/shared/kbn-management/storybook/config":
   version "0.0.0"
   uid ""
 
@@ -7205,7 +7205,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/security-solution-side-nav@link:x-pack/solutions/security/packages/side_nav":
+"@kbn/security-solution-side-nav@link:x-pack/solutions/security/packages/side-nav":
   version "0.0.0"
   uid ""
 
@@ -7229,7 +7229,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/securitysolution-data-table@link:x-pack/solutions/security/packages/data_table":
+"@kbn/securitysolution-data-table@link:x-pack/solutions/security/packages/data-table":
   version "0.0.0"
   uid ""
 
@@ -7321,7 +7321,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/serverless-common-settings@link:src/platform/packages/private/serverless/settings/common":
+"@kbn/serverless-common-settings@link:src/platform/packages/shared/serverless/settings/common":
   version "0.0.0"
   uid ""
 
@@ -7345,11 +7345,11 @@
   version "0.0.0"
   uid ""
 
-"@kbn/serverless-storybook-config@link:packages/serverless/storybook/config":
+"@kbn/serverless-storybook-config@link:src/platform/packages/shared/serverless/storybook/config":
   version "0.0.0"
   uid ""
 
-"@kbn/serverless-types@link:src/platform/packages/private/serverless/types":
+"@kbn/serverless-types@link:src/platform/packages/shared/serverless/types":
   version "0.0.0"
   uid ""
 
@@ -7657,6 +7657,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/storage-adapter@link:src/platform/packages/shared/kbn-storage-adapter":
+  version "0.0.0"
+  uid ""
+
 "@kbn/storybook@link:packages/kbn-storybook":
   version "0.0.0"
   uid ""
@@ -7669,7 +7673,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/streams-schema@link:x-pack/solutions/observability/packages/kbn-streams-schema":
+"@kbn/streams-schema@link:x-pack/platform/packages/shared/kbn-streams-schema":
   version "0.0.0"
   uid ""
 
@@ -7797,6 +7801,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/traced-es-client@link:src/platform/packages/shared/kbn-traced-es-client":
+  version "0.0.0"
+  uid ""
+
 "@kbn/transform-plugin@link:x-pack/platform/plugins/private/transform":
   version "0.0.0"
   uid ""
@@ -7906,6 +7914,14 @@
   uid ""
 
 "@kbn/unified-search-plugin@link:src/platform/plugins/shared/unified_search":
+  version "0.0.0"
+  uid ""
+
+"@kbn/unified-tabs-examples-plugin@link:examples/unified_tabs_examples":
+  version "0.0.0"
+  uid ""
+
+"@kbn/unified-tabs@link:src/platform/packages/shared/kbn-unified-tabs":
   version "0.0.0"
   uid ""
 
@@ -13314,10 +13330,10 @@
     use-isomorphic-layout-effect "^1.1.2"
     use-sync-external-store "^1.0.0"
 
-"@xstate5/react@npm:@xstate/react@^4.1.2":
-  version "4.1.2"
-  resolved "https://registry.yarnpkg.com/@xstate/react/-/react-4.1.2.tgz#4bfcdf2d9e9ef1eaea7388d1896649345e6679cd"
-  integrity sha512-orAidFrKCrU0ZwN5l/ABPlBfW2ziRDT2RrYoktRlZ0WRoLvA2E/uAC1JpZt43mCLtc8jrdwYCgJiqx1V8NvGTw==
+"@xstate5/react@npm:@xstate/react@^5.0.2":
+  version "5.0.2"
+  resolved "https://registry.yarnpkg.com/@xstate/react/-/react-5.0.2.tgz#92185d20efedac97350c996cda29749c2e3fdbf1"
+  integrity sha512-x5GOrE0ZYjU2ba986u0CCp7SaPwzElSn1SW0mZ9MuBgsZ+BW7vTLVOvGmURynwojdso8d6nVbK3c2+MRVqGVgA==
   dependencies:
     use-isomorphic-layout-effect "^1.1.2"
     use-sync-external-store "^1.2.0"
@@ -15455,10 +15471,10 @@ chrome-trace-event@^1.0.2:
   dependencies:
     tslib "^1.9.0"
 
-chromedriver@^132.0.0:
-  version "132.0.1"
-  resolved "https://registry.yarnpkg.com/chromedriver/-/chromedriver-132.0.1.tgz#55f288943ac68ad262b3267e7696538d4bda918a"
-  integrity sha512-M3XyeyOdYfEiw3plMeEvF/iMwluOH9+8K5mJwFmxllFBPfHvDGX1Oeys3GNzMyhqQ1lJbRX7B6bp+323LLd5lg==
+chromedriver@^133.0.0:
+  version "133.0.0"
+  resolved "https://registry.yarnpkg.com/chromedriver/-/chromedriver-133.0.0.tgz#56dedd23974f986ef5fb1ec3402d2d5b845e35dc"
+  integrity sha512-7arRrtD9WGSlemMLE4IOoD42OSKKyOtQP/Z0x/WB5jYSaCzcI95j67EK0wQ2w1y5IjSJnYvnmXOJM6Nla4OG2w==
   dependencies:
     "@testim/chrome-version" "^1.1.4"
     axios "^1.7.4"
@@ -29710,7 +29726,7 @@ select-hose@^2.0.0:
   resolved "https://registry.yarnpkg.com/select-hose/-/select-hose-2.0.0.tgz#625d8658f865af43ec962bfc376a37359a4994ca"
   integrity sha1-Yl2GWPhlr0Psliv8N2o3NZpJlMo=
 
-selenium-webdriver@^4.28.0:
+selenium-webdriver@^4.28.1:
   version "4.28.1"
   resolved "https://registry.yarnpkg.com/selenium-webdriver/-/selenium-webdriver-4.28.1.tgz#0f6cc4fbc83cee3fdf8b116257656892957b72da"
   integrity sha512-TwbTpu/NUQkorBODGAkGowJ8sar63bvqi66/tjqhS05rBl34HkVp8DoRg1cOv2iSnNonVSbkxazS3wjbc+NRtg==
@@ -34058,10 +34074,10 @@ xpath@^0.0.33:
   resolved "https://registry.yarnpkg.com/xpath/-/xpath-0.0.33.tgz#5136b6094227c5df92002e7c3a13516a5074eb07"
   integrity sha512-NNXnzrkDrAzalLhIUc01jO2mOzXGXh1JwPgkihcLLzw98c0WgYDmmjSh1Kl3wzaxSVWMuA+fe0WTWOBDWCBmNA==
 
-"xstate5@npm:xstate@^5.18.1", xstate@^5.18.1:
-  version "5.18.1"
-  resolved "https://registry.yarnpkg.com/xstate/-/xstate-5.18.1.tgz#c4d43ceaba6e6c31705d36bd96e285de4be4f7f4"
-  integrity sha512-m02IqcCQbaE/kBQLunwub/5i8epvkD2mFutnL17Oeg1eXTShe1sRF4D5mhv1dlaFO4vbW5gRGRhraeAD5c938g==
+"xstate5@npm:xstate@^5.19.2", xstate@^5.19.2:
+  version "5.19.2"
+  resolved "https://registry.yarnpkg.com/xstate/-/xstate-5.19.2.tgz#db3f1ee614bbb6a49ad3f0c96ddbf98562d456ba"
+  integrity sha512-B8fL2aP0ogn5aviAXFzI5oZseAMqN00fg/TeDa3ZtatyDcViYLIfuQl4y8qmHCiKZgGEzmnTyNtNQL9oeJE2gw==
 
 xstate@^4.38.2:
   version "4.38.2"
