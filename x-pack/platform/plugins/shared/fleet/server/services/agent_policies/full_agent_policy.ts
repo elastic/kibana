@@ -520,12 +520,13 @@ export function transformOutputToFullPolicyOutput(
     ...(!isShipperDisabled ? generalShipperData : {}),
     ...(ca_sha256 ? { ca_sha256 } : {}),
     ...(ca_trusted_fingerprint ? { 'ssl.ca_trusted_fingerprint': ca_trusted_fingerprint } : {}),
+    ...((output.type === outputType.Kafka || output.type === outputType.Logstash) && ssl
+      ? { ssl }
+      : {}),
+    ...((output.type === outputType.Kafka || output.type === outputType.Logstash) && secrets
+      ? { secrets }
+      : {}),
   };
-
-  if (output.type === outputType.Kafka || output.type === outputType.Logstash) {
-    newOutput.ssl = { ...(ssl ? { ssl } : {}) };
-    newOutput.secrets = { ...(secrets ? { secrets } : {}) };
-  }
 
   if (proxy) {
     newOutput.proxy_url = proxy.url;
