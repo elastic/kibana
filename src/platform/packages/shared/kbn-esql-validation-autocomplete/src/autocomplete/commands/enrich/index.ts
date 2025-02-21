@@ -8,7 +8,7 @@
  */
 
 import { ESQLSource } from '@kbn/esql-ast';
-import { findFinalWord, isSingleItem } from '../../../shared/helpers';
+import { findFinalWord, findPreviousWord, isSingleItem } from '../../../shared/helpers';
 import { CommandSuggestParams } from '../../../definitions/types';
 import type { SuggestionRawDefinition } from '../../types';
 import {
@@ -20,7 +20,13 @@ import {
   onSuggestion,
   withSuggestion,
 } from './util';
-import { pipeCompleteItem } from '../../complete_items';
+import { commaCompleteItem, pipeCompleteItem } from '../../complete_items';
+import {
+  TRIGGER_SUGGESTION_COMMAND,
+  buildFieldsDefinitions,
+  getNewVariableSuggestion,
+  getOperatorSuggestions,
+} from '../../factories';
 
 export async function suggest({
   innerText,
@@ -28,14 +34,44 @@ export async function suggest({
   getPolicies,
   getPolicyMetadata,
   getAllColumnNames,
+  getSuggestedVariableName,
+  columnExists,
 }: CommandSuggestParams<'enrich'>): Promise<SuggestionRawDefinition[]> {
   const pos = getPosition(innerText, command);
+
+  const policyName = (
+    command.args.find((arg) => isSingleItem(arg) && arg.type === 'source') as ESQLSource | undefined
+  )?.name;
+
+  const getFieldSuggestionsForWithClause = async () => {
+    if (!policyName) {
+      return [];
+    }
+
+    const policyMetadata = await getPolicyMetadata(policyName);
+    if (!policyMetadata) {
+      return [];
+    }
+
+    const fieldSuggestions = buildFieldsDefinitions(policyMetadata.enrichFields);
+
+    const lastWord = findFinalWord(innerText);
+    if (lastWord) {
+      // ENRICH ... WITH a <suggest>
+      const rangeToReplace = {
+        start: innerText.length - lastWord.length + 1,
+        end: innerText.length + 1,
+      };
+      fieldSuggestions.forEach((s) => (s.rangeToReplace = rangeToReplace));
+    }
+    return fieldSuggestions;
+  };
 
   switch (pos) {
     case Position.MODE:
       return modeSuggestions;
 
-    case Position.POLICY:
+    case Position.POLICY: {
       const policies = await getPolicies();
       const lastWord = findFinalWord(innerText);
       if (lastWord !== '') {
@@ -47,15 +83,12 @@ export async function suggest({
         });
       }
       return policies.length ? policies : [noPoliciesAvailableSuggestion];
+    }
 
     case Position.AFTER_POLICY:
       return [onSuggestion, withSuggestion, pipeCompleteItem];
 
-    case Position.MATCH_FIELD:
-      const policyName = (
-        command.args.find((arg) => isSingleItem(arg) && arg.type === 'source') as ESQLSource
-      )?.name;
-
+    case Position.MATCH_FIELD: {
       if (!policyName) {
         return [];
       }
@@ -66,9 +99,38 @@ export async function suggest({
       }
 
       return buildMatchingFieldsDefinition(policyMetadata.matchField, getAllColumnNames());
+    }
 
-    case Position.AFTER_ON:
+    case Position.AFTER_ON_CLAUSE:
       return [withSuggestion, pipeCompleteItem];
+
+    case Position.WITH_NEW_CLAUSE: {
+      const suggestions: SuggestionRawDefinition[] = [];
+      suggestions.push(getNewVariableSuggestion(getSuggestedVariableName()));
+      suggestions.push(...(await getFieldSuggestionsForWithClause()));
+      return suggestions;
+    }
+
+    case Position.WITH_AFTER_FIRST_WORD: {
+      const word = findPreviousWord(innerText);
+      if (columnExists(word)) {
+        // comma or pipe
+        return [pipeCompleteItem, { ...commaCompleteItem, command: TRIGGER_SUGGESTION_COMMAND }];
+      } else {
+        // assignment
+        return getOperatorSuggestions({ command: 'enrich' });
+      }
+    }
+
+    case Position.WITH_AFTER_ASSIGNMENT: {
+      const suggestions: SuggestionRawDefinition[] = [];
+      suggestions.push(...(await getFieldSuggestionsForWithClause()));
+      return suggestions;
+    }
+
+    case Position.WITH_AFTER_COMPLETE_CLAUSE: {
+      return [pipeCompleteItem, { ...commaCompleteItem, command: TRIGGER_SUGGESTION_COMMAND }];
+    }
 
     default:
       return [];

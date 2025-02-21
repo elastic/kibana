@@ -17,13 +17,17 @@ describe('autocomplete.suggest', () => {
       .map(({ name, suggestedAs }) => suggestedAs || name)
       .map((name) => `${name} `);
 
+    let assertSuggestions: Awaited<ReturnType<typeof setup>>['assertSuggestions'];
+    beforeEach(async () => {
+      const setupResult = await setup();
+      assertSuggestions = setupResult.assertSuggestions;
+    });
+
     it('suggests policy names', async () => {
-      const { assertSuggestions } = await setup();
       await assertSuggestions(`from a | enrich /`, expectedPolicyNameSuggestions);
     });
 
     test('modes', async () => {
-      const { assertSuggestions } = await setup();
       await assertSuggestions(
         `from a | enrich _/`,
         modes.map((mode) => `_${mode}:$0`),
@@ -50,12 +54,10 @@ describe('autocomplete.suggest', () => {
     });
 
     it('suggests ON and WITH after policy name', async () => {
-      const { assertSuggestions } = await setup();
       await assertSuggestions(`from a | enrich policy /`, ['ON ', 'WITH ', '| ']);
     });
 
     it('suggests fields after ON', async () => {
-      const { assertSuggestions } = await setup();
       await assertSuggestions(
         `from a | enrich policy on /`,
         getFieldNamesByType('any').map((v) => `${v} `)
@@ -63,46 +65,46 @@ describe('autocomplete.suggest', () => {
     });
 
     it('suggests WITH after ON <field>', async () => {
-      const { assertSuggestions } = await setup();
       await assertSuggestions(`from a | enrich policy on field /`, ['WITH ', '| ']);
     });
 
-    it('suggests fields after WITH', async () => {
-      const { assertSuggestions } = await setup();
+    it('suggests fields for new clauses', async () => {
       await assertSuggestions(`from a | enrich policy on field with /`, [
         'var0 = ',
         ...getPolicyFields('policy'),
-      ]);
-      await assertSuggestions(`from a | enrich policy on b with var0 /`, ['= $0', ',', '| ']);
-      await assertSuggestions(`from a | enrich policy on b with var0 = /`, [
-        ...getPolicyFields('policy'),
-      ]);
-      await assertSuggestions(`from a | enrich policy on b with var0 = keywordField /`, [
-        ',',
-        '| ',
       ]);
       await assertSuggestions(`from a | enrich policy on b with var0 = keywordField, /`, [
         'var1 = ',
         ...getPolicyFields('policy'),
       ]);
-      await assertSuggestions(`from a | enrich policy on b with var0 = keywordField, var1 /`, [
-        '= $0',
+    });
+    test('after first word', async () => {
+      await assertSuggestions(`from a | enrich policy on b with var0 /`, ['= $0']);
+      await assertSuggestions(`from a | enrich policy on b with keywordField /`, [',', '| ']);
+    });
+
+    test('after open assignment', async () => {
+      await assertSuggestions(`from a | enrich policy on b with var0 = /`, [
+        ...getPolicyFields('policy'),
+      ]);
+      await assertSuggestions(`from a | enrich policy on b with var0 = keywordField, var1 =  /`, [
+        ...getPolicyFields('policy'),
+      ]);
+    });
+
+    test('after complete clause', async () => {
+      await assertSuggestions(`from a | enrich policy on b with var0 = keywordField /`, [
         ',',
         '| ',
       ]);
-      await assertSuggestions(`from a | enrich policy on b with var0 = keywordField, var1 = /`, [
-        ...getPolicyFields('policy'),
-      ]);
-      await assertSuggestions(
-        `from a | enrich policy with /`,
-        ['var0 = ', ...getPolicyFields('policy')],
-        { triggerCharacter: ' ' }
-      );
+      await assertSuggestions(`from a | enrich policy on b with var0=keywordField /`, [',', '| ']);
+      await assertSuggestions(`from a | enrich policy on b with keywordField /`, [',', '| ']);
     });
 
-    test('suggestions after a <field>', async () => {
-      const { assertSuggestions } = await setup();
-      await assertSuggestions(`from a | enrich policy with keywordField /`, ['= $0', ',', '| ']);
+    test('after user-defined column name', async () => {
+      await assertSuggestions(`from a | enrich policy on b with var0 = keywordField, var1 /`, [
+        '= $0',
+      ]);
     });
   });
 });

@@ -18,16 +18,12 @@ export enum Position {
   MODE = 'mode',
   POLICY = 'policy',
   AFTER_POLICY = 'after_policy',
-  ON = 'on',
-  AFTER_ON = 'after_on',
   MATCH_FIELD = 'match_field',
-  AFTER_MATCH_FIELD = 'after_match_field',
-  WITH = 'with',
-  AFTER_WITH = 'after_with',
-  NEW_NAME = 'new_name',
-  AFTER_NEW_NAME = 'after_new_name',
-  FIELD = 'field',
-  AFTER_FIELD = 'after_field',
+  AFTER_ON_CLAUSE = 'after_on_clause',
+  WITH_NEW_CLAUSE = 'with_new_clause',
+  WITH_AFTER_FIRST_WORD = 'with_after_first_word',
+  WITH_AFTER_ASSIGNMENT = 'with_after_assignment',
+  WITH_AFTER_COMPLETE_CLAUSE = 'with_after_complete_clause',
 }
 
 export const getPosition = (
@@ -35,13 +31,18 @@ export const getPosition = (
   command: ESQLCommand<'enrich'>
 ): Position | undefined => {
   if (command.args.length < 2) {
-    if (innerText.match(/\s+$/)) {
-      return Position.AFTER_POLICY;
+    if (innerText.match(/(:\S*|ENRICH\s+)$/i)) {
+      return Position.POLICY;
     }
     if (innerText.match(/_[^:\s]*$/)) {
       return Position.MODE;
     }
-    return Position.POLICY;
+    if (innerText.match(/:\s+$/)) {
+      return undefined;
+    }
+    if (innerText.match(/\s+$/)) {
+      return Position.AFTER_POLICY;
+    }
   }
 
   const lastArg = command.args[command.args.length - 1];
@@ -50,7 +51,22 @@ export const getPosition = (
       return Position.MATCH_FIELD;
     }
     if (innerText.match(/on\s+\S+\s+$/i)) {
-      return Position.AFTER_ON;
+      return Position.AFTER_ON_CLAUSE;
+    }
+  }
+
+  if (isSingleItem(lastArg) && lastArg.name === 'with') {
+    if (innerText.match(/[,|with]\s+$/i)) {
+      return Position.WITH_NEW_CLAUSE;
+    }
+    if (innerText.match(/[,|with]\s+\S+\s*=\s*\S+\s+$/i)) {
+      return Position.WITH_AFTER_COMPLETE_CLAUSE;
+    }
+    if (innerText.match(/[,|with]\s+\S+\s+$/i)) {
+      return Position.WITH_AFTER_FIRST_WORD;
+    }
+    if (innerText.match(/=\s+$/i)) {
+      return Position.WITH_AFTER_ASSIGNMENT;
     }
   }
 };
