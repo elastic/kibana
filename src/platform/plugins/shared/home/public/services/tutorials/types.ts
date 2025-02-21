@@ -10,7 +10,6 @@
 import type {
   TutorialSchema,
   InstructionSetSchema,
-  ParamsSchema,
   StatusCheckSchema,
   InstructionVariant,
   Instruction,
@@ -20,7 +19,6 @@ import type {
 export type TutorialType = TutorialSchema;
 export type InstructionSetType = InstructionSetSchema;
 export type InstructionsType = InstructionsSchema;
-export type ParamType = ParamsSchema;
 export type StatusCheckType = StatusCheckSchema;
 export type InstructionVariantType = InstructionVariant;
 export type InstructionType = Instruction;

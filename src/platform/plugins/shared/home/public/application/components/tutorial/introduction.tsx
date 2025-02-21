@@ -31,7 +31,7 @@ export interface IntroductionProps {
   exportedFieldUrl?: string;
   iconType?: string;
   isBeta?: boolean;
-  notices?: Array<React.ReactElement<any, string>> | null;
+  notices?: React.ReactNode;
   exportedFieldsUrl?: string;
   category?: TutorialsCategory;
 }

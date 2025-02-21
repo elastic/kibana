@@ -36,7 +36,6 @@ jest.mock('../../kibana_services', () => ({
 const replaceTemplateStrings = (text: string) => text;
 const commonProps: InstructionProps = {
   variantId: 'OSX',
-  paramValues: {},
   isCloudEnabled: false,
   replaceTemplateStrings,
 };

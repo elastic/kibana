@@ -24,7 +24,6 @@ import type { EuiContainedStepProps } from '@elastic/eui/src/components/steps/st
 import { injectI18n, FormattedMessage, InjectedIntl } from '@kbn/i18n-react';
 import { euiThemeVars } from '@kbn/ui-theme'; // FIXME: remove this, and access style variables from EUI context
 import { Instruction } from './instruction';
-import { ParameterForm } from './parameter_form';
 import { Content } from './content';
 import { INSTRUCTION_VARIANT, getDisplayText } from '../../..';
 import * as StatusCheckStates from './status_check_states';
@@ -32,7 +31,6 @@ import type {
   InstructionSetType,
   InstructionVariantType,
   InstructionType,
-  ParamType,
 } from '../../../services/tutorials/types';
 
 interface InstructionStep {
@@ -48,16 +46,12 @@ interface InstructionSetProps extends InstructionSetType {
   statusCheckState: keyof typeof StatusCheckStates;
   onStatusCheck: () => void;
   offset: number;
-  params: ParamType[];
-  paramValues: { [key: string]: string | number };
-  setParameter: (paramId: string, newValue: string) => void;
   replaceTemplateStrings: (text: string) => string;
   isCloudEnabled: boolean;
   intl: InjectedIntl;
 }
 interface InstructionSetState {
   selectedTabId: string;
-  isParamFormVisible: boolean;
 }
 interface InstructionSetTab {
   id: string;
@@ -83,7 +77,6 @@ class InstructionSetUi extends React.Component<InstructionSetProps, InstructionS
 
   initializeState(tabs: InstructionSetTab[]) {
     const initialState = {
-      isParamFormVisible: false,
       selectedTabId:
         tabs.length > 0
           ? tabs.find(({ initialSelected }) => initialSelected)?.id ?? tabs[0].id
@@ -92,12 +85,6 @@ class InstructionSetUi extends React.Component<InstructionSetProps, InstructionS
 
     return initialState;
   }
-
-  handleToggleVisibility = () => {
-    this.setState((prevState: InstructionSetState) => ({
-      isParamFormVisible: !prevState.isParamFormVisible,
-    }));
-  };
 
   onSelectedTabChanged = (id: string) => {
     this.setState({
@@ -232,12 +219,11 @@ class InstructionSetUi extends React.Component<InstructionSetProps, InstructionS
         const step = (
           <Instruction
             commands={instruction.commands}
-            paramValues={this.props.paramValues}
             textPre={instruction.textPre}
             textPost={instruction.textPost}
             replaceTemplateStrings={this.props.replaceTemplateStrings}
-            customComponentName={instruction.customComponentName as string}
-            variantId={instructionVariant.id as keyof typeof INSTRUCTION_VARIANT}
+            customComponentName={instruction.customComponentName}
+            variantId={instructionVariant.id}
             isCloudEnabled={this.props.isCloudEnabled}
           />
         );
@@ -262,23 +248,6 @@ class InstructionSetUi extends React.Component<InstructionSetProps, InstructionS
   };
 
   renderHeader = () => {
-    let paramsVisibilityToggle;
-    if (this.props.params) {
-      paramsVisibilityToggle = (
-        <EuiButton
-          size="s"
-          iconType={this.state.isParamFormVisible ? 'arrowDown' : 'arrowRight'}
-          aria-pressed={this.state.isParamFormVisible}
-          onClick={this.handleToggleVisibility}
-        >
-          <FormattedMessage
-            id="home.tutorial.instructionSet.customizeLabel"
-            defaultMessage="Customize your code snippets"
-          />
-        </EuiButton>
-      );
-    }
-
     return (
       <EuiFlexGroup responsive={false} wrap justifyContent="spaceBetween">
         <EuiFlexItem grow={false}>
@@ -286,8 +255,6 @@ class InstructionSetUi extends React.Component<InstructionSetProps, InstructionS
             <h2>{this.props.title}</h2>
           </EuiTitle>
         </EuiFlexItem>
-
-        <EuiFlexItem grow={false}>{paramsVisibilityToggle}</EuiFlexItem>
       </EuiFlexGroup>
     );
   };
@@ -310,20 +277,6 @@ class InstructionSetUi extends React.Component<InstructionSetProps, InstructionS
   };
 
   render() {
-    let paramsForm;
-    if (this.props.params && this.state.isParamFormVisible) {
-      paramsForm = (
-        <>
-          <EuiSpacer />
-          <ParameterForm
-            params={this.props.params}
-            paramValues={this.props.paramValues}
-            setParameter={this.props.setParameter}
-          />
-        </>
-      );
-    }
-
     return (
       <EuiSplitPanel.Outer>
         <EuiSplitPanel.Inner color="subdued" paddingSize="none">
@@ -331,7 +284,6 @@ class InstructionSetUi extends React.Component<InstructionSetProps, InstructionS
         </EuiSplitPanel.Inner>
         <EuiSplitPanel.Inner paddingSize="l">
           {this.renderHeader()}
-          {paramsForm}
           {this.renderCallOut()}
           {this.renderInstructions()}
         </EuiSplitPanel.Inner>

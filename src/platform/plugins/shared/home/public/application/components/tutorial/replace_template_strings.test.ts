@@ -48,14 +48,7 @@ describe('replaceTemplateStrings', () => {
       expect(result).toBe('Kibana version: 8.0.0');
     });
 
-    it('provided params', () => {
-      const text = 'Hello, {params.name}!';
-      const params = { name: 'Elastic' };
-      const result = replaceTemplateStrings(text, params);
-      expect(result).toBe('Hello, Elastic!');
-    });
-
-    it(' doc links', () => {
+    it('doc links', () => {
       const text = 'Filebeat docs: {config.docs.beats.filebeat}';
       const result = replaceTemplateStrings(text);
       expect(result).toBe(
@@ -64,7 +57,7 @@ describe('replaceTemplateStrings', () => {
     });
   });
 
-  it('should handle escaped values correctly', () => {
+  it('should handle {curlyOpen} {curlyClose} correctly', () => {
     const text = 'Curly braces: {curlyOpen}escaped{curlyClose}';
     const result = replaceTemplateStrings(text);
     expect(result).toBe('Curly braces: {escaped}');

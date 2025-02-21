@@ -16,7 +16,6 @@ export type { TutorialsRegistrySetup, TutorialsRegistryStart } from './tutorials
 
 export type {
   InstructionSetSchema,
-  ParamsSchema,
   InstructionsSchema,
   DashboardSchema,
   ArtifactsSchema,

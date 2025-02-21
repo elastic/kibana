@@ -14,7 +14,6 @@ export type {
   ArtifactsSchema,
   TutorialProvider,
   TutorialSchema,
-  ParamsSchema,
   StatusCheckSchema,
   Instruction,
   InstructionVariant,

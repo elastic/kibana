@@ -9,21 +9,18 @@
 
 import React, { Suspense, useMemo } from 'react';
 import { EuiCodeBlock, EuiSpacer, EuiLoadingSpinner, EuiErrorBoundary } from '@elastic/eui';
-import { INSTRUCTION_VARIANT } from '../../..';
 import { Content } from './content';
 import { getServices } from '../../kibana_services';
 import { InstructionType } from '../../../services/tutorials/types';
 
 export interface InstructionProps extends InstructionType {
-  variantId: keyof typeof INSTRUCTION_VARIANT;
-  paramValues: { [key: string]: string | number };
+  variantId: string;
   isCloudEnabled: boolean;
-  replaceTemplateStrings: (text: string, paramValues?: InstructionProps['paramValues']) => string;
+  replaceTemplateStrings: (text: string) => string;
 }
 
 export function Instruction({
   commands,
-  paramValues,
   textPost,
   textPre,
   replaceTemplateStrings,
@@ -52,7 +49,9 @@ export function Instruction({
       </>
     );
   }
-  const customComponent = tutorialService.getCustomComponent(customComponentName as string);
+  const customComponent = customComponentName
+    ? tutorialService.getCustomComponent(customComponentName)
+    : null;
   const LazyCustomComponent = useMemo(() => {
     if (customComponent) {
       return React.lazy(() => customComponent().then((component) => ({ default: component })));
@@ -63,7 +62,7 @@ export function Instruction({
   if (commands) {
     const cmdText = commands
       .map((cmd) => {
-        return replaceTemplateStrings(cmd, paramValues);
+        return replaceTemplateStrings(cmd);
       })
       .join('\n');
     commandBlock = (

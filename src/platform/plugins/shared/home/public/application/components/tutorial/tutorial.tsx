@@ -21,7 +21,6 @@ import {
 import type {
   TutorialType,
   InstructionSetType,
-  ParamType,
   StatusCheckType,
   InstructionsType,
 } from '../../../services/tutorials/types';
@@ -61,8 +60,6 @@ type StatusCheckStatesType = 'HAS_DATA' | 'NO_DATA' | 'ERROR' | 'NOT_CHECKED' | 
 
 interface TutorialState {
   notFound: boolean;
-  params: ParamType[];
-  paramValues: { [key: string]: string | number }; // how does it connect with server
   statusCheckStates: StatusCheckStatesType[];
   tutorial: TutorialType | null;
   visibleInstructions: string;
@@ -76,8 +73,6 @@ class TutorialUi extends React.Component<TutorialProps, TutorialState> {
 
     this.state = {
       notFound: false,
-      params: [],
-      paramValues: {},
       statusCheckStates: [],
       tutorial: null,
       visibleInstructions: props.isCloudEnabled
@@ -153,21 +148,11 @@ class TutorialUi extends React.Component<TutorialProps, TutorialState> {
   initInstructionsState = () => {
     const instructions: InstructionsType = this.getInstructions() || { instructionSets: [] };
 
-    const params = instructions.params || [];
-    const paramValues: TutorialState['paramValues'] = {};
-    if (instructions && instructions.params) {
-      instructions.params.forEach((param: ParamType) => {
-        paramValues[param.id] = param.defaultValue;
-      });
-    }
-
     const statusCheckStates = new Array(instructions?.instructionSets?.length ?? 0).fill(
       StatusCheckStates.NOT_CHECKED
     );
 
     this.setState({
-      params,
-      paramValues,
       statusCheckStates,
     });
   };
@@ -179,14 +164,6 @@ class TutorialUi extends React.Component<TutorialProps, TutorialState> {
       },
       this.initInstructionsState
     );
-  };
-
-  setParameter = (paramId: string, newValue: string) => {
-    this.setState((previousState) => {
-      const paramValues = _.cloneDeep(previousState.paramValues);
-      paramValues[paramId] = newValue;
-      return { paramValues };
-    });
   };
 
   checkInstructionSetStatus = async (instructionSetIndex: number) => {
@@ -201,9 +178,6 @@ class TutorialUi extends React.Component<TutorialProps, TutorialState> {
       return;
     }
     const esHitsCheckConfig = _.get(instructionSet, `statusCheck.esHitsCheck`);
-
-    // Checks if a custom status check callback  was registered in the CLIENT
-    // that matches the same name registered in the SERVER (customStatusCheckName)
     if (this.state.tutorial) {
       const customStatusCheckCallback = this.state.tutorial.customStatusCheckName
         ? getServices().tutorialService.getCustomStatusCheck(
@@ -245,13 +219,9 @@ class TutorialUi extends React.Component<TutorialProps, TutorialState> {
   ): Promise<StatusCheckStatesType> => {
     const { http } = getServices();
     try {
-      const index = Array.isArray(esHitsCheckConfig.index)
-        ? esHitsCheckConfig.index.join(',')
-        : esHitsCheckConfig.index;
-
       const response: { count: number } = await http.post('/api/home/hits_status', {
         body: JSON.stringify({
-          index,
+          index: esHitsCheckConfig.index,
           query: esHitsCheckConfig.query,
         }),
       });
@@ -308,11 +278,10 @@ class TutorialUi extends React.Component<TutorialProps, TutorialState> {
   onStatusCheck = (instructionSetIndex: number) => {
     this.setState(
       (prevState) => ({
-        statusCheckStates: [
-          ...prevState.statusCheckStates.slice(0, instructionSetIndex),
-          StatusCheckStates.FETCHING,
-          ...prevState.statusCheckStates.slice(instructionSetIndex + 1),
-        ],
+        statusCheckStates: {
+          ...prevState.statusCheckStates,
+          [instructionSetIndex]: StatusCheckStates.FETCHING,
+        },
       }),
       this.checkInstructionSetStatus.bind(null, instructionSetIndex)
     );
@@ -343,9 +312,6 @@ class TutorialUi extends React.Component<TutorialProps, TutorialState> {
               this.onStatusCheck(index);
             }}
             offset={currentOffset}
-            params={this.state.params}
-            paramValues={this.state.paramValues}
-            setParameter={this.setParameter}
             replaceTemplateStrings={this.props.replaceTemplateStrings}
             isCloudEnabled={this.props.isCloudEnabled}
           />
@@ -402,7 +368,7 @@ class TutorialUi extends React.Component<TutorialProps, TutorialState> {
     }
   };
 
-  renderModuleNotices(): Array<React.ReactElement<any, string>> | null {
+  renderModuleNotices(): React.ReactNode {
     const notices = getServices().tutorialService.getModuleNotices();
     if (notices.length && this.state.tutorial?.moduleName) {
       return notices.map((ModuleNotice, index) => (

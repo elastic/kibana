@@ -11,7 +11,7 @@ import React from 'react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { InstructionSet } from './instruction_set';
 import * as StatusCheckStates from './status_check_states';
-import { fireEvent, render } from '@testing-library/react';
+import { render } from '@testing-library/react';
 import { getServices } from '../../kibana_services';
 import type { InstructionVariantType } from '../../../services/tutorials/types';
 
@@ -45,14 +45,12 @@ const instructionVariants: InstructionVariantType[] = [
 const mockReplaceTemplateStrings = (text: string) => {
   return `Processed: ${text}`;
 };
-const mockSetParameter = jest.fn();
 
 const defaultProps = {
   title: 'title1',
   instructionVariants,
   onStatusCheck: () => {},
   offset: 1,
-  paramValues: {},
   statusCheckConfig: {
     title: 'custom title',
     text: 'custom status check description',
@@ -63,8 +61,6 @@ const defaultProps = {
   },
   replaceTemplateStrings: mockReplaceTemplateStrings,
   isCloudEnabled: false,
-  setParameter: mockSetParameter,
-  params: [],
 };
 
 beforeAll(() => {
@@ -155,30 +151,6 @@ describe('render InstructionSet component', () => {
     );
     expect(getByText('step 1')).toBeInTheDocument();
     expect(getByText('step 2')).toBeInTheDocument();
-  });
-
-  test('should toggle parameter form visibility', () => {
-    const { getByText, queryByText } = render(
-      <IntlProvider locale="en">
-        <InstructionSet
-          {...defaultProps}
-          statusCheckState={StatusCheckStates.NOT_CHECKED}
-          params={[{ id: 'id-1', label: 'Param 1', type: 'string' }]}
-          paramValues={{ value: 'param value' }}
-        />
-      </IntlProvider>
-    );
-
-    // Check initial state (form hidden)
-    expect(queryByText('Param 1')).not.toBeInTheDocument();
-
-    // Click to show form
-    fireEvent.click(getByText('Customize your code snippets'));
-    expect(getByText('Param 1')).toBeInTheDocument();
-
-    // Click to hide form
-    fireEvent.click(getByText('Customize your code snippets'));
-    expect(queryByText('Param 1')).not.toBeInTheDocument();
   });
 
   test('should render custom callout', () => {

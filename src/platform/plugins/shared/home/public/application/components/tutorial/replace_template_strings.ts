@@ -31,7 +31,6 @@ interface TemplateContext {
       version: string;
     };
   };
-  params: Record<string, any>;
 }
 
 // Extend the MustacheWriter class to include the escapedValue method
@@ -50,7 +49,7 @@ class CustomMustacheWriter extends Writer {
 // Can not use 'Mustache' since its a global object
 const mustacheWriter = new CustomMustacheWriter();
 
-export function replaceTemplateStrings(text: string, params = {}) {
+export function replaceTemplateStrings(text: string) {
   const { tutorialService, kibanaVersion, docLinks } = getServices();
   const variables: TemplateContext = {
     // '{' and '}' can not be used in template since they are used as template tags.
@@ -75,7 +74,6 @@ export function replaceTemplateStrings(text: string, params = {}) {
         version: kibanaVersion,
       },
     },
-    params,
   };
   mustacheWriter.parse(text, TEMPLATE_TAGS);
   return mustacheWriter.render(text, variables, {});

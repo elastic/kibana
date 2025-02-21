@@ -14,7 +14,6 @@ export { TutorialsCategory } from './lib/tutorials_registry_types';
 
 export type {
   InstructionSetSchema,
-  ParamsSchema,
   StatusCheckSchema,
   InstructionsSchema,
   InstructionVariant,
