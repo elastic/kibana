@@ -52,10 +52,7 @@ const AttackDiscoveryPageComponent: React.FC = () => {
     services: { uiSettings },
   } = useKibana();
 
-  const {
-    assistantFeatures: { attackDiscoveryAlertFiltering },
-    http,
-  } = useAssistantContext();
+  const { http } = useAssistantContext();
   const { data: aiConnectors } = useLoadConnectors({
     http,
   });
@@ -209,23 +206,13 @@ const AttackDiscoveryPageComponent: React.FC = () => {
     const size = alertsContextCount ?? DEFAULT_ATTACK_DISCOVERY_MAX_ALERTS;
     const filter = parseFilterQuery({ filterQuery, kqlError });
 
-    return attackDiscoveryAlertFiltering // feature flag enabled?
-      ? fetchAttackDiscoveries({
-          end,
-          filter, // <-- combined search bar query and filters
-          size,
-          start,
-        })
-      : fetchAttackDiscoveries({ size }); // <-- NO filtering / time ranges, feature flag is off
-  }, [
-    alertsContextCount,
-    attackDiscoveryAlertFiltering,
-    end,
-    fetchAttackDiscoveries,
-    filterQuery,
-    kqlError,
-    start,
-  ]);
+    return fetchAttackDiscoveries({
+      end,
+      filter, // <-- combined search bar query and filters
+      size,
+      start,
+    });
+  }, [alertsContextCount, end, fetchAttackDiscoveries, filterQuery, kqlError, start]);
 
   useEffect(() => {
     setSelectedConnectorReplacements(replacements);
