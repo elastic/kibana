@@ -21,7 +21,7 @@ export const DeprecationCallout = () => {
       <p>
         {i18n.translate('xpack.enterpriseSearch.deprecationCallout.description', {
           defaultMessage:
-            'The Behavioral Analytics has been deprecated and will be removed in a future release.',
+            'Behavioral Analytics has been deprecated and will be removed in a future release.',
         })}
       </p>
     </EuiCallOut>
