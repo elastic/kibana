@@ -120,7 +120,7 @@ export interface PackageClient {
   ): ReturnType<typeof getPackageInfo>;
 
   getPackages(params?: {
-    excludeInstallStatus?: false;
+    excludeInstallStatus?: boolean;
     category?: CategoryId;
     prerelease?: boolean;
   }): Promise<PackageList>;
@@ -345,7 +345,7 @@ class PackageClientImpl implements PackageClient {
   }
 
   public async getPackages(params?: {
-    excludeInstallStatus?: false;
+    excludeInstallStatus?: boolean;
     category?: CategoryId;
     prerelease?: boolean;
   }) {
