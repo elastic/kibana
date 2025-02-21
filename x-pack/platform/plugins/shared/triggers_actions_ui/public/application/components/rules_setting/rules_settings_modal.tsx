@@ -27,7 +27,7 @@ import {
   EuiEmptyPrompt,
 } from '@elastic/eui';
 import { useFetchFlappingSettings } from '@kbn/alerts-ui-shared/src/common/hooks/use_fetch_flapping_settings';
-import { useFetchAlertsDeletionSettings } from '@kbn/alerts-ui-shared/src/common/hooks/use_fetch_alerts_deletion_settings';
+import { useFetchAlertsDeletionSettings } from '@kbn/alerts-ui-shared/src/common/hooks/alert_deletion/use_fetch_alerts_deletion_settings';
 import { RulesSettingsAlertsDeletionSection } from '@kbn/alerts-ui-shared/src/rule_settings/alert_deletion/rules_settings_alerts_deletion_section';
 import type { RulesSettingsAlertDeletionProperties } from '@kbn/alerting-types/rule_settings';
 import { useKibana } from '../../../common/lib/kibana';
