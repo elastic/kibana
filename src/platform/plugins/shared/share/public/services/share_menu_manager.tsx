@@ -18,15 +18,15 @@ import { ShareMenu } from '../components/share_tabs';
 
 interface ShareMenuManagerStartDeps {
   core: CoreStart;
-  shareRegistry: ShareRegistry;
   isServerless: boolean;
+  resolveShareItemsForShareContext: ShareRegistry['resolveShareItemsForShareContext'];
 }
 
 export class ShareMenuManager {
   private isOpen = false;
   private container = document.createElement('div');
 
-  start({ core, shareRegistry, isServerless }: ShareMenuManagerStartDeps) {
+  start({ core, resolveShareItemsForShareContext, isServerless }: ShareMenuManagerStartDeps) {
     return {
       /**
        * Collects share menu items from registered providers and mounts the share context menu under
@@ -39,7 +39,7 @@ export class ShareMenuManager {
           options.onClose?.();
         };
 
-        const menuItems = shareRegistry.resolveShareItemsForShareContext({
+        const menuItems = resolveShareItemsForShareContext({
           ...options,
           isServerless,
           onClose,
