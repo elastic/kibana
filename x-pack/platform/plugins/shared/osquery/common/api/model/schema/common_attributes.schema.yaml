@@ -223,24 +223,28 @@ components:
       nullable: true
 
     KueryOrUndefined:
+      description: 'The kuery to filter the results by.'
       type: string
       nullable: true
 
     PageOrUndefined:
+      description: 'The page number to return. The default is 1.'
       type: integer
       nullable: true
 
     PageSizeOrUndefined:
+      description: 'The number of results to return per page. The default is 20.'
       type: integer
       nullable: true
 
     SortOrUndefined:
+      description: 'The field that is used to sort the results. Options include createdAt or updatedAt. The default is createdAt.'
       type: string
       nullable: true
 
     SortOrderOrUndefined:
+      description: 'Specified the sort order. Options include desc or asc. The default is desc.'
       oneOf:
-
         - type: string
           nullable: true
         - enum: [ asc, desc ]

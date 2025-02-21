@@ -32,3 +32,6 @@ export const FindLiveQueryRequestQuery = z.object({
   sort: SortOrUndefined.optional(),
   sortOrder: SortOrderOrUndefined.optional(),
 });
+
+export type FindLiveQueryResponse = z.infer<typeof FindLiveQueryResponse>;
+export const FindLiveQueryResponse = z.object({});

@@ -161,18 +161,33 @@ export const Queries = z.union([ArrayQueries, ObjectQueries]);
 export type QueriesOrUndefined = z.infer<typeof QueriesOrUndefined>;
 export const QueriesOrUndefined = Queries.nullable();
 
+/**
+ * The kuery to filter the results by.
+ */
 export type KueryOrUndefined = z.infer<typeof KueryOrUndefined>;
 export const KueryOrUndefined = z.string().nullable();
 
+/**
+ * The page number to return. The default is 1.
+ */
 export type PageOrUndefined = z.infer<typeof PageOrUndefined>;
 export const PageOrUndefined = z.number().int().nullable();
 
+/**
+ * The number of results to return per page. The default is 20.
+ */
 export type PageSizeOrUndefined = z.infer<typeof PageSizeOrUndefined>;
 export const PageSizeOrUndefined = z.number().int().nullable();
 
+/**
+ * The field that is used to sort the results. Options include createdAt or updatedAt. The default is createdAt.
+ */
 export type SortOrUndefined = z.infer<typeof SortOrUndefined>;
 export const SortOrUndefined = z.string().nullable();
 
+/**
+ * Specified the sort order. Options include desc or asc. The default is desc.
+ */
 export type SortOrderOrUndefined = z.infer<typeof SortOrderOrUndefined>;
 export const SortOrderOrUndefined = z.union([z.string().nullable(), z.unknown()]);
 
