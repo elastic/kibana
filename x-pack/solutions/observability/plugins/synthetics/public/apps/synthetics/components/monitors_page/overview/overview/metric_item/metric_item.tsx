@@ -69,7 +69,7 @@ export const MetricItem = ({
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const isErrorPopoverOpen = useSelector(selectErrorPopoverState);
   const locationName = useLocationName(monitor);
-  const { status, timestamp, ping, configIdByLocation } = useStatusByLocationOverview({
+  const { status, timestamp, configIdByLocation } = useStatusByLocationOverview({
     configId: monitor.configId,
     locationId: monitor.locationId,
   });
@@ -184,7 +184,6 @@ export const MetricItem = ({
           <MetricItemIcon
             monitor={monitor}
             status={status}
-            ping={ping}
             timestamp={timestamp}
             configIdByLocation={configIdByLocation}
           />
