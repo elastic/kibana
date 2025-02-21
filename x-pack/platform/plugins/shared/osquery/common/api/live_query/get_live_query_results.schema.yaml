@@ -7,6 +7,13 @@ components:
   schemas:
     GetLiveQueryResultsRequestQuery:
       type: object
+      description: 'The query parameters for getting live query results.'
+      example:
+        kuery: 'host.name: "foo"'
+        page: 1
+        pageSize: 10
+        sort: 'createdAt'
+        sortOrder: 'desc'
       properties:
         kuery:
           $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/KueryOrUndefined'
@@ -18,3 +25,11 @@ components:
           $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/SortOrUndefined'
         sortOrder:
           $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/SortOrderOrUndefined'
+    GetLiveQueryResultsResponse:
+      type: object
+      description: 'The response for getting live query results.'
+      properties: { }
+      example:
+        data:
+          total: 2
+          edges: [{}, {}]

@@ -56,12 +56,15 @@ paths:
           in: path
           required: true
           schema:
-            $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/Id'
+            description: 'The ID of the live query result you want to retrieve.'
+            type: string
+            example: '3c42c847-eb30-4452-80e0-728584042334'
         - name: query
           in: query
           schema:
             description: 'Additional query parameters.'
             type: object
+            example: { }
             additionalProperties: true
       responses:
         '200':
@@ -83,12 +86,16 @@ paths:
           in: path
           required: true
           schema:
-            $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/Id'
+            example: '3c42c847-eb30-4452-80e0-728584042334'
+            description: 'The ID of the live query result you want to retrieve.'
+            type: string
         - name: actionId
           in: path
           required: true
           schema:
-            $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/Id'
+            example: '609c4c66-ba3d-43fa-afdd-53e244577aa0'
+            description: 'The ID of the query action that generated the live query results.'
+            type: string
         - name: query
           in: query
           required: true
@@ -100,4 +107,4 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/DefaultSuccessResponse'
+                $ref: './get_live_query_results.schema.yaml#/components/schemas/GetLiveQueryResultsResponse'
