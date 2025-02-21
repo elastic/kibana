@@ -46,7 +46,7 @@ interface NewBaseOutput {
   ssl?: {
     certificate_authorities?: string[];
     certificate?: string;
-    key?: OutputSecret;
+    key?: string;
     verification_mode?: ValueOf<KafkaVerificationMode>;
   } | null;
   proxy_id?: string | null;

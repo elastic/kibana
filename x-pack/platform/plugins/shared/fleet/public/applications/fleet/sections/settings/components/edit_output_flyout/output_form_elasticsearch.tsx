@@ -10,6 +10,8 @@ import { EuiFieldText, EuiFormRow, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 
+import { ExperimentalFeaturesService } from '../../../../services';
+
 import { MultiRowInput } from '../multi_row_input';
 
 import { useStartServices } from '../../../../hooks';
@@ -30,12 +32,13 @@ export const OutputFormElasticsearchSection: React.FunctionComponent<Props> = (p
   const [isConvertedToSecret, setIsConvertedToSecret] = React.useState({
     sslKey: false,
   });
+  const { enableSSLSecrets } = ExperimentalFeaturesService.get();
 
   useEffect(() => {
     if (!isFirstLoad) return;
     setIsFirstLoad(false);
     // populate the secret input with the value of the plain input in order to re-save the output with secret storage
-    if (useSecretsStorage) {
+    if (useSecretsStorage && enableSSLSecrets) {
       if (inputs.sslKeyInput.value && !inputs.sslKeySecretInput.value) {
         inputs.sslKeySecretInput.setValue(inputs.sslKeyInput.value);
         inputs.sslKeyInput.clear();
@@ -49,6 +52,7 @@ export const OutputFormElasticsearchSection: React.FunctionComponent<Props> = (p
     isFirstLoad,
     setIsFirstLoad,
     isConvertedToSecret,
+    enableSSLSecrets,
   ]);
 
   const onToggleSecretAndClearValue = (secretEnabled: boolean) => {
@@ -109,7 +113,7 @@ export const OutputFormElasticsearchSection: React.FunctionComponent<Props> = (p
       <EuiSpacer size="m" />
       <SSLFormSection
         inputs={inputs}
-        useSecretsStorage={false}
+        useSecretsStorage={enableSSLSecrets && useSecretsStorage}
         isConvertedToSecret={isConvertedToSecret.sslKey}
         onToggleSecretAndClearValue={onToggleSecretAndClearValue}
       />

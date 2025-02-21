@@ -44,7 +44,7 @@ export const OutputFormRemoteEsSection: React.FunctionComponent<Props> = (props)
     kibanaAPIKey: false,
     sslKey: false,
   });
-  const { enableSyncIntegrationsOnRemote } = ExperimentalFeaturesService.get();
+  const { enableSyncIntegrationsOnRemote, enableSSLSecrets } = ExperimentalFeaturesService.get();
 
   const [isFirstLoad, setIsFirstLoad] = React.useState(true);
 
@@ -66,10 +66,12 @@ export const OutputFormRemoteEsSection: React.FunctionComponent<Props> = (props)
         isKibanaAPIKeySecret = true;
       }
       let isSslKeySecretInput = false;
-      if (inputs.sslKeyInput.value && !inputs.sslKeySecretInput.value) {
-        inputs.sslKeySecretInput.setValue(inputs.sslKeyInput.value);
-        inputs.sslKeyInput.clear();
-        isSslKeySecretInput = true;
+      if (enableSSLSecrets) {
+        if (inputs.sslKeyInput.value && !inputs.sslKeySecretInput.value) {
+          inputs.sslKeySecretInput.setValue(inputs.sslKeyInput.value);
+          inputs.sslKeyInput.clear();
+          isSslKeySecretInput = true;
+        }
       }
       setIsConvertedToSecret({
         ...isConvertedToSecret,
@@ -89,16 +91,18 @@ export const OutputFormRemoteEsSection: React.FunctionComponent<Props> = (props)
     isConvertedToSecret,
     inputs.sslKeyInput,
     inputs.sslKeySecretInput,
+    enableSSLSecrets,
   ]);
 
   const onToggleSecretAndClearValue = (secretEnabled: boolean) => {
     if (secretEnabled) {
       inputs.serviceTokenInput.clear();
       inputs.kibanaAPIKeyInput.clear();
-      inputs.sslKeyInput.clear();
+      if (enableSSLSecrets) inputs.sslKeyInput.clear();
     } else {
       inputs.serviceTokenSecretInput.setValue('');
       inputs.kibanaAPIKeySecretInput.setValue('');
+      if (enableSSLSecrets) inputs.sslKeyInput.setValue('');
     }
     setIsConvertedToSecret({
       ...isConvertedToSecret,
@@ -179,7 +183,7 @@ export const OutputFormRemoteEsSection: React.FunctionComponent<Props> = (props)
       <EuiSpacer size="m" />
       <SSLFormSection
         inputs={inputs}
-        useSecretsStorage={false}
+        useSecretsStorage={enableSSLSecrets && useSecretsStorage}
         isConvertedToSecret={isConvertedToSecret.sslKey}
         onToggleSecretAndClearValue={onToggleSecretAndClearValue}
       />

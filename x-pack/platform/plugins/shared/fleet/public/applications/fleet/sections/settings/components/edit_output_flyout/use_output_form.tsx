@@ -380,7 +380,7 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOupu
     isSSLEditable
   );
   const sslKeyInput = useInput(
-    (output?.ssl?.key as string) ?? '',
+    output?.ssl?.key ?? '',
     output?.type === 'logstash' ? validateSSLKey : undefined,
     isSSLEditable
   );
