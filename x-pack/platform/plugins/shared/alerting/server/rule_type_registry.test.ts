@@ -1014,11 +1014,13 @@ describe('Create Lifecycle', () => {
   describe('getAllTypesForCategory()', () => {
     test('should return empty when nothing is registered', () => {
       const registry = new RuleTypeRegistry(ruleTypeRegistryParams);
-      expect(registry.getAllTypesForCategories([
-        DEFAULT_APP_CATEGORIES.management.id,
-        DEFAULT_APP_CATEGORIES.observability.id,
-        DEFAULT_APP_CATEGORIES.security.id]
-      )).toEqual([]);
+      expect(
+        registry.getAllTypesForCategories([
+          DEFAULT_APP_CATEGORIES.management.id,
+          DEFAULT_APP_CATEGORIES.observability.id,
+          DEFAULT_APP_CATEGORIES.security.id,
+        ])
+      ).toEqual([]);
     });
 
     test('should return list of registered type ids for a category', () => {
@@ -1086,8 +1088,8 @@ describe('Create Lifecycle', () => {
           params: schema.any(),
         },
       });
-      const result = registry.getAllTypesForCategories(['test','test2']);
-      expect(result).toEqual(['test','test2']);
+      const result = registry.getAllTypesForCategories(['test', 'test2']);
+      expect(result).toEqual(['test', 'test2']);
     });
   });
 

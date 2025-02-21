@@ -198,7 +198,7 @@ const mockCreatePointInTimeFinderAsInternalUser = (
           isInactiveAlertsDeletionEnabled: true,
           activeAlertsDeletionThreshold: 1,
           inactiveAlertsDeletionThreshold: 30,
-          categoryIds: ['securitySolution']
+          categoryIds: ['securitySolution'],
         },
         references: [],
         namespaces: ['space-1'],
@@ -552,7 +552,10 @@ describe('AlertDeletionClient', () => {
           duration: expect.any(String),
         },
         message: 'Alert deletion task deleted 3 alerts',
-        kibana: { space_ids: ['default'] },
+        kibana: {
+          alert: { deletion: { num_deleted: 3 } },
+          space_ids: ['default'],
+        },
       });
       expect(eventLogger.logEvent).toHaveBeenNthCalledWith(2, {
         '@timestamp': expect.any(String),
@@ -564,7 +567,7 @@ describe('AlertDeletionClient', () => {
           duration: expect.any(String),
         },
         message: 'Alert deletion task deleted 10 alerts',
-        kibana: { space_ids: ['space-1'] },
+        kibana: { alert: { deletion: { num_deleted: 10 } }, space_ids: ['space-1'] },
       });
       expect(eventLogger.logEvent).toHaveBeenNthCalledWith(3, {
         '@timestamp': expect.any(String),
@@ -576,7 +579,10 @@ describe('AlertDeletionClient', () => {
           duration: expect.any(String),
         },
         message: 'Alert deletion task deleted 125 alerts',
-        kibana: { space_ids: ['another-space'] },
+        kibana: {
+          alert: { deletion: { num_deleted: 125 } },
+          space_ids: ['another-space'],
+        },
       });
     });
 
@@ -607,7 +613,10 @@ describe('AlertDeletionClient', () => {
             duration: expect.any(String),
           },
           error: { message: `error getting saved object` },
-          kibana: { space_ids: ['default', 'space-1', 'another-space'] },
+          kibana: {
+            alert: { deletion: { num_deleted: 0 } },
+            space_ids: ['default', 'space-1', 'another-space'],
+          },
         });
       });
 
@@ -679,7 +688,7 @@ describe('AlertDeletionClient', () => {
             duration: expect.any(String),
           },
           message: 'Alert deletion task deleted 3 alerts',
-          kibana: { space_ids: ['default'] },
+          kibana: { alert: { deletion: { num_deleted: 3 } }, space_ids: ['default'] },
         });
         expect(eventLogger.logEvent).toHaveBeenNthCalledWith(2, {
           '@timestamp': expect.any(String),
@@ -691,7 +700,7 @@ describe('AlertDeletionClient', () => {
             duration: expect.any(String),
           },
           message: 'Alert deletion task deleted 10 alerts',
-          kibana: { space_ids: ['space-1'] },
+          kibana: { alert: { deletion: { num_deleted: 10 } }, space_ids: ['space-1'] },
         });
         expect(eventLogger.logEvent).toHaveBeenNthCalledWith(3, {
           '@timestamp': expect.any(String),
@@ -703,7 +712,7 @@ describe('AlertDeletionClient', () => {
             duration: expect.any(String),
           },
           error: { message: 'Error deleting active alerts: search failure!' },
-          kibana: { space_ids: ['another-space'] },
+          kibana: { alert: { deletion: { num_deleted: 123 } }, space_ids: ['another-space'] },
         });
       });
 
@@ -843,7 +852,7 @@ describe('AlertDeletionClient', () => {
             duration: expect.any(String),
           },
           message: 'Alert deletion task deleted 3 alerts',
-          kibana: { space_ids: ['default'] },
+          kibana: { alert: { deletion: { num_deleted: 3 } }, space_ids: ['default'] },
         });
         expect(eventLogger.logEvent).toHaveBeenNthCalledWith(2, {
           '@timestamp': expect.any(String),
@@ -855,7 +864,7 @@ describe('AlertDeletionClient', () => {
             duration: expect.any(String),
           },
           message: 'Alert deletion task deleted 10 alerts',
-          kibana: { space_ids: ['space-1'] },
+          kibana: { alert: { deletion: { num_deleted: 10 } }, space_ids: ['space-1'] },
         });
         expect(eventLogger.logEvent).toHaveBeenNthCalledWith(3, {
           '@timestamp': expect.any(String),
@@ -867,7 +876,7 @@ describe('AlertDeletionClient', () => {
             duration: expect.any(String),
           },
           error: { message: `Error deleting alert "def" - not found` },
-          kibana: { space_ids: ['another-space'] },
+          kibana: { alert: { deletion: { num_deleted: 124 } }, space_ids: ['another-space'] },
         });
       });
 
@@ -1000,7 +1009,7 @@ describe('AlertDeletionClient', () => {
             duration: expect.any(String),
           },
           message: 'Alert deletion task deleted 3 alerts',
-          kibana: { space_ids: ['default'] },
+          kibana: { alert: { deletion: { num_deleted: 3 } }, space_ids: ['default'] },
         });
         expect(eventLogger.logEvent).toHaveBeenNthCalledWith(2, {
           '@timestamp': expect.any(String),
@@ -1012,7 +1021,7 @@ describe('AlertDeletionClient', () => {
             duration: expect.any(String),
           },
           error: { message: `Error deleting inactive alerts: delete by query failure` },
-          kibana: { space_ids: ['space-1'] },
+          kibana: { alert: { deletion: { num_deleted: 0 } }, space_ids: ['space-1'] },
         });
         expect(eventLogger.logEvent).toHaveBeenNthCalledWith(3, {
           '@timestamp': expect.any(String),
@@ -1024,7 +1033,7 @@ describe('AlertDeletionClient', () => {
             duration: expect.any(String),
           },
           message: 'Alert deletion task deleted 125 alerts',
-          kibana: { space_ids: ['another-space'] },
+          kibana: { alert: { deletion: { num_deleted: 125 } }, space_ids: ['another-space'] },
         });
       });
     });

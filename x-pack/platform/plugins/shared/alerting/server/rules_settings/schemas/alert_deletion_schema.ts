@@ -28,5 +28,5 @@ export const alertDeletionSchema = schema.object({
         ])
       )
     )
-  )
+  ),
 });

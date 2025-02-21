@@ -118,10 +118,13 @@ export class AlertDeletionClient {
       isInactiveAlertsDeletionEnabled,
       activeAlertsDeletionThreshold,
       inactiveAlertsDeletionThreshold,
-      categoryIds
+      categoryIds,
     } = settings;
 
-    const ruleTypes = categoryIds && categoryIds.length > 0 ? this.ruleTypeRegistry.getAllTypesForCategories(categoryIds) : this.ruleTypeRegistry.getAllTypes();
+    const ruleTypes =
+      categoryIds && categoryIds.length > 0
+        ? this.ruleTypeRegistry.getAllTypesForCategories(categoryIds)
+        : this.ruleTypeRegistry.getAllTypes();
     const indices = this.getAlertIndicesAlias(ruleTypes, spaceId);
 
     let numAlertsToBeDeleted = 0;
@@ -238,10 +241,13 @@ export class AlertDeletionClient {
       isInactiveAlertsDeletionEnabled,
       activeAlertsDeletionThreshold,
       inactiveAlertsDeletionThreshold,
-      categoryIds
+      categoryIds,
     } = settings;
 
-    const ruleTypes = categoryIds && categoryIds.length > 0 ? this.ruleTypeRegistry.getAllTypesForCategories(categoryIds) : this.ruleTypeRegistry.getAllTypes();
+    const ruleTypes =
+      categoryIds && categoryIds.length > 0
+        ? this.ruleTypeRegistry.getAllTypesForCategories(categoryIds)
+        : this.ruleTypeRegistry.getAllTypes();
     const indices = this.getAlertIndicesAlias(ruleTypes, spaceId);
 
     let numAlertsDeleted = 0;
@@ -340,7 +346,14 @@ export class AlertDeletionClient {
         duration: millisToNanos(end.getTime() - runDate.getTime()),
       },
       message: `Alert deletion task deleted ${numDeleted} alerts`,
-      kibana: { space_ids: spaceIds },
+      kibana: {
+        alert: {
+          deletion: {
+            num_deleted: numDeleted,
+          },
+        },
+        space_ids: spaceIds,
+      },
     });
   }
 
@@ -362,7 +375,14 @@ export class AlertDeletionClient {
         duration: millisToNanos(end.getTime() - runDate.getTime()),
       },
       error: { message: errMessage },
-      kibana: { space_ids: spaceIds },
+      kibana: {
+        alert: {
+          deletion: {
+            num_deleted: numDeleted,
+          },
+        },
+        space_ids: spaceIds,
+      },
     });
   }
 }

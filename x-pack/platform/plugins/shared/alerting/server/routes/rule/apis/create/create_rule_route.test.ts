@@ -19,8 +19,10 @@ import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/s
 import { usageCountersServiceMock } from '@kbn/usage-collection-plugin/server/usage_counters/usage_counters_service.mock';
 import { actionsClientMock } from '@kbn/actions-plugin/server/mocks';
 import { docLinksServiceMock } from '@kbn/core/server/mocks';
+import { alertDeletionClientMock } from '@kbn/alerting-plugin/server/alert_deletion/alert_deletion_client.mock';
 
 const rulesClient = rulesClientMock.create();
+const alertDeletionClient = alertDeletionClientMock.create();
 
 jest.mock('../../../../lib/license_api_access', () => ({
   verifyApiAccess: jest.fn(),
@@ -154,6 +156,7 @@ describe('createRuleRoute', () => {
       encryptedSavedObjects,
       usageCounter: mockUsageCounter,
       docLinks,
+      alertDeletionClient,
     });
 
     const [config, handler] = router.post.mock.calls[0];
@@ -268,6 +271,7 @@ describe('createRuleRoute', () => {
       encryptedSavedObjects,
       usageCounter: mockUsageCounter,
       docLinks,
+      alertDeletionClient,
     });
 
     const [config, handler] = router.post.mock.calls[0];
@@ -386,6 +390,7 @@ describe('createRuleRoute', () => {
       encryptedSavedObjects,
       usageCounter: mockUsageCounter,
       docLinks,
+      alertDeletionClient,
     });
 
     const [config, handler] = router.post.mock.calls[0];
@@ -505,6 +510,7 @@ describe('createRuleRoute', () => {
       encryptedSavedObjects,
       usageCounter: mockUsageCounter,
       docLinks,
+      alertDeletionClient,
     });
 
     const [config, handler] = router.post.mock.calls[0];
@@ -612,7 +618,7 @@ describe('createRuleRoute', () => {
     const router = httpServiceMock.createRouter();
     const encryptedSavedObjects = encryptedSavedObjectsMock.createSetup({ canEncrypt: true });
 
-    createRuleRoute({ router, licenseState, encryptedSavedObjects, docLinks });
+    createRuleRoute({ router, licenseState, encryptedSavedObjects, docLinks, alertDeletionClient });
 
     const [, handler] = router.post.mock.calls[0];
 
@@ -634,7 +640,7 @@ describe('createRuleRoute', () => {
       throw new Error('OMG');
     });
 
-    createRuleRoute({ router, licenseState, encryptedSavedObjects, docLinks });
+    createRuleRoute({ router, licenseState, encryptedSavedObjects, docLinks, alertDeletionClient });
 
     const [, handler] = router.post.mock.calls[0];
 
@@ -652,7 +658,7 @@ describe('createRuleRoute', () => {
     const router = httpServiceMock.createRouter();
     const encryptedSavedObjects = encryptedSavedObjectsMock.createSetup({ canEncrypt: true });
 
-    createRuleRoute({ router, licenseState, encryptedSavedObjects, docLinks });
+    createRuleRoute({ router, licenseState, encryptedSavedObjects, docLinks, alertDeletionClient });
 
     const [, handler] = router.post.mock.calls[0];
 
@@ -684,6 +690,7 @@ describe('createRuleRoute', () => {
         encryptedSavedObjects,
         usageCounter: mockUsageCounter,
         docLinks,
+        alertDeletionClient,
       });
 
       const [_, handler] = router.post.mock.calls[0];
@@ -767,6 +774,7 @@ describe('createRuleRoute', () => {
         encryptedSavedObjects,
         usageCounter: mockUsageCounter,
         docLinks,
+        alertDeletionClient,
       });
 
       const [_, handler] = router.post.mock.calls[0];
@@ -824,6 +832,7 @@ describe('createRuleRoute', () => {
         encryptedSavedObjects,
         usageCounter: mockUsageCounter,
         docLinks,
+        alertDeletionClient,
       });
 
       const [_, handler] = router.post.mock.calls[0];
