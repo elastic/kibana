@@ -25,7 +25,7 @@ import { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import { GetAlertIndicesAlias, spaceIdToNamespace } from '../lib';
 import { IEventLogger, millisToNanos } from '@kbn/event-log-plugin/server';
 import { ALERT_INSTANCE_ID, ALERT_RULE_UUID, SPACE_IDS } from '@kbn/rule-data-utils';
-import { compact, omitBy } from 'lodash';
+import { omitBy } from 'lodash';
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 import { EVENT_LOG_ACTIONS } from '../plugin';
@@ -66,7 +66,7 @@ export class AlertDeletionClient {
     this.getAlertIndicesAlias = opts.getAlertIndicesAlias;
     this.ruleTypeRegistry = opts.ruleTypeRegistry;
     this.internalSavedObjectsRepositoryPromise = opts.internalSavedObjectsRepositoryPromise;
-    this.logger = opts.logger;
+    this.logger = opts.logger.get(ALERT_DELETION_TASK_TYPE);
     this.spacesPluginStartPromise = opts.spacesStartPromise;
     this.taskManagerStartPromise = opts.taskManagerStartPromise;
 
@@ -160,8 +160,8 @@ export class AlertDeletionClient {
     taskInstance: ConcreteTaskInstance,
     abortController: AbortController
   ) => {
+    const runDate = new Date();
     try {
-      const runDate = new Date();
       const internalSavedObjectsRepository = await this.internalSavedObjectsRepositoryPromise;
       const spaces = await this.spacesPluginStartPromise;
       const spaceIds = taskInstance.params.spaceIds;
@@ -169,7 +169,6 @@ export class AlertDeletionClient {
 
       // Query for rules settings in the specified spaces; create a point in time finder for efficient
       // pagination in case there are a lot of spaces
-
       const alertDeletionSettingsFinder =
         await internalSavedObjectsRepository.createPointInTimeFinder<RulesSettingsAlertDeletionProperties>(
           {
@@ -184,7 +183,6 @@ export class AlertDeletionClient {
         for await (const response of alertDeletionSettingsFinder.find()) {
           // For each rules settings, call the library function to delete alerts
           for (const settings of response.saved_objects) {
-            const start = new Date();
             const namespace =
               settings.namespaces && settings.namespaces.length > 0
                 ? settings.namespaces[0]
@@ -192,55 +190,45 @@ export class AlertDeletionClient {
             const spaceId = SavedObjectsUtils.namespaceIdToString(namespace);
 
             try {
-              const numDeleted = await this.deleteAlertsForSpace(
+              const { numAlertsDeleted, errors } = await this.deleteAlertsForSpace(
                 settings.attributes,
                 spaceId,
                 abortController
               );
 
-              const end = new Date();
-
-              // Add event log entry to record the last time alerts were deleted in this space
-              this.eventLogger.logEvent({
-                '@timestamp': runDate.toISOString(),
-                event: {
-                  action: EVENT_LOG_ACTIONS.deleteAlerts,
-                  outcome: 'success',
-                  start: start.toISOString(),
-                  end: end.toISOString(),
-                  duration: millisToNanos(end.getTime() - start.getTime()),
-                },
-                message: `Alert deletion task deleted ${numDeleted} alerts`,
-                kibana: { space_ids: [spaceId] },
-              });
+              if (errors && errors.length > 0) {
+                this.logFailedDeletion(runDate, numAlertsDeleted, [spaceId], errors?.join(', '));
+              } else {
+                this.logSuccessfulDeletion(runDate, numAlertsDeleted, [spaceId]);
+              }
             } catch (err) {
-              const end = new Date();
-              this.eventLogger.logEvent({
-                '@timestamp': runDate.toISOString(),
-                event: {
-                  action: EVENT_LOG_ACTIONS.deleteAlerts,
-                  outcome: 'failure',
-                  start: start.toISOString(),
-                  end: end.toISOString(),
-                  duration: millisToNanos(end.getTime() - start.getTime()),
-                },
-                error: { message: err.message },
-                kibana: { space_ids: [spaceId] },
-              });
+              this.logFailedDeletion(runDate, 0, taskInstance.params.spaceIds, err.message);
+
+              // do we want to retry this task? if so, we should throw a retryable error, otherwise
+              // we'll just return.
             }
           }
         }
       } finally {
         await alertDeletionSettingsFinder.close();
       }
-    } catch (err) {}
+    } catch (err) {
+      this.logger.error(`Error encountered while running alert deletion task: ${err.message}`, {
+        error: { stack_trace: err.stack },
+      });
+
+      this.logFailedDeletion(runDate, 0, taskInstance.params.spaceIds, err.message);
+
+      // do we want to retry this task? if so, we should throw a retryable error, otherwise
+      // we'll just return.
+    }
   };
 
   private async deleteAlertsForSpace(
     settings: RulesSettingsAlertDeletionProperties,
     spaceId: string,
     abortController: AbortController
-  ) {
+  ): Promise<{ numAlertsDeleted: number; errors?: string[] }> {
     const esClient = await this.elasticsearchClientPromise;
     const taskManager = await this.taskManagerStartPromise;
     const indices = this.getAlertIndicesAlias(this.ruleTypeRegistry.getAllTypes(), spaceId);
@@ -253,6 +241,7 @@ export class AlertDeletionClient {
     } = settings;
 
     let numAlertsDeleted = 0;
+    const errors = [];
 
     // TODO - are we filtering by solution type?
 
@@ -279,18 +268,26 @@ export class AlertDeletionClient {
           { signal: abortController.signal }
         );
 
-        // get the task documents
-        const taskIds: string[] = compact(
-          searchResponse.hits.hits.map((hit) => {
-            const ruleId = hit._source?.[ALERT_RULE_UUID];
-            if (ruleId) {
-              return `task:${ruleId}`;
-            }
-          })
-        );
-        const alertUuidsToClear = searchResponse.hits.hits.map((hit) => hit._id);
+        // update the task state for only alerts that were successfully deleted
+        const taskIds = new Set<string>();
+        const alertUuidsToClear: string[] = [];
+        bulkDeleteResponse.items.forEach((item, index) => {
+          const alertUuid = searchResponse.hits.hits[index]._id;
+          if (item.delete?.result === 'deleted') {
+            numAlertsDeleted++;
 
-        await taskManager.bulkUpdateState(taskIds, (state) => {
+            const ruleId = searchResponse.hits.hits[index]._source?.[ALERT_RULE_UUID];
+            if (ruleId) {
+              taskIds.add(`task:${ruleId}`);
+            }
+
+            alertUuidsToClear.push(alertUuid!);
+          } else {
+            errors.push(`Error deleting alert "${alertUuid!}" - ${item.delete?.error?.reason}`);
+          }
+        });
+
+        await taskManager.bulkUpdateState(Array.from(taskIds), (state) => {
           try {
             const updatedAlertInstances = omitBy(state.alertInstances, ({ meta: { uuid } }) =>
               alertUuidsToClear.includes(uuid)
@@ -303,14 +300,10 @@ export class AlertDeletionClient {
             return state;
           }
         });
-
-        bulkDeleteResponse.items.forEach((item) => {
-          if (item.delete?.result === 'deleted') {
-            numAlertsDeleted++;
-          }
-        });
       } catch (err) {
-        this.logger.error(`Error deleting active alerts: ${err.message}`);
+        const errMessage = `Error deleting active alerts: ${err.message}`;
+        this.logger.error(errMessage, { error: { stack_trace: err.stack } });
+        errors.push(errMessage);
       }
     }
 
@@ -324,11 +317,51 @@ export class AlertDeletionClient {
         );
         numAlertsDeleted += dbqResponse.deleted ?? 0;
       } catch (err) {
-        this.logger.error(`Error deleting inactive alerts: ${err.message}`);
+        const errMessage = `Error deleting inactive alerts: ${err.message}`;
+        this.logger.error(errMessage, { error: { stack_trace: err.stack } });
+        errors.push(errMessage);
       }
     }
 
-    return numAlertsDeleted;
+    return { numAlertsDeleted, ...(errors.length > 0 ? { errors } : {}) };
+  }
+
+  private logSuccessfulDeletion(runDate: Date, numDeleted: number, spaceIds: string[]) {
+    const end = new Date();
+    this.eventLogger.logEvent({
+      '@timestamp': runDate.toISOString(),
+      event: {
+        action: EVENT_LOG_ACTIONS.deleteAlerts,
+        outcome: 'success',
+        start: runDate.toISOString(),
+        end: end.toISOString(),
+        duration: millisToNanos(end.getTime() - runDate.getTime()),
+      },
+      message: `Alert deletion task deleted ${numDeleted} alerts`,
+      kibana: { space_ids: spaceIds },
+    });
+  }
+
+  // todo - add field for number of alerts deleted
+  private logFailedDeletion(
+    runDate: Date,
+    numDeleted: number,
+    spaceIds: string[],
+    errMessage: string
+  ) {
+    const end = new Date();
+    this.eventLogger.logEvent({
+      '@timestamp': runDate.toISOString(),
+      event: {
+        action: EVENT_LOG_ACTIONS.deleteAlerts,
+        outcome: 'failure',
+        start: runDate.toISOString(),
+        end: end.toISOString(),
+        duration: millisToNanos(end.getTime() - runDate.getTime()),
+      },
+      error: { message: errMessage },
+      kibana: { space_ids: spaceIds },
+    });
   }
 }
 
