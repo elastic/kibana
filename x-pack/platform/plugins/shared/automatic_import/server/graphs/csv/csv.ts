@@ -7,6 +7,7 @@
 import type { LogFormatDetectionState } from '../../types';
 import type { LogDetectionNodeParams } from '../log_type_detection/types';
 import { createJSONInput } from '../../util';
+import type { ESProcessorItem } from '../../../common';
 import { createCSVProcessor, createDropProcessor } from '../../util/processors';
 import { CSVParseError, UnparseableCSVFormatError } from '../../lib/errors/unparseable_csv_error';
 import {
@@ -46,35 +47,43 @@ export async function handleCSV({
     throw new UnparseableCSVFormatError(tempErrors as CSVParseError[]);
   }
 
-  const headerColumns = state.samplesFormat.header
-    ? columnsFromHeader(temporaryColumns, tempResults[0])
-    : [];
+  const prefix = [packageName, dataStreamName];
+
+  // What columns does the LLM suggest?
   const llmProvidedColumns = (state.samplesFormat.columns || []).map(toSafeColumnName);
   const needColumns = totalColumnCount(temporaryColumns, tempResults);
-  const columns: string[] = Array.from(
-    yieldUniqueColumnNames(needColumns, [llmProvidedColumns, headerColumns], temporaryColumns)
-  );
 
-  const prefix = [packageName, dataStreamName];
-  const prefixedColumns = prefixColumns(columns, prefix);
-  const csvProcessor = createCSVProcessor('message', prefixedColumns);
-  const csvHandlingProcessors = [csvProcessor];
+  // What columns do we get by parsing the header row, if any?
+  const headerColumns: Array<string | undefined> = [];
+  const dropProcessors: ESProcessorItem[] = [];
+  if (state.samplesFormat.header) {
+    const headerResults = tempResults[0];
+    headerColumns.push(...columnsFromHeader(temporaryColumns, headerResults));
 
-  if (headerColumns.length > 0) {
-    const dropValues = columns.reduce((acc, column, index) => {
-      if (headerColumns[index] !== undefined) {
-        acc[column] = String(headerColumns[index]);
+    const dropValues = temporaryColumns.reduce((acc, column, index) => {
+      const headerValue = headerResults[temporaryColumns[index]];
+      if (typeof headerValue === 'string') {
+        acc[column] = headerValue;
       }
       return acc;
     }, {} as Record<string, string>);
+
     const dropProcessor = createDropProcessor(
       dropValues,
       prefix,
       'remove_csv_header',
       'Remove the CSV header line by comparing the values'
     );
-    csvHandlingProcessors.push(dropProcessor);
+    dropProcessors.push(dropProcessor);
   }
+
+  // Combine all that information into a single list of columns
+  const columns: string[] = Array.from(
+    yieldUniqueColumnNames(needColumns, [llmProvidedColumns, headerColumns], temporaryColumns)
+  );
+  const prefixedColumns = prefixColumns(columns, prefix);
+  const csvProcessor = createCSVProcessor('message', prefixedColumns);
+  const csvHandlingProcessors = [csvProcessor];
 
   const { pipelineResults: finalResults, errors: finalErrors } = await createJSONInput(
     csvHandlingProcessors,
