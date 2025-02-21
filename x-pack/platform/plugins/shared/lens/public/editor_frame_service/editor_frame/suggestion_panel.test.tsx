@@ -116,7 +116,7 @@ describe('suggestion_panel', () => {
   });
 
   it('should avoid completely to render SuggestionPanel when in fullscreen mode', async () => {
-    const { instance, lensStore } = await mountWithReduxStore(
+    const { instance, lensStore } = mountWithReduxStore(
       <SuggestionPanelWrapper {...defaultProps} />
     );
     expect(instance.find(SuggestionPanel).exists()).toBe(true);
@@ -131,7 +131,7 @@ describe('suggestion_panel', () => {
   });
 
   it('should display apply-changes prompt when changes not applied', async () => {
-    const { instance, lensStore } = await mountWithReduxStore(<SuggestionPanel {...defaultProps} />, {
+    const { instance, lensStore } = mountWithReduxStore(<SuggestionPanel {...defaultProps} />, {
       preloadedState: {
         ...preloadedState,
         visualization: {
@@ -163,7 +163,7 @@ describe('suggestion_panel', () => {
   });
 
   it('should list passed in suggestions', async () => {
-    const { instance } = await mountWithReduxStore(<SuggestionPanel {...defaultProps} />, {
+    const { instance } = mountWithReduxStore(<SuggestionPanel {...defaultProps} />, {
       preloadedState,
     });
 
@@ -199,10 +199,9 @@ describe('suggestion_panel', () => {
     });
 
     it('should not update suggestions if current state is moved to staged preview', async () => {
-      const { instance, lensStore } = await mountWithReduxStore(
-        <SuggestionPanel {...defaultProps} />,
-        { preloadedState }
-      );
+      const { instance, lensStore } = mountWithReduxStore(<SuggestionPanel {...defaultProps} />, {
+        preloadedState,
+      });
       getSuggestionsMock.mockClear();
       lensStore.dispatch(setState({ stagedPreview }));
       instance.update();
@@ -210,10 +209,9 @@ describe('suggestion_panel', () => {
     });
 
     it('should update suggestions if staged preview is removed', async () => {
-      const { instance, lensStore } = await mountWithReduxStore(
-        <SuggestionPanel {...defaultProps} />,
-        { preloadedState }
-      );
+      const { instance, lensStore } = mountWithReduxStore(<SuggestionPanel {...defaultProps} />, {
+        preloadedState,
+      });
       getSuggestionsMock.mockClear();
       lensStore.dispatch(setState({ stagedPreview, ...suggestionState }));
       instance.update();
@@ -234,9 +232,7 @@ describe('suggestion_panel', () => {
     });
 
     it('should rollback suggestion if current panel is clicked', async () => {
-      const { instance, lensStore } = await mountWithReduxStore(
-        <SuggestionPanel {...defaultProps} />
-      );
+      const { instance, lensStore } = mountWithReduxStore(<SuggestionPanel {...defaultProps} />);
 
       act(() => {
         instance.find(SELECTORS.SUGGESTION_TILE_BUTTON).at(2).simulate('click');
@@ -261,7 +257,7 @@ describe('suggestion_panel', () => {
   });
 
   it('should dispatch visualization switch action if suggestion is clicked', async () => {
-    const { instance, lensStore } = await mountWithReduxStore(<SuggestionPanel {...defaultProps} />, {
+    const { instance, lensStore } = mountWithReduxStore(<SuggestionPanel {...defaultProps} />, {
       preloadedState,
     });
 
@@ -315,7 +311,7 @@ describe('suggestion_panel', () => {
 
     mockDatasource.toExpression.mockReturnValue('datasource_expression');
 
-    const { instance } = await mountWithReduxStore(<SuggestionPanel {...defaultProps} />, {
+    const { instance } = mountWithReduxStore(<SuggestionPanel {...defaultProps} />, {
       preloadedState,
     });
 
@@ -343,14 +339,14 @@ describe('suggestion_panel', () => {
       },
     };
 
-    const { instance } = await mountWithReduxStore(<SuggestionPanel {...defaultProps} />, {
+    const { instance } = mountWithReduxStore(<SuggestionPanel {...defaultProps} />, {
       preloadedState: newPreloadedState,
     });
     expect(instance.html()).toEqual(null);
   });
 
   it('should hide the selections when the accordion is hidden', async () => {
-    const { instance } = await mountWithReduxStore(<SuggestionPanel {...defaultProps} />);
+    const { instance } = mountWithReduxStore(<SuggestionPanel {...defaultProps} />);
     expect(instance.find(EuiAccordion)).toHaveLength(1);
     act(() => {
       instance.find(EuiAccordion).at(0).simulate('change');

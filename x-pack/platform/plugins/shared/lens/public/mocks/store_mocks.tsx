@@ -100,7 +100,7 @@ export function makeLensStore({
 }: {
   storeDeps?: LensStoreDeps;
   preloadedState?: Partial<LensAppState>;
-}) {
+} = {}) {
   const data = storeDeps.lensServices.data;
   const store = makeConfigureStore(storeDeps, {
     lens: {
@@ -119,10 +119,10 @@ export function makeLensStore({
 export interface MountStoreProps {
   storeDeps?: LensStoreDeps;
   preloadedState?: Partial<LensAppState>;
-  dispatch?: jest.Mock;
 }
 
-export const mountWithReduxStore = async (
+// legacy enzyme usage: remove when all tests are migrated to @testing-library/react
+export const mountWithReduxStore = (
   component: React.ReactElement,
   store?: MountStoreProps,
   options?: {
@@ -131,12 +131,12 @@ export const mountWithReduxStore = async (
     attachTo?: HTMLElement;
   }
 ) => {
-  const { store: lensStore, deps } = makeLensStore(store || {});
+  const { store: lensStore, deps } = makeLensStore(store);
 
   let wrappingComponent: React.FC<PropsWithChildren<{}>> = ({ children }) => (
     <Provider store={lensStore}>{children}</Provider>
   );
- if (options?.wrappingComponent) {
+  if (options?.wrappingComponent) {
     wrappingComponent = ({ children }) => {
       return options?.wrappingComponent?.({
         ...options?.wrappingComponentProps,
@@ -146,9 +146,9 @@ export const mountWithReduxStore = async (
   }
 
   const instance = mountWithProviders(component, {
-      ...options,
-      wrappingComponent,
-    } as unknown as ReactWrapper);
+    ...options,
+    wrappingComponent,
+  } as unknown as ReactWrapper);
 
   return { instance, lensStore, deps };
 };
