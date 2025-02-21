@@ -909,6 +909,15 @@ export class DataViewsService {
       ? JSON.parse(savedObject.attributes.fieldAttrs)
       : {};
 
+    if (spec.fieldAttrs) {
+      Object.keys(spec.fieldAttrs).forEach((fieldName) => {
+        // Because of https://github.com/elastic/kibana/issues/211109 bug, the persisted "count" might be a string.
+        if (typeof spec.fieldAttrs[fieldName].count === 'string') {
+          spec.fieldAttrs[fieldName].count = Number(spec.fieldAttrs[fieldName].count) || 0;
+        }
+      });
+    }
+
     let fields: Record<string, FieldSpec> = {};
     let indices: string[] = [];
     let etag: string | undefined;
