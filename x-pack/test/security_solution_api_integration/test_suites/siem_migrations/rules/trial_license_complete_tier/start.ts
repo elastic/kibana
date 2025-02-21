@@ -113,6 +113,16 @@ export default ({ getService }: FtrProviderContext) => {
           '[request body]: connector_id: Required'
         );
       });
+
+      it('should reject with 404 if migrationId is not found', async () => {
+        await migrationRulesRoutes.start({
+          migrationId: 'invalid_migration_id',
+          expectStatusCode: 404,
+          payload: {
+            connector_id: 'preconfigured-bedrock',
+          },
+        });
+      });
     });
   });
 };
