@@ -86,7 +86,7 @@ export function ChatSharingMenu() {
       isOpen={isPopoverOpen}
       closePopover={() => setIsPopoverOpen(false)}
       panelPaddingSize="none"
-      anchorPosition="downLeft"
+      anchorPosition="downCenter"
     >
       <EuiSelectable
         aria-label="Sharing options"

@@ -32,6 +32,11 @@ const minWidthClassName = css`
   min-width: 0;
 `;
 
+const minMaxWidthClassName = css`
+  min-width: 0;
+  max-width: 80%;
+`;
+
 const chatHeaderClassName = css`
   padding-top: 12px;
   padding-bottom: 12px;
@@ -109,7 +114,7 @@ export function ChatHeader({
           alignItems="center"
           className={minWidthClassName}
         >
-          <EuiFlexGroup gutterSize="s" alignItems="center" className={minWidthClassName}>
+          <EuiFlexGroup gutterSize="s" alignItems="center" className={minMaxWidthClassName}>
             <EuiFlexItem grow={false} className={minWidthClassName}>
               <EuiInlineEditTitle
                 heading="h2"
