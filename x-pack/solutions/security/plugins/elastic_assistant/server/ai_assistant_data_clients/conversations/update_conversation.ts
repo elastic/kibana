@@ -131,7 +131,11 @@ export const transformToUpdateScheme = (
           },
         }
       : {}),
-    exclude_from_last_conversation_storage: excludeFromLastConversationStorage ?? false,
+    ...(excludeFromLastConversationStorage != null
+      ? {
+          exclude_from_last_conversation_storage: excludeFromLastConversationStorage,
+        }
+      : {}),
     ...(replacements
       ? {
           replacements: Object.keys(replacements).map((key) => ({
