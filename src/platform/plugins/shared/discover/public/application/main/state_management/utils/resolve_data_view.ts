@@ -11,6 +11,7 @@ import { i18n } from '@kbn/i18n';
 import type { DataView, DataViewListItem, DataViewSpec } from '@kbn/data-views-plugin/public';
 import type { ToastsStart } from '@kbn/core/public';
 import { SavedSearch } from '@kbn/saved-search-plugin/public';
+import { NoDataViewError } from './load_saved_search';
 import { DiscoverInternalStateContainer } from '../discover_internal_state_container';
 import { DiscoverServices } from '../../../../build_services';
 
@@ -93,6 +94,10 @@ export async function loadDataView({
   let defaultAdHocDataView: DataView | null = null;
   if (!fetchedDataView && !defaultDataView && adHocDataViews.length) {
     defaultAdHocDataView = adHocDataViews[0];
+  }
+  if (!fetchedDataView && !defaultDataView && !defaultAdHocDataView) {
+    // there seems to be no data view available, this could be the case if all were deleted but they're still in cache
+    throw new NoDataViewError();
   }
 
   return {

@@ -13,6 +13,7 @@ import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';
 import { expressionsPluginMock } from '@kbn/expressions-plugin/public/mocks';
 import { savedSearchPluginMock } from '@kbn/saved-search-plugin/public/mocks';
+import { IStorage, Storage } from '@kbn/kibana-utils-plugin/public';
 import {
   analyticsServiceMock,
   chromeServiceMock,
@@ -39,7 +40,6 @@ import { FORMATS_UI_SETTINGS } from '@kbn/field-formats-plugin/common';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { fieldFormatsMock } from '@kbn/field-formats-plugin/common/mocks';
 import { embeddablePluginMock } from '@kbn/embeddable-plugin/public/mocks';
-import { LocalStorageMock } from './local_storage_mock';
 import { createDiscoverDataViewsMock } from './data_views';
 import { SearchSourceDependencies } from '@kbn/data-plugin/common';
 import { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
@@ -48,6 +48,17 @@ import { createContextAwarenessMocks } from '../context_awareness/__mocks__';
 import { DiscoverEBTManager } from '../services/discover_ebt_manager';
 import { discoverSharedPluginMock } from '@kbn/discover-shared-plugin/public/mocks';
 import { createUrlTrackerMock } from './url_tracker.mock';
+import type { MockedKeys } from '@kbn/utility-types-jest';
+
+const createMockStore = (): MockedKeys<IStorage> => {
+  let store: Record<string, unknown> = {};
+  return {
+    getItem: jest.fn().mockImplementation((key) => store[key]),
+    setItem: jest.fn().mockImplementation((key, value) => (store[key] = value)),
+    removeItem: jest.fn().mockImplementation((key: string) => delete store[key]),
+    clear: jest.fn().mockImplementation(() => (store = {})),
+  };
+};
 
 export function createDiscoverServicesMock(): DiscoverServices {
   const dataPlugin = dataPluginMock.createStartContract();
@@ -213,7 +224,8 @@ export function createDiscoverServicesMock(): DiscoverServices {
       branch: 'test',
     },
     theme,
-    storage: new LocalStorageMock({}) as unknown as Storage,
+    sessionStorage: new Storage(createMockStore()),
+    storage: new Storage(createMockStore()),
     addBasePath: jest.fn(),
     toastNotifications: {
       addInfo: jest.fn(),

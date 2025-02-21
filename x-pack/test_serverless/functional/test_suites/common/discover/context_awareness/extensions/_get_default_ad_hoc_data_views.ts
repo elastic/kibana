@@ -31,6 +31,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     after(async () => {
       await kibanaServer.savedObjects.clean({ types: ['search'] });
     });
+    beforeEach(async () => {
+      await browser.clearLocalStorage();
+    });
 
     it('should show the profile data view', async () => {
       await common.navigateToActualUrl('discover', undefined, {

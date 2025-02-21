@@ -20,13 +20,16 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const dataViews = getService('dataViews');
   const dataGrid = getService('dataGrid');
   const toasts = getService('toasts');
-  const browser = getService('browser');
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
+  const browser = getService('browser');
 
   describe('extension getDefaultAdHocDataViews', () => {
     after(async () => {
       await kibanaServer.savedObjects.clean({ types: ['search'] });
+    });
+    beforeEach(async () => {
+      await browser.clearLocalStorage();
     });
 
     it('should show the profile data view', async () => {

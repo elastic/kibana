@@ -17,6 +17,7 @@ import {
 } from '@kbn/kibana-utils-plugin/public';
 import {
   DataPublicPluginStart,
+  type DataViewListItem,
   noSearchSessionStorageCapabilityMessage,
   SearchSessionInfoProvider,
 } from '@kbn/data-plugin/public';
@@ -33,6 +34,7 @@ import {
   TimeRange,
 } from '@kbn/es-query';
 import { isFunction } from 'lodash';
+import { getSWRBoolean, getSWRDataViewList } from './utils/data_swr_helper';
 import { loadSavedSearch as loadSavedSearchFn } from './utils/load_saved_search';
 import { restoreStateFromSavedSearch } from '../../../services/saved_searches/restore_from_saved_search';
 import { FetchStatus } from '../../types';
@@ -53,14 +55,14 @@ import {
 } from './discover_internal_state_container';
 import { DiscoverServices } from '../../../build_services';
 import {
+  DiscoverSavedSearchContainer,
   getDefaultAppState,
   getSavedSearchContainer,
-  DiscoverSavedSearchContainer,
 } from './discover_saved_search_container';
 import { updateFiltersReferences } from './utils/update_filter_references';
 import {
-  getDiscoverGlobalStateContainer,
   DiscoverGlobalStateContainer,
+  getDiscoverGlobalStateContainer,
 } from './discover_global_state_container';
 import type { DiscoverCustomizationContext } from '../../../customizations';
 import {
@@ -68,6 +70,13 @@ import {
   DataSourceType,
   isDataSourceType,
 } from '../../../../common/data_sources';
+
+interface DiscoverStateDataRequirements {
+  hasUserDataViewValue: boolean;
+  hasESDataValue?: boolean;
+  defaultDataViewExists?: boolean;
+  dataViewList?: DataViewListItem[];
+}
 
 export interface DiscoverStateContainerParams {
   /**
@@ -161,7 +170,11 @@ export interface DiscoverStateContainer {
     /**
      * Load current list of data views, add them to internal state
      */
-    loadDataViewList: () => Promise<void>;
+    loadDataViewList: () => Promise<DataViewListItem[]>;
+    /**
+     * Loading information about data and data views that are required for the current session
+     */
+    loadDataRequirements: (useCache: boolean) => Promise<DiscoverStateDataRequirements>;
     /**
      * Load a saved search by id or create a new one that's not persisted yet
      * @param LoadParams - optional parameters to load a saved search
@@ -325,6 +338,47 @@ export function getDiscoverStateContainer({
   const loadDataViewList = async () => {
     const dataViewList = await services.dataViews.getIdsWithTitle(true);
     internalStateContainer.transitions.setSavedDataViews(dataViewList);
+    return dataViewList;
+  };
+
+  const loadDataRequirements = async (
+    useCache: boolean = true
+  ): Promise<DiscoverStateDataRequirements> => {
+    const currentUser = await services.core.security.authc.getCurrentUser();
+    const currentSpace = await services.spaces?.getActiveSpace();
+    const { dataViews } = services.data;
+
+    const cacheKey = `discover:cache:${currentUser.profile_uid}:${currentSpace?.id}`;
+    const [hasUserDataViewValue, hasESDataValue, defaultDataViewExists, dataViewList] =
+      await Promise.all([
+        getSWRBoolean(
+          useCache ? `${cacheKey}:hasUserDataView` : '',
+          () => dataViews.hasData.hasUserDataView(),
+          services.storage
+        ),
+        getSWRBoolean(
+          useCache ? `${cacheKey}:hasData` : '',
+          () => dataViews.hasData.hasESData(),
+          services.storage
+        ),
+        getSWRBoolean(
+          useCache ? `${cacheKey}:defaultDataView` : '',
+          () => dataViews.defaultDataViewExists(),
+          services.storage
+        ),
+        getSWRDataViewList(
+          useCache ? `${cacheKey}:dataViewList` : '',
+          () => loadDataViewList(),
+          services.sessionStorage
+        ),
+      ]);
+
+    return {
+      hasUserDataViewValue,
+      hasESDataValue,
+      defaultDataViewExists,
+      dataViewList,
+    };
   };
 
   /**
@@ -616,6 +670,7 @@ export function getDiscoverStateContainer({
       initializeAndSync,
       fetchData,
       loadDataViewList,
+      loadDataRequirements,
       loadSavedSearch,
       onChangeDataView,
       createAndAppendAdHocDataView,
