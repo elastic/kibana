@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { memo } from 'react';
+import React from 'react';
 import {
   EuiDescribedFormGroup,
   EuiEmptyPrompt,
