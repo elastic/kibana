@@ -239,6 +239,11 @@ export class RuleMigrationTaskRunner {
             this.logger.debug(
               `Rate limit backoff completed unsuccessfully for rule "${migrationRule.id}"`
             );
+            const logMessage =
+              retriesLeft === 0
+                ? `Rate limit backoff completed unsuccessfully for rule "${migrationRule.id}"`
+                : `Rate limit backoff interrupted for rule "${migrationRule.id}". ${error} `;
+            this.logger.debug(logMessage);
             throw error;
           }
           this.logger.debug(
