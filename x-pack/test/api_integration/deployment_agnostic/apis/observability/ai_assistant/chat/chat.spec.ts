@@ -71,9 +71,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
     });
 
     it('returns a 200 if the connector exists', async () => {
-      void proxy
-        .intercept('conversation', () => true, 'Hello from LLM Proxy')
-        .completeAfterIntercept();
+      void proxy.interceptConversation('Hello from LLM Proxy');
       const { status } = await observabilityAIAssistantAPIClient.editor({
         endpoint: 'POST /internal/observability_ai_assistant/chat',
         params: {
@@ -87,6 +85,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
           },
         },
       });
+      await proxy.waitForAllInterceptorsSettled();
       expect(status).to.be(200);
     });
 
