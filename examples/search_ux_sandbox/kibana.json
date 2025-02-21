@@ -1,0 +1,14 @@
+{
+  "id": "searchUxSandbox",
+  "version": "1.0.0",
+  "kibanaVersion": "kibana",
+  "owner": {
+    "name": "search-ux",
+    "githubTeam": ""
+  },
+  "description": "Search UX experiements and POC",
+  "server": true,
+  "ui": true,
+  "requiredPlugins": ["navigation"],
+  "optionalPlugins": []
+}
