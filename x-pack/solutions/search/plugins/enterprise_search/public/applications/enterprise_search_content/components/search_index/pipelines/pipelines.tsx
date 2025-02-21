@@ -73,7 +73,7 @@ export const SearchIndexPipelines: React.FC = () => {
       if (buttonRef.current) {
         buttonRef.current.focus();
       }
-    }, 300);
+    }, 100);
   };
 
   useEffect(() => {
