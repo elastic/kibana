@@ -21820,20 +21820,22 @@ paths:
                             originId:
                               type: string
                             type:
-                              enum:
-                                - dashboard
-                                - lens
-                                - visualization
-                                - search
-                                - index-pattern
-                                - map
-                                - ml-module
-                                - security-rule
-                                - csp-rule-template
-                                - osquery-pack-asset
-                                - osquery-saved-query
-                                - tag
-                              type: string
+                              anyOf:
+                                - enum:
+                                    - dashboard
+                                    - lens
+                                    - visualization
+                                    - search
+                                    - index-pattern
+                                    - map
+                                    - ml-module
+                                    - security-rule
+                                    - csp-rule-template
+                                    - osquery-pack-asset
+                                    - osquery-saved-query
+                                    - tag
+                                  type: string
+                                - type: string
                           required:
                             - id
                             - type
@@ -22083,20 +22085,22 @@ paths:
                                     originId:
                                       type: string
                                     type:
-                                      enum:
-                                        - dashboard
-                                        - lens
-                                        - visualization
-                                        - search
-                                        - index-pattern
-                                        - map
-                                        - ml-module
-                                        - security-rule
-                                        - csp-rule-template
-                                        - osquery-pack-asset
-                                        - osquery-saved-query
-                                        - tag
-                                      type: string
+                                      anyOf:
+                                        - enum:
+                                            - dashboard
+                                            - lens
+                                            - visualization
+                                            - search
+                                            - index-pattern
+                                            - map
+                                            - ml-module
+                                            - security-rule
+                                            - csp-rule-template
+                                            - osquery-pack-asset
+                                            - osquery-saved-query
+                                            - tag
+                                          type: string
+                                        - type: string
                                   required:
                                     - id
                                     - type
@@ -22178,20 +22182,22 @@ paths:
                                   originId:
                                     type: string
                                   type:
-                                    enum:
-                                      - dashboard
-                                      - lens
-                                      - visualization
-                                      - search
-                                      - index-pattern
-                                      - map
-                                      - ml-module
-                                      - security-rule
-                                      - csp-rule-template
-                                      - osquery-pack-asset
-                                      - osquery-saved-query
-                                      - tag
-                                    type: string
+                                    anyOf:
+                                      - enum:
+                                          - dashboard
+                                          - lens
+                                          - visualization
+                                          - search
+                                          - index-pattern
+                                          - map
+                                          - ml-module
+                                          - security-rule
+                                          - csp-rule-template
+                                          - osquery-pack-asset
+                                          - osquery-saved-query
+                                          - tag
+                                        type: string
+                                      - type: string
                                 required:
                                   - id
                                   - type
@@ -22318,11 +22324,17 @@ paths:
                         title:
                           type: string
                         type:
-                          enum:
-                            - integration
-                            - input
-                            - content
-                          type: string
+                          anyOf:
+                            - enum:
+                                - integration
+                              type: string
+                            - enum:
+                                - input
+                              type: string
+                            - enum:
+                                - content
+                              type: string
+                            - type: string
                         vars:
                           items:
                             additionalProperties: {}
@@ -22416,20 +22428,22 @@ paths:
                             originId:
                               type: string
                             type:
-                              enum:
-                                - dashboard
-                                - lens
-                                - visualization
-                                - search
-                                - index-pattern
-                                - map
-                                - ml-module
-                                - security-rule
-                                - csp-rule-template
-                                - osquery-pack-asset
-                                - osquery-saved-query
-                                - tag
-                              type: string
+                              anyOf:
+                                - enum:
+                                    - dashboard
+                                    - lens
+                                    - visualization
+                                    - search
+                                    - index-pattern
+                                    - map
+                                    - ml-module
+                                    - security-rule
+                                    - csp-rule-template
+                                    - osquery-pack-asset
+                                    - osquery-saved-query
+                                    - tag
+                                  type: string
+                                - type: string
                           required:
                             - id
                             - type
@@ -22560,20 +22574,22 @@ paths:
                                           originId:
                                             type: string
                                           type:
-                                            enum:
-                                              - dashboard
-                                              - lens
-                                              - visualization
-                                              - search
-                                              - index-pattern
-                                              - map
-                                              - ml-module
-                                              - security-rule
-                                              - csp-rule-template
-                                              - osquery-pack-asset
-                                              - osquery-saved-query
-                                              - tag
-                                            type: string
+                                            anyOf:
+                                              - enum:
+                                                  - dashboard
+                                                  - lens
+                                                  - visualization
+                                                  - search
+                                                  - index-pattern
+                                                  - map
+                                                  - ml-module
+                                                  - security-rule
+                                                  - csp-rule-template
+                                                  - osquery-pack-asset
+                                                  - osquery-saved-query
+                                                  - tag
+                                                type: string
+                                              - type: string
                                         required:
                                           - id
                                           - type
@@ -22706,20 +22722,22 @@ paths:
                             originId:
                               type: string
                             type:
-                              enum:
-                                - dashboard
-                                - lens
-                                - visualization
-                                - search
-                                - index-pattern
-                                - map
-                                - ml-module
-                                - security-rule
-                                - csp-rule-template
-                                - osquery-pack-asset
-                                - osquery-saved-query
-                                - tag
-                              type: string
+                              anyOf:
+                                - enum:
+                                    - dashboard
+                                    - lens
+                                    - visualization
+                                    - search
+                                    - index-pattern
+                                    - map
+                                    - ml-module
+                                    - security-rule
+                                    - csp-rule-template
+                                    - osquery-pack-asset
+                                    - osquery-saved-query
+                                    - tag
+                                  type: string
+                                - type: string
                           required:
                             - id
                             - type
@@ -22935,20 +22953,22 @@ paths:
                                   originId:
                                     type: string
                                   type:
-                                    enum:
-                                      - dashboard
-                                      - lens
-                                      - visualization
-                                      - search
-                                      - index-pattern
-                                      - map
-                                      - ml-module
-                                      - security-rule
-                                      - csp-rule-template
-                                      - osquery-pack-asset
-                                      - osquery-saved-query
-                                      - tag
-                                    type: string
+                                    anyOf:
+                                      - enum:
+                                          - dashboard
+                                          - lens
+                                          - visualization
+                                          - search
+                                          - index-pattern
+                                          - map
+                                          - ml-module
+                                          - security-rule
+                                          - csp-rule-template
+                                          - osquery-pack-asset
+                                          - osquery-saved-query
+                                          - tag
+                                        type: string
+                                      - type: string
                                 required:
                                   - id
                                   - type
@@ -23030,20 +23050,22 @@ paths:
                                 originId:
                                   type: string
                                 type:
-                                  enum:
-                                    - dashboard
-                                    - lens
-                                    - visualization
-                                    - search
-                                    - index-pattern
-                                    - map
-                                    - ml-module
-                                    - security-rule
-                                    - csp-rule-template
-                                    - osquery-pack-asset
-                                    - osquery-saved-query
-                                    - tag
-                                  type: string
+                                  anyOf:
+                                    - enum:
+                                        - dashboard
+                                        - lens
+                                        - visualization
+                                        - search
+                                        - index-pattern
+                                        - map
+                                        - ml-module
+                                        - security-rule
+                                        - csp-rule-template
+                                        - osquery-pack-asset
+                                        - osquery-saved-query
+                                        - tag
+                                      type: string
+                                    - type: string
                               required:
                                 - id
                                 - type
@@ -23196,11 +23218,17 @@ paths:
                       title:
                         type: string
                       type:
-                        enum:
-                          - integration
-                          - input
-                          - content
-                        type: string
+                        anyOf:
+                          - enum:
+                              - integration
+                            type: string
+                          - enum:
+                              - input
+                            type: string
+                          - enum:
+                              - content
+                            type: string
+                          - type: string
                       vars:
                         items:
                           additionalProperties: {}
@@ -23324,20 +23352,22 @@ paths:
                             originId:
                               type: string
                             type:
-                              enum:
-                                - dashboard
-                                - lens
-                                - visualization
-                                - search
-                                - index-pattern
-                                - map
-                                - ml-module
-                                - security-rule
-                                - csp-rule-template
-                                - osquery-pack-asset
-                                - osquery-saved-query
-                                - tag
-                              type: string
+                              anyOf:
+                                - enum:
+                                    - dashboard
+                                    - lens
+                                    - visualization
+                                    - search
+                                    - index-pattern
+                                    - map
+                                    - ml-module
+                                    - security-rule
+                                    - csp-rule-template
+                                    - osquery-pack-asset
+                                    - osquery-saved-query
+                                    - tag
+                                  type: string
+                                - type: string
                           required:
                             - id
                             - type
@@ -23552,20 +23582,22 @@ paths:
                                   originId:
                                     type: string
                                   type:
-                                    enum:
-                                      - dashboard
-                                      - lens
-                                      - visualization
-                                      - search
-                                      - index-pattern
-                                      - map
-                                      - ml-module
-                                      - security-rule
-                                      - csp-rule-template
-                                      - osquery-pack-asset
-                                      - osquery-saved-query
-                                      - tag
-                                    type: string
+                                    anyOf:
+                                      - enum:
+                                          - dashboard
+                                          - lens
+                                          - visualization
+                                          - search
+                                          - index-pattern
+                                          - map
+                                          - ml-module
+                                          - security-rule
+                                          - csp-rule-template
+                                          - osquery-pack-asset
+                                          - osquery-saved-query
+                                          - tag
+                                        type: string
+                                      - type: string
                                 required:
                                   - id
                                   - type
@@ -23647,20 +23679,22 @@ paths:
                                 originId:
                                   type: string
                                 type:
-                                  enum:
-                                    - dashboard
-                                    - lens
-                                    - visualization
-                                    - search
-                                    - index-pattern
-                                    - map
-                                    - ml-module
-                                    - security-rule
-                                    - csp-rule-template
-                                    - osquery-pack-asset
-                                    - osquery-saved-query
-                                    - tag
-                                  type: string
+                                  anyOf:
+                                    - enum:
+                                        - dashboard
+                                        - lens
+                                        - visualization
+                                        - search
+                                        - index-pattern
+                                        - map
+                                        - ml-module
+                                        - security-rule
+                                        - csp-rule-template
+                                        - osquery-pack-asset
+                                        - osquery-saved-query
+                                        - tag
+                                      type: string
+                                    - type: string
                               required:
                                 - id
                                 - type
@@ -23813,11 +23847,17 @@ paths:
                       title:
                         type: string
                       type:
-                        enum:
-                          - integration
-                          - input
-                          - content
-                        type: string
+                        anyOf:
+                          - enum:
+                              - integration
+                            type: string
+                          - enum:
+                              - input
+                            type: string
+                          - enum:
+                              - content
+                            type: string
+                          - type: string
                       vars:
                         items:
                           additionalProperties: {}
