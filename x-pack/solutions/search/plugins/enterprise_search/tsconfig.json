@@ -88,7 +88,6 @@
     "@kbn/ui-actions-plugin",
     "@kbn/core-deprecations-server",
     "@kbn/core-deprecations-common",
-    "@kbn/fleet-plugin",
     "@kbn/core-http-request-handler-context-server",
     "@kbn/ui-actions-enhanced-plugin",
     "@kbn/file-upload-common",

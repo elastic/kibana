@@ -45,6 +45,7 @@ import {
   API_VERSIONS,
   RISK_ENGINE_CLEANUP_URL,
   RISK_ENGINE_SCHEDULE_NOW_URL,
+  RISK_ENGINE_CONFIGURE_SO_URL,
 } from '../../../common/constants';
 import type { SnakeToCamelCase } from '../common/utils';
 import { useKibana } from '../../common/lib/kibana/kibana_react';
@@ -298,6 +299,14 @@ export const useEntityAnalyticsRoutes = () => {
         method: 'DELETE',
       });
 
+    const updateSavedObjectConfiguration = (params: {}) => {
+      http.fetch(RISK_ENGINE_CONFIGURE_SO_URL, {
+        version: API_VERSIONS.public.v1,
+        method: 'PUT',
+        body: JSON.stringify(params),
+      });
+    };
+
     return {
       fetchRiskScorePreview,
       fetchRiskEngineStatus,
@@ -317,6 +326,7 @@ export const useEntityAnalyticsRoutes = () => {
       calculateEntityRiskScore,
       cleanUpRiskEngine,
       fetchEntitiesList,
+      updateSavedObjectConfiguration,
     };
   }, [http]);
 };

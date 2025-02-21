@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import styled from 'styled-components';
+import styled from '@emotion/styled';
 
 import { EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
 
@@ -28,6 +28,7 @@ export const MetricItem = styled(EuiFlexItem)`
   &.euiFlexItem {
     flex-basis: 0;
     flex-grow: 0;
+    min-width: 100px;
   }
 `;
 MetricItem.displayName = 'MetricItem';

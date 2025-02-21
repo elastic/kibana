@@ -45,7 +45,12 @@ export const updateSavedObjectAttribute = async ({
   savedObjectsClient,
   attributes,
 }: SavedObjectsClientArg & {
-  attributes: Partial<RiskEngineConfiguration>;
+  attributes: {
+    enabled?: boolean;
+    excludeAlertIds?: string[];
+    range?: { start: string; end: string };
+    excludeAlertTags?: string[];
+  };
 }) => {
   const savedObjectConfiguration = await getConfigurationSavedObject({
     savedObjectsClient,

@@ -28,7 +28,6 @@
     "@kbn/react-kibana-context-render",
     "@kbn/code-editor",
     "@kbn/observability-utils-browser",
-    "@kbn/observability-utils-server",
     "@kbn/ui-theme",
     "@kbn/calculate-auto",
     "@kbn/kibana-react-plugin",
@@ -40,7 +39,6 @@
     "@kbn/calculate-auto",
     "@kbn/streams-plugin",
     "@kbn/share-plugin",
-    "@kbn/observability-utils-server",
     "@kbn/code-editor",
     "@kbn/ui-theme",
     "@kbn/navigation-plugin",
@@ -51,10 +49,16 @@
     "@kbn/react-field",
     "@kbn/shared-ux-utility",
     "@kbn/unsaved-changes-prompt",
-    "@kbn/object-utils",
     "@kbn/deeplinks-analytics",
     "@kbn/dashboard-plugin",
     "@kbn/react-kibana-mount",
-    "@kbn/fields-metadata-plugin"
+    "@kbn/fields-metadata-plugin",
+    "@kbn/observability-ai-assistant-plugin",
+    "@kbn/actions-plugin",
+    "@kbn/object-utils",
+    "@kbn/traced-es-client",
+    "@kbn/datemath",
+    "@kbn/dataset-quality-plugin",
+    "@kbn/search-types"
   ]
 }

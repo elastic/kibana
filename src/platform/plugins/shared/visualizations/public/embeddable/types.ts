@@ -71,26 +71,6 @@ export type VisualizeOutputState = VisualizeSavedVisInputState &
   Required<Omit<SerializedTitles, 'hidePanelTitles'>> &
   ExtraSavedObjectProperties;
 
-export const isVisualizeSavedObjectState = (
-  state: unknown
-): state is VisualizeSavedObjectInputState => {
-  return (
-    typeof state !== 'undefined' &&
-    (state as VisualizeSavedObjectInputState).savedObjectId !== undefined &&
-    !!(state as VisualizeSavedObjectInputState).savedObjectId &&
-    !('savedVis' in (state as VisualizeSavedObjectInputState)) &&
-    !('serializedVis' in (state as VisualizeSavedObjectInputState))
-  );
-};
-
-export const isVisualizeRuntimeState = (state: unknown): state is VisualizeRuntimeState => {
-  return (
-    !isVisualizeSavedObjectState(state) &&
-    !('savedVis' in (state as VisualizeRuntimeState)) &&
-    (state as VisualizeRuntimeState).serializedVis !== undefined
-  );
-};
-
 export type VisualizeApi = Partial<HasEditCapabilities> &
   PublishesDataViews &
   PublishesDataLoading &

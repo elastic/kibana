@@ -115,6 +115,10 @@ export const ESQLEditor = memo(function ESQLEditor({
   esqlVariables,
 }: ESQLEditorProps) {
   const popoverRef = useRef<HTMLDivElement>(null);
+  const editorModel = useRef<monaco.editor.ITextModel>();
+  const editor1 = useRef<monaco.editor.IStandaloneCodeEditor>();
+  const containerRef = useRef<HTMLElement>(null);
+
   const datePickerOpenStatusRef = useRef<boolean>(false);
   const theme = useEuiTheme();
   const kibana = useKibana<ESQLEditorDeps>();
@@ -249,9 +253,9 @@ export const ESQLEditor = memo(function ESQLEditor({
 
   const showSuggestionsIfEmptyQuery = useCallback(() => {
     if (editorModel.current?.getValueLength() === 0) {
-      setImmediate(() => {
+      setTimeout(() => {
         editor1.current?.trigger(undefined, 'editor.action.triggerSuggest', {});
-      });
+      }, 0);
     }
   }, []);
 
@@ -325,6 +329,25 @@ export const ESQLEditor = memo(function ESQLEditor({
     );
   });
 
+  monaco.editor.registerCommand('esql.control.functions.create', async (...args) => {
+    const position = editor1.current?.getPosition();
+    await triggerControl(
+      query.esql,
+      ESQLVariableType.FUNCTIONS,
+      position,
+      uiActions,
+      esqlVariables,
+      onSaveControl,
+      onCancelControl
+    );
+  });
+
+  editor1.current?.addCommand(
+    // eslint-disable-next-line no-bitwise
+    monaco.KeyMod.CtrlCmd | monaco.KeyCode.Enter,
+    onQuerySubmit
+  );
+
   const styles = esqlEditorStyles(
     theme.euiTheme,
     editorHeight,
@@ -334,9 +357,6 @@ export const ESQLEditor = memo(function ESQLEditor({
     Boolean(editorIsInline),
     Boolean(hasOutline)
   );
-  const editorModel = useRef<monaco.editor.ITextModel>();
-  const editor1 = useRef<monaco.editor.IStandaloneCodeEditor>();
-  const containerRef = useRef<HTMLElement>(null);
 
   const onMouseDownResize = useCallback<typeof onMouseDownResizeHandler>(
     (
@@ -651,47 +671,50 @@ export const ESQLEditor = memo(function ESQLEditor({
 
   onLayoutChangeRef.current = onLayoutChange;
 
-  const codeEditorOptions: CodeEditorProps['options'] = {
-    hover: {
-      above: false,
-    },
-    accessibilitySupport: 'off',
-    autoIndent: 'none',
-    automaticLayout: true,
-    fixedOverflowWidgets: true,
-    folding: false,
-    fontSize: 14,
-    hideCursorInOverviewRuler: true,
-    // this becomes confusing with multiple markers, so quick fixes
-    // will be proposed only within the tooltip
-    lightbulb: {
-      enabled: false,
-    },
-    lineDecorationsWidth: 20,
-    lineNumbers: 'on',
-    lineNumbersMinChars: 3,
-    minimap: { enabled: false },
-    overviewRulerLanes: 0,
-    overviewRulerBorder: false,
-    padding: {
-      top: 8,
-      bottom: 8,
-    },
-    quickSuggestions: true,
-    readOnly: isDisabled,
-    renderLineHighlight: 'line',
-    renderLineHighlightOnlyWhenFocus: true,
-    scrollbar: {
-      horizontal: 'hidden',
-      horizontalScrollbarSize: 6,
-      vertical: 'auto',
-      verticalScrollbarSize: 6,
-    },
-    scrollBeyondLastLine: false,
-    theme: darkMode ? ESQL_DARK_THEME_ID : ESQL_LIGHT_THEME_ID,
-    wordWrap: 'on',
-    wrappingIndent: 'none',
-  };
+  const codeEditorOptions: CodeEditorProps['options'] = useMemo(
+    () => ({
+      hover: {
+        above: false,
+      },
+      accessibilitySupport: 'off',
+      autoIndent: 'none',
+      automaticLayout: true,
+      fixedOverflowWidgets: true,
+      folding: false,
+      fontSize: 14,
+      hideCursorInOverviewRuler: true,
+      // this becomes confusing with multiple markers, so quick fixes
+      // will be proposed only within the tooltip
+      lightbulb: {
+        enabled: false,
+      },
+      lineDecorationsWidth: 20,
+      lineNumbers: 'on',
+      lineNumbersMinChars: 3,
+      minimap: { enabled: false },
+      overviewRulerLanes: 0,
+      overviewRulerBorder: false,
+      padding: {
+        top: 8,
+        bottom: 8,
+      },
+      quickSuggestions: true,
+      readOnly: isDisabled,
+      renderLineHighlight: 'line',
+      renderLineHighlightOnlyWhenFocus: true,
+      scrollbar: {
+        horizontal: 'hidden',
+        horizontalScrollbarSize: 6,
+        vertical: 'auto',
+        verticalScrollbarSize: 6,
+      },
+      scrollBeyondLastLine: false,
+      theme: darkMode ? ESQL_DARK_THEME_ID : ESQL_LIGHT_THEME_ID,
+      wordWrap: 'on',
+      wrappingIndent: 'none',
+    }),
+    [isDisabled, darkMode]
+  );
 
   const editorPanel = (
     <>
@@ -787,13 +810,6 @@ export const ESQLEditor = memo(function ESQLEditor({
                     editor.onKeyDown(() => {
                       onEditorFocus();
                     });
-
-                    // on CMD/CTRL + Enter submit the query
-                    editor.addCommand(
-                      // eslint-disable-next-line no-bitwise
-                      monaco.KeyMod.CtrlCmd | monaco.KeyCode.Enter,
-                      onQuerySubmit
-                    );
 
                     // on CMD/CTRL + / comment out the entire line
                     editor.addCommand(

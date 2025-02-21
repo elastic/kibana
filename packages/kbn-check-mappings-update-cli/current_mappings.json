@@ -2945,6 +2945,9 @@
       "enabled": {
         "type": "boolean"
       },
+      "excludeAlertStatuses": {
+        "type": "keyword"
+      },
       "filter": {
         "dynamic": false,
         "properties": {}

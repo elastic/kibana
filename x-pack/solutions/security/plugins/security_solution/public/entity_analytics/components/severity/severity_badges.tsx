@@ -14,24 +14,28 @@ import type { SeverityCount } from './types';
 
 export const SeverityBadges: React.FC<{
   severityCount: SeverityCount;
-}> = React.memo(({ severityCount }) => (
-  <EuiFlexGroup
-    justifyContent="spaceBetween"
-    gutterSize="m"
-    data-test-subj="risk-score-severity-badges"
-  >
-    <EuiFlexItem grow={false} />
-    <EuiFlexItem grow={false}>
-      <EuiFlexGroup gutterSize="m">
-        {(Object.keys(RISK_SEVERITY_COLOUR) as RiskSeverity[]).map((status) => (
-          <EuiFlexItem key={status} grow={false}>
-            <SeverityBadge status={status} count={severityCount[status] || 0} />
-          </EuiFlexItem>
-        ))}
-      </EuiFlexGroup>
-    </EuiFlexItem>
-  </EuiFlexGroup>
-));
+}> = React.memo(({ severityCount }) => {
+  // TODO: use riskSeverity hook when palette agreed.
+  // https://github.com/elastic/security-team/issues/11516 hook - https://github.com/elastic/kibana/pull/206276
+  return (
+    <EuiFlexGroup
+      justifyContent="spaceBetween"
+      gutterSize="m"
+      data-test-subj="risk-score-severity-badges"
+    >
+      <EuiFlexItem grow={false} />
+      <EuiFlexItem grow={false}>
+        <EuiFlexGroup gutterSize="m">
+          {(Object.keys(RISK_SEVERITY_COLOUR) as RiskSeverity[]).map((status) => (
+            <EuiFlexItem key={status} grow={false}>
+              <SeverityBadge status={status} count={severityCount[status] || 0} />
+            </EuiFlexItem>
+          ))}
+        </EuiFlexGroup>
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  );
+});
 
 SeverityBadges.displayName = 'SeverityBadges';
 

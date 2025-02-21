@@ -35,8 +35,6 @@ import { withoutTokenCountEvents } from '../../../../common/utils/without_token_
 import type { ChatFunctionClient } from '../../chat_function_client';
 import type { AutoAbortedChatFunction } from '../../types';
 import { createServerSideFunctionResponseError } from '../../util/create_server_side_function_response_error';
-import { getSystemMessageFromInstructions } from '../../util/get_system_message_from_instructions';
-import { replaceSystemMessage } from '../../util/replace_system_message';
 import { LangTracer } from '../instrumentation/lang_tracer';
 import { catchFunctionNotFoundError } from './catch_function_not_found_error';
 import { extractMessages } from './extract_messages';
@@ -54,7 +52,7 @@ function executeFunctionAndCatchError({
   logger,
   tracer,
   connectorId,
-  useSimulatedFunctionCalling,
+  simulateFunctionCalling,
 }: {
   name: string;
   args: string | undefined;
@@ -65,7 +63,7 @@ function executeFunctionAndCatchError({
   logger: Logger;
   tracer: LangTracer;
   connectorId: string;
-  useSimulatedFunctionCalling: boolean;
+  simulateFunctionCalling: boolean;
 }): Observable<MessageOrChatEvent> {
   // hide token count events from functions to prevent them from
   // having to deal with it as well
@@ -86,7 +84,7 @@ function executeFunctionAndCatchError({
           signal,
           messages,
           connectorId,
-          useSimulatedFunctionCalling,
+          simulateFunctionCalling,
         })
       );
 
@@ -184,7 +182,7 @@ export function continueConversation({
   disableFunctions,
   tracer,
   connectorId,
-  useSimulatedFunctionCalling,
+  simulateFunctionCalling,
 }: {
   messages: Message[];
   functionClient: ChatFunctionClient;
@@ -201,7 +199,7 @@ export function continueConversation({
       };
   tracer: LangTracer;
   connectorId: string;
-  useSimulatedFunctionCalling: boolean;
+  simulateFunctionCalling: boolean;
 }): Observable<MessageOrChatEvent> {
   let nextFunctionCallsLeft = functionCallsLeft;
 
@@ -213,20 +211,7 @@ export function continueConversation({
     disableFunctions,
   });
 
-  const registeredAdhocInstructions = functionClient.getAdhocInstructions();
-  const allAdHocInstructions = adHocInstructions.concat(registeredAdhocInstructions);
-
-  const messagesWithUpdatedSystemMessage = replaceSystemMessage(
-    getSystemMessageFromInstructions({
-      applicationInstructions: functionClient.getInstructions(),
-      userInstructions,
-      adHocInstructions: allAdHocInstructions,
-      availableFunctionNames: definitions.map((def) => def.name),
-    }),
-    initialMessages
-  );
-
-  const lastMessage = last(messagesWithUpdatedSystemMessage)?.message;
+  const lastMessage = last(initialMessages)?.message;
   const isUserMessage = lastMessage?.role === MessageRole.User;
 
   return executeNextStep().pipe(handleEvents());
@@ -239,7 +224,7 @@ export function continueConversation({
           : 'user_message';
 
       return chat(operationName, {
-        messages: messagesWithUpdatedSystemMessage,
+        messages: initialMessages,
         functions: definitions,
         tracer,
         connectorId,
@@ -314,12 +299,12 @@ export function continueConversation({
       args: lastMessage.function_call!.arguments,
       chat,
       functionClient,
-      messages: messagesWithUpdatedSystemMessage,
+      messages: initialMessages,
       signal,
       logger,
       tracer,
       connectorId,
-      useSimulatedFunctionCalling,
+      simulateFunctionCalling,
     });
   }
 
@@ -337,7 +322,7 @@ export function continueConversation({
               return EMPTY;
             }
             return continueConversation({
-              messages: messagesWithUpdatedSystemMessage.concat(extractedMessages),
+              messages: initialMessages.concat(extractedMessages),
               chat,
               functionCallsLeft: nextFunctionCallsLeft,
               functionClient,
@@ -348,7 +333,7 @@ export function continueConversation({
               disableFunctions,
               tracer,
               connectorId,
-              useSimulatedFunctionCalling,
+              simulateFunctionCalling,
             });
           })
         )

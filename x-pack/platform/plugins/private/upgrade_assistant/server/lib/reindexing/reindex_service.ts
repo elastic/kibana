@@ -10,11 +10,12 @@ import { firstValueFrom } from 'rxjs';
 
 import { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
 
+import { IndicesAlias, IndicesIndexSettings } from '@elastic/elasticsearch/lib/api/types';
 import {
   ReindexSavedObject,
   ReindexStatus,
   ReindexStep,
-  ReindexWarning,
+  IndexWarning,
 } from '../../../common/types';
 
 import { esIndicesStateCheck } from '../es_indices_state_check';
@@ -37,7 +38,7 @@ export interface ReindexService {
    * Resolves to null if index does not exist.
    * @param indexName
    */
-  detectReindexWarnings(indexName: string): Promise<ReindexWarning[] | undefined>;
+  detectReindexWarnings(indexName: string): Promise<IndexWarning[] | undefined>;
 
   /**
    * Creates a new reindex operation for a given index.
@@ -111,7 +112,13 @@ export interface ReindexService {
    */
   cancelReindexing(indexName: string): Promise<ReindexSavedObject>;
 
-  getIndexAliases(indexName: string): any;
+  /**
+   * Obtain metadata about the index, including aliases and settings
+   * @param indexName
+   */
+  getIndexInfo(
+    indexName: string
+  ): Promise<{ aliases: Record<string, IndicesAlias>; settings?: IndicesIndexSettings }>;
 }
 
 export const reindexServiceFactory = (
@@ -167,7 +174,7 @@ export const reindexServiceFactory = (
     });
 
     if (!putReadonly.acknowledged) {
-      throw new Error(`Index could not be set to readonly.`);
+      throw new Error(`Index could not be set to read-only.`);
     }
 
     return actions.updateReindexOp(reindexOp, { lastCompletedStep: ReindexStep.readonly });
@@ -341,12 +348,15 @@ export const reindexServiceFactory = (
     return reindexOp;
   };
 
-  const getIndexAliases = async (indexName: string) => {
-    const response = await esClient.indices.getAlias({
+  const getIndexInfo = async (indexName: string) => {
+    const response = await esClient.indices.get({
       index: indexName,
+      features: ['aliases', 'settings'],
     });
 
-    return response[indexName]?.aliases ?? {};
+    const aliases = response[indexName]?.aliases ?? {};
+    const settings = response[indexName]?.settings?.index ?? {};
+    return { aliases, settings };
   };
 
   const isIndexHidden = async (indexName: string) => {
@@ -391,7 +401,7 @@ export const reindexServiceFactory = (
   const switchAlias = async (reindexOp: ReindexSavedObject) => {
     const { indexName, newIndexName, reindexOptions } = reindexOp.attributes;
 
-    const existingAliases = await getIndexAliases(indexName);
+    const existingAliases = (await getIndexInfo(indexName)).aliases;
 
     const extraAliases = Object.keys(existingAliases).map((aliasName) => ({
       add: { index: newIndexName, alias: aliasName, ...existingAliases[aliasName] },
@@ -468,9 +478,8 @@ export const reindexServiceFactory = (
       return resp.has_all_requested;
     },
 
-    async detectReindexWarnings(indexName: string): Promise<ReindexWarning[] | undefined> {
+    async detectReindexWarnings(indexName: string): Promise<IndexWarning[] | undefined> {
       const flatSettings = await actions.getFlatSettings(indexName);
-
       if (!flatSettings) {
         return undefined;
       } else {
@@ -479,7 +488,12 @@ export const reindexServiceFactory = (
           // pointing to a newly created "reindexed" index. This is destructive as delete operations originally
           // done on the index itself will now need to be done to the "reindexed-{indexName}"
           {
+            warningType: 'makeIndexReadonly',
+            flow: 'readonly',
+          },
+          {
             warningType: 'replaceIndexWithAlias',
+            flow: 'reindex',
           },
           ...getReindexWarnings(flatSettings),
         ];
@@ -681,6 +695,6 @@ export const reindexServiceFactory = (
       return reindexOp;
     },
 
-    getIndexAliases,
+    getIndexInfo,
   };
 };

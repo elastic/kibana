@@ -33,6 +33,13 @@ describe('Template schema', () => {
           "connectorId": Object {
             "defaultValue": "none",
             "label": "External incident management system",
+            "labelAppend": <EuiText
+              color="subdued"
+              data-test-subj="form-optional-field-label"
+              size="xs"
+            >
+              Optional
+            </EuiText>,
           },
           "customFields": Object {},
           "description": Object {

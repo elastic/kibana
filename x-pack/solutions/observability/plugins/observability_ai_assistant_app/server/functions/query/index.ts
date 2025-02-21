@@ -112,7 +112,7 @@ export function registerQueryFunction({
       function takes no input.`,
       visibility: FunctionVisibility.AssistantOnly,
     },
-    async ({ messages, connectorId, useSimulatedFunctionCalling }, signal) => {
+    async ({ messages, connectorId, simulateFunctionCalling }, signal) => {
       const esqlFunctions = functions
         .getFunctions()
         .filter(
@@ -137,7 +137,7 @@ export function registerQueryFunction({
             { description: fn.description, schema: fn.parameters } as ToolDefinition,
           ])
         ),
-        functionCalling: useSimulatedFunctionCalling ? 'simulated' : 'native',
+        functionCalling: simulateFunctionCalling ? 'simulated' : 'auto',
       });
 
       const chatMessageId = v4();

@@ -9,7 +9,7 @@ import type { Location } from 'history';
 import { EuiFlexItem } from '@elastic/eui';
 import React, { useCallback } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
-import styled from 'styled-components';
+import styled from '@emotion/styled';
 
 import * as i18nIp from '../details/translations';
 

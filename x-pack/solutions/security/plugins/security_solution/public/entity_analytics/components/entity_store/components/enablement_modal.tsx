@@ -24,6 +24,7 @@ import {
 import { css } from '@emotion/react';
 import React, { useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { useContractComponents } from '../../../../common/hooks/use_contract_component';
 import {
   ENABLEMENT_DESCRIPTION_RISK_ENGINE_ONLY,
   ENABLEMENT_DESCRIPTION_ENTITY_STORE_ONLY,
@@ -69,6 +70,7 @@ export const EntityStoreEnablementModal: React.FC<EntityStoreEnablementModalProp
     useEntityEnginePrivileges();
   const riskEnginePrivileges = useMissingRiskEnginePrivileges();
   const enablementOptions = enablements.riskScore || enablements.entityStore;
+  const { AdditionalChargesMessage } = useContractComponents();
 
   if (!visible) {
     return null;
@@ -97,6 +99,7 @@ export const EntityStoreEnablementModal: React.FC<EntityStoreEnablementModalProp
 
       <EuiModalBody>
         <EuiFlexGroup direction="column">
+          <EuiFlexItem>{AdditionalChargesMessage && <AdditionalChargesMessage />}</EuiFlexItem>
           <EuiFlexItem>
             <EuiSwitch
               label={

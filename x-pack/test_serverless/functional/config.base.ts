@@ -6,6 +6,7 @@
  */
 
 import { FtrConfigProviderContext } from '@kbn/test';
+import { ScoutTestRunConfigCategory } from '@kbn/scout-info';
 import { resolve } from 'path';
 import { pageObjects } from './page_objects';
 import { services } from './services';
@@ -20,6 +21,7 @@ export function createTestConfig<TServices extends {} = typeof services>(
     return {
       ...svlSharedConfig.getAll(),
 
+      testConfigCategory: ScoutTestRunConfigCategory.UI_TEST,
       pageObjects,
       services: { ...services, ...options.services },
       esTestCluster: {

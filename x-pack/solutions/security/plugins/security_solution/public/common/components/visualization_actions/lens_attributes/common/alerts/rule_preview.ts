@@ -9,11 +9,14 @@ import type { GetLensAttributes } from '../../../types';
 
 const layerId = uuidv4();
 const internalReferenceId = uuidv4();
+const columnCountOfRecords = uuidv4();
+const columnTimestamp = uuidv4();
+const columnTopValues = uuidv4();
 
-export const getRulePreviewLensAttributes: GetLensAttributes = (
+export const getRulePreviewLensAttributes: GetLensAttributes = ({
   stackByField = 'event.category',
-  extraOptions
-) => {
+  extraOptions,
+}) => {
   return {
     title: 'Rule preview',
     description: '',
@@ -31,13 +34,13 @@ export const getRulePreviewLensAttributes: GetLensAttributes = (
         layers: [
           {
             layerId,
-            accessors: ['9c89324b-0c59-4403-9698-d989a09dc5a8'],
+            accessors: [columnCountOfRecords],
             position: 'top',
             seriesType: 'bar_stacked',
             showGridlines: false,
             layerType: 'data',
-            xAccessor: 'eba07b4d-766d-49d7-8435-d40367d3d055',
-            splitAccessor: 'e92c8920-0449-4564-81f4-8945517817a4',
+            xAccessor: columnTimestamp,
+            splitAccessor: columnTopValues,
           },
         ],
         yTitle: '',
@@ -77,7 +80,7 @@ export const getRulePreviewLensAttributes: GetLensAttributes = (
           layers: {
             [layerId]: {
               columns: {
-                '9c89324b-0c59-4403-9698-d989a09dc5a8': {
+                [columnCountOfRecords]: {
                   label: 'Count of records',
                   dataType: 'number',
                   operationType: 'count',
@@ -88,7 +91,7 @@ export const getRulePreviewLensAttributes: GetLensAttributes = (
                     emptyAsNull: true,
                   },
                 },
-                'eba07b4d-766d-49d7-8435-d40367d3d055': {
+                [columnTimestamp]: {
                   label: '@timestamp',
                   dataType: 'date',
                   operationType: 'date_histogram',
@@ -101,7 +104,7 @@ export const getRulePreviewLensAttributes: GetLensAttributes = (
                     dropPartials: false,
                   },
                 },
-                'e92c8920-0449-4564-81f4-8945517817a4': {
+                [columnTopValues]: {
                   label: `Top 10 values of ${stackByField}`,
                   dataType: 'string',
                   operationType: 'terms',
@@ -112,7 +115,7 @@ export const getRulePreviewLensAttributes: GetLensAttributes = (
                     size: 10,
                     orderBy: {
                       type: 'column',
-                      columnId: '9c89324b-0c59-4403-9698-d989a09dc5a8',
+                      columnId: columnCountOfRecords,
                     },
                     orderDirection: 'desc',
                     otherBucket: true,
@@ -127,11 +130,7 @@ export const getRulePreviewLensAttributes: GetLensAttributes = (
                   },
                 },
               },
-              columnOrder: [
-                'e92c8920-0449-4564-81f4-8945517817a4',
-                'eba07b4d-766d-49d7-8435-d40367d3d055',
-                '9c89324b-0c59-4403-9698-d989a09dc5a8',
-              ],
+              columnOrder: [columnTopValues, columnTimestamp, columnCountOfRecords],
               sampling: 1,
               incompleteColumns: {},
             },

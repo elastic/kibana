@@ -14,7 +14,7 @@ export const ReindexWarningCallout: React.FunctionComponent<{}> = () => {
     <EuiCallOut
       title={
         <FormattedMessage
-          id="xpack.upgradeAssistant.dataStream.migration.flyout.warningsStep.destructiveCallout.calloutTitle"
+          id="xpack.upgradeAssistant.dataStream.migration.flyout.warningsStep.reindex.calloutTitle"
           defaultMessage="This operation requires destructive changes that cannot be reversed"
         />
       }
@@ -23,7 +23,7 @@ export const ReindexWarningCallout: React.FunctionComponent<{}> = () => {
     >
       <p>
         <FormattedMessage
-          id="xpack.upgradeAssistant.dataStream.migration.flyout.warningsStep.destructiveCallout.calloutDetail"
+          id="xpack.upgradeAssistant.dataStream.migration.flyout.warningsStep.reindex.calloutDetail"
           defaultMessage="Ensure data has been backed up before continuing. To proceed with reindexing this data, confirm below."
         />
       </p>
@@ -36,7 +36,7 @@ export const ReadonlyWarningCallout: React.FunctionComponent<{}> = () => {
     <EuiCallOut
       title={
         <FormattedMessage
-          id="xpack.upgradeAssistant.dataStream.migration.flyout.warningsStep.destructiveCallout.calloutTitle"
+          id="xpack.upgradeAssistant.dataStream.migration.flyout.warningsStep.readonly.calloutTitle"
           defaultMessage="Marking this data read only could affect some of the existing setups"
         />
       }
@@ -45,7 +45,7 @@ export const ReadonlyWarningCallout: React.FunctionComponent<{}> = () => {
     >
       <p>
         <FormattedMessage
-          id="xpack.upgradeAssistant.dataStream.migration.flyout.warningsStep.destructiveCallout.calloutDetail"
+          id="xpack.upgradeAssistant.dataStream.migration.flyout.warningsStep.readonly.calloutDetail"
           defaultMessage="Make sure you have backed up your data, etc. You can always re-index this data later to make it editable."
         />
       </p>

@@ -19,11 +19,14 @@
       "savedObjectsTagging",
       "navigation",
       "fieldsMetadata",
+      "datasetQuality"
     ],
     "requiredBundles": [
       "kibanaReact"
     ],
-    "optionalPlugins": [],
+    "optionalPlugins": [
+      "observabilityAIAssistant"
+    ],
     "extraPublicDirs": []
   }
 }

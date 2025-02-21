@@ -8,7 +8,7 @@
 import { render } from '@testing-library/react';
 import { TestProviders } from '../../../../../common/mock';
 import React from 'react';
-import { hostsStatItems, HostsKpiHosts } from '.';
+import { HostsKpiHosts } from '.';
 import { KpiBaseComponent } from '../../../../components/kpi';
 
 jest.mock('../../../../components/kpi');
@@ -26,7 +26,6 @@ describe('Hosts KPI', () => {
     render(<HostsKpiHosts from={from} to={to} />, {
       wrapper: TestProviders,
     });
-    expect(MockKpiBaseComponent.mock.calls[0][0].statItems).toEqual(hostsStatItems);
     expect(MockKpiBaseComponent.mock.calls[0][0].from).toEqual(from);
     expect(MockKpiBaseComponent.mock.calls[0][0].to).toEqual(to);
   });

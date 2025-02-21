@@ -47,7 +47,7 @@ export const getNamedParams = (
   const namedParams: ESQLSearchParams['params'] = getStartEndParams(query, timeRange);
   if (variables?.length) {
     variables?.forEach(({ key, value, type }) => {
-      if (type === ESQLVariableType.FIELDS) {
+      if (type === ESQLVariableType.FIELDS || type === ESQLVariableType.FUNCTIONS) {
         namedParams.push({ [key]: { identifier: value } });
       } else {
         namedParams.push({ [key]: value });

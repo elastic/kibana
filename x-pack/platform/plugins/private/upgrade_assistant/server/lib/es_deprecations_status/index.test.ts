@@ -284,6 +284,70 @@ describe('getESUpgradeStatus', () => {
     expect(upgradeStatus.totalCriticalDeprecations).toBe(1);
   });
 
+  it('filters out old index deprecations enterprise search indices', async () => {
+    esClient.asCurrentUser.migration.deprecations.mockResponse({
+      cluster_settings: [],
+      node_settings: [],
+      ml_settings: [],
+      index_settings: {
+        '.ent-search-1': [
+          {
+            level: 'critical',
+            message: 'Old index with a compatibility version < 8.0',
+            url: 'https://www.elastic.co/guide/en/elasticsearch/reference/current/migrating-8.0.html#breaking-changes-8.0',
+            details: 'This index has version: 7.17.28-8.0.0',
+            resolve_during_rolling_upgrade: false,
+            _meta: { reindex_required: true },
+          },
+          {
+            level: 'critical',
+            message:
+              'Index [.ent-search-1] is a frozen index. The frozen indices feature is deprecated and will be removed in version 9.0.',
+            url: 'https://www.elastic.co/guide/en/elasticsearch/reference/master/frozen-indices.html',
+            details:
+              'Frozen indices must be unfrozen before upgrading to version 9.0. (The legacy frozen indices feature no longer offers any advantages. You may consider cold or frozen tiers in place of frozen indices.)',
+            resolve_during_rolling_upgrade: false,
+          },
+        ],
+        '.ent-search-2': [
+          {
+            level: 'critical',
+            message:
+              'Index [.ent-search-2] is a frozen index. The frozen indices feature is deprecated and will be removed in version 9.0.',
+            url: 'https://www.elastic.co/guide/en/elasticsearch/reference/master/frozen-indices.html',
+            details:
+              'Frozen indices must be unfrozen before upgrading to version 9.0. (The legacy frozen indices feature no longer offers any advantages. You may consider cold or frozen tiers in place of frozen indices.)',
+            resolve_during_rolling_upgrade: false,
+          },
+        ],
+      },
+      data_streams: {},
+      // @ts-expect-error not in types yet
+      ilm_policies: {},
+      templates: {},
+    });
+
+    const upgradeStatus = await getESUpgradeStatus(esClient, {
+      ...featureSet,
+    });
+
+    expect(upgradeStatus.migrationsDeprecations).toHaveLength(2);
+    expect(
+      upgradeStatus.migrationsDeprecations.find((dep) => dep.correctiveAction?.type === 'reindex')
+    ).toBeUndefined();
+
+    expect(
+      upgradeStatus.migrationsDeprecations.find((dep) => dep.index === '.ent-search-1')
+    ).toMatchObject({
+      details: expect.stringContaining('Frozen indices'),
+    });
+    expect(
+      upgradeStatus.migrationsDeprecations.find((dep) => dep.index === '.ent-search-2')
+    ).toMatchObject({
+      details: expect.stringContaining('Frozen indices'),
+    });
+  });
+
   it('returns health indicators', async () => {
     esClient.asCurrentUser.migration.deprecations.mockResponse({
       cluster_settings: [],

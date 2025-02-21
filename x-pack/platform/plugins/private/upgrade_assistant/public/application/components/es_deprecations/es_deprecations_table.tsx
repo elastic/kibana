@@ -31,7 +31,7 @@ import {
   MlSnapshotsTableRow,
   DefaultTableRow,
   IndexSettingsTableRow,
-  ReindexTableRow,
+  IndexTableRow,
   ClusterSettingsTableRow,
   HealthIndicatorTableRow,
   DataStreamTableRow,
@@ -55,10 +55,10 @@ const i18nTexts = {
   typeFilterLabel: i18n.translate('xpack.upgradeAssistant.esDeprecations.table.typeFilterLabel', {
     defaultMessage: 'Type',
   }),
-  criticalFilterLabel: i18n.translate(
-    'xpack.upgradeAssistant.esDeprecations.table.criticalFilterLabel',
+  statusFilterLabel: i18n.translate(
+    'xpack.upgradeAssistant.esDeprecations.table.statusFilterLabel',
     {
-      defaultMessage: 'Critical',
+      defaultMessage: 'Status',
     }
   ),
   searchPlaceholderLabel: i18n.translate(
@@ -126,7 +126,8 @@ const renderTableRowCells = (
       return <ClusterSettingsTableRow deprecation={deprecation} rowFieldNames={cellTypes} />;
 
     case 'reindex':
-      return <ReindexTableRow deprecation={deprecation} rowFieldNames={cellTypes} />;
+    case 'unfreeze':
+      return <IndexTableRow deprecation={deprecation} rowFieldNames={cellTypes} />;
 
     case 'healthIndicator':
       return <HealthIndicatorTableRow deprecation={deprecation} rowFieldNames={cellTypes} />;
@@ -163,6 +164,21 @@ const getSortedItems = (deprecations: EnrichedDeprecationInfo[], sortConfig: Sor
 
   return isSortAscending ? sorted : sorted.reverse();
 };
+
+const statusFilterOptions = [
+  {
+    value: true,
+    name: i18n.translate('xpack.upgradeAssistant.esDeprecations.table.filter.critical', {
+      defaultMessage: 'Critical',
+    }),
+  },
+  {
+    value: false,
+    name: i18n.translate('xpack.upgradeAssistant.esDeprecations.table.filter.warning', {
+      defaultMessage: 'Warning',
+    }),
+  },
+];
 
 export const EsDeprecationsTable: React.FunctionComponent<Props> = ({
   deprecations = [],
@@ -243,9 +259,11 @@ export const EsDeprecationsTable: React.FunctionComponent<Props> = ({
             }}
             filters={[
               {
-                type: 'is',
+                type: 'field_value_selection',
                 field: 'isCritical',
-                name: i18nTexts.criticalFilterLabel,
+                name: i18nTexts.statusFilterLabel,
+                multiSelect: false,
+                options: statusFilterOptions,
               },
               {
                 type: 'field_value_selection',

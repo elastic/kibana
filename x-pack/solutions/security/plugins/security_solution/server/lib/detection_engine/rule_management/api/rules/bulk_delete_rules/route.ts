@@ -122,12 +122,17 @@ export const bulkDeleteRulesRoute = (
     access: 'public',
     path: DETECTION_ENGINE_RULES_BULK_DELETE,
     options: {
-      tags: ['access:securitySolution'],
       timeout: {
         idleSocket: RULE_MANAGEMENT_BULK_ACTION_SOCKET_TIMEOUT_MS,
       },
     },
+    security: {
+      authz: { requiredPrivileges: ['securitySolution'] },
+    },
   };
+
+  const securityDocLinks = docLinks.links.securitySolution;
+
   router.versioned.delete(routeConfig).addVersion(
     {
       version: '2023-10-31',
@@ -138,7 +143,7 @@ export const bulkDeleteRulesRoute = (
       },
       options: {
         deprecated: {
-          documentationUrl: docLinks.links.securitySolution.legacyBulkApiDeprecations,
+          documentationUrl: securityDocLinks.legacyRuleManagementBulkApiDeprecations,
           severity: 'warning',
           reason: {
             type: 'migrate',
@@ -150,6 +155,7 @@ export const bulkDeleteRulesRoute = (
     },
     handler
   );
+
   router.versioned.post(routeConfig).addVersion(
     {
       version: '2023-10-31',
@@ -160,7 +166,7 @@ export const bulkDeleteRulesRoute = (
       },
       options: {
         deprecated: {
-          documentationUrl: docLinks.links.securitySolution.legacyBulkApiDeprecations,
+          documentationUrl: securityDocLinks.legacyRuleManagementBulkApiDeprecations,
           severity: 'warning',
           reason: {
             type: 'migrate',

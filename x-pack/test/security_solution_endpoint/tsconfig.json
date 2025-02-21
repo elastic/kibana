@@ -29,5 +29,6 @@
     "@kbn/test-subj-selector",
     "@kbn/ftr-common-functional-services",
     "@kbn/spaces-plugin",
+    "@kbn/scout-info",
   ]
 }

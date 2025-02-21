@@ -6,3 +6,5 @@
  */
 
 export { usageReportingService } from './usage_reporting_service';
+export const SECURITY_ES_ARCHIVES_DIR = 'x-pack/test/security_solution_cypress/es_archives';
+export const AGENTLESS_SECURITY_POSTURE_PACKAGE_VERSION = '1.13.0-preview02';
