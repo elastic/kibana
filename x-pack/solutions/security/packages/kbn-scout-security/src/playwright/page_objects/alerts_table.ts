@@ -28,4 +28,8 @@ export class AlertsTablePage {
     const url = await this.page.url();
     return url;
   }
+
+  async reload() {
+    this.page.reload();
+  }
 }

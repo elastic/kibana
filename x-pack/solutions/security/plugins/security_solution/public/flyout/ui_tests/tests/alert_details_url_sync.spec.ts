@@ -6,6 +6,7 @@
  */
 
 import { expect, test } from '@kbn/scout-security';
+import { CUSTOM_QUERY_RULE } from '@kbn/scout-security/src/playwright/fixtures/test_data';
 
 const RIGHT = 'right';
 
@@ -16,17 +17,30 @@ test.describe('Expandable flyout state sync', { tag: ['@svlSecurity'] }, () => {
     await browserAuth.loginAsPlatformEngineer();
   });
 
-  test('should test flyout url sync', async ({ pageObjects: { alertsTablePage } }) => {
+  test('should test flyout url sync', async ({
+    pageObjects: { alertsTablePage, alertDetailsRightPanelPage },
+  }) => {
     await alertsTablePage.navigate();
-    
+
     const urlBeforeAlertDetails = await alertsTablePage.getCurrentUrl();
     expect(urlBeforeAlertDetails).not.toContain(RIGHT);
-    
+
     await alertsTablePage.expandAlertDetailsFlyout();
-    
+
     const urlAfterAlertDetails = await alertsTablePage.getCurrentUrl();
     expect(urlAfterAlertDetails).toContain(RIGHT);
 
-    
+    const headerTitle = alertDetailsRightPanelPage.detailsFlyoutHeaderTitle;
+    await expect(headerTitle).toHaveText(CUSTOM_QUERY_RULE.name);
+
+    await alertsTablePage.reload();
+
+    const urlAfterReload = await alertsTablePage.getCurrentUrl();
+    expect(urlAfterReload).toContain(RIGHT);
+
+    await alertDetailsRightPanelPage.closeFlyout();
+
+    const urlAfterClosingFlyout = await alertsTablePage.getCurrentUrl();
+    expect(urlAfterClosingFlyout).not.toContain(RIGHT);
   });
 });

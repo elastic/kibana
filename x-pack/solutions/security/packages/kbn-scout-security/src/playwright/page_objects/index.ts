@@ -7,14 +7,17 @@
 
 import { PageObjects, ScoutPage, createLazyPageObject } from '@kbn/scout';
 import { AlertsTablePage } from './alerts_table';
+import { AlertDetailsRightPanelPage } from './alert_details_right_panel';
 
 export interface SecurityPageObjects extends PageObjects {
   alertsTablePage: AlertsTablePage;
+  alertDetailsRightPanelPage: AlertDetailsRightPanelPage;
 }
 
 export function extendPageObjects(pageObjects: PageObjects, page: ScoutPage): SecurityPageObjects {
   return {
     ...pageObjects,
     alertsTablePage: createLazyPageObject(AlertsTablePage, page),
+    alertDetailsRightPanelPage: createLazyPageObject(AlertDetailsRightPanelPage, page),
   };
 }
