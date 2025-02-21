@@ -7,6 +7,7 @@
 
 export enum ProductLine {
   security = 'security',
+  ai = 'ai',
   endpoint = 'endpoint',
   cloud = 'cloud',
 }

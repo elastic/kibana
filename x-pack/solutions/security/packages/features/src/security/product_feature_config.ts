@@ -20,6 +20,24 @@ import type { DefaultSecurityProductFeaturesConfig } from './types';
  * - `subFeaturesPrivileges`: the privileges that will be added into the existing Security subFeature with the privilege `id` specified.
  */
 export const securityDefaultProductFeaturesConfig: DefaultSecurityProductFeaturesConfig = {
+  [ProductFeatureSecurityKey.dashboards]: {
+    privileges: {
+      all: { ui: ['dashboards'] },
+      read: { ui: ['dashboards'] },
+    },
+  },
+  [ProductFeatureSecurityKey.detections]: {
+    privileges: {
+      all: {
+        ui: ['rules', 'alerts', 'explore'],
+        api: [`${APP_ID}-detections`], // TODO: add detections API action `authz`
+      },
+      read: {
+        ui: ['rules', 'alerts', 'explore'],
+        api: [`${APP_ID}-detections`], // TODO: add detections API action `authz`
+      },
+    },
+  },
   [ProductFeatureSecurityKey.advancedInsights]: {
     privileges: {
       all: {
