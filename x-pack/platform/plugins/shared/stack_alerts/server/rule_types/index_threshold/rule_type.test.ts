@@ -12,7 +12,7 @@ import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { RuleExecutorServices } from '@kbn/alerting-plugin/server';
 import { getRuleType, ActionGroupId } from './rule_type';
 import { ActionContext } from './action_context';
-import { Params } from './rule_type_params';
+import type { Params } from '@kbn/response-ops-rule-params/index_threshold';
 import { TIME_SERIES_BUCKET_SELECTOR_FIELD } from '@kbn/triggers-actions-ui-plugin/server';
 import { RuleExecutorServicesMock, alertsMock } from '@kbn/alerting-plugin/server/mocks';
 import { Comparator } from '../../../common/comparator_types';

@@ -9,10 +9,21 @@
 
 import { ScoutPage } from '..';
 
+const DEFAULT_MAP_LOADING_TIMEOUT = 10_000;
+
 export class MapsPage {
   constructor(private readonly page: ScoutPage) {}
 
   async gotoNewMap() {
-    await this.page.gotoApp('maps/map');
+    return this.page.gotoApp('maps/map');
+  }
+
+  async waitForRenderComplete() {
+    // first wait for the top level container to be present
+    await this.page.locator('div#maps-plugin').waitFor({ timeout: DEFAULT_MAP_LOADING_TIMEOUT });
+    // then wait for the map to be fully rendered
+    return this.page
+      .locator('div[data-dom-id][data-render-complete="true"]')
+      .waitFor({ timeout: DEFAULT_MAP_LOADING_TIMEOUT });
   }
 }
