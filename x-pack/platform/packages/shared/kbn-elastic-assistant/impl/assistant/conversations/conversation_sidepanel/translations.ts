@@ -43,28 +43,28 @@ export const DELETE_BUTTON_TEXT = i18n.translate(
 );
 
 export const DATE_CATEGORY_LABELS: Record<string, string> = {
-  TODAY: i18n.translate('xpack.aiAssistant.conversationList.dateGroupTitle.today', {
+  TODAY: i18n.translate('xpack.elasticAssistant.conversationList.dateGroupTitle.today', {
     defaultMessage: 'Today',
   }),
-  YESTERDAY: i18n.translate('xpack.aiAssistant.conversationList.dateGroupTitle.yesterday', {
+  YESTERDAY: i18n.translate('xpack.elasticAssistant.conversationList.dateGroupTitle.yesterday', {
     defaultMessage: 'Yesterday',
   }),
-  THIS_WEEK: i18n.translate('xpack.aiAssistant.conversationList.dateGroupTitle.thisWeek', {
+  THIS_WEEK: i18n.translate('xpack.elasticAssistant.conversationList.dateGroupTitle.thisWeek', {
     defaultMessage: 'This Week',
   }),
-  LAST_WEEK: i18n.translate('xpack.aiAssistant.conversationList.dateGroupTitle.lastWeek', {
+  LAST_WEEK: i18n.translate('xpack.elasticAssistant.conversationList.dateGroupTitle.lastWeek', {
     defaultMessage: 'Last Week',
   }),
-  THIS_MONTH: i18n.translate('xpack.aiAssistant.conversationList.dateGroupTitle.thisMonth', {
+  THIS_MONTH: i18n.translate('xpack.elasticAssistant.conversationList.dateGroupTitle.thisMonth', {
     defaultMessage: 'This Month',
   }),
-  LAST_MONTH: i18n.translate('xpack.aiAssistant.conversationList.dateGroupTitle.lastMonth', {
+  LAST_MONTH: i18n.translate('xpack.elasticAssistant.conversationList.dateGroupTitle.lastMonth', {
     defaultMessage: 'Last Month',
   }),
-  THIS_YEAR: i18n.translate('xpack.aiAssistant.conversationList.dateGroupTitle.thisYear', {
+  THIS_YEAR: i18n.translate('xpack.elasticAssistant.conversationList.dateGroupTitle.thisYear', {
     defaultMessage: 'This Year',
   }),
-  OLDER: i18n.translate('xpack.aiAssistant.conversationList.dateGroupTitle.older', {
+  OLDER: i18n.translate('xpack.elasticAssistant.conversationList.dateGroupTitle.older', {
     defaultMessage: 'Older',
   }),
 };

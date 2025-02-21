@@ -85,6 +85,7 @@ const HistoricalCheckFieldsComponent: React.FC<Props> = ({ indexName, historical
       },
     ],
     [
+      checkedAt,
       customFieldCount,
       docsCount,
       ecsFieldCount,
