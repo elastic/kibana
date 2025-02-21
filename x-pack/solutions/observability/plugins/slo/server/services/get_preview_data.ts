@@ -53,7 +53,7 @@ export class GetPreviewData {
     private dataViewService: DataViewsService
   ) {}
 
-  public async buildRuntimeMappings({ dataViewId }: { dataViewId?: string }) {
+  private async buildRuntimeMappings({ dataViewId }: { dataViewId?: string }) {
     let dataView: DataView | undefined;
     if (dataViewId) {
       try {
@@ -62,7 +62,7 @@ export class GetPreviewData {
         // If the data view is not found, we will continue without it
       }
     }
-    return dataView?.getRuntimeMappings?.() ?? {};
+    return dataView?.getRuntimeMappings() ?? {};
   }
 
   private addExtraTermsOrMultiTermsAgg(
