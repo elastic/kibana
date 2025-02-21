@@ -4,7 +4,7 @@ set -euo pipefail
 
 RELEASE_BUILD="${RELEASE_BUILD:="false"}"
 if [[ "$RELEASE_BUILD" == "true" ]]; then
-  VERSION_QUALIFIER="${VERSION_QUALIFIER:="beta1"}"
+  VERSION_QUALIFIER="${VERSION_QUALIFIER:="rc1"}"
 else
   VERSION_QUALIFIER="${VERSION_QUALIFIER:=""}"
 fi

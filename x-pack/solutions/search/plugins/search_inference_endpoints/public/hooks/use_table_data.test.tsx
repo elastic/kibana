@@ -18,7 +18,7 @@ const inferenceEndpoints = [
   {
     inference_id: 'my-elser-model-04',
     task_type: 'sparse_embedding',
-    service: 'elser',
+    service: 'elasticsearch',
     service_settings: {
       num_allocations: 1,
       num_threads: 1,
@@ -29,7 +29,7 @@ const inferenceEndpoints = [
   {
     inference_id: 'my-elser-model-01',
     task_type: 'sparse_embedding',
-    service: 'elser',
+    service: 'elasticsearch',
     service_settings: {
       num_allocations: 1,
       num_threads: 1,
@@ -38,13 +38,12 @@ const inferenceEndpoints = [
     task_settings: {},
   },
   {
-    inference_id: 'my-elser-model-05',
+    inference_id: 'my-openai-model-05',
     task_type: 'text_embedding',
-    service: 'elasticsearch',
+    service: 'openai',
     service_settings: {
-      num_allocations: 1,
-      num_threads: 1,
-      model_id: '.elser_model_2',
+      url: 'https://somewhere.com',
+      model_id: 'third-party-model',
     },
     task_settings: {},
   },
@@ -58,7 +57,7 @@ const queryParams = {
 } as QueryParams;
 
 const filterOptions = {
-  provider: ['elser', 'elasticsearch'],
+  provider: ['elasticsearch', 'openai'],
   type: ['sparse_embedding', 'text_embedding'],
 } as any;
 
@@ -126,7 +125,7 @@ describe('useTableData', () => {
 
   it('should filter data based on provider and type from filterOptions', () => {
     const filterOptions2 = {
-      provider: ['elser'],
+      provider: ['elasticsearch'],
       type: ['text_embedding'],
     } as any;
     const { result } = renderHook(

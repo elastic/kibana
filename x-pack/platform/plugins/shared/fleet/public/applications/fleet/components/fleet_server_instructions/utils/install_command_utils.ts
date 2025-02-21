@@ -132,6 +132,8 @@ export function getInstallCommandForPlatform({
 
   commandArguments.push(['fleet-server-port', '8220']);
 
+  commandArguments.push(['install-servers']);
+
   const enrollmentProxyArgs = [];
   if (esOutputProxy) {
     enrollmentProxyArgs.push(['proxy-url', esOutputProxy.url]);

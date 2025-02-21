@@ -90,6 +90,7 @@ export default async function ({ readConfigFile, log }: FtrConfigProviderContext
         `--xpack.fleet.agentless.api.tls.certificate=./config/node.crt`,
         `--xpack.fleet.agentless.api.tls.key=./config/node.key`,
         `--xpack.fleet.agentless.api.tls.ca=./config/ca.crt`,
+        `--xpack.fleet.internal.registry.kibanaVersionCheckEnabled=false`,
         `--logging.loggers=${JSON.stringify([
           ...getKibanaCliLoggers(xPackAPITestsConfig.get('kbnTestServer.serverArgs')),
 

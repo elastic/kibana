@@ -26,6 +26,7 @@ import { RULE_MANAGEMENT_PAGE_BREADCRUMB } from '../../../../screens/breadcrumbs
 import {
   installPrebuiltRuleAssets,
   createAndInstallMockedPrebuiltRules,
+  preventPrebuiltRulesPackageInstallation,
 } from '../../../../tasks/api_calls/prebuilt_rules';
 import { createSavedQuery, deleteSavedQueries } from '../../../../tasks/api_calls/saved_queries';
 import { fetchMachineLearningModules } from '../../../../tasks/api_calls/machine_learning';
@@ -72,7 +73,7 @@ import { enableRules, waitForRulesToFinishExecution } from '../../../../tasks/ap
 const PREVIEW_TABS = {
   OVERVIEW: 'Overview',
   JSON_VIEW: 'JSON view',
-  UPDATES: 'Updates', // Currently open by default on upgrade
+  UPDATES: 'Elastic update overview', // Currently open by default on upgrade
 };
 
 describe(
@@ -374,6 +375,8 @@ describe(
     };
 
     beforeEach(() => {
+      preventPrebuiltRulesPackageInstallation();
+
       login();
       resetRulesTableState();
       deleteAlertsAndRules();

@@ -28,8 +28,18 @@ export function getColorLabel(percent: number) {
   return { color: 'text', label: undefined, icon: undefined };
 }
 
-export function scaleValue({ value, scaleFactor = 1 }: { value: number; scaleFactor?: number }) {
+function scaleValue({ value, scaleFactor = 1 }: { value: number; scaleFactor?: number }) {
   return value * scaleFactor;
+}
+
+export function scaleAndRoundValue({
+  value,
+  scaleFactor = 1,
+}: {
+  value: number;
+  scaleFactor?: number;
+}) {
+  return Math.round(scaleValue({ value, scaleFactor }));
 }
 
 export const getTotalCount = (topNFunctions?: TopNFunctions) => topNFunctions?.selfCPU ?? 0;
