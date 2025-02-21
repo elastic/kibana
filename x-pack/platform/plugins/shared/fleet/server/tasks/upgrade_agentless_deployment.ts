@@ -14,7 +14,8 @@ import {
   type TaskManagerSetupContract,
 } from '@kbn/task-manager-plugin/server';
 import { getDeleteTaskRunResult } from '@kbn/task-manager-plugin/server/task';
-import semverLt from 'semver/functions/lt';
+
+import { isAgentVersionLessThanLatest } from '../../common/services';
 
 import { agentPolicyService, appContextService } from '../services';
 
@@ -28,7 +29,7 @@ export const UPGRADE_AGENTLESS_DEPLOYMENTS_TASK_TYPE = 'fleet:upgrade-agentless-
 export const UPGRADE_AGENT_DEPLOYMENTS_TASK_VERSION = '1.0.0';
 const TITLE = 'Fleet upgrade agentless deployments Task';
 const TIMEOUT = '2m';
-const INTERVAL = '1d';
+const INTERVAL = '1m';
 const LOGGER_SUBJECT = '[UpgradeAgentlessDeploymentsTask]';
 const BATCH_SIZE = 10;
 const AGENTLESS_DEPLOYMENTS_SIZE = 40;
@@ -45,7 +46,7 @@ interface UpgradeAgentlessDeploymentsTaskStartContract {
 export class UpgradeAgentlessDeploymentsTask {
   private logger: Logger;
   private startedTaskRunner: boolean = false;
-  private abortController = new AbortController();
+  public abortController = new AbortController();
 
   constructor(setupContract: UpgradeAgentlessDeploymentsTaskSetupContract) {
     const { core, taskManager, logFactory } = setupContract;
@@ -128,14 +129,16 @@ export class UpgradeAgentlessDeploymentsTask {
           );
 
           if (this.abortController.signal.aborted) {
-            this.abortController.abort('Task runner canceled!');
+            this.logger.info(`${LOGGER_SUBJECT} Task runner canceled!`);
+            this.abortController.signal.throwIfAborted();
           }
           return processFunction(agentPolicy, agentlessAgent);
         })
       );
 
       if (this.abortController.signal.aborted) {
-        this.abortController.abort('Task runner canceled!');
+        this.logger.info(`${LOGGER_SUBJECT} Task runner canceled!`);
+        this.abortController.signal.throwIfAborted();
       }
     }
   };
@@ -204,7 +207,8 @@ export class UpgradeAgentlessDeploymentsTask {
         }
 
         if (this.abortController.signal.aborted) {
-          this.abortController.abort('Task runner canceled!');
+          this.logger.info(`${LOGGER_SUBJECT} Task runner canceled!`);
+          this.abortController.signal.throwIfAborted();
         }
       }
     } catch (e) {
@@ -235,7 +239,7 @@ export class UpgradeAgentlessDeploymentsTask {
       agent.status === 'online' &&
       latestAgentVersion &&
       currentAgentVersion &&
-      semverLt(currentAgentVersion, latestAgentVersion)
+      isAgentVersionLessThanLatest(currentAgentVersion, latestAgentVersion)
     ) {
       this.logger.info(
         `${LOGGER_SUBJECT} Upgrade Available to ${latestAgentVersion} for agentless policy ${agentPolicy.id} current version ${currentAgentVersion}`
