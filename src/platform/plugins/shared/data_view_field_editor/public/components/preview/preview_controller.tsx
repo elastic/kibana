@@ -212,9 +212,8 @@ export class PreviewController {
     this.dataView.setFieldCustomDescription(updatedField.name, updatedField.customDescription);
 
     if (updatedField.popularity !== undefined) {
-      const updatedCount = Number(updatedField.popularity) || 0;
-      this.dataViewToUpdate.setFieldCount(updatedField.name, updatedCount);
-      this.dataView.setFieldCount(updatedField.name, updatedCount);
+      this.dataViewToUpdate.setFieldCount(updatedField.name, updatedField.popularity || 0);
+      this.dataView.setFieldCount(updatedField.name, updatedField.popularity || 0);
     }
 
     if (updatedField.format) {
