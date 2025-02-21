@@ -17,7 +17,7 @@ import type {
 import { MODEL_STATE } from '@kbn/ml-trained-models-utils';
 import { i18n } from '@kbn/i18n';
 import type { MlTrainedModelConfig } from '@elastic/elasticsearch/lib/api/types';
-import type { ITelemetryClient } from '../../services/telemetry/types';
+import type { ITelemetryClient } from '../services/telemetry/types';
 import type { DeploymentParamsUI } from './deployment_setup';
 import type { CloudInfo } from '../services/ml_server_info';
 import type { MlServerLimits } from '../../../common/types/ml_server_info';

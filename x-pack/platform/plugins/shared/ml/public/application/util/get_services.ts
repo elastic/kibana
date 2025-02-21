@@ -19,7 +19,6 @@ import { mlUsageCollectionProvider } from '../services/usage_collection';
 import { mlJobServiceFactory } from '../services/job_service';
 import { indexServiceFactory } from './index_service';
 import { TrainedModelsService } from '../model_management/trained_models_service';
-import type { ITelemetryClient } from '../../services/telemetry/types';
 
 /**
  * Provides global services available across the entire ML app.
@@ -27,7 +26,6 @@ import type { ITelemetryClient } from '../../services/telemetry/types';
 export function getMlGlobalServices(
   coreStart: CoreStart,
   dataViews: DataViewsContract,
-  telemetry: ITelemetryClient,
   usageCollection?: UsageCollectionSetup
 ) {
   const httpService = new HttpService(coreStart.http);
@@ -54,6 +52,5 @@ export function getMlGlobalServices(
     mlCapabilities: new MlCapabilitiesService(mlApi),
     mlLicense: new MlLicense(),
     trainedModelsService,
-    telemetry,
   };
 }

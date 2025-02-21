@@ -17,6 +17,7 @@ import { useEnabledFeatures, useMlServerInfo } from '../../contexts/ml';
 import { useCloudCheck } from '../../components/node_available_warning/hooks';
 import { getNewJobLimits } from '../../services/ml_server_info';
 import { DeploymentParamsMapper } from '../deployment_params_mapper';
+import { useMlTelemetryClient } from '../../contexts/ml/ml_telemetry_context';
 
 /**
  * Hook that initializes the shared TrainedModelsService instance with storage
@@ -28,9 +29,11 @@ export function useInitTrainedModelsService(
 ): TrainedModelsService {
   const {
     services: {
-      mlServices: { trainedModelsService, telemetry },
+      mlServices: { trainedModelsService },
     },
   } = useMlKibana();
+
+  const { telemetryClient } = useMlTelemetryClient();
 
   const { displayErrorToast, displaySuccessToast } = useToastNotificationService();
 
@@ -68,7 +71,7 @@ export function useInitTrainedModelsService(
       displaySuccessToast,
       savedObjectsApiService,
       canManageSpacesAndSavedObjects,
-      telemetryService: telemetry,
+      telemetryService: telemetryClient,
       deploymentParamsMapper,
     });
 

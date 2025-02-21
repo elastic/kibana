@@ -6,7 +6,7 @@
  */
 
 import type { RootSchema } from '@kbn/core/public';
-import type { DeploymentParamsUI } from '../../application/model_management/deployment_setup';
+import type { DeploymentParamsUI } from '../../model_management/deployment_setup';
 
 export type TrainedModelsDeploymentEbtProps = {
   model_id: string;

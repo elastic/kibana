@@ -75,8 +75,8 @@ import type { ElasticModels } from './application/services/elastic_models_servic
 import type { MlApi } from './application/services/ml_api_service';
 import type { MlCapabilities } from '../common/types/capabilities';
 import { AnomalySwimLane } from './shared_components';
-import { TelemetryService } from './services/telemetry/telemetry_service';
-import type { ITelemetryClient } from './services/telemetry/types';
+import { TelemetryService } from './application/services/telemetry/telemetry_service';
+import type { ITelemetryClient } from './application/services/telemetry/types';
 
 export interface MlStartDependencies {
   cases?: CasesPublicStart;
@@ -243,7 +243,6 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
         core,
         {
           usageCollection: pluginsSetup.usageCollection,
-          telemetry: telemetryClient,
         },
         this.isServerless,
         this.enabledFeatures

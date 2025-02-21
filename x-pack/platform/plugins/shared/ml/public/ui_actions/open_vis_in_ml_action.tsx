@@ -39,26 +39,16 @@ export function createVisToADJobAction(
 
       try {
         if (isLensApi(embeddable)) {
-          const [
-            { showLensVisToADJobFlyout },
-            [coreStart, { share, data, lens, dashboard, telemetry }],
-          ] = await Promise.all([import('../embeddables/job_creation/lens'), getStartServices()]);
+          const [{ showLensVisToADJobFlyout }, [coreStart, { share, data, lens, dashboard }]] =
+            await Promise.all([import('../embeddables/job_creation/lens'), getStartServices()]);
           if (lens === undefined) {
             return;
           }
-          await showLensVisToADJobFlyout(
-            embeddable,
-            coreStart,
-            share,
-            data,
-            dashboard,
-            lens,
-            telemetry
-          );
+          await showLensVisToADJobFlyout(embeddable, coreStart, share, data, dashboard, lens);
         } else if (isMapApi(embeddable)) {
-          const [{ showMapVisToADJobFlyout }, [coreStart, { share, data, dashboard, telemetry }]] =
+          const [{ showMapVisToADJobFlyout }, [coreStart, { share, data, dashboard }]] =
             await Promise.all([import('../embeddables/job_creation/map'), getStartServices()]);
-          await showMapVisToADJobFlyout(embeddable, coreStart, share, data, dashboard, telemetry);
+          await showMapVisToADJobFlyout(embeddable, coreStart, share, data, dashboard);
         }
       } catch (e) {
         return Promise.reject();

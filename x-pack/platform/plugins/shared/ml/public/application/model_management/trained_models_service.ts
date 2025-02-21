@@ -42,7 +42,7 @@ import {
 import type { UpdateAllocationParams } from '../services/ml_api_service/trained_models';
 import { type TrainedModelsApiService } from '../services/ml_api_service/trained_models';
 import type { SavedObjectsApiService } from '../services/ml_api_service/saved_objects';
-import type { ITelemetryClient } from '../../services/telemetry/types';
+import type { ITelemetryClient } from '../services/telemetry/types';
 import type { DeploymentParamsUI } from './deployment_setup';
 import type { DeploymentParamsMapper } from './deployment_params_mapper';
 

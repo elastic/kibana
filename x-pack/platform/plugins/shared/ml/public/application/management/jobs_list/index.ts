@@ -14,7 +14,6 @@ import type { ManagementAppMountParams } from '@kbn/management-plugin/public';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
-import type { ITelemetryClient } from '../../../services/telemetry/types';
 import type { MlFeatures } from '../../../../common/constants/app';
 import type { MlStartDependencies } from '../../../plugin';
 import { JobsListPage } from './components';
@@ -29,7 +28,6 @@ const renderApp = (
   fieldFormats: FieldFormatsStart,
   isServerless: boolean,
   mlFeatures: MlFeatures,
-  telemetry: ITelemetryClient,
   spaces?: SpacesPluginStart,
   usageCollection?: UsageCollectionSetup
 ) => {
@@ -44,7 +42,6 @@ const renderApp = (
       fieldFormats,
       isServerless,
       mlFeatures,
-      telemetry,
     }),
     element
   );
@@ -56,7 +53,7 @@ const renderApp = (
 export async function mountApp(
   core: CoreSetup<MlStartDependencies>,
   params: ManagementAppMountParams,
-  deps: { usageCollection?: UsageCollectionSetup; telemetry: ITelemetryClient },
+  deps: { usageCollection?: UsageCollectionSetup },
   isServerless: boolean,
   mlFeatures: MlFeatures
 ) {
@@ -72,7 +69,6 @@ export async function mountApp(
     pluginsStart.fieldFormats,
     isServerless,
     mlFeatures,
-    deps.telemetry,
     pluginsStart.spaces,
     deps.usageCollection
   );
