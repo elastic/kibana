@@ -8,14 +8,14 @@
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { DashboardPanelMap } from '@kbn/dashboard-plugin/common';
 // Remove
-import {
-  AGENT_NAME_DASHBOARD_FILE_MAPPING,
-  loadDashboardFile,
-} from './dashboards/dashboard_catalog';
+// import {
+//   AGENT_NAME_DASHBOARD_FILE_MAPPING,
+//   loadDashboardFile,
+// } from './dashboards/dashboard_catalog';
 
 // Uncomment
 // import { loadDashboardFile } from './dashboards/get_dashboard_file_name';
-// import { getDashboardFileName } from './dashboards/get_dashboard_file_name';
+import { getDashboardFileName, loadDashboardFile } from './dashboards/get_dashboard_file_name';
 interface DashboardFileProps {
   agentName?: string;
   runtimeName?: string;
@@ -27,13 +27,24 @@ export interface MetricsDashboardProps extends DashboardFileProps {
   dataView: DataView;
 }
 
-export function hasDashboardFile(props: DashboardFileProps) {
-  return !!getDashboardFileName(props);
+export async function getDashboardFile(props: DashboardFileProps) {
+  const dashboardFilename = getDashboardFileNameFromProps(props);
+  const dashboardJSON = !!dashboardFilename ? await loadDashboardFile(dashboardFilename) : false;
+
+  if (!dashboardFilename || !dashboardJSON) {
+    return undefined;
+  }
+  return dashboardJSON;
+}
+
+export async function hasDashboardFile(props: DashboardFileProps) {
+  const dashboardJSON = await getDashboardFile(props);
+  return !!dashboardJSON;
 }
 
 // Remove
-function getDashboardFileName({ agentName }: DashboardFileProps) {
-  const dashboardFile = agentName && AGENT_NAME_DASHBOARD_FILE_MAPPING[agentName];
+function getDashboardFileNameFromProps({ agentName, telemetrySdkName }: DashboardFileProps) {
+  const dashboardFile = agentName && getDashboardFileName({ agentName, telemetrySdkName });
   return dashboardFile;
 }
 
@@ -49,12 +60,8 @@ export async function convertSavedDashboardToPanels(
   props: MetricsDashboardProps,
   dataView: DataView
 ): Promise<DashboardPanelMap | undefined> {
-  const dashboardFilename = getDashboardFileName(props);
-  const dashboardJSON = !!dashboardFilename
-    ? await loadDashboardFile(dashboardFilename)
-    : undefined;
-
-  if (!dashboardFilename || !dashboardJSON) {
+  const dashboardJSON = await getDashboardFile(props);
+  if (!dashboardJSON) {
     return undefined;
   }
 

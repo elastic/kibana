@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
+import { isElasticAgentName } from '@kbn/elastic-agent-utils/src/agent_guards';
+import { EuiCallOut, EuiLink } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import {
   isJavaAgentName,
   isJRubyAgentName,
@@ -26,6 +30,20 @@ export function Metrics() {
     useApmServiceContext();
   const isAWSLambda = isAWSLambdaAgentName(serverlessType);
   const { dataView } = useAdHocApmDataView();
+  const [hasDashboard, setHasDashboard] = useState<boolean>(false);
+
+  useEffect(() => {
+    async function loadDashboardFile() {
+      const loadDashboard = await hasDashboardFile({
+        agentName,
+        telemetrySdkName,
+        runtimeName,
+        serverlessType,
+      });
+      setHasDashboard(loadDashboard);
+    }
+    loadDashboardFile();
+  }, [agentName, runtimeName, serverlessType, telemetrySdkName]);
 
   const hasLogsOnlySignal =
     serviceEntitySummary?.dataStreamTypes && isLogsOnlySignal(serviceEntitySummary.dataStreamTypes);
@@ -38,18 +56,41 @@ export function Metrics() {
     return <ServerlessMetrics />;
   }
 
-  const hasStaticDashboard = hasDashboardFile({
-    agentName,
-    telemetrySdkName,
-    runtimeName,
-    serverlessType,
-  });
-
+  if (!hasDashboard && !isElasticAgentName(agentName ?? '')) {
+    // TODO move and replace the fallback message here
+    return (
+      <EuiCallOut
+        title={i18n.translate('xpack.apm.metrics.emptyState.title', {
+          defaultMessage: 'No dashboard found',
+        })}
+        iconType="iInCircle"
+      >
+        <FormattedMessage
+          id="xpack.apm.metrics.emptyState.explanation"
+          defaultMessage="We could not find a dashboard matching the metrics of your service. To learn more check the {link}"
+          values={{
+            link: (
+              <EuiLink
+                data-test-subj="apmServiceMetricsDocumentationOfApmMetricsLink"
+                // TODO add to docLinks like docLinks.links.apm.metrics or whatever link we decide to use
+                href="https://www.elastic.co/guide/en/observability/current/apm-metrics.html"
+                target="_blank"
+              >
+                {i18n.translate('xpack.apm.metrics.emptyState.explanation.documantationLink', {
+                  defaultMessage: 'APM metrics documentation',
+                })}
+              </EuiLink>
+            ),
+          }}
+        />
+      </EuiCallOut>
+    );
+  }
   // if (!hasDashboardFile && telemetrySdkName) {
   // Fallback message here
   // }
 
-  if (hasStaticDashboard && dataView) {
+  if (hasDashboard && dataView) {
     return (
       <JsonMetricsDashboard
         agentName={agentName}
