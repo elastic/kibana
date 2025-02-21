@@ -7917,6 +7917,14 @@
   version "0.0.0"
   uid ""
 
+"@kbn/unified-tabs-examples-plugin@link:examples/unified_tabs_examples":
+  version "0.0.0"
+  uid ""
+
+"@kbn/unified-tabs@link:src/platform/packages/shared/kbn-unified-tabs":
+  version "0.0.0"
+  uid ""
+
 "@kbn/unsaved-changes-badge@link:src/platform/packages/private/kbn-unsaved-changes-badge":
   version "0.0.0"
   uid ""
