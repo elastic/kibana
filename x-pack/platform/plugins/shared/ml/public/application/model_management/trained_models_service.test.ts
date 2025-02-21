@@ -409,13 +409,17 @@ describe('TrainedModelsService', () => {
     expect(mockTrainedModelsApiService.deleteTrainedModel).toHaveBeenCalledTimes(2);
     expect(mockTrainedModelsApiService.deleteTrainedModel).toHaveBeenCalledWith({
       modelId: 'model-1',
-      with_pipelines: false,
-      force: false,
+      options: {
+        with_pipelines: false,
+        force: false,
+      },
     });
     expect(mockTrainedModelsApiService.deleteTrainedModel).toHaveBeenCalledWith({
       modelId: 'model-2',
-      with_pipelines: false,
-      force: false,
+      options: {
+        with_pipelines: false,
+        force: false,
+      },
     });
   });
 
