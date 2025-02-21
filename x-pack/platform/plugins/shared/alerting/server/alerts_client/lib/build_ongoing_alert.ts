@@ -10,6 +10,7 @@ import type { Alert } from '@kbn/alerts-as-data-utils';
 import {
   ALERT_ACTION_GROUP,
   ALERT_CONSECUTIVE_MATCHES,
+  ALERT_PENDING_RECOVERED_COUNT,
   ALERT_DURATION,
   ALERT_FLAPPING,
   ALERT_FLAPPING_HISTORY,
@@ -108,6 +109,7 @@ export const buildOngoingAlert = <
     [ALERT_MAINTENANCE_WINDOW_IDS]: legacyAlert.getMaintenanceWindowIds(),
     // Set latest match count
     [ALERT_CONSECUTIVE_MATCHES]: legacyAlert.getActiveCount(),
+    [ALERT_PENDING_RECOVERED_COUNT]: legacyAlert.getPendingRecoveredCount(),
     // Set the time range
     ...(legacyAlert.getState().start
       ? {

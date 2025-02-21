@@ -23,6 +23,7 @@ import {
   ALERT_TIME_RANGE,
   ALERT_START,
   ALERT_CONSECUTIVE_MATCHES,
+  ALERT_PENDING_RECOVERED_COUNT,
   ALERT_RULE_EXECUTION_TIMESTAMP,
   ALERT_PREVIOUS_ACTION_GROUP,
   ALERT_SEVERITY_IMPROVING,
@@ -105,6 +106,7 @@ export const buildRecoveredAlert = <
     [ALERT_MAINTENANCE_WINDOW_IDS]: legacyAlert.getMaintenanceWindowIds(),
     // Set latest match count, should be 0
     [ALERT_CONSECUTIVE_MATCHES]: legacyAlert.getActiveCount(),
+    [ALERT_PENDING_RECOVERED_COUNT]: legacyAlert.getPendingRecoveredCount(),
     // Set status to 'recovered'
     [ALERT_STATUS]: 'recovered',
     // Set latest duration as recovered alerts should have updated duration
