@@ -44,6 +44,7 @@ import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/publ
 import type { LogsDataAccessPluginStart } from '@kbn/logs-data-access-plugin/public';
 import { DiscoverSharedPublicStart } from '@kbn/discover-shared-plugin/public';
 import { DiscoverAppLocator } from '../common';
+import type { EmbeddableEnhancedPluginStart } from '@kbn/embeddable-enhanced-plugin/public';
 import { DiscoverCustomizationContext } from './customizations';
 import { type DiscoverContainerProps } from './components/discover_container';
 
@@ -174,4 +175,5 @@ export interface DiscoverStartPlugins {
   unifiedSearch: UnifiedSearchPublicPluginStart;
   urlForwarding: UrlForwardingStart;
   usageCollection?: UsageCollectionSetup;
+  embeddableEnhanced?: EmbeddableEnhancedPluginStart;
 }
