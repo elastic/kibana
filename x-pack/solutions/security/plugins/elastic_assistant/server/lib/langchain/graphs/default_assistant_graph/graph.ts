@@ -43,7 +43,7 @@ export interface GetDefaultAssistantGraphParams {
   tools: StructuredTool[];
   replacements: Replacements;
   contentReferencesEnabled: boolean;
-  getFormattedTime: () => string;
+  getFormattedTime?: () => string;
 }
 
 export type DefaultAssistantGraph = ReturnType<typeof getDefaultAssistantGraph>;
@@ -135,7 +135,7 @@ export const getDefaultAssistantGraph = ({
       },
       formattedTime: {
         value: (x: string, y?: string) => y ?? x,
-        default: getFormattedTime,
+        default: getFormattedTime ?? (() => ''),
       },
     };
 
