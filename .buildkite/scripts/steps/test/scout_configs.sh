@@ -6,8 +6,15 @@ source .buildkite/scripts/steps/functional/common.sh
 
 BUILDKITE_PARALLEL_JOB=${BUILDKITE_PARALLEL_JOB:-}
 SCOUT_CONFIG_GROUP_KEY=${SCOUT_CONFIG_GROUP_KEY:-}
+SCOUT_CONFIG_GROUP_TYPE=${SCOUT_CONFIG_GROUP_TYPE:-}
+
 if [ "$SCOUT_CONFIG_GROUP_KEY" == "" ] && [ "$BUILDKITE_PARALLEL_JOB" == "" ]; then
   echo "Missing SCOUT_CONFIG_GROUP_KEY env var"
+  exit 1
+fi
+
+if [ "$SCOUT_CONFIG_GROUP_TYPE" == "" ]; then
+  echo "Missing SCOUT_CONFIG_GROUP_TYPE env var"
   exit 1
 fi
 
@@ -19,10 +26,7 @@ export JOB="$SCOUT_CONFIG_GROUP_KEY"
 FAILED_CONFIGS_KEY="${BUILDKITE_STEP_ID}${SCOUT_CONFIG_GROUP_KEY}"
 
 configs=""
-
-echo "--- downloading scout test configuration"
-download_artifact scout_test_configs.json .
-group=$(jq -r '.[env.SCOUT_CONFIG_GROUP_KEY].group' scout_test_configs.json)
+group=$SCOUT_CONFIG_GROUP_TYPE
 
 # The first retry should only run the configs that failed in the previous attempt
 # Any subsequent retries, which would generally only happen by someone clicking the button in the UI, will run everything
@@ -35,7 +39,8 @@ if [[ ! "$configs" && "${BUILDKITE_RETRY_COUNT:-0}" == "1" ]]; then
 fi
 
 if [ "$configs" == "" ] && [ "$SCOUT_CONFIG_GROUP_KEY" != "" ]; then
-  echo "--- Loading all the config files for $SCOUT_CONFIG_GROUP_KEY plugin"
+  echo "--- downloading scout test configuration"
+  download_artifact scout_test_configs.json .
   configs=$(jq -r '.[env.SCOUT_CONFIG_GROUP_KEY].configs[]' scout_test_configs.json)
 fi
 

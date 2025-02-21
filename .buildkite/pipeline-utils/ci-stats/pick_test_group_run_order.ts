@@ -564,15 +564,6 @@ export async function pickTestGroupRunOrder() {
 
 export async function pickScoutTestGroupRunOrder(scoutConfigsPath: string) {
   const bk = new BuildkiteClient();
-
-  // re-use FTR dependenices for now
-  const FTR_CONFIGS_DEPS =
-    process.env.FTR_CONFIGS_DEPS !== undefined
-      ? process.env.FTR_CONFIGS_DEPS.split(',')
-          .map((t) => t.trim())
-          .filter(Boolean)
-      : ['build'];
-
   const envFromlabels: Record<string, string> = collectEnvFromLabels();
 
   const rawScoutConfigs = JSON.parse(Fs.readFileSync(scoutConfigsPath, 'utf-8'));
@@ -591,7 +582,7 @@ export async function pickScoutTestGroupRunOrder(scoutConfigsPath: string) {
         ? {
             group: 'Scout Configs',
             key: 'scout-configs',
-            depends_on: FTR_CONFIGS_DEPS,
+            depends_on: ['build'],
             steps: scoutGroups.map(
               ({ title, key, group }): BuildkiteStep => ({
                 label: `Scout: [ ${group} / ${title} ] plugin`,
@@ -600,6 +591,7 @@ export async function pickScoutTestGroupRunOrder(scoutConfigsPath: string) {
                 agents: expandAgentQueue('n2-4-spot'),
                 env: {
                   SCOUT_CONFIG_GROUP_KEY: key,
+                  SCOUT_CONFIG_GROUP_TYPE: group,
                   ...envFromlabels,
                 },
                 retry: {
