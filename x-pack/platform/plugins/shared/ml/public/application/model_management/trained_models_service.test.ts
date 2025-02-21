@@ -401,6 +401,8 @@ describe('TrainedModelsService', () => {
   it('deletes multiple models successfully', async () => {
     const modelIds = ['model-1', 'model-2'];
 
+    mockTrainedModelsApiService.deleteTrainedModel.mockResolvedValue({ acknowledge: true });
+
     await trainedModelsService.deleteModels(modelIds, {
       with_pipelines: false,
       force: false,
@@ -440,6 +442,15 @@ describe('TrainedModelsService', () => {
         defaultMessage: '{modelsCount, plural, one {Model} other {Models}} deletion failed',
         values: {
           modelsCount: modelIds.length,
+        },
+      }),
+      undefined,
+      i18n.translate('xpack.ml.trainedModels.modelsList.fetchDeletionErrorMessage', {
+        defaultMessage:
+          'Failed to delete the following {count, plural, one {model} other {models}}: {modelIds}',
+        values: {
+          count: modelIds.length,
+          modelIds: modelIds.join(', '),
         },
       })
     );

@@ -73,7 +73,12 @@ export class TrainedModelsService {
   private abortedDownloads = new Set<string>();
   private downloadStatusFetchInProgress = false;
   private setScheduledDeployments?: (deployingModels: StartAllocationParams[]) => void;
-  private displayErrorToast?: (error: ErrorType, title?: string) => void;
+  private displayErrorToast?: (
+    error: ErrorType,
+    title?: string,
+    toastLifeTimeMs?: number,
+    toastMessage?: string
+  ) => void;
   private displaySuccessToast?: (toast: { title: string; text: string }) => void;
   private subscription!: Subscription;
   private _scheduledDeployments$ = new BehaviorSubject<StartAllocationParams[]>([]);
@@ -215,27 +220,48 @@ export class TrainedModelsService {
   }
 
   public async deleteModels(modelIds: string[], options: DeleteModelParams['options']) {
-    modelIds.forEach((modelId) => this.removeScheduledDeployments({ modelId }));
-    try {
-      await Promise.all(
-        modelIds.map((modelId) =>
-          this.trainedModelsApiService.deleteTrainedModel({
+    const results = await Promise.allSettled(
+      modelIds.map((modelId) =>
+        this.trainedModelsApiService
+          .deleteTrainedModel({
             modelId,
             options,
           })
-        )
-      );
-    } catch (error) {
+          .then(() => this.removeScheduledDeployments({ modelId }))
+      )
+    );
+
+    // Handle failures
+    const failures = results
+      .map((result, index) => ({
+        modelId: modelIds[index],
+        failed: result.status === 'rejected',
+        error: result.status === 'rejected' ? result.reason : null,
+      }))
+      .filter((r) => r.failed);
+
+    if (failures.length > 0) {
+      const failedModelIds = failures.map((f) => f.modelId).join(', ');
       this.displayErrorToast?.(
-        error,
-        i18n.translate('xpack.ml.trainedModels.modelsList.fetchDeletionErrorMessage', {
+        failures[0].error,
+        i18n.translate('xpack.ml.trainedModels.modelsList.fetchDeletionErrorTitle', {
           defaultMessage: '{modelsCount, plural, one {Model} other {Models}} deletion failed',
           values: {
-            modelsCount: modelIds.length,
+            modelsCount: failures.length,
+          },
+        }),
+        undefined,
+        i18n.translate('xpack.ml.trainedModels.modelsList.fetchDeletionErrorMessage', {
+          defaultMessage:
+            'Failed to delete the following {count, plural, one {model} other {models}}: {modelIds}',
+          values: {
+            count: failures.length,
+            modelIds: failedModelIds,
           },
         })
       );
     }
+
     this.fetchModels();
   }
 
