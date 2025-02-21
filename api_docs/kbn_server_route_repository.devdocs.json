@@ -867,7 +867,7 @@
             "label": "body",
             "description": [],
             "signature": [
-              "Zod.ZodAny"
+              "KbnPassThroughAny"
             ],
             "path": "src/platform/packages/shared/kbn-server-route-repository/src/validation_objects.ts",
             "deprecated": false,
@@ -881,7 +881,7 @@
             "label": "params",
             "description": [],
             "signature": [
-              "Zod.ZodAny"
+              "KbnPassThroughAny"
             ],
             "path": "src/platform/packages/shared/kbn-server-route-repository/src/validation_objects.ts",
             "deprecated": false,
@@ -895,7 +895,7 @@
             "label": "query",
             "description": [],
             "signature": [
-              "Zod.ZodAny"
+              "KbnPassThroughAny"
             ],
             "path": "src/platform/packages/shared/kbn-server-route-repository/src/validation_objects.ts",
             "deprecated": false,
