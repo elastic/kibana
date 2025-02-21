@@ -26,7 +26,14 @@ export function useConversationsByDate(
 
     const categorizedConversations: Record<
       string,
-      Array<{ id: string; label: string; lastUpdated: string; href?: string; public: boolean }>
+      Array<{
+        id: string;
+        label: string;
+        lastUpdated: string;
+        href?: string;
+        public: boolean;
+        conversation: Conversation;
+      }>
     > = {
       TODAY: [],
       YESTERDAY: [],
@@ -50,6 +57,7 @@ export function useConversationsByDate(
         lastUpdated: conversation.conversation.last_updated,
         href: getConversationHref ? getConversationHref(conversation.conversation.id) : undefined,
         public: conversation.public,
+        conversation,
       };
 
       if (lastUpdated >= startOfToday) {

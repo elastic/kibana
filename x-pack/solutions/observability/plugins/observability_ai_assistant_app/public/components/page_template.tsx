@@ -14,7 +14,7 @@ const pageSectionContentClassName = css`
   flex-grow: 1;
   padding-top: 0;
   padding-bottom: 0;
-  max-block-size: calc(100vh - 48px);
+  max-block-size: calc(100vh - 58px);
 `;
 
 export function ObservabilityAIAssistantPageTemplate({ children }: { children: React.ReactNode }) {

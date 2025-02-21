@@ -18,91 +18,115 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
+import { useConfirmModal } from '../hooks';
 
 export function ChatContextMenu({
+  disabled = false,
   onCopyToClipboardClick,
   onCopyUrlClick,
-  disabled,
+  onDeleteClick,
 }: {
+  disabled?: boolean;
   onCopyToClipboardClick: () => void;
   onCopyUrlClick: () => void;
-  disabled: boolean;
+  onDeleteClick: () => void;
 }) {
   const { euiTheme } = useEuiTheme();
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
+  const { element: confirmDeleteElement, confirm: confirmDeleteCallback } = useConfirmModal({
+    title: i18n.translate('xpack.aiAssistant.flyout.confirmDeleteConversationTitle', {
+      defaultMessage: 'Delete this conversation?',
+    }),
+    children: i18n.translate('xpack.aiAssistant.flyout.confirmDeleteConversationContent', {
+      defaultMessage: 'This action cannot be undone.',
+    }),
+    confirmButtonText: i18n.translate('xpack.aiAssistant.flyout.confirmDeleteButtonText', {
+      defaultMessage: 'Delete conversation',
+    }),
+  });
+
   return (
-    <EuiPopover
-      button={
-        <EuiToolTip
-          content={i18n.translate('xpack.aiAssistant.chatHeader.contextMenu.chatActionsTooltip', {
-            defaultMessage: 'Conversation actions',
-          })}
-          display="block"
-        >
-          <EuiButtonIcon
-            data-test-subj="observabilityAiAssistantChatContextMenuButtonIcon"
-            iconType="boxesVertical"
-            color="text"
-            disabled={disabled}
-            aria-label={i18n.translate('xpack.aiAssistant.chatHeader.contextMenu.iconAreaLabel', {
-              defaultMessage: 'Conversation context menu',
+    <>
+      <EuiPopover
+        button={
+          <EuiToolTip
+            content={i18n.translate('xpack.aiAssistant.chatHeader.contextMenu.chatActionsTooltip', {
+              defaultMessage: 'Conversation actions',
             })}
-            onClick={() => setIsPopoverOpen(!isPopoverOpen)}
-          />
-        </EuiToolTip>
-      }
-      isOpen={isPopoverOpen}
-      closePopover={() => setIsPopoverOpen(false)}
-      anchorPosition="downCenter"
-      panelPaddingSize="xs"
-    >
-      <EuiContextMenuPanel
-        size="s"
-        items={[
-          <EuiContextMenuItem
-            key="copyConversationToClipboard"
-            icon="copyClipboard"
-            onClick={() => {
-              onCopyToClipboardClick();
-              setIsPopoverOpen(false);
-            }}
+            display="block"
           >
-            {i18n.translate('xpack.aiAssistant.chatHeader.contextMenu.copyToClipboard', {
-              defaultMessage: 'Copy to clipboard',
-            })}
-          </EuiContextMenuItem>,
-          <EuiContextMenuItem
-            key="copyURL"
-            icon="link"
-            onClick={() => {
-              onCopyUrlClick();
-              setIsPopoverOpen(false);
-            }}
-          >
-            {i18n.translate('xpack.aiAssistant.chatHeader.contextMenu.copyUrl', {
-              defaultMessage: 'Copy URL',
-            })}
-          </EuiContextMenuItem>,
-          <EuiHorizontalRule margin="none" />,
-          <EuiContextMenuItem
-            key="delete"
-            css={css`
-              color: ${euiTheme.colors.danger};
-              padding: ${euiTheme.size.s};
-            `}
-            icon={<EuiIcon type="trash" size="m" color="danger" />}
-            onClick={() => {
-              // onCopyUrlClick();
-              setIsPopoverOpen(false);
-            }}
-          >
-            {i18n.translate('xpack.aiAssistant.conversationList.deleteConversationIconLabel', {
-              defaultMessage: 'Delete',
-            })}
-          </EuiContextMenuItem>,
-        ]}
-      />
-    </EuiPopover>
+            <EuiButtonIcon
+              data-test-subj="observabilityAiAssistantChatContextMenuButtonIcon"
+              iconType="boxesVertical"
+              color="text"
+              disabled={disabled}
+              aria-label={i18n.translate('xpack.aiAssistant.chatHeader.contextMenu.iconAreaLabel', {
+                defaultMessage: 'Conversation context menu',
+              })}
+              onClick={() => setIsPopoverOpen(!isPopoverOpen)}
+            />
+          </EuiToolTip>
+        }
+        isOpen={isPopoverOpen}
+        closePopover={() => setIsPopoverOpen(false)}
+        anchorPosition="downCenter"
+        panelPaddingSize="xs"
+      >
+        <EuiContextMenuPanel
+          size="s"
+          items={[
+            <EuiContextMenuItem
+              key="copyConversationToClipboard"
+              icon="copyClipboard"
+              onClick={() => {
+                onCopyToClipboardClick();
+                setIsPopoverOpen(false);
+              }}
+            >
+              {i18n.translate('xpack.aiAssistant.chatHeader.contextMenu.copyToClipboard', {
+                defaultMessage: 'Copy to clipboard',
+              })}
+            </EuiContextMenuItem>,
+            <EuiContextMenuItem
+              key="copyURL"
+              icon="link"
+              onClick={() => {
+                onCopyUrlClick();
+                setIsPopoverOpen(false);
+              }}
+            >
+              {i18n.translate('xpack.aiAssistant.chatHeader.contextMenu.copyUrl', {
+                defaultMessage: 'Copy URL',
+              })}
+            </EuiContextMenuItem>,
+            <EuiHorizontalRule margin="none" />,
+            <EuiContextMenuItem
+              key="delete"
+              css={css`
+                color: ${euiTheme.colors.danger};
+                padding: ${euiTheme.size.s};
+              `}
+              icon={<EuiIcon type="trash" size="m" color="danger" />}
+              onClick={() => {
+                confirmDeleteCallback().then((confirmed) => {
+                  if (!confirmed) {
+                    return;
+                  }
+                  onDeleteClick();
+                });
+
+                setIsPopoverOpen(false);
+              }}
+            >
+              {i18n.translate('xpack.aiAssistant.conversationList.deleteConversationIconLabel', {
+                defaultMessage: 'Delete',
+              })}
+            </EuiContextMenuItem>,
+          ]}
+        />
+      </EuiPopover>
+      {confirmDeleteElement}
+    </>
   );
 }

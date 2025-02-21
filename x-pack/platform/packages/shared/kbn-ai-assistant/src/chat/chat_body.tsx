@@ -46,8 +46,8 @@ import { SimulatedFunctionCallingCallout } from './simulated_function_calling_ca
 import { WelcomeMessage } from './welcome_message';
 import { useLicense } from '../hooks/use_license';
 import { PromptEditor } from '../prompt_editor/prompt_editor';
-import { deserializeMessage } from '../utils/deserialize_message';
 import { useKibana } from '../hooks/use_kibana';
+import { CopyConversationToClipboardParams } from '../hooks/use_conversation_context_menu';
 
 const fullHeightClassName = css`
   height: 100%;
@@ -118,6 +118,9 @@ export function ChatBody({
   onConversationUpdate,
   onToggleFlyoutPositionMode,
   navigateToConversation,
+  copyConversationToClipboard,
+  copyUrl,
+  deleteConversation,
 }: {
   connectors: ReturnType<typeof useGenAIConnectors>;
   currentUser?: Pick<AuthenticatedUser, 'full_name' | 'username'>;
@@ -130,6 +133,12 @@ export function ChatBody({
   onConversationUpdate: (conversation: { conversation: Conversation['conversation'] }) => void;
   onToggleFlyoutPositionMode?: (flyoutPositionMode: FlyoutPositionMode) => void;
   navigateToConversation?: (conversationId?: string) => void;
+  copyConversationToClipboard: ({
+    conversation,
+    messages,
+  }: CopyConversationToClipboardParams) => void;
+  copyUrl: (conversation: Conversation) => void;
+  deleteConversation: (id: string) => void;
 }) {
   const license = useLicense();
   const hasCorrectLicense = license?.hasAtLeast('enterprise');
@@ -140,7 +149,7 @@ export function ChatBody({
   const chatService = useAIAssistantChatService();
 
   const {
-    services: { uiSettings, notifications, http },
+    services: { uiSettings },
   } = useKibana();
 
   const simulateFunctionCalling = uiSettings!.get<boolean>(
@@ -167,6 +176,11 @@ export function ChatBody({
       state === ChatState.Loading ||
       conversation.loading
   );
+
+  const conversationId =
+    conversation.value?.conversation && 'id' in conversation.value.conversation
+      ? conversation.value.conversation.id
+      : undefined;
 
   let title = conversation.value?.conversation.title || initialTitle;
 
@@ -250,66 +264,6 @@ export function ChatBody({
       parent.scrollTop = parent.scrollHeight;
     }
   });
-
-  const handleCopyConversationToClipboard = () => {
-    try {
-      const deserializedMessages = (conversation.value?.messages ?? messages).map(
-        deserializeMessage
-      );
-
-      const content = JSON.stringify({
-        title: conversation.value?.conversation.title || initialTitle,
-        systemMessage: conversation.value?.systemMessage,
-        messages: deserializedMessages,
-      });
-
-      navigator.clipboard?.writeText(content || '');
-
-      notifications!.toasts.addSuccess({
-        title: i18n.translate('xpack.aiAssistant.copyConversationSuccessToast', {
-          defaultMessage: 'Conversation content copied to clipboard in JSON format',
-        }),
-      });
-    } catch (error) {
-      notifications!.toasts.addError(error, {
-        title: i18n.translate('xpack.aiAssistant.copyConversationErrorToast', {
-          defaultMessage: 'Could not copy conversation',
-        }),
-      });
-    }
-  };
-
-  const handleCopyUrl = () => {
-    try {
-      const conversationId = conversation.value?.conversation?.id;
-      if (!conversationId) {
-        throw new Error('Cannot copy URL if the conversation is not stored');
-      }
-
-      const conversationUrl = http?.basePath.prepend(
-        `/app/observabilityAIAssistant/conversations/${conversationId}`
-      );
-
-      if (!conversationUrl) {
-        throw new Error('Conversation URL does not exist');
-      }
-
-      const urlToCopy = new URL(conversationUrl, window.location.origin).toString();
-      navigator.clipboard?.writeText(urlToCopy);
-
-      notifications!.toasts.addSuccess({
-        title: i18n.translate('xpack.aiAssistant.copyUrlSuccessToast', {
-          defaultMessage: 'URL copied to clipboard',
-        }),
-      });
-    } catch (error) {
-      notifications!.toasts.addError(error, {
-        title: i18n.translate('xpack.aiAssistant.copyUrlErrorToast', {
-          defaultMessage: 'Could not copy URL',
-        }),
-      });
-    }
-  };
 
   const handleActionClick = ({
     message,
@@ -563,17 +517,11 @@ export function ChatBody({
       <EuiFlexItem grow={false} className={headerContainerClassName}>
         <ChatHeader
           connectors={connectors}
-          conversationId={
-            conversation.value?.conversation && 'id' in conversation.value.conversation
-              ? conversation.value.conversation.id
-              : undefined
-          }
+          conversationId={conversationId}
           flyoutPositionMode={flyoutPositionMode}
           licenseInvalid={!hasCorrectLicense && !initialConversationId}
           loading={isLoading}
           title={title}
-          onCopyConversationToClipboard={handleCopyConversationToClipboard}
-          onCopyUrl={handleCopyUrl}
           onSaveTitle={(newTitle) => {
             saveTitle(newTitle);
           }}
@@ -581,6 +529,19 @@ export function ChatBody({
           navigateToConversation={
             initialMessages?.length && !initialConversationId ? undefined : navigateToConversation
           }
+          onCopyConversationToClipboard={
+            conversation.value
+              ? () =>
+                  copyConversationToClipboard({
+                    conversation: conversation.value as Conversation,
+                    messages,
+                  })
+              : undefined
+          }
+          onCopyUrl={
+            conversation.value ? () => copyUrl(conversation.value as Conversation) : undefined
+          }
+          deleteConversation={conversationId ? () => deleteConversation(conversationId) : undefined}
         />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
