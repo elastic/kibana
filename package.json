@@ -981,6 +981,8 @@
     "@kbn/unified-field-list-examples-plugin": "link:examples/unified_field_list_examples",
     "@kbn/unified-histogram-plugin": "link:src/platform/plugins/shared/unified_histogram",
     "@kbn/unified-search-plugin": "link:src/platform/plugins/shared/unified_search",
+    "@kbn/unified-tabs": "link:src/platform/packages/shared/kbn-unified-tabs",
+    "@kbn/unified-tabs-examples-plugin": "link:examples/unified_tabs_examples",
     "@kbn/unsaved-changes-badge": "link:src/platform/packages/private/kbn-unsaved-changes-badge",
     "@kbn/unsaved-changes-prompt": "link:src/platform/packages/shared/kbn-unsaved-changes-prompt",
     "@kbn/upgrade-assistant-plugin": "link:x-pack/platform/plugins/private/upgrade_assistant",
