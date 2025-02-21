@@ -14,23 +14,24 @@ import {
   EuiPopoverTitle,
   EuiPopoverFooter,
   EuiButton,
-  useEuiShadow,
   EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
   EuiLink,
   EuiSpacer,
+  EuiSkeletonText,
 } from '@elastic/eui';
 import { useDispatch, useSelector } from 'react-redux';
-import styled from 'styled-components';
+import styled from '@emotion/styled';
 import { i18n } from '@kbn/i18n';
-import { euiStyled } from '@kbn/kibana-react-plugin/common';
-import { useRef } from 'react';
-import { selectErrorPopoverState, toggleErrorPopoverOpen } from '../../../../state';
-import { useErrorDetailsLink } from '../../../common/links/error_details_link';
-import { OverviewPing, OverviewStatusMetaData } from '../../../../../../../common/runtime_types';
-import { isTestRunning, manualTestRunSelector } from '../../../../state/manual_test_runs';
-import { useDateFormat } from '../../../../../../hooks/use_date_format';
+
+import { MetricErrorIcon } from './metric_error_icon';
+import { OverviewStatusMetaData } from '../../../../../../../../common/runtime_types';
+import { isTestRunning, manualTestRunSelector } from '../../../../../state/manual_test_runs';
+import { selectErrorPopoverState, toggleErrorPopoverOpen } from '../../../../../state';
+import { useErrorDetailsLink } from '../../../../common/links/error_details_link';
+import { useDateFormat } from '../../../../../../../hooks/use_date_format';
+import { useLatestError } from './use_latest_error';
 
 const Container = styled.div`
   display: inline-block;
@@ -43,7 +44,6 @@ const Container = styled.div`
 export const MetricItemIcon = ({
   monitor,
   status,
-  ping,
   timestamp,
   configIdByLocation,
 }: {
@@ -51,27 +51,24 @@ export const MetricItemIcon = ({
   status: string;
   configIdByLocation: string;
   timestamp?: string;
-  ping?: OverviewPing;
 }) => {
   const testNowRun = useSelector(manualTestRunSelector(monitor.configId));
   const isPopoverOpen = useSelector(selectErrorPopoverState);
+  const { latestPing } = useLatestError({
+    configIdByLocation,
+    monitorId: monitor.configId,
+    locationLabel: monitor.locationLabel,
+  });
 
   const dispatch = useDispatch();
-
-  const timer = useRef<NodeJS.Timeout | null>(null);
-
-  const setIsPopoverOpen = () => {
-    dispatch(toggleErrorPopoverOpen(configIdByLocation));
-  };
 
   const inProgress = isTestRunning(testNowRun);
 
   const errorLink = useErrorDetailsLink({
     configId: monitor.configId,
-    stateId: ping?.state?.id!,
+    stateId: latestPing?.state?.id!,
     locationId: monitor.locationId,
   });
-  const euiShadow = useEuiShadow('s');
 
   const formatter = useDateFormat();
   const testTime = formatter(timestamp);
@@ -94,42 +91,7 @@ export const MetricItemIcon = ({
     return (
       <Container>
         <EuiPopover
-          button={
-            <StyledIcon
-              onMouseEnter={() => {
-                // show popover with delay
-                if (timer.current) {
-                  clearTimeout(timer.current);
-                }
-                timer.current = setTimeout(() => {
-                  setIsPopoverOpen();
-                }, 300);
-              }}
-              onMouseLeave={() => {
-                if (isPopoverOpen) {
-                  return;
-                } else if (timer.current) {
-                  clearTimeout(timer.current);
-                }
-              }}
-              boxShadow={euiShadow}
-              onClick={() => {
-                if (configIdByLocation === isPopoverOpen) {
-                  dispatch(toggleErrorPopoverOpen(null));
-                } else {
-                  dispatch(toggleErrorPopoverOpen(configIdByLocation));
-                }
-              }}
-            >
-              <EuiButtonIcon
-                data-test-subj="syntheticsMetricItemIconButton"
-                iconType="warning"
-                color="danger"
-                size="m"
-                aria-label={ERROR_DETAILS}
-              />
-            </StyledIcon>
-          }
+          button={<MetricErrorIcon configIdByLocation={configIdByLocation} />}
           isOpen={configIdByLocation === isPopoverOpen}
           closePopover={closePopover}
           anchorPosition="upCenter"
@@ -145,27 +107,43 @@ export const MetricItemIcon = ({
                   data-test-subj="syntheticsMetricItemIconButton"
                   iconType="cross"
                   onClick={closePopover}
+                  aria-label={i18n.translate(
+                    'xpack.synthetics.metricItemIcon.euiButtonIcon.closePopover',
+                    {
+                      defaultMessage: 'Close popover',
+                    }
+                  )}
                 />
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiPopoverTitle>
-          <div style={{ width: '300px' }}>
-            {ping?.url?.full && (
+          <div style={{ width: '300px', overflowWrap: 'break-word' }}>
+            {latestPing?.url?.full && (
               <>
                 {i18n.translate('xpack.synthetics.metricItemIcon.div.urlLabel', {
                   defaultMessage: 'URL: ',
                 })}
                 <EuiLink
                   data-test-subj="syntheticsMetricItemIconLink"
-                  href={ping.url.full}
+                  href={latestPing.url.full}
                   target="_blank"
                 >
-                  {ping.url.full}
+                  {latestPing.url.full}
                 </EuiLink>
                 <EuiSpacer size="s" />
               </>
             )}
-            <EuiCallOut title={ping?.error?.message} color="danger" iconType="warning" />
+            <EuiCallOut
+              title={
+                latestPing?.error?.message ? (
+                  latestPing?.error?.message
+                ) : (
+                  <EuiSkeletonText lines={2} />
+                )
+              }
+              color="danger"
+              iconType="warning"
+            />
           </div>
           <EuiPopoverFooter>
             <EuiButton
@@ -181,14 +159,14 @@ export const MetricItemIcon = ({
       </Container>
     );
   } else {
-    if (ping?.url) {
+    if (latestPing?.url) {
       return (
         <Container>
           <EuiButtonIcon
-            title={ping.url.full}
+            title={latestPing.url.full}
             color="text"
             data-test-subj="syntheticsMetricItemIconButton"
-            href={ping.url.full}
+            href={latestPing.url.full}
             iconType="link"
             target="_blank"
             aria-label={i18n.translate('xpack.synthetics.metricItemIcon.euiButtonIcon.monitorUrl', {
@@ -209,22 +187,3 @@ const ERROR_DETAILS = i18n.translate('xpack.synthetics.errorDetails.label', {
 const TEST_IN_PROGRESS = i18n.translate('xpack.synthetics.inProgress.label', {
   defaultMessage: 'Manual test run is in progress.',
 });
-
-const StyledIcon = euiStyled.div<{ boxShadow: string }>`
-  box-sizing: border-box;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 10px;
-  width: 32px;
-  height: 32px;
-  background: ${({ theme }) =>
-    theme.darkMode ? theme.eui.euiColorDarkestShade : theme.eui.euiColorLightestShade};
-  border: 1px solid ${({ theme }) =>
-    theme.darkMode ? theme.eui.euiColorDarkShade : theme.eui.euiColorLightShade};
-  ${({ boxShadow }) => boxShadow}
-  border-radius: 16px;
-  flex: none;
-  order: 0;
-  flex-grow: 0;
-`;
