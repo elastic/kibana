@@ -268,7 +268,7 @@ export const OutputFormRemoteEsSection: React.FunctionComponent<Props> = (props)
                     <EuiSpacer size="m" />
                     <FormattedMessage
                       id="xpack.fleet.settings.remoteClusterConfiguration.description"
-                      defaultMessage="The Remote Elasticsearch output must have additional configuration to sync integrations from this cluster. {documentationLink}."
+                      defaultMessage="To sync integrations from this cluster, the remote Elasticsearch output needs additional configuration. {documentationLink}."
                       values={{
                         documentationLink: (
                           <EuiLink external={true} href={docLinks.links.fleet.remoteESOoutput}>
@@ -285,7 +285,7 @@ export const OutputFormRemoteEsSection: React.FunctionComponent<Props> = (props)
                       <li>
                         <FormattedMessage
                           id="xpack.fleet.settings.remoteClusterConfiguration.addRemoteClusterStep"
-                          defaultMessage="In the remote Kibana, go to {appPath} and add this cluster by following the instructions."
+                          defaultMessage="In the remote cluster, open Kibana and go to {appPath}, and follow the steps to add this cluster."
                           values={{
                             appPath: (
                               <strong>
@@ -302,7 +302,7 @@ export const OutputFormRemoteEsSection: React.FunctionComponent<Props> = (props)
                       <li>
                         <FormattedMessage
                           id="xpack.fleet.settings.remoteClusterConfiguration.replicationStep"
-                          defaultMessage="Next, go to {appPath} and add a follower index using this cluster from the previous step. The leader index {leaderIndex} from this cluster and should be replicated to the follower index {followerIndex} on the remote cluster."
+                          defaultMessage="Go to {appPath} and create a follower index using the cluster from Step 1. The leader index {leaderIndex} from this cluster and should be replicated to the follower index {followerIndex} on the remote cluster."
                           values={{
                             appPath: (
                               <strong>
@@ -326,7 +326,7 @@ export const OutputFormRemoteEsSection: React.FunctionComponent<Props> = (props)
                       <li>
                         <FormattedMessage
                           id="xpack.fleet.settings.remoteClusterConfiguration.configureKibanaStep"
-                          defaultMessage="Allow this cluster to read integration status on the remote cluster by entering in the remote Kibana information below."
+                          defaultMessage="Below, provide the access details for the remote cluster's Kibana instance."
                         />
                       </li>
                     </ol>
