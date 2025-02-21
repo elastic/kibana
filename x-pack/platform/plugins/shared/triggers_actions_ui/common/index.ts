@@ -17,6 +17,7 @@ export type {
   TimeSeriesResult,
   TimeSeriesResultRow,
   MetricResult,
+  ParseAggregationResultsOpts,
 } from './data';
 export {
   MAX_INTERVALS,

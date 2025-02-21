@@ -20,7 +20,7 @@ describe('useTestQuery', () => {
           },
           isGrouped: false,
           timeWindow: '1s',
-          rawResults: {
+          preview: {
             cols: [{ id: 'ungrouped', name: 'ungrouped', field: 'ungrouped', actions: false }],
             rows: [{ ungrouped: 'test' }],
           },
@@ -53,7 +53,7 @@ describe('useTestQuery', () => {
           },
           isGrouped: true,
           timeWindow: '1s',
-          rawResults: {
+          preview: {
             cols: [{ id: 'grouped', name: 'grouped', field: 'grouped', actions: false }],
             rows: [{ grouped: 'test' }],
           },

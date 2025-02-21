@@ -64,7 +64,7 @@ export async function executor(core: CoreSetup, options: ExecutorOptions<EsQuery
   if (compareFn == null) {
     throw new Error(getInvalidComparatorError(params.thresholdComparator));
   }
-  const isGroupAgg = isGroupAggregation(params.termField);
+  const isGroupAgg = isGroupAggregation(params.termField) || (esqlQueryRule && params.alertType);
   // For ungrouped queries, we run the configured query during each rule run, get a hit count
   // and retrieve up to params.size hits. We evaluate the threshold condition using the
   // value of the hit count. If the threshold condition is met, the hits are counted
@@ -103,6 +103,7 @@ export async function executor(core: CoreSetup, options: ExecutorOptions<EsQuery
           share,
           scopedClusterClient,
           logger,
+          ruleResultService,
         },
         dateStart,
         dateEnd,

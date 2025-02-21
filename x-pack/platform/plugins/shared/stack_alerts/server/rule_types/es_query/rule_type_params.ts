@@ -101,6 +101,12 @@ const EsQueryRuleParamsSchemaProperties = {
     schema.object({ esql: schema.string({ minLength: 1 }) }),
     schema.never()
   ),
+  alertType: schema.conditional(
+    schema.siblingRef('searchType'),
+    schema.literal('esqlQuery'),
+    schema.maybe(schema.oneOf([schema.literal('alertPerRow')])),
+    schema.never()
+  ),
   sourceFields: schema.maybe(
     schema.arrayOf(
       schema.object({
