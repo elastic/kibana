@@ -124,9 +124,12 @@ async function _fetchFindLatestPackage(
 
         const latestPackageFromRegistry = searchResults[0] ?? null;
 
+        if (bundledPackage && !latestPackageFromRegistry) {
+          return bundledPackage;
+        }
+
         if (
           bundledPackage &&
-          latestPackageFromRegistry &&
           semverGte(bundledPackage.version, latestPackageFromRegistry.version)
         ) {
           return bundledPackage;
