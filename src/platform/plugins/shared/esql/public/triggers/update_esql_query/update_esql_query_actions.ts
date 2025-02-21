@@ -10,14 +10,13 @@
 import { i18n } from '@kbn/i18n';
 import type { Action } from '@kbn/ui-actions-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import { isActionCompatible, executeAction } from './update_esql_query_helpers';
 
-const ACTION_UPDATE_ESQL_QUERY = 'ACTION_UPDATE_ESQL_QUERY';
+export const ACTION_UPDATE_ESQL_QUERY = 'ACTION_UPDATE_ESQL_QUERY';
 
 interface Context {
   queryString: string;
 }
-
-export const getHelpersAsync = async () => await import('./update_esql_query_helpers');
 
 export class UpdateESQLQueryAction implements Action<Context> {
   public type = ACTION_UPDATE_ESQL_QUERY;
@@ -37,12 +36,10 @@ export class UpdateESQLQueryAction implements Action<Context> {
   }
 
   public async isCompatible() {
-    const { isActionCompatible } = await getHelpersAsync();
     return isActionCompatible(this.data);
   }
 
   public async execute({ queryString }: Context) {
-    const { executeAction } = await getHelpersAsync();
     return executeAction({
       queryString,
       data: this.data,

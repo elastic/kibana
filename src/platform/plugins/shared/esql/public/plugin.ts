@@ -18,11 +18,11 @@ import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import {
   updateESQLQueryTrigger,
-  UpdateESQLQueryAction,
   UPDATE_ESQL_QUERY_TRIGGER,
   esqlControlTrigger,
-  CreateESQLControlAction,
   ESQL_CONTROL_TRIGGER,
+  ACTION_UPDATE_ESQL_QUERY,
+  ACTION_CREATE_ESQL_CONTROL,
 } from './triggers';
 import { setKibanaServices } from './kibana_services';
 import { JoinIndicesAutocompleteResult } from '../common';
@@ -74,11 +74,25 @@ export class EsqlPlugin implements Plugin<{}, EsqlPluginStart> {
     const storage = new Storage(localStorage);
 
     // Register triggers
-    const appendESQLAction = new UpdateESQLQueryAction(data);
+    uiActions.addTriggerActionAsync(
+      UPDATE_ESQL_QUERY_TRIGGER,
+      ACTION_UPDATE_ESQL_QUERY,
+      async () => {
+        const { UpdateESQLQueryAction } = await import(
+          './triggers/update_esql_query/update_esql_query_actions'
+        );
+        const appendESQLAction = new UpdateESQLQueryAction(data);
+        return appendESQLAction;
+      }
+    );
 
-    uiActions.addTriggerAction(UPDATE_ESQL_QUERY_TRIGGER, appendESQLAction);
-    const createESQLControlAction = new CreateESQLControlAction(core, data.search.search);
-    uiActions.addTriggerAction(ESQL_CONTROL_TRIGGER, createESQLControlAction);
+    uiActions.addTriggerActionAsync(ESQL_CONTROL_TRIGGER, ACTION_CREATE_ESQL_CONTROL, async () => {
+      const { CreateESQLControlAction } = await import(
+        './triggers/esql_controls/esql_control_action'
+      );
+      const createESQLControlAction = new CreateESQLControlAction(core, data.search.search);
+      return createESQLControlAction;
+    });
 
     const variablesService = new EsqlVariablesService();
 
