@@ -109,6 +109,9 @@ export async function startHistoricalDataUpload({
           case LogLevel.trace:
             logger.debug.apply({}, message.args);
             return;
+          case LogLevel.warn:
+            logger.warn.apply({}, message.args);
+            return;
           case LogLevel.error:
             logger.error.apply({}, message.args);
             return;
