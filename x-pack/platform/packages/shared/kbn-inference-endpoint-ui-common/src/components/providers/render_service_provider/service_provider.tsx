@@ -119,7 +119,6 @@ export const ServiceProviderIcon: React.FC<ServiceProviderProps> = ({ providerKe
 
   return provider ? (
     <EuiAvatar name={providerKey} data-test-subj={`icon-service-provider-${providerKey}`} iconType={provider.icon} color="#fff" size="s" type="space" />
-    // <EuiIcon data-test-subj={`icon-service-provider-${providerKey}`} type={provider.icon} color='primary' />
   ) : null;
 };
 
