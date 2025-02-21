@@ -35,6 +35,7 @@ const unmountComponentAtNode = (container: Container): void => {
   const root = elements.get(container);
   if (root) {
     root.unmount();
+    elements.delete(container);
   } else {
     throw new Error('Cannot unmount component that is not mounted.');
   }
