@@ -25,8 +25,8 @@ import {
   ESQLParamLiteral,
   ESQLProperNode,
 } from '@kbn/esql-ast/src/types';
-import { aggregationFunctionDefinitions } from '../definitions/generated/aggregation_functions';
-import { builtinFunctions } from '../definitions/builtin';
+import { aggFunctionDefinitions } from '../definitions/generated/aggregation_functions';
+import { operatorsDefinitions } from '../definitions/all_operators';
 import { commandDefinitions } from '../definitions/commands';
 import { scalarFunctionDefinitions } from '../definitions/generated/scalar_functions';
 import { groupingFunctionDefinitions } from '../definitions/generated/grouping_functions';
@@ -50,6 +50,7 @@ import {
   FunctionReturnType,
   ArrayType,
   SupportedDataType,
+  FunctionDefinitionTypes,
 } from '../definitions/types';
 import type { ESQLRealField, ESQLVariable, ReferenceMaps } from '../validation/types';
 import { removeMarkerArgFromArgsList } from './context';
@@ -116,7 +117,7 @@ export function isMathFunction(query: string, offset: number) {
   const [opString] = queryTrimmed.split(' ').reverse();
   // compare last char for all math functions
   // limit only to 2 chars operators
-  const fns = builtinFunctions.filter(({ name }) => name.length < 3).map(({ name }) => name);
+  const fns = operatorsDefinitions.filter(({ name }) => name.length < 3).map(({ name }) => name);
   const tokenMatch = fns.some((op) => opString === op);
   // there's a match, that's good
   if (tokenMatch) {
@@ -143,10 +144,10 @@ let commandLookups: Map<string, CommandDefinition<string>> | undefined;
 function buildFunctionLookup() {
   // we always refresh if we have test functions
   if (!fnLookups || getTestFunctions().length) {
-    fnLookups = builtinFunctions
+    fnLookups = operatorsDefinitions
       .concat(
         scalarFunctionDefinitions,
-        aggregationFunctionDefinitions,
+        aggFunctionDefinitions,
         groupingFunctionDefinitions,
         getTestFunctions()
       )
@@ -652,7 +653,7 @@ export function shouldBeQuotedText(
 }
 
 export const isAggFunction = (arg: ESQLFunction): boolean =>
-  getFunctionDefinition(arg.name)?.type === 'agg';
+  getFunctionDefinition(arg.name)?.type === FunctionDefinitionTypes.AGG;
 
 export const isParam = (x: unknown): x is ESQLParamLiteral =>
   !!x &&
