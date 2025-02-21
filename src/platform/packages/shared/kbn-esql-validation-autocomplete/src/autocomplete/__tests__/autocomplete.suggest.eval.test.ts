@@ -19,6 +19,7 @@ import {
 import { ESQL_COMMON_NUMERIC_TYPES } from '../../shared/esql_types';
 import { scalarFunctionDefinitions } from '../../definitions/generated/scalar_functions';
 import { timeUnitsToSuggest } from '../../definitions/literals';
+import { FunctionDefinitionTypes } from '../../definitions/types';
 import {
   getCompatibleTypesToSuggestNext,
   getValidFunctionSignaturesForPreviousArgs,
@@ -454,7 +455,8 @@ describe('autocomplete.suggest', () => {
 
                 // Wehther to prepend comma to suggestion string
                 // E.g. if true, "fieldName" -> "fieldName, "
-                const shouldAddComma = hasMoreMandatoryArgs && fn.type !== 'operator';
+                const shouldAddComma =
+                  hasMoreMandatoryArgs && fn.type !== FunctionDefinitionTypes.OPERATOR;
 
                 const constantOnlyParamDefs = typesToSuggestNext.filter(
                   (p) => p.constantOnly || /_literal/.test(p.type as string)
