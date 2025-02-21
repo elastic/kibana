@@ -7,25 +7,46 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { HttpSetup } from '@kbn/core/public';
+import type { HttpStart } from '@kbn/core/public';
 import type { AsApiContract } from '@kbn/actions-types';
-import type { AlertDeletionPreview } from '@kbn/alerting-types';
+import type {
+  AlertDeletionPreview,
+  RulesSettingsAlertDeletionProperties,
+} from '@kbn/alerting-types';
 import { INTERNAL_BASE_ALERTING_API_PATH } from '../../constants';
 
-export const fetchAlertDeletionPreview = async ({ http }: { http: HttpSetup }) => {
-  const res = await http.get<AsApiContract<AlertDeletionPreview>>(
+const transformAlertDeletionPreviewRequest = ({
+  settings,
+}: {
+  settings: RulesSettingsAlertDeletionProperties;
+}) => {
+  return {
+    is_active_alerts_deletion_enabled: settings.isActiveAlertsDeletionEnabled,
+    is_inactive_alerts_deletion_enabled: settings.isInactiveAlertsDeletionEnabled,
+    active_alerts_deletion_threshold: settings.activeAlertsDeletionThreshold,
+    inactive_alerts_deletion_threshold: settings.inactiveAlertsDeletionThreshold,
+  };
+};
+
+const transformAlertDeletionPreviewResponse = ({
+  affected_alert_count: affectedAlertCount,
+}: AsApiContract<AlertDeletionPreview>): AlertDeletionPreview => {
+  return {
+    affectedAlertCount,
+  };
+};
+
+interface Props {
+  http: HttpStart;
+  settings: RulesSettingsAlertDeletionProperties;
+}
+export const fetchAlertDeletionPreview = async ({ http, settings }: Props) => {
+  const response = await http.get<AsApiContract<AlertDeletionPreview>>(
     `${INTERNAL_BASE_ALERTING_API_PATH}/alert_deletion/preview`,
     {
-      query: {
-        is_active_alerts_deletion_enabled: true,
-        is_inactive_alerts_deletion_enabled: true,
-        active_alerts_deletion_threshold: 30,
-        inactive_alerts_deletion_threshold: 90,
-      },
+      query: transformAlertDeletionPreviewRequest({ settings }),
     }
   );
 
-  console.log({ res });
-
-  return res;
+  return transformAlertDeletionPreviewResponse(response);
 };

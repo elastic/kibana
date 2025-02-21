@@ -6,8 +6,8 @@
  */
 import { schema } from '@kbn/config-schema';
 
-// TODO: add descriptions
-export const alertDeletionPreviewSchema = schema.object({
+// TODO: add description
+export const alertDeletionPreviewQuerySchema = schema.object({
   is_active_alerts_deletion_enabled: schema.boolean(),
   is_inactive_alerts_deletion_enabled: schema.boolean(),
   active_alerts_deletion_threshold: schema.number({ min: 1 }),

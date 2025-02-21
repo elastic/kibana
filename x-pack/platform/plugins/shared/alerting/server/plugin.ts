@@ -313,26 +313,6 @@ export class AlertingPlugin {
       event: { provider: EVENT_LOG_PROVIDER },
     });
 
-    this.alertDeletionClient = new AlertDeletionClient({
-      elasticsearchClientPromise: core
-        .getStartServices()
-        .then(([{ elasticsearch }]) => elasticsearch.client.asInternalUser),
-      eventLogger: this.eventLogger,
-      getAlertIndicesAlias: createGetAlertIndicesAliasFn(this.ruleTypeRegistry!),
-      internalSavedObjectsRepositoryPromise: core
-        .getStartServices()
-        .then(([{ savedObjects }]) =>
-          savedObjects.createInternalRepository([RULES_SETTINGS_SAVED_OBJECT_TYPE])
-        ),
-      logger: this.logger,
-      ruleTypeRegistry: this.ruleTypeRegistry!,
-      spacesStartPromise: core
-        .getStartServices()
-        .then(([_, alertingStart]) => alertingStart.spaces),
-      taskManagerSetup: plugins.taskManager,
-      taskManagerStartPromise,
-    });
-
     this.eventLogService = plugins.eventLog;
     plugins.eventLog.registerProviderActions(EVENT_LOG_PROVIDER, Object.values(EVENT_LOG_ACTIONS));
 
@@ -371,6 +351,26 @@ export class AlertingPlugin {
       inMemoryMetrics: this.inMemoryMetrics,
     });
     this.ruleTypeRegistry = ruleTypeRegistry;
+
+    this.alertDeletionClient = new AlertDeletionClient({
+      elasticsearchClientPromise: core
+        .getStartServices()
+        .then(([{ elasticsearch }]) => elasticsearch.client.asInternalUser),
+      eventLogger: this.eventLogger,
+      getAlertIndicesAlias: createGetAlertIndicesAliasFn(this.ruleTypeRegistry!),
+      internalSavedObjectsRepositoryPromise: core
+        .getStartServices()
+        .then(([{ savedObjects }]) =>
+          savedObjects.createInternalRepository([RULES_SETTINGS_SAVED_OBJECT_TYPE])
+        ),
+      logger: this.logger,
+      ruleTypeRegistry: this.ruleTypeRegistry!,
+      spacesStartPromise: core
+        .getStartServices()
+        .then(([_, alertingStart]) => alertingStart.spaces),
+      taskManagerSetup: plugins.taskManager,
+      taskManagerStartPromise,
+    });
 
     const usageCollection = plugins.usageCollection;
     if (usageCollection) {
@@ -692,6 +692,7 @@ export class AlertingPlugin {
       rulesClientFactory,
       rulesSettingsClientFactory,
       maintenanceWindowClientFactory,
+      alertDeletionClient,
     } = this;
     return async function alertsRouteHandlerContext(context, request) {
       const [{ savedObjects }] = await core.getStartServices();
@@ -714,6 +715,9 @@ export class AlertingPlugin {
         areApiKeysEnabled: async () => {
           const [, { security }] = await core.getStartServices();
           return security?.authc.apiKeys.areAPIKeysEnabled() ?? false;
+        },
+        getAlertDeletionClient: () => {
+          return alertDeletionClient!;
         },
       };
     };

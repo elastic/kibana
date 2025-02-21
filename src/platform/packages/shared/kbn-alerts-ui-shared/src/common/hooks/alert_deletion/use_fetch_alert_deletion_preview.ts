@@ -9,34 +9,30 @@
 
 import { useQuery } from '@tanstack/react-query';
 import type { HttpStart } from '@kbn/core-http-browser';
-import type { RulesSettingsAlertDeletion } from '@kbn/alerting-types/rule_settings';
+import type { RulesSettingsAlertDeletionProperties } from '@kbn/alerting-types/rule_settings';
 import { fetchAlertDeletionPreview } from '../../apis/alert_deletion_preview';
 
 interface Props {
   http: HttpStart;
   enabled: boolean;
-  onSuccess?: (settings: RulesSettingsAlertDeletion) => void;
+  settings: RulesSettingsAlertDeletionProperties | undefined;
 }
 export const useFetchAlertsDeletionPreview = (props: Props) => {
-  const { http, enabled, onSuccess } = props;
+  const { http, enabled, settings } = props;
 
-  const queryFn = () => {
-    return fetchAlertDeletionPreview({ http });
-  };
-
-  const { data, isFetching, isError, isLoadingError, isLoading, isInitialLoading } = useQuery({
+  const { data, isFetching, isError, isLoadingError } = useQuery({
+    enabled: enabled && Boolean(settings),
+    queryFn: () => {
+      return fetchAlertDeletionPreview({ http, settings: settings! });
+    },
     queryKey: ['fetchAlertDeletionPreview'],
-    queryFn,
-    onSuccess,
-    enabled,
     refetchOnWindowFocus: false,
     retry: false,
   });
 
   return {
-    isInitialLoading,
-    isLoading: (isLoading || isFetching) && enabled,
-    isError: isError || isLoadingError,
+    isLoading: isFetching && enabled,
+    isValid: !(isError || isLoadingError) && Boolean(data),
     data,
   };
 };

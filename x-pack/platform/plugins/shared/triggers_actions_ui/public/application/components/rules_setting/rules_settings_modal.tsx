@@ -307,6 +307,7 @@ export const RulesSettingsModal = memo((props: RulesSettingsModalProps) => {
               settings={alertDeletionSettings}
               canWrite={canWriteAlertsDeletionSettings}
               hasError={hasAlertsDeletionError}
+              http={http}
             />
           </>
         )}
