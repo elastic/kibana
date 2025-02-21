@@ -41,7 +41,7 @@ describe('snoozeAlertRoute', () => {
 
     expect(config.path).toMatchInlineSnapshot(`"/internal/alerting/rule/{id}/_snooze"`);
 
-    rulesClient.snooze.mockResolvedValueOnce();
+    rulesClient.snoozeInternal.mockResolvedValueOnce();
 
     const [context, req, res] = mockHandlerArguments(
       { rulesClient },
@@ -58,8 +58,8 @@ describe('snoozeAlertRoute', () => {
 
     expect(await handler(context, req, res)).toEqual(undefined);
 
-    expect(rulesClient.snooze).toHaveBeenCalledTimes(1);
-    expect(rulesClient.snooze.mock.calls[0]).toMatchInlineSnapshot(`
+    expect(rulesClient.snoozeInternal).toHaveBeenCalledTimes(1);
+    expect(rulesClient.snoozeInternal.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
         Object {
           "id": "1",
@@ -88,7 +88,7 @@ describe('snoozeAlertRoute', () => {
 
     expect(config.path).toMatchInlineSnapshot(`"/internal/alerting/rule/{id}/_snooze"`);
 
-    rulesClient.snooze.mockResolvedValueOnce();
+    rulesClient.snoozeInternal.mockResolvedValueOnce();
 
     const [context, req, res] = mockHandlerArguments(
       { rulesClient },
@@ -108,8 +108,8 @@ describe('snoozeAlertRoute', () => {
 
     expect(await handler(context, req, res)).toEqual(undefined);
 
-    expect(rulesClient.snooze).toHaveBeenCalledTimes(1);
-    expect(rulesClient.snooze.mock.calls[0]).toMatchInlineSnapshot(`
+    expect(rulesClient.snoozeInternal).toHaveBeenCalledTimes(1);
+    expect(rulesClient.snoozeInternal.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
         Object {
           "id": "1",
@@ -136,7 +136,9 @@ describe('snoozeAlertRoute', () => {
 
     const [, handler] = router.post.mock.calls[0];
 
-    rulesClient.snooze.mockRejectedValue(new RuleTypeDisabledError('Fail', 'license_invalid'));
+    rulesClient.snoozeInternal.mockRejectedValue(
+      new RuleTypeDisabledError('Fail', 'license_invalid')
+    );
 
     const [context, req, res] = mockHandlerArguments({ rulesClient }, { params: {}, body: {} }, [
       'ok',

@@ -5,7 +5,13 @@
  * 2.0.
  */
 
-export type { SnoozeRuleOptions } from './internal/types';
-export type { SnoozeRule } from './external/types';
-export { snoozeRule as snoozeRuleInternal } from './internal/snooze_rule';
-export { snoozeRule } from './external/snooze_rule';
+import type { RRule } from '../../../../r_rule/types';
+
+export interface SnoozeRule {
+  id: string;
+  snoozeSchedule: {
+    id: string;
+    duration: number;
+    rRule: RRule;
+  };
+}

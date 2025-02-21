@@ -16,7 +16,7 @@ describe('validateIntervalAndFrequency', () => {
   });
 
   it('validates frequency in months correctly', () => {
-    expect(validateIntervalAndFrequency('3m')).toBeUndefined();
+    expect(validateIntervalAndFrequency('3M')).toBeUndefined();
   });
 
   it('validates frequency in years correctly', () => {
@@ -26,6 +26,12 @@ describe('validateIntervalAndFrequency', () => {
   it('throws error when invalid frequency', () => {
     expect(validateIntervalAndFrequency('1h')).toEqual(
       `'every' string of recurring schedule is not valid : 1h`
+    );
+  });
+
+  it('throws error when invalid frequency in minutes', () => {
+    expect(validateIntervalAndFrequency('5m')).toEqual(
+      `'every' string of recurring schedule is not valid : 5m`
     );
   });
 

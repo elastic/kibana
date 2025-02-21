@@ -14,7 +14,7 @@ import {
   validateDurationV1,
   validateTimezoneV1,
   validateScheduleV1,
-} from '../validation';
+} from '../../validation';
 
 export const scheduleRequestSchema = schema.object(
   {

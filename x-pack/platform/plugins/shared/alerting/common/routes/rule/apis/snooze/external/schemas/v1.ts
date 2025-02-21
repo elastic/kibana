@@ -6,7 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { scheduleRequestSchemaV1 } from '../../../../../schedule';
+import { scheduleRequestSchemaV1, scheduleResponseSchemaV1 } from '../../../../../schedule';
 
 export const snoozeParamsSchema = schema.object({
   id: schema.string(),
@@ -14,4 +14,8 @@ export const snoozeParamsSchema = schema.object({
 
 export const snoozeBodySchema = schema.object({
   schedule: scheduleRequestSchemaV1,
+});
+
+export const snoozeResponseSchema = schema.object({
+  body: scheduleResponseSchemaV1,
 });

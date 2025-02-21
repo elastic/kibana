@@ -51,6 +51,7 @@ const createRulesClientMock = () => {
     bulkEnableRules: jest.fn(),
     bulkDisableRules: jest.fn(),
     snooze: jest.fn(),
+    snoozeInternal: jest.fn(),
     unsnooze: jest.fn(),
     runSoon: jest.fn(),
     clone: jest.fn(),

@@ -19,14 +19,8 @@ export function getSnoozeAttributes(attributes: RawRule, snoozeSchedule: RuleDom
   // If duration is -1, instead mute all
   const { id: snoozeId, duration } = snoozeSchedule;
 
-  if (duration === -1) {
-    return {
-      muteAll: true,
-      snoozeSchedule: clearUnscheduledSnoozeAttributes(attributes),
-    };
-  }
-
   return {
+    ...(duration === -1 ? { muteAll: true } : {}),
     snoozeSchedule: (snoozeId
       ? clearScheduledSnoozesAttributesById(attributes, [snoozeId])
       : clearUnscheduledSnoozeAttributes(attributes)

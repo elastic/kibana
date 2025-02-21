@@ -5,13 +5,18 @@
  * 2.0.
  */
 
-export { snoozeParamsSchema, snoozeBodySchema } from './external/schemas/latest';
+export {
+  snoozeParamsSchema,
+  snoozeBodySchema,
+  snoozeResponseSchema,
+} from './external/schemas/latest';
 export { snoozeParamsInternalSchema, snoozeBodyInternalSchema } from './internal/schemas/latest';
-export type { SnoozeParams, SnoozeBody } from './external/types/latest';
+export type { SnoozeParams, SnoozeBody, SnoozeResponse } from './external/types/latest';
 
 export {
   snoozeParamsSchema as snoozeParamsSchemaV1,
   snoozeBodySchema as snoozeBodySchemaV1,
+  snoozeResponseSchema as snoozeResponseSchemaV1,
 } from './external/schemas/v1';
 export {
   snoozeParamsInternalSchema as snoozeParamsInternalSchemaV1,
@@ -20,4 +25,5 @@ export {
 export type {
   SnoozeParams as SnoozeParamsV1,
   SnoozeBody as SnoozeBodyV1,
+  SnoozeResponse as SnoozeResponseV1,
 } from './external/types/v1';

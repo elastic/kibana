@@ -11,6 +11,7 @@ import { mockHandlerArguments } from '../../../../_mock_handler_arguments';
 import { rulesClientMock } from '../../../../../rules_client.mock';
 import { RuleTypeDisabledError } from '../../../../../lib/errors/rule_type_disabled';
 import { snoozeRuleRoute } from './snooze_rule_route';
+import { SanitizedRule } from '@kbn/alerting-types';
 
 const rulesClient = rulesClientMock.create();
 jest.mock('../../../../../lib/license_api_access', () => ({
@@ -29,6 +30,38 @@ const schedule = {
   },
 };
 
+const mockedRule = {
+  apiKeyOwner: 'api-key-owner',
+  consumer: 'bar',
+  createdBy: 'elastic',
+  updatedBy: 'elastic',
+  enabled: true,
+  id: '1',
+  name: 'abc',
+  alertTypeId: '1',
+  tags: ['foo'],
+  throttle: '10m',
+  schedule: { interval: '12s' },
+  params: {
+    otherField: false,
+  },
+  createdAt: new Date('2019-02-12T21:01:22.479Z'),
+  updatedAt: new Date('2019-02-12T21:01:22.479Z'),
+  snoozeSchedule: [
+    {
+      duration: 864000000,
+      id: 'random-schedule-id',
+      rRule: {
+        count: 1,
+        tzid: 'UTC',
+        dtstart: '2021-03-07T00:00:00.000Z',
+      },
+    },
+  ],
+};
+
+rulesClient.update.mockResolvedValueOnce(mockedRule as unknown as SanitizedRule);
+
 describe('snoozeAlertRoute', () => {
   it('snoozes an alert', async () => {
     const licenseState = licenseStateMock.create();
@@ -38,9 +71,9 @@ describe('snoozeAlertRoute', () => {
 
     const [config, handler] = router.post.mock.calls[0];
 
-    expect(config.path).toMatchInlineSnapshot(`"/api/alerting/rule/{id}/_snooze"`);
+    expect(config.path).toMatchInlineSnapshot(`"/api/alerting/rule/{id}/snooze_schedule"`);
 
-    rulesClient.snooze.mockResolvedValueOnce();
+    rulesClient.snooze.mockResolvedValueOnce(mockedRule as unknown as SanitizedRule);
 
     const [context, req, res] = mockHandlerArguments(
       { rulesClient },
@@ -58,29 +91,26 @@ describe('snoozeAlertRoute', () => {
     expect(await handler(context, req, res)).toEqual(undefined);
 
     expect(rulesClient.snooze).toHaveBeenCalledTimes(1);
-    expect(rulesClient.snooze.mock.calls[0]).toMatchInlineSnapshot(`
-      Array [
-        Object {
-          "id": "1",
-          "snoozeSchedule": Object {
-            "duration": 864000000,
-            "rRule": Object {
-              "bymonth": undefined,
-              "bymonthday": undefined,
-              "byweekday": undefined,
-              "count": 1,
-              "dtstart": "2021-03-07T00:00:00.000Z",
-              "freq": undefined,
-              "interval": undefined,
-              "tzid": "UTC",
-              "until": undefined,
-            },
-          },
-        },
-      ]
+    expect(rulesClient.snooze.mock.calls[0][0].snoozeSchedule.duration).toMatchInlineSnapshot(
+      `864000000`
+    );
+    expect(rulesClient.snooze.mock.calls[0][0].snoozeSchedule.rRule).toMatchInlineSnapshot(`
+      Object {
+        "bymonth": undefined,
+        "bymonthday": undefined,
+        "byweekday": undefined,
+        "count": 1,
+        "dtstart": "2021-03-07T00:00:00.000Z",
+        "freq": undefined,
+        "interval": undefined,
+        "tzid": "UTC",
+        "until": undefined,
+      }
     `);
 
-    expect(res.noContent).toHaveBeenCalled();
+    expect(res.ok).toHaveBeenCalledWith({
+      body: [{ ...schedule, id: 'random-schedule-id', timezone: 'UTC' }],
+    });
   });
 
   it('also snoozes an alert when passed snoozeEndTime of -1', async () => {
@@ -91,9 +121,22 @@ describe('snoozeAlertRoute', () => {
 
     const [config, handler] = router.post.mock.calls[0];
 
-    expect(config.path).toMatchInlineSnapshot(`"/api/alerting/rule/{id}/_snooze"`);
+    expect(config.path).toMatchInlineSnapshot(`"/api/alerting/rule/{id}/snooze_schedule"`);
 
-    rulesClient.snooze.mockResolvedValueOnce();
+    rulesClient.snooze.mockResolvedValueOnce({
+      ...mockedRule,
+      snoozeSchedule: [
+        {
+          duration: -1,
+          id: 'random-schedule-id',
+          rRule: {
+            count: 1,
+            tzid: 'UTC',
+            dtstart: '2021-03-07T00:00:00.000Z',
+          },
+        },
+      ],
+    } as unknown as SanitizedRule);
 
     const [context, req, res] = mockHandlerArguments(
       { rulesClient },
@@ -114,29 +157,24 @@ describe('snoozeAlertRoute', () => {
     expect(await handler(context, req, res)).toEqual(undefined);
 
     expect(rulesClient.snooze).toHaveBeenCalledTimes(1);
-    expect(rulesClient.snooze.mock.calls[0]).toMatchInlineSnapshot(`
-      Array [
-        Object {
-          "id": "1",
-          "snoozeSchedule": Object {
-            "duration": -1,
-            "rRule": Object {
-              "bymonth": undefined,
-              "bymonthday": undefined,
-              "byweekday": undefined,
-              "count": 1,
-              "dtstart": "2021-03-07T00:00:00.000Z",
-              "freq": undefined,
-              "interval": undefined,
-              "tzid": "UTC",
-              "until": undefined,
-            },
-          },
-        },
-      ]
+    expect(rulesClient.snooze.mock.calls[0][0].snoozeSchedule.duration).toMatchInlineSnapshot(`-1`);
+    expect(rulesClient.snooze.mock.calls[0][0].snoozeSchedule.rRule).toMatchInlineSnapshot(`
+      Object {
+        "bymonth": undefined,
+        "bymonthday": undefined,
+        "byweekday": undefined,
+        "count": 1,
+        "dtstart": "2021-03-07T00:00:00.000Z",
+        "freq": undefined,
+        "interval": undefined,
+        "tzid": "UTC",
+        "until": undefined,
+      }
     `);
 
-    expect(res.noContent).toHaveBeenCalled();
+    expect(res.ok).toHaveBeenCalledWith({
+      body: [{ ...schedule, duration: '-1', id: 'random-schedule-id', timezone: 'UTC' }],
+    });
   });
 
   it('snoozes an alert with recurring', async () => {
@@ -147,9 +185,25 @@ describe('snoozeAlertRoute', () => {
 
     const [config, handler] = router.post.mock.calls[0];
 
-    expect(config.path).toMatchInlineSnapshot(`"/api/alerting/rule/{id}/_snooze"`);
+    expect(config.path).toMatchInlineSnapshot(`"/api/alerting/rule/{id}/snooze_schedule"`);
 
-    rulesClient.snooze.mockResolvedValueOnce();
+    rulesClient.snooze.mockResolvedValueOnce({
+      ...mockedRule,
+      snoozeSchedule: [
+        {
+          duration: 864000000,
+          id: 'random-schedule-id',
+          rRule: {
+            tzid: 'America/New_York',
+            dtstart: '2021-03-07T00:00:00.000Z',
+            byweekday: ['MO'],
+            freq: 2,
+            interval: 1,
+            until: '2021-05-10T00:00:00.000Z',
+          },
+        },
+      ],
+    } as unknown as SanitizedRule);
 
     const [context, req, res] = mockHandlerArguments(
       { rulesClient },
@@ -160,6 +214,7 @@ describe('snoozeAlertRoute', () => {
         body: {
           schedule: {
             ...schedule,
+            timezone: 'America/New_York',
             recurring: {
               every: '1w',
               end: '2021-05-10T00:00:00.000Z',
@@ -174,31 +229,36 @@ describe('snoozeAlertRoute', () => {
     expect(await handler(context, req, res)).toEqual(undefined);
 
     expect(rulesClient.snooze).toHaveBeenCalledTimes(1);
-    expect(rulesClient.snooze.mock.calls[0]).toMatchInlineSnapshot(`
-      Array [
-        Object {
-          "id": "1",
-          "snoozeSchedule": Object {
-            "duration": 864000000,
-            "rRule": Object {
-              "bymonth": undefined,
-              "bymonthday": undefined,
-              "byweekday": Array [
-                "MO",
-              ],
-              "count": undefined,
-              "dtstart": "2021-03-07T00:00:00.000Z",
-              "freq": 2,
-              "interval": 1,
-              "tzid": "UTC",
-              "until": "2021-05-10T00:00:00.000Z",
-            },
-          },
-        },
-      ]
+    expect(rulesClient.snooze.mock.calls[0][0].snoozeSchedule.rRule).toMatchInlineSnapshot(`
+      Object {
+        "bymonth": undefined,
+        "bymonthday": undefined,
+        "byweekday": Array [
+          "MO",
+        ],
+        "count": undefined,
+        "dtstart": "2021-03-07T00:00:00.000Z",
+        "freq": 2,
+        "interval": 1,
+        "tzid": "America/New_York",
+        "until": "2021-05-10T00:00:00.000Z",
+      }
     `);
 
-    expect(res.noContent).toHaveBeenCalled();
+    expect(res.ok).toHaveBeenCalledWith({
+      body: [
+        {
+          ...schedule,
+          recurring: {
+            every: '1w',
+            end: '2021-05-10T00:00:00.000Z',
+            onWeekDay: ['MO'],
+          },
+          id: 'random-schedule-id',
+          timezone: 'America/New_York',
+        },
+      ],
+    });
   });
 
   it('snoozes an alert with occurrences', async () => {
@@ -209,9 +269,26 @@ describe('snoozeAlertRoute', () => {
 
     const [config, handler] = router.post.mock.calls[0];
 
-    expect(config.path).toMatchInlineSnapshot(`"/api/alerting/rule/{id}/_snooze"`);
+    expect(config.path).toMatchInlineSnapshot(`"/api/alerting/rule/{id}/snooze_schedule"`);
 
-    rulesClient.snooze.mockResolvedValueOnce();
+    rulesClient.snooze.mockResolvedValueOnce({
+      ...mockedRule,
+      snoozeSchedule: [
+        {
+          duration: 864000000,
+          id: 'random-schedule-id',
+          rRule: {
+            count: 5,
+            dtstart: '2021-03-07T00:00:00.000Z',
+            freq: 0,
+            interval: 1,
+            tzid: 'UTC',
+            bymonth: [2, 4, 6, 8, 10, 12],
+            bymonthday: [5, 25],
+          },
+        },
+      ],
+    } as unknown as SanitizedRule);
 
     const [context, req, res] = mockHandlerArguments(
       { rulesClient },
@@ -237,39 +314,45 @@ describe('snoozeAlertRoute', () => {
     expect(await handler(context, req, res)).toEqual(undefined);
 
     expect(rulesClient.snooze).toHaveBeenCalledTimes(1);
-    expect(rulesClient.snooze.mock.calls[0]).toMatchInlineSnapshot(`
-      Array [
-        Object {
-          "id": "1",
-          "snoozeSchedule": Object {
-            "duration": 864000000,
-            "rRule": Object {
-              "bymonth": Array [
-                2,
-                4,
-                6,
-                8,
-                10,
-                12,
-              ],
-              "bymonthday": Array [
-                5,
-                25,
-              ],
-              "byweekday": undefined,
-              "count": 5,
-              "dtstart": "2021-03-07T00:00:00.000Z",
-              "freq": 0,
-              "interval": 1,
-              "tzid": "UTC",
-              "until": undefined,
-            },
-          },
-        },
-      ]
+    expect(rulesClient.snooze.mock.calls[0][0].snoozeSchedule.rRule).toMatchInlineSnapshot(`
+      Object {
+        "bymonth": Array [
+          2,
+          4,
+          6,
+          8,
+          10,
+          12,
+        ],
+        "bymonthday": Array [
+          5,
+          25,
+        ],
+        "byweekday": undefined,
+        "count": 5,
+        "dtstart": "2021-03-07T00:00:00.000Z",
+        "freq": 0,
+        "interval": 1,
+        "tzid": "UTC",
+        "until": undefined,
+      }
     `);
 
-    expect(res.noContent).toHaveBeenCalled();
+    expect(res.ok).toHaveBeenCalledWith({
+      body: [
+        {
+          ...schedule,
+          recurring: {
+            every: '1y',
+            occurrences: 5,
+            onMonthDay: [5, 25],
+            onMonth: [2, 4, 6, 8, 10, 12],
+          },
+          id: 'random-schedule-id',
+          timezone: 'UTC',
+        },
+      ],
+    });
   });
 
   it('ensures the rule type gets validated for the license', async () => {

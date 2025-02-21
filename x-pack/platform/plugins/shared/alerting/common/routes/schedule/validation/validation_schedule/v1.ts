@@ -30,5 +30,9 @@ export const validateSchedule = (schedule: {
     }
   }
 
+  if (duration === '-1' && recurring) {
+    return `The duration of -1 snoozes the rule indefinitely. Recurring schedules cannot be set when the duration is -1.`;
+  }
+
   return;
 };

@@ -5,17 +5,23 @@
  * 2.0.
  */
 
+import { v4 as uuidV4 } from 'uuid';
 import { IRouter } from '@kbn/core/server';
 import {
   type SnoozeParams,
+  type SnoozeResponse,
   snoozeBodySchema,
   snoozeParamsSchema,
+  snoozeResponseSchema,
 } from '../../../../../../common/routes/rule/apis/snooze';
 import { ILicenseState, RuleMutedError } from '../../../../../lib';
 import { verifyAccessAndContext } from '../../../../lib';
 import { AlertingRequestHandlerContext, BASE_ALERTING_API_PATH } from '../../../../../types';
 import { DEFAULT_ALERTING_ROUTE_SECURITY } from '../../../../constants';
-import { transformSchedule } from '../../../../../../common/routes/schedule';
+import {
+  transformScheduleToRRule,
+  transformRRuleToSchedule,
+} from '../../../../../../common/routes/schedule';
 import type { SnoozeRuleOptions } from '../../../../../application/rule/methods/snooze';
 
 export const snoozeRuleRoute = (
@@ -24,7 +30,7 @@ export const snoozeRuleRoute = (
 ) => {
   router.post(
     {
-      path: `${BASE_ALERTING_API_PATH}/rule/{id}/_snooze`,
+      path: `${BASE_ALERTING_API_PATH}/rule/{id}/snooze_schedule`,
       security: DEFAULT_ALERTING_ROUTE_SECURITY,
       options: {
         access: 'public',
@@ -37,7 +43,8 @@ export const snoozeRuleRoute = (
           body: snoozeBodySchema,
         },
         response: {
-          204: {
+          200: {
+            body: () => snoozeResponseSchema,
             description: 'Indicates a successful call.',
           },
           400: {
@@ -57,17 +64,24 @@ export const snoozeRuleRoute = (
         const alertingContext = await context.alerting;
         const rulesClient = await alertingContext.getRulesClient();
         const params: SnoozeParams = req.params;
-        const { rRule, duration } = transformSchedule(req.body.schedule);
+        const { rRule, duration } = transformScheduleToRRule(req.body.schedule);
+        const snoozeSchedule = {
+          id: uuidV4(),
+          duration,
+          rRule: rRule as SnoozeRuleOptions['snoozeSchedule']['rRule'],
+        };
 
         try {
-          await rulesClient.snooze({
+          const snoozedRule = await rulesClient.snooze({
             ...params,
-            snoozeSchedule: {
-              duration,
-              rRule: rRule as SnoozeRuleOptions['snoozeSchedule']['rRule'],
-            },
+            snoozeSchedule,
           });
-          return res.noContent();
+
+          const response: SnoozeResponse = {
+            body: transformRRuleToSchedule(snoozedRule?.snoozeSchedule),
+          };
+
+          return res.ok(response);
         } catch (e) {
           if (e instanceof RuleMutedError) {
             return e.sendResponse(res);
