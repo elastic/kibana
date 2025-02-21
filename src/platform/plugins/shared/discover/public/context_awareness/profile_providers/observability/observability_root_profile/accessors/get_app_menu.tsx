@@ -14,10 +14,10 @@ import { OBSERVABILITY_THRESHOLD_RULE_TYPE_ID } from '@kbn/rule-data-utils';
 import { RuleFormFlyout } from '@kbn/response-ops-rule-form/flyout';
 import { isOfQueryType } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
+import { isValidRuleFormPlugins } from '@kbn/response-ops-rule-form/lib';
 import { AppMenuExtensionParams } from '../../../..';
 import type { RootProfileProvider } from '../../../../profiles';
 import { ProfileProviderServices } from '../../../profile_provider_services';
-import { isValidRuleFormPlugins } from '@kbn/response-ops-rule-form/lib';
 
 export const createGetAppMenu =
   (services: ProfileProviderServices): RootProfileProvider['profile']['getAppMenu'] =>

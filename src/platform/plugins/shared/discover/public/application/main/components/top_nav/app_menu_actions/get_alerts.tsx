@@ -23,10 +23,10 @@ import {
 } from '@kbn/rule-data-utils';
 import { RuleTypeMetaData } from '@kbn/alerting-plugin/common';
 import { RuleFormFlyout } from '@kbn/response-ops-rule-form/flyout';
+import { isValidRuleFormPlugins } from '@kbn/response-ops-rule-form/lib';
 import { DiscoverStateContainer } from '../../../state_management/discover_state';
 import { AppMenuDiscoverParams } from './types';
 import { DiscoverServices } from '../../../../../build_services';
-import { isValidRuleFormPlugins } from '@kbn/response-ops-rule-form/lib';
 
 const EsQueryValidConsumer: RuleCreationValidConsumer[] = [
   AlertConsumers.INFRASTRUCTURE,

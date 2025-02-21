@@ -17,8 +17,8 @@ import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
-import { UptimeAlertTypeParams } from '../../../state/alerts/alerts';
 import { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
+import { UptimeAlertTypeParams } from '../../../state/alerts/alerts';
 
 interface Props {
   alertFlyoutVisible: boolean;
