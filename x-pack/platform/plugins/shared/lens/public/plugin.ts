@@ -671,6 +671,19 @@ export class LensPlugin {
       )(core.application)
     );
 
+
+  const alertRulesDefinition = {
+      type: 'alertRule',
+      id: 'alertRule',
+      shouldAutoExecute: async () => true,
+      execute: async (context: unknown) => {
+      console.log('open the flyout and execute the action here', context);
+      }
+  }
+
+
+    startDependencies.uiActions.addTriggerAction('alertRule', alertRulesDefinition);
+
     // Allows the Lens embeddable to easily open the inline editing flyout
     const editLensEmbeddableAction = new EditLensEmbeddableAction(core, async () => {
       const { visualizationMap, datasourceMap } = await this.initEditorFrameService();
@@ -695,6 +708,7 @@ export class LensPlugin {
       return getAddLensPanelAction(startDependencies);
     });
     startDependencies.uiActions.attachAction(ADD_PANEL_TRIGGER, 'addLensPanelAction');
+
     if (startDependencies.uiActions.hasTrigger('ADD_CANVAS_ELEMENT_TRIGGER')) {
       // Because Canvas is not enabled in Serverless, this trigger might not be registered - only attach
       // the create action if the Canvas-specific trigger does indeed exist.
