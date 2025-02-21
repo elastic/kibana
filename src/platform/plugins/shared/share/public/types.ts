@@ -23,7 +23,7 @@ export interface ShareRegistryApiStart {
   anonymousAccessServiceProvider?: () => AnonymousAccessServiceContract;
 }
 
-export type ShareTypes = 'link' | 'embed' | 'integration';
+export type ShareTypes = 'link' | 'embed' | 'legacy' | 'integration';
 
 export type InternalShareActionIntent = Exclude<ShareTypes, 'integration'>;
 
@@ -42,8 +42,13 @@ type ShareActionUserInputBase<E extends Record<string, unknown> = Record<string,
   disabled?: boolean;
 } & E;
 
+export interface ShareMenuProviderLegacy {
+  readonly id: string;
+  getShareMenuItemsLegacy: (context: ShareContext) => ShareMenuItemLegacy[];
+}
+
 type ShareImplementationFactory<
-  T extends ShareTypes,
+  T extends Omit<ShareTypes, 'legacy'>,
   C extends Record<string, unknown> = Record<string, unknown>
 > = T extends 'integration'
   ? {
@@ -91,6 +96,15 @@ export type ShareIntegration<
 > = ShareImplementationFactory<'integration', IntegrationParameters>;
 
 /**
+ * @description implementation definition to support legacy share implementation
+ */
+export interface ShareLegacy {
+  shareType: 'legacy';
+  id: ShareMenuProviderLegacy['id'];
+  config: ShareMenuProviderLegacy['getShareMenuItemsLegacy'];
+}
+
+/**
  * @description Share integration implementation definition for performing exports within kibana
  */
 export interface ExportShare
@@ -123,7 +137,7 @@ export interface ExportShare
   groupId: 'export';
 }
 
-export type ShareActionIntents = LinkShare | EmbedShare | ShareIntegration;
+export type ShareActionIntents = LinkShare | EmbedShare | ShareLegacy | ShareIntegration;
 
 // Example usage
 export type LinkShareConfig = ShareImplementation<LinkShare>;
@@ -131,7 +145,16 @@ export type EmbedShareConfig = ShareImplementation<EmbedShare>;
 export type ExportShareConfig = ShareImplementation<ExportShare>;
 export type ShareIntegrationConfig = ShareImplementation<ShareIntegration>;
 
-export type ShareConfigs = LinkShareConfig | EmbedShareConfig | ExportShareConfig;
+export type LegacyIntegrationConfig = Omit<ShareLegacy, 'config'> & {
+  config: ReturnType<ShareLegacy['config']>;
+};
+
+export type ShareConfigs =
+  | LinkShareConfig
+  | EmbedShareConfig
+  | ExportShareConfig
+  | LegacyIntegrationConfig
+  | ShareIntegrationConfig;
 
 export type LinkShareUIConfig = ShareActionUserInputBase<{
   /**
@@ -167,24 +190,15 @@ export interface SharingData {
   };
 }
 
-export abstract class ShareRegistryApi {
-  abstract start(args: ShareRegistryApiStart): ShareRegistryApi;
+export abstract class ShareRegistryPublicApi {
+  abstract start(
+    args: ShareRegistryApiStart
+  ): ShareRegistryPublicApi['resolveShareItemsForShareContext'];
 
   abstract registerShareIntegration<I extends ShareIntegration>(shareObject: string, arg: I): void;
   abstract registerShareIntegration<I extends ShareIntegration>(arg: I): void;
 
-  abstract getShareConfigOptionsForObject(
-    objectType: string
-  ): Array<ShareActionIntents | undefined>;
-
   abstract resolveShareItemsForShareContext(args: ShareContext): ShareConfigs[];
-
-  // abstract registerShareAction(app: string, args: ShareActionIntent[]): void;
-  // abstract registerShareAction(args: ShareActionIntent[]): void;
-
-  // // when toggling the share menu we keep it simple, only passing in the minimum required data, instead of a sleuth of options
-  // // any extra check that is required to be done will happen behind the scenes for each share context
-  // abstract toggleShare(context: string, data: SharingData): void;
 }
 
 export type BrowserUrlService = UrlService<
@@ -271,11 +285,6 @@ export interface ShareMenuItemLegacy extends ShareMenuItemBase {
 export interface ExportGenerationOpts {
   optimizedForPrinting?: boolean;
   intl: InjectedIntl;
-}
-
-export interface ShareMenuProviderLegacy {
-  readonly id: string;
-  getShareMenuItemsLegacy: (context: ShareContext) => ShareMenuItemLegacy[];
 }
 
 /**

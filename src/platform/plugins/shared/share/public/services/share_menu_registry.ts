@@ -11,7 +11,7 @@ import type {
   BrowserUrlService,
   ShareContext,
   ShareConfigs,
-  ShareRegistryApi,
+  ShareRegistryPublicApi,
   ShareActionIntents,
   InternalShareActionIntent,
   ShareIntegration,
@@ -20,7 +20,7 @@ import type {
 } from '../types';
 import type { AnonymousAccessServiceContract } from '../../common/anonymous_access';
 
-export class ShareRegistry implements ShareRegistryApi {
+export class ShareRegistry implements ShareRegistryPublicApi {
   private urlService?: BrowserUrlService;
   private anonymousAccessServiceProvider?: () => AnonymousAccessServiceContract;
 
@@ -38,6 +38,13 @@ export class ShareRegistry implements ShareRegistryApi {
   > = {
     [this.globalMarker]: new Map(),
   };
+
+  start({ urlService, anonymousAccessServiceProvider }: ShareRegistryApiStart) {
+    this.urlService = urlService;
+    this.anonymousAccessServiceProvider = anonymousAccessServiceProvider;
+
+    return this.resolveShareItemsForShareContext.bind(this);
+  }
 
   private registerShareIntentAction(
     shareObject: string,
@@ -83,12 +90,13 @@ export class ShareRegistry implements ShareRegistryApi {
   }
 
   /**
-   * @deprecated use {@link registerShareIntegration} instead
+   * @description provides an escape hatch to support allowing legacy share menu items to be registered
    */
   register(value: ShareMenuProviderLegacy) {
     // implement backwards compatibility for the share plugin
     this.registerShareIntentAction(this.globalMarker, {
-      shareType: 'integration',
+      shareType: 'legacy',
+      id: value.id,
       config: value.getShareMenuItemsLegacy,
     });
   }
@@ -104,15 +112,9 @@ export class ShareRegistry implements ShareRegistryApi {
     });
   }
 
-  start({ urlService, anonymousAccessServiceProvider }: ShareRegistryApiStart) {
-    this.urlService = urlService;
-    this.anonymousAccessServiceProvider = anonymousAccessServiceProvider;
-    return this;
-  }
-
-  getShareConfigOptionsForObject(
+  private getShareConfigOptionsForObject(
     objectType: ShareContext['objectType']
-  ): Array<ShareActionIntents | undefined> {
+  ): ShareActionIntents[] {
     const shareContextMap = this.shareOptionsStore[objectType];
     const globalOptions = Array.from(this.shareOptionsStore[this.globalMarker].values());
 
@@ -133,17 +135,30 @@ export class ShareRegistry implements ShareRegistryApi {
     }
 
     return this.getShareConfigOptionsForObject(objectType)
-      .map((shareAction) => ({
-        ...shareAction,
-        config: shareAction?.config?.call(null, {
-          urlService: this.urlService!,
-          anonymousAccessServiceProvider: this.anonymousAccessServiceProvider,
-          objectType,
-          ...shareContext,
-        }),
-      }))
-      .filter(
-        (shareAction) => shareAction.config || (shareAction.shareType === 'embed' && !isServerless)
-      );
+      .map((shareAction) => {
+        let config: ShareConfigs['config'];
+
+        if (shareAction.shareType === 'legacy') {
+          config = shareAction.config.call(null, {
+            objectType,
+            ...shareContext,
+          });
+        } else {
+          config = shareAction.config.call(null, {
+            urlService: this.urlService!,
+            anonymousAccessServiceProvider: this.anonymousAccessServiceProvider,
+            objectType,
+            ...shareContext,
+          });
+        }
+
+        return {
+          ...shareAction,
+          config,
+        } as ShareConfigs;
+      })
+      .filter((shareAction) => {
+        return shareAction.config || (shareAction.shareType === 'embed' && !isServerless);
+      });
   }
 }
