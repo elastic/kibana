@@ -26,7 +26,7 @@ export interface GraphInputs {
   isOssModel?: boolean;
   input: string;
   provider: string;
-  responseLanguage?: string
+  responseLanguage?: string;
 }
 
 export interface AgentState extends AgentStateBase {
@@ -44,7 +44,7 @@ export interface AgentState extends AgentStateBase {
   conversation: ConversationResponse | undefined;
   conversationId: string;
   contentReferencesEnabled: boolean;
-  formattedTime: string
+  formattedTime: string;
 }
 
 export interface NodeParamsBase {

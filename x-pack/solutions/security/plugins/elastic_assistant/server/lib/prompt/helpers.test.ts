@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { getFormattedTime } from "./helpers";
+import { getFormattedTime } from './helpers';
 
 describe('helper', () => {
   describe('getCurrentTimeForPrompt', () => {
@@ -58,7 +58,11 @@ describe('helper', () => {
         'Europe/Warsaw',
         'Current time: 14/02/2025, 00:33:12 GMT-7 (14/02/2025, 07:33:12 GMT)',
       ],
-      ['MST', 'Europe/Warsaw', 'Current time: 14/02/2025, 00:33:12 GMT-7 (14/02/2025, 07:33:12 GMT)'],
+      [
+        'MST',
+        'Europe/Warsaw',
+        'Current time: 14/02/2025, 00:33:12 GMT-7 (14/02/2025, 07:33:12 GMT)',
+      ],
       [
         'America/Los_Angeles',
         'Europe/Warsaw',
@@ -95,11 +99,10 @@ describe('helper', () => {
         screenContextTimezone: string | undefined,
         expectedResult: string
       ) => {
-
         const result = getFormattedTime({
-            screenContextTimezone,
-            uiSettingsDateFormatTimezone
-            });
+          screenContextTimezone,
+          uiSettingsDateFormatTimezone,
+        });
 
         expect(result).toEqual(expectedResult);
       }

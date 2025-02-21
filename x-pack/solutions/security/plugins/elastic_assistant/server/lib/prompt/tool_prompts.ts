@@ -78,5 +78,5 @@ export const localToolPrompts: Prompt[] = [
     prompt: {
       default: 'Call this for Elastic Defend insights.',
     },
-  }
+  },
 ];

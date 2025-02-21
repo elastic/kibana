@@ -60,7 +60,7 @@ export const getDefaultAssistantGraph = ({
   tools,
   replacements,
   contentReferencesEnabled = false,
-  getFormattedTime
+  getFormattedTime,
 }: GetDefaultAssistantGraphParams) => {
   try {
     // Default graph state
