@@ -352,6 +352,7 @@ export default function ({ getService }: FtrProviderContext) {
         [ALERT_RULE_UUID]: ruleId,
         [SPACE_IDS]: ['default'],
         [TAGS]: [],
+        [ALERT_PENDING_RECOVERED_COUNT]: 0,
       });
     });
 
@@ -575,6 +576,7 @@ export default function ({ getService }: FtrProviderContext) {
         [ALERT_RULE_UUID]: ruleId,
         [SPACE_IDS]: ['default'],
         [TAGS]: [],
+        [ALERT_PENDING_RECOVERED_COUNT]: 0,
       });
     });
   });
