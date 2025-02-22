@@ -11,7 +11,7 @@ import { i18n } from '@kbn/i18n';
 import type { ServerApiError } from '../../../../common/types';
 import { useAssetInventoryRoutes } from '../../../hooks/use_asset_inventory_routes';
 
-export const useEnableAssetInventory = () => {
+export const useEnableAssetInventory = (refetchStatusFn: () => void) => {
   const { postEnableAssetInventory } = useAssetInventoryRoutes();
   const [error, setError] = useState<string | null>(null);
   const [isEnabling, setIsEnabling] = useState(false);
@@ -20,6 +20,9 @@ export const useEnableAssetInventory = () => {
     onMutate: () => {
       setIsEnabling(true);
       setError(null);
+    },
+    onSuccess: () => {
+      refetchStatusFn();
     },
     onError: (err: { body?: ServerApiError }) => {
       const errorMessage =

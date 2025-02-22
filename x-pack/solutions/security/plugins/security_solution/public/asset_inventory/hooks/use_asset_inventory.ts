@@ -15,6 +15,7 @@ export interface UseAssetInventory {
   isLoading: boolean;
   status?: AssetInventoryStatusResponse['status'];
   privileges?: AssetInventoryStatusResponse['privileges'];
+  refetchStatusFn: () => void;
 }
 
 export const useAssetInventoryStatus = () => {
@@ -34,11 +35,12 @@ export const useAssetInventoryStatus = () => {
 };
 
 export const useAssetInventory = (): UseAssetInventory => {
-  const { data, isLoading } = useAssetInventoryStatus();
+  const { data, isLoading, refetch: refetchStatusFn } = useAssetInventoryStatus();
 
   return {
     isLoading,
     status: data?.status,
     privileges: data?.privileges,
+    refetchStatusFn,
   };
 };

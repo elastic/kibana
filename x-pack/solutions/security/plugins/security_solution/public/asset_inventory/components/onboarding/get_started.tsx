@@ -11,11 +11,11 @@ import {
   EuiEmptyPrompt,
   EuiButton,
   EuiLink,
-  useEuiTheme,
   EuiTitle,
   EuiFlexGroup,
   EuiFlexItem,
   EuiCallOut,
+  useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -24,14 +24,14 @@ import illustration from '../../../common/images/information_light.png';
 import { Title } from '../title';
 import { CenteredWrapper } from './centered_wrapper';
 import { HoverForExplanation } from './hover_for_explanation';
-import { useEnableAssetInventory } from './hooks/use_enable_asset_inventory';
+import { useGetStarted } from './hooks/use_get_started';
 
 const ASSET_INVENTORY_DOCS_URL = 'https://ela.st/asset-inventory';
 const TEST_SUBJ = 'assetInventory:onboarding:get-started';
 
 export const GetStarted = () => {
   const { euiTheme } = useEuiTheme();
-  const { isEnabling, error, setError, handleEnableClick } = useEnableAssetInventory();
+  const { isEnabling, error, setError, handleEnableClick } = useGetStarted();
 
   return (
     <EuiFlexGroup>

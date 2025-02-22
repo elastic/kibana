@@ -9,14 +9,14 @@
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { GetStarted } from './get_started';
-import { useEnableAssetInventory } from './hooks/use_enable_asset_inventory';
+import { useGetStarted } from './hooks/use_get_started';
 import { TestProvider } from '../../test/test_provider';
 
-jest.mock('./hooks/use_enable_asset_inventory', () => ({
-  useEnableAssetInventory: jest.fn(),
+jest.mock('./hooks/use_get_started', () => ({
+  useGetStarted: jest.fn(),
 }));
 
-const mockEnableAssetInventory = {
+const mockGetStarted = {
   isEnabling: false,
   error: null,
   setError: jest.fn(),
@@ -30,7 +30,7 @@ const renderWithProvider = (children: React.ReactNode) => {
 describe('GetStarted Component', () => {
   beforeEach(() => {
     jest.resetAllMocks();
-    (useEnableAssetInventory as jest.Mock).mockReturnValue(mockEnableAssetInventory);
+    (useGetStarted as jest.Mock).mockReturnValue(mockGetStarted);
   });
 
   it('renders the component', () => {
@@ -52,12 +52,12 @@ describe('GetStarted Component', () => {
     const button = screen.getByRole('button', { name: /enable asset inventory/i });
     fireEvent.click(button);
 
-    expect(mockEnableAssetInventory.handleEnableClick).toHaveBeenCalled();
+    expect(mockGetStarted.handleEnableClick).toHaveBeenCalled();
   });
 
   it('shows a loading spinner when enabling', () => {
-    (useEnableAssetInventory as jest.Mock).mockReturnValue({
-      ...mockEnableAssetInventory,
+    (useGetStarted as jest.Mock).mockReturnValue({
+      ...mockGetStarted,
       isEnabling: true,
     });
 
@@ -68,8 +68,8 @@ describe('GetStarted Component', () => {
 
   it('displays an error message when there is an error', async () => {
     const errorMessage = 'Task Manager is not available';
-    (useEnableAssetInventory as jest.Mock).mockReturnValue({
-      ...mockEnableAssetInventory,
+    (useGetStarted as jest.Mock).mockReturnValue({
+      ...mockGetStarted,
       error: errorMessage,
     });
 
@@ -80,8 +80,8 @@ describe('GetStarted Component', () => {
   });
 
   it('dismisses error message when dismissed', async () => {
-    (useEnableAssetInventory as jest.Mock).mockReturnValue({
-      ...mockEnableAssetInventory,
+    (useGetStarted as jest.Mock).mockReturnValue({
+      ...mockGetStarted,
       error: 'Task Manager is not available',
     });
 
@@ -90,6 +90,6 @@ describe('GetStarted Component', () => {
     const dismissButton = screen.getByRole('button', { name: /dismiss/i });
     fireEvent.click(dismissButton);
 
-    await waitFor(() => expect(mockEnableAssetInventory.setError).toHaveBeenCalledWith(null));
+    await waitFor(() => expect(mockGetStarted.setError).toHaveBeenCalledWith(null));
   });
 });

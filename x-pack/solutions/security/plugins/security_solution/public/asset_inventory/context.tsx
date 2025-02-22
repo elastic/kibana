@@ -11,6 +11,7 @@ import { useAssetInventory } from './hooks/use_asset_inventory';
 
 const defaultContextValue: UseAssetInventory = {
   isLoading: true,
+  refetchStatusFn: () => {},
 };
 
 export const AssetInventoryContext = createContext<UseAssetInventory>(defaultContextValue);
