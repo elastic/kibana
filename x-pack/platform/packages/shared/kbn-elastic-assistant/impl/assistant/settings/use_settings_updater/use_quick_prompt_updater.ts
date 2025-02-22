@@ -53,9 +53,10 @@ export const useQuickPromptUpdater = ({
   useEffect(() => {
     // Update quick prompts settings when prompts are loaded
     if (promptsLoaded) {
-      setUpdatedQuickPromptSettings(
-        allPrompts.data.filter((p) => p.promptType === PromptTypeEnum.quick)
-      );
+      setUpdatedQuickPromptSettings((prev) => [
+        ...prev,
+        ...allPrompts.data.filter((p) => p.promptType === PromptTypeEnum.quick),
+      ]);
     }
   }, [allPrompts.data, promptsLoaded]);
 
@@ -119,7 +120,7 @@ export const useQuickPromptUpdater = ({
         if (existingPrompt) {
           const newBulkActions = {
             ...promptsBulkActions,
-            ...(selectedQuickPrompt.id !== ''
+            ...(selectedQuickPrompt.id !== '' && selectedQuickPrompt.name !== selectedQuickPrompt.id
               ? {
                   update: [
                     ...(promptsBulkActions.update ?? []).filter(
@@ -293,8 +294,7 @@ export const useQuickPromptUpdater = ({
     const hasBulkPrompts =
       promptsBulkActions.create || promptsBulkActions.update || promptsBulkActions.delete;
     const bulkPromptsResult = hasBulkPrompts
-      ? // TODO add toasts?
-        await bulkUpdatePrompts(http, promptsBulkActions, undefined)
+      ? await bulkUpdatePrompts(http, promptsBulkActions)
       : undefined;
     return bulkPromptsResult?.success ?? true;
   }, [http, promptsBulkActions]);

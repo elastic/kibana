@@ -20,6 +20,7 @@ import {
   createSystemPrompt,
   openAssistant,
   resetConversation,
+  selectConnector,
   selectConversation,
   selectSystemPrompt,
   sendQuickPrompt,
@@ -28,9 +29,10 @@ import {
 import {
   deleteConversations,
   deletePrompts,
+  waitForConversation,
   waitForCreatePrompts,
 } from '../../tasks/api_calls/assistant';
-import { createAzureConnector } from '../../tasks/api_calls/connectors';
+import { azureConnectorAPIPayload, createAzureConnector } from '../../tasks/api_calls/connectors';
 import { deleteConnectors } from '../../tasks/api_calls/common';
 import { login } from '../../tasks/login';
 import { visit, visitGetStartedPage } from '../../tasks/navigation';
@@ -55,6 +57,16 @@ const customPrompt2 = {
   content: 'This is an enhanced system prompt.',
   promptType,
 };
+const mockConvo1 = {
+  id: 'spooky',
+  title: 'Spooky convo',
+  messages: [],
+};
+const mockConvo2 = {
+  id: 'silly',
+  title: 'Silly convo',
+  messages: [],
+};
 
 describe('AI Assistant Prompts', { tags: ['@ess', '@serverless'] }, () => {
   beforeEach(() => {
@@ -63,6 +75,8 @@ describe('AI Assistant Prompts', { tags: ['@ess', '@serverless'] }, () => {
     deletePrompts();
     login();
     createAzureConnector();
+    waitForConversation(mockConvo1);
+    waitForConversation(mockConvo2);
   });
 
   describe('System Prompts', () => {
@@ -95,15 +109,17 @@ describe('AI Assistant Prompts', { tags: ['@ess', '@serverless'] }, () => {
     it('Last selected system prompt persists in conversation', () => {
       visitGetStartedPage();
       openAssistant();
+      selectConversation(mockConvo1.title);
+      selectConnector(azureConnectorAPIPayload.name);
       selectSystemPrompt(customPrompt2.name);
       typeAndSendMessage('hello');
       assertSystemPromptSent(customPrompt2.content);
       assertMessageSent('hello', true);
       resetConversation();
       assertSystemPromptSelected(customPrompt2.name);
-      selectConversation('Timeline');
+      selectConversation(mockConvo2.title);
       assertEmptySystemPrompt();
-      selectConversation('Welcome');
+      selectConversation(mockConvo1.title);
       assertSystemPromptSelected(customPrompt2.name);
     });
 
@@ -122,7 +138,9 @@ describe('AI Assistant Prompts', { tags: ['@ess', '@serverless'] }, () => {
     it('Add prompt from system prompt selector and set multiple conversations (including current) as default conversation', () => {
       visitGetStartedPage();
       openAssistant();
-      createSystemPrompt(testPrompt.name, testPrompt.content, ['Welcome', 'Timeline']);
+      selectConversation(mockConvo1.title);
+      selectConnector(azureConnectorAPIPayload.name);
+      createSystemPrompt(testPrompt.name, testPrompt.content, [mockConvo1.title, mockConvo2.title]);
       assertSystemPromptSelected(testPrompt.name);
       typeAndSendMessage('hello');
 
@@ -130,7 +148,8 @@ describe('AI Assistant Prompts', { tags: ['@ess', '@serverless'] }, () => {
       assertMessageSent('hello', true);
       // ensure response before changing convo
       assertErrorResponse();
-      selectConversation('Timeline');
+      selectConversation(mockConvo2.title);
+      selectConnector(azureConnectorAPIPayload.name);
       assertSystemPromptSelected(testPrompt.name);
       typeAndSendMessage('hello');
 

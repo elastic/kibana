@@ -34,7 +34,7 @@ export const ConversationMultiSelector: React.FC<Props> = React.memo(
   }) => {
     const lastConversationId = useMemo(() => {
       const allIds = Object.values(conversations);
-      return allIds[allIds.length - 1].id;
+      return allIds[allIds.length - 1]?.id;
     }, [conversations]);
     const internalSetObserver = useCallback(
       (ref: HTMLDivElement | null) => {

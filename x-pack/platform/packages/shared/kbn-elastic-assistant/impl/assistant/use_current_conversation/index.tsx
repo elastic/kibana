@@ -152,64 +152,62 @@ export const useCurrentConversation = ({
     [currentConversation?.id, getConversation]
   );
 
-  const handleOnConversationSelected = useCallback(
-    async ({
-      cId,
-      cTitle,
-      apiConfig: providedApiConfig,
-    }: {
-      apiConfig?: ApiConfig;
-      cId: string;
-      cTitle?: string;
-    }) => {
-      if (cId === '') {
-        const apiConfig =
-          providedApiConfig ??
-          (currentConversation?.apiConfig
-            ? currentConversation.apiConfig
-            : defaultConnector
-            ? {
-                connectorId: defaultConnector.id ?? '',
-                actionTypeId: defaultConnector.actionTypeId ?? '',
-              }
-            : undefined);
+  const getNewConversation = useCallback(
+    ({ cTitle, apiConfig: providedApiConfig }: { apiConfig?: ApiConfig; cTitle?: string }) => {
+      const apiConfig =
+        providedApiConfig ??
+        (currentConversation?.apiConfig
+          ? currentConversation.apiConfig
+          : defaultConnector
+          ? {
+              connectorId: defaultConnector.id ?? '',
+              actionTypeId: defaultConnector.actionTypeId ?? '',
+            }
+          : undefined);
 
-        const newConversationDefaultSystemPrompt = getDefaultNewSystemPrompt(allSystemPrompts);
-        setLastConversation({
-          id: '',
-          title: cTitle ?? '',
-        });
-        return setCurrentConversation({
-          ...(apiConfig
-            ? {
-                apiConfig: {
-                  ...apiConfig,
-                  ...(newConversationDefaultSystemPrompt?.id
-                    ? { defaultSystemPromptId: newConversationDefaultSystemPrompt?.id }
-                    : {}),
-                },
-              }
-            : {}),
-          id: '',
-          messages: [],
-          replacements: {},
-          category: 'assistant',
-          title: cTitle ?? '',
-        });
-      }
+      const newConversationDefaultSystemPrompt = getDefaultNewSystemPrompt(allSystemPrompts);
       setLastConversation({
-        id: cId,
+        id: '',
+        title: cTitle ?? '',
       });
-      // refetch will set the currentConversation
-      await refetchCurrentConversation({ cId });
+      return setCurrentConversation({
+        ...(apiConfig
+          ? {
+              apiConfig: {
+                ...apiConfig,
+                ...(newConversationDefaultSystemPrompt?.id
+                  ? { defaultSystemPromptId: newConversationDefaultSystemPrompt?.id }
+                  : {}),
+              },
+            }
+          : {}),
+        id: '',
+        messages: [],
+        replacements: {},
+        category: 'assistant',
+        title: cTitle ?? '',
+      });
     },
-    [
-      allSystemPrompts,
-      currentConversation?.apiConfig,
-      defaultConnector,
-      refetchCurrentConversation,
-      setLastConversation,
-    ]
+    [allSystemPrompts, currentConversation?.apiConfig, defaultConnector, setLastConversation]
+  );
+
+  const handleOnConversationSelected = useCallback(
+    async ({ cId, cTitle, apiConfig }: { apiConfig?: ApiConfig; cId: string; cTitle?: string }) => {
+      if (cId === '') {
+        return getNewConversation({ apiConfig, cTitle });
+      }
+      // refetch will set the currentConversation
+      try {
+        await refetchCurrentConversation({ cId });
+        setLastConversation({
+          id: cId,
+        });
+      } catch (e) {
+        getNewConversation({ apiConfig, cTitle });
+        throw e;
+      }
+    },
+    [getNewConversation, refetchCurrentConversation, setLastConversation]
   );
   useEffect(() => {
     if (!mayUpdateConversations || !!currentConversation) return;
