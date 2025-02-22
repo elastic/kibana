@@ -11,8 +11,6 @@ import React from 'react';
 import { shallow, ShallowWrapper } from 'enzyme';
 import { Redirect, RouteProps } from 'react-router-dom';
 import { Route } from '@kbn/shared-ux-router';
-import { createSearchSessionMock } from '../__mocks__/search_session';
-import { discoverServiceMock as mockDiscoverServices } from '../__mocks__/services';
 import { DiscoverRoutes } from './discover_router';
 import { DiscoverMainRoute } from './main';
 import { SingleDocRoute } from './doc';
@@ -34,8 +32,6 @@ const gatherRoutes = (wrapper: ShallowWrapper) => {
   });
 };
 
-const mockExperimentalFeatures = {};
-
 const props: MainRouteProps = {
   customizationContext: mockCustomizationContext,
 };
@@ -43,15 +39,7 @@ const props: MainRouteProps = {
 describe('DiscoverRouter', () => {
   beforeAll(() => {
     pathMap = {};
-    const { history } = createSearchSessionMock();
-    const component = shallow(
-      <DiscoverRoutes
-        services={mockDiscoverServices}
-        history={history}
-        customizationContext={mockCustomizationContext}
-        experimentalFeatures={mockExperimentalFeatures}
-      />
-    );
+    const component = shallow(<DiscoverRoutes customizationContext={mockCustomizationContext} />);
     gatherRoutes(component);
   });
 

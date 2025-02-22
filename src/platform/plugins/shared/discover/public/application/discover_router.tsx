@@ -10,10 +10,8 @@
 import { Redirect } from 'react-router-dom';
 import { Router, Routes, Route } from '@kbn/shared-ux-router';
 import React from 'react';
-import { History } from 'history';
 import { EuiErrorBoundary } from '@elastic/eui';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import type { ExperimentalFeatures } from '../../server/config';
 import { ContextAppRoute } from './context';
 import { SingleDocRoute } from './doc';
 import { DiscoverMainRoute } from './main';
@@ -21,37 +19,29 @@ import { NotFoundRoute } from './not_found';
 import { DiscoverServices } from '../build_services';
 import { ViewAlertRoute } from './view_alert';
 import type { DiscoverCustomizationContext } from '../customizations';
+import { DiscoverMainRoute2 } from './main/discover_main_route_2';
 
-export type DiscoverRouterProps = Omit<DiscoverRoutesProps, 'customizationContext'> & {
+export interface DiscoverRouterProps {
+  services: DiscoverServices;
   customizationContext: DiscoverCustomizationContext;
-};
+}
 
-export const DiscoverRouter = ({ services, history, ...routeProps }: DiscoverRouterProps) => {
+export const DiscoverRouter = ({ services, ...routeProps }: DiscoverRouterProps) => {
   return (
     <KibanaContextProvider services={services}>
       <EuiErrorBoundary>
-        <Router history={history} data-test-subj="discover-react-router">
-          <DiscoverRoutes services={services} history={history} {...routeProps} />
+        <Router history={services.history} data-test-subj="discover-react-router">
+          <DiscoverRoutes {...routeProps} />
         </Router>
       </EuiErrorBoundary>
     </KibanaContextProvider>
   );
 };
 
-export interface DiscoverRoutesProps {
-  services: DiscoverServices;
-  customizationContext: DiscoverCustomizationContext;
-  experimentalFeatures: ExperimentalFeatures;
-  history: History;
-}
-
 // this exists as a separate component to allow the tests to gather the routes
 export const DiscoverRoutes = ({
-  customizationContext,
-  services,
-  history,
   ...routeProps
-}: DiscoverRoutesProps) => {
+}: Pick<DiscoverRouterProps, 'customizationContext'>) => {
   return (
     <Routes>
       <Route path="/context/:dataViewId/:id">
@@ -70,10 +60,13 @@ export const DiscoverRoutes = ({
         <ViewAlertRoute />
       </Route>
       <Route path="/view/:id">
-        <DiscoverMainRoute customizationContext={customizationContext} {...routeProps} />
+        <DiscoverMainRoute {...routeProps} />
+      </Route>
+      <Route path="/v2">
+        <DiscoverMainRoute2 {...routeProps} />
       </Route>
       <Route path="/" exact>
-        <DiscoverMainRoute customizationContext={customizationContext} {...routeProps} />
+        <DiscoverMainRoute {...routeProps} />
       </Route>
       <NotFoundRoute />
     </Routes>
