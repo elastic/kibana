@@ -1500,6 +1500,7 @@ instanceStateValue: true
                             action_group: 'default',
                             flapping_history: expectExpect.any(Array),
                             maintenance_window_ids: [],
+                            pending_recovered_count: 0,
                             severity_improving: false,
                             rule: {
                               parameters: {
@@ -1544,6 +1545,7 @@ instanceStateValue: true
                             action_group: 'default',
                             flapping_history: expectExpect.any(Array),
                             maintenance_window_ids: [],
+                            pending_recovered_count: 0,
                             severity_improving: false,
                             rule: {
                               parameters: {
@@ -1604,6 +1606,7 @@ instanceStateValue: true
                             action_group: 'default',
                             flapping_history: expectExpect.any(Array),
                             maintenance_window_ids: [],
+                            pending_recovered_count: 0,
                             previous_action_group: 'default',
                             rule: {
                               parameters: {
@@ -1648,6 +1651,7 @@ instanceStateValue: true
                             action_group: 'default',
                             flapping_history: expectExpect.any(Array),
                             maintenance_window_ids: [],
+                            pending_recovered_count: 0,
                             previous_action_group: 'default',
                             rule: {
                               parameters: {
@@ -1756,6 +1760,7 @@ instanceStateValue: true
                       action_group: 'default',
                       flapping_history: expectExpect.any(Array),
                       maintenance_window_ids: [],
+                      pending_recovered_count: 0,
                       severity_improving: false,
                       rule: {
                         parameters: {
@@ -1800,6 +1805,7 @@ instanceStateValue: true
                       action_group: 'default',
                       flapping_history: expectExpect.any(Array),
                       maintenance_window_ids: [],
+                      pending_recovered_count: 0,
                       severity_improving: false,
                       rule: {
                         parameters: {
