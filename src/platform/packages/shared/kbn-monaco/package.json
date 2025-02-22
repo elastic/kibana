@@ -29,14 +29,5 @@
       "**/test_fixtures/**",
       "**/test_helpers/**"
     ]
-  },
-  "nx": {
-    "targets": {
-      "build": {
-        "outputs": [
-          "{workspaceRoot}/bazel-bin/packages/kbn-monaco"
-        ]
-      }
-    }
   }
 }

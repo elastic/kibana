@@ -11,7 +11,7 @@
   },
   "targets": {
     "build": {
-      "outputs": ["{workspaceRoot}/bazel-bin/packages/kbn-ui-shared-deps-npm"]
+      "outputs": ["{workspaceRoot}/bazel-bin/src/platform/packages/private/kbn-ui-shared-deps-npm"]
     },
     "typecheck": {
       "inputs": [
