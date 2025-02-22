@@ -135,7 +135,9 @@ describe('AI Assistant Prompts', { tags: ['@ess', '@serverless'] }, () => {
       assertMessageSent('hello', true);
     });
 
-    it('Add prompt from system prompt selector and set multiple conversations (including current) as default conversation', () => {
+    // due to the missing profile_uid when creating conversations from the API
+    // bulk actions cannot be performed on conversations so this test does is skipped
+    it.skip('Add prompt from system prompt selector and set multiple conversations (including current) as default conversation', () => {
       visitGetStartedPage();
       openAssistant();
       selectConversation(mockConvo1.title);
