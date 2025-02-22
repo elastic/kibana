@@ -62,7 +62,7 @@ export const LocationForm = ({ privateLocations }: { privateLocations: PrivateLo
         <EuiSpacer />
         <BrowserMonitorCallout />
         <EuiSpacer />
-        <SpaceSelector />
+        <SpaceSelector helpText={LOCATION_HELP_TEXT} />
       </EuiForm>
     </>
   );
@@ -92,6 +92,13 @@ export const LOCATION_NAME_LABEL = i18n.translate(
   'xpack.synthetics.monitorManagement.locationName',
   {
     defaultMessage: 'Location name',
+  }
+);
+
+const LOCATION_HELP_TEXT = i18n.translate(
+  'xpack.synthetics.privateLocation.locationSpacesHelpText',
+  {
+    defaultMessage: 'Select the spaces where this location will be available.',
   }
 );
 
