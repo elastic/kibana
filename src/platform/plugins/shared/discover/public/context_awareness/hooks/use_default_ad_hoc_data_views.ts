@@ -91,7 +91,7 @@ export const useDefaultAdHocDataViews2 = ({
       profileDataViewSpecs.map((spec) => dataViews.create(spec, true))
     );
 
-    dispatch(internalStateActions.setDefaultProfileAdHocDataViews(profileDataViews));
+    return profileDataViews;
   });
 
   // This approach allows us to return a callback with a stable reference
