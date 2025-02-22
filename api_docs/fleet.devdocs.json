@@ -11865,7 +11865,7 @@
             "label": "getPackages",
             "description": [],
             "signature": [
-              "(params?: { excludeInstallStatus?: false | undefined; category?: string | undefined; prerelease?: false | undefined; } | undefined) => Promise<",
+              "(params?: { excludeInstallStatus?: boolean | undefined; category?: string | undefined; prerelease?: boolean | undefined; } | undefined) => Promise<",
               {
                 "pluginId": "fleet",
                 "scope": "common",
@@ -11893,12 +11893,12 @@
                   {
                     "parentPluginId": "fleet",
                     "id": "def-server.PackageClient.getPackages.$1.excludeInstallStatus",
-                    "type": "boolean",
+                    "type": "CompoundType",
                     "tags": [],
                     "label": "excludeInstallStatus",
                     "description": [],
                     "signature": [
-                      "false | undefined"
+                      "boolean | undefined"
                     ],
                     "path": "x-pack/platform/plugins/shared/fleet/server/services/epm/package_service.ts",
                     "deprecated": false,
@@ -11921,12 +11921,12 @@
                   {
                     "parentPluginId": "fleet",
                     "id": "def-server.PackageClient.getPackages.$1.prerelease",
-                    "type": "boolean",
+                    "type": "CompoundType",
                     "tags": [],
                     "label": "prerelease",
                     "description": [],
                     "signature": [
-                      "false | undefined"
+                      "boolean | undefined"
                     ],
                     "path": "x-pack/platform/plugins/shared/fleet/server/services/epm/package_service.ts",
                     "deprecated": false,
@@ -11945,7 +11945,7 @@
             "label": "getAgentPolicyConfigYAML",
             "description": [],
             "signature": [
-              "(pkgName: string, pkgVersion?: string | undefined, prerelease?: false | undefined, ignoreUnverified?: boolean | undefined) => Promise<string>"
+              "(pkgName: string, pkgVersion?: string | undefined, prerelease?: boolean | undefined, ignoreUnverified?: boolean | undefined) => Promise<string>"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/server/services/epm/package_service.ts",
             "deprecated": false,
@@ -11984,12 +11984,12 @@
               {
                 "parentPluginId": "fleet",
                 "id": "def-server.PackageClient.getAgentPolicyConfigYAML.$3",
-                "type": "boolean",
+                "type": "CompoundType",
                 "tags": [],
                 "label": "prerelease",
                 "description": [],
                 "signature": [
-                  "false | undefined"
+                  "boolean | undefined"
                 ],
                 "path": "x-pack/platform/plugins/shared/fleet/server/services/epm/package_service.ts",
                 "deprecated": false,
