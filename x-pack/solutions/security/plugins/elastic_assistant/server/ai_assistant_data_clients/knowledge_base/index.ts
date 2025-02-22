@@ -79,9 +79,9 @@ export interface GetAIAssistantKnowledgeBaseDataClientParams {
 export interface KnowledgeBaseDataClientParams extends AIAssistantDataClientParams {
   ml: MlPluginSetup;
   getElserId: GetElser;
-  getIsKBSetupInProgress: () => boolean;
+  getIsKBSetupInProgress: (spaceId: string) => boolean;
   ingestPipelineResourceName: string;
-  setIsKBSetupInProgress: (isInProgress: boolean) => void;
+  setIsKBSetupInProgress: (spaceId: string, isInProgress: boolean) => void;
   manageGlobalKnowledgeBaseAIAssistant: boolean;
   assistantDefaultInferenceEndpoint: boolean;
 }
@@ -91,7 +91,7 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
   }
 
   public get isSetupInProgress() {
-    return this.options.getIsKBSetupInProgress();
+    return this.options.getIsKBSetupInProgress(this.spaceId);
   }
   /**
    * Returns whether setup of the Knowledge Base can be performed (essentially an ML features check)
@@ -295,18 +295,20 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
     soClient,
     ignoreSecurityLabs = false,
     request,
+    spaceId,
   }: {
     soClient: SavedObjectsClientContract;
     ignoreSecurityLabs?: boolean;
     request: KibanaRequest;
+    spaceId: string;
   }): Promise<void> => {
-    if (this.options.getIsKBSetupInProgress()) {
+    if (this.options.getIsKBSetupInProgress(spaceId)) {
       this.options.logger.debug('Knowledge Base setup already in progress');
       return;
     }
 
     this.options.logger.debug('Starting Knowledge Base setup...');
-    this.options.setIsKBSetupInProgress(true);
+    this.options.setIsKBSetupInProgress(spaceId, true);
     const elserId = await this.options.getElserId();
 
     // Delete legacy ESQL knowledge base docs if they exist, and silence the error if they do not
@@ -395,11 +397,11 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
         }
       }
     } catch (e) {
-      this.options.setIsKBSetupInProgress(false);
+      this.options.setIsKBSetupInProgress(spaceId, false);
       this.options.logger.error(`Error setting up Knowledge Base: ${e.message}`);
       throw new Error(`Error setting up Knowledge Base: ${e.message}`);
     } finally {
-      this.options.setIsKBSetupInProgress(false);
+      this.options.setIsKBSetupInProgress(spaceId, false);
     }
   };
 

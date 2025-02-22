@@ -104,7 +104,7 @@ export class AIAssistantService {
   private defendInsightsDataStream: DataStreamSpacesAdapter;
   private resourceInitializationHelper: ResourceInstallationHelper;
   private initPromise: Promise<InitializationPromise>;
-  private isKBSetupInProgress: boolean = false;
+  private isKBSetupInProgress: Map<string, boolean> = new Map();
   private hasInitializedV2KnowledgeBase: boolean = false;
   private productDocManager?: ProductDocBaseStartContract['management'];
   // Temporary 'feature flag' to determine if we should initialize the new message metadata mappings, toggled when citations should be enabled.
@@ -167,12 +167,12 @@ export class AIAssistantService {
     return this.initialized;
   }
 
-  public getIsKBSetupInProgress() {
-    return this.isKBSetupInProgress;
+  public getIsKBSetupInProgress(spaceId: string) {
+    return this.isKBSetupInProgress.get(spaceId) ?? false;
   }
 
-  public setIsKBSetupInProgress(isInProgress: boolean) {
-    this.isKBSetupInProgress = isInProgress;
+  public setIsKBSetupInProgress(spaceId: string, isInProgress: boolean) {
+    this.isKBSetupInProgress.set(spaceId, isInProgress);
   }
 
   private createDataStream: CreateDataStream = ({
