@@ -41,11 +41,12 @@ export interface MainRoute2Props {
   customizationContext: DiscoverCustomizationContext;
 }
 
-interface InitializationState {
+interface MainInitializationState {
   hasESData: boolean;
   hasUserDataView: boolean;
-  defaultDataViewExists: boolean;
 }
+
+type NarrowAsyncState<T> = Exclude<AsyncState<T>, { error?: undefined; value?: undefined }>;
 
 export const DiscoverMainRoute2 = ({
   customizationCallbacks = [],
@@ -55,7 +56,6 @@ export const DiscoverMainRoute2 = ({
   const services = useDiscoverServices();
   const rootProfileState = useRootProfile();
   const history = useHistory();
-  const { id: discoverSessionId } = useParams<{ id: string }>();
   const [stateStorage] = useState(
     () =>
       stateStorageContainer ??
@@ -70,7 +70,7 @@ export const DiscoverMainRoute2 = ({
   const [internalState] = useState(() =>
     createInternalStateStore({ services, runtimeStateManager })
   );
-  const initializationState = useAsync(async (): Promise<InitializationState> => {
+  const mainInitializationState = useAsync(async (): Promise<MainInitializationState> => {
     const { dataViews } = services;
     const [hasESData, hasUserDataView, defaultDataViewExists, savedDataViews] = await Promise.all([
       dataViews.hasData.hasESData().catch(() => false),
@@ -84,22 +84,21 @@ export const DiscoverMainRoute2 = ({
     return {
       hasESData,
       hasUserDataView: hasUserDataView && defaultDataViewExists,
-      defaultDataViewExists,
     };
-  }) as Exclude<AsyncState<InitializationState>, { error?: undefined; value?: undefined }>;
+  }) as NarrowAsyncState<MainInitializationState>;
 
-  if (rootProfileState.rootProfileLoading || initializationState.loading) {
+  if (rootProfileState.rootProfileLoading || mainInitializationState.loading) {
     return <BrandedLoadingIndicator />;
   }
 
-  if (initializationState.error) {
-    return <DiscoverError error={initializationState.error} />;
+  if (mainInitializationState.error) {
+    return <DiscoverError error={mainInitializationState.error} />;
   }
 
-  if (!initializationState.value.hasESData) {
+  if (!mainInitializationState.value.hasESData) {
     return (
       <NoDataPage
-        {...initializationState.value}
+        {...mainInitializationState.value}
         onDataViewCreated={() => {}}
         onESQLNavigationComplete={() => {}}
       />
@@ -111,7 +110,7 @@ export const DiscoverMainRoute2 = ({
       <rootProfileState.AppWrapper>
         <DiscoverSessionView
           rootProfileState={rootProfileState}
-          initializationState={initializationState.value}
+          mainInitializationState={mainInitializationState.value}
         />
       </rootProfileState.AppWrapper>
     </InternalStateProvider>
@@ -120,21 +119,28 @@ export const DiscoverMainRoute2 = ({
 
 interface DiscoverSessionViewProps {
   rootProfileState: Extract<RootProfileState, { rootProfileLoading: false }>;
-  initializationState: InitializationState;
+  mainInitializationState: MainInitializationState;
 }
 
-const DiscoverSessionView = ({ rootProfileState }: DiscoverSessionViewProps) => {
+const DiscoverSessionView = ({
+  rootProfileState,
+  mainInitializationState,
+}: DiscoverSessionViewProps) => {
+  const { id: discoverSessionId } = useParams<{ id: string }>();
   const { initializeProfileDataViews } = useDefaultAdHocDataViews2({ rootProfileState });
-  const [state, setState] = useState({
-    isInitializing: true,
-    hasESData: false,
-    hasUserDataView: false,
-    showNoDataPage: false,
-  });
+  const isEsqlMode = false;
 
-  const initialize = async () => {
-    setState((prevState) => ({ ...prevState, isInitializing: true }));
+  if (!isEsqlMode && !mainInitializationState.hasUserDataView) {
+    return (
+      <NoDataPage
+        {...mainInitializationState}
+        onDataViewCreated={() => {}}
+        onESQLNavigationComplete={() => {}}
+      />
+    );
+  }
 
+  const initializeSession = async () => {
     // Initialize profile data views
     await initializeProfileDataViews();
 
@@ -163,7 +169,7 @@ const NoDataPage = ({
   hasUserDataView,
   onDataViewCreated,
   onESQLNavigationComplete,
-}: InitializationState & AnalyticsNoDataPageProps) => {
+}: MainInitializationState & AnalyticsNoDataPageProps) => {
   const services = useDiscoverServices();
   const noDataDependencies = useMemo<AnalyticsNoDataPageKibanaDependencies>(
     () => ({
