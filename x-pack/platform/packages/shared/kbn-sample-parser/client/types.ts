@@ -12,6 +12,5 @@ export interface StreamLogDocument {
 }
 
 export interface StreamLogGenerator {
-  range: number;
   next: (timestamp: number) => StreamLogDocument[];
 }

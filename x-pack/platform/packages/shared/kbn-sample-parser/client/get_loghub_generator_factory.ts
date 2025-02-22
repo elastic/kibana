@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import { once, orderBy } from 'lodash';
+import { once } from 'lodash';
 import { ToolingLog } from '@kbn/tooling-log';
 import { getParser } from '../src/get_parser';
 import { LoghubSystem } from '../src/read_loghub_system_files';
 import { validateParser } from '../src/validate_parser';
-import { StreamLogDocument, StreamLogGenerator } from './types';
+import { StreamLogGenerator } from './types';
+import { createLoghubGenerator } from './create_loghub_generator';
 
 export function getLoghubGeneratorFactory({
   system,
@@ -32,72 +33,14 @@ export function getLoghubGeneratorFactory({
     };
   });
 
-  const MAX_PER_MINUTE = 100;
-
   return async (): Promise<StreamLogGenerator> => {
     const parser = await get();
-    let index = 0;
-    let start = 0;
-    const parsedLogLines = system.logLines.map((line) => {
-      const timestamp = parser.getTimestamp(line);
-      return {
-        timestamp,
-        message: line,
-      };
+    const generator = createLoghubGenerator({
+      system,
+      parser,
+      log,
     });
 
-    const sortedLogLines = orderBy(parsedLogLines, (line) => line.timestamp, 'asc');
-
-    const min = sortedLogLines[0].timestamp;
-    const max = sortedLogLines[parsedLogLines.length - 1].timestamp;
-
-    const count = sortedLogLines.length;
-
-    const range = max - min;
-
-    const rpm = count / (range / 1000 / 60);
-
-    const speed = rpm > MAX_PER_MINUTE ? MAX_PER_MINUTE / rpm : 1;
-
-    log.debug(`Indexing data for ${system.name} at ${speed.toPrecision(4)}`);
-
-    return {
-      range,
-      next: (timestamp) => {
-        if (index === 0) {
-          start = timestamp;
-        }
-
-        const docs: StreamLogDocument[] = [];
-
-        while (true) {
-          const line = sortedLogLines[index % count];
-
-          const rotations = Math.floor(index / count);
-
-          const rel = (line.timestamp - min) / range;
-
-          const delta = speed * range * (rotations + rel);
-
-          const simulatedTimestamp = Math.floor(start + delta);
-
-          if (simulatedTimestamp > timestamp) {
-            break;
-          }
-
-          index++;
-
-          const next = {
-            '@timestamp': simulatedTimestamp,
-            message: parser.replaceTimestamp(line.message, simulatedTimestamp),
-            filepath: `${system.name}_2k.log`,
-          };
-
-          docs.push(next);
-        }
-
-        return docs;
-      },
-    };
+    return generator;
   };
 }

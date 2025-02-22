@@ -33,7 +33,7 @@ async function run({ log }: { log: ToolingLog }) {
           .then(() => {
             return {
               name: system.name,
-              error: undefined,
+              error: null,
             };
           })
           .catch((error) => {
@@ -46,8 +46,7 @@ async function run({ log }: { log: ToolingLog }) {
     })
   );
 
-  const [valid, invalid] = partition(results, (result) => !!result.error);
-
+  const [valid, invalid] = partition(results, (result) => !result.error);
   if (invalid.length === 0) {
     log.info(`Ensured ${valid.length} parsers`);
     return;

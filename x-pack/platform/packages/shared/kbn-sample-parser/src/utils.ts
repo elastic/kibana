@@ -9,12 +9,6 @@ import Path from 'path';
 import { LOGHUB_PARSER_DIR } from './constants';
 import { type LoghubSystem } from './read_loghub_system_files';
 
-export function maybeGetFile(filename: string): Promise<string | undefined> {
-  return Fs.readFile(filename, 'utf-8').catch(() => {
-    return undefined;
-  });
-}
-
 export async function getFileOrThrow(filename: string): Promise<string> {
   return await Fs.readFile(filename, 'utf-8');
 }

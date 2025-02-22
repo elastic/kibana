@@ -12,14 +12,5 @@ import { getParserFilename } from './utils';
 export async function getParser(system: LoghubSystem): Promise<LoghubParser> {
   const fileName = getParserFilename(system);
 
-  const [{ getTimestamp, replaceTimestamp }] = await Promise.all([
-    import(fileName) as Promise<LoghubParser>,
-  ]);
-
-  const parser: LoghubParser = {
-    getTimestamp,
-    replaceTimestamp,
-  };
-
-  return parser;
+  return (await import(fileName)) as LoghubParser;
 }
