@@ -1,0 +1,4 @@
+FROM docker.elastic.co/kibana/kibana:7.17.27-amd64
+
+COPY plugins/plugin_demo/build/pluginDemo-7.17.27.zip /usr/share/kibana/
+RUN bin/kibana-plugin install file:///usr/share/kibana/pluginDemo-7.17.27.zip
