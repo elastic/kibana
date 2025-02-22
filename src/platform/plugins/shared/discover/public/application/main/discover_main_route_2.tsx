@@ -153,7 +153,7 @@ const DiscoverSessionView = ({
     return () => {};
   };
 
-  return <></>;
+  return <p>HELLO I WORK!</p>;
 };
 
 const importNoData = () => import('@kbn/shared-ux-page-analytics-no-data');
