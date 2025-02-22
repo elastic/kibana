@@ -13,7 +13,11 @@ import useUnmount from 'react-use/lib/useUnmount';
 import type { RootProfileState } from './use_root_profile';
 import { useDiscoverServices } from '../../hooks/use_discover_services';
 import type { DiscoverStateContainer } from '../../application/main/state_management/discover_state';
-import { internalStateActions } from '../../application/main/state_management/redux';
+import {
+  internalStateActions,
+  useInternalStateDispatch,
+  useInternalStateSelector,
+} from '../../application/main/state_management/redux';
 
 /**
  * Hook to retrieve and initialize the default profile ad hoc data views
@@ -59,6 +63,47 @@ export const useDefaultAdHocDataViews = ({
     }
 
     internalState.dispatch(internalStateActions.setDefaultProfileAdHocDataViews([]));
+  });
+
+  return { initializeProfileDataViews };
+};
+
+export const useDefaultAdHocDataViews2 = ({
+  rootProfileState,
+}: {
+  rootProfileState: Extract<RootProfileState, { rootProfileLoading: false }>;
+}) => {
+  const { dataViews } = useDiscoverServices();
+  const dispatch = useInternalStateDispatch();
+  const defaultProfileAdHocDataViewIds = useInternalStateSelector(
+    (state) => state.defaultProfileAdHocDataViewIds
+  );
+
+  const initializeDataViews = useLatest(async () => {
+    // Clear the cache of old data views before creating
+    // the new ones to avoid cache hits on duplicate IDs
+    for (const prevId of defaultProfileAdHocDataViewIds) {
+      dataViews.clearInstanceCache(prevId);
+    }
+
+    const profileDataViewSpecs = rootProfileState.getDefaultAdHocDataViews();
+    const profileDataViews = await Promise.all(
+      profileDataViewSpecs.map((spec) => dataViews.create(spec, true))
+    );
+
+    dispatch(internalStateActions.setDefaultProfileAdHocDataViews(profileDataViews));
+  });
+
+  // This approach allows us to return a callback with a stable reference
+  const [initializeProfileDataViews] = useState(() => () => initializeDataViews.current());
+
+  // Make sure to clean up on unmount
+  useUnmount(() => {
+    for (const prevId of defaultProfileAdHocDataViewIds) {
+      dataViews.clearInstanceCache(prevId);
+    }
+
+    dispatch(internalStateActions.setDefaultProfileAdHocDataViews([]));
   });
 
   return { initializeProfileDataViews };
