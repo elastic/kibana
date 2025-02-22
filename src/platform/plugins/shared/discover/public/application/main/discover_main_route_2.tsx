@@ -24,6 +24,7 @@ import { withSuspense } from '@kbn/shared-ux-utility';
 import useAsyncFn, { AsyncState } from 'react-use/lib/useAsyncFn';
 import useMount from 'react-use/lib/useMount';
 import { DataView } from '@kbn/data-views-plugin/common';
+import { useExecutionContext } from '@kbn/kibana-react-plugin/public';
 import { useDiscoverServices } from '../../hooks/use_discover_services';
 import { CustomizationCallback, DiscoverCustomizationContext } from '../../customizations';
 import {
@@ -36,6 +37,8 @@ import { LoadingIndicator } from '../../components/common/loading_indicator';
 import { RootProfileState, useRootProfile } from '../../context_awareness';
 import { useDefaultAdHocDataViews2 } from '../../context_awareness/hooks/use_default_ad_hoc_data_views';
 import { DiscoverError } from '../../components/common/error_alert';
+import { MainHistoryLocationState } from '../../../common';
+import { useAlertResultsToast } from './hooks/use_alert_results_toast';
 
 export interface MainRoute2Props {
   customizationCallbacks?: CustomizationCallback[];
@@ -154,11 +157,41 @@ const DiscoverSessionView = ({
   mainInitializationState,
   initializeMain,
 }: DiscoverSessionViewProps) => {
+  const { core, toastNotifications, getScopedHistory } = useDiscoverServices();
   const { id: discoverSessionId } = useParams<{ id: string }>();
+  const [historyLocationState] = useState(
+    () => getScopedHistory<MainHistoryLocationState>()?.location.state
+  );
   const { initializeProfileDataViews } = useDefaultAdHocDataViews2({ rootProfileState });
-  const isEsqlMode = false;
+  const initializeSession = useAsyncFn(
+    async () => {
+      // Initialize profile data views
+      await initializeProfileDataViews();
 
-  if (!isEsqlMode && !mainInitializationState.hasUserDataView) {
+      // No data check
+
+      // Load saved search if exists
+
+      // Set breadrcumbs
+
+      return () => {};
+    },
+    [],
+    { loading: true }
+  );
+
+  useAlertResultsToast({
+    isAlertResults: historyLocationState?.isAlertResults,
+    toastNotifications,
+  });
+
+  useExecutionContext(core.executionContext, {
+    type: 'application',
+    page: 'app',
+    id: discoverSessionId || 'new',
+  });
+
+  if (!mainInitializationState.hasUserDataView) {
     return (
       <NoDataPage
         {...mainInitializationState}
@@ -178,19 +211,6 @@ const DiscoverSessionView = ({
       />
     );
   }
-
-  const initializeSession = async () => {
-    // Initialize profile data views
-    await initializeProfileDataViews();
-
-    // No data check
-
-    // Load saved search if exists
-
-    // Set breadrcumbs
-
-    return () => {};
-  };
 
   return <p>HELLO I WORK!</p>;
 };
