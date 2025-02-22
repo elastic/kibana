@@ -197,7 +197,7 @@ const AwsAccountTypeSelect = ({
 }: {
   input: Extract<NewPackagePolicyPostureInput, { type: 'cloudbeat/cis_aws' }>;
   newPolicy: NewPackagePolicy;
-  updatePolicy: (updatedPolicy: NewPackagePolicy) => void;
+  updatePolicy: (updatedPolicy: NewPackagePolicy, fetchedPackagePolicies?: boolean) => void;
   packageInfo: PackageInfo;
   disabled: boolean;
 }) => {
@@ -303,7 +303,7 @@ const GcpAccountTypeSelect = ({
 }: {
   input: Extract<NewPackagePolicyPostureInput, { type: 'cloudbeat/cis_gcp' }>;
   newPolicy: NewPackagePolicy;
-  updatePolicy: (updatedPolicy: NewPackagePolicy) => void;
+  updatePolicy: (updatedPolicy: NewPackagePolicy, fetchedPackagePolicies?: boolean) => void;
   packageInfo: PackageInfo;
   disabled: boolean;
 }) => {
@@ -443,7 +443,7 @@ const AzureAccountTypeSelect = ({
 }: {
   input: Extract<NewPackagePolicyPostureInput, { type: 'cloudbeat/cis_azure' }>;
   newPolicy: NewPackagePolicy;
-  updatePolicy: (updatedPolicy: NewPackagePolicy) => void;
+  updatePolicy: (updatedPolicy: NewPackagePolicy, fetchedPackagePolicies?: boolean) => void;
   disabled: boolean;
   packageInfo: PackageInfo;
   setupTechnology: SetupTechnology;
@@ -548,7 +548,7 @@ const useEnsureDefaultNamespace = ({
 }: {
   newPolicy: NewPackagePolicy;
   input: NewPackagePolicyPostureInput;
-  updatePolicy: (policy: NewPackagePolicy) => void;
+  updatePolicy: (policy: NewPackagePolicy, fetchedPackagePolicies?: boolean) => void;
 }) => {
   useEffect(() => {
     if (newPolicy.namespace === POSTURE_NAMESPACE) return;
@@ -572,7 +572,7 @@ const usePolicyTemplateInitialName = ({
   integration: CloudSecurityPolicyTemplate | undefined;
   newPolicy: NewPackagePolicy;
   packagePolicyList: PackagePolicy[] | undefined;
-  updatePolicy: (policy: NewPackagePolicy) => void;
+  updatePolicy: (policy: NewPackagePolicy, fetchedPackagePolicies?: boolean) => void;
   setCanFetchIntegration: (canFetch: boolean) => void;
 }) => {
   useEffect(() => {
@@ -583,17 +583,35 @@ const usePolicyTemplateInitialName = ({
     const packagePolicyListByIntegration = packagePolicyList?.filter(
       (policy) => policy?.vars?.posture?.value === integration
     );
+    // console.log("keta123");
+    // console.log("integration123 ", integration);
+    // console.log("packagePolicyListByIntegration123 ", packagePolicyListByIntegration);
 
     const currentIntegrationName = getMaxPackageName(integration, packagePolicyListByIntegration);
 
-    if (newPolicy.name === currentIntegrationName) {
-      return;
-    }
-
-    updatePolicy({
-      ...newPolicy,
-      name: currentIntegrationName,
-    });
+    // if (newPolicy.name === currentIntegrationName) {
+    //   // console.log("newPolicy.name ", newPolicy.name);
+    //   // console.log("currentIntegrationName ", currentIntegrationName);
+    //   updatePolicy(
+    //     {
+    //       ...newPolicy,
+    //       name: currentIntegrationName,
+    //     },
+    //     Array.isArray(packagePolicyListByIntegration)
+    //   );
+    //   return;
+    // }
+    // console.log(
+    // 'Array.isArray(packagePolicyListByIntegration ',
+    // Array.isArray(packagePolicyListByIntegration)
+    // );
+    updatePolicy(
+      {
+        ...newPolicy,
+        name: currentIntegrationName,
+      },
+      Array.isArray(packagePolicyListByIntegration)
+    );
     setCanFetchIntegration(false);
     // since this useEffect should only run on initial mount updatePolicy and newPolicy shouldn't re-trigger it
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -629,7 +647,7 @@ const useCloudFormationTemplate = ({
 }: {
   packageInfo: PackageInfo;
   newPolicy: NewPackagePolicy;
-  updatePolicy: (policy: NewPackagePolicy) => void;
+  updatePolicy: (policy: NewPackagePolicy, fetchedPackagePolicies?: boolean) => void;
 }) => {
   useEffect(() => {
     const templateUrl = getVulnMgmtCloudFormationDefaultValue(packageInfo);
@@ -744,8 +762,12 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
     };
 
     const updatePolicy = useCallback(
-      (updatedPolicy: NewPackagePolicy) => {
-        onChange({ isValid, updatedPolicy });
+      (updatedPolicy: NewPackagePolicy, fetchedPackagePolicies?: boolean) => {
+        // console.log("updatedPolicyy ", updatedPolicy);
+        // console.log("isValid ", isValid);
+        // console.log("fetchedPackagePolicies1 ", fetchedPackagePolicies);
+
+        onChange({ isValid, updatedPolicy, fetchedPackagePolicies });
       },
       [onChange, isValid]
     );

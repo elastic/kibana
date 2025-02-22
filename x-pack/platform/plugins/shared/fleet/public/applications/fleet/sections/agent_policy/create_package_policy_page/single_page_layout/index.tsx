@@ -122,6 +122,10 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
   );
 
   const [withSysMonitoring, setWithSysMonitoring] = useState<boolean>(true);
+  const [isFetchedPackagePolicies, setIsFetchedPackagePolicies] = useState<boolean | undefined>(
+    undefined
+  );
+
   const validation = agentPolicyFormValidation(newAgentPolicy, {
     allowedNamespacePrefixes: spaceSettings.allowedNamespacePrefixes,
   });
@@ -266,8 +270,13 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
   const handleExtensionViewOnChange = useCallback<
     PackagePolicyEditExtensionComponentProps['onChange']
   >(
-    ({ isValid, updatedPolicy }) => {
+    ({ isValid, updatedPolicy, fetchedPackagePolicies }) => {
+      // console.log("isValid1 ", isValid);
+      // console.log("updatedPolicy2 ", updatedPolicy);
+      // console.log("fetchedPackagePolicies2 ", fetchedPackagePolicies);
+
       updatePackagePolicy(updatedPolicy);
+      setIsFetchedPackagePolicies(fetchedPackagePolicies);
       setFormState((prevState) => {
         if (prevState === 'VALID' && !isValid) {
           return 'INVALID';
@@ -652,7 +661,10 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
                         onClick={() => onSubmit()}
                         isLoading={formState === 'LOADING'}
                         disabled={
-                          formState !== 'VALID' || hasAgentPolicyError || !validationResults
+                          formState !== 'VALID' ||
+                          hasAgentPolicyError ||
+                          !validationResults ||
+                          isFetchedPackagePolicies === false
                         }
                         iconType="save"
                         color="primary"
