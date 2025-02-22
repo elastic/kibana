@@ -10,10 +10,12 @@
 import { useHistory, useParams } from 'react-router-dom';
 import {
   IKbnUrlStateStorage,
+  SavedObjectNotFound,
   createKbnUrlStateStorage,
+  redirectWhenMissing,
   withNotifyOnErrors,
 } from '@kbn/kibana-utils-plugin/public';
-import { lazy, useMemo, useState } from 'react';
+import { lazy, useCallback, useMemo, useState } from 'react';
 import React from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import {
@@ -25,6 +27,9 @@ import useAsyncFn, { AsyncState } from 'react-use/lib/useAsyncFn';
 import useMount from 'react-use/lib/useMount';
 import { DataView } from '@kbn/data-views-plugin/common';
 import { useExecutionContext } from '@kbn/kibana-react-plugin/public';
+import { getSavedSearchFullPathUrl } from '@kbn/saved-search-plugin/public';
+import { i18n } from '@kbn/i18n';
+import { isEsqlSource } from '../../../common/data_sources';
 import { useDiscoverServices } from '../../hooks/use_discover_services';
 import { CustomizationCallback, DiscoverCustomizationContext } from '../../customizations';
 import {
@@ -32,6 +37,7 @@ import {
   createInternalStateStore,
   createRuntimeStateManager,
   internalStateActions,
+  useInternalStateDispatch,
 } from './state_management/redux';
 import { LoadingIndicator } from '../../components/common/loading_indicator';
 import { RootProfileState, useRootProfile } from '../../context_awareness';
@@ -39,6 +45,10 @@ import { useDefaultAdHocDataViews2 } from '../../context_awareness/hooks/use_def
 import { DiscoverError } from '../../components/common/error_alert';
 import { MainHistoryLocationState } from '../../../common';
 import { useAlertResultsToast } from './hooks/use_alert_results_toast';
+import { APP_STATE_URL_KEY, AppStateUrl } from './state_management/discover_app_state_container';
+import { cleanupUrlState } from './state_management/utils/cleanup_url_state';
+import { setBreadcrumbs } from '../../utils/breadcrumbs';
+import { useUrl } from './hooks/use_url';
 
 export interface MainRoute2Props {
   customizationCallbacks?: CustomizationCallback[];
@@ -57,7 +67,10 @@ type InitializeMain = (
   }
 ) => Promise<MainInitializationState>;
 
-type NarrowAsyncState<T> = Exclude<AsyncState<T>, { error?: undefined; value?: undefined }>;
+type NarrowAsyncState<TState extends AsyncState<unknown>> = Exclude<
+  TState,
+  { error?: undefined; value?: undefined }
+>;
 
 export const DiscoverMainRoute2 = ({
   customizationCallbacks = [],
@@ -67,7 +80,7 @@ export const DiscoverMainRoute2 = ({
   const services = useDiscoverServices();
   const rootProfileState = useRootProfile();
   const history = useHistory();
-  const [stateStorage] = useState(
+  const [urlStateStorage] = useState(
     () =>
       stateStorageContainer ??
       createKbnUrlStateStorage({
@@ -108,7 +121,9 @@ export const DiscoverMainRoute2 = ({
     [internalState, services],
     { loading: true }
   );
-  const mainInitializationState = initializationState as NarrowAsyncState<MainInitializationState>;
+  const mainInitializationState = initializationState as NarrowAsyncState<
+    typeof initializationState
+  >;
 
   useMount(() => {
     initializeMain();
@@ -139,6 +154,8 @@ export const DiscoverMainRoute2 = ({
         <DiscoverSessionView
           rootProfileState={rootProfileState}
           mainInitializationState={mainInitializationState.value}
+          customizationContext={customizationContext}
+          urlStateStorage={urlStateStorage}
           initializeMain={initializeMain}
         />
       </rootProfileState.AppWrapper>
@@ -149,36 +166,94 @@ export const DiscoverMainRoute2 = ({
 interface DiscoverSessionViewProps {
   rootProfileState: Extract<RootProfileState, { rootProfileLoading: false }>;
   mainInitializationState: MainInitializationState;
+  customizationContext: DiscoverCustomizationContext;
+  urlStateStorage: IKbnUrlStateStorage;
   initializeMain: InitializeMain;
 }
 
 const DiscoverSessionView = ({
   rootProfileState,
   mainInitializationState,
+  customizationContext,
+  urlStateStorage,
   initializeMain,
 }: DiscoverSessionViewProps) => {
-  const { core, toastNotifications, getScopedHistory } = useDiscoverServices();
+  const dispatch = useInternalStateDispatch();
+  const services = useDiscoverServices();
+  const {
+    core,
+    chrome,
+    ebtManager,
+    savedSearch,
+    toastNotifications,
+    uiSettings,
+    history,
+    getScopedHistory,
+  } = services;
   const { id: discoverSessionId } = useParams<{ id: string }>();
   const [historyLocationState] = useState(
     () => getScopedHistory<MainHistoryLocationState>()?.location.state
   );
   const { initializeProfileDataViews } = useDefaultAdHocDataViews2({ rootProfileState });
-  const initializeSession = useAsyncFn(
+  const [initializationState, initializeSession] = useAsyncFn(
     async () => {
-      // Initialize profile data views
-      await initializeProfileDataViews();
+      const discoverSessionLoadtracker =
+        ebtManager.trackPerformanceEvent('discoverLoadSavedSearch');
+      const urlState = cleanupUrlState(
+        urlStateStorage.get<AppStateUrl>(APP_STATE_URL_KEY) ?? {},
+        uiSettings
+      );
+      const isEsqlQuery = isEsqlSource(urlState.dataSource);
+      const discoverSession = discoverSessionId
+        ? await savedSearch.get(discoverSessionId)
+        : undefined;
+      const discoverSessionDataView = discoverSession?.searchSource.getField('index');
+      const discoverSessionHasAdHocDataView = Boolean(
+        discoverSessionDataView && !discoverSessionDataView.isPersisted()
+      );
+      const profileDataViews = await initializeProfileDataViews();
+      const profileDataViewsExist = profileDataViews.length > 0;
+      const locationStateHasDataViewSpec = Boolean(historyLocationState?.dataViewSpec);
+      const canAccessWithoutPersistedDataView =
+        isEsqlQuery ||
+        discoverSessionHasAdHocDataView ||
+        profileDataViewsExist ||
+        locationStateHasDataViewSpec;
 
-      // No data check
+      if (!mainInitializationState.hasUserDataView && !canAccessWithoutPersistedDataView) {
+        return { showNoDataPage: true };
+      }
 
-      // Load saved search if exists
+      if (customizationContext.displayMode === 'standalone' && discoverSession) {
+        if (discoverSession.id) {
+          chrome.recentlyAccessed.add(
+            getSavedSearchFullPathUrl(discoverSession.id),
+            discoverSession.title ??
+              i18n.translate('discover.defaultDiscoverSessionTitle', {
+                defaultMessage: 'Untitled Discover session',
+              }),
+            discoverSession.id
+          );
+        }
 
-      // Set breadrcumbs
+        setBreadcrumbs({ services, titleBreadcrumbText: discoverSession.title });
+      }
 
-      return () => {};
+      discoverSessionLoadtracker.reportEvent();
+      dispatch(internalStateActions.setDefaultProfileAdHocDataViews(profileDataViews));
+
+      return {};
     },
     [],
     { loading: true }
   );
+  const initializeSessionState = initializationState as NarrowAsyncState<
+    typeof initializationState
+  >;
+
+  useMount(() => {
+    initializeSession();
+  });
 
   useAlertResultsToast({
     isAlertResults: historyLocationState?.isAlertResults,
@@ -191,7 +266,35 @@ const DiscoverSessionView = ({
     id: discoverSessionId || 'new',
   });
 
-  if (!mainInitializationState.hasUserDataView) {
+  useUrl({
+    history,
+    savedSearchId: discoverSessionId,
+    onNewUrl: useCallback(() => {
+      initializeMain({
+        hasESData: true,
+        hasUserDataView: true,
+      });
+    }, [initializeMain]),
+  });
+
+  if (initializeSessionState.loading) {
+    return <BrandedLoadingIndicator />;
+  }
+
+  if (initializeSessionState.error) {
+    if (initializeSessionState.error instanceof SavedObjectNotFound) {
+      return (
+        <RedirectWhenSavedObjectNotFound
+          error={initializeSessionState.error}
+          discoverSessionId={discoverSessionId}
+        />
+      );
+    }
+
+    return <DiscoverError error={initializeSessionState.error} />;
+  }
+
+  if (initializeSessionState.value.showNoDataPage) {
     return (
       <NoDataPage
         {...mainInitializationState}
@@ -256,6 +359,47 @@ const NoDataPage = ({
       />
     </AnalyticsNoDataPageKibanaProvider>
   );
+};
+
+const RedirectWhenSavedObjectNotFound = ({
+  error,
+  discoverSessionId,
+}: {
+  error: SavedObjectNotFound;
+  discoverSessionId: string | undefined;
+}) => {
+  const {
+    application: { navigateToApp },
+    core,
+    history,
+    http: { basePath },
+    toastNotifications,
+    urlTracker,
+  } = useDiscoverServices();
+
+  useMount(() => {
+    const redirect = redirectWhenMissing({
+      history,
+      navigateToApp,
+      basePath,
+      mapping: {
+        search: '/',
+        'index-pattern': {
+          app: 'management',
+          path: `kibana/objects/savedSearches/${discoverSessionId}`,
+        },
+      },
+      toastNotifications,
+      onBeforeRedirect() {
+        urlTracker.setTrackedUrl('/');
+      },
+      ...core,
+    });
+
+    redirect(error);
+  });
+
+  return <BrandedLoadingIndicator />;
 };
 
 const BrandedLoadingIndicator = () => {
