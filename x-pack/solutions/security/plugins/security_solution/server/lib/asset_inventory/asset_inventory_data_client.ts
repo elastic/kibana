@@ -7,11 +7,11 @@
 
 import type { Logger, IScopedClusterClient } from '@kbn/core/server';
 
-import type { InitEntityStoreRequestBody } from '../../../common/api/entity_analytics/entity_store/enable.gen';
+import type { EntityAnalyticsPrivileges } from '../../../common/api/entity_analytics';
 import type { GetEntityStoreStatusResponse } from '../../../common/api/entity_analytics/entity_store/status.gen';
+import type { InitEntityStoreRequestBody } from '../../../common/api/entity_analytics/entity_store/enable.gen';
 import type { ExperimentalFeatures } from '../../../common';
 import type { SecuritySolutionApiRequestHandlerContext } from '../..';
-import type { getEntityStorePrivileges } from '../entity_analytics/entity_store/utils/get_entity_store_privileges';
 
 interface AssetInventoryClientOpts {
   logger: Logger;
@@ -105,7 +105,7 @@ export class AssetInventoryDataClient {
 
   public async status(
     secSolutionContext: SecuritySolutionApiRequestHandlerContext,
-    entityStorePrivileges: Awaited<ReturnType<typeof getEntityStorePrivileges>>
+    entityStorePrivileges: EntityAnalyticsPrivileges
   ) {
     // Check if the user has the required privileges to access the entity store.
     if (!entityStorePrivileges.has_all_required) {
