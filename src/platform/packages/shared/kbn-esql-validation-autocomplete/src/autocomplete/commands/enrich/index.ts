@@ -57,7 +57,7 @@ export async function suggest({
       return [];
     }
 
-    const fieldSuggestions = buildFieldsDefinitions(policyMetadata.enrichFields);
+    const fieldSuggestions = buildFieldsDefinitions(policyMetadata.enrichFields, false);
 
     const lastWord = findFinalWord(innerText);
     if (lastWord) {
@@ -66,8 +66,11 @@ export async function suggest({
         start: innerText.length - lastWord.length + 1,
         end: innerText.length + 1,
       };
-      fieldSuggestions.forEach((s) => (s.rangeToReplace = rangeToReplace));
+      fieldSuggestions.forEach((s) => {
+        s.rangeToReplace = rangeToReplace;
+      });
     }
+
     return fieldSuggestions;
   };
 

@@ -78,7 +78,11 @@ describe('autocomplete.suggest', () => {
       it('suggests fields for new WITH clauses', async () => {
         await assertSuggestions(`from a | enrich policy on field with /`, [
           'var0 = ',
-          ...getPolicyFields('policy'),
+          ...getPolicyFields('policy').map((name) => ({
+            text: name,
+            // Makes sure the suggestion menu isn't opened when a field is accepted
+            command: undefined,
+          })),
         ]);
         await assertSuggestions(`from a | enrich policy on field with fi/`, [
           'var0 = ',
@@ -94,12 +98,19 @@ describe('autocomplete.suggest', () => {
         ]);
       });
 
+      test('waits to suggest fields until space', async () => {
+        await assertSuggestions(`from a | enrich policy on b with var0 = otherField,/`, []);
+        await assertSuggestions(`from a | enrich policy on b with/`, []);
+      });
+
       test('after first word', async () => {
+        // not a recognized column name
         await assertSuggestions(`from a | enrich policy on b with var0 /`, ['= $0']);
+        // recognized column name
         await assertSuggestions(`from a | enrich policy on b with otherField /`, [',', '| ']);
       });
 
-      test('after open assignment', async () => {
+      test('suggests enrich fields after open assignment', async () => {
         await assertSuggestions(`from a | enrich policy on b with var0 = /`, [
           ...getPolicyFields('policy'),
         ]);

@@ -244,7 +244,10 @@ export const buildFieldsDefinitionsWithMetadata = (
   return [...suggestions];
 };
 
-export const buildFieldsDefinitions = (fields: string[]): SuggestionRawDefinition[] => {
+export const buildFieldsDefinitions = (
+  fields: string[],
+  openSuggestions = true
+): SuggestionRawDefinition[] => {
   return fields.map((label) => ({
     label,
     text: getSafeInsertText(label),
@@ -253,7 +256,7 @@ export const buildFieldsDefinitions = (fields: string[]): SuggestionRawDefinitio
       defaultMessage: `Field specified by the input table`,
     }),
     sortText: 'D',
-    command: TRIGGER_SUGGESTION_COMMAND,
+    command: openSuggestions ? TRIGGER_SUGGESTION_COMMAND : undefined,
   }));
 };
 export const buildVariablesDefinitions = (variables: string[]): SuggestionRawDefinition[] =>

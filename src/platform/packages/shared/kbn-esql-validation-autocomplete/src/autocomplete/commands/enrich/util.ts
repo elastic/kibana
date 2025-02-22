@@ -65,7 +65,7 @@ export const getPosition = (
     if (innerText.match(/[,|with]\s+\S+\s+$/i)) {
       return Position.WITH_AFTER_FIRST_WORD;
     }
-    if (innerText.match(/=\s+\S*$/i)) {
+    if (innerText.match(/=\s+[^,\s]*$/i)) {
       return Position.WITH_AFTER_ASSIGNMENT;
     }
   }
