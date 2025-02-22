@@ -16,12 +16,14 @@ import {
 import { lazy, useMemo, useState } from 'react';
 import React from 'react';
 import useObservable from 'react-use/lib/useObservable';
-import useAsync, { AsyncState } from 'react-use/lib/useAsync';
 import {
   AnalyticsNoDataPageKibanaDependencies,
   AnalyticsNoDataPageProps,
 } from '@kbn/shared-ux-page-analytics-no-data-types';
 import { withSuspense } from '@kbn/shared-ux-utility';
+import useAsyncFn, { AsyncState } from 'react-use/lib/useAsyncFn';
+import useMount from 'react-use/lib/useMount';
+import { DataView } from '@kbn/data-views-plugin/common';
 import { useDiscoverServices } from '../../hooks/use_discover_services';
 import { CustomizationCallback, DiscoverCustomizationContext } from '../../customizations';
 import {
@@ -45,6 +47,12 @@ interface MainInitializationState {
   hasESData: boolean;
   hasUserDataView: boolean;
 }
+
+type InitializeMain = (
+  overrides?: MainInitializationState & {
+    dataView?: DataView;
+  }
+) => Promise<MainInitializationState>;
 
 type NarrowAsyncState<T> = Exclude<AsyncState<T>, { error?: undefined; value?: undefined }>;
 
@@ -70,22 +78,38 @@ export const DiscoverMainRoute2 = ({
   const [internalState] = useState(() =>
     createInternalStateStore({ services, runtimeStateManager })
   );
-  const mainInitializationState = useAsync(async (): Promise<MainInitializationState> => {
-    const { dataViews } = services;
-    const [hasESData, hasUserDataView, defaultDataViewExists, savedDataViews] = await Promise.all([
-      dataViews.hasData.hasESData().catch(() => false),
-      dataViews.hasData.hasUserDataView().catch(() => false),
-      dataViews.defaultDataViewExists().catch(() => false),
-      services.dataViews.getIdsWithTitle(true).catch(() => []),
-    ]);
+  const [initializationState, initializeMain] = useAsyncFn<InitializeMain>(
+    async (overrides) => {
+      const { dataViews } = services;
+      const shouldRefreshDataViews = !overrides || Boolean(overrides.dataView);
+      const [hasESData, hasUserDataView, defaultDataViewExists, savedDataViews] = await Promise.all(
+        [
+          overrides?.hasESData ?? dataViews.hasData.hasESData().catch(() => false),
+          overrides?.hasUserDataView ?? dataViews.hasData.hasUserDataView().catch(() => false),
+          overrides?.hasUserDataView ?? dataViews.defaultDataViewExists().catch(() => false),
+          services.dataViews.getIdsWithTitle(shouldRefreshDataViews).catch(() => []),
+        ]
+      );
 
-    internalState.dispatch(internalStateActions.setSavedDataViews(savedDataViews));
+      internalState.dispatch(internalStateActions.setSavedDataViews(savedDataViews));
 
-    return {
-      hasESData,
-      hasUserDataView: hasUserDataView && defaultDataViewExists,
-    };
-  }) as NarrowAsyncState<MainInitializationState>;
+      if (overrides?.dataView) {
+        internalState.dispatch(internalStateActions.setDataView(overrides.dataView));
+      }
+
+      return {
+        hasESData,
+        hasUserDataView: hasUserDataView && defaultDataViewExists,
+      };
+    },
+    [internalState, services],
+    { loading: true }
+  );
+  const mainInitializationState = initializationState as NarrowAsyncState<MainInitializationState>;
+
+  useMount(() => {
+    initializeMain();
+  });
 
   if (rootProfileState.rootProfileLoading || mainInitializationState.loading) {
     return <BrandedLoadingIndicator />;
@@ -99,8 +123,9 @@ export const DiscoverMainRoute2 = ({
     return (
       <NoDataPage
         {...mainInitializationState.value}
-        onDataViewCreated={() => {}}
-        onESQLNavigationComplete={() => {}}
+        onDataViewCreated={() => {
+          // This is unused if there is no ES data
+        }}
       />
     );
   }
@@ -111,6 +136,7 @@ export const DiscoverMainRoute2 = ({
         <DiscoverSessionView
           rootProfileState={rootProfileState}
           mainInitializationState={mainInitializationState.value}
+          initializeMain={initializeMain}
         />
       </rootProfileState.AppWrapper>
     </InternalStateProvider>
@@ -120,11 +146,13 @@ export const DiscoverMainRoute2 = ({
 interface DiscoverSessionViewProps {
   rootProfileState: Extract<RootProfileState, { rootProfileLoading: false }>;
   mainInitializationState: MainInitializationState;
+  initializeMain: InitializeMain;
 }
 
 const DiscoverSessionView = ({
   rootProfileState,
   mainInitializationState,
+  initializeMain,
 }: DiscoverSessionViewProps) => {
   const { id: discoverSessionId } = useParams<{ id: string }>();
   const { initializeProfileDataViews } = useDefaultAdHocDataViews2({ rootProfileState });
@@ -134,8 +162,19 @@ const DiscoverSessionView = ({
     return (
       <NoDataPage
         {...mainInitializationState}
-        onDataViewCreated={() => {}}
-        onESQLNavigationComplete={() => {}}
+        onDataViewCreated={(dataView) => {
+          initializeMain({
+            hasESData: true,
+            hasUserDataView: true,
+            dataView: dataView as DataView,
+          });
+        }}
+        onESQLNavigationComplete={() => {
+          initializeMain({
+            hasESData: true,
+            hasUserDataView: true,
+          });
+        }}
       />
     );
   }
