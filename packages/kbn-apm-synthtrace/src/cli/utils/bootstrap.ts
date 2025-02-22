@@ -33,7 +33,6 @@ export async function bootstrap(runOptions: RunOptions) {
   const clients = await getClients({
     logger,
     packageVersion: runOptions['assume-package-version'],
-    kibanaClient,
     options: {
       client,
       logger,

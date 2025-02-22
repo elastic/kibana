@@ -23,7 +23,7 @@ import { KibanaClient } from './base_kibana_client';
 
 export interface SynthtraceEsClientOptions {
   client: Client;
-  kibana: KibanaClient;
+  kibana?: KibanaClient;
   logger: Logger;
   concurrency?: number;
   refreshAfterIndex?: boolean;
@@ -34,7 +34,7 @@ type MaybeArray<T> = T | T[];
 
 export class SynthtraceEsClient<TFields extends Fields> {
   protected readonly client: Client;
-  protected readonly kibana: KibanaClient;
+  protected readonly kibana?: KibanaClient;
   protected readonly logger: Logger;
 
   private readonly concurrency: number;

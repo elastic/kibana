@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { Required } from 'utility-types';
 import { ApmSynthtraceEsClient } from '../../lib/apm/client/apm_synthtrace_es_client';
 import { ApmSynthtraceKibanaClient } from '../../lib/apm/client/apm_synthtrace_kibana_client';
 import { EntitiesSynthtraceEsClient } from '../../lib/entities/entities_synthtrace_es_client';
@@ -15,7 +16,6 @@ import { InfraSynthtraceEsClient } from '../../lib/infra/infra_synthtrace_es_cli
 import { LogsSynthtraceEsClient } from '../../lib/logs/logs_synthtrace_es_client';
 import { OtelSynthtraceEsClient } from '../../lib/otel/otel_synthtrace_es_client';
 import { SynthtraceEsClientOptions } from '../../lib/shared/base_client';
-import { KibanaClient } from '../../lib/shared/base_kibana_client';
 import { StreamsSynthtraceClient } from '../../lib/streams/streams_synthtrace_client';
 import { SyntheticsSynthtraceEsClient } from '../../lib/synthetics/synthetics_synthtrace_es_client';
 import { Logger } from '../../lib/utils/create_logger';
@@ -26,8 +26,7 @@ export async function getClients({
   packageVersion,
 }: {
   logger: Logger;
-  kibanaClient: KibanaClient;
-  options: Omit<SynthtraceEsClientOptions, 'pipeline'>;
+  options: Required<Omit<SynthtraceEsClientOptions, 'pipeline'>, 'kibana'>;
   packageVersion?: string;
 }) {
   const apmKibanaClient = new ApmSynthtraceKibanaClient({
@@ -55,7 +54,10 @@ export async function getClients({
   const infraEsClient = new InfraSynthtraceEsClient(options);
   const entitiesEsClient = new EntitiesSynthtraceEsClient(options);
 
-  const entitiesKibanaClient = new EntitiesSynthtraceKibanaClient(options);
+  const entitiesKibanaClient = new EntitiesSynthtraceKibanaClient({
+    ...options,
+    kibanaClient: options.kibana,
+  });
 
   const syntheticsEsClient = new SyntheticsSynthtraceEsClient(options);
   const otelEsClient = new OtelSynthtraceEsClient(options);

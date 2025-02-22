@@ -10,13 +10,14 @@
 import pRetry from 'p-retry';
 import { KibanaClient, KibanaClientHttpError } from '../../shared/base_kibana_client';
 import { Logger } from '../../utils/create_logger';
+import { getKibanaClient } from '../../../cli/utils/get_kibana_client';
 
 export class ApmSynthtraceKibanaClient {
   private readonly kibanaClient: KibanaClient;
   private readonly logger: Logger;
 
-  constructor(options: { kibanaClient: KibanaClient; logger: Logger }) {
-    this.kibanaClient = options.kibanaClient;
+  constructor(options: { logger: Logger } & ({ target: string } | { kibanaClient: KibanaClient })) {
+    this.kibanaClient = 'kibanaClient' in options ? options.kibanaClient : getKibanaClient(options);
     this.logger = options.logger;
   }
 

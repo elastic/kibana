@@ -18,6 +18,15 @@ export enum LogLevel {
   error = 'error',
 }
 
+export function extendToolingLog(log: ToolingLog, logLevel: LogLevel = LogLevel.verbose): Logger {
+  const logger = log as Logger;
+  logger.perf = (name: string, callback: () => any) => {
+    return logPerf(log, LogLevel.verbose, name, callback);
+  };
+
+  return logger;
+}
+
 export function createLogger(logLevel: LogLevel, writer?: Writer): Logger {
   const log = new ToolingLog({
     level: logLevel,
@@ -28,9 +37,7 @@ export function createLogger(logLevel: LogLevel, writer?: Writer): Logger {
     log.setWriters([writer]);
   }
 
-  log.perf = (name: string, callback: () => any) => {
-    return logPerf(log, logLevel, name, callback);
-  };
+  extendToolingLog(log, logLevel);
 
   return log;
 }

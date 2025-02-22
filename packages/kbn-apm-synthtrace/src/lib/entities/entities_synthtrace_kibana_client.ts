@@ -9,8 +9,8 @@
 
 import fetch from 'node-fetch';
 import { Logger } from '../utils/create_logger';
-import { SynthtraceEsClientOptions } from '../shared/base_client';
 import { KibanaClient } from '../shared/base_kibana_client';
+import { getKibanaClient } from '../../cli/utils/get_kibana_client';
 
 interface EntityDefinitionResponse {
   definitions: Array<{ type: string; state: { installed: boolean; running: boolean } }>;
@@ -20,8 +20,8 @@ export class EntitiesSynthtraceKibanaClient {
   private readonly logger: Logger;
   private readonly kibana: KibanaClient;
 
-  constructor(options: Pick<SynthtraceEsClientOptions, 'logger' | 'kibana'>) {
-    this.kibana = options.kibana;
+  constructor(options: { logger: Logger } & ({ target: string } | { kibanaClient: KibanaClient })) {
+    this.kibana = 'kibanaClient' in options ? options.kibanaClient : getKibanaClient(options);
     this.logger = options.logger;
   }
 

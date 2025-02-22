@@ -7,7 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { createLogger, LogLevel } from './src/lib/utils/create_logger';
+export {
+  createLogger,
+  LogLevel,
+  type Logger,
+  extendToolingLog,
+} from './src/lib/utils/create_logger';
 
 export { ApmSynthtraceEsClient } from './src/lib/apm/client/apm_synthtrace_es_client';
 export { ApmSynthtraceKibanaClient } from './src/lib/apm/client/apm_synthtrace_kibana_client';

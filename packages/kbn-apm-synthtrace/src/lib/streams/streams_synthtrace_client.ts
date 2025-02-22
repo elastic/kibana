@@ -9,6 +9,7 @@
 
 import { Readable, Transform, pipeline } from 'stream';
 import { ESDocumentWithOperation } from '@kbn/apm-synthtrace-client';
+import { Required } from 'utility-types';
 import { SynthtraceEsClient, SynthtraceEsClientOptions } from '../shared/base_client';
 import { getSerializeTransform } from '../shared/get_serialize_transform';
 
@@ -16,7 +17,7 @@ import { getSerializeTransform } from '../shared/get_serialize_transform';
 interface StreamsDocument {}
 
 export class StreamsSynthtraceClient extends SynthtraceEsClient<StreamsDocument> {
-  constructor(options: Omit<SynthtraceEsClientOptions, 'pipeline'>) {
+  constructor(options: Required<Omit<SynthtraceEsClientOptions, 'pipeline'>, 'kibana'>) {
     super({
       ...options,
       pipeline: streamsPipeline(),
@@ -25,14 +26,14 @@ export class StreamsSynthtraceClient extends SynthtraceEsClient<StreamsDocument>
   }
 
   async enable() {
-    await this.kibana.fetch('/api/streams/_enable', {
+    await this.kibana!.fetch('/api/streams/_enable', {
       method: 'POST',
       headers: { 'x-elastic-internal-origin': 'kibana' },
     });
   }
 
   async disable() {
-    await this.kibana.fetch('/api/streams/_disable', {
+    await this.kibana!.fetch('/api/streams/_disable', {
       method: 'POST',
       headers: { 'x-elastic-internal-origin': 'kibana' },
     });
