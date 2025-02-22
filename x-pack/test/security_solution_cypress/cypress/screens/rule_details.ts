@@ -8,6 +8,8 @@
 export const POPOVER_ACTIONS_TRIGGER_BUTTON =
   '[data-test-subj="rules-details-popover-button-icon"]';
 
+export const EXPORT_RULE_ACTION_BUTTON = '[data-test-subj="rules-details-export-rule"]';
+
 export const ABOUT_INVESTIGATION_NOTES = '[data-test-subj="stepAboutDetailsNoteContent"]';
 
 export const ABOUT_RULE_DESCRIPTION = '[data-test-subj=stepAboutRuleDetailsToggleDescriptionText]';
