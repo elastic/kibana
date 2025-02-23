@@ -61,6 +61,30 @@ export const EngineDescriptor = z.object({
   error: z.object({}).optional(),
 });
 
+export type TransformStatsMetadata = z.infer<typeof TransformStatsMetadata>;
+export const TransformStatsMetadata = z.object({
+  pages_processed: z.number().int(),
+  documents_processed: z.number().int(),
+  documents_indexed: z.number().int(),
+  documents_deleted: z.number().int().optional(),
+  trigger_count: z.number().int(),
+  index_time_in_ms: z.number().int(),
+  index_total: z.number().int(),
+  index_failures: z.number().int(),
+  search_time_in_ms: z.number().int(),
+  search_total: z.number().int(),
+  search_failures: z.number().int(),
+  processing_time_in_ms: z.number().int(),
+  processing_total: z.number().int(),
+  delete_time_in_ms: z.number().int().optional(),
+  exponential_avg_checkpoint_duration_ms: z.number().int(),
+  exponential_avg_documents_indexed: z.number().int(),
+  exponential_avg_documents_processed: z.number().int(),
+});
+
+export type Metadata = z.infer<typeof Metadata>;
+export const Metadata = TransformStatsMetadata;
+
 export type EngineComponentResource = z.infer<typeof EngineComponentResource>;
 export const EngineComponentResource = z.enum([
   'entity_engine',
@@ -80,6 +104,7 @@ export type EngineComponentStatus = z.infer<typeof EngineComponentStatus>;
 export const EngineComponentStatus = z.object({
   id: z.string(),
   installed: z.boolean(),
+  metadata: Metadata.optional(),
   resource: EngineComponentResource,
   health: z.enum(['green', 'yellow', 'red', 'unknown']).optional(),
   errors: z
