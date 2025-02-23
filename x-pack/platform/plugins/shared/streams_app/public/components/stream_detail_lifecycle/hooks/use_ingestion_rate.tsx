@@ -8,12 +8,12 @@
 import datemath from '@elastic/datemath';
 import { TimeRange, getCalculateAutoTimeExpression } from '@kbn/data-plugin/common';
 import { IngestStreamGetResponse, PhaseName } from '@kbn/streams-schema';
-import { useKibana } from '../../../hooks/use_kibana';
-import { useStreamsAppFetch } from '../../../hooks/use_streams_app_fetch';
 import { lastValueFrom } from 'rxjs';
 import { IKibanaSearchRequest, IKibanaSearchResponse } from '@kbn/search-types';
-import { DataStreamStats } from './use_data_stream_stats';
 import { uniq } from 'lodash';
+import { useKibana } from '../../../hooks/use_kibana';
+import { useStreamsAppFetch } from '../../../hooks/use_streams_app_fetch';
+import { DataStreamStats } from './use_data_stream_stats';
 
 const TIMESTAMP_FIELD = '@timestamp';
 const RANDOM_SAMPLER_PROBABILITY = 0.1;
@@ -244,7 +244,7 @@ export const useIngestionRatePerTier = ({
             return tiers;
           }, {} as Record<PhaseNameWithoutDelete, number>);
 
-          for (let entry of Object.entries(countByTier)) {
+          for (const entry of Object.entries(countByTier)) {
             const tier = entry[0] as PhaseNameWithoutDelete;
             (acc[tier] = acc[tier] ?? []).push({ key, value: entry[1] * stats.bytesPerDoc });
           }
