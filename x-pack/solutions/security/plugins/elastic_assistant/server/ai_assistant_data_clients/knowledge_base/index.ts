@@ -12,9 +12,7 @@ import {
   QueryDslQueryContainer,
 } from '@elastic/elasticsearch/lib/api/types';
 import type { MlPluginSetup } from '@kbn/ml-plugin/server';
-import type { KibanaRequest } from '@kbn/core-http-server';
 import { Document } from 'langchain/document';
-import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import {
   DocumentEntryType,
   DocumentEntry,
@@ -30,6 +28,7 @@ import { StructuredTool } from '@langchain/core/tools';
 import { AnalyticsServiceSetup, AuditLogger, ElasticsearchClient } from '@kbn/core/server';
 import { IndexPatternsFetcher } from '@kbn/data-views-plugin/server';
 import { map } from 'lodash';
+import type { TrainedModelsProvider } from '@kbn/ml-plugin/server/shared_services/providers';
 import { AIAssistantDataClient, AIAssistantDataClientParams } from '..';
 import { GetElser } from '../../types';
 import {
@@ -83,6 +82,7 @@ export interface KnowledgeBaseDataClientParams extends AIAssistantDataClientPara
   setIsKBSetupInProgress: (spaceId: string, isInProgress: boolean) => void;
   manageGlobalKnowledgeBaseAIAssistant: boolean;
   assistantDefaultInferenceEndpoint: boolean;
+  trainedModelsProvider: ReturnType<TrainedModelsProvider['trainedModelsProvider']>;
 }
 export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
   constructor(public readonly options: KnowledgeBaseDataClientParams) {
@@ -111,18 +111,13 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
 
   /**
    * Downloads and installs ELSER model if not already installed
-   *
-   * @param soClient SavedObjectsClientContract for installing ELSER so that ML SO's are in sync
    */
-  private installModel = async ({ soClient }: { soClient: SavedObjectsClientContract }) => {
+  private installModel = async () => {
     const elserId = await this.options.getElserId();
     this.options.logger.debug(`Installing ELSER model '${elserId}'...`);
 
     try {
-      await this.options.ml
-        // TODO: Potentially plumb soClient through DataClient from pluginStart
-        .trainedModelsProvider({} as KibanaRequest, soClient)
-        .installElasticModel(elserId);
+      await this.options.trainedModelsProvider.installElasticModel(elserId);
     } catch (error) {
       this.options.logger.error(`Error installing ELSER model '${elserId}':\n${error}`);
     }
@@ -138,8 +133,7 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
     this.options.logger.debug(`Checking if ELSER model '${elserId}' is installed...`);
 
     try {
-      const esClient = await this.options.elasticsearchClientPromise;
-      const getResponse = await esClient.ml.getTrainedModels({
+      const getResponse = await this.options.trainedModelsProvider.getTrainedModels({
         model_id: elserId,
         include: 'definition_status',
       });
@@ -197,7 +191,7 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
       if (!inferenceExists) {
         return false;
       }
-      const getResponse = await esClient.ml.getTrainedModelsStats({
+      const getResponse = await this.options.trainedModelsProvider.getTrainedModelsStats({
         // it's model_id or deployment_id, we need to use inference id to get the stats
         model_id: inferenceId,
       });
@@ -223,26 +217,20 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
     }
   };
 
-  private dryRunTrainedModelDeployment = async ({
-    request,
-    soClient,
-  }: {
-    request: KibanaRequest;
-    soClient: SavedObjectsClientContract;
-  }) => {
+  private dryRunTrainedModelDeployment = async () => {
     const elserId = await this.options.getElserId();
+    const esClient = await this.options.elasticsearchClientPromise;
 
     try {
       // As there is no better way to check if the model is deployed, we try to start the model
       // deployment and throw an error if it fails
-      const mlTrainderMol = this.options.ml.trainedModelsProvider(request, soClient);
-      const dryRunId = await mlTrainderMol.startTrainedModelDeployment({
+      const dryRunId = await esClient.ml.startTrainedModelDeployment({
         model_id: elserId,
         wait_for: 'fully_allocated',
       });
       this.options.logger.debug(`Dry run for ELSER model '${elserId}' successfully deployed!`);
 
-      await mlTrainderMol.stopTrainedModelDeployment({
+      await this.options.trainedModelsProvider.stopTrainedModelDeployment({
         model_id: elserId,
         deployment_id: dryRunId.assignment.task_parameters.deployment_id,
       });
@@ -271,13 +259,7 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
     }
   };
 
-  public createInferenceEndpoint = async ({
-    request,
-    soClient,
-  }: {
-    request: KibanaRequest;
-    soClient: SavedObjectsClientContract;
-  }) => {
+  public createInferenceEndpoint = async () => {
     const elserId = await this.options.getElserId();
     this.options.logger.debug(`Deploying ELSER model '${elserId}'...`);
     const esClient = await this.options.elasticsearchClientPromise;
@@ -286,7 +268,7 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
     if (inferenceId === ASSISTANT_ELSER_INFERENCE_ID) {
       await this.deleteInferenceEndpoint();
 
-      await pRetry(async () => this.dryRunTrainedModelDeployment({ request, soClient }), {
+      await pRetry(async () => this.dryRunTrainedModelDeployment(), {
         minTimeout: 10000,
         maxTimeout: 10000,
         retries: 10,
@@ -329,7 +311,7 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
         );
       }
     } else {
-      await this.dryRunTrainedModelDeployment({ request, soClient });
+      await this.dryRunTrainedModelDeployment();
     }
   };
 
@@ -346,23 +328,17 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
    * @returns Promise<void>
    */
   public setupKnowledgeBase = async ({
-    soClient,
     ignoreSecurityLabs = false,
-    request,
-    spaceId,
   }: {
-    soClient: SavedObjectsClientContract;
     ignoreSecurityLabs?: boolean;
-    request: KibanaRequest;
-    spaceId: string;
   }): Promise<void> => {
-    if (this.options.getIsKBSetupInProgress(spaceId)) {
+    if (this.options.getIsKBSetupInProgress(this.spaceId)) {
       this.options.logger.debug('Knowledge Base setup already in progress');
       return;
     }
 
     this.options.logger.debug('Starting Knowledge Base setup...');
-    this.options.setIsKBSetupInProgress(spaceId, true);
+    this.options.setIsKBSetupInProgress(this.spaceId, true);
     const elserId = await this.options.getElserId();
 
     // Delete legacy ESQL knowledge base docs if they exist, and silence the error if they do not
@@ -395,7 +371,7 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
       */
       const isInstalled = await this.isModelInstalled();
       if (!isInstalled) {
-        await this.installModel({ soClient });
+        await this.installModel();
         await pRetry(
           async () =>
             (await this.isModelInstalled())
@@ -410,7 +386,7 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
 
       const inferenceExists = await this.isInferenceEndpointExists();
       if (!inferenceExists) {
-        await this.createInferenceEndpoint({ request, soClient });
+        await this.createInferenceEndpoint();
 
         this.options.logger.debug(
           `Inference endpoint for ELSER model '${elserId}' successfully deployed!`
@@ -451,11 +427,11 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
         }
       }
     } catch (e) {
-      this.options.setIsKBSetupInProgress(spaceId, false);
+      this.options.setIsKBSetupInProgress(this.spaceId, false);
       this.options.logger.error(`Error setting up Knowledge Base: ${e.message}`);
       throw new Error(e.message);
     } finally {
-      this.options.setIsKBSetupInProgress(spaceId, false);
+      this.options.setIsKBSetupInProgress(this.spaceId, false);
     }
   };
 

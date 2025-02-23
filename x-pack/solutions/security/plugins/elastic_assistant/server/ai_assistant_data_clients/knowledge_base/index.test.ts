@@ -29,6 +29,7 @@ import {
 import { DynamicStructuredTool } from '@langchain/core/tools';
 import { newContentReferencesStoreMock } from '@kbn/elastic-assistant-common/impl/content_references/content_references_store/__mocks__/content_references_store.mock';
 import { KnowledgeBaseResource } from '@kbn/elastic-assistant-common';
+import { TrainedModelsProvider } from '@kbn/ml-plugin/server/shared_services/providers';
 jest.mock('../../lib/langchain/content_loaders/security_labs_loader');
 jest.mock('p-retry');
 const date = '2023-03-28T22:27:28.159Z';
@@ -75,6 +76,7 @@ describe('AIAssistantKnowledgeBaseDataClient', () => {
       setIsKBSetupInProgress: jest.fn().mockImplementation(() => {}),
       manageGlobalKnowledgeBaseAIAssistant: true,
       assistantDefaultInferenceEndpoint: false,
+      trainedModelsProvider: {} as ReturnType<TrainedModelsProvider['trainedModelsProvider']>,
     };
     esClientMock.search.mockReturnValue(
       // @ts-expect-error not full response interface
@@ -271,7 +273,7 @@ describe('AIAssistantKnowledgeBaseDataClient', () => {
       esClientMock.search.mockResolvedValue({});
 
       const client = new AIAssistantKnowledgeBaseDataClient(mockOptions);
-      await client.setupKnowledgeBase({ soClient: savedObjectClient });
+      await client.setupKnowledgeBase({});
 
       // install model
       expect(trainedModelsProvider).toHaveBeenCalledWith({}, savedObjectClient);
@@ -303,7 +305,7 @@ describe('AIAssistantKnowledgeBaseDataClient', () => {
       });
       const client = new AIAssistantKnowledgeBaseDataClient(mockOptions);
 
-      await client.setupKnowledgeBase({ soClient: savedObjectClient });
+      await client.setupKnowledgeBase({});
 
       expect(installElasticModel).not.toHaveBeenCalled();
       expect(esClientMock.ml.startTrainedModelDeployment).not.toHaveBeenCalled();
@@ -322,7 +324,7 @@ describe('AIAssistantKnowledgeBaseDataClient', () => {
       mockLoadSecurityLabs.mockRejectedValue(new Error('Installation error'));
       const client = new AIAssistantKnowledgeBaseDataClient(mockOptions);
 
-      await expect(client.setupKnowledgeBase({ soClient: savedObjectClient })).rejects.toThrow(
+      await expect(client.setupKnowledgeBase({})).rejects.toThrow(
         'Error setting up Knowledge Base: Installation error'
       );
       expect(mockOptions.logger.error).toHaveBeenCalledWith(

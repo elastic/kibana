@@ -55,9 +55,6 @@ export const postKnowledgeBaseRoute = (router: ElasticAssistantPluginRouter) => 
         const resp = buildResponse(response);
         const ctx = await context.resolve(['core', 'elasticAssistant', 'licensing']);
         const assistantContext = ctx.elasticAssistant;
-        const spaceId = ctx.elasticAssistant.getSpaceId();
-        const core = ctx.core;
-        const soClient = core.savedObjects.getClient();
         const ignoreSecurityLabs = request.query.ignoreSecurityLabs;
 
         try {
@@ -70,10 +67,7 @@ export const postKnowledgeBaseRoute = (router: ElasticAssistantPluginRouter) => 
           }
 
           await knowledgeBaseDataClient.setupKnowledgeBase({
-            request,
-            soClient,
             ignoreSecurityLabs,
-            spaceId,
           });
 
           return response.ok({ body: { success: true } });
