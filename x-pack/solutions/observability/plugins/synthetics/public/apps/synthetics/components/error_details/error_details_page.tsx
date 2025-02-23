@@ -134,7 +134,7 @@ export function ErrorDetailsPage() {
   );
 }
 
-const TIMELINE_LABEL = i18n.translate('xpack.synthetics.errors.timeline.title', {
+export const TIMELINE_LABEL = i18n.translate('xpack.synthetics.errors.timeline.title', {
   defaultMessage: 'Timeline',
 });
 

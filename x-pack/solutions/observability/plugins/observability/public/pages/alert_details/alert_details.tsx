@@ -195,6 +195,8 @@ export function AlertDetails() {
     }
   };
 
+  console.log(alertDetail);
+
   useEffect(() => {
     if (!alertDetail || !observabilityAIAssistant) {
       return;
@@ -342,6 +344,8 @@ export function AlertDetails() {
     );
   const AlertDetailsAppSection = ruleTypeModel ? ruleTypeModel.alertDetailsAppSection : null;
   const timeZone = getTimeZone(uiSettings);
+
+  console.log(ruleTypeModel);
 
   const overviewTab = alertDetail ? (
     AlertDetailsAppSection &&

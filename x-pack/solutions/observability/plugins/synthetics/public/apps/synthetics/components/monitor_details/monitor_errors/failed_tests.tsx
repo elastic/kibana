@@ -18,10 +18,12 @@ import type { ClientPluginsStart } from '../../../../../plugin';
 
 export const MonitorFailedTests = ({
   time,
+  errorStateId: errorStateIdProp,
   allowBrushing = true,
 }: {
   time: { to: string; from: string };
   allowBrushing?: boolean;
+  errorStateId?: string;
 }) => {
   const {
     exploratoryView: { ExploratoryViewEmbeddable },
@@ -29,7 +31,9 @@ export const MonitorFailedTests = ({
 
   const { queryIdFilter, locationFilter } = useMonitorQueryFilters();
 
-  const { errorStateId } = useParams<{ errorStateId: string }>();
+  const { errorStateId: errorStateIdUrl } = useParams<{ errorStateId: string }>();
+
+  const errorStateId = errorStateIdProp ?? errorStateIdUrl;
 
   const [, updateUrl] = useUrlParams();
 

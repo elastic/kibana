@@ -17,12 +17,24 @@ import { getSyntheticsCcsIndex } from '../../../../../../common/get_synthetics_i
 import { useSyntheticsRefreshContext } from '../../../contexts';
 import { useGetUrlParams } from '../../../hooks';
 
-export function useErrorFailedTests() {
+export function useErrorFailedTests({
+  errorStateId,
+  configId,
+}: {
+  errorStateId?: string;
+  configId?: string;
+} = {}) {
   const { lastRefresh } = useSyntheticsRefreshContext();
 
-  const { errorStateId, monitorId } = useParams<{ errorStateId: string; monitorId: string }>();
+  const { errorStateId: errorStateIdUrl, monitorId: monitorIdUrl } = useParams<{
+    errorStateId: string;
+    monitorId: string;
+  }>();
 
   const { dateRangeStart, dateRangeEnd, remoteName } = useGetUrlParams();
+
+  const errorStateIdToUse = errorStateId ?? errorStateIdUrl;
+  const monitorId = configId ?? monitorIdUrl;
 
   const { data, loading } = useReduxEsSearch(
     {
@@ -35,7 +47,7 @@ export function useErrorFailedTests() {
             EXCLUDE_RUN_ONCE_FILTER,
             {
               term: {
-                'state.id': errorStateId,
+                'state.id': errorStateIdToUse,
               },
             },
             {
@@ -48,7 +60,7 @@ export function useErrorFailedTests() {
       },
       sort: [{ '@timestamp': 'desc' }],
     },
-    [lastRefresh, monitorId, dateRangeStart, dateRangeEnd, remoteName],
+    [lastRefresh, monitorId, dateRangeStart, dateRangeEnd, remoteName, errorStateIdToUse],
     { name: 'getMonitorErrorFailedTests' }
   );
 
