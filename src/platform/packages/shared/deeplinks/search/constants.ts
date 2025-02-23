@@ -20,6 +20,7 @@ export const ES_SEARCH_SYNONYMS_ID = 'searchSynonyms';
 export const SEARCH_HOMEPAGE = 'searchHomepage';
 export const SEARCH_INDICES_START = 'elasticsearchStart';
 export const SEARCH_INDICES = 'elasticsearchIndices';
+export const SEARCH_INDEX_MANAGEMENT = 'elasticsearchIndexManagement';
 export const SEARCH_ELASTICSEARCH = 'enterpriseSearchElasticsearch';
 export const SEARCH_VECTOR_SEARCH = 'enterpriseSearchVectorSearch';
 export const SEARCH_SEMANTIC_SEARCH = 'enterpriseSearchSemanticSearch';

@@ -19,12 +19,13 @@ import type {
   SearchIndicesServicesContextDeps,
 } from './types';
 import { initQueryClient } from './services/query_client';
-import { INDICES_APP_ID, START_APP_ID } from '../common';
+import { INDEX_MANAGEMENT_APP_ID, INDICES_APP_ID, START_APP_ID } from '../common';
 import {
   CREATE_INDEX_PATH,
   INDICES_APP_BASE,
   START_APP_BASE,
   SearchIndexDetailsTabValues,
+  INDEX_MANAGEMNT_APP_BASE,
 } from './routes';
 import { registerLocators } from './locators';
 
@@ -89,9 +90,11 @@ export class SearchIndicesPlugin
       visibleIn: [],
     });
     core.application.register({
-      id: 'searchIndexManagement',
-      appRoute: '/app/elasticsearch/index_management',
-      title: 'Search Index management',
+      id: INDEX_MANAGEMENT_APP_ID,
+      appRoute: INDEX_MANAGEMNT_APP_BASE,
+      title: i18n.translate('xpack.searchIndices.elasticsearchIndices.indexManagementTitle', {
+        defaultMessage: 'Index Management',
+      }),
       async mount({ element, history }) {
         // return plugins.indexManagement.managementApp(element, ()=>{},history);
         const { renderIndexManagementApp } = await import('./index_management_application');

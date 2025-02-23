@@ -26,6 +26,7 @@ import {
   SEARCH_SEMANTIC_SEARCH,
   SEARCH_AI_SEARCH,
   ES_SEARCH_SYNONYMS_ID,
+  SEARCH_INDEX_MANAGEMENT,
 } from './constants';
 
 export type EnterpriseSearchApp = typeof ENTERPRISE_SEARCH_APP_ID;
@@ -41,6 +42,7 @@ export type SearchSynonymsId = typeof ES_SEARCH_SYNONYMS_ID;
 export type SearchHomepage = typeof SEARCH_HOMEPAGE;
 export type SearchStart = typeof SEARCH_INDICES_START;
 export type SearchIndices = typeof SEARCH_INDICES;
+export type SearchIndexManagement = typeof SEARCH_INDEX_MANAGEMENT;
 export type SearchElasticsearch = typeof SEARCH_ELASTICSEARCH;
 export type SearchVectorSearch = typeof SEARCH_VECTOR_SEARCH;
 export type SearchSemanticSearch = typeof SEARCH_SEMANTIC_SEARCH;
@@ -74,6 +76,7 @@ export type DeepLinkId =
   | `${SearchSynonymsId}:${SynonymsLinkId}`
   | SearchStart
   | SearchIndices
+  | SearchIndexManagement
   | SearchElasticsearch
   | SearchVectorSearch
   | SearchSemanticSearch
