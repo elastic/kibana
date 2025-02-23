@@ -331,7 +331,8 @@ export default ({ getService }: FtrProviderContext): void => {
         );
       });
 
-      it('imports prebuilt rules when the rules package is not installed', async () => {
+      // TODO: Fix the test setup https://github.com/elastic/kibana/pull/206893#discussion_r1966170712
+      it.skip('imports prebuilt rules when the rules package is not installed', async () => {
         await deletePrebuiltRulesFleetPackage({ supertest, es, log, retryService }); // First we delete the rule package
 
         const { body } = await importRules([prebuiltRules[0]]); // Then we import a rule which should cause the rule package to be redownloaded
