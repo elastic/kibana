@@ -108,7 +108,7 @@ fi
 
 if [[ ${#configWithoutTests[@]} -gt 0 ]]; then
 {
-  echo "⚠️ [$SCOUT_CONFIG_GROUP_TYPE / $SCOUT_CONFIG_GROUP_KEY] Scout configs without tests:"
+  echo "⚠️ Scout playwright configs without tests:"
   echo ""
   for config in "${configWithoutTests[@]}"; do
     echo "- $config"
