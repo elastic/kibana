@@ -127,6 +127,7 @@ export const getEnrichedDeprecations = async (
 
   const systemIndicesList = convertFeaturesToIndicesArray(systemIndices.features);
 
+  // this is the list of indices that have deprecations
   const indexSettingsIndexNames = Object.keys(deprecations.index_settings);
   const indexSettingsIndexStates = indexSettingsIndexNames.length
     ? await esIndicesStateCheck(dataClient.asCurrentUser, indexSettingsIndexNames)
