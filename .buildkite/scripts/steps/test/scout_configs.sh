@@ -86,7 +86,7 @@ while read -r config_path; do
     set -e;
 
     if [[ $EXIT_CODE -eq 2 ]]; then
-      configWithoutTests+=("$config_path ($mode) ⚠️ No tests found")
+      configWithoutTests+=("$config_path ($mode)")
     elif [[ $EXIT_CODE -ne 0 ]]; then
       failedConfigs+=("$config_path ($mode) ❌")
       FINAL_EXIT_CODE=10  # Ensure we exit with failure if any test fails with (exit code 10 to match FTR)
@@ -107,10 +107,13 @@ if [[ ${#results[@]} -gt 0 ]]; then
 fi
 
 if [[ ${#configWithoutTests[@]} -gt 0 ]]; then
-  {
-    echo "### ⚠️ [$SCOUT_CONFIG_GROUP_TYPE / $SCOUT_CONFIG_GROUP_KEY] Scout configs without tests:"
-    printf "%s\n" "${configWithoutTests[@]}"
-  } | buildkite-agent annotate --style "warning" --context "no-tests"
+{
+  echo "⚠️ [$SCOUT_CONFIG_GROUP_TYPE / $SCOUT_CONFIG_GROUP_KEY] Scout configs without tests:"
+  echo ""
+  for config in "${configWithoutTests[@]}"; do
+    echo "- $config"
+  done
+} | buildkite-agent annotate --style "warning" --context "no-tests"
 fi
 
 if [[ ${#failedConfigs[@]} -gt 0 ]]; then
