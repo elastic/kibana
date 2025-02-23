@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import fetch from 'node-fetch';
 import { Logger } from '../utils/create_logger';
 import { KibanaClient } from '../shared/base_kibana_client';
 import { getKibanaClient } from '../../cli/utils/get_kibana_client';
@@ -41,14 +40,14 @@ export class EntitiesSynthtraceKibanaClient {
       this.logger.debug('Entity definitions are already defined');
     } else {
       this.logger.debug('Installing Entity definitions');
-      await fetch(`/internal/entities/managed/enablement?installOnly=true`, {
+      await this.kibana.fetch(`/internal/entities/managed/enablement?installOnly=true`, {
         method: 'PUT',
       });
     }
   }
 
   async uninstallEntityIndexPatterns() {
-    await fetch(`/internal/entities/managed/enablement`, {
+    await this.kibana.fetch(`/internal/entities/managed/enablement`, {
       method: 'DELETE',
     });
   }
