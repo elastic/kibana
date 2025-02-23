@@ -9,7 +9,6 @@ import { capitalize, last } from 'lodash';
 import React, { useMemo } from 'react';
 import {
   IlmPolicyDeletePhase,
-  IlmPolicyHotPhase,
   IlmPolicyPhase,
   IlmPolicyPhases,
   IngestStreamGetResponse,
@@ -34,67 +33,7 @@ import { useStreamsAppFetch } from '../../hooks/use_streams_app_fetch';
 import { useKibana } from '../../hooks/use_kibana';
 import { orderIlmPhases, parseDurationInSeconds } from './helpers';
 import { IlmLink } from './ilm_link';
-import { rolloverCondition } from './helpers/rollover_condition';
-
-const ILM_PHASES = {
-  hot: {
-    color: '#F6726A',
-    description: (phase: IlmPolicyPhase | IlmPolicyDeletePhase) => {
-      const hotPhase = phase as IlmPolicyHotPhase;
-      const condition = rolloverCondition(hotPhase.rollover);
-      return [
-        i18n.translate('xpack.streams.streamDetailLifecycle.hotPhaseDescription', {
-          defaultMessage: 'Recent, frequently-searched data. Best indexing and search performance.',
-        }),
-        condition
-          ? i18n.translate('xpack.streams.streamDetailLifecycle.hotPhaseRolloverDescription', {
-              defaultMessage: '*Time since rollover. Current rollover condition: {condition}.',
-              values: { condition },
-            })
-          : i18n.translate('xpack.streams.streamDetailLifecycle.hotPhaseNoRolloverDescription', {
-              defaultMessage:
-                '*Time since rollover. Data will not move to the next phase because rollover is not enabled.',
-            }),
-      ];
-    },
-  },
-  warm: {
-    color: '#FCD883',
-    description: () => [
-      i18n.translate('xpack.streams.streamDetailLifecycle.warmPhaseDescription', {
-        defaultMessage:
-          'Frequently searched data, rarely updated. Optimized for search, not indexing.',
-      }),
-    ],
-  },
-  cold: {
-    color: '#A6EDEA',
-    description: () => [
-      i18n.translate('xpack.streams.streamDetailLifecycle.coldPhaseDescription', {
-        defaultMessage:
-          'Data searched infrequently, not updated. Optimized for cost savings over search performance.',
-      }),
-    ],
-  },
-  frozen: {
-    color: '#61A2FF',
-    description: () => [
-      i18n.translate('xpack.streams.streamDetailLifecycle.frozenPhaseDescription', {
-        defaultMessage:
-          'Most cost-effective way to store your data and still be able to search it.',
-      }),
-    ],
-  },
-  delete: {
-    color: '#DDD',
-    description: (phase: IlmPolicyPhase | IlmPolicyDeletePhase) => [
-      i18n.translate('xpack.streams.streamDetailLifecycle.deletePhaseDescription', {
-        defaultMessage: 'Data deleted after {duration}.',
-        values: { duration: phase.min_age! },
-      }),
-    ],
-  },
-};
+import { ILM_PHASES } from './helpers/ilm_phases';
 
 export function IlmSummary({
   definition,

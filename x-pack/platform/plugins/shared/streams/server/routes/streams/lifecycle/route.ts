@@ -58,6 +58,35 @@ const lifecycleStatsRoute = createServerRoute({
   },
 });
 
+const lifecycleIlmExplainRoute = createServerRoute({
+  endpoint: 'GET /api/streams/{name}/lifecycle/{indices}/_explain',
+  options: {
+    access: 'internal',
+  },
+  security: {
+    authz: {
+      enabled: false,
+      reason:
+        'This API delegates security to the currently logged in user and their Elasticsearch permissions.',
+    },
+  },
+  params: z.object({
+    path: z.object({ name: z.string(), indices: z.string() }),
+  }),
+  handler: async ({ params, request, getScopedClients }) => {
+    const { scopedClusterClient, streamsClient } = await getScopedClients({ request });
+    const name = params.path.name;
+
+    // verifies read privileges
+    await streamsClient.getStream(name);
+
+    return scopedClusterClient.asCurrentUser.ilm.explainLifecycle({
+      index: params.path.indices,
+    });
+  },
+});
+
 export const lifecycleRoutes = {
   ...lifecycleStatsRoute,
+  ...lifecycleIlmExplainRoute,
 };
