@@ -65,7 +65,7 @@ export function createPlaywrightConfig(options: ScoutPlaywrightOptions): Playwri
 
     // Timeout for each assertion
     expect: {
-      timeout: 15000,
+      timeout: 10000,
     },
 
     outputDir: './output/test-artifacts', // For other test artifacts (screenshots, videos, traces)
