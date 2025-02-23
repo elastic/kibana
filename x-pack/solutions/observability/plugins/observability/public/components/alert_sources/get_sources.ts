@@ -7,7 +7,7 @@
 
 import { ALERT_GROUP_FIELD, ALERT_GROUP_VALUE, ALERT_GROUP } from '@kbn/rule-data-utils';
 import { TopAlert } from '../../typings/alerts';
-import { apmSources, infraSources } from './get_alert_source_links';
+import { apmSources, infraSources, syntheticsSources } from './get_alert_source_links';
 import { Group } from '../../../common/typings';
 
 interface AlertFields {
@@ -35,7 +35,7 @@ export const getSources = (alert: TopAlert): Group[] => {
 
   // Not all rules has group.fields, in that case we search in the alert fields.
   const matchedSources: Group[] = [];
-  const ALL_SOURCES = [...infraSources, ...apmSources];
+  const ALL_SOURCES = [...infraSources, ...apmSources, ...syntheticsSources];
   const alertFields = alert.fields as AlertFields;
   ALL_SOURCES.forEach((source: string) => {
     Object.keys(alertFields).forEach((field: any) => {

@@ -13,6 +13,7 @@ export const SYNTHETICS_DOCUMENT_ONLOAD = 'browser.experience.load.us';
 export const SYNTHETICS_DCL = 'browser.experience.dcl.us';
 export const SYNTHETICS_STEP_NAME = 'synthetics.step.name.keyword';
 export const SYNTHETICS_STEP_DURATION = 'synthetics.step.duration.us';
+export const MONITOR_ID = 'monitor.id';
 
 export const SYNTHETICS_DNS_TIMINGS = 'synthetics.payload.timings.dns';
 export const SYNTHETICS_SSL_TIMINGS = 'synthetics.payload.timings.ssl';

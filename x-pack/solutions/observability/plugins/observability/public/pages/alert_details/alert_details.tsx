@@ -135,6 +135,8 @@ export function AlertDetails() {
     history.replace({ search: searchParams.toString() });
   };
 
+  console.log(alertDetail);
+
   useEffect(() => {
     if (!alertDetail || !observabilityAIAssistant) {
       return;
@@ -218,6 +220,8 @@ export function AlertDetails() {
     );
   const AlertDetailsAppSection = ruleTypeModel ? ruleTypeModel.alertDetailsAppSection : null;
   const timeZone = getTimeZone(uiSettings);
+
+  console.log(ruleTypeModel);
 
   const overviewTab = alertDetail ? (
     AlertDetailsAppSection &&
