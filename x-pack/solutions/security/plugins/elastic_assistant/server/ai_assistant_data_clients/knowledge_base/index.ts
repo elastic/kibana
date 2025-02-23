@@ -11,7 +11,6 @@ import {
   SearchTotalHits,
   QueryDslQueryContainer,
 } from '@elastic/elasticsearch/lib/api/types';
-import numeral from '@elastic/numeral';
 import type { MlPluginSetup } from '@kbn/ml-plugin/server';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import { Document } from 'langchain/document';
@@ -198,9 +197,9 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
       if (!inferenceExists) {
         return false;
       }
-      const elserId = await this.options.getElserId();
       const getResponse = await esClient.ml.getTrainedModelsStats({
-        model_id: elserId,
+        // it's model_id or deployment_id, we need to use inference id to get the stats
+        model_id: inferenceId,
       });
 
       // For standardized way of checking deployment status see: https://github.com/elastic/elasticsearch/issues/106986
@@ -224,28 +223,74 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
     }
   };
 
-  public createInferenceEndpoint = async () => {
+  private dryRunTrainedModelDeployment = async ({
+    request,
+    soClient,
+  }: {
+    request: KibanaRequest;
+    soClient: SavedObjectsClientContract;
+  }) => {
+    const elserId = await this.options.getElserId();
+
+    try {
+      // As there is no better way to check if the model is deployed, we try to start the model
+      // deployment and throw an error if it fails
+      const mlTrainderMol = this.options.ml.trainedModelsProvider(request, soClient);
+      const dryRunId = await mlTrainderMol.startTrainedModelDeployment({
+        model_id: elserId,
+        wait_for: 'fully_allocated',
+      });
+      this.options.logger.debug(`Dry run for ELSER model '${elserId}' successfully deployed!`);
+
+      await mlTrainderMol.stopTrainedModelDeployment({
+        model_id: elserId,
+        deployment_id: dryRunId.assignment.task_parameters.deployment_id,
+      });
+      this.options.logger.debug(`Dry run for ELSER model '${elserId}' successfully stopped!`);
+    } catch (e) {
+      this.options.logger.error(`Dry run error starting trained model deployment: ${e.message}`);
+      throw new Error(`${e.message}`);
+    }
+  };
+
+  private deleteInferenceEndpoint = async () => {
+    const elserId = await this.options.getElserId();
+    const esClient = await this.options.elasticsearchClientPromise;
+
+    try {
+      await esClient.inference.delete({
+        inference_id: ASSISTANT_ELSER_INFERENCE_ID,
+        // it's being used in the mapping so we need to force delete
+        force: true,
+      });
+      this.options.logger.debug(`Deleted existing inference endpoint for ELSER model '${elserId}'`);
+    } catch (error) {
+      this.options.logger.error(
+        `Error deleting inference endpoint ${ASSISTANT_ELSER_INFERENCE_ID} for ELSER model '${elserId}':\n${error}`
+      );
+    }
+  };
+
+  public createInferenceEndpoint = async ({
+    request,
+    soClient,
+  }: {
+    request: KibanaRequest;
+    soClient: SavedObjectsClientContract;
+  }) => {
     const elserId = await this.options.getElserId();
     this.options.logger.debug(`Deploying ELSER model '${elserId}'...`);
     const esClient = await this.options.elasticsearchClientPromise;
     const inferenceId = await this.getInferenceEndpointId();
 
-    // Don't try to create the inference endpoint for ELASTICSEARCH_ELSER_INFERENCE_ID
     if (inferenceId === ASSISTANT_ELSER_INFERENCE_ID) {
-      try {
-        await esClient.inference.delete({
-          inference_id: ASSISTANT_ELSER_INFERENCE_ID,
-          // it's being used in the mapping so we need to force delete
-          force: true,
-        });
-        this.options.logger.debug(
-          `Deleted existing inference endpoint for ELSER model '${elserId}'`
-        );
-      } catch (error) {
-        this.options.logger.error(
-          `Error deleting inference endpoint for ELSER model '${elserId}':\n${error}`
-        );
-      }
+      await this.deleteInferenceEndpoint();
+
+      await pRetry(async () => this.dryRunTrainedModelDeployment({ request, soClient }), {
+        minTimeout: 10000,
+        maxTimeout: 10000,
+        retries: 10,
+      });
 
       try {
         await esClient.inference.put({
@@ -267,7 +312,14 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
         });
 
         // await for the model to be deployed
-        await this.isInferenceEndpointExists(inferenceId);
+        const inferenceEndpointExists = await this.isInferenceEndpointExists(
+          ASSISTANT_ELSER_INFERENCE_ID
+        );
+        if (!inferenceEndpointExists) {
+          throw new Error(
+            `Inference endpoint for ELSER model '${elserId}' was not deployed successfully`
+          );
+        }
       } catch (error) {
         this.options.logger.error(
           `Error creating inference endpoint for ELSER model '${elserId}':\n${error}`
@@ -276,6 +328,8 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
           `Error creating inference endpoint for ELSER model '${elserId}':\n${error}`
         );
       }
+    } else {
+      await this.dryRunTrainedModelDeployment({ request, soClient });
     }
   };
 
@@ -331,14 +385,14 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
       this.options.logger.info('No legacy ESQL or Security Labs knowledge base docs to delete');
     }
 
-    const mlSystemProvider = this.options.ml.mlSystemProvider(request, soClient);
-    const mlSystemInfo = await mlSystemProvider.mlInfo();
-
-    if (numeral(mlSystemInfo.limits.effective_max_model_memory_limit) < numeral('4000mb')) {
-      throw new Error('Effective max model memory limit is less than 4000mb, cannot install ELSER');
-    }
-
     try {
+      /*
+        #1 Check if ELSER model is downloaded
+        #2 Check if inference endpoint is deployed
+        #3 Dry run ELSER model deployment if not already deployed
+        #4 Create inference endpoint if not deployed / delete and create inference endpoint if model was not deployed
+        #5 Load Security Labs docs
+      */
       const isInstalled = await this.isModelInstalled();
       if (!isInstalled) {
         await this.installModel({ soClient });
@@ -356,7 +410,7 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
 
       const inferenceExists = await this.isInferenceEndpointExists();
       if (!inferenceExists) {
-        await this.createInferenceEndpoint();
+        await this.createInferenceEndpoint({ request, soClient });
 
         this.options.logger.debug(
           `Inference endpoint for ELSER model '${elserId}' successfully deployed!`
@@ -367,9 +421,9 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
         );
       }
 
-      this.options.logger.debug(`Checking if Knowledge Base docs have been loaded...`);
-
       if (!ignoreSecurityLabs) {
+        this.options.logger.debug(`Checking if Knowledge Base docs have been loaded...`);
+
         const labsDocsLoaded = await this.isSecurityLabsDocsLoaded();
         if (!labsDocsLoaded) {
           // Delete any existing Security Labs content
@@ -399,7 +453,7 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
     } catch (e) {
       this.options.setIsKBSetupInProgress(spaceId, false);
       this.options.logger.error(`Error setting up Knowledge Base: ${e.message}`);
-      throw new Error(`Error setting up Knowledge Base: ${e.message}`);
+      throw new Error(e.message);
     } finally {
       this.options.setIsKBSetupInProgress(spaceId, false);
     }
@@ -505,17 +559,15 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
   };
 
   /**
-   * Returns if allSecurity Labs KB docs have been loaded
+   * Returns loaded Security Labs KB docs count
    */
-  public isSecurityLabsDocsLoaded = async (): Promise<boolean> => {
+  public getLoadedSecurityLabsDocsCount = async (): Promise<number> => {
     const user = this.options.currentUser;
     if (user == null) {
       throw new Error(
         'Authenticated user not found! Ensure kbDataClient was initialized from a request.'
       );
     }
-
-    const expectedDocsCount = await getSecurityLabsDocsCount({ logger: this.options.logger });
 
     const esClient = await this.options.elasticsearchClientPromise;
 
@@ -533,7 +585,27 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
         track_total_hits: true,
       });
 
-      const existingDocs = (result.hits?.total as SearchTotalHits).value;
+      return (result.hits?.total as SearchTotalHits).value;
+    } catch (e) {
+      this.options.logger.info(`Error checking if Security Labs docs are loaded: ${e.message}`);
+      return 0;
+    }
+  };
+
+  /**
+   * Returns if allSecurity Labs KB docs have been loaded
+   */
+  public isSecurityLabsDocsLoaded = async (): Promise<boolean> => {
+    const user = this.options.currentUser;
+    if (user == null) {
+      throw new Error(
+        'Authenticated user not found! Ensure kbDataClient was initialized from a request.'
+      );
+    }
+
+    try {
+      const expectedDocsCount = await getSecurityLabsDocsCount({ logger: this.options.logger });
+      const existingDocs = await this.getLoadedSecurityLabsDocsCount();
 
       if (existingDocs !== expectedDocsCount) {
         this.options.logger.debug(

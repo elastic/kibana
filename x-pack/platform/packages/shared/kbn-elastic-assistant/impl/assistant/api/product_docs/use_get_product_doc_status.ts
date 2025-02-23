@@ -12,21 +12,13 @@ import { useAssistantContext } from '../../../..';
 export function useGetProductDocStatus() {
   const { productDocBase } = useAssistantContext();
 
-  const { isLoading, isError, isSuccess, isRefetching, data, refetch } = useQuery({
+  return useQuery({
     queryKey: [REACT_QUERY_KEYS.GET_PRODUCT_DOC_STATUS],
     queryFn: async () => {
       return productDocBase.installation.getStatus();
     },
+
     keepPreviousData: false,
     refetchOnWindowFocus: false,
   });
-
-  return {
-    status: data,
-    refetch,
-    isLoading,
-    isRefetching,
-    isSuccess,
-    isError,
-  };
 }
