@@ -58,7 +58,7 @@ const getDefaultIconType = (type: CallOutType): string => {
     case 'danger':
       return 'warning';
     case 'accent':
-          return 'cheer';
+      return 'cheer';
     default:
       return assertUnreachable(type);
   }
