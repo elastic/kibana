@@ -5,52 +5,84 @@
  * 2.0.
  */
 
-export const AGENT_NAME_DASHBOARD_FILE_MAPPING: Record<string, string> = {
-  nodejs: 'nodejs',
-  'opentelemetry/nodejs': 'opentelemetry_nodejs',
-  'opentelemetry/nodejs/elastic': 'opentelemetry_nodejs',
-  java: 'java',
-  'opentelemetry/java': 'opentelemetry_java',
-  'opentelemetry/java/opentelemetry-java-instrumentation': 'opentelemetry_java',
-  'opentelemetry/java/elastic': 'opentelemetry_java',
-  'opentelemetry/dotnet': 'opentelemetry_dotnet',
-  'opentelemetry/dotnet/opentelemetry-dotnet-instrumentation': 'opentelemetry_dotnet',
-  'opentelemetry/dotnet/elastic': 'opentelemetry_dotnet',
-};
+export const existingDashboardFileNames = new Set([
+  'classic_apm-apm-nodejs',
+  'classic_apm-apm-java',
+  'classic_apm-otel_other-nodejs',
+  'classic_apm-otel_other-java',
+  'classic_apm-otel_other-dotnet',
+  'otel_native-otel_other-nodejs',
+  'otel_native-otel_other-java',
+  'otel_native-otel_other-dotnet',
+]);
+
+// Remove :
+/**
+ * The specially formatted comment in the `import` expression causes the corresponding webpack chunk to be named. This aids us in debugging chunk size issues.
+ * [request] placeholder is set for dynamic chunk name: https://webpack.js.org/api/module-methods/#webpackchunkname
+ * See https://webpack.js.org/api/module-methods/#magic-comments
+ */
+// export async function loadDashboardFile(filename: string) {
+//   return import(
+//     /* webpackMode: "lazy" */
+//     /* webpackChunkName: "dashboard" */
+//     `./${filename}.json` // Throws an error: Error: worker exitted unexpectedly with code 1 [last message: { bundleId: 'apm', type: 'running' }]
+//   );
+// }
 
 /**
  * The specially formatted comment in the `import` expression causes the corresponding webpack chunk to be named. This aids us in debugging chunk size issues.
  * See https://webpack.js.org/api/module-methods/#magic-comments
  */
-export async function loadDashboardFile(filename: string): Promise<any> {
+
+// TODO replace when the new dashboards are ready (if possible with the above comment)
+export async function loadDashboardFile(filename: string) {
   switch (filename) {
-    case 'nodejs': {
+    case 'classic_apm-apm-nodejs': {
       return import(
-        /* webpackChunkName: "lazyNodeJsDashboard" */
+        /* webpackChunkName: "lazyNodeJsClassicApmDashboard" */
         './nodejs.json'
       );
     }
-    case 'opentelemetry_nodejs': {
+    case 'classic_apm-otel_other-nodejs': {
       return import(
-        /* webpackChunkName: "lazyNodeJsDashboard" */
+        /* webpackChunkName: "lazyNodeJsApmOtelDashboard" */
         './opentelemetry_nodejs.json'
       );
     }
-    case 'java': {
+    case 'otel_native-otel_other-nodejs': {
       return import(
-        /* webpackChunkName: "lazyJavaDashboard" */
+        /* webpackChunkName: "lazyNodeJsOtelNativeDashboard" */
+        './opentelemetry_nodejs.json'
+      );
+    }
+    case 'classic_apm-apm-java': {
+      return import(
+        /* webpackChunkName: "lazyJavaClassicApmDashboard" */
         './java.json'
       );
     }
-    case 'opentelemetry_java': {
+    case 'classic_apm-otel_other-java': {
       return import(
-        /* webpackChunkName: "lazyJavaDashboard" */
+        /* webpackChunkName: "lazyJavaApmOtelDashboard" */
         './opentelemetry_java.json'
       );
     }
-    case 'opentelemetry_dotnet': {
+    case 'otel_native-otel_other-java': {
       return import(
-        /* webpackChunkName: "lazyOtelDotnetDashboard" */
+        /* webpackChunkName: "lazyJavaOtelNativeDashboard" */
+        './opentelemetry_java.json'
+      );
+    }
+    case 'otel_native-otel_other-dotnet': {
+      return import(
+        /* webpackChunkName: "lazyDotnetOtelNativeDashboard" */
+        './opentelemetry_dotnet.json'
+      );
+    }
+    case 'classic_apm-otel_other-dotnet': {
+      return import(
+        /* webpackChunkName: "lazyDotnetApmOtelDashboard" */
         './opentelemetry_dotnet.json'
       );
     }

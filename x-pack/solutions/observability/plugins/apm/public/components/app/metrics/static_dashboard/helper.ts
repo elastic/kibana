@@ -7,15 +7,8 @@
 
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { DashboardPanelMap } from '@kbn/dashboard-plugin/common';
-// Remove
-// import {
-//   AGENT_NAME_DASHBOARD_FILE_MAPPING,
-//   loadDashboardFile,
-// } from './dashboards/dashboard_catalog';
-
-// Uncomment
-// import { loadDashboardFile } from './dashboards/get_dashboard_file_name';
-import { getDashboardFileName, loadDashboardFile } from './dashboards/get_dashboard_file_name';
+import { existingDashboardFileNames, loadDashboardFile } from './dashboards/dashboard_catalog';
+import { getDashboardFileName } from './dashboards/get_dashboard_file_name';
 interface DashboardFileProps {
   agentName?: string;
   runtimeName?: string;
@@ -37,9 +30,9 @@ export async function getDashboardFile(props: DashboardFileProps) {
   return dashboardJSON;
 }
 
-export async function hasDashboardFile(props: DashboardFileProps) {
-  const dashboardJSON = await getDashboardFile(props);
-  return !!dashboardJSON;
+export function hasDashboard(props: DashboardFileProps) {
+  const dashboardFilename = getDashboardFileNameFromProps(props);
+  return !!dashboardFilename && existingDashboardFileNames.has(dashboardFilename);
 }
 
 // Remove
