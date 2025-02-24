@@ -351,3 +351,5 @@ export const PER_FIELD_DIFF_WRAPPER = '[data-test-subj="ruleUpgradePerFieldDiffW
 export const PER_FIELD_DIFF_DEFINITION_SECTION = '[data-test-subj="perFieldDiffDefinitionSection"]';
 
 export const MODIFIED_RULE_BADGE = '[data-test-subj="upgradeRulesTableModifiedColumnBadge"]';
+
+export const RULES_TABLE_MODIFIED_RULE_BADGE = '[data-test-subj="rulesTableModifiedColumnBadge"]';
