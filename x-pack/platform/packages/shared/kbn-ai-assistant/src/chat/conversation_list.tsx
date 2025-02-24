@@ -26,6 +26,7 @@ import { useConfirmModal, useConversationsByDate } from '../hooks';
 import { DATE_CATEGORY_LABELS } from '../i18n';
 import { NewChatButton } from '../buttons/new_chat_button';
 import { ConversationListItemLabel } from './conversation_list_item_label';
+import { useConversationContextMenu } from '../hooks/use_conversation_context_menu';
 
 const panelClassName = css`
   max-height: 100%;
@@ -46,17 +47,21 @@ export function ConversationList({
   isLoading,
   selectedConversationId,
   onConversationSelect,
-  onConversationDeleteClick,
   newConversationHref,
   getConversationHref,
+  setIsUpdatingConversationList,
+  refreshConversations,
+  updateDisplayedConversation,
 }: {
   conversations: UseConversationListResult['conversations'];
   isLoading: boolean;
   selectedConversationId?: string;
   onConversationSelect?: (conversationId?: string) => void;
-  onConversationDeleteClick: (conversationId: string) => void;
   newConversationHref?: string;
   getConversationHref?: (conversationId: string) => string;
+  setIsUpdatingConversationList: (isUpdating: boolean) => void;
+  refreshConversations: () => void;
+  updateDisplayedConversation: (id?: string) => void;
 }) {
   const euiTheme = useEuiTheme();
   const scrollBarStyles = euiScrollBarStyles(euiTheme);
@@ -99,6 +104,11 @@ export function ConversationList({
       onConversationSelect(conversationId);
     }
   };
+
+  const { deleteConversation } = useConversationContextMenu({
+    setIsUpdatingConversationList,
+    refreshConversations,
+  });
 
   return (
     <>
@@ -180,7 +190,12 @@ export function ConversationList({
                                 if (!confirmed) {
                                   return;
                                 }
-                                onConversationDeleteClick(conversation.id);
+
+                                deleteConversation(conversation.id).then(() => {
+                                  if (conversation.id === selectedConversationId) {
+                                    updateDisplayedConversation();
+                                  }
+                                });
                               });
                             },
                           }}

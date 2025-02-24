@@ -17,6 +17,7 @@ export interface UseConversationListResult {
   conversations: AbortableAsyncState<{ conversations: Conversation[] }>;
   isLoadingConversationList: boolean;
   setIsUpdatingConversationList: (isUpdating: boolean) => void;
+  refreshConversations: () => void;
 }
 
 export function useConversationList(): UseConversationListResult {
@@ -42,5 +43,6 @@ export function useConversationList(): UseConversationListResult {
     conversations,
     isLoadingConversationList: conversations.loading || isUpdatingList,
     setIsUpdatingConversationList: setIsUpdatingList,
+    refreshConversations: conversations.refresh,
   };
 }

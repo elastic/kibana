@@ -21,11 +21,13 @@ import {
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/css';
 import { AssistantIcon } from '@kbn/ai-assistant-icon';
+import { Conversation } from '@kbn/observability-ai-assistant-plugin/common';
 import { ChatActionsMenu } from './chat_actions_menu';
 import type { UseGenAIConnectorsResult } from '../hooks/use_genai_connectors';
 import { FlyoutPositionMode } from './chat_flyout';
 import { ChatSharingMenu } from './chat_sharing_menu';
 import { ChatContextMenu } from './chat_context_menu';
+import { useConversationContextMenu } from '../hooks/use_conversation_context_menu';
 
 // needed to prevent InlineTextEdit component from expanding container
 const minWidthClassName = css`
@@ -50,29 +52,31 @@ const chatHeaderMobileClassName = css`
 export function ChatHeader({
   connectors,
   conversationId,
+  conversation,
   flyoutPositionMode,
   licenseInvalid,
   loading,
   title,
-  onCopyConversationToClipboard,
   onSaveTitle,
   onToggleFlyoutPositionMode,
   navigateToConversation,
-  onCopyUrl,
-  deleteConversation,
+  setIsUpdatingConversationList,
+  refreshConversations,
+  updateDisplayedConversation,
 }: {
   connectors: UseGenAIConnectorsResult;
   conversationId?: string;
+  conversation?: Conversation;
   flyoutPositionMode?: FlyoutPositionMode;
   licenseInvalid: boolean;
   loading: boolean;
   title: string;
-  onCopyConversationToClipboard?: () => void;
   onSaveTitle: (title: string) => void;
   onToggleFlyoutPositionMode?: (newFlyoutPositionMode: FlyoutPositionMode) => void;
   navigateToConversation?: (nextConversationId?: string) => void;
-  onCopyUrl?: () => void;
-  deleteConversation?: () => void;
+  setIsUpdatingConversationList: (isUpdating: boolean) => void;
+  refreshConversations: () => void;
+  updateDisplayedConversation: (id?: string) => void;
 }) {
   const theme = useEuiTheme();
   const breakpoint = useCurrentEuiBreakpoint();
@@ -92,6 +96,11 @@ export function ChatHeader({
       );
     }
   };
+
+  const { copyConversationToClipboard, copyUrl, deleteConversation } = useConversationContextMenu({
+    setIsUpdatingConversationList,
+    refreshConversations,
+  });
 
   return (
     <EuiPanel
@@ -154,7 +163,7 @@ export function ChatHeader({
               />
             </EuiFlexItem>
 
-            {conversationId && onCopyConversationToClipboard && onCopyUrl && deleteConversation ? (
+            {conversationId && conversation ? (
               <>
                 <EuiFlexItem grow={false}>
                   <ChatSharingMenu />
@@ -162,9 +171,11 @@ export function ChatHeader({
                 <EuiFlexItem grow={false}>
                   <ChatContextMenu
                     disabled={licenseInvalid}
-                    onCopyToClipboardClick={onCopyConversationToClipboard}
-                    onCopyUrlClick={onCopyUrl}
-                    onDeleteClick={deleteConversation}
+                    onCopyToClipboardClick={() => copyConversationToClipboard(conversation)}
+                    onCopyUrlClick={() => copyUrl(conversationId)}
+                    onDeleteClick={() => {
+                      deleteConversation(conversationId).then(() => updateDisplayedConversation());
+                    }}
                   />
                 </EuiFlexItem>
               </>

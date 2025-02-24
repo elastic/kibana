@@ -15,31 +15,22 @@ export interface CopyConversationToClipboardParams {
   messages: Message[];
 }
 
-export interface UseConversationContextMenuProps {
-  initialTitle?: string;
-  setIsUpdatingConversationList: (isUpdating: boolean) => void;
-  refreshConversations: () => void;
-}
-
 export interface UseConversationContextMenuResult {
   deleteConversation: (id: string) => Promise<void>;
-  copyConversationToClipboard: ({
-    conversation,
-    messages,
-  }: CopyConversationToClipboardParams) => void;
-  copyUrl: (conversation: Conversation) => void;
+  copyConversationToClipboard: (conversation: Conversation) => void;
+  copyUrl: (id: string) => void;
 }
 
 export function useConversationContextMenu({
-  initialTitle,
   setIsUpdatingConversationList,
   refreshConversations,
-}: UseConversationContextMenuProps): UseConversationContextMenuResult {
+}: {
+  setIsUpdatingConversationList: (isUpdating: boolean) => void;
+  refreshConversations: () => void;
+}): UseConversationContextMenuResult {
   const service = useAIAssistantAppService();
 
-  const {
-    services: { notifications, http },
-  } = useKibana();
+  const { notifications, http } = useKibana().services;
 
   const handleDeleteConversation = async (id: string) => {
     setIsUpdatingConversationList(true);
@@ -57,26 +48,24 @@ export function useConversationContextMenu({
         }
       );
 
+      setIsUpdatingConversationList(false);
       refreshConversations();
     } catch (err) {
       notifications!.toasts.addError(err, {
-        title: i18n.translate('xpack.aiAssistant.flyout.failedToDeleteConversation', {
+        title: i18n.translate('xpack.aiAssistant.flyout.deleteConversationErrorToast', {
           defaultMessage: 'Could not delete conversation',
         }),
       });
     }
   };
 
-  const handleCopyConversationToClipboard = ({
-    conversation,
-    messages,
-  }: CopyConversationToClipboardParams) => {
+  const handleCopyConversationToClipboard = (conversation: Conversation) => {
     try {
-      const deserializedMessages = (conversation?.messages ?? messages).map(deserializeMessage);
+      const deserializedMessages = conversation.messages.map(deserializeMessage);
 
       const content = JSON.stringify({
-        title: conversation?.conversation.title || initialTitle,
-        systemMessage: conversation?.systemMessage,
+        title: conversation.conversation.title,
+        systemMessage: conversation.systemMessage,
         messages: deserializedMessages,
       });
 
@@ -96,16 +85,10 @@ export function useConversationContextMenu({
     }
   };
 
-  const handleCopyUrl = (conversation: Conversation) => {
+  const handleCopyUrl = (id: string) => {
     try {
-      const conversationId = conversation?.conversation?.id;
-
-      if (!conversationId) {
-        throw new Error('Cannot copy URL if the conversation is not stored');
-      }
-
       const conversationUrl = http?.basePath.prepend(
-        `/app/observabilityAIAssistant/conversations/${conversationId}`
+        `/app/observabilityAIAssistant/conversations/${id}`
       );
 
       if (!conversationUrl) {
@@ -117,27 +100,20 @@ export function useConversationContextMenu({
 
       notifications!.toasts.addSuccess({
         title: i18n.translate('xpack.aiAssistant.copyUrlSuccessToast', {
-          defaultMessage: 'URL copied to clipboard',
+          defaultMessage: 'Conversation URL copied to clipboard',
         }),
       });
     } catch (error) {
       notifications!.toasts.addError(error, {
         title: i18n.translate('xpack.aiAssistant.copyUrlErrorToast', {
-          defaultMessage: 'Could not copy URL',
+          defaultMessage: 'Could not copy conversation URL',
         }),
       });
     }
   };
 
   return {
-    deleteConversation: async (id: string) => {
-      setIsUpdatingConversationList(true);
-      try {
-        return await handleDeleteConversation(id);
-      } finally {
-        setIsUpdatingConversationList(false);
-      }
-    },
+    deleteConversation: handleDeleteConversation,
     copyConversationToClipboard: handleCopyConversationToClipboard,
     copyUrl: handleCopyUrl,
   };
