@@ -5,6 +5,7 @@
  * 2.0.
  */
 import React from 'react';
+import { EuiFlexGroup, EuiLoadingChart } from '@elastic/eui';
 import { Chart, Settings, Axis, BarSeries, Position, ScaleType } from '@elastic/charts';
 import { useElasticChartsTheme } from '@kbn/charts-theme';
 import { i18n } from '@kbn/i18n';
@@ -27,14 +28,24 @@ const yAxisTitle = i18n.translate(
 const chartStyles = { height: '260px' };
 
 export interface TopAssetsBarChartProps {
-  loading: boolean;
+  isLoading: boolean;
   entities: AggregationResult[];
 }
 
-export const TopAssetsBarChart = ({ loading, entities }: TopAssetsBarChartProps) => {
+export const TopAssetsBarChart = ({ isLoading, entities }: TopAssetsBarChartProps) => {
   const baseTheme = useElasticChartsTheme();
   return (
     <div css={chartStyles}>
+      {isLoading ? (
+        <EuiFlexGroup
+          justifyContent="center"
+          alignItems="center"
+          css={{ height: '100%', width: '100%' }}
+        >
+          <EuiLoadingChart size="xl" />
+        </EuiFlexGroup>
+      ) : null}
+
       <Chart title={chartTitle}>
         <Settings baseTheme={baseTheme} showLegend={true} animateData={true} />
         <Axis
