@@ -65,15 +65,22 @@ export function cleanupUrlState(
     delete appStateFromUrl.sampleSize;
   }
 
-  if (appStateFromUrl.index) {
-    if (!appStateFromUrl.dataSource) {
-      // Convert the provided index to a data source
-      appStateFromUrl.dataSource = isEsqlQuery
-        ? createEsqlDataSource()
-        : createDataViewDataSource({ dataViewId: appStateFromUrl.index });
-    }
+  let migratedDataViewId: string | undefined;
 
+  // Migrate legacy index parameter
+  if (appStateFromUrl.index) {
+    migratedDataViewId = appStateFromUrl.index;
     delete appStateFromUrl.index;
+  }
+
+  if (!appStateFromUrl.dataSource) {
+    if (isEsqlQuery) {
+      // Use ES|QL data source for ES|QL queries
+      appStateFromUrl.dataSource = createEsqlDataSource();
+    } else if (migratedDataViewId) {
+      // Use data view data source for migrated data view IDs
+      appStateFromUrl.dataSource = createDataViewDataSource({ dataViewId: migratedDataViewId });
+    }
   }
 
   return appStateFromUrl as DiscoverAppState;
