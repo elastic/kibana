@@ -9,13 +9,13 @@ import { IScopedClusterClient, Logger } from '@kbn/core/server';
 import { StreamsStorageClient } from '../service';
 import { StreamActiveRecord, StreamChange, ValidationResult } from './types';
 import { streamFromDefinition } from './stream_from_definition';
-import { StreamsRepository } from './stream_repository';
 
 export class State {
-  streams: StreamsRepository;
+  private streamsByName: Map<string, StreamActiveRecord>;
 
   constructor(streams: StreamActiveRecord[]) {
-    this.streams = new StreamsRepository(streams);
+    this.streamsByName = new Map();
+    streams.forEach((stream) => this.streamsByName.set(stream.definition.name, stream));
   }
 
   applyChanges(requestedChanges: StreamChange[]): State {
@@ -25,7 +25,7 @@ export class State {
     const newState = this.clone();
 
     requestedChanges.forEach((change) => {
-      const targetStream = newState.streams.get(change.target);
+      const targetStream = newState.get(change.target);
 
       if (!targetStream) {
         if (change.type === 'delete') {
@@ -33,7 +33,7 @@ export class State {
         } else {
           const newStream = streamFromDefinition(change.request.stream);
           newStream.update(change.request.stream, newState, this);
-          newState.streams.set(newStream.definition.name, newStream);
+          newState.set(newStream.definition.name, newStream);
         }
       } else {
         if (change.type === 'delete') {
@@ -48,7 +48,7 @@ export class State {
   }
 
   private clone(): State {
-    const newStreams = this.streams.all().map((stream) => stream.clone());
+    const newStreams = this.all().map((stream) => stream.clone());
     return new State(newStreams);
   }
 
@@ -58,7 +58,7 @@ export class State {
   ): Promise<ValidationResult> {
     // Should I use allSettled here?
     const validationResults = await Promise.all(
-      this.streams.all().map((stream) => stream.validate(this, startingState, scopedClusterClient))
+      this.all().map((stream) => stream.validate(this, startingState, scopedClusterClient))
     );
 
     const isValid = validationResults.every((validationResult) => validationResult.isValid);
@@ -74,7 +74,7 @@ export class State {
     // Could there be conflicts between changes, like a group being updated with new members before that member is deleted?
     // I guess the deletion change for that member should catch that and update the group again or validation for the group should catch it
     // In reverse, the change for the group should check that the member was deleted and throw? And in any case the validation should catch it
-    return this.streams.all().filter((stream) => stream.changeStatus !== 'unchanged');
+    return this.all().filter((stream) => stream.changeStatus !== 'unchanged');
   }
 
   async commitChanges(
@@ -102,9 +102,9 @@ export class State {
     const changes = changedStreams
       .map((stream) => {
         if (stream.changeStatus === 'upserted') {
-          if (startingState.streams.has(stream.definition.name)) {
+          if (startingState.has(stream.definition.name)) {
             // Stream was updated, revert to previous state
-            return startingState.streams.get(stream.definition.name);
+            return startingState.get(stream.definition.name);
           } else {
             // Stream was created, delete it
             stream.markForDeletion();
@@ -112,7 +112,7 @@ export class State {
           }
         } else if (stream.changeStatus === 'deleted') {
           // Stream was deleted, revert to previous state
-          return startingState.streams.get(stream.definition.name);
+          return startingState.get(stream.definition.name);
         }
       })
       .filter((maybeStream): maybeStream is StreamActiveRecord => maybeStream !== undefined);
@@ -122,6 +122,22 @@ export class State {
         stream.commit(storageClient, logger, scopedClusterClient, isServerless)
       )
     );
+  }
+
+  get(name: string) {
+    return this.streamsByName.get(name);
+  }
+
+  set(name: string, stream: StreamActiveRecord) {
+    this.streamsByName.set(name, stream);
+  }
+
+  all() {
+    return Array.from(this.streamsByName.values());
+  }
+
+  has(name: string) {
+    return this.streamsByName.has(name);
   }
 
   static async currentState(storageClient: StreamsStorageClient): Promise<State> {

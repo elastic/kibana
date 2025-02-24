@@ -38,7 +38,7 @@ import {
   findInheritedLifecycle,
   findInheritingStreams,
 } from '@kbn/streams-schema';
-import { cloneDeep, keyBy, omit, orderBy } from 'lodash';
+import { cloneDeep, keyBy, orderBy } from 'lodash';
 import { AssetClient } from './assets/asset_client';
 import { ForbiddenMemberTypeError } from './errors/forbidden_member_type_error';
 import {

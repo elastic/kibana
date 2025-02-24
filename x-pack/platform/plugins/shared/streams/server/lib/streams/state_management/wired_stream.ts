@@ -57,7 +57,7 @@ export class WiredStream implements StreamActiveRecord {
     startingState: State,
     scopedClusterClient: IScopedClusterClient
   ): Promise<ValidationResult> {
-    const existsInStartingState = startingState.streams.has(this.definition.name);
+    const existsInStartingState = startingState.has(this.definition.name);
 
     if (!existsInStartingState) {
       // Check for data stream conflict
