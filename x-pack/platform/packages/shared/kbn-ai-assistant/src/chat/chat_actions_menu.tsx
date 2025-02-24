@@ -25,11 +25,13 @@ export function ChatActionsMenu({
   conversationId,
   disabled,
   onCopyConversationClick,
+  onDuplicateConversationClick,
 }: {
   connectors: UseGenAIConnectorsResult;
   conversationId?: string;
   disabled: boolean;
   onCopyConversationClick: () => void;
+  onDuplicateConversationClick: () => void;
 }) {
   const { application, http } = useKibana().services;
   const knowledgeBase = useKnowledgeBase();
@@ -139,6 +141,16 @@ export function ChatActionsMenu({
                 onClick: () => {
                   toggleActionsMenu();
                   onCopyConversationClick();
+                },
+              },
+              {
+                name: i18n.translate('xpack.aiAssistant.chatHeader.actions.duplicateConversation', {
+                  defaultMessage: 'Duplicate',
+                }),
+                disabled: !conversationId,
+                onClick: () => {
+                  toggleActionsMenu();
+                  onDuplicateConversationClick();
                 },
               },
             ],

@@ -105,6 +105,31 @@ const createConversationRoute = createObservabilityAIAssistantServerRoute({
   },
 });
 
+const duplicateConversationRoute = createObservabilityAIAssistantServerRoute({
+  endpoint: 'POST /internal/observability_ai_assistant/conversation/{conversationId}/duplicate',
+  params: t.type({
+    path: t.type({
+      conversationId: t.string,
+    }),
+  }),
+  security: {
+    authz: {
+      requiredPrivileges: ['ai_assistant'],
+    },
+  },
+  handler: async (resources): Promise<Conversation> => {
+    const { service, request, params } = resources;
+
+    const client = await service.getClient({ request });
+
+    if (!client) {
+      throw notImplemented();
+    }
+
+    return client.duplicateConversation(params.path.conversationId);
+  },
+});
+
 const updateConversationRoute = createObservabilityAIAssistantServerRoute({
   endpoint: 'PUT /internal/observability_ai_assistant/conversation/{conversationId}',
   params: t.type({
@@ -198,4 +223,5 @@ export const conversationRoutes = {
   ...updateConversationRoute,
   ...updateConversationTitle,
   ...deleteConversationRoute,
+  ...duplicateConversationRoute,
 };
