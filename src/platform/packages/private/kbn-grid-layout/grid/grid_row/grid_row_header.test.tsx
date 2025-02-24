@@ -13,8 +13,7 @@ import { EuiThemeProvider } from '@elastic/eui';
 import { RenderResult, act, render, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
-import { gridLayoutStateManagerMock, mockRenderPanelContents } from '../test_utils/mocks';
-import { getSampleLayout } from '../test_utils/sample_layout';
+import { getGridLayoutStateManagerMock, mockRenderPanelContents } from '../test_utils/mocks';
 import { GridLayoutStateManager } from '../types';
 import { GridRowHeader, GridRowHeaderProps } from './grid_row_header';
 import { GridLayoutContext, GridLayoutContextType } from '../use_grid_layout_context';
@@ -32,43 +31,43 @@ describe('GridRowHeader', () => {
     propsOverrides: Partial<GridRowHeaderProps> = {},
     contextOverrides: Partial<GridLayoutContextType> = {}
   ) => {
-    return render(
-      <EuiThemeProvider>
+    const stateManagerMock = getGridLayoutStateManagerMock();
+    return {
+      component: render(
         <GridLayoutContext.Provider
           value={
             {
               renderPanelContents: mockRenderPanelContents,
-              gridLayoutStateManager: gridLayoutStateManagerMock,
+              gridLayoutStateManager: stateManagerMock,
               ...contextOverrides,
             } as GridLayoutContextType
           }
         >
           <GridRowHeader
             rowIndex={0}
-            toggleIsCollapsed={() => toggleIsCollapsed(0, gridLayoutStateManagerMock)}
+            toggleIsCollapsed={() => toggleIsCollapsed(0, stateManagerMock)}
             collapseButtonRef={React.createRef()}
             {...propsOverrides}
           />
-        </GridLayoutContext.Provider>
-      </EuiThemeProvider>
-    );
+        </GridLayoutContext.Provider>,
+        { wrapper: EuiThemeProvider }
+      ),
+      gridLayoutStateManager: stateManagerMock,
+    };
   };
 
   beforeEach(() => {
     toggleIsCollapsed.mockClear();
-    act(() => {
-      gridLayoutStateManagerMock.gridLayout$.next(getSampleLayout());
-    });
   });
 
   it('renders the panel count', async () => {
-    const component = renderGridRowHeader();
+    const { component, gridLayoutStateManager } = renderGridRowHeader();
     const initialCount = component.getByTestId('kbnGridRowHeader-0--panelCount');
     expect(initialCount.textContent).toBe('(8 panels)');
 
     act(() => {
-      const currentRow = gridLayoutStateManagerMock.gridLayout$.getValue()[0];
-      gridLayoutStateManagerMock.gridLayout$.next([
+      const currentRow = gridLayoutStateManager.gridLayout$.getValue()[0];
+      gridLayoutStateManager.gridLayout$.next([
         {
           ...currentRow,
           panels: {
@@ -85,14 +84,14 @@ describe('GridRowHeader', () => {
   });
 
   it('clicking title calls `toggleIsCollapsed`', async () => {
-    const component = renderGridRowHeader();
+    const { component, gridLayoutStateManager } = renderGridRowHeader();
     const title = component.getByTestId('kbnGridRowTitle-0');
 
     expect(toggleIsCollapsed).toBeCalledTimes(0);
-    expect(gridLayoutStateManagerMock.gridLayout$.getValue()[0].isCollapsed).toBe(false);
+    expect(gridLayoutStateManager.gridLayout$.getValue()[0].isCollapsed).toBe(false);
     await userEvent.click(title);
     expect(toggleIsCollapsed).toBeCalledTimes(1);
-    expect(gridLayoutStateManagerMock.gridLayout$.getValue()[0].isCollapsed).toBe(true);
+    expect(gridLayoutStateManager.gridLayout$.getValue()[0].isCollapsed).toBe(true);
   });
 
   describe('title editor', () => {
@@ -105,21 +104,21 @@ describe('GridRowHeader', () => {
     };
 
     it('clicking on edit icon triggers inline title editor and does not toggle collapsed', async () => {
-      const component = renderGridRowHeader();
+      const { component, gridLayoutStateManager } = renderGridRowHeader();
       const editIcon = component.getByTestId('kbnGridRowTitle-0--edit');
 
       expect(component.queryByTestId('kbnGridRowTitle-0--editor')).not.toBeInTheDocument();
-      expect(gridLayoutStateManagerMock.gridLayout$.getValue()[0].isCollapsed).toBe(false);
+      expect(gridLayoutStateManager.gridLayout$.getValue()[0].isCollapsed).toBe(false);
       await userEvent.click(editIcon);
       expect(component.getByTestId('kbnGridRowTitle-0--editor')).toBeInTheDocument();
       expect(toggleIsCollapsed).toBeCalledTimes(0);
-      expect(gridLayoutStateManagerMock.gridLayout$.getValue()[0].isCollapsed).toBe(false);
+      expect(gridLayoutStateManager.gridLayout$.getValue()[0].isCollapsed).toBe(false);
     });
 
     it('can update the title', async () => {
-      const component = renderGridRowHeader();
+      const { component, gridLayoutStateManager } = renderGridRowHeader();
       expect(component.getByTestId('kbnGridRowTitle-0').textContent).toBe('Large section');
-      expect(gridLayoutStateManagerMock.gridLayout$.getValue()[0].title).toBe('Large section');
+      expect(gridLayoutStateManager.gridLayout$.getValue()[0].title).toBe('Large section');
 
       const editIcon = component.getByTestId('kbnGridRowTitle-0--edit');
       await userEvent.click(editIcon);
@@ -129,11 +128,11 @@ describe('GridRowHeader', () => {
 
       expect(component.queryByTestId('kbnGridRowTitle-0--editor')).not.toBeInTheDocument();
       expect(component.getByTestId('kbnGridRowTitle-0').textContent).toBe('Large section 123');
-      expect(gridLayoutStateManagerMock.gridLayout$.getValue()[0].title).toBe('Large section 123');
+      expect(gridLayoutStateManager.gridLayout$.getValue()[0].title).toBe('Large section 123');
     });
 
     it('clicking on cancel closes the inline title editor without updating title', async () => {
-      const component = renderGridRowHeader();
+      const { component, gridLayoutStateManager } = renderGridRowHeader();
       const editIcon = component.getByTestId('kbnGridRowTitle-0--edit');
       await userEvent.click(editIcon);
 
@@ -143,7 +142,7 @@ describe('GridRowHeader', () => {
 
       expect(component.queryByTestId('kbnGridRowTitle-0--editor')).not.toBeInTheDocument();
       expect(component.getByTestId('kbnGridRowTitle-0').textContent).toBe('Large section');
-      expect(gridLayoutStateManagerMock.gridLayout$.getValue()[0].title).toBe('Large section');
+      expect(gridLayoutStateManager.gridLayout$.getValue()[0].title).toBe('Large section');
     });
   });
 });

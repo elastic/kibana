@@ -12,7 +12,7 @@ import { EuiThemeProvider } from '@elastic/eui';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
-import { gridLayoutStateManagerMock, mockRenderPanelContents } from '../test_utils/mocks';
+import { getGridLayoutStateManagerMock, mockRenderPanelContents } from '../test_utils/mocks';
 import { getSampleLayout } from '../test_utils/sample_layout';
 import { GridLayoutContext, type GridLayoutContextType } from '../use_grid_layout_context';
 import { GridRow, GridRowProps } from './grid_row';
@@ -23,19 +23,18 @@ describe('GridRow', () => {
     contextOverrides: Partial<GridLayoutContextType> = {}
   ) => {
     return render(
-      <EuiThemeProvider>
-        <GridLayoutContext.Provider
-          value={
-            {
-              renderPanelContents: mockRenderPanelContents,
-              gridLayoutStateManager: gridLayoutStateManagerMock,
-              ...contextOverrides,
-            } as GridLayoutContextType
-          }
-        >
-          <GridRow rowIndex={0} {...propsOverrides} />
-        </GridLayoutContext.Provider>
-      </EuiThemeProvider>
+      <GridLayoutContext.Provider
+        value={
+          {
+            renderPanelContents: mockRenderPanelContents,
+            gridLayoutStateManager: getGridLayoutStateManagerMock(),
+            ...contextOverrides,
+          } as GridLayoutContextType
+        }
+      >
+        <GridRow rowIndex={0} {...propsOverrides} />
+      </GridLayoutContext.Provider>,
+      { wrapper: EuiThemeProvider }
     );
   };
 

@@ -35,21 +35,13 @@ const renderGridLayout = (propsOverrides: Partial<GridLayoutProps> = {}) => {
     ...propsOverrides,
   } as GridLayoutProps;
 
-  const { rerender, ...rtlRest } = render(
-    <EuiThemeProvider>
-      <GridLayout {...props} />
-    </EuiThemeProvider>
-  );
+  const { rerender, ...rtlRest } = render(<GridLayout {...props} />, { wrapper: EuiThemeProvider });
 
   return {
     ...rtlRest,
     rerender: (overrides: Partial<GridLayoutProps>) => {
       const newProps = { ...props, ...overrides } as GridLayoutProps;
-      return rerender(
-        <EuiThemeProvider>
-          <GridLayout {...newProps} />
-        </EuiThemeProvider>
-      );
+      return rerender(<GridLayout {...newProps} />);
     },
   };
 };
