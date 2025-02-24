@@ -9,7 +9,6 @@ import { ignoreElements, last, merge, Observable, shareReplay, tap } from 'rxjs'
 import { createFunctionNotFoundError, FunctionDefinition } from '../../../../common';
 import { ChatEvent } from '../../../../common/conversation_complete';
 import { concatenateChatCompletionChunks } from '../../../../common/utils/concatenate_chat_completion_chunks';
-import { withoutTokenCountEvents } from '../../../../common/utils/without_token_count_events';
 
 export function failOnNonExistingFunctionCall({
   functions,
@@ -22,7 +21,6 @@ export function failOnNonExistingFunctionCall({
     return merge(
       shared$,
       shared$.pipe(
-        withoutTokenCountEvents(),
         concatenateChatCompletionChunks(),
         last(),
         tap((event) => {
