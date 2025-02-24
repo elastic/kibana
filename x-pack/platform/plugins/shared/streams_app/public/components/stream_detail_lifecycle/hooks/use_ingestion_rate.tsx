@@ -10,7 +10,6 @@ import { TimeRange, getCalculateAutoTimeExpression } from '@kbn/data-plugin/comm
 import { IngestStreamGetResponse, PhaseName } from '@kbn/streams-schema';
 import { lastValueFrom } from 'rxjs';
 import { IKibanaSearchRequest, IKibanaSearchResponse } from '@kbn/search-types';
-import { uniq } from 'lodash';
 import { useKibana } from '../../../hooks/use_kibana';
 import { useStreamsAppFetch } from '../../../hooks/use_streams_app_fetch';
 import { DataStreamStats } from './use_data_stream_stats';
