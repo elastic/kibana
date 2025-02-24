@@ -34,6 +34,7 @@ import { AssistantFeatureKey } from '@kbn/elastic-assistant-common/impl/capabili
 import { getLangSmithTracer } from '@kbn/langchain/server/tracers/langsmith';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import type { LlmTasksPluginStart } from '@kbn/llm-tasks-plugin/server';
+import { isEmpty } from 'lodash';
 import { INVOKE_ASSISTANT_SUCCESS_EVENT } from '../lib/telemetry/event_based_telemetry';
 import { AIAssistantKnowledgeBaseDataClient } from '../ai_assistant_data_clients/knowledge_base';
 import { FindResponse } from '../ai_assistant_data_clients/find';
@@ -52,7 +53,6 @@ import { getLangChainMessages } from '../lib/langchain/helpers';
 import { AIAssistantConversationsDataClient } from '../ai_assistant_data_clients/conversations';
 import { ElasticAssistantRequestHandlerContext, GetElser } from '../types';
 import { callAssistantGraph } from '../lib/langchain/graphs/default_assistant_graph';
-import { isEmpty } from 'lodash';
 
 interface GetPluginNameFromRequestParams {
   request: KibanaRequest;

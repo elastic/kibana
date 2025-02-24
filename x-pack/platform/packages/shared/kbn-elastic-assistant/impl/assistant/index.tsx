@@ -454,8 +454,7 @@ const AssistantComponent: React.FC<Props> = ({
 
   return (
     <>
-      
-        <AnonymizedValuesAndCitationsTour conversation={currentConversation} />
+      <AnonymizedValuesAndCitationsTour conversation={currentConversation} />
       <EuiFlexGroup direction={'row'} wrap={false} gutterSize="none">
         {chatHistoryVisible && (
           <EuiFlexItem

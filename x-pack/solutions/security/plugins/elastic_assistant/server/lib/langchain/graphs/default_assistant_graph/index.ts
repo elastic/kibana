@@ -16,6 +16,7 @@ import { APMTracer } from '@kbn/langchain/server/tracers/apm';
 import { TelemetryTracer } from '@kbn/langchain/server/tracers/telemetry';
 import { pruneContentReferences, MessageMetadata } from '@kbn/elastic-assistant-common';
 import { getPrompt, resolveProviderAndModel } from '@kbn/security-ai-prompts';
+import { isEmpty } from 'lodash';
 import { localToolPrompts, promptGroupId as toolsGroupId } from '../../../prompt/tool_prompts';
 import { promptGroupId } from '../../../prompt/local_prompt_object';
 import { getModelOrOss } from '../../../prompt/helpers';
@@ -29,7 +30,6 @@ import { GraphInputs } from './types';
 import { getDefaultAssistantGraph } from './graph';
 import { invokeGraph, streamGraph } from './helpers';
 import { transformESSearchToAnonymizationFields } from '../../../../ai_assistant_data_clients/anonymization_fields/helpers';
-import { isEmpty } from 'lodash';
 
 export const callAssistantGraph: AgentExecutor<true | false> = async ({
   abortSignal,

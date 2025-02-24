@@ -33,9 +33,7 @@ import {
   errorResult,
   successResult,
 } from './create_resource_installation_helper';
-import {
-  conversationsFieldMap,
-} from '../ai_assistant_data_clients/conversations/field_maps_configuration';
+import { conversationsFieldMap } from '../ai_assistant_data_clients/conversations/field_maps_configuration';
 import { assistantPromptsFieldMap } from '../ai_assistant_data_clients/prompts/field_maps_configuration';
 import { assistantAnonymizationFieldsFieldMap } from '../ai_assistant_data_clients/anonymization_fields/field_maps_configuration';
 import { AIAssistantDataClient } from '../ai_assistant_data_clients';
