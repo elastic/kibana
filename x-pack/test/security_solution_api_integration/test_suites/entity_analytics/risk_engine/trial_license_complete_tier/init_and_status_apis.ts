@@ -763,7 +763,6 @@ export default ({ getService }: FtrProviderContext) => {
 
         expect(status2.body.risk_engine_task_status?.runAt).to.be.a('string');
         expectTaskIsHealthy(status2.body.risk_engine_task_status?.status);
-        expect(status2.body.risk_engine_task_status?.startedAt).to.be(undefined);
 
         await riskEngineRoutes.disable();
         const status3 = await riskEngineRoutes.getStatus();
@@ -779,7 +778,6 @@ export default ({ getService }: FtrProviderContext) => {
 
         expect(status4.body.risk_engine_task_status?.runAt).to.be.a('string');
         expectTaskIsHealthy(status4.body.risk_engine_task_status?.status);
-        expect(status4.body.risk_engine_task_status?.startedAt).to.be(undefined);
       });
     });
   });

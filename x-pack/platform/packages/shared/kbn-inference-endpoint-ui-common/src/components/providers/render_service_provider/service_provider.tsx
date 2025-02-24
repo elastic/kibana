@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiHighlight, EuiIcon } from '@elastic/eui';
+import { EuiAvatar, EuiHighlight } from '@elastic/eui';
 import React from 'react';
 
 import { ServiceProviderKeys } from '../../../constants';
@@ -118,7 +118,14 @@ export const ServiceProviderIcon: React.FC<ServiceProviderProps> = ({ providerKe
   const provider = SERVICE_PROVIDERS[providerKey];
 
   return provider ? (
-    <EuiIcon data-test-subj={`icon-service-provider-${providerKey}`} type={provider.icon} />
+    <EuiAvatar
+      name={providerKey}
+      data-test-subj={`icon-service-provider-${providerKey}`}
+      iconType={provider.icon}
+      color="#fff"
+      size="s"
+      type="space"
+    />
   ) : null;
 };
 

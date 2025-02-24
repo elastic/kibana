@@ -517,10 +517,11 @@ export class EntityStoreDataClient {
           resource: EngineComponentResourceEnum.entity_definition,
         },
         ...definition.state.components.transforms.map(({ installed, stats }) => ({
-          id,
+          id: stats?.id || id,
           resource: EngineComponentResourceEnum.transform,
           installed,
           health: transformHealthToComponentHealth(stats?.health?.status),
+          metadata: stats?.stats,
           errors: (stats?.health as TransformHealth)?.issues?.map(({ issue, details }) => ({
             title: issue,
             message: details,

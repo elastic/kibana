@@ -1,0 +1,55 @@
+{
+  "id": "streamsAppWrapper",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": [],
+    "setup": {
+      "parentPluginId": "streamsAppWrapper",
+      "id": "def-public.ObservabilityStreamsWrapperPublicSetup",
+      "type": "Interface",
+      "tags": [],
+      "label": "ObservabilityStreamsWrapperPublicSetup",
+      "description": [],
+      "path": "x-pack/solutions/observability/plugins/observability_streams_wrapper/public/types.ts",
+      "deprecated": false,
+      "trackAdoption": false,
+      "children": [],
+      "lifecycle": "setup",
+      "initialIsOpen": true
+    },
+    "start": {
+      "parentPluginId": "streamsAppWrapper",
+      "id": "def-public.ObservabilityStreamsWrapperPublicStart",
+      "type": "Interface",
+      "tags": [],
+      "label": "ObservabilityStreamsWrapperPublicStart",
+      "description": [],
+      "path": "x-pack/solutions/observability/plugins/observability_streams_wrapper/public/types.ts",
+      "deprecated": false,
+      "trackAdoption": false,
+      "children": [],
+      "lifecycle": "start",
+      "initialIsOpen": true
+    }
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

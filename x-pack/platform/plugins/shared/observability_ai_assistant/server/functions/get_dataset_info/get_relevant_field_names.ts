@@ -106,8 +106,8 @@ export async function getRelevantFieldNames({
             types provided in the last user message. DO NOT UNDER ANY
             CIRCUMSTANCES include fields not mentioned in this list.`,
           messages: [
-            // remove the function request
-            ...messages.filter((msg) => !msg.message?.function_call),
+            // remove the last function request
+            ...messages.slice(0, -1),
             {
               '@timestamp': new Date().toISOString(),
               message: {
