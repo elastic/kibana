@@ -25,7 +25,6 @@ import type { SetOptional } from 'type-fest';
 import { noop } from 'lodash';
 import type { Alert } from '@kbn/alerting-types';
 import { AlertsTable } from '@kbn/response-ops-alerts-table';
-import type { EuiTheme } from '@kbn/react-kibana-context-styled';
 import { useAlertsContext } from './alerts_context';
 import { getBulkActionsByTableType } from '../../hooks/trigger_actions_alert_table/use_bulk_actions';
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
@@ -104,9 +103,6 @@ export const FullWidthFlexGroupTable = styled(EuiFlexGroup)<{ $visible: boolean 
 `;
 
 const EuiDataGridContainer = styled.div<GridContainerProps>`
-  .euiDataGrid__content {
-    background: ${({ theme }) => (theme as EuiTheme).eui.euiColorLightShade};
-  }
   ul.euiPagination__list {
     li.euiPagination__item:last-child {
       ${({ hideLastPage }) => {
