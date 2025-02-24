@@ -139,6 +139,12 @@ export const CreateDockerUBI: Task = {
       context: false,
       image: true,
     });
+    await runDockerGenerator(config, log, build, {
+      architecture: 'aarch64',
+      baseImage: 'ubi',
+      context: false,
+      image: true,
+    });
   },
 };
 
