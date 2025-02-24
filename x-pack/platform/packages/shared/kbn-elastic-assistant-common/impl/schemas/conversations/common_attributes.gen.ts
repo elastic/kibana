@@ -404,10 +404,6 @@ export const ConversationCreateProps = z.object({
    */
   excludeFromLastConversationStorage: z.boolean().optional(),
   replacements: Replacements.optional(),
-  /**
-   * Set the creation date.
-   */
-  createdAt: z.string().optional(),
 });
 
 export type ConversationMessageCreateProps = z.infer<typeof ConversationMessageCreateProps>;

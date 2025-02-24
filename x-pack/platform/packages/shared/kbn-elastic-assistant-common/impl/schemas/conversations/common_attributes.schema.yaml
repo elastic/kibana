@@ -395,9 +395,6 @@ components:
           type: boolean
         replacements:
           $ref: '#/components/schemas/Replacements'
-        createdAt:
-          description: Set the creation date.
-          type: string
 
     ConversationMessageCreateProps:
       type: object
