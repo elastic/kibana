@@ -216,14 +216,23 @@ function getConfigFleetServerHosts(config?: FleetConfigType) {
 }
 
 async function hashSecrets(preconfiguredFleetServerHost: FleetServerHost) {
+  let secrets: Record<string, any> = {};
   if (typeof preconfiguredFleetServerHost.secrets?.ssl?.key === 'string') {
     const key = await hashSecret(preconfiguredFleetServerHost.secrets?.ssl?.key);
-    return {
+    secrets = {
       ssl: {
         key,
       },
     };
   }
+  if (typeof preconfiguredFleetServerHost.secrets?.ssl?.key === 'string') {
+    const esKey = await hashSecret(preconfiguredFleetServerHost.secrets?.ssl?.key);
+    secrets = {
+      ...(secrets ? secrets : {}),
+      ssl: { es_key: esKey },
+    };
+  }
+  return secrets;
 }
 
 async function isPreconfiguredFleetServerHostDifferentFromCurrent(

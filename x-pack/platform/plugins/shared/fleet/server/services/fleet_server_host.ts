@@ -120,13 +120,11 @@ export async function createFleetServerHost(
       data.ssl = JSON.stringify({ ...fleetServerHost.ssl, ...fleetServerHost.secrets.ssl });
     }
   }
-
   const res = await soClient.create<FleetServerHostSOAttributes>(
     FLEET_SERVER_HOST_SAVED_OBJECT_TYPE,
     data,
     { id: options?.id, overwrite: options?.overwrite }
   );
-
   logger.debug(`Created fleet server host ${options?.id}`);
   return savedObjectToFleetServerHost(res);
 }
