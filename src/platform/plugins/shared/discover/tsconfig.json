@@ -99,6 +99,7 @@
     "@kbn/discover-contextual-components",
     "@kbn/esql-ast",
     "@kbn/discover-shared-plugin",
+    "@kbn/embeddable-enhanced-plugin",
     "@kbn/ui-theme"
   ],
   "exclude": ["target/**/*"]

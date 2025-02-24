@@ -15,18 +15,25 @@ import { useKibana } from './use_kibana';
 
 interface MutationArgs {
   synonymsSetId: string;
+  forceWrite?: boolean;
 }
 
-export const usePutSynonymsSet = (onSuccess?: () => void, onError?: (error: string) => void) => {
+export const usePutSynonymsSet = (
+  onSuccess?: () => void,
+  onConflictError?: (error: KibanaServerError) => void
+) => {
   const queryClient = useQueryClient();
   const {
     services: { http, notifications, application },
   } = useKibana();
 
   return useMutation(
-    async ({ synonymsSetId }: MutationArgs) => {
+    async ({ synonymsSetId, forceWrite }: MutationArgs) => {
       return await http.put<SynonymsPutSynonymResponse>(
-        `/internal/search_synonyms/synonyms/${synonymsSetId}`
+        `/internal/search_synonyms/synonyms/${synonymsSetId}`,
+        {
+          query: { forceWrite },
+        }
       );
     },
     {
@@ -46,8 +53,8 @@ export const usePutSynonymsSet = (onSuccess?: () => void, onError?: (error: stri
         );
       },
       onError: (error: { body: KibanaServerError }) => {
-        if (onError) {
-          onError(error.body.message);
+        if (onConflictError && error.body.statusCode === 409) {
+          onConflictError(error.body);
         } else {
           notifications?.toasts?.addError(new Error(error.body.message), {
             title: i18n.translate('xpack.searchSynonyms.putSynonymsSetError', {
