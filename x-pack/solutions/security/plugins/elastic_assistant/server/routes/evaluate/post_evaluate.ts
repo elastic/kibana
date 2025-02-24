@@ -405,10 +405,11 @@ export const postEvaluateRoute = (
                   tools,
                   replacements: {},
                   contentReferencesEnabled: Boolean(contentReferencesStore),
-                  getFormattedTime: () => getFormattedTime({
-                  screenContextTimezone: request.body.screenContext?.timeZone,
-                  uiSettingsDateFormatTimezone,
-                }),
+                  getFormattedTime: () =>
+                    getFormattedTime({
+                      screenContextTimezone: request.body.screenContext?.timeZone,
+                      uiSettingsDateFormatTimezone,
+                    }),
                 }),
               };
             })
