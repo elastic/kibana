@@ -122,8 +122,20 @@ const normalizeEsResponse = (migrationsResponse: EsDeprecations) => {
 export const getEnrichedDeprecations = async (
   dataClient: IScopedClusterClient
 ): Promise<EnrichedDeprecationInfo[]> => {
-  const deprecations = (await dataClient.asCurrentUser.migration.deprecations()) as EsDeprecations;
-  const systemIndices = await getESSystemIndicesMigrationStatus(dataClient.asCurrentUser);
+  const asCurrentUser = dataClient.asCurrentUser;
+  const deprecationsPromise =
+    dataClient.asCurrentUser.migration.deprecations() as Promise<EsDeprecations>;
+  const systemIndicesPromise = getESSystemIndicesMigrationStatus(asCurrentUser);
+  const rollupCapsPromise = asCurrentUser.rollup.getRollupCaps();
+
+  const [deprecations, systemIndices, rollupCaps] = await Promise.all([
+    deprecationsPromise,
+    systemIndicesPromise,
+    rollupCapsPromise,
+  ]);
+
+  // todo
+  rollupCaps;
 
   const systemIndicesList = convertFeaturesToIndicesArray(systemIndices.features);
 
