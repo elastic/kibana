@@ -27,7 +27,7 @@ RUNTIME_DEPS = [
   "@npm//babel-loader",
   "@npm//@babel/plugin-proposal-optional-chaining",
   "@npm//val-loader",
-  "//packages/kbn-node-libs-browser-webpack-plugin",
+  "//src/platform/packages/private/kbn-node-libs-browser-webpack-plugin",
   "//src/platform/packages/shared/kbn-repo-info",
   # deps in the dll need to be included in the sandbox for consumers
   # of this DLL (ui-shared-deps-src) because webpack won't actually
