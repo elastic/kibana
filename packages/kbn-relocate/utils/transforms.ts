@@ -10,69 +10,15 @@
 import type { Package } from '../types';
 
 export const HARDCODED_MODULE_PATHS: Record<string, string> = {
+  '@kbn/apm-ftr-e2e': 'x-pack/solutions/observability/plugins/apm/ftr_e2e',
+  '@kbn/core-test-helpers-kbn-server': 'src/core/test-helpers/kbn-server',
+  '@kbn/core-test-helpers-model-versions': 'src/core/test-helpers/model-versions',
+  '@kbn/synthetics-e2e': 'x-pack/solutions/observability/plugins/synthetics/e2e',
   '@kbn/test-suites-src': 'src/platform/test',
 };
 
 type TransformFunction = (param: string) => string;
 const TRANSFORMS: Record<string, string | TransformFunction> = {
-  // misc path enhancements
-  'x-pack/platform/packages/shared/observability/': 'x-pack/platform/packages/shared/',
-  'src/platform/packages/shared/chart_expressions/common':
-    'src/platform/packages/shared/chart-expressions-common',
-  'x-pack/solutions/security/packages/security-solution/': 'x-pack/solutions/security/packages/',
-  'x-pack/platform/plugins/shared/observability_ai_assistant':
-    'x-pack/platform/plugins/shared/observability_ai_assistant',
-  'x-pack/solutions/observability/plugins/observability_solution/':
-    'x-pack/solutions/observability/plugins/',
-  'x-pack/solutions/observability/packages/observability/observability_utils/observability_':
-    'x-pack/solutions/observability/packages/',
-  'x-pack/solutions/observability/packages/observability/':
-    'x-pack/solutions/observability/packages/',
-  'x-pack/platform/packages/shared/alerting_rule_utils':
-    'x-pack/platform/packages/shared/alerting-rule-utils',
-  'x-pack/platform/packages/shared/logs_overview': 'x-pack/platform/packages/shared/logs-overview',
-  'x-pack/solutions/observability/packages/alert_details':
-    'x-pack/solutions/observability/packages/alert-details',
-  'x-pack/solutions/observability/packages/alerting_test_data':
-    'x-pack/solutions/observability/packages/alerting-test-data',
-  'x-pack/solutions/observability/packages/get_padded_alert_time_range_util':
-    'x-pack/solutions/observability/packages/get-padded-alert-time-range-util',
-  'x-pack/solutions/observability/packages/synthetics_test_data':
-    'x-pack/solutions/observability/packages/synthetics-test-data',
-  'x-pack/solutions/observability/packages/utils_browser':
-    'x-pack/solutions/observability/packages/utils-browser',
-  'x-pack/solutions/observability/packages/utils_common':
-    'x-pack/solutions/observability/packages/utils-common',
-  'x-pack/solutions/observability/packages/utils_server':
-    'x-pack/solutions/observability/packages/utils-server',
-  'x-pack/solutions/search/packages/shared_ui': 'x-pack/solutions/search/packages/shared-ui',
-  'x-pack/solutions/security/packages/data_table': 'x-pack/solutions/security/packages/data-table',
-  'x-pack/solutions/security/packages/distribution_bar':
-    'x-pack/solutions/security/packages/distribution-bar',
-  'x-pack/solutions/security/packages/ecs_data_quality_dashboard':
-    'x-pack/solutions/security/packages/ecs-data-quality-dashboard',
-  'x-pack/solutions/security/packages/side_nav': 'x-pack/solutions/security/packages/side-nav',
-  'x-pack/solutions/observability/packages/observability_ai/observability_ai_common':
-    'x-pack/solutions/observability/packages/observability-ai/observability-ai-common',
-  'x-pack/solutions/observability/packages/observability_ai/observability_ai_server':
-    'x-pack/solutions/observability/packages/observability-ai/observability-ai-server',
-  'src/platform/packages/shared/response-ops/alerts_apis':
-    'src/platform/packages/shared/response-ops/alerts-apis',
-  'src/platform/packages/shared/response-ops/alerts_fields_browser':
-    'src/platform/packages/shared/response-ops/alerts-fields-browser',
-  'src/platform/packages/shared/response-ops/alerts_table':
-    'src/platform/packages/shared/response-ops/alerts-table',
-
-  // custom core package relocation
-  'src/dev/packages/serverless/storybook/config': 'src/dev/packages/serverless-storybook-config',
-  'src/dev/packages/kbn-management/storybook/config':
-    'src/dev/packages/management-storybook-config',
-  'src/core/packages/core/test-helpers/core-test-helpers-kbn-server':
-    'src/dev/packages/core-test-helpers-kbn-server',
-  'src/core/packages/core/test-helpers/core-test-helpers-model-versions':
-    'src/dev/packages/core-test-helpers-model-versions',
-  // 'src/dev/packages/kbn-': (path: string) =>
-  //   path.replace('src/dev/packages/kbn-', 'src/dev/packages/'),
   'src/core/packages/core/': (path: string) => {
     const relativePath = path.split('src/core/packages/')[1];
     const relativeChunks = relativePath.split('/');
