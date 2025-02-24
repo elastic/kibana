@@ -69,8 +69,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         return await testSubjects.exists('create_esql_control_flyout');
       });
 
-      await comboBox.set('esqlFieldsOptions', 'geo.dest');
-      await comboBox.set('esqlFieldsOptions', 'clientip');
+      await comboBox.set('esqlIdentifiersOptions', 'geo.dest');
+      await comboBox.set('esqlIdentifiersOptions', 'clientip');
 
       // create the control
       await testSubjects.click('saveEsqlControlsFlyoutButton');

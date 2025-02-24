@@ -3125,16 +3125,16 @@
             "pluginId": "embeddable",
             "scope": "common",
             "docId": "kibEmbeddablePluginApi",
-            "section": "def-common.EmbeddableInput",
-            "text": "EmbeddableInput"
+            "section": "def-common.SavedObjectEmbeddableInput",
+            "text": "SavedObjectEmbeddableInput"
           },
           " | ",
           {
             "pluginId": "embeddable",
             "scope": "common",
             "docId": "kibEmbeddablePluginApi",
-            "section": "def-common.SavedObjectEmbeddableInput",
-            "text": "SavedObjectEmbeddableInput"
+            "section": "def-common.EmbeddableInput",
+            "text": "EmbeddableInput"
           },
           ") => boolean"
         ],
@@ -3154,16 +3154,16 @@
                 "pluginId": "embeddable",
                 "scope": "common",
                 "docId": "kibEmbeddablePluginApi",
-                "section": "def-common.EmbeddableInput",
-                "text": "EmbeddableInput"
+                "section": "def-common.SavedObjectEmbeddableInput",
+                "text": "SavedObjectEmbeddableInput"
               },
               " | ",
               {
                 "pluginId": "embeddable",
                 "scope": "common",
                 "docId": "kibEmbeddablePluginApi",
-                "section": "def-common.SavedObjectEmbeddableInput",
-                "text": "SavedObjectEmbeddableInput"
+                "section": "def-common.EmbeddableInput",
+                "text": "EmbeddableInput"
               }
             ],
             "path": "src/platform/plugins/shared/embeddable/common/lib/saved_object_embeddable.ts",
@@ -3332,55 +3332,6 @@
       },
       {
         "parentPluginId": "embeddable",
-        "id": "def-common.PanelState",
-        "type": "Interface",
-        "tags": [],
-        "label": "PanelState",
-        "description": [],
-        "signature": [
-          {
-            "pluginId": "embeddable",
-            "scope": "common",
-            "docId": "kibEmbeddablePluginApi",
-            "section": "def-common.PanelState",
-            "text": "PanelState"
-          },
-          "<E>"
-        ],
-        "path": "src/platform/plugins/shared/embeddable/common/types.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "embeddable",
-            "id": "def-common.PanelState.type",
-            "type": "string",
-            "tags": [],
-            "label": "type",
-            "description": [],
-            "path": "src/platform/plugins/shared/embeddable/common/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "embeddable",
-            "id": "def-common.PanelState.explicitInput",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "explicitInput",
-            "description": [],
-            "signature": [
-              "Partial<E> & { id: string; }"
-            ],
-            "path": "src/platform/plugins/shared/embeddable/common/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "embeddable",
         "id": "def-common.SavedObjectEmbeddableInput",
         "type": "Interface",
         "tags": [],
@@ -3508,14 +3459,15 @@
         "label": "EmbeddableStateWithType",
         "description": [],
         "signature": [
+          "{ enhancements?: ",
           {
-            "pluginId": "embeddable",
+            "pluginId": "@kbn/utility-types",
             "scope": "common",
-            "docId": "kibEmbeddablePluginApi",
-            "section": "def-common.EmbeddableInput",
-            "text": "EmbeddableInput"
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-common.SerializableRecord",
+            "text": "SerializableRecord"
           },
-          " & { type: string; }"
+          " | undefined; type: string; }"
         ],
         "path": "src/platform/plugins/shared/embeddable/common/types.ts",
         "deprecated": false,

@@ -7,17 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import {
-  Walker,
-  type ESQLAstItem,
-  type ESQLCommand,
-  type ESQLSingleAstItem,
-  type ESQLFunction,
-} from '@kbn/esql-ast';
-import { logicalOperators } from '../../../definitions/builtin';
-import { isParameterType, type SupportedDataType } from '../../../definitions/types';
+import { Walker, type ESQLSingleAstItem, type ESQLFunction } from '@kbn/esql-ast';
+import { logicalOperators } from '../../../definitions/all_operators';
+import { CommandSuggestParams, isParameterType } from '../../../definitions/types';
 import { isFunctionItem } from '../../../shared/helpers';
-import type { GetColumnsByTypeFn, SuggestionRawDefinition } from '../../types';
+import type { SuggestionRawDefinition } from '../../types';
 import {
   getFunctionSuggestions,
   getOperatorSuggestion,
@@ -33,16 +27,13 @@ import {
   UNSUPPORTED_COMMANDS_BEFORE_QSTR,
 } from '../../../shared/constants';
 
-export async function suggest(
-  innerText: string,
-  command: ESQLCommand<'where'>,
-  getColumnsByType: GetColumnsByTypeFn,
-  _columnExists: (column: string) => boolean,
-  _getSuggestedVariableName: () => string,
-  getExpressionType: (expression: ESQLAstItem | undefined) => SupportedDataType | 'unknown',
-  _getPreferences?: () => Promise<{ histogramBarTarget: number } | undefined>,
-  previousCommands?: ESQLCommand[]
-): Promise<SuggestionRawDefinition[]> {
+export async function suggest({
+  innerText,
+  command,
+  getColumnsByType,
+  getExpressionType,
+  previousCommands,
+}: CommandSuggestParams<'where'>): Promise<SuggestionRawDefinition[]> {
   const suggestions: SuggestionRawDefinition[] = [];
 
   /**
@@ -161,14 +152,14 @@ export async function suggest(
       break;
 
     case 'empty_expression':
-      // Don't suggest MATCH or QSTR after unsupported commands
+      // Don't suggest MATCH, QSTR or KQL after unsupported commands
       const priorCommands = previousCommands?.map((a) => a.name) ?? [];
       const ignored = [];
       if (priorCommands.some((c) => UNSUPPORTED_COMMANDS_BEFORE_MATCH.has(c))) {
         ignored.push('match');
       }
       if (priorCommands.some((c) => UNSUPPORTED_COMMANDS_BEFORE_QSTR.has(c))) {
-        ignored.push('qstr');
+        ignored.push('kql', 'qstr');
       }
       const last = previousCommands?.[previousCommands.length - 1];
       let columnSuggestions: SuggestionRawDefinition[] = [];

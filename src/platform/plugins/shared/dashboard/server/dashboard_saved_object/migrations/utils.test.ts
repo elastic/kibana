@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { EmbeddableInput } from '@kbn/embeddable-plugin/common/types';
 import type { SavedDashboardPanel } from '../schema';
 import type { DashboardPanelState } from '../../../common';
 
@@ -44,7 +43,6 @@ test('convertSavedDashboardPanelToPanelState', () => {
     },
     explicitInput: {
       something: 'hi!',
-      id: '123',
       savedObjectId: 'savedObjectId',
     },
     type: 'search',
@@ -87,11 +85,11 @@ test('convertPanelStateToSavedDashboardPanel', () => {
       something: 'hi!',
       id: '123',
       savedObjectId: 'savedObjectId',
-    } as EmbeddableInput,
+    },
     type: 'search',
   };
 
-  expect(convertPanelStateToSavedDashboardPanel(dashboardPanel)).toEqual({
+  expect(convertPanelStateToSavedDashboardPanel('123', dashboardPanel)).toEqual({
     type: 'search',
     embeddableConfig: {
       something: 'hi!',
@@ -118,13 +116,12 @@ test('convertPanelStateToSavedDashboardPanel will not add an undefined id when n
       i: '123',
     },
     explicitInput: {
-      id: '123',
       something: 'hi!',
-    } as EmbeddableInput,
+    },
     type: 'search',
   };
 
-  const converted = convertPanelStateToSavedDashboardPanel(dashboardPanel);
+  const converted = convertPanelStateToSavedDashboardPanel('123', dashboardPanel);
   expect(Object.hasOwn(converted, 'id')).toBe(false);
 });
 
@@ -138,13 +135,12 @@ test('convertPanelStateToSavedDashboardPanel will not leave title as part of emb
       i: '123',
     },
     explicitInput: {
-      id: '123',
       title: 'title',
-    } as EmbeddableInput,
+    },
     type: 'search',
   };
 
-  const converted = convertPanelStateToSavedDashboardPanel(dashboardPanel);
+  const converted = convertPanelStateToSavedDashboardPanel('123', dashboardPanel);
   expect(Object.hasOwn(converted.embeddableConfig, 'title')).toBe(false);
   expect(converted.title).toBe('title');
 });
@@ -159,13 +155,12 @@ test('convertPanelStateToSavedDashboardPanel retains legacy version info', () =>
       i: '123',
     },
     explicitInput: {
-      id: '123',
       title: 'title',
-    } as EmbeddableInput,
+    },
     type: 'search',
     version: '8.10.0',
   };
 
-  const converted = convertPanelStateToSavedDashboardPanel(dashboardPanel);
+  const converted = convertPanelStateToSavedDashboardPanel('123', dashboardPanel);
   expect(converted.version).toBe('8.10.0');
 });
