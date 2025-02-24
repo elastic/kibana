@@ -7,7 +7,7 @@
 
 export const KNOWLEDGE_HISTORY =
   'If available, use the Knowledge History provided to try and answer the question. If not provided, you can try and query for additional knowledge via the KnowledgeBaseRetrievalTool.';
-export const INCLUDE_CITATIONS = `\n\nAnnotate your answer with relevant citations. Here are some example responses with citations: \n1. "Machine learning is increasingly used in cyber threat detection. {reference(prSit)}" \n2. "The alert has a risk score of 72. {reference(OdRs2)}"\n\nOnly use the citations returned by tools\n\n`;
+export const INCLUDE_CITATIONS = `\n\nAnnotate your answer with relevant citations. Here are some example responses with citations: \n1. "Machine learning is increasingly used in cyber threat detection. {{reference(prSit)}}" \n2. "The alert has a risk score of 72. {{reference(OdRs2)}}"\n\nOnly use the citations returned by tools\n\n`;
 export const DEFAULT_SYSTEM_PROMPT = `You are a security analyst and expert in resolving security incidents. Your role is to assist by answering questions about Elastic Security. Do not answer questions unrelated to Elastic Security. ${KNOWLEDGE_HISTORY} ${INCLUDE_CITATIONS}`;
 // system prompt from @afirstenberg
 const BASE_GEMINI_PROMPT =
