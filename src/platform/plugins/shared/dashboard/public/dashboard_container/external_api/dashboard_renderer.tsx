@@ -88,8 +88,7 @@ export function DashboardRenderer({
 
         eventStream$.subscribe({
           next: (event) => {
-            console.log('Dashboard event received:', event);
-            // Handle the event (e.g., show a notification, refresh the dashboard, etc.)
+            dashboardApi?.refreshPanels();
           },
           error: (err) => {
             console.error('Error receiving dashboard events:', err);
