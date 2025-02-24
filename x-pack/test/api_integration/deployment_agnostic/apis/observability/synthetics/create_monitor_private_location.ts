@@ -14,8 +14,10 @@ import {
   HTTPFields,
   PrivateLocation,
   ServiceLocation,
+  MonitorTypeEnum,
 } from '@kbn/synthetics-plugin/common/runtime_types';
 import { SYNTHETICS_API_URLS } from '@kbn/synthetics-plugin/common/constants';
+import { DEFAULT_FIELDS } from '@kbn/synthetics-plugin/common/constants/monitor_defaults';
 import { omit } from 'lodash';
 import { PackagePolicy } from '@kbn/fleet-plugin/common';
 import expect from '@kbn/expect';
@@ -489,7 +491,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         ...httpMonitorJson,
         name: `Test monitor ${uuidv4()}`,
         [ConfigKey.NAMESPACE]: 'default',
-        locations: [privateLocation],
+        private_locations: [privateLocation.id],
       };
 
       try {
@@ -497,8 +499,10 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           .post(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS)
           .set(editorUser.apiKeyHeader)
           .set(samlAuth.getInternalRequestHeader())
-          .send(monitor)
-          .expect(200);
+          .send(monitor);
+
+        expect(apiResponse.status).eql(200, JSON.stringify(apiResponse.body));
+
         monitorId = apiResponse.body.id;
 
         const policyResponse = await supertestWithAuth.get(
@@ -524,6 +528,161 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         });
       } finally {
         await deleteMonitor(monitorId);
+      }
+    });
+
+    it('returns bad request if payload is invalid for HTTP monitor', async () => {
+      // Delete a required property to make payload invalid
+      const newMonitor = { ...httpMonitorJson, 'check.request.headers': null };
+      await addMonitorAPI(newMonitor, 400);
+    });
+
+    it('returns bad request if monitor type is invalid', async () => {
+      const newMonitor = { ...httpMonitorJson, type: 'invalid-data-steam' };
+
+      const apiResponse = await addMonitorAPI(newMonitor, 400);
+
+      expect(apiResponse.message).eql('Invalid value "invalid-data-steam" supplied to "type"');
+    });
+
+    it('can create valid monitors without all defaults', async () => {
+      // Delete a required property to make payload invalid
+      const newMonitor = {
+        name: 'Sample name',
+        type: 'http',
+        urls: 'https://elastic.co',
+        locations: [privateLocations[0]],
+      };
+
+      const { body: apiResponse } = await addMonitorAPI(newMonitor);
+
+      expect(apiResponse).eql(
+        omitMonitorKeys({
+          ...DEFAULT_FIELDS[MonitorTypeEnum.HTTP],
+          ...newMonitor,
+        })
+      );
+    });
+
+    it('can disable retries', async () => {
+      const maxAttempts = 1;
+      const newMonitor = {
+        max_attempts: maxAttempts,
+        urls: 'https://elastic.co',
+        name: `Sample name ${uuidv4()}`,
+        type: 'http',
+        locations: [privateLocations[0]],
+      };
+
+      const { body: apiResponse } = await addMonitorAPI(newMonitor);
+
+      rawExpect(apiResponse).toEqual(rawExpect.objectContaining({ retest_on_failure: false }));
+    });
+
+    it('can enable retries with max attempts', async () => {
+      const maxAttempts = 2;
+      const newMonitor = {
+        max_attempts: maxAttempts,
+        urls: 'https://elastic.co',
+        name: `Sample name ${uuidv4()}`,
+        type: 'http',
+        locations: [privateLocations[0]],
+      };
+
+      const { body: apiResponse } = await addMonitorAPI(newMonitor);
+
+      rawExpect(apiResponse).toEqual(rawExpect.objectContaining({ retest_on_failure: true }));
+    });
+
+    it('can enable retries', async () => {
+      const newMonitor = {
+        retest_on_failure: false,
+        urls: 'https://elastic.co',
+        name: `Sample name ${uuidv4()}`,
+        type: 'http',
+        locations: [privateLocations[0]],
+      };
+
+      const { body: apiResponse } = await addMonitorAPI(newMonitor);
+
+      rawExpect(apiResponse).toEqual(rawExpect.objectContaining({ retest_on_failure: false }));
+    });
+
+    it('cannot create a invalid monitor without a monitor type', async () => {
+      // Delete a required property to make payload invalid
+      const newMonitor = {
+        name: 'Sample name',
+        url: 'https://elastic.co',
+        locations: [privateLocations[0]],
+      };
+      await addMonitorAPI(newMonitor, 400);
+    });
+
+    it('omits unknown keys', async () => {
+      // Delete a required property to make payload invalid
+      const newMonitor = {
+        name: 'Sample name',
+        url: 'https://elastic.co',
+        unknownKey: 'unknownValue',
+        type: 'http',
+        locations: [privateLocations[0]],
+      };
+      const apiResponse = await addMonitorAPI(newMonitor, 400);
+      expect(apiResponse.message).not.to.have.keys(
+        'Invalid monitor key(s) for http type:  unknownKey","attributes":{"details":"Invalid monitor key(s) for http type:  unknownKey'
+      );
+    });
+
+    it('preserves the passed namespace when preserve_namespace is passed', async () => {
+      const SPACE_ID = `test-space-${uuidv4()}`;
+      const SPACE_NAME = `test-space-name ${uuidv4()}`;
+      const privateLocation = await testPrivateLocations.addTestPrivateLocation(SPACE_ID);
+      const monitor = {
+        ...httpMonitorJson,
+        [ConfigKey.NAMESPACE]: 'default',
+        locations: [privateLocation],
+      };
+      let monitorId = '';
+      await kibanaServer.spaces.create({ id: SPACE_ID, name: SPACE_NAME });
+
+      try {
+        const apiResponse = await supertestWithoutAuth
+          .post(`/s/${SPACE_ID}${SYNTHETICS_API_URLS.SYNTHETICS_MONITORS}`)
+          .query({ preserve_namespace: true })
+          .set(editorUser.apiKeyHeader)
+          .set(samlAuth.getInternalRequestHeader())
+          .send(monitor)
+          .expect(200);
+        monitorId = apiResponse.body.id;
+        expect(apiResponse.body[ConfigKey.NAMESPACE]).eql('default');
+      } finally {
+        await deleteMonitor(monitorId, 200, SPACE_ID);
+      }
+    });
+
+    it('sets namespace to custom namespace when set', async () => {
+      const SPACE_ID = `test-space-${uuidv4()}`;
+      const SPACE_NAME = `test-space-name ${uuidv4()}`;
+      const privateLocation = await testPrivateLocations.addTestPrivateLocation(SPACE_ID);
+      const monitor = {
+        ...httpMonitorJson,
+        locations: [privateLocation],
+      };
+      let monitorId = '';
+
+      try {
+        await kibanaServer.spaces.create({ id: SPACE_ID, name: SPACE_NAME });
+
+        const apiResponse = await supertestWithoutAuth
+          .post(`/s/${SPACE_ID}${SYNTHETICS_API_URLS.SYNTHETICS_MONITORS}`)
+          .set(editorUser.apiKeyHeader)
+          .set(samlAuth.getInternalRequestHeader())
+          .send(monitor)
+          .expect(200);
+        monitorId = apiResponse.body.id;
+        expect(apiResponse.body[ConfigKey.NAMESPACE]).eql(monitor[ConfigKey.NAMESPACE]);
+      } finally {
+        await deleteMonitor(monitorId, 200, SPACE_ID);
       }
     });
   });
