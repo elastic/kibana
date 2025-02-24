@@ -183,7 +183,6 @@ export function RulePagePageProvider({ getService, getPageObjects }: FtrProvider
         );
         // Check that href exists and is not empty
         const href = await integrationsEvaluatedButton.getAttribute('href');
-        console.log("href123 ", href);
         if (!href) {
           throw new Error('Integration link is not ready yet - href is empty');
         }

@@ -29,7 +29,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   ]);
   const retryService = getService('retry');
 
-  // FLAKY: https://github.com/elastic/kibana/issues/178413
   describe('Cloud Posture Rules Page', function () {
     this.tags(['cloud_security_posture_rules_page']);
     let rule: typeof pageObjects.rule;
@@ -51,8 +50,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           name: 'Test policy',
           namespace: 'default',
         });
-      // eslint-disable-next-line prettier/prettier
-      console.log("agentPolicyResponse1 ", agentPolicyResponse);
+
       agentPolicyId = agentPolicyResponse.item.id;
 
       await createPackagePolicy(
@@ -70,12 +68,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     beforeEach(async () => {
       await rule.navigateToRulePage('cis_k8s', '1.0.1');
     });
-
-    // afterEach(async () => {
-    //   await kibanaServer.savedObjects.cleanStandardList();
-    //   await esArchiver.unload('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
-    //   await findings.index.remove();
-    // });
 
     after(async () => {
       await kibanaServer.savedObjects.cleanStandardList();
@@ -257,6 +249,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
     describe('Rules Page - Flyout', () => {
       it('Users are able to Enable/Disable Rule from Switch on Rule Flyout', async () => {
+        // Ensure that the first rule is enabled
         await rule.rulePage.togglEnableRulesRowSwitchButton(0);
         await rule.rulePage.clickRulesNames(0);
         await rule.rulePage.clickFlyoutEnableSwitchButton();
