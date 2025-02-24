@@ -3618,7 +3618,8 @@
         "peggy"
       ],
       "reviewers": [
-        "team:kibana-operations"
+        "team:kibana-visualizations",
+        "team:kibana-data-discovery"
       ],
       "matchBaseBranches": [
         "main"
