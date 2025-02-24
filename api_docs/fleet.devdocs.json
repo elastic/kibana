@@ -3018,7 +3018,7 @@
                 "section": "def-common.NewPackagePolicy",
                 "text": "NewPackagePolicy"
               },
-              ">; }) => void"
+              ">; isExtensionLoaded?: boolean | undefined; }) => void"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/public/types/ui_extensions.ts",
             "deprecated": false,
@@ -3083,6 +3083,20 @@
                         "text": "PackagePolicyConfigRecord"
                       },
                       " | undefined; elasticsearch?: { [key: string]: any; privileges?: { cluster?: string[] | undefined; } | undefined; } | undefined; overrides?: { inputs?: { [key: string]: any; } | undefined; } | null | undefined; supports_agentless?: boolean | null | undefined; additional_datastreams_permissions?: string[] | undefined; }"
+                    ],
+                    "path": "x-pack/platform/plugins/shared/fleet/public/types/ui_extensions.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "fleet",
+                    "id": "def-public.PackagePolicyEditExtensionComponentProps.onChange.$1.isExtensionLoaded",
+                    "type": "CompoundType",
+                    "tags": [],
+                    "label": "isExtensionLoaded",
+                    "description": [],
+                    "signature": [
+                      "boolean | undefined"
                     ],
                     "path": "x-pack/platform/plugins/shared/fleet/public/types/ui_extensions.ts",
                     "deprecated": false,
