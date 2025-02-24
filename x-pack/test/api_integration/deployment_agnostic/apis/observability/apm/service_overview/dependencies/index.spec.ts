@@ -61,7 +61,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
       after(() => apmSynthtraceEsClient.clean());
 
-      it('returns one dependencies', () => {
+      it('returns one dependency', () => {
         expect(dependencies.serviceDependencies.length).to.be(1);
       });
 
