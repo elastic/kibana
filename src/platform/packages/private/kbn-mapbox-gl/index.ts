@@ -30,15 +30,16 @@ import type {
   FeatureIdentifier,
 } from 'maplibre-gl';
 
+import maplibreglDist from 'maplibre-gl/dist/maplibre-gl';
 // @ts-expect-error
-import maplibreglDist from 'maplibre-gl/dist/maplibre-gl-csp';
+import maplibreglDistCsp from 'maplibre-gl/dist/maplibre-gl-csp';
 import mbRtlPlugin from '@mapbox/mapbox-gl-rtl-text/mapbox-gl-rtl-text.min.js?asUrl';
 import mbWorkerUrl from 'maplibre-gl/dist/maplibre-gl-csp-worker?asUrl';
 import 'maplibre-gl/dist/maplibre-gl.css';
 
-const maplibregl = maplibreglDist;
+const maplibregl = maplibreglDistCsp as typeof maplibreglDist;
 maplibregl.setWorkerUrl(mbWorkerUrl);
-maplibregl.setRTLTextPlugin(mbRtlPlugin);
+maplibregl.setRTLTextPlugin(mbRtlPlugin, true);
 
 export { maplibregl };
 
