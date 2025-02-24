@@ -24,6 +24,7 @@ import {
 } from '@kbn/optimizer-webpack-helpers';
 import { NodeLibsBrowserPlugin } from '@kbn/node-libs-browser-webpack-plugin';
 
+import { defineReactCompilerLoaderOption, reactCompilerLoader } from 'react-compiler-webpack';
 import { Bundle, BundleRemotes, WorkerConfig, parseDllManifest } from '../common';
 import { BundleRemotesPlugin } from './bundle_remotes_plugin';
 import { BundleMetricsPlugin } from './bundle_metrics_plugin';
@@ -124,6 +125,33 @@ export function getWebpackConfig(
       ],
 
       rules: [
+        // {
+        //   test: /\.[mc]?[jt]sx?$/i,
+        //   exclude: /node_modules/,
+        //   use: [
+        //     // babel-loader, swc-loader, esbuild-loader, or anything you like to transpile JSX should go here.
+        //     // If you are using rspack, the rspack's buiilt-in react transformation is sufficient.
+        //     // { loader: 'swc-loader' },
+        //     // Now add forgetti-loader
+        //     {
+        //       loader: reactCompilerLoader,
+        //       options: defineReactCompilerLoaderOption({
+        //         // React Compiler options goes here
+        //       }),
+        //     },
+        //     {
+        //       loader: 'babel-loader',
+        //       options: {
+        //         babelrc: false,
+        //         envName: worker.dist ? 'production' : 'development',
+        //         presets: [
+        //           [BABEL_PRESET, { useTransformRequireDefault: true }],
+        //           '@babel/preset-typescript',
+        //         ],
+        //       },
+        //     },
+        //   ],
+        // },
         {
           include: [ENTRY_CREATOR],
           use: [
@@ -241,14 +269,20 @@ export function getWebpackConfig(
         {
           test: /\.(js|tsx?)$/,
           exclude: /node_modules/,
-          use: {
-            loader: 'babel-loader',
-            options: {
-              babelrc: false,
-              envName: worker.dist ? 'production' : 'development',
-              presets: [[BABEL_PRESET, { useTransformRequireDefault: true }]],
+          use: [
+            {
+              loader: 'babel-loader',
+              options: {
+                babelrc: false,
+                envName: worker.dist ? 'production' : 'development',
+                presets: [[BABEL_PRESET, { useTransformRequireDefault: true }]],
+              },
             },
-          },
+            {
+              loader: reactCompilerLoader,
+              options: defineReactCompilerLoaderOption({}),
+            },
+          ],
         },
         {
           test: /\.peggy$/,
@@ -297,6 +331,7 @@ export function getWebpackConfig(
           worker.reactVersion === '18' ? 'react-dom-18/profiling' : 'react-dom/profiling',
         'scheduler/tracing': 'scheduler/tracing-profiling',
         react: worker.reactVersion === '18' ? 'react-18' : 'react',
+        'react/compiler-runtime': require.resolve('react-compiler-runtime'),
       },
     },
 
