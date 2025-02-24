@@ -22,9 +22,9 @@ interface SelectedField {
 export const HistogramWrapper: FC = () => {
   const state = useEventBusExampleState();
 
-  const chartWidth = state.useState((s) => s.chartWidth);
+  const chartWidth = state.useEventBusState((s) => s.chartWidth);
 
-  const groupedFields = state.useState((s) => {
+  const groupedFields = state.useEventBusState((s) => {
     const selectedFields = Object.entries(s.allFields)
       .filter(([name, type]) => {
         return s.selectedFields.includes(name) && (type === 'keyword' || type === 'long');

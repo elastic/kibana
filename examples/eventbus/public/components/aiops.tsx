@@ -22,8 +22,8 @@ export const Aiops: FC<AiopsProps> = ({ field }) => {
   const iframeID = `aiops_${field}`;
 
   const state = useEventBusExampleState();
-  const esql = state.useState((s) => s.esql);
-  const filters = state.useState((s) => s.filters);
+  const esql = state.useEventBusState((s) => s.esql);
+  const filters = state.useEventBusState((s) => s.filters);
 
   const esqlWithFilters = useMemo(() => {
     if (esql === '' || Object.values(filters).length === 0) return null;

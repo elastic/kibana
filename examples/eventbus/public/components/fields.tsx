@@ -15,14 +15,14 @@ import { useEventBusExampleState } from '../hooks/use_event_bus_example_state';
 
 export const Fields: FC = () => {
   const state = useEventBusExampleState();
-  const data = state.useState((s) => s.allFields);
+  const data = state.useEventBusState((s) => s.allFields);
 
   const checkboxes = Object.keys(data).map((d) => ({
     id: d,
     label: d,
   }));
 
-  const checkboxIdToSelectedMap = state.useState((s) => {
+  const checkboxIdToSelectedMap = state.useEventBusState((s) => {
     return s.selectedFields.reduce((acc, field) => {
       acc[field] = true;
       return acc;

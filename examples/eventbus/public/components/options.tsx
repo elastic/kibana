@@ -15,8 +15,8 @@ import { useEventBusExampleState } from '../hooks/use_event_bus_example_state';
 
 export const Options: FC = () => {
   const state = useEventBusExampleState();
-  const aiopsEnabled = state.useState((s) => s.aiopsEnabled);
-  const genaiEnabled = state.useState((s) => s.genaiEnabled);
+  const aiopsEnabled = state.useEventBusState((s) => s.aiopsEnabled);
+  const genaiEnabled = state.useEventBusState((s) => s.genaiEnabled);
 
   return (
     <>

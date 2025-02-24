@@ -94,7 +94,7 @@ export class EventBus<S extends Slice> {
   }
 
   // React hook with an optional selector.
-  useState<SelectedState = ReturnType<S['reducer']>>(
+  useEventBusState<SelectedState = ReturnType<S['reducer']>>(
     selector?: (state: ReturnType<S['reducer']>) => SelectedState
   ): SelectedState {
     // eslint-disable-next-line react-hooks/rules-of-hooks

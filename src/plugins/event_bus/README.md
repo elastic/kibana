@@ -17,6 +17,6 @@ The main use cases this was developed for:
   would be a classic crossfilter dashboard: On top of a global search filter,
   each panel may add an additional filter that gets considered by other panels.
 - Because the events and state are "data-only" like redux, events and state
-  could potentially be replayed and persistet. This also allows to use it
+  could potentially be replayed and persisted. This also allows to use it
   in a curated way to pass certain events/state across plugin boundaries or
   into sandboxed enviroments.

@@ -36,7 +36,7 @@ export const App: FC = () => {
   const state = useEventBusExampleState();
 
   // find all selectedFields of type date in allFields
-  const dateFields = state.useState((s) =>
+  const dateFields = state.useEventBusState((s) =>
     Object.entries(s.allFields)
       .filter(([name, type]) => {
         return s.selectedFields.includes(name) && type === 'date';
@@ -44,7 +44,7 @@ export const App: FC = () => {
       .map((d) => d[0])
   );
 
-  const genaiEnabled = state.useState((s) => s.genaiEnabled);
+  const genaiEnabled = state.useEventBusState((s) => s.genaiEnabled);
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const resizeHandler = useCallback(

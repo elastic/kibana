@@ -52,8 +52,8 @@ export const QuantitativeHistogram: FC<QuantitativeHistogramProps> = (props) => 
   const fieldWithoutKeyword = field.replace(/\./g, '_');
   const iframeID = `ordinal_histogram_${fieldWithoutKeyword}`;
   const state = useEventBusExampleState();
-  const esql = state.useState((s) => s.esql);
-  const filters = state.useState((s) => s.filters);
+  const esql = state.useEventBusState((s) => s.esql);
+  const filters = state.useEventBusState((s) => s.filters);
 
   const [range, setRange] = useState();
 

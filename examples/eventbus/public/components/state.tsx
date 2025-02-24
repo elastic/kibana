@@ -16,7 +16,7 @@ export const State: FC = () => {
   const { core, plugins } = useDeps();
   const { data: dataPlugin } = plugins;
   const state = useEventBusExampleState();
-  const esql = state.useState((s) => s.esql);
+  const esql = state.useEventBusState((s) => s.esql);
 
   useEffect(() => {
     const fetchData = async () => {

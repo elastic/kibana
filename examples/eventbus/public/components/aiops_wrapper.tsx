@@ -15,9 +15,9 @@ import { Aiops } from './aiops';
 
 export const AiopsWrapper: FC = () => {
   const state = useEventBusExampleState();
-  const aiopsFieldCandidates = state.useState((s) => s.aiopsFieldCandidates);
-  const aiopsEnabled = state.useState((s) => s.aiopsEnabled);
-  const filters = state.useState((s) => s.filters);
+  const aiopsFieldCandidates = state.useEventBusState((s) => s.aiopsFieldCandidates);
+  const aiopsEnabled = state.useEventBusState((s) => s.aiopsEnabled);
+  const filters = state.useEventBusState((s) => s.filters);
 
   useEffect(() => {
     if (Object.keys(filters).filter((key) => !key.startsWith('aiops_')).length === 0) {
