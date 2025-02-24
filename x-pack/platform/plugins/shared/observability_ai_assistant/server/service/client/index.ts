@@ -631,14 +631,32 @@ export class ObservabilityAIAssistantClient {
     return createdConversation;
   };
 
-  setConversationUser = async (
-    conversationId: string,
-    user: {
-      id?: string;
-      name: string;
-    }
-  ): Promise<Conversation> => {
-    const persistedConversation = await this.getConversationWithMetaFields(conversationId);
+  setConversationUser = async ({
+    conversationId,
+    user,
+  }: {
+    conversationId: string;
+    user: { id?: string; name: string };
+  }): Promise<Conversation> => {
+    const response = await this.dependencies.esClient.asInternalUser.search<Conversation>({
+      index: resourceNames.aliases.conversations,
+      query: {
+        bool: {
+          filter: [
+            { term: { 'conversation.id': conversationId } },
+            {
+              bool: {
+                must_not: [{ exists: { field: 'user.id' } }, { exists: { field: 'user.name' } }],
+              },
+            },
+          ],
+        },
+      },
+      size: 1,
+      terminate_after: 1,
+    });
+
+    const persistedConversation = response.hits.hits[0];
 
     if (!persistedConversation || !persistedConversation?._id) {
       throw notFound();
@@ -656,7 +674,7 @@ export class ObservabilityAIAssistantClient {
       id: persistedConversation._id,
       index: persistedConversation._index,
       doc: updatedConversation,
-      refresh: true,
+      refresh: 'wait_for',
     });
 
     return updatedConversation;
