@@ -83,7 +83,7 @@ export const DiscoverTabContent: FC<DiscoverTabContentProps> = ({ timelineId }) 
   // TODO: should not be here, used to make discover container work I suppose
   useEffect(() => {
     if (!dataViewId) return;
-    dataViewService.get(dataViewId).then((dv) => setDataView(dv?.toSpec()));
+    dataViewService.get(dataViewId).then((dv) => setDataView(dv?.toSpec?.()));
   }, [dataViewId, dataViewService]);
 
   const {
