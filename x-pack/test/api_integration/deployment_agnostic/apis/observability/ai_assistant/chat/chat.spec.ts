@@ -90,8 +90,8 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
     });
 
     it('should forward the system message to the LLM', async () => {
-      const interceptor = proxy.intercept('conversation', () => true);
-      observabilityAIAssistantAPIClient.editor({
+      const simulatorPromise = proxy.interceptConversation('Hello from LLM Proxy');
+      await observabilityAIAssistantAPIClient.editor({
         endpoint: 'POST /internal/observability_ai_assistant/chat',
         params: {
           body: {
@@ -104,7 +104,8 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
           },
         },
       });
-      const simulator = await interceptor.waitForIntercept();
+      await proxy.waitForAllInterceptorsSettled();
+      const simulator = await simulatorPromise;
       const requestData = simulator.requestBody; // This is the request sent to the LLM
       expect(requestData.messages[0].content).to.eql(SYSTEM_MESSAGE);
     });

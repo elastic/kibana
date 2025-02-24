@@ -448,7 +448,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       });
 
       it('includes private KB instructions in the system message sent to the LLM', async () => {
-        const interceptor = proxy.intercept('conversation', () => true);
+        const simulatorPromise = proxy.interceptConversation('Hello from LLM Proxy');
         const messages: Message[] = [
           {
             '@timestamp': new Date().toISOString(),
@@ -458,7 +458,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
             },
           },
         ];
-        observabilityAIAssistantAPIClient.editor({
+        await observabilityAIAssistantAPIClient.editor({
           endpoint: 'POST /internal/observability_ai_assistant/chat/complete',
           params: {
             body: {
@@ -470,7 +470,8 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
             },
           },
         });
-        const simulator = await interceptor.waitForIntercept();
+        await proxy.waitForAllInterceptorsSettled();
+        const simulator = await simulatorPromise;
         const requestData = simulator.requestBody;
         expect(requestData.messages[0].content).to.contain(userInstructionText);
         expect(requestData.messages[0].content).to.eql(systemMessage);
