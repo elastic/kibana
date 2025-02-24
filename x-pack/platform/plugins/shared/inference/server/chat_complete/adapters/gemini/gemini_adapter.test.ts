@@ -247,37 +247,39 @@ describe('geminiAdapter', () => {
     });
 
     it('encapsulates string tool messages', () => {
-      geminiAdapter.chatComplete({
-        logger,
-        executor: executorMock,
-        messages: [
-          {
-            role: MessageRole.User,
-            content: 'question',
-          },
-          {
-            role: MessageRole.Assistant,
-            content: null,
-            toolCalls: [
-              {
-                function: {
-                  name: 'my_function',
-                  arguments: {
-                    foo: 'bar',
+      geminiAdapter
+        .chatComplete({
+          logger,
+          executor: executorMock,
+          messages: [
+            {
+              role: MessageRole.User,
+              content: 'question',
+            },
+            {
+              role: MessageRole.Assistant,
+              content: null,
+              toolCalls: [
+                {
+                  function: {
+                    name: 'my_function',
+                    arguments: {
+                      foo: 'bar',
+                    },
                   },
+                  toolCallId: '0',
                 },
-                toolCallId: '0',
-              },
-            ],
-          },
-          {
-            name: 'my_function',
-            role: MessageRole.Tool,
-            toolCallId: '0',
-            response: JSON.stringify({ bar: 'foo' }),
-          },
-        ],
-      });
+              ],
+            },
+            {
+              name: 'my_function',
+              role: MessageRole.Tool,
+              toolCallId: '0',
+              response: JSON.stringify({ bar: 'foo' }),
+            },
+          ],
+        })
+        .subscribe(noop);
 
       expect(executorMock.invoke).toHaveBeenCalledTimes(1);
 
