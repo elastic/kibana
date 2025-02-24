@@ -47,3 +47,4 @@ export { RandomnessService } from './services/randomness';
 export { KibanaSupertestProvider, ElasticsearchSupertestProvider } from './services/supertest';
 export { retryForSuccess } from './services/retry/retry_for_success';
 export { runExperiments } from './services/fp_experiments'
+export { runEffectTSExperiments } from './services/fp_experiments/effect_ts_research'

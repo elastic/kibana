@@ -8,4 +8,5 @@
  */
 
 require('../src/setup_node_env');
-require('@kbn/ftr-common-functional-services').runExperiments();
+// require('@kbn/ftr-common-functional-services').runExperiments();
+require('@kbn/ftr-common-functional-services').runEffectTSExperiments();
