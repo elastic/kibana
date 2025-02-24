@@ -39,8 +39,7 @@ const {
   validateErrorToastContent,
 } = workflowInsightsSelectors;
 
-// Failing: See https://github.com/elastic/kibana/issues/211894
-describe.skip(
+describe(
   'Workflow Insights',
   {
     tags: [

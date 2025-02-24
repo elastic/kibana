@@ -17,7 +17,7 @@ const serviceOverviewHref = url.format({
   query: { rangeFrom: start, rangeTo: end },
 });
 
-describe('Errors table', () => {
+describe('Alerts table', () => {
   before(() => {
     synthtrace.index(
       opbeans({
