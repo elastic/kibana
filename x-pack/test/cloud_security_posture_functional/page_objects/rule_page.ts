@@ -177,10 +177,18 @@ export function RulePagePageProvider({ getService, getPageObjects }: FtrProvider
     },
 
     clickIntegrationsEvaluatedButton: async () => {
-      const integrationsEvaluatedButton = await testSubjects.find(
-        'rules-counters-integrations-evaluated-button'
-      );
-      await integrationsEvaluatedButton.click();
+      await retry.try(async () => {
+        const integrationsEvaluatedButton = await testSubjects.find(
+          'rules-counters-integrations-evaluated-button'
+        );
+        // Check that href exists and is not empty
+        const href = await integrationsEvaluatedButton.getAttribute('href');
+        console.log("href123 ", href);
+        if (!href) {
+          throw new Error('Integration link is not ready yet - href is empty');
+        }
+        await integrationsEvaluatedButton.click();
+      });
     },
 
     getFailedFindingsCounter: async () => {
@@ -225,7 +233,7 @@ export function RulePagePageProvider({ getService, getPageObjects }: FtrProvider
       `cloud_security_posture/benchmarks/${benchmarkCisId}/${benchmarkCisVersion}/rules`,
       options
     );
-    // await PageObjects.header.waitUntilLoadingHasFinished();
+    await PageObjects.header.waitUntilLoadingHasFinished();
   };
 
   return {
