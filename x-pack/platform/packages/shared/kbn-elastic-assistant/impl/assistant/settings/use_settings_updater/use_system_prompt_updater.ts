@@ -15,6 +15,7 @@ import {
 import { HttpSetup } from '@kbn/core-http-browser';
 import { PerformPromptsBulkActionRequestBody as PromptsPerformBulkActionRequestBody } from '@kbn/elastic-assistant-common/impl/schemas/prompts/bulk_crud_prompts_route.gen';
 import { InfiniteData, QueryObserverResult } from '@tanstack/react-query';
+import { IToasts } from '@kbn/core-notifications-browser';
 import { AIConnector } from '../../../connectorland/connector_selector';
 import { getConversationApiConfig } from '../../use_conversation/helpers';
 import {
@@ -35,6 +36,7 @@ interface Params {
   setConversationsSettingsBulkActions: React.Dispatch<
     React.SetStateAction<ConversationsBulkActions>
   >;
+  toasts?: IToasts;
 }
 export interface SystemPromptSettings extends PromptResponse {
   conversations: Conversation[];
@@ -66,6 +68,7 @@ export const useSystemPromptUpdater = ({
   http,
   isAssistantEnabled,
   setConversationsSettingsBulkActions,
+  toasts,
 }: Params): SystemPromptUpdater => {
   // server equivalent
   const [systemPromptSettings, setSystemPromptSettings] = useState<SystemPromptSettings[]>([]);
@@ -79,10 +82,12 @@ export const useSystemPromptUpdater = ({
   // System Prompt Selection State
   const [selectedSystemPromptId, setSelectedSystemPromptId] = useState<string | undefined>();
 
-  const selectedSystemPrompt: SystemPromptSettings | undefined = useMemo(
-    () => systemPromptSettingsUpdates.find((sp) => sp.id === selectedSystemPromptId),
-    [selectedSystemPromptId, systemPromptSettingsUpdates]
-  );
+  const selectedSystemPrompt: SystemPromptSettings | undefined = useMemo(() => {
+    const found = systemPromptSettingsUpdates.find((sp) => sp.id === selectedSystemPromptId);
+    console.log('==>', { found, systemPromptSettingsUpdates, selectedSystemPromptId });
+    return found;
+    return systemPromptSettingsUpdates.find((sp) => sp.id === selectedSystemPromptId);
+  }, [selectedSystemPromptId, systemPromptSettingsUpdates]);
 
   const systemPrompts = useMemo(() => {
     return allPrompts.data.filter((p) => p.promptType === PromptTypeEnum.system);
@@ -138,7 +143,7 @@ export const useSystemPromptUpdater = ({
       const isNew = typeof systemPrompt === 'string';
       const newSelectedSystemPrompt: SystemPromptSettings = isNew
         ? {
-            id: systemPrompt ?? '',
+            id: '',
             content: '',
             name: systemPrompt ?? '',
             promptType: 'system',
@@ -156,8 +161,7 @@ export const useSystemPromptUpdater = ({
       if (isNew) {
         setPromptsBulkActions((prev) => ({
           ...prev,
-          // only creating one at a time. initially we create it with empty id,
-          // and once they type the title the id becomes the same as the title until it is saved
+          // only creating one new system prompt at a time
           create: [newSelectedSystemPrompt],
         }));
       }
@@ -200,8 +204,7 @@ export const useSystemPromptUpdater = ({
         if (existingPrompt) {
           const newBulkActions = {
             ...promptsBulkActions,
-            ...(selectedSystemPrompt.id !== '' &&
-            selectedSystemPrompt.id !== selectedSystemPrompt.name
+            ...(selectedSystemPrompt.id !== ''
               ? {
                   update: [
                     ...(promptsBulkActions.update ?? []).filter(
@@ -244,11 +247,9 @@ export const useSystemPromptUpdater = ({
       const shouldUpdateNewDefaultSystemPrompts = (sp?: { name: string; id: string }) =>
         sp?.name !== sp?.id; // Prompts after preserving have different name and id
 
-      const shouldCreateSelectedSystemPrompt =
-        selectedSystemPrompt?.name === selectedSystemPrompt?.id;
+      const shouldCreateSelectedSystemPrompt = selectedSystemPrompt?.id === '';
 
-      const shouldUpdateSelectedSystemPrompt =
-        selectedSystemPrompt?.name !== selectedSystemPrompt?.id;
+      const shouldUpdateSelectedSystemPrompt = selectedSystemPrompt?.id !== '';
 
       if (selectedSystemPrompt != null) {
         setSystemPromptSettingsUpdates((prev) => {
@@ -460,8 +461,7 @@ export const useSystemPromptUpdater = ({
     const hasBulkPrompts =
       promptsBulkActions.create || promptsBulkActions.update || promptsBulkActions.delete;
     const bulkPromptsResult = hasBulkPrompts
-      ? // TODO add toasts?
-        await bulkUpdatePrompts(http, promptsBulkActions, undefined)
+      ? await bulkUpdatePrompts(http, promptsBulkActions, toasts)
       : undefined;
     let conversationUpdates;
     if (
@@ -505,12 +505,13 @@ export const useSystemPromptUpdater = ({
       };
     }
 
-    return { success: bulkPromptsResult?.success ?? true, conversationUpdates };
+    return { success: bulkPromptsResult?.success ?? false, conversationUpdates };
   }, [
     conversationsSettingsBulkActions,
     http,
     promptsBulkActions,
     setConversationsSettingsBulkActions,
+    toasts,
   ]);
 
   return {

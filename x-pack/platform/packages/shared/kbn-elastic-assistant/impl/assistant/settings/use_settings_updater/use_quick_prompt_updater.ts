@@ -10,6 +10,7 @@ import { FindPromptsResponse, PromptResponse, PromptTypeEnum } from '@kbn/elasti
 import { PerformPromptsBulkActionRequestBody as PromptsPerformBulkActionRequestBody } from '@kbn/elastic-assistant-common/impl/schemas/prompts/bulk_crud_prompts_route.gen';
 import { HttpSetup } from '@kbn/core-http-browser';
 import { EuiSetColorMethod } from '@elastic/eui/src/services/color_picker/color_picker';
+import { IToasts } from '@kbn/core-notifications-browser';
 import { getRandomEuiColor } from '../../quick_prompts/quick_prompt_settings/helpers';
 import { bulkUpdatePrompts, PromptContextTemplate } from '../../../..';
 
@@ -18,6 +19,7 @@ interface Params {
   currentAppId: string;
   http: HttpSetup;
   promptsLoaded: boolean;
+  toasts?: IToasts;
 }
 interface QuickPromptUpdater {
   onPromptContentChange: (newValue: string) => void;
@@ -36,6 +38,7 @@ export const useQuickPromptUpdater = ({
   currentAppId,
   http,
   promptsLoaded,
+  toasts,
 }: Params): QuickPromptUpdater => {
   const [promptsBulkActions, setPromptsBulkActions] = useState<PromptsPerformBulkActionRequestBody>(
     {}
@@ -75,7 +78,7 @@ export const useQuickPromptUpdater = ({
       const newSelectedQuickPrompt: PromptResponse | undefined = isNew
         ? {
             name: quickPrompt,
-            id: quickPrompt,
+            id: '',
             content: '',
             color: qpColor,
             categories: [],
@@ -125,7 +128,7 @@ export const useQuickPromptUpdater = ({
         if (existingPrompt) {
           const newBulkActions = {
             ...promptsBulkActions,
-            ...(selectedQuickPrompt.id !== '' && selectedQuickPrompt.name !== selectedQuickPrompt.id
+            ...(selectedQuickPrompt.id !== ''
               ? {
                   update: [
                     ...(promptsBulkActions.update ?? []).filter(
@@ -180,7 +183,7 @@ export const useQuickPromptUpdater = ({
         if (existingPrompt) {
           setPromptsBulkActions({
             ...promptsBulkActions,
-            ...(selectedQuickPrompt.name !== selectedQuickPrompt.id
+            ...(selectedQuickPrompt.id !== ''
               ? {
                   update: [
                     ...(promptsBulkActions.update ?? []).filter(
@@ -252,7 +255,7 @@ export const useQuickPromptUpdater = ({
         if (existingPrompt) {
           setPromptsBulkActions({
             ...promptsBulkActions,
-            ...(selectedQuickPrompt.name !== selectedQuickPrompt.id
+            ...(selectedQuickPrompt.id !== ''
               ? {
                   update: [
                     ...(promptsBulkActions.update ?? []).filter(
@@ -299,10 +302,11 @@ export const useQuickPromptUpdater = ({
     const hasBulkPrompts =
       promptsBulkActions.create || promptsBulkActions.update || promptsBulkActions.delete;
     const bulkPromptsResult = hasBulkPrompts
-      ? await bulkUpdatePrompts(http, promptsBulkActions)
+      ? await bulkUpdatePrompts(http, promptsBulkActions, toasts)
       : undefined;
-    return bulkPromptsResult?.success ?? true;
-  }, [http, promptsBulkActions]);
+    console.log('bulkPromptsResult', bulkPromptsResult);
+    return bulkPromptsResult?.success ?? false;
+  }, [http, promptsBulkActions, toasts]);
 
   return {
     onPromptContentChange,

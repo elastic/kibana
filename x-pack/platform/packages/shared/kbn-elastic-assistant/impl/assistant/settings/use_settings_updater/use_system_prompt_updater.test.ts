@@ -6,7 +6,7 @@
  */
 
 import { renderHook, act } from '@testing-library/react';
-import { useSystemPromptUpdater } from './use_system_prompt_updater';
+import { SystemPromptSettings, useSystemPromptUpdater } from './use_system_prompt_updater';
 import { FindPromptsResponse, PromptTypeEnum } from '@kbn/elastic-assistant-common';
 import { ConversationsBulkActions } from '../../../..';
 import { HttpSetupMock } from '@kbn/core-http-browser-mocks';
@@ -15,7 +15,14 @@ import { TestProviders } from '../../../mock/test_providers/test_providers';
 import { WELCOME_CONVERSATION } from '../../use_conversation/sample_conversations';
 
 const mockSetConversationsSettingsBulkActions = jest.fn();
-
+const defaultPrompt = {
+  id: 'New Prompt',
+  content: '',
+  name: 'New Prompt',
+  promptType: 'system',
+  consumer: 'app-id',
+  conversations: [],
+} as SystemPromptSettings;
 const http: HttpSetupMock = coreMock.createSetup().http;
 const defaultParams = {
   allPrompts: {
@@ -52,7 +59,7 @@ describe('useSystemPromptUpdater', () => {
     });
 
     act(() => {
-      result.current.onSystemPromptSelect('1');
+      result.current.onSystemPromptSelect({ ...defaultPrompt, id: '1' });
     });
 
     expect(result.current.selectedSystemPrompt?.id).toBe('1');
@@ -68,7 +75,7 @@ describe('useSystemPromptUpdater', () => {
     });
 
     expect(result.current.selectedSystemPrompt).toEqual({
-      id: 'New Prompt',
+      id: '',
       content: '',
       name: 'New Prompt',
       promptType: 'system',
@@ -83,7 +90,7 @@ describe('useSystemPromptUpdater', () => {
     });
 
     act(() => {
-      result.current.onSystemPromptSelect('1');
+      result.current.onSystemPromptSelect({ ...defaultPrompt, id: '1' });
     });
 
     act(() => {

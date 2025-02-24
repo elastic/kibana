@@ -51,10 +51,7 @@ export const SystemPromptEditorComponent: React.FC<Props> = ({
   setPaginationObserver,
   systemPromptSettings,
 }) => {
-  const disableFields = useMemo(
-    () => selectedSystemPrompt == null || selectedSystemPrompt.id === '',
-    [selectedSystemPrompt]
-  );
+  const disableFields = useMemo(() => selectedSystemPrompt == null, [selectedSystemPrompt]);
   // Prompt
   const promptContent = useMemo(
     // Fixing Cursor Jump in text area

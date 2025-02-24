@@ -106,6 +106,7 @@ const SystemPromptSettingsManagementComponent = ({ connectors, defaultConnector 
     http,
     isAssistantEnabled,
     setConversationsSettingsBulkActions,
+    toasts,
   });
 
   const handleSave = useCallback(

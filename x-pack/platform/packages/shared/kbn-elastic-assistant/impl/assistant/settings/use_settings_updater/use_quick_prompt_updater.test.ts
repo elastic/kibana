@@ -8,10 +8,23 @@
 import { renderHook, act } from '@testing-library/react';
 import { HttpSetup } from '@kbn/core-http-browser';
 import { useQuickPromptUpdater } from './use_quick_prompt_updater';
-import { FindPromptsResponse } from '@kbn/elastic-assistant-common';
+import { FindPromptsResponse, PromptResponse } from '@kbn/elastic-assistant-common';
 
 const mockHttp = {} as HttpSetup;
-
+const quickPrompt: PromptResponse = {
+  timestamp: '2025-02-24T18:13:51.851Z',
+  users: [{ id: 'u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0', name: 'elastic' }],
+  content:
+    'As an expert in security operations and incident response, provide a breakdown of the attached alert and summarize what it might mean for my organization.',
+  isDefault: true,
+  updatedAt: '2025-02-24T18:13:51.851Z',
+  id: 'OZ4qOZUBqnYEVX-cWulv',
+  name: 'Alert summarization',
+  promptType: 'quick',
+  color: '#F68FBE',
+  categories: ['alert'],
+  consumer: 'securitySolutionUI',
+};
 const mockAllPrompts: FindPromptsResponse = {
   perPage: 1000,
   page: 1,
@@ -27,20 +40,7 @@ const mockAllPrompts: FindPromptsResponse = {
       promptType: 'system',
       consumer: 'securitySolutionUI',
     },
-    {
-      timestamp: '2025-02-24T18:13:51.851Z',
-      users: [{ id: 'u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0', name: 'elastic' }],
-      content:
-        'As an expert in security operations and incident response, provide a breakdown of the attached alert and summarize what it might mean for my organization.',
-      isDefault: true,
-      updatedAt: '2025-02-24T18:13:51.851Z',
-      id: 'OZ4qOZUBqnYEVX-cWulv',
-      name: 'Alert summarization',
-      promptType: 'quick',
-      color: '#F68FBE',
-      categories: ['alert'],
-      consumer: 'securitySolutionUI',
-    },
+    quickPrompt,
     {
       timestamp: '2025-02-24T18:13:51.851Z',
       users: [{ id: 'u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0', name: 'elastic' }],
@@ -84,7 +84,7 @@ describe('useQuickPromptUpdater', () => {
     );
 
     act(() => {
-      result.current.onQuickPromptSelect('OZ4qOZUBqnYEVX-cWulv');
+      result.current.onQuickPromptSelect({ ...quickPrompt, id: 'OZ4qOZUBqnYEVX-cWulv' });
     });
 
     expect(result.current.selectedQuickPrompt?.name).toBe('Alert summarization');

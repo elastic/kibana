@@ -67,6 +67,7 @@ export const AssistantSettings: React.FC<Props> = React.memo(
       assistantAvailability: { isAssistantEnabled },
       selectedSettingsTab,
       setSelectedSettingsTab,
+      toasts,
     } = useAssistantContext();
 
     useEffect(() => {
@@ -102,6 +103,7 @@ export const AssistantSettings: React.FC<Props> = React.memo(
       currentAppId,
       http,
       promptsLoaded,
+      toasts,
     });
 
     const {
@@ -124,6 +126,7 @@ export const AssistantSettings: React.FC<Props> = React.memo(
       http,
       isAssistantEnabled,
       setConversationsSettingsBulkActions,
+      toasts,
     });
 
     const onCancelSystemPrompt = useCallback(() => {
