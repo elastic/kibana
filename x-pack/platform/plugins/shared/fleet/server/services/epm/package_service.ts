@@ -405,7 +405,6 @@ class PackageClientImpl implements PackageClient {
 
     const { installedTransforms } = await installTransforms({
       packageInstallContext: {
-        assetsMap,
         packageInfo,
         paths,
         archiveIterator,

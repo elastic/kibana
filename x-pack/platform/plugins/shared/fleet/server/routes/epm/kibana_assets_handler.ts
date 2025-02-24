@@ -68,7 +68,6 @@ export const installPackageKibanaAssetsHandler: FleetRequestHandler<
     packageInstallContext: {
       packageInfo,
       paths: installedPkgWithAssets.paths,
-      assetsMap: installedPkgWithAssets.assetsMap,
       archiveIterator: createArchiveIteratorFromMap(installedPkgWithAssets.assetsMap),
     },
   });

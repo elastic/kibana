@@ -29,7 +29,6 @@ describe('Install pipeline tests', () => {
           ],
         } as any,
         paths: [],
-        assetsMap: new Map(),
         archiveIterator: createArchiveIteratorFromMap(new Map()),
       });
 

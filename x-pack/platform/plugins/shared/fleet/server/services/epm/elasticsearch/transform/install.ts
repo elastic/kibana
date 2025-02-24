@@ -408,6 +408,12 @@ const processTransformAssetsPerModule = async (
     version: t.transformVersion,
   }));
 
+  const fieldAssetsMap: AssetsMap = new Map();
+  await packageInstallContext.archiveIterator.traverseEntries(async (entry) => {
+    if (entry.buffer) {
+      fieldAssetsMap.set(entry.path, entry.buffer);
+    }
+  }, isFields);
   // Load and generate mappings
   for (const destinationIndexTemplate of destinationIndexTemplates) {
     if (!destinationIndexTemplate.transformModuleId) {
@@ -418,7 +424,11 @@ const processTransformAssetsPerModule = async (
       .get(destinationIndexTemplate.transformModuleId)
       ?.set(
         'mappings',
-        loadMappingForTransform(packageInstallContext, destinationIndexTemplate.transformModuleId)
+        loadMappingForTransform(
+          packageInstallContext,
+          fieldAssetsMap,
+          destinationIndexTemplate.transformModuleId
+        )
       );
   }
 

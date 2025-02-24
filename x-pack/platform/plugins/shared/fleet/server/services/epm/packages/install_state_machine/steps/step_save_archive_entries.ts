@@ -17,7 +17,7 @@ import { INSTALL_STATES } from '../../../../../../common/types';
 import { getPathParts } from '../../../archive';
 
 export async function stepSaveArchiveEntries(context: InstallContext) {
-  const { packageInstallContext, savedObjectsClient, installSource } = context;
+  const { packageInstallContext, savedObjectsClient, installSource, useStreaming } = context;
 
   const { packageInfo, archiveIterator } = packageInstallContext;
 
@@ -49,7 +49,7 @@ export async function stepSaveArchiveEntries(context: InstallContext) {
   await archiveIterator.traverseEntries(async (entry) => {
     const assetType = getPathParts(entry.path).type as KibanaAssetType;
     // Skip security rules to avoid storing to many things
-    if (assetType !== 'security_rule') {
+    if (assetType !== 'security_rule' && useStreaming) {
       assetsToSaveMap.set(entry.path, entry.buffer);
     }
     if (assetsToSaveMap.size > 100) {

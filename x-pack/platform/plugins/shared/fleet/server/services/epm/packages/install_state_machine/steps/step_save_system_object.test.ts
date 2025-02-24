@@ -66,7 +66,6 @@ describe('updateLatestExecutedState', () => {
       esClient,
       logger,
       packageInstallContext: {
-        assetsMap: new Map(),
         archiveIterator: createArchiveIteratorFromMap(new Map()),
         paths: [],
         packageInfo: {
@@ -133,7 +132,6 @@ describe('updateLatestExecutedState', () => {
       esClient,
       logger,
       packageInstallContext: {
-        assetsMap: new Map(),
         archiveIterator: createArchiveIteratorFromMap(new Map()),
         paths: [],
         packageInfo: {
