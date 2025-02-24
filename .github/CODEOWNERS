@@ -957,8 +957,9 @@ src/platform/packages/shared/kbn-std @elastic/kibana-core
 packages/kbn-stdio-dev-helpers @elastic/kibana-operations
 src/platform/packages/shared/kbn-storage-adapter @elastic/observability-ui
 packages/kbn-storybook @elastic/kibana-operations
-x-pack/solutions/observability/plugins/streams_app @simianhacker @flash1293 @dgieselaar
-x-pack/solutions/observability/plugins/streams @simianhacker @flash1293 @dgieselaar
+x-pack/platform/plugins/shared/streams_app @elastic/streams-program-team
+x-pack/solutions/observability/plugins/observability_streams_wrapper @elastic/streams-program-team
+x-pack/platform/plugins/shared/streams @simianhacker @flash1293 @dgieselaar
 x-pack/platform/packages/shared/kbn-streams-schema @elastic/streams-program-team
 packages/kbn-styled-components-mapping-cli @elastic/kibana-operations @elastic/eui-team
 x-pack/solutions/observability/plugins/synthetics/e2e @elastic/obs-ux-management-team
