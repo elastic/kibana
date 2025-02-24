@@ -10,8 +10,10 @@ import type { SecurityRoleDescriptor } from '@elastic/elasticsearch/lib/api/type
 import type { agentPolicyStatuses } from '../../constants';
 import type { MonitoringType, PolicySecretReference, ValueOf } from '..';
 
+import type { SOSecret } from '..';
+
 import type { PackagePolicy, PackagePolicyPackage } from './package_policy';
-import type { Output, OutputSecret } from './output';
+import type { Output } from './output';
 
 export type AgentPolicyStatus = typeof agentPolicyStatuses;
 
@@ -238,7 +240,7 @@ export interface FullAgentPolicyFleetConfig {
   proxy_headers?: any;
   ssl?: BaseSSLConfig;
   secrets?: {
-    ssl?: { key?: OutputSecret };
+    ssl?: { key?: SOSecret };
   };
 }
 
