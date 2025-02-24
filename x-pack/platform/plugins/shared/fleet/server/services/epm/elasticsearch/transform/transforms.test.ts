@@ -22,11 +22,11 @@ import { PACKAGES_SAVED_OBJECT_TYPE } from '../../../../constants';
 
 import { getESAssetMetadata } from '../meta';
 
+import { createArchiveIteratorFromMap } from '../../archive/archive_iterator';
 import { createAppContextStartContractMock } from '../../../../mocks';
 import type { PackageInstallContext } from '../../../../../common/types';
 
 import { installTransforms } from './install';
-import { createArchiveIteratorFromMap } from '../../archive/archive_iterator';
 
 jest.mock('../../packages/get', () => {
   return { getInstallation: jest.fn(), getInstallationObject: jest.fn() };

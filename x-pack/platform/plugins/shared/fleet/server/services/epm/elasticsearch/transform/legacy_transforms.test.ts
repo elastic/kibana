@@ -26,11 +26,11 @@ import { appContextService } from '../../../app_context';
 
 import { getESAssetMetadata } from '../meta';
 
+import { createArchiveIteratorFromMap } from '../../archive/archive_iterator';
 import type { PackageInstallContext } from '../../../../../common/types';
 import { PACKAGES_SAVED_OBJECT_TYPE } from '../../../../constants';
 
 import { installTransforms } from './install';
-import { createArchiveIteratorFromMap } from '../../archive/archive_iterator';
 
 describe('test transform install with legacy schema', () => {
   let esClient: ReturnType<typeof elasticsearchClientMock.createElasticsearchClient>;
