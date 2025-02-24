@@ -1126,6 +1126,7 @@
     "del": "^6.1.0",
     "diff": "^7.0.0",
     "dotenv": "^16.4.5",
+    "effect": "^3.13.2",
     "elastic-apm-node": "^4.11.0",
     "email-addresses": "^5.0.0",
     "eventsource-parser": "^3.0.0",
