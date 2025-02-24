@@ -17,13 +17,14 @@ import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/publ
 import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import {
-  updateESQLQueryTrigger,
-  UPDATE_ESQL_QUERY_TRIGGER,
   esqlControlTrigger,
   ESQL_CONTROL_TRIGGER,
-  ACTION_UPDATE_ESQL_QUERY,
-  ACTION_CREATE_ESQL_CONTROL,
-} from './triggers';
+} from './triggers/esql_controls/esql_control_trigger';
+import {
+  updateESQLQueryTrigger,
+  UPDATE_ESQL_QUERY_TRIGGER,
+} from './triggers/update_esql_query/update_esql_query_trigger';
+import { ACTION_UPDATE_ESQL_QUERY, ACTION_CREATE_ESQL_CONTROL } from './triggers/constants';
 import { setKibanaServices } from './kibana_services';
 import { JoinIndicesAutocompleteResult } from '../common';
 import { cacheNonParametrizedAsyncFunction } from './util/cache';

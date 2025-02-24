@@ -15,8 +15,7 @@ import type { ESQLVariableType, ESQLControlVariable } from '@kbn/esql-validation
 import { monaco } from '@kbn/monaco';
 import type { ESQLControlState } from './types';
 import { isActionCompatible, executeAction } from './esql_control_helpers';
-
-export const ACTION_CREATE_ESQL_CONTROL = 'ACTION_CREATE_ESQL_CONTROL';
+import { ACTION_CREATE_ESQL_CONTROL } from '../constants';
 
 interface Context {
   queryString: string;
