@@ -387,6 +387,45 @@ export function registerAPIRoutes({
     }
   );
 
+  const publishEventRoute = versionedRouter.post({
+    path: `${PUBLIC_API_PATH}/{id}/events`,
+    access: 'public',
+    summary: `Publish dashboard events`,
+  });
+
+  publishEventRoute.addVersion(
+    {
+      version: PUBLIC_API_VERSION,
+      validate: {
+        request: {
+          params: schema.object({
+            id: schema.string({
+              meta: {
+                description: 'A unique identifier for the dashboard.',
+              },
+            }),
+          }),
+          body: schema.object({
+            type: schema.string({
+              meta: {
+                description: 'The type of event to publish.',
+              },
+            }),
+          }),
+        },
+      },
+    },
+    async (_ctx, req, res) => {
+      const { id } = req.params;
+
+      const subject = getEventSubjectForDashboard(id);
+
+      subject.next(req.body);
+
+      return res.ok();
+    }
+  );
+
   const eventsRoute = versionedRouter.get({
     path: `${PUBLIC_API_PATH}/{id}/events`,
     access: 'public',
@@ -418,13 +457,7 @@ export function registerAPIRoutes({
         controller.abort();
       });
 
-      return res.custom({
-        statusCode: 200,
-        headers: {
-          'Content-Type': 'text/event-stream',
-          'Cache-Control': 'no-cache',
-          Connection: 'keep-alive',
-        },
+      return res.ok({
         body: observableIntoEventSourceStream(subject.asObservable(), {
           logger,
           signal: controller.signal,

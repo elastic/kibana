@@ -74,8 +74,10 @@ export function DashboardRenderer({
           results.cleanup();
           return;
         }
-
         const { http } = coreServices;
+        http.post(`/api/dashboards/dashboard/${savedObjectId}/events`, {
+          body: JSON.stringify({ type: 'dashboard.opened' }),
+        });
 
         const eventStream$ = from(
           http.get(`/api/dashboards/dashboard/${savedObjectId}/events`, {
