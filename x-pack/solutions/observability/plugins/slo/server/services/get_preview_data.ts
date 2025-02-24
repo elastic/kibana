@@ -62,7 +62,7 @@ export class GetPreviewData {
         // If the data view is not found, we will continue without it
       }
     }
-    return dataView?.getRuntimeMappings() ?? {};
+    return dataView?.getRuntimeMappings?.() ?? {};
   }
 
   private addExtraTermsOrMultiTermsAgg(
