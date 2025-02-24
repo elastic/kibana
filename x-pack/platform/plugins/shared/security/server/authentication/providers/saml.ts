@@ -377,9 +377,9 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
       })) as any;
     } catch (err) {
       this.logger.error(
-        `Failed to log in with SAML response: ${getDetailedErrorMessage(err)}${
-          !isIdPInitiatedLogin ? `, request id: ${stateRequestId}` : ''
-        }`
+        `Failed to log in with SAML response, ${
+          !isIdPInitiatedLogin ? `request id: ${stateRequestId}, ` : ''
+        }error: ${getDetailedErrorMessage(err)}`
       );
 
       // Since we don't know upfront what realm is targeted by the Identity Provider initiated login
