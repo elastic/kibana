@@ -256,12 +256,12 @@ export const initUiSettings = (
     },
     [ENABLE_ASSET_INVENTORY_SETTING]: {
       name: i18n.translate('xpack.securitySolution.uiSettings.enableAssetInventoryLabel', {
-        defaultMessage: 'Enable Asset Inventory',
+        defaultMessage: 'Enable Security Asset Inventory',
       }),
       description: i18n.translate(
         'xpack.securitySolution.uiSettings.enableAssetInventoryDescription',
         {
-          defaultMessage: `<em>[technical preview]</em> Enable the Asset Inventory feature to view and manage assets in the Security Solution plugin.`,
+          defaultMessage: `<em>[technical preview]</em> Enable the Asset Inventory experience within the Security Solution. When enabled, you can access the new Inventory feature through the Security Solution navigation. Note: Disabling this setting will not disable the Entity Store or clear persistent Entity metadata. To manage or disable the Entity Store, please visit the Entity Store Management page.`,
           values: { em: (chunks) => `<em>${chunks}</em>` },
         }
       ),
