@@ -26,7 +26,6 @@ export interface StreamEnrichmentContext {
   definition: IngestStreamGetResponse;
   initialProcessors: Array<ActorRefFrom<typeof processorMachine>>;
   processors: Array<ActorRefFrom<typeof processorMachine>>;
-  hasStagedChanges: boolean;
   fields?: FieldDefinition;
 }
 

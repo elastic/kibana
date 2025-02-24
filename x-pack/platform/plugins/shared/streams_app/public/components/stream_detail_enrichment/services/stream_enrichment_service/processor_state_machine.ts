@@ -34,7 +34,7 @@ export interface ProcessorMachineContext {
   initialProcessor: ProcessorDefinitionWithUIAttributes;
   processor: ProcessorDefinitionWithUIAttributes;
   isNew: boolean;
-  hasChanges: boolean;
+  isUpdated?: boolean;
 }
 
 const getParentRef = ({ context }: { context: ProcessorMachineContext }) => context.parentRef;
@@ -48,12 +48,12 @@ export const processorMachine = setup({
     },
     context: {} as ProcessorMachineContext,
     events: {} as
-      | { type: 'processor.stage' }
       | { type: 'processor.cancel' }
+      | { type: 'processor.change'; processor: ProcessorDefinition }
       | { type: 'processor.delete' }
       | { type: 'processor.edit' }
-      | { type: 'processor.update' }
-      | { type: 'processor.change'; processor: ProcessorDefinition },
+      | { type: 'processor.stage' }
+      | { type: 'processor.update' },
   },
   actors: {
     confirmDiscardChanges: getPlaceholderFor(createConfirmDiscardChangesActor),
@@ -72,6 +72,7 @@ export const processorMachine = setup({
     })),
     updateProcessor: assign(({ context }) => ({
       initialProcessor: context.processor,
+      isUpdated: true,
     })),
     emitProcessorChange: sendTo(getParentRef, { type: 'processor.change' }),
     emitProcessorDelete: sendTo(getParentRef, ({ context }) => ({
@@ -85,19 +86,18 @@ export const processorMachine = setup({
     hasEditingChanges: ({ context }) => !isEqual(context.initialProcessor, context.processor),
   },
 }).createMachine({
-  /** @xstate-layout N4IgpgJg5mDOIC5QAcBOB7AxnW7UDoBXAO1TnQBsA3SAYgG0AGAXURXVgEsAXT9YtiAAeiAIwB2AGz5xAZgAssyQFYATAA55o2evUAaEAE9Ei2fmXrZsxo1GNx4+Y4C+zg2iw48RUuWp16UVYkEGQOHj4BEJEECWk5RRUNLR19I0RlSWlGS2tbe0cXN1CMbFhcAghUAEMAM258SAjiKFoPMor8WG5qmCZg9i5efkEY0VVZURlGDXVGZQBOBYdGeQNjBFkF1XxdW3lJWXFF1RVZV3dSr0qa+saIZtb26-xMauJsCn7BMKHI0Yykh2jlUonUyismXUqjW6U2NnwNhskhyjk0okkFxKnnK3iqdQaTV4LTaV1xBDeHzAXyCP3CwyioBi0PWiHB2VyqmUjEk2j5WOe5Pw+LuRM4JMFnUwAAt3n0WHS-iNoogFAt8KJMqoYacFlolqzYll8DCjqpVjlGEoFsoBWTOiKGph+LVOKgALbiqAAEU4sDeqAgAGFZS04LQIPwwPhxVR0ABraOSvG3J0ut2elq+-3VQMhuVwBCxrDVBn9b4hX4RZVMsQTKbiGZ7RbLRuwjYTdQaiFA3szWyyVR2nEO1OvdMer3ZgPB0MwWC0MCoDAEZAUUu1PDu-DJm4E8fEV2TrN+mf5sOwIvEONvMssCuDauM4SILJTZaSeTLeRqUTydSSIaXI7NyNgSPI9h-vYQ7FLuXQ9DAEAxhAFBgKSI7eESD6hPS-wqrE9iGuM2iIkoyjKOI5pAt+w4dN43S9JA9w8MxxJPPa3iEMgEClmA2FVgyAIEeRGoSIwCySI4KjzKoRGnGYPaHCs2qSLotEvAxiGsaxXroXRFLvJ8-G4TWL6bOC5jggstgAeMRwHERFE7KINoQgsczjBBmKwRxBCaUxRI6RKvmvIZ1KBAMOFKs+YzzMoomNhJUncmoRE6NIeqqMstguU4hzqUK-lIYFYrBRhlTUmA3B8QqlYmTFqoWRYiw2byExSURkniPgkiuVlWifksto+eV8GMcVDyEpNulwTKBbGdFQl-rJcKagoPV2AsYLajkWTqAVnRFdpzqHhmU6nrms4FgukbENGxaJjuIVHYFJ1HpmPoXXmc6FsWt6ROWtWPoJ+F2CJohiUlBwpStGyanY+BqtYXJKKpOgHfRCEBZNB7vedObfddi7Lt4a4bluT2jS9ONvWdJ4E1dF5XjepYA-eQNRU+Qn-vIuzmqocjbZR6jiI5MI9TaX6HJCWziBjflYxNLG08ePqVdVAAKvkRlGMbXgmSbPYrx0Th93rq2AWvlczJZ3swC1c6DX683qygSHMvVHHIRGUeqP4AYclhApM+0jfpY1aa9ptThbVv6cTK47uu3Cbh6lPh9TyvR1mse+Tb-38IDkUCXhtYIDzJqgXYOgYl+2iddYGo2pRAuqeoSzyzuS5cN0TGcChaFwVhHMl6ZMTLERIvSALIsCzavUonLYcvMg3d+tVStTY8ekvFxPHVQ7INl2D8UQ4lknQ-MQH-t1BxOFovt-hIner6gPcb9ppXsaNlJGSP9VCSOPFZq1kwRtXsoBOEoISJNi1NqJw4Il6XFGq-d+2MWJfx3kKX+4VaR1UWqDOKCVxIX2ksoICoJ1Q6GUBBACVgXLnGXkKVB690FbzYlgh0FtD6lzMkAyyLUwF2Q6lA+QoINoYhRDJcS2oX5r17pvIK39w5zTDDwseYhBwUPEF2NQqlxhWkOIsORb9WGKJVmbL6jN5w6zunrOMj04IsIUSbU6qtpyXXPPOfOrNC7s2LgAwhP5iFQzIURbY8QdEUQxIOSwMITFoPMdnT6DMvHhiXInMmKcKZOPkR-KObjLGpJ+peP6vjiBF0VI7Mu98+YzEFtCYWosoE8mARoY45EHBgicAksxri8Y51QprbWt17r60cSFZx+SabJPNkMy2ecyl23UQ1BAGgXKI2skoCQjgmztkQKcaEPUqLLG2gocEvSXEFIGWreZcdrgJ1JsnVO25cmmKuTMwpMc7mLP1gXCp-iqlHzMrUmEQ0z5ZBhBIIC9lRJgghBBeQddGHIPDlMpie9eJIX7qhThmFJorKWlsaQSK3aWDbCoMEQFbAZUMToKwtCAKXI-pi6ZGDpplXDqymqASCFlwmEi8wQINCrDdpqVS1LND4CRdCM0NCZHyGZRi7iWLP4cuUS8HBXx-58rMhiY4pE7DgkyBYduMLjSajEV+eYAEmVMM6OipC3LFGYNmmFGkvLqlmQFbzOBcwfwQyhBQ+wuwaGZCStoJVTqVVsvYTNEKEBuE6q9WMSS8UrRGvIioXQCxr7iCmCofU2wrTbAWFGogMa2FKLxRSH6hKnaTGlQG8lqxKVpA7LEoVNo9g5Cyvle1pM8nKv3lWix+MzwlNsWMhxhsUFDujSOpJXz6YTuuj45ZybgUxB9UK7U-qxVBqgdYXm1hxALFifKiS5bnX9Lpik1dF5HmrmeTkyZ86K2Ltve4qxaTSl-PKZU-BKaxAOF5qcMNbc5D+phWCHqblVIrF0ORa9lal03LmVVBZ5Up32INunFe76b3XLvRh4Z1slls3tpu3h271AbK2IYnZEFkhATUGYB+EJxJyEcIqgdq5COoa-WbXO2GMlPPJmnN5iSP2quI+4kT+l12UfrcfBwZhepuz1LtPIzSOxWu7FsMEW02pSFcMUYg6BE3wErL5IFNHEAAFpxiGgc12Y41FepLGrr1JB2IuW+FwP4CAdmNHl1hhkCi+BjMnBRroDQndHQhdWdYKY4r4G6iLYaHRMhFBtgmAhrKMFUUvEdEopLgD3IyAhLPAWLl5g2iAnqHqX5z1IvhnqXjxWhSlbHSuzxJTyv4S2t1FQvJ-yywUE4IChxLJWG1BJbY+ait+Y0orQbNTIFw3GMApQAarU2Hbp3I6OKwDrb1UcElzajitrJY5JwJpZhtjdhYcSR3jZEjO+PfZsRctNwou5XKyxNBvfGmqx4n2xBbXMB+f8NgYQAVWJ1GbthGzaDo2ekEIPI6fPQz+gbQGt2IF2dKpY7krCDj1AaVaEJ4oOHbksGEFEadY9HbMhT1wIcIGJy1snc3Ke5tWp+KYM8RaipIacKNnOlA+10DIHRjgMSZAkBictJ3OfaEyE2sl13oZUtWroLsWy24ixOBcvjXd3mxs55ocJ2WmyDTPf+CSy2pN9JKuq9XdHodSFhzMf8KJvswh5FF+hSKfyyEyCoctcmikPvnJzuQjAScM60HPeH1KpASMcBCM921o845I+z8kCfG486hWn-8MKLK5U0IOHk-5LAocXeryEWuwQ67beErK0qrQQi5G7M97km+qrVwT+zaysjxXboY3Z56rQwq0BqEWi3RUSCUMPq3Y-Qto-Y1dilt2oH1gM2ezzoJ4nm8dTJ2NZWt+rL-F71YGhJiNnzUcdtByfwZWOMWsR5ErQopW2YQE0-Rj3HX62uk535nVFdn1StCkFsHISPW7243cicHPUmG8i6wdWANkwL3kx+XKkgJmGgIDUkjgJRE1GvgjxNAuxcndl-wSwtmC1v0AV2iiykAhnBCRAUB9itGmE0AsHhy2jdjM2cCAA */
+  /** @xstate-layout N4IgpgJg5mDOIC5QAcBOB7AxnW7UDoBXAO1TnQBsA3SAYgG0AGAXURXVgEsAXT9YtiAAeiAIwB2AGz5xAZgAss8QFYANCACeiZcoBM+RgA5ZJ+fMO6AnJN3KAvnfVosOPEVLlqdeqNZIQyBw8fAL+IggS0nKKKupaCIai+MqMqYyiovLWVqIOThjYsLgEEKgAhgBm3PiQwcRQtM6Fxfiw3GUwTH7sXLz8guGiurJJ4owjtnGIuqKyMtaGUpnZlqKSeQEFriXlVTUQdQ1N2-iYZcTYFF2Cgb0hA9o2MvIzi2qaiPKihslp6cs2VbrRybFxFNylSrVWq8eqNLbgghnC5gK6+G5BPqhUDhPRTCKSRYyIwmZSSWS2IEbY6I-CQvYwzhwmktTAAC3OnRYGLu-TCiAUlnwojJkw+CF0hnkzyUygyWUBs2pCJa9OqmH4FU4qAAtkyoAARTiwM6oCAAYQ59TgtAg-DA+CZVHQAGsHSyIbt1ZrtXr6kaTWUzZbOXAEE6sGUsV1rv5bsE+TjEDZ8SLJMp8MMJHJZpS1sqwaqvacfbr9QHTRarTBYLQwKgMARkBQoxU8Dr8B6dlCS8QtWX-cbKyHrbBw8RnWdoyxYz0E9jhMnJElLFJRe94kokn9-gqcsD8oW3Bq+5woIQyBBHRAKGB4UeCDDZwFMfd+REJPjLLZksZSeS8wPUFmmPH1z0vfYeEg2EjhVNxCGQCAozAZ94yxB4IkYdNhQkb5YnFVdpBJf8KWUKkQS7XstXAyBoOg-V7xApFzkuVDX0TRcEFkSwM2UQwyNlVMRiSSQeJGeRxEsb8+NkAsmKos8L1omF6OZODmJRNFuhfXkF0GLCMwycQ8I3MQhmkMxdGMrDSPIw95JPailKvFTGTUh86VRMBuBQ7k43YvSBR438BPw+JMgkYUxMySTpOMOSTkcxSINcg4YMYxLq187S0LfJMIjxcUhnEaUMkYLITDGQlxAS2kkpoly0oUgdDSHIMq1DWs7WIB0IzdTt1IUhq6KSlqK3akca3HScoxCGM-LndD31EAycOMt5U10LJ8ClQxrBsvNZIowb6uckbSz9VrA2DLLa3rRtOxbbg211AaPNOlKmtGy7xpuzrpsjadmDY3SMKyaULHGIZTIiXRJFK6KJKk2x4uO96wLOlTvvLLyfIABXU217UdCdXXdE6Mc+qDsf9XGwAJh8AanOaZwWnT5wwkURhkEzU3kQl8B4v8yVs-M0YcynlK+i6cdvfHCfutxm1bds3ol09hqxmXabl+n1KZ2b+HmnKArByxpTFcLZFE-BROUcTYpRo6QWIdAIDgG51J5Dn3wAWkkfF-dqloSDIXAvAgb2lvyl58UMaQ1kkJPxESQFlHEGrxZONUo7yzjZHSYV11TVdMxiOUARyI77Oz4s3KgXOOPCbifhUbisMtz5ZiLtJ5RWJUs9pNVmp+tq-tHRvAoQVZxFt4vxVkCwDD-BRzCsGwJOD0CNecyeMLJOPF+XkxV4sbJ7EH1lJavTgbzAPflq+OZXjCsRJSid-zFzMixZrurr+gg-fKK15CpkiLbRGjsZJbyRAA1KhwgGcV0IXMia4bApD+LIPmjB9BykkCVSqWFFgwKGpjaWp4xpjw6hPfyoN3wqEYMkTaKhMwp3hokUWQFKIfSltTbWho6YMyYog8IDCmFFUXowjO8cv6cJIe7XWkdaE+3yvgkuxlMzERFoBBwDggA */
   id: 'processor',
   context: ({ input }) => ({
     parentRef: input.parentRef,
     initialProcessor: input.processor,
     processor: input.processor,
     isNew: input.isNew ?? false,
-    hasChanges: false,
   }),
   initial: 'unresolved',
   states: {
     unresolved: {
-      always: [{ target: 'draft', guard: 'isDraft' }, { target: 'persisted' }],
+      always: [{ target: 'draft', guard: 'isDraft' }, { target: 'configured' }],
     },
     draft: {
       initial: 'editing',
@@ -105,7 +105,7 @@ export const processorMachine = setup({
         editing: {
           on: {
             'processor.stage': {
-              target: '#staged',
+              target: '#configured',
               actions: [{ type: 'updateProcessor' }, { type: 'emitProcessorChange' }],
             },
             'processor.cancel': [
@@ -137,8 +137,8 @@ export const processorMachine = setup({
         },
       },
     },
-    staged: {
-      id: 'staged',
+    configured: {
+      id: 'configured',
       initial: 'idle',
       states: {
         idle: {
@@ -150,7 +150,8 @@ export const processorMachine = setup({
             editing: {
               on: {
                 'processor.update': {
-                  target: '#staged.idle',
+                  guard: 'hasEditingChanges',
+                  target: '#configured.idle',
                   actions: [{ type: 'updateProcessor' }, { type: 'emitProcessorChange' }],
                 },
                 'processor.cancel': [
@@ -159,7 +160,7 @@ export const processorMachine = setup({
                     target: 'confirmingDiscardChanges',
                   },
                   {
-                    target: '#staged.idle',
+                    target: '#configured.idle',
                     actions: [{ type: 'emitProcessorChange' }, { type: 'emitChangesDiscarded' }],
                   },
                 ],
@@ -176,7 +177,7 @@ export const processorMachine = setup({
               invoke: {
                 src: 'confirmDiscardChanges',
                 onDone: {
-                  target: '#staged.idle',
+                  target: '#configured.idle',
                   actions: [
                     { type: 'restoreInitialProcessor' },
                     { type: 'emitProcessorChange' },
@@ -191,125 +192,6 @@ export const processorMachine = setup({
                 src: 'confirmProcessorDelete',
                 onDone: '#deleted',
                 onError: 'editing',
-              },
-            },
-          },
-        },
-      },
-    },
-    persisted: {
-      id: 'persisted',
-      initial: 'idle',
-      states: {
-        idle: {
-          on: { 'processor.edit': 'edit' },
-        },
-        edit: {
-          initial: 'editing',
-          states: {
-            editing: {
-              on: {
-                'processor.update': {
-                  target: '#persisted.updated',
-                  actions: [{ type: 'updateProcessor' }, { type: 'emitProcessorChange' }],
-                },
-                'processor.cancel': [
-                  {
-                    guard: 'hasEditingChanges',
-                    target: 'confirmingDiscardChanges',
-                  },
-                  {
-                    target: '#persisted.idle',
-                    actions: [{ type: 'emitChangesDiscarded' }],
-                  },
-                ],
-                'processor.delete': 'confirmingDeleteProcessor',
-                'processor.change': {
-                  actions: [
-                    { type: 'changeProcessor', params: ({ event }) => event },
-                    { type: 'emitProcessorChange' },
-                  ],
-                },
-              },
-            },
-            confirmingDiscardChanges: {
-              invoke: {
-                src: 'confirmDiscardChanges',
-                onDone: {
-                  target: '#persisted.idle',
-                  actions: [
-                    { type: 'restoreInitialProcessor' },
-                    { type: 'emitProcessorChange' },
-                    { type: 'emitChangesDiscarded' },
-                  ],
-                },
-                onError: 'editing',
-              },
-            },
-            confirmingDeleteProcessor: {
-              invoke: {
-                src: 'confirmProcessorDelete',
-                onDone: '#deleted',
-                onError: 'editing',
-              },
-            },
-          },
-        },
-        updated: {
-          initial: 'idle',
-          states: {
-            idle: {
-              on: { 'processor.edit': 'edit' },
-            },
-            edit: {
-              initial: 'editing',
-              states: {
-                editing: {
-                  on: {
-                    'processor.update': {
-                      target: '#persisted.updated.idle',
-                      actions: [{ type: 'updateProcessor' }, { type: 'emitProcessorChange' }],
-                    },
-                    'processor.cancel': [
-                      {
-                        guard: 'hasEditingChanges',
-                        target: 'confirmingDiscardChanges',
-                      },
-                      {
-                        target: '#persisted.updated.idle',
-                        actions: [{ type: 'emitChangesDiscarded' }],
-                      },
-                    ],
-                    'processor.delete': 'confirmingDeleteProcessor',
-                    'processor.change': {
-                      actions: [
-                        { type: 'changeProcessor', params: ({ event }) => event },
-                        { type: 'emitProcessorChange' },
-                      ],
-                    },
-                  },
-                },
-                confirmingDiscardChanges: {
-                  invoke: {
-                    src: 'confirmDiscardChanges',
-                    onDone: {
-                      target: '#persisted.updated.idle',
-                      actions: [
-                        { type: 'restoreInitialProcessor' },
-                        { type: 'emitProcessorChange' },
-                        { type: 'emitChangesDiscarded' },
-                      ],
-                    },
-                    onError: 'editing',
-                  },
-                },
-                confirmingDeleteProcessor: {
-                  invoke: {
-                    src: 'confirmProcessorDelete',
-                    onDone: '#deleted',
-                    onError: 'editing',
-                  },
-                },
               },
             },
           },

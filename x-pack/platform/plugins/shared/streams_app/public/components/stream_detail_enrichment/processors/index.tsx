@@ -206,9 +206,9 @@ export function EditProcessorPanel({
 
   const processorDescription = getProcessorDescription(processor);
 
-  const isOpen = state.matches({ staged: 'edit' }) || state.matches({ persisted: 'edit' });
-  const isStaged = state.matches('staged');
-  const isUnsaved = isStaged || state.matches({ persisted: 'updated' });
+  const isOpen = state.matches({ configured: 'edit' });
+  const isNew = state.context.isNew;
+  const isUnsaved = isNew || state.context.isUpdated;
 
   const defaultValues = useMemo(() => getFormStateFrom(processor), [processor]);
 
@@ -269,7 +269,7 @@ export function EditProcessorPanel({
   return (
     <EuiPanel
       hasBorder
-      color={isStaged ? 'subdued' : undefined}
+      color={isNew ? 'subdued' : undefined}
       css={css`
         border: ${euiTheme.border.thin};
         padding: ${euiTheme.size.m};
@@ -312,7 +312,7 @@ export function EditProcessorPanel({
                 size="s"
                 fill
                 onClick={methods.handleSubmit(handleSubmit)}
-                disabled={!methods.formState.isValid}
+                disabled={!methods.formState.isValid || !state.can({ type: 'processor.update' })}
               >
                 {i18n.translate(
                   'xpack.streams.streamDetailView.managementTab.enrichment.processorPanel.confirmEditProcessor',

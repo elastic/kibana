@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { MachineImplementationsFrom, assign, enqueueActions, setup, stopChild } from 'xstate5';
+import { MachineImplementationsFrom, assign, enqueueActions, not, setup, stopChild } from 'xstate5';
 import { getPlaceholderFor } from '@kbn/xstate-utils';
 import {
   IngestStreamGetResponse,
@@ -100,22 +100,23 @@ export const streamEnrichmentMachine = setup({
     reassignProcessors: assign(({ context }) => ({
       processors: [...context.processors],
     })),
-    deriveStagedChangesFlag: assign(({ context }) => {
-      const { initialProcessors, processors } = context;
-      return {
-        hasStagedChanges:
-          initialProcessors.length !== processors.length || // Deleted/New processors
-          processors.some((processor) => {
-            const state = processor.getSnapshot();
-            return state.matches('staged') || state.matches({ persisted: 'updated' });
-          }) || // New/updated/deleted processors
-          processors.some((processor, pos) => initialProcessors[pos]?.id !== processor.id), // Processor order changed
-      };
-    }),
   },
   guards: {
     hasMultipleProcessors: ({ context }) => context.processors.length > 1,
-    hasStagedChanges: ({ context }) => context.hasStagedChanges,
+    hasStagedChanges: ({ context }) => {
+      const { initialProcessors, processors } = context;
+      return (
+        // Deleted processors
+        initialProcessors.length !== processors.length ||
+        // New/updated processors
+        processors.some((processor) => {
+          const state = processor.getSnapshot();
+          return state.matches('configured') || state.context.isUpdated;
+        }) ||
+        // Processor order changed
+        processors.some((processor, pos) => initialProcessors[pos]?.id !== processor.id)
+      );
+    },
     hasPendingDraft: ({ context }) =>
       Boolean(context.processors.find((p) => p.getSnapshot().matches('draft'))),
     isRootStream: ({ context }) => isRootStreamDefinition(context.definition.stream),
@@ -128,7 +129,6 @@ export const streamEnrichmentMachine = setup({
     definition: input.definition,
     initialProcessors: [],
     processors: [],
-    hasStagedChanges: false,
   }),
   initial: 'listeningForDefinitionChanges',
   on: {
@@ -168,8 +168,6 @@ export const streamEnrichmentMachine = setup({
                 }),
               });
             }
-
-            enqueue({ type: 'deriveStagedChangesFlag' });
           }),
         },
       ],
@@ -180,29 +178,21 @@ export const streamEnrichmentMachine = setup({
         displayingProcessors: {
           on: {
             'processors.add': {
-              actions: enqueueActions(({ check, enqueue }) => {
-                if (!check('hasPendingDraft')) {
-                  enqueue({ type: 'addProcessor', params: ({ event }) => event });
-                }
-                enqueue({ type: 'deriveStagedChangesFlag' });
-              }),
+              guard: not('hasPendingDraft'),
+              actions: [{ type: 'addProcessor', params: ({ event }) => event }],
             },
             'processors.reorder': {
               guard: 'hasMultipleProcessors',
-              actions: [
-                { type: 'reorderProcessors', params: ({ event }) => event },
-                { type: 'deriveStagedChangesFlag' },
-              ],
+              actions: [{ type: 'reorderProcessors', params: ({ event }) => event }],
             },
             'processor.delete': {
               actions: [
                 { type: 'stopProcessor', params: ({ event }) => event },
                 { type: 'deleteProcessor', params: ({ event }) => event },
-                { type: 'deriveStagedChangesFlag' },
               ],
             },
             'processor.change': {
-              actions: [{ type: 'reassignProcessors' }, { type: 'deriveStagedChangesFlag' }],
+              actions: [{ type: 'reassignProcessors' }],
             },
           },
         },
@@ -237,7 +227,10 @@ export const streamEnrichmentMachine = setup({
         src: 'upsertStream',
         input: ({ context }) => ({
           definition: context.definition,
-          processors: context.processors.map((proc) => proc.getSnapshot().context.processor),
+          processors: context.processors
+            .map((proc) => proc.getSnapshot())
+            .filter((proc) => proc.matches('configured'))
+            .map((proc) => proc.context.processor),
           fields: context.fields,
         }),
         onDone: {

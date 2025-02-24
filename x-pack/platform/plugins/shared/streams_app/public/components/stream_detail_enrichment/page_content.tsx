@@ -72,15 +72,11 @@ export function StreamDetailEnrichmentContentImpl() {
 
   const definition = useStreamsEnrichmentSelector((state) => state.context.definition);
   const processors = useStreamsEnrichmentSelector((state) => state.context.processors);
-  const hasChanges = useStreamsEnrichmentSelector((state) => state.context.hasStagedChanges);
+  const hasChanges = useStreamsEnrichmentSelector((state) => state.can({ type: 'stream.update' }));
   const isSavingChanges = useStreamsEnrichmentSelector((state) => state.matches('updatingStream'));
 
   const processorList = useMemo(
-    () =>
-      processors.filter((p) => {
-        const snapshot = p.getSnapshot();
-        return snapshot.matches('staged') || snapshot.matches('persisted');
-      }),
+    () => processors.filter((processor) => processor.getSnapshot().matches('configured')),
     [processors]
   );
 
