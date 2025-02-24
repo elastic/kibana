@@ -12,7 +12,7 @@ import '../_dashboard_container.scss';
 import classNames from 'classnames';
 import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
 
-import { EuiButton, EuiEmptyPrompt, EuiLoadingElastic, EuiLoadingSpinner } from '@elastic/eui';
+import { EuiEmptyPrompt, EuiLoadingElastic, EuiLoadingSpinner } from '@elastic/eui';
 import { SavedObjectNotFound } from '@kbn/kibana-utils-plugin/common';
 import { useStateFromPublishingSubject } from '@kbn/presentation-publishing';
 import { LocatorPublic } from '@kbn/share-plugin/common';
@@ -29,6 +29,7 @@ import { DashboardContext } from '../../dashboard_api/use_dashboard_api';
 import { DashboardViewport } from '../component/viewport/dashboard_viewport';
 import { loadDashboardApi } from '../../dashboard_api/load_dashboard_api';
 import { DashboardInternalContext } from '../../dashboard_api/use_dashboard_internal_api';
+import { v4 } from 'uuid';
 
 export interface DashboardRendererProps {
   onApiAvailable?: (api: DashboardApi) => void;
@@ -75,7 +76,9 @@ export function DashboardRenderer({
     const eventSubscription = eventStream$.subscribe({
       next: (event) => {
         console.log(event);
-        dashboardApi?.refreshPanels();
+        if (event.type === 'dashboard.saved') {
+          dashboardApi?.refreshPanels();
+        }
       },
       error: (err) => {
         console.error('Error receiving dashboard events:', err);
@@ -158,7 +161,6 @@ export function DashboardRenderer({
         >
           <DashboardContext.Provider value={dashboardApi}>
             <DashboardInternalContext.Provider value={dashboardInternalApi}>
-              <EuiButton onClick={() => dashboardApi.refreshPanels()}>REFRESH TEST</EuiButton>
               <DashboardViewport dashboardContainerRef={dashboardContainerRef} />
             </DashboardInternalContext.Provider>
           </DashboardContext.Provider>

@@ -260,7 +260,7 @@ export function getDashboardApi({
         }
       }
 
-      panelsManager.api.setPanels(nextPanels);
+      panelsManager.internalApi.reset(nextSavedObjectResult.dashboardInput);
       hasChangeConflict$.next(false);
     },
     hasChangeConflict$,
