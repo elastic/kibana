@@ -53,6 +53,11 @@ describe('GetPreviewData', () => {
       await service.execute({ ...params, groupBy: ['host.name', 'event.action'] });
       expect(esClientMock.search).toMatchSnapshot();
     });
+
+    it('builds the query for a set of groupings', async () => {
+      await service.execute({ ...params, groupings: { 'host.name': 'host.001', env: 'prod' } });
+      expect(esClientMock.search).toMatchSnapshot();
+    });
   });
 
   describe("for 'Custom Metric' indicator type", () => {
@@ -105,6 +110,10 @@ describe('GetPreviewData', () => {
       await service.execute({ ...params, groupBy: ['host.name', 'event.action'] });
       expect(esClientMock.search).toMatchSnapshot();
     });
+    it('builds the query for a set of groupings', async () => {
+      await service.execute({ ...params, groupings: { 'host.name': 'host.001', env: 'prod' } });
+      expect(esClientMock.search).toMatchSnapshot();
+    });
   });
 
   describe("for 'Custom Histogram' indicator type", () => {
@@ -145,6 +154,10 @@ describe('GetPreviewData', () => {
     });
     it('builds the query with 2 groups', async () => {
       await service.execute({ ...params, groupBy: ['host.name', 'event.action'] });
+      expect(esClientMock.search).toMatchSnapshot();
+    });
+    it('builds the query for a set of groupings', async () => {
+      await service.execute({ ...params, groupings: { 'host.name': 'host.001', env: 'prod' } });
       expect(esClientMock.search).toMatchSnapshot();
     });
   });
@@ -201,6 +214,10 @@ describe('GetPreviewData', () => {
       await service.execute({ ...params, groupBy: ['host.name', 'event.action'] });
       expect(esClientMock.search).toMatchSnapshot();
     });
+    it('builds the query for a set of groupings', async () => {
+      await service.execute({ ...params, groupings: { 'host.name': 'host.001', env: 'prod' } });
+      expect(esClientMock.search).toMatchSnapshot();
+    });
   });
 
   describe("for 'APM Latency' indicator type", () => {
@@ -233,6 +250,10 @@ describe('GetPreviewData', () => {
     });
     it('builds the query with 2 groups', async () => {
       await service.execute({ ...params, groupBy: ['host.name', 'event.action'] });
+      expect(esClientMock.search).toMatchSnapshot();
+    });
+    it('builds the query for a set of groupings', async () => {
+      await service.execute({ ...params, groupings: { 'host.name': 'host.001', env: 'prod' } });
       expect(esClientMock.search).toMatchSnapshot();
     });
   });
@@ -268,6 +289,10 @@ describe('GetPreviewData', () => {
       await service.execute({ ...params, groupBy: ['host.name', 'event.action'] });
       expect(esClientMock.search).toMatchSnapshot();
     });
+    it('builds the query for a set of groupings', async () => {
+      await service.execute({ ...params, groupings: { 'host.name': 'host.001', env: 'prod' } });
+      expect(esClientMock.search).toMatchSnapshot();
+    });
   });
 
   describe("for 'Synthetics' indicator type", () => {
@@ -300,6 +325,10 @@ describe('GetPreviewData', () => {
     });
     it('builds the query with 2 groups', async () => {
       await service.execute({ ...params, groupBy: ['host.name', 'event.action'] });
+      expect(esClientMock.search).toMatchSnapshot();
+    });
+    it('builds the query for a set of groupings', async () => {
+      await service.execute({ ...params, groupings: { 'host.name': 'host.001', env: 'prod' } });
       expect(esClientMock.search).toMatchSnapshot();
     });
   });
