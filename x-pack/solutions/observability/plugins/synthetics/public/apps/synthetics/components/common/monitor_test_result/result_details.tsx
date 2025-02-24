@@ -33,15 +33,17 @@ export const ResultDetails = ({
     <div>
       <EuiText className="eui-textNoWrap" size="s">
         <StatusBadge status={parseBadgeStatus(pingStatus)} />{' '}
-        {!testNowMode
-          ? i18n.translate('xpack.synthetics.step.duration.label', {
-              defaultMessage: 'after {value}',
-              values: {
-                value: formatMillisecond((step.synthetics?.step?.duration.us ?? 0) / 1000, {}),
-              },
-            })
-          : ''}
       </EuiText>
+      {!testNowMode ? (
+        <EuiText className="eui-textNoWrap" size="s">
+          {i18n.translate('xpack.synthetics.step.duration.label', {
+            defaultMessage: 'after {value}',
+            values: {
+              value: formatMillisecond((step.synthetics?.step?.duration.us ?? 0) / 1000, {}),
+            },
+          })}
+        </EuiText>
+      ) : null}
 
       {isExpanded && (
         <>

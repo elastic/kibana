@@ -10,6 +10,24 @@ import * as t from 'io-ts';
 import { ObserverCodec } from './observer';
 import { ErrorStateCodec } from './error_state';
 
+export const PageMetricsType = t.type({
+  Documents: t.number,
+  Frames: t.number,
+  JSEventListeners: t.number,
+  JSHeapTotalSize: t.number,
+  JSHeapUsedSize: t.number,
+  LayoutCount: t.number,
+  LayoutDuration: t.number,
+  Nodes: t.number,
+  RecalcStyleCount: t.number,
+  RecalcStyleDuration: t.number,
+  ScriptDuration: t.number,
+  TaskDuration: t.number,
+  Timestamp: t.number,
+});
+
+export type PageMetrics = t.TypeOf<typeof PageMetricsType>;
+
 /**
  * This type has some overlap with the Ping type, but it helps avoid runtime type
  * check failures and removes a lot of unnecessary fields that our Synthetics UI code
@@ -56,6 +74,7 @@ export const SyntheticsDataType = t.partial({
     url: t.string,
     end: t.number,
     text: t.string,
+    pagemetrics: PageMetricsType,
   }),
   isFullScreenshot: t.boolean,
   isScreenshotRef: t.boolean,
