@@ -14,7 +14,7 @@ import { of } from 'rxjs';
 import { dataViewWithTimefieldMock } from '../../../__mocks__/data_view_with_timefield';
 import { discoverServiceMock } from '../../../__mocks__/services';
 import { fetchEsql, getTextBasedQueryStateToAstProps } from './fetch_esql';
-import { TimeRange } from '@kbn/es-query';
+import type { TimeRange } from '@kbn/es-query';
 
 describe('fetchEsql', () => {
   beforeEach(() => {
