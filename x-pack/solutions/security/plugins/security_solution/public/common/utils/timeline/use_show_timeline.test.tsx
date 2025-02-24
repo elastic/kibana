@@ -13,6 +13,7 @@ import { appLinks } from '../../../app_links';
 import { useUserPrivileges } from '../../components/user_privileges';
 import { useShowTimeline } from './use_show_timeline';
 import { uiSettingsServiceMock } from '@kbn/core-ui-settings-browser-mocks';
+import { TestProviders } from '../../mock';
 
 jest.mock('../../components/user_privileges');
 
@@ -59,6 +60,8 @@ jest.mock('../../lib/kibana', () => {
 const mockUpselling = new UpsellingService();
 const mockUiSettingsClient = uiSettingsServiceMock.createStartContract();
 
+const renderUseShowTimeline = () => renderHook(() => useShowTimeline(), { wrapper: TestProviders });
+
 describe('use show timeline', () => {
   beforeAll(() => {
     (useUserPrivileges as unknown as jest.Mock).mockReturnValue({
@@ -84,25 +87,25 @@ describe('use show timeline', () => {
   });
 
   it('shows timeline for routes on default', async () => {
-    const { result } = renderHook(() => useShowTimeline());
+    const { result } = renderUseShowTimeline();
     await waitFor(() => expect(result.current).toEqual([true]));
   });
 
   it('hides timeline for blacklist routes', async () => {
     mockUseLocation.mockReturnValueOnce({ pathname: '/rules/add_rules' });
-    const { result } = renderHook(() => useShowTimeline());
+    const { result } = renderUseShowTimeline();
     await waitFor(() => expect(result.current).toEqual([false]));
   });
 
   it('shows timeline for partial blacklist routes', async () => {
     mockUseLocation.mockReturnValueOnce({ pathname: '/rules' });
-    const { result } = renderHook(() => useShowTimeline());
+    const { result } = renderUseShowTimeline();
     await waitFor(() => expect(result.current).toEqual([true]));
   });
 
   it('hides timeline for sub blacklist routes', async () => {
     mockUseLocation.mockReturnValueOnce({ pathname: '/administration/policy' });
-    const { result } = renderHook(() => useShowTimeline());
+    const { result } = renderUseShowTimeline();
     await waitFor(() => expect(result.current).toEqual([false]));
   });
   it('hides timeline for users without timeline access', async () => {
@@ -110,7 +113,7 @@ describe('use show timeline', () => {
       timelinePrivileges: { read: false },
     });
 
-    const { result } = renderHook(() => useShowTimeline());
+    const { result } = renderUseShowTimeline();
     const showTimeline = result.current;
     expect(showTimeline).toEqual([false]);
   });
@@ -120,7 +123,7 @@ it('shows timeline for users with timeline read access', async () => {
     timelinePrivileges: { read: true },
   });
 
-  const { result } = renderHook(() => useShowTimeline());
+  const { result } = renderUseShowTimeline();
   const showTimeline = result.current;
   expect(showTimeline).toEqual([true]);
 });
@@ -128,19 +131,19 @@ it('shows timeline for users with timeline read access', async () => {
 describe('sourcererDataView', () => {
   it('should show timeline when indices exist', () => {
     mockUseSourcererDataView.mockReturnValueOnce({ indicesExist: true, dataViewId: 'test' });
-    const { result } = renderHook(() => useShowTimeline());
+    const { result } = renderUseShowTimeline();
     expect(result.current).toEqual([true]);
   });
 
   it('should show timeline when dataViewId is null', () => {
     mockUseSourcererDataView.mockReturnValueOnce({ indicesExist: false, dataViewId: null });
-    const { result } = renderHook(() => useShowTimeline());
+    const { result } = renderUseShowTimeline();
     expect(result.current).toEqual([true]);
   });
 
   it('should not show timeline when dataViewId is not null and indices does not exist', () => {
     mockUseSourcererDataView.mockReturnValueOnce({ indicesExist: false, dataViewId: 'test' });
-    const { result } = renderHook(() => useShowTimeline());
+    const { result } = renderUseShowTimeline();
     expect(result.current).toEqual([false]);
   });
 });
@@ -148,13 +151,13 @@ describe('sourcererDataView', () => {
 describe('Security solution capabilities', () => {
   it('should show timeline when user has read capabilities', () => {
     mockSiemUserCanRead.mockReturnValueOnce(true);
-    const { result } = renderHook(() => useShowTimeline());
+    const { result } = renderUseShowTimeline();
     expect(result.current).toEqual([true]);
   });
 
   it('should not show timeline when user does not have read capabilities', () => {
     mockSiemUserCanRead.mockReturnValueOnce(false);
-    const { result } = renderHook(() => useShowTimeline());
+    const { result } = renderUseShowTimeline();
     expect(result.current).toEqual([false]);
   });
 });
