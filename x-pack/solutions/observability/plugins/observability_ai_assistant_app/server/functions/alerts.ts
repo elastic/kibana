@@ -20,6 +20,8 @@ import { omit } from 'lodash';
 import { OBSERVABILITY_RULE_TYPE_IDS_WITH_SUPPORTED_STACK_RULE_TYPES } from '@kbn/observability-plugin/common/constants';
 import { FunctionRegistrationParameters } from '.';
 
+export const GET_ALERTS_DATASET_INFO_NAME = 'get_alerts_dataset_info';
+
 const defaultFields = [
   '@timestamp',
   'kibana.alert.start',
@@ -72,7 +74,7 @@ export function registerAlertsFunction({
   if (scopes.includes('observability')) {
     functions.registerFunction(
       {
-        name: 'get_alerts_dataset_info',
+        name: GET_ALERTS_DATASET_INFO_NAME,
         visibility: FunctionVisibility.AssistantOnly,
         description: `Use this function to get information about alerts data.`,
         parameters: {
@@ -133,7 +135,7 @@ export function registerAlertsFunction({
     functions.registerFunction(
       {
         name: 'alerts',
-        description: `Get alerts for Observability.  Make sure get_alerts_dataset_info was called before.
+        description: `Get alerts for Observability.  Make sure ${GET_ALERTS_DATASET_INFO_NAME} was called before.
         Use this to get open (and optionally recovered) alerts for Observability assets, like services,
         hosts or containers.
         Display the response in tabular format if appropriate.
