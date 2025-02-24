@@ -8,12 +8,12 @@
 import { useQuery } from '@tanstack/react-query';
 import { lastValueFrom } from 'rxjs';
 import type * as estypes from '@elastic/elasticsearch/lib/api/types';
-import type { RuntimePrimitiveTypes } from '@kbn/data-views-plugin/common';
 import { showErrorToast } from '@kbn/cloud-security-posture';
 import type { IKibanaSearchResponse, IKibanaSearchRequest } from '@kbn/search-types';
 import type { FindingsBaseEsQuery } from '@kbn/cloud-security-posture';
 import { useKibana } from '../../common/lib/kibana';
 import { ASSET_INVENTORY_INDEX_PATTERN } from '../constants';
+import { getRuntimeMappingsFromSort, getMultiFieldsSort } from './fetch_utils';
 
 interface UseTopAssetsOptions extends FindingsBaseEsQuery {
   sort: string[][];
@@ -25,55 +25,6 @@ const ASSET_INVENTORY_TABLE_RUNTIME_MAPPING_FIELDS: string[] = [
   'entity.category',
   'entity.type',
 ];
-
-const getRuntimeMappingsFromSort = (sort: string[][]) => {
-  return sort
-    .filter(([field]) => ASSET_INVENTORY_TABLE_RUNTIME_MAPPING_FIELDS.includes(field))
-    .reduce((acc, [field]) => {
-      const type: RuntimePrimitiveTypes = 'keyword';
-
-      return {
-        ...acc,
-        [field]: {
-          type,
-        },
-      };
-    }, {});
-};
-
-const getMultiFieldsSort = (sort: string[][]) => {
-  return sort.map(([id, direction]) => {
-    return {
-      ...getSortField({ field: id, direction }),
-    };
-  });
-};
-
-/**
- * By default, ES will sort keyword fields in case-sensitive format, the
- * following fields are required to have a case-insensitive sorting.
- */
-const fieldsRequiredSortingByPainlessScript = ['entity.name']; // TODO TBD
-
-/**
- * Generates Painless sorting if the given field is matched or returns default sorting
- * This painless script will sort the field in case-insensitive manner
- */
-const getSortField = ({ field, direction }: { field: string; direction: string }) => {
-  if (fieldsRequiredSortingByPainlessScript.includes(field)) {
-    return {
-      _script: {
-        type: 'string',
-        order: direction,
-        script: {
-          source: `doc["${field}"].value.toLowerCase()`,
-          lang: 'painless',
-        },
-      },
-    };
-  }
-  return { [field]: direction };
-};
 
 const getTopAssetsQuery = ({ query, sort }: UseTopAssetsOptions) => ({
   size: 0,
@@ -123,7 +74,7 @@ const getTopAssetsQuery = ({ query, sort }: UseTopAssetsOptions) => ({
     },
   },
   sort: getMultiFieldsSort(sort),
-  runtime_mappings: getRuntimeMappingsFromSort(sort),
+  runtime_mappings: getRuntimeMappingsFromSort(ASSET_INVENTORY_TABLE_RUNTIME_MAPPING_FIELDS, sort),
   ignore_unavailable: true,
 });
 
