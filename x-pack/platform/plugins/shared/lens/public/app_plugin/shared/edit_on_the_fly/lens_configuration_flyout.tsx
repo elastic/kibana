@@ -39,11 +39,7 @@ import {
   onActiveDataChange,
   useLensDispatch,
 } from '../../../state_management';
-import {
-  EXPRESSION_BUILD_ERROR_ID,
-  extractReferencesFromState,
-  getAbsoluteDateRange,
-} from '../../../utils';
+import { EXPRESSION_BUILD_ERROR_ID, getAbsoluteDateRange } from '../../../utils';
 import { LayerConfiguration } from './layer_configuration_section';
 import type { EditConfigPanelProps } from './types';
 import { FlyoutWrapper } from './flyout_wrapper';
@@ -55,6 +51,7 @@ import { ESQLDataGridAccordion } from './esql_data_grid_accordion';
 import { isApiESQLVariablesCompatible } from '../../../react_embeddable/types';
 import { useESQLVariables } from './use_esql_variables';
 import { getActiveDataFromDatatable } from '../../../state_management/shared_logic';
+import { useCurrentAttributes } from './use_current_attributes';
 
 export function LensEditConfigurationFlyout({
   attributes,
@@ -242,43 +239,19 @@ export function LensEditConfigurationFlyout({
     [query]
   );
 
+  const currentAttributes = useCurrentAttributes({
+    textBasedMode,
+    initialAttributes: attributes,
+    datasourceMap,
+    visualizationMap,
+  });
+
   const onApply = useCallback(() => {
     if (visualization.activeId == null) {
       return;
     }
-    const dsStates = Object.fromEntries(
-      Object.entries(datasourceStates).map(([id, ds]) => {
-        const dsState = ds.state;
-        return [id, dsState];
-      })
-    );
-    // as ES|QL queries are using adHoc dataviews, we don't want to pass references
-    const references = !textBasedMode
-      ? extractReferencesFromState({
-          activeDatasources: Object.keys(datasourceStates).reduce(
-            (acc, id) => ({
-              ...acc,
-              [id]: datasourceMap[id],
-            }),
-            {}
-          ),
-          datasourceStates,
-          visualizationState: visualization.state,
-          activeVisualization,
-        })
-      : [];
-    const attrs: TypedLensSerializedState['attributes'] = {
-      ...attributes,
-      state: {
-        ...attributes.state,
-        visualization: visualization.state,
-        datasourceStates: dsStates,
-      },
-      references,
-      visualizationType: visualization.activeId,
-    };
     if (savedObjectId) {
-      saveByRef?.(attrs);
+      saveByRef?.(currentAttributes);
       updateByRefInput?.(savedObjectId);
     }
 
@@ -295,19 +268,16 @@ export function LensEditConfigurationFlyout({
       trackSaveUiCounterEvents(telemetryEvents);
     }
 
-    onApplyCallback?.(attrs);
+    onApplyCallback?.(currentAttributes);
     closeFlyout?.();
   }, [
     visualization.activeId,
-    savedObjectId,
-    closeFlyout,
-    onApplyCallback,
-    datasourceStates,
-    textBasedMode,
     visualization.state,
+    savedObjectId,
     activeVisualization,
-    attributes,
-    datasourceMap,
+    onApplyCallback,
+    currentAttributes,
+    closeFlyout,
     saveByRef,
     updateByRefInput,
   ]);
@@ -336,7 +306,8 @@ export function LensEditConfigurationFlyout({
         abortController,
         setDataGridAttrs,
         esqlVariables,
-        shouldUpdateAttrs
+        shouldUpdateAttrs,
+        currentAttributes
       );
       if (attrs) {
         setCurrentAttributes?.(attrs);
@@ -351,9 +322,10 @@ export function LensEditConfigurationFlyout({
       datasourceMap,
       visualizationMap,
       adHocDataViews,
+      esqlVariables,
+      currentAttributes,
       setCurrentAttributes,
       updateSuggestion,
-      esqlVariables,
     ]
   );
 
