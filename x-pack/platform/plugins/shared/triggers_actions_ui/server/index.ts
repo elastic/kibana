@@ -8,17 +8,8 @@ import { PluginConfigDescriptor, PluginInitializerContext } from '@kbn/core/serv
 import { configSchema, ConfigSchema } from './config';
 
 export type { PluginStartContract } from './plugin';
-export type { TimeSeriesQuery, CoreQueryParams } from './data';
-export {
-  CoreQueryParamsSchemaProperties,
-  validateCoreQueryBody,
-  validateTimeWindowUnits,
-  validateAggType,
-  validateGroupBy,
-  MAX_GROUPS,
-  DEFAULT_GROUPS,
-  TIME_SERIES_BUCKET_SELECTOR_FIELD,
-} from './data';
+export type { TimeSeriesQuery } from './data';
+export { DEFAULT_GROUPS, TIME_SERIES_BUCKET_SELECTOR_FIELD } from './data';
 
 export const config: PluginConfigDescriptor<ConfigSchema> = {
   exposeToBrowser: {

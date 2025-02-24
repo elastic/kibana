@@ -16183,6 +16183,8 @@ paths:
                               type: string
                             memory:
                               type: string
+                bumpRevision:
+                  type: boolean
                 data_output_id:
                   nullable: true
                   type: string
@@ -17879,6 +17881,22 @@ paths:
                                   proxy_headers: {}
                                   proxy_url:
                                     type: string
+                                  secrets:
+                                    additionalProperties: false
+                                    type: object
+                                    properties:
+                                      ssl:
+                                        additionalProperties: false
+                                        type: object
+                                        properties:
+                                          key:
+                                            additionalProperties: false
+                                            type: object
+                                            properties:
+                                              id:
+                                                type: string
+                                        required:
+                                          - key
                                   ssl:
                                     additionalProperties: false
                                     type: object
@@ -21806,20 +21824,22 @@ paths:
                             originId:
                               type: string
                             type:
-                              enum:
-                                - dashboard
-                                - lens
-                                - visualization
-                                - search
-                                - index-pattern
-                                - map
-                                - ml-module
-                                - security-rule
-                                - csp-rule-template
-                                - osquery-pack-asset
-                                - osquery-saved-query
-                                - tag
-                              type: string
+                              anyOf:
+                                - enum:
+                                    - dashboard
+                                    - lens
+                                    - visualization
+                                    - search
+                                    - index-pattern
+                                    - map
+                                    - ml-module
+                                    - security-rule
+                                    - csp-rule-template
+                                    - osquery-pack-asset
+                                    - osquery-saved-query
+                                    - tag
+                                  type: string
+                                - type: string
                           required:
                             - id
                             - type
@@ -22069,20 +22089,22 @@ paths:
                                     originId:
                                       type: string
                                     type:
-                                      enum:
-                                        - dashboard
-                                        - lens
-                                        - visualization
-                                        - search
-                                        - index-pattern
-                                        - map
-                                        - ml-module
-                                        - security-rule
-                                        - csp-rule-template
-                                        - osquery-pack-asset
-                                        - osquery-saved-query
-                                        - tag
-                                      type: string
+                                      anyOf:
+                                        - enum:
+                                            - dashboard
+                                            - lens
+                                            - visualization
+                                            - search
+                                            - index-pattern
+                                            - map
+                                            - ml-module
+                                            - security-rule
+                                            - csp-rule-template
+                                            - osquery-pack-asset
+                                            - osquery-saved-query
+                                            - tag
+                                          type: string
+                                        - type: string
                                   required:
                                     - id
                                     - type
@@ -22164,20 +22186,22 @@ paths:
                                   originId:
                                     type: string
                                   type:
-                                    enum:
-                                      - dashboard
-                                      - lens
-                                      - visualization
-                                      - search
-                                      - index-pattern
-                                      - map
-                                      - ml-module
-                                      - security-rule
-                                      - csp-rule-template
-                                      - osquery-pack-asset
-                                      - osquery-saved-query
-                                      - tag
-                                    type: string
+                                    anyOf:
+                                      - enum:
+                                          - dashboard
+                                          - lens
+                                          - visualization
+                                          - search
+                                          - index-pattern
+                                          - map
+                                          - ml-module
+                                          - security-rule
+                                          - csp-rule-template
+                                          - osquery-pack-asset
+                                          - osquery-saved-query
+                                          - tag
+                                        type: string
+                                      - type: string
                                 required:
                                   - id
                                   - type
@@ -22304,11 +22328,17 @@ paths:
                         title:
                           type: string
                         type:
-                          enum:
-                            - integration
-                            - input
-                            - content
-                          type: string
+                          anyOf:
+                            - enum:
+                                - integration
+                              type: string
+                            - enum:
+                                - input
+                              type: string
+                            - enum:
+                                - content
+                              type: string
+                            - type: string
                         vars:
                           items:
                             additionalProperties: {}
@@ -22402,20 +22432,22 @@ paths:
                             originId:
                               type: string
                             type:
-                              enum:
-                                - dashboard
-                                - lens
-                                - visualization
-                                - search
-                                - index-pattern
-                                - map
-                                - ml-module
-                                - security-rule
-                                - csp-rule-template
-                                - osquery-pack-asset
-                                - osquery-saved-query
-                                - tag
-                              type: string
+                              anyOf:
+                                - enum:
+                                    - dashboard
+                                    - lens
+                                    - visualization
+                                    - search
+                                    - index-pattern
+                                    - map
+                                    - ml-module
+                                    - security-rule
+                                    - csp-rule-template
+                                    - osquery-pack-asset
+                                    - osquery-saved-query
+                                    - tag
+                                  type: string
+                                - type: string
                           required:
                             - id
                             - type
@@ -22546,20 +22578,22 @@ paths:
                                           originId:
                                             type: string
                                           type:
-                                            enum:
-                                              - dashboard
-                                              - lens
-                                              - visualization
-                                              - search
-                                              - index-pattern
-                                              - map
-                                              - ml-module
-                                              - security-rule
-                                              - csp-rule-template
-                                              - osquery-pack-asset
-                                              - osquery-saved-query
-                                              - tag
-                                            type: string
+                                            anyOf:
+                                              - enum:
+                                                  - dashboard
+                                                  - lens
+                                                  - visualization
+                                                  - search
+                                                  - index-pattern
+                                                  - map
+                                                  - ml-module
+                                                  - security-rule
+                                                  - csp-rule-template
+                                                  - osquery-pack-asset
+                                                  - osquery-saved-query
+                                                  - tag
+                                                type: string
+                                              - type: string
                                         required:
                                           - id
                                           - type
@@ -22692,20 +22726,22 @@ paths:
                             originId:
                               type: string
                             type:
-                              enum:
-                                - dashboard
-                                - lens
-                                - visualization
-                                - search
-                                - index-pattern
-                                - map
-                                - ml-module
-                                - security-rule
-                                - csp-rule-template
-                                - osquery-pack-asset
-                                - osquery-saved-query
-                                - tag
-                              type: string
+                              anyOf:
+                                - enum:
+                                    - dashboard
+                                    - lens
+                                    - visualization
+                                    - search
+                                    - index-pattern
+                                    - map
+                                    - ml-module
+                                    - security-rule
+                                    - csp-rule-template
+                                    - osquery-pack-asset
+                                    - osquery-saved-query
+                                    - tag
+                                  type: string
+                                - type: string
                           required:
                             - id
                             - type
@@ -22921,20 +22957,22 @@ paths:
                                   originId:
                                     type: string
                                   type:
-                                    enum:
-                                      - dashboard
-                                      - lens
-                                      - visualization
-                                      - search
-                                      - index-pattern
-                                      - map
-                                      - ml-module
-                                      - security-rule
-                                      - csp-rule-template
-                                      - osquery-pack-asset
-                                      - osquery-saved-query
-                                      - tag
-                                    type: string
+                                    anyOf:
+                                      - enum:
+                                          - dashboard
+                                          - lens
+                                          - visualization
+                                          - search
+                                          - index-pattern
+                                          - map
+                                          - ml-module
+                                          - security-rule
+                                          - csp-rule-template
+                                          - osquery-pack-asset
+                                          - osquery-saved-query
+                                          - tag
+                                        type: string
+                                      - type: string
                                 required:
                                   - id
                                   - type
@@ -23016,20 +23054,22 @@ paths:
                                 originId:
                                   type: string
                                 type:
-                                  enum:
-                                    - dashboard
-                                    - lens
-                                    - visualization
-                                    - search
-                                    - index-pattern
-                                    - map
-                                    - ml-module
-                                    - security-rule
-                                    - csp-rule-template
-                                    - osquery-pack-asset
-                                    - osquery-saved-query
-                                    - tag
-                                  type: string
+                                  anyOf:
+                                    - enum:
+                                        - dashboard
+                                        - lens
+                                        - visualization
+                                        - search
+                                        - index-pattern
+                                        - map
+                                        - ml-module
+                                        - security-rule
+                                        - csp-rule-template
+                                        - osquery-pack-asset
+                                        - osquery-saved-query
+                                        - tag
+                                      type: string
+                                    - type: string
                               required:
                                 - id
                                 - type
@@ -23182,11 +23222,17 @@ paths:
                       title:
                         type: string
                       type:
-                        enum:
-                          - integration
-                          - input
-                          - content
-                        type: string
+                        anyOf:
+                          - enum:
+                              - integration
+                            type: string
+                          - enum:
+                              - input
+                            type: string
+                          - enum:
+                              - content
+                            type: string
+                          - type: string
                       vars:
                         items:
                           additionalProperties: {}
@@ -23310,20 +23356,22 @@ paths:
                             originId:
                               type: string
                             type:
-                              enum:
-                                - dashboard
-                                - lens
-                                - visualization
-                                - search
-                                - index-pattern
-                                - map
-                                - ml-module
-                                - security-rule
-                                - csp-rule-template
-                                - osquery-pack-asset
-                                - osquery-saved-query
-                                - tag
-                              type: string
+                              anyOf:
+                                - enum:
+                                    - dashboard
+                                    - lens
+                                    - visualization
+                                    - search
+                                    - index-pattern
+                                    - map
+                                    - ml-module
+                                    - security-rule
+                                    - csp-rule-template
+                                    - osquery-pack-asset
+                                    - osquery-saved-query
+                                    - tag
+                                  type: string
+                                - type: string
                           required:
                             - id
                             - type
@@ -23538,20 +23586,22 @@ paths:
                                   originId:
                                     type: string
                                   type:
-                                    enum:
-                                      - dashboard
-                                      - lens
-                                      - visualization
-                                      - search
-                                      - index-pattern
-                                      - map
-                                      - ml-module
-                                      - security-rule
-                                      - csp-rule-template
-                                      - osquery-pack-asset
-                                      - osquery-saved-query
-                                      - tag
-                                    type: string
+                                    anyOf:
+                                      - enum:
+                                          - dashboard
+                                          - lens
+                                          - visualization
+                                          - search
+                                          - index-pattern
+                                          - map
+                                          - ml-module
+                                          - security-rule
+                                          - csp-rule-template
+                                          - osquery-pack-asset
+                                          - osquery-saved-query
+                                          - tag
+                                        type: string
+                                      - type: string
                                 required:
                                   - id
                                   - type
@@ -23633,20 +23683,22 @@ paths:
                                 originId:
                                   type: string
                                 type:
-                                  enum:
-                                    - dashboard
-                                    - lens
-                                    - visualization
-                                    - search
-                                    - index-pattern
-                                    - map
-                                    - ml-module
-                                    - security-rule
-                                    - csp-rule-template
-                                    - osquery-pack-asset
-                                    - osquery-saved-query
-                                    - tag
-                                  type: string
+                                  anyOf:
+                                    - enum:
+                                        - dashboard
+                                        - lens
+                                        - visualization
+                                        - search
+                                        - index-pattern
+                                        - map
+                                        - ml-module
+                                        - security-rule
+                                        - csp-rule-template
+                                        - osquery-pack-asset
+                                        - osquery-saved-query
+                                        - tag
+                                      type: string
+                                    - type: string
                               required:
                                 - id
                                 - type
@@ -23799,11 +23851,17 @@ paths:
                       title:
                         type: string
                       type:
-                        enum:
-                          - integration
-                          - input
-                          - content
-                        type: string
+                        anyOf:
+                          - enum:
+                              - integration
+                            type: string
+                          - enum:
+                              - input
+                            type: string
+                          - enum:
+                              - content
+                            type: string
+                          - type: string
                       vars:
                         items:
                           additionalProperties: {}
@@ -25131,6 +25189,24 @@ paths:
                             proxy_id:
                               nullable: true
                               type: string
+                            secrets:
+                              additionalProperties: true
+                              type: object
+                              properties:
+                                ssl:
+                                  additionalProperties: true
+                                  type: object
+                                  properties:
+                                    key:
+                                      anyOf:
+                                        - additionalProperties: true
+                                          type: object
+                                          properties:
+                                            id:
+                                              type: string
+                                          required:
+                                            - id
+                                        - type: string
                             shipper:
                               additionalProperties: true
                               nullable: true
@@ -25282,6 +25358,20 @@ paths:
                                       required:
                                         - id
                                     - type: string
+                                ssl:
+                                  additionalProperties: true
+                                  type: object
+                                  properties:
+                                    key:
+                                      anyOf:
+                                        - additionalProperties: true
+                                          type: object
+                                          properties:
+                                            id:
+                                              type: string
+                                          required:
+                                            - id
+                                        - type: string
                             service_token:
                               nullable: true
                               type: string
@@ -25878,6 +25968,24 @@ paths:
                     proxy_id:
                       nullable: true
                       type: string
+                    secrets:
+                      additionalProperties: false
+                      type: object
+                      properties:
+                        ssl:
+                          additionalProperties: false
+                          type: object
+                          properties:
+                            key:
+                              anyOf:
+                                - additionalProperties: false
+                                  type: object
+                                  properties:
+                                    id:
+                                      type: string
+                                  required:
+                                    - id
+                                - type: string
                     shipper:
                       additionalProperties: false
                       nullable: true
@@ -26029,6 +26137,20 @@ paths:
                               required:
                                 - id
                             - type: string
+                        ssl:
+                          additionalProperties: false
+                          type: object
+                          properties:
+                            key:
+                              anyOf:
+                                - additionalProperties: false
+                                  type: object
+                                  properties:
+                                    id:
+                                      type: string
+                                  required:
+                                    - id
+                                - type: string
                     service_token:
                       nullable: true
                       type: string
@@ -26585,6 +26707,24 @@ paths:
                           proxy_id:
                             nullable: true
                             type: string
+                          secrets:
+                            additionalProperties: true
+                            type: object
+                            properties:
+                              ssl:
+                                additionalProperties: true
+                                type: object
+                                properties:
+                                  key:
+                                    anyOf:
+                                      - additionalProperties: true
+                                        type: object
+                                        properties:
+                                          id:
+                                            type: string
+                                        required:
+                                          - id
+                                      - type: string
                           shipper:
                             additionalProperties: true
                             nullable: true
@@ -26736,6 +26876,20 @@ paths:
                                     required:
                                       - id
                                   - type: string
+                              ssl:
+                                additionalProperties: true
+                                type: object
+                                properties:
+                                  key:
+                                    anyOf:
+                                      - additionalProperties: true
+                                        type: object
+                                        properties:
+                                          id:
+                                            type: string
+                                        required:
+                                          - id
+                                      - type: string
                           service_token:
                             nullable: true
                             type: string
@@ -27394,6 +27548,24 @@ paths:
                           proxy_id:
                             nullable: true
                             type: string
+                          secrets:
+                            additionalProperties: true
+                            type: object
+                            properties:
+                              ssl:
+                                additionalProperties: true
+                                type: object
+                                properties:
+                                  key:
+                                    anyOf:
+                                      - additionalProperties: true
+                                        type: object
+                                        properties:
+                                          id:
+                                            type: string
+                                        required:
+                                          - id
+                                      - type: string
                           shipper:
                             additionalProperties: true
                             nullable: true
@@ -27545,6 +27717,20 @@ paths:
                                     required:
                                       - id
                                   - type: string
+                              ssl:
+                                additionalProperties: true
+                                type: object
+                                properties:
+                                  key:
+                                    anyOf:
+                                      - additionalProperties: true
+                                        type: object
+                                        properties:
+                                          id:
+                                            type: string
+                                        required:
+                                          - id
+                                      - type: string
                           service_token:
                             nullable: true
                             type: string
@@ -28134,6 +28320,24 @@ paths:
                     proxy_id:
                       nullable: true
                       type: string
+                    secrets:
+                      additionalProperties: false
+                      type: object
+                      properties:
+                        ssl:
+                          additionalProperties: false
+                          type: object
+                          properties:
+                            key:
+                              anyOf:
+                                - additionalProperties: false
+                                  type: object
+                                  properties:
+                                    id:
+                                      type: string
+                                  required:
+                                    - id
+                                - type: string
                     shipper:
                       additionalProperties: false
                       nullable: true
@@ -28279,6 +28483,20 @@ paths:
                               required:
                                 - id
                             - type: string
+                        ssl:
+                          additionalProperties: false
+                          type: object
+                          properties:
+                            key:
+                              anyOf:
+                                - additionalProperties: false
+                                  type: object
+                                  properties:
+                                    id:
+                                      type: string
+                                  required:
+                                    - id
+                                - type: string
                     service_token:
                       nullable: true
                       type: string
@@ -28822,6 +29040,24 @@ paths:
                           proxy_id:
                             nullable: true
                             type: string
+                          secrets:
+                            additionalProperties: true
+                            type: object
+                            properties:
+                              ssl:
+                                additionalProperties: true
+                                type: object
+                                properties:
+                                  key:
+                                    anyOf:
+                                      - additionalProperties: true
+                                        type: object
+                                        properties:
+                                          id:
+                                            type: string
+                                        required:
+                                          - id
+                                      - type: string
                           shipper:
                             additionalProperties: true
                             nullable: true
@@ -28973,6 +29209,20 @@ paths:
                                     required:
                                       - id
                                   - type: string
+                              ssl:
+                                additionalProperties: true
+                                type: object
+                                properties:
+                                  key:
+                                    anyOf:
+                                      - additionalProperties: true
+                                        type: object
+                                        properties:
+                                          id:
+                                            type: string
+                                        required:
+                                          - id
+                                      - type: string
                           service_token:
                             nullable: true
                             type: string
@@ -52108,6 +52358,8 @@ components:
           type: string
         installed:
           type: boolean
+        metadata:
+          $ref: '#/components/schemas/Security_Entity_Analytics_API_Metadata'
         resource:
           $ref: '#/components/schemas/Security_Entity_Analytics_API_EngineComponentResource'
       required:
@@ -52263,7 +52515,6 @@ components:
         - user
         - host
         - service
-        - universal
       type: string
     Security_Entity_Analytics_API_HostEntity:
       type: object
@@ -52339,7 +52590,6 @@ components:
         - host.name
         - user.name
         - service.name
-        - related.entity
       type: string
     Security_Entity_Analytics_API_IndexPattern:
       type: string
@@ -52362,6 +52612,8 @@ components:
       example: 1h
       pattern: ^[1-9]\d*[smh]$
       type: string
+    Security_Entity_Analytics_API_Metadata:
+      $ref: '#/components/schemas/Security_Entity_Analytics_API_TransformStatsMetadata'
     Security_Entity_Analytics_API_RiskEngineScheduleNowErrorResponse:
       type: object
       properties:
@@ -52476,6 +52728,59 @@ components:
       required:
         - status_code
         - message
+    Security_Entity_Analytics_API_TransformStatsMetadata:
+      type: object
+      properties:
+        delete_time_in_ms:
+          type: integer
+        documents_deleted:
+          type: integer
+        documents_indexed:
+          type: integer
+        documents_processed:
+          type: integer
+        exponential_avg_checkpoint_duration_ms:
+          type: integer
+        exponential_avg_documents_indexed:
+          type: integer
+        exponential_avg_documents_processed:
+          type: integer
+        index_failures:
+          type: integer
+        index_time_in_ms:
+          type: integer
+        index_total:
+          type: integer
+        pages_processed:
+          type: integer
+        processing_time_in_ms:
+          type: integer
+        processing_total:
+          type: integer
+        search_failures:
+          type: integer
+        search_time_in_ms:
+          type: integer
+        search_total:
+          type: integer
+        trigger_count:
+          type: integer
+      required:
+        - pages_processed
+        - documents_processed
+        - documents_indexed
+        - trigger_count
+        - index_time_in_ms
+        - index_total
+        - index_failures
+        - search_time_in_ms
+        - search_total
+        - search_failures
+        - processing_time_in_ms
+        - processing_total
+        - exponential_avg_checkpoint_duration_ms
+        - exponential_avg_documents_indexed
+        - exponential_avg_documents_processed
     Security_Entity_Analytics_API_UserEntity:
       type: object
       properties:

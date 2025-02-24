@@ -310,6 +310,7 @@ export interface DocLinks {
     readonly privileges: string;
     readonly manageDetectionRules: string;
     readonly createDetectionRules: string;
+    readonly updatePrebuiltDetectionRules: string;
     readonly createEsqlRuleType: string;
     readonly ruleUiAdvancedParams: string;
     readonly entityAnalytics: {
@@ -458,6 +459,7 @@ export interface DocLinks {
     mappingRolesFieldRules: string;
     runAsPrivilege: string;
     deprecatedV1Endpoints: string;
+    enableElasticSearchSecurityFeatures: string;
   }>;
   readonly spaces: Readonly<{
     kibanaLegacyUrlAliases: string;
