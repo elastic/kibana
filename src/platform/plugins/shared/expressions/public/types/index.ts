@@ -18,6 +18,7 @@ import {
   IInterpreterRenderEvent,
 } from '../../common';
 import { ExpressionRenderHandlerParams } from '../render';
+import React from "react";
 
 /**
  * @deprecated
@@ -47,6 +48,7 @@ export interface IExpressionLoaderParams {
   inspectorAdapters?: Adapters;
   interactive?: boolean;
   onRenderError?: RenderErrorHandlerFnType;
+  onRenderComponent?: (Component: React.ComponentType) => void;
   searchSessionId?: string;
   renderMode?: RenderMode;
   syncColors?: boolean;

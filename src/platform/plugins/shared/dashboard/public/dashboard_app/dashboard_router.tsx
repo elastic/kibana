@@ -145,27 +145,25 @@ export async function mountApp({
   });
 
   const app = (
-    <KibanaRenderContextProvider {...coreStart}>
-      <DashboardMountContext.Provider value={mountContext}>
-        <HashRouter>
-          <Routes>
-            <Route
-              path={[
-                CREATE_NEW_DASHBOARD_URL,
-                `${VIEW_DASHBOARD_URL}/:id/:expandedPanelId`,
-                `${VIEW_DASHBOARD_URL}/:id`,
-              ]}
-              render={renderDashboard}
-            />
-            <Route exact path={LANDING_PAGE_PATH} render={renderListingPage} />
-            <Route exact path="/">
-              <Redirect to={LANDING_PAGE_PATH} />
-            </Route>
-            <Route render={renderNoMatch} />
-          </Routes>
-        </HashRouter>
-      </DashboardMountContext.Provider>
-    </KibanaRenderContextProvider>
+    <DashboardMountContext.Provider value={mountContext}>
+      <HashRouter>
+        <Routes>
+          <Route
+            path={[
+              CREATE_NEW_DASHBOARD_URL,
+              `${VIEW_DASHBOARD_URL}/:id/:expandedPanelId`,
+              `${VIEW_DASHBOARD_URL}/:id`,
+            ]}
+            render={renderDashboard}
+          />
+          <Route exact path={LANDING_PAGE_PATH} render={renderListingPage} />
+          <Route exact path="/">
+            <Redirect to={LANDING_PAGE_PATH} />
+          </Route>
+          <Route render={renderNoMatch} />
+        </Routes>
+      </HashRouter>
+    </DashboardMountContext.Provider>
   );
 
   coreServices.chrome.setHelpExtension({
@@ -185,11 +183,26 @@ export async function mountApp({
       iconType: 'glasses',
     });
   }
-  render(app, element);
-  return () => {
-    dataService.search.session.clear();
-    unlistenParentHistory();
-    unmountComponentAtNode(element);
-    appUnMounted();
+  // render(app, element);
+
+  const App: React.FC = () => {
+    return <>{app}</>;
   };
+
+  return {
+    Component: App,
+    unmount: () => {
+      dataService.search.session.clear();
+      unlistenParentHistory();
+      //  unmountComponentAtNode(element);
+      appUnMounted();
+    },
+  };
+
+  // return () => {
+  //   dataService.search.session.clear();
+  //   unlistenParentHistory();
+  //   unmountComponentAtNode(element);
+  //   appUnMounted();
+  // };
 }

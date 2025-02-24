@@ -9,6 +9,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
+import useAsync from 'react-use/lib/useAsync';
 import React from 'react';
 import ReactDOM from '@kbn/react-dom';
 import { METRIC_TYPE } from '@kbn/analytics';
@@ -195,15 +196,8 @@ const getLayerCellValueActions = async (
 
 export const getXyChartRenderer = ({
   getStartDeps,
-}: XyChartRendererDeps): ExpressionRenderDefinition<XYChartProps> => ({
-  name: 'xyVis',
-  displayName: 'XY chart',
-  help: i18n.translate('expressionXY.xyVis.renderer.help', {
-    defaultMessage: 'X/Y chart renderer',
-  }),
-  validate: () => undefined,
-  reuseDomNode: true,
-  render: async (domNode: Element, config: XYChartProps, handlers) => {
+}: XyChartRendererDeps): ExpressionRenderDefinition<XYChartProps> => {
+  const LazyComponent = React.lazy(async () => {
     const deps = await getStartDeps();
 
     // Lazy loaded parts
@@ -212,86 +206,213 @@ export const getXyChartRenderer = ({
       import('../helpers'),
     ]);
 
-    handlers.onDestroy(() => ReactDOM.unmountComponentAtNode(domNode));
-    const onClickValue = (data: FilterEvent['data']) => {
-      handlers.event({ name: 'filter', data });
-    };
-    const onSelectRange = (data: BrushEvent['data']) => {
-      handlers.event({ name: 'brush', data });
-    };
-    const onClickMultiValue = (data: MultiFilterEvent['data']) => {
-      handlers.event({ name: 'multiFilter', data });
-    };
-    const setChartSize = (data: ChartSizeSpec) => {
-      const event: ChartSizeEvent = { name: 'chartSize', data };
-      handlers.event(event);
-    };
+    function Component({
+      config,
+      handlers,
+    }: {
+      config: XYChartProps;
+      handlers: IInterpreterRenderHandlers;
+    }) {
+      const onClickValue = (data: FilterEvent['data']) => {
+        handlers.event({ name: 'filter', data });
+      };
+      const onSelectRange = (data: BrushEvent['data']) => {
+        handlers.event({ name: 'brush', data });
+      };
+      const onClickMultiValue = (data: MultiFilterEvent['data']) => {
+        handlers.event({ name: 'multiFilter', data });
+      };
+      const setChartSize = (data: ChartSizeSpec) => {
+        const event: ChartSizeEvent = { name: 'chartSize', data };
+        handlers.event(event);
+      };
 
-    const layerCellValueActions = await getLayerCellValueActions(
-      getDataLayers(config.args.layers),
-      handlers.getCompatibleCellValueActions as GetCompatibleCellValueActions | undefined
-    );
+      // const layerCellValueActions = await getLayerCellValueActions(
+      //   getDataLayers(config.args.layers),
+      //   handlers.getCompatibleCellValueActions as GetCompatibleCellValueActions | undefined
+      // );
 
-    const renderComplete = () => {
-      const executionContext = handlers.getExecutionContext();
-      const containerType = extractContainerType(executionContext);
-      const visualizationType = extractVisualizationType(executionContext);
+      // const layerCellValueActionsState = useAsync(
+      //   () =>
+      //     getLayerCellValueActions(
+      //       getDataLayers(config.args.layers),
+      //       handlers.getCompatibleCellValueActions as GetCompatibleCellValueActions | undefined
+      //     ),
+      //   [config.args.layers]
+      // );
 
-      if (deps.usageCollection && containerType && visualizationType) {
-        const uiEvents = extractCounterEvents(
-          visualizationType,
-          config.args,
-          Boolean(config.canNavigateToLens),
-          {
-            getDataLayers,
+      const layerCellValueActionsState = { value: [[]] };
+
+      const renderComplete = () => {
+        const executionContext = handlers.getExecutionContext();
+        const containerType = extractContainerType(executionContext);
+        const visualizationType = extractVisualizationType(executionContext);
+
+        if (deps.usageCollection && containerType && visualizationType) {
+          const uiEvents = extractCounterEvents(
+            visualizationType,
+            config.args,
+            Boolean(config.canNavigateToLens),
+            {
+              getDataLayers,
+            }
+          );
+
+          if (uiEvents) {
+            deps.usageCollection.reportUiCounter(containerType, METRIC_TYPE.COUNT, uiEvents);
           }
-        );
-
-        if (uiEvents) {
-          deps.usageCollection.reportUiCounter(containerType, METRIC_TYPE.COUNT, uiEvents);
         }
-      }
 
-      handlers.done();
-    };
+        handlers.done();
+      };
 
-    const chartContainerStyle = css({
-      position: 'relative',
-      width: '100%',
-      height: '100%',
-    });
+      const chartContainerStyle = css({
+        position: 'relative',
+        width: '100%',
+        height: '100%',
+      });
 
-    ReactDOM.render(
-      <KibanaRenderContextProvider {...deps.startServices}>
+      return (
         <div css={chartContainerStyle} data-test-subj="xyVisChart">
-          <XYChartReportable
-            {...config}
-            data={deps.data}
-            formatFactory={deps.formatFactory}
-            chartsActiveCursorService={deps.activeCursor}
-            chartsThemeService={deps.theme}
-            paletteService={deps.paletteService}
-            timeZone={deps.timeZone}
-            timeFormat={deps.timeFormat}
-            eventAnnotationService={deps.eventAnnotationService}
-            useLegacyTimeAxis={deps.useLegacyTimeAxis}
-            minInterval={calculateMinInterval(deps.data.datatableUtilities, config)}
-            interactive={handlers.isInteractive()}
-            onClickValue={onClickValue}
-            onClickMultiValue={onClickMultiValue}
-            layerCellValueActions={layerCellValueActions}
-            onSelectRange={onSelectRange}
-            renderMode={handlers.getRenderMode()}
-            syncColors={config.syncColors}
-            syncTooltips={config.syncTooltips}
-            syncCursor={config.syncCursor}
-            uiState={handlers.uiState as PersistedState}
-            renderComplete={renderComplete}
-            setChartSize={setChartSize}
-          />
+          {layerCellValueActionsState.value && (
+            <XYChartReportable
+              {...config}
+              data={deps.data}
+              formatFactory={deps.formatFactory}
+              chartsActiveCursorService={deps.activeCursor}
+              chartsThemeService={deps.theme}
+              paletteService={deps.paletteService}
+              timeZone={deps.timeZone}
+              timeFormat={deps.timeFormat}
+              eventAnnotationService={deps.eventAnnotationService}
+              useLegacyTimeAxis={deps.useLegacyTimeAxis}
+              minInterval={calculateMinInterval(deps.data.datatableUtilities, config)}
+              interactive={handlers.isInteractive()}
+              onClickValue={onClickValue}
+              onClickMultiValue={onClickMultiValue}
+              layerCellValueActions={layerCellValueActionsState.value!}
+              onSelectRange={onSelectRange}
+              renderMode={handlers.getRenderMode()}
+              syncColors={config.syncColors}
+              syncTooltips={config.syncTooltips}
+              syncCursor={config.syncCursor}
+              uiState={handlers.uiState as PersistedState}
+              renderComplete={renderComplete}
+              setChartSize={setChartSize}
+            />
+          )}
         </div>
-      </KibanaRenderContextProvider>,
-      domNode
-    );
-  },
-});
+      );
+    }
+    return { default: Component };
+  });
+
+  return {
+    name: 'xyVis',
+    displayName: 'XY chart',
+    help: i18n.translate('expressionXY.xyVis.renderer.help', {
+      defaultMessage: 'X/Y chart renderer',
+    }),
+    validate: () => undefined,
+    reuseDomNode: true,
+    Component: ({ config, handlers }) => {
+      return (
+        <React.Suspense>
+          <LazyComponent config={config} handlers={handlers} />
+        </React.Suspense>
+      );
+    },
+    render: async (domNode: Element, config: XYChartProps, handlers) => {
+      const deps = await getStartDeps();
+
+      // Lazy loaded parts
+      const [{ XYChartReportable }, { calculateMinInterval, getDataLayers }] = await Promise.all([
+        import('../components/xy_chart'),
+        import('../helpers'),
+      ]);
+
+      handlers.onDestroy(() => ReactDOM.unmountComponentAtNode(domNode));
+      const onClickValue = (data: FilterEvent['data']) => {
+        handlers.event({ name: 'filter', data });
+      };
+      const onSelectRange = (data: BrushEvent['data']) => {
+        handlers.event({ name: 'brush', data });
+      };
+      const onClickMultiValue = (data: MultiFilterEvent['data']) => {
+        handlers.event({ name: 'multiFilter', data });
+      };
+      const setChartSize = (data: ChartSizeSpec) => {
+        const event: ChartSizeEvent = { name: 'chartSize', data };
+        handlers.event(event);
+      };
+
+      // const layerCellValueActions = await getLayerCellValueActions(
+      //   getDataLayers(config.args.layers),
+      //   handlers.getCompatibleCellValueActions as GetCompatibleCellValueActions | undefined
+      // );
+      const layerCellValueActions = [[]];
+
+      const renderComplete = () => {
+        const executionContext = handlers.getExecutionContext();
+        const containerType = extractContainerType(executionContext);
+        const visualizationType = extractVisualizationType(executionContext);
+
+        if (deps.usageCollection && containerType && visualizationType) {
+          const uiEvents = extractCounterEvents(
+            visualizationType,
+            config.args,
+            Boolean(config.canNavigateToLens),
+            {
+              getDataLayers,
+            }
+          );
+
+          if (uiEvents) {
+            deps.usageCollection.reportUiCounter(containerType, METRIC_TYPE.COUNT, uiEvents);
+          }
+        }
+
+        handlers.done();
+      };
+
+      const chartContainerStyle = css({
+        position: 'relative',
+        width: '100%',
+        height: '100%',
+      });
+
+      ReactDOM.render(
+        <KibanaRenderContextProvider {...deps.startServices}>
+          <div css={chartContainerStyle} data-test-subj="xyVisChart">
+            <XYChartReportable
+              {...config}
+              data={deps.data}
+              formatFactory={deps.formatFactory}
+              chartsActiveCursorService={deps.activeCursor}
+              chartsThemeService={deps.theme}
+              paletteService={deps.paletteService}
+              timeZone={deps.timeZone}
+              timeFormat={deps.timeFormat}
+              eventAnnotationService={deps.eventAnnotationService}
+              useLegacyTimeAxis={deps.useLegacyTimeAxis}
+              minInterval={calculateMinInterval(deps.data.datatableUtilities, config)}
+              interactive={handlers.isInteractive()}
+              onClickValue={onClickValue}
+              onClickMultiValue={onClickMultiValue}
+              layerCellValueActions={layerCellValueActions}
+              onSelectRange={onSelectRange}
+              renderMode={handlers.getRenderMode()}
+              syncColors={config.syncColors}
+              syncTooltips={config.syncTooltips}
+              syncCursor={config.syncCursor}
+              uiState={handlers.uiState as PersistedState}
+              renderComplete={renderComplete}
+              setChartSize={setChartSize}
+            />
+          </div>
+        </KibanaRenderContextProvider>,
+        domNode
+      );
+    },
+  };
+};

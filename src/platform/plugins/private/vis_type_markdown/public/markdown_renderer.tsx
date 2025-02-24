@@ -32,6 +32,13 @@ export const getMarkdownVisRenderer: ({
   name: 'markdown_vis',
   displayName: 'markdown visualization',
   reuseDomNode: true,
+  Component: ({ config: { visParams }, handlers }) => {
+    return (
+      <VisualizationContainer className="markdownVis" handlers={handlers}>
+        <MarkdownVisComponent {...visParams} renderComplete={handlers.done} />
+      </VisualizationContainer>
+    );
+  },
   render: async (domNode, { visParams }, handlers) => {
     const [core] = await getStartDeps();
 

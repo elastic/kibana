@@ -133,5 +133,6 @@ function reportPerformanceMetrics({
     key4: 'load_type',
     value4: loadTypesMapping[loadType],
   };
+  console.warn('reportPerformanceMetrics', e);
   reportPerformanceMetricEvent(coreServices.analytics, e);
 }

@@ -48,6 +48,7 @@ const journeyTargetGroups: JourneyTargetGroups = {
   ml: ['aiops_log_rate_analysis', 'many_fields_transform', 'tsdb_logs_data_visualizer'],
   esql: ['many_fields_discover_esql', 'web_logs_dashboard_esql'],
   http2: ['data_stress_test_lens_http2', 'ecommerce_dashboard_http2'],
+  lens: ['data_stress_test_lens'],
 };
 
 const readFilesRecursively = (dir: string, callback: Function) => {

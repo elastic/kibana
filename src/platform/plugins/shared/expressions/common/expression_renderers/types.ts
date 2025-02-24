@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import React from 'react';
 import type { KibanaExecutionContext } from '@kbn/core-execution-context-common';
 import { ExpressionAstExpression } from '../ast';
 
@@ -49,6 +50,8 @@ export interface ExpressionRenderDefinition<Config = unknown> {
     config: Config,
     handlers: IInterpreterRenderHandlers
   ) => void | Promise<void>;
+
+  Component?: React.ComponentType<{ config: Config; handlers: IInterpreterRenderHandlers }>;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any

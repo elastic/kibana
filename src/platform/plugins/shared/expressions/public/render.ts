@@ -8,7 +8,8 @@
  */
 
 import * as Rx from 'rxjs';
-import { Observable } from 'rxjs';
+import { BehaviorSubject, Observable } from 'rxjs';
+import useObservable from 'react-use/lib/useObservable';
 import { filter } from 'rxjs';
 import { isNumber } from 'lodash';
 import { SerializableRecord } from '@kbn/utility-types';
@@ -24,11 +25,13 @@ import { renderErrorHandler as defaultRenderErrorHandler } from './render_error_
 import { IInterpreterRenderHandlers, IInterpreterRenderUpdateParams, RenderMode } from '../common';
 
 import { getRenderersRegistry } from './services';
+import React from 'react';
 
 export type IExpressionRendererExtraHandlers = Record<string, unknown>;
 
 export interface ExpressionRenderHandlerParams {
   onRenderError?: RenderErrorHandlerFnType;
+  onRenderComponent?: (Component: React.ComponentType) => void;
   renderMode?: RenderMode;
   syncColors?: boolean;
   syncCursor?: boolean;
@@ -54,6 +57,7 @@ export class ExpressionRenderHandler {
   private updateSubject: Rx.Subject<UpdateValue | null>;
   private handlers: IInterpreterRenderHandlers;
   private onRenderError: RenderErrorHandlerFnType;
+  private onRenderComponent?: (Component: React.ComponentType) => void;
 
   constructor(
     element: HTMLElement,
@@ -67,9 +71,12 @@ export class ExpressionRenderHandler {
       hasCompatibleActions = async () => false,
       getCompatibleCellValueActions = async () => [],
       executionContext,
+      onRenderComponent,
     }: ExpressionRenderHandlerParams = {}
   ) {
     this.element = element;
+
+    this.onRenderComponent = onRenderComponent;
 
     this.eventsSubject = new Rx.Subject();
     this.events$ = this.eventsSubject.asObservable() as Observable<ExpressionRendererEvent>;
@@ -87,6 +94,15 @@ export class ExpressionRenderHandler {
         this.destroyFn = fn;
       },
       done: () => {
+        performance.mark('expression_render_end');
+        performance.measure(
+          'expression_render',
+          'expression_render_start',
+          'expression_render_end'
+        );
+        const measure = performance.getEntriesByName('expression_render');
+        // console.log(measure[measure.length - 1].duration);
+
         this.renderCount++;
         this.renderSubject.next(this.renderCount);
       },
@@ -122,7 +138,11 @@ export class ExpressionRenderHandler {
     };
   }
 
+  private wrapperComponents = new WeakMap<React.ComponentType<any>, BehaviorSubject<any>>();
+
   render = async (value: SerializableRecord, uiState?: unknown) => {
+    performance.mark('expression_render_start');
+
     if (!value || typeof value !== 'object') {
       return this.handleRenderError(new Error('invalid data provided to the expression renderer'));
     }
@@ -143,12 +163,38 @@ export class ExpressionRenderHandler {
 
     try {
       // Rendering is asynchronous, completed by handlers.done()
-      await getRenderersRegistry()
-        .get(value.as as string)!
-        .render(this.element, value.value, {
+      const renderer = getRenderersRegistry().get(value.as as string)!;
+
+      if (renderer.Component && this.onRenderComponent) {
+        const Component = renderer.Component;
+        if (!this.wrapperComponents.has(Component)) {
+          const state$ = new BehaviorSubject({
+            config: value.value,
+            handlers: { ...this.handlers, uiState },
+          });
+
+          const initial = state$.getValue();
+          const WrapperComponent = React.memo(() => {
+            const state = useObservable(state$, initial);
+            return React.createElement(Component, state);
+          });
+
+          this.wrapperComponents.set(Component, state$);
+
+          this.onRenderComponent(WrapperComponent);
+        } else {
+          const componentState$ = this.wrapperComponents.get(Component)!;
+          componentState$.next({
+            config: value.value,
+            handlers: { ...this.handlers, uiState },
+          });
+        }
+      } else {
+        await renderer.render(this.element, value.value, {
           ...this.handlers,
           uiState,
         });
+      }
     } catch (e) {
       return this.handleRenderError(e as ExpressionRenderError);
     }
