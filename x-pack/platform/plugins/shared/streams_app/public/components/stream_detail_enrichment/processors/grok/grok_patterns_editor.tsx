@@ -86,7 +86,7 @@ export const GrokPatternsEditor = () => {
           </SortableList>
         </EuiPanel>
       </EuiFormRow>
-      <EuiFlexGroup justifyContent="spaceBetween" gutterSize="s" wrap>
+      <EuiFlexGroup justifyContent="spaceBetween" gutterSize="s" alignItems="center" wrap>
         <GrokAiSuggestions />
         <EuiButtonEmpty
           data-test-subj="streamsAppGrokPatternsEditorAddPatternButton"
