@@ -9,7 +9,7 @@ import React, { memo, type PropsWithChildren } from 'react';
 import { EuiText, EuiTextTruncate, EuiToolTip } from '@elastic/eui';
 import { css } from '@emotion/react';
 import styled from '@emotion/styled';
-import { NODE_LABEL_WIDTH, NODE_WIDTH } from './styles';
+import { LabelBadge, NODE_LABEL_WIDTH, NODE_WIDTH } from './styles';
 
 const WORD_BOUNDARIES_REGEX = /\b/;
 const FORCE_BREAK_REGEX = /(.{10})/;
@@ -60,9 +60,11 @@ GeneratedText.displayName = 'GeneratedText';
 
 export interface LabelProps {
   text?: string;
+  badge?: number;
+  badgeColor?: string;
 }
 
-const LabelComponent = ({ text = '' }: LabelProps) => {
+const LabelComponent = ({ text = '', badge = 0, badgeColor = 'primary' }: LabelProps) => {
   const [isTruncated, setIsTruncated] = React.useState(false);
 
   return (
@@ -75,6 +77,11 @@ const LabelComponent = ({ text = '' }: LabelProps) => {
         overflow: hidden;
         text-overflow: ellipsis;
         max-height: 32px;
+
+        .euiBadge {
+          margin-left: 4px;
+          margin-top: -8px;
+        }
       `}
     >
       <EuiToolTip content={isTruncated ? text : ''} position="bottom">
@@ -92,6 +99,7 @@ const LabelComponent = ({ text = '' }: LabelProps) => {
           )}
         </EuiTextTruncate>
       </EuiToolTip>
+      {badge > 0 && <LabelBadge color={badgeColor}>{badge}</LabelBadge>}
     </EuiText>
   );
 };

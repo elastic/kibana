@@ -15,7 +15,7 @@ import {
   type _EuiBackgroundColor,
 } from '@elastic/eui';
 
-export const EdgeLabelHeight = 24;
+export const EdgeLabelHeight = 32;
 export const EdgeLabelWidth = 100;
 
 export interface EdgeLabelContainerProps {

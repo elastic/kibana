@@ -7,7 +7,7 @@
 
 import Dagre from '@dagrejs/dagre';
 import type { Node, Edge } from '@xyflow/react';
-import type { EdgeViewModel, NodeViewModel, Size } from '../types';
+import type { EdgeViewModel, LabelNodeViewModel, NodeViewModel, Size } from '../types';
 import { calcLabelSize } from './utils';
 import { GroupStyleOverride, NODE_HEIGHT, NODE_WIDTH } from '../node/styles';
 
@@ -30,7 +30,7 @@ export const layoutGraph = (
     let size = { width: NODE_WIDTH, height: node.measured?.height ?? NODE_HEIGHT };
 
     if (node.data.shape === 'label') {
-      size = calcLabelSize(node.data.label);
+      size = calcLabelSize(node.data.label, node.data.badge, node.data.failureOutcomeCount);
 
       // TODO: waiting for a fix: https://github.com/dagrejs/dagre/issues/238
       // if (node.parentId) {
@@ -111,7 +111,7 @@ const layoutGroupChildren = (
 ): { size: Size; children: Array<Node<NodeViewModel>> } => {
   const children = nodes.filter(
     (child) => child.data.shape === 'label' && child.parentId === groupNode.id
-  );
+  ) as Array<Node<LabelNodeViewModel>>;
 
   const STACK_VERTICAL_PADDING = 20;
   const MIN_STACK_HEIGHT = 70;
@@ -128,13 +128,19 @@ const layoutGroupChildren = (
 
   const space = (stackHeight - allChildrenHeight) / (stackSize - 1);
   const groupNodeWidth = children.reduce((acc, child) => {
-    const currLblWidth = PADDING * 2 + calcLabelSize(child.data.label).width;
+    const currLblWidth =
+      PADDING * 2 +
+      calcLabelSize(child.data.label, child.data.badge, child.data.failureOutcomeCount).width;
     return Math.max(acc, currLblWidth);
   }, 0);
 
   // Layout children relative to parent
   children.forEach((child, index) => {
-    const childSize = calcLabelSize(child.data.label);
+    const childSize = calcLabelSize(
+      child.data.label,
+      child.data.badge,
+      child.data.failureOutcomeCount
+    );
     child.position = {
       x: groupNodeWidth / 2 - childSize.width / 2,
       y: index * (childSize.height + space),

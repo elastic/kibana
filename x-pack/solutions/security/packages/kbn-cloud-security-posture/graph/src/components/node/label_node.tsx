@@ -8,36 +8,46 @@
 import React, { memo } from 'react';
 import { Handle, Position } from '@xyflow/react';
 import { css } from '@emotion/react';
+import { EuiText } from '@elastic/eui';
 import {
   LabelNodeContainer,
   LabelShape,
   HandleStyleOverride,
   LabelShapeOnHover,
   NodeButton,
-  LABEL_PADDING_X,
-  LABEL_BORDER_WIDTH,
   LABEL_HEIGHT,
+  LabelBadge,
 } from './styles';
 import type { LabelNodeViewModel, NodeProps } from '../types';
 import { NodeExpandButton } from './node_expand_button';
-import { getTextWidth } from '../graph/utils';
-
-const LABEL_MIN_WIDTH = 100;
 
 export const LabelNode = memo<NodeProps>((props: NodeProps) => {
-  const { id, color, label, interactive, nodeClick, expandButtonClick } =
-    props.data as LabelNodeViewModel;
+  const {
+    id,
+    color,
+    label,
+    badge,
+    failureOutcomeCount,
+    interactive,
+    nodeClick,
+    expandButtonClick,
+  } = props.data as LabelNodeViewModel;
   const text = label ? label : id;
-  const labelWidth = Math.max(
-    LABEL_MIN_WIDTH,
-    getTextWidth(text ?? '') + LABEL_PADDING_X * 2 + LABEL_BORDER_WIDTH * 2
-  );
 
   return (
     <LabelNodeContainer>
       {interactive && <LabelShapeOnHover color={color} />}
       <LabelShape color={color} textAlign="center">
-        {text}
+        <EuiText size="xs">
+          {text}
+          {badge > 1 && <LabelBadge color={color}>{badge}</LabelBadge>}
+          {(failureOutcomeCount > 1 ||
+            (badge > failureOutcomeCount && failureOutcomeCount === 1)) && (
+            <LabelBadge color="warning" iconType="errorFilled">
+              {failureOutcomeCount}
+            </LabelBadge>
+          )}
+        </EuiText>
       </LabelShape>
       {interactive && (
         <>
@@ -46,13 +56,12 @@ export const LabelNode = memo<NodeProps>((props: NodeProps) => {
               margin-top: -${LABEL_HEIGHT}px;
             `}
             height={LABEL_HEIGHT}
-            width={labelWidth}
+            width="100%"
             onClick={(e) => nodeClick?.(e, props)}
           />
           <NodeExpandButton
             color={color}
             onClick={(e, unToggleCallback) => expandButtonClick?.(e, props, unToggleCallback)}
-            x={`${labelWidth}px`}
             y={`${-LABEL_HEIGHT + (LABEL_HEIGHT - NodeExpandButton.ExpandButtonSize) / 2}px`}
           />
         </>

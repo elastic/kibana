@@ -11,6 +11,7 @@ import { ApiMessageCode } from '../../types/graph/v1';
 export const graphRequestSchema = schema.object({
   nodesLimit: schema.maybe(schema.number()),
   showUnknownTarget: schema.maybe(schema.boolean()),
+  ungroupedEntityIds: schema.maybe(schema.arrayOf(schema.string())),
   query: schema.object({
     originEventIds: schema.arrayOf(
       schema.object({ id: schema.string(), isAlert: schema.boolean() })
@@ -75,6 +76,7 @@ export const entityNodeDataSchema = schema.allOf([
       schema.literal('rectangle'),
       schema.literal('diamond'),
     ]),
+    count: schema.maybe(schema.number()),
   }),
 ]);
 
@@ -91,6 +93,9 @@ export const labelNodeDataSchema = schema.allOf([
     shape: schema.literal('label'),
     parentId: schema.maybe(schema.string()),
     color: colorSchema,
+    badge: schema.number(),
+    successOutcomeCount: schema.number(),
+    failureOutcomeCount: schema.number(),
   }),
 ]);
 

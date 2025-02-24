@@ -16,7 +16,9 @@ import type { Filter, PhraseFilter } from '@kbn/es-query';
 import type {
   CombinedFilter,
   PhraseFilterMetaParams,
+  PhraseFilterValue,
 } from '@kbn/es-query/src/filters/build_filters';
+import { flatten } from 'lodash';
 
 export const CONTROLLED_BY_GRAPH_INVESTIGATION_FILTER = 'graph-investigation';
 
@@ -46,6 +48,34 @@ const filterHasKeyAndValue = (filter: Filter, key: string, value: string): boole
   }
 
   return filter.meta.key === key && (filter.meta.params as PhraseFilterMetaParams)?.query === value;
+};
+
+const getFilterValue = (
+  filter: Filter,
+  keys: string[]
+): PhraseFilterValue[] | PhraseFilterValue | null => {
+  if (isCombinedFilter(filter)) {
+    return flatten(
+      filter.meta.params
+        .map((param) => getFilterValue(param, keys))
+        .filter((value) => value !== null) as PhraseFilterValue[]
+    );
+  }
+
+  return filter.meta.key && keys.includes(filter.meta.key)
+    ? (filter.meta.params as PhraseFilterMetaParams)?.query
+    : null;
+};
+
+export const getFilterValues = (filters: Filter[], key: string | string[]): PhraseFilterValue[] => {
+  const keys = Array.isArray(key) ? key : [key];
+
+  return flatten(
+    filters
+      .filter((filter) => !filter.meta.disabled)
+      .map((filter) => getFilterValue(filter, keys))
+      .filter((value) => value !== null)
+  ) as PhraseFilterValue[];
 };
 
 /**

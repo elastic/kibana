@@ -28,7 +28,11 @@ export default {
       options: ['ellipse', 'hexagon', 'pentagon', 'rectangle', 'diamond', 'label'],
       control: { type: 'radio' },
     },
+    nodeClick: { action: 'nodeClick' },
     expandButtonClick: { action: 'expandButtonClick' },
+    count: { control: { type: 'number' } },
+    badge: { control: { type: 'number' } },
+    failureOutcomeCount: { control: { type: 'number' } },
   },
   decorators: [GlobalStylesStorybookDecorator],
 };
@@ -52,7 +56,18 @@ const Template: Story<NodeViewModel> = (args: NodeViewModel) => (
         {
           id: args.id,
           type: args.shape,
-          data: pick(args, ['id', 'label', 'color', 'icon', 'interactive', 'expandButtonClick']),
+          data: pick(args, [
+            'id',
+            'label',
+            'color',
+            'icon',
+            'count',
+            'badge',
+            'failureOutcomeCount',
+            'interactive',
+            'nodeClick',
+            'expandButtonClick',
+          ]),
           position: { x: 0, y: 0 },
         },
       ]}
@@ -72,4 +87,7 @@ Node.args = {
   shape: 'hexagon',
   icon: 'okta',
   interactive: true,
+  count: 1,
+  badge: 0,
+  failureOutcomeCount: 0,
 };

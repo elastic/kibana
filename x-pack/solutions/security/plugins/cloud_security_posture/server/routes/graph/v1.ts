@@ -30,9 +30,12 @@ interface GraphEdge {
   hosts?: string[] | string;
   users?: string[] | string;
   actorIds: string[] | string;
+  actorIdsCount: number;
   action: string;
   targetIds: string[] | string;
-  eventOutcome: string;
+  targetIdsCount: number;
+  successOutcomeCount: number;
+  failureOutcomeCount: number;
   isOrigin: boolean;
   isOriginAlert: boolean;
 }
@@ -63,6 +66,7 @@ interface GetGraphParams {
     esQuery?: EsQuery;
   };
   showUnknownTarget: boolean;
+  ungroupedEntityIds?: string[];
   nodesLimit?: number;
 }
 
@@ -70,10 +74,13 @@ export const getGraph = async ({
   services: { esClient, logger },
   query: { originEventIds, spaceId = 'default', start, end, esQuery },
   showUnknownTarget,
+  ungroupedEntityIds,
   nodesLimit,
 }: GetGraphParams): Promise<Pick<GraphResponse, 'nodes' | 'edges' | 'messages'>> => {
   logger.trace(
-    `Fetching graph for [originEventIds: ${originEventIds.join(', ')}] in [spaceId: ${spaceId}]`
+    `Fetching graph for [originEventIds: ${originEventIds
+      .map(({ id, isAlert }) => `[id: ${id} isAlert: ${isAlert}]`)
+      .join(', ')}] in [spaceId: ${spaceId}]`
   );
 
   const results = await fetchGraph({
@@ -84,7 +91,10 @@ export const getGraph = async ({
     end,
     originEventIds,
     esQuery,
+    ungroupedEntityIds,
   });
+
+  logger.trace(JSON.stringify(results.records));
 
   // Convert results into set of nodes and edges
   return parseRecords(logger, results.records, nodesLimit);
@@ -143,6 +153,7 @@ const fetchGraph = async ({
   end,
   originEventIds,
   showUnknownTarget,
+  ungroupedEntityIds = [],
   esQuery,
 }: {
   esClient: IScopedClusterClient;
@@ -151,6 +162,7 @@ const fetchGraph = async ({
   end: string | number;
   originEventIds: OriginEventId[];
   showUnknownTarget: boolean;
+  ungroupedEntityIds?: string[];
   esQuery?: EsQuery;
 }): Promise<EsqlToRecords<GraphEdge>> => {
   const originAlertIds = originEventIds.filter((originEventId) => originEventId.isAlert);
@@ -166,16 +178,32 @@ const fetchGraph = async ({
       ? `event.id in (${originAlertIds.map((_id, idx) => `?og_alrt_id${idx}`).join(', ')})`
       : 'false'
   }
+| EVAL isSuccessOutcome = CASE(event.outcome == "success", 1, 0)
+| EVAL isFailureOutcome = CASE(event.outcome == "failed", 1, 0)
+// 'ungroup' will contain the entity ids that are requested to have their own representation in the graph
+| EVAL ungroup = ${
+    ungroupedEntityIds.length > 0
+      ? `CASE(actor.entity.id IN (${ungroupedEntityIds
+          .map((_id, idx) => `?ungrp_id${idx}`)
+          .join(', ')}), actor.entity.id, target.entity.id IN (${ungroupedEntityIds
+          .map((_id, idx) => `?ungrp_id${idx}`)
+          .join(', ')}), target.entity.id, null)`
+      : 'null'
+  }
 | STATS badge = COUNT(*),
   ips = VALUES(related.ip),
   // hosts = VALUES(related.hosts),
-  users = VALUES(related.user)
-    by actorIds = actor.entity.id,
-      action = event.action,
-      targetIds = target.entity.id,
-      eventOutcome = event.outcome,
+  users = VALUES(related.user),
+  actorIds = VALUES(actor.entity.id),
+  actorIdsCount = COUNT_DISTINCT(actor.entity.id),
+  targetIds = VALUES(target.entity.id),
+  targetIdsCount = COUNT_DISTINCT(target.entity.id),
+  successOutcomeCount = SUM(isSuccessOutcome),
+  failureOutcomeCount = SUM(isFailureOutcome)
+    by action = event.action,
       isOrigin,
-      isOriginAlert
+      isOriginAlert,
+      ungroup
 | LIMIT 1000
 | SORT isOrigin DESC`;
 
@@ -193,6 +221,7 @@ const fetchGraph = async ({
         ...originEventIds
           .filter((originEventId) => originEventId.isAlert)
           .map((originEventId, idx) => ({ [`og_alrt_id${idx}`]: originEventId.id })),
+        ...ungroupedEntityIds.map((entityId, idx) => ({ [`ungrp_id${idx}`]: entityId })),
       ],
     })
     .toRecords<GraphEdge>();
@@ -265,11 +294,15 @@ const createNodes = (records: GraphEdge[], context: Omit<ParseContext, 'edgesMap
       hosts,
       users,
       actorIds,
+      actorIdsCount,
       action,
       targetIds,
+      targetIdsCount,
+      badge,
+      successOutcomeCount,
+      failureOutcomeCount,
       isOrigin,
       isOriginAlert,
-      eventOutcome,
     } = record;
     const actorIdsArray = castArray(actorIds);
     const targetIdsArray = castArray(targetIds);
@@ -284,12 +317,19 @@ const createNodes = (records: GraphEdge[], context: Omit<ParseContext, 'edgesMap
     });
 
     // Create entity nodes
-    [...actorIdsArray, ...targetIdsArray].forEach((id) => {
+    const actorId = actorIdsCount === 1 ? actorIdsArray[0] : `group ${uuidv4()}`;
+    const targetId = targetIdsCount === 1 ? targetIdsArray[0] : `group ${uuidv4()}`;
+
+    [
+      { id: actorId, count: actorIdsCount, ids: actorIdsArray },
+      { id: targetId, count: targetIdsCount, ids: targetIdsArray },
+    ].forEach(({ id, count, ids }) => {
       if (nodesMap[id] === undefined) {
         nodesMap[id] = {
           id,
-          label: unknownTargets.includes(id) ? 'Unknown' : undefined,
+          label: unknownTargets.includes(id) ? 'Unknown' : count > 1 ? 'Entities' : undefined,
           color: isOriginAlert ? 'danger' : 'primary',
+          count,
           ...determineEntityNodeShape(
             id,
             castArray(ips ?? []),
@@ -301,30 +341,29 @@ const createNodes = (records: GraphEdge[], context: Omit<ParseContext, 'edgesMap
     });
 
     // Create label nodes
-    for (const actorId of actorIdsArray) {
-      for (const targetId of targetIdsArray) {
-        const edgeId = `a(${actorId})-b(${targetId})`;
+    const edgeId = `a(${actorId})-b(${targetId})`;
 
-        if (edgeLabelsNodes[edgeId] === undefined) {
-          edgeLabelsNodes[edgeId] = [];
-        }
-
-        const labelNode: LabelNodeDataModel = {
-          id: edgeId + `label(${action})outcome(${eventOutcome})`,
-          label: action,
-          color: isOriginAlert ? 'danger' : eventOutcome === 'failed' ? 'warning' : 'primary',
-          shape: 'label',
-        };
-
-        nodesMap[labelNode.id] = labelNode;
-        edgeLabelsNodes[edgeId].push(labelNode.id);
-        labelEdges[labelNode.id] = {
-          source: actorId,
-          target: targetId,
-          edgeType: isOrigin ? 'solid' : 'dashed',
-        };
-      }
+    if (edgeLabelsNodes[edgeId] === undefined) {
+      edgeLabelsNodes[edgeId] = [];
     }
+
+    const labelNode: LabelNodeDataModel = {
+      id: edgeId + `label(${action})`,
+      label: action,
+      color: isOriginAlert ? 'danger' : badge === failureOutcomeCount ? 'warning' : 'primary',
+      shape: 'label',
+      badge,
+      successOutcomeCount,
+      failureOutcomeCount,
+    };
+
+    nodesMap[labelNode.id] = labelNode;
+    edgeLabelsNodes[edgeId].push(labelNode.id);
+    labelEdges[labelNode.id] = {
+      source: actorId,
+      target: targetId,
+      edgeType: isOrigin ? 'solid' : 'dashed',
+    };
   }
 };
 

@@ -86,8 +86,8 @@ export const useFetchGraphData = ({
     services: { http },
   } = useKibana();
   const QUERY_KEY = useMemo(
-    () => ['useFetchGraphData', originEventIds, start, end, esQuery],
-    [end, esQuery, originEventIds, start]
+    () => ['useFetchGraphData', originEventIds, start, end, esQuery, req.ungroupedEntityIds],
+    [end, esQuery, originEventIds, start, req.ungroupedEntityIds]
   );
 
   const { isLoading, isError, data, isFetching } = useQuery<GraphResponse>(

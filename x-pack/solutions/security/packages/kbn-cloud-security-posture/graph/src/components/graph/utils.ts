@@ -8,11 +8,19 @@
 import { EdgeLabelHeight, EdgeLabelWidth } from '../edge/styles';
 import { LABEL_BORDER_WIDTH, LABEL_PADDING_X } from '../node/styles';
 
-const LABEL_FONT = `600 7.875px Inter, "system-ui", Helvetica, Arial, sans-serif`;
+const LABEL_FONT = `400 12px Inter, "system-ui", Helvetica, Arial, sans-serif`;
 const LABEL_PADDING = (LABEL_PADDING_X + LABEL_BORDER_WIDTH) * 2;
 
-export const calcLabelSize = (label?: string) => {
-  const currLblWidth = Math.max(EdgeLabelWidth, LABEL_PADDING + getTextWidth(label ?? ''));
+export const calcLabelSize = (label?: string, badge?: number, failure?: number) => {
+  const text = [
+    label ?? '',
+    badge && badge > 0 ? badge : '',
+    failure && failure > 1 ? failure : '',
+  ].join(' ');
+  const currLblWidth = Math.max(
+    EdgeLabelWidth,
+    LABEL_PADDING + getTextWidth(text) + (badge ? 14 : 0) + (failure ? 26 : 0)
+  );
   return { width: currLblWidth, height: EdgeLabelHeight };
 };
 

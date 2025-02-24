@@ -16,14 +16,16 @@ import {
   EuiText,
   useEuiBackgroundColor,
   useEuiTheme,
+  EuiBadge,
 } from '@elastic/eui';
 import { rgba } from 'polished';
+import { isNumber } from 'lodash';
 import { getSpanIcon } from './get_span_icon';
 import type { NodeExpandButtonProps } from './node_expand_button';
 import type { EntityNodeViewModel, LabelNodeViewModel } from '..';
 
-export const LABEL_HEIGHT = 24;
-export const LABEL_PADDING_X = 15;
+export const LABEL_HEIGHT = 32;
+export const LABEL_PADDING_X = 10;
 export const LABEL_BORDER_WIDTH = 1;
 export const NODE_WIDTH = 90;
 export const NODE_HEIGHT = 90;
@@ -41,6 +43,16 @@ interface LabelShapeProps extends EuiTextProps {
   color: LabelNodeViewModel['color'];
 }
 
+export const LabelBadge = styled(EuiBadge)`
+  padding: 0px 3px;
+  line-height: 15px;
+  font-weight: normal;
+
+  .euiBadge__content {
+    min-block-size: 15px;
+  }
+`;
+
 export const LabelShape = styled(EuiText)<LabelShapeProps>`
   background: ${(props) => useNodeFillColor(props.color)};
   border: ${(props) => {
@@ -50,21 +62,17 @@ export const LabelShape = styled(EuiText)<LabelShapeProps>`
     } ${LABEL_BORDER_WIDTH}px`;
   }};
 
-  font-weight: ${(_props) => {
-    const { euiTheme } = useEuiTheme();
-    return `${euiTheme.font.weight.semiBold}`;
-  }};
-  font-size: ${(_props) => {
-    const { euiTheme } = useEuiTheme();
-    return `${euiTheme.font.scale.xs * 10.5}px`;
-  }};
-
-  line-height: 1.5;
-
-  padding: 5px ${LABEL_PADDING_X}px;
-  border-radius: 16px;
+  align-content: center;
+  line-height: inherit;
+  font-size: inherit;
+  padding: 0px ${LABEL_PADDING_X}px;
+  border-radius: 8px;
   min-height: 100%;
   min-width: 100%;
+
+  .euiBadge {
+    margin-left: 4px;
+  }
 `;
 
 export const LabelShapeOnHover = styled.div`
@@ -82,9 +90,9 @@ export const LabelShapeOnHover = styled.div`
       0.5
     )} 1px`;
   }};
-  border-radius: 20px;
+  border-radius: 10px;
   background: transparent;
-  width: 108%;
+  width: 106%;
   height: 134%;
 
   ${LabelNodeContainer}:hover & {
@@ -111,7 +119,7 @@ export const NodeShapeSvg = styled.svg`
 `;
 
 export interface NodeButtonProps extends CommonProps {
-  width?: number;
+  width?: number | string;
   height?: number;
   onClick?: (e: React.MouseEvent<HTMLElement>) => void;
 }
@@ -124,13 +132,19 @@ export const NodeButton = ({ onClick, width, height, ...props }: NodeButtonProps
 
 const StyledNodeContainer = styled.div<NodeButtonProps>`
   position: absolute;
-  width: ${(props) => props.width ?? NODE_WIDTH}px;
+  width: ${(props) => {
+    const width = props.width ?? NODE_WIDTH;
+    return isNumber(width) ? `${width}px` : width;
+  }};
   height: ${(props) => props.height ?? NODE_HEIGHT}px;
   z-index: 1;
 `;
 
 const StyledNodeButton = styled.div<NodeButtonProps>`
-  width: ${(props) => props.width ?? NODE_WIDTH}px;
+  width: ${(props) => {
+    const width = props.width ?? NODE_WIDTH;
+    return isNumber(width) ? `${width}px` : width;
+  }};
   height: ${(props) => props.height ?? NODE_HEIGHT}px;
 `;
 
@@ -140,6 +154,7 @@ export const StyledNodeExpandButton = styled.div<NodeExpandButtonProps>`
   ${(props: NodeExpandButtonProps) =>
     (Boolean(props.x) || Boolean(props.y)) &&
     `transform: translate(${props.x ?? '0'}, ${props.y ?? '0'});`}
+  ${(props: NodeExpandButtonProps) => (!props.x || props.x === '0' ? 'right: -18px;' : '')}
   position: absolute;
   z-index: 1;
 

@@ -20,10 +20,20 @@ import useSessionStorage from 'react-use/lib/useSessionStorage';
 import { Graph, isEntityNode } from '../../..';
 import { type UseFetchGraphDataParams, useFetchGraphData } from '../../hooks/use_fetch_graph_data';
 import { GRAPH_INVESTIGATION_TEST_ID } from '../test_ids';
-import { EVENT_ID, GRAPH_NODES_LIMIT, TOGGLE_SEARCH_BAR_STORAGE_KEY } from '../../common/constants';
+import {
+  ACTOR_ENTITY_ID,
+  EVENT_ID,
+  GRAPH_NODES_LIMIT,
+  TARGET_ENTITY_ID,
+  TOGGLE_SEARCH_BAR_STORAGE_KEY,
+} from '../../common/constants';
 import { Actions } from '../controls/actions';
 import { AnimatedSearchBarContainer, useBorder } from './styles';
-import { CONTROLLED_BY_GRAPH_INVESTIGATION_FILTER, addFilter } from './search_filters';
+import {
+  CONTROLLED_BY_GRAPH_INVESTIGATION_FILTER,
+  addFilter,
+  getFilterValues,
+} from './search_filters';
 import { useEntityNodeExpandPopover } from './use_entity_node_expand_popover';
 import { useLabelNodeExpandPopover } from './use_label_node_expand_popover';
 
@@ -187,6 +197,9 @@ export const GraphInvestigation = memo<GraphInvestigationProps>(
     const isPopoverOpen = [nodeExpandPopover, labelExpandPopover].some(
       ({ state: { isOpen } }) => isOpen
     );
+    const ungroupedEntities = useMemo(() => {
+      return getFilterValues(searchFilters, [ACTOR_ENTITY_ID, TARGET_ENTITY_ID]).map(String);
+    }, [searchFilters]);
     const { data, refresh, isFetching } = useFetchGraphData({
       req: {
         query: {
@@ -196,6 +209,7 @@ export const GraphInvestigation = memo<GraphInvestigationProps>(
           end: timeRange.to,
         },
         nodesLimit: GRAPH_NODES_LIMIT,
+        ungroupedEntityIds: ungroupedEntities,
       },
       options: {
         refetchOnWindowFocus: false,
