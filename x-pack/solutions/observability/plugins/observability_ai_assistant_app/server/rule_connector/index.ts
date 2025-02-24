@@ -392,7 +392,10 @@ If available, include the link of the conversation at the end of your answer.`
     .subscribe({
       complete: async () => {
         if (ruleCreatedBy && conversationId) {
-          await client.setConversationUser(conversationId, { name: ruleCreatedBy.name });
+          await client.setConversationUser({
+            conversationId,
+            user: { name: ruleCreatedBy.name },
+          });
         }
       },
       error: (err) => {
