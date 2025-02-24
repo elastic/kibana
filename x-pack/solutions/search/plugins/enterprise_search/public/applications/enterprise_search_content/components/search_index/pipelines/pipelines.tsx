@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect, useRef } from 'react';
+import React, { useCallback, useEffect, useRef } from 'react';
 
 import { useActions, useValues } from 'kea';
 
@@ -67,14 +67,14 @@ export const SearchIndexPipelines: React.FC = () => {
   const extractionDisabled = getContentExtractionDisabled(index);
   const buttonRef = useRef<HTMLButtonElement | null>(null);
 
-  const onCloseHandler = () => {
+  const onCloseDeleteModal = useCallback(() => {
     closeDeleteModal();
     setTimeout(() => {
       if (buttonRef.current) {
         buttonRef.current.focus();
       }
-    }, 100);
-  };
+    }, 0);
+  }, [closeDeleteModal, buttonRef]);
 
   useEffect(() => {
     if (index) {
@@ -289,7 +289,7 @@ export const SearchIndexPipelines: React.FC = () => {
             }
           )}
           isLoading={revertStatus === Status.LOADING}
-          onCancel={onCloseHandler}
+          onCancel={onCloseDeleteModal}
           onConfirm={() => revertPipeline({ indexName })}
           cancelButtonText={CANCEL_BUTTON_LABEL}
           confirmButtonText={i18n.translate(
