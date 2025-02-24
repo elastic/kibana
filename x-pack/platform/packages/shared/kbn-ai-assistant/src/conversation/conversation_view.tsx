@@ -19,13 +19,12 @@ import { useKnowledgeBase } from '../hooks/use_knowledge_base';
 import { useAIAssistantAppService } from '../hooks/use_ai_assistant_app_service';
 import { useAbortableAsync } from '../hooks/use_abortable_async';
 import { useConversationList } from '../hooks/use_conversation_list';
-import { useConversationContextMenu } from '../hooks/use_conversation_context_menu';
 
 const SECOND_SLOT_CONTAINER_WIDTH = 400;
 
 interface ConversationViewProps {
   conversationId?: string;
-  navigateToConversation?: (nextConversationId?: string) => void;
+  navigateToConversation: (nextConversationId?: string) => void;
   getConversationHref?: (conversationId: string) => string;
   newConversationHref?: string;
   scopes?: AssistantScope[];
@@ -72,26 +71,23 @@ export const ConversationView: React.FC<ConversationViewProps> = ({
   const [secondSlotContainer, setSecondSlotContainer] = useState<HTMLDivElement | null>(null);
   const [isSecondSlotVisible, setIsSecondSlotVisible] = useState(false);
 
-  const { conversations, isLoadingConversationList, setIsUpdatingConversationList } =
-    useConversationList();
-
-  const refreshConversations = () => {
-    conversations.refresh();
-  };
-
-  const { copyConversationToClipboard, copyUrl, deleteConversation } = useConversationContextMenu({
+  const {
+    conversations,
+    isLoadingConversationList,
     setIsUpdatingConversationList,
     refreshConversations,
-  });
+  } = useConversationList();
 
   const handleConversationUpdate = (conversation: { conversation: { id: string } }) => {
     if (!conversationId) {
       updateConversationIdInPlace(conversation.conversation.id);
-      if (navigateToConversation) {
-        navigateToConversation(conversation.conversation.id);
-      }
+      navigateToConversation(conversation.conversation.id);
     }
     refreshConversations();
+  };
+
+  const updateDisplayedConversation = (id?: string) => {
+    navigateToConversation(id || undefined);
   };
 
   useEffect(() => {
@@ -149,16 +145,12 @@ export const ConversationView: React.FC<ConversationViewProps> = ({
           selectedConversationId={conversationId}
           conversations={conversations}
           isLoading={isLoadingConversationList}
-          onConversationDeleteClick={(deletedConversationId) => {
-            deleteConversation(deletedConversationId).then(() => {
-              if (deletedConversationId === conversationId && navigateToConversation) {
-                navigateToConversation(undefined);
-              }
-            });
-          }}
           newConversationHref={newConversationHref}
           onConversationSelect={navigateToConversation}
           getConversationHref={getConversationHref}
+          setIsUpdatingConversationList={setIsUpdatingConversationList}
+          refreshConversations={refreshConversations}
+          updateDisplayedConversation={updateDisplayedConversation}
         />
         <EuiSpacer size="s" />
       </EuiFlexItem>
@@ -183,15 +175,9 @@ export const ConversationView: React.FC<ConversationViewProps> = ({
             showLinkToConversationsApp={false}
             onConversationUpdate={handleConversationUpdate}
             navigateToConversation={navigateToConversation}
-            copyConversationToClipboard={copyConversationToClipboard}
-            copyUrl={copyUrl}
-            deleteConversation={(deletedConversationId) => {
-              deleteConversation(deletedConversationId).then(() => {
-                if (deletedConversationId === conversationId && navigateToConversation) {
-                  navigateToConversation(undefined);
-                }
-              });
-            }}
+            setIsUpdatingConversationList={setIsUpdatingConversationList}
+            refreshConversations={refreshConversations}
+            updateDisplayedConversation={updateDisplayedConversation}
           />
 
           <div className={sidebarContainerClass}>

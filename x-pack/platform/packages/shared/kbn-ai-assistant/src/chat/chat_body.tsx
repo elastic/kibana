@@ -47,7 +47,6 @@ import { WelcomeMessage } from './welcome_message';
 import { useLicense } from '../hooks/use_license';
 import { PromptEditor } from '../prompt_editor/prompt_editor';
 import { useKibana } from '../hooks/use_kibana';
-import { CopyConversationToClipboardParams } from '../hooks/use_conversation_context_menu';
 
 const fullHeightClassName = css`
   height: 100%;
@@ -118,9 +117,9 @@ export function ChatBody({
   onConversationUpdate,
   onToggleFlyoutPositionMode,
   navigateToConversation,
-  copyConversationToClipboard,
-  copyUrl,
-  deleteConversation,
+  setIsUpdatingConversationList,
+  refreshConversations,
+  updateDisplayedConversation,
 }: {
   connectors: ReturnType<typeof useGenAIConnectors>;
   currentUser?: Pick<AuthenticatedUser, 'full_name' | 'username'>;
@@ -133,12 +132,9 @@ export function ChatBody({
   onConversationUpdate: (conversation: { conversation: Conversation['conversation'] }) => void;
   onToggleFlyoutPositionMode?: (flyoutPositionMode: FlyoutPositionMode) => void;
   navigateToConversation?: (conversationId?: string) => void;
-  copyConversationToClipboard: ({
-    conversation,
-    messages,
-  }: CopyConversationToClipboardParams) => void;
-  copyUrl: (conversation: Conversation) => void;
-  deleteConversation: (id: string) => void;
+  setIsUpdatingConversationList: (isUpdating: boolean) => void;
+  refreshConversations: () => void;
+  updateDisplayedConversation: (id?: string) => void;
 }) {
   const license = useLicense();
   const hasCorrectLicense = license?.hasAtLeast('enterprise');
@@ -168,8 +164,6 @@ export function ChatBody({
 
   const timelineContainerRef = useRef<HTMLDivElement | null>(null);
 
-  let footer: React.ReactNode;
-
   const isLoading = Boolean(
     connectors.loading ||
       knowledgeBase.status.loading ||
@@ -177,13 +171,7 @@ export function ChatBody({
       conversation.loading
   );
 
-  const conversationId =
-    conversation.value?.conversation && 'id' in conversation.value.conversation
-      ? conversation.value.conversation.id
-      : undefined;
-
   let title = conversation.value?.conversation.title || initialTitle;
-
   if (!title) {
     if (!connectors.selectedConnector) {
       title = ASSISTANT_SETUP_TITLE;
@@ -335,6 +323,7 @@ export function ChatBody({
     }
   };
 
+  let footer: React.ReactNode;
   if (!hasCorrectLicense && !initialConversationId) {
     footer = (
       <>
@@ -517,7 +506,12 @@ export function ChatBody({
       <EuiFlexItem grow={false} className={headerContainerClassName}>
         <ChatHeader
           connectors={connectors}
-          conversationId={conversationId}
+          conversationId={
+            conversation.value?.conversation && 'id' in conversation.value.conversation
+              ? conversation.value.conversation.id
+              : undefined
+          }
+          conversation={conversation.value as Conversation}
           flyoutPositionMode={flyoutPositionMode}
           licenseInvalid={!hasCorrectLicense && !initialConversationId}
           loading={isLoading}
@@ -529,19 +523,9 @@ export function ChatBody({
           navigateToConversation={
             initialMessages?.length && !initialConversationId ? undefined : navigateToConversation
           }
-          onCopyConversationToClipboard={
-            conversation.value
-              ? () =>
-                  copyConversationToClipboard({
-                    conversation: conversation.value as Conversation,
-                    messages,
-                  })
-              : undefined
-          }
-          onCopyUrl={
-            conversation.value ? () => copyUrl(conversation.value as Conversation) : undefined
-          }
-          deleteConversation={conversationId ? () => deleteConversation(conversationId) : undefined}
+          setIsUpdatingConversationList={setIsUpdatingConversationList}
+          refreshConversations={refreshConversations}
+          updateDisplayedConversation={updateDisplayedConversation}
         />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>

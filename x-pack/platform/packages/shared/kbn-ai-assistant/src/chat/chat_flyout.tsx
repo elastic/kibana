@@ -29,7 +29,6 @@ import { ConversationList } from './conversation_list';
 import { useKibana } from '../hooks/use_kibana';
 import { useKnowledgeBase } from '../hooks/use_knowledge_base';
 import { NewChatButton } from '../buttons/new_chat_button';
-import { useConversationContextMenu } from '../hooks/use_conversation_context_menu';
 
 const CONVERSATIONS_SIDEBAR_WIDTH = 260;
 const CONVERSATIONS_SIDEBAR_WIDTH_COLLAPSED = 34;
@@ -86,8 +85,12 @@ export function ChatFlyout({
     },
   } = useKibana();
 
-  const { conversations, setIsUpdatingConversationList, isLoadingConversationList } =
-    useConversationList();
+  const {
+    conversations,
+    isLoadingConversationList,
+    setIsUpdatingConversationList,
+    refreshConversations,
+  } = useConversationList();
 
   const { key: bodyKey, updateConversationIdInPlace } = useConversationKey(conversationId);
 
@@ -145,15 +148,9 @@ export function ChatFlyout({
     onFlyoutPositionModeChange?.(newFlyoutPositionMode);
   };
 
-  const refreshConversations = () => {
-    conversations.refresh();
+  const updateDisplayedConversation = (id?: string) => {
+    setConversationId(id || undefined);
   };
-
-  const { copyConversationToClipboard, copyUrl, deleteConversation } = useConversationContextMenu({
-    initialTitle,
-    setIsUpdatingConversationList,
-    refreshConversations,
-  });
 
   return isOpen ? (
     <ObservabilityAIAssistantMultipaneFlyoutContext.Provider
@@ -232,16 +229,12 @@ export function ChatFlyout({
                   conversations={conversations}
                   isLoading={isLoadingConversationList}
                   selectedConversationId={conversationId}
-                  onConversationDeleteClick={(deletedConversationId) => {
-                    deleteConversation(deletedConversationId).then(() => {
-                      if (deletedConversationId === conversationId) {
-                        setConversationId(undefined);
-                      }
-                    });
-                  }}
                   onConversationSelect={(nextConversationId) => {
                     setConversationId(nextConversationId);
                   }}
+                  setIsUpdatingConversationList={setIsUpdatingConversationList}
+                  refreshConversations={refreshConversations}
+                  updateDisplayedConversation={updateDisplayedConversation}
                 />
               ) : (
                 <EuiPopover
@@ -300,15 +293,9 @@ export function ChatFlyout({
                     }
                   : undefined
               }
-              copyConversationToClipboard={copyConversationToClipboard}
-              copyUrl={copyUrl}
-              deleteConversation={(deletedConversationId) => {
-                deleteConversation(deletedConversationId).then(() => {
-                  if (deletedConversationId === conversationId) {
-                    setConversationId(undefined);
-                  }
-                });
-              }}
+              setIsUpdatingConversationList={setIsUpdatingConversationList}
+              refreshConversations={refreshConversations}
+              updateDisplayedConversation={updateDisplayedConversation}
             />
           </EuiFlexItem>
 
