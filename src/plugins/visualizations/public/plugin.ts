@@ -125,7 +125,7 @@ import {
   VisualizationSavedObjectAttributes,
 } from '../common/content_management';
 import { AddAggVisualizationPanelAction } from './actions/add_agg_vis_action';
-import type { VisualizeSerializedState } from './embeddable/types';
+import type { VisualizeRuntimeState } from './embeddable/types';
 import { getVisualizeEmbeddableFactoryLazy } from './embeddable';
 
 /**
@@ -412,10 +412,15 @@ export class VisualizationsPlugin
       return getVisualizeEmbeddableFactory({ embeddableStart, embeddableEnhancedStart });
     });
     embeddable.registerReactEmbeddableSavedObject<VisualizationSavedObjectAttributes>({
-      onAdd: (container, savedObject) => {
-        container.addNewPanel<VisualizeSerializedState>({
+      onAdd: async (container, savedObject) => {
+        const { deserializeState } = await import('./embeddable/state');
+        const initialState = await deserializeState({
+          rawState: { savedObjectId: savedObject.id },
+          references: savedObject.references,
+        });
+        container.addNewPanel<VisualizeRuntimeState>({
           panelType: VISUALIZE_EMBEDDABLE_TYPE,
-          initialState: { savedObjectId: savedObject.id },
+          initialState,
         });
       },
       embeddableType: VISUALIZE_EMBEDDABLE_TYPE,

@@ -41,6 +41,7 @@ export {
   FetchLogViewError,
   FetchLogViewStatusError,
   ResolveLogViewError,
+  isNoSuchRemoteClusterError,
 } from './log_views/errors';
 
 // eslint-disable-next-line @kbn/eslint/no_export_all

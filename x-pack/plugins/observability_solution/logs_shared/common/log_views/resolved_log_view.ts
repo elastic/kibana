@@ -60,11 +60,16 @@ const resolveLegacyReference = async (
   }
 
   const indices = logViewAttributes.logIndices.indexName;
+  const dataViewId = `log-view-${logViewId}`;
+
+  // If we didn't remove the item from the cache here the subsequent call to
+  // create would not have any effect
+  dataViewsService.clearInstanceCache(dataViewId);
 
   const dataViewReference = await dataViewsService
     .create(
       {
-        id: `log-view-${logViewId}`,
+        id: dataViewId,
         name: logViewAttributes.name,
         title: indices,
         timeFieldName: TIMESTAMP_FIELD,
@@ -134,11 +139,16 @@ const resolveKibanaAdvancedSettingReference = async (
   const indices = (await logSourcesService.getLogSources())
     .map((logSource) => logSource.indexPattern)
     .join(',');
+  const dataViewId = `log-view-${logViewId}`;
+
+  // If we didn't remove the item from the cache here the subsequent call to
+  // create would not have any effect
+  dataViewsService.clearInstanceCache(dataViewId);
 
   const dataViewReference = await dataViewsService
     .create(
       {
-        id: `log-view-${logViewId}`,
+        id: dataViewId,
         name: logViewAttributes.name,
         title: indices,
         timeFieldName: TIMESTAMP_FIELD,

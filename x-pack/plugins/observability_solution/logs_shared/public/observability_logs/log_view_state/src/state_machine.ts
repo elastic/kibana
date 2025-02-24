@@ -7,6 +7,7 @@
 
 import { catchError, from, map, of, throwError } from 'rxjs';
 import { createMachine, actions, assign } from 'xstate';
+import { isNoSuchRemoteClusterError } from '../../../../common';
 import { ILogViewsClient } from '../../../services/log_views';
 import { NotificationChannel } from '../../xstate_helpers';
 import { LogViewNotificationEvent, logViewNotificationEventSelectors } from './notifications';
@@ -75,7 +76,7 @@ export const createPureLogViewStateMachine = (initialContext: LogViewContextWith
           on: {
             RESOLUTION_FAILED: {
               target: 'resolutionFailed',
-              actions: 'storeError',
+              actions: ['storeError', 'storeStatusAfterError'],
             },
             RESOLUTION_SUCCEEDED: {
               target: 'checkingStatus',
@@ -247,6 +248,20 @@ export const createPureLogViewStateMachine = (initialContext: LogViewContextWith
           'status' in event
             ? ({
                 status: event.status,
+              } as LogViewContextWithStatus)
+            : {}
+        ),
+        storeStatusAfterError: assign((context, event) =>
+          'error' in event
+            ? ({
+                status: isNoSuchRemoteClusterError(event.error)
+                  ? {
+                      index: 'missing',
+                      reason: 'remoteClusterNotFound',
+                    }
+                  : {
+                      index: 'unknown',
+                    },
               } as LogViewContextWithStatus)
             : {}
         ),
