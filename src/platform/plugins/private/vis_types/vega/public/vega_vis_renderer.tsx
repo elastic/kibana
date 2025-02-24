@@ -80,4 +80,37 @@ export const getVegaVisRenderer: (
       domNode
     );
   },
+  loadComponent: async () => {
+    return ({ config: { visData }, handlers }) => {
+      const renderComplete = () => {
+        const usageCollection = getUsageCollectionStart();
+        const containerType = extractContainerType(handlers.getExecutionContext());
+        const visualizationType = 'vega';
+
+        if (usageCollection && containerType) {
+          const counterEvents = [
+            `render_${visualizationType}`,
+            visData.useMap ? `render_${visualizationType}_map` : undefined,
+            `render_${visualizationType}_${visData.isVegaLite ? 'lite' : 'normal'}`,
+          ].filter(Boolean) as string[];
+
+          usageCollection.reportUiCounter(containerType, METRIC_TYPE.COUNT, counterEvents);
+        }
+
+        handlers.done();
+      };
+
+      return (
+        <VisualizationContainer handlers={handlers}>
+          <LazyVegaVisComponent
+            deps={deps}
+            fireEvent={handlers.event}
+            renderComplete={renderComplete}
+            renderMode={handlers.getRenderMode()}
+            visData={visData}
+          />
+        </VisualizationContainer>
+      );
+    };
+  },
 });

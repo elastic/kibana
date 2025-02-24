@@ -9,7 +9,6 @@
 
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
-import useAsync from 'react-use/lib/useAsync';
 import React from 'react';
 import ReactDOM from '@kbn/react-dom';
 import { METRIC_TYPE } from '@kbn/analytics';
@@ -233,21 +232,16 @@ export const getXyChartRenderer = ({
           handlers.event(event);
         };
 
-        // const layerCellValueActions = await getLayerCellValueActions(
-        //   getDataLayers(config.args.layers),
-        //   handlers.getCompatibleCellValueActions as GetCompatibleCellValueActions | undefined
-        // );
+        const [layerCellValueActions, setLayerCellValueActions] = React.useState<Awaited<
+          ReturnType<typeof getLayerCellValueActions>
+        > | null>(null);
 
-        // const layerCellValueActionsState = useAsync(
-        //   () =>
-        //     getLayerCellValueActions(
-        //       getDataLayers(config.args.layers),
-        //       handlers.getCompatibleCellValueActions as GetCompatibleCellValueActions | undefined
-        //     ),
-        //   [config.args.layers]
-        // );
-
-        const layerCellValueActionsState = { value: [[]] };
+        React.useEffect(() => {
+          getLayerCellValueActions(
+            getDataLayers(config.args.layers),
+            handlers.getCompatibleCellValueActions as GetCompatibleCellValueActions | undefined
+          ).then((r) => setLayerCellValueActions(r));
+        }, [config.args.layers, handlers.getCompatibleCellValueActions]);
 
         const renderComplete = () => {
           const executionContext = handlers.getExecutionContext();
@@ -278,35 +272,35 @@ export const getXyChartRenderer = ({
           height: '100%',
         });
 
+        if (!layerCellValueActions) return null;
+
         return (
           <div css={chartContainerStyle} data-test-subj="xyVisChart">
-            {layerCellValueActionsState.value && (
-              <XYChartReportable
-                {...config}
-                data={deps.data}
-                formatFactory={deps.formatFactory}
-                chartsActiveCursorService={deps.activeCursor}
-                chartsThemeService={deps.theme}
-                paletteService={deps.paletteService}
-                timeZone={deps.timeZone}
-                timeFormat={deps.timeFormat}
-                eventAnnotationService={deps.eventAnnotationService}
-                useLegacyTimeAxis={deps.useLegacyTimeAxis}
-                minInterval={calculateMinInterval(deps.data.datatableUtilities, config)}
-                interactive={handlers.isInteractive()}
-                onClickValue={onClickValue}
-                onClickMultiValue={onClickMultiValue}
-                layerCellValueActions={layerCellValueActionsState.value!}
-                onSelectRange={onSelectRange}
-                renderMode={handlers.getRenderMode()}
-                syncColors={config.syncColors}
-                syncTooltips={config.syncTooltips}
-                syncCursor={config.syncCursor}
-                uiState={handlers.uiState as PersistedState}
-                renderComplete={renderComplete}
-                setChartSize={setChartSize}
-              />
-            )}
+            <XYChartReportable
+              {...config}
+              data={deps.data}
+              formatFactory={deps.formatFactory}
+              chartsActiveCursorService={deps.activeCursor}
+              chartsThemeService={deps.theme}
+              paletteService={deps.paletteService}
+              timeZone={deps.timeZone}
+              timeFormat={deps.timeFormat}
+              eventAnnotationService={deps.eventAnnotationService}
+              useLegacyTimeAxis={deps.useLegacyTimeAxis}
+              minInterval={calculateMinInterval(deps.data.datatableUtilities, config)}
+              interactive={handlers.isInteractive()}
+              onClickValue={onClickValue}
+              onClickMultiValue={onClickMultiValue}
+              layerCellValueActions={layerCellValueActions}
+              onSelectRange={onSelectRange}
+              renderMode={handlers.getRenderMode()}
+              syncColors={config.syncColors}
+              syncTooltips={config.syncTooltips}
+              syncCursor={config.syncCursor}
+              uiState={handlers.uiState as PersistedState}
+              renderComplete={renderComplete}
+              setChartSize={setChartSize}
+            />
           </div>
         );
       }
@@ -337,11 +331,10 @@ export const getXyChartRenderer = ({
         handlers.event(event);
       };
 
-      // const layerCellValueActions = await getLayerCellValueActions(
-      //   getDataLayers(config.args.layers),
-      //   handlers.getCompatibleCellValueActions as GetCompatibleCellValueActions | undefined
-      // );
-      const layerCellValueActions = [[]];
+      const layerCellValueActions = await getLayerCellValueActions(
+        getDataLayers(config.args.layers),
+        handlers.getCompatibleCellValueActions as GetCompatibleCellValueActions | undefined
+      );
 
       const renderComplete = () => {
         const executionContext = handlers.getExecutionContext();

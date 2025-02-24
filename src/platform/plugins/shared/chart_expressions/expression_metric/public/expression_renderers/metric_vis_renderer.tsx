@@ -110,5 +110,63 @@ export const getMetricVisRenderer = (
         domNode
       );
     },
+    loadComponent: async () => {
+      const { plugins } = deps.getStartDeps();
+      const { MetricVis } = await import('../components/metric_vis');
+
+      return ({ config: { visData, visConfig, overrides }, handlers }) => {
+        const [filterable, setFilterable] = React.useState<boolean | null>(null);
+
+        React.useEffect(() => {
+          if (visData.rows.length) {
+            metricFilterable(
+              visConfig.dimensions,
+              visData,
+              handlers.hasCompatibleActions?.bind(handlers)
+            ).then((value) => setFilterable(value));
+          } else {
+            setFilterable(false);
+          }
+        }, [visData, visConfig.dimensions, handlers]);
+
+        const renderComplete = () => {
+          const executionContext = handlers.getExecutionContext();
+          const containerType = extractContainerType(executionContext);
+          const visualizationType = extractVisualizationType(executionContext);
+
+          if (containerType && visualizationType) {
+            plugins.usageCollection?.reportUiCounter(containerType, METRIC_TYPE.COUNT, [
+              `render_${visualizationType}_metric`,
+            ]);
+          }
+
+          handlers.done();
+        };
+
+        if (filterable === null) return null;
+
+        return (
+          <div
+            data-test-subj="mtrVis"
+            css={css`
+              height: 100%;
+              width: 100%;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+            `}
+          >
+            <MetricVis
+              data={visData}
+              config={visConfig}
+              renderComplete={renderComplete}
+              fireEvent={handlers.event}
+              filterable={filterable}
+              overrides={overrides}
+            />
+          </div>
+        );
+      };
+    },
   });
 };

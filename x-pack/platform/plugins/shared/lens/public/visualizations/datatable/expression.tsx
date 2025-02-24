@@ -180,4 +180,84 @@ export const getDatatableRenderer = (dependencies: {
       domNode
     );
   },
+  loadComponent: async () => {
+    const [startServices] = await dependencies.core.getStartServices();
+
+    const resolvedGetType = await dependencies.getType;
+    const getType = (meta?: DatatableColumnMeta): IAggType | undefined => {
+      if (meta?.sourceParams?.type === undefined) return;
+      return resolvedGetType(String(meta.sourceParams.type));
+    };
+
+    return ({
+      config,
+      handlers,
+    }: {
+      config: DatatableProps;
+      handlers: ILensInterpreterRenderHandlers;
+    }) => {
+      const { hasCompatibleActions, isInteractive, getCompatibleCellValueActions } = handlers;
+
+      const [lazyState, setState] = React.useState(null);
+
+      React.useEffect(() => {
+        const getRowHasRowClickTriggerActions = async () =>
+          (hasCompatibleActions &&
+            config.data &&
+            (await Promise.all(
+              config.data.rows.map(async (_row, rowIndex) => {
+                try {
+                  const hasActions = await hasCompatibleActions({
+                    name: 'tableRowContextMenuClick',
+                    data: {
+                      rowIndex,
+                      table: config.data,
+                      columns: config.args.columns.map((column) => column.columnId),
+                    },
+                  });
+
+                  return hasActions;
+                } catch {
+                  return false;
+                }
+              })
+            ))) ||
+          [];
+
+        (async () => {
+          const state = await Promise.all([
+            getColumnCellValueActions(config, getCompatibleCellValueActions),
+            getColumnsFilterable(config.data, handlers),
+            getRowHasRowClickTriggerActions(),
+          ]);
+          setState(state);
+        })();
+      }, [config, getCompatibleCellValueActions, handlers, hasCompatibleActions]);
+
+      const renderComplete = () => {
+        trackUiCounterEvents('table', handlers.getExecutionContext());
+        handlers.done();
+      };
+
+      if (!lazyState) return null;
+
+      return (
+        <DatatableComponent
+          {...config}
+          formatFactory={dependencies.formatFactory}
+          dispatchEvent={handlers.event}
+          renderMode={handlers.getRenderMode()}
+          paletteService={dependencies.paletteService}
+          getType={getType}
+          rowHasRowClickTriggerActions={lazyState[2]}
+          columnCellValueActions={lazyState[0]}
+          columnFilterable={lazyState[0]}
+          interactive={isInteractive()}
+          theme={dependencies.core.theme}
+          renderComplete={renderComplete}
+          syncColors={config.syncColors}
+        />
+      );
+    };
+  },
 });

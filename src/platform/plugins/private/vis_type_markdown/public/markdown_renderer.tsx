@@ -32,8 +32,8 @@ export const getMarkdownVisRenderer: ({
   name: 'markdown_vis',
   displayName: 'markdown visualization',
   reuseDomNode: true,
-  Component: ({ config: { visParams }, handlers }) => {
-    return (
+  loadComponent: async () => {
+    return ({ config: { visParams }, handlers }) => (
       <VisualizationContainer className="markdownVis" handlers={handlers}>
         <MarkdownVisComponent {...visParams} renderComplete={handlers.done} />
       </VisualizationContainer>
