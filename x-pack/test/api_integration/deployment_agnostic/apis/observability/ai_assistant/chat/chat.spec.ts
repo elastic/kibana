@@ -8,6 +8,7 @@
 import expect from '@kbn/expect';
 import { MessageRole, type Message } from '@kbn/observability-ai-assistant-plugin/common';
 import { PassThrough } from 'stream';
+import { times } from 'lodash';
 import {
   LlmProxy,
   createLlmProxy,
@@ -20,13 +21,6 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
   const observabilityAIAssistantAPIClient = getService('observabilityAIAssistantApi');
 
   const messages: Message[] = [
-    {
-      '@timestamp': new Date().toISOString(),
-      message: {
-        role: MessageRole.System,
-        content: 'You are a helpful assistant',
-      },
-    },
     {
       '@timestamp': new Date().toISOString(),
       message: {
@@ -63,6 +57,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         params: {
           body: {
             name: 'my_api_call',
+            systemMessage: 'You are a helpful assistant',
             messages,
             connectorId: 'does not exist',
             functions: [],
@@ -72,6 +67,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       });
       expect(status).to.be(404);
     });
+
     it('returns a streaming response from the server', async () => {
       const NUM_RESPONSES = 5;
       const roleScopedSupertest = getService('roleScopedSupertest');
@@ -89,7 +85,9 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         }),
         new Promise<void>((resolve, reject) => {
           async function runTest() {
-            const interceptor = proxy.intercept('conversation', () => true);
+            const chunks = times(NUM_RESPONSES).map((i) => `Part: ${i}\n`);
+            void proxy.interceptConversation(chunks);
+
             const receivedChunks: Array<Record<string, any>> = [];
 
             const passThrough = new PassThrough();
@@ -98,6 +96,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
               .on('error', reject)
               .send({
                 name: 'my_api_call',
+                systemMessage: 'You are a helpful assistant',
                 messages,
                 connectorId,
                 functions: [],
@@ -105,19 +104,9 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
               })
               .pipe(passThrough);
 
-            const simulator = await interceptor.waitForIntercept();
-
             passThrough.on('data', (chunk) => {
               receivedChunks.push(JSON.parse(chunk.toString()));
             });
-
-            for (let i = 0; i < NUM_RESPONSES; i++) {
-              await simulator.next(`Part: ${i}\n`);
-            }
-
-            await simulator.tokenCount({ completion: 20, prompt: 33, total: 53 });
-
-            await simulator.complete();
 
             await new Promise<void>((innerResolve) => passThrough.on('end', () => innerResolve()));
 
@@ -132,15 +121,6 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
                 2
               )}`
             );
-
-            const tokenCountChunk = receivedChunks.find((chunk) => chunk.type === 'tokenCount');
-            expect(tokenCountChunk).to.eql(
-              {
-                type: 'tokenCount',
-                tokens: { completion: 20, prompt: 33, total: 53 },
-              },
-              `received token count chunk did not match expected`
-            );
           }
 
           runTest().then(resolve, reject);
@@ -154,6 +134,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
           params: {
             body: {
               name: 'my_api_call',
+              systemMessage: 'You are a helpful assistant',
               messages,
               connectorId,
               functions: [],
