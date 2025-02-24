@@ -25,6 +25,7 @@ import type { SetOptional } from 'type-fest';
 import { noop } from 'lodash';
 import type { Alert } from '@kbn/alerting-types';
 import { AlertsTable } from '@kbn/response-ops-alerts-table';
+import type { EuiTheme } from '@kbn/react-kibana-context-styled';
 import { useAlertsContext } from './alerts_context';
 import { getBulkActionsByTableType } from '../../hooks/trigger_actions_alert_table/use_bulk_actions';
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
@@ -104,7 +105,7 @@ export const FullWidthFlexGroupTable = styled(EuiFlexGroup)<{ $visible: boolean 
 
 const EuiDataGridContainer = styled.div<GridContainerProps>`
   .euiDataGrid__content {
-    background: ${({ theme }) => theme.eui.euiColorLightestShade};
+    background: ${({ theme }) => (theme as EuiTheme).eui.euiColorLightShade};
   }
   ul.euiPagination__list {
     li.euiPagination__item:last-child {
@@ -254,7 +255,7 @@ const DetectionEngineAlertsTableComponent: FC<Omit<DetectionEngineAlertTableProp
   const gridStyle = useMemo(
     () =>
       ({
-        border: 'horizontal',
+        border: 'none',
         fontSize: 's',
         header: 'underline',
         stripes: isEventRenderedView,
@@ -429,6 +430,25 @@ const DetectionEngineAlertsTableComponent: FC<Omit<DetectionEngineAlertTableProp
     [application, data, fieldFormats, http, licensing, notifications, settings]
   );
 
+  /**
+   * if records are too less, we don't want table to be of fixed height.
+   * it should shrink to the content height.
+   * Height setting enables/disables virtualization depending on fixed/undefined height values respectively.
+   * */
+  const alertTableHeight = useMemo(
+    () =>
+      isEventRenderedView
+        ? `${DEFAULT_DATA_GRID_HEIGHT}px`
+        : /*
+         * We keep fixed height in Event rendered because of the row height issue
+         * as mentioned here
+         */
+        count > 20
+        ? `${DEFAULT_DATA_GRID_HEIGHT}px`
+        : undefined,
+    [count, isEventRenderedView]
+  );
+
   if (isLoading) {
     return null;
   }
@@ -455,10 +475,7 @@ const DetectionEngineAlertsTableComponent: FC<Omit<DetectionEngineAlertTableProp
               browserFields={finalBrowserFields}
               onUpdate={onUpdate}
               additionalContext={additionalContext}
-              // if records are too less, we don't want table to be of fixed height.
-              // it should shrink to the content height.
-              // Height setting enables/disables virtualization depending on fixed/undefined height values respectively.
-              height={`${DEFAULT_DATA_GRID_HEIGHT}px`}
+              height={alertTableHeight}
               initialPageSize={50}
               runtimeMappings={sourcererDataView?.runtimeFieldMap as RunTimeMappings}
               toolbarVisibility={toolbarVisibility}
