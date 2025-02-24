@@ -48,10 +48,7 @@ const lifecycleStatsRoute = createServerRoute({
 
     const [{ indices: indicesIlmDetails }, { indices: indicesStats = {} }] = await Promise.all([
       scopedClusterClient.asCurrentUser.ilm.explainLifecycle({ index: name }),
-
-      scopedClusterClient.asCurrentUser.indices.stats({
-        index: dataStream.indices.map(({ index_name: indexName }) => indexName),
-      }),
+      scopedClusterClient.asCurrentUser.indices.stats({ index: dataStream.name }),
     ]);
 
     return { phases: ilmPhases({ policy, indicesIlmDetails, indicesStats }) };
