@@ -18,7 +18,8 @@
       "savedObjectsTagging",
       "navigation",
       "fieldsMetadata",
-      "datasetQuality"
+      "datasetQuality",
+      "licensing",
     ],
     "requiredBundles": [
       "kibanaReact"

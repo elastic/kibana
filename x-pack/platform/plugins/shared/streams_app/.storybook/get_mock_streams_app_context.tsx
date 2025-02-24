@@ -15,6 +15,7 @@ import { NavigationPublicStart } from '@kbn/navigation-plugin/public/types';
 import type { SavedObjectTaggingPluginStart } from '@kbn/saved-objects-tagging-plugin/public';
 import { fieldsMetadataPluginPublicMock } from '@kbn/fields-metadata-plugin/public/mocks';
 import { DataStreamsStatsClient } from '@kbn/dataset-quality-plugin/public/services/data_streams_stats/data_streams_stats_client';
+import { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import type { StreamsAppKibanaContext } from '../public/hooks/use_kibana';
 
 export function getMockStreamsAppContext(): StreamsAppKibanaContext {
@@ -34,6 +35,7 @@ export function getMockStreamsAppContext(): StreamsAppKibanaContext {
         navigation: {} as unknown as NavigationPublicStart,
         savedObjectsTagging: {} as unknown as SavedObjectTaggingPluginStart,
         fieldsMetadata: fieldsMetadataPluginPublicMock.createStartContract(),
+        licensing: {} as unknown as LicensingPluginStart,
       },
     },
     services: {

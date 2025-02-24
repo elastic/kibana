@@ -8,6 +8,7 @@ import dedent from 'dedent';
 import { ChatFunctionClient, GET_DATA_ON_SCREEN_FUNCTION_NAME } from '.';
 import { FunctionVisibility } from '../../../common/functions/types';
 import { AdHocInstruction } from '../../../common/types';
+import { Logger } from '@kbn/logging';
 
 describe('chatFunctionClient', () => {
   describe('when executing a function with invalid arguments', () => {
@@ -49,6 +50,7 @@ describe('chatFunctionClient', () => {
           }),
           messages: [],
           signal: new AbortController().signal,
+          logger: getLoggerMock(),
           connectorId: 'foo',
           simulateFunctionCalling: false,
         });
@@ -111,6 +113,7 @@ describe('chatFunctionClient', () => {
         args: JSON.stringify({ data: ['my_dummy_data'] }),
         messages: [],
         signal: new AbortController().signal,
+        logger: getLoggerMock(),
         connectorId: 'foo',
         simulateFunctionCalling: false,
       });
@@ -179,3 +182,15 @@ describe('chatFunctionClient', () => {
     });
   });
 });
+
+function getLoggerMock() {
+  // const consoleOrPassThrough = console.log.bind(console);
+  const consoleOrPassThrough = () => {};
+  return {
+    log: jest.fn().mockImplementation(consoleOrPassThrough),
+    error: jest.fn().mockImplementation(consoleOrPassThrough),
+    debug: jest.fn().mockImplementation(consoleOrPassThrough),
+    trace: jest.fn().mockImplementation(consoleOrPassThrough),
+    isLevelEnabled: jest.fn().mockReturnValue(true),
+  } as unknown as Logger;
+}

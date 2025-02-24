@@ -341,6 +341,20 @@ steps:
             - exit_status: "1"
               limit: 2
 
+      - label: Running rule_execution_logic:general_logic:essentials:qa:serverless:release
+        command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh rule_execution_logic:general_logic:essentials:qa:serverless:release
+        key: rule_execution_logic:general_logic:essentials:qa:serverless:release
+        agents:
+          image: family/kibana-ubuntu-2004
+          imageProject: elastic-images-prod
+          provider: gcp
+          machineType: n2-standard-4
+        timeout_in_minutes: 120
+        retry:
+          automatic:
+            - exit_status: '1'
+              limit: 2
+
       - label: Running rule_execution_logic:indicator_match:qa:serverless:release
         command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh rule_execution_logic:indicator_match:qa:serverless:release
         key: rule_execution_logic:indicator_match:qa:serverless:release

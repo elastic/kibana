@@ -6,6 +6,7 @@
  */
 
 import { EuiComboBoxOptionOption } from '@elastic/eui';
+import { KibanaServerError } from '@kbn/kibana-utils-plugin/common';
 
 export const isExplicitSynonym = (synonym: string) => {
   return synonym.trim().includes('=>');
@@ -41,3 +42,7 @@ export const synonymsOptionToString = ({
   `${fromTerms.map((s) => s.label).join(',')}${
     isExplicit ? ' => ' + toTerms.map((s) => s.label).join(',') : ''
   }`;
+
+export const isPermissionError = (error: { body: KibanaServerError }) => {
+  return error.body.statusCode === 403;
+};

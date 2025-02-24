@@ -199,7 +199,7 @@ const TargetVersionsRow: React.FunctionComponent<{
 
   return (
     <EuiFlexGroup direction="row" alignItems="stretch">
-      <EuiFlexItem>
+      <EuiFlexItem grow={false}>
         <EuiFormRow
           label={
             <>
@@ -230,7 +230,7 @@ const TargetVersionsRow: React.FunctionComponent<{
           />
         </EuiFormRow>
       </EuiFlexItem>
-      <EuiFlexItem>
+      <EuiFlexItem grow={false}>
         <EuiFormRow
           label={
             <>
