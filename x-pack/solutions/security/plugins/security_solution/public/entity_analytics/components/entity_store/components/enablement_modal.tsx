@@ -55,14 +55,14 @@ interface EntityStoreEnablementModalProps {
 }
 
 const shouldAllowEnablement = (
-  riskScoreDisabled: boolean,
-  entityStoreDisabled: boolean,
+  canEnableRiskScore: boolean,
+  canEnableEntityStore: boolean,
   enablements: Enablements
 ) => {
-  if (riskScoreDisabled) {
+  if (canEnableRiskScore) {
     return enablements.entityStore;
   }
-  if (entityStoreDisabled) {
+  if (canEnableEntityStore) {
     return enablements.riskScore;
   }
   return enablements.riskScore || enablements.entityStore;
