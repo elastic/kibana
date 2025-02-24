@@ -14,4 +14,5 @@ module.exports = {
   collectCoverageFrom: [
     '<rootDir>/x-pack/platform/plugins/shared/ml/{common,public,server}/**/*.{js,ts,tsx}',
   ],
+  runInBand: true,
 };

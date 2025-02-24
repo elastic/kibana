@@ -1,4 +1,5 @@
 {
+  "name": "kbn-utility-tsd_tests",
   "types": "empty.d.ts",
   "tsd": {
     "directory": "test_d",

@@ -7,4 +7,9 @@ source .buildkite/scripts/common/util.sh
 .buildkite/scripts/bootstrap.sh
 
 echo --- Check Types
-node scripts/type_check
+if ! which nx > /dev/null; then
+  echo "Nx not found by name, trying to use local version"
+  ./node_modules/.bin/nx affected --target=typecheck --nxIgnoreCycles --parallel 3
+else
+  nx affected --target=typecheck --nxIgnoreCycles --parallel 3
+fi

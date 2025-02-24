@@ -1,0 +1,36 @@
+{
+  "$schema": "https://raw.githubusercontent.com/nrwl/nx/refs/heads/master/packages/nx/schemas/project-schema.json",
+  "name": "@kbn/profiling-plugin",
+  "namedInputs": {
+    "src": [
+      "{projectRoot}/index.ts",
+      "{projectRoot}/common/**/*.ts",
+      "{projectRoot}/common/**/*.json",
+      "{projectRoot}/public/**/*.ts",
+      "{projectRoot}/public/**/*.tsx",
+      "{projectRoot}/server/**/*.ts",
+      "!{projectRoot}/target/**/*"
+    ]
+  },
+  "targets": {
+    "typecheck": {
+      "inputs": [
+        "src",
+        "^src",
+        "global:tsConfigs",
+        "^global:tsConfigs"
+      ],
+      "outputs": [
+        "{projectRoot}/target"
+      ]
+    },
+    "jest": {
+      "options": {
+        "jestConfig": "{projectRoot}/jest.config.js"
+      }
+    },
+    "lint": {}
+  },
+  "projectType": "application",
+  "sourceRoot": "x-pack/solutions/observability/plugins/profiling"
+}

@@ -56,11 +56,19 @@ export default class CiStatsJestReporter extends BaseReporter {
       throw new Error('missing testGroupType reporter option');
     }
 
-    const configArg = getopts(process.argv).config;
-    if (typeof configArg !== 'string') {
-      throw new Error('expected to find a single --config arg');
+    const isRunningNx = process.env.NX_TASK_TARGET_PROJECT && process.env.NX_TASK_TARGET_TARGET;
+    if (!isRunningNx) {
+      const configArg = getopts(process.argv).config;
+      if (typeof configArg !== 'string') {
+        throw new Error('expected to find a single --config arg');
+      }
+      this.reportName = configArg;
+    } else {
+      // we could use this to identify, but we currently use the config paths.
+      const nxFlavorTestName = `${process.env.NX_TASK_TARGET_PROJECT}:${process.env.NX_TASK_TARGET_TARGET}`;
+      // NX_JEST_CONFIG_PATH is set in the kbn-nx jest executor (packages/kbn-nx/src/executors/jest/executor.ts)
+      this.reportName = process.env.NX_JEST_CONFIG_PATH || nxFlavorTestName;
     }
-    this.reportName = configArg;
   }
 
   async onRunStart() {

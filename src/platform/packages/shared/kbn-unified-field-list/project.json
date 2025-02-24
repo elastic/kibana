@@ -1,0 +1,34 @@
+{
+  "$schema": "https://raw.githubusercontent.com/nrwl/nx/refs/heads/master/packages/nx/schemas/project-schema.json",
+  "name": "@kbn/unified-field-list",
+  "namedInputs": {
+    "src": [
+      "{projectRoot}/*.ts",
+      "{projectRoot}/src/**/*",
+      "{projectRoot}/__mocks__/**/*.ts",
+      "{workspaceRoot}/typings/emotion.d.ts",
+      "!{projectRoot}/target/**/*"
+    ]
+  },
+  "targets": {
+    "typecheck": {
+      "inputs": [
+        "src",
+        "^src",
+        "global:tsConfigs",
+        "^global:tsConfigs"
+      ],
+      "outputs": [
+        "{projectRoot}/target"
+      ]
+    },
+    "jest": {
+      "options": {
+        "jestConfig": "{projectRoot}/jest.config.js"
+      }
+    },
+    "lint": {}
+  },
+  "projectType": "library",
+  "sourceRoot": "src/platform/packages/shared/kbn-unified-field-list"
+}

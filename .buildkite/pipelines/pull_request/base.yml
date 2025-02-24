@@ -1,3 +1,6 @@
+env:
+  NX_VERBOSE_LOGGING: true
+
 steps:
   - command: .buildkite/scripts/lifecycle/pre_build.sh
     label: Pre-Build
@@ -48,7 +51,7 @@ steps:
         - exit_status: '-1'
           limit: 3
 
-  - command: .buildkite/scripts/steps/lint.sh
+  - command: .buildkite/scripts/steps/lint_nx.sh
     label: 'Linting'
     agents:
       machineType: n2-standard-16
@@ -96,7 +99,7 @@ steps:
       spotZones: us-central1-a,us-central1-b,us-central1-c
       diskSizeGb: 75
     key: check_types
-    timeout_in_minutes: 60
+    timeout_in_minutes: 100
     retry:
       automatic:
         - exit_status: '-1'
@@ -125,13 +128,28 @@ steps:
       diskSizeGb: 75
     timeout_in_minutes: 10
     env:
-      JEST_UNIT_SCRIPT: '.buildkite/scripts/steps/test/jest.sh'
+      LIMIT_CONFIG_TYPE: 'functional,integration'
       JEST_INTEGRATION_SCRIPT: '.buildkite/scripts/steps/test/jest_integration.sh'
       FTR_CONFIGS_SCRIPT: '.buildkite/scripts/steps/test/ftr_configs.sh'
     retry:
       automatic:
         - exit_status: '*'
           limit: 1
+
+  - command: .buildkite/scripts/steps/test/jest_nx.sh
+    label: 'Jest (nx)'
+    agents:
+      machineType: n2-standard-8
+      preemptible: true
+      provider: 'gcp'
+      image: 'family/kibana-ubuntu-2004'
+      imageProject: 'elastic-images-qa'
+    key: jest_nx
+    timeout_in_minutes: 120
+    retry:
+      automatic:
+        - exit_status: '-1'
+          limit: 3
 
   - command: .buildkite/scripts/steps/api_docs/build_api_docs.sh
     label: 'Build API Docs'

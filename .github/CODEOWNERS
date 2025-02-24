@@ -52,7 +52,9 @@ packages/kbn-axe-config @elastic/kibana-qa
 packages/kbn-babel-preset @elastic/kibana-operations
 packages/kbn-babel-register @elastic/kibana-operations
 packages/kbn-babel-transform @elastic/kibana-operations
-packages/kbn-bazel-runner @elastic/kibana-operations
+packages/kbn-bfetch-error @elastic/appex-sharedux
+packages/kbn-calculate-auto @elastic/obs-ux-management-team
+packages/kbn-calculate-width-from-char-count @elastic/kibana-visualizations
 packages/kbn-capture-oas-snapshot-cli @elastic/kibana-core
 packages/kbn-check-mappings-update-cli @elastic/kibana-core
 packages/kbn-check-prod-native-modules-cli @elastic/kibana-operations
@@ -103,6 +105,7 @@ packages/kbn-manifest @elastic/kibana-core
 packages/kbn-mock-idp-plugin @elastic/kibana-security
 packages/kbn-mock-idp-utils @elastic/kibana-security
 packages/kbn-node-libs-browser-webpack-plugin @elastic/kibana-operations
+packages/kbn-nx @elastic/kibana-operations
 packages/kbn-openapi-bundler @elastic/security-detection-rule-management
 packages/kbn-openapi-generator @elastic/security-detection-rule-management
 packages/kbn-optimizer @elastic/kibana-operations
@@ -1581,11 +1584,6 @@ packages/kbn-monaco/src/esql @elastic/kibana-esql
 /src/cli_keystore/ @elastic/kibana-operations
 /.github/workflows/ @elastic/kibana-operations
 /vars/ @elastic/kibana-operations
-/.bazelignore @elastic/kibana-operations
-/.bazeliskversion @elastic/kibana-operations
-/.bazelrc @elastic/kibana-operations
-/.bazelrc.common @elastic/kibana-operations
-/.bazelversion @elastic/kibana-operations
 /WORKSPACE.bazel @elastic/kibana-operations
 /.buildkite/ @elastic/kibana-operations
 /.buildkite/scripts/steps/esql_grammar_sync.sh @elastic/kibana-esql
@@ -2712,6 +2710,10 @@ x-pack/plugins/observability_solution/synthetics/server/saved_objects/synthetics
 /.github/workflows/deploy-my-kibana.yml   @elastic/observablt-robots @elastic/kibana-operations
 /.github/workflows/oblt-github-commands   @elastic/observablt-robots @elastic/kibana-operations
 /.github/workflows/undeploy-my-kibana.yml @elastic/observablt-robots @elastic/kibana-operations
+
+# NX Configs
+nx.json @elastic/kibana-operations
+**/project.json @elastic/kibana-operations
 
 ####
 ## These rules are always last so they take ultimate priority over everything else

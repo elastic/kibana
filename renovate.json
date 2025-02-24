@@ -3985,6 +3985,27 @@
       "enabled": true
     },
     {
+      "groupName": "nx",
+      "matchDepNames": [
+        "nx",
+        "@nx/jest",
+        "@nx/js",
+        "@nx/webpack"
+      ],
+      "reviewers": [
+        "team:appex-operations"
+      ],
+      "matchBaseBranches": [
+        "main"
+      ],
+      "labels": [
+        "release_note:skip",
+        "backport:all-open"
+      ],
+      "minimumReleaseAge": "7 days",
+      "enabled": true
+    },
+    {
       "groupName": "fuse.js",
       "matchDepNames": [
         "fuse.js"
