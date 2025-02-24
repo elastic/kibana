@@ -132,13 +132,13 @@ describe('RulesFileUpload', () => {
       },
     ];
 
-    it('should display API Error correctly', async () => {
+    it('should display API Error', async () => {
       renderTestComponent({
         apiError: mockApiError,
       });
 
       await waitFor(() => {
-        expect(screen.getByTestId('uploadFileButton')).toBeDisabled();
+        expect(screen.getByText(mockApiError)).toBeVisible();
       });
     });
 
