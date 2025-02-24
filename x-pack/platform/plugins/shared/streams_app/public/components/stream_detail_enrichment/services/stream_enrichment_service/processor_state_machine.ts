@@ -115,7 +115,6 @@ export const processorMachine = setup({
               },
               {
                 target: '#deleted',
-                actions: [{ type: 'emitChangesDiscarded' }],
               },
             ],
             'processor.change': {
@@ -131,11 +130,7 @@ export const processorMachine = setup({
             src: 'confirmDiscardChanges',
             onDone: {
               target: '#deleted',
-              actions: [
-                { type: 'restoreInitialProcessor' },
-                { type: 'emitProcessorChange' },
-                { type: 'emitChangesDiscarded' },
-              ],
+              actions: [{ type: 'restoreInitialProcessor' }],
             },
             onError: 'editing',
           },

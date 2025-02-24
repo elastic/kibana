@@ -23,11 +23,10 @@ import {
 import { useSelector } from '@xstate5/react';
 import { i18n } from '@kbn/i18n';
 import { IngestStreamGetResponse } from '@kbn/streams-schema';
-import { isEmpty, isEqual } from 'lodash';
-import React, { useEffect, useMemo, useState } from 'react';
+import { isEmpty } from 'lodash';
+import React, { useEffect, useMemo } from 'react';
 import { useForm, SubmitHandler, FormProvider, useWatch } from 'react-hook-form';
 import { css } from '@emotion/react';
-import { useBoolean } from '@kbn/react-hooks';
 import { DissectProcessorForm } from './dissect';
 import { GrokProcessorForm } from './grok';
 import { ProcessorTypeSelector } from './processor_type_selector';
@@ -37,10 +36,8 @@ import {
   convertFormStateToProcessor,
   isGrokProcessor,
   isDissectProcessor,
-  processorConverter,
   getDefaultFormStateByType,
 } from '../utils';
-import { useDiscardConfirm } from '../../../hooks/use_discard_confirm';
 import {
   useStreamEnrichmentEvents,
   useStreamsEnrichmentSelector,
@@ -65,11 +62,11 @@ export function AddProcessorPanel({ processorMetrics }: AddProcessorPanelProps) 
 
   const { addProcessor } = useStreamEnrichmentEvents();
 
-  const processorActor = useStreamsEnrichmentSelector(
-    (state) => state.context.processors.find((p) => p.getSnapshot().matches('draft'))!
+  const processorActor = useStreamsEnrichmentSelector((state) =>
+    state.context.processors.find((p) => p.getSnapshot().matches('draft'))
   );
 
-  const [isOpen, { on: openPanel, off: closePanel }] = useBoolean(false);
+  const isOpen = Boolean(processorActor);
 
   const defaultValues = useMemo(() => getDefaultFormStateByType('grok'), []);
 
@@ -78,7 +75,13 @@ export function AddProcessorPanel({ processorMetrics }: AddProcessorPanelProps) 
   const type = useWatch({ control: methods.control, name: 'type' });
 
   useEffect(() => {
-    if (isOpen) {
+    if (!processorActor) {
+      methods.reset(defaultValues);
+    }
+  }, [defaultValues, methods, processorActor]);
+
+  useEffect(() => {
+    if (processorActor) {
       const { unsubscribe } = methods.watch((value) => {
         const processor = convertFormStateToProcessor(value as ProcessorFormState);
         processorActor.send({ type: 'processor.change', processor });
@@ -86,35 +89,19 @@ export function AddProcessorPanel({ processorMetrics }: AddProcessorPanelProps) 
 
       return () => unsubscribe();
     }
-  }, [isOpen, methods, processorActor]);
-
-  useEffect(() => {
-    console.log(processorActor);
-
-    if (processorActor) {
-      const subscription = processorActor.on('processor.changesDiscarded', () => {
-        console.log('discardeeeed');
-        methods.reset();
-        closePanel();
-      });
-
-      return () => subscription.unsubscribe();
-    }
-  }, [closePanel, methods, processorActor]);
+  }, [methods, processorActor]);
 
   const handleSubmit: SubmitHandler<ProcessorFormState> = async () => {
-    closePanel();
-    processorActor.send({ type: 'processor.stage' });
+    processorActor?.send({ type: 'processor.stage' });
   };
 
   const handleCancel = () => {
-    processorActor.send({ type: 'processor.cancel' });
+    processorActor?.send({ type: 'processor.cancel' });
   };
 
   const handleOpen = () => {
     const draftProcessor = createDraftProcessorFromForm(defaultValues);
     addProcessor({ processor: draftProcessor });
-    openPanel();
   };
 
   const buttonContent = isOpen ? (

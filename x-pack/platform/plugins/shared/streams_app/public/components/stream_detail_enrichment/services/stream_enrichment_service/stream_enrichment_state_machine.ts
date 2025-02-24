@@ -116,6 +116,8 @@ export const streamEnrichmentMachine = setup({
   guards: {
     hasMultipleProcessors: ({ context }) => context.processors.length > 1,
     hasStagedChanges: ({ context }) => context.hasStagedChanges,
+    hasPendingDraft: ({ context }) =>
+      Boolean(context.processors.find((p) => p.getSnapshot().matches('draft'))),
     isRootStream: ({ context }) => isRootStreamDefinition(context.definition.stream),
     isWiredStream: ({ context }) => isWiredStreamGetResponse(context.definition),
   },
@@ -178,10 +180,12 @@ export const streamEnrichmentMachine = setup({
         displayingProcessors: {
           on: {
             'processors.add': {
-              actions: [
-                { type: 'addProcessor', params: ({ event }) => event },
-                { type: 'deriveStagedChangesFlag' },
-              ],
+              actions: enqueueActions(({ check, enqueue }) => {
+                if (!check('hasPendingDraft')) {
+                  enqueue({ type: 'addProcessor', params: ({ event }) => event });
+                }
+                enqueue({ type: 'deriveStagedChangesFlag' });
+              }),
             },
             'processors.reorder': {
               guard: 'hasMultipleProcessors',
