@@ -18,9 +18,9 @@ import { EsqlPopover } from './esql_popover';
 
 export const Logs: FC = () => {
   const state = useEventBusExampleState();
-  const esql = state.useState((s) => s.esql);
-  const crossfilter = state.useState((s) => s.filters);
-  const selectedFields = state.useState((s) => s.selectedFields);
+  const esql = state.useEventBusState((s) => s.esql);
+  const crossfilter = state.useEventBusState((s) => s.filters);
+  const selectedFields = state.useEventBusState((s) => s.selectedFields);
 
   const esqlWithFilters = useMemo(() => {
     if (esql === '' || selectedFields.length === 0) return null;

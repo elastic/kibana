@@ -20,11 +20,11 @@ import { EsqlPopover } from './esql_popover';
 
 export const GenAI: FC = () => {
   const state = useEventBusExampleState();
-  const fullState = state.useState();
-  const esql = state.useState((s) => s.esql);
-  const crossfilter = state.useState((s) => s.filters);
-  const selectedFields = state.useState((s) => s.selectedFields);
-  // const allFields = state.useState((s) => s.allFields);
+  const fullState = state.useEventBusState();
+  const esql = state.useEventBusState((s) => s.esql);
+  const crossfilter = state.useEventBusState((s) => s.filters);
+  const selectedFields = state.useEventBusState((s) => s.selectedFields);
+  // const allFields = state.useEventBusState((s) => s.allFields);
   // console.log('allFields', allFields);
 
   const [isLoading, setIsLoading] = useState(false);

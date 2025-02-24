@@ -50,9 +50,9 @@ interface DateHistogramProps {
 export const DateHistogram: FC<DateHistogramProps> = ({ field }) => {
   const iframeID = `date_histogram_${field}`;
   const state = useEventBusExampleState();
-  const esql = state.useState((s) => s.esql);
-  const filters = state.useState((s) => s.filters);
-  const width = state.useState((s) => s.chartWidth);
+  const esql = state.useEventBusState((s) => s.esql);
+  const filters = state.useEventBusState((s) => s.filters);
+  const width = state.useEventBusState((s) => s.chartWidth);
 
   const panelFilters = useMemo(() => {
     const pfs = cloneDeep(filters);
