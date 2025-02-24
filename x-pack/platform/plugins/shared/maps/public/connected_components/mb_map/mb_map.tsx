@@ -154,7 +154,7 @@ export class MbMap extends Component<Props, State> {
         version: 8 as 8,
         sources: {},
         layers: [],
-        //glyphs: glyphs.glyphUrlTemplate,
+        glyphs: glyphs.glyphUrlTemplate,
       };
 
       const options: MapOptions = {
