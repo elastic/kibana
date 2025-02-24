@@ -16,6 +16,7 @@ import {
   EuiContextMenuPanel,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiLink,
   EuiPopover,
   EuiText,
   EuiToolTip,
@@ -347,8 +348,8 @@ export function GrokAiSuggestions() {
           }
         )}
       >
-        <EuiButton
-          iconType="sparkles"
+        <EuiLink
+          target="_blank"
           href={http!.basePath.prepend(
             `/app/management/insightsAndAlerting/triggersActionsConnectors/connectors`
           )}
@@ -359,7 +360,7 @@ export function GrokAiSuggestions() {
               defaultMessage: 'Enable AI Assistant features',
             }
           )}
-        </EuiButton>
+        </EuiLink>
       </EuiToolTip>
     );
   }
