@@ -121,6 +121,7 @@ describe('Serialization utils', () => {
         savedSearch,
         serializeTitles: jest.fn(),
         serializeTimeRange: jest.fn(),
+        serializeDynamicActions: jest.fn(),
         discoverServices: discoverServiceMock,
       });
 
@@ -159,6 +160,7 @@ describe('Serialization utils', () => {
           savedSearch,
           serializeTitles: jest.fn(),
           serializeTimeRange: jest.fn(),
+          serializeDynamicActions: jest.fn(),
           savedObjectId: 'test-id',
           discoverServices: discoverServiceMock,
         });
@@ -178,6 +180,7 @@ describe('Serialization utils', () => {
           savedSearch: { ...savedSearch, sampleSize: 500, sort: [['order_date', 'asc']] },
           serializeTitles: jest.fn(),
           serializeTimeRange: jest.fn(),
+          serializeDynamicActions: jest.fn(),
           savedObjectId: 'test-id',
           discoverServices: discoverServiceMock,
         });
