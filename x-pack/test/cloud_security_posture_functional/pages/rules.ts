@@ -27,9 +27,10 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     'header',
     'findings',
   ]);
+  const retryService = getService('retry');
 
   // FLAKY: https://github.com/elastic/kibana/issues/178413
-  describe.skip('Cloud Posture Rules Page', function () {
+  describe('Cloud Posture Rules Page', function () {
     this.tags(['cloud_security_posture_rules_page']);
     let rule: typeof pageObjects.rule;
     let findings: typeof pageObjects.findings;
@@ -82,8 +83,10 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it('Clicking the posture score button leads to the dashboard', async () => {
-        await rule.rulePage.clickPostureScoreButton();
-        await pageObjects.common.waitUntilUrlIncludes('cloud_security_posture/dashboard');
+        await retryService.tryForTime(5000, async () => {
+          await rule.rulePage.clickPostureScoreButton();
+          await pageObjects.common.waitUntilUrlIncludes('cloud_security_posture/dashboard');
+        });
       });
 
       it('Shows integrations count when there are findings', async () => {
@@ -244,10 +247,12 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
     describe('Rules Page - Flyout', () => {
       it('Users are able to Enable/Disable Rule from Switch on Rule Flyout', async () => {
+        await rule.rulePage.togglEnableRulesRowSwitchButton(0);
         await rule.rulePage.clickRulesNames(0);
         await rule.rulePage.clickFlyoutEnableSwitchButton();
         await pageObjects.header.waitUntilLoadingHasFinished();
         expect((await rule.rulePage.getEnableSwitchButtonState()) === 'false').to.be(true);
+        await rule.rulePage.clickCloseFlyoutButton();
       });
       it('Alerts section of Rules Flyout shows Disabled text when Rules are disabled', async () => {
         await rule.rulePage.clickRulesNames(0);
@@ -257,13 +262,17 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
             'csp:findings-flyout-create-detection-rule-link'
           )) === false
         ).to.be(true);
+        await rule.rulePage.clickCloseFlyoutButton();
       });
       it('Users are able to Enable/Disable Rule from Take Action on Rule Flyout', async () => {
         await rule.rulePage.clickRulesNames(0);
-        await rule.rulePage.clickTakeActionButton();
-        await rule.rulePage.clickTakeActionButtonOption('enable');
+        await retryService.try(async () => {
+          await rule.rulePage.clickTakeActionButton();
+          await rule.rulePage.clickTakeActionButtonOption('enable');
+        });
         await pageObjects.header.waitUntilLoadingHasFinished();
         expect((await rule.rulePage.getEnableSwitchButtonState()) === 'true').to.be(true);
+        await rule.rulePage.clickCloseFlyoutButton();
       });
       it('Alerts section of Rules Flyout shows Detection Rule Counter component when Rules are enabled', async () => {
         await rule.rulePage.clickRulesNames(0);

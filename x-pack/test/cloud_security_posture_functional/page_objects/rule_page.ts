@@ -25,6 +25,7 @@ export const RULE_NUMBER_FILTER = 'options-filter-popover-button-rule-number-mul
 export const RULE_NUMBER_FILTER_SEARCH_FIELD = 'rule-number-search-input';
 export const RULES_FLYOUT_SWITCH_BUTTON = 'rule-flyout-switch-button';
 export const TAKE_ACTION_BUTTON = 'csp:take_action';
+export const CLOSE_FLYOUT_BUTTON = 'euiFlyoutCloseButton';
 
 export function RulePagePageProvider({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
@@ -132,6 +133,20 @@ export function RulePagePageProvider({ getService, getPageObjects }: FtrProvider
       return await rulesFlyoutEnableSwitchButton.getAttribute('aria-checked');
     },
 
+    togglEnableRulesRowSwitchButton: async (index: number) => {
+      const enableRulesRowSwitches = await testSubjects.findAll(RULES_ROWS_ENABLE_SWITCH_BUTTON);
+      const checked = await enableRulesRowSwitches[index].getAttribute('aria-checked');
+      if (checked) {
+        return;
+      }
+      await enableRulesRowSwitches[index].click();
+    },
+
+    clickCloseFlyoutButton: async () => {
+      const closeFlyoutButton = await testSubjects.find(CLOSE_FLYOUT_BUTTON);
+      await closeFlyoutButton.click();
+    },
+
     clickTakeActionButton: async () => {
       const takeActionButton = await testSubjects.find(TAKE_ACTION_BUTTON);
       await takeActionButton.click();
@@ -210,7 +225,7 @@ export function RulePagePageProvider({ getService, getPageObjects }: FtrProvider
       `cloud_security_posture/benchmarks/${benchmarkCisId}/${benchmarkCisVersion}/rules`,
       options
     );
-    await PageObjects.header.waitUntilLoadingHasFinished();
+    // await PageObjects.header.waitUntilLoadingHasFinished();
   };
 
   return {
