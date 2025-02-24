@@ -122,14 +122,7 @@ export const BaseUpdateProps = BaseCreateProps.partial().merge(
 );
 
 export type BaseResponseProps = z.infer<typeof BaseResponseProps>;
-export const BaseResponseProps = BaseRequiredFields.merge(BaseDefaultableFields.required()).merge(
-  z.object({
-    /**
-     * Users who have access to the Knowledge Base Entry, defaults to current user. Empty array provides access to all users.
-     */
-    users: z.array(User),
-  })
-);
+export const BaseResponseProps = BaseRequiredFields.merge(BaseDefaultableFields.required());
 
 export type ResponseFields = z.infer<typeof ResponseFields>;
 export const ResponseFields = z.object({

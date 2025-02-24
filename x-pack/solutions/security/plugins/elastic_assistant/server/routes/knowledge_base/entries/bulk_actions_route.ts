@@ -48,7 +48,7 @@ import {
   transformToCreateSchema,
   transformToUpdateSchema,
 } from '../../../ai_assistant_data_clients/knowledge_base/create_knowledge_base_entry';
-import { validateDocumentsModification } from './utils';
+import { isGlobalEntry, validateDocumentsModification } from './utils';
 
 export interface BulkOperationError {
   message: string;
@@ -241,8 +241,7 @@ export const bulkActionKnowledgeBaseEntriesRoute = (router: ElasticAssistantPlug
           if (body.create && body.create.length > 0) {
             // RBAC validation
             body.create.forEach((entry) => {
-              const isGlobal = entry.global ?? (entry.users != null && entry.users.length === 0);
-              if (isGlobal && !manageGlobalKnowledgeBaseAIAssistant) {
+              if (isGlobalEntry(entry) && !manageGlobalKnowledgeBaseAIAssistant) {
                 throw new Error(`User lacks privileges to create global knowledge base entries`);
               }
             });

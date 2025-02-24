@@ -29,7 +29,7 @@ import pRetry from 'p-retry';
 import { StructuredTool } from '@langchain/core/tools';
 import { AnalyticsServiceSetup, AuditLogger, ElasticsearchClient } from '@kbn/core/server';
 import { IndexPatternsFetcher } from '@kbn/data-views-plugin/server';
-import { isArray, map } from 'lodash';
+import { map } from 'lodash';
 import { AIAssistantDataClient, AIAssistantDataClientParams } from '..';
 import { GetElser } from '../../types';
 import {
@@ -53,6 +53,7 @@ import {
 } from './helpers';
 import {
   getKBUserFilter,
+  isGlobalEntry,
   validateDocumentsModification,
 } from '../../routes/knowledge_base/entries/utils';
 import {
@@ -671,12 +672,7 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
       );
     }
 
-    const globalEntry =
-      (isArray(knowledgeBaseEntry.users) && knowledgeBaseEntry.users.length === 0) ||
-      knowledgeBaseEntry.global ||
-      false;
-
-    if (globalEntry && !this.options.manageGlobalKnowledgeBaseAIAssistant) {
+    if (isGlobalEntry(knowledgeBaseEntry) && !this.options.manageGlobalKnowledgeBaseAIAssistant) {
       throw new Error('User lacks privileges to create global knowledge base entries');
     }
 
