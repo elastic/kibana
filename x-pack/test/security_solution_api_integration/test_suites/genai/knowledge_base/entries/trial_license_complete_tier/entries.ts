@@ -28,6 +28,13 @@ import { getEntry } from '../utils/get_entry';
 import { deleteEntry } from '../utils/delete_entry';
 import { updateEntry } from '../utils/update_entry';
 
+const EXPECTED_USERS = [
+  expect.objectContaining({
+    id: expect.any(String), // Matches any string value for "id"
+    name: 'elastic',
+  }),
+];
+
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
@@ -54,12 +61,10 @@ export default ({ getService }: FtrProviderContext) => {
         it('should create a new document entry for the current user', async () => {
           const entry = await createEntry({ supertest, log, entry: documentEntry });
 
-          const expectedDocumentEntry = {
+          expect(removeServerGeneratedProperties(entry)).toMatchObject({
             ...documentEntry,
-            users: [{ name: 'elastic' }],
-          };
-
-          expect(removeServerGeneratedProperties(entry)).toEqual(expectedDocumentEntry);
+            users: EXPECTED_USERS,
+          });
         });
 
         it('should create a new index entry for the current user', async () => {
@@ -69,7 +74,7 @@ export default ({ getService }: FtrProviderContext) => {
             ...indexEntry,
             inputSchema: [],
             outputFields: [],
-            users: [{ name: 'elastic' }],
+            users: EXPECTED_USERS,
           };
 
           expect(removeServerGeneratedProperties(entry)).toEqual(expectedIndexEntry);
@@ -104,7 +109,7 @@ export default ({ getService }: FtrProviderContext) => {
 
           const expectedDocumentEntry = {
             ...documentEntry,
-            users: [{ name: 'elastic' }],
+            users: EXPECTED_USERS,
           };
 
           expect(removeServerGeneratedProperties(entry)).toEqual(expectedDocumentEntry);
@@ -117,7 +122,7 @@ export default ({ getService }: FtrProviderContext) => {
             ...indexEntry,
             inputSchema: [],
             outputFields: [],
-            users: [{ name: 'elastic' }],
+            users: EXPECTED_USERS,
           };
 
           expect(removeServerGeneratedProperties(entry)).toEqual(expectedIndexEntry);
@@ -135,7 +140,7 @@ export default ({ getService }: FtrProviderContext) => {
 
           const expectedDocumentEntry = {
             ...documentEntry,
-            users: [{ name: 'elastic' }],
+            users: EXPECTED_USERS,
           };
 
           expect(removeServerGeneratedProperties(entry)).toEqual(expectedDocumentEntry);
@@ -268,7 +273,7 @@ export default ({ getService }: FtrProviderContext) => {
 
         const expectedDocumentEntry = {
           ...documentEntry,
-          users: [{ name: 'elastic' }],
+          users: EXPECTED_USERS,
           text: 'This is a sample of updated document entry',
         };
 
@@ -340,7 +345,7 @@ export default ({ getService }: FtrProviderContext) => {
 
         const expectedDocumentEntry = {
           ...globalDocumentEntry,
-          users: [{ name: 'elastic' }],
+          users: EXPECTED_USERS,
           text: 'This is a sample of updated global document entry',
         };
 
@@ -576,7 +581,7 @@ export default ({ getService }: FtrProviderContext) => {
 
           const expectedCreatedIndexEntry = {
             ...indexEntry,
-            users: [{ name: 'elastic' }],
+            users: EXPECTED_USERS,
           };
 
           expect(response.attributes.summary.succeeded).toEqual(3);
@@ -601,7 +606,7 @@ export default ({ getService }: FtrProviderContext) => {
 
           const expectedDocumentEntry = {
             ...documentEntry,
-            users: [{ name: 'elastic' }],
+            users: EXPECTED_USERS,
           };
 
           expect(response.attributes.summary.succeeded).toEqual(1);
@@ -622,7 +627,7 @@ export default ({ getService }: FtrProviderContext) => {
             ...indexEntry,
             inputSchema: [],
             outputFields: [],
-            users: [{ name: 'elastic' }],
+            users: EXPECTED_USERS,
           };
 
           expect(response.attributes.summary.succeeded).toEqual(1);
@@ -717,7 +722,7 @@ export default ({ getService }: FtrProviderContext) => {
 
           const expectedDocumentEntry = {
             ...documentEntry,
-            users: [{ name: 'elastic' }],
+            users: EXPECTED_USERS,
             text: 'This is a sample of updated document entry',
           };
 

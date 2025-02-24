@@ -61,6 +61,7 @@ import {
 import {
   ASSISTANT_ELSER_INFERENCE_ID,
   ELASTICSEARCH_ELSER_INFERENCE_ID,
+  ELSER_MODEL_2,
 } from './field_maps_configuration';
 import { BulkOperationError } from '../../lib/data_stream/documents_data_writer';
 import { AUDIT_OUTCOME, KnowledgeBaseAuditAction, knowledgeBaseAuditEvent } from './audit_events';
@@ -149,7 +150,8 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
   };
 
   public getInferenceEndpointId = async () => {
-    if (!this.options.assistantDefaultInferenceEndpoint) {
+    const elserId = await this.options.getElserId();
+    if (!this.options.assistantDefaultInferenceEndpoint || elserId !== ELSER_MODEL_2) {
       return ASSISTANT_ELSER_INFERENCE_ID;
     }
     const esClient = await this.options.elasticsearchClientPromise;
@@ -179,6 +181,7 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
    * @returns Promise<boolean> indicating whether the model is deployed
    */
   public isInferenceEndpointExists = async (inferenceEndpointId?: string): Promise<boolean> => {
+    const elserId = await this.options.getElserId();
     const inferenceId = inferenceEndpointId || (await this.getInferenceEndpointId());
 
     try {
@@ -188,13 +191,19 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
         inference_id: inferenceId,
         task_type: 'sparse_embedding',
       }));
+
       if (!inferenceExists) {
         return false;
       }
-      const getResponse = await this.options.trainedModelsProvider.getTrainedModelsStats({
-        // it's model_id or deployment_id, we need to use inference id to get the stats
-        model_id: inferenceId,
-      });
+
+      let getResponse;
+      try {
+        getResponse = await this.options.trainedModelsProvider.getTrainedModelsStats({
+          model_id: elserId,
+        });
+      } catch (e) {
+        return false;
+      }
 
       // For standardized way of checking deployment status see: https://github.com/elastic/elasticsearch/issues/106986
       const isReadyESS = (stats: MlTrainedModelStats) =>
@@ -206,9 +215,9 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
           (node) => node.routing_state.routing_state === 'started'
         );
 
-      return !!getResponse.trained_model_stats?.some(
-        (stats) => isReadyESS(stats) || isReadyServerless(stats)
-      );
+      return !!getResponse.trained_model_stats
+        .filter((stats) => stats.deployment_stats?.deployment_id === inferenceId)
+        ?.some((stats) => isReadyESS(stats) || isReadyServerless(stats));
     } catch (error) {
       this.options.logger.debug(
         `Error checking if Inference endpoint ${ASSISTANT_ELSER_INFERENCE_ID} exists: ${error}`
