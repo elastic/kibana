@@ -121,7 +121,7 @@ export class UpgradeAgentlessDeploymentsTask {
       const currentAgentPolicyBatch = agentlessPolicies.slice(i, i + batchSize);
 
       await Promise.allSettled(
-        await currentAgentPolicyBatch.map(async(agentPolicy) => {
+        await currentAgentPolicyBatch.map(async (agentPolicy) => {
           const agentlessAgent = agents.find((agent) => agent.policy_id === agentPolicy.id);
 
           if (!agentlessAgent) {
