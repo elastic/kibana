@@ -124,7 +124,7 @@ export function outputIdToUuid(id: string) {
 
 export function outputSavedObjectToOutput(so: SavedObject<OutputSOAttributes>): Output {
   const logger = appContextService.getLogger();
-  const { output_id: outputId, ssl, proxy_id: proxyId, ...atributes } = so.attributes;
+  const { output_id: outputId, ssl, proxy_id: proxyId, ...attributes } = so.attributes;
 
   let parsedSsl;
   try {
@@ -135,7 +135,7 @@ export function outputSavedObjectToOutput(so: SavedObject<OutputSOAttributes>): 
   }
   return {
     id: outputId ?? so.id,
-    ...atributes,
+    ...attributes,
     ...(parsedSsl ? { ssl: parsedSsl } : {}),
     ...(proxyId ? { proxy_id: proxyId } : {}),
   };
@@ -551,14 +551,16 @@ class OutputService {
 
     const defaultDataOutputId = await this.getDefaultDataOutputId(soClient);
 
-    if (output.type === outputType.Logstash || output.type === outputType.Kafka) {
+    if (output.type === outputType.Logstash) {
       await validateLogstashOutputNotUsedInAPMPolicy(undefined, data.is_default);
-      if (!appContextService.getEncryptedSavedObjectsSetup()?.canEncrypt) {
-        throw new FleetEncryptedSavedObjectEncryptionKeyRequired(
-          `${output.type} output needs encrypted saved object api key to be set`
-        );
-      }
     }
+
+    if (!appContextService.getEncryptedSavedObjectsSetup()?.canEncrypt) {
+      throw new FleetEncryptedSavedObjectEncryptionKeyRequired(
+        `${output.type} output needs encrypted saved object api key to be set`
+      );
+    }
+
     const { policiesWithFleetServer, policiesWithSynthetics } =
       await findPoliciesWithFleetServerOrSynthetics();
     const agentlessPolicies = await findAgentlessPolicies();
@@ -686,16 +688,13 @@ class OutputService {
 
       if (outputWithSecrets.secrets) data.secrets = outputWithSecrets.secrets;
     } else {
-      if (output.type === outputType.Logstash && data.type === outputType.Logstash) {
-        if (!output.ssl?.key && output.secrets?.ssl?.key) {
-          data.ssl = JSON.stringify({ ...output.ssl, ...output.secrets.ssl });
-        }
-      } else if (output.type === outputType.Kafka && data.type === outputType.Kafka) {
+      if (!output.ssl?.key && output.secrets?.ssl?.key) {
+        data.ssl = JSON.stringify({ ...output.ssl, ...output.secrets.ssl });
+      }
+
+      if (output.type === outputType.Kafka && data.type === outputType.Kafka) {
         if (!output.password && output.secrets?.password) {
           data.password = output.secrets?.password as string;
-        }
-        if (!output.ssl?.key && output.secrets?.ssl?.key) {
-          data.ssl = JSON.stringify({ ...output.ssl, ...output.secrets.ssl });
         }
       } else if (
         output.type === outputType.RemoteElasticsearch &&
@@ -715,7 +714,6 @@ class OutputService {
       id,
       savedObjectType: OUTPUT_SAVED_OBJECT_TYPE,
     });
-
     const newSo = await this.encryptedSoClient.create<OutputSOAttributes>(SAVED_OBJECT_TYPE, data, {
       overwrite: options?.overwrite || options?.fromPreconfiguration,
       id,
@@ -964,11 +962,6 @@ class OutputService {
         delete (updateData as Nullable<OutputSoRemoteElasticsearchAttributes>).kibana_api_key;
       }
 
-      if (data.type !== outputType.Logstash) {
-        // remove logstash specific field
-        updateData.ssl = null;
-      }
-
       if (data.type === outputType.Kafka && updateData.type === outputType.Kafka) {
         updateData.ca_trusted_fingerprint = null;
         updateData.ca_sha256 = null;
@@ -1038,11 +1031,11 @@ class OutputService {
       if (!data.username) {
         updateData.username = null;
       }
-      if (!data.ssl) {
-        updateData.ssl = null;
-      }
       if (!data.sasl) {
         updateData.sasl = null;
+      }
+      if (!data.ssl) {
+        updateData.ssl = null;
       }
     }
 
@@ -1118,16 +1111,12 @@ class OutputService {
       updateData.secrets = secretsRes.outputUpdate.secrets;
       secretsToDelete = secretsRes.secretsToDelete;
     } else {
-      if (data.type === outputType.Logstash && updateData.type === outputType.Logstash) {
-        if (!data.ssl?.key && data.secrets?.ssl?.key) {
-          updateData.ssl = JSON.stringify({ ...data.ssl, ...data.secrets.ssl });
-        }
-      } else if (data.type === outputType.Kafka && updateData.type === outputType.Kafka) {
+      if (!data.ssl?.key && data.secrets?.ssl?.key) {
+        updateData.ssl = JSON.stringify({ ...data.ssl, ...data.secrets.ssl });
+      }
+      if (data.type === outputType.Kafka && updateData.type === outputType.Kafka) {
         if (!data.password && data.secrets?.password) {
           updateData.password = data.secrets?.password as string;
-        }
-        if (!data.ssl?.key && data.secrets?.ssl?.key) {
-          updateData.ssl = JSON.stringify({ ...data.ssl, ...data.secrets.ssl });
         }
       } else if (
         data.type === outputType.RemoteElasticsearch &&
