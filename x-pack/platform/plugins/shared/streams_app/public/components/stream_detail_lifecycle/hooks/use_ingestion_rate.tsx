@@ -239,7 +239,10 @@ export const useIngestionRatePerTier = ({
 
           const countByTier = indices.buckets.reduce((tiers, index) => {
             const explain = ilmExplain.indices[index.key];
-            const tier = explain.managed ? (explain.phase as PhaseNameWithoutDelete) : fallbackTier;
+            const tier =
+              explain.managed && explain.phase !== 'new'
+                ? (explain.phase as PhaseNameWithoutDelete)
+                : fallbackTier;
             tiers[tier] = (tiers[tier] ?? 0) + index.doc_count;
             return tiers;
           }, {} as Record<PhaseNameWithoutDelete, number>);
