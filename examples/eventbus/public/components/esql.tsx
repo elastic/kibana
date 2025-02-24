@@ -15,7 +15,7 @@ import { useEventBusExampleState } from '../hooks/use_event_bus_example_state';
 
 export const Esql: FC = () => {
   const state = useEventBusExampleState();
-  const esql = state.useState((s) => s.esql);
+  const esql = state.useEventBusState((s) => s.esql);
 
   return (
     <div data-test-id="eventBusExampleESQL" css={{ border: '1px solid #999' }}>
