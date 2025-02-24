@@ -73,7 +73,7 @@ describe('AI Assistant Prompts', { tags: ['@ess', '@serverless'] }, () => {
     deleteConnectors();
     deleteConversations();
     deletePrompts();
-    login();
+    login('admin');
     createAzureConnector();
     waitForConversation(mockConvo1);
     waitForConversation(mockConvo2);
