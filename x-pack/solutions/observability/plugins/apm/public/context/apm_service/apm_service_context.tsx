@@ -28,7 +28,7 @@ import {
 export interface APMServiceContextValue {
   serviceName: string;
   agentName?: string;
-  telemetrySdkName?: string;
+  hasOpenTelemetryFields?: boolean;
   serverlessType?: ServerlessType;
   transactionType?: string;
   transactionTypeStatus: FETCH_STATUS;
@@ -64,7 +64,7 @@ export function ApmServiceContextProvider({ children }: { children: ReactNode })
     agentName,
     runtimeName,
     serverlessType,
-    telemetrySdkName,
+    hasOpenTelemetryFields,
     status: serviceAgentStatus,
   } = useServiceAgentFetcher({
     serviceName,
@@ -110,7 +110,7 @@ export function ApmServiceContextProvider({ children }: { children: ReactNode })
         serviceName,
         agentName,
         serverlessType,
-        telemetrySdkName,
+        hasOpenTelemetryFields,
         transactionType: currentTransactionType,
         transactionTypeStatus,
         transactionTypes,

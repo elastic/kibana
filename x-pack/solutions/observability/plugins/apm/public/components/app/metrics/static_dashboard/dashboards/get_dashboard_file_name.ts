@@ -12,7 +12,7 @@ import {
 
 interface DashboardFileNamePartsProps {
   agentName: string;
-  telemetrySdkName?: string;
+  hasOpenTelemetryFields?: boolean;
 }
 
 interface SdkNameAndLanguage {
@@ -51,9 +51,9 @@ const getSdkNameAndLanguage = (agentName: string): SdkNameAndLanguage => {
 
 export const getDashboardFileName = ({
   agentName,
-  telemetrySdkName,
+  hasOpenTelemetryFields,
 }: DashboardFileNamePartsProps): string | undefined => {
-  const dataFormat = telemetrySdkName ? 'otel_native' : 'classic_apm';
+  const dataFormat = hasOpenTelemetryFields ? 'otel_native' : 'classic_apm';
   const { sdkName, language } = getSdkNameAndLanguage(agentName);
   if (!dataFormat || !sdkName || !language) {
     return undefined;

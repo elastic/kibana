@@ -11,17 +11,17 @@ describe('getDashboardFileName', () => {
   it.each([
     {
       agentName: 'java',
-      telemetrySdkName: undefined,
+      hasOpenTelemetryFields: false,
       filename: 'classic_apm-apm-java',
     },
     {
       agentName: 'iOS/swift',
-      telemetrySdkName: undefined,
+      hasOpenTelemetryFields: false,
       filename: 'classic_apm-apm-ios_swift',
     },
     {
       agentName: 'android/java',
-      telemetrySdkName: undefined,
+      hasOpenTelemetryFields: false,
       filename: 'classic_apm-apm-android_java',
     },
     {
@@ -30,47 +30,47 @@ describe('getDashboardFileName', () => {
     },
     {
       agentName: 'opentelemetry/java/elastic',
-      telemetrySdkName: undefined,
+      hasOpenTelemetryFields: false,
       filename: 'classic_apm-edot-java',
     },
     {
       agentName: 'test/test/test/something-else/elastic',
-      telemetrySdkName: undefined,
+      hasOpenTelemetryFields: false,
       filename: undefined,
     },
     {
       agentName: 'opentelemetry/java/elastic',
-      telemetrySdkName: 'opentelementry',
+      hasOpenTelemetryFields: true,
       filename: 'otel_native-edot-java',
     },
     {
       agentName: 'opentelemetry/nodejs/nodejs-agent/elastic',
-      telemetrySdkName: 'opentelementry',
+      hasOpenTelemetryFields: true,
       filename: 'otel_native-edot-nodejs',
     },
     {
       agentName: 'opentelemetry/nodejs/test/nodejs-agent',
-      telemetrySdkName: 'opentelementry',
+      hasOpenTelemetryFields: true,
       filename: 'otel_native-otel_other-nodejs',
     },
     {
       agentName: 'opentelemetry/java/test/something-else/',
-      telemetrySdkName: 'opentelementry',
+      hasOpenTelemetryFields: true,
       filename: 'otel_native-otel_other-java',
     },
     {
       agentName: 'otlp/nodejs',
-      telemetrySdkName: 'opentelementry',
+      hasOpenTelemetryFields: true,
       filename: 'otel_native-otel_other-nodejs',
     },
     {
       agentName: 'otlp/Android',
-      telemetrySdkName: 'opentelementry',
+      hasOpenTelemetryFields: true,
       filename: 'otel_native-otel_other-android',
     },
     {
       agentName: 'test/java/test/something-else/',
-      telemetrySdkName: 'test',
+      hasOpenTelemetryFields: undefined,
       filename: undefined,
     },
     {
@@ -83,13 +83,13 @@ describe('getDashboardFileName', () => {
     },
     {
       agentName: 'my-awesome-agent/otel',
-      telemetrySdkName: 'opentelemetry',
+      hasOpenTelemetryFields: true,
       filename: undefined,
     },
   ])(
-    'for the agent name $agentName and telemetry sdk $telemetrySdkName return $filename',
-    ({ agentName, telemetrySdkName, filename }) => {
-      expect(getDashboardFileName({ agentName, telemetrySdkName })).toStrictEqual(filename);
+    'for the agent name $agentName and open telemetry is $hasOpenTelemetryFields return $filename',
+    ({ agentName, hasOpenTelemetryFields, filename }) => {
+      expect(getDashboardFileName({ agentName, hasOpenTelemetryFields })).toStrictEqual(filename);
     }
   );
 });

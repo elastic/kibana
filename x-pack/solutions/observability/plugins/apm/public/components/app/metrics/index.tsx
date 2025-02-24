@@ -20,7 +20,7 @@ import { isLogsOnlySignal } from '../../../utils/get_signal_type';
 import { ServiceTabEmptyState } from '../service_tab_empty_state';
 
 export function Metrics() {
-  const { agentName, runtimeName, serverlessType, serviceEntitySummary, telemetrySdkName } =
+  const { agentName, runtimeName, serverlessType, serviceEntitySummary, hasOpenTelemetryFields } =
     useApmServiceContext();
   const isAWSLambda = isAWSLambdaAgentName(serverlessType);
   const { dataView } = useAdHocApmDataView();
@@ -36,7 +36,10 @@ export function Metrics() {
     return <ServerlessMetrics />;
   }
 
-  if (!hasDashboard({ agentName, telemetrySdkName }) && !isElasticAgentName(agentName ?? '')) {
+  if (
+    !hasDashboard({ agentName, hasOpenTelemetryFields }) &&
+    !isElasticAgentName(agentName ?? '')
+  ) {
     return (
       <EuiCallOut
         title={i18n.translate('xpack.apm.metrics.emptyState.title', {
@@ -47,7 +50,7 @@ export function Metrics() {
     );
   }
 
-  if (hasDashboard({ agentName, telemetrySdkName }) && dataView) {
+  if (hasDashboard({ agentName, hasOpenTelemetryFields }) && dataView) {
     return (
       <JsonMetricsDashboard
         agentName={agentName}

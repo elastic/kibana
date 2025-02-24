@@ -35,7 +35,8 @@ export const existingDashboardFileNames = new Set([
  * See https://webpack.js.org/api/module-methods/#magic-comments
  */
 
-// TODO replace when the new dashboards are ready (if possible with the above comment)
+// TODO Change the dashboards with the new ones and create edot mapping
+// example: otel_native-edot-nodejs
 export async function loadDashboardFile(filename: string) {
   switch (filename) {
     case 'classic_apm-apm-nodejs': {

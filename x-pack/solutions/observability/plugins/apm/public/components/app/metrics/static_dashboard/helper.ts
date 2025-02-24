@@ -13,32 +13,21 @@ interface DashboardFileProps {
   agentName?: string;
   runtimeName?: string;
   serverlessType?: string;
-  telemetrySdkName?: string;
+  hasOpenTelemetryFields?: boolean;
 }
 
 export interface MetricsDashboardProps extends DashboardFileProps {
   dataView: DataView;
 }
 
-export async function getDashboardFile(props: DashboardFileProps) {
-  const dashboardFilename = getDashboardFileNameFromProps(props);
-  const dashboardJSON = !!dashboardFilename ? await loadDashboardFile(dashboardFilename) : false;
-
-  if (!dashboardFilename || !dashboardJSON) {
-    return undefined;
-  }
-  return dashboardJSON;
+function getDashboardFileNameFromProps({ agentName, hasOpenTelemetryFields }: DashboardFileProps) {
+  const dashboardFile = agentName && getDashboardFileName({ agentName, hasOpenTelemetryFields });
+  return dashboardFile;
 }
 
 export function hasDashboard(props: DashboardFileProps) {
   const dashboardFilename = getDashboardFileNameFromProps(props);
   return !!dashboardFilename && existingDashboardFileNames.has(dashboardFilename);
-}
-
-// Remove
-function getDashboardFileNameFromProps({ agentName, telemetrySdkName }: DashboardFileProps) {
-  const dashboardFile = agentName && getDashboardFileName({ agentName, telemetrySdkName });
-  return dashboardFile;
 }
 
 const getAdhocDataView = (dataView: DataView) => {
@@ -53,8 +42,10 @@ export async function convertSavedDashboardToPanels(
   props: MetricsDashboardProps,
   dataView: DataView
 ): Promise<DashboardPanelMap | undefined> {
-  const dashboardJSON = await getDashboardFile(props);
-  if (!dashboardJSON) {
+  const dashboardFilename = getDashboardFileNameFromProps(props);
+  const dashboardJSON = !!dashboardFilename ? await loadDashboardFile(dashboardFilename) : false;
+
+  if (!dashboardFilename || !dashboardJSON) {
     return undefined;
   }
 

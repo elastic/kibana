@@ -16,6 +16,7 @@ import {
   CLOUD_PROVIDER,
   CLOUD_SERVICE_NAME,
   TELEMETRY_SDK_NAME,
+  TELEMETRY_SDK_LANGUAGE,
 } from '../../../common/es_fields/apm';
 import type { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
 import type { ServerlessType } from '../../../common/serverless';
@@ -25,7 +26,7 @@ import { maybe } from '../../../common/utils/maybe';
 export interface ServiceAgentResponse {
   agentName?: string;
   runtimeName?: string;
-  telemetrySdkName?: string;
+  hasOpenTelemetryFields?: boolean;
   serverlessType?: ServerlessType;
 }
 
@@ -43,6 +44,7 @@ export async function getServiceAgent({
   const fields = asMutableArray([
     AGENT_NAME,
     TELEMETRY_SDK_NAME,
+    TELEMETRY_SDK_LANGUAGE,
     SERVICE_RUNTIME_NAME,
     CLOUD_PROVIDER,
     CLOUD_SERVICE_NAME,
@@ -51,7 +53,12 @@ export async function getServiceAgent({
   const params = {
     terminate_after: 1,
     apm: {
-      events: [ProcessorEvent.error, ProcessorEvent.transaction, ProcessorEvent.metric],
+      events: [
+        ProcessorEvent.span,
+        ProcessorEvent.error,
+        ProcessorEvent.transaction,
+        ProcessorEvent.metric,
+      ],
     },
     body: {
       track_total_hits: 1,
@@ -107,7 +114,7 @@ export async function getServiceAgent({
 
   return {
     agentName: agent?.name,
-    telemetrySdkName: telemetry?.sdk?.name,
+    hasOpenTelemetryFields: !!(telemetry?.sdk?.name ?? telemetry?.sdk?.language),
     runtimeName: service?.runtime?.name,
     serverlessType,
   };
