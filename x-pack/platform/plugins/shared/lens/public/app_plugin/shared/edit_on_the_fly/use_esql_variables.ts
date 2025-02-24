@@ -62,6 +62,7 @@ export const useESQLVariables = ({
         return;
       }
 
+      // control is new
       if (updatedQuery) {
         // add a new control
         controlGroupApi?.addNewPanel({
@@ -108,15 +109,6 @@ export const useESQLVariables = ({
       panel.onEdit();
     }
   }, [closeFlyout, panel]);
-
-  // const onEditControl = (updatedState: ESQLControlState) => {
-  //   const uuid = updatedState.id;
-  //   controlGroupApi?.replacePanel(uuid, {
-  //     panelType: 'esqlControl',
-  //     initialState: updatedState,
-  //   });
-  //   closeFlyout();
-  // };
 
   return { onSaveControl, onCancelControl, dashboardESQLControls };
 };
