@@ -7,10 +7,10 @@
 
 import {
   AnnotationDomainType,
-  AreaSeries,
   Axis,
   Chart,
   LineAnnotation,
+  LineSeries,
   Position,
   RectAnnotation,
   ScaleType,
@@ -302,7 +302,7 @@ export function DataPreviewChart({
                 }}
               />
 
-              <AreaSeries
+              <LineSeries
                 id="All groups"
                 xScaleType={ScaleType.Time}
                 yScaleType={ScaleType.Linear}
@@ -316,7 +316,7 @@ export function DataPreviewChart({
               />
 
               {map(previewData?.groups, (data, group) => (
-                <AreaSeries
+                <LineSeries
                   key={group}
                   id={group}
                   xScaleType={ScaleType.Time}
