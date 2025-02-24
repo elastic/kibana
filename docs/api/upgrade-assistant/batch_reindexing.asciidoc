@@ -6,9 +6,11 @@
 
 experimental["The underlying Upgrade Assistant concepts are stable, but the APIs for managing Upgrade Assistant are experimental."]
 
-Start or resume multiple <<start-resume-reindex, reindexing>> tasks in one request. Additionally, reindexing tasks started or resumed
-via the batch endpoint will be placed on a queue and executed one-by-one, which ensures that minimal cluster resources
-are consumed over time.
+Start or resume upgrading multiple indices in one request. Additionally, <<start-resume-reindex, reindexing>> tasks for upgrading 
+indices that are started or resumed via the batch endpoint will be placed on a queue and executed one-by-one. This ensures that 
+minimal cluster resources are consumed over time. 
+
+NOTE: This API does not support data streams.
 
 [[batch-start-resume-reindex-request]]
 ==== Request

@@ -10,6 +10,14 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/types';
 import type { RulePreviewLoggedRequest } from '../../../../../common/api/detection_engine/rule_preview/rule_preview.gen';
 import { logQueryRequest } from '../utils/logged_requests';
 import * as i18n from '../translations';
+import type { SignalSource } from '../types';
+
+interface FetchedDocument {
+  fields: estypes.SearchHit['fields'];
+  _source?: SignalSource;
+  _index: estypes.SearchHit['_index'];
+  _version: estypes.SearchHit['_version'];
+}
 
 interface FetchSourceDocumentsArgs {
   isRuleAggregating: boolean;
@@ -29,7 +37,7 @@ export const fetchSourceDocuments = async ({
   esClient,
   index,
   loggedRequests,
-}: FetchSourceDocumentsArgs): Promise<Record<string, { fields: estypes.SearchHit['fields'] }>> => {
+}: FetchSourceDocumentsArgs): Promise<Record<string, FetchedDocument>> => {
   const ids = results.reduce<string[]>((acc, doc) => {
     if (doc._id) {
       acc.push(doc._id);
@@ -54,7 +62,7 @@ export const fetchSourceDocuments = async ({
 
   const searchBody = {
     query: idsQuery.query,
-    _source: false,
+    _source: true,
     fields: ['*'],
   };
   const ignoreUnavailable = true;
@@ -66,7 +74,7 @@ export const fetchSourceDocuments = async ({
     });
   }
 
-  const response = await esClient.search({
+  const response = await esClient.search<SignalSource>({
     index,
     body: searchBody,
     ignore_unavailable: ignoreUnavailable,
@@ -76,12 +84,15 @@ export const fetchSourceDocuments = async ({
     loggedRequests[loggedRequests.length - 1].duration = response.took;
   }
 
-  return response.hits.hits.reduce<Record<string, { fields: estypes.SearchHit['fields'] }>>(
-    (acc, hit) => {
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      acc[hit._id!] = { fields: hit.fields };
-      return acc;
-    },
-    {}
-  );
+  return response.hits.hits.reduce<Record<string, FetchedDocument>>((acc, hit) => {
+    if (hit._id) {
+      acc[hit._id] = {
+        fields: hit.fields,
+        _source: hit._source,
+        _index: hit._index,
+        _version: hit._version,
+      };
+    }
+    return acc;
+  }, {});
 };

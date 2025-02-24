@@ -20,7 +20,6 @@ const defaultProps = {
   fieldName: 'testField',
   fieldType: 'testType',
   isAggregatable: true,
-  isDraggable: true,
   value: 'low_impact',
 };
 

@@ -48,6 +48,35 @@ paths:
                 sort:
                   $ref: '#/components/schemas/AlertsSort'
               description: Elasticsearch query and aggregation request
+            examples:
+              query:
+                value:
+                  size: 0
+                  query:
+                    bool:
+                      filter:
+                        - bool:
+                            must: []
+                            filter:
+                              - match_phrase:
+                                  kibana.alert.workflow_status: open
+                            should: []
+                            must_not:
+                              - exists:
+                                  field: kibana.alert.building_block_type
+                        - range:
+                            '@timestamp':
+                              gte: 2025-01-17T08:00:00.000Z
+                              lte: 2025-01-18T07:59:59.999Z
+                  aggs:
+                    alertsByGrouping:
+                      terms:
+                        field: host.name
+                        size: 10
+                    missingFields:
+                      missing:
+                        field: host.name
+                  runtime_mappings: {}
       responses:
         200:
           description: Successful response
@@ -57,6 +86,31 @@ paths:
                 type: object
                 additionalProperties: true
                 description: Elasticsearch search response
+              examples:
+                success:
+                  value:
+                    took: 0
+                    timed_out: false
+                    _shards:
+                      total: 1
+                      successful: 1
+                      skipped: 0
+                      failed: 0
+                    hits:
+                      total:
+                        value: 5
+                        relation: eq
+                      max_score: null
+                      hits: []
+                    aggregations:
+                      alertsByGrouping:
+                        doc_count_error_upper_bound: 0
+                        sum_other_doc_count: 0
+                        buckets:
+                          - key: Host-f43kkddfyc
+                            doc_count: 5
+                      missingFields:
+                        doc_count: 0
         400:
           description: Invalid input data response
           content:

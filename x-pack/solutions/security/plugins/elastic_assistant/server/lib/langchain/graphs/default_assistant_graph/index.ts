@@ -15,9 +15,11 @@ import {
 import { APMTracer } from '@kbn/langchain/server/tracers/apm';
 import { TelemetryTracer } from '@kbn/langchain/server/tracers/telemetry';
 import { pruneContentReferences, MessageMetadata } from '@kbn/elastic-assistant-common';
+import { getPrompt, resolveProviderAndModel } from '@kbn/security-ai-prompts';
+import { localToolPrompts, promptGroupId as toolsGroupId } from '../../../prompt/tool_prompts';
 import { promptGroupId } from '../../../prompt/local_prompt_object';
 import { getModelOrOss } from '../../../prompt/helpers';
-import { getPrompt, promptDictionary } from '../../../prompt';
+import { getPrompt as localGetPrompt, promptDictionary } from '../../../prompt';
 import { getLlmClass } from '../../../../routes/utils';
 import { EsAnonymizationFieldsSchema } from '../../../../ai_assistant_data_clients/anonymization_fields/types';
 import { AssistantToolParams } from '../../../../types';
@@ -123,9 +125,33 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
     telemetry,
   };
 
-  const tools: StructuredTool[] = assistantTools.flatMap(
-    (tool) => tool.getTool({ ...assistantToolParams, llm: createLlmInstance(), isOssModel }) ?? []
-  );
+  const tools: StructuredTool[] = (
+    await Promise.all(
+      assistantTools.map(async (tool) => {
+        let description: string | undefined;
+        try {
+          description = await getPrompt({
+            actionsClient,
+            connectorId,
+            localPrompts: localToolPrompts,
+            model: getModelOrOss(llmType, isOssModel, request.body.model),
+            promptId: tool.name,
+            promptGroupId: toolsGroupId,
+            provider: llmType,
+            savedObjectsClient,
+          });
+        } catch (e) {
+          logger.error(`Failed to get prompt for tool: ${tool.name}`);
+        }
+        return tool.getTool({
+          ...assistantToolParams,
+          llm: createLlmInstance(),
+          isOssModel,
+          description,
+        });
+      })
+    )
+  ).filter((e) => e != null) as StructuredTool[];
 
   // If KB enabled, fetch for any KB IndexEntries and generate a tool for each
   if (isEnabledKnowledgeBase) {
@@ -138,7 +164,7 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
     }
   }
 
-  const defaultSystemPrompt = await getPrompt({
+  const defaultSystemPrompt = await localGetPrompt({
     actionsClient,
     connectorId,
     model: getModelOrOss(llmType, isOssModel, request.body.model),
@@ -175,7 +201,7 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
   const telemetryTracer = telemetryParams
     ? new TelemetryTracer(
         {
-          elasticTools: assistantTools.map(({ name }) => name),
+          elasticTools: tools.map(({ name }) => name),
           totalTools: tools.length,
           telemetry,
           telemetryParams,
@@ -183,6 +209,13 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
         logger
       )
     : undefined;
+  const { provider } =
+    !llmType || llmType === 'inference'
+      ? await resolveProviderAndModel({
+          connectorId,
+          actionsClient,
+        })
+      : { provider: llmType };
   const assistantGraph = getDefaultAssistantGraph({
     agentRunnable,
     dataClients,
@@ -205,6 +238,7 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
     isStream,
     isOssModel,
     input: latestMessage[0]?.content as string,
+    provider: provider ?? '',
   };
 
   if (isStream) {

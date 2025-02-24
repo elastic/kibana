@@ -117,10 +117,12 @@ export const generateProjectAPIKey = async ({
   server,
   request,
   accessToElasticManagedLocations = true,
+  spaces = [ALL_SPACES_ID],
 }: {
   server: SyntheticsServerSetup;
   request: KibanaRequest;
   accessToElasticManagedLocations?: boolean;
+  spaces?: string[];
 }): Promise<SecurityCreateApiKeyResponse | null> => {
   const { security } = server;
   const isApiKeysEnabled = await security.authc.apiKeys?.areAPIKeysEnabled();
@@ -138,7 +140,7 @@ export const generateProjectAPIKey = async ({
         kibana: [
           {
             base: [],
-            spaces: [ALL_SPACES_ID],
+            spaces,
             feature: {
               uptime: [accessToElasticManagedLocations ? 'all' : 'minimal_all'],
             },

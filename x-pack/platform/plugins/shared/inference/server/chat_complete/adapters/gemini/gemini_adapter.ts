@@ -18,6 +18,7 @@ import {
   ToolSchemaType,
 } from '@kbn/inference-common';
 import type { InferenceConnectorAdapter } from '../../types';
+import { convertUpstreamError } from '../../utils';
 import { eventSourceStreamIntoObservable } from '../../../util/event_source_stream_into_observable';
 import { processVertexStream } from './process_vertex_stream';
 import type { GenerateContentResponseChunk, GeminiMessage, GeminiToolConfig } from './types';
@@ -32,6 +33,7 @@ export const geminiAdapter: InferenceConnectorAdapter = {
     temperature = 0,
     modelName,
     abortSignal,
+    metadata,
   }) => {
     return from(
       executor.invoke({
@@ -45,14 +47,17 @@ export const geminiAdapter: InferenceConnectorAdapter = {
           model: modelName,
           signal: abortSignal,
           stopSequences: ['\n\nHuman:'],
+          ...(metadata?.connectorTelemetry
+            ? { telemetryMetadata: metadata.connectorTelemetry }
+            : {}),
         },
       })
     ).pipe(
       switchMap((response) => {
         if (response.status === 'error') {
           return throwError(() =>
-            createInferenceInternalError(`Error calling connector: ${response.serviceMessage}`, {
-              rootError: response.serviceMessage,
+            convertUpstreamError(response.serviceMessage!, {
+              messagePrefix: 'Error calling connector:',
             })
           );
         }
@@ -244,7 +249,10 @@ function messageToGeminiMapper() {
             {
               functionResponse: {
                 name: message.toolCallId,
-                response: message.response as object,
+                // gemini expects a structured response shape, making sure we're not sending a string
+                response: (typeof message.response === 'string'
+                  ? { response: message.response }
+                  : (message.response as string)) as object,
               },
             },
           ],

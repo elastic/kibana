@@ -8,6 +8,11 @@
 import { schema } from '@kbn/config-schema';
 import { DEFAULT_BEDROCK_MODEL } from './constants';
 
+export const TelemtryMetadataSchema = schema.object({
+  pluginId: schema.maybe(schema.string()),
+  aggregateBy: schema.maybe(schema.string()),
+});
+
 // Connector schema
 export const ConfigSchema = schema.object({
   apiUrl: schema.string(),
@@ -26,6 +31,7 @@ export const RunActionParamsSchema = schema.object({
   signal: schema.maybe(schema.any()),
   timeout: schema.maybe(schema.number()),
   raw: schema.maybe(schema.boolean()),
+  telemetryMetadata: schema.maybe(TelemtryMetadataSchema),
 });
 
 export const BedrockMessageSchema = schema.object(
@@ -71,10 +77,17 @@ export const InvokeAIActionParamsSchema = schema.object({
     )
   ),
   toolChoice: schema.maybe(BedrockToolChoiceSchema),
+  telemetryMetadata: schema.maybe(TelemtryMetadataSchema),
 });
 
 export const InvokeAIActionResponseSchema = schema.object({
   message: schema.string(),
+  usage: schema.maybe(
+    schema.object({
+      input_tokens: schema.number(),
+      output_tokens: schema.number(),
+    })
+  ),
 });
 
 export const InvokeAIRawActionParamsSchema = schema.object({
@@ -85,6 +98,7 @@ export const InvokeAIRawActionParamsSchema = schema.object({
     })
   ),
   model: schema.maybe(schema.string()),
+
   temperature: schema.maybe(schema.number()),
   stopSequences: schema.maybe(schema.arrayOf(schema.string())),
   system: schema.maybe(schema.string()),
@@ -103,6 +117,7 @@ export const InvokeAIRawActionParamsSchema = schema.object({
     )
   ),
   toolChoice: schema.maybe(BedrockToolChoiceSchema),
+  telemetryMetadata: schema.maybe(TelemtryMetadataSchema),
 });
 
 export const InvokeAIRawActionResponseSchema = schema.object({}, { unknowns: 'allow' });
@@ -154,6 +169,7 @@ export const BedrockClientSendParamsSchema = schema.object({
   command: schema.any(),
   // Kibana related properties
   signal: schema.maybe(schema.any()),
+  telemetryMetadata: schema.maybe(TelemtryMetadataSchema),
 });
 
 export const BedrockClientSendResponseSchema = schema.object({}, { unknowns: 'allow' });

@@ -6,7 +6,7 @@ Array [
     "additionalFilters": undefined,
     "annotations": Array [
       Object {
-        "color": "#BD271E",
+        "color": "#C61E25",
         "icon": "alert",
         "id": "metric_threshold_alert_start_annotation",
         "key": Object {
@@ -17,7 +17,7 @@ Array [
         "type": "manual",
       },
       Object {
-        "color": "rgba(189,39,30,0.2)",
+        "color": "rgba(198,30,37,0.2)",
         "id": "metric_threshold_active_alert_range_annotation",
         "key": Object {
           "endTimestamp": "2024-06-13T07:00:33.381Z",

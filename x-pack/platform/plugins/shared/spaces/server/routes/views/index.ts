@@ -20,7 +20,18 @@ export interface ViewRouteDeps {
 
 export function initSpacesViewsRoutes(deps: ViewRouteDeps) {
   deps.httpResources.register(
-    { path: '/spaces/space_selector', validate: false, options: { excludeFromOAS: true } },
+    {
+      path: '/spaces/space_selector',
+      validate: false,
+      options: { excludeFromOAS: true },
+      security: {
+        authz: {
+          enabled: false,
+          reason:
+            'This route is opted out from authorization because it a host for the spaces selector view.',
+        },
+      },
+    },
     (context, request, response) => response.renderCoreApp()
   );
 
@@ -33,6 +44,13 @@ export function initSpacesViewsRoutes(deps: ViewRouteDeps) {
         ),
       },
       options: { excludeFromOAS: true },
+      security: {
+        authz: {
+          enabled: false,
+          reason:
+            'The route is opted out from authorization because it handles redirects to internal routes.',
+        },
+      },
     },
     async (context, request, response) => {
       try {

@@ -12,6 +12,7 @@ export type {
   ESQLAstItem,
   ESQLAstCommand,
   ESQLAstMetricsCommand,
+  ESQLAstJoinCommand,
   ESQLCommand,
   ESQLCommandOption,
   ESQLCommandMode,

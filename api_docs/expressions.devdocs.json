@@ -6775,6 +6775,39 @@
       },
       {
         "parentPluginId": "expressions",
+        "id": "def-public.isSourceParamsESQL",
+        "type": "Function",
+        "tags": [],
+        "label": "isSourceParamsESQL",
+        "description": [],
+        "signature": [
+          "(obj: Record<string, unknown>) => boolean"
+        ],
+        "path": "src/platform/plugins/shared/expressions/common/expression_types/specs/datatable.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "expressions",
+            "id": "def-public.isSourceParamsESQL.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "obj",
+            "description": [],
+            "signature": [
+              "Record<string, unknown>"
+            ],
+            "path": "src/platform/plugins/shared/expressions/common/expression_types/specs/datatable.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "expressions",
         "id": "def-public.parseExpression",
         "type": "Function",
         "tags": [],

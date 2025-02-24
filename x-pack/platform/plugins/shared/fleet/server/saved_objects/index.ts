@@ -402,6 +402,7 @@ export const getSavedObjectTypes = (
         importableAndExportable: false,
       },
       mappings: {
+        dynamic: false,
         properties: {
           output_id: { type: 'keyword', index: false },
           name: { type: 'keyword' },
@@ -613,6 +614,14 @@ export const getSavedObjectTypes = (
             },
           ],
         },
+        '8': {
+          changes: [
+            {
+              type: 'mappings_addition',
+              addedMappings: {},
+            },
+          ],
+        },
       },
       migrations: {
         '7.13.0': migrateOutputToV7130,
@@ -628,6 +637,7 @@ export const getSavedObjectTypes = (
         importableAndExportable: false,
       },
       mappings: {
+        dynamic: false,
         properties: {
           name: { type: 'keyword' },
           description: { type: 'text' },
@@ -835,6 +845,14 @@ export const getSavedObjectTypes = (
             },
           ],
         },
+        '18': {
+          changes: [
+            {
+              type: 'mappings_addition',
+              addedMappings: {}, // Empty to add dynamic:false
+            },
+          ],
+        },
       },
       migrations: {
         '7.10.0': migratePackagePolicyToV7100,
@@ -862,6 +880,7 @@ export const getSavedObjectTypes = (
         importableAndExportable: false,
       },
       mappings: {
+        dynamic: false,
         properties: {
           name: { type: 'keyword' },
           description: { type: 'text' },
@@ -925,6 +944,14 @@ export const getSavedObjectTypes = (
             {
               type: 'data_backfill',
               backfillFn: packagePolicyV17AdvancedFieldsForEndpointV818,
+            },
+          ],
+        },
+        '4': {
+          changes: [
+            {
+              type: 'mappings_addition',
+              addedMappings: {}, // Empty to add dynamic:false
             },
           ],
         },

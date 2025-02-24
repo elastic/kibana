@@ -9,7 +9,7 @@ import { from, identity, switchMap, throwError } from 'rxjs';
 import { isReadable, Readable } from 'stream';
 import { createInferenceInternalError } from '@kbn/inference-common';
 import { eventSourceStreamIntoObservable } from '../../../util/event_source_stream_into_observable';
-import { isNativeFunctionCallingSupported } from '../../utils';
+import { convertUpstreamError, isNativeFunctionCallingSupported } from '../../utils';
 import type { InferenceConnectorAdapter } from '../../types';
 import { parseInlineFunctionCalls } from '../../simulated_function_calling';
 import { processOpenAIStream, emitTokenCountEstimateIfMissing } from '../openai';
@@ -27,6 +27,7 @@ export const inferenceAdapter: InferenceConnectorAdapter = {
     modelName,
     logger,
     abortSignal,
+    metadata,
   }) => {
     const useSimulatedFunctionCalling =
       functionCalling === 'auto'
@@ -50,14 +51,17 @@ export const inferenceAdapter: InferenceConnectorAdapter = {
         subActionParams: {
           body: request,
           signal: abortSignal,
+          ...(metadata?.connectorTelemetry
+            ? { telemetryMetadata: metadata.connectorTelemetry }
+            : {}),
         },
       })
     ).pipe(
       switchMap((response) => {
         if (response.status === 'error') {
           return throwError(() =>
-            createInferenceInternalError(`Error calling connector: ${response.serviceMessage}`, {
-              rootError: response.serviceMessage,
+            convertUpstreamError(response.serviceMessage!, {
+              messagePrefix: 'Error calling connector:',
             })
           );
         }

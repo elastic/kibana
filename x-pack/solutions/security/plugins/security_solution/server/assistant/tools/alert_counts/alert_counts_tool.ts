@@ -23,6 +23,9 @@ export const ALERT_COUNTS_TOOL_DESCRIPTION =
 export const ALERT_COUNTS_TOOL: AssistantTool = {
   id: 'alert-counts-tool',
   name: 'AlertCountsTool',
+  // note: this description is overwritten when `getTool` is called
+  // local definitions exist ../elastic_assistant/server/lib/prompt/tool_prompts.ts
+  // local definitions can be overwritten by security-ai-prompt integration definitions
   description: ALERT_COUNTS_TOOL_DESCRIPTION,
   sourceRegister: APP_UI_ID,
   isSupported: (params: AssistantToolParams): params is AlertCountsToolParams => {
@@ -35,7 +38,7 @@ export const ALERT_COUNTS_TOOL: AssistantTool = {
       params as AlertCountsToolParams;
     return new DynamicStructuredTool({
       name: 'AlertCountsTool',
-      description: ALERT_COUNTS_TOOL_DESCRIPTION,
+      description: params.description || ALERT_COUNTS_TOOL_DESCRIPTION,
       schema: z.object({}),
       func: async () => {
         const query = getAlertsCountQuery(alertsIndexPattern);

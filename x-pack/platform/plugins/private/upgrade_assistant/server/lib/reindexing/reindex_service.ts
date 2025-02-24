@@ -349,6 +349,12 @@ export const reindexServiceFactory = (
     return response[indexName]?.aliases ?? {};
   };
 
+  const isIndexHidden = async (indexName: string) => {
+    const response = await esClient.indices.getSettings({ index: indexName });
+    const isHidden = response[indexName]?.settings?.index?.hidden;
+    return isHidden === true || isHidden === 'true';
+  };
+
   /**
    * Restores the original index settings in the new index that had other defaults for reindexing performance reasons
    * @param reindexOp
@@ -391,9 +397,11 @@ export const reindexServiceFactory = (
       add: { index: newIndexName, alias: aliasName, ...existingAliases[aliasName] },
     }));
 
+    const isHidden = await isIndexHidden(indexName);
+
     const aliasResponse = await esClient.indices.updateAliases({
       actions: [
-        { add: { index: newIndexName, alias: indexName } },
+        { add: { index: newIndexName, alias: indexName, is_hidden: isHidden } },
         { remove_index: { index: indexName } },
         ...extraAliases,
       ],

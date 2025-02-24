@@ -7,23 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiIcon, EuiLink, EuiToolTip } from '@elastic/eui';
-import classNames from 'classnames';
-import { once } from 'lodash';
-import React, { useMemo, useEffect, useRef, useState } from 'react';
 import {
-  type Observable,
-  fromEvent,
-  map,
-  race,
-  mergeMap,
-  takeUntil,
-  takeLast,
-  takeWhile,
-  defaultIfEmpty,
-  repeatWhen,
-} from 'rxjs';
+  EuiIcon,
+  EuiLink,
+  EuiScreenReaderOnly,
+  EuiToolTip,
+  euiTextTruncate,
+  useEuiTheme,
+} from '@elastic/eui';
+import React, { useCallback, useMemo } from 'react';
 
+import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { ViewMode } from '@kbn/presentation-publishing';
 import {
@@ -32,140 +26,120 @@ import {
 } from '../../panel_actions/customize_panel_action';
 import { openCustomizePanelFlyout } from '../../panel_actions/customize_panel_action/open_customize_panel';
 
-export const placeholderTitle = i18n.translate('presentationPanel.placeholderTitle', {
-  defaultMessage: '[No Title]',
-});
-
-const createDocumentMouseMoveListener = once(() => fromEvent<MouseEvent>(document, 'mousemove'));
-const createDocumentMouseUpListener = once(() => fromEvent<MouseEvent>(document, 'mouseup'));
-
-export const usePresentationPanelTitleClickHandler = (titleElmRef: HTMLElement | null) => {
-  const onClick = useRef<Observable<{ dragged: boolean }> | null>(null);
-  const [initialized, setInitialized] = useState(false);
-
-  useEffect(() => {
-    if (titleElmRef) {
-      const mouseup = createDocumentMouseUpListener();
-      const mousemove = createDocumentMouseMoveListener();
-      const mousedown = fromEvent<MouseEvent>(titleElmRef, 'mousedown');
-      const keydown = fromEvent<KeyboardEvent>(titleElmRef, 'keydown');
-
-      const mousedragExclusiveClick$ = mousedown
-        .pipe(
-          mergeMap(function (md) {
-            // create reference for when mouse is down
-            const startX = md.offsetX;
-            const startY = md.offsetY;
-
-            return mousemove
-              .pipe(
-                map(function (mm) {
-                  return { dragged: startX !== mm.clientX && startY !== mm.clientY };
-                })
-              )
-              .pipe(takeUntil(mouseup), takeLast(1))
-              .pipe(defaultIfEmpty({ dragged: false }));
-          })
-        )
-        .pipe(repeatWhen(() => mousedown));
-
-      onClick.current = race(
-        keydown.pipe(takeWhile((kd) => kd.key === 'Enter')).pipe(map(() => ({ dragged: false }))),
-        mousedragExclusiveClick$
-      );
-
-      setInitialized(true);
-    }
-  }, [titleElmRef]);
-
-  return initialized ? onClick.current : null;
-};
-
 export const PresentationPanelTitle = ({
   api,
+  headerId,
   viewMode,
   hideTitle,
   panelTitle,
   panelDescription,
 }: {
   api: unknown;
+  headerId: string;
   hideTitle?: boolean;
   panelTitle?: string;
   panelDescription?: string;
   viewMode?: ViewMode;
 }) => {
-  const [panelTitleElmRef, setPanelTitleElmRef] = useState<HTMLElement | null>(null);
+  const { euiTheme } = useEuiTheme();
+
+  const onClick = useCallback(() => {
+    openCustomizePanelFlyout({
+      api: api as CustomizePanelActionApi,
+      focusOnTitle: true,
+    });
+  }, [api]);
+
   const panelTitleElement = useMemo(() => {
     if (hideTitle) return null;
-    const titleClassNames = classNames('embPanel__titleText', {
-      // eslint-disable-next-line @typescript-eslint/naming-convention
-      embPanel__placeholderTitleText: !panelTitle,
-    });
+
+    const titleStyles = css`
+      ${euiTextTruncate()};
+      font-weight: ${euiTheme.font.weight.bold};
+
+      .kbnGridPanel--active & {
+        pointer-events: none; // prevent drag event from triggering onClick
+      }
+    `;
 
     if (viewMode !== 'edit' || !isApiCompatibleWithCustomizePanelAction(api)) {
-      return <span className={titleClassNames}>{panelTitle}</span>;
+      return (
+        <span data-test-subj="embeddablePanelTitle" css={titleStyles}>
+          {panelTitle}
+        </span>
+      );
     }
 
     return (
       <EuiLink
         color="text"
-        ref={setPanelTitleElmRef}
-        className={titleClassNames}
+        onClick={onClick}
+        css={titleStyles}
         aria-label={i18n.translate('presentationPanel.header.titleAriaLabel', {
           defaultMessage: 'Click to edit title: {title}',
-          values: { title: panelTitle ?? placeholderTitle },
+          values: { title: panelTitle },
         })}
-        data-test-subj={'embeddablePanelTitleLink'}
+        data-test-subj="embeddablePanelTitle"
       >
-        {panelTitle || placeholderTitle}
+        {panelTitle}
       </EuiLink>
     );
-  }, [setPanelTitleElmRef, hideTitle, panelTitle, viewMode, api]);
-
-  const onClick = usePresentationPanelTitleClickHandler(panelTitleElmRef);
-
-  useEffect(() => {
-    const panelTitleClickSubscription = onClick?.subscribe(function onClickHandler({ dragged }) {
-      if (!dragged) {
-        openCustomizePanelFlyout({
-          api: api as CustomizePanelActionApi,
-          focusOnTitle: true,
-        });
-      }
-    });
-
-    return () => panelTitleClickSubscription?.unsubscribe();
-  }, [api, onClick]);
+  }, [onClick, hideTitle, panelTitle, viewMode, api, euiTheme]);
 
   const describedPanelTitleElement = useMemo(() => {
     if (hideTitle) return null;
+
     if (!panelDescription) {
-      return (
-        <span data-test-subj="embeddablePanelTitleInner" className="embPanel__titleInner">
-          {panelTitleElement}
-        </span>
-      );
+      return panelTitleElement;
     }
+
     return (
       <EuiToolTip
-        title={!hideTitle ? panelTitle || undefined : undefined}
+        title={panelTitle}
         content={panelDescription}
         delay="regular"
         position="top"
-        anchorClassName="embPanel__titleTooltipAnchor"
-        anchorProps={{ 'data-test-subj': 'embeddablePanelTooltipAnchor' }}
+        anchorProps={{
+          'data-test-subj': 'embeddablePanelTooltipAnchor',
+          css: css`
+            max-width: 100%;
+            display: flex;
+            flex-wrap: nowrap;
+            column-gap: ${euiTheme.size.xs};
+            align-items: center;
+          `,
+        }}
       >
-        <span data-test-subj="embeddablePanelTitleInner" className="embPanel__titleInner">
-          {!hideTitle ? <>{panelTitleElement}&nbsp;</> : null}
+        <div data-test-subj="embeddablePanelTitleInner" className="embPanel__titleInner">
+          {!hideTitle ? (
+            <h2>
+              <EuiScreenReaderOnly>
+                <span id={headerId}>
+                  {panelTitle
+                    ? i18n.translate('presentationPanel.ariaLabel', {
+                        defaultMessage: 'Panel: {title}',
+                        values: {
+                          title: panelTitle,
+                        },
+                      })
+                    : i18n.translate('presentationPanel.untitledPanelAriaLabel', {
+                        defaultMessage: 'Untitled panel',
+                      })}
+                </span>
+              </EuiScreenReaderOnly>
+              {panelTitleElement}&nbsp;
+            </h2>
+          ) : null}
           <EuiIcon
             type="iInCircle"
             color="subdued"
             data-test-subj="embeddablePanelTitleDescriptionIcon"
+            tabIndex={0}
           />
-        </span>
+        </div>
       </EuiToolTip>
     );
-  }, [hideTitle, panelDescription, panelTitle, panelTitleElement]);
+  }, [hideTitle, panelDescription, panelTitle, panelTitleElement, headerId, euiTheme.size.xs]);
 
   return describedPanelTitleElement;
 };

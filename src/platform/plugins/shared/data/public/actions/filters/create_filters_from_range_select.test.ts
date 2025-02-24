@@ -97,6 +97,7 @@ describe('brushEvent', () => {
             name: '1',
             meta: {
               type: 'date',
+              sourceParams: {},
             },
           },
         ],
@@ -246,6 +247,21 @@ describe('brushEvent', () => {
         expect(rangeFilter.query.range['1'].lt).toBe(moment(rangeEnd).toISOString());
         expect(rangeFilter.query.range['1']).toHaveProperty('format', 'strict_date_optional_time');
       }
+    });
+
+    test('for column with different name than source field', async () => {
+      const rangeBegin = JAN_01_2014;
+      const rangeEnd = rangeBegin + DAY_IN_MS;
+      esqlEventContext.range = [rangeBegin, rangeEnd];
+      esqlEventContext.table.columns[0].meta!.sourceParams!.sourceField = 'time';
+      esqlEventContext.table.columns[0].name = 'time over 12h';
+
+      const filter = await createFiltersFromRangeSelectAction(esqlEventContext);
+
+      expect(filter).toBeDefined();
+      expect(filter.length).toEqual(1);
+      expect(filter[0].query).toBeDefined();
+      expect(filter[0].query!.range.time).toBeDefined();
     });
   });
 });

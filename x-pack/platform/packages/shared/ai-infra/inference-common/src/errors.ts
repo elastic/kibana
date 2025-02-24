@@ -27,6 +27,13 @@ export class InferenceTaskError<
     super(message);
   }
 
+  public get status() {
+    if (typeof this.meta === 'object' && this.meta.status) {
+      return this.meta.status as number;
+    }
+    return undefined;
+  }
+
   toJSON(): InferenceTaskErrorEvent {
     return {
       type: InferenceTaskEventType.error,

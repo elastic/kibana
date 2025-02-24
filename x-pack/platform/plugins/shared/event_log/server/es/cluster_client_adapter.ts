@@ -664,6 +664,19 @@ export class ClusterClientAdapter<
       throw err;
     }
   }
+
+  public async refreshIndex(): Promise<void> {
+    try {
+      const esClient = await this.elasticsearchClientPromise;
+
+      await esClient.indices.refresh({
+        index: this.esNames.dataStream,
+      });
+    } catch (err) {
+      this.logger.error(`error refreshing index: ${err.message}`);
+      throw err;
+    }
+  }
 }
 
 export function getQueryBodyWithAuthFilter(

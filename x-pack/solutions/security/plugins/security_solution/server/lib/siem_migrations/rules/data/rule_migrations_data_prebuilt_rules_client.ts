@@ -14,9 +14,9 @@ import { RuleMigrationsDataBaseClient } from './rule_migrations_data_base_client
 
 export type { RuleVersions };
 export type PrebuildRuleVersionsMap = Map<string, RuleVersions>;
-/* The minimum score required for a integration to be considered correct, might need to change this later */
+/* The minimum score required for a prebuilt rule to be considered correct */
 const MIN_SCORE = 40 as const;
-/* The number of integrations the RAG will return, sorted by score */
+/* The number of prebuilt rules the RAG will return, sorted by score */
 const RETURNED_RULES = 5 as const;
 
 /* BULK_MAX_SIZE defines the number to break down the bulk operations by.
@@ -31,12 +31,12 @@ export class RuleMigrationsDataPrebuiltRulesClient extends RuleMigrationsDataBas
     return fetchRuleVersionsTriad({ ruleAssetsClient, ruleObjectsClient });
   }
 
-  /** Indexes an array of integrations to be used with ELSER semantic search queries */
+  /** Indexes an array of prebuilt rules to be used with ELSER semantic search queries */
   async populate(ruleVersionsMap: PrebuildRuleVersionsMap): Promise<void> {
     const filteredRules: RuleMigrationPrebuiltRule[] = [];
 
     ruleVersionsMap.forEach((ruleVersions) => {
-      const rule = ruleVersions.target || ruleVersions.current;
+      const rule = ruleVersions.target;
       if (rule) {
         const mitreAttackIds = rule?.threat?.flatMap(
           ({ technique }) => technique?.map(({ id }) => id) ?? []

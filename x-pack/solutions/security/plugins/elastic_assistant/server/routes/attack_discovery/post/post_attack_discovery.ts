@@ -157,9 +157,12 @@ export const postAttackDiscoveryRoute = (
                 attackDiscoveryId,
                 authenticatedUser,
                 dataClient,
+                hasFilter: !!(filter && Object.keys(filter).length),
+                end,
                 latestReplacements,
                 logger,
                 size,
+                start,
                 startTime,
                 telemetry,
               })

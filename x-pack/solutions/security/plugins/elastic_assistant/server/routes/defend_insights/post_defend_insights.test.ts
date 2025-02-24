@@ -10,6 +10,7 @@
 import type { AuthenticatedUser } from '@kbn/core-security-common';
 import type { DefendInsightsPostRequestBody } from '@kbn/elastic-assistant-common';
 
+import { getPrompt } from '@kbn/security-ai-prompts';
 import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 import { actionsMock } from '@kbn/actions-plugin/server/mocks';
 import { OpenAiProviderType } from '@kbn/stack-connectors-plugin/common/openai/constants';
@@ -29,8 +30,10 @@ import { getAssistantTool, createDefendInsight, isDefendInsightsEnabled } from '
 import { postDefendInsightsRoute } from './post_defend_insights';
 import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
 
+jest.mock('@kbn/security-ai-prompts');
 jest.mock('./helpers');
 
+const getPromptMock = getPrompt as jest.Mock;
 describe('postDefendInsightsRoute', () => {
   let server: ReturnType<typeof serverMock.create>;
   let context: ElasticAssistantRequestHandlerContextMock;
@@ -80,6 +83,7 @@ describe('postDefendInsightsRoute', () => {
       langSmithApiKey: 'langSmithApiKey',
     };
   }
+  const getTool = jest.fn();
 
   beforeEach(() => {
     const tools = requestContextMock.createTools();
@@ -94,7 +98,8 @@ describe('postDefendInsightsRoute', () => {
     mockDataClient = getDefaultDataClient();
     mockApiConfig = getDefaultApiConfig();
     mockRequestBody = getDefaultRequestBody();
-    (getAssistantTool as jest.Mock).mockReturnValue({ getTool: jest.fn() });
+    getPromptMock.mockResolvedValue('prompt');
+    (getAssistantTool as jest.Mock).mockReturnValue({ getTool, name: 'test-tool' });
     (createDefendInsight as jest.Mock).mockResolvedValue({
       currentInsight: mockCurrentInsight,
       defendInsightId: mockCurrentInsight.id,
@@ -195,5 +200,24 @@ describe('postDefendInsightsRoute', () => {
       },
       status_code: 500,
     });
+  });
+
+  it('should call getPrompt for tool description', async () => {
+    await server.inject(
+      postDefendInsightsRequest(mockRequestBody),
+      requestContextMock.convertContext(context)
+    );
+    expect(getPromptMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        connectorId: 'connector-id',
+        promptId: 'test-tool',
+        promptGroupId: 'security-tools',
+      })
+    );
+    expect(getTool).toHaveBeenCalledWith(
+      expect.objectContaining({
+        description: 'prompt',
+      })
+    );
   });
 });

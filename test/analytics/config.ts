@@ -9,6 +9,7 @@
 
 import path from 'path';
 import { FtrConfigProviderContext } from '@kbn/test';
+import { ScoutTestRunConfigCategory } from '@kbn/scout-info';
 import { services } from './services';
 
 /*
@@ -23,6 +24,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const functionalConfig = await readConfigFile(require.resolve('../functional/config.base.js'));
 
   return {
+    testConfigCategory: ScoutTestRunConfigCategory.UI_TEST,
     testFiles: [require.resolve('./tests')],
     services,
     pageObjects: functionalConfig.get('pageObjects'),

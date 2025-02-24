@@ -24,6 +24,8 @@ export interface ActiveMatch {
 
 export interface InTableSearchHighlightsWrapperProps {
   inTableSearchTerm?: string;
+  highlightColor: string;
+  highlightBackgroundColor: string;
   onHighlightsCountFound?: (count: number) => void;
   children: ReactNode;
 }

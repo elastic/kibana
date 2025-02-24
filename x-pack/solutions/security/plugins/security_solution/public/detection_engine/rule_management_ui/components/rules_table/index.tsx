@@ -38,13 +38,11 @@ export const AllRules = React.memo(() => {
     );
   } else {
     return (
-      <>
-        <UpgradePrebuiltRulesTableContextProvider>
-          <RulesTableToolbar />
-          <EuiSpacer />
-          <UpgradePrebuiltRulesTable />
-        </UpgradePrebuiltRulesTableContextProvider>
-      </>
+      <UpgradePrebuiltRulesTableContextProvider>
+        <RulesTableToolbar />
+        <EuiSpacer />
+        <UpgradePrebuiltRulesTable />
+      </UpgradePrebuiltRulesTableContextProvider>
     );
   }
 });

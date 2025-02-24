@@ -108,7 +108,6 @@ export const InTableSearchInput: React.FC<InTableSearchInputProps> = React.memo(
                 {matchesCount && activeMatchPosition
                   ? `${activeMatchPosition}/${matchesCount}`
                   : '0/0'}
-                &nbsp;
               </EuiText>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>

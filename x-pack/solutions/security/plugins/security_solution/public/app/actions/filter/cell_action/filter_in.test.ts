@@ -57,7 +57,7 @@ describe('createFilterInCellActionFactory', () => {
   } as SecurityCellActionExecutionContext;
 
   it('should return display name', () => {
-    expect(filterInAction.getDisplayName(context)).toEqual('Filter In');
+    expect(filterInAction.getDisplayName(context)).toEqual('Filter for');
   });
 
   it('should return icon type', () => {

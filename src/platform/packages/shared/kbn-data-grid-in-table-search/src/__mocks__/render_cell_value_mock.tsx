@@ -9,18 +9,28 @@
 
 import React from 'react';
 import type { EuiDataGridCellValueElementProps } from '@elastic/eui';
+import { useMockContextValue } from './mock_context';
 
 export function getRenderCellValueMock(testData: string[][]) {
   return function OriginalRenderCellValue({
     colIndex,
     rowIndex,
   }: EuiDataGridCellValueElementProps) {
+    const mockContextValue = useMockContextValue();
     const cellValue = testData[rowIndex][colIndex];
 
     if (!cellValue) {
       throw new Error('Testing unexpected errors');
     }
 
-    return <div>{cellValue}</div>;
+    return (
+      <div>
+        {cellValue}
+        {
+          // testing that it can access the parent context value
+          mockContextValue ? <span>{mockContextValue}</span> : null
+        }
+      </div>
+    );
   };
 }

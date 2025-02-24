@@ -5,15 +5,20 @@
  * 2.0.
  */
 
-import type { ContentReferences } from '@kbn/elastic-assistant-common';
-import { contentReferenceComponentFactory } from './content_reference_component_factory';
+import type { ContentReference } from '@kbn/elastic-assistant-common';
+import { ContentReferenceComponentFactory } from './content_reference_component_factory';
 import React from 'react';
 import { render, screen } from '@testing-library/react';
-import type { ContentReferenceNode } from '../content_reference_parser';
-
-const testContentReferenceNode = { contentReferenceId: '1' } as ContentReferenceNode;
+import type {
+  InvalidContentReferenceNode,
+  ResolvedContentReferenceNode,
+  UnresolvedContentReferenceNode,
+} from '../content_reference_parser';
 
 jest.mock('../../../../common/lib/kibana', () => ({
+  useNavigation: jest.fn().mockReturnValue({
+    navigateTo: jest.fn(),
+  }),
   useKibana: jest.fn().mockReturnValue({
     services: {
       discover: {
@@ -31,89 +36,80 @@ describe('contentReferenceComponentFactory', () => {
     [
       'EsqlQueryReference',
       {
-        '1': {
-          id: '1',
-          type: 'EsqlQuery',
-          query: '',
-          label: '',
-        },
-      } as ContentReferences,
-      testContentReferenceNode,
+        id: '1',
+        type: 'EsqlQuery',
+        query: '',
+        label: '',
+      } as ContentReference,
     ],
     [
       'KnowledgeBaseEntryReference',
       {
-        '1': {
-          id: '1',
-          type: 'KnowledgeBaseEntry',
-          knowledgeBaseEntryId: '',
-          knowledgeBaseEntryName: '',
-        },
-      } as ContentReferences,
-      testContentReferenceNode,
+        id: '1',
+        type: 'KnowledgeBaseEntry',
+        knowledgeBaseEntryId: '',
+        knowledgeBaseEntryName: '',
+      } as ContentReference,
     ],
     [
       'ProductDocumentationReference',
       {
-        '1': {
-          id: '1',
-          type: 'ProductDocumentation',
-          title: '',
-          url: '',
-        },
-      } as ContentReferences,
-      testContentReferenceNode,
+        id: '1',
+        type: 'ProductDocumentation',
+        title: '',
+        url: '',
+      } as ContentReference,
     ],
     [
       'SecurityAlertReference',
       {
-        '1': {
-          id: '1',
-          type: 'SecurityAlert',
-          alertId: '',
-        },
-      } as ContentReferences,
-      testContentReferenceNode,
+        id: '1',
+        type: 'SecurityAlert',
+        alertId: '',
+      } as ContentReference,
     ],
     [
       'SecurityAlertsPageReference',
       {
-        '1': {
-          id: '1',
-          type: 'SecurityAlertsPage',
-        },
-      } as ContentReferences,
-      testContentReferenceNode,
+        id: '1',
+        type: 'SecurityAlertsPage',
+      } as ContentReference,
     ],
   ])(
-    "Renders component: '%s'",
-    async (
-      testId: string,
-      contentReferences: ContentReferences,
-      contentReferenceNode: ContentReferenceNode
-    ) => {
-      const Component = contentReferenceComponentFactory({
-        contentReferences,
-        contentReferencesVisible: true,
-        loading: false,
-      });
+    "Renders correct component for '%s'",
+    async (testId: string, contentReference: ContentReference) => {
+      const resolvedContentReferenceNode: ResolvedContentReferenceNode<ContentReference> = {
+        contentReferenceId: '1',
+        contentReferenceCount: 1,
+        contentReferenceBlock: '{reference(123)}',
+        contentReference,
+        type: 'contentReference',
+      };
 
-      render(<Component {...contentReferenceNode} />);
+      render(
+        <ContentReferenceComponentFactory
+          contentReferencesVisible
+          contentReferenceNode={resolvedContentReferenceNode}
+        />
+      );
 
       expect(screen.getByTestId(testId)).toBeInTheDocument();
     }
   );
 
-  it('renders nothing when specific contentReference is undefined', async () => {
-    const Component = contentReferenceComponentFactory({
-      contentReferences: {},
-      contentReferencesVisible: true,
-      loading: false,
-    });
+  it('renders nothing when specific contentReferenceNode is invalid', () => {
+    const invalidContentReferenceNode: InvalidContentReferenceNode = {
+      contentReferenceId: '1',
+      contentReferenceCount: undefined,
+      contentReferenceBlock: '{reference(123)}',
+      contentReference: undefined,
+      type: 'contentReference',
+    };
 
     const { container } = render(
-      <Component
-        {...({ contentReferenceId: '1', contentReferenceCount: 1 } as ContentReferenceNode)}
+      <ContentReferenceComponentFactory
+        contentReferencesVisible
+        contentReferenceNode={invalidContentReferenceNode}
       />
     );
 
@@ -121,37 +117,23 @@ describe('contentReferenceComponentFactory', () => {
     expect(screen.queryByText('[1]')).not.toBeInTheDocument();
   });
 
-  it('renders placeholder if contentReferences are undefined and is loading', async () => {
-    const Component = contentReferenceComponentFactory({
-      contentReferences: undefined,
-      contentReferencesVisible: true,
-      loading: true,
-    });
+  it('renders placeholder if contentReferenceNode is unresolved', () => {
+    const unresolvedContentReferenceNode: UnresolvedContentReferenceNode = {
+      contentReferenceId: '1',
+      contentReferenceCount: 1,
+      contentReferenceBlock: '{reference(123)}',
+      contentReference: undefined,
+      type: 'contentReference',
+    };
 
     render(
-      <Component
-        {...({ contentReferenceId: '1', contentReferenceCount: 1 } as ContentReferenceNode)}
+      <ContentReferenceComponentFactory
+        contentReferencesVisible
+        contentReferenceNode={unresolvedContentReferenceNode}
       />
     );
 
     expect(screen.getByTestId('ContentReferenceButton')).toBeInTheDocument();
     expect(screen.getByText('[1]')).toBeInTheDocument();
-  });
-
-  it('renders nothing if contentReferences are undefined and is not loading', async () => {
-    const Component = contentReferenceComponentFactory({
-      contentReferences: undefined,
-      contentReferencesVisible: true,
-      loading: false,
-    });
-
-    const { container } = render(
-      <Component
-        {...({ contentReferenceId: '1', contentReferenceCount: 1 } as ContentReferenceNode)}
-      />
-    );
-
-    expect(container).toBeEmptyDOMElement();
-    expect(screen.queryByText('[1]')).not.toBeInTheDocument();
   });
 });

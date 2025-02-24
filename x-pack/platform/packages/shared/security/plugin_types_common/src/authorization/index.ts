@@ -17,3 +17,4 @@ export type {
   RoleRemoteIndexPrivilege,
   RoleRemoteClusterPrivilege,
 } from './role';
+export { ApiOperation } from './api';

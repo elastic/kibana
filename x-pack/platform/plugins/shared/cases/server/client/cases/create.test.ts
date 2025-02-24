@@ -161,6 +161,22 @@ describe('create', () => {
         })
       );
     });
+
+    it('should filter out empty assignees', async () => {
+      await create(
+        { ...theCase, assignees: [{ uid: '' }, { uid: '1' }] },
+        clientArgs,
+        casesClientMock
+      );
+
+      expect(clientArgs.services.caseService.createCase).toHaveBeenCalledWith(
+        expect.objectContaining({
+          attributes: expect.objectContaining({
+            assignees: [{ uid: '1' }],
+          }),
+        })
+      );
+    });
   });
 
   describe('Attributes', () => {

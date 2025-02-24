@@ -8,19 +8,43 @@
 import React from 'react';
 import type { EuiDataGridCellValueElementProps } from '@elastic/eui';
 import { TableId } from '@kbn/securitysolution-data-table';
+import type { LegacyField } from '@kbn/alerting-types';
 import type { CellValueElementProps } from '../../../../../common/types';
 import { SourcererScopeName } from '../../../../sourcerer/store/model';
-import { RenderCellValue } from '../../../../detections/configurations/security_solution_detections';
+import { CellValue } from '../../../../detections/configurations/security_solution_detections';
 
 export const PreviewRenderCellValue: React.FC<
   EuiDataGridCellValueElementProps & CellValueElementProps
-> = (props) => {
+> = ({
+  data,
+  ecsData,
+  setCellProps,
+  isExpandable,
+  isExpanded,
+  isDetails,
+  rowIndex,
+  colIndex,
+  columnId,
+  rowRenderers,
+  truncate,
+}) => {
   return (
-    <RenderCellValue
-      {...props}
+    <CellValue
+      tableType={TableId.rulePreview}
+      sourcererScope={SourcererScopeName.detections}
+      legacyAlert={(data ?? []) as LegacyField[]}
+      ecsAlert={ecsData}
       asPlainText={true}
-      scopeId={SourcererScopeName.detections}
-      tableId={TableId.rulePreview}
+      setCellProps={setCellProps}
+      isExpandable={isExpandable}
+      isExpanded={isExpanded}
+      isDetails={isDetails}
+      rowIndex={rowIndex}
+      colIndex={colIndex}
+      columnId={columnId}
+      rowRenderers={rowRenderers}
+      truncate={truncate}
+      userProfiles={{ profiles: [], isLoading: false }}
     />
   );
 };

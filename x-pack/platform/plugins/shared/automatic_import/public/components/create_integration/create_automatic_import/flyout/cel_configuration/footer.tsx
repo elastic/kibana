@@ -30,7 +30,11 @@ export const Footer = React.memo<FooterProps>(
           </EuiButtonEmpty>
         </EuiFlexItem>
         <EuiFlexGroup justifyContent="flexEnd" alignItems="center">
-          {showHint && <EuiText size="s">{hint}</EuiText>}
+          {showHint && (
+            <EuiText size="s" data-test-subj="footer-showHint">
+              {hint}
+            </EuiText>
+          )}
           <EuiButton
             fill={isGenerationComplete}
             color="primary"

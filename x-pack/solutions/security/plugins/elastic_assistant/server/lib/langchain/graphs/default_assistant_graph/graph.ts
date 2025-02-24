@@ -127,6 +127,10 @@ export const getDefaultAssistantGraph = ({
         value: (x: boolean, y?: boolean) => y ?? x,
         default: () => contentReferencesEnabled,
       },
+      provider: {
+        value: (x: string, y?: string) => y ?? x,
+        default: () => '',
+      },
     };
 
     // Default node parameters

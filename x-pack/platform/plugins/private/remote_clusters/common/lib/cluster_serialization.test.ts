@@ -252,8 +252,6 @@ describe('cluster_serialization', () => {
                 skip_unavailable: false,
                 server_name: 'localhost',
                 proxy: null,
-                seeds: null,
-                node_connections: null,
               },
             },
           },
@@ -282,11 +280,8 @@ describe('cluster_serialization', () => {
               test_cluster: {
                 mode: 'sniff',
                 node_connections: null,
-                proxy_address: null,
-                proxy_socket_connections: null,
                 seeds: ['localhost:9300'],
                 skip_unavailable: false,
-                server_name: null,
               },
             },
           },
@@ -307,10 +302,69 @@ describe('cluster_serialization', () => {
               test_cluster: {
                 mode: null,
                 node_connections: null,
-                proxy_address: null,
-                proxy_socket_connections: null,
                 seeds: ['localhost:9300'],
                 skip_unavailable: null,
+              },
+            },
+          },
+        },
+      });
+    });
+
+    it('should serialize a cluster object that will be deleted', () => {
+      expect(
+        serializeCluster(
+          {
+            name: 'test_cluster',
+            seeds: ['localhost:9300'],
+          },
+          undefined,
+          true
+        )
+      ).toEqual({
+        persistent: {
+          cluster: {
+            remote: {
+              test_cluster: {
+                mode: null,
+                node_connections: null,
+                seeds: ['localhost:9300'],
+                skip_unavailable: null,
+                proxy_address: null,
+                proxy_socket_connections: null,
+                server_name: null,
+              },
+            },
+          },
+        },
+      });
+    });
+
+    it('should serialize a cluster object that has modified mode', () => {
+      expect(
+        serializeCluster(
+          {
+            name: 'test_cluster',
+            seeds: ['localhost:9300'],
+            isConnected: true,
+            connectedNodesCount: 1,
+            maxConnectionsPerCluster: 3,
+            mode: 'sniff',
+            nodeConnections: 18,
+          },
+          'proxy'
+        )
+      ).toEqual({
+        persistent: {
+          cluster: {
+            remote: {
+              test_cluster: {
+                mode: 'sniff',
+                node_connections: 18,
+                seeds: ['localhost:9300'],
+                skip_unavailable: null,
+                proxy_address: null,
+                proxy_socket_connections: null,
                 server_name: null,
               },
             },

@@ -138,6 +138,7 @@ export const CreateCelConfigFlyout = React.memo<CreateCelConfigFlyoutProps>(
                 paddingSize="m"
                 forceState={isUploadStepExpanded ? 'open' : 'closed'}
                 onToggle={handleToggleStep}
+                data-test-subj="celGenStep1"
                 buttonContent={
                   <EuiFlexGroup alignItems="center" gutterSize="m">
                     <EuiStepNumber
@@ -174,6 +175,7 @@ export const CreateCelConfigFlyout = React.memo<CreateCelConfigFlyoutProps>(
                 isDisabled={!isAnalyzeApiGenerationComplete}
                 forceState={isConfirmStepExpanded ? 'open' : 'closed'}
                 onToggle={handleToggleStep}
+                data-test-subj="celGenStep2"
                 buttonContent={
                   <EuiFlexGroup alignItems="center" gutterSize="m">
                     <EuiStepNumber
