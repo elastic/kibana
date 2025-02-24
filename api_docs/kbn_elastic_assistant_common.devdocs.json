@@ -1563,7 +1563,7 @@
           "\nInterface for features available to the elastic assistant"
         ],
         "signature": [
-          "{ readonly assistantModelEvaluation: boolean; readonly defendInsights: boolean; readonly attackDiscoveryAlertFiltering: boolean; readonly contentReferencesEnabled: boolean; }"
+          "{ readonly assistantModelEvaluation: boolean; readonly defendInsights: boolean; readonly contentReferencesEnabled: boolean; }"
         ],
         "path": "x-pack/platform/packages/shared/kbn-elastic-assistant-common/impl/capabilities/index.ts",
         "deprecated": false,
@@ -2455,7 +2455,7 @@
         "label": "CreateKnowledgeBaseRequestQuery",
         "description": [],
         "signature": [
-          "{ ignoreSecurityLabs: boolean; modelId?: string | undefined; }"
+          "{ modelId?: string | undefined; ignoreSecurityLabs?: any; }"
         ],
         "path": "x-pack/platform/packages/shared/kbn-elastic-assistant-common/impl/schemas/knowledge_base/crud_kb_route.gen.ts",
         "deprecated": false,
@@ -2470,7 +2470,7 @@
         "label": "CreateKnowledgeBaseRequestQueryInput",
         "description": [],
         "signature": [
-          "{ modelId?: string | undefined; ignoreSecurityLabs?: boolean | \"true\" | \"false\" | undefined; }"
+          "{ modelId?: string | undefined; ignoreSecurityLabs?: any; }"
         ],
         "path": "x-pack/platform/packages/shared/kbn-elastic-assistant-common/impl/schemas/knowledge_base/crud_kb_route.gen.ts",
         "deprecated": false,
@@ -3785,7 +3785,7 @@
         "label": "GetCapabilitiesResponse",
         "description": [],
         "signature": [
-          "{ assistantModelEvaluation: boolean; defendInsights: boolean; attackDiscoveryAlertFiltering: boolean; contentReferencesEnabled: boolean; }"
+          "{ assistantModelEvaluation: boolean; defendInsights: boolean; contentReferencesEnabled: boolean; }"
         ],
         "path": "x-pack/platform/packages/shared/kbn-elastic-assistant-common/impl/schemas/capabilities/get_capabilities_route.gen.ts",
         "deprecated": false,
@@ -5910,7 +5910,7 @@
         "label": "CreateKnowledgeBaseRequestQuery",
         "description": [],
         "signature": [
-          "Zod.ZodObject<{ modelId: Zod.ZodOptional<Zod.ZodString>; ignoreSecurityLabs: Zod.ZodDefault<Zod.ZodOptional<Zod.ZodEffects<Zod.ZodUnion<[Zod.ZodEnum<[\"true\", \"false\"]>, Zod.ZodBoolean]>, boolean, boolean | \"true\" | \"false\">>>; }, \"strip\", Zod.ZodTypeAny, { ignoreSecurityLabs: boolean; modelId?: string | undefined; }, { modelId?: string | undefined; ignoreSecurityLabs?: boolean | \"true\" | \"false\" | undefined; }>"
+          "Zod.ZodObject<{ modelId: Zod.ZodOptional<Zod.ZodString>; ignoreSecurityLabs: Zod.ZodDefault<Zod.ZodOptional<KbnZodBooleanFromString>>; }, \"strip\", Zod.ZodTypeAny, { modelId?: string | undefined; ignoreSecurityLabs?: any; }, { modelId?: string | undefined; ignoreSecurityLabs?: any; }>"
         ],
         "path": "x-pack/platform/packages/shared/kbn-elastic-assistant-common/impl/schemas/knowledge_base/crud_kb_route.gen.ts",
         "deprecated": false,
@@ -5942,7 +5942,7 @@
           "\nDefault features available to the elastic assistant"
         ],
         "signature": [
-          "{ readonly assistantModelEvaluation: false; readonly defendInsights: true; readonly attackDiscoveryAlertFiltering: false; readonly contentReferencesEnabled: false; }"
+          "{ readonly assistantModelEvaluation: false; readonly defendInsights: true; readonly contentReferencesEnabled: false; }"
         ],
         "path": "x-pack/platform/packages/shared/kbn-elastic-assistant-common/impl/capabilities/index.ts",
         "deprecated": false,
@@ -6677,7 +6677,7 @@
         "label": "GetCapabilitiesResponse",
         "description": [],
         "signature": [
-          "Zod.ZodObject<{ assistantModelEvaluation: Zod.ZodBoolean; attackDiscoveryAlertFiltering: Zod.ZodBoolean; contentReferencesEnabled: Zod.ZodBoolean; defendInsights: Zod.ZodBoolean; }, \"strip\", Zod.ZodTypeAny, { assistantModelEvaluation: boolean; defendInsights: boolean; attackDiscoveryAlertFiltering: boolean; contentReferencesEnabled: boolean; }, { assistantModelEvaluation: boolean; defendInsights: boolean; attackDiscoveryAlertFiltering: boolean; contentReferencesEnabled: boolean; }>"
+          "Zod.ZodObject<{ assistantModelEvaluation: Zod.ZodBoolean; contentReferencesEnabled: Zod.ZodBoolean; defendInsights: Zod.ZodBoolean; }, \"strip\", Zod.ZodTypeAny, { assistantModelEvaluation: boolean; defendInsights: boolean; contentReferencesEnabled: boolean; }, { assistantModelEvaluation: boolean; defendInsights: boolean; contentReferencesEnabled: boolean; }>"
         ],
         "path": "x-pack/platform/packages/shared/kbn-elastic-assistant-common/impl/schemas/capabilities/get_capabilities_route.gen.ts",
         "deprecated": false,
