@@ -44919,13 +44919,12 @@ components:
       allOf:
         - type: object
           properties:
+            global:
+              description: Whether this Knowledge Base Entry is global, defaults to false
+              type: boolean
             name:
               description: Name of the Knowledge Base Entry
               type: string
-          required:
-            - name
-        - type: object
-          properties:
             namespace:
               description: Kibana Space, defaults to 'default' space
               type: string
@@ -44933,19 +44932,11 @@ components:
               description: Users who have access to the Knowledge Base Entry, defaults to current user. Empty array provides access to all users.
               items:
                 $ref: '#/components/schemas/Security_AI_Assistant_API_User'
-              nullable: true
               type: array
           required:
+            - name
             - namespace
-            - users
-        - type: object
-          properties:
-            users:
-              description: Users who have access to the Knowledge Base Entry, defaults to current user. Empty array provides access to all users.
-              items:
-                $ref: '#/components/schemas/Security_AI_Assistant_API_User'
-              type: array
-          required:
+            - global
             - users
         - $ref: '#/components/schemas/Security_AI_Assistant_API_ResponseFields'
         - $ref: '#/components/schemas/Security_AI_Assistant_API_DocumentEntryResponseFields'
@@ -44953,6 +44944,9 @@ components:
       allOf:
         - type: object
           properties:
+            global:
+              description: Whether this Knowledge Base Entry is global, defaults to false
+              type: boolean
             name:
               description: Name of the Knowledge Base Entry
               type: string
@@ -44963,7 +44957,6 @@ components:
               description: Users who have access to the Knowledge Base Entry, defaults to current user. Empty array provides access to all users.
               items:
                 $ref: '#/components/schemas/Security_AI_Assistant_API_User'
-              nullable: true
               type: array
           required:
             - name
@@ -45006,6 +44999,9 @@ components:
       allOf:
         - type: object
           properties:
+            global:
+              description: Whether this Knowledge Base Entry is global, defaults to false
+              type: boolean
             id:
               $ref: '#/components/schemas/Security_AI_Assistant_API_NonEmptyString'
             name:
@@ -45018,7 +45014,6 @@ components:
               description: Users who have access to the Knowledge Base Entry, defaults to current user. Empty array provides access to all users.
               items:
                 $ref: '#/components/schemas/Security_AI_Assistant_API_User'
-              nullable: true
               type: array
           required:
             - id
@@ -45087,13 +45082,12 @@ components:
       allOf:
         - type: object
           properties:
+            global:
+              description: Whether this Knowledge Base Entry is global, defaults to false
+              type: boolean
             name:
               description: Name of the Knowledge Base Entry
               type: string
-          required:
-            - name
-        - type: object
-          properties:
             namespace:
               description: Kibana Space, defaults to 'default' space
               type: string
@@ -45101,19 +45095,11 @@ components:
               description: Users who have access to the Knowledge Base Entry, defaults to current user. Empty array provides access to all users.
               items:
                 $ref: '#/components/schemas/Security_AI_Assistant_API_User'
-              nullable: true
               type: array
           required:
+            - name
             - namespace
-            - users
-        - type: object
-          properties:
-            users:
-              description: Users who have access to the Knowledge Base Entry, defaults to current user. Empty array provides access to all users.
-              items:
-                $ref: '#/components/schemas/Security_AI_Assistant_API_User'
-              type: array
-          required:
+            - global
             - users
         - $ref: '#/components/schemas/Security_AI_Assistant_API_ResponseFields'
         - $ref: '#/components/schemas/Security_AI_Assistant_API_IndexEntryResponseFields'
@@ -45121,6 +45107,9 @@ components:
       allOf:
         - type: object
           properties:
+            global:
+              description: Whether this Knowledge Base Entry is global, defaults to false
+              type: boolean
             name:
               description: Name of the Knowledge Base Entry
               type: string
@@ -45131,7 +45120,6 @@ components:
               description: Users who have access to the Knowledge Base Entry, defaults to current user. Empty array provides access to all users.
               items:
                 $ref: '#/components/schemas/Security_AI_Assistant_API_User'
-              nullable: true
               type: array
           required:
             - name
@@ -45181,6 +45169,9 @@ components:
       allOf:
         - type: object
           properties:
+            global:
+              description: Whether this Knowledge Base Entry is global, defaults to false
+              type: boolean
             id:
               $ref: '#/components/schemas/Security_AI_Assistant_API_NonEmptyString'
             name:
@@ -45193,7 +45184,6 @@ components:
               description: Users who have access to the Knowledge Base Entry, defaults to current user. Empty array provides access to all users.
               items:
                 $ref: '#/components/schemas/Security_AI_Assistant_API_User'
-              nullable: true
               type: array
           required:
             - id
