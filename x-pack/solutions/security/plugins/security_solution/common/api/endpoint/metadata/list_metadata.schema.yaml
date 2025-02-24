@@ -5,50 +5,265 @@ info:
 paths: { }
 components:
   schemas:
-    ListRequestQuery:
+    EndpointMetadataResponse:
       type: object
-      required:
-        - hostStatuses
-      properties:
-        page:
-          type: integer
-          default: 0
-          minimum: 0
-          description: Page number
-        pageSize:
-          type: integer
-          default: 10
-          minimum: 1
-          maximum: 10000
-          description: Number of items per page
-        kuery:
-            type: string
-            nullable: true
-        sortField:
-          type: string
-          enum:
-            - enrolled_at
-            - metadata.host.hostname
-            - host_status
-            - metadata.Endpoint.policy.applied.name
-            - metadata.Endpoint.policy.applied.status
-            - metadata.host.os.name
-            - metadata.host.ip
-            - metadata.agent.version
-            - last_checkin
-        sortDirection:
-          type: string
-          enum:
-            - 'asc'
-            - 'desc'
-          nullable: true
-        hostStatuses:
-          type: array
-          items:
-            type: string
-            enum:
-              - healthy
-              - offline
-              - updating
-              - inactive
-              - unenrolled
+      properties: { }
+      example:
+        host_status: "healthy"
+        last_checkin: "2023-07-04T15:48:57.360Z"
+        metadata:
+          "@timestamp": "2023-07-04T15:48:57.3609346Z"
+          Endpoint:
+            capabilities:
+              - "isolation"
+            configuration:
+              isolation: false
+            policy:
+              applied:
+                endpoint_policy_version: "2"
+                id: "d5371dcd-93b7-4627-af88-4084f7d6aa3e"
+                name: "test"
+                status: "success"
+                version: "3"
+            state:
+              isolation: false
+            status: "enrolled"
+          agent:
+            build:
+              original: "version: 7.16.0, compiled: Tue Nov 16 17:00:00 2021, branch: 7.16, commit: 73a51033db85e0fb3be1c934697ef6a2b08979ab"
+            id: "abb8a826-6812-448c-a571-6d8269b51449"
+            type: "endpoint"
+            version: "7.16.0"
+          data_stream:
+            dataset: "endpoint.metadata"
+            namespace: "default"
+            type: "metrics"
+          ecs:
+            version: "1.11.0"
+          elastic:
+            agent:
+              id: "abb8a826-6812-448c-a571-6d8269b51449"
+          event:
+            action: "endpoint_metadata"
+            agent_id_status: "verified"
+            category:
+              - "host"
+            created: "2023-07-04T15:48:57.3609346Z"
+            dataset: "endpoint.metadata"
+            id: "MNtRc++KoKHXXwlj+++++OhZ"
+            ingested: "2023-07-04T15:48:58Z"
+            kind: "metric"
+            module: "endpoint"
+            sequence: 43757
+            type:
+              - "info"
+          host:
+            architecture: "x86_64"
+            hostname: "WinDev2104Eval"
+            id: "17d9cabc-7edd-43bc-bacb-8da5f5e6c0e5"
+            ip:
+              - "10.0.2.15"
+              - "fe80::21a6:63d3:d70e:e3ad"
+              - "127.0.0.1"
+              - "::1"
+            mac:
+              - "08:00:27:b1:1d:5a"
+            name: "WinDev2104Eval"
+            os:
+              Ext:
+                variant: "Windows 10 Enterprise Evaluation"
+              family: "windows"
+              full: "Windows 10 Enterprise Evaluation 20H2 (10.0.19042.906)"
+              kernel: "20H2 (10.0.19042.906)"
+              name: "Windows"
+              platform: "windows"
+              type: "windows"
+              version: "20H2 (10.0.19042.906)"
+          message: "Endpoint metadata"
+          policy_info:
+            agent:
+              applied:
+                id: "ed7e3720-4bad-11ec-a2a8-fb22e62a5753"
+                revision: 3
+              configured:
+                id: "ed7e3720-4bad-11ec-a2a8-fb22e62a5753"
+                revision: 3
+            endpoint:
+              id: "d5371dcd-93b7-4627-af88-4084f7d6aa3e"
+              revision: 2
+    MetadataListResponse:
+      type: object
+      properties: {}
+      example:
+        data:
+          - host_status: healthy
+            last_checkin: "2023-07-04T15:47:57.432Z"
+            metadata:
+              "@timestamp": "2023-07-04T15:47:57.432173535Z"
+              Endpoint:
+                capabilities:
+                  - isolation
+                configuration:
+                  isolation: false
+                policy:
+                  applied:
+                    endpoint_policy_version: "2"
+                    id: "d5371dcd-93b7-4627-af88-4084f7d6aa3e"
+                    name: test
+                    status: success
+                    version: "3"
+                state:
+                  isolation: false
+                status: enrolled
+              agent:
+                build:
+                  original: "version: 7.16.0, compiled: Tue Nov 16 16:00:00 2021, branch: 7.16, commit: 73a51033db85e0fb3be1c934697ef6a2b08979ab"
+                id: "285297c6-3bff-4b83-9a07-f3e749801123"
+                type: endpoint
+                version: "7.16.0"
+              data_stream:
+                dataset: endpoint.metadata
+                namespace: default
+                type: metrics
+              ecs:
+                version: "1.11.0"
+              elastic:
+                agent:
+                  id: "285297c6-3bff-4b83-9a07-f3e749801123"
+              event:
+                action: endpoint_metadata
+                agent_id_status: verified
+                category:
+                  - host
+                created: "2023-07-04T15:47:57.432173535Z"
+                dataset: endpoint.metadata
+                id: "MNtSXK/SkhEBnmgt++++++7S"
+                ingested: "2023-07-04T15:47:58Z"
+                kind: metric
+                module: endpoint
+                sequence: 400
+                type:
+                  - info
+              host:
+                architecture: x86_64
+                hostname: david-Xubuntu
+                id: "0cfead88e2024bd8a27476352b5ab264"
+                ip:
+                  - "127.0.0.1"
+                  - "::1"
+                  - "10.0.2.15"
+                  - "fe80::2ac7:8e15:b957:2fa1"
+                mac:
+                  - "08:00:27:e6:78:8b"
+                name: david-Xubuntu
+                os:
+                  Ext:
+                    variant: Ubuntu
+                  family: ubuntu
+                  full: Ubuntu 20.04.2
+                  kernel: "5.8.0-59-generic #66~20.04.1-Ubuntu SMP Thu Jun 17 11:14:10 UTC 2021"
+                  name: Linux
+                  platform: ubuntu
+                  type: linux
+                  version: "20.04.2"
+              message: Endpoint metadata
+            policy_info:
+              agent:
+                applied:
+                  id: "ed7e3720-4bad-11ec-a2a8-fb22e62a5753"
+                  revision: 0
+                configured:
+                  id: "ed7e3720-4bad-11ec-a2a8-fb22e62a5753"
+                  revision: 3
+              endpoint:
+                id: "d5371dcd-93b7-4627-af88-4084f7d6aa3e"
+                revision: 2
+          - host_status: healthy
+            last_checkin: "2023-07-04T15:44:31.491Z"
+            metadata:
+              "@timestamp": "2023-07-04T15:44:31.4917849Z"
+              Endpoint:
+                capabilities:
+                  - isolation
+                configuration:
+                  isolation: false
+                policy:
+                  applied:
+                    endpoint_policy_version: "2"
+                    id: "d5371dcd-93b7-4627-af88-4084f7d6aa3e"
+                    name: test
+                    status: success
+                    version: "3"
+                state:
+                  isolation: false
+                status: enrolled
+              agent:
+                build:
+                  original: "version: 7.16.0, compiled: Tue Nov 16 17:00:00 2021, branch: 7.16, commit: 73a51033db85e0fb3be1c934697ef6a2b08979ab"
+                id: "abb8a826-6812-448c-a571-6d8269b51449"
+                type: endpoint
+                version: "7.16.0"
+              data_stream:
+                dataset: endpoint.metadata
+                namespace: default
+                type: metrics
+              ecs:
+                version: "1.11.0"
+              elastic:
+                agent:
+                  id: "abb8a826-6812-448c-a571-6d8269b51449"
+              event:
+                action: endpoint_metadata
+                agent_id_status: verified
+                category:
+                  - host
+                created: "2023-07-04T15:44:31.4917849Z"
+                dataset: endpoint.metadata
+                id: "MNtRc++KoKHXXwlj+++++/N9"
+                ingested: "2023-07-04T15:44:33Z"
+                kind: metric
+                module: endpoint
+                sequence: 5159
+                type:
+                  - info
+              host:
+                architecture: x86_64
+                hostname: WinDev2104Eval
+                id: "17d9cabc-7edd-43bc-bacb-8da5f5e6c0e5"
+                ip:
+                  - "10.0.2.15"
+                  - "fe80::21a6:63d3:d70e:e3ad"
+                  - "127.0.0.1"
+                  - "::1"
+                mac:
+                  - "08:00:27:b1:1d:5a"
+                name: WinDev2104Eval
+                os:
+                  Ext:
+                    variant: Windows 10 Enterprise Evaluation
+                  family: windows
+                  full: Windows 10 Enterprise Evaluation 20H2 (10.0.19042.906)
+                  kernel: "20H2 (10.0.19042.906)"
+                  name: Windows
+                  platform: windows
+                  type: windows
+                  version: "20H2 (10.0.19042.906)"
+              message: Endpoint metadata
+            policy_info:
+              agent:
+                applied:
+                  id: "ed7e3720-4bad-11ec-a2a8-fb22e62a5753"
+                  revision: 0
+                configured:
+                  id: "ed7e3720-4bad-11ec-a2a8-fb22e62a5753"
+                  revision: 3
+              endpoint:
+                id: "d5371dcd-93b7-4627-af88-4084f7d6aa3e"
+                revision: 2
+        total: 2
+        page: 0
+        pageSize: 10
+        sortField: enrolled_at
+        sortDirection: desc
+
+
