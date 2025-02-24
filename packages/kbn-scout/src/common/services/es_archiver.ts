@@ -14,7 +14,11 @@ import { EsClient, KbnClient } from '../../types';
 
 let esArchiverInstance: EsArchiver | undefined;
 
-export function getEsArchiver(esClient: EsClient, kbnClient: KbnClient, log: ScoutLogger) {
+export function getEsArchiver(
+  esClient: EsClient,
+  kbnClient: KbnClient,
+  log: ScoutLogger
+): EsArchiver {
   if (!esArchiverInstance) {
     esArchiverInstance = new EsArchiver({
       log,
