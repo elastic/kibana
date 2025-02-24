@@ -341,6 +341,17 @@ export const FullAgentPolicyResponseSchema = schema.object({
             renegotiation: schema.maybe(schema.string()),
           })
         ),
+        secrets: schema.maybe(
+          schema.object({
+            ssl: schema.maybe(
+              schema.object({
+                key: schema.object({
+                  id: schema.maybe(schema.string()),
+                }),
+              })
+            ),
+          })
+        ),
       }),
       schema.object({
         kibana: schema.object({
