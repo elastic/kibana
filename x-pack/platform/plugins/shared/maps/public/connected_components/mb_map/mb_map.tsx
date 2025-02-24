@@ -154,14 +154,16 @@ export class MbMap extends Component<Props, State> {
         version: 8 as 8,
         sources: {},
         layers: [],
-        glyphs: glyphs.glyphUrlTemplate,
+        //glyphs: glyphs.glyphUrlTemplate,
       };
 
       const options: MapOptions = {
         attributionControl: false,
         container: this._containerRef!,
         style: mbStyle,
-        preserveDrawingBuffer: getPreserveDrawingBuffer(),
+        canvasContextAttributes: {
+          preserveDrawingBuffer: getPreserveDrawingBuffer(),
+        },
         maxZoom: this.props.settings.maxZoom,
         minZoom: this.props.settings.minZoom,
         transformRequest,
