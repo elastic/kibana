@@ -490,7 +490,7 @@ async function installPackageFromRegistry({
         latestPkg ? Promise.resolve(latestPkg) : queryLatest(),
         Registry.getPackage(pkgName, pkgVersion, {
           ignoreUnverified: force && !neverIgnoreVerificationError,
-          useStreaming,
+          fetchFullAssetsMap: false,
         }),
       ]);
     const packageInstallContext: PackageInstallContext = {

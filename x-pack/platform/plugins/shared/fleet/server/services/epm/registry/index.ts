@@ -355,7 +355,7 @@ async function getPackageInfoFromArchiveOrCache(
 export async function getPackage(
   name: string,
   version: string,
-  options?: { ignoreUnverified?: boolean; useStreaming?: boolean }
+  options?: { ignoreUnverified?: boolean; fetchFullAssetsMap?: boolean }
 ): Promise<{
   paths: string[];
   packageInfo: ArchivePackage;
@@ -392,7 +392,7 @@ export async function getPackage(
     const { paths, assetsMap, archiveIterator } = await unpackBufferToAssetsMap({
       archiveBuffer,
       contentType,
-      useStreaming: options?.useStreaming,
+      useStreaming: options?.fetchFullAssetsMap,
     });
 
     if (!packageInfo) {
