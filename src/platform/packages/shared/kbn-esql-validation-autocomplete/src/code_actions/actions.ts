@@ -29,6 +29,7 @@ import {
   isSourceItem,
   shouldBeQuotedText,
 } from '../shared/helpers';
+import { FunctionDefinitionTypes } from '../definitions/types';
 import { ESQLCallbacks } from '../shared/types';
 import { buildQueryForFieldsFromSource } from '../validation/helpers';
 import { DOUBLE_BACKTICK, SINGLE_TICK_REGEX, METADATA_FIELDS } from '../shared/constants';
@@ -74,9 +75,10 @@ export const getCompatibleFunctionDefinitions = (
   command: string,
   option: string | undefined
 ): string[] => {
-  const fnSupportedByCommand = getAllFunctions({ type: ['scalar', 'agg'] }).filter(
-    ({ name, supportedCommands, supportedOptions }) =>
-      option ? supportedOptions?.includes(option) : supportedCommands.includes(command)
+  const fnSupportedByCommand = getAllFunctions({
+    type: [FunctionDefinitionTypes.SCALAR, FunctionDefinitionTypes.AGG],
+  }).filter(({ name, supportedCommands, supportedOptions }) =>
+    option ? supportedOptions?.includes(option) : supportedCommands.includes(command)
   );
   return fnSupportedByCommand.map(({ name }) => name);
 };
