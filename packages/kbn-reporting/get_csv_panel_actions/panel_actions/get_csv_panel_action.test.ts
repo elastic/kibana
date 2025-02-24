@@ -103,8 +103,8 @@ describe('GetCsvReportPanelAction', () => {
           },
         }),
         hasTimeRange: () => true,
-        title$: new BehaviorSubject('embeddable title'),
-        hideTitle$: new BehaviorSubject(false),
+        panelTitle: new BehaviorSubject('embeddable title'),
+        hidePanelTitle: new BehaviorSubject(false),
         parentApi: {
           viewMode: new BehaviorSubject('view'),
         },
