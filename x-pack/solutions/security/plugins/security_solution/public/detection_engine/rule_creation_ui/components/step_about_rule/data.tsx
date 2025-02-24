@@ -12,12 +12,6 @@ import { EuiHealth, useEuiTheme } from '@elastic/eui';
 import type { Severity } from '@kbn/securitysolution-io-ts-alerting-types';
 import * as I18n from './translations';
 
-import {
-  RISK_SCORE_LOW,
-  RISK_SCORE_MEDIUM,
-  RISK_SCORE_HIGH,
-  RISK_SCORE_CRITICAL,
-} from '../../../../common/constants';
 import { getRiskSeverityColors } from '../../../../common/utils/risk_color_palette';
 
 export interface SeverityOptionItem {
@@ -63,11 +57,4 @@ export const useSeverityOptions = () => {
   const severityOptions = useMemo(() => getSeverityOptions(euiTheme), [euiTheme]);
 
   return severityOptions;
-};
-
-export const defaultRiskScoreBySeverity: Record<Severity, number> = {
-  low: RISK_SCORE_LOW,
-  medium: RISK_SCORE_MEDIUM,
-  high: RISK_SCORE_HIGH,
-  critical: RISK_SCORE_CRITICAL,
 };
