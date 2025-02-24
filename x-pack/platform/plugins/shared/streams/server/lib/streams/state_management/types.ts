@@ -6,11 +6,7 @@
  */
 
 import { IScopedClusterClient, Logger } from '@kbn/core/server';
-import {
-  GroupStreamUpsertRequest,
-  StreamDefinition,
-  WiredStreamUpsertRequest,
-} from '@kbn/streams-schema';
+import { StreamDefinition, WiredStreamUpsertRequest } from '@kbn/streams-schema';
 import { State } from './state'; // Does this create a circular dependency?
 import { StreamsStorageClient } from '../service';
 
@@ -54,19 +50,9 @@ interface WiredStreamUpsertChange {
   };
 }
 
-interface GroupStreamUpsertChange {
-  target: string;
-  type: 'group_upsert';
-  request: GroupStreamUpsertRequest & {
-    stream: {
-      name: string;
-    };
-  };
-}
-
 interface StreamDeleteChange {
   target: string;
   type: 'delete';
 }
 
-export type StreamChange = WiredStreamUpsertChange | GroupStreamUpsertChange | StreamDeleteChange;
+export type StreamChange = WiredStreamUpsertChange | StreamDeleteChange;
