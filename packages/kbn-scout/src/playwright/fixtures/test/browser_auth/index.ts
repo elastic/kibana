@@ -14,6 +14,10 @@ export type LoginFunction = (role: string) => Promise<void>;
 
 export interface BrowserAuthFixture {
   /**
+   * Logs in as a user with the specified role.
+   */
+  loginAs: LoginFunction;
+  /**
    * Logs in as a user with viewer-only permissions.
    * @returns A Promise that resolves once the cookie in browser is set.
    */
@@ -64,6 +68,6 @@ export const browserAuthFixture = coreWorkerFixtures.extend<{ browserAuth: Brows
     };
 
     log.serviceLoaded('browserAuth');
-    await use({ loginAsAdmin, loginAsViewer, loginAsPrivilegedUser });
+    await use({ loginAsAdmin, loginAsViewer, loginAsPrivilegedUser, loginAs });
   },
 });

@@ -9,3 +9,10 @@
 
 export * from './single_thread_fixtures';
 export * from './parallel_run_fixtures';
+
+// to extend or override fixtures for individuals solutions
+export { browserAuthFixture, pageObjectsFixture, pageObjectsParallelFixture } from './test';
+export { scoutSpaceParallelFixture } from './worker';
+
+export type { BrowserAuthFixture } from './test';
+export type { ScoutSpaceParallelFixture } from './worker';

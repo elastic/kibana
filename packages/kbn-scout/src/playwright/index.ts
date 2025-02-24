@@ -15,6 +15,8 @@ export const test = scoutFixtures;
 // Scout core 'space aware' fixtures: worker & test scope
 export const spaceTest = scoutParallelFixtures;
 
+export { browserAuthFixture, scoutSpaceParallelFixture } from './fixtures';
+
 export { createPlaywrightConfig } from './config';
 export { createLazyPageObject } from './page_objects/utils';
 export { expect } from './expect';
@@ -25,8 +27,10 @@ export type {
   ScoutWorkerFixtures,
   ScoutParallelTestFixtures,
   ScoutParallelWorkerFixtures,
+  BrowserAuthFixture,
   ScoutPage,
   PageObjects,
+  ScoutSpaceParallelFixture,
 } from './fixtures';
 
 // use to tag tests
