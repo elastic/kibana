@@ -5887,6 +5887,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/grok-ui@link:src/platform/packages/shared/kbn-grok-ui":
+  version "0.0.0"
+  uid ""
+
 "@kbn/grokdebugger-plugin@link:x-pack/platform/plugins/private/grokdebugger":
   version "0.0.0"
   uid ""
@@ -18181,6 +18185,11 @@ emittery@^0.13.1:
   resolved "https://registry.yarnpkg.com/emittery/-/emittery-0.13.1.tgz#c04b8c3457490e0847ae51fced3af52d338e3dad"
   integrity sha512-DeWwawk6r5yR9jFgnDKYt4sLS0LmHJJi3ZOnb5/JdbYwj3nW+FxQnHIjhBKz8YLC7oRNPVM9NQ47I3CVx34eqQ==
 
+emoji-regex-xs@^1.0.0:
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/emoji-regex-xs/-/emoji-regex-xs-1.0.0.tgz#e8af22e5d9dbd7f7f22d280af3d19d2aab5b0724"
+  integrity sha512-LRlerrMYoIDrT6jgpeZ2YYl/L8EulRTt5hQcYjy5AInh7HWXKimpqx68aknBFpGL2+/IcogTcaydJEgaTmOpDg==
+
 emoji-regex@10.3.0, emoji-regex@^10.2.1, emoji-regex@^10.3.0:
   version "10.3.0"
   resolved "https://registry.yarnpkg.com/emoji-regex/-/emoji-regex-10.3.0.tgz#76998b9268409eb3dae3de989254d456e70cfe23"
@@ -26203,6 +26212,15 @@ onetime@^7.0.0:
   dependencies:
     mimic-function "^5.0.0"
 
+oniguruma-to-es@^3.1.1:
+  version "3.1.1"
+  resolved "https://registry.yarnpkg.com/oniguruma-to-es/-/oniguruma-to-es-3.1.1.tgz#480e4bac4d3bc9439ac0d2124f0725e7a0d76d17"
+  integrity sha512-bUH8SDvPkH3ho3dvwJwfonjlQ4R80vjyvrU8YpxuROddv55vAEJrTuCuCVUhhsHbtlD9tGGbaNApGQckXhS8iQ==
+  dependencies:
+    emoji-regex-xs "^1.0.0"
+    regex "^6.0.1"
+    regex-recursion "^6.0.2"
+
 open@^10.0.3:
   version "10.1.0"
   resolved "https://registry.yarnpkg.com/open/-/open-10.1.0.tgz#a7795e6e5d519abe4286d9937bb24b51122598e1"
@@ -28973,6 +28991,25 @@ regex-not@^1.0.0, regex-not@^1.0.2:
   dependencies:
     extend-shallow "^3.0.2"
     safe-regex "^1.1.0"
+
+regex-recursion@^6.0.2:
+  version "6.0.2"
+  resolved "https://registry.yarnpkg.com/regex-recursion/-/regex-recursion-6.0.2.tgz#a0b1977a74c87f073377b938dbedfab2ea582b33"
+  integrity sha512-0YCaSCq2VRIebiaUviZNs0cBz1kg5kVS2UKUfNIx8YVs1cN3AV7NTctO5FOKBA+UT2BPJIWZauYHPqJODG50cg==
+  dependencies:
+    regex-utilities "^2.3.0"
+
+regex-utilities@^2.3.0:
+  version "2.3.0"
+  resolved "https://registry.yarnpkg.com/regex-utilities/-/regex-utilities-2.3.0.tgz#87163512a15dce2908cf079c8960d5158ff43280"
+  integrity sha512-8VhliFJAWRaUiVvREIiW2NXXTmHs4vMNnSzuJVhscgmGav3g9VDxLrQndI3dZZVVdp0ZO/5v0xmX516/7M9cng==
+
+regex@^6.0.1:
+  version "6.0.1"
+  resolved "https://registry.yarnpkg.com/regex/-/regex-6.0.1.tgz#282fa4435d0c700b09c0eb0982b602e05ab6a34f"
+  integrity sha512-uorlqlzAKjKQZ5P+kTJr3eeJGSVroLKoHmquUj4zHWuR+hEyNqlXsSKlYYF5F4NI6nl7tWCs0apKJ0lmfsXAPA==
+  dependencies:
+    regex-utilities "^2.3.0"
 
 regexp-tree@~0.1.1:
   version "0.1.27"
