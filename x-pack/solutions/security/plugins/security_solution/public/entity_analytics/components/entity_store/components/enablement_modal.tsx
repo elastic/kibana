@@ -54,6 +54,20 @@ interface EntityStoreEnablementModalProps {
   };
 }
 
+const shouldAllowEnablement = (
+  riskScoreDisabled: boolean,
+  entityStoreDisabled: boolean,
+  enablements: Enablements
+) => {
+  if (riskScoreDisabled) {
+    return enablements.entityStore;
+  }
+  if (entityStoreDisabled) {
+    return enablements.riskScore;
+  }
+  return enablements.riskScore || enablements.entityStore;
+};
+
 export const EntityStoreEnablementModal: React.FC<EntityStoreEnablementModalProps> = ({
   visible,
   toggle,
@@ -69,11 +83,8 @@ export const EntityStoreEnablementModal: React.FC<EntityStoreEnablementModalProp
   const { data: entityEnginePrivileges, isLoading: isLoadingEntityEnginePrivileges } =
     useEntityEnginePrivileges();
   const riskEnginePrivileges = useMissingRiskEnginePrivileges();
-  const enablementOptions = !riskScore.disabled
-    ? enablements.entityStore // If riskScore is already enabled, check entityStore toggle button
-    : !entityStore.disabled
-    ? enablements.riskScore // If entityStore already enabled, check riskScore toggle button
-    : enablements.riskScore || enablements.entityStore; // If both are disabled, check their enablements
+
+  const enablementOptions = shouldAllowEnablement(!!riskScore.disabled, !!entityStore.disabled, enablements);
   const { AdditionalChargesMessage } = useContractComponents();
 
   if (!visible) {
