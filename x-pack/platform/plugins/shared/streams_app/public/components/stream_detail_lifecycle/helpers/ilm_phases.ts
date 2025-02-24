@@ -6,29 +6,38 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { IlmPolicyDeletePhase, IlmPolicyHotPhase, IlmPolicyPhase } from '@kbn/streams-schema';
+import { compact } from 'lodash';
+import {
+  IlmPolicyDeletePhase,
+  IlmPolicyHotPhase,
+  IlmPolicyPhase,
+  IlmPolicyPhases,
+} from '@kbn/streams-schema';
 import { rolloverCondition } from './rollover_condition';
 
 export const ILM_PHASES = {
   hot: {
     color: '#F6726A',
-    description: (phase: IlmPolicyPhase | IlmPolicyDeletePhase) => {
+    description: (phase: IlmPolicyPhase | IlmPolicyDeletePhase, phases: IlmPolicyPhases) => {
       const hotPhase = phase as IlmPolicyHotPhase;
+      const hasNextPhase = Boolean(phases.warm || phases.cold || phases.frozen || phases.delete);
       const condition = rolloverCondition(hotPhase.rollover);
-      return [
+      return compact([
         i18n.translate('xpack.streams.streamDetailLifecycle.hotPhaseDescription', {
           defaultMessage: 'Recent, frequently-searched data. Best indexing and search performance.',
         }),
-        condition
-          ? i18n.translate('xpack.streams.streamDetailLifecycle.hotPhaseRolloverDescription', {
-              defaultMessage: '*Time since rollover. Current rollover condition: {condition}.',
-              values: { condition },
-            })
-          : i18n.translate('xpack.streams.streamDetailLifecycle.hotPhaseNoRolloverDescription', {
-              defaultMessage:
-                '*Time since rollover. Data will not move to the next phase because rollover is not enabled.',
-            }),
-      ];
+        hasNextPhase
+          ? condition
+            ? i18n.translate('xpack.streams.streamDetailLifecycle.hotPhaseRolloverDescription', {
+                defaultMessage: '*Time since rollover. Current rollover condition: {condition}.',
+                values: { condition },
+              })
+            : i18n.translate('xpack.streams.streamDetailLifecycle.hotPhaseNoRolloverDescription', {
+                defaultMessage:
+                  '*Time since rollover. Data will not move to the next phase because rollover is not enabled.',
+              })
+          : '',
+      ]);
     },
   },
   warm: {

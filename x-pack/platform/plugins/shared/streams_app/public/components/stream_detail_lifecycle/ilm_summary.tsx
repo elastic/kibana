@@ -225,7 +225,7 @@ function phasesDescriptions(phases: IlmPolicyPhases) {
     .filter(({ name }) => name !== 'delete')
     .map((phase) => ({
       name: phase.name,
-      description: ILM_PHASES[phase.name].description(phase),
+      description: ILM_PHASES[phase.name].description(phase, phases),
       color: ILM_PHASES[phase.name].color,
     })) as Array<
     {
