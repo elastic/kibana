@@ -110,6 +110,8 @@ export const ADD_ELASTIC_RULES_TABLE = '[data-test-subj="add-prebuilt-rules-tabl
 
 export const RULES_ROW = '.euiTableRow';
 
+export const RULE_ROW_MODIFIED_BADGE = '[data-test-subj="rulesTableModifiedColumnBadge"]';
+
 export const SEVERITY = '[data-test-subj="severity"]';
 
 export const SELECT_ALL_RULES_BTN = '[data-test-subj="selectAllRules"]';
@@ -351,3 +353,5 @@ export const PER_FIELD_DIFF_WRAPPER = '[data-test-subj="ruleUpgradePerFieldDiffW
 export const PER_FIELD_DIFF_DEFINITION_SECTION = '[data-test-subj="perFieldDiffDefinitionSection"]';
 
 export const MODIFIED_RULE_BADGE = '[data-test-subj="upgradeRulesTableModifiedColumnBadge"]';
+
+export const RULES_TABLE_MODIFIED_RULE_BADGE = '[data-test-subj="rulesTableModifiedColumnBadge"]';

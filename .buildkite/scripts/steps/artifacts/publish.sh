@@ -23,6 +23,7 @@ download "kibana-$FULL_VERSION-docker-image-aarch64.tar.gz"
 download "kibana-cloud-$FULL_VERSION-docker-image.tar.gz"
 download "kibana-cloud-$FULL_VERSION-docker-image-aarch64.tar.gz"
 download "kibana-ubi-$FULL_VERSION-docker-image.tar.gz"
+download "kibana-ubi-$FULL_VERSION-docker-image-aarch64.tar.gz"
 download "kibana-wolfi-$FULL_VERSION-docker-image.tar.gz"
 download "kibana-wolfi-$FULL_VERSION-docker-image-aarch64.tar.gz"
 

@@ -7,12 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import React from 'react';
+
+import { EuiThemeProvider } from '@elastic/eui';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { GridRow, type GridRowProps } from './grid_row';
-import { gridLayoutStateManagerMock, mockRenderPanelContents } from '../test_utils/mocks';
+
+import { getGridLayoutStateManagerMock, mockRenderPanelContents } from '../test_utils/mocks';
 import { getSampleLayout } from '../test_utils/sample_layout';
 import { GridLayoutContext, type GridLayoutContextType } from '../use_grid_layout_context';
+import { GridRow, GridRowProps } from './grid_row';
 
 describe('GridRow', () => {
   const renderGridRow = (
@@ -24,13 +27,14 @@ describe('GridRow', () => {
         value={
           {
             renderPanelContents: mockRenderPanelContents,
-            gridLayoutStateManager: gridLayoutStateManagerMock,
+            gridLayoutStateManager: getGridLayoutStateManagerMock(),
             ...contextOverrides,
           } as GridLayoutContextType
         }
       >
         <GridRow rowIndex={0} {...propsOverrides} />
-      </GridLayoutContext.Provider>
+      </GridLayoutContext.Provider>,
+      { wrapper: EuiThemeProvider }
     );
   };
 
@@ -45,11 +49,13 @@ describe('GridRow', () => {
   it('does not show the panels in a row that is collapsed', async () => {
     renderGridRow({ rowIndex: 1 });
 
+    expect(screen.getByTestId('kbnGridRowTitle-1').ariaExpanded).toBe('true');
     expect(screen.getAllByText(/panel content/)).toHaveLength(1);
 
     const collapseButton = screen.getByRole('button', { name: /toggle collapse/i });
     await userEvent.click(collapseButton);
 
+    expect(screen.getByTestId('kbnGridRowTitle-1').ariaExpanded).toBe('false');
     expect(screen.queryAllByText(/panel content/)).toHaveLength(0);
   });
 });
