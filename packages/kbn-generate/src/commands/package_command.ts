@@ -88,7 +88,23 @@ export const PackageCommand: GenerateCommand = {
       throw createFlagError(`expected --owner to be a string starting with an @ symbol`);
     }
 
+    let isCliScript = false;
     if (dev) {
+      isCliScript = (
+        await inquirer.prompt<{ cli: boolean }>({
+          type: 'list',
+          default: false,
+          choices: [
+            { name: 'Yes, it can go in /packages', value: true },
+            { name: 'No, it will be used from platform / solutions code', value: false },
+          ],
+          name: 'cli',
+          message: `Is the package going to be used exclusively from tooling / CLI scripts?`,
+        })
+      ).cli;
+    }
+
+    if (isCliScript) {
       calculatedPackageDir = determineDevPackageDir(pkgId);
     } else {
       group = (

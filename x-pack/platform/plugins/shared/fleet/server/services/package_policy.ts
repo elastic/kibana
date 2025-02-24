@@ -2453,10 +2453,17 @@ function validatePackagePolicyOrThrow(packagePolicy: NewPackagePolicy, pkgInfo: 
   const validationResults = validatePackagePolicy(packagePolicy, pkgInfo, load);
   if (validationHasErrors(validationResults)) {
     const responseFormattedValidationErrors = Object.entries(getFlattenedObject(validationResults))
-      .map(([key, value]) => ({
-        key,
-        message: value,
-      }))
+      .map(([key, value]) => {
+        try {
+          const message = !!value ? JSON.stringify(value) : value;
+          return { key, message };
+        } catch (e) {
+          return {
+            key,
+            message: value,
+          };
+        }
+      })
       .filter(({ message }) => !!message);
 
     if (responseFormattedValidationErrors.length) {
@@ -2951,10 +2958,17 @@ export function updatePackageInputs(
 
   if (validationHasErrors(validationResults)) {
     const responseFormattedValidationErrors = Object.entries(getFlattenedObject(validationResults))
-      .map(([key, value]) => ({
-        key,
-        message: value,
-      }))
+      .map(([key, value]) => {
+        try {
+          const message = !!value ? JSON.stringify(value) : value;
+          return { key, message };
+        } catch (e) {
+          return {
+            key,
+            message: value,
+          };
+        }
+      })
       .filter(({ message }) => !!message);
 
     if (responseFormattedValidationErrors.length) {

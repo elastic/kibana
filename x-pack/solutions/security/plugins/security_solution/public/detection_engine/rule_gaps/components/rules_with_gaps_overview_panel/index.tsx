@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
 import {
   EuiButton,
@@ -41,6 +41,16 @@ export const RulesWithGapsOverviewPanel = () => {
   });
   const [isPopoverOpen, setPopover] = useState(false);
   const telemetry = useKibana().services.telemetry;
+
+  useEffect(() => {
+    return () => {
+      // reset filter options when unmounting
+      setFilterOptions({
+        gapSearchRange: defaultRangeValue,
+        showRulesWithGaps: false,
+      });
+    };
+  }, [setFilterOptions]);
 
   const rangeValueToLabel = {
     [GapRangeValue.LAST_24_H]: i18n.RULE_GAPS_OVERVIEW_PANEL_LAST_24_HOURS_LABEL,
