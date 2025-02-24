@@ -451,8 +451,8 @@ export function ChatBody({
                               </p>
                               <EuiButton onClick={duplicateConversation} iconType="copy" size="s">
                                 {i18n.translate('xpack.aiAssistant.duplicateButton', {
-        defaultMessage: 'Duplicate',
- })}
+                                  defaultMessage: 'Duplicate',
+                                })}
                               </EuiButton>
                             </EuiText>
                           </EuiFlexItem>
