@@ -8,6 +8,7 @@
  */
 
 import type { Observable } from 'rxjs';
+import type { WorkspaceService } from '@kbn/core-workspace-browser';
 import type { ChromeNavLink, ChromeNavLinks } from './nav_links';
 import type { ChromeRecentlyAccessed } from './recently_accessed';
 import type { ChromeDocTitle } from './doc_title';
@@ -220,4 +221,5 @@ export interface ChromeStart {
    * Get the id of the currently active project navigation or `null` otherwise.
    */
   getActiveSolutionNavId$(): Observable<string | null>;
+  workspace: WorkspaceService;
 }

@@ -9,7 +9,7 @@
 import React from 'react';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import { useEuiTheme, euiScrollBarStyles } from '@elastic/eui';
+import { useEuiTheme } from '@elastic/eui';
 import { EuiFlexGroup, EuiText, EuiBetaBadge } from '@elastic/eui';
 import type { LanguageDocumentationSections } from '../../types';
 
@@ -22,6 +22,7 @@ interface DocumentationContentProps {
     options: Array<{ label: string; description?: JSX.Element | undefined; preview?: boolean }>;
   }>;
   sections?: LanguageDocumentationSections;
+  css?: ReturnType<typeof css>;
 }
 
 function DocumentationContent({
@@ -31,19 +32,9 @@ function DocumentationContent({
   sections,
 }: DocumentationContentProps) {
   const theme = useEuiTheme();
-  const scrollBarStyles = euiScrollBarStyles(theme);
   return (
     <>
-      <EuiFlexGroup
-        gutterSize="none"
-        responsive={false}
-        direction="column"
-        css={css`
-          padding: ${theme.euiTheme.size.base};
-          ${scrollBarStyles}
-          overflow-y: auto;
-        `}
-      >
+      <EuiFlexGroup gutterSize="none" responsive={false} direction="column" css={css``}>
         <EuiText size="s">
           {!searchText && (
             <section
