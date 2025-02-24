@@ -14,6 +14,7 @@ import { dataViewRouteHelpersFactory } from '../../utils/data_view';
 export default ({ getService }: FtrProviderContext) => {
   const api = getService('securitySolutionApi');
   const supertest = getService('supertest');
+  const kibanaServer = getService('kibanaServer');
 
   const utils = EntityStoreUtils(getService);
   describe.only('@ess @skipInServerlessMKI Entity Store APIs', () => {
@@ -283,10 +284,15 @@ export default ({ getService }: FtrProviderContext) => {
       });
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/209010
     describe('apply_dataview_indices', () => {
       before(async () => {
         await utils.initEntityEngineForEntityTypesAndWait(['host']);
+
+        // Delete the data view refresh task so it doesn't interfere with the tests
+        await kibanaServer.savedObjects.delete({
+          type: 'task',
+          id: 'entity_store:data_view:refresh:default:1.0.0',
+        });
       });
 
       after(async () => {
