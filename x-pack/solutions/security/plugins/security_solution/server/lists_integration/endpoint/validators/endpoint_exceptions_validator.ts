@@ -24,7 +24,11 @@ export class EndpointExceptionsValidator extends BaseValidator {
   }
 
   protected async validateHasWritePrivilege(): Promise<void> {
-    return this.validateHasEndpointExceptionsPrivileges('canWriteEndpointExceptions');
+    await this.validateHasEndpointExceptionsPrivileges('canWriteEndpointExceptions');
+
+    // Endpoint Exceptions are currently ONLY global, so we need to make sure the user
+    // also has the new Global Artifacts privilege
+    await this.validateHasEndpointExceptionsPrivileges('canManageGlobalArtifacts');
   }
 
   async validatePreCreateItem(item: CreateExceptionListItemOptions) {
@@ -50,7 +54,7 @@ export class EndpointExceptionsValidator extends BaseValidator {
     return item;
   }
 
-  async validatePreDeleteItem(): Promise<void> {
+  async validatePreDeleteItem(currentItem: ExceptionListItemSchema): Promise<void> {
     await this.validateHasWritePrivilege();
   }
 
