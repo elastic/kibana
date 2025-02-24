@@ -20,7 +20,7 @@ import {
   EuiSelectable,
   FilterChecked,
 } from '@elastic/eui';
-import type { BrowserFields } from '@kbn/rule-registry-plugin/common';
+import type { AlertFieldCategoriesMap } from '@kbn/rule-registry-plugin/common';
 import * as i18n from '../../translations';
 import { getFieldCount, isEscape } from '../../helpers';
 import { styles } from './categories_selector.styles';
@@ -31,7 +31,7 @@ interface CategoriesSelectorProps {
    * filtered such that the name of every field in the category includes
    * the filter input (as a substring).
    */
-  filteredBrowserFields: BrowserFields;
+  filteredBrowserFields: AlertFieldCategoriesMap;
   /**
    * Invoked when the user clicks on the name of a category in the left-hand
    * side of the field browser

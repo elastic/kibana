@@ -8,7 +8,7 @@
  */
 
 import type { EuiBasicTableColumn } from '@elastic/eui';
-import type { BrowserFields } from '@kbn/rule-registry-plugin/common';
+import type { AlertFieldCategoriesMap } from '@kbn/rule-registry-plugin/common';
 
 /**
  * An item rendered in the table
@@ -20,7 +20,7 @@ export interface BrowserFieldItem {
   example?: string;
   category: string;
   selected: boolean;
-  isRuntime: boolean;
+  isRuntime?: boolean;
 }
 
 export type OnFieldSelected = (fieldId: string) => void;
@@ -46,7 +46,7 @@ export interface FieldBrowserProps {
   /** The timeline's current column headers */
   columnIds: string[];
   /** A map of categoryId -> metadata about the fields in that category */
-  browserFields: BrowserFields;
+  alertFields: AlertFieldCategoriesMap;
   /** When true, this Fields Browser is being used as an "events viewer" */
   isEventViewer?: boolean;
   /** Callback to reset the default columns */

@@ -6,11 +6,11 @@
  */
 
 import React, { VFC } from 'react';
-import { BrowserField } from '@kbn/rule-registry-plugin/common';
+import { AlertFieldCategory } from '@kbn/rule-registry-plugin/common';
 import { FieldBrowser } from '@kbn/response-ops-alerts-fields-browser';
 
 export interface IndicatorsFieldBrowserProps {
-  browserFields: Readonly<Record<string, Partial<BrowserField>>>;
+  browserFields: Readonly<Record<string, Partial<AlertFieldCategory>>>;
   columnIds: string[];
   onResetColumns: () => void;
   onToggleColumn: (columnId: string) => void;
@@ -24,7 +24,7 @@ export const IndicatorsFieldBrowser: VFC<IndicatorsFieldBrowserProps> = ({
 }) => {
   return (
     <FieldBrowser
-      browserFields={browserFields}
+      alertFields={browserFields}
       columnIds={columnIds}
       onResetColumns={onResetColumns}
       onToggleColumn={onToggleColumn}

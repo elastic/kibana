@@ -12,7 +12,7 @@ import {
   EuiDataGridToolBarVisibilityOptions,
 } from '@elastic/eui';
 import React, { lazy, memo, ReactNode, Suspense, useMemo } from 'react';
-import { Alert, BrowserFields, EsQuerySnapshot } from '@kbn/alerting-types';
+import { Alert, AlertFieldCategoriesMap, EsQuerySnapshot } from '@kbn/alerting-types';
 import { FieldBrowser, FieldBrowserOptions } from '@kbn/response-ops-alerts-fields-browser';
 import type { SettingsStart } from '@kbn/core-ui-settings-browser';
 import { AlertsCount } from '../components/alerts_count';
@@ -69,7 +69,7 @@ const LeftAppendControl = memo(
     controls?: EuiDataGridToolBarAdditionalControlsOptions;
     fieldsBrowserOptions?: FieldBrowserOptions;
     hasBrowserFields: boolean;
-    browserFields: BrowserFields;
+    browserFields: AlertFieldCategoriesMap;
   }) => {
     return (
       <>
@@ -77,7 +77,7 @@ const LeftAppendControl = memo(
         {hasBrowserFields && (
           <FieldBrowser
             columnIds={columnIds}
-            browserFields={browserFields}
+            alertFields={browserFields}
             onResetColumns={onResetColumns}
             onToggleColumn={onToggleColumn}
             options={fieldsBrowserOptions}
@@ -104,7 +104,7 @@ const useGetDefaultVisibility = ({
   columnIds: string[];
   onToggleColumn: (columnId: string) => void;
   onResetColumns: () => void;
-  browserFields: BrowserFields;
+  browserFields: AlertFieldCategoriesMap;
   additionalToolbarControls?: ReactNode;
   fieldsBrowserOptions?: FieldBrowserOptions;
   alertsQuerySnapshot?: EsQuerySnapshot;

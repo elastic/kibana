@@ -40,11 +40,11 @@ import {
 } from '@kbn/alerting-plugin/server';
 import { Logger, ElasticsearchClient, EcsEvent } from '@kbn/core/server';
 import { AuditLogger } from '@kbn/security-plugin/server';
-import { FieldDescriptor, IndexPatternsFetcher } from '@kbn/data-plugin/server';
+import { IndexPatternsFetcher } from '@kbn/data-plugin/server';
 import { isEmpty } from 'lodash';
 import { RuleTypeRegistry } from '@kbn/alerting-plugin/server/types';
 import { TypeOf } from 'io-ts';
-import { BrowserFields } from '../../common';
+import { IFieldsMetadataClient } from '@kbn/fields-metadata-plugin/server/services/fields_metadata/types';
 import { alertAuditEvent, operationAlertAuditActionMap } from './audit_events';
 import {
   ALERT_WORKFLOW_STATUS,
@@ -55,8 +55,8 @@ import {
 import { ParsedTechnicalFields } from '../../common/parse_technical_fields';
 import { IRuleDataService } from '../rule_data_plugin_service';
 import { getAuthzFilter, getSpacesFilter } from '../lib';
-import { fieldDescriptorToBrowserFieldMapper } from './browser_fields';
-import { alertsAggregationsSchema } from '../../common/types';
+import { groupAlertFieldsByCategory } from './browser_fields';
+import { alertsAggregationsSchema, FieldDescriptorWithMetadata } from '../../common/types';
 import {
   MAX_ALERTS_GROUPING_QUERY_SIZE,
   MAX_ALERTS_PAGES,
@@ -94,6 +94,7 @@ export interface ConstructorOptions {
   getRuleType: RuleTypeRegistry['get'];
   getRuleList: RuleTypeRegistry['list'];
   getAlertIndicesAlias: AlertingServerStart['getAlertIndicesAlias'];
+  fieldsMetadataClient: IFieldsMetadataClient;
 }
 
 export interface UpdateOptions<Params extends RuleTypeParams> {
@@ -170,6 +171,7 @@ export class AlertsClient {
   private readonly ruleDataService: IRuleDataService;
   private readonly getRuleType: RuleTypeRegistry['get'];
   private readonly getRuleList: RuleTypeRegistry['list'];
+  private readonly fieldsMetadataClient!: IFieldsMetadataClient;
   private getAlertIndicesAlias!: AlertingServerStart['getAlertIndicesAlias'];
 
   constructor(options: ConstructorOptions) {
@@ -184,6 +186,7 @@ export class AlertsClient {
     this.getRuleType = options.getRuleType;
     this.getRuleList = options.getRuleList;
     this.getAlertIndicesAlias = options.getAlertIndicesAlias;
+    this.fieldsMetadataClient = options.fieldsMetadataClient;
   }
 
   private getOutcome(
@@ -1199,7 +1202,7 @@ export class AlertsClient {
     }
   }
 
-  public async getBrowserFields({
+  public async getAlertsFieldsByCategory({
     ruleTypeIds,
     indices,
     metaFields,
@@ -1209,7 +1212,7 @@ export class AlertsClient {
     indices: string[];
     metaFields: string[];
     allowNoIndex: boolean;
-  }): Promise<{ browserFields: BrowserFields; fields: FieldDescriptor[] }> {
+  }) {
     const indexPatternsFetcherAsInternalUser = new IndexPatternsFetcher(this.esClient);
     const ruleTypeList = this.getRuleList();
     const fieldsForAAD = new Set<string>();
@@ -1229,10 +1232,16 @@ export class AlertsClient {
       fields: [...fieldsForAAD, 'kibana.*'],
     });
 
-    return {
-      browserFields: fieldDescriptorToBrowserFieldMapper(fields),
-      fields,
-    };
+    const fieldsMetadataMap = (
+      await this.fieldsMetadataClient.find({ fieldNames: fields.map(({ name }) => name) })
+    ).getFields();
+
+    const fieldsWithMetadata: FieldDescriptorWithMetadata[] = fields.map((field) => ({
+      ...field,
+      metadata: fieldsMetadataMap[field.name]?.toPlain() ?? null,
+    }));
+
+    return groupAlertFieldsByCategory(fieldsWithMetadata);
   }
 
   public async getAADFields({ ruleTypeId }: { ruleTypeId: string }) {

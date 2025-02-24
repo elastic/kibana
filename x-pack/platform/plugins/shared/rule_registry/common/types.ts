@@ -8,6 +8,8 @@
 import type { estypes } from '@elastic/elasticsearch';
 import * as t from 'io-ts';
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
+import { FieldMetadataPlain } from '@kbn/fields-metadata-plugin/common';
+import type { FieldDescriptor } from '@kbn/data-views-plugin/server';
 
 // note: these schemas are not exhaustive. See the `Sort` type of `@elastic/elasticsearch` if you need to enhance it.
 const fieldSchema = t.string;
@@ -412,4 +414,8 @@ export interface ClusterPutComponentTemplateBody {
     };
     mappings: estypes.MappingTypeMapping;
   };
+}
+
+export interface FieldDescriptorWithMetadata extends FieldDescriptor {
+  metadata?: FieldMetadataPlain;
 }

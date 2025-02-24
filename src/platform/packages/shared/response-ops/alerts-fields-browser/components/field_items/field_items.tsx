@@ -10,29 +10,22 @@
 import React from 'react';
 import {
   EuiCheckbox,
-  EuiIcon,
   EuiToolTip,
   EuiFlexGroup,
   EuiFlexItem,
   EuiBadge,
   EuiScreenReaderOnly,
 } from '@elastic/eui';
-import type { BrowserFields } from '@kbn/rule-registry-plugin/common';
-import { EcsFlat } from '@elastic/ecs';
-import { EcsMetadata } from '@kbn/alerts-as-data-utils/src/field_maps/types';
+import type { AlertFieldCategoriesMap } from '@kbn/rule-registry-plugin/common';
 
 import { ALERT_CASE_IDS, ALERT_MAINTENANCE_WINDOW_IDS } from '@kbn/rule-data-utils';
+import { FieldIcon, getFieldIconType } from '@kbn/field-utils';
+import { css } from '@emotion/react';
 import type { BrowserFieldItem, FieldTableColumns, GetFieldTableColumns } from '../../types';
 import { FieldName } from '../field_name';
 import * as i18n from '../../translations';
 import { styles } from './field_items.style';
-import {
-  getCategory,
-  getDescription,
-  getEmptyValue,
-  getExampleText,
-  getIconFromType,
-} from '../../helpers';
+import { getCategory, getEmptyValue, getExampleText } from '../../helpers';
 
 /**
  * For the Cases field we want to change the
@@ -58,7 +51,7 @@ export const getFieldItemsData = ({
   selectedCategoryIds,
   columnIds,
 }: {
-  browserFields: BrowserFields;
+  browserFields: AlertFieldCategoriesMap;
   selectedCategoryIds: string[];
   columnIds: string[];
 }): { fieldItems: BrowserFieldItem[] } => {
@@ -87,11 +80,9 @@ export const getFieldItemsData = ({
           const categoryFieldItem = {
             name,
             type: field.type,
-            description: getDescription(name, EcsFlat as Record<string, EcsMetadata>),
-            example: field.example?.toString(),
-            category: getCategory(name),
-            selected: selectedFieldIds.has(name),
-            isRuntime: !!field.runtimeField,
+            description: field.metadata?.description,
+              category: getCategory(name),
+              selected: selectedFieldIds.has(name),
           };
           fieldItemsAcc.push(categoryFieldItem);
         }
@@ -107,16 +98,19 @@ const getDefaultFieldTableColumns = ({ highlight }: { highlight: string }): Fiel
   const nameColumn = {
     field: 'name',
     name: i18n.NAME,
-    render: (name: string, { type }: BrowserFieldItem) => {
+    render: (name: string, field: BrowserFieldItem) => {
       return (
-        <EuiFlexGroup alignItems="center" gutterSize="none">
+        <EuiFlexGroup alignItems="center" gutterSize="s">
           <EuiFlexItem grow={false}>
-            <EuiToolTip content={type}>
-              <EuiIcon
-                data-test-subj={`field-${name}-icon`}
-                css={styles.icon}
-                type={getIconFromType(type ?? null)}
-              />
+            <EuiToolTip
+              content={field.type}
+              anchorProps={{
+                css: css`
+                  display: flex;
+                `,
+              }}
+            >
+              <FieldIcon type={getFieldIconType(field)} />
             </EuiToolTip>
           </EuiFlexItem>
 

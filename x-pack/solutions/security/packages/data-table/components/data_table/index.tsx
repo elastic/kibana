@@ -230,7 +230,7 @@ export const DataTableComponent = React.memo<DataTableProps>(
                 <UnitCount data-test-subj="server-side-event-count">{unitCountText}</UnitCount>
                 {additionalControls ?? null}
                 <FieldsBrowserComponent
-                  browserFields={browserFields}
+                  alertFields={browserFields}
                   options={fieldBrowserOptions}
                   columnIds={columnHeaders.map(({ id: columnId }) => columnId)}
                   onResetColumns={onResetColumns}
