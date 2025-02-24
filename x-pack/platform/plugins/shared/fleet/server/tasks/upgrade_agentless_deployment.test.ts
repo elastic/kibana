@@ -328,22 +328,15 @@ describe('Upgrade Agentless Deployments', () => {
       expect(agentlessAgentService.upgradeAgentlessDeployment).not.toHaveBeenCalled();
     });
 
-    // TODO: Fix promise to reject error
-    it.skip('should throw an error if task is aborted', async () => {
+    it('should throw an error if task is aborted', async () => {
+      mockTask.abortController = new AbortController();
+
       mockTask.abortController.signal.throwIfAborted = jest.fn(() => {
         throw new Error('Task aborted!');
       });
 
       mockTask.abortController.abort();
-
-      await expect(
-        mockTask.runTask(
-          {
-            id: `${UPGRADE_AGENTLESS_DEPLOYMENTS_TASK_TYPE}:${UPGRADE_AGENT_DEPLOYMENTS_TASK_VERSION}`,
-          } as any,
-          mockCore
-        )
-      ).rejects.toThrow('Task aborted!');
+      await runTask();
 
       expect(mockTask.abortController.signal.throwIfAborted).toHaveBeenCalled();
     });

@@ -112,11 +112,16 @@ export class UpgradeAgentlessDeploymentsTask {
     batchSize: number,
     processFunction: (agentPolicy: AgentPolicy, agentlessAgent: Agent) => void
   ) => {
+    if (!agents.length) {
+      this.endRun('No agents found');
+      return;
+    }
+
     for (let i = 0; i < agentlessPolicies.length; i += batchSize) {
       const currentAgentPolicyBatch = agentlessPolicies.slice(i, i + batchSize);
 
       await Promise.allSettled(
-        currentAgentPolicyBatch.map((agentPolicy) => {
+        await currentAgentPolicyBatch.map(async(agentPolicy) => {
           const agentlessAgent = agents.find((agent) => agent.policy_id === agentPolicy.id);
 
           if (!agentlessAgent) {
@@ -155,26 +160,16 @@ export class UpgradeAgentlessDeploymentsTask {
       const agentPolicyFetcher = await agentPolicyService.fetchAllAgentPolicies(soClient, {
         kuery: policiesKuery,
         perPage: BATCH_SIZE,
-        fields: ['id', 'package_policies', 'agents'],
         spaceId: '*',
       });
       this.logger.info(
         `[${LOGGER_SUBJECT}] running task to upgrade agentless deployments with kuery: ${policiesKuery}`
       );
 
-      for await (const agentPolicyPageResults of agentPolicyFetcher) {
+      for await (const agentlessPolicies of agentPolicyFetcher) {
         this.logger.info(
-          `[${LOGGER_SUBJECT}] Found "${agentPolicyPageResults.length}" agentless policies`
+          `[${LOGGER_SUBJECT}] Found "${agentlessPolicies.length}" agentless policies`
         );
-
-        if (!agentPolicyPageResults.length) {
-          this.endRun('Found no agentless policies to process');
-          return;
-        }
-
-        const agentlessPolicies = agentPolicyPageResults.filter(async (agentPolicy) => {
-          return !!agentPolicy.package_policies?.length && !!agentPolicy.agents;
-        });
 
         if (!agentlessPolicies.length) {
           this.endRun('Found no agentless policies to upgrade');
