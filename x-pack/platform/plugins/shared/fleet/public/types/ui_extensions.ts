@@ -48,6 +48,10 @@ export type PackagePolicyReplaceDefineStepExtensionComponentProps = (
   defaultSetupTechnology?: SetupTechnology;
   integrationToEnable?: string;
   setIntegrationToEnable?: (integration: string) => void;
+  handleAgentFeaturesChange?: (
+    setupTechnology: SetupTechnology,
+    agentFeatures: Array<{ name: string; enabled: boolean }>
+  ) => void;
 };
 
 /**

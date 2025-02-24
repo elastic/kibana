@@ -35,6 +35,7 @@ import type {
   AwsCredentialsType,
   PostureInput,
   CloudSecurityPolicyTemplate,
+  CredentialsType,
 } from '../../../common/types_old';
 import { cloudPostureIntegrations } from '../../common/constants';
 import { DEFAULT_EKS_VARS_GROUP } from './eks_credentials_form';
@@ -45,6 +46,7 @@ import {
 } from './aws_credentials_form/get_aws_credentials_form_options';
 import { GCP_CREDENTIALS_TYPE } from './gcp_credentials_form/gcp_credential_form';
 import { AZURE_CREDENTIALS_TYPE } from './azure_credentials_form/azure_credentials_form';
+import { AWS_CREDENTIALS_TYPE } from './aws_credentials_form/aws_credentials_form';
 
 // Posture policies only support the default namespace
 export const POSTURE_NAMESPACE = 'default';
@@ -398,4 +400,24 @@ export const hasErrors = (validationResults: PackagePolicyValidationResults | un
   const flattenedValidation = getFlattenedObject(validationResults);
   const errors = Object.values(flattenedValidation).filter((value) => Boolean(value)) || [];
   return errors.length;
+};
+
+export const getAgentFeatures = (
+  credentialsType: CredentialsType | undefined,
+  isAgentless: boolean
+) => {
+  const defaultAgentlesAgentFeatures = [
+    {
+      name: 'supports_cloud_connectors',
+      enabled: true,
+    },
+  ];
+  if (
+    (isAgentless && !credentialsType) ||
+    (isAgentless && credentialsType === AWS_CREDENTIALS_TYPE.ASSUME_ROLE)
+  ) {
+    return defaultAgentlesAgentFeatures;
+  }
+
+  return [{ name: 'supports_cloud_connectors', enabled: false }];
 };

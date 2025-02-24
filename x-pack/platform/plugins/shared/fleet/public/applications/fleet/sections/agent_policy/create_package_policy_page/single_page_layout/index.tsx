@@ -185,6 +185,7 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
     validationResults,
     hasAgentPolicyError,
     isInitialized,
+    handleAgentFeaturesChange,
     handleSetupTechnologyChange,
     allowedSetupTechnologies,
     selectedSetupTechnology,
@@ -383,6 +384,7 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
             validationResults={validationResults}
             isEditPage={false}
             handleSetupTechnologyChange={handleSetupTechnologyChange}
+            handleAgentFeaturesChange={handleAgentFeaturesChange}
             isAgentlessEnabled={isAgentlessIntegration(packageInfo)}
             defaultSetupTechnology={defaultSetupTechnology}
             integrationToEnable={integrationToEnable}

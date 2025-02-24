@@ -168,6 +168,7 @@ export const AZURE_CREDENTIALS_TYPE_TO_FIELDS_MAP = {
 };
 
 export const TEMPLATE_URL_ACCOUNT_TYPE_ENV_VAR = 'ACCOUNT_TYPE';
+export const TEMPLATE_URL_ELASTIC_RESOURCE_ID_ENV_VAR = 'RESOURCE_ID';
 
 export const ORGANIZATION_ACCOUNT = 'organization-account';
 export const SINGLE_ACCOUNT = 'single-account';

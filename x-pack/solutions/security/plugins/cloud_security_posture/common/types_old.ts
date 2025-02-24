@@ -194,3 +194,8 @@ export interface AggFieldBucket {
     doc_count?: string;
   }>;
 }
+
+export type CredentialsType = Extract<
+  AwsCredentialsType,
+  'direct_access_keys' | 'assume_role' | 'temporary_keys'
+>;

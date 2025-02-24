@@ -53,6 +53,7 @@ import {
   POSTURE_NAMESPACE,
   POLICY_TEMPLATE_FORM_DTS,
   hasErrors,
+  getAgentFeatures,
 } from './utils';
 import {
   PolicyTemplateInfo,
@@ -672,6 +673,7 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
     isEditPage,
     packageInfo,
     handleSetupTechnologyChange,
+    handleAgentFeaturesChange,
     isAgentlessEnabled,
     defaultSetupTechnology,
     integrationToEnable,
@@ -691,13 +693,15 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
     const input = getSelectedOption(newPolicy.inputs, integration);
     const getIsSubscriptionValid = useIsSubscriptionStatusValid();
     const isSubscriptionValid = !!getIsSubscriptionValid.data;
-    const { isAgentlessAvailable, setupTechnology, updateSetupTechnology } = useSetupTechnology({
-      input,
-      isAgentlessEnabled,
-      handleSetupTechnologyChange,
-      isEditPage,
-      defaultSetupTechnology,
-    });
+    const { isAgentlessAvailable, setupTechnology, updateSetupTechnology, updateAgentFeatures } =
+      useSetupTechnology({
+        input,
+        isAgentlessEnabled,
+        handleSetupTechnologyChange,
+        handleAgentFeaturesChange,
+        isEditPage,
+        defaultSetupTechnology,
+      });
 
     const shouldRenderAgentlessSelector =
       (!isEditPage && isAgentlessAvailable) || (isEditPage && isAgentlessEnabled);
@@ -713,17 +717,21 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
         Extract<PostureInput, 'cloudbeat/cis_aws' | 'cloudbeat/cis_azure' | 'cloudbeat/cis_gcp'>,
         {
           [key: string]: {
-            value: string;
-            type: 'text';
+            value: string | boolean;
+            type: 'text' | 'boolean';
           };
         }
       > = {
         'cloudbeat/cis_aws': {
           'aws.credentials.type': {
             value: isAgentless
-              ? AWS_CREDENTIALS_TYPE.DIRECT_ACCESS_KEYS
+              ? AWS_CREDENTIALS_TYPE.ASSUME_ROLE
               : AWS_CREDENTIALS_TYPE.CLOUD_FORMATION,
             type: 'text',
+          },
+          'aws.supports_cloud_connectors': {
+            value: isAgentless ? true : false,
+            type: 'boolean',
           },
         },
         'cloudbeat/cis_gcp': {
@@ -749,9 +757,19 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
 
     const updatePolicy = useCallback(
       (updatedPolicy: NewPackagePolicy, isExtensionLoaded?: boolean) => {
+        const currentInput = updatedPolicy.inputs.find(
+          (i) => i.enabled === true && i.type === 'cloudbeat/cis_aws'
+        );
+        if (currentInput) {
+          const agentFeatures = getAgentFeatures(
+            currentInput?.streams?.[0].vars?.['aws.credentials.type']?.value,
+            setupTechnology === SetupTechnology.AGENTLESS
+          );
+          updateAgentFeatures(setupTechnology, agentFeatures);
+        }
         onChange({ isValid, updatedPolicy, isExtensionLoaded });
       },
-      [onChange, isValid]
+      [onChange, isValid, setupTechnology, updateAgentFeatures]
     );
 
     /**
