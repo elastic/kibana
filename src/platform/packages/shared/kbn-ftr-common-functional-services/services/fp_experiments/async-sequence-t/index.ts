@@ -126,7 +126,7 @@ const e3_LessUgly = () => {
       TE.chain(decodeWith(codec))
     );
 
-  const getAnswer = pipe(TE.right({ ans: }), TE.chain(decodeWith(answer)));
+  const getAnswer = pipe(TE.right({ ans: 42 }), TE.chain(decodeWith(answer)));
 
   const apiUrl = (page: number) => `https://reqres.in/api/users?page=${page}`;
 

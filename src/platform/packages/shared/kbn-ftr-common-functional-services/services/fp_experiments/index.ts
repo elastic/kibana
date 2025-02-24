@@ -17,6 +17,7 @@ export const runExperiments = () => {
   // e1();
   // e2();
   sequenceTExperiment();
+  // console.log('\nλjs experiment?')
 };
 
 const e1 = () => {
