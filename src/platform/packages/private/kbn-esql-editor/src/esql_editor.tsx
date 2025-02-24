@@ -58,6 +58,7 @@ import {
   RESIZABLE_CONTAINER_INITIAL_HEIGHT,
   esqlEditorStyles,
 } from './esql_editor.styles';
+import './decorations.scss';
 import type { ESQLEditorProps, ESQLEditorDeps } from './types';
 
 // for editor width smaller than this value we want to start hiding some text
@@ -70,7 +71,8 @@ const triggerControl = async (
   uiActions: ESQLEditorDeps['uiActions'],
   esqlVariables?: ESQLControlVariable[],
   onSaveControl?: ESQLEditorProps['onSaveControl'],
-  onCancelControl?: ESQLEditorProps['onCancelControl']
+  onCancelControl?: ESQLEditorProps['onCancelControl'],
+  initialState?: unknown
 ) => {
   await uiActions.getTrigger('ESQL_CONTROL_TRIGGER').exec({
     queryString,
@@ -79,6 +81,7 @@ const triggerControl = async (
     esqlVariables,
     onSaveControl,
     onCancelControl,
+    initialState,
   });
 };
 
@@ -106,6 +109,7 @@ export const ESQLEditor = memo(function ESQLEditor({
   onCancelControl,
   supportsControls,
   esqlVariables,
+  esqlControls,
 }: ESQLEditorProps) {
   const popoverRef = useRef<HTMLDivElement>(null);
   const editorModel = useRef<monaco.editor.ITextModel>();
@@ -250,6 +254,43 @@ export const ESQLEditor = memo(function ESQLEditor({
       }, 0);
     }
   }, []);
+
+  const addVariablesDecoration = useCallback(() => {
+    // we need to remove the previous decorations first
+    const lineCount = editorModel.current?.getLineCount() || 1;
+    for (let i = 1; i <= lineCount; i++) {
+      const decorations = editor1?.current?.getLineDecorations(i) ?? [];
+      editor1?.current?.removeDecorations(decorations.map((d) => d.id));
+    }
+
+    const variables = esqlVariables ?? [];
+
+    for (let i = 0; i < variables.length; i++) {
+      const variable = variables[i];
+      const matches =
+        editorModel.current?.findMatches(`?${variable.key}`, true, false, true, null, true) || [];
+
+      matches.forEach((match) => {
+        const range = new monaco.Range(
+          match.range.startLineNumber,
+          match.range.startColumn,
+          match.range.endLineNumber,
+          match.range.endColumn
+        );
+
+        editor1?.current?.createDecorationsCollection([
+          {
+            range,
+            options: {
+              isWholeLine: false,
+              stickiness: monaco.editor.TrackedRangeStickiness.NeverGrowsWhenTypingAtEdges,
+              inlineClassName: 'variableBadge',
+            },
+          },
+        ]);
+      });
+    }
+  }, [esqlVariables]);
 
   const openTimePickerPopover = useCallback(() => {
     const currentCursorPosition = editor1.current?.getPosition();
@@ -780,18 +821,49 @@ export const ESQLEditor = memo(function ESQLEditor({
                     const model = editor.getModel();
                     if (model) {
                       editorModel.current = model;
+                      addVariablesDecoration();
                     }
+
+                    monaco.languages.setLanguageConfiguration(ESQL_LANG_ID, {
+                      wordPattern: /'?\w[\w'-.]*[?!,;:"]*/,
+                    });
                     // this is fixing a bug between the EUIPopover and the monaco editor
                     // when the user clicks the editor, we force it to focus and the onDidFocusEditorText
                     // to fire, the timeout is needed because otherwise it refocuses on the popover icon
                     // and the user needs to click again the editor.
                     // IMPORTANT: The popover needs to be wrapped with the EuiOutsideClickDetector component.
-                    editor.onMouseDown(() => {
+                    editor.onMouseDown(async (e) => {
                       setTimeout(() => {
                         editor.focus();
                       }, 100);
                       if (datePickerOpenStatusRef.current) {
                         setPopoverPosition({});
+                      }
+
+                      const mousePosition = e.target.position;
+                      if (mousePosition) {
+                        const currentWord = model?.getWordAtPosition(mousePosition);
+                        const variables = esqlVariables ?? [];
+                        const clickedVariable = variables.find((v) =>
+                          currentWord?.word.includes(v.key)
+                        );
+
+                        if (clickedVariable) {
+                          const position = editor1.current?.getPosition();
+                          const initialState = esqlControls?.find(
+                            (c) => c.variableName === clickedVariable.key
+                          );
+                          await triggerControl(
+                            editor1.current?.getValue() ?? code,
+                            clickedVariable.type,
+                            position,
+                            uiActions,
+                            esqlVariables,
+                            onSaveControl,
+                            onCancelControl,
+                            initialState
+                          );
+                        }
                       }
                     });
 
