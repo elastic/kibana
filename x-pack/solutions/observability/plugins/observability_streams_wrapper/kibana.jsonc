@@ -2,8 +2,8 @@
   "type": "plugin",
   "id": "@kbn/streams-app-wrapper-plugin",
   "owner": "@elastic/streams-program-team",
-  "group": "platform",
-  "visibility": "shared",
+  "group": "observability",
+  "visibility": "private",
   "plugin": {
     "id": "streamsAppWrapper",
     "server": false,
