@@ -21,7 +21,7 @@ import { ElasticAssistantPluginRouter } from '../../types';
 import { buildResponse } from '../utils';
 import { EsConversationSchema } from '../../ai_assistant_data_clients/conversations/types';
 import { transformESSearchToConversations } from '../../ai_assistant_data_clients/conversations/transforms';
-import { DEFAULT_PLUGIN_NAME, performChecks } from '../helpers';
+import { performChecks } from '../helpers';
 
 export const findUserConversationsRoute = (router: ElasticAssistantPluginRouter) => {
   router.versioned
