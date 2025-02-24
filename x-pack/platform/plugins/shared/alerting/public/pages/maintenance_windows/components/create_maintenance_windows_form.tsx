@@ -299,6 +299,14 @@ export const CreateMaintenanceWindowForm = React.memo<CreateMaintenanceWindowFor
 
   return (
     <Form form={form} data-test-subj="createMaintenanceWindowForm">
+      {isEditMode && (
+        <>
+          <EuiCallOut title={i18n.ARCHIVE_TITLE} color="warning" iconType="trash">
+            {i18n.ARCHIVE_SUBTITLE}
+          </EuiCallOut>
+          <EuiSpacer size="l" />
+        </>
+      )}
       <EuiFlexGroup direction="column" responsive={false}>
         <EuiFlexItem>
           <UseField
