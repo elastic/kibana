@@ -51370,9 +51370,6 @@ components:
         category:
           $ref: '#/components/schemas/Security_AI_Assistant_API_ConversationCategory'
           description: The conversation category.
-        createdAt:
-          description: Set the creation date.
-          type: string
         excludeFromLastConversationStorage:
           description: excludeFromLastConversationStorage.
           type: boolean
