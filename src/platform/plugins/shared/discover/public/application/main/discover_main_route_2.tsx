@@ -29,6 +29,7 @@ import { DataView } from '@kbn/data-views-plugin/common';
 import { useExecutionContext } from '@kbn/kibana-react-plugin/public';
 import { getSavedSearchFullPathUrl } from '@kbn/saved-search-plugin/public';
 import { i18n } from '@kbn/i18n';
+import useLatest from 'react-use/lib/useLatest';
 import { isEsqlSource } from '../../../common/data_sources';
 import { useDiscoverServices } from '../../hooks/use_discover_services';
 import { CustomizationCallback, DiscoverCustomizationContext } from '../../customizations';
@@ -94,31 +95,30 @@ export const DiscoverMainRoute2 = ({
   const [internalState] = useState(() =>
     createInternalStateStore({ services, runtimeStateManager })
   );
+  const initialize = useLatest<InitializeMain>(async (overrides) => {
+    const { dataViews } = services;
+    const shouldRefreshDataViews = !overrides || Boolean(overrides.dataView);
+    const [hasESData, hasUserDataView, defaultDataViewExists, savedDataViews] = await Promise.all([
+      overrides?.hasESData ?? dataViews.hasData.hasESData().catch(() => false),
+      overrides?.hasUserDataView ?? dataViews.hasData.hasUserDataView().catch(() => false),
+      overrides?.hasUserDataView ?? dataViews.defaultDataViewExists().catch(() => false),
+      services.dataViews.getIdsWithTitle(shouldRefreshDataViews).catch(() => []),
+    ]);
+
+    internalState.dispatch(internalStateActions.setSavedDataViews(savedDataViews));
+
+    if (overrides?.dataView) {
+      internalState.dispatch(internalStateActions.setDataView(overrides.dataView));
+    }
+
+    return {
+      hasESData,
+      hasUserDataView: hasUserDataView && defaultDataViewExists,
+    };
+  });
   const [initializationState, initializeMain] = useAsyncFn<InitializeMain>(
-    async (overrides) => {
-      const { dataViews } = services;
-      const shouldRefreshDataViews = !overrides || Boolean(overrides.dataView);
-      const [hasESData, hasUserDataView, defaultDataViewExists, savedDataViews] = await Promise.all(
-        [
-          overrides?.hasESData ?? dataViews.hasData.hasESData().catch(() => false),
-          overrides?.hasUserDataView ?? dataViews.hasData.hasUserDataView().catch(() => false),
-          overrides?.hasUserDataView ?? dataViews.defaultDataViewExists().catch(() => false),
-          services.dataViews.getIdsWithTitle(shouldRefreshDataViews).catch(() => []),
-        ]
-      );
-
-      internalState.dispatch(internalStateActions.setSavedDataViews(savedDataViews));
-
-      if (overrides?.dataView) {
-        internalState.dispatch(internalStateActions.setDataView(overrides.dataView));
-      }
-
-      return {
-        hasESData,
-        hasUserDataView: hasUserDataView && defaultDataViewExists,
-      };
-    },
-    [internalState, services],
+    (...params) => initialize.current(...params),
+    [initialize],
     { loading: true }
   );
   const mainInitializationState = initializationState as NarrowAsyncState<
@@ -195,57 +195,59 @@ const DiscoverSessionView = ({
     () => getScopedHistory<MainHistoryLocationState>()?.location.state
   );
   const { initializeProfileDataViews } = useDefaultAdHocDataViews2({ rootProfileState });
+  const initialize = useLatest(async () => {
+    const discoverSessionLoadTracker = ebtManager.trackPerformanceEvent('discoverLoadSavedSearch');
+    const urlState = cleanupUrlState(
+      urlStateStorage.get<AppStateUrl>(APP_STATE_URL_KEY) ?? {},
+      uiSettings
+    );
+    const isEsqlQuery = isEsqlSource(urlState.dataSource);
+    const discoverSession = discoverSessionId
+      ? await savedSearch.get(discoverSessionId)
+      : undefined;
+    const discoverSessionDataView = discoverSession?.searchSource.getField('index');
+    const discoverSessionHasAdHocDataView = Boolean(
+      discoverSessionDataView && !discoverSessionDataView.isPersisted()
+    );
+    const profileDataViews = await initializeProfileDataViews();
+    const profileDataViewsExist = profileDataViews.length > 0;
+    const locationStateHasDataViewSpec = Boolean(historyLocationState?.dataViewSpec);
+    const canAccessWithoutPersistedDataView =
+      isEsqlQuery ||
+      discoverSessionHasAdHocDataView ||
+      profileDataViewsExist ||
+      locationStateHasDataViewSpec;
+
+    if (!mainInitializationState.hasUserDataView && !canAccessWithoutPersistedDataView) {
+      return { showNoDataPage: true };
+    }
+
+    if (customizationContext.displayMode === 'standalone' && discoverSession) {
+      if (discoverSession.id) {
+        chrome.recentlyAccessed.add(
+          getSavedSearchFullPathUrl(discoverSession.id),
+          discoverSession.title ??
+            i18n.translate('discover.defaultDiscoverSessionTitle', {
+              defaultMessage: 'Untitled Discover session',
+            }),
+          discoverSession.id
+        );
+      }
+
+      setBreadcrumbs({ services, titleBreadcrumbText: discoverSession.title });
+    }
+
+    dispatch(internalStateActions.setDefaultProfileAdHocDataViews(profileDataViews));
+    discoverSessionLoadTracker.reportEvent();
+
+    return { showNoDataPage: false };
+  });
   const [initializationState, initializeSession] = useAsyncFn(
-    async () => {
-      const discoverSessionLoadtracker =
-        ebtManager.trackPerformanceEvent('discoverLoadSavedSearch');
-      const urlState = cleanupUrlState(
-        urlStateStorage.get<AppStateUrl>(APP_STATE_URL_KEY) ?? {},
-        uiSettings
-      );
-      const isEsqlQuery = isEsqlSource(urlState.dataSource);
-      const discoverSession = discoverSessionId
-        ? await savedSearch.get(discoverSessionId)
-        : undefined;
-      const discoverSessionDataView = discoverSession?.searchSource.getField('index');
-      const discoverSessionHasAdHocDataView = Boolean(
-        discoverSessionDataView && !discoverSessionDataView.isPersisted()
-      );
-      const profileDataViews = await initializeProfileDataViews();
-      const profileDataViewsExist = profileDataViews.length > 0;
-      const locationStateHasDataViewSpec = Boolean(historyLocationState?.dataViewSpec);
-      const canAccessWithoutPersistedDataView =
-        isEsqlQuery ||
-        discoverSessionHasAdHocDataView ||
-        profileDataViewsExist ||
-        locationStateHasDataViewSpec;
-
-      if (!mainInitializationState.hasUserDataView && !canAccessWithoutPersistedDataView) {
-        return { showNoDataPage: true };
-      }
-
-      if (customizationContext.displayMode === 'standalone' && discoverSession) {
-        if (discoverSession.id) {
-          chrome.recentlyAccessed.add(
-            getSavedSearchFullPathUrl(discoverSession.id),
-            discoverSession.title ??
-              i18n.translate('discover.defaultDiscoverSessionTitle', {
-                defaultMessage: 'Untitled Discover session',
-              }),
-            discoverSession.id
-          );
-        }
-
-        setBreadcrumbs({ services, titleBreadcrumbText: discoverSession.title });
-      }
-
-      discoverSessionLoadtracker.reportEvent();
-      dispatch(internalStateActions.setDefaultProfileAdHocDataViews(profileDataViews));
-
-      return {};
-    },
-    [],
-    { loading: true }
+    () => initialize.current(),
+    [initialize],
+    {
+      loading: true,
+    }
   );
   const initializeSessionState = initializationState as NarrowAsyncState<
     typeof initializationState
