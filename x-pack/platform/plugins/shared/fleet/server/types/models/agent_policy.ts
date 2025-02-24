@@ -343,9 +343,13 @@ export const FullAgentPolicyResponseSchema = schema.object({
         ),
         secrets: schema.maybe(
           schema.object({
-            key: schema.object({
-              id: schema.maybe(schema.string()),
-            }),
+            ssl: schema.maybe(
+              schema.object({
+                key: schema.object({
+                  id: schema.maybe(schema.string()),
+                }),
+              })
+            ),
           })
         ),
       }),

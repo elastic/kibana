@@ -11,7 +11,7 @@ import type { agentPolicyStatuses } from '../../constants';
 import type { MonitoringType, PolicySecretReference, ValueOf } from '..';
 
 import type { PackagePolicy, PackagePolicyPackage } from './package_policy';
-import type { Output } from './output';
+import type { Output, OutputSecret } from './output';
 
 export type AgentPolicyStatus = typeof agentPolicyStatuses;
 
@@ -237,6 +237,9 @@ export interface FullAgentPolicyFleetConfig {
   proxy_url?: string;
   proxy_headers?: any;
   ssl?: BaseSSLConfig;
+  secrets?: {
+    ssl?: { key?: OutputSecret };
+  };
 }
 
 export interface FullAgentPolicyKibanaConfig {

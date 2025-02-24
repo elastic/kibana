@@ -39,7 +39,8 @@ describe('Mobile transactions page', () => {
       synthtrace.clean();
     });
 
-    describe('when click on tab shows correct table', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/207040
+    describe.skip('when click on tab shows correct table', () => {
       it('shows version tab', () => {
         cy.visitKibana(mobileTransactionsPageHref);
         cy.getByTestSubj('apmAppVersionTab').click();

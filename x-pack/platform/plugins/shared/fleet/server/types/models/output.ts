@@ -116,6 +116,11 @@ const BaseSchema = {
     ])
   ),
   allow_edit: schema.maybe(schema.arrayOf(schema.string())),
+  secrets: schema.maybe(
+    schema.object({
+      ssl: schema.maybe(schema.object({ key: schema.maybe(secretRefSchema) })),
+    })
+  ),
 };
 
 const UpdateSchema = {
@@ -163,6 +168,7 @@ export const RemoteElasticSearchSchema = {
     schema.object({
       service_token: schema.maybe(secretRefSchema),
       kibana_api_key: schema.maybe(secretRefSchema),
+      ssl: schema.maybe(schema.object({ key: schema.maybe(secretRefSchema) })),
     })
   ),
   sync_integrations: schema.maybe(schema.boolean()),
@@ -178,6 +184,7 @@ const RemoteElasticSearchUpdateSchema = {
     schema.object({
       service_token: schema.maybe(secretRefSchema),
       kibana_api_key: schema.maybe(secretRefSchema),
+      ssl: schema.maybe(schema.object({ key: schema.maybe(secretRefSchema) })),
     })
   ),
   sync_integrations: schema.maybe(schema.boolean()),
@@ -193,11 +200,6 @@ export const LogstashSchema = {
   ...BaseSchema,
   type: schema.literal(outputType.Logstash),
   hosts: schema.arrayOf(schema.string({ validate: validateLogstashHost }), { minSize: 1 }),
-  secrets: schema.maybe(
-    schema.object({
-      ssl: schema.maybe(schema.object({ key: schema.maybe(secretRefSchema) })),
-    })
-  ),
 };
 
 const LogstashUpdateSchema = {

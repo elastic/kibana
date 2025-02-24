@@ -20012,14 +20012,18 @@ paths:
                                     additionalProperties: false
                                     type: object
                                     properties:
-                                      key:
+                                      ssl:
                                         additionalProperties: false
                                         type: object
                                         properties:
-                                          id:
-                                            type: string
-                                    required:
-                                      - key
+                                          key:
+                                            additionalProperties: false
+                                            type: object
+                                            properties:
+                                              id:
+                                                type: string
+                                        required:
+                                          - key
                                   ssl:
                                     additionalProperties: false
                                     type: object
@@ -27578,6 +27582,24 @@ paths:
                             proxy_id:
                               nullable: true
                               type: string
+                            secrets:
+                              additionalProperties: true
+                              type: object
+                              properties:
+                                ssl:
+                                  additionalProperties: true
+                                  type: object
+                                  properties:
+                                    key:
+                                      anyOf:
+                                        - additionalProperties: true
+                                          type: object
+                                          properties:
+                                            id:
+                                              type: string
+                                          required:
+                                            - id
+                                        - type: string
                             shipper:
                               additionalProperties: true
                               nullable: true
@@ -27730,6 +27752,20 @@ paths:
                                       required:
                                         - id
                                     - type: string
+                                ssl:
+                                  additionalProperties: true
+                                  type: object
+                                  properties:
+                                    key:
+                                      anyOf:
+                                        - additionalProperties: true
+                                          type: object
+                                          properties:
+                                            id:
+                                              type: string
+                                          required:
+                                            - id
+                                        - type: string
                             service_token:
                               nullable: true
                               type: string
@@ -28328,6 +28364,24 @@ paths:
                     proxy_id:
                       nullable: true
                       type: string
+                    secrets:
+                      additionalProperties: false
+                      type: object
+                      properties:
+                        ssl:
+                          additionalProperties: false
+                          type: object
+                          properties:
+                            key:
+                              anyOf:
+                                - additionalProperties: false
+                                  type: object
+                                  properties:
+                                    id:
+                                      type: string
+                                  required:
+                                    - id
+                                - type: string
                     shipper:
                       additionalProperties: false
                       nullable: true
@@ -28480,6 +28534,20 @@ paths:
                               required:
                                 - id
                             - type: string
+                        ssl:
+                          additionalProperties: false
+                          type: object
+                          properties:
+                            key:
+                              anyOf:
+                                - additionalProperties: false
+                                  type: object
+                                  properties:
+                                    id:
+                                      type: string
+                                  required:
+                                    - id
+                                - type: string
                     service_token:
                       nullable: true
                       type: string
@@ -29039,6 +29107,24 @@ paths:
                           proxy_id:
                             nullable: true
                             type: string
+                          secrets:
+                            additionalProperties: true
+                            type: object
+                            properties:
+                              ssl:
+                                additionalProperties: true
+                                type: object
+                                properties:
+                                  key:
+                                    anyOf:
+                                      - additionalProperties: true
+                                        type: object
+                                        properties:
+                                          id:
+                                            type: string
+                                        required:
+                                          - id
+                                      - type: string
                           shipper:
                             additionalProperties: true
                             nullable: true
@@ -29191,6 +29277,20 @@ paths:
                                     required:
                                       - id
                                   - type: string
+                              ssl:
+                                additionalProperties: true
+                                type: object
+                                properties:
+                                  key:
+                                    anyOf:
+                                      - additionalProperties: true
+                                        type: object
+                                        properties:
+                                          id:
+                                            type: string
+                                        required:
+                                          - id
+                                      - type: string
                           service_token:
                             nullable: true
                             type: string
@@ -29850,6 +29950,24 @@ paths:
                           proxy_id:
                             nullable: true
                             type: string
+                          secrets:
+                            additionalProperties: true
+                            type: object
+                            properties:
+                              ssl:
+                                additionalProperties: true
+                                type: object
+                                properties:
+                                  key:
+                                    anyOf:
+                                      - additionalProperties: true
+                                        type: object
+                                        properties:
+                                          id:
+                                            type: string
+                                        required:
+                                          - id
+                                      - type: string
                           shipper:
                             additionalProperties: true
                             nullable: true
@@ -30002,6 +30120,20 @@ paths:
                                     required:
                                       - id
                                   - type: string
+                              ssl:
+                                additionalProperties: true
+                                type: object
+                                properties:
+                                  key:
+                                    anyOf:
+                                      - additionalProperties: true
+                                        type: object
+                                        properties:
+                                          id:
+                                            type: string
+                                        required:
+                                          - id
+                                      - type: string
                           service_token:
                             nullable: true
                             type: string
@@ -30593,6 +30725,24 @@ paths:
                     proxy_id:
                       nullable: true
                       type: string
+                    secrets:
+                      additionalProperties: false
+                      type: object
+                      properties:
+                        ssl:
+                          additionalProperties: false
+                          type: object
+                          properties:
+                            key:
+                              anyOf:
+                                - additionalProperties: false
+                                  type: object
+                                  properties:
+                                    id:
+                                      type: string
+                                  required:
+                                    - id
+                                - type: string
                     shipper:
                       additionalProperties: false
                       nullable: true
@@ -30739,6 +30889,20 @@ paths:
                               required:
                                 - id
                             - type: string
+                        ssl:
+                          additionalProperties: false
+                          type: object
+                          properties:
+                            key:
+                              anyOf:
+                                - additionalProperties: false
+                                  type: object
+                                  properties:
+                                    id:
+                                      type: string
+                                  required:
+                                    - id
+                                - type: string
                     service_token:
                       nullable: true
                       type: string
@@ -31285,6 +31449,24 @@ paths:
                           proxy_id:
                             nullable: true
                             type: string
+                          secrets:
+                            additionalProperties: true
+                            type: object
+                            properties:
+                              ssl:
+                                additionalProperties: true
+                                type: object
+                                properties:
+                                  key:
+                                    anyOf:
+                                      - additionalProperties: true
+                                        type: object
+                                        properties:
+                                          id:
+                                            type: string
+                                        required:
+                                          - id
+                                      - type: string
                           shipper:
                             additionalProperties: true
                             nullable: true
@@ -31437,6 +31619,20 @@ paths:
                                     required:
                                       - id
                                   - type: string
+                              ssl:
+                                additionalProperties: true
+                                type: object
+                                properties:
+                                  key:
+                                    anyOf:
+                                      - additionalProperties: true
+                                        type: object
+                                        properties:
+                                          id:
+                                            type: string
+                                        required:
+                                          - id
+                                      - type: string
                           service_token:
                             nullable: true
                             type: string
@@ -40014,7 +40210,7 @@ paths:
               schema:
                 type: object
           description: |
-            Indicates a successful call. NOTE: This HTTP response code indicates that the bulk operation succeeded.  Errors pertaining to individual objects will be returned in the response body. 
+            Indicates a successful call. NOTE: This HTTP response code indicates that the bulk operation succeeded.  Errors pertaining to individual objects will be returned in the response body.
         '400':
           content:
             application/json:
@@ -40046,7 +40242,7 @@ paths:
               schema:
                 type: object
           description: |
-            Indicates a successful call. NOTE: This HTTP response code indicates that the bulk operation succeeded. Errors pertaining to individual objects will be returned in the response body. 
+            Indicates a successful call. NOTE: This HTTP response code indicates that the bulk operation succeeded. Errors pertaining to individual objects will be returned in the response body.
         '400':
           content:
             application/json:
@@ -48348,7 +48544,7 @@ components:
           type: boolean
         scaling_factor:
           description: |
-            The scaling factor to use when encoding values. This property is applicable when `type` is `scaled_float`. Values will be multiplied by this factor at index time and rounded to the closest long value. 
+            The scaling factor to use when encoding values. This property is applicable when `type` is `scaled_float`. Values will be multiplied by this factor at index time and rounded to the closest long value.
           type: integer
         type:
           description: Specifies the data type for the field.
@@ -59283,6 +59479,8 @@ components:
           type: string
         installed:
           type: boolean
+        metadata:
+          $ref: '#/components/schemas/Security_Entity_Analytics_API_Metadata'
         resource:
           $ref: '#/components/schemas/Security_Entity_Analytics_API_EngineComponentResource'
       required:
@@ -59535,6 +59733,8 @@ components:
       example: 1h
       pattern: ^[1-9]\d*[smh]$
       type: string
+    Security_Entity_Analytics_API_Metadata:
+      $ref: '#/components/schemas/Security_Entity_Analytics_API_TransformStatsMetadata'
     Security_Entity_Analytics_API_RiskEngineScheduleNowErrorResponse:
       type: object
       properties:
@@ -59649,6 +59849,59 @@ components:
       required:
         - status_code
         - message
+    Security_Entity_Analytics_API_TransformStatsMetadata:
+      type: object
+      properties:
+        delete_time_in_ms:
+          type: integer
+        documents_deleted:
+          type: integer
+        documents_indexed:
+          type: integer
+        documents_processed:
+          type: integer
+        exponential_avg_checkpoint_duration_ms:
+          type: integer
+        exponential_avg_documents_indexed:
+          type: integer
+        exponential_avg_documents_processed:
+          type: integer
+        index_failures:
+          type: integer
+        index_time_in_ms:
+          type: integer
+        index_total:
+          type: integer
+        pages_processed:
+          type: integer
+        processing_time_in_ms:
+          type: integer
+        processing_total:
+          type: integer
+        search_failures:
+          type: integer
+        search_time_in_ms:
+          type: integer
+        search_total:
+          type: integer
+        trigger_count:
+          type: integer
+      required:
+        - pages_processed
+        - documents_processed
+        - documents_indexed
+        - trigger_count
+        - index_time_in_ms
+        - index_total
+        - index_failures
+        - search_time_in_ms
+        - search_total
+        - search_failures
+        - processing_time_in_ms
+        - processing_total
+        - exponential_avg_checkpoint_duration_ms
+        - exponential_avg_documents_indexed
+        - exponential_avg_documents_processed
     Security_Entity_Analytics_API_UserEntity:
       type: object
       properties:
@@ -63794,7 +64047,7 @@ components:
           items:
             type: string
           description: |
-            A list of "carbon copy" email addresses. Addresses can be specified in `user@host-name` format or in name `<user@host-name>` format 
+            A list of "carbon copy" email addresses. Addresses can be specified in `user@host-name` format or in name `<user@host-name>` format
         message:
           type: string
           description: The email message text. Markdown format is supported.

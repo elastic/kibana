@@ -132,14 +132,14 @@ export const deleteFirstRule = () => {
 };
 
 export const deleteRuleFromDetailsPage = () => {
-  cy.get(POPOVER_ACTIONS_TRIGGER_BUTTON).click();
+  cy.get(POPOVER_ACTIONS_TRIGGER_BUTTON).click({ force: true });
   cy.get(RULE_DETAILS_DELETE_BTN).click();
   cy.get(RULE_DETAILS_DELETE_BTN).should('not.exist');
   cy.get(CONFIRM_DELETE_RULE_BTN).click();
 };
 
 export const manualRuleRunFromDetailsPage = () => {
-  cy.get(POPOVER_ACTIONS_TRIGGER_BUTTON).click();
+  cy.get(POPOVER_ACTIONS_TRIGGER_BUTTON).click({ force: true });
   cy.get(RULE_DETAILS_MANUAL_RULE_RUN_BTN).click();
   cy.get(RULE_DETAILS_MANUAL_RULE_RUN_BTN).should('not.exist');
   cy.get(MODAL_CONFIRMATION_BTN).click();
@@ -201,6 +201,7 @@ export const filterByElasticRules = () => {
 
 export const filterByCustomRules = () => {
   cy.get(CUSTOM_RULES_BTN).click();
+  waitForRulesTableToBeRefreshed();
 };
 
 export const filterByEnabledRules = () => {

@@ -47,7 +47,11 @@ interface NewBaseOutput {
   proxy_id?: string | null;
   shipper?: ShipperOutput | null;
   allow_edit?: string[];
-  secrets?: {};
+  secrets?: {
+    ssl?: {
+      key?: SOSecret;
+    };
+  };
   preset?: OutputPreset;
 }
 
@@ -61,6 +65,9 @@ export interface NewRemoteElasticsearchOutput extends NewBaseOutput {
   secrets?: {
     service_token?: SOSecret;
     kibana_api_key?: SOSecret;
+    ssl?: {
+      key?: SOSecret;
+    };
   };
   sync_integrations?: boolean;
   kibana_url?: string | null;
