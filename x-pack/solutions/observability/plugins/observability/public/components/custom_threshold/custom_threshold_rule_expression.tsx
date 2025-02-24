@@ -34,6 +34,7 @@ import {
 } from '@kbn/triggers-actions-ui-plugin/public';
 
 import { COMPARATORS } from '@kbn/alerting-comparators';
+import { ThresholdTemplates } from './components/threshold_templates/threshold_templates';
 import { useKibana } from '../../utils/kibana_react';
 import { Aggregators } from '../../../common/custom_threshold_rule/types';
 import { TimeUnitChar } from '../../../common/utils/formatters/duration';
@@ -412,6 +413,7 @@ export default function Expressions(props: Props) {
           onChangeMetaData({ ...metadata, adHocDataViewList });
         }}
       />
+      <ThresholdTemplates setRuleParams={setRuleParams} />
       {dataViewTimeFieldError && (
         <EuiFormErrorText data-test-subj="thresholdRuleDataViewErrorNoTimestamp">
           {dataViewTimeFieldError}
