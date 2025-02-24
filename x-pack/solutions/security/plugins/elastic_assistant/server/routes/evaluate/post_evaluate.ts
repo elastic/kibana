@@ -290,7 +290,7 @@ export const postEvaluateRoute = (
                   },
                 };
 
-              const contentReferencesStore = newContentReferencesStore()
+              const contentReferencesStore = newContentReferencesStore();
 
               // Fetch any applicable tools that the source plugin may have registered
               const assistantToolParams: AssistantToolParams = {

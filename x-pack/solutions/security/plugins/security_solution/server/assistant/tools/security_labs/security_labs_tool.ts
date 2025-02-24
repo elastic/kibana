@@ -52,13 +52,13 @@ export const SECURITY_LABS_KNOWLEDGE_BASE_TOOL: AssistantTool = {
         });
 
         const reference = contentReferencesStore.add((p) =>
-            knowledgeBaseReference(p.id, 'Elastic Security Labs content', 'securityLabsId')
-          );
+          knowledgeBaseReference(p.id, 'Elastic Security Labs content', 'securityLabsId')
+        );
 
         // TODO: Token pruning
         const result = JSON.stringify(docs).substring(0, 20000);
 
-        const citation = contentReferenceString(reference)
+        const citation = contentReferenceString(reference);
         return `${result}\n${citation}`;
       },
       tags: ['security-labs', 'knowledge-base'],

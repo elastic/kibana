@@ -113,7 +113,7 @@ export const postActionsConnectorExecuteRoute = (
             await assistantContext.getAIAssistantConversationsDataClient();
           const promptsDataClient = await assistantContext.getAIAssistantPromptsDataClient();
 
-          const contentReferencesStore = newContentReferencesStore()
+          const contentReferencesStore = newContentReferencesStore();
 
           onLlmResponse = async (
             content: string,

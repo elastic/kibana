@@ -75,16 +75,13 @@ export const PRODUCT_DOCUMENTATION_TOOL: AssistantTool = {
           functionCalling: 'auto',
         });
 
+        const enrichedDocuments = response.documents.map(enrichDocument(contentReferencesStore));
 
-          const enrichedDocuments = response.documents.map(enrichDocument(contentReferencesStore));
-
-          return {
-            content: {
-              documents: enrichedDocuments,
-            },
-          };
-
-
+        return {
+          content: {
+            documents: enrichedDocuments,
+          },
+        };
       },
       tags: ['product-documentation'],
       // TODO: Remove after ZodAny is fixed https://github.com/langchain-ai/langchainjs/blob/main/langchain-core/src/tools.ts
