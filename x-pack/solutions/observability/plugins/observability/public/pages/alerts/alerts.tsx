@@ -7,7 +7,7 @@
 
 import React, { useEffect, useMemo, useState } from 'react';
 import { BrushEndListener, XYBrushEvent } from '@elastic/charts';
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { BoolQuery, Filter } from '@kbn/es-query';
 import { usePerformanceContext } from '@kbn/ebt-tools';
 import { i18n } from '@kbn/i18n';
@@ -286,6 +286,7 @@ function InternalAlertsPage() {
                 uiSettings,
               }}
             />
+            <EuiSpacer size="s" />
           </EuiFlexItem>
           <EuiFlexItem>
             <AlertSummaryWidget

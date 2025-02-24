@@ -98,7 +98,7 @@ describe('ObservabilityAlertSearchBar', () => {
       {
         query: {
           match_phrase: {
-            'kibana.alert.rule.uuid': 'ALERT_UUID',
+            'kibana.alert.rule.uuid': ALERT_UUID,
           },
         },
         meta: {},
@@ -129,7 +129,7 @@ describe('ObservabilityAlertSearchBar', () => {
           },
           {
             match_phrase: {
-              'kibana.alert.rule.uuid': 'ALERT_UUID',
+              'kibana.alert.rule.uuid': ALERT_UUID,
             },
           },
         ],
@@ -150,7 +150,7 @@ describe('ObservabilityAlertSearchBar', () => {
       {
         query: {
           match_phrase: {
-            'kibana.alert.rule.uuid': 'ALERT_UUID',
+            'kibana.alert.rule.uuid': ALERT_UUID,
           },
         },
         meta: {},
@@ -181,7 +181,7 @@ describe('ObservabilityAlertSearchBar', () => {
           },
           {
             match_phrase: {
-              'kibana.alert.rule.uuid': 'ALERT_UUID',
+              'kibana.alert.rule.uuid': ALERT_UUID,
             },
           },
         ],
