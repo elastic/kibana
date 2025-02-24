@@ -63,10 +63,12 @@ export const updateMonitorAPI = async ({
 };
 
 export const fetchProjectAPIKey = async (
-  accessToElasticManagedLocations: boolean
+  accessToElasticManagedLocations: boolean,
+  spaces: string[]
 ): Promise<ProjectAPIKeyResponse> => {
   return await apiService.get(SYNTHETICS_API_URLS.SYNTHETICS_PROJECT_APIKEY, {
     accessToElasticManagedLocations,
+    spaces: JSON.stringify(spaces),
   });
 };
 
