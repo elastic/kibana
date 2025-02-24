@@ -13,16 +13,23 @@ import {
 import { cloneDeep } from 'lodash';
 import { IScopedClusterClient } from '@kbn/core/server';
 import { State } from './state';
-import { StreamActiveRecord, StreamChangeStatus, ValidationResult } from './types';
+import {
+  StreamActiveRecord,
+  StreamChangeStatus,
+  StreamCommitStatus,
+  ValidationResult,
+} from './types';
 
 export class GroupStream implements StreamActiveRecord {
   definition: GroupStreamDefinition;
   changeStatus: StreamChangeStatus;
+  commitStatus: StreamCommitStatus;
 
   constructor(definition: GroupStreamDefinition) {
     // What about the assets?
     this.definition = definition;
     this.changeStatus = 'unchanged';
+    this.commitStatus = 'uncomitted';
   }
 
   clone(): StreamActiveRecord {
@@ -33,7 +40,7 @@ export class GroupStream implements StreamActiveRecord {
     this.changeStatus = 'deleted';
   }
 
-  update(newDefinition: StreamDefinition) {
+  update(newDefinition: StreamDefinition): void {
     if (isGroupStreamDefinition(newDefinition)) {
       this.definition = newDefinition; // Perhaps it should avoid this if the definition are the same?
       this.changeStatus = 'upserted';
@@ -48,5 +55,9 @@ export class GroupStream implements StreamActiveRecord {
     scopedClusterClient: IScopedClusterClient
   ): Promise<ValidationResult> {
     return { isValid: true, errors: [] };
+  }
+
+  async commit(): Promise<void> {
+    return;
   }
 }

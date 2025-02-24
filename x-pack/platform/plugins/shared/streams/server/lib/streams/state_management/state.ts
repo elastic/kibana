@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { IScopedClusterClient } from '@kbn/core/server';
+import { IScopedClusterClient, Logger } from '@kbn/core/server';
 import { StreamsStorageClient } from '../service';
 import { StreamActiveRecord, StreamChange, ValidationResult } from './types';
 import { streamFromDefinition } from './stream_from_definition';
@@ -77,16 +77,51 @@ export class State {
     return this.streams.all().filter((stream) => stream.changeStatus !== 'unchanged');
   }
 
-  async commitChanges() {
-    // Based on .changes(), go off and do the actual work in ES
+  async commitChanges(
+    storageClient: StreamsStorageClient,
+    logger: Logger,
+    scopedClusterClient: IScopedClusterClient,
+    isServerless: boolean
+  ) {
+    await Promise.all(
+      this.changes().map((stream) =>
+        stream.commit(storageClient, logger, scopedClusterClient, isServerless)
+      )
+    );
   }
 
-  async attemptRollback(startingState: State) {
-    // Find what changes should have been applied with .changes()
-    // Then ask each stream to validate its current state and try to rollback those that did a change
-    // To match what was in startingState
-    // I wonder if as part of commitChanges I should change the status to "committed"
-    throw new Error('Method not implemented.');
+  async attemptRollback(
+    startingState: State,
+    storageClient: StreamsStorageClient,
+    logger: Logger,
+    scopedClusterClient: IScopedClusterClient,
+    isServerless: boolean
+  ) {
+    const changedStreams = this.changes().filter((stream) => stream.commitStatus !== 'uncomitted');
+
+    const changes = changedStreams
+      .map((stream) => {
+        if (stream.changeStatus === 'upserted') {
+          if (startingState.streams.has(stream.definition.name)) {
+            // Stream was updated, revert to previous state
+            return startingState.streams.get(stream.definition.name);
+          } else {
+            // Stream was created, delete it
+            stream.markForDeletion();
+            return stream;
+          }
+        } else if (stream.changeStatus === 'deleted') {
+          // Stream was deleted, revert to previous state
+          return startingState.streams.get(stream.definition.name);
+        }
+      })
+      .filter((maybeStream): maybeStream is StreamActiveRecord => maybeStream !== undefined);
+
+    await Promise.all(
+      changes.map((stream) =>
+        stream.commit(storageClient, logger, scopedClusterClient, isServerless)
+      )
+    );
   }
 
   static async currentState(storageClient: StreamsStorageClient): Promise<State> {

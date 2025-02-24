@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-import { IScopedClusterClient } from '@kbn/core/server';
+import { IScopedClusterClient, Logger } from '@kbn/core/server';
 import {
   GroupStreamUpsertRequest,
   StreamDefinition,
   WiredStreamUpsertRequest,
 } from '@kbn/streams-schema';
 import { State } from './state'; // Does this create a circular dependency?
+import { StreamsStorageClient } from '../service';
 
 export interface ValidationResult {
   isValid: boolean;
@@ -19,12 +20,14 @@ export interface ValidationResult {
 }
 
 export type StreamChangeStatus = 'unchanged' | 'upserted' | 'deleted';
+export type StreamCommitStatus = 'uncomitted' | 'committing' | 'committed';
 
 // Interface or abstract class to make somethings private?
 // Should all of these methods be async from the start?
 export interface StreamActiveRecord {
   definition: StreamDefinition;
   changeStatus: StreamChangeStatus;
+  commitStatus: StreamCommitStatus;
   clone(): StreamActiveRecord;
   markForDeletion(): void;
   update(newDefinition: StreamDefinition, desiredState: State, startingState: State): void;
@@ -33,6 +36,12 @@ export interface StreamActiveRecord {
     startingState: State,
     scopedClusterClient: IScopedClusterClient
   ): Promise<ValidationResult>;
+  commit(
+    storageClient: StreamsStorageClient,
+    logger: Logger,
+    scopedClusterClient: IScopedClusterClient,
+    isServerless: boolean
+  ): Promise<void>;
 }
 
 interface WiredStreamUpsertChange {

@@ -134,7 +134,7 @@ export class StreamsClient {
 
     if (!validationResult.isValid) {
       // How do these translate to HTTP errors?
-      return validationResult.errors;
+      throw new Error(validationResult.errors.join(', '));
     }
 
     if (dryRun) {
@@ -142,10 +142,20 @@ export class StreamsClient {
       return desiredState.changes();
     } else {
       try {
-        await desiredState.commitChanges();
+        await desiredState.commitChanges(
+          this.dependencies.storageClient,
+          this.dependencies.logger,
+          this.dependencies.scopedClusterClient,
+          this.dependencies.isServerless
+        );
       } catch (error) {
-        await desiredState.attemptRollback(startingState);
-        // Rollback to currentState
+        await desiredState.attemptRollback(
+          startingState,
+          this.dependencies.storageClient,
+          this.dependencies.logger,
+          this.dependencies.scopedClusterClient,
+          this.dependencies.isServerless
+        );
       }
     }
   }
@@ -155,6 +165,12 @@ export class StreamsClient {
    * If it is already enabled, it is a noop.
    */
   async enableStreams(): Promise<EnableStreamsResponse> {
+    const isEnabled = await this.isStreamsEnabled();
+
+    if (isEnabled) {
+      return { acknowledged: true, result: 'noop' };
+    }
+
     await this.attemptChanges([
       {
         target: rootStreamDefinition.name,
@@ -165,20 +181,6 @@ export class StreamsClient {
         },
       },
     ]);
-
-    const isEnabled = await this.isStreamsEnabled();
-
-    if (isEnabled) {
-      return { acknowledged: true, result: 'noop' };
-    }
-
-    await this.upsertStream({
-      request: {
-        dashboards: [],
-        stream: omit(rootStreamDefinition, 'name'),
-      },
-      name: rootStreamDefinition.name,
-    });
 
     return { acknowledged: true, result: 'created' };
   }
@@ -197,9 +199,12 @@ export class StreamsClient {
       return { acknowledged: true, result: 'noop' };
     }
 
-    const definition = await this.getStream(LOGS_ROOT_STREAM_NAME);
-
-    await this.deleteStreamFromDefinition(definition);
+    await this.attemptChanges([
+      {
+        type: 'delete',
+        target: LOGS_ROOT_STREAM_NAME,
+      },
+    ]);
 
     const { assetClient, storageClient } = this.dependencies;
     await Promise.all([assetClient.clean(), storageClient.clean()]);

@@ -11,18 +11,28 @@ import {
   isWiredStreamDefinition,
 } from '@kbn/streams-schema';
 import { cloneDeep } from 'lodash';
-import { IScopedClusterClient } from '@kbn/core/server';
+import { IScopedClusterClient, Logger } from '@kbn/core/server';
 import { State } from './state';
-import { StreamActiveRecord, StreamChangeStatus, ValidationResult } from './types';
+import {
+  StreamActiveRecord,
+  StreamChangeStatus,
+  StreamCommitStatus,
+  ValidationResult,
+} from './types';
+import { StreamsStorageClient } from '../service';
+import { syncWiredStreamDefinitionObjects } from '../helpers/sync';
+import { deleteStreamObjects } from '../stream_crud';
 
 export class WiredStream implements StreamActiveRecord {
   definition: WiredStreamDefinition;
   changeStatus: StreamChangeStatus;
+  commitStatus: StreamCommitStatus;
 
   constructor(definition: WiredStreamDefinition) {
     // What about the assets?
     this.definition = definition;
     this.changeStatus = 'unchanged';
+    this.commitStatus = 'uncomitted';
   }
 
   clone(): StreamActiveRecord {
@@ -86,5 +96,39 @@ export class WiredStream implements StreamActiveRecord {
     }
 
     return { isValid: true, errors: [] };
+  }
+
+  async commit(
+    storageClient: StreamsStorageClient,
+    logger: Logger,
+    scopedClusterClient: IScopedClusterClient,
+    isServerless: boolean
+  ): Promise<void> {
+    this.commitStatus = 'committing';
+
+    if (this.changeStatus === 'upserted') {
+      await storageClient.index({
+        id: this.definition.name,
+        document: this.definition,
+      });
+
+      await syncWiredStreamDefinitionObjects({
+        definition: this.definition,
+        logger,
+        scopedClusterClient,
+        isServerless,
+      });
+      // Also update lifecycle
+
+      // Update assets
+    } else if (this.changeStatus === 'deleted') {
+      await deleteStreamObjects({ scopedClusterClient, name: this.definition.name, logger });
+
+      // Update assets
+
+      await storageClient.delete({ id: this.definition.name });
+    }
+
+    this.commitStatus = 'committed';
   }
 }
