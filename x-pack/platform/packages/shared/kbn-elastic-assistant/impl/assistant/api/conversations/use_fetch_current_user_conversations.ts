@@ -109,7 +109,7 @@ export const useFetchCurrentUserConversations = ({
     [fields, filter, http, page, perPage, signal, sortField, sortOrder]
   );
 
-  const getNextPageParam = useCallback(() => {
+  const getNextPageParam = useCallback((lastPage: FetchConversationsResponse) => {
     const totalPages = Math.max(1, Math.ceil(lastPage.total / lastPage.perPage));
     if (totalPages === lastPage.page) {
       return;
