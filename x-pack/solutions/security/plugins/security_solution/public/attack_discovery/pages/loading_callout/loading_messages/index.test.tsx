@@ -5,48 +5,18 @@
  * 2.0.
  */
 
-import { defaultAssistantFeatures } from '@kbn/elastic-assistant-common';
 import { render, screen } from '@testing-library/react';
 import React from 'react';
 
 import { LoadingMessages } from '.';
 import { TestProviders } from '../../../../common/mock';
 
-jest.mock('@kbn/elastic-assistant-common', () => {
-  const original = jest.requireActual('@kbn/elastic-assistant-common');
-
-  return {
-    ...original,
-    defaultAssistantFeatures: {
-      ...original.defaultAssistantFeatures,
-      attackDiscoveryAlertFiltering: jest.mocked<boolean>(false), // <-- feature flag is off by default
-    },
-  };
-});
-
 describe('LoadingMessages', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-
-    (defaultAssistantFeatures.attackDiscoveryAlertFiltering as jest.Mocked<boolean>) = false; // reset feature flag to off
   });
 
-  it('renders the expected loading message, when the attackDiscoveryAlertFiltering feature flag is off', () => {
-    render(
-      <TestProviders>
-        <LoadingMessages alertsContextCount={20} localStorageAttackDiscoveryMaxAlerts={undefined} />
-      </TestProviders>
-    );
-    const aiCurrentlyAnalyzing = screen.getByTestId('aisCurrentlyAnalyzing');
-
-    expect(aiCurrentlyAnalyzing).toHaveTextContent(
-      'AI is analyzing up to 20 alerts in the last 24 hours to generate discoveries.'
-    );
-  });
-
-  it('renders a special-case loading message for the default relative range (of the last 24 hours), when attackDiscoveryAlertFiltering is on', () => {
-    (defaultAssistantFeatures.attackDiscoveryAlertFiltering as jest.Mocked<boolean>) = true; // <-- feature flag is on
-
+  it('renders a special-case loading message for the default relative range (of the last 24 hours)', () => {
     render(
       <TestProviders>
         <LoadingMessages
@@ -64,9 +34,7 @@ describe('LoadingMessages', () => {
     );
   });
 
-  it('renders the expected loading message for a NON-default relative date range, when attackDiscoveryAlertFiltering is on', () => {
-    (defaultAssistantFeatures.attackDiscoveryAlertFiltering as jest.Mocked<boolean>) = true;
-
+  it('renders the expected loading message for a NON-default relative date range', () => {
     render(
       <TestProviders>
         <LoadingMessages
@@ -84,9 +52,7 @@ describe('LoadingMessages', () => {
     );
   });
 
-  it('renders the expected loading message for an absolute date range, when attackDiscoveryAlertFiltering is on', () => {
-    (defaultAssistantFeatures.attackDiscoveryAlertFiltering as jest.Mocked<boolean>) = true;
-
+  it('renders the expected loading message for an absolute date range', () => {
     render(
       <TestProviders>
         <LoadingMessages
@@ -105,8 +71,6 @@ describe('LoadingMessages', () => {
   });
 
   it('renders the expected loading message with the default max alerts (from local storage) when alertsContextCount is null', () => {
-    (defaultAssistantFeatures.attackDiscoveryAlertFiltering as jest.Mocked<boolean>) = true;
-
     render(
       <TestProviders>
         <LoadingMessages
