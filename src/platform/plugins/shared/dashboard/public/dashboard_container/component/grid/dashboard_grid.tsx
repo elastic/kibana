@@ -127,11 +127,12 @@ export const DashboardGrid = ({
       <GridLayout
         css={layoutStyles}
         layout={currentLayout}
-        gridSettings={{
-          gutterSize: useMargins ? DASHBOARD_MARGIN_SIZE : 0,
-          rowHeight: DASHBOARD_GRID_HEIGHT,
-          columnCount: DASHBOARD_GRID_COLUMN_COUNT,
-        }}
+        gridSettings={'none'}
+        // gridSettings={{
+        //   gutterSize: useMargins ? DASHBOARD_MARGIN_SIZE : 0,
+        //   rowHeight: DASHBOARD_GRID_HEIGHT,
+        //   columnCount: DASHBOARD_GRID_COLUMN_COUNT,
+        // }}
         useCustomDragHandle={true}
         renderPanelContents={renderPanelContents}
         onLayoutChange={onLayoutChange}
@@ -142,11 +143,11 @@ export const DashboardGrid = ({
   }, [
     layoutStyles,
     currentLayout,
-    useMargins,
     renderPanelContents,
     onLayoutChange,
     expandedPanelId,
     viewMode,
+    useMargins,
   ]);
 
   const { dashboardClasses, dashboardStyles } = useMemo(() => {

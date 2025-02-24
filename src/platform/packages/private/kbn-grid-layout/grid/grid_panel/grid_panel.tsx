@@ -175,6 +175,14 @@ const panelStyles = ({ euiTheme }: UseEuiTheme) =>
     gridColumnEnd: `calc(var(--kbnGridPanelX) + 1 + var(--kbnGridPanelWidth))`,
     gridRowStart: `calc(var(--kbnGridPanelY) + 1)`,
     gridRowEnd: `calc(var(--kbnGridPanelY) + 1 + var(--kbnGridPanelHeight))`,
+    '.kbnGrid--freeform &': {
+      position: 'absolute',
+      gridArea: 'auto', // shortcut to set all grid styles to `auto`
+      left: 'calc(var(--kbnGridPanelX) * 1px)',
+      top: 'calc(var(--kbnGridPanelY) * 1px)',
+      width: `calc(1px * var(--kbnGridPanelWidth)) `,
+      height: `calc(1px * var(--kbnGridPanelHeight)) `,
+    },
     '&.kbnGridPanel--active': {
       zIndex: euiTheme.levels.modal,
       width: `calc(1px * var(--kbnGridPanelWidth)) `,

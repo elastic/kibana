@@ -33,18 +33,20 @@ export interface GridRowData {
 
 export type GridLayoutData = GridRowData[];
 
-export interface GridSettings {
-  gutterSize: number;
-  rowHeight: number;
-  columnCount: number;
-}
+export type GridSettings =
+  | {
+      gutterSize: number;
+      rowHeight: number;
+      columnCount: number;
+    }
+  | 'none';
 
 /**
  * The runtime settings for the grid, including the pixel width of each column
  * which is calculated on the fly based on the grid settings and the width of
  * the containing element.
  */
-export type RuntimeGridSettings = GridSettings & { columnPixelWidth: number };
+export type RuntimeGridSettings = (GridSettings & { columnPixelWidth: number }) | 'none';
 
 export interface ActivePanel {
   id: string;

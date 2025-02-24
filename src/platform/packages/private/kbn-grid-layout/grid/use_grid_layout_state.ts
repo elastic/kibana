@@ -66,20 +66,36 @@ export const useGridLayoutState = ({
 
   const runtimeSettings$ = useMemo(
     () =>
-      new BehaviorSubject<RuntimeGridSettings>({
-        ...gridSettings,
-        columnPixelWidth: 0,
-      }),
+      new BehaviorSubject<RuntimeGridSettings>(
+        gridSettings === 'none'
+          ? gridSettings
+          : {
+              ...gridSettings,
+              columnPixelWidth: 0,
+            }
+      ),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     []
   );
   useEffect(() => {
     const runtimeSettings = runtimeSettings$.getValue();
-    if (!deepEqual(gridSettings, pick(runtimeSettings, ['gutterSize', 'rowHeight', 'columnCount'])))
+    if (runtimeSettings !== 'none' && gridSettings === 'none') {
+      runtimeSettings$.next('none');
+    } else if (runtimeSettings === 'none' && gridSettings !== 'none') {
       runtimeSettings$.next({
         ...gridSettings,
-        columnPixelWidth: runtimeSettings.columnPixelWidth,
+        columnPixelWidth: 0,
       });
+    } else if (
+      runtimeSettings !== 'none' &&
+      gridSettings !== 'none' &&
+      !deepEqual(gridSettings, pick(runtimeSettings, ['gutterSize', 'rowHeight', 'columnCount']))
+    ) {
+      runtimeSettings$.next({
+        ...gridSettings,
+        columnPixelWidth: runtimeSettings?.columnPixelWidth ?? 0,
+      });
+    }
   }, [gridSettings, runtimeSettings$]);
 
   const gridLayoutStateManager = useMemo(() => {
@@ -124,6 +140,8 @@ export const useGridLayoutState = ({
       .pipe(debounceTime(250))
       .subscribe(([dimensions, currentAccessMode]) => {
         const currentRuntimeSettings = gridLayoutStateManager.runtimeSettings$.getValue();
+        if (currentRuntimeSettings === 'none') return;
+
         const elementWidth = dimensions.width ?? 0;
         const columnPixelWidth =
           (elementWidth -

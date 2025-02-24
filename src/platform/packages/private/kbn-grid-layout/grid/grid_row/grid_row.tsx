@@ -106,7 +106,7 @@ export const GridRow = React.memo(({ rowIndex }: GridRowProps) => {
 
       const columnCountSubscription = gridLayoutStateManager.runtimeSettings$
         .pipe(
-          map(({ columnCount }) => columnCount),
+          map((runtimeSettings) => (runtimeSettings === 'none' ? 0 : runtimeSettings.columnCount)),
           distinctUntilChanged()
         )
         .subscribe((columnCount) => {
@@ -163,6 +163,9 @@ const styles = {
     height: '100%',
   }),
   grid: css({
+    '.kbnGrid--freeform &': {
+      display: 'block',
+    },
     position: 'relative',
     justifyItems: 'stretch',
     display: 'grid',

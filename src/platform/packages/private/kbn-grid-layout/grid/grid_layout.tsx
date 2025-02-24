@@ -108,8 +108,15 @@ export const GridLayout = ({
     const gridLayoutClassSubscription = combineLatest([
       gridLayoutStateManager.accessMode$,
       gridLayoutStateManager.isMobileView$,
-    ]).subscribe(([currentAccessMode, isMobileView]) => {
+      gridLayoutStateManager.runtimeSettings$,
+    ]).subscribe(([currentAccessMode, isMobileView, runtimeSettings]) => {
       if (!layoutRef) return;
+
+      if (runtimeSettings === 'none') {
+        layoutRef.current?.classList.add('kbnGrid--freeform');
+      } else {
+        layoutRef.current?.classList.remove('kbnGrid--freeform');
+      }
 
       if (isMobileView) {
         layoutRef.current?.classList.add('kbnGrid--mobileView');
@@ -181,7 +188,7 @@ const styles = {
   singleColumn: css({
     '&.kbnGrid--mobileView': {
       '.kbnGridRow': {
-        gridTemplateAreas: '100%',
+        gridTemplateColumns: '100%',
         gridTemplateRows: 'auto',
         gridAutoFlow: 'row',
         gridAutoRows: 'auto',
