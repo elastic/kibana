@@ -268,6 +268,15 @@ export class Plugin implements ISecuritySolutionPlugin {
       });
     }
 
+
+    registerPrivilegeMonitoringTask({
+      getStartServices: core.getStartServices,
+      taskManager: plugins.taskManager,
+      logger: this.logger,
+      kibanaVersion: pluginContext.env.packageInfo.version,
+      experimentalFeatures,
+    })
+
     const requestContextFactory = new RequestContextFactory({
       config,
       logger,
