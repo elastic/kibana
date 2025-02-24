@@ -223,7 +223,7 @@ function MetadataRow({
   return (
     <EuiFlexGroup alignItems="center" gutterSize="xl" responsive={false}>
       <EuiFlexItem grow={1}>
-        <EuiFlexGroup alignItems="center">
+        <EuiFlexGroup gutterSize="xs" alignItems="center">
           <EuiFlexItem grow={false}>
             <b>{metadata}</b>
           </EuiFlexItem>
