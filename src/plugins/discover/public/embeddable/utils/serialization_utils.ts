@@ -20,6 +20,7 @@ import {
 } from '@kbn/saved-search-plugin/common';
 import { SavedSearchUnwrapResult } from '@kbn/saved-search-plugin/public';
 
+import type { DynamicActionsSerializedState } from '@kbn/embeddable-enhanced-plugin/public/plugin';
 import { extract, inject } from '../../../common/embeddable/search_inject_extract';
 import { DiscoverServices } from '../../build_services';
 import {
@@ -77,6 +78,7 @@ export const serializeState = async ({
   savedSearch,
   serializeTitles,
   serializeTimeRange,
+  serializeDynamicActions,
   savedObjectId,
   discoverServices,
 }: {
@@ -85,6 +87,7 @@ export const serializeState = async ({
   savedSearch: SavedSearch;
   serializeTitles: () => SerializedTitles;
   serializeTimeRange: () => SerializedTimeRange;
+  serializeDynamicActions: (() => DynamicActionsSerializedState) | undefined;
   savedObjectId?: string;
   discoverServices: DiscoverServices;
 }): Promise<SerializedPanelState<SearchEmbeddableSerializedState>> => {
@@ -110,6 +113,7 @@ export const serializeState = async ({
         // Serialize the current dashboard state into the panel state **without** updating the saved object
         ...serializeTitles(),
         ...serializeTimeRange(),
+        ...serializeDynamicActions?.(),
         ...overwriteState,
       },
       // No references to extract for by-reference embeddable since all references are stored with by-reference saved object
