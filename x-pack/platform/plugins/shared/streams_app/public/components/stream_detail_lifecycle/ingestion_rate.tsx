@@ -243,5 +243,5 @@ function ChartBarSeries({
 }
 
 function toLegendFormat(date: moment.Moment) {
-  return date.format('MMM DD, YYYY @ DD:mm:ss');
+  return date.format('MMM DD, YYYY @ HH:mm:ss');
 }
