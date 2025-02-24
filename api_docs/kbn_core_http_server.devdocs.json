@@ -3789,14 +3789,6 @@
                 "path": "x-pack/solutions/observability/plugins/observability/server/lib/annotations/register_annotation_apis.ts"
               },
               {
-                "plugin": "triggersActionsUi",
-                "path": "x-pack/platform/plugins/shared/triggers_actions_ui/server/routes/health.ts"
-              },
-              {
-                "plugin": "triggersActionsUi",
-                "path": "x-pack/platform/plugins/shared/triggers_actions_ui/server/routes/config.ts"
-              },
-              {
                 "plugin": "metricsDataAccess",
                 "path": "x-pack/solutions/observability/plugins/metrics_data_access/server/lib/adapters/framework/kibana_framework_adapter.ts"
               },
@@ -3807,6 +3799,14 @@
               {
                 "plugin": "searchprofiler",
                 "path": "x-pack/platform/plugins/shared/searchprofiler/server/routes/profile.ts"
+              },
+              {
+                "plugin": "triggersActionsUi",
+                "path": "x-pack/platform/plugins/shared/triggers_actions_ui/server/routes/health.ts"
+              },
+              {
+                "plugin": "triggersActionsUi",
+                "path": "x-pack/platform/plugins/shared/triggers_actions_ui/server/routes/config.ts"
               },
               {
                 "plugin": "stackConnectors",
@@ -4023,6 +4023,10 @@
               {
                 "plugin": "searchIndices",
                 "path": "x-pack/solutions/search/plugins/search_indices/server/routes/status.ts"
+              },
+              {
+                "plugin": "searchIndices",
+                "path": "x-pack/solutions/search/plugins/search_indices/server/routes/onboarding.ts"
               },
               {
                 "plugin": "searchInferenceEndpoints",
@@ -5917,6 +5921,14 @@
                 "path": "x-pack/solutions/observability/plugins/observability/server/lib/annotations/register_annotation_apis.ts"
               },
               {
+                "plugin": "metricsDataAccess",
+                "path": "x-pack/solutions/observability/plugins/metrics_data_access/server/lib/adapters/framework/kibana_framework_adapter.ts"
+              },
+              {
+                "plugin": "searchprofiler",
+                "path": "x-pack/platform/plugins/shared/searchprofiler/server/routes/profile.ts"
+              },
+              {
                 "plugin": "triggersActionsUi",
                 "path": "x-pack/platform/plugins/shared/triggers_actions_ui/server/data/routes/time_series_query.ts"
               },
@@ -5927,14 +5939,6 @@
               {
                 "plugin": "triggersActionsUi",
                 "path": "x-pack/platform/plugins/shared/triggers_actions_ui/server/data/routes/indices.ts"
-              },
-              {
-                "plugin": "metricsDataAccess",
-                "path": "x-pack/solutions/observability/plugins/metrics_data_access/server/lib/adapters/framework/kibana_framework_adapter.ts"
-              },
-              {
-                "plugin": "searchprofiler",
-                "path": "x-pack/platform/plugins/shared/searchprofiler/server/routes/profile.ts"
               },
               {
                 "plugin": "stackConnectors",
@@ -13517,6 +13521,10 @@
               {
                 "plugin": "securitySolution",
                 "path": "x-pack/solutions/security/plugins/security_solution/server/lib/siem_migrations/rules/api/privileges/get_missing_privileges.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/asset_inventory/routes/status.ts"
               },
               {
                 "plugin": "securitySolution",

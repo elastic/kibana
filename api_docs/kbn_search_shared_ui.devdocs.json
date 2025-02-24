@@ -71,72 +71,6 @@
       },
       {
         "parentPluginId": "@kbn/search-shared-ui",
-        "id": "def-public.EuiIconPlugs",
-        "type": "Function",
-        "tags": [],
-        "label": "EuiIconPlugs",
-        "description": [],
-        "signature": [
-          "({ title, titleId, ...props }: React.SVGProps<SVGSVGElement> & SVGRProps) => React.JSX.Element"
-        ],
-        "path": "x-pack/solutions/search/packages/shared-ui/src/icons/EuiIconPlugs.tsx",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/search-shared-ui",
-            "id": "def-public.EuiIconPlugs.$1",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "{ title, titleId, ...props }",
-            "description": [],
-            "signature": [
-              "React.SVGProps<SVGSVGElement> & SVGRProps"
-            ],
-            "path": "x-pack/solutions/search/packages/shared-ui/src/icons/EuiIconPlugs.tsx",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/search-shared-ui",
-        "id": "def-public.EuiIconWeb",
-        "type": "Function",
-        "tags": [],
-        "label": "EuiIconWeb",
-        "description": [],
-        "signature": [
-          "({ title, titleId, ...props }: React.SVGProps<SVGSVGElement> & SVGRProps) => React.JSX.Element"
-        ],
-        "path": "x-pack/solutions/search/packages/shared-ui/src/icons/EuiIconWeb.tsx",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/search-shared-ui",
-            "id": "def-public.EuiIconWeb.$1",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "{ title, titleId, ...props }",
-            "description": [],
-            "signature": [
-              "React.SVGProps<SVGSVGElement> & SVGRProps"
-            ],
-            "path": "x-pack/solutions/search/packages/shared-ui/src/icons/EuiIconWeb.tsx",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/search-shared-ui",
         "id": "def-public.FormInfoField",
         "type": "Function",
         "tags": [],
@@ -204,7 +138,38 @@
     ],
     "interfaces": [],
     "enums": [],
-    "misc": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/search-shared-ui",
+        "id": "def-public.WORKFLOW_LOCALSTORAGE_KEY",
+        "type": "string",
+        "tags": [],
+        "label": "WORKFLOW_LOCALSTORAGE_KEY",
+        "description": [],
+        "signature": [
+          "\"search_onboarding_workflow\""
+        ],
+        "path": "x-pack/solutions/search/packages/shared-ui/src/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/search-shared-ui",
+        "id": "def-public.WorkflowId",
+        "type": "Type",
+        "tags": [],
+        "label": "WorkflowId",
+        "description": [],
+        "signature": [
+          "\"default\" | \"vector\" | \"semantic\""
+        ],
+        "path": "x-pack/solutions/search/packages/shared-ui/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
     "objects": []
   },
   "server": {

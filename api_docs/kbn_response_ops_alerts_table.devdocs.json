@@ -21,7 +21,7 @@
           "AlertsTableImperativeApi",
           ">) => React.ReactElement<any, string | React.JSXElementConstructor<any>>"
         ],
-        "path": "packages/response-ops/alerts_table/components/alerts_table.tsx",
+        "path": "src/platform/packages/shared/response-ops/alerts-table/components/alerts_table.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -36,7 +36,7 @@
             "signature": [
               "P & React.RefAttributes<T>"
             ],
-            "path": "packages/response-ops/alerts_table/utils/react.ts",
+            "path": "src/platform/packages/shared/response-ops/alerts-table/utils/react.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -61,7 +61,7 @@
           "AlertsTableImperativeApi",
           ">) => React.ReactElement<any, string | React.JSXElementConstructor<any>>"
         ],
-        "path": "packages/response-ops/alerts_table/components/alerts_table.tsx",
+        "path": "src/platform/packages/shared/response-ops/alerts-table/components/alerts_table.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -76,7 +76,7 @@
             "signature": [
               "P & React.RefAttributes<T>"
             ],
-            "path": "packages/response-ops/alerts_table/utils/react.ts",
+            "path": "src/platform/packages/shared/response-ops/alerts-table/utils/react.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -103,7 +103,7 @@
           "AlertsTableImperativeApi",
           ">) => React.ReactElement<any, string | React.JSXElementConstructor<any>>"
         ],
-        "path": "packages/response-ops/alerts_table/components/alerts_table.tsx",
+        "path": "src/platform/packages/shared/response-ops/alerts-table/components/alerts_table.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -118,7 +118,7 @@
             "signature": [
               "P & React.RefAttributes<T>"
             ],
-            "path": "packages/response-ops/alerts_table/utils/react.ts",
+            "path": "src/platform/packages/shared/response-ops/alerts-table/utils/react.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -141,7 +141,7 @@
           "AlertsTableImperativeApi",
           ">) => React.ReactElement<any, string | React.JSXElementConstructor<any>>"
         ],
-        "path": "packages/response-ops/alerts_table/components/alerts_table.tsx",
+        "path": "src/platform/packages/shared/response-ops/alerts-table/components/alerts_table.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -156,7 +156,7 @@
             "signature": [
               "P & React.RefAttributes<T>"
             ],
-            "path": "packages/response-ops/alerts_table/utils/react.ts",
+            "path": "src/platform/packages/shared/response-ops/alerts-table/utils/react.ts",
             "deprecated": false,
             "trackAdoption": false
           }
