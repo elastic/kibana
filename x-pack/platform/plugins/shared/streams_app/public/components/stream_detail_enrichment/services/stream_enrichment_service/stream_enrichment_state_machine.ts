@@ -111,7 +111,7 @@ export const streamEnrichmentMachine = setup({
         // New/updated processors
         processors.some((processor) => {
           const state = processor.getSnapshot();
-          return state.matches('configured') || state.context.isUpdated;
+          return state.matches('configured') && state.context.isUpdated;
         }) ||
         // Processor order changed
         processors.some((processor, pos) => initialProcessors[pos]?.id !== processor.id)
@@ -214,6 +214,7 @@ export const streamEnrichmentMachine = setup({
       },
       on: {
         'stream.reset': {
+          guard: 'hasStagedChanges',
           target: 'initializing',
         },
         'stream.update': {
