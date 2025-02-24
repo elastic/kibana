@@ -57,6 +57,20 @@ interface EntityStoreEnablementModalProps {
   };
 }
 
+const shouldAllowEnablement = (
+  riskScoreEnabled: boolean,
+  entityStoreEnabled: boolean,
+  enablements: Enablements
+) => {
+  if (riskScoreEnabled) {
+    return enablements.entityStore;
+  }
+  if (entityStoreEnabled) {
+    return enablements.riskScore;
+  }
+  return enablements.riskScore || enablements.entityStore;
+};
+
 export const EntityStoreEnablementModal: React.FC<EntityStoreEnablementModalProps> = ({
   visible,
   toggle,
@@ -72,7 +86,12 @@ export const EntityStoreEnablementModal: React.FC<EntityStoreEnablementModalProp
   const { data: entityEnginePrivileges, isLoading: isLoadingEntityEnginePrivileges } =
     useEntityEnginePrivileges();
   const riskEnginePrivileges = useMissingRiskEnginePrivileges();
-  const enablementOptions = enablements.riskScore || enablements.entityStore;
+
+  const enablementOptions = shouldAllowEnablement(
+    !!riskScore.disabled,
+    !!entityStore.disabled,
+    enablements
+  );
   const { EnablementModalCallout } = useContractComponents();
 
   if (!visible) {
