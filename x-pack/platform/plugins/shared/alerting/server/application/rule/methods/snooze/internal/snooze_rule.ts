@@ -17,7 +17,7 @@ import { validateSnoozeStartDate } from '../../../../../lib/validate_snooze_date
 import { RuleMutedError } from '../../../../../lib/errors/rule_muted';
 import { RulesClientContext } from '../../../../../rules_client/types';
 import {
-  getSnoozeAttributes,
+  getInternalSnoozeAttributes,
   verifySnoozeAttributeScheduleLimit,
 } from '../../../../../rules_client/common';
 import { updateRuleSo } from '../../../../../data/rule';
@@ -91,7 +91,7 @@ async function snoozeWithOCC(
 
   context.ruleTypeRegistry.ensureRuleTypeEnabled(attributes.alertTypeId);
 
-  const newAttrs = getSnoozeAttributes(attributes, snoozeSchedule);
+  const newAttrs = getInternalSnoozeAttributes(attributes, snoozeSchedule);
 
   try {
     verifySnoozeAttributeScheduleLimit(newAttrs);

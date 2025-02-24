@@ -28,6 +28,28 @@ export function getSnoozeAttributes(attributes: RawRule, snoozeSchedule: RuleDom
   };
 }
 
+export function getInternalSnoozeAttributes(
+  attributes: RawRule,
+  snoozeSchedule: RuleDomainSnoozeSchedule
+) {
+  // If duration is -1, instead mute all
+  const { id: snoozeId, duration } = snoozeSchedule;
+
+  if (duration === -1) {
+    return {
+      muteAll: true,
+      snoozeSchedule: clearUnscheduledSnoozeAttributes(attributes),
+    };
+  }
+
+  return {
+    snoozeSchedule: (snoozeId
+      ? clearScheduledSnoozesAttributesById(attributes, [snoozeId])
+      : clearUnscheduledSnoozeAttributes(attributes)
+    ).concat(snoozeSchedule),
+  };
+}
+
 export function getBulkSnooze<Params extends RuleParams>(
   rule: RuleDomain<Params>,
   snoozeSchedule: RuleDomainSnoozeSchedule

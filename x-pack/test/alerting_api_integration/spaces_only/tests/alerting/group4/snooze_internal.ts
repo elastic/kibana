@@ -6,6 +6,7 @@
  */
 
 import expect from '@kbn/expect';
+import { v4 as uuidv4 } from 'uuid';
 import { RULE_SAVED_OBJECT_TYPE } from '@kbn/alerting-plugin/server';
 import { Spaces } from '../../../scenarios';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
@@ -19,15 +20,12 @@ import {
 } from '../../../../common/lib';
 
 const NOW = new Date().toISOString();
-const snoozeSchedule = {
-  schedule: {
-    custom: {
-      duration: '240h',
-      start: NOW,
-      recurring: {
-        occurrences: 1,
-      },
-    },
+const SNOOZE_SCHEDULE = {
+  duration: 864000000,
+  rRule: {
+    dtstart: NOW,
+    tzid: 'UTC',
+    count: 1,
   },
 };
 
@@ -38,7 +36,7 @@ export default function createSnoozeRuleTests({ getService }: FtrProviderContext
   const log = getService('log');
   const retry = getService('retry');
 
-  describe('snooze', () => {
+  describe('snooze internal', () => {
     const objectRemover = new ObjectRemover(supertest);
 
     after(() => objectRemover.removeAll());
@@ -78,19 +76,12 @@ export default function createSnoozeRuleTests({ getService }: FtrProviderContext
           .expect(200);
         objectRemover.add(Spaces.space1.id, createdRule.id, 'rule', 'alerting');
 
-        const response = await alertUtils.getSnoozeRequest(createdRule.id).send(snoozeSchedule);
+        const response = await alertUtils
+          .getSnoozeInternalRequest(createdRule.id)
+          .send({ snooze_schedule: SNOOZE_SCHEDULE });
 
-        expect(response.statusCode).to.eql(200);
-        expect(response.body).to.eql({
-          schedule: {
-            ...snoozeSchedule.schedule,
-            id: response.body.schedule.id,
-            custom: {
-              ...snoozeSchedule.schedule.custom,
-              timezone: 'UTC',
-            },
-          },
-        });
+        expect(response.statusCode).to.eql(204);
+        expect(response.body).to.eql('');
         const { body: updatedAlert } = await supertestWithoutAuth
           .get(`${getUrlPrefix(Spaces.space1.id)}/internal/alerting/rule/${createdRule.id}`)
           .set('kbn-xsrf', 'foo')
@@ -98,7 +89,7 @@ export default function createSnoozeRuleTests({ getService }: FtrProviderContext
         expect(updatedAlert.snooze_schedule.length).to.eql(1);
         const { rRule, duration } = updatedAlert.snooze_schedule[0];
         expect(rRule.dtstart).to.eql(NOW);
-        expect(duration).to.eql(864000000);
+        expect(duration).to.eql(SNOOZE_SCHEDULE.duration);
         expect(updatedAlert.mute_all).to.eql(false);
         // Ensure AAD isn't broken
         await checkAAD({
@@ -143,40 +134,20 @@ export default function createSnoozeRuleTests({ getService }: FtrProviderContext
           .expect(200);
         objectRemover.add(Spaces.space1.id, createdRule.id, 'rule', 'alerting');
 
-        const response = await alertUtils.getSnoozeRequest(createdRule.id).send({
-          schedule: {
-            custom: {
-              duration: '-1',
-              start: NOW,
-            },
+        const response = await alertUtils.getSnoozeInternalRequest(createdRule.id).send({
+          snooze_schedule: {
+            ...SNOOZE_SCHEDULE,
+            duration: -1,
           },
         });
 
-        expect(response.statusCode).to.eql(200);
-        expect(response.body).to.eql({
-          schedule: {
-            id: response.body.schedule.id,
-            custom: {
-              duration: '-1',
-              start: NOW,
-              timezone: 'UTC',
-            },
-          },
-        });
+        expect(response.statusCode).to.eql(204);
+        expect(response.body).to.eql('');
         const { body: updatedAlert } = await supertestWithoutAuth
           .get(`${getUrlPrefix(Spaces.space1.id)}/internal/alerting/rule/${createdRule.id}`)
           .set('kbn-xsrf', 'foo')
           .expect(200);
-        expect(updatedAlert.snooze_schedule).to.eql([
-          {
-            duration: -1,
-            id: response.body.schedule.id,
-            rRule: {
-              dtstart: NOW,
-              tzid: 'UTC',
-            },
-          },
-        ]);
+        expect(updatedAlert.snooze_schedule).to.eql([]);
         expect(updatedAlert.mute_all).to.eql(true);
         // Ensure AAD isn't broken
         await checkAAD({
@@ -235,14 +206,13 @@ export default function createSnoozeRuleTests({ getService }: FtrProviderContext
       const now = new Date().toISOString();
       const snoozeSeconds = 10;
       const snoozeDuration = snoozeSeconds * 1000;
-      await alertUtils.getSnoozeRequest(createdRule.id).send({
-        schedule: {
-          custom: {
-            duration: snoozeDuration,
-            start: now,
-            recurring: {
-              occurrences: 1,
-            },
+      await alertUtils.getSnoozeInternalRequest(createdRule.id).send({
+        snooze_schedule: {
+          duration: snoozeDuration,
+          rRule: {
+            dtstart: now,
+            tzid: 'UTC',
+            count: 1,
           },
         },
       });
@@ -295,73 +265,59 @@ export default function createSnoozeRuleTests({ getService }: FtrProviderContext
 
         // Creating 5 snooze schedules, using Promise.all is very flaky, therefore
         // the schedules are being created 1 at a time
-        await alertUtils.getSnoozeRequest(createdRule.id).send(snoozeSchedule).expect(200);
         await alertUtils
-          .getSnoozeRequest(createdRule.id)
+          .getSnoozeInternalRequest(createdRule.id)
           .send({
-            schedule: {
-              custom: {
-                duration: '20h',
-                start: NOW,
-                recurring: {
-                  every: '1d',
-                },
-              },
+            snooze_schedule: {
+              ...SNOOZE_SCHEDULE,
+              id: uuidv4(),
             },
           })
-          .expect(200);
+          .expect(204);
         await alertUtils
-          .getSnoozeRequest(createdRule.id)
+          .getSnoozeInternalRequest(createdRule.id)
           .send({
-            schedule: {
-              custom: {
-                duration: '24h',
-                start: NOW,
-                recurring: {
-                  every: '1w',
-                },
-              },
+            snooze_schedule: {
+              ...SNOOZE_SCHEDULE,
+              id: uuidv4(),
             },
           })
-          .expect(200);
+          .expect(204);
         await alertUtils
-          .getSnoozeRequest(createdRule.id)
+          .getSnoozeInternalRequest(createdRule.id)
           .send({
-            schedule: {
-              custom: {
-                duration: '20h',
-                start: NOW,
-                recurring: {
-                  every: '1M',
-                },
-              },
+            snooze_schedule: {
+              ...SNOOZE_SCHEDULE,
+              id: uuidv4(),
             },
           })
-          .expect(200);
+          .expect(204);
+
         await alertUtils
-          .getSnoozeRequest(createdRule.id)
+          .getSnoozeInternalRequest(createdRule.id)
           .send({
-            schedule: {
-              custom: {
-                duration: '24h',
-                start: NOW,
-                recurring: {
-                  every: '1y',
-                },
-              },
+            snooze_schedule: {
+              ...SNOOZE_SCHEDULE,
+              id: uuidv4(),
             },
           })
-          .expect(200);
+          .expect(204);
+
+        await alertUtils
+          .getSnoozeInternalRequest(createdRule.id)
+          .send({
+            snooze_schedule: {
+              ...SNOOZE_SCHEDULE,
+              id: uuidv4(),
+            },
+          })
+          .expect(204);
+
         // Adding the 6th snooze schedule, should fail
-        const response = await alertUtils.getSnoozeRequest(createdRule.id).send({
-          schedule: {
-            custom: {
-              duration: '20h',
-              start: NOW,
-              recurring: {
-                occurrences: 2,
-              },
-            },
+        const response = await alertUtils.getSnoozeInternalRequest(createdRule.id).send({
+          snooze_schedule: {
+            ...SNOOZE_SCHEDULE,
+            id: uuidv4(),
           },
         });
         expect(response.statusCode).to.eql(400);
@@ -411,36 +367,28 @@ export default function createSnoozeRuleTests({ getService }: FtrProviderContext
 
         const dateStart = new Date().toISOString();
         const snooze = {
-          schedule: {
-            custom: {
-              start: dateStart,
-              duration: '3s',
-            },
+          ...SNOOZE_SCHEDULE,
+          rRule: {
+            ...SNOOZE_SCHEDULE.rRule,
+            // updating the dtstart to the current time because otherwise the snooze might be over already
+            dtstart: dateStart,
           },
+          duration: 3000,
         };
 
-        const response = await alertUtils.getSnoozeRequest(createdRule.id).send(snooze);
-
-        expect(response.statusCode).to.eql(200);
-        expect(response.body).to.eql({
-          schedule: {
-            ...snooze.schedule,
-            id: response.body.schedule.id,
-            custom: {
-              ...snooze.schedule.custom,
-              timezone: 'UTC',
-            },
-          },
+        const response = await alertUtils.getSnoozeInternalRequest(createdRule.id).send({
+          snooze_schedule: snooze,
         });
+
+        expect(response.statusCode).to.eql(204);
+        expect(response.body).to.eql('');
 
         await retry.try(async () => {
           const { body: updatedAlert } = await supertestWithoutAuth
             .get(`${getUrlPrefix(Spaces.space1.id)}/internal/alerting/rule/${createdRule.id}`)
             .set('kbn-xsrf', 'foo')
             .expect(200);
-          expect(updatedAlert.snooze_schedule).to.eql([
-            { duration: 3000, rRule: { dtstart: dateStart, tzid: 'UTC' } },
-          ]);
+          expect(updatedAlert.snooze_schedule).to.eql([snooze]);
         });
         log.info('wait for snoozing to end');
         await retry.try(async () => {
@@ -462,7 +410,7 @@ export default function createSnoozeRuleTests({ getService }: FtrProviderContext
 
     describe('validation', function () {
       this.tags('skipFIPS');
-      it('should return 400 if the start is not valid', async () => {
+      it('should return 400 if the id is not in a valid format', async () => {
         const { body: createdRule } = await supertest
           .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
           .set('kbn-xsrf', 'foo')
@@ -475,22 +423,20 @@ export default function createSnoozeRuleTests({ getService }: FtrProviderContext
 
         objectRemover.add(Spaces.space1.id, createdRule.id, 'rule', 'alerting');
 
-        const response = await alertUtils.getSnoozeRequest(createdRule.id).send({
-          schedule: {
-            custom: {
-              start: 'invalid',
-              duration: '240h',
-            },
+        const response = await alertUtils.getSnoozeInternalRequest(createdRule.id).send({
+          snooze_schedule: {
+            ...SNOOZE_SCHEDULE,
+            id: 'invalid key',
           },
         });
 
         expect(response.statusCode).to.eql(400);
         expect(response.body.message).to.eql(
-          '[request body.schedule.custom.start]: Invalid snooze start date: invalid'
+          `[request body.snooze_schedule.id]: Key must be lower case, a-z, 0-9, '_', and '-' are allowed`
         );
       });
 
-      it('should return 400 if the duration is not valid', async () => {
+      it('accepts a uuid as a key', async () => {
         const { body: createdRule } = await supertest
           .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
           .set('kbn-xsrf', 'foo')
@@ -503,22 +449,44 @@ export default function createSnoozeRuleTests({ getService }: FtrProviderContext
 
         objectRemover.add(Spaces.space1.id, createdRule.id, 'rule', 'alerting');
 
-        const response = await alertUtils.getSnoozeRequest(createdRule.id).send({
-          schedule: {
-            custom: {
-              start: snoozeSchedule.schedule.custom.start,
-              duration: 'invalid',
+        await alertUtils
+          .getSnoozeInternalRequest(createdRule.id)
+          .send({
+            snooze_schedule: {
+              ...SNOOZE_SCHEDULE,
+              id: 'e58e2340-dba6-454c-8308-b2ca66a7cf7',
             },
+          })
+          .expect(204);
+      });
+
+      it('should return 400 if the timezone is not valid', async () => {
+        const { body: createdRule } = await supertest
+          .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
+          .set('kbn-xsrf', 'foo')
+          .send(
+            getTestRuleData({
+              enabled: false,
+            })
+          )
+          .expect(200);
+
+        objectRemover.add(Spaces.space1.id, createdRule.id, 'rule', 'alerting');
+
+        const response = await alertUtils.getSnoozeInternalRequest(createdRule.id).send({
+          snooze_schedule: {
+            ...SNOOZE_SCHEDULE,
+            rRule: { ...SNOOZE_SCHEDULE.rRule, tzid: 'invalid' },
           },
         });
 
         expect(response.statusCode).to.eql(400);
         expect(response.body.message).to.eql(
-          '[request body.schedule.custom.duration]: Invalid schedule duration format: invalid'
+          '[request body.snooze_schedule.rRule.tzid]: string is not a valid timezone: invalid'
         );
       });
 
-      it('should return 400 if the every is not valid', async () => {
+      it('should return 400 if the byweekday is not valid', async () => {
         const { body: createdRule } = await supertest
           .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
           .set('kbn-xsrf', 'foo')
@@ -531,24 +499,43 @@ export default function createSnoozeRuleTests({ getService }: FtrProviderContext
 
         objectRemover.add(Spaces.space1.id, createdRule.id, 'rule', 'alerting');
 
-        const response = await alertUtils.getSnoozeRequest(createdRule.id).send({
-          schedule: {
-            custom: {
-              ...snoozeSchedule.schedule.custom,
-              recurring: {
-                every: 'invalid',
-              },
-            },
+        const response = await alertUtils.getSnoozeInternalRequest(createdRule.id).send({
+          snooze_schedule: {
+            ...SNOOZE_SCHEDULE,
+            rRule: { ...SNOOZE_SCHEDULE.rRule, byweekday: ['invalid'] },
+          },
+        });
+
+        expect(response.statusCode).to.eql(400);
+      });
+
+      it('should return 400 if the bymonthday is not valid', async () => {
+        const { body: createdRule } = await supertest
+          .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
+          .set('kbn-xsrf', 'foo')
+          .send(
+            getTestRuleData({
+              enabled: false,
+            })
+          )
+          .expect(200);
+
+        objectRemover.add(Spaces.space1.id, createdRule.id, 'rule', 'alerting');
+
+        const response = await alertUtils.getSnoozeInternalRequest(createdRule.id).send({
+          snooze_schedule: {
+            ...SNOOZE_SCHEDULE,
+            rRule: { ...SNOOZE_SCHEDULE.rRule, bymonthday: [35] },
           },
         });
 
         expect(response.statusCode).to.eql(400);
         expect(response.body.message).to.eql(
-          `[request body.schedule.custom.recurring.every]: 'every' string of recurring schedule is not valid : invalid`
+          '[request body.snooze_schedule.rRule.bymonthday.0]: Value must be equal to or lower than [31].'
         );
       });
 
-      it('should return 400 if the onWeekDay is not valid', async () => {
+      it('should return 400 if the bymonth is not valid', async () => {
         const { body: createdRule } = await supertest
           .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
           .set('kbn-xsrf', 'foo')
@@ -561,130 +548,16 @@ export default function createSnoozeRuleTests({ getService }: FtrProviderContext
 
         objectRemover.add(Spaces.space1.id, createdRule.id, 'rule', 'alerting');
 
-        const response = await alertUtils.getSnoozeRequest(createdRule.id).send({
-          schedule: {
-            custom: {
-              ...snoozeSchedule.schedule.custom,
-              recurring: { onWeekDay: ['invalid'] },
-            },
+        const response = await alertUtils.getSnoozeInternalRequest(createdRule.id).send({
+          snooze_schedule: {
+            ...SNOOZE_SCHEDULE,
+            rRule: { ...SNOOZE_SCHEDULE.rRule, bymonth: [14] },
           },
         });
 
         expect(response.statusCode).to.eql(400);
         expect(response.body.message).to.eql(
-          '[request body.schedule.custom.recurring.onWeekDay]: Invalid onWeekDay values in recurring schedule: invalid'
-        );
-      });
-
-      it('should return 400 if the onMonthDay is not valid', async () => {
-        const { body: createdRule } = await supertest
-          .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
-          .set('kbn-xsrf', 'foo')
-          .send(
-            getTestRuleData({
-              enabled: false,
-            })
-          )
-          .expect(200);
-
-        objectRemover.add(Spaces.space1.id, createdRule.id, 'rule', 'alerting');
-
-        const response = await alertUtils.getSnoozeRequest(createdRule.id).send({
-          schedule: {
-            custom: {
-              ...snoozeSchedule.schedule.custom,
-              recurring: { onMonthDay: [35] },
-            },
-          },
-        });
-
-        expect(response.statusCode).to.eql(400);
-        expect(response.body.message).to.eql(
-          '[request body.schedule.custom.recurring.onMonthDay.0]: Value must be equal to or lower than [31].'
-        );
-      });
-
-      it('should return 400 if the onMonth is not valid', async () => {
-        const { body: createdRule } = await supertest
-          .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
-          .set('kbn-xsrf', 'foo')
-          .send(
-            getTestRuleData({
-              enabled: false,
-            })
-          )
-          .expect(200);
-
-        objectRemover.add(Spaces.space1.id, createdRule.id, 'rule', 'alerting');
-
-        const response = await alertUtils.getSnoozeRequest(createdRule.id).send({
-          schedule: {
-            custom: {
-              ...snoozeSchedule.schedule.custom,
-              recurring: { onMonth: [14] },
-            },
-          },
-        });
-
-        expect(response.statusCode).to.eql(400);
-        expect(response.body.message).to.eql(
-          '[request body.schedule.custom.recurring.onMonth.0]: Value must be equal to or lower than [12].'
-        );
-      });
-
-      it('should return 400 if the end date is not valid', async () => {
-        const { body: createdRule } = await supertest
-          .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
-          .set('kbn-xsrf', 'foo')
-          .send(
-            getTestRuleData({
-              enabled: false,
-            })
-          )
-          .expect(200);
-
-        objectRemover.add(Spaces.space1.id, createdRule.id, 'rule', 'alerting');
-
-        const response = await alertUtils.getSnoozeRequest(createdRule.id).send({
-          schedule: {
-            custom: {
-              ...snoozeSchedule.schedule.custom,
-              recurring: { end: 'invalid' },
-            },
-          },
-        });
-
-        expect(response.statusCode).to.eql(400);
-        expect(response.body.message).to.eql(
-          '[request body.schedule.custom.recurring.end]: Invalid snooze end date: invalid'
-        );
-      });
-
-      it('should return 400 if the occurrences is not valid', async () => {
-        const { body: createdRule } = await supertest
-          .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
-          .set('kbn-xsrf', 'foo')
-          .send(
-            getTestRuleData({
-              enabled: false,
-            })
-          )
-          .expect(200);
-
-        objectRemover.add(Spaces.space1.id, createdRule.id, 'rule', 'alerting');
-
-        const response = await alertUtils.getSnoozeRequest(createdRule.id).send({
-          schedule: {
-            custom: {
-              ...snoozeSchedule.schedule.custom,
-              recurring: { occurrences: 0 },
-            },
-          },
-        });
-
-        expect(response.statusCode).to.eql(400);
-        expect(response.body.message).to.eql(
-          '[request body.schedule.custom.recurring.occurrences]: Value must be equal to or greater than [1].'
+          '[request body.snooze_schedule.rRule.bymonth.0]: Value must be equal to or lower than [12].'
         );
       });
     });
