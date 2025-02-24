@@ -20,8 +20,9 @@ import {
   EuiText,
   EuiBadge,
 } from '@elastic/eui';
+import { useSelector } from '@xstate5/react';
 import { i18n } from '@kbn/i18n';
-import { ProcessorType, IngestStreamGetResponse } from '@kbn/streams-schema';
+import { IngestStreamGetResponse } from '@kbn/streams-schema';
 import { isEmpty, isEqual } from 'lodash';
 import React, { useEffect, useMemo, useState } from 'react';
 import { useForm, SubmitHandler, FormProvider, useWatch } from 'react-hook-form';
@@ -32,44 +33,45 @@ import { GrokProcessorForm } from './grok';
 import { ProcessorTypeSelector } from './processor_type_selector';
 import { ProcessorFormState, ProcessorDefinitionWithUIAttributes } from '../types';
 import {
-  getDefaultFormState,
+  getFormStateFrom,
   convertFormStateToProcessor,
   isGrokProcessor,
   isDissectProcessor,
+  processorConverter,
+  getDefaultFormStateByType,
 } from '../utils';
 import { useDiscardConfirm } from '../../../hooks/use_discard_confirm';
-import { ProcessorMetrics, UseProcessingSimulatorReturn } from '../hooks/use_processing_simulator';
+import {
+  useStreamEnrichmentEvents,
+  useStreamsEnrichmentSelector,
+} from '../services/stream_enrichment_service';
+import { ProcessorMetrics } from '../hooks/use_processing_simulator';
 import { ProcessorErrors, ProcessorMetricBadges } from './processor_metrics';
-import { UseDefinitionReturn } from '../hooks/use_definition';
+import { StreamEnrichmentContext } from '../services/stream_enrichment_service/types';
 
 export interface ProcessorPanelProps {
   definition: IngestStreamGetResponse;
   processorMetrics?: ProcessorMetrics;
-  onWatchProcessor: UseProcessingSimulatorReturn['watchProcessor'];
 }
 
-export interface AddProcessorPanelProps extends ProcessorPanelProps {
-  isInitiallyOpen?: boolean;
-  onAddProcessor: UseDefinitionReturn['addProcessor'];
-}
+export type AddProcessorPanelProps = ProcessorPanelProps;
 
 export interface EditProcessorPanelProps extends ProcessorPanelProps {
-  processor: ProcessorDefinitionWithUIAttributes;
-  onDeleteProcessor: UseDefinitionReturn['deleteProcessor'];
-  onUpdateProcessor: UseDefinitionReturn['updateProcessor'];
+  processor: StreamEnrichmentContext['processors'][number];
 }
 
-export function AddProcessorPanel({
-  onAddProcessor,
-  onWatchProcessor,
-  processorMetrics,
-}: AddProcessorPanelProps) {
+export function AddProcessorPanel({ processorMetrics }: AddProcessorPanelProps) {
   const { euiTheme } = useEuiTheme();
 
-  const [hasChanges, setHasChanges] = useState(false);
+  const { addProcessor } = useStreamEnrichmentEvents();
+
+  const processorActor = useStreamsEnrichmentSelector(
+    (state) => state.context.processors.find((p) => p.getSnapshot().matches('draft'))!
+  );
+
   const [isOpen, { on: openPanel, off: closePanel }] = useBoolean(false);
 
-  const defaultValues = useMemo(() => getDefaultFormState('grok'), []);
+  const defaultValues = useMemo(() => getDefaultFormStateByType('grok'), []);
 
   const methods = useForm<ProcessorFormState>({ defaultValues, mode: 'onChange' });
 
@@ -78,35 +80,42 @@ export function AddProcessorPanel({
   useEffect(() => {
     if (isOpen) {
       const { unsubscribe } = methods.watch((value) => {
-        const draftProcessor = createDraftProcessorFromForm(value as ProcessorFormState);
-        onWatchProcessor(draftProcessor);
-        setHasChanges(!isEqual(defaultValues, value));
+        const processor = convertFormStateToProcessor(value as ProcessorFormState);
+        processorActor.send({ type: 'processor.change', processor });
       });
+
       return () => unsubscribe();
     }
-  }, [defaultValues, isOpen, methods, onWatchProcessor]);
+  }, [isOpen, methods, processorActor]);
 
-  const handleSubmit: SubmitHandler<ProcessorFormState> = async (data) => {
-    const processingDefinition = convertFormStateToProcessor(data);
+  useEffect(() => {
+    console.log(processorActor);
 
-    onWatchProcessor({ id: 'draft', deleteIfExists: true });
-    onAddProcessor(processingDefinition, data.detected_fields);
+    if (processorActor) {
+      const subscription = processorActor.on('processor.changesDiscarded', () => {
+        console.log('discardeeeed');
+        methods.reset();
+        closePanel();
+      });
+
+      return () => subscription.unsubscribe();
+    }
+  }, [closePanel, methods, processorActor]);
+
+  const handleSubmit: SubmitHandler<ProcessorFormState> = async () => {
     closePanel();
+    processorActor.send({ type: 'processor.stage' });
   };
 
   const handleCancel = () => {
-    closePanel();
-    methods.reset();
-    onWatchProcessor({ id: 'draft', deleteIfExists: true });
+    processorActor.send({ type: 'processor.cancel' });
   };
 
   const handleOpen = () => {
     const draftProcessor = createDraftProcessorFromForm(defaultValues);
-    onWatchProcessor(draftProcessor);
+    addProcessor({ processor: draftProcessor });
     openPanel();
   };
-
-  const confirmDiscardAndClose = useDiscardConfirm(handleCancel);
 
   const buttonContent = isOpen ? (
     i18n.translate(
@@ -146,7 +155,7 @@ export function AddProcessorPanel({
             <EuiFlexGroup alignItems="center" gutterSize="s">
               <EuiButtonEmpty
                 data-test-subj="streamsAppAddProcessorPanelCancelButton"
-                onClick={hasChanges ? confirmDiscardAndClose : handleCancel}
+                onClick={handleCancel}
                 size="s"
               >
                 {i18n.translate(
@@ -195,73 +204,68 @@ const createDraftProcessorFromForm = (
 
   return {
     id: 'draft',
-    status: 'draft',
     type: formState.type,
     ...processingDefinition,
   };
 };
 
 export function EditProcessorPanel({
-  onDeleteProcessor,
-  onUpdateProcessor,
-  onWatchProcessor,
-  processor,
+  processor: processorActor,
   processorMetrics,
 }: EditProcessorPanelProps) {
   const { euiTheme } = useEuiTheme();
-
-  const [hasChanges, setHasChanges] = useState(false);
-  const [isOpen, { on: openPanel, off: closePanel }] = useBoolean();
+  const state = useSelector(processorActor, (s) => s);
+  const processor = state.context.processor;
 
   const processorDescription = getProcessorDescription(processor);
 
-  const isDraft = processor.status === 'draft';
-  const isUnsaved = isDraft || processor.status === 'updated';
+  const isOpen = state.matches({ staged: 'edit' }) || state.matches({ persisted: 'edit' });
+  const isStaged = state.matches('staged');
+  const isUnsaved = isStaged || state.matches({ persisted: 'updated' });
 
-  const defaultValues = useMemo(() => getDefaultFormState(processor.type, processor), [processor]);
+  const defaultValues = useMemo(() => getFormStateFrom(processor), [processor]);
 
-  const methods = useForm<ProcessorFormState>({ defaultValues, mode: 'onChange' });
+  const methods = useForm<ProcessorFormState>({
+    defaultValues,
+    mode: 'onChange',
+  });
 
   const type = useWatch({ control: methods.control, name: 'type' });
 
   useEffect(() => {
     const { unsubscribe } = methods.watch((value) => {
       const processingDefinition = convertFormStateToProcessor(value as ProcessorFormState);
-      onWatchProcessor({
-        id: processor.id,
-        status: processor.status,
-        type: value.type as ProcessorType,
-        ...processingDefinition,
+      processorActor.send({
+        type: 'processor.change',
+        processor: processingDefinition,
       });
-      setHasChanges(!isEqual(defaultValues, value));
     });
     return () => unsubscribe();
-  }, [defaultValues, methods, onWatchProcessor, processor.id, processor.status]);
+  }, [methods, processorActor]);
 
-  const handleSubmit: SubmitHandler<ProcessorFormState> = (data) => {
-    const processorDefinition = convertFormStateToProcessor(data);
+  useEffect(() => {
+    const subscription = processorActor.on('processor.changesDiscarded', () => {
+      methods.reset();
+    });
 
-    onUpdateProcessor(processor.id, processorDefinition, isDraft ? 'draft' : 'updated');
-    closePanel();
+    return () => subscription.unsubscribe();
+  }, [methods, processorActor]);
+
+  const handleSubmit: SubmitHandler<ProcessorFormState> = () => {
+    processorActor.send({ type: 'processor.update' });
   };
 
   const handleProcessorDelete = () => {
-    onDeleteProcessor(processor.id);
-    closePanel();
+    processorActor.send({ type: 'processor.delete' });
   };
 
   const handleCancel = () => {
-    methods.reset();
-    closePanel();
+    processorActor.send({ type: 'processor.cancel' });
   };
 
-  const confirmDiscardAndClose = useDiscardConfirm(handleCancel);
-  const confirmDeletionAndClose = useDiscardConfirm(handleProcessorDelete, {
-    title: deleteProcessorTitle,
-    message: deleteProcessorMessage,
-    confirmButtonText: deleteProcessorLabel,
-    cancelButtonText: deleteProcessorCancelLabel,
-  });
+  const handleOpen = () => {
+    processorActor.send({ type: 'processor.edit' });
+  };
 
   const buttonContent = isOpen ? (
     <strong>{processor.type.toUpperCase()}</strong>
@@ -278,7 +282,7 @@ export function EditProcessorPanel({
   return (
     <EuiPanel
       hasBorder
-      color={isDraft ? 'subdued' : undefined}
+      color={isStaged ? 'subdued' : undefined}
       css={css`
         border: ${euiTheme.border.thin};
         padding: ${euiTheme.size.m};
@@ -308,7 +312,7 @@ export function EditProcessorPanel({
             <EuiFlexGroup alignItems="center" gutterSize="s">
               <EuiButtonEmpty
                 data-test-subj="streamsAppEditProcessorPanelCancelButton"
-                onClick={hasChanges ? confirmDiscardAndClose : handleCancel}
+                onClick={handleCancel}
                 size="s"
               >
                 {i18n.translate(
@@ -342,7 +346,7 @@ export function EditProcessorPanel({
               )}
               <EuiButtonIcon
                 data-test-subj="streamsAppEditProcessorPanelButton"
-                onClick={openPanel}
+                onClick={handleOpen}
                 iconType="pencil"
                 color="text"
                 size="xs"
@@ -363,15 +367,15 @@ export function EditProcessorPanel({
             <EuiSpacer size="m" />
             {type === 'grok' && <GrokProcessorForm />}
             {type === 'dissect' && <DissectProcessorForm />}
-            <EuiHorizontalRule margin="m" />
-            <EuiButton
-              data-test-subj="streamsAppEditProcessorPanelButton"
-              color="danger"
-              onClick={confirmDeletionAndClose}
-            >
-              {deleteProcessorLabel}
-            </EuiButton>
           </EuiForm>
+          <EuiHorizontalRule margin="m" />
+          <EuiButton
+            data-test-subj="streamsAppEditProcessorPanelButton"
+            color="danger"
+            onClick={handleProcessorDelete}
+          >
+            {deleteProcessorLabel}
+          </EuiButton>
           {processorMetrics && !isEmpty(processorMetrics.errors) && (
             <ProcessorErrors metrics={processorMetrics} />
           )}
