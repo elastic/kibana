@@ -1301,16 +1301,12 @@ components:
       allOf:
         - type: object
           properties:
-            name:
-              description: Name of the Knowledge Base Entry
-              type: string
-          required:
-            - name
-        - type: object
-          properties:
             global:
               description: Whether this Knowledge Base Entry is global, defaults to false
               type: boolean
+            name:
+              description: Name of the Knowledge Base Entry
+              type: string
             namespace:
               description: Kibana Space, defaults to 'default' space
               type: string
@@ -1320,22 +1316,11 @@ components:
                 current user. Empty array provides access to all users.
               items:
                 $ref: '#/components/schemas/User'
-              nullable: true
               type: array
           required:
+            - name
             - namespace
             - global
-            - users
-        - type: object
-          properties:
-            users:
-              description: >-
-                Users who have access to the Knowledge Base Entry, defaults to
-                current user. Empty array provides access to all users.
-              items:
-                $ref: '#/components/schemas/User'
-              type: array
-          required:
             - users
         - $ref: '#/components/schemas/ResponseFields'
         - $ref: '#/components/schemas/DocumentEntryResponseFields'
@@ -1358,7 +1343,6 @@ components:
                 current user. Empty array provides access to all users.
               items:
                 $ref: '#/components/schemas/User'
-              nullable: true
               type: array
           required:
             - name
@@ -1418,7 +1402,6 @@ components:
                 current user. Empty array provides access to all users.
               items:
                 $ref: '#/components/schemas/User'
-              nullable: true
               type: array
           required:
             - id
@@ -1487,16 +1470,12 @@ components:
       allOf:
         - type: object
           properties:
-            name:
-              description: Name of the Knowledge Base Entry
-              type: string
-          required:
-            - name
-        - type: object
-          properties:
             global:
               description: Whether this Knowledge Base Entry is global, defaults to false
               type: boolean
+            name:
+              description: Name of the Knowledge Base Entry
+              type: string
             namespace:
               description: Kibana Space, defaults to 'default' space
               type: string
@@ -1506,22 +1485,11 @@ components:
                 current user. Empty array provides access to all users.
               items:
                 $ref: '#/components/schemas/User'
-              nullable: true
               type: array
           required:
+            - name
             - namespace
             - global
-            - users
-        - type: object
-          properties:
-            users:
-              description: >-
-                Users who have access to the Knowledge Base Entry, defaults to
-                current user. Empty array provides access to all users.
-              items:
-                $ref: '#/components/schemas/User'
-              type: array
-          required:
             - users
         - $ref: '#/components/schemas/ResponseFields'
         - $ref: '#/components/schemas/IndexEntryResponseFields'
@@ -1544,7 +1512,6 @@ components:
                 current user. Empty array provides access to all users.
               items:
                 $ref: '#/components/schemas/User'
-              nullable: true
               type: array
           required:
             - name
@@ -1617,7 +1584,6 @@ components:
                 current user. Empty array provides access to all users.
               items:
                 $ref: '#/components/schemas/User'
-              nullable: true
               type: array
           required:
             - id
