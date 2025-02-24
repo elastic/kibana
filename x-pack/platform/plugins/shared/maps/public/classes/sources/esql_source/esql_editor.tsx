@@ -12,7 +12,7 @@ import useMountedState from 'react-use/lib/useMountedState';
 import type { AggregateQuery } from '@kbn/es-query';
 import type { ESQLColumn } from '@kbn/es-types';
 import { ESQLLangEditor } from '@kbn/esql/public';
-import { getESQLMeta, verifyGeometryColumn } from './esql_utils';
+import { getESQLMeta } from './esql_utils';
 
 export interface IOnEsqlChangeParams {
   adhocDataViewId: string;

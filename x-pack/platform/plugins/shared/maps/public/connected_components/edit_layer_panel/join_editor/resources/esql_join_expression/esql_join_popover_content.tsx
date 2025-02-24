@@ -5,16 +5,8 @@
  * 2.0.
  */
 
-import React, { useEffect, useState } from 'react';
-import {
-  EuiCallOut,
-  EuiFormRow,
-  EuiFormHelpText,
-  EuiPopoverTitle,
-  EuiSkeletonText,
-  EuiSpacer,
-  EuiComboBox,
-} from '@elastic/eui';
+import React from 'react';
+import { EuiFormHelpText, EuiPopoverTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 // import type { DataView, DataViewField } from '@kbn/data-plugin/common';
 import { FormattedMessage } from '@kbn/i18n-react';
