@@ -19,5 +19,9 @@ export {
   MOCK_IDP_ATTRIBUTE_EMAIL,
   MOCK_IDP_ATTRIBUTE_NAME,
 } from './constants';
-
-export { createMockIdpMetadata, createSAMLResponse, ensureSAMLRoleMapping } from './utils';
+export {
+  createMockIdpMetadata,
+  createSAMLResponse,
+  ensureSAMLRoleMapping,
+  getSAMLRequestId,
+} from './utils';

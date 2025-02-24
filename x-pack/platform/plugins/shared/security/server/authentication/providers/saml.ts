@@ -33,7 +33,7 @@ interface ProviderState extends Partial<TokenPair> {
   /**
    * Unique identifier of the SAML request initiated the handshake.
    */
-  requestId?: string;
+  requestIds?: string[];
 
   /**
    * Stores path component of the URL only or in a combination with URL fragment that was used to
@@ -97,6 +97,10 @@ function canStartNewSession(request: KibanaRequest) {
 }
 
 /**
+ * SAML _requestId limit
+ */
+const samlRequestIdLimit = 50;
+/**
  * Provider that supports SAML request authentication.
  */
 export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
@@ -141,7 +145,7 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
     this.logger.debug('Trying to perform a login.');
 
     // It may happen that Kibana is re-configured to use different realm for the same provider name,
-    // we should clear such session an log user out.
+    // we should clear such session and log user out.
     if (state && this.realm && state.realm !== this.realm) {
       const message = `State based on realm "${state.realm}", but provider with the name "${this.options.name}" is configured to use realm "${this.realm}".`;
       this.logger.warn(message);
@@ -154,10 +158,11 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
         this.logger.warn(message);
         return AuthenticationResult.failed(Boom.badRequest(message));
       }
-      return this.authenticateViaHandshake(request, attempt.redirectURL);
+      return this.authenticateViaHandshake(request, attempt.redirectURL, state);
     }
 
     const { samlResponse, relayState } = attempt;
+
     const authenticationResult = state
       ? await this.authenticateViaState(request, state)
       : AuthenticationResult.notHandled();
@@ -213,16 +218,19 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
     }
 
     // It may happen that Kibana is re-configured to use different realm for the same provider name,
-    // we should clear such session an log user out.
+    // we should clear such session and log user out.
     if (state && this.realm && state.realm !== this.realm) {
       const message = `State based on realm "${state.realm}", but provider with the name "${this.options.name}" is configured to use realm "${this.realm}".`;
       this.logger.warn(message);
+
       return AuthenticationResult.failed(Boom.unauthorized(message));
     }
 
     let authenticationResult = AuthenticationResult.notHandled();
+
     if (state) {
       authenticationResult = await this.authenticateViaState(request, state);
+
       if (
         authenticationResult.failed() &&
         Tokens.isAccessTokenExpiredError(authenticationResult.error)
@@ -234,7 +242,7 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
     // If we couldn't authenticate by means of all methods above, let's try to capture user URL and
     // initiate SAML handshake, otherwise just return authentication result we have.
     return authenticationResult.notHandled() && canStartNewSession(request)
-      ? this.initiateAuthenticationHandshake(request)
+      ? this.initiateAuthenticationHandshake(request, state)
       : authenticationResult;
   }
 
@@ -331,26 +339,34 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
     // If we have a `SAMLResponse` and state, but state doesn't contain all the necessary information,
     // then something unexpected happened and we should fail.
     const {
-      requestId: stateRequestId,
+      requestIds: stateRequestIds,
       redirectURL: stateRedirectURL,
       realm: stateRealm,
     } = state || {
-      requestId: '',
+      requestIds: [],
       redirectURL: '',
       realm: '',
     };
-    if (state && !stateRequestId) {
+
+    if (state && (stateRequestIds === undefined || stateRequestIds.length === 0)) {
       const message = 'SAML response state does not have corresponding request id.';
       this.logger.warn(message);
       return AuthenticationResult.failed(Boom.badRequest(message));
     }
 
-    // When we don't have state and hence request id we assume that SAMLResponse came from the IdP initiated login.
-    const isIdPInitiatedLogin = !stateRequestId;
+    // When we don't have requestIds we assume that SAMLResponse came from an IdP initiated login.
+    const isIdPInitiatedLogin = !stateRequestIds?.length;
+
     this.logger.debug(
       !isIdPInitiatedLogin
         ? 'Login has been previously initiated by Kibana.'
         : 'Login has been initiated by Identity Provider.'
+    );
+
+    this.logger.debug(
+      `SAML RESPONSE: ${samlResponse}:::${JSON.stringify(
+        !isIdPInitiatedLogin ? [stateRequestIds] : []
+      )}`
     );
 
     const providerRealm = this.realm || stateRealm;
@@ -370,7 +386,7 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
         method: 'POST',
         path: '/_security/saml/authenticate',
         body: {
-          ids: !isIdPInitiatedLogin ? [stateRequestId] : [],
+          ids: !isIdPInitiatedLogin ? stateRequestIds : [],
           content: samlResponse,
           ...(providerRealm ? { realm: providerRealm } : {}),
         },
@@ -389,6 +405,7 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
     // IdP can pass `RelayState` with the deep link in Kibana during IdP initiated login and
     // depending on the configuration we may need to redirect user to this URL.
     let redirectURLFromRelayState;
+
     if (isIdPInitiatedLogin && relayState) {
       if (!this.useRelayStateDeepLink) {
         this.options.logger.warn(
@@ -407,6 +424,16 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
     }
 
     this.logger.debug('Login has been performed with SAML response.');
+
+    const inResponseToRequestId = this.parseRequestIdFromSAMLResponse(samlResponse);
+
+    // Remove value of inResponseToRequestId from stateRequestIds and return the array of any
+    // requestIds that remain
+    const [areAnyRequestIdsRemaining, remainingRequestIds] = this.updateRemainingRequestIds(
+      inResponseToRequestId,
+      stateRequestIds
+    );
+
     return AuthenticationResult.redirectTo(
       redirectURLFromRelayState || stateRedirectURL || `${this.options.basePath.get(request)}/`,
       {
@@ -416,9 +443,41 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
           accessToken: result.access_token,
           refreshToken: result.refresh_token,
           realm: result.realm,
+          ...(areAnyRequestIdsRemaining && { requestIds: remainingRequestIds }),
         },
       }
     );
+  }
+
+  private parseRequestIdFromSAMLResponse(samlResponse: string): string | null {
+    const samlResponseBuffer = Buffer.from(samlResponse, 'base64');
+
+    const inResponseToRequestIdMatch = samlResponseBuffer
+      .toString()
+      .match(/InResponseTo="([a-z0-9_]*)"/);
+
+    return inResponseToRequestIdMatch ? inResponseToRequestIdMatch[1] : null;
+  }
+
+  private updateRemainingRequestIds(
+    requestIdToRemove: string | null,
+    remainingRequestIds: string[] = []
+  ): [boolean, string[]] {
+    if (requestIdToRemove) {
+      this.logger.info(`Removing requestId ${requestIdToRemove} from the state.`);
+      remainingRequestIds = remainingRequestIds?.filter(
+        (requestId) => requestId !== requestIdToRemove
+      );
+    }
+
+    const areAnyRequestIdsRemaining = remainingRequestIds && remainingRequestIds?.length > 0;
+    if (areAnyRequestIdsRemaining) {
+      this.logger.info(`The remaining requestIds in the state are ${remainingRequestIds}`);
+    } else {
+      this.logger.info(`There are no remaining requestIds in the state.`);
+    }
+
+    return [areAnyRequestIdsRemaining, remainingRequestIds];
   }
 
   /**
@@ -442,12 +501,17 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
   ) {
     this.logger.info('Trying to log in with SAML response payload and existing valid session.');
 
+    // If there are requestIds we want to pass the state
+    const shouldPassState = (existingState?.requestIds?.length ?? 0) > 0;
+
     // First let's try to authenticate via SAML Response payload.
     const payloadAuthenticationResult = await this.loginWithSAMLResponse(
       request,
       samlResponse,
-      relayState
+      relayState,
+      shouldPassState ? existingState : null
     );
+
     if (payloadAuthenticationResult.failed() || payloadAuthenticationResult.notHandled()) {
       return payloadAuthenticationResult;
     }
@@ -565,15 +629,20 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
    * Tries to start SAML handshake and eventually receive a token.
    * @param request Request instance.
    * @param redirectURL URL to redirect user to after successful SAML handshake.
+   * @param state Optional state object associated with the provider.
    */
-  private async authenticateViaHandshake(request: KibanaRequest, redirectURL: string) {
+  private async authenticateViaHandshake(
+    request: KibanaRequest,
+    redirectURL: string,
+    state?: ProviderState | null
+  ) {
     this.logger.debug('Trying to initiate SAML handshake.');
 
     try {
       // Prefer realm name if it's specified, otherwise fallback to ACS.
       const preparePayload = this.realm ? { realm: this.realm } : { acs: this.getACS() };
 
-      // This operation should be performed on behalf of the user with a privilege that normal
+      // This operation should be performed on behalf of the user with a privilege that a normal
       // user usually doesn't have `cluster:admin/xpack/security/saml/prepare`.
       // We can replace generic `transport.request` with a dedicated API method call once
       // https://github.com/elastic/elasticsearch/issues/67189 is resolved.
@@ -591,12 +660,44 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
 
       // Store request id in the state so that we can reuse it once we receive `SAMLResponse`.
       return AuthenticationResult.redirectTo(redirect, {
-        state: { requestId, redirectURL, realm },
+        state: {
+          requestIds: this.prepareRequestIDs(requestId, state?.requestIds),
+          redirectURL,
+          realm,
+        },
       });
     } catch (err) {
       this.logger.debug(() => `Failed to initiate SAML handshake: ${getDetailedErrorMessage(err)}`);
       return AuthenticationResult.failed(err);
     }
+  }
+
+  private prepareRequestIDs(
+    newRequestID: string,
+    existingRequestIDs: string[] | undefined
+  ): string[] {
+    let result: string[] = [];
+
+    if (existingRequestIDs) {
+      result = existingRequestIDs;
+    }
+
+    // We do not want to add an infinite number of requestIds to the state, so we limit it to `samlRequestIdLimit`(50)
+    // We remove the first requestId if we have 50
+    if (result.length >= samlRequestIdLimit) {
+      this.logger.debug(
+        `requestId limit reached, removing the oldest requestId ${result[0]} from the state.`
+      );
+      result.shift();
+    }
+
+    // We add the new requestId to the end of the array
+    this.logger.debug(
+      `Adding new requestId ${newRequestID} to the state. Current state: ${result}`
+    );
+    result.push(newRequestID);
+
+    return result;
   }
 
   /**
@@ -667,13 +768,16 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
    * initiate handshake right away, otherwise we'll redirect user to a dedicated page where we capture URL hash fragment
    * first and only then initiate SAML handshake.
    * @param request Request instance.
+   * @param state Optional state object associated with the provider.
    */
-  private initiateAuthenticationHandshake(request: KibanaRequest) {
+  private initiateAuthenticationHandshake(request: KibanaRequest, state?: ProviderState | null) {
     const originalURLHash = request.url.searchParams.get(AUTH_URL_HASH_QUERY_STRING_PARAMETER);
+
     if (originalURLHash != null) {
       return this.authenticateViaHandshake(
         request,
-        `${this.options.getRequestOriginalURL(request)}${originalURLHash}`
+        `${this.options.getRequestOriginalURL(request)}${originalURLHash}`,
+        state
       );
     }
 
@@ -687,7 +791,7 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
       )}`,
       // Here we indicate that current session, if any, should be invalidated. It is a no-op for the
       // initial handshake, but is essential when both access and refresh tokens are expired.
-      { state: null }
+      { state: state ? state : null }
     );
   }
 }
