@@ -766,6 +766,7 @@ describe('Observability AI Assistant client', () => {
           chat: expect.any(Function),
           args: JSON.stringify({ foo: 'bar' }),
           signal: expect.any(AbortSignal),
+          logger: expect.any(Object),
           connectorId: 'foo',
           messages: [
             {
