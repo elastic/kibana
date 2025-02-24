@@ -182,7 +182,6 @@ export default function ({ getService }: FtrProviderContext) {
           "case_4_feature_b",
           "dashboard",
           "discover",
-          "enterpriseSearchAnalytics",
           "generalCases",
           "generalCasesV2",
           "maps",

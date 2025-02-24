@@ -208,7 +208,6 @@ export class EnterpriseSearchPlugin implements Plugin<void, void, PluginsSetup, 
             read: [],
           },
           ui: [],
-          replacedBy: [],
         },
         read: {
           disabled: true,
@@ -217,14 +216,7 @@ export class EnterpriseSearchPlugin implements Plugin<void, void, PluginsSetup, 
             read: [],
           },
           ui: [],
-          replacedBy: [],
         },
-      },
-      deprecated: {
-        notice: i18n.translate('xpack.enterpriseSearch.analytics.deprecatedNotice', {
-          defaultMessage:
-            'Behavioral Analytics is deprecated and will be removed in a future release.',
-        }),
       },
     });
 
