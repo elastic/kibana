@@ -561,3 +561,49 @@ export async function pickTestGroupRunOrder() {
     ].flat()
   );
 }
+
+export async function pickScoutTestGroupRunOrder(scoutConfigsPath: string) {
+  const bk = new BuildkiteClient();
+  const envFromlabels: Record<string, string> = collectEnvFromLabels();
+
+  const rawScoutConfigs = JSON.parse(Fs.readFileSync(scoutConfigsPath, 'utf-8'));
+  const pluginsWithScoutConfigs: string[] = Object.keys(rawScoutConfigs);
+
+  const scoutGroups = pluginsWithScoutConfigs.map((plugin) => ({
+    title: plugin,
+    key: plugin,
+    group: rawScoutConfigs[plugin].group,
+  }));
+
+  // upload the step definitions to Buildkite
+  bk.uploadSteps(
+    [
+      scoutGroups.length
+        ? {
+            group: 'Scout Configs',
+            key: 'scout-configs',
+            depends_on: ['build'],
+            steps: scoutGroups.map(
+              ({ title, key, group }): BuildkiteStep => ({
+                label: `Scout: [ ${group} / ${title} ] plugin`,
+                command: getRequiredEnv('SCOUT_CONFIGS_SCRIPT'),
+                timeout_in_minutes: 60,
+                agents: expandAgentQueue('n2-4-spot'),
+                env: {
+                  SCOUT_CONFIG_GROUP_KEY: key,
+                  SCOUT_CONFIG_GROUP_TYPE: group,
+                  ...envFromlabels,
+                },
+                retry: {
+                  automatic: [
+                    { exit_status: '-1', limit: 1 },
+                    { exit_status: '*', limit: 0 },
+                  ],
+                },
+              })
+            ),
+          }
+        : [],
+    ].flat()
+  );
+}
