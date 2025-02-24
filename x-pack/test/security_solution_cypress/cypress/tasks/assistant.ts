@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { azureConnectorAPIPayload } from './api_calls/connectors';
 import { TIMELINE_CHECKBOX } from '../screens/timelines';
 import { CLOSE_FLYOUT } from '../screens/alerts';
 import {
@@ -99,6 +100,17 @@ export const updateConversationTitle = (newTitle: string) => {
 export const typeAndSendMessage = (message: string) => {
   cy.get(USER_PROMPT).type(message);
   cy.get(SUBMIT_CHAT).click();
+};
+
+// message must get sent before the title can be updated
+export const createAndTitleConversation = (newTitle = 'Something else') => {
+  createNewChat();
+  assertNewConversation(false, 'New chat');
+  assertConnectorSelected(azureConnectorAPIPayload.name);
+  typeAndSendMessage('hello');
+  assertMessageSent('hello');
+  assertErrorResponse();
+  updateConversationTitle(newTitle);
 };
 
 export const sendQueryToTimeline = () => {

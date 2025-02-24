@@ -19,7 +19,6 @@ import {
   createNewChat,
   selectConversation,
   assertMessageSent,
-  assertConversationTitle,
   typeAndSendMessage,
   assertErrorResponse,
   selectRule,
@@ -155,7 +154,7 @@ describe.skip('AI Assistant Conversations', { tags: ['@ess', '@serverless'] }, (
       assertConnectorSelected(azureConnectorAPIPayload.name);
       typeAndSendMessage('hello');
       assertMessageSent('hello');
-      assertConversationTitle('Unexpected API Error:  - Connection error.');
+      assertErrorResponse();
       updateConversationTitle('Something else');
     });
   });

@@ -7,6 +7,7 @@
 
 import { EXPLAIN_THEN_SUMMARIZE_SUGGEST_INVESTIGATION_GUIDE_NON_I18N } from '@kbn/security-solution-plugin/public/assistant/content/prompts/user/translations';
 import { PromptCreateProps } from '@kbn/elastic-assistant-common/impl/schemas/prompts/bulk_crud_prompts_route.gen';
+import { IS_SERVERLESS } from '../../env_var_names_constants';
 import { QUICK_PROMPT_BADGE, USER_PROMPT } from '../../screens/ai_assistant';
 import { createRule } from '../../tasks/api_calls/rules';
 import {
@@ -16,6 +17,7 @@ import {
   assertSystemPromptSelected,
   assertSystemPromptSent,
   clearSystemPrompt,
+  createAndTitleConversation,
   createQuickPrompt,
   createSystemPrompt,
   openAssistant,
@@ -73,7 +75,7 @@ describe('AI Assistant Prompts', { tags: ['@ess', '@serverless'] }, () => {
     deleteConnectors();
     deleteConversations();
     deletePrompts();
-    login('admin');
+    login(Cypress.env(IS_SERVERLESS) ? 'admin' : undefined);
     createAzureConnector();
     waitForConversation(mockConvo1);
     waitForConversation(mockConvo2);
@@ -136,13 +138,17 @@ describe('AI Assistant Prompts', { tags: ['@ess', '@serverless'] }, () => {
     });
 
     // due to the missing profile_uid when creating conversations from the API
-    // bulk actions cannot be performed on conversations so this test does is skipped
-    it.skip('Add prompt from system prompt selector and set multiple conversations (including current) as default conversation', () => {
+    // bulk actions cannot be performed on conversations, so they must be created from the UI for this test
+    it('Add prompt from system prompt selector and set multiple conversations (including current) as default conversation', () => {
       visitGetStartedPage();
       openAssistant();
+      createAndTitleConversation('Lucky title');
+      resetConversation();
+      createAndTitleConversation('Lovely title');
+      resetConversation();
       selectConversation(mockConvo1.title);
-      selectConnector(azureConnectorAPIPayload.name);
-      createSystemPrompt(testPrompt.name, testPrompt.content, [mockConvo1.title, mockConvo2.title]);
+      createSystemPrompt(testPrompt.name, testPrompt.content, ['Lucky title', 'Lovely title']);
+      selectConversation('Lovely title');
       assertSystemPromptSelected(testPrompt.name);
       typeAndSendMessage('hello');
 
@@ -150,8 +156,7 @@ describe('AI Assistant Prompts', { tags: ['@ess', '@serverless'] }, () => {
       assertMessageSent('hello', true);
       // ensure response before changing convo
       assertErrorResponse();
-      selectConversation(mockConvo2.title);
-      selectConnector(azureConnectorAPIPayload.name);
+      selectConversation('Lucky title');
       assertSystemPromptSelected(testPrompt.name);
       typeAndSendMessage('hello');
 

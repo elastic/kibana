@@ -6,6 +6,7 @@
  */
 
 import { MessageRole } from '@kbn/elastic-assistant-common';
+import { IS_SERVERLESS } from '../../env_var_names_constants';
 import { TIMELINE_QUERY } from '../../screens/timeline';
 import { CASES_URL } from '../../urls/navigation';
 import { SEND_TO_TIMELINE_BUTTON } from '../../screens/ai_assistant';
@@ -50,7 +51,7 @@ describe('AI Assistant Messages', { tags: ['@ess', '@serverless'] }, () => {
     deleteConnectors();
     deleteConversations();
     deletePrompts();
-    login('admin');
+    login(Cypress.env(IS_SERVERLESS) ? 'admin' : undefined);
     createAzureConnector();
     waitForConversation(mockConvo);
   });
