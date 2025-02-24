@@ -50,15 +50,14 @@ interface StreamDetailEnrichmentContentProps {
 
 export function StreamDetailEnrichmentContent(props: StreamDetailEnrichmentContentProps) {
   const { core, dependencies } = useKibana();
-  const { toasts } = core.notifications;
   const { streamsRepositoryClient } = dependencies.start.streams;
 
   return (
     <StreamEnrichmentContextProvider
       definition={props.definition}
       refreshDefinition={props.refreshDefinition}
+      core={core}
       streamsRepositoryClient={streamsRepositoryClient}
-      toasts={toasts}
     >
       <StreamDetailEnrichmentContentImpl />
     </StreamEnrichmentContextProvider>
@@ -157,8 +156,6 @@ export function StreamDetailEnrichmentContentImpl() {
                   <ProcessorsEditor
                     definition={definition}
                     processors={processorList}
-                    // onUpdateProcessor={updateProcessor}
-                    // onDeleteProcessor={deleteProcessor}
                     onWatchProcessor={watchProcessor}
                     onAddProcessor={addProcessor}
                     onReorderProcessor={reorderProcessors}

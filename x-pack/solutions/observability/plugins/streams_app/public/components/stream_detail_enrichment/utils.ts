@@ -48,11 +48,13 @@ const defaultProcessorFormStateByType: Record<ProcessorType, ProcessorFormState>
   grok: defaultGrokProcessorFormState,
 };
 
-export const getDefaultFormState = (
-  type: ProcessorType,
+export const getDefaultFormStateByType = (type: ProcessorType) =>
+  defaultProcessorFormStateByType[type];
+
+export const getFormStateFrom = (
   processor?: ProcessorDefinitionWithUIAttributes
 ): ProcessorFormState => {
-  if (!processor) return defaultProcessorFormStateByType[type];
+  if (!processor) return defaultGrokProcessorFormState;
 
   if (isGrokProcessor(processor)) {
     const { grok } = processor;

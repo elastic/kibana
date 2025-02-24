@@ -6,7 +6,7 @@
  */
 
 import { ActorRefFrom } from 'xstate5';
-import { IToasts } from '@kbn/core/public';
+import { CoreStart } from '@kbn/core/public';
 import { StreamsRepositoryClient } from '@kbn/streams-plugin/public/api';
 import { FieldDefinition, IngestStreamGetResponse } from '@kbn/streams-schema';
 import { ProcessorDefinitionWithUIAttributes } from '../../types';
@@ -15,7 +15,7 @@ import { ProcessorToParentEvent, processorMachine } from './processor_state_mach
 export interface StreamEnrichmentServiceDependencies {
   refreshDefinition: () => void;
   streamsRepositoryClient: StreamsRepositoryClient;
-  toasts: IToasts;
+  core: CoreStart;
 }
 
 export interface StreamEnrichmentInput {

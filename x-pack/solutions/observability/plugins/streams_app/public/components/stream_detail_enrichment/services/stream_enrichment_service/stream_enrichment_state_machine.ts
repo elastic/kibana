@@ -26,11 +26,11 @@ import {
   createUpsertStreamFailureNofitier,
   createUpsertStreamSuccessNofitier,
 } from './upsert_stream';
-import { processorMachine } from './processor_state_machine';
+import { processorMachine, createProcessorMachineImplementations } from './processor_state_machine';
 
 const createId = htmlIdGenerator();
 
-export const streamEnrichmentActor = setup({
+export const streamEnrichmentMachine = setup({
   types: {
     input: {} as StreamEnrichmentInput,
     context: {} as StreamEnrichmentContext,
@@ -38,7 +38,7 @@ export const streamEnrichmentActor = setup({
   },
   actors: {
     upsertStream: getPlaceholderFor(createUpsertStreamActor),
-    processorMachine,
+    processorMachine: getPlaceholderFor(() => processorMachine),
   },
   actions: {
     notifyUpsertStreamSuccess: getPlaceholderFor(createUpsertStreamSuccessNofitier),
@@ -252,19 +252,26 @@ export const streamEnrichmentActor = setup({
   },
 });
 
-export const createStreamEnrichmentActorImplementations = ({
+export const createStreamEnrichmentMachineImplementations = ({
   refreshDefinition,
   streamsRepositoryClient,
-  toasts,
+  core,
 }: StreamEnrichmentServiceDependencies): MachineImplementationsFrom<
-  typeof streamEnrichmentActor
+  typeof streamEnrichmentMachine
 > => ({
   actors: {
     upsertStream: createUpsertStreamActor({ streamsRepositoryClient }),
+    processorMachine: processorMachine.provide(
+      createProcessorMachineImplementations({ overlays: core.overlays })
+    ),
   },
   actions: {
     refreshDefinition,
-    notifyUpsertStreamSuccess: createUpsertStreamSuccessNofitier({ toasts }),
-    notifyUpsertStreamFailure: createUpsertStreamFailureNofitier({ toasts }),
+    notifyUpsertStreamSuccess: createUpsertStreamSuccessNofitier({
+      toasts: core.notifications.toasts,
+    }),
+    notifyUpsertStreamFailure: createUpsertStreamFailureNofitier({
+      toasts: core.notifications.toasts,
+    }),
   },
 });

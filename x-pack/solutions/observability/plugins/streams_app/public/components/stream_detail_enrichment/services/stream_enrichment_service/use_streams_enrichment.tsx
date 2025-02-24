@@ -9,8 +9,8 @@ import React, { useEffect, useMemo } from 'react';
 import { createActorContext } from '@xstate5/react';
 import { createConsoleInspector } from '@kbn/xstate-utils';
 import {
-  streamEnrichmentActor,
-  createStreamEnrichmentActorImplementations,
+  streamEnrichmentMachine,
+  createStreamEnrichmentMachineImplementations,
 } from './stream_enrichment_state_machine';
 import {
   StreamEnrichmentEventParams,
@@ -20,7 +20,7 @@ import {
 
 const consoleInspector = createConsoleInspector();
 
-const StreamEnrichmentContext = createActorContext(streamEnrichmentActor);
+const StreamEnrichmentContext = createActorContext(streamEnrichmentMachine);
 
 export const useStreamsEnrichmentSelector = StreamEnrichmentContext.useSelector;
 
@@ -55,7 +55,7 @@ export const StreamEnrichmentContextProvider = ({
 }: React.PropsWithChildren<StreamEnrichmentServiceDependencies & StreamEnrichmentInput>) => {
   return (
     <StreamEnrichmentContext.Provider
-      logic={streamEnrichmentActor.provide(createStreamEnrichmentActorImplementations(deps))}
+      logic={streamEnrichmentMachine.provide(createStreamEnrichmentMachineImplementations(deps))}
       options={{
         inspect: consoleInspector,
         input: {
