@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-export const mockRuleMigrationsTaskClient = {
+export const createRuleMigrationsTaskClientMock = () => ({
   start: jest.fn().mockResolvedValue({ started: true }),
   stop: jest.fn().mockResolvedValue({ stopped: true }),
   getStats: jest.fn().mockResolvedValue({
@@ -19,15 +19,15 @@ export const mockRuleMigrationsTaskClient = {
     },
   }),
   getAllStats: jest.fn().mockResolvedValue([]),
-};
+});
 
 export const MockRuleMigrationsTaskClient = jest
   .fn()
-  .mockImplementation(() => mockRuleMigrationsTaskClient);
+  .mockImplementation(() => createRuleMigrationsTaskClientMock());
 
 // Rule migrations task service
 export const mockStopAll = jest.fn();
-export const mockCreateClient = jest.fn().mockReturnValue(mockRuleMigrationsTaskClient);
+export const mockCreateClient = jest.fn(() => createRuleMigrationsTaskClientMock());
 
 export const MockRuleMigrationsTaskService = jest.fn().mockImplementation(() => ({
   createClient: mockCreateClient,
