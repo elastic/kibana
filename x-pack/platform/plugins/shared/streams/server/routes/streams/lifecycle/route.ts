@@ -56,7 +56,7 @@ const lifecycleStatsRoute = createServerRoute({
 });
 
 const lifecycleIlmExplainRoute = createServerRoute({
-  endpoint: 'GET /api/streams/{name}/lifecycle/{indices}/_explain',
+  endpoint: 'GET /api/streams/{name}/lifecycle/_explain',
   options: {
     access: 'internal',
   },
@@ -68,7 +68,7 @@ const lifecycleIlmExplainRoute = createServerRoute({
     },
   },
   params: z.object({
-    path: z.object({ name: z.string(), indices: z.string() }),
+    path: z.object({ name: z.string() }),
   }),
   handler: async ({ params, request, getScopedClients }) => {
     const { scopedClusterClient, streamsClient } = await getScopedClients({ request });
@@ -78,7 +78,7 @@ const lifecycleIlmExplainRoute = createServerRoute({
     await streamsClient.getStream(name);
 
     return scopedClusterClient.asCurrentUser.ilm.explainLifecycle({
-      index: params.path.indices,
+      index: name,
     });
   },
 });

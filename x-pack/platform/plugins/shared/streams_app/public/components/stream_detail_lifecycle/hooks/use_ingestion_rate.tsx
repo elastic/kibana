@@ -204,25 +204,14 @@ export const useIngestionRatePerTier = ({
         )
       );
 
-      const indices = uniq(
-        aggregations.sampler.docs_count.buckets.flatMap((bucket) =>
-          bucket.indices.buckets.map(({ key }) => key)
-        )
-      );
-
-      if (indices.length === 0) {
+      if (aggregations.sampler.docs_count.buckets.length === 0) {
         return { start, end, interval, buckets: {} };
       }
 
       const ilmExplain = await streamsRepositoryClient.fetch(
-        'GET /api/streams/{name}/lifecycle/{indices}/_explain',
+        'GET /api/streams/{name}/lifecycle/_explain',
         {
-          params: {
-            path: {
-              name: definition.stream.name,
-              indices: indices.join(','),
-            },
-          },
+          params: { path: { name: definition.stream.name } },
           signal,
         }
       );
