@@ -61,6 +61,7 @@ export class EventBus<S extends Slice> {
   // workaround for initialization in hook
   private currentState: ReturnType<S['reducer']>;
   private currentStateSubscription: Subscription;
+  private disposed = false;
 
   constructor(slice: S) {
     this.subject = new BehaviorSubject<Action>({ type: '', payload: null });
@@ -81,7 +82,8 @@ export class EventBus<S extends Slice> {
   // Subscribe to this event bus with an optional selector.
   subscribe<SelectedState = ReturnType<S['reducer']>>(
     cb: (state: SelectedState) => void,
-    selector?: (state: ReturnType<S['reducer']>) => SelectedState
+    selector?: (state: ReturnType<S['reducer']>) => SelectedState,
+    errorHandler?: (error: Error) => void
   ): Subscription {
     return this.state
       .pipe(
@@ -90,7 +92,10 @@ export class EventBus<S extends Slice> {
         // Emit only if the selected state has changed
         distinctUntilChanged(customIsEqual)
       )
-      .subscribe(cb);
+      .subscribe({
+        next: cb,
+        error: errorHandler || console.error,
+      });
   }
 
   // React hook with an optional selector.
@@ -121,20 +126,21 @@ export class EventBus<S extends Slice> {
     return useObservable(o$, initialState);
   }
 
-  // Wrap slice actions to automatically dispatch through the event bus
-  private wrapActions(actions: S['actions']) {
+  private wrapActions<A extends S['actions']>(actions: A): A {
     return Object.entries(actions).reduce((p, [key, actionCreator]) => {
-      p[key as any as keyof S['actions']] = ((...args: any[]) => {
-        const actionObj = actionCreator.apply(null, [args[0]]);
+      p[key as keyof A] = ((payload: any) => {
+        const actionObj = actionCreator(payload);
         this.subject.next(actionObj);
-      }) as any;
+      }) as A[keyof A];
       return p;
-    }, {} as S['actions']);
+    }, {} as A);
   }
 
   // Call this method when unregistering the event bus to make sure
   // the state subscription is cleaned up.
   dispose() {
+    if (this.disposed) return;
+    this.disposed = true;
     this.subject.complete();
     this.currentStateSubscription.unsubscribe();
   }
