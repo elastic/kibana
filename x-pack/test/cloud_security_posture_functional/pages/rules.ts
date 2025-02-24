@@ -36,7 +36,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     let findings: typeof pageObjects.findings;
     let agentPolicyId: string;
 
-    beforeEach(async () => {
+    before(async () => {
       rule = pageObjects.rule;
       findings = pageObjects.findings;
 
@@ -51,7 +51,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           name: 'Test policy',
           namespace: 'default',
         });
-
+      // eslint-disable-next-line prettier/prettier
+      console.log("agentPolicyResponse1 ", agentPolicyResponse);
       agentPolicyId = agentPolicyResponse.item.id;
 
       await createPackagePolicy(
@@ -64,10 +65,19 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       );
       await rule.waitForPluginInitialized();
       await findings.index.add(k8sFindingsMock);
+    });
+
+    beforeEach(async () => {
       await rule.navigateToRulePage('cis_k8s', '1.0.1');
     });
 
-    afterEach(async () => {
+    // afterEach(async () => {
+    //   await kibanaServer.savedObjects.cleanStandardList();
+    //   await esArchiver.unload('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
+    //   await findings.index.remove();
+    // });
+
+    after(async () => {
       await kibanaServer.savedObjects.cleanStandardList();
       await esArchiver.unload('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
       await findings.index.remove();
