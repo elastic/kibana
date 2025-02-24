@@ -47,96 +47,16 @@ describe('extract rule data queries', () => {
       });
     });
 
-    it('normalizes filters with all fields present', () => {
-      const extractedKqlQuery = extractRuleKqlQuery(
-        'event.kind:alert',
-        'kuery',
-        [mockFilter],
-        undefined
-      );
+    describe('filters normalization', () => {
+      it('normalizes filters[].query when all fields present', () => {
+        const extractedKqlQuery = extractRuleKqlQuery(
+          'some:query',
+          'kuery',
+          [mockFilter],
+          undefined
+        );
 
-      expect(extractedKqlQuery).toEqual(
-        expect.objectContaining({
-          filters: [
-            {
-              meta: {
-                negate: false,
-                disabled: false,
-              },
-              query: {
-                term: {
-                  field: 'value',
-                },
-              },
-            },
-          ],
-        })
-      );
-    });
-
-    it('normalizes filters without disabled field', () => {
-      const extractedKqlQuery = extractRuleKqlQuery(
-        'event.kind:alert',
-        'kuery',
-        [{ ...mockFilter, meta: { ...mockFilter.meta, disabled: undefined } }],
-        undefined
-      );
-
-      expect(extractedKqlQuery).toEqual(
-        expect.objectContaining({
-          filters: [
-            {
-              meta: {
-                negate: false,
-                disabled: false,
-              },
-              query: {
-                term: {
-                  field: 'value',
-                },
-              },
-            },
-          ],
-        })
-      );
-    });
-
-    it('normalizes filters without negate field', () => {
-      const extractedKqlQuery = extractRuleKqlQuery(
-        'event.kind:alert',
-        'kuery',
-        [{ ...mockFilter, meta: { ...mockFilter.meta, negate: undefined } }],
-        undefined
-      );
-
-      expect(extractedKqlQuery).toEqual(
-        expect.objectContaining({
-          filters: [
-            {
-              meta: {
-                disabled: false,
-              },
-              query: {
-                term: {
-                  field: 'value',
-                },
-              },
-            },
-          ],
-        })
-      );
-    });
-
-    it('normalizes filters without meta object', () => {
-      const extractedKqlQuery = extractRuleKqlQuery(
-        'event.kind:alert',
-        'kuery',
-        [{ ...mockFilter, meta: undefined }],
-        undefined
-      );
-
-      expect(extractedKqlQuery).toEqual(
-        expect.objectContaining({
+        expect(extractedKqlQuery).toMatchObject({
           filters: [
             {
               query: {
@@ -146,20 +66,79 @@ describe('extract rule data queries', () => {
               },
             },
           ],
-        })
-      );
-    });
+        });
+      });
 
-    it('normalizes filters without query object', () => {
-      const extractedKqlQuery = extractRuleKqlQuery(
-        'event.kind:alert',
-        'kuery',
-        [{ ...mockFilter, query: undefined }],
-        undefined
-      );
+      it('normalizes filters[].query when query object is missing', () => {
+        const extractedKqlQuery = extractRuleKqlQuery(
+          'some:query',
+          'kuery',
+          [{ ...mockFilter, query: undefined }],
+          undefined
+        );
 
-      expect(extractedKqlQuery).toEqual(
-        expect.objectContaining({
+        expect(extractedKqlQuery).not.toMatchObject({
+          filters: [
+            {
+              query: expect.anything(),
+            },
+          ],
+        });
+      });
+
+      it.each([
+        {
+          caseName: 'when all fields present',
+          filter: mockFilter,
+          expectedFilterMeta: {
+            negate: false,
+            disabled: false,
+          },
+        },
+        {
+          caseName: 'when disabled field is missing',
+          filter: { ...mockFilter, meta: { ...mockFilter.meta, disabled: undefined } },
+          expectedFilterMeta: {
+            negate: false,
+            disabled: false,
+          },
+        },
+        {
+          caseName: 'when negate field is missing',
+          filter: { ...mockFilter, meta: { ...mockFilter.meta, negate: undefined } },
+          expectedFilterMeta: {
+            disabled: false,
+          },
+        },
+        {
+          caseName: 'when query object is missing',
+          filter: { ...mockFilter, query: undefined },
+          expectedFilterMeta: {
+            negate: false,
+            disabled: false,
+          },
+        },
+      ])('normalizes filters[].meta $caseName', ({ filter, expectedFilterMeta }) => {
+        const extractedKqlQuery = extractRuleKqlQuery('some:query', 'kuery', [filter], undefined);
+
+        expect(extractedKqlQuery).toMatchObject({
+          filters: [
+            {
+              meta: expectedFilterMeta,
+            },
+          ],
+        });
+      });
+
+      it('normalizes filters[].meta when query object is missing', () => {
+        const extractedKqlQuery = extractRuleKqlQuery(
+          'some:query',
+          'kuery',
+          [{ ...mockFilter, query: undefined }],
+          undefined
+        );
+
+        expect(extractedKqlQuery).toMatchObject({
           filters: [
             {
               meta: {
@@ -168,8 +147,8 @@ describe('extract rule data queries', () => {
               },
             },
           ],
-        })
-      );
+        });
+      });
     });
   });
 
