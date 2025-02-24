@@ -283,17 +283,6 @@ export const AgentUpgradeStatus: React.FC<{
   const minVersion = '8.12';
   const notUpgradeableMessage = getNotUpgradeableMessage(agent, latestAgentVersion);
 
-  if (isAgentUpgradable && isAgentUpgradeAvailable(agent, latestAgentVersion)) {
-    return (
-      <EuiBadge color="hollow" iconType="sortUp">
-        <FormattedMessage
-          id="xpack.fleet.agentUpgradeStatusBadge.upgradeAvailable"
-          defaultMessage="Upgrade available"
-        />
-      </EuiBadge>
-    );
-  }
-
   if (agent.upgrade_details && status) {
     return (
       <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
@@ -309,6 +298,17 @@ export const AgentUpgradeStatus: React.FC<{
           </EuiFlexItem>
         )}
       </EuiFlexGroup>
+    );
+  }
+
+  if (isAgentUpgradable && isAgentUpgradeAvailable(agent, latestAgentVersion)) {
+    return (
+      <EuiBadge color="hollow" iconType="sortUp">
+        <FormattedMessage
+          id="xpack.fleet.agentUpgradeStatusBadge.upgradeAvailable"
+          defaultMessage="Upgrade available"
+        />
+      </EuiBadge>
     );
   }
 

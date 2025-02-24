@@ -105,6 +105,12 @@ export const GetOneAgentPolicyRequestSchema = {
   }),
 };
 
+export const GetAutoUpgradeAgentsStatusRequestSchema = {
+  params: schema.object({
+    agentPolicyId: schema.string(),
+  }),
+};
+
 export const CreateAgentPolicyRequestSchema = {
   body: NewAgentPolicySchema,
   query: schema.object({
@@ -116,6 +122,7 @@ export const UpdateAgentPolicyRequestSchema = {
   ...GetOneAgentPolicyRequestSchema,
   body: NewAgentPolicySchema.extends({
     force: schema.maybe(schema.boolean()),
+    bumpRevision: schema.maybe(schema.boolean()),
   }),
 };
 
