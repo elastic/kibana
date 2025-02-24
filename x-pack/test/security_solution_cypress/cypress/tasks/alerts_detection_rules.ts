@@ -201,6 +201,7 @@ export const filterByElasticRules = () => {
 
 export const filterByCustomRules = () => {
   cy.get(CUSTOM_RULES_BTN).click();
+  waitForRulesTableToBeRefreshed();
 };
 
 export const filterByEnabledRules = () => {

@@ -4025,6 +4025,10 @@
                 "path": "x-pack/solutions/search/plugins/search_indices/server/routes/status.ts"
               },
               {
+                "plugin": "searchIndices",
+                "path": "x-pack/solutions/search/plugins/search_indices/server/routes/onboarding.ts"
+              },
+              {
                 "plugin": "searchInferenceEndpoints",
                 "path": "x-pack/solutions/search/plugins/search_inference_endpoints/server/routes.ts"
               },
@@ -13517,6 +13521,10 @@
               {
                 "plugin": "securitySolution",
                 "path": "x-pack/solutions/security/plugins/security_solution/server/lib/siem_migrations/rules/api/privileges/get_missing_privileges.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/asset_inventory/routes/status.ts"
               },
               {
                 "plugin": "securitySolution",
