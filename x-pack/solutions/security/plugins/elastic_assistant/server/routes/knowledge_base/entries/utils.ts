@@ -50,7 +50,7 @@ export const validateDocumentsModification = async (
   const availableEntries = entries ? transformESSearchToKnowledgeBaseEntry(entries.data) : [];
   availableEntries.forEach((entry) => {
     // RBAC validation
-    const isGlobal = entry.users != null && entry.users.length === 0;
+    const isGlobal = entry.global ?? (entry.users != null && entry.users.length === 0);
     if (isGlobal && !manageGlobalKnowledgeBaseAIAssistant) {
       throw new Error(`User lacks privileges to ${operation} global knowledge base entries`);
     }

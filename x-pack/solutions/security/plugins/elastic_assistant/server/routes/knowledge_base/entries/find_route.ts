@@ -139,6 +139,7 @@ export const findKnowledgeBaseEntriesRoute = (router: ElasticAssistantPluginRout
                         createdBy: entry.created_by,
                         updatedAt: entry.updated_at,
                         updatedBy: entry.updated_by,
+                        global: true,
                         users: [],
                         name,
                         namespace: entry.namespace,

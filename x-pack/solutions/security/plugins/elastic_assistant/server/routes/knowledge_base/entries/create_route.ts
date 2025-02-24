@@ -62,7 +62,6 @@ export const createKnowledgeBaseEntryRoute = (router: ElasticAssistantPluginRout
           logger.debug(() => `Creating KB Entry:\n${JSON.stringify(request.body)}`);
           const createResponse = await kbDataClient?.createKnowledgeBaseEntry({
             knowledgeBaseEntry: request.body,
-            global: request.body.users != null && request.body.users.length === 0,
             auditLogger: ctx.elasticAssistant.auditLogger,
             telemetry: ctx.elasticAssistant.telemetry,
           });

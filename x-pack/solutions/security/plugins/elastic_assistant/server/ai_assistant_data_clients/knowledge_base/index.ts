@@ -29,7 +29,7 @@ import pRetry from 'p-retry';
 import { StructuredTool } from '@langchain/core/tools';
 import { AnalyticsServiceSetup, AuditLogger, ElasticsearchClient } from '@kbn/core/server';
 import { IndexPatternsFetcher } from '@kbn/data-views-plugin/server';
-import { map } from 'lodash';
+import { isArray, map } from 'lodash';
 import { AIAssistantDataClient, AIAssistantDataClientParams } from '..';
 import { GetElser } from '../../types';
 import {
@@ -434,8 +434,8 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
             kbResource: doc.metadata.kbResource ?? 'unknown',
             required: doc.metadata.required ?? false,
             source: doc.metadata.source ?? 'unknown',
+            global,
           },
-          global,
         });
       }),
       authenticatedUser,
@@ -658,11 +658,9 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
     auditLogger,
     knowledgeBaseEntry,
     telemetry,
-    global = false,
   }: {
     auditLogger?: AuditLogger;
     knowledgeBaseEntry: KnowledgeBaseEntryCreateProps;
-    global?: boolean;
     telemetry: AnalyticsServiceSetup;
   }): Promise<KnowledgeBaseEntryResponse | null> => {
     const authenticatedUser = this.options.currentUser;
@@ -673,7 +671,12 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
       );
     }
 
-    if (global && !this.options.manageGlobalKnowledgeBaseAIAssistant) {
+    const globalEntry =
+      (isArray(knowledgeBaseEntry.users) && knowledgeBaseEntry.users.length === 0) ||
+      knowledgeBaseEntry.global ||
+      false;
+
+    if (globalEntry && !this.options.manageGlobalKnowledgeBaseAIAssistant) {
       throw new Error('User lacks privileges to create global knowledge base entries');
     }
 
@@ -690,7 +693,6 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
       spaceId: this.spaceId,
       user: authenticatedUser,
       knowledgeBaseEntry,
-      global,
       telemetry,
     });
   };
@@ -736,7 +738,6 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
           user: authenticatedUser,
           updatedAt: changedAt,
           entry: knowledgeBaseEntry,
-          global: knowledgeBaseEntry.users != null && knowledgeBaseEntry.users.length === 0,
         }),
       ],
       getUpdateScript: (entry: UpdateKnowledgeBaseEntrySchema) => getUpdateScript({ entry }),

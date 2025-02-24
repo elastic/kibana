@@ -241,7 +241,7 @@ export const bulkActionKnowledgeBaseEntriesRoute = (router: ElasticAssistantPlug
           if (body.create && body.create.length > 0) {
             // RBAC validation
             body.create.forEach((entry) => {
-              const isGlobal = entry.users != null && entry.users.length === 0;
+              const isGlobal = entry.global ?? (entry.users != null && entry.users.length === 0);
               if (isGlobal && !manageGlobalKnowledgeBaseAIAssistant) {
                 throw new Error(`User lacks privileges to create global knowledge base entries`);
               }
@@ -276,7 +276,6 @@ export const bulkActionKnowledgeBaseEntriesRoute = (router: ElasticAssistantPlug
                 spaceId,
                 user: authenticatedUser,
                 entry,
-                global: entry.users != null && entry.users.length === 0,
               })
             ),
             documentsToDelete: body.delete?.ids,
@@ -285,7 +284,6 @@ export const bulkActionKnowledgeBaseEntriesRoute = (router: ElasticAssistantPlug
                 user: authenticatedUser,
                 updatedAt: changedAt,
                 entry,
-                global: entry.users != null && entry.users.length === 0,
               })
             ),
             getUpdateScript: (entry: UpdateKnowledgeBaseEntrySchema) => getUpdateScript({ entry }),

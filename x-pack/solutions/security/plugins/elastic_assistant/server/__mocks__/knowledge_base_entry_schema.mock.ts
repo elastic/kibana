@@ -157,6 +157,7 @@ export const getKnowledgeBaseEntryMock = (
   createdAt: '2020-04-20T15:25:31.830Z',
   updatedAt: '2020-04-20T15:25:31.830Z',
   namespace: 'default',
+  global: false,
   users: [
     {
       name: 'my_username',

@@ -102,9 +102,13 @@ export const BaseDefaultableFields = z.object({
    */
   namespace: z.string().optional(),
   /**
+   * Whether this Knowledge Base Entry is global, defaults to false
+   */
+  global: z.boolean().optional(),
+  /**
    * Users who have access to the Knowledge Base Entry, defaults to current user. Empty array provides access to all users.
    */
-  users: z.array(User).nullable().optional(),
+  users: z.array(User).optional(),
 });
 
 export type BaseCreateProps = z.infer<typeof BaseCreateProps>;
