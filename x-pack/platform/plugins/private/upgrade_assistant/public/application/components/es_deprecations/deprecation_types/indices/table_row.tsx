@@ -27,11 +27,15 @@ const { useGlobalFlyout } = GlobalFlyout;
 interface TableRowProps {
   deprecation: EnrichedDeprecationInfo;
   rowFieldNames: DeprecationTableColumns[];
+  selectedDeprecations?: Set<string>,
+  toggleDeprecation?: (id: string) => void,
 }
 
 const IndexTableRowCells: React.FunctionComponent<TableRowProps> = ({
   rowFieldNames,
   deprecation,
+  selectedDeprecations,
+  toggleDeprecation,
 }) => {
   const [showFlyout, setShowFlyout] = useState(false);
   const indexContext = useIndexContext();
@@ -84,6 +88,8 @@ const IndexTableRowCells: React.FunctionComponent<TableRowProps> = ({
               openFlyout={() => setShowFlyout(true)}
               deprecation={deprecation}
               resolutionTableCell={<ReindexResolutionCell />}
+              selectedDeprecations={selectedDeprecations}
+              toggleDeprecation={toggleDeprecation}
             />
           </EuiTableRowCell>
         );

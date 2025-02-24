@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiLink, EuiText, EuiToolTip } from '@elastic/eui';
+import { EuiLink, EuiText, EuiToolTip, EuiCheckbox } from '@elastic/eui';
 import { EnrichedDeprecationInfo } from '../../../../common/types';
 import { DEPRECATION_TYPE_MAP } from '../constants';
 import { DeprecationTableColumns } from '../types';
@@ -18,6 +18,8 @@ interface Props {
   fieldName: DeprecationTableColumns;
   deprecation: EnrichedDeprecationInfo;
   openFlyout: () => void;
+  selectedDeprecations?: Set<string>,
+  toggleDeprecation?: (id?: string) => void,
 }
 
 const i18nTexts = {
@@ -40,7 +42,24 @@ export const EsDeprecationsTableCells: React.FunctionComponent<Props> = ({
   fieldName,
   deprecation,
   openFlyout,
+  selectedDeprecations,
+  toggleDeprecation,
 }) => {
+  // "Select" column
+  if (fieldName === 'select') {
+    const index = deprecation.index ?? '';
+    const isDisabled = !deprecation.index || deprecation.correctiveAction?.type !== 'reindex';
+
+    return (
+      <EuiCheckbox
+        id={`select-${index}`}
+        disabled={isDisabled}
+        checked={!isDisabled && selectedDeprecations?.has(index)}
+        onChange={() => !isDisabled && toggleDeprecation?.(index)}
+      />
+    );
+  }
+
   // "Status column"
   if (fieldName === 'isCritical') {
     return <DeprecationBadge isCritical={deprecation.isCritical} />;

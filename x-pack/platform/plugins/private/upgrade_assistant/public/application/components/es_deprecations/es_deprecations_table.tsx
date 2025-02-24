@@ -22,6 +22,8 @@ import {
   EuiTablePagination,
   EuiCallOut,
   EuiTableRowCell,
+  EuiTableHeaderCellCheckbox,
+  EuiCheckbox,
   Pager,
   Query,
 } from '@elastic/eui';
@@ -70,6 +72,12 @@ const i18nTexts = {
 };
 
 const cellToLabelMap = {
+  select: {
+    label: i18n.translate('xpack.upgradeAssistant.esDeprecations.table.selectColumnTitle', {
+      defaultMessage: 'Select',
+    }),
+    width: '8px',
+  },
   isCritical: {
     label: i18n.translate('xpack.upgradeAssistant.esDeprecations.table.statusColumnTitle', {
       defaultMessage: 'Status',
@@ -107,7 +115,9 @@ const pageSizeOptions = PAGINATION_CONFIG.pageSizeOptions;
 
 const renderTableRowCells = (
   deprecation: EnrichedDeprecationInfo,
-  mlUpgradeModeEnabled: boolean
+  mlUpgradeModeEnabled: boolean,
+  selectedDeprecations: Set<string>,
+  toggleDeprecation: (id: string) => void,
 ) => {
   switch (deprecation.correctiveAction?.type) {
     case 'mlSnapshot':
@@ -127,7 +137,7 @@ const renderTableRowCells = (
 
     case 'reindex':
     case 'unfreeze':
-      return <IndexTableRow deprecation={deprecation} rowFieldNames={cellTypes} />;
+      return <IndexTableRow deprecation={deprecation} rowFieldNames={cellTypes} selectedDeprecations={selectedDeprecations} toggleDeprecation={toggleDeprecation} />;
 
     case 'healthIndicator':
       return <HealthIndicatorTableRow deprecation={deprecation} rowFieldNames={cellTypes} />;
@@ -190,6 +200,19 @@ export const EsDeprecationsTable: React.FunctionComponent<Props> = ({
   const { data } = api.useLoadMlUpgradeMode();
   const mlUpgradeModeEnabled = !!data?.mlUpgradeModeEnabled;
 
+  const [selectedDeprecations, setSelectedDeprecations] = useState<Set<string>>(new Set());
+  const toggleDeprecation = (id: string) => {
+    setSelectedDeprecations((prev) => {
+      const newSelection = new Set(prev);
+      if (newSelection.has(id)) {
+        newSelection.delete(id);
+      } else {
+        newSelection.add(id);
+      }
+      return newSelection;
+    });
+  };
+
   const [sortConfig, setSortConfig] = useState<SortConfig>({
     isSortAscending: true,
     sortField: 'isCritical',
@@ -247,6 +270,33 @@ export const EsDeprecationsTable: React.FunctionComponent<Props> = ({
       goToPageIndex(0);
     }
   }, [deprecations, sortConfig, pager, searchQuery, filteredDeprecations.length]);
+
+  const areAllItemsSelected = () => {
+    return deprecations.length > 0 && selectedDeprecations.size === deprecations.length;
+  };
+
+  const toggleAll = () => {
+    setSelectedDeprecations((prev) => {
+      const visibleIds = new Set(filteredDeprecations.map((dep) => dep.index || dep.message));
+
+      if (visibleIds.size === prev.size && [...prev].every((id) => visibleIds.has(id))) {
+        return new Set(); // Deselect all visible items
+      }
+      return visibleIds; // Select all visible items
+    });
+  };
+
+  const renderSelectAll = () => {
+    return (
+      <EuiCheckbox
+        id={'selectAllCheckbox'}
+        aria-label="Select all rows"
+        title="Select all rows"
+        checked={areAllItemsSelected()}
+        onChange={toggleAll}
+      />
+    );
+  };
 
   return (
     <>
@@ -310,6 +360,14 @@ export const EsDeprecationsTable: React.FunctionComponent<Props> = ({
       <EuiTable data-test-subj="esDeprecationsTable">
         <EuiTableHeader>
           {Object.entries(cellToLabelMap).map(([fieldName, cell]) => {
+            if (fieldName === 'select') {
+              return (
+                <EuiTableHeaderCellCheckbox key={cell.label} width={cell.width}>
+                  {renderSelectAll()}
+                </EuiTableHeaderCellCheckbox>
+              );
+            }
+
             return (
               <EuiTableHeaderCell
                 width={cell.width}
@@ -341,7 +399,7 @@ export const EsDeprecationsTable: React.FunctionComponent<Props> = ({
             {visibleDeprecations.map((deprecation, index) => {
               return (
                 <EuiTableRow data-test-subj="deprecationTableRow" key={`deprecation-row-${index}`}>
-                  {renderTableRowCells(deprecation, mlUpgradeModeEnabled)}
+                  {renderTableRowCells(deprecation, mlUpgradeModeEnabled, selectedDeprecations, toggleDeprecation)}
                 </EuiTableRow>
               );
             })}

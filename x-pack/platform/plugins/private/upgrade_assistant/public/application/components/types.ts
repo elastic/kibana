@@ -21,6 +21,7 @@ export enum CancelLoadingState {
 }
 
 export type DeprecationTableColumns =
+  | 'select'
   | 'type'
   | 'index'
   | 'message'
