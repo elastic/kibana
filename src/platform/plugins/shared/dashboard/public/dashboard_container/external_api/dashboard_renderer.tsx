@@ -47,6 +47,8 @@ export function DashboardRenderer({
   locator,
   onApiAvailable,
 }: DashboardRendererProps) {
+  const { http } = coreServices;
+
   const dashboardViewport = useRef(null);
   const dashboardContainerRef = useRef<HTMLElement | null>(null);
   const [dashboardApi, setDashboardApi] = useState<DashboardApi | undefined>();
@@ -59,6 +61,28 @@ export function DashboardRenderer({
     /* In case the locator prop changes, we need to reassign the value in the container */
     if (dashboardApi) dashboardApi.locator = locator;
   }, [dashboardApi, locator]);
+
+  // subscribe to Dashboard events
+  useEffect(() => {
+    if (!dashboardApi) return;
+    const eventStream$ = from(
+      http.get(`/api/dashboards/dashboard/${savedObjectId}/events`, {
+        asResponse: true,
+        rawResponse: true,
+      })
+    ).pipe(httpResponseIntoObservable());
+
+    const eventSubscription = eventStream$.subscribe({
+      next: (event) => {
+        console.log(event);
+        dashboardApi?.refreshPanels();
+      },
+      error: (err) => {
+        console.error('Error receiving dashboard events:', err);
+      },
+    });
+    return () => eventSubscription.unsubscribe();
+  }, [dashboardApi, http, savedObjectId]);
 
   useEffect(() => {
     if (error) setError(undefined);
@@ -74,25 +98,8 @@ export function DashboardRenderer({
           results.cleanup();
           return;
         }
-        const { http } = coreServices;
         http.post(`/api/dashboards/dashboard/${savedObjectId}/events`, {
           body: JSON.stringify({ type: 'dashboard.opened' }),
-        });
-
-        const eventStream$ = from(
-          http.get(`/api/dashboards/dashboard/${savedObjectId}/events`, {
-            asResponse: true,
-            rawResponse: true,
-          })
-        ).pipe(httpResponseIntoObservable());
-
-        eventStream$.subscribe({
-          next: (event) => {
-            dashboardApi?.refreshPanels();
-          },
-          error: (err) => {
-            console.error('Error receiving dashboard events:', err);
-          },
         });
 
         cleanupDashboardApi = results.cleanup;

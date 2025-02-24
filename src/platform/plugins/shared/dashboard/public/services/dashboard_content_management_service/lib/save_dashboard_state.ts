@@ -67,11 +67,9 @@ export const saveDashboardState = async ({
 
     if (newId) {
       const { http } = coreServices;
-      setTimeout(() => {
-        http.post(`/api/dashboards/dashboard/${newId}/events`, {
-          body: JSON.stringify({ type: 'dashboard.saved' }),
-        });
-      }, 5000);
+      http.post(`/api/dashboards/dashboard/${newId}/events`, {
+        body: JSON.stringify({ type: 'dashboard.saved' }),
+      });
 
       coreServices.notifications.toasts.addSuccess({
         title: i18n.translate('dashboard.dashboardWasSavedSuccessMessage', {
