@@ -34,7 +34,9 @@ export default function ({ getService }: FtrProviderContext) {
   const kbnServer = getService('kibanaServer');
   const log = getService('log');
 
-  describe('@ess @serverless @skipInServerlessMKI Endpoint Artifacts space awareness support', function () {
+  // @skipInServerless: due to the fact that the serverless builtin roles are not yet updated with new privilege
+  //                    and tests below are currently creating a new role/user
+  describe('@ess @serverless, @skipInServerless, @skipInServerlessMKI Endpoint Artifacts space awareness support', function () {
     const spaceOneId = 'space_one';
     const spaceTwoId = 'space_two';
 
