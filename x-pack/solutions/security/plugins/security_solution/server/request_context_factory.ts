@@ -37,6 +37,7 @@ import type {
   SecuritySolutionApiRequestHandlerContext,
   SecuritySolutionRequestHandlerContext,
 } from './types';
+import { PrivilegeMonitoringDataClient } from './lib/entity_analytics/privilege_monitoring/PrivilegeMonitoringDataClient';
 
 export interface IRequestContextFactory {
   create(
@@ -235,6 +236,19 @@ export class RequestContextFactory implements IRequestContextFactory {
             esClient: coreContext.elasticsearch.client.asCurrentUser,
             namespace: getSpaceId(),
             auditLogger: getAuditLogger(),
+          })
+      ),
+      getPrivilegeMonitoringDataClient: memoize(
+        () =>
+          new PrivilegeMonitoringDataClient({
+            logger: options.logger,
+            clusterClient: coreContext.elasticsearch.client,
+            namespace: getSpaceId(),
+            soClient: coreContext.savedObjects.client,
+            taskManager: startPlugins.taskManager,
+            auditLogger: getAuditLogger(),
+            kibanaVersion: options.kibanaVersion,
+            telemetry: core.analytics,
           })
       ),
       getEntityStoreDataClient: memoize(() => {
