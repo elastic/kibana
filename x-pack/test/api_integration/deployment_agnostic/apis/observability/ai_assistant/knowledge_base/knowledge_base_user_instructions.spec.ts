@@ -281,9 +281,8 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
         expect(status).to.be(200);
 
-        const interceptPromises = proxy
-          .interceptConversation({ name: 'conversation', response: 'I, the LLM, hear you!' })
-          .completeAfterIntercept();
+        void proxy.interceptTitle('This is a conversation title');
+        void proxy.interceptConversation('I, the LLM, hear you!');
 
         const messages: Message[] = [
           {
@@ -322,7 +321,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
           },
         });
 
-        await interceptPromises;
+        await proxy.waitForAllInterceptorsSettled();
 
         const conversation = res.body;
         return conversation;
