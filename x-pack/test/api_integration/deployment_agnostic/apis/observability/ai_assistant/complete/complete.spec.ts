@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { Response } from 'supertest';
+
 import { MessageRole, type Message } from '@kbn/observability-ai-assistant-plugin/common';
 import { omit, pick } from 'lodash';
 import { PassThrough } from 'stream';
@@ -19,20 +19,19 @@ import {
 import { ObservabilityAIAssistantScreenContextRequest } from '@kbn/observability-ai-assistant-plugin/common/types';
 import {
   createLlmProxy,
-  isFunctionTitleRequest,
   LlmProxy,
-  LlmResponseSimulator,
+  ToolMessage,
 } from '../../../../../../observability_ai_assistant_api_integration/common/create_llm_proxy';
-import { createOpenAiChunk } from '../../../../../../observability_ai_assistant_api_integration/common/create_openai_chunk';
 import { decodeEvents, getConversationCreatedEvent } from '../helpers';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provider_context';
 import { SupertestWithRoleScope } from '../../../../services/role_scoped_supertest';
+import { clearConversations } from '../knowledge_base/helpers';
 
 export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderContext) {
   const log = getService('log');
   const roleScopedSupertest = getService('roleScopedSupertest');
-
   const observabilityAIAssistantAPIClient = getService('observabilityAIAssistantApi');
+  const es = getService('es');
 
   const messages: Message[] = [
     {
@@ -54,14 +53,11 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
     async function getEvents(
       params: { screenContexts?: ObservabilityAIAssistantScreenContextRequest[] },
-      cb: (conversationSimulator: LlmResponseSimulator) => Promise<void>
+      title: string,
+      conversationResponse: string | ToolMessage
     ) {
-      const titleInterceptor = proxy.intercept('title', (body) => isFunctionTitleRequest(body));
-
-      const conversationInterceptor = proxy.intercept(
-        'conversation',
-        (body) => !isFunctionTitleRequest(body)
-      );
+      void proxy.interceptTitle(title);
+      void proxy.interceptConversation(conversationResponse);
 
       const supertestEditorWithCookieCredentials: SupertestWithRoleScope =
         await roleScopedSupertest.getSupertestWithRoleScope('editor', {
@@ -69,46 +65,18 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
           withInternalHeaders: true,
         });
 
-      const responsePromise = new Promise<Response>((resolve, reject) => {
-        supertestEditorWithCookieCredentials
-          .post('/internal/observability_ai_assistant/chat/complete')
-          .set('kbn-xsrf', 'foo')
-          .send({
-            messages,
-            connectorId,
-            persist: true,
-            screenContexts: params.screenContexts || [],
-            scopes: ['all'],
-          })
-          .then((response) => resolve(response))
-          .catch((err) => reject(err));
-      });
+      const response = await supertestEditorWithCookieCredentials
+        .post('/internal/observability_ai_assistant/chat/complete')
+        .set('kbn-xsrf', 'foo')
+        .send({
+          messages,
+          connectorId,
+          persist: true,
+          screenContexts: params.screenContexts || [],
+          scopes: ['all'],
+        });
 
-      const [conversationSimulator, titleSimulator] = await Promise.all([
-        conversationInterceptor.waitForIntercept(),
-        titleInterceptor.waitForIntercept(),
-      ]);
-
-      await titleSimulator.status(200);
-      await titleSimulator.next({
-        content: '',
-        tool_calls: [
-          {
-            id: 'id',
-            index: 0,
-            function: {
-              name: 'title_conversation',
-              arguments: JSON.stringify({ title: 'My generated title' }),
-            },
-          },
-        ],
-      });
-      await titleSimulator.complete();
-
-      await conversationSimulator.status(200);
-      await cb(conversationSimulator);
-
-      const response = await responsePromise;
+      await proxy.waitForAllInterceptorsSettled();
 
       return String(response.body)
         .split('\n')
@@ -132,114 +100,116 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       });
     });
 
-    it('returns a streaming response from the server', async () => {
-      const interceptor = proxy.intercept('conversation', () => true);
+    describe('returns a streaming response from the server', () => {
+      let parsedEvents: StreamingChatResponseEvent[];
+      before(async () => {
+        const supertestEditorWithCookieCredentials: SupertestWithRoleScope =
+          await roleScopedSupertest.getSupertestWithRoleScope('editor', {
+            useCookieHeader: true,
+            withInternalHeaders: true,
+          });
 
-      const receivedChunks: any[] = [];
-
-      const passThrough = new PassThrough();
-
-      const supertestEditorWithCookieCredentials: SupertestWithRoleScope =
-        await roleScopedSupertest.getSupertestWithRoleScope('editor', {
-          useCookieHeader: true,
-          withInternalHeaders: true,
+        proxy.interceptConversation('Hello!').catch((e) => {
+          log.error(`Failed to intercept conversation ${e}`);
         });
 
-      supertestEditorWithCookieCredentials
-        .post('/internal/observability_ai_assistant/chat/complete')
-        .set('kbn-xsrf', 'foo')
-        .send({
-          messages,
-          connectorId,
-          persist: false,
-          screenContexts: [],
-          scopes: ['all'],
-        })
-        .pipe(passThrough);
+        const passThrough = new PassThrough();
+        supertestEditorWithCookieCredentials
+          .post('/internal/observability_ai_assistant/chat/complete')
+          .set('kbn-xsrf', 'foo')
+          .send({
+            messages,
+            connectorId,
+            persist: false,
+            screenContexts: [],
+            scopes: ['all'],
+          })
+          .pipe(passThrough);
 
-      passThrough.on('data', (chunk) => {
-        receivedChunks.push(chunk.toString());
+        const receivedChunks: string[] = [];
+        passThrough.on('data', (chunk) => {
+          receivedChunks.push(chunk.toString());
+        });
+
+        await new Promise<void>((resolve) => passThrough.on('end', () => resolve()));
+
+        await proxy.waitForAllInterceptorsSettled();
+
+        parsedEvents = decodeEvents(receivedChunks.join(''));
       });
 
-      const simulator = await interceptor.waitForIntercept();
+      it('returns the correct sequence of event types', async () => {
+        expect(
+          parsedEvents
+            .map((event) => event.type)
+            .filter((eventType) => eventType !== StreamingChatResponseEventType.BufferFlush)
+        ).to.eql([
+          StreamingChatResponseEventType.MessageAdd,
+          StreamingChatResponseEventType.MessageAdd,
+          StreamingChatResponseEventType.ChatCompletionChunk,
+          StreamingChatResponseEventType.ChatCompletionMessage,
+          StreamingChatResponseEventType.MessageAdd,
+        ]);
+      });
 
-      await simulator.status(200);
-      const chunk = JSON.stringify(createOpenAiChunk('Hello'));
+      it('has a ChatCompletionChunk event', () => {
+        const chunkEvents = parsedEvents.filter(
+          (msg): msg is ChatCompletionChunkEvent =>
+            msg.type === StreamingChatResponseEventType.ChatCompletionChunk
+        );
 
-      await simulator.rawWrite(`data: ${chunk.substring(0, 10)}`);
-      await simulator.rawWrite(`${chunk.substring(10)}\n\n`);
-      await simulator.complete();
-
-      await new Promise<void>((resolve) => passThrough.on('end', () => resolve()));
-
-      const parsedEvents = decodeEvents(receivedChunks.join(''));
-
-      expect(
-        parsedEvents
-          .map((event) => event.type)
-          .filter((eventType) => eventType !== StreamingChatResponseEventType.BufferFlush)
-      ).to.eql([
-        StreamingChatResponseEventType.MessageAdd,
-        StreamingChatResponseEventType.MessageAdd,
-        StreamingChatResponseEventType.ChatCompletionChunk,
-        StreamingChatResponseEventType.ChatCompletionMessage,
-        StreamingChatResponseEventType.MessageAdd,
-      ]);
-
-      const messageEvents = parsedEvents.filter(
-        (msg): msg is MessageAddEvent => msg.type === StreamingChatResponseEventType.MessageAdd
-      );
-
-      const chunkEvents = parsedEvents.filter(
-        (msg): msg is ChatCompletionChunkEvent =>
-          msg.type === StreamingChatResponseEventType.ChatCompletionChunk
-      );
-
-      expect(omit(messageEvents[0], 'id', 'message.@timestamp')).to.eql({
-        type: StreamingChatResponseEventType.MessageAdd,
-        message: {
+        expect(omit(chunkEvents[0], 'id')).to.eql({
+          type: StreamingChatResponseEventType.ChatCompletionChunk,
           message: {
-            content: '',
-            role: MessageRole.Assistant,
-            function_call: {
+            content: 'Hello!',
+          },
+        });
+      });
+
+      it('has MessageAdd events', () => {
+        const messageEvents = parsedEvents.filter(
+          (msg): msg is MessageAddEvent => msg.type === StreamingChatResponseEventType.MessageAdd
+        );
+
+        expect(omit(messageEvents[0], 'id', 'message.@timestamp')).to.eql({
+          type: StreamingChatResponseEventType.MessageAdd,
+          message: {
+            message: {
+              content: '',
+              role: MessageRole.Assistant,
+              function_call: {
+                name: 'context',
+                trigger: MessageRole.Assistant,
+              },
+            },
+          },
+        });
+
+        expect(omit(messageEvents[1], 'id', 'message.@timestamp')).to.eql({
+          type: StreamingChatResponseEventType.MessageAdd,
+          message: {
+            message: {
+              role: MessageRole.User,
               name: 'context',
-              trigger: MessageRole.Assistant,
+              content: JSON.stringify({ screen_description: '', learnings: [] }),
             },
           },
-        },
-      });
+        });
 
-      expect(omit(messageEvents[1], 'id', 'message.@timestamp')).to.eql({
-        type: StreamingChatResponseEventType.MessageAdd,
-        message: {
+        expect(omit(messageEvents[2], 'id', 'message.@timestamp')).to.eql({
+          type: StreamingChatResponseEventType.MessageAdd,
           message: {
-            role: MessageRole.User,
-            name: 'context',
-            content: JSON.stringify({ screen_description: '', learnings: [] }),
-          },
-        },
-      });
-
-      expect(omit(chunkEvents[0], 'id')).to.eql({
-        type: StreamingChatResponseEventType.ChatCompletionChunk,
-        message: {
-          content: 'Hello',
-        },
-      });
-
-      expect(omit(messageEvents[2], 'id', 'message.@timestamp')).to.eql({
-        type: StreamingChatResponseEventType.MessageAdd,
-        message: {
-          message: {
-            content: 'Hello',
-            role: MessageRole.Assistant,
-            function_call: {
-              name: '',
-              arguments: '',
-              trigger: MessageRole.Assistant,
+            message: {
+              content: 'Hello!',
+              role: MessageRole.Assistant,
+              function_call: {
+                name: '',
+                arguments: '',
+                trigger: MessageRole.Assistant,
+              },
             },
           },
-        },
+        });
       });
     });
 
@@ -247,18 +217,16 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       let events: StreamingChatResponseEvent[];
 
       before(async () => {
-        events = await getEvents({}, async (conversationSimulator) => {
-          await conversationSimulator.next('Hello');
-          await conversationSimulator.next(' again');
-          await conversationSimulator.complete();
-        }).then((_events) => {
-          return _events.filter(
-            (event) => event.type !== StreamingChatResponseEventType.BufferFlush
-          );
-        });
+        events = await getEvents({}, 'Title for at new conversation', 'Hello again').then(
+          (_events) => {
+            return _events.filter(
+              (event) => event.type !== StreamingChatResponseEventType.BufferFlush
+            );
+          }
+        );
       });
 
-      it('creates a new conversation', async () => {
+      it('has the correct events', async () => {
         expect(omit(events[0], 'id')).to.eql({
           type: StreamingChatResponseEventType.ChatCompletionChunk,
           message: {
@@ -291,31 +259,19 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
             },
           },
         });
+      });
 
+      it('has the correct title', () => {
         expect(omit(events[4], 'conversation.id', 'conversation.last_updated')).to.eql({
           type: StreamingChatResponseEventType.ConversationCreate,
           conversation: {
-            title: 'My generated title',
+            title: 'Title for at new conversation',
           },
         });
       });
 
       after(async () => {
-        const createdConversationId = events.filter(
-          (line): line is ConversationCreateEvent =>
-            line.type === StreamingChatResponseEventType.ConversationCreate
-        )[0]?.conversation.id;
-
-        const { status } = await observabilityAIAssistantAPIClient.editor({
-          endpoint: 'DELETE /internal/observability_ai_assistant/conversation/{conversationId}',
-          params: {
-            path: {
-              conversationId: createdConversationId,
-            },
-          },
-        });
-
-        expect(status).to.be(200);
+        await clearConversations(es);
       });
     });
 
@@ -344,20 +300,18 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
               },
             ],
           },
-          async (conversationSimulator) => {
-            await conversationSimulator.next({
-              tool_calls: [
-                {
-                  id: 'fake-id',
-                  index: 'fake-index',
-                  function: {
-                    name: 'my_action',
-                    arguments: JSON.stringify({ foo: 'bar' }),
-                  },
+          'Title for conversation with screen context action',
+          {
+            tool_calls: [
+              {
+                toolCallId: 'fake-id',
+                index: 1,
+                function: {
+                  name: 'my_action',
+                  arguments: JSON.stringify({ foo: 'bar' }),
                 },
-              ],
-            });
-            await conversationSimulator.complete();
+              },
+            ],
           }
         );
       });
@@ -405,20 +359,13 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       let conversationCreatedEvent: ConversationCreateEvent;
 
       before(async () => {
-        void proxy
-          .intercept('conversation_title', (body) => isFunctionTitleRequest(body), [
-            {
-              function_call: {
-                name: 'title_conversation',
-                arguments: JSON.stringify({ title: 'LLM-generated title' }),
-              },
-            },
-          ])
-          .completeAfterIntercept();
+        proxy.interceptTitle('LLM-generated title').catch((e) => {
+          throw new Error('Failed to intercept conversation title', e);
+        });
 
-        void proxy
-          .intercept('conversation', (body) => !isFunctionTitleRequest(body), 'Good morning, sir!')
-          .completeAfterIntercept();
+        proxy.interceptConversation('Good night, sir!').catch((e) => {
+          throw new Error('Failed to intercept conversation ', e);
+        });
 
         const createResponse = await observabilityAIAssistantAPIClient.editor({
           endpoint: 'POST /internal/observability_ai_assistant/chat/complete',
@@ -449,9 +396,9 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
           },
         });
 
-        void proxy
-          .intercept('conversation', (body) => !isFunctionTitleRequest(body), 'Good night, sir!')
-          .completeAfterIntercept();
+        proxy.interceptConversation('Good night, sir!').catch((e) => {
+          log.error(`Failed to intercept conversation ${e}`);
+        });
 
         const updatedResponse = await observabilityAIAssistantAPIClient.editor({
           endpoint: 'POST /internal/observability_ai_assistant/chat/complete',
@@ -482,16 +429,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       });
 
       after(async () => {
-        const { status } = await observabilityAIAssistantAPIClient.editor({
-          endpoint: 'DELETE /internal/observability_ai_assistant/conversation/{conversationId}',
-          params: {
-            path: {
-              conversationId: conversationCreatedEvent.conversation.id,
-            },
-          },
-        });
-
-        expect(status).to.be(200);
+        await clearConversations(es);
       });
     });
 
