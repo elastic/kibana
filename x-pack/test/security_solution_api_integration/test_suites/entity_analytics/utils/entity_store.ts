@@ -99,13 +99,19 @@ export const EntityStoreUtils = (
           .getEntityEngine({ params: { entityType } }, namespace)
           .expect(200);
         log.debug(`Engine status for ${entityType}: ${body.status}`);
+
+        if (status !== 'error' && body.status === 'error') {
+          // If we are not expecting an error, throw an error to improve logging
+          throw new Error(`Engine not started: ${JSON.stringify(body)}`);
+        }
+
         return body.status === status;
       }
     );
   };
 
-  const enableEntityStore = async () => {
-    const res = await api.initEntityStore({ body: {} }, namespace);
+  const enableEntityStore = async (body: InitEntityStoreRequestBodyInput = {}) => {
+    const res = await api.initEntityStore({ body }, namespace);
     if (res.status !== 200) {
       log.error(`Failed to enable entity store`);
       log.error(JSON.stringify(res.body));

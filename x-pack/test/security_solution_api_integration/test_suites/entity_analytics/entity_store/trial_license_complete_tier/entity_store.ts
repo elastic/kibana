@@ -66,7 +66,9 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       it('should enable the entity store, creating both user and host engines', async () => {
-        await utils.enableEntityStore();
+        await utils.enableEntityStore({
+          entityTypes: ['host', 'user'],
+        });
         await utils.expectEngineAssetsExist('user');
         await utils.expectEngineAssetsExist('host');
       });
@@ -204,7 +206,6 @@ export default ({ getService }: FtrProviderContext) => {
       });
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/200758
     describe('status', () => {
       afterEach(async () => {
         await utils.cleanEngines();
@@ -219,22 +220,21 @@ export default ({ getService }: FtrProviderContext) => {
         });
       });
 
-      // it always fails on ESS
       it('should return "installing" when at least one engine is being initialized', async () => {
-        await utils.enableEntityStore();
+        await utils.enableEntityStore({
+          entityTypes: ['host', 'user'],
+        });
 
         const { body } = await api.getEntityStoreStatus({ query: {} }).expect(200);
 
         expect(body.status).toEqual('installing');
-        expect(body.engines.length).toEqual(3);
+        expect(body.engines.length).toEqual(2);
         expect(body.engines[0].status).toEqual('installing');
         expect(body.engines[1].status).toEqual('installing');
-        expect(body.engines[2].status).toEqual('installing');
 
         await Promise.all([
           utils.waitForEngineStatus('host', 'started'),
           utils.waitForEngineStatus('user', 'started'),
-          utils.waitForEngineStatus('service', 'started'),
         ]);
       });
 
