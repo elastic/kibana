@@ -55,6 +55,9 @@ export interface FetchCurrentUserConversations {
 const query = {
   page: 1,
   perPage: 28,
+  // keep request small returning a subset of fields
+  // un-requested required fields like the users array will now appear empty
+  // something to consider if/when we add support for global/shared conversations.
   fields: ['id', 'title', 'apiConfig', 'updatedAt'],
 };
 
@@ -71,7 +74,6 @@ const formatFetchedData = (data: InfiniteData<FetchConversationsResponse> | unde
       ),
     };
   }, {});
-
 /**
  * API call for fetching assistant conversations for the current user
  */
@@ -88,23 +90,26 @@ export const useFetchCurrentUserConversations = ({
   isAssistantEnabled,
   setTotalItemCount,
 }: UseFetchCurrentUserConversationsParams): FetchCurrentUserConversations => {
-  const queryFn = async ({ pageParam }: { pageParam?: UseFetchCurrentUserConversationsParams }) => {
-    return http.fetch<FetchConversationsResponse>(ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL_FIND, {
-      method: 'GET',
-      version: API_VERSIONS.public.v1,
-      query: {
-        fields,
-        filter,
-        page: pageParam?.page ?? page,
-        per_page: pageParam?.perPage ?? perPage,
-        sort_field: sortField,
-        sort_order: sortOrder,
-      },
-      signal,
-    });
-  };
+  const queryFn = useCallback(
+    async ({ pageParam }: { pageParam?: UseFetchCurrentUserConversationsParams }) => {
+      return http.fetch<FetchConversationsResponse>(ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL_FIND, {
+        method: 'GET',
+        version: API_VERSIONS.public.v1,
+        query: {
+          fields,
+          filter,
+          page: pageParam?.page ?? page,
+          per_page: pageParam?.perPage ?? perPage,
+          sort_field: sortField,
+          sort_order: sortOrder,
+        },
+        signal,
+      });
+    },
+    [fields, filter, http, page, perPage, signal, sortField, sortOrder]
+  );
 
-  const getNextPageParam = (lastPage: FetchConversationsResponse) => {
+  const getNextPageParam = useCallback(() => {
     const totalPages = Math.max(1, Math.ceil(lastPage.total / lastPage.perPage));
     if (totalPages === lastPage.page) {
       return;
@@ -113,7 +118,7 @@ export const useFetchCurrentUserConversations = ({
       ...lastPage,
       page: lastPage.page + 1,
     };
-  };
+  }, []);
 
   const { data, fetchNextPage, hasNextPage, isFetched, isFetching, isLoading, refetch } =
     useInfiniteQuery(
