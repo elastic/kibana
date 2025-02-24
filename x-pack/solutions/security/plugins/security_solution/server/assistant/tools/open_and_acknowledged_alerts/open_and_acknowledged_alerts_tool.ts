@@ -94,13 +94,9 @@ export const OPEN_AND_ACKNOWLEDGED_ALERTS_TOOL: AssistantTool = {
               onNewReplacements: localOnNewReplacements, // <-- the local callback
               rawData: getRawDataOrDefault(x.fields),
             });
+
             const hitId = x._id;
-            const citation =
-              hitId &&
-              contentReferencesStore &&
-              `\nCitation,${contentReferenceBlock(
-                contentReferencesStore.add((p) => securityAlertReference(p.id, hitId))
-              )}`;
+            const citation = hitId && `\nCitation,${contentReferenceBlock(contentReferencesStore.add((p) => securityAlertReference(p.id, hitId)))}`;
 
             return `${transformed}${citation ?? ''}`;
           })

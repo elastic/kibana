@@ -87,15 +87,8 @@ export const chatCompleteRoute = (
             return checkResponse.response;
           }
 
-          const contentReferencesEnabled =
-            ctx.elasticAssistant.getRegisteredFeatures(
-              DEFAULT_PLUGIN_NAME
-            ).contentReferencesEnabled;
-
           const conversationsDataClient =
-            await ctx.elasticAssistant.getAIAssistantConversationsDataClient({
-              contentReferencesEnabled,
-            });
+            await ctx.elasticAssistant.getAIAssistantConversationsDataClient();
 
           const anonymizationFieldsDataClient =
             await ctx.elasticAssistant.getAIAssistantAnonymizationFieldsDataClient();
@@ -186,9 +179,7 @@ export const chatCompleteRoute = (
             }));
           }
 
-          const contentReferencesStore = contentReferencesEnabled
-            ? newContentReferencesStore()
-            : undefined;
+          const contentReferencesStore = newContentReferencesStore();
 
           const onLlmResponse = async (
             content: string,
@@ -196,8 +187,7 @@ export const chatCompleteRoute = (
             isError = false
           ): Promise<void> => {
             if (newConversation?.id && conversationsDataClient) {
-              const contentReferences =
-                contentReferencesStore && pruneContentReferences(content, contentReferencesStore);
+              const contentReferences = pruneContentReferences(content, contentReferencesStore);
 
               await appendAssistantMessageToConversation({
                 conversationId: newConversation?.id,

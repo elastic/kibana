@@ -66,7 +66,6 @@ export const SettingsContextMenu: React.FC<Params> = React.memo(
       contentReferencesVisible,
       showAnonymizedValues,
       setShowAnonymizedValues,
-      assistantFeatures: { contentReferencesEnabled },
     } = useAssistantContext();
 
     const [isPopoverOpen, setPopover] = useState(false);
@@ -256,8 +255,6 @@ export const SettingsContextMenu: React.FC<Params> = React.memo(
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiContextMenuItem>
-
-          {contentReferencesEnabled && (
             <EuiContextMenuItem
               aria-label={'show-citations'}
               key={'show-citations'}
@@ -311,7 +308,7 @@ export const SettingsContextMenu: React.FC<Params> = React.memo(
                 </EuiFlexItem>
               </EuiFlexGroup>
             </EuiContextMenuItem>
-          )}
+
           <EuiHorizontalRule margin="none" />
           <EuiContextMenuItem
             aria-label={'clear-chat'}
@@ -339,7 +336,6 @@ export const SettingsContextMenu: React.FC<Params> = React.memo(
         handleShowAlertsModal,
         knowledgeBase.latestAlerts,
         showDestroyModal,
-        contentReferencesEnabled,
         euiTheme.size.m,
         euiTheme.size.xs,
         selectedConversationHasCitations,

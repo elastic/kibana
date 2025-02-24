@@ -52,6 +52,7 @@ import { getLangChainMessages } from '../lib/langchain/helpers';
 import { AIAssistantConversationsDataClient } from '../ai_assistant_data_clients/conversations';
 import { ElasticAssistantRequestHandlerContext, GetElser } from '../types';
 import { callAssistantGraph } from '../lib/langchain/graphs/default_assistant_graph';
+import { isEmpty } from 'lodash';
 
 interface GetPluginNameFromRequestParams {
   request: KibanaRequest;
@@ -175,7 +176,7 @@ export interface AppendAssistantMessageToConversationParams {
   messageContent: string;
   replacements: Replacements;
   conversationId: string;
-  contentReferences?: ContentReferences | false;
+  contentReferences: ContentReferences;
   isError?: boolean;
   traceData?: Message['traceData'];
 }
@@ -194,10 +195,8 @@ export const appendAssistantMessageToConversation = async ({
   }
 
   const metadata: MessageMetadata = {
-    ...(contentReferences ? { contentReferences } : {}),
+    ...(!isEmpty(contentReferences) ? { contentReferences } : {}),
   };
-
-  const isMetadataPopulated = Boolean(contentReferences) !== false;
 
   await conversationsDataClient.appendConversationMessages({
     existingConversation: conversation,
@@ -207,7 +206,7 @@ export const appendAssistantMessageToConversation = async ({
           messageContent,
           replacements,
         }),
-        metadata: isMetadataPopulated ? metadata : undefined,
+        metadata: !isEmpty(metadata) ? metadata : undefined,
         traceData,
         isError,
       }),
@@ -232,7 +231,7 @@ export interface LangChainExecuteParams {
   telemetry: AnalyticsServiceSetup;
   actionTypeId: string;
   connectorId: string;
-  contentReferencesStore: ContentReferencesStore | undefined;
+  contentReferencesStore: ContentReferencesStore;
   llmTasks?: LlmTasksPluginStart;
   inference: InferenceServerStart;
   isOssModel?: boolean;

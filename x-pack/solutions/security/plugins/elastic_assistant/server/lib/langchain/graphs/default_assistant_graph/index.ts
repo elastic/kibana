@@ -29,6 +29,7 @@ import { GraphInputs } from './types';
 import { getDefaultAssistantGraph } from './graph';
 import { invokeGraph, streamGraph } from './helpers';
 import { transformESSearchToAnonymizationFields } from '../../../../ai_assistant_data_clients/anonymization_fields/helpers';
+import { isEmpty } from 'lodash';
 
 export const callAssistantGraph: AgentExecutor<true | false> = async ({
   abortSignal,
@@ -228,7 +229,6 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
     replacements,
     // some chat models (bedrock) require a signal to be passed on agent invoke rather than the signal passed to the chat model
     ...(llmType === 'bedrock' ? { signal: abortSignal } : {}),
-    contentReferencesEnabled: Boolean(contentReferencesStore),
   });
   const inputs: GraphInputs = {
     responseLanguage,
@@ -263,14 +263,11 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
     traceOptions,
   });
 
-  const contentReferences =
-    contentReferencesStore && pruneContentReferences(graphResponse.output, contentReferencesStore);
+  const contentReferences = pruneContentReferences(graphResponse.output, contentReferencesStore);
 
   const metadata: MessageMetadata = {
-    ...(contentReferences ? { contentReferences } : {}),
+    ...(!isEmpty(contentReferences) ? { contentReferences } : {}),
   };
-
-  const isMetadataPopulated = !!contentReferences;
 
   return {
     body: {
@@ -279,7 +276,7 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
       trace_data: graphResponse.traceData,
       replacements,
       status: 'ok',
-      ...(isMetadataPopulated ? { metadata } : {}),
+      ...(!isEmpty(metadata) ? { metadata } : {}),
       ...(graphResponse.conversationId ? { conversationId: graphResponse.conversationId } : {}),
     },
     headers: {
