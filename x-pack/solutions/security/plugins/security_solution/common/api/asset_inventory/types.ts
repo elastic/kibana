@@ -6,7 +6,7 @@
  */
 
 import type { EntityAnalyticsPrivileges } from '../entity_analytics';
-import { InitEntityStoreResponse } from '../entity_analytics/entity_store/enable.gen';
+import type { InitEntityStoreResponse } from '../entity_analytics/entity_store/enable.gen';
 
 export type AssetInventoryStatus =
   | 'disabled'
