@@ -88,11 +88,11 @@ describe('callAssistantGraph', () => {
     contentReferencesStore: newContentReferencesStoreMock(),
     core: {
       uiSettings: {
-        client:{
-          get: jest.fn().mockResolvedValue('Browser')
-        }
-      }
-    }
+        client: {
+          get: jest.fn().mockResolvedValue('Browser'),
+        },
+      },
+    },
   } as unknown as AgentExecutorParams<boolean>;
 
   beforeEach(() => {
