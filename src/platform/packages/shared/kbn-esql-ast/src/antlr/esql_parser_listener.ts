@@ -104,6 +104,12 @@ import { JoinConditionContext } from "./esql_parser.js";
 import { JoinPredicateContext } from "./esql_parser.js";
 import { ChangePointCommandContext } from "./esql_parser.js";
 import { InsistCommandContext } from "./esql_parser.js";
+import { ForkCommandContext } from "./esql_parser.js";
+import { ForkSubQueriesContext } from "./esql_parser.js";
+import { ForkSubQueryContext } from "./esql_parser.js";
+import { SingleForkSubQueryCommandContext } from "./esql_parser.js";
+import { CompositeForkSubQueryContext } from "./esql_parser.js";
+import { ForkSubQueryProcessingCommandContext } from "./esql_parser.js";
 
 
 /**
@@ -1097,5 +1103,69 @@ export default class esql_parserListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	exitInsistCommand?: (ctx: InsistCommandContext) => void;
+	/**
+	 * Enter a parse tree produced by `esql_parser.forkCommand`.
+	 * @param ctx the parse tree
+	 */
+	enterForkCommand?: (ctx: ForkCommandContext) => void;
+	/**
+	 * Exit a parse tree produced by `esql_parser.forkCommand`.
+	 * @param ctx the parse tree
+	 */
+	exitForkCommand?: (ctx: ForkCommandContext) => void;
+	/**
+	 * Enter a parse tree produced by `esql_parser.forkSubQueries`.
+	 * @param ctx the parse tree
+	 */
+	enterForkSubQueries?: (ctx: ForkSubQueriesContext) => void;
+	/**
+	 * Exit a parse tree produced by `esql_parser.forkSubQueries`.
+	 * @param ctx the parse tree
+	 */
+	exitForkSubQueries?: (ctx: ForkSubQueriesContext) => void;
+	/**
+	 * Enter a parse tree produced by `esql_parser.forkSubQuery`.
+	 * @param ctx the parse tree
+	 */
+	enterForkSubQuery?: (ctx: ForkSubQueryContext) => void;
+	/**
+	 * Exit a parse tree produced by `esql_parser.forkSubQuery`.
+	 * @param ctx the parse tree
+	 */
+	exitForkSubQuery?: (ctx: ForkSubQueryContext) => void;
+	/**
+	 * Enter a parse tree produced by the `singleForkSubQueryCommand`
+	 * labeled alternative in `esql_parser.forkSubQueryCommand`.
+	 * @param ctx the parse tree
+	 */
+	enterSingleForkSubQueryCommand?: (ctx: SingleForkSubQueryCommandContext) => void;
+	/**
+	 * Exit a parse tree produced by the `singleForkSubQueryCommand`
+	 * labeled alternative in `esql_parser.forkSubQueryCommand`.
+	 * @param ctx the parse tree
+	 */
+	exitSingleForkSubQueryCommand?: (ctx: SingleForkSubQueryCommandContext) => void;
+	/**
+	 * Enter a parse tree produced by the `compositeForkSubQuery`
+	 * labeled alternative in `esql_parser.forkSubQueryCommand`.
+	 * @param ctx the parse tree
+	 */
+	enterCompositeForkSubQuery?: (ctx: CompositeForkSubQueryContext) => void;
+	/**
+	 * Exit a parse tree produced by the `compositeForkSubQuery`
+	 * labeled alternative in `esql_parser.forkSubQueryCommand`.
+	 * @param ctx the parse tree
+	 */
+	exitCompositeForkSubQuery?: (ctx: CompositeForkSubQueryContext) => void;
+	/**
+	 * Enter a parse tree produced by `esql_parser.forkSubQueryProcessingCommand`.
+	 * @param ctx the parse tree
+	 */
+	enterForkSubQueryProcessingCommand?: (ctx: ForkSubQueryProcessingCommandContext) => void;
+	/**
+	 * Exit a parse tree produced by `esql_parser.forkSubQueryProcessingCommand`.
+	 * @param ctx the parse tree
+	 */
+	exitForkSubQueryProcessingCommand?: (ctx: ForkSubQueryProcessingCommandContext) => void;
 }
 

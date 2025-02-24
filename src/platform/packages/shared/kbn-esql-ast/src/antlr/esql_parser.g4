@@ -59,6 +59,7 @@ processingCommand
     | {this.isDevVersion()}? lookupCommand
     | {this.isDevVersion()}? changePointCommand
     | {this.isDevVersion()}? insistCommand
+    | {this.isDevVersion()}? forkCommand
     ;
 
 whereCommand
@@ -350,4 +351,27 @@ changePointCommand
 
 insistCommand
     : DEV_INSIST qualifiedNamePatterns
+    ;
+
+forkCommand
+    : DEV_FORK forkSubQueries
+    ;
+
+forkSubQueries
+    : (forkSubQuery)+
+    ;
+
+forkSubQuery
+    : LP forkSubQueryCommand RP
+    ;
+
+forkSubQueryCommand
+    : forkSubQueryProcessingCommand                             #singleForkSubQueryCommand
+    | forkSubQueryCommand PIPE forkSubQueryProcessingCommand    #compositeForkSubQuery
+    ;
+
+forkSubQueryProcessingCommand
+    : whereCommand
+    | sortCommand
+    | limitCommand
     ;
