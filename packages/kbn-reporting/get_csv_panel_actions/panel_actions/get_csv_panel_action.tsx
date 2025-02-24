@@ -31,12 +31,12 @@ import {
   apiCanAccessViewMode,
   apiHasType,
   apiIsOfType,
-  apiPublishesTitle,
+  apiPublishesPanelTitle,
   CanAccessViewMode,
   EmbeddableApiContext,
   getInheritedViewMode,
   HasType,
-  PublishesTitle,
+  PublishesPanelTitle,
 } from '@kbn/presentation-publishing';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { CSV_REPORTING_ACTION, JobAppParamsCSV } from '@kbn/reporting-export-types-csv-common';
@@ -88,7 +88,7 @@ type GetCsvActionApi = HasType &
   PublishesSavedSearch &
   CanAccessViewMode &
   HasTimeRange &
-  PublishesTitle;
+  PublishesPanelTitle;
 
 const compatibilityCheck = (api: EmbeddableApiContext['embeddable']): api is GetCsvActionApi => {
   return (
@@ -97,7 +97,7 @@ const compatibilityCheck = (api: EmbeddableApiContext['embeddable']): api is Get
     apiPublishesSavedSearch(api) &&
     apiCanAccessViewMode(api) &&
     Boolean((api as unknown as HasTimeRange).hasTimeRange) &&
-    apiPublishesTitle(api)
+    apiPublishesPanelTitle(api)
   );
 };
 
@@ -281,7 +281,7 @@ export class ReportingCsvPanelAction implements ActionDefinition<EmbeddableApiCo
       addGlobalTimeFilter: !embeddable.hasTimeRange(),
       absoluteTime: true,
     });
-    const title = embeddable.title$.getValue() ?? '';
+    const title = embeddable.panelTitle.getValue() ?? '';
     const executionParams = { searchSource, columns, title, savedSearch, i18nStart, analytics };
 
     if (this.enablePanelActionDownload) {
