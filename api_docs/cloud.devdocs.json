@@ -935,7 +935,43 @@
   },
   "server": {
     "classes": [],
-    "functions": [],
+    "functions": [
+      {
+        "parentPluginId": "cloud",
+        "id": "def-server.getOnboardingToken",
+        "type": "Function",
+        "tags": [],
+        "label": "getOnboardingToken",
+        "description": [],
+        "signature": [
+          "(savedObjectsClient: ",
+          "SavedObjectsClientContract",
+          ") => Promise<string | null>"
+        ],
+        "path": "x-pack/platform/plugins/shared/cloud/server/saved_objects/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "cloud",
+            "id": "def-server.getOnboardingToken.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "savedObjectsClient",
+            "description": [],
+            "signature": [
+              "SavedObjectsClientContract"
+            ],
+            "path": "x-pack/platform/plugins/shared/cloud/server/saved_objects/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
     "interfaces": [],
     "enums": [],
     "misc": [],
