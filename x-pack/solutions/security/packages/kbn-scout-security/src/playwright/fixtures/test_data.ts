@@ -1,0 +1,37 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { QueryRuleCreateProps } from '@kbn/security-solution-plugin/common/api/detection_engine';
+
+export const ES_ARCHIVES = {
+  AUDITBEAT: 'x-pack/test/security_solution_cypress/es_archives/auditbeat_single',
+};
+
+export const DEFAULT_SECURITY_SOLUTION_INDEXES = [
+  'apm-*-transaction*',
+  'auditbeat-*',
+  'endgame-*',
+  'filebeat-*',
+  'logs-*',
+  'packetbeat-*',
+  'traces-apm*',
+  'winlogbeat-*',
+  '-*elastic-cloud-logs-*',
+];
+
+export const CUSTOM_QUERY_RULE: QueryRuleCreateProps = {
+  index: DEFAULT_SECURITY_SOLUTION_INDEXES,
+  enabled: true,
+  name: 'Alert Testing Query',
+  description: 'Tests a simple query',
+  risk_score: 1,
+  rule_id: 'rule-1',
+  severity: 'high',
+  type: 'query',
+  query: '*:*',
+  from: '2019-01-01T00:00:00.000Z',
+};
