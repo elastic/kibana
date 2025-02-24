@@ -1592,6 +1592,14 @@
                 "section": "def-common.ScoutFileInfo",
                 "text": "ScoutFileInfo"
               },
+              " | undefined; category?: ",
+              {
+                "pluginId": "@kbn/scout-info",
+                "scope": "common",
+                "docId": "kibKbnScoutInfoPluginApi",
+                "section": "def-common.ScoutTestRunConfigCategory",
+                "text": "ScoutTestRunConfigCategory"
+              },
               " | undefined; } | undefined"
             ],
             "path": "packages/kbn-scout-reporting/src/reporting/report/events/event.ts",

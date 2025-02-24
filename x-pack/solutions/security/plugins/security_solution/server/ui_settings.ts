@@ -95,6 +95,7 @@ export const initUiSettings = (
         value: schema.number(),
         pause: schema.boolean(),
       }),
+      solution: 'security',
     },
     [DEFAULT_APP_TIME_RANGE]: {
       type: 'json',
@@ -115,6 +116,7 @@ export const initUiSettings = (
         from: schema.string(),
         to: schema.string(),
       }),
+      solution: 'security',
     },
     [DEFAULT_INDEX_KEY]: {
       name: i18n.translate('xpack.securitySolution.uiSettings.defaultIndexLabel', {
@@ -133,6 +135,7 @@ export const initUiSettings = (
       schema: validationsEnabled
         ? schema.arrayOf(schema.string(), { maxSize: 50 })
         : schema.arrayOf(schema.string()),
+      solution: 'security',
     },
     [DEFAULT_THREAT_INDEX_KEY]: {
       name: i18n.translate('xpack.securitySolution.uiSettings.defaultThreatIndexLabel', {
@@ -153,6 +156,7 @@ export const initUiSettings = (
       schema: validationsEnabled
         ? schema.arrayOf(schema.string(), { maxSize: 10 })
         : schema.arrayOf(schema.string()),
+      solution: 'security',
     },
     [DEFAULT_ANOMALY_SCORE]: {
       name: i18n.translate('xpack.securitySolution.uiSettings.defaultAnomalyScoreLabel', {
@@ -171,6 +175,7 @@ export const initUiSettings = (
       category: [APP_ID],
       requiresPageReload: true,
       schema: validationsEnabled ? schema.number({ max: 100, min: 0 }) : schema.number(),
+      solution: 'security',
     },
     [ENABLE_NEWS_FEED_SETTING]: {
       name: i18n.translate('xpack.securitySolution.uiSettings.enableNewsFeedLabel', {
@@ -185,6 +190,7 @@ export const initUiSettings = (
       category: [APP_ID],
       requiresPageReload: true,
       schema: schema.boolean(),
+      solution: 'security',
     },
     [EXCLUDE_COLD_AND_FROZEN_TIERS_IN_ANALYZER]: {
       name: i18n.translate(
@@ -206,22 +212,23 @@ export const initUiSettings = (
       category: [APP_ID],
       requiresPageReload: true,
       schema: schema.boolean(),
+      solution: 'security',
     },
     [ENABLE_VISUALIZATIONS_IN_FLYOUT_SETTING]: {
       name: enableVisualizationsInFlyoutLabel,
-      value: false,
+      value: true,
       description: i18n.translate(
         'xpack.securitySolution.uiSettings.enableVisualizationsInFlyoutDescription',
         {
           defaultMessage:
-            '<em>[technical preview]</em> Enable visualizations (analyzer and session viewer) in flyout.',
-          values: { em: (chunks) => `<em>${chunks}</em>` },
+            'Enable visualizations (analyzer and session viewer) in document details flyout.',
         }
       ),
       type: 'boolean',
       category: [APP_ID],
       requiresPageReload: true,
       schema: schema.boolean(),
+      solution: 'security',
     },
     [ENABLE_GRAPH_VISUALIZATION_SETTING]: {
       name: i18n.translate('xpack.securitySolution.uiSettings.enableGraphVisualizationLabel', {
@@ -244,6 +251,7 @@ export const initUiSettings = (
       category: [APP_ID],
       requiresPageReload: true,
       schema: schema.boolean(),
+      solution: 'security',
     },
     [DEFAULT_RULES_TABLE_REFRESH_SETTING]: {
       name: i18n.translate('xpack.securitySolution.uiSettings.rulesTableRefresh', {
@@ -268,6 +276,7 @@ export const initUiSettings = (
         value: schema.number({ min: 60000 }),
         on: schema.boolean(),
       }),
+      solution: 'security',
     },
     [NEWS_FEED_URL_SETTING]: {
       name: i18n.translate('xpack.securitySolution.uiSettings.newsFeedUrl', {
@@ -282,6 +291,7 @@ export const initUiSettings = (
       category: [APP_ID],
       requiresPageReload: true,
       schema: schema.string(),
+      solution: 'security',
     },
     [IP_REPUTATION_LINKS_SETTING]: {
       name: i18n.translate('xpack.securitySolution.uiSettings.ipReputationLinks', {
@@ -305,6 +315,7 @@ export const initUiSettings = (
           url_template: schema.string(),
         })
       ),
+      solution: 'security',
     },
     [ENABLE_CCS_READ_WARNING_SETTING]: {
       name: i18n.translate('xpack.securitySolution.uiSettings.enableCcsReadWarningLabel', {
@@ -319,6 +330,7 @@ export const initUiSettings = (
       category: [APP_ID],
       requiresPageReload: false,
       schema: schema.boolean(),
+      solution: 'security',
     },
     [SHOW_RELATED_INTEGRATIONS_SETTING]: {
       name: i18n.translate('xpack.securitySolution.uiSettings.showRelatedIntegrationsLabel', {
@@ -336,6 +348,7 @@ export const initUiSettings = (
       category: [APP_ID],
       requiresPageReload: true,
       schema: schema.boolean(),
+      solution: 'security',
     },
     [DEFAULT_ALERT_TAGS_KEY]: {
       name: i18n.translate('xpack.securitySolution.uiSettings.defaultAlertTagsLabel', {
@@ -351,6 +364,7 @@ export const initUiSettings = (
       category: [APP_ID],
       requiresPageReload: true,
       schema: schema.arrayOf(schema.string()),
+      solution: 'security',
     },
     [MAX_UNASSOCIATED_NOTES]: {
       name: i18n.translate('xpack.securitySolution.uiSettings.maxUnassociatedNotesLabel', {
@@ -372,6 +386,7 @@ export const initUiSettings = (
       }),
       category: [APP_ID],
       requiresPageReload: false,
+      solution: 'security',
     },
     [EXCLUDED_DATA_TIERS_FOR_RULE_EXECUTION]: {
       name: i18n.translate(
@@ -396,6 +411,7 @@ export const initUiSettings = (
       value: [],
       category: [APP_ID],
       requiresPageReload: false,
+      solution: 'security',
     },
     ...(experimentalFeatures.extendedRuleExecutionLoggingEnabled
       ? {
@@ -419,6 +435,7 @@ export const initUiSettings = (
             value: true,
             category: [APP_ID],
             requiresPageReload: false,
+            solution: 'security',
           },
           [EXTENDED_RULE_EXECUTION_LOGGING_MIN_LEVEL_SETTING]: {
             name: i18n.translate(
@@ -493,6 +510,7 @@ export const initUiSettings = (
             },
             category: [APP_ID],
             requiresPageReload: false,
+            solution: 'security',
           },
         }
       : {}),

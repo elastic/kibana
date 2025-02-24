@@ -7,7 +7,6 @@
 
 import { END, START, StateGraph } from '@langchain/langgraph';
 import { isEmpty } from 'lodash/fp';
-import { RuleTranslationResult } from '../../../../../../../../common/siem_migrations/constants';
 import { getEcsMappingNode } from './nodes/ecs_mapping';
 import { getFixQueryErrorsNode } from './nodes/fix_query_errors';
 import { getInlineQueryNode } from './nodes/inline_query';
@@ -23,27 +22,25 @@ const MAX_VALIDATION_ITERATIONS = 3;
 
 export function getTranslateRuleGraph({
   model,
-  inferenceClient,
-  connectorId,
+  esqlKnowledgeBase,
   ruleMigrationsRetriever,
   logger,
   telemetryClient,
 }: TranslateRuleGraphParams) {
   const translateRuleNode = getTranslateRuleNode({
-    inferenceClient,
-    connectorId,
+    esqlKnowledgeBase,
     logger,
   });
   const translationResultNode = getTranslationResultNode();
   const inlineQueryNode = getInlineQueryNode({ model, ruleMigrationsRetriever });
   const validationNode = getValidationNode({ logger });
-  const fixQueryErrorsNode = getFixQueryErrorsNode({ inferenceClient, connectorId, logger });
+  const fixQueryErrorsNode = getFixQueryErrorsNode({ esqlKnowledgeBase, logger });
   const retrieveIntegrationsNode = getRetrieveIntegrationsNode({
     model,
     ruleMigrationsRetriever,
     telemetryClient,
   });
-  const ecsMappingNode = getEcsMappingNode({ inferenceClient, connectorId, logger });
+  const ecsMappingNode = getEcsMappingNode({ esqlKnowledgeBase, logger });
 
   const translateRuleGraph = new StateGraph(translateRuleState)
     // Nodes
@@ -86,14 +83,13 @@ const translatableRouter = (state: TranslateRuleState) => {
 const validationRouter = (state: TranslateRuleState) => {
   if (
     state.validation_errors.iterations <= MAX_VALIDATION_ITERATIONS &&
-    state.translation_result === RuleTranslationResult.FULL
+    !isEmpty(state.validation_errors?.esql_errors)
   ) {
-    if (!isEmpty(state.validation_errors?.esql_errors)) {
-      return 'fixQueryErrors';
-    }
-    if (!state.translation_finalized) {
-      return 'ecsMapping';
-    }
+    return 'fixQueryErrors';
   }
+  if (!state.includes_ecs_mapping) {
+    return 'ecsMapping';
+  }
+
   return 'translationResult';
 };
