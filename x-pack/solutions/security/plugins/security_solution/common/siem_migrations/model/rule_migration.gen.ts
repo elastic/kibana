@@ -71,6 +71,10 @@ export const OriginalRule = z.object({
    * The original rule annotations containing additional information.
    */
   annotations: OriginalRuleAnnotations.optional(),
+  /**
+   * The original rule's severity or some representation of it.
+   */
+  severity: z.string().optional(),
 });
 
 /**
