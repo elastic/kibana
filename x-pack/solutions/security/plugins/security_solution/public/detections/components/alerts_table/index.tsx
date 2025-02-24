@@ -85,7 +85,6 @@ const { updateIsLoading, updateTotalCount } = dataTableActions;
 // - analyzer graph
 const MAX_ACTION_BUTTON_COUNT = 6;
 const DEFAULT_DATA_GRID_HEIGHT = 600;
-const DEFAULT_DATA_GRID_HEIGHT_MIN = 600;
 
 const ALERT_TABLE_CONSUMERS: AlertsTableProps['consumers'] = [AlertConsumers.SIEM];
 
