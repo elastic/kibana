@@ -1,0 +1,56 @@
+{
+  "name": "@template/cli",
+  "version": "0.0.0",
+  "type": "module",
+  "packageManager": "pnpm@9.10.0",
+  "license": "MIT",
+  "description": "A basic Effect CLI application",
+  "repository": {
+    "type": "git",
+    "url": "n/a"
+  },
+  "publishConfig": {
+    "access": "public",
+    "directory": "dist"
+  },
+  "scripts": {
+    "build": "tsup && pnpm copy-package-json",
+    "build:ts": "tsup",
+    "clean": "rimraf dist/*",
+    "check": "tsc -b tsconfig.json",
+    "lint": "eslint \"**/{src,test,examples,scripts,dtslint}/**/*.{ts,mjs}\"",
+    "lint-fix": "pnpm lint --fix",
+    "test": "vitest run",
+    "coverage": "vitest run --coverage",
+    "copy-package-json": "tsx scripts/copy-package-json.ts"
+  },
+  "devDependencies": {
+    "@effect/cli": "latest",
+    "@effect/eslint-plugin": "^0.2.0",
+    "@effect/language-service": "^0.1.0",
+    "@effect/platform": "latest",
+    "@effect/platform-node": "latest",
+    "@effect/vitest": "latest",
+    "@eslint/compat": "1.1.1",
+    "@eslint/eslintrc": "3.1.0",
+    "@eslint/js": "9.10.0",
+    "@types/node": "^22.5.2",
+    "@typescript-eslint/eslint-plugin": "^8.4.0",
+    "@typescript-eslint/parser": "^8.4.0",
+    "effect": "latest",
+    "eslint": "^9.10.0",
+    "eslint-import-resolver-typescript": "^3.6.3",
+    "eslint-plugin-codegen": "0.28.0",
+    "eslint-plugin-deprecation": "^3.0.0",
+    "eslint-plugin-import": "^2.30.0",
+    "eslint-plugin-simple-import-sort": "^12.1.1",
+    "eslint-plugin-sort-destructure-keys": "^2.0.0",
+    "tsup": "^8.2.4",
+    "tsx": "^4.19.1",
+    "typescript": "^5.6.2",
+    "vitest": "^2.0.5"
+  },
+  "pnpm": {
+    "patchedDependencies": {}
+  }
+}
