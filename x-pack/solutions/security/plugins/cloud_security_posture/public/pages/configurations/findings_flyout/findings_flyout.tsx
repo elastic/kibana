@@ -36,11 +36,10 @@ import { generatePath } from 'react-router-dom';
 import { css } from '@emotion/react';
 import { CspEvaluationBadge, benchmarksNavigation } from '@kbn/cloud-security-posture';
 import type { CspFinding, BenchmarkId } from '@kbn/cloud-security-posture-common';
-import { BenchmarkName } from '@kbn/cloud-security-posture-common';
+import { BenchmarkName, CSP_MISCONFIGURATIONS_DATASET } from '@kbn/cloud-security-posture-common';
 import { CspVulnerabilityFinding } from '@kbn/cloud-security-posture-common/schema/vulnerabilities/csp_vulnerability_finding';
 import { isNativeCspFinding } from '../../../common/utils/is_native_csp_finding';
 import {
-  CSP_MISCONFIGURATIONS_DATASET,
   getVendorName,
 } from '../../../common/utils/get_vendor_name';
 import { truthy } from '../../../../common/utils/helpers';

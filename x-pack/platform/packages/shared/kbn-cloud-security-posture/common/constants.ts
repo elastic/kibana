@@ -41,6 +41,8 @@ export const LATEST_VULNERABILITIES_RETENTION_POLICY = '3d';
 // meant as a temp workaround to get good enough posture view for 3rd party integrations, see https://github.com/elastic/security-team/issues/10683
 export const CDR_3RD_PARTY_RETENTION_POLICY = '90d';
 
+export const CSP_MISCONFIGURATIONS_DATASET = 'cloud_security_posture.findings';
+
 export const VULNERABILITIES_SEVERITY: Record<VulnSeverity, VulnSeverity> = {
   LOW: 'LOW',
   MEDIUM: 'MEDIUM',
