@@ -62,7 +62,8 @@ export function initializeUnsavedChangesManager({
       ...viewModeManager.comparators,
       ...unifiedSearchManager.comparators,
       ...referencesComparator,
-    }
+    },
+    () => lastSavedState$.value
   );
 
   const unsavedChangesSubscription = combineLatest([

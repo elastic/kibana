@@ -30,7 +30,8 @@ export const COMPARATOR_SUBJECTS_DEBOUNCE = 100;
 export const initializeUnsavedChanges = <RuntimeState extends {} = {}>(
   initialLastSavedState: RuntimeState,
   parentApi: unknown,
-  comparators: StateComparators<RuntimeState>
+  comparators: StateComparators<RuntimeState>,
+  fetchLastSavedState?: () => RuntimeState
 ) => {
   const subscriptions: Subscription[] = [];
   const lastSavedState$ = new BehaviorSubject<RuntimeState | undefined>(initialLastSavedState);
@@ -49,7 +50,10 @@ export const initializeUnsavedChanges = <RuntimeState extends {} = {}>(
     subscriptions.push(
       // any time the parent saves, the current state becomes the last saved state...
       parentApi.saveNotification$.subscribe(() => {
-        lastSavedState$.next(snapshotRuntimeState());
+        const nextLastSavedState = fetchLastSavedState
+          ? fetchLastSavedState()
+          : snapshotRuntimeState();
+        lastSavedState$.next(nextLastSavedState);
       })
     );
   }

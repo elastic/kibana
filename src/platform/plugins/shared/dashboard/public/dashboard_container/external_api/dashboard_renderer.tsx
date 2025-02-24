@@ -12,7 +12,7 @@ import '../_dashboard_container.scss';
 import classNames from 'classnames';
 import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
 
-import { EuiLoadingElastic, EuiLoadingSpinner } from '@elastic/eui';
+import { EuiButton, EuiEmptyPrompt, EuiLoadingElastic, EuiLoadingSpinner } from '@elastic/eui';
 import { SavedObjectNotFound } from '@kbn/kibana-utils-plugin/common';
 import { useStateFromPublishingSubject } from '@kbn/presentation-publishing';
 import { LocatorPublic } from '@kbn/share-plugin/common';
@@ -130,7 +130,18 @@ export function DashboardRenderer({
       return error instanceof SavedObjectNotFound ? (
         <Dashboard404Page dashboardRedirect={dashboardRedirect} />
       ) : (
-        error.message
+        <EuiEmptyPrompt
+          iconType="error"
+          color="danger"
+          title={
+            <h2>
+              {i18n.translate('dashboard.renderer.errorTitle', {
+                defaultMessage: 'Dashboard load error',
+              })}
+            </h2>
+          }
+          body={<p>{error.message}</p>}
+        />
       );
     }
 
@@ -141,6 +152,7 @@ export function DashboardRenderer({
         >
           <DashboardContext.Provider value={dashboardApi}>
             <DashboardInternalContext.Provider value={dashboardInternalApi}>
+              <EuiButton onClick={() => dashboardApi.refreshPanels()}>REFRESH TEST</EuiButton>
               <DashboardViewport dashboardContainerRef={dashboardContainerRef} />
             </DashboardInternalContext.Provider>
           </DashboardContext.Provider>
