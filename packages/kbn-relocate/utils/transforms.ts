@@ -19,8 +19,6 @@ export const HARDCODED_MODULE_PATHS: Record<string, string> = {
 
 type TransformFunction = (param: string) => string;
 const TRANSFORMS: Record<string, string | TransformFunction> = {
-  'x-pack/solutions/observability/packages/synthetics_test_data':
-    'x-pack/solutions/observability/packages/synthetics-test-data',
   'src/core/packages/core/': (path: string) => {
     const relativePath = path.split('src/core/packages/')[1];
     const relativeChunks = relativePath.split('/');

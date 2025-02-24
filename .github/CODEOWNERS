@@ -933,7 +933,7 @@ x-pack/solutions/observability/packages/kbn-investigation-shared @elastic/obs-ux
 x-pack/solutions/observability/packages/kbn-scout-oblt @elastic/appex-qa
 x-pack/solutions/observability/packages/observability-ai/observability-ai-common @elastic/obs-ai-assistant
 x-pack/solutions/observability/packages/observability-ai/observability-ai-server @elastic/obs-ai-assistant
-x-pack/solutions/observability/packages/synthetics_test_data @elastic/obs-ux-management-team
+x-pack/solutions/observability/packages/synthetics-test-data @elastic/obs-ux-management-team
 x-pack/solutions/observability/packages/utils-browser @elastic/observability-ui
 x-pack/solutions/observability/packages/utils-common @elastic/observability-ui
 x-pack/solutions/observability/packages/utils-server @elastic/observability-ui
