@@ -12,7 +12,6 @@ import {
   setPreEightEnterpriseSearchIndicesReadOnly,
 } from './pre_eight_index_deprecator';
 
-// settings?.index?.version?.created?.startsWith('7') && indexData.settings?.index?.blocks?.write !== 'true'
 const testIndices = {
   'non-ent-search-index': {
     settings: {
@@ -32,6 +31,7 @@ const testIndices = {
         blocks: {
           write: 'true',
         },
+        verified_read_only: 'true',
       },
     },
     data_stream: 'datastream-123',
@@ -86,6 +86,15 @@ const testIndices = {
   },
 };
 
+const additionalDatastreams = {
+  'logs-app_search.testdatastream': {
+    indices: [
+      { index_name: 'non-existingindex' },
+      { index_name: '.ent-search-with_same_data_stream' },
+    ],
+  },
+};
+
 const testIndicesWithoutDatastream = {
   '.ent-search-already_read_only': {
     settings: {
@@ -96,6 +105,7 @@ const testIndicesWithoutDatastream = {
         blocks: {
           write: 'true',
         },
+        verified_read_only: 'true',
       },
     },
   },
@@ -137,11 +147,38 @@ function getMockIndicesFxn(values: any) {
   });
 }
 
+function getMockDatastreamsFxn(values: any) {
+  return jest.fn((params) => {
+    const prefixes = [];
+    const names = params.name.split(',');
+    for (const name of names) {
+      if (name.endsWith('*')) {
+        prefixes.push(name.slice(0, -1));
+      } else {
+        prefixes.push(name);
+      }
+    }
+
+    const ret: any = {};
+    for (const [datastream, datastreamData] of Object.entries(values)) {
+      for (const prefix of prefixes) {
+        if (datastream.startsWith(prefix)) {
+          ret[datastream] = datastreamData;
+          break;
+        }
+      }
+      return Promise.resolve(ret);
+    }
+  });
+}
+
 describe('getPreEightEnterpriseSearchIndices', () => {
   const getIndicesMock = getMockIndicesFxn(testIndices);
+  const getDatastreamsMock = getMockDatastreamsFxn(additionalDatastreams);
   const esClientMock = {
     indices: {
       get: getIndicesMock,
+      getDataStream: getDatastreamsMock,
     },
   } as unknown as ElasticsearchClient;
 
@@ -150,23 +187,23 @@ describe('getPreEightEnterpriseSearchIndices', () => {
     expect(indices).toEqual([
       {
         name: '.ent-search-index_without_datastream',
-        isDatastream: false,
-        datastreamName: '',
+        hasDatastream: false,
+        datastreams: [''],
       },
       {
         name: '.ent-search-with_data_stream',
-        isDatastream: true,
-        datastreamName: 'datastream-testing',
+        hasDatastream: true,
+        datastreams: ['datastream-testing'],
       },
       {
         name: '.ent-search-with_another_data_stream',
-        isDatastream: true,
-        datastreamName: 'datastream-testing-another',
+        hasDatastream: true,
+        datastreams: ['datastream-testing-another'],
       },
       {
         name: '.ent-search-with_same_data_stream',
-        isDatastream: true,
-        datastreamName: 'datastream-testing',
+        hasDatastream: true,
+        datastreams: ['datastream-testing', 'logs-app_search.testdatastream'],
       },
     ]);
   });
@@ -175,11 +212,13 @@ describe('getPreEightEnterpriseSearchIndices', () => {
 describe('setPreEightEnterpriseSearchIndicesReadOnly', () => {
   it('does not rollover datastreams if there are none', async () => {
     const getIndicesMock = getMockIndicesFxn(testIndicesWithoutDatastream);
+    const getDatastreamsMock = jest.fn(() => Promise.resolve({}));
     const rolloverMock = jest.fn(() => Promise.resolve(true));
     const addBlockMock = jest.fn(() => Promise.resolve({ acknowledged: true }));
     const esClientMock = {
       indices: {
         get: getIndicesMock,
+        getDataStream: getDatastreamsMock,
         rollover: rolloverMock,
         addBlock: addBlockMock,
       },
@@ -194,11 +233,13 @@ describe('setPreEightEnterpriseSearchIndicesReadOnly', () => {
 
   it('does rollover datastreams if there are any', async () => {
     const getIndicesMock = getMockIndicesFxn(testIndices);
+    const getDatastreamsMock = getMockDatastreamsFxn(additionalDatastreams);
     const rolloverMock = jest.fn(() => Promise.resolve(true));
     const addBlockMock = jest.fn(() => Promise.resolve({ acknowledged: true }));
     const esClientMock = {
       indices: {
         get: getIndicesMock,
+        getDataStream: getDatastreamsMock,
         rollover: rolloverMock,
         addBlock: addBlockMock,
       },
@@ -207,7 +248,7 @@ describe('setPreEightEnterpriseSearchIndicesReadOnly', () => {
     const result = await setPreEightEnterpriseSearchIndicesReadOnly(esClientMock);
     expect(result).toEqual('');
     expect(getIndicesMock).toHaveBeenCalledTimes(2);
-    expect(rolloverMock).toHaveBeenCalledTimes(2);
+    expect(rolloverMock).toHaveBeenCalledTimes(3);
     expect(addBlockMock).toHaveBeenCalledTimes(4);
   });
 });
