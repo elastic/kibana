@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import {
@@ -30,10 +30,12 @@ import {
 
 import { MultiRowInput } from '../multi_row_input';
 import { MAX_FLYOUT_WIDTH } from '../../../../constants';
-import { useStartServices } from '../../../../hooks';
+import { useFleetStatus, useStartServices } from '../../../../hooks';
 import type { FleetServerHost, FleetProxy } from '../../../../types';
 import { TextInput } from '../form';
 import { ProxyWarning } from '../fleet_proxies_table/proxy_warning';
+
+import { ExperimentalFeaturesService } from '../../../../services';
 
 import { SSLFormSection } from './ssl_form_section';
 import { useFleetServerHostsForm } from './use_fleet_server_host_form';
@@ -60,6 +62,68 @@ export const FleetServerHostsFlyout: React.FunctionComponent<FleetServerHostsFly
     () => proxies.map((proxy) => ({ value: proxy.id, label: proxy.name })),
     [proxies]
   );
+
+  const { enableSSLSecrets } = ExperimentalFeaturesService.get();
+  const [isFirstLoad, setIsFirstLoad] = React.useState(true);
+  const [isConvertedToSecret, setIsConvertedToSecret] = React.useState({
+    sslKey: false,
+    sslESKey: false,
+  });
+  const [secretsToggleState, setSecretsToggleState] = useState<'disabled' | true | false>(false);
+
+  const useSecretsStorage = secretsToggleState === true;
+
+  const fleetStatus = useFleetStatus();
+  if (fleetStatus.isSecretsStorageEnabled !== undefined && secretsToggleState === 'disabled') {
+    setSecretsToggleState(fleetStatus.isSecretsStorageEnabled);
+  }
+
+  const onToggleSecretStorage = (secretEnabled: boolean) => {
+    if (secretsToggleState === 'disabled') {
+      return;
+    }
+
+    setSecretsToggleState(secretEnabled);
+  };
+
+  useEffect(() => {
+    if (!isFirstLoad) return;
+    setIsFirstLoad(false);
+    // populate the secret input with the value of the plain input in order to re-save the key with secret storage
+    if (secretsToggleState) {
+      if (inputs.sslKeyInput.value && !inputs.sslKeySecretInput.value) {
+        inputs.sslKeySecretInput.setValue(inputs.sslKeyInput.value);
+        inputs.sslKeyInput.clear();
+        setIsConvertedToSecret({ ...isConvertedToSecret, sslKey: true });
+      }
+      if (inputs.sslESKeyInput.value && !inputs.sslESKeySecretInput.value) {
+        inputs.sslESKeySecretInput.setValue(inputs.sslESKeyInput.value);
+        inputs.sslESKeyInput.clear();
+        setIsConvertedToSecret({ ...isConvertedToSecret, sslESKey: true });
+      }
+    }
+  }, [
+    inputs.sslKeyInput,
+    inputs.sslKeySecretInput,
+    isFirstLoad,
+    setIsFirstLoad,
+    isConvertedToSecret,
+    inputs.sslESKeyInput,
+    inputs.sslESKeySecretInput,
+    secretsToggleState,
+  ]);
+
+  const onToggleSecretAndClearValue = (secretEnabled: boolean) => {
+    if (secretEnabled && enableSSLSecrets) {
+      inputs.sslKeyInput.clear();
+      inputs.sslESKeyInput.clear();
+    } else {
+      inputs.sslKeySecretInput.setValue('');
+      inputs.sslESKeySecretInput.setValue('');
+    }
+    setIsConvertedToSecret({ ...isConvertedToSecret, sslKey: false, sslESKey: false });
+    onToggleSecretStorage(secretEnabled);
+  };
 
   return (
     <EuiFlyout onClose={onClose} maxWidth={MAX_FLYOUT_WIDTH}>
@@ -232,7 +296,12 @@ export const FleetServerHostsFlyout: React.FunctionComponent<FleetServerHostsFly
             />
           </EuiFormRow>
           <EuiSpacer size="l" />
-          <SSLFormSection inputs={inputs} />
+          <SSLFormSection
+            inputs={inputs}
+            useSecretsStorage={enableSSLSecrets && useSecretsStorage}
+            onToggleSecretAndClearValue={onToggleSecretAndClearValue}
+            isConvertedToSecret={isConvertedToSecret}
+          />
         </EuiForm>
       </EuiFlyoutBody>
       <EuiFlyoutFooter>
