@@ -10,10 +10,7 @@ import {
   SiemMigrationStatus,
   SiemMigrationTaskStatus,
 } from '../../../../../common/siem_migrations/constants';
-import type {
-  ElasticRule,
-  RuleMigrationTaskStats,
-} from '../../../../../common/siem_migrations/model/rule_migration.gen';
+import type { RuleMigrationTaskStats } from '../../../../../common/siem_migrations/model/rule_migration.gen';
 import type { RuleMigrationFilters } from '../../../../../common/siem_migrations/types';
 import type { RuleMigrationsDataClient } from '../data/rule_migrations_data_client';
 import type { RuleMigrationDataStats } from '../data/rule_migrations_data_rules_client';
