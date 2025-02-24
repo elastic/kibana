@@ -36,8 +36,8 @@ export const useShowTimelineForGivenPath = () => {
 
   const isTimelineAllowed = useMemo(() => {
     // NOTE: with new Data View Picker, data view is always defined
-    if (newDataViewPickerEnabled && userHasSecuritySolutionVisible) {
-      return true;
+    if (newDataViewPickerEnabled) {
+      return userHasSecuritySolutionVisible;
     }
 
     return userHasSecuritySolutionVisible && (indicesExist || dataViewId === null);

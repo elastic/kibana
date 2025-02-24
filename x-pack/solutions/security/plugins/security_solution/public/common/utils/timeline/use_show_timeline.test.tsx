@@ -14,8 +14,10 @@ import { useUserPrivileges } from '../../components/user_privileges';
 import { useShowTimeline } from './use_show_timeline';
 import { uiSettingsServiceMock } from '@kbn/core-ui-settings-browser-mocks';
 import { TestProviders } from '../../mock';
+import { hasAccessToSecuritySolution } from '../../../helpers_access';
 
 jest.mock('../../components/user_privileges');
+jest.mock('../../../helpers_access', () => ({ hasAccessToSecuritySolution: jest.fn(() => true) }));
 
 const mockUseLocation = jest.fn().mockReturnValue({ pathname: '/overview' });
 jest.mock('react-router-dom', () => {
@@ -35,27 +37,6 @@ const mockUseSourcererDataView = jest.fn(
 jest.mock('../../../sourcerer/containers', () => ({
   useSourcererDataView: () => mockUseSourcererDataView(),
 }));
-
-const mockSiemUserCanRead = jest.fn(() => true);
-jest.mock('../../lib/kibana', () => {
-  const original = jest.requireActual('../../lib/kibana');
-
-  return {
-    ...original,
-    useKibana: () => ({
-      services: {
-        ...original.useKibana().services,
-        application: {
-          capabilities: {
-            siemV2: {
-              show: mockSiemUserCanRead(),
-            },
-          },
-        },
-      },
-    }),
-  };
-});
 
 const mockUpselling = new UpsellingService();
 const mockUiSettingsClient = uiSettingsServiceMock.createStartContract();
@@ -150,13 +131,12 @@ describe('sourcererDataView', () => {
 
 describe('Security solution capabilities', () => {
   it('should show timeline when user has read capabilities', () => {
-    mockSiemUserCanRead.mockReturnValueOnce(true);
     const { result } = renderUseShowTimeline();
     expect(result.current).toEqual([true]);
   });
 
   it('should not show timeline when user does not have read capabilities', () => {
-    mockSiemUserCanRead.mockReturnValueOnce(false);
+    jest.mocked(hasAccessToSecuritySolution).mockReturnValueOnce(false);
     const { result } = renderUseShowTimeline();
     expect(result.current).toEqual([false]);
   });
