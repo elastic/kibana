@@ -53,10 +53,15 @@ export const useQuickPromptUpdater = ({
   useEffect(() => {
     // Update quick prompts settings when prompts are loaded
     if (promptsLoaded) {
-      setUpdatedQuickPromptSettings((prev) => [
-        ...prev,
-        ...allPrompts.data.filter((p) => p.promptType === PromptTypeEnum.quick),
-      ]);
+      setUpdatedQuickPromptSettings((prev) => {
+        const prevIds = prev.map((p) => p.id);
+        return [
+          ...prev,
+          ...allPrompts.data.filter(
+            (p) => p.promptType === PromptTypeEnum.quick && !prevIds.includes(p.id)
+          ),
+        ];
+      });
     }
   }, [allPrompts.data, promptsLoaded]);
 
