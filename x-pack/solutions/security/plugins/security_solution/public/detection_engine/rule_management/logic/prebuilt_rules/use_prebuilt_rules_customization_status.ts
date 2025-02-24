@@ -20,7 +20,9 @@ export const usePrebuiltRulesCustomizationStatus = (): PrebuiltRulesCustomizatio
   const isFeatureFlagEnabled = useIsExperimentalFeatureEnabled('prebuiltRulesCustomizationEnabled');
   // Upselling message is returned when the license level is insufficient,
   // otherwise it's undefined
-  const upsellingMessage = usePrebuiltRuleCustomizationUpsellingMessage();
+  const upsellingMessage = usePrebuiltRuleCustomizationUpsellingMessage(
+    'prebuilt_rule_customization'
+  );
 
   const isRulesCustomizationEnabled = isFeatureFlagEnabled && !upsellingMessage;
   let customizationDisabledReason;
