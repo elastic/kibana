@@ -21,6 +21,7 @@ import { generateAssistantComment } from './util/comments';
 import type { SiemRuleMigrationsClientDependencies, StoredRuleMigration } from '../types';
 import { ActionsClientChat } from './util/actions_client_chat';
 import { EsqlKnowledgeBase } from './util/esql_knowledge_base';
+import { ElasticRule } from '@kbn/security-solution-plugin/common/siem_migrations/model/rule_migration.gen';
 
 /** Number of concurrent rule translations in the pool */
 const TASK_CONCURRENCY = 10 as const;
@@ -336,7 +337,7 @@ export class RuleMigrationTaskRunner {
     this.logger.debug(`Translation of rule "${ruleMigration.id}" succeeded`);
     const ruleMigrationTranslated = {
       ...ruleMigration,
-      elastic_rule: migrationResult.elastic_rule,
+      elastic_rule: migrationResult.elastic_rule as ElasticRule,
       translation_result: migrationResult.translation_result,
       comments: migrationResult.comments,
     };
