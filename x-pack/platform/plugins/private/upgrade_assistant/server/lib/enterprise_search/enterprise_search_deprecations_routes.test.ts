@@ -7,17 +7,21 @@
 
 import { kibanaResponseFactory } from '@kbn/core/server';
 
-import { handleEsError } from '../shared_imports';
-import { createMockRouter, MockRouter, routeHandlerContextMock } from './__mocks__/routes.mock';
-import { createRequestMock } from './__mocks__/request.mock';
+import { handleEsError } from '../../shared_imports';
+import {
+  createMockRouter,
+  MockRouter,
+  routeHandlerContextMock,
+} from '../../routes/__mocks__/routes.mock';
+import { createRequestMock } from '../../routes/__mocks__/request.mock';
 
-jest.mock('../lib/es_version_precheck', () => ({
+jest.mock('../es_version_precheck', () => ({
   versionCheckHandlerWrapper: (a: any) => a,
 }));
 
-import indexDeprecatorFxns = require('../lib/enterprise_search/pre_eight_index_deprecator');
+import indexDeprecatorFxns = require('./pre_eight_index_deprecator');
 
-import { registerEnterpriseSearchDeprecationRoutes } from './enterprise_search_deprecations';
+import { registerEnterpriseSearchDeprecationRoutes } from './enterprise_search_deprecations_routes';
 
 describe('deprecation routes', () => {
   let routeDependencies: any;

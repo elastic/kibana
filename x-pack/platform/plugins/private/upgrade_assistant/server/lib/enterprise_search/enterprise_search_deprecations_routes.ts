@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { setPreEightEnterpriseSearchIndicesReadOnly } from '../lib/enterprise_search/pre_eight_index_deprecator';
-import { versionCheckHandlerWrapper } from '../lib/es_version_precheck';
-import { RouteDependencies } from '../types';
+import { setPreEightEnterpriseSearchIndicesReadOnly } from './pre_eight_index_deprecator';
+import { versionCheckHandlerWrapper } from '../es_version_precheck';
+import { RouteDependencies } from '../../types';
 
 export function registerEnterpriseSearchDeprecationRoutes({
   config: { featureSet },
