@@ -112,6 +112,18 @@ export class SecurityNavControlService {
   private registerSecurityNavControl(core: CoreStart, authc: AuthenticationServiceSetup) {
     core.chrome.navControls.registerRight({
       order: 4000,
+      Component: React.memo(() => {
+        return (
+          <Providers services={core} authc={authc} securityApiClients={this.securityApiClients}>
+            <SecurityNavControl
+              editProfileUrl={core.http.basePath.prepend('/security/account')}
+              logoutUrl={this.logoutUrl}
+              userMenuLinks$={this.userMenuLinks$}
+              buildFlavour={this.buildFlavor}
+            />
+          </Providers>
+        );
+      }),
       mount: (element: HTMLElement) => {
         const root = createRoot(element);
         root.render(

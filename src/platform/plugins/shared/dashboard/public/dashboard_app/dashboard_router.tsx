@@ -185,9 +185,9 @@ export async function mountApp({
   }
   // render(app, element);
 
-  const App: React.FC = () => {
+  const App: React.FC = React.memo(() => {
     return <>{app}</>;
-  };
+  });
 
   return {
     Component: App,

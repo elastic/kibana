@@ -33,7 +33,11 @@ export function HeaderNavControls({ navControls$, append = null }: Props) {
     <>
       {navControls.map((navControl: ChromeNavControl, index: number) => (
         <EuiHeaderSectionItem key={index}>
-          <HeaderExtension extension={navControl.mount} />
+          {navControl.Component ? (
+            <navControl.Component />
+          ) : (
+            <HeaderExtension extension={navControl.mount} />
+          )}
         </EuiHeaderSectionItem>
       ))}
       {append}

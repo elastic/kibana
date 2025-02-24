@@ -21,6 +21,7 @@ import type { UserProfileService } from '@kbn/core-user-profile-browser';
 import { KibanaRootContextProvider } from '@kbn/react-kibana-context-root';
 import { APP_FIXED_VIEWPORT_ID } from '@kbn/core-rendering-browser';
 import { GlobalAppStyle } from '@kbn/core-application-common';
+import { NotificationsStart } from '@kbn/core-notifications-browser';
 import { AppWrapper } from './app_containers';
 
 interface StartServices {
@@ -35,6 +36,7 @@ export interface StartDeps extends StartServices {
   chrome: InternalChromeStart;
   overlays: OverlayStart;
   targetDomElement: HTMLDivElement;
+  notifications: NotificationsStart;
 }
 
 /**
@@ -46,10 +48,19 @@ export interface StartDeps extends StartServices {
  * @internal
  */
 export class RenderingService {
-  start({ application, chrome, overlays, targetDomElement, ...startServices }: StartDeps) {
+  start({
+    application,
+    chrome,
+    overlays,
+    targetDomElement,
+    notifications,
+    ...startServices
+  }: StartDeps) {
     const chromeHeader = chrome.getHeaderComponent();
     const appComponent = application.getComponent();
     const bannerComponent = overlays.banners.getComponent();
+    // @ts-expect-error
+    const toastsComponent = notifications.toasts.getComponent();
 
     const body = document.querySelector('body')!;
     chrome
@@ -81,6 +92,8 @@ export class RenderingService {
             {/* The actual plugin/app */}
             {appComponent}
           </AppWrapper>
+
+          {toastsComponent}
         </>
       </KibanaRootContextProvider>
     );

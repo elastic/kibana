@@ -37,7 +37,7 @@ interface StartDeps {
 
 export class ToastsService {
   private api?: ToastsApi;
-  private root?: Root;
+  // private root?: Root;
 
   public setup({ uiSettings }: SetupDeps) {
     this.api = new ToastsApi({ uiSettings });
@@ -47,26 +47,38 @@ export class ToastsService {
   public start({ eventReporter, overlays, targetDomElement, ...startDeps }: StartDeps) {
     this.api!.start({ overlays, ...startDeps });
 
-    const root = createRoot(targetDomElement);
-    this.root = root;
+    // const root = createRoot(targetDomElement);
+    // this.root = root;
+    //
+    // root.render(
+    //   <KibanaRenderContextProvider {...startDeps}>
+    //     <GlobalToastList
+    //       dismissToast={(toastId: string) => this.api!.remove(toastId)}
+    //       toasts$={this.api!.get$()}
+    //       reportEvent={eventReporter}
+    //     />
+    //   </KibanaRenderContextProvider>
+    // );
 
-    root.render(
-      <KibanaRenderContextProvider {...startDeps}>
-        <GlobalToastList
-          dismissToast={(toastId: string) => this.api!.remove(toastId)}
-          toasts$={this.api!.get$()}
-          reportEvent={eventReporter}
-        />
-      </KibanaRenderContextProvider>
-    );
+    Object.assign(this.api!, {
+      getComponent: () => {
+        return (
+          <GlobalToastList
+            dismissToast={(toastId: string) => this.api!.remove(toastId)}
+            toasts$={this.api!.get$()}
+            reportEvent={eventReporter}
+          />
+        );
+      },
+    });
 
-    return this.api!;
+    return this.api;
   }
 
   public stop() {
-    if (this.root) {
-      this.root.unmount();
-      this.root = undefined;
-    }
+    // if (this.root) {
+    //   this.root.unmount();
+    //   this.root = undefined;
+    // }
   }
 }

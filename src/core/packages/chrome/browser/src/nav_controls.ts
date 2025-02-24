@@ -9,11 +9,13 @@
 
 import type { Observable } from 'rxjs';
 import type { MountPoint } from '@kbn/core-mount-utils-browser';
+import React from 'react';
 
 /** @public */
 export interface ChromeNavControl {
   order?: number;
   mount: MountPoint;
+  Component?: React.ComponentType<any>;
 }
 
 /** @public */

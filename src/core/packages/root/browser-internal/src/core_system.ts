@@ -428,6 +428,7 @@ export class CoreSystem {
         theme,
         targetDomElement: coreUiTargetDomElement,
         userProfile,
+        notifications,
       });
 
       performance.mark(KBN_LOAD_MARKS, {

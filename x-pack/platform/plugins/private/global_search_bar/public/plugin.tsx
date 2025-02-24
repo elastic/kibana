@@ -72,6 +72,18 @@ export class GlobalSearchBarPlugin implements Plugin<{}, {}, {}, GlobalSearchBar
 
         return () => root.unmount();
       },
+      Component: React.memo(() => {
+        return (
+          <SearchBar
+            globalSearch={{ ...globalSearch, searchCharLimit: this.config.input_max_limit }}
+            navigateToUrl={application.navigateToUrl}
+            taggingApi={savedObjectsTagging}
+            basePathUrl={http.basePath.prepend('/plugins/globalSearchBar/assets/')}
+            chromeStyle$={core.chrome.getChromeStyle$()}
+            reportEvent={reportEvent}
+          />
+        );
+      }),
     };
     return navControl;
   }

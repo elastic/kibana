@@ -138,7 +138,7 @@ export class ExpressionRenderHandler {
     };
   }
 
-  private wrapperComponents = new WeakMap<React.ComponentType<any>, BehaviorSubject<any>>();
+  private wrapperComponents = new WeakMap<any, BehaviorSubject<any>>();
 
   render = async (value: SerializableRecord, uiState?: unknown) => {
     performance.mark('expression_render_start');
@@ -165,9 +165,9 @@ export class ExpressionRenderHandler {
       // Rendering is asynchronous, completed by handlers.done()
       const renderer = getRenderersRegistry().get(value.as as string)!;
 
-      if (renderer.Component && this.onRenderComponent) {
-        const Component = renderer.Component;
-        if (!this.wrapperComponents.has(Component)) {
+      if (renderer.loadComponent && this.onRenderComponent) {
+        const Component = await renderer.loadComponent();
+        if (!this.wrapperComponents.has(renderer.loadComponent)) {
           const state$ = new BehaviorSubject({
             config: value.value,
             handlers: { ...this.handlers, uiState },
@@ -179,11 +179,11 @@ export class ExpressionRenderHandler {
             return React.createElement(Component, state);
           });
 
-          this.wrapperComponents.set(Component, state$);
+          this.wrapperComponents.set(renderer.loadComponent, state$);
 
           this.onRenderComponent(WrapperComponent);
         } else {
-          const componentState$ = this.wrapperComponents.get(Component)!;
+          const componentState$ = this.wrapperComponents.get(renderer.loadComponent)!;
           componentState$.next({
             config: value.value,
             handlers: { ...this.handlers, uiState },

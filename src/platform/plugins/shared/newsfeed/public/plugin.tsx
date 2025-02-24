@@ -52,6 +52,15 @@ export class NewsfeedPublicPlugin
     core.chrome.navControls.registerRight({
       order: 1000,
       mount: (target) => this.mount(api, target, core),
+      Component: React.memo(() => {
+        return (
+          <NewsfeedNavButton
+            newsfeedApi={api}
+            hasCustomBranding$={core.customBranding.hasCustomBranding$}
+            isServerless={this.isServerless}
+          />
+        );
+      }),
     });
 
     return {
