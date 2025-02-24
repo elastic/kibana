@@ -63,9 +63,6 @@ export const registerEntityStoreDataViewRefreshTask = ({
   }
 
   const refreshDataViews = async (namespace: string): Promise<void> => {
-    console.log(
-      'refreshDataViews task start -------------------------------------------------------------------------'
-    );
     const [core, { dataViews, taskManager: taskManagerStart, security, encryptedSavedObjects }] =
       await getStartServices();
 
@@ -108,8 +105,6 @@ export const registerEntityStoreDataViewRefreshTask = ({
       dataViewsService,
       config: entityStoreConfig,
     });
-
-    console.log('refreshDataViews task applyDataViewIndices');
 
     await entityStoreClient.applyDataViewIndices();
   };

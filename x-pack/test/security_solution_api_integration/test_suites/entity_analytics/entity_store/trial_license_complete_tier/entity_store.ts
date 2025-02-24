@@ -17,7 +17,7 @@ export default ({ getService }: FtrProviderContext) => {
   const kibanaServer = getService('kibanaServer');
 
   const utils = EntityStoreUtils(getService);
-  describe.only('@ess @skipInServerlessMKI Entity Store APIs', () => {
+  describe('@ess @skipInServerlessMKI Entity Store APIs', () => {
     const dataView = dataViewRouteHelpersFactory(supertest);
 
     const defaults = omit('docsPerSecond', defaultOptions);
@@ -232,6 +232,7 @@ export default ({ getService }: FtrProviderContext) => {
         expect(body.engines[0].status).toEqual('installing');
         expect(body.engines[1].status).toEqual('installing');
 
+        // Make sure all engines have started before the test finishes to prevent flakiness
         await Promise.all([
           utils.waitForEngineStatus('host', 'started'),
           utils.waitForEngineStatus('user', 'started'),
