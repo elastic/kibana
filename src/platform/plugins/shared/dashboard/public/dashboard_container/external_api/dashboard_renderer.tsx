@@ -18,6 +18,8 @@ import { useStateFromPublishingSubject } from '@kbn/presentation-publishing';
 import { LocatorPublic } from '@kbn/share-plugin/common';
 
 import { ExitFullScreenButtonKibanaProvider } from '@kbn/shared-ux-button-exit-full-screen';
+import { httpResponseIntoObservable } from '@kbn/sse-utils-client';
+import { from } from 'rxjs';
 import { DashboardApi, DashboardInternalApi } from '../../dashboard_api/types';
 import { coreServices, screenshotModeService } from '../../services/kibana_services';
 import type { DashboardCreationOptions } from '../..';
@@ -72,6 +74,25 @@ export function DashboardRenderer({
           results.cleanup();
           return;
         }
+
+        const { http } = coreServices;
+
+        const eventStream$ = from(
+          http.get(`/api/dashboards/dashboard/${savedObjectId}/events`, {
+            asResponse: true,
+            rawResponse: true,
+          })
+        ).pipe(httpResponseIntoObservable());
+
+        eventStream$.subscribe({
+          next: (event) => {
+            console.log('Dashboard event received:', event);
+            // Handle the event (e.g., show a notification, refresh the dashboard, etc.)
+          },
+          error: (err) => {
+            console.error('Error receiving dashboard events:', err);
+          },
+        });
 
         cleanupDashboardApi = results.cleanup;
         setDashboardApi(results.api);

@@ -13,6 +13,9 @@ import type { HttpServiceSetup } from '@kbn/core/server';
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import type { Logger } from '@kbn/logging';
 
+import { Subject } from 'rxjs';
+import { ServerSentEvent } from '@kbn/sse-utils';
+import { observableIntoEventSourceStream } from '@kbn/sse-utils-server';
 import { CONTENT_ID } from '../../common/content_management';
 import {
   PUBLIC_API_PATH,
@@ -117,6 +120,17 @@ export function registerAPIRoutes({
     }
   );
 
+  const dashboardEvents = new Map<string, Subject<ServerSentEvent>>();
+
+  const getEventSubjectForDashboard = (id: string) => {
+    let subject = dashboardEvents.get(id);
+    if (!subject) {
+      subject = new Subject<ServerSentEvent>();
+      dashboardEvents.set(id, subject);
+    }
+    return subject;
+  };
+
   // Update API route
 
   const updateRoute = versionedRouter.put({
@@ -175,6 +189,11 @@ export function registerAPIRoutes({
         }
         return res.badRequest(e.message);
       }
+
+      getEventSubjectForDashboard(req.params.id).next({
+        type: 'dashboard.saved',
+        data: {},
+      });
 
       return res.created({ body: result });
     }
@@ -365,6 +384,52 @@ export function registerAPIRoutes({
       }
 
       return res.ok();
+    }
+  );
+
+  const eventsRoute = versionedRouter.get({
+    path: `${PUBLIC_API_PATH}/{id}/events`,
+    access: 'public',
+    summary: `Subscribe to dashboard events`,
+  });
+
+  eventsRoute.addVersion(
+    {
+      version: PUBLIC_API_VERSION,
+      validate: {
+        request: {
+          params: schema.object({
+            id: schema.string({
+              meta: {
+                description: 'A unique identifier for the dashboard.',
+              },
+            }),
+          }),
+        },
+      },
+    },
+    async (_ctx, req, res) => {
+      const { id } = req.params;
+
+      const subject = getEventSubjectForDashboard(id);
+
+      const controller = new AbortController();
+      req.events.aborted$.subscribe(() => {
+        controller.abort();
+      });
+
+      return res.custom({
+        statusCode: 200,
+        headers: {
+          'Content-Type': 'text/event-stream',
+          'Cache-Control': 'no-cache',
+          Connection: 'keep-alive',
+        },
+        body: observableIntoEventSourceStream(subject.asObservable(), {
+          logger,
+          signal: controller.signal,
+        }),
+      });
     }
   );
 }
