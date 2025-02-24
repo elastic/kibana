@@ -10,7 +10,7 @@
 import React, { useEffect, useMemo } from 'react';
 import { combineLatest, skip } from 'rxjs';
 
-import { useEuiTheme } from '@elastic/eui';
+import { UseEuiTheme, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 
 import { useGridLayoutContext } from '../use_grid_layout_context';
@@ -27,7 +27,6 @@ export const GridPanel = React.memo(({ panelId, rowIndex }: GridPanelProps) => {
   const { gridLayoutStateManager, useCustomDragHandle, renderPanelContents } =
     useGridLayoutContext();
 
-  const { euiTheme } = useEuiTheme();
   const dragHandleApi = useDragHandleApi({ panelId, rowIndex });
 
   /** Set initial styles based on state at mount to prevent styles from "blipping" */
@@ -65,29 +64,33 @@ export const GridPanel = React.memo(({ panelId, rowIndex }: GridPanelProps) => {
             const { position: draggingPosition } = activePanel;
             const runtimeSettings = gridLayoutStateManager.runtimeSettings$.getValue();
 
-            ref.style.setProperty(
-              '--kbnGridPanelWidth',
-              `${Math.max(
-                draggingPosition.right - draggingPosition.left,
-                runtimeSettings === 'none' ? 20 : runtimeSettings.columnPixelWidth
-              )}`
-            );
-            ref.style.setProperty(
-              '--kbnGridPanelHeight',
-              `${Math.max(
-                draggingPosition.bottom - draggingPosition.top,
-                runtimeSettings === 'none' ? 20 : runtimeSettings.rowHeight
-              )}`
-            );
-
             if (currentInteractionEvent?.type === 'resize') {
               // if the current panel is being resized, ensure it is not shrunk past the size of a single cell
               ref.classList.add('kbnGridPanel--resize');
+              ref.style.setProperty(
+                '--kbnGridPanelWidth',
+                `${Math.max(
+                  draggingPosition.right - draggingPosition.left,
+                  runtimeSettings === 'none' ? 20 : runtimeSettings.columnPixelWidth
+                )}`
+              );
+              ref.style.setProperty(
+                '--kbnGridPanelHeight',
+                `${Math.max(
+                  draggingPosition.bottom - draggingPosition.top,
+                  runtimeSettings === 'none' ? 20 : runtimeSettings.rowHeight
+                )}`
+              );
             } else {
               ref.classList.add('kbnGridPanel--drag');
-
-              // if the current panel is being dragged, render it with a fixed position + size
-
+              ref.style.setProperty(
+                '--kbnGridPanelHeight',
+                `${draggingPosition.bottom - draggingPosition.top}`
+              );
+              ref.style.setProperty(
+                '--kbnGridPanelWidth',
+                `${draggingPosition.right - draggingPosition.left}`
+              );
               ref.style.setProperty('--kbnGridPanelX', `${draggingPosition.left}`);
               ref.style.setProperty('--kbnGridPanelY', `${draggingPosition.top}`);
             }
@@ -157,33 +160,34 @@ export const GridPanel = React.memo(({ panelId, rowIndex }: GridPanelProps) => {
 
 GridPanel.displayName = 'KbnGridLayoutPanel';
 
-const panelStyles = css({
-  position: 'relative',
-  height: `calc(
+const panelStyles = ({ euiTheme }: UseEuiTheme) =>
+  css({
+    position: 'relative',
+    height: `calc(
     1px *
       (
         var(--kbnGridPanelHeight) * (var(--kbnGridRowHeight) + var(--kbnGridGutterSize)) -
           var(--kbnGridGutterSize)
       )
   )`,
-  zIndex: 'auto',
-  gridColumnStart: `calc(var(--kbnGridPanelX) + 1)`,
-  gridColumnEnd: `calc(var(--kbnGridPanelX) + 1 + var(--kbnGridPanelWidth))`,
-  gridRowStart: `calc(var(--kbnGridPanelY) + 1)`,
-  gridRowEnd: `calc(var(--kbnGridPanelY) + 1 + var(--kbnGridPanelHeight))`,
-  '&.kbnGridPanel--active': {
-    zIndex: 8000,
-    width: `calc(1px * var(--kbnGridPanelWidth)) `,
-    height: `calc(1px * var(--kbnGridPanelHeight)) `,
-  },
-  '&.kbnGridPanel--resize': {
-    gridColumnEnd: `auto !important`,
-    gridRowEnd: `auto !important`,
-  },
-  '&.kbnGridPanel--drag': {
-    position: 'fixed',
-    gridArea: 'auto', // shortcut to set all grid styles to `auto`
-    left: 'calc(var(--kbnGridPanelX) * 1px)',
-    top: 'calc(var(--kbnGridPanelY) * 1px)',
-  },
-});
+    zIndex: 'auto',
+    gridColumnStart: `calc(var(--kbnGridPanelX) + 1)`,
+    gridColumnEnd: `calc(var(--kbnGridPanelX) + 1 + var(--kbnGridPanelWidth))`,
+    gridRowStart: `calc(var(--kbnGridPanelY) + 1)`,
+    gridRowEnd: `calc(var(--kbnGridPanelY) + 1 + var(--kbnGridPanelHeight))`,
+    '&.kbnGridPanel--active': {
+      zIndex: euiTheme.levels.modal,
+      width: `calc(1px * var(--kbnGridPanelWidth)) `,
+      height: `calc(1px * var(--kbnGridPanelHeight)) `,
+    },
+    '&.kbnGridPanel--resize': {
+      gridColumnEnd: `auto !important`,
+      gridRowEnd: `auto !important`,
+    },
+    '&.kbnGridPanel--drag': {
+      position: 'fixed',
+      gridArea: 'auto', // shortcut to set all grid styles to `auto`
+      left: 'calc(var(--kbnGridPanelX) * 1px)',
+      top: 'calc(var(--kbnGridPanelY) * 1px)',
+    },
+  });
