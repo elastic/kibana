@@ -9,6 +9,7 @@ import assert from 'assert';
 import type { AuthenticatedUser, Logger } from '@kbn/core/server';
 import { abortSignalToPromise, AbortError } from '@kbn/kibana-utils-plugin/server';
 import type { RunnableConfig } from '@langchain/core/runnables';
+import type { ElasticRule } from '../../../../../common/siem_migrations/model/rule_migration.gen';
 import { SiemMigrationStatus } from '../../../../../common/siem_migrations/constants';
 import { initPromisePool } from '../../../../utils/promise_pool';
 import type { RuleMigrationsDataClient } from '../data/rule_migrations_data_client';
@@ -21,7 +22,6 @@ import { generateAssistantComment } from './util/comments';
 import type { SiemRuleMigrationsClientDependencies, StoredRuleMigration } from '../types';
 import { ActionsClientChat } from './util/actions_client_chat';
 import { EsqlKnowledgeBase } from './util/esql_knowledge_base';
-import { ElasticRule } from '@kbn/security-solution-plugin/common/siem_migrations/model/rule_migration.gen';
 
 /** Number of concurrent rule translations in the pool */
 const TASK_CONCURRENCY = 10 as const;
