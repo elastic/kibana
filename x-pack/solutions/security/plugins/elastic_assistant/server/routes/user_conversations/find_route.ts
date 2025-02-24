@@ -58,14 +58,7 @@ export const findUserConversationsRoute = (router: ElasticAssistantPluginRouter)
             return checkResponse.response;
           }
 
-          const contentReferencesEnabled =
-            ctx.elasticAssistant.getRegisteredFeatures(
-              DEFAULT_PLUGIN_NAME
-            ).contentReferencesEnabled;
-
-          const dataClient = await ctx.elasticAssistant.getAIAssistantConversationsDataClient({
-            contentReferencesEnabled,
-          });
+          const dataClient = await ctx.elasticAssistant.getAIAssistantConversationsDataClient();
           const currentUser = checkResponse.currentUser;
 
           const additionalFilter = query.filter ? ` AND ${query.filter}` : '';

@@ -9,7 +9,6 @@ import { RunnableConfig } from '@langchain/core/runnables';
 import { AgentRunnableSequence } from 'langchain/dist/agents/agent';
 import { BaseMessage } from '@langchain/core/messages';
 import { removeContentReferences } from '@kbn/elastic-assistant-common';
-import { INCLUDE_CITATIONS } from '../../../../prompt/prompts';
 import { promptGroupId } from '../../../../prompt/local_prompt_object';
 import { getPrompt, promptDictionary } from '../../../../prompt';
 import { AgentState, NodeParamsBase } from '../types';

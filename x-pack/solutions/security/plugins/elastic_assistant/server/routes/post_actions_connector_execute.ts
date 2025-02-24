@@ -25,7 +25,6 @@ import { buildResponse } from '../lib/build_response';
 import { ElasticAssistantRequestHandlerContext, GetElser } from '../types';
 import {
   appendAssistantMessageToConversation,
-  DEFAULT_PLUGIN_NAME,
   getIsKnowledgeBaseInstalled,
   getSystemPromptFromUserConversation,
   langChainExecute,

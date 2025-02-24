@@ -27,7 +27,6 @@ import { buildResponse } from '../../lib/build_response';
 import {
   appendAssistantMessageToConversation,
   createConversationWithUserInput,
-  DEFAULT_PLUGIN_NAME,
   getIsKnowledgeBaseInstalled,
   langChainExecute,
   performChecks,

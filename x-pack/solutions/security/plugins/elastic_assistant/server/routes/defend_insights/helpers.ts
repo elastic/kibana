@@ -124,7 +124,7 @@ export function getAssistantToolParams({
   langSmithProject?: string;
   langSmithApiKey?: string;
   logger: Logger;
-  contentReferencesStore: ContentReferencesStore | undefined;
+  contentReferencesStore: ContentReferencesStore;
   latestReplacements: Replacements;
   onNewReplacements: (newReplacements: Replacements) => void;
   request: KibanaRequest<unknown, unknown, DefendInsightsPostRequestBody>;
@@ -136,7 +136,7 @@ export function getAssistantToolParams({
   langChainTimeout: number;
   llm: ActionsClientLlm;
   logger: Logger;
-  contentReferencesStore: ContentReferencesStore | undefined;
+  contentReferencesStore: ContentReferencesStore;
   replacements: Replacements;
   onNewReplacements: (newReplacements: Replacements) => void;
   request: KibanaRequest<unknown, unknown, DefendInsightsPostRequestBody>;
