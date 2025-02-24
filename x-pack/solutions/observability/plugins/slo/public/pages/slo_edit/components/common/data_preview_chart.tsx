@@ -203,19 +203,6 @@ export function DataPreviewChart({
       style: { textAlign: 'right' },
     },
     {
-      id: 'bad',
-      type: 'custom',
-      header: i18n.translate('xpack.slo.sloEdit.dataPreviewChart.tooltip.badEventsLabel', {
-        defaultMessage: 'Bad events',
-      }),
-      cell: ({ datum }) => (
-        <span className="echTooltip__value" dir="ltr">
-          {datum.events?.bad ?? '-'}
-        </span>
-      ),
-      style: { textAlign: 'right' },
-    },
-    {
       id: 'total',
       type: 'custom',
       header: i18n.translate('xpack.slo.sloEdit.dataPreviewChart.tooltip.totalEventsLabel', {
