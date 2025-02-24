@@ -52,9 +52,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await dataGrid.changeDensityValue('Normal');
 
       // toggle the popover
-      // Right now changing the density closes the popover (see packages/kbn-unified-data-table/src/components/data_table.tsx:1144)
-      // When that workaround is removed we will need to uncomment this next line
-      // await dataGrid.clickGridSettings();
+      await dataGrid.clickGridSettings();
       await dataGrid.clickGridSettings();
       expect(await dataGrid.getCurrentDensityValue()).to.be('Normal');
     });
@@ -62,7 +60,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('should persist the density selection after reloading the page', async () => {
       await dataGrid.clickGridSettings();
       await dataGrid.changeDensityValue('Expanded');
-      await dataGrid.clickGridSettings();
       expect(await dataGrid.getCurrentDensityValue()).to.be('Expanded');
 
       await browser.refresh();

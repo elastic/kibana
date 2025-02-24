@@ -5,12 +5,14 @@
  * 2.0.
  */
 
+import { KibanaEBTServerProvider } from '@kbn/test-suites-src/analytics/services/kibana_ebt';
+import { SecuritySolutionESSUtils } from '../services/security_solution_ess_utils';
 import { SpacesServiceProvider } from '../../../common/services/spaces';
 import { services as essServices } from '../../../api_integration/services';
-import { SecuritySolutionESSUtils } from '../services/security_solution_ess_utils';
 
 export const services = {
   ...essServices,
   spaces: SpacesServiceProvider,
   securitySolutionUtils: SecuritySolutionESSUtils,
+  kibana_ebt_server: KibanaEBTServerProvider,
 };

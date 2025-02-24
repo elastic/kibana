@@ -1,0 +1,18 @@
+[[breaking-changes-9.0]]
+== Breaking changes in 9.0
+++++
+<titleabbrev>9.0</titleabbrev>
+++++
+
+This section discusses the changes that you need to be aware of when migrating
+your application to Kibana 9.0.
+
+See also <<whats-new>> and <<release-notes>>.
+
+* <<breaking_90_setting_changes>>
+
+
+[float]
+[[breaking_90_setting_changes]]
+=== Settings changes
+

@@ -1006,7 +1006,7 @@
         "label": "renderReactTestingLibraryWithI18n",
         "description": [],
         "signature": [
-          "(ui: React.ReactElement<any, string | React.JSXElementConstructor<any>>, options?: Omit<",
+          "(ui: React.ReactNode, options?: Omit<",
           "RenderOptions",
           "<typeof ",
           "node_modules/@testing-library/dom/types/queries",
@@ -1028,7 +1028,7 @@
             "label": "args",
             "description": [],
             "signature": [
-              "[ui: React.ReactElement<any, string | React.JSXElementConstructor<any>>, options?: Omit<",
+              "[ui: React.ReactNode, options?: Omit<",
               "RenderOptions",
               "<typeof ",
               "node_modules/@testing-library/dom/types/queries",

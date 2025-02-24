@@ -35,14 +35,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await kibanaServer.importExport.load(
         'x-pack/test/functional/fixtures/kbn_archiver/dashboard_drilldowns/drilldowns'
       );
-      await kibanaServer.uiSettings.update({
-        'doc_table:legacy': false,
-      });
       await timePicker.setDefaultAbsoluteRangeViaUiSettings();
     });
 
     after(async () => {
-      await kibanaServer.uiSettings.unset('doc_table:legacy');
       await common.unsetTime();
       await kibanaServer.savedObjects.cleanStandardList();
     });

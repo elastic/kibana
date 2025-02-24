@@ -13,6 +13,9 @@ import {
   riskEngineRouteHelpersFactory,
   waitForRiskScoresToBePresent,
   createAndSyncRuleAndAlertsFactory,
+  waitForRiskEngineTaskToBeGone,
+  waitForSavedObjectToBeGone,
+  waitForRiskScoresToBeGone,
 } from '../../utils';
 import { dataGeneratorFactory } from '../../../detections_response/utils';
 
@@ -22,6 +25,7 @@ export default ({ getService }: FtrProviderContext) => {
   const es = getService('es');
   const log = getService('log');
   const esArchiver = getService('esArchiver');
+  const kibanaServer = getService('kibanaServer');
 
   describe('@ess @ serverless @serverless QA risk_engine_cleanup_api', () => {
     const createAndSyncRuleAndAlerts = createAndSyncRuleAndAlertsFactory({ supertest, log });
@@ -41,7 +45,6 @@ export default ({ getService }: FtrProviderContext) => {
     it('should return response with success status', async () => {
       const status1 = await riskEngineRoutes.getStatus();
       expect(status1.body.risk_engine_status).to.be('NOT_INSTALLED');
-      expect(status1.body.legacy_risk_engine_status).to.be('NOT_INSTALLED');
 
       const firstDocumentId = uuidv4();
       await indexListOfDocuments([buildDocument({ host: { name: 'host-1' } }, firstDocumentId)]);
@@ -52,16 +55,18 @@ export default ({ getService }: FtrProviderContext) => {
 
       const status2 = await riskEngineRoutes.getStatus();
       expect(status2.body.risk_engine_status).to.be('ENABLED');
-      expect(status2.body.legacy_risk_engine_status).to.be('NOT_INSTALLED');
 
       const response = await riskEngineRoutes.cleanUp();
       expect(response.body).to.eql({
         cleanup_successful: true,
       });
 
+      await waitForRiskEngineTaskToBeGone({ es, log });
+      await waitForSavedObjectToBeGone({ log, kibanaServer });
+      await waitForRiskScoresToBeGone({ es, log });
+
       const status3 = await riskEngineRoutes.getStatus();
       expect(status3.body.risk_engine_status).to.be('NOT_INSTALLED');
-      expect(status3.body.legacy_risk_engine_status).to.be('NOT_INSTALLED');
     });
   });
 };

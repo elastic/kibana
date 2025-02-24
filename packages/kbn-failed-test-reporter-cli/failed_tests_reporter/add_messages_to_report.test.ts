@@ -63,7 +63,7 @@ it('rewrites ftr reports with minimal changes', async () => {
      ‹?xml version="1.0" encoding="utf-8"?›
      ‹testsuites name="ftr" timestamp="2019-06-05T23:37:10" time="903.670" tests="129" failures="5" skipped="71" command-line="node scripts/functional_tests --config=x-pack/test/api_integration/apis/status/config.ts"›
        ‹testsuite timestamp="2019-06-05T23:37:10" time="903.670" tests="129" failures="5" skipped="71" command-line="node scripts/functional_tests --config=x-pack/test/api_integration/apis/status/config.ts"›
-         ‹testcase name="maps app  maps loaded from sample data ecommerce &quot;before all&quot; hook" classname="Chrome X-Pack UI Functional Tests.x-pack/test/functional/apps/maps/sample_data·js" time="154.378"›
+         ‹testcase name="maps app  maps loaded from sample data ecommerce &quot;before all&quot; hook" classname="Chrome X-Pack UI Functional Tests.x-pack/test/functional/apps/maps/sample_data·js" time="154.378" owners="elastic/kibana-presentation"›
     -      ‹system-out›
     -        ‹![CDATA[[00:00:00]       │
     +      ‹system-out›Failed Tests Reporter:
@@ -88,7 +88,7 @@ it('rewrites ftr reports with minimal changes', async () => {
     +    at onFailure (/var/lib/jenkins/workspace/elastic+kibana+master/JOB/x-pack-ciGroup7/node/immutable/kibana/test/common/services/retry/retry_for_success.ts:68:13)
            ‹/failure›
          ‹/testcase›
-         ‹testcase name="maps app &quot;after all&quot; hook" classname="Chrome X-Pack UI Functional Tests.x-pack/test/functional/apps/maps" time="0.179" metadata-json="{&quot;messages&quot;:[&quot;foo&quot;],&quot;screenshots&quot;:[{&quot;name&quot;:&quot;failure[dashboard app using current data dashboard snapshots compare TSVB snapshot]&quot;,&quot;url&quot;:&quot;https://storage.googleapis.com/kibana-ci-artifacts/jobs/elastic+kibana+7.x/1632/kibana-oss-tests/test/functional/screenshots/failure/dashboard%20app%20using%20current%20data%20dashboard%20snapshots%20compare%20TSVB%20snapshot.png&quot;}]}"›
+         ‹testcase name="maps app &quot;after all&quot; hook" classname="Chrome X-Pack UI Functional Tests.x-pack/test/functional/apps/maps" time="0.179" metadata-json="{&quot;messages&quot;:[&quot;foo&quot;],&quot;screenshots&quot;:[{&quot;name&quot;:&quot;failure[dashboard app using current data dashboard snapshots compare TSVB snapshot]&quot;,&quot;url&quot;:&quot;https://storage.googleapis.com/kibana-ci-artifacts/jobs/elastic+kibana+7.x/1632/kibana-oss-tests/test/functional/screenshots/failure/dashboard%20app%20using%20current%20data%20dashboard%20snapshots%20compare%20TSVB%20snapshot.png&quot;}]}" owners="elastic/kibana-presentation"›
            ‹system-out›
     -        ‹![CDATA[[00:00:00]       │
     +        [00:00:00]       │
@@ -106,7 +106,7 @@ it('rewrites ftr reports with minimal changes', async () => {
     +    at process._tickCallback (internal/process/next_tick.js:68:7) name: 'NoSuchSessionError', remoteStacktrace: '' }
            ‹/failure›
          ‹/testcase›
-         ‹testcase name="InfraOps app feature controls infrastructure security global infrastructure all privileges shows infrastructure navlink" classname="Chrome X-Pack UI Functional Tests.x-pack/test/functional/apps/infra/feature_controls/infrastructure_security·ts"›
+         ‹testcase name="InfraOps app feature controls infrastructure security global infrastructure all privileges shows infrastructure navlink" classname="Chrome X-Pack UI Functional Tests.x-pack/test/functional/apps/infra/feature_controls/infrastructure_security·ts" owners="elastic/kibana-presentation"›
            ‹system-out›
     -        ‹![CDATA[[00:00:00]       │
     +        [00:00:00]       │
@@ -117,7 +117,7 @@ it('rewrites ftr reports with minimal changes', async () => {
            ‹/system-out›
            ‹skipped/›
          ‹/testcase›
-         ‹testcase name="machine learning anomaly detection saved search  with lucene query job creation opens the advanced section" classname="Firefox XPack UI Functional Tests.x-pack/test/functional/apps/machine_learning/anomaly_detection/saved_search_job·ts" time="6.040"›
+         ‹testcase name="machine learning anomaly detection saved search  with lucene query job creation opens the advanced section" classname="Firefox XPack UI Functional Tests.x-pack/test/functional/apps/machine_learning/anomaly_detection/saved_search_job·ts" time="6.040" owners="elastic/ml-ui"›
     -      ‹system-out›‹![CDATA[[00:21:57]         └-: machine learning...]]›‹/system-out›
     -      ‹failure›‹![CDATA[{ NoSuchSessionError: Tried to run command without establishing a connection
     +      ‹system-out›[00:21:57]         └-: machine learning...‹/system-out›
@@ -227,7 +227,7 @@ it('rewrites mocha reports with minimal changes', async () => {
      ‹/body›
      ‹/html›
 
-         at Function.getSnapshot (/var/lib/jenkins/workspace/elastic+kibana+master/JOB/x-pack-intake/node/immutable/kibana/packages/kbn-es/src/artifact.js:95:13)
+         at Function.getSnapshot (/var/lib/jenkins/workspace/elastic+kibana+master/JOB/x-pack-intake/node/immutable/kibana/src/platform/packages/shared/kbn-es/src/artifact.js:95:13)
     -    at process._tickCallback (internal/process/next_tick.js:68:7)]]›
     -      ‹/failure›
     +    at process._tickCallback (internal/process/next_tick.js:68:7)

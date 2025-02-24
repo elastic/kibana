@@ -39,9 +39,7 @@ import { visit } from '../../../tasks/navigation';
 
 import { ALERTS_URL } from '../../../urls/navigation';
 
-// Iusse tracked in: https://github.com/elastic/kibana/issues/167809
-// FLAKY: https://github.com/elastic/kibana/issues/182206
-describe.skip('Changing alert status', { tags: ['@ess', '@skipInServerless'] }, () => {
+describe('Changing alert status', () => {
   before(() => {
     cy.task('esArchiverLoad', { archiveName: 'auditbeat_multiple' });
   });
@@ -50,7 +48,7 @@ describe.skip('Changing alert status', { tags: ['@ess', '@skipInServerless'] }, 
     cy.task('esArchiverUnload', { archiveName: 'auditbeat_multiple' });
   });
 
-  context('Opening alerts', () => {
+  context('Opening alerts', { tags: ['@ess', '@serverless'] }, () => {
     beforeEach(() => {
       login();
       createRule(getNewRule());
@@ -64,7 +62,7 @@ describe.skip('Changing alert status', { tags: ['@ess', '@skipInServerless'] }, 
       selectAlertsCountTable();
     });
 
-    it.skip('Open one alert when more than one closed alerts are selected', () => {
+    it('Open one alert when more than one closed alerts are selected', () => {
       waitForAlertsToPopulate();
       cy.get(ALERTS_COUNT)
         .invoke('text')
@@ -119,7 +117,7 @@ describe.skip('Changing alert status', { tags: ['@ess', '@skipInServerless'] }, 
         });
     });
   });
-  context('Marking alerts as acknowledged', () => {
+  context('Marking alerts as acknowledged', { tags: ['@ess', '@serverless'] }, () => {
     beforeEach(() => {
       login();
       deleteAlertsAndRules();
@@ -159,8 +157,7 @@ describe.skip('Changing alert status', { tags: ['@ess', '@skipInServerless'] }, 
         });
     });
   });
-  // FLAKY: https://github.com/elastic/kibana/issues/173597
-  context.skip('Closing alerts', () => {
+  context('Closing alerts', { tags: ['@ess', '@serverless'] }, () => {
     beforeEach(() => {
       login();
       deleteAlertsAndRules();
@@ -169,7 +166,7 @@ describe.skip('Changing alert status', { tags: ['@ess', '@skipInServerless'] }, 
       waitForAlertsToPopulate();
       selectAlertsCountTable();
     });
-    it.skip('Closes and opens alerts', () => {
+    it('Closes and opens alerts', () => {
       const numberOfAlertsToBeClosed = 3;
       cy.get(ALERTS_COUNT)
         .invoke('text')
@@ -311,12 +308,11 @@ describe.skip('Changing alert status', { tags: ['@ess', '@skipInServerless'] }, 
         });
     });
   });
-
-  context('Changing alert status with read only role', () => {
+  context.only('Changing alert status with read only role', { tags: ['@ess'] }, () => {
     beforeEach(() => {
-      login(ROLES.t2_analyst);
       deleteAlertsAndRules();
       createRule(getNewRule());
+      login(ROLES.reader);
       visit(ALERTS_URL);
       waitForAlertsToPopulate();
       selectAlertsCountTable();
@@ -334,6 +330,7 @@ describe.skip('Changing alert status', { tags: ['@ess', '@skipInServerless'] }, 
           cy.get(TAKE_ACTION_POPOVER_BTN).should('exist');
 
           markAcknowledgedFirstAlert();
+          waitForAlerts();
           cy.get(ALERTS_COUNT).should('have.text', `${numberOfAlerts} alerts`); // user with read only role cannot mark alerts as acknowledged
 
           sumAlertCountFromAlertCountTable((sumAlerts) => {
@@ -362,10 +359,10 @@ describe.skip('Changing alert status', { tags: ['@ess', '@skipInServerless'] }, 
           closeAlerts();
           waitForAlerts();
 
-          cy.get(ALERTS_COUNT).should('have.text', `${numberOfAlerts} alerts`); // user with read only role cannot mark alerts as acknowledged
+          cy.get(ALERTS_COUNT).should('have.text', `${numberOfAlertsToBeClosed} alerts`); // user with read only role cannot mark alerts as acknowledged
 
           sumAlertCountFromAlertCountTable((sumAlerts) => {
-            expect(sumAlerts).to.eq(parseAlertsCountToInt(numberOfAlerts));
+            expect(sumAlerts).to.eq(parseAlertsCountToInt(numberOfAlertsToBeClosed));
           });
         });
     });

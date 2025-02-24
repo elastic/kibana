@@ -276,7 +276,7 @@ export default function createGetExecutionLogTests({ getService }: FtrProviderCo
           secrets: {},
         })
         .expect(200);
-      objectRemover.add(Spaces.space1.id, createdConnector.id, 'action', 'actions');
+      objectRemover.add(Spaces.space1.id, createdConnector.id, 'connector', 'actions');
       const { body: createdRule } = await supertest
         .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
         .set('kbn-xsrf', 'foo')
@@ -335,7 +335,7 @@ export default function createGetExecutionLogTests({ getService }: FtrProviderCo
           secrets: {},
         })
         .expect(200);
-      objectRemover.add(Spaces.space1.id, createdConnector.id, 'action', 'actions');
+      objectRemover.add(Spaces.space1.id, createdConnector.id, 'connector', 'actions');
       const { body: createdRule } = await supertest
         .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
         .set('kbn-xsrf', 'foo')

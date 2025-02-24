@@ -13,7 +13,7 @@
         "description": [
           "\nClient-side client that provides access to the advanced settings stored in elasticsearch.\nThe settings provide control over the behavior of the Kibana application.\nFor example, a user can specify how to display numeric or date fields.\nUsers can adjust the settings via Management UI.\n{@link IUiSettingsClient}\n"
         ],
-        "path": "packages/core/ui-settings/core-ui-settings-browser/src/types.ts",
+        "path": "src/core/packages/ui-settings/browser/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -29,7 +29,7 @@
             "signature": [
               "<T = any>(key: string, defaultOverride?: T | undefined) => T"
             ],
-            "path": "packages/core/ui-settings/core-ui-settings-browser/src/types.ts",
+            "path": "src/core/packages/ui-settings/browser/src/types.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -43,7 +43,7 @@
                 "signature": [
                   "string"
                 ],
-                "path": "packages/core/ui-settings/core-ui-settings-browser/src/types.ts",
+                "path": "src/core/packages/ui-settings/browser/src/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -58,7 +58,7 @@
                 "signature": [
                   "T | undefined"
                 ],
-                "path": "packages/core/ui-settings/core-ui-settings-browser/src/types.ts",
+                "path": "src/core/packages/ui-settings/browser/src/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -80,7 +80,7 @@
               "Observable",
               "<T>"
             ],
-            "path": "packages/core/ui-settings/core-ui-settings-browser/src/types.ts",
+            "path": "src/core/packages/ui-settings/browser/src/types.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -94,7 +94,7 @@
                 "signature": [
                   "string"
                 ],
-                "path": "packages/core/ui-settings/core-ui-settings-browser/src/types.ts",
+                "path": "src/core/packages/ui-settings/browser/src/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -109,7 +109,7 @@
                 "signature": [
                   "T | undefined"
                 ],
-                "path": "packages/core/ui-settings/core-ui-settings-browser/src/types.ts",
+                "path": "src/core/packages/ui-settings/browser/src/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -128,24 +128,12 @@
             ],
             "signature": [
               "() => Readonly<Record<string, ",
-              {
-                "pluginId": "@kbn/core-ui-settings-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreUiSettingsBrowserPluginApi",
-                "section": "def-public.PublicUiSettingsParams",
-                "text": "PublicUiSettingsParams"
-              },
+              "PublicUiSettingsParams",
               " & ",
-              {
-                "pluginId": "@kbn/core-ui-settings-common",
-                "scope": "common",
-                "docId": "kibKbnCoreUiSettingsCommonPluginApi",
-                "section": "def-common.UserProvidedValues",
-                "text": "UserProvidedValues"
-              },
+              "UserProvidedValues",
               "<any>>>"
             ],
-            "path": "packages/core/ui-settings/core-ui-settings-browser/src/types.ts",
+            "path": "src/core/packages/ui-settings/browser/src/types.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -163,7 +151,7 @@
             "signature": [
               "(key: string, value: any) => Promise<boolean>"
             ],
-            "path": "packages/core/ui-settings/core-ui-settings-browser/src/types.ts",
+            "path": "src/core/packages/ui-settings/browser/src/types.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -177,7 +165,7 @@
                 "signature": [
                   "string"
                 ],
-                "path": "packages/core/ui-settings/core-ui-settings-browser/src/types.ts",
+                "path": "src/core/packages/ui-settings/browser/src/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -192,7 +180,7 @@
                 "signature": [
                   "any"
                 ],
-                "path": "packages/core/ui-settings/core-ui-settings-browser/src/types.ts",
+                "path": "src/core/packages/ui-settings/browser/src/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -212,7 +200,7 @@
             "signature": [
               "(key: string) => Promise<boolean>"
             ],
-            "path": "packages/core/ui-settings/core-ui-settings-browser/src/types.ts",
+            "path": "src/core/packages/ui-settings/browser/src/types.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -226,7 +214,7 @@
                 "signature": [
                   "string"
                 ],
-                "path": "packages/core/ui-settings/core-ui-settings-browser/src/types.ts",
+                "path": "src/core/packages/ui-settings/browser/src/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -246,7 +234,7 @@
             "signature": [
               "(key: string) => boolean"
             ],
-            "path": "packages/core/ui-settings/core-ui-settings-browser/src/types.ts",
+            "path": "src/core/packages/ui-settings/browser/src/types.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -260,7 +248,7 @@
                 "signature": [
                   "string"
                 ],
-                "path": "packages/core/ui-settings/core-ui-settings-browser/src/types.ts",
+                "path": "src/core/packages/ui-settings/browser/src/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -280,7 +268,7 @@
             "signature": [
               "(key: string) => boolean"
             ],
-            "path": "packages/core/ui-settings/core-ui-settings-browser/src/types.ts",
+            "path": "src/core/packages/ui-settings/browser/src/types.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -294,7 +282,7 @@
                 "signature": [
                   "string"
                 ],
-                "path": "packages/core/ui-settings/core-ui-settings-browser/src/types.ts",
+                "path": "src/core/packages/ui-settings/browser/src/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -314,7 +302,7 @@
             "signature": [
               "(key: string) => boolean"
             ],
-            "path": "packages/core/ui-settings/core-ui-settings-browser/src/types.ts",
+            "path": "src/core/packages/ui-settings/browser/src/types.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -328,7 +316,7 @@
                 "signature": [
                   "string"
                 ],
-                "path": "packages/core/ui-settings/core-ui-settings-browser/src/types.ts",
+                "path": "src/core/packages/ui-settings/browser/src/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -348,7 +336,7 @@
             "signature": [
               "(key: string) => boolean"
             ],
-            "path": "packages/core/ui-settings/core-ui-settings-browser/src/types.ts",
+            "path": "src/core/packages/ui-settings/browser/src/types.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -362,7 +350,7 @@
                 "signature": [
                   "string"
                 ],
-                "path": "packages/core/ui-settings/core-ui-settings-browser/src/types.ts",
+                "path": "src/core/packages/ui-settings/browser/src/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -384,7 +372,7 @@
               "Observable",
               "<{ key: string; newValue: T; oldValue: T; }>"
             ],
-            "path": "packages/core/ui-settings/core-ui-settings-browser/src/types.ts",
+            "path": "src/core/packages/ui-settings/browser/src/types.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -404,7 +392,7 @@
               "Observable",
               "<Error>"
             ],
-            "path": "packages/core/ui-settings/core-ui-settings-browser/src/types.ts",
+            "path": "src/core/packages/ui-settings/browser/src/types.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -424,7 +412,7 @@
               "ValueValidation",
               ">"
             ],
-            "path": "packages/core/ui-settings/core-ui-settings-browser/src/types.ts",
+            "path": "src/core/packages/ui-settings/browser/src/types.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -438,7 +426,7 @@
                 "signature": [
                   "string"
                 ],
-                "path": "packages/core/ui-settings/core-ui-settings-browser/src/types.ts",
+                "path": "src/core/packages/ui-settings/browser/src/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -453,7 +441,7 @@
                 "signature": [
                   "any"
                 ],
-                "path": "packages/core/ui-settings/core-ui-settings-browser/src/types.ts",
+                "path": "src/core/packages/ui-settings/browser/src/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -471,7 +459,7 @@
         "tags": [],
         "label": "SettingsStart",
         "description": [],
-        "path": "packages/core/ui-settings/core-ui-settings-browser/src/types.ts",
+        "path": "src/core/packages/ui-settings/browser/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -483,15 +471,9 @@
             "label": "client",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/core-ui-settings-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreUiSettingsBrowserPluginApi",
-                "section": "def-public.IUiSettingsClient",
-                "text": "IUiSettingsClient"
-              }
+              "IUiSettingsClient"
             ],
-            "path": "packages/core/ui-settings/core-ui-settings-browser/src/types.ts",
+            "path": "src/core/packages/ui-settings/browser/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -503,15 +485,9 @@
             "label": "globalClient",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/core-ui-settings-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreUiSettingsBrowserPluginApi",
-                "section": "def-public.IUiSettingsClient",
-                "text": "IUiSettingsClient"
-              }
+              "IUiSettingsClient"
             ],
-            "path": "packages/core/ui-settings/core-ui-settings-browser/src/types.ts",
+            "path": "src/core/packages/ui-settings/browser/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -525,7 +501,7 @@
         "tags": [],
         "label": "UiSettingsState",
         "description": [],
-        "path": "packages/core/ui-settings/core-ui-settings-browser/src/types.ts",
+        "path": "src/core/packages/ui-settings/browser/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -538,24 +514,12 @@
             "description": [],
             "signature": [
               "[key: string]:  ",
-              {
-                "pluginId": "@kbn/core-ui-settings-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreUiSettingsBrowserPluginApi",
-                "section": "def-public.PublicUiSettingsParams",
-                "text": "PublicUiSettingsParams"
-              },
+              "PublicUiSettingsParams",
               " & ",
-              {
-                "pluginId": "@kbn/core-ui-settings-common",
-                "scope": "common",
-                "docId": "kibKbnCoreUiSettingsCommonPluginApi",
-                "section": "def-common.UserProvidedValues",
-                "text": "UserProvidedValues"
-              },
+              "UserProvidedValues",
               "<any>"
             ],
-            "path": "packages/core/ui-settings/core-ui-settings-browser/src/types.ts",
+            "path": "src/core/packages/ui-settings/browser/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -574,48 +538,20 @@
         "description": [],
         "signature": [
           "{ value?: unknown; type?: ",
-          {
-            "pluginId": "@kbn/core-ui-settings-common",
-            "scope": "common",
-            "docId": "kibKbnCoreUiSettingsCommonPluginApi",
-            "section": "def-common.UiSettingsType",
-            "text": "UiSettingsType"
-          },
+          "UiSettingsType",
           " | undefined; options?: string[] | number[] | undefined; scope?: ",
-          {
-            "pluginId": "@kbn/core-ui-settings-common",
-            "scope": "common",
-            "docId": "kibKbnCoreUiSettingsCommonPluginApi",
-            "section": "def-common.UiSettingsScope",
-            "text": "UiSettingsScope"
-          },
+          "UiSettingsScope",
           " | undefined; order?: number | undefined; name?: string | undefined; description?: string | undefined; getValue?: ((context?: ",
-          {
-            "pluginId": "@kbn/core-ui-settings-common",
-            "scope": "common",
-            "docId": "kibKbnCoreUiSettingsCommonPluginApi",
-            "section": "def-common.GetUiSettingsContext",
-            "text": "GetUiSettingsContext"
-          },
+          "GetUiSettingsContext",
           " | undefined) => Promise<unknown>) | undefined; category?: string[] | undefined; metric?: { type: string; name: string; } | undefined; readonly?: boolean | undefined; optionLabels?: Record<string, string> | undefined; requiresPageReload?: boolean | undefined; readonlyMode?: ",
-          {
-            "pluginId": "@kbn/core-ui-settings-common",
-            "scope": "common",
-            "docId": "kibKbnCoreUiSettingsCommonPluginApi",
-            "section": "def-common.ReadonlyModeType",
-            "text": "ReadonlyModeType"
-          },
+          "ReadonlyModeType",
           " | undefined; sensitive?: boolean | undefined; deprecation?: ",
-          {
-            "pluginId": "@kbn/core-ui-settings-common",
-            "scope": "common",
-            "docId": "kibKbnCoreUiSettingsCommonPluginApi",
-            "section": "def-common.DeprecationSettings",
-            "text": "DeprecationSettings"
-          },
+          "DeprecationSettings",
+          " | undefined; solution?: ",
+          "UiSettingsSolution",
           " | undefined; }"
         ],
-        "path": "packages/core/ui-settings/core-ui-settings-browser/src/types.ts",
+        "path": "src/core/packages/ui-settings/browser/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -628,15 +564,9 @@
         "label": "SettingsSetup",
         "description": [],
         "signature": [
-          {
-            "pluginId": "@kbn/core-ui-settings-browser",
-            "scope": "public",
-            "docId": "kibKbnCoreUiSettingsBrowserPluginApi",
-            "section": "def-public.SettingsStart",
-            "text": "SettingsStart"
-          }
+          "SettingsStart"
         ],
-        "path": "packages/core/ui-settings/core-ui-settings-browser/src/types.ts",
+        "path": "src/core/packages/ui-settings/browser/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

@@ -17,6 +17,7 @@ import type {
 } from '@kbn/core-http-context-server-internal';
 import { InternalExecutionContextSetup } from '@kbn/core-execution-context-server-internal';
 import { IRouter } from '@kbn/core-http-server';
+import { schema } from '@kbn/config-schema';
 
 let prebootDeps: {
   context: jest.Mocked<InternalContextPreboot>;
@@ -81,14 +82,14 @@ it('handles requests when enabled', async () => {
 
 it.each([
   {
-    queryParam: { pathStartsWith: '/api/include-test' },
+    queryParam: { pathStartsWith: '/api/public-test' },
     includes: {
       paths: {
-        '/api/include-test': {
+        '/api/public-test': {
           get: {},
           post: {},
         },
-        '/api/include-test/{id}': {},
+        '/api/public-test/{id}': {},
       },
     },
     excludes: ['/my-other-plugin'],
@@ -97,11 +98,11 @@ it.each([
     queryParam: { pluginId: 'myPlugin' },
     includes: {
       paths: {
-        '/api/include-test': {
+        '/api/public-test': {
           get: {},
           post: {},
         },
-        '/api/include-test/{id}': {},
+        '/api/public-test/{id}': {},
       },
     },
     excludes: ['/my-other-plugin'],
@@ -109,12 +110,13 @@ it.each([
   {
     queryParam: { pluginId: 'nonExistant' },
     includes: {},
-    excludes: ['/my-include-test', '/my-other-plugin'],
+    excludes: ['/my-public-test', '/my-other-plugin'],
   },
   {
     queryParam: {
       pluginId: 'myOtherPlugin',
-      pathStartsWith: ['/api/my-other-plugin', '/api/versioned'],
+      access: 'internal',
+      pathStartsWith: ['/api/my-other-plugin'],
     },
     includes: {
       paths: {
@@ -125,13 +127,13 @@ it.each([
         },
       },
     },
-    excludes: ['/my-include-test'],
+    excludes: ['/my-public-test'],
   },
   {
     queryParam: { access: 'public', version: '2023-10-31' },
     includes: {
       paths: {
-        '/api/include-test': {
+        '/api/public-test': {
           get: {},
         },
         '/api/versioned': {
@@ -139,13 +141,13 @@ it.each([
         },
       },
     },
-    excludes: ['/api/my-include-test/{id}', '/api/exclude-test', '/api/my-other-plugin'],
+    excludes: ['/api/my-public-test/{id}', '/api/my-other-plugin'],
   },
   {
-    queryParam: { excludePathsMatching: ['/api/exclude-test', '/api/my-other-plugin'] },
+    queryParam: { excludePathsMatching: ['/api/internal-test', '/api/my-other-plugin'] },
     includes: {
       paths: {
-        '/api/include-test': {
+        '/api/public-test': {
           get: {},
         },
         '/api/versioned': {
@@ -153,7 +155,37 @@ it.each([
         },
       },
     },
-    excludes: ['/api/exclude-test', '/api/my-other-plugin'],
+    excludes: ['/api/internal-test', '/api/my-other-plugin'],
+  },
+  {
+    queryParam: { access: 'internal', pathStartsWith: ['/api/versioned-internal'] },
+    includes: {
+      paths: {
+        '/api/versioned-internal': {
+          get: {
+            parameters: [
+              {
+                description: 'The version of the API to use',
+                in: 'header',
+                name: 'elastic-api-version',
+                schema: {
+                  default: '2',
+                  enum: ['1', '2'],
+                  type: 'string',
+                },
+              },
+            ],
+            requestBody: {
+              content: {
+                'application/json; Elastic-Api-Version=1': {}, // Multiple body types
+                'application/json; Elastic-Api-Version=2': {},
+              },
+            },
+          },
+        },
+      },
+    },
+    excludes: ['/api/internal-test', '/api/my-other-plugin'],
   },
 ])(
   'can filter paths based on query params $queryParam',
@@ -163,16 +195,48 @@ it.each([
       createRoutes: (getRouter) => {
         const router1 = getRouter(Symbol('myPlugin'));
         router1.get(
-          { path: '/api/include-test', validate: false, options: { access: 'public' } },
+          { path: '/api/public-test', validate: false, options: { access: 'public' } },
           (_, __, res) => res.ok()
         );
-        router1.post({ path: '/api/include-test', validate: false }, (_, __, res) => res.ok());
-        router1.get({ path: '/api/include-test/{id}', validate: false }, (_, __, res) => res.ok());
-        router1.get({ path: '/api/exclude-test', validate: false }, (_, __, res) => res.ok());
+        router1.post(
+          { path: '/api/public-test', validate: false, options: { access: 'public' } },
+          (_, __, res) => res.ok()
+        );
+        router1.get(
+          { path: '/api/public-test/{id}', validate: false, options: { access: 'public' } },
+          (_, __, res) => res.ok()
+        );
+        router1.get(
+          {
+            path: '/api/internal-test',
+            validate: false,
+            options: {
+              /* empty */
+            },
+          },
+          (_, __, res) => res.ok()
+        );
 
         router1.versioned
           .get({ path: '/api/versioned', access: 'public' })
           .addVersion({ version: '2023-10-31', validate: false }, (_, __, res) => res.ok());
+
+        router1.versioned
+          .get({ path: '/api/versioned-internal', access: 'internal' })
+          .addVersion(
+            {
+              version: '1',
+              validate: { request: { body: schema.object({ foo: schema.string() }) } },
+            },
+            (_, __, res) => res.ok()
+          )
+          .addVersion(
+            {
+              version: '2',
+              validate: { request: { body: schema.object({ bar: schema.string() }) } },
+            },
+            (_, __, res) => res.ok()
+          );
 
         const router2 = getRouter(Symbol('myOtherPlugin'));
         router2.get({ path: '/api/my-other-plugin', validate: false }, (_, __, res) => res.ok());

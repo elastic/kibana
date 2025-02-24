@@ -70,7 +70,7 @@ export const EditExample = () => {
       INPUT_KEY,
       JSON.stringify({
         ...controlGroupAPI.snapshotRuntimeState(),
-        disabledActions: controlGroupAPI.disabledActionIds.getValue(), // not part of runtime
+        disabledActions: controlGroupAPI.disabledActionIds$.getValue(), // not part of runtime
       })
     );
 

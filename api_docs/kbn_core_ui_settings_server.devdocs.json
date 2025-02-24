@@ -21,7 +21,7 @@
         "description": [
           "\nServer-side client that provides access to the advanced settings stored in elasticsearch.\nThe settings provide control over the behavior of the Kibana application.\nFor example, a user can specify how to display numeric or date fields.\nUsers can adjust the settings via Management UI.\n"
         ],
-        "path": "packages/core/ui-settings/core-ui-settings-server/src/ui_settings_client.ts",
+        "path": "src/core/packages/ui-settings/server/src/ui_settings_client.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -36,16 +36,10 @@
             ],
             "signature": [
               "() => Readonly<Record<string, Omit<",
-              {
-                "pluginId": "@kbn/core-ui-settings-common",
-                "scope": "common",
-                "docId": "kibKbnCoreUiSettingsCommonPluginApi",
-                "section": "def-common.UiSettingsParams",
-                "text": "UiSettingsParams"
-              },
+              "UiSettingsParams",
               "<unknown>, \"schema\">>>"
             ],
-            "path": "packages/core/ui-settings/core-ui-settings-server/src/ui_settings_client.ts",
+            "path": "src/core/packages/ui-settings/server/src/ui_settings_client.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -62,16 +56,10 @@
             ],
             "signature": [
               "<T = any>(key: string, context?: ",
-              {
-                "pluginId": "@kbn/core-ui-settings-common",
-                "scope": "common",
-                "docId": "kibKbnCoreUiSettingsCommonPluginApi",
-                "section": "def-common.GetUiSettingsContext",
-                "text": "GetUiSettingsContext"
-              },
+              "GetUiSettingsContext",
               " | undefined) => Promise<T>"
             ],
-            "path": "packages/core/ui-settings/core-ui-settings-server/src/ui_settings_client.ts",
+            "path": "src/core/packages/ui-settings/server/src/ui_settings_client.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -85,7 +73,7 @@
                 "signature": [
                   "string"
                 ],
-                "path": "packages/core/ui-settings/core-ui-settings-server/src/ui_settings_client.ts",
+                "path": "src/core/packages/ui-settings/server/src/ui_settings_client.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -98,16 +86,10 @@
                 "label": "context",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "@kbn/core-ui-settings-common",
-                    "scope": "common",
-                    "docId": "kibKbnCoreUiSettingsCommonPluginApi",
-                    "section": "def-common.GetUiSettingsContext",
-                    "text": "GetUiSettingsContext"
-                  },
+                  "GetUiSettingsContext",
                   " | undefined"
                 ],
-                "path": "packages/core/ui-settings/core-ui-settings-server/src/ui_settings_client.ts",
+                "path": "src/core/packages/ui-settings/server/src/ui_settings_client.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -126,16 +108,10 @@
             ],
             "signature": [
               "<T = any>(context?: ",
-              {
-                "pluginId": "@kbn/core-ui-settings-common",
-                "scope": "common",
-                "docId": "kibKbnCoreUiSettingsCommonPluginApi",
-                "section": "def-common.GetUiSettingsContext",
-                "text": "GetUiSettingsContext"
-              },
+              "GetUiSettingsContext",
               " | undefined) => Promise<Record<string, T>>"
             ],
-            "path": "packages/core/ui-settings/core-ui-settings-server/src/ui_settings_client.ts",
+            "path": "src/core/packages/ui-settings/server/src/ui_settings_client.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -147,16 +123,10 @@
                 "label": "context",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "@kbn/core-ui-settings-common",
-                    "scope": "common",
-                    "docId": "kibKbnCoreUiSettingsCommonPluginApi",
-                    "section": "def-common.GetUiSettingsContext",
-                    "text": "GetUiSettingsContext"
-                  },
+                  "GetUiSettingsContext",
                   " | undefined"
                 ],
-                "path": "packages/core/ui-settings/core-ui-settings-server/src/ui_settings_client.ts",
+                "path": "src/core/packages/ui-settings/server/src/ui_settings_client.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -175,16 +145,10 @@
             ],
             "signature": [
               "<T = any>() => Promise<Record<string, ",
-              {
-                "pluginId": "@kbn/core-ui-settings-common",
-                "scope": "common",
-                "docId": "kibKbnCoreUiSettingsCommonPluginApi",
-                "section": "def-common.UserProvidedValues",
-                "text": "UserProvidedValues"
-              },
+              "UserProvidedValues",
               "<T>>>"
             ],
-            "path": "packages/core/ui-settings/core-ui-settings-server/src/ui_settings_client.ts",
+            "path": "src/core/packages/ui-settings/server/src/ui_settings_client.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -202,7 +166,7 @@
             "signature": [
               "(changes: Record<string, any>) => Promise<void>"
             ],
-            "path": "packages/core/ui-settings/core-ui-settings-server/src/ui_settings_client.ts",
+            "path": "src/core/packages/ui-settings/server/src/ui_settings_client.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -216,7 +180,7 @@
                 "signature": [
                   "Record<string, any>"
                 ],
-                "path": "packages/core/ui-settings/core-ui-settings-server/src/ui_settings_client.ts",
+                "path": "src/core/packages/ui-settings/server/src/ui_settings_client.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -236,7 +200,7 @@
             "signature": [
               "(key: string, value: any) => Promise<void>"
             ],
-            "path": "packages/core/ui-settings/core-ui-settings-server/src/ui_settings_client.ts",
+            "path": "src/core/packages/ui-settings/server/src/ui_settings_client.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -250,7 +214,7 @@
                 "signature": [
                   "string"
                 ],
-                "path": "packages/core/ui-settings/core-ui-settings-server/src/ui_settings_client.ts",
+                "path": "src/core/packages/ui-settings/server/src/ui_settings_client.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -265,7 +229,7 @@
                 "signature": [
                   "any"
                 ],
-                "path": "packages/core/ui-settings/core-ui-settings-server/src/ui_settings_client.ts",
+                "path": "src/core/packages/ui-settings/server/src/ui_settings_client.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -285,7 +249,7 @@
             "signature": [
               "(key: string) => Promise<void>"
             ],
-            "path": "packages/core/ui-settings/core-ui-settings-server/src/ui_settings_client.ts",
+            "path": "src/core/packages/ui-settings/server/src/ui_settings_client.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -299,7 +263,7 @@
                 "signature": [
                   "string"
                 ],
-                "path": "packages/core/ui-settings/core-ui-settings-server/src/ui_settings_client.ts",
+                "path": "src/core/packages/ui-settings/server/src/ui_settings_client.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -319,7 +283,7 @@
             "signature": [
               "(keys: string[], options?: { validateKeys?: boolean | undefined; handleWriteErrors?: boolean | undefined; } | undefined) => Promise<void>"
             ],
-            "path": "packages/core/ui-settings/core-ui-settings-server/src/ui_settings_client.ts",
+            "path": "src/core/packages/ui-settings/server/src/ui_settings_client.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -333,7 +297,7 @@
                 "signature": [
                   "string[]"
                 ],
-                "path": "packages/core/ui-settings/core-ui-settings-server/src/ui_settings_client.ts",
+                "path": "src/core/packages/ui-settings/server/src/ui_settings_client.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -345,7 +309,7 @@
                 "tags": [],
                 "label": "options",
                 "description": [],
-                "path": "packages/core/ui-settings/core-ui-settings-server/src/ui_settings_client.ts",
+                "path": "src/core/packages/ui-settings/server/src/ui_settings_client.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "children": [
@@ -359,7 +323,7 @@
                     "signature": [
                       "boolean | undefined"
                     ],
-                    "path": "packages/core/ui-settings/core-ui-settings-server/src/ui_settings_client.ts",
+                    "path": "src/core/packages/ui-settings/server/src/ui_settings_client.ts",
                     "deprecated": false,
                     "trackAdoption": false
                   },
@@ -373,7 +337,7 @@
                     "signature": [
                       "boolean | undefined"
                     ],
-                    "path": "packages/core/ui-settings/core-ui-settings-server/src/ui_settings_client.ts",
+                    "path": "src/core/packages/ui-settings/server/src/ui_settings_client.ts",
                     "deprecated": false,
                     "trackAdoption": false
                   }
@@ -394,7 +358,7 @@
             "signature": [
               "(key: string) => boolean"
             ],
-            "path": "packages/core/ui-settings/core-ui-settings-server/src/ui_settings_client.ts",
+            "path": "src/core/packages/ui-settings/server/src/ui_settings_client.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -408,7 +372,7 @@
                 "signature": [
                   "string"
                 ],
-                "path": "packages/core/ui-settings/core-ui-settings-server/src/ui_settings_client.ts",
+                "path": "src/core/packages/ui-settings/server/src/ui_settings_client.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -428,7 +392,7 @@
             "signature": [
               "(key: string) => boolean"
             ],
-            "path": "packages/core/ui-settings/core-ui-settings-server/src/ui_settings_client.ts",
+            "path": "src/core/packages/ui-settings/server/src/ui_settings_client.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -442,7 +406,7 @@
                 "signature": [
                   "string"
                 ],
-                "path": "packages/core/ui-settings/core-ui-settings-server/src/ui_settings_client.ts",
+                "path": "src/core/packages/ui-settings/server/src/ui_settings_client.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -462,7 +426,7 @@
             "signature": [
               "(key: string, value: unknown) => Promise<ValueValidation>"
             ],
-            "path": "packages/core/ui-settings/core-ui-settings-server/src/ui_settings_client.ts",
+            "path": "src/core/packages/ui-settings/server/src/ui_settings_client.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -476,7 +440,7 @@
                 "signature": [
                   "string"
                 ],
-                "path": "packages/core/ui-settings/core-ui-settings-server/src/ui_settings_client.ts",
+                "path": "src/core/packages/ui-settings/server/src/ui_settings_client.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -491,7 +455,7 @@
                 "signature": [
                   "unknown"
                 ],
-                "path": "packages/core/ui-settings/core-ui-settings-server/src/ui_settings_client.ts",
+                "path": "src/core/packages/ui-settings/server/src/ui_settings_client.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -511,7 +475,7 @@
         "description": [
           "\nCore's `uiSettings` request handler context."
         ],
-        "path": "packages/core/ui-settings/core-ui-settings-server/src/request_handler_context.ts",
+        "path": "src/core/packages/ui-settings/server/src/request_handler_context.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -523,15 +487,9 @@
             "label": "client",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/core-ui-settings-server",
-                "scope": "server",
-                "docId": "kibKbnCoreUiSettingsServerPluginApi",
-                "section": "def-server.IUiSettingsClient",
-                "text": "IUiSettingsClient"
-              }
+              "IUiSettingsClient"
             ],
-            "path": "packages/core/ui-settings/core-ui-settings-server/src/request_handler_context.ts",
+            "path": "src/core/packages/ui-settings/server/src/request_handler_context.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -543,15 +501,9 @@
             "label": "globalClient",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/core-ui-settings-server",
-                "scope": "server",
-                "docId": "kibKbnCoreUiSettingsServerPluginApi",
-                "section": "def-server.IUiSettingsClient",
-                "text": "IUiSettingsClient"
-              }
+              "IUiSettingsClient"
             ],
-            "path": "packages/core/ui-settings/core-ui-settings-server/src/request_handler_context.ts",
+            "path": "src/core/packages/ui-settings/server/src/request_handler_context.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -565,7 +517,7 @@
         "tags": [],
         "label": "UiSettingsServiceSetup",
         "description": [],
-        "path": "packages/core/ui-settings/core-ui-settings-server/src/contracts.ts",
+        "path": "src/core/packages/ui-settings/server/src/contracts.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -580,16 +532,10 @@
             ],
             "signature": [
               "(settings: Record<string, ",
-              {
-                "pluginId": "@kbn/core-ui-settings-common",
-                "scope": "common",
-                "docId": "kibKbnCoreUiSettingsCommonPluginApi",
-                "section": "def-common.UiSettingsParams",
-                "text": "UiSettingsParams"
-              },
+              "UiSettingsParams",
               "<unknown>>) => void"
             ],
-            "path": "packages/core/ui-settings/core-ui-settings-server/src/contracts.ts",
+            "path": "src/core/packages/ui-settings/server/src/contracts.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -602,16 +548,10 @@
                 "description": [],
                 "signature": [
                   "Record<string, ",
-                  {
-                    "pluginId": "@kbn/core-ui-settings-common",
-                    "scope": "common",
-                    "docId": "kibKbnCoreUiSettingsCommonPluginApi",
-                    "section": "def-common.UiSettingsParams",
-                    "text": "UiSettingsParams"
-                  },
+                  "UiSettingsParams",
                   "<unknown>>"
                 ],
-                "path": "packages/core/ui-settings/core-ui-settings-server/src/contracts.ts",
+                "path": "src/core/packages/ui-settings/server/src/contracts.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -630,16 +570,10 @@
             ],
             "signature": [
               "(settings: Record<string, ",
-              {
-                "pluginId": "@kbn/core-ui-settings-common",
-                "scope": "common",
-                "docId": "kibKbnCoreUiSettingsCommonPluginApi",
-                "section": "def-common.UiSettingsParams",
-                "text": "UiSettingsParams"
-              },
+              "UiSettingsParams",
               "<unknown>>) => void"
             ],
-            "path": "packages/core/ui-settings/core-ui-settings-server/src/contracts.ts",
+            "path": "src/core/packages/ui-settings/server/src/contracts.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -652,16 +586,10 @@
                 "description": [],
                 "signature": [
                   "Record<string, ",
-                  {
-                    "pluginId": "@kbn/core-ui-settings-common",
-                    "scope": "common",
-                    "docId": "kibKbnCoreUiSettingsCommonPluginApi",
-                    "section": "def-common.UiSettingsParams",
-                    "text": "UiSettingsParams"
-                  },
+                  "UiSettingsParams",
                   "<unknown>>"
                 ],
-                "path": "packages/core/ui-settings/core-ui-settings-server/src/contracts.ts",
+                "path": "src/core/packages/ui-settings/server/src/contracts.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -681,7 +609,7 @@
             "signature": [
               "(keys: string[]) => void"
             ],
-            "path": "packages/core/ui-settings/core-ui-settings-server/src/contracts.ts",
+            "path": "src/core/packages/ui-settings/server/src/contracts.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -695,7 +623,7 @@
                 "signature": [
                   "string[]"
                 ],
-                "path": "packages/core/ui-settings/core-ui-settings-server/src/contracts.ts",
+                "path": "src/core/packages/ui-settings/server/src/contracts.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -713,7 +641,7 @@
         "tags": [],
         "label": "UiSettingsServiceStart",
         "description": [],
-        "path": "packages/core/ui-settings/core-ui-settings-server/src/contracts.ts",
+        "path": "src/core/packages/ui-settings/server/src/contracts.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -728,23 +656,11 @@
             ],
             "signature": [
               "(savedObjectsClient: ",
-              {
-                "pluginId": "@kbn/core-saved-objects-api-server",
-                "scope": "server",
-                "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-                "section": "def-server.SavedObjectsClientContract",
-                "text": "SavedObjectsClientContract"
-              },
+              "SavedObjectsClientContract",
               ") => ",
-              {
-                "pluginId": "@kbn/core-ui-settings-server",
-                "scope": "server",
-                "docId": "kibKbnCoreUiSettingsServerPluginApi",
-                "section": "def-server.IUiSettingsClient",
-                "text": "IUiSettingsClient"
-              }
+              "IUiSettingsClient"
             ],
-            "path": "packages/core/ui-settings/core-ui-settings-server/src/contracts.ts",
+            "path": "src/core/packages/ui-settings/server/src/contracts.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -756,15 +672,9 @@
                 "label": "savedObjectsClient",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "@kbn/core-saved-objects-api-server",
-                    "scope": "server",
-                    "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-                    "section": "def-server.SavedObjectsClientContract",
-                    "text": "SavedObjectsClientContract"
-                  }
+                  "SavedObjectsClientContract"
                 ],
-                "path": "packages/core/ui-settings/core-ui-settings-server/src/contracts.ts",
+                "path": "src/core/packages/ui-settings/server/src/contracts.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -783,23 +693,11 @@
             ],
             "signature": [
               "(savedObjectsClient: ",
-              {
-                "pluginId": "@kbn/core-saved-objects-api-server",
-                "scope": "server",
-                "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-                "section": "def-server.SavedObjectsClientContract",
-                "text": "SavedObjectsClientContract"
-              },
+              "SavedObjectsClientContract",
               ") => ",
-              {
-                "pluginId": "@kbn/core-ui-settings-server",
-                "scope": "server",
-                "docId": "kibKbnCoreUiSettingsServerPluginApi",
-                "section": "def-server.IUiSettingsClient",
-                "text": "IUiSettingsClient"
-              }
+              "IUiSettingsClient"
             ],
-            "path": "packages/core/ui-settings/core-ui-settings-server/src/contracts.ts",
+            "path": "src/core/packages/ui-settings/server/src/contracts.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -811,15 +709,9 @@
                 "label": "savedObjectsClient",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "@kbn/core-saved-objects-api-server",
-                    "scope": "server",
-                    "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-                    "section": "def-server.SavedObjectsClientContract",
-                    "text": "SavedObjectsClientContract"
-                  }
+                  "SavedObjectsClientContract"
                 ],
-                "path": "packages/core/ui-settings/core-ui-settings-server/src/contracts.ts",
+                "path": "src/core/packages/ui-settings/server/src/contracts.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true

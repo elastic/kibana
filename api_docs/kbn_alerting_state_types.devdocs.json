@@ -69,7 +69,7 @@
           "NumberC",
           "; }>>; }>"
         ],
-        "path": "x-pack/packages/kbn-alerting-state-types/src/lifecycle_state.ts",
+        "path": "x-pack/platform/packages/private/kbn-alerting-state-types/src/lifecycle_state.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [],
@@ -86,7 +86,7 @@
         "tags": [],
         "label": "ActionsCompletion",
         "description": [],
-        "path": "x-pack/packages/kbn-alerting-state-types/src/rule_task_instance.ts",
+        "path": "x-pack/platform/packages/private/kbn-alerting-state-types/src/rule_task_instance.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -103,7 +103,7 @@
         "signature": [
           "{ [x: string]: unknown; }"
         ],
-        "path": "x-pack/packages/kbn-alerting-state-types/src/alert_instance.ts",
+        "path": "x-pack/platform/packages/private/kbn-alerting-state-types/src/alert_instance.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -118,7 +118,7 @@
         "signature": [
           "{ readonly flapping?: boolean | undefined; readonly uuid?: string | undefined; readonly lastScheduledActions?: Readonly<{ actions?: Record<string, Readonly<{} & { date: string; }>> | undefined; subgroup?: string | undefined; } & { date: string; group: string; }> | undefined; readonly flappingHistory?: boolean[] | undefined; readonly maintenanceWindowIds?: string[] | undefined; readonly pendingRecoveredCount?: number | undefined; readonly activeCount?: number | undefined; }"
         ],
-        "path": "x-pack/packages/kbn-alerting-state-types/src/task_state/index.ts",
+        "path": "x-pack/platform/packages/private/kbn-alerting-state-types/src/task_state/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -133,7 +133,7 @@
         "signature": [
           "{ [x: string]: any; }"
         ],
-        "path": "x-pack/packages/kbn-alerting-state-types/src/task_state/index.ts",
+        "path": "x-pack/platform/packages/private/kbn-alerting-state-types/src/task_state/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -148,7 +148,7 @@
         "signature": [
           "{ readonly actions?: Record<string, Readonly<{} & { date: string; }>> | undefined; readonly subgroup?: string | undefined; readonly date: string; readonly group: string; }"
         ],
-        "path": "x-pack/packages/kbn-alerting-state-types/src/task_state/index.ts",
+        "path": "x-pack/platform/packages/private/kbn-alerting-state-types/src/task_state/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -163,7 +163,7 @@
         "signature": [
           "{ readonly meta?: Readonly<{ flapping?: boolean | undefined; uuid?: string | undefined; lastScheduledActions?: Readonly<{ actions?: Record<string, Readonly<{} & { date: string; }>> | undefined; subgroup?: string | undefined; } & { date: string; group: string; }> | undefined; flappingHistory?: boolean[] | undefined; maintenanceWindowIds?: string[] | undefined; pendingRecoveredCount?: number | undefined; activeCount?: number | undefined; } & {}> | undefined; readonly state?: Record<string, any> | undefined; }"
         ],
-        "path": "x-pack/packages/kbn-alerting-state-types/src/task_state/index.ts",
+        "path": "x-pack/platform/packages/private/kbn-alerting-state-types/src/task_state/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -178,7 +178,7 @@
         "signature": [
           "{ readonly alertTypeState?: Record<string, any> | undefined; readonly alertInstances?: Record<string, Readonly<{ meta?: Readonly<{ flapping?: boolean | undefined; uuid?: string | undefined; lastScheduledActions?: Readonly<{ actions?: Record<string, Readonly<{} & { date: string; }>> | undefined; subgroup?: string | undefined; } & { date: string; group: string; }> | undefined; flappingHistory?: boolean[] | undefined; maintenanceWindowIds?: string[] | undefined; pendingRecoveredCount?: number | undefined; activeCount?: number | undefined; } & {}> | undefined; state?: Record<string, any> | undefined; } & {}>> | undefined; readonly alertRecoveredInstances?: Record<string, Readonly<{ meta?: Readonly<{ flapping?: boolean | undefined; uuid?: string | undefined; lastScheduledActions?: Readonly<{ actions?: Record<string, Readonly<{} & { date: string; }>> | undefined; subgroup?: string | undefined; } & { date: string; group: string; }> | undefined; flappingHistory?: boolean[] | undefined; maintenanceWindowIds?: string[] | undefined; pendingRecoveredCount?: number | undefined; activeCount?: number | undefined; } & {}> | undefined; state?: Record<string, any> | undefined; } & {}>> | undefined; readonly previousStartedAt?: string | null | undefined; readonly summaryActions?: Record<string, Readonly<{} & { date: string; }>> | undefined; }"
         ],
-        "path": "x-pack/packages/kbn-alerting-state-types/src/task_state/index.ts",
+        "path": "x-pack/platform/packages/private/kbn-alerting-state-types/src/task_state/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -193,7 +193,7 @@
         "signature": [
           "{ [x: string]: Readonly<{} & { date: string; }>; }"
         ],
-        "path": "x-pack/packages/kbn-alerting-state-types/src/task_state/index.ts",
+        "path": "x-pack/platform/packages/private/kbn-alerting-state-types/src/task_state/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -208,7 +208,7 @@
         "signature": [
           "{ flapping?: Mutable<boolean | undefined>; uuid?: Mutable<string | undefined>; lastScheduledActions?: Mutable<Readonly<{ actions?: Record<string, Readonly<{} & { date: string; }>> | undefined; subgroup?: string | undefined; } & { date: string; group: string; }> | undefined>; flappingHistory?: Mutable<boolean[] | undefined>; maintenanceWindowIds?: Mutable<string[] | undefined>; pendingRecoveredCount?: Mutable<number | undefined>; activeCount?: Mutable<number | undefined>; }"
         ],
-        "path": "x-pack/packages/kbn-alerting-state-types/src/task_state/index.ts",
+        "path": "x-pack/platform/packages/private/kbn-alerting-state-types/src/task_state/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -223,7 +223,7 @@
         "signature": [
           "{ alertTypeState?: Mutable<Record<string, any> | undefined>; alertInstances?: Mutable<Record<string, Readonly<{ meta?: Readonly<{ flapping?: boolean | undefined; uuid?: string | undefined; lastScheduledActions?: Readonly<{ actions?: Record<string, Readonly<{} & { date: string; }>> | undefined; subgroup?: string | undefined; } & { date: string; group: string; }> | undefined; flappingHistory?: boolean[] | undefined; maintenanceWindowIds?: string[] | undefined; pendingRecoveredCount?: number | undefined; activeCount?: number | undefined; } & {}> | undefined; state?: Record<string, any> | undefined; } & {}>> | undefined>; alertRecoveredInstances?: Mutable<Record<string, Readonly<{ meta?: Readonly<{ flapping?: boolean | undefined; uuid?: string | undefined; lastScheduledActions?: Readonly<{ actions?: Record<string, Readonly<{} & { date: string; }>> | undefined; subgroup?: string | undefined; } & { date: string; group: string; }> | undefined; flappingHistory?: boolean[] | undefined; maintenanceWindowIds?: string[] | undefined; pendingRecoveredCount?: number | undefined; activeCount?: number | undefined; } & {}> | undefined; state?: Record<string, any> | undefined; } & {}>> | undefined>; previousStartedAt?: Mutable<string | null | undefined>; summaryActions?: Mutable<Record<string, Readonly<{} & { date: string; }>> | undefined>; }"
         ],
-        "path": "x-pack/packages/kbn-alerting-state-types/src/task_state/index.ts",
+        "path": "x-pack/platform/packages/private/kbn-alerting-state-types/src/task_state/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -238,7 +238,7 @@
         "signature": [
           "{ alertId: string; } & { spaceId?: string | undefined; }"
         ],
-        "path": "x-pack/packages/kbn-alerting-state-types/src/rule_task_instance.ts",
+        "path": "x-pack/platform/packages/private/kbn-alerting-state-types/src/rule_task_instance.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -253,7 +253,7 @@
         "signature": [
           "{ alertId: string; alertUuid: string; started: string; flappingHistory: boolean[]; flapping: boolean; pendingRecoveredCount: number; activeCount: number; }"
         ],
-        "path": "x-pack/packages/kbn-alerting-state-types/src/lifecycle_state.ts",
+        "path": "x-pack/platform/packages/private/kbn-alerting-state-types/src/lifecycle_state.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -270,7 +270,7 @@
         "signature": [
           "RuleTypeState & { wrapped: State; trackedAlerts: Record<string, { alertId: string; alertUuid: string; started: string; flappingHistory: boolean[]; flapping: boolean; pendingRecoveredCount: number; activeCount: number; }>; trackedAlertsRecovered: Record<string, { alertId: string; alertUuid: string; started: string; flappingHistory: boolean[]; flapping: boolean; pendingRecoveredCount: number; activeCount: number; }>; }"
         ],
-        "path": "x-pack/packages/kbn-alerting-state-types/src/lifecycle_state.ts",
+        "path": "x-pack/platform/packages/private/kbn-alerting-state-types/src/lifecycle_state.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -284,7 +284,7 @@
         "tags": [],
         "label": "emptyState",
         "description": [],
-        "path": "x-pack/packages/kbn-alerting-state-types/src/task_state/index.ts",
+        "path": "x-pack/platform/packages/private/kbn-alerting-state-types/src/task_state/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -295,7 +295,7 @@
             "tags": [],
             "label": "alertTypeState",
             "description": [],
-            "path": "x-pack/packages/kbn-alerting-state-types/src/task_state/index.ts",
+            "path": "x-pack/platform/packages/private/kbn-alerting-state-types/src/task_state/index.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": []
@@ -307,7 +307,7 @@
             "tags": [],
             "label": "alertInstances",
             "description": [],
-            "path": "x-pack/packages/kbn-alerting-state-types/src/task_state/index.ts",
+            "path": "x-pack/platform/packages/private/kbn-alerting-state-types/src/task_state/index.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": []
@@ -319,7 +319,7 @@
             "tags": [],
             "label": "alertRecoveredInstances",
             "description": [],
-            "path": "x-pack/packages/kbn-alerting-state-types/src/task_state/index.ts",
+            "path": "x-pack/platform/packages/private/kbn-alerting-state-types/src/task_state/index.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": []
@@ -334,7 +334,7 @@
             "signature": [
               "null"
             ],
-            "path": "x-pack/packages/kbn-alerting-state-types/src/task_state/index.ts",
+            "path": "x-pack/platform/packages/private/kbn-alerting-state-types/src/task_state/index.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -345,7 +345,7 @@
             "tags": [],
             "label": "summaryActions",
             "description": [],
-            "path": "x-pack/packages/kbn-alerting-state-types/src/task_state/index.ts",
+            "path": "x-pack/platform/packages/private/kbn-alerting-state-types/src/task_state/index.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": []
@@ -372,7 +372,7 @@
           "StringC",
           "; }>]>"
         ],
-        "path": "x-pack/packages/kbn-alerting-state-types/src/rule_task_instance.ts",
+        "path": "x-pack/platform/packages/private/kbn-alerting-state-types/src/rule_task_instance.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -384,7 +384,7 @@
         "tags": [],
         "label": "stateSchemaByVersion",
         "description": [],
-        "path": "x-pack/packages/kbn-alerting-state-types/src/task_state/index.ts",
+        "path": "x-pack/platform/packages/private/kbn-alerting-state-types/src/task_state/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -446,7 +446,7 @@
               },
               "<Record<string, Readonly<{} & { date: string; }>> | undefined>; }>; }"
             ],
-            "path": "x-pack/packages/kbn-alerting-state-types/src/task_state/index.ts",
+            "path": "x-pack/platform/packages/private/kbn-alerting-state-types/src/task_state/index.ts",
             "deprecated": false,
             "trackAdoption": false
           }

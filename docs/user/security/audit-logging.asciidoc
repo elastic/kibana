@@ -148,6 +148,21 @@ Refer to the corresponding {es} logs for potential write errors.
 | `success` | Creating trained model.
 | `failure` | Failed to create trained model.
 
+.1+| `product_documentation_create`
+| `unknown` | User requested to install the product documentation for use in AI Assistants.
+
+.2+| `knowledge_base_entry_create`
+| `success` | User has created knowledge base entry [id=x]
+| `failure` | Failed attempt to create a knowledge base entry
+
+.2+| `knowledge_base_entry_update`
+| `success` | User has updated knowledge base entry [id=x]
+| `failure` | Failed attempt to update a knowledge base entry
+
+.2+| `knowledge_base_entry_delete`
+| `success` | User has deleted knowledge base entry [id=x]
+| `failure` | Failed attempt to delete a knowledge base entry
+
 3+a|
 ====== Type: change
 
@@ -334,6 +349,9 @@ Refer to the corresponding {es} logs for potential write errors.
 | `success` | Updating trained model deployment.
 | `failure` | Failed to update trained model deployment.
 
+.1+| `product_documentation_update`
+| `unknown` | User requested to update the product documentation for use in AI Assistants.
+
 3+a|
 ====== Type: deletion
 
@@ -424,6 +442,9 @@ Refer to the corresponding {es} logs for potential write errors.
 .2+| `ml_delete_trained_model`
 | `success` | Deleting trained model.
 | `failure` | Failed to delete trained model.
+
+.1+| `product_documentation_delete`
+| `unknown` | User requested to delete the product documentation for use in AI Assistants.
 
 3+a|
 ====== Type: access

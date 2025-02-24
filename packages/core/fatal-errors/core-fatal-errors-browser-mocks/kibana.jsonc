@@ -1,6 +1,0 @@
-{
-  "type": "shared-browser",
-  "id": "@kbn/core-fatal-errors-browser-mocks",
-  "devOnly": true,
-  "owner": "@elastic/kibana-core"
-}

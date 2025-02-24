@@ -23,7 +23,7 @@ To upload GeoJSON files, shapefiles, and draw features in {kib} with *Maps*, you
 * The `create` and `create_index` index privileges for destination indices
 * To use the index in *Maps*, you must also have the `read` and `view_index_metadata` index privileges for destination indices
 
-To upload delimited files (such as CSV, TSV, or JSON files) on the {kib} home page, you must also have:
+To upload delimited files (such as CSV, TSV, or JSON files) from the **Upload file** integration, you must also have:
 
 * The `all` {kib} privilege for *Discover*
 * The `manage_pipeline` or `manage_ingest_pipelines` cluster privilege
@@ -33,9 +33,9 @@ To upload delimited files (such as CSV, TSV, or JSON files) on the {kib} home pa
 [discrete]
 === Upload delimited files with latitude and longitude columns
 
-On the {kib} home page, you can upload a file and import it into an {es} index with latitude and longitude columns combined into a `geo_point` field.
+You can upload a file and import it into an {es} index with latitude and longitude columns combined into a `geo_point` field.
 
-. Go to the {kib} home page and click *Upload a file*.
+. Go to the *Integrations* page and select *Upload file*.
 . Select a file in one of the supported file formats.
 . Click *Import*.
 . Select the *Advanced* tab.

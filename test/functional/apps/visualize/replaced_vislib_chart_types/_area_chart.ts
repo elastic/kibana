@@ -49,7 +49,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     const intervalValue = await visEditor.getInterval();
     log.debug('intervalValue = ' + intervalValue);
     expect(intervalValue[0]).to.be('Auto');
-    await visEditor.clickGo(true);
+    await visEditor.clickGo();
   };
 
   describe('area charts', function indexPatternCreation() {
@@ -177,8 +177,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         await visEditor.toggleOpenEditor(2);
         await visEditor.setInterval('Second');
-        await visEditor.clickGo(true);
+        await visEditor.clickGo();
         await inspector.open();
+        await inspector.setTablePageSize(20);
         await inspector.expectTableData(expectedTableData);
         await inspector.close();
       });
@@ -209,8 +210,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         await visEditor.toggleAdvancedParams('2');
         await visEditor.toggleScaleMetrics();
-        await visEditor.clickGo(true);
+        await visEditor.clickGo();
         await inspector.open();
+        await inspector.setTablePageSize(20);
         await inspector.expectTableData(expectedTableData);
         await inspector.close();
       });
@@ -243,8 +245,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await visEditor.selectAggregation('Top Hit', 'metrics');
         await visEditor.selectField('bytes', 'metrics');
         await visEditor.selectAggregateWith('average');
-        await visEditor.clickGo(true);
+        await visEditor.clickGo();
         await inspector.open();
+        await inspector.setTablePageSize(20);
         await inspector.expectTableData(expectedTableData);
         await inspector.close();
       });
@@ -277,7 +280,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await visEditor.clickYAxisOptions(axisId);
         await visEditor.selectYAxisScaleType(axisId, 'log');
         await visEditor.changeYAxisFilterLabelsCheckbox(axisId, false);
-        await visEditor.clickGo(true);
+        await visEditor.clickGo();
         const labels = await visChart.getYAxisLabelsAsNumbers(xyChartSelector);
         const minLabel = 1;
         const maxLabel = 900;
@@ -289,7 +292,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       it('should show filtered ticks on selecting log scale', async () => {
         await visEditor.changeYAxisFilterLabelsCheckbox(axisId, true);
-        await visEditor.clickGo(true);
+        await visEditor.clickGo();
         const labels = await visChart.getYAxisLabelsAsNumbers(xyChartSelector);
         const minLabel = 1;
         const maxLabel = 900;
@@ -302,7 +305,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       it('should show ticks on selecting square root scale', async () => {
         await visEditor.selectYAxisScaleType(axisId, 'square root');
         await visEditor.changeYAxisFilterLabelsCheckbox(axisId, false);
-        await visEditor.clickGo(true);
+        await visEditor.clickGo();
         const labels = await visChart.getYAxisLabels(xyChartSelector);
         const expectedLabels = ['0', '200', '400', '600', '800', '1,000', '1,200', '1,400'];
         expect(labels).to.eql(expectedLabels);
@@ -310,7 +313,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       it('should show filtered ticks on selecting square root scale', async () => {
         await visEditor.changeYAxisFilterLabelsCheckbox(axisId, true);
-        await visEditor.clickGo(true);
+        await visEditor.clickGo();
         const labels = await visChart.getYAxisLabels(xyChartSelector);
         const expectedLabels = ['0', '200', '400', '600', '800', '1,000', '1,200', '1,400'];
         expect(labels).to.eql(expectedLabels);
@@ -319,7 +322,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       it('should show ticks on selecting linear scale', async () => {
         await visEditor.selectYAxisScaleType(axisId, 'linear');
         await visEditor.changeYAxisFilterLabelsCheckbox(axisId, false);
-        await visEditor.clickGo(true);
+        await visEditor.clickGo();
         const labels = await visChart.getYAxisLabels(xyChartSelector);
         log.debug(labels);
         const expectedLabels = ['0', '200', '400', '600', '800', '1,000', '1,200', '1,400'];
@@ -328,7 +331,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       it('should show filtered ticks on selecting linear scale', async () => {
         await visEditor.changeYAxisFilterLabelsCheckbox(axisId, true);
-        await visEditor.clickGo(true);
+        await visEditor.clickGo();
         const labels = await visChart.getYAxisLabels(xyChartSelector);
         const expectedLabels = ['0', '200', '400', '600', '800', '1,000', '1,200', '1,400'];
         expect(labels).to.eql(expectedLabels);
@@ -353,7 +356,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await visEditor.selectAggregation('Date Histogram');
         await visEditor.selectField('@timestamp');
         await visEditor.setInterval('Year');
-        await visEditor.clickGo(true);
+        await visEditor.clickGo();
         // This svg area is composed by 7 years (2013 - 2019).
         // 7 points are used to draw the upper line (usually called y1)
         // 7 points compose the lower line (usually called y0)
@@ -376,7 +379,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await visEditor.selectAggregation('Date Histogram');
         await visEditor.selectField('@timestamp');
         await visEditor.setInterval('Month');
-        await visEditor.clickGo(true);
+        await visEditor.clickGo();
         // This svg area is composed by 67 months 3 (2013) + 5 * 12 + 4 (2019)
         // 67 points are used to draw the upper line (usually called y1)
         // 67 points compose the lower line (usually called y0)

@@ -29,7 +29,7 @@
         "signature": [
           "(obj: Record<string, any>, accessor: string, defaultValue: any) => any"
         ],
-        "path": "x-pack/packages/ml/nested_property/src/get_nested_property.ts",
+        "path": "x-pack/platform/packages/private/ml/nested_property/src/get_nested_property.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -43,7 +43,7 @@
             "signature": [
               "Record<string, any>"
             ],
-            "path": "x-pack/packages/ml/nested_property/src/get_nested_property.ts",
+            "path": "x-pack/platform/packages/private/ml/nested_property/src/get_nested_property.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -58,7 +58,7 @@
             "signature": [
               "string"
             ],
-            "path": "x-pack/packages/ml/nested_property/src/get_nested_property.ts",
+            "path": "x-pack/platform/packages/private/ml/nested_property/src/get_nested_property.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -73,7 +73,7 @@
             "signature": [
               "any"
             ],
-            "path": "x-pack/packages/ml/nested_property/src/get_nested_property.ts",
+            "path": "x-pack/platform/packages/private/ml/nested_property/src/get_nested_property.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -92,7 +92,7 @@
         "signature": [
           "(obj: Record<string, any>, accessor: string, value: any) => Record<string, any>"
         ],
-        "path": "x-pack/packages/ml/nested_property/src/set_nested_property.ts",
+        "path": "x-pack/platform/packages/private/ml/nested_property/src/set_nested_property.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -106,7 +106,7 @@
             "signature": [
               "Record<string, any>"
             ],
-            "path": "x-pack/packages/ml/nested_property/src/set_nested_property.ts",
+            "path": "x-pack/platform/packages/private/ml/nested_property/src/set_nested_property.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -121,7 +121,7 @@
             "signature": [
               "string"
             ],
-            "path": "x-pack/packages/ml/nested_property/src/set_nested_property.ts",
+            "path": "x-pack/platform/packages/private/ml/nested_property/src/set_nested_property.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -136,7 +136,7 @@
             "signature": [
               "any"
             ],
-            "path": "x-pack/packages/ml/nested_property/src/set_nested_property.ts",
+            "path": "x-pack/platform/packages/private/ml/nested_property/src/set_nested_property.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true

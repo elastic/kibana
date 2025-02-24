@@ -24,7 +24,6 @@
     "@kbn/notifications-plugin",
     "@kbn/core-saved-objects-server",
     "@kbn/logging",
-    "@kbn/rule-data-utils",
     "@kbn/alerting-api-integration-helpers",
   ],
   "exclude": [

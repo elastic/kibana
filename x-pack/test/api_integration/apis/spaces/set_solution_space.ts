@@ -139,7 +139,7 @@ export default function ({ getService }: FtrProviderContext) {
         .expect(400);
 
       expect(body.message).to.eql(
-        '[request body]: types that failed validation:\n- [request body.0.solution]: expected at least one defined value but got [undefined]\n- [request body.1.solution_type]: types that failed validation:\n - [request body.solution_type.0]: expected value to equal [security]\n - [request body.solution_type.1]: expected value to equal [observability]\n - [request body.solution_type.2]: expected value to equal [elasticsearch]'
+        '[request body]: types that failed validation:\n- [request body.0.solution]: expected at least one defined value but got [undefined]\n- [request body.1.solution_type]: types that failed validation:\n - [request body.solution_type.0]: expected value to equal [security]\n - [request body.solution_type.1]: expected value to equal [observability]\n - [request body.solution_type.2]: expected value to equal [elasticsearch]\n - [request body.solution_type.3]: expected value to equal [search]'
       );
     });
 

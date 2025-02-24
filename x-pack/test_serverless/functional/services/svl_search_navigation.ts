@@ -19,7 +19,8 @@ export function SvlSearchNavigationServiceProvider({
     async navigateToLandingPage() {
       await retry.tryForTime(60 * 1000, async () => {
         await PageObjects.common.navigateToApp('landingPage');
-        await testSubjects.existOrFail('svlSearchOverviewPage', { timeout: 2000 });
+        // Wait for the side nav, since the landing page will sometimes redirect to index management now
+        await testSubjects.existOrFail('svlSearchSideNav', { timeout: 2000 });
       });
     },
     async navigateToGettingStartedPage() {
@@ -45,6 +46,11 @@ export function SvlSearchNavigationServiceProvider({
         });
       });
       await testSubjects.existOrFail('searchIndicesDetailsPage', { timeout: 2000 });
+    },
+    async navigateToInferenceManagementPage(expectRedirect: boolean = false) {
+      await PageObjects.common.navigateToApp('searchInferenceEndpoints', {
+        shouldLoginIfPrompted: false,
+      });
     },
   };
 }

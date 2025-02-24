@@ -13,20 +13,23 @@ const SYSTEMPATH = 'systemPath';
 
 const testMap = [
   [
-    'x-pack/plugins/observability_solution/observability/public/header_actions.tsx',
+    'x-pack/solutions/observability/plugins/observability/public/header_actions.tsx',
     'xpack.observability',
   ],
   [
-    'x-pack/plugins/observability_solution/apm/common/components/app/correlations/correlations_table.tsx',
+    'x-pack/solutions/observability/plugins/apm/common/components/app/correlations/correlations_table.tsx',
     'xpack.apm',
   ],
-  ['x-pack/plugins/cases/server/components/foo.tsx', 'xpack.cases'],
+  ['x-pack/platform/plugins/shared/cases/server/components/foo.tsx', 'xpack.cases'],
   [
-    'x-pack/plugins/observability_solution/synthetics/public/apps/synthetics/components/alerts/toggle_alert_flyout_button.tsx',
+    'x-pack/solutions/observability/plugins/synthetics/public/apps/synthetics/components/alerts/toggle_alert_flyout_button.tsx',
     'xpack.synthetics',
   ],
-  ['src/plugins/vis_types/gauge/public/editor/collections.ts', 'visTypeGauge'],
-  ['packages/kbn-alerts-ui-shared/src/alert_lifecycle_status_badge/index.tsx', 'alertsUIShared'],
+  ['src/platform/plugins/private/vis_types/gauge/public/editor/collections.ts', 'visTypeGauge'],
+  [
+    'src/platform/packages/shared/kbn-alerts-ui-shared/src/alert_lifecycle_status_badge/index.tsx',
+    'alertsUIShared',
+  ],
 ];
 
 describe('Get i18n Identifier for file', () => {

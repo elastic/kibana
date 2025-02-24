@@ -1,0 +1,51 @@
+{
+  "extends": "../../../../../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "target/types",
+    "strictNullChecks": false
+  },
+  "include": [
+    "server/**/*",
+    "public/**/*",
+    "*.ts",
+    // have to declare *.json explicitly due to https://github.com/microsoft/TypeScript/issues/25636
+    "public/test_utils/vega_map_test.json",
+    "public/test_utils/vegalite_graph.json",
+    "public/test_utils/vega_graph.json",
+  ],
+  "kbn_references": [
+    "@kbn/core",
+    "@kbn/data-plugin",
+    "@kbn/data-views-plugin",
+    "@kbn/visualizations-plugin",
+    "@kbn/maps-ems-plugin",
+    "@kbn/expressions-plugin",
+    "@kbn/inspector-plugin",
+    "@kbn/home-plugin",
+    "@kbn/kibana-utils-plugin",
+    "@kbn/kibana-react-plugin",
+    "@kbn/vis-default-editor-plugin",
+    "@kbn/usage-collection-plugin",
+    "@kbn/es-query",
+    "@kbn/analytics",
+    "@kbn/core-execution-context-common",
+    "@kbn/i18n",
+    "@kbn/i18n-react",
+    "@kbn/monaco",
+    "@kbn/utility-types",
+    "@kbn/ui-theme",
+    "@kbn/std",
+    "@kbn/datemath",
+    "@kbn/mapbox-gl",
+    "@kbn/config-schema",
+    "@kbn/code-editor",
+    "@kbn/react-kibana-context-render",
+    "@kbn/search-types",
+    "@kbn/presentation-publishing",
+    "@kbn/embeddable-plugin",
+    "@kbn/ui-actions-plugin",
+  ],
+  "exclude": [
+    "target/**/*",
+  ]
+}

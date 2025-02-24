@@ -31,7 +31,7 @@
         "signature": [
           "(interval: string | number, checkValidEsUnit: boolean) => moment.Duration | null"
         ],
-        "path": "x-pack/packages/ml/parse_interval/parse_interval.ts",
+        "path": "x-pack/platform/packages/private/ml/parse_interval/parse_interval.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -47,7 +47,7 @@
             "signature": [
               "string | number"
             ],
-            "path": "x-pack/packages/ml/parse_interval/parse_interval.ts",
+            "path": "x-pack/platform/packages/private/ml/parse_interval/parse_interval.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -64,7 +64,7 @@
             "signature": [
               "boolean"
             ],
-            "path": "x-pack/packages/ml/parse_interval/parse_interval.ts",
+            "path": "x-pack/platform/packages/private/ml/parse_interval/parse_interval.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true

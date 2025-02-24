@@ -20,8 +20,7 @@ import { CA_CERT_PATH, kibanaDevServiceAccount } from '@kbn/dev-utils';
 import { commonFunctionalServices } from '@kbn/ftr-common-functional-services';
 import { MOCK_IDP_REALM_NAME } from '@kbn/mock-idp-utils';
 import path from 'path';
-import { defineDockerServersConfig } from '@kbn/test';
-import { dockerImage } from '@kbn/test-suites-xpack/fleet_api_integration/config.base';
+import { fleetPackageRegistryDockerImage, defineDockerServersConfig } from '@kbn/test';
 import { services } from './services';
 
 export default async () => {
@@ -66,7 +65,7 @@ export default async () => {
     dockerServers: defineDockerServersConfig({
       registry: {
         enabled: !!dockerRegistryPort,
-        image: dockerImage,
+        image: fleetPackageRegistryDockerImage,
         portInContainer: 8080,
         port: dockerRegistryPort,
         args: dockerArgs,
@@ -94,6 +93,11 @@ export default async () => {
         'xpack.security.authc.realms.jwt.jwt1.order=-98',
         `xpack.security.authc.realms.jwt.jwt1.pkc_jwkset_path=${getDockerFileMountPath(jwksPath)}`,
         `xpack.security.authc.realms.jwt.jwt1.token_type=access_token`,
+        'serverless.indices.validate_dot_prefixes=true',
+        // controller cluster-settings
+        `cluster.service.slow_task_logging_threshold=15s`,
+        `cluster.service.slow_task_thread_dump_timeout=5s`,
+        `serverless.search.enable_replicas_for_instant_failover=true`,
       ],
       ssl: true, // SSL is required for SAML realm
     },
@@ -107,6 +111,7 @@ export default async () => {
       serverArgs: [
         `--server.restrictInternalApis=true`,
         `--server.port=${servers.kibana.port}`,
+        `--server.prototypeHardening=true`,
         '--status.allowAnonymous=true',
         `--migrations.zdt.runOnRoles=${JSON.stringify(['ui'])}`,
         // We shouldn't embed credentials into the URL since Kibana requests to Elasticsearch should
@@ -151,7 +156,6 @@ export default async () => {
         // This ensures that we register the Security SAML API endpoints.
         // In the real world the SAML config is injected by control plane.
         `--plugin-path=${samlIdPPlugin}`,
-        '--xpack.cloud.id=ftr_fake_cloud_id',
         // Ensure that SAML is used as the default authentication method whenever a user navigates to Kibana. In other
         // words, Kibana should attempt to authenticate the user using the provider with the lowest order if the Login
         // Selector is disabled (which is how Serverless Kibana is configured). By declaring `cloud-basic` with a higher
@@ -167,6 +171,16 @@ export default async () => {
         // configure security reponse header report-to settings to mimic MKI configuration
         `--csp.report_to=${JSON.stringify(['violations-endpoint'])}`,
         `--permissionsPolicy.report_to=${JSON.stringify(['violations-endpoint'])}`,
+        // normally below is injected by control plane
+        '--xpack.cloud.id=ftr_fake_cloud_id',
+        `--xpack.cloud.serverless.project_id=fakeprojectid`,
+        `--xpack.cloud.base_url=https://fake-cloud.elastic.co`,
+        `--xpack.cloud.projects_url=/projects/`,
+        `--xpack.cloud.profile_url=/user/settings/`,
+        `--xpack.cloud.billing_url=/billing/overview/`,
+        `--xpack.cloud.deployments_url=/deployments`,
+        `--xpack.cloud.organization_url=/account/`,
+        `--xpack.cloud.users_and_roles_url=/account/members/`,
       ],
     },
 
@@ -180,7 +194,7 @@ export default async () => {
       ...services,
     },
 
-    // overriding default timeouts from packages/kbn-test/src/functional_test_runner/lib/config/schema.ts
+    // overriding default timeouts from src/platform/packages/shared/kbn-test/src/functional_test_runner/lib/config/schema.ts
     // so we can easily adjust them for serverless where needed
     timeouts: {
       find: 10 * 1000,

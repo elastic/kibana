@@ -28,7 +28,7 @@ export function runEslintWithTypes() {
     async ({ log, flags }) => {
       const ignoreFilePath = Path.resolve(REPO_ROOT, '.eslintignore');
       const configTemplate = Fs.readFileSync(
-        Path.resolve(__dirname, 'types.eslint.config.template.js'),
+        Path.resolve(__dirname, 'types.eslint.config.template.cjs'),
         'utf8'
       );
 
@@ -65,7 +65,7 @@ export function runEslintWithTypes() {
       const failures = await Rx.lastValueFrom(
         Rx.from(projects).pipe(
           mergeMap(async (project) => {
-            const configFilePath = Path.resolve(project.directory, 'types.eslint.config.js');
+            const configFilePath = Path.resolve(project.directory, 'types.eslint.config.cjs');
 
             Fs.writeFileSync(
               configFilePath,

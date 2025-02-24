@@ -8,3 +8,4 @@
  */
 
 export { registerRoutes } from './register_routes';
+export { registerDeprecatedRoutes } from './deprecated_routes';

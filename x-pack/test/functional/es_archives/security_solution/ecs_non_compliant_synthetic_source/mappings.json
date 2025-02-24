@@ -1,0 +1,128 @@
+{
+    "type": "index",
+    "value": {
+      "index": "ecs_non_compliant_synthetic_source",
+      "mappings": {
+        "properties": {
+          "id": {
+            "type": "keyword"
+          },
+          "@timestamp": {
+            "type": "date"
+          },
+          "agent": {
+            "properties": {
+              "name": {
+                "properties": {
+                  "first": {
+                    "type": "keyword"
+                  }
+                }
+              },
+              "type": {
+                "type": "long"
+              }
+            }
+          },
+          "container": {
+            "properties": {
+              "image": {
+                "type": "keyword"
+              }
+            }
+          },
+          "client": {
+            "properties": {
+              "ip": {
+                "type": "keyword"
+              }
+            }
+          },
+          "event": {
+            "properties": {
+              "created": {
+                "type": "keyword"
+              },
+              "action": {
+                "type": "text",
+                "fields": {
+                  "keyword": {
+                    "type": "keyword",
+                    "ignore_above": 256
+                  }
+                }
+              },
+              "original": {
+                "type": "text"
+              },
+              "module": {
+                "type": "text"
+              }
+            }
+          },
+          "dll": {
+            "properties": {
+              "code_signature": {
+                "properties": {
+                  "valid": {
+                    "type": "keyword"
+                  }
+                }
+              }
+            }
+          },
+          "process.command_line": {
+            "type": "keyword",
+            "ignore_above": 10, 
+            "fields": {
+              "text": {
+                "type": "text"
+              }
+            }
+          },
+          "nonEcs.command_line": {
+            "type": "keyword",
+            "ignore_above": 10, 
+            "fields": {
+              "text": {
+                "type": "text"
+              }
+            }
+          },
+          "random": {
+            "properties": {
+              "entry_leader": {
+                "properties": {
+                  "name": {
+                    "type": "keyword",
+                    "ignore_above": 1024,
+                    "fields": {
+                      "text": {
+                        "type": "match_only_text"
+                      },
+                      "caseless": {
+                        "type": "keyword",
+                        "ignore_above": 1024,
+                        "normalizer": "lowercase"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "settings": {
+        "index": {
+          "number_of_replicas": "1",
+          "number_of_shards": "1",
+          "mapping": {
+            "source": {
+              "mode": "synthetic"
+            }
+          }
+        }
+      }
+    }
+  }

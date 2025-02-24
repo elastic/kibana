@@ -21,6 +21,39 @@
     "functions": [
       {
         "parentPluginId": "@kbn/visualization-utils",
+        "id": "def-common.getDatasourceId",
+        "type": "Function",
+        "tags": [],
+        "label": "getDatasourceId",
+        "description": [],
+        "signature": [
+          "(datasourceStates: Record<string, unknown>) => \"formBased\" | \"textBased\" | undefined"
+        ],
+        "path": "src/platform/packages/shared/kbn-visualization-utils/src/get_datasource_id.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/visualization-utils",
+            "id": "def-common.getDatasourceId.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "datasourceStates",
+            "description": [],
+            "signature": [
+              "Record<string, unknown>"
+            ],
+            "path": "src/platform/packages/shared/kbn-visualization-utils/src/get_datasource_id.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/visualization-utils",
         "id": "def-common.getLensAttributesFromSuggestion",
         "type": "Function",
         "tags": [],
@@ -87,7 +120,7 @@
           },
           "[]; }; title: string; }"
         ],
-        "path": "packages/kbn-visualization-utils/src/get_lens_attributes.ts",
+        "path": "src/platform/packages/shared/kbn-visualization-utils/src/get_lens_attributes.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -98,7 +131,7 @@
             "tags": [],
             "label": "{\n  filters,\n  query,\n  suggestion,\n  dataView,\n}",
             "description": [],
-            "path": "packages/kbn-visualization-utils/src/get_lens_attributes.ts",
+            "path": "src/platform/packages/shared/kbn-visualization-utils/src/get_lens_attributes.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -119,7 +152,7 @@
                   },
                   "[]"
                 ],
-                "path": "packages/kbn-visualization-utils/src/get_lens_attributes.ts",
+                "path": "src/platform/packages/shared/kbn-visualization-utils/src/get_lens_attributes.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -147,7 +180,7 @@
                     "text": "AggregateQuery"
                   }
                 ],
-                "path": "packages/kbn-visualization-utils/src/get_lens_attributes.ts",
+                "path": "src/platform/packages/shared/kbn-visualization-utils/src/get_lens_attributes.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -162,7 +195,7 @@
                   "Suggestion",
                   "<unknown, unknown> | undefined"
                 ],
-                "path": "packages/kbn-visualization-utils/src/get_lens_attributes.ts",
+                "path": "src/platform/packages/shared/kbn-visualization-utils/src/get_lens_attributes.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -183,7 +216,7 @@
                   },
                   " | undefined"
                 ],
-                "path": "packages/kbn-visualization-utils/src/get_lens_attributes.ts",
+                "path": "src/platform/packages/shared/kbn-visualization-utils/src/get_lens_attributes.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -204,16 +237,10 @@
         ],
         "signature": [
           "(uiSettings: ",
-          {
-            "pluginId": "@kbn/core-ui-settings-browser",
-            "scope": "public",
-            "docId": "kibKbnCoreUiSettingsBrowserPluginApi",
-            "section": "def-public.IUiSettingsClient",
-            "text": "IUiSettingsClient"
-          },
+          "IUiSettingsClient",
           ") => string"
         ],
-        "path": "packages/kbn-visualization-utils/src/get_timezone.ts",
+        "path": "src/platform/packages/shared/kbn-visualization-utils/src/get_timezone.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -225,15 +252,50 @@
             "label": "uiSettings",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/core-ui-settings-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreUiSettingsBrowserPluginApi",
-                "section": "def-public.IUiSettingsClient",
-                "text": "IUiSettingsClient"
-              }
+              "IUiSettingsClient"
             ],
-            "path": "packages/kbn-visualization-utils/src/get_timezone.ts",
+            "path": "src/platform/packages/shared/kbn-visualization-utils/src/get_timezone.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/visualization-utils",
+        "id": "def-common.mapVisToChartType",
+        "type": "Function",
+        "tags": [],
+        "label": "mapVisToChartType",
+        "description": [],
+        "signature": [
+          "(visualizationType: string) => ",
+          {
+            "pluginId": "@kbn/visualization-utils",
+            "scope": "common",
+            "docId": "kibKbnVisualizationUtilsPluginApi",
+            "section": "def-common.ChartType",
+            "text": "ChartType"
+          },
+          " | undefined"
+        ],
+        "path": "src/platform/packages/shared/kbn-visualization-utils/src/map_vis_to_chart_type.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/visualization-utils",
+            "id": "def-common.mapVisToChartType.$1",
+            "type": "string",
+            "tags": [],
+            "label": "visualizationType",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "src/platform/packages/shared/kbn-visualization-utils/src/map_vis_to_chart_type.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -252,7 +314,7 @@
         "signature": [
           "({ children, condition, tooltipContent, ...tooltipProps }: TooltipWrapperProps) => React.JSX.Element"
         ],
-        "path": "packages/kbn-visualization-utils/src/tooltip_wrapper.tsx",
+        "path": "src/platform/packages/shared/kbn-visualization-utils/src/tooltip_wrapper.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -266,7 +328,7 @@
             "signature": [
               "TooltipWrapperProps"
             ],
-            "path": "packages/kbn-visualization-utils/src/tooltip_wrapper.tsx",
+            "path": "src/platform/packages/shared/kbn-visualization-utils/src/tooltip_wrapper.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -287,7 +349,7 @@
         "signature": [
           "<T>({ onChange, value, defaultValue, }: { onChange: (val: T) => void; value: T; defaultValue?: T | undefined; }, { allowFalsyValue, wait }?: { allowFalsyValue?: boolean | undefined; wait?: number | undefined; }) => { inputValue: T; handleInputChange: (val: T) => void; initialValue: T; }"
         ],
-        "path": "packages/kbn-visualization-utils/src/debounced_value.ts",
+        "path": "src/platform/packages/shared/kbn-visualization-utils/src/debounced_value.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -298,7 +360,7 @@
             "tags": [],
             "label": "{\n    onChange,\n    value,\n    defaultValue,\n  }",
             "description": [],
-            "path": "packages/kbn-visualization-utils/src/debounced_value.ts",
+            "path": "src/platform/packages/shared/kbn-visualization-utils/src/debounced_value.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -312,7 +374,7 @@
                 "signature": [
                   "(val: T) => void"
                 ],
-                "path": "packages/kbn-visualization-utils/src/debounced_value.ts",
+                "path": "src/platform/packages/shared/kbn-visualization-utils/src/debounced_value.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "children": [
@@ -326,7 +388,7 @@
                     "signature": [
                       "T"
                     ],
-                    "path": "packages/kbn-visualization-utils/src/debounced_value.ts",
+                    "path": "src/platform/packages/shared/kbn-visualization-utils/src/debounced_value.ts",
                     "deprecated": false,
                     "trackAdoption": false,
                     "isRequired": true
@@ -344,7 +406,7 @@
                 "signature": [
                   "T"
                 ],
-                "path": "packages/kbn-visualization-utils/src/debounced_value.ts",
+                "path": "src/platform/packages/shared/kbn-visualization-utils/src/debounced_value.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -358,7 +420,7 @@
                 "signature": [
                   "T | undefined"
                 ],
-                "path": "packages/kbn-visualization-utils/src/debounced_value.ts",
+                "path": "src/platform/packages/shared/kbn-visualization-utils/src/debounced_value.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -371,7 +433,7 @@
             "tags": [],
             "label": "{ allowFalsyValue, wait = DEFAULT_TIMEOUT }",
             "description": [],
-            "path": "packages/kbn-visualization-utils/src/debounced_value.ts",
+            "path": "src/platform/packages/shared/kbn-visualization-utils/src/debounced_value.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -385,7 +447,7 @@
                 "signature": [
                   "boolean | undefined"
                 ],
-                "path": "packages/kbn-visualization-utils/src/debounced_value.ts",
+                "path": "src/platform/packages/shared/kbn-visualization-utils/src/debounced_value.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -399,7 +461,7 @@
                 "signature": [
                   "number | undefined"
                 ],
-                "path": "packages/kbn-visualization-utils/src/debounced_value.ts",
+                "path": "src/platform/packages/shared/kbn-visualization-utils/src/debounced_value.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -411,7 +473,20 @@
       }
     ],
     "interfaces": [],
-    "enums": [],
+    "enums": [
+      {
+        "parentPluginId": "@kbn/visualization-utils",
+        "id": "def-common.ChartType",
+        "type": "Enum",
+        "tags": [],
+        "label": "ChartType",
+        "description": [],
+        "path": "src/platform/packages/shared/kbn-visualization-utils/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
     "misc": [],
     "objects": []
   }

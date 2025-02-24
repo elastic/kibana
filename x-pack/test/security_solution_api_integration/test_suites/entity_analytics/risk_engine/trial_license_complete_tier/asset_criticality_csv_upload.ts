@@ -8,17 +8,14 @@ import expect from 'expect';
 import {
   assetCriticalityRouteHelpersFactory,
   cleanAssetCriticality,
-  disableAssetCriticalityAdvancedSetting,
-  enableAssetCriticalityAdvancedSetting,
   getAssetCriticalityDoc,
 } from '../../utils';
 import { FtrProviderContext } from '../../../../ftr_provider_context';
 export default ({ getService }: FtrProviderContext) => {
-  describe('@ess @serverless @serverlessQA Entity Analytics - Asset Criticality CSV upload', () => {
+  describe('@ess @serverless @skipInServerlessMKI Entity Analytics - Asset Criticality CSV upload', () => {
     const esClient = getService('es');
     const supertest = getService('supertest');
     const assetCriticalityRoutes = assetCriticalityRouteHelpersFactory(supertest);
-    const kibanaServer = getService('kibanaServer');
     const log = getService('log');
     const expectAssetCriticalityDocMatching = async (expectedDoc: {
       id_field: string;
@@ -35,10 +32,6 @@ export default ({ getService }: FtrProviderContext) => {
 
     before(async () => {
       await cleanAssetCriticality({ es: esClient, namespace: 'default', log });
-    });
-
-    beforeEach(async () => {
-      await enableAssetCriticalityAdvancedSetting(kibanaServer, log);
     });
 
     after(async () => {
@@ -109,36 +102,37 @@ export default ({ getService }: FtrProviderContext) => {
 
       expect(body.errors).toEqual([
         {
-          index: 0,
-          message:
-            'Invalid criticality level "invalid_criticality", expected one of extreme_impact, high_impact, medium_impact, low_impact',
-        },
-        {
           index: 1,
-          message: 'Invalid entity type "invalid_entity", expected host or user',
+          message:
+            'Invalid criticality level "invalid_criticality", expected one of extreme_impact, high_impact, medium_impact, low_impact, unassigned',
         },
         {
           index: 2,
-          message: 'Missing identifier',
+          message:
+            'Invalid entity type "invalid_entity", expected to be one of: user, host, service',
         },
         {
           index: 3,
-          message: 'Missing criticality level',
+          message: 'Missing identifier',
         },
         {
           index: 4,
-          message: 'Missing entity type',
+          message: 'Missing criticality level',
         },
         {
           index: 5,
-          message: 'Expected 3 columns, got 2',
+          message: 'Missing entity type',
         },
         {
           index: 6,
-          message: 'Expected 3 columns, got 4',
+          message: 'Expected 3 columns, got 2',
         },
         {
           index: 7,
+          message: 'Expected 3 columns, got 4',
+        },
+        {
+          index: 8,
           message: `Identifier is too long, expected less than 1000 characters, got 1001`,
         },
       ]);
@@ -161,9 +155,9 @@ export default ({ getService }: FtrProviderContext) => {
 
       expect(body.errors).toEqual([
         {
-          index: 1,
+          index: 2,
           message:
-            'Invalid criticality level "invalid_criticality", expected one of extreme_impact, high_impact, medium_impact, low_impact',
+            'Invalid criticality level "invalid_criticality", expected one of extreme_impact, high_impact, medium_impact, low_impact, unassigned',
         },
       ]);
 
@@ -186,14 +180,6 @@ export default ({ getService }: FtrProviderContext) => {
         total: 0,
         successful: 0,
         failed: 0,
-      });
-    });
-
-    it('should return 403 if the advanced setting is disabled', async () => {
-      await disableAssetCriticalityAdvancedSetting(kibanaServer, log);
-
-      await assetCriticalityRoutes.uploadCsv('host,host-1,low_impact', {
-        expectStatusCode: 403,
       });
     });
   });

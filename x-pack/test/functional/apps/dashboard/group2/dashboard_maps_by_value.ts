@@ -30,9 +30,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     if (inViewMode) {
       await dashboard.switchToEditMode();
     }
-    await dashboardAddPanel.clickEditorMenuButton();
-    await testSubjects.setValue('dashboardPanelSelectionFlyout__searchInput', 'maps');
-    await dashboardAddPanel.clickVisType('maps');
+    await dashboardAddPanel.clickAddMapPanel();
     await maps.clickSaveAndReturnButton();
   }
 
@@ -42,7 +40,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await dashboard.switchToEditMode();
     }
 
-    await dashboardPanelActions.openContextMenu();
     await dashboardPanelActions.clickEdit();
     await maps.clickAddLayer();
     await maps.selectLayerGroupCard();

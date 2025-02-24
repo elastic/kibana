@@ -49,21 +49,21 @@ function RoutingExplorer({
                 listItems={[
                   {
                     label: 'IRouter API docs',
-                    href: 'https://github.com/elastic/kibana/blob/main/docs/development/core/server/kibana-plugin-core-server.irouter.md',
+                    href: 'https://docs.elastic.dev/kibana-dev-docs/api/kbn-core-http-server#:~:text=IRouter',
                     iconType: 'logoGithub',
                     target: '_blank',
                     size: 's',
                   },
                   {
                     label: 'HttpHandler (core.http.fetch) API docs',
-                    href: 'https://github.com/elastic/kibana/blob/main/docs/development/core/public/kibana-plugin-core-public.httphandler.md',
+                    href: 'https://docs.elastic.dev/kibana-dev-docs/api/kbn-core-http-browser#:~:text=HttpHandler',
                     iconType: 'logoGithub',
                     target: '_blank',
                     size: 's',
                   },
                   {
                     label: 'Conventions',
-                    href: 'https://github.com/elastic/kibana/tree/main/STYLEGUIDE.mdx#api-endpoints',
+                    href: 'https://github.com/elastic/kibana/blob/main/STYLEGUIDE.mdx#api-endpoints',
                     iconType: 'logoGithub',
                     target: '_blank',
                     size: 's',

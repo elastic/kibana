@@ -10,6 +10,7 @@ import { render, unmountComponentAtNode } from 'react-dom';
 import { EuiCallOut } from '@elastic/eui';
 
 import type { CoreSetup, AppMountParameters } from '@kbn/core/public';
+import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import type { StartDependencies } from './plugin';
 
 export const mount =
@@ -21,10 +22,15 @@ export const mount =
     const dataView = await plugins.dataViews.getDefaultDataView();
     const stateHelpers = await plugins.lens.stateHelperApi();
 
-    const i18nCore = core.i18n;
-
     const reactElement = (
-      <i18nCore.Context>
+      <KibanaRenderContextProvider
+        {...{
+          uiSettings: core.uiSettings,
+          settings: core.settings,
+          theme: core.theme,
+          i18n: core.i18n,
+        }}
+      >
         {dataView ? (
           <App
             core={core}
@@ -41,7 +47,7 @@ export const mount =
             <p>You need at least one dataview for this demo to work</p>
           </EuiCallOut>
         )}
-      </i18nCore.Context>
+      </KibanaRenderContextProvider>
     );
 
     render(reactElement, element);

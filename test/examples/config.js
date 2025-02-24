@@ -10,16 +10,17 @@
 import { resolve } from 'path';
 import { REPO_ROOT } from '@kbn/repo-info';
 import { findTestPluginPaths } from '@kbn/test';
+import { ScoutTestRunConfigCategory } from '@kbn/scout-info';
 import { services } from '../plugin_functional/services';
 
 export default async function ({ readConfigFile }) {
   const functionalConfig = await readConfigFile(require.resolve('../functional/config.base.js'));
 
   return {
+    testConfigCategory: ScoutTestRunConfigCategory.UI_TEST,
     rootTags: ['runOutsideOfCiGroups'],
     testFiles: [
       require.resolve('./hello_world'),
-      require.resolve('./bfetch_explorer'),
       require.resolve('./ui_actions'),
       require.resolve('./state_sync'),
       require.resolve('./routing'),

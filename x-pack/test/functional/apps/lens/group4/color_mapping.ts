@@ -6,23 +6,20 @@
  */
 import expect from '@kbn/expect';
 
-import {
-  EUI_AMSTERDAM_PALETTE_COLORS,
-  ELASTIC_BRAND_PALETTE_COLORS,
-  EUIAmsterdamColorBlindPalette,
-  ElasticBrandPalette,
-} from '@kbn/coloring/src/shared_components/color_mapping/palettes';
+import { getKbnPalettes, KbnPalette } from '@kbn/palettes';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const { visualize, lens } = getPageObjects(['visualize', 'lens']);
   const elasticChart = getService('elasticChart');
+  const palettes = getKbnPalettes({ name: 'amsterdam', darkMode: false });
+  const defaultPalette = palettes.get(KbnPalette.Default);
+  const classicPalette = palettes.get(KbnPalette.ElasticClassic);
 
   describe('lens color mapping', () => {
     before(async () => {
       await visualize.navigateToNewVisualization();
       await visualize.clickVisType('lens');
-      await lens.goToTimeRange();
       await elasticChart.setNewChartUiDebugFlag(true);
 
       await lens.configureDimension({
@@ -35,7 +32,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         dimension: 'lnsXY_splitDimensionPanel > lns-empty-dimension',
         operation: 'terms',
         field: 'extension.raw',
-        palette: { mode: 'colorMapping', id: ElasticBrandPalette.id },
+        palette: { mode: 'colorMapping', id: classicPalette.id },
         keepOpen: true,
       });
     });
@@ -44,18 +41,25 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const chart = await lens.getCurrentChartDebugState('xyVisChart');
       const legendColors = chart?.legend?.items?.map((item) => item.color.toLowerCase()) ?? [];
       expect(legendColors).to.eql(
-        ELASTIC_BRAND_PALETTE_COLORS.slice(0, 5).map((c) => c.toLowerCase())
+        classicPalette
+          .colors()
+          .slice(0, 5)
+          .map((c) => c.toLowerCase())
       );
     });
+
     it('should allow switching color mapping palette', async () => {
       await lens.changeColorMappingPalette(
         'lnsXY_splitDimensionPanel > lnsLayerPanel-dimensionLink',
-        EUIAmsterdamColorBlindPalette.id
+        defaultPalette.id
       );
       const chart = await lens.getCurrentChartDebugState('xyVisChart');
       const legendColors = chart?.legend?.items?.map((item) => item.color.toLowerCase()) ?? [];
       expect(legendColors).to.eql(
-        EUI_AMSTERDAM_PALETTE_COLORS.slice(0, 5).map((c) => c.toLowerCase())
+        defaultPalette
+          .colors()
+          .slice(0, 5)
+          .map((c) => c.toLowerCase())
       );
     });
 
@@ -67,7 +71,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       );
       const chart = await lens.getCurrentChartDebugState('xyVisChart');
       const firstLegendItemColor = chart?.legend?.items?.[0]?.color?.toLowerCase() ?? 'NONE';
-      expect(firstLegendItemColor).to.eql(EUI_AMSTERDAM_PALETTE_COLORS[3].toLowerCase());
+      expect(firstLegendItemColor).to.eql(defaultPalette.colors()[3].toLowerCase());
     });
   });
 }

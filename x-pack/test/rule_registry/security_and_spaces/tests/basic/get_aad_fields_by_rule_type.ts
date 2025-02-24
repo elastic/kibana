@@ -38,8 +38,12 @@ export default ({ getService }: FtrProviderContext) => {
       await esArchiver.load('x-pack/test/functional/es_archives/rule_registry/alerts');
     });
 
+    after(async () => {
+      await esArchiver.unload('x-pack/test/functional/es_archives/rule_registry/alerts');
+    });
+
     describe('Users:', () => {
-      it(`${obsOnlySpacesAll.username} should be able to get browser fields for o11y featureIds`, async () => {
+      it(`${obsOnlySpacesAll.username} should be able to get browser fields for o11y rule type ids`, async () => {
         await retry.try(async () => {
           const aadFields = await getAADFieldsByRuleType(
             obsOnlySpacesAll,

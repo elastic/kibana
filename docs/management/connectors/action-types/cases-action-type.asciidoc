@@ -8,8 +8,6 @@
 :frontmatter-tags-content-type: [how-to] 
 :frontmatter-tags-user-goals: [configure]
 
-preview::[]
-
 The Cases connector creates cases in {kib} when alerts occur.
 
 [float]

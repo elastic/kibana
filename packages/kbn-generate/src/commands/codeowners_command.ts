@@ -62,8 +62,17 @@ export const CodeownersCommand: GenerateCommand = {
       content = content.slice(0, ultStart);
     }
 
+    // sort genarated entries by directory name
+    // this improves readability and makes sure that ownership for nested
+    // test plugins is not overriden by the parent package's entry
+    pkgs.sort((a, b) => a.directory.localeCompare(b.directory));
+
     const newCodeowners = `${GENERATED_START}${pkgs
-      .map((pkg) => `${pkg.normalizedRepoRelativeDir} ${pkg.manifest.owner.join(' ')}`)
+      .map(
+        (pkg) =>
+          pkg.normalizedRepoRelativeDir +
+          (pkg.manifest.owner.length ? ' ' + pkg.manifest.owner.join(' ') : '')
+      )
       .join('\n')}${GENERATED_END}${content}${ULTIMATE_PRIORITY_RULES}`;
 
     if (newCodeowners === oldCodeowners) {

@@ -18,7 +18,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('should allow creation of lens xy chart', async () => {
       await visualize.navigateToNewVisualization();
       await visualize.clickVisType('lens');
-      await lens.goToTimeRange();
 
       // check that no sampling info is shown in the dataView picker
       expect(await testSubjects.exists('lnsChangeIndexPatternSamplingInfo')).to.be(false);
@@ -188,7 +187,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('should show visualization modifiers for layer settings when embedded in a dashboard', async () => {
       await visualize.navigateToNewVisualization();
       await visualize.clickVisType('lens');
-      await lens.goToTimeRange();
       // click on open layer settings
       await lens.openLayerContextMenu();
       await testSubjects.click('lnsLayerSettings');

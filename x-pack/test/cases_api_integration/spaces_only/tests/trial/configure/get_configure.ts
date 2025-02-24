@@ -58,7 +58,7 @@ export default ({ getService }: FtrProviderContext): void => {
         },
         auth: authSpace1,
       });
-      actionsRemover.add('space1', connector.id, 'action', 'actions');
+      actionsRemover.add('space1', connector.id, 'connector', 'actions');
 
       await createConfiguration(
         supertestWithoutAuth,
@@ -113,7 +113,7 @@ export default ({ getService }: FtrProviderContext): void => {
         },
         auth: authSpace1,
       });
-      actionsRemover.add('space1', connector.id, 'action', 'actions');
+      actionsRemover.add('space1', connector.id, 'connector', 'actions');
 
       await createConfiguration(
         supertest,

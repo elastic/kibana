@@ -7,6 +7,7 @@
 
 import { defineCypressConfig } from '@kbn/cypress-config';
 import { esArchiver } from './support/es_archiver';
+import { esClient } from './support/es_client';
 
 export default defineCypressConfig({
   chromeWebSecurity: false,
@@ -31,6 +32,7 @@ export default defineCypressConfig({
     experimentalCspAllowList: ['default-src', 'script-src', 'script-src-elem'],
     setupNodeEvents(on, config) {
       esArchiver(on, config);
+      esClient(on, config);
       on('before:browser:launch', (browser, launchOptions) => {
         if (browser.name === 'chrome' && browser.isHeadless) {
           launchOptions.args.push('--window-size=1920,1200');

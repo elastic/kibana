@@ -25,7 +25,7 @@
           "ContentInsightsConfig",
           ") => void"
         ],
-        "path": "packages/content-management/content_insights/content_insights_server/src/register.ts",
+        "path": "src/platform/packages/shared/content-management/content_insights/content_insights_server/src/register.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -39,7 +39,7 @@
             "signature": [
               "ContentInsightsDependencies"
             ],
-            "path": "packages/content-management/content_insights/content_insights_server/src/register.ts",
+            "path": "src/platform/packages/shared/content-management/content_insights/content_insights_server/src/register.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -54,7 +54,7 @@
             "signature": [
               "ContentInsightsConfig"
             ],
-            "path": "packages/content-management/content_insights/content_insights_server/src/register.ts",
+            "path": "src/platform/packages/shared/content-management/content_insights/content_insights_server/src/register.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -72,7 +72,7 @@
         "tags": [],
         "label": "ContentInsightsStats",
         "description": [],
-        "path": "packages/content-management/content_insights/content_insights_server/src/register.ts",
+        "path": "src/platform/packages/shared/content-management/content_insights/content_insights_server/src/register.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -85,7 +85,7 @@
             "description": [
               "\nThe date from which the data is counted"
             ],
-            "path": "packages/content-management/content_insights/content_insights_server/src/register.ts",
+            "path": "src/platform/packages/shared/content-management/content_insights/content_insights_server/src/register.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -98,7 +98,7 @@
             "description": [
               "\nTotal count of events"
             ],
-            "path": "packages/content-management/content_insights/content_insights_server/src/register.ts",
+            "path": "src/platform/packages/shared/content-management/content_insights/content_insights_server/src/register.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -114,7 +114,7 @@
             "signature": [
               "{ date: string; count: number; }[]"
             ],
-            "path": "packages/content-management/content_insights/content_insights_server/src/register.ts",
+            "path": "src/platform/packages/shared/content-management/content_insights/content_insights_server/src/register.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -128,7 +128,7 @@
         "tags": [],
         "label": "ContentInsightsStatsResponse",
         "description": [],
-        "path": "packages/content-management/content_insights/content_insights_server/src/register.ts",
+        "path": "src/platform/packages/shared/content-management/content_insights/content_insights_server/src/register.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -148,7 +148,7 @@
                 "text": "ContentInsightsStats"
               }
             ],
-            "path": "packages/content-management/content_insights/content_insights_server/src/register.ts",
+            "path": "src/platform/packages/shared/content-management/content_insights/content_insights_server/src/register.ts",
             "deprecated": false,
             "trackAdoption": false
           }

@@ -12,18 +12,46 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
   const svlCommonNavigation = getService('svlCommonNavigation');
   const testSubjects = getService('testSubjects');
 
-  // Skipped due to change in QA environment for role management and spaces
-  // TODO: revisit once the change is rolled out to all environments
-  describe.skip('space selection', function () {
-    before(async () => {
-      await svlCommonPage.loginAsViewer();
-    });
+  describe('spaces', function () {
+    describe('selection', function () {
+      describe('as Viewer', function () {
+        before(async () => {
+          await svlCommonPage.loginAsViewer();
+        });
 
-    it('does not have the space selection menu in header', async () => {
-      await svlCommonNavigation.navigateToKibanaHome();
-      await svlCommonPage.assertProjectHeaderExists();
+        it('displays the space selection menu in header', async () => {
+          await svlCommonNavigation.navigateToKibanaHome();
+          await svlCommonPage.assertProjectHeaderExists();
 
-      await testSubjects.missingOrFail('spacesNavSelector');
+          await testSubjects.existOrFail('spacesNavSelector');
+        });
+
+        it(`does not display the manage button in the space selection menu`, async () => {
+          await svlCommonNavigation.navigateToKibanaHome();
+          await svlCommonPage.assertProjectHeaderExists();
+          await testSubjects.click('spacesNavSelector');
+          await testSubjects.missingOrFail('manageSpaces');
+        });
+      });
+
+      describe('as Admin', function () {
+        before(async () => {
+          await svlCommonPage.loginAsAdmin();
+        });
+
+        it('displays the space selection menu in header', async () => {
+          await svlCommonNavigation.navigateToKibanaHome();
+          await svlCommonPage.assertProjectHeaderExists();
+          await testSubjects.existOrFail('spacesNavSelector');
+        });
+
+        it(`displays the manage button in the space selection menu`, async () => {
+          await svlCommonNavigation.navigateToKibanaHome();
+          await svlCommonPage.assertProjectHeaderExists();
+          await testSubjects.click('spacesNavSelector');
+          await testSubjects.existOrFail('manageSpaces');
+        });
+      });
     });
   });
 }

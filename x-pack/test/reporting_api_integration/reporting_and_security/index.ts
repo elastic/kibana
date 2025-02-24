@@ -21,6 +21,7 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
 
     loadTestFile(require.resolve('./bwc_existing_indexes'));
     loadTestFile(require.resolve('./datastream'));
+    loadTestFile(require.resolve('./default_reporting_user_role'));
     loadTestFile(require.resolve('./ilm_migration_apis'));
     loadTestFile(require.resolve('./security_roles_privileges'));
     loadTestFile(require.resolve('./spaces'));

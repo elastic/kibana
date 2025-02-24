@@ -15,7 +15,6 @@ import {
   TaskManagerSetupContract,
   TaskManagerStartContract,
   ConcreteTaskInstance,
-  EphemeralTask,
 } from '@kbn/task-manager-plugin/server';
 import { DEFAULT_MAX_WORKERS } from '@kbn/task-manager-plugin/server/config';
 import { getDeleteTaskRunResult, TaskPriority } from '@kbn/task-manager-plugin/server/task';
@@ -39,8 +38,6 @@ export class SampleTaskManagerFixturePlugin
   public setup(core: CoreSetup, { taskManager }: SampleTaskManagerFixtureSetupDeps) {
     const taskTestingEvents = new EventEmitter();
     taskTestingEvents.setMaxListeners(DEFAULT_MAX_WORKERS * 2);
-
-    const tmStart = this.taskManagerStart;
 
     const defaultSampleTaskConfig = {
       timeout: '1m',
@@ -344,37 +341,6 @@ export class SampleTaskManagerFixturePlugin
         description:
           'A task that can only have two concurrent instance and tracks its execution timing.',
         ...taskWithTiming,
-      },
-      taskWhichExecutesOtherTasksEphemerally: {
-        title: 'Task Which Executes Other Tasks Ephemerally',
-        description: 'A sample task used to validate how ephemeral tasks are executed.',
-        maxAttempts: 1,
-        timeout: '60s',
-        createTaskRunner: ({ taskInstance }: { taskInstance: ConcreteTaskInstance }) => ({
-          async run() {
-            const {
-              params: { tasks = [] },
-            } = taskInstance;
-
-            const tm = await tmStart;
-            const executions = await Promise.all(
-              (tasks as EphemeralTask[]).map(async (task) => {
-                return tm
-                  .ephemeralRunNow(task)
-                  .then((result) => ({
-                    result,
-                  }))
-                  .catch((error) => ({
-                    error,
-                  }));
-              })
-            );
-
-            return {
-              state: { executions },
-            };
-          },
-        }),
       },
     });
 

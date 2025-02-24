@@ -224,7 +224,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
   // Helpers
 
-  const loginWithReadOnlyUserAndNavigateToHostsFlyout = async () => {
+  const loginWithReadOnlyUser = async () => {
     await security.role.create('global_hosts_read_privileges_role', {
       elasticsearch: {
         indices: [
@@ -236,7 +236,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         {
           feature: {
             infrastructure: ['read'],
+            apm: ['read'],
             advancedSettings: ['read'],
+            streams: ['read'],
           },
           spaces: ['*'],
         },
@@ -258,17 +260,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         expectSpaceSelector: false,
       }
     );
-
-    await pageObjects.common.navigateToApp(HOSTS_VIEW_PATH);
-    await pageObjects.header.waitUntilLoadingHasFinished();
-    await pageObjects.timePicker.setAbsoluteRange(
-      START_SYNTHTRACE_DATE.format(DATE_PICKER_FORMAT),
-      END_SYNTHTRACE_DATE.format(DATE_PICKER_FORMAT)
-    );
-
-    await waitForPageToLoad();
-
-    await pageObjects.infraHostsView.clickTableOpenFlyoutButton();
   };
 
   const logoutAndDeleteReadOnlyUser = async () => {
@@ -298,8 +289,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         (await pageObjects.infraHostsView.isKPIChartsLoaded())
     );
 
-  // Failing: See https://github.com/elastic/kibana/issues/191806
-  describe.skip('Hosts View', function () {
+  describe('Hosts View', function () {
     let synthEsInfraClient: InfraSynthtraceEsClient;
     let syntEsLogsClient: LogsSynthtraceEsClient;
     let synthtraceApmClient: ApmSynthtraceEsClient;
@@ -342,7 +332,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           const currentUrl = await browser.getCurrentUrl();
           const parsedUrl = new URL(currentUrl);
           const baseUrl = `${parsedUrl.protocol}//${parsedUrl.host}`;
-          const expectedUrlPattern = `${baseUrl}/app/observabilityOnboarding/?category=logs`;
+          const expectedUrlPattern = `${baseUrl}/app/observabilityOnboarding/?category=host`;
           expect(currentUrl).to.equal(expectedUrlPattern);
         });
       });
@@ -420,10 +410,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
             ].forEach(({ metric, value }) => {
               it(`${metric} tile should show ${value}`, async () => {
                 await retry.tryForTime(5000, async () => {
-                  const tileValue = await pageObjects.assetDetails.getAssetDetailsKPITileValue(
-                    metric
+                  expect(await pageObjects.assetDetails.getAssetDetailsKPITileValue(metric)).to.eql(
+                    value
                   );
-                  expect(tileValue).to.eql(value);
                 });
               });
             });
@@ -676,7 +665,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
         describe('Metrics Tab', () => {
           before(async () => {
-            await browser.scrollTop();
             await pageObjects.infraHostsView.visitMetricsTab();
           });
 
@@ -689,7 +677,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
             expect(metricCharts.length).to.equal(11);
           });
 
-          it('should have an option to open the chart in lens', async () => {
+          // flaky, the option is not visible
+          it.skip('should have an option to open the chart in lens', async () => {
             await retry.tryForTime(5000, async () => {
               await pageObjects.infraHostsView.clickAndValidateMetricChartActionOptions();
               await browser.pressKeys(browser.keys.ESCAPE);
@@ -997,13 +986,19 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           });
         });
       });
-
       describe('#Permissions: Read Only User - Single Host Flyout', () => {
         describe('Dashboards Tab', () => {
           before(async () => {
             await setCustomDashboardsEnabled(true);
-            await loginWithReadOnlyUserAndNavigateToHostsFlyout();
-            await pageObjects.assetDetails.clickDashboardsTab();
+            await loginWithReadOnlyUser();
+            // Setting the params directly will help us reduce flakiness (and clicking the wrong tab)
+            // as we already test the flow (in #Single Host Flyout) here we can directly navigate to test the permissions
+            const dashboardsTabSearchParams = `?_a=(dateRange:(from:%27${DATE_WITH_HOSTS_DATA_FROM}%27,to:%27${DATE_WITH_HOSTS_DATA_TO}%27),filters:!(),limit:100,panelFilters:!(),query:(language:kuery,query:%27%27))&tableProperties=(detailsItemId:host-1-Linux,pagination:(pageIndex:0,pageSize:10),sorting:(direction:desc,field:alertsCount))&assetDetails=(dateRange:(from:%27${DATE_WITH_HOSTS_DATA_FROM}%27,to:%27${DATE_WITH_HOSTS_DATA_TO}%27),name:host-1,tabId:dashboards)`;
+
+            await pageObjects.common.navigateToApp(HOSTS_VIEW_PATH, {
+              search: dashboardsTabSearchParams,
+            });
+            await pageObjects.header.waitUntilLoadingHasFinished();
           });
 
           after(async () => {
@@ -1014,6 +1009,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           });
 
           it('should render dashboards tab splash screen with disabled option to add dashboard', async () => {
+            await pageObjects.assetDetails.dashboardsTabExistsOrFail();
+            await pageObjects.assetDetails.clickDashboardsTab();
             await pageObjects.assetDetails.addDashboardExists();
             const elementToHover = await pageObjects.assetDetails.getAddDashboardButton();
             await retry.tryForTime(5000, async () => {

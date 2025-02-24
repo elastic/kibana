@@ -38,6 +38,8 @@ export default function casesWebhookTest({ getService }: FtrProviderContext) {
     headers: { ['content-type']: 'application/json', ['kbn-xsrf']: 'abcd' },
     viewIncidentUrl: 'https://coolsite.net/browse/{{{external.system.title}}}',
     getIncidentUrl: 'https://coolsite.net/rest/api/2/issue/{{{external.system.id}}}',
+    getIncidentMethod: 'get',
+    getIncidentJson: null,
     updateIncidentJson:
       '{"fields":{"summary":{{{case.title}}},"description":{{{case.description}}},"labels":{{{case.tags}}},"project":{"key":"ROC"},"issuetype":{"id":"10024"}}}',
     updateIncidentMethod: 'put',
@@ -79,7 +81,7 @@ export default function casesWebhookTest({ getService }: FtrProviderContext) {
   };
 
   let casesWebhookSimulatorURL: string = '<could not determine kibana url>';
-  let simulatorConfig: Record<string, string | boolean | Record<string, string>>;
+  let simulatorConfig: Record<string, string | boolean | null | Record<string, string>>;
   describe('CasesWebhook', () => {
     before(() => {
       // use jira because cases webhook works with any third party case management system
@@ -135,6 +137,53 @@ export default function casesWebhookTest({ getService }: FtrProviderContext) {
           config: simulatorConfig,
         });
       });
+
+      it('should return 200 when creating a casesWebhook action with get case info using POST successfully', async () => {
+        const newConfig = {
+          ...simulatorConfig,
+          getIncidentMethod: 'post',
+          getIncidentJson: '{"id": {{{external.system.id}}} }',
+          getIncidentUrl: `${casesWebhookSimulatorURL}/rest/api/2/issue`,
+        };
+
+        const { body: createdAction } = await supertest
+          .post('/api/actions/connector')
+          .set('kbn-xsrf', 'foo')
+          .send({
+            name: 'A casesWebhook action',
+            connector_type_id: '.cases-webhook',
+            config: newConfig,
+            secrets,
+          })
+          .expect(200);
+
+        expect(createdAction).to.eql({
+          id: createdAction.id,
+          is_preconfigured: false,
+          is_system_action: false,
+          is_deprecated: false,
+          name: 'A casesWebhook action',
+          connector_type_id: '.cases-webhook',
+          is_missing_secrets: false,
+          config: newConfig,
+        });
+
+        const { body: fetchedAction } = await supertest
+          .get(`/api/actions/connector/${createdAction.id}`)
+          .expect(200);
+
+        expect(fetchedAction).to.eql({
+          id: fetchedAction.id,
+          is_preconfigured: false,
+          is_system_action: false,
+          is_deprecated: false,
+          name: 'A casesWebhook action',
+          connector_type_id: '.cases-webhook',
+          is_missing_secrets: false,
+          config: newConfig,
+        });
+      });
+
       describe('400s for all required fields when missing', () => {
         requiredFields.forEach((field) => {
           it(`should respond with a 400 Bad Request when creating a casesWebhook action with no ${field}`, async () => {
@@ -246,12 +295,12 @@ export default function casesWebhookTest({ getService }: FtrProviderContext) {
               params: {},
             })
             .then((resp: any) => {
-              expect(Object.keys(resp.body)).to.eql([
-                'status',
+              expect(Object.keys(resp.body).sort()).to.eql([
+                'connector_id',
+                'errorSource',
                 'message',
                 'retry',
-                'errorSource',
-                'connector_id',
+                'status',
               ]);
               expect(resp.body.connector_id).to.eql(simulatedActionId);
               expect(resp.body.status).to.eql('error');
@@ -272,7 +321,7 @@ export default function casesWebhookTest({ getService }: FtrProviderContext) {
                 retry: false,
                 message:
                   'error validating action params: [subAction]: expected value to equal [pushToService]',
-                errorSource: TaskErrorSource.FRAMEWORK,
+                errorSource: TaskErrorSource.USER,
               });
             });
         });
@@ -291,7 +340,7 @@ export default function casesWebhookTest({ getService }: FtrProviderContext) {
                 retry: false,
                 message:
                   'error validating action params: [subActionParams.incident.title]: expected value of type [string] but got [undefined]',
-                errorSource: TaskErrorSource.FRAMEWORK,
+                errorSource: TaskErrorSource.USER,
               });
             });
         });
@@ -318,7 +367,7 @@ export default function casesWebhookTest({ getService }: FtrProviderContext) {
                 retry: false,
                 message:
                   'error validating action params: [subActionParams.incident.title]: expected value of type [string] but got [undefined]',
-                errorSource: TaskErrorSource.FRAMEWORK,
+                errorSource: TaskErrorSource.USER,
               });
             });
         });
@@ -347,7 +396,7 @@ export default function casesWebhookTest({ getService }: FtrProviderContext) {
                 retry: false,
                 message:
                   'error validating action params: [subActionParams.comments]: types that failed validation:\n- [subActionParams.comments.0.0.commentId]: expected value of type [string] but got [undefined]\n- [subActionParams.comments.1]: expected value to equal [null]',
-                errorSource: TaskErrorSource.FRAMEWORK,
+                errorSource: TaskErrorSource.USER,
               });
             });
         });
@@ -375,7 +424,7 @@ export default function casesWebhookTest({ getService }: FtrProviderContext) {
                 retry: false,
                 message:
                   'error validating action params: [subActionParams.comments]: types that failed validation:\n- [subActionParams.comments.0.0.comment]: expected value of type [string] but got [undefined]\n- [subActionParams.comments.1]: expected value to equal [null]',
-                errorSource: TaskErrorSource.FRAMEWORK,
+                errorSource: TaskErrorSource.USER,
               });
             });
         });
@@ -529,6 +578,53 @@ export default function casesWebhookTest({ getService }: FtrProviderContext) {
             });
           expect(proxyHaveBeenCalled).to.equal(false);
         });
+
+        it('should respond with bad JSON error when get case POST JSON is bad', async () => {
+          const { body } = await supertest
+            .post('/api/actions/connector')
+            .set('kbn-xsrf', 'foo')
+            .send({
+              name: 'A casesWebhook simulator',
+              connector_type_id: '.cases-webhook',
+              config: {
+                ...simulatorConfig,
+                getIncidentJson: '{"id": "{{{external.system.id}}}" }',
+                getIncidentUrl: `${casesWebhookSimulatorURL}/rest/api/2/issue`,
+                getIncidentMethod: 'post',
+              },
+              secrets,
+            });
+
+          simulatedActionId = body.id;
+
+          await supertest
+            .post(`/api/actions/connector/${simulatedActionId}/_execute`)
+            .set('kbn-xsrf', 'foo')
+            .send({
+              params: {
+                ...mockCasesWebhook.params,
+                subActionParams: {
+                  incident: {
+                    title: 'success',
+                    description: 'success',
+                  },
+                  comments: [],
+                },
+              },
+            })
+            .then((resp: any) => {
+              expect(resp.body).to.eql({
+                connector_id: simulatedActionId,
+                status: 'error',
+                retry: true,
+                message: 'an error occurred while running the action',
+                errorSource: TaskErrorSource.FRAMEWORK,
+                service_message:
+                  '[Action][Webhook - Case Management]: Unable to create case. Error: [Action][Webhook - Case Management]: Unable to get case with id 123. Error: JSON Error: Get case JSON body must be valid JSON.  .  ',
+              });
+            });
+        });
+
         after(() => {
           if (proxyServer) {
             proxyServer.close();

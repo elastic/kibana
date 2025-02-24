@@ -22,7 +22,7 @@ import {
   getConfigurationRequest,
   updateConfiguration,
 } from '../../../../common/lib/api';
-import { getCaseUserActions } from '../../../../common/lib/api/user_actions';
+import { findCaseUserActions } from '../../../../common/lib/api/user_actions';
 import { getPostCaseRequest, postCommentUserReq } from '../../../../common/lib/mock';
 
 // eslint-disable-next-line import/no-default-export
@@ -57,7 +57,7 @@ export default function ({ getService }: FtrProviderContext) {
               headers
             );
 
-            const userActions = await getCaseUserActions({
+            const { userActions } = await findCaseUserActions({
               supertest: supertestWithoutAuth,
               caseID: caseInfo.id,
             });
@@ -72,7 +72,7 @@ export default function ({ getService }: FtrProviderContext) {
               space: null,
             });
 
-            const userActions = await getCaseUserActions({
+            const { userActions } = await findCaseUserActions({
               supertest: supertestWithoutAuth,
               caseID: caseInfo.id,
             });

@@ -7,12 +7,15 @@
 
 import { FtrProviderContext } from '../../ftr_provider_context';
 
-export default function ({ getPageObjects }: FtrProviderContext) {
+export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const pageObjects = getPageObjects(['svlCommonPage', 'embeddedConsole']);
+  const svlSearchNavigation = getService('svlSearchNavigation');
 
   describe('Console Notebooks', function () {
     before(async () => {
       await pageObjects.svlCommonPage.loginAsViewer();
+
+      await svlSearchNavigation.navigateToGettingStartedPage();
     });
 
     it('has notebooks view available', async () => {

@@ -7,22 +7,27 @@
 
 import expect from '@kbn/expect';
 import type { FtrProviderContext } from '../../../ftr_provider_context';
+import { testSubjectIds } from '../../../constants/test_subject_ids';
 
-const CIS_GCP_OPTION_TEST_ID = 'cisGcpTestId';
-const GCP_ORGANIZATION_TEST_ID = 'gcpOrganizationAccountTestId';
-const GCP_SINGLE_ACCOUNT_TEST_ID = 'gcpSingleAccountTestId';
-const GCP_CLOUD_SHELL_TEST_ID = 'gcpGoogleCloudShellOptionTestId';
-const GCP_MANUAL_TEST_ID = 'gcpManualOptionTestId';
-const PRJ_ID_TEST_ID = 'project_id_test_id';
-const ORG_ID_TEST_ID = 'organization_id_test_id';
-const CREDENTIALS_TYPE_TEST_ID = 'credentials_type_test_id';
-const CREDENTIALS_FILE_TEST_ID = 'credentials_file_test_id';
-const CREDENTIALS_JSON_TEST_ID = 'textAreaInput-credentials-json';
+const {
+  CIS_GCP_OPTION_TEST_ID,
+  GCP_ORGANIZATION_TEST_ID,
+  GCP_SINGLE_ACCOUNT_TEST_ID,
+  GCP_CLOUD_SHELL_TEST_ID,
+  GCP_MANUAL_TEST_ID,
+  PRJ_ID_TEST_ID,
+  ORG_ID_TEST_ID,
+  CREDENTIALS_TYPE_TEST_ID,
+  CREDENTIALS_FILE_TEST_ID,
+  CREDENTIALS_JSON_TEST_ID,
+} = testSubjectIds;
 
 // eslint-disable-next-line import/no-default-export
 export default function (providerContext: FtrProviderContext) {
-  const { getPageObjects } = providerContext;
+  const { getPageObjects, getService } = providerContext;
   const pageObjects = getPageObjects(['cloudPostureDashboard', 'cisAddIntegration', 'header']);
+  const retry = getService('retry');
+  const saveIntegrationPolicyTimeout = 1000 * 30; // 30 seconds
 
   describe('Test adding Cloud Security Posture Integrations CSPM GCP', function () {
     this.tags(['cloud_security_posture_cis_integration_cspm_gcp']);
@@ -37,7 +42,7 @@ export default function (providerContext: FtrProviderContext) {
     });
 
     // FLAKY: https://github.com/elastic/kibana/issues/191027
-    describe.skip('CIS_GCP Organization', () => {
+    describe('CIS_GCP Organization', () => {
       it('Switch between Manual and Google cloud shell', async () => {
         await cisIntegration.clickOptionButton(CIS_GCP_OPTION_TEST_ID);
         await cisIntegration.clickOptionButton(GCP_ORGANIZATION_TEST_ID);
@@ -62,11 +67,15 @@ export default function (providerContext: FtrProviderContext) {
         await cisIntegration.clickOptionButton(CIS_GCP_OPTION_TEST_ID);
         await cisIntegration.clickOptionButton(GCP_ORGANIZATION_TEST_ID);
         await cisIntegration.clickOptionButton(GCP_CLOUD_SHELL_TEST_ID);
+        await cisIntegration.inputUniqueIntegrationName();
         await cisIntegration.clickSaveButton();
-        await pageObjects.header.waitUntilLoadingHasFinished();
-        expect((await cisIntegrationGcp.isPostInstallGoogleCloudShellModal(true)) === true).to.be(
-          true
-        );
+
+        await retry.tryForTime(saveIntegrationPolicyTimeout, async () => {
+          await pageObjects.header.waitUntilLoadingHasFinished();
+          expect((await cisIntegrationGcp.isPostInstallGoogleCloudShellModal(true)) === true).to.be(
+            true
+          );
+        });
       });
 
       it('Post Installation Google Cloud Shell modal pops up after user clicks on Save button when adding integration, when there are Project ID or Organization ID provided, it should use that value', async () => {
@@ -77,16 +86,19 @@ export default function (providerContext: FtrProviderContext) {
         await cisIntegration.clickOptionButton(GCP_CLOUD_SHELL_TEST_ID);
         await cisIntegration.fillInTextField('project_id_test_id', projectName);
         await cisIntegration.fillInTextField('organization_id_test_id', organizationName);
-
+        await cisIntegration.inputUniqueIntegrationName();
         await cisIntegration.clickSaveButton();
-        await pageObjects.header.waitUntilLoadingHasFinished();
-        expect(
-          (await cisIntegrationGcp.isPostInstallGoogleCloudShellModal(
-            true,
-            organizationName,
-            projectName
-          )) === true
-        ).to.be(true);
+
+        await retry.tryForTime(saveIntegrationPolicyTimeout, async () => {
+          await pageObjects.header.waitUntilLoadingHasFinished();
+          expect(
+            (await cisIntegrationGcp.isPostInstallGoogleCloudShellModal(
+              true,
+              organizationName,
+              projectName
+            )) === true
+          ).to.be(true);
+        });
       });
 
       it('Add Agent FLyout - Post Installation Google Cloud Shell modal pops up after user clicks on Save button when adding integration, when there are Project ID or Organization ID provided, it should use that value', async () => {
@@ -100,40 +112,51 @@ export default function (providerContext: FtrProviderContext) {
         await cisIntegration.clickOptionButton(CIS_GCP_OPTION_TEST_ID);
         await cisIntegration.clickOptionButton(GCP_SINGLE_ACCOUNT_TEST_ID);
         await cisIntegration.clickOptionButton(GCP_CLOUD_SHELL_TEST_ID);
-
+        await cisIntegration.inputUniqueIntegrationName();
         await cisIntegration.clickSaveButton();
-        await pageObjects.header.waitUntilLoadingHasFinished();
-        expect((await cisIntegrationGcp.isPostInstallGoogleCloudShellModal(false)) === true).to.be(
-          true
-        );
+
+        await retry.tryForTime(saveIntegrationPolicyTimeout, async () => {
+          await pageObjects.header.waitUntilLoadingHasFinished();
+          expect(
+            (await cisIntegrationGcp.isPostInstallGoogleCloudShellModal(false)) === true
+          ).to.be(true);
+        });
       });
 
       it('Hyperlink on PostInstallation Modal should have the correct URL', async () => {
         await cisIntegration.clickOptionButton(CIS_GCP_OPTION_TEST_ID);
+        await cisIntegration.inputUniqueIntegrationName();
+
         await cisIntegration.clickSaveButton();
-        await pageObjects.header.waitUntilLoadingHasFinished();
-        expect(
-          (await cisIntegration.getUrlOnPostInstallModal()) ===
-            'https://cloud.google.com/shell/docs'
-        );
+        await retry.tryForTime(saveIntegrationPolicyTimeout, async () => {
+          await pageObjects.header.waitUntilLoadingHasFinished();
+          expect(
+            (await cisIntegration.getUrlOnPostInstallModal()) ===
+              'https://cloud.google.com/shell/docs'
+          );
+        });
       });
 
       it('Clicking on Launch CloudShell on post intall modal should lead user to CloudShell page', async () => {
         await cisIntegration.clickOptionButton(CIS_GCP_OPTION_TEST_ID);
+        await cisIntegration.inputUniqueIntegrationName();
+
         await cisIntegration.clickSaveButton();
-        await pageObjects.header.waitUntilLoadingHasFinished();
-        expect(
-          (
-            await cisIntegration.clickLaunchAndGetCurrentUrl(
-              'confirmGoogleCloudShellModalConfirmButton'
-            )
-          ).includes('shell.cloud.google.com%2Fcloudshell')
-        ).to.be(true);
+        await retry.tryForTime(saveIntegrationPolicyTimeout, async () => {
+          await pageObjects.header.waitUntilLoadingHasFinished();
+          expect(
+            (
+              await cisIntegration.clickLaunchAndGetCurrentUrl(
+                'confirmGoogleCloudShellModalConfirmButton'
+              )
+            ).includes('shell.cloud.google.com%2Fcloudshell')
+          ).to.be(true);
+        });
       });
     });
 
     // FLAKY: https://github.com/elastic/kibana/issues/190779
-    describe.skip('CIS_GCP Organization Credentials File', () => {
+    describe('CIS_GCP Organization Credentials File', () => {
       it('CIS_GCP Organization Credentials File workflow', async () => {
         const projectName = 'PRJ_NAME_TEST';
         const credentialFileName = 'CRED_FILE_TEST_NAME';
@@ -142,14 +165,18 @@ export default function (providerContext: FtrProviderContext) {
         await cisIntegration.clickOptionButton(GCP_MANUAL_TEST_ID);
         await cisIntegration.fillInTextField(PRJ_ID_TEST_ID, projectName);
         await cisIntegration.fillInTextField(CREDENTIALS_FILE_TEST_ID, credentialFileName);
+        await cisIntegration.inputUniqueIntegrationName();
+
         await cisIntegration.clickSaveButton();
-        await pageObjects.header.waitUntilLoadingHasFinished();
-        expect((await cisIntegration.getPostInstallModal()) !== undefined).to.be(true);
-        await cisIntegration.navigateToIntegrationCspList();
-        expect(
-          (await cisIntegration.getFieldValueInEditPage(CREDENTIALS_FILE_TEST_ID)) ===
-            credentialFileName
-        ).to.be(true);
+        await retry.tryForTime(saveIntegrationPolicyTimeout, async () => {
+          await pageObjects.header.waitUntilLoadingHasFinished();
+          expect((await cisIntegration.getPostInstallModal()) !== undefined).to.be(true);
+          await cisIntegration.navigateToIntegrationCspList();
+          expect(
+            (await cisIntegration.getFieldValueInEditPage(CREDENTIALS_FILE_TEST_ID)) ===
+              credentialFileName
+          ).to.be(true);
+        });
       });
     });
 
@@ -166,30 +193,38 @@ export default function (providerContext: FtrProviderContext) {
           'credentials_json_option_test_id'
         );
         await cisIntegration.fillInTextField(CREDENTIALS_JSON_TEST_ID, credentialJsonName);
+        await cisIntegration.inputUniqueIntegrationName();
         await cisIntegration.clickSaveButton();
-        await pageObjects.header.waitUntilLoadingHasFinished();
-        expect((await cisIntegration.getPostInstallModal()) !== undefined).to.be(true);
-        await cisIntegration.navigateToIntegrationCspList();
-        await cisIntegration.clickFirstElementOnIntegrationTable();
-        expect(
-          (await cisIntegration.getSecretComponentReplaceButton(
-            'button-replace-credentials-json'
-          )) !== undefined
-        ).to.be(true);
+
+        await retry.tryForTime(saveIntegrationPolicyTimeout, async () => {
+          await pageObjects.header.waitUntilLoadingHasFinished();
+          expect((await cisIntegration.getPostInstallModal()) !== undefined).to.be(true);
+          await cisIntegration.navigateToIntegrationCspList();
+          await cisIntegration.clickFirstElementOnIntegrationTable();
+          expect(
+            (await cisIntegration.getSecretComponentReplaceButton(
+              'button-replace-credentials-json'
+            )) !== undefined
+          ).to.be(true);
+        });
       });
     });
 
     // FLAKY: https://github.com/elastic/kibana/issues/191144
-    describe.skip('CIS_GCP Single', () => {
+    describe('CIS_GCP Single', () => {
       it('Post Installation Google Cloud Shell modal pops up after user clicks on Save button when adding integration, when there are no Project ID, it should use default value', async () => {
         await cisIntegration.clickOptionButton(CIS_GCP_OPTION_TEST_ID);
         await cisIntegration.clickOptionButton(GCP_SINGLE_ACCOUNT_TEST_ID);
         await cisIntegration.clickOptionButton(GCP_CLOUD_SHELL_TEST_ID);
+        await cisIntegration.inputUniqueIntegrationName();
         await cisIntegration.clickSaveButton();
-        await pageObjects.header.waitUntilLoadingHasFinished();
-        expect((await cisIntegrationGcp.isPostInstallGoogleCloudShellModal(false)) === true).to.be(
-          true
-        );
+
+        await retry.tryForTime(saveIntegrationPolicyTimeout, async () => {
+          await pageObjects.header.waitUntilLoadingHasFinished();
+          expect(
+            (await cisIntegrationGcp.isPostInstallGoogleCloudShellModal(false)) === true
+          ).to.be(true);
+        });
       });
       it('Post Installation Google Cloud Shell modal pops up after user clicks on Save button when adding integration, when there are Project ID, it should use that value', async () => {
         const projectName = 'PRJ_NAME_TEST';
@@ -197,12 +232,16 @@ export default function (providerContext: FtrProviderContext) {
         await cisIntegration.clickOptionButton(GCP_SINGLE_ACCOUNT_TEST_ID);
         await cisIntegration.clickOptionButton(GCP_CLOUD_SHELL_TEST_ID);
         await cisIntegration.fillInTextField('project_id_test_id', projectName);
+        await cisIntegration.inputUniqueIntegrationName();
         await cisIntegration.clickSaveButton();
-        await pageObjects.header.waitUntilLoadingHasFinished();
-        expect(
-          (await cisIntegrationGcp.isPostInstallGoogleCloudShellModal(false, '', projectName)) ===
-            true
-        ).to.be(true);
+
+        await retry.tryForTime(saveIntegrationPolicyTimeout, async () => {
+          await pageObjects.header.waitUntilLoadingHasFinished();
+          expect(
+            (await cisIntegrationGcp.isPostInstallGoogleCloudShellModal(false, '', projectName)) ===
+              true
+          ).to.be(true);
+        });
       });
       it('Add Agent FLyout - Organization ID field on cloud shell command should only be shown if user chose Google Cloud Shell, if user chose Single Account it shouldn not show up', async () => {
         await cisIntegration.navigateToIntegrationCspList();
@@ -232,14 +271,19 @@ export default function (providerContext: FtrProviderContext) {
         await cisIntegration.clickOptionButton(GCP_MANUAL_TEST_ID);
         await cisIntegration.fillInTextField(PRJ_ID_TEST_ID, projectName);
         await cisIntegration.fillInTextField(CREDENTIALS_FILE_TEST_ID, credentialFileName);
+        await cisIntegration.inputUniqueIntegrationName();
+
         await cisIntegration.clickSaveButton();
-        await pageObjects.header.waitUntilLoadingHasFinished();
-        expect((await cisIntegration.getPostInstallModal()) !== undefined).to.be(true);
-        await cisIntegration.navigateToIntegrationCspList();
-        expect(
-          (await cisIntegration.getFieldValueInEditPage(CREDENTIALS_FILE_TEST_ID)) ===
-            credentialFileName
-        ).to.be(true);
+
+        await retry.tryForTime(saveIntegrationPolicyTimeout, async () => {
+          await pageObjects.header.waitUntilLoadingHasFinished();
+          expect((await cisIntegration.getPostInstallModal()) !== undefined).to.be(true);
+          await cisIntegration.navigateToIntegrationCspList();
+          expect(
+            (await cisIntegration.getFieldValueInEditPage(CREDENTIALS_FILE_TEST_ID)) ===
+              credentialFileName
+          ).to.be(true);
+        });
       });
       it('Users are able to switch credentials_type from/to Credential JSON fields ', async () => {
         const credentialJsonName = 'CRED_JSON_TEST_NAME';
@@ -271,16 +315,20 @@ export default function (providerContext: FtrProviderContext) {
           'credentials_json_option_test_id'
         );
         await cisIntegration.fillInTextField(CREDENTIALS_JSON_TEST_ID, credentialJsonName);
+        await cisIntegration.inputUniqueIntegrationName();
+
         await cisIntegration.clickSaveButton();
-        await pageObjects.header.waitUntilLoadingHasFinished();
-        expect((await cisIntegration.getPostInstallModal()) !== undefined).to.be(true);
-        await cisIntegration.navigateToIntegrationCspList();
-        await cisIntegration.clickFirstElementOnIntegrationTable();
-        expect(
-          (await cisIntegration.getSecretComponentReplaceButton(
-            'button-replace-credentials-json'
-          )) !== undefined
-        ).to.be(true);
+        await retry.tryForTime(saveIntegrationPolicyTimeout, async () => {
+          await pageObjects.header.waitUntilLoadingHasFinished();
+          expect((await cisIntegration.getPostInstallModal()) !== undefined).to.be(true);
+          await cisIntegration.navigateToIntegrationCspList();
+          await cisIntegration.clickFirstElementOnIntegrationTable();
+          expect(
+            (await cisIntegration.getSecretComponentReplaceButton(
+              'button-replace-credentials-json'
+            )) !== undefined
+          ).to.be(true);
+        });
       });
       it('Users are able to switch credentials_type from/to Credential File fields ', async () => {
         const credentialFileName = 'CRED_FILE_TEST_NAME';

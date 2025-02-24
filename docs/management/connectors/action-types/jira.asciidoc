@@ -14,7 +14,7 @@ The Jira connector uses the https://developer.atlassian.com/cloud/jira/platform/
 [[jira-compatibility]]
 === Compatibility
 
-Jira on-premise deployments (Server and Data Center) are not supported.
+Jira Cloud and Jira Data Center are supported. Jira on-premise deployments are not supported.
 
 [float]
 [[define-jira-ui]]
@@ -37,7 +37,7 @@ Name::      The name of the connector.
 URL::       Jira instance URL.
 Project key:: Jira project key.
 Email::  The account email for HTTP Basic authentication.
-API token::  Jira API authentication token for HTTP Basic authentication.
+API token::  Jira API authentication token for HTTP Basic authentication. For Jira Data Center, this value should be the password associated with the email owner.
 
 [float]
 [[jira-action-configuration]]

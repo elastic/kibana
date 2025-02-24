@@ -15,6 +15,7 @@ import {
   DISCOVER_DATA_VIEW_EDITOR_FLYOUT,
   DISCOVER_FIELD_LIST_LOADING,
   DISCOVER_ESQL_EDITABLE_INPUT,
+  AVAILABLE_FIELD_COUNT,
 } from '../screens/discover';
 import { GET_LOCAL_SEARCH_BAR_SUBMIT_BUTTON } from '../screens/search_bar';
 import { goToEsqlTab } from './timeline';
@@ -40,6 +41,14 @@ export const waitForDiscoverGridToLoad = () => {
   cy.get(DISCOVER_DATA_GRID_UPDATING).should('be.visible');
   cy.get(DISCOVER_DATA_GRID_UPDATING).should('not.exist');
   cy.get(DISCOVER_FIELD_LIST_LOADING).should('be.visible');
+  cy.get(DISCOVER_FIELD_LIST_LOADING).should('not.exist');
+};
+
+export const waitForDiscoverFieldsToLoad = () => {
+  cy.get(AVAILABLE_FIELD_COUNT).should('be.visible');
+};
+
+export const assertFieldsAreLoaded = () => {
   cy.get(DISCOVER_FIELD_LIST_LOADING).should('not.exist');
 };
 
@@ -94,11 +103,11 @@ export const openAddDiscoverFilterPopover = () => {
 };
 
 export const searchForField = (fieldId: string) => {
-  cy.get(DISCOVER_FIELD_SEARCH).type(fieldId);
+  cy.get(DISCOVER_FIELD_SEARCH).should('be.visible').type(fieldId);
 };
 
 export const clearFieldSearch = () => {
-  cy.get(DISCOVER_FIELD_SEARCH).clear();
+  cy.get(DISCOVER_FIELD_SEARCH).first().clear();
 };
 
 export const addFieldToTable = (fieldId: string) => {

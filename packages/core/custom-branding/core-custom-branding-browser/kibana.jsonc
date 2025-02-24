@@ -1,5 +1,0 @@
-{
-  "type": "shared-browser",
-  "id": "@kbn/core-custom-branding-browser",
-  "owner": "@elastic/appex-sharedux",
-}

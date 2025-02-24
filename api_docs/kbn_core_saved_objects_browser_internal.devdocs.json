@@ -12,48 +12,40 @@
         "label": "SavedObjectsService",
         "description": [],
         "signature": [
-          {
-            "pluginId": "@kbn/core-saved-objects-browser-internal",
-            "scope": "public",
-            "docId": "kibKbnCoreSavedObjectsBrowserInternalPluginApi",
-            "section": "def-public.SavedObjectsService",
-            "text": "SavedObjectsService"
-          },
+          "SavedObjectsService",
           " implements ",
           "CoreService",
           "<void, ",
-          {
-            "pluginId": "@kbn/core-saved-objects-browser",
-            "scope": "public",
-            "docId": "kibKbnCoreSavedObjectsBrowserPluginApi",
-            "section": "def-public.SavedObjectsStart",
-            "text": "SavedObjectsStart"
-          },
+          "SavedObjectsStart",
           ">"
         ],
-        "path": "packages/core/saved-objects/core-saved-objects-browser-internal/src/saved_objects_service.ts",
+        "path": "src/core/packages/saved-objects/browser-internal/src/saved_objects_service.ts",
         "deprecated": true,
         "trackAdoption": false,
         "references": [
           {
-            "plugin": "@kbn/core-root-browser-internal",
-            "path": "packages/core/root/core-root-browser-internal/src/core_system.ts"
+            "plugin": "@kbn/core",
+            "path": "src/core/packages/saved-objects/browser-internal/index.ts"
           },
           {
-            "plugin": "@kbn/core-root-browser-internal",
-            "path": "packages/core/root/core-root-browser-internal/src/core_system.ts"
+            "plugin": "@kbn/core",
+            "path": "src/core/packages/root/browser-internal/src/core_system.ts"
           },
           {
-            "plugin": "@kbn/core-root-browser-internal",
-            "path": "packages/core/root/core-root-browser-internal/src/core_system.ts"
+            "plugin": "@kbn/core",
+            "path": "src/core/packages/root/browser-internal/src/core_system.ts"
           },
           {
-            "plugin": "@kbn/core-saved-objects-browser-mocks",
-            "path": "packages/core/saved-objects/core-saved-objects-browser-mocks/src/saved_objects_service.mock.ts"
+            "plugin": "@kbn/core",
+            "path": "src/core/packages/root/browser-internal/src/core_system.ts"
           },
           {
-            "plugin": "@kbn/core-saved-objects-browser-mocks",
-            "path": "packages/core/saved-objects/core-saved-objects-browser-mocks/src/saved_objects_service.mock.ts"
+            "plugin": "@kbn/core",
+            "path": "src/core/packages/saved-objects/browser-mocks/src/saved_objects_service.mock.ts"
+          },
+          {
+            "plugin": "@kbn/core",
+            "path": "src/core/packages/saved-objects/browser-mocks/src/saved_objects_service.mock.ts"
           }
         ],
         "children": [
@@ -67,7 +59,7 @@
             "signature": [
               "() => Promise<void>"
             ],
-            "path": "packages/core/saved-objects/core-saved-objects-browser-internal/src/saved_objects_service.ts",
+            "path": "src/core/packages/saved-objects/browser-internal/src/saved_objects_service.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -82,24 +74,12 @@
             "description": [],
             "signature": [
               "({ http }: { http: ",
-              {
-                "pluginId": "@kbn/core-http-browser-internal",
-                "scope": "public",
-                "docId": "kibKbnCoreHttpBrowserInternalPluginApi",
-                "section": "def-public.InternalHttpStart",
-                "text": "InternalHttpStart"
-              },
+              "InternalHttpStart",
               "; }) => Promise<",
-              {
-                "pluginId": "@kbn/core-saved-objects-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreSavedObjectsBrowserPluginApi",
-                "section": "def-public.SavedObjectsStart",
-                "text": "SavedObjectsStart"
-              },
+              "SavedObjectsStart",
               ">"
             ],
-            "path": "packages/core/saved-objects/core-saved-objects-browser-internal/src/saved_objects_service.ts",
+            "path": "src/core/packages/saved-objects/browser-internal/src/saved_objects_service.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -110,7 +90,7 @@
                 "tags": [],
                 "label": "{ http }",
                 "description": [],
-                "path": "packages/core/saved-objects/core-saved-objects-browser-internal/src/saved_objects_service.ts",
+                "path": "src/core/packages/saved-objects/browser-internal/src/saved_objects_service.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "children": [
@@ -123,18 +103,12 @@
                     "description": [],
                     "signature": [
                       "Omit<",
-                      {
-                        "pluginId": "@kbn/core-http-browser",
-                        "scope": "public",
-                        "docId": "kibKbnCoreHttpBrowserPluginApi",
-                        "section": "def-public.HttpSetup",
-                        "text": "HttpSetup"
-                      },
+                      "HttpSetup",
                       ", \"staticAssets\"> & { staticAssets: ",
                       "InternalStaticAssets",
                       "; }"
                     ],
-                    "path": "packages/core/saved-objects/core-saved-objects-browser-internal/src/saved_objects_service.ts",
+                    "path": "src/core/packages/saved-objects/browser-internal/src/saved_objects_service.ts",
                     "deprecated": false,
                     "trackAdoption": false
                   }
@@ -153,7 +127,7 @@
             "signature": [
               "() => Promise<void>"
             ],
-            "path": "packages/core/saved-objects/core-saved-objects-browser-internal/src/saved_objects_service.ts",
+            "path": "src/core/packages/saved-objects/browser-internal/src/saved_objects_service.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],

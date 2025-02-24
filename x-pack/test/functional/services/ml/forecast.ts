@@ -102,6 +102,11 @@ export function MachineLearningForecastProvider({ getPageObject, getService }: F
       });
     },
 
+    async assertForecastNeverExpireSwitchExists() {
+      await testSubjects.existOrFail('mlModalForecastNeverExpireSwitch');
+      expect(await testSubjects.isChecked('mlModalForecastNeverExpireSwitch')).to.be(false);
+    },
+
     async assertForecastModalRunButtonEnabled(expectedValue: boolean) {
       await headerPage.waitUntilLoadingHasFinished();
       const isEnabled = await testSubjects.isEnabled('mlModalForecast > mlModalForecastButtonRun');

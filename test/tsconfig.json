@@ -13,7 +13,7 @@
   "include": [
     "**/*",
     "../typings/**/*",
-    "../packages/kbn-test/types/ftr_globals/**/*",
+    "../src/platform/packages/shared/kbn-test/types/ftr_globals/**/*",
     "api_integration/apis/logstash/pipeline/fixtures/*.json",
     "api_integration/apis/logstash/pipelines/fixtures/*.json",
     "api_integration/apis/telemetry/fixtures/*.json",
@@ -23,7 +23,6 @@
   "kbn_references": [
     "@kbn/core",
     { "path": "../src/setup_node_env/tsconfig.json" },
-    "@kbn/bfetch-plugin",
     "@kbn/dashboard-plugin",
     "@kbn/expressions-plugin",
     "@kbn/saved-objects-management-plugin",
@@ -68,7 +67,6 @@
     "@kbn/event-annotation-common",
     "@kbn/links-plugin",
     "@kbn/ftr-common-functional-ui-services",
-    "@kbn/monaco",
     "@kbn/console-plugin",
     "@kbn/core-chrome-browser",
     "@kbn/default-nav-ml",
@@ -76,6 +74,8 @@
     "@kbn/default-nav-management",
     "@kbn/default-nav-devtools",
     "@kbn/core-saved-objects-import-export-server-internal",
-    "@kbn/management-settings-ids",
+    "@kbn/core-deprecations-common",
+    "@kbn/data-grid-in-table-search",
+    "@kbn/scout-info",
   ]
 }

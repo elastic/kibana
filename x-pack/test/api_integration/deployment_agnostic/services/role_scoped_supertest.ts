@@ -83,7 +83,7 @@ export class SupertestWithRoleScope {
     return agent;
   }
 
-  private request(method: 'post' | 'get' | 'put' | 'delete', url: string): Test {
+  private request(method: 'post' | 'get' | 'put' | 'delete' | 'patch', url: string): Test {
     if (!this.authValue) {
       throw new Error('Instance has been destroyed and cannot be used for making requests.');
     }
@@ -105,6 +105,10 @@ export class SupertestWithRoleScope {
 
   delete(url: string) {
     return this.request('delete', url);
+  }
+
+  patch(url: string) {
+    return this.request('patch', url);
   }
 }
 

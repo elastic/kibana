@@ -39,7 +39,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         describe('follower index form', () => {
           before(async () => {
             await PageObjects.common.navigateToApp('remoteClusters');
-            await PageObjects.remoteClusters.createNewRemoteCluster(remoteName, 'localhost:9300');
+            await PageObjects.remoteClusters.createNewRemoteCluster(
+              remoteName,
+              'localhost:9300',
+              false
+            );
             await es.indices.create({ index: testIndex });
             await es.indices.create({ index: testLeader });
           });

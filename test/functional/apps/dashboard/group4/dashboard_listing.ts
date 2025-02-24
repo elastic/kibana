@@ -17,6 +17,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const listingTable = getService('listingTable');
   const dashboardAddPanel = getService('dashboardAddPanel');
   const testSubjects = getService('testSubjects');
+  const retry = getService('retry');
+  const kibanaServer = getService('kibanaServer');
 
   describe('dashboard listing page', function describeIndexTests() {
     const dashboardName = 'Dashboard Listing Test';
@@ -27,6 +29,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     describe('create prompt', () => {
       it('appears when there are no dashboards', async function () {
+        await kibanaServer.savedObjects.clean({ types: ['dashboard'] });
+        await dashboard.navigateToApp();
         const promptExists = await dashboard.getCreateDashboardPromptExists();
         expect(promptExists).to.be(true);
       });
@@ -271,8 +275,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await listingTable.clickItemLink('dashboard', DASHBOARD_NAME);
         await dashboard.waitForRenderComplete();
         await dashboard.gotoDashboardLandingPage();
-        const views2 = await getViewsCount();
-        expect(views2).to.be(2);
+
+        // it might take a bit for the view to be counted
+        await retry.try(async () => {
+          const views2 = await getViewsCount();
+          expect(views2).to.be(2);
+        });
       });
     });
   });

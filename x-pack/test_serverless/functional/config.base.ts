@@ -6,20 +6,24 @@
  */
 
 import { FtrConfigProviderContext } from '@kbn/test';
+import { ScoutTestRunConfigCategory } from '@kbn/scout-info';
 import { resolve } from 'path';
 import { pageObjects } from './page_objects';
 import { services } from './services';
 import type { CreateTestConfigOptions } from '../shared/types';
 
-export function createTestConfig(options: CreateTestConfigOptions) {
+export function createTestConfig<TServices extends {} = typeof services>(
+  options: CreateTestConfigOptions<TServices>
+) {
   return async ({ readConfigFile }: FtrConfigProviderContext) => {
     const svlSharedConfig = await readConfigFile(require.resolve('../shared/config.base.ts'));
 
     return {
       ...svlSharedConfig.getAll(),
 
+      testConfigCategory: ScoutTestRunConfigCategory.UI_TEST,
       pageObjects,
-      services,
+      services: { ...services, ...options.services },
       esTestCluster: {
         ...svlSharedConfig.get('esTestCluster'),
         serverArgs: [
@@ -41,10 +45,6 @@ export function createTestConfig(options: CreateTestConfigOptions) {
           `--xpack.trigger_actions_ui.enableExperimental=${JSON.stringify([
             'isUsingRuleCreateFlyout',
           ])}`,
-          // custom native roles are enabled only for search and security projects
-          ...(options.serverlessProject !== 'oblt'
-            ? ['--xpack.security.roleManagementEnabled=true']
-            : []),
           ...(options.kbnServerArgs ?? []),
         ],
       },

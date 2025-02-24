@@ -11,7 +11,7 @@
         "tags": [],
         "label": "KubernetesSecurityStart",
         "description": [],
-        "path": "x-pack/plugins/kubernetes_security/public/types.ts",
+        "path": "x-pack/solutions/security/plugins/kubernetes_security/public/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -27,7 +27,7 @@
               "KubernetesSecurityDeps",
               ") => JSX.Element"
             ],
-            "path": "x-pack/plugins/kubernetes_security/public/types.ts",
+            "path": "x-pack/solutions/security/plugins/kubernetes_security/public/types.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -41,7 +41,7 @@
                 "signature": [
                   "KubernetesSecurityDeps"
                 ],
-                "path": "x-pack/plugins/kubernetes_security/public/types.ts",
+                "path": "x-pack/solutions/security/plugins/kubernetes_security/public/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -65,7 +65,7 @@
         "signature": [
           "\"/kubernetes\""
         ],
-        "path": "x-pack/plugins/kubernetes_security/common/constants.ts",
+        "path": "x-pack/solutions/security/plugins/kubernetes_security/common/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -80,7 +80,7 @@
         "signature": [
           "\"Kubernetes\""
         ],
-        "path": "x-pack/plugins/kubernetes_security/common/constants.ts",
+        "path": "x-pack/solutions/security/plugins/kubernetes_security/common/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

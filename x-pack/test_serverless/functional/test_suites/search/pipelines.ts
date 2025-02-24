@@ -20,8 +20,8 @@ export default function ({ getPageObjects }: FtrProviderContext) {
     before(async () => {
       await pageObjects.svlCommonPage.loginWithRole('developer');
       await pageObjects.svlCommonNavigation.sidenav.openSection('project_settings_project_nav');
-      await pageObjects.svlCommonNavigation.sidenav.clickLink({ deepLinkId: 'management' });
-      await pageObjects.svlManagementPage.clickIngestPipelinesManagementCard();
+      await pageObjects.svlCommonNavigation.sidenav.clickLink({ navId: 'management' });
+      await pageObjects.svlCommonNavigation.sidenav.clickPanelLink('management:ingest_pipelines');
     });
 
     it('has embedded console', async () => {

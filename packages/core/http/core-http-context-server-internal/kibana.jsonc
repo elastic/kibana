@@ -1,5 +1,0 @@
-{
-  "type": "shared-server",
-  "id": "@kbn/core-http-context-server-internal",
-  "owner": "@elastic/kibana-core"
-}

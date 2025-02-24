@@ -13,16 +13,17 @@ import {
   MOCK_IDP_ATTRIBUTE_NAME,
 } from '@kbn/mock-idp-utils';
 import {
+  fleetPackageRegistryDockerImage,
   esTestConfig,
   kbnTestConfig,
   systemIndicesSuperuser,
   FtrConfigProviderContext,
   defineDockerServersConfig,
 } from '@kbn/test';
+import { ScoutTestRunConfigCategory } from '@kbn/scout-info';
 import path from 'path';
 import { REPO_ROOT } from '@kbn/repo-info';
 import { STATEFUL_ROLES_ROOT_PATH } from '@kbn/es';
-import { dockerImage } from '../../../fleet_api_integration/config.base';
 import { DeploymentAgnosticCommonServices, services } from '../services';
 
 interface CreateTestConfigOptions<T extends DeploymentAgnosticCommonServices> {
@@ -33,6 +34,11 @@ interface CreateTestConfigOptions<T extends DeploymentAgnosticCommonServices> {
   junit: { reportName: string };
   suiteTags?: { include?: string[]; exclude?: string[] };
 }
+
+export const AI_ASSISTANT_SNAPSHOT_REPO_PATH = path.resolve(
+  REPO_ROOT,
+  'x-pack/test/api_integration/deployment_agnostic/apis/observability/ai_assistant/knowledge_base/snapshot_kb_8.10'
+);
 
 export function createStatefulTestConfig<T extends DeploymentAgnosticCommonServices>(
   options: CreateTestConfigOptions<T>
@@ -85,10 +91,11 @@ export function createStatefulTestConfig<T extends DeploymentAgnosticCommonServi
 
     return {
       servers,
+      testConfigCategory: ScoutTestRunConfigCategory.API_TEST,
       dockerServers: defineDockerServersConfig({
         registry: {
           enabled: !!dockerRegistryPort,
-          image: dockerImage,
+          image: fleetPackageRegistryDockerImage,
           portInContainer: 8080,
           port: dockerRegistryPort,
           args: dockerArgs,
@@ -101,7 +108,10 @@ export function createStatefulTestConfig<T extends DeploymentAgnosticCommonServi
       // services can be customized, but must extend DeploymentAgnosticCommonServices
       services: options.services || services,
       junit: options.junit,
-      suiteTags: options.suiteTags,
+      suiteTags: {
+        include: options.suiteTags?.include,
+        exclude: [...(options.suiteTags?.exclude || []), 'skipStateful'],
+      },
 
       esTestCluster: {
         ...xPackAPITestsConfig.get('esTestCluster'),
@@ -118,13 +128,13 @@ export function createStatefulTestConfig<T extends DeploymentAgnosticCommonServi
           `xpack.security.authc.realms.saml.${MOCK_IDP_REALM_NAME}.attributes.groups=${MOCK_IDP_ATTRIBUTE_ROLES}`,
           `xpack.security.authc.realms.saml.${MOCK_IDP_REALM_NAME}.attributes.name=${MOCK_IDP_ATTRIBUTE_NAME}`,
           `xpack.security.authc.realms.saml.${MOCK_IDP_REALM_NAME}.attributes.mail=${MOCK_IDP_ATTRIBUTE_EMAIL}`,
+          `path.repo=${AI_ASSISTANT_SNAPSHOT_REPO_PATH}`,
         ],
         files: [
           // Passing the roles that are equivalent to the ones we have in serverless
           path.resolve(REPO_ROOT, STATEFUL_ROLES_ROOT_PATH, 'roles.yml'),
         ],
       },
-
       kbnTestServer: {
         ...xPackAPITestsConfig.get('kbnTestServer'),
         serverArgs: [
@@ -146,6 +156,11 @@ export function createStatefulTestConfig<T extends DeploymentAgnosticCommonServi
             basic: { 'cloud-basic': { order: 1 } },
           })}`,
           `--server.publicBaseUrl=${servers.kibana.protocol}://${servers.kibana.hostname}:${servers.kibana.port}`,
+          '--xpack.uptime.service.password=test',
+          '--xpack.uptime.service.username=localKibanaIntegrationTestsUser',
+          '--xpack.uptime.service.devUrl=mockDevUrl',
+          '--xpack.uptime.service.manifestUrl=mockDevUrl',
+          '--xpack.observabilityAIAssistant.disableKbSemanticTextMigration=true',
         ],
       },
     };

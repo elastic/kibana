@@ -1,0 +1,10 @@
+summary: Update a marketing space
+description: Update the marketing space to remove the imageUrl.
+value:
+  id: marketing
+  name: Marketing
+  description : This is the Marketing Space
+  color: #aabbcc
+  initials: MK
+  disabledFeatures: []
+  imageUrl: ""

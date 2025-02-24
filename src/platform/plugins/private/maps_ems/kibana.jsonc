@@ -1,0 +1,23 @@
+{
+  "type": "plugin",
+  "id": "@kbn/maps-ems-plugin",
+  "owner": [
+    "@elastic/kibana-presentation"
+  ],
+  "group": "platform",
+  "visibility": "private",
+  "plugin": {
+    "id": "mapsEms",
+    "browser": true,
+    "server": true,
+    "configPath": [
+      "map"
+    ],
+    "optionalPlugins": [
+      "licensing"
+    ],
+    "extraPublicDirs": [
+      "common"
+    ]
+  }
+}

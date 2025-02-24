@@ -9,7 +9,7 @@
 
 import { Client } from '@elastic/elasticsearch';
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
-import { SearchRequest, MsearchRequestItem } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { SearchRequest, MsearchRequestItem } from '@elastic/elasticsearch/lib/api/types';
 import { ToolingLog } from '@kbn/tooling-log';
 
 interface ClientOptions {
@@ -116,26 +116,24 @@ export class ESClient {
   async getTransactions<T>(queryFilters: QueryDslQueryContainer[]) {
     const searchRequest: SearchRequest = {
       index: this.tracesIndex,
-      body: {
-        sort: [
-          {
-            '@timestamp': {
-              order: 'asc',
-              unmapped_type: 'boolean',
-            },
+      sort: [
+        {
+          '@timestamp': {
+            order: 'asc',
+            unmapped_type: 'boolean',
           },
-        ],
-        size: 10000,
-        query: {
-          bool: {
-            filter: [
-              {
-                bool: {
-                  filter: queryFilters,
-                },
+        },
+      ],
+      size: 10000,
+      query: {
+        bool: {
+          filter: [
+            {
+              bool: {
+                filter: queryFilters,
               },
-            ],
-          },
+            },
+          ],
         },
       },
     };

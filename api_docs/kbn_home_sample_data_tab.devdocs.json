@@ -31,7 +31,7 @@
         "signature": [
           "() => React.JSX.Element"
         ],
-        "path": "packages/home/sample_data_tab/src/sample_data_tab.tsx",
+        "path": "src/platform/packages/shared/home/sample_data_tab/src/sample_data_tab.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [],
@@ -52,7 +52,7 @@
           "SampleDataTabKibanaDependencies",
           ">) => React.JSX.Element"
         ],
-        "path": "packages/home/sample_data_tab/src/services.tsx",
+        "path": "src/platform/packages/shared/home/sample_data_tab/src/services.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -68,7 +68,7 @@
               "SampleDataTabKibanaDependencies",
               ">"
             ],
-            "path": "packages/home/sample_data_tab/src/services.tsx",
+            "path": "src/platform/packages/shared/home/sample_data_tab/src/services.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -91,7 +91,7 @@
           "SampleDataTabServices",
           ">) => React.JSX.Element"
         ],
-        "path": "packages/home/sample_data_tab/src/services.tsx",
+        "path": "src/platform/packages/shared/home/sample_data_tab/src/services.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -107,7 +107,7 @@
               "SampleDataTabServices",
               ">"
             ],
-            "path": "packages/home/sample_data_tab/src/services.tsx",
+            "path": "src/platform/packages/shared/home/sample_data_tab/src/services.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -132,7 +132,7 @@
         "signature": [
           "\"goToDemoEnvButton\""
         ],
-        "path": "packages/home/sample_data_tab/src/constants.ts",
+        "path": "src/platform/packages/shared/home/sample_data_tab/src/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -149,7 +149,7 @@
         "signature": [
           "\"showSampleDataAccordion\""
         ],
-        "path": "packages/home/sample_data_tab/src/constants.ts",
+        "path": "src/platform/packages/shared/home/sample_data_tab/src/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -166,7 +166,7 @@
         "signature": [
           "\"showSampleDataButton\""
         ],
-        "path": "packages/home/sample_data_tab/src/constants.ts",
+        "path": "src/platform/packages/shared/home/sample_data_tab/src/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

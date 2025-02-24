@@ -38,7 +38,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         ...manualConfigurationFlowTestsConfig.get('esTestCluster.serverArgs'),
         'xpack.security.enrollment.enabled=true',
         `xpack.security.http.ssl.keystore.path=${caPath}`,
-        'xpack.security.http.ssl.keystore.password=storepass',
+        'xpack.security.http.ssl.keystore.secure_password=storepass',
       ],
     },
 

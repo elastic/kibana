@@ -1,0 +1,23 @@
+{
+  "type": "plugin",
+  "id": "@kbn/usage-collection-plugin",
+  "owner": [
+    "@elastic/kibana-core"
+  ],
+  "group": "platform",
+  "visibility": "shared",
+  "plugin": {
+    "id": "usageCollection",
+    "browser": true,
+    "server": true,
+    "configPath": [
+      "usageCollection"
+    ],
+    "requiredPlugins": [
+      "screenshotMode"
+    ],
+    "requiredBundles": [
+      "kibanaUtils"
+    ]
+  }
+}

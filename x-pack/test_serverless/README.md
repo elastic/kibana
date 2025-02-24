@@ -6,7 +6,7 @@ The tests and helper methods (services, page objects) defined here in
  `serverless_security` plugins.
 
  For how to set up Docker for serverless ES images, please refer to
- [packages/kbn-es/README](https://github.com/elastic/kibana/blob/main/packages/kbn-es/README.mdx).
+ [src/platform/packages/shared/kbn-es/README](https://github.com/elastic/kibana/blob/main/src/platform/packages/shared/kbn-es/README.mdx).
 
 ## Serverless testing structure and conventions
 
@@ -106,7 +106,7 @@ particularly when it comes to timing for API requests and UI interaction.
 
 ### Roles-based testing
 
-Each serverless project has its own set of SAML roles with [specfic permissions defined in roles.yml](https://github.com/elastic/kibana/blob/main/packages/kbn-es/src/serverless_resources/project_roles)
+Each serverless project has its own set of SAML roles with [specfic permissions defined in roles.yml](https://github.com/elastic/kibana/blob/main/src/platform/packages/shared/kbn-es/src/serverless_resources/project_roles)
 and in oder to properly test Kibana functionality, test design requires to login with
 a project-supported SAML role. FTR provides `svlUserManager` service to do SAML authentication, that allows UI tests to set
 the SAML cookie in the browser context and generates api key to use in the api integration tests. See examples below.
@@ -154,7 +154,7 @@ Kibana provides both public and internal APIs, each requiring authentication wit
 Recommendations:
 - use `roleScopedSupertest` service to create a supertest instance scoped to a specific role and predefined request headers
 - `roleScopedSupertest.getSupertestWithRoleScope(<role>)` authenticates requests with an API key by default
-- pass `withCookieHeader: true` to use Cookie header for request authentication
+- pass `useCookieHeader: true` to use Cookie header for request authentication
 - don't forget to invalidate API keys by using `destroy()` on the supertest scoped instance in the `after` hook
 
 ```
@@ -183,7 +183,7 @@ describe("my internal APIs test suite", async function() {
     before(async () => {
       supertestViewerWithCookieCredentials =
         await roleScopedSupertest.getSupertestWithRoleScope('admin', {
-          withCookieHeader: true, // to avoid generating API key and use Cookie header instead
+          useCookieHeader: true, // to avoid generating API key and use Cookie header instead
           withInternalHeaders: true,
         });
     });
@@ -207,6 +207,8 @@ describe("my internal APIs test suite", async function() {
 With custom native roles now enabled for the Security and Search projects on MKI, the FTR supports
 defining and authenticating with custom roles in both UI functional tests and API integration tests.
 
+To test role management within the Observability project, you can execute the tests using the existing [config.feature_flags.ts](x-pack/test_serverless/functional/test_suites/observability/config.feature_flags.ts), where this functionality is explicitly enabled. Though the config is not run on MKI, it provides the ability to test custom roles in Kibana CI before the functionality is enabled in MKI. When roles management is enabled on MKI, these tests can be migrated to the regular FTR config and will be run on MKI.
+
 For compatibility with MKI, the role name `customRole` is reserved for use in tests. The test user is automatically assigned to this role, but before logging in via the browser, generating a cookie header, or creating an API key in each test suite, the role’s privileges must be updated.
 
 Note: We are still working on a solution to run these tests against MKI. In the meantime, please tag the suite with `skipMKI`.
@@ -229,6 +231,9 @@ await samlAuth.setCustomRole({
 });
 // Then, log in via the browser as a user with the newly defined privileges
 await pageObjects.svlCommonPage.loginWithCustomRole();
+
+// Make sure to delete the custom role in the 'after' hook
+await samlAuth.deleteCustomRole();
 ```
 
 FTR api_integration test example:
@@ -251,8 +256,9 @@ await samlAuth.setCustomRole({
 // Then, generate an API key with the newly defined privileges
 const roleAuthc = await samlAuth.createM2mApiKeyWithRoleScope('customRole');
 
-// Remember to invalidate the API key after use
+// Remember to invalidate the API key after use and delete the custom role
 await samlAuth.invalidateM2mApiKeyWithRoleScope(roleAuthc);
+await samlAuth.deleteCustomRole();
 ```
 
 ### Testing with feature flags

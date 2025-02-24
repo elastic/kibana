@@ -22,14 +22,18 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await visualize.navigateToNewVisualization();
     });
 
-    it('should show the promoted vis types for the first step', async function () {
-      const expectedChartTypes = ['Custom visualization', 'Lens', 'Maps', 'TSVB'];
+    it('should show the expected visualizations types for both recommended and legacy tabs', async function () {
+      const expectedRecommendedChartTypes = ['Custom visualization', 'Lens', 'Maps'];
+      const expectedLegacyChartTypes = ['Aggregation-based', 'TSVB'];
 
       // find all the chart types and make sure there all there
-      const chartTypes = (await visualize.getPromotedVisTypes()).sort();
+      const chartTypes = await visualize.getVisibleVisTypes();
       log.debug('returned chart types = ' + chartTypes);
-      log.debug('expected chart types = ' + expectedChartTypes);
-      expect(chartTypes).to.eql(expectedChartTypes);
+      log.debug('expected chart types = ' + expectedRecommendedChartTypes);
+      expect(chartTypes).to.eql(expectedRecommendedChartTypes);
+      await visualize.clickLegacyTab();
+      const legacyChartTypes = await visualize.getVisibleVisTypes();
+      expect(legacyChartTypes).to.eql(expectedLegacyChartTypes);
     });
 
     it('should show the correct agg based chart types', async function () {

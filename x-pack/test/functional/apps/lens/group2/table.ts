@@ -20,7 +20,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await visualize.gotoVisualizationLandingPage();
       await listingTable.searchForItemWithName('lnsXYvis');
       await lens.clickVisualizeListItemTitle('lnsXYvis');
-      await lens.goToTimeRange();
       await lens.switchToVisualization('lnsDatatable');
       // Sort by number
       await lens.changeTableSortingBy(2, 'ascending');
@@ -143,14 +142,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await lens.waitForVisualization();
       const styleObj = await lens.getDatatableCellStyle(0, 2);
       expect(styleObj['background-color']).to.be(undefined);
-      expect(styleObj.color).to.be('rgb(133, 189, 177)');
+      expect(styleObj.color).to.be('rgb(140, 217, 187)');
     });
 
     it('should allow to color cell background rather than text', async () => {
       await lens.setTableDynamicColoring('cell');
       await lens.waitForVisualization();
       const styleObj = await lens.getDatatableCellStyle(0, 2);
-      expect(styleObj['background-color']).to.be('rgb(133, 189, 177)');
+      expect(styleObj['background-color']).to.be('rgb(140, 217, 187)');
       // should also set text color when in cell mode
       expect(styleObj.color).to.be('rgb(0, 0, 0)');
     });
@@ -161,7 +160,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await lens.changePaletteTo('temperature');
       await lens.waitForVisualization();
       const styleObj = await lens.getDatatableCellStyle(0, 2);
-      expect(styleObj['background-color']).to.be('rgb(235, 239, 245)');
+      expect(styleObj['background-color']).to.be('rgb(232, 241, 255)');
     });
 
     it('should keep the coloring consistent when changing mode', async () => {
@@ -170,7 +169,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await lens.waitForVisualization();
       // check that all remained the same
       const styleObj = await lens.getDatatableCellStyle(0, 2);
-      expect(styleObj['background-color']).to.be('rgb(235, 239, 245)');
+      expect(styleObj['background-color']).to.be('rgb(232, 241, 255)');
     });
 
     it('should keep the coloring consistent when moving to custom palette from default', async () => {
@@ -178,7 +177,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await lens.waitForVisualization();
       // check that all remained the same
       const styleObj = await lens.getDatatableCellStyle(0, 2);
-      expect(styleObj['background-color']).to.be('rgb(235, 239, 245)');
+      expect(styleObj['background-color']).to.be('rgb(232, 241, 255)');
     });
 
     it('tweak the color stops numeric value', async () => {
@@ -203,7 +202,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await testSubjects.click('lnsPalettePanel_dynamicColoring_reverseColors');
       await lens.waitForVisualization();
       const styleObj = await lens.getDatatableCellStyle(1, 1);
-      expect(styleObj['background-color']).to.be('rgb(168, 191, 218)');
+      expect(styleObj['background-color']).to.be('rgb(168, 202, 255)');
       // should also set text color when in cell mode
       expect(styleObj.color).to.be('rgb(0, 0, 0)');
       await lens.closePalettePanel();

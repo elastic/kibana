@@ -150,7 +150,7 @@ export function OverrideSwitch({
         </EuiToolTip>
       }
       helpText={helpText}
-      display="columnCompressedSwitch"
+      display="columnCompressed"
       hasChildLabel={false}
     >
       <EuiSwitch
@@ -249,7 +249,7 @@ export function AttributesMenu({
           </EuiFormRow>
         ) : null}
         {isPieChart(currentAttributes) ? (
-          <EuiFormRow label="Show values" display="columnCompressedSwitch">
+          <EuiFormRow label="Show values" display="columnCompressed">
             <EuiSwitch
               label="As percentage"
               name="switch"
@@ -269,7 +269,7 @@ export function AttributesMenu({
           </EuiFormRow>
         ) : null}
         {isHeatmapChart(currentAttributes) ? (
-          <EuiFormRow label="Show values" display="columnCompressedSwitch">
+          <EuiFormRow label="Show values" display="columnCompressed">
             <EuiSwitch
               label="As percentage"
               name="switch"
@@ -287,7 +287,7 @@ export function AttributesMenu({
           </EuiFormRow>
         ) : null}
         {isGaugeChart(currentAttributes) ? (
-          <EuiFormRow label="Ticks visibility" display="columnCompressedSwitch">
+          <EuiFormRow label="Ticks visibility" display="columnCompressed">
             <EuiSwitch
               label="Show ticks"
               name="switch"
@@ -522,7 +522,7 @@ export function PanelMenu({
         <EuiSpacer />
         <EuiFormRow
           label="Enable triggers"
-          display="columnCompressedSwitch"
+          display="columnCompressed"
           helpText="This setting controls the interactivity of the chart: when disabled the chart won't bubble any event on user action."
         >
           <EuiSwitch
@@ -538,7 +538,7 @@ export function PanelMenu({
         </EuiFormRow>
         <EuiFormRow
           label="Enable default action"
-          display="columnCompressedSwitch"
+          display="columnCompressed"
           helpText="When disabled the default panel actions (i.e. CSV download)"
         >
           <EuiSwitch
@@ -589,7 +589,7 @@ export function PanelMenu({
               </span>
             </EuiToolTip>
           }
-          display="columnCompressedSwitch"
+          display="columnCompressed"
           helpText="Pass a consumer defined action to show in the panel context menu."
         >
           <EuiSwitch

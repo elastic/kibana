@@ -1,0 +1,18 @@
+{
+  "type": "plugin",
+  "id": "@kbn/llm-tasks-plugin",
+  "owner": "@elastic/appex-ai-infra",
+  // all packages under 'ai_infra' will be used across solutions
+  "group": "platform",
+  "visibility": "shared",
+  "plugin": {
+    "id": "llmTasks",
+    "server": true,
+    "browser": false,
+    "configPath": ["xpack", "llmTasks"],
+    "requiredPlugins": ["inference", "productDocBase"],
+    "requiredBundles": [],
+    "optionalPlugins": [],
+    "extraPublicDirs": []
+  }
+}

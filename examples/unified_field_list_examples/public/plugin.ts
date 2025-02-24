@@ -53,7 +53,7 @@ export class UnifiedFieldListExamplesPlugin
       links: [
         {
           label: 'README',
-          href: 'https://github.com/elastic/kibana/tree/main/packages/kbn-unified-field-list/README.md',
+          href: 'https://github.com/elastic/kibana/tree/main/src/platform/packages/shared/kbn-unified-field-list/README.md',
           iconType: 'logoGithub',
           target: '_blank',
           size: 's',

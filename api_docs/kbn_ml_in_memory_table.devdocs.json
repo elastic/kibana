@@ -39,7 +39,7 @@
           "Direction",
           "; }; }; setPageIndex: React.Dispatch<React.SetStateAction<number>>; }"
         ],
-        "path": "x-pack/packages/ml/in_memory_table/hooks/use_table_state.ts",
+        "path": "x-pack/platform/packages/private/ml/in_memory_table/hooks/use_table_state.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -55,7 +55,7 @@
             "signature": [
               "T[]"
             ],
-            "path": "x-pack/packages/ml/in_memory_table/hooks/use_table_state.ts",
+            "path": "x-pack/platform/packages/private/ml/in_memory_table/hooks/use_table_state.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -72,7 +72,7 @@
             "signature": [
               "string"
             ],
-            "path": "x-pack/packages/ml/in_memory_table/hooks/use_table_state.ts",
+            "path": "x-pack/platform/packages/private/ml/in_memory_table/hooks/use_table_state.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -89,7 +89,7 @@
             "signature": [
               "\"asc\" | \"desc\""
             ],
-            "path": "x-pack/packages/ml/in_memory_table/hooks/use_table_state.ts",
+            "path": "x-pack/platform/packages/private/ml/in_memory_table/hooks/use_table_state.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -106,7 +106,7 @@
               "Pagination",
               "> | undefined"
             ],
-            "path": "x-pack/packages/ml/in_memory_table/hooks/use_table_state.ts",
+            "path": "x-pack/platform/packages/private/ml/in_memory_table/hooks/use_table_state.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -136,7 +136,7 @@
           },
           "<T>"
         ],
-        "path": "x-pack/packages/ml/in_memory_table/hooks/use_table_state.ts",
+        "path": "x-pack/platform/packages/private/ml/in_memory_table/hooks/use_table_state.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -154,7 +154,7 @@
               "Criteria",
               "<T>) => void"
             ],
-            "path": "x-pack/packages/ml/in_memory_table/hooks/use_table_state.ts",
+            "path": "x-pack/platform/packages/private/ml/in_memory_table/hooks/use_table_state.ts",
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -188,7 +188,7 @@
             "signature": [
               "Pagination"
             ],
-            "path": "x-pack/packages/ml/in_memory_table/hooks/use_table_state.ts",
+            "path": "x-pack/platform/packages/private/ml/in_memory_table/hooks/use_table_state.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -206,7 +206,7 @@
               "Direction",
               "; }; }"
             ],
-            "path": "x-pack/packages/ml/in_memory_table/hooks/use_table_state.ts",
+            "path": "x-pack/platform/packages/private/ml/in_memory_table/hooks/use_table_state.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -222,7 +222,7 @@
             "signature": [
               "(value: React.SetStateAction<number>) => void"
             ],
-            "path": "x-pack/packages/ml/in_memory_table/hooks/use_table_state.ts",
+            "path": "x-pack/platform/packages/private/ml/in_memory_table/hooks/use_table_state.ts",
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],

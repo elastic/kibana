@@ -22,18 +22,19 @@ include::{docs-root}/shared/cloud/ess-getting-started.asciidoc[]
 
 [float]
 [[gs-get-data-into-kibana]]
-== Add the sample data
+== Add sample data
 
 Sample data sets come with sample visualizations, dashboards, and more to help you explore {kib} before you ingest or add your own data.
 
-. On the home page, click *Try sample data*.
+. Open the **Integrations** page from the navigation menu or using the <<kibana-navigation-search,global search field>>.
 
-. Click *Other sample data sets*. 
+. In the list of integrations, select **Sample Data**.
 
-. On the *Sample eCommerce orders* card, click *Add data*.
-+
-[role="screenshot"]
-image::images/addData_sampleDataCards_8.6.0.png[Add data UI for the sample data sets]
+. On the page that opens, select *Other sample data sets*. 
+
+. Install the sample data sets that you want.
+
+Once installed, you can access the sample data in the various {kib} apps available to you. 
 
 [float]
 [[explore-the-data]]
@@ -41,7 +42,7 @@ image::images/addData_sampleDataCards_8.6.0.png[Add data UI for the sample data 
 
 *Discover* displays the data in an interactive histogram that shows the distribution of data, or documents, over time, and a table that lists the fields for each document that matches the {data-source}. To view a subset of the documents, you can apply filters to the data, and customize the table to display only the fields you want to explore.
 
-. Open the main menu, then click *Discover*.
+. Go to *Discover*.
 
 . Change the <<set-time-filter, time filter>> to *Last 7 days*.
 +
@@ -67,7 +68,7 @@ image::images/availableFields_discover_8.4.0.png[Discover table that displays on
 
 A dashboard is a collection of panels that you can use to visualize the data. Panels contain visualizations, interactive controls, text, and more.
 
-. Open the main menu, then click *Dashboard*.
+. Go to *Dashboards*.
 
 . Click *[eCommerce] Revenue Dashboard*.
 +

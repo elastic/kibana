@@ -21,6 +21,69 @@
     "functions": [
       {
         "parentPluginId": "@kbn/elastic-agent-utils",
+        "id": "def-common.getAgentName",
+        "type": "Function",
+        "tags": [],
+        "label": "getAgentName",
+        "description": [],
+        "signature": [
+          "(agentName: string | null, telemetryAgentName: string | null, telemetrySdkName: string | null) => string | null"
+        ],
+        "path": "src/platform/packages/shared/kbn-elastic-agent-utils/src/agent_guards.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/elastic-agent-utils",
+            "id": "def-common.getAgentName.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "agentName",
+            "description": [],
+            "signature": [
+              "string | null"
+            ],
+            "path": "src/platform/packages/shared/kbn-elastic-agent-utils/src/agent_guards.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          },
+          {
+            "parentPluginId": "@kbn/elastic-agent-utils",
+            "id": "def-common.getAgentName.$2",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "telemetryAgentName",
+            "description": [],
+            "signature": [
+              "string | null"
+            ],
+            "path": "src/platform/packages/shared/kbn-elastic-agent-utils/src/agent_guards.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          },
+          {
+            "parentPluginId": "@kbn/elastic-agent-utils",
+            "id": "def-common.getAgentName.$3",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "telemetrySdkName",
+            "description": [],
+            "signature": [
+              "string | null"
+            ],
+            "path": "src/platform/packages/shared/kbn-elastic-agent-utils/src/agent_guards.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/elastic-agent-utils",
         "id": "def-common.hasOpenTelemetryPrefix",
         "type": "Function",
         "tags": [],
@@ -29,7 +92,7 @@
         "signature": [
           "(agentName: string | undefined, language: string) => boolean"
         ],
-        "path": "packages/kbn-elastic-agent-utils/src/agent_guards.ts",
+        "path": "src/platform/packages/shared/kbn-elastic-agent-utils/src/agent_guards.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -43,7 +106,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "packages/kbn-elastic-agent-utils/src/agent_guards.ts",
+            "path": "src/platform/packages/shared/kbn-elastic-agent-utils/src/agent_guards.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -58,7 +121,7 @@
             "signature": [
               "string"
             ],
-            "path": "packages/kbn-elastic-agent-utils/src/agent_guards.ts",
+            "path": "src/platform/packages/shared/kbn-elastic-agent-utils/src/agent_guards.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -77,7 +140,7 @@
         "signature": [
           "(agentName: string | undefined) => boolean"
         ],
-        "path": "packages/kbn-elastic-agent-utils/src/agent_guards.ts",
+        "path": "src/platform/packages/shared/kbn-elastic-agent-utils/src/agent_guards.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -91,7 +154,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "packages/kbn-elastic-agent-utils/src/agent_guards.ts",
+            "path": "src/platform/packages/shared/kbn-elastic-agent-utils/src/agent_guards.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -110,7 +173,7 @@
         "signature": [
           "(serverlessType: string | undefined) => boolean"
         ],
-        "path": "packages/kbn-elastic-agent-utils/src/agent_guards.ts",
+        "path": "src/platform/packages/shared/kbn-elastic-agent-utils/src/agent_guards.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -124,7 +187,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "packages/kbn-elastic-agent-utils/src/agent_guards.ts",
+            "path": "src/platform/packages/shared/kbn-elastic-agent-utils/src/agent_guards.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -143,7 +206,7 @@
         "signature": [
           "(serverlessType: string | undefined) => boolean"
         ],
-        "path": "packages/kbn-elastic-agent-utils/src/agent_guards.ts",
+        "path": "src/platform/packages/shared/kbn-elastic-agent-utils/src/agent_guards.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -157,7 +220,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "packages/kbn-elastic-agent-utils/src/agent_guards.ts",
+            "path": "src/platform/packages/shared/kbn-elastic-agent-utils/src/agent_guards.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -176,7 +239,7 @@
         "signature": [
           "(agentName: string | undefined) => boolean"
         ],
-        "path": "packages/kbn-elastic-agent-utils/src/agent_guards.ts",
+        "path": "src/platform/packages/shared/kbn-elastic-agent-utils/src/agent_guards.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -190,7 +253,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "packages/kbn-elastic-agent-utils/src/agent_guards.ts",
+            "path": "src/platform/packages/shared/kbn-elastic-agent-utils/src/agent_guards.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -209,7 +272,7 @@
         "signature": [
           "(agentName: string | undefined) => boolean"
         ],
-        "path": "packages/kbn-elastic-agent-utils/src/agent_guards.ts",
+        "path": "src/platform/packages/shared/kbn-elastic-agent-utils/src/agent_guards.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -223,7 +286,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "packages/kbn-elastic-agent-utils/src/agent_guards.ts",
+            "path": "src/platform/packages/shared/kbn-elastic-agent-utils/src/agent_guards.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -242,7 +305,7 @@
         "signature": [
           "(agentName: string | undefined, runtimeName: string | undefined) => boolean"
         ],
-        "path": "packages/kbn-elastic-agent-utils/src/agent_guards.ts",
+        "path": "src/platform/packages/shared/kbn-elastic-agent-utils/src/agent_guards.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -256,7 +319,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "packages/kbn-elastic-agent-utils/src/agent_guards.ts",
+            "path": "src/platform/packages/shared/kbn-elastic-agent-utils/src/agent_guards.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -271,7 +334,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "packages/kbn-elastic-agent-utils/src/agent_guards.ts",
+            "path": "src/platform/packages/shared/kbn-elastic-agent-utils/src/agent_guards.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -290,7 +353,7 @@
         "signature": [
           "(agentName: string | undefined) => boolean"
         ],
-        "path": "packages/kbn-elastic-agent-utils/src/agent_guards.ts",
+        "path": "src/platform/packages/shared/kbn-elastic-agent-utils/src/agent_guards.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -304,7 +367,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "packages/kbn-elastic-agent-utils/src/agent_guards.ts",
+            "path": "src/platform/packages/shared/kbn-elastic-agent-utils/src/agent_guards.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -323,7 +386,7 @@
         "signature": [
           "(agentName: string) => boolean"
         ],
-        "path": "packages/kbn-elastic-agent-utils/src/agent_guards.ts",
+        "path": "src/platform/packages/shared/kbn-elastic-agent-utils/src/agent_guards.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -337,7 +400,7 @@
             "signature": [
               "string"
             ],
-            "path": "packages/kbn-elastic-agent-utils/src/agent_guards.ts",
+            "path": "src/platform/packages/shared/kbn-elastic-agent-utils/src/agent_guards.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -356,7 +419,7 @@
         "signature": [
           "(agentName: string | undefined) => boolean"
         ],
-        "path": "packages/kbn-elastic-agent-utils/src/agent_guards.ts",
+        "path": "src/platform/packages/shared/kbn-elastic-agent-utils/src/agent_guards.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -370,7 +433,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "packages/kbn-elastic-agent-utils/src/agent_guards.ts",
+            "path": "src/platform/packages/shared/kbn-elastic-agent-utils/src/agent_guards.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -389,7 +452,7 @@
         "signature": [
           "(agentName: string | undefined) => boolean"
         ],
-        "path": "packages/kbn-elastic-agent-utils/src/agent_guards.ts",
+        "path": "src/platform/packages/shared/kbn-elastic-agent-utils/src/agent_guards.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -403,7 +466,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "packages/kbn-elastic-agent-utils/src/agent_guards.ts",
+            "path": "src/platform/packages/shared/kbn-elastic-agent-utils/src/agent_guards.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -422,7 +485,7 @@
         "signature": [
           "(serverlessType: string | undefined) => boolean"
         ],
-        "path": "packages/kbn-elastic-agent-utils/src/agent_guards.ts",
+        "path": "src/platform/packages/shared/kbn-elastic-agent-utils/src/agent_guards.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -436,7 +499,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "packages/kbn-elastic-agent-utils/src/agent_guards.ts",
+            "path": "src/platform/packages/shared/kbn-elastic-agent-utils/src/agent_guards.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -466,7 +529,7 @@
           },
           "[]"
         ],
-        "path": "packages/kbn-elastic-agent-utils/src/agent_names.ts",
+        "path": "src/platform/packages/shared/kbn-elastic-agent-utils/src/agent_names.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -479,9 +542,9 @@
         "label": "AgentName",
         "description": [],
         "signature": [
-          "\"java\" | \"ruby\" | \"opentelemetry\" | \"dotnet\" | \"go\" | \"iOS/swift\" | \"js-base\" | \"nodejs\" | \"php\" | \"python\" | \"rum-js\" | \"android/java\" | \"otlp\" | \"opentelemetry/cpp\" | \"opentelemetry/dotnet\" | \"opentelemetry/erlang\" | \"opentelemetry/go\" | \"opentelemetry/java\" | \"opentelemetry/nodejs\" | \"opentelemetry/php\" | \"opentelemetry/python\" | \"opentelemetry/ruby\" | \"opentelemetry/rust\" | \"opentelemetry/swift\" | \"opentelemetry/android\" | \"opentelemetry/webjs\" | \"otlp/cpp\" | \"otlp/dotnet\" | \"otlp/erlang\" | \"otlp/go\" | \"otlp/java\" | \"otlp/nodejs\" | \"otlp/php\" | \"otlp/python\" | \"otlp/ruby\" | \"otlp/rust\" | \"otlp/swift\" | \"otlp/android\" | \"otlp/webjs\" | \"ios/swift\""
+          "\"java\" | \"ruby\" | \"opentelemetry\" | \"dotnet\" | \"go\" | \"iOS/swift\" | \"js-base\" | \"nodejs\" | \"php\" | \"python\" | \"rum-js\" | \"android/java\" | \"otlp\" | `opentelemetry/${string}` | `otlp/${string}` | \"ios/swift\""
         ],
-        "path": "packages/kbn-elastic-agent-utils/src/agent_names.ts",
+        "path": "src/platform/packages/shared/kbn-elastic-agent-utils/src/agent_names.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -503,7 +566,7 @@
           },
           "[]"
         ],
-        "path": "packages/kbn-elastic-agent-utils/src/agent_names.ts",
+        "path": "src/platform/packages/shared/kbn-elastic-agent-utils/src/agent_names.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -520,7 +583,7 @@
         "signature": [
           "\"java\" | \"ruby\" | \"dotnet\" | \"go\" | \"iOS/swift\" | \"js-base\" | \"nodejs\" | \"php\" | \"python\" | \"rum-js\" | \"android/java\""
         ],
-        "path": "packages/kbn-elastic-agent-utils/src/agent_names.ts",
+        "path": "src/platform/packages/shared/kbn-elastic-agent-utils/src/agent_names.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -542,7 +605,7 @@
           },
           "[]"
         ],
-        "path": "packages/kbn-elastic-agent-utils/src/agent_names.ts",
+        "path": "src/platform/packages/shared/kbn-elastic-agent-utils/src/agent_names.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -557,7 +620,7 @@
         "signature": [
           "\"java\" | \"opentelemetry/java\" | \"otlp/java\""
         ],
-        "path": "packages/kbn-elastic-agent-utils/src/agent_names.ts",
+        "path": "src/platform/packages/shared/kbn-elastic-agent-utils/src/agent_names.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -579,7 +642,7 @@
           },
           "[]"
         ],
-        "path": "packages/kbn-elastic-agent-utils/src/agent_names.ts",
+        "path": "src/platform/packages/shared/kbn-elastic-agent-utils/src/agent_names.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -592,9 +655,9 @@
         "label": "OpenTelemetryAgentName",
         "description": [],
         "signature": [
-          "\"opentelemetry\" | \"otlp\" | \"opentelemetry/cpp\" | \"opentelemetry/dotnet\" | \"opentelemetry/erlang\" | \"opentelemetry/go\" | \"opentelemetry/java\" | \"opentelemetry/nodejs\" | \"opentelemetry/php\" | \"opentelemetry/python\" | \"opentelemetry/ruby\" | \"opentelemetry/rust\" | \"opentelemetry/swift\" | \"opentelemetry/android\" | \"opentelemetry/webjs\" | \"otlp/cpp\" | \"otlp/dotnet\" | \"otlp/erlang\" | \"otlp/go\" | \"otlp/java\" | \"otlp/nodejs\" | \"otlp/php\" | \"otlp/python\" | \"otlp/ruby\" | \"otlp/rust\" | \"otlp/swift\" | \"otlp/android\" | \"otlp/webjs\""
+          "\"opentelemetry\" | \"otlp\" | `opentelemetry/${string}` | `otlp/${string}`"
         ],
-        "path": "packages/kbn-elastic-agent-utils/src/agent_names.ts",
+        "path": "src/platform/packages/shared/kbn-elastic-agent-utils/src/agent_names.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -616,7 +679,7 @@
           },
           "[]"
         ],
-        "path": "packages/kbn-elastic-agent-utils/src/agent_names.ts",
+        "path": "src/platform/packages/shared/kbn-elastic-agent-utils/src/agent_names.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -631,7 +694,7 @@
         "signature": [
           "\"js-base\" | \"rum-js\" | \"opentelemetry/webjs\" | \"otlp/webjs\""
         ],
-        "path": "packages/kbn-elastic-agent-utils/src/agent_names.ts",
+        "path": "src/platform/packages/shared/kbn-elastic-agent-utils/src/agent_names.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -653,7 +716,7 @@
           },
           "[]"
         ],
-        "path": "packages/kbn-elastic-agent-utils/src/agent_names.ts",
+        "path": "src/platform/packages/shared/kbn-elastic-agent-utils/src/agent_names.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -668,7 +731,7 @@
         "signature": [
           "\"aws.lambda\" | \"azure.functions\""
         ],
-        "path": "packages/kbn-elastic-agent-utils/src/agent_names.ts",
+        "path": "src/platform/packages/shared/kbn-elastic-agent-utils/src/agent_names.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

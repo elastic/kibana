@@ -33,7 +33,7 @@
           "StreamedHttpResponse",
           ", T>"
         ],
-        "path": "packages/kbn-sse-utils-client/src/http_response_into_observable.ts",
+        "path": "src/platform/packages/shared/kbn-sse-utils-client/src/http_response_into_observable.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [],

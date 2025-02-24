@@ -9,7 +9,7 @@
         "tags": [],
         "label": "AnalyticsService",
         "description": [],
-        "path": "packages/core/analytics/core-analytics-browser-internal/src/analytics_service.ts",
+        "path": "src/core/packages/analytics/browser-internal/src/analytics_service.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -23,7 +23,7 @@
             "signature": [
               "any"
             ],
-            "path": "packages/core/analytics/core-analytics-browser-internal/src/analytics_service.ts",
+            "path": "src/core/packages/analytics/browser-internal/src/analytics_service.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -37,7 +37,7 @@
                 "signature": [
                   "CoreContext"
                 ],
-                "path": "packages/core/analytics/core-analytics-browser-internal/src/analytics_service.ts",
+                "path": "src/core/packages/analytics/browser-internal/src/analytics_service.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -56,15 +56,9 @@
               "({ injectedMetadata }: ",
               "AnalyticsServiceSetupDeps",
               ") => ",
-              {
-                "pluginId": "@kbn/core-analytics-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreAnalyticsBrowserPluginApi",
-                "section": "def-public.AnalyticsServiceSetup",
-                "text": "AnalyticsServiceSetup"
-              }
+              "AnalyticsServiceSetup"
             ],
-            "path": "packages/core/analytics/core-analytics-browser-internal/src/analytics_service.ts",
+            "path": "src/core/packages/analytics/browser-internal/src/analytics_service.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -78,7 +72,7 @@
                 "signature": [
                   "AnalyticsServiceSetupDeps"
                 ],
-                "path": "packages/core/analytics/core-analytics-browser-internal/src/analytics_service.ts",
+                "path": "src/core/packages/analytics/browser-internal/src/analytics_service.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -95,15 +89,9 @@
             "description": [],
             "signature": [
               "() => ",
-              {
-                "pluginId": "@kbn/core-analytics-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreAnalyticsBrowserPluginApi",
-                "section": "def-public.AnalyticsServiceStart",
-                "text": "AnalyticsServiceStart"
-              }
+              "AnalyticsServiceStart"
             ],
-            "path": "packages/core/analytics/core-analytics-browser-internal/src/analytics_service.ts",
+            "path": "src/core/packages/analytics/browser-internal/src/analytics_service.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -119,7 +107,7 @@
             "signature": [
               "() => Promise<void>"
             ],
-            "path": "packages/core/analytics/core-analytics-browser-internal/src/analytics_service.ts",
+            "path": "src/core/packages/analytics/browser-internal/src/analytics_service.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],

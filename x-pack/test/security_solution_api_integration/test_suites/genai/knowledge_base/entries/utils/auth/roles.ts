@@ -40,7 +40,7 @@ export const securitySolutionOnlyAll: Role = {
     kibana: [
       {
         feature: {
-          siem: ['all'],
+          siemV2: ['all'],
           securitySolutionAssistant: ['all'],
           securitySolutionAttackDiscovery: ['all'],
           aiAssistantManagementSelection: ['all'],
@@ -60,7 +60,7 @@ export const securitySolutionOnlyAllSpace2: Role = {
     kibana: [
       {
         feature: {
-          siem: ['all'],
+          siemV2: ['all'],
           securitySolutionAssistant: ['all'],
           securitySolutionAttackDiscovery: ['all'],
           aiAssistantManagementSelection: ['all'],
@@ -80,7 +80,7 @@ export const securitySolutionOnlyRead: Role = {
     kibana: [
       {
         feature: {
-          siem: ['read'],
+          siemV2: ['read'],
           securitySolutionAssistant: ['all'],
           securitySolutionAttackDiscovery: ['all'],
           aiAssistantManagementSelection: ['all'],
@@ -100,7 +100,7 @@ export const securitySolutionOnlyReadSpace2: Role = {
     kibana: [
       {
         feature: {
-          siem: ['read'],
+          siemV2: ['read'],
           securitySolutionAssistant: ['all'],
           securitySolutionAttackDiscovery: ['all'],
           aiAssistantManagementSelection: ['all'],
@@ -123,7 +123,7 @@ export const securitySolutionOnlyAllSpacesAll: Role = {
     kibana: [
       {
         feature: {
-          siem: ['all'],
+          siemV2: ['all'],
           securitySolutionAssistant: ['all'],
           securitySolutionAttackDiscovery: ['all'],
           aiAssistantManagementSelection: ['all'],
@@ -148,7 +148,7 @@ export const securitySolutionOnlyAllSpacesAllWithReadESIndices: Role = {
     kibana: [
       {
         feature: {
-          siem: ['all'],
+          siemV2: ['all'],
           securitySolutionAssistant: ['all'],
           securitySolutionAttackDiscovery: ['all'],
           aiAssistantManagementSelection: ['all'],
@@ -168,8 +168,28 @@ export const securitySolutionOnlyReadSpacesAll: Role = {
     kibana: [
       {
         feature: {
-          siem: ['read'],
+          siemV2: ['read'],
           securitySolutionAssistant: ['all'],
+          securitySolutionAttackDiscovery: ['all'],
+          aiAssistantManagementSelection: ['all'],
+        },
+        spaces: ['*'],
+      },
+    ],
+  },
+};
+
+export const securitySolutionOnlyAllSpacesAllAssistantMinimalAll: Role = {
+  name: 'sec_only_all_spaces_all_assistant_minimal_all',
+  privileges: {
+    elasticsearch: {
+      indices: [],
+    },
+    kibana: [
+      {
+        feature: {
+          siemV2: ['all'],
+          securitySolutionAssistant: ['minimal_all'],
           securitySolutionAttackDiscovery: ['all'],
           aiAssistantManagementSelection: ['all'],
         },
@@ -193,6 +213,7 @@ export const allRoles = [
   securitySolutionOnlyRead,
   securitySolutionOnlyAllSpacesAll,
   securitySolutionOnlyAllSpacesAllWithReadESIndices,
+  securitySolutionOnlyAllSpacesAllAssistantMinimalAll,
   securitySolutionOnlyReadSpacesAll,
   securitySolutionOnlyAllSpace2,
   securitySolutionOnlyReadSpace2,

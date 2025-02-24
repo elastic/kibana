@@ -18,6 +18,7 @@ import {
 import {
   addDiscoverEsqlQuery,
   addFieldToTable,
+  assertFieldsAreLoaded,
   verifyDiscoverEsqlQuery,
 } from '../../../../tasks/discover';
 import {
@@ -52,8 +53,7 @@ const INITIAL_END_DATE = 'Jan 19, 2024 @ 20:33:29.186';
 const TIMELINE_REQ_WITH_SAVED_SEARCH = 'TIMELINE_REQ_WITH_SAVED_SEARCH';
 const TIMELINE_PATCH_REQ = 'TIMELINE_PATCH_REQ';
 
-const TIMELINE_RESPONSE_SAVED_OBJECT_ID_PATH =
-  'response.body.data.persistTimeline.timeline.savedObjectId';
+const TIMELINE_RESPONSE_SAVED_OBJECT_ID_PATH = 'response.body.savedObjectId';
 const esqlQuery = 'from auditbeat-* | where ecs.version == "8.0.0"';
 
 const handleIntercepts = () => {
@@ -69,7 +69,7 @@ const handleIntercepts = () => {
   });
 };
 
-// Failing: See https://github.com/elastic/kibana/issues/180755
+// Failing: See https://github.com/elastic/kibana/issues/198066
 describe.skip(
   'Discover Timeline State Integration',
   {
@@ -81,6 +81,7 @@ describe.skip(
       visitWithTimeRange(ALERTS_URL);
       createTimelineFromBottomBar();
       goToEsqlTab();
+      addDiscoverEsqlQuery(esqlQuery);
       updateDateRangeInLocalDatePickers(DISCOVER_CONTAINER, INITIAL_START_DATE, INITIAL_END_DATE);
       handleIntercepts();
     });
@@ -90,17 +91,14 @@ describe.skip(
         addNameToTimelineAndSave('Timerange timeline');
         createNewTimeline();
         goToEsqlTab();
-        cy.get(GET_LOCAL_SHOW_DATES_BUTTON(DISCOVER_CONTAINER)).should(
-          'contain.text',
-          `Last 15 minutes`
-        );
+        cy.get(GET_LOCAL_SHOW_DATES_BUTTON(DISCOVER_CONTAINER)).should('be.disabled'); // default state
       });
       it('should save/restore esql tab dataview/timerange/filter/query/columns when saving/resoring timeline', () => {
         const timelineSuffix = Date.now();
         const timelineName = `DataView timeline-${timelineSuffix}`;
         const column1 = 'event.category';
         const column2 = 'ecs.version';
-        addDiscoverEsqlQuery(esqlQuery);
+        assertFieldsAreLoaded();
         addFieldToTable(column1);
         addFieldToTable(column2);
 
@@ -132,6 +130,7 @@ describe.skip(
         const column1 = 'event.category';
         const column2 = 'ecs.version';
         addDiscoverEsqlQuery(esqlQuery);
+        assertFieldsAreLoaded();
         addFieldToTable(column1);
         addFieldToTable(column2);
 

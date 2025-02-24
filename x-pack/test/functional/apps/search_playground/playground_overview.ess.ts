@@ -41,7 +41,7 @@ export default function (ftrContext: FtrProviderContext) {
   describe('Playground', () => {
     before(async () => {
       proxy = await createLlmProxy(log);
-      await pageObjects.common.navigateToApp('enterpriseSearchApplications/playground');
+      await pageObjects.common.navigateToApp('searchPlayground');
     });
 
     after(async () => {
@@ -110,6 +110,7 @@ export default function (ftrContext: FtrProviderContext) {
         before(async () => {
           await createConnector();
           await createIndex();
+          await pageObjects.searchPlayground.session.setSession();
           await browser.refresh();
         });
 
@@ -165,7 +166,10 @@ export default function (ftrContext: FtrProviderContext) {
         });
 
         it('show edit context', async () => {
-          await pageObjects.searchPlayground.PlaygroundChatPage.expectEditContextOpens();
+          await pageObjects.searchPlayground.PlaygroundChatPage.expectEditContextOpens(
+            'basic_index',
+            ['baz']
+          );
         });
 
         it('save selected fields between modes', async () => {

@@ -24,6 +24,7 @@ import {
   I18nStart,
   IUiSettingsClient,
   ThemeServiceStart,
+  UserProfileService,
 } from '@kbn/core/public';
 import { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import { Start as InspectorStart } from '@kbn/inspector-plugin/public';
@@ -41,6 +42,7 @@ interface Props {
   inspector: InspectorStart;
   actions: UiActionsStart;
   uiSettings: IUiSettingsClient;
+  userProfile: UserProfileService;
   settings: SettingsStart;
   theme: ThemeServiceStart;
   i18n: I18nStart;
@@ -52,15 +54,13 @@ const ExpressionsExplorer = ({
   actions,
   uiSettings,
   settings,
-  i18n,
-  theme,
+  ...startServices
 }: Props) => {
   const { Provider: KibanaReactContextProvider } = createKibanaReactContext({
     uiSettings,
     settings,
-    theme,
+    theme: startServices.theme,
   });
-  const startServices = { i18n, theme };
   return (
     <KibanaRenderContextProvider {...startServices}>
       <KibanaReactContextProvider>
@@ -77,7 +77,7 @@ const ExpressionsExplorer = ({
                     demonstrated. You can read more about it{' '}
                     <EuiLink
                       href={
-                        'https://github.com/elastic/kibana/blob/main/src/plugins/expressions/README.asciidoc'
+                        'https://github.com/elastic/kibana/blob/main/src/platform/plugins/shared/expressions/README.asciidoc'
                       }
                     >
                       here

@@ -16,17 +16,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
   const find = getService('find');
-  const { common, dashboard, header, timePicker } = getPageObjects([
-    'common',
-    'dashboard',
-    'header',
-    'timePicker',
-  ]);
+  const { dashboard, header, timePicker } = getPageObjects(['dashboard', 'header', 'timePicker']);
   const retry = getService('retry');
   const dataGrid = getService('dataGrid');
 
-  // FLAKY: https://github.com/elastic/kibana/issues/181955
-  describe.skip('dashboard embeddable data grid', () => {
+  describe('dashboard embeddable data grid', () => {
     before(async () => {
       await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/logstash_functional');
       await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/dashboard/current/data');
@@ -36,7 +30,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       );
       await kibanaServer.uiSettings.replace({
         defaultIndex: '0bf35f60-3dc9-11e8-8660-4d65aa086b3c',
-        'doc_table:legacy': false,
       });
       await dashboard.navigateToApp();
       await filterBar.ensureFieldEditorModalIsClosed();
@@ -62,16 +55,24 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('are added when a cell filter is clicked', async function () {
-      await find.clickByCssSelector(`[role="gridcell"]:nth-child(4)`);
-      // needs a short delay between becoming visible & being clickable
-      await common.sleep(250);
-      await find.clickByCssSelector(`[data-test-subj="filterOutButton"]`);
+      const gridCell = '[role="gridcell"]:nth-child(4)';
+      const filterOutButton = '[data-test-subj="filterOutButton"]';
+      const filterForButton = '[data-test-subj="filterForButton"]';
+      await retry.try(async () => {
+        await find.clickByCssSelector(gridCell);
+        await find.clickByCssSelector(filterOutButton);
+        await header.waitUntilLoadingHasFinished();
+        const filterCount = await filterBar.getFilterCount();
+        expect(filterCount).to.equal(1);
+      });
       await header.waitUntilLoadingHasFinished();
-      await find.clickByCssSelector(`[role="gridcell"]:nth-child(4)`);
-      await common.sleep(250);
-      await find.clickByCssSelector(`[data-test-subj="filterForButton"]`);
-      const filterCount = await filterBar.getFilterCount();
-      expect(filterCount).to.equal(2);
+      await retry.try(async () => {
+        await find.clickByCssSelector(gridCell);
+        await find.clickByCssSelector(filterForButton);
+        await header.waitUntilLoadingHasFinished();
+        const filterCount = await filterBar.getFilterCount();
+        expect(filterCount).to.equal(2);
+      });
     });
   });
 }

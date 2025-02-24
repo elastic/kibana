@@ -1,5 +1,7 @@
 FROM mcr.microsoft.com/devcontainers/base:ubuntu-22.04
 
+ARG KBN_DIR
+
 ENV LANG=en_US.UTF-8 LANGUAGE=en_US:en LC_ALL=en_US.UTF-8
 ENV HOME=/home/vscode
 ENV NVM_DIR=${HOME}/nvm
@@ -67,8 +69,8 @@ RUN mkdir -p $NVM_DIR && \
 USER root
 
 # Reload the env everytime a new shell is opened incase the .env file changed.
-RUN echo "source $KBN_DIR/.devcontainer/scripts/env.sh" >> ${HOME}/.bashrc && \
-  echo "source $KBN_DIR/.devcontainer/scripts/env.sh" >> ${HOME}/.zshrc
+RUN echo "source ${KBN_DIR}/.devcontainer/scripts/env.sh" >> ${HOME}/.bashrc && \
+  echo "source ${KBN_DIR}/.devcontainer/scripts/env.sh" >> ${HOME}/.zshrc
 
 # This is for documentation. Ports are exposed via devcontainer.json
 EXPOSE 9200 5601 9229 9230 9231

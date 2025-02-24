@@ -1,7 +1,7 @@
 {
   "name": "@kbn/telemetry-test-plugin",
   "version": "1.0.0",
-  "main": "target/test/plugin_functional/plugins/telemetry",
+  "main": "target/test/plugin_functional/platform/plugins/shared/telemetry",
   "kibana": {
     "version": "kibana",
     "templateVersion": "1.0.0"

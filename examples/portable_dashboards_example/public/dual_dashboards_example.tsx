@@ -27,7 +27,7 @@ export const DualDashboardsExample = () => {
   const [secondDashboardApi, setSecondDashboardApi] = useState<DashboardApi | undefined>();
 
   const ButtonControls = ({ dashboardApi }: { dashboardApi: DashboardApi }) => {
-    const viewMode = useStateFromPublishingSubject(dashboardApi.viewMode);
+    const viewMode = useStateFromPublishingSubject(dashboardApi.viewMode$);
 
     return (
       <EuiButtonGroup

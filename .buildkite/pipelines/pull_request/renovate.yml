@@ -1,0 +1,12 @@
+steps:
+  - command: .buildkite/scripts/steps/renovate.sh
+    label: 'Renovate validation'
+    agents:
+      machineType: n2-highcpu-8
+      preemptible: true
+    key: renovate_validation
+    timeout_in_minutes: 60
+    retry:
+      automatic:
+        - exit_status: '-1'
+          limit: 3

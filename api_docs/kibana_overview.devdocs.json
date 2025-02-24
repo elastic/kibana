@@ -14,7 +14,7 @@
       "tags": [],
       "label": "KibanaOverviewPluginSetup",
       "description": [],
-      "path": "src/plugins/kibana_overview/public/types.ts",
+      "path": "src/platform/plugins/private/kibana_overview/public/types.ts",
       "deprecated": false,
       "trackAdoption": false,
       "children": [],
@@ -28,7 +28,7 @@
       "tags": [],
       "label": "KibanaOverviewPluginStart",
       "description": [],
-      "path": "src/plugins/kibana_overview/public/types.ts",
+      "path": "src/platform/plugins/private/kibana_overview/public/types.ts",
       "deprecated": false,
       "trackAdoption": false,
       "children": [],
@@ -60,7 +60,7 @@
         "signature": [
           "\"logoKibana\""
         ],
-        "path": "src/plugins/kibana_overview/common/index.ts",
+        "path": "src/platform/plugins/private/kibana_overview/common/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -75,7 +75,7 @@
         "signature": [
           "\"kibanaOverview\""
         ],
-        "path": "src/plugins/kibana_overview/common/index.ts",
+        "path": "src/platform/plugins/private/kibana_overview/common/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -90,7 +90,7 @@
         "signature": [
           "\"Overview\""
         ],
-        "path": "src/plugins/kibana_overview/common/index.ts",
+        "path": "src/platform/plugins/private/kibana_overview/common/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -105,7 +105,7 @@
         "signature": [
           "\"/app/kibana_overview\""
         ],
-        "path": "src/plugins/kibana_overview/common/index.ts",
+        "path": "src/platform/plugins/private/kibana_overview/common/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

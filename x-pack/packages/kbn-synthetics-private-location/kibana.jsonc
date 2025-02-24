@@ -1,5 +1,6 @@
 {
   "type": "shared-common",
   "id": "@kbn/synthetics-private-location",
-  "owner": "@elastic/obs-ux-management-team"
+  "owner": "@elastic/obs-ux-management-team",
+  "devOnly": true
 }

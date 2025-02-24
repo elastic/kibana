@@ -4073,10 +4073,6 @@
       "index": {
         "auto_expand_replicas": "0-1",
         "codec": "best_compression",
-        "lifecycle": {
-          "name": "apm-rollover-30-days",
-          "rollover_alias": "apm-8.0.0-metric"
-        },
         "mapping": {
           "total_fields": {
             "limit": "2000"
@@ -4085,8 +4081,7 @@
         "max_docvalue_fields_search": "200",
         "number_of_replicas": "0",
         "number_of_shards": "1",
-        "priority": "100",
-        "refresh_interval": "1ms"
+        "priority": "100"
       }
     }
   }

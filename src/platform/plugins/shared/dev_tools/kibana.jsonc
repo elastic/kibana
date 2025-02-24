@@ -1,0 +1,18 @@
+{
+  "type": "plugin",
+  "id": "@kbn/dev-tools-plugin",
+  "owner": [
+    "@elastic/kibana-management"
+  ],
+  "group": "platform",
+  "visibility": "shared",
+  "plugin": {
+    "id": "devTools",
+    "browser": true,
+    "server": true,
+    "requiredPlugins": [
+      "urlForwarding"
+    ],
+    "requiredBundles": []
+  }
+}

@@ -15,7 +15,7 @@
           "SearchResponseIncompleteWarning",
           "[]) => string"
         ],
-        "path": "packages/kbn-search-response-warnings/src/components/search_response_warnings/i18n_utils.ts",
+        "path": "src/platform/packages/shared/kbn-search-response-warnings/src/components/search_response_warnings/i18n_utils.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -30,7 +30,7 @@
               "SearchResponseIncompleteWarning",
               "[]"
             ],
-            "path": "packages/kbn-search-response-warnings/src/components/search_response_warnings/i18n_utils.ts",
+            "path": "src/platform/packages/shared/kbn-search-response-warnings/src/components/search_response_warnings/i18n_utils.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -51,7 +51,7 @@
           "SearchResponseIncompleteWarning",
           "[]) => string"
         ],
-        "path": "packages/kbn-search-response-warnings/src/components/search_response_warnings/i18n_utils.ts",
+        "path": "src/platform/packages/shared/kbn-search-response-warnings/src/components/search_response_warnings/i18n_utils.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -66,7 +66,7 @@
               "SearchResponseIncompleteWarning",
               "[]"
             ],
-            "path": "packages/kbn-search-response-warnings/src/components/search_response_warnings/i18n_utils.ts",
+            "path": "src/platform/packages/shared/kbn-search-response-warnings/src/components/search_response_warnings/i18n_utils.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -87,7 +87,7 @@
           "SearchResponseIncompleteWarning",
           ") => boolean"
         ],
-        "path": "packages/kbn-search-response-warnings/src/has_unsupported_downsampled_aggregation_failure.ts",
+        "path": "src/platform/packages/shared/kbn-search-response-warnings/src/has_unsupported_downsampled_aggregation_failure.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -101,7 +101,7 @@
             "signature": [
               "SearchResponseIncompleteWarning"
             ],
-            "path": "packages/kbn-search-response-warnings/src/has_unsupported_downsampled_aggregation_failure.ts",
+            "path": "src/platform/packages/shared/kbn-search-response-warnings/src/has_unsupported_downsampled_aggregation_failure.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -120,7 +120,7 @@
         "signature": [
           "(props: Props) => React.JSX.Element | null"
         ],
-        "path": "packages/kbn-search-response-warnings/src/components/search_response_warnings/badge.tsx",
+        "path": "src/platform/packages/shared/kbn-search-response-warnings/src/components/search_response_warnings/badge.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -134,7 +134,7 @@
             "signature": [
               "Props"
             ],
-            "path": "packages/kbn-search-response-warnings/src/components/search_response_warnings/badge.tsx",
+            "path": "src/platform/packages/shared/kbn-search-response-warnings/src/components/search_response_warnings/badge.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -153,7 +153,7 @@
         "signature": [
           "(props: Props) => React.JSX.Element"
         ],
-        "path": "packages/kbn-search-response-warnings/src/components/search_response_warnings/badge_popover_content.tsx",
+        "path": "src/platform/packages/shared/kbn-search-response-warnings/src/components/search_response_warnings/badge_popover_content.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -167,7 +167,7 @@
             "signature": [
               "Props"
             ],
-            "path": "packages/kbn-search-response-warnings/src/components/search_response_warnings/badge_popover_content.tsx",
+            "path": "src/platform/packages/shared/kbn-search-response-warnings/src/components/search_response_warnings/badge_popover_content.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -186,7 +186,7 @@
         "signature": [
           "(props: Props) => React.JSX.Element | null"
         ],
-        "path": "packages/kbn-search-response-warnings/src/components/search_response_warnings/callout.tsx",
+        "path": "src/platform/packages/shared/kbn-search-response-warnings/src/components/search_response_warnings/callout.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -200,7 +200,7 @@
             "signature": [
               "Props"
             ],
-            "path": "packages/kbn-search-response-warnings/src/components/search_response_warnings/callout.tsx",
+            "path": "src/platform/packages/shared/kbn-search-response-warnings/src/components/search_response_warnings/callout.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -219,7 +219,7 @@
         "signature": [
           "(props: Props) => React.JSX.Element"
         ],
-        "path": "packages/kbn-search-response-warnings/src/components/search_response_warnings/empty_prompt.tsx",
+        "path": "src/platform/packages/shared/kbn-search-response-warnings/src/components/search_response_warnings/empty_prompt.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -233,7 +233,7 @@
             "signature": [
               "Props"
             ],
-            "path": "packages/kbn-search-response-warnings/src/components/search_response_warnings/empty_prompt.tsx",
+            "path": "src/platform/packages/shared/kbn-search-response-warnings/src/components/search_response_warnings/empty_prompt.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -252,7 +252,7 @@
         "signature": [
           "(props: Props) => React.JSX.Element | null"
         ],
-        "path": "packages/kbn-search-response-warnings/src/components/search_response_warnings/view_details_popover.tsx",
+        "path": "src/platform/packages/shared/kbn-search-response-warnings/src/components/search_response_warnings/view_details_popover.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -266,7 +266,7 @@
             "signature": [
               "Props"
             ],
-            "path": "packages/kbn-search-response-warnings/src/components/search_response_warnings/view_details_popover.tsx",
+            "path": "src/platform/packages/shared/kbn-search-response-warnings/src/components/search_response_warnings/view_details_popover.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -291,7 +291,7 @@
         "signature": [
           "SearchResponseIncompleteWarning"
         ],
-        "path": "packages/kbn-search-response-warnings/src/types.ts",
+        "path": "src/platform/packages/shared/kbn-search-response-warnings/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -316,7 +316,7 @@
           "AggregationsAggregate",
           ">>; requestId: string | undefined; }) => boolean | undefined"
         ],
-        "path": "packages/kbn-search-response-warnings/src/types.ts",
+        "path": "src/platform/packages/shared/kbn-search-response-warnings/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -331,7 +331,7 @@
             "signature": [
               "SearchResponseIncompleteWarning"
             ],
-            "path": "packages/kbn-search-response-warnings/src/types.ts",
+            "path": "src/platform/packages/shared/kbn-search-response-warnings/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -351,7 +351,7 @@
               "AggregationsAggregate",
               ">>; requestId: string | undefined; }"
             ],
-            "path": "packages/kbn-search-response-warnings/src/types.ts",
+            "path": "src/platform/packages/shared/kbn-search-response-warnings/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }

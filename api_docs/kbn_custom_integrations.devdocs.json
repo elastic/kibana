@@ -13,7 +13,7 @@
         "signature": [
           "({ isDisabled, onClick, testSubj, }: ConnectedCustomIntegrationsButtonProps) => React.JSX.Element | null"
         ],
-        "path": "packages/kbn-custom-integrations/src/components/custom_integrations_button.tsx",
+        "path": "x-pack/solutions/observability/packages/kbn-custom-integrations/src/components/custom_integrations_button.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -27,7 +27,7 @@
             "signature": [
               "ConnectedCustomIntegrationsButtonProps"
             ],
-            "path": "packages/kbn-custom-integrations/src/components/custom_integrations_button.tsx",
+            "path": "x-pack/solutions/observability/packages/kbn-custom-integrations/src/components/custom_integrations_button.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -46,7 +46,7 @@
         "signature": [
           "({ testSubjects }: Props) => React.JSX.Element | null"
         ],
-        "path": "packages/kbn-custom-integrations/src/components/custom_integrations_form.tsx",
+        "path": "x-pack/solutions/observability/packages/kbn-custom-integrations/src/components/custom_integrations_form.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -60,7 +60,7 @@
             "signature": [
               "Props"
             ],
-            "path": "packages/kbn-custom-integrations/src/components/custom_integrations_form.tsx",
+            "path": "x-pack/solutions/observability/packages/kbn-custom-integrations/src/components/custom_integrations_form.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -79,7 +79,7 @@
         "signature": [
           "React.FunctionComponent<React.PropsWithChildren<ProviderProps>>"
         ],
-        "path": "packages/kbn-custom-integrations/src/state_machines/custom_integrations/provider.tsx",
+        "path": "x-pack/solutions/observability/packages/kbn-custom-integrations/src/state_machines/custom_integrations/provider.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -127,7 +127,7 @@
           "Mode",
           "; dispatchableEvents: { saveCreateFields: (() => void) | undefined; updateCreateFields: ((fields: Partial<{ integrationName: string; datasets: { name: string; type: \"metrics\" | \"logs\"; }[]; }>) => void) | undefined; }; }"
         ],
-        "path": "packages/kbn-custom-integrations/src/hooks/use_consumer_custom_integrations.ts",
+        "path": "x-pack/solutions/observability/packages/kbn-custom-integrations/src/hooks/use_consumer_custom_integrations.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [],
@@ -210,7 +210,7 @@
           "ServiceMap",
           ">>; }"
         ],
-        "path": "packages/kbn-custom-integrations/src/hooks/use_custom_integrations.ts",
+        "path": "x-pack/solutions/observability/packages/kbn-custom-integrations/src/hooks/use_custom_integrations.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [],
@@ -226,7 +226,7 @@
         "tags": [],
         "label": "Callbacks",
         "description": [],
-        "path": "packages/kbn-custom-integrations/src/state_machines/custom_integrations/provider.tsx",
+        "path": "x-pack/solutions/observability/packages/kbn-custom-integrations/src/state_machines/custom_integrations/provider.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -240,7 +240,7 @@
             "signature": [
               "((integrationOptions: { integrationName: string; datasets: { name: string; type: \"metrics\" | \"logs\"; }[]; }) => void) | undefined"
             ],
-            "path": "packages/kbn-custom-integrations/src/state_machines/custom_integrations/provider.tsx",
+            "path": "x-pack/solutions/observability/packages/kbn-custom-integrations/src/state_machines/custom_integrations/provider.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -254,7 +254,7 @@
                 "signature": [
                   "{ integrationName: string; datasets: { name: string; type: \"metrics\" | \"logs\"; }[]; }"
                 ],
-                "path": "packages/kbn-custom-integrations/src/state_machines/custom_integrations/provider.tsx",
+                "path": "x-pack/solutions/observability/packages/kbn-custom-integrations/src/state_machines/custom_integrations/provider.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -272,7 +272,7 @@
             "signature": [
               "((integrationName: string) => void) | undefined"
             ],
-            "path": "packages/kbn-custom-integrations/src/state_machines/custom_integrations/provider.tsx",
+            "path": "x-pack/solutions/observability/packages/kbn-custom-integrations/src/state_machines/custom_integrations/provider.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -286,7 +286,7 @@
                 "signature": [
                   "string"
                 ],
-                "path": "packages/kbn-custom-integrations/src/state_machines/custom_integrations/provider.tsx",
+                "path": "x-pack/solutions/observability/packages/kbn-custom-integrations/src/state_machines/custom_integrations/provider.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -306,7 +306,7 @@
               "IntegrationError",
               ") => void) | undefined"
             ],
-            "path": "packages/kbn-custom-integrations/src/state_machines/custom_integrations/provider.tsx",
+            "path": "x-pack/solutions/observability/packages/kbn-custom-integrations/src/state_machines/custom_integrations/provider.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -320,7 +320,7 @@
                 "signature": [
                   "IntegrationError"
                 ],
-                "path": "packages/kbn-custom-integrations/src/state_machines/custom_integrations/provider.tsx",
+                "path": "x-pack/solutions/observability/packages/kbn-custom-integrations/src/state_machines/custom_integrations/provider.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -344,7 +344,7 @@
         "signature": [
           "{ integrationName: string; datasets: { name: string; type: \"metrics\" | \"logs\"; }[]; }"
         ],
-        "path": "packages/kbn-custom-integrations/src/types.ts",
+        "path": "x-pack/solutions/observability/packages/kbn-custom-integrations/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -359,7 +359,7 @@
         "signature": [
           "{ saveCreateFields: (() => void) | undefined; updateCreateFields: ((fields: Partial<{ integrationName: string; datasets: { name: string; type: \"metrics\" | \"logs\"; }[]; }>) => void) | undefined; }"
         ],
-        "path": "packages/kbn-custom-integrations/src/hooks/use_consumer_custom_integrations.ts",
+        "path": "x-pack/solutions/observability/packages/kbn-custom-integrations/src/hooks/use_consumer_custom_integrations.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -377,7 +377,7 @@
           "> | undefined; } & ",
           "WithSelectedMode"
         ],
-        "path": "packages/kbn-custom-integrations/src/state_machines/custom_integrations/types.ts",
+        "path": "x-pack/solutions/observability/packages/kbn-custom-integrations/src/state_machines/custom_integrations/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

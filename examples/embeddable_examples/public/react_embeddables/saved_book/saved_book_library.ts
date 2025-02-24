@@ -23,7 +23,7 @@ export const saveBookAttributes = async (
   maybeId?: string,
   attributes?: BookAttributes
 ): Promise<string> => {
-  await new Promise((r) => setTimeout(r, 100)); // simulate save to network.
+  await new Promise((r) => setTimeout(r, 500)); // simulate save to network.
   const id = maybeId ?? v4();
   storage.set(id, attributes);
   return id;

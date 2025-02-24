@@ -22,9 +22,17 @@ export default function ({ getService }: FtrProviderContext) {
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .expect(200));
 
-    it('should return 404 for an exact match index', () =>
+    it('should return 404 when no indices match', () =>
       supertest
         .get(`/internal/index-pattern-management/resolve_index/test`)
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+        .expect(404));
+
+    it('should return 404 when cluster is not found', () =>
+      supertest
+        .get(
+          `/internal/index-pattern-management/resolve_index/cluster1:filebeat-*,cluster2:filebeat-*`
+        )
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .expect(404));
   });

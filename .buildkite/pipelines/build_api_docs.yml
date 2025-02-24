@@ -18,7 +18,7 @@ steps:
       image: family/kibana-ubuntu-2004
       imageProject: elastic-images-prod
       provider: gcp
-      machineType: n2-standard-4
+      machineType: n2-highmem-4
       preemptible: true
     key: build_api_docs
     timeout_in_minutes: 50

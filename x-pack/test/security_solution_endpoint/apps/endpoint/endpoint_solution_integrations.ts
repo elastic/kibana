@@ -86,21 +86,15 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         );
 
         await pageObjects.timeline.navigateToTimelineList();
-        await pageObjects.timeline.openTimelineById(
-          timeline.data.persistTimeline.timeline.savedObjectId
-        );
+        await pageObjects.timeline.openTimelineById(timeline.savedObjectId);
         await pageObjects.timeline.setDateRange('Last 1 year');
         await pageObjects.timeline.waitForEvents(60_000 * 2);
       });
 
       after(async () => {
         if (timeline) {
-          log.info(
-            `Cleaning up created timeline [${timeline.data.persistTimeline.timeline.title} - ${timeline.data.persistTimeline.timeline.savedObjectId}]`
-          );
-          await timelineTestService.deleteTimeline(
-            timeline.data.persistTimeline.timeline.savedObjectId
-          );
+          log.info(`Cleaning up created timeline [${timeline.title} - ${timeline.savedObjectId}]`);
+          await timelineTestService.deleteTimeline(timeline.savedObjectId);
         }
       });
 

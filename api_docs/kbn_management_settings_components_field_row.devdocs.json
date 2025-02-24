@@ -23,7 +23,7 @@
           },
           ") => React.JSX.Element"
         ],
-        "path": "packages/kbn-management/settings/components/field_row/field_row.tsx",
+        "path": "src/platform/packages/shared/kbn-management/settings/components/field_row/field_row.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -45,7 +45,7 @@
                 "text": "FieldRowProps"
               }
             ],
-            "path": "packages/kbn-management/settings/components/field_row/field_row.tsx",
+            "path": "src/platform/packages/shared/kbn-management/settings/components/field_row/field_row.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -74,7 +74,7 @@
           },
           ">) => React.JSX.Element"
         ],
-        "path": "packages/kbn-management/settings/components/field_row/services.tsx",
+        "path": "src/platform/packages/shared/kbn-management/settings/components/field_row/services.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -96,7 +96,7 @@
               },
               ">"
             ],
-            "path": "packages/kbn-management/settings/components/field_row/services.tsx",
+            "path": "src/platform/packages/shared/kbn-management/settings/components/field_row/services.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -125,7 +125,7 @@
           },
           ") => React.JSX.Element"
         ],
-        "path": "packages/kbn-management/settings/components/field_row/services.tsx",
+        "path": "src/platform/packages/shared/kbn-management/settings/components/field_row/services.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -145,7 +145,7 @@
                 "text": "FieldRowProviderProps"
               }
             ],
-            "path": "packages/kbn-management/settings/components/field_row/services.tsx",
+            "path": "src/platform/packages/shared/kbn-management/settings/components/field_row/services.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -165,7 +165,7 @@
         "description": [
           "\nProps for a {@link FieldRow} component."
         ],
-        "path": "packages/kbn-management/settings/components/field_row/field_row.tsx",
+        "path": "src/platform/packages/shared/kbn-management/settings/components/field_row/field_row.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -180,16 +180,10 @@
             ],
             "signature": [
               "{ id: string; type: ",
-              {
-                "pluginId": "@kbn/core-ui-settings-common",
-                "scope": "common",
-                "docId": "kibKbnCoreUiSettingsCommonPluginApi",
-                "section": "def-common.UiSettingsType",
-                "text": "UiSettingsType"
-              },
+              "UiSettingsType",
               "; defaultValue?: string | number | boolean | (string | number)[] | null | undefined; name: string; groupId: string; displayName: string; isCustom: boolean; isOverridden: boolean; ariaAttributes: { ariaLabel: string; ariaDescribedBy?: string | undefined; }; savedValue?: string | number | boolean | (string | number)[] | null | undefined; defaultValueDisplay: string; isDefaultValue: boolean; unsavedFieldId: string; }"
             ],
-            "path": "packages/kbn-management/settings/components/field_row/field_row.tsx",
+            "path": "src/platform/packages/shared/kbn-management/settings/components/field_row/field_row.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -202,7 +196,7 @@
             "description": [
               "True if saving settings is enabled, false otherwise."
             ],
-            "path": "packages/kbn-management/settings/components/field_row/field_row.tsx",
+            "path": "src/platform/packages/shared/kbn-management/settings/components/field_row/field_row.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -225,16 +219,10 @@
                 "text": "UnsavedFieldChange"
               },
               "<",
-              {
-                "pluginId": "@kbn/core-ui-settings-common",
-                "scope": "common",
-                "docId": "kibKbnCoreUiSettingsCommonPluginApi",
-                "section": "def-common.UiSettingsType",
-                "text": "UiSettingsType"
-              },
+              "UiSettingsType",
               "> | undefined) => void"
             ],
-            "path": "packages/kbn-management/settings/components/field_row/field_row.tsx",
+            "path": "src/platform/packages/shared/kbn-management/settings/components/field_row/field_row.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -246,7 +234,7 @@
                 "tags": [],
                 "label": "id",
                 "description": [],
-                "path": "packages/kbn-management/settings/types/index.ts",
+                "path": "src/platform/packages/shared/kbn-management/settings/types/index.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -267,7 +255,7 @@
                   },
                   "<T> | undefined"
                 ],
-                "path": "packages/kbn-management/settings/types/index.ts",
+                "path": "src/platform/packages/shared/kbn-management/settings/types/index.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -285,7 +273,7 @@
             "signature": [
               "((id: string) => void) | undefined"
             ],
-            "path": "packages/kbn-management/settings/components/field_row/field_row.tsx",
+            "path": "src/platform/packages/shared/kbn-management/settings/components/field_row/field_row.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -301,7 +289,7 @@
                 "signature": [
                   "string"
                 ],
-                "path": "packages/kbn-management/settings/components/field_row/field_row.tsx",
+                "path": "src/platform/packages/shared/kbn-management/settings/components/field_row/field_row.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -327,16 +315,10 @@
                 "text": "UnsavedFieldChange"
               },
               "<",
-              {
-                "pluginId": "@kbn/core-ui-settings-common",
-                "scope": "common",
-                "docId": "kibKbnCoreUiSettingsCommonPluginApi",
-                "section": "def-common.UiSettingsType",
-                "text": "UiSettingsType"
-              },
+              "UiSettingsType",
               "> | undefined"
             ],
-            "path": "packages/kbn-management/settings/components/field_row/field_row.tsx",
+            "path": "src/platform/packages/shared/kbn-management/settings/components/field_row/field_row.tsx",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -369,7 +351,7 @@
             "text": "FieldRowServices"
           }
         ],
-        "path": "packages/kbn-management/settings/components/field_row/services.tsx",
+        "path": "src/platform/packages/shared/kbn-management/settings/components/field_row/services.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -383,7 +365,7 @@
             "signature": [
               "string | number | boolean | React.ReactElement<any, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | null | undefined"
             ],
-            "path": "packages/kbn-management/settings/components/field_row/services.tsx",
+            "path": "src/platform/packages/shared/kbn-management/settings/components/field_row/services.tsx",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -399,7 +381,7 @@
         "description": [
           "\nAn interface containing a collection of Kibana plugins and services required to\nrender a {@link FieldRow} component."
         ],
-        "path": "packages/kbn-management/settings/components/field_row/types.ts",
+        "path": "src/platform/packages/shared/kbn-management/settings/components/field_row/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -413,7 +395,7 @@
             "signature": [
               "{ links: { management: Record<string, string>; }; }"
             ],
-            "path": "packages/kbn-management/settings/components/field_row/types.ts",
+            "path": "src/platform/packages/shared/kbn-management/settings/components/field_row/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -429,7 +411,7 @@
         "description": [
           "\nContextual services used by a {@link FieldRow} component."
         ],
-        "path": "packages/kbn-management/settings/components/field_row/types.ts",
+        "path": "src/platform/packages/shared/kbn-management/settings/components/field_row/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -443,7 +425,7 @@
             "signature": [
               "{ [key: string]: string; }"
             ],
-            "path": "packages/kbn-management/settings/components/field_row/types.ts",
+            "path": "src/platform/packages/shared/kbn-management/settings/components/field_row/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -479,7 +461,7 @@
             "text": "FieldInputKibanaDependencies"
           }
         ],
-        "path": "packages/kbn-management/settings/components/field_row/types.ts",
+        "path": "src/platform/packages/shared/kbn-management/settings/components/field_row/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -510,7 +492,7 @@
             "text": "Services"
           }
         ],
-        "path": "packages/kbn-management/settings/components/field_row/types.ts",
+        "path": "src/platform/packages/shared/kbn-management/settings/components/field_row/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

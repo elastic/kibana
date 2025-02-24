@@ -49,7 +49,8 @@ By default, if you are running {kib} locally, go to `http://localhost:5601/`.
 If {security-features} are enabled, log in.
 --
 
-... Open the main menu, then click *Stack Monitoring*. If data collection is
+... Go to the *Stack Monitoring* page using the 
+<<kibana-navigation-search,global search field>>. If data collection is
 disabled, you are prompted to turn it on. 
 
 ** From the Console or command line, set `xpack.monitoring.collection.enabled`

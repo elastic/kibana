@@ -1,0 +1,31 @@
+# QSTR
+
+The QSTR function performs a query string query, returning true if the provided query string matches a row.
+
+Please note this functionality is currently in its technical preview stage, which means it might undergo changes or removal in future releases. Elastic commits to address any issues during this period. However, since it's a technical preview, it doesn't come under the support SLA of official GA features.
+
+## Syntax
+
+`QSTR(query)`
+
+### Parameters
+
+#### query
+
+The query parameter must be a string written in the Lucene query format.
+
+## Examples
+
+Conduct a query string query on a book's author:
+
+```esql
+FROM books
+| WHERE QSTR("author: Faulkner")
+| KEEP book_no, author
+| SORT book_no
+| LIMIT 5;
+```
+
+## Notes
+
+- Do not use `QSTR` in production - it is in technical preview and may be changed or removed in a future release

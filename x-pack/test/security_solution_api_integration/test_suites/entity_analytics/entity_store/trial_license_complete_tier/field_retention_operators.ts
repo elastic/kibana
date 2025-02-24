@@ -6,11 +6,10 @@
  */
 
 import expect from '@kbn/expect';
-import {
-  FieldRetentionOperator,
-  fieldOperatorToIngestProcessor,
-} from '@kbn/security-solution-plugin/server/lib/entity_analytics/entity_store/field_retention_definition';
+import { fieldOperatorToIngestProcessor } from '@kbn/security-solution-plugin/server/lib/entity_analytics/entity_store/field_retention';
+import { FieldDescription } from '@kbn/security-solution-plugin/server/lib/entity_analytics/entity_store/installation/types';
 import { FtrProviderContext } from '../../../../ftr_provider_context';
+import { applyIngestProcessorToDoc } from '../utils/ingest';
 export default ({ getService }: FtrProviderContext) => {
   const es = getService('es');
   const log = getService('log');
@@ -21,45 +20,25 @@ export default ({ getService }: FtrProviderContext) => {
     expect(aSorted).to.eql(bSorted);
   };
 
-  const applyOperatorToDoc = async (
-    operator: FieldRetentionOperator,
-    docSource: any
-  ): Promise<any> => {
+  const applyOperatorToDoc = async (operator: FieldDescription, docSource: any): Promise<any> => {
     const step = fieldOperatorToIngestProcessor(operator, { enrichField: 'historical' });
-    const doc = {
-      _index: 'index',
-      _id: 'id',
-      _source: docSource,
-    };
 
-    const res = await es.ingest.simulate({
-      pipeline: {
-        description: 'test',
-        processors: [step],
-      },
-      docs: [doc],
-    });
-
-    const firstDoc = res.docs?.[0];
-
-    // @ts-expect-error error is not in the types
-    const error = firstDoc?.error;
-    if (error) {
-      log.error('Full painless error below: ');
-      log.error(JSON.stringify(error, null, 2));
-      throw new Error('Painless error running pipelie see logs for full detail : ' + error?.type);
-    }
-
-    return firstDoc?.doc?._source;
+    return applyIngestProcessorToDoc([step], docSource, es, log);
   };
 
   describe('@ess @serverless @skipInServerlessMKI Entity store - Field Retention Pipeline Steps', () => {
     describe('collect_values operator', () => {
       it('should return value if no history', async () => {
-        const op: FieldRetentionOperator = {
-          operation: 'collect_values',
-          field: 'test_field',
-          maxLength: 10,
+        const op: FieldDescription = {
+          retention: { operation: 'collect_values', maxLength: 10 },
+          destination: 'test_field',
+          source: 'test_field',
+          aggregation: {
+            type: 'terms',
+            limit: 10,
+            lookbackPeriod: undefined,
+          },
+          mapping: { type: 'keyword' },
         };
 
         const doc = {
@@ -72,10 +51,16 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       it('should not take from history if latest field has maxLength values', async () => {
-        const op: FieldRetentionOperator = {
-          operation: 'collect_values',
-          field: 'test_field',
-          maxLength: 1,
+        const op: FieldDescription = {
+          retention: { operation: 'collect_values', maxLength: 1 },
+          destination: 'test_field',
+          source: 'test_field',
+          aggregation: {
+            type: 'terms',
+            limit: 10,
+            lookbackPeriod: undefined,
+          },
+          mapping: { type: 'keyword' },
         };
 
         const doc = {
@@ -90,11 +75,17 @@ export default ({ getService }: FtrProviderContext) => {
         expectArraysMatchAnyOrder(resultDoc.test_field, ['foo']);
       });
 
-      it('should take from history if latest field doesnt have maxLength values', async () => {
-        const op: FieldRetentionOperator = {
-          operation: 'collect_values',
-          field: 'test_field',
-          maxLength: 10,
+      it("should take from history if latest field doesn't have maxLength values", async () => {
+        const op: FieldDescription = {
+          retention: { operation: 'collect_values', maxLength: 10 },
+          destination: 'test_field',
+          source: 'test_field',
+          aggregation: {
+            type: 'terms',
+            limit: 10,
+            lookbackPeriod: undefined,
+          },
+          mapping: { type: 'keyword' },
         };
 
         const doc = {
@@ -110,10 +101,16 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       it('should only take from history up to maxLength values', async () => {
-        const op: FieldRetentionOperator = {
-          operation: 'collect_values',
-          field: 'test_field',
-          maxLength: 2,
+        const op: FieldDescription = {
+          retention: { operation: 'collect_values', maxLength: 2 },
+          destination: 'test_field',
+          source: 'test_field',
+          aggregation: {
+            type: 'terms',
+            limit: 10,
+            lookbackPeriod: undefined,
+          },
+          mapping: { type: 'keyword' },
         };
 
         const doc = {
@@ -129,10 +126,16 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       it('should handle value not being an array', async () => {
-        const op: FieldRetentionOperator = {
-          operation: 'collect_values',
-          field: 'test_field',
-          maxLength: 2,
+        const op: FieldDescription = {
+          retention: { operation: 'collect_values', maxLength: 2 },
+          destination: 'test_field',
+          source: 'test_field',
+          aggregation: {
+            type: 'terms',
+            limit: 10,
+            lookbackPeriod: undefined,
+          },
+          mapping: { type: 'keyword' },
         };
         const doc = {
           test_field: 'foo',
@@ -147,10 +150,16 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       it('should handle missing values', async () => {
-        const op: FieldRetentionOperator = {
-          operation: 'collect_values',
-          field: 'test_field',
-          maxLength: 2,
+        const op: FieldDescription = {
+          retention: { operation: 'collect_values', maxLength: 2 },
+          destination: 'test_field',
+          source: 'test_field',
+          aggregation: {
+            type: 'terms',
+            limit: 10,
+            lookbackPeriod: undefined,
+          },
+          mapping: { type: 'keyword' },
         };
         const doc = {};
 
@@ -161,9 +170,16 @@ export default ({ getService }: FtrProviderContext) => {
     });
     describe('prefer_newest_value operator', () => {
       it('should return latest value if no history value', async () => {
-        const op: FieldRetentionOperator = {
-          operation: 'prefer_newest_value',
-          field: 'test_field',
+        const op: FieldDescription = {
+          retention: { operation: 'prefer_newest_value' },
+          destination: 'test_field',
+          source: 'test_field',
+          aggregation: {
+            type: 'terms',
+            limit: 10,
+            lookbackPeriod: undefined,
+          },
+          mapping: { type: 'keyword' },
         };
 
         const doc = {
@@ -175,9 +191,16 @@ export default ({ getService }: FtrProviderContext) => {
         expect(resultDoc.test_field).to.eql('latest');
       });
       it('should return history value if no latest value (undefined)', async () => {
-        const op: FieldRetentionOperator = {
-          operation: 'prefer_newest_value',
-          field: 'test_field',
+        const op: FieldDescription = {
+          retention: { operation: 'prefer_newest_value' },
+          destination: 'test_field',
+          source: 'test_field',
+          aggregation: {
+            type: 'terms',
+            limit: 10,
+            lookbackPeriod: undefined,
+          },
+          mapping: { type: 'keyword' },
         };
 
         const doc = {
@@ -191,9 +214,16 @@ export default ({ getService }: FtrProviderContext) => {
         expect(resultDoc.test_field).to.eql('historical');
       });
       it('should return history value if no latest value (empty string)', async () => {
-        const op: FieldRetentionOperator = {
-          operation: 'prefer_newest_value',
-          field: 'test_field',
+        const op: FieldDescription = {
+          retention: { operation: 'prefer_newest_value' },
+          destination: 'test_field',
+          source: 'test_field',
+          aggregation: {
+            type: 'terms',
+            limit: 10,
+            lookbackPeriod: undefined,
+          },
+          mapping: { type: 'keyword' },
         };
 
         const doc = {
@@ -208,9 +238,16 @@ export default ({ getService }: FtrProviderContext) => {
         expect(resultDoc.test_field).to.eql('historical');
       });
       it('should return history value if no latest value (empty array)', async () => {
-        const op: FieldRetentionOperator = {
-          operation: 'prefer_newest_value',
-          field: 'test_field',
+        const op: FieldDescription = {
+          retention: { operation: 'prefer_newest_value' },
+          destination: 'test_field',
+          source: 'test_field',
+          aggregation: {
+            type: 'terms',
+            limit: 10,
+            lookbackPeriod: undefined,
+          },
+          mapping: { type: 'keyword' },
         };
 
         const doc = {
@@ -225,9 +262,16 @@ export default ({ getService }: FtrProviderContext) => {
         expect(resultDoc.test_field).to.eql('historical');
       });
       it('should return history value if no latest value (empty object)', async () => {
-        const op: FieldRetentionOperator = {
-          operation: 'prefer_newest_value',
-          field: 'test_field',
+        const op: FieldDescription = {
+          retention: { operation: 'prefer_newest_value' },
+          destination: 'test_field',
+          source: 'test_field',
+          aggregation: {
+            type: 'terms',
+            limit: 10,
+            lookbackPeriod: undefined,
+          },
+          mapping: { type: 'keyword' },
         };
 
         const doc = {
@@ -242,9 +286,16 @@ export default ({ getService }: FtrProviderContext) => {
         expect(resultDoc.test_field).to.eql('historical');
       });
       it('should return latest value if both latest and history values', async () => {
-        const op: FieldRetentionOperator = {
-          operation: 'prefer_newest_value',
-          field: 'test_field',
+        const op: FieldDescription = {
+          retention: { operation: 'prefer_newest_value' },
+          destination: 'test_field',
+          source: 'test_field',
+          aggregation: {
+            type: 'terms',
+            limit: 10,
+            lookbackPeriod: undefined,
+          },
+          mapping: { type: 'keyword' },
         };
 
         const doc = {
@@ -260,9 +311,16 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       it('should handle missing values', async () => {
-        const op: FieldRetentionOperator = {
-          operation: 'prefer_newest_value',
-          field: 'test_field',
+        const op: FieldDescription = {
+          retention: { operation: 'prefer_newest_value' },
+          destination: 'test_field',
+          source: 'test_field',
+          aggregation: {
+            type: 'terms',
+            limit: 10,
+            lookbackPeriod: undefined,
+          },
+          mapping: { type: 'keyword' },
         };
         const doc = {};
 
@@ -273,9 +331,16 @@ export default ({ getService }: FtrProviderContext) => {
     });
     describe('prefer_oldest_value operator', () => {
       it('should return history value if no latest value', async () => {
-        const op: FieldRetentionOperator = {
-          operation: 'prefer_oldest_value',
-          field: 'test_field',
+        const op: FieldDescription = {
+          retention: { operation: 'prefer_oldest_value' },
+          destination: 'test_field',
+          source: 'test_field',
+          aggregation: {
+            type: 'terms',
+            limit: 10,
+            lookbackPeriod: undefined,
+          },
+          mapping: { type: 'keyword' },
         };
 
         const doc = {
@@ -289,9 +354,16 @@ export default ({ getService }: FtrProviderContext) => {
         expect(resultDoc.test_field).to.eql('historical');
       });
       it('should return latest value if no history value (undefined)', async () => {
-        const op: FieldRetentionOperator = {
-          operation: 'prefer_oldest_value',
-          field: 'test_field',
+        const op: FieldDescription = {
+          retention: { operation: 'prefer_oldest_value' },
+          destination: 'test_field',
+          source: 'test_field',
+          aggregation: {
+            type: 'terms',
+            limit: 10,
+            lookbackPeriod: undefined,
+          },
+          mapping: { type: 'keyword' },
         };
 
         const doc = {
@@ -306,9 +378,16 @@ export default ({ getService }: FtrProviderContext) => {
         expect(resultDoc.test_field).to.eql('latest');
       });
       it('should return latest value if no history value (empty string)', async () => {
-        const op: FieldRetentionOperator = {
-          operation: 'prefer_oldest_value',
-          field: 'test_field',
+        const op: FieldDescription = {
+          retention: { operation: 'prefer_oldest_value' },
+          destination: 'test_field',
+          source: 'test_field',
+          aggregation: {
+            type: 'terms',
+            limit: 10,
+            lookbackPeriod: undefined,
+          },
+          mapping: { type: 'keyword' },
         };
 
         const doc = {
@@ -323,9 +402,16 @@ export default ({ getService }: FtrProviderContext) => {
         expect(resultDoc.test_field).to.eql('latest');
       });
       it('should return latest value if no history value (empty array)', async () => {
-        const op: FieldRetentionOperator = {
-          operation: 'prefer_oldest_value',
-          field: 'test_field',
+        const op: FieldDescription = {
+          retention: { operation: 'prefer_oldest_value' },
+          destination: 'test_field',
+          source: 'test_field',
+          aggregation: {
+            type: 'terms',
+            limit: 10,
+            lookbackPeriod: undefined,
+          },
+          mapping: { type: 'keyword' },
         };
 
         const doc = {
@@ -340,9 +426,16 @@ export default ({ getService }: FtrProviderContext) => {
         expect(resultDoc.test_field).to.eql('latest');
       });
       it('should return latest value if no history value (empty object)', async () => {
-        const op: FieldRetentionOperator = {
-          operation: 'prefer_oldest_value',
-          field: 'test_field',
+        const op: FieldDescription = {
+          retention: { operation: 'prefer_oldest_value' },
+          destination: 'test_field',
+          source: 'test_field',
+          aggregation: {
+            type: 'terms',
+            limit: 10,
+            lookbackPeriod: undefined,
+          },
+          mapping: { type: 'keyword' },
         };
 
         const doc = {
@@ -357,9 +450,16 @@ export default ({ getService }: FtrProviderContext) => {
         expect(resultDoc.test_field).to.eql('latest');
       });
       it('should return history value if both latest and history values', async () => {
-        const op: FieldRetentionOperator = {
-          operation: 'prefer_oldest_value',
-          field: 'test_field',
+        const op: FieldDescription = {
+          retention: { operation: 'prefer_oldest_value' },
+          destination: 'test_field',
+          source: 'test_field',
+          aggregation: {
+            type: 'terms',
+            limit: 10,
+            lookbackPeriod: undefined,
+          },
+          mapping: { type: 'keyword' },
         };
 
         const doc = {

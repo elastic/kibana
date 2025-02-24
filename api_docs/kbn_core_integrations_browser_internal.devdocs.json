@@ -11,7 +11,7 @@
         "tags": [],
         "label": "IntegrationsServiceSetupDeps",
         "description": [],
-        "path": "packages/core/integrations/core-integrations-browser-internal/src/integrations_service.ts",
+        "path": "src/core/packages/integrations/browser-internal/src/integrations_service.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -23,15 +23,9 @@
             "label": "uiSettings",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/core-ui-settings-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreUiSettingsBrowserPluginApi",
-                "section": "def-public.IUiSettingsClient",
-                "text": "IUiSettingsClient"
-              }
+              "IUiSettingsClient"
             ],
-            "path": "packages/core/integrations/core-integrations-browser-internal/src/integrations_service.ts",
+            "path": "src/core/packages/integrations/browser-internal/src/integrations_service.ts",
             "deprecated": false,
             "trackAdoption": false
           }

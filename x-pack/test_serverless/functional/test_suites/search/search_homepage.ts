@@ -84,5 +84,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await pageObjects.svlSearchHomePage.createApiKeyInFlyout('ftr-test-key');
       await pageObjects.svlSearchHomePage.closeConnectionDetailsFlyout();
     });
+
+    it('shows the AI assistant', async () => {
+      await pageObjects.svlSearchHomePage.expectAIAssistantToExist();
+    });
   });
 }

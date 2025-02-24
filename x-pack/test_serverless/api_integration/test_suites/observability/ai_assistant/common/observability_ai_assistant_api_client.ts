@@ -15,37 +15,51 @@ import supertest from 'supertest';
 import { Subtract } from 'utility-types';
 import { format } from 'url';
 import { Config } from '@kbn/test';
+import { SupertestWithRoleScope } from '@kbn/test-suites-xpack/api_integration/deployment_agnostic/services/role_scoped_supertest';
 import { InheritedFtrProviderContext } from '../../../../services';
 import type { InternalRequestHeader, RoleCredentials } from '../../../../../shared/services';
 
 export function getObservabilityAIAssistantApiClient({
   svlSharedConfig,
+  supertestUserWithCookieCredentials,
 }: {
   svlSharedConfig: Config;
+  supertestUserWithCookieCredentials?: SupertestWithRoleScope;
 }) {
-  const kibanaServer = svlSharedConfig.get('servers.kibana');
-  const cAuthorities = svlSharedConfig.get('servers.kibana.certificateAuthorities');
+  if (supertestUserWithCookieCredentials) {
+    return createObservabilityAIAssistantApiClient(supertestUserWithCookieCredentials);
+  } else {
+    const kibanaServer = svlSharedConfig.get('servers.kibana');
+    const cAuthorities = svlSharedConfig.get('servers.kibana.certificateAuthorities');
 
-  const url = format({
-    ...kibanaServer,
-    auth: false, // don't use auth in serverless
-  });
-
-  return createObservabilityAIAssistantApiClient(supertest.agent(url, { ca: cAuthorities }));
+    const url = format({
+      ...kibanaServer,
+      auth: false, // don't use auth in serverless
+    });
+    return createObservabilityAIAssistantApiClient(supertest.agent(url, { ca: cAuthorities }));
+  }
 }
 
-type ObservabilityAIAssistantApiClientKey = 'slsUser';
+type ObservabilityAIAssistantApiClientKey =
+  | 'slsAdmin'
+  | 'slsEditor'
+  | 'slsUser'
+  | 'slsUnauthorized';
+
 export type ObservabilityAIAssistantApiClient = Record<
   ObservabilityAIAssistantApiClientKey,
   Awaited<ReturnType<typeof getObservabilityAIAssistantApiClient>>
 >;
-export function createObservabilityAIAssistantApiClient(st: supertest.Agent) {
+
+export function createObservabilityAIAssistantApiClient(
+  st: SupertestWithRoleScope | supertest.Agent
+) {
   return <TEndpoint extends ObservabilityAIAssistantAPIEndpoint>(
     options: {
       type?: 'form-data';
       endpoint: TEndpoint;
-      roleAuthc: RoleCredentials;
-      internalReqHeader: InternalRequestHeader;
+      roleAuthc?: RoleCredentials;
+      internalReqHeader?: InternalRequestHeader;
     } & ObservabilityAIAssistantAPIClientRequestParamsOf<TEndpoint> & {
         params?: { query?: { _inspect?: boolean } };
       }
@@ -57,7 +71,8 @@ export function createObservabilityAIAssistantApiClient(st: supertest.Agent) {
     const { method, pathname, version } = formatRequest(endpoint, params.path);
     const url = format({ pathname, query: params?.query });
 
-    const headers: Record<string, string> = { ...internalReqHeader, ...roleAuthc.apiKeyHeader };
+    const headers: Record<string, string> =
+      roleAuthc && internalReqHeader ? { ...internalReqHeader, ...roleAuthc.apiKeyHeader } : {};
 
     if (version) {
       headers['Elastic-Api-Version'] = version;
@@ -182,10 +197,47 @@ export async function getObservabilityAIAssistantApiClientService({
   getService,
 }: InheritedFtrProviderContext): Promise<ObservabilityAIAssistantApiClient> {
   const svlSharedConfig = getService('config');
-  // defaults to elastic_admin user when used without auth
+  const roleScopedSupertest = getService('roleScopedSupertest');
+
+  // admin user
+  const supertestAdminWithCookieCredentials: SupertestWithRoleScope =
+    await roleScopedSupertest.getSupertestWithRoleScope('admin', {
+      useCookieHeader: true,
+      withInternalHeaders: true,
+    });
+
+  // editor user
+  const supertestEditorWithCookieCredentials: SupertestWithRoleScope =
+    await roleScopedSupertest.getSupertestWithRoleScope('editor', {
+      useCookieHeader: true,
+      withInternalHeaders: true,
+    });
+
+  // unauthorized user
+  const supertestUnauthorizedWithCookieCredentials: SupertestWithRoleScope =
+    await roleScopedSupertest.getSupertestWithRoleScope('viewer', {
+      useCookieHeader: false,
+      withInternalHeaders: true,
+    });
+
   return {
+    // defaults to elastic_admin user when used without auth
     slsUser: await getObservabilityAIAssistantApiClient({
       svlSharedConfig,
+    }),
+    // cookie auth for internal apis
+    slsAdmin: await getObservabilityAIAssistantApiClient({
+      svlSharedConfig,
+      supertestUserWithCookieCredentials: supertestAdminWithCookieCredentials,
+    }),
+    // cookie auth for internal apis
+    slsEditor: await getObservabilityAIAssistantApiClient({
+      svlSharedConfig,
+      supertestUserWithCookieCredentials: supertestEditorWithCookieCredentials,
+    }),
+    slsUnauthorized: await getObservabilityAIAssistantApiClient({
+      svlSharedConfig,
+      supertestUserWithCookieCredentials: supertestUnauthorizedWithCookieCredentials,
     }),
   };
 }

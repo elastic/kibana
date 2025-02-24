@@ -78,7 +78,11 @@ export function DashboardDrilldownsManageProvider({ getService }: FtrProviderCon
     }: {
       drilldownName: string;
       destinationURLTemplate: string;
-      trigger: 'VALUE_CLICK_TRIGGER' | 'SELECT_RANGE_TRIGGER' | 'IMAGE_CLICK_TRIGGER';
+      trigger:
+        | 'VALUE_CLICK_TRIGGER'
+        | 'SELECT_RANGE_TRIGGER'
+        | 'IMAGE_CLICK_TRIGGER'
+        | 'CONTEXT_MENU_TRIGGER';
     }) {
       await this.fillInDrilldownName(drilldownName);
       await this.selectTriggerIfNeeded(trigger);
@@ -94,7 +98,11 @@ export function DashboardDrilldownsManageProvider({ getService }: FtrProviderCon
     }
 
     async selectTriggerIfNeeded(
-      trigger: 'VALUE_CLICK_TRIGGER' | 'SELECT_RANGE_TRIGGER' | 'IMAGE_CLICK_TRIGGER'
+      trigger:
+        | 'VALUE_CLICK_TRIGGER'
+        | 'SELECT_RANGE_TRIGGER'
+        | 'IMAGE_CLICK_TRIGGER'
+        | 'CONTEXT_MENU_TRIGGER'
     ) {
       if (await testSubjects.exists(`triggerPicker`)) {
         const container = await testSubjects.find(`triggerPicker-${trigger}`);
@@ -115,7 +123,9 @@ export function DashboardDrilldownsManageProvider({ getService }: FtrProviderCon
     }
 
     async fillInURLTemplate(destinationURLTemplate: string) {
-      const monaco = await find.byCssSelector('.urlTemplateEditor__container .monaco-editor');
+      const monaco = await find.byCssSelector(
+        '[data-test-subj="url-template-editor-container"] .monaco-editor'
+      );
       await monaco.clickMouseButton();
       await this.eraseInput(300);
       await browser.pressKeys(destinationURLTemplate);

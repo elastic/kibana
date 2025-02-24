@@ -262,6 +262,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           path: '/field-update-test',
           method: 'DELETE',
         });
+        await timePicker.setDefaultAbsoluteRangeViaUiSettings();
       });
 
       it('should show new fields Available fields', async () => {

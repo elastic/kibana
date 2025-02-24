@@ -23,9 +23,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   const isServerless = config.get('serverless');
   const expectedConsumer = isServerless ? 'observability' : 'slo';
 
-  describe('Burn rate rule', function () {
-    // see details: https://github.com/elastic/kibana/issues/196252
-    this.tags(['failsOnMKI']);
+  describe('Burn rate rule', () => {
     const RULE_TYPE_ID = 'slo.rules.burnRate';
     const DATA_VIEW = 'kbn-data-forge-fake_hosts.fake_hosts-*';
     const RULE_ALERT_INDEX = '.alerts-observability.slo.alerts-default';
@@ -35,6 +33,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     let dataForgeIndices: string[];
     let actionId: string;
     let ruleId: string;
+    let dependencyRuleId: string;
     let adminRoleAuthc: RoleCredentials;
     let internalHeaders: InternalRequestHeader;
 
@@ -78,6 +77,18 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         .delete(`/api/actions/connector/${actionId}`)
         .set(adminRoleAuthc.apiKeyHeader)
         .set(internalHeaders);
+      await esClient.deleteByQuery({
+        index: RULE_ALERT_INDEX,
+        query: {
+          bool: {
+            should: [
+              { term: { 'kibana.alert.rule.uuid': ruleId } },
+              { term: { 'kibana.alert.rule.uuid': dependencyRuleId } },
+            ],
+          },
+        },
+        conflicts: 'proceed',
+      });
       await esClient.deleteByQuery({
         index: '.kibana-event-log-*',
         query: { term: { 'rule.id': ruleId } },
@@ -204,6 +215,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           actions: [],
         });
 
+        dependencyRuleId = dependencyRule.id;
         const createdRule = await alertingApi.createRule({
           roleAuthc: adminRoleAuthc,
           tags: ['observability'],

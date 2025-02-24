@@ -9,28 +9,14 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const { visualize, lens, common, tagManagement } = getPageObjects([
-    'visualize',
-    'lens',
-    'common',
-    'tagManagement',
-  ]);
+  const { visualize, lens, tagManagement } = getPageObjects(['visualize', 'lens', 'tagManagement']);
   const find = getService('find');
   const retry = getService('retry');
   const toastsService = getService('toasts');
   const testSubjects = getService('testSubjects');
   const listingTable = getService('listingTable');
-  const from = 'Sep 19, 2015 @ 06:31:44.000';
-  const to = 'Sep 23, 2015 @ 18:31:44.000';
 
   describe('lens annotations tests', () => {
-    before(async () => {
-      await common.setTime({ from, to });
-    });
-    after(async () => {
-      await common.unsetTime();
-    });
-
     it('should show a disabled annotation layer button if there is no date histogram in data layer', async () => {
       await visualize.navigateToNewVisualization();
       await visualize.clickVisType('lens');
@@ -46,7 +32,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('should add manual annotation layer with static date and allow edition', async () => {
       await lens.removeLayer();
-      await lens.goToTimeRange();
       await lens.dragFieldToWorkspace('@timestamp', 'xyVisChart');
 
       await lens.createLayer('annotations');
@@ -117,8 +102,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       it('should save annotation group to library', async () => {
         await visualize.navigateToNewVisualization();
         await visualize.clickVisType('lens');
-
-        await lens.goToTimeRange();
         await lens.dragFieldToWorkspace('@timestamp', 'xyVisChart');
 
         await lens.createLayer('annotations');
@@ -166,8 +149,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       it('should add annotation group from library', async () => {
         await visualize.navigateToNewVisualization();
         await visualize.clickVisType('lens');
-
-        await lens.goToTimeRange();
         await lens.dragFieldToWorkspace('@timestamp', 'xyVisChart');
 
         await lens.createLayer('annotations', ANNOTATION_GROUP_TITLE);

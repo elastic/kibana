@@ -199,7 +199,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
               legend: '6 categories',
               colorStats: [
                 { color: '#000000', percentage: 45 },
-                { color: '#54B399', percentage: 55 },
+                { color: '#16C5C0', percentage: 55 },
               ],
             },
             {
@@ -208,7 +208,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
               legend: '1 category',
               colorStats: [
                 { color: '#000000', percentage: 10 },
-                { color: '#54B399', percentage: 90 },
+                { color: '#16C5C0', percentage: 90 },
               ],
             },
             {
@@ -217,7 +217,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
               legend: 'top 20 of 46 categories',
               colorStats: [
                 { color: '#000000', percentage: 60 },
-                { color: '#54B399', percentage: 37 },
+                { color: '#16C5C0', percentage: 37 },
               ],
             },
             {
@@ -226,7 +226,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
               legend: 'top 20 of 3327 categories',
               colorStats: [
                 { color: '#000000', percentage: 25 },
-                { color: '#54B399', percentage: 75 },
+                { color: '#16C5C0', percentage: 75 },
               ],
             },
             {
@@ -235,7 +235,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
               legend: '2 categories',
               colorStats: [
                 { color: '#000000', percentage: 15 },
-                { color: '#54B399', percentage: 85 },
+                { color: '#16C5C0', percentage: 85 },
               ],
             },
             {
@@ -243,7 +243,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
               id: 'customer_id',
               legend: 'top 20 of 46 categories',
               colorStats: [
-                { color: '#54B399', percentage: 37 },
+                { color: '#16C5C0', percentage: 37 },
                 { color: '#000000', percentage: 60 },
               ],
             },
@@ -253,7 +253,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
               legend: 'top 20 of 183 categories',
               colorStats: [
                 { color: '#000000', percentage: 23 },
-                { color: '#54B399', percentage: 77 },
+                { color: '#16C5C0', percentage: 77 },
               ],
             },
             {
@@ -262,7 +262,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
               legend: '1 category',
               colorStats: [
                 { color: '#000000', percentage: 10 },
-                { color: '#54B399', percentage: 90 },
+                { color: '#16C5C0', percentage: 90 },
               ],
             },
             {
@@ -271,7 +271,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
               legend: '7 categories',
               colorStats: [
                 { color: '#000000', percentage: 20 },
-                { color: '#54B399', percentage: 80 },
+                { color: '#16C5C0', percentage: 80 },
               ],
             },
             {
@@ -280,7 +280,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
               legend: '0 - 6',
               colorStats: [
                 { color: '#000000', percentage: 20 },
-                { color: '#54B399', percentage: 75 },
+                { color: '#16C5C0', percentage: 75 },
               ],
             },
           ],
@@ -302,6 +302,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           {
             identifier: 'percentiles(products.base_price)',
             label: 'products.base_price.percentiles',
+            form: {
+              transformPercentilesAggPercentsSelector: [1, 25, 50, 75, 100],
+            },
           },
           {
             identifier: 'filter(customer_phone)',
