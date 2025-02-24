@@ -429,7 +429,7 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
     } catch (e) {
       this.options.setIsKBSetupInProgress(this.spaceId, false);
       this.options.logger.error(`Error setting up Knowledge Base: ${e.message}`);
-      throw new Error(e.message);
+      throw new Error(`Error setting up Knowledge Base: ${e.message}`);
     } finally {
       this.options.setIsKBSetupInProgress(this.spaceId, false);
     }

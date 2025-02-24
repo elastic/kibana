@@ -14,24 +14,44 @@ import {
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
-import React, { useCallback, useMemo } from 'react';
+import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import { useInstallProductDoc } from '../../api/product_docs/use_install_product_doc';
 import { useGetProductDocStatus } from '../../api/product_docs/use_get_product_doc_status';
 import * as i18n from './translations';
 
 export const ProductDocumentationManagement: React.FC = React.memo(() => {
-  const { mutateAsync: installProductDoc, isLoading: isInstalling } = useInstallProductDoc();
-  const { data: status, isLoading: isStatusLoading, isFetched } = useGetProductDocStatus();
+  const [{ isInstalled, isInstalling }, setState] = useState({
+    isInstalled: true,
+    isInstalling: false,
+  });
 
-  const onClickInstall = useCallback(() => {
-    installProductDoc();
+  const { mutateAsync: installProductDoc } = useInstallProductDoc();
+  const { status, isLoading: isStatusLoading } = useGetProductDocStatus();
+
+  useEffect(() => {
+    if (status) {
+      setState((prevState) => ({
+        ...prevState,
+        isInstalled: status.overall === 'installed',
+      }));
+    }
+  }, [status]);
+
+  const onClickInstall = useCallback(async () => {
+    setState((prevState) => ({ ...prevState, isInstalling: true }));
+    try {
+      await installProductDoc();
+      setState({ isInstalled: true, isInstalling: false });
+    } catch {
+      setState({ isInstalled: false, isInstalling: false });
+    }
   }, [installProductDoc]);
 
   const content = useMemo(() => {
     if (isStatusLoading) {
       return <EuiLoadingSpinner data-test-subj="statusLoading" size="m" />;
     }
-    if (status?.overall === 'installing' || isInstalling) {
+    if (isInstalling) {
       return (
         <EuiFlexGroup justifyContent="flexStart" alignItems="center">
           <EuiLoadingSpinner size="m" data-test-subj="installing" />
@@ -52,9 +72,9 @@ export const ProductDocumentationManagement: React.FC = React.memo(() => {
         </EuiFlexItem>
       </EuiFlexGroup>
     );
-  }, [isInstalling, isStatusLoading, onClickInstall, status?.overall]);
+  }, [isInstalling, isStatusLoading, onClickInstall]);
 
-  if (!isFetched || status?.overall === 'installed') {
+  if (isInstalled) {
     return null;
   }
 
