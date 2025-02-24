@@ -41,7 +41,7 @@ export const StatusColumn: React.FunctionComponent<{
 
   const calcPercentage = useCallback(
     (agents: number): number =>
-      autoUpgradeAgentsStatus
+      autoUpgradeAgentsStatus && autoUpgradeAgentsStatus.totalAgents > 0
         ? Math.round((agents / autoUpgradeAgentsStatus.totalAgents) * 100)
         : 0,
     [autoUpgradeAgentsStatus]
@@ -142,11 +142,13 @@ export const StatusColumn: React.FunctionComponent<{
   }, [agentVersionCounts, percentage, calcPercentage, getAgentsHref]);
 
   return (
-    <EuiFlexGroup direction="row" gutterSize="s" alignItems="center">
-      <EuiFlexItem grow={false}>
+    <EuiFlexGroup direction="row" gutterSize="s" alignItems="center" justifyContent="flexStart">
+      <EuiFlexItem grow={1}>
         <EuiText size="s">{currentPercentage}</EuiText>
       </EuiFlexItem>
-      <EuiFlexItem component="span">{currentStatus}</EuiFlexItem>
+      <EuiFlexItem component="span" grow={4}>
+        {currentStatus}
+      </EuiFlexItem>
     </EuiFlexGroup>
   );
 };
