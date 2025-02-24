@@ -38,7 +38,7 @@ export const MANAGED_CONFIG_KEYS: ManagedConfigKey[] = [
   {
     key: 'search.exclude',
     value: {
-      ['**/packages/kbn-pm/dist/index.js']: true,
+      ['**/packages/kbn-pm/dist/index.js']: true, // FIXME delete this?
       ['**/api_docs']: true,
       ['**/tsconfig.tsbuildinfo']: true,
       ['**/*.map']: true,
