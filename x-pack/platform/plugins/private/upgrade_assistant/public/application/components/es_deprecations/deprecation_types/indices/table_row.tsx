@@ -28,7 +28,7 @@ interface TableRowProps {
   deprecation: EnrichedDeprecationInfo;
   rowFieldNames: DeprecationTableColumns[];
   selectedDeprecations?: Set<string>,
-  toggleDeprecation?: (id: string) => void,
+  toggleDeprecation?: (id?: string) => void,
 }
 
 const IndexTableRowCells: React.FunctionComponent<TableRowProps> = ({

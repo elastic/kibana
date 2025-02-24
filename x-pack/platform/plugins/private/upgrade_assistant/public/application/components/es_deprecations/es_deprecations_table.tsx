@@ -76,7 +76,7 @@ const cellToLabelMap = {
     label: i18n.translate('xpack.upgradeAssistant.esDeprecations.table.selectColumnTitle', {
       defaultMessage: 'Select',
     }),
-    width: '8px',
+    width: '3px',
   },
   isCritical: {
     label: i18n.translate('xpack.upgradeAssistant.esDeprecations.table.statusColumnTitle', {
