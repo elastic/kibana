@@ -12,8 +12,9 @@ import { CA_CERT_PATH } from '@kbn/dev-utils';
 import https from 'https';
 
 export function getFetchAgent(url: string) {
-  const isHTTPS = new URL(url).protocol === 'https:';
-  const isLocalhost = new URL(url).hostname === 'localhost';
+  const urlObj = new URL(url);
+  const isHTTPS = urlObj.protocol === 'https:';
+  const isLocalhost = urlObj.hostname === 'localhost' || urlObj.hostname === '127.0.0.1';
   return isHTTPS && isLocalhost ? new https.Agent({ rejectUnauthorized: false }) : undefined;
 }
 
