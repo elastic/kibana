@@ -18,12 +18,16 @@ export interface ValidationResult {
   errors: string[]; // Or Errors?
 }
 
+export type StreamChangeStatus = 'unchanged' | 'upserted' | 'deleted';
+
 // Interface or abstract class to make somethings private?
+// Should all of these methods be async from the start?
 export interface StreamActiveRecord {
   definition: StreamDefinition;
+  changeStatus: StreamChangeStatus;
   clone(): StreamActiveRecord;
   markForDeletion(): void;
-  update(newDefinition: StreamDefinition): void;
+  update(newDefinition: StreamDefinition, desiredState: State, startingState: State): void;
   validate(
     desiredState: State,
     startingState: State,

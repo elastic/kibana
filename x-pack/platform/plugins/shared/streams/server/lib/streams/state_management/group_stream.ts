@@ -13,14 +13,16 @@ import {
 import { cloneDeep } from 'lodash';
 import { IScopedClusterClient } from '@kbn/core/server';
 import { State } from './state';
-import { StreamActiveRecord, ValidationResult } from './types';
+import { StreamActiveRecord, StreamChangeStatus, ValidationResult } from './types';
 
 export class GroupStream implements StreamActiveRecord {
   definition: GroupStreamDefinition;
+  changeStatus: StreamChangeStatus;
 
   constructor(definition: GroupStreamDefinition) {
     // What about the assets?
     this.definition = definition;
+    this.changeStatus = 'unchanged';
   }
 
   clone(): StreamActiveRecord {
@@ -28,13 +30,13 @@ export class GroupStream implements StreamActiveRecord {
   }
 
   markForDeletion(): void {
-    // Mark as deleted
+    this.changeStatus = 'deleted';
   }
 
   update(newDefinition: StreamDefinition) {
     if (isGroupStreamDefinition(newDefinition)) {
-      this.definition = newDefinition;
-      // Mark as changed
+      this.definition = newDefinition; // Perhaps it should avoid this if the definition are the same?
+      this.changeStatus = 'upserted';
     } else {
       throw new Error('Cannot apply this change');
     }

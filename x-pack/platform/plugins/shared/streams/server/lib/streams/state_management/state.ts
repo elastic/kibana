@@ -19,28 +19,27 @@ export class State {
   }
 
   applyChanges(requestedChanges: StreamChange[]): State {
+    // What if multiple changes target the same stream?
+
     // Optional: Expand requested changes to include automatic creation of missing streams
     const newState = this.clone();
 
     requestedChanges.forEach((change) => {
-      const targetStream = this.streams.get(change.target);
+      const targetStream = newState.streams.get(change.target);
 
       if (!targetStream) {
         if (change.type === 'delete') {
           throw new Error('Cannot delete non-existing stream');
         } else {
           const newStream = streamFromDefinition(change.request.stream);
-          // Mark as changed
-          // What if adding this stream to the state triggers other changes?
-          this.streams.set(newStream.definition.name, newStream);
+          newStream.update(change.request.stream, newState, this);
+          newState.streams.set(newStream.definition.name, newStream);
         }
       } else {
         if (change.type === 'delete') {
           targetStream.markForDeletion();
         } else {
-          // Each stream type should check that the payload matches the existing stream type
-          // What if this update needs to also change things in other streams?
-          targetStream.update(change.request.stream);
+          targetStream.update(change.request.stream, newState, this);
         }
       }
     });
@@ -72,11 +71,22 @@ export class State {
   }
 
   changes() {
-    // Find all streams marked as changed and order them by their impact level
+    // Could there be conflicts between changes, like a group being updated with new members before that member is deleted?
+    // I guess the deletion change for that member should catch that and update the group again or validation for the group should catch it
+    // In reverse, the change for the group should check that the member was deleted and throw? And in any case the validation should catch it
+    return this.streams.all().filter((stream) => stream.changeStatus !== 'unchanged');
   }
 
   async commitChanges() {
     // Based on .changes(), go off and do the actual work in ES
+  }
+
+  async attemptRollback(startingState: State) {
+    // Find what changes should have been applied with .changes()
+    // Then ask each stream to validate its current state and try to rollback those that did a change
+    // To match what was in startingState
+    // I wonder if as part of commitChanges I should change the status to "committed"
+    throw new Error('Method not implemented.');
   }
 
   static async currentState(storageClient: StreamsStorageClient): Promise<State> {

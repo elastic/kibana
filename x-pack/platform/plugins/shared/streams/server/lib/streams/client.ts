@@ -138,11 +138,13 @@ export class StreamsClient {
     }
 
     if (dryRun) {
+      // Perhaps we can/should compute some kind of diff here instead to make it easier for the UI to present what (in more detail) has changed?
       return desiredState.changes();
     } else {
       try {
         await desiredState.commitChanges();
       } catch (error) {
+        await desiredState.attemptRollback(startingState);
         // Rollback to currentState
       }
     }
