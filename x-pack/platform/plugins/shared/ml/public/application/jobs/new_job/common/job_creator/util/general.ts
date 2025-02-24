@@ -287,7 +287,7 @@ export function advancedStartDatafeed(
   if (jobCreator !== null) {
     jobCloningService.stashJobForCloning(jobCreator, false, false);
   }
-  navigateToPath('/jobs');
+  navigateToPath(ML_PAGES.ANOMALY_DETECTION_JOBS_MANAGE);
 }
 
 export function aggFieldPairsCanBeCharted(afs: AggFieldPair[]) {

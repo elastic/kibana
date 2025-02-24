@@ -69,11 +69,6 @@ export const useNavigateToManagementMlLink = (appId: string) => {
   const mlManagementLocatorInternal = useMlManagementLocatorInternal();
   const [globalState] = useUrlState('_g');
 
-  const {
-    services: {
-      application: { navigateToUrl },
-    },
-  } = useMlKibana();
 
   const redirectToMlPage: NavigateToMlManagementLink = useCallback(
     async (_page, pageState?) => {
@@ -100,7 +95,7 @@ export const useNavigateToManagementMlLink = (appId: string) => {
       }
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [MlManagementLocatorInternal, navigateToUrl, appId]
+    [MlManagementLocatorInternal, appId]
   );
 
   return redirectToMlPage;

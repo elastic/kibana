@@ -213,8 +213,7 @@ export function MachineLearningNavigationProvider({
     },
 
     async navigateToTrainedModels() {
-      await this.navigateToMl();
-      await this.navigateToArea('~mlMainTab & ~trainedModels', 'mlModelsTableContainer');
+      await this.navigateToStackManagementMlSection('trained_models', 'mlModelsTableContainer');
     },
 
     async navigateToModelManagementNodeList() {
