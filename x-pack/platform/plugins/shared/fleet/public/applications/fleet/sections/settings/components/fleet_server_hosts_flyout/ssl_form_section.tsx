@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { EuiTextArea, EuiFormRow, EuiRadioGroup, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
@@ -13,86 +13,23 @@ import { i18n } from '@kbn/i18n';
 import { MultiRowInput } from '../multi_row_input';
 
 import { SecretFormRow } from '../edit_output_flyout/output_form_secret_form_row';
-import { useFleetStatus } from '../../../../hooks';
+
 import { clientAuth } from '../../../../../../../common/types';
 
 import type { FleetServerHostSSLInputsType } from './use_fleet_server_host_form';
 
 interface Props {
   inputs: FleetServerHostSSLInputsType;
+  useSecretsStorage: boolean;
+  isConvertedToSecret: {
+    sslKey: boolean;
+    sslESKey: boolean;
+  };
+  onToggleSecretAndClearValue: (secretEnabled: boolean) => void;
 }
 
 export const SSLFormSection: React.FunctionComponent<Props> = (props) => {
-  const { inputs } = props;
-
-  const [isFirstLoad, setIsFirstLoad] = React.useState(true);
-  const [isConvertedToSecret, setIsConvertedToSecret] = React.useState({
-    sslKey: false,
-    sslESKey: false,
-  });
-
-  const [secretsToggleState, setSecretsToggleState] = useState<'disabled' | true | false>(true);
-  const fleetStatus = useFleetStatus();
-  if (fleetStatus.isSecretsStorageEnabled !== undefined && secretsToggleState === 'disabled') {
-    setSecretsToggleState(fleetStatus.isSecretsStorageEnabled);
-  }
-
-  const onToggleSecretStorage = (secretEnabled: boolean) => {
-    if (secretsToggleState === 'disabled') {
-      return;
-    }
-
-    setSecretsToggleState(secretEnabled);
-  };
-
-  const useSecretsStorage = secretsToggleState === false;
-
-  useEffect(() => {
-    if (!isFirstLoad) return;
-    setIsFirstLoad(false);
-    // populate the secret input with the value of the plain input in order to re-save the key with secret storage
-    if (useSecretsStorage) {
-      if (inputs.sslKeyInput.value && !inputs.sslKeySecretInput.value) {
-        inputs.sslKeySecretInput.setValue(inputs.sslKeyInput.value);
-        inputs.sslKeyInput.clear();
-        setIsConvertedToSecret({ ...isConvertedToSecret, sslKey: true });
-      }
-      if (inputs.sslESKeyInput.value && !inputs.sslESKeySecretInput.value) {
-        inputs.sslESKeySecretInput.setValue(inputs.sslESKeyInput.value);
-        inputs.sslESKeyInput.clear();
-        setIsConvertedToSecret({ ...isConvertedToSecret, sslESKey: true });
-      }
-    }
-  }, [
-    useSecretsStorage,
-    inputs.sslKeyInput,
-    inputs.sslKeySecretInput,
-    isFirstLoad,
-    setIsFirstLoad,
-    isConvertedToSecret,
-    inputs.sslESKeyInput,
-    inputs.sslESKeySecretInput,
-  ]);
-
-  const onToggleKeySecretAndClearValue = (secretEnabled: boolean) => {
-    if (secretEnabled) {
-      inputs.sslKeyInput.clear();
-    } else {
-      inputs.sslKeySecretInput.setValue('');
-    }
-    setIsConvertedToSecret({ ...isConvertedToSecret, sslKey: false });
-    onToggleSecretStorage(secretEnabled);
-  };
-
-  const onToggleESKeySecretAndClearValue = (secretEnabled: boolean) => {
-    if (secretEnabled) {
-      inputs.sslESKeyInput.clear();
-    } else {
-      inputs.sslESKeySecretInput.setValue('');
-    }
-    setIsConvertedToSecret({ ...isConvertedToSecret, sslESKey: false });
-    onToggleSecretStorage(secretEnabled);
-  };
+  const { inputs, useSecretsStorage, isConvertedToSecret, onToggleSecretAndClearValue } = props;
 
   const clientAuthenticationsOptions = [
     {
@@ -163,7 +100,7 @@ export const SSLFormSection: React.FunctionComponent<Props> = (props) => {
           }
           {...inputs.sslKeyInput.formRowProps}
           useSecretsStorage={useSecretsStorage}
-          onToggleSecretStorage={onToggleKeySecretAndClearValue}
+          onToggleSecretStorage={onToggleSecretAndClearValue}
           disabled={true}
         >
           <EuiTextArea
@@ -187,7 +124,7 @@ export const SSLFormSection: React.FunctionComponent<Props> = (props) => {
           {...inputs.sslKeySecretInput.formRowProps}
           useSecretsStorage={useSecretsStorage}
           isConvertedToSecret={isConvertedToSecret.sslKey}
-          onToggleSecretStorage={onToggleKeySecretAndClearValue}
+          onToggleSecretStorage={onToggleSecretAndClearValue}
           cancelEdit={inputs.sslKeySecretInput.cancelEdit}
         >
           <EuiTextArea
@@ -255,7 +192,7 @@ export const SSLFormSection: React.FunctionComponent<Props> = (props) => {
           }
           {...inputs.sslESKeyInput.formRowProps}
           useSecretsStorage={useSecretsStorage}
-          onToggleSecretStorage={onToggleESKeySecretAndClearValue}
+          onToggleSecretStorage={onToggleSecretAndClearValue}
           disabled={true}
         >
           <EuiTextArea
@@ -279,7 +216,7 @@ export const SSLFormSection: React.FunctionComponent<Props> = (props) => {
           {...inputs.sslESKeySecretInput.formRowProps}
           useSecretsStorage={useSecretsStorage}
           isConvertedToSecret={isConvertedToSecret.sslKey}
-          onToggleSecretStorage={onToggleESKeySecretAndClearValue}
+          onToggleSecretStorage={onToggleSecretAndClearValue}
           cancelEdit={inputs.sslESKeySecretInput.cancelEdit}
         >
           <EuiTextArea

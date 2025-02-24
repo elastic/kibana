@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import type { EuiStepProps } from '@elastic/eui';
 import { EuiAccordion, EuiIconTip } from '@elastic/eui';
 import {
@@ -28,11 +28,12 @@ import styled from 'styled-components';
 
 import type { FleetServerHost } from '../../../types';
 
-import { useStartServices, useLink } from '../../../hooks';
+import { useStartServices, useLink, useFleetStatus } from '../../../hooks';
 import type { FleetServerHostForm } from '../hooks';
 import { MultiRowInput } from '../../../sections/settings/components/multi_row_input';
 import { FleetServerHostSelect } from '../components';
 import { SSLFormSection } from '../../../sections/settings/components/fleet_server_hosts_flyout/ssl_form_section';
+import { ExperimentalFeaturesService } from '../../../services';
 
 const StyledEuiAccordion = styled(EuiAccordion)`
   .ingest-active-button {
@@ -79,6 +80,68 @@ export const AddFleetServerHostStepContent = ({
   const [submittedFleetServerHost, setSubmittedFleetServerHost] = useState<FleetServerHost>();
   const { notifications } = useStartServices();
   const { getHref } = useLink();
+  const { enableSSLSecrets } = ExperimentalFeaturesService.get();
+
+  const [isFirstLoad, setIsFirstLoad] = React.useState(true);
+  const [isConvertedToSecret, setIsConvertedToSecret] = React.useState({
+    sslKey: false,
+    sslESKey: false,
+  });
+  const [secretsToggleState, setSecretsToggleState] = useState<'disabled' | true | false>(false);
+
+  const useSecretsStorage = secretsToggleState === true;
+
+  const fleetStatus = useFleetStatus();
+  if (fleetStatus.isSecretsStorageEnabled !== undefined && secretsToggleState === 'disabled') {
+    setSecretsToggleState(fleetStatus.isSecretsStorageEnabled);
+  }
+
+  const onToggleSecretStorage = (secretEnabled: boolean) => {
+    if (secretsToggleState === 'disabled') {
+      return;
+    }
+
+    setSecretsToggleState(secretEnabled);
+  };
+
+  useEffect(() => {
+    if (!isFirstLoad) return;
+    setIsFirstLoad(false);
+    // populate the secret input with the value of the plain input in order to re-save the key with secret storage
+    if (secretsToggleState) {
+      if (inputs.sslKeyInput.value && !inputs.sslKeySecretInput.value) {
+        inputs.sslKeySecretInput.setValue(inputs.sslKeyInput.value);
+        inputs.sslKeyInput.clear();
+        setIsConvertedToSecret({ ...isConvertedToSecret, sslKey: true });
+      }
+      if (inputs.sslESKeyInput.value && !inputs.sslESKeySecretInput.value) {
+        inputs.sslESKeySecretInput.setValue(inputs.sslESKeyInput.value);
+        inputs.sslESKeyInput.clear();
+        setIsConvertedToSecret({ ...isConvertedToSecret, sslESKey: true });
+      }
+    }
+  }, [
+    inputs.sslKeyInput,
+    inputs.sslKeySecretInput,
+    isFirstLoad,
+    setIsFirstLoad,
+    isConvertedToSecret,
+    inputs.sslESKeyInput,
+    inputs.sslESKeySecretInput,
+    secretsToggleState,
+  ]);
+
+  const onToggleSecretAndClearValue = (secretEnabled: boolean) => {
+    if (secretEnabled && enableSSLSecrets) {
+      inputs.sslKeyInput.clear();
+      inputs.sslESKeyInput.clear();
+    } else {
+      inputs.sslKeySecretInput.setValue('');
+      inputs.sslESKeySecretInput.setValue('');
+    }
+    setIsConvertedToSecret({ ...isConvertedToSecret, sslKey: false, sslESKey: false });
+    onToggleSecretStorage(secretEnabled);
+  };
 
   const onSubmit = useCallback(async () => {
     try {
@@ -192,7 +255,12 @@ export const AddFleetServerHostStepContent = ({
             buttonClassName="ingest-active-button"
           >
             <EuiSpacer size="s" />
-            <SSLFormSection inputs={inputs} />
+            <SSLFormSection
+              inputs={inputs}
+              useSecretsStorage={enableSSLSecrets && useSecretsStorage}
+              onToggleSecretAndClearValue={onToggleSecretAndClearValue}
+              isConvertedToSecret={isConvertedToSecret}
+            />
           </StyledEuiAccordion>
           <EuiSpacer size="m" />
           {fleetServerHosts.length > 0 ? (

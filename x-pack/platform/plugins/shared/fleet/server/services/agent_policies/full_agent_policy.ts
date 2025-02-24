@@ -120,6 +120,7 @@ export async function getFullAgentPolicy(
       packageInfoCache.set(pkgKey, packageInfo);
     })
   );
+  const bootstrapOutputConfig = generateFleetServerOutputSSLConfig(fleetServerHost);
 
   const inputs = (
     await storedPackagePoliciesToAgentInputs(
@@ -138,7 +139,13 @@ export async function getFullAgentPolicy(
     if (input.type === 'fleet-server' && fleetServerHost) {
       const sslInputConfig = generateSSLConfigForFleetServerInput(fleetServerHost);
       if (sslInputConfig) {
-        input = { ...input, ...sslInputConfig };
+        input = {
+          ...input,
+          ...sslInputConfig,
+          ...(bootstrapOutputConfig
+            ? { use_output: `fleetserver-output-${fleetServerHost.id}` }
+            : {}),
+        };
       }
     }
     return input;
@@ -160,7 +167,7 @@ export async function getFullAgentPolicy(
   const fullAgentPolicy: FullAgentPolicy = {
     id: agentPolicy.id,
     outputs: {
-      ...(fleetServerHost ? generateFleetServerOutputSSLConfig(fleetServerHost) : {}),
+      ...(bootstrapOutputConfig ? bootstrapOutputConfig : {}),
       ...outputs.reduce<FullAgentPolicy['outputs']>((acc, output) => {
         acc[getOutputIdForAgentPolicy(output)] = transformOutputToFullPolicyOutput(
           output,
@@ -626,11 +633,14 @@ export function transformOutputToFullPolicyOutput(
 // Generate the SSL configs for fleet server connection to ES
 // Corresponding to --fleet-server-es-ca, --fleet-server-es-cert, --fleet-server-es-cert-key cli options
 // This function generates a `bootstrap output` to be sent directly to elastic-agent
-function generateFleetServerOutputSSLConfig(fleetServerHost: FleetServerHost): {
-  [key: string]: FullAgentPolicyOutput;
-} {
-  const outputConfig: FullAgentPolicyOutput = { type: 'elasticsearch' };
+function generateFleetServerOutputSSLConfig(fleetServerHost: FleetServerHost | undefined):
+  | {
+      [key: string]: FullAgentPolicyOutput;
+    }
+  | undefined {
+  if (!fleetServerHost || (!fleetServerHost?.ssl && !fleetServerHost.secrets)) return undefined;
 
+  const outputConfig: FullAgentPolicyOutput = { type: 'elasticsearch' };
   if (fleetServerHost?.ssl) {
     outputConfig.ssl = {
       ...(fleetServerHost.ssl.es_certificate_authorities && {
@@ -653,7 +663,10 @@ function generateFleetServerOutputSSLConfig(fleetServerHost: FleetServerHost): {
         }),
     };
   }
-  return { [`fleetserver-output-${fleetServerHost?.id}`]: outputConfig };
+
+  return {
+    [`fleetserver-output-${fleetServerHost?.id}`]: outputConfig,
+  };
 }
 
 export function getFullMonitoringSettings(

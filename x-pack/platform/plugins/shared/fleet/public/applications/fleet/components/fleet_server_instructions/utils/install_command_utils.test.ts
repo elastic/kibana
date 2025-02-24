@@ -721,7 +721,8 @@ describe('getInstallCommandForPlatform', () => {
           --fleet-server-es-ca='path/to/EScert' \\\\
           --fleet-server-cert='path/to/cert' \\\\
           --fleet-server-cert-key=<PATH_TO_FLEET_SERVER_CERT_KEY> \\\\
-          --fleet-server-port=8220"
+          --fleet-server-port=8220 \\\\
+          --install-servers"
       `);
       });
       it('should return the command with SSL options and placeholders', () => {
@@ -754,7 +755,8 @@ describe('getInstallCommandForPlatform', () => {
           --fleet-server-es-ca=<PATH_TO_ES_CERT> \\\\
           --fleet-server-cert='path/to/cert' \\\\
           --fleet-server-cert-key=<PATH_TO_FLEET_SERVER_CERT_KEY> \\\\
-          --fleet-server-port=8220"
+          --fleet-server-port=8220 \\\\
+          --install-servers"
       `);
       });
     });
