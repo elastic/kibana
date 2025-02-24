@@ -29,7 +29,7 @@ export interface StreamActiveRecord {
   changeStatus: StreamChangeStatus;
   commitStatus: StreamCommitStatus;
   clone(): StreamActiveRecord;
-  markForDeletion(): void;
+  markForDeletion(desiredState: State, startingState: State): void;
   update(newDefinition: StreamDefinition, desiredState: State, startingState: State): void;
   validate(
     desiredState: State,

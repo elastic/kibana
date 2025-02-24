@@ -37,7 +37,7 @@ export class State {
         }
       } else {
         if (change.type === 'delete') {
-          targetStream.markForDeletion();
+          targetStream.markForDeletion(newState, this);
         } else {
           targetStream.update(change.request.stream, newState, this);
         }
@@ -107,7 +107,7 @@ export class State {
             return startingState.get(stream.definition.name);
           } else {
             // Stream was created, delete it
-            stream.markForDeletion();
+            stream.markForDeletion(this, startingState);
             return stream;
           }
         } else if (stream.changeStatus === 'deleted') {
