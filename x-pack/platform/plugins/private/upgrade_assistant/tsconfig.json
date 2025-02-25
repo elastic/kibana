@@ -32,7 +32,6 @@
     "@kbn/es-query",
     "@kbn/config-schema",
     "@kbn/security-plugin",
-    "@kbn/console-plugin",
     "@kbn/core-elasticsearch-client-server-mocks",
     "@kbn/utility-types",
     "@kbn/shared-ux-router",
