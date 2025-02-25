@@ -16,7 +16,7 @@ export interface ValidationResult {
 }
 
 export type StreamChangeStatus = 'unchanged' | 'upserted' | 'deleted';
-export type StreamCommitStatus = 'uncomitted' | 'committing' | 'committed';
+export type StreamCommitStatus = 'uncommitted' | 'committing' | 'committed';
 
 // Interface or abstract class to make somethings private?
 // Should all of these methods be async from the start?
