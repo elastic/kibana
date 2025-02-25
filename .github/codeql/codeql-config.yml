@@ -75,7 +75,7 @@ paths-ignore:
   - src/platform/packages/private/kbn-some-dev-log
   - packages/kbn-sort-package-json
   - packages/kbn-spec-to-console
-  - packages/kbn-stdio-dev-helpers
+  - src/platform/packages/private/kbn-stdio-dev-helpers
   - packages/kbn-storybook
   - packages/kbn-telemetry-tools
   - packages/kbn-test
