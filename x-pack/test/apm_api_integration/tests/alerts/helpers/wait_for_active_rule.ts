@@ -7,7 +7,6 @@
 
 import { ToolingLog } from '@kbn/tooling-log';
 import type SuperTest from 'supertest';
-// import { retryForSuccess } from '@kbn/ftr-common-functional-services';
 import { Console, Effect } from 'effect';
 
 export async function waitForActiveRule({
@@ -19,48 +18,27 @@ export async function waitForActiveRule({
   supertest: SuperTest.Agent;
   logger?: ToolingLog;
 }) {
-  // const debugLog = ToolingLog.bind(ToolingLog, { level: 'debug', writeTo: process.stdout });
-  // const retryCount = 10;
-  // return await retryForSuccess(logger || new debugLog({ context: 'waitForActiveRule' }), {
-  //   timeout: 20_000,
-  //   methodName: 'waitForActiveRule',
-  //   block: async () => {
-  //     const response = await supertest.get(`/api/alerting/rule/${ruleId}`);
-  //     const status = response.body?.execution_status?.status;
-  //     const expectedStatus = 'active';
-
-  //     if (status !== expectedStatus)
-  //       throw new Error(`Expected: ${expectedStatus}: got ${status}`);
-
-  //     return status;
-  //   },
-  //   retryCount,
-  // });
-
-  const result = await Effect.runPromise(retryFetch(`/api/alerting/rule/${ruleId}`));
-
-  return result;
-  function retryFetch(url: string) {
-    return getRuleId(url).pipe(
+  return await Effect.runPromise(
+    getRuleId(`/api/alerting/rule/${ruleId}`).pipe(
       Effect.retry({ times: 100 }),
       Effect.timeout('2 minutes'),
       Effect.catchAll(Console.error)
-    );
-  }
+    )
+  );
+
   function getRuleId(url: string) {
-    return Effect.tryPromise(() =>
-      supertest.get(url).then((response) => {
-        logger ? logResponse(logger, response) : () => {};
+    return Effect.tryPromise(() => supertest.get(url).then(logAndInspect));
+  }
 
-        const status = response.body?.execution_status?.status;
-        const expectedStatus = 'active';
+  function logAndInspect(response) {
+    if (logger) logResponse(logger, response);
 
-        if (status !== expectedStatus)
-          throw new Error(`Expected: ${expectedStatus}: got ${status}`);
+    const status = response.body?.execution_status?.status;
+    const expectedStatus = 'active';
 
-        return status;
-      })
-    );
+    if (status !== expectedStatus) throw new Error(`Expected: ${expectedStatus}: got ${status}`);
+
+    return status;
   }
 }
 
