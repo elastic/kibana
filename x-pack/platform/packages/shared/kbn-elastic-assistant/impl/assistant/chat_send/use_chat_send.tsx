@@ -11,7 +11,6 @@ import { i18n } from '@kbn/i18n';
 import { Replacements } from '@kbn/elastic-assistant-common';
 import { useKnowledgeBaseStatus } from '../api/knowledge_base/use_knowledge_base_status';
 import { DataStreamApis } from '../use_data_stream_apis';
-import { NEW_CHAT } from '../conversations/conversation_sidepanel/translations';
 import type { ClientMessage } from '../../assistant_context/types';
 import { SelectedPromptContext } from '../prompt_context/types';
 import { useSendMessage } from '../use_send_message';
@@ -233,11 +232,10 @@ export const useChatSend = ({
   const handleChatSend = useCallback(
     async (promptText: string) => {
       await handleSendMessage(promptText);
-      if (currentConversation?.title === NEW_CHAT || currentConversation?.title === '') {
-        await refetchCurrentUserConversations();
-      }
+      // refetch to update the conversation list
+      await refetchCurrentUserConversations();
     },
-    [currentConversation, handleSendMessage, refetchCurrentUserConversations]
+    [handleSendMessage, refetchCurrentUserConversations]
   );
 
   return {
