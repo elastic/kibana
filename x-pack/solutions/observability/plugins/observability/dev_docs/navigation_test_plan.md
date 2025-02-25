@@ -29,9 +29,17 @@ The outcome of testing each part assumes the following:
 
 Side navigation opens and closes correctly, based on the deployment type (classic or cloud / serverless) and solution view.
 
-- Expect classic view to have all plugins displayed in a single column.
-- Expect cloud view to have a collapsed view of nav sections with headers, with each view visible in a flyout once the header is clicked on.
-- In serverless, observability plugins will become available in central navigation.
+- Expect classic view to have all plugins displayed in a single column for the Kibana home page, with the observability nav bar to appear once the user navigates to the solution.
+
+  - Once the user navigates to the observability solution, the nav bar should appear with the obs plugins as outlined in this [plugin file](https://github.com/elastic/kibana/blob/main/x-pack/solutions/observability/plugins/observability/public/plugin.ts).
+
+- Expect solution view to have a collapsed view of nav sections with headers, with each view visible in a flyout once the header is clicked on.
+
+  - Side nav for solution view should appear as outlined in this [config](https://github.com/elastic/kibana/blob/main/x-pack/solutions/observability/plugins/observability/public/navigation_tree.ts).
+
+- In serverless, observability plugins will become available in central navigation
+
+  - Side nav for serverless mode should appear as outlined in this [config](https://github.com/elastic/kibana/blob/main/x-pack/solutions/observability/plugins/serverless_observability/public/navigation_tree.ts).
 
 - Expect breadcrumbs to logically follow the organization of the navigation bar. There are some exceptions, where the first entry under a subheader may act as a default page or route to an external view. Otherwise, for modules such as SLO, Alerts, and Monitors, you should exect the breadcrumbs to lead to:
 
