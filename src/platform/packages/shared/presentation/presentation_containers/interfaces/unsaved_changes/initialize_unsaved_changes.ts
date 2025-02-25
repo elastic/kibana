@@ -75,9 +75,6 @@ export const initializeUnsavedChanges = <RuntimeState extends {} = {}>(
           )
         )
         .subscribe((nextLastSavedState) => {
-          if ((nextLastSavedState as any).content !== undefined) {
-            console.log('panel updating last saved state', nextLastSavedState);
-          }
           lastSavedState$.next(nextLastSavedState);
           isDeserializing$.next(false);
         })
@@ -127,10 +124,6 @@ export const initializeUnsavedChanges = <RuntimeState extends {} = {}>(
         (async () => {
           await untilLastSavedStateDeserialized();
           const lastSaved = lastSavedState$.getValue();
-          if ((lastSaved as any).content) {
-            console.log('resetting unsaved changes to', lastSaved);
-          }
-
           // Do not reset to undefined or empty last saved state
           // Temporary fix for https://github.com/elastic/kibana/issues/201627
           // TODO remove when architecture fix resolves issue.
