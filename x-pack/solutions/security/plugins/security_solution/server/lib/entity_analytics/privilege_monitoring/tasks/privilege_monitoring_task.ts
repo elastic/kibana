@@ -5,17 +5,20 @@
  * 2.0.
  */
 
-import { stateSchemaByVersion } from '@kbn/alerting-state-types';
+
 import type { Logger, AnalyticsServiceSetup } from '@kbn/core/server';
 import type {
+  ConcreteTaskInstance,
   TaskManagerSetupContract,
+  TaskManagerStartContract,
   TaskRunCreatorFunction,
 } from '@kbn/task-manager-plugin/server';
 
 import type { ExperimentalFeatures } from '../../../../../common';
 import type { EntityAnalyticsRoutesDeps } from '../../types';
 
-import { TYPE, VERSION, TIMEOUT } from './constants';
+import { TYPE, VERSION, TIMEOUT, SCOPE, INTERVAL } from './constants';
+import { defaultState, stateSchemaByVersion } from './state';
 
 interface RegisterParams {
   getStartServices: EntityAnalyticsRoutesDeps['getStartServices'];
@@ -23,6 +26,21 @@ interface RegisterParams {
   telemetry: AnalyticsServiceSetup;
   taskManager: TaskManagerSetupContract | undefined;
   experimentalFeatures: ExperimentalFeatures;
+  kibanaVersion: string;
+}
+
+interface RunParams {
+  isCancelled: () => boolean;
+  logger: Logger;
+  telemetry: AnalyticsServiceSetup;
+  experimentalFeatures: ExperimentalFeatures;
+  taskInstance: ConcreteTaskInstance;
+}
+
+interface StartParams {
+  logger: Logger;
+  namespace: string;
+  taskManager: TaskManagerStartContract;
 }
 
 const getTaskName = (): string => TYPE;
@@ -34,8 +52,10 @@ export const registerPrivilegeMonitoringTask = ({
   logger,
   telemetry,
   taskManager,
+  kibanaVersion,
   experimentalFeatures,
 }: RegisterParams): void => {
+  console.log(`registering GREAT SUCCESS`);
   if (!taskManager) {
     logger.info(
       '[Privilege Monitoring]  Task Manager is unavailable; skipping privilege monitoring task registration.'
@@ -65,31 +85,28 @@ const createPrivilegeMonitoringTaskRunnerFactory =
   }): TaskRunCreatorFunction =>
   ({ taskInstance }) => {
     let cancelled = false;
+    console.log(`Creating GREAT SUCCESS factory`);
     const isCancelled = () => cancelled;
     return {
-      run: runPrivilegeMonitoringTask({
-        isCancelled,
-        logger: deps.logger,
-        telemetry: deps.telemetry,
-        experimentalFeatures: deps.experimentalFeatures,
-      }),
+      run: async () =>
+        runPrivilegeMonitoringTask({
+          isCancelled,
+          logger: deps.logger,
+          telemetry: deps.telemetry,
+          taskInstance,
+          experimentalFeatures: deps.experimentalFeatures,
+        }),
       cancel: async () => {
         cancelled = true;
       },
     };
   };
 
-interface RunParams {
-  isCancelled: () => boolean;
-  logger: Logger;
-  telemetry: AnalyticsServiceSetup;
-  experimentalFeatures: ExperimentalFeatures;
-}
-
 const runPrivilegeMonitoringTask = async ({
   isCancelled,
   logger,
   telemetry,
+  taskInstance,
   experimentalFeatures,
 }: RunParams): Promise<void> => {
   logger.info('[Privilege Monitoring] Running privilege monitoring task');
@@ -99,9 +116,35 @@ const runPrivilegeMonitoringTask = async ({
   }
 
   try {
-    // eslint-disable-next-line no-console
     console.log('GREAT SUCCESS');
   } catch (e) {
     logger.error('[Privilege Monitoring] Error running privilege monitoring task', e);
+  }
+};
+
+export const startPrivilegeMonitoringTask = async ({
+  logger,
+  namespace,
+  taskManager,
+}: StartParams) => {
+  const taskId = getTaskId(namespace);
+
+  try {
+    console.log(`Starting the start GREAT SUCCESS`);
+    await taskManager.ensureScheduled({
+      id: taskId,
+      taskType: getTaskName(),
+      scope: SCOPE,
+      schedule: {
+        interval: INTERVAL,
+      },
+      state: { ...defaultState, namespace },
+      params: { version: VERSION },
+    });
+  } catch (e) {
+    logger.warn(
+      `[Privilege Monitoring]  [task ${taskId}]: error scheduling task, received ${e.message}`
+    );
+    throw e;
   }
 };
