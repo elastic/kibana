@@ -260,7 +260,7 @@ const aggregatedCriticalPathRoute = createApmServerRoute({
     ]),
   }),
   security: { authz: { requiredPrivileges: ['apm'] } },
-  handler: async (resources): Promise<{ criticalPath: CriticalPathResponse | null }> => {
+  handler: async (resources): Promise<CriticalPathResponse> => {
     const {
       params: {
         body: { traceIds, start, end, serviceName, transactionName },

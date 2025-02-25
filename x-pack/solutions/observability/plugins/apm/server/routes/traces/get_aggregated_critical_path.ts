@@ -6,49 +6,66 @@
  */
 
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
-import { rangeQuery, termsQuery } from '@kbn/observability-plugin/server';
+import { existsQuery, rangeQuery, termsQuery } from '@kbn/observability-plugin/server';
 import type { Logger } from '@kbn/logging';
-import type {
+import { unflattenKnownApmEventFields } from '@kbn/apm-data-access-plugin/server/utils';
+import type { Sort } from '@elastic/elasticsearch/lib/api/types';
+import { EventOutcome } from '../../../common/event_outcome';
+import {
+  AT_TIMESTAMP,
+  TRACE_ID,
   AGENT_NAME,
-  PROCESSOR_EVENT,
   SERVICE_NAME,
-  SPAN_NAME,
   SPAN_SUBTYPE,
   SPAN_TYPE,
+  SPAN_ID,
+  SPAN_DESTINATION_SERVICE_RESOURCE,
+  PARENT_ID,
   TRANSACTION_NAME,
   TRANSACTION_TYPE,
+  SPAN_DURATION,
+  TRANSACTION_DURATION,
+  SPAN_NAME,
+  TRANSACTION_ID,
+  SERVICE_NODE_NAME,
+  EVENT_OUTCOME,
 } from '../../../common/es_fields/apm';
-import { TRACE_ID } from '../../../common/es_fields/apm';
 import type { AgentName } from '../../../typings/es_schemas/ui/fields/agent';
 import type { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
+import { asMutableArray } from '../../../common/utils/as_mutable_array';
 
-type OperationMetadata = {
-  [SERVICE_NAME]: string;
-  [AGENT_NAME]: AgentName;
-} & (
-  | {
-      [PROCESSOR_EVENT]: ProcessorEvent.transaction;
-      [TRANSACTION_TYPE]: string;
-      [TRANSACTION_NAME]: string;
-    }
-  | {
-      [PROCESSOR_EVENT]: ProcessorEvent.span;
-      [SPAN_NAME]: string;
-      [SPAN_TYPE]: string;
-      [SPAN_SUBTYPE]: string;
-    }
-);
+export interface CriticalPathTransaction {
+  traceId: string;
+  transactionId: string;
+  agentName: AgentName;
+  serviceName: string;
+  serviceNodeName?: string;
+  transactionName: string;
+  transactionType: string;
+  transactionDuration: number;
+  timestamp: string;
+  parentId?: string;
+  processorEvent: ProcessorEvent.transaction;
+}
 
-type OperationId = string;
-
-type NodeId = string;
-
+export interface CriticalPathSpan {
+  traceId: string;
+  spanId: string;
+  spanName: string;
+  spanType: string;
+  spanSubtype?: string;
+  spanDestinationServiceResource?: string;
+  serviceName: string;
+  serviceNodeName?: string;
+  agentName: AgentName;
+  spanDuration: number;
+  parentId?: string;
+  timestamp: string;
+  processorEvent: ProcessorEvent.span;
+}
 export interface CriticalPathResponse {
-  metadata: Record<OperationId, OperationMetadata>;
-  timeByNodeId: Record<NodeId, number>;
-  nodes: Record<NodeId, NodeId[]>;
-  rootNodes: NodeId[];
-  operationIdByNodeId: Record<NodeId, OperationId>;
+  path: Array<CriticalPathSpan | CriticalPathTransaction>;
+  entryTransactions: CriticalPathTransaction[];
 }
 
 const TWO_DAYS_MS = 2 * 24 * 60 * 60 * 1000;
@@ -69,338 +86,516 @@ export async function getAggregatedCriticalPath({
   serviceName: string | null;
   transactionName: string | null;
   logger: Logger;
-}): Promise<{ criticalPath: CriticalPathResponse | null }> {
-  const now = Date.now();
+}): Promise<CriticalPathResponse> {
+  // const range = end - start;
+  // const startRange = range < TWO_DAYS_MS ? start - TWO_DAYS_MS : start;
+  // const endRange = range < TWO_DAYS_MS ? end + TWO_DAYS_MS : end;
 
-  const response = await apmEventClient.search('get_aggregated_critical_path', {
+  const startRange = start;
+  const endRange = end;
+
+  const exitSpansSample = await fetchSpansFromTraceIds({
+    apmEventClient,
+    traceIds,
+    start: startRange,
+    end: endRange,
+  });
+
+  const [transactions, entryTransactions] = await Promise.all([
+    getTransactionsForExitSpans({
+      apmEventClient,
+      exitSpansSample,
+      start: startRange,
+      end: endRange,
+    }),
+    fetchEntryTransactions({
+      apmEventClient,
+      exitSpansSample,
+      start: startRange,
+      end: endRange,
+    }),
+  ]);
+
+  const exitSpans = Array.from(exitSpansSample.values());
+
+  return {
+    entryTransactions,
+    path: [...transactions, ...exitSpans],
+  };
+}
+
+async function fetchEntryTransactions({
+  apmEventClient,
+  start,
+  end,
+  exitSpansSample,
+}: {
+  apmEventClient: APMEventClient;
+  start: number;
+  end: number;
+  exitSpansSample: Map<string, CriticalPathSpan>;
+}) {
+  const requiredFields = asMutableArray([
+    TRACE_ID,
+    SPAN_ID,
+    SERVICE_NAME,
+    AGENT_NAME,
+    AT_TIMESTAMP,
+    TRANSACTION_ID,
+    TRANSACTION_NAME,
+    TRANSACTION_TYPE,
+    TRANSACTION_DURATION,
+  ] as const);
+  const optionalSpanFields = asMutableArray([SERVICE_NODE_NAME] as const);
+
+  const traceIds = Array.from(exitSpansSample.values()).map((p) => p.traceId);
+
+  const sampleExitSpans = await apmEventClient.search('get_critical_path_span_samples', {
     apm: {
-      events: [ProcessorEvent.span, ProcessorEvent.transaction],
+      events: [ProcessorEvent.transaction],
     },
     body: {
-      size: 0,
       track_total_hits: false,
       query: {
         bool: {
+          filter: [...rangeQuery(start, end), ...termsQuery(TRACE_ID, ...traceIds)],
+          must_not: [...existsQuery(PARENT_ID)],
+        },
+      },
+      fields: [...requiredFields, ...optionalSpanFields],
+      sort: [
+        { _score: 'asc' },
+        { [AT_TIMESTAMP]: 'asc' },
+        { [TRANSACTION_DURATION]: 'desc' },
+      ] as Sort,
+      size: traceIds.length,
+    },
+  });
+
+  return sampleExitSpans.hits.hits.map((hit): CriticalPathTransaction => {
+    const { transaction, agent, service, span, trace, ...remainingFields } =
+      unflattenKnownApmEventFields(hit.fields, requiredFields);
+
+    return {
+      traceId: trace.id as string,
+      transactionId: transaction.id as string,
+      transactionName: transaction.name as string,
+      transactionType: transaction.type as string,
+      transactionDuration: transaction.duration.us as number,
+      timestamp: remainingFields['@timestamp'] as string,
+      serviceName: service.name as string,
+      serviceNodeName: service.node?.name as string,
+      agentName: agent.name as AgentName,
+      processorEvent: ProcessorEvent.transaction,
+    };
+  });
+}
+
+// async function fetchSpans({
+//   apmEventClient,
+//   start,
+//   end,
+//   spanIds,
+// }: {
+//   apmEventClient: APMEventClient;
+//   start: number;
+//   end: number;
+//   spanIds: string[];
+// }) {
+//   const optionalSpanFields = asMutableArray([SERVICE_NODE_NAME] as const);
+//   const requiredFields = asMutableArray([
+//     TRACE_ID,
+//     SPAN_TYPE,
+//     SPAN_ID,
+//     SPAN_NAME,
+//     SPAN_DESTINATION_SERVICE_RESOURCE,
+//     AGENT_NAME,
+//     SERVICE_NAME,
+//     AT_TIMESTAMP,
+//     SPAN_DURATION,
+//   ] as const);
+
+//   const sampleExitSpans = await apmEventClient.search('get_critical_path_span_samples', {
+//     apm: {
+//       events: [ProcessorEvent.span],
+//     },
+//     body: {
+//       track_total_hits: false,
+//       query: {
+//         bool: {
+//           filter: [
+//             ...rangeQuery(start, end),
+//             ...termsQuery(SPAN_ID, ...spanIds),
+//             ...existsQuery(SPAN_DESTINATION_SERVICE_RESOURCE),
+//           ],
+//         },
+//       },
+//       fields: [...requiredFields, ...optionalSpanFields],
+//       sort: [
+//         { _score: 'asc' },
+//         { [AT_TIMESTAMP]: 'asc' },
+//         { [TRANSACTION_DURATION]: 'desc' },
+//       ] as Sort,
+//       size: spanIds.length,
+//     },
+//   });
+
+//   const destinationBySpanId = new Map<string, CriticalPathSpan>();
+
+//   sampleExitSpans.hits.hits.forEach((hit) => {
+//     const { span, agent, service, trace, ...remainingFields } = unflattenKnownApmEventFields(
+//       hit.fields,
+//       requiredFields
+//     );
+
+//     destinationBySpanId.set(span.id as string, {
+//       traceId: trace.id as string,
+//       spanId: span.id as string,
+//       spanType: span.type as string,
+//       spanName: span.name as string,
+//       serviceName: service.name as string,
+//       agentName: agent.name as AgentName,
+//       timestamp: remainingFields['@timestamp'] as string,
+//       serviceNodeName: service.node?.name as string,
+//       spanDuration: span.duration.us as number,
+//       processorEvent: ProcessorEvent.span,
+//     });
+//   });
+
+//   return destinationBySpanId;
+// }
+
+// async function fetchEntryTransactions({
+//   apmEventClient,
+//   traceIds,
+//   start,
+//   end,
+// }: {
+//   apmEventClient: APMEventClient;
+//   traceIds: string[];
+//   start: number;
+//   end: number;
+// }): Promise<CriticalPathTransaction[]> {
+//   const entryTransactionsSample = await apmEventClient.search(
+//     'get_critical_path_entry_transactions_sample',
+//     {
+//       apm: {
+//         events: [ProcessorEvent.transaction],
+//       },
+//       body: {
+//         track_total_hits: false,
+//         size: 0,
+//         query: {
+//           bool: {
+//             filter: [...rangeQuery(start, end), ...termsQuery(TRACE_ID, ...traceIds)],
+//             must_not: [...existsQuery(PARENT_ID)],
+//           },
+//         },
+//         aggs: {
+//           entryTansactions: {
+//             composite: {
+//               sources: asMutableArray([
+//                 { serviceNodeName: { terms: { field: SERVICE_NODE_NAME, missing_bucket: true } } },
+//                 {
+//                   serviceName: {
+//                     terms: { field: SERVICE_NAME },
+//                   },
+//                 },
+//                 {
+//                   transactionName: {
+//                     terms: { field: TRANSACTION_NAME },
+//                   },
+//                 },
+//               ] as const),
+//               size: 10000,
+//             },
+//             aggs: {
+//               duration: {
+//                 sum: {
+//                   field: TRANSACTION_DURATION,
+//                 },
+//               },
+//               sample: {
+//                 top_metrics: {
+//                   size: 1,
+//                   sort: {
+//                     [AT_TIMESTAMP]: 'asc',
+//                   },
+//                   metrics: asMutableArray([
+//                     { field: TRACE_ID },
+//                     { field: AT_TIMESTAMP },
+//                     { field: AGENT_NAME },
+//                     { field: PROCESSOR_EVENT },
+//                     { field: SERVICE_NODE_NAME },
+//                     { field: SPAN_ID },
+//                     { field: TRANSACTION_ID },
+//                     { field: TRANSACTION_TYPE },
+//                     { field: TRANSACTION_DURATION },
+//                   ] as const),
+//                 },
+//               },
+//             },
+//           },
+//         },
+//       },
+//     }
+//   );
+
+//   return (entryTransactionsSample.aggregations?.entryTansactions.buckets ?? []).map((bucket) => {
+//     const sample = bucket.sample.top[0].metrics;
+
+//     return {
+//       traceId: sample[TRACE_ID] as string,
+//       transactionId: sample[TRANSACTION_ID] as string,
+//       transactionName: bucket.key.transactionName as string,
+//       transactionType: sample[TRANSACTION_TYPE] as string,
+//       // transactionDuration: sample[TRANSACTION_DURATION] as number, // bucket.duration.value as number, // bucket.duration.value as number
+//       transactionDuration: bucket.duration.value as number,
+//       timestamp: sample[AT_TIMESTAMP] as string,
+//       serviceName: bucket.key.serviceName as string,
+//       serviceNodeName: sample[SERVICE_NODE_NAME] as string,
+//       agentName: sample[AGENT_NAME] as AgentName,
+//       processorEvent: ProcessorEvent.transaction,
+//     };
+//   });
+// }
+
+// async function transactionsSample({
+//   apmEventClient,
+//   keys,
+//   start,
+//   end,
+// }: {
+//   apmEventClient: APMEventClient;
+//   keys: string[];
+//   start: number;
+//   end: number;
+// }): Promise<CriticalPathTransaction[]> {
+//   const entryTransactionsSample = await apmEventClient.search(
+//     'get_critical_path_entry_transactions_sample',
+//     {
+//       apm: {
+//         events: [ProcessorEvent.transaction],
+//       },
+//       body: {
+//         track_total_hits: false,
+//         size: 0,
+//         query: {
+//           bool: {
+//             filter: [
+//               {
+//                 script: {
+//                   script: {
+//                     source: `
+//                      String transactionKey = doc['${TRACE_ID}'].value + '|' + doc['${SERVICE_NAME}'].value + '|' + doc['${SERVICE_NODE_NAME}'].value;
+//                      return params.keys.contains(transactionKey);
+//                     `,
+//                     lang: 'painless',
+//                     params: {
+//                       keys,
+//                     },
+//                   },
+//                 },
+//               },
+//               ...rangeQuery(start, end),
+//             ],
+//             must: [...existsQuery(PARENT_ID)],
+//           },
+//         },
+//         aggs: {
+//           entryTansactions: {
+//             composite: {
+//               sources: asMutableArray([
+//                 { serviceNodeName: { terms: { field: SERVICE_NODE_NAME, missing_bucket: true } } },
+//                 {
+//                   serviceName: {
+//                     terms: { field: SERVICE_NAME },
+//                   },
+//                 },
+//                 {
+//                   transactionName: {
+//                     terms: { field: TRANSACTION_NAME },
+//                   },
+//                 },
+//               ] as const),
+//               size: 10000,
+//             },
+//             aggs: {
+//               duration: {
+//                 sum: {
+//                   field: TRANSACTION_DURATION,
+//                 },
+//               },
+//               sample: {
+//                 top_metrics: {
+//                   size: 1,
+//                   sort: {
+//                     [AT_TIMESTAMP]: 'asc',
+//                   },
+//                   metrics: asMutableArray([
+//                     { field: TRACE_ID },
+//                     { field: AT_TIMESTAMP },
+//                     { field: AGENT_NAME },
+//                     { field: PROCESSOR_EVENT },
+//                     { field: SERVICE_NODE_NAME },
+//                     { field: SPAN_ID },
+//                     { field: TRANSACTION_ID },
+//                     { field: TRANSACTION_TYPE },
+//                     { field: TRANSACTION_DURATION },
+//                     { field: PARENT_ID },
+//                   ] as const),
+//                 },
+//               },
+//             },
+//           },
+//         },
+//       },
+//     }
+//   );
+
+//   return (entryTransactionsSample.aggregations?.entryTansactions.buckets ?? []).map((bucket) => {
+//     const sample = bucket.sample.top[0].metrics;
+
+//     return {
+//       traceId: sample[TRACE_ID] as string,
+//       transactionId: sample[TRANSACTION_ID] as string,
+//       transactionName: bucket.key.transactionName as string,
+//       transactionType: sample[TRANSACTION_TYPE] as string,
+//       transactionDuration: bucket.duration.value as number,
+//       timestamp: sample[AT_TIMESTAMP] as string,
+//       serviceName: bucket.key.serviceName as string,
+//       serviceNodeName: sample[SERVICE_NODE_NAME] as string,
+//       agentName: sample[AGENT_NAME] as AgentName,
+//       parentId: sample[PARENT_ID] as string,
+//       processorEvent: ProcessorEvent.transaction,
+//     };
+//   });
+// }
+
+async function getTransactionsForExitSpans({
+  apmEventClient,
+  start,
+  end,
+  exitSpansSample,
+}: {
+  apmEventClient: APMEventClient;
+  start: number;
+  end: number;
+  exitSpansSample: Map<string, CriticalPathSpan>;
+}): Promise<CriticalPathTransaction[]> {
+  const requiredFields = asMutableArray([
+    TRACE_ID,
+    SPAN_ID,
+    SERVICE_NAME,
+    AGENT_NAME,
+    AT_TIMESTAMP,
+    TRANSACTION_ID,
+    TRANSACTION_NAME,
+    TRANSACTION_TYPE,
+    TRANSACTION_DURATION,
+    PARENT_ID,
+  ] as const);
+
+  const optionalSpanFields = asMutableArray([SERVICE_NODE_NAME] as const);
+
+  const sampleExitSpans = await apmEventClient.search('get_critical_path_span_samples', {
+    apm: {
+      events: [ProcessorEvent.transaction],
+    },
+    body: {
+      track_total_hits: false,
+      query: {
+        bool: {
+          filter: [...rangeQuery(start, end), ...termsQuery(PARENT_ID, ...exitSpansSample.keys())],
+        },
+      },
+      fields: [...requiredFields, ...optionalSpanFields],
+      size: exitSpansSample.size,
+    },
+  });
+
+  return sampleExitSpans.hits.hits.map((hit) => {
+    const { transaction, agent, service, parent, span, trace, ...remainingFields } =
+      unflattenKnownApmEventFields(hit.fields, requiredFields);
+
+    return {
+      traceId: trace.id as string,
+      transactionId: transaction.id as string,
+      transactionName: transaction.name as string,
+      transactionType: transaction.type as string,
+      transactionDuration: transaction.duration.us as number,
+      timestamp: remainingFields['@timestamp'] as string,
+      serviceName: service.name as string,
+      serviceNodeName: service.node?.name as string,
+      agentName: agent.name as AgentName,
+      parentId: parent.id as string,
+      processorEvent: ProcessorEvent.transaction,
+    };
+  });
+}
+
+async function fetchSpansFromTraceIds({
+  apmEventClient,
+  traceIds,
+  start,
+  end,
+}: {
+  apmEventClient: APMEventClient;
+  traceIds: string[];
+  start: number;
+  end: number;
+}) {
+  const sampleExitSpans = await apmEventClient.search('get_service_map_exit_span_samples', {
+    apm: {
+      events: [ProcessorEvent.span],
+    },
+    body: {
+      track_total_hits: false,
+      size: 0,
+      query: {
+        bool: {
           filter: [
+            ...rangeQuery(start, end),
             ...termsQuery(TRACE_ID, ...traceIds),
-            // we need a range query to allow ES to skip shards based on the time range,
-            // but we need enough padding to make sure we get the full trace
-            ...rangeQuery(start - TWO_DAYS_MS, end + TWO_DAYS_MS),
+            ...existsQuery(SPAN_DESTINATION_SERVICE_RESOURCE),
+            ...termsQuery(EVENT_OUTCOME, EventOutcome.success),
           ],
         },
       },
       aggs: {
-        critical_path: {
-          scripted_metric: {
-            params: {
-              // can't send null parameters to ES. undefined will be removed during JSON serialisation
-              serviceName: serviceName || undefined,
-              transactionName: transactionName || undefined,
-            },
-            init_script: {
-              source: `
-                state.eventsById = [:];
-                state.metadataByOperationId = [:];
-              `,
-            },
-            map_script: {
-              source: `
-                String toHash (def item) {
-                  long FNV_32_INIT = 0x811c9dc5L;
-                  long FNV_32_PRIME = 0x01000193L;
-                  char[] chars = item.toString().toCharArray();
-                  long rv = FNV_32_INIT;
-                  int len = chars.length;
-                  for(int i = 0; i < len; i++) {
-                      byte bt = (byte) chars[i];
-                      rv ^= bt;
-                      rv *= FNV_32_PRIME;
-                  }
-                  return rv.toString();
-                }
-                
-                def id;
-                double duration;
-                
-                def operationMetadata = [
-                  "service.name": $('service.name', ''),
-                  "processor.event": $('processor.event', ''),
-                  "agent.name": $('agent.name', '')
-                ];
-
-                def spanName = $('span.name', null);
-                id = $('span.id', null);
-                if (id != null && spanName != null) {
-                  operationMetadata.put('span.name', spanName);
-                  def spanType = $('span.type', '');
-                  if (spanType != '') {
-                    operationMetadata.put('span.type', spanType);
-                  }
-                  def spanSubtype = $('span.subtype', '');
-                  if (spanSubtype != '') {
-                    operationMetadata.put('span.subtype', spanSubtype);
-                  }
-                  duration = $('span.duration.us', 0);
-                } else {
-                  id = $('transaction.id', '');
-                  operationMetadata.put('transaction.name', $('transaction.name', ''));
-                  operationMetadata.put('transaction.type', $('transaction.type', ''));
-                  duration = $('transaction.duration.us', 0);
-                }
-                 
-                String operationId = toHash(operationMetadata);
-                
-                def map = [
-                  "traceId": $('trace.id', ''),
-                  "id": id,
-                  "parentId": $('parent.id', null),
-                  "operationId": operationId,
-                  "timestamp": $('timestamp.us', 0),
-                  "duration": duration
-                ];
-                
-                if (state.metadataByOperationId[operationId] == null) {
-                  state.metadataByOperationId.put(operationId, operationMetadata);
-                }
-                state.eventsById.put(id, map);
-              `,
-            },
-            combine_script: {
-              source: 'return state;',
-            },
-            reduce_script: {
-              source: `
-                String toHash (def item) {
-                  long FNV_32_INIT = 0x811c9dc5L;
-                  long FNV_32_PRIME = 0x01000193L;
-                  char[] chars = item.toString().toCharArray();
-                  long rv = FNV_32_INIT;
-                  int len = chars.length;
-                  for(int i = 0; i < len; i++) {
-                      byte bt = (byte) chars[i];
-                      rv ^= bt;
-                      rv *= FNV_32_PRIME;
-                  }
-                  return rv.toString();
-                }
-                
-                def processEvent (def context, def event) {
-                  if (context.processedEvents[event.id] != null) {
-                    return context.processedEvents[event.id];
-                  }
-                  
-                  def processedEvent = [
-                    "children": []
-                  ];
-                  
-                  if(event.parentId != null) {
-                    def parent = context.events[event.parentId];
-                    if (parent == null) {
-                      return null;
-                    }
-                    def processedParent = processEvent(context, parent);
-                    if (processedParent == null) {
-                      return null;
-                    }
-                    processedParent.children.add(processedEvent);
-                  }
-                  
-                  context.processedEvents.put(event.id, processedEvent);
-                  
-                  processedEvent.putAll(event);
-
-                  if (context.params.serviceName != null && context.params.transactionName != null) {
-                    
-                    def metadata = context.metadata[event.operationId];
-                    
-                    if (metadata != null
-                      && context.params.serviceName == metadata['service.name']
-                      && metadata['transaction.name'] != null 
-                      && context.params.transactionName == metadata['transaction.name']
-                    ) {
-                      context.entryTransactions.add(processedEvent);
-                    }
-
-                  } else if (event.parentId == null) {
-                    context.entryTransactions.add(processedEvent);
-                  }
-                  
-                  return processedEvent;
-                }
-                
-                double getClockSkew (def context, def item, def parent ) {
-                  if (parent == null) {
-                    return 0;
-                  }
-                  
-                  def processorEvent = context.metadata[item.operationId]['processor.event'];
-                  
-                  def isTransaction = processorEvent == 'transaction';
-                  
-                  if (!isTransaction) {
-                    return parent.skew;
-                  }
-                  
-                  double parentStart = parent.timestamp + parent.skew;
-                  double offsetStart = parentStart - item.timestamp;
-                  if (offsetStart > 0) {
-                    double latency = Math.round(Math.max(parent.duration - item.duration, 0) / 2);
-                    return offsetStart + latency;
-                  }
-                  
-                  return 0;
-                }
-                
-                void setOffsetAndSkew ( def context, def event, def parent, def startOfTrace ) {
-                  event.skew = getClockSkew(context, event, parent);
-                  event.offset = event.timestamp - startOfTrace;
-                  for(child in event.children) {
-                    setOffsetAndSkew(context, child, event, startOfTrace);
-                  }
-                  event.end = event.offset + event.skew + event.duration;
-                }
-                
-                void count ( def context, def nodeId, def duration ) {
-                  context.timeByNodeId[nodeId] = (context.timeByNodeId[nodeId] ?: 0) + duration;
-                }
-                
-                void scan ( def context, def item, def start, def end, def path ) {
-                  
-                  def nodeId = toHash(path);
-        
-                  def childNodes = context.nodes[nodeId] != null ? context.nodes[nodeId] : [];
-                  
-                  context.nodes[nodeId] = childNodes;
-                  
-                  context.operationIdByNodeId[nodeId] = item.operationId;
-                  
-                  if (item.children.size() == 0) {
-                    count(context, nodeId, end - start);
-                    return;
-                  }
-                  
-                  item.children.sort((a, b) -> {
-                    if (b.end === a.end) {
-                      return 0;
-                    }
-                    if (b.end > a.end) {
-                      return 1;
-                    }
-                    return -1;
-                  });
-                  
-                  def scanTime = end;
-                  
-                  for(child in item.children) {
-                    double normalizedChildStart = Math.max(child.offset + child.skew, start);
-                    double childEnd = child.offset + child.skew + child.duration;
-                    
-                    double normalizedChildEnd = Math.min(childEnd, scanTime);
-              
-                    def isOnCriticalPath = !(
-                      normalizedChildStart >= scanTime ||
-                      normalizedChildEnd < start ||
-                      childEnd > scanTime
-                    );
-                    
-                    if (!isOnCriticalPath) {
-                      continue;
-                    }
-                    
-                    def childPath = path.clone();
-                    
-                    childPath.add(child.operationId);
-                    
-                    def childId = toHash(childPath);
-                    
-                    if(!childNodes.contains(childId)) {
-                      childNodes.add(childId);
-                    }
-                    
-                    if (normalizedChildEnd < (scanTime - 1000)) {
-                      count(context, nodeId, scanTime - normalizedChildEnd); 
-                    }
-                    
-                    scan(context, child, normalizedChildStart, childEnd, childPath);
-                    
-                    scanTime = normalizedChildStart;
-                  }
-                  
-                  if (scanTime > start) {
-                    count(context, nodeId, scanTime - start);
-                  }
-                  
-                }
-              
-                def events = [:];
-                def metadata = [:];
-                def processedEvents = [:];
-                def entryTransactions = [];
-                def timeByNodeId = [:];
-                def nodes = [:];
-                def rootNodes = [];
-                def operationIdByNodeId = [:];
-                
-                
-                def context = [
-                  "events": events,
-                  "metadata": metadata,
-                  "processedEvents": processedEvents,
-                  "entryTransactions": entryTransactions,
-                  "timeByNodeId": timeByNodeId,
-                  "nodes": nodes,
-                  "operationIdByNodeId": operationIdByNodeId,
-                  "params": params
-                ];
-              
-                for(state in states) {
-                  if (state.eventsById != null) {
-                    events.putAll(state.eventsById);
-                  }
-                  if (state.metadataByOperationId != null) {
-                    metadata.putAll(state.metadataByOperationId);
-                  }
-                }
-                
-                
-                for(def event: events.values()) {
-                  processEvent(context, event);
-                }
-                
-                for(transaction in context.entryTransactions) {
-                  transaction.skew = 0;
-                  transaction.offset = 0;
-                  setOffsetAndSkew(context, transaction, null, transaction.timestamp);
-                  
-                  def path = [];
-                  def parent = transaction;
-                  while (parent != null) {
-                    path.add(parent.operationId);
-                    if (parent.parentId == null) {
-                      break;
-                    }
-                    parent = context.processedEvents[parent.parentId];
-                  }
-
-                  Collections.reverse(path);
-
-                  def nodeId = toHash(path);
-                  
-                  scan(context, transaction, 0, transaction.duration, path);
-                  
-                  if (!rootNodes.contains(nodeId)) {
-                    rootNodes.add(nodeId);
-                  }
-                  
-                }
-                
-                return [
-                  "timeByNodeId": timeByNodeId,
-                  "metadata": metadata,
-                  "nodes": nodes,
-                  "rootNodes": rootNodes,
-                  "operationIdByNodeId": operationIdByNodeId
-                ];`,
+        exitSpans: {
+          composite: {
+            sources: asMutableArray([
+              { serviceNodeName: { terms: { field: SERVICE_NODE_NAME, missing_bucket: true } } },
+              { serviceName: { terms: { field: SERVICE_NAME } } },
+              {
+                spanName: {
+                  terms: { field: SPAN_NAME },
+                },
+              },
+            ] as const),
+            size: 1000,
+          },
+          aggs: {
+            sample: {
+              top_metrics: {
+                size: 1,
+                sort: {
+                  [AT_TIMESTAMP]: 'asc',
+                },
+                metrics: asMutableArray([
+                  { field: TRACE_ID },
+                  { field: SPAN_ID },
+                  { field: SPAN_TYPE },
+                  { field: SPAN_SUBTYPE },
+                  { field: SPAN_NAME },
+                  { field: AGENT_NAME },
+                  { field: AT_TIMESTAMP },
+                  { field: SPAN_SUBTYPE },
+                  { field: SPAN_DURATION },
+                  { field: PARENT_ID },
+                ] as const),
+              },
             },
           },
         },
@@ -408,17 +603,34 @@ export async function getAggregatedCriticalPath({
     },
   });
 
-  logger.debug(`Retrieved critical path in ${Date.now() - now}ms, took: ${response.took}ms`);
+  const destinationBySpanId = new Map<string, CriticalPathSpan>();
 
-  if (!response.aggregations) {
-    return {
-      criticalPath: null,
-    };
-  }
+  (sampleExitSpans.aggregations?.exitSpans.buckets ?? []).forEach((bucket) => {
+    const sample = bucket.sample.top[0].metrics;
+    if (!sample) {
+      return;
+    }
 
-  const criticalPath = response.aggregations?.critical_path.value as CriticalPathResponse;
+    const spanId = sample[SPAN_ID] as string;
+    if (!spanId) {
+      return;
+    }
 
-  return {
-    criticalPath,
-  };
+    destinationBySpanId.set(spanId, {
+      spanId,
+      traceId: sample[TRACE_ID] as string,
+      spanType: sample[SPAN_TYPE] as string,
+      spanSubtype: sample[SPAN_SUBTYPE] as string,
+      spanName: sample[SPAN_NAME] as string,
+      serviceName: bucket.key.serviceName as string,
+      agentName: sample[AGENT_NAME] as AgentName,
+      timestamp: sample[AT_TIMESTAMP] as string,
+      spanDuration: sample[SPAN_DURATION] as number,
+      serviceNodeName: bucket.key.serviceNodeName as string,
+      parentId: sample[PARENT_ID] as string,
+      processorEvent: ProcessorEvent.span,
+    });
+  });
+
+  return destinationBySpanId;
 }
