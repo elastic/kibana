@@ -291,8 +291,8 @@ function PhasesLegend({ phases }: { phases?: IlmPolicyPhases }) {
             </EuiFlexItem>
 
             <EuiFlexItem grow={10}>
-              {phase.description.map((desc, index) => (
-                <EuiTextColor key={`${phase.name}-desc-${index}`} color="subdued">
+              {phase.description.map((desc, idx) => (
+                <EuiTextColor key={`${phase.name}-desc-${idx}`} color="subdued">
                   {desc}
                 </EuiTextColor>
               ))}
