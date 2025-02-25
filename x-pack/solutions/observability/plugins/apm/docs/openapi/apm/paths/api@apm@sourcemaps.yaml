@@ -1,6 +1,8 @@
 get:
   summary: Get source maps
-  description: Returns an array of Fleet artifacts, including source map uploads.
+  description: >
+    Get an array of Fleet artifacts, including source map uploads.
+    You must have `read` or `all` Kibana privileges for the APM and User Experience feature.
   operationId: getSourceMaps
   tags:
     - APM sourcemaps
@@ -48,8 +50,14 @@ get:
           schema:
             $ref: '../components/schemas/501_response.yaml'
 post:
-  summary: Upload source map
-  description: Upload a source map for a specific service and version.
+  summary: Upload a source map
+  description: >
+    Upload a source map for a specific service and version.
+    You must have `all` Kibana privileges for the APM and User Experience feature.
+
+    The maximum payload size is `1mb`.
+    If you attempt to upload a source map that exceeds the maximum payload size, you will get a 413 error.
+    Before uploading source maps that exceed this default, change the maximum payload size allowed by Kibana with the `server.maxPayload` variable.
   operationId: uploadSourceMap
   tags:
     - APM sourcemaps
