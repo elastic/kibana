@@ -1527,7 +1527,7 @@
     "@kbn/synthetics-private-location": "link:x-pack/packages/kbn-synthetics-private-location",
     "@kbn/telemetry-tools": "link:src/platform/packages/private/kbn-telemetry-tools",
     "@kbn/test": "link:src/platform/packages/shared/kbn-test",
-    "@kbn/test-eui-helpers": "link:packages/kbn-test-eui-helpers",
+    "@kbn/test-eui-helpers": "link:src/platform/packages/private/kbn-test-eui-helpers",
     "@kbn/test-jest-helpers": "link:packages/kbn-test-jest-helpers",
     "@kbn/test-subj-selector": "link:packages/kbn-test-subj-selector",
     "@kbn/test-suites-serverless": "link:x-pack/test_serverless",
