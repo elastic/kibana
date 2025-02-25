@@ -69,6 +69,7 @@ import {
   filterMaintenanceWindowsIds,
 } from '../task_runner/maintenance_windows';
 import { ErrorWithType } from '../lib/error_with_type';
+import { reduceAlerts } from '../task_runner/alert_reducers';
 
 // Term queries can take up to 10,000 terms
 const CHUNK_SIZE = 10000;
@@ -547,6 +548,12 @@ export class AlertsClient<
         return true;
       }
     );
+
+    // Alert reducer here
+    console.log('alertsToIndex', alertsToIndex);
+    const reducedAlertsToIndex = reduceAlerts({ rule: this.rule, alerts: alertsToIndex });
+    console.log('reducedAlertsToIndex', reducedAlertsToIndex);
+
     if (alertsToIndex.length > 0) {
       const bulkBody = flatMap(
         alertsToIndex.map((alert: Alert & AlertData) => {
