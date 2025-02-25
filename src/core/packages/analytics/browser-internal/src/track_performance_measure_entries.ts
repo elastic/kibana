@@ -59,6 +59,7 @@ export function trackPerformanceMeasureEntries(analytics: AnalyticsClient, isDev
           }
 
           if (description?.length > MAX_DESCRIPTION_LENGTH) {
+            // eslint-disable-next-line no-console
             console.error(
               `The description for the measure: ${target} is too long. The maximum length is ${MAX_DESCRIPTION_LENGTH}. Strings longer than ${MAX_DESCRIPTION_LENGTH} will not be indexed or stored`
             );
