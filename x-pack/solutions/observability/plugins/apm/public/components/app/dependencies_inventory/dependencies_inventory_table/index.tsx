@@ -21,7 +21,7 @@ import type { DependenciesItem } from '../../../shared/dependencies_table';
 import {
   DependenciesTable,
   INITIAL_SORTING_FIELD,
-  INITIA_SORTING_DIRECTION,
+  INITIAL_SORTING_DIRECTION,
 } from '../../../shared/dependencies_table';
 import { DependencyLink } from '../../../shared/links/dependency_link';
 import { isTimeComparison } from '../../../shared/time_comparison/get_comparison_options';
@@ -40,7 +40,7 @@ export function DependenciesInventoryTable() {
       offset,
       page = 0,
       pageSize = INITIAL_PAGE_SIZE,
-      sortDirection = INITIA_SORTING_DIRECTION,
+      sortDirection = INITIAL_SORTING_DIRECTION,
       sortField = INITIAL_SORTING_FIELD,
     },
   } = useApmParams('/dependencies/inventory');
@@ -111,7 +111,7 @@ export function DependenciesInventoryTable() {
     },
     // Disables exhaustive deps because the statistics api must only be called when the rendered items changed or when comparison is toggled or changed.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [data?.requestId, visibleDependenciesNames],
+    [data?.requestId, visibleDependenciesNames, comparisonEnabled, offset],
     // Do not invalidate this API call when the refresh button is clicked
     { skipTimeRangeRefreshUpdate: true }
   );

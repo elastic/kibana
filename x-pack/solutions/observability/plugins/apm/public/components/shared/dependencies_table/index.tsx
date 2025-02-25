@@ -140,7 +140,7 @@ export function DependenciesTable({
             items={items}
             noItemsMessage={noItemsMessage}
             initialSortField={INITIAL_SORTING_FIELD}
-            initialSortDirection={INITIA_SORTING_DIRECTION}
+            initialSortDirection={INITIAL_SORTING_DIRECTION}
             pagination={true}
             showPerPageOptions={showPerPageOptions}
             initialPageSize={initialPageSize}
