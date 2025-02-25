@@ -21,7 +21,8 @@ import {
   alertDetailUrlActionVariableDescription,
   cloudActionVariableDescription,
   containerActionVariableDescription,
-  groupByKeysActionVariableDescription,
+  groupActionVariableDescription,
+  groupingsActionVariableDescription,
   hostActionVariableDescription,
   labelsActionVariableDescription,
   orchestratorActionVariableDescription,
@@ -76,7 +77,8 @@ export function thresholdRuleType(
     doesSetRecoveryContext: true,
     actionVariables: {
       context: [
-        { name: 'group', description: groupByKeysActionVariableDescription },
+        { name: 'group', description: groupActionVariableDescription },
+        { name: 'groupings', description: groupingsActionVariableDescription },
         {
           name: 'alertDetailsUrl',
           description: alertDetailUrlActionVariableDescription,
