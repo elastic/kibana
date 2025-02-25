@@ -61,7 +61,7 @@ paths-ignore:
   - packages/kbn-managed-vscode-config-cli
   - packages/kbn-optimizer
   - packages/kbn-optimizer-*
-  - packages/kbn-peggy
+  - src/platform/packages/private/kbn-peggy
   - packages/kbn-peggy-loader
   - packages/kbn-performance-testing-dataset-extractor
   - packages/kbn-plugin-generator
