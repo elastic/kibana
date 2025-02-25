@@ -31,10 +31,12 @@ import {
   apiCanAccessViewMode,
   apiHasType,
   apiIsOfType,
+  apiPublishesPanelTitle,
   CanAccessViewMode,
   EmbeddableApiContext,
   getInheritedViewMode,
   HasType,
+  PublishesPanelTitle,
 } from '@kbn/presentation-publishing';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { CSV_REPORTING_ACTION, JobAppParamsCSV } from '@kbn/reporting-export-types-csv-common';
@@ -44,7 +46,6 @@ import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 import type { ClientConfigType } from '@kbn/reporting-public/types';
 import { checkLicense } from '@kbn/reporting-public/license_check';
 import type { ReportingAPIClient } from '@kbn/reporting-public/reporting_api_client';
-
 import { getI18nStrings } from './strings';
 
 export interface PanelActionDependencies {
@@ -83,7 +84,11 @@ interface ExecutionParams {
   i18nStart: I18nStart;
 }
 
-type GetCsvActionApi = HasType & PublishesSavedSearch & CanAccessViewMode & HasTimeRange;
+type GetCsvActionApi = HasType &
+  PublishesSavedSearch &
+  CanAccessViewMode &
+  HasTimeRange &
+  PublishesPanelTitle;
 
 const compatibilityCheck = (api: EmbeddableApiContext['embeddable']): api is GetCsvActionApi => {
   return (
@@ -91,7 +96,8 @@ const compatibilityCheck = (api: EmbeddableApiContext['embeddable']): api is Get
     apiIsOfType(api, SEARCH_EMBEDDABLE_TYPE) &&
     apiPublishesSavedSearch(api) &&
     apiCanAccessViewMode(api) &&
-    Boolean((api as unknown as HasTimeRange).hasTimeRange)
+    Boolean((api as unknown as HasTimeRange).hasTimeRange) &&
+    apiPublishesPanelTitle(api)
   );
 };
 
@@ -275,7 +281,7 @@ export class ReportingCsvPanelAction implements ActionDefinition<EmbeddableApiCo
       addGlobalTimeFilter: !embeddable.hasTimeRange(),
       absoluteTime: true,
     });
-    const title = savedSearch.title || '';
+    const title = embeddable.panelTitle.getValue() ?? '';
     const executionParams = { searchSource, columns, title, savedSearch, i18nStart, analytics };
 
     if (this.enablePanelActionDownload) {
