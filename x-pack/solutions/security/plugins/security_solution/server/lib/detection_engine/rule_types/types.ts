@@ -151,6 +151,7 @@ export interface CreateSecurityRuleTypeWrapperProps {
   experimentalFeatures?: ExperimentalFeatures;
   alerting: SetupPlugins['alerting'];
   analytics?: AnalyticsServiceSetup;
+  isServerless: boolean;
 }
 
 export type CreateSecurityRuleTypeWrapper = (

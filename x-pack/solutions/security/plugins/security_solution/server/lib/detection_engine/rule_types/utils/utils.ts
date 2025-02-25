@@ -4,14 +4,16 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { createHash } from 'crypto';
-import { chunk, get, invert, isEmpty, merge, partition } from 'lodash';
+import { chunk, get, invert, isArray, isEmpty, merge, partition } from 'lodash';
 import moment from 'moment';
 import objectHash from 'object-hash';
 
 import dateMath from '@kbn/datemath';
 import { isCCSRemoteIndexName } from '@kbn/es-query';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { FieldCapsResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { TransportResult } from '@elastic/elasticsearch';
 import {
   ALERT_UUID,
@@ -92,6 +94,7 @@ import type {
 import type { BuildReasonMessage } from './reason_formatters';
 import { getSuppressionTerms } from './suppression_utils';
 import { robustGet } from './source_fields_merging/utils/robust_field_access';
+import { buildTimeRangeFilter } from './build_events_query';
 
 export const MAX_RULE_GAP_RATIO = 4;
 
@@ -133,10 +136,7 @@ export const hasReadIndexPrivileges = async (args: {
 
 export const hasTimestampFields = async (args: {
   timestampField: string;
-  // any is derived from here
-  // node_modules/@elastic/elasticsearch/lib/api/kibana.d.ts
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  timestampFieldCapsResponse: TransportResult<Record<string, any>, unknown>;
+  timestampFieldCapsResponse: TransportResult<FieldCapsResponse, unknown>;
   inputIndices: string[];
   ruleExecutionLogger: IRuleExecutionLogForExecutors;
 }): Promise<{
@@ -191,6 +191,71 @@ export const hasTimestampFields = async (args: {
   }
 
   return { foundNoIndices: false, warningMessage: undefined };
+};
+
+export const checkForFrozenIndices = async ({
+  inputIndices,
+  internalEsClient,
+  currentUserEsClient,
+  to,
+  from,
+  primaryTimestamp,
+  secondaryTimestamp,
+}: {
+  inputIndices: string[];
+  internalEsClient: ElasticsearchClient;
+  currentUserEsClient: ElasticsearchClient;
+  to: string;
+  from: string;
+  primaryTimestamp: string;
+  secondaryTimestamp: string | undefined;
+}): Promise<string | undefined> => {
+  const fieldCapsResponse = await currentUserEsClient.fieldCaps({
+    index: inputIndices,
+    fields: ['_id'],
+    ignore_unavailable: true,
+    index_filter: buildTimeRangeFilter({
+      to,
+      from,
+      primaryTimestamp,
+      secondaryTimestamp,
+    }),
+  });
+
+  const responseIndices = isArray(fieldCapsResponse.indices)
+    ? fieldCapsResponse.indices
+    : [fieldCapsResponse.indices];
+  // Frozen indices start with `partial-`, but it's possible
+  // for some regular hot/warm index to start with that prefix as well by coincidence. If we find indices with that naming pattern,
+  // we fetch the index settings to verify that they are actually frozen indices.
+  const partialIndices = responseIndices.filter((index) => index.startsWith('partial-'));
+  if (partialIndices.length > 0) {
+    const frozenIndices = [];
+    // See https://www.elastic.co/guide/en/elasticsearch/reference/current/data-tiers.html#data-tier-allocation for
+    // details on _tier_preference
+    const tierPreferencesResp = await internalEsClient.indices.getSettings({
+      // Use the original index patterns again instead of just the concrete names of the partial indices:
+      // the list of concrete indices could be huge and make the request URL too large, but we know the list of index patterns works
+      index: inputIndices,
+      filter_path: '*.settings.index.routing.allocation.include._tier_preference',
+    });
+    const keys = Object.keys(tierPreferencesResp);
+    for (const key of keys) {
+      const tiers =
+        tierPreferencesResp[key].settings?.index?.routing?.allocation?.include?._tier_preference;
+      if (tiers) {
+        const preferredTier = tiers.split(',')[0];
+        if (preferredTier === 'data_frozen' && partialIndices.includes(key)) {
+          frozenIndices.push(key);
+        }
+      }
+    }
+    if (frozenIndices.length > 0) {
+      return `This rule found frozen indices that could not be excluded by the time range filter: ${frozenIndices
+        .sort()
+        .join(', ')}`;
+    }
+  }
 };
 
 export const checkPrivileges = async (
