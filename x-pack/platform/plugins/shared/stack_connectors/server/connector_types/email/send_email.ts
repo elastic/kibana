@@ -35,6 +35,7 @@ export interface SendEmailOptions {
   transport: Transport;
   routing: Routing;
   content: Content;
+  attachments?: Attachments[];
   hasAuth: boolean;
   configurationUtilities: ActionsConfigurationUtilities;
 }
@@ -67,13 +68,20 @@ export interface Content {
   messageHTML?: string | null;
 }
 
+export interface Attachments {
+  content: string;
+  contentType?: string;
+  filename: string;
+  encoding?: string;
+}
+
 export async function sendEmail(
   logger: Logger,
   options: SendEmailOptions,
   connectorTokenClient: ConnectorTokenClientContract,
   connectorUsageCollector: ConnectorUsageCollector
 ): Promise<unknown> {
-  const { transport, content } = options;
+  const { transport, content, attachments } = options;
   const { message, messageHTML } = content;
 
   const renderedMessage = messageHTML ?? htmlFromMarkdown(logger, message);
@@ -87,7 +95,14 @@ export async function sendEmail(
       connectorUsageCollector
     );
   } else {
-    return await sendEmailWithNodemailer(logger, options, renderedMessage, connectorUsageCollector);
+    return await sendEmailWithNodemailer(
+      logger,
+      options,
+      renderedMessage,
+      connectorUsageCollector,
+      // only send attachments with nodemailer
+      attachments
+    );
   }
 }
 
@@ -177,7 +192,8 @@ async function sendEmailWithNodemailer(
   logger: Logger,
   options: SendEmailOptions,
   messageHTML: string,
-  connectorUsageCollector: ConnectorUsageCollector
+  connectorUsageCollector: ConnectorUsageCollector,
+  attachments?: Attachments[]
 ): Promise<unknown> {
   const { transport, routing, content, configurationUtilities, hasAuth } = options;
   const { service } = transport;
@@ -194,6 +210,7 @@ async function sendEmailWithNodemailer(
     subject,
     html: messageHTML,
     text: message,
+    ...(attachments && { attachments }),
   };
 
   // The transport options do not seem to be exposed as a type, and we reference

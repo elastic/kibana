@@ -86,6 +86,7 @@ export function jobsQueryFactory(
                   { term: { created_by: username } },
                   ...(jobIds ? [{ ids: { values: jobIds } }] : []),
                 ],
+                must_not: [{ exists: { field: 'cron_schedule' } }],
               },
             },
           },

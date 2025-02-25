@@ -79,7 +79,6 @@ export type BaseParamsV2 = BaseParams & {
 };
 
 export interface BasePayload extends BaseParams {
-  headers: string;
   spaceId?: string;
   isDeprecated?: boolean;
 }
@@ -135,6 +134,9 @@ export interface ReportSource {
   jobtype: string; // refers to `ExportTypeDefinition.jobType`
   created_by: string | false; // username or `false` if security is disabled. Used for ensuring users can only access the reports they've created.
   payload: BasePayload;
+  cron_schedule?: string;
+  notify?: string;
+  scheduled_id?: string;
   meta: {
     // for telemetry
     objectType: string;
@@ -168,6 +170,23 @@ export interface ReportSource {
   completed_at?: string; // timestamp in UTC
   process_expiration?: string | null; // timestamp in UTC - is overwritten with `null` when the job needs a retry
   metrics?: TaskRunMetrics;
+}
+
+export interface ScheduledReportSource {
+  jobtype: string; // refers to `ExportTypeDefinition.jobType`
+  created_at: string; // timestamp in UTC
+  created_by: string | false; // username or `false` if security is disabled. Used for ensuring users can only access the reports they've created.
+  payload: BasePayload;
+  cron_schedule?: string;
+  notify?: string;
+  migration_version: string; // for reminding the user to update their POST URL
+  meta: {
+    // for telemetry
+    objectType: string;
+    layout?: string;
+    isDeprecated?: boolean;
+  };
+  '@timestamp'?: string; // creation timestamp, only used for data streams compatibility
 }
 
 /*

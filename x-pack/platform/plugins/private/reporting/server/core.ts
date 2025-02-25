@@ -46,11 +46,16 @@ import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 
 import { checkLicense } from '@kbn/reporting-server/check_license';
 import { ExportTypesRegistry } from '@kbn/reporting-server/export_types_registry';
+import {
+  EncryptedSavedObjectsPluginSetup,
+  EncryptedSavedObjectsPluginStart,
+} from '@kbn/encrypted-saved-objects-plugin/server';
+import { PluginStartContract as ActionsPluginStartContract } from '@kbn/actions-plugin/server';
 import type { ReportingSetup } from '.';
 import { createConfig } from './config';
 import { reportingEventLoggerFactory } from './lib/event_logger/logger';
 import type { IReport, ReportingStore } from './lib/store';
-import { ExecuteReportTask, ReportTaskParams } from './lib/tasks';
+import { ExecuteReportTask, RunScheduledReportTask, ReportTaskParams } from './lib/tasks';
 import type { ReportingPluginRouter } from './types';
 import { EventTracker } from './usage';
 
@@ -59,6 +64,7 @@ export interface ReportingInternalSetup {
   router: ReportingPluginRouter;
   features: FeaturesPluginSetup;
   security?: SecurityPluginSetup;
+  encryptedSavedObjects: EncryptedSavedObjectsPluginSetup;
   spaces?: SpacesPluginSetup;
   usageCounter?: UsageCounter;
   taskManager: TaskManagerSetupContract;
@@ -68,13 +74,16 @@ export interface ReportingInternalSetup {
 }
 
 export interface ReportingInternalStart {
+  actions: ActionsPluginStartContract;
   store: ReportingStore;
+  basePathService: IBasePath;
   analytics: AnalyticsServiceStart;
   savedObjects: SavedObjectsServiceStart;
   uiSettings: UiSettingsServiceStart;
   esClient: IClusterClient;
   data: DataPluginStart;
   discover: DiscoverServerPluginStart;
+  encryptedSavedObjects: EncryptedSavedObjectsPluginStart;
   fieldFormats: FieldFormatsStart;
   licensing: LicensingPluginStart;
   logger: Logger;
@@ -93,6 +102,7 @@ export class ReportingCore {
   private readonly pluginSetup$ = new Rx.ReplaySubject<boolean>(); // observe async background setupDeps each are done
   private readonly pluginStart$ = new Rx.ReplaySubject<ReportingInternalStart>(); // observe async background startDeps
   private executeTask: ExecuteReportTask;
+  private runScheduledReportTask: RunScheduledReportTask;
   private config: ReportingConfigType;
   private executing: Set<string>;
   private exportTypesRegistry = new ExportTypesRegistry();
@@ -114,6 +124,7 @@ export class ReportingCore {
       this.exportTypesRegistry.register(et);
     });
     this.executeTask = new ExecuteReportTask(this, config, this.logger);
+    this.runScheduledReportTask = new RunScheduledReportTask(this, config, this.logger);
 
     this.getContract = () => ({
       registerExportTypes: (id) => id,
@@ -138,9 +149,14 @@ export class ReportingCore {
       et.setup(setupDeps);
     });
 
-    const { executeTask } = this;
+    // setupDeps.taskManager.registerEncryptedSavedObjects(setupDeps.encryptedSavedObjects);
+
+    const { executeTask, runScheduledReportTask } = this;
     setupDeps.taskManager.registerTaskDefinitions({
       [executeTask.TYPE]: executeTask.getTaskDefinition(),
+    });
+    setupDeps.taskManager.registerTaskDefinitions({
+      [runScheduledReportTask.TYPE]: runScheduledReportTask.getTaskDefinition(),
     });
   }
 
@@ -151,14 +167,18 @@ export class ReportingCore {
     this.pluginStart$.next(startDeps); // trigger the observer
     this.pluginStartDeps = startDeps; // cache
 
+    // startDeps.taskManager.registerEncryptedSavedObjectsPlugin(startDeps.encryptedSavedObjects);
     this.exportTypesRegistry.getAll().forEach((et) => {
       et.start({ ...startDeps });
     });
 
-    const { taskManager } = startDeps;
-    const { executeTask } = this;
+    const { basePathService, taskManager } = startDeps;
+    const { executeTask, runScheduledReportTask } = this;
     // enable this instance to generate reports
-    await Promise.all([executeTask.init(taskManager)]);
+    await Promise.all([
+      executeTask.init(taskManager, basePathService),
+      runScheduledReportTask.init(taskManager, basePathService, startDeps.actions),
+    ]);
   }
 
   public pluginStop() {
@@ -290,8 +310,16 @@ export class ReportingCore {
     return this.exportTypesRegistry;
   }
 
-  public async scheduleTask(report: ReportTaskParams) {
-    return await this.executeTask.scheduleTask(report);
+  public async scheduleOneTimeTask(report: ReportTaskParams, apiKey: string) {
+    return await this.executeTask.scheduleTask(report, apiKey);
+  }
+
+  public async scheduleRecurringReportTask(
+    report: ReportTaskParams,
+    apiKey: string,
+    cronSchedule: string
+  ) {
+    return await this.runScheduledReportTask.scheduleTask(report, apiKey, cronSchedule);
   }
 
   public async getStore() {

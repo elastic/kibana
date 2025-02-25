@@ -29,6 +29,9 @@
     "@kbn/cloud-plugin",
     "@kbn/core-saved-objects-base-server-internal",
     "@kbn/core-elasticsearch-server",
+    "@kbn/encrypted-saved-objects-plugin",
+    "@kbn/es-query",
+    "@kbn/core-http-server-utils",
   ],
   "exclude": ["target/**/*"]
 }

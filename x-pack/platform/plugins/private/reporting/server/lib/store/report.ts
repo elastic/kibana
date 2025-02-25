@@ -16,6 +16,7 @@ import {
   ReportDocumentHead,
   ReportFields,
   ReportSource,
+  ScheduledReportSource,
 } from '@kbn/reporting-common/types';
 
 import type { ReportTaskParams } from '../tasks';
@@ -35,6 +36,9 @@ export class Report implements Partial<ReportSource & ReportDocumentHead> {
   public readonly created_at: ReportSource['created_at'];
   public readonly created_by: ReportSource['created_by'];
   public readonly payload: ReportSource['payload'];
+  public readonly scheduled_id: ReportSource['scheduled_id'];
+  public readonly cron_schedule?: string;
+  public readonly notify?: string;
 
   public readonly meta: ReportSource['meta'];
 
@@ -85,6 +89,8 @@ export class Report implements Partial<ReportSource & ReportDocumentHead> {
     this.max_attempts = opts.max_attempts;
     this.attempts = opts.attempts || 0;
     this.timeout = opts.timeout;
+    this.cron_schedule = opts.cron_schedule;
+    this.notify = opts.notify;
 
     this.process_expiration = opts.process_expiration;
     this.started_at = opts.started_at;
@@ -93,6 +99,7 @@ export class Report implements Partial<ReportSource & ReportDocumentHead> {
     this.created_by = opts.created_by || false;
     this.meta = opts.meta || { objectType: 'unknown' };
     this.metrics = opts.metrics;
+    this.scheduled_id = opts.scheduled_id;
 
     this.status = opts.status || JOB_STATUS.PENDING;
     this.output = opts.output || null;
@@ -139,6 +146,20 @@ export class Report implements Partial<ReportSource & ReportDocumentHead> {
       process_expiration: this.process_expiration,
       output: this.output || null,
       metrics: this.metrics,
+      ...(this.scheduled_id ? { scheduled_id: this.scheduled_id } : {}),
+    };
+  }
+
+  toScheduledReportSource(): ScheduledReportSource {
+    return {
+      migration_version: MIGRATION_VERSION,
+      jobtype: this.jobtype,
+      created_at: this.created_at,
+      created_by: this.created_by,
+      payload: this.payload,
+      meta: this.meta,
+      cron_schedule: this.cron_schedule!,
+      notify: this.notify,
     };
   }
 

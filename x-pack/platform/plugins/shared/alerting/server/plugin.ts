@@ -27,8 +27,9 @@ import {
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
-import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
+import { addSpaceIdToPath, DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import { SpacesPluginStart } from '@kbn/spaces-plugin/server';
+import { type FakeRawRequest } from '@kbn/core-http-server';
 import {
   KibanaRequest,
   Logger,
@@ -62,6 +63,7 @@ import { PluginStart as DataPluginStart } from '@kbn/data-plugin/server';
 import { MonitoringCollectionSetup } from '@kbn/monitoring-collection-plugin/server';
 import { SharePluginStart } from '@kbn/share-plugin/server';
 
+import { kibanaRequestFactory } from '@kbn/core-http-server-utils';
 import { RuleTypeRegistry } from './rule_type_registry';
 import { TaskRunnerFactory } from './task_runner';
 import { RulesClientFactory } from './rules_client_factory';
@@ -290,6 +292,8 @@ export class AlertingPlugin {
       );
     }
 
+    plugins.taskManager.registerEncryptedSavedObjects(plugins.encryptedSavedObjects);
+
     const taskManagerStartPromise = core
       .getStartServices()
       .then(([_, alertingStart]) => alertingStart.taskManager);
@@ -343,6 +347,42 @@ export class AlertingPlugin {
       inMemoryMetrics: this.inMemoryMetrics,
     });
     this.ruleTypeRegistry = ruleTypeRegistry;
+
+    plugins.taskManager.registerTaskDefinitions({
+      taskWithApiKey: {
+        title: 'taskWithApiKey',
+        createTaskRunner: ({ taskInstance }) => ({
+          run: async () => {
+            const services = await core.getStartServices();
+
+            const fakeRawRequest: FakeRawRequest = {
+              headers: {
+                authorization: `ApiKey ${taskInstance.apiKey}`,
+              },
+              path: '/',
+            };
+
+            const path = addSpaceIdToPath('/', 'default');
+
+            // Fake request from the API key
+            const fakeRequest = kibanaRequestFactory(fakeRawRequest);
+            services[0].http.basePath.set(fakeRequest, path);
+
+            // Getting access to scoped clients using the API key
+            // const scopedClusterClient = services[0].elasticsearch.client.asScoped(fakeRequest);
+            // const savedObjectsClient = services[0].savedObjects.getScopedClient(fakeRequest);
+
+            console.log(`TASK WITH API KEY - ${taskInstance.id}`);
+            console.log(JSON.stringify(taskInstance, null, 2));
+
+            return {
+              state: {},
+            };
+          },
+          cancel: async () => {},
+        }),
+      },
+    });
 
     const usageCollection = plugins.usageCollection;
     if (usageCollection) {
@@ -502,6 +542,8 @@ export class AlertingPlugin {
       licenseState,
     } = this;
     licenseState?.setNotifyUsage(plugins.licensing.featureUsage.notifyUsage);
+
+    plugins.taskManager.registerEncryptedSavedObjectsPlugin(plugins.encryptedSavedObjects);
 
     const encryptedSavedObjectsClient = plugins.encryptedSavedObjects.getClient({
       includedHiddenTypes: [RULE_SAVED_OBJECT_TYPE, AD_HOC_RUN_SAVED_OBJECT_TYPE],

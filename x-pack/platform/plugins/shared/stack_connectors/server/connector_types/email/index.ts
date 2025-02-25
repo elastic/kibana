@@ -158,6 +158,16 @@ const ParamsSchemaProps = {
   subject: schema.string(),
   message: schema.string(),
   messageHTML: schema.nullable(schema.string()),
+  attachments: schema.maybe(
+    schema.arrayOf(
+      schema.object({
+        content: schema.string(),
+        contentType: schema.maybe(schema.string()),
+        filename: schema.string(),
+        encoding: schema.maybe(schema.string()),
+      })
+    )
+  ),
   // kibanaFooterLink isn't inteded for users to set, this is here to be able to programatically
   // provide a more contextual URL in the footer (ex: URL to the alert details page)
   kibanaFooterLink: schema.object({
@@ -362,6 +372,7 @@ async function executor(
       cc: params.cc,
       bcc: params.bcc,
     },
+    attachments: params.attachments,
     content: {
       subject: params.subject,
       message: actualMessage,

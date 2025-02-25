@@ -32,9 +32,9 @@ import {
   BaseExportTypeSetupDeps,
   BaseExportTypeStartDeps,
   ExportType,
-  decryptJobHeaders,
   getFieldFormats,
 } from '@kbn/reporting-server';
+import { KibanaRequest } from '@kbn/core/server';
 
 type CsvSearchSourceExportTypeSetupDeps = BaseExportTypeSetupDeps;
 interface CsvSearchSourceExportTypeStartDeps extends BaseExportTypeStartDeps {
@@ -76,14 +76,14 @@ export class CsvSearchSourceExportType extends ExportType<
     jobId: string,
     job: TaskPayloadCSV,
     taskInstanceFields: TaskInstanceFields,
+    fakeRequest: KibanaRequest,
     cancellationToken: CancellationToken,
-    stream: Writable
+    stream: Writable,
+    forceNowOverride?: string
   ) => {
     const logger = this.logger.get(`execute-job:${jobId}`);
 
-    const { encryptionKey, csv: csvConfig } = this.config;
-    const headers = await decryptJobHeaders(encryptionKey, job.headers, logger);
-    const fakeRequest = this.getFakeRequest(headers, job.spaceId, logger);
+    const { csv: csvConfig } = this.config;
     const uiSettings = await this.getUiSettingsClient(fakeRequest, logger);
     const dataPluginStart = this.startDeps.data;
     const fieldFormatsRegistry = await getFieldFormats().fieldFormatServiceFactory(uiSettings);

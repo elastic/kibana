@@ -24,7 +24,8 @@ import { validateUrls } from './validate_urls';
 export function getFullUrls(
   serverInfo: ReportingServerInfo,
   config: ReportingConfigType,
-  job: TaskPayloadPDF
+  job: TaskPayloadPDF,
+  forceNowOverride?: string
 ) {
   const {
     kibanaServer: { protocol, hostname, port },
@@ -64,7 +65,7 @@ export function getFullUrls(
     }
 
     // allow the hash check to perform first
-    if (!job.forceNow) {
+    if (!job.forceNow && !forceNowOverride) {
       return jobUrl;
     }
 
@@ -75,7 +76,7 @@ export function getFullUrls(
       pathname: visualizationRoute.pathname,
       query: {
         ...visualizationRoute.query,
-        forceNow: job.forceNow,
+        forceNow: forceNowOverride ? forceNowOverride : job.forceNow,
       },
     });
 

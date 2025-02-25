@@ -18,6 +18,7 @@
     "requiredPlugins": [
       "data",
       "discover",
+      "encryptedSavedObjects",
       "fieldFormats",
       "home",
       "management",
@@ -29,6 +30,7 @@
       "features"
     ],
     "optionalPlugins": [
+      "actions",
       "security",
       "spaces",
       "usageCollection",

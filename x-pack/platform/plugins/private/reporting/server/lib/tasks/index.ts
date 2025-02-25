@@ -13,6 +13,7 @@ export const REPORTING_EXECUTE_TYPE = 'report:execute';
 export const TIME_BETWEEN_ATTEMPTS = 10 * 1000; // 10 seconds
 
 export { ExecuteReportTask } from './execute_report';
+export { RunScheduledReportTask } from './run_scheduled_reports';
 
 export interface ReportTaskParams<JobPayloadType = BasePayload> {
   id: string;

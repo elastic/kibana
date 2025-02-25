@@ -53,6 +53,7 @@ export class ContentStream extends Duplex {
   private buffers: Buffer[] = [];
   private bytesBuffered = 0;
 
+  private savedContent: string | undefined;
   private bytesRead = 0;
   private chunksRead = 0;
   private chunksWritten = 0;
@@ -83,6 +84,10 @@ export class ContentStream extends Duplex {
   ) {
     super();
     this.parameters = { encoding };
+  }
+
+  public content(): string | undefined {
+    return this.savedContent;
   }
 
   private decode(content: string) {
@@ -190,6 +195,7 @@ export class ContentStream extends Duplex {
   private async writeHead(content: string) {
     this.logger.debug(`Updating chunk #0 (${this.document.id}).`);
 
+    this.savedContent = content;
     const body = await this.client.update<ReportSource>({
       ...this.document,
       body: {

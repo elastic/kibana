@@ -1114,8 +1114,10 @@
     "name"
   ],
   "task": [
+    "apiKey",
     "attempts",
     "enabled",
+    "invalidateApiKey",
     "ownerId",
     "partition",
     "priority",
