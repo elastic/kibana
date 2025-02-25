@@ -102,7 +102,7 @@ export function getVersionsForComparison(
     case VersionsPickerOptionEnum.UpdateFromElastic:
       return hasBaseVersion ? [Version.Base, Version.Target] : [Version.Current, Version.Target];
     case VersionsPickerOptionEnum.Merged:
-      return [Version.Base, Version.Target];
+      return [Version.Base, Version.Final];
     default:
       return assertUnreachable(selectedOption);
   }
