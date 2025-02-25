@@ -61,6 +61,8 @@ export async function rolloverDataStreamIfNecessary({
   logger,
   mappings,
 }: RolloverDataStreamOptions) {
+  // remove stream.name from mappings because it doesn't matter
+  delete mappings?.['stream.name'];
   const dataStreams = await esClient.indices.getDataStream({ name: `${name},${name}.*` });
   for (const dataStream of dataStreams.data_streams) {
     const writeIndex = dataStream.indices.at(-1);

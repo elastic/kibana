@@ -82,16 +82,13 @@ export async function readStream({
   }
 
   const inheritedFields = getInheritedFieldsFromAncestors(ancestors);
-  getSortedFields(otelFields).forEach(([key, fieldDef]) => {
-    inheritedFields[key] = { ...fieldDef, from: '<otel_compat_mode>' };
-  });
   // calculate aliases for all fields based on their prefixes and add them to the inherited fields
   getSortedFields(inheritedFields).forEach(([key, fieldDef]) => {
     // if the field starts with one of the otel prefixes, add an alias without the prefix
     if (otelPrefixes.some((prefix) => key.startsWith(prefix))) {
       inheritedFields[key.replace(new RegExp(`^(${otelPrefixes.join('|')})`), '')] = {
         ...fieldDef,
-        from: '<otel_compat_mode>',
+        from: inheritedFields[key].from,
         alias_for: key,
       };
     }
@@ -112,7 +109,7 @@ export async function readStream({
       inheritedFields[key] = {
         type: otelFields[fieldDef.path!].type,
         alias_for: fieldDef.path,
-        from: '<otel_compat_mode>',
+        from: 'logs',
       };
     }
   });

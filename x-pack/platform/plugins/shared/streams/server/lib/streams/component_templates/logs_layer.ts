@@ -11,6 +11,10 @@ export const logsSettings: IndicesIndexSettings = {
   index: {
     mode: 'logsdb',
     codec: 'best_compression',
+    sort: {
+      field: ['resource.attributes.host.name', '@timestamp'],
+      order: ['asc', 'desc'],
+    },
     mapping: {
       total_fields: {
         ignore_dynamic_beyond_limit: true,

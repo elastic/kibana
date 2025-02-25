@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import { IndicesIndexSettings, MappingProperty } from '@elastic/elasticsearch/lib/api/types';
+import {
+  IndicesIndexSettings,
+  MappingObjectProperty,
+  MappingProperty,
+} from '@elastic/elasticsearch/lib/api/types';
 import { FieldDefinition } from '@kbn/streams-schema';
 
 export const otelSettings: IndicesIndexSettings = {
@@ -82,6 +86,37 @@ export const otelFields: FieldDefinition = {
 };
 
 export const otelMappings: Record<string, MappingProperty> = {
+  body: {
+    type: 'object',
+    properties: {
+      structured: {
+        type: 'flattened',
+      },
+      text: {
+        type: 'match_only_text',
+      },
+    },
+  },
+  attributes: {
+    type: 'object',
+    subobjects: false,
+  },
+  resource: {
+    type: 'object',
+    properties: {
+      dropped_attributes_count: {
+        type: 'long',
+      },
+      schema_url: {
+        ignore_above: 1024,
+        type: 'keyword',
+      },
+      attributes: {
+        type: 'object',
+        subobjects: false,
+      },
+    },
+  },
   'error.exception.type': {
     path: 'attributes.exception.type',
     type: 'alias',
@@ -115,3 +150,32 @@ export const otelMappings: Record<string, MappingProperty> = {
     type: 'alias',
   },
 };
+
+/* Goes through the top level record and if a field in there starts with attributes,
+   put it into attributes.properties (and cut the attributes prefix). Same for resource.attributes.
+
+   This is necessary because of an Elasticsearch issue that requires all fields to be in the properties,
+   as the merge later on doesn't work
+*/
+export function moveFieldsToProperties(mappings: Record<string, MappingProperty>) {
+  const attributes: Record<string, MappingProperty> = {};
+  const resourceAttributes: Record<string, MappingProperty> = {};
+  for (const [field, props] of Object.entries(mappings)) {
+    if (field.startsWith('attributes.')) {
+      attributes[field.replace('attributes.', '')] = props;
+      delete mappings[field];
+    } else if (field.startsWith('resource.attributes.')) {
+      resourceAttributes[field.replace('resource.attributes.', '')] = props;
+      delete mappings[field];
+    }
+  }
+  if (Object.keys(attributes).length > 0) {
+    (mappings.attributes as MappingObjectProperty).properties = attributes;
+  }
+  if (Object.keys(resourceAttributes).length > 0) {
+    (
+      (mappings.resource as MappingObjectProperty).properties?.attributes as MappingObjectProperty
+    ).properties = resourceAttributes;
+  }
+  return mappings;
+}

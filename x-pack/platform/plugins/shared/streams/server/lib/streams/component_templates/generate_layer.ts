@@ -20,7 +20,7 @@ import {
 import { ASSET_VERSION } from '../../../../common/constants';
 import { logsSettings } from './logs_layer';
 import { getComponentTemplateName } from './name';
-import { otelMappings, otelPrefixes } from './otel_layer';
+import { moveFieldsToProperties, otelMappings, otelPrefixes } from './otel_layer';
 
 export function generateLayer(
   name: string,
@@ -62,12 +62,13 @@ export function generateLayer(
       lifecycle: getTemplateLifecycle(definition, isServerless),
       settings: getTemplateSettings(definition, isServerless),
       mappings: {
-        subobjects: false,
         dynamic: false,
-        properties: {
-          ...properties,
-          ...(isRoot(name) ? otelMappings : {}),
-        },
+        properties: isRoot(name)
+          ? moveFieldsToProperties({
+              ...otelMappings,
+              ...properties,
+            })
+          : properties,
       },
     },
     version: ASSET_VERSION,
