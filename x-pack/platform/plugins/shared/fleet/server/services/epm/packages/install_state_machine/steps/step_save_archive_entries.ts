@@ -6,7 +6,7 @@
  */
 
 import { ASSETS_SAVED_OBJECT_TYPE } from '../../../../../constants';
-import type { AssetsMap, PackageAssetReference } from '../../../../../types';
+import type { AssetsMap, KibanaAssetType, PackageAssetReference } from '../../../../../types';
 
 import { removeArchiveEntries, saveArchiveEntriesFromAssetsMap } from '../../../archive/storage';
 
@@ -14,9 +14,10 @@ import { withPackageSpan } from '../../utils';
 
 import type { InstallContext } from '../_state_machine_package_install';
 import { INSTALL_STATES } from '../../../../../../common/types';
+import { getPathParts } from '../../../archive';
 
 export async function stepSaveArchiveEntries(context: InstallContext) {
-  const { packageInstallContext, savedObjectsClient, installSource } = context;
+  const { packageInstallContext, savedObjectsClient, installSource, useStreaming } = context;
 
   const { packageInfo, archiveIterator } = packageInstallContext;
 
@@ -47,7 +48,12 @@ export async function stepSaveArchiveEntries(context: InstallContext) {
   }
 
   await archiveIterator.traverseEntries(async (entry) => {
-    assetsToSaveMap.set(entry.path, entry.buffer);
+    const assetType = getPathParts(entry.path).type as KibanaAssetType;
+    if (assetType === 'security_rule' && useStreaming) {
+      // Skip security rules to avoid storing to many things
+    } else {
+      assetsToSaveMap.set(entry.path, entry.buffer);
+    }
     if (assetsToSaveMap.size > 100) {
       await flushAssets();
     }
