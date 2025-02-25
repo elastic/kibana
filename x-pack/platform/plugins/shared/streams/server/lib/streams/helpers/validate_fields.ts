@@ -6,6 +6,7 @@
  */
 
 import { FieldDefinition, WiredStreamDefinition } from '@kbn/streams-schema';
+import { keepFields } from '@kbn/streams-schema/src/helpers/namespaced_ecs';
 import { MalformedFieldsError } from '../errors/malformed_fields_error';
 import { otelMappings, otelPrefixes } from '../component_templates/otel_layer';
 
@@ -30,6 +31,14 @@ export function validateAncestorFields({
       ) {
         throw new MalformedFieldsError(
           `Field ${fieldName} is already defined with incompatible type in the parent stream ${ancestor.name}`
+        );
+      }
+      if (
+        !otelPrefixes.some((prefix) => fieldName.startsWith(prefix)) &&
+        !keepFields.includes(fieldName)
+      ) {
+        throw new MalformedFieldsError(
+          `Field ${fieldName} is not allowed to be defined as it doesn't match the namespaced ECS or OTel schema.`
         );
       }
       for (const prefix of otelPrefixes) {

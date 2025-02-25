@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-const keepFields: string[] = [
+export const keepFields: string[] = [
   '@timestamp',
   'observed_timestamp',
   'trace_id',
@@ -16,6 +16,10 @@ const keepFields: string[] = [
   'event_name',
   'dropped_attributes_count',
   'scope',
+  'body.text',
+  'body.structured',
+  'resource.schema_url',
+  'resource.dropped_attributes_count',
 ];
 
 const renameMap: Record<string, string> = {
@@ -32,6 +36,7 @@ export function getRealFieldName(fieldName: string) {
   // Return unchanged if field is already namespaced or real
   if (
     keepFields.includes(fieldName) ||
+    fieldName.startsWith('body.structured.') ||
     fieldName.startsWith('resource.attributes.') ||
     fieldName.startsWith('attributes.')
   ) {
