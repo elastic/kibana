@@ -9,6 +9,8 @@ import type { AnyAction, Dispatch, ListenerEffectAPI } from '@reduxjs/toolkit';
 import type { DataViewsServicePublic } from '@kbn/data-views-plugin/public';
 import type { RootState } from '../reducer';
 import { shared } from '../slices';
+import { DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID, DataViewPickerScopeName } from '../../constants';
+import { selectDataViewAsync } from '../actions';
 
 export const createInitListener = (dependencies: { dataViews: DataViewsServicePublic }) => {
   return {
@@ -22,6 +24,19 @@ export const createInitListener = (dependencies: { dataViews: DataViewsServicePu
         const dataViewSpecs = await Promise.all(dataViews.map((dataView) => dataView.toSpec()));
 
         listenerApi.dispatch(shared.actions.setDataViews(dataViewSpecs));
+
+        // Preload the default data view for related scopes
+        // NOTE: we will remove this ideally and load only when particular dataview is necessary
+        listenerApi.dispatch(
+          selectDataViewAsync({
+            id: DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID,
+            scope: [
+              DataViewPickerScopeName.default,
+              DataViewPickerScopeName.timeline,
+              DataViewPickerScopeName.analyzer,
+            ],
+          })
+        );
       } catch (error: unknown) {
         listenerApi.dispatch(shared.actions.error());
       }

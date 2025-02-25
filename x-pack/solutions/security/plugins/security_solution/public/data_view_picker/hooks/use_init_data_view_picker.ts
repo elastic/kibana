@@ -13,9 +13,7 @@ import {
   removeListener as originalRemoveListener,
 } from '@reduxjs/toolkit';
 import type { RootState } from '../redux/reducer';
-import { selectDataViewAsync } from '../redux/actions';
 import { useKibana } from '../../common/lib/kibana';
-import { DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID, DataViewPickerScopeName } from '../constants';
 import { createDataViewSelectedListener } from '../redux/listeners/data_view_selected';
 import { createInitListener } from '../redux/listeners/init_listener';
 import { useEnableExperimental } from '../../common/hooks/use_experimental_features';
@@ -58,19 +56,8 @@ export const useInitDataViewPicker = () => {
     dispatch(addListener(dataViewsLoadingListener));
     dispatch(addListener(dataViewSelectedListener));
 
+    // NOTE: this kicks off the data loading in the Data View Picker
     dispatch(shared.actions.init());
-
-    // Preload the default view for related scopes
-    dispatch(
-      selectDataViewAsync({
-        id: DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID,
-        scope: [
-          DataViewPickerScopeName.default,
-          DataViewPickerScopeName.timeline,
-          DataViewPickerScopeName.analyzer,
-        ],
-      })
-    );
 
     return () => {
       dispatch(removeListener(dataViewsLoadingListener));
