@@ -56,6 +56,21 @@ export class BaseValidatorMock extends BaseValidator {
   ): Promise<void> {
     return this.validateUpdateOwnerSpaceIds(updatedItem, currentItem);
   }
+
+  _validateCanCreateGlobalArtifacts(item: ExceptionItemLikeOptions): Promise<void> {
+    return this.validateCanCreateGlobalArtifacts(item);
+  }
+
+  _validateCanUpdateItemInActiveSpace(
+    updatedItem: Partial<Pick<ExceptionListItemSchema, 'tags'>>,
+    currentSavedItem: ExceptionListItemSchema
+  ): Promise<void> {
+    return this.validateCanUpdateItemInActiveSpace(updatedItem, currentSavedItem);
+  }
+
+  _validateCanDeleteItemInActiveSpace(currentSavedItem: ExceptionListItemSchema): Promise<void> {
+    return this.validateCanDeleteItemInActiveSpace(currentSavedItem);
+  }
 }
 
 export const createExceptionItemLikeOptionsMock = (

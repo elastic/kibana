@@ -291,5 +291,49 @@ describe('When using Artifacts Exceptions BaseValidator', () => {
         ).resolves.toBeUndefined();
       });
     });
+
+    describe('validateCanCreateGlobalArtifacts()', () => {
+      it.todo('should do nothing if feature flag is turned off');
+
+      it.todo('should error is user does not have new global artifact management privilege');
+
+      it.todo('should allow creation of global artifacts when user has privilege');
+    });
+
+    describe('validateCanUpdateItemInActiveSpace()', () => {
+      it.todo('should do nothing if feature flag is turned off');
+
+      it.todo(
+        'should error if updating a global item when user does not have global artifact privilege'
+      );
+
+      it.todo(
+        'should error if updating an item outside of its owner space id when user does not have global artifact privilege'
+      );
+
+      it.todo('should allow updates to global items when user has global artifact privilege');
+
+      it.todo(
+        'should allow update to item outside of owner space id when user has global artifact privilege'
+      );
+    });
+
+    describe('validateCanDeleteItemInActiveSpace()', () => {
+      it.todo('should do nothing if feature flag is turned off');
+
+      it.todo(
+        'should error if deleting a global artifact when user does not have global artifact privilege'
+      );
+
+      it.todo(
+        'should error if deleting item outside of its owner space id when user does not have global artifact privilege'
+      );
+
+      it.todo('should allow delete of global item when user has global artifact privilege');
+
+      it.todo(
+        'should allow deleting item from outside of its owner space id when user has global artifact privilege'
+      );
+    });
   });
 });

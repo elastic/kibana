@@ -328,7 +328,7 @@ export class BaseValidator {
       }
 
       // If either the updated item or the saved item is a global artifact, then
-      // ensure that user has global artifact management privilege
+      // error out - user needs global artifact management privilege
       if (!this.isItemByPolicy(updatedItem) || !this.isItemByPolicy(currentSavedItem)) {
         throw new EndpointArtifactExceptionValidationError(
           `${ENDPOINT_AUTHZ_ERROR_MESSAGE}. ${GLOBAL_ARTIFACT_MANAGEMENT_NOT_ALLOWED_MESSAGE}`,
