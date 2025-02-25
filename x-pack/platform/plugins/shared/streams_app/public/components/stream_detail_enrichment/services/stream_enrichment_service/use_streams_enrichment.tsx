@@ -91,9 +91,13 @@ const ListenForDefinitionChanges = ({
   return children;
 };
 
+export const useSimulatorRef = () => {
+  return useStreamsEnrichmentSelector((state) => state.context.simulatorRef);
+};
+
 export const useSimulatorSelector = <T,>(
   selector: (snapshot: SnapshotFrom<typeof simulationMachine> | undefined) => T
 ): T => {
-  const simulationRef = useStreamsEnrichmentSelector((state) => state.context.simulatorRef);
+  const simulationRef = useSimulatorRef();
   return useSelector(simulationRef, selector);
 };

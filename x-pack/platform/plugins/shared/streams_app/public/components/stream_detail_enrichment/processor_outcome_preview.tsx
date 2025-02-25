@@ -20,32 +20,18 @@ import { TimeRange } from '@kbn/es-query';
 import { useKibana } from '../../hooks/use_kibana';
 import { StreamsAppSearchBar, StreamsAppSearchBarProps } from '../streams_app_search_bar';
 import { PreviewTable } from '../preview_table';
-import {
-  DocsFilterOption,
-  UseProcessingSimulatorReturn,
-  docsFilterOptions,
-} from './hooks/use_processing_simulator';
 import { AssetImage } from '../asset_image';
 import { useDateRange } from '../../hooks/use_date_range';
-import { useSimulatorSelector } from './services/stream_enrichment_service';
+import { useSimulatorRef, useSimulatorSelector } from './services/stream_enrichment_service';
+import { previewDocsFilterOptions } from './services/stream_enrichment_service/simulation_state_machine';
 
-interface ProcessorOutcomePreviewProps {
-  isLoading: UseProcessingSimulatorReturn['isLoading'];
-  simulation: UseProcessingSimulatorReturn['simulation'];
-  onRefreshSamples: UseProcessingSimulatorReturn['refreshSamples'];
-  selectedDocsFilter: UseProcessingSimulatorReturn['selectedDocsFilter'];
-  setSelectedDocsFilter: UseProcessingSimulatorReturn['setSelectedDocsFilter'];
-}
-
-export const ProcessorOutcomePreview = ({
-  isLoading,
-  simulation,
-  onRefreshSamples,
-  selectedDocsFilter,
-  setSelectedDocsFilter,
-}: ProcessorOutcomePreviewProps) => {
+export const ProcessorOutcomePreview = () => {
   const { dependencies } = useKibana();
   const { data } = dependencies.start;
+
+  const isLoading = useSimulatorSelector(
+    (state) => state?.matches('loadingSamples') || state?.matches('runningSimulation')
+  );
 
   const { timeRange, setTimeRange } = useDateRange({ data });
 
@@ -53,13 +39,9 @@ export const ProcessorOutcomePreview = ({
     <>
       <EuiFlexItem grow={false}>
         <OutcomeControls
-          docsFilter={selectedDocsFilter}
-          onDocsFilterChange={setSelectedDocsFilter}
           timeRange={timeRange}
           onTimeRangeChange={setTimeRange}
-          onTimeRangeRefresh={onRefreshSamples}
-          simulationFailureRate={simulation?.failure_rate}
-          simulationSuccessRate={simulation?.success_rate}
+          onTimeRangeRefresh={() => {}}
         />
       </EuiFlexItem>
       <EuiSpacer size="m" />
@@ -70,24 +52,25 @@ export const ProcessorOutcomePreview = ({
 };
 
 interface OutcomeControlsProps {
-  docsFilter: DocsFilterOption;
   timeRange: TimeRange;
-  onDocsFilterChange: (filter: DocsFilterOption) => void;
   onTimeRangeChange: (timeRange: TimeRange) => void;
   onTimeRangeRefresh: () => void;
-  simulationFailureRate?: number;
-  simulationSuccessRate?: number;
 }
 
 const OutcomeControls = ({
-  docsFilter,
   timeRange,
-  onDocsFilterChange,
   onTimeRangeChange,
   onTimeRangeRefresh,
-  simulationFailureRate,
-  simulationSuccessRate,
 }: OutcomeControlsProps) => {
+  const simulatorRef = useSimulatorRef();
+  const previewDocsFilter = useSimulatorSelector((state) => state?.context.previewDocsFilter);
+  const simulationFailureRate = useSimulatorSelector(
+    (state) => state?.context.simulation?.failure_rate
+  );
+  const simulationSuccessRate = useSimulatorSelector(
+    (state) => state?.context.simulation?.success_rate
+  );
+
   const handleQuerySubmit: StreamsAppSearchBarProps['onQuerySubmit'] = (
     { dateRange },
     isUpdate
@@ -105,9 +88,9 @@ const OutcomeControls = ({
     }
   };
 
-  const getFilterButtonPropsFor = (filterId: DocsFilterOption) => ({
-    hasActiveFilters: docsFilter === filterId,
-    onClick: () => onDocsFilterChange(filterId),
+  const getFilterButtonPropsFor = (filter: NonNullable<typeof previewDocsFilter>) => ({
+    hasActiveFilters: previewDocsFilter === filter,
+    onClick: () => simulatorRef?.send({ type: 'filters.changePreviewDocsFilter', filter }),
   });
 
   return (
@@ -118,26 +101,28 @@ const OutcomeControls = ({
           { defaultMessage: 'Filter for all, matching or unmatching previewed documents.' }
         )}
       >
-        <EuiFilterButton {...getFilterButtonPropsFor(docsFilterOptions.outcome_filter_all.id)}>
-          {docsFilterOptions.outcome_filter_all.label}
+        <EuiFilterButton
+          {...getFilterButtonPropsFor(previewDocsFilterOptions.outcome_filter_all.id)}
+        >
+          {previewDocsFilterOptions.outcome_filter_all.label}
         </EuiFilterButton>
         <EuiFilterButton
-          {...getFilterButtonPropsFor(docsFilterOptions.outcome_filter_matched.id)}
+          {...getFilterButtonPropsFor(previewDocsFilterOptions.outcome_filter_matched.id)}
           badgeColor="success"
           numActiveFilters={
             simulationSuccessRate ? parseFloat((simulationSuccessRate * 100).toFixed(2)) : undefined
           }
         >
-          {docsFilterOptions.outcome_filter_matched.label}
+          {previewDocsFilterOptions.outcome_filter_matched.label}
         </EuiFilterButton>
         <EuiFilterButton
-          {...getFilterButtonPropsFor(docsFilterOptions.outcome_filter_unmatched.id)}
+          {...getFilterButtonPropsFor(previewDocsFilterOptions.outcome_filter_unmatched.id)}
           badgeColor="accent"
           numActiveFilters={
             simulationFailureRate ? parseFloat((simulationFailureRate * 100).toFixed(2)) : undefined
           }
         >
-          {docsFilterOptions.outcome_filter_unmatched.label}
+          {previewDocsFilterOptions.outcome_filter_unmatched.label}
         </EuiFilterButton>
       </EuiFilterGroup>
       <StreamsAppSearchBar

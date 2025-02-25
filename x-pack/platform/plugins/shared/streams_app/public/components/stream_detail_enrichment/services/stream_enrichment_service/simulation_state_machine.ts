@@ -30,15 +30,10 @@ import {
 import { APIReturnType, StreamsRepositoryClient } from '@kbn/streams-plugin/public/api';
 import { flattenObjectNestedLast } from '@kbn/object-utils';
 import { errors as esErrors } from '@elastic/elasticsearch';
-import { isEmpty, isEqual, uniq, uniqBy } from 'lodash';
+import { isEmpty, isEqual, uniq } from 'lodash';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { DetectedField, ProcessorDefinitionWithUIAttributes } from '../../types';
 import { processorConverter } from '../../utils';
-
-export interface TableColumn {
-  name: string;
-  origin: 'processor' | 'detected';
-}
 
 export const previewDocsFilterOptions = {
   outcome_filter_all: {
@@ -98,6 +93,7 @@ export const simulationMachine = setup({
     },
     context: {} as SimulationMachineContext,
     events: {} as
+      | { type: 'simulation.refreshSamples' }
       | { type: 'filters.changePreviewDocsFilter'; filter: PreviewDocsFilterOption }
       | { type: 'processors.change'; processors: ProcessorDefinitionWithUIAttributes[] },
   },
@@ -156,7 +152,7 @@ export const simulationMachine = setup({
       ),
   },
 }).createMachine({
-  /** @xstate-layout N4IgpgJg5mDOIC5SwJYFsCuAbAhgFxQHsA7AOhWJQJyxQC8KoBiAbQAYBdRUAB0NQIluIAB6IATAGY2pAGwBOeQBZZADjYBGAOzTZ4gDQgAnoiUaNpVQFZ5krWqnitbWQF9Xh1JlyCyKCFhgTDwAToQAxnCwhCGwpOEAFjjEMOxcSCB8AkTEwmIITuKkVmxaZfKaskryVpKGJggqFpI2di1KdrXunujY+DnkAUGhEVExcYnJqRrpvPxUOXmIWlaycqsaqkpKqo4u9YiSqhY7NVpK4h0atSvdIF59vqRYhDgQjADKOGg8gbBMEBIYHIxAAboQANbAh4+AYvN6fb6-OAICjg8L9EhpNLCLILIQZfKFYqlcqVaq1A4IWRaVSkcSbeyyNiSeTnDp3GGYsjw94pL4-P5MMAhMIhUi-fAAMxiaFIXKevMRgpRaIi3OxnFx818SwKWiKJTKWgqGiqNTqxkQVi2pHsq0k2msSis205vVhJFIOFgsBFBH5Hu5ACUwABHDAoEJgNBgYh4f44jJ43WExC2OlKew7cQM2yyDQGK0IY6kaqKWxWcS7Fom93ebne33+z5B3yhiNRmNxhOsGba7IE0D5eQaGSSatsbbVpwaSSWhrzqxl1Q1dSurTXKf1x4DEIYYiUQMN3wAoEg8FQ+VtvcHo9QD43kiosHq3ya2aZHWLNP6w2kk1yQtKkNEUUgK0UFl7Ckc4d09Mh90PVsTxyYVRRiCUfBlEI5QVW8kOPXdnzVDF304JM5kHXJf2JI0yTNCkF0OcQZCUFxLnEVZV3ULR3A8EBiEICA4GEPChy-Ki9QAWmZUhJAUKQ2WrWoVKpGTSDYTSWTYswaTZVRJDgxsKAWGh6EYAd8Wo4dECk+RSFAs1aRZMd51ZVQqTMcdWjUTYOjKN1+LEvwhks1MbOpNQHI2AznGZZQrE8sc5NaCoqhYyQlCMxVXj5B8kT+MKfwii4qVkV0NOcTKqpNZwsqCp8yB9P0QgDB9Go7SNo1jeN4GTb9xPyMcDIc2RWQCqdc2rJK6TYeRCkci5HTYKxsvw+9HxQ8SU2K0RbMLOSFPG5SWkyjziykNZ7GNK42OuLM+NcIA */
+  /** @xstate-layout N4IgpgJg5mDOIC5SwJYFsCuAbAhgFxQHsA7AYlU1wJIDoAnMAMwdgAsBlHNAByzgG0ADAF1EoboVTViYkAA9EAFgBMAGhABPRAA4AbMpq7BugJy6AzIpMBWXbu0B2AL5P1FbPiLEaKYigI4WCgAXr5QpEKiSCASUl6yCgjKJuY0DmbaAIwmJsbWDtbmDupaCA6KujTmtiaZinWZ1sraLm7oHtI+fgFBocTh-JlR4pL+8dGJyanp9tm5uvmFxZqI1pmp5pnKFopFjtomLa4g7lRePhB8pNx0hADGcLCEdLA0d6w4-WCRsrFjJAlEA51jQDtpzI5FIpCplBNoSogLJlQVtdJlMg4kUZlK0Tu0zrQUJcwNdbg9YE8Xm8Pl9BsMYqNpICEOsTIo0gsjJk7BjrAcEQhFODDPk6lDBMoKvpcadPITiaRGCgsHgwFT3p8YAAFBgANxQYAA7gARe6wABiytVdB+0T+TImiHRgnZ1gq2jWGMEKW0ahWCAh7K2gmBBzZ+QcRzalDl3iwhBwEDCnB4fFgpAgJDAXV1hAA1tnZZ144nk1xeHAEL5c3dY5FbSM4gDHWUQWCIeVoZs4QLtELDA5lC6mkYTAVMjL8bGaCWk-0UxX02rbnQaLx8IxnmgaEXzrOy6nK9X7nWRA2GU2ZC3gal25Cu7D4f6CtYaMpMtpP01I5jNpOY50OAUmqBDzlO0gAEpgAAjhgKAMGgYDEHg6bnva4ygJMErIo0+hWOYliDu+ApNAYgiwkObrmM0fbmP+HTnEBsAgcm4FeFBsHwWAiHIahQy-IyGHyE6brsrs5R8mOWzUYovbItYgiKSoikEaiE7HLutBMSxYEAexMFwQhSEoREyj0uhzaYSJ-bifhn76HU1gCuJIoON62Tcoc6z0QS3h0BgxB+LpDEkBmWY5vmhZsbQ-mBaxekkFWxA1qewhoYJlnCa2t6HB2UIwj2-pDoINCKYp9iSkY1hrD506xUFUDsNFZDLs8a5UJudDbppfkBQ1TUJcQSUpdI9YiAJl7MjeoK5feBVPqUhFVNY4YYto3pCsodG4sQhAQHAsg9RN-xXlZCAALS6AKl2lWVd33XUtWdL4YyBCEYTHQ6Z3cq+JjJGiiiRnCgjmMYAoOBCNDZBKphupKkbbdGIXeGgKAUgei6fUJkyNK+tEIy6IN-SRQ5vtizSic0yjOBpzUXHwWOZYkwYODQ8ySh65j6BtJFbDQI4HIDKS7LoNNI75M4JnOjXlmmjOnVlQobLkth1LoUIesspS+q6W2mJi2wVAUT2McBdCgY1zUcYZ3HGfAdoZQrzODsi1OWLCfLGFzJMldsEoU1CVPWCbMV9fFyPy8ySs0CoZhbRDzQpARArUak76wqDHqfr65QuC4QA */
   id: 'simulation',
   context: ({ input }) => ({
     parentRef: input.parentRef,
@@ -170,6 +166,15 @@ export const simulationMachine = setup({
     timeRange: { start: 0, end: 0 },
   }),
   initial: 'initializing',
+  on: {
+    'simulation.refreshSamples': '.loadingSamples',
+    'filters.changePreviewDocsFilter': {
+      actions: [
+        { type: 'storePreviewDocsFilter', params: ({ event }) => event },
+        { type: 'derivePreviewConfig' },
+      ],
+    },
+  },
   states: {
     initializing: {
       always: [
@@ -183,7 +188,7 @@ export const simulationMachine = setup({
     missingSamples: {
       on: {
         // 'simulation.updateTimeRange': 'loadingSamples',
-        // 'simulation.refreshTimeRange': 'loadingSamples',
+        // 'simulation.refreshSamples': 'loadingSamples',
       },
     },
     idle: {
@@ -207,12 +212,6 @@ export const simulationMachine = setup({
             ],
           },
         ],
-        'filters.changePreviewDocsFilter': {
-          actions: [
-            { type: 'storePreviewDocsFilter', params: ({ event }) => event },
-            { type: 'derivePreviewConfig' },
-          ],
-        },
       },
     },
     loadingSamples: {
@@ -228,8 +227,11 @@ export const simulationMachine = setup({
           actions: [{ type: 'storeSamples', params: ({ event }) => ({ samples: event.output }) }],
         },
         onError: {
-          target: 'idle',
-          actions: [{ type: 'notifySamplesFetchFailure' }],
+          target: 'missingSamples',
+          actions: [
+            { type: 'storeSamples', params: () => ({ samples: [] }) },
+            { type: 'notifySamplesFetchFailure' },
+          ],
         },
       },
     },

@@ -28,8 +28,10 @@ import { UseGenAIConnectorsResult } from '@kbn/observability-ai-assistant-plugin
 import { useAbortController, useBoolean } from '@kbn/react-hooks';
 import { useKibana } from '../../../../hooks/use_kibana';
 import { GrokFormState, ProcessorFormState } from '../../types';
-import { UseProcessingSimulatorReturn } from '../../hooks/use_processing_simulator';
-import { useSimulatorContext } from '../../simulator_context';
+import {
+  useSimulatorSelector,
+  useStreamsEnrichmentSelector,
+} from '../../services/stream_enrichment_service';
 
 const RefreshButton = ({
   generatePatterns,
@@ -120,12 +122,10 @@ function useAiEnabled() {
 }
 
 function InnerGrokAiSuggestions({
-  refreshSimulation,
-  filteredSamples,
+  previewDocuments,
   definition,
 }: {
-  refreshSimulation: UseProcessingSimulatorReturn['refreshSimulation'];
-  filteredSamples: FlattenRecord[];
+  previewDocuments: FlattenRecord[];
   definition: IngestStreamGetResponse;
 }) {
   const { dependencies } = useKibana();
@@ -165,7 +165,7 @@ function InnerGrokAiSuggestions({
           body: {
             field: fieldValue,
             connectorId: currentConnector,
-            samples: filteredSamples,
+            samples: previewDocuments,
           },
         },
       })
@@ -182,7 +182,7 @@ function InnerGrokAiSuggestions({
     currentConnector,
     definition.stream.name,
     fieldValue,
-    filteredSamples,
+    previewDocuments,
     streamsRepositoryClient,
   ]);
 
@@ -267,7 +267,6 @@ function InnerGrokAiSuggestions({
                           { value: suggestion.pattern },
                         ]);
                       }
-                      refreshSimulation();
                     }}
                     data-test-subj="streamsAppGrokAiSuggestionsButton"
                     iconType="plusInCircle"
@@ -319,11 +318,12 @@ function InnerGrokAiSuggestions({
 
 export function GrokAiSuggestions() {
   const isAiEnabled = useAiEnabled();
-  const props = useSimulatorContext();
+  const definition = useStreamsEnrichmentSelector((state) => state.context.definition);
+  const previewDocuments = useSimulatorSelector((state) => state?.context.previewDocuments);
 
-  if (!isAiEnabled || !props.filteredSamples.length) {
+  if (!isAiEnabled || !previewDocuments?.length) {
     return null;
   }
 
-  return <InnerGrokAiSuggestions {...props} />;
+  return <InnerGrokAiSuggestions definition={definition} previewDocuments={previewDocuments} />;
 }

@@ -8,27 +8,14 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiFlexItem, EuiSpacer, EuiTab, EuiTabs } from '@elastic/eui';
-import { IngestStreamGetResponse, isWiredStreamGetResponse } from '@kbn/streams-schema';
+import { isWiredStreamGetResponse } from '@kbn/streams-schema';
 import { ProcessorOutcomePreview } from './processor_outcome_preview';
-import { UseProcessingSimulatorReturn } from './hooks/use_processing_simulator';
 import {
   useStreamEnrichmentEvents,
   useStreamsEnrichmentSelector,
 } from './services/stream_enrichment_service';
 
-interface SimulationPlaygroundProps {
-  definition: IngestStreamGetResponse;
-  isLoading: UseProcessingSimulatorReturn['isLoading'];
-  simulation: UseProcessingSimulatorReturn['simulation'];
-  selectedDocsFilter: UseProcessingSimulatorReturn['selectedDocsFilter'];
-  setSelectedDocsFilter: UseProcessingSimulatorReturn['setSelectedDocsFilter'];
-  onRefreshSamples: UseProcessingSimulatorReturn['refreshSamples'];
-}
-
-export const SimulationPlayground = (props: SimulationPlaygroundProps) => {
-  const { isLoading, simulation, onRefreshSamples, setSelectedDocsFilter, selectedDocsFilter } =
-    props;
-
+export const SimulationPlayground = () => {
   const isViewingDataPreview = useStreamsEnrichmentSelector((state) =>
     state.matches({
       resolvedChildStream: { displayingSimulation: 'viewDataPreview' },
@@ -66,15 +53,7 @@ export const SimulationPlayground = (props: SimulationPlaygroundProps) => {
         </EuiTabs>
       </EuiFlexItem>
       <EuiSpacer size="m" />
-      {isViewingDataPreview && (
-        <ProcessorOutcomePreview
-          isLoading={isLoading}
-          simulation={simulation}
-          onRefreshSamples={onRefreshSamples}
-          selectedDocsFilter={selectedDocsFilter}
-          setSelectedDocsFilter={setSelectedDocsFilter}
-        />
-      )}
+      {isViewingDataPreview && <ProcessorOutcomePreview />}
       {isViewingDetectedFields &&
         i18n.translate('xpack.streams.simulationPlayground.div.detectedFieldsLabel', {
           defaultMessage: 'WIP',
