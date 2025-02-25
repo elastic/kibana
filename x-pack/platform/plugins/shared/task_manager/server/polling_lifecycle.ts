@@ -13,6 +13,7 @@ import { tap } from 'rxjs';
 import { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import type { Logger, ExecutionContextStart } from '@kbn/core/server';
 
+import { IEventLogger } from '@kbn/event-log-plugin/server';
 import { Result, asErr, mapErr, asOk, map, mapOk, isOk } from './lib/result_type';
 import {
   TaskManagerConfig,
@@ -55,6 +56,7 @@ import {
   ADJUST_THROUGHPUT_INTERVAL,
 } from './lib/create_managed_configuration';
 import { createRunningAveragedStat } from './monitoring/task_run_calculators';
+import { EVENT_LOG_ACTIONS } from './plugin';
 
 const MAX_BUFFER_OPERATIONS = 100;
 
@@ -73,6 +75,8 @@ export interface TaskPollingLifecycleOpts {
   usageCounter?: UsageCounter;
   taskPartitioner: TaskPartitioner;
   startingCapacity: number;
+  eventLogger: IEventLogger;
+  taskManagerId: string;
 }
 
 export type TaskLifecycleEvent =
@@ -93,6 +97,7 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
   private store: TaskStore;
   private taskClaiming: TaskClaiming;
   private bufferedStore: BufferedTaskStore;
+  private readonly taskManagerId;
   private readonly executionContext: ExecutionContextStart;
 
   private logger: Logger;
@@ -108,6 +113,8 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
   private events$ = new Subject<TaskLifecycleEvent>();
 
   private middleware: Middleware;
+
+  private eventLogger: IEventLogger;
 
   private usageCounter?: UsageCounter;
   private config: TaskManagerConfig;
@@ -131,8 +138,11 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
     usageCounter,
     taskPartitioner,
     startingCapacity,
+    taskManagerId,
+    eventLogger,
   }: TaskPollingLifecycleOpts) {
     this.logger = logger;
+    this.taskManagerId = taskManagerId;
     this.middleware = middleware;
     this.definitions = definitions;
     this.store = taskStore;
@@ -141,6 +151,7 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
     this.config = config;
     const { poll_interval: pollInterval, claim_strategy: claimStrategy } = config;
     this.currentPollInterval = pollInterval;
+    this.eventLogger = eventLogger;
 
     const errorCheck$ = countErrors(taskStore.errors$, ADJUST_THROUGHPUT_INTERVAL);
     const window = WORKER_UTILIZATION_RUNNING_AVERAGE_WINDOW_SIZE_MS / this.currentPollInterval;
@@ -215,6 +226,20 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
 
           // Emit event indicating task manager utilization
           this.emitEvent(asTaskManagerStatEvent('workerUtilization', asOk(usedCapacityPercentage)));
+
+          this.eventLogger.logEvent({
+            '@timestamp': new Date().toISOString(),
+            event: {
+              action: EVENT_LOG_ACTIONS.claim,
+              outcome: 'failure',
+            },
+            kibana: {
+              server_uuid: this.taskManagerId,
+              task_claim: {
+                load: usedCapacityPercentage,
+              },
+            },
+          });
         }
         return capacity;
       },
@@ -259,6 +284,8 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
       allowReadingInvalidState: this.config.allow_reading_invalid_state,
       strategy: this.config.claim_strategy,
       getPollInterval: () => this.currentPollInterval,
+      taskManagerId: this.taskManagerId,
+      eventLogger: this.eventLogger,
     });
   };
 
@@ -323,6 +350,24 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
             this.emitEvent(
               asTaskManagerStatEvent('workerUtilization', asOk(this.pool.usedCapacityPercentage))
             );
+
+            this.eventLogger.logEvent({
+              '@timestamp': new Date().toISOString(),
+              event: {
+                action: EVENT_LOG_ACTIONS.claim,
+                outcome: 'failure',
+              },
+              kibana: {
+                server_uuid: this.taskManagerId,
+                task_claim: {
+                  load: this.pool.usedCapacityPercentage,
+                },
+              },
+              error: {
+                message: error.message,
+                type: error.type as unknown as string,
+              },
+            });
           })
         )
       )
@@ -344,6 +389,22 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
 
             this.currentTmUtilization$.next(tmUtilization);
             this.emitEvent(asTaskManagerStatEvent('workerUtilization', asOk(tmUtilization)));
+
+            this.eventLogger.logEvent({
+              '@timestamp': new Date().toISOString(),
+              event: {
+                action: EVENT_LOG_ACTIONS.claim,
+                outcome: 'success',
+                duration: results.timing?.stop - results.timing?.start,
+              },
+              kibana: {
+                server_uuid: this.taskManagerId,
+                task_claim: {
+                  load: tmUtilization,
+                  conflicts: results.stats?.tasksConflicted,
+                },
+              },
+            });
           })
         )
       )
