@@ -1302,7 +1302,7 @@ components:
         - type: object
           properties:
             global:
-              description: Whether this Knowledge Base Entry is global, defaults to false
+              description: 'Whether this Knowledge Base Entry is global, defaults to false'
               type: boolean
             name:
               description: Name of the Knowledge Base Entry
@@ -1329,7 +1329,7 @@ components:
         - type: object
           properties:
             global:
-              description: Whether this Knowledge Base Entry is global, defaults to false
+              description: 'Whether this Knowledge Base Entry is global, defaults to false'
               type: boolean
             name:
               description: Name of the Knowledge Base Entry
@@ -1386,7 +1386,7 @@ components:
         - type: object
           properties:
             global:
-              description: Whether this Knowledge Base Entry is global, defaults to false
+              description: 'Whether this Knowledge Base Entry is global, defaults to false'
               type: boolean
             id:
               $ref: '#/components/schemas/NonEmptyString'
@@ -1471,7 +1471,7 @@ components:
         - type: object
           properties:
             global:
-              description: Whether this Knowledge Base Entry is global, defaults to false
+              description: 'Whether this Knowledge Base Entry is global, defaults to false'
               type: boolean
             name:
               description: Name of the Knowledge Base Entry
@@ -1498,7 +1498,7 @@ components:
         - type: object
           properties:
             global:
-              description: Whether this Knowledge Base Entry is global, defaults to false
+              description: 'Whether this Knowledge Base Entry is global, defaults to false'
               type: boolean
             name:
               description: Name of the Knowledge Base Entry
@@ -1568,7 +1568,7 @@ components:
         - type: object
           properties:
             global:
-              description: Whether this Knowledge Base Entry is global, defaults to false
+              description: 'Whether this Knowledge Base Entry is global, defaults to false'
               type: boolean
             id:
               $ref: '#/components/schemas/NonEmptyString'
