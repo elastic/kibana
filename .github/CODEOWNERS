@@ -695,7 +695,7 @@ x-pack/test/security_api_integration/plugins/oidc_provider @elastic/kibana-secur
 test/common/plugins/otel_metrics @elastic/obs-ux-infra_services-team
 src/platform/packages/shared/kbn-openapi-bundler @elastic/security-detection-rule-management
 src/platform/packages/shared/kbn-openapi-common @elastic/security-detection-rule-management
-packages/kbn-openapi-generator @elastic/security-detection-rule-management
+src/platform/packages/shared/kbn-openapi-generator @elastic/security-detection-rule-management
 packages/kbn-optimizer @elastic/kibana-operations
 packages/kbn-optimizer-webpack-helpers @elastic/kibana-operations
 src/platform/packages/shared/kbn-osquery-io-ts-types @elastic/security-asset-management

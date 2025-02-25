@@ -1478,7 +1478,7 @@
     "@kbn/mock-idp-utils": "link:src/platform/packages/private/kbn-mock-idp-utils",
     "@kbn/observability-synthetics-test-data": "link:x-pack/solutions/observability/packages/synthetics-test-data",
     "@kbn/openapi-bundler": "link:src/platform/packages/shared/kbn-openapi-bundler",
-    "@kbn/openapi-generator": "link:packages/kbn-openapi-generator",
+    "@kbn/openapi-generator": "link:src/platform/packages/shared/kbn-openapi-generator",
     "@kbn/optimizer": "link:packages/kbn-optimizer",
     "@kbn/optimizer-webpack-helpers": "link:packages/kbn-optimizer-webpack-helpers",
     "@kbn/peggy": "link:packages/kbn-peggy",

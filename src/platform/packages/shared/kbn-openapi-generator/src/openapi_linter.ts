@@ -33,7 +33,7 @@ export const lint = async (config: LinterConfig) => {
       './node_modules/.bin/redocly',
       [
         'lint',
-        '--config=packages/kbn-openapi-generator/redocly_linter/config.yaml',
+        '--config=src/platform/packages/shared/kbn-openapi-generator/redocly_linter/config.yaml',
         ...schemaPaths,
       ],
       {

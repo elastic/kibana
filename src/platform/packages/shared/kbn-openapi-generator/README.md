@@ -104,11 +104,11 @@ export const InstallPrebuiltRulesResponse = z.object({
 Alternatively, you can use the code generator programmatically. You can create a script file and run it with `node` command. This could be useful if you want to set up code generation in your CI pipeline. Here's an example of such script:
 
 ```ts
-require('../../../../../src/setup_node_env');
+require('../../../../../../../../src/setup_node_env');
 const { generate } = require('@kbn/openapi-generator');
 const { resolve } = require('path');
 
-const SECURITY_SOLUTION_ROOT = resolve(__dirname, '../..');
+const SECURITY_SOLUTION_ROOT = resolve(__dirname, '../../../../..');
 
 generate({
   rootDir: SECURITY_SOLUTION_ROOT, // Path to the plugin root directory
@@ -190,18 +190,18 @@ paths:
           required: false
           description: The rule's `id` value.
           schema:
-            $ref: '../../../model/rule_schema/common_attributes.schema.yaml#/components/schemas/RuleSignatureId'
+            $ref: '../../../../../../model/rule_schema/common_attributes.schema.yaml#/components/schemas/RuleSignatureId'
         - name: rule_id
           in: query
           required: false
           description: The rule's `rule_id` value.
           schema:
-            $ref: '../../../model/rule_schema/common_attributes.schema.yaml#/components/schemas/RuleObjectId'
+            $ref: '../../../../../../model/rule_schema/common_attributes.schema.yaml#/components/schemas/RuleObjectId'
       responses:
         200:
           description: Indicates a successful call.
           content:
             application/json:
               schema:
-                $ref: '../../../model/rule_schema/rule_schemas.schema.yaml#/components/schemas/RuleResponse'
+                $ref: '../../../../../../model/rule_schema/rule_schemas.schema.yaml#/components/schemas/RuleResponse'
 ```
