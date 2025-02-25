@@ -109,6 +109,9 @@ export const KV_HEADER_PROMPT = ChatPromptTemplate.fromMessages([
  <samples>
  {samples}
  </samples>
+ <regex>
+ {regex}
+ </regex>
  </context>`,
   ],
   [
@@ -211,6 +214,7 @@ Follow these steps to fix the errors in the header pattern:
 2. The log samples contain the header and structured body. The header may contain any or all of priority, timestamp, loglevel, hostname, ipAddress, messageId or any free-form text or non key-value information etc.,
 3. The message body may start with a description, followed by structured key-value pairs.
 4. Make sure the regex and grok pattern matches all the header information. Only the structured message body should be under GREEDYDATA in grok pattern.
+
 You ALWAYS follow these guidelines when writing your response:
  <guidelines>
  - Do not parse the message part in the regex. Just the header part should be in regex and grok_pattern.

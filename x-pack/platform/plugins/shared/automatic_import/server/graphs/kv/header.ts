@@ -44,6 +44,7 @@ export async function handleHeader({
     samples: state.logSamples,
     packageName: state.packageName,
     dataStreamName: state.dataStreamName,
+    regex: state.regex,
     ex_answer: JSON.stringify(KV_HEADER_EXAMPLE_ANSWER, null, 2),
   });
 
