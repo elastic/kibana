@@ -18,19 +18,17 @@ export async function waitForActiveRule({
   supertest: SuperTest.Agent;
   logger?: ToolingLog;
 }) {
+  const getRule = () => supertest.get(`/api/alerting/rule/${ruleId}`).then(logAndInspect);
+
   return await Effect.runPromise(
-    getRuleId(`/api/alerting/rule/${ruleId}`).pipe(
+    Effect.tryPromise(getRule).pipe(
       Effect.retry({ times: 100 }),
       Effect.timeout('2 minutes'),
       Effect.catchAll(Console.error)
     )
   );
 
-  function getRuleId(url: string) {
-    return Effect.tryPromise(() => supertest.get(url).then(logAndInspect));
-  }
-
-  function logAndInspect(response) {
+  function logAndInspect(response: any): any {
     if (logger) logResponse(logger, response);
 
     const status = response.body?.execution_status?.status;
