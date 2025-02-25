@@ -20,7 +20,7 @@ import type {
   RefAttributes,
   SetStateAction,
 } from 'react';
-import {
+import type {
   AlertConsumers,
   ALERT_CASE_IDS,
   ALERT_STATUS,
