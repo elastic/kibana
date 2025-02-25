@@ -462,7 +462,8 @@ const AllAssets = ({
         />
         {dataView ? (
           <TopAssetsBarChart
-            isLoading={isLoadingChartData || isFetchingChartData}
+            isLoading={isLoadingChartData}
+            isFetching={isFetchingChartData}
             entities={!!chartData && chartData.length > 0 ? chartData : []}
           />
         ) : null}
