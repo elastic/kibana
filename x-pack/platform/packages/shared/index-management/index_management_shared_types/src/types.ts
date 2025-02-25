@@ -16,6 +16,7 @@ import type { SerializableRecord } from '@kbn/utility-types';
 import type { LocatorPublic } from '@kbn/share-plugin/public';
 import { ExtensionsSetup } from './services/extensions_service';
 import { PublicApiServiceSetup } from './services/public_api_service';
+import { ChromeBreadcrumb } from '@kbn/core/public';
 
 export type IndexManagementLocatorParams = SerializableRecord &
   (
@@ -35,11 +36,17 @@ export type IndexManagementLocatorParams = SerializableRecord &
 
 export type IndexManagementLocator = LocatorPublic<IndexManagementLocatorParams>;
 
+export interface SearchIndicesAppMountParams  {
+  element: HTMLElement |null;
+  setBreadcrumbs: (crumbs: ChromeBreadcrumb[]) => void;
+  history: ScopedHistory;
+
+}
 export interface IndexManagementPluginSetup {
   apiService: PublicApiServiceSetup;
   extensionsService: ExtensionsSetup;
   locator?: IndexManagementLocator;
-  managementApp?: any;
+  managementApp:(params: SearchIndicesAppMountParams) => Promise<() => void>;
 }
 
 export interface IndexManagementPluginStart {
@@ -50,9 +57,6 @@ export interface IndexManagementPluginStart {
   getIndexSettingsComponent: (deps: {
     history: ScopedHistory<unknown>;
   }) => React.FC<IndexSettingProps>;
-  getIndexManagementComponent:(deps: {
-    history: ScopedHistory<unknown>;
-  }) => React.FC<{}>;
 }
 
 export interface Index {

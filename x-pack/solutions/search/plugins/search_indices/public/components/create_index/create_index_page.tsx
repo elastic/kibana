@@ -36,7 +36,12 @@ export const CreateIndexPage = () => {
     () => (consolePlugin?.EmbeddableConsole ? <consolePlugin.EmbeddableConsole /> : null),
     [consolePlugin]
   );
-  usePageChrome(CreateIndexLabel, IndexManagementBreadcrumbs());
+  usePageChrome(CreateIndexLabel, [
+    ...IndexManagementBreadcrumbs(),
+    {
+      text: CreateIndexLabel,
+    },
+  ]);
 
   return (
     <KibanaPageTemplate

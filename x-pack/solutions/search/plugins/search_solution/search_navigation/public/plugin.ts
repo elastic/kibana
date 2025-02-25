@@ -105,8 +105,7 @@ export class SearchNavigationPlugin
     { forClassicChromeStyle = false }: SearchNavigationSetBreadcrumbsOptions = {}
   ) {
     if (forClassicChromeStyle === true && this.currentChromeStyle !== 'classic') return;
-    console.log("this.getSearchHomeBreadcrumb()",this.getSearchHomeBreadcrumb(),"breadcrumbs",breadcrumbs )
-    const searchBreadcrumbs = [this.getSearchHomeBreadcrumb(), ...breadcrumbs];
+
     if (this.pluginsStart?.serverless) {
       this.pluginsStart.serverless.setBreadcrumbs(breadcrumbs);
     } else {

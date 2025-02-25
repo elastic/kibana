@@ -82,7 +82,12 @@ export const SearchIndexDetailsPage = () => {
 
   const hasDocuments = Boolean(isInitialLoading || indexDocuments?.results?.data.length);
 
-  usePageChrome(indexName, IndexManagementBreadcrumbs());
+  usePageChrome(indexName, [
+    ...IndexManagementBreadcrumbs(),
+    {
+      text: indexName,
+    },
+  ]);
 
   const usageTracker = useUsageTracker();
 

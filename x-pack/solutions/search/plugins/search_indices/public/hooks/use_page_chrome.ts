@@ -7,45 +7,27 @@
 
 import { useEffect } from 'react';
 import type { ChromeBreadcrumb } from '@kbn/core-chrome-browser';
-import { useKibana } from './use_kibana';
 import { i18n } from '@kbn/i18n';
-import { IndexManagementBreadcrumbs } from '../components/shared/breadcrumbs';
+import { useKibana } from './use_kibana';
 
 export const usePageChrome = (docTitle: string, breadcrumbs: ChromeBreadcrumb[]) => {
-  const { cloud, chrome, http, serverless} = useKibana().services;
-  const IndexManagementBreadcrumb = IndexManagementBreadcrumbs();
-  const newBreadcrumbs = [
-    ...breadcrumbs,
-    {
-      text: docTitle,
-    },
-  ]
+  const { chrome, serverless } = useKibana().services;
 
   useEffect(() => {
     chrome.docTitle.change(docTitle);
-    // const newBreadcrumbs = breadcrumbs.map((breadcrumb) => {
-    //   if (breadcrumb.href && http.basePath.get().length > 0) {
-    //     breadcrumb.href = http.basePath.prepend(breadcrumb.href);
-    //   }
-    //   return breadcrumb;
-    // });
 
     if (serverless) {
-      serverless.setBreadcrumbs(newBreadcrumbs);
+      serverless.setBreadcrumbs(breadcrumbs);
     } else {
-      // chrome.setBreadcrumbs([{
-      //   text: i18n.translate('xpack.searchIndices.breadcrumbs.indexManagement.label', {
-      //     defaultMessage: 'Content',
-      //   }),
-      // }], {
-      //   project: { value: newBreadcrumbs, absolute: true },
-      // });
-      const breadcrumbs = [{
-        text: i18n.translate('xpack.searchIndices.breadcrumbs.indexManagement.label', {
-          defaultMessage: 'Content',
-        }),
-      }, ...newBreadcrumbs]
-      chrome.setBreadcrumbs(breadcrumbs, { project: { value: breadcrumbs, absolute: true }})
+      const newBreadcrumbs = [
+        {
+          text: i18n.translate('xpack.searchIndices.breadcrumbs.content.label', {
+            defaultMessage: 'Content',
+          }),
+        },
+        ...breadcrumbs,
+      ];
+      chrome.setBreadcrumbs(newBreadcrumbs, { project: { value: newBreadcrumbs, absolute: true } });
     }
     return () => {
       // clear manually set breadcrumbs
@@ -55,5 +37,5 @@ export const usePageChrome = (docTitle: string, breadcrumbs: ChromeBreadcrumb[])
         chrome.setBreadcrumbs([]);
       }
     };
-  }, [chrome, docTitle, http.basePath, serverless]);
+  }, [chrome, docTitle, serverless, breadcrumbs]);
 };

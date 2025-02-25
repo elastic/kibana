@@ -10,11 +10,10 @@ import { IndexManagementPluginSetup } from '@kbn/index-management-shared-types';
 import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import React, { useRef, useEffect, useCallback } from 'react';
+import { i18n } from '@kbn/i18n';
 import { useKibana } from '../../hooks/use_kibana';
 
-import { i18n } from '@kbn/i18n';
-
-const breadcrumbText = i18n.translate('management.breadcrumb', {
+const breadcrumbText = i18n.translate('xpack.searchIndices.breadcrumb', {
   defaultMessage: 'Content',
 });
 
@@ -35,10 +34,6 @@ export const IndexManagementApp: React.FC<IndexManagementAppProps> = ({ indexMan
         ...(item.href ? reactRouterNavigate(scopedHistory, item.href) : {}),
       });
 
-      // Clicking the Management breadcrumb to navigate back to the "root" only
-      // makes sense if there's a management app open. So when one isn't open
-      // this breadcrumb shouldn't be a clickable link.
-
       const breadcrumbValue = [
         wrapBreadcrumb(breadcrumb, history),
         ...crumbs.map((item) => wrapBreadcrumb(item, appHistory || history)),
@@ -50,9 +45,12 @@ export const IndexManagementApp: React.FC<IndexManagementAppProps> = ({ indexMan
   );
 
   useEffect(() => {
-    const unmount = indexManagement.managementApp(managementRef.current, setBreadcrumbs, history);
-    return unmount;
-  }, [indexManagement, managementRef]);
+    const unmount = () => {
+      indexManagement.managementApp({ element: managementRef.current, setBreadcrumbs, history });
+    };
+
+    return unmount();
+  }, [indexManagement, managementRef, setBreadcrumbs, history]);
   return (
     <KibanaPageTemplate
       offset={0}
