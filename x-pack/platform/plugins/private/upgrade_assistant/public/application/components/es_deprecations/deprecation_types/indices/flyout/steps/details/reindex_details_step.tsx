@@ -83,6 +83,7 @@ export const ReindexDetailsFlyoutStep: React.FunctionComponent<{
   let showMlAnomalyReindexingGuidance = false;
   let showReadOnlyGuidance = false;
   let showDefaultGuidance = false;
+  let showRollupGuidance = false;
 
   if (isESTransformTarget) {
     showEsTransformsGuidance = true;
@@ -90,9 +91,22 @@ export const ReindexDetailsFlyoutStep: React.FunctionComponent<{
     showReadOnlyGuidance = true;
   } else if (isMLAnomalyIndex) {
     showMlAnomalyReindexingGuidance = true;
+  } else if (deprecation.isRollup) {
+    showRollupGuidance = true;
   } else {
     showDefaultGuidance = true;
   }
+
+  console.log('XXX', deprecation);
+
+  const defaultGuidanceIntro = (
+    <p>
+      <FormattedMessage
+        id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.detailsStep.notCompatibleIndexText"
+        defaultMessage="This index was created in ES 7.x and it is not compatible with the next major version. Choose one of the following options:"
+      />
+    </p>
+  );
 
   return (
     <Fragment>
@@ -181,14 +195,46 @@ export const ReindexDetailsFlyoutStep: React.FunctionComponent<{
               </p>
             </Fragment>
           )}
+
+          {showRollupGuidance && (
+            <Fragment>
+              {defaultGuidanceIntro}
+              <p>
+                Moving to a time series data stream and using downsampling is recommended. For your
+                existing data you can -{' '}
+              </p>
+              <p>Disable rollup job and mark read only</p>
+              <p>
+                Reindex - need to try sending docs while reindexing. Stop job, reindex, create new
+                job
+              </p>
+              <EuiDescriptionList
+                rowGutterSize="m"
+                listItems={[
+                  {
+                    title: i18n.translate(
+                      'xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.detailsStep.reindex.option1.title',
+                      {
+                        defaultMessage: 'Option 1: Reindex data',
+                      }
+                    ),
+                    description: (
+                      <EuiText size="m">
+                        <FormattedMessage
+                          id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.detailsStep.reindex.option1.descriptionRollup"
+                          defaultMessage="The reindex operation allows transforming an index into a new, compatible one. It will copy all of the existing documents into a new index and remove the old one. Depending on size and resources, reindexing may take extended time and your data will be in a read-only state until the job has completed."
+                        />
+                      </EuiText>
+                    ),
+                  },
+                ]}
+              />
+            </Fragment>
+          )}
+
           {showDefaultGuidance && (
             <Fragment>
-              <p>
-                <FormattedMessage
-                  id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.detailsStep.notCompatibleIndexText"
-                  defaultMessage="This index was created in ES 7.x and it is not compatible with the next major version. Choose one of the following options:"
-                />
-              </p>
+              {defaultGuidanceIntro}
               <EuiDescriptionList
                 rowGutterSize="m"
                 listItems={[
@@ -292,7 +338,8 @@ export const ReindexDetailsFlyoutStep: React.FunctionComponent<{
                 !hasFetchFailed &&
                 !isCompleted &&
                 hasRequiredPrivileges &&
-                !isESTransformTarget && (
+                !isESTransformTarget &&
+                !deprecation.isRollup && (
                   <EuiFlexItem grow={false}>
                     <EuiButton
                       onClick={startReadonly}
@@ -306,21 +353,24 @@ export const ReindexDetailsFlyoutStep: React.FunctionComponent<{
                     </EuiButton>
                   </EuiFlexItem>
                 )}
-              {!hasFetchFailed && !isCompleted && hasRequiredPrivileges && (
-                <EuiFlexItem grow={false}>
-                  <EuiButton
-                    fill
-                    color={reindexStatus === ReindexStatus.cancelled ? 'warning' : 'primary'}
-                    iconType={reindexStatus === ReindexStatus.cancelled ? 'play' : undefined}
-                    onClick={startReindex}
-                    isLoading={loading}
-                    disabled={loading}
-                    data-test-subj="startReindexingButton"
-                  >
-                    {getReindexButtonLabel(reindexStatus)}
-                  </EuiButton>
-                </EuiFlexItem>
-              )}
+              {!hasFetchFailed &&
+                !isCompleted &&
+                hasRequiredPrivileges &&
+                !deprecation.isRollup && (
+                  <EuiFlexItem grow={false}>
+                    <EuiButton
+                      fill
+                      color={reindexStatus === ReindexStatus.cancelled ? 'warning' : 'primary'}
+                      iconType={reindexStatus === ReindexStatus.cancelled ? 'play' : undefined}
+                      onClick={startReindex}
+                      isLoading={loading}
+                      disabled={loading}
+                      data-test-subj="startReindexingButton"
+                    >
+                      {getReindexButtonLabel(reindexStatus)}
+                    </EuiButton>
+                  </EuiFlexItem>
+                )}
             </EuiFlexGroup>
           </EuiFlexItem>
         </EuiFlexGroup>
