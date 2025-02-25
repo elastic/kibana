@@ -121,6 +121,7 @@ function optionsOut(optionsJSON: string): DashboardAttributes['options'] {
     syncColors = DEFAULT_DASHBOARD_OPTIONS.syncColors,
     syncCursor = DEFAULT_DASHBOARD_OPTIONS.syncCursor,
     syncTooltips = DEFAULT_DASHBOARD_OPTIONS.syncTooltips,
+    lockToGrid = DEFAULT_DASHBOARD_OPTIONS.lockToGrid,
   } = JSON.parse(optionsJSON) as DashboardOptions;
   return {
     hidePanelTitles,
@@ -128,6 +129,7 @@ function optionsOut(optionsJSON: string): DashboardAttributes['options'] {
     syncColors,
     syncCursor,
     syncTooltips,
+    lockToGrid,
   };
 }
 

@@ -69,6 +69,7 @@ export const getSerializedState = ({
     syncColors,
     syncCursor,
     syncTooltips,
+    lockToGrid,
     hidePanelTitles,
     controlGroupInput,
   } = dashboardState;
@@ -94,6 +95,7 @@ export const getSerializedState = ({
     syncColors,
     syncCursor,
     syncTooltips,
+    lockToGrid,
     hidePanelTitles,
   };
   const savedPanels = convertPanelMapToPanelsArray(panels, true);
@@ -126,6 +128,8 @@ export const getSerializedState = ({
     title,
     timeTo,
   };
+
+  console.log(rawDashboardAttributes);
 
   /**
    * Extract references from raw attributes and tags into the references array.

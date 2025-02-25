@@ -58,7 +58,15 @@ export const GridLayout = ({
    * Update the `gridLayout$` behaviour subject in response to the `layout` prop changing
    */
   useEffect(() => {
-    if (!isLayoutEqual(layout, gridLayoutStateManager.gridLayout$.getValue())) {
+    console.log(
+      gridLayoutStateManager.runtimeSettings$.getValue(),
+      gridLayoutStateManager.gridLayout$.getValue()
+    );
+    if (
+      gridLayoutStateManager.runtimeSettings$.getValue() !== 'none' &&
+      !isLayoutEqual(layout, gridLayoutStateManager.gridLayout$.getValue())
+    ) {
+      console.log('HERE!');
       const newLayout = cloneDeep(layout);
       /**
        * the layout sent in as a prop is not guaranteed to be valid (i.e it may have floating panels) -

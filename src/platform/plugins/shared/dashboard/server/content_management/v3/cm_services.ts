@@ -27,7 +27,6 @@ import {
 import { FilterStateStore } from '@kbn/es-query';
 import { SortDirection } from '@kbn/data-plugin/common/search';
 import {
-  DASHBOARD_GRID_COLUMN_COUNT,
   DEFAULT_PANEL_HEIGHT,
   DEFAULT_PANEL_WIDTH,
   DEFAULT_DASHBOARD_OPTIONS,
@@ -235,7 +234,6 @@ export const gridDataSchema = schema.object({
   w: schema.number({
     defaultValue: DEFAULT_PANEL_WIDTH,
     min: 1,
-    max: DASHBOARD_GRID_COLUMN_COUNT,
     meta: { description: 'The width of the panel in grid units' },
   }),
   h: schema.number({
