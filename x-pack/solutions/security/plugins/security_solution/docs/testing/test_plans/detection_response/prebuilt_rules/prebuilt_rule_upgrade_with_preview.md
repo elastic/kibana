@@ -112,9 +112,9 @@ https://marketplace.visualstudio.com/items?itemName=yzhang.markdown-all-in-one
   - The "Investigation guide" tab.
 - On the "Updates" tab:
   - We should show the updates from Elastic and the user-customized fields.
-  - We should show only those fields that are [customizable](./shared_assets/customizable_rule_fields.md).
-  - We shouldn't show technical fields and those that are [not customizable](./shared_assets/non_customizable_rule_fields.md).
-- User should be able to upgrade a prebuilt rule that has some updates to [non-customizable fields](./shared_assets/non_customizable_rule_fields.md) in the latest version.
+  - We should show only those fields that are [customizable](./prebuilt_rules_common_info.md#customizable-rule-fields).
+  - We shouldn't show technical fields and those that are [not customizable](./prebuilt_rules_common_info.md#non-customizable-rule-fields).
+- User should be able to upgrade a prebuilt rule that has some updates to [non-customizable fields](./prebuilt_rules_common_info.md#non-customizable-rule-fields) in the latest version.
 - Any other fields that are not involved in the rule upgrade workflow, such as `enabled` or `exceptions`, should stay unchanged after rule upgrade.
 
 ## Scenarios
