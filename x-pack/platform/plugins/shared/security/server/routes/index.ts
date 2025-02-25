@@ -21,6 +21,7 @@ import { defineAuthorizationRoutes } from './authorization';
 import { defineDeprecationsRoutes } from './deprecations';
 import { defineSecurityFeatureRoutes } from './feature_check';
 import { defineIndicesRoutes } from './indices';
+import { defineKeyDerivationRoutes } from './key_derivation/test';
 import { defineRoleMappingRoutes } from './role_mapping';
 import { defineSecurityCheckupGetStateRoutes } from './security_checkup';
 import { defineSessionManagementRoutes } from './session_management';
@@ -37,7 +38,6 @@ import type { SecurityFeatureUsageServiceStart } from '../feature_usage';
 import type { Session } from '../session_management';
 import type { SecurityRouter } from '../types';
 import type { UserProfileServiceStartInternal } from '../user_profile';
-import { defineKeyDerivationRoutes } from './key_derivation/test';
 
 /**
  * Describes parameters used to define HTTP routes.
