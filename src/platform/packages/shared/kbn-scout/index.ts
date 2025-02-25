@@ -17,6 +17,9 @@ export {
   createLazyPageObject,
   ingestTestDataHook,
   ingestSynthtraceDataHook,
+  trackBundleSizes,
+  waitForJsBundles,
+  savePageBundleStats,
 } from './src/playwright';
 export type {
   ScoutPlaywrightOptions,
@@ -27,6 +30,7 @@ export type {
   ScoutWorkerFixtures,
   ScoutParallelTestFixtures,
   ScoutParallelWorkerFixtures,
+  BundleInfo,
 } from './src/playwright';
 
 export type {

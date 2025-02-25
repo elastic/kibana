@@ -8,6 +8,7 @@
  */
 
 import { ScoutPage } from '..';
+import { CollapsibleNav } from './collapsible_nav';
 import { DashboardApp } from './dashboard_app';
 import { DatePicker } from './date_picker';
 import { DiscoverApp } from './discover_app';
@@ -23,6 +24,7 @@ export interface PageObjects {
   filterBar: FilterBar;
   maps: MapsPage;
   renderable: RenderablePage;
+  collapsibleNav: CollapsibleNav;
 }
 
 /**
@@ -39,6 +41,7 @@ export function createCorePageObjects(page: ScoutPage): PageObjects {
     filterBar: createLazyPageObject(FilterBar, page),
     maps: createLazyPageObject(MapsPage, page),
     renderable: createLazyPageObject(RenderablePage, page),
+    collapsibleNav: createLazyPageObject(CollapsibleNav, page),
     // Add new page objects here
   };
 }

@@ -33,3 +33,6 @@ export type {
 export { tags } from './tags';
 
 export { ingestTestDataHook, ingestSynthtraceDataHook } from './global_hooks';
+
+export { trackBundleSizes, waitForJsBundles, savePageBundleStats } from './performance';
+export type { BundleInfo } from './performance';
