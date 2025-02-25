@@ -5,7 +5,7 @@
 Navigation exists in three states for observability:
 
 1. Classic - Observability is one of several available solutions
-2. Cloud - Observability is the solution of focus
+2. Solution View - Observability is the solution of focus
 3. Serverless - Observability plays a role, but is not the focus
 
 ### Creating necessary environments
@@ -27,7 +27,7 @@ The output of the buildkite jobs will display instructions on how to connect to 
 Each navigation solution has two core parts: side navigation, and breadcrumbs.
 The outcome of testing each part assumes the following:
 
-Side navigation opens and closes correctly, based on the deployment type (classic or cloud / serverless) and solution view.
+Side navigation opens and closes correctly, based on the deployment type (classic or solution view / serverless) and solution view.
 
 - Expect classic view to have all plugins displayed in a single column for the Kibana home page, with the observability nav bar to appear once the user navigates to the solution.
 
