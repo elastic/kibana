@@ -62,6 +62,7 @@ export class UpgradeAssistantUIPlugin
           const appDependencies: AppDependencies = {
             featureSet,
             kibanaVersionInfo,
+            application: coreStart.application,
             plugins: {
               cloud,
               share,

@@ -23,7 +23,8 @@
       "usageCollection",
       "cloud",
       "security",
-      "logsShared"
+      "logsShared",
+      "console"
     ],
     "requiredBundles": [
       "esUiShared",

@@ -5,7 +5,9 @@
  * 2.0.
  */
 
-import React, { useState, FunctionComponent } from 'react';
+import React, { useMemo, useState, FunctionComponent } from 'react';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { compressToEncodedURIComponent } from 'lz-string';
 
 import {
   EuiSpacer,
@@ -19,6 +21,9 @@ import {
   EuiCodeBlock,
   useGeneratedHtmlId,
 } from '@elastic/eui';
+
+import { BatchReindexApiDocsLink } from '../es_deprecations';
+import { useAppContext } from '../../../app_context';
 
 interface Props {
   indices: Set<string>;
@@ -41,37 +46,91 @@ const getBulkReindexConsoleCommand = (indices: Set<string>) => {
 export const BulkReindexModal: FunctionComponent<Props> = ({
   indices,
 }) => {
+  const {
+    application,
+    plugins: { share },
+    services: {
+      core: { docLinks },
+    }
+  } = useAppContext();
+
   const [isModalVisible, setIsModalVisible] = useState(false);
 
   const closeModal = () => setIsModalVisible(false);
   const showModal = () => setIsModalVisible(true);
 
+  const consoleRequest = useMemo(() => getBulkReindexConsoleCommand(indices), [indices]);
+
   const modalTitleId = useGeneratedHtmlId();
+
+  const getUrlParams = undefined;
+  const canShowDevtools = !!application?.capabilities?.dev_tools?.show;
+  const devToolsDataUri = compressToEncodedURIComponent(consoleRequest);
+
+  // Generate a console preview link if we have a valid locator
+  const consolePreviewLink = share?.url?.locators.get('CONSOLE_APP_LOCATOR')?.useUrl(
+    {
+      loadFrom: `data:text/plain,${devToolsDataUri}`,
+    },
+    getUrlParams,
+    [consoleRequest]
+  );
+
+  const shouldShowDevToolsLink = canShowDevtools && consolePreviewLink !== undefined;
 
   return (
     <>
-      <EuiButton onClick={showModal}>Bulk reindex</EuiButton>
+      <EuiButton onClick={showModal}>
+        <FormattedMessage
+          id="xpack.upgradeAssistant.esDeprecations.bulkReindex.ctaButtonLabel"
+          defaultMessage="Bulk reindex"
+        />
+      </EuiButton>
       {isModalVisible && (
         <EuiModal aria-labelledby={modalTitleId} onClose={closeModal} style={{ width: 800 }}>
           <EuiModalHeader>
             <EuiModalHeaderTitle id={modalTitleId}>
-              Bulk reindexing
+              <FormattedMessage
+                id="xpack.upgradeAssistant.esDeprecations.bulkReindexModal.title"
+                defaultMessage="Bulk reindexing"
+              />
             </EuiModalHeaderTitle>
           </EuiModalHeader>
 
           <EuiModalBody>
-            This command will make use of the batch reindexing API to reindex the following indices:
+            <FormattedMessage
+              id="xpack.upgradeAssistant.esDeprecations.bulkReindexModal.description"
+              defaultMessage="This command will make use of the {docsLink} to reindex the following indices:"
+              values={{
+                docsLink: <BatchReindexApiDocsLink docLinks={docLinks} />,
+              }}
+            />
             <EuiSpacer />
             <EuiCodeBlock language="json" isCopyable overflowHeight={250}>
-              {getBulkReindexConsoleCommand(indices)}
+              {consoleRequest}
             </EuiCodeBlock>
           </EuiModalBody>
 
           <EuiModalFooter>
-            <EuiButtonEmpty onClick={closeModal}>Close</EuiButtonEmpty>
-            <EuiButton onClick={closeModal} fill>
-              Open in Console
-            </EuiButton>
+            <EuiButtonEmpty onClick={closeModal}>
+              <FormattedMessage
+                id="xpack.upgradeAssistant.esDeprecations.bulkReindexModal.closeButtonLabel"
+                defaultMessage="Close"
+              />
+            </EuiButtonEmpty>
+            {shouldShowDevToolsLink && (
+              <EuiButton
+                fill
+                iconType="wrench"
+                href={consolePreviewLink}
+                data-test-subj="openInConsoleButton"
+              >
+                <FormattedMessage
+                  id="xpack.upgradeAssistant.esDeprecations.bulkReindexModal.openInConsoleButtonLabel"
+                  defaultMessage="Open in Console"
+                />
+              </EuiButton>
+            )}
           </EuiModalFooter>
         </EuiModal>
       )}
