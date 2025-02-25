@@ -820,6 +820,449 @@
         ]
       }
     },
+    "/api/alerting/maintenance_window": {
+      "post": {
+        "description": "[Required authorization] Route required privileges: ALL of [write-maintenance-window].",
+        "operationId": "post-alerting-maintenance-window",
+        "parameters": [
+          {
+            "description": "A required header to protect against CSRF attacks",
+            "in": "header",
+            "name": "kbn-xsrf",
+            "required": true,
+            "schema": {
+              "example": "true",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": false,
+                "properties": {
+                  "duration": {
+                    "type": "number"
+                  },
+                  "enabled": {
+                    "description": "Whether the current maintenance window is enabled. Disabled maintenance windows do not suppress notifications.",
+                    "type": "boolean"
+                  },
+                  "recurring": {
+                    "additionalProperties": false,
+                    "properties": {
+                      "end": {
+                        "type": "string"
+                      },
+                      "every": {
+                        "type": "string"
+                      },
+                      "occurrences": {
+                        "type": "number"
+                      },
+                      "onMonth": {
+                        "items": {
+                          "type": "string"
+                        },
+                        "type": "array"
+                      },
+                      "onMonthDay": {
+                        "items": {
+                          "type": "number"
+                        },
+                        "type": "array"
+                      },
+                      "onWeekDay": {
+                        "items": {
+                          "type": "string"
+                        },
+                        "type": "array"
+                      }
+                    },
+                    "type": "object"
+                  },
+                  "scope": {
+                    "additionalProperties": false,
+                    "properties": {
+                      "query": {
+                        "additionalProperties": false,
+                        "properties": {
+                          "kql": {
+                            "description": "A filter written in Kibana Query Language (KQL).",
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "kql"
+                        ],
+                        "type": "object"
+                      }
+                    },
+                    "required": [
+                      "query"
+                    ],
+                    "type": "object"
+                  },
+                  "start": {
+                    "type": "string"
+                  },
+                  "title": {
+                    "description": "The name of the maintenance window. While this name does not have to be unique, a distinctive name can help you identify a specific maintenance window.",
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "title",
+                  "duration",
+                  "start"
+                ],
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "created_at": {
+                      "description": "The date and time when the maintenance window was created.",
+                      "type": "string"
+                    },
+                    "created_by": {
+                      "description": "The identifier for the user that created the maintenance window.",
+                      "nullable": true,
+                      "type": "string"
+                    },
+                    "duration": {
+                      "type": "number"
+                    },
+                    "enabled": {
+                      "description": "Whether the current maintenance window is enabled. Disabled maintenance windows do not suppress notifications.",
+                      "type": "boolean"
+                    },
+                    "id": {
+                      "description": "The identifier for the maintenance window.",
+                      "type": "string"
+                    },
+                    "recurring": {
+                      "additionalProperties": false,
+                      "properties": {
+                        "end": {
+                          "type": "string"
+                        },
+                        "every": {
+                          "type": "string"
+                        },
+                        "occurrences": {
+                          "type": "number"
+                        },
+                        "onMonth": {
+                          "items": {
+                            "type": "string"
+                          },
+                          "type": "array"
+                        },
+                        "onMonthDay": {
+                          "items": {
+                            "type": "number"
+                          },
+                          "type": "array"
+                        },
+                        "onWeekDay": {
+                          "items": {
+                            "type": "string"
+                          },
+                          "type": "array"
+                        }
+                      },
+                      "type": "object"
+                    },
+                    "scope": {
+                      "additionalProperties": false,
+                      "properties": {
+                        "query": {
+                          "additionalProperties": false,
+                          "properties": {
+                            "kql": {
+                              "description": "A filter written in Kibana Query Language (KQL).",
+                              "type": "string"
+                            }
+                          },
+                          "required": [
+                            "kql"
+                          ],
+                          "type": "object"
+                        }
+                      },
+                      "required": [
+                        "query"
+                      ],
+                      "type": "object"
+                    },
+                    "start": {
+                      "type": "string"
+                    },
+                    "status": {
+                      "description": "The current status of the maintenance window.",
+                      "enum": [
+                        "running",
+                        "upcoming",
+                        "finished",
+                        "archived"
+                      ],
+                      "type": "string"
+                    },
+                    "title": {
+                      "description": "The name of the maintenance window.",
+                      "type": "string"
+                    },
+                    "updated_at": {
+                      "description": "The date and time when the maintenance window was last updated.",
+                      "type": "string"
+                    },
+                    "updated_by": {
+                      "description": "The identifier for the user that last updated this maintenance window.",
+                      "nullable": true,
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "title",
+                    "enabled",
+                    "created_by",
+                    "updated_by",
+                    "created_at",
+                    "updated_at",
+                    "status",
+                    "duration",
+                    "start"
+                  ],
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Indicates a successful call."
+          },
+          "400": {
+            "description": "Indicates an invalid schema or parameters."
+          },
+          "403": {
+            "description": "Indicates that this call is forbidden."
+          }
+        },
+        "summary": "Create a maintenance window.",
+        "tags": [
+          "alerting"
+        ]
+      }
+    },
+    "/api/alerting/maintenance_window/{id}": {
+      "delete": {
+        "description": "Delete a maintenance window by ID.<br/><br/>[Required authorization] Route required privileges: ALL of [write-maintenance-window].",
+        "operationId": "delete-alerting-maintenance-window-id",
+        "parameters": [
+          {
+            "description": "A required header to protect against CSRF attacks",
+            "in": "header",
+            "name": "kbn-xsrf",
+            "required": true,
+            "schema": {
+              "example": "true",
+              "type": "string"
+            }
+          },
+          {
+            "description": "The identifier for the maintenance window to be deleted.",
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Indicates a successful call."
+          },
+          "400": {
+            "description": "Indicates an invalid schema or parameters."
+          },
+          "403": {
+            "description": "Indicates that this call is forbidden."
+          },
+          "404": {
+            "description": "Indicates a maintenance window with the given ID does not exist."
+          }
+        },
+        "summary": "Delete a maintenace window",
+        "tags": [
+          "alerting"
+        ]
+      },
+      "get": {
+        "description": "Get a maintenance window by ID.<br/><br/>[Required authorization] Route required privileges: ALL of [read-maintenance-window].",
+        "operationId": "get-alerting-maintenance-window-id",
+        "parameters": [
+          {
+            "description": "The identifier for the maintenance window.",
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "created_at": {
+                      "description": "The date and time when the maintenance window was created.",
+                      "type": "string"
+                    },
+                    "created_by": {
+                      "description": "The identifier for the user that created the maintenance window.",
+                      "nullable": true,
+                      "type": "string"
+                    },
+                    "duration": {
+                      "type": "number"
+                    },
+                    "enabled": {
+                      "description": "Whether the current maintenance window is enabled. Disabled maintenance windows do not suppress notifications.",
+                      "type": "boolean"
+                    },
+                    "id": {
+                      "description": "The identifier for the maintenance window.",
+                      "type": "string"
+                    },
+                    "recurring": {
+                      "additionalProperties": false,
+                      "properties": {
+                        "end": {
+                          "type": "string"
+                        },
+                        "every": {
+                          "type": "string"
+                        },
+                        "occurrences": {
+                          "type": "number"
+                        },
+                        "onMonth": {
+                          "items": {
+                            "type": "string"
+                          },
+                          "type": "array"
+                        },
+                        "onMonthDay": {
+                          "items": {
+                            "type": "number"
+                          },
+                          "type": "array"
+                        },
+                        "onWeekDay": {
+                          "items": {
+                            "type": "string"
+                          },
+                          "type": "array"
+                        }
+                      },
+                      "type": "object"
+                    },
+                    "scope": {
+                      "additionalProperties": false,
+                      "properties": {
+                        "query": {
+                          "additionalProperties": false,
+                          "properties": {
+                            "kql": {
+                              "description": "A filter written in Kibana Query Language (KQL).",
+                              "type": "string"
+                            }
+                          },
+                          "required": [
+                            "kql"
+                          ],
+                          "type": "object"
+                        }
+                      },
+                      "required": [
+                        "query"
+                      ],
+                      "type": "object"
+                    },
+                    "start": {
+                      "type": "string"
+                    },
+                    "status": {
+                      "description": "The current status of the maintenance window.",
+                      "enum": [
+                        "running",
+                        "upcoming",
+                        "finished",
+                        "archived"
+                      ],
+                      "type": "string"
+                    },
+                    "title": {
+                      "description": "The name of the maintenance window.",
+                      "type": "string"
+                    },
+                    "updated_at": {
+                      "description": "The date and time when the maintenance window was last updated.",
+                      "type": "string"
+                    },
+                    "updated_by": {
+                      "description": "The identifier for the user that last updated this maintenance window.",
+                      "nullable": true,
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "title",
+                    "enabled",
+                    "created_by",
+                    "updated_by",
+                    "created_at",
+                    "updated_at",
+                    "status",
+                    "duration",
+                    "start"
+                  ],
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Indicates a successful call."
+          },
+          "400": {
+            "description": "Indicates an invalid schema or parameters."
+          },
+          "403": {
+            "description": "Indicates that this call is forbidden."
+          },
+          "404": {
+            "description": "Indicates a maintenance window with the given ID does not exist."
+          }
+        },
+        "summary": "Get a maintenance window",
+        "tags": [
+          "alerting"
+        ]
+      }
+    },
     "/api/alerting/rule/{id}": {
       "delete": {
         "operationId": "delete-alerting-rule-id",
