@@ -18,10 +18,10 @@ function download {
 mkdir -p target
 cd target
 
+download "kibana-$FULL_VERSION-docker-image.tar.gz"
+download "kibana-$FULL_VERSION-docker-image-aarch64.tar.gz"
 download "kibana-cloud-$FULL_VERSION-docker-image.tar.gz"
 download "kibana-cloud-$FULL_VERSION-docker-image-aarch64.tar.gz"
-download "kibana-ubi-$FULL_VERSION-docker-image.tar.gz"
-download "kibana-ubi-$FULL_VERSION-docker-image-aarch64.tar.gz"
 download "kibana-wolfi-$FULL_VERSION-docker-image.tar.gz"
 download "kibana-wolfi-$FULL_VERSION-docker-image-aarch64.tar.gz"
 
@@ -30,9 +30,9 @@ download "kibana-$FULL_VERSION-amd64.deb"
 download "kibana-$FULL_VERSION-x86_64.rpm"
 download "kibana-$FULL_VERSION-aarch64.rpm"
 
+download "kibana-$FULL_VERSION-docker-build-context.tar.gz"
 download "kibana-cloud-$FULL_VERSION-docker-build-context.tar.gz"
 download "kibana-ironbank-$FULL_VERSION-docker-build-context.tar.gz"
-download "kibana-ubi-$FULL_VERSION-docker-build-context.tar.gz"
 download "kibana-wolfi-$FULL_VERSION-docker-build-context.tar.gz"
 
 download "kibana-$FULL_VERSION-linux-aarch64.tar.gz"
