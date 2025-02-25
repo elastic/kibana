@@ -956,7 +956,7 @@ test/server_integration/plugins/status_plugin_b @elastic/kibana-core
 src/platform/packages/shared/kbn-std @elastic/kibana-core
 src/platform/packages/private/kbn-stdio-dev-helpers @elastic/kibana-operations
 src/platform/packages/shared/kbn-storage-adapter @elastic/observability-ui
-packages/kbn-storybook @elastic/kibana-operations
+src/platform/packages/shared/kbn-storybook @elastic/kibana-operations
 x-pack/platform/plugins/shared/streams_app @elastic/streams-program-team
 x-pack/solutions/observability/plugins/observability_streams_wrapper @elastic/streams-program-team
 x-pack/platform/plugins/shared/streams @simianhacker @flash1293 @dgieselaar

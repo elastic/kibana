@@ -17,7 +17,7 @@ addons.setConfig({
   theme: create({
     base: 'light',
     brandTitle: 'Kibana Storybook',
-    brandUrl: 'https://github.com/elastic/kibana/tree/main/packages/kbn-storybook',
+    brandUrl: 'https://github.com/elastic/kibana/tree/main/src/platform/packages/shared/kbn-storybook',
   }),
   showPanel: false,
   isFullscreen: false,
