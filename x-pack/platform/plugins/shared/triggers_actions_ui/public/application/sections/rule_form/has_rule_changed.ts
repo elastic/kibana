@@ -7,18 +7,18 @@
 
 import deepEqual from 'fast-deep-equal';
 import { pick } from 'lodash';
-import { RuleTypeParams } from '../../../types';
-import { InitialRule } from './rule_reducer';
+import type { RuleTypeParams } from '../../../types';
+import type { InitialRule } from './rule_reducer';
 
 const DEEP_COMPARE_FIELDS = ['tags', 'schedule', 'actions'];
 
 function getNonNullCompareFields(rule: InitialRule) {
   const { name, ruleTypeId, throttle, notifyWhen } = rule;
   return {
-    ...(!!(name && name.length > 0) ? { name } : {}),
-    ...(!!(ruleTypeId && ruleTypeId.length > 0) ? { ruleTypeId } : {}),
-    ...(!!(throttle && throttle.length > 0) ? { throttle } : {}),
-    ...(!!(notifyWhen && notifyWhen.length > 0) ? { notifyWhen } : {}),
+    ...(name && name.length > 0 ? { name } : {}),
+    ...(ruleTypeId && ruleTypeId.length > 0 ? { ruleTypeId } : {}),
+    ...(throttle && throttle.length > 0 ? { throttle } : {}),
+    ...(notifyWhen && notifyWhen.length > 0 ? { notifyWhen } : {}),
   };
 }
 
