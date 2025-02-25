@@ -12,8 +12,8 @@ import { Panel } from '../types';
 import {
   LEFT_SECTION_TEST_ID,
   PREVIEW_SECTION_TEST_ID,
-  SETTINGS_MENU_BUTTON_TEST_ID,
   RIGHT_SECTION_TEST_ID,
+  SETTINGS_MENU_BUTTON_TEST_ID,
 } from './test_ids';
 import { initialUiState, type State } from '../store/state';
 import { TestProvider } from '../test/provider';
@@ -56,7 +56,7 @@ describe('Container', () => {
             },
             left: undefined,
             preview: undefined,
-            history: [{ id: 'key' }],
+            history: [{ lastOpen: Date.now(), panel: { id: 'key1' } }],
           },
         },
       },

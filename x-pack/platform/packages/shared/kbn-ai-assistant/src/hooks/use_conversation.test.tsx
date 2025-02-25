@@ -116,16 +116,8 @@ describe('useConversation', () => {
       });
     });
 
-    it('returns only the system message', () => {
-      expect(hookResult.result.current.messages).toEqual([
-        {
-          '@timestamp': expect.any(String),
-          message: {
-            content: '',
-            role: MessageRole.System,
-          },
-        },
-      ]);
+    it('returns empty messages', () => {
+      expect(hookResult.result.current.messages).toEqual([]);
     });
 
     it('returns a ready state', () => {
@@ -157,15 +149,8 @@ describe('useConversation', () => {
       });
     });
 
-    it('returns the system message and the initial messages', () => {
+    it('returns the initial messages', () => {
       expect(hookResult.result.current.messages).toEqual([
-        {
-          '@timestamp': expect.any(String),
-          message: {
-            content: '',
-            role: MessageRole.System,
-          },
-        },
         {
           '@timestamp': expect.any(String),
           message: {
@@ -183,14 +168,8 @@ describe('useConversation', () => {
         conversation: {
           id: 'my-conversation-id',
         },
+        systemMessage: 'System',
         messages: [
-          {
-            '@timestamp': new Date().toISOString(),
-            message: {
-              role: MessageRole.System,
-              content: 'System',
-            },
-          },
           {
             '@timestamp': new Date().toISOString(),
             message: {
@@ -218,14 +197,8 @@ describe('useConversation', () => {
         conversation: {
           id: 'my-conversation-id',
         },
+        systemMessage: 'System',
         messages: [
-          {
-            '@timestamp': expect.any(String),
-            message: {
-              content: 'System',
-              role: MessageRole.System,
-            },
-          },
           {
             '@timestamp': expect.any(String),
             message: {
@@ -242,22 +215,11 @@ describe('useConversation', () => {
         {
           '@timestamp': expect.any(String),
           message: {
-            content: expect.any(String),
-            role: MessageRole.System,
-          },
-        },
-        {
-          '@timestamp': expect.any(String),
-          message: {
             content: 'User',
             role: MessageRole.User,
           },
         },
       ]);
-    });
-
-    it('overrides the system message', () => {
-      expect(hookResult.result.current.messages[0].message.content).toBe('');
     });
   });
 
@@ -282,7 +244,7 @@ describe('useConversation', () => {
     });
 
     it('resets the messages', () => {
-      expect(hookResult.result.current.messages.length).toBe(1);
+      expect(hookResult.result.current.messages.length).toBe(0);
     });
   });
 
@@ -290,13 +252,6 @@ describe('useConversation', () => {
     const subject: Subject<StreamingChatResponseEventWithoutError> = new Subject();
     let onConversationUpdate: jest.Mock;
     const expectedMessages = [
-      {
-        '@timestamp': expect.any(String),
-        message: {
-          role: MessageRole.System,
-          content: '',
-        },
-      },
       {
         '@timestamp': expect.any(String),
         message: {
@@ -333,6 +288,7 @@ describe('useConversation', () => {
             conversation: {
               id: 'my-conversation-id',
             },
+            systemMessage: '',
             messages: expectedMessages,
           },
           (request as any).params.body

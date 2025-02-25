@@ -443,7 +443,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
          */
         await setTimeoutAsync(2000);
 
-        await testSubjects.click('backToCases');
+        await testSubjects.click('breadcrumb');
 
         await cases.casesTable.waitForCasesToBeListed();
         await cases.casesTable.goToFirstListedCase();
