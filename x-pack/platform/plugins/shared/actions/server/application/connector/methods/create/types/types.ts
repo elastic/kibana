@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { SavedObjectAttributes } from '@kbn/core/server';
-import { ActionsClientContext } from '../../../../../actions_client';
+import type { SavedObjectAttributes } from '@kbn/core/server';
+import type { ActionsClientContext } from '../../../../../actions_client';
 
 export interface ConnectorCreate {
   actionTypeId: string;

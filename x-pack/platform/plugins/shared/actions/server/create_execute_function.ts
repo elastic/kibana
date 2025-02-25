@@ -5,13 +5,17 @@
  * 2.0.
  */
 
-import { SavedObjectsBulkResponse, SavedObjectsClientContract, Logger } from '@kbn/core/server';
-import { TaskPriority, TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
-import { RawAction, ActionTypeRegistryContract, InMemoryConnector } from './types';
+import type {
+  SavedObjectsBulkResponse,
+  SavedObjectsClientContract,
+  Logger,
+} from '@kbn/core/server';
+import type { TaskPriority, TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
+import type { RawAction, ActionTypeRegistryContract, InMemoryConnector } from './types';
 import { ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE } from './constants/saved_objects';
-import { ExecuteOptions as ActionExecutorOptions } from './lib/action_executor';
+import type { ExecuteOptions as ActionExecutorOptions } from './lib/action_executor';
 import { extractSavedObjectReferences, isSavedObjectExecutionSource } from './lib';
-import { ActionsConfigurationUtilities } from './actions_config';
+import type { ActionsConfigurationUtilities } from './actions_config';
 import { hasReachedTheQueuedActionsLimit } from './lib/has_reached_queued_actions_limit';
 
 interface CreateExecuteFunctionOptions {

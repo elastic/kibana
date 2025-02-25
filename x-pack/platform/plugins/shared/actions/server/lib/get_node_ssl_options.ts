@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { PeerCertificate } from 'tls';
-import { Logger } from '@kbn/core/server';
-import { SSLSettings } from '../types';
+import type { PeerCertificate } from 'tls';
+import type { Logger } from '@kbn/core/server';
+import type { SSLSettings } from '../types';
 
 export function getNodeSSLOptions(
   logger: Logger,
@@ -31,7 +31,7 @@ export function getNodeSSLOptions(
     passphrase?: string;
     ca?: Buffer;
   } = {};
-  if (!!verificationMode) {
+  if (verificationMode) {
     switch (verificationMode) {
       case 'none':
         agentOptions.rejectUnauthorized = false;
