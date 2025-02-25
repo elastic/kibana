@@ -151,84 +151,82 @@ describe('OpenAndAcknowledgedAlertsTool', () => {
 
       expect(esClient.search).toHaveBeenCalledWith({
         allow_no_indices: true,
-        body: {
-          _source: false,
-          fields: [
-            {
-              field: '@timestamp',
-              include_unmapped: true,
-            },
-            {
-              field: 'cloud.availability_zone',
-              include_unmapped: true,
-            },
-            {
-              field: 'user.name',
-              include_unmapped: true,
-            },
-          ],
-          query: {
-            bool: {
-              filter: [
-                {
-                  bool: {
-                    filter: [
-                      {
-                        bool: {
-                          should: [
-                            {
-                              match_phrase: {
-                                'kibana.alert.workflow_status': 'open',
-                              },
+        _source: false,
+        fields: [
+          {
+            field: '@timestamp',
+            include_unmapped: true,
+          },
+          {
+            field: 'cloud.availability_zone',
+            include_unmapped: true,
+          },
+          {
+            field: 'user.name',
+            include_unmapped: true,
+          },
+        ],
+        query: {
+          bool: {
+            filter: [
+              {
+                bool: {
+                  filter: [
+                    {
+                      bool: {
+                        should: [
+                          {
+                            match_phrase: {
+                              'kibana.alert.workflow_status': 'open',
                             },
-                            {
-                              match_phrase: {
-                                'kibana.alert.workflow_status': 'acknowledged',
-                              },
-                            },
-                          ],
-                          minimum_should_match: 1,
-                        },
-                      },
-                      {
-                        range: {
-                          '@timestamp': {
-                            format: 'strict_date_optional_time',
-                            gte: 'now-24h',
-                            lte: 'now',
                           },
+                          {
+                            match_phrase: {
+                              'kibana.alert.workflow_status': 'acknowledged',
+                            },
+                          },
+                        ],
+                        minimum_should_match: 1,
+                      },
+                    },
+                    {
+                      range: {
+                        '@timestamp': {
+                          format: 'strict_date_optional_time',
+                          gte: 'now-24h',
+                          lte: 'now',
                         },
                       },
-                    ],
-                    must: [],
-                    must_not: [
-                      {
-                        exists: {
-                          field: 'kibana.alert.building_block_type',
-                        },
+                    },
+                  ],
+                  must: [],
+                  must_not: [
+                    {
+                      exists: {
+                        field: 'kibana.alert.building_block_type',
                       },
-                    ],
-                    should: [],
-                  },
+                    },
+                  ],
+                  should: [],
                 },
-              ],
+              },
+            ],
+          },
+        },
+        runtime_mappings: {},
+        size: 20,
+        sort: [
+          {
+            'kibana.alert.risk_score': {
+              order: 'desc',
             },
           },
-          runtime_mappings: {},
-          size: 20,
-          sort: [
-            {
-              'kibana.alert.risk_score': {
-                order: 'desc',
-              },
+          {
+            '@timestamp': {
+              order: 'desc',
             },
-            {
-              '@timestamp': {
-                order: 'desc',
-              },
-            },
-          ],
-        },
+          },
+        ],
         ignore_unavailable: true,
         index: ['alerts-index'],
       });

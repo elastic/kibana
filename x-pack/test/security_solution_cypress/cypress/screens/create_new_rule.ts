@@ -9,6 +9,8 @@ export const ABOUT_CONTINUE_BTN = '[data-test-subj="about-continue"]';
 
 export const ABOUT_EDIT_BUTTON = '[data-test-subj="edit-about-rule"]';
 
+export const DEFINITION_EDIT_TAB = '[data-test-subj="edit-rule-define-tab"]';
+
 export const ABOUT_EDIT_TAB = '[data-test-subj="edit-rule-about-tab"]';
 
 export const ACTIONS_EDIT_TAB = '[data-test-subj="edit-rule-actions-tab"]';
