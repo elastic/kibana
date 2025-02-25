@@ -19,8 +19,10 @@ https://marketplace.visualstudio.com/items?itemName=yzhang.markdown-all-in-one
 
 - [Useful information](#useful-information)
   - [Tickets](#tickets)
+  - [User stories](#user-stories)
   - [Terminology](#terminology)
   - [Assumptions](#assumptions)
+  - [Non-functional requirements](#non-functional-requirements)
   - [Functional requirements](#functional-requirements)
 - [Scenarios](#scenarios)
   - [Rule upgrade field preview](#rule-upgrade-field-preview)
@@ -66,24 +68,32 @@ https://marketplace.visualstudio.com/items?itemName=yzhang.markdown-all-in-one
 - [Users can Customize Prebuilt Detection Rules: Milestone 3](https://github.com/elastic/kibana/issues/174168)
 - [Tests for prebuilt rule upgrade workflow](https://github.com/elastic/kibana/issues/202078)
 
+### User stories
+
+**Prebuilt rule upgrade workflow:**
+
+- User can upgrade a single prebuilt rule to its latest version from the Rule Upgrade table with previewing incoming updates from Elastic and user customizations in the Rule Upgrade flyout.
+- Specifically, when upgrading a rule, in the Rule Upgrade flyout:
+  - User can preview updates from Elastic, for each rule field that has an update from Elastic.
+  - User can preview their customizations, for each rule field that was customized.
+  - User can compare their customizations with updates from Elastic and see if there are any conflicts between them, per each rule field.
+  - User can manually resolve conflicts between their customizations and updates from Elastic, per each rule field.
+  - User can edit the final field values before submitting the update.
+- User can upgrade a rule if its type has been changed by Elastic in the latest version, but can only accept the incoming changes; any user customizations will be lost.
+
 ### Terminology
 
-- **CTA**: "call to action", usually a button, a link, or a callout message with a button, etc, that invites the user to do some action.
-
-  - **CTA to upgrade the prebuilt rule**: the button to upgrade the prebuilt rule currently shown in the Rule Upgrade flyout.
-
-- **Non-customized field**: a prebuilt rule's field that has the original value from the originally installed prebuilt rule.
-
-- **Customized field**: a prebuilt rule's field that has a value that differs from the original field value of the originally installed prebuilt rule.
-
-- **Non-customized rule**: a prebuilt rule that doesn't have any customized fields.
-
-- **Customized rule**: a prebuilt rule that has one or more customized fields.
+- [Common terminology](./prebuilt_rules_common_info.md#common-terminology).
+- **CTA to upgrade the prebuilt rule**: the button to upgrade the prebuilt rule currently shown in the Rule Upgrade flyout.
 
 ### Assumptions
 
-- Below scenarios only apply to prebuilt detection rules.
+- [Common assumptions](./prebuilt_rules_common_info.md#common-assumptions).
 - A prebuilt rule is shown in the Rule Upgrade table when there's a newer version of this rule in the currently installed package with prebuilt rules.
+
+### Non-functional requirements
+
+- [Common non-functional requirements](./prebuilt_rules_common_info.md#common-non-functional-requirements).
 
 ### Functional requirements
 

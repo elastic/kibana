@@ -10,35 +10,33 @@
 export const painlessErrReq = {
   params: {
     index: 'log*',
-    body: {
-      size: 500,
-      fields: ['*'],
-      script_fields: {
-        invalid_scripted_field: {
-          script: {
-            source: 'invalid',
-            lang: 'painless',
-          },
+    size: 500,
+    fields: ['*'],
+    script_fields: {
+      invalid_scripted_field: {
+        script: {
+          source: 'invalid',
+          lang: 'painless',
         },
       },
-      stored_fields: ['*'],
-      query: {
-        bool: {
-          filter: [
-            {
-              match_all: {},
-            },
-            {
-              range: {
-                '@timestamp': {
-                  gte: '2015-01-19T12:27:55.047Z',
-                  lte: '2021-01-19T12:27:55.047Z',
-                  format: 'strict_date_optional_time',
-                },
+    },
+    stored_fields: ['*'],
+    query: {
+      bool: {
+        filter: [
+          {
+            match_all: {},
+          },
+          {
+            range: {
+              '@timestamp': {
+                gte: '2015-01-19T12:27:55.047Z',
+                lte: '2021-01-19T12:27:55.047Z',
+                format: 'strict_date_optional_time',
               },
             },
-          ],
-        },
+          },
+        ],
       },
     },
   },

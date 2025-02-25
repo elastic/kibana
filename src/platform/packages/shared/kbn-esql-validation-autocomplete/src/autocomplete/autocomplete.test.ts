@@ -536,7 +536,7 @@ describe('autocomplete', () => {
         'where',
         'boolean',
         {
-          builtin: true,
+          operators: true,
         },
         undefined,
         ['and', 'or', 'not']
@@ -550,7 +550,7 @@ describe('autocomplete', () => {
         'where',
         'any',
         {
-          builtin: true,
+          operators: true,
           skipAssign: true,
         },
         ['integer'],
@@ -924,7 +924,7 @@ describe('autocomplete', () => {
         'where',
         'boolean',
         {
-          builtin: true,
+          operators: true,
         },
         ['keyword']
       ).map((s) => (s.text.toLowerCase().includes('null') ? s : attachTriggerCommand(s)))
