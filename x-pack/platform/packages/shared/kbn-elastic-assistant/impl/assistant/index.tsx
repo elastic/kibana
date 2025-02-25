@@ -98,7 +98,6 @@ const AssistantComponent: React.FC<Props> = ({
     showAnonymizedValues,
     setContentReferencesVisible,
     setShowAnonymizedValues,
-    assistantFeatures: { contentReferencesEnabled },
   } = useAssistantContext();
 
   const [selectedPromptContexts, setSelectedPromptContexts] = useState<
@@ -394,7 +393,6 @@ const AssistantComponent: React.FC<Props> = ({
             currentUserAvatar,
             systemPromptContent: currentSystemPrompt?.content,
             contentReferencesVisible,
-            contentReferencesEnabled,
           })}
           // Avoid comments going off the flyout
           css={css`
@@ -425,7 +423,6 @@ const AssistantComponent: React.FC<Props> = ({
       contentReferencesVisible,
       euiTheme.size.l,
       selectedPromptContextsCount,
-      contentReferencesEnabled,
     ]
   );
 
@@ -442,9 +439,7 @@ const AssistantComponent: React.FC<Props> = ({
 
   return (
     <>
-      {contentReferencesEnabled && (
-        <AnonymizedValuesAndCitationsTour conversation={currentConversation} />
-      )}
+      <AnonymizedValuesAndCitationsTour conversation={currentConversation} />
       <EuiFlexGroup direction={'row'} wrap={false} gutterSize="none">
         {chatHistoryVisible && (
           <EuiFlexItem
