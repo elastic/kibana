@@ -53,6 +53,7 @@ export const deleteMaintenanceWindowRoute = (
       options: {
         access: 'public',
         summary: 'Deletes a maintenance window by ID.',
+        tags: ['oas-tag:alerting'],
       },
     },
     router.handleLegacyErrors(
