@@ -97,8 +97,6 @@ export const ReindexDetailsFlyoutStep: React.FunctionComponent<{
     showDefaultGuidance = true;
   }
 
-  console.log('XXX', deprecation);
-
   const defaultGuidanceIntro = (
     <p>
       <FormattedMessage
