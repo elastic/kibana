@@ -40,13 +40,11 @@ export async function getTransaction({
         },
       ],
     },
-    body: {
-      track_total_hits: false,
-      size: 1,
-      query: {
-        bool: {
-          filter: esFilters,
-        },
+    track_total_hits: false,
+    size: 1,
+    query: {
+      bool: {
+        filter: esFilters,
       },
     },
   });

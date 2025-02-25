@@ -127,7 +127,7 @@ Run `node scripts/functional_test_runner --help` to see all available options.
 [discrete]
 ==== Environment
 
-The tests are written in https://mochajs.org[mocha] using https://github.com/elastic/kibana/tree/main/packages/kbn-expect[@kbn/expect] for assertions.
+The tests are written in https://mochajs.org[mocha] using https://github.com/elastic/kibana/tree/main/src/platform/packages/shared/kbn-expect[@kbn/expect] for assertions.
 
 We use https://www.w3.org/TR/webdriver1/[WebDriver Protocol] to run tests in both Chrome and Firefox with the help of https://sites.google.com/a/chromium.org/chromedriver/[chromedriver] and https://firefox-source-docs.mozilla.org/testing/geckodriver/[geckodriver]. When the `FunctionalTestRunner` launches, remote service creates a new webdriver session, which starts the driver and a stripped-down browser instance. We use `browser` service and `webElementWrapper` class to wrap up https://seleniumhq.github.io/selenium/docs/api/javascript/module/selenium-webdriver/[Webdriver API].
 
@@ -203,7 +203,7 @@ Tests should run at the positive security boundary condition, meaning that they 
  
 The functional UI tests now default to logging in with a user named `test_user` and the roles of this user can be changed dynamically without logging in and out.  
 
-In order to achieve this a new service was introduced called `createTestUserService` (see `packages/kbn-ftr-common-functional-ui-services/services/security/test_user.ts`). The purpose of this test user service is to create roles defined in the test config files and setRoles() or restoreDefaults().
+In order to achieve this a new service was introduced called `createTestUserService` (see `src/platform/packages/shared/kbn-ftr-common-functional-ui-services/services/security/test_user.ts`). The purpose of this test user service is to create roles defined in the test config files and setRoles() or restoreDefaults().
 
 An example of how to set the role like how its defined below:
 
@@ -217,7 +217,7 @@ Tests should normally setRoles() in the before() and restoreDefaults() in the af
 [discrete]
 ==== Anatomy of a test file
 
-This annotated example file shows the basic structure every test suite uses. It starts by importing https://github.com/elastic/kibana/tree/main/packages/kbn-expect[`@kbn/expect`] and defining its default export: an anonymous Test Provider. The test provider then destructures the Provider API for the `getService()` and `getPageObjects()` functions. It uses these functions to collect the dependencies of this suite. The rest of the test file will look pretty normal to mocha.js users. `describe()`, `it()`, `before()` and the lot are used to define suites that happen to automate a browser via services and objects of type `PageObject`.
+This annotated example file shows the basic structure every test suite uses. It starts by importing https://github.com/elastic/kibana/tree/main/src/platform/packages/shared/kbn-expect[`@kbn/expect`] and defining its default export: an anonymous Test Provider. The test provider then destructures the Provider API for the `getService()` and `getPageObjects()` functions. It uses these functions to collect the dependencies of this suite. The rest of the test file will look pretty normal to mocha.js users. `describe()`, `it()`, `before()` and the lot are used to define suites that happen to automate a browser via services and objects of type `PageObject`.
 
 ["source","js"]
 ----
@@ -311,7 +311,7 @@ The `FunctionalTestRunner` comes with three built-in services:
 * Use `config.get(path)` to read any value from the config file
 
 **log:**:::
-// * Source: {kibana-blob}packages/kbn-dev-utils/src/tooling_log/tooling_log.js[packages/kbn-dev-utils/src/tooling_log/tooling_log.js]
+// * Source: {kibana-blob}src/platform/packages/shared/kbn-dev-utils/src/tooling_log/tooling_log.js[src/platform/packages/shared/kbn-dev-utils/src/tooling_log/tooling_log.js]
 * `ToolingLog` instances are readable streams. The instance provided by this service is automatically piped to stdout by the `FunctionalTestRunner` CLI
 * `log.verbose()`, `log.debug()`, `log.info()`, `log.warning()` all work just like console.log but produce more organized output
 
@@ -366,14 +366,14 @@ await testSubjects.click(‘containerButton’);
 ** `find.allByCssSelector()`
 
 **retry:**:::
-// * Source: {kibana-blob}packages/kbn-ftr-common-functional-services/services/retry/retry.ts[packages/kbn-ftr-common-functional-services/services/retry/retry.ts]
+// * Source: {kibana-blob}src/platform/packages/shared/kbn-ftr-common-functional-services/services/retry/retry.ts[src/platform/packages/shared/kbn-ftr-common-functional-services/services/retry/retry.ts]
 * Helpers for retrying operations
 * Popular methods:
 ** `retry.try(fn, onFailureBlock)` - Execute `fn` in a loop until it succeeds or the default timeout elapses. The optional `onFailureBlock` is executed before each retry attempt.
 ** `retry.tryForTime(ms, fn, onFailureBlock)` - Execute `fn` in a loop until it succeeds or `ms` milliseconds elapses. The optional `onFailureBlock` is executed before each retry attempt.
 
 **kibanaServer:**:::
-// * Source: {kibana-blob}packages/kbn-ftr-common-functional-services/services/kibana_server/kibana_server.ts[packages/kbn-ftr-common-functional-services/services/kibana_server/kibana_server.ts]
+// * Source: {kibana-blob}src/platform/packages/shared/kbn-ftr-common-functional-services/services/kibana_server/kibana_server.ts[src/platform/packages/shared/kbn-ftr-common-functional-services/services/kibana_server/kibana_server.ts]
 * Helpers for interacting with {kib}'s server
 * Commonly used methods:
 ** `kibanaServer.uiSettings.update()`
@@ -381,7 +381,7 @@ await testSubjects.click(‘containerButton’);
 ** `kibanaServer.status.getOverallState()`
 
 **esArchiver:**:::
-// * Source: {kibana-blob}packages/kbn-ftr-common-functional-services/services/es_archiver.ts[packages/kbn-ftr-common-functional-services/services/es_archiver.ts]
+// * Source: {kibana-blob}src/platform/packages/shared/kbn-ftr-common-functional-services/services/es_archiver.ts[src/platform/packages/shared/kbn-ftr-common-functional-services/services/es_archiver.ts]
 * Load/unload archives created with the `esArchiver`
 * Popular methods:
 ** `esArchiver.load(path)`
@@ -393,7 +393,7 @@ Full list of services that are used in functional tests can be found here: {kiba
 
 **Low-level utilities:**:::
 * es
-// ** Source: {kibana-blob}packages/kbn-ftr-common-functional-services/services/es.ts[packages/kbn-ftr-common-functional-services/services/es.ts]
+// ** Source: {kibana-blob}src/platform/packages/shared/kbn-ftr-common-functional-services/services/es.ts[src/platform/packages/shared/kbn-ftr-common-functional-services/services/es.ts]
 ** {es} client
 ** Higher level options: `kibanaServer.uiSettings` or `esArchiver`
 * remote

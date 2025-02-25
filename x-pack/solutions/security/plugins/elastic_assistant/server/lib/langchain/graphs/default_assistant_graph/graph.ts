@@ -42,7 +42,6 @@ export interface GetDefaultAssistantGraphParams {
   signal?: AbortSignal;
   tools: StructuredTool[];
   replacements: Replacements;
-  contentReferencesEnabled: boolean;
   getFormattedTime?: () => string;
 }
 
@@ -59,7 +58,6 @@ export const getDefaultAssistantGraph = ({
   signal,
   tools,
   replacements,
-  contentReferencesEnabled = false,
   getFormattedTime,
 }: GetDefaultAssistantGraphParams) => {
   try {
@@ -124,10 +122,6 @@ export const getDefaultAssistantGraph = ({
       responseLanguage: {
         value: (x: string, y?: string) => y ?? x,
         default: () => 'English',
-      },
-      contentReferencesEnabled: {
-        value: (x: boolean, y?: boolean) => y ?? x,
-        default: () => contentReferencesEnabled,
       },
       provider: {
         value: (x: string, y?: string) => y ?? x,
