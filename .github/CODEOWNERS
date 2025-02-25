@@ -424,7 +424,7 @@ x-pack/test/api_integration/apis/entity_manager/fixture_plugin @elastic/obs-enti
 x-pack/solutions/observability/plugins/entity_manager_app @elastic/obs-entities
 x-pack/platform/plugins/shared/entity_manager @elastic/obs-entities
 examples/error_boundary @elastic/appex-sharedux
-packages/kbn-es @elastic/kibana-operations
+src/platform/packages/shared/kbn-es @elastic/kibana-operations
 packages/kbn-es-archiver @elastic/kibana-operations @elastic/appex-qa
 src/platform/packages/shared/kbn-es-errors @elastic/kibana-core
 src/platform/packages/shared/kbn-es-query @elastic/kibana-data-discovery
@@ -1428,7 +1428,7 @@ packages/kbn-monaco/src/esql @elastic/kibana-esql
 /x-pack/test_serverless/functional/test_suites/security/ftr/ @elastic/appex-qa
 /x-pack/test_serverless/functional/test_suites/common/home_page/  @elastic/appex-qa
 /x-pack/test_serverless/**/services/ @elastic/appex-qa
-/packages/kbn-es/src/stateful_resources/roles.yml @elastic/appex-qa
+/src/platform/packages/shared/kbn-es/src/stateful_resources/roles.yml @elastic/appex-qa
 x-pack/test/api_integration/deployment_agnostic/default_configs/ @elastic/appex-qa
 x-pack/test/api_integration/deployment_agnostic/services/ @elastic/appex-qa
 x-pack/test/**/deployment_agnostic/ @elastic/appex-qa #temporarily to monitor tests migration
