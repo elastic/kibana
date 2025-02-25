@@ -14,7 +14,7 @@ import {
   validateActionFilterQuery,
 } from './value_validators';
 import { v4 as uuidv4 } from 'uuid';
-import { Rule, IErrorObject, UserConfiguredActionConnector, RuleUiAction } from '../../types';
+import type { Rule, IErrorObject, UserConfiguredActionConnector, RuleUiAction } from '../../types';
 
 describe('throwIfAbsent', () => {
   test('throws if value is absent', () => {

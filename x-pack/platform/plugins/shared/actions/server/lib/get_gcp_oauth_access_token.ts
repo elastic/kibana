@@ -4,9 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { Logger } from '@kbn/core/server';
+import type { Logger } from '@kbn/core/server';
 import { GoogleAuth } from 'google-auth-library';
-import { ConnectorToken, ConnectorTokenClientContract } from '../types';
+import type { ConnectorToken, ConnectorTokenClientContract } from '../types';
 
 interface GetOAuthJwtAccessTokenOpts {
   connectorId?: string;
@@ -22,7 +22,7 @@ export const getGoogleOAuthJwtAccessToken = async ({
 }: GetOAuthJwtAccessTokenOpts) => {
   let accessToken;
   let connectorToken: ConnectorToken | null = null;
-  let hasErrors: boolean = false;
+  let hasErrors = false;
   const expiresInSec = 3500;
 
   if (connectorId && connectorTokenClient) {

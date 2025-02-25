@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { SmithyMessageDecoderStream } from '@smithy/eventstream-codec';
-import { Logger } from '@kbn/logging';
+import type { SmithyMessageDecoderStream } from '@smithy/eventstream-codec';
+import type { Logger } from '@kbn/logging';
 
 export type SmithyStream = SmithyMessageDecoderStream<{
   metadata?: {

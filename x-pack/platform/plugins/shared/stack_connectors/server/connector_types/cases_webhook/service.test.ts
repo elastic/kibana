@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import axios, { AxiosError, AxiosResponse } from 'axios';
+import type { AxiosError, AxiosResponse } from 'axios';
+import axios from 'axios';
 
 import { createExternalService } from './service';
 import { request, createAxiosResponse } from '@kbn/actions-plugin/server/lib/axios_utils';
-import { CasesWebhookPublicConfigurationType, ExternalService } from './types';
-import { Logger } from '@kbn/core/server';
+import type { CasesWebhookPublicConfigurationType, ExternalService } from './types';
+import type { Logger } from '@kbn/core/server';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { actionsConfigMock } from '@kbn/actions-plugin/server/actions_config.mock';
 import { getBasicAuthHeader } from '@kbn/actions-plugin/server/lib';

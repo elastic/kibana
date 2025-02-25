@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { OnlyEsqlQueryRuleParams } from '../types';
+import type { OnlyEsqlQueryRuleParams } from '../types';
 import { Comparator } from '../../../../common/comparator_types';
 import { fetchEsqlQuery, getEsqlQuery, getSourceFields } from './fetch_esql_query';
 import { getErrorSource, TaskErrorSource } from '@kbn/task-manager-plugin/server/task_running';
-import { SharePluginStart } from '@kbn/share-plugin/server';
+import type { SharePluginStart } from '@kbn/share-plugin/server';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 

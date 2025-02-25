@@ -7,7 +7,7 @@
 
 import { some } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { ActionVariable, RuleActionParam } from '@kbn/alerting-plugin/common';
+import type { ActionVariable, RuleActionParam } from '@kbn/alerting-plugin/common';
 import Mustache from 'mustache';
 
 const publicUrlWarning = i18n.translate(
