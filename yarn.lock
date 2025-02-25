@@ -6094,7 +6094,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/journeys@link:packages/kbn-journeys":
+"@kbn/journeys@link:src/platform/packages/private/kbn-journeys":
   version "0.0.0"
   uid ""
 
