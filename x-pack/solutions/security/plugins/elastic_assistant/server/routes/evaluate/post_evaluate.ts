@@ -384,11 +384,6 @@ export const postEvaluateRoute = (
               const uiSettingsDateFormatTimezone = await ctx.core.uiSettings.client.get<string>(
                 'dateFormat:tz'
               );
-              const _getFormattedTime = () =>
-                getFormattedTime({
-                  screenContextTimezone: request.body.screenContext?.timeZone,
-                  uiSettingsDateFormatTimezone,
-                });
 
               return {
                 connectorId: connector.id,
