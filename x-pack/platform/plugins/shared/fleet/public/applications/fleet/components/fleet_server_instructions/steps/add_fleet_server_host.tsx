@@ -107,7 +107,7 @@ export const AddFleetServerHostStepContent = ({
     if (!isFirstLoad) return;
     setIsFirstLoad(false);
     // populate the secret input with the value of the plain input in order to re-save the key with secret storage
-    if (secretsToggleState) {
+    if (useSecretsStorage && enableSSLSecrets) {
       if (inputs.sslKeyInput.value && !inputs.sslKeySecretInput.value) {
         inputs.sslKeySecretInput.setValue(inputs.sslKeyInput.value);
         inputs.sslKeyInput.clear();
@@ -128,10 +128,12 @@ export const AddFleetServerHostStepContent = ({
     inputs.sslESKeyInput,
     inputs.sslESKeySecretInput,
     secretsToggleState,
+    useSecretsStorage,
+    enableSSLSecrets,
   ]);
 
   const onToggleSecretAndClearValue = (secretEnabled: boolean) => {
-    if (secretEnabled && enableSSLSecrets) {
+    if (secretEnabled) {
       inputs.sslKeyInput.clear();
       inputs.sslESKeyInput.clear();
     } else {
