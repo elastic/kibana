@@ -266,7 +266,7 @@ const AllAssets = ({
     };
   }, [persistedSettings]);
 
-  const { dataView, dataViewIsLoading, dataViewIsRefetching } = useDataViewContext();
+  const { dataView } = useDataViewContext();
 
   const {
     uiActions,
@@ -411,14 +411,7 @@ const AllAssets = ({
     },
   ];
 
-  const loadingStyle = {
-    opacity: isLoading ? 1 : 0,
-  };
-
-  const loadingState =
-    isLoading || isFetching || dataViewIsLoading || dataViewIsRefetching || !dataView
-      ? DataLoadingState.loading
-      : DataLoadingState.loaded;
+  const loadingState = isLoading || !dataView ? DataLoadingState.loading : DataLoadingState.loaded;
 
   return (
     <I18nProvider>
@@ -475,7 +468,7 @@ const AllAssets = ({
               height: computeDataTableRendering.wrapperHeight,
             }}
           >
-            <EuiProgress size="xs" color="accent" style={loadingStyle} />
+            <EuiProgress size="xs" color="accent" style={{ opacity: isFetching ? 1 : 0 }} />
             {!dataView ? null : loadingState === DataLoadingState.loaded && totalHits === 0 ? (
               <EmptyState onResetFilters={onResetFilters} />
             ) : (
