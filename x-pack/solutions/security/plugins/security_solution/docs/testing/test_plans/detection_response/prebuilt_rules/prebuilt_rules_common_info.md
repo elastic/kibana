@@ -1,5 +1,10 @@
 # Common information about prebuilt rules <!-- omit from toc -->
 
+**Status**: `in progress`, matches [Milestone 3](https://github.com/elastic/kibana/issues/174168).
+
+> [!TIP]
+> If you're new to prebuilt rules, get started [here](./prebuilt_rules.md) and check an overview of the features of prebuilt rules in [this section](#features).
+
 ## Table of contents <!-- omit from toc -->
 
 <!--
