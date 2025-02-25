@@ -32,10 +32,6 @@
       "version": "8.16.5",
       "branch": "8.16",
       "previousMajor": true
-    },
-    {
-      "version": "7.17.28",
-      "branch": "7.17"
     }
   ]
 }
