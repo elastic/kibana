@@ -61,7 +61,7 @@ export const AssistantSettingsModal: React.FC<Props> = React.memo(
     const handleSave = useCallback(
       async (success: boolean) => {
         cleanupAndCloseModal();
-        await refetchCurrentConversation();
+        await refetchCurrentConversation({ isStreamRefetch: false });
         await refetchCurrentUserConversations();
         if (refetchPrompts) {
           await refetchPrompts();
