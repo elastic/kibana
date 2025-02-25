@@ -11,12 +11,12 @@ import { i18n } from '@kbn/i18n';
 import type * as estypes from '@elastic/elasticsearch/lib/api/types';
 import { showErrorToast } from '@kbn/cloud-security-posture';
 import type { IKibanaSearchResponse, IKibanaSearchRequest } from '@kbn/search-types';
-import type { FindingsBaseEsQuery } from '@kbn/cloud-security-posture';
+import type { BaseEsQuery } from '@kbn/cloud-security-posture';
 import { useKibana } from '../../common/lib/kibana';
 import { ASSET_INVENTORY_INDEX_PATTERN } from '../constants';
 import { getMultiFieldsSort } from './fetch_utils';
 
-interface UseTopAssetsOptions extends FindingsBaseEsQuery {
+interface UseTopAssetsOptions extends BaseEsQuery {
   sort: string[][];
   enabled: boolean;
 }
