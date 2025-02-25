@@ -16,6 +16,7 @@ import {
 } from '@kbn/presentation-publishing';
 import { omit } from 'lodash';
 import { BehaviorSubject, Subject, combineLatest, debounceTime, skipWhile, switchMap } from 'rxjs';
+import { getReferencesForPanelId } from '../../common/dashboard_container/persistable_state/dashboard_container_references';
 import {
   PANELS_CONTROL_GROUP_KEY,
   getDashboardBackupService,
@@ -119,6 +120,16 @@ export function initializeUnsavedChangesManager({
         settingsManager.internalApi.reset(lastSavedState$.value);
         unifiedSearchManager.internalApi.reset(lastSavedState$.value);
         await controlGroupApi$.value?.asyncResetUnsavedChanges();
+      },
+      getLastSavedStateForChild: (childId: string) => {
+        const rawState = lastSavedState$.value.panels[childId]?.explicitInput ?? {};
+        const references = getReferencesForPanelId(childId, lastSavedState$.value.references ?? []);
+        return Object.keys(rawState).length === 0
+          ? undefined
+          : {
+              rawState,
+              references,
+            };
       },
       hasUnsavedChanges$,
       saveNotification$,

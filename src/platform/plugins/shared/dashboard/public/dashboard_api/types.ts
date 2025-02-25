@@ -20,6 +20,7 @@ import { PublishesESQLVariables } from '@kbn/esql-variables-types';
 import { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import {
   CanExpandPanels,
+  HasLastSavedChildState,
   HasRuntimeChildState,
   HasSaveNotification,
   HasSerializedChildState,
@@ -127,6 +128,7 @@ export type DashboardApi = CanExpandPanels &
   HasRuntimeChildState &
   HasSaveNotification &
   HasSerializedChildState &
+  HasLastSavedChildState &
   HasType<typeof DASHBOARD_API_TYPE> &
   HasUniqueId &
   PresentationContainer &
