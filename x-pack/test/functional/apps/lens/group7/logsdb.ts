@@ -40,7 +40,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   describe('lens logsdb', function () {
     const logsdbIndex = 'kibana_sample_data_logslogsdb';
     const logsdbDataView = logsdbIndex;
-    const logsdbEsArchive = 'test/functional/fixtures/es_archiver/kibana_sample_data_logs_logsdb';
+    const logsdbEsArchive =
+      'src/platform/test/functional/fixtures/es_archiver/kibana_sample_data_logs_logsdb';
     const fromTime = 'Apr 16, 2023 @ 00:00:00.000';
     const toTime = 'Jun 16, 2023 @ 00:00:00.000';
 

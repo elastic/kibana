@@ -66,27 +66,35 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await kibanaServer.uiSettings.update({ 'courier:ignoreFilterIfFieldNotInIndex': true });
 
-      await esArchiver.load('test/functional/fixtures/es_archiver/kibana_sample_data_flights');
+      await esArchiver.load(
+        'src/platform/test/functional/fixtures/es_archiver/kibana_sample_data_flights'
+      );
       await kibanaServer.importExport.load(
-        'test/functional/fixtures/kbn_archiver/kibana_sample_data_flights_index_pattern'
+        'src/platform/test/functional/fixtures/kbn_archiver/kibana_sample_data_flights_index_pattern'
       );
 
-      await esArchiver.load('test/functional/fixtures/es_archiver/long_window_logstash');
+      await esArchiver.load(
+        'src/platform/test/functional/fixtures/es_archiver/long_window_logstash'
+      );
       await kibanaServer.importExport.load(
-        'test/functional/fixtures/kbn_archiver/long_window_logstash_index_pattern'
+        'src/platform/test/functional/fixtures/kbn_archiver/long_window_logstash_index_pattern'
       );
       await common.navigateToApp('lens');
     });
 
     after(async () => {
       await kibanaServer.uiSettings.unset('courier:ignoreFilterIfFieldNotInIndex');
-      await esArchiver.unload('test/functional/fixtures/es_archiver/kibana_sample_data_flights');
-      await kibanaServer.importExport.unload(
-        'test/functional/fixtures/kbn_archiver/kibana_sample_data_flights_index_pattern'
+      await esArchiver.unload(
+        'src/platform/test/functional/fixtures/es_archiver/kibana_sample_data_flights'
       );
-      await esArchiver.unload('test/functional/fixtures/es_archiver/long_window_logstash');
       await kibanaServer.importExport.unload(
-        'test/functional/fixtures/kbn_archiver/long_window_logstash_index_pattern'
+        'src/platform/test/functional/fixtures/kbn_archiver/kibana_sample_data_flights_index_pattern'
+      );
+      await esArchiver.unload(
+        'src/platform/test/functional/fixtures/es_archiver/long_window_logstash'
+      );
+      await kibanaServer.importExport.unload(
+        'src/platform/test/functional/fixtures/kbn_archiver/long_window_logstash_index_pattern'
       );
     });
 

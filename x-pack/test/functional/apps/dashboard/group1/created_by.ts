@@ -26,7 +26,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await esArchiver.emptyKibanaIndex();
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/logstash_functional');
       await kibanaServer.importExport.load(
-        'test/functional/fixtures/kbn_archiver/dashboard/current/kibana'
+        'src/platform/test/functional/fixtures/kbn_archiver/dashboard/current/kibana'
       );
       await kibanaServer.importExport.load(
         'x-pack/test/functional/fixtures/kbn_archiver/lens/lens_basic.json'
@@ -85,7 +85,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       await esArchiver.unload('x-pack/test/functional/es_archives/logstash_functional');
       await kibanaServer.importExport.unload(
-        'test/functional/fixtures/kbn_archiver/dashboard/current/kibana'
+        'src/platform/test/functional/fixtures/kbn_archiver/dashboard/current/kibana'
       );
       await kibanaServer.importExport.unload(
         'x-pack/test/functional/fixtures/kbn_archiver/lens/lens_basic.json'

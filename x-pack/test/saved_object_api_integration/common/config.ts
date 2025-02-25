@@ -23,7 +23,9 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
   return async ({ readConfigFile }: FtrConfigProviderContext) => {
     const config = {
       kibana: {
-        api: await readConfigFile(path.resolve(REPO_ROOT, 'test/api_integration/config.js')),
+        api: await readConfigFile(
+          path.resolve(REPO_ROOT, 'src/platform/test/api_integration/config.js')
+        ),
         functional: await readConfigFile(
           require.resolve('@kbn/test-suites-src/functional/config.base')
         ),
