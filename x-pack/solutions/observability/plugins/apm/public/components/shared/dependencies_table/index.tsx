@@ -25,7 +25,7 @@ export type DependenciesItem = Omit<ConnectionStatsItemWithComparisonData, 'loca
 };
 
 export const INITIAL_SORTING_FIELD = 'impact';
-export const INITIA_SORTING_DIRECTION = 'desc';
+export const INITIAL_SORTING_DIRECTION = 'desc';
 interface Props {
   dependencies: DependenciesItem[];
   initialPageSize: number;
