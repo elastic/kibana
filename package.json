@@ -1542,7 +1542,6 @@
     "@storybook/addon-docs": "^8.5.8",
     "@storybook/addon-essentials": "^8.5.8",
     "@storybook/components": "^8.5.8",
-    "@storybook/core-common": "^8.5.8",
     "@storybook/core-events": "^8.5.8",
     "@storybook/core-server": "^8.5.8",
     "@storybook/icons": "^1.3.2",

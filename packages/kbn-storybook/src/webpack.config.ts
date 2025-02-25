@@ -75,6 +75,12 @@ function isDesiredPreset(preset: Preset) {
 /* eslint-disable import/no-default-export */
 export default ({ config: storybookConfig }: { config: Configuration }) => {
   const config: Configuration = {
+    cache: {
+      type: 'filesystem',
+      buildDependencies: {
+        config: [__filename],
+      },
+    },
     devServer: {
       devMiddleware: {
         stats,
@@ -94,9 +100,7 @@ export default ({ config: storybookConfig }: { config: Configuration }) => {
         },
         {
           test: /\.(html|md|txt|tmpl)$/,
-          use: {
-            loader: 'raw-loader',
-          },
+          type: 'asset/source' as webpack.RuleSetRule['type'],
         },
         {
           test: /\.peggy$/,
@@ -166,6 +170,39 @@ export default ({ config: storybookConfig }: { config: Configuration }) => {
             plugins: ['@babel/plugin-transform-logical-assignment-operators'],
           },
         },
+        {
+          test: /\.(js|jsx)$/,
+          exclude: /node_modules/,
+          use: [
+            {
+              loader: 'babel-loader',
+              options: {
+                presets: [require.resolve('@babel/preset-react')],
+              },
+            },
+          ],
+        },
+        {
+          test: /\.(ts|tsx)$/,
+          exclude: /node_modules/,
+          use: [
+            {
+              loader: 'babel-loader',
+              options: {
+                presets: [
+                  [
+                    require.resolve('@babel/preset-typescript'),
+                    {
+                      allowDeclareFields: true,
+                      allowNamespaces: true,
+                    },
+                  ],
+                  require.resolve('@babel/preset-react'),
+                ],
+              },
+            },
+          ],
+        },
       ],
     },
     plugins: [new IgnoreNotFoundExportPlugin()],
@@ -177,8 +214,13 @@ export default ({ config: storybookConfig }: { config: Configuration }) => {
         core_styles: resolve(REPO_ROOT, 'src/core/public/index.scss'),
         vega: resolve(REPO_ROOT, 'node_modules/vega/build-es5/vega.js'),
       },
+      // @ts-expect-error fallback is a valid property in webpack 5 but not included in the type definitions
+      fallback: {
+        timers: false,
+      },
     },
     stats,
+    mode: process.env.NODE_ENV === 'production' ? 'production' : 'development',
   };
 
   // Override storybookConfig mainFields instead of merging with config

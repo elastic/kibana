@@ -11,27 +11,23 @@
 //
 // This plugin suppresses the irritating TS-related warnings in Storybook HMR.
 
-import { Compiler, Stats } from 'webpack';
-// @ts-expect-error
-import ModuleDependencyWarning from 'webpack/lib/ModuleDependencyWarning';
+import { Compiler } from 'webpack';
 
 export class IgnoreNotFoundExportPlugin {
   apply(compiler: Compiler) {
     const messageRegExp = /export '.*'( \(reexported as '.*'\))? was not found in/;
 
-    function doneHook(stats: Stats) {
-      stats.compilation.warnings = stats.compilation.warnings.filter(function (warn) {
-        if (warn instanceof ModuleDependencyWarning && messageRegExp.test(warn.message)) {
-          return false;
-        }
-        return true;
-      });
-    }
-
-    if (compiler.hooks) {
-      compiler.hooks.done.tap('IgnoreNotFoundExportPlugin', doneHook);
-    } else {
-      compiler.plugin('done', doneHook);
-    }
+    compiler.hooks.done.tap('IgnoreNotFoundExportPlugin', (stats) => {
+      if (stats.compilation.warnings) {
+        stats.compilation.warnings = stats.compilation.warnings.filter((warning) => {
+          // In webpack 5, we check if the warning message matches our pattern
+          // instead of checking the instanceof ModuleDependencyWarning
+          if (warning && warning.message && messageRegExp.test(warning.message)) {
+            return false;
+          }
+          return true;
+        });
+      }
+    });
   }
 }

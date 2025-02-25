@@ -10187,11 +10187,6 @@
   resolved "https://registry.yarnpkg.com/@storybook/components/-/components-8.5.8.tgz#d5be849c7aef5e0ab518c5620b8c2a1ccc8469fc"
   integrity sha512-PPEMqWPXn7rX+qISaOOv9CDSuuvG538f0+4M5Ppq2LwpjXecgOG5ktqJF0ZqxmTytT+RpEaJmgjGW0dMAKZswA==
 
-"@storybook/core-common@^8.5.8":
-  version "8.5.8"
-  resolved "https://registry.yarnpkg.com/@storybook/core-common/-/core-common-8.5.8.tgz#f27d9cb8ccfb94188165ed88345361a1139e5630"
-  integrity sha512-T/4TAkNfb85q/XLL0CQvLoiXU5n9+b1j3LTM9+S0wjnOOGcE3hgI4H7l1gU9rLvZCUnMZkCgCoIrlTN7Fgd2AA==
-
 "@storybook/core-events@^8.5.8":
   version "8.5.8"
   resolved "https://registry.yarnpkg.com/@storybook/core-events/-/core-events-8.5.8.tgz#43b22a1d4ed02dd52a86d957cd7c26e9c41ae482"
@@ -26351,7 +26346,6 @@ re2js@0.4.3:
   integrity sha512-EuNmh7jurhHEE8Ge/lBo9JuMLb3qf866Xjjfyovw3wPc7+hlqDkZq4LwhrCQMEI+ARWfrKrHozEndzlpNT0WDg==
 
 "react-18@npm:react@~18.2.0", "react@^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0", "react@^17.0.0 || ^18.2.0":
-  name react-18
   version "18.2.0"
   resolved "https://registry.yarnpkg.com/react/-/react-18.2.0.tgz#555bd98592883255fa00de14f1151a917b5d77d5"
   integrity sha512-/3IjMdb2L9QbBdWiW5e3P2/npwMBaU9mHCSCUzNln0ZCYbcfTsGbTJrU/kGemdH2IWmB2ioZ+zkxtmq6g09fGQ==
@@ -26399,7 +26393,6 @@ react-docgen@^7.0.0:
     strip-indent "^4.0.0"
 
 "react-dom-18@npm:react-dom@~18.2.0", "react-dom@^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0", "react-dom@^17.0.0 || ^18.2.0":
-  name react-dom-18
   version "18.2.0"
   resolved "https://registry.yarnpkg.com/react-dom/-/react-dom-18.2.0.tgz#22aaf38708db2674ed9ada224ca4aa708d821e3d"
   integrity sha512-6IMTriUmvsjHUjNtEDudZfuDQUoWXVxKHhlEGSk81n4YFS+r/Kl99wXiwlVXtPBtJenozv2P+hxDsw9eA7Xo6g==
