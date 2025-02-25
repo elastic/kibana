@@ -272,7 +272,6 @@ export async function installKibanaAssetsAndReferences({
   const { savedObjectsImporter, savedObjectTagAssignmentService, savedObjectTagClient } =
     getSpaceAwareSaveobjectsClients(spaceId);
   // This is where the memory consumption is rising up in the first place
-  // const kibanaAssets = getKibanaAssets(packageInstallContext);
   const kibanaAssetsArchiveIterator = getKibanaAssetsArchiveIterator(packageInstallContext);
 
   if (installedPkg) {
