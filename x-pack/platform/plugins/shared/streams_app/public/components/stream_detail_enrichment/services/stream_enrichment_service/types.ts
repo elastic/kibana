@@ -9,13 +9,16 @@ import { ActorRefFrom } from 'xstate5';
 import { CoreStart } from '@kbn/core/public';
 import { StreamsRepositoryClient } from '@kbn/streams-plugin/public/api';
 import { FieldDefinition, IngestStreamGetResponse } from '@kbn/streams-schema';
+import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { ProcessorDefinitionWithUIAttributes } from '../../types';
 import { ProcessorToParentEvent, processorMachine } from './processor_state_machine';
+import { SimulationToParentEvent, simulationMachine } from './simulation_state_machine';
 
 export interface StreamEnrichmentServiceDependencies {
   refreshDefinition: () => void;
   streamsRepositoryClient: StreamsRepositoryClient;
   core: CoreStart;
+  data: DataPublicPluginStart;
 }
 
 export interface StreamEnrichmentInput {
@@ -24,20 +27,22 @@ export interface StreamEnrichmentInput {
 
 export interface StreamEnrichmentContext {
   definition: IngestStreamGetResponse;
-  initialProcessors: Array<ActorRefFrom<typeof processorMachine>>;
-  processors: Array<ActorRefFrom<typeof processorMachine>>;
+  initialProcessorsRefs: Array<ActorRefFrom<typeof processorMachine>>;
+  processorsRefs: Array<ActorRefFrom<typeof processorMachine>>;
+  simulatorRef?: ActorRefFrom<typeof simulationMachine>;
   fields?: FieldDefinition;
 }
 
 export type StreamEnrichmentEvent =
   | ProcessorToParentEvent
+  | SimulationToParentEvent
   | { type: 'stream.received'; definition: IngestStreamGetResponse }
   | { type: 'stream.reset' }
   | { type: 'stream.update' }
   | { type: 'simulation.viewDataPreview' }
   | { type: 'simulation.viewDetectedFields' }
   | { type: 'processors.add'; processor: ProcessorDefinitionWithUIAttributes }
-  | { type: 'processors.reorder'; processors: Array<ActorRefFrom<typeof processorMachine>> };
+  | { type: 'processors.reorder'; processorsRefs: Array<ActorRefFrom<typeof processorMachine>> };
 
 export type StreamEnrichmentEventByType<TEventType extends StreamEnrichmentEvent['type']> = Extract<
   StreamEnrichmentEvent,

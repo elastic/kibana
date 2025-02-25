@@ -23,7 +23,6 @@ import { ProcessorDefinitionWithUIAttributes } from '../../types';
 
 export type ProcessorToParentEvent =
   | { type: 'processor.change' }
-  | { type: 'processor.stage' }
   | { type: 'processor.delete'; id: string }
   | { type: 'processor.changesDiscarded' };
 

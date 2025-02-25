@@ -4,7 +4,15 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { MachineImplementationsFrom, assign, enqueueActions, not, setup, stopChild } from 'xstate5';
+import {
+  MachineImplementationsFrom,
+  assign,
+  enqueueActions,
+  not,
+  setup,
+  sendTo,
+  stopChild,
+} from 'xstate5';
 import { getPlaceholderFor } from '@kbn/xstate-utils';
 import {
   IngestStreamGetResponse,
@@ -27,6 +35,10 @@ import {
   createUpsertStreamSuccessNofitier,
 } from './upsert_stream';
 import { processorMachine, createProcessorMachineImplementations } from './processor_state_machine';
+import {
+  createSimulationMachineImplementations,
+  simulationMachine,
+} from './simulation_state_machine';
 
 const createId = htmlIdGenerator();
 
@@ -39,16 +51,27 @@ export const streamEnrichmentMachine = setup({
   actors: {
     upsertStream: getPlaceholderFor(createUpsertStreamActor),
     processorMachine: getPlaceholderFor(() => processorMachine),
+    simulationMachine: getPlaceholderFor(() => simulationMachine),
   },
   actions: {
+    spawnSimulationMachine: assign(({ context, self, spawn }) => ({
+      simulatorRef: spawn('simulationMachine', {
+        id: 'simulator',
+        input: {
+          parentRef: self,
+          processors: context.processorsRefs.map((proc) => proc.getSnapshot().context.processor),
+          streamName: context.definition.stream.name,
+        },
+      }),
+    })),
     notifyUpsertStreamSuccess: getPlaceholderFor(createUpsertStreamSuccessNofitier),
     notifyUpsertStreamFailure: getPlaceholderFor(createUpsertStreamFailureNofitier),
     refreshDefinition: () => {},
     storeDefinition: assign((_, params: { definition: IngestStreamGetResponse }) => ({
       definition: params.definition,
     })),
-    setupProcessors: assign(({ spawn, self }, params: { definition: IngestStreamGetResponse }) => {
-      const processors = params.definition.stream.ingest.processing.map((proc) => {
+    setupProcessors: assign(({ self, spawn }, params: { definition: IngestStreamGetResponse }) => {
+      const processorsRefs = params.definition.stream.ingest.processing.map((proc) => {
         const processor = processorConverter.toUIDefinition(proc);
         return spawn('processorMachine', {
           id: processor.id,
@@ -61,8 +84,8 @@ export const streamEnrichmentMachine = setup({
       });
 
       return {
-        initialProcessors: processors,
-        processors,
+        initialProcessorsRefs: processorsRefs,
+        processorsRefs,
       };
     }),
     setupFields: assign((_, params: { definition: WiredStreamGetResponse }) => ({
@@ -72,7 +95,7 @@ export const streamEnrichmentMachine = setup({
       ({ context, spawn, self }, { processor }: StreamEnrichmentEventByType<'processors.add'>) => {
         const id = createId();
         return {
-          processors: context.processors.concat(
+          processorsRefs: context.processorsRefs.concat(
             spawn('processorMachine', {
               id,
               input: {
@@ -91,34 +114,39 @@ export const streamEnrichmentMachine = setup({
     ),
     deleteProcessor: assign(
       ({ context }, params: StreamEnrichmentEventByType<'processor.delete'>) => ({
-        processors: context.processors.filter((proc) => proc.id !== params.id),
+        processorsRefs: context.processorsRefs.filter((proc) => proc.id !== params.id),
       })
     ),
     reorderProcessors: assign((_, params: StreamEnrichmentEventByType<'processors.reorder'>) => ({
-      processors: params.processors,
+      processorsRefs: params.processors,
     })),
     reassignProcessors: assign(({ context }) => ({
-      processors: [...context.processors],
+      processorsRefs: [...context.processorsRefs],
     })),
+    sendChangeToSimulator: sendTo('simulator', ({ context }) => {
+      return { type: 'processors.change', processorsRefs: context.processorsRefs };
+    }),
   },
   guards: {
-    hasMultipleProcessors: ({ context }) => context.processors.length > 1,
+    hasMultipleProcessors: ({ context }) => context.processorsRefs.length > 1,
     hasStagedChanges: ({ context }) => {
-      const { initialProcessors, processors } = context;
+      const { initialProcessorsRefs, processorsRefs } = context;
       return (
         // Deleted processors
-        initialProcessors.length !== processors.length ||
+        initialProcessorsRefs.length !== processorsRefs.length ||
         // New/updated processors
-        processors.some((processor) => {
-          const state = processor.getSnapshot();
+        processorsRefs.some((processorRef) => {
+          const state = processorRef.getSnapshot();
           return state.matches('configured') && state.context.isUpdated;
         }) ||
         // Processor order changed
-        processors.some((processor, pos) => initialProcessors[pos]?.id !== processor.id)
+        processorsRefs.some(
+          (processorRef, pos) => initialProcessorsRefs[pos]?.id !== processorRef.id
+        )
       );
     },
     hasPendingDraft: ({ context }) =>
-      Boolean(context.processors.find((p) => p.getSnapshot().matches('draft'))),
+      Boolean(context.processorsRefs.find((p) => p.getSnapshot().matches('draft'))),
     isRootStream: ({ context }) => isRootStreamDefinition(context.definition.stream),
     isWiredStream: ({ context }) => isWiredStreamGetResponse(context.definition),
   },
@@ -127,8 +155,8 @@ export const streamEnrichmentMachine = setup({
   id: 'enrichStream',
   context: ({ input }) => ({
     definition: input.definition,
-    initialProcessors: [],
-    processors: [],
+    initialProcessorsRefs: [],
+    processorsRefs: [],
   }),
   initial: 'listeningForDefinitionChanges',
   on: {
@@ -192,11 +220,12 @@ export const streamEnrichmentMachine = setup({
               ],
             },
             'processor.change': {
-              actions: [{ type: 'reassignProcessors' }],
+              actions: [{ type: 'reassignProcessors' }, { type: 'sendChangeToSimulator' }],
             },
           },
         },
         displayingSimulation: {
+          entry: [{ type: 'spawnSimulationMachine' }],
           initial: 'viewDataPreview',
           states: {
             viewDataPreview: {
@@ -228,7 +257,7 @@ export const streamEnrichmentMachine = setup({
         src: 'upsertStream',
         input: ({ context }) => ({
           definition: context.definition,
-          processors: context.processors
+          processors: context.processorsRefs
             .map((proc) => proc.getSnapshot())
             .filter((proc) => proc.matches('configured'))
             .map((proc) => proc.context.processor),
@@ -254,6 +283,7 @@ export const createStreamEnrichmentMachineImplementations = ({
   refreshDefinition,
   streamsRepositoryClient,
   core,
+  data,
 }: StreamEnrichmentServiceDependencies): MachineImplementationsFrom<
   typeof streamEnrichmentMachine
 > => ({
@@ -261,6 +291,13 @@ export const createStreamEnrichmentMachineImplementations = ({
     upsertStream: createUpsertStreamActor({ streamsRepositoryClient }),
     processorMachine: processorMachine.provide(
       createProcessorMachineImplementations({ overlays: core.overlays })
+    ),
+    simulationMachine: simulationMachine.provide(
+      createSimulationMachineImplementations({
+        data,
+        streamsRepositoryClient,
+        toasts: core.notifications.toasts,
+      })
     ),
   },
   actions: {

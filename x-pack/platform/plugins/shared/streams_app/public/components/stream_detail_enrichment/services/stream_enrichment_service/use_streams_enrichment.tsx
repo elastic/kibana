@@ -6,8 +6,9 @@
  */
 
 import React, { useEffect, useMemo } from 'react';
-import { createActorContext } from '@xstate5/react';
+import { createActorContext, useSelector } from '@xstate5/react';
 import { createConsoleInspector } from '@kbn/xstate-utils';
+import { SnapshotFrom } from 'xstate5';
 import {
   streamEnrichmentMachine,
   createStreamEnrichmentMachineImplementations,
@@ -17,6 +18,7 @@ import {
   StreamEnrichmentInput,
   StreamEnrichmentServiceDependencies,
 } from './types';
+import { simulationMachine } from './simulation_state_machine';
 
 const consoleInspector = createConsoleInspector();
 
@@ -31,17 +33,25 @@ export const useStreamEnrichmentEvents = () => {
 
   return useMemo(
     () => ({
-      addProcessor: (params: StreamEnrichmentEventParams<'processors.add'>) => {
-        service.send({ type: 'processors.add', ...params });
+      addProcessor: (processor: StreamEnrichmentEventParams<'processors.add'>['processor']) => {
+        service.send({ type: 'processors.add', processor });
       },
-      reorderProcessors: (params: StreamEnrichmentEventParams<'processors.reorder'>) => {
-        service.send({ type: 'processors.reorder', ...params });
+      reorderProcessors: (
+        processorsRefs: StreamEnrichmentEventParams<'processors.reorder'>['processorsRefs']
+      ) => {
+        service.send({ type: 'processors.reorder', processorsRefs });
       },
       resetChanges: () => {
         service.send({ type: 'stream.reset' });
       },
       saveChanges: () => {
         service.send({ type: 'stream.update' });
+      },
+      viewSimulationPreviewData: () => {
+        service.send({ type: 'simulation.viewDataPreview' });
+      },
+      viewSimulationDetectedFields: () => {
+        service.send({ type: 'simulation.viewDetectedFields' });
       },
     }),
     [service]
@@ -79,4 +89,11 @@ const ListenForDefinitionChanges = ({
   }, [definition, service]);
 
   return children;
+};
+
+export const useSimulatorSelector = <T,>(
+  selector: (snapshot: SnapshotFrom<typeof simulationMachine> | undefined) => T
+): T => {
+  const simulationRef = useStreamsEnrichmentSelector((state) => state.context.simulatorRef);
+  return useSelector(simulationRef, selector);
 };
