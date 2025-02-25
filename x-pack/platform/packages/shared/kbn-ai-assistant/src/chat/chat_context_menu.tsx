@@ -22,11 +22,13 @@ import { useConfirmModal } from '../hooks';
 
 export function ChatContextMenu({
   disabled = false,
+  isConversationOwnedByCurrentUser,
   onCopyToClipboardClick,
   onCopyUrlClick,
   onDeleteClick,
 }: {
   disabled?: boolean;
+  isConversationOwnedByCurrentUser: boolean;
   onCopyToClipboardClick: () => void;
   onCopyUrlClick: () => void;
   onDeleteClick: () => void;
@@ -45,6 +47,61 @@ export function ChatContextMenu({
       defaultMessage: 'Delete conversation',
     }),
   });
+
+  const menuItems = [
+    <EuiContextMenuItem
+      key="copyConversationToClipboard"
+      icon="copyClipboard"
+      onClick={() => {
+        onCopyToClipboardClick();
+        setIsPopoverOpen(false);
+      }}
+    >
+      {i18n.translate('xpack.aiAssistant.chatHeader.contextMenu.copyToClipboard', {
+        defaultMessage: 'Copy to clipboard',
+      })}
+    </EuiContextMenuItem>,
+    <EuiContextMenuItem
+      key="copyURL"
+      icon="link"
+      onClick={() => {
+        onCopyUrlClick();
+        setIsPopoverOpen(false);
+      }}
+    >
+      {i18n.translate('xpack.aiAssistant.chatHeader.contextMenu.copyUrl', {
+        defaultMessage: 'Copy URL',
+      })}
+    </EuiContextMenuItem>,
+  ];
+
+  if (isConversationOwnedByCurrentUser) {
+    menuItems.push(<EuiHorizontalRule margin="none" />);
+    menuItems.push(
+      <EuiContextMenuItem
+        key="delete"
+        css={css`
+          color: ${euiTheme.colors.danger};
+          padding: ${euiTheme.size.s};
+        `}
+        icon={<EuiIcon type="trash" size="m" color="danger" />}
+        onClick={() => {
+          confirmDeleteCallback().then((confirmed) => {
+            if (!confirmed) {
+              return;
+            }
+            onDeleteClick();
+          });
+
+          setIsPopoverOpen(false);
+        }}
+      >
+        {i18n.translate('xpack.aiAssistant.conversationList.deleteConversationIconLabel', {
+          defaultMessage: 'Delete',
+        })}
+      </EuiContextMenuItem>
+    );
+  }
 
   return (
     <>
@@ -73,58 +130,7 @@ export function ChatContextMenu({
         anchorPosition="downCenter"
         panelPaddingSize="xs"
       >
-        <EuiContextMenuPanel
-          size="s"
-          items={[
-            <EuiContextMenuItem
-              key="copyConversationToClipboard"
-              icon="copyClipboard"
-              onClick={() => {
-                onCopyToClipboardClick();
-                setIsPopoverOpen(false);
-              }}
-            >
-              {i18n.translate('xpack.aiAssistant.chatHeader.contextMenu.copyToClipboard', {
-                defaultMessage: 'Copy to clipboard',
-              })}
-            </EuiContextMenuItem>,
-            <EuiContextMenuItem
-              key="copyURL"
-              icon="link"
-              onClick={() => {
-                onCopyUrlClick();
-                setIsPopoverOpen(false);
-              }}
-            >
-              {i18n.translate('xpack.aiAssistant.chatHeader.contextMenu.copyUrl', {
-                defaultMessage: 'Copy URL',
-              })}
-            </EuiContextMenuItem>,
-            <EuiHorizontalRule margin="none" />,
-            <EuiContextMenuItem
-              key="delete"
-              css={css`
-                color: ${euiTheme.colors.danger};
-                padding: ${euiTheme.size.s};
-              `}
-              icon={<EuiIcon type="trash" size="m" color="danger" />}
-              onClick={() => {
-                confirmDeleteCallback().then((confirmed) => {
-                  if (!confirmed) {
-                    return;
-                  }
-                  onDeleteClick();
-                });
-
-                setIsPopoverOpen(false);
-              }}
-            >
-              {i18n.translate('xpack.aiAssistant.conversationList.deleteConversationIconLabel', {
-                defaultMessage: 'Delete',
-              })}
-            </EuiContextMenuItem>,
-          ]}
-        />
+        <EuiContextMenuPanel size="s" items={menuItems} />
       </EuiPopover>
       {confirmDeleteElement}
     </>
