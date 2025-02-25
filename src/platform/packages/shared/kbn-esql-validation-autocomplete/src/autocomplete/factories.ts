@@ -11,7 +11,7 @@ import { i18n } from '@kbn/i18n';
 import { memoize } from 'lodash';
 import { SuggestionRawDefinition } from './types';
 import { groupingFunctionDefinitions } from '../definitions/generated/grouping_functions';
-import { aggregationFunctionDefinitions } from '../definitions/generated/aggregation_functions';
+import { aggFunctionDefinitions } from '../definitions/generated/aggregation_functions';
 import { scalarFunctionDefinitions } from '../definitions/generated/scalar_functions';
 import { getFunctionSignatures } from '../definitions/helpers';
 import { timeUnitsToSuggest } from '../definitions/literals';
@@ -20,6 +20,7 @@ import {
   CommandOptionsDefinition,
   CommandModeDefinition,
   FunctionParameterType,
+  FunctionDefinitionTypes,
 } from '../definitions/types';
 import { shouldBeQuotedSource, shouldBeQuotedText } from '../shared/helpers';
 import { buildFunctionDocumentation } from './documentation_util';
@@ -39,7 +40,7 @@ const techPreviewLabel = i18n.translate(
 
 const allFunctions = memoize(
   () =>
-    aggregationFunctionDefinitions
+    aggFunctionDefinitions
       .concat(scalarFunctionDefinitions)
       .concat(groupingFunctionDefinitions)
       .concat(getTestFunctions()),
@@ -72,9 +73,14 @@ export function getFunctionSuggestion(fn: FunctionDefinition): SuggestionRawDefi
     detail = `[${techPreviewLabel}] ${detail}`;
   }
   const fullSignatures = getFunctionSignatures(fn, { capitalize: true, withTypes: true });
+
+  let text = `${fn.name.toUpperCase()}($0)`;
+  if (fn.customParametersSnippet) {
+    text = `${fn.name.toUpperCase()}(${fn.customParametersSnippet})`;
+  }
   return {
     label: fn.name.toUpperCase(),
-    text: `${fn.name.toUpperCase()}($0)`,
+    text,
     asSnippet: true,
     kind: 'Function',
     detail,
@@ -82,7 +88,7 @@ export function getFunctionSuggestion(fn: FunctionDefinition): SuggestionRawDefi
       value: buildFunctionDocumentation(fullSignatures, fn.examples),
     },
     // agg functgions have priority over everything else
-    sortText: fn.type === 'agg' ? '1A' : 'C',
+    sortText: fn.type === FunctionDefinitionTypes.AGG ? '1A' : 'C',
     // trigger a suggestion follow up on selection
     command: TRIGGER_SUGGESTION_COMMAND,
   };

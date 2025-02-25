@@ -61,64 +61,66 @@ function DeveloperExamples({ startServices, examples, navigateToApp, getUrlForAp
 
   return (
     <KibanaRenderContextProvider {...startServices}>
-      <EuiPageTemplate.Header>
-        <EuiFlexGroup justifyContent={'spaceBetween'}>
-          <EuiFlexItem>
-            <EuiPageHeader pageTitle={'Developer examples'} />
-            <EuiText>
-              The following examples showcase services and APIs that are available to developers.
-            </EuiText>
-          </EuiFlexItem>
-          <EuiFlexItem>
-            <EuiFieldSearch
-              fullWidth
-              placeholder="Search"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              isClearable={true}
-              aria-label="Search developer examples"
-            />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiPageTemplate.Header>
-      <EuiPageTemplate.Section>
-        <EuiFlexGroup wrap>
-          {filteredExamples.map((def) => (
-            <EuiFlexItem style={{ minWidth: 300, maxWidth: 500 }} key={def.appId}>
-              <EuiCard
-                description={
-                  <EuiHighlight search={search} highlightAll={true}>
-                    {def.description}
-                  </EuiHighlight>
-                }
-                title={
-                  <React.Fragment>
-                    <EuiLink
-                      onClick={() => {
-                        navigateToApp(def.appId);
-                      }}
-                    >
-                      <EuiHighlight search={search} highlightAll={true}>
-                        {def.title}
-                      </EuiHighlight>
-                    </EuiLink>
-                    <EuiButtonIcon
-                      iconType="popout"
-                      onClick={() =>
-                        window.open(getUrlForApp(def.appId), '_blank', 'noopener, noreferrer')
-                      }
-                    >
-                      Open in new tab
-                    </EuiButtonIcon>
-                  </React.Fragment>
-                }
-                image={def.image}
-                footer={def.links ? <EuiListGroup size={'s'} listItems={def.links} /> : undefined}
+      <EuiPageTemplate offset={0}>
+        <EuiPageTemplate.Header>
+          <EuiFlexGroup justifyContent={'spaceBetween'}>
+            <EuiFlexItem>
+              <EuiPageHeader pageTitle={'Developer examples'} />
+              <EuiText>
+                The following examples showcase services and APIs that are available to developers.
+              </EuiText>
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <EuiFieldSearch
+                fullWidth
+                placeholder="Search"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                isClearable={true}
+                aria-label="Search developer examples"
               />
             </EuiFlexItem>
-          ))}
-        </EuiFlexGroup>
-      </EuiPageTemplate.Section>
+          </EuiFlexGroup>
+        </EuiPageTemplate.Header>
+        <EuiPageTemplate.Section>
+          <EuiFlexGroup wrap>
+            {filteredExamples.map((def) => (
+              <EuiFlexItem style={{ minWidth: 300, maxWidth: 500 }} key={def.appId}>
+                <EuiCard
+                  description={
+                    <EuiHighlight search={search} highlightAll={true}>
+                      {def.description}
+                    </EuiHighlight>
+                  }
+                  title={
+                    <React.Fragment>
+                      <EuiLink
+                        onClick={() => {
+                          navigateToApp(def.appId);
+                        }}
+                      >
+                        <EuiHighlight search={search} highlightAll={true}>
+                          {def.title}
+                        </EuiHighlight>
+                      </EuiLink>
+                      <EuiButtonIcon
+                        iconType="popout"
+                        onClick={() =>
+                          window.open(getUrlForApp(def.appId), '_blank', 'noopener, noreferrer')
+                        }
+                      >
+                        Open in new tab
+                      </EuiButtonIcon>
+                    </React.Fragment>
+                  }
+                  image={def.image}
+                  footer={def.links ? <EuiListGroup size={'s'} listItems={def.links} /> : undefined}
+                />
+              </EuiFlexItem>
+            ))}
+          </EuiFlexGroup>
+        </EuiPageTemplate.Section>
+      </EuiPageTemplate>
     </KibanaRenderContextProvider>
   );
 }
