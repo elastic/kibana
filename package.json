@@ -1457,7 +1457,7 @@
     "@kbn/ftr-common-functional-services": "link:src/platform/packages/shared/kbn-ftr-common-functional-services",
     "@kbn/ftr-common-functional-ui-services": "link:src/platform/packages/shared/kbn-ftr-common-functional-ui-services",
     "@kbn/ftr-screenshot-filename": "link:src/platform/packages/private/kbn-ftr-screenshot-filename",
-    "@kbn/gen-ai-functional-testing": "link:packages/kbn-gen-ai-functional-testing",
+    "@kbn/gen-ai-functional-testing": "link:src/platform/packages/private/kbn-gen-ai-functional-testing",
     "@kbn/generate": "link:packages/kbn-generate",
     "@kbn/generate-console-definitions": "link:packages/kbn-generate-console-definitions",
     "@kbn/get-repo-files": "link:packages/kbn-get-repo-files",
