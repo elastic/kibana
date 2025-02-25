@@ -99,11 +99,6 @@ export function generateUnwiredLayer(
     template: {
       lifecycle: getTemplateLifecycle(definition, isServerless),
       settings: getTemplateSettings(definition, isServerless),
-      mappings: {
-        subobjects: false,
-        dynamic: false,
-        properties: {},
-      },
     },
     version: ASSET_VERSION,
     _meta: {
@@ -116,7 +111,7 @@ export function generateUnwiredLayer(
 function getTemplateLifecycle(definition: IngestStreamDefinition, isServerless: boolean) {
   const lifecycle = definition.ingest.lifecycle;
   if (isServerless) {
-    // dlm cannot be disabled in serverless
+    // dsl cannot be disabled in serverless
     return {
       data_retention: isDslLifecycle(lifecycle) ? lifecycle.dsl.data_retention : undefined,
     };
