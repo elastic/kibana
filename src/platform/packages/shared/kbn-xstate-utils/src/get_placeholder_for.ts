@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export * from './actions';
-export * from './dev_tools';
-export * from './get_placeholder_for';
-export * from './console_inspector';
-export * from './notification_channel';
-export * from './types';
+export const getPlaceholderFor = <ImplementationFactory extends (...factoryArgs: any[]) => any>(
+  _implementationFactory: ImplementationFactory
+): ReturnType<ImplementationFactory> =>
+  (() => {
+    throw new Error('Not implemented');
+  }) as ReturnType<ImplementationFactory>;

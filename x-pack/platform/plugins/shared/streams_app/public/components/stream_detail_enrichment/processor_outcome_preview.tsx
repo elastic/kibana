@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React from 'react';
 import {
   EuiFlexGroup,
   EuiFilterButton,
@@ -17,35 +17,29 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { TimeRange } from '@kbn/es-query';
-import { isEmpty } from 'lodash';
-import { SampleDocument } from '@kbn/streams-schema';
 import { useKibana } from '../../hooks/use_kibana';
 import { StreamsAppSearchBar, StreamsAppSearchBarProps } from '../streams_app_search_bar';
 import { PreviewTable } from '../preview_table';
 import {
   DocsFilterOption,
-  TableColumn,
   UseProcessingSimulatorReturn,
   docsFilterOptions,
 } from './hooks/use_processing_simulator';
 import { AssetImage } from '../asset_image';
 import { useDateRange } from '../../hooks/use_date_range';
+import { useSimulatorSelector } from './services/stream_enrichment_service';
 
 interface ProcessorOutcomePreviewProps {
-  columns: TableColumn[];
   isLoading: UseProcessingSimulatorReturn['isLoading'];
   simulation: UseProcessingSimulatorReturn['simulation'];
-  filteredSamples: UseProcessingSimulatorReturn['samples'];
   onRefreshSamples: UseProcessingSimulatorReturn['refreshSamples'];
   selectedDocsFilter: UseProcessingSimulatorReturn['selectedDocsFilter'];
   setSelectedDocsFilter: UseProcessingSimulatorReturn['setSelectedDocsFilter'];
 }
 
 export const ProcessorOutcomePreview = ({
-  columns,
   isLoading,
   simulation,
-  filteredSamples,
   onRefreshSamples,
   selectedDocsFilter,
   setSelectedDocsFilter,
@@ -54,19 +48,6 @@ export const ProcessorOutcomePreview = ({
   const { data } = dependencies.start;
 
   const { timeRange, setTimeRange } = useDateRange({ data });
-
-  const tableColumns = useMemo(() => {
-    switch (selectedDocsFilter) {
-      case 'outcome_filter_unmatched':
-        return columns
-          .filter((column) => column.origin === 'processor')
-          .map((column) => column.name);
-      case 'outcome_filter_matched':
-      case 'outcome_filter_all':
-      default:
-        return columns.map((column) => column.name);
-    }
-  }, [columns, selectedDocsFilter]);
 
   return (
     <>
@@ -82,7 +63,7 @@ export const ProcessorOutcomePreview = ({
         />
       </EuiFlexItem>
       <EuiSpacer size="m" />
-      <OutcomePreviewTable documents={filteredSamples} columns={tableColumns} />
+      <OutcomePreviewTable />
       {isLoading && <EuiProgress size="xs" color="accent" position="absolute" />}
     </>
   );
@@ -169,13 +150,12 @@ const OutcomeControls = ({
   );
 };
 
-interface OutcomePreviewTableProps {
-  documents: SampleDocument[];
-  columns: string[];
-}
+const OutcomePreviewTable = () => {
+  const isMissingSamples = useSimulatorSelector((state) => state?.matches('missingSamples'));
+  const previewDocuments = useSimulatorSelector((state) => state?.context.previewDocuments);
+  const previewColumns = useSimulatorSelector((state) => state?.context.previewColumns);
 
-const OutcomePreviewTable = ({ documents, columns }: OutcomePreviewTableProps) => {
-  if (isEmpty(documents)) {
+  if (isMissingSamples || !previewDocuments) {
     return (
       <EuiEmptyPrompt
         titleSize="xs"
@@ -203,5 +183,5 @@ const OutcomePreviewTable = ({ documents, columns }: OutcomePreviewTableProps) =
     );
   }
 
-  return <PreviewTable documents={documents} displayColumns={columns} />;
+  return <PreviewTable documents={previewDocuments} displayColumns={previewColumns} />;
 };

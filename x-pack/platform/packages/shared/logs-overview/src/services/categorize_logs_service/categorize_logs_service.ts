@@ -6,8 +6,8 @@
  */
 
 import { MachineImplementationsFrom, assign, setup } from 'xstate5';
+import { getPlaceholderFor } from '@kbn/xstate-utils';
 import { LogCategory } from '../../types';
-import { getPlaceholderFor } from '../../utils/xstate5_utils';
 import { categorizeDocuments } from './categorize_documents';
 import { countDocuments } from './count_documents';
 import { CategorizeLogsServiceDependencies, LogCategorizationParams } from './types';

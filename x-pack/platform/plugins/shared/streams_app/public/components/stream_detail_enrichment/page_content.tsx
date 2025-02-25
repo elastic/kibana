@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import {
   DragDropContextProps,
   EuiPanel,
@@ -18,23 +18,26 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { IngestStreamGetResponse, isRootStreamDefinition } from '@kbn/streams-schema';
+import { IngestStreamGetResponse } from '@kbn/streams-schema';
 import { useUnsavedChangesPrompt } from '@kbn/unsaved-changes-prompt';
 import { css } from '@emotion/react';
 import { isEmpty } from 'lodash';
-import { UseDefinitionReturn, useDefinition } from './hooks/use_definition';
 import { useKibana } from '../../hooks/use_kibana';
-import { RootStreamEmptyPrompt } from './root_stream_empty_prompt';
 import { DraggableProcessorListItem } from './processors_list';
 import { SortableList } from './sortable_list';
 import { ManagementBottomBar } from '../management_bottom_bar';
 import { AddProcessorPanel } from './processors';
 import { SimulationPlayground } from './simulation_playground';
+import { useProcessingSimulator } from './hooks/use_processing_simulator';
 import {
-  UseProcessingSimulatorReturn,
-  useProcessingSimulator,
-} from './hooks/use_processing_simulator';
+  StreamEnrichmentContextProvider,
+  StreamEnrichmentEvents,
+  useSimulatorSelector,
+  useStreamEnrichmentEvents,
+  useStreamsEnrichmentSelector,
+} from './services/stream_enrichment_service';
 import { SimulatorContextProvider } from './simulator_context';
+import { StreamEnrichmentContext } from './services/stream_enrichment_service/types';
 
 const MemoSimulationPlayground = React.memo(SimulationPlayground);
 
@@ -43,68 +46,61 @@ interface StreamDetailEnrichmentContentProps {
   refreshDefinition: () => void;
 }
 
-export function StreamDetailEnrichmentContent({
-  definition,
-  refreshDefinition,
-}: StreamDetailEnrichmentContentProps) {
+export function StreamDetailEnrichmentContent(props: StreamDetailEnrichmentContentProps) {
+  const { core, dependencies } = useKibana();
+  const {
+    data,
+    streams: { streamsRepositoryClient },
+  } = dependencies.start;
+
+  return (
+    <StreamEnrichmentContextProvider
+      definition={props.definition}
+      refreshDefinition={props.refreshDefinition}
+      core={core}
+      data={data}
+      streamsRepositoryClient={streamsRepositoryClient}
+    >
+      <StreamDetailEnrichmentContentImpl />
+    </StreamEnrichmentContextProvider>
+  );
+}
+
+export function StreamDetailEnrichmentContentImpl() {
   const { appParams, core } = useKibana();
 
-  const {
-    processors,
-    addProcessor,
-    updateProcessor,
-    deleteProcessor,
-    resetChanges,
-    saveChanges,
-    reorderProcessors,
-    hasChanges,
-    isSavingChanges,
-  } = useDefinition(definition, refreshDefinition);
+  const { reorderProcessors, resetChanges, saveChanges } = useStreamEnrichmentEvents();
 
-  const processingSimulator = useProcessingSimulator({ definition, processors });
+  const definition = useStreamsEnrichmentSelector((state) => state.context.definition);
+  const processorsRefs = useStreamsEnrichmentSelector((state) => state.context.processorsRefs);
+  const hasChanges = useStreamsEnrichmentSelector((state) => state.can({ type: 'stream.update' }));
+  const isSavingChanges = useStreamsEnrichmentSelector((state) => state.matches('updatingStream'));
 
-  const {
-    hasLiveChanges,
-    isLoading,
-    refreshSamples,
-    filteredSamples,
-    simulation,
-    tableColumns,
-    watchProcessor,
-    selectedDocsFilter,
-    setSelectedDocsFilter,
-  } = processingSimulator;
+  const processorRefsList = useMemo(
+    () => processorsRefs.filter((processorRef) => processorRef.getSnapshot().matches('configured')),
+    [processorsRefs]
+  );
+
+  const simulationProcessors = useMemo(
+    () => processorsRefs.map((processorRef) => processorRef.getSnapshot().context.processor),
+    [processorsRefs]
+  );
+
+  const processingSimulator = useProcessingSimulator({
+    definition,
+    processors: simulationProcessors,
+  });
+
+  const { isLoading, refreshSamples, simulation, selectedDocsFilter, setSelectedDocsFilter } =
+    processingSimulator;
 
   useUnsavedChangesPrompt({
-    hasUnsavedChanges: hasChanges || hasLiveChanges,
+    hasUnsavedChanges: hasChanges,
     history: appParams.history,
     http: core.http,
     navigateToUrl: core.application.navigateToUrl,
     openConfirm: core.overlays.openConfirm,
   });
-
-  if (isRootStreamDefinition(definition.stream)) {
-    return <RootStreamEmptyPrompt />;
-  }
-
-  const isNonAdditiveSimulation = simulation && simulation.is_non_additive_simulation;
-  const isSubmitDisabled = Boolean(!hasChanges || isNonAdditiveSimulation);
-
-  const confirmTooltip = isNonAdditiveSimulation
-    ? {
-        title: i18n.translate(
-          'xpack.streams.streamDetailView.managementTab.enrichment.nonAdditiveProcessorsTooltip.title',
-          { defaultMessage: 'Non additive simulation detected' }
-        ),
-        content: i18n.translate(
-          'xpack.streams.streamDetailView.managementTab.enrichment.nonAdditiveProcessorsTooltip.content',
-          {
-            defaultMessage:
-              'We currently prevent adding processors that change/remove existing data. Please update your processor configurations to continue.',
-          }
-        ),
-      }
-    : undefined;
 
   return (
     <SimulatorContextProvider processingSimulator={processingSimulator} definition={definition}>
@@ -127,14 +123,8 @@ export function StreamDetailEnrichmentContent({
                   css={verticalFlexCss}
                 >
                   <ProcessorsEditor
-                    definition={definition}
-                    processors={processors}
-                    onUpdateProcessor={updateProcessor}
-                    onDeleteProcessor={deleteProcessor}
-                    onWatchProcessor={watchProcessor}
-                    onAddProcessor={addProcessor}
+                    processorsRefs={processorRefsList}
                     onReorderProcessor={reorderProcessors}
-                    simulation={simulation}
                   />
                 </EuiResizablePanel>
                 <EuiResizableButton indicator="border" accountForScrollbars="both" />
@@ -147,9 +137,7 @@ export function StreamDetailEnrichmentContent({
                 >
                   <MemoSimulationPlayground
                     definition={definition}
-                    columns={tableColumns}
                     simulation={simulation}
-                    filteredSamples={filteredSamples}
                     onRefreshSamples={refreshSamples}
                     isLoading={isLoading}
                     selectedDocsFilter={selectedDocsFilter}
@@ -162,11 +150,10 @@ export function StreamDetailEnrichmentContent({
         </EuiSplitPanel.Inner>
         <EuiSplitPanel.Inner grow={false} color="subdued">
           <ManagementBottomBar
-            confirmTooltip={confirmTooltip}
             onCancel={resetChanges}
             onConfirm={saveChanges}
             isLoading={isSavingChanges}
-            disabled={isSubmitDisabled}
+            disabled={!hasChanges}
           />
         </EuiSplitPanel.Inner>
       </EuiSplitPanel.Outer>
@@ -175,37 +162,24 @@ export function StreamDetailEnrichmentContent({
 }
 
 interface ProcessorsEditorProps {
-  definition: IngestStreamGetResponse;
-  processors: UseDefinitionReturn['processors'];
-  onAddProcessor: UseDefinitionReturn['addProcessor'];
-  onDeleteProcessor: UseDefinitionReturn['deleteProcessor'];
-  onReorderProcessor: UseDefinitionReturn['reorderProcessors'];
-  onUpdateProcessor: UseDefinitionReturn['updateProcessor'];
-  onWatchProcessor: UseProcessingSimulatorReturn['watchProcessor'];
-  simulation: UseProcessingSimulatorReturn['simulation'];
+  processorsRefs: StreamEnrichmentContext['processorsRefs'];
+  onReorderProcessor: StreamEnrichmentEvents['reorderProcessors'];
 }
 
 const ProcessorsEditor = React.memo(
-  ({
-    definition,
-    processors,
-    onAddProcessor,
-    onDeleteProcessor,
-    onReorderProcessor,
-    onUpdateProcessor,
-    onWatchProcessor,
-    simulation,
-  }: ProcessorsEditorProps) => {
+  ({ processorsRefs, onReorderProcessor }: ProcessorsEditorProps) => {
     const { euiTheme } = useEuiTheme();
+
+    const simulationSnapshot = useSimulatorSelector((s) => s);
 
     const handlerItemDrag: DragDropContextProps['onDragEnd'] = ({ source, destination }) => {
       if (source && destination) {
-        const items = euiDragDropReorder(processors, source.index, destination.index);
+        const items = euiDragDropReorder(processorsRefs, source.index, destination.index);
         onReorderProcessor(items);
       }
     };
 
-    const hasProcessors = !isEmpty(processors);
+    const hasProcessors = !isEmpty(processorsRefs);
 
     return (
       <>
@@ -249,27 +223,19 @@ const ProcessorsEditor = React.memo(
         >
           {hasProcessors && (
             <SortableList onDragItem={handlerItemDrag}>
-              {processors.map((processor, idx) => (
+              {processorsRefs.map((processorRef, idx) => (
                 <DraggableProcessorListItem
-                  key={processor.id}
+                  key={processorRef.id}
                   idx={idx}
-                  definition={definition}
-                  processor={processor}
-                  onDeleteProcessor={onDeleteProcessor}
-                  onUpdateProcessor={onUpdateProcessor}
-                  onWatchProcessor={onWatchProcessor}
-                  processorMetrics={simulation?.processors_metrics[processor.id]}
+                  processorRef={processorRef}
+                  processorMetrics={
+                    simulationSnapshot?.context.simulation?.processors_metrics[processorRef.id]
+                  }
                 />
               ))}
             </SortableList>
           )}
-          <AddProcessorPanel
-            key={processors.length} // Used to force reset the inner form state once a new processor is added
-            definition={definition}
-            onAddProcessor={onAddProcessor}
-            onWatchProcessor={onWatchProcessor}
-            processorMetrics={simulation?.processors_metrics.draft}
-          />
+          <AddProcessorPanel key={processorsRefs.length} />
         </EuiPanel>
       </>
     );
