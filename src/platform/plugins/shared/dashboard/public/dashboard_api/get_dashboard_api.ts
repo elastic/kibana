@@ -20,8 +20,14 @@ import {
 } from '../../common/dashboard_container/persistable_state/dashboard_container_references';
 import { UnsavedPanelState } from '../dashboard_container/types';
 import { DASHBOARD_APP_ID } from '../plugin_constants';
-import { PANELS_CONTROL_GROUP_KEY } from '../services/dashboard_backup_service';
-import { getDashboardContentManagementService } from '../services/dashboard_content_management_service';
+import {
+  getDashboardBackupService,
+  PANELS_CONTROL_GROUP_KEY,
+} from '../services/dashboard_backup_service';
+import {
+  getDashboardContentManagementCache,
+  getDashboardContentManagementService,
+} from '../services/dashboard_content_management_service';
 import { LoadDashboardReturn } from '../services/dashboard_content_management_service/types';
 import { initializeDataLoadingManager } from './data_loading_manager';
 import { initializeDataViewsManager } from './data_views_manager';
@@ -51,16 +57,19 @@ export function getDashboardApi({
   initialState,
   initialPanelsRuntimeState,
   savedObjectResult,
+  loadDashboardSavedObject,
   savedObjectId,
 }: {
   creationOptions?: DashboardCreationOptions;
   incomingEmbeddable?: EmbeddablePackageState | undefined;
+  loadDashboardSavedObject: () => Promise<LoadDashboardReturn | undefined>;
   initialState: DashboardState;
   initialPanelsRuntimeState?: UnsavedPanelState;
   savedObjectResult?: LoadDashboardReturn;
   savedObjectId?: string;
 }) {
   const controlGroupApi$ = new BehaviorSubject<ControlGroupApi | undefined>(undefined);
+  const hasChangeConflict$ = new BehaviorSubject<boolean>(false);
   const fullScreenMode$ = new BehaviorSubject(creationOptions?.fullScreenMode ?? false);
   const isManaged = savedObjectResult?.managed ?? false;
   const savedObjectId$ = new BehaviorSubject<string | undefined>(savedObjectId);
@@ -230,6 +239,31 @@ export function getDashboardApi({
     setSavedObjectId: (id: string | undefined) => savedObjectId$.next(id),
     type: DASHBOARD_API_TYPE as 'dashboard',
     uuid: v4(),
+    refreshPanels: async (force?: boolean) => {
+      if (!savedObjectId) return;
+      getDashboardContentManagementCache().deleteDashboard(savedObjectId);
+      const nextSavedObjectResult = await loadDashboardSavedObject();
+      if (!nextSavedObjectResult) return;
+
+      const nextPanels = nextSavedObjectResult.dashboardInput.panels;
+
+      // update last saved state.
+      unsavedChangesManager.internalApi.onSave(nextSavedObjectResult.dashboardInput);
+
+      const localPanelChanges =
+        getDashboardBackupService().getState(savedObjectId)?.dashboardState?.panels;
+      if (localPanelChanges && Object.keys(localPanelChanges).length > 0) {
+        const hasDifferences = panelsManager.comparators.panels[2]!(localPanelChanges, nextPanels);
+        if (localPanelChanges && hasDifferences && !force) {
+          hasChangeConflict$.next(true);
+          return;
+        }
+      }
+
+      panelsManager.internalApi.reset(nextSavedObjectResult.dashboardInput);
+      hasChangeConflict$.next(false);
+    },
+    hasChangeConflict$,
   } as Omit<DashboardApi, 'searchSessionId$'>;
 
   const searchSessionManager = initializeSearchSessionManager(

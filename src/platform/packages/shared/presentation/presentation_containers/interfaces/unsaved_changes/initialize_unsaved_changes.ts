@@ -14,6 +14,7 @@ import {
   debounceTime,
   map,
   Subscription,
+  switchMap,
 } from 'rxjs';
 import {
   getInitialValuesFromComparators,
@@ -30,7 +31,8 @@ export const COMPARATOR_SUBJECTS_DEBOUNCE = 100;
 export const initializeUnsavedChanges = <RuntimeState extends {} = {}>(
   initialLastSavedState: RuntimeState,
   parentApi: unknown,
-  comparators: StateComparators<RuntimeState>
+  comparators: StateComparators<RuntimeState>,
+  fetchLastSavedState?: () => Promise<RuntimeState>
 ) => {
   const subscriptions: Subscription[] = [];
   const lastSavedState$ = new BehaviorSubject<RuntimeState | undefined>(initialLastSavedState);
@@ -48,9 +50,13 @@ export const initializeUnsavedChanges = <RuntimeState extends {} = {}>(
   if (apiHasSaveNotification(parentApi)) {
     subscriptions.push(
       // any time the parent saves, the current state becomes the last saved state...
-      parentApi.saveNotification$.subscribe(() => {
-        lastSavedState$.next(snapshotRuntimeState());
-      })
+      parentApi.saveNotification$
+        .pipe(
+          switchMap(() =>
+            fetchLastSavedState ? fetchLastSavedState() : Promise.resolve(snapshotRuntimeState())
+          )
+        )
+        .subscribe((nextLastSavedState) => lastSavedState$.next(nextLastSavedState))
     );
   }
 

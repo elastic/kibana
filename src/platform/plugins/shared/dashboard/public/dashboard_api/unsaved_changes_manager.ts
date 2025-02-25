@@ -62,7 +62,8 @@ export function initializeUnsavedChangesManager({
       ...viewModeManager.comparators,
       ...unifiedSearchManager.comparators,
       ...referencesComparator,
-    }
+    },
+    () => Promise.resolve(lastSavedState$.value)
   );
 
   const unsavedChangesSubscription = combineLatest([

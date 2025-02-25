@@ -12,7 +12,7 @@ import '../_dashboard_container.scss';
 import classNames from 'classnames';
 import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
 
-import { EuiLoadingElastic, EuiLoadingSpinner } from '@elastic/eui';
+import { EuiEmptyPrompt, EuiLoadingElastic, EuiLoadingSpinner } from '@elastic/eui';
 import { SavedObjectNotFound } from '@kbn/kibana-utils-plugin/common';
 import { useStateFromPublishingSubject } from '@kbn/presentation-publishing';
 import { LocatorPublic } from '@kbn/share-plugin/common';
@@ -29,6 +29,7 @@ import { DashboardContext } from '../../dashboard_api/use_dashboard_api';
 import { DashboardViewport } from '../component/viewport/dashboard_viewport';
 import { loadDashboardApi } from '../../dashboard_api/load_dashboard_api';
 import { DashboardInternalContext } from '../../dashboard_api/use_dashboard_internal_api';
+import { v4 } from 'uuid';
 
 export interface DashboardRendererProps {
   onApiAvailable?: (api: DashboardApi) => void;
@@ -47,6 +48,8 @@ export function DashboardRenderer({
   locator,
   onApiAvailable,
 }: DashboardRendererProps) {
+  const { http } = coreServices;
+
   const dashboardViewport = useRef(null);
   const dashboardContainerRef = useRef<HTMLElement | null>(null);
   const [dashboardApi, setDashboardApi] = useState<DashboardApi | undefined>();
@@ -59,6 +62,30 @@ export function DashboardRenderer({
     /* In case the locator prop changes, we need to reassign the value in the container */
     if (dashboardApi) dashboardApi.locator = locator;
   }, [dashboardApi, locator]);
+
+  // subscribe to Dashboard events
+  useEffect(() => {
+    if (!dashboardApi) return;
+    const eventStream$ = from(
+      http.get(`/api/dashboards/dashboard/${savedObjectId}/events`, {
+        asResponse: true,
+        rawResponse: true,
+      })
+    ).pipe(httpResponseIntoObservable());
+
+    const eventSubscription = eventStream$.subscribe({
+      next: (event) => {
+        console.log(event);
+        if (event.type === 'dashboard.saved') {
+          dashboardApi?.refreshPanels();
+        }
+      },
+      error: (err) => {
+        console.error('Error receiving dashboard events:', err);
+      },
+    });
+    return () => eventSubscription.unsubscribe();
+  }, [dashboardApi, http, savedObjectId]);
 
   useEffect(() => {
     if (error) setError(undefined);
@@ -74,26 +101,8 @@ export function DashboardRenderer({
           results.cleanup();
           return;
         }
-        const { http } = coreServices;
         http.post(`/api/dashboards/dashboard/${savedObjectId}/events`, {
           body: JSON.stringify({ type: 'dashboard.opened' }),
-        });
-
-        const eventStream$ = from(
-          http.get(`/api/dashboards/dashboard/${savedObjectId}/events`, {
-            asResponse: true,
-            rawResponse: true,
-          })
-        ).pipe(httpResponseIntoObservable());
-
-        eventStream$.subscribe({
-          next: (event) => {
-            console.log('Dashboard event received:', event);
-            // Handle the event (e.g., show a notification, refresh the dashboard, etc.)
-          },
-          error: (err) => {
-            console.error('Error receiving dashboard events:', err);
-          },
         });
 
         cleanupDashboardApi = results.cleanup;
@@ -130,7 +139,18 @@ export function DashboardRenderer({
       return error instanceof SavedObjectNotFound ? (
         <Dashboard404Page dashboardRedirect={dashboardRedirect} />
       ) : (
-        error.message
+        <EuiEmptyPrompt
+          iconType="error"
+          color="danger"
+          title={
+            <h2>
+              {i18n.translate('dashboard.renderer.errorTitle', {
+                defaultMessage: 'Dashboard load error',
+              })}
+            </h2>
+          }
+          body={<p>{error.message}</p>}
+        />
       );
     }
 

@@ -146,6 +146,8 @@ export type DashboardApi = CanExpandPanels &
   TracksOverlays & {
     asyncResetToLastSavedState: () => Promise<void>;
     controlGroupApi$: PublishingSubject<ControlGroupApi | undefined>;
+    hasChangeConflict$: PublishingSubject<boolean>;
+    refreshPanels: (force?: boolean) => Promise<void>;
     fullScreenMode$: PublishingSubject<boolean>;
     focusedPanelId$: PublishingSubject<string | undefined>;
     setFocusedPanelId: (id: string | undefined) => void;

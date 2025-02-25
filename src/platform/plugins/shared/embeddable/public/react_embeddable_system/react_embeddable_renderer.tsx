@@ -156,7 +156,13 @@ export const ReactEmbeddableRenderer = <
             const unsavedChanges = initializeUnsavedChanges<RuntimeState>(
               lastSavedRuntimeState,
               parentApi,
-              comparators
+              comparators,
+              async () => {
+                const lastSavedSerializedState = parentApi.getSerializedStateForChild(uuid);
+                return lastSavedSerializedState
+                  ? await factory.deserializeState(lastSavedSerializedState)
+                  : api.snapshotRuntimeState();
+              }
             );
 
             const fullApi = setApi({

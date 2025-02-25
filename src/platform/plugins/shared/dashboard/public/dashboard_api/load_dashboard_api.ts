@@ -32,21 +32,27 @@ export async function loadDashboardApi({
   const creationStartTime = performance.now();
   const creationOptions = await getCreationOptions?.();
   const incomingEmbeddable = creationOptions?.getIncomingEmbeddable?.();
-  const savedObjectResult = await getDashboardContentManagementService().loadDashboardState({
-    id: savedObjectId,
-  });
 
-  // --------------------------------------------------------------------------------------
-  // Run validation.
-  // --------------------------------------------------------------------------------------
-  const validationResult =
-    savedObjectResult && creationOptions?.validateLoadedSavedObject?.(savedObjectResult);
-  if (validationResult === 'invalid') {
-    // throw error to stop the rest of Dashboard loading and make the factory throw an Error
-    throw new Error('Dashboard failed saved object result validation');
-  } else if (validationResult === 'redirected') {
-    return;
-  }
+  const loadDashboardSavedObject = async () => {
+    const savedObjectResult = await getDashboardContentManagementService().loadDashboardState({
+      id: savedObjectId,
+    });
+    // --------------------------------------------------------------------------------------
+    // Run validation.
+    // --------------------------------------------------------------------------------------
+    const validationResult =
+      savedObjectResult && creationOptions?.validateLoadedSavedObject?.(savedObjectResult);
+    if (validationResult === 'invalid') {
+      // throw error to stop the rest of Dashboard loading and make the factory throw an Error
+      throw new Error('Dashboard failed saved object result validation');
+    } else if (validationResult === 'redirected') {
+      return;
+    }
+    return savedObjectResult;
+  };
+
+  const savedObjectResult = await loadDashboardSavedObject();
+  if (!savedObjectResult) return;
 
   // --------------------------------------------------------------------------------------
   // Combine saved object state and session storage state
@@ -107,6 +113,7 @@ export async function loadDashboardApi({
   const { api, cleanup, internalApi } = getDashboardApi({
     creationOptions,
     incomingEmbeddable,
+    loadDashboardSavedObject,
     initialState: {
       ...combinedSessionState,
       ...overrideState,
