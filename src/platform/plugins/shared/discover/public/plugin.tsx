@@ -102,9 +102,7 @@ export class DiscoverPlugin
       this.locator = plugins.share.url.locators.create({
         id: DISCOVER_APP_LOCATOR,
         getLocation: async (params) => {
-          const { appLocatorGetLocation } = await import(
-            './plugin_imports/app_locator_get_location'
-          );
+          const { appLocatorGetLocation } = await getLocators();
           return appLocatorGetLocation({ useHash }, params);
         },
       });
@@ -112,9 +110,7 @@ export class DiscoverPlugin
       this.contextLocator = plugins.share.url.locators.create({
         id: DISCOVER_CONTEXT_APP_LOCATOR,
         getLocation: async (params) => {
-          const { contextAppLocatorGetLocation } = await import(
-            './application/context/services/locator_get_location'
-          );
+          const { contextAppLocatorGetLocation } = await getLocators();
           return contextAppLocatorGetLocation({ useHash }, params);
         },
       });
@@ -122,9 +118,7 @@ export class DiscoverPlugin
       this.singleDocLocator = plugins.share.url.locators.create({
         id: DISCOVER_SINGLE_DOC_LOCATOR,
         getLocation: async (params) => {
-          const { singleDocLocatorGetLocation } = await import(
-            './application/doc/locator_get_location'
-          );
+          const { singleDocLocatorGetLocation } = await getLocators();
           return singleDocLocatorGetLocation(params);
         },
       });
@@ -271,9 +265,7 @@ export class DiscoverPlugin
       'CONTEXT_MENU_TRIGGER',
       ACTION_VIEW_SAVED_SEARCH,
       async () => {
-        const { ViewSavedSearchAction } = await import(
-          './embeddable/actions/view_saved_search_action'
-        );
+        const { ViewSavedSearchAction } = await getEmbeddableServices();
         return new ViewSavedSearchAction(core.application, this.locator!);
       }
     );
@@ -283,12 +275,13 @@ export class DiscoverPlugin
     const isEsqlEnabled = core.uiSettings.get(ENABLE_ESQL);
 
     if (plugins.share && this.locator && isEsqlEnabled) {
+      const discoverAppLocator = this.locator;
       plugins.share?.url.locators.create({
         id: DISCOVER_ESQL_LOCATOR,
         getLocation: async () => {
-          const { esqlLocatorGetLocation } = await import('../common/esql_locator_get_location');
+          const { esqlLocatorGetLocation } = await getLocators();
           return esqlLocatorGetLocation({
-            discoverAppLocator: this.locator!,
+            discoverAppLocator,
             dataViews: plugins.dataViews,
           });
         },
@@ -435,7 +428,7 @@ export class DiscoverPlugin
     plugins.embeddable.registerAddFromLibraryType<SavedSearchAttributes>({
       onAdd: async (container, savedObject) => {
         const services = await getDiscoverServicesForEmbeddable();
-        const { deserializeState } = await import('./embeddable/utils/serialization_utils');
+        const { deserializeState } = await getEmbeddableServices();
         const initialState = await deserializeState({
           serializedState: {
             rawState: { savedObjectId: savedObject.id },
@@ -460,7 +453,7 @@ export class DiscoverPlugin
       const [startServices, discoverServices, { getSearchEmbeddableFactory }] = await Promise.all([
         getStartServices(),
         getDiscoverServicesForEmbeddable(),
-        import('./embeddable/get_search_embeddable_factory'),
+        getEmbeddableServices(),
       ]);
 
       return getSearchEmbeddableFactory({
@@ -471,6 +464,8 @@ export class DiscoverPlugin
   }
 }
 
+const getLocators = () => import('./plugin_imports/locators');
+const getEmbeddableServices = () => import('./plugin_imports/embeddable_services');
 const getSharedServices = () => import('./plugin_imports/shared_services');
 
 const getHistoryService = once(async () => {

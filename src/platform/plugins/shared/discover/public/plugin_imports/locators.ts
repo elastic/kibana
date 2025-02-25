@@ -18,3 +18,7 @@ export const appLocatorGetLocation = (
   },
   params: DiscoverAppLocatorParams
 ) => appLocatorGetLocationCommon({ useHash, setStateToKbnUrl }, params);
+
+export { contextAppLocatorGetLocation } from '../application/context/services/locator_get_location';
+export { singleDocLocatorGetLocation } from '../application/doc/locator_get_location';
+export { esqlLocatorGetLocation } from '../../common/esql_locator_get_location';
