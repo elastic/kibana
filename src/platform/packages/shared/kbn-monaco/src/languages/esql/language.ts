@@ -34,27 +34,6 @@ export const ESQLLang: CustomLangModuleType<ESQLCallbacks> = {
     workerProxyService.setup(ESQL_LANG_ID);
 
     monaco.languages.setTokensProvider(ESQL_LANG_ID, new ESQLTokensProvider());
-
-    // monaco.languages.registerInlineCompletionsProvider(ESQL_LANG_ID, {
-    //   provideInlineCompletions: async (model, position) => {
-    //     console.log('provideInlineCompletions', model, position);
-    //     const range = new monaco.Range(
-    //       position.lineNumber,
-    //       position.column,
-    //       position.lineNumber,
-    //       position.column
-    //     );
-    //     return {
-    //       items: [
-    //         {
-    //           insertText: 'FROM logs',
-    //           range,
-    //         },
-    //       ],
-    //     };
-    //   },
-    //   freeInlineCompletions: () => {},
-    // });
   },
   languageThemeResolver: buildESQLTheme,
   languageConfiguration: {
