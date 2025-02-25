@@ -87,8 +87,7 @@ export const AddFleetServerHostStepContent = ({
     sslKey: false,
     sslESKey: false,
   });
-  const [secretsToggleState, setSecretsToggleState] = useState<'disabled' | true | false>(false);
-
+  const [secretsToggleState, setSecretsToggleState] = useState<'disabled' | true | false>(true);
   const useSecretsStorage = secretsToggleState === true;
 
   const fleetStatus = useFleetStatus();

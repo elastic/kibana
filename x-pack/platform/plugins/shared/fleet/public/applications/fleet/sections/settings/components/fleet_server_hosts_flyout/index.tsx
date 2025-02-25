@@ -69,7 +69,7 @@ export const FleetServerHostsFlyout: React.FunctionComponent<FleetServerHostsFly
     sslKey: false,
     sslESKey: false,
   });
-  const [secretsToggleState, setSecretsToggleState] = useState<'disabled' | true | false>(false);
+  const [secretsToggleState, setSecretsToggleState] = useState<'disabled' | true | false>(true);
 
   const useSecretsStorage = secretsToggleState === true;
 
