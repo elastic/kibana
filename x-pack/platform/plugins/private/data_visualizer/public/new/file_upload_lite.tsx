@@ -5,7 +5,7 @@
  * 2.0.
  */
 import type { FC, PropsWithChildren } from 'react';
-import React from 'react';
+import React, { useMemo } from 'react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import type { IndicesIndexSettings } from '@elastic/elasticsearch/lib/api/types';
@@ -14,6 +14,7 @@ import type { ResultLinks } from '../../common/app';
 import type { GetAdditionalLinks } from '../application/common/components/results_links';
 import { getCoreStart, getPluginsStart } from '../kibana_services';
 import { FileUploadLiteView } from './file_upload_lite_view';
+import { FileUploadManager } from './file_manager/file_manager';
 
 export interface Props {
   resultLinks?: ResultLinks;
@@ -46,6 +47,27 @@ export const FileDataVisualizerLite: FC<Props> = ({
     fieldFormats,
   };
 
+  const fileUploadManager = useMemo(
+    () =>
+      new FileUploadManager(
+        fileUpload,
+        coreStart.http,
+        data.dataViews,
+        autoAddInference ?? null,
+        autoCreateDataView,
+        true,
+        indexSettings
+      ),
+    [
+      autoAddInference,
+      autoCreateDataView,
+      coreStart.http,
+      data.dataViews,
+      fileUpload,
+      indexSettings,
+    ]
+  );
+
   const EmptyContext: FC<PropsWithChildren<unknown>> = ({ children }) => <>{children}</>;
   const CloudContext = cloud?.CloudContextProvider ?? EmptyContext;
 
@@ -54,16 +76,10 @@ export const FileDataVisualizerLite: FC<Props> = ({
       <KibanaContextProvider services={{ ...services }}>
         <CloudContext>
           <FileUploadLiteView
-            dataStart={data}
-            http={coreStart.http}
-            fileUpload={fileUpload}
+            fileUploadManager={fileUploadManager}
             getAdditionalLinks={getAdditionalLinks}
             resultLinks={resultLinks}
-            capabilities={coreStart.application.capabilities}
             setUploadResults={setUploadResults}
-            autoAddInference={autoAddInference}
-            autoCreateDataView={autoCreateDataView}
-            indexSettings={indexSettings}
             onClose={onClose}
           />
         </CloudContext>

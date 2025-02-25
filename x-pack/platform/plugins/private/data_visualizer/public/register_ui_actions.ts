@@ -13,7 +13,7 @@ import {
 import {
   createOpenFileUploadLiteAction,
   createOpenFileUploadLiteTrigger,
-} from './lite/file_upload_lite_action';
+} from './new/file_upload_lite_action';
 import type { DataVisualizerStartDependencies } from './application/common/types/data_visualizer_plugin';
 
 export function registerUiActions(coreStart: CoreStart, plugins: DataVisualizerStartDependencies) {

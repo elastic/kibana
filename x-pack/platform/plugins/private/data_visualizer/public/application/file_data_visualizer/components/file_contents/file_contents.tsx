@@ -28,9 +28,7 @@ import { LINE_LIMIT } from './grok_highlighter';
 
 interface Props {
   fileContents: string;
-  format: string;
-  numberOfLines: number;
-  semiStructureTextData: SemiStructureTextData | null;
+  results: FindFileStructureResponse;
 }
 
 interface SemiStructureTextData {
@@ -38,7 +36,6 @@ interface SemiStructureTextData {
   multilineStartPattern?: string;
   excludeLinesPattern?: string;
   sampleStart: string;
-  mappings: FindFileStructureResponse['mappings'];
   ecsCompatibility?: string;
 }
 
@@ -52,18 +49,31 @@ function semiStructureTextDataGuard(
   );
 }
 
-export const FileContents: FC<Props> = ({
-  fileContents,
-  format,
-  numberOfLines,
-  semiStructureTextData,
-}) => {
+export const FileContents: FC<Props> = ({ fileContents, results }) => {
   let mode = EDITOR_MODE.TEXT;
+  const format = results.format;
+  const numberOfLines = results.num_lines_analyzed;
+
   if (format === EDITOR_MODE.JSON) {
     mode = EDITOR_MODE.JSON;
   }
   const isMounted = useMountedState();
   const grokHighlighter = useGrokHighlighter();
+
+  const semiStructureTextData = useMemo(
+    () =>
+      results.format === FILE_FORMATS.SEMI_STRUCTURED_TEXT
+        ? {
+            grokPattern: results.grok_pattern,
+            multilineStartPattern: results.multiline_start_pattern,
+            sampleStart: results.sample_start,
+            excludeLinesPattern: results.exclude_lines_pattern,
+            mappings: results.mappings,
+            ecsCompatibility: results.ecs_compatibility,
+          }
+        : null,
+    [results]
+  );
 
   const [isSemiStructureTextData, setIsSemiStructureTextData] = useState(
     semiStructureTextDataGuard(semiStructureTextData)

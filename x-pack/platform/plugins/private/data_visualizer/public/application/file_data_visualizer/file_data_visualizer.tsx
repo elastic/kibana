@@ -5,7 +5,7 @@
  * 2.0.
  */
 import type { FC, PropsWithChildren } from 'react';
-import React from 'react';
+import React, { useMemo, useState } from 'react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import type { FileUploadResults } from '@kbn/file-upload-common';
@@ -15,6 +15,8 @@ import { getCoreStart, getPluginsStart } from '../../kibana_services';
 // @ts-ignore
 import { FileDataVisualizerView } from './components/file_data_visualizer_view';
 import type { GetAdditionalLinks } from '../common/components/results_links';
+import { FileUploadManager } from '../../new/file_manager';
+import { FileUploadView } from '../../new/file_upload_view';
 
 export interface Props {
   resultLinks?: ResultLinks;
@@ -23,6 +25,11 @@ export interface Props {
 }
 
 export type FileDataVisualizerSpec = typeof FileDataVisualizer;
+
+enum TEST_MODE {
+  OLD,
+  NEW,
+}
 
 export const FileDataVisualizer: FC<Props> = ({
   getAdditionalLinks,
@@ -40,23 +47,59 @@ export const FileDataVisualizer: FC<Props> = ({
     fileUpload,
     fieldFormats,
   };
+  const [mode, setMode] = useState<TEST_MODE>(TEST_MODE.NEW);
 
   const EmptyContext: FC<PropsWithChildren<unknown>> = ({ children }) => <>{children}</>;
   const CloudContext = cloud?.CloudContextProvider || EmptyContext;
+
+  const autoAddInference = undefined;
+  const autoCreateDataView = true;
+  const indexSettings = undefined;
+
+  const fileUploadManager = useMemo(
+    () =>
+      new FileUploadManager(
+        fileUpload,
+        coreStart.http,
+        data.dataViews,
+        autoAddInference ?? null,
+        autoCreateDataView,
+        true,
+        indexSettings
+      ),
+    [
+      autoAddInference,
+      autoCreateDataView,
+      coreStart.http,
+      data.dataViews,
+      fileUpload,
+      indexSettings,
+    ]
+  );
 
   return (
     <KibanaRenderContextProvider {...coreStart}>
       <KibanaContextProvider services={{ ...services }}>
         <CloudContext>
-          <FileDataVisualizerView
-            dataStart={data}
-            http={coreStart.http}
-            fileUpload={fileUpload}
-            getAdditionalLinks={getAdditionalLinks}
-            resultLinks={resultLinks}
-            capabilities={coreStart.application.capabilities}
-            setUploadResults={setUploadResults}
-          />
+          {mode === TEST_MODE.NEW ? (
+            <FileUploadView
+              fileUploadManager={fileUploadManager}
+              getAdditionalLinks={getAdditionalLinks}
+              resultLinks={resultLinks}
+              setUploadResults={setUploadResults}
+              onClose={() => {}}
+            />
+          ) : (
+            <FileDataVisualizerView
+              dataStart={data}
+              http={coreStart.http}
+              fileUpload={fileUpload}
+              getAdditionalLinks={getAdditionalLinks}
+              resultLinks={resultLinks}
+              capabilities={coreStart.application.capabilities}
+              setUploadResults={setUploadResults}
+            />
+          )}
         </CloudContext>
       </KibanaContextProvider>
     </KibanaRenderContextProvider>

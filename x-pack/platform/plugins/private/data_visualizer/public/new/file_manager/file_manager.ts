@@ -56,7 +56,7 @@ export interface UploadStatus {
   errors: Array<{ title: string; error: any }>;
 }
 
-export class FileManager {
+export class FileUploadManager {
   private readonly files$ = new BehaviorSubject<FileWrapper[]>([]);
   private readonly analysisValid$ = new BehaviorSubject<boolean>(false);
   public readonly fileAnalysisStatus$: Observable<FileAnalysis[]> = this.files$.pipe(
