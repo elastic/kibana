@@ -38480,12 +38480,6 @@ components:
       maximum: 100
       minimum: 1
       type: integer
-    Security_Endpoint_Management_API_PageSize:
-      default: 10
-      description: Number of items per page
-      maximum: 100
-      minimum: 1
-      type: integer
     Security_Endpoint_Management_API_Parameters:
       description: Optional parameters object
       type: object
