@@ -96,7 +96,7 @@ type EnrichedDocument = RetrieveDocumentationResultDoc & {
 const enrichDocument = (contentReferencesStore: ContentReferencesStore | undefined) => {
   return (document: RetrieveDocumentationResultDoc): EnrichedDocument => {
     if (contentReferencesStore == null) {
-      return document
+      return document;
     }
     const reference = contentReferencesStore.add((p) =>
       productDocumentationReference(p.id, document.title, document.url)

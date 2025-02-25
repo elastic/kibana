@@ -27,7 +27,7 @@ export const getContentReferenceId = (
  */
 export const contentReferenceBlock = (
   contentReference: ContentReference | undefined
-): ContentReferenceBlock | "" => {
+): ContentReferenceBlock | '' => {
   if (!contentReference) {
     return '';
   }

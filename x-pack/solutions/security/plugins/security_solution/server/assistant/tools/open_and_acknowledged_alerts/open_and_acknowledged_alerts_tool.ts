@@ -96,10 +96,10 @@ export const OPEN_AND_ACKNOWLEDGED_ALERTS_TOOL: AssistantTool = {
             });
 
             const hitId = hit._id;
-            const reference = hitId ? contentReferencesStore?.add((p) => securityAlertReference(p.id, hitId)) : undefined
-            const citation =
-            reference &&
-              `\nCitation,${contentReferenceBlock(reference)}`;
+            const reference = hitId
+              ? contentReferencesStore?.add((p) => securityAlertReference(p.id, hitId))
+              : undefined;
+            const citation = reference && `\nCitation,${contentReferenceBlock(reference)}`;
 
             return `${transformed}${citation ?? ''}`;
           })
