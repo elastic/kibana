@@ -669,7 +669,7 @@ src/platform/plugins/shared/navigation @elastic/appex-sharedux
 src/platform/plugins/shared/newsfeed @elastic/kibana-core
 test/common/plugins/newsfeed @elastic/kibana-core
 src/platform/plugins/private/no_data_page @elastic/appex-sharedux
-packages/kbn-node-libs-browser-webpack-plugin @elastic/kibana-operations
+src/platform/packages/private/kbn-node-libs-browser-webpack-plugin @elastic/kibana-operations
 x-pack/platform/plugins/shared/notifications @elastic/appex-sharedux
 src/platform/packages/shared/kbn-object-utils @elastic/kibana-core
 src/platform/packages/shared/kbn-object-versioning @elastic/appex-sharedux
