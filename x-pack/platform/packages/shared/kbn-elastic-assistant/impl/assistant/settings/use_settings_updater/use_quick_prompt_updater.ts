@@ -304,7 +304,6 @@ export const useQuickPromptUpdater = ({
     const bulkPromptsResult = hasBulkPrompts
       ? await bulkUpdatePrompts(http, promptsBulkActions, toasts)
       : undefined;
-    console.log('bulkPromptsResult', bulkPromptsResult);
     return bulkPromptsResult?.success ?? false;
   }, [http, promptsBulkActions, toasts]);
 
