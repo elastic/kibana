@@ -19,7 +19,6 @@ import {
   KnowledgeBaseEntryResponse,
   KnowledgeBaseEntryUpdateProps,
 } from '@kbn/elastic-assistant-common';
-import { isArray } from 'lodash';
 import { AUDIT_OUTCOME, KnowledgeBaseAuditAction, knowledgeBaseAuditEvent } from './audit_events';
 import {
   CREATE_KNOWLEDGE_BASE_ENTRY_ERROR_EVENT,
@@ -127,8 +126,6 @@ export const transformToUpdateSchema = ({
     global: entry.global,
     users: entry.global
       ? []
-      : isArray(entry.users) && entry.users.length
-      ? entry.users
       : [
           {
             id: user.profile_uid,
@@ -198,8 +195,6 @@ export const transformToCreateSchema = ({
     global: entry.global,
     users: entry.global
       ? []
-      : isArray(entry.users) && entry.users.length
-      ? entry.users
       : [
           {
             id: user.profile_uid,
