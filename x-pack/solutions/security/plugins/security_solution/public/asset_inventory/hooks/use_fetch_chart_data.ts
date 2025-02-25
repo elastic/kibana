@@ -13,18 +13,12 @@ import type { IKibanaSearchResponse, IKibanaSearchRequest } from '@kbn/search-ty
 import type { FindingsBaseEsQuery } from '@kbn/cloud-security-posture';
 import { useKibana } from '../../common/lib/kibana';
 import { ASSET_INVENTORY_INDEX_PATTERN } from '../constants';
-import { getRuntimeMappingsFromSort, getMultiFieldsSort } from './fetch_utils';
+import { getMultiFieldsSort } from './fetch_utils';
 
 interface UseTopAssetsOptions extends FindingsBaseEsQuery {
   sort: string[][];
   enabled: boolean;
 }
-
-const ASSET_INVENTORY_TABLE_RUNTIME_MAPPING_FIELDS: string[] = [
-  'entity.id',
-  'entity.category',
-  'entity.type',
-];
 
 const getTopAssetsQuery = ({ query, sort }: UseTopAssetsOptions) => ({
   size: 0,
@@ -74,7 +68,6 @@ const getTopAssetsQuery = ({ query, sort }: UseTopAssetsOptions) => ({
     },
   },
   sort: getMultiFieldsSort(sort),
-  runtime_mappings: getRuntimeMappingsFromSort(ASSET_INVENTORY_TABLE_RUNTIME_MAPPING_FIELDS, sort),
   ignore_unavailable: true,
 });
 
