@@ -1032,6 +1032,36 @@
       },
       {
         "parentPluginId": "@kbn/slo-schema",
+        "id": "def-common.GetSLOStatsOverviewParams",
+        "type": "Type",
+        "tags": [],
+        "label": "GetSLOStatsOverviewParams",
+        "description": [],
+        "signature": [
+          "{ kqlQuery?: string | undefined; filters?: string | undefined; }"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-slo-schema/src/rest_specs/routes/get_slo_stats_overview.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/slo-schema",
+        "id": "def-common.GetSLOStatsOverviewResponse",
+        "type": "Type",
+        "tags": [],
+        "label": "GetSLOStatsOverviewResponse",
+        "description": [],
+        "signature": [
+          "{ violated: number; degrading: number; stale: number; healthy: number; noData: number; burnRateRules: number; burnRateActiveAlerts: number; burnRateRecoveredAlerts: number; }"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-slo-schema/src/rest_specs/routes/get_slo_stats_overview.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/slo-schema",
         "id": "def-common.GetSLOSuggestionsResponse",
         "type": "Type",
         "tags": [],
@@ -10808,6 +10838,60 @@
           "; }>; }>]>"
         ],
         "path": "x-pack/platform/packages/shared/kbn-slo-schema/src/rest_specs/routes/get.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/slo-schema",
+        "id": "def-common.getSLOStatsOverviewParamsSchema",
+        "type": "Object",
+        "tags": [],
+        "label": "getSLOStatsOverviewParamsSchema",
+        "description": [],
+        "signature": [
+          "PartialC",
+          "<{ query: ",
+          "PartialC",
+          "<{ kqlQuery: ",
+          "StringC",
+          "; filters: ",
+          "StringC",
+          "; }>; }>"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-slo-schema/src/rest_specs/routes/get_slo_stats_overview.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/slo-schema",
+        "id": "def-common.getSLOStatsOverviewResponseSchema",
+        "type": "Object",
+        "tags": [],
+        "label": "getSLOStatsOverviewResponseSchema",
+        "description": [],
+        "signature": [
+          "TypeC",
+          "<{ violated: ",
+          "NumberC",
+          "; degrading: ",
+          "NumberC",
+          "; stale: ",
+          "NumberC",
+          "; healthy: ",
+          "NumberC",
+          "; noData: ",
+          "NumberC",
+          "; burnRateRules: ",
+          "NumberC",
+          "; burnRateActiveAlerts: ",
+          "NumberC",
+          "; burnRateRecoveredAlerts: ",
+          "NumberC",
+          "; }>"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-slo-schema/src/rest_specs/routes/get_slo_stats_overview.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
