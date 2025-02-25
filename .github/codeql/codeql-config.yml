@@ -42,7 +42,7 @@ paths-ignore:
   - src/platform/packages/shared/kbn-dev-cli-errors
   - src/platform/packages/shared/kbn-dev-cli-runner
   - src/platform/packages/shared/kbn-dev-proc-runner
-  - packages/kbn-dev-utils
+  - src/platform/packages/shared/kbn-dev-utils
   - packages/kbn-docs-utils
   - packages/kbn-es
   - packages/kbn-es-archiver
