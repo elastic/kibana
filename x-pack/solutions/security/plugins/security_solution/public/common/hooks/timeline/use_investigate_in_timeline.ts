@@ -133,7 +133,7 @@ export const useInvestigateInTimeline = () => {
             setSelectedDataView({
               scope: [SourcererScopeName.timeline],
               id: defaultDataView.id,
-              patterns: [signalIndexName || ''],
+              fallbackPatterns: [signalIndexName || ''],
             });
           } else {
             dispatch(

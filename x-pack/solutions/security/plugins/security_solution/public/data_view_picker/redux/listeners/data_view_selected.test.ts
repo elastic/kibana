@@ -104,9 +104,21 @@ describe('createDataViewSelectedListener', () => {
       mockListenerApi
     );
 
+    // NOTE: we should check if the data view existence is checked
     expect(mockDataViewsService.get).toHaveBeenCalledWith('fetched-id');
+
+    expect(mockDataViewsService.create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        id: 'adhoc_test-*',
+        title: 'test-*',
+      })
+    );
+
     expect(mockDispatch).toHaveBeenCalledWith(
-      expect.objectContaining({ payload: expect.objectContaining({ id: 'adhoc_test-*' }) })
+      expect.objectContaining({
+        payload: expect.objectContaining({ id: 'adhoc_test-*' }),
+        type: 'x-pack/security_solution/dataViewPicker/default/setSelectedDataView',
+      })
     );
   });
 

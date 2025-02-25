@@ -68,7 +68,7 @@ export const useUpdateTimeline = () => {
         if (newDataViewPickerEnabled) {
           selectDataView({
             id: _timeline.dataViewId,
-            patterns: _timeline.indexNames,
+            fallbackPatterns: _timeline.indexNames,
             scope: [DataViewPickerScopeName.timeline],
           });
         } else {

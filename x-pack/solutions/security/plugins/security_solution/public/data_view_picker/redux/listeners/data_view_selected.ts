@@ -40,7 +40,7 @@ export const createDataViewSelectedListener = (dependencies: {
         // This is required to compute browserFields later.
         // If the view is not returned here, it will be fetched further down this file, and that
         // should return the full data view.
-        if (!Object.keys(cachedDataView?.fields || {})) {
+        if (!Object.keys(cachedDataView?.fields || {}).length) {
           return null;
         }
 
