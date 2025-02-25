@@ -55,7 +55,7 @@ test/plugin_functional/plugins/app_link_test @elastic/kibana-core
 x-pack/test/usage_collection/plugins/application_usage_test @elastic/kibana-core
 x-pack/test/security_api_integration/plugins/audit_log @elastic/kibana-security
 src/platform/packages/shared/kbn-avc-banner @elastic/security-defend-workflows
-packages/kbn-axe-config @elastic/kibana-qa
+src/platform/packages/shared/kbn-axe-config @elastic/kibana-qa
 packages/kbn-babel-preset @elastic/kibana-operations
 packages/kbn-babel-register @elastic/kibana-operations
 packages/kbn-babel-transform @elastic/kibana-operations

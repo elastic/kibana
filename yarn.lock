@@ -4062,7 +4062,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/axe-config@link:packages/kbn-axe-config":
+"@kbn/axe-config@link:src/platform/packages/shared/kbn-axe-config":
   version "0.0.0"
   uid ""
 
