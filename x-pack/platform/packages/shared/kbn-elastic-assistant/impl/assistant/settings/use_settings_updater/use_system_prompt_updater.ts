@@ -83,9 +83,6 @@ export const useSystemPromptUpdater = ({
   const [selectedSystemPromptId, setSelectedSystemPromptId] = useState<string | undefined>();
 
   const selectedSystemPrompt: SystemPromptSettings | undefined = useMemo(() => {
-    const found = systemPromptSettingsUpdates.find((sp) => sp.id === selectedSystemPromptId);
-    console.log('==>', { found, systemPromptSettingsUpdates, selectedSystemPromptId });
-    return found;
     return systemPromptSettingsUpdates.find((sp) => sp.id === selectedSystemPromptId);
   }, [selectedSystemPromptId, systemPromptSettingsUpdates]);
 
