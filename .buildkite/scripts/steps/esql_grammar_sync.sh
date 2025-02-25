@@ -64,8 +64,7 @@ main () {
   report_main_step "Cloning repositories"
 
   rm -rf elasticsearch
-  git clone https://github.com/nik9000/elasticsearch --depth 1
-  cd elasticsearch && git fetch antlr_include && git checkout antlr_include
+  git clone https://github.com/elastic/elasticsearch --depth 1
 
   ls -la ./x-pack/plugin/esql/src/main/antlr
   
