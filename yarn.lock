@@ -4034,7 +4034,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/apm-synthtrace@link:packages/kbn-apm-synthtrace":
+"@kbn/apm-synthtrace@link:src/platform/packages/shared/kbn-apm-synthtrace":
   version "0.0.0"
   uid ""
 

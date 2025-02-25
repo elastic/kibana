@@ -47,7 +47,7 @@ x-pack/solutions/observability/plugins/apm_data_access @elastic/obs-ux-infra_ser
 src/platform/packages/shared/kbn-apm-data-view @elastic/obs-ux-infra_services-team
 x-pack/solutions/observability/plugins/apm/ftr_e2e @elastic/obs-ux-infra_services-team
 x-pack/solutions/observability/plugins/apm @elastic/obs-ux-infra_services-team
-packages/kbn-apm-synthtrace @elastic/obs-ux-infra_services-team @elastic/obs-ux-logs-team
+src/platform/packages/shared/kbn-apm-synthtrace @elastic/obs-ux-infra_services-team @elastic/obs-ux-logs-team
 packages/kbn-apm-synthtrace-client @elastic/obs-ux-infra_services-team @elastic/obs-ux-logs-team
 x-pack/platform/packages/shared/kbn-apm-types @elastic/obs-ux-infra_services-team
 src/platform/packages/shared/kbn-apm-utils @elastic/obs-ux-infra_services-team
