@@ -111,7 +111,7 @@
     "xpack.observability_onboarding": "solutions/observability/plugins/observability_onboarding",
     "xpack.observabilityShared": "solutions/observability/plugins/observability_shared",
     "xpack.observabilityLogsOverview": [
-      "platform/packages/shared/observability/logs_overview/src/components"
+      "platform/packages/shared/logs-overview/src/components"
     ],
     "xpack.osquery": [
       "platform/plugins/shared/osquery"
@@ -130,7 +130,7 @@
     ],
     "xpack.runtimeFields": "platform/plugins/private/runtime_fields",
     "xpack.screenshotting": "platform/plugins/shared/screenshotting",
-    "xpack.searchSharedUI": "solutions/search/packages/shared_ui",
+    "xpack.searchSharedUI": "solutions/search/packages/shared-ui",
     "xpack.searchHomepage": "solutions/search/plugins/search_homepage",
     "xpack.searchIndices": "solutions/search/plugins/search_indices",
     "xpack.searchNavigation": "solutions/search/plugins/search_solution/search_navigation",
@@ -163,7 +163,7 @@
     ],
     "xpack.taskManager": "legacy/platform/plugins/shared/task_manager",
     "xpack.threatIntelligence": "solutions/security/plugins/threat_intelligence",
-    "xpack.timelines": "solutions/security/plugins/timelines",
+    "xpack.timelines": "platform/plugins/shared/timelines",
     "xpack.transform": "platform/plugins/private/transform",
     "xpack.triggersActionsUI": "platform/plugins/shared/triggers_actions_ui",
     "xpack.upgradeAssistant": "platform/plugins/private/upgrade_assistant",

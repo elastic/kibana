@@ -51,7 +51,7 @@ export const ENABLEMENT_DESCRIPTION_RISK_ENGINE_ONLY = i18n.translate(
 export const ENABLEMENT_DESCRIPTION_ENTITY_STORE_ONLY = i18n.translate(
   'xpack.securitySolution.entityAnalytics.entityStore.enablement.description.store',
   {
-    defaultMessage: 'Store host and user entities observed in events.',
+    defaultMessage: 'Store data for entities observed in events.',
   }
 );
 

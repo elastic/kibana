@@ -26,9 +26,17 @@ const _buildInactiveCondition = (opts: {
   inactivityTimeouts: InactivityTimeouts;
   maxAgentPoliciesWithInactivityTimeout: number;
   field: (path: string) => string;
+  fieldPath: (path: string) => string;
   logger?: Logger;
 }): string | null => {
-  const { now, inactivityTimeouts, maxAgentPoliciesWithInactivityTimeout, field, logger } = opts;
+  const {
+    now,
+    inactivityTimeouts,
+    maxAgentPoliciesWithInactivityTimeout,
+    field,
+    fieldPath,
+    logger,
+  } = opts;
   // if there are no policies with inactivity timeouts, then no agents are inactive
   if (inactivityTimeouts.length === 0) {
     return null;
@@ -70,7 +78,9 @@ const _buildInactiveCondition = (opts: {
     })
     .join(' || ');
 
-  return `lastCheckinMillis > 0 && ${field('policy_id')}.size() > 0 && ${policyClauses}`;
+  return `lastCheckinMillis > 0 && doc.containsKey(${fieldPath('policy_id')}) && ${field(
+    'policy_id'
+  )}.size() > 0 && (${policyClauses})`;
 };
 
 function _buildSource(
@@ -81,12 +91,14 @@ function _buildSource(
 ) {
   const normalizedPrefix = pathPrefix ? `${pathPrefix}${pathPrefix.endsWith('.') ? '' : '.'}` : '';
   const field = (path: string) => `doc['${normalizedPrefix + path}']`;
+  const fieldPath = (path: string) => `'${normalizedPrefix + path}'`;
   const now = Date.now();
   const agentIsInactiveCondition = _buildInactiveCondition({
     now,
     inactivityTimeouts,
     maxAgentPoliciesWithInactivityTimeout,
     field,
+    fieldPath,
     logger,
   });
 

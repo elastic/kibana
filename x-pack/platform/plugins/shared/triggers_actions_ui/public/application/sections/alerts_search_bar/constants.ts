@@ -13,3 +13,4 @@ export const ALERTS_SEARCH_BAR_PARAMS_URL_STORAGE_KEY = 'searchBarParams';
 export const NON_SIEM_CONSUMERS = Object.values(AlertConsumers).filter(
   (fid) => fid !== AlertConsumers.SIEM
 );
+export const RESET_FILTER_CONTROLS_TEST_SUBJ = 'resetFilterControlsButton';

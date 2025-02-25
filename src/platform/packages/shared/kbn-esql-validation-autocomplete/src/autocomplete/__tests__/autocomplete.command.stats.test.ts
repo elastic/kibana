@@ -272,7 +272,8 @@ describe('autocomplete.suggest', () => {
           ...getFunctionSignaturesByReturnType('eval', ['integer', 'double', 'long'], {
             scalar: true,
           }),
-          ...allGroupingFunctions,
+          // categorize is not compatible here
+          ...allGroupingFunctions.filter((f) => !f.text.includes('CATEGORIZE')),
         ]);
         await assertSuggestions('from a | stats avg(b) by var0 = /', [
           getDateHistogramCompletionItem(),

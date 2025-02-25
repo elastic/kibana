@@ -12,12 +12,8 @@ import { mockFlyoutApi } from '../mocks/mock_flyout_context';
 import { useWhichFlyout } from './use_which_flyout';
 import { useKibana as mockUseKibana } from '../../../../common/lib/kibana/__mocks__';
 import { useKibana } from '../../../../common/lib/kibana';
-import {
-  DocumentDetailsRightPanelKey,
-  DocumentDetailsLeftPanelKey,
-  DocumentDetailsAnalyzerPanelKey,
-} from '../constants/panel_keys';
-import { ANALYZE_GRAPH_ID, ANALYZER_PREVIEW_BANNER } from '../../left/components/analyze_graph';
+import { DocumentDetailsRightPanelKey, DocumentDetailsLeftPanelKey } from '../constants/panel_keys';
+import { ANALYZE_GRAPH_ID } from '../../left/components/analyze_graph';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 
 jest.mock('@kbn/expandable-flyout');
@@ -30,7 +26,6 @@ const mockedUseKibana = mockUseKibana();
 
 const mockUseWhichFlyout = useWhichFlyout as jest.Mock;
 const FLYOUT_KEY = 'SecuritySolution';
-const TIMELINE_FLYOUT_KEY = 'Timeline';
 
 const eventId = 'eventId1';
 const indexName = 'index1';
@@ -40,10 +35,10 @@ describe('useNavigateToAnalyzer', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     jest.mocked(useExpandableFlyoutApi).mockReturnValue(mockFlyoutApi);
-    (useIsExperimentalFeatureEnabled as jest.Mock).mockReturnValue(false);
+    (useIsExperimentalFeatureEnabled as jest.Mock).mockReturnValue(true);
   });
 
-  it('when isFlyoutOpen is true and not in preview mode, should return callback that opens left and preview panels', () => {
+  it('when isFlyoutOpen is true and not in preview mode, should return callback that opens left panels', () => {
     mockUseWhichFlyout.mockReturnValue(FLYOUT_KEY);
     const hookResult = renderHook(() =>
       useNavigateToAnalyzer({
@@ -66,14 +61,6 @@ describe('useNavigateToAnalyzer', () => {
         id: eventId,
         indexName,
         scopeId,
-      },
-    });
-
-    expect(mockFlyoutApi.openPreviewPanel).toHaveBeenCalledWith({
-      id: DocumentDetailsAnalyzerPanelKey,
-      params: {
-        resolverComponentInstanceID: `${FLYOUT_KEY}-${scopeId}`,
-        banner: ANALYZER_PREVIEW_BANNER,
       },
     });
   });
@@ -128,13 +115,6 @@ describe('useNavigateToAnalyzer', () => {
           scopeId,
         },
       },
-      preview: {
-        id: DocumentDetailsAnalyzerPanelKey,
-        params: {
-          resolverComponentInstanceID: `${FLYOUT_KEY}-${scopeId}`,
-          banner: ANALYZER_PREVIEW_BANNER,
-        },
-      },
     });
   });
 
@@ -172,22 +152,15 @@ describe('useNavigateToAnalyzer', () => {
           scopeId: timelineId,
         },
       },
-      preview: {
-        id: DocumentDetailsAnalyzerPanelKey,
-        params: {
-          resolverComponentInstanceID: `${TIMELINE_FLYOUT_KEY}-${timelineId}`,
-          banner: ANALYZER_PREVIEW_BANNER,
-        },
-      },
     });
   });
 
-  describe('when new navigation is enabled', () => {
+  describe('when newExpandableFlyoutNavigationDisabled is false', () => {
     beforeEach(() => {
-      (useIsExperimentalFeatureEnabled as jest.Mock).mockReturnValue(true);
+      (useIsExperimentalFeatureEnabled as jest.Mock).mockReturnValue(false);
     });
 
-    it('when isFlyoutOpen is true and not in preview mode, should return callback that opens left and preview panels', () => {
+    it('when isFlyoutOpen is true and not in preview mode, should return callback that opens left panels', () => {
       mockUseWhichFlyout.mockReturnValue(FLYOUT_KEY);
       const hookResult = renderHook(() =>
         useNavigateToAnalyzer({
@@ -210,14 +183,6 @@ describe('useNavigateToAnalyzer', () => {
           id: eventId,
           indexName,
           scopeId,
-        },
-      });
-
-      expect(mockFlyoutApi.openPreviewPanel).toHaveBeenCalledWith({
-        id: DocumentDetailsAnalyzerPanelKey,
-        params: {
-          resolverComponentInstanceID: `${FLYOUT_KEY}-${scopeId}`,
-          banner: ANALYZER_PREVIEW_BANNER,
         },
       });
     });
@@ -254,13 +219,6 @@ describe('useNavigateToAnalyzer', () => {
             id: eventId,
             indexName,
             scopeId,
-          },
-        },
-        preview: {
-          id: DocumentDetailsAnalyzerPanelKey,
-          params: {
-            resolverComponentInstanceID: `${FLYOUT_KEY}-${scopeId}`,
-            banner: ANALYZER_PREVIEW_BANNER,
           },
         },
       });
@@ -300,13 +258,6 @@ describe('useNavigateToAnalyzer', () => {
             scopeId,
           },
         },
-        preview: {
-          id: DocumentDetailsAnalyzerPanelKey,
-          params: {
-            resolverComponentInstanceID: `${FLYOUT_KEY}-${scopeId}`,
-            banner: ANALYZER_PREVIEW_BANNER,
-          },
-        },
       });
     });
 
@@ -342,13 +293,6 @@ describe('useNavigateToAnalyzer', () => {
             id: eventId,
             indexName,
             scopeId: timelineId,
-          },
-        },
-        preview: {
-          id: DocumentDetailsAnalyzerPanelKey,
-          params: {
-            resolverComponentInstanceID: `${TIMELINE_FLYOUT_KEY}-${timelineId}`,
-            banner: ANALYZER_PREVIEW_BANNER,
           },
         },
       });

@@ -14,8 +14,9 @@ import {
   InstallMigrationRulesRequestParams,
 } from '../../../../../common/siem_migrations/model/api/rules/rule_migration.gen';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
-import { SiemMigrationAuditLogger, SiemMigrationsAuditActions } from './util/audit';
+import { SiemMigrationAuditLogger } from './util/audit';
 import { installTranslated } from './util/installation';
+import { authz } from './util/authz';
 import { withLicense } from './util/with_license';
 
 export const registerSiemRuleMigrationsInstallRoute = (
@@ -26,7 +27,7 @@ export const registerSiemRuleMigrationsInstallRoute = (
     .post({
       path: SIEM_RULE_MIGRATION_INSTALL_PATH,
       access: 'internal',
-      security: { authz: { requiredPrivileges: ['securitySolution'] } },
+      security: { authz },
     })
     .addVersion(
       {
@@ -42,7 +43,7 @@ export const registerSiemRuleMigrationsInstallRoute = (
         async (context, req, res): Promise<IKibanaResponse<InstallMigrationRulesResponse>> => {
           const { migration_id: migrationId } = req.params;
           const { ids, enabled = false } = req.body;
-          let siemMigrationAuditLogger: SiemMigrationAuditLogger | undefined;
+          const siemMigrationAuditLogger = new SiemMigrationAuditLogger(context.securitySolution);
 
           try {
             const ctx = await context.resolve(['core', 'alerting', 'securitySolution']);
@@ -50,14 +51,9 @@ export const registerSiemRuleMigrationsInstallRoute = (
             const securitySolutionContext = ctx.securitySolution;
             const savedObjectsClient = ctx.core.savedObjects.client;
             const rulesClient = await ctx.alerting.getRulesClient();
-            const auditLogger = ctx.securitySolution.getAuditLogger();
-            if (auditLogger) {
-              siemMigrationAuditLogger = new SiemMigrationAuditLogger(auditLogger);
-            }
-            siemMigrationAuditLogger?.log({
-              action: SiemMigrationsAuditActions.SIEM_MIGRATION_INSTALLED_RULE,
-              id: migrationId,
-            });
+
+            await siemMigrationAuditLogger.logInstallRules({ ids, migrationId });
+
             const installed = await installTranslated({
               migrationId,
               ids,
@@ -68,14 +64,10 @@ export const registerSiemRuleMigrationsInstallRoute = (
             });
 
             return res.ok({ body: { installed } });
-          } catch (err) {
-            logger.error(err);
-            siemMigrationAuditLogger?.log({
-              action: SiemMigrationsAuditActions.SIEM_MIGRATION_INSTALLED_RULE,
-              error: err,
-              id: migrationId,
-            });
-            return res.badRequest({ body: err.message });
+          } catch (error) {
+            logger.error(error);
+            await siemMigrationAuditLogger.logInstallRules({ ids, migrationId, error });
+            return res.badRequest({ body: error.message });
           }
         }
       )

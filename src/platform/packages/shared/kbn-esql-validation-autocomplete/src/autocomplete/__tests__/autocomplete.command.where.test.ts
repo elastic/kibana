@@ -136,6 +136,24 @@ describe('WHERE <expression>', () => {
       }
     });
 
+    test('filters suggestions based on previous commands', async () => {
+      const { assertSuggestions } = await setup();
+
+      await assertSuggestions('from a | where / | limit 3', [
+        ...getFieldNamesByType('any')
+          .map((field) => `${field} `)
+          .map(attachTriggerCommand),
+        ...allEvalFns,
+      ]);
+
+      await assertSuggestions('from a | limit 3 | where / ', [
+        ...getFieldNamesByType('any')
+          .map((field) => `${field} `)
+          .map(attachTriggerCommand),
+        ...allEvalFns.filter((fn) => fn.label !== 'QSTR' && fn.label !== 'MATCH'),
+      ]);
+    });
+
     test('suggests operators after a field name', async () => {
       const { assertSuggestions } = await setup();
 
@@ -318,30 +336,57 @@ describe('WHERE <expression>', () => {
       );
     });
 
-    test('attaches ranges', async () => {
-      const { suggest } = await setup();
+    describe('attaches ranges', () => {
+      test('omits ranges if there is no prefix', async () => {
+        const { suggest } = await setup();
 
-      const suggestions = await suggest('FROM index | WHERE doubleField IS N/');
+        (await suggest('FROM index | WHERE /')).forEach((suggestion) => {
+          expect(suggestion.rangeToReplace).toBeUndefined();
+        });
+      });
 
-      expect(suggestions).toContainEqual(
-        expect.objectContaining({
-          text: 'IS NOT NULL',
-          rangeToReplace: {
-            start: 32,
-            end: 36,
-          },
-        })
-      );
+      test('uses indices of single prefix by default', async () => {
+        const { suggest } = await setup();
 
-      expect(suggestions).toContainEqual(
-        expect.objectContaining({
-          text: 'IS NULL',
-          rangeToReplace: {
-            start: 32,
-            end: 36,
-          },
-        })
-      );
+        (await suggest('FROM index | WHERE some.prefix/')).forEach((suggestion) => {
+          expect(suggestion.rangeToReplace).toEqual({
+            start: 20,
+            end: 30,
+          });
+        });
+      });
+
+      test('"IS (NOT) NULL" with a matching prefix', async () => {
+        const { suggest } = await setup();
+
+        const suggestions = await suggest('FROM index | WHERE doubleField IS N/');
+
+        expect(suggestions.find((s) => s.text === 'IS NOT NULL')?.rangeToReplace).toEqual({
+          start: 32,
+          end: 36,
+        });
+
+        expect(suggestions.find((s) => s.text === 'IS NULL')?.rangeToReplace).toEqual({
+          start: 32,
+          end: 36,
+        });
+      });
+
+      test('"IS (NOT) NULL" with a matching prefix with trailing space', async () => {
+        const { suggest } = await setup();
+
+        const suggestions = await suggest('FROM index | WHERE doubleField IS /');
+
+        expect(suggestions.find((s) => s.text === 'IS NOT NULL')?.rangeToReplace).toEqual({
+          start: 32,
+          end: 35,
+        });
+
+        expect(suggestions.find((s) => s.text === 'IS NULL')?.rangeToReplace).toEqual({
+          start: 32,
+          end: 35,
+        });
+      });
     });
 
     describe('create control suggestion', () => {

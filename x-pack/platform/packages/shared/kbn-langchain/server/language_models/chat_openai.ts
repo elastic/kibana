@@ -9,11 +9,12 @@ import { v4 as uuidv4 } from 'uuid';
 import { Logger } from '@kbn/core/server';
 import type { ActionsClient } from '@kbn/actions-plugin/server';
 import { get } from 'lodash/fp';
-
+import type { TelemetryMetadata } from '@kbn/actions-plugin/server/lib';
 import { ChatOpenAI } from '@langchain/openai';
 import { Stream } from 'openai/streaming';
 import type OpenAI from 'openai';
 import { PublicMethodsOf } from '@kbn/utility-types';
+
 import { DEFAULT_OPEN_AI_MODEL, DEFAULT_TIMEOUT } from './constants';
 import {
   InferenceChatCompleteParamsSchema,
@@ -36,6 +37,7 @@ export interface ActionsClientChatOpenAIParams {
   temperature?: number;
   signal?: AbortSignal;
   timeout?: number;
+  telemetryMetadata?: TelemetryMetadata;
 }
 
 /**
@@ -65,6 +67,7 @@ export class ActionsClientChatOpenAI extends ChatOpenAI {
   #traceId: string;
   #signal?: AbortSignal;
   #timeout?: number;
+  telemetryMetadata?: TelemetryMetadata;
 
   constructor({
     actionsClient,
@@ -79,6 +82,7 @@ export class ActionsClientChatOpenAI extends ChatOpenAI {
     temperature,
     timeout,
     maxTokens,
+    telemetryMetadata,
   }: ActionsClientChatOpenAIParams) {
     super({
       maxRetries,
@@ -109,6 +113,7 @@ export class ActionsClientChatOpenAI extends ChatOpenAI {
     // matters only for LangSmith logs (Metadata > Invocation Params)
     // the connector can be passed an undefined temperature through #temperature
     this.temperature = temperature ?? this.temperature;
+    this.telemetryMetadata = telemetryMetadata;
   }
 
   getActionResultData(): string {
@@ -237,6 +242,7 @@ export class ActionsClientChatOpenAI extends ChatOpenAI {
         : completionRequest.stream
         ? { ...body, timeout: this.#timeout ?? DEFAULT_TIMEOUT }
         : { body: JSON.stringify(body), timeout: this.#timeout ?? DEFAULT_TIMEOUT }),
+      telemetryMetadata: this.telemetryMetadata,
       signal: this.#signal,
     };
     return {

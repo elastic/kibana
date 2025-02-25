@@ -233,6 +233,7 @@ export interface EnrichedDeprecationInfo
     | 'ilm_policies'
     | 'templates';
   isCritical: boolean;
+  frozen?: boolean;
   status?: estypes.HealthReportIndicatorHealthStatus;
   index?: string;
   correctiveAction?:

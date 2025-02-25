@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { FlyoutPanelHistory } from '../types';
 import { FlyoutPanelProps } from '../..';
 
 export interface FlyoutPanels {
@@ -20,10 +21,10 @@ export interface FlyoutPanels {
    * Panels to render in the preview section
    */
   preview: FlyoutPanelProps[] | undefined;
-  /*
+  /**
    * History of the right panels that were opened
    */
-  history: FlyoutPanelProps[];
+  history: FlyoutPanelHistory[];
 }
 
 export interface PanelsState {

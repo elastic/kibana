@@ -8,6 +8,7 @@
  */
 
 import { Page } from '@playwright/test';
+import { PathOptions } from '../../../../common/services/kibana_url';
 
 /**
  * Extends the Playwright 'Page' interface with methods specific to Kibana.
@@ -24,7 +25,7 @@ export type ScoutPage = Page & {
    * @param options - Additional navigation options, passed directly to Playwright's `goto` method.
    * @returns A Promise resolving to a Playwright `Response` or `null`.
    */
-  gotoApp: (appName: string, options?: Parameters<Page['goto']>[1]) => ReturnType<Page['goto']>;
+  gotoApp: (appName: string, pathOptions?: PathOptions) => ReturnType<Page['goto']>;
   /**
    * Waits for the Kibana loading spinner indicator to disappear.
    * @returns A Promise resolving when the indicator is hidden.
