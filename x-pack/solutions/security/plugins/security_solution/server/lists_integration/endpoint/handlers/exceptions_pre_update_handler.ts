@@ -76,7 +76,10 @@ export const getExceptionsPreUpdateItemHandler = (
         endpointAppContextService,
         request
       );
-      const validatedItem = await hostIsolationExceptionValidator.validatePreUpdateItem(data);
+      const validatedItem = await hostIsolationExceptionValidator.validatePreUpdateItem(
+        data,
+        currentSavedItem
+      );
       hostIsolationExceptionValidator.notifyFeatureUsage(
         data as ExceptionItemLikeOptions,
         'HOST_ISOLATION_EXCEPTION_BY_POLICY'
@@ -105,7 +108,10 @@ export const getExceptionsPreUpdateItemHandler = (
         endpointAppContextService,
         request
       );
-      const validatedItem = await endpointExceptionValidator.validatePreUpdateItem(data);
+      const validatedItem = await endpointExceptionValidator.validatePreUpdateItem(
+        data,
+        currentSavedItem
+      );
       endpointExceptionValidator.notifyFeatureUsage(
         data as ExceptionItemLikeOptions,
         'ENDPOINT_EXCEPTIONS'

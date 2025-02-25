@@ -7,7 +7,7 @@
   "include": [
     "**/*",
     "../../../typings/**/*",
-    "../../../packages/kbn-test/types/ftr_globals/**/*",
+    "../../../src/platform/packages/shared/kbn-test/types/ftr_globals/**/*",
   ],
   "exclude": [
     "target/**/*"
@@ -55,5 +55,6 @@
     "@kbn/test-suites-src",
     "@kbn/openapi-common",
     "@kbn/scout-info",
+    "@kbn/security-plugin-types-common",
   ]
 }
