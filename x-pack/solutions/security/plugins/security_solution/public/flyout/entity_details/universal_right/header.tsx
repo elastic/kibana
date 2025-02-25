@@ -5,10 +5,20 @@
  * 2.0.
  */
 
-import { EuiSpacer, EuiText, EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
+import {
+  EuiSpacer,
+  EuiText,
+  EuiFlexItem,
+  EuiFlexGroup,
+  EuiBadgeGroup,
+  EuiBadge,
+  useEuiTheme,
+} from '@elastic/eui';
 import React from 'react';
 
 import type { EntityEcs } from '@kbn/securitysolution-ecs/src/entity';
+import { css } from '@emotion/react';
+import { HeaderDataCards } from './header_data_cards';
 import { EntityIconByType } from '../../../entity_analytics/components/entity_store/helpers';
 import { PreferenceFormattedDate } from '../../../common/components/formatted_date';
 import { FlyoutHeader } from '../../shared/components/flyout_header';
@@ -20,18 +30,62 @@ interface UniversalEntityFlyoutHeaderProps {
 
 export const UniversalEntityFlyoutHeader = ({ entity }: UniversalEntityFlyoutHeaderProps) => {
   return (
-    <FlyoutHeader data-test-subj="service-panel-header">
-      <EuiFlexGroup gutterSize="s" responsive={false} direction="column">
-        <EuiFlexItem grow={false}>
-          <EuiText size="xs" data-test-subj={'service-panel-header-lastSeen'}>
-            <PreferenceFormattedDate value={entity?.timestamp} />
-            <EuiSpacer size="xs" />
-          </EuiText>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <FlyoutTitle title={entity?.id} iconType={EntityIconByType[entity?.type]} />
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </FlyoutHeader>
+    <>
+      <FlyoutHeader data-test-subj="service-panel-header">
+        <EuiFlexGroup gutterSize="s" responsive={false} direction="column">
+          <EuiFlexItem grow={false}>
+            <EuiText size="xs" data-test-subj={'service-panel-header-lastSeen'}>
+              <PreferenceFormattedDate value={entity?.timestamp} />
+              <EuiSpacer size="xs" />
+            </EuiText>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <FlyoutTitle
+              title={entity?.name}
+              iconType={EntityIconByType[entity?.type] || 'globe'}
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </FlyoutHeader>
+      <div style={{ margin: 8 }}>
+        <HeaderDataCards entity={entity} />
+      </div>
+      <div style={{ margin: 8 }}>
+        <HeaderTags entity={entity} />
+      </div>
+    </>
+  );
+};
+
+const HeaderTags = ({ entity }) => {
+  const { euiTheme } = useEuiTheme();
+
+  return (
+    <EuiBadgeGroup gutterSize="s">
+      {entity.tags?.map((tag) => (
+        <EuiBadge color="hollow">{tag}</EuiBadge>
+      ))}
+      {entity.labels &&
+        Object.entries(entity.labels)?.map(([key, value]) => (
+          <EuiBadge color="hollow">
+            <span
+              css={css`
+                color: ${euiTheme.colors.disabledText};
+                border-right: ${euiTheme.border.thick};
+                padding-right: 4px;
+              `}
+            >
+              {key}
+            </span>
+            <span
+              css={css`
+                padding-left: 4px;
+              `}
+            >
+              {value}
+            </span>
+          </EuiBadge>
+        ))}
+    </EuiBadgeGroup>
   );
 };

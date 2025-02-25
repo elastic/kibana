@@ -115,7 +115,7 @@ export const FieldsSelectorTable = ({
   };
   const fields = useMemo<Field[]>(
     () =>
-      filterFieldsBySearch(dataView.fields.getAll(), columns, searchQuery, isFilterSelectedEnabled),
+      filterFieldsBySearch(dataView.fields?.getAll(), columns, searchQuery, isFilterSelectedEnabled),
     [dataView, columns, searchQuery, isFilterSelectedEnabled]
   );
 
@@ -171,7 +171,7 @@ export const FieldsSelectorTable = ({
   ];
 
   const error = useMemo(() => {
-    if (!dataView || dataView.fields.length === 0) {
+    if (!dataView || dataView.fields?.length === 0) {
       return i18n.translate('xpack.securitySolution.assetInventory.allAssets.fieldsModalError', {
         defaultMessage: 'No fields found in the data view',
       });
