@@ -90,6 +90,7 @@ export class MbMap extends Component<Props, State> {
   private _containerRef: HTMLDivElement | null = null;
   private _prevCustomIcons?: CustomIcon[];
   private _prevDisableInteractive?: boolean;
+  private _prevProjection?: MapSettings['projection'];
   private _prevLayerList?: ILayer[];
   private _prevTimeslice?: Timeslice;
   private _navigationControl = new maplibregl.NavigationControl({ showCompass: false });
@@ -189,15 +190,6 @@ export class MbMap extends Component<Props, State> {
         }
       });
       mbMap.on('load', () => {
-        mbMap.setProjection({ type: [
-          "interpolate",
-          ["linear"],
-          ["zoom"],
-          0,
-          "globe",
-          9,
-          "mercator"
-        ]});
         // Map instance automatically resizes when container size changes.
         // However, issues may arise if container resizes before map finishes loading.
         // This is occuring when by-value maps are used in dashboard.
@@ -395,6 +387,17 @@ export class MbMap extends Component<Props, State> {
   _syncSettings() {
     if (!this.state.mbMap) {
       return;
+    }
+
+    if (this._prevProjection !== this.props.settings.projection) {
+      this._prevProjection = this.props.settings.projection;
+      if (this.props.settings.projection === 'globeInterpolate') {
+        this.state.mbMap.setProjection({
+          type: ['interpolate', ['linear'], ['zoom'], 0, 'globe', 9, 'mercator'],
+        });
+      } else {
+        this.state.mbMap.setProjection({ type: 'mercator' });
+      }
     }
 
     if (

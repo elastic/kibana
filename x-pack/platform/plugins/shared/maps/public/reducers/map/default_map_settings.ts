@@ -24,6 +24,7 @@ export function getDefaultMapSettings(): MapSettings {
     keydownScrollZoom: false,
     maxZoom: MAX_ZOOM,
     minZoom: MIN_ZOOM,
+    projection: 'globeInterpolate',
     showScaleControl: false,
     showSpatialFilters: true,
     showTimesliderToggleButton: true,
