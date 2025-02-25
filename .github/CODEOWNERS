@@ -973,7 +973,7 @@ x-pack/platform/plugins/private/telemetry_collection_xpack @elastic/kibana-core
 src/platform/plugins/shared/telemetry_management_section @elastic/kibana-core
 src/platform/plugins/shared/telemetry @elastic/kibana-core
 test/plugin_functional/plugins/telemetry @elastic/kibana-core
-packages/kbn-telemetry-tools @elastic/kibana-core
+src/platform/packages/private/kbn-telemetry-tools @elastic/kibana-core
 packages/kbn-test @elastic/kibana-operations @elastic/appex-qa
 packages/kbn-test-eui-helpers @elastic/kibana-visualizations
 x-pack/test/licensing_plugin/plugins/test_feature_usage @elastic/kibana-security
