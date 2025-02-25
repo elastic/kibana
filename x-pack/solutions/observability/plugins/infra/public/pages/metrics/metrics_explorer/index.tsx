@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { useTrackPageview, FeatureFeedbackButton } from '@kbn/observability-shared-plugin/public';
 import { usePerformanceContext } from '@kbn/ebt-tools';
 import { OnboardingFlow } from '../../../components/shared/templates/no_data_config';
@@ -65,7 +65,7 @@ const MetricsExplorerContent = () => {
   const { currentView } = useMetricsExplorerViews();
 
   const { kibanaVersion, isCloudEnv, isServerlessEnv } = useKibanaEnvironmentContext();
-
+  const prevDataRef = useRef(data);
   const { onPageReady } = usePerformanceContext();
 
   useTrackPageview({ app: 'infra_metrics', path: 'metrics_explorer' });
@@ -97,13 +97,15 @@ const MetricsExplorerContent = () => {
   };
 
   useEffect(() => {
-    if (!isLoading && data) {
+    if (!isLoading && data && prevDataRef.current !== data) {
       onPageReady({
         meta: {
           rangeFrom: timeRange.from,
           rangeTo: timeRange.to,
         },
       });
+
+      prevDataRef.current = data;
     }
   }, [isLoading, data, timeRange.from, timeRange.to, onPageReady]);
 
