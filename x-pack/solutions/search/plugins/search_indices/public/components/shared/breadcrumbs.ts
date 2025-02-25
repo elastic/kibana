@@ -7,18 +7,23 @@
 
 import { ChromeBreadcrumb } from '@kbn/core-chrome-browser';
 import { i18n } from '@kbn/i18n';
+import { useKibana } from '../../hooks/use_kibana';
 
-export const IndexManagementBreadcrumbs: ChromeBreadcrumb[] = [
-  {
+export const IndexManagementBreadcrumbs = (): ChromeBreadcrumb[] => {
+  const { cloud, http } = useKibana().services;
+  const indexManagementPath: string = cloud?.isServerlessEnabled? '/app/elasticsearch/data/index_management': '/app/elasticsearch/index_management'
+ return  [{
     text: i18n.translate('xpack.searchIndices.breadcrumbs.indexManagement.label', {
       defaultMessage: 'Index Management',
     }),
-    href: '/app/management/data/index_management',
+    href: http.basePath.prepend(indexManagementPath)
+
   },
   {
     text: i18n.translate('xpack.searchIndices.breadcrumbs.indexManagement.indices.label', {
       defaultMessage: 'Indices',
     }),
-    href: '/app/management/data/index_management/indices',
-  },
-];
+    href:  http.basePath.prepend(`${indexManagementPath}/indices`)
+
+  }]
+}

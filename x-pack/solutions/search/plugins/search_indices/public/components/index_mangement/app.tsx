@@ -18,14 +18,10 @@ const breadcrumbText = i18n.translate('management.breadcrumb', {
   defaultMessage: 'Content',
 });
 
-export const BREADCRUMB_NO_HREF = {
+const breadcrumb = {
   text: breadcrumbText,
 };
 
-export const BREADCRUMB = {
-  text: breadcrumbText,
-  href: '/',
-};
 interface IndexManagementAppProps {
   indexManagement: IndexManagementPluginSetup;
 }
@@ -34,7 +30,6 @@ export const IndexManagementApp: React.FC<IndexManagementAppProps> = ({ indexMan
   const managementRef = useRef(null);
   const setBreadcrumbs = useCallback(
     (crumbs: ChromeBreadcrumb[] = [], appHistory?: ScopedHistory) => {
-      console.log('crumbs', crumbs);
       const wrapBreadcrumb = (item: ChromeBreadcrumb, scopedHistory: ScopedHistory) => ({
         ...item,
         ...(item.href ? reactRouterNavigate(scopedHistory, item.href) : {}),
@@ -43,7 +38,7 @@ export const IndexManagementApp: React.FC<IndexManagementAppProps> = ({ indexMan
       // Clicking the Management breadcrumb to navigate back to the "root" only
       // makes sense if there's a management app open. So when one isn't open
       // this breadcrumb shouldn't be a clickable link.
-      const breadcrumb = crumbs.length ? BREADCRUMB : BREADCRUMB_NO_HREF;
+
       const breadcrumbValue = [
         wrapBreadcrumb(breadcrumb, history),
         ...crumbs.map((item) => wrapBreadcrumb(item, appHistory || history)),
