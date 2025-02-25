@@ -21,10 +21,12 @@ import {
   RuleTypeParams,
   RuleTypeState,
   RuleAlertData,
+  SanitizedRule,
 } from '../../../common';
 import { getSummaryActionsFromTaskState } from './lib';
 import { withAlertingSpan } from '../lib';
 import * as schedulers from './schedulers';
+import { reduceAlertsForActions } from '../action_reducers';
 
 const BULK_SCHEDULE_CHUNK_SIZE = 1000;
 
@@ -67,9 +69,11 @@ export class ActionScheduler<
   }
 
   public async run({
+    rule,
     activeCurrentAlerts,
     recoveredCurrentAlerts,
   }: {
+    rule: SanitizedRule;
     activeCurrentAlerts?: Record<string, Alert<State, Context, ActionGroupIds>>;
     recoveredCurrentAlerts?: Record<string, Alert<State, Context, RecoveryActionGroupId>>;
   }): Promise<RunResult> {
@@ -77,6 +81,20 @@ export class ActionScheduler<
       actions: this.context.rule.actions,
       summaryActions: this.context.taskInstance.state?.summaryActions,
     });
+
+    // Hook to reduce alerts
+    console.log('activeCurrentAlerts', activeCurrentAlerts);
+    console.log('recoveredCurrentAlerts', recoveredCurrentAlerts);
+    const reducedActiveCurrentAlerts = reduceAlertsForActions({
+      rule,
+      alerts: Object.values(activeCurrentAlerts || {}) as Array<Alert<State, Context>>,
+    });
+    const reducedRecoveredCurrentAlerts = reduceAlertsForActions({
+      rule,
+      alerts: Object.values(recoveredCurrentAlerts || {}) as Array<Alert<State, Context>>,
+    });
+    console.log('reducedActiveCurrentAlerts', reducedActiveCurrentAlerts);
+    console.log('reducedRecoveredCurrentAlerts', reducedRecoveredCurrentAlerts);
 
     const allActionsToScheduleResult: ActionsToSchedule[] = [];
     for (const scheduler of this.schedulers) {

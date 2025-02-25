@@ -52,6 +52,7 @@ import {
   RuleLastRunOutcomeOrderMap,
   RuleTypeParams,
   RuleTypeState,
+  SanitizedRule,
 } from '../../common';
 import { NormalizedRuleType, UntypedNormalizedRuleType } from '../rule_type_registry';
 import { getEsErrorMessage } from '../lib/errors';
@@ -417,6 +418,7 @@ export class TaskRunner<
           this.countUsageOfActionExecutionAfterRuleCancellation();
         } else {
           actionSchedulerResult = await actionScheduler.run({
+            rule: rule as SanitizedRule,
             activeCurrentAlerts: alertsClient.getProcessedAlerts('activeCurrent'),
             recoveredCurrentAlerts: alertsClient.getProcessedAlerts('recoveredCurrent'),
           });
