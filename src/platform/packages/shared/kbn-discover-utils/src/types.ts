@@ -112,3 +112,41 @@ export interface LogCloudFields {
   'cloud.project.id'?: string;
   'cloud.instance.id'?: string;
 }
+
+export interface TraceDocumentOverview
+  extends ServiceFields,
+    TransactionTraceFields,
+    SpanTraceFields,
+    UserAgentTraceFields {
+  '@timestamp': number;
+  'trace.id': string;
+  'parent.id'?: string;
+  'http.response.status_code'?: number;
+  'processor.event'?: 'span' | 'transaction';
+}
+
+export interface ServiceFields {
+  'service.name': string;
+  'service.environment': string;
+  'agent.name': string;
+}
+
+export interface TransactionTraceFields {
+  'transaction.id'?: string;
+  'transaction.name'?: string;
+  'transaction.duration.us'?: number;
+}
+
+export interface SpanTraceFields {
+  'span.name'?: string;
+  'span.action'?: string;
+  'span.duration.us'?: number;
+  'span.type'?: string;
+  'span.subtype'?: string;
+  'span.destination.service.resource'?: string;
+}
+
+export interface UserAgentTraceFields {
+  'user_agent.name'?: string;
+  'user_agent.version'?: string;
+}
