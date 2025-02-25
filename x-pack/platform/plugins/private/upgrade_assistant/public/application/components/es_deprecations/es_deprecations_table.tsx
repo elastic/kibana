@@ -40,6 +40,7 @@ import {
 } from './deprecation_types';
 import { DeprecationTableColumns } from '../types';
 import { DEPRECATION_TYPE_MAP, PAGINATION_CONFIG } from '../constants';
+import { BulkReindexModal } from './bulk_reindex';
 
 const i18nTexts = {
   refreshButtonLabel: i18n.translate(
@@ -117,7 +118,7 @@ const renderTableRowCells = (
   deprecation: EnrichedDeprecationInfo,
   mlUpgradeModeEnabled: boolean,
   selectedDeprecations: Set<string>,
-  toggleDeprecation: (id: string) => void,
+  toggleDeprecation: (id?: string) => void,
 ) => {
   switch (deprecation.correctiveAction?.type) {
     case 'mlSnapshot':
@@ -277,12 +278,16 @@ export const EsDeprecationsTable: React.FunctionComponent<Props> = ({
 
   const toggleAll = () => {
     setSelectedDeprecations((prev) => {
-      const visibleIds = new Set(filteredDeprecations.map((dep) => dep.index || dep.message));
+      const selectableDeprecations = new Set(
+        filteredDeprecations
+        .filter((dep) => dep.correctiveAction?.type === 'reindex')
+        .map((dep) => dep.index || dep.message)
+      );
 
-      if (visibleIds.size === prev.size && [...prev].every((id) => visibleIds.has(id))) {
-        return new Set(); // Deselect all visible items
+      if (selectableDeprecations.size === prev.size && [...prev].every((id) => selectableDeprecations.has(id))) {
+        return new Set(); // Deselect all selectable items
       }
-      return visibleIds; // Select all visible items
+      return selectableDeprecations; // Select all selectable items
     });
   };
 
@@ -301,6 +306,12 @@ export const EsDeprecationsTable: React.FunctionComponent<Props> = ({
   return (
     <>
       <EuiFlexGroup gutterSize="m">
+        {selectedDeprecations.size > 0 && (
+          <EuiFlexItem grow={false}>
+            <BulkReindexModal indices={selectedDeprecations} />
+          </EuiFlexItem>
+        )}
+
         <EuiFlexItem data-test-subj="searchBarContainer">
           <EuiSearchBar
             box={{
