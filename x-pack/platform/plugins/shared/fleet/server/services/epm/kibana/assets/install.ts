@@ -38,7 +38,7 @@ import { appContextService } from '../../..';
 import { tagKibanaAssets } from './tag_assets';
 import { getSpaceAwareSaveobjectsClients } from './saved_objects';
 
-const MAX_ASSETS_TO_INSTALL_IN_PARALLEL = 100;
+const MAX_ASSETS_TO_INSTALL_IN_PARALLEL = 200;
 
 type SavedObjectsImporterContract = Pick<ISavedObjectsImporter, 'import' | 'resolveImportErrors'>;
 const formatImportErrorsForLog = (errors: SavedObjectsImportFailure[]) =>
@@ -276,7 +276,6 @@ export async function installKibanaAssetsAndReferences({
   const kibanaAssetsArchiveIterator = getKibanaAssetsArchiveIterator(packageInstallContext);
 
   if (installedPkg) {
-    // TODO condition if security rule not delete
     await deleteKibanaSavedObjectsAssets({ installedPkg, spaceId });
   }
   let installedKibanaAssetsRefs: KibanaAssetReference[] = [];
@@ -288,12 +287,11 @@ export async function installKibanaAssetsAndReferences({
     pkgName,
     kibanaAssetsArchiveIterator,
   });
-  // if (installAsAdditionalSpace) {
   const assets = importedAssets.map(
     ({ id, type, destinationId }) =>
       ({
         id: destinationId ?? id,
-        originId: id,
+        ...(id !== destinationId ? { originId: id } : {}),
         type,
       } as KibanaAssetReference)
   );

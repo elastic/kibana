@@ -271,28 +271,6 @@ _meta:
           'endpoint-0.16.0-dev.0/elasticsearch/transform/metadata_current/manifest.yml',
           'endpoint-0.16.0-dev.0/elasticsearch/transform/metadata_current/transform.yml',
         ],
-        assetsMap: new Map([
-          [
-            'endpoint-0.16.0-dev.0/elasticsearch/transform/metadata_current/fields/beats.yml',
-            sourceData.BEATS_FIELDS,
-          ],
-          [
-            'endpoint-0.16.0-dev.0/elasticsearch/transform/metadata_current/fields/agent.yml',
-            sourceData.AGENT_FIELDS,
-          ],
-          [
-            'endpoint-0.16.0-dev.0/elasticsearch/transform/metadata_current/fields/fields.yml',
-            sourceData.FIELDS,
-          ],
-          [
-            'endpoint-0.16.0-dev.0/elasticsearch/transform/metadata_current/manifest.yml',
-            sourceData.MANIFEST,
-          ],
-          [
-            'endpoint-0.16.0-dev.0/elasticsearch/transform/metadata_current/transform.yml',
-            sourceData.TRANSFORM,
-          ],
-        ]),
         archiveIterator: createArchiveIteratorFromMap(
           new Map([
             [
@@ -597,20 +575,6 @@ _meta:
           'endpoint-0.16.0-dev.0/elasticsearch/transform/metadata_current/manifest.yml',
           'endpoint-0.16.0-dev.0/elasticsearch/transform/metadata_current/transform.yml',
         ],
-        assetsMap: new Map([
-          [
-            'endpoint-0.16.0-dev.0/elasticsearch/transform/metadata_current/fields/fields.yml',
-            Buffer.from(sourceData.FIELDS),
-          ],
-          [
-            'endpoint-0.16.0-dev.0/elasticsearch/transform/metadata_current/manifest.yml',
-            Buffer.from(sourceData.MANIFEST),
-          ],
-          [
-            'endpoint-0.16.0-dev.0/elasticsearch/transform/metadata_current/transform.yml',
-            Buffer.from(sourceData.TRANSFORM),
-          ],
-        ]),
         archiveIterator: createArchiveIteratorFromMap(
           new Map([
             [
@@ -895,16 +859,6 @@ _meta:
           'endpoint-0.16.0-dev.0/elasticsearch/transform/metadata_current/fields/fields.yml',
           'endpoint-0.16.0-dev.0/elasticsearch/transform/metadata_current/transform.yml',
         ],
-        assetsMap: new Map([
-          [
-            'endpoint-0.16.0-dev.0/elasticsearch/transform/metadata_current/fields/fields.yml',
-            Buffer.from(sourceData.FIELDS),
-          ],
-          [
-            'endpoint-0.16.0-dev.0/elasticsearch/transform/metadata_current/transform.yml',
-            Buffer.from(sourceData.TRANSFORM),
-          ],
-        ]),
         archiveIterator: createArchiveIteratorFromMap(
           new Map([
             [
@@ -1135,16 +1089,6 @@ _meta:
           'endpoint-0.16.0-dev.0/elasticsearch/transform/metadata_current/manifest.yml',
           'endpoint-0.16.0-dev.0/elasticsearch/transform/metadata_current/transform.yml',
         ],
-        assetsMap: new Map([
-          [
-            'endpoint-0.16.0-dev.0/elasticsearch/transform/metadata_current/manifest.yml',
-            sourceData.MANIFEST,
-          ],
-          [
-            'endpoint-0.16.0-dev.0/elasticsearch/transform/metadata_current/transform.yml',
-            sourceData.TRANSFORM,
-          ],
-        ]),
         archiveIterator: createArchiveIteratorFromMap(
           new Map([
             [
@@ -1251,16 +1195,6 @@ _meta:
           'endpoint-0.16.0-dev.0/elasticsearch/transform/metadata_current/manifest.yml',
           'endpoint-0.16.0-dev.0/elasticsearch/transform/metadata_current/transform.yml',
         ],
-        assetsMap: new Map([
-          [
-            'endpoint-0.16.0-dev.0/elasticsearch/transform/metadata_current/manifest.yml',
-            sourceData.MANIFEST,
-          ],
-          [
-            'endpoint-0.16.0-dev.0/elasticsearch/transform/metadata_current/transform.yml',
-            sourceData.TRANSFORM,
-          ],
-        ]),
         archiveIterator: createArchiveIteratorFromMap(
           new Map([
             [
@@ -1358,20 +1292,6 @@ _meta:
           'endpoint-0.16.0-dev.0/elasticsearch/transform/metadata_current/manifest.yml',
           'endpoint-0.16.0-dev.0/elasticsearch/transform/metadata_current/transform.yml',
         ],
-        assetsMap: new Map([
-          [
-            'endpoint-0.16.0-dev.0/elasticsearch/transform/metadata_current/fields/fields.yml',
-            sourceData.FIELDS,
-          ],
-          [
-            'endpoint-0.16.0-dev.0/elasticsearch/transform/metadata_current/manifest.yml',
-            sourceData.MANIFEST,
-          ],
-          [
-            'endpoint-0.16.0-dev.0/elasticsearch/transform/metadata_current/transform.yml',
-            sourceData.TRANSFORM,
-          ],
-        ]),
         archiveIterator: createArchiveIteratorFromMap(
           new Map([
             [
