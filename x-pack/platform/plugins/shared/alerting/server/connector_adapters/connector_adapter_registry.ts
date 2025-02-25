@@ -8,7 +8,7 @@
 import Boom from '@hapi/boom';
 import { i18n } from '@kbn/i18n';
 
-import { ConnectorAdapter, ConnectorAdapterParams } from './types';
+import type { ConnectorAdapter, ConnectorAdapterParams } from './types';
 
 export class ConnectorAdapterRegistry {
   private readonly connectorAdapters: Map<string, ConnectorAdapter> = new Map();

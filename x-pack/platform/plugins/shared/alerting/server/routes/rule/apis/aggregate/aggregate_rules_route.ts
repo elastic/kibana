@@ -5,22 +5,23 @@
  * 2.0.
  */
 
-import { IRouter } from '@kbn/core/server';
-import { UsageCounter } from '@kbn/usage-collection-plugin/server';
+import type { IRouter } from '@kbn/core/server';
+import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 
 import { defaultRuleAggregationFactoryV1 } from '../../../../application/rule/methods/aggregate';
-import { ILicenseState } from '../../../../lib';
+import type { ILicenseState } from '../../../../lib';
 import { verifyAccessAndContext } from '../../../lib';
-import { AlertingRequestHandlerContext, INTERNAL_BASE_ALERTING_API_PATH } from '../../../../types';
+import type { AlertingRequestHandlerContext } from '../../../../types';
+import { INTERNAL_BASE_ALERTING_API_PATH } from '../../../../types';
 import { trackLegacyTerminology } from '../../../lib/track_legacy_terminology';
-import {
-  aggregateRulesRequestBodySchemaV1,
+import type {
   AggregateRulesRequestBodyV1,
   AggregateRulesResponseV1,
 } from '../../../../../common/routes/rule/apis/aggregate';
+import { aggregateRulesRequestBodySchemaV1 } from '../../../../../common/routes/rule/apis/aggregate';
 import { formatDefaultAggregationResult } from './transforms';
 import { transformAggregateQueryRequestV1, transformAggregateBodyResponseV1 } from './transforms';
-import { DefaultRuleAggregationResult } from './types';
+import type { DefaultRuleAggregationResult } from './types';
 import { DEFAULT_ALERTING_ROUTE_SECURITY } from '../../../constants';
 
 export const aggregateRulesRoute = (

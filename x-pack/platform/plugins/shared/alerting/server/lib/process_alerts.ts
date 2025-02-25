@@ -7,10 +7,10 @@
 
 import { millisToNanos } from '@kbn/event-log-plugin/server';
 import { cloneDeep } from 'lodash';
-import { Alert } from '../alert';
-import { AlertInstanceState, AlertInstanceContext } from '../types';
+import type { Alert } from '../alert';
+import type { AlertInstanceState, AlertInstanceContext } from '../types';
 import { updateFlappingHistory } from './flapping_utils';
-import { RulesSettingsFlappingProperties } from '../../common/rules_settings';
+import type { RulesSettingsFlappingProperties } from '../../common/rules_settings';
 
 interface ProcessAlertsOpts<
   State extends AlertInstanceState,

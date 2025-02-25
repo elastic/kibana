@@ -6,14 +6,14 @@
  */
 
 import sinon from 'sinon';
-import { KibanaRequest } from '@kbn/core/server';
+import type { KibanaRequest } from '@kbn/core/server';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { alertingEventLoggerMock } from '../../lib/alerting_event_logger/alerting_event_logger.mock';
 import { MaintenanceWindowsService } from './maintenance_windows_service';
 import { maintenanceWindowClientMock } from '../../maintenance_window_client.mock';
 import { getMockMaintenanceWindow } from '../../data/maintenance_window/test_helpers';
 import { MaintenanceWindowStatus } from '../../../common';
-import { MaintenanceWindowCategoryIds } from '../../../common/routes/maintenance_window/shared';
+import type { MaintenanceWindowCategoryIds } from '../../../common/routes/maintenance_window/shared';
 import { FilterStateStore } from '@kbn/es-query';
 
 const alertingEventLogger = alertingEventLoggerMock.create();

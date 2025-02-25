@@ -6,8 +6,8 @@
  */
 
 import { keys } from 'lodash';
-import { Alert } from '../alert';
-import { AlertInstanceState, AlertInstanceContext, RawAlertInstance } from '../types';
+import type { Alert } from '../alert';
+import type { AlertInstanceState, AlertInstanceContext, RawAlertInstance } from '../types';
 
 // determines which alerts to return in the state
 export function determineAlertsToReturn<
@@ -18,7 +18,7 @@ export function determineAlertsToReturn<
 >(
   activeAlerts: Record<string, Alert<State, Context, ActionGroupIds>> = {},
   recoveredAlerts: Record<string, Alert<State, Context, RecoveryActionGroupId>> = {},
-  shouldOptimizeTaskState: boolean = true
+  shouldOptimizeTaskState = true
 ): {
   alertsToReturn: Record<string, RawAlertInstance>;
   recoveredAlertsToReturn: Record<string, RawAlertInstance>;

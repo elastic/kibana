@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { AdHocRunSO } from '../../../data/ad_hoc_run/types';
-import { SavedObject } from '@kbn/core/server';
+import type { AdHocRunSO } from '../../../data/ad_hoc_run/types';
+import type { SavedObject } from '@kbn/core/server';
 import { adHocRunStatus } from '../../../../common/constants';
 import {
   transformAdHocRunToAdHocRunData,
   transformAdHocRunToBackfillResult,
 } from './transform_ad_hoc_run_to_backfill_result';
-import { RawRule } from '../../../types';
+import type { RawRule } from '../../../types';
 
 const isSystemAction = jest.fn().mockReturnValue(false);
 
