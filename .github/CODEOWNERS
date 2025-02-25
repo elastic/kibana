@@ -938,7 +938,7 @@ src/platform/packages/shared/kbn-shared-ux-utility @elastic/appex-sharedux
 x-pack/solutions/observability/plugins/slo @elastic/obs-ux-management-team
 x-pack/platform/packages/shared/kbn-slo-schema @elastic/obs-ux-management-team
 x-pack/platform/plugins/private/snapshot_restore @elastic/kibana-management
-packages/kbn-some-dev-log @elastic/kibana-operations
+src/platform/packages/private/kbn-some-dev-log @elastic/kibana-operations
 packages/kbn-sort-package-json @elastic/kibana-operations
 src/platform/packages/shared/kbn-sort-predicates @elastic/kibana-visualizations
 x-pack/platform/plugins/shared/spaces @elastic/kibana-security

@@ -7594,7 +7594,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/some-dev-log@link:packages/kbn-some-dev-log":
+"@kbn/some-dev-log@link:src/platform/packages/private/kbn-some-dev-log":
   version "0.0.0"
   uid ""
 
