@@ -66,10 +66,6 @@ main () {
   rm -rf elasticsearch
   git clone https://github.com/elastic/elasticsearch --depth 1
 
-  ls -la ./x-pack/plugin/esql/src/main/antlr
-  
-  cd ..
-
   cd "$KIBANA_DIR"
 
   license_header=$(cat "$KIBANA_DIR/licenses/ELASTIC-LICENSE-2.0-HEADER.txt")
