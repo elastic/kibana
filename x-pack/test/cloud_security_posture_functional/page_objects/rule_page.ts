@@ -133,10 +133,14 @@ export function RulePagePageProvider({ getService, getPageObjects }: FtrProvider
       return await rulesFlyoutEnableSwitchButton.getAttribute('aria-checked');
     },
 
-    togglEnableRulesRowSwitchButton: async (index: number) => {
+    togglEnableRulesRowSwitchButton: async (index: number, filterType: 'enable' | 'disable') => {
       const enableRulesRowSwitches = await testSubjects.findAll(RULES_ROWS_ENABLE_SWITCH_BUTTON);
       const checked = await enableRulesRowSwitches[index].getAttribute('aria-checked');
-      if (checked) {
+
+      if (filterType === 'enable' && checked) {
+        return;
+      }
+      if (filterType === 'disable' && !checked) {
         return;
       }
       await enableRulesRowSwitches[index].click();

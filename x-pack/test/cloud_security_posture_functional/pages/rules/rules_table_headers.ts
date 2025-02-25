@@ -42,6 +42,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           'fleet-agent-policies',
           'ingest-package-policies',
           'fleet-package-policies',
+          'cloud-security-posture-settings',
         ],
       });
       await esArchiver.load('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
@@ -84,6 +85,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           'fleet-agent-policies',
           'ingest-package-policies',
           'fleet-package-policies',
+          'cloud-security-posture-settings',
         ],
       });
       await findings.index.remove();
@@ -93,13 +95,13 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       it('Should only display Enabled rules when Enabled Rules filter is ON', async () => {
         await rule.rulePage.clickFilterButton('enabled');
         await pageObjects.header.waitUntilLoadingHasFinished();
-        expect((await rule.rulePage.getEnableRulesRowSwitchButton()) === 1).to.be(true);
+        expect((await rule.rulePage.getEnableRulesRowSwitchButton()) === 25).to.be(true);
       });
 
       it('Should only display Disabled rules when Disabled Rules filter is ON', async () => {
         await rule.rulePage.clickFilterButton('disabled');
         await pageObjects.header.waitUntilLoadingHasFinished();
-        expect((await rule.rulePage.getEnableRulesRowSwitchButton()) > 1).to.be(true);
+        expect((await rule.rulePage.getEnableRulesRowSwitchButton()) === 0).to.be(true);
       });
     });
 

@@ -47,6 +47,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           'fleet-agent-policies',
           'ingest-package-policies',
           'fleet-package-policies',
+          'cloud-security-posture-settings',
         ],
       });
       await esArchiver.load('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
@@ -89,6 +90,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           'fleet-agent-policies',
           'ingest-package-policies',
           'fleet-package-policies',
+          'cloud-security-posture-settings',
         ],
       });
       await findings.index.remove();
@@ -156,7 +158,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     describe('Rules Page - Flyout', () => {
       it('Users are able to Enable/Disable Rule from Switch on Rule Flyout', async () => {
         // Ensure that the first rule is enabled
-        await rule.rulePage.togglEnableRulesRowSwitchButton(0);
+        await rule.rulePage.togglEnableRulesRowSwitchButton(0, 'enable');
         await rule.rulePage.clickRulesNames(0);
         await rule.rulePage.clickFlyoutEnableSwitchButton();
         await pageObjects.header.waitUntilLoadingHasFinished();
@@ -164,6 +166,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await rule.rulePage.clickCloseFlyoutButton();
       });
       it('Alerts section of Rules Flyout shows Disabled text when Rules are disabled', async () => {
+        await rule.rulePage.togglEnableRulesRowSwitchButton(0, 'disable');
         await rule.rulePage.clickRulesNames(0);
         await pageObjects.header.waitUntilLoadingHasFinished();
         expect(
@@ -174,6 +177,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await rule.rulePage.clickCloseFlyoutButton();
       });
       it('Users are able to Enable/Disable Rule from Take Action on Rule Flyout', async () => {
+        await rule.rulePage.togglEnableRulesRowSwitchButton(0, 'disable');
+
         await rule.rulePage.clickRulesNames(0);
         await retryService.try(async () => {
           await rule.rulePage.clickTakeActionButton();

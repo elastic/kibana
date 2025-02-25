@@ -43,6 +43,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           'fleet-agent-policies',
           'ingest-package-policies',
           'fleet-package-policies',
+          'cloud-security-posture-settings',
         ],
       });
       await esArchiver.load('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
@@ -85,6 +86,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           'fleet-agent-policies',
           'ingest-package-policies',
           'fleet-package-policies',
+          'cloud-security-posture-settings',
         ],
       });
       await findings.index.remove();
