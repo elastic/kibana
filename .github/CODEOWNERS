@@ -562,7 +562,7 @@ x-pack/solutions/observability/plugins/investigate @elastic/obs-ux-management-te
 x-pack/solutions/observability/packages/kbn-investigation-shared @elastic/obs-ux-management-team
 src/platform/packages/shared/kbn-io-ts-utils @elastic/obs-knowledge-team
 x-pack/solutions/search/packages/kbn-ipynb @elastic/search-kibana
-packages/kbn-jest-serializers @elastic/kibana-operations
+src/platform/packages/private/kbn-jest-serializers @elastic/kibana-operations
 packages/kbn-journeys @elastic/kibana-operations @elastic/appex-qa
 packages/kbn-json-ast @elastic/kibana-operations
 x-pack/platform/packages/private/ml/json_schemas @elastic/ml-ui

@@ -6090,7 +6090,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/jest-serializers@link:packages/kbn-jest-serializers":
+"@kbn/jest-serializers@link:src/platform/packages/private/kbn-jest-serializers":
   version "0.0.0"
   uid ""
 
