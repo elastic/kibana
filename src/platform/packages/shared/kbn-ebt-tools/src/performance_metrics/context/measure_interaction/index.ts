@@ -34,7 +34,7 @@ export function measureInteraction() {
       performance.mark(perfomanceMarkers.endPageReady);
 
       if (eventData?.meta) {
-        const { rangeFrom, rangeTo } = eventData.meta;
+        const { rangeFrom, rangeTo, description } = eventData.meta;
 
         // Convert the date range  to epoch timestamps (in milliseconds)
         const dateRangesInEpoch = getDateRange({
@@ -46,6 +46,7 @@ export function measureInteraction() {
           queryRangeSecs: getTimeDifferenceInSeconds(dateRangesInEpoch),
           queryOffsetSecs:
             rangeTo === 'now' ? 0 : getOffsetFromNowInSeconds(dateRangesInEpoch.endDate),
+          ...(description && { description }),
         };
       }
 
