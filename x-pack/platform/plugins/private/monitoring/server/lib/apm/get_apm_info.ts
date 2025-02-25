@@ -128,25 +128,23 @@ export async function getApmInfo(
       'hits.hits.inner_hits.first_hit.hits.hits._source.beat.stats.libbeat.pipeline.events.dropped',
       'hits.hits.inner_hits.first_hit.hits.hits._source.beat.stats.libbeat.output.write.bytes',
     ],
-    body: {
-      sort: { timestamp: { order: 'desc', unmapped_type: 'long' } },
-      query: createQuery({
-        start,
-        end,
-        clusterUuid,
-        metric: ApmMetric.getMetricFields(),
-        filters,
-      }),
-      collapse: {
-        field: 'beats_stats.metrics.beat.info.ephemeral_id', // collapse on ephemeral_id to handle restart
-        inner_hits: {
-          name: 'first_hit',
-          size: 1,
-          sort: [
-            { 'beats_stats.timestamp': { order: 'asc', unmapped_type: 'long' } },
-            { '@timestamp': { order: 'asc', unmapped_type: 'long' } },
-          ],
-        },
+    sort: { timestamp: { order: 'desc', unmapped_type: 'long' } },
+    query: createQuery({
+      start,
+      end,
+      clusterUuid,
+      metric: ApmMetric.getMetricFields(),
+      filters,
+    }),
+    collapse: {
+      field: 'beats_stats.metrics.beat.info.ephemeral_id', // collapse on ephemeral_id to handle restart
+      inner_hits: {
+        name: 'first_hit',
+        size: 1,
+        sort: [
+          { 'beats_stats.timestamp': { order: 'asc', unmapped_type: 'long' } },
+          { '@timestamp': { order: 'asc', unmapped_type: 'long' } },
+        ],
       },
     },
   };

@@ -101,12 +101,10 @@ export async function getLogs(
       'hits.hits._source.elasticsearch.node.name',
     ],
     ignore_unavailable: true,
-    body: {
-      sort: { '@timestamp': { order: 'desc', unmapped_type: 'long' } },
-      query: {
-        bool: {
-          filter: [elasticsearchLogsFilter, ...filter],
-        },
+    sort: { '@timestamp': { order: 'desc', unmapped_type: 'long' } },
+    query: {
+      bool: {
+        filter: [elasticsearchLogsFilter, ...filter],
       },
     },
   };

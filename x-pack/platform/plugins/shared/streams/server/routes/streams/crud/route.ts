@@ -87,18 +87,16 @@ export const streamDetailRoute = createServerRoute({
     // check doc count
     const docCountResponse = await scopedClusterClient.asCurrentUser.search({
       index: indexPattern,
-      body: {
-        track_total_hits: true,
-        query: {
-          range: {
-            '@timestamp': {
-              gte: params.query.start,
-              lte: params.query.end,
-            },
+      track_total_hits: true,
+      query: {
+        range: {
+          '@timestamp': {
+            gte: params.query.start,
+            lte: params.query.end,
           },
         },
-        size: 0,
       },
+      size: 0,
     });
 
     const count = (docCountResponse.hits.total as SearchTotalHits).value;

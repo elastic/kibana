@@ -101,10 +101,10 @@ describe('CSV Export Search Cursor', () => {
       expect(dataSearchSpy).toBeCalledTimes(1);
       expect(dataSearchSpy).toBeCalledWith(
         {
-          params: {
-            body: expect.objectContaining({ pit: { id: 'somewhat-pit-id', keep_alive: '10m' } }),
+          params: expect.objectContaining({
+            pit: { id: 'somewhat-pit-id', keep_alive: '10m' },
             max_concurrent_shard_requests: 5,
-          },
+          }),
         },
         expect.objectContaining({
           strategy: 'es',
@@ -160,14 +160,12 @@ describe('CSV Export Search Cursor', () => {
       expect(dataSearchSpy).toBeCalledWith(
         {
           params: {
-            body: {
-              fields: [],
-              pit: { id: 'somewhat-pit-id', keep_alive: '10m' },
-              query: { bool: { filter: [], must: [], must_not: [], should: [] } },
-              runtime_mappings: {},
-              script_fields: {},
-              stored_fields: ['*'],
-            },
+            fields: [],
+            pit: { id: 'somewhat-pit-id', keep_alive: '10m' },
+            query: { bool: { filter: [], must: [], must_not: [], should: [] } },
+            runtime_mappings: {},
+            script_fields: {},
+            stored_fields: ['*'],
             max_concurrent_shard_requests: undefined,
           },
         },

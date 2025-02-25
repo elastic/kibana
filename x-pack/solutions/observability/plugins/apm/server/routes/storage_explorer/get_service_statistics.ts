@@ -57,68 +57,66 @@ async function getMainServiceStatistics({
           ProcessorEvent.metric,
         ],
       },
-      body: {
-        size: 0,
-        track_total_hits: false,
-        query: {
-          bool: {
-            filter: [
-              ...environmentQuery(environment),
-              ...kqlQuery(kuery),
-              ...rangeQuery(start, end),
-              ...(indexLifecyclePhase !== IndexLifecyclePhaseSelectOption.All
-                ? termQuery(TIER, indexLifeCyclePhaseToDataTier[indexLifecyclePhase])
-                : []),
-            ],
-          },
+      size: 0,
+      track_total_hits: false,
+      query: {
+        bool: {
+          filter: [
+            ...environmentQuery(environment),
+            ...kqlQuery(kuery),
+            ...rangeQuery(start, end),
+            ...(indexLifecyclePhase !== IndexLifecyclePhaseSelectOption.All
+              ? termQuery(TIER, indexLifeCyclePhaseToDataTier[indexLifecyclePhase])
+              : []),
+          ],
         },
-        aggs: {
-          sample: {
-            random_sampler: randomSampler,
-            aggs: {
-              services: {
-                terms: {
-                  field: SERVICE_NAME,
-                  size: 500,
+      },
+      aggs: {
+        sample: {
+          random_sampler: randomSampler,
+          aggs: {
+            services: {
+              terms: {
+                field: SERVICE_NAME,
+                size: 500,
+              },
+              aggs: {
+                sample: {
+                  top_metrics: {
+                    size: 1,
+                    metrics: { field: AGENT_NAME },
+                    sort: {
+                      '@timestamp': 'desc',
+                    },
+                  },
                 },
-                aggs: {
-                  sample: {
-                    top_metrics: {
-                      size: 1,
-                      metrics: { field: AGENT_NAME },
-                      sort: {
-                        '@timestamp': 'desc',
+                indices: {
+                  terms: {
+                    field: INDEX,
+                    size: 500,
+                  },
+                  aggs: {
+                    number_of_metric_docs: {
+                      value_count: {
+                        field: INDEX,
                       },
                     },
                   },
-                  indices: {
-                    terms: {
-                      field: INDEX,
-                      size: 500,
-                    },
-                    aggs: {
-                      number_of_metric_docs: {
-                        value_count: {
-                          field: INDEX,
-                        },
-                      },
-                    },
+                },
+                environments: {
+                  terms: {
+                    field: SERVICE_ENVIRONMENT,
                   },
-                  environments: {
-                    terms: {
-                      field: SERVICE_ENVIRONMENT,
-                    },
+                },
+                transactions: {
+                  filter: {
+                    term: { [PROCESSOR_EVENT]: ProcessorEvent.transaction },
                   },
-                  transactions: {
-                    filter: {
-                      term: { [PROCESSOR_EVENT]: ProcessorEvent.transaction },
-                    },
-                    aggs: {
-                      sampled_transactions: {
-                        terms: {
-                          field: TRANSACTION_SAMPLED,
-                          size: 10,
-                        },
+                  aggs: {
+                    sampled_transactions: {
+                      terms: {
+                        field: TRANSACTION_SAMPLED,
+                        size: 10,
                       },
                     },
                   },

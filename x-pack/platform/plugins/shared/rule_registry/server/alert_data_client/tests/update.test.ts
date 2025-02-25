@@ -135,10 +135,8 @@ describe('update()', () => {
     expect(esClientMock.update.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
         Object {
-          "body": Object {
-            "doc": Object {
-              "${ALERT_WORKFLOW_STATUS}": "closed",
-            },
+          "doc": Object {
+            "kibana.alert.workflow_status": "closed",
           },
           "id": "1",
           "index": ".alerts-observability.apm.alerts",

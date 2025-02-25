@@ -13,7 +13,7 @@ import type {
 import type { FileUploadStartApi } from '@kbn/file-upload-plugin/public/api';
 import { i18n } from '@kbn/i18n';
 import type { HttpSetup } from '@kbn/core/public';
-import type { MappingTypeMapping } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
 import { IMPORT_STATUS } from '../import_progress/import_progress';
 import { AutoDeploy } from './auto_deploy';
 

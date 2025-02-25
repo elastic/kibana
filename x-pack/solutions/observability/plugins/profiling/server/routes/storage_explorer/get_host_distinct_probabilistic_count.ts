@@ -27,48 +27,46 @@ export async function getHostAndDistinctProbabilisticCount({
 }) {
   const response = await client.search('profiling_probabilistic_cardinality', {
     index: 'profiling-hosts',
-    body: {
-      query: {
-        bool: {
-          filter: [
-            ...kqlQuery(kuery),
-            {
-              range: {
-                '@timestamp': {
-                  gte: String(timeFrom),
-                  lt: String(timeTo),
-                  format: 'epoch_second',
-                },
+    query: {
+      bool: {
+        filter: [
+          ...kqlQuery(kuery),
+          {
+            range: {
+              '@timestamp': {
+                gte: String(timeFrom),
+                lt: String(timeTo),
+                format: 'epoch_second',
               },
             },
-            ...(indexLifecyclePhase !== IndexLifecyclePhaseSelectOption.All
-              ? termQuery('_tier', indexLifeCyclePhaseToDataTier[indexLifecyclePhase])
-              : []),
-          ],
+          },
+          ...(indexLifecyclePhase !== IndexLifecyclePhaseSelectOption.All
+            ? termQuery('_tier', indexLifeCyclePhaseToDataTier[indexLifecyclePhase])
+            : []),
+        ],
+      },
+    },
+    aggs: {
+      hostsAndProjectIds: {
+        multi_terms: {
+          terms: [{ field: 'host.id' }, { field: 'profiling.project.id' }],
+        },
+        aggs: {
+          activeProbabilisticValue: {
+            top_metrics: {
+              metrics: {
+                field: 'profiling.agent.config.probabilistic_threshold',
+              },
+              sort: {
+                '@timestamp': 'desc',
+              },
+            },
+          },
         },
       },
-      aggs: {
-        hostsAndProjectIds: {
-          multi_terms: {
-            terms: [{ field: 'host.id' }, { field: 'profiling.project.id' }],
-          },
-          aggs: {
-            activeProbabilisticValue: {
-              top_metrics: {
-                metrics: {
-                  field: 'profiling.agent.config.probabilistic_threshold',
-                },
-                sort: {
-                  '@timestamp': 'desc',
-                },
-              },
-            },
-          },
-        },
-        hostCount: {
-          cardinality: {
-            field: 'host.id',
-          },
+      hostCount: {
+        cardinality: {
+          field: 'host.id',
         },
       },
     },

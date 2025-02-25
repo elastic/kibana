@@ -12,7 +12,7 @@ import type {
   QueryDslGeoDistanceQuery,
   QueryDslGeoShapeFieldQuery,
   QueryDslGeoShapeQuery,
-} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+} from '@elastic/elasticsearch/lib/api/types';
 import { i18n } from '@kbn/i18n';
 import { Feature, Geometry, MultiPolygon, Polygon, Position } from 'geojson';
 // @ts-expect-error

@@ -14,33 +14,33 @@ export const canManageEntityDefinition = async (
   client: ElasticsearchClient,
   sourceIndices: string[]
 ) => {
-  const { has_all_requested: hasAllRequested } = await client.security.hasPrivileges({
-    body: entityDefinitionRuntimePrivileges(sourceIndices),
-  });
+  const { has_all_requested: hasAllRequested } = await client.security.hasPrivileges(
+    entityDefinitionRuntimePrivileges(sourceIndices)
+  );
 
   return hasAllRequested;
 };
 
 export const canDeleteEntityDefinition = async (client: ElasticsearchClient) => {
-  const { has_all_requested: hasAllRequested } = await client.security.hasPrivileges({
-    body: entityDefinitionDeletionPrivileges,
-  });
+  const { has_all_requested: hasAllRequested } = await client.security.hasPrivileges(
+    entityDefinitionDeletionPrivileges
+  );
 
   return hasAllRequested;
 };
 
 const canManageAPIKey = async (client: ElasticsearchClient) => {
-  const { has_all_requested: hasAllRequested } = await client.security.hasPrivileges({
-    body: apiKeyCreationPrivileges,
-  });
+  const { has_all_requested: hasAllRequested } = await client.security.hasPrivileges(
+    apiKeyCreationPrivileges
+  );
 
   return hasAllRequested;
 };
 
 const canDeleteAPIKey = async (client: ElasticsearchClient) => {
-  const { has_all_requested: hasAllRequested } = await client.security.hasPrivileges({
-    body: apiKeyDeletionPrivileges,
-  });
+  const { has_all_requested: hasAllRequested } = await client.security.hasPrivileges(
+    apiKeyDeletionPrivileges
+  );
 
   return hasAllRequested;
 };

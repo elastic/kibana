@@ -97,15 +97,13 @@ export class EsIndexFilesMetadataClient<M = unknown> implements FileMetadataClie
     const doc = await this.esClient
       .search({
         index: this.index,
-        body: {
-          size: 1,
-          query: {
-            term: {
-              _id: id,
-            },
+        size: 1,
+        query: {
+          term: {
+            _id: id,
           },
-          _source: false, // suppress the document content
         },
+        _source: false, // suppress the document content
       })
       .catch(
         wrapErrorAndReThrow.withMessagePrefix('EsIndexFilesMetadataClient.getBackingIndex(): ')
@@ -156,12 +154,10 @@ export class EsIndexFilesMetadataClient<M = unknown> implements FileMetadataClie
         await esClient
           .search<FileDocument<M>>({
             index,
-            body: {
-              size: 1,
-              query: {
-                term: {
-                  _id: id,
-                },
+            size: 1,
+            query: {
+              term: {
+                _id: id,
               },
             },
           })

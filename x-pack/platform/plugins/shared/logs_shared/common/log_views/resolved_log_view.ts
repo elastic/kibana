@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { estypes } from '@elastic/elasticsearch';
 import { DataView, DataViewsContract, FieldSpec } from '@kbn/data-views-plugin/common';
 import { LogSourcesService } from '@kbn/logs-data-access-plugin/common/services/log_sources_service/types';
 import { TIEBREAKER_FIELD, TIMESTAMP_FIELD } from '../constants';

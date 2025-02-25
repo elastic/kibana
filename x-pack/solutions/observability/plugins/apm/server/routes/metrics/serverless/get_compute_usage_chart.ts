@@ -56,33 +56,31 @@ export async function getComputeUsageChart({
     apm: {
       events: [ProcessorEvent.metric],
     },
-    body: {
-      track_total_hits: false,
-      size: 0,
-      query: {
-        bool: {
-          filter: [
-            { term: { [SERVICE_NAME]: serviceName } },
-            ...rangeQuery(start, end),
-            ...environmentQuery(environment),
-            ...kqlQuery(kuery),
-            { exists: { field: FAAS_BILLED_DURATION } },
-            ...termQuery(METRICSET_NAME, 'app'),
-            ...termQuery(FAAS_ID, serverlessId),
-          ],
-        },
+    track_total_hits: false,
+    size: 0,
+    query: {
+      bool: {
+        filter: [
+          { term: { [SERVICE_NAME]: serviceName } },
+          ...rangeQuery(start, end),
+          ...environmentQuery(environment),
+          ...kqlQuery(kuery),
+          { exists: { field: FAAS_BILLED_DURATION } },
+          ...termQuery(METRICSET_NAME, 'app'),
+          ...termQuery(FAAS_ID, serverlessId),
+        ],
       },
-      aggs: {
-        timeseriesData: {
-          date_histogram: getMetricsDateHistogramParams({
-            start,
-            end,
-            metricsInterval: config.metricsInterval,
-          }),
-          aggs,
-        },
-        ...aggs,
+    },
+    aggs: {
+      timeseriesData: {
+        date_histogram: getMetricsDateHistogramParams({
+          start,
+          end,
+          metricsInterval: config.metricsInterval,
+        }),
+        aggs,
       },
+      ...aggs,
     },
   };
 

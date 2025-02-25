@@ -27,7 +27,7 @@
           "TelemetrySchemaObject",
           "; }, stats: unknown) => void"
         ],
-        "path": "packages/kbn-telemetry-tools/src/schema_ftr_validations/schema_to_config_schema.ts",
+        "path": "src/platform/packages/private/kbn-telemetry-tools/src/schema_ftr_validations/schema_to_config_schema.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -38,7 +38,7 @@
             "tags": [],
             "label": "telemetrySchema",
             "description": [],
-            "path": "packages/kbn-telemetry-tools/src/schema_ftr_validations/schema_to_config_schema.ts",
+            "path": "src/platform/packages/private/kbn-telemetry-tools/src/schema_ftr_validations/schema_to_config_schema.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -52,7 +52,7 @@
                 "signature": [
                   "TelemetrySchemaObject"
                 ],
-                "path": "packages/kbn-telemetry-tools/src/schema_ftr_validations/schema_to_config_schema.ts",
+                "path": "src/platform/packages/private/kbn-telemetry-tools/src/schema_ftr_validations/schema_to_config_schema.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -66,7 +66,7 @@
                 "signature": [
                   "TelemetrySchemaObject"
                 ],
-                "path": "packages/kbn-telemetry-tools/src/schema_ftr_validations/schema_to_config_schema.ts",
+                "path": "src/platform/packages/private/kbn-telemetry-tools/src/schema_ftr_validations/schema_to_config_schema.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -84,7 +84,7 @@
             "signature": [
               "unknown"
             ],
-            "path": "packages/kbn-telemetry-tools/src/schema_ftr_validations/schema_to_config_schema.ts",
+            "path": "src/platform/packages/private/kbn-telemetry-tools/src/schema_ftr_validations/schema_to_config_schema.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -103,7 +103,7 @@
         "signature": [
           "() => void"
         ],
-        "path": "packages/kbn-telemetry-tools/src/cli/run_telemetry_check.ts",
+        "path": "src/platform/packages/private/kbn-telemetry-tools/src/cli/run_telemetry_check.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [],
@@ -120,7 +120,7 @@
         "signature": [
           "() => void"
         ],
-        "path": "packages/kbn-telemetry-tools/src/cli/run_telemetry_extract.ts",
+        "path": "src/platform/packages/private/kbn-telemetry-tools/src/cli/run_telemetry_extract.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [],

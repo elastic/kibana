@@ -10,10 +10,8 @@ import { LegacyRequest } from '../../../types';
 export function setCollectionDisabled(req: LegacyRequest) {
   const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('admin');
   const params = {
-    body: {
-      transient: { 'xpack.monitoring.elasticsearch.collection.enabled': null }, // clears the disabling method used in testing environment
-      persistent: { 'xpack.monitoring.elasticsearch.collection.enabled': false },
-    },
+    transient: { 'xpack.monitoring.elasticsearch.collection.enabled': null }, // clears the disabling method used in testing environment
+    persistent: { 'xpack.monitoring.elasticsearch.collection.enabled': false },
   };
 
   // https://www.elastic.co/guide/en/elasticsearch/client/javascript-api/current/api-reference.html#api-cluster-putsettings

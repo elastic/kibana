@@ -9,7 +9,7 @@ import { groupBy, keyBy, memoize, partition } from 'lodash';
 
 import type { KibanaRequest, Logger, SavedObjectsClientContract } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
-import type { MlJob } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { MlJob } from '@elastic/elasticsearch/lib/api/types';
 import { isDefined } from '@kbn/ml-is-defined';
 import { ALERT_REASON } from '@kbn/rule-data-utils';
 import { parseInterval } from '@kbn/ml-parse-interval';
@@ -204,7 +204,7 @@ export function jobsHealthServiceProvider(
         // match datafeed stats with the job ids
         return (datafeedsStats as DatafeedStats[])
           .map((datafeedStats) => {
-            const jobId = datafeedStats.timing_stats.job_id;
+            const jobId = datafeedStats.timing_stats!.job_id;
             const jobState =
               jobsStats.find((jobStats) => jobStats.job_id === jobId)?.state ?? 'failed';
             return {

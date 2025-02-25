@@ -29,7 +29,7 @@
         "description": [
           "\nGeneric interface that is implemented by the ToolingLog and the logger\nused by kbn_pm, which is responsible for running before the repo is\nbootstrapped and therefore can't use the ToolingLog."
         ],
-        "path": "packages/kbn-some-dev-log/src/some_dev_log.ts",
+        "path": "src/platform/packages/private/kbn-some-dev-log/src/some_dev_log.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -45,7 +45,7 @@
             "signature": [
               "(msg: string, ...rest: any[]) => void"
             ],
-            "path": "packages/kbn-some-dev-log/src/some_dev_log.ts",
+            "path": "src/platform/packages/private/kbn-some-dev-log/src/some_dev_log.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -59,7 +59,7 @@
                 "signature": [
                   "string"
                 ],
-                "path": "packages/kbn-some-dev-log/src/some_dev_log.ts",
+                "path": "src/platform/packages/private/kbn-some-dev-log/src/some_dev_log.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -74,7 +74,7 @@
                 "signature": [
                   "any[]"
                 ],
-                "path": "packages/kbn-some-dev-log/src/some_dev_log.ts",
+                "path": "src/platform/packages/private/kbn-some-dev-log/src/some_dev_log.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -94,7 +94,7 @@
             "signature": [
               "(msg: string, ...rest: any[]) => void"
             ],
-            "path": "packages/kbn-some-dev-log/src/some_dev_log.ts",
+            "path": "src/platform/packages/private/kbn-some-dev-log/src/some_dev_log.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -108,7 +108,7 @@
                 "signature": [
                   "string"
                 ],
-                "path": "packages/kbn-some-dev-log/src/some_dev_log.ts",
+                "path": "src/platform/packages/private/kbn-some-dev-log/src/some_dev_log.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -123,7 +123,7 @@
                 "signature": [
                   "any[]"
                 ],
-                "path": "packages/kbn-some-dev-log/src/some_dev_log.ts",
+                "path": "src/platform/packages/private/kbn-some-dev-log/src/some_dev_log.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -143,7 +143,7 @@
             "signature": [
               "(msg: string, ...rest: any[]) => void"
             ],
-            "path": "packages/kbn-some-dev-log/src/some_dev_log.ts",
+            "path": "src/platform/packages/private/kbn-some-dev-log/src/some_dev_log.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -157,7 +157,7 @@
                 "signature": [
                   "string"
                 ],
-                "path": "packages/kbn-some-dev-log/src/some_dev_log.ts",
+                "path": "src/platform/packages/private/kbn-some-dev-log/src/some_dev_log.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -172,7 +172,7 @@
                 "signature": [
                   "any[]"
                 ],
-                "path": "packages/kbn-some-dev-log/src/some_dev_log.ts",
+                "path": "src/platform/packages/private/kbn-some-dev-log/src/some_dev_log.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -192,7 +192,7 @@
             "signature": [
               "(msg: string, ...rest: any[]) => void"
             ],
-            "path": "packages/kbn-some-dev-log/src/some_dev_log.ts",
+            "path": "src/platform/packages/private/kbn-some-dev-log/src/some_dev_log.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -206,7 +206,7 @@
                 "signature": [
                   "string"
                 ],
-                "path": "packages/kbn-some-dev-log/src/some_dev_log.ts",
+                "path": "src/platform/packages/private/kbn-some-dev-log/src/some_dev_log.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -221,7 +221,7 @@
                 "signature": [
                   "any[]"
                 ],
-                "path": "packages/kbn-some-dev-log/src/some_dev_log.ts",
+                "path": "src/platform/packages/private/kbn-some-dev-log/src/some_dev_log.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -241,7 +241,7 @@
             "signature": [
               "(msg: string, ...rest: any[]) => void"
             ],
-            "path": "packages/kbn-some-dev-log/src/some_dev_log.ts",
+            "path": "src/platform/packages/private/kbn-some-dev-log/src/some_dev_log.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -255,7 +255,7 @@
                 "signature": [
                   "string"
                 ],
-                "path": "packages/kbn-some-dev-log/src/some_dev_log.ts",
+                "path": "src/platform/packages/private/kbn-some-dev-log/src/some_dev_log.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -270,7 +270,7 @@
                 "signature": [
                   "any[]"
                 ],
-                "path": "packages/kbn-some-dev-log/src/some_dev_log.ts",
+                "path": "src/platform/packages/private/kbn-some-dev-log/src/some_dev_log.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -290,7 +290,7 @@
             "signature": [
               "(msg: string, ...rest: any[]) => void"
             ],
-            "path": "packages/kbn-some-dev-log/src/some_dev_log.ts",
+            "path": "src/platform/packages/private/kbn-some-dev-log/src/some_dev_log.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -304,7 +304,7 @@
                 "signature": [
                   "string"
                 ],
-                "path": "packages/kbn-some-dev-log/src/some_dev_log.ts",
+                "path": "src/platform/packages/private/kbn-some-dev-log/src/some_dev_log.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -319,7 +319,7 @@
                 "signature": [
                   "any[]"
                 ],
-                "path": "packages/kbn-some-dev-log/src/some_dev_log.ts",
+                "path": "src/platform/packages/private/kbn-some-dev-log/src/some_dev_log.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -345,7 +345,7 @@
         "signature": [
           "\"info\" | \"debug\" | \"verbose\" | \"quiet\""
         ],
-        "path": "packages/kbn-some-dev-log/src/some_dev_log.ts",
+        "path": "src/platform/packages/private/kbn-some-dev-log/src/some_dev_log.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

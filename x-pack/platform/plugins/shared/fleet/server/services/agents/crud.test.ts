@@ -29,6 +29,7 @@ import {
   updateAgent,
   _joinFilters,
   getByIds,
+  fetchAllAgentsByKuery,
 } from './crud';
 
 jest.mock('../audit_logging');
@@ -572,6 +573,44 @@ describe('Agents CRUD test', () => {
       await expect(getByIds(esClientMock, soClientMock, ['1', '2'])).rejects.toThrow(
         AgentNotFoundError
       );
+    });
+  });
+
+  describe('fetchAllAgentsByKuery', () => {
+    const createEsSearchResultMock = (ids: string[]) => {
+      const mock = getEsResponse(ids, ids.length, 'online');
+      return {
+        ...mock,
+        hits: {
+          ...mock.hits,
+          hits: mock.hits.hits.map((item) => ({ ...item, sort: ['enrolled_at'] })),
+        },
+      };
+    };
+
+    it('should return an iterator', async () => {
+      expect(await fetchAllAgentsByKuery(esClientMock, soClientMock, {})).toEqual({
+        [Symbol.asyncIterator]: expect.any(Function),
+      });
+    });
+
+    it('should provide agents on every iteration', async () => {
+      const agentIds = [
+        ['1', '2', '3'],
+        ['4', '5', '6'],
+      ];
+      searchMock
+        .mockResolvedValueOnce(createEsSearchResultMock(agentIds[0]))
+        .mockResolvedValueOnce(createEsSearchResultMock(agentIds[1]))
+        .mockResolvedValueOnce(createEsSearchResultMock([]));
+
+      let testCounter = 0;
+      for await (const agents of await fetchAllAgentsByKuery(esClientMock, soClientMock, {})) {
+        expect(agents.map((agent) => agent.id)).toEqual(agentIds[testCounter]);
+        testCounter++;
+      }
+
+      expect(searchMock).toHaveBeenCalledTimes(3);
     });
   });
 });

@@ -126,7 +126,7 @@ function getIndexRecordActionType() {
       await services.scopedClusterClient.index({
         index: params.index,
         refresh: 'wait_for',
-        body: {
+        document: {
           params,
           config,
           secrets,

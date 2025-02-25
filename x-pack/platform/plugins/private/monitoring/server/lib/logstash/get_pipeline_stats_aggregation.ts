@@ -148,12 +148,10 @@ function fetchPipelineLatestStats(
       'aggregations.pipelines_mb.scoped.vertices.vertex_id.buckets.duration_in_millis_total',
       'aggregations.pipelines_mb.scoped.total_processor_duration_stats',
     ],
-    body: {
-      query,
-      aggs: {
-        pipelines: pipelineAggregation('logstash_stats'),
-        pipelines_mb: pipelineAggregation('logstash.node.stats'),
-      },
+    query,
+    aggs: {
+      pipelines: pipelineAggregation('logstash_stats'),
+      pipelines_mb: pipelineAggregation('logstash.node.stats'),
     },
   };
 

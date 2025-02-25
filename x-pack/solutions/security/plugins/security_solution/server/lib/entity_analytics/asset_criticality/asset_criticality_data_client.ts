@@ -246,10 +246,8 @@ export class AssetCriticalityDataClient {
       id,
       index: this.getIndex(),
       refresh: refresh ?? false,
-      body: {
-        doc,
-        doc_as_upsert: true,
-      },
+      doc,
+      doc_as_upsert: true,
     });
 
     return doc;

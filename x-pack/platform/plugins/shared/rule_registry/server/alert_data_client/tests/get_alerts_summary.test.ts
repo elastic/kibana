@@ -121,188 +121,186 @@ describe('getAlertSummary()', () => {
       Array [
         Array [
           Object {
-            "body": Object {
-              "_source": undefined,
-              "aggs": Object {
-                "active_alerts_bucket": Object {
-                  "date_histogram": Object {
-                    "extended_bounds": Object {
-                      "max": "now/d",
-                      "min": "now-1d/d",
-                    },
-                    "field": "kibana.alert.time_range",
-                    "fixed_interval": "1m",
-                    "hard_bounds": Object {
-                      "max": "now/d",
-                      "min": "now-1d/d",
-                    },
-                    "min_doc_count": 0,
+            "_source": undefined,
+            "aggs": Object {
+              "active_alerts_bucket": Object {
+                "date_histogram": Object {
+                  "extended_bounds": Object {
+                    "max": "now/d",
+                    "min": "now-1d/d",
                   },
-                },
-                "count": Object {
-                  "terms": Object {
-                    "field": "kibana.alert.status",
+                  "field": "kibana.alert.time_range",
+                  "fixed_interval": "1m",
+                  "hard_bounds": Object {
+                    "max": "now/d",
+                    "min": "now-1d/d",
                   },
+                  "min_doc_count": 0,
                 },
-                "recovered_alerts": Object {
-                  "aggs": Object {
-                    "container": Object {
-                      "date_histogram": Object {
-                        "extended_bounds": Object {
-                          "max": "now/d",
-                          "min": "now-1d/d",
-                        },
-                        "field": "kibana.alert.end",
-                        "fixed_interval": "1m",
-                        "min_doc_count": 0,
+              },
+              "count": Object {
+                "terms": Object {
+                  "field": "kibana.alert.status",
+                },
+              },
+              "recovered_alerts": Object {
+                "aggs": Object {
+                  "container": Object {
+                    "date_histogram": Object {
+                      "extended_bounds": Object {
+                        "max": "now/d",
+                        "min": "now-1d/d",
                       },
+                      "field": "kibana.alert.end",
+                      "fixed_interval": "1m",
+                      "min_doc_count": 0,
                     },
                   },
-                  "filter": Object {
-                    "term": Object {
-                      "kibana.alert.status": "recovered",
-                    },
+                },
+                "filter": Object {
+                  "term": Object {
+                    "kibana.alert.status": "recovered",
                   },
                 },
               },
-              "fields": Array [
-                "kibana.alert.rule.rule_type_id",
-                "kibana.alert.rule.consumer",
-                "kibana.alert.workflow_status",
-                "kibana.space_ids",
-              ],
-              "query": Object {
-                "bool": Object {
-                  "filter": Array [
-                    Object {
-                      "bool": Object {
-                        "filter": Array [
-                          Object {
-                            "bool": Object {
-                              "minimum_should_match": 1,
-                              "should": Array [
-                                Object {
-                                  "bool": Object {
-                                    "filter": Array [
-                                      Object {
-                                        "bool": Object {
-                                          "minimum_should_match": 1,
-                                          "should": Array [
-                                            Object {
-                                              "match": Object {
-                                                "kibana.alert.rule.rule_type_id": ".es-query",
-                                              },
-                                            },
-                                          ],
-                                        },
-                                      },
-                                      Object {
-                                        "bool": Object {
-                                          "minimum_should_match": 1,
-                                          "should": Array [
-                                            Object {
-                                              "bool": Object {
-                                                "minimum_should_match": 1,
-                                                "should": Array [
-                                                  Object {
-                                                    "match": Object {
-                                                      "kibana.alert.rule.consumer": "stackAlerts",
-                                                    },
-                                                  },
-                                                ],
-                                              },
-                                            },
-                                            Object {
-                                              "bool": Object {
-                                                "minimum_should_match": 1,
-                                                "should": Array [
-                                                  Object {
-                                                    "match": Object {
-                                                      "kibana.alert.rule.consumer": "alerts",
-                                                    },
-                                                  },
-                                                ],
-                                              },
-                                            },
-                                          ],
-                                        },
-                                      },
-                                    ],
-                                  },
-                                },
-                              ],
-                            },
-                          },
-                          Object {
-                            "term": Object {
-                              "kibana.space_ids": "default",
-                            },
-                          },
-                          Object {
-                            "terms": Object {
-                              "kibana.alert.rule.rule_type_id": Array [
-                                ".es-query",
-                              ],
-                            },
-                          },
-                        ],
-                      },
-                    },
-                    Object {
-                      "term": Object {
-                        "kibana.space_ids": "test_default_space_id",
-                      },
-                    },
-                    Object {
-                      "terms": Object {
-                        "kibana.alert.rule.rule_type_id": Array [
-                          ".es-query",
-                        ],
-                      },
-                    },
-                    Object {
-                      "terms": Object {
-                        "kibana.alert.rule.consumer": Array [
-                          "stackAlerts",
-                        ],
-                      },
-                    },
-                  ],
-                  "must": Array [
-                    Object {
-                      "bool": Object {
-                        "filter": Array [
-                          Object {
-                            "range": Object {
-                              "kibana.alert.time_range": Object {
-                                "gt": "now-1d/d",
-                                "lt": "now/d",
-                              },
-                            },
-                          },
-                        ],
-                      },
-                    },
-                  ],
-                  "must_not": Array [],
-                  "should": Array [],
-                },
-              },
-              "runtime_mappings": undefined,
-              "size": 0,
-              "sort": Array [
-                Object {
-                  "@timestamp": Object {
-                    "order": "asc",
-                    "unmapped_type": "date",
-                  },
-                },
-              ],
-              "track_total_hits": undefined,
             },
+            "fields": Array [
+              "kibana.alert.rule.rule_type_id",
+              "kibana.alert.rule.consumer",
+              "kibana.alert.workflow_status",
+              "kibana.space_ids",
+            ],
             "ignore_unavailable": true,
             "index": "stack-index",
+            "query": Object {
+              "bool": Object {
+                "filter": Array [
+                  Object {
+                    "bool": Object {
+                      "filter": Array [
+                        Object {
+                          "bool": Object {
+                            "minimum_should_match": 1,
+                            "should": Array [
+                              Object {
+                                "bool": Object {
+                                  "filter": Array [
+                                    Object {
+                                      "bool": Object {
+                                        "minimum_should_match": 1,
+                                        "should": Array [
+                                          Object {
+                                            "match": Object {
+                                              "kibana.alert.rule.rule_type_id": ".es-query",
+                                            },
+                                          },
+                                        ],
+                                      },
+                                    },
+                                    Object {
+                                      "bool": Object {
+                                        "minimum_should_match": 1,
+                                        "should": Array [
+                                          Object {
+                                            "bool": Object {
+                                              "minimum_should_match": 1,
+                                              "should": Array [
+                                                Object {
+                                                  "match": Object {
+                                                    "kibana.alert.rule.consumer": "stackAlerts",
+                                                  },
+                                                },
+                                              ],
+                                            },
+                                          },
+                                          Object {
+                                            "bool": Object {
+                                              "minimum_should_match": 1,
+                                              "should": Array [
+                                                Object {
+                                                  "match": Object {
+                                                    "kibana.alert.rule.consumer": "alerts",
+                                                  },
+                                                },
+                                              ],
+                                            },
+                                          },
+                                        ],
+                                      },
+                                    },
+                                  ],
+                                },
+                              },
+                            ],
+                          },
+                        },
+                        Object {
+                          "term": Object {
+                            "kibana.space_ids": "default",
+                          },
+                        },
+                        Object {
+                          "terms": Object {
+                            "kibana.alert.rule.rule_type_id": Array [
+                              ".es-query",
+                            ],
+                          },
+                        },
+                      ],
+                    },
+                  },
+                  Object {
+                    "term": Object {
+                      "kibana.space_ids": "test_default_space_id",
+                    },
+                  },
+                  Object {
+                    "terms": Object {
+                      "kibana.alert.rule.rule_type_id": Array [
+                        ".es-query",
+                      ],
+                    },
+                  },
+                  Object {
+                    "terms": Object {
+                      "kibana.alert.rule.consumer": Array [
+                        "stackAlerts",
+                      ],
+                    },
+                  },
+                ],
+                "must": Array [
+                  Object {
+                    "bool": Object {
+                      "filter": Array [
+                        Object {
+                          "range": Object {
+                            "kibana.alert.time_range": Object {
+                              "gt": "now-1d/d",
+                              "lt": "now/d",
+                            },
+                          },
+                        },
+                      ],
+                    },
+                  },
+                ],
+                "must_not": Array [],
+                "should": Array [],
+              },
+            },
+            "runtime_mappings": undefined,
             "seq_no_primary_term": true,
+            "size": 0,
+            "sort": Array [
+              Object {
+                "@timestamp": Object {
+                  "order": "asc",
+                  "unmapped_type": "date",
+                },
+              },
+            ],
+            "track_total_hits": undefined,
           },
         ],
       ]

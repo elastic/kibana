@@ -40,41 +40,39 @@ export const buildUsersQuery = ({
     index: defaultIndex,
     ignore_unavailable: true,
     track_total_hits: false,
-    body: {
-      aggregations: {
-        user_count: { cardinality: { field: 'user.name' } },
-        user_data: {
-          terms: { size: querySize, field: 'user.name', order: getQueryOrder(sort) },
-          aggs: {
-            lastSeen: { max: { field: '@timestamp' } },
-            domain: {
-              top_hits: {
-                size: 1,
-                sort: [
-                  {
-                    '@timestamp': {
-                      order: 'desc' as const,
-                    },
+    aggregations: {
+      user_count: { cardinality: { field: 'user.name' } },
+      user_data: {
+        terms: { size: querySize, field: 'user.name', order: getQueryOrder(sort) },
+        aggs: {
+          lastSeen: { max: { field: '@timestamp' } },
+          domain: {
+            top_hits: {
+              size: 1,
+              sort: [
+                {
+                  '@timestamp': {
+                    order: 'desc' as const,
                   },
-                ],
-                _source: false,
-              },
+                },
+              ],
+              _source: false,
             },
           },
         },
       },
-      query: { bool: { filter } },
-      _source: false,
-      fields: [
-        'user.name',
-        'user.domain',
-        {
-          field: '@timestamp',
-          format: 'strict_date_optional_time',
-        },
-      ],
-      size: 0,
     },
+    query: { bool: { filter } },
+    _source: false,
+    fields: [
+      'user.name',
+      'user.domain',
+      {
+        field: '@timestamp',
+        format: 'strict_date_optional_time',
+      },
+    ],
+    size: 0,
   };
 
   return dslQuery;

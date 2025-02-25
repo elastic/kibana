@@ -9,7 +9,7 @@
 
 import moment from 'moment-timezone';
 import { isArray } from 'lodash';
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { estypes } from '@elastic/elasticsearch';
 
 import { RangeFilter } from '@kbn/es-query';
 import { AggGroupNames } from '../agg_groups';

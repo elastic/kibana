@@ -8,7 +8,7 @@
  */
 
 import type { Observable } from 'rxjs';
-import { estypes } from '@elastic/elasticsearch';
+import type { estypes } from '@elastic/elasticsearch';
 import { schema } from '@kbn/config-schema';
 import type { IRouter, RequestHandler, RouteAuthz, StartServicesAccessor } from '@kbn/core/server';
 import { VersionedRouteValidation } from '@kbn/core-http-server';

@@ -94,7 +94,7 @@ export default function maintenanceWindowScopedQueryTests({ getService }: FtrPro
       await retry.try(async () => {
         const result = await es.search<Alert>({
           index: alertAsDataIndex,
-          body: { query: { match_all: {} } },
+          query: { match_all: {} },
         });
 
         expect(result.hits.hits[0]?._source?.[ALERT_MAINTENANCE_WINDOW_IDS]).eql([

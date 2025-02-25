@@ -205,7 +205,7 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
       // For standardized way of checking deployment status see: https://github.com/elastic/elasticsearch/issues/106986
       const isReadyESS = (stats: MlTrainedModelStats) =>
         stats.deployment_stats?.state === 'started' &&
-        stats.deployment_stats?.allocation_status.state === 'fully_allocated';
+        stats.deployment_stats?.allocation_status?.state === 'fully_allocated';
 
       const isReadyServerless = (stats: MlTrainedModelStats) =>
         (stats.deployment_stats?.nodes as unknown as MlTrainedModelDeploymentNodesStats[])?.some(
@@ -817,7 +817,7 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
     contentReferencesStore,
     esClient,
   }: {
-    contentReferencesStore: ContentReferencesStore | undefined;
+    contentReferencesStore: ContentReferencesStore;
     esClient: ElasticsearchClient;
   }): Promise<StructuredTool[]> => {
     const user = this.options.currentUser;

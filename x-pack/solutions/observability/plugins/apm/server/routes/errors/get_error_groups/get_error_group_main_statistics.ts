@@ -116,44 +116,42 @@ export async function getErrorGroupMainStatistics({
         },
       ],
     },
-    body: {
-      track_total_hits: false,
-      size: 0,
-      query: {
-        bool: {
-          filter: [
-            ...termQuery(SERVICE_NAME, serviceName),
-            ...termQuery(TRANSACTION_NAME, transactionName),
-            ...termQuery(TRANSACTION_TYPE, transactionType),
-            ...rangeQuery(start, end),
-            ...environmentQuery(environment),
-            ...kqlQuery(kuery),
-            ...shouldMatchSearchQuery,
-          ],
-        },
+    track_total_hits: false,
+    size: 0,
+    query: {
+      bool: {
+        filter: [
+          ...termQuery(SERVICE_NAME, serviceName),
+          ...termQuery(TRANSACTION_NAME, transactionName),
+          ...termQuery(TRANSACTION_TYPE, transactionType),
+          ...rangeQuery(start, end),
+          ...environmentQuery(environment),
+          ...kqlQuery(kuery),
+          ...shouldMatchSearchQuery,
+        ],
       },
-      aggs: {
-        error_groups: {
-          terms: {
-            field: ERROR_GROUP_ID,
-            size: maxNumberOfErrorGroups,
-            order,
-          },
-          aggs: {
-            sample: {
-              top_hits: {
-                size: 1,
-                fields: [...requiredFields, ...optionalFields],
-                _source: [ERROR_LOG_MESSAGE, ERROR_EXC_MESSAGE, ERROR_EXC_HANDLED, ERROR_EXC_TYPE],
-                sort: {
-                  '@timestamp': 'desc',
-                },
+    },
+    aggs: {
+      error_groups: {
+        terms: {
+          field: ERROR_GROUP_ID,
+          size: maxNumberOfErrorGroups,
+          order,
+        },
+        aggs: {
+          sample: {
+            top_hits: {
+              size: 1,
+              fields: [...requiredFields, ...optionalFields],
+              _source: [ERROR_LOG_MESSAGE, ERROR_EXC_MESSAGE, ERROR_EXC_HANDLED, ERROR_EXC_TYPE],
+              sort: {
+                '@timestamp': 'desc',
               },
             },
-            ...(sortByLatestOccurrence
-              ? { [maxTimestampAggKey]: { max: { field: '@timestamp' } } }
-              : {}),
           },
+          ...(sortByLatestOccurrence
+            ? { [maxTimestampAggKey]: { max: { field: '@timestamp' } } }
+            : {}),
         },
       },
     },

@@ -48,7 +48,7 @@ describe('updateDataStreams', () => {
 
     expect(esClient.indices.putSettings).toHaveBeenCalledWith({
       index: dataStreamName,
-      body: { 'index.mapping.total_fields.limit': totalFieldsLimit },
+      settings: { 'index.mapping.total_fields.limit': totalFieldsLimit },
     });
     expect(esClient.indices.simulateIndexTemplate).toHaveBeenCalledWith({
       name: dataStreamName,
@@ -160,7 +160,7 @@ describe('createOrUpdateDataStream', () => {
 
     expect(esClient.indices.putSettings).toHaveBeenCalledWith({
       index: name,
-      body: { 'index.mapping.total_fields.limit': totalFieldsLimit },
+      settings: { 'index.mapping.total_fields.limit': totalFieldsLimit },
     });
     expect(esClient.indices.simulateIndexTemplate).toHaveBeenCalledWith({
       name,

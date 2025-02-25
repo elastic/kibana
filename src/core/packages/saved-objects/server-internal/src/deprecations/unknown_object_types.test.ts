@@ -174,11 +174,9 @@ describe('unknown saved object types deprecation', () => {
       expect(esClient.asInternalUser.deleteByQuery).toHaveBeenCalledWith({
         index: ['foo-index', 'bar-index'],
         wait_for_completion: false,
-        body: {
-          query: {
-            bool: {
-              must_not: [{ term: { type: 'foo' } }, { term: { type: 'bar' } }],
-            },
+        query: {
+          bool: {
+            must_not: [{ term: { type: 'foo' } }, { term: { type: 'bar' } }],
           },
         },
       });

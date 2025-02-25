@@ -437,9 +437,7 @@ describe('When using the artifacts services', () => {
         size: 20,
         track_total_hits: true,
         rest_total_hits_as_int: true,
-        body: {
-          sort: [{ created: { order: 'asc' } }],
-        },
+        sort: [{ created: { order: 'asc' } }],
       });
 
       expect(results).toEqual({
@@ -473,9 +471,7 @@ describe('When using the artifacts services', () => {
         size: 50,
         track_total_hits: true,
         rest_total_hits_as_int: true,
-        body: {
-          sort: [{ identifier: { order: 'desc' } }],
-        },
+        sort: [{ identifier: { order: 'desc' } }],
       });
 
       expect(listMeta).toEqual({

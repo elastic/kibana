@@ -53,15 +53,13 @@ export default ({ getService }: FtrProviderContext) => {
         log.info(`loading test data`);
         await es.indices.create({
           index: timelessIndexName,
-          body: {
-            settings: { number_of_shards: 1 },
-            mappings: {
-              properties: {
-                eon: { type: 'keyword' },
-                era: { type: 'keyword' },
-                period: { type: 'keyword' },
-                epoch: { type: 'keyword' },
-              },
+          settings: { number_of_shards: 1 },
+          mappings: {
+            properties: {
+              eon: { type: 'keyword' },
+              era: { type: 'keyword' },
+              period: { type: 'keyword' },
+              epoch: { type: 'keyword' },
             },
           },
         });

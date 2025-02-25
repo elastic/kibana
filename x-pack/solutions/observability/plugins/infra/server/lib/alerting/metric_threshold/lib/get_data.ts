@@ -266,7 +266,7 @@ export const getData = async (
     index,
     allow_no_indices: true,
     ignore_unavailable: true,
-    body: getElasticsearchMetricQuery(
+    ...getElasticsearchMetricQuery(
       params,
       timeframe,
       compositeSize,

@@ -7,7 +7,7 @@
 
 import type moment from 'moment';
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/types';
+import type { estypes } from '@elastic/elasticsearch';
 
 import { withSecuritySpan } from '../../../../../utils/with_security_span';
 import { buildTimeRangeFilter } from '../../utils/build_events_query';

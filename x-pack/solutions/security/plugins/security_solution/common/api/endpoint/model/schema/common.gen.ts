@@ -54,6 +54,46 @@ export const EndDate = z.string();
 export type AgentId = z.infer<typeof AgentId>;
 export const AgentId = z.string();
 
+/**
+ * A KQL string.
+ */
+export type Kuery = z.infer<typeof Kuery>;
+export const Kuery = z.string();
+
+/**
+ * A set of agent health statuses to filter by.
+ */
+export type HostStatuses = z.infer<typeof HostStatuses>;
+export const HostStatuses = z.array(
+  z.enum(['healthy', 'offline', 'updating', 'inactive', 'unenrolled'])
+);
+
+/**
+ * Determines the sort order.
+ */
+export type SortDirection = z.infer<typeof SortDirection>;
+export const SortDirection = z.enum(['asc', 'desc']);
+export type SortDirectionEnum = typeof SortDirection.enum;
+export const SortDirectionEnum = SortDirection.enum;
+
+/**
+ * Determines which field is used to sort the results.
+ */
+export type SortField = z.infer<typeof SortField>;
+export const SortField = z.enum([
+  'enrolled_at',
+  'metadata.host.hostname',
+  'host_status',
+  'metadata.Endpoint.policy.applied.name',
+  'metadata.Endpoint.policy.applied.status',
+  'metadata.host.os.name',
+  'metadata.host.ip',
+  'metadata.agent.version',
+  'last_checkin',
+]);
+export type SortFieldEnum = typeof SortField.enum;
+export const SortFieldEnum = SortField.enum;
+
 export type AgentIds = z.infer<typeof AgentIds>;
 export const AgentIds = z.union([z.array(z.string().min(1)).min(1).max(50), z.string().min(1)]);
 

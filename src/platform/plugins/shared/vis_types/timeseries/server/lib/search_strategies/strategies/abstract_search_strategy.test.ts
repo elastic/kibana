@@ -88,7 +88,6 @@ describe('AbstractSearchStrategy', () => {
     expect((await requestContext.search).search).toHaveBeenCalledWith(
       {
         params: {
-          body: {},
           index: 'index',
         },
         indexType: undefined,

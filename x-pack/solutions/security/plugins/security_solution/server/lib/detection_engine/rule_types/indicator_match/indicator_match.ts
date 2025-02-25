@@ -6,7 +6,7 @@
  */
 
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { estypes } from '@elastic/elasticsearch';
 import type { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
 
 import type {

@@ -36,37 +36,35 @@ export async function getInstanceRuleDataForClusters(
         index: indexPatterns,
         size: 0,
         ignore_unavailable: true,
-        body: {
-          query: createQuery({
-            type,
-            dsDataset: getKibanaDataset(dataset),
-            metricset: dataset,
-            start,
-            end,
-            clusterUuid,
-            metric,
-          }),
-          aggs: {
-            indices: {
-              terms: {
-                field: '_index',
-                size: 1,
-              },
+        query: createQuery({
+          type,
+          dsDataset: getKibanaDataset(dataset),
+          metricset: dataset,
+          start,
+          end,
+          clusterUuid,
+          metric,
+        }),
+        aggs: {
+          indices: {
+            terms: {
+              field: '_index',
+              size: 1,
             },
-            executions: {
-              max: {
-                field: 'kibana.node_rules.executions',
-              },
+          },
+          executions: {
+            max: {
+              field: 'kibana.node_rules.executions',
             },
-            failures: {
-              max: {
-                field: 'kibana.node_rules.failures',
-              },
+          },
+          failures: {
+            max: {
+              field: 'kibana.node_rules.failures',
             },
-            timeouts: {
-              max: {
-                field: 'kibana.node_rules.timeouts',
-              },
+          },
+          timeouts: {
+            max: {
+              field: 'kibana.node_rules.timeouts',
             },
           },
         },

@@ -201,10 +201,8 @@ function fetchPipelineVertexTimeSeriesStats({
       'aggregations.timeseries.buckets.pipelines_mb.scoped.vertices.vertex_id.queue_push_duration_in_millis_total',
       'aggregations.timeseries.buckets.pipelines_mb.scoped.total_processor_duration_stats',
     ],
-    body: {
-      query,
-      aggs,
-    },
+    query,
+    aggs,
   };
 
   return callWithRequest(req, 'search', params);

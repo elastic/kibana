@@ -8,7 +8,7 @@
 import { uniq, pick, isEqual } from 'lodash';
 import { group } from 'd3-array';
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { estypes } from '@elastic/elasticsearch';
 
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { Logger } from '@kbn/logging';
@@ -164,8 +164,7 @@ export async function fetchFrequentItemSets({
   >(
     {
       index,
-      size: 0,
-      body: esBody,
+      ...esBody,
     },
     { signal: abortSignal, maxRetries: 0 }
   );

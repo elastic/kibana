@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { estypes } from '@elastic/elasticsearch';
+import type { estypes } from '@elastic/elasticsearch';
 
 /**
  * Grants all cluster read-only operations, like cluster health and state, hot threads, node info, node and cluster stats, and pending cluster tasks.

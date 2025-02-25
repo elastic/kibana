@@ -154,34 +154,32 @@ export function registerErrorCountRuleType({
 
       const searchParams = {
         index: indices.error,
-        body: {
-          track_total_hits: false,
-          size: 0,
-          query: {
-            bool: {
-              filter: [
-                {
-                  range: {
-                    '@timestamp': {
-                      gte: dateStart,
-                    },
+        track_total_hits: false,
+        size: 0,
+        query: {
+          bool: {
+            filter: [
+              {
+                range: {
+                  '@timestamp': {
+                    gte: dateStart,
                   },
                 },
-                { term: { [PROCESSOR_EVENT]: ProcessorEvent.error } },
-                ...termFilterQuery,
-                ...getParsedFilterQuery(ruleParams.searchConfiguration?.query?.query as string),
-              ],
-            },
-          },
-          aggs: {
-            error_counts: {
-              multi_terms: {
-                terms: getGroupByTerms(allGroupByFields),
-                size: 1000,
-                order: { _count: 'desc' as const },
               },
-              aggs: getApmAlertSourceFieldsAgg(),
+              { term: { [PROCESSOR_EVENT]: ProcessorEvent.error } },
+              ...termFilterQuery,
+              ...getParsedFilterQuery(ruleParams.searchConfiguration?.query?.query as string),
+            ],
+          },
+        },
+        aggs: {
+          error_counts: {
+            multi_terms: {
+              terms: getGroupByTerms(allGroupByFields),
+              size: 1000,
+              order: { _count: 'desc' as const },
             },
+            aggs: getApmAlertSourceFieldsAgg(),
           },
         },
       };

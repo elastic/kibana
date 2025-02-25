@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 
 import { useValues } from 'kea';
 
@@ -23,7 +23,13 @@ export interface ConnectorTypeProps {
 
 export const ConnectorType: React.FC<ConnectorTypeProps> = ({ serviceType }) => {
   const { connectorTypes } = useValues(KibanaLogic);
-  const connector = connectorTypes.find((c) => c.serviceType === serviceType);
+  // TODO service_type === "" is considered unknown/custom connector multiple places replace all of them with a better solution
+  const CUSTOM_CONNECTOR = useMemo(
+    () => connectorTypes.filter(({ serviceType: type }) => type === ''),
+    [connectorTypes]
+  );
+  const connector =
+    connectorTypes.find((c) => c.serviceType === serviceType) || CUSTOM_CONNECTOR[0];
   return (
     <EuiFlexGroup gutterSize="s" responsive={false} alignItems="center">
       {connector && connector.iconPath && (

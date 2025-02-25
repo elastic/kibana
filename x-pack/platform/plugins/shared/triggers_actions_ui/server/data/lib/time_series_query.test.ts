@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { estypes } from '@elastic/elasticsearch';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { Logger } from '@kbn/core/server';
 import { TimeSeriesQuery, timeSeriesQuery, getResultFromEs } from './time_series_query';
@@ -61,7 +61,7 @@ describe('timeSeriesQuery', () => {
       query: { ...params.query, filterKuery: 'event.provider: alerting' },
     });
     // @ts-ignore
-    expect(esClient.search.mock.calls[0]![0].body.query.bool.filter[1]).toEqual({
+    expect(esClient.search.mock.calls[0]![0].query.bool.filter[1]).toEqual({
       bool: {
         minimum_should_match: 1,
         should: [
@@ -80,42 +80,40 @@ describe('timeSeriesQuery', () => {
     expect(esClient.search).toHaveBeenCalledWith(
       {
         allow_no_indices: true,
-        body: {
-          aggs: {
-            dateAgg: {
-              date_range: {
-                field: 'time-field',
-                format: 'strict_date_time',
-                ranges: [
-                  {
-                    from: '2021-04-22T15:14:31.000Z',
-                    to: '2021-04-22T15:19:31.000Z',
-                  },
-                  {
-                    from: '2021-04-22T15:15:31.000Z',
-                    to: '2021-04-22T15:20:31.000Z',
-                  },
-                ],
-              },
-            },
-          },
-          query: {
-            bool: {
-              filter: [
+        aggs: {
+          dateAgg: {
+            date_range: {
+              field: 'time-field',
+              format: 'strict_date_time',
+              ranges: [
                 {
-                  range: {
-                    'time-field': {
-                      format: 'strict_date_time',
-                      gte: '2021-04-22T15:14:31.000Z',
-                      lt: '2021-04-22T15:20:31.000Z',
-                    },
-                  },
+                  from: '2021-04-22T15:14:31.000Z',
+                  to: '2021-04-22T15:19:31.000Z',
+                },
+                {
+                  from: '2021-04-22T15:15:31.000Z',
+                  to: '2021-04-22T15:20:31.000Z',
                 },
               ],
             },
           },
-          size: 0,
         },
+        query: {
+          bool: {
+            filter: [
+              {
+                range: {
+                  'time-field': {
+                    format: 'strict_date_time',
+                    gte: '2021-04-22T15:14:31.000Z',
+                    lt: '2021-04-22T15:20:31.000Z',
+                  },
+                },
+              },
+            ],
+          },
+        },
+        size: 0,
         ignore_unavailable: true,
         index: 'index-name',
       },
@@ -134,42 +132,40 @@ describe('timeSeriesQuery', () => {
     expect(esClient.search).toHaveBeenCalledWith(
       {
         allow_no_indices: true,
-        body: {
-          aggs: {
-            dateAgg: {
-              date_range: {
-                field: 'time-field',
-                format: 'strict_date_time',
-                ranges: [
-                  {
-                    from: '2021-04-22T15:14:31.000Z',
-                    to: '2021-04-22T15:19:31.000Z',
-                  },
-                  {
-                    from: '2021-04-22T15:15:31.000Z',
-                    to: '2021-04-22T15:20:31.000Z',
-                  },
-                ],
-              },
-            },
-          },
-          query: {
-            bool: {
-              filter: [
+        aggs: {
+          dateAgg: {
+            date_range: {
+              field: 'time-field',
+              format: 'strict_date_time',
+              ranges: [
                 {
-                  range: {
-                    'time-field': {
-                      format: 'strict_date_time',
-                      gte: '2021-04-22T15:14:31.000Z',
-                      lt: '2021-04-22T15:20:31.000Z',
-                    },
-                  },
+                  from: '2021-04-22T15:14:31.000Z',
+                  to: '2021-04-22T15:19:31.000Z',
+                },
+                {
+                  from: '2021-04-22T15:15:31.000Z',
+                  to: '2021-04-22T15:20:31.000Z',
                 },
               ],
             },
           },
-          size: 0,
         },
+        query: {
+          bool: {
+            filter: [
+              {
+                range: {
+                  'time-field': {
+                    format: 'strict_date_time',
+                    gte: '2021-04-22T15:14:31.000Z',
+                    lt: '2021-04-22T15:20:31.000Z',
+                  },
+                },
+              },
+            ],
+          },
+        },
+        size: 0,
         ignore_unavailable: true,
         index: 'index-name',
       },
@@ -189,50 +185,48 @@ describe('timeSeriesQuery', () => {
     expect(esClient.search).toHaveBeenCalledWith(
       {
         allow_no_indices: true,
-        body: {
-          aggs: {
-            groupAgg: {
-              terms: {
-                field: 'the-term',
-                size: 10,
-              },
-              aggs: {
-                dateAgg: {
-                  date_range: {
-                    field: 'time-field',
-                    format: 'strict_date_time',
-                    ranges: [
-                      {
-                        from: '2021-04-22T15:14:31.000Z',
-                        to: '2021-04-22T15:19:31.000Z',
-                      },
-                      {
-                        from: '2021-04-22T15:15:31.000Z',
-                        to: '2021-04-22T15:20:31.000Z',
-                      },
-                    ],
-                  },
-                },
-              },
+        aggs: {
+          groupAgg: {
+            terms: {
+              field: 'the-term',
+              size: 10,
             },
-          },
-          query: {
-            bool: {
-              filter: [
-                {
-                  range: {
-                    'time-field': {
-                      format: 'strict_date_time',
-                      gte: '2021-04-22T15:14:31.000Z',
-                      lt: '2021-04-22T15:20:31.000Z',
+            aggs: {
+              dateAgg: {
+                date_range: {
+                  field: 'time-field',
+                  format: 'strict_date_time',
+                  ranges: [
+                    {
+                      from: '2021-04-22T15:14:31.000Z',
+                      to: '2021-04-22T15:19:31.000Z',
                     },
-                  },
+                    {
+                      from: '2021-04-22T15:15:31.000Z',
+                      to: '2021-04-22T15:20:31.000Z',
+                    },
+                  ],
                 },
-              ],
+              },
             },
           },
-          size: 0,
         },
+        query: {
+          bool: {
+            filter: [
+              {
+                range: {
+                  'time-field': {
+                    format: 'strict_date_time',
+                    gte: '2021-04-22T15:14:31.000Z',
+                    lt: '2021-04-22T15:20:31.000Z',
+                  },
+                },
+              },
+            ],
+          },
+        },
+        size: 0,
         ignore_unavailable: true,
         index: 'index-name',
       },
@@ -256,63 +250,61 @@ describe('timeSeriesQuery', () => {
     expect(esClient.search).toHaveBeenCalledWith(
       {
         allow_no_indices: true,
-        body: {
-          aggs: {
-            groupAgg: {
-              terms: {
-                field: 'the-term',
-                size: 10,
-              },
-              aggs: {
-                conditionSelector: {
-                  bucket_selector: {
-                    buckets_path: {
-                      compareValue: '_count',
-                    },
-                    script: `params.compareValue > 1`,
-                  },
-                },
-                dateAgg: {
-                  date_range: {
-                    field: 'time-field',
-                    format: 'strict_date_time',
-                    ranges: [
-                      {
-                        from: '2021-04-22T15:14:31.000Z',
-                        to: '2021-04-22T15:19:31.000Z',
-                      },
-                      {
-                        from: '2021-04-22T15:15:31.000Z',
-                        to: '2021-04-22T15:20:31.000Z',
-                      },
-                    ],
-                  },
-                },
-              },
+        aggs: {
+          groupAgg: {
+            terms: {
+              field: 'the-term',
+              size: 10,
             },
-            groupAggCount: {
-              stats_bucket: {
-                buckets_path: 'groupAgg._count',
+            aggs: {
+              conditionSelector: {
+                bucket_selector: {
+                  buckets_path: {
+                    compareValue: '_count',
+                  },
+                  script: `params.compareValue > 1`,
+                },
+              },
+              dateAgg: {
+                date_range: {
+                  field: 'time-field',
+                  format: 'strict_date_time',
+                  ranges: [
+                    {
+                      from: '2021-04-22T15:14:31.000Z',
+                      to: '2021-04-22T15:19:31.000Z',
+                    },
+                    {
+                      from: '2021-04-22T15:15:31.000Z',
+                      to: '2021-04-22T15:20:31.000Z',
+                    },
+                  ],
+                },
               },
             },
           },
-          query: {
-            bool: {
-              filter: [
-                {
-                  range: {
-                    'time-field': {
-                      format: 'strict_date_time',
-                      gte: '2021-04-22T15:14:31.000Z',
-                      lt: '2021-04-22T15:20:31.000Z',
-                    },
-                  },
-                },
-              ],
+          groupAggCount: {
+            stats_bucket: {
+              buckets_path: 'groupAgg._count',
             },
           },
-          size: 0,
         },
+        query: {
+          bool: {
+            filter: [
+              {
+                range: {
+                  'time-field': {
+                    format: 'strict_date_time',
+                    gte: '2021-04-22T15:14:31.000Z',
+                    lt: '2021-04-22T15:20:31.000Z',
+                  },
+                },
+              },
+            ],
+          },
+        },
+        size: 0,
         ignore_unavailable: true,
         index: 'index-name',
       },
@@ -332,54 +324,52 @@ describe('timeSeriesQuery', () => {
     expect(esClient.search).toHaveBeenCalledWith(
       {
         allow_no_indices: true,
-        body: {
-          aggs: {
-            dateAgg: {
-              date_range: {
-                field: 'time-field',
-                format: 'strict_date_time',
-                ranges: [
-                  {
-                    from: '2021-04-22T15:14:31.000Z',
-                    to: '2021-04-22T15:19:31.000Z',
-                  },
-                  {
-                    from: '2021-04-22T15:15:31.000Z',
-                    to: '2021-04-22T15:20:31.000Z',
-                  },
-                ],
-              },
-              aggs: {
-                metricAgg: {
-                  avg: {
-                    field: 'avg-field',
-                  },
-                },
-              },
-            },
-            sortValueAgg: {
-              avg: {
-                field: 'avg-field',
-              },
-            },
-          },
-          query: {
-            bool: {
-              filter: [
+        aggs: {
+          dateAgg: {
+            date_range: {
+              field: 'time-field',
+              format: 'strict_date_time',
+              ranges: [
                 {
-                  range: {
-                    'time-field': {
-                      format: 'strict_date_time',
-                      gte: '2021-04-22T15:14:31.000Z',
-                      lt: '2021-04-22T15:20:31.000Z',
-                    },
-                  },
+                  from: '2021-04-22T15:14:31.000Z',
+                  to: '2021-04-22T15:19:31.000Z',
+                },
+                {
+                  from: '2021-04-22T15:15:31.000Z',
+                  to: '2021-04-22T15:20:31.000Z',
                 },
               ],
             },
+            aggs: {
+              metricAgg: {
+                avg: {
+                  field: 'avg-field',
+                },
+              },
+            },
           },
-          size: 0,
+          sortValueAgg: {
+            avg: {
+              field: 'avg-field',
+            },
+          },
         },
+        query: {
+          bool: {
+            filter: [
+              {
+                range: {
+                  'time-field': {
+                    format: 'strict_date_time',
+                    gte: '2021-04-22T15:14:31.000Z',
+                    lt: '2021-04-22T15:20:31.000Z',
+                  },
+                },
+              },
+            ],
+          },
+        },
+        size: 0,
         ignore_unavailable: true,
         index: 'index-name',
       },
@@ -403,54 +393,52 @@ describe('timeSeriesQuery', () => {
     expect(esClient.search).toHaveBeenCalledWith(
       {
         allow_no_indices: true,
-        body: {
-          aggs: {
-            dateAgg: {
-              date_range: {
-                field: 'time-field',
-                format: 'strict_date_time',
-                ranges: [
-                  {
-                    from: '2021-04-22T15:14:31.000Z',
-                    to: '2021-04-22T15:19:31.000Z',
-                  },
-                  {
-                    from: '2021-04-22T15:15:31.000Z',
-                    to: '2021-04-22T15:20:31.000Z',
-                  },
-                ],
-              },
-              aggs: {
-                metricAgg: {
-                  avg: {
-                    field: 'avg-field',
-                  },
-                },
-              },
-            },
-            sortValueAgg: {
-              avg: {
-                field: 'avg-field',
-              },
-            },
-          },
-          query: {
-            bool: {
-              filter: [
+        aggs: {
+          dateAgg: {
+            date_range: {
+              field: 'time-field',
+              format: 'strict_date_time',
+              ranges: [
                 {
-                  range: {
-                    'time-field': {
-                      format: 'strict_date_time',
-                      gte: '2021-04-22T15:14:31.000Z',
-                      lt: '2021-04-22T15:20:31.000Z',
-                    },
-                  },
+                  from: '2021-04-22T15:14:31.000Z',
+                  to: '2021-04-22T15:19:31.000Z',
+                },
+                {
+                  from: '2021-04-22T15:15:31.000Z',
+                  to: '2021-04-22T15:20:31.000Z',
                 },
               ],
             },
+            aggs: {
+              metricAgg: {
+                avg: {
+                  field: 'avg-field',
+                },
+              },
+            },
           },
-          size: 0,
+          sortValueAgg: {
+            avg: {
+              field: 'avg-field',
+            },
+          },
         },
+        query: {
+          bool: {
+            filter: [
+              {
+                range: {
+                  'time-field': {
+                    format: 'strict_date_time',
+                    gte: '2021-04-22T15:14:31.000Z',
+                    lt: '2021-04-22T15:20:31.000Z',
+                  },
+                },
+              },
+            ],
+          },
+        },
+        size: 0,
         ignore_unavailable: true,
         index: 'index-name',
       },
@@ -472,65 +460,63 @@ describe('timeSeriesQuery', () => {
     expect(esClient.search).toHaveBeenCalledWith(
       {
         allow_no_indices: true,
-        body: {
-          aggs: {
-            groupAgg: {
-              terms: {
-                field: 'the-field',
-                order: {
-                  sortValueAgg: 'desc',
-                },
-                size: 20,
+        aggs: {
+          groupAgg: {
+            terms: {
+              field: 'the-field',
+              order: {
+                sortValueAgg: 'desc',
               },
-              aggs: {
-                dateAgg: {
-                  date_range: {
-                    field: 'time-field',
-                    format: 'strict_date_time',
-                    ranges: [
-                      {
-                        from: '2021-04-22T15:14:31.000Z',
-                        to: '2021-04-22T15:19:31.000Z',
-                      },
-                      {
-                        from: '2021-04-22T15:15:31.000Z',
-                        to: '2021-04-22T15:20:31.000Z',
-                      },
-                    ],
-                  },
-                  aggs: {
-                    metricAgg: {
-                      avg: {
-                        field: 'avg-field',
-                      },
+              size: 20,
+            },
+            aggs: {
+              dateAgg: {
+                date_range: {
+                  field: 'time-field',
+                  format: 'strict_date_time',
+                  ranges: [
+                    {
+                      from: '2021-04-22T15:14:31.000Z',
+                      to: '2021-04-22T15:19:31.000Z',
+                    },
+                    {
+                      from: '2021-04-22T15:15:31.000Z',
+                      to: '2021-04-22T15:20:31.000Z',
+                    },
+                  ],
+                },
+                aggs: {
+                  metricAgg: {
+                    avg: {
+                      field: 'avg-field',
                     },
                   },
                 },
-                sortValueAgg: {
-                  avg: {
-                    field: 'avg-field',
-                  },
+              },
+              sortValueAgg: {
+                avg: {
+                  field: 'avg-field',
                 },
               },
             },
           },
-          query: {
-            bool: {
-              filter: [
-                {
-                  range: {
-                    'time-field': {
-                      format: 'strict_date_time',
-                      gte: '2021-04-22T15:14:31.000Z',
-                      lt: '2021-04-22T15:20:31.000Z',
-                    },
-                  },
-                },
-              ],
-            },
-          },
-          size: 0,
         },
+        query: {
+          bool: {
+            filter: [
+              {
+                range: {
+                  'time-field': {
+                    format: 'strict_date_time',
+                    gte: '2021-04-22T15:14:31.000Z',
+                    lt: '2021-04-22T15:20:31.000Z',
+                  },
+                },
+              },
+            ],
+          },
+        },
+        size: 0,
         ignore_unavailable: true,
         index: 'index-name',
       },
@@ -556,78 +542,76 @@ describe('timeSeriesQuery', () => {
     expect(esClient.search).toHaveBeenCalledWith(
       {
         allow_no_indices: true,
-        body: {
-          aggs: {
-            groupAgg: {
-              terms: {
-                field: 'the-field',
-                order: {
-                  sortValueAgg: 'desc',
-                },
-                size: 20,
+        aggs: {
+          groupAgg: {
+            terms: {
+              field: 'the-field',
+              order: {
+                sortValueAgg: 'desc',
               },
-              aggs: {
-                dateAgg: {
-                  date_range: {
-                    field: 'time-field',
-                    format: 'strict_date_time',
-                    ranges: [
-                      {
-                        from: '2021-04-22T15:14:31.000Z',
-                        to: '2021-04-22T15:19:31.000Z',
-                      },
-                      {
-                        from: '2021-04-22T15:15:31.000Z',
-                        to: '2021-04-22T15:20:31.000Z',
-                      },
-                    ],
-                  },
-                  aggs: {
-                    metricAgg: {
-                      avg: {
-                        field: 'avg-field',
-                      },
-                    },
-                  },
-                },
-                conditionSelector: {
-                  bucket_selector: {
-                    buckets_path: {
-                      compareValue: 'sortValueAgg',
-                    },
-                    script: 'params.compareValue > 1',
-                  },
-                },
-                sortValueAgg: {
-                  avg: {
-                    field: 'avg-field',
-                  },
-                },
-              },
+              size: 20,
             },
-            groupAggCount: {
-              stats_bucket: {
-                buckets_path: 'groupAgg._count',
+            aggs: {
+              dateAgg: {
+                date_range: {
+                  field: 'time-field',
+                  format: 'strict_date_time',
+                  ranges: [
+                    {
+                      from: '2021-04-22T15:14:31.000Z',
+                      to: '2021-04-22T15:19:31.000Z',
+                    },
+                    {
+                      from: '2021-04-22T15:15:31.000Z',
+                      to: '2021-04-22T15:20:31.000Z',
+                    },
+                  ],
+                },
+                aggs: {
+                  metricAgg: {
+                    avg: {
+                      field: 'avg-field',
+                    },
+                  },
+                },
+              },
+              conditionSelector: {
+                bucket_selector: {
+                  buckets_path: {
+                    compareValue: 'sortValueAgg',
+                  },
+                  script: 'params.compareValue > 1',
+                },
+              },
+              sortValueAgg: {
+                avg: {
+                  field: 'avg-field',
+                },
               },
             },
           },
-          query: {
-            bool: {
-              filter: [
-                {
-                  range: {
-                    'time-field': {
-                      format: 'strict_date_time',
-                      gte: '2021-04-22T15:14:31.000Z',
-                      lt: '2021-04-22T15:20:31.000Z',
-                    },
-                  },
-                },
-              ],
+          groupAggCount: {
+            stats_bucket: {
+              buckets_path: 'groupAgg._count',
             },
           },
-          size: 0,
         },
+        query: {
+          bool: {
+            filter: [
+              {
+                range: {
+                  'time-field': {
+                    format: 'strict_date_time',
+                    gte: '2021-04-22T15:14:31.000Z',
+                    lt: '2021-04-22T15:20:31.000Z',
+                  },
+                },
+              },
+            ],
+          },
+        },
+        size: 0,
         ignore_unavailable: true,
         index: 'index-name',
       },
@@ -651,63 +635,61 @@ describe('timeSeriesQuery', () => {
     expect(esClient.search).toHaveBeenCalledWith(
       {
         allow_no_indices: true,
-        body: {
-          aggs: {
-            groupAgg: {
-              terms: {
-                field: 'the-term',
-                size: 6,
-              },
-              aggs: {
-                conditionSelector: {
-                  bucket_selector: {
-                    buckets_path: {
-                      compareValue: '_count',
-                    },
-                    script: `params.compareValue > 1`,
-                  },
-                },
-                dateAgg: {
-                  date_range: {
-                    field: 'time-field',
-                    format: 'strict_date_time',
-                    ranges: [
-                      {
-                        from: '2021-04-22T15:14:31.000Z',
-                        to: '2021-04-22T15:19:31.000Z',
-                      },
-                      {
-                        from: '2021-04-22T15:15:31.000Z',
-                        to: '2021-04-22T15:20:31.000Z',
-                      },
-                    ],
-                  },
-                },
-              },
+        aggs: {
+          groupAgg: {
+            terms: {
+              field: 'the-term',
+              size: 6,
             },
-            groupAggCount: {
-              stats_bucket: {
-                buckets_path: 'groupAgg._count',
+            aggs: {
+              conditionSelector: {
+                bucket_selector: {
+                  buckets_path: {
+                    compareValue: '_count',
+                  },
+                  script: `params.compareValue > 1`,
+                },
+              },
+              dateAgg: {
+                date_range: {
+                  field: 'time-field',
+                  format: 'strict_date_time',
+                  ranges: [
+                    {
+                      from: '2021-04-22T15:14:31.000Z',
+                      to: '2021-04-22T15:19:31.000Z',
+                    },
+                    {
+                      from: '2021-04-22T15:15:31.000Z',
+                      to: '2021-04-22T15:20:31.000Z',
+                    },
+                  ],
+                },
               },
             },
           },
-          query: {
-            bool: {
-              filter: [
-                {
-                  range: {
-                    'time-field': {
-                      format: 'strict_date_time',
-                      gte: '2021-04-22T15:14:31.000Z',
-                      lt: '2021-04-22T15:20:31.000Z',
-                    },
-                  },
-                },
-              ],
+          groupAggCount: {
+            stats_bucket: {
+              buckets_path: 'groupAgg._count',
             },
           },
-          size: 0,
         },
+        query: {
+          bool: {
+            filter: [
+              {
+                range: {
+                  'time-field': {
+                    format: 'strict_date_time',
+                    gte: '2021-04-22T15:14:31.000Z',
+                    lt: '2021-04-22T15:20:31.000Z',
+                  },
+                },
+              },
+            ],
+          },
+        },
+        size: 0,
         ignore_unavailable: true,
         index: 'index-name',
       },
@@ -715,7 +697,7 @@ describe('timeSeriesQuery', () => {
     );
   });
 
-  it('uses the passed in date parms when useCalculatedDateRange = false param is passed', async () => {
+  it('uses the passed in date params when useCalculatedDateRange = false param is passed', async () => {
     await timeSeriesQuery({
       ...params,
       useCalculatedDateRange: false,
@@ -726,7 +708,7 @@ describe('timeSeriesQuery', () => {
       },
     });
     // @ts-ignore
-    expect(esClient.search.mock.calls[0]![0].body.query.bool.filter[0]).toEqual({
+    expect(esClient.search.mock.calls[0]![0].query.bool.filter[0]).toEqual({
       range: {
         'time-field': {
           format: 'strict_date_time',

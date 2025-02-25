@@ -36,39 +36,37 @@ describe('Test of <Doc /> helper / hook', () => {
     const actual = buildSearchBody('1', index, dataView);
     expect(actual).toMatchInlineSnapshot(`
       Object {
-        "body": Object {
-          "_source": true,
-          "fields": Array [
-            Object {
-              "field": "*",
-              "include_unmapped": true,
-            },
-          ],
-          "query": Object {
-            "bool": Object {
-              "filter": Array [
-                Object {
-                  "ids": Object {
-                    "values": Array [
-                      "1",
-                    ],
-                  },
-                },
-                Object {
-                  "term": Object {
-                    "_index": "test-index",
-                  },
-                },
-              ],
-            },
+        "_source": true,
+        "fields": Array [
+          Object {
+            "field": "*",
+            "include_unmapped": true,
           },
-          "runtime_mappings": Object {},
-          "script_fields": Array [],
-          "stored_fields": Array [
-            "*",
-          ],
-          "version": true,
+        ],
+        "query": Object {
+          "bool": Object {
+            "filter": Array [
+              Object {
+                "ids": Object {
+                  "values": Array [
+                    "1",
+                  ],
+                },
+              },
+              Object {
+                "term": Object {
+                  "_index": "test-index",
+                },
+              },
+            ],
+          },
         },
+        "runtime_mappings": Object {},
+        "script_fields": Array [],
+        "stored_fields": Array [
+          "*",
+        ],
+        "version": true,
       }
     `);
   });
@@ -91,46 +89,44 @@ describe('Test of <Doc /> helper / hook', () => {
     const actual = buildSearchBody('1', index, dataView);
     expect(actual).toMatchInlineSnapshot(`
       Object {
-        "body": Object {
-          "_source": true,
-          "fields": Array [
-            Object {
-              "field": "*",
-              "include_unmapped": true,
-            },
-          ],
-          "query": Object {
-            "bool": Object {
-              "filter": Array [
-                Object {
-                  "ids": Object {
-                    "values": Array [
-                      "1",
-                    ],
-                  },
-                },
-                Object {
-                  "term": Object {
-                    "_index": "test-index",
-                  },
-                },
-              ],
-            },
+        "_source": true,
+        "fields": Array [
+          Object {
+            "field": "*",
+            "include_unmapped": true,
           },
-          "runtime_mappings": Object {
-            "myRuntimeField": Object {
-              "script": Object {
-                "source": "emit(10.0)",
+        ],
+        "query": Object {
+          "bool": Object {
+            "filter": Array [
+              Object {
+                "ids": Object {
+                  "values": Array [
+                    "1",
+                  ],
+                },
               },
-              "type": "double",
-            },
+              Object {
+                "term": Object {
+                  "_index": "test-index",
+                },
+              },
+            ],
           },
-          "script_fields": Array [],
-          "stored_fields": Array [
-            "*",
-          ],
-          "version": true,
         },
+        "runtime_mappings": Object {
+          "myRuntimeField": Object {
+            "script": Object {
+              "source": "emit(10.0)",
+            },
+            "type": "double",
+          },
+        },
+        "script_fields": Array [],
+        "stored_fields": Array [
+          "*",
+        ],
+        "version": true,
       }
     `);
   });

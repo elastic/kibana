@@ -26,14 +26,14 @@ export default function ({ getService }: FtrProviderContext) {
         index: 'helloworld1',
         refresh: true,
         id: 'helloworld',
-        body: { hello: 'world' },
+        document: { hello: 'world' },
       });
 
       await es.index({
         index: 'helloworld2',
         refresh: true,
         id: 'helloworld2',
-        body: { bye: 'world' },
+        document: { bye: 'world' },
       });
     });
 

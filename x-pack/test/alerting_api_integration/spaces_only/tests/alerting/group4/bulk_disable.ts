@@ -50,7 +50,7 @@ export default function createDisableRuleTests({ getService }: FtrProviderContex
         hits: { hits: alerts },
       } = await es.search({
         index: alertAsDataIndex,
-        body: { query: { match_all: {} } },
+        query: { match_all: {} },
       });
 
       return alerts;

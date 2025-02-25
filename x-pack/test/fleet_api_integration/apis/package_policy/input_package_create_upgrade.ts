@@ -154,7 +154,7 @@ export default function (providerContext: FtrProviderContext) {
 
     await es.index({
       index: indexName,
-      body: {
+      document: {
         '@timestamp': new Date().toISOString(),
         message: 'test',
       },

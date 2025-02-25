@@ -244,11 +244,9 @@ export async function deleteAgentUploadFile(
     const filesDeleteResponse = await esClient.deleteByQuery({
       index: FILE_STORAGE_DATA_AGENT_INDEX,
       refresh: true,
-      body: {
-        query: {
-          match: {
-            bid: id, // Use `bid` instead of `_id` because `_id` has additional suffixes
-          },
+      query: {
+        match: {
+          bid: id, // Use `bid` instead of `_id` because `_id` has additional suffixes
         },
       },
     });

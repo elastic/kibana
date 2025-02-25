@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 import { omit } from 'lodash';
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { estypes } from '@elastic/elasticsearch';
 import { Response as SupertestResponse } from 'supertest';
 import { RecoveredActionGroup } from '@kbn/alerting-plugin/common';
 import { TaskRunning, TaskRunningStage } from '@kbn/task-manager-plugin/server/task_running';
@@ -385,34 +385,32 @@ instanceStateValue: true
           TaskRunning<TaskRunningStage.RAN, ConcreteTaskInstance>
         >({
           index: '.kibana_task_manager',
-          body: {
-            query: {
-              bool: {
-                must: [
-                  {
-                    term: {
-                      'task.status': 'idle',
+          query: {
+            bool: {
+              must: [
+                {
+                  term: {
+                    'task.status': 'idle',
+                  },
+                },
+                {
+                  term: {
+                    'task.attempts': 1,
+                  },
+                },
+                {
+                  term: {
+                    'task.taskType': 'actions:test.rate-limit',
+                  },
+                },
+                {
+                  range: {
+                    'task.scheduledAt': {
+                      gte: testStart,
                     },
                   },
-                  {
-                    term: {
-                      'task.attempts': 1,
-                    },
-                  },
-                  {
-                    term: {
-                      'task.taskType': 'actions:test.rate-limit',
-                    },
-                  },
-                  {
-                    range: {
-                      'task.scheduledAt': {
-                        gte: testStart,
-                      },
-                    },
-                  },
-                ],
-              },
+                },
+              ],
             },
           },
         });

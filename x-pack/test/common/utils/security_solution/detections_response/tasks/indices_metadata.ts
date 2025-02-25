@@ -32,7 +32,7 @@ export const randomDatastream = async (es: Client, policyName?: string): Promise
 
   await es.indices.putIndexTemplate({
     name: DS_PREFIX,
-    body: indexTemplateBody,
+    ...indexTemplateBody,
   });
 
   await es.indices.createDataStream({ name });

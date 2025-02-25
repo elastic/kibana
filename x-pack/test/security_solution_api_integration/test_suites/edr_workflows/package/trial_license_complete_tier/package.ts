@@ -54,17 +54,15 @@ export default function ({ getService }: FtrProviderContext) {
     return es.search<T>(
       {
         index: eventsIndexPattern,
-        body: {
-          query: {
-            bool: {
-              filter: [
-                {
-                  ids: {
-                    values: [id],
-                  },
+        query: {
+          bool: {
+            filter: [
+              {
+                ids: {
+                  values: [id],
                 },
-              ],
-            },
+              },
+            ],
           },
         },
       },

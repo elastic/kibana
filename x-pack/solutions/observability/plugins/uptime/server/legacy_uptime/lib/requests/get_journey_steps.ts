@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { asMutableArray } from '../../../../common/utils/as_mutable_array';
 import { UMElasticsearchQueryFn } from '../adapters/framework';
 import { JourneyStep } from '../../../../common/runtime_types/ping/synthetics';
@@ -63,7 +63,7 @@ export const getJourneySteps: UMElasticsearchQueryFn<
     },
     size: 500,
   };
-  const { body: result } = await uptimeEsClient.search({ body: params }, 'getJourneySteps');
+  const { body: result } = await uptimeEsClient.search(params, 'getJourneySteps');
 
   const steps = result.hits.hits.map(
     ({ _id, _source }) => Object.assign({ _id }, _source) as ResultType

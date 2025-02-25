@@ -73,11 +73,9 @@ export function bulkDeleteTestSuiteFactory(context: FtrProviderContext) {
             await es.indices.refresh({ index: '.kibana' }); // alias deletion uses refresh: false, so we need to manually refresh the index before searching
             const searchResponse = await es.search({
               index: '.kibana',
-              body: {
-                size: 0,
-                query: { terms: { type: ['legacy-url-alias'] } },
-                track_total_hits: true,
-              },
+              size: 0,
+              query: { terms: { type: ['legacy-url-alias'] } },
+              track_total_hits: true,
             });
 
             const expectAliasWasDeleted = !![ALIAS_DELETE_INCLUSIVE, ALIAS_DELETE_EXCLUSIVE].find(

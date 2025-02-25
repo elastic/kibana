@@ -60,10 +60,8 @@ export class Tokens {
         refresh_token: refreshToken,
         authentication: authenticationInfo,
       } = await this.options.client.security.getToken({
-        body: {
-          grant_type: 'refresh_token',
-          refresh_token: existingRefreshToken,
-        },
+        grant_type: 'refresh_token',
+        refresh_token: existingRefreshToken,
       });
 
       this.logger.debug('Access token has been successfully refreshed.');
@@ -118,9 +116,7 @@ export class Tokens {
       let invalidatedTokensCount;
       try {
         invalidatedTokensCount = (
-          await this.options.client.security.invalidateToken({
-            body: { refresh_token: refreshToken },
-          })
+          await this.options.client.security.invalidateToken({ refresh_token: refreshToken })
         ).invalidated_tokens;
       } catch (err) {
         this.logger.debug(
@@ -152,9 +148,7 @@ export class Tokens {
       let invalidatedTokensCount;
       try {
         invalidatedTokensCount = (
-          await this.options.client.security.invalidateToken({
-            body: { token: accessToken },
-          })
+          await this.options.client.security.invalidateToken({ token: accessToken })
         ).invalidated_tokens;
       } catch (err) {
         this.logger.debug(

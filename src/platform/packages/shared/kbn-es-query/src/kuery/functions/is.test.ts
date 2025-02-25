@@ -12,7 +12,7 @@ import { fields } from '../../filters/stubs';
 
 import * as is from './is';
 import { DataViewBase } from '../../..';
-import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { estypes } from '@elastic/elasticsearch';
 import { KQL_NODE_TYPE_WILDCARD } from '../node_types/wildcard';
 import { KQL_NODE_TYPE_LITERAL } from '../node_types/literal';
 import { KqlIsFunctionNode } from './is';

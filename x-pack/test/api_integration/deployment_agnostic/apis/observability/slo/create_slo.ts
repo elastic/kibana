@@ -235,7 +235,7 @@ const getRollupDataEsQuery = (id: string) => ({
         sort: [
           {
             '@timestamp': {
-              order: 'desc',
+              order: 'desc' as const,
             },
           },
         ],

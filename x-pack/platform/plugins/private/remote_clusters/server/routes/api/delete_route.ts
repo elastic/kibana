@@ -74,9 +74,7 @@ export const register = (deps: RouteDependencies): void => {
         try {
           const body = serializeCluster({ name, hasDeprecatedProxySetting }, undefined, true);
 
-          const updateClusterResponse = await clusterClient.asCurrentUser.cluster.putSettings({
-            body,
-          });
+          const updateClusterResponse = await clusterClient.asCurrentUser.cluster.putSettings(body);
           const acknowledged = get(updateClusterResponse, 'acknowledged');
           const cluster = get(updateClusterResponse, `persistent.cluster.remote.${name}`);
 

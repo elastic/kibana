@@ -128,34 +128,32 @@ export class CleanUpTempSummary {
         wait_for_completion: false,
         slices: 'auto',
         conflicts: 'proceed',
-        body: {
-          query: {
-            bool: {
-              should: buckets.map((bucket) => {
-                return {
-                  bool: {
-                    must: [
-                      {
-                        term: {
-                          isTempDoc: true,
-                        },
+        query: {
+          bool: {
+            should: buckets.map((bucket) => {
+              return {
+                bool: {
+                  must: [
+                    {
+                      term: {
+                        isTempDoc: true,
                       },
-                      {
-                        term: {
-                          'slo.id': bucket.id,
-                        },
+                    },
+                    {
+                      term: {
+                        'slo.id': bucket.id,
                       },
-                      {
-                        term: {
-                          spaceId: bucket.spaceId,
-                        },
+                    },
+                    {
+                      term: {
+                        spaceId: bucket.spaceId,
                       },
-                    ],
-                  },
-                };
-              }),
-              minimum_should_match: 1,
-            },
+                    },
+                  ],
+                },
+              };
+            }),
+            minimum_should_match: 1,
           },
         },
       },

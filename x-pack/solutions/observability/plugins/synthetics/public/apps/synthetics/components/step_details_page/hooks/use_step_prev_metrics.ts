@@ -44,68 +44,66 @@ export const useStepPrevMetrics = (step?: JourneyStep) => {
   const { data, loading } = useReduxEsSearch(
     {
       index: SYNTHETICS_INDEX_PATTERN,
-      body: {
-        size: 0,
-        query: {
-          bool: {
-            filter: [
-              {
-                terms: {
-                  'synthetics.type': ['step/metrics', 'step/end'],
-                },
+      size: 0,
+      query: {
+        bool: {
+          filter: [
+            {
+              terms: {
+                'synthetics.type': ['step/metrics', 'step/end'],
               },
-              {
-                term: {
-                  'synthetics.step.index': Number(stepIndex),
-                },
-              },
-              {
-                term: {
-                  config_id: monitorId,
-                },
-              },
-              {
-                range: {
-                  '@timestamp': {
-                    lte: 'now',
-                    gte: 'now-24h/h',
-                  },
-                },
-              },
-            ],
-          },
-        },
-        aggs: {
-          testRuns: {
-            terms: {
-              field: 'monitor.check_group',
-              size: 10000,
             },
-            aggs: {
-              fcp: {
-                sum: {
-                  field: SYNTHETICS_FCP,
+            {
+              term: {
+                'synthetics.step.index': Number(stepIndex),
+              },
+            },
+            {
+              term: {
+                config_id: monitorId,
+              },
+            },
+            {
+              range: {
+                '@timestamp': {
+                  lte: 'now',
+                  gte: 'now-24h/h',
                 },
               },
-              lcp: {
-                sum: {
-                  field: SYNTHETICS_LCP,
-                },
+            },
+          ],
+        },
+      },
+      aggs: {
+        testRuns: {
+          terms: {
+            field: 'monitor.check_group',
+            size: 10000,
+          },
+          aggs: {
+            fcp: {
+              sum: {
+                field: SYNTHETICS_FCP,
               },
-              cls: {
-                sum: {
-                  field: SYNTHETICS_CLS,
-                },
+            },
+            lcp: {
+              sum: {
+                field: SYNTHETICS_LCP,
               },
-              dcl: {
-                sum: {
-                  field: SYNTHETICS_DCL,
-                },
+            },
+            cls: {
+              sum: {
+                field: SYNTHETICS_CLS,
               },
-              stepDuration: {
-                sum: {
-                  field: SYNTHETICS_STEP_DURATION,
-                },
+            },
+            dcl: {
+              sum: {
+                field: SYNTHETICS_DCL,
+              },
+            },
+            stepDuration: {
+              sum: {
+                field: SYNTHETICS_STEP_DURATION,
               },
             },
           },
@@ -118,56 +116,54 @@ export const useStepPrevMetrics = (step?: JourneyStep) => {
   const { data: transferData } = useReduxEsSearch(
     {
       index: SYNTHETICS_INDEX_PATTERN,
-      body: {
-        size: 0,
-        runtime_mappings: {
-          'synthetics.payload.transfer_size': {
-            type: 'double',
-          },
-          'synthetics.payload.resource_size': {
-            type: 'double',
-          },
+      size: 0,
+      runtime_mappings: {
+        'synthetics.payload.transfer_size': {
+          type: 'double',
         },
-        query: {
-          bool: {
-            filter: [
-              {
-                term: {
-                  'synthetics.type': 'journey/network_info',
-                },
-              },
-              {
-                term: {
-                  'synthetics.step.index': Number(stepIndex),
-                },
-              },
-              {
-                term: {
-                  config_id: monitorId,
-                },
-              },
-              {
-                range: {
-                  '@timestamp': {
-                    lte: 'now',
-                    gte: 'now-24h/h',
-                  },
-                },
-              },
-            ],
-          },
+        'synthetics.payload.resource_size': {
+          type: 'double',
         },
-        aggs: {
-          testRuns: {
-            terms: {
-              field: 'monitor.check_group',
-              size: 10000,
+      },
+      query: {
+        bool: {
+          filter: [
+            {
+              term: {
+                'synthetics.type': 'journey/network_info',
+              },
             },
-            aggs: {
-              transferSize: {
-                sum: {
-                  field: 'synthetics.payload.transfer_size',
+            {
+              term: {
+                'synthetics.step.index': Number(stepIndex),
+              },
+            },
+            {
+              term: {
+                config_id: monitorId,
+              },
+            },
+            {
+              range: {
+                '@timestamp': {
+                  lte: 'now',
+                  gte: 'now-24h/h',
                 },
+              },
+            },
+          ],
+        },
+      },
+      aggs: {
+        testRuns: {
+          terms: {
+            field: 'monitor.check_group',
+            size: 10000,
+          },
+          aggs: {
+            transferSize: {
+              sum: {
+                field: 'synthetics.payload.transfer_size',
               },
             },
           },

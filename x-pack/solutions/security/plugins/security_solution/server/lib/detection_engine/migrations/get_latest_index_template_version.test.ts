@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { IndicesGetIndexTemplateResponse } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { IndicesGetIndexTemplateResponse } from '@elastic/elasticsearch/lib/api/types';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { getLatestIndexTemplateVersion } from './get_latest_index_template_version';
 

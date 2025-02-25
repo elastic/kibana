@@ -9,7 +9,7 @@ import type { EuiBasicTableColumn } from '@elastic/eui';
 import { EuiInMemoryTable, EuiSpacer, EuiText } from '@elastic/eui';
 import React from 'react';
 import styled from 'styled-components';
-import type { SortOrder } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { SortOrder } from '@elastic/elasticsearch/lib/api/types';
 import { ALERT_RULE_NAME } from '@kbn/rule-data-utils';
 import { TableId } from '@kbn/securitysolution-data-table';
 import type { AlertsByRuleData } from './types';

@@ -36,10 +36,8 @@ export default function (providerContext: FtrProviderContext) {
     try {
       await es.deleteByQuery({
         index: '.fleet-secrets',
-        body: {
-          query: {
-            match_all: {},
-          },
+        query: {
+          match_all: {},
         },
       });
     } catch (err) {
@@ -85,7 +83,7 @@ export default function (providerContext: FtrProviderContext) {
     const agentResponse = await es.index({
       index: '.fleet-agents',
       refresh: true,
-      body: {
+      document: {
         access_api_key_id: 'api-key-3',
         active: true,
         policy_id: agentPolicyId,
@@ -109,10 +107,8 @@ export default function (providerContext: FtrProviderContext) {
       await es.deleteByQuery({
         index: '.fleet-agents',
         refresh: true,
-        body: {
-          query: {
-            match_all: {},
-          },
+        query: {
+          match_all: {},
         },
       });
     } catch (err) {

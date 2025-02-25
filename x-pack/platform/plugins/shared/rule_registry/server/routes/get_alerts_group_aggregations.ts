@@ -9,7 +9,7 @@ import { IRouter } from '@kbn/core/server';
 import * as t from 'io-ts';
 import { transformError } from '@kbn/securitysolution-es-utils';
 
-import { SortCombinations } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { SortCombinations } from '@elastic/elasticsearch/lib/api/types';
 import { RacRequestHandlerContext } from '../types';
 import { BASE_RAC_ALERTS_API_PATH } from '../../common/constants';
 import { buildRouteValidation } from './utils/route_validation';

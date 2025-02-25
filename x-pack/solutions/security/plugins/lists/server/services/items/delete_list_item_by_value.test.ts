@@ -45,22 +45,20 @@ describe('delete_list_item_by_value', () => {
     const options = getDeleteListItemByValueOptionsMock();
     await deleteListItemByValue(options);
     const deleteByQuery = {
-      body: {
-        query: {
-          bool: {
-            filter: [
-              { term: { list_id: 'some-list-id' } },
-              {
-                bool: {
-                  minimum_should_match: 1,
-                  should: [{ term: { ip: { _name: '0.0', value: '127.0.0.1' } } }],
-                },
+      index: '.items',
+      query: {
+        bool: {
+          filter: [
+            { term: { list_id: 'some-list-id' } },
+            {
+              bool: {
+                minimum_should_match: 1,
+                should: [{ term: { ip: { _name: '0.0', value: '127.0.0.1' } } }],
               },
-            ],
-          },
+            },
+          ],
         },
       },
-      index: '.items',
       refresh: false,
     };
     expect(options.esClient.deleteByQuery).toBeCalledWith(deleteByQuery);

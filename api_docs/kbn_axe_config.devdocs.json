@@ -30,7 +30,7 @@
         "tags": [],
         "label": "AXE_CONFIG",
         "description": [],
-        "path": "packages/kbn-axe-config/index.ts",
+        "path": "src/platform/packages/shared/kbn-axe-config/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -44,7 +44,7 @@
             "signature": [
               "{ id: string; selector: string; }[]"
             ],
-            "path": "packages/kbn-axe-config/index.ts",
+            "path": "src/platform/packages/shared/kbn-axe-config/index.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -58,7 +58,7 @@
         "tags": [],
         "label": "AXE_OPTIONS",
         "description": [],
-        "path": "packages/kbn-axe-config/index.ts",
+        "path": "src/platform/packages/shared/kbn-axe-config/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -72,7 +72,7 @@
             "signature": [
               "\"raw\" | \"v2\" | \"v1\" | \"rawEnv\" | \"no-passes\""
             ],
-            "path": "packages/kbn-axe-config/index.ts",
+            "path": "src/platform/packages/shared/kbn-axe-config/index.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -86,7 +86,7 @@
             "signature": [
               "string[]"
             ],
-            "path": "packages/kbn-axe-config/index.ts",
+            "path": "src/platform/packages/shared/kbn-axe-config/index.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -97,7 +97,7 @@
             "tags": [],
             "label": "rules",
             "description": [],
-            "path": "packages/kbn-axe-config/index.ts",
+            "path": "src/platform/packages/shared/kbn-axe-config/index.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -108,7 +108,7 @@
                 "tags": [],
                 "label": "'color-contrast'",
                 "description": [],
-                "path": "packages/kbn-axe-config/index.ts",
+                "path": "src/platform/packages/shared/kbn-axe-config/index.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "children": [
@@ -119,7 +119,7 @@
                     "tags": [],
                     "label": "enabled",
                     "description": [],
-                    "path": "packages/kbn-axe-config/index.ts",
+                    "path": "src/platform/packages/shared/kbn-axe-config/index.ts",
                     "deprecated": false,
                     "trackAdoption": false
                   }
@@ -132,7 +132,7 @@
                 "tags": [],
                 "label": "bypass",
                 "description": [],
-                "path": "packages/kbn-axe-config/index.ts",
+                "path": "src/platform/packages/shared/kbn-axe-config/index.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "children": [
@@ -143,7 +143,7 @@
                     "tags": [],
                     "label": "enabled",
                     "description": [],
-                    "path": "packages/kbn-axe-config/index.ts",
+                    "path": "src/platform/packages/shared/kbn-axe-config/index.ts",
                     "deprecated": false,
                     "trackAdoption": false
                   }
@@ -156,7 +156,7 @@
                 "tags": [],
                 "label": "'nested-interactive'",
                 "description": [],
-                "path": "packages/kbn-axe-config/index.ts",
+                "path": "src/platform/packages/shared/kbn-axe-config/index.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "children": [
@@ -167,7 +167,7 @@
                     "tags": [],
                     "label": "enabled",
                     "description": [],
-                    "path": "packages/kbn-axe-config/index.ts",
+                    "path": "src/platform/packages/shared/kbn-axe-config/index.ts",
                     "deprecated": false,
                     "trackAdoption": false
                   }

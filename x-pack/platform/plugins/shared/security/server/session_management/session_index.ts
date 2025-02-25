@@ -381,7 +381,7 @@ export class SessionIndex {
       const response = await this.options.elasticsearchClient.deleteByQuery({
         index: this.aliasName,
         refresh: false,
-        body: { query: deleteQuery },
+        query: deleteQuery,
       });
       return response.deleted as number;
     } catch (err) {
@@ -762,7 +762,8 @@ export class SessionIndex {
       try {
         await this.options.elasticsearchClient.indices.putMapping({
           index: this.aliasName,
-          ...sessionIndexSettings.mappings,
+          // @ts-expect-error elasticsearch@9.0.0 https://github.com/elastic/elasticsearch-js/issues/2584
+          body: sessionIndexSettings.mappings,
         });
         this.options.logger.debug('Successfully updated session index mappings.');
       } catch (err) {
@@ -783,7 +784,7 @@ export class SessionIndex {
         id: sid,
         // We write to the alias for `create` operations so that we can prevent index auto-creation in the event it is missing.
         index: this.aliasName,
-        body: sessionValueToStore,
+        document: sessionValueToStore,
         refresh: false,
         require_alias: true,
       } as CreateRequest,

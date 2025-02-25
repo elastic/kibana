@@ -628,53 +628,51 @@ export const formattedSearchStrategyResponse = {
             'winlogbeat-*',
           ],
           ignore_unavailable: true,
-          body: {
-            aggregations: {
-              http_count: { cardinality: { field: 'url.path' } },
-              url: {
-                terms: { field: 'url.path', size: 10, order: { _count: 'desc' } },
-                aggs: {
-                  methods: { terms: { field: 'http.request.method', size: 4 } },
-                  domains: { terms: { field: 'url.domain', size: 4 } },
-                  status: { terms: { field: 'http.response.status_code', size: 4 } },
-                  source: {
-                    top_hits: { size: 1, _source: false },
-                  },
+          aggregations: {
+            http_count: { cardinality: { field: 'url.path' } },
+            url: {
+              terms: { field: 'url.path', size: 10, order: { _count: 'desc' } },
+              aggs: {
+                methods: { terms: { field: 'http.request.method', size: 4 } },
+                domains: { terms: { field: 'url.domain', size: 4 } },
+                status: { terms: { field: 'http.response.status_code', size: 4 } },
+                source: {
+                  top_hits: { size: 1, _source: false },
                 },
               },
             },
-            query: {
-              bool: {
-                filter: [
-                  { bool: { must: [], filter: [{ match_all: {} }], should: [], must_not: [] } },
-                  {
-                    range: {
-                      '@timestamp': {
-                        gte: '2020-09-13T09:00:43.249Z',
-                        lte: '2020-09-14T09:00:43.249Z',
-                        format: 'strict_date_optional_time',
-                      },
+          },
+          query: {
+            bool: {
+              filter: [
+                { bool: { must: [], filter: [{ match_all: {} }], should: [], must_not: [] } },
+                {
+                  range: {
+                    '@timestamp': {
+                      gte: '2020-09-13T09:00:43.249Z',
+                      lte: '2020-09-14T09:00:43.249Z',
+                      format: 'strict_date_optional_time',
                     },
                   },
-                  { exists: { field: 'http.request.method' } },
-                ],
-              },
+                },
+                { exists: { field: 'http.request.method' } },
+              ],
             },
-            _source: false,
-            fields: [
-              'host.name',
-              'source.ip',
-              'url.path',
-              'http.request.method',
-              'url.domain',
-              'http.response.status_code',
-              {
-                field: '@timestamp',
-                format: 'strict_date_optional_time',
-              },
-            ],
-            size: 0,
           },
+          _source: false,
+          fields: [
+            'host.name',
+            'source.ip',
+            'url.path',
+            'http.request.method',
+            'url.domain',
+            'http.response.status_code',
+            {
+              field: '@timestamp',
+              format: 'strict_date_optional_time',
+            },
+          ],
+          size: 0,
           track_total_hits: false,
         },
         null,
@@ -699,50 +697,48 @@ export const expectedDsl = {
     'winlogbeat-*',
   ],
   ignore_unavailable: true,
-  body: {
-    aggregations: {
-      http_count: { cardinality: { field: 'url.path' } },
-      url: {
-        terms: { field: 'url.path', size: 10, order: { _count: 'desc' } },
-        aggs: {
-          methods: { terms: { field: 'http.request.method', size: 4 } },
-          domains: { terms: { field: 'url.domain', size: 4 } },
-          status: { terms: { field: 'http.response.status_code', size: 4 } },
-          source: { top_hits: { size: 1, _source: false } },
-        },
+  aggregations: {
+    http_count: { cardinality: { field: 'url.path' } },
+    url: {
+      terms: { field: 'url.path', size: 10, order: { _count: 'desc' } },
+      aggs: {
+        methods: { terms: { field: 'http.request.method', size: 4 } },
+        domains: { terms: { field: 'url.domain', size: 4 } },
+        status: { terms: { field: 'http.response.status_code', size: 4 } },
+        source: { top_hits: { size: 1, _source: false } },
       },
     },
-    query: {
-      bool: {
-        filter: [
-          { bool: { must: [], filter: [{ match_all: {} }], should: [], must_not: [] } },
-          {
-            range: {
-              '@timestamp': {
-                gte: '2020-09-13T09:00:43.249Z',
-                lte: '2020-09-14T09:00:43.249Z',
-                format: 'strict_date_optional_time',
-              },
+  },
+  query: {
+    bool: {
+      filter: [
+        { bool: { must: [], filter: [{ match_all: {} }], should: [], must_not: [] } },
+        {
+          range: {
+            '@timestamp': {
+              gte: '2020-09-13T09:00:43.249Z',
+              lte: '2020-09-14T09:00:43.249Z',
+              format: 'strict_date_optional_time',
             },
           },
-          { exists: { field: 'http.request.method' } },
-        ],
-      },
+        },
+        { exists: { field: 'http.request.method' } },
+      ],
     },
-    _source: false,
-    fields: [
-      'host.name',
-      'source.ip',
-      'url.path',
-      'http.request.method',
-      'url.domain',
-      'http.response.status_code',
-      {
-        field: '@timestamp',
-        format: 'strict_date_optional_time',
-      },
-    ],
-    size: 0,
   },
+  _source: false,
+  fields: [
+    'host.name',
+    'source.ip',
+    'url.path',
+    'http.request.method',
+    'url.domain',
+    'http.response.status_code',
+    {
+      field: '@timestamp',
+      format: 'strict_date_optional_time',
+    },
+  ],
+  size: 0,
   track_total_hits: false,
 };

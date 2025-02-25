@@ -186,6 +186,12 @@ export const getNavigationTreeDefinition = ({
                       },
                       link: 'enterpriseSearchAnalytics',
                       renderAs: 'item',
+                      sideNavStatus: collections?.some((collection) =>
+                        collection.items?.some((item) => item.isSelected)
+                      )
+                        ? 'visible'
+                        : 'hidden',
+
                       ...(collections
                         ? {
                             children: collections.map(euiItemTypeToNodeDefinition),

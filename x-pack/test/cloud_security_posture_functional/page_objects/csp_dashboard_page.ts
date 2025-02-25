@@ -45,7 +45,7 @@ export function CspDashboardPageProvider({ getService, getPageObjects }: FtrProv
         findingsMock.map((finding) =>
           es.index({
             index: LATEST_FINDINGS_INDEX,
-            body: finding,
+            document: finding,
           })
         )
       );

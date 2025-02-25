@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { MlStartTrainedModelDeploymentRequest } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { MlStartTrainedModelDeploymentRequest } from '@elastic/elasticsearch/lib/api/types';
 import type { NLPSettings } from '../../../common/constants/app';
 import type { TrainedModelDeploymentStatsResponse } from '../../../common/types/trained_models';
 import type { CloudInfo } from '../services/ml_server_info';
@@ -226,16 +226,16 @@ export class DeploymentParamsMapper {
     input: MlTrainedModelAssignmentTaskParametersAdaptive
   ): DeploymentParamsUI {
     let optimized: DeploymentParamsUI['optimized'] = 'optimizedForIngest';
-    if (input.threads_per_allocation > 1) {
+    if (input.threads_per_allocation && input.threads_per_allocation > 1) {
       optimized = 'optimizedForSearch';
     }
     const adaptiveResources = !!input.adaptive_allocations?.enabled;
 
     const vCPUs =
-      input.threads_per_allocation *
+      (input.threads_per_allocation ?? 0) *
       (adaptiveResources
         ? input.adaptive_allocations!.max_number_of_allocations!
-        : input.number_of_allocations);
+        : input.number_of_allocations ?? 0);
 
     // The deployment can be created via API with a number of allocations that do not exactly match our vCPU ranges.
     // In this case, we should find the closest vCPU range that does not exceed the max or static value of the range.

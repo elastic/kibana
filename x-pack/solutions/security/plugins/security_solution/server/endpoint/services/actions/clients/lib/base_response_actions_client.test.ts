@@ -28,8 +28,7 @@ import type { CasesClientMock } from '@kbn/cases-plugin/server/client/mocks';
 import type { CasesByAlertIDParams } from '@kbn/cases-plugin/server/client/cases/get';
 import type { Logger } from '@kbn/logging';
 import { getActionDetailsById as _getActionDetailsById } from '../../action_details_by_id';
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import type { TransportResult } from '@elastic/elasticsearch';
+import type { estypes, TransportResult } from '@elastic/elasticsearch';
 import {
   ENDPOINT_ACTION_RESPONSES_INDEX,
   ENDPOINT_ACTION_RESPONSES_INDEX_PATTERN,

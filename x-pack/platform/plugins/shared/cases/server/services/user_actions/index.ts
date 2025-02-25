@@ -11,7 +11,7 @@ import type {
   SavedObjectsRawDoc,
 } from '@kbn/core/server';
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { estypes } from '@elastic/elasticsearch';
 import type { KueryNode } from '@kbn/es-query';
 import type { CaseUserActionDeprecatedResponse } from '../../../common/types/api';
 import { UserActionTypes } from '../../../common/types/domain';

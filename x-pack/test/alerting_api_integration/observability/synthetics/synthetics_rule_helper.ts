@@ -43,12 +43,10 @@ export class SyntheticsRuleHelper {
   async createIndexAction() {
     await this.esClient.indices.create({
       index: this.alertActionIndex,
-      body: {
-        mappings: {
-          properties: {
-            'monitor.id': {
-              type: 'keyword',
-            },
+      mappings: {
+        properties: {
+          'monitor.id': {
+            type: 'keyword',
           },
         },
       },

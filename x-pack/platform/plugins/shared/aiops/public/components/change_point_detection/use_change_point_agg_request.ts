@@ -9,10 +9,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { type QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { i18n } from '@kbn/i18n';
 import { isDefined } from '@kbn/ml-is-defined';
-import type {
-  MappingRuntimeFields,
-  SearchRequest,
-} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { MappingRuntimeFields, SearchRequest } from '@elastic/elasticsearch/lib/api/types';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { useReload } from '../../hooks/use_reload';
 import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
@@ -108,11 +105,9 @@ function getChangePointDetectionRequestBody(
   return {
     index,
     size: 0,
-    body: {
-      ...(query ? { query } : {}),
-      ...(runtimeMappings ? { runtime_mappings: runtimeMappings } : {}),
-      aggregations,
-    },
+    ...(query ? { query } : {}),
+    ...(runtimeMappings ? { runtime_mappings: runtimeMappings } : {}),
+    aggregations,
   } as SearchRequest;
 }
 

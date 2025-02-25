@@ -60,9 +60,7 @@ export function registerAppRoutes({
         // Get cluster privileges
         const { has_all_requested: hasAllPrivileges, cluster } =
           await clusterClient.asCurrentUser.security.hasPrivileges({
-            body: {
-              cluster: [...APP_REQUIRED_CLUSTER_PRIVILEGES, ...APP_SLM_CLUSTER_PRIVILEGES],
-            },
+            cluster: [...APP_REQUIRED_CLUSTER_PRIVILEGES, ...APP_SLM_CLUSTER_PRIVILEGES],
           });
 
         // Find missing cluster privileges and set overall app privileges

@@ -102,14 +102,12 @@ export function dataFrameAnalyticsRoutes(
     }
 
     const body = await client.asCurrentUser.security.hasPrivileges({
-      body: {
-        index: [
-          {
-            names: [destinationIndex], // uses wildcard
-            privileges: ['delete_index'],
-          },
-        ],
-      },
+      index: [
+        {
+          names: [destinationIndex], // uses wildcard
+          privileges: ['delete_index'],
+        },
+      ],
     });
 
     return body?.has_all_requested === true;
@@ -400,6 +398,7 @@ export function dataFrameAnalyticsRoutes(
         try {
           const body = await mlClient.explainDataFrameAnalytics(
             {
+              // @ts-expect-error elasticsearch@9.0.0 https://github.com/elastic/elasticsearch-js/issues/2584 (_meta)
               body: request.body,
             },
             getAuthorizationHeader(request)
@@ -620,6 +619,7 @@ export function dataFrameAnalyticsRoutes(
           const body = await mlClient.updateDataFrameAnalytics(
             {
               id: analyticsId,
+              // @ts-expect-error elasticsearch@9.0.0 https://github.com/elastic/elasticsearch-js/issues/2584 (_meta)
               body: request.body,
             },
             getAuthorizationHeader(request)

@@ -7,7 +7,7 @@
 
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { estypes } from '@elastic/elasticsearch';
 import type {
   PivotAggsConfigBase,
   PivotAggsConfigWithUiBase,

@@ -51,9 +51,7 @@ export const registerPrivilegesRoute = ({
       try {
         const { has_all_requested: hasAllPrivileges, cluster } =
           await client.asCurrentUser.security.hasPrivileges({
-            body: {
-              cluster: ['manage_enrich'],
-            },
+            cluster: ['manage_enrich'],
           });
 
         if (!hasAllPrivileges) {

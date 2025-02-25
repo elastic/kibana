@@ -30,34 +30,32 @@ export async function queryFilterMonitors({
   const filters = toElasticsearchQuery(fromKueryExpression(ruleParams.kqlQuery));
   const { body: result } = await esClient.search(
     {
-      body: {
-        size: 0,
-        query: {
-          bool: {
-            filter: [
-              FINAL_SUMMARY_FILTER,
-              getRangeFilter({ from: 'now-24h/m', to: 'now/m' }),
-              getTimeSpanFilter(),
-              {
-                term: {
-                  'meta.space_id': spaceId,
-                },
+      size: 0,
+      query: {
+        bool: {
+          filter: [
+            FINAL_SUMMARY_FILTER,
+            getRangeFilter({ from: 'now-24h/m', to: 'now/m' }),
+            getTimeSpanFilter(),
+            {
+              term: {
+                'meta.space_id': spaceId,
               },
-              {
-                bool: {
-                  should: filters,
-                },
-              },
-              ...getFilters(ruleParams),
-            ],
-          },
-        },
-        aggs: {
-          ids: {
-            terms: {
-              size: 10000,
-              field: 'config_id',
             },
+            {
+              bool: {
+                should: filters,
+              },
+            },
+            ...getFilters(ruleParams),
+          ],
+        },
+      },
+      aggs: {
+        ids: {
+          terms: {
+            size: 10000,
+            field: 'config_id',
           },
         },
       },

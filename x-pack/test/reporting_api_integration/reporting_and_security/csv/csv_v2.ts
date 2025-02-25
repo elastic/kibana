@@ -68,21 +68,19 @@ export default ({ getService }: FtrProviderContext) => {
     log.info(`loading test data`);
     await es.indices.create({
       index: timelessIndexName,
-      body: {
-        settings: { number_of_shards: 1 },
-        mappings: {
-          properties: {
-            eon: { type: 'keyword' },
-            era: { type: 'keyword' },
-            period: { type: 'keyword' },
-            epoch: { type: 'keyword' },
-          },
+      settings: { number_of_shards: 1 },
+      mappings: {
+        properties: {
+          eon: { type: 'keyword' },
+          era: { type: 'keyword' },
+          period: { type: 'keyword' },
+          epoch: { type: 'keyword' },
         },
       },
     });
     await es.bulk({
       refresh: 'wait_for',
-      body: [
+      operations: [
         { index: { _index: timelessIndexName, _id: 'tvJJX4UBvD7uFsw9L2x4' } },
         { eon: 'Phanerozoic', era: 'Cenozoic', period: 'Neogene', epoch: ' Pliocene' },
         { index: { _index: timelessIndexName, _id: 't_JJX4UBvD7uFsw9L2x4' } },

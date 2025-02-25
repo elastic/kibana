@@ -102,7 +102,7 @@ describe('getOutdatedDocumentsQuery', () => {
 
     await client.bulk({
       refresh: 'true',
-      body: bulkCreateParams,
+      operations: bulkCreateParams,
     });
 
     return { client };

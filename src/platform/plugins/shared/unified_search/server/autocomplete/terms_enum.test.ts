@@ -12,7 +12,7 @@ import { coreMock } from '@kbn/core/server/mocks';
 import { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
 import { ConfigSchema } from '../config';
 import type { DeeplyMockedKeys } from '@kbn/utility-types-jest';
-import { TermsEnumResponse } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { TermsEnumResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { DataViewField } from '@kbn/data-views-plugin/common';
 
 let savedObjectsClientMock: jest.Mocked<SavedObjectsClientContract>;
@@ -54,24 +54,22 @@ describe('_terms_enum suggestions', () => {
 
     expect(args).toMatchInlineSnapshot(`
       Object {
-        "body": Object {
-          "field": "field_name",
-          "index_filter": Object {
-            "bool": Object {
-              "must": Array [],
-              "must_not": Object {
-                "terms": Object {
-                  "_tier": Array [
-                    "data_cold",
-                    "data_frozen",
-                  ],
-                },
+        "field": "field_name",
+        "index": "index",
+        "index_filter": Object {
+          "bool": Object {
+            "must": Array [],
+            "must_not": Object {
+              "terms": Object {
+                "_tier": Array [
+                  "data_cold",
+                  "data_frozen",
+                ],
               },
             },
           },
-          "string": "query",
         },
-        "index": "index",
+        "string": "query",
       }
     `);
     expect(result).toEqual(mockResponse.terms);
@@ -92,24 +90,22 @@ describe('_terms_enum suggestions', () => {
 
     expect(args).toMatchInlineSnapshot(`
       Object {
-        "body": Object {
-          "field": "fieldName",
-          "index_filter": Object {
-            "bool": Object {
-              "must": Array [],
-              "must_not": Object {
-                "terms": Object {
-                  "_tier": Array [
-                    "data_cold",
-                    "data_frozen",
-                  ],
-                },
+        "field": "fieldName",
+        "index": "index",
+        "index_filter": Object {
+          "bool": Object {
+            "must": Array [],
+            "must_not": Object {
+              "terms": Object {
+                "_tier": Array [
+                  "data_cold",
+                  "data_frozen",
+                ],
               },
             },
           },
-          "string": "query",
         },
-        "index": "index",
+        "string": "query",
       }
     `);
     expect(result).toEqual(mockResponse.terms);

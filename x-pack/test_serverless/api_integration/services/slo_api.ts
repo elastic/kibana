@@ -165,11 +165,9 @@ export function SloApiProvider({ getService }: FtrProviderContext) {
     async getSloData({ sloId, indexName }: { sloId: string; indexName: string }) {
       const response = await es.search({
         index: indexName,
-        body: {
-          query: {
-            bool: {
-              filter: [{ term: { 'slo.id': sloId } }],
-            },
+        query: {
+          bool: {
+            filter: [{ term: { 'slo.id': sloId } }],
           },
         },
       });
@@ -179,11 +177,9 @@ export function SloApiProvider({ getService }: FtrProviderContext) {
       return await retry.tryForTime(retryTimeout, async () => {
         const response = await es.search({
           index: indexName,
-          body: {
-            query: {
-              bool: {
-                filter: [{ term: { 'slo.id': sloId } }],
-              },
+          query: {
+            bool: {
+              filter: [{ term: { 'slo.id': sloId } }],
             },
           },
         });

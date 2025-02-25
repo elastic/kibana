@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { estypes } from '@elastic/elasticsearch';
 
 import type { ISearchRequestParams } from '@kbn/search-types';
 import { AGENT_ACTIONS_INDEX } from '@kbn/fleet-plugin/common';
@@ -27,39 +27,37 @@ export const buildActionsQuery = ({
     allow_no_indices: true,
     index: componentTemplateExists ? `${ACTIONS_INDEX}*` : AGENT_ACTIONS_INDEX,
     ignore_unavailable: true,
-    body: {
-      query: {
-        bool: {
-          filter,
-          must: [
-            {
-              term: {
-                type: {
-                  value: 'INPUT_ACTION',
-                },
+    query: {
+      bool: {
+        filter,
+        must: [
+          {
+            term: {
+              type: {
+                value: 'INPUT_ACTION',
               },
             },
-            {
-              term: {
-                input_type: {
-                  value: 'osquery',
-                },
+          },
+          {
+            term: {
+              input_type: {
+                value: 'osquery',
               },
             },
-          ] as estypes.QueryDslQueryContainer[],
+          },
+        ] as estypes.QueryDslQueryContainer[],
+      },
+    },
+    from: cursorStart,
+    size: querySize,
+    track_total_hits: true,
+    fields: ['*'],
+    sort: [
+      {
+        [sort.field]: {
+          order: sort.direction,
         },
       },
-      from: cursorStart,
-      size: querySize,
-      track_total_hits: true,
-      fields: ['*'],
-      sort: [
-        {
-          [sort.field]: {
-            order: sort.direction,
-          },
-        },
-      ],
-    },
+    ],
   };
 };

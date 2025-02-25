@@ -83,56 +83,54 @@ export const buildDnsQuery = ({
     allow_no_indices: true,
     index: defaultIndex,
     ignore_unavailable: true,
-    body: {
-      aggregations: {
-        ...getCountAgg(),
-        dns_name_query_count: {
-          terms: {
-            field: stackByField,
-            size: HUGE_QUERY_SIZE,
-          },
-          aggs: {
+    aggregations: {
+      ...getCountAgg(),
+      dns_name_query_count: {
+        terms: {
+          field: stackByField,
+          size: HUGE_QUERY_SIZE,
+        },
+        aggs: {
+          bucket_sort: {
             bucket_sort: {
-              bucket_sort: {
-                sort: [getQueryOrder(sort), { _key: { order: Direction.asc } }],
-                from: cursorStart,
-                size: querySize,
-              },
+              sort: [getQueryOrder(sort), { _key: { order: Direction.asc } }],
+              from: cursorStart,
+              size: querySize,
             },
-            unique_domains: {
-              cardinality: {
-                field: 'dns.question.name',
-              },
+          },
+          unique_domains: {
+            cardinality: {
+              field: 'dns.question.name',
             },
-            dns_bytes_in: {
-              sum: {
-                field: 'source.bytes',
-              },
+          },
+          dns_bytes_in: {
+            sum: {
+              field: 'source.bytes',
             },
-            dns_bytes_out: {
-              sum: {
-                field: 'destination.bytes',
-              },
+          },
+          dns_bytes_out: {
+            sum: {
+              field: 'destination.bytes',
             },
           },
         },
       },
-      query: {
-        bool: {
-          filter,
-          ...createIncludePTRFilter(isPtrIncluded),
-        },
-      },
-      _source: false,
-      fields: [
-        'dns.question.registered_domain',
-        {
-          field: '@timestamp',
-          format: 'strict_date_optional_time',
-        },
-      ],
-      size: 0,
     },
+    query: {
+      bool: {
+        filter,
+        ...createIncludePTRFilter(isPtrIncluded),
+      },
+    },
+    _source: false,
+    fields: [
+      'dns.question.registered_domain',
+      {
+        field: '@timestamp',
+        format: 'strict_date_optional_time',
+      },
+    ],
+    size: 0,
     track_total_hits: false,
   };
 

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { estypes } from '@elastic/elasticsearch';
 
 import type { AiopsLogRateAnalysisSchema } from '../api/schema';
 
@@ -16,11 +16,9 @@ export const getTotalDocCountRequest = (
   params: AiopsLogRateAnalysisSchema
 ): estypes.SearchRequest => ({
   ...getRequestBase(params),
-  body: {
-    fields: ['*'],
-    _source: false,
-    query: getQueryWithParams({ params }),
-    size: 0,
-    track_total_hits: true,
-  },
+  fields: ['*'],
+  _source: false,
+  query: getQueryWithParams({ params }),
+  size: 0,
+  track_total_hits: true,
 });

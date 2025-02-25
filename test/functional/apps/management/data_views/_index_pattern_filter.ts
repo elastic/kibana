@@ -150,12 +150,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await es.indices.create({
         index: additionalIndexWithWrongMapping,
-        body: {
-          mappings: {
-            properties: {
-              bytes: {
-                type: 'keyword',
-              },
+        mappings: {
+          properties: {
+            bytes: {
+              type: 'keyword',
             },
           },
         },
@@ -163,7 +161,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await es.index({
         index: additionalIndexWithWrongMapping,
-        body: {
+        document: {
           bytes: 'wrong_value',
         },
         refresh: 'wait_for',

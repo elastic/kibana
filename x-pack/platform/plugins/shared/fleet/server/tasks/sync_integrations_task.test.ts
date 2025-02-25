@@ -156,29 +156,27 @@ describe('SyncIntegrationsTask', () => {
 
       expect(esClient.update).toHaveBeenCalledWith(
         {
-          body: {
-            doc: {
-              integrations: [
-                {
-                  package_name: 'package-1',
-                  package_version: '0.1.0',
-                  updated_at: expect.any(String),
-                },
-                {
-                  package_name: 'package-2',
-                  package_version: '0.2.0',
-                  updated_at: expect.any(String),
-                },
-              ],
-              remote_es_hosts: [
-                { hosts: ['https://remote1:9200'], name: 'remote1', sync_integrations: true },
-                { hosts: ['https://remote2:9200'], name: 'remote2', sync_integrations: false },
-              ],
-            },
-            doc_as_upsert: true,
-          },
           id: 'fleet-synced-integrations',
           index: 'fleet-synced-integrations',
+          doc: {
+            integrations: [
+              {
+                package_name: 'package-1',
+                package_version: '0.1.0',
+                updated_at: expect.any(String),
+              },
+              {
+                package_name: 'package-2',
+                package_version: '0.2.0',
+                updated_at: expect.any(String),
+              },
+            ],
+            remote_es_hosts: [
+              { hosts: ['https://remote1:9200'], name: 'remote1', sync_integrations: true },
+              { hosts: ['https://remote2:9200'], name: 'remote2', sync_integrations: false },
+            ],
+          },
+          doc_as_upsert: true,
         },
         expect.anything()
       );

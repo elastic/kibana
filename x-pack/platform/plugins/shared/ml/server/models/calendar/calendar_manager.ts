@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { estypes } from '@elastic/elasticsearch';
 import { difference } from 'lodash';
 import { EventManager } from './event_manager';
 import type { MlClient } from '../../lib/ml_client';
@@ -47,7 +47,7 @@ export class CalendarManager {
   }
 
   async getAllCalendars() {
-    const body = await this._mlClient.getCalendars({ body: { page: { from: 0, size: 10000 } } });
+    const body = await this._mlClient.getCalendars({ page: { from: 0, size: 10000 } });
 
     const events: ScheduledEvent[] = await this._eventManager.getAllEvents();
     const calendars: Calendar[] = body.calendars as Calendar[];
@@ -77,7 +77,7 @@ export class CalendarManager {
     const { calendarId, events, ...newCalendar } = calendar;
     await this._mlClient.putCalendar({
       calendar_id: calendarId,
-      body: newCalendar,
+      ...newCalendar,
     });
 
     if (events.length) {
