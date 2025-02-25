@@ -6,7 +6,7 @@
  */
 
 import { Subject } from 'rxjs';
-import { elasticsearchServiceMock, savedObjectsServiceMock } from '@kbn/core/server/mocks';
+import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { createPackagePolicyServiceMock } from '@kbn/fleet-plugin/server/mocks';
 import type { PackagePolicyClient } from '@kbn/fleet-plugin/server';
 import type { PackagePolicy, UpdatePackagePolicy } from '@kbn/fleet-plugin/common';
@@ -32,9 +32,8 @@ const MockPackagePolicyWithEndpointPolicy = (
 };
 
 describe('Telemetry config watcher', () => {
-  const soStartMock = savedObjectsServiceMock.createStartContract();
   const esStartMock = elasticsearchServiceMock.createStart();
-  let packagePolicySvcMock: jest.Mocked<PackagePolicyClient>;
+  let packagePolicyServiceMock: jest.Mocked<PackagePolicyClient>;
   let telemetryWatcher: TelemetryConfigWatcher;
 
   const preparePackagePolicyMock = ({
@@ -42,7 +41,7 @@ describe('Telemetry config watcher', () => {
   }: {
     isGlobalTelemetryEnabled: boolean;
   }) => {
-    packagePolicySvcMock.list.mockResolvedValueOnce({
+    packagePolicyServiceMock.list.mockResolvedValueOnce({
       items: [
         MockPackagePolicyWithEndpointPolicy((pc: PolicyConfig): PolicyConfig => {
           pc.global_telemetry_enabled = isGlobalTelemetryEnabled;
@@ -56,11 +55,10 @@ describe('Telemetry config watcher', () => {
   };
 
   beforeEach(() => {
-    packagePolicySvcMock = createPackagePolicyServiceMock();
+    packagePolicyServiceMock = createPackagePolicyServiceMock();
 
     telemetryWatcher = new TelemetryConfigWatcher(
-      packagePolicySvcMock,
-      soStartMock,
+      packagePolicyServiceMock,
       esStartMock,
       createMockEndpointAppContextService()
     );
@@ -90,7 +88,7 @@ describe('Telemetry config watcher', () => {
     const TOTAL = 247;
 
     // set up the mocked package policy service to return and do what we want
-    packagePolicySvcMock.list
+    packagePolicyServiceMock.list
       .mockResolvedValueOnce({
         items: Array.from({ length: 100 }, () => MockPackagePolicyWithEndpointPolicy()),
         total: TOTAL,
@@ -112,12 +110,12 @@ describe('Telemetry config watcher', () => {
 
     await telemetryWatcher.watch(true); // manual trigger
 
-    expect(packagePolicySvcMock.list).toBeCalledTimes(3);
+    expect(packagePolicyServiceMock.list).toBeCalledTimes(3);
 
     // Assert: on the first call to packagePolicy.list, we asked for page 1
-    expect(packagePolicySvcMock.list.mock.calls[0][1].page).toBe(1);
-    expect(packagePolicySvcMock.list.mock.calls[1][1].page).toBe(2); // second call, asked for page 2
-    expect(packagePolicySvcMock.list.mock.calls[2][1].page).toBe(3); // etc
+    expect(packagePolicyServiceMock.list.mock.calls[0][1].page).toBe(1);
+    expect(packagePolicyServiceMock.list.mock.calls[1][1].page).toBe(2); // second call, asked for page 2
+    expect(packagePolicyServiceMock.list.mock.calls[2][1].page).toBe(3); // etc
   });
 
   it.each([true, false])(
@@ -127,17 +125,18 @@ describe('Telemetry config watcher', () => {
 
       await telemetryWatcher.watch(value);
 
-      expect(packagePolicySvcMock.bulkUpdate).not.toHaveBeenCalled();
+      expect(packagePolicyServiceMock.bulkUpdate).not.toHaveBeenCalled();
     }
   );
 
-  it.each([true, false])('updates `global_telemetry_config` field to %s', async (value) => {
+  it.each([true, false])('updates `global_telemetry_enabled` field to %s', async (value) => {
     preparePackagePolicyMock({ isGlobalTelemetryEnabled: !value });
 
     await telemetryWatcher.watch(value);
 
-    expect(packagePolicySvcMock.bulkUpdate).toHaveBeenCalled();
-    const policyUpdates: UpdatePackagePolicy[] = packagePolicySvcMock.bulkUpdate.mock.calls[0][2];
+    expect(packagePolicyServiceMock.bulkUpdate).toHaveBeenCalled();
+    const policyUpdates: UpdatePackagePolicy[] =
+      packagePolicyServiceMock.bulkUpdate.mock.calls[0][2];
     expect(policyUpdates.length).toBe(1);
     const updatedPolicyConfigs: PolicyConfig = policyUpdates[0].inputs[0].config?.policy.value;
     expect(updatedPolicyConfigs.global_telemetry_enabled).toBe(value);
