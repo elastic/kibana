@@ -4238,7 +4238,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/code-owners@link:packages/kbn-code-owners":
+"@kbn/code-owners@link:src/platform/packages/private/kbn-code-owners":
   version "0.0.0"
   uid ""
 

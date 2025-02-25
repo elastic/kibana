@@ -99,7 +99,7 @@ x-pack/solutions/security/packages/kbn-cloud-security-posture/graph @elastic/kib
 x-pack/solutions/security/plugins/cloud_security_posture @elastic/kibana-cloud-security-posture
 src/platform/packages/shared/shared-ux/code_editor/impl @elastic/appex-sharedux
 src/platform/packages/shared/shared-ux/code_editor/mocks @elastic/appex-sharedux
-packages/kbn-code-owners @elastic/appex-qa
+src/platform/packages/private/kbn-code-owners @elastic/appex-qa
 src/platform/packages/shared/kbn-coloring @elastic/kibana-visualizations
 src/platform/packages/shared/kbn-config @elastic/kibana-core
 src/platform/packages/private/kbn-config-mocks @elastic/kibana-core
