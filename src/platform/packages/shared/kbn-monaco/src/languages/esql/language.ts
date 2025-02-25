@@ -34,6 +34,27 @@ export const ESQLLang: CustomLangModuleType<ESQLCallbacks> = {
     workerProxyService.setup(ESQL_LANG_ID);
 
     monaco.languages.setTokensProvider(ESQL_LANG_ID, new ESQLTokensProvider());
+
+    // monaco.languages.registerInlineCompletionsProvider(ESQL_LANG_ID, {
+    //   provideInlineCompletions: async (model, position) => {
+    //     console.log('provideInlineCompletions', model, position);
+    //     const range = new monaco.Range(
+    //       position.lineNumber,
+    //       position.column,
+    //       position.lineNumber,
+    //       position.column
+    //     );
+    //     return {
+    //       items: [
+    //         {
+    //           insertText: 'FROM logs',
+    //           range,
+    //         },
+    //       ],
+    //     };
+    //   },
+    //   freeInlineCompletions: () => {},
+    // });
   },
   languageThemeResolver: buildESQLTheme,
   languageConfiguration: {
@@ -92,6 +113,24 @@ export const ESQLLang: CustomLangModuleType<ESQLCallbacks> = {
         );
         return astAdapter.getHover(model, position, token);
       },
+    };
+  },
+  getInlineCompletionsProvider: (
+    callbacks?: ESQLCallbacks
+  ): monaco.languages.InlineCompletionsProvider => {
+    return {
+      provideInlineCompletions(model, position) {
+        console.log('provideInlineCompletions');
+        return {
+          items: [
+            // {
+            //   insertText: 'provide',
+            //   range: meow,
+            // },
+          ],
+        };
+      },
+      freeInlineCompletions: () => {},
     };
   },
   getSuggestionProvider: (callbacks?: ESQLCallbacks): monaco.languages.CompletionItemProvider => {

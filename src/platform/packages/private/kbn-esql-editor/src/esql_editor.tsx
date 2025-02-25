@@ -621,6 +621,10 @@ export const ESQLEditor = memo(function ESQLEditor({
 
   const hoverProvider = useMemo(() => ESQLLang.getHoverProvider?.(esqlCallbacks), [esqlCallbacks]);
 
+  const inlineCompletionsProvider = useMemo(() => {
+    return ESQLLang.getInlineCompletionsProvider?.(esqlCallbacks);
+  }, [esqlCallbacks]);
+
   const codeActionProvider = useMemo(
     () => ESQLLang.getCodeActionProvider?.(esqlCallbacks),
     [esqlCallbacks]
@@ -680,6 +684,9 @@ export const ESQLEditor = memo(function ESQLEditor({
       lightbulb: {
         enabled: false,
       },
+      inlineSuggest: {
+        enabled: true,
+      },
       lineDecorationsWidth: 20,
       lineNumbers: 'on',
       lineNumbersMinChars: 3,
@@ -692,8 +699,8 @@ export const ESQLEditor = memo(function ESQLEditor({
       },
       quickSuggestions: true,
       readOnly: isDisabled,
-      renderLineHighlight: 'line',
-      renderLineHighlightOnlyWhenFocus: true,
+      // renderLineHighlight: 'line',
+      // renderLineHighlightOnlyWhenFocus: true,
       scrollbar: {
         horizontal: 'hidden',
         horizontalScrollbarSize: 6,
@@ -773,6 +780,7 @@ export const ESQLEditor = memo(function ESQLEditor({
                       return hoverProvider?.provideHover(model, position, token);
                     },
                   }}
+                  inlineCompletionsProvider={inlineCompletionsProvider}
                   codeActions={codeActionProvider}
                   onChange={onQueryUpdate}
                   editorDidMount={(editor) => {

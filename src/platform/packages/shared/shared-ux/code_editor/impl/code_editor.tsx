@@ -82,6 +82,8 @@ export interface CodeEditorProps {
    */
   hoverProvider?: monaco.languages.HoverProvider;
 
+  inlineCompletionsProvider?: monaco.languages.InlineCompletionsProvider;
+
   /**
    * Language config provider for bracket
    * Documentation for the provider can be found here:
@@ -178,6 +180,7 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
   suggestionProvider,
   signatureProvider,
   hoverProvider,
+  inlineCompletionsProvider,
   placeholder,
   languageConfiguration,
   codeActions,
@@ -374,6 +377,10 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
           monaco.languages.registerHoverProvider(languageId, hoverProvider);
         }
 
+        if (inlineCompletionsProvider) {
+          monaco.languages.registerInlineCompletionsProvider(languageId, inlineCompletionsProvider);
+        }
+
         if (languageConfiguration) {
           monaco.languages.setLanguageConfiguration(languageId, languageConfiguration);
         }
@@ -396,6 +403,7 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
       suggestionProvider,
       signatureProvider,
       hoverProvider,
+      inlineCompletionsProvider,
       codeActions,
       languageConfiguration,
       enableFindAction,
