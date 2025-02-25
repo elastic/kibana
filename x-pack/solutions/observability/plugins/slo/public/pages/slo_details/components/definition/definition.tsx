@@ -27,6 +27,7 @@ import { ApmIndicatorOverview } from '../overview/apm_indicator_overview';
 import { DisplayQuery } from '../overview/display_query';
 import { DefinitionItem } from './definition_item';
 import { SyntheticsIndicatorOverview } from '../overview/synthetics_indicator_overview';
+import { LinkedDashboards } from '../overview/linked_dashboards';
 
 export interface Props {
   slo: SLOWithSummaryResponse;
@@ -54,19 +55,19 @@ export function Definition({ slo }: Props) {
           title={i18n.translate('xpack.slo.sloDetails.overview.indicatorTypeTitle', {
             defaultMessage: 'Indicator type',
           })}
-          subtitle={<EuiText size="s">{toIndicatorTypeLabel(slo.indicator.type)}</EuiText>}
+          content={<EuiText size="s">{toIndicatorTypeLabel(slo.indicator.type)}</EuiText>}
         />
         <DefinitionItem
           title={i18n.translate('xpack.slo.sloDetails.overview.timeWindowTitle', {
             defaultMessage: 'Time window',
           })}
-          subtitle={toTimeWindowLabel(slo.timeWindow)}
+          content={toTimeWindowLabel(slo.timeWindow)}
         />
         <DefinitionItem
           title={i18n.translate('xpack.slo.sloDetails.overview.budgetingMethodTitle', {
             defaultMessage: 'Budgeting method',
           })}
-          subtitle={
+          content={
             occurrencesBudgetingMethodSchema.is(slo.budgetingMethod) ? (
               <EuiText size="s">{BUDGETING_METHOD_OCCURRENCES}</EuiText>
             ) : (
@@ -104,7 +105,7 @@ export function Definition({ slo }: Props) {
             title={i18n.translate('xpack.slo.sloDetails.overview.indexTitle', {
               defaultMessage: 'Index pattern',
             })}
-            subtitle={slo.indicator.params.index}
+            content={slo.indicator.params.index}
           />
         )}
         {'filter' in slo.indicator.params && (
@@ -112,7 +113,7 @@ export function Definition({ slo }: Props) {
             title={i18n.translate('xpack.slo.sloDetails.overview.overallQueryTitle', {
               defaultMessage: 'Overall query',
             })}
-            subtitle={
+            content={
               <DisplayQuery
                 query={slo.indicator.params.filter}
                 index={slo.indicator.params.index}
@@ -125,7 +126,7 @@ export function Definition({ slo }: Props) {
             title={i18n.translate('xpack.slo.sloDetails.overview.goodQueryTitle', {
               defaultMessage: 'Good query',
             })}
-            subtitle={
+            content={
               <DisplayQuery query={slo.indicator.params.good} index={slo.indicator.params.index} />
             }
           />
@@ -135,7 +136,7 @@ export function Definition({ slo }: Props) {
             title={i18n.translate('xpack.slo.sloDetails.overview.totalQueryTitle', {
               defaultMessage: 'Total query',
             })}
-            subtitle={
+            content={
               <DisplayQuery query={slo.indicator.params.total} index={slo.indicator.params.index} />
             }
           />
@@ -145,13 +146,19 @@ export function Definition({ slo }: Props) {
           title={i18n.translate('xpack.slo.sloDetails.overview.settings.syncDelay', {
             defaultMessage: 'Sync delay',
           })}
-          subtitle={slo.settings.syncDelay}
+          content={slo.settings.syncDelay}
         />
         <DefinitionItem
           title={i18n.translate('xpack.slo.sloDetails.overview.settings.frequency', {
             defaultMessage: 'Frequency',
           })}
-          subtitle={slo.settings.frequency}
+          content={slo.settings.frequency}
+        />
+        <DefinitionItem
+          title={i18n.translate('xpack.slo.sloDetails.overview.dashboards', {
+            defaultMessage: 'Linked dashboards',
+          })}
+          content={<LinkedDashboards assets={slo.assets} />}
         />
       </EuiFlexGrid>
     </EuiPanel>

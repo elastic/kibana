@@ -4,9 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import type * as t from 'io-ts';
+import type { assetSchema, assetsSchema } from '../schema';
 
-export * from './slo';
-export * from './routes';
-export type * from './indicators';
-export type * from './common';
-export type * from './asset';
+type Assets = t.OutputOf<typeof assetsSchema>;
+type Asset = t.OutputOf<typeof assetSchema>;
+
+export type { Asset, Assets };
