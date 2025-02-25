@@ -36,22 +36,19 @@ export async function stepSaveArchiveEntries(context: InstallContext) {
         installSource,
       })
     );
-    packageAssetRefs = packageAssetRefs.concat(
-      packageAssetResults.saved_objects.map((result) => ({
+    packageAssetRefs = [
+      ...packageAssetRefs,
+      ...packageAssetResults.saved_objects.map((result) => ({
         id: result.id,
-        type: ASSETS_SAVED_OBJECT_TYPE,
-      }))
-    );
+        type: ASSETS_SAVED_OBJECT_TYPE as typeof ASSETS_SAVED_OBJECT_TYPE,
+      })),
+    ];
 
     assetsToSaveMap = new Map();
   }
 
   await archiveIterator.traverseEntries(async (entry) => {
-    const assetType = getPathParts(entry.path).type as KibanaAssetType;
-    // Skip security rules to avoid storing to many things
-    if (assetType !== 'security_rule' && useStreaming) {
-      assetsToSaveMap.set(entry.path, entry.buffer);
-    }
+    assetsToSaveMap.set(entry.path, entry.buffer);
     if (assetsToSaveMap.size > 100) {
       await flushAssets();
     }

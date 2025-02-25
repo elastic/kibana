@@ -141,11 +141,6 @@ export interface ArchiveIterator {
 
 export interface PackageInstallContext {
   packageInfo: InstallablePackage;
-  /**
-   * @deprecated Use `archiveIterator` to access the package archive entries
-   * without loading them all into memory at once.
-   */
-  // assetsMap: AssetsMap; // TODO remove
   paths: string[];
   archiveIterator: ArchiveIterator;
 }
