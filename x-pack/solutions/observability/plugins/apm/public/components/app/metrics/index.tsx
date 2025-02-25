@@ -44,7 +44,7 @@ export function Metrics() {
     return (
       <EuiCallOut
         title={i18n.translate('xpack.apm.metrics.emptyState.title', {
-          defaultMessage: 'No dashboard found',
+          defaultMessage: 'Runtime metrics are not available for this Agent / SDK type.',
         })}
         iconType="iInCircle"
         data-test-subj="apmMetricsNoDashboardFound"
