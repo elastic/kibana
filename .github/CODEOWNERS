@@ -661,7 +661,7 @@ x-pack/platform/packages/private/ml/ui_actions @elastic/ml-ui
 x-pack/platform/packages/private/ml/url_state @elastic/ml-ui
 x-pack/platform/packages/private/ml/validators @elastic/ml-ui
 packages/kbn-mock-idp-plugin @elastic/kibana-security
-packages/kbn-mock-idp-utils @elastic/kibana-security
+src/platform/packages/private/kbn-mock-idp-utils @elastic/kibana-security
 src/platform/packages/shared/kbn-monaco @elastic/appex-sharedux
 x-pack/platform/plugins/private/monitoring_collection @elastic/stack-monitoring
 x-pack/platform/plugins/private/monitoring @elastic/stack-monitoring
