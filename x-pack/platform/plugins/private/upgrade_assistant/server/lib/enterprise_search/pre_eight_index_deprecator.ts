@@ -5,10 +5,16 @@
  * 2.0.
  */
 
+import { IndicesIndexState } from '@elastic/elasticsearch/lib/api/types';
 import { ElasticsearchClient } from '@kbn/core/server';
 
-const ENT_SEARCH_INDEX_PREFIX = '.ent-search-';
-const ENT_SEARCH_DATASTREAM_PATTERN = [
+export const ENT_SEARCH_INDEX_PREFIX = '.ent-search-';
+export const ENT_SEARCH_DATASTREAM_PREFIXES = [
+  'logs-enterprise_search.',
+  'logs-app_search.',
+  'logs-workplace_search.',
+];
+export const ENT_SEARCH_DATASTREAM_PATTERN = [
   'logs-enterprise_search.*',
   'logs-app_search.*',
   'logs-workplace_search.*',
@@ -20,6 +26,13 @@ export interface EnterpriseSearchIndexMapping {
   datastreams: string[];
 }
 
+function is7xIncompatibleIndex(indexData: IndicesIndexState): boolean {
+  const isReadOnly = indexData.settings?.index?.verified_read_only ?? 'false';
+  return Boolean(
+    indexData.settings?.index?.version?.created?.startsWith('7') && isReadOnly !== 'true'
+  );
+}
+
 export async function getPreEightEnterpriseSearchIndices(
   esClient: ElasticsearchClient
 ): Promise<EnterpriseSearchIndexMapping[]> {
@@ -29,15 +42,10 @@ export async function getPreEightEnterpriseSearchIndices(
     expand_wildcards: ['all', 'hidden'],
   });
 
-  const entSearchDatastreams = await esClient.indices.getDataStream({
-    name: ENT_SEARCH_DATASTREAM_PATTERN.join(','),
-    expand_wildcards: ['all', 'hidden'],
-  });
-
   const returnIndices: EnterpriseSearchIndexMapping[] = [];
+
   for (const [index, indexData] of Object.entries(entSearchIndices)) {
-    const isReadOnly = indexData.settings?.index?.verified_read_only ?? 'false';
-    if (indexData.settings?.index?.version?.created?.startsWith('7') && isReadOnly !== 'true') {
+    if (is7xIncompatibleIndex(indexData)) {
       const dataStreamName = indexData.data_stream;
       returnIndices.push({
         name: index,
@@ -47,22 +55,40 @@ export async function getPreEightEnterpriseSearchIndices(
     }
   }
 
-  for (const [datastream, datastreamData] of Object.entries(entSearchDatastreams)) {
-    if (!datastreamData.indices || datastreamData.indices.length === 0) {
-      continue;
-    }
+  const { data_streams: entSearchDatastreams } = await esClient.indices.getDataStream({
+    name: ENT_SEARCH_DATASTREAM_PATTERN.join(','),
+    expand_wildcards: ['all', 'hidden'],
+  });
 
-    // only get the last index, as this the current write index
-    const lastIndexName = datastreamData.indices[datastreamData.indices.length - 1].index_name;
-    const existingIndex = returnIndices.find((index) => index.name === lastIndexName);
-    if (existingIndex) {
-      existingIndex.hasDatastream = true;
-      existingIndex.datastreams.push(datastream);
-    } else {
+  const dsIndices = new Set<string>();
+  entSearchDatastreams.forEach(({ indices: dsi }) => {
+    dsi.forEach(({ index_name: indexName }) => {
+      dsIndices.add(indexName);
+    });
+  });
+
+  if (!dsIndices.size) return returnIndices;
+
+  for (const returnIndex of returnIndices) {
+    if (dsIndices.has(returnIndex.name)) {
+      dsIndices.delete(returnIndex.name);
+    }
+  }
+
+  if (!dsIndices.size) return returnIndices;
+
+  const entSearchDsIndices = await esClient.indices.get({
+    index: Array.from(dsIndices.values()),
+    ignore_unavailable: true,
+  });
+
+  for (const [index, indexData] of Object.entries(entSearchDsIndices)) {
+    if (is7xIncompatibleIndex(indexData)) {
+      const dataStreamName = indexData.data_stream;
       returnIndices.push({
-        name: lastIndexName,
-        hasDatastream: true,
-        datastreams: [datastream],
+        name: index,
+        hasDatastream: dataStreamName ? true : false,
+        datastreams: [dataStreamName ?? ''],
       });
     }
   }
