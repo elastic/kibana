@@ -42,14 +42,15 @@ export function createJoinSource(
 
   if (descriptor.type === SOURCE_TYPES.ES_DISTANCE_SOURCE && isSpatialSourceComplete(descriptor)) {
     return new ESDistanceSource(descriptor as ESDistanceSourceDescriptor);
-  }
-
-  if (descriptor.type === SOURCE_TYPES.ES_TERM_SOURCE && isTermSourceComplete(descriptor)) {
+  } else if (descriptor.type === SOURCE_TYPES.ES_TERM_SOURCE && isTermSourceComplete(descriptor)) {
     return new ESTermSource(descriptor as ESTermSourceDescriptor);
-  }
-
-  if (descriptor.type === SOURCE_TYPES.TABLE_SOURCE) {
+  } else if (descriptor.type === SOURCE_TYPES.TABLE_SOURCE) {
     return new TableSource(descriptor as TableSourceDescriptor);
+  } else if (descriptor.type === SOURCE_TYPES.ES_ESQL_TERM_SOURCE) {
+    console.log('CREATE ESQL TERM SOURCE', descriptor);
+    const esq = new ESESQLTermSource(descriptor as ESESQLTermSourceDescriptor);
+    console.log(esq);
+    return esq;
   }
 }
 

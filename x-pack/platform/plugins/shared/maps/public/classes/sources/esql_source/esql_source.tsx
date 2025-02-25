@@ -148,6 +148,8 @@ export class ESQLSource
   }
 
   supportsJoins() {
+    // todo : this should return true. should be able to join es|ql source (e.g. geometries only that gets loaded once),
+    // with other esq|ql statement (that may get called multiple times)
     return false; // Joins will be part of ESQL statement and not client side join
   }
 
