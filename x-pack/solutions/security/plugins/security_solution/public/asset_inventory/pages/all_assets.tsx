@@ -60,7 +60,7 @@ import {
   type AssetsBaseURLQuery,
   type URLQuery,
 } from '../hooks/use_asset_inventory_data_table';
-import { useFetchData } from '../hooks/use_fetch_data';
+import { useFetchGridData } from '../hooks/use_fetch_grid_data';
 import { useFetchChartData } from '../hooks/use_fetch_chart_data';
 import { DEFAULT_VISIBLE_ROWS_PER_PAGE, MAX_ASSETS_TO_LOAD } from '../constants';
 
@@ -162,7 +162,20 @@ const AllAssets = ({
   ...rest
 }: AllAssetsProps) => {
   const { euiTheme } = useEuiTheme();
-  const assetInventoryDataTable = useAssetInventoryDataTable({
+
+  const {
+    filters,
+    pageSize,
+    sort,
+    query,
+    queryError,
+    urlQuery,
+    getRowsFromPages,
+    onChangeItemsPerPage,
+    onResetFilters,
+    onSort,
+    setUrlQuery,
+  } = useAssetInventoryDataTable({
     paginationLocalStorageKey: LOCAL_STORAGE_DATA_TABLE_PAGE_SIZE_KEY,
     columnsLocalStorageKey,
     defaultQuery: getDefaultQuery,
@@ -193,27 +206,14 @@ const AllAssets = ({
   };
 
   // -----------------------------------------------------------------------------------------
-  const {
-    filters,
-    pageSize,
-    sort,
-    query,
-    queryError,
-    urlQuery,
-    getRowsFromPages,
-    onChangeItemsPerPage,
-    onResetFilters,
-    onSort,
-    setUrlQuery,
-  } = assetInventoryDataTable;
 
   const {
     data: rowsData,
     // error: fetchError,
-    isFetching,
     fetchNextPage: loadMore,
-    isLoading,
-  } = useFetchData({
+    isFetching: isFetchingGridData,
+    isLoading: isLoadingGridData,
+  } = useFetchGridData({
     query,
     sort,
     enabled: !queryError,
@@ -273,16 +273,12 @@ const AllAssets = ({
     uiSettings,
     dataViews,
     data,
-    application,
+    application: { capabilities },
     theme,
     fieldFormats,
     notifications,
     storage,
   } = useKibana().services;
-
-  const styles = useStyles();
-
-  const { capabilities } = application;
   const { filterManager } = data.query;
 
   const services = {
@@ -293,6 +289,8 @@ const AllAssets = ({
     storage,
     data,
   };
+
+  const styles = useStyles();
 
   const {
     columns: currentColumns,
@@ -404,24 +402,23 @@ const AllAssets = ({
           )}
           iconType="boxesHorizontal"
           color="primary"
-          isLoading={isLoading}
+          isLoading={isLoadingGridData}
           // onClick={() => createFn(rowIndex)}
         />
       ),
     },
   ];
 
-  const loadingState = isLoading || !dataView ? DataLoadingState.loading : DataLoadingState.loaded;
+  const loadingState =
+    isLoadingGridData || !dataView ? DataLoadingState.loading : DataLoadingState.loaded;
 
   return (
     <I18nProvider>
-      {!dataView ? null : (
-        <AssetInventorySearchBar
-          query={urlQuery}
-          setQuery={setUrlQuery}
-          loading={loadingState === DataLoadingState.loading}
-        />
-      )}
+      <AssetInventorySearchBar
+        query={urlQuery}
+        setQuery={setUrlQuery}
+        loading={loadingState === DataLoadingState.loading}
+      />
       <EuiPageTemplate.Section>
         <EuiTitle size="l" data-test-subj="all-assets-title">
           <h1>
@@ -468,7 +465,7 @@ const AllAssets = ({
               height: computeDataTableRendering.wrapperHeight,
             }}
           >
-            <EuiProgress size="xs" color="accent" style={{ opacity: isFetching ? 1 : 0 }} />
+            <EuiProgress size="xs" color="accent" style={{ opacity: isFetchingGridData ? 1 : 0 }} />
             {!dataView ? null : loadingState === DataLoadingState.loaded && totalHits === 0 ? (
               <EmptyState onResetFilters={onResetFilters} />
             ) : (

@@ -8,3 +8,6 @@
 export const MAX_ASSETS_TO_LOAD = 500; // equivalent to MAX_FINDINGS_TO_LOAD in @kbn/cloud-security-posture-common
 export const DEFAULT_VISIBLE_ROWS_PER_PAGE = 25;
 export const ASSET_INVENTORY_INDEX_PATTERN = 'logs-cloud_asset_inventory.asset_inventory-*';
+
+export const GRID_DATA_QUERY_KEY = 'asset_inventory_grid_data';
+export const CHART_DATA_QUERY_KEY = 'asset_inventory_chart_data';
