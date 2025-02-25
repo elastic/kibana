@@ -67,8 +67,7 @@ import { MalformedStreamIdError } from './errors/malformed_stream_id_error';
 import { SecurityError } from './errors/security_error';
 import { NameTakenError } from './errors/name_taken_error';
 import { MalformedStreamError } from './errors/malformed_stream_error';
-import { State } from './state_management/state';
-import { StreamChange } from './state_management/types';
+import { State, StreamChange } from './state_management/state';
 
 interface AcknowledgeResponse<TResult extends Result> {
   acknowledged: true;

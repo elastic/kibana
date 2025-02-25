@@ -6,9 +6,27 @@
  */
 
 import { IScopedClusterClient, Logger } from '@kbn/core/server';
+import { WiredStreamUpsertRequest } from '@kbn/streams-schema';
 import { StreamsStorageClient } from '../service';
-import { StreamActiveRecord, StreamChange, ValidationResult } from './types';
+import { StreamActiveRecord, ValidationResult } from './stream_active_record';
 import { streamFromDefinition } from './stream_from_definition';
+
+interface WiredStreamUpsertChange {
+  target: string;
+  type: 'wired_upsert';
+  request: WiredStreamUpsertRequest & {
+    stream: {
+      name: string;
+    };
+  };
+}
+
+interface StreamDeleteChange {
+  target: string;
+  type: 'delete';
+}
+
+export type StreamChange = WiredStreamUpsertChange | StreamDeleteChange;
 
 export class State {
   private streamsByName: Map<string, StreamActiveRecord>;
@@ -32,18 +50,15 @@ export class State {
           throw new Error('Cannot delete non-existing stream');
         } else {
           const newStream = streamFromDefinition(change.request.stream);
-          newStream.update(change.request.stream, newState, this);
+          newStream.applyChange(change, newState, this);
           newState.set(newStream.definition.name, newStream);
         }
       } else {
-        if (change.type === 'delete') {
-          targetStream.markForDeletion(newState, this);
-        } else {
-          targetStream.update(change.request.stream, newState, this);
-        }
+        targetStream.applyChange(change, newState, this);
       }
     });
 
+    // Here we might return { changedSuccessfully: boolean; errors: Error[] }
     return newState;
   }
 
@@ -74,7 +89,7 @@ export class State {
     // Could there be conflicts between changes, like a group being updated with new members before that member is deleted?
     // I guess the deletion change for that member should catch that and update the group again or validation for the group should catch it
     // In reverse, the change for the group should check that the member was deleted and throw? And in any case the validation should catch it
-    return this.all().filter((stream) => stream.changeStatus !== 'unchanged');
+    return this.all().filter((stream) => stream.hasChanged());
   }
 
   async commitChanges(
@@ -97,36 +112,19 @@ export class State {
     scopedClusterClient: IScopedClusterClient,
     isServerless: boolean
   ) {
-    const changedStreams = this.changes().filter((stream) => stream.commitStatus !== 'uncommitted');
-
-    const changes = changedStreams
-      .map((stream) => {
-        if (stream.changeStatus === 'upserted') {
-          if (startingState.has(stream.definition.name)) {
-            // Stream was updated, revert to previous state
-            const startingStateDefinition = startingState.get(stream.definition.name)?.definition!;
-            const revertStream = streamFromDefinition(startingStateDefinition);
-            revertStream.update(startingStateDefinition, startingState, this);
-            return revertStream;
-          } else {
-            // Stream was created, delete it
-            stream.markForDeletion(this, startingState);
-            return stream;
-          }
-        } else if (stream.changeStatus === 'deleted') {
-          // Stream was deleted, revert to previous state
-          const startingStateDefinition = startingState.get(stream.definition.name)?.definition!;
-          const revertStream = streamFromDefinition(startingStateDefinition);
-          revertStream.update(startingStateDefinition, startingState, this);
-          return revertStream;
-        }
-      })
-      .filter((maybeStream): maybeStream is StreamActiveRecord => maybeStream !== undefined);
-
     await Promise.all(
-      changes.map((stream) =>
-        stream.commit(storageClient, logger, scopedClusterClient, isServerless)
-      )
+      this.changes()
+        .filter((stream) => stream.hasCommitted())
+        .map((stream) =>
+          stream.revert(
+            this,
+            startingState,
+            storageClient,
+            logger,
+            scopedClusterClient,
+            isServerless
+          )
+        )
     );
   }
 
@@ -147,17 +145,21 @@ export class State {
   }
 
   static async currentState(storageClient: StreamsStorageClient): Promise<State> {
-    const streamsSearchResponse = await storageClient.search({
-      size: 10000, // Paginate if there are more...
-      sort: [{ name: 'asc' }],
-      track_total_hits: false,
-    });
+    try {
+      const streamsSearchResponse = await storageClient.search({
+        size: 10000, // Paginate if there are more...
+        sort: [{ name: 'asc' }],
+        track_total_hits: false,
+      });
 
-    const streams = streamsSearchResponse.hits.hits.map(({ _source: definition }) =>
-      streamFromDefinition(definition)
-    );
+      const streams = streamsSearchResponse.hits.hits.map(({ _source: definition }) =>
+        streamFromDefinition(definition)
+      );
 
-    // State might need to be enriched with more information about these stream instances, like their existing ES resources
-    return new State(streams);
+      // State might need to be enriched with more information about these stream instances, like their existing ES resources
+      return new State(streams);
+    } catch (error) {
+      throw new Error(`Failed to load current Streams state due to: ${error.message}`);
+    }
   }
 }
