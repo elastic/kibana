@@ -341,5 +341,15 @@ export const getEditorOverwrites = (theme: UseEuiTheme<{}>) => {
     .monaco-list .monaco-scrollable-element .monaco-list-row.focused {
       border-radius: ${theme.euiTheme.border.radius.medium};
     }
+
+    .hover-contents th {
+      padding: 2px 2px;
+      border: 1px solid ${theme.euiTheme.colors.backgroundBasePlain};
+      color: ${theme.euiTheme.colors.textAccent};
+    }
+    .hover-contents td {
+      padding: 2px 2px;
+      border: 1px solid ${theme.euiTheme.colors.backgroundBasePlain};
+    }
   `;
 };

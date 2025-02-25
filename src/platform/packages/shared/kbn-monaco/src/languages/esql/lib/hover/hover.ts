@@ -6,9 +6,10 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-
+import { parse, Walker } from '@kbn/esql-ast';
 import { i18n } from '@kbn/i18n';
 import type { AstProviderFn, ESQLAstItem } from '@kbn/esql-ast';
+import { Datatable } from '@kbn/expressions-plugin/common';
 import {
   getAstContext,
   getFunctionDefinition,
@@ -40,6 +41,55 @@ import { monaco } from '../../../../monaco_imports';
 const ACCEPTABLE_TYPES_HOVER = i18n.translate('monaco.esql.hover.acceptableTypes', {
   defaultMessage: 'Acceptable types',
 });
+
+const getESQLQueryVariables = (esql: string): string[] => {
+  const { root } = parse(esql);
+  const usedVariablesInQuery = Walker.params(root);
+  return usedVariablesInQuery.map((v) => v.text.replace('?', ''));
+};
+
+const createMarkdownTable = (table: Datatable) => {
+  if (!table || !table.columns || !table.rows) {
+    return undefined;
+  }
+
+  // Remove empty columns
+  const nonEmptyColumns = table.columns.filter((col) =>
+    table.rows.some((row) => row[col.name] !== undefined && row[col.name] !== '')
+  );
+
+  const headers = nonEmptyColumns.map((col) => col.name);
+
+  // Remove empty rows
+  const filteredRows = table.rows.filter((row) =>
+    headers.some((header) => row[header] !== undefined && row[header] !== '')
+  );
+
+  if (headers.length === 0 || filteredRows.length === 0) {
+    return undefined;
+  }
+
+  // Determine max column widths with extra padding for readability
+  const columnWidths = headers.map(
+    (header) =>
+      Math.max(header.length, ...filteredRows.map((row) => String(row[header] || '').length)) + 2
+  );
+
+  // Create markdown table header
+  let markdown = `| ${headers.map((header, i) => header.padEnd(columnWidths[i])).join(' | ')} |
+`;
+  markdown += `| ${columnWidths.map((width) => '-'.repeat(width)).join(' | ')} |
+`;
+
+  // Populate rows
+  filteredRows.forEach((row) => {
+    const rowValues = headers.map((header, i) => String(row[header] || '').padEnd(columnWidths[i]));
+    markdown += `| ${rowValues.join(' | ')} |
+`;
+  });
+
+  return markdown;
+};
 
 async function getHoverItemForFunction(
   model: monaco.editor.ITextModel,
@@ -145,15 +195,36 @@ export async function getHoverItem(
 ) {
   const fullText = model.getValue();
   const offset = monacoPositionToOffset(fullText, position);
-
+  const innerText = fullText.substring(0, offset);
   const { ast } = await astProvider(fullText);
   const astContext = getAstContext(fullText, ast, offset);
 
+  const currentPipeIndex = innerText.split('|').length;
+  const validQueryOnCurrentPipe = fullText.split('|').slice(0, currentPipeIndex).join('|');
+  const previewTable = await resourceRetriever?.getHoverData?.({ query: validQueryOnCurrentPipe });
+  const variables = resourceRetriever?.getESQLVariables?.();
+  const usedVariablesInQuery = getESQLQueryVariables(fullText);
+  const usedVariables = variables?.filter((v) => usedVariablesInQuery.includes(v.key));
+
+  const markdownTable = previewTable ? createMarkdownTable(previewTable) : '';
   const { getPolicyMetadata } = getPolicyHelper(resourceRetriever);
 
-  let hoverContent: monaco.languages.Hover = {
+  const hoverContent: monaco.languages.Hover = {
     contents: [],
   };
+
+  if (usedVariables?.length) {
+    usedVariables.forEach((variable) => {
+      hoverContent.contents.push({
+        value: `**${variable.key}**: ${variable.value}`,
+      });
+    });
+  }
+
+  if (markdownTable) {
+    const markdownHoverContent = [{ value: `**Data preview**` }, { value: markdownTable }];
+    hoverContent.contents.push(...markdownHoverContent);
+  }
   const hoverItemsForFunction = await getHoverItemForFunction(
     model,
     position,
@@ -162,10 +233,15 @@ export async function getHoverItem(
     resourceRetriever
   );
   if (hoverItemsForFunction) {
-    hoverContent = hoverItemsForFunction;
+    hoverContent.contents.push(...hoverItemsForFunction.contents);
+    hoverContent.range = hoverItemsForFunction.range;
   }
 
   if (['newCommand', 'list'].includes(astContext.type)) {
+    if (markdownTable) {
+      const markdownHoverContent = [{ value: `**Data preview**` }, { value: markdownTable }];
+      return { contents: markdownHoverContent };
+    }
     return { contents: [] };
   }
 
