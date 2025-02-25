@@ -8090,6 +8090,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/workchat-app@link:x-pack/solutions/search/plugins/workchat/workchat_app":
+  version "0.0.0"
+  uid ""
+
 "@kbn/xstate-utils@link:src/platform/packages/shared/kbn-xstate-utils":
   version "0.0.0"
   uid ""

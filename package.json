@@ -1018,6 +1018,7 @@
     "@kbn/visualization-utils": "link:src/platform/packages/shared/kbn-visualization-utils",
     "@kbn/visualizations-plugin": "link:src/platform/plugins/shared/visualizations",
     "@kbn/watcher-plugin": "link:x-pack/platform/plugins/private/watcher",
+    "@kbn/workchat-app": "link:x-pack/solutions/search/plugins/workchat/workchat_app",
     "@kbn/xstate-utils": "link:src/platform/packages/shared/kbn-xstate-utils",
     "@kbn/zod": "link:src/platform/packages/shared/kbn-zod",
     "@kbn/zod-helpers": "link:src/platform/packages/shared/kbn-zod-helpers",
