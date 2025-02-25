@@ -53,7 +53,6 @@ export default function searchSolutionNavigation({
         { id: 'Build', label: 'Build' },
         { id: 'Playground', label: 'Playground' },
         { id: 'SearchApplications', label: 'Search Applications' },
-        { id: 'BehavioralAnalytics', label: 'Behavioral Analytics' },
         { id: 'Relevance', label: 'Relevance' },
         { id: 'InferenceEndpoints', label: 'Inference Endpoints' },
         { id: 'GettingStarted', label: 'Getting started' },
