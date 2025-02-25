@@ -50,7 +50,7 @@ components:
           - unenrolled
     SortDirection:
       type: string
-      description: Determines the sort order, which can be desc or asc.
+      description: Determines the sort order.
       example: desc
       enum:
         - asc
