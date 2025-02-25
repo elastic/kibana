@@ -133,6 +133,6 @@ function reportPerformanceMetrics({
     key4: 'load_type',
     value4: loadTypesMapping[loadType],
   };
-  console.warn('reportPerformanceMetrics', duration - timeToData, e);
+  console.error('reportPerformanceMetrics', JSON.stringify(e));
   reportPerformanceMetricEvent(coreServices.analytics, e);
 }
