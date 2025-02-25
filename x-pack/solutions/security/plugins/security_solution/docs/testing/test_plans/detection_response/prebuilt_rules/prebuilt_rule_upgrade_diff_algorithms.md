@@ -21,8 +21,10 @@ https://marketplace.visualstudio.com/items?itemName=yzhang.markdown-all-in-one
 - [Useful information](#useful-information)
   - [Tickets](#tickets)
   - [Terminology](#terminology)
+- [Requirements](#requirements)
   - [Assumptions](#assumptions)
-  - [Non-functional requirements](#non-functional-requirements)
+  - [Technical requirements](#technical-requirements)
+  - [Product requirements](#product-requirements)
 - [Scenarios](#scenarios)
   - [Rule field doesn't have an update and has no custom value - `AAA`](#rule-field-doesnt-have-an-update-and-has-no-custom-value---aaa)
     - [**Scenario: `AAA` - Rule field is any type**](#scenario-aaa---rule-field-is-any-type)
@@ -79,15 +81,27 @@ https://marketplace.visualstudio.com/items?itemName=yzhang.markdown-all-in-one
   - `eql_query`: an object that contains a `query` string field, a `language` field that always has the value: `eql`, and a `filters` field that contains an array of kibana filters.
   - `esql_query`: an object that contains a `query` string field and a `language` field that always has the value: `esql`.
 
+## Requirements
+
 ### Assumptions
+
+Assumptions about test environments and scenarios outlined in this test plan.
 
 - [Common assumptions](./prebuilt_rules_common_info.md#common-assumptions).
 - All scenarios will contain at least 1 prebuilt rule installed in Kibana.
 - A new version will be available for rule(s).
 
-### Non-functional requirements
+### Technical requirements
 
-- [Common non-functional requirements](./prebuilt_rules_common_info.md#common-non-functional-requirements).
+Non-functional requirements for the functionality outlined in this test plan.
+
+- [Common technical requirements](./prebuilt_rules_common_info.md#common-technical-requirements).
+
+### Product requirements
+
+Functional requirements for the functionality outlined in this test plan.
+
+- [Common product requirements](./prebuilt_rules_common_info.md#common-product-requirements).
 
 ## Scenarios
 

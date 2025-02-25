@@ -24,10 +24,11 @@ https://marketplace.visualstudio.com/items?itemName=yzhang.markdown-all-in-one
 
 - [Useful information](#useful-information)
   - [Tickets](#tickets)
-  - [User stories](#user-stories)
   - [Terminology](#terminology)
+- [Requirements](#requirements)
   - [Assumptions](#assumptions)
-  - [Non-functional requirements](#non-functional-requirements)
+  - [Technical requirements](#technical-requirements)
+  - [Product requirements](#product-requirements)
 - [Scenarios](#scenarios)
   - [Core Functionality](#core-functionality)
     - [Scenario: Importing a non-customized prebuilt rule with a matching `rule_id` and `version`](#scenario-importing-a-non-customized-prebuilt-rule-with-a-matching-rule_id-and-version)
@@ -56,27 +57,37 @@ https://marketplace.visualstudio.com/items?itemName=yzhang.markdown-all-in-one
 - [Benchmark performance of importing a large number of prebuilt rules](https://github.com/elastic/kibana/issues/195632)
 - [Tests for prebuilt rule import/export workflow](https://github.com/elastic/kibana/issues/202079)
 
-### User stories
+### Terminology
 
-**Prebuilt rule import workflow:**
+- [Common terminology](./prebuilt_rules_common_info.md#common-terminology).
+
+## Requirements
+
+### Assumptions
+
+Assumptions about test environments and scenarios outlined in this test plan.
+
+- [Common assumptions](./prebuilt_rules_common_info.md#common-assumptions).
+
+### Technical requirements
+
+Non-functional requirements for the functionality outlined in this test plan.
+
+- [Common technical requirements](./prebuilt_rules_common_info.md#common-technical-requirements).
+
+### Product requirements
+
+Functional requirements for the functionality outlined in this test plan.
+
+- [Common product requirements](./prebuilt_rules_common_info.md#common-product-requirements).
+
+User stories:
 
 - User can import a single prebuilt rule on the Rule Management page.
 - User can import multiple prebuilt rules on the Rule Management page.
 - User can import prebuilt non-customized rules.
 - User can import prebuilt customized rules.
 - User can import any combination of prebuilt non-customized, prebuilt customized, and custom rules.
-
-### Terminology
-
-- [Common terminology](./prebuilt_rules_common_info.md#common-terminology).
-
-### Assumptions
-
-- [Common assumptions](./prebuilt_rules_common_info.md#common-assumptions).
-
-### Non-functional requirements
-
-- [Common non-functional requirements](./prebuilt_rules_common_info.md#common-non-functional-requirements).
 
 ## Scenarios
 

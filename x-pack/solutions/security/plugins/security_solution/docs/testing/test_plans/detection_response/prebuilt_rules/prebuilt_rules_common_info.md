@@ -16,8 +16,8 @@ https://marketplace.visualstudio.com/items?itemName=yzhang.markdown-all-in-one
 - [Features](#features)
 - [Common terminology](#common-terminology)
 - [Common assumptions](#common-assumptions)
-- [Common non-functional requirements](#common-non-functional-requirements)
-- [Common functional requirements](#common-functional-requirements)
+- [Common technical requirements](#common-technical-requirements)
+- [Common product requirements](#common-product-requirements)
   - [Customizable rule fields](#customizable-rule-fields)
   - [Non-customizable rule fields](#non-customizable-rule-fields)
 
@@ -116,6 +116,8 @@ Terminology related to UI and UX:
 
 ## Common assumptions
 
+**Assumptions about test environments and scenarios** outlined in all of the test plans related to prebuilt rules.
+
 Unless explicitly indicated otherwise:
 
 - Scenarios in the test plans only apply to prebuilt detection rules. Some scenarios may apply to both prebuilt and custom detection rules, in which case it should be clearly stated.
@@ -126,7 +128,9 @@ Unless explicitly indicated otherwise:
   - on the `Essentials` tier in a Serverless Security environment.
 - User has the required [privileges for managing detection rules](https://www.elastic.co/guide/en/security/current/detections-permissions-section.html).
 
-## Common non-functional requirements
+## Common technical requirements
+
+**Non-functional requirements** for the functionality of prebuilt rules. These apply to all of / most of the prebuilt rules workflows and test plans.
 
 - Package installation, rule installation and rule upgrade workflows should work:
   - regardless of the package type: with historical rule versions or without;
@@ -135,7 +139,9 @@ Unless explicitly indicated otherwise:
 - Kibana should not crash with Out Of Memory exception during package installation.
 - For test purposes, it should be possible to use detection rules package versions lower than the latest.
 
-## Common functional requirements
+## Common product requirements
+
+**Functional requirements** for the functionality of prebuilt rules. These apply to all of / most of the prebuilt rules workflows and test plans.
 
 ### Customizable rule fields
 

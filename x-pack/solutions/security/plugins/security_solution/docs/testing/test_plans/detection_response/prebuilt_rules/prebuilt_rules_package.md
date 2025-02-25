@@ -21,9 +21,10 @@ https://marketplace.visualstudio.com/items?itemName=yzhang.markdown-all-in-one
 - [Useful information](#useful-information)
   - [Tickets](#tickets)
   - [Terminology](#terminology)
+- [Requirements](#requirements)
   - [Assumptions](#assumptions)
-  - [Non-functional requirements](#non-functional-requirements)
-  - [Functional requirements](#functional-requirements)
+  - [Technical requirements](#technical-requirements)
+  - [Product requirements](#product-requirements)
 - [Scenarios](#scenarios)
   - [Package installation](#package-installation)
     - [**Scenario: Package is installed via Fleet**](#scenario-package-is-installed-via-fleet)
@@ -48,22 +49,34 @@ https://marketplace.visualstudio.com/items?itemName=yzhang.markdown-all-in-one
 
 - [Common terminology](./prebuilt_rules_common_info.md#common-terminology), see the terminology related to the package with prebuilt rules.
 
+## Requirements
+
 ### Assumptions
+
+Assumptions about test environments and scenarios outlined in this test plan.
 
 - [Common assumptions](./prebuilt_rules_common_info.md#common-assumptions).
 
-### Non-functional requirements
+### Technical requirements
 
-- [Common non-functional requirements](./prebuilt_rules_common_info.md#common-non-functional-requirements).
+Non-functional requirements for the functionality outlined in this test plan.
 
-### Functional requirements
+- [Common technical requirements](./prebuilt_rules_common_info.md#common-technical-requirements).
 
-- Package should be installable and updatable:
+### Product requirements
+
+Functional requirements for the functionality outlined in this test plan.
+
+- [Common product requirements](./prebuilt_rules_common_info.md#common-product-requirements).
+
+User stories:
+
+- Package can be installed and updated:
   - on any license in self-hosted and ECH environments;
   - on any tier in Serverless Security environments;
   - regardless of user privileges, as long as the user has access to Security Solution.
-- User should be able to install prebuilt rules with and without previewing what exactly they would install (rule properties).
-- User should be able to upgrade prebuilt rules with and without previewing what updates they would apply (rule properties of target rule versions).
+- User can install prebuilt rules with and without previewing what exactly they would install (rule properties).
+- User can upgrade prebuilt rules with and without previewing what updates they would apply (rule properties of target rule versions).
 
 ## Scenarios
 
