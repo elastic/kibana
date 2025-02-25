@@ -25,7 +25,7 @@ interface IndexManagementAppProps {
   indexManagement: IndexManagementPluginSetup;
 }
 export const IndexManagementApp: React.FC<IndexManagementAppProps> = ({ indexManagement }) => {
-  const { history, searchNavigation } = useKibana().services;
+  const { history, searchNavigation, cloud } = useKibana().services;
   const managementRef = useRef(null);
   const setBreadcrumbs = useCallback(
     (crumbs: ChromeBreadcrumb[] = [], appHistory?: ScopedHistory) => {
@@ -34,14 +34,18 @@ export const IndexManagementApp: React.FC<IndexManagementAppProps> = ({ indexMan
         ...(item.href ? reactRouterNavigate(scopedHistory, item.href) : {}),
       });
 
+      const wrapBreadcrumbValue = !cloud?.isServerlessEnabled
+        ? [wrapBreadcrumb(breadcrumb, history)]
+        : [];
+
       const breadcrumbValue = [
-        wrapBreadcrumb(breadcrumb, history),
+        ...wrapBreadcrumbValue,
         ...crumbs.map((item) => wrapBreadcrumb(item, appHistory || history)),
       ];
 
       searchNavigation?.breadcrumbs.setSearchBreadCrumbs(breadcrumbValue);
     },
-    [searchNavigation, history]
+    [searchNavigation, history, cloud]
   );
 
   useEffect(() => {
@@ -50,7 +54,7 @@ export const IndexManagementApp: React.FC<IndexManagementAppProps> = ({ indexMan
     };
 
     return unmount();
-  }, [indexManagement, managementRef, setBreadcrumbs, history]);
+  }, [indexManagement, managementRef, setBreadcrumbs, history, cloud]);
   return (
     <KibanaPageTemplate
       offset={0}
