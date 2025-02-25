@@ -7,7 +7,13 @@
 
 import { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
-import { IngestStreamLifecycle, isDslLifecycle, isIlmLifecycle } from '@kbn/streams-schema';
+import {
+  IngestStreamLifecycle,
+  IngestStreamLifecycleDisabled,
+  isDisabledLifecycle,
+  isDslLifecycle,
+  isIlmLifecycle,
+} from '@kbn/streams-schema';
 import { retryTransientEsErrors } from '../helpers/retry';
 
 interface DataStreamManagementOptions {
@@ -104,18 +110,24 @@ export async function updateDataStreamsLifecycle({
   esClient: ElasticsearchClient;
   logger: Logger;
   names: string[];
-  lifecycle: IngestStreamLifecycle;
+  lifecycle: IngestStreamLifecycle | IngestStreamLifecycleDisabled;
   isServerless: boolean;
 }) {
   try {
-    await retryTransientEsErrors(
-      () =>
-        esClient.indices.putDataLifecycle({
-          name: names,
-          data_retention: isDslLifecycle(lifecycle) ? lifecycle.dsl.data_retention : undefined,
-        }),
-      { logger }
-    );
+    if (isDisabledLifecycle(lifecycle)) {
+      await retryTransientEsErrors(() => esClient.indices.deleteDataLifecycle({ name: names }), {
+        logger,
+      });
+    } else {
+      await retryTransientEsErrors(
+        () =>
+          esClient.indices.putDataLifecycle({
+            name: names,
+            data_retention: isDslLifecycle(lifecycle) ? lifecycle.dsl.data_retention : undefined,
+          }),
+        { logger }
+      );
+    }
 
     // if we transition from ilm to dlm or vice versa, the rolled over backing
     // indices need to be updated or they'll retain the lifecycle configuration

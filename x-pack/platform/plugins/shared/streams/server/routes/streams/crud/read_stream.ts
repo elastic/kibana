@@ -69,7 +69,9 @@ export async function readStream({
           })
         : [],
       data_stream_exists: !!dataStream,
-      effective_lifecycle: getDataStreamLifecycle(dataStream),
+      effective_lifecycle: dataStream
+        ? getDataStreamLifecycle(dataStream)
+        : { error: { message: 'Data stream not found' } },
       dashboards,
       inherited_fields: {},
     };

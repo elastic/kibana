@@ -26,14 +26,17 @@ import {
   generateUnwiredLayer,
   generateWiredLayer,
 } from '../component_templates/generate_layer';
-import { upsertComponent } from '../component_templates/manage_component_templates';
+import {
+  deleteComponent,
+  upsertComponent,
+} from '../component_templates/manage_component_templates';
 import { upsertIngestPipeline } from '../ingest_pipelines/manage_ingest_pipelines';
 import {
   generateClassicIngestPipelineBody,
   generateIngestPipeline,
 } from '../ingest_pipelines/generate_ingest_pipeline';
 import { generateReroutePipeline } from '../ingest_pipelines/generate_reroute_pipeline';
-import { upsertTemplate } from '../index_templates/manage_index_templates';
+import { deleteTemplate, upsertTemplate } from '../index_templates/manage_index_templates';
 import {
   generateWiredIndexTemplate,
   generateUnwiredIndexTemplate,
@@ -45,6 +48,10 @@ import {
 import { getUnmanagedElasticsearchAssets } from '../stream_crud';
 import { getProcessingPipelineName } from '../ingest_pipelines/name';
 import { getIndexTemplateName } from '../index_templates/name';
+import {
+  getBaseLayerComponentName,
+  getStreamLayerComponentName,
+} from '../component_templates/name';
 
 interface SyncStreamParamsBase {
   scopedClusterClient: IScopedClusterClient;
@@ -277,24 +284,16 @@ export async function syncUnwiredStreamDefinitionObjects({
     }
   }
 
-  if (requiresForkedTemplate(definition)) {
-    await ensureForkedIndexTemplate({
-      unmanagedAssets,
-      definition,
-      scopedClusterClient,
-      logger,
-      isServerless,
-    });
-
-    await upsertComponent({
-      logger,
-      esClient: scopedClusterClient.asCurrentUser,
-      component: generateUnwiredLayer(definition, isServerless),
-    });
-  }
+  await syncForkedIndexTemplate({
+    unmanagedAssets,
+    definition,
+    scopedClusterClient,
+    logger,
+    isServerless,
+  });
 }
 
-async function ensureForkedIndexTemplate({
+async function syncForkedIndexTemplate({
   definition,
   unmanagedAssets,
   scopedClusterClient,
@@ -307,37 +306,53 @@ async function ensureForkedIndexTemplate({
   logger: Logger;
   isServerless: boolean;
 }) {
-  const forkedTemplate = unmanagedAssets.find(
-    ({ type, id }) => type === 'index_template' && id === getIndexTemplateName(definition.name)
-  );
-  if (forkedTemplate) {
+  const esClient = scopedClusterClient.asCurrentUser;
+
+  if (!requiresForkedTemplate(definition)) {
+    await Promise.all([
+      deleteTemplate({ esClient, logger, name: getIndexTemplateName(definition.name) }),
+      deleteComponent({ esClient, logger, name: getBaseLayerComponentName(definition.name) }),
+      deleteComponent({ esClient, logger, name: getStreamLayerComponentName(definition.name) }),
+    ]);
+
     return;
   }
 
-  const template = unmanagedAssets.find(({ type }) => type === 'index_template');
-  if (!template) {
-    throw new Error(`Could not find index template for stream [${definition.name}]`);
+  const forkedTemplate = unmanagedAssets.find(
+    ({ type, id }) => type === 'index_template' && id === getIndexTemplateName(definition.name)
+  );
+  if (!forkedTemplate) {
+    const activeTemplate = unmanagedAssets.find(({ type }) => type === 'index_template');
+    if (!activeTemplate) {
+      throw new Error(`Could not find index template for stream [${definition.name}]`);
+    }
+
+    const {
+      index_templates: [{ index_template: indexTemplate }],
+    } = await scopedClusterClient.asCurrentUser.indices.getIndexTemplate({
+      name: activeTemplate.id,
+    });
+
+    await Promise.all([
+      upsertComponent({
+        logger,
+        esClient,
+        component: generateUnwiredBaseLayer(definition, indexTemplate),
+      }),
+
+      upsertTemplate({
+        logger,
+        esClient,
+        template: generateUnwiredIndexTemplate(definition.name, indexTemplate, isServerless),
+      }),
+    ]);
   }
 
-  const {
-    index_templates: [{ index_template: indexTemplate }],
-  } = await scopedClusterClient.asCurrentUser.indices.getIndexTemplate({
-    name: template.id,
+  await upsertComponent({
+    logger,
+    esClient,
+    component: generateUnwiredLayer(definition, isServerless),
   });
-
-  await Promise.all([
-    upsertComponent({
-      logger,
-      esClient: scopedClusterClient.asCurrentUser,
-      component: generateUnwiredBaseLayer(definition, indexTemplate),
-    }),
-
-    upsertTemplate({
-      logger,
-      esClient: scopedClusterClient.asCurrentUser,
-      template: generateUnwiredIndexTemplate(definition.name, indexTemplate, isServerless),
-    }),
-  ]);
 }
 
 function requiresForkedTemplate(definition: UnwiredStreamDefinition) {

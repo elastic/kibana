@@ -411,6 +411,37 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         await clean();
       });
 
+      it('applies the original retention when inherit lifecycle is set', async () => {
+        const indexName = 'unwired-stream-override-then-inherit-dsl';
+        const clean = await createDataStream(indexName, { dsl: { data_retention: '77d' } });
+
+        await putStream(apiClient, indexName, {
+          dashboards: [],
+          stream: {
+            ingest: {
+              ...unwiredPutBody.stream.ingest,
+              lifecycle: { dsl: { data_retention: '11d' } },
+            },
+          },
+        });
+
+        await expectLifecycle([indexName], { dsl: { data_retention: '11d' } });
+
+        await putStream(apiClient, indexName, {
+          dashboards: [],
+          stream: {
+            ingest: {
+              ...unwiredPutBody.stream.ingest,
+              lifecycle: { inherit: {} },
+            },
+          },
+        });
+
+        await expectLifecycle([indexName], { dsl: { data_retention: '77d' } });
+
+        await clean();
+      });
+
       if (!isServerless) {
         it('allows dsl lifecycle if the data stream is managed by ilm', async () => {
           const indexName = 'unwired-stream-ilm-to-dsl';

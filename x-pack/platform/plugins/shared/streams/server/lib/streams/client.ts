@@ -36,6 +36,7 @@ import {
   findInheritedLifecycle,
   findInheritingStreams,
   getAncestorsAndSelf,
+  IngestStreamLifecycleDisabled,
 } from '@kbn/streams-schema';
 import { cloneDeep, keyBy, omit, orderBy } from 'lodash';
 import { AssetClient } from './assets/asset_client';
@@ -58,6 +59,7 @@ import {
   checkAccessBulk,
   deleteStreamObjects,
   deleteUnmanagedStreamObjects,
+  getDataStreamLifecycle,
 } from './stream_crud';
 import { updateDataStreamsLifecycle } from './data_streams/manage_data_streams';
 import { DefinitionNotFoundError } from './errors/definition_not_found_error';
@@ -217,11 +219,10 @@ export class StreamsClient {
         dataStream: await this.getDataStream(definition.name),
       });
 
-      // inherit lifecycle is a noop for unwired streams, it keeps the
-      // data stream configuration as-is
-      if (!isInheritLifecycle(definition.ingest.lifecycle)) {
-        await this.updateStreamLifecycle(definition, definition.ingest.lifecycle);
-      }
+      const lifecycle = isInheritLifecycle(definition.ingest.lifecycle)
+        ? getDataStreamLifecycle(await this.getDataStream(definition.name))
+        : definition.ingest.lifecycle;
+      await this.updateStreamLifecycle(definition, lifecycle);
     }
   }
 
@@ -942,7 +943,10 @@ export class StreamsClient {
    * inherited, any updates to a given data stream also triggers an update
    * to existing children data streams that do not specify an override.
    */
-  private async updateStreamLifecycle(root: StreamDefinition, lifecycle: IngestStreamLifecycle) {
+  private async updateStreamLifecycle(
+    root: StreamDefinition,
+    lifecycle: IngestStreamLifecycle | IngestStreamLifecycleDisabled
+  ) {
     const { logger, scopedClusterClient } = this.dependencies;
     const inheritingStreams = isWiredStreamDefinition(root)
       ? findInheritingStreams(root, await this.getDescendants(root.name))
