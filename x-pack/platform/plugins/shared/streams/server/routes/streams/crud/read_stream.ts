@@ -20,12 +20,7 @@ import {
   getDataStreamLifecycle,
   getUnmanagedElasticsearchAssets,
 } from '../../../lib/streams/stream_crud';
-import { getSortedFields } from '../../../lib/streams/helpers/field_sorting';
-import {
-  otelFields,
-  otelMappings,
-  otelPrefixes,
-} from '../../../lib/streams/component_templates/otel_layer';
+import { addAliasesForOtelFields } from '../../../lib/streams/component_templates/otel_layer';
 
 export async function readStream({
   name,
@@ -81,38 +76,10 @@ export async function readStream({
     };
   }
 
-  const inheritedFields = getInheritedFieldsFromAncestors(ancestors);
-  // calculate aliases for all fields based on their prefixes and add them to the inherited fields
-  getSortedFields(inheritedFields).forEach(([key, fieldDef]) => {
-    // if the field starts with one of the otel prefixes, add an alias without the prefix
-    if (otelPrefixes.some((prefix) => key.startsWith(prefix))) {
-      inheritedFields[key.replace(new RegExp(`^(${otelPrefixes.join('|')})`), '')] = {
-        ...fieldDef,
-        from: inheritedFields[key].from,
-        alias_for: key,
-      };
-    }
-  });
-  // calculate aliases for regular fields of this stream
-  getSortedFields(streamDefinition.ingest.wired.fields).forEach(([key, fieldDef]) => {
-    if (otelPrefixes.some((prefix) => key.startsWith(prefix))) {
-      inheritedFields[key.replace(new RegExp(`^(${otelPrefixes.join('|')})`), '')] = {
-        ...fieldDef,
-        from: streamDefinition.name,
-        alias_for: key,
-      };
-    }
-  });
-  // add aliases defined by the otel compat mode itself
-  Object.entries(otelMappings).forEach(([key, fieldDef]) => {
-    if (fieldDef.type === 'alias') {
-      inheritedFields[key] = {
-        type: otelFields[fieldDef.path!].type,
-        alias_for: fieldDef.path,
-        from: 'logs',
-      };
-    }
-  });
+  const inheritedFields = addAliasesForOtelFields(
+    streamDefinition,
+    getInheritedFieldsFromAncestors(ancestors)
+  );
 
   const body: WiredStreamGetResponse = {
     stream: streamDefinition,

@@ -10,7 +10,12 @@ import {
   MappingObjectProperty,
   MappingProperty,
 } from '@elastic/elasticsearch/lib/api/types';
-import { FieldDefinition } from '@kbn/streams-schema';
+import {
+  FieldDefinition,
+  InheritedFieldDefinition,
+  WiredStreamDefinition,
+} from '@kbn/streams-schema';
+import { getSortedFields } from '../helpers/field_sorting';
 
 export const otelSettings: IndicesIndexSettings = {
   index: {
@@ -178,4 +183,43 @@ export function moveFieldsToProperties(mappings: Record<string, MappingProperty>
     ).properties = resourceAttributes;
   }
   return mappings;
+}
+
+export function addAliasesForOtelFields(
+  streamDefinition: WiredStreamDefinition,
+  inheritedFields: InheritedFieldDefinition
+) {
+  // calculate aliases for all fields based on their prefixes and add them to the inherited fields
+  getSortedFields(inheritedFields).forEach(([key, fieldDef]) => {
+    // if the field starts with one of the otel prefixes, add an alias without the prefix
+    if (otelPrefixes.some((prefix) => key.startsWith(prefix))) {
+      inheritedFields[key.replace(new RegExp(`^(${otelPrefixes.join('|')})`), '')] = {
+        ...fieldDef,
+        from: inheritedFields[key].from,
+        alias_for: key,
+      };
+    }
+  });
+  // calculate aliases for regular fields of this stream
+  getSortedFields(streamDefinition.ingest.wired.fields).forEach(([key, fieldDef]) => {
+    if (otelPrefixes.some((prefix) => key.startsWith(prefix))) {
+      inheritedFields[key.replace(new RegExp(`^(${otelPrefixes.join('|')})`), '')] = {
+        ...fieldDef,
+        from: streamDefinition.name,
+        alias_for: key,
+      };
+    }
+  });
+  // add aliases defined by the otel compat mode itself
+  Object.entries(otelMappings).forEach(([key, fieldDef]) => {
+    if (fieldDef.type === 'alias') {
+      inheritedFields[key] = {
+        type: otelFields[fieldDef.path!].type,
+        alias_for: fieldDef.path,
+        from: 'logs',
+      };
+    }
+  });
+
+  return inheritedFields;
 }
