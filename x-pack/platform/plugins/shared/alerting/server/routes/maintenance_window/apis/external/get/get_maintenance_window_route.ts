@@ -58,7 +58,7 @@ export const getMaintenanceWindowRoute = (
         access: 'public',
         summary: 'Get a maintenance window',
         description: 'Get a maintenance window by ID.',
-        tags: ['oas-tag:alerting']
+        tags: ['oas-tag:alerting'],
       },
     },
     router.handleLegacyErrors(
