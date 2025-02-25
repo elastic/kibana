@@ -14,6 +14,7 @@ import { dataViewRouteHelpersFactory } from '../../utils/data_view';
 export default ({ getService }: FtrProviderContext) => {
   const api = getService('securitySolutionApi');
   const supertest = getService('supertest');
+  const kibanaServer = getService('kibanaServer');
 
   const utils = EntityStoreUtils(getService);
   describe('@ess @skipInServerlessMKI Entity Store APIs', () => {
@@ -65,7 +66,9 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       it('should enable the entity store, creating both user and host engines', async () => {
-        await utils.enableEntityStore();
+        await utils.enableEntityStore({
+          entityTypes: ['host', 'user'],
+        });
         await utils.expectEngineAssetsExist('user');
         await utils.expectEngineAssetsExist('host');
       });
@@ -203,8 +206,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/200758
-    describe.skip('status', () => {
+    describe('status', () => {
       afterEach(async () => {
         await utils.cleanEngines();
       });
@@ -219,7 +221,9 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       it('should return "installing" when at least one engine is being initialized', async () => {
-        await utils.enableEntityStore();
+        await utils.enableEntityStore({
+          entityTypes: ['host', 'user'],
+        });
 
         const { body } = await api.getEntityStoreStatus({ query: {} }).expect(200);
 
@@ -227,6 +231,12 @@ export default ({ getService }: FtrProviderContext) => {
         expect(body.engines.length).toEqual(2);
         expect(body.engines[0].status).toEqual('installing');
         expect(body.engines[1].status).toEqual('installing');
+
+        // Make sure all engines have started before the test finishes to prevent flakiness
+        await Promise.all([
+          utils.waitForEngineStatus('host', 'started'),
+          utils.waitForEngineStatus('user', 'started'),
+        ]);
       });
 
       it('should return "started" when all engines are started', async () => {
@@ -265,6 +275,7 @@ export default ({ getService }: FtrProviderContext) => {
             expect.objectContaining({ resource: 'ingest_pipeline' }),
             expect.objectContaining({ resource: 'index_template' }),
             expect.objectContaining({ resource: 'task' }),
+            expect.objectContaining({ resource: 'task' }),
             expect.objectContaining({ resource: 'ingest_pipeline' }),
             expect.objectContaining({ resource: 'enrich_policy' }),
             expect.objectContaining({ resource: 'index' }),
@@ -277,6 +288,12 @@ export default ({ getService }: FtrProviderContext) => {
     describe('apply_dataview_indices', () => {
       before(async () => {
         await utils.initEntityEngineForEntityTypesAndWait(['host']);
+
+        // Delete the data view refresh task so it doesn't interfere with the tests
+        await kibanaServer.savedObjects.delete({
+          type: 'task',
+          id: 'entity_store:data_view:refresh:default:1.0.0',
+        });
       });
 
       after(async () => {
