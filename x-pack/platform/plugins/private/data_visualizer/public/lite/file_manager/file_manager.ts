@@ -20,7 +20,7 @@ import type {
 import type {
   IndicesIndexSettings,
   MappingTypeMapping,
-} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+} from '@elastic/elasticsearch/lib/api/types';
 import { i18n } from '@kbn/i18n';
 import type { FileUploadResults } from '@kbn/file-upload-common';
 import type { FileAnalysis } from './file_wrapper';

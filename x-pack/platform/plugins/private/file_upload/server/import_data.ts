@@ -11,7 +11,7 @@ import type {
   IndicesCreateRequest,
   IndicesIndexSettings,
   MappingTypeMapping,
-} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+} from '@elastic/elasticsearch/lib/api/types';
 import { INDEX_META_DATA_CREATED_BY } from '../common/constants';
 import type {
   ImportResponse,
@@ -116,7 +116,7 @@ export function importDataProvider({ asCurrentUser }: IScopedClusterClient) {
     settings: IndicesIndexSettings,
     mappings: MappingTypeMapping
   ) {
-    const body: IndicesCreateRequest['body'] = {
+    const body: Omit<IndicesCreateRequest, 'index'> = {
       mappings: {
         _meta: {
           created_by: INDEX_META_DATA_CREATED_BY,
@@ -129,7 +129,7 @@ export function importDataProvider({ asCurrentUser }: IScopedClusterClient) {
       body.settings = settings;
     }
 
-    await asCurrentUser.indices.create({ index, body }, { maxRetries: 0 });
+    await asCurrentUser.indices.create({ index, ...body }, { maxRetries: 0 });
   }
 
   async function indexData(index: string, pipelineId: string | undefined, data: InputData) {
