@@ -60,6 +60,7 @@ import {
   registerDiscoverAnalytics,
 } from './plugin_imports/discover_ebt_manager';
 import type { ProfilesManager } from './context_awareness';
+import { forwardLegacyUrls } from './plugin_imports/forward_legacy_urls';
 
 /**
  * Contains Discover, one of the oldest parts of Kibana
@@ -228,34 +229,13 @@ export class DiscoverPlugin
       },
     });
 
-    plugins.urlForwarding.forwardApp('doc', 'discover', (path) => {
-      return `#${path}`;
-    });
-    plugins.urlForwarding.forwardApp('context', 'discover', (path) => {
-      const urlParts = path.split('/');
-      // take care of urls containing legacy url, those split in the following way
-      // ["", "context", indexPatternId, _type, id + params]
-      if (urlParts[4]) {
-        // remove _type part
-        const newPath = [...urlParts.slice(0, 3), ...urlParts.slice(4)].join('/');
-        return `#${newPath}`;
-      }
-      return `#${path}`;
-    });
-    plugins.urlForwarding.forwardApp('discover', 'discover', (path) => {
-      const [, id, tail] = /discover\/([^\?]+)(.*)/.exec(path) || [];
-      if (!id) {
-        return `#${path.replace('/discover', '') || '/'}`;
-      }
-      return `#/view/${id}${tail || ''}`;
-    });
-
     if (plugins.home) {
       registerFeature(plugins.home);
     }
 
-    this.registerEmbeddable(core, plugins);
+    forwardLegacyUrls(plugins.urlForwarding);
     registerDiscoverAnalytics(core, this.discoverEbtContext$);
+    this.registerEmbeddable(core, plugins);
 
     return { locator: this.locator };
   }
