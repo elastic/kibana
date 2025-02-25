@@ -13,7 +13,7 @@ import { IKibanaSearchRequest, IKibanaSearchResponse } from '@kbn/search-types';
 import { useKibana } from '../../../hooks/use_kibana';
 import { useStreamsAppFetch } from '../../../hooks/use_streams_app_fetch';
 import { DataStreamStats } from './use_data_stream_stats';
-import { ILM_PHASES } from '../helpers/ilm_phases';
+import { useIlmPhasesColorAndDescription } from './use_ilm_phases_color_and_description';
 
 const TIMESTAMP_FIELD = '@timestamp';
 const RANDOM_SAMPLER_PROBABILITY = 0.1;
@@ -133,6 +133,8 @@ export const useIngestionRatePerTier = ({
     },
   } = useKibana();
 
+  const { ilmPhases } = useIlmPhasesColorAndDescription();
+
   const ingestionRateFetch = useStreamsAppFetch(
     async ({ signal }) => {
       if (!definition || !stats) {
@@ -229,7 +231,7 @@ export const useIngestionRatePerTier = ({
           const countByTier = indices.buckets.reduce((tiers, index) => {
             const explain = ilmExplain.indices[index.key];
             const tier =
-              explain.managed && explain.phase in ILM_PHASES
+              explain.managed && explain.phase in ilmPhases
                 ? (explain.phase as PhaseNameWithoutDelete)
                 : fallbackTier;
             tiers[tier] = (tiers[tier] ?? 0) + index.doc_count;

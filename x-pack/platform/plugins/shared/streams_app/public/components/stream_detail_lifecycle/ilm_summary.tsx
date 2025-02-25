@@ -26,6 +26,7 @@ import {
   EuiText,
   EuiTextColor,
   formatNumber,
+  useEuiTheme,
 } from '@elastic/eui';
 import { LocatorPublic } from '@kbn/share-plugin/common';
 import { IlmLocatorParams } from '@kbn/index-lifecycle-management-common-shared';
@@ -33,7 +34,7 @@ import { useStreamsAppFetch } from '../../hooks/use_streams_app_fetch';
 import { useKibana } from '../../hooks/use_kibana';
 import { orderIlmPhases, parseDurationInSeconds } from './helpers';
 import { IlmLink } from './ilm_link';
-import { ILM_PHASES } from './helpers/ilm_phases';
+import { useIlmPhasesColorAndDescription } from './hooks/use_ilm_phases_color_and_description';
 
 export function IlmSummary({
   definition,
@@ -153,6 +154,8 @@ function IlmPhase({
       : minAge
       ? '16px'
       : '16px 0px 0px 16px';
+  const { ilmPhases } = useIlmPhasesColorAndDescription();
+  const { euiTheme } = useEuiTheme();
 
   return (
     <>
@@ -166,7 +169,7 @@ function IlmPhase({
           hasBorder={false}
           hasShadow={false}
           css={{
-            backgroundColor: ILM_PHASES[phase.name].color,
+            backgroundColor: ilmPhases[phase.name].color,
             margin: '0 2px',
             borderRadius,
           }}
@@ -174,10 +177,10 @@ function IlmPhase({
         >
           {phase.name === 'delete' ? (
             <EuiText size="xs" style={{ margin: '0 2px' }}>
-              <EuiIcon size="s" style={{}} type="trash" />
+              <EuiIcon size="s" type="trash" />
             </EuiText>
           ) : (
-            <EuiText size="xs">
+            <EuiText size="xs" color={euiTheme.colors.plainDark}>
               <b>{capitalize(phase.name)}</b>
             </EuiText>
           )}
@@ -207,7 +210,7 @@ function IlmPhase({
             style={{
               marginRight: minAge ? '-20px' : '-5px',
               width: '50px',
-              backgroundColor: ILM_PHASES.delete.color,
+              backgroundColor: ilmPhases.delete.color,
             }}
             grow={false}
             hasBorder={false}
@@ -223,45 +226,45 @@ function IlmPhase({
   );
 }
 
-function phasesDescriptions(phases: IlmPolicyPhases) {
-  const descriptions = orderIlmPhases(phases)
-    .filter(({ name }) => name !== 'delete')
-    .map((phase) => ({
-      name: phase.name,
-      description: ILM_PHASES[phase.name].description(phase, phases),
-      color: ILM_PHASES[phase.name].color,
-    })) as Array<
-    {
-      name: PhaseName | 'indefinite';
-      description: string[];
-    } & ({ color: string } | { icon: string })
-  >;
-
-  if (phases.delete) {
-    descriptions.push({
-      name: 'delete',
-      description: ILM_PHASES.delete.description(phases.delete),
-      icon: 'trash',
-    });
-  } else {
-    descriptions.push({
-      name: 'indefinite',
-      description: [
-        i18n.translate('xpack.streams.streamDetailLifecycle.noRetentionDescription', {
-          defaultMessage: 'Data is stored indefinitely.',
-        }),
-      ],
-      icon: 'infinity',
-    });
-  }
-
-  return descriptions;
-}
-
 function PhasesLegend({ phases }: { phases?: IlmPolicyPhases }) {
   if (!phases) return null;
 
-  const descriptions = phasesDescriptions(phases);
+  const { ilmPhases } = useIlmPhasesColorAndDescription();
+  const descriptions = useMemo(() => {
+    const desc = orderIlmPhases(phases)
+      .filter(({ name }) => name !== 'delete')
+      .map((phase) => ({
+        name: phase.name,
+        description: ilmPhases[phase.name].description(phase, phases),
+        color: ilmPhases[phase.name].color,
+      })) as Array<
+      {
+        name: PhaseName | 'indefinite';
+        description: string[];
+      } & ({ color: string } | { icon: string })
+    >;
+
+    if (phases.delete) {
+      desc.push({
+        name: 'delete',
+        description: ilmPhases.delete.description(phases.delete),
+        icon: 'trash',
+      });
+    } else {
+      desc.push({
+        name: 'indefinite',
+        description: [
+          i18n.translate('xpack.streams.streamDetailLifecycle.noRetentionDescription', {
+            defaultMessage: 'Data is stored indefinitely.',
+          }),
+        ],
+        icon: 'infinity',
+      });
+    }
+
+    return desc;
+  }, [phases, ilmPhases]);
+
   return (
     <EuiPanel hasBorder={false} hasShadow={false} paddingSize="s">
       {descriptions.map((phase, index) => (

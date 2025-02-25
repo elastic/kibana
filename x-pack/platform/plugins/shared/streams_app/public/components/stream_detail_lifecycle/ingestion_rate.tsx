@@ -18,15 +18,24 @@ import {
   EuiPanel,
   EuiSpacer,
   EuiText,
+  useEuiTheme,
 } from '@elastic/eui';
-import { AreaSeries, Axis, BarSeries, Chart, Settings } from '@elastic/charts';
+import {
+  AreaSeries,
+  Axis,
+  BarSeries,
+  Chart,
+  DARK_THEME,
+  LIGHT_THEME,
+  Settings,
+} from '@elastic/charts';
 import { useKibana } from '../../hooks/use_kibana';
 import { DataStreamStats } from './hooks/use_data_stream_stats';
 import { formatBytes } from './helpers/format_bytes';
 import { StreamsAppSearchBar } from '../streams_app_search_bar';
 import { useDateRange } from '../../hooks/use_date_range';
-import { ILM_PHASES } from './helpers/ilm_phases';
 import { useIngestionRate, useIngestionRatePerTier } from './hooks/use_ingestion_rate';
+import { useIlmPhasesColorAndDescription } from './hooks/use_ilm_phases_color_and_description';
 
 export function IngestionRate({
   definition,
@@ -128,6 +137,7 @@ function ChartAreaSeries({
     isLoading: isLoadingIngestionRate,
     error: ingestionRateError,
   } = useIngestionRate({ definition, stats, timeRange });
+  const { colorMode } = useEuiTheme();
 
   return ingestionRateError ? (
     'Failed to load ingestion rate'
@@ -136,7 +146,7 @@ function ChartAreaSeries({
   ) : (
     <>
       <Chart size={{ height: 250 }}>
-        <Settings showLegend={false} />
+        <Settings showLegend={false} baseTheme={colorMode === 'LIGHT' ? LIGHT_THEME : DARK_THEME} />
 
         <AreaSeries
           id="ingestionRate"
@@ -192,6 +202,8 @@ function ChartBarSeries({
     isLoading: isLoadingIngestionRate,
     error: ingestionRateError,
   } = useIngestionRatePerTier({ definition, stats, timeRange });
+  const { ilmPhases } = useIlmPhasesColorAndDescription();
+  const { colorMode } = useEuiTheme();
 
   return ingestionRateError ? (
     'Failed to load ingestion rate'
@@ -200,14 +212,14 @@ function ChartBarSeries({
   ) : (
     <>
       <Chart size={{ height: 250 }}>
-        <Settings showLegend={false} />
+        <Settings showLegend={false} baseTheme={colorMode === 'LIGHT' ? LIGHT_THEME : DARK_THEME} />
         {Object.entries(ingestionRate.buckets).map(([tier, buckets]) => (
           <BarSeries
             id={`ingestionRate-${tier}`}
             key={`ingestionRate-${tier}`}
             name={capitalize(tier)}
             data={buckets}
-            color={ILM_PHASES[tier as PhaseName].color}
+            color={ilmPhases[tier as PhaseName].color}
             xScaleType="time"
             xAccessor={'key'}
             yAccessors={['value']}
