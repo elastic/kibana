@@ -9,13 +9,7 @@ import { setPreEightEnterpriseSearchIndicesReadOnly } from './pre_eight_index_de
 import { versionCheckHandlerWrapper } from '../es_version_precheck';
 import { RouteDependencies } from '../../types';
 
-export function registerEnterpriseSearchDeprecationRoutes({
-  config: { featureSet },
-  router,
-  lib: { handleEsError },
-  licensing,
-  log,
-}: RouteDependencies) {
+export function registerEnterpriseSearchDeprecationRoutes({ router }: RouteDependencies) {
   router.post(
     {
       path: '/internal/enterprise_search/deprecations/set_enterprise_search_indices_read_only',
