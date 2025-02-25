@@ -215,10 +215,8 @@ const hasEnablePermissions = async ({
   const { cluster: clusterPrivs, indices: index } =
     getServiceApiKeyPrivileges(isElasticsearchServerless);
   const hasPrivileges = await syntheticsEsClient.baseESClient.security.hasPrivileges({
-    body: {
-      cluster: ['manage_security', 'manage_api_key', 'manage_own_api_key', ...clusterPrivs],
-      index,
-    },
+    cluster: ['manage_security', 'manage_api_key', 'manage_own_api_key', ...clusterPrivs],
+    index,
   });
 
   const { cluster } = hasPrivileges;
