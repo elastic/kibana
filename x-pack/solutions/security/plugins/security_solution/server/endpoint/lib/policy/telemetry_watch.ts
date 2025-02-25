@@ -130,7 +130,7 @@ export class TelemetryConfigWatcher {
 
       if (updates.length) {
         try {
-          await pRetry(
+          const updateResult = await pRetry(
             () =>
               this.policyService.bulkUpdate(this.makeInternalSOClient(), this.esClient, updates),
             {
@@ -143,13 +143,20 @@ export class TelemetryConfigWatcher {
               ...this.retryOptions,
             }
           );
+
+          if (updateResult.failedPolicies.length) {
+            this.logger.warn(
+              `Cannot update telemetry flag in the following policies:\n${updateResult.failedPolicies
+                .map((entry) => `- id: ${entry.packagePolicy.id}, error: ${stringify(entry.error)}`)
+                .join('\n')}`
+            );
+          }
         } catch (e) {
           this.logger.warn(
             `Unable to update telemetry config state to ${isTelemetryEnabled} in policies: ${updates.map(
               (update) => update.id
-            )}`
+            )}\n\n${stringify(e)}`
           );
-          this.logger.warn(stringify(e));
         }
       }
     } while (response.page * response.perPage < response.total);
