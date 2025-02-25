@@ -111,8 +111,6 @@ main () {
 
   # Build ANTLR stuff
   cd ./src/platform/packages/shared/kbn-esql-ast/src
-  ls -la
-  ls -la antlr
   yarn build:antlr4:esql
 
   # Make a commit
