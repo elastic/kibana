@@ -16,16 +16,17 @@ import type { PolicyConfig } from '../../../../common/endpoint/types';
 import { TelemetryConfigWatcher } from './telemetry_watch';
 import { TelemetryConfigProvider } from '../../../../common/telemetry_config/telemetry_config_provider';
 import { createMockEndpointAppContextService } from '../../mocks';
+import type { MockedLogger } from '@kbn/logging-mocks';
+import { loggerMock } from '@kbn/logging-mocks';
+import type { NewPackagePolicyWithId } from '@kbn/fleet-plugin/server/services/package_policy';
 
 const MockPackagePolicyWithEndpointPolicy = (
   cb?: (p: PolicyConfig) => PolicyConfig
 ): PackagePolicy => {
   const packagePolicy = createPackagePolicyMock();
-  if (!cb) {
-    // eslint-disable-next-line no-param-reassign
-    cb = (p) => p;
-  }
-  const policyConfig = cb(policyFactory());
+
+  const policyConfig = cb?.(policyFactory()) ?? policyFactory();
+
   packagePolicy.inputs[0].config = { policy: { value: policyConfig } };
 
   return packagePolicy;
@@ -33,6 +34,8 @@ const MockPackagePolicyWithEndpointPolicy = (
 
 describe('Telemetry config watcher', () => {
   const esStartMock = elasticsearchServiceMock.createStart();
+
+  let mockedLogger: MockedLogger;
   let packagePolicyServiceMock: jest.Mocked<PackagePolicyClient>;
   let telemetryWatcher: TelemetryConfigWatcher;
 
@@ -56,11 +59,19 @@ describe('Telemetry config watcher', () => {
 
   beforeEach(() => {
     packagePolicyServiceMock = createPackagePolicyServiceMock();
+    packagePolicyServiceMock.bulkUpdate.mockResolvedValue({
+      updatedPolicies: [],
+      failedPolicies: [],
+    });
+
+    mockedLogger = loggerMock.create();
+    const endpointAppContextServiceMock = createMockEndpointAppContextService();
+    endpointAppContextServiceMock.createLogger = jest.fn().mockReturnValue(mockedLogger);
 
     telemetryWatcher = new TelemetryConfigWatcher(
       packagePolicyServiceMock,
       esStartMock,
-      createMockEndpointAppContextService(),
+      endpointAppContextServiceMock,
       { immediateRetry: true }
     );
   });
@@ -117,6 +128,9 @@ describe('Telemetry config watcher', () => {
     expect(packagePolicyServiceMock.list.mock.calls[0][1].page).toBe(1);
     expect(packagePolicyServiceMock.list.mock.calls[1][1].page).toBe(2); // second call, asked for page 2
     expect(packagePolicyServiceMock.list.mock.calls[2][1].page).toBe(3); // etc
+
+    expect(mockedLogger.warn).not.toHaveBeenCalled();
+    expect(mockedLogger.error).not.toHaveBeenCalled();
   });
 
   describe('error handling', () => {
@@ -130,27 +144,33 @@ describe('Telemetry config watcher', () => {
         perPage: 100,
       });
 
-      await telemetryWatcher.watch(true); // manual trigger
+      await telemetryWatcher.watch(true);
 
       expect(packagePolicyServiceMock.list).toBeCalledTimes(2);
+
+      expect(mockedLogger.warn).not.toHaveBeenCalled();
+      expect(mockedLogger.error).not.toHaveBeenCalled();
     });
 
     it('retries fetching package policies maximum 5 times', async () => {
       packagePolicyServiceMock.list.mockRejectedValue(new Error());
 
-      await telemetryWatcher.watch(true); // manual trigger
+      await telemetryWatcher.watch(true);
 
       expect(packagePolicyServiceMock.list).toBeCalledTimes(5);
+      expect(mockedLogger.warn).toHaveBeenCalledTimes(1);
+      expect(mockedLogger.error).not.toHaveBeenCalled();
     });
 
     it('retries bulk updating package policies', async () => {
       preparePackagePolicyMock({ isGlobalTelemetryEnabled: true });
       packagePolicyServiceMock.bulkUpdate.mockRejectedValueOnce(new Error());
-      packagePolicyServiceMock.bulkUpdate.mockRejectedValue(null);
 
       await telemetryWatcher.watch(false);
 
       expect(packagePolicyServiceMock.bulkUpdate).toHaveBeenCalledTimes(2);
+      expect(mockedLogger.warn).not.toHaveBeenCalled();
+      expect(mockedLogger.error).not.toHaveBeenCalled();
     });
 
     it('retries bulk updating package policies maximum 5 times', async () => {
@@ -160,6 +180,35 @@ describe('Telemetry config watcher', () => {
       await telemetryWatcher.watch(false);
 
       expect(packagePolicyServiceMock.bulkUpdate).toHaveBeenCalledTimes(5);
+      expect(mockedLogger.warn).toHaveBeenCalledTimes(1);
+      expect(mockedLogger.error).not.toHaveBeenCalled();
+    });
+
+    it('logs the ids of package policies that are failed to be updated', async () => {
+      preparePackagePolicyMock({ isGlobalTelemetryEnabled: true });
+      packagePolicyServiceMock.bulkUpdate.mockResolvedValueOnce({
+        updatedPolicies: [],
+        failedPolicies: [
+          {
+            error: new Error('error message 1'),
+            packagePolicy: { id: 'policy-id-1' } as NewPackagePolicyWithId,
+          },
+          {
+            error: new Error('error message 2'),
+            packagePolicy: { id: 'policy-id-2' } as NewPackagePolicyWithId,
+          },
+        ],
+      });
+
+      await telemetryWatcher.watch(false);
+
+      expect(packagePolicyServiceMock.bulkUpdate).toHaveBeenCalledTimes(1);
+      expect(mockedLogger.warn).toHaveBeenCalledTimes(1);
+      expect(mockedLogger.error).not.toHaveBeenCalled();
+
+      const logMessage = mockedLogger.warn.mock.calls[0][0] as string;
+      expect(logMessage).toMatch(/- id: policy-id-1, error:.+error message 1/);
+      expect(logMessage).toMatch(/- id: policy-id-2, error:.+error message 2/);
     });
   });
 
