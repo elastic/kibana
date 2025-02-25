@@ -69,7 +69,7 @@ export const HostStatuses = z.array(
 );
 
 /**
- * Determines the sort order, which can be desc or asc.
+ * Determines the sort order.
  */
 export type SortDirection = z.infer<typeof SortDirection>;
 export const SortDirection = z.enum(['asc', 'desc']);
