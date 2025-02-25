@@ -14,7 +14,6 @@ import {
 } from '@kbn/elastic-assistant-common';
 
 import { mockAnonymizationFields } from '../../../../mock/mock_anonymization_fields';
-import { mockFileEventsQueryResults } from '../../../../mock/mock_file_events_query_results';
 import { mockAnonymizedEventsReplacements } from '../../../../mock/mock_anonymized_events';
 import { getAnonymizedEvents } from '.';
 
@@ -45,13 +44,28 @@ describe('getAnonymizedEvents', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockEsClient.search.mockResolvedValue({
-      ...mockFileEventsQueryResults,
-      hits: {
-        ...mockFileEventsQueryResults.hits,
-        hits: mockFileEventsQueryResults.hits.hits.map((hit) => ({
-          ...hit,
-          fields: { ...mockRawData },
-        })),
+      aggregations: {
+        unique_process_executable: {
+          buckets: [
+            {
+              key: 'process1',
+              doc_count: 1,
+              latest_event: {
+                hits: {
+                  hits: [
+                    {
+                      _id: 'event1',
+                      _source: {
+                        agent: { id: 'agent1' },
+                        process: { executable: 'executable1' },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+          ],
+        },
       },
     } as unknown as SearchResponse);
     mockedGetRawDataOrDefault.mockReturnValue(mockRawData);
@@ -69,7 +83,7 @@ describe('getAnonymizedEvents', () => {
     expect(mockEsClient.search).not.toHaveBeenCalled();
   });
 
-  it('should properly handle undefined hits in response', async () => {
+  it('should properly handle missing aggregations in response', async () => {
     mockEsClient.search.mockResolvedValue({} as SearchResponse);
 
     const result = await getAnonymizedEvents({
@@ -78,7 +92,7 @@ describe('getAnonymizedEvents', () => {
       esClient: mockEsClient,
     });
 
-    expect(result).toBeUndefined();
+    expect(result).toEqual([]);
   });
 
   it('should properly handle required parameters', async () => {
@@ -100,8 +114,11 @@ describe('getAnonymizedEvents', () => {
       esClient: mockEsClient,
     });
 
-    // Verify getRawDataOrDefault is called with fields
-    expect(mockedGetRawDataOrDefault).toHaveBeenCalledWith(expect.objectContaining(mockRawData));
+    expect(mockedGetRawDataOrDefault).toHaveBeenCalledWith({
+      _id: ['event1'],
+      'agent.id': ['agent1'],
+      'process.executable': ['executable1'],
+    });
   });
 
   it('should handle anonymizationFields when provided', async () => {
@@ -186,7 +203,23 @@ describe('getAnonymizedEvents', () => {
 
     expect(mockEsClient.search).toHaveBeenCalledWith(
       expect.objectContaining({
-        size,
+        aggs: {
+          unique_process_executable: {
+            terms: {
+              field: 'process.executable',
+              size,
+            },
+            aggs: {
+              latest_event: {
+                top_hits: {
+                  _source: ['_id', 'agent.id', 'process.executable'],
+                  size: 1,
+                  sort: [{ '@timestamp': { order: 'desc' } }],
+                },
+              },
+            },
+          },
+        },
       })
     );
   });
@@ -205,7 +238,13 @@ describe('getAnonymizedEvents', () => {
   });
 
   it('should handle empty search results', async () => {
-    mockEsClient.search.mockResolvedValue({ hits: { hits: [] } } as unknown as SearchResponse);
+    mockEsClient.search.mockResolvedValue({
+      aggregations: {
+        unique_process_executable: {
+          buckets: [],
+        },
+      },
+    } as unknown as SearchResponse);
 
     const result = await getAnonymizedEvents({
       insightType: DefendInsightType.Enum.incompatible_antivirus,

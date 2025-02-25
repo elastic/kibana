@@ -20,15 +20,15 @@ export type CustomRetrieverInput = BaseRetrieverInput;
 export class AnonymizedEventsRetriever extends BaseRetriever {
   lc_namespace = ['langchain', 'retrievers'];
 
-  private insightType: DefendInsightType;
-  private endpointIds: string[];
-  private anonymizationFields?: AnonymizationFieldResponse[];
-  private esClient: ElasticsearchClient;
-  private onNewReplacements?: (newReplacements: Replacements) => void;
-  private replacements?: Replacements;
-  private size?: number;
-  private start?: DateMath;
-  private end?: DateMath;
+  private readonly insightType: DefendInsightType;
+  private readonly endpointIds: string[];
+  private readonly anonymizationFields?: AnonymizationFieldResponse[];
+  private readonly esClient: ElasticsearchClient;
+  private readonly onNewReplacements?: (newReplacements: Replacements) => void;
+  private readonly replacements?: Replacements;
+  private readonly size?: number;
+  private readonly start?: DateMath;
+  private readonly end?: DateMath;
 
   constructor({
     insightType,

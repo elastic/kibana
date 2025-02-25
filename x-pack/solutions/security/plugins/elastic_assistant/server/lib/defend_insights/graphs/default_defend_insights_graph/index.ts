@@ -42,9 +42,6 @@ export type DefaultDefendInsightsGraph = ReturnType<typeof getDefaultDefendInsig
 /**
  * This function returns a compiled state graph that represents the default
  * Defend Insights graph.
- *
- * Refer to the following diagram for this graph:
- * x-pack/solutions/security/plugins/elastic_assistant/docs/img/default_defend_insights_graph.png
  */
 export const getDefaultDefendInsightsGraph = ({
   insightType,

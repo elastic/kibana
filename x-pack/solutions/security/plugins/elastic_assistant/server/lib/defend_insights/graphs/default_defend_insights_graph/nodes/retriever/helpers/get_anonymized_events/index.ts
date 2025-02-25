@@ -18,6 +18,26 @@ import {
 import { AnonymizationFieldResponse } from '@kbn/elastic-assistant-common/impl/schemas/anonymization_fields/bulk_crud_anonymization_fields_route.gen';
 import { getQuery } from './get_events';
 
+interface AggregationResponse {
+  unique_process_executable: {
+    buckets: Array<{
+      key: string;
+      doc_count: number;
+      latest_event: {
+        hits: {
+          hits: Array<{
+            _id: string;
+            _source: {
+              agent: { id: string };
+              process: { executable: string };
+            };
+          }>;
+        };
+      };
+    }>;
+  };
+}
+
 export const getAnonymizedEvents = async ({
   insightType,
   endpointIds,
@@ -44,7 +64,18 @@ export const getAnonymizedEvents = async ({
   }
 
   const query = getQuery(insightType, { endpointIds, size, gte: start, lte: end });
-  const result = await esClient.search<SearchResponse>(query);
+  // TODO add support for other insight types
+  const result = await esClient.search<SearchResponse, AggregationResponse>(query);
+  const fileEvents = (result.aggregations?.unique_process_executable.buckets ?? []).map(
+    (bucket) => {
+      const latestEvent = bucket.latest_event.hits.hits[0];
+      return {
+        _id: [latestEvent._id],
+        'agent.id': [latestEvent._source.agent.id],
+        'process.executable': [latestEvent._source.process.executable],
+      };
+    }
+  );
 
   let localReplacements = { ...(replacements ?? {}) };
   const localOnNewReplacements = (newReplacements: Replacements) => {
@@ -53,13 +84,13 @@ export const getAnonymizedEvents = async ({
     onNewReplacements?.(localReplacements); // invoke the callback with the latest replacements
   };
 
-  return result.hits?.hits?.map((x) =>
+  return fileEvents.map((event) =>
     transformRawData({
       anonymizationFields,
       currentReplacements: localReplacements, // <-- the latest local replacements
       getAnonymizedValue,
       onNewReplacements: localOnNewReplacements, // <-- the local callback
-      rawData: getRawDataOrDefault(x.fields),
+      rawData: getRawDataOrDefault(event),
     })
   );
 };

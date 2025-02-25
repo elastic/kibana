@@ -30,7 +30,7 @@ import { getLangSmithTracer } from '@kbn/langchain/server/tracers/langsmith';
 import { PublicMethodsOf } from '@kbn/utility-types';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import {
-  DEFEND_INSIGHTS_TOOL_ID,
+  DEFEND_INSIGHTS_ID,
   DefendInsightStatus,
   DefendInsightType,
   DefendInsightsGetRequestQuery,
@@ -39,7 +39,7 @@ import {
 import type { GraphState } from '../../lib/defend_insights/graphs/default_defend_insights_graph/types';
 import type { GetRegisteredTools } from '../../services/app_context';
 import type { AssistantTool, ElasticAssistantApiRequestHandlerContext } from '../../types';
-import { DefendInsightsDataClient } from '../../ai_assistant_data_clients/defend_insights';
+import { DefendInsightsDataClient } from '../../lib/defend_insights/persistence';
 import {
   DEFEND_INSIGHT_ERROR_EVENT,
   DEFEND_INSIGHT_SUCCESS_EVENT,
@@ -87,7 +87,7 @@ export function getAssistantTool(
   pluginName: string
 ): AssistantTool | undefined {
   const assistantTools = getRegisteredTools(pluginName);
-  return assistantTools.find((tool) => tool.id === DEFEND_INSIGHTS_TOOL_ID);
+  return assistantTools.find((tool) => tool.id === DEFEND_INSIGHTS_ID);
 }
 
 export function getAssistantToolParams({
@@ -422,7 +422,7 @@ export const invokeDefendInsightsGraph = async ({
 }> => {
   const llmType = getLlmType(apiConfig.actionTypeId);
   const model = apiConfig.model;
-  const tags = [DEFEND_INSIGHTS_TOOL_ID, llmType, model].flatMap((tag) => tag ?? []);
+  const tags = [DEFEND_INSIGHTS_ID, llmType, model].flatMap((tag) => tag ?? []);
 
   const traceOptions = {
     projectName: langSmithProject,
@@ -465,14 +465,14 @@ export const invokeDefendInsightsGraph = async ({
 
   logger?.debug(() => 'invokeDefendInsightsGraph: invoking the Defend insights graph');
 
-  const result: GraphState = await graph.invoke(
+  const result: GraphState = (await graph.invoke(
     {},
     {
       callbacks: [...(traceOptions?.tracers ?? [])],
       runName: DEFEND_INSIGHTS_GRAPH_RUN_NAME,
       tags,
     }
-  );
+  )) as GraphState;
   const {
     insights,
     anonymizedEvents,

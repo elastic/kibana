@@ -15,13 +15,13 @@ import { OpenAiProviderType } from '@kbn/stack-connectors-plugin/common/openai/c
 import { DefendInsightStatus, DefendInsightType } from '@kbn/elastic-assistant-common';
 import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
 
-import type { DefendInsightsDataClient } from '../../ai_assistant_data_clients/defend_insights';
+import type { DefendInsightsDataClient } from '../../lib/defend_insights/persistence';
 import { serverMock } from '../../__mocks__/server';
 import {
   ElasticAssistantRequestHandlerContextMock,
   requestContextMock,
 } from '../../__mocks__/request_context';
-import { transformESSearchToDefendInsights } from '../../ai_assistant_data_clients/defend_insights/helpers';
+import { transformESSearchToDefendInsights } from '../../lib/defend_insights/persistence/helpers';
 import { getDefendInsightsSearchEsMock } from '../../__mocks__/defend_insights_schema.mock';
 import { postDefendInsightsRequest } from '../../__mocks__/request';
 import { createDefendInsight, isDefendInsightsEnabled, invokeDefendInsightsGraph } from './helpers';

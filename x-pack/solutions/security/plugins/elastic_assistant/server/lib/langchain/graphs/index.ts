@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { DEFEND_INSIGHTS_TOOL_ID } from '@kbn/elastic-assistant-common';
+import { DEFEND_INSIGHTS_ID } from '@kbn/elastic-assistant-common';
 
 import {
   getDefaultAssistantGraph,
@@ -43,7 +43,7 @@ export interface AttackDiscoveryGraphMetadata {
 
 export interface DefendInsightsGraphMetadata {
   getDefaultDefendInsightsGraph: GetDefendInsightsGraph;
-  graphType: typeof DEFEND_INSIGHTS_TOOL_ID;
+  graphType: typeof DEFEND_INSIGHTS_ID;
 }
 
 export type GraphMetadata =
@@ -65,6 +65,6 @@ export const ASSISTANT_GRAPH_MAP: Record<string, GraphMetadata> = {
   },
   DefaultDefendInsightsGraph: {
     getDefaultDefendInsightsGraph,
-    graphType: DEFEND_INSIGHTS_TOOL_ID,
+    graphType: DEFEND_INSIGHTS_ID,
   },
 };
