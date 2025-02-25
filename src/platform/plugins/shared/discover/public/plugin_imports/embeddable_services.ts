@@ -8,5 +8,5 @@
  */
 
 export { ViewSavedSearchAction } from '../embeddable/actions/view_saved_search_action';
-export { deserializeState } from '../embeddable/utils/serialization_utils';
+export { getOnAddSearchEmbeddable } from '../embeddable/get_on_add_search_embeddable';
 export { getSearchEmbeddableFactory } from '../embeddable/get_search_embeddable_factory';

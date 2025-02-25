@@ -406,21 +406,10 @@ export class DiscoverPlugin
     };
 
     plugins.embeddable.registerAddFromLibraryType<SavedSearchAttributes>({
-      onAdd: async (container, savedObject) => {
+      onAdd: async (...params) => {
         const services = await getDiscoverServicesForEmbeddable();
-        const { deserializeState } = await getEmbeddableServices();
-        const initialState = await deserializeState({
-          serializedState: {
-            rawState: { savedObjectId: savedObject.id },
-            references: savedObject.references,
-          },
-          discoverServices: services,
-        });
-
-        container.addNewPanel({
-          panelType: SEARCH_EMBEDDABLE_TYPE,
-          initialState,
-        });
+        const { getOnAddSearchEmbeddable } = await getEmbeddableServices();
+        return getOnAddSearchEmbeddable(services)(...params);
       },
       savedObjectType: SavedSearchType,
       savedObjectName: i18n.translate('discover.savedSearch.savedObjectName', {
