@@ -10,14 +10,11 @@ import type {
   AggregationsAggregate,
   SearchResponse,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { ToolingLog } from '@kbn/tooling-log';
-import { retryForSuccess } from '@kbn/ftr-common-functional-services';
+import { Console, Effect } from 'effect';
 import {
   APM_ALERTS_INDEX,
   ApmAlertFields,
 } from '../../../../api_integration/deployment_agnostic/apis/observability/apm/alerts/helpers/alerting_helper';
-
-const debugLog = ToolingLog.bind(ToolingLog, { level: 'debug', writeTo: process.stdout });
 
 async function getAlertByRuleId({ es, ruleId }: { es: Client; ruleId: string }) {
   const response = (await es.search({
@@ -43,17 +40,20 @@ export async function waitForAlertsForRule({
   ruleId: string;
   minimumAlertCount?: number;
 }) {
-  return await retryForSuccess(new debugLog({ context: 'waitForAlertsForRule' }), {
-    timeout: 20_000,
-    methodName: 'waitForAlertsForRule',
-    block: async () => {
-      const alerts = await getAlertByRuleId({ es, ruleId });
+  const getAlerts = () =>
+    getAlertByRuleId({ es, ruleId }).then((alerts) => {
       const actualAlertCount = alerts.length;
       if (actualAlertCount < minimumAlertCount)
         throw new Error(`Expected ${minimumAlertCount} but got ${actualAlertCount} alerts`);
 
       return alerts;
-    },
-    retryCount: 5,
-  });
+    });
+
+  return await Effect.runPromise(
+    Effect.tryPromise(getAlerts).pipe(
+      Effect.retry({ times: 100 }),
+      Effect.timeout('2 minutes'),
+      Effect.catchAll(Console.error)
+    )
+  );
 }
