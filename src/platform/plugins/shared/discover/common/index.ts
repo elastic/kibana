@@ -16,6 +16,5 @@ export type {
   DiscoverAppLocatorParams,
   MainHistoryLocationState,
 } from './app_locator';
-export { appLocatorGetLocationCommon } from './app_locator_get_location';
 
 export type { DiscoverESQLLocator, DiscoverESQLLocatorParams } from './esql_locator';
