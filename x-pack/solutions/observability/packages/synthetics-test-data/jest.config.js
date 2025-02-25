@@ -8,5 +8,5 @@
 module.exports = {
   preset: '@kbn/test',
   rootDir: '../../../../..',
-  roots: ['<rootDir>/x-pack/solutions/observability/packages/synthetics_test_data'],
+  roots: ['<rootDir>/x-pack/solutions/observability/packages/synthetics-test-data'],
 };
