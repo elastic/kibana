@@ -86,7 +86,7 @@ const RuleStatusFailedCallOutComponent: React.FC<RuleStatusFailedCallOutProps> =
           <NewChat
             category="detection-rules"
             color={color}
-            conversationId={chatTitle}
+            conversationTitle={chatTitle}
             description={i18n.ASK_ASSISTANT_DESCRIPTION}
             getPromptContext={getPromptContext}
             suggestedUserPrompt={i18n.ASK_ASSISTANT_USER_PROMPT}

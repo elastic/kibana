@@ -45,7 +45,7 @@ const ChatActionComponent: FC<Props> = ({ indexName, markdownComment, chatTitle 
     <NewChat
       asLink={true}
       category="data-quality-dashboard"
-      conversationId={chatTitle ?? DATA_QUALITY_DASHBOARD_CONVERSATION_ID}
+      conversationTitle={chatTitle ?? DATA_QUALITY_DASHBOARD_CONVERSATION_ID}
       description={DATA_QUALITY_PROMPT_CONTEXT_PILL(indexName)}
       getPromptContext={getPromptContext}
       suggestedUserPrompt={DATA_QUALITY_SUGGESTED_USER_PROMPT}

@@ -18,7 +18,7 @@ jest.mock('../../../../assistant/use_assistant_availability', () => ({
 }));
 
 const useAssistantAvailabilityMock = useAssistantAvailability as jest.Mock;
-const getFields = jest.fn().mockReturnValue({ queryBar: { value: { query: 'something' } } });
+const getFieldsMock = jest.fn().mockReturnValue({ queryBar: { value: { query: 'something' } } });
 describe('AiAssistant', () => {
   beforeEach(() => {
     useAssistantAvailabilityMock.mockReturnValue({ hasAssistantPrivilege: true });
@@ -26,14 +26,17 @@ describe('AiAssistant', () => {
   it('does not render chat component when does not have hasAssistantPrivilege', () => {
     useAssistantAvailabilityMock.mockReturnValue({ hasAssistantPrivilege: false });
 
-    const { container } = render(<AiAssistant getFields={getFields} setFieldValue={jest.fn()} />, {
-      wrapper: TestProviders,
-    });
+    const { container } = render(
+      <AiAssistant getFields={getFieldsMock} setFieldValue={jest.fn()} />,
+      {
+        wrapper: TestProviders,
+      }
+    );
 
     expect(container).toBeEmptyDOMElement();
   });
   it('renders chat component when has hasAssistantPrivilege', () => {
-    render(<AiAssistant getFields={getFields} setFieldValue={jest.fn()} />, {
+    render(<AiAssistant getFields={getFieldsMock} setFieldValue={jest.fn()} />, {
       wrapper: TestProviders,
     });
 

@@ -106,7 +106,7 @@ export const RulesTableToolbar = React.memo(() => {
         {hasAssistantPrivilege && selectedRules.length > 0 && (
           <NewChat
             category="detection-rules"
-            conversationId={chatTitle}
+            conversationTitle={chatTitle}
             description={i18nAssistant.RULE_MANAGEMENT_CONTEXT_DESCRIPTION}
             getPromptContext={getPromptContext}
             suggestedUserPrompt={i18nAssistant.EXPLAIN_THEN_SUMMARIZE_RULE_DETAILS}

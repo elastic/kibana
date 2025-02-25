@@ -113,7 +113,7 @@ Proposed solution should be valid and must not contain new line symbols (\\n)`;
             <NewChat
               asLink={true}
               category="detection-rules"
-              conversationId={chatTitle}
+              conversationTitle={chatTitle}
               description={i18n.ASK_ASSISTANT_DESCRIPTION}
               getPromptContext={getPromptContext}
               suggestedUserPrompt={i18n.ASK_ASSISTANT_USER_PROMPT(languageName)}
