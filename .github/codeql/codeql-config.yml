@@ -47,7 +47,7 @@ paths-ignore:
   - src/platform/packages/shared/kbn-es
   - src/platform/packages/shared/kbn-es-archiver
   - packages/kbn-eslint-*
-  - packages/kbn-expect
+  - src/platform/packages/shared/kbn-expect
   - packages/kbn-failed-test-reporter-cli
   - packages/kbn-find-used-node-modules
   - packages/kbn-ftr-*

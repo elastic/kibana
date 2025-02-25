@@ -457,7 +457,7 @@ x-pack/test/plugin_api_integration/plugins/event_log @elastic/response-ops
 x-pack/platform/plugins/shared/event_log @elastic/response-ops
 x-pack/platform/packages/shared/kbn-event-stacktrace @elastic/obs-ux-infra_services-team @elastic/obs-ux-logs-team
 x-pack/solutions/security/packages/expandable-flyout @elastic/security-threat-hunting-investigations
-packages/kbn-expect @elastic/kibana-operations @elastic/appex-qa
+src/platform/packages/shared/kbn-expect @elastic/kibana-operations @elastic/appex-qa
 x-pack/examples/exploratory_view_example @elastic/obs-ux-infra_services-team
 x-pack/solutions/observability/plugins/exploratory_view @elastic/obs-ux-management-team
 src/platform/plugins/shared/expression_error @elastic/kibana-presentation
