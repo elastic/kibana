@@ -146,9 +146,8 @@ describe('AI Assistant Prompts', { tags: ['@ess', '@serverless'] }, () => {
       resetConversation();
       createAndTitleConversation('Lovely title');
       resetConversation();
-      selectConversation(mockConvo1.title);
+      // current conversation is 'Lovely title'
       createSystemPrompt(testPrompt.name, testPrompt.content, ['Lucky title', 'Lovely title']);
-      selectConversation('Lovely title');
       assertSystemPromptSelected(testPrompt.name);
       typeAndSendMessage('hello');
 

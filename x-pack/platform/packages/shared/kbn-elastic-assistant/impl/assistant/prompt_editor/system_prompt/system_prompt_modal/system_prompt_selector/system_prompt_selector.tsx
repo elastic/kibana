@@ -42,21 +42,18 @@ const formatSystemPromptsAsOptions = (
   systemPrompts: SystemPromptSettings[]
 ): SystemPromptSelectorOption[] =>
   systemPrompts.reduce(
-    (acc: SystemPromptSelectorOption[], sp) =>
-      sp.id !== ''
-        ? [
-            ...acc,
-            {
-              value: {
-                isDefault: sp.isDefault ?? false,
-                isNewConversationDefault: sp.isNewConversationDefault ?? false,
-              },
-              label: sp.name,
-              id: sp.id,
-              'data-test-subj': `${TEST_IDS.SYSTEM_PROMPT_SELECTOR}-${sp.id}`,
-            },
-          ]
-        : acc,
+    (acc: SystemPromptSelectorOption[], sp) => [
+      ...acc,
+      {
+        value: {
+          isDefault: sp.isDefault ?? false,
+          isNewConversationDefault: sp.isNewConversationDefault ?? false,
+        },
+        label: sp.name,
+        id: sp.id,
+        'data-test-subj': `${TEST_IDS.SYSTEM_PROMPT_SELECTOR}-${sp.id}`,
+      },
+    ],
     []
   );
 /**
@@ -81,7 +78,7 @@ export const SystemPromptSelector: React.FC<Props> = React.memo(
       }
     }, [options.length, systemPrompts]);
     const selectedOptions = useMemo<SystemPromptSelectorOption[]>(() => {
-      return selectedSystemPrompt && selectedSystemPrompt.id !== ''
+      return selectedSystemPrompt
         ? [
             {
               value: {

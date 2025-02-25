@@ -50,6 +50,7 @@ interface OwnProps {
   }) => void;
   conversations: Record<string, Conversation>;
   conversationsLoaded: boolean;
+  refetchCurrentConversation: ({ isStreamRefetch }: { isStreamRefetch?: boolean }) => void;
   refetchCurrentUserConversations: DataStreamApis['refetchCurrentUserConversations'];
   onConversationCreate: () => Promise<void>;
   isAssistantEnabled: boolean;
@@ -69,23 +70,24 @@ export const AI_ASSISTANT_SETTINGS_MENU_CONTAINER_ID = 'aiAssistantSettingsMenuC
  * toggling the display of anonymized values, and accessing the assistant settings.
  */
 export const AssistantHeader: React.FC<Props> = ({
-  selectedConversation,
+  chatHistoryVisible,
+  conversations,
+  conversationsLoaded,
   defaultConnector,
+  isAssistantEnabled,
   isDisabled,
   isLoading,
   isSettingsModalVisible,
-  setIsSettingsModalVisible,
   onChatCleared,
-  chatHistoryVisible,
-  setChatHistoryVisible,
   onCloseFlyout,
-  onConversationSelected,
-  conversations,
-  conversationsLoaded,
-  refetchCurrentUserConversations,
   onConversationCreate,
-  isAssistantEnabled,
+  onConversationSelected,
+  refetchCurrentConversation,
+  refetchCurrentUserConversations,
   refetchPrompts,
+  selectedConversation,
+  setChatHistoryVisible,
+  setIsSettingsModalVisible,
   setPaginationObserver,
 }) => {
   const { euiTheme } = useEuiTheme();
@@ -125,6 +127,7 @@ export const AssistantHeader: React.FC<Props> = ({
               onConversationSelected={onConversationSelected}
               conversations={conversations}
               conversationsLoaded={conversationsLoaded}
+              refetchCurrentConversation={refetchCurrentConversation}
               refetchCurrentUserConversations={refetchCurrentUserConversations}
               refetchPrompts={refetchPrompts}
               setPaginationObserver={setPaginationObserver}

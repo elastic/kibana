@@ -107,7 +107,7 @@ export const useSystemPromptUpdater = ({
     filter,
   });
   useEffect(() => {
-    if (!Object.keys(data).length) return;
+    if (!Object.keys(data).length && !systemPrompts.length) return;
     const updateSystemPromptSettings = (prev: SystemPromptSettings[]) => {
       const updatedSettings = systemPrompts.map((p) => {
         const conversations = Object.values(data).filter(
@@ -457,6 +457,7 @@ export const useSystemPromptUpdater = ({
   }> => {
     const hasBulkPrompts =
       promptsBulkActions.create || promptsBulkActions.update || promptsBulkActions.delete;
+
     const bulkPromptsResult = hasBulkPrompts
       ? await bulkUpdatePrompts(http, promptsBulkActions, toasts)
       : undefined;
@@ -469,10 +470,9 @@ export const useSystemPromptUpdater = ({
     ) {
       const updatesWithNewIds = conversationsSettingsBulkActions.update
         ? Object.entries(conversationsSettingsBulkActions.update).reduce((acc, [key, value]) => {
-            if (value.apiConfig?.defaultSystemPromptId) {
-              const createdPrompt = bulkPromptsResult?.attributes?.results?.created.find(
-                (c) => c.name === value.apiConfig?.defaultSystemPromptId
-              );
+            if (value.apiConfig?.defaultSystemPromptId === '') {
+              // only creating one at a time
+              const createdPrompt = bulkPromptsResult?.attributes?.results?.created[0];
               if (createdPrompt) {
                 return {
                   ...acc,

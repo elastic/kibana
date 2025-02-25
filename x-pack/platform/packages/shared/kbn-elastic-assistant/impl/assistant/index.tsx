@@ -479,23 +479,24 @@ const AssistantComponent: React.FC<Props> = ({
               >
                 <EuiFlyoutHeader hasBorder>
                   <AssistantHeader
-                    isLoading={isInitialLoad}
-                    selectedConversation={currentConversation}
-                    defaultConnector={defaultConnector}
-                    isDisabled={isDisabled || isLoadingChatSend}
-                    isSettingsModalVisible={isSettingsModalVisible}
-                    setIsSettingsModalVisible={setIsSettingsModalVisible}
-                    onCloseFlyout={onCloseFlyout}
-                    onChatCleared={handleOnChatCleared}
                     chatHistoryVisible={chatHistoryVisible}
-                    setChatHistoryVisible={setChatHistoryVisible}
-                    onConversationSelected={handleOnConversationSelected}
                     conversations={conversations}
                     conversationsLoaded={isFetchedCurrentUserConversations}
-                    refetchCurrentUserConversations={refetchCurrentUserConversations}
-                    onConversationCreate={handleCreateConversation}
+                    defaultConnector={defaultConnector}
                     isAssistantEnabled={isAssistantEnabled}
+                    isDisabled={isDisabled || isLoadingChatSend}
+                    isLoading={isInitialLoad}
+                    isSettingsModalVisible={isSettingsModalVisible}
+                    onChatCleared={handleOnChatCleared}
+                    onCloseFlyout={onCloseFlyout}
+                    onConversationCreate={handleCreateConversation}
+                    onConversationSelected={handleOnConversationSelected}
+                    refetchCurrentConversation={refetchCurrentConversation}
+                    refetchCurrentUserConversations={refetchCurrentUserConversations}
                     refetchPrompts={refetchPrompts}
+                    selectedConversation={currentConversation}
+                    setChatHistoryVisible={setChatHistoryVisible}
+                    setIsSettingsModalVisible={setIsSettingsModalVisible}
                     setPaginationObserver={setPaginationObserver}
                   />
 

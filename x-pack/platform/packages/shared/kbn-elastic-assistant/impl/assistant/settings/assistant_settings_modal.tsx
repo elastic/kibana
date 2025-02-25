@@ -23,6 +23,7 @@ interface Props {
   isDisabled?: boolean;
   conversations: Record<string, Conversation>;
   conversationsLoaded: boolean;
+  refetchCurrentConversation: ({ isStreamRefetch }: { isStreamRefetch?: boolean }) => void;
   refetchCurrentUserConversations: DataStreamApis['refetchCurrentUserConversations'];
   refetchPrompts?: (
     options?: RefetchOptions & RefetchQueryFilters<unknown>
@@ -41,6 +42,7 @@ export const AssistantSettingsModal: React.FC<Props> = React.memo(
     onConversationSelected,
     conversations,
     conversationsLoaded,
+    refetchCurrentConversation,
     refetchCurrentUserConversations,
     refetchPrompts,
     setPaginationObserver,
@@ -59,6 +61,7 @@ export const AssistantSettingsModal: React.FC<Props> = React.memo(
     const handleSave = useCallback(
       async (success: boolean) => {
         cleanupAndCloseModal();
+        await refetchCurrentConversation();
         await refetchCurrentUserConversations();
         if (refetchPrompts) {
           await refetchPrompts();
@@ -70,7 +73,13 @@ export const AssistantSettingsModal: React.FC<Props> = React.memo(
           });
         }
       },
-      [cleanupAndCloseModal, refetchCurrentUserConversations, refetchPrompts, toasts]
+      [
+        cleanupAndCloseModal,
+        refetchCurrentConversation,
+        refetchCurrentUserConversations,
+        refetchPrompts,
+        toasts,
+      ]
     );
 
     return (

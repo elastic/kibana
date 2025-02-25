@@ -8,12 +8,14 @@
 import { renderHook, act } from '@testing-library/react';
 import { SystemPromptSettings, useSystemPromptUpdater } from './use_system_prompt_updater';
 import { FindPromptsResponse, PromptTypeEnum } from '@kbn/elastic-assistant-common';
-import { ConversationsBulkActions } from '../../../..';
+import { ConversationsBulkActions, useFetchCurrentUserConversations } from '../../../..';
 import { HttpSetupMock } from '@kbn/core-http-browser-mocks';
 import { coreMock } from '@kbn/core/public/mocks';
 import { TestProviders } from '../../../mock/test_providers/test_providers';
 import { WELCOME_CONVERSATION } from '../../use_conversation/sample_conversations';
+import { FetchCurrentUserConversations } from '../../api';
 
+jest.mock('../../../..');
 const mockSetConversationsSettingsBulkActions = jest.fn();
 const defaultPrompt = {
   id: 'New Prompt',
@@ -23,13 +25,14 @@ const defaultPrompt = {
   consumer: 'app-id',
   conversations: [],
 } as SystemPromptSettings;
+const prompts = [
+  { id: '1', promptType: PromptTypeEnum.system, name: 'Prompt 1', content: 'Content 1' },
+  { id: '2', promptType: PromptTypeEnum.system, name: 'Prompt 2', content: 'Content 2' },
+];
 const http: HttpSetupMock = coreMock.createSetup().http;
 const defaultParams = {
   allPrompts: {
-    data: [
-      { id: '1', promptType: PromptTypeEnum.system, name: 'Prompt 1', content: 'Content 1' },
-      { id: '2', promptType: PromptTypeEnum.system, name: 'Prompt 2', content: 'Content 2' },
-    ],
+    data: prompts,
   } as FindPromptsResponse,
   connectors: [],
   conversationsSettingsBulkActions: {} as ConversationsBulkActions,
@@ -39,18 +42,91 @@ const defaultParams = {
   setConversationsSettingsBulkActions: mockSetConversationsSettingsBulkActions,
 };
 
+const mockData = {
+  welcome_id: {
+    id: 'welcome_id',
+    title: 'Welcome',
+    category: 'assistant',
+    messages: [],
+    apiConfig: { connectorId: '123', defaultSystemPromptId: '1' },
+    replacements: {},
+  },
+  electric_sheep_id: {
+    id: 'electric_sheep_id',
+    category: 'assistant',
+    title: 'electric sheep',
+    messages: [],
+    apiConfig: { connectorId: '123', defaultSystemPromptId: '2' },
+    replacements: {},
+  },
+};
+
 describe('useSystemPromptUpdater', () => {
-  afterEach(() => {
+  beforeEach(() => {
     jest.clearAllMocks();
+    jest.mocked(useFetchCurrentUserConversations).mockReturnValue({
+      data: {},
+      isLoading: true,
+      refetch: jest.fn().mockResolvedValue({
+        isLoading: false,
+        data: {},
+      }),
+      isFetched: false,
+      isFetching: false,
+      setPaginationObserver: jest.fn(),
+    } as unknown as FetchCurrentUserConversations);
   });
 
-  it('should initialize with system prompts from allPrompts', () => {
+  it('should initialize with system prompts with empty conversation arrays', () => {
     const { result } = renderHook(() => useSystemPromptUpdater(defaultParams), {
       wrapper: TestProviders,
     });
 
-    expect(result.current.systemPromptSettings).toEqual([]);
+    expect(result.current.systemPromptSettings).toEqual(
+      prompts.map((p) => ({ ...p, conversations: [] }))
+    );
     expect(result.current.selectedSystemPrompt).toBeUndefined();
+  });
+
+  it('should update conversation arrays once fetched', async () => {
+    const { result, rerender } = renderHook(() => useSystemPromptUpdater(defaultParams), {
+      wrapper: TestProviders,
+    });
+
+    expect(result.current.systemPromptSettings).toEqual(
+      prompts.map((p) => ({ ...p, conversations: [] }))
+    );
+    jest.mocked(useFetchCurrentUserConversations).mockReturnValue({
+      data: mockData,
+      isLoading: false,
+      refetch: jest.fn().mockResolvedValue({
+        isLoading: false,
+        data: {
+          pages: [
+            {
+              page: 1,
+              perPage: 28,
+              total: 150,
+              data: Object.values(mockData),
+            },
+          ],
+        },
+      }),
+      isFetched: true,
+      isFetching: false,
+      setPaginationObserver: jest.fn(),
+    } as unknown as FetchCurrentUserConversations);
+
+    await act(async () => {
+      rerender();
+    });
+
+    expect(result.current.systemPromptSettings).toEqual(
+      prompts.map((p) => ({
+        ...p,
+        conversations: p.id === '1' ? [mockData.welcome_id] : [mockData.electric_sheep_id],
+      }))
+    );
   });
 
   it('should select a system prompt by ID', () => {
@@ -133,7 +209,9 @@ describe('useSystemPromptUpdater', () => {
       result.current.resetSystemPromptSettings();
     });
 
-    expect(result.current.systemPromptSettings).toEqual([]);
+    expect(result.current.systemPromptSettings).toEqual(
+      prompts.map((p) => ({ ...p, conversations: [] }))
+    );
   });
 
   it('should call setConversationsSettingsBulkActions on conversation selection change', () => {

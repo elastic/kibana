@@ -38,6 +38,7 @@ const testProps = {
   onChatCleared: jest.fn(),
   showAnonymizedValues: false,
   conversations: mockConversations,
+  refetchCurrentConversation: jest.fn(),
   refetchCurrentUserConversations: jest.fn(),
   isAssistantEnabled: true,
   anonymizationFields: { total: 0, page: 1, perPage: 1000, data: [] },
