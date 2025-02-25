@@ -6,7 +6,7 @@
  */
 
 import { ASSETS_SAVED_OBJECT_TYPE } from '../../../../../constants';
-import type { AssetsMap, KibanaAssetType, PackageAssetReference } from '../../../../../types';
+import type { AssetsMap, PackageAssetReference } from '../../../../../types';
 
 import { removeArchiveEntries, saveArchiveEntriesFromAssetsMap } from '../../../archive/storage';
 
@@ -14,10 +14,9 @@ import { withPackageSpan } from '../../utils';
 
 import type { InstallContext } from '../_state_machine_package_install';
 import { INSTALL_STATES } from '../../../../../../common/types';
-import { getPathParts } from '../../../archive';
 
 export async function stepSaveArchiveEntries(context: InstallContext) {
-  const { packageInstallContext, savedObjectsClient, installSource, useStreaming } = context;
+  const { packageInstallContext, savedObjectsClient, installSource } = context;
 
   const { packageInfo, archiveIterator } = packageInstallContext;
 
