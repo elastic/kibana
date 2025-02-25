@@ -163,12 +163,12 @@ export const GetStarted = () => {
               >
                 {isEnabling ? (
                   <FormattedMessage
-                    id="xpack.securitySolution.assetInventory.emptyState.resetFiltersButton.loading"
+                    id="xpack.securitySolution.assetInventory.emptyState.enableAssetInventory.loading"
                     defaultMessage="Enabling Asset Inventory"
                   />
                 ) : (
                   <FormattedMessage
-                    id="xpack.securitySolution.assetInventory.emptyState.resetFiltersButton"
+                    id="xpack.securitySolution.assetInventory.emptyState.enableAssetInventory"
                     defaultMessage="Enable Asset Inventory"
                   />
                 )}
