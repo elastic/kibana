@@ -159,14 +159,19 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       it('Users are able to Enable/Disable Rule from Switch on Rule Flyout', async () => {
         // Ensure that the first rule is enabled
         await rule.rulePage.togglEnableRulesRowSwitchButton(0, 'enable');
+        await rule.rulePage.closeToasts();
+
         await rule.rulePage.clickRulesNames(0);
         await rule.rulePage.clickFlyoutEnableSwitchButton();
         await pageObjects.header.waitUntilLoadingHasFinished();
+
         expect((await rule.rulePage.getEnableSwitchButtonState()) === 'false').to.be(true);
         await rule.rulePage.clickCloseFlyoutButton();
       });
       it('Alerts section of Rules Flyout shows Disabled text when Rules are disabled', async () => {
         await rule.rulePage.togglEnableRulesRowSwitchButton(0, 'disable');
+        await rule.rulePage.closeToasts();
+
         await rule.rulePage.clickRulesNames(0);
         await pageObjects.header.waitUntilLoadingHasFinished();
         expect(
@@ -174,10 +179,12 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
             'csp:findings-flyout-create-detection-rule-link'
           )) === false
         ).to.be(true);
+
         await rule.rulePage.clickCloseFlyoutButton();
       });
       it('Users are able to Enable/Disable Rule from Take Action on Rule Flyout', async () => {
         await rule.rulePage.togglEnableRulesRowSwitchButton(0, 'disable');
+        await rule.rulePage.closeToasts();
 
         await rule.rulePage.clickRulesNames(0);
         await retryService.try(async () => {
@@ -186,6 +193,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         });
         await pageObjects.header.waitUntilLoadingHasFinished();
         expect((await rule.rulePage.getEnableSwitchButtonState()) === 'true').to.be(true);
+
         await rule.rulePage.clickCloseFlyoutButton();
       });
       it('Alerts section of Rules Flyout shows Detection Rule Counter component when Rules are enabled', async () => {
