@@ -14,7 +14,7 @@ import {
   EuiBadge,
   useEuiTheme,
 } from '@elastic/eui';
-import React from 'react';
+import React, { useState } from 'react';
 
 import type { EntityEcs } from '@kbn/securitysolution-ecs/src/entity';
 import { css } from '@emotion/react';
@@ -59,33 +59,45 @@ export const UniversalEntityFlyoutHeader = ({ entity }: UniversalEntityFlyoutHea
 
 const HeaderTags = ({ entity }) => {
   const { euiTheme } = useEuiTheme();
+  const [badgesToShow, setBadgesToShow] = useState<number | 'all'>(3);
+
+  const tagBadges = entity.tags?.map((tag) => <EuiBadge color="hollow">{tag}</EuiBadge>);
+
+  const labelBadges =
+    entity.labels &&
+    Object.entries(entity.labels)?.map(([key, value]) => (
+      <EuiBadge color="hollow">
+        <span
+          css={css`
+            color: ${euiTheme.colors.disabledText};
+            border-right: ${euiTheme.border.thick};
+            padding-right: 4px;
+          `}
+        >
+          {key}
+        </span>
+        <span
+          css={css`
+            padding-left: 4px;
+          `}
+        >
+          {value}
+        </span>
+      </EuiBadge>
+    ));
+
+  const allBadges = [...(tagBadges || []), ...(labelBadges || [])];
+  const remainingCount = allBadges.length - badgesToShow;
 
   return (
     <EuiBadgeGroup gutterSize="s">
-      {entity.tags?.map((tag) => (
-        <EuiBadge color="hollow">{tag}</EuiBadge>
-      ))}
-      {entity.labels &&
-        Object.entries(entity.labels)?.map(([key, value]) => (
-          <EuiBadge color="hollow">
-            <span
-              css={css`
-                color: ${euiTheme.colors.disabledText};
-                border-right: ${euiTheme.border.thick};
-                padding-right: 4px;
-              `}
-            >
-              {key}
-            </span>
-            <span
-              css={css`
-                padding-left: 4px;
-              `}
-            >
-              {value}
-            </span>
-          </EuiBadge>
-        ))}
+      {badgesToShow === 'all' ? allBadges : allBadges.slice(0, badgesToShow)}
+      {remainingCount > 0 && badgesToShow !== 'all' && (
+        <EuiBadge
+          color="hollow"
+          onClick={() => setBadgesToShow('all')}
+        >{`+${remainingCount}`}</EuiBadge>
+      )}
     </EuiBadgeGroup>
   );
 };

@@ -215,6 +215,7 @@ const getEntity = (row: DataTableRecord): EntityEcs => {
       sub_category: 'messaging',
       sub_type: 'sns-topic',
       type: 'notification-service',
+      tags: ['infrastructure', 'linux'],
       tags: ['infrastructure', 'linux', 'admin', 'active'],
       labels: { Group: 'cloud-sec-dev', Environment: 'Production' },
     },
