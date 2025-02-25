@@ -27,12 +27,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   describe('Classic streams', () => {
     before(async () => {
       apiClient = await createStreamsRepositoryAdminClient(roleScopedSupertest);
-      // await enableStreams(apiClient);
     });
-
-    // after(async () => {
-    //   await disableStreams(apiClient);
-    // });
 
     it('non-wired data streams', async () => {
       const doc = {
