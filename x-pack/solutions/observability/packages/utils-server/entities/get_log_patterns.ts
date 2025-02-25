@@ -6,6 +6,7 @@
  */
 
 import {
+  AggregationsAggregationContainer,
   AggregationsCategorizeTextAggregation,
   AggregationsDateHistogramAggregation,
   AggregationsMaxAggregation,
@@ -19,7 +20,7 @@ import { pValueToLabel } from '@kbn/observability-utils-common/ml/p_value_to_lab
 import { calculateAuto } from '@kbn/calculate-auto';
 import { omit, orderBy, uniqBy } from 'lodash';
 import moment from 'moment';
-import { ObservabilityElasticsearchClient } from '../es/client/create_observability_es_client';
+import { TracedElasticsearchClient } from '@kbn/traced-es-client';
 import { kqlQuery } from '../es/queries/kql_query';
 import { rangeQuery } from '../es/queries/range_query';
 
@@ -32,7 +33,7 @@ interface FieldPatternResultBase {
   firstOccurrence: string;
   lastOccurrence: string;
   highlight: Record<string, string[]>;
-  metadata: Record<string, unknown[]>;
+  metadata: Record<string, unknown[] | undefined>;
 }
 
 interface FieldPatternResultChanges {
@@ -54,7 +55,7 @@ export type FieldPatternResultWithChanges = FieldPatternResult<true>;
 interface CategorizeTextOptions {
   query: QueryDslQueryContainer;
   metadata: string[];
-  esClient: ObservabilityElasticsearchClient;
+  esClient: TracedElasticsearchClient;
   samplingProbability: number;
   fields: string[];
   index: string | string[];
@@ -63,8 +64,8 @@ interface CategorizeTextOptions {
   start: number;
   end: number;
 }
-// eslint-disable-next-line @typescript-eslint/consistent-type-definitions
-type CategorizeTextSubAggregations = {
+
+type CategorizeTextSubAggregations = Record<string, AggregationsAggregationContainer> & {
   sample: { top_hits: AggregationsTopHitsAggregation };
   minTimestamp: { min: AggregationsMinAggregation };
   maxTimestamp: { max: AggregationsMaxAggregation };
@@ -213,28 +214,35 @@ export async function runCategorizeTextAggregation({
         count: bucket.doc_count,
         pattern: bucket.key,
         regex: bucket.regex,
-        sample: bucket.sample.hits.hits[0].fields![fieldName][0] as string,
+        sample: bucket.sample.hits.hits[0].fields![fieldName]![0] as string,
         highlight: bucket.sample.hits.hits[0].highlight ?? {},
         metadata: bucket.sample.hits.hits[0].fields!,
         firstOccurrence: new Date(bucket.minTimestamp.value!).toISOString(),
         lastOccurrence: new Date(bucket.maxTimestamp.value!).toISOString(),
         ...('timeseries' in bucket
           ? {
+              // @ts-expect-error timeseries result types can't be inferred
               timeseries: bucket.timeseries.buckets.map((dateBucket) => ({
                 x: dateBucket.key,
                 y: dateBucket.doc_count,
               })),
+              // @ts-expect-error changes result types can't be inferred
               change: Object.entries(bucket.changes.type).map(
                 ([changePointType, change]): FieldPatternResultChanges['change'] => {
                   return {
                     type: changePointType as ChangePointType,
                     significance:
+                      // @ts-expect-error changes result types can't be inferred
                       change.p_value !== undefined ? pValueToLabel(change.p_value) : null,
+                    // @ts-expect-error changes result types can't be inferred
                     change_point: change.change_point,
+                    // @ts-expect-error changes result types can't be inferred
                     p_value: change.p_value,
                     timestamp:
+                      // @ts-expect-error changes result types can't be inferred
                       change.change_point !== undefined
-                        ? bucket.timeseries.buckets[change.change_point].key_as_string
+                        ? // @ts-expect-error changes and timeseries result types can't be inferred
+                          bucket.timeseries.buckets[change.change_point].key_as_string
                         : undefined,
                   };
                 }
@@ -247,7 +255,7 @@ export async function runCategorizeTextAggregation({
 }
 
 interface LogPatternOptions {
-  esClient: ObservabilityElasticsearchClient;
+  esClient: TracedElasticsearchClient;
   start: number;
   end: number;
   index: string | string[];
