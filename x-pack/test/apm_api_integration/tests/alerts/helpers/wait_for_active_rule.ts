@@ -7,11 +7,11 @@
 
 import { ToolingLog } from '@kbn/tooling-log';
 import type SuperTest from 'supertest';
-// import { retryForSuccess } from '@kbn/ftr-common-functional-services';
+import { retryForSuccess } from '@kbn/ftr-common-functional-services';
 import { Console, Effect } from 'effect';
 
-// // const debugLog = ToolingLog.bind(ToolingLog, { level: 'debug', writeTo: process.stdout });
-// const retryCount = 10;
+const debugLog = ToolingLog.bind(ToolingLog, { level: 'debug', writeTo: process.stdout });
+const retryCount = 10;
 
 export async function waitForActiveRule({
   ruleId,
@@ -36,16 +36,19 @@ export async function waitForActiveRule({
   //   },
   //   retryCount,
   // });
+  //
 
-  const program = (url: string) =>
-    getRuleId(url).pipe(
+
+  const result = await Effect.runPromise(retryFetch(`/api/alerting/rule/${ruleId}`));
+
+  return result;
+  function retryFetch(url: string) {
+    return getRuleId(url).pipe(
       Effect.retry({ times: 100 }),
       Effect.timeout('2 minutes'),
       Effect.catchAll(Console.error)
     );
-
-  Effect.runFork(program(`/api/alerting/rule/${ruleId}`));
-
+  }
   function getRuleId(url: string) {
     return Effect.tryPromise(() =>
       supertest.get(url).then((response) => {
