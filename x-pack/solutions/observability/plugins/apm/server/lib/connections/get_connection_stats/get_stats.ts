@@ -202,52 +202,27 @@ async function getConnectionStats({
               },
             },
           },
-          total_latency_sum: {
-            sum: {
-              field: SPAN_DESTINATION_SERVICE_RESPONSE_TIME_SUM,
-            },
-          },
-          total_latency_count: {
-            sum: {
-              field: SPAN_DESTINATION_SERVICE_RESPONSE_TIME_COUNT,
-            },
-          },
-          timeseries: {
-            date_histogram: {
-              field: '@timestamp',
-              fixed_interval: getBucketSize({
-                start: startWithOffset,
-                end: endWithOffset,
-                numBuckets,
-                minBucketSize: 60,
-              }).intervalString,
-              extended_bounds: {
-                min: startWithOffset,
-                max: endWithOffset,
-              },
-            },
-            ...statsAggs,
-            ...(withTimeseries
-              ? {
-                  timeseries: {
-                    date_histogram: {
-                      field: '@timestamp',
-                      fixed_interval: getBucketSize({
-                        start: startWithOffset,
-                        end: endWithOffset,
-                        numBuckets,
-                        minBucketSize: 60,
-                      }).intervalString,
-                      extended_bounds: {
-                        min: startWithOffset,
-                        max: endWithOffset,
-                      },
+          ...statsAggs,
+          ...(withTimeseries
+            ? {
+                timeseries: {
+                  date_histogram: {
+                    field: '@timestamp',
+                    fixed_interval: getBucketSize({
+                      start: startWithOffset,
+                      end: endWithOffset,
+                      numBuckets,
+                      minBucketSize: 60,
+                    }).intervalString,
+                    extended_bounds: {
+                      min: startWithOffset,
+                      max: endWithOffset,
                     },
-                    aggs: statsAggs,
                   },
-                }
-              : undefined),
-          },
+                  aggs: statsAggs,
+                },
+              }
+            : undefined),
         },
       },
     },
