@@ -173,12 +173,14 @@ describe('vega_map_view/view', () => {
 
       const { longitude, latitude, scrollWheelZoom } = vegaMapView._parser.mapConfig;
       expect(maplibregl.Map).toHaveBeenCalledWith({
+        attributionControl: {
+          customAttribution: 'tilemap-attribution',
+        },
         style: {
           version: 8,
           sources: {},
           layers: [],
         },
-        customAttribution: 'tilemap-attribution',
         container: vegaMapView._container,
         minZoom: 0,
         maxZoom: 20,
@@ -197,12 +199,14 @@ describe('vega_map_view/view', () => {
 
       const { longitude, latitude, scrollWheelZoom } = vegaMapView._parser.mapConfig;
       expect(maplibregl.Map).toHaveBeenCalledWith({
+        attributionControl: {
+          customAttribution: ['<a rel="noreferrer noopener" href="tms_attributions"></a>'],
+        },
         style: {
           version: 8,
           sources: {},
           layers: [],
         },
-        customAttribution: ['<a rel="noreferrer noopener" href="tms_attributions"></a>'],
         container: vegaMapView._container,
         minZoom: 0,
         maxZoom: 20,
