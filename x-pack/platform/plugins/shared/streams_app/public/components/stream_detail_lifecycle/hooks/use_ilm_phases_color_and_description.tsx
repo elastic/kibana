@@ -16,8 +16,6 @@ import {
 } from '@kbn/streams-schema';
 import { rolloverCondition } from '../helpers/rollover_condition';
 
-export const ILM_PHASES = {};
-
 export const useIlmPhasesColorAndDescription = () => {
   const { euiTheme } = useEuiTheme();
 
