@@ -77,15 +77,15 @@ export const SearchIndexPipelines: React.FC = () => {
   }, [closeDeleteModal, buttonRef]);
 
   const onDeletePipeline = () => {
-    revertPipeline({ indexName })   
+    revertPipeline({ indexName });
     setTimeout(() => {
       const button = Array.from(document.querySelectorAll('button')).find(
-        btn => btn.textContent?.trim() === 'Pipelines'
+        (btn) => btn.textContent?.trim() === 'Pipelines'
       );
       if (button) {
         button.focus();
       }
-    }, 200); 
+    }, 200);
   };
 
   useEffect(() => {
