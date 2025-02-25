@@ -152,7 +152,41 @@ describe('trackPerformanceMeasureEntries', () => {
     expect(analyticsClientMock.reportEvent).toHaveBeenCalledWith('performance_metric', {
       duration: 1000,
       eventName: 'kibana:plugin_render_time',
-      meta: { target: '/', query_range_secs: 86400, query_offset_secs: 0 },
+      meta: {
+        target: '/',
+        query_range_secs: 86400,
+        query_offset_secs: 0,
+      },
+    });
+  });
+
+  test('reports an analytics event with description metadata', () => {
+    setupMockPerformanceObserver([
+      {
+        name: '/',
+        entryType: 'measure',
+        startTime: 100,
+        duration: 1000,
+        detail: {
+          eventName: 'kibana:plugin_render_time',
+          type: 'kibana:performance',
+          meta: {
+            description:
+              '[TTFMP] onPageReady is called when the most important content is rendered',
+          },
+        },
+      },
+    ]);
+    trackPerformanceMeasureEntries(analyticsClientMock, true);
+
+    expect(analyticsClientMock.reportEvent).toHaveBeenCalledTimes(1);
+    expect(analyticsClientMock.reportEvent).toHaveBeenCalledWith('performance_metric', {
+      duration: 1000,
+      eventName: 'kibana:plugin_render_time',
+      meta: {
+        target: '/',
+        description: '[TTFMP] onPageReady is called when the most important content is rendered',
+      },
     });
   });
 });
