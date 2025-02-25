@@ -369,6 +369,34 @@ export function validateDynamicKafkaTopics(value: Array<EuiComboBoxOptionOption<
         })
       );
     }
+
+    const getAllIndices = (str: string, substring: string): number[] => {
+      const indices = [];
+      let indx = str.indexOf(substring);
+      while (indx !== -1) {
+        indices.push(indx);
+        indx = str.indexOf(substring, indx + 1);
+      }
+      return indices;
+    };
+    // need to make sure that there are matching amounts of opening and closing brackets
+    const openingBracks = getAllIndices(val?.value!, '{[');
+    const closingBracks = getAllIndices(val?.value!, ']}');
+    if (openingBracks.length !== closingBracks.length) {
+      res.push(
+        i18n.translate('xpack.fleet.settings.outputForm.kafkaTopicBracketsError', {
+          defaultMessage: 'Topic should have matching amounts of opening and closing brackets',
+        })
+      );
+    }
+    // check for preceding percent sign
+    if (!openingBracks.every((item) => val?.value![item - 1] === '%')) {
+      res.push(
+        i18n.translate('xpack.fleet.settings.outputForm.kafkaTopicPercentError', {
+          defaultMessage: 'Opening brackets should be preceded by a percent sign',
+        })
+      );
+    }
   });
 
   if (value.length === 0) {
@@ -378,6 +406,7 @@ export function validateDynamicKafkaTopics(value: Array<EuiComboBoxOptionOption<
       })
     );
   }
+
   if (res.length) {
     return res;
   }
