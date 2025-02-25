@@ -9,7 +9,8 @@
 
 import { dataViewWithTimefieldMock } from '../../../../../__mocks__/data_view_with_timefield';
 import { createEsqlDataSource } from '../../../../../../common/data_sources';
-import { DataSourceCategory, RootContext, SolutionType } from '../../../../profiles';
+import type { RootContext } from '../../../../profiles';
+import { DataSourceCategory, SolutionType } from '../../../../profiles';
 import { createContextAwarenessMocks } from '../../../../__mocks__';
 import { createLogsDataSourceProfileProvider } from '../profile';
 import { createAwsS3accessLogsDataSourceProfileProvider } from './aws_s3access_logs';
