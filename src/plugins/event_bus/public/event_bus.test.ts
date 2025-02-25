@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { createSlice, PayloadAction } from '@reduxjs/toolkit';
+import { createSlice, PayloadAction, configureStore } from '@reduxjs/toolkit';
 import { EventBus } from './event_bus';
 import type { Subscription } from 'rxjs';
 
@@ -373,6 +373,44 @@ describe('EventBus', () => {
 
       // Our main subscription from beforeEach should still work
       expect(mockSubscriber).toHaveBeenCalled();
+    });
+  });
+
+  describe('performance', () => {
+    it('should handle 1000 actions in reasonable time', () => {
+      const start = performance.now();
+
+      for (let i = 0; i < 1000; i++) {
+        eventBus.actions.increment();
+      }
+
+      const duration = performance.now() - start;
+
+      // Set a generous upper bound to avoid CI failures.
+      // 500ms is very generous, actual time is ~15ms but
+      // this should let us track severe regressions.
+      expect(duration).toBeLessThan(500);
+    });
+
+    it('should not be significantly slower than plain Redux', () => {
+      const store = configureStore({ reducer: testSlice.reducer });
+
+      const reduxStart = performance.now();
+      for (let i = 0; i < 1000; i++) {
+        store.dispatch(testSlice.actions.increment());
+      }
+      const reduxDuration = performance.now() - reduxStart;
+
+      const eventBusStart = performance.now();
+      for (let i = 0; i < 1000; i++) {
+        eventBus.actions.increment();
+      }
+      const eventBusDuration = performance.now() - eventBusStart;
+
+      // Assert event bus shouldn't be dramatically slower
+      // 1.5x is a generous factor to account for CI variability
+      // Local baseline is that both eventBus and plain Redux are ~15ms.
+      expect(eventBusDuration).toBeLessThan(reduxDuration * 1.5);
     });
   });
 });
