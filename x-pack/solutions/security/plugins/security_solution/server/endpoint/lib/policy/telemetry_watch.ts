@@ -16,6 +16,7 @@ import type {
 import type { PackagePolicy, UpdatePackagePolicy } from '@kbn/fleet-plugin/common';
 import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
 import type { PackagePolicyClient } from '@kbn/fleet-plugin/server';
+import pRetry from 'p-retry';
 import type { TelemetryConfigProvider } from '../../../../common/telemetry_config/telemetry_config_provider';
 import type { PolicyData } from '../../../../common/endpoint/types';
 import { getPolicyDataForUpdate } from '../../../../common/endpoint/service/policy';
@@ -76,11 +77,23 @@ export class TelemetryConfigWatcher {
 
     do {
       try {
-        response = await this.policyService.list(this.makeInternalSOClient(), {
-          page: page++,
-          perPage: 100,
-          kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name: endpoint`,
-        });
+        response = await pRetry(
+          () =>
+            this.policyService.list(this.makeInternalSOClient(), {
+              page: page++,
+              perPage: 100,
+              kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name: endpoint`,
+            }),
+          {
+            onFailedAttempt: (error) =>
+              this.logger.debug(
+                `Failed to read package policies on ${
+                  error.attemptNumber
+                }. attempt, reason: ${stringify(error)}`
+              ),
+            retries: 4,
+          }
+        );
       } catch (e) {
         this.logger.warn(
           `Unable to verify endpoint policies in line with telemetry change: failed to fetch package policies: ${stringify(
