@@ -1534,7 +1534,7 @@
     "@kbn/test-suites-src": "link:test",
     "@kbn/test-suites-xpack": "link:x-pack/test",
     "@kbn/test-suites-xpack-performance": "link:x-pack/performance",
-    "@kbn/tooling-log": "link:packages/kbn-tooling-log",
+    "@kbn/tooling-log": "link:src/platform/packages/shared/kbn-tooling-log",
     "@kbn/ts-projects": "link:packages/kbn-ts-projects",
     "@kbn/ts-type-check-cli": "link:packages/kbn-ts-type-check-cli",
     "@kbn/validate-next-docs-cli": "link:packages/kbn-validate-next-docs-cli",

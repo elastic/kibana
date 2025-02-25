@@ -991,7 +991,7 @@ x-pack/platform/plugins/shared/timelines @elastic/security-threat-hunting-invest
 src/platform/packages/private/kbn-timelion-grammar @elastic/kibana-visualizations
 src/platform/packages/shared/kbn-timerange @elastic/obs-ux-logs-team
 src/platform/packages/private/kbn-tinymath @elastic/kibana-visualizations
-packages/kbn-tooling-log @elastic/kibana-operations
+src/platform/packages/shared/kbn-tooling-log @elastic/kibana-operations
 src/platform/packages/shared/kbn-traced-es-client @elastic/observability-ui
 x-pack/platform/plugins/private/transform @elastic/ml-ui
 x-pack/platform/plugins/private/translations @elastic/kibana-localization

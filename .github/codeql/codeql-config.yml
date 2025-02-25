@@ -80,7 +80,7 @@ paths-ignore:
   - src/platform/packages/private/kbn-telemetry-tools
   - src/platform/packages/shared/kbn-test
   - packages/kbn-test-*
-  - packages/kbn-tooling-log
+  - src/platform/packages/shared/kbn-tooling-log
   - packages/kbn-ts-*
   - packages/kbn-web-worker-stub
   - packages/kbn-yarn-lock-validator
