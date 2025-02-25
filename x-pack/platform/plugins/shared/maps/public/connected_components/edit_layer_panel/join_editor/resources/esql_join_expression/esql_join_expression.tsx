@@ -16,20 +16,22 @@ import {
 import { ESQLJoinPopoverContent } from './esql_join_popover_content';
 
 interface Props {
-  sourceDescriptor: Partial<ESESQLTermSourceDescriptor>;
-  onSourceDescriptorChange: (sourceDescriptor: Partial<JoinSourceDescriptor>) => void;
-
   // Left field props
   leftValue?: string;
   leftFields: JoinField[];
   onLeftFieldChange: (leftField: string) => void;
+
+  // right field props
+  sourceDescriptor: Partial<ESESQLTermSourceDescriptor>;
+  onSourceDescriptorChange: (sourceDescriptor: Partial<JoinSourceDescriptor>) => void;
+  rightFields: any[];
 }
 
 export function ESQLJoinExpression(props: Props) {
   const expressionValue =
     props.sourceDescriptor.term !== undefined && props.sourceDescriptor.esql !== undefined
       ? i18n.translate('xpack.maps.termJoinExpression.value', {
-          defaultMessage: '{term}-field from {esql}',
+          defaultMessage: '{term}-field from statement {esql}',
           values: {
             term: props.sourceDescriptor.term || '',
             esql: props.sourceDescriptor.esql,
@@ -48,6 +50,7 @@ export function ESQLJoinExpression(props: Props) {
         onLeftFieldChange={props.onLeftFieldChange}
         sourceDescriptor={props.sourceDescriptor}
         onSourceDescriptorChange={props.onSourceDescriptorChange}
+        rightFields={props.rightFields}
       />
     );
   }

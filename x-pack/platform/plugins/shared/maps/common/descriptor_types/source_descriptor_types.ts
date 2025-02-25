@@ -44,8 +44,8 @@ export type ESQLSourceDescriptor = AbstractSourceDescriptor & {
    */
   id: string;
   esql: string;
-  columns: ESQLColumn[];
-  dataViewId: string;
+  columns: ESQLColumn[]; // why is this mandatory?
+  dataViewId: string; // why is this mandatory?
   /*
    * Date field used to narrow ES|QL requests by global time range
    */
@@ -156,7 +156,8 @@ export type ESTermSourceDescriptor = AbstractESJoinSourceDescriptor & {
 };
 
 export type ESESQLTermSourceDescriptor = ESQLSourceDescriptor & {
-  term: string; // term field name (this is the "right field" that will be joined to the left field from another dataset
+  term: string; // term field name (this is the "right field" from the ES|QL-query that will be joined to the left field from another dataset
+
   type: SOURCE_TYPES.ES_ESQL_TERM_SOURCE;
 };
 

@@ -47,7 +47,8 @@ interface Props {
 }
 
 interface State {
-  rightFields: DataViewField[];
+  rightDataViewFields?: DataViewField[];
+  rightESQLFields?: any[];
   indexPattern?: DataView;
   loadError?: string;
 }
@@ -57,21 +58,22 @@ export class Join extends Component<Props, State> {
   private _nextIndexPatternId: string | undefined;
 
   state: State = {
-    rightFields: [],
+    rightDataViewFields: [],
+    rightESQLFields: [],
     indexPattern: undefined,
     loadError: undefined,
   };
 
   componentDidMount() {
     this._isMounted = true;
-    this._loadRightFields(_.get(this.props.join, 'right.indexPatternId'));
+    this._loadRightFieldsFromIndexPattern(_.get(this.props.join, 'right.indexPatternId'));
   }
 
   componentWillUnmount() {
     this._isMounted = false;
   }
 
-  async _loadRightFields(indexPatternId?: string) {
+  async _loadRightFieldsFromIndexPattern(indexPatternId?: string) {
     if (!indexPatternId) {
       return;
     }
@@ -94,7 +96,9 @@ export class Join extends Component<Props, State> {
     }
 
     this.setState({
-      rightFields: indexPattern.fields.filter((field) => !indexPatterns.isNestedField(field)),
+      rightDataViewFields: indexPattern.fields.filter(
+        (field) => !indexPatterns.isNestedField(field)
+      ),
       indexPattern,
     });
   }
@@ -110,25 +114,40 @@ export class Join extends Component<Props, State> {
   _onRightSourceDescriptorChange = (sourceDescriptor: Partial<JoinSourceDescriptor>) => {
     console.log('right source descriptor change', sourceDescriptor);
 
-    const indexPatternId = (sourceDescriptor as Partial<AbstractESJoinSourceDescriptor>)
-      .indexPatternId;
-    if (this.state.indexPattern?.id !== indexPatternId) {
-      this.setState({
-        indexPattern: undefined,
-        rightFields: [],
-        loadError: undefined,
-      });
-      if (indexPatternId) {
-        this._loadRightFields(indexPatternId);
-      }
-    }
+    if (sourceDescriptor.type === SOURCE_TYPES.ES_ESQL_TERM_SOURCE) {
+      console.log('sd', sourceDescriptor);
 
-    this.props.onChange({
-      leftField: this.props.join.leftField,
-      right: {
-        ...sourceDescriptor,
-      },
-    });
+      this.setState({
+        rightESQLFields: sourceDescriptor.columns,
+      });
+
+      this.props.onChange({
+        leftField: this.props.join.leftField,
+        right: {
+          ...sourceDescriptor,
+        },
+      });
+    } else {
+      const indexPatternId = (sourceDescriptor as Partial<AbstractESJoinSourceDescriptor>)
+        .indexPatternId;
+      if (this.state.indexPattern?.id !== indexPatternId) {
+        this.setState({
+          indexPattern: undefined,
+          rightDataViewFields: [],
+          loadError: undefined,
+        });
+        if (indexPatternId) {
+          this._loadRightFieldsFromIndexPattern(indexPatternId);
+        }
+      }
+
+      this.props.onChange({
+        leftField: this.props.join.leftField,
+        right: {
+          ...sourceDescriptor,
+        },
+      });
+    }
   };
 
   _onMetricsChange = (metrics: AggDescriptor[]) => {
@@ -173,7 +192,6 @@ export class Join extends Component<Props, State> {
 
   render() {
     const { join, onRemove, leftFields, leftSourceName } = this.props;
-    const { rightFields, indexPattern } = this.state;
     const right = (join?.right ?? {}) as Partial<AbstractESJoinSourceDescriptor>;
 
     let isJoinConfigComplete = false;
@@ -190,7 +208,7 @@ export class Join extends Component<Props, State> {
           onLeftFieldChange={this._onLeftFieldChange}
           sourceDescriptor={right as Partial<ESTermSourceDescriptor>}
           onSourceDescriptorChange={this._onRightSourceDescriptorChange}
-          rightFields={rightFields}
+          rightFields={this.state.rightDataViewFields || []}
         />
       );
     } else if (isSpatialJoin(this.props.join)) {
@@ -204,6 +222,7 @@ export class Join extends Component<Props, State> {
         />
       );
     } else if (right.type === SOURCE_TYPES.ES_ESQL_TERM_SOURCE) {
+      console.log('right fields', this.state.rightESQLFields);
       joinExpression = (
         <ESQLJoinExpression
           leftSourceName={leftSourceName}
@@ -212,6 +231,7 @@ export class Join extends Component<Props, State> {
           onLeftFieldChange={this._onLeftFieldChange}
           sourceDescriptor={right as Partial<ESESQLTermSourceDescriptor>}
           onSourceDescriptorChange={this._onRightSourceDescriptorChange}
+          rightFields={this.state.rightESQLFields}
         />
       );
     } else {
@@ -241,7 +261,7 @@ export class Join extends Component<Props, State> {
         <EuiFlexItem grow={false}>
           <MetricsExpression
             metrics={right.metrics ? right.metrics : [{ type: AGG_TYPE.COUNT }]}
-            rightFields={rightFields}
+            rightFields={this.state.rightDataViewFields}
             onChange={this._onMetricsChange}
           />
         </EuiFlexItem>
@@ -273,11 +293,11 @@ export class Join extends Component<Props, State> {
     }
 
     let whereExpression;
-    if (indexPattern && isJoinConfigComplete) {
+    if (this.state.indexPattern && isJoinConfigComplete) {
       whereExpression = (
         <EuiFlexItem grow={false}>
           <WhereExpression
-            indexPattern={indexPattern}
+            indexPattern={this.state.indexPattern}
             whereQuery={right.whereQuery}
             onChange={this._onWhereQueryChange}
           />
