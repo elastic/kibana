@@ -79,7 +79,7 @@ describe('createKnowledgeBaseEntry', () => {
         source: 'test',
         text: 'test',
         name: 'test',
-        kb_resource: 'test',
+        kb_resource: 'user',
         required: false,
         vector: undefined,
       },

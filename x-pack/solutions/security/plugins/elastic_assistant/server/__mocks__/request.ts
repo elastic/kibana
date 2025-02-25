@@ -132,6 +132,15 @@ export const getPostEvaluateRequest = ({ body }: { body: PostEvaluateRequestBody
     path: ELASTIC_AI_ASSISTANT_EVALUATE_URL,
   });
 
+export const getKnowledgeBaseEntryGetRequest = (
+  id: string = '04128c15-0d1b-4716-a4c5-46997ac7f3bd'
+) =>
+  requestMock.create({
+    method: 'get',
+    path: ELASTIC_AI_ASSISTANT_KNOWLEDGE_BASE_ENTRIES_URL_BY_ID,
+    params: { id },
+  });
+
 export const getKnowledgeBaseEntryFindRequest = () =>
   requestMock.create({
     method: 'get',

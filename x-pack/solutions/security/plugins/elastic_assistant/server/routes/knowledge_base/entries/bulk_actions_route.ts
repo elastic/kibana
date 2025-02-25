@@ -200,7 +200,7 @@ export const bulkActionKnowledgeBaseEntriesRoute = (router: ElasticAssistantPlug
           const logger = ctx.elasticAssistant.logger;
 
           // Perform license, authenticated user and FF checks
-          const checkResponse = performChecks({
+          const checkResponse = await performChecks({
             context: ctx,
             request,
             response,
@@ -246,23 +246,6 @@ export const bulkActionKnowledgeBaseEntriesRoute = (router: ElasticAssistantPlug
                 throw new Error(`User lacks privileges to create global knowledge base entries`);
               }
             });
-
-            const result = await kbDataClient?.findDocuments<EsKnowledgeBaseEntrySchema>({
-              perPage: 100,
-              page: 1,
-              filter: `users:{ id: "${authenticatedUser?.profile_uid}" }`,
-              fields: [],
-            });
-            if (result?.data != null && result.total > 0) {
-              return assistantResponse.error({
-                statusCode: 409,
-                body: `Knowledge Base Entry id's: "${transformESSearchToKnowledgeBaseEntry(
-                  result.data
-                )
-                  .map((c) => c.id)
-                  .join(',')}" already exists`,
-              });
-            }
           }
 
           await validateDocumentsModification(

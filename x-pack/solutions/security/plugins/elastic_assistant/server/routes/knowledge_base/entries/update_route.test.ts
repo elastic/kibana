@@ -45,7 +45,7 @@ describe('Update knowledge base entry route', () => {
     context.core.elasticsearch.client.asCurrentUser.search.mockResolvedValue(
       elasticsearchClientMock.createSuccessTransportRequestPromise(getBasicEmptySearchResponse())
     );
-    context.elasticAssistant.getCurrentUser.mockReturnValue(mockUser1);
+    context.elasticAssistant.getCurrentUser.mockResolvedValue(mockUser1);
     updateKnowledgeBaseEntryRoute(server.router);
   });
 
@@ -66,7 +66,7 @@ describe('Update knowledge base entry route', () => {
     });
 
     test('returns 401 Unauthorized when request context getCurrentUser is not defined', async () => {
-      context.elasticAssistant.getCurrentUser.mockReturnValueOnce(null);
+      context.elasticAssistant.getCurrentUser.mockResolvedValueOnce(null);
       const response = await server.inject(
         getUpdateKnowledgeBaseEntryRequest({
           params: { id: '1' },

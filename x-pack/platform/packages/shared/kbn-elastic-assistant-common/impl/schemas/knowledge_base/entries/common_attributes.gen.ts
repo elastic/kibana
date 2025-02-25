@@ -49,14 +49,19 @@ export const KnowledgeBaseEntryErrorSchema = z
   .strict();
 
 /**
+ * Knowledge Base resource name for grouping entries, e.g. 'security_labs', 'user', etc
+ */
+export type KnowledgeBaseResource = z.infer<typeof KnowledgeBaseResource>;
+export const KnowledgeBaseResource = z.enum(['security_labs', 'user']);
+export type KnowledgeBaseResourceEnum = typeof KnowledgeBaseResource.enum;
+export const KnowledgeBaseResourceEnum = KnowledgeBaseResource.enum;
+
+/**
  * Metadata about a Knowledge Base Entry
  */
 export type Metadata = z.infer<typeof Metadata>;
 export const Metadata = z.object({
-  /**
-   * Knowledge Base resource name for grouping entries, e.g. 'esql', 'lens-docs', etc
-   */
-  kbResource: z.string(),
+  kbResource: KnowledgeBaseResource,
   /**
    * Source document name or filepath
    */
@@ -99,7 +104,7 @@ export const BaseDefaultableFields = z.object({
   /**
    * Users who have access to the Knowledge Base Entry, defaults to current user. Empty array provides access to all users.
    */
-  users: z.array(User).optional(),
+  users: z.array(User).nullable().optional(),
 });
 
 export type BaseCreateProps = z.infer<typeof BaseCreateProps>;
@@ -113,7 +118,14 @@ export const BaseUpdateProps = BaseCreateProps.partial().merge(
 );
 
 export type BaseResponseProps = z.infer<typeof BaseResponseProps>;
-export const BaseResponseProps = BaseRequiredFields.merge(BaseDefaultableFields.required());
+export const BaseResponseProps = BaseRequiredFields.merge(BaseDefaultableFields.required()).merge(
+  z.object({
+    /**
+     * Users who have access to the Knowledge Base Entry, defaults to current user. Empty array provides access to all users.
+     */
+    users: z.array(User),
+  })
+);
 
 export type ResponseFields = z.infer<typeof ResponseFields>;
 export const ResponseFields = z.object({
@@ -153,10 +165,7 @@ export const DocumentEntryRequiredFields = z.object({
    * Entry type
    */
   type: z.literal('document'),
-  /**
-   * Knowledge Base resource name for grouping entries, e.g. 'esql', 'lens-docs', etc
-   */
-  kbResource: z.string(),
+  kbResource: KnowledgeBaseResource,
   /**
    * Source document name or filepath
    */
@@ -251,6 +260,12 @@ export type KnowledgeBaseEntryUpdateProps = z.infer<typeof KnowledgeBaseEntryUpd
 export const KnowledgeBaseEntryUpdateProps = z.discriminatedUnion('type', [
   DocumentEntryUpdateFields,
   IndexEntryUpdateFields,
+]);
+
+export type KnowledgeBaseEntryUpdateRouteProps = z.infer<typeof KnowledgeBaseEntryUpdateRouteProps>;
+export const KnowledgeBaseEntryUpdateRouteProps = z.discriminatedUnion('type', [
+  DocumentEntryCreateFields,
+  IndexEntryCreateFields,
 ]);
 
 export type KnowledgeBaseEntryResponse = z.infer<typeof KnowledgeBaseEntryResponse>;
