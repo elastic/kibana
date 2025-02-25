@@ -32,7 +32,7 @@ export class WiredStream implements StreamActiveRecord {
     // What about the assets?
     this.definition = definition;
     this.changeStatus = 'unchanged';
-    this.commitStatus = 'uncomitted';
+    this.commitStatus = 'uncommitted';
   }
 
   clone(): StreamActiveRecord {
