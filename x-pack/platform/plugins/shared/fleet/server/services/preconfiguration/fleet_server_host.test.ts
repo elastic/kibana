@@ -441,7 +441,7 @@ describe('createOrUpdatePreconfiguredFleetServerHosts', () => {
       expect.objectContaining({
         is_internal: true,
       }),
-      { fromPreconfiguration: true }
+      { fromPreconfiguration: true, secretHashes: {} }
     );
   });
 
@@ -468,7 +468,7 @@ describe('createOrUpdatePreconfiguredFleetServerHosts', () => {
       expect.objectContaining({
         host_urls: ['http://test-internal.fr', 'http://test.fr'],
       }),
-      { fromPreconfiguration: true }
+      { fromPreconfiguration: true, secretHashes: {} }
     );
   });
 
@@ -496,7 +496,7 @@ describe('createOrUpdatePreconfiguredFleetServerHosts', () => {
       expect.objectContaining({
         proxy_id: 'proxy-test',
       }),
-      { fromPreconfiguration: true }
+      { fromPreconfiguration: true, secretHashes: {} }
     );
   });
 

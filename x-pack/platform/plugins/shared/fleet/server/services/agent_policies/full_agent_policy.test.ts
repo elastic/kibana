@@ -16,6 +16,7 @@ import { agentPolicyService } from '../agent_policy';
 import { agentPolicyUpdateEventHandler } from '../agent_policy_update';
 import { appContextService } from '../app_context';
 import { getPackageInfo } from '../epm/packages';
+import { getFleetServerHostsForAgentPolicy } from '../fleet_server_host';
 
 import {
   generateFleetConfig,
@@ -26,6 +27,7 @@ import {
 import { getMonitoringPermissions } from './monitoring_permissions';
 
 jest.mock('../epm/packages');
+jest.mock('../fleet_server_host');
 
 const mockedGetElasticAgentMonitoringPermissions = getMonitoringPermissions as jest.Mock<
   ReturnType<typeof getMonitoringPermissions>
@@ -34,6 +36,9 @@ const mockedAgentPolicyService = agentPolicyService as jest.Mocked<typeof agentP
 
 const soClientMock = savedObjectsClientMock.create();
 const mockedGetPackageInfo = getPackageInfo as jest.Mock<ReturnType<typeof getPackageInfo>>;
+const mockedGetFleetServerHostsForAgentPolicy = getFleetServerHostsForAgentPolicy as jest.Mock<
+  ReturnType<typeof getFleetServerHostsForAgentPolicy>
+>;
 
 function mockAgentPolicy(data: Partial<AgentPolicy>) {
   mockedAgentPolicyService.get.mockResolvedValue({
@@ -50,18 +55,6 @@ function mockAgentPolicy(data: Partial<AgentPolicy>) {
     ...data,
   });
 }
-
-jest.mock('../fleet_server_host', () => {
-  return {
-    getFleetServerHostsForAgentPolicy: async () => {
-      return {
-        id: '93f74c0-e876-11ea-b7d3-8b2acec6f75c',
-        is_default: true,
-        host_urls: ['http://fleetserver:8220'],
-      };
-    },
-  };
-});
 
 jest.mock('../agent_policy');
 
@@ -154,6 +147,14 @@ function getAgentPolicyUpdateMock() {
 
 describe('getFullAgentPolicy', () => {
   beforeEach(() => {
+    mockedGetFleetServerHostsForAgentPolicy.mockResolvedValue({
+      name: 'default Fleet Server',
+      id: '93f74c0-e876-11ea-b7d3-8b2acec6f75c',
+      is_default: true,
+      host_urls: ['http://fleetserver:8220'],
+      is_preconfigured: false,
+    });
+
     getAgentPolicyUpdateMock().mockClear();
     mockedAgentPolicyService.get.mockReset();
     mockedGetElasticAgentMonitoringPermissions.mockReset();
@@ -1028,6 +1029,107 @@ describe('getFullAgentPolicy', () => {
       },
     });
   });
+
+  it('should have ssl options in outputs when fleet server host has es ssl options', async () => {
+    mockedGetFleetServerHostsForAgentPolicy.mockResolvedValue({
+      name: 'default Fleet Server',
+      id: '93f74c0-e876-11ea-b7d3-8b2acec6f75c',
+      is_default: true,
+      host_urls: ['http://fleetserver:8220'],
+      is_preconfigured: false,
+      ssl: {
+        certificate_authorities: ['/tmp/ssl/ca.crt'],
+        certificate: 'my-cert',
+        key: 'my-key',
+        es_certificate_authorities: ['/tmp/ssl/es-ca.crt'],
+        es_certificate: 'my-es-cert',
+        es_key: 'my-es-key',
+      },
+    });
+
+    mockAgentPolicy({});
+    const agentPolicy = await getFullAgentPolicy(savedObjectsClientMock.create(), 'agent-policy');
+    expect(agentPolicy?.outputs).toMatchObject({
+      default: {
+        hosts: ['http://127.0.0.1:9201'],
+        preset: 'balanced',
+        type: 'elasticsearch',
+      },
+      'fleetserver-output-93f74c0-e876-11ea-b7d3-8b2acec6f75c': {
+        ssl: {
+          certificate: 'my-es-cert',
+          certificate_authorities: ['/tmp/ssl/es-ca.crt'],
+          key: 'my-es-key',
+        },
+        type: 'elasticsearch',
+      },
+    });
+  });
+  // it('should have ssl options in fleet-server input when fleet server host has ssl opttons', async () => {
+  //   mockedGetFleetServerHostsForAgentPolicy.mockResolvedValue({
+  //     name: 'default Fleet Server',
+  //     id: '93f74c0-e876-11ea-b7d3-8b2acec6f75c',
+  //     is_default: true,
+  //     host_urls: ['http://fleetserver:8220'],
+  //     is_preconfigured: false,
+  //     ssl: {
+  //       certificate_authorities: ['/tmp/ssl/ca.crt'],
+  //       certificate: 'my-cert',
+  //       key: 'my-key',
+  //       es_certificate_authorities: ['/tmp/ssl/es-ca.crt'],
+  //       es_certificate: 'my-es-cert',
+  //       es_key: 'my-es-key',
+  //     },
+  //   });
+
+  //   mockAgentPolicy({
+  //     package_policies: [
+  //       {
+  //         id: 'package-policy-using-output',
+  //         name: 'test-policy-1',
+  //         namespace: 'policyspace',
+  //         enabled: true,
+  //         package: {
+  //           name: 'fleet_server',
+  //           title: 'Fleet Server',
+  //           version: '1.9.0',
+  //         },
+  //         inputs: [],
+  //         created_at: '',
+  //         updated_at: '',
+  //         created_by: '',
+  //         updated_by: '',
+  //         revision: 1,
+  //         policy_id: '',
+  //         policy_ids: [''],
+  //       },
+  //     ],
+  //   });
+  //   mockedGetPackageInfo.mockResolvedValue({
+  //     data_streams: [
+  //       {
+  //         type: 'logs',
+  //         dataset: 'fleet_server.logs',
+  //       },
+  //       {
+  //         type: 'metrics',
+  //         dataset: 'fleet_server.metrics',
+  //       },
+  //       {
+  //         type: 'logs',
+  //         dataset: 'elastic_agent.filebeat',
+  //       },
+  //     ],
+  //   } as PackageInfo);
+  //   const agentPolicy = await getFullAgentPolicy(savedObjectsClientMock.create(), 'agent-policy');
+  //   // expect(agentPolicy).toMatchObject({
+  //   //   id: 'agent-policy',
+  //   //   inputs: [{
+
+  //   //   }],
+  //   // });
+  //   expect(agentPolicy).toEqual({});
+  // });
 });
 
 describe('getFullMonitoringSettings', () => {
