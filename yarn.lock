@@ -6802,7 +6802,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/repo-path@link:packages/kbn-repo-path":
+"@kbn/repo-path@link:src/platform/packages/private/kbn-repo-path":
   version "0.0.0"
   uid ""
 

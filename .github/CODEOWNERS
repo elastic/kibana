@@ -740,7 +740,7 @@ packages/kbn-repo-file-maps @elastic/kibana-operations
 src/platform/packages/shared/kbn-repo-info @elastic/kibana-operations
 packages/kbn-repo-linter @elastic/kibana-operations
 src/platform/packages/private/kbn-repo-packages @elastic/kibana-operations
-packages/kbn-repo-path @elastic/kibana-operations
+src/platform/packages/private/kbn-repo-path @elastic/kibana-operations
 packages/kbn-repo-source-classifier @elastic/kibana-operations
 packages/kbn-repo-source-classifier-cli @elastic/kibana-operations
 src/platform/packages/private/kbn-reporting/common @elastic/appex-sharedux
