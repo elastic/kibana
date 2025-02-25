@@ -42,7 +42,6 @@ export interface GetDefaultAssistantGraphParams {
   signal?: AbortSignal;
   tools: StructuredTool[];
   replacements: Replacements;
-  contentReferencesEnabled: boolean;
 }
 
 export type DefaultAssistantGraph = ReturnType<typeof getDefaultAssistantGraph>;
@@ -58,7 +57,6 @@ export const getDefaultAssistantGraph = ({
   signal,
   tools,
   replacements,
-  contentReferencesEnabled = false,
 }: GetDefaultAssistantGraphParams) => {
   try {
     // Default graph state
@@ -122,10 +120,6 @@ export const getDefaultAssistantGraph = ({
       responseLanguage: Annotation<string>({
         reducer: (x: string, y?: string) => y ?? x,
         default: () => 'English',
-      }),
-      contentReferencesEnabled: Annotation<boolean>({
-        reducer: (x: boolean, y?: boolean) => y ?? x,
-        default: () => contentReferencesEnabled,
       }),
       provider: Annotation<string>({
         reducer: (x: string, y?: string) => y ?? x,
