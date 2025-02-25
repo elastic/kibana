@@ -7014,7 +7014,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/scout-reporting@link:packages/kbn-scout-reporting":
+"@kbn/scout-reporting@link:src/platform/packages/private/kbn-scout-reporting":
   version "0.0.0"
   uid ""
 

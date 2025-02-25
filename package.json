@@ -1499,7 +1499,7 @@
     "@kbn/scout": "link:src/platform/packages/shared/kbn-scout",
     "@kbn/scout-info": "link:src/platform/packages/private/kbn-scout-info",
     "@kbn/scout-oblt": "link:x-pack/solutions/observability/packages/kbn-scout-oblt",
-    "@kbn/scout-reporting": "link:packages/kbn-scout-reporting",
+    "@kbn/scout-reporting": "link:src/platform/packages/private/kbn-scout-reporting",
     "@kbn/security-api-integration-helpers": "link:x-pack/test/security_api_integration/packages/helpers",
     "@kbn/serverless-storybook-config": "link:src/platform/packages/shared/serverless/storybook/config",
     "@kbn/set-map": "link:packages/kbn-set-map",
