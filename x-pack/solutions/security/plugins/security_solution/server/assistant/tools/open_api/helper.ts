@@ -2,7 +2,7 @@
 import apiSpec from './kibana.json';
 
 
-export const getApiSpec = async () => {
+export const getApiSpec = () => {
     
     return JSON.stringify(apiSpec)
 }
