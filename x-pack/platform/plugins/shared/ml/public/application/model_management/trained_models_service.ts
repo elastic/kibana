@@ -441,29 +441,31 @@ export class TrainedModelsService {
                   }),
                 });
               },
-              error: (error) => {
-                this.displayErrorToast?.(
-                  error,
-                  i18n.translate('xpack.ml.trainedModels.modelsList.startFailed', {
-                    defaultMessage: 'Failed to start "{deploymentId}"',
-                    values: {
-                      deploymentId: deployment.deploymentParams.deployment_id,
-                    },
-                  })
-                );
-              },
-              finalize: () => {
-                this.removeScheduledDeployments({
-                  deploymentId: deployment.deploymentParams.deployment_id!,
-                });
-                // Manually update the BehaviorSubject to ensure proper cleanup
-                // if user navigates away, as localStorage hook won't be available to handle updates
-                const updatedDeployments = this._scheduledDeployments$
-                  .getValue()
-                  .filter((d) => d.modelId !== deployment.modelId);
-                this._scheduledDeployments$.next(updatedDeployments);
-                this.fetchModels();
-              },
+            }),
+            catchError((error) => {
+              this.displayErrorToast?.(
+                error,
+                i18n.translate('xpack.ml.trainedModels.modelsList.startFailed', {
+                  defaultMessage: 'Failed to start "{deploymentId}"',
+                  values: {
+                    deploymentId: deployment.deploymentParams.deployment_id,
+                  },
+                })
+              );
+              // Return null to allow stream to continue
+              return of(null);
+            }),
+            finalize(() => {
+              this.removeScheduledDeployments({
+                deploymentId: deployment.deploymentParams.deployment_id!,
+              });
+              // Manually update the BehaviorSubject to ensure proper cleanup
+              // if user navigates away, as localStorage hook won't be available to handle updates
+              const updatedDeployments = this._scheduledDeployments$
+                .getValue()
+                .filter((d) => d.modelId !== deployment.modelId);
+              this._scheduledDeployments$.next(updatedDeployments);
+              this.fetchModels();
             })
           )
         );
