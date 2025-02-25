@@ -7,10 +7,11 @@
 
 import { ToolingLog } from '@kbn/tooling-log';
 import type SuperTest from 'supertest';
-import { retryForSuccess } from '@kbn/ftr-common-functional-services';
+// import { retryForSuccess } from '@kbn/ftr-common-functional-services';
+import { Console, Effect } from 'effect';
 
-const debugLog = ToolingLog.bind(ToolingLog, { level: 'debug', writeTo: process.stdout });
-const retryCount = 10;
+// // const debugLog = ToolingLog.bind(ToolingLog, { level: 'debug', writeTo: process.stdout });
+// const retryCount = 10;
 
 export async function waitForActiveRule({
   ruleId,
@@ -20,19 +21,43 @@ export async function waitForActiveRule({
   ruleId: string;
   supertest: SuperTest.Agent;
   logger?: ToolingLog;
-}): Promise<Record<string, any>> {
-  return await retryForSuccess(logger || new debugLog({ context: 'waitForActiveRule' }), {
-    timeout: 20_000,
-    methodName: 'waitForActiveRule',
-    block: async () => {
-      const response = await supertest.get(`/api/alerting/rule/${ruleId}`);
-      const status = response.body?.execution_status?.status;
-      const expectedStatus = 'active';
+}) {
+  // return await retryForSuccess(logger || new debugLog({ context: 'waitForActiveRule' }), {
+  //   timeout: 20_000,
+  //   methodName: 'waitForActiveRule',
+  //   block: async () => {
+  //     const response = await supertest.get(`/api/alerting/rule/${ruleId}`);
+  //     const status = response.body?.execution_status?.status;
+  //     const expectedStatus = 'active';
+  //
+  //     if (status !== expectedStatus) throw new Error(`Expected: ${expectedStatus}: got ${status}`);
+  //
+  //     return status;
+  //   },
+  //   retryCount,
+  // });
 
-      if (status !== expectedStatus) throw new Error(`Expected: ${expectedStatus}: got ${status}`);
+  const program = (url: string) =>
+    getRuleId(url).pipe(
+      Effect.retry({ times: 2 }),
+      Effect.timeout('10 minutes'),
+      Effect.catchAll(Console.error)
+    );
 
-      return status;
-    },
-    retryCount,
-  });
+  Effect.runFork(program(`/api/alerting/rule/${ruleId}`));
+
+  function getRuleId(url: string) {
+    return Effect.tryPromise(() =>
+      supertest.get(url).then((response) => {
+        console.log(`\nλjs response: \n${JSON.stringify(response, null, 2)}`);
+        const status = response.body?.execution_status?.status;
+        const expectedStatus = 'active';
+
+        if (status !== expectedStatus)
+          throw new Error(`Expected: ${expectedStatus}: got ${status}`);
+
+        return status;
+      })
+    );
+  }
 }
