@@ -37,6 +37,7 @@ import type { SecurityFeatureUsageServiceStart } from '../feature_usage';
 import type { Session } from '../session_management';
 import type { SecurityRouter } from '../types';
 import type { UserProfileServiceStartInternal } from '../user_profile';
+import { defineKeyDerivationRoutes } from './key_derivation/test';
 
 /**
  * Describes parameters used to define HTTP routes.
@@ -71,6 +72,7 @@ export function defineRoutes(params: RouteDefinitionParams) {
   defineUserProfileRoutes(params);
   defineUsersRoutes(params); // Temporarily allow user APIs (ToDo: move to non-serverless block below)
   defineViewRoutes(params);
+  defineKeyDerivationRoutes(params);
 
   // In the serverless environment...
   if (params.buildFlavor !== 'serverless') {
