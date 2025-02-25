@@ -35,7 +35,7 @@
           "Configuration",
           "; }"
         ],
-        "path": "packages/kbn-storybook/src/lib/default_config.ts",
+        "path": "src/platform/packages/shared/kbn-storybook/src/lib/default_config.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -49,7 +49,7 @@
             "signature": [
               "Configuration"
             ],
-            "path": "packages/kbn-storybook/src/lib/default_config.ts",
+            "path": "src/platform/packages/shared/kbn-storybook/src/lib/default_config.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -68,7 +68,7 @@
         "signature": [
           "({ configDir, name }: { configDir: string; name: string; }) => void"
         ],
-        "path": "packages/kbn-storybook/src/lib/run_storybook_cli.ts",
+        "path": "src/platform/packages/shared/kbn-storybook/src/lib/run_storybook_cli.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -79,7 +79,7 @@
             "tags": [],
             "label": "{ configDir, name }",
             "description": [],
-            "path": "packages/kbn-storybook/src/lib/run_storybook_cli.ts",
+            "path": "src/platform/packages/shared/kbn-storybook/src/lib/run_storybook_cli.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -90,7 +90,7 @@
                 "tags": [],
                 "label": "configDir",
                 "description": [],
-                "path": "packages/kbn-storybook/src/lib/run_storybook_cli.ts",
+                "path": "src/platform/packages/shared/kbn-storybook/src/lib/run_storybook_cli.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -101,7 +101,7 @@
                 "tags": [],
                 "label": "name",
                 "description": [],
-                "path": "packages/kbn-storybook/src/lib/run_storybook_cli.ts",
+                "path": "src/platform/packages/shared/kbn-storybook/src/lib/run_storybook_cli.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -453,7 +453,7 @@
         "tags": [],
         "label": "defaultConfig",
         "description": [],
-        "path": "packages/kbn-storybook/src/lib/default_config.ts",
+        "path": "src/platform/packages/shared/kbn-storybook/src/lib/default_config.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -467,7 +467,7 @@
             "signature": [
               "string[]"
             ],
-            "path": "packages/kbn-storybook/src/lib/default_config.ts",
+            "path": "src/platform/packages/shared/kbn-storybook/src/lib/default_config.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -478,7 +478,7 @@
             "tags": [],
             "label": "core",
             "description": [],
-            "path": "packages/kbn-storybook/src/lib/default_config.ts",
+            "path": "src/platform/packages/shared/kbn-storybook/src/lib/default_config.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -489,7 +489,7 @@
                 "tags": [],
                 "label": "builder",
                 "description": [],
-                "path": "packages/kbn-storybook/src/lib/default_config.ts",
+                "path": "src/platform/packages/shared/kbn-storybook/src/lib/default_config.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -505,7 +505,7 @@
             "signature": [
               "string[]"
             ],
-            "path": "packages/kbn-storybook/src/lib/default_config.ts",
+            "path": "src/platform/packages/shared/kbn-storybook/src/lib/default_config.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -516,7 +516,7 @@
             "tags": [],
             "label": "typescript",
             "description": [],
-            "path": "packages/kbn-storybook/src/lib/default_config.ts",
+            "path": "src/platform/packages/shared/kbn-storybook/src/lib/default_config.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -530,7 +530,7 @@
                 "signature": [
                   "false"
                 ],
-                "path": "packages/kbn-storybook/src/lib/default_config.ts",
+                "path": "src/platform/packages/shared/kbn-storybook/src/lib/default_config.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -543,7 +543,7 @@
             "tags": [],
             "label": "features",
             "description": [],
-            "path": "packages/kbn-storybook/src/lib/default_config.ts",
+            "path": "src/platform/packages/shared/kbn-storybook/src/lib/default_config.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -557,7 +557,7 @@
                 "signature": [
                   "false"
                 ],
-                "path": "packages/kbn-storybook/src/lib/default_config.ts",
+                "path": "src/platform/packages/shared/kbn-storybook/src/lib/default_config.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -575,7 +575,7 @@
             "signature": [
               "(options: any) => Promise<any>"
             ],
-            "path": "packages/kbn-storybook/src/lib/default_config.ts",
+            "path": "src/platform/packages/shared/kbn-storybook/src/lib/default_config.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -589,7 +589,7 @@
                 "signature": [
                   "any"
                 ],
-                "path": "packages/kbn-storybook/src/lib/default_config.ts",
+                "path": "src/platform/packages/shared/kbn-storybook/src/lib/default_config.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -659,7 +659,7 @@
               "Configuration",
               " | undefined; }"
             ],
-            "path": "packages/kbn-storybook/src/lib/default_config.ts",
+            "path": "src/platform/packages/shared/kbn-storybook/src/lib/default_config.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -673,7 +673,7 @@
                 "signature": [
                   "Configuration"
                 ],
-                "path": "packages/kbn-storybook/src/lib/default_config.ts",
+                "path": "src/platform/packages/shared/kbn-storybook/src/lib/default_config.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -688,7 +688,7 @@
                 "signature": [
                   "Options"
                 ],
-                "path": "packages/kbn-storybook/src/lib/default_config.ts",
+                "path": "src/platform/packages/shared/kbn-storybook/src/lib/default_config.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -706,7 +706,7 @@
         "tags": [],
         "label": "defaultConfigWebFinal",
         "description": [],
-        "path": "packages/kbn-storybook/src/lib/default_config.ts",
+        "path": "src/platform/packages/shared/kbn-storybook/src/lib/default_config.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -720,7 +720,7 @@
             "signature": [
               "any"
             ],
-            "path": "packages/kbn-storybook/src/lib/default_config.ts",
+            "path": "src/platform/packages/shared/kbn-storybook/src/lib/default_config.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -736,7 +736,7 @@
               "Configuration",
               ") => object"
             ],
-            "path": "packages/kbn-storybook/src/lib/default_config.ts",
+            "path": "src/platform/packages/shared/kbn-storybook/src/lib/default_config.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -750,7 +750,7 @@
                 "signature": [
                   "Configuration"
                 ],
-                "path": "packages/kbn-storybook/src/lib/default_config.ts",
+                "path": "src/platform/packages/shared/kbn-storybook/src/lib/default_config.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true

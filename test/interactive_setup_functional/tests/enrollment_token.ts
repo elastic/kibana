@@ -43,13 +43,13 @@ export default function ({ getService }: FtrProviderContext) {
 
     let enrollmentAPIKey: string;
     beforeEach(async function () {
-      const apiResponse = await es.security.createApiKey({ body: { name: 'enrollment_api_key' } });
+      const apiResponse = await es.security.createApiKey({ name: 'enrollment_api_key' });
       enrollmentAPIKey = `${apiResponse.id}:${apiResponse.api_key}`;
       log.info(`API key for enrollment token: ${enrollmentAPIKey}`);
     });
 
     afterEach(async function () {
-      await es.security.invalidateApiKey({ body: { name: 'enrollment_api_key' } });
+      await es.security.invalidateApiKey({ name: 'enrollment_api_key' });
     });
 
     it('should configure Kibana successfully', async function () {

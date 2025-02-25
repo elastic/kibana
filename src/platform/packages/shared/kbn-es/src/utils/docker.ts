@@ -771,6 +771,7 @@ export async function runServerlessEsNode(
 function getESClient(clientOptions: ClientOptions): Client {
   return new Client({
     Connection: HttpConnection,
+    requestTimeout: 30_000,
     ...clientOptions,
   });
 }
