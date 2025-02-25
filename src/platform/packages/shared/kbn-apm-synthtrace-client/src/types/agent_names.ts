@@ -20,7 +20,7 @@ type ElasticAgentName =
   | 'php'
   | 'android/java';
 
-type EDOTAgentName = 
+type EDOTAgentName =
   | 'opentelemetry/java/elastic'
   | 'opentelemetry/dotnet/elastic'
   | 'opentelemetry/nodejs/elastic'
