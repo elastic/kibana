@@ -4,9 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import React, { useCallback, useMemo } from 'react';
+import { css } from '@emotion/react';
 import { ALERT_SEVERITY } from '@kbn/rule-data-utils';
-import styled from 'styled-components';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -24,9 +25,6 @@ import { getSeverityColor } from './helpers';
 
 const DONUT_HEIGHT = 150;
 
-const StyledEuiLoadingSpinner = styled(EuiLoadingSpinner)`
-  margin: auto;
-`;
 export interface SeverityLevelProps {
   data: SeverityData[];
   isLoading: boolean;
@@ -75,7 +73,12 @@ export const SeverityLevelChart: React.FC<SeverityLevelProps> = ({
       </EuiFlexItem>
       <EuiFlexItem data-test-subj="severity-level-donut">
         {isLoading ? (
-          <StyledEuiLoadingSpinner size="l" />
+          <EuiLoadingSpinner
+            size="l"
+            css={css`
+              margin: auto;
+            `}
+          />
         ) : (
           <DonutChart
             data={data}

@@ -9,7 +9,7 @@ import { fireEvent, render, screen } from '@testing-library/react';
 import React from 'react';
 
 import { TestProviders } from '../../../../common/mock';
-import { KpiPanel, StackByComboBox } from './components';
+import { StackByComboBox } from './components';
 import * as i18n from './translations';
 
 jest.mock('react-router-dom', () => {
@@ -56,44 +56,6 @@ jest.mock('../../../../common/lib/kibana/kibana_react', () => {
 });
 
 describe('components', () => {
-  describe('KpiPanel', () => {
-    test('it has a hidden overflow-x', () => {
-      render(
-        <TestProviders>
-          <KpiPanel data-test-subj="test" $toggleStatus={true}>
-            {'test'}
-          </KpiPanel>
-        </TestProviders>
-      );
-
-      expect(screen.getByTestId('test')).toHaveStyleRule('overflow-x', 'hidden');
-    });
-
-    test('it has a hidden overflow-y by default', () => {
-      render(
-        <TestProviders>
-          <KpiPanel data-test-subj="test" $toggleStatus={true}>
-            {'test'}
-          </KpiPanel>
-        </TestProviders>
-      );
-
-      expect(screen.getByTestId('test')).toHaveStyleRule('overflow-y', 'hidden');
-    });
-
-    test('it uses the `$overflowY` prop for the value of overflow-y when provided', () => {
-      render(
-        <TestProviders>
-          <KpiPanel data-test-subj="test" $overflowY="auto" $toggleStatus={true}>
-            {'test'}
-          </KpiPanel>
-        </TestProviders>
-      );
-
-      expect(screen.getByTestId('test')).toHaveStyleRule('overflow-y', 'auto');
-    });
-  });
-
   describe('StackByComboBox', () => {
     test('it invokes onSelect when a field is selected', async () => {
       const onSelect = jest.fn();

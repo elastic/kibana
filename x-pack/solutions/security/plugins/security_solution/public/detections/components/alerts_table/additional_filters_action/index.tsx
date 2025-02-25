@@ -7,27 +7,17 @@
 
 import React, { useCallback } from 'react';
 
-import { EuiFlexGroup, EuiFlexItem, EuiCheckbox, EuiNotificationBadge } from '@elastic/eui';
-import styled from 'styled-components';
+import {
+  EuiCheckbox,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiNotificationBadge,
+  useEuiTheme,
+} from '@elastic/eui';
 
+import { css } from '@emotion/react';
 import { UtilityBarAction } from '../../../../common/components/utility_bar';
 import * as i18n from './translations';
-
-const UtilityBarFlexGroup = styled(EuiFlexGroup)`
-  min-width: 175px;
-`;
-
-const AdditionalFiltersItem = styled(EuiFlexItem)`
-  padding: ${({ theme }) => theme.eui.euiSizeS};
-`;
-
-const BuildingBlockContainer = styled(AdditionalFiltersItem)`
-  background: ${({ theme }) => theme.eui.euiColorHighlight};
-`;
-
-const CenterText = styled.span`
-  text-align: center;
-`;
 
 export const AdditionalFiltersAction = ({
   areEventsLoading,
@@ -42,10 +32,22 @@ export const AdditionalFiltersAction = ({
   onShowOnlyThreatIndicatorAlertsChanged: (showOnlyThreatIndicatorAlerts: boolean) => void;
   showOnlyThreatIndicatorAlerts: boolean;
 }) => {
+  const { euiTheme } = useEuiTheme();
   const UtilityBarAdditionalFiltersContent = useCallback(
     (closePopover: () => void) => (
-      <UtilityBarFlexGroup direction="column" gutterSize="none">
-        <BuildingBlockContainer>
+      <EuiFlexGroup
+        direction="column"
+        gutterSize="none"
+        css={css`
+          min-width: 175px;
+        `}
+      >
+        <EuiFlexItem
+          css={css`
+            color: ${euiTheme.colors.highlight};
+            padding: ${euiTheme.size.s};
+          `}
+        >
           <EuiCheckbox
             id="showBuildingBlockAlertsCheckbox"
             aria-label="showBuildingBlockAlerts"
@@ -58,8 +60,12 @@ export const AdditionalFiltersAction = ({
             data-test-subj="showBuildingBlockAlertsCheckbox"
             label={i18n.ADDITIONAL_FILTERS_ACTIONS_SHOW_BUILDING_BLOCK}
           />
-        </BuildingBlockContainer>
-        <AdditionalFiltersItem>
+        </EuiFlexItem>
+        <EuiFlexItem
+          css={css`
+            padding: ${euiTheme.size.s};
+          `}
+        >
           <EuiCheckbox
             id="showOnlyThreatIndicatorAlertsCheckbox"
             aria-label="showOnlyThreatIndicatorAlerts"
@@ -72,10 +78,12 @@ export const AdditionalFiltersAction = ({
             data-test-subj="showOnlyThreatIndicatorAlertsCheckbox"
             label={i18n.ADDITIONAL_FILTERS_ACTIONS_SHOW_ONLY_THREAT_INDICATOR_ALERTS}
           />
-        </AdditionalFiltersItem>
-      </UtilityBarFlexGroup>
+        </EuiFlexItem>
+      </EuiFlexGroup>
     ),
     [
+      euiTheme.colors.highlight,
+      euiTheme.size.s,
       onShowBuildingBlockAlertsChanged,
       onShowOnlyThreatIndicatorAlertsChanged,
       showBuildingBlockAlerts,
@@ -95,7 +103,11 @@ export const AdditionalFiltersAction = ({
       ownFocus
       popoverContent={UtilityBarAdditionalFiltersContent}
     >
-      <CenterText>
+      <span
+        css={css`
+          text-align: center;
+        `}
+      >
         {i18n.ADDITIONAL_FILTERS_ACTIONS}
         {additionalFilterCount > 0 && (
           <>
@@ -106,7 +118,7 @@ export const AdditionalFiltersAction = ({
             >{`${additionalFilterCount}`}</EuiNotificationBadge>
           </>
         )}
-      </CenterText>
+      </span>
     </UtilityBarAction>
   );
 };

@@ -21,14 +21,13 @@ import { SourcererScopeName } from '../../../../sourcerer/store/model';
 import { VisualizationEmbeddable } from '../../../../common/components/visualization_actions/visualization_embeddable';
 
 export const DETECTIONS_ALERTS_COUNT_ID = 'detections-alerts-count';
+const CHART_HEIGHT = 218; // px
 
 interface AlertsCountPanelProps {
-  alignHeader?: 'center' | 'baseline' | 'stretch' | 'flexStart' | 'flexEnd';
-  chartOptionsContextMenu?: (queryId: string) => React.ReactNode;
-  extraActions?: Action[];
-  filters?: Filter[];
-  inspectTitle: string;
-  panelHeight?: number;
+  chartOptionsContextMenu: (queryId: string) => React.ReactNode;
+  extraActions: Action[];
+  filters: Filter[];
+  panelHeight: number;
   setStackByField0: (stackBy: string) => void;
   setStackByField0ComboboxInputRef?: (inputRef: HTMLInputElement | null) => void;
   setStackByField1: (stackBy: string | undefined) => void;
@@ -37,20 +36,16 @@ interface AlertsCountPanelProps {
   stackByField0ComboboxRef?: React.RefObject<EuiComboBox<string | number | string[] | undefined>>;
   stackByField1: string | undefined;
   stackByField1ComboboxRef?: React.RefObject<EuiComboBox<string | number | string[] | undefined>>;
-  stackByWidth?: number;
-  title?: React.ReactNode;
+  title: React.ReactNode;
   isExpanded: boolean;
   setIsExpanded: (status: boolean) => void;
 }
-const CHART_HEIGHT = 218; // px
 
 export const AlertsCountPanel = memo<AlertsCountPanelProps>(
   ({
-    alignHeader,
     chartOptionsContextMenu,
     extraActions,
     filters,
-    inspectTitle,
     panelHeight,
     setStackByField0,
     setStackByField0ComboboxInputRef,
@@ -60,7 +55,6 @@ export const AlertsCountPanel = memo<AlertsCountPanelProps>(
     stackByField0ComboboxRef,
     stackByField1,
     stackByField1ComboboxRef,
-    stackByWidth,
     title = i18n.COUNT_TABLE_TITLE,
     isExpanded,
     setIsExpanded,
@@ -81,15 +75,14 @@ export const AlertsCountPanel = memo<AlertsCountPanelProps>(
     return (
       <InspectButtonContainer show={isExpanded}>
         <KpiPanel
-          $toggleStatus={Boolean(isExpanded)}
-          data-test-subj="alertsCountPanel"
-          hasBorder
           height={panelHeight}
+          toggleStatus={Boolean(isExpanded)}
+          data-test-subj="alertsCountPanel"
         >
           <HeaderSection
-            alignHeader={alignHeader}
+            alignHeader="flexStart"
             id={uniqueQueryId}
-            inspectTitle={inspectTitle}
+            inspectTitle={i18n.COUNTS}
             outerDirection="row"
             title={title}
             titleSize="s"
@@ -107,7 +100,6 @@ export const AlertsCountPanel = memo<AlertsCountPanelProps>(
               stackByField0ComboboxRef={stackByField0ComboboxRef}
               stackByField1={stackByField1}
               stackByField1ComboboxRef={stackByField1ComboboxRef}
-              stackByWidth={stackByWidth}
               uniqueQueryId={uniqueQueryId}
               useLensCompatibleFields={true}
             />
@@ -120,7 +112,7 @@ export const AlertsCountPanel = memo<AlertsCountPanelProps>(
               getLensAttributes={getLensAttributes}
               height={CHART_HEIGHT}
               id={`${uniqueQueryId}-embeddable`}
-              inspectTitle={inspectTitle}
+              inspectTitle={i18n.COUNTS}
               scopeId={SourcererScopeName.detections}
               stackByField={stackByField0}
               timerange={timerange}

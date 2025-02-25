@@ -142,7 +142,6 @@ const TopNComponent: React.FC<Props> = ({
             filters={applicableFilters}
             headerChildren={headerChildren}
             onlyField={field}
-            paddingSize={paddingSize}
             setAbsoluteRangeDatePickerTarget={setAbsoluteRangeDatePickerTarget}
             hideQueryToggle
           />
