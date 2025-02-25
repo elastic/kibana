@@ -1823,6 +1823,7 @@ x-pack/test/security_solution_cypress/cypress/tasks/expandable_flyout  @elastic/
 /x-pack/solutions/security/plugins/security_solution/common/api/detection_engine/prebuilt_rules @elastic/security-detection-rule-management
 /x-pack/solutions/security/plugins/security_solution/common/api/detection_engine/rule_management @elastic/security-detection-rule-management
 /x-pack/solutions/security/plugins/security_solution/common/api/detection_engine/rule_monitoring @elastic/security-detection-rule-management
+/x-pack/solutions/security/plugins/security_solution/common/detection_engine/prebuilt_rules @elastic/security-detection-rule-management
 /x-pack/solutions/security/plugins/security_solution/common/detection_engine/rule_management @elastic/security-detection-rule-management
 
 /x-pack/test/security_solution_cypress/cypress/e2e/detection_response/rule_management @elastic/security-detection-rule-management
