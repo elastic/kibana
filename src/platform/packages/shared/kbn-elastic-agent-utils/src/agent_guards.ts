@@ -59,10 +59,8 @@ export function isOpenTelemetryAgentName(agentName: string): agentName is OpenTe
 }
 
 export function isEDOTAgentName(agentName: string): agentName is OpenTelemetryAgentName {
-    return (
-        EDOT_AGENT_NAMES.includes(agentName as OpenTelemetryAgentName)
-    );
-  }
+  return EDOT_AGENT_NAMES.includes(agentName as OpenTelemetryAgentName);
+}
 
 export function isJavaAgentName(agentName?: string): agentName is JavaAgentName {
   return (
