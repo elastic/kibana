@@ -341,6 +341,7 @@ export default ({ getService }: FtrProviderContext) => {
         const expectedDocumentEntry = {
           ...globalDocumentEntry,
           users: [{ name: 'elastic' }],
+          global: false,
           text: 'This is a sample of updated global document entry',
         };
 

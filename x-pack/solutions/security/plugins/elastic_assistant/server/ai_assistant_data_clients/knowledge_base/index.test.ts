@@ -506,7 +506,10 @@ describe('AIAssistantKnowledgeBaseDataClient', () => {
       mockOptions.manageGlobalKnowledgeBaseAIAssistant = false;
 
       await expect(
-        client.createKnowledgeBaseEntry({ telemetry, knowledgeBaseEntry })
+        client.createKnowledgeBaseEntry({
+          telemetry,
+          knowledgeBaseEntry: { ...knowledgeBaseEntry, global: true },
+        })
       ).rejects.toThrow('User lacks privileges to create global knowledge base entries');
     });
   });
