@@ -13,9 +13,10 @@ import { DataView, type DataViewListItem } from '@kbn/data-views-plugin/public';
 import type { DataViewPickerScopeName } from '../../constants';
 import { useKibana } from '../../../common/lib/kibana/kibana_react';
 import { DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID } from '../../constants';
-import { selectDataViewAsync, shared } from '../../redux/reducer';
+import { selectDataViewAsync } from '../../redux/actions';
 import { useDataView } from '../../hooks/use_data_view';
 import { sharedStateSelector } from '../../redux/selectors';
+import { shared } from '../../redux/slices';
 
 export const DataViewPicker = memo((props: { scope: DataViewPickerScopeName }) => {
   const dispatch = useDispatch();
@@ -27,7 +28,7 @@ export const DataViewPicker = memo((props: { scope: DataViewPickerScopeName }) =
   const closeDataViewEditor = useRef<() => void | undefined>();
   const closeFieldEditor = useRef<() => void | undefined>();
 
-  // TODO: should this be implemented like that? If yes, we need to source dataView somehow or implement the same thing based on the existing state value.
+  // TODO: this should be disabled for the default data views probably, eg. `security-solution-default`
   // const canEditDataView =
   // Boolean(dataViewEditor?.userPermissions.editDataView()) || !dataView.isPersisted();
   const canEditDataView = true;
@@ -41,7 +42,6 @@ export const DataViewPicker = memo((props: { scope: DataViewPickerScopeName }) =
       onSave: async (newDataView) => {
         dispatch(shared.actions.addDataView(newDataView));
         dispatch(selectDataViewAsync({ id: newDataView.id, scope: [props.scope] }));
-        // TODO: reload data views
       },
       allowAdHocDataView: true,
     });

@@ -8,7 +8,7 @@
 import { useDispatch } from 'react-redux';
 import { useCallback } from 'react';
 import type { DataViewPickerScopeName } from '../constants';
-import { selectDataViewAsync } from '../redux/reducer';
+import { selectDataViewAsync } from '../redux/actions';
 
 export const useSelectDataView = () => {
   const dispatch = useDispatch();

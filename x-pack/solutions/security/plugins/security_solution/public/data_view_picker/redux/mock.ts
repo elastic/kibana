@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { DataViewSpec } from '@kbn/data-views-plugin/common';
+import type { DataViewSpec } from './types';
 import { DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID } from '../constants';
 import { initialDataViewPickerState, type RootState } from './reducer';
 import { mockIndexFields } from '../../common/containers/source/mock';

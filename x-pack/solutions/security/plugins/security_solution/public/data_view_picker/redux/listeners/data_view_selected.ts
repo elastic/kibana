@@ -8,7 +8,9 @@
 import type { DataViewSpec, DataViewsServicePublic } from '@kbn/data-views-plugin/public';
 import type { AnyAction, Dispatch, ListenerEffectAPI } from '@reduxjs/toolkit';
 import type { RootState } from '../reducer';
-import { scopes, selectDataViewAsync, shared } from '../reducer';
+import { scopes } from '../reducer';
+import { selectDataViewAsync } from '../actions';
+import { shared } from '../slices';
 
 export const createDataViewSelectedListener = (dependencies: {
   dataViews: DataViewsServicePublic;
@@ -22,16 +24,27 @@ export const createDataViewSelectedListener = (dependencies: {
       const state = listenerApi.getState();
 
       const findCachedDataView = (id: string | null | undefined) => {
-        const dataView =
-          state.dataViewPicker.shared.adhocDataViews.find((dv) => dv.id === id) ?? null;
-
-        // NOTE: validate if fields are available, otherwise dont return the view
-        // This is required to compute browserFields later.
-        if (!Object.keys(dataView?.fields || {})) {
+        if (!id) {
           return null;
         }
 
-        return dataView;
+        const cachedAdHocDataView =
+          state.dataViewPicker.shared.adhocDataViews.find((dv) => dv.id === id) ?? null;
+
+        const cachedPersistedDataView =
+          state.dataViewPicker.shared.dataViews.find((dv) => dv.id === id) ?? null;
+
+        const cachedDataView = cachedAdHocDataView || cachedPersistedDataView;
+
+        // NOTE: validate if fields are available, otherwise dont return the view
+        // This is required to compute browserFields later.
+        // If the view is not returned here, it will be fetched further down this file, and that
+        // should return the full data view.
+        if (!Object.keys(cachedDataView?.fields || {})) {
+          return null;
+        }
+
+        return cachedDataView;
       };
 
       let dataViewByIdError: unknown;
@@ -56,7 +69,7 @@ export const createDataViewSelectedListener = (dependencies: {
 
       if (!dataViewSpec) {
         try {
-          const title = action.payload.patterns?.join(',') ?? '';
+          const title = action.payload.fallbackPatterns?.join(',') ?? '';
           if (!title.length) {
             throw new Error('empty adhoc title field');
           }
@@ -78,8 +91,11 @@ export const createDataViewSelectedListener = (dependencies: {
         if (dataViewSpec) {
           listenerApi.dispatch(currentScopeActions.setSelectedDataView(dataViewSpec));
         } else if (dataViewByIdError || adhocDataViewCreationError) {
+          const err = dataViewByIdError || adhocDataViewCreationError;
           listenerApi.dispatch(
-            currentScopeActions.dataViewSelectionError('An error occured when setting data view')
+            currentScopeActions.dataViewSelectionError(
+              `An error occured when setting data view: ${err}`
+            )
           );
         }
       });

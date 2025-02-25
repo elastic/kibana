@@ -8,7 +8,7 @@
 import type { AnyAction, Dispatch, ListenerEffectAPI } from '@reduxjs/toolkit';
 import type { DataViewsServicePublic } from '@kbn/data-views-plugin/public';
 import type { RootState } from '../reducer';
-import { shared } from '../reducer';
+import { shared } from '../slices';
 
 export const createInitListener = (dependencies: { dataViews: DataViewsServicePublic }) => {
   return {

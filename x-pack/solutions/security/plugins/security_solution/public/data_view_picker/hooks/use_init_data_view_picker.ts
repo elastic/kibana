@@ -13,12 +13,13 @@ import {
   removeListener as originalRemoveListener,
 } from '@reduxjs/toolkit';
 import type { RootState } from '../redux/reducer';
-import { shared, selectDataViewAsync } from '../redux/reducer';
+import { selectDataViewAsync } from '../redux/actions';
 import { useKibana } from '../../common/lib/kibana';
 import { DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID, DataViewPickerScopeName } from '../constants';
 import { createDataViewSelectedListener } from '../redux/listeners/data_view_selected';
 import { createInitListener } from '../redux/listeners/init_listener';
 import { useEnableExperimental } from '../../common/hooks/use_experimental_features';
+import { shared } from '../redux/slices';
 
 type OriginalListener = Parameters<typeof originalAddListener>[0];
 
