@@ -73,11 +73,9 @@ export const deleteAllEndpointData = async (
 
   const deleteResponse = await esClientUnrestricted.deleteByQuery({
     index: '*,.*',
-    body: {
-      query: {
-        query_string: {
-          query: queryString,
-        },
+    query: {
+      query_string: {
+        query: queryString,
       },
     },
     ignore_unavailable: true,
