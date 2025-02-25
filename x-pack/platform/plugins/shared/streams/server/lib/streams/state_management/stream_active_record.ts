@@ -97,19 +97,13 @@ export abstract class StreamActiveRecord<TDefinition extends StreamDefinition = 
     scopedClusterClient: IScopedClusterClient,
     isServerless: boolean
   ) {
-    if (this.changeStatus === 'upserted') {
-      if (startingState.has(this.definition.name)) {
-        // Stream was updated, revert to previous state
-        const startingStateDefinition = startingState.get(this.definition.name)?.definition!;
-        this.upsert(startingStateDefinition, startingState, desiredState);
-      } else {
-        // Stream was created, delete it
-        this.delete(startingState, desiredState);
-      }
-    } else if (this.changeStatus === 'deleted') {
-      // Stream was deleted, revert to previous state
+    if (startingState.has(this.definition.name)) {
+      // Stream was updated or deleted
       const startingStateDefinition = startingState.get(this.definition.name)?.definition!;
       this.upsert(startingStateDefinition, startingState, desiredState);
+    } else {
+      // Stream was created
+      this.delete(startingState, desiredState);
     }
 
     await this.commit(storageClient, logger, scopedClusterClient, isServerless);
