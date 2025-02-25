@@ -25,6 +25,7 @@ import { isRetina } from '../../../util';
 import { DataRequestContext } from '../../../actions';
 import { EMSTMSSource } from '../../sources/ems_tms_source';
 import { EMSVectorTileStyle } from '../../styles/ems/ems_vector_tile_style';
+import type { SpriteMeta } from '../../sources/ems_tms_source/ems_tms_source';
 
 interface SourceRequestMeta {
   tileLayerId: string;
@@ -33,10 +34,7 @@ interface SourceRequestMeta {
 interface SourceRequestData {
   spriteSheetImageData?: ImageData;
   vectorStyleSheet?: StyleSpecification;
-  spriteMeta?: {
-    png: string;
-    json: EmsSpriteSheet;
-  };
+  spriteMeta?: SpriteMeta;
 }
 
 export class EmsVectorTileLayer extends AbstractLayer {
