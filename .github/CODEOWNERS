@@ -79,7 +79,7 @@ src/platform/plugins/shared/charts @elastic/kibana-visualizations
 src/platform/packages/shared/kbn-charts-theme @elastic/kibana-visualizations
 packages/kbn-check-mappings-update-cli @elastic/kibana-core
 packages/kbn-check-prod-native-modules-cli @elastic/kibana-operations
-packages/kbn-ci-stats-core @elastic/kibana-operations
+src/platform/packages/private/kbn-ci-stats-core @elastic/kibana-operations
 packages/kbn-ci-stats-performance-metrics @elastic/kibana-operations
 packages/kbn-ci-stats-reporter @elastic/kibana-operations
 packages/kbn-ci-stats-shipper-cli @elastic/kibana-operations
