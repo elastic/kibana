@@ -14,8 +14,6 @@ import { Connector, fetchConnectors } from '@kbn/search-connectors';
 
 import { ConfigType } from '..';
 
-import { getPreEightEnterpriseSearchIndices } from './pre_eight_index_deprecator';
-
 export const getRegisteredDeprecations = (
   config: ConfigType,
   cloud: CloudSetup,
@@ -24,18 +22,11 @@ export const getRegisteredDeprecations = (
   return {
     getDeprecations: async (ctx: GetDeprecationsContext) => {
       const entSearchDetails = getEnterpriseSearchNodeDeprecation(config, cloud, docsUrl);
-      const [crawlerDetails, nativeConnectorsDetails, entSearchIndexIncompatibility] =
-        await Promise.all([
-          getCrawlerDeprecations(ctx, docsUrl),
-          getNativeConnectorDeprecations(ctx, docsUrl),
-          getEnterpriseSearchPre8IndexDeprecations(ctx, docsUrl, config.host),
-        ]);
-      return [
-        ...entSearchDetails,
-        ...crawlerDetails,
-        ...nativeConnectorsDetails,
-        ...entSearchIndexIncompatibility,
-      ];
+      const [crawlerDetails, nativeConnectorsDetails] = await Promise.all([
+        getCrawlerDeprecations(ctx, docsUrl),
+        getNativeConnectorDeprecations(ctx, docsUrl),
+      ]);
+      return [...entSearchDetails, ...crawlerDetails, ...nativeConnectorsDetails];
     },
   };
 };
@@ -49,7 +40,7 @@ export function getEnterpriseSearchNodeDeprecation(
   cloud: CloudSetup,
   docsUrl: string
 ): DeprecationsDetails[] {
-  if (config.host) {
+  if (config.host || config.customHeaders) {
     const steps = [];
     let addendum: string = '';
     const isCloud = !!cloud?.cloudId;
@@ -96,6 +87,10 @@ export function getEnterpriseSearchNodeDeprecation(
           i18n.translate('xpack.enterpriseSearch.deprecations.entsearchhost.removeconfig', {
             defaultMessage: "Edit 'kibana.yml' to remove 'enterpriseSearch.host'",
           }),
+          i18n.translate('xpack.enterpriseSearch.deprecations.entsearchhost.removecustomconfig', {
+            defaultMessage:
+              "Edit 'kibana.yml' to remove 'enterpriseSearch.customHeaders' if it exists",
+          }),
           i18n.translate('xpack.enterpriseSearch.deprecations.entsearchhost.restart', {
             defaultMessage: 'Restart Kibana',
           }),
@@ -107,7 +102,7 @@ export function getEnterpriseSearchNodeDeprecation(
         level: 'critical',
         deprecationType: 'feature',
         title: i18n.translate('xpack.enterpriseSearch.deprecations.entsearchhost.title', {
-          defaultMessage: 'Enterprise Search host(s) must be removed',
+          defaultMessage: 'Enterprise Search host(s) and configuration must be removed',
         }),
         message: {
           type: 'markdown',
@@ -120,6 +115,7 @@ export function getEnterpriseSearchNodeDeprecation(
               'Enterprise Search is not supported in versions >= 9.x.\n\n' +
               'Please note the following:\n' +
               '- You must remove any Enterprise Search nodes from your deployment to proceed with the upgrade.\n' +
+              '- You must also remove any Enterprise Search configuration elements in your Kibana config.\n' +
               '- If you are currently using App Search, Workplace Search, or the Elastic Web Crawler, these features will ' +
               'cease to function if you remove Enterprise Search from your deployment. Therefore, it is critical to ' +
               'first [migrate your Enterprise Search use cases]({migration_link}) before decommissioning your ' +
@@ -266,106 +262,4 @@ export async function getNativeConnectorDeprecations(
 
     return deprecations;
   }
-}
-
-/**
- * If there are any Enterprise Search indices that were created with Elasticsearch 7.x, they must be removed
- * or set to read-only
- */
-export async function getEnterpriseSearchPre8IndexDeprecations(
-  ctx: GetDeprecationsContext,
-  docsUrl: string,
-  configHost?: string
-): Promise<DeprecationsDetails[]> {
-  const deprecations: DeprecationsDetails[] = [];
-
-  if (!configHost) {
-    return deprecations;
-  }
-
-  const entSearchIndices = await getPreEightEnterpriseSearchIndices(ctx.esClient.asInternalUser);
-  if (!entSearchIndices || entSearchIndices.length === 0) {
-    return deprecations;
-  }
-
-  let indicesList = '';
-  let datastreamsList = '';
-  for (const index of entSearchIndices) {
-    if (index.isDatastream) {
-      datastreamsList += `${index.name}\n`;
-    } else {
-      indicesList += `${index.name}\n`;
-    }
-  }
-
-  let message = `There are ${entSearchIndices.length} incompatible Enterprise Search indices.\n\n`;
-
-  if (indicesList.length > 0) {
-    message +=
-      'The following indices are found to be incompatible for upgrade:\n\n' +
-      '```\n' +
-      `${indicesList}` +
-      '\n```\n\n' +
-      'These indices must be either set to read-only or deleted before upgrading. ';
-  }
-
-  if (datastreamsList.length > 0) {
-    message +=
-      '\nThe following data streams are found to be incompatible for upgrade:\n\n' +
-      '```\n' +
-      `${datastreamsList}` +
-      '\n```\n\n' +
-      'Using the "quick resolve" button below will roll over any datastreams and set all incompatible indices to read-only.\n\n' +
-      'Alternatively, manually deleting these indices and data streams will also unblock your upgrade.';
-  } else {
-    message +=
-      'Setting these indices to read-only can be attempted with the "quick resolve" button below.\n\n' +
-      'Alternatively, manually deleting these indices will also unblock your upgrade.';
-  }
-
-  deprecations.push({
-    level: 'critical',
-    deprecationType: 'feature',
-    title: i18n.translate(
-      'xpack.enterpriseSearch.deprecations.incompatibleEnterpriseSearchIndexes.title',
-      {
-        defaultMessage: 'Pre 8.x Enterprise Search indices compatibility',
-      }
-    ),
-    message: {
-      type: 'markdown',
-      content: i18n.translate(
-        'xpack.enterpriseSearch.deprecations.incompatibleEnterpriseSearchIndexes.message',
-        {
-          defaultMessage: message,
-        }
-      ),
-    },
-    documentationUrl: docsUrl,
-    correctiveActions: {
-      manualSteps: [
-        i18n.translate(
-          'xpack.enterpriseSearch.deprecations.incompatibleEnterpriseSearchIndexes.deleteIndices',
-          {
-            defaultMessage: 'Set all incompatible indices to read only, or',
-          }
-        ),
-        i18n.translate(
-          'xpack.enterpriseSearch.deprecations.incompatibleEnterpriseSearchIndexes.deleteIndices',
-          {
-            defaultMessage: 'Delete all incompatible indices',
-          }
-        ),
-      ],
-      api: {
-        method: 'POST',
-        path: '/internal/enterprise_search/deprecations/set_enterprise_search_indices_read_only',
-        body: {
-          deprecationDetails: { domainId: 'enterpriseSearch' },
-        },
-      },
-    },
-  });
-
-  return deprecations;
 }

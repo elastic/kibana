@@ -6,6 +6,7 @@
  */
 
 import { coreMock } from '@kbn/core/server/mocks';
+import { loggerMock } from '@kbn/logging-mocks';
 import { SiemMigrationTelemetryClient } from './rule_migrations_telemetry_client';
 import type { RuleMigrationIntegration, RuleMigrationPrebuiltRule } from '../types';
 import type { MigrateRuleState } from './agent/types';
@@ -17,7 +18,6 @@ const translationResultWithMatchMock = {
 const translationResultMock = {
   translation_result: 'partial',
 } as MigrateRuleState;
-const stats = { completed: 2, failed: 2 };
 const preFilterRulesMock: RuleMigrationPrebuiltRule[] = [
   {
     rule_id: 'rule1id',
@@ -68,8 +68,10 @@ const preFilterIntegrationMocks: RuleMigrationIntegration[] = [
 ];
 
 const mockTelemetry = coreMock.createSetup().analytics;
+const mockLogger = loggerMock.create();
 const siemTelemetryClient = new SiemMigrationTelemetryClient(
   mockTelemetry,
+  mockLogger,
   'testmigration',
   'testModel'
 );
@@ -93,13 +95,22 @@ describe('siemMigrationTelemetry', () => {
     jest.useRealTimers();
   });
   it('start/end migration with error', async () => {
-    const endSiemMigration = siemTelemetryClient.startSiemMigration();
-    const error = new Error('test');
-    endSiemMigration({ stats, error });
+    const error = 'test error message';
+    const siemMigrationTaskTelemetry = siemTelemetryClient.startSiemMigrationTask();
+    const ruleTranslationTelemetry = siemMigrationTaskTelemetry.startRuleTranslation();
+
+    // 2 success and 2 failures
+    ruleTranslationTelemetry.success(translationResultMock);
+    ruleTranslationTelemetry.success(translationResultMock);
+    ruleTranslationTelemetry.failure(new Error('test'));
+    ruleTranslationTelemetry.failure(new Error('test'));
+
+    siemMigrationTaskTelemetry.failure(new Error(error));
+
     expect(mockTelemetry.reportEvent).toHaveBeenCalledWith('siem_migrations_migration_failure', {
       completed: 2,
       duration: 0,
-      error: 'test',
+      error,
       failed: 2,
       migrationId: 'testmigration',
       model: 'testModel',
@@ -107,9 +118,17 @@ describe('siemMigrationTelemetry', () => {
     });
   });
   it('start/end migration success', async () => {
-    const endSiemMigration = siemTelemetryClient.startSiemMigration();
+    const siemMigrationTaskTelemetry = siemTelemetryClient.startSiemMigrationTask();
+    const ruleTranslationTelemetry = siemMigrationTaskTelemetry.startRuleTranslation();
 
-    endSiemMigration({ stats });
+    // 2 success and 2 failures
+    ruleTranslationTelemetry.success(translationResultMock);
+    ruleTranslationTelemetry.success(translationResultMock);
+    ruleTranslationTelemetry.failure(new Error('test'));
+    ruleTranslationTelemetry.failure(new Error('test'));
+
+    siemMigrationTaskTelemetry.success();
+
     expect(mockTelemetry.reportEvent).toHaveBeenCalledWith('siem_migrations_migration_success', {
       completed: 2,
       duration: 0,
@@ -120,23 +139,23 @@ describe('siemMigrationTelemetry', () => {
     });
   });
   it('start/end rule translation with error', async () => {
-    const endRuleTranslation = siemTelemetryClient.startRuleTranslation();
-    const error = new Error('test');
+    const error = 'test error message';
+    const siemMigrationTaskTelemetry = siemTelemetryClient.startSiemMigrationTask();
+    const ruleTranslationTelemetry = siemMigrationTaskTelemetry.startRuleTranslation();
 
-    endRuleTranslation({ error });
+    ruleTranslationTelemetry.failure(new Error(error));
+
     expect(mockTelemetry.reportEvent).toHaveBeenCalledWith(
       'siem_migrations_rule_translation_failure',
-      {
-        error: 'test',
-        migrationId: 'testmigration',
-        model: 'testModel',
-      }
+      { error, migrationId: 'testmigration', model: 'testModel' }
     );
   });
   it('start/end rule translation success with prebuilt', async () => {
-    const endRuleTranslation = siemTelemetryClient.startRuleTranslation();
+    const siemMigrationTaskTelemetry = siemTelemetryClient.startSiemMigrationTask();
+    const ruleTranslationTelemetry = siemMigrationTaskTelemetry.startRuleTranslation();
 
-    endRuleTranslation({ migrationResult: translationResultWithMatchMock });
+    ruleTranslationTelemetry.success(translationResultWithMatchMock);
+
     expect(mockTelemetry.reportEvent).toHaveBeenCalledWith(
       'siem_migrations_rule_translation_success',
       {
@@ -149,9 +168,11 @@ describe('siemMigrationTelemetry', () => {
     );
   });
   it('start/end rule translation success without prebuilt', async () => {
-    const endRuleTranslation = siemTelemetryClient.startRuleTranslation();
+    const siemMigrationTaskTelemetry = siemTelemetryClient.startSiemMigrationTask();
+    const ruleTranslationTelemetry = siemMigrationTaskTelemetry.startRuleTranslation();
 
-    endRuleTranslation({ migrationResult: translationResultMock });
+    ruleTranslationTelemetry.success(translationResultMock);
+
     expect(mockTelemetry.reportEvent).toHaveBeenCalledWith(
       'siem_migrations_rule_translation_success',
       {
@@ -199,7 +220,7 @@ describe('siemMigrationTelemetry', () => {
       migrationId: 'testmigration',
       model: 'testModel',
       postFilterRuleCount: 1,
-      postFilterRuleNames: 'rule1id',
+      postFilterRuleName: 'rule1id',
       preFilterRuleCount: 2,
       preFilterRuleNames: ['rule1id', 'rule2id'],
     });
@@ -212,7 +233,7 @@ describe('siemMigrationTelemetry', () => {
       migrationId: 'testmigration',
       model: 'testModel',
       postFilterRuleCount: 0,
-      postFilterRuleNames: '',
+      postFilterRuleName: '',
       preFilterRuleCount: 2,
       preFilterRuleNames: ['rule1id', 'rule2id'],
     });

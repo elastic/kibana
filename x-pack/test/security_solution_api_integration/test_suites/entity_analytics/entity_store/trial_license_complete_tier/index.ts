@@ -13,6 +13,5 @@ export default function ({ loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./entity_store'));
     loadTestFile(require.resolve('./field_retention_operators'));
     loadTestFile(require.resolve('./entity_store_nondefault_spaces'));
-    loadTestFile(require.resolve('./asset_inventory_pipeline'));
   });
 }
