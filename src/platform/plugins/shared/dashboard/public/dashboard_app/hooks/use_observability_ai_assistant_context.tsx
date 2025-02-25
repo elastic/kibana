@@ -24,7 +24,7 @@ import {
   type LensXYConfig,
 } from '@kbn/lens-embeddable-utils/config_builder';
 import { LensEmbeddableInput } from '@kbn/lens-plugin/public';
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { DashboardApi } from '../../dashboard_api/types';
 import { dataService, observabilityAssistantService } from '../../services/kibana_services';
 
@@ -47,6 +47,7 @@ export function useObservabilityAIAssistantContext({
 }: {
   dashboardApi: DashboardApi | undefined;
 }) {
+  const cleanupRef = useRef<(() => void) | undefined>(undefined);
   useEffect(() => {
     if (!observabilityAssistantService) {
       return;
@@ -57,7 +58,7 @@ export function useObservabilityAIAssistantContext({
       createScreenContextAction,
     } = observabilityAssistantService;
 
-    return setScreenContext({
+    cleanupRef.current = setScreenContext({
       screenDescription:
         'The user is looking at the dashboard app. Here they can add visualizations to a dashboard and save them',
       actions: dashboardApi
@@ -377,5 +378,11 @@ export function useObservabilityAIAssistantContext({
           ]
         : [],
     });
+
+    return () => {
+      if (cleanupRef.current) {
+        cleanupRef.current();
+      }
+    };
   }, [dashboardApi]);
 }
