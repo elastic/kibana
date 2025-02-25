@@ -101,7 +101,8 @@
     "@kbn/react-hooks",
     "@kbn/logs-data-access-plugin",
     "@kbn/core-lifecycle-browser",
-    "@kbn/esql-ast"
+    "@kbn/esql-ast",
+    "@kbn/embeddable-enhanced-plugin"
   ],
   "exclude": [
     "target/**/*"

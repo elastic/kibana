@@ -21,6 +21,15 @@
       "enabled": false
     },
     {
+      "groupName": "webpack",
+      "matchDepNames": ["webpack", "@types/webpack", "webpack-cli", "webpack-dev-server", "webpack-merge"],
+      "reviewers": ["team:kibana-operations"],
+      "matchBaseBranches": ["main"],
+      "labels": ["Team:Operations", "backport:all-open", "release_note:skip", "ci:build-webpack-bundle-analyzer"],
+      "minimumReleaseAge": "60 days",
+      "enabled": true
+    },
+    {
       "groupName": "devcontainer",
       "reviewers": ["team:kibana-operations"],
       "matchBaseBranches": ["main"],

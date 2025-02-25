@@ -239,6 +239,11 @@ export class DashboardContainer
     const controlGroupApi$ = new BehaviorSubject<ControlGroupApi | undefined>(undefined);
     async function untilContainerInitialized(): Promise<void> {
       return new Promise((resolve) => {
+        if (initialInput.viewMode === ViewMode.PRINT) {
+          // control group is not created in print mode
+          resolve();
+          return;
+        }
         controlGroupApi$
           .pipe(
             skipWhile((controlGroupApi) => !controlGroupApi),

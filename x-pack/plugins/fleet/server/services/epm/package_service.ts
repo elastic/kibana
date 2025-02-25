@@ -111,15 +111,15 @@ export interface PackageClient {
   ): ReturnType<typeof getPackageFieldsMetadata>;
 
   getPackages(params?: {
-    excludeInstallStatus?: false;
+    excludeInstallStatus?: boolean;
     category?: CategoryId;
-    prerelease?: false;
+    prerelease?: boolean;
   }): Promise<PackageList>;
 
   getAgentPolicyInputs(
     pkgName: string,
     pkgVersion?: string,
-    prerelease?: false,
+    prerelease?: boolean,
     ignoreUnverified?: boolean
   ): Promise<TemplateAgentPolicyInput[]>;
 
@@ -287,7 +287,7 @@ class PackageClientImpl implements PackageClient {
   public async getAgentPolicyInputs(
     pkgName: string,
     pkgVersion?: string,
-    prerelease?: false,
+    prerelease?: boolean,
     ignoreUnverified?: boolean
   ) {
     await this.#runPreflight(READ_PACKAGE_INFO_AUTHZ);
@@ -328,9 +328,9 @@ class PackageClientImpl implements PackageClient {
   }
 
   public async getPackages(params?: {
-    excludeInstallStatus?: false;
+    excludeInstallStatus?: boolean;
     category?: CategoryId;
-    prerelease?: false;
+    prerelease?: boolean;
   }) {
     const { excludeInstallStatus, category, prerelease } = params || {};
     await this.#runPreflight(READ_PACKAGE_INFO_AUTHZ);
