@@ -6590,7 +6590,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/observability-synthetics-test-data@link:x-pack/solutions/observability/packages/synthetics_test_data":
+"@kbn/observability-synthetics-test-data@link:x-pack/solutions/observability/packages/synthetics-test-data":
   version "0.0.0"
   uid ""
 
