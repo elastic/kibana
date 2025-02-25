@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { merge } from 'lodash';
 import type { ValuesType } from 'utility-types';
 import { joinByKey } from '../../../../common/utils/join_by_key';
