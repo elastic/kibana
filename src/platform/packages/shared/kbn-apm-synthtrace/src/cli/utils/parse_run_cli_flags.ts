@@ -67,13 +67,11 @@ export function parseRunCliFlags(flags: RunCliFlags) {
       parsedLogLevel = LogLevel.error;
       break;
   }
-
   return {
     ...pick(
       flags,
       'target',
       'workers',
-      'scenarioOpts',
       'kibana',
       'concurrency',
       'versionOverride',
@@ -81,6 +79,7 @@ export function parseRunCliFlags(flags: RunCliFlags) {
       'assume-package-version',
       'liveBucketSize'
     ),
+    scenarioOpts: flags.scenarioOpts as unknown as Record<string, unknown>,
     logLevel: parsedLogLevel,
     file: parsedFile,
   };

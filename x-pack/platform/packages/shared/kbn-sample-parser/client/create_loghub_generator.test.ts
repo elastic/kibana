@@ -76,7 +76,7 @@ describe('createLoghubGenerator', () => {
     });
 
     test('applies speed throttle when log rate is too high', () => {
-      const generator = createLoghubGenerator({ system, parser, log });
+      const generator = createLoghubGenerator({ system, parser, log, targetRpm: 100 });
 
       const startTime = 100_000;
       const firstBatch = generator.next(startTime);

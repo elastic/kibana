@@ -6,44 +6,30 @@
  */
 
 import { ToolingLog } from '@kbn/tooling-log';
-import { orderBy } from 'lodash';
 import { LoghubSystem } from '../src/read_loghub_system_files';
 import { LoghubParser } from '../src/types';
 import { StreamLogDocument, StreamLogGenerator } from './types';
+import { parseDataset } from './parse_dataset';
 
 export function createLoghubGenerator({
   system,
   parser,
   log,
+  targetRpm,
 }: {
   system: LoghubSystem;
   parser: LoghubParser;
   log: ToolingLog;
+  targetRpm?: number;
 }): StreamLogGenerator {
-  const MAX_PER_MINUTE = 100;
   let index = 0;
   let start = 0;
-  const parsedLogLines = system.logLines.map((line) => {
-    const timestamp = parser.getTimestamp(line);
-    return {
-      timestamp,
-      message: line,
-    };
-  });
 
-  const sortedLogLines = orderBy(parsedLogLines, (line) => line.timestamp, 'asc');
+  const { rpm: systemRpm, lines, min, range } = parseDataset({ system, parser });
 
-  const min = sortedLogLines[0].timestamp;
-  const max = sortedLogLines[parsedLogLines.length - 1].timestamp;
+  const count = lines.length;
 
-  const count = sortedLogLines.length;
-
-  // add one to separate start and end event
-  const range = max - min + 1;
-
-  const rpm = count / (range / 1000 / 60);
-
-  const speed = rpm > MAX_PER_MINUTE ? MAX_PER_MINUTE / rpm : 1;
+  const speed = targetRpm === undefined ? 1 : targetRpm / systemRpm;
 
   log.debug(`Indexing data for ${system.name} at ${speed.toPrecision(4)}`);
 
@@ -56,13 +42,13 @@ export function createLoghubGenerator({
       const docs: StreamLogDocument[] = [];
 
       while (true) {
-        const line = sortedLogLines[index % count];
+        const line = lines[index % count];
 
         const rotations = Math.floor(index / count);
 
         const rel = (line.timestamp - min) / range;
 
-        const delta = speed * range * (rotations + rel);
+        const delta = (1 / speed) * range * (rotations + rel);
 
         const simulatedTimestamp = Math.floor(start + delta);
 

@@ -15,7 +15,11 @@ import { withClient } from '../lib/utils/with_client';
 const scenario: Scenario<LogDocument> = async (runOptions) => {
   const client = new SampleParserClient({ logger: runOptions.logger });
 
-  const generators = await client.getLogGenerators();
+  const { rpm } = (runOptions.scenarioOpts ?? {}) as { rpm?: number };
+
+  const generators = await client.getLogGenerators({
+    rpm,
+  });
 
   return {
     bootstrap: async ({ streamsClient }) => {
