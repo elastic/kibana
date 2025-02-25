@@ -39,8 +39,8 @@ export async function waitForActiveRule({
 
   const program = (url: string) =>
     getRuleId(url).pipe(
-      Effect.retry({ times: 2 }),
-      Effect.timeout('10 minutes'),
+      Effect.retry({ times: 100 }),
+      Effect.timeout('2 minutes'),
       Effect.catchAll(Console.error)
     );
 
@@ -49,7 +49,9 @@ export async function waitForActiveRule({
   function getRuleId(url: string) {
     return Effect.tryPromise(() =>
       supertest.get(url).then((response) => {
-        console.log(`\nλjs response: \n${JSON.stringify(response, null, 2)}`);
+        console.log(`\nλjs response.status: \n\t${response?.status}`);
+        console.log(`\nλjs response.body?.status: \n\t${response.body?.status}`);
+        console.log(`\nλjs response.body?.execution_status?.status: \n${JSON.stringify(response.body?.execution_status?.status, null, 2)}`);
         const status = response.body?.execution_status?.status;
         const expectedStatus = 'active';
 
