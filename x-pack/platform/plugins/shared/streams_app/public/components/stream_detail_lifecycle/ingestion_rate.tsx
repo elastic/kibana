@@ -204,6 +204,7 @@ function ChartBarSeries({
         {Object.entries(ingestionRate.buckets).map(([tier, buckets]) => (
           <BarSeries
             id={`ingestionRate-${tier}`}
+            key={`ingestionRate-${tier}`}
             name={capitalize(tier)}
             data={buckets}
             color={ILM_PHASES[tier as PhaseName].color}

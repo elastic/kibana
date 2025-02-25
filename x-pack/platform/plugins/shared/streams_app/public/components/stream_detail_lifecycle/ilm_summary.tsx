@@ -118,7 +118,10 @@ export function IlmSummary({
         ) : (
           <EuiFlexGroup direction="row" gutterSize="none" responsive={false}>
             {phasesWithGrow.map((phase, index) => (
-              <EuiFlexItem grow={phase.grow as false | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10}>
+              <EuiFlexItem
+                key={`${phase.name}-timeline`}
+                grow={phase.grow as false | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10}
+              >
                 <IlmPhase phase={phase} minAge={phasesWithGrow[index + 1]?.min_age} />
               </EuiFlexItem>
             ))}
@@ -262,7 +265,7 @@ function PhasesLegend({ phases }: { phases?: IlmPolicyPhases }) {
   return (
     <EuiPanel hasBorder={false} hasShadow={false} paddingSize="s">
       {descriptions.map((phase, index) => (
-        <>
+        <React.Fragment key={phase.name}>
           <EuiFlexGroup alignItems="center">
             <EuiFlexItem grow={false} style={{ width: '20px', alignItems: 'center' }}>
               {'color' in phase ? (
@@ -285,14 +288,16 @@ function PhasesLegend({ phases }: { phases?: IlmPolicyPhases }) {
             </EuiFlexItem>
 
             <EuiFlexItem grow={10}>
-              {phase.description.map((desc) => (
-                <EuiTextColor color="subdued">{desc}</EuiTextColor>
+              {phase.description.map((desc, index) => (
+                <EuiTextColor key={`${phase.name}-desc-${index}`} color="subdued">
+                  {desc}
+                </EuiTextColor>
               ))}
             </EuiFlexItem>
           </EuiFlexGroup>
 
           {index === descriptions.length - 1 ? null : <EuiSpacer size="s" />}
-        </>
+        </React.Fragment>
       ))}
     </EuiPanel>
   );
