@@ -69,7 +69,7 @@ export const postActionsConnectorExecuteRoute = (
         let onLlmResponse;
 
         try {
-          const checkResponse = performChecks({
+          const checkResponse = await performChecks({
             context: ctx,
             request,
             response,
