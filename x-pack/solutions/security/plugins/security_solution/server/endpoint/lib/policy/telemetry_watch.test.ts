@@ -60,7 +60,8 @@ describe('Telemetry config watcher', () => {
     telemetryWatcher = new TelemetryConfigWatcher(
       packagePolicyServiceMock,
       esStartMock,
-      createMockEndpointAppContextService()
+      createMockEndpointAppContextService(),
+      { immediateRetry: true }
     );
   });
 
@@ -118,28 +119,49 @@ describe('Telemetry config watcher', () => {
     expect(packagePolicyServiceMock.list.mock.calls[2][1].page).toBe(3); // etc
   });
 
-  it('retries fetching package policies', async () => {
-    packagePolicyServiceMock.list.mockRejectedValueOnce(new Error());
+  describe('error handling', () => {
+    it('retries fetching package policies', async () => {
+      packagePolicyServiceMock.list.mockRejectedValueOnce(new Error());
 
-    packagePolicyServiceMock.list.mockResolvedValueOnce({
-      items: Array.from({ length: 6 }, () => MockPackagePolicyWithEndpointPolicy()),
-      total: 6,
-      page: 1,
-      perPage: 100,
+      packagePolicyServiceMock.list.mockResolvedValueOnce({
+        items: Array.from({ length: 6 }, () => MockPackagePolicyWithEndpointPolicy()),
+        total: 6,
+        page: 1,
+        perPage: 100,
+      });
+
+      await telemetryWatcher.watch(true); // manual trigger
+
+      expect(packagePolicyServiceMock.list).toBeCalledTimes(2);
     });
 
-    await telemetryWatcher.watch(true); // manual trigger
+    it('retries fetching package policies maximum 5 times', async () => {
+      packagePolicyServiceMock.list.mockRejectedValue(new Error());
 
-    expect(packagePolicyServiceMock.list).toBeCalledTimes(2);
+      await telemetryWatcher.watch(true); // manual trigger
+
+      expect(packagePolicyServiceMock.list).toBeCalledTimes(5);
+    });
+
+    it('retries bulk updating package policies', async () => {
+      preparePackagePolicyMock({ isGlobalTelemetryEnabled: true });
+      packagePolicyServiceMock.bulkUpdate.mockRejectedValueOnce(new Error());
+      packagePolicyServiceMock.bulkUpdate.mockRejectedValue(null);
+
+      await telemetryWatcher.watch(false);
+
+      expect(packagePolicyServiceMock.bulkUpdate).toHaveBeenCalledTimes(2);
+    });
+
+    it('retries bulk updating package policies maximum 5 times', async () => {
+      preparePackagePolicyMock({ isGlobalTelemetryEnabled: true });
+      packagePolicyServiceMock.bulkUpdate.mockRejectedValue(new Error());
+
+      await telemetryWatcher.watch(false);
+
+      expect(packagePolicyServiceMock.bulkUpdate).toHaveBeenCalledTimes(5);
+    });
   });
-
-  it('retries fetching package policies maximum 5 times', async () => {
-    packagePolicyServiceMock.list.mockRejectedValue(new Error());
-
-    await telemetryWatcher.watch(true); // manual trigger
-
-    expect(packagePolicyServiceMock.list).toBeCalledTimes(5);
-  }, 30_000);
 
   it.each([true, false])(
     'does not update policies if both global telemetry config and policy fields are %s',

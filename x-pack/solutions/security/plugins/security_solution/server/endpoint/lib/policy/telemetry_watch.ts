@@ -23,22 +23,35 @@ import { getPolicyDataForUpdate } from '../../../../common/endpoint/service/poli
 import type { EndpointAppContextService } from '../../endpoint_app_context_services';
 import { stringify } from '../../utils/stringify';
 
+interface TelemetryConfigWatcherOptions {
+  /** Retry SO operations immediately, without any delay. Useful for testing.
+   */
+  immediateRetry: boolean;
+}
+
 export class TelemetryConfigWatcher {
   private logger: Logger;
   private esClient: ElasticsearchClient;
   private policyService: PackagePolicyClient;
   private endpointAppContextService: EndpointAppContextService;
   private subscription: Subscription | undefined;
+  private retryOptions: Partial<pRetry.Options>;
 
   constructor(
     policyService: PackagePolicyClient,
     esStart: ElasticsearchServiceStart,
-    endpointAppContextService: EndpointAppContextService
+    endpointAppContextService: EndpointAppContextService,
+    options: TelemetryConfigWatcherOptions = { immediateRetry: false }
   ) {
     this.policyService = policyService;
     this.esClient = esStart.client.asInternalUser;
     this.endpointAppContextService = endpointAppContextService;
     this.logger = endpointAppContextService.createLogger(this.constructor.name);
+
+    this.retryOptions = {
+      retries: 4,
+      minTimeout: options.immediateRetry ? 0 : 1000,
+    };
   }
 
   /**
@@ -91,7 +104,7 @@ export class TelemetryConfigWatcher {
                   error.attemptNumber
                 }. attempt, reason: ${stringify(error)}`
               ),
-            retries: 4,
+            ...this.retryOptions,
           }
         );
       } catch (e) {
@@ -117,23 +130,26 @@ export class TelemetryConfigWatcher {
 
       if (updates.length) {
         try {
-          await this.policyService.bulkUpdate(this.makeInternalSOClient(), this.esClient, updates);
+          await pRetry(
+            () =>
+              this.policyService.bulkUpdate(this.makeInternalSOClient(), this.esClient, updates),
+            {
+              onFailedAttempt: (error) =>
+                this.logger.debug(
+                  `Failed to bulk update package policies on ${
+                    error.attemptNumber
+                  }. attempt, reason: ${stringify(error)}`
+                ),
+              ...this.retryOptions,
+            }
+          );
         } catch (e) {
-          // try again for transient issues
-          try {
-            await this.policyService.bulkUpdate(
-              this.makeInternalSOClient(),
-              this.esClient,
-              updates
-            );
-          } catch (ee) {
-            this.logger.warn(
-              `Unable to update telemetry config state to ${isTelemetryEnabled} in policies: ${updates.map(
-                (update) => update.id
-              )}`
-            );
-            this.logger.warn(stringify(ee));
-          }
+          this.logger.warn(
+            `Unable to update telemetry config state to ${isTelemetryEnabled} in policies: ${updates.map(
+              (update) => update.id
+            )}`
+          );
+          this.logger.warn(stringify(e));
         }
       }
     } while (response.page * response.perPage < response.total);
