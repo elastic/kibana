@@ -37,7 +37,7 @@ src/platform/packages/shared/kbn-alerts-ui-shared @elastic/response-ops
 src/platform/packages/private/kbn-ambient-common-types @elastic/kibana-operations
 src/platform/packages/private/kbn-ambient-ftr-types @elastic/kibana-operations @elastic/appex-qa
 src/platform/packages/shared/kbn-ambient-storybook-types @elastic/kibana-operations
-packages/kbn-ambient-ui-types @elastic/kibana-operations
+src/platform/packages/shared/kbn-ambient-ui-types @elastic/kibana-operations
 src/platform/packages/shared/kbn-analytics @elastic/kibana-core
 src/platform/packages/private/analytics/utils/analytics_collection_utils @elastic/kibana-core
 test/analytics/plugins/analytics_ftr_helpers @elastic/kibana-core
