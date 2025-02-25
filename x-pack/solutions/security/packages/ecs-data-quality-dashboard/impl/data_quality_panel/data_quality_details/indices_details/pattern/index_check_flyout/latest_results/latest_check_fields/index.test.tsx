@@ -22,7 +22,7 @@ describe('IndexCheckFields', () => {
       <TestExternalProviders>
         <TestDataQualityProviders>
           <LatestCheckFields
-            checkedAt={1706526408000}
+            checkedAt={'Feb 16, 2021 @ 11:20:00'}
             indexName="indexName"
             docsCount={123}
             ilmPhase="hot"

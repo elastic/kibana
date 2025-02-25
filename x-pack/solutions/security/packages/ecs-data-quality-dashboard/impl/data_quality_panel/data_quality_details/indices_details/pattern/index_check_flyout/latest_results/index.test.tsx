@@ -35,7 +35,7 @@ const defaultProps: Props = {
   ilmExplain: auditbeatWithAllResults.ilmExplain,
   indexName: 'auditbeat-custom-index-1',
   patternRollup,
-  checkedAt: 1706526408000,
+  checkedAt: 'Feb 16, 2021 @ 11:20:00',
 };
 
 describe('LatestResults', () => {
