@@ -279,25 +279,32 @@ export const EsDeprecationsTable: React.FunctionComponent<Props> = ({
     }
   }, [deprecations, sortConfig, pager, searchQuery, filteredDeprecations.length]);
 
+  const getSelectableDeprecations = (deprecations: EnrichedDeprecationInfo[]) => {
+    return new Set(
+      deprecations
+      .filter(({ correctiveAction }) => correctiveAction?.type === 'reindex')
+      .map(({ index, message }) => index || message)
+    );
+  };
+
   const areAllItemsSelected = () => {
-    return deprecations.length > 0 && selectedDeprecations.size === deprecations.length;
+    const selectableDeprecations = getSelectableDeprecations(filteredDeprecations);
+    return (
+      selectableDeprecations.size > 0 &&
+      selectedDeprecations.size === selectableDeprecations.size &&
+      [...selectedDeprecations].every((id) => selectableDeprecations.has(id))
+    );
   };
 
   const toggleAll = () => {
     setSelectedDeprecations((prev) => {
-      const selectableDeprecations = new Set(
-        filteredDeprecations
-          .filter((dep) => dep.correctiveAction?.type === 'reindex')
-          .map((dep) => dep.index || dep.message)
-      );
-
-      if (
+      const selectableDeprecations = getSelectableDeprecations(filteredDeprecations);
+      return (
         selectableDeprecations.size === prev.size &&
         [...prev].every((id) => selectableDeprecations.has(id))
-      ) {
-        return new Set(); // Deselect all selectable items
-      }
-      return selectableDeprecations; // Select all selectable items
+      )
+        ? new Set() // Deselect all
+        : selectableDeprecations; // Select all
     });
   };
 
