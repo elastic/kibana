@@ -7,11 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { BehaviorSubject } from 'rxjs';
+import type { BehaviorSubject } from 'rxjs';
 import { isEqual } from 'lodash';
 import type { CoreSetup } from '@kbn/core-lifecycle-browser';
 import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
 import { ContextualProfileLevel } from '../context_awareness/profiles_manager';
+import type { DiscoverStartPlugins } from '../types';
 
 /**
  * Field usage events i.e. when a field is selected in the data table, removed from the data table, or a filter is added
@@ -73,83 +74,20 @@ export class DiscoverEBTManager {
   // https://docs.elastic.dev/telemetry/collection/event-based-telemetry
   public initialize({
     core,
+    discoverEbtContext$,
     shouldInitializeCustomContext,
     shouldInitializeCustomEvents,
   }: {
     core: CoreSetup;
+    discoverEbtContext$: BehaviorSubject<DiscoverEBTContextProps>;
     shouldInitializeCustomContext: boolean;
     shouldInitializeCustomEvents: boolean;
   }) {
     if (shouldInitializeCustomContext) {
-      // Register Discover specific context to be used in EBT
-      const context$ = new BehaviorSubject<DiscoverEBTContextProps>({
-        discoverProfiles: [],
-      });
-      core.analytics.registerContextProvider({
-        name: 'discover_context',
-        context$,
-        schema: {
-          discoverProfiles: {
-            type: 'array',
-            items: {
-              type: 'keyword',
-              _meta: {
-                description: 'List of active Discover context awareness profiles',
-              },
-            },
-          },
-          // If we decide to extend EBT context with more properties, we can do it here
-        },
-      });
-      this.customContext$ = context$;
+      this.customContext$ = discoverEbtContext$;
     }
 
     if (shouldInitializeCustomEvents) {
-      // Register Discover events to be used with EBT
-      core.analytics.registerEventType({
-        eventType: FIELD_USAGE_EVENT_TYPE,
-        schema: {
-          [FIELD_USAGE_EVENT_NAME]: {
-            type: 'keyword',
-            _meta: {
-              description:
-                'The name of the event that is tracked in the metrics i.e. dataTableSelection, dataTableRemoval',
-            },
-          },
-          [FIELD_USAGE_FIELD_NAME]: {
-            type: 'keyword',
-            _meta: {
-              description: "Field name if it's a part of ECS schema",
-              optional: true,
-            },
-          },
-          [FIELD_USAGE_FILTER_OPERATION]: {
-            type: 'keyword',
-            _meta: {
-              description: "Operation type when a filter is added i.e. '+', '-', '_exists_'",
-              optional: true,
-            },
-          },
-        },
-      });
-      core.analytics.registerEventType({
-        eventType: CONTEXTUAL_PROFILE_RESOLVED_EVENT_TYPE,
-        schema: {
-          [CONTEXTUAL_PROFILE_LEVEL]: {
-            type: 'keyword',
-            _meta: {
-              description:
-                'The context level at which it was resolved i.e. rootLevel, dataSourceLevel, documentLevel',
-            },
-          },
-          [CONTEXTUAL_PROFILE_ID]: {
-            type: 'keyword',
-            _meta: {
-              description: 'The resolved name of the active profile',
-            },
-          },
-        },
-      });
       this.reportEvent = core.analytics.reportEvent;
     }
   }
@@ -294,3 +232,77 @@ export class DiscoverEBTManager {
     this.reportEvent(CONTEXTUAL_PROFILE_RESOLVED_EVENT_TYPE, eventData);
   }
 }
+
+/**
+ * This function is statically imported since analytics registrations must happen at setup,
+ * while the EBT manager is loaded dynamically when needed to avoid page load bundle bloat
+ */
+export const registerDiscoverAnalytics = (
+  core: CoreSetup<DiscoverStartPlugins>,
+  discoverEbtContext$: BehaviorSubject<DiscoverEBTContextProps>
+) => {
+  // Register Discover specific context to be used in EBT
+  core.analytics.registerContextProvider({
+    name: 'discover_context',
+    context$: discoverEbtContext$,
+    schema: {
+      discoverProfiles: {
+        type: 'array',
+        items: {
+          type: 'keyword',
+          _meta: {
+            description: 'List of active Discover context awareness profiles',
+          },
+        },
+      },
+      // If we decide to extend EBT context with more properties, we can do it here
+    },
+  });
+
+  // Register Discover events to be used with EBT
+  core.analytics.registerEventType({
+    eventType: FIELD_USAGE_EVENT_TYPE,
+    schema: {
+      [FIELD_USAGE_EVENT_NAME]: {
+        type: 'keyword',
+        _meta: {
+          description:
+            'The name of the event that is tracked in the metrics i.e. dataTableSelection, dataTableRemoval',
+        },
+      },
+      [FIELD_USAGE_FIELD_NAME]: {
+        type: 'keyword',
+        _meta: {
+          description: "Field name if it's a part of ECS schema",
+          optional: true,
+        },
+      },
+      [FIELD_USAGE_FILTER_OPERATION]: {
+        type: 'keyword',
+        _meta: {
+          description: "Operation type when a filter is added i.e. '+', '-', '_exists_'",
+          optional: true,
+        },
+      },
+    },
+  });
+
+  core.analytics.registerEventType({
+    eventType: CONTEXTUAL_PROFILE_RESOLVED_EVENT_TYPE,
+    schema: {
+      [CONTEXTUAL_PROFILE_LEVEL]: {
+        type: 'keyword',
+        _meta: {
+          description:
+            'The context level at which it was resolved i.e. rootLevel, dataSourceLevel, documentLevel',
+        },
+      },
+      [CONTEXTUAL_PROFILE_ID]: {
+        type: 'keyword',
+        _meta: {
+          description: 'The resolved name of the active profile',
+        },
+      },
+    },
+  });
+};

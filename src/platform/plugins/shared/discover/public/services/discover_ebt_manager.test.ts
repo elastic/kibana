@@ -9,12 +9,17 @@
 
 import { BehaviorSubject } from 'rxjs';
 import { coreMock } from '@kbn/core/public/mocks';
-import { DiscoverEBTManager } from './discover_ebt_manager';
+import {
+  DiscoverEBTContextProps,
+  DiscoverEBTManager,
+  registerDiscoverAnalytics,
+} from './discover_ebt_manager';
 import { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
 import { ContextualProfileLevel } from '../context_awareness/profiles_manager';
 
 describe('DiscoverEBTManager', () => {
   let discoverEBTContextManager: DiscoverEBTManager;
+  let discoverEbtContext$: BehaviorSubject<DiscoverEBTContextProps>;
 
   const coreSetupMock = coreMock.createSetup();
 
@@ -32,13 +37,19 @@ describe('DiscoverEBTManager', () => {
 
   beforeEach(() => {
     discoverEBTContextManager = new DiscoverEBTManager();
+    discoverEbtContext$ = new BehaviorSubject<DiscoverEBTContextProps>({
+      discoverProfiles: [],
+    });
     (coreSetupMock.analytics.reportEvent as jest.Mock).mockClear();
   });
 
   describe('register', () => {
     it('should register the context provider and custom events', () => {
+      registerDiscoverAnalytics(coreSetupMock, discoverEbtContext$);
+
       discoverEBTContextManager.initialize({
         core: coreSetupMock,
+        discoverEbtContext$,
         shouldInitializeCustomContext: true,
         shouldInitializeCustomEvents: true,
       });
@@ -94,6 +105,7 @@ describe('DiscoverEBTManager', () => {
       const dscProfiles2 = ['profile21', 'profile22'];
       discoverEBTContextManager.initialize({
         core: coreSetupMock,
+        discoverEbtContext$,
         shouldInitializeCustomContext: true,
         shouldInitializeCustomEvents: false,
       });
@@ -111,6 +123,7 @@ describe('DiscoverEBTManager', () => {
       const dscProfiles2 = ['profile1', 'profile2'];
       discoverEBTContextManager.initialize({
         core: coreSetupMock,
+        discoverEbtContext$,
         shouldInitializeCustomContext: true,
         shouldInitializeCustomEvents: false,
       });
@@ -127,6 +140,7 @@ describe('DiscoverEBTManager', () => {
       const dscProfiles = ['profile1', 'profile2'];
       discoverEBTContextManager.initialize({
         core: coreSetupMock,
+        discoverEbtContext$,
         shouldInitializeCustomContext: true,
         shouldInitializeCustomEvents: false,
       });
@@ -139,6 +153,7 @@ describe('DiscoverEBTManager', () => {
       const dscProfiles = ['profile1', 'profile2'];
       discoverEBTContextManager.initialize({
         core: coreSetupMock,
+        discoverEbtContext$,
         shouldInitializeCustomContext: true,
         shouldInitializeCustomEvents: false,
       });
@@ -159,6 +174,7 @@ describe('DiscoverEBTManager', () => {
     it('should track the field usage when a field is added to the table', async () => {
       discoverEBTContextManager.initialize({
         core: coreSetupMock,
+        discoverEbtContext$,
         shouldInitializeCustomContext: false,
         shouldInitializeCustomEvents: true,
       });
@@ -186,6 +202,7 @@ describe('DiscoverEBTManager', () => {
     it('should track the field usage when a field is removed from the table', async () => {
       discoverEBTContextManager.initialize({
         core: coreSetupMock,
+        discoverEbtContext$,
         shouldInitializeCustomContext: false,
         shouldInitializeCustomEvents: true,
       });
@@ -213,6 +230,7 @@ describe('DiscoverEBTManager', () => {
     it('should track the field usage when a filter is created', async () => {
       discoverEBTContextManager.initialize({
         core: coreSetupMock,
+        discoverEbtContext$,
         shouldInitializeCustomContext: false,
         shouldInitializeCustomEvents: true,
       });
@@ -246,6 +264,7 @@ describe('DiscoverEBTManager', () => {
     it('should track the event when a next contextual profile is resolved', async () => {
       discoverEBTContextManager.initialize({
         core: coreSetupMock,
+        discoverEbtContext$,
         shouldInitializeCustomContext: false,
         shouldInitializeCustomEvents: true,
       });
@@ -296,6 +315,7 @@ describe('DiscoverEBTManager', () => {
     it('should not trigger duplicate requests', async () => {
       discoverEBTContextManager.initialize({
         core: coreSetupMock,
+        discoverEbtContext$,
         shouldInitializeCustomContext: false,
         shouldInitializeCustomEvents: true,
       });
@@ -325,6 +345,7 @@ describe('DiscoverEBTManager', () => {
     it('should trigger similar requests after remount', async () => {
       discoverEBTContextManager.initialize({
         core: coreSetupMock,
+        discoverEbtContext$,
         shouldInitializeCustomContext: false,
         shouldInitializeCustomEvents: true,
       });
