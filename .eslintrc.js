@@ -1658,7 +1658,7 @@ module.exports = {
         'x-pack/test/alerting_api_integration/**/*.{ts, tsx}',
         'x-pack/test/cases_api_integration/**/*.{ts, tsx},',
         'x-pack/test/rule_registry/**/*.{ts, tsx}',
-        '/x-pack/test/api_integration/apis/cases/**/*.{ts, tsx}',
+        'x-pack/test/api_integration/apis/cases/**/*.{ts, tsx}',
       ],
       extends: [
         'eslint:recommended',
