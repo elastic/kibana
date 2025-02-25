@@ -7770,7 +7770,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/test@link:packages/kbn-test":
+"@kbn/test@link:src/platform/packages/shared/kbn-test":
   version "0.0.0"
   uid ""
 
