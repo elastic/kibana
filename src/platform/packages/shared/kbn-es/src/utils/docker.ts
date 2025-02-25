@@ -133,7 +133,7 @@ const DEFAULT_DOCKER_ESARGS: Array<[string, string]> = [
   ['xpack.security.enabled', 'false'],
 ];
 // Temporary workaround for https://github.com/elastic/elasticsearch/issues/118583
-if (process.platform === 'darwin') {
+if (process.platform === 'darwin' && process.arch === 'arm64') {
   DEFAULT_DOCKER_ESARGS.push(
     ['ES_JAVA_OPTS', '-Xms1536m -Xmx1536m -XX:UseSVE=0'],
     ['CLI_JAVA_OPTS', '-XX:UseSVE=0']
@@ -218,7 +218,7 @@ const DEFAULT_SERVERLESS_ESARGS: Array<[string, string]> = [
   ['xpack.security.transport.ssl.verification_mode', 'certificate'],
 ];
 // Temporary workaround for https://github.com/elastic/elasticsearch/issues/118583
-if (process.platform === 'darwin') {
+if (process.platform === 'darwin' && process.arch === 'arm64') {
   DEFAULT_SERVERLESS_ESARGS.push(
     ['ES_JAVA_OPTS', '-Xms1g -Xmx1g -XX:UseSVE=0'],
     ['CLI_JAVA_OPTS', '-XX:UseSVE=0']
