@@ -909,7 +909,7 @@ components:
           description: The date and time of the annotation. It must be in ISO 8601 format.
         service:
           type: object
-          description: The service that identifoes the configuration to create or update.
+          description: The service that identifies the configuration to create or update.
           required:
             - version
           properties:

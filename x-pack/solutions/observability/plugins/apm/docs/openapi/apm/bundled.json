@@ -1412,7 +1412,7 @@
           },
           "service": {
             "type": "object",
-            "description": "The service that identifoes the configuration to create or update.",
+            "description": "The service that identifies the configuration to create or update.",
             "required": [
               "version"
             ],

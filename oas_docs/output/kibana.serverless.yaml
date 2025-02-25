@@ -51554,7 +51554,7 @@ components:
           description: The message displayed in the annotation. It defaults to `service.version`.
           type: string
         service:
-          description: The service that identifoes the configuration to create or update.
+          description: The service that identifies the configuration to create or update.
           type: object
           properties:
             environment:
