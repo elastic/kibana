@@ -10,7 +10,7 @@
 import { Transform, Readable } from 'stream';
 import { inspect } from 'util';
 
-import * as estypes from '@elastic/elasticsearch/lib/api/types';
+import type { estypes } from '@elastic/elasticsearch';
 import type { Client } from '@elastic/elasticsearch';
 import { ToolingLog } from '@kbn/tooling-log';
 
@@ -162,10 +162,8 @@ export function createCreateIndexStream({
         await client.indices.create(
           {
             index,
-            body: {
-              settings,
-              mappings,
-            },
+            settings,
+            mappings,
           },
           {
             headers: ES_CLIENT_HEADERS,
@@ -184,7 +182,7 @@ export function createCreateIndexStream({
         );
 
         if (actions.length) {
-          await client.indices.updateAliases({ body: { actions } });
+          await client.indices.updateAliases({ actions });
         }
 
         stats.createdIndex(index, { settings });
