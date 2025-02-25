@@ -311,6 +311,10 @@ export const optionsSchema = schema.object({
     defaultValue: DEFAULT_DASHBOARD_OPTIONS.useMargins,
     meta: { description: 'Show margins between panels in the dashboard layout.' },
   }),
+  lockToGrid: schema.boolean({
+    defaultValue: DEFAULT_DASHBOARD_OPTIONS.syncCursor,
+    meta: { description: 'Lock panels to a grid.' },
+  }),
   syncColors: schema.boolean({
     defaultValue: DEFAULT_DASHBOARD_OPTIONS.syncColors,
     meta: { description: 'Synchronize colors between related panels in the dashboard.' },

@@ -21,4 +21,5 @@ export const DEFAULT_DASHBOARD_OPTIONS = {
   syncColors: true,
   syncCursor: true,
   syncTooltips: true,
+  lockToGrid: true,
 } as const;

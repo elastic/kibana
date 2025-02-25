@@ -34,10 +34,11 @@ export const DashboardGrid = ({
   const panelRefs = useRef<{ [panelId: string]: React.Ref<HTMLDivElement> }>({});
   const { euiTheme } = useEuiTheme();
 
-  const [expandedPanelId, panels, useMargins, viewMode] = useBatchedPublishingSubjects(
+  const [expandedPanelId, panels, useMargins, lockToGrid, viewMode] = useBatchedPublishingSubjects(
     dashboardApi.expandedPanelId$,
     dashboardApi.panels$,
     dashboardApi.settings.useMargins$,
+    dashboardApi.settings.lockToGrid$,
     dashboardApi.viewMode$
   );
 
@@ -127,12 +128,15 @@ export const DashboardGrid = ({
       <GridLayout
         css={layoutStyles}
         layout={currentLayout}
-        gridSettings={'none'}
-        // gridSettings={{
-        //   gutterSize: useMargins ? DASHBOARD_MARGIN_SIZE : 0,
-        //   rowHeight: DASHBOARD_GRID_HEIGHT,
-        //   columnCount: DASHBOARD_GRID_COLUMN_COUNT,
-        // }}
+        gridSettings={
+          lockToGrid
+            ? {
+                gutterSize: useMargins ? DASHBOARD_MARGIN_SIZE : 0,
+                rowHeight: DASHBOARD_GRID_HEIGHT,
+                columnCount: DASHBOARD_GRID_COLUMN_COUNT,
+              }
+            : 'none'
+        }
         useCustomDragHandle={true}
         renderPanelContents={renderPanelContents}
         onLayoutChange={onLayoutChange}
@@ -148,6 +152,7 @@ export const DashboardGrid = ({
     expandedPanelId,
     viewMode,
     useMargins,
+    lockToGrid,
   ]);
 
   const { dashboardClasses, dashboardStyles } = useMemo(() => {

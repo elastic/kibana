@@ -332,11 +332,12 @@ export const GridExample = ({
             accessMode={viewMode === 'view' ? 'VIEW' : 'EDIT'}
             expandedPanelId={expandedPanelId}
             layout={currentLayout}
-            gridSettings={{
-              gutterSize,
-              rowHeight,
-              columnCount: DASHBOARD_GRID_COLUMN_COUNT,
-            }}
+            // gridSettings={{
+            //   gutterSize,
+            //   rowHeight,
+            //   columnCount: DASHBOARD_GRID_COLUMN_COUNT,
+            // }}
+            gridSettings={'none'}
             useCustomDragHandle={true}
             renderPanelContents={renderPanelContents}
             onLayoutChange={(newLayout) => {

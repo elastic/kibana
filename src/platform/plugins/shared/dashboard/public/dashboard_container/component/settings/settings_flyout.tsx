@@ -13,6 +13,7 @@ import useMountedState from 'react-use/lib/useMountedState';
 import {
   EuiButton,
   EuiButtonEmpty,
+  EuiButtonGroup,
   EuiCallOut,
   EuiFieldText,
   EuiFlexGroup,
@@ -229,6 +230,35 @@ export const DashboardSettingsFlyout = ({ onClose }: DashboardSettingsProps) => 
               }
             />
           </EuiFormRow>
+          <EuiFormRow
+            label={
+              <FormattedMessage
+                id="dashboard.embeddableApi.showSettings.flyout.form.layout"
+                defaultMessage="Layout"
+              />
+            }
+          >
+            <EuiButtonGroup
+              name="coarsness"
+              legend="Choose the layout to use for this dashboard"
+              options={[
+                {
+                  id: `lock`,
+                  label: 'Lock to grid',
+                },
+                {
+                  id: `freeform`,
+                  label: 'Freeform',
+                },
+              ]}
+              idSelected={localSettings.lockToGrid ? 'lock' : 'freeform'}
+              onChange={(id) =>
+                updateDashboardSetting({ lockToGrid: id === 'lock' ? true : false })
+              }
+              buttonSize="compressed"
+              isFullWidth
+            />
+          </EuiFormRow>
           <EuiFormRow>
             <EuiSwitch
               label={i18n.translate(
@@ -240,6 +270,7 @@ export const DashboardSettingsFlyout = ({ onClose }: DashboardSettingsProps) => 
               checked={localSettings.useMargins}
               onChange={(event) => updateDashboardSetting({ useMargins: event.target.checked })}
               data-test-subj="dashboardMarginsCheckbox"
+              disabled={!localSettings.lockToGrid}
             />
           </EuiFormRow>
 

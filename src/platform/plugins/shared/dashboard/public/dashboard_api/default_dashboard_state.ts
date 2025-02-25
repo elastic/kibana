@@ -24,5 +24,6 @@ export const DEFAULT_DASHBOARD_STATE: DashboardState = {
   syncColors: false,
   syncCursor: true,
   syncTooltips: false,
+  lockToGrid: true,
   hidePanelTitles: false,
 };

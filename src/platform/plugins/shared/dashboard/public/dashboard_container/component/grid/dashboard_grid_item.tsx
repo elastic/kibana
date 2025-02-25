@@ -58,6 +58,7 @@ export const Item = React.forwardRef<HTMLDivElement, Props>(
       expandedPanelId,
       focusedPanelId,
       useMargins,
+      lockToGrid,
       viewMode,
     ] = useBatchedPublishingSubjects(
       dashboardApi.highlightPanelId$,
@@ -65,6 +66,7 @@ export const Item = React.forwardRef<HTMLDivElement, Props>(
       dashboardApi.expandedPanelId$,
       dashboardApi.focusedPanelId$,
       dashboardApi.settings.useMargins$,
+      dashboardApi.settings.lockToGrid$,
       dashboardApi.viewMode$
     );
 
@@ -120,7 +122,7 @@ export const Item = React.forwardRef<HTMLDivElement, Props>(
     const renderedEmbeddable = useMemo(() => {
       const panelProps = {
         showBadges: true,
-        showBorder: useMargins,
+        showBorder: lockToGrid || !useMargins,
         showNotifications: true,
         showShadow: false,
         setDragHandles,
@@ -139,7 +141,7 @@ export const Item = React.forwardRef<HTMLDivElement, Props>(
           onApiAvailable={(api) => dashboardInternalApi.registerChildApi(api)}
         />
       );
-    }, [id, dashboardApi, dashboardInternalApi, type, useMargins, setDragHandles]);
+    }, [id, dashboardApi, dashboardInternalApi, type, lockToGrid, useMargins, setDragHandles]);
 
     return (
       <div

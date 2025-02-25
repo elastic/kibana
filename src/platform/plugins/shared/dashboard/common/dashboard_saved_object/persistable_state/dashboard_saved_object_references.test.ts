@@ -54,6 +54,7 @@ const commonAttributes: DashboardAttributes = {
     syncColors: true,
     syncCursor: true,
     syncTooltips: true,
+    lockToGrid: true,
   },
   panels: [],
   description: '',
