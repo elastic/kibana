@@ -30,7 +30,7 @@
     "/api/apm/agent_keys": {
       "post": {
         "summary": "Create an APM agent key",
-        "description": "Create a new agent key for APM.",
+        "description": "Create a new agent key for APM.\nThe user creating an APM agent API key must have at least the `manage_own_api_key` cluster privilege and the APM application-level privileges that it wishes to grant.\nAfter it is created, you can copy the API key (Base64 encoded) and use it to to authorize requests from APM agents to the APM Server.\n",
         "operationId": "createAgentKey",
         "tags": [
           "APM agent keys"
@@ -49,6 +49,11 @@
             "application/json": {
               "schema": {
                 "$ref": "#/components/schemas/agent_keys_object"
+              },
+              "examples": {
+                "createAgentKeyRequest1": {
+                  "$ref": "#/components/examples/agent_keys_object_post_request1"
+                }
               }
             }
           }
@@ -60,6 +65,11 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/agent_keys_response"
+                },
+                "examples": {
+                  "createAgentKeyResponse1": {
+                    "$ref": "#/components/examples/agent_keys_object_post_200_response1"
+                  }
                 }
               }
             }
@@ -1235,11 +1245,11 @@
         "properties": {
           "name": {
             "type": "string",
-            "description": "Agent name"
+            "description": "The name of the APM agent key."
           },
           "privileges": {
             "type": "array",
-            "description": "Privileges configuration",
+            "description": "The APM agent key privileges. It can take one or more of the following values:\n* `event:write`, which is required for ingesting APM agent events. * `config_agent:read`, which is required for APM agents to read agent configuration remotely.\n",
             "items": {
               "type": "string",
               "enum": [
@@ -1890,6 +1900,14 @@
       }
     },
     "examples": {
+      "agent_keys_object_post_request1": {
+        "description": "Run `POST /api/apm/agent_keys` to create an APM agent API key with the specified privileges.",
+        "value": "{\n    \"name\": \"apm-key\",\n    \"privileges\": [\"event:write\", \"config_agent:read\"]\n}\n"
+      },
+      "agent_keys_object_post_200_response1": {
+        "description": "An example of a successful response from `POST /api/apm/agent_keys`, which creates an APM agent API key.",
+        "value": "{\n  \"agentKey\": {\n    \"id\": \"3DCLmn0B3ZMhLUa7WBG9\",\n    \"name\": \"apm-key\",\n    \"api_key\": \"PjGloCGOTzaZr8ilUPvkjA\",\n    \"encoded\": \"M0RDTG1uMEIzWk1oTFVhN1dCRzk6UGpHbG9DR09UemFacjhpbFVQdmtqQQ==\"\n  }\n}\n"
+      },
       "annotation_object_post_200_response1": {
         "description": "An example of a successful response from `POST /api/apm/services/opbeans-java/annotation`, which creates an annotation for a service named `opbeans-java`.",
         "value": "{\n  \"_index\": \"observability-annotations\",\n  \"_id\": \"Lc9I93EBh6DbmkeV7nFX\",\n  \"_version\": 1,\n  \"_seq_no\": 12,\n  \"_primary_term\": 1,\n  \"found\": true,\n  \"_source\": {\n    \"message\": \"Deployment 1.2\",\n    \"@timestamp\": \"2020-05-08T10:31:30.452Z\",\n    \"service\": {\n      \"version\": \"1.2\",\n      \"name\": \"opbeans-java\"\n    },\n    \"tags\": [\n      \"apm\",\n      \"elastic.co\",\n      \"customer\"\n    ],\n    \"annotation\": {\n      \"type\": \"deployment\"\n    },\n    \"event\": {\n      \"created\": \"2020-05-09T02:34:43.937Z\"\n    }\n  }\n}\n"

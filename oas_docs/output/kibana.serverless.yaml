@@ -5153,7 +5153,10 @@ paths:
         - alerting
   /api/apm/agent_keys:
     post:
-      description: Create a new agent key for APM.
+      description: |
+        Create a new agent key for APM.
+        The user creating an APM agent API key must have at least the `manage_own_api_key` cluster privilege and the APM application-level privileges that it wishes to grant.
+        After it is created, you can copy the API key (Base64 encoded) and use it to to authorize requests from APM agents to the APM Server.
       operationId: createAgentKey
       parameters:
         - $ref: '#/components/parameters/APM_UI_elastic_api_version'
@@ -5161,6 +5164,9 @@ paths:
       requestBody:
         content:
           application/json:
+            examples:
+              createAgentKeyRequest1:
+                $ref: '#/components/examples/APM_UI_agent_keys_object_post_request1'
             schema:
               $ref: '#/components/schemas/APM_UI_agent_keys_object'
         required: true
@@ -5168,6 +5174,9 @@ paths:
         '200':
           content:
             application/json:
+              examples:
+                createAgentKeyResponse1:
+                  $ref: '#/components/examples/APM_UI_agent_keys_object_post_200_response1'
               schema:
                 $ref: '#/components/schemas/APM_UI_agent_keys_response'
           description: Agent key created successfully
@@ -48795,6 +48804,24 @@ components:
                 "environment": "production"
             }
         }
+    APM_UI_agent_keys_object_post_200_response1:
+      description: An example of a successful response from `POST /api/apm/agent_keys`, which creates an APM agent API key.
+      value: |
+        {
+          "agentKey": {
+            "id": "3DCLmn0B3ZMhLUa7WBG9",
+            "name": "apm-key",
+            "api_key": "PjGloCGOTzaZr8ilUPvkjA",
+            "encoded": "M0RDTG1uMEIzWk1oTFVhN1dCRzk6UGpHbG9DR09UemFacjhpbFVQdmtqQQ=="
+          }
+        }
+    APM_UI_agent_keys_object_post_request1:
+      description: Run `POST /api/apm/agent_keys` to create an APM agent API key with the specified privileges.
+      value: |
+        {
+            "name": "apm-key",
+            "privileges": ["event:write", "config_agent:read"]
+        }
     APM_UI_annotation_object_post_200_response1:
       description: An example of a successful response from `POST /api/apm/services/opbeans-java/annotation`, which creates an annotation for a service named `opbeans-java`.
       value: |
@@ -51421,10 +51448,12 @@ components:
       type: object
       properties:
         name:
-          description: Agent name
+          description: The name of the APM agent key.
           type: string
         privileges:
-          description: Privileges configuration
+          description: |
+            The APM agent key privileges. It can take one or more of the following values:
+            * `event:write`, which is required for ingesting APM agent events. * `config_agent:read`, which is required for APM agents to read agent configuration remotely.
           items:
             enum:
               - event:write
