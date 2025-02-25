@@ -5275,6 +5275,9 @@ paths:
         '200':
           content:
             application/json:
+              examples:
+                createAnnotationResponse1:
+                  $ref: '#/components/examples/APM_UI_annotation_object_post_200_response1'
               schema:
                 $ref: '#/components/schemas/APM_UI_create_annotation_response'
           description: Annotation created successfully
@@ -5305,6 +5308,21 @@ paths:
       summary: Create a service annotation
       tags:
         - APM annotations
+      x-codeSamples:
+        - lang: Curl
+          source: |
+            curl -X POST \
+            http://localhost:5601/api/apm/services/opbeans-java/annotation \
+            -H 'Content-Type: application/json' \
+            -H 'kbn-xsrf: true' \
+            -H 'Authorization: Basic YhUlubWZhM0FDbnlQeE6WRtaW49FQmSGZ4RUWXdX' \
+            -d '{
+                "@timestamp": "2020-05-08T10:31:30.452Z",
+                "service": {
+                    "version": "1.2"
+                },
+                "message": "Deployment 1.2"
+                }'
   /api/apm/services/{serviceName}/annotation/search:
     get:
       description: Search for annotations related to a specific service.
@@ -48777,6 +48795,36 @@ components:
                 "environment": "production"
             }
         }
+    APM_UI_annotation_object_post_200_response1:
+      description: An example of a successful response from `POST /api/apm/services/opbeans-java/annotation`, which creates an annotation for a service named `opbeans-java`.
+      value: |
+        {
+          "_index": "observability-annotations",
+          "_id": "Lc9I93EBh6DbmkeV7nFX",
+          "_version": 1,
+          "_seq_no": 12,
+          "_primary_term": 1,
+          "found": true,
+          "_source": {
+            "message": "Deployment 1.2",
+            "@timestamp": "2020-05-08T10:31:30.452Z",
+            "service": {
+              "version": "1.2",
+              "name": "opbeans-java"
+            },
+            "tags": [
+              "apm",
+              "elastic.co",
+              "customer"
+            ],
+            "annotation": {
+              "type": "deployment"
+            },
+            "event": {
+              "created": "2020-05-09T02:34:43.937Z"
+            }
+          }
+        }
     APM_UI_source_maps_get_200_response1:
       description: A successful response from `GET /api/apm/sourcemaps`.
       value: |
@@ -51471,23 +51519,26 @@ components:
       type: object
       properties:
         '@timestamp':
-          description: Timestamp
+          description: The date and time of the annotation. It must be in ISO 8601 format.
           type: string
         message:
-          description: Message
+          description: The message displayed in the annotation. It defaults to `service.version`.
           type: string
         service:
-          description: Service
+          description: The service that identifoes the configuration to create or update.
           type: object
           properties:
             environment:
+              description: The environment of the service.
               type: string
             version:
+              description: The version of the service.
               type: string
           required:
             - version
         tags:
-          description: Tags
+          description: |
+            Tags are used by the Applications UI to distinguish APM annotations from other annotations. Tags may have additional functionality in future releases. It defaults to `[apm]`. While you can add additional tags, you cannot remove the `apm` tag.
           items:
             type: string
           type: array
