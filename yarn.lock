@@ -3986,7 +3986,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/ambient-storybook-types@link:packages/kbn-ambient-storybook-types":
+"@kbn/ambient-storybook-types@link:src/platform/packages/shared/kbn-ambient-storybook-types":
   version "0.0.0"
   uid ""
 
