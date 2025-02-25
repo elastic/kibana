@@ -19,6 +19,15 @@ const toSecretValidator =
     return validator(value ?? '');
   };
 
+const getAllIndices = (str: string, substring: string): number[] => {
+  const indices = [];
+  let index = str.indexOf(substring);
+  while (index !== -1) {
+    indices.push(index);
+    index = str.indexOf(substring, index + 1);
+  }
+  return indices;
+};
 export function validateKafkaHosts(value: string[]) {
   const res: Array<{ message: string; index?: number }> = [];
   const urlIndexes: { [key: string]: number[] } = {};
@@ -362,40 +371,30 @@ export function validateKafkaStaticTopic(value: string) {
 export function validateDynamicKafkaTopics(value: Array<EuiComboBoxOptionOption<string>>) {
   const res = [];
   value.forEach((val, idx) => {
-    if (!val) {
+    if (!val || !val.value) {
       res.push(
         i18n.translate('xpack.fleet.settings.outputForm.kafkaTopicFieldRequiredMessage', {
           defaultMessage: 'Topic is required',
         })
       );
-    }
-
-    const getAllIndices = (str: string, substring: string): number[] => {
-      const indices = [];
-      let indx = str.indexOf(substring);
-      while (indx !== -1) {
-        indices.push(indx);
-        indx = str.indexOf(substring, indx + 1);
+    } else {
+      const openingBrackets = getAllIndices(val.value, '{[');
+      const closingBrackets = getAllIndices(val.value, ']}');
+      if (openingBrackets.length !== closingBrackets.length) {
+        res.push(
+          i18n.translate('xpack.fleet.settings.outputForm.kafkaTopicBracketsError', {
+            defaultMessage: 'Topic should have matching amounts of opening and closing brackets',
+          })
+        );
       }
-      return indices;
-    };
-    // need to make sure that there are matching amounts of opening and closing brackets
-    const openingBracks = getAllIndices(val?.value!, '{[');
-    const closingBracks = getAllIndices(val?.value!, ']}');
-    if (openingBracks.length !== closingBracks.length) {
-      res.push(
-        i18n.translate('xpack.fleet.settings.outputForm.kafkaTopicBracketsError', {
-          defaultMessage: 'Topic should have matching amounts of opening and closing brackets',
-        })
-      );
-    }
-    // check for preceding percent sign
-    if (!openingBracks.every((item) => val?.value![item - 1] === '%')) {
-      res.push(
-        i18n.translate('xpack.fleet.settings.outputForm.kafkaTopicPercentError', {
-          defaultMessage: 'Opening brackets should be preceded by a percent sign',
-        })
-      );
+      // check for preceding percent sign
+      if (!openingBrackets.every((item) => val?.value![item - 1] === '%')) {
+        res.push(
+          i18n.translate('xpack.fleet.settings.outputForm.kafkaTopicPercentError', {
+            defaultMessage: 'Opening brackets should be preceded by a percent sign',
+          })
+        );
+      }
     }
   });
 
