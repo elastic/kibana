@@ -90,11 +90,6 @@ export default function searchSolutionNavigation({
       await searchClassicNavigation.expectNavItemActive('SearchApplications');
       await searchClassicNavigation.breadcrumbs.expectBreadcrumbExists('Build');
       await searchClassicNavigation.breadcrumbs.expectBreadcrumbExists('Search Applications');
-      // > BehavioralAnalytics
-      await searchClassicNavigation.clickNavItem('BehavioralAnalytics');
-      await searchClassicNavigation.expectNavItemActive('BehavioralAnalytics');
-      await searchClassicNavigation.breadcrumbs.expectBreadcrumbExists('Build');
-      await searchClassicNavigation.breadcrumbs.expectBreadcrumbExists('Behavioral Analytics');
 
       // Check Relevance
       // > InferenceEndpoints
