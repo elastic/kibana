@@ -163,6 +163,7 @@ export class KibanaSavedObjectsSLORepository implements SLORepository {
       ),
       createdBy: storedSLO.createdBy ?? storedSLOObject.created_by,
       updatedBy: storedSLO.updatedBy ?? storedSLOObject.updated_by,
+      assets: storedSLO.assets ?? [],
     });
 
     if (isLeft(result)) {

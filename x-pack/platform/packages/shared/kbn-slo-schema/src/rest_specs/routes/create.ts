@@ -6,6 +6,7 @@
  */
 import * as t from 'io-ts';
 import { indicatorSchema, timeWindowSchema } from '../../schema';
+import { assetsSchema } from '../../schema/asset';
 import { allOrAnyStringOrArray } from '../../schema/common';
 import {
   budgetingMethodSchema,
@@ -31,6 +32,7 @@ const createSLOParamsSchema = t.type({
       tags: tagsSchema,
       groupBy: allOrAnyStringOrArray,
       revision: t.number,
+      assets: assetsSchema,
     }),
   ]),
 });

@@ -49,7 +49,7 @@ export function ApmIndicatorOverview({ slo }: Props) {
       title={i18n.translate('xpack.slo.sloDetails.overview.apmSource', {
         defaultMessage: 'APM source',
       })}
-      subtitle={
+      content={
         <EuiFlexGroup direction="row" alignItems="flexStart" gutterSize="s" responsive={false} wrap>
           <EuiFlexItem grow={false}>
             <EuiBadge color="hollow" href={link}>

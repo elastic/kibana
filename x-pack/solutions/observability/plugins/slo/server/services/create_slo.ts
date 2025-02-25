@@ -222,6 +222,7 @@ export class CreateSLO {
       updatedBy: this.username,
       groupBy: !!params.groupBy ? params.groupBy : ALL_VALUE,
       version: SLO_MODEL_VERSION,
+      assets: params.assets ?? [],
     };
   }
 
