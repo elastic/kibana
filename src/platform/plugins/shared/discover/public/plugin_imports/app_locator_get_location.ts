@@ -8,7 +8,7 @@
  */
 
 import { setStateToKbnUrl } from '@kbn/kibana-utils-plugin/public';
-import { type DiscoverAppLocatorParams, appLocatorGetLocationCommon } from '../common';
+import { type DiscoverAppLocatorParams, appLocatorGetLocationCommon } from '../../common';
 
 export const appLocatorGetLocation = (
   {

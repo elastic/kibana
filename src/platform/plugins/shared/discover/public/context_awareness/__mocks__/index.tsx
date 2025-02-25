@@ -23,7 +23,7 @@ import {
 } from '../profiles';
 import { ProfileProviderServices } from '../profile_providers/profile_provider_services';
 import { ProfilesManager } from '../profiles_manager';
-import { DiscoverEBTManager } from '../../services/discover_ebt_manager';
+import { DiscoverEBTManager } from '../../plugin_imports/discover_ebt_manager';
 import { createLogsContextServiceMock } from '@kbn/discover-utils/src/__mocks__';
 import { discoverSharedPluginMock } from '@kbn/discover-shared-plugin/public/mocks';
 

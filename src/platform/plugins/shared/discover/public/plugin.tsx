@@ -26,7 +26,7 @@ import { i18n } from '@kbn/i18n';
 import { once } from 'lodash';
 import { DISCOVER_ESQL_LOCATOR } from '@kbn/deeplinks-analytics';
 import { DISCOVER_APP_LOCATOR, PLUGIN_ID } from '../common';
-import { registerFeature } from './register_feature';
+import { registerFeature } from './plugin_imports/register_feature';
 import type { UrlTracker } from './build_services';
 import { ACTION_VIEW_SAVED_SEARCH } from './embeddable/actions/view_saved_search_action';
 import { initializeKbnUrlTracking } from './utils/initialize_kbn_url_tracking';
@@ -58,7 +58,7 @@ import {
   type DiscoverEBTContextProps,
   type DiscoverEBTManager,
   registerDiscoverAnalytics,
-} from './services/discover_ebt_manager';
+} from './plugin_imports/discover_ebt_manager';
 import type { ProfilesManager } from './context_awareness';
 
 /**
@@ -102,7 +102,9 @@ export class DiscoverPlugin
       this.locator = plugins.share.url.locators.create({
         id: DISCOVER_APP_LOCATOR,
         getLocation: async (params) => {
-          const { appLocatorGetLocation } = await import('./app_locator_get_location');
+          const { appLocatorGetLocation } = await import(
+            './plugin_imports/app_locator_get_location'
+          );
           return appLocatorGetLocation({ useHash }, params);
         },
       });
@@ -319,7 +321,7 @@ export class DiscoverPlugin
       DataSourceProfileService,
       DocumentProfileService,
       ProfilesManager,
-    } = await import('./plugin_imports/shared_services');
+    } = await getSharedServices();
 
     const rootProfileService = new RootProfileService();
     const dataSourceProfileService = new DataSourceProfileService();

@@ -9,7 +9,7 @@
 
 import type { TimefilterContract } from '@kbn/data-plugin/public';
 import type { SavedSearch } from '@kbn/saved-search-plugin/public';
-import { isRefreshIntervalValid, isTimeRangeValid } from '../../utils/validate_time';
+import { isRefreshIntervalValid, isTimeRangeValid } from '../../../../utils/validate_time';
 
 export const restoreStateFromSavedSearch = ({
   savedSearch,

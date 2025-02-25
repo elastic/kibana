@@ -8,7 +8,7 @@
  */
 
 import { createHashHistory, History } from 'history';
-import { HistoryLocationState } from './build_services';
+import { HistoryLocationState } from '../build_services';
 
 export class HistoryService {
   private history?: History<HistoryLocationState>;
