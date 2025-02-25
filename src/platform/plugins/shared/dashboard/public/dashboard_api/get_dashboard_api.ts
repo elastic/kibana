@@ -253,8 +253,8 @@ export function getDashboardApi({
       const localPanelChanges =
         getDashboardBackupService().getState(savedObjectId)?.dashboardState?.panels;
       if (localPanelChanges && Object.keys(localPanelChanges).length > 0) {
-        const hasDifferences = panelsManager.comparators.panels[2]!(localPanelChanges, nextPanels);
-        if (localPanelChanges && hasDifferences && !force) {
+        const panelsAreEqual = panelsManager.comparators.panels[2]!(localPanelChanges, nextPanels);
+        if (localPanelChanges && !panelsAreEqual && !force) {
           hasChangeConflict$.next(true);
           return;
         }
@@ -264,6 +264,7 @@ export function getDashboardApi({
       hasChangeConflict$.next(false);
     },
     hasChangeConflict$,
+    setHasChangeConflict: (hasConflict: boolean) => hasChangeConflict$.next(hasConflict),
   } as Omit<DashboardApi, 'searchSessionId$'>;
 
   const searchSessionManager = initializeSearchSessionManager(
