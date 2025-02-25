@@ -3613,13 +3613,13 @@
       "enabled": true
     },
     {
-      "groupName": "Profiling",
+      "groupName": "Peggy",
       "matchDepNames": [
-        "peggy",
-        "@types/dagre"
+        "peggy"
       ],
       "reviewers": [
-        "team:obs-ux-infra_services-team"
+        "team:kibana-visualizations",
+        "team:kibana-data-discovery"
       ],
       "matchBaseBranches": [
         "main"
