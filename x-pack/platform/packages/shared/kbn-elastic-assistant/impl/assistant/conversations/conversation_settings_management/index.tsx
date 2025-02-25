@@ -15,6 +15,7 @@ import {
   EuiLoadingSpinner,
 } from '@elastic/eui';
 import React, { useCallback, useMemo, useState } from 'react';
+import { snakeCase } from 'lodash';
 
 import { css } from '@emotion/react';
 import { PromptTypeEnum } from '@kbn/elastic-assistant-common';
@@ -42,8 +43,6 @@ interface Props {
   defaultConnector?: AIConnector;
   isDisabled?: boolean;
 }
-const camelToSnake = (camelStr: string): string =>
-  camelStr.replace(/(?<!^)([A-Z])/g, '_$1').toLowerCase();
 const ConversationSettingsManagementComponent: React.FC<Props> = ({
   connectors,
   defaultConnector,
@@ -85,7 +84,7 @@ const ConversationSettingsManagementComponent: React.FC<Props> = ({
     setTotalItemCount,
     ...(sorting?.sort?.field
       ? // @ts-ignore field can be Title field column gets entire conversation and is labeled Title
-        { sortField: sorting.sort.field === 'Title' ? 'title' : camelToSnake(sorting.sort.field) }
+        { sortField: sorting.sort.field === 'Title' ? 'title' : snakeCase(sorting.sort.field) }
       : {}),
     ...(sorting?.sort?.direction ? { sortOrder: sorting.sort.direction } : {}),
   });
