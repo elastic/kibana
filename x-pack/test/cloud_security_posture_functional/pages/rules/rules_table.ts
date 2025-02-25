@@ -30,7 +30,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const retryService = getService('retry');
 
   describe('Cloud Posture Rules Page - Table', function () {
-    this.tags(['cloud_security_posture_rules_page']);
+    this.tags(['cloud_security_posture_rules_page_table']);
     let rule: typeof pageObjects.rule;
     let findings: typeof pageObjects.findings;
     let agentPolicyId: string;
