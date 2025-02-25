@@ -6,56 +6,26 @@
  */
 
 import { action } from '@storybook/addon-actions';
-import { boolean } from '@storybook/addon-knobs';
-import { storiesOf } from '@storybook/react';
-import React from 'react';
+import type { Meta, StoryObj } from '@storybook/react';
+import React, { useState } from 'react';
 import { ColorPicker } from '../color_picker';
 
 const THREE_COLORS = ['#fff', '#666', '#000'];
 const SIX_COLORS = ['#fff', '#666', '#000', '#abc', '#def', '#abcdef'];
 
-class Interactive extends React.Component<
-  {},
-  { hasButtons: boolean; value: string; colors: string[] }
-> {
-  public state = {
-    value: '',
-    colors: SIX_COLORS,
-    hasButtons: true,
-  };
-
-  public render() {
-    return (
-      <div>
-        <ColorPicker
-          colors={this.state.colors}
-          onAddColor={(value) => this.setState({ colors: this.state.colors.concat(value) })}
-          onRemoveColor={(value) =>
-            this.setState({ colors: this.state.colors.filter((color) => color !== value) })
-          }
-          onChange={(value) => this.setState({ value })}
-          hasButtons={this.state.hasButtons}
-          value={this.state.value}
-        />
-        <p style={{ marginTop: 20 }}>
-          <label>
-            <input
-              aria-checked={this.state.hasButtons}
-              type="checkbox"
-              checked={this.state.hasButtons}
-              onChange={() => this.setState({ hasButtons: !this.state.hasButtons })}
-            />
-            {'  '}
-            <span>Show Buttons?</span>
-          </label>
-        </p>
-      </div>
-    );
-  }
+interface ColorPickerProps {
+  value?: string;
+  colors: string[];
+  hasButtons?: boolean;
+  onChange?: (value: string) => void;
+  onAddColor?: (value: string) => void;
+  onRemoveColor?: (value: string) => void;
 }
 
-storiesOf('components/Color/ColorPicker', module)
-  .addParameters({
+const meta: Meta<ColorPickerProps> = {
+  title: 'components/Color/ColorPicker',
+  component: ColorPicker,
+  parameters: {
     info: {
       inline: true,
       styles: {
@@ -68,42 +38,103 @@ storiesOf('components/Color/ColorPicker', module)
         },
       },
     },
-  })
-  .add('three colors', () => (
+  },
+};
+
+export default meta;
+type Story = StoryObj<ColorPickerProps>;
+
+export const ThreeColors: Story = {
+  name: 'three colors',
+  args: {
+    value: '#fff',
+    colors: THREE_COLORS,
+    hasButtons: true,
+  },
+  render: (args) => (
     <ColorPicker
-      value="#fff"
+      {...args}
+      onChange={action('onChange')}
       onAddColor={action('onAddColor')}
       onRemoveColor={action('onRemoveColor')}
-      onChange={action('onChange')}
-      colors={THREE_COLORS}
-      hasButtons={boolean('Has Buttons', true)}
     />
-  ))
-  .add('six colors', () => (
+  ),
+};
+
+export const SixColors: Story = {
+  name: 'six colors',
+  args: {
+    value: '#fff',
+    colors: SIX_COLORS,
+    hasButtons: true,
+  },
+  render: (args) => (
     <ColorPicker
-      value="#fff"
+      {...args}
+      onChange={action('onChange')}
       onAddColor={action('onAddColor')}
       onRemoveColor={action('onRemoveColor')}
-      onChange={action('onChange')}
-      colors={SIX_COLORS}
-      hasButtons={boolean('Has Buttons', true)}
     />
-  ))
-  .add('six colors, value missing', () => (
+  ),
+};
+
+export const SixColorsMissingValue: Story = {
+  name: 'six colors, value missing',
+  args: {
+    value: '#a1b2c3',
+    colors: SIX_COLORS,
+    hasButtons: true,
+  },
+  render: (args) => (
     <ColorPicker
-      value="#a1b2c3"
+      {...args}
+      onChange={action('onChange')}
       onAddColor={action('onAddColor')}
       onRemoveColor={action('onRemoveColor')}
-      onChange={action('onChange')}
-      colors={SIX_COLORS}
-      hasButtons={boolean('Has Buttons', true)}
     />
-  ))
-  .add('interactive', () => <Interactive />, {
+  ),
+};
+
+const InteractiveComponent = () => {
+  const [value, setValue] = useState<string>('');
+  const [colors, setColors] = useState<string[]>(SIX_COLORS);
+  const [hasButtons, setHasButtons] = useState<boolean>(true);
+
+  return (
+    <div>
+      <ColorPicker
+        colors={colors}
+        onAddColor={(newColor) => setColors([...colors, newColor])}
+        onRemoveColor={(colorToRemove) =>
+          setColors(colors.filter((color) => color !== colorToRemove))
+        }
+        onChange={(newValue) => setValue(newValue)}
+        hasButtons={hasButtons}
+        value={value}
+      />
+      <p style={{ marginTop: 20 }}>
+        <label>
+          <input
+            aria-checked={hasButtons}
+            type="checkbox"
+            checked={hasButtons}
+            onChange={() => setHasButtons(!hasButtons)}
+          />
+          {'  '}
+          <span>Show Buttons?</span>
+        </label>
+      </p>
+    </div>
+  );
+};
+
+export const Interactive: Story = {
+  name: 'interactive',
+  parameters: {
     info: {
       inline: true,
       source: false,
-      propTablesExclude: [Interactive],
+      propTablesExclude: [InteractiveComponent],
       styles: {
         infoBody: {
           margin: 20,
@@ -114,4 +145,6 @@ storiesOf('components/Color/ColorPicker', module)
         },
       },
     },
-  });
+  },
+  render: InteractiveComponent,
+};

@@ -5,11 +5,10 @@
  * 2.0.
  */
 
-import React, { ComponentType, useEffect, useState } from 'react';
+import React, { type ComponentType, useEffect, useState } from 'react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { Observable } from 'rxjs';
-import { CoreStart } from '@kbn/core/public';
-import { text } from '@storybook/addon-knobs';
+import type { CoreStart } from '@kbn/core/public';
 import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
 import { FieldValueSelectionProps } from '../types';
 import { FieldValueSelection } from '../field_value_selection';
@@ -83,13 +82,25 @@ export function EmptyState() {
   );
 }
 
-export function SearchState(args: FieldValueSelectionProps) {
-  const name = text('Query', '');
+export const SearchState: Story = {
+  args: {
+    query: '',
+  },
+  argTypes: {
+    query: {
+      control: { type: 'text' },
+      description: 'Search query',
+    },
+  },
+  render: SearchStateComponent,
+};
 
-  const [, setQuery] = useState('');
+const SearchStateComponent = (args) => {
+  const [query, setQuery] = useState(args.query || '');
+
   useEffect(() => {
-    setQuery(name);
-  }, [name]);
+    setQuery(args.query || '');
+  }, [args.query]);
 
   return (
     <FieldValueSelection
@@ -101,4 +112,4 @@ export function SearchState(args: FieldValueSelectionProps) {
       setQuery={setQuery}
     />
   );
-}
+};
