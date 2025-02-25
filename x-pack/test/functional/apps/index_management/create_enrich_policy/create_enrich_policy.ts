@@ -25,15 +25,13 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       try {
         await es.indices.create({
           index: INDEX_NAME,
-          body: {
-            mappings: {
-              properties: {
-                email: {
-                  type: 'text',
-                },
-                age: {
-                  type: 'long',
-                },
+          mappings: {
+            properties: {
+              email: {
+                type: 'text',
+              },
+              age: {
+                type: 'long',
               },
             },
           },

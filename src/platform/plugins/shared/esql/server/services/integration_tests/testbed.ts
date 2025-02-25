@@ -48,14 +48,12 @@ export class EsqlServiceTestbed {
 
     await client.indices.create({
       index: 'lookup_index1',
-      body: {
-        settings: {
-          'index.mode': 'lookup',
-        },
-        mappings: {
-          properties: {
-            field1: { type: 'keyword' },
-          },
+      settings: {
+        'index.mode': 'lookup',
+      },
+      mappings: {
+        properties: {
+          field1: { type: 'keyword' },
         },
       },
     });
@@ -63,18 +61,16 @@ export class EsqlServiceTestbed {
     // Lookup index with aliases
     await client.indices.create({
       index: 'lookup_index2',
-      body: {
-        settings: {
-          'index.mode': 'lookup',
-        },
-        aliases: {
-          lookup_index2_alias1: {},
-          lookup_index2_alias2: {},
-        },
-        mappings: {
-          properties: {
-            field2: { type: 'keyword' },
-          },
+      settings: {
+        'index.mode': 'lookup',
+      },
+      aliases: {
+        lookup_index2_alias1: {},
+        lookup_index2_alias2: {},
+      },
+      mappings: {
+        properties: {
+          field2: { type: 'keyword' },
         },
       },
     });
