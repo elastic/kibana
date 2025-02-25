@@ -156,6 +156,7 @@ export interface KVState {
   errors: object;
   additionalProcessors: object[];
   ecsVersion: string;
+  regex: RegExp;
 }
 
 export interface UnstructuredLogState {

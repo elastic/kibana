@@ -56,6 +56,51 @@ export const KV_MAIN_PROMPT = ChatPromptTemplate.fromMessages([
   ['ai', 'Please find the JSON object below:'],
 ]);
 
+export const KV_HEADER_REGEX_PROMPT = ChatPromptTemplate.fromMessages([
+  [
+    'system',
+    `You are an expert in Syslogs and identifying the headers and structured body in syslog messages. Here is some context for you to reference for your task, read it carefully as you will get questions about it later:
+ <context>
+ <samples>
+ {samples}
+ </samples>
+ </context>`,
+  ],
+  [
+    'human',
+    `Your task is to:
+
+1. Identify the header and message parts of each log sample.
+2. Create a regex pattern that can parse the header part of the logs.
+3. Use a wildcard to match the message part.
+
+ You ALWAYS follow these guidelines when writing your response:
+ <guidelines>
+ - The regular expression needs to escape the forward slash characters in the pattern to prevent them from being interpreted as regex delimiters.
+ - Analyze the structure of the log samples, paying attention to consistent patterns in the header.
+ - Identify common elements in the header, such as timestamp, hostname, process name, and process ID.
+ - Create a regex pattern that captures these header elements precisely.
+ - For the timestamp, use a flexible pattern that can accommodate various date and time formats.
+ - Escape any special characters in the regex that might interfere with pattern matching. Specially characters like '\/'.
+ - Use non-capturing groups where appropriate to improve efficiency.
+ - For the message part, use a wildcard pattern (e.g., ".*") to match any content.
+ - Ensure the regex can handle variations in log formats while still accurately parsing the header.
+ - Remember to consider potential variations in log formats and provide a robust solution that can handle most standard syslog formats.
+ - Do not respond with anything except the processor as a JSON object enclosed with 3 backticks (\`), see example response above. Use strict JSON response format.
+ </guidelines>
+
+ You are required to provide the output in the following example response format:
+
+ <example_response>
+ A: Please find the JSON object below:
+ \`\`\`json
+ {ex_answer}
+ \`\`\`
+ </example_response>`,
+  ],
+  ['ai', 'Please find the JSON object below:'],
+]);
+
 export const KV_HEADER_PROMPT = ChatPromptTemplate.fromMessages([
   [
     'system',
@@ -82,6 +127,52 @@ Follow these steps to identify the header pattern:
  - Do not parse the message part in the regex. Just the header part should be in regex and grok_pattern.
  - Make sure to map the remaining message body to \'message\' in grok pattern.
  - Make sure to add \`{packageName}.{dataStreamName}\` as a prefix to each field in the pattern. Refer to example response.
+ - Do not respond with anything except the processor as a JSON object enclosed with 3 backticks (\`), see example response above. Use strict JSON response format.
+ </guidelines>
+
+ You are required to provide the output in the following example response format:
+
+ <example_response>
+ A: Please find the JSON object below:
+ \`\`\`json
+ {ex_answer}
+ \`\`\`
+ </example_response>`,
+  ],
+  ['ai', 'Please find the JSON object below:'],
+]);
+
+export const KV_HEADER_REGEX_ERROR_PROMPT = ChatPromptTemplate.fromMessages([
+  [
+    'system',
+    `You are an expert in Syslogs and identifying the headers and structured body in syslog messages. Here is some context for you to reference for your task, read it carefully as you will get questions about it later:
+<context>
+<current_regex>
+{current_regex}
+</current_regex>
+<errors>
+{errors}
+<errors>
+</context>`,
+  ],
+  [
+    'human',
+    `Please go through each error below, carefully review the provided current grok pattern, and resolve the most likely cause to the supplied error by returning an updated version of the current_pattern.
+
+<errors>
+{errors}
+</errors>
+
+Follow these steps to fix the errors in the header pattern:
+1. Identify any mismatches, incorrect syntax, or logical errors in the pattern.
+2. The log samples contain the header and structured body. The header may contain any or all of priority, timestamp, loglevel, hostname, ipAddress, messageId or any free-form text or non key-value information etc.,
+3. The message body may start with a description, followed by structured key-value pairs.
+4. Create a regex pattern that includes special characters escaped correctly.
+
+You ALWAYS follow these guidelines when writing your response:
+ <guidelines>
+- The regular expression needs to escape the forward slash characters in the pattern to prevent them from being interpreted as regex delimiters.
+ - Do not parse the message part in the regex. Just the header part should be in regex and a wild card matching the message part.
  - Do not respond with anything except the processor as a JSON object enclosed with 3 backticks (\`), see example response above. Use strict JSON response format.
  </guidelines>
 

@@ -22,4 +22,5 @@ export const kvState = {
   errors: { test: 'testerror' },
   additionalProcessors: [{ kv: { field: 'test', target_field: 'newtest' } }],
   grokPattern: 'testPattern',
+  regex: new RegExp('testRegex'),
 };

@@ -62,6 +62,37 @@ export async function handleKVValidate({
   };
 }
 
+export async function handleHeaderRegexValidate({
+  state,
+  client,
+}: HandleKVNodeParams): Promise<Partial<KVState>> {
+  const regex = state.regex;
+  const regexpErrors: string[] = [];
+  const failedSamples = state.logSamples.filter((sample) => {
+    try {
+      const matches = new RegExp(regex).test(sample);
+      if (!matches) {
+        regexpErrors.push(`Sample "${sample}" does not match the regex pattern`);
+      }
+      return !matches;
+    } catch (e) {
+      regexpErrors.push(`Error processing sample "${sample}": ${e.message}`);
+      return true;
+    }
+  });
+  if (failedSamples.length > 0) {
+    return {
+      errors: regexpErrors,
+      lastExecutedChain: 'kv_regex_validate',
+    };
+  }
+  return {
+    regex,
+    errors: [],
+    lastExecutedChain: 'kv_regex_validate',
+  };
+}
+
 export async function handleHeaderValidate({
   state,
   client,

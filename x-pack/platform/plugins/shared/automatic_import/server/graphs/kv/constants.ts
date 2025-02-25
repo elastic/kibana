@@ -13,10 +13,13 @@ export const KV_EXAMPLE_ANSWER = {
   ignore_missing: true,
 };
 
-export const KV_HEADER_EXAMPLE_ANSWER = {
+export const KV_HEADER_REGEX_EXAMPLE_ANSWER = {
   rfc: 'RFC2454',
   regex:
     '/(?:(d{4}[-]d{2}[-]d{2}[T]d{2}[:]d{2}[:]d{2}(?:.d{1,6})?(?:[+-]d{2}[:]d{2}|Z)?)|-)s(?:([w][wd.@-]*)|-)s(.*)$/',
+};
+
+export const KV_HEADER_EXAMPLE_ANSWER = {
   grok_pattern:
     '%{WORD:cisco.audit.key1}:%{WORD:cisco.audit.value1};%{WORD:cisco.audit.key2}:%{WORD:cisco.audit.value2}:%{GREEDYDATA:message}',
 };
