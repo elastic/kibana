@@ -43,7 +43,7 @@ export const ALERT_COUNTS_TOOL: AssistantTool = {
       func: async () => {
         const query = getAlertsCountQuery(alertsIndexPattern);
         const result = await esClient.search<SearchResponse>(query);
-        const alertsCountReference = contentReferencesStore.add((p) =>
+        const alertsCountReference = contentReferencesStore?.add((p) =>
           securityAlertsPageReference(p.id)
         );
 

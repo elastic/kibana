@@ -16,7 +16,6 @@ import {
   DefendInsightsPostResponse,
   API_VERSIONS,
   Replacements,
-  newContentReferencesStore,
 } from '@kbn/elastic-assistant-common';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { IRouter, Logger } from '@kbn/core/server';
@@ -153,7 +152,7 @@ export const postDefendInsightsRoute = (router: IRouter<ElasticAssistantRequestH
             apiConfig,
             esClient,
             latestReplacements,
-            contentReferencesStore: newContentReferencesStore(),
+            contentReferencesStore: undefined,
             connectorTimeout: CONNECTOR_TIMEOUT,
             langChainTimeout: LANG_CHAIN_TIMEOUT,
             langSmithProject,
