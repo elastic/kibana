@@ -97,7 +97,7 @@ export class State {
     scopedClusterClient: IScopedClusterClient,
     isServerless: boolean
   ) {
-    const changedStreams = this.changes().filter((stream) => stream.commitStatus !== 'uncomitted');
+    const changedStreams = this.changes().filter((stream) => stream.commitStatus !== 'uncommitted');
 
     const changes = changedStreams
       .map((stream) => {
