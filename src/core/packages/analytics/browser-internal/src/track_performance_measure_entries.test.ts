@@ -114,6 +114,11 @@ describe('trackPerformanceMeasureEntries', () => {
             anyKey: 'anyKey',
             anyValue: 'anyValue',
           },
+          meta: {
+            isInitialLoad: true,
+            queryRangeSecs: 86400,
+            queryOffsetSecs: 0,
+          },
         },
       },
     ]);
@@ -124,7 +129,7 @@ describe('trackPerformanceMeasureEntries', () => {
       duration: 1000,
       eventName: 'kibana:plugin_render_time',
       key1: 'key1',
-      meta: { target: '/' },
+      meta: { is_initial_load: true, query_range_secs: 86400, query_offset_secs: 0 },
       value1: 'value1',
     });
   });
@@ -152,7 +157,7 @@ describe('trackPerformanceMeasureEntries', () => {
     expect(analyticsClientMock.reportEvent).toHaveBeenCalledWith('performance_metric', {
       duration: 1000,
       eventName: 'kibana:plugin_render_time',
-      meta: { target: '/', query_range_secs: 86400, query_offset_secs: 0 },
+      meta: { query_range_secs: 86400, query_offset_secs: 0 },
     });
   });
 });

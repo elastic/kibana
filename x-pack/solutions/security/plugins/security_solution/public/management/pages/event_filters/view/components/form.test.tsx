@@ -31,6 +31,7 @@ import {
   FILTER_PROCESS_DESCENDANTS_TAG,
   GLOBAL_ARTIFACT_TAG,
 } from '../../../../../../common/endpoint/service/artifacts/constants';
+import type { IHttpFetchError } from '@kbn/core-http-browser';
 
 jest.mock('../../../../../common/lib/kibana');
 jest.mock('../../../../../common/containers/source');
@@ -365,6 +366,25 @@ describe('Event filter form', () => {
       //   'true'
       // );
     });
+
+    it('should preserve other tags when updating artifact assignment', async () => {
+      formProps.item.tags = ['some:random_tag'];
+      render();
+      const policyId = formProps.policies[0].id;
+      // move to per-policy and select the first
+      await userEvent.click(
+        renderResult.getByTestId('eventFilters-form-effectedPolicies-perPolicy')
+      );
+      await userEvent.click(renderResult.getByTestId(`policy-${policyId}`));
+
+      expect(formProps.onChange).toHaveBeenLastCalledWith(
+        expect.objectContaining({
+          item: expect.objectContaining({
+            tags: ['some:random_tag', 'policy:id-0'],
+          }),
+        })
+      );
+    });
   });
 
   describe('Policy section with downgraded license', () => {
@@ -520,8 +540,8 @@ describe('Event filter form', () => {
       rerenderWithLatestProps();
       await userEvent.click(renderResult.getByTestId(`${formPrefix}-effectedPolicies-global`));
       expect(latestUpdatedItem.tags).toStrictEqual([
-        GLOBAL_ARTIFACT_TAG,
         FILTER_PROCESS_DESCENDANTS_TAG,
+        GLOBAL_ARTIFACT_TAG,
       ]);
 
       rerenderWithLatestProps();
@@ -542,8 +562,8 @@ describe('Event filter form', () => {
         renderResult.getByTestId('eventFilters-form-effectedPolicies-perPolicy')
       );
       expect(latestUpdatedItem.tags).toStrictEqual([
-        ...perPolicyTags,
         FILTER_PROCESS_DESCENDANTS_TAG,
+        ...perPolicyTags,
       ]);
     });
 
@@ -883,6 +903,14 @@ describe('Event filter form', () => {
           `The length of the comment is too long. The maximum length is ${MAX_COMMENT_LENGTH} characters.`
         )
       ).not.toBeNull();
+    });
+
+    it('should display form submission errors', () => {
+      const message = 'oh oh - error';
+      formProps.error = new Error(message) as IHttpFetchError;
+      const { getByTestId } = render();
+
+      expect(getByTestId('eventFilters-form-submitError').textContent).toMatch(message);
     });
   });
 });

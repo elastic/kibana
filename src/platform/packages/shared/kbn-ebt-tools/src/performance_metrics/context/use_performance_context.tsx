@@ -15,6 +15,19 @@ export interface PerformanceApi {
    * @param eventData - Data to send with the performance measure, conforming the structure of a {@link EventData}.
    */
   onPageReady(eventData?: EventData): void;
+  /**
+   * Marks the start of a page refresh event for performance tracking.
+   * This method adds a performance marker start::pageRefresh to indicate when a page refresh begins.
+   *
+   * Usage:
+   * ```ts
+   * onPageRefreshStart();
+   * ```
+   *
+   * The marker set by this function can later be used in performance measurements
+   * along with an end marker end::pageReady to determine the total refresh duration.
+   */
+  onPageRefreshStart(): void;
 }
 
 export const PerformanceContext = createContext<PerformanceApi | undefined>(undefined);

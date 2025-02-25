@@ -29,6 +29,8 @@ import {
   OperatingSystem,
 } from '@kbn/securitysolution-utils';
 import { WildCardWithWrongOperatorCallout } from '@kbn/securitysolution-exception-list-components';
+import { useGetUpdatedTags } from '../../../../hooks/artifacts';
+import { FormattedError } from '../../../../components/formatted_error';
 import type {
   TrustedAppConditionEntry,
   NewTrustedApp,
@@ -235,7 +237,7 @@ const defaultConditionEntry = (): TrustedAppConditionEntry<ConditionEntryField.H
 });
 
 export const TrustedAppsForm = memo<ArtifactFormComponentProps>(
-  ({ item, policies, policiesIsLoading, onChange, mode }) => {
+  ({ item, policies, policiesIsLoading, onChange, mode, error: submitError }) => {
     const getTestId = useTestIdGenerator('trustedApps-form');
     const [visited, setVisited] = useState<
       Partial<{
@@ -248,6 +250,7 @@ export const TrustedAppsForm = memo<ArtifactFormComponentProps>(
     const isGlobal = useMemo(() => isArtifactGlobal(item), [item]);
     const [wasByPolicy, setWasByPolicy] = useState(!isArtifactGlobal(item));
     const [hasFormChanged, setHasFormChanged] = useState(false);
+    const { getTagsUpdatedBy } = useGetUpdatedTags(item);
 
     useEffect(() => {
       if (!hasFormChanged && item.tags) {
@@ -301,9 +304,9 @@ export const TrustedAppsForm = memo<ArtifactFormComponentProps>(
 
     const handleOnPolicyChange = useCallback(
       (change: EffectedPolicySelection) => {
-        const tags = getArtifactTagsByPolicySelection(change);
-
+        const tags = getTagsUpdatedBy('policySelection', getArtifactTagsByPolicySelection(change));
         const nextItem = { ...item, tags };
+
         // Preserve old selected policies when switching to global
         if (!change.isGlobal) {
           setSelectedPolicies(change.selected);
@@ -311,7 +314,7 @@ export const TrustedAppsForm = memo<ArtifactFormComponentProps>(
         processChanged(nextItem);
         setHasFormChanged(true);
       },
-      [item, processChanged]
+      [getTagsUpdatedBy, item, processChanged]
     );
 
     const handleOnNameOrDescriptionChange = useCallback<
@@ -480,7 +483,16 @@ export const TrustedAppsForm = memo<ArtifactFormComponentProps>(
     }, [item]);
 
     return (
-      <EuiForm component="div" data-test-subj={getTestId('')}>
+      <EuiForm
+        component="div"
+        data-test-subj={getTestId('')}
+        error={
+          submitError ? (
+            <FormattedError error={submitError} data-test-subj={getTestId('submitError')} />
+          ) : undefined
+        }
+        isInvalid={!!submitError}
+      >
         <EuiTitle size="xs">
           <h3>{DETAILS_HEADER}</h3>
         </EuiTitle>

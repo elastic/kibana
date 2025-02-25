@@ -7,6 +7,7 @@
 
 import { EndpointAppContextService } from '../../../endpoint/endpoint_app_context_services';
 import {
+  createMockEndpointAppContextService,
   createMockEndpointAppContextServiceSetupContract,
   createMockEndpointAppContextServiceStartContract,
 } from '../../../endpoint/mocks';
@@ -22,6 +23,10 @@ import {
   GLOBAL_ARTIFACT_TAG,
 } from '../../../../common/endpoint/service/artifacts';
 import { securityMock } from '@kbn/security-plugin/server/mocks';
+import { setArtifactOwnerSpaceId } from '../../../../common/endpoint/service/artifacts/utils';
+import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
+import { getEndpointAuthzInitialStateMock } from '../../../../common/endpoint/service/authz/mocks';
+import type { EndpointAuthz } from '../../../../common/endpoint/types/authz';
 
 describe('When using Artifacts Exceptions BaseValidator', () => {
   let endpointAppContextServices: EndpointAppContextService;
@@ -64,6 +69,11 @@ describe('When using Artifacts Exceptions BaseValidator', () => {
 
       return validator;
     };
+  });
+
+  afterEach(() => {
+    // @ts-expect-error setting variable to undefined
+    validator = undefined;
   });
 
   it('should use default endpoint authz (no access) when `request` is not provided', async () => {
@@ -185,5 +195,101 @@ describe('When using Artifacts Exceptions BaseValidator', () => {
     expect(initValidator()._wasByPolicyEffectScopeChanged(getUpdated(), exceptionLikeItem)).toBe(
       false
     );
+  });
+
+  describe('with space awareness', () => {
+    const noGlobalArtifactManagementAuthzMessage =
+      'EndpointArtifactError: Endpoint authorization failure. Management of "ownerSpaceId" tag requires global artifact management privilege';
+    let authzMock: EndpointAuthz;
+
+    beforeEach(() => {
+      authzMock = getEndpointAuthzInitialStateMock();
+      endpointAppContextServices = createMockEndpointAppContextService();
+      // @ts-expect-error updating a readonly field
+      endpointAppContextServices.experimentalFeatures.endpointManagementSpaceAwarenessEnabled =
+        true;
+      (endpointAppContextServices.getEndpointAuthz as jest.Mock).mockResolvedValue(authzMock);
+      setArtifactOwnerSpaceId(exceptionLikeItem, DEFAULT_SPACE_ID);
+      validator = new BaseValidatorMock(endpointAppContextServices, kibanaRequest);
+    });
+
+    describe('#validateCreateOnwerSpaceIds()', () => {
+      it('should error if adding an spaceOwnerId but has no global artifact management authz', async () => {
+        setArtifactOwnerSpaceId(exceptionLikeItem, 'foo');
+        authzMock.canManageGlobalArtifacts = false;
+
+        await expect(validator._validateCreateOwnerSpaceIds(exceptionLikeItem)).rejects.toThrow(
+          noGlobalArtifactManagementAuthzMessage
+        );
+      });
+
+      it('should allow spaceOwnerId tag matching current space even if no global artifact management authz', async () => {
+        authzMock.canManageGlobalArtifacts = false;
+
+        await expect(
+          validator._validateCreateOwnerSpaceIds(exceptionLikeItem)
+        ).resolves.toBeUndefined();
+      });
+
+      it('should allow additional spaceOwnerId tags if user has global artifact management authz', async () => {
+        setArtifactOwnerSpaceId(exceptionLikeItem, 'foo');
+
+        await expect(
+          validator._validateCreateOwnerSpaceIds(exceptionLikeItem)
+        ).resolves.toBeUndefined();
+      });
+
+      it('should not error if feature flag is disabled', async () => {
+        // @ts-expect-error updating a readonly field
+        endpointAppContextServices.experimentalFeatures.endpointManagementSpaceAwarenessEnabled =
+          false;
+        authzMock.canManageGlobalArtifacts = false;
+        setArtifactOwnerSpaceId(exceptionLikeItem, 'foo');
+        setArtifactOwnerSpaceId(exceptionLikeItem, 'bar');
+
+        await expect(
+          validator._validateCreateOwnerSpaceIds(exceptionLikeItem)
+        ).resolves.toBeUndefined();
+      });
+    });
+
+    describe('#validateUpdateOnwerSpaceIds()', () => {
+      let savedExceptionLikeItem: ExceptionItemLikeOptions;
+
+      beforeEach(() => {
+        savedExceptionLikeItem = createExceptionItemLikeOptionsMock();
+        setArtifactOwnerSpaceId(exceptionLikeItem, DEFAULT_SPACE_ID);
+      });
+
+      it('should error if changing spaceOwnerId but has no global artifact management authz', async () => {
+        authzMock.canManageGlobalArtifacts = false;
+        setArtifactOwnerSpaceId(exceptionLikeItem, 'foo');
+
+        await expect(
+          validator._validateUpdateOwnerSpaceIds(exceptionLikeItem, savedExceptionLikeItem)
+        ).rejects.toThrow(noGlobalArtifactManagementAuthzMessage);
+      });
+
+      it('should allow changes to spaceOwnerId tags if user has global artifact management authz', async () => {
+        setArtifactOwnerSpaceId(exceptionLikeItem, 'foo');
+
+        await expect(
+          validator._validateUpdateOwnerSpaceIds(exceptionLikeItem, savedExceptionLikeItem)
+        ).resolves.toBeUndefined();
+      });
+
+      it('should not error if feature flag is disabled', async () => {
+        // @ts-expect-error updating a readonly field
+        endpointAppContextServices.experimentalFeatures.endpointManagementSpaceAwarenessEnabled =
+          false;
+        authzMock.canManageGlobalArtifacts = false;
+        setArtifactOwnerSpaceId(exceptionLikeItem, 'foo');
+        setArtifactOwnerSpaceId(exceptionLikeItem, 'bar');
+
+        await expect(
+          validator._validateUpdateOwnerSpaceIds(exceptionLikeItem, savedExceptionLikeItem)
+        ).resolves.toBeUndefined();
+      });
+    });
   });
 });

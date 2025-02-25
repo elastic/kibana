@@ -20,7 +20,7 @@ import { useAnyOfApmParams } from '../../../hooks/use_apm_params';
 import { useApmRouter } from '../../../hooks/use_apm_router';
 import { useBreakpoints } from '../../../hooks/use_breakpoints';
 import { useStateDebounced } from '../../../hooks/use_debounce';
-import { FETCH_STATUS, isPending, useFetcher } from '../../../hooks/use_fetcher';
+import { FETCH_STATUS, isPending, isSuccess, useFetcher } from '../../../hooks/use_fetcher';
 import { usePreferredDataSourceAndBucketSize } from '../../../hooks/use_preferred_data_source_and_bucket_size';
 import type { APIReturnType } from '../../../services/rest/create_call_apm_api';
 import { TransactionOverviewLink } from '../links/apm/transaction_overview_link';
@@ -91,7 +91,6 @@ export function TransactionsTable({
   const shouldShowSparkPlots = showSparkPlots ?? !isLarge;
   const { transactionType, serviceName } = useApmServiceContext();
   const [searchQuery, setSearchQueryDebounced] = useStateDebounced('');
-  const [hasTableLoaded, setHasTableLoaded] = useState(false);
   const [renderedItems, setRenderedItems] = useState<ApiResponse['transactionGroups']>([]);
 
   const { mainStatistics, mainStatisticsStatus, detailedStatistics, detailedStatisticsStatus } =
@@ -110,16 +109,10 @@ export function TransactionsTable({
     });
 
   useEffect(() => {
-    if (
-      mainStatisticsStatus === FETCH_STATUS.SUCCESS &&
-      detailedStatisticsStatus === FETCH_STATUS.SUCCESS &&
-      onLoadTable &&
-      !hasTableLoaded
-    ) {
-      onLoadTable();
-      setHasTableLoaded(true);
+    if (isSuccess(mainStatisticsStatus) && isSuccess(detailedStatisticsStatus)) {
+      onLoadTable?.();
     }
-  }, [mainStatisticsStatus, detailedStatisticsStatus, onLoadTable, hasTableLoaded]);
+  }, [mainStatisticsStatus, detailedStatisticsStatus, onLoadTable, end, start]);
 
   const columns = useMemo(() => {
     return getColumns({

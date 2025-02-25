@@ -150,7 +150,11 @@ export const createMockEndpointAppContextService = (
     savedObjects: createSavedObjectsClientFactoryMock({ savedObjectsServiceStart }).service,
     isServerless: jest.fn().mockReturnValue(false),
     getInternalEsClient: jest.fn().mockReturnValue(esClient),
-    getActiveSpace: jest.fn(async () => DEFAULT_SPACE_ID),
+    getActiveSpace: jest.fn(async () => ({
+      id: DEFAULT_SPACE_ID,
+      name: 'default',
+      disabledFeatures: [],
+    })),
   } as unknown as jest.Mocked<EndpointAppContextService>;
 };
 

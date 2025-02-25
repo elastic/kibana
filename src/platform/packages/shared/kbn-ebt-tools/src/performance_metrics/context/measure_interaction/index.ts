@@ -12,24 +12,25 @@ import {
   getOffsetFromNowInSeconds,
   getTimeDifferenceInSeconds,
 } from '@kbn/timerange';
-import { perfomanceMarkers } from '../../performance_markers';
 import { EventData } from '../performance_context';
+import { perfomanceMarkers } from '../../performance_markers';
 
 interface PerformanceMeta {
   queryRangeSecs: number;
   queryOffsetSecs: number;
+  isInitialLoad?: boolean;
 }
 
-export function measureInteraction() {
+export function measureInteraction(pathname: string) {
   performance.mark(perfomanceMarkers.startPageChange);
-  const trackedRoutes: string[] = [];
+
   return {
     /**
      * Marks the end of the page ready state and measures the performance between the start of the page change and the end of the page ready state.
      * @param pathname - The pathname of the page.
      * @param customMetrics - Custom metrics to be included in the performance measure.
      */
-    pageReady(pathname: string, eventData?: EventData) {
+    pageReady(eventData?: EventData) {
       let performanceMeta: PerformanceMeta | undefined;
       performance.mark(perfomanceMarkers.endPageReady);
 
@@ -49,19 +50,48 @@ export function measureInteraction() {
         };
       }
 
-      if (!trackedRoutes.includes(pathname)) {
-        performance.measure(pathname, {
+      if (
+        performance.getEntriesByName(perfomanceMarkers.startPageChange).length > 0 &&
+        performance.getEntriesByName(perfomanceMarkers.endPageReady).length > 0
+      ) {
+        performance.measure(`[ttfmp:initial] - ${pathname}`, {
           detail: {
             eventName: 'kibana:plugin_render_time',
             type: 'kibana:performance',
             customMetrics: eventData?.customMetrics,
-            meta: performanceMeta,
+            meta: { ...performanceMeta, isInitialLoad: true },
           },
           start: perfomanceMarkers.startPageChange,
           end: perfomanceMarkers.endPageReady,
         });
-        trackedRoutes.push(pathname);
+
+        // Clean up the marks once the measure is done
+        performance.clearMarks(perfomanceMarkers.startPageChange);
+        performance.clearMarks(perfomanceMarkers.endPageReady);
       }
+
+      if (
+        performance.getEntriesByName(perfomanceMarkers.startPageRefresh).length > 0 &&
+        performance.getEntriesByName(perfomanceMarkers.endPageReady).length > 0
+      ) {
+        performance.measure(`[ttfmp:refresh] - ${pathname}`, {
+          detail: {
+            eventName: 'kibana:plugin_render_time',
+            type: 'kibana:performance',
+            customMetrics: eventData?.customMetrics,
+            meta: { ...performanceMeta, isInitialLoad: false },
+          },
+          start: perfomanceMarkers.startPageRefresh,
+          end: perfomanceMarkers.endPageReady,
+        });
+
+        // // Clean up the marks once the measure is done
+        performance.clearMarks(perfomanceMarkers.startPageRefresh);
+        performance.clearMarks(perfomanceMarkers.endPageReady);
+      }
+    },
+    pageRefreshStart() {
+      performance.mark(perfomanceMarkers.startPageRefresh);
     },
   };
 }
