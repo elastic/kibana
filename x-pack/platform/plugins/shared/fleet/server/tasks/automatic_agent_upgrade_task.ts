@@ -74,17 +74,12 @@ export class AutomaticAgentUpgradeTask {
         title: TITLE,
         timeout: TIMEOUT,
         createTaskRunner: ({ taskInstance }: { taskInstance: ConcreteTaskInstance }) => {
-          let cancelled = false;
-          const isCancelled = () => cancelled;
           return {
             run: async () => {
-              if (isCancelled()) {
-                this.abortController.abort('Task has been cancelled');
-              }
-              return this.runTask(taskInstance, core, isCancelled);
+              return this.runTask(taskInstance, core);
             },
             cancel: async () => {
-              cancelled = true;
+              this.abortController.abort('Task timed out');
             },
           };
         },
@@ -121,11 +116,7 @@ export class AutomaticAgentUpgradeTask {
     return `${TYPE}:${VERSION}`;
   }
 
-  public runTask = async (
-    taskInstance: ConcreteTaskInstance,
-    core: CoreSetup,
-    isCancelled: () => boolean
-  ) => {
+  public runTask = async (taskInstance: ConcreteTaskInstance, core: CoreSetup) => {
     if (!appContextService.getExperimentalFeatures().enableAutomaticAgentUpgrades) {
       this.logger.debug(
         '[AutomaticAgentUpgradeTask] Aborting runTask: automatic upgrades feature is disabled'
@@ -152,7 +143,7 @@ export class AutomaticAgentUpgradeTask {
     const soClient = new SavedObjectsClient(coreStart.savedObjects.createInternalRepository());
 
     try {
-      await this.checkAgentPoliciesForAutomaticUpgrades(esClient, soClient, isCancelled);
+      await this.checkAgentPoliciesForAutomaticUpgrades(esClient, soClient);
       this.endRun('success');
     } catch (err) {
       if (err instanceof errors.RequestAbortedError) {
@@ -171,8 +162,7 @@ export class AutomaticAgentUpgradeTask {
 
   private async checkAgentPoliciesForAutomaticUpgrades(
     esClient: ElasticsearchClient,
-    soClient: SavedObjectsClientContract,
-    isCancelled: () => boolean
+    soClient: SavedObjectsClientContract
   ) {
     // Fetch custom agent policies with set required_versions in batches.
     const agentPolicyFetcher = await agentPolicyService.fetchAllAgentPolicies(soClient, {
@@ -189,8 +179,8 @@ export class AutomaticAgentUpgradeTask {
         return;
       }
       for (const agentPolicy of agentPolicyPageResults) {
-        if (isCancelled()) {
-          this.abortController.abort('Task has been cancelled');
+        if (this.abortController.signal.aborted) {
+          throw new Error('Task was aborted');
         }
 
         await this.checkAgentPolicyForAutomaticUpgrades(esClient, soClient, agentPolicy);
