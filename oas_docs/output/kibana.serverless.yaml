@@ -52289,7 +52289,7 @@ components:
           required:
             - parameters
     Security_Endpoint_Management_API_SortDirection:
-      description: Determines the sort order, which can be desc or asc.
+      description: Determines the sort order.
       enum:
         - asc
         - desc
