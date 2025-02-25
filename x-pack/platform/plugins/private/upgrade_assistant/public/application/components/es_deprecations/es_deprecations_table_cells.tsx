@@ -18,8 +18,8 @@ interface Props {
   fieldName: DeprecationTableColumns;
   deprecation: EnrichedDeprecationInfo;
   openFlyout: () => void;
-  selectedDeprecations?: Set<string>,
-  toggleDeprecation?: (id?: string) => void,
+  selectedDeprecations?: Set<string>;
+  toggleDeprecation?: (id?: string) => void;
 }
 
 const i18nTexts = {

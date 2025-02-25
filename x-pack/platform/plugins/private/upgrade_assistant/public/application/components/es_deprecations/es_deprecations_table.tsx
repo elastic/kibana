@@ -118,7 +118,7 @@ const renderTableRowCells = (
   deprecation: EnrichedDeprecationInfo,
   mlUpgradeModeEnabled: boolean,
   selectedDeprecations: Set<string>,
-  toggleDeprecation: (id?: string) => void,
+  toggleDeprecation: (id?: string) => void
 ) => {
   switch (deprecation.correctiveAction?.type) {
     case 'mlSnapshot':
@@ -138,7 +138,14 @@ const renderTableRowCells = (
 
     case 'reindex':
     case 'unfreeze':
-      return <IndexTableRow deprecation={deprecation} rowFieldNames={cellTypes} selectedDeprecations={selectedDeprecations} toggleDeprecation={toggleDeprecation} />;
+      return (
+        <IndexTableRow
+          deprecation={deprecation}
+          rowFieldNames={cellTypes}
+          selectedDeprecations={selectedDeprecations}
+          toggleDeprecation={toggleDeprecation}
+        />
+      );
 
     case 'healthIndicator':
       return <HealthIndicatorTableRow deprecation={deprecation} rowFieldNames={cellTypes} />;
@@ -280,11 +287,14 @@ export const EsDeprecationsTable: React.FunctionComponent<Props> = ({
     setSelectedDeprecations((prev) => {
       const selectableDeprecations = new Set(
         filteredDeprecations
-        .filter((dep) => dep.correctiveAction?.type === 'reindex')
-        .map((dep) => dep.index || dep.message)
+          .filter((dep) => dep.correctiveAction?.type === 'reindex')
+          .map((dep) => dep.index || dep.message)
       );
 
-      if (selectableDeprecations.size === prev.size && [...prev].every((id) => selectableDeprecations.has(id))) {
+      if (
+        selectableDeprecations.size === prev.size &&
+        [...prev].every((id) => selectableDeprecations.has(id))
+      ) {
         return new Set(); // Deselect all selectable items
       }
       return selectableDeprecations; // Select all selectable items
@@ -410,7 +420,12 @@ export const EsDeprecationsTable: React.FunctionComponent<Props> = ({
             {visibleDeprecations.map((deprecation, index) => {
               return (
                 <EuiTableRow data-test-subj="deprecationTableRow" key={`deprecation-row-${index}`}>
-                  {renderTableRowCells(deprecation, mlUpgradeModeEnabled, selectedDeprecations, toggleDeprecation)}
+                  {renderTableRowCells(
+                    deprecation,
+                    mlUpgradeModeEnabled,
+                    selectedDeprecations,
+                    toggleDeprecation
+                  )}
                 </EuiTableRow>
               );
             })}

@@ -73,12 +73,8 @@ const i18nTexts = {
   ),
 };
 
-export const BatchReindexApiDocsLink = ({ docLinks }: { docLinks: DocLinksStart}) => (
-  <EuiLink
-    href={docLinks.links.upgradeAssistant.batchReindex}
-    target="_blank"
-    external={true}
-  >
+export const BatchReindexApiDocsLink = ({ docLinks }: { docLinks: DocLinksStart }) => (
+  <EuiLink href={docLinks.links.upgradeAssistant.batchReindex} target="_blank" external={true}>
     {i18n.translate('xpack.upgradeAssistant.esDeprecations.batchReindexingDocsLink', {
       defaultMessage: 'batch reindexing API',
     })}
@@ -91,9 +87,7 @@ const getBatchReindexLink = (docLinks: DocLinksStart) => {
       id="xpack.upgradeAssistant.esDeprecations.batchReindexingDocsDescription"
       defaultMessage="To start upgrading multiple indices in a single request, use the Kibana {docsLink}. Note: this API does not support data streams."
       values={{
-        docsLink: (
-        <BatchReindexApiDocsLink docLinks={docLinks} />
-        ),
+        docsLink: <BatchReindexApiDocsLink docLinks={docLinks} />,
       }}
     />
   );

@@ -27,8 +27,8 @@ const { useGlobalFlyout } = GlobalFlyout;
 interface TableRowProps {
   deprecation: EnrichedDeprecationInfo;
   rowFieldNames: DeprecationTableColumns[];
-  selectedDeprecations?: Set<string>,
-  toggleDeprecation?: (id?: string) => void,
+  selectedDeprecations?: Set<string>;
+  toggleDeprecation?: (id?: string) => void;
 }
 
 const IndexTableRowCells: React.FunctionComponent<TableRowProps> = ({

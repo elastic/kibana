@@ -41,17 +41,15 @@ const getBulkReindexConsoleCommand = (indices: Set<string>) => {
   ]
 }
   `;
-}
+};
 
-export const BulkReindexModal: FunctionComponent<Props> = ({
-  indices,
-}) => {
+export const BulkReindexModal: FunctionComponent<Props> = ({ indices }) => {
   const {
     application,
     plugins: { share },
     services: {
       core: { docLinks },
-    }
+    },
   } = useAppContext();
 
   const [isModalVisible, setIsModalVisible] = useState(false);
