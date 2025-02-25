@@ -150,9 +150,7 @@ export const useGridLayoutState = ({
           rowOffsets[rowNum] += width;
         });
         newLayout[rowIndex] = { ...newLayout[rowIndex], panels: newPanels };
-        console.log(rowOffsets);
       });
-      console.log(newLayout);
       runtimeSettings$.next('none');
       gridLayoutStateManager.gridLayout$.next(newLayout);
     } else if (runtimeSettings === 'none' && gridSettings !== 'none') {

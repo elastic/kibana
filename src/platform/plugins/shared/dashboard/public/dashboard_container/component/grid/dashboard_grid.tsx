@@ -172,8 +172,6 @@ export const DashboardGrid = ({
           .embPanel__hoverActions {
           z-index: ${euiTheme.levels.toast};
         }
-
-        // when in fullscreen mode, combine all floating actions on first row and nudge them down
       `,
     };
   }, [useMargins, viewMode, expandedPanelId, euiTheme.levels.toast]);

@@ -5,6 +5,9 @@
   flex: auto;
   display: flex;
   width: 100%;
+  &:has(.kbnGrid--freeform) {
+    overflow: hidden;
+  };
 }
 
 .dashboardViewport--loading {

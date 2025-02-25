@@ -66,7 +66,6 @@ export const GridLayout = ({
       gridLayoutStateManager.runtimeSettings$.getValue() !== 'none' &&
       !isLayoutEqual(layout, gridLayoutStateManager.gridLayout$.getValue())
     ) {
-      console.log('HERE!');
       const newLayout = cloneDeep(layout);
       /**
        * the layout sent in as a prop is not guaranteed to be valid (i.e it may have floating panels) -
