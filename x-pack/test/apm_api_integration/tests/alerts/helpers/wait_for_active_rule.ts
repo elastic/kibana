@@ -7,11 +7,8 @@
 
 import { ToolingLog } from '@kbn/tooling-log';
 import type SuperTest from 'supertest';
-import { retryForSuccess } from '@kbn/ftr-common-functional-services';
+// import { retryForSuccess } from '@kbn/ftr-common-functional-services';
 import { Console, Effect } from 'effect';
-
-const debugLog = ToolingLog.bind(ToolingLog, { level: 'debug', writeTo: process.stdout });
-const retryCount = 10;
 
 export async function waitForActiveRule({
   ruleId,
@@ -22,6 +19,8 @@ export async function waitForActiveRule({
   supertest: SuperTest.Agent;
   logger?: ToolingLog;
 }) {
+  // const debugLog = ToolingLog.bind(ToolingLog, { level: 'debug', writeTo: process.stdout });
+  // const retryCount = 10;
   // return await retryForSuccess(logger || new debugLog({ context: 'waitForActiveRule' }), {
   //   timeout: 20_000,
   //   methodName: 'waitForActiveRule',
@@ -29,15 +28,14 @@ export async function waitForActiveRule({
   //     const response = await supertest.get(`/api/alerting/rule/${ruleId}`);
   //     const status = response.body?.execution_status?.status;
   //     const expectedStatus = 'active';
-  //
-  //     if (status !== expectedStatus) throw new Error(`Expected: ${expectedStatus}: got ${status}`);
-  //
+
+  //     if (status !== expectedStatus)
+  //       throw new Error(`Expected: ${expectedStatus}: got ${status}`);
+
   //     return status;
   //   },
   //   retryCount,
   // });
-  //
-
 
   const result = await Effect.runPromise(retryFetch(`/api/alerting/rule/${ruleId}`));
 
@@ -52,9 +50,8 @@ export async function waitForActiveRule({
   function getRuleId(url: string) {
     return Effect.tryPromise(() =>
       supertest.get(url).then((response) => {
-        console.log(`\nλjs response.status: \n\t${response?.status}`);
-        console.log(`\nλjs response.body?.status: \n\t${response.body?.status}`);
-        console.log(`\nλjs response.body?.execution_status?.status: \n${JSON.stringify(response.body?.execution_status?.status, null, 2)}`);
+        logger ? logResponse(logger, response) : () => {};
+
         const status = response.body?.execution_status?.status;
         const expectedStatus = 'active';
 
@@ -65,4 +62,16 @@ export async function waitForActiveRule({
       })
     );
   }
+}
+
+function logResponse(logger: ToolingLog, response: any) {
+  logger.debug(`\nλjs response.status: \n\t${response?.status}`);
+  logger.debug(`\nλjs response.body?.status: \n\t${response.body?.status}`);
+  logger.debug(
+    `\nλjs response.body?.execution_status?.status: \n${JSON.stringify(
+      response.body?.execution_status?.status,
+      null,
+      2
+    )}`
+  );
 }
