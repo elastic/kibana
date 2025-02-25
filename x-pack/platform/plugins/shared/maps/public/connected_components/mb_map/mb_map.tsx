@@ -189,6 +189,15 @@ export class MbMap extends Component<Props, State> {
         }
       });
       mbMap.on('load', () => {
+        mbMap.setProjection({ type: [
+          "interpolate",
+          ["linear"],
+          ["zoom"],
+          0,
+          "globe",
+          9,
+          "mercator"
+        ]});
         // Map instance automatically resizes when container size changes.
         // However, issues may arise if container resizes before map finishes loading.
         // This is occuring when by-value maps are used in dashboard.
