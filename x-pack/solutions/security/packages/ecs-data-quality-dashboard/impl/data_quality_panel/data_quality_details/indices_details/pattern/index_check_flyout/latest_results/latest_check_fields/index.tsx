@@ -48,7 +48,7 @@ const styles = {
 };
 
 export interface Props {
-  checkedAt: number;
+  checkedAt: string;
   indexName: string;
   patternRollup: PatternRollup | undefined;
   ilmPhase: IlmPhase | undefined;

@@ -28,7 +28,7 @@ import {
 } from '../translations';
 
 export interface Props {
-  checkedAt: number;
+  checkedAt: string;
   ilmExplain: Record<string, IlmExplainLifecycleLifecycleExplain> | null;
   indexName: string;
   patternRollup: PatternRollup | undefined;

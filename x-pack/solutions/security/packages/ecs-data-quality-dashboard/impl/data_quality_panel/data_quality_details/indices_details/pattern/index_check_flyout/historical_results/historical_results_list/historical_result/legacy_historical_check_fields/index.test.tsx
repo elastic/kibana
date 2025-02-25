@@ -58,6 +58,7 @@ describe('LegacyHistoricalCheckFields', () => {
       <TestExternalProviders>
         <TestDataQualityProviders>
           <LegacyHistoricalCheckFields
+            checkedAt={'Feb 16, 2021 @ 11:20:00'}
             indexName="test"
             historicalResult={getLegacyHistoricalResultStub('test')}
           />
@@ -80,7 +81,11 @@ describe('LegacyHistoricalCheckFields', () => {
         render(
           <TestExternalProviders>
             <TestDataQualityProviders>
-              <LegacyHistoricalCheckFields indexName="test" historicalResult={historicalResult} />
+              <LegacyHistoricalCheckFields
+                checkedAt={'Feb 16, 2021 @ 11:20:00'}
+                indexName="test"
+                historicalResult={historicalResult}
+              />
             </TestDataQualityProviders>
           </TestExternalProviders>
         );
@@ -98,7 +103,11 @@ describe('LegacyHistoricalCheckFields', () => {
         render(
           <TestExternalProviders>
             <TestDataQualityProviders>
-              <LegacyHistoricalCheckFields indexName="test" historicalResult={historicalResult} />
+              <LegacyHistoricalCheckFields
+                checkedAt={'Feb 16, 2021 @ 11:20:00'}
+                indexName="test"
+                historicalResult={historicalResult}
+              />
             </TestDataQualityProviders>
           </TestExternalProviders>
         );
@@ -133,7 +142,11 @@ describe('LegacyHistoricalCheckFields', () => {
                 openCreateCaseFlyout,
               }}
             >
-              <LegacyHistoricalCheckFields indexName="test" historicalResult={historicalResult} />
+              <LegacyHistoricalCheckFields
+                checkedAt={'Feb 16, 2021 @ 11:20:00'}
+                indexName="test"
+                historicalResult={historicalResult}
+              />
             </TestDataQualityProviders>
           </TestExternalProviders>
         );
@@ -169,6 +182,7 @@ describe('LegacyHistoricalCheckFields', () => {
         <TestExternalProviders>
           <TestDataQualityProviders>
             <LegacyHistoricalCheckFields
+              checkedAt={'Feb 16, 2021 @ 11:20:00'}
               indexName="test"
               historicalResult={getLegacyHistoricalResultStub('test')}
             />

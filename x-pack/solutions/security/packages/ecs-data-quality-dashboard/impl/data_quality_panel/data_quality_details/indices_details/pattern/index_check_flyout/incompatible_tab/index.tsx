@@ -8,7 +8,6 @@
 import { EuiSpacer } from '@elastic/eui';
 import React, { useMemo } from 'react';
 
-import { getFormattedCheckTime } from '../utils/get_formatted_check_time';
 import { Actions } from '../../../../../actions';
 import { getAllIncompatibleMarkdownComments } from '../../../../../utils/markdown';
 import { IncompatibleCallout } from '../incompatible_callout';
@@ -27,7 +26,7 @@ import {
 import { CheckSuccessEmptyPrompt } from '../check_success_empty_prompt';
 
 interface Props {
-  checkedAt: number;
+  checkedAt: string;
   docsCount: number;
   ilmPhase: IlmPhase | undefined;
   indexName: string;
@@ -99,7 +98,7 @@ const IncompatibleTabComponent: React.FC<Props> = ({
   );
 
   const chatTitle = useMemo(() => {
-    return `${indexName} - ${getFormattedCheckTime(checkedAt)}`;
+    return `${indexName} - ${checkedAt}`;
   }, [checkedAt, indexName]);
 
   return (
