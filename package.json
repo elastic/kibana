@@ -1460,7 +1460,7 @@
     "@kbn/gen-ai-functional-testing": "link:src/platform/packages/private/kbn-gen-ai-functional-testing",
     "@kbn/generate": "link:packages/kbn-generate",
     "@kbn/generate-console-definitions": "link:packages/kbn-generate-console-definitions",
-    "@kbn/get-repo-files": "link:packages/kbn-get-repo-files",
+    "@kbn/get-repo-files": "link:src/platform/packages/private/kbn-get-repo-files",
     "@kbn/import-locator": "link:packages/kbn-import-locator",
     "@kbn/import-resolver": "link:packages/kbn-import-resolver",
     "@kbn/inventory-e2e": "link:x-pack/solutions/observability/plugins/inventory/e2e",

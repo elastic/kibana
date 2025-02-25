@@ -5866,7 +5866,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/get-repo-files@link:packages/kbn-get-repo-files":
+"@kbn/get-repo-files@link:src/platform/packages/private/kbn-get-repo-files":
   version "0.0.0"
   uid ""
 

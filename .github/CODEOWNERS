@@ -506,7 +506,7 @@ x-pack/examples/gen_ai_streaming_response_example @elastic/response-ops
 packages/kbn-generate @elastic/kibana-operations
 packages/kbn-generate-console-definitions @elastic/kibana-management
 src/platform/packages/private/kbn-generate-csv @elastic/appex-sharedux
-packages/kbn-get-repo-files @elastic/kibana-operations
+src/platform/packages/private/kbn-get-repo-files @elastic/kibana-operations
 x-pack/platform/plugins/private/global_search_bar @elastic/appex-sharedux
 x-pack/platform/plugins/shared/global_search @elastic/appex-sharedux
 x-pack/platform/plugins/private/global_search_providers @elastic/appex-sharedux
