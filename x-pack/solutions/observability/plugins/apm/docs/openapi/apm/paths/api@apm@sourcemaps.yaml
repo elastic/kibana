@@ -25,6 +25,9 @@ get:
         application/json:
           schema:
             $ref: '../components/schemas/source_maps_response.yaml'
+          examples:
+            getSourceMapsResponse1:
+              $ref: '../components/examples/source_maps_get_200_response1.yaml'
     '400':
       description: Bad Request response
       content:
@@ -49,6 +52,8 @@ get:
         application/json:
           schema:
             $ref: '../components/schemas/501_response.yaml'
+  x-codeSamples:
+    - $ref: "../components/examples/source_maps_get_curl_request1.yaml"
 post:
   summary: Upload a source map
   description: >
@@ -77,6 +82,9 @@ post:
         application/json:
           schema:
             $ref: '../components/schemas/upload_source_maps_response.yaml'
+          examples:
+            uploadSourceMapResponse1:
+              $ref: '../components/examples/source_maps_upload_200_response1.yaml'
     '400':
       description: Bad Request response
       content:
@@ -107,3 +115,5 @@ post:
         application/json:
           schema:
             $ref: '../components/schemas/501_response.yaml'
+  x-codeSamples:
+    - $ref: "../components/examples/source_maps_upload_curl_request1.yaml"

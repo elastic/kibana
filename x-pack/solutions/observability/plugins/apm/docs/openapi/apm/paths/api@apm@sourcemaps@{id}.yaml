@@ -53,3 +53,5 @@ delete:
         application/json:
           schema:
             $ref: '../components/schemas/501_response.yaml'
+  x-codeSamples:
+    - $ref: "../components/examples/source_maps_delete_curl_request1.yaml"

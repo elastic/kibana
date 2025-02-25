@@ -15,7 +15,7 @@
     },
     {
       "name": "APM sourcemaps",
-      "description": "Configure APM source maps."
+      "description": "Configure APM source maps. A source map allows minified files to be mapped back to original source code--allowing you to maintain the speed advantage of minified code, without losing the ability to quickly and easily debug your application.\nFor best results, uploading source maps should become a part of your deployment procedure, and not something you only do when you see unhelpful errors. That's because uploading source maps after errors happen won't make old errors magically readable--errors must occur again for source mapping to occur.\n"
     },
     {
       "name": "APM annotations",
@@ -786,7 +786,7 @@
     "/api/apm/sourcemaps": {
       "get": {
         "summary": "Get source maps",
-        "description": "Returns an array of Fleet artifacts, including source map uploads.",
+        "description": "Get an array of Fleet artifacts, including source map uploads. You must have `read` or `all` Kibana privileges for the APM and User Experience feature.\n",
         "operationId": "getSourceMaps",
         "tags": [
           "APM sourcemaps"
@@ -819,6 +819,11 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/source_maps_response"
+                },
+                "examples": {
+                  "getSourceMapsResponse1": {
+                    "$ref": "#/components/examples/source_maps_get_200_response1"
+                  }
                 }
               }
             }
@@ -863,11 +868,17 @@
               }
             }
           }
-        }
+        },
+        "x-codeSamples": [
+          {
+            "lang": "Curl",
+            "source": "curl -X GET \"http://localhost:5601/api/apm/sourcemaps\" \\\n-H 'Content-Type: application/json' \\\n-H 'kbn-xsrf: true' \\\n-H 'Authorization: ApiKey ${YOUR_API_KEY}'\n"
+          }
+        ]
       },
       "post": {
-        "summary": "Upload source map",
-        "description": "Upload a source map for a specific service and version.",
+        "summary": "Upload a source map",
+        "description": "Upload a source map for a specific service and version. You must have `all` Kibana privileges for the APM and User Experience feature.\nThe maximum payload size is `1mb`. If you attempt to upload a source map that exceeds the maximum payload size, you will get a 413 error. Before uploading source maps that exceed this default, change the maximum payload size allowed by Kibana with the `server.maxPayload` variable.\n",
         "operationId": "uploadSourceMap",
         "tags": [
           "APM sourcemaps"
@@ -897,6 +908,11 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/upload_source_maps_response"
+                },
+                "examples": {
+                  "uploadSourceMapResponse1": {
+                    "$ref": "#/components/examples/source_maps_upload_200_response1"
+                  }
                 }
               }
             }
@@ -951,13 +967,19 @@
               }
             }
           }
-        }
+        },
+        "x-codeSamples": [
+          {
+            "lang": "Curl",
+            "source": "curl -X POST \"http://localhost:5601/api/apm/sourcemaps\" \\\n-H 'Content-Type: multipart/form-data' \\\n-H 'kbn-xsrf: true' \\\n-H 'Authorization: ApiKey ${YOUR_API_KEY}' \\\n-F 'service_name=\"foo\"' \\\n-F 'service_version=\"1.0.0\"' \\\n-F 'bundle_filepath=\"/test/e2e/general-usecase/bundle.js\"' \\\n-F 'sourcemap=\"{\\\"version\\\":3,\\\"file\\\":\\\"static/js/main.chunk.js\\\",\\\"sources\\\":[\\\"fleet-source-map-client/src/index.css\\\",\\\"fleet-source-map-client/src/App.js\\\",\\\"webpack:///./src/index.css?bb0a\\\",\\\"fleet-source-map-client/src/index.js\\\",\\\"fleet-source-map-client/src/reportWebVitals.js\\\"],\\\"sourcesContent\\\":[\\\"content\\\"],\\\"mappings\\\":\\\"mapping\\\",\\\"sourceRoot\\\":\\\"\\\"}\"' \n"
+          }
+        ]
       }
     },
     "/api/apm/sourcemaps/{id}": {
       "delete": {
         "summary": "Delete source map",
-        "description": "Delete a previously uploaded source map.",
+        "description": "Delete a previously uploaded source map. You must have `all` Kibana privileges for the APM and User Experience feature.\n",
         "operationId": "deleteSourceMap",
         "tags": [
           "APM sourcemaps"
@@ -1041,7 +1063,13 @@
               }
             }
           }
-        }
+        },
+        "x-codeSamples": [
+          {
+            "lang": "Curl",
+            "source": "curl -X DELETE \"http://localhost:5601/api/apm/sourcemaps/apm:foo-1.0.0-644fd5a9\" \\\n-H 'Content-Type: application/json' \\\n-H 'kbn-xsrf: true' \\\n-H 'Authorization: ApiKey ${YOUR_API_KEY}'\n"
+          }
+        ]
       }
     },
     "/api/apm/fleet/apm_server_schema": {
@@ -1803,7 +1831,7 @@
           "sourcemap": {
             "type": "string",
             "format": "binary",
-            "description": "The source map. String or file upload. It must follow the\n[source map revision 3 proposal](https://docs.google.com/document/d/1U1RGAehQwRypUTovF1KRlpiOFze0b-_2gc6fAH0KY0k).\n"
+            "description": "The source map. It can be a string or file upload. It must follow the\n[source map format specification](https://tc39.es/ecma426/).\n"
           }
         }
       },
@@ -1821,6 +1849,30 @@
             "$ref": "#/components/schemas/base_source_map_object"
           }
         ]
+      }
+    },
+    "examples": {
+      "source_maps_get_200_response1": {
+        "description": "A successful response from `GET /api/apm/sourcemaps`.",
+        "value": "{\n  \"artifacts\": [\n    {\n      \"type\": \"sourcemap\",\n      \"identifier\": \"foo-1.0.0\",\n      \"relative_url\": \"/api/fleet/artifacts/foo-1.0.0/644fd5a997d1ddd90ee131ba18e2b3d03931d89dd1fe4599143c0b3264b3e456\",\n      \"body\": {\n        \"serviceName\": \"foo\",\n        \"serviceVersion\": \"1.0.0\",\n        \"bundleFilepath\": \"/test/e2e/general-usecase/bundle.js\",\n        \"sourceMap\": {\n          \"version\": 3,\n          \"file\": \"static/js/main.chunk.js\",\n          \"sources\": [\n            \"fleet-source-map-client/src/index.css\",\n            \"fleet-source-map-client/src/App.js\",\n            \"webpack:///./src/index.css?bb0a\",\n            \"fleet-source-map-client/src/index.js\",\n            \"fleet-source-map-client/src/reportWebVitals.js\"\n          ],\n          \"sourcesContent\": [\n            \"content\"\n          ],\n          \"mappings\": \"mapping\",\n          \"sourceRoot\": \"\"\n        }\n      },\n      \"created\": \"2021-07-09T20:47:44.812Z\",\n      \"id\": \"apm:foo-1.0.0-644fd5a997d1ddd90ee131ba18e2b3d03931d89dd1fe4599143c0b3264b3e456\",\n      \"compressionAlgorithm\": \"zlib\",\n      \"decodedSha256\": \"644fd5a997d1ddd90ee131ba18e2b3d03931d89dd1fe4599143c0b3264b3e456\",\n      \"decodedSize\": 441,\n      \"encodedSha256\": \"024c72749c3e3dd411b103f7040ae62633558608f480bce4b108cf5b2275bd24\",\n      \"encodedSize\": 237,\n      \"encryptionAlgorithm\": \"none\",\n      \"packageName\": \"apm\"\n    }\n  ]\n}\n"
+      },
+      "source_maps_upload_200_response1": {
+        "description": "A successful response from `POST /api/apm/sourcemaps`.",
+        "value": {
+          "type": "sourcemap",
+          "identifier": "foo-1.0.0",
+          "relative_url": "/api/fleet/artifacts/foo-1.0.0/644fd5a997d1ddd90ee131ba18e2b3d03931d89dd1fe4599143c0b3264b3e456",
+          "body": "eJyFkL1OwzAUhd/Fc+MbYMuCEBIbHRjKgBgc96R16tiWr1OQqr47NwqJxEK3q/PzWccXxchnZ7E1A1SjuhjVZtF2yOxiEPlO17oWox3D3uPFeSRTjmJQARfCPeiAgGx8NTKsYdAc1T3rwaSJGcds8Sp3c1HnhfywUZ3QhMTFFGepZxqMC9oex3CS9tpk1XyozgOlmoVKuJX1DqEQZ0su7PGtLU+V/3JPKc3cL7TJ2FNDRPov4bFta3MDM4f7W69lpJjLO9qdK8bzVPhcJz3HUCQ4LbO/p5hCSC4cZPByrp/wFqOklbpefwAhzpqI",
+          "created": "2021-07-09T20:47:44.812Z",
+          "id": "apm:foo-1.0.0-644fd5a997d1ddd90ee131ba18e2b3d03931d89dd1fe4599143c0b3264b3e456",
+          "compressionAlgorithm": "zlib",
+          "decodedSha256": "644fd5a997d1ddd90ee131ba18e2b3d03931d89dd1fe4599143c0b3264b3e456",
+          "decodedSize": 441,
+          "encodedSha256": "024c72749c3e3dd411b103f7040ae62633558608f480bce4b108cf5b2275bd24",
+          "encodedSize": 237,
+          "encryptionAlgorithm": "none",
+          "packageName": "apm"
+        }
       }
     }
   }
