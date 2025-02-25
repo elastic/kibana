@@ -202,7 +202,19 @@ Object {
       "url": "https://www.elastic.co/guide/en/elasticsearch/reference/master/breaking-changes-9.0.html",
     },
     Object {
-      "correctiveAction": undefined,
+      "correctiveAction": Object {
+        "metadata": Object {
+          "ignoredIndicesRequiringUpgrade": Array [],
+          "ignoredIndicesRequiringUpgradeCount": 0,
+          "indicesRequiringUpgrade": Array [
+            ".ds-some-backing-index-5-2024.11.07-000001",
+          ],
+          "indicesRequiringUpgradeCount": 1,
+          "reindexRequired": true,
+          "totalBackingIndices": 2,
+        },
+        "type": "dataStream",
+      },
       "details": "This data stream has backing indices that were created before Elasticsearch 8.0.0",
       "index": "my-v7-data-stream",
       "isCritical": true,
