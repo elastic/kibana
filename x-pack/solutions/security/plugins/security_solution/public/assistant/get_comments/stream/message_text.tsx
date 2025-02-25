@@ -139,7 +139,7 @@ const getPluginDependencies = ({
     customCodeBlock: (props) => {
       return (
         <>
-          <CustomCodeBlock value={props.value} />
+          <CustomCodeBlock value={props.value} lang={props.lang} />
           <EuiSpacer size="m" />
         </>
       );
