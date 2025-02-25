@@ -4070,7 +4070,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/babel-register@link:packages/kbn-babel-register":
+"@kbn/babel-register@link:src/platform/packages/shared/kbn-babel-register":
   version "0.0.0"
   uid ""
 

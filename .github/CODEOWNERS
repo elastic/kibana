@@ -57,7 +57,7 @@ x-pack/test/security_api_integration/plugins/audit_log @elastic/kibana-security
 src/platform/packages/shared/kbn-avc-banner @elastic/security-defend-workflows
 src/platform/packages/shared/kbn-axe-config @elastic/kibana-qa
 packages/kbn-babel-preset @elastic/kibana-operations
-packages/kbn-babel-register @elastic/kibana-operations
+src/platform/packages/shared/kbn-babel-register @elastic/kibana-operations
 packages/kbn-babel-transform @elastic/kibana-operations
 x-pack/platform/plugins/private/banners @elastic/appex-sharedux
 packages/kbn-bazel-runner @elastic/kibana-operations
