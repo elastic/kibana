@@ -29,7 +29,7 @@ import { DashboardContext } from '../../dashboard_api/use_dashboard_api';
 import { DashboardViewport } from '../component/viewport/dashboard_viewport';
 import { loadDashboardApi } from '../../dashboard_api/load_dashboard_api';
 import { DashboardInternalContext } from '../../dashboard_api/use_dashboard_internal_api';
-import { v4 } from 'uuid';
+import { eventSourceClientId } from '../../services/dashboard_content_management_service/lib/event_source_client_id';
 
 export interface DashboardRendererProps {
   onApiAvailable?: (api: DashboardApi) => void;
@@ -70,13 +70,16 @@ export function DashboardRenderer({
       http.get(`/api/dashboards/dashboard/${savedObjectId}/events`, {
         asResponse: true,
         rawResponse: true,
+        query: {
+          source: eventSourceClientId,
+        },
       })
     ).pipe(httpResponseIntoObservable());
 
     const eventSubscription = eventStream$.subscribe({
       next: (event) => {
         console.log(event);
-        if (event.type === 'dashboard.saved') {
+        if (event.event === 'dashboard.saved') {
           dashboardApi?.refreshPanels();
         }
       },
@@ -101,9 +104,6 @@ export function DashboardRenderer({
           results.cleanup();
           return;
         }
-        http.post(`/api/dashboards/dashboard/${savedObjectId}/events`, {
-          body: JSON.stringify({ type: 'dashboard.opened' }),
-        });
 
         cleanupDashboardApi = results.cleanup;
         setDashboardApi(results.api);

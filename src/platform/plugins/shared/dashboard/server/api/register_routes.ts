@@ -13,7 +13,7 @@ import type { HttpServiceSetup } from '@kbn/core/server';
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import type { Logger } from '@kbn/logging';
 
-import { Subject } from 'rxjs';
+import { Subject, filter } from 'rxjs';
 import { ServerSentEvent } from '@kbn/sse-utils';
 import { observableIntoEventSourceStream } from '@kbn/sse-utils-server';
 import { CONTENT_ID } from '../../common/content_management';
@@ -406,9 +406,14 @@ export function registerAPIRoutes({
             }),
           }),
           body: schema.object({
-            type: schema.string({
+            event: schema.string({
               meta: {
-                description: 'The type of event to publish.',
+                description: 'The name of the event to publish.',
+              },
+            }),
+            source: schema.string({
+              meta: {
+                description: "The client's identifier.",
               },
             }),
           }),
@@ -420,7 +425,11 @@ export function registerAPIRoutes({
 
       const subject = getEventSubjectForDashboard(id);
 
-      subject.next(req.body);
+      subject.next({
+        type: 'event',
+        source: req.body.source,
+        event: req.body.event,
+      });
 
       return res.ok();
     }
@@ -444,11 +453,19 @@ export function registerAPIRoutes({
               },
             }),
           }),
+          query: schema.object({
+            source: schema.string({
+              meta: {
+                description: "The client's identifier.",
+              },
+            }),
+          }),
         },
       },
     },
     async (_ctx, req, res) => {
       const { id } = req.params;
+      const { source } = req.query;
 
       const subject = getEventSubjectForDashboard(id);
 
@@ -458,10 +475,13 @@ export function registerAPIRoutes({
       });
 
       return res.ok({
-        body: observableIntoEventSourceStream(subject.asObservable(), {
-          logger,
-          signal: controller.signal,
-        }),
+        body: observableIntoEventSourceStream(
+          subject.asObservable().pipe(filter((event) => event.source !== source)),
+          {
+            logger,
+            signal: controller.signal,
+          }
+        ),
       });
     }
   );
