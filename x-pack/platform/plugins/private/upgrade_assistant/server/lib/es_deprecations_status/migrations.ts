@@ -22,6 +22,7 @@ import {
   isFrozenDeprecation,
 } from './get_corrective_actions';
 import { esIndicesStateCheck } from '../es_indices_state_check';
+import { ENT_SEARCH_DATASTREAM_PREFIXES, ENT_SEARCH_INDEX_PREFIX } from '../enterprise_search';
 
 /**
  * Remove once the these keys are added to the `MigrationDeprecationsResponse` type
@@ -123,14 +124,6 @@ const normalizeEsResponse = (migrationsResponse: EsDeprecations) => {
   ].flat();
 };
 
-// See https://github.com/elastic/kibana/pull/211847/files#diff-0efda7ded7bf269691d976e1dbefcda12399cac99d4c788bf422f63527f30260R10-R15
-const ENT_SEARCH_INDICES_PREFIX = '.ent-search-';
-const ENT_SEARCH_DATASTREAM_PREFIXES = [
-  'logs-enterprise_search.',
-  'logs-app_search.',
-  'logs-workplace_search.',
-];
-
 export const getEnrichedDeprecations = async (
   dataClient: IScopedClusterClient
 ): Promise<EnrichedDeprecationInfo[]> => {
@@ -183,7 +176,7 @@ export const getEnrichedDeprecations = async (
       if (
         (deprecation.type === 'index_settings' &&
           correctiveAction?.type === 'reindex' &&
-          deprecation.index?.startsWith(ENT_SEARCH_INDICES_PREFIX)) ||
+          deprecation.index?.startsWith(ENT_SEARCH_INDEX_PREFIX)) ||
         (deprecation.type === 'data_streams' &&
           correctiveAction?.type === 'dataStream' &&
           correctiveAction.metadata.reindexRequired &&
