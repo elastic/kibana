@@ -34,6 +34,7 @@ import { AssistantFeatureKey } from '@kbn/elastic-assistant-common/impl/capabili
 import { getLangSmithTracer } from '@kbn/langchain/server/tracers/langsmith';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import type { LlmTasksPluginStart } from '@kbn/llm-tasks-plugin/server';
+import { isEmpty } from 'lodash';
 import { INVOKE_ASSISTANT_SUCCESS_EVENT } from '../lib/telemetry/event_based_telemetry';
 import { AIAssistantKnowledgeBaseDataClient } from '../ai_assistant_data_clients/knowledge_base';
 import { FindResponse } from '../ai_assistant_data_clients/find';
@@ -175,7 +176,7 @@ export interface AppendAssistantMessageToConversationParams {
   messageContent: string;
   replacements: Replacements;
   conversationId: string;
-  contentReferences?: ContentReferences | false;
+  contentReferences: ContentReferences;
   isError?: boolean;
   traceData?: Message['traceData'];
 }
@@ -194,10 +195,8 @@ export const appendAssistantMessageToConversation = async ({
   }
 
   const metadata: MessageMetadata = {
-    ...(contentReferences ? { contentReferences } : {}),
+    ...(!isEmpty(contentReferences) ? { contentReferences } : {}),
   };
-
-  const isMetadataPopulated = Boolean(contentReferences) !== false;
 
   await conversationsDataClient.appendConversationMessages({
     existingConversation: conversation,
@@ -207,7 +206,7 @@ export const appendAssistantMessageToConversation = async ({
           messageContent,
           replacements,
         }),
-        metadata: isMetadataPopulated ? metadata : undefined,
+        metadata: !isEmpty(metadata) ? metadata : undefined,
         traceData,
         isError,
       }),
@@ -232,7 +231,7 @@ export interface LangChainExecuteParams {
   telemetry: AnalyticsServiceSetup;
   actionTypeId: string;
   connectorId: string;
-  contentReferencesStore: ContentReferencesStore | undefined;
+  contentReferencesStore: ContentReferencesStore;
   llmTasks?: LlmTasksPluginStart;
   inference: InferenceServerStart;
   isOssModel?: boolean;
