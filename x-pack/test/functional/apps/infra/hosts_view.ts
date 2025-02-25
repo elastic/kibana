@@ -991,18 +991,14 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           before(async () => {
             await setCustomDashboardsEnabled(true);
             await loginWithReadOnlyUser();
-            await pageObjects.common.navigateToApp(HOSTS_VIEW_PATH);
+            // Setting the params directly will help us reduce flakiness (and clicking the wrong tab)
+            // as we already test the flow (in #Single Host Flyout) here we can directly navigate to test the permissions
+            const dashboardsTabSearchParams = `?_a=(dateRange:(from:%27${DATE_WITH_HOSTS_DATA_FROM}%27,to:%27${DATE_WITH_HOSTS_DATA_TO}%27),filters:!(),limit:100,panelFilters:!(),query:(language:kuery,query:%27%27))&tableProperties=(detailsItemId:host-1-Linux,pagination:(pageIndex:0,pageSize:10),sorting:(direction:desc,field:alertsCount))&assetDetails=(dateRange:(from:%27${DATE_WITH_HOSTS_DATA_FROM}%27,to:%27${DATE_WITH_HOSTS_DATA_TO}%27),name:host-1,tabId:dashboards)`;
+
+            await pageObjects.common.navigateToApp(HOSTS_VIEW_PATH, {
+              search: dashboardsTabSearchParams,
+            });
             await pageObjects.header.waitUntilLoadingHasFinished();
-
-            await pageObjects.timePicker.setAbsoluteRange(
-              START_SYNTHTRACE_DATE.format(DATE_PICKER_FORMAT),
-              END_SYNTHTRACE_DATE.format(DATE_PICKER_FORMAT)
-            );
-
-            await waitForPageToLoad();
-
-            await pageObjects.infraHostsView.clickTableOpenFlyoutButton();
-            await browser.scrollTop();
           });
 
           after(async () => {

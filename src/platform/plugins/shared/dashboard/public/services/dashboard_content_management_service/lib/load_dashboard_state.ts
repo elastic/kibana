@@ -8,7 +8,6 @@
  */
 
 import { has } from 'lodash';
-import { v4 as uuidv4 } from 'uuid';
 
 import { injectSearchSourceReferences } from '@kbn/data-plugin/public';
 import { Filter, Query } from '@kbn/es-query';
@@ -19,7 +18,7 @@ import { getDashboardContentManagementCache } from '..';
 import { convertPanelsArrayToPanelMap, injectReferences } from '../../../../common';
 import type { DashboardGetIn, DashboardGetOut } from '../../../../server/content_management';
 import { DASHBOARD_CONTENT_ID } from '../../../utils/telemetry_constants';
-import { DEFAULT_DASHBOARD_INPUT } from '../../../dashboard_api/default_dashboard_input';
+import { DEFAULT_DASHBOARD_STATE } from '../../../dashboard_api/default_dashboard_state';
 import {
   contentManagementService,
   dataService,
@@ -52,9 +51,8 @@ export const loadDashboardState = async ({
   const dashboardContentManagementCache = getDashboardContentManagementCache();
 
   const savedObjectId = id;
-  const embeddableId = uuidv4();
 
-  const newDashboardState = { ...DEFAULT_DASHBOARD_INPUT, id: embeddableId };
+  const newDashboardState = { ...DEFAULT_DASHBOARD_STATE };
 
   /**
    * This is a newly created dashboard, so there is no saved object state to load.
@@ -175,10 +173,8 @@ export const loadDashboardState = async ({
     references,
     resolveMeta,
     dashboardInput: {
-      ...DEFAULT_DASHBOARD_INPUT,
+      ...DEFAULT_DASHBOARD_STATE,
       ...options,
-
-      id: embeddableId,
       refreshInterval,
       timeRestore,
       description,

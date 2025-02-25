@@ -17,13 +17,14 @@ import {
   ALERT_STATUS_UNTRACKED,
 } from '@kbn/rule-data-utils';
 import { AlertStatusValues, MaintenanceWindow } from '@kbn/alerting-plugin/common';
+import { useBulkGetMaintenanceWindowsQuery } from '@kbn/response-ops-alerts-table/hooks/use_bulk_get_maintenance_windows';
+import { MaintenanceWindowBaseCell } from '@kbn/response-ops-alerts-table/components/maintenance_windows_cell';
 import { DEFAULT_SEARCH_PAGE_SIZE } from '../../../constants';
 import { Pagination } from '../../../../types';
 import { AlertListItem } from './types';
 import { AlertMutedSwitch } from './alert_muted_switch';
 import { AlertLifecycleStatusBadge } from '../../../components/alert_lifecycle_status_badge';
-import { useBulkGetMaintenanceWindows } from '../../alerts_table/hooks/use_bulk_get_maintenance_windows';
-import { MaintenanceWindowBaseCell } from '../../alerts_table/maintenance_windows/cell';
+import { useKibana } from '../../../../common';
 
 export const getConvertedAlertStatus = (
   status: AlertStatusValues,
@@ -98,6 +99,7 @@ const RuleAlertListMaintenanceWindowCell = (props: RuleAlertListMaintenanceWindo
 };
 
 export const RuleAlertList = (props: RuleAlertListProps) => {
+  const { http, application, notifications, licensing } = useKibana().services;
   const { items, readOnly, onMuteAction } = props;
 
   const [pagination, setPagination] = useState<Pagination>({
@@ -125,9 +127,12 @@ export const RuleAlertList = (props: RuleAlertListProps) => {
   }, [pageOfAlerts]);
 
   const { data: maintenanceWindows, isFetching: isLoadingMaintenanceWindows } =
-    useBulkGetMaintenanceWindows({
+    useBulkGetMaintenanceWindowsQuery({
       ids: Array.from(maintenanceWindowIds.values()),
-      canFetchMaintenanceWindows: true,
+      http,
+      application,
+      notifications,
+      licensing,
     });
 
   const alertsTableColumns = useMemo(

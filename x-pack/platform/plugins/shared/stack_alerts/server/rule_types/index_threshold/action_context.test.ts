@@ -6,7 +6,7 @@
  */
 
 import { BaseActionContext, addMessages } from './action_context';
-import { ParamsSchema } from './rule_type_params';
+import { ParamsSchema } from '@kbn/response-ops-rule-params/index_threshold';
 
 describe('ActionContext', () => {
   it('generates expected properties if aggField is null', async () => {

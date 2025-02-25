@@ -6,8 +6,7 @@
  */
 
 import { ALERT_WORKFLOW_ASSIGNEE_IDS } from '@kbn/rule-data-utils';
-import type { BulkActionsConfig } from '@kbn/triggers-actions-ui-plugin/public/types';
-import type { TimelineItem } from '@kbn/triggers-actions-ui-plugin/public/application/sections/alerts_table/bulk_actions/components/toolbar';
+import type { BulkActionsConfig } from '@kbn/response-ops-alerts-table/types';
 import { act, fireEvent, render, renderHook } from '@testing-library/react';
 
 import { TestProviders } from '../../../mock';
@@ -23,6 +22,7 @@ import { useSuggestUsers } from '../../user_profiles/use_suggest_users';
 import { ASSIGNEES_APPLY_BUTTON_TEST_ID } from '../../assignees/test_ids';
 import { useAlertsPrivileges } from '../../../../detections/containers/detection_engine/alerts/use_alerts_privileges';
 import { useLicense } from '../../../hooks/use_license';
+import type { TimelineItem } from '@kbn/timelines-plugin/common';
 
 jest.mock('./use_set_alert_assignees');
 jest.mock('../../user_profiles/use_get_current_user_profile');

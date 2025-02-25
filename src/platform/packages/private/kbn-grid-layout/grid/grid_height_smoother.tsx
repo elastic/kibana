@@ -8,15 +8,14 @@
  */
 
 import { css } from '@emotion/react';
-import React, { PropsWithChildren, useEffect, useRef } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { combineLatest } from 'rxjs';
-import { GridLayoutStateManager } from './types';
+import { useGridLayoutContext } from './use_grid_layout_context';
 
 export const GridHeightSmoother = React.memo(
-  ({
-    children,
-    gridLayoutStateManager,
-  }: PropsWithChildren<{ gridLayoutStateManager: GridLayoutStateManager }>) => {
+  ({ children }: { children: React.ReactNode | undefined }) => {
+    const { gridLayoutStateManager } = useGridLayoutContext();
+
     // set the parent div size directly to smooth out height changes.
     const smoothHeightRef = useRef<HTMLDivElement | null>(null);
 

@@ -7,18 +7,18 @@
 
 import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import type { ContentReferences } from '@kbn/elastic-assistant-common';
 import type { ContentMessage } from '..';
 import { useStream } from './use_stream';
 import { StopGeneratingButton } from './buttons/stop_generating_button';
 import { RegenerateResponseButton } from './buttons/regenerate_response_button';
 import { MessagePanel } from './message_panel';
 import { MessageText } from './message_text';
+import type { StreamingOrFinalContentReferences } from '../content_reference/components/content_reference_component_factory';
 
 interface Props {
   abortStream: () => void;
   content?: string;
-  contentReferences?: ContentReferences;
+  contentReferences: StreamingOrFinalContentReferences;
   contentReferencesVisible?: boolean;
   contentReferencesEnabled?: boolean;
   isError?: boolean;
@@ -116,8 +116,8 @@ export const StreamComment = ({
           contentReferences={contentReferences}
           contentReferencesEnabled={contentReferencesEnabled}
           index={index}
-          loading={isAnythingLoading}
           contentReferencesVisible={contentReferencesVisible}
+          loading={isAnythingLoading}
         />
       }
       error={error ? new Error(error) : undefined}

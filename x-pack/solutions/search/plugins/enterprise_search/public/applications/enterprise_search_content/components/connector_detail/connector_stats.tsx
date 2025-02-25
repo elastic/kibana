@@ -28,7 +28,6 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 
 import { Connector, ConnectorStatus, ElasticsearchIndex } from '@kbn/search-connectors';
-import { EuiIconPlugs } from '@kbn/search-shared-ui';
 
 import { KibanaDeps } from '../../../../../common/types';
 import { generateEncodedPath } from '../../../shared/encode_path_params';
@@ -403,7 +402,7 @@ export const ConnectorStats: React.FC<ConnectorStatsProps> = ({
                 <EuiFlexItem grow={false}>
                   <EuiButtonEmpty
                     isDisabled={!connector.service_type}
-                    iconType={EuiIconPlugs}
+                    iconType="plugs"
                     color="text"
                     href={http.basePath.prepend(
                       generateEncodedPath(CONNECTOR_INTEGRATION_DETAIL_PATH, {

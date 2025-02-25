@@ -16,7 +16,7 @@ const { createPromiseFromStreams } = require('@kbn/utils');
 
 const {
   createParseArchiveStreams,
-} = require('../../../../packages/kbn-es-archiver/src/lib/archives/parse'); // eslint-disable-line @kbn/imports/uniform_imports
+} = require('../../../../src/platform/packages/shared/kbn-es-archiver/src/lib/archives/parse'); // eslint-disable-line @kbn/imports/uniform_imports
 
 /**
  * generates .monitoring-* (metricbeat) archive from a metrics-* (package) archive
