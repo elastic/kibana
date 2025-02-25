@@ -14,6 +14,7 @@ export function registerServerRoutes({
   core,
   logger,
   dependencies,
+  isDev,
 }: {
   core: CoreSetup;
   logger: Logger;
@@ -21,11 +22,13 @@ export function registerServerRoutes({
     InvestigateAppRouteHandlerResources,
     'request' | 'context' | 'logger' | 'params'
   >;
+  isDev: boolean;
 }) {
   registerRoutes({
     core,
     logger,
     repository: getGlobalInvestigateAppServerRouteRepository(),
     dependencies,
+    runDevModeChecks: isDev,
   });
 }

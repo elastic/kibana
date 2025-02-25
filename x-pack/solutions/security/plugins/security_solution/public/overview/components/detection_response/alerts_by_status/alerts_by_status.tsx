@@ -18,7 +18,7 @@ import {
   useIsWithinMinBreakpoint,
 } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
-import styled from 'styled-components';
+import styled from '@emotion/styled';
 
 import { ALERT_WORKFLOW_STATUS, ALERT_SEVERITY } from '@kbn/rule-data-utils';
 import { FILTER_OPEN, FILTER_ACKNOWLEDGED, FILTER_CLOSED } from '../../../../../common/types';

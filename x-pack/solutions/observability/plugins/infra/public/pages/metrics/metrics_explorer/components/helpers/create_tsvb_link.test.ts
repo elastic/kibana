@@ -27,7 +27,7 @@ describe('createTSVBLink()', () => {
       app: 'visualize',
       hash: '/create',
       search: {
-        _a: "(filters:!(),linked:!f,query:(language:kuery,query:''),uiState:(),vis:(aggs:!(),params:(axis_formatter:number,axis_min:0,axis_position:left,axis_scale:normal,default_index_pattern:'metricbeat-*',filter:(language:kuery,query:'host.name : \"example-01\"'),id:test-id,index_pattern:'metricbeat-*',interval:auto,series:!((axis_position:right,chart_type:line,color:#54B399,fill:0,formatter:percent,id:test-id,label:'avg(system.cpu.user.pct)',line_width:2,metrics:!((field:system.cpu.user.pct,id:test-id,type:avg)),point_size:0,separate_axis:0,split_mode:everything,stacked:none,value_template:{{value}})),show_grid:1,show_legend:1,time_field:'@timestamp',type:timeseries),title:example-01,type:metrics))",
+        _a: "(filters:!(),linked:!f,query:(language:kuery,query:''),uiState:(),vis:(aggs:!(),params:(axis_formatter:number,axis_min:0,axis_position:left,axis_scale:normal,default_index_pattern:'metricbeat-*',filter:(language:kuery,query:'host.name : \"example-01\"'),id:test-id,index_pattern:'metricbeat-*',interval:auto,series:!((axis_position:right,chart_type:line,color:#16C5C0,fill:0,formatter:percent,id:test-id,label:'avg(system.cpu.user.pct)',line_width:2,metrics:!((field:system.cpu.user.pct,id:test-id,type:avg)),point_size:0,separate_axis:0,split_mode:everything,stacked:none,value_template:{{value}})),show_grid:1,show_legend:1,time_field:'@timestamp',type:timeseries),title:example-01,type:metrics))",
         _g: '(refreshInterval:(pause:!t,value:0),time:(from:now-1h,to:now))',
         type: 'metrics',
       },
@@ -44,7 +44,7 @@ describe('createTSVBLink()', () => {
       app: 'visualize',
       hash: '/create',
       search: {
-        _a: "(filters:!(),linked:!f,query:(language:kuery,query:''),uiState:(),vis:(aggs:!(),params:(axis_formatter:number,axis_min:0,axis_position:left,axis_scale:normal,default_index_pattern:'metricbeat-*',filter:(language:kuery,query:'host.name : \"example-01\"'),id:test-id,index_pattern:'metricbeat-*',interval:auto,series:!((axis_position:right,chart_type:line,color:#54B399,fill:0,formatter:bytes,id:test-id,label:'rate(host.network.egress.bytes)',line_width:2,metrics:!((field:host.network.egress.bytes,id:test-id,type:max),(field:test-id,id:test-id,type:derivative,unit:'1s'),(field:test-id,id:test-id,type:positive_only)),point_size:0,separate_axis:0,split_mode:everything,stacked:none,value_template:{{value}}/s)),show_grid:1,show_legend:1,time_field:'@timestamp',type:timeseries),title:example-01,type:metrics))",
+        _a: "(filters:!(),linked:!f,query:(language:kuery,query:''),uiState:(),vis:(aggs:!(),params:(axis_formatter:number,axis_min:0,axis_position:left,axis_scale:normal,default_index_pattern:'metricbeat-*',filter:(language:kuery,query:'host.name : \"example-01\"'),id:test-id,index_pattern:'metricbeat-*',interval:auto,series:!((axis_position:right,chart_type:line,color:#16C5C0,fill:0,formatter:bytes,id:test-id,label:'rate(host.network.egress.bytes)',line_width:2,metrics:!((field:host.network.egress.bytes,id:test-id,type:max),(field:test-id,id:test-id,type:derivative,unit:'1s'),(field:test-id,id:test-id,type:positive_only)),point_size:0,separate_axis:0,split_mode:everything,stacked:none,value_template:{{value}}/s)),show_grid:1,show_legend:1,time_field:'@timestamp',type:timeseries),title:example-01,type:metrics))",
         _g: '(refreshInterval:(pause:!t,value:0),time:(from:now-1h,to:now))',
         type: 'metrics',
       },
@@ -57,7 +57,7 @@ describe('createTSVBLink()', () => {
       app: 'visualize',
       hash: '/create',
       search: {
-        _a: "(filters:!(),linked:!f,query:(language:kuery,query:''),uiState:(),vis:(aggs:!(),params:(axis_formatter:number,axis_min:0,axis_position:left,axis_scale:normal,default_index_pattern:'metricbeat-*',filter:(language:kuery,query:'host.name : \"example-01\"'),id:test-id,index_pattern:'metricbeat-*',interval:auto,series:!((axis_position:right,chart_type:line,color:#54B399,fill:0,formatter:percent,id:test-id,label:'avg(system.cpu.user.pct)',line_width:2,metrics:!((field:system.cpu.user.pct,id:test-id,type:avg)),point_size:0,separate_axis:0,split_mode:everything,stacked:none,value_template:{{value}})),show_grid:1,show_legend:1,time_field:'@timestamp',type:timeseries),title:example-01,type:metrics))",
+        _a: "(filters:!(),linked:!f,query:(language:kuery,query:''),uiState:(),vis:(aggs:!(),params:(axis_formatter:number,axis_min:0,axis_position:left,axis_scale:normal,default_index_pattern:'metricbeat-*',filter:(language:kuery,query:'host.name : \"example-01\"'),id:test-id,index_pattern:'metricbeat-*',interval:auto,series:!((axis_position:right,chart_type:line,color:#16C5C0,fill:0,formatter:percent,id:test-id,label:'avg(system.cpu.user.pct)',line_width:2,metrics:!((field:system.cpu.user.pct,id:test-id,type:avg)),point_size:0,separate_axis:0,split_mode:everything,stacked:none,value_template:{{value}})),show_grid:1,show_legend:1,time_field:'@timestamp',type:timeseries),title:example-01,type:metrics))",
         _g: '(refreshInterval:(pause:!t,value:0),time:(from:now-10m,to:now))',
         type: 'metrics',
       },
@@ -71,7 +71,7 @@ describe('createTSVBLink()', () => {
       app: 'visualize',
       hash: '/create',
       search: {
-        _a: "(filters:!(),linked:!f,query:(language:kuery,query:''),uiState:(),vis:(aggs:!(),params:(axis_formatter:number,axis_min:0,axis_position:left,axis_scale:normal,default_index_pattern:'my-beats-*',filter:(language:kuery,query:'system.network.name:lo* and host.name : \"example-01\"'),id:test-id,index_pattern:'my-beats-*',interval:auto,series:!((axis_position:right,chart_type:line,color:#54B399,fill:0,formatter:percent,id:test-id,label:'avg(system.cpu.user.pct)',line_width:2,metrics:!((field:system.cpu.user.pct,id:test-id,type:avg)),point_size:0,separate_axis:0,split_mode:everything,stacked:none,value_template:{{value}})),show_grid:1,show_legend:1,time_field:'@timestamp',type:timeseries),title:example-01,type:metrics))",
+        _a: "(filters:!(),linked:!f,query:(language:kuery,query:''),uiState:(),vis:(aggs:!(),params:(axis_formatter:number,axis_min:0,axis_position:left,axis_scale:normal,default_index_pattern:'my-beats-*',filter:(language:kuery,query:'system.network.name:lo* and host.name : \"example-01\"'),id:test-id,index_pattern:'my-beats-*',interval:auto,series:!((axis_position:right,chart_type:line,color:#16C5C0,fill:0,formatter:percent,id:test-id,label:'avg(system.cpu.user.pct)',line_width:2,metrics:!((field:system.cpu.user.pct,id:test-id,type:avg)),point_size:0,separate_axis:0,split_mode:everything,stacked:none,value_template:{{value}})),show_grid:1,show_legend:1,time_field:'@timestamp',type:timeseries),title:example-01,type:metrics))",
         _g: '(refreshInterval:(pause:!t,value:0),time:(from:now-1h,to:now))',
         type: 'metrics',
       },
@@ -85,7 +85,7 @@ describe('createTSVBLink()', () => {
       app: 'visualize',
       hash: '/create',
       search: {
-        _a: "(filters:!(),linked:!f,query:(language:kuery,query:''),uiState:(),vis:(aggs:!(),params:(axis_formatter:number,axis_position:left,axis_scale:normal,default_index_pattern:'metricbeat-*',filter:(language:kuery,query:'host.name : \"example-01\"'),id:test-id,index_pattern:'metricbeat-*',interval:auto,series:!((axis_position:right,chart_type:line,color:#54B399,fill:0,formatter:percent,id:test-id,label:'avg(system.cpu.user.pct)',line_width:2,metrics:!((field:system.cpu.user.pct,id:test-id,type:avg)),point_size:0,separate_axis:0,split_mode:everything,stacked:none,value_template:{{value}})),show_grid:1,show_legend:1,time_field:'@timestamp',type:timeseries),title:example-01,type:metrics))",
+        _a: "(filters:!(),linked:!f,query:(language:kuery,query:''),uiState:(),vis:(aggs:!(),params:(axis_formatter:number,axis_position:left,axis_scale:normal,default_index_pattern:'metricbeat-*',filter:(language:kuery,query:'host.name : \"example-01\"'),id:test-id,index_pattern:'metricbeat-*',interval:auto,series:!((axis_position:right,chart_type:line,color:#16C5C0,fill:0,formatter:percent,id:test-id,label:'avg(system.cpu.user.pct)',line_width:2,metrics:!((field:system.cpu.user.pct,id:test-id,type:avg)),point_size:0,separate_axis:0,split_mode:everything,stacked:none,value_template:{{value}})),show_grid:1,show_legend:1,time_field:'@timestamp',type:timeseries),title:example-01,type:metrics))",
         _g: '(refreshInterval:(pause:!t,value:0),time:(from:now-1h,to:now))',
         type: 'metrics',
       },
@@ -99,7 +99,7 @@ describe('createTSVBLink()', () => {
       app: 'visualize',
       hash: '/create',
       search: {
-        _a: "(filters:!(),linked:!f,query:(language:kuery,query:''),uiState:(),vis:(aggs:!(),params:(axis_formatter:number,axis_min:0,axis_position:left,axis_scale:normal,default_index_pattern:'metricbeat-*',filter:(language:kuery,query:'host.name : \"example-01\"'),id:test-id,index_pattern:'metricbeat-*',interval:auto,series:!((axis_position:right,chart_type:line,color:#54B399,fill:0.5,formatter:percent,id:test-id,label:'avg(system.cpu.user.pct)',line_width:2,metrics:!((field:system.cpu.user.pct,id:test-id,type:avg)),point_size:0,separate_axis:0,split_mode:everything,stacked:none,value_template:{{value}})),show_grid:1,show_legend:1,time_field:'@timestamp',type:timeseries),title:example-01,type:metrics))",
+        _a: "(filters:!(),linked:!f,query:(language:kuery,query:''),uiState:(),vis:(aggs:!(),params:(axis_formatter:number,axis_min:0,axis_position:left,axis_scale:normal,default_index_pattern:'metricbeat-*',filter:(language:kuery,query:'host.name : \"example-01\"'),id:test-id,index_pattern:'metricbeat-*',interval:auto,series:!((axis_position:right,chart_type:line,color:#16C5C0,fill:0.5,formatter:percent,id:test-id,label:'avg(system.cpu.user.pct)',line_width:2,metrics:!((field:system.cpu.user.pct,id:test-id,type:avg)),point_size:0,separate_axis:0,split_mode:everything,stacked:none,value_template:{{value}})),show_grid:1,show_legend:1,time_field:'@timestamp',type:timeseries),title:example-01,type:metrics))",
         _g: '(refreshInterval:(pause:!t,value:0),time:(from:now-1h,to:now))',
         type: 'metrics',
       },
@@ -117,7 +117,7 @@ describe('createTSVBLink()', () => {
       app: 'visualize',
       hash: '/create',
       search: {
-        _a: "(filters:!(),linked:!f,query:(language:kuery,query:''),uiState:(),vis:(aggs:!(),params:(axis_formatter:number,axis_min:0,axis_position:left,axis_scale:normal,default_index_pattern:'metricbeat-*',filter:(language:kuery,query:'host.name : \"example-01\"'),id:test-id,index_pattern:'metricbeat-*',interval:auto,series:!((axis_position:right,chart_type:line,color:#54B399,fill:0.5,formatter:percent,id:test-id,label:'avg(system.cpu.user.pct)',line_width:2,metrics:!((field:system.cpu.user.pct,id:test-id,type:avg)),point_size:0,separate_axis:0,split_mode:everything,stacked:stacked,value_template:{{value}})),show_grid:1,show_legend:1,time_field:'@timestamp',type:timeseries),title:example-01,type:metrics))",
+        _a: "(filters:!(),linked:!f,query:(language:kuery,query:''),uiState:(),vis:(aggs:!(),params:(axis_formatter:number,axis_min:0,axis_position:left,axis_scale:normal,default_index_pattern:'metricbeat-*',filter:(language:kuery,query:'host.name : \"example-01\"'),id:test-id,index_pattern:'metricbeat-*',interval:auto,series:!((axis_position:right,chart_type:line,color:#16C5C0,fill:0.5,formatter:percent,id:test-id,label:'avg(system.cpu.user.pct)',line_width:2,metrics:!((field:system.cpu.user.pct,id:test-id,type:avg)),point_size:0,separate_axis:0,split_mode:everything,stacked:stacked,value_template:{{value}})),show_grid:1,show_legend:1,time_field:'@timestamp',type:timeseries),title:example-01,type:metrics))",
         _g: '(refreshInterval:(pause:!t,value:0),time:(from:now-1h,to:now))',
         type: 'metrics',
       },
@@ -130,7 +130,7 @@ describe('createTSVBLink()', () => {
       app: 'visualize',
       hash: '/create',
       search: {
-        _a: "(filters:!(),linked:!f,query:(language:kuery,query:''),uiState:(),vis:(aggs:!(),params:(axis_formatter:number,axis_min:0,axis_position:left,axis_scale:normal,default_index_pattern:'metric*',filter:(language:kuery,query:'host.name : \"example-01\"'),id:test-id,index_pattern:'metric*',interval:auto,series:!((axis_position:right,chart_type:line,color:#54B399,fill:0,formatter:percent,id:test-id,label:'avg(system.cpu.user.pct)',line_width:2,metrics:!((field:system.cpu.user.pct,id:test-id,type:avg)),point_size:0,separate_axis:0,split_mode:everything,stacked:none,value_template:{{value}})),show_grid:1,show_legend:1,time_field:'@timestamp',type:timeseries),title:example-01,type:metrics))",
+        _a: "(filters:!(),linked:!f,query:(language:kuery,query:''),uiState:(),vis:(aggs:!(),params:(axis_formatter:number,axis_min:0,axis_position:left,axis_scale:normal,default_index_pattern:'metric*',filter:(language:kuery,query:'host.name : \"example-01\"'),id:test-id,index_pattern:'metric*',interval:auto,series:!((axis_position:right,chart_type:line,color:#16C5C0,fill:0,formatter:percent,id:test-id,label:'avg(system.cpu.user.pct)',line_width:2,metrics:!((field:system.cpu.user.pct,id:test-id,type:avg)),point_size:0,separate_axis:0,split_mode:everything,stacked:none,value_template:{{value}})),show_grid:1,show_legend:1,time_field:'@timestamp',type:timeseries),title:example-01,type:metrics))",
         _g: '(refreshInterval:(pause:!t,value:0),time:(from:now-1h,to:now))',
         type: 'metrics',
       },

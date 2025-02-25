@@ -17,7 +17,7 @@ export default async function ({ readConfigFile }) {
   const certificateAuthorities = [readFileSync(CA_CERT_PATH)];
 
   return {
-    testConfigCategory: ScoutTestRunConfigCategory.UI_TEST,
+    testConfigCategory: ScoutTestRunConfigCategory.UNIT_INTEGRATION_TEST,
     testFiles: [require.resolve('.')],
     services: {
       ...httpConfig.get('services'),

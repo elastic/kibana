@@ -20,7 +20,7 @@ import {
   getDashboardBackupService,
 } from '../services/dashboard_backup_service';
 import { UnsavedPanelState } from '../dashboard_container/types';
-import { DEFAULT_DASHBOARD_INPUT } from './default_dashboard_input';
+import { DEFAULT_DASHBOARD_STATE } from './default_dashboard_state';
 
 export async function loadDashboardApi({
   getCreationOptions,
@@ -62,7 +62,7 @@ export async function loadDashboardApi({
   })();
 
   const combinedSessionState: DashboardState = {
-    ...DEFAULT_DASHBOARD_INPUT,
+    ...DEFAULT_DASHBOARD_STATE,
     ...(savedObjectResult?.dashboardInput ?? {}),
     ...sessionStorageInput,
   };
@@ -76,20 +76,20 @@ export async function loadDashboardApi({
   const overrideState = creationOptions?.getInitialInput?.();
   if (overrideState?.panels) {
     const overridePanels: DashboardPanelMap = {};
-    for (const panel of Object.values(overrideState?.panels)) {
-      overridePanels[panel.explicitInput.id] = {
+    for (const [panelId, panel] of Object.entries(overrideState?.panels)) {
+      overridePanels[panelId] = {
         ...panel,
 
         /**
          * here we need to keep the state of the panel that was already in the Dashboard if one exists.
          * This is because this state will become the "last saved state" for this panel.
          */
-        ...(combinedSessionState.panels[panel.explicitInput.id] ?? []),
+        ...(combinedSessionState.panels[panelId] ?? []),
       };
       /**
        * We also need to add the state of this react embeddable into the runtime state to be restored.
        */
-      initialPanelsRuntimeState[panel.explicitInput.id] = panel.explicitInput;
+      initialPanelsRuntimeState[panelId] = panel.explicitInput;
     }
     overrideState.panels = overridePanels;
   }

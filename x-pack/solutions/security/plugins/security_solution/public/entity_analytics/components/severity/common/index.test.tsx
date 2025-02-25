@@ -5,17 +5,20 @@
  * 2.0.
  */
 
-import { render } from '@testing-library/react';
+import { render, renderHook } from '@testing-library/react';
 import React from 'react';
+import { matchers } from '@emotion/jest';
 
 import { TestProviders } from '../../../../common/mock';
 
 import type { EuiHealthProps } from '@elastic/eui';
-import { EuiHealth } from '@elastic/eui';
+import { EuiHealth, useEuiTheme } from '@elastic/eui';
 
 import { RiskSeverity } from '../../../../../common/search_strategy';
 import { RiskScoreLevel } from '.';
 import { SEVERITY_COLOR } from '../../../../overview/components/detection_response/utils';
+
+expect.extend(matchers);
 
 jest.mock('@elastic/eui', () => {
   const original = jest.requireActual('@elastic/eui');
@@ -109,6 +112,21 @@ describe('RiskScore', () => {
       </TestProviders>
     );
 
-    expect(queryByTestId('risk-score')).toHaveStyleRule('background-color', undefined);
+    expect(queryByTestId('risk-score')).not.toHaveStyleRule('background-color');
+  });
+
+  it('renders background-color when hideBackgroundColor is false', () => {
+    const { queryByTestId } = render(
+      <TestProviders>
+        <RiskScoreLevel severity={RiskSeverity.Critical} />
+      </TestProviders>
+    );
+
+    const { result } = renderHook(() => useEuiTheme());
+
+    expect(queryByTestId('risk-score')).toHaveStyleRule(
+      'background-color',
+      result.current.euiTheme.colors.backgroundBaseDanger
+    );
   });
 });

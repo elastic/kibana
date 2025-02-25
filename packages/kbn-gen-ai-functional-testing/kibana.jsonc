@@ -1,6 +1,0 @@
-{
-  "type": "shared-common",
-  "id": "@kbn/gen-ai-functional-testing",
-  "owner": "@elastic/appex-ai-infra",
-  "devOnly": true
-}
