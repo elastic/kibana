@@ -7,7 +7,6 @@
 import { useTimeZone } from '@kbn/observability-shared-plugin/public';
 import { useParams } from 'react-router-dom';
 import { useMemo } from 'react';
-import { useSelectedLocation } from './use_selected_location';
 import { Ping, PingState } from '../../../../../../common/runtime_types';
 import {
   EXCLUDE_RUN_ONCE_FILTER,
@@ -18,14 +17,12 @@ import { useSyntheticsRefreshContext } from '../../../contexts';
 import { useGetUrlParams } from '../../../hooks';
 import { useReduxEsSearch } from '../../../hooks/use_redux_es_search';
 
-export function useMonitorErrors(monitorIdArg?: string) {
+export function useAllMonitorErrors() {
   const { lastRefresh } = useSyntheticsRefreshContext();
 
   const { monitorId } = useParams<{ monitorId: string }>();
 
   const { dateRangeStart, dateRangeEnd } = useGetUrlParams();
-
-  const selectedLocation = useSelectedLocation();
 
   const timeZone = useTimeZone();
 
@@ -46,16 +43,6 @@ export function useMonitorErrors(monitorIdArg?: string) {
                     lte: dateRangeEnd,
                     time_zone: timeZone,
                   },
-                },
-              },
-              {
-                term: {
-                  config_id: monitorIdArg ?? monitorId,
-                },
-              },
-              {
-                term: {
-                  'observer.geo.name': selectedLocation?.label,
                 },
               },
             ],
@@ -88,10 +75,10 @@ export function useMonitorErrors(monitorIdArg?: string) {
         },
       },
     },
-    [lastRefresh, monitorId, monitorIdArg, dateRangeStart, dateRangeEnd, selectedLocation?.label],
+    [lastRefresh, monitorId, dateRangeStart, dateRangeEnd],
     {
       name: `getMonitorErrors/${dateRangeStart}/${dateRangeEnd}`,
-      isRequestReady: Boolean(selectedLocation?.label),
+      isRequestReady: true,
     }
   );
 
@@ -124,12 +111,15 @@ export function useMonitorErrors(monitorIdArg?: string) {
       (a, b) => Number(new Date(a.state.started_at)) - Number(new Date(b.state.started_at))
     );
 
+    const ids = new Set(errorStates.map((state) => state.monitor.id));
+
     return {
       errorStates,
       upStates: upStatesSortedAsc,
       loading,
       data,
       hasActiveError,
+      monitorIds: Array.from(ids),
     };
   }, [data, loading]);
 }
