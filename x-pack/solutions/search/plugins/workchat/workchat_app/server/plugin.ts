@@ -14,8 +14,6 @@ import type {
   WorkChatAppPluginStartDependencies,
 } from './types';
 
-import { registerFunctions } from './functions';
-
 export class WorkChatAppPlugin
   implements
     Plugin<
