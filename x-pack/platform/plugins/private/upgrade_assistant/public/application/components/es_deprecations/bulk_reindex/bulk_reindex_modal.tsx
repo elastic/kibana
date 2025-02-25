@@ -78,7 +78,7 @@ export const BulkReindexModal: FunctionComponent<Props> = ({ indices }) => {
 
   return (
     <>
-      <EuiButton onClick={showModal}>
+      <EuiButton onClick={showModal} fill>
         <FormattedMessage
           id="xpack.upgradeAssistant.esDeprecations.bulkReindex.ctaButtonLabel"
           defaultMessage="Bulk reindex"
