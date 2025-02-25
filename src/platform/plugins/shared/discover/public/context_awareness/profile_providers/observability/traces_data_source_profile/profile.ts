@@ -9,6 +9,7 @@
 
 import { DataSourceType, isDataSourceType } from '../../../../../common/data_sources';
 import { DataSourceCategory, DataSourceProfileProvider } from '../../../profiles';
+import { getDocViewer } from './accessors/get_doc_viewer';
 import { getCellRenderers } from './accessors';
 
 export const createTracesDataSourceProfileProvider = (): DataSourceProfileProvider => ({
@@ -27,6 +28,7 @@ export const createTracesDataSourceProfileProvider = (): DataSourceProfileProvid
       ],
       rowHeight: 5,
     }),
+    getDocViewer,
     getCellRenderers,
   },
   resolve: ({ dataSource }) => {
