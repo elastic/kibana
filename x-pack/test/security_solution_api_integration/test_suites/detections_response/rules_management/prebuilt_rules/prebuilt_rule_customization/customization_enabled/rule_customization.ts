@@ -753,24 +753,39 @@ export default ({ getService }: FtrProviderContext): void => {
 
       it('actions field', async () => {
         // create connector/action
-        const { body: hookAction } = await supertest
-          .post('/api/actions/action')
-          .set('kbn-xsrf', 'true')
-          .send(getWebHookAction())
-          .expect(200);
+        const createConnector = async (payload: Record<string, unknown>) =>
+          (
+            await supertest
+              .post('/api/actions/action')
+              .set('kbn-xsrf', 'true')
+              .send(payload)
+              .expect(200)
+          ).body;
+
+        const createWebHookConnector = () => createConnector(getWebHookAction());
+
+        const webHookAction = await createWebHookConnector();
+
+        const defaultRuleAction = {
+          id: webHookAction.id,
+          action_type_id: '.webhook' as const,
+          group: 'default' as const,
+          params: {
+            body: '{"test":"a default action"}',
+          },
+          frequency: {
+            notifyWhen: 'onThrottleInterval' as const,
+            summary: true,
+            throttle: '1h' as const,
+          },
+          uuid: 'd487ec3d-05f2-44ad-8a68-11c97dc92202',
+        };
 
         const { body } = await securitySolutionApi
           .patchRule({
             body: {
               rule_id: 'rule_1',
-              actions: [
-                {
-                  group: 'default',
-                  id: hookAction.id,
-                  action_type_id: hookAction.connector_type_id,
-                  params: {},
-                },
-              ],
+              actions: [defaultRuleAction],
             },
           })
           .expect(200);
