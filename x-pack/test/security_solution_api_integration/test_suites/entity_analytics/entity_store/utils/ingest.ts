@@ -6,7 +6,7 @@
  */
 
 import { Client } from '@elastic/elasticsearch';
-import { IngestProcessorContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { IngestProcessorContainer } from '@elastic/elasticsearch/lib/api/types';
 import { ToolingLog } from '@kbn/tooling-log';
 
 export const applyIngestProcessorToDoc = async (

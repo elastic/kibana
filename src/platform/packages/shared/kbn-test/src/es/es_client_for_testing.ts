@@ -68,6 +68,7 @@ export function createEsClientForTesting(options: EsClientForTestingOptions) {
 
   return new EsClient({
     Connection: HttpConnection,
+    requestTimeout: 30_000,
     tls: isCloud ? undefined : { ca: Fs.readFileSync(CA_CERT_PATH) },
 
     ...otherOptions,
