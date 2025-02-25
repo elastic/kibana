@@ -17,6 +17,10 @@ describe('validateTimezone', () => {
     expect(validateTimezone()).toBeUndefined();
   });
 
+  it('throws error for invalid combination', () => {
+    expect(validateTimezone('Europe/India')).toEqual('Invalid snooze timezone: Europe/India');
+  });
+
   it('throws error for invalid timezone', () => {
     expect(validateTimezone('invalid')).toEqual('Invalid snooze timezone: invalid');
   });

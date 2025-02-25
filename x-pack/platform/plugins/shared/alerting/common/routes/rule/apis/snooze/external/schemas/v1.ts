@@ -9,7 +9,11 @@ import { schema } from '@kbn/config-schema';
 import { scheduleRequestSchemaV1 } from '../../../../../schedule';
 
 export const snoozeParamsSchema = schema.object({
-  id: schema.string(),
+  id: schema.string({
+    meta: {
+      description: 'Identifier of the rule.',
+    },
+  }),
 });
 
 export const snoozeBodySchema = schema.object({

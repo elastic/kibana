@@ -69,6 +69,29 @@ describe('transformCustomScheduleToRRule', () => {
     });
   });
 
+  it('transforms recurring with every correctly', () => {
+    expect(
+      transformCustomScheduleToRRule({
+        duration: '30m',
+        start: '2025-02-17T19:04:46.320Z',
+        recurring: { every: '4w' },
+      })
+    ).toEqual({
+      duration: 1800000,
+      rRule: {
+        bymonth: undefined,
+        bymonthday: undefined,
+        byweekday: undefined,
+        count: undefined,
+        dtstart: '2025-02-17T19:04:46.320Z',
+        freq: 2,
+        interval: 4,
+        tzid: 'UTC',
+        until: undefined,
+      },
+    });
+  });
+
   it('transforms recurring with weekday correctly', () => {
     expect(
       transformCustomScheduleToRRule({

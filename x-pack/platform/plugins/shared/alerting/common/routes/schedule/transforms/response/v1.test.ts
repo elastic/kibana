@@ -8,50 +8,38 @@
 import { transformRRuleToCustomSchedule } from './v1';
 
 describe('transformRRuleToCustomSchedule', () => {
-  it('transforms start and duration correctly', () => {
+  it('transforms to start and duration correctly', () => {
     expect(
       transformRRuleToCustomSchedule({
-        snoozeSchedule: [
-          {
-            duration: 7200000,
-            rRule: {
-              dtstart: '2021-05-10T00:00:00.000Z',
-              tzid: 'UTC',
-            },
-          },
-        ],
+        duration: 7200000,
+        rRule: {
+          dtstart: '2021-05-10T00:00:00.000Z',
+          tzid: 'UTC',
+        },
       })
     ).toEqual({ duration: '2h', start: '2021-05-10T00:00:00.000Z', timezone: 'UTC' });
   });
 
-  it('transforms duration as indefinite correctly', () => {
+  it('transforms to duration as indefinite correctly', () => {
     expect(
       transformRRuleToCustomSchedule({
-        snoozeSchedule: [
-          {
-            duration: -1,
-            rRule: {
-              dtstart: '2021-05-10T00:00:00.000Z',
-              tzid: 'UTC',
-            },
-          },
-        ],
+        duration: -1,
+        rRule: {
+          dtstart: '2021-05-10T00:00:00.000Z',
+          tzid: 'UTC',
+        },
       })
     ).toEqual({ duration: '-1', start: '2021-05-10T00:00:00.000Z', timezone: 'UTC' });
   });
 
-  it('transforms start date and timezone correctly', () => {
+  it('transforms to start date and timezone correctly', () => {
     expect(
       transformRRuleToCustomSchedule({
-        snoozeSchedule: [
-          {
-            duration: 1500000,
-            rRule: {
-              dtstart: '2025-02-10T21:30:00.000Z',
-              tzid: 'America/New_York',
-            },
-          },
-        ],
+        duration: 1500000,
+        rRule: {
+          dtstart: '2025-02-10T21:30:00.000Z',
+          tzid: 'America/New_York',
+        },
       })
     ).toEqual({
       duration: '25m',
@@ -60,22 +48,39 @@ describe('transformRRuleToCustomSchedule', () => {
     });
   });
 
-  it('transforms recurring with weekday correctly', () => {
+  it('transforms to recurring with every correctly', () => {
     expect(
       transformRRuleToCustomSchedule({
-        snoozeSchedule: [
-          {
-            duration: 1800000,
-            rRule: {
-              byweekday: ['Mo', 'FR'],
-              dtstart: '2025-02-17T19:04:46.320Z',
-              freq: 3,
-              interval: 1,
-              tzid: 'UTC',
-              until: '2025-05-17T05:05:00.000Z',
-            },
-          },
-        ],
+        duration: 1800000,
+        rRule: {
+          byweekday: ['Mo', 'FR'],
+          dtstart: '2025-02-17T19:04:46.320Z',
+          freq: 1,
+          interval: 6,
+          tzid: 'UTC',
+          until: '2025-05-17T05:05:00.000Z',
+        },
+      })
+    ).toEqual({
+      duration: '30m',
+      start: '2025-02-17T19:04:46.320Z',
+      recurring: { every: '6M', end: '2025-05-17T05:05:00.000Z', onWeekDay: ['Mo', 'FR'] },
+      timezone: 'UTC',
+    });
+  });
+
+  it('transforms to recurring with weekday correctly', () => {
+    expect(
+      transformRRuleToCustomSchedule({
+        duration: 1800000,
+        rRule: {
+          byweekday: ['Mo', 'FR'],
+          dtstart: '2025-02-17T19:04:46.320Z',
+          freq: 3,
+          interval: 1,
+          tzid: 'UTC',
+          until: '2025-05-17T05:05:00.000Z',
+        },
       })
     ).toEqual({
       duration: '30m',
@@ -85,23 +90,19 @@ describe('transformRRuleToCustomSchedule', () => {
     });
   });
 
-  it('transforms recurring with month and day correctly', () => {
+  it('transforms to recurring with month and day correctly', () => {
     expect(
       transformRRuleToCustomSchedule({
-        snoozeSchedule: [
-          {
-            duration: 18000000,
-            rRule: {
-              bymonth: [1, 3, 5],
-              bymonthday: [1, 31],
-              dtstart: '2025-02-17T19:04:46.320Z',
-              freq: 1,
-              interval: 1,
-              tzid: 'UTC',
-              until: '2025-12-17T05:05:00.000Z',
-            },
-          },
-        ],
+        duration: 18000000,
+        rRule: {
+          bymonth: [1, 3, 5],
+          bymonthday: [1, 31],
+          dtstart: '2025-02-17T19:04:46.320Z',
+          freq: 1,
+          interval: 1,
+          tzid: 'UTC',
+          until: '2025-12-17T05:05:00.000Z',
+        },
       })
     ).toEqual({
       duration: '5h',
@@ -116,21 +117,17 @@ describe('transformRRuleToCustomSchedule', () => {
     });
   });
 
-  it('transforms recurring with occurrences correctly', () => {
+  it('transforms to recurring with occurrences correctly', () => {
     expect(
       transformRRuleToCustomSchedule({
-        snoozeSchedule: [
-          {
-            duration: 300000,
-            rRule: {
-              count: 3,
-              dtstart: '2025-01-14T05:05:00.000Z',
-              freq: 2,
-              interval: 2,
-              tzid: 'UTC',
-            },
-          },
-        ],
+        duration: 300000,
+        rRule: {
+          count: 3,
+          dtstart: '2025-01-14T05:05:00.000Z',
+          freq: 2,
+          interval: 2,
+          tzid: 'UTC',
+        },
       })
     ).toEqual({
       duration: '5m',

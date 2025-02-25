@@ -33,6 +33,17 @@ describe('validateSchedule', () => {
         duration: '700h',
         recurring: { every: '1w' },
       })
-    ).toEqual(`Recurrence every 1w must be longer than the snooze duration 700h`);
+    ).toEqual('Recurrence every 1w must be longer than the snooze duration 700h');
+  });
+
+  it('throws error when recurring schedule provided with indefinite duration', () => {
+    expect(
+      validateSchedule({
+        duration: '-1',
+        recurring: { every: '1M' },
+      })
+    ).toEqual(
+      'The duration of -1 snoozes the rule indefinitely. Recurring schedules cannot be set when the duration is -1.'
+    );
   });
 });

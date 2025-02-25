@@ -8,7 +8,7 @@
 import moment from 'moment-timezone';
 import { isEmpty, isUndefined, omitBy } from 'lodash';
 import { Frequency } from '@kbn/rrule';
-import { RuleSnooze } from '@kbn/alerting-types';
+import type { RRule } from '../../../../../server/application/r_rule/types';
 import { ScheduleRequest } from '../../types/v1';
 
 const transformFrequencyToEvery = (frequency: Frequency) => {
@@ -43,16 +43,15 @@ const getDurationInString = (duration: number): string => {
   return `${durationInSeconds}s`;
 };
 
-export const transformRRuleToCustomSchedule = ({
-  snoozeSchedule,
-}: {
-  snoozeSchedule: RuleSnooze;
+export const transformRRuleToCustomSchedule = (snoozeSchedule?: {
+  duration: number;
+  rRule: RRule;
 }): ScheduleRequest | undefined => {
-  if (!snoozeSchedule?.length) {
+  if (!snoozeSchedule) {
     return;
   }
 
-  const { rRule, duration } = snoozeSchedule[snoozeSchedule.length - 1];
+  const { rRule, duration } = snoozeSchedule;
   const transformedFrequency = transformFrequencyToEvery(rRule.freq as Frequency);
   const transformedDuration = getDurationInString(duration);
 

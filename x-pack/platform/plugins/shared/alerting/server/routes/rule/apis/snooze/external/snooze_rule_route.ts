@@ -34,7 +34,7 @@ export const snoozeRuleRoute = (
       security: DEFAULT_ALERTING_ROUTE_SECURITY,
       options: {
         access: 'public',
-        summary: 'Snooze a rule',
+        summary: 'Schedule a snooze for the rule',
         tags: ['oas-tag:alerting'],
       },
       validate: {
@@ -54,7 +54,7 @@ export const snoozeRuleRoute = (
             description: 'Indicates that this call is forbidden.',
           },
           404: {
-            description: 'Indicates a rule with the given ID does not exist.',
+            description: 'Indicates a rule with the given id does not exist.',
           },
         },
       },
@@ -87,9 +87,9 @@ export const snoozeRuleRoute = (
             id: (snoozedRule?.snoozeSchedule?.length
               ? snoozedRule?.snoozeSchedule[snoozedRule.snoozeSchedule.length - 1].id
               : '') as string,
-            custom: transformRRuleToCustomSchedule({
-              snoozeSchedule: snoozedRule.snoozeSchedule ?? [],
-            }),
+            custom: transformRRuleToCustomSchedule(
+              snoozedRule?.snoozeSchedule?.[snoozedRule.snoozeSchedule.length - 1]
+            ),
           };
 
           const response: SnoozeResponse = {
