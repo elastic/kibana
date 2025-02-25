@@ -284,8 +284,8 @@ export const EsDeprecationsTable: React.FunctionComponent<Props> = ({
   const getSelectableDeprecations = (deprecationsList: EnrichedDeprecationInfo[]) => {
     return new Set(
       deprecationsList
-      .filter(({ correctiveAction }) => correctiveAction?.type === 'reindex')
-      .map(({ index, message }) => index || message)
+        .filter(({ correctiveAction }) => correctiveAction?.type === 'reindex')
+        .map(({ index, message }) => index || message)
     );
   };
 
@@ -301,10 +301,8 @@ export const EsDeprecationsTable: React.FunctionComponent<Props> = ({
   const toggleAll = () => {
     setSelectedDeprecations((prev) => {
       const selectableDeprecations = getSelectableDeprecations(filteredDeprecations);
-      return (
-        selectableDeprecations.size === prev.size &&
+      return selectableDeprecations.size === prev.size &&
         [...prev].every((id) => selectableDeprecations.has(id))
-      )
         ? new Set() // Deselect all
         : selectableDeprecations; // Select all
     });
