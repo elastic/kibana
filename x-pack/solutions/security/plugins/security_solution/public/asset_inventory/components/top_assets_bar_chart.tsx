@@ -5,7 +5,7 @@
  * 2.0.
  */
 import React from 'react';
-import { EuiFlexGroup, EuiLoadingChart } from '@elastic/eui';
+import { EuiProgress, EuiFlexGroup, EuiLoadingChart } from '@elastic/eui';
 import { Chart, Settings, Axis, BarSeries, Position, ScaleType } from '@elastic/charts';
 import { useElasticChartsTheme } from '@kbn/charts-theme';
 import { i18n } from '@kbn/i18n';
@@ -29,13 +29,15 @@ const chartStyles = { height: '260px' };
 
 export interface TopAssetsBarChartProps {
   isLoading: boolean;
+  isFetching: boolean;
   entities: AggregationResult[];
 }
 
-export const TopAssetsBarChart = ({ isLoading, entities }: TopAssetsBarChartProps) => {
+export const TopAssetsBarChart = ({ isLoading, isFetching, entities }: TopAssetsBarChartProps) => {
   const baseTheme = useElasticChartsTheme();
   return (
     <div css={chartStyles}>
+      <EuiProgress size="xs" color="accent" style={{ opacity: isFetching ? 1 : 0 }} />
       {isLoading ? (
         <EuiFlexGroup
           justifyContent="center"
@@ -44,40 +46,40 @@ export const TopAssetsBarChart = ({ isLoading, entities }: TopAssetsBarChartProp
         >
           <EuiLoadingChart size="xl" />
         </EuiFlexGroup>
-      ) : null}
-
-      <Chart title={chartTitle}>
-        <Settings baseTheme={baseTheme} showLegend={true} animateData={true} />
-        <Axis
-          id="X-axis"
-          position={Position.Bottom}
-          gridLine={{
-            visible: false,
-          }}
-        />
-        <Axis
-          id="Y-axis"
-          position={Position.Left}
-          title={yAxisTitle}
-          maximumFractionDigits={0}
-          showOverlappingTicks={false}
-          gridLine={{
-            visible: false,
-          }}
-        />
-        <BarSeries
-          id="grouped-categories"
-          xScaleType={ScaleType.Ordinal}
-          yScaleType={ScaleType.Linear}
-          xAccessor="category"
-          yAccessors={['count']}
-          yNice={true}
-          splitSeriesAccessors={['source']}
-          stackAccessors={['category']}
-          minBarHeight={1}
-          data={entities}
-        />
-      </Chart>
+      ) : (
+        <Chart title={chartTitle}>
+          <Settings baseTheme={baseTheme} showLegend={true} animateData={true} />
+          <Axis
+            id="X-axis"
+            position={Position.Bottom}
+            gridLine={{
+              visible: false,
+            }}
+          />
+          <Axis
+            id="Y-axis"
+            position={Position.Left}
+            title={yAxisTitle}
+            maximumFractionDigits={0}
+            showOverlappingTicks={false}
+            gridLine={{
+              visible: false,
+            }}
+          />
+          <BarSeries
+            id="grouped-categories"
+            xScaleType={ScaleType.Ordinal}
+            yScaleType={ScaleType.Linear}
+            xAccessor="category"
+            yAccessors={['count']}
+            yNice={true}
+            splitSeriesAccessors={['source']}
+            stackAccessors={['category']}
+            minBarHeight={1}
+            data={entities}
+          />
+        </Chart>
+      )}
     </div>
   );
 };
