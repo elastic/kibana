@@ -9,6 +9,7 @@
 
 import type {
   AJAXError,
+  AttributionControlOptions,
   Map,
   LayerSpecification,
   Source,
@@ -45,6 +46,7 @@ export { maplibregl };
 
 export type {
   AJAXError,
+  AttributionControlOptions,
   Map,
   LayerSpecification,
   SourceSpecification,
