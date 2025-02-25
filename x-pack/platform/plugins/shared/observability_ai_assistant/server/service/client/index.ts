@@ -41,7 +41,6 @@ import {
   ConversationUpdateEvent,
   createConversationNotFoundError,
   StreamingChatResponseEventType,
-  TokenCountEvent,
   type StreamingChatResponseEvent,
 } from '../../../common/conversation_complete';
 import { convertMessagesForInference } from '../../../common/convert_messages_for_inference';
@@ -56,7 +55,6 @@ import {
   KnowledgeBaseType,
   KnowledgeBaseEntryRole,
 } from '../../../common/types';
-import { withoutTokenCountEvents } from '../../../common/utils/without_token_count_events';
 import { CONTEXT_FUNCTION_NAME } from '../../functions/context';
 import type { ChatFunctionClient } from '../chat_function_client';
 import { KnowledgeBaseService, RecalledEntry } from '../knowledge_base_service';
@@ -68,9 +66,7 @@ import { LangTracer } from './instrumentation/lang_tracer';
 import { continueConversation } from './operators/continue_conversation';
 import { convertInferenceEventsToStreamingEvents } from './operators/convert_inference_events_to_streaming_events';
 import { extractMessages } from './operators/extract_messages';
-import { extractTokenCount } from './operators/extract_token_count';
 import { getGeneratedTitle } from './operators/get_generated_title';
-import { instrumentAndCountTokens } from './operators/instrument_and_count_tokens';
 import {
   reIndexKnowledgeBaseAndPopulateSemanticTextField,
   scheduleKbSemanticTextMigrationTask,
@@ -78,6 +74,7 @@ import {
 import { ObservabilityAIAssistantPluginStartDependencies } from '../../types';
 import { ObservabilityAIAssistantConfig } from '../../config';
 import { getElserModelId } from '../knowledge_base_service/get_elser_model_id';
+import { apmInstrumentation } from './operators/apm_instrumentation';
 
 const MAX_FUNCTION_CALLS = 8;
 
@@ -297,17 +294,12 @@ export class ObservabilityAIAssistantClient {
           // wait until all dependencies have completed
           forkJoin([
             // get just the new messages
-            nextEvents$.pipe(withoutTokenCountEvents(), extractMessages()),
-            // count all the token count events emitted during completion
-            mergeOperator(
-              nextEvents$,
-              title$.pipe(filter((value): value is TokenCountEvent => typeof value !== 'string'))
-            ).pipe(extractTokenCount()),
+            nextEvents$.pipe(extractMessages()),
             // get just the title, and drop the token count events
             title$.pipe(filter((value): value is string => typeof value === 'string')),
             systemMessage$,
           ]).pipe(
-            switchMap(([addedMessages, tokenCountResult, title, systemMessage]) => {
+            switchMap(([addedMessages, title, systemMessage]) => {
               const initialMessagesWithAddedMessages = initialMessages.concat(addedMessages);
 
               const lastMessage = last(initialMessagesWithAddedMessages);
@@ -329,13 +321,6 @@ export class ObservabilityAIAssistantClient {
                         return throwError(() => createConversationNotFoundError());
                       }
 
-                      const persistedTokenCount = conversation._source?.conversation
-                        .token_count ?? {
-                        prompt: 0,
-                        completion: 0,
-                        total: 0,
-                      };
-
                       return from(
                         this.update(
                           conversationId,
@@ -349,16 +334,10 @@ export class ObservabilityAIAssistantClient {
                             // update messages and system message
                             { messages: initialMessagesWithAddedMessages, systemMessage },
 
-                            // update token count
+                            // update title
                             {
                               conversation: {
                                 title: title || conversation._source?.conversation.title,
-                                token_count: {
-                                  prompt: persistedTokenCount.prompt + tokenCountResult.prompt,
-                                  completion:
-                                    persistedTokenCount.completion + tokenCountResult.completion,
-                                  total: persistedTokenCount.total + tokenCountResult.total,
-                                },
                               },
                             }
                           )
@@ -382,7 +361,6 @@ export class ObservabilityAIAssistantClient {
                   conversation: {
                     title,
                     id: conversationId,
-                    token_count: tokenCountResult,
                   },
                   public: !!isPublic,
                   labels: {},
@@ -403,8 +381,7 @@ export class ObservabilityAIAssistantClient {
         );
 
         return output$.pipe(
-          instrumentAndCountTokens('complete'),
-          withoutTokenCountEvents(),
+          apmInstrumentation('complete'),
           catchError((error) => {
             this.dependencies.logger.error(error);
             return throwError(() => error);
@@ -462,7 +439,7 @@ export class ObservabilityAIAssistantClient {
       stream: TStream;
     }
   ): TStream extends true
-    ? Observable<ChatCompletionChunkEvent | TokenCountEvent | ChatCompletionMessageEvent>
+    ? Observable<ChatCompletionChunkEvent | ChatCompletionMessageEvent>
     : Promise<ChatCompleteResponse> {
     let tools: Record<string, { description: string; schema: any }> | undefined;
     let toolChoice: ToolChoiceType | { function: string } | undefined;
@@ -492,6 +469,11 @@ export class ObservabilityAIAssistantClient {
       functionCalling: (simulateFunctionCalling ? 'simulated' : 'auto') as FunctionCallingMode,
     };
 
+    this.dependencies.logger.debug(
+      () =>
+        `Calling inference client with for name: "${name}" with options: ${JSON.stringify(options)}`
+    );
+
     if (stream) {
       return defer(() =>
         this.dependencies.inferenceClient.chatComplete({
@@ -500,7 +482,7 @@ export class ObservabilityAIAssistantClient {
         })
       ).pipe(
         convertInferenceEventsToStreamingEvents(),
-        instrumentAndCountTokens(name),
+        apmInstrumentation(name),
         failOnNonExistingFunctionCall({ functions }),
         tap((event) => {
           if (
@@ -512,7 +494,7 @@ export class ObservabilityAIAssistantClient {
         }),
         shareReplay()
       ) as TStream extends true
-        ? Observable<ChatCompletionChunkEvent | TokenCountEvent | ChatCompletionMessageEvent>
+        ? Observable<ChatCompletionChunkEvent | ChatCompletionMessageEvent>
         : never;
     } else {
       return this.dependencies.inferenceClient.chatComplete({
