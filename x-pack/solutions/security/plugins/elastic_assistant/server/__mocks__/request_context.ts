@@ -29,7 +29,7 @@ import {
 } from '../ai_assistant_data_clients/knowledge_base';
 import { defaultAssistantFeatures } from '@kbn/elastic-assistant-common';
 import { AttackDiscoveryDataClient } from '../lib/attack_discovery/persistence';
-import { DefendInsightsDataClient } from '../ai_assistant_data_clients/defend_insights';
+import { DefendInsightsDataClient } from '../lib/defend_insights/persistence';
 import { authenticatedUser } from './user';
 
 export const createMockClients = () => {

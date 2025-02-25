@@ -78,10 +78,10 @@ export class DefendInsightsDataClient extends AIAssistantDataClient {
     const id = defendInsightCreate?.id || uuidv4();
     const createdAt = new Date().toISOString();
 
-    const body = transformToCreateScheme(createdAt, this.spaceId, user, defendInsightCreate);
+    const document = transformToCreateScheme(createdAt, this.spaceId, user, defendInsightCreate);
     try {
       const response = await esClient.create({
-        body,
+        document,
         id,
         index,
         refresh: 'wait_for',

@@ -60,7 +60,7 @@ import type { GetRegisteredFeatures, GetRegisteredTools } from './services/app_c
 import { CallbackIds } from './services/app_context';
 import { AIAssistantDataClient } from './ai_assistant_data_clients';
 import { AIAssistantKnowledgeBaseDataClient } from './ai_assistant_data_clients/knowledge_base';
-import type { DefendInsightsDataClient } from './ai_assistant_data_clients/defend_insights';
+import type { DefendInsightsDataClient } from './lib/defend_insights/persistence';
 
 export const PLUGIN_ID = 'elasticAssistant' as const;
 export { CallbackIds };

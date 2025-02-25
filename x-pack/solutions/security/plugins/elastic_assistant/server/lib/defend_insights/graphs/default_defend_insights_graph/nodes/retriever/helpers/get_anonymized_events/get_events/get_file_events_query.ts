@@ -23,7 +23,6 @@ export function getFileEventsQuery({
 }): SearchRequest {
   return {
     allow_no_indices: true,
-    fields: ['_id', 'agent.id', 'process.executable'],
     query: {
       bool: {
         must: [
@@ -35,7 +34,8 @@ export function getFileEventsQuery({
           {
             range: {
               '@timestamp': {
-                gte: gte ?? 'now-24h',
+                gte: gte ?? 'now-14d',
+                // gte: gte ?? 'now-24h',
                 lte: lte ?? 'now',
               },
             },
@@ -43,15 +43,31 @@ export function getFileEventsQuery({
         ],
       },
     },
-    size: size ?? SIZE,
-    sort: [
-      {
-        '@timestamp': {
-          order: 'desc',
+    size: 0, // Aggregations only
+    aggs: {
+      unique_process_executable: {
+        terms: {
+          field: 'process.executable',
+          size: size ?? SIZE,
+        },
+        aggs: {
+          // Get the latest event for each process.executable
+          latest_event: {
+            top_hits: {
+              size: 1,
+              sort: [
+                {
+                  '@timestamp': {
+                    order: 'desc',
+                  },
+                },
+              ],
+              _source: ['_id', 'agent.id', 'process.executable'], // Include only necessary fields
+            },
+          },
         },
       },
-    ],
-    _source: false,
+    },
     ignore_unavailable: true,
     index: [FILE_EVENTS_INDEX_PATTERN],
   };

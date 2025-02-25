@@ -12,7 +12,7 @@ import type { DefendInsights } from '@kbn/elastic-assistant-common';
 import moment from 'moment';
 import {
   ContentReferencesStore,
-  DEFEND_INSIGHTS_TOOL_ID,
+  DEFEND_INSIGHTS_ID,
   DefendInsightStatus,
   DefendInsightType,
 } from '@kbn/elastic-assistant-common';
@@ -37,9 +37,9 @@ describe('defend insights route helpers', () => {
 
   describe('getAssistantTool', () => {
     it('should return the defend-insights tool', () => {
-      const getRegisteredTools = jest.fn().mockReturnValue([{ id: DEFEND_INSIGHTS_TOOL_ID }]);
+      const getRegisteredTools = jest.fn().mockReturnValue([{ id: DEFEND_INSIGHTS_ID }]);
       const result = getAssistantTool(getRegisteredTools, 'pluginName');
-      expect(result).toEqual({ id: DEFEND_INSIGHTS_TOOL_ID });
+      expect(result).toEqual({ id: DEFEND_INSIGHTS_ID });
     });
   });
 

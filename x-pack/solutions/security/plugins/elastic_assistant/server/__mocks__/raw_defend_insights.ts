@@ -7,7 +7,7 @@
 
 import { DefendInsightStatus, DefendInsightType } from '@kbn/elastic-assistant-common';
 
-import type { EsDefendInsightSchema } from '../ai_assistant_data_clients/defend_insights/types';
+import type { EsDefendInsightSchema } from '../lib/defend_insights/persistence/types';
 
 export const getParsedDefendInsightsMock = (timestamp: string): EsDefendInsightSchema[] => [
   {
