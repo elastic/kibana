@@ -227,10 +227,10 @@ function IlmPhase({
 }
 
 function PhasesLegend({ phases }: { phases?: IlmPolicyPhases }) {
-  if (!phases) return null;
-
   const { ilmPhases } = useIlmPhasesColorAndDescription();
   const descriptions = useMemo(() => {
+    if (!phases) return [];
+
     const desc = orderIlmPhases(phases)
       .filter(({ name }) => name !== 'delete')
       .map((phase) => ({
@@ -264,6 +264,8 @@ function PhasesLegend({ phases }: { phases?: IlmPolicyPhases }) {
 
     return desc;
   }, [phases, ilmPhases]);
+
+  if (!phases) return null;
 
   return (
     <EuiPanel hasBorder={false} hasShadow={false} paddingSize="s">
