@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { InferenceInferenceEndpointInfo } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { InferenceInferenceEndpointInfo } from '@elastic/elasticsearch/lib/api/types';
 export const isProviderTechPreview = (provider: InferenceInferenceEndpointInfo) => {
   const { service_settings: serviceSettings, task_type: taskType } = provider;
   const modelId = serviceSettings?.model_id;

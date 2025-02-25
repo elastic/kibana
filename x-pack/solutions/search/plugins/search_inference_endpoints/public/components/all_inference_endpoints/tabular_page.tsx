@@ -12,7 +12,7 @@ import { InferenceAPIConfigResponse } from '@kbn/ml-trained-models-utils';
 import {
   InferenceInferenceEndpointInfo,
   InferenceTaskType,
-} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+} from '@elastic/elasticsearch/lib/api/types';
 import { ServiceProviderKeys } from '@kbn/inference-endpoint-ui-common';
 import * as i18n from '../../../common/translations';
 

@@ -10,7 +10,7 @@ import { EuiButtonEmpty, EuiConfirmModal, EuiFlexGroup, EuiFlexItem, EuiText } f
 import { css } from '@emotion/react';
 import { euiThemeVars } from '@kbn/ui-theme';
 
-import { InferenceInferenceEndpointInfo } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { InferenceInferenceEndpointInfo } from '@elastic/elasticsearch/lib/api/types';
 import * as i18n from './translations';
 import { useScanUsage } from '../../../../../../../hooks/use_scan_usage';
 import { InferenceUsageInfo } from '../../../../../types';

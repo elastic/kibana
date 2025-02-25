@@ -9,7 +9,7 @@ import { InferenceFlyoutWrapper } from '@kbn/inference-endpoint-ui-common/src/co
 import React, { useCallback } from 'react';
 import { InferenceEndpoint } from '@kbn/inference-endpoint-ui-common';
 import { flattenObject } from '@kbn/object-utils';
-import { InferenceInferenceEndpointInfo } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { InferenceInferenceEndpointInfo } from '@elastic/elasticsearch/lib/api/types';
 import { useKibana } from '../../hooks/use_kibana';
 import { useQueryInferenceEndpoints } from '../../hooks/use_inference_endpoints';
 

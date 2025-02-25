@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { InferenceTaskType } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { InferenceTaskType } from '@elastic/elasticsearch/lib/api/types';
 import { EuiBadge } from '@elastic/eui';
 import React from 'react';
 

@@ -6,7 +6,7 @@
  */
 
 import { ServiceProviderKeys } from '@kbn/inference-endpoint-ui-common';
-import { InferenceTaskType } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { InferenceTaskType } from '@elastic/elasticsearch/lib/api/types';
 
 export const INFERENCE_ENDPOINTS_TABLE_PER_PAGE_VALUES = [25, 50, 100];
 

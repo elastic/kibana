@@ -9,7 +9,7 @@ import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiIcon, EuiText } from '@elastic/
 import React from 'react';
 import { ELASTIC_MODEL_DEFINITIONS } from '@kbn/ml-trained-models-utils';
 import { SERVICE_PROVIDERS, ServiceProviderKeys } from '@kbn/inference-endpoint-ui-common';
-import { InferenceInferenceEndpointInfo } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { InferenceInferenceEndpointInfo } from '@elastic/elasticsearch/lib/api/types';
 import * as i18n from './translations';
 
 interface EndpointModelInfoProps {

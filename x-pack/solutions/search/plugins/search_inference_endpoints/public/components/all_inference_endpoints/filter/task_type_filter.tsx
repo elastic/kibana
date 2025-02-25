@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { InferenceTaskType } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { InferenceTaskType } from '@elastic/elasticsearch/lib/api/types';
 import { FilterOptions } from '../types';
 import { MultiSelectFilter, MultiSelectFilterOption } from './multi_select_filter';
 import * as i18n from './translations';

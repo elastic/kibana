@@ -10,7 +10,7 @@ import { Pagination } from '@elastic/eui';
 import { InferenceAPIConfigResponse } from '@kbn/ml-trained-models-utils';
 import { useMemo } from 'react';
 import { ServiceProviderKeys } from '@kbn/inference-endpoint-ui-common';
-import { InferenceInferenceEndpointInfo } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { InferenceInferenceEndpointInfo } from '@elastic/elasticsearch/lib/api/types';
 import { DEFAULT_TABLE_LIMIT } from '../components/all_inference_endpoints/constants';
 import {
   FilterOptions,
