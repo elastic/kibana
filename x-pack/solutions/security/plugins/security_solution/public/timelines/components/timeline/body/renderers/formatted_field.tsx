@@ -49,7 +49,6 @@ import { UserName } from './user_name';
 import { AssetCriticalityLevel } from './asset_criticality_level';
 import { ServiceName } from './service_name';
 
-
 // Offset top-aligned tooltips so that cell actions are more visible
 const dataGridToolTipOffset = css`
   &[data-position='top'] {
