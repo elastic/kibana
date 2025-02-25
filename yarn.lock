@@ -7746,7 +7746,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/test-jest-helpers@link:packages/kbn-test-jest-helpers":
+"@kbn/test-jest-helpers@link:src/platform/packages/shared/kbn-test-jest-helpers":
   version "0.0.0"
   uid ""
 
