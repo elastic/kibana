@@ -10,15 +10,12 @@ import type { Subscription } from 'rxjs';
 import type {
   ElasticsearchClient,
   ElasticsearchServiceStart,
-  KibanaRequest,
   Logger,
   SavedObjectsClientContract,
-  SavedObjectsServiceStart,
 } from '@kbn/core/server';
 import type { PackagePolicy, UpdatePackagePolicy } from '@kbn/fleet-plugin/common';
 import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
 import type { PackagePolicyClient } from '@kbn/fleet-plugin/server';
-import { SECURITY_EXTENSION_ID } from '@kbn/core-saved-objects-server';
 import type { TelemetryConfigProvider } from '../../../../common/telemetry_config/telemetry_config_provider';
 import type { PolicyData } from '../../../../common/endpoint/types';
 import { getPolicyDataForUpdate } from '../../../../common/endpoint/service/policy';
@@ -28,18 +25,18 @@ export class TelemetryConfigWatcher {
   private logger: Logger;
   private esClient: ElasticsearchClient;
   private policyService: PackagePolicyClient;
+  private endpointAppContextService: EndpointAppContextService;
   private subscription: Subscription | undefined;
-  private soStart: SavedObjectsServiceStart;
+
   constructor(
     policyService: PackagePolicyClient,
-    soStart: SavedObjectsServiceStart,
     esStart: ElasticsearchServiceStart,
     endpointAppContextService: EndpointAppContextService
   ) {
     this.policyService = policyService;
     this.esClient = esStart.client.asInternalUser;
+    this.endpointAppContextService = endpointAppContextService;
     this.logger = endpointAppContextService.createLogger(this.constructor.name);
-    this.soStart = soStart;
   }
 
   /**
@@ -49,16 +46,8 @@ export class TelemetryConfigWatcher {
    * intentionally using the system user here. Be very aware of what you are using this
    * client to do
    */
-  private makeInternalSOClient(soStart: SavedObjectsServiceStart): SavedObjectsClientContract {
-    const fakeRequest = {
-      headers: {},
-      getBasePath: () => '',
-      path: '/',
-      route: { settings: {} },
-      url: { href: {} },
-      raw: { req: { url: '/' } },
-    } as unknown as KibanaRequest;
-    return soStart.getScopedClient(fakeRequest, { excludedExtensions: [SECURITY_EXTENSION_ID] });
+  private makeInternalSOClient(): SavedObjectsClientContract {
+    return this.endpointAppContextService.savedObjects.createInternalUnscopedSoClient(false);
   }
 
   public start(telemetryConfigProvider: TelemetryConfigProvider) {
@@ -86,7 +75,7 @@ export class TelemetryConfigWatcher {
 
     do {
       try {
-        response = await this.policyService.list(this.makeInternalSOClient(this.soStart), {
+        response = await this.policyService.list(this.makeInternalSOClient(), {
           page: page++,
           perPage: 100,
           kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name: endpoint`,
@@ -112,16 +101,12 @@ export class TelemetryConfigWatcher {
 
       if (updates.length) {
         try {
-          await this.policyService.bulkUpdate(
-            this.makeInternalSOClient(this.soStart),
-            this.esClient,
-            updates
-          );
+          await this.policyService.bulkUpdate(this.makeInternalSOClient(), this.esClient, updates);
         } catch (e) {
           // try again for transient issues
           try {
             await this.policyService.bulkUpdate(
-              this.makeInternalSOClient(this.soStart),
+              this.makeInternalSOClient(),
               this.esClient,
               updates
             );
