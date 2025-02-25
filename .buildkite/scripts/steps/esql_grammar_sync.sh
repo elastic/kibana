@@ -31,7 +31,7 @@ synchronize_parser_grammar () {
   source_file="$PARENT_DIR/elasticsearch/x-pack/plugin/esql/src/main/antlr/EsqlBaseParser.g4"
   source_lib_dir="$PARENT_DIR/elasticsearch/x-pack/plugin/esql/src/main/antlr/parser"
   destination_file="./src/platform/packages/shared/kbn-esql-ast/src/antlr/esql_parser.g4"
-  destination_lib_dir="./src/platform/packages/shared/kbn-esql-ast/src/antlr/lexer"
+  destination_lib_dir="./src/platform/packages/shared/kbn-esql-ast/src/antlr/parser"
 
   # Copy the file
   cp "$source_file" "$destination_file"
