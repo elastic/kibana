@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { isElasticAgentName } from '@kbn/elastic-agent-utils/src/agent_guards';
+import { isElasticAgentName, isJRubyAgentName } from '@kbn/elastic-agent-utils/src/agent_guards';
 import { EuiCallOut } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { isAWSLambdaAgentName } from '../../../../common/agent_name';
@@ -18,6 +18,7 @@ import { hasDashboard } from './static_dashboard/helper';
 import { useAdHocApmDataView } from '../../../hooks/use_adhoc_apm_data_view';
 import { isLogsOnlySignal } from '../../../utils/get_signal_type';
 import { ServiceTabEmptyState } from '../service_tab_empty_state';
+import { JvmMetricsOverview } from './jvm_metrics_overview';
 
 export function Metrics() {
   const { agentName, runtimeName, serverlessType, serviceEntitySummary, hasOpenTelemetryFields } =
@@ -46,6 +47,7 @@ export function Metrics() {
           defaultMessage: 'No dashboard found',
         })}
         iconType="iInCircle"
+        data-test-subj="apmMetricsNoDashboardFound"
       />
     );
   }
@@ -59,6 +61,10 @@ export function Metrics() {
         dataView={dataView}
       />
     );
+  }
+
+  if (!isAWSLambda && isJRubyAgentName(agentName, runtimeName)) {
+    return <JvmMetricsOverview />;
   }
 
   return <ServiceMetrics />;

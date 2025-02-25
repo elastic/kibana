@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+// The new dashboard file names should be added here
 export const existingDashboardFileNames = new Set([
   'classic_apm-apm-nodejs',
   'classic_apm-apm-java',
@@ -16,27 +17,10 @@ export const existingDashboardFileNames = new Set([
   'otel_native-otel_other-dotnet',
 ]);
 
-// Remove :
-/**
- * The specially formatted comment in the `import` expression causes the corresponding webpack chunk to be named. This aids us in debugging chunk size issues.
- * [request] placeholder is set for dynamic chunk name: https://webpack.js.org/api/module-methods/#webpackchunkname
- * See https://webpack.js.org/api/module-methods/#magic-comments
- */
-// export async function loadDashboardFile(filename: string) {
-//   return import(
-//     /* webpackMode: "lazy" */
-//     /* webpackChunkName: "dashboard" */
-//     `./${filename}.json` // Throws an error: Error: worker exitted unexpectedly with code 1 [last message: { bundleId: 'apm', type: 'running' }]
-//   );
-// }
-
-/**
- * The specially formatted comment in the `import` expression causes the corresponding webpack chunk to be named. This aids us in debugging chunk size issues.
- * See https://webpack.js.org/api/module-methods/#magic-comments
- */
-
-// TODO Change the dashboards with the new ones and create edot mapping
-// example: otel_native-edot-nodejs
+// The new dashboard files should be mapped here
+// + changed with the new ones (following the naming convention)
+// + similar mapping for edot needed
+//     - example: otel_native-edot-nodejs
 export async function loadDashboardFile(filename: string) {
   switch (filename) {
     case 'classic_apm-apm-nodejs': {
