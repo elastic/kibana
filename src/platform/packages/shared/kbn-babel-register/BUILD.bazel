@@ -39,7 +39,7 @@ BUNDLER_DEPS = [
   "@npm//source-map-support",
   "//src/platform/packages/private/kbn-repo-packages",
   "//src/platform/packages/shared/kbn-repo-info",
-  "//packages/kbn-babel-transform",
+  "//src/platform/packages/private/kbn-babel-transform",
 ]
 
 js_library(
