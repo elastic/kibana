@@ -1,6 +1,7 @@
 import { AssistantTool, AssistantToolParams } from "@kbn/elastic-assistant-plugin/server";
 import { APP_UI_ID } from "@kbn/security-solution-plugin/common";
 import { generateToolsFromOpenApiSpec } from "./generate_open_api_graph";
+import { groupBy } from "lodash";
 
 export const OPEN_API_TOOL_DETAILS = {
     id: 'api-tool',
@@ -23,7 +24,15 @@ export const OPEN_API_TOOL: AssistantTool = {
     },
     async getTool(params: AssistantToolParams) {
 
-        const result = await generateToolsFromOpenApiSpec()
-        return result
+        const tools = await generateToolsFromOpenApiSpec(params)
+
+        const groupedByTag = groupBy(
+            tools.flatMap(tool => tool.tags?.map(tag => ({ tag, ...tool }))),
+            "tag"
+        )
+
+        
+
+        return tools
     },
 } as unknown as AssistantTool;

@@ -257,4 +257,5 @@ export interface AssistantToolParams {
   >;
   size?: number;
   telemetry?: AnalyticsServiceSetup;
+  kibanaClient: KibanaAPIClient
 }

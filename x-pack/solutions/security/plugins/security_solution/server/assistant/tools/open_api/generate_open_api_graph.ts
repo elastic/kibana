@@ -6,12 +6,13 @@ import { JsonSchema, jsonSchemaToZod } from '@n8n/json-schema-to-zod';
 import { z } from 'zod';
 import { SchemaObject } from 'oas/dist/types.cjs';
 import { parse } from 'uri-template';
+import { AssistantToolParams } from '@kbn/elastic-assistant-plugin/server';
 
 
 type Operation = ReturnType<Oas['operation']>
 type OperationOrWebhook = ReturnType<Oas['getOperationById']>
 
-export const generateToolsFromOpenApiSpec = async () => {
+export const generateToolsFromOpenApiSpec = async (params: AssistantToolParams) => {
     const apiSpec = getApiSpec()
     const oas = new Oas(apiSpec);
     await oas.dereference()
@@ -35,11 +36,10 @@ export const generateToolsFromOpenApiSpec = async () => {
                 headers: { ...input.header, "Authorization": `Basic ZWxhc3RpYzpjaGFuZ2VtZQ==` },
                 body: JSON.stringify(input.body)
             }
-
             return await fetch(url.toString(), requestOptions).then((res) => res.json())
         }, {
             name: operation.getOperationId(),
-            description: [operation.getDescription(), ...operation.getTags().map(tag => tag.description)].join('\n'),
+            description: [operation.getDescription(), ...operation.getTags().map(tag => tag.description), operation.getRequestBodyExamples()].join('\n'),
             tags: operation.getTags().map(tag => tag.name),
             schema: getParametersAsZodSchema(operation),
             verbose: true,
