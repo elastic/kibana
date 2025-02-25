@@ -84,19 +84,21 @@ export const extractRuleEsqlQuery = (
 };
 
 /**
- * Removes the null `alias` field that gets appended from the internal kibana filter util for comparison
- * Relevant issue: https://github.com/elastic/kibana/issues/202966
+ * Normalizes filter properties to only include ones relevant to the query itself
+ * Relevant issues:
+ *  - https://github.com/elastic/kibana/issues/202966
+ *  - https://github.com/elastic/kibana/issues/206527
  */
 const normalizeFilterArray = (filters: RuleFilterArray | undefined): RuleFilterArray => {
   if (!filters?.length) {
     return [];
   }
   return (filters as Filter[]).map((filter) => ({
-    ...filter,
+    query: filter.query,
     meta: filter.meta
       ? {
-          ...filter.meta,
-          alias: filter.meta.alias ?? undefined,
+          negate: filter.meta.negate,
+          disabled: filter.meta.disabled !== undefined ? filter.meta.disabled : false,
         }
       : undefined,
   }));
