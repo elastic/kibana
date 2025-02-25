@@ -10,3 +10,4 @@ import * as jest from 'jest-mock';
 
 window.jest = jest;
 export const decorators = [EuiThemeProviderDecorator];
+export const tags = ['autodocs'];
