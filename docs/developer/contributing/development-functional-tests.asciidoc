@@ -366,14 +366,14 @@ await testSubjects.click(‘containerButton’);
 ** `find.allByCssSelector()`
 
 **retry:**:::
-// * Source: {kibana-blob}packages/kbn-ftr-common-functional-services/services/retry/retry.ts[packages/kbn-ftr-common-functional-services/services/retry/retry.ts]
+// * Source: {kibana-blob}src/platform/packages/shared/kbn-ftr-common-functional-services/services/retry/retry.ts[src/platform/packages/shared/kbn-ftr-common-functional-services/services/retry/retry.ts]
 * Helpers for retrying operations
 * Popular methods:
 ** `retry.try(fn, onFailureBlock)` - Execute `fn` in a loop until it succeeds or the default timeout elapses. The optional `onFailureBlock` is executed before each retry attempt.
 ** `retry.tryForTime(ms, fn, onFailureBlock)` - Execute `fn` in a loop until it succeeds or `ms` milliseconds elapses. The optional `onFailureBlock` is executed before each retry attempt.
 
 **kibanaServer:**:::
-// * Source: {kibana-blob}packages/kbn-ftr-common-functional-services/services/kibana_server/kibana_server.ts[packages/kbn-ftr-common-functional-services/services/kibana_server/kibana_server.ts]
+// * Source: {kibana-blob}src/platform/packages/shared/kbn-ftr-common-functional-services/services/kibana_server/kibana_server.ts[src/platform/packages/shared/kbn-ftr-common-functional-services/services/kibana_server/kibana_server.ts]
 * Helpers for interacting with {kib}'s server
 * Commonly used methods:
 ** `kibanaServer.uiSettings.update()`
@@ -381,7 +381,7 @@ await testSubjects.click(‘containerButton’);
 ** `kibanaServer.status.getOverallState()`
 
 **esArchiver:**:::
-// * Source: {kibana-blob}packages/kbn-ftr-common-functional-services/services/es_archiver.ts[packages/kbn-ftr-common-functional-services/services/es_archiver.ts]
+// * Source: {kibana-blob}src/platform/packages/shared/kbn-ftr-common-functional-services/services/es_archiver.ts[src/platform/packages/shared/kbn-ftr-common-functional-services/services/es_archiver.ts]
 * Load/unload archives created with the `esArchiver`
 * Popular methods:
 ** `esArchiver.load(path)`
@@ -393,7 +393,7 @@ Full list of services that are used in functional tests can be found here: {kiba
 
 **Low-level utilities:**:::
 * es
-// ** Source: {kibana-blob}packages/kbn-ftr-common-functional-services/services/es.ts[packages/kbn-ftr-common-functional-services/services/es.ts]
+// ** Source: {kibana-blob}src/platform/packages/shared/kbn-ftr-common-functional-services/services/es.ts[src/platform/packages/shared/kbn-ftr-common-functional-services/services/es.ts]
 ** {es} client
 ** Higher level options: `kibanaServer.uiSettings` or `esArchiver`
 * remote

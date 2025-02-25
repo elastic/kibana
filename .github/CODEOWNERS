@@ -497,7 +497,7 @@ x-pack/platform/plugins/shared/fleet @elastic/fleet
 src/platform/packages/shared/kbn-flot-charts @elastic/kibana-operations
 x-pack/test/ui_capabilities/common/plugins/foo_plugin @elastic/kibana-security
 src/platform/plugins/private/ftr_apis @elastic/kibana-core
-packages/kbn-ftr-common-functional-services @elastic/kibana-operations @elastic/appex-qa
+src/platform/packages/shared/kbn-ftr-common-functional-services @elastic/kibana-operations @elastic/appex-qa
 packages/kbn-ftr-common-functional-ui-services @elastic/appex-qa
 packages/kbn-ftr-screenshot-filename @elastic/kibana-operations @elastic/appex-qa
 x-pack/test/functional_with_es_ssl/plugins/cases @elastic/response-ops
