@@ -20516,7 +20516,7 @@ paths:
               schema:
                 type: object
           description: |
-            Indicates a successful call. NOTE: This HTTP response code indicates that the bulk operation succeeded.  Errors pertaining to individual objects will be returned in the response body.
+            Indicates a successful call. NOTE: This HTTP response code indicates that the bulk operation succeeded.  Errors pertaining to individual objects will be returned in the response body. 
         '400':
           content:
             application/json; Elastic-Api-Version=2023-10-31:
@@ -20548,7 +20548,7 @@ paths:
               schema:
                 type: object
           description: |
-            Indicates a successful call. NOTE: This HTTP response code indicates that the bulk operation succeeded. Errors pertaining to individual objects will be returned in the response body.
+            Indicates a successful call. NOTE: This HTTP response code indicates that the bulk operation succeeded. Errors pertaining to individual objects will be returned in the response body. 
         '400':
           content:
             application/json; Elastic-Api-Version=2023-10-31:
@@ -28824,7 +28824,7 @@ components:
           type: boolean
         scaling_factor:
           description: |
-            The scaling factor to use when encoding values. This property is applicable when `type` is `scaled_float`. Values will be multiplied by this factor at index time and rounded to the closest long value.
+            The scaling factor to use when encoding values. This property is applicable when `type` is `scaled_float`. Values will be multiplied by this factor at index time and rounded to the closest long value. 
           type: integer
         type:
           description: Specifies the data type for the field.
@@ -41202,23 +41202,6 @@ components:
           $ref: '#/components/schemas/Security_Endpoint_Management_API_Parameters'
       required:
         - endpoint_ids
-    Security_Endpoint_Management_API_HostPathScriptParameters:
-      type: object
-      properties:
-        commandLine:
-          description: Command line arguments.
-          minLength: 1
-          type: string
-        hostPath:
-          description: Absolute or relative path of script on host machine.
-          minLength: 1
-          type: string
-        timeout:
-          description: Timeout in seconds.
-          minimum: 1
-          type: integer
-      required:
-        - hostPath
     Security_Endpoint_Management_API_HostStatuses:
       description: A set of agent health statuses to filter by.
       example:
@@ -41470,12 +41453,6 @@ components:
       default: 10
       description: Number of items per page
       example: 10
-      maximum: 100
-      minimum: 1
-      type: integer
-    Security_Endpoint_Management_API_PageSize:
-      default: 10
-      description: Number of items per page
       maximum: 100
       minimum: 1
       type: integer
@@ -46273,7 +46250,7 @@ components:
           items:
             type: string
           description: |
-            A list of "carbon copy" email addresses. Addresses can be specified in `user@host-name` format or in name `<user@host-name>` format
+            A list of "carbon copy" email addresses. Addresses can be specified in `user@host-name` format or in name `<user@host-name>` format 
         message:
           type: string
           description: The email message text. Markdown format is supported.
