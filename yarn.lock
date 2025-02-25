@@ -5974,7 +5974,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/import-resolver@link:packages/kbn-import-resolver":
+"@kbn/import-resolver@link:src/platform/packages/private/kbn-import-resolver":
   version "0.0.0"
   uid ""
 

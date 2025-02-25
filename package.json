@@ -1462,7 +1462,7 @@
     "@kbn/generate-console-definitions": "link:packages/kbn-generate-console-definitions",
     "@kbn/get-repo-files": "link:src/platform/packages/private/kbn-get-repo-files",
     "@kbn/import-locator": "link:packages/kbn-import-locator",
-    "@kbn/import-resolver": "link:packages/kbn-import-resolver",
+    "@kbn/import-resolver": "link:src/platform/packages/private/kbn-import-resolver",
     "@kbn/inventory-e2e": "link:x-pack/solutions/observability/plugins/inventory/e2e",
     "@kbn/jest-serializers": "link:packages/kbn-jest-serializers",
     "@kbn/journeys": "link:packages/kbn-journeys",
