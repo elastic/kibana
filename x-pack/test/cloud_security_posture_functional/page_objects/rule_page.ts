@@ -121,6 +121,7 @@ export function RulePagePageProvider({ getService, getPageObjects }: FtrProvider
 
     clickRulesNames: async (index: number) => {
       const rulesNames = await testSubjects.findAll('csp_rules_table_row_item_name');
+      console.log("rulesNames[index] ", rulesNames[index]);
       await rulesNames[index].click();
     },
 
@@ -136,12 +137,15 @@ export function RulePagePageProvider({ getService, getPageObjects }: FtrProvider
     closeToasts: async () => {
       const toasts = await testSubjects.findAll(CLOSE_TOAST_BUTTON);
       for (const toast of toasts) {
+        console.log("toast1 ", toast);
         await toast.click();
       }
     },
     togglEnableRulesRowSwitchButton: async (index: number, filterType: 'enable' | 'disable') => {
       const enableRulesRowSwitches = await testSubjects.findAll(RULES_ROWS_ENABLE_SWITCH_BUTTON);
       const checked = await enableRulesRowSwitches[index].getAttribute('aria-checked');
+      console.log("checked1 ", checked);
+      console.log("filterType1 ", filterType);
 
       if (filterType === 'enable' && checked) {
         return;
