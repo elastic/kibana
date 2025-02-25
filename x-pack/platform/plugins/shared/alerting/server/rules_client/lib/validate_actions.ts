@@ -9,10 +9,11 @@ import Boom from '@hapi/boom';
 import { map } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { validateHours } from '../../routes/lib/validate_hours';
-import { RawRule, RuleNotifyWhen } from '../../types';
-import { UntypedNormalizedRuleType } from '../../rule_type_registry';
-import { NormalizedAlertAction, NormalizedSystemAction } from '../types';
-import { RulesClientContext } from '../types';
+import type { RawRule } from '../../types';
+import { RuleNotifyWhen } from '../../types';
+import type { UntypedNormalizedRuleType } from '../../rule_type_registry';
+import type { NormalizedAlertAction, NormalizedSystemAction } from '../types';
+import type { RulesClientContext } from '../types';
 import { parseDuration } from '../../lib';
 
 export type ValidateActionsData = Pick<RawRule, 'notifyWhen' | 'throttle' | 'schedule'> & {

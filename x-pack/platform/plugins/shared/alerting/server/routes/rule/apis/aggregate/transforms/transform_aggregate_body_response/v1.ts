@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { RuleAggregationFormattedResult } from '../../../../../../application/rule/methods/aggregate/types';
-import { AggregateRulesResponseBodyV1 } from '../../../../../../../common/routes/rule/apis/aggregate';
+import type { RuleAggregationFormattedResult } from '../../../../../../application/rule/methods/aggregate/types';
+import type { AggregateRulesResponseBodyV1 } from '../../../../../../../common/routes/rule/apis/aggregate';
 
 export const transformAggregateBodyResponse = ({
   ruleExecutionStatus,

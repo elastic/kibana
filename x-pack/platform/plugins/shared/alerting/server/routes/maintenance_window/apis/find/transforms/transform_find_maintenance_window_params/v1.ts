@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { FindMaintenanceWindowsRequestQuery } from '../../../../../../../common/routes/maintenance_window/apis/find';
-import { FindMaintenanceWindowsParams } from '../../../../../../application/maintenance_window/methods/find/types';
+import type { FindMaintenanceWindowsRequestQuery } from '../../../../../../../common/routes/maintenance_window/apis/find';
+import type { FindMaintenanceWindowsParams } from '../../../../../../application/maintenance_window/methods/find/types';
 
 export const transformFindMaintenanceWindowParams = (
   params: FindMaintenanceWindowsRequestQuery

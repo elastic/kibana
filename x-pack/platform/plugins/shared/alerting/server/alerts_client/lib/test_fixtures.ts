@@ -37,7 +37,7 @@ import {
   ALERT_END,
   ALERT_SEVERITY_IMPROVING,
 } from '@kbn/rule-data-utils';
-import { AlertRule } from '../types';
+import type { AlertRule } from '../types';
 import { expandFlattenedAlert } from './format_alert';
 
 export const rule = {

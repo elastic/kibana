@@ -13,10 +13,10 @@ import { retrieveMigratedLegacyActions } from './retrieve_migrated_legacy_action
 import { injectReferencesIntoActions } from '../../common';
 
 import { validateActions } from '../validate_actions';
-import { RulesClientContext } from '../..';
-import { RawRuleAction, RawRule } from '../../../types';
+import type { RulesClientContext } from '../..';
+import type { RawRuleAction, RawRule } from '../../../types';
 
-import { UntypedNormalizedRuleType } from '../../../rule_type_registry';
+import type { UntypedNormalizedRuleType } from '../../../rule_type_registry';
 import { RecoveredActionGroup } from '../../../../common';
 
 jest.mock('./retrieve_migrated_legacy_actions', () => ({

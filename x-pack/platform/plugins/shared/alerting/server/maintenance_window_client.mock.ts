@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { MaintenanceWindowClientApi } from './types';
+import type { MaintenanceWindowClientApi } from './types';
 
 type Schema = MaintenanceWindowClientApi;
 export type MaintenanceWindowClientMock = jest.Mocked<Schema>;

@@ -7,7 +7,7 @@
 
 import { pick } from 'lodash';
 import { Alert } from '../alert';
-import { AlertInstanceState, AlertInstanceContext, DefaultActionGroupId } from '../../common';
+import type { AlertInstanceState, AlertInstanceContext, DefaultActionGroupId } from '../../common';
 import { setFlapping, isAlertFlapping } from './set_flapping';
 import { DEFAULT_FLAPPING_SETTINGS, DISABLE_FLAPPING_SETTINGS } from '../../common/rules_settings';
 

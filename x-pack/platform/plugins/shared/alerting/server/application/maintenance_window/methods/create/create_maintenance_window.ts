@@ -8,7 +8,8 @@
 import moment from 'moment';
 import Boom from '@hapi/boom';
 import { SavedObjectsUtils } from '@kbn/core/server';
-import { buildEsQuery, Filter } from '@kbn/es-query';
+import type { Filter } from '@kbn/es-query';
+import { buildEsQuery } from '@kbn/es-query';
 import { getEsQueryConfig } from '../../../../lib/get_es_query_config';
 import { generateMaintenanceWindowEvents } from '../../lib/generate_maintenance_window_events';
 import type { MaintenanceWindowClientContext } from '../../../../../common';

@@ -12,12 +12,9 @@ import { alertsClientMock } from '../../../alerts_client/alerts_client.mock';
 import { alertingEventLoggerMock } from '../../../lib/alerting_event_logger/alerting_event_logger.mock';
 import { RuleRunMetricsStore } from '../../../lib/rule_run_metrics_store';
 import { mockAAD } from '../../fixtures';
-import { Alert } from '../../../alert';
-import {
-  ActionsCompletion,
-  AlertInstanceContext,
-  AlertInstanceState,
-} from '@kbn/alerting-state-types';
+import type { Alert } from '../../../alert';
+import type { AlertInstanceContext, AlertInstanceState } from '@kbn/alerting-state-types';
+import { ActionsCompletion } from '@kbn/alerting-state-types';
 import { getRule, getRuleType, getDefaultSchedulerContext, generateAlert } from '../test_fixtures';
 import { SystemActionScheduler } from './system_action_scheduler';
 import { ALERT_UUID } from '@kbn/rule-data-utils';
@@ -25,7 +22,7 @@ import {
   getErrorSource,
   TaskErrorSource,
 } from '@kbn/task-manager-plugin/server/task_running/errors';
-import { CombinedSummarizedAlerts } from '../../../types';
+import type { CombinedSummarizedAlerts } from '../../../types';
 import { schema } from '@kbn/config-schema';
 import { TaskPriority } from '@kbn/task-manager-plugin/server';
 

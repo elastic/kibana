@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { TypeOf } from '@kbn/config-schema';
-import { alertsFilterQuerySchema } from '../schemas/alerts_filter_query_schemas';
+import type { TypeOf } from '@kbn/config-schema';
+import type { alertsFilterQuerySchema } from '../schemas/alerts_filter_query_schemas';
 
 export type AlertsFilterQuery = TypeOf<typeof alertsFilterQuerySchema>;

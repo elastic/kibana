@@ -77,7 +77,7 @@ export const RECURRENCE_END_OPTIONS = [
   },
 ];
 
-export const CREATE_FORM_CUSTOM_FREQUENCY = (interval: number = 1) => [
+export const CREATE_FORM_CUSTOM_FREQUENCY = (interval = 1) => [
   {
     text: i18n.CREATE_FORM_CUSTOM_FREQUENCY_DAILY(interval),
     value: Frequency.DAILY,

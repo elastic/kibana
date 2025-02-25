@@ -6,6 +6,6 @@
  */
 
 import type { TypeOf } from '@kbn/config-schema';
-import { unmuteAllRuleRequestParamsSchemaV1 } from '..';
+import type { unmuteAllRuleRequestParamsSchemaV1 } from '..';
 
 export type UnmuteAllRuleRequestParams = TypeOf<typeof unmuteAllRuleRequestParamsSchemaV1>;
