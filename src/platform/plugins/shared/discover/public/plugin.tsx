@@ -45,7 +45,7 @@ import {
   DiscoverContainerInternal,
   type DiscoverContainerProps,
 } from './components/discover_container';
-import { getESQLSearchProvider } from './global_search/search_provider';
+import { getESQLSearchProvider } from './plugin_imports/search_provider';
 import type { ConfigSchema, ExperimentalFeatures } from '../server/config';
 import type {
   DiscoverSetup,
