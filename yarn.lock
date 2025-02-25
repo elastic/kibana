@@ -5402,7 +5402,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/dev-proc-runner@link:packages/kbn-dev-proc-runner":
+"@kbn/dev-proc-runner@link:src/platform/packages/shared/kbn-dev-proc-runner":
   version "0.0.0"
   uid ""
 
