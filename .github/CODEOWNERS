@@ -34,7 +34,7 @@ src/platform/packages/shared/kbn-alerts-as-data-utils @elastic/response-ops
 x-pack/solutions/observability/packages/kbn-alerts-grouping @elastic/response-ops
 x-pack/test/alerting_api_integration/common/plugins/alerts_restricted @elastic/response-ops
 src/platform/packages/shared/kbn-alerts-ui-shared @elastic/response-ops
-packages/kbn-ambient-common-types @elastic/kibana-operations
+src/platform/packages/private/kbn-ambient-common-types @elastic/kibana-operations
 packages/kbn-ambient-ftr-types @elastic/kibana-operations @elastic/appex-qa
 packages/kbn-ambient-storybook-types @elastic/kibana-operations
 packages/kbn-ambient-ui-types @elastic/kibana-operations
