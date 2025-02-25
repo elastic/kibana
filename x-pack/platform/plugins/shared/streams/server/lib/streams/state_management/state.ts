@@ -104,7 +104,10 @@ export class State {
         if (stream.changeStatus === 'upserted') {
           if (startingState.has(stream.definition.name)) {
             // Stream was updated, revert to previous state
-            return startingState.get(stream.definition.name);
+            const startingStateDefinition = startingState.get(stream.definition.name)?.definition!;
+            const revertStream = streamFromDefinition(startingStateDefinition);
+            revertStream.update(startingStateDefinition, startingState, this);
+            return revertStream;
           } else {
             // Stream was created, delete it
             stream.markForDeletion(this, startingState);
@@ -112,7 +115,10 @@ export class State {
           }
         } else if (stream.changeStatus === 'deleted') {
           // Stream was deleted, revert to previous state
-          return startingState.get(stream.definition.name);
+          const startingStateDefinition = startingState.get(stream.definition.name)?.definition!;
+          const revertStream = streamFromDefinition(startingStateDefinition);
+          revertStream.update(startingStateDefinition, startingState, this);
+          return revertStream;
         }
       })
       .filter((maybeStream): maybeStream is StreamActiveRecord => maybeStream !== undefined);
