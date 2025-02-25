@@ -153,3 +153,8 @@ export interface ObservabilityAIAssistantScreenContext {
   actions?: Array<ScreenContextActionDefinition<any>>;
   starterPrompts?: StarterPrompt[];
 }
+
+export enum ConversationAccess {
+  SHARED = 'shared',
+  PRIVATE = 'private',
+}

@@ -152,7 +152,6 @@ export const ConversationView: React.FC<ConversationViewProps> = ({
           refreshConversations={refreshConversations}
           updateDisplayedConversation={updateDisplayedConversation}
         />
-        <EuiSpacer size="s" />
       </EuiFlexItem>
 
       {!chatService.value ? (

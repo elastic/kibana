@@ -21,7 +21,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/css';
 import { AssistantIcon } from '@kbn/ai-assistant-icon';
-import { Conversation } from '@kbn/observability-ai-assistant-plugin/common';
+import { Conversation, ConversationAccess } from '@kbn/observability-ai-assistant-plugin/common';
 import { ChatActionsMenu } from './chat_actions_menu';
 import type { UseGenAIConnectorsResult } from '../hooks/use_genai_connectors';
 import { FlyoutPositionMode } from './chat_flyout';
@@ -63,6 +63,8 @@ export function ChatHeader({
   setIsUpdatingConversationList,
   refreshConversations,
   updateDisplayedConversation,
+  handleConversationAccessUpdate,
+  isConversationOwnedByCurrentUser,
 }: {
   connectors: UseGenAIConnectorsResult;
   conversationId?: string;
@@ -77,6 +79,8 @@ export function ChatHeader({
   setIsUpdatingConversationList: (isUpdating: boolean) => void;
   refreshConversations: () => void;
   updateDisplayedConversation: (id?: string) => void;
+  handleConversationAccessUpdate: (access: ConversationAccess) => Promise<void>;
+  isConversationOwnedByCurrentUser: boolean;
 }) {
   const theme = useEuiTheme();
   const breakpoint = useCurrentEuiBreakpoint();
@@ -165,9 +169,15 @@ export function ChatHeader({
 
             {conversationId && conversation ? (
               <>
-                <EuiFlexItem grow={false}>
-                  <ChatSharingMenu />
-                </EuiFlexItem>
+                {isConversationOwnedByCurrentUser ? (
+                  <EuiFlexItem grow={false}>
+                    <ChatSharingMenu
+                      conversationId={conversationId}
+                      isPublic={conversation.public}
+                      onChangeConversationAccess={handleConversationAccessUpdate}
+                    />
+                  </EuiFlexItem>
+                ) : null}
                 <EuiFlexItem grow={false}>
                   <ChatContextMenu
                     disabled={licenseInvalid}
@@ -176,6 +186,7 @@ export function ChatHeader({
                     onDeleteClick={() => {
                       deleteConversation(conversationId).then(() => updateDisplayedConversation());
                     }}
+                    isConversationOwnedByCurrentUser={isConversationOwnedByCurrentUser}
                   />
                 </EuiFlexItem>
               </>

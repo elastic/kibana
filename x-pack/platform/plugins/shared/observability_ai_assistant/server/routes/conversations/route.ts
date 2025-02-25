@@ -6,7 +6,7 @@
  */
 import { notImplemented } from '@hapi/boom';
 import * as t from 'io-ts';
-import { Conversation, MessageRole } from '../../../common/types';
+import { Conversation, ConversationAccess, MessageRole } from '../../../common/types';
 import { createObservabilityAIAssistantServerRoute } from '../create_observability_ai_assistant_server_route';
 import { conversationCreateRt, conversationUpdateRt } from '../runtime_types';
 
@@ -191,6 +191,39 @@ const deleteConversationRoute = createObservabilityAIAssistantServerRoute({
   },
 });
 
+const updateConversationAccessRoute = createObservabilityAIAssistantServerRoute({
+  endpoint: 'PUT /internal/observability_ai_assistant/conversation/{conversationId}/access',
+  params: t.type({
+    path: t.type({
+      conversationId: t.string,
+    }),
+    body: t.type({
+      access: t.string,
+    }),
+  }),
+  security: {
+    authz: {
+      requiredPrivileges: ['ai_assistant'],
+    },
+  },
+  handler: async (resources): Promise<Conversation> => {
+    const { service, request, params } = resources;
+
+    const client = await service.getClient({ request });
+
+    if (!client) {
+      throw notImplemented();
+    }
+
+    const conversation = await client.updateAccess({
+      conversationId: params.path.conversationId,
+      access: params.body.access as ConversationAccess,
+    });
+
+    return Promise.resolve(conversation);
+  },
+});
+
 export const conversationRoutes = {
   ...getConversationRoute,
   ...findConversationsRoute,
@@ -198,4 +231,5 @@ export const conversationRoutes = {
   ...updateConversationRoute,
   ...updateConversationTitle,
   ...deleteConversationRoute,
+  ...updateConversationAccessRoute,
 };

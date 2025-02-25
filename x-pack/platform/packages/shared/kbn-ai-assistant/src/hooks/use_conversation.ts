@@ -15,6 +15,8 @@ import type {
 import type { ObservabilityAIAssistantChatService } from '@kbn/observability-ai-assistant-plugin/public';
 import type { AbortableAsyncState } from '@kbn/observability-ai-assistant-plugin/public';
 import type { UseChatResult } from '@kbn/observability-ai-assistant-plugin/public';
+import { AuthenticatedUser } from '@kbn/security-plugin-types-common';
+import { ConversationAccess } from '@kbn/observability-ai-assistant-plugin/public';
 import { EMPTY_CONVERSATION_TITLE } from '../i18n';
 import { useAIAssistantAppService } from './use_ai_assistant_app_service';
 import { useKibana } from './use_kibana';
@@ -38,6 +40,7 @@ function createNewConversation({
 }
 
 export interface UseConversationProps {
+  currentUser?: Pick<AuthenticatedUser, 'full_name' | 'username' | 'profile_uid'>;
   initialConversationId?: string;
   initialMessages?: Message[];
   initialTitle?: string;
@@ -48,12 +51,17 @@ export interface UseConversationProps {
 
 export type UseConversationResult = {
   conversation: AbortableAsyncState<ConversationCreateRequest | Conversation | undefined>;
+  conversationId?: string;
+  user?: Pick<AuthenticatedUser, 'username' | 'profile_uid'>;
+  isConversationOwnedByCurrentUser: boolean;
   saveTitle: (newTitle: string) => void;
+  updateConversationAccess: (access: ConversationAccess) => Promise<Conversation>;
 } & Omit<UseChatResult, 'setMessages'>;
 
 const DEFAULT_INITIAL_MESSAGES: Message[] = [];
 
 export function useConversation({
+  currentUser,
   initialConversationId: initialConversationIdFromProps,
   initialMessages: initialMessagesFromProps = DEFAULT_INITIAL_MESSAGES,
   initialTitle: initialTitleFromProps,
@@ -74,6 +82,8 @@ export function useConversation({
   const initialConversationId = useOnce(initialConversationIdFromProps);
   const initialMessages = useOnce(initialMessagesFromProps);
   const initialTitle = useOnce(initialTitleFromProps);
+
+  const [displayedConversationId, setDisplayedConversationId] = useState(initialConversationId);
 
   if (initialMessages.length && initialConversationId) {
     throw new Error('Cannot set initialMessages if initialConversationId is set');
@@ -110,6 +120,45 @@ export function useConversation({
       });
   };
 
+  const updateConversationAccess = async (access: ConversationAccess) => {
+    if (!displayedConversationId || !conversation.value) {
+      throw new Error('Cannot share the conversation if conversation is not stored');
+    }
+
+    try {
+      const sharedConversation = await service.callApi(
+        `PUT /internal/observability_ai_assistant/conversation/{conversationId}/access`,
+        {
+          signal: null,
+          params: {
+            path: {
+              conversationId: displayedConversationId,
+            },
+            body: {
+              access,
+            },
+          },
+        }
+      );
+
+      notifications!.toasts.addSuccess({
+        title: i18n.translate('xpack.aiAssistant.updateConversationAccessSuccessToast', {
+          defaultMessage: 'Conversation access successfully updated to {access}',
+          values: { access },
+        }),
+      });
+
+      return sharedConversation;
+    } catch (err) {
+      notifications!.toasts.addError(err, {
+        title: i18n.translate('xpack.aiAssistant.updateConversationAccessErrorToast', {
+          defaultMessage: 'Could not share conversation',
+        }),
+      });
+      throw err;
+    }
+  };
+
   const { next, messages, setMessages, state, stop } = useChat({
     initialMessages,
     initialConversationId,
@@ -124,8 +173,6 @@ export function useConversation({
     persist: true,
     scopes,
   });
-
-  const [displayedConversationId, setDisplayedConversationId] = useState(initialConversationId);
 
   const conversation: AbortableAsyncState<ConversationCreateRequest | Conversation | undefined> =
     useAbortableAsync(
@@ -161,8 +208,32 @@ export function useConversation({
       }
     );
 
+  const isConversationOwnedByUser = (conversationUser: Conversation['user']): boolean => {
+    if (!initialConversationId) return true;
+
+    if (!conversationUser || !currentUser) return false;
+
+    return conversationUser.id && currentUser.profile_uid
+      ? conversationUser.id === currentUser.profile_uid
+      : conversationUser.name === currentUser.username;
+  };
+
   return {
     conversation,
+    conversationId:
+      conversation.value?.conversation && 'id' in conversation.value.conversation
+        ? conversation.value.conversation.id
+        : undefined,
+    isConversationOwnedByCurrentUser: isConversationOwnedByUser(
+      conversation.value && 'user' in conversation.value ? conversation.value.user : undefined
+    ),
+    user:
+      initialConversationId && conversation.value?.conversation && 'user' in conversation.value
+        ? {
+            profile_uid: conversation.value.user?.id,
+            username: conversation.value.user?.name || '',
+          }
+        : undefined,
     state,
     next,
     stop,
@@ -182,5 +253,6 @@ export function useConversation({
           onConversationUpdate?.(nextConversation);
         });
     },
+    updateConversationAccess,
   };
 }
