@@ -298,6 +298,26 @@ describe('Upgrade Agentless Deployments', () => {
       expect(agentlessAgentService.upgradeAgentlessDeployment).not.toHaveBeenCalled();
     });
 
+    it('should upgrade agentless deployments when agent for target bg task release', async () => {
+      mockedGetLatestAvailableAgentVersion.mockResolvedValue('8.18.1');
+      mockedGetAgentsByKuery.mockResolvedValue({
+        agents: [
+          {
+            id: 'agent-1',
+            policy_id: '93c46720-c217-11ea-9906-b5b8a21b268e',
+            status: 'online',
+            agent: {
+              version: '8.18.0',
+            },
+          },
+        ],
+      });
+      await runTask();
+
+      expect(mockAgentPolicyService.fetchAllAgentPolicies).toHaveBeenCalled();
+      expect(agentlessAgentService.upgradeAgentlessDeployment).toHaveBeenCalled();
+    });
+
     it('should upgrade agentless deployments when agent version is up to date', async () => {
       mockedGetLatestAvailableAgentVersion.mockResolvedValue('8.17.1');
       mockedGetAgentsByKuery.mockResolvedValue({
