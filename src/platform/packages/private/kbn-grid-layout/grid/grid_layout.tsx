@@ -181,7 +181,7 @@ const styles = {
   singleColumn: css({
     '&.kbnGrid--mobileView': {
       '.kbnGridRow': {
-        gridTemplateAreas: '100%',
+        gridTemplateColumns: '100%',
         gridTemplateRows: 'auto',
         gridAutoFlow: 'row',
         gridAutoRows: 'auto',
