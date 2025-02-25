@@ -42,6 +42,8 @@ import { DeprecationTableColumns } from '../types';
 import { DEPRECATION_TYPE_MAP, PAGINATION_CONFIG } from '../constants';
 import { BulkReindexModal } from './bulk_reindex';
 
+type DeprecationTableColumnsWithoutSelect = Exclude<DeprecationTableColumns, 'select'>;
+
 const i18nTexts = {
   refreshButtonLabel: i18n.translate(
     'xpack.upgradeAssistant.esDeprecations.table.refreshButtonLabel',
@@ -118,7 +120,7 @@ const renderTableRowCells = (
   deprecation: EnrichedDeprecationInfo,
   mlUpgradeModeEnabled: boolean,
   selectedDeprecations: Set<string>,
-  toggleDeprecation: (id?: string) => void
+  toggleDeprecation: (id: string) => void
 ) => {
   switch (deprecation.correctiveAction?.type) {
     case 'mlSnapshot':
@@ -165,7 +167,7 @@ interface Props {
 
 interface SortConfig {
   isSortAscending: boolean;
-  sortField: DeprecationTableColumns;
+  sortField: DeprecationTableColumnsWithoutSelect;
 }
 
 const getSortedItems = (deprecations: EnrichedDeprecationInfo[], sortConfig: SortConfig) => {
@@ -246,7 +248,7 @@ export const EsDeprecationsTable: React.FunctionComponent<Props> = ({
   );
 
   const handleSort = useCallback(
-    (fieldName: DeprecationTableColumns) => {
+    (fieldName: DeprecationTableColumnsWithoutSelect) => {
       const newSortConfig = {
         isSortAscending: sortConfig.sortField === fieldName ? !sortConfig.isSortAscending : true,
         sortField: fieldName,
@@ -400,7 +402,7 @@ export const EsDeprecationsTable: React.FunctionComponent<Props> = ({
               <EuiTableHeaderCell
                 width={cell.width}
                 key={cell.label}
-                onSort={() => handleSort(fieldName as DeprecationTableColumns)}
+                onSort={() => handleSort(fieldName as DeprecationTableColumnsWithoutSelect)}
                 isSorted={sortConfig.sortField === fieldName}
                 isSortAscending={sortConfig.isSortAscending}
               >

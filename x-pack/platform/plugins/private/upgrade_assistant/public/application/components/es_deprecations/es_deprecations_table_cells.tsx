@@ -19,7 +19,7 @@ interface Props {
   deprecation: EnrichedDeprecationInfo;
   openFlyout: () => void;
   selectedDeprecations?: Set<string>;
-  toggleDeprecation?: (id?: string) => void;
+  toggleDeprecation?: (id: string) => void;
 }
 
 const i18nTexts = {
