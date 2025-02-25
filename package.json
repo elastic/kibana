@@ -1357,7 +1357,7 @@
     "@kayahr/text-encoding": "^1.3.0",
     "@kbn/alerting-api-integration-helpers": "link:x-pack/test/alerting_api_integration/packages/helpers",
     "@kbn/ambient-common-types": "link:src/platform/packages/private/kbn-ambient-common-types",
-    "@kbn/ambient-ftr-types": "link:packages/kbn-ambient-ftr-types",
+    "@kbn/ambient-ftr-types": "link:src/platform/packages/private/kbn-ambient-ftr-types",
     "@kbn/ambient-storybook-types": "link:packages/kbn-ambient-storybook-types",
     "@kbn/ambient-ui-types": "link:packages/kbn-ambient-ui-types",
     "@kbn/apm-ftr-e2e": "link:x-pack/solutions/observability/plugins/apm/ftr_e2e",
