@@ -1171,7 +1171,7 @@ components:
           required:
             - parameters
     SortDirection:
-      description: Determines the sort order, which can be desc or asc.
+      description: Determines the sort order.
       enum:
         - asc
         - desc
