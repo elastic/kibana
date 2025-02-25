@@ -24,7 +24,7 @@ The `kbn-scout` framework provides:
 The `kbn-scout` structure includes the following key directories and files:
 
 ```
-packages/kbn-scout/
+src/platform/packages/shared/kbn-scout/
 ├── src/
 │   ├── cli/
 │   ├── common/
@@ -196,7 +196,7 @@ We welcome contributions to improve and extend `kbn-scout`. This guide will help
 Make sure to run unit tests before opening the PR:
 
 ```bash
-node scripts/jest --config packages/kbn-scout/jest.config.js
+node scripts/jest --config src/platform/packages/shared/kbn-scout/jest.config.js
 ```
 
 #### Setting Up the Environment
@@ -207,7 +207,7 @@ Install dependencies by running the following commands:
 - `yarn kbn bootstrap` to install dependencies.
 - `node scripts/build_kibana_platform_plugins.js` to build plugins.
 
-Move to the `packages/kbn-scout` directory to begin development.
+Move to the `src/platform/packages/shared/kbn-scout` directory to begin development.
 
 #### Adding or Modifying Features
 

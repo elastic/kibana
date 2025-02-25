@@ -791,7 +791,7 @@ src/platform/plugins/shared/saved_objects_tagging_oss @elastic/appex-sharedux
 x-pack/platform/plugins/shared/saved_objects_tagging @elastic/appex-sharedux
 src/platform/packages/shared/kbn-saved-search-component @elastic/obs-ux-logs-team
 src/platform/plugins/shared/saved_search @elastic/kibana-data-discovery
-packages/kbn-scout @elastic/appex-qa
+src/platform/packages/shared/kbn-scout @elastic/appex-qa
 packages/kbn-scout-info @elastic/appex-qa
 x-pack/solutions/observability/packages/kbn-scout-oblt @elastic/appex-qa
 packages/kbn-scout-reporting @elastic/appex-qa
