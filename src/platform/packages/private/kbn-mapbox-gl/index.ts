@@ -30,7 +30,7 @@ import type {
   FeatureIdentifier,
 } from 'maplibre-gl';
 
-import maplibreglDist from 'maplibre-gl/dist/maplibre-gl';
+import type maplibreglDist from 'maplibre-gl/dist/maplibre-gl';
 // @ts-expect-error
 import maplibreglDistCsp from 'maplibre-gl/dist/maplibre-gl-csp';
 import mbRtlPlugin from '@mapbox/mapbox-gl-rtl-text/mapbox-gl-rtl-text.min.js?asUrl';
