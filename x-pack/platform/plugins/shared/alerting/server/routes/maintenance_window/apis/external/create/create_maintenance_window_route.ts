@@ -53,6 +53,7 @@ export const createMaintenanceWindowRoute = (
       options: {
         access: 'public',
         summary: 'Create a maintenance window.',
+        tags: ['oas-tag:alerting'],
       },
     },
     router.handleLegacyErrors(
