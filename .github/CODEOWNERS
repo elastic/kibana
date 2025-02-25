@@ -81,7 +81,7 @@ packages/kbn-check-mappings-update-cli @elastic/kibana-core
 packages/kbn-check-prod-native-modules-cli @elastic/kibana-operations
 src/platform/packages/private/kbn-ci-stats-core @elastic/kibana-operations
 packages/kbn-ci-stats-performance-metrics @elastic/kibana-operations
-packages/kbn-ci-stats-reporter @elastic/kibana-operations
+src/platform/packages/private/kbn-ci-stats-reporter @elastic/kibana-operations
 packages/kbn-ci-stats-shipper-cli @elastic/kibana-operations
 packages/kbn-cli-dev-mode @elastic/kibana-operations
 src/platform/packages/shared/cloud @elastic/kibana-core
