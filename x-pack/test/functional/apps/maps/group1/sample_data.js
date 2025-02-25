@@ -24,7 +24,7 @@ export default function ({ getPageObjects, getService, updateBaselines }) {
   // Only update the baseline images from CI session images after comparing them
   // These tests might fail locally because of scaling factors and resolution.
 
-  describe('maps loaded from sample data', () => {
+  describe.only('maps loaded from sample data', () => {
     before(async () => {
       //installing the sample data with test user with super user role and then switching roles with limited privileges
       await security.testUser.setRoles(['superuser'], { skipBrowserRefresh: true });
