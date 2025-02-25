@@ -4,34 +4,48 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { METRIC_TYPE } from '@kbn/analytics';
-import { i18n } from '@kbn/i18n';
-import React, { useEffect, useMemo, useState } from 'react';
 import { useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { useUiTracker } from '@kbn/observability-shared-plugin/public';
+import { METRIC_TYPE } from '@kbn/analytics';
 import { usePerformanceContext } from '@kbn/ebt-tools';
-import { isTimeComparison } from '../../../shared/time_comparison/get_comparison_options';
-import { getNodeName, NodeType } from '../../../../../common/connections';
+import { i18n } from '@kbn/i18n';
+import { useUiTracker } from '@kbn/observability-shared-plugin/public';
+import { orderBy } from 'lodash';
+import React, { useEffect, useMemo } from 'react';
+import { v4 as uuidv4 } from 'uuid';
+import { NodeType, getNodeName } from '../../../../../common/connections';
 import { useApmParams } from '../../../../hooks/use_apm_params';
-import { FETCH_STATUS, useFetcher, isPending } from '../../../../hooks/use_fetcher';
+import { FETCH_STATUS, isPending, useFetcher } from '../../../../hooks/use_fetcher';
 import { useTimeRange } from '../../../../hooks/use_time_range';
-import { DependencyLink } from '../../../shared/links/dependency_link';
-import type {
-  DependenciesItem,
-  FormattedSpanMetricGroup,
+import type { DependenciesItem } from '../../../shared/dependencies_table';
+import {
+  DependenciesTable,
+  INITIAL_SORTING_FIELD,
+  INITIA_SORTING_DIRECTION,
 } from '../../../shared/dependencies_table';
-import { DependenciesTable } from '../../../shared/dependencies_table';
+import { DependencyLink } from '../../../shared/links/dependency_link';
+import { isTimeComparison } from '../../../shared/time_comparison/get_comparison_options';
 import { RandomSamplerBadge } from '../random_sampler_badge';
+
+const INITIAL_PAGE_SIZE = 25;
 
 export function DependenciesInventoryTable() {
   const {
-    query: { rangeFrom, rangeTo, environment, kuery, comparisonEnabled, offset },
+    query: {
+      rangeFrom,
+      rangeTo,
+      environment,
+      kuery,
+      comparisonEnabled,
+      offset,
+      page = 0,
+      pageSize = INITIAL_PAGE_SIZE,
+      sortDirection = INITIA_SORTING_DIRECTION,
+      sortField = INITIAL_SORTING_FIELD,
+    },
   } = useApmParams('/dependencies/inventory');
   const { onPageReady } = usePerformanceContext();
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
-  const [renderedItems, setRenderedItems] = useState<FormattedSpanMetricGroup[]>([]);
 
   const { euiTheme } = useEuiTheme();
   const trackEvent = useUiTracker();
@@ -44,22 +58,40 @@ export function DependenciesInventoryTable() {
 
       return callApmApi('GET /internal/apm/dependencies/top_dependencies', {
         params: { query: { start, end, environment, numBuckets: 8, kuery } },
+      }).then((response) => {
+        return {
+          ...response,
+          requestId: uuidv4(),
+        };
       });
     },
     [start, end, environment, kuery]
   );
 
-  const renderedDependencyNames = useMemo(
+  const visibleDependenciesNames = useMemo(
     () =>
-      renderedItems.length
-        ? JSON.stringify(renderedItems.map((item) => item.name).sort())
+      data?.dependencies
+        ? orderBy(
+            data.dependencies.map((item) => ({
+              name: getNodeName(item.location),
+              impact: item.currentStats.impact,
+              latency: item.currentStats.latency.value,
+              throughput: item.currentStats.throughput.value,
+              failureRate: item.currentStats.errorRate.value,
+            })),
+            sortField,
+            sortDirection
+          )
+            .slice(page * pageSize, (page + 1) * pageSize)
+            .map(({ name }) => name)
+            .sort()
         : undefined,
-    [renderedItems]
+    [data?.dependencies, page, pageSize, sortDirection, sortField]
   );
 
   const { data: timeseriesData, status: timeseriesStatus } = useFetcher(
     (callApmApi) => {
-      if (renderedDependencyNames) {
+      if (data?.requestId && visibleDependenciesNames?.length) {
         return callApmApi('POST /internal/apm/dependencies/top_dependencies/statistics', {
           params: {
             query: {
@@ -70,14 +102,18 @@ export function DependenciesInventoryTable() {
               offset: comparisonEnabled && isTimeComparison(offset) ? offset : undefined,
               kuery,
             },
-            body: { dependencyNames: renderedDependencyNames },
+            body: {
+              dependencyNames: JSON.stringify(visibleDependenciesNames),
+            },
           },
         });
       }
     },
     // Disables exhaustive deps because the statistics api must only be called when the rendered items changed or when comparison is toggled or changed.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [renderedDependencyNames, comparisonEnabled, offset]
+    [data?.requestId, visibleDependenciesNames],
+    // Do not invalidate this API call when the refresh button is clicked
+    { skipTimeRangeRefreshUpdate: true }
   );
 
   useEffect(() => {
@@ -195,8 +231,7 @@ export function DependenciesInventoryTable() {
         })}
         status={fetchingStatus}
         compact={false}
-        initialPageSize={25}
-        onChangeRenderedItems={setRenderedItems}
+        initialPageSize={INITIAL_PAGE_SIZE}
       />
     </>
   );

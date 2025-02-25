@@ -24,6 +24,8 @@ export type DependenciesItem = Omit<ConnectionStatsItemWithComparisonData, 'loca
   link: React.ReactElement;
 };
 
+export const INITIAL_SORTING_FIELD = 'impact';
+export const INITIA_SORTING_DIRECTION = 'desc';
 interface Props {
   dependencies: DependenciesItem[];
   initialPageSize: number;
@@ -137,8 +139,8 @@ export function DependenciesTable({
             columns={columns}
             items={items}
             noItemsMessage={noItemsMessage}
-            initialSortField="impact"
-            initialSortDirection="desc"
+            initialSortField={INITIAL_SORTING_FIELD}
+            initialSortDirection={INITIA_SORTING_DIRECTION}
             pagination={true}
             showPerPageOptions={showPerPageOptions}
             initialPageSize={initialPageSize}
