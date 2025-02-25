@@ -37,6 +37,8 @@ info:
     label: Feedback
     url: https://github.com/elastic/docs-content/issues/new?assignees=&labels=feedback%2Ccommunity&projects=&template=api-feedback.yaml&title=%5BFeedback%5D%3A+
 servers:
+  - url: http://localhost:5622
+  - url: /
   - url: https://{kibana_url}
     variables:
       kibana_url:
@@ -45,12 +47,6 @@ security:
   - apiKeyAuth: []
 tags:
   - name: alerting
-    description: |
-      Alerting enables you to define rules, which detect complex conditions within your data. When a condition is met, the rule tracks it as an alert and runs the actions that are defined in the rule.  Actions typically involve the use of connectors to interact with Kibana services or third party integrations.
-    externalDocs:
-      description: Alerting documentation
-      url: https://www.elastic.co/docs/current/serverless/rules
-    x-displayName: Alerting
   - description: |
       Adjust APM agent configuration without need to redeploy your application.
     name: APM agent configuration
@@ -5376,6 +5372,9 @@ paths:
       requestBody:
         content:
           application/json:
+            examples:
+              deleteAgentConfigurationRequest1:
+                $ref: '#/components/examples/APM_UI_agent_configuration_intake_object_delete_request1'
             schema:
               $ref: '#/components/schemas/APM_UI_service_object'
         required: true
@@ -5421,6 +5420,9 @@ paths:
         '200':
           content:
             application/json:
+              examples:
+                getAgentConfigurationsResponseExample1:
+                  $ref: '#/components/examples/APM_UI_agent_configuration_intake_object_get_200_response1'
               schema:
                 $ref: '#/components/schemas/APM_UI_agent_configurations_response'
           description: Successful response
@@ -5458,6 +5460,9 @@ paths:
       requestBody:
         content:
           application/json:
+            examples:
+              createUpdateAgentConfigurationRequestExample1:
+                $ref: '#/components/examples/APM_UI_agent_configuration_intake_object_put_request1'
             schema:
               $ref: '#/components/schemas/APM_UI_agent_configuration_intake_object'
         required: true
@@ -5578,7 +5583,7 @@ paths:
   /api/apm/settings/agent-configuration/search:
     post:
       description: |
-        This endpoint allows to search for single agent configuration and update 'applied_by_agent' field.
+        This endpoint enables you to search for a single agent configuration and update the 'applied_by_agent' field.
       operationId: searchSingleConfiguration
       parameters:
         - $ref: '#/components/parameters/APM_UI_elastic_api_version'
@@ -5586,6 +5591,9 @@ paths:
       requestBody:
         content:
           application/json:
+            examples:
+              searchSingleConfigurationRequest1:
+                $ref: '#/components/examples/APM_UI_agent_configuration_intake_object_search_request1'
             schema:
               $ref: '#/components/schemas/APM_UI_search_agent_configuration_object'
         required: true
@@ -5593,6 +5601,9 @@ paths:
         '200':
           content:
             application/json:
+              examples:
+                searchSingleConfigurationResponse1:
+                  $ref: '#/components/examples/APM_UI_agent_configuration_intake_object_search_200_response1'
               schema:
                 $ref: '#/components/schemas/APM_UI_search_agent_configuration_response'
           description: Successful response
@@ -48666,6 +48677,106 @@ paths:
         - slo
 components:
   examples:
+    APM_UI_agent_configuration_intake_object_delete_request1:
+      description: Run `DELETE /api/apm/settings/agent-configuration` to delete a configuration.
+      value: |
+        {
+            "service" : {
+                "name": "frontend",
+                "environment": "production"
+            }
+        }
+    APM_UI_agent_configuration_intake_object_get_200_response1:
+      description: An example of a successful response from `GET /api/apm/settings/agent-configuration`.
+      value: |
+        [
+          {
+              "agent_name": "go",
+              "service": {
+              "name": "opbeans-go",
+              "environment": "production"
+              },
+              "settings": {
+              "transaction_sample_rate": "1",
+              "capture_body": "off",
+              "transaction_max_spans": "200"
+              },
+              "@timestamp": 1581934104843,
+              "applied_by_agent": false,
+              "etag": "1e58c178efeebae15c25c539da740d21dee422fc"
+          },
+          {
+              "agent_name": "go",
+              "service": {
+              "name": "opbeans-go"
+              },
+              "settings": {
+              "transaction_sample_rate": "1",
+              "capture_body": "off",
+              "transaction_max_spans": "300"
+              },
+              "@timestamp": 1581934111727,
+              "applied_by_agent": false,
+              "etag": "3eed916d3db434d9fb7f039daa681c7a04539a64"
+          },
+          {
+              "agent_name": "nodejs",
+              "service": {
+              "name": "frontend"
+              },
+              "settings": {
+              "transaction_sample_rate": "1",
+              },
+              "@timestamp": 1582031336265,
+              "applied_by_agent": false,
+              "etag": "5080ed25785b7b19f32713681e79f46996801a5b"
+          }
+        ]
+    APM_UI_agent_configuration_intake_object_put_request1:
+      description: Run `PUT /api/apm/settings/agent-configuration` to create or update configuration details.
+      value: |
+        {
+            "service": {
+                "name": "frontend",
+                "environment": "production"
+            },
+            "settings": {
+                "transaction_sample_rate": "0.4",
+                "capture_body": "off",
+                "transaction_max_spans": "500"
+            },
+            "agent_name": "nodejs"
+        }
+    APM_UI_agent_configuration_intake_object_search_200_response1:
+      description: An example of a successful response from `POST /api/apm/settings/agent-configuration/search`.
+      value: |
+        {
+          "_index": ".apm-agent-configuration",
+          "_id": "CIaqXXABmQCdPphWj8EJ",
+          "_score": 2,
+          "_source": {
+            "agent_name": "nodejs",
+            "service": {
+              "name": "frontend"
+            },
+            "settings": {
+              "transaction_sample_rate": "1",
+            },
+            "@timestamp": 1582031336265,
+            "applied_by_agent": false,
+            "etag": "5080ed25785b7b19f32713681e79f46996801a5b"
+          }
+        }
+    APM_UI_agent_configuration_intake_object_search_request1:
+      description: Run `POST /api/apm/settings/agent-configuration/search` to search configuration details.
+      value: |
+        {
+            "etag": "1e58c178efeebae15c25c539da740d21dee422fc",
+            "service" : {
+                "name": "frontend",
+                "environment": "production"
+            }
+        }
     APM_UI_source_maps_get_200_response1:
       description: A successful response from `GET /api/apm/sourcemaps`.
       value: |
@@ -51212,7 +51323,7 @@ components:
       type: object
       properties:
         agent_name:
-          description: Agent name
+          description: The agent name is used by the UI to determine which settings to display.
           type: string
         service:
           $ref: '#/components/schemas/APM_UI_service_object'
@@ -51237,7 +51348,8 @@ components:
           example: true
           type: boolean
         etag:
-          description: Etag
+          description: |
+            `etag` is sent by the APM agent to indicate the `etag` of the last successfully applied configuration. If the `etag` matches an existing configuration its `applied_by_agent` property will be set to `true`. Every time a configuration is edited `applied_by_agent` is reset to `false`.
           example: 0bc3b5ebf18fba8163fe4c96f491e3767a358f85
           type: string
         service:
@@ -51490,11 +51602,11 @@ components:
       type: object
       properties:
         environment:
-          description: Environment
+          description: The environment of the service.
           example: prod
           type: string
         name:
-          description: Name
+          description: The name of the service.
           example: node
           type: string
     APM_UI_settings_object:
