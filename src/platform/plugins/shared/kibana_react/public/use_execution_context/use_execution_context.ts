@@ -8,7 +8,8 @@
  */
 
 import type { KibanaExecutionContext, CoreStart } from '@kbn/core/public';
-import useDeepCompareEffect from 'react-use/lib/useDeepCompareEffect';
+import { isEqual } from 'lodash';
+import { useEffect, useRef } from 'react';
 
 /**
  * Set and clean up application level execution context
@@ -19,11 +20,16 @@ export function useExecutionContext(
   executionContext: CoreStart['executionContext'] | undefined,
   context: KibanaExecutionContext
 ) {
-  useDeepCompareEffect(() => {
-    executionContext?.set(context);
+  const prevContextRef = useRef<KibanaExecutionContext>(context);
+
+  useEffect(() => {
+    if (!isEqual(prevContextRef.current, context)) {
+      executionContext?.set(context);
+      prevContextRef.current = context;
+    }
 
     return () => {
       executionContext?.clear();
     };
-  }, [context]);
+  }, [context, executionContext]);
 }
