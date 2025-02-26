@@ -9,39 +9,40 @@ import type {
   Connection,
   ConnectionEdge,
   ConnectionNode,
-  DiscoveredService,
+  DestinationService,
   ConnectionElement,
   ExternalConnectionNode,
   ServiceConnectionNode,
   ServicesResponse,
   ServiceMapResponse,
+  ServiceMapWithConnections,
   ServiceMapTelemetry,
   NodeStats,
   NodeItem,
-} from './typings';
+} from './types';
 import type { GroupResourceNodesResponse } from './group_resource_nodes';
 
 export * from './utils';
 export { getConnections } from './get_service_map_from_trace_ids';
 export {
   transformServiceMapResponses,
-  getConnectionNodeId,
   getExternalConnectionNode,
   getServiceConnectionNode,
   getConnectionId,
-  isSpan,
+  isExitSpan,
 } from './transform_service_map_responses';
 
 export {
   Connection,
   ConnectionEdge,
   ConnectionNode,
-  DiscoveredService,
+  DestinationService,
   ConnectionElement,
   GroupResourceNodesResponse,
   ExternalConnectionNode,
   ServiceConnectionNode,
   ServicesResponse,
+  ServiceMapWithConnections,
   ServiceMapResponse,
   ServiceMapTelemetry,
   NodeStats,

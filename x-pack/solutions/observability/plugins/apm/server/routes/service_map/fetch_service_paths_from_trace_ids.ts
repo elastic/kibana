@@ -9,8 +9,8 @@ import { existsQuery, rangeQuery, termsQuery } from '@kbn/observability-plugin/s
 import type { APMEventClient } from '@kbn/apm-data-access-plugin/server';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { unflattenKnownApmEventFields } from '@kbn/apm-data-access-plugin/server/utils';
-import { chunk } from 'lodash';
-import type { ServiceMapSpan } from '../../../common/service_map/typings';
+import { EventOutcome } from '../../../common/event_outcome';
+import type { ServiceMapNode } from '../../../common/service_map/types';
 import type { AgentName } from '../../../typings/es_schemas/ui/fields/agent';
 import { asMutableArray } from '../../../common/utils/as_mutable_array';
 import {
@@ -31,14 +31,12 @@ export async function fetchPathsFromTraceIds({
   traceIds,
   start,
   end,
-  terminateAfter,
   logger,
 }: {
   apmEventClient: APMEventClient;
   traceIds: string[];
   start: number;
   end: number;
-  terminateAfter: number;
   logger: Logger;
 }) {
   logger.debug(`Fetching spans (${traceIds.length} traces)`);
@@ -48,40 +46,26 @@ export async function fetchPathsFromTraceIds({
     traceIds,
     start,
     end,
-    terminateAfter,
   });
 
-  const entries = Array.from(exitSpansSample.entries());
-  const chunkedExitSpansSample = chunk(entries, 1_000).map(
-    (chunkedEntries) => new Map(chunkedEntries)
-  );
-  const transactionsFromExitSpans = await Promise.all(
-    chunkedExitSpansSample.map((sample) =>
-      fetchTransactionsFromExitSpans({
-        apmEventClient,
-        exitSpansSample: sample,
-        start,
-        end,
-        terminateAfter,
-      })
-    )
-  );
+  const transactionsFromExitSpans = await fetchTransactionsFromExitSpans({
+    apmEventClient,
+    exitSpansSample,
+    start,
+    end,
+  });
 
-  return transactionsFromExitSpans.reduce((acc, spans) => {
-    return acc.concat(spans);
-  }, [] as ServiceMapSpan[]);
+  return transactionsFromExitSpans;
 }
 
 async function fetchExitSpanIdsFromTraceIds({
   apmEventClient,
   traceIds,
-  terminateAfter,
   start,
   end,
 }: {
   apmEventClient: APMEventClient;
   traceIds: string[];
-  terminateAfter: number;
   start: number;
   end: number;
 }) {
@@ -89,68 +73,65 @@ async function fetchExitSpanIdsFromTraceIds({
     apm: {
       events: [ProcessorEvent.span],
     },
-    body: {
-      track_total_hits: false,
-      size: 0,
-      query: {
-        bool: {
-          filter: [
-            ...rangeQuery(start, end),
-            ...termsQuery(TRACE_ID, ...traceIds),
-            ...existsQuery(SPAN_DESTINATION_SERVICE_RESOURCE),
-          ],
-        },
+
+    track_total_hits: false,
+    size: 0,
+    query: {
+      bool: {
+        filter: [
+          ...rangeQuery(start, end),
+          ...termsQuery(TRACE_ID, ...traceIds),
+          ...existsQuery(SPAN_DESTINATION_SERVICE_RESOURCE),
+        ],
       },
-      aggs: {
-        exitSpans: {
-          composite: {
-            sources: asMutableArray([
-              { serviceName: { terms: { field: SERVICE_NAME } } },
-              {
-                spanDestinationServiceResource: {
-                  terms: { field: SPAN_DESTINATION_SERVICE_RESOURCE },
-                },
+    },
+    aggs: {
+      exitSpans: {
+        composite: {
+          sources: asMutableArray([
+            { serviceName: { terms: { field: SERVICE_NAME } } },
+            {
+              spanDestinationServiceResource: {
+                terms: { field: SPAN_DESTINATION_SERVICE_RESOURCE },
               },
-            ] as const),
-            size: terminateAfter,
-          },
-          aggs: {
-            eventOutcomeGroup: {
+            },
+          ] as const),
+          size: 10000,
+        },
+        aggs: {
+          eventOutcomeGroup: {
+            filters: {
               filters: {
-                filters: {
-                  success: {
-                    term: {
-                      [EVENT_OUTCOME]: 'success' as const,
-                    },
+                success: {
+                  term: {
+                    [EVENT_OUTCOME]: EventOutcome.success as const,
                   },
-                  others: {
-                    bool: {
-                      must_not: {
-                        term: {
-                          [EVENT_OUTCOME]: 'success' as const,
-                        },
+                },
+                others: {
+                  bool: {
+                    must_not: {
+                      term: {
+                        [EVENT_OUTCOME]: EventOutcome.success as const,
                       },
                     },
                   },
                 },
               },
-              aggs: {
-                sample: {
-                  top_metrics: {
-                    size: 1,
-                    sort: {
-                      '@timestamp': 'asc',
-                    },
-                    metrics: asMutableArray([
-                      { field: SPAN_ID },
-                      { field: SPAN_TYPE },
-                      { field: SPAN_SUBTYPE },
-                      { field: SPAN_DESTINATION_SERVICE_RESOURCE },
-                      { field: SERVICE_NAME },
-                      { field: SERVICE_ENVIRONMENT },
-                      { field: AGENT_NAME },
-                    ] as const),
-                  },
+            },
+            aggs: {
+              sample: {
+                top_metrics: {
+                  size: 1,
+                  sort: '_score',
+                  metrics: asMutableArray([
+                    { field: SPAN_ID },
+                    { field: SPAN_TYPE },
+                    { field: SPAN_SUBTYPE },
+                    { field: SPAN_DESTINATION_SERVICE_RESOURCE },
+                    { field: SERVICE_NAME },
+                    { field: SERVICE_ENVIRONMENT },
+                    { field: AGENT_NAME },
+                  ] as const),
                 },
               },
             },
@@ -160,7 +141,7 @@ async function fetchExitSpanIdsFromTraceIds({
     },
   });
 
-  const destinationsBySpanId = new Map<string, ServiceMapSpan>();
+  const destinationsBySpanId = new Map<string, ServiceMapNode>();
 
   sampleExitSpans.aggregations?.exitSpans.buckets.forEach((bucket) => {
     const eventOutcomeGroup =
@@ -181,8 +162,8 @@ async function fetchExitSpanIdsFromTraceIds({
     }
 
     destinationsBySpanId.set(spanId, {
+      spanId,
       spanDestinationServiceResource: bucket.key.spanDestinationServiceResource as string,
-      spanId: spanId as string,
       spanType: sample[SPAN_TYPE] as string,
       spanSubtype: sample[SPAN_SUBTYPE] as string,
       agentName: sample[AGENT_NAME] as AgentName,
@@ -196,13 +177,12 @@ async function fetchExitSpanIdsFromTraceIds({
 
 async function fetchTransactionsFromExitSpans({
   apmEventClient,
-  exitSpansSample: exitSpansSample,
+  exitSpansSample,
   start,
   end,
 }: {
   apmEventClient: APMEventClient;
-  exitSpansSample: Map<string, ServiceMapSpan>;
-  terminateAfter: number;
+  exitSpansSample: Map<string, ServiceMapNode>;
   start: number;
   end: number;
 }) {
@@ -213,28 +193,20 @@ async function fetchTransactionsFromExitSpans({
     apm: {
       events: [ProcessorEvent.transaction],
     },
-    body: {
-      track_total_hits: false,
-      query: {
-        bool: {
-          filter: [...rangeQuery(start, end), ...termsQuery(PARENT_ID, ...exitSpansSample.keys())],
-        },
+    track_total_hits: false,
+    query: {
+      bool: {
+        filter: [...rangeQuery(start, end), ...termsQuery(PARENT_ID, ...exitSpansSample.keys())],
       },
-      size: exitSpansSample.size,
-      fields: [...requiredFields, ...optionalFields],
     },
+    size: exitSpansSample.size,
+    fields: [...requiredFields, ...optionalFields],
   });
 
   const destinationsBySpanId = new Map(exitSpansSample);
 
   servicesResponse.hits.hits.forEach((hit) => {
-    let transaction;
-    try {
-      transaction = unflattenKnownApmEventFields(hit.fields, [...requiredFields]);
-    } catch (e) {
-      console.error('Failed to unflatten transaction', e);
-      return;
-    }
+    const transaction = unflattenKnownApmEventFields(hit.fields, [...requiredFields]);
 
     const spanId = transaction.parent.id;
 
@@ -242,7 +214,7 @@ async function fetchTransactionsFromExitSpans({
     if (destination) {
       destinationsBySpanId.set(spanId, {
         ...destination,
-        downstreamService: {
+        destinationService: {
           agentName: transaction.agent.name,
           serviceEnvironment: transaction.service.environment,
           serviceName: transaction.service.name,
