@@ -10,7 +10,7 @@
 import { of, Subject } from 'rxjs';
 import React, { useEffect } from 'react';
 import { action } from '@storybook/addon-actions';
-import type { DecoratorFn } from '@storybook/react';
+import type { Decorator } from '@storybook/react';
 import { I18nProvider } from '@kbn/i18n-react';
 
 import 'core_styles';
@@ -38,7 +38,7 @@ const analytics: AnalyticsServiceStart = {
  * Storybook decorator using the `KibanaContextProvider`. Uses the value from
  * `globals` provided by the Storybook theme switcher to set the `colorMode`.
  */
-const KibanaContextDecorator: DecoratorFn = (storyFn, { globals }) => {
+const KibanaContextDecorator: Decorator = (storyFn, { globals }) => {
   // TODO: Add a switcher to see components in other locales or pseudo locale
   i18n.init({ locale: 'en', messages: {} });
   const colorMode = globals.euiTheme === 'v8.dark' ? 'dark' : 'light';
