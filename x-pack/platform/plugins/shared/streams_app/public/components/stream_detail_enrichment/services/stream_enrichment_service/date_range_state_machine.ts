@@ -10,10 +10,10 @@ import {
   MachineImplementationsFrom,
   Snapshot,
   assertEvent,
-  assign,
   fromObservable,
-  sendTo,
+  enqueueActions,
   setup,
+  assign,
 } from 'xstate5';
 import type { TimeRange } from '@kbn/data-plugin/common';
 import type { DataPublicPluginStart, TimefilterContract } from '@kbn/data-plugin/public';
@@ -26,7 +26,7 @@ export interface DateRangeToParentEvent {
 export type DateRangeParentActor = ActorRef<Snapshot<unknown>, DateRangeToParentEvent>;
 
 export interface DateRangeContext {
-  parentRef: DateRangeParentActor;
+  parentRef?: DateRangeParentActor;
   timeRange: TimeRange;
   absoluteTimeRange: {
     start?: number;
@@ -43,19 +43,27 @@ export const dateRangeMachine = setup({
     context: {} as DateRangeContext,
     events: {} as DateRangeEvent,
     input: {} as {
-      parentRef: DateRangeParentActor;
+      parentRef?: DateRangeParentActor;
     },
   },
   actors: {
     subscribeTimeUpdates: getPlaceholderFor(createTimeUpdatesActor),
   },
   actions: {
-    setTimeUpdates: () => {},
-    storeTimeUpdates: () => {},
-    emitDateRangeUpdate: sendTo(({ context }) => context.parentRef, { type: 'dateRange.update' }),
+    setTimeUpdates: () => {
+      throw new Error('Not implemented');
+    },
+    storeTimeUpdates: () => {
+      throw new Error('Not implemented');
+    },
+    emitDateRangeUpdate: enqueueActions(({ enqueue, context }) => {
+      if (context.parentRef) {
+        enqueue.sendTo(context.parentRef, { type: 'dateRange.update' });
+      }
+    }),
   },
 }).createMachine({
-  /** @xstate-layout N4IgpgJg5mDOIC5QQIYBcwCUUDsYGJUNs8wA6AVwAciwBtABgF1FQqB7WASzS-Z1YgAHogBMADjIBmAJziALFPGiAbAHZ5DGWrVSANCACeiALQBGeWXUBWNeLOjrAXycHaJAu9wwyAJzAAZv6wABaMLEggHNy8-IIiCFKqZAxS1mbWKo4GxghmFmS6yiry9ppmMqIuriA47BBwgl6kgtE8fAKRCWYqZDL9A4MDajmI+VJk8tZSZgzimeWV1U5AA */
+  /** @xstate-layout N4IgpgJg5mDOIC5QQIYBcwCUUDsYGJUNs8wA6AVwAciwBtABgF1FQqB7WASzS-Z1YgAHogCsAdjLiALADYGATgDM40QBoQAT0QBGJaLLSGsgEwAOBqJ2rxZnSYC+DjbRIFXuGGQBOYAGa+sAAWjCxIIBzcvPyCIgiiDIbSokr26lq6jk4aOOwQcIIepIKRPHwC4XHWGtoIJkqyZGaiCtINDPo6oqaiTk5AA */
   id: 'dateRange',
   context: ({ input }) => ({
     parentRef: input.parentRef,

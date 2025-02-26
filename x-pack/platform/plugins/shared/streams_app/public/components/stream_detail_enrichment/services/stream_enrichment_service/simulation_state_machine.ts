@@ -33,7 +33,6 @@ import { flattenObjectNestedLast } from '@kbn/object-utils';
 import { errors as esErrors } from '@elastic/elasticsearch';
 import { isEmpty, isEqual, uniq } from 'lodash';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import { TimeRange } from '@kbn/es-query';
 import { ALWAYS_CONDITION } from '../../../../util/condition';
 import { DetectedField, ProcessorDefinitionWithUIAttributes } from '../../types';
 import { processorConverter } from '../../utils';
@@ -94,8 +93,6 @@ export interface SimulationMachineContext {
   streamName: string;
 }
 
-const getParentRef = ({ context }: { context: SimulationMachineContext }) => context.parentRef;
-
 export const simulationMachine = setup({
   types: {
     input: {} as {
@@ -106,8 +103,6 @@ export const simulationMachine = setup({
     context: {} as SimulationMachineContext,
     events: {} as
       | DateRangeToParentEvent
-      | { type: 'simulation.refreshSamples' }
-      | { type: 'simulation.updateTimeRange'; timeRange: TimeRange }
       | { type: 'filters.changePreviewDocsFilter'; filter: PreviewDocsFilterOption }
       | { type: 'processors.change'; processors: ProcessorDefinitionWithUIAttributes[] },
   },
@@ -134,12 +129,12 @@ export const simulationMachine = setup({
     })),
     derivePreviewColumns: assign(
       ({ context }, params: { processors: ProcessorDefinitionWithUIAttributes[] }) => ({
-        previewColumns: derivePreviewColumnsHelper(context, params.processors),
+        previewColumns: derivePreviewColumns(context, params.processors),
       })
     ),
     derivePreviewConfig: assign(({ context }) => {
       return {
-        previewColumns: derivePreviewColumnsHelper(context, context.processors),
+        previewColumns: derivePreviewColumns(context, context.processors),
         previewDocuments: context.simulation
           ? filterSimulationDocuments(context.simulation.documents, context.previewDocsFilter)
           : context.samples,
@@ -148,7 +143,7 @@ export const simulationMachine = setup({
     deriveSamplingCondition: assign(({ context }) => ({
       samplingCondition: composeSamplingCondition(context.processors),
     })),
-    emitSimulationChange: sendTo(getParentRef, { type: 'simulation.change' }),
+    emitSimulationChange: sendTo(({ context }) => context.parentRef, { type: 'simulation.change' }),
   },
   delays: {
     debounceTime: 800,
@@ -160,14 +155,14 @@ export const simulationMachine = setup({
       context.processors
         .map(processorConverter.toAPIDefinition)
         .every((processor) => isSchema(processorDefinitionSchema, processor)),
-    hasDifferentCondition: ({ context }) =>
+    shouldRefetchSamples: ({ context }) =>
       Boolean(
         context.samplingCondition &&
           !isEqual(context.samplingCondition, composeSamplingCondition(context.processors))
       ),
   },
 }).createMachine({
-  /** @xstate-layout N4IgpgJg5mDOIC5SwJYFsCuAbAhgFxQHsA7AYgnzACUdiYA6DABwrzAG0AGAXUVCcKoCJPiAAeiAKwB2ADQgAnogDMkzvQCMkgJwAWZRt2dlADm2cAbBYC+1+aky5hZB9nxFi9AE5gAZj9gACwBlHDQmLDguXiQQASEPUQkEGXklBAAmbW16Cx0dEwzOaWUMk1t7dDdnUl8ULDYvWHoAY0DaGAAFHwA3FDAAdwARQhbYADF6xujReJRnJMQNQ2l6SVUtSQtdSRMNE2U0xGl9emkMov1lXW1JXRNpCpBXJw9SJi9RuFhCJtb2ugcHizQTzRKxZKpRSICwaDK5TgZDSWUrSREaGx2Z5VV4kegoYhgnBYFAALwJUFIM1icwWEJhJl0Z20FhMBwyujyul0GSOCH2ynoRj0hlh0m0ylMmMqjnceIJRJJ5LoVI0MX4oLpoGSrKZ4tZ7M5dx5fL2a04Fp2+wyOkMTxecs8EDAACNCBhiC0KQBhAEwWDvT4tb6-ZptDpA9VxTXg7UqTgmZmsiW6aQlHSSvmSDSCkySC6I6Sbfa6e04x30Z1uj1eui+iMBsSwPCUeg4XyNAAUVfdnrAABV0GAAJSkB3OSuu3u1qD1wGwakahIiekIXVJtmlI3c3nQhCp9TmPRlaT59bLMuyic9ms+v1wUhNltsNsdsBebtTmsDoej8ceSdq09O8G3YNUQWXYhFjXRkN0NLkTT3W16AMLZJHWC1WQTS9qgArBCBwCAKVCcJIgDCASDAfFiB6QgAGsqP-PF8MI4iwgiOAEAJWiWkdaJF2jSDoLhE5zQtQojAuCULD5Up1CMCxSmtHZpDZHDcU8FiiLoEiOIDd9Pi8egInwXxfjQegmM0gjtKgXSyK4mjRj4ngBNpWNxCWDJRLUcSOURLJlBkvcinUC0LVubztiyRF1IrHBYFgd8CB08tnCoMAAEcMBQHw0DAYg8ADNyYxXON+T2VYzEsMwLCKMVd3SZRzjOQwNBZZQWRtDQTjiicEqSrwUrstKPAy7LcrAfLCuK8CaVKqDV32Hr6Gq5M6ssHrGsQblVk5HkeQuHZtDzPqAIG5LiNGkhxpyvKCqKqkMijdyys8iqVrW2r6q2vlFPUMxTHFdZtBOLIzrxLwPUJVKrzeCjiCo7j6MY67PCh4gYZGuGSEcniXO4EqhNXAt1Hau5motcU9j5XRlnoYxOU4ApVGOiH0ehq6cbIAzfmMpwzK8CyrO8TnYdw3Hkd45x+OBebifK0nNFufQ0WKE6NFklbdk2c4Hm2TgNFsLFiEIZ14FiKyILBN7km0PkAFpJHobJXbdt2TGlbFueoxUyQpa2tXe1MNBQwoDl2A5OH0HM+R652OTKQ3dkRbN2foNAUEStjSLgQOPOSdrYPOPJbj2bJFNkxTWrpixtG8+5pDydOUAgSJ89txAOW5M4zBzZFo5OKF0h2Z3YTpyUix2RllHTm9gLre8LaXG3FvKzqmWuZrFIMTkj0OPcNpQ-N9lhCUdB5dOtJzvSO7X97kV2F3660Exo+jxkTC1xNkQlItFLBiUWeWIRYXSGlzCWxBbqTWmkVO+wk1CJipoydCaIMgWFUn9dqax9h5jKBYREBDyggLRqLTGECNLwKWidPU6D8jlw6rTC49AkS106ucLQJRSzGyAA */
+  /** @xstate-layout N4IgpgJg5mDOIC5SwJYFsCuAbAhgFxQHsA7AYgnzACUdiYA6DABwrzAG0AGAXUVCcKoCJPiAAeiAEySAHPQBsATgCsARgDsqmasUrlAGhABPKQGYALPRWnV8m+eXrp65QF9Xh1JlzCyAMxQsNgAnWHoAYwALWhgABWCwADcUMAB3ABFCcNgAMUCQrl4kEAEhImJRCQRVTnllehlZThlFGXVzRU1DEwRtS05zdXUVeRklFpl3T3RsfHLSJmCsuFhCUIjoug4eUVKUX0rEZVN6cx1HTlVVU0kVLW6j8zkz5TtTRVHdD6mQL1nfegoYj7FA4LAoABeQKgpEKu0EIJExSq8nMnHo6jqqM4jlMphkTwe1Uk6noyk4FLxnEx+Opih+fx85UBwIIYMh0NhqiK-ARB2RiEUA3oNTOQoc8kk5MkRNUJLJFM4VJpMjpDJmTJI9AgYAARoQMMRwtCAMKbGCwBZLcIrNZhKIxbY8kp88qHBCSG70SQ1Ank5Ro9qDImmNSnbRXUwDVH4yYeX4auZanX6w3Guhmx2WsSwPCUeg4PwhAAUKYNRrAABV0GAAJSkRlJ4javXl9NQTNbWBw4p7fmgFF4jGKG6ScyDRrSGRE5TSU4OWrS2wteTq7xNlupo2m81wUg5vNsAtFsDBUuttNVmv1xsAstpndZ9jc+FlJEDxBXCkNTG2Cnjj4ZWMI453Hck6k4H1PlXeNb2ZLBCBwCBoQAZRwNAmCwPcIBIMAWUSQgAGs8LgrUEKQ1D0MwuAECBAjwibQoe15N8KgFYkpQaIV5HaUx1G0H11BDZQ5BkNR5FsNRVHJUM13+eDEOQug0IwrDLVPJZgnoTD8D8NY0HoUjm3IpSoBU6jYFo4h6MYnhmJdVj3TlTiWlqXj+LlDQiUkb9FUgxpFAAmw42mdcARwWBYFPAhlMTXwqDAABHDAUASNAwGIPBLXsvs3XYjQ7B-SVTDqWd5CJcwh3kAZdGka5jneOTNWbCKouCGKzLi8oEuS1KwHSzLspfXtXXfcQzHJBpUX9dQbiuadgIQSVVAxKVaUUL83iajdgkNYFYrC+YcOIPC6KIkiuq1XbiH2zrDpIKybN8JidhGxz2J9MMROq94eNDClysWyqVrxKcHEUKUJJg0L5KuvbUMusgNLWbSfD04IDKM+hrtulDEcerJbO4HLRrYj8PWuRQFFnd4ZBsCGPm8xoGiVJU2g+CxmnMdx42IQgdXgYojNfREyfGhB6jFC5I1uNQFp6ABaEG8RsW4SVeSMCW2gEgRBdkoToEX+3F8x5VDaSCSuDpx3lxAxhFeRHeGES5c4elYMRwEICwo28vJsdahFYZGhuCkCUBnpaQxMYxPJMZySVbmPfu5t723DNd0FljRfdf76FVuPBLafEhMWkTLBj1UfLsAD1G1hSKOUqi1N9saqhqGp88aOmVEgqNhm8yR5G9JUrmq5QPmueutVa6KEZTnqUrSjKstbsX2-B-PWnEyVJSFW2EDRFblADTFqqUK5VAcafmxx+fYbF3K28-EdJAxPu-1NqNjgqyCyRkOm1UpSaEtjzVwQA */
   id: 'simulation',
   context: ({ input, self, spawn }) => ({
     parentRef: input.parentRef,
@@ -188,7 +183,6 @@ export const simulationMachine = setup({
   initial: 'initializing',
   on: {
     'dateRange.update': '.loadingSamples',
-    'simulation.refreshSamples': '.loadingSamples',
     'filters.changePreviewDocsFilter': {
       actions: [
         { type: 'storePreviewDocsFilter', params: ({ event }) => event },
@@ -229,14 +223,11 @@ export const simulationMachine = setup({
       after: {
         debounceTime: [
           {
-            guard: { type: 'hasDifferentCondition' },
+            guard: { type: 'shouldRefetchSamples' },
             actions: [{ type: 'deriveSamplingCondition' }],
             target: 'loadingSamples',
           },
-          {
-            target: 'assertingSimulationRequirements',
-            actions: [{ type: 'deriveSamplingCondition' }],
-          },
+          { target: 'assertingSimulationRequirements' },
         ],
       },
     },
@@ -267,11 +258,7 @@ export const simulationMachine = setup({
     assertingSimulationRequirements: {
       always: [
         {
-          guard: not('hasSamples'),
-          target: 'idle',
-        },
-        {
-          guard: and(['hasProcessors', 'hasValidProcessors']),
+          guard: and(['hasSamples', 'hasProcessors', 'hasValidProcessors']),
           target: 'runningSimulation',
         },
         { target: 'idle' },
@@ -456,7 +443,7 @@ const filterSimulationDocuments = (
   }
 };
 
-const derivePreviewColumnsHelper = (
+const derivePreviewColumns = (
   context: SimulationMachineContext,
   processors: ProcessorDefinitionWithUIAttributes[]
 ) => {
