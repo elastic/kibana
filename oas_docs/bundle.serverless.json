@@ -27686,7 +27686,6 @@
                                     },
                                     "type": "array"
                                   },
-                                  "client_authentication": {},
                                   "key": {
                                     "type": "string"
                                   },
@@ -27932,7 +27931,6 @@
                                     },
                                     "type": "array"
                                   },
-                                  "client_authentication": {},
                                   "key": {
                                     "type": "string"
                                   },
@@ -28120,7 +28118,6 @@
                                     },
                                     "type": "array"
                                   },
-                                  "client_authentication": {},
                                   "key": {
                                     "type": "string"
                                   },
@@ -28551,7 +28548,6 @@
                                     },
                                     "type": "array"
                                   },
-                                  "client_authentication": {},
                                   "key": {
                                     "type": "string"
                                   },
@@ -28868,7 +28864,6 @@
                             },
                             "type": "array"
                           },
-                          "client_authentication": {},
                           "key": {
                             "type": "string"
                           },
@@ -29114,7 +29109,6 @@
                             },
                             "type": "array"
                           },
-                          "client_authentication": {},
                           "key": {
                             "type": "string"
                           },
@@ -29302,7 +29296,6 @@
                             },
                             "type": "array"
                           },
-                          "client_authentication": {},
                           "key": {
                             "type": "string"
                           },
@@ -29733,7 +29726,6 @@
                             },
                             "type": "array"
                           },
-                          "client_authentication": {},
                           "key": {
                             "type": "string"
                           },
@@ -29986,7 +29978,6 @@
                                   },
                                   "type": "array"
                                 },
-                                "client_authentication": {},
                                 "key": {
                                   "type": "string"
                                 },
@@ -30232,7 +30223,6 @@
                                   },
                                   "type": "array"
                                 },
-                                "client_authentication": {},
                                 "key": {
                                   "type": "string"
                                 },
@@ -30420,7 +30410,6 @@
                                   },
                                   "type": "array"
                                 },
-                                "client_authentication": {},
                                 "key": {
                                   "type": "string"
                                 },
@@ -30851,7 +30840,6 @@
                                   },
                                   "type": "array"
                                 },
-                                "client_authentication": {},
                                 "key": {
                                   "type": "string"
                                 },
@@ -31260,7 +31248,6 @@
                                   },
                                   "type": "array"
                                 },
-                                "client_authentication": {},
                                 "key": {
                                   "type": "string"
                                 },
@@ -31506,7 +31493,6 @@
                                   },
                                   "type": "array"
                                 },
-                                "client_authentication": {},
                                 "key": {
                                   "type": "string"
                                 },
@@ -31694,7 +31680,6 @@
                                   },
                                   "type": "array"
                                 },
-                                "client_authentication": {},
                                 "key": {
                                   "type": "string"
                                 },
@@ -32125,7 +32110,6 @@
                                   },
                                   "type": "array"
                                 },
-                                "client_authentication": {},
                                 "key": {
                                   "type": "string"
                                 },
@@ -32434,7 +32418,6 @@
                             },
                             "type": "array"
                           },
-                          "client_authentication": {},
                           "key": {
                             "type": "string"
                           },
@@ -32673,7 +32656,6 @@
                             },
                             "type": "array"
                           },
-                          "client_authentication": {},
                           "key": {
                             "type": "string"
                           },
@@ -32854,7 +32836,6 @@
                             },
                             "type": "array"
                           },
-                          "client_authentication": {},
                           "key": {
                             "type": "string"
                           },
@@ -33280,7 +33261,6 @@
                             },
                             "type": "array"
                           },
-                          "client_authentication": {},
                           "key": {
                             "type": "string"
                           },
@@ -33530,7 +33510,6 @@
                                   },
                                   "type": "array"
                                 },
-                                "client_authentication": {},
                                 "key": {
                                   "type": "string"
                                 },
@@ -33776,7 +33755,6 @@
                                   },
                                   "type": "array"
                                 },
-                                "client_authentication": {},
                                 "key": {
                                   "type": "string"
                                 },
@@ -33964,7 +33942,6 @@
                                   },
                                   "type": "array"
                                 },
-                                "client_authentication": {},
                                 "key": {
                                   "type": "string"
                                 },
@@ -34395,7 +34372,6 @@
                                   },
                                   "type": "array"
                                 },
-                                "client_authentication": {},
                                 "key": {
                                   "type": "string"
                                 },
