@@ -11,72 +11,24 @@ import { timerange } from '@kbn/apm-synthtrace-client';
 import { castArray } from 'lodash';
 import { memoryUsage } from 'process';
 import { parentPort, workerData } from 'worker_threads';
-import { getApmEsClient } from './get_apm_es_client';
-import { getEntitiesKibanaClient } from './get_entites_kibana_client';
-import { getEntitiesEsClient } from './get_entities_es_client';
-import { getInfraEsClient } from './get_infra_es_client';
-import { getLogsEsClient } from './get_logs_es_client';
-import { getOtelSynthtraceEsClient } from './get_otel_es_client';
 import { getScenario } from './get_scenario';
-import { getSyntheticsEsClient } from './get_synthetics_es_client';
 import { loggerProxy } from './logger_proxy';
 import { RunOptions } from './parse_run_cli_flags';
+import { bootstrap } from './bootstrap';
 
 export interface WorkerData {
   bucketFrom: Date;
   bucketTo: Date;
   runOptions: RunOptions;
   workerId: string;
-  esUrl: string;
-  version: string;
-  kibanaUrl: string;
 }
 
-const { bucketFrom, bucketTo, runOptions, esUrl, version, kibanaUrl } = workerData as WorkerData;
+const { bucketFrom, bucketTo, runOptions } = workerData as WorkerData;
 
 async function start() {
   const logger = loggerProxy;
-  const entitiesEsClient = getEntitiesEsClient({
-    concurrency: runOptions.concurrency,
-    target: esUrl,
-    logger,
-  });
 
-  const entitiesKibanaClient = getEntitiesKibanaClient({
-    target: kibanaUrl,
-    logger,
-  });
-
-  const apmEsClient = getApmEsClient({
-    concurrency: runOptions.concurrency,
-    target: esUrl,
-    logger,
-    version,
-  });
-
-  const logsEsClient = getLogsEsClient({
-    concurrency: runOptions.concurrency,
-    target: esUrl,
-    logger,
-  });
-
-  const infraEsClient = getInfraEsClient({
-    concurrency: runOptions.concurrency,
-    target: esUrl,
-    logger,
-  });
-
-  const syntheticsEsClient = getSyntheticsEsClient({
-    concurrency: runOptions.concurrency,
-    target: esUrl,
-    logger,
-  });
-
-  const otelEsClient = getOtelSynthtraceEsClient({
-    concurrency: runOptions.concurrency,
-    target: esUrl,
-    logger,
-  });
+  const { clients } = await bootstrap(runOptions);
 
   const file = runOptions.file;
 
@@ -84,33 +36,14 @@ async function start() {
 
   logger.info(`Running scenario from ${bucketFrom.toISOString()} to ${bucketTo.toISOString()}`);
 
-  const { generate, bootstrap, teardown } = await scenario({ ...runOptions, logger });
-
-  if (bootstrap) {
-    await bootstrap({
-      apmEsClient,
-      logsEsClient,
-      infraEsClient,
-      syntheticsEsClient,
-      otelEsClient,
-      entitiesEsClient,
-      entitiesKibanaClient,
-    });
-  }
+  const { generate, teardown } = await scenario({ ...runOptions, logger });
 
   logger.debug('Generating scenario');
 
   const generatorsAndClients = logger.perf('generate_scenario', () =>
     generate({
       range: timerange(bucketFrom, bucketTo),
-      clients: {
-        logsEsClient,
-        apmEsClient,
-        infraEsClient,
-        entitiesEsClient,
-        syntheticsEsClient,
-        otelEsClient,
-      },
+      clients,
     })
   );
 
@@ -145,13 +78,7 @@ async function start() {
 
   if (teardown) {
     await teardown({
-      apmEsClient,
-      logsEsClient,
-      infraEsClient,
-      syntheticsEsClient,
-      otelEsClient,
-      entitiesEsClient,
-      entitiesKibanaClient,
+      ...clients,
     });
   }
 }

@@ -74,8 +74,33 @@ function options(y: Argv) {
     })
     .option('scenarioOpts', {
       describe: 'Options specific to the scenario',
-      coerce: (arg) => {
-        return arg as Record<string, any> | undefined;
+      type: 'string',
+      coerce: (arg: string): Record<string, unknown> => {
+        if (!arg) {
+          return {};
+        }
+
+        let scenarioOptions: Record<string, unknown> = {};
+
+        try {
+          scenarioOptions = JSON.parse(arg);
+        } catch (error) {
+          scenarioOptions = Object.fromEntries(
+            arg.split(',').map((kv) => {
+              const [key, value] = kv
+                .trim()
+                .split('=')
+                .map((part) => part.trim());
+
+              if (isNaN(Number(value))) {
+                return [key, value];
+              }
+              return [key, Number(value)];
+            })
+          );
+        }
+
+        return scenarioOptions;
       },
     })
     .option('assume-package-version', {
