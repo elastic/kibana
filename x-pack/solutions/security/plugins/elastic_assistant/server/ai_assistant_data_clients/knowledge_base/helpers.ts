@@ -153,7 +153,7 @@ export const getStructuredToolForIndexEntry = ({
 }: {
   indexEntry: IndexEntry;
   esClient: ElasticsearchClient;
-  contentReferencesStore: ContentReferencesStore | undefined;
+  contentReferencesStore: ContentReferencesStore;
   logger: Logger;
 }): DynamicStructuredTool => {
   const inputSchema = indexEntry.inputSchema?.reduce((prev, input) => {
@@ -222,8 +222,7 @@ export const getStructuredToolForIndexEntry = ({
         const result = await esClient.search(params);
 
         const kbDocs = result.hits.hits.map((hit) => {
-          const reference =
-            contentReferencesStore && contentReferencesStore.add((p) => createReference(p.id, hit));
+          const reference = contentReferencesStore.add((p) => createReference(p.id, hit));
 
           if (indexEntry.outputFields && indexEntry.outputFields.length > 0) {
             return indexEntry.outputFields.reduce(
@@ -231,13 +230,13 @@ export const getStructuredToolForIndexEntry = ({
                 // @ts-expect-error
                 return { ...prev, [field]: hit._source[field] };
               },
-              reference ? { citation: contentReferenceBlock(reference) } : {}
+              { citation: contentReferenceBlock(reference) }
             );
           }
 
           return {
             text: hit.highlight?.[indexEntry.field].join('\n --- \n'),
-            ...(reference ? { citation: contentReferenceBlock(reference) } : {}),
+            citation: contentReferenceBlock(reference),
           };
         });
 

@@ -21,7 +21,7 @@ import { ElasticAssistantPluginRouter } from '../../types';
 import { buildResponse } from '../utils';
 import { EsConversationSchema } from '../../ai_assistant_data_clients/conversations/types';
 import { transformESSearchToConversations } from '../../ai_assistant_data_clients/conversations/transforms';
-import { DEFAULT_PLUGIN_NAME, performChecks } from '../helpers';
+import { performChecks } from '../helpers';
 
 export const findUserConversationsRoute = (router: ElasticAssistantPluginRouter) => {
   router.versioned
@@ -58,14 +58,7 @@ export const findUserConversationsRoute = (router: ElasticAssistantPluginRouter)
             return checkResponse.response;
           }
 
-          const contentReferencesEnabled =
-            ctx.elasticAssistant.getRegisteredFeatures(
-              DEFAULT_PLUGIN_NAME
-            ).contentReferencesEnabled;
-
-          const dataClient = await ctx.elasticAssistant.getAIAssistantConversationsDataClient({
-            contentReferencesEnabled,
-          });
+          const dataClient = await ctx.elasticAssistant.getAIAssistantConversationsDataClient();
           const currentUser = checkResponse.currentUser;
 
           const additionalFilter = query.filter ? ` AND ${query.filter}` : '';

@@ -65,7 +65,6 @@ export const SettingsContextMenu: React.FC<Params> = React.memo(
       contentReferencesVisible,
       showAnonymizedValues,
       setShowAnonymizedValues,
-      assistantFeatures: { contentReferencesEnabled },
     } = useAssistantContext();
 
     const [isPopoverOpen, setPopover] = useState(false);
@@ -255,62 +254,60 @@ export const SettingsContextMenu: React.FC<Params> = React.memo(
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiContextMenuItem>
-
-          {contentReferencesEnabled && (
-            <EuiContextMenuItem
-              aria-label={'show-citations'}
-              key={'show-citations'}
-              data-test-subj={'show-citations'}
-            >
-              <EuiFlexGroup direction="row" gutterSize="s" alignItems="center">
-                <EuiFlexItem grow={false}>
-                  <ConditionalWrap
-                    condition={!selectedConversationHasCitations}
-                    wrap={(children) => (
-                      <EuiToolTip
-                        position="top"
-                        key={'disabled-anonymize-values-tooltip'}
-                        content={
-                          <FormattedMessage
-                            id="xpack.elasticAssistant.assistant.settings.showCitationsLabel.disabled.tooltip"
-                            defaultMessage="This conversation does not contain citations."
-                          />
-                        }
-                      >
-                        {children}
-                      </EuiToolTip>
-                    )}
-                  >
-                    <EuiSwitch
-                      label={i18n.SHOW_CITATIONS}
-                      checked={contentReferencesVisible}
-                      onChange={onChangeContentReferencesVisible}
-                      compressed
-                      disabled={!selectedConversationHasCitations}
+          <EuiContextMenuItem
+            aria-label={'show-citations'}
+            key={'show-citations'}
+            data-test-subj={'show-citations'}
+          >
+            <EuiFlexGroup direction="row" gutterSize="s" alignItems="center">
+              <EuiFlexItem grow={false}>
+                <ConditionalWrap
+                  condition={!selectedConversationHasCitations}
+                  wrap={(children) => (
+                    <EuiToolTip
+                      position="top"
+                      key={'disabled-anonymize-values-tooltip'}
+                      content={
+                        <FormattedMessage
+                          id="xpack.elasticAssistant.assistant.settings.showCitationsLabel.disabled.tooltip"
+                          defaultMessage="This conversation does not contain citations."
+                        />
+                      }
+                    >
+                      {children}
+                    </EuiToolTip>
+                  )}
+                >
+                  <EuiSwitch
+                    label={i18n.SHOW_CITATIONS}
+                    checked={contentReferencesVisible}
+                    onChange={onChangeContentReferencesVisible}
+                    compressed
+                    disabled={!selectedConversationHasCitations}
+                  />
+                </ConditionalWrap>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiToolTip
+                  position="top"
+                  key={'show-citations-tooltip'}
+                  content={
+                    <FormattedMessage
+                      id="xpack.elasticAssistant.assistant.settings.showCitationsLabel.tooltip"
+                      defaultMessage="Keyboard shortcut: <bold>{keyboardShortcut}</bold>"
+                      values={{
+                        keyboardShortcut: isMac ? '⌥ + c' : 'Alt + c',
+                        bold: (str) => <strong>{str}</strong>,
+                      }}
                     />
-                  </ConditionalWrap>
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <EuiToolTip
-                    position="top"
-                    key={'show-citations-tooltip'}
-                    content={
-                      <FormattedMessage
-                        id="xpack.elasticAssistant.assistant.settings.showCitationsLabel.tooltip"
-                        defaultMessage="Keyboard shortcut: <bold>{keyboardShortcut}</bold>"
-                        values={{
-                          keyboardShortcut: isMac ? '⌥ + c' : 'Alt + c',
-                          bold: (str) => <strong>{str}</strong>,
-                        }}
-                      />
-                    }
-                  >
-                    <EuiIcon tabIndex={0} type="iInCircle" />
-                  </EuiToolTip>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </EuiContextMenuItem>
-          )}
+                  }
+                >
+                  <EuiIcon tabIndex={0} type="iInCircle" />
+                </EuiToolTip>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiContextMenuItem>
+
           <EuiHorizontalRule margin="none" />
           <EuiContextMenuItem
             aria-label={'clear-chat'}
@@ -337,7 +334,6 @@ export const SettingsContextMenu: React.FC<Params> = React.memo(
         handleShowAlertsModal,
         knowledgeBase.latestAlerts,
         showDestroyModal,
-        contentReferencesEnabled,
         selectedConversationHasCitations,
         selectedConversationHasAnonymizedValues,
       ]

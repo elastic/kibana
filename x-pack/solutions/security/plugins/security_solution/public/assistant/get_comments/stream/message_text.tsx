@@ -33,7 +33,6 @@ interface Props {
   content: string;
   contentReferences: StreamingOrFinalContentReferences;
   contentReferencesVisible: boolean;
-  contentReferencesEnabled: boolean;
   index: number;
   loading: boolean;
   ['data-test-subj']?: string;
@@ -108,13 +107,11 @@ const loadingCursorPlugin = () => {
 interface GetPluginDependencies {
   contentReferences: StreamingOrFinalContentReferences;
   contentReferencesVisible: boolean;
-  contentReferencesEnabled: boolean;
 }
 
 const getPluginDependencies = ({
   contentReferences,
   contentReferencesVisible,
-  contentReferencesEnabled,
 }: GetPluginDependencies) => {
   const parsingPlugins = getDefaultEuiMarkdownParsingPlugins();
 
@@ -124,18 +121,14 @@ const getPluginDependencies = ({
 
   processingPlugins[1][1].components = {
     ...components,
-    ...(contentReferencesEnabled
-      ? {
-          contentReference: (contentReferenceNode) => {
-            return (
-              <ContentReferenceComponentFactory
-                contentReferencesVisible={contentReferencesVisible}
-                contentReferenceNode={contentReferenceNode}
-              />
-            );
-          },
-        }
-      : {}),
+    contentReference: (contentReferenceNode) => {
+      return (
+        <ContentReferenceComponentFactory
+          contentReferencesVisible={contentReferencesVisible}
+          contentReferenceNode={contentReferenceNode}
+        />
+      );
+    },
     cursor: Cursor,
     customCodeBlock: (props) => {
       return (
@@ -171,7 +164,7 @@ const getPluginDependencies = ({
       loadingCursorPlugin,
       customCodeBlockLanguagePlugin,
       ...parsingPlugins,
-      ...(contentReferencesEnabled ? [contentReferenceParser({ contentReferences })] : []),
+      contentReferenceParser({ contentReferences }),
     ],
     processingPluginList: processingPlugins,
   };
@@ -182,7 +175,6 @@ export function MessageText({
   content,
   contentReferences,
   contentReferencesVisible,
-  contentReferencesEnabled,
   index,
   'data-test-subj': dataTestSubj,
 }: Props) {
@@ -195,9 +187,8 @@ export function MessageText({
       getPluginDependencies({
         contentReferences,
         contentReferencesVisible,
-        contentReferencesEnabled,
       }),
-    [contentReferences, contentReferencesVisible, contentReferencesEnabled]
+    [contentReferences, contentReferencesVisible]
   );
 
   return (
