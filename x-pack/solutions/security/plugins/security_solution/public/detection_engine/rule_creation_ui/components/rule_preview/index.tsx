@@ -22,7 +22,6 @@ import {
 } from '@elastic/eui';
 import moment from 'moment';
 import type { List } from '@kbn/securitysolution-io-ts-list-types';
-import type { Type } from '@kbn/securitysolution-io-ts-alerting-types';
 
 import { isEqual } from 'lodash';
 import * as i18n from './translations';
@@ -42,16 +41,6 @@ import type {
 import { usePreviewInvocationCount } from './use_preview_invocation_count';
 
 export const REASONABLE_INVOCATION_COUNT = 200;
-
-const RULE_TYPES_SUPPORTING_LOGGED_REQUESTS: Type[] = [
-  'esql',
-  'eql',
-  'threshold',
-  'machine_learning',
-  'query',
-  'saved_query',
-  'new_terms',
-];
 
 const timeRanges = [
   { start: 'now/d', end: 'now', label: 'Today' },
@@ -115,8 +104,6 @@ const RulePreviewComponent: React.FC<RulePreviewProps> = ({
   const [showElasticsearchRequests, setShowElasticsearchRequests] = useState(false);
 
   const [isDateRangeInvalid, setIsDateRangeInvalid] = useState(false);
-
-  const isLoggedRequestsSupported = RULE_TYPES_SUPPORTING_LOGGED_REQUESTS.includes(ruleType);
 
   useEffect(() => {
     const { start, end } = refreshedTimeframe(startDate, endDate);
@@ -204,7 +191,7 @@ const RulePreviewComponent: React.FC<RulePreviewProps> = ({
         interval: scheduleRuleData.interval,
         lookback: scheduleRuleData.from,
       },
-      enableLoggedRequests: showElasticsearchRequests && isLoggedRequestsSupported,
+      enableLoggedRequests: showElasticsearchRequests,
     });
     setIsRefreshing(true);
   }, [
@@ -215,7 +202,6 @@ const RulePreviewComponent: React.FC<RulePreviewProps> = ({
     startDate,
     startTransaction,
     showElasticsearchRequests,
-    isLoggedRequestsSupported,
   ]);
 
   const isDirty = useMemo(
@@ -290,23 +276,21 @@ const RulePreviewComponent: React.FC<RulePreviewProps> = ({
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFormRow>
-      {isLoggedRequestsSupported ? (
-        <EuiFormRow>
-          <EuiFlexGroup alignItems="center" gutterSize="s" responsive>
-            <EuiFlexItem grow>
-              <EuiCheckbox
-                data-test-subj="show-elasticsearch-requests"
-                id="showElasticsearchRequests"
-                label={i18n.ENABLED_LOGGED_REQUESTS_CHECKBOX}
-                checked={showElasticsearchRequests}
-                onChange={() => {
-                  setShowElasticsearchRequests(!showElasticsearchRequests);
-                }}
-              />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiFormRow>
-      ) : null}
+      <EuiFormRow>
+        <EuiFlexGroup alignItems="center" gutterSize="s" responsive>
+          <EuiFlexItem grow>
+            <EuiCheckbox
+              data-test-subj="show-elasticsearch-requests"
+              id="showElasticsearchRequests"
+              label={i18n.ENABLED_LOGGED_REQUESTS_CHECKBOX}
+              checked={showElasticsearchRequests}
+              onChange={() => {
+                setShowElasticsearchRequests(!showElasticsearchRequests);
+              }}
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiFormRow>
       <EuiSpacer size="l" />
       {isPreviewRequestInProgress && <LoadingHistogram />}
       {!isPreviewRequestInProgress && previewId && spaceId && (
@@ -323,7 +307,7 @@ const RulePreviewComponent: React.FC<RulePreviewProps> = ({
         logs={logs}
         hasNoiseWarning={hasNoiseWarning}
         isAborted={isAborted}
-        showElasticsearchRequests={showElasticsearchRequests && isLoggedRequestsSupported}
+        showElasticsearchRequests={showElasticsearchRequests}
         ruleType={ruleType}
       />
     </div>
