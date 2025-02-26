@@ -25620,7 +25620,6 @@ paths:
                                   items:
                                     type: string
                                   type: array
-                                client_authentication: {}
                                 key:
                                   type: string
                                 verification_mode:
@@ -25789,7 +25788,6 @@ paths:
                                   items:
                                     type: string
                                   type: array
-                                client_authentication: {}
                                 key:
                                   type: string
                                 verification_mode:
@@ -25922,7 +25920,6 @@ paths:
                                   items:
                                     type: string
                                   type: array
-                                client_authentication: {}
                                 key:
                                   type: string
                                 verification_mode:
@@ -26190,7 +26187,6 @@ paths:
                                   items:
                                     type: string
                                   type: array
-                                client_authentication: {}
                                 key:
                                   type: string
                                 verification_mode:
@@ -26403,7 +26399,6 @@ paths:
                           items:
                             type: string
                           type: array
-                        client_authentication: {}
                         key:
                           type: string
                         verification_mode:
@@ -26572,7 +26567,6 @@ paths:
                           items:
                             type: string
                           type: array
-                        client_authentication: {}
                         key:
                           type: string
                         verification_mode:
@@ -26705,7 +26699,6 @@ paths:
                           items:
                             type: string
                           type: array
-                        client_authentication: {}
                         key:
                           type: string
                         verification_mode:
@@ -26973,7 +26966,6 @@ paths:
                           items:
                             type: string
                           type: array
-                        client_authentication: {}
                         key:
                           type: string
                         verification_mode:
@@ -27146,7 +27138,6 @@ paths:
                                 items:
                                   type: string
                                 type: array
-                              client_authentication: {}
                               key:
                                 type: string
                               verification_mode:
@@ -27315,7 +27306,6 @@ paths:
                                 items:
                                   type: string
                                 type: array
-                              client_authentication: {}
                               key:
                                 type: string
                               verification_mode:
@@ -27448,7 +27438,6 @@ paths:
                                 items:
                                   type: string
                                 type: array
-                              client_authentication: {}
                               key:
                                 type: string
                               verification_mode:
@@ -27716,7 +27705,6 @@ paths:
                                 items:
                                   type: string
                                 type: array
-                              client_authentication: {}
                               key:
                                 type: string
                               verification_mode:
@@ -27991,7 +27979,6 @@ paths:
                                 items:
                                   type: string
                                 type: array
-                              client_authentication: {}
                               key:
                                 type: string
                               verification_mode:
@@ -28160,7 +28147,6 @@ paths:
                                 items:
                                   type: string
                                 type: array
-                              client_authentication: {}
                               key:
                                 type: string
                               verification_mode:
@@ -28293,7 +28279,6 @@ paths:
                                 items:
                                   type: string
                                 type: array
-                              client_authentication: {}
                               key:
                                 type: string
                               verification_mode:
@@ -28561,7 +28546,6 @@ paths:
                                 items:
                                   type: string
                                 type: array
-                              client_authentication: {}
                               key:
                                 type: string
                               verification_mode:
@@ -28767,7 +28751,6 @@ paths:
                           items:
                             type: string
                           type: array
-                        client_authentication: {}
                         key:
                           type: string
                         verification_mode:
@@ -28930,7 +28913,6 @@ paths:
                           items:
                             type: string
                           type: array
-                        client_authentication: {}
                         key:
                           type: string
                         verification_mode:
@@ -29057,7 +29039,6 @@ paths:
                           items:
                             type: string
                           type: array
-                        client_authentication: {}
                         key:
                           type: string
                         verification_mode:
@@ -29321,7 +29302,6 @@ paths:
                           items:
                             type: string
                           type: array
-                        client_authentication: {}
                         key:
                           type: string
                         verification_mode:
@@ -29491,7 +29471,6 @@ paths:
                                 items:
                                   type: string
                                 type: array
-                              client_authentication: {}
                               key:
                                 type: string
                               verification_mode:
@@ -29660,7 +29639,6 @@ paths:
                                 items:
                                   type: string
                                 type: array
-                              client_authentication: {}
                               key:
                                 type: string
                               verification_mode:
@@ -29793,7 +29771,6 @@ paths:
                                 items:
                                   type: string
                                 type: array
-                              client_authentication: {}
                               key:
                                 type: string
                               verification_mode:
@@ -30061,7 +30038,6 @@ paths:
                                 items:
                                   type: string
                                 type: array
-                              client_authentication: {}
                               key:
                                 type: string
                               verification_mode:
