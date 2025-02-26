@@ -33,12 +33,12 @@ const sharedLabel = i18n.translate('xpack.aiAssistant.chatHeader.shareOptions.sh
 });
 
 export function ChatSharingMenu({
-  conversationId,
   isPublic,
+  disabled,
   onChangeConversationAccess,
 }: {
-  conversationId: string;
   isPublic: boolean;
+  disabled: boolean;
   onChangeConversationAccess: (access: ConversationAccess) => Promise<void>;
 }) {
   const { euiTheme } = useEuiTheme();
@@ -81,6 +81,17 @@ export function ChatSharingMenu({
     ),
     [euiTheme.size.xs]
   );
+
+  if (disabled) {
+    return (
+      <EuiBadge
+        iconType={selectedValue === ConversationAccess.SHARED ? 'users' : 'lock'}
+        color="default"
+      >
+        {selectedValue === ConversationAccess.SHARED ? sharedLabel : privateLabel}
+      </EuiBadge>
+    );
+  }
 
   return (
     <EuiPopover

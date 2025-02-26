@@ -143,7 +143,7 @@ export function useConversation({
 
       notifications!.toasts.addSuccess({
         title: i18n.translate('xpack.aiAssistant.updateConversationAccessSuccessToast', {
-          defaultMessage: 'Conversation access successfully updated to {access}',
+          defaultMessage: 'Conversation access successfully updated to "{access}"',
           values: { access },
         }),
       });
@@ -233,7 +233,7 @@ export function useConversation({
             profile_uid: conversation.value.user?.id,
             username: conversation.value.user?.name || '',
           }
-        : undefined,
+        : currentUser,
     state,
     next,
     stop,
