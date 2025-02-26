@@ -11,11 +11,11 @@ import type {
   ContentReferencesStore,
   KnowledgeBaseEntryContentReference,
 } from '@kbn/elastic-assistant-common';
-import { contentReferencesStoreFactoryMock } from '@kbn/elastic-assistant-common/impl/content_references/content_references_store/__mocks__/content_references_store.mock';
+import { newContentReferencesStoreMock } from '@kbn/elastic-assistant-common/impl/content_references/content_references_store/__mocks__/content_references_store.mock';
 import type { AssistantToolParams } from '@kbn/elastic-assistant-plugin/server';
 
 describe('SecurityLabsTool', () => {
-  const contentReferencesStore = contentReferencesStoreFactoryMock();
+  const contentReferencesStore = newContentReferencesStoreMock();
   const getKnowledgeBaseDocumentEntries = jest.fn().mockResolvedValue([]);
   const kbDataClient = { getKnowledgeBaseDocumentEntries };
   const defaultArgs = {
