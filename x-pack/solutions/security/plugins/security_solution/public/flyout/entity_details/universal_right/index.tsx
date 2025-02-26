@@ -13,6 +13,7 @@ import {
 } from '@kbn/cloud-security-posture-common/utils/ui_metrics';
 import { METRIC_TYPE } from '@kbn/analytics';
 import type { EntityEcs } from '@kbn/securitysolution-ecs/src/entity';
+import { EuiHorizontalRule } from '@elastic/eui';
 import { UniversalEntityFlyoutHeader } from './header';
 import { UniversalEntityFlyoutContent } from './content';
 import { FlyoutNavigation } from '../../shared/components/flyout_navigation';
@@ -37,6 +38,7 @@ export const UniversalEntityPanel = ({ entity }: UniversalEntityPanelProps) => {
     <>
       <FlyoutNavigation flyoutIsExpandable={false} />
       <UniversalEntityFlyoutHeader entity={entity} />
+      <EuiHorizontalRule margin="xs" />
       <UniversalEntityFlyoutContent entity={entity} />
     </>
   );
