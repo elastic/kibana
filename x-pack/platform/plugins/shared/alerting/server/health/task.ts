@@ -55,43 +55,37 @@ function registerAlertingHealthCheckTask(
   taskManager: TaskManagerSetupContract,
   coreStartServices: Promise<[CoreStart, AlertingPluginsStart, unknown]>
 ) {
-  taskManager.registerTaskDefinitions({
-    [HEALTH_TASK_TYPE]: {
-      title: 'Alerting framework health check task',
-      stateSchemaByVersion,
-      createTaskRunner: healthCheckTaskRunner(logger, coreStartServices),
+  taskManager.registerRecurringTaskType(
+    HEALTH_TASK_TYPE,
+    async ({ state }) => {
+      return await healthCheckTaskRunner(logger, coreStartServices, state as LatestTaskStateSchema);
     },
-  });
+    { stateSchemaByVersion }
+  );
 }
 
-export function healthCheckTaskRunner(
+export async function healthCheckTaskRunner(
   logger: Logger,
-  coreStartServices: Promise<[CoreStart, AlertingPluginsStart, unknown]>
+  coreStartServices: Promise<[CoreStart, AlertingPluginsStart, unknown]>,
+  state: LatestTaskStateSchema
 ) {
-  return ({ taskInstance }: RunContext) => {
-    const state = taskInstance.state as LatestTaskStateSchema;
-    return {
-      async run() {
-        try {
-          const result = await getAlertingHealthStatus(
-            (
-              await coreStartServices
-            )[0].savedObjects,
-            state.runs
-          );
-          const updatedState: LatestTaskStateSchema = result.state;
-          return { state: updatedState };
-        } catch (errMsg) {
-          logger.warn(`Error executing alerting health check task: ${errMsg}`);
-          const updatedState: LatestTaskStateSchema = {
-            runs: state.runs + 1,
-            health_status: HealthStatus.Error,
-          };
-          return {
-            state: updatedState,
-          };
-        }
-      },
+  try {
+    const result = await getAlertingHealthStatus(
+      (
+        await coreStartServices
+      )[0].savedObjects,
+      state.runs
+    );
+    const updatedState: LatestTaskStateSchema = result.state;
+    return { state: updatedState };
+  } catch (errMsg) {
+    logger.warn(`Error executing alerting health check task: ${errMsg}`);
+    const updatedState: LatestTaskStateSchema = {
+      runs: state.runs + 1,
+      health_status: HealthStatus.Error,
     };
-  };
+    return {
+      state: updatedState,
+    };
+  }
 }

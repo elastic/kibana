@@ -14,7 +14,6 @@ import {
 import { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
 import { InvalidateAPIKeysParams, SecurityPluginStart } from '@kbn/security-plugin/server';
 import {
-  RunContext,
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
@@ -93,70 +92,64 @@ function registerApiKeyInvalidatorTaskDefinition(
   taskManager: TaskManagerSetupContract,
   config: AlertingConfig
 ) {
-  taskManager.registerTaskDefinitions({
-    [TASK_TYPE]: {
-      title: 'Invalidate alert API Keys',
-      stateSchemaByVersion,
-      createTaskRunner: taskRunner(logger, coreStartServices, config),
+  taskManager.registerRecurringTaskType(
+    TASK_TYPE,
+    async ({ state }) => {
+      return await taskRunner(logger, coreStartServices, config, state as LatestTaskStateSchema);
     },
-  });
+    { stateSchemaByVersion }
+  );
 }
 
-export function taskRunner(
+export async function taskRunner(
   logger: Logger,
   coreStartServices: Promise<[CoreStart, AlertingPluginsStart, unknown]>,
-  config: AlertingConfig
+  config: AlertingConfig,
+  state: LatestTaskStateSchema
 ) {
-  return ({ taskInstance }: RunContext) => {
-    const state = taskInstance.state as LatestTaskStateSchema;
+  let totalInvalidated = 0;
+  try {
+    const [{ savedObjects }, { encryptedSavedObjects, security }] = await coreStartServices;
+    const savedObjectsClient = savedObjects.createInternalRepository([
+      API_KEY_PENDING_INVALIDATION_TYPE,
+      AD_HOC_RUN_SAVED_OBJECT_TYPE,
+      ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE,
+    ]);
+    const encryptedSavedObjectsClient = encryptedSavedObjects.getClient({
+      includedHiddenTypes: [API_KEY_PENDING_INVALIDATION_TYPE],
+    });
+
+    totalInvalidated = await runInvalidate({
+      config,
+      encryptedSavedObjectsClient,
+      logger,
+      savedObjectsClient,
+      security,
+    });
+
+    const updatedState: LatestTaskStateSchema = {
+      runs: (state.runs || 0) + 1,
+      total_invalidated: totalInvalidated,
+    };
     return {
-      async run() {
-        let totalInvalidated = 0;
-        try {
-          const [{ savedObjects }, { encryptedSavedObjects, security }] = await coreStartServices;
-          const savedObjectsClient = savedObjects.createInternalRepository([
-            API_KEY_PENDING_INVALIDATION_TYPE,
-            AD_HOC_RUN_SAVED_OBJECT_TYPE,
-            ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE,
-          ]);
-          const encryptedSavedObjectsClient = encryptedSavedObjects.getClient({
-            includedHiddenTypes: [API_KEY_PENDING_INVALIDATION_TYPE],
-          });
-
-          totalInvalidated = await runInvalidate({
-            config,
-            encryptedSavedObjectsClient,
-            logger,
-            savedObjectsClient,
-            security,
-          });
-
-          const updatedState: LatestTaskStateSchema = {
-            runs: (state.runs || 0) + 1,
-            total_invalidated: totalInvalidated,
-          };
-          return {
-            state: updatedState,
-            schedule: {
-              interval: config.invalidateApiKeysTask.interval,
-            },
-          };
-        } catch (e) {
-          logger.warn(`Error executing alerting apiKey invalidation task: ${e.message}`);
-          const updatedState: LatestTaskStateSchema = {
-            runs: state.runs + 1,
-            total_invalidated: totalInvalidated,
-          };
-          return {
-            state: updatedState,
-            schedule: {
-              interval: config.invalidateApiKeysTask.interval,
-            },
-          };
-        }
+      state: updatedState,
+      schedule: {
+        interval: config.invalidateApiKeysTask.interval,
       },
     };
-  };
+  } catch (e) {
+    logger.warn(`Error executing alerting apiKey invalidation task: ${e.message}`);
+    const updatedState: LatestTaskStateSchema = {
+      runs: state.runs + 1,
+      total_invalidated: totalInvalidated,
+    };
+    return {
+      state: updatedState,
+      schedule: {
+        interval: config.invalidateApiKeysTask.interval,
+      },
+    };
+  }
 }
 
 interface ApiKeyIdAndSOId {
