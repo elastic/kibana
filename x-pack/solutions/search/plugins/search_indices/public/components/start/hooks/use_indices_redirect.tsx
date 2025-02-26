@@ -42,7 +42,7 @@ export const useIndicesRedirect = (indicesStatus?: IndicesStatusResponse) => {
       usageTracker.click(AnalyticsEvents.startCreateIndexCreatedRedirect);
       return;
     }
-    application.navigateToApp('management', { deepLinkId: 'index_management' });
+    application.navigateToApp('elasticsearchIndexManagement');
     setHasDoneRedirect(true);
   }, [
     application,

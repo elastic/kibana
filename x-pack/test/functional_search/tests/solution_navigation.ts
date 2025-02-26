@@ -65,8 +65,17 @@ export default function searchSolutionNavigation({
       await solutionNavigation.sidenav.expectLinkActive({
         deepLinkId: 'enterpriseSearch',
       });
+      // await solutionNavigation.breadcrumbs.expectBreadcrumbExists({
+      //   deepLinkId: 'enterpriseSearch',
+      // });
+      await solutionNavigation.breadcrumbs.expectBreadcrumbExists({ text: 'Deployment' });
+      await solutionNavigation.breadcrumbs.expectBreadcrumbExists({ text: 'Content' });
+      await solutionNavigation.breadcrumbs.expectBreadcrumbExists({ text: 'Index Management' });
       await solutionNavigation.breadcrumbs.expectBreadcrumbExists({
-        deepLinkId: 'enterpriseSearch',
+        text: 'Indices',
+      });
+      await solutionNavigation.breadcrumbs.expectBreadcrumbExists({
+        text: 'Create your first index',
       });
 
       // check Dev tools
@@ -110,10 +119,10 @@ export default function searchSolutionNavigation({
       // check the Content
       // > Indices section
       await solutionNavigation.sidenav.clickLink({
-        deepLinkId: 'management:index_management',
+        deepLinkId: 'elasticsearchIndexManagement',
       });
       await solutionNavigation.sidenav.expectLinkActive({
-        deepLinkId: 'management:index_management',
+        deepLinkId: 'elasticsearchIndexManagement',
       });
       await solutionNavigation.breadcrumbs.expectBreadcrumbExists({ text: 'Deployment' });
       await solutionNavigation.breadcrumbs.expectBreadcrumbExists({ text: 'Content' });
@@ -228,7 +237,7 @@ export default function searchSolutionNavigation({
 
     it("should redirect to index management when clicking on 'Indices'", async () => {
       await solutionNavigation.sidenav.clickLink({
-        deepLinkId: 'management:index_management',
+        deepLinkId: 'elasticsearchIndexManagement',
       });
       await indexManagement.expectToBeOnIndicesManagement();
     });
@@ -247,7 +256,7 @@ export default function searchSolutionNavigation({
         'discover',
         'dashboards',
         'content',
-        'management:index_management',
+        'elasticsearchIndexManagement',
         'enterpriseSearchContent:connectors',
         'enterpriseSearchContent:webCrawlers',
         'build',
@@ -264,5 +273,6 @@ export default function searchSolutionNavigation({
         'monitoring',
       ]);
     });
+
   });
 }
