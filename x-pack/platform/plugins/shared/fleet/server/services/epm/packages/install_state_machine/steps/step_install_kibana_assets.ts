@@ -98,10 +98,9 @@ export async function cleanUpKibanaAssetsStep(context: InstallContext) {
  *
  */
 export async function cleanUpUnusedKibanaAssetsStep(context: InstallContext) {
-  const { logger, installedPkg, packageInstallContext, spaceId, kibanaAssetPromise } = context;
+  const { logger, installedPkg, packageInstallContext, spaceId, installedKibanaAssetsRefs } =
+    context;
   const { packageInfo } = packageInstallContext;
-
-  const installedKibanaAssetsRefs = await kibanaAssetPromise;
 
   if (!installedKibanaAssetsRefs) {
     return;
