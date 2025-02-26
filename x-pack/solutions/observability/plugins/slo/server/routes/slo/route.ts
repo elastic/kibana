@@ -27,9 +27,11 @@ import { getSLOSuggestionsRoute } from './get_suggestions';
 import { putSloSettings } from './put_slo_settings';
 import { resetSLORoute } from './reset_slo';
 import { getSLOStatsOverview } from './get_slo_stats_overview';
+import { findDashboards } from './find_dashboards';
 
 export const getSloRouteRepository = (isServerless?: boolean) => {
   return {
+    ...findDashboards,
     ...fetchSloHealthRoute,
     ...getSloSettingsRoute,
     ...putSloSettings(isServerless),

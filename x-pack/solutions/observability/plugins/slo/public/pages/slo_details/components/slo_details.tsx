@@ -30,6 +30,7 @@ export interface Props {
   isAutoRefreshing: boolean;
   selectedTabId: SloTabId;
 }
+
 export function SloDetails({ slo, isAutoRefreshing, selectedTabId }: Props) {
   const [range, setRange] = useState<{ from: Date; to: Date }>({
     from: moment().subtract(1, 'day').toDate(),
@@ -78,6 +79,7 @@ export function SloDetails({ slo, isAutoRefreshing, selectedTabId }: Props) {
 
         <EventsChartPanel slo={slo} range={range} selectedTabId={selectedTabId} />
       </EuiFlexGroup>
+      {}
     </EuiFlexGroup>
   );
 }
