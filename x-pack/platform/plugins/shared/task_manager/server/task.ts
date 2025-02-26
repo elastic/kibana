@@ -42,7 +42,7 @@ export enum TaskCost {
  *    // This type is now defined as { id: string; name: string; }
  *    type TaskInstanceWithId = Require<TaskInstance, 'id'>;
  */
-type Require<T extends object, P extends keyof T> = Omit<T, P> & Required<Pick<T, P>>;
+export type Require<T extends object, P extends keyof T> = Omit<T, P> & Required<Pick<T, P>>;
 
 /**
  * The run context is passed into a task's run function as its sole argument.
@@ -254,7 +254,7 @@ export interface IntervalSchedule {
  * A task instance represents all of the data required to store, fetch,
  * and execute a task.
  */
-export interface TaskInstance {
+export interface BaseTask {
   /**
    * Optional ID that can be passed by the caller. When ID is undefined, ES
    * will auto-generate a unique id. Otherwise, ID will be used to either
@@ -294,13 +294,6 @@ export interface TaskInstance {
   runAt?: Date;
 
   /**
-   * A TaskSchedule string, which specifies this as a recurring task.
-   *
-   * Currently, this supports a single format: an interval in minutes or seconds (e.g. '5m', '30s').
-   */
-  schedule?: IntervalSchedule;
-
-  /**
    * A task-specific set of parameters, used by the task's run function to tailor
    * its work. This is generally user-input, such as { sms: '333-444-2222' }.
    */
@@ -308,17 +301,6 @@ export interface TaskInstance {
   // this can be fixed by supporting generics in the future
 
   params: Record<string, any>;
-
-  /**
-   * The state passed into the task's run function, and returned by the previous
-   * run. If there was no previous run, or if the previous run did not return
-   * any state, this will be the empy object: {}
-   */
-  // we allow any here as unknown will break current use in other plugins
-  // this can be fixed by supporting generics in the future
-
-  state: Record<string, any>;
-  stateVersion?: number;
 
   /**
    * The serialized traceparent string of the current APM transaction or span.
@@ -341,11 +323,6 @@ export interface TaskInstance {
    */
   ownerId?: string | null;
 
-  /**
-   * Indicates whether the task is currently enabled. Disabled tasks will not be claimed.
-   */
-  enabled?: boolean;
-
   /*
    * Optionally override the timeout defined in the task type for this specific task instance
    */
@@ -360,6 +337,58 @@ export interface TaskInstance {
    * Optionally override the priority defined in the task type for this specific task instance
    */
   priority?: TaskPriority;
+}
+
+export type OneOffTask = BaseTask;
+
+export interface RecurringTask extends BaseTask {
+  /**
+   * A TaskSchedule string, which specifies this as a recurring task.
+   *
+   * Currently, this supports a single format: an interval in minutes or seconds (e.g. '5m', '30s').
+   */
+  schedule?: IntervalSchedule;
+
+  /**
+   * The state passed into the task's run function, and returned by the previous
+   * run. If there was no previous run, or if the previous run did not return
+   * any state, this will be the empy object: {}
+   */
+  // we allow any here as unknown will break current use in other plugins
+  // this can be fixed by supporting generics in the future
+
+  state: Record<string, any>;
+  stateVersion?: number;
+
+  /**
+   * Indicates whether the task is currently enabled. Disabled tasks will not be claimed.
+   */
+  enabled?: boolean;
+}
+
+export interface TaskInstance extends BaseTask {
+  /**
+   * A TaskSchedule string, which specifies this as a recurring task.
+   *
+   * Currently, this supports a single format: an interval in minutes or seconds (e.g. '5m', '30s').
+   */
+  schedule?: IntervalSchedule;
+
+  /**
+   * The state passed into the task's run function, and returned by the previous
+   * run. If there was no previous run, or if the previous run did not return
+   * any state, this will be the empy object: {}
+   */
+  // we allow any here as unknown will break current use in other plugins
+  // this can be fixed by supporting generics in the future
+
+  state: Record<string, any>;
+  stateVersion?: number;
+
+  /**
+   * Indicates whether the task is currently enabled. Disabled tasks will not be claimed.
+   */
+  enabled?: boolean;
 }
 
 /**

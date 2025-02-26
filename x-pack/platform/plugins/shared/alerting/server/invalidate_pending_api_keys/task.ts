@@ -73,7 +73,7 @@ export async function scheduleApiKeyInvalidatorTask(
 ) {
   const interval = config.invalidateApiKeysTask.interval;
   try {
-    await taskManager.ensureScheduled({
+    await taskManager.createRecurringTaskIfMissing({
       id: TASK_ID,
       taskType: TASK_TYPE,
       schedule: {

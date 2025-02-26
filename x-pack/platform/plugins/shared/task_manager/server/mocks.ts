@@ -26,6 +26,12 @@ const createStartMock = () => {
     remove: jest.fn(),
     bulkRemove: jest.fn(),
     schedule: jest.fn(),
+    createOneOffTask: jest.fn(),
+    createOneOffTaskIfMissing: jest.fn(),
+    createRecurringTask: jest.fn(),
+    createRecurringTaskIfMissing: jest.fn(),
+    createOneOffTaskBulk: jest.fn(),
+    createRecurringTaskBulk: jest.fn(),
     runSoon: jest.fn(),
     ensureScheduled: jest.fn(),
     removeIfExists: jest.fn().mockResolvedValue(Promise.resolve()), // it's a promise and there are some places where it's followed by `.catch()`

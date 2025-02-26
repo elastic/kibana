@@ -65,7 +65,7 @@ export function scheduleAlertingTelemetry(logger: Logger, taskManager?: TaskMana
 
 async function scheduleTasks(logger: Logger, taskManager: TaskManagerStartContract) {
   try {
-    await taskManager.ensureScheduled({
+    await taskManager.createRecurringTaskIfMissing({
       id: TASK_ID,
       taskType: TELEMETRY_TASK_TYPE,
       state: emptyState,

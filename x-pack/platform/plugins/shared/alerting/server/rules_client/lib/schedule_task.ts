@@ -30,7 +30,7 @@ export async function scheduleTask(context: RulesClientContext, opts: ScheduleTa
   };
   try {
     return await withSpan({ name: 'taskManager.schedule', type: 'rules' }, () =>
-      context.taskManager.schedule(taskInstance)
+      context.taskManager.createRecurringTask(taskInstance)
     );
   } catch (err) {
     if (err.statusCode === 409 && !throwOnConflict) {

@@ -302,7 +302,7 @@ export class BackfillClient {
 
     if (adHocTasksToSchedule.length > 0) {
       const taskManager = await this.taskManagerStartPromise;
-      await taskManager.bulkSchedule(adHocTasksToSchedule);
+      await taskManager.createOneOffTaskBulk(adHocTasksToSchedule);
     }
 
     return createSOResult;

@@ -76,6 +76,12 @@ export type TaskManagerStartContract = Pick<
   | 'bulkDisable'
   | 'bulkSchedule'
   | 'bulkUpdateState'
+  | 'createOneOffTask'
+  | 'createOneOffTaskIfMissing'
+  | 'createRecurringTask'
+  | 'createRecurringTaskIfMissing'
+  | 'createOneOffTaskBulk'
+  | 'createRecurringTaskBulk'
 > &
   Pick<TaskStore, 'fetch' | 'aggregate' | 'get' | 'remove' | 'bulkRemove'> & {
     removeIfExists: TaskStore['remove'];
@@ -395,6 +401,12 @@ export class TaskManagerPlugin
       bulkRemove: (ids: string[]) => taskStore.bulkRemove(ids),
       removeIfExists: (id: string) => removeIfExists(taskStore, id),
       schedule: (...args) => taskScheduling.schedule(...args),
+      createOneOffTask: (...args) => taskScheduling.createOneOffTask(...args),
+      createOneOffTaskIfMissing: (...args) => taskScheduling.createOneOffTaskIfMissing(...args),
+      createRecurringTask: (...args) => taskScheduling.createRecurringTask(...args),
+      createRecurringTaskIfMissing: (...args) => taskScheduling.createRecurringTaskIfMissing(...args),
+      createOneOffTaskBulk: (...args) => taskScheduling.createOneOffTaskBulk(...args),
+      createRecurringTaskBulk: (...args) => taskScheduling.createRecurringTaskBulk(...args),
       bulkSchedule: (...args) => taskScheduling.bulkSchedule(...args),
       ensureScheduled: (...args) => taskScheduling.ensureScheduled(...args),
       runSoon: (...args) => taskScheduling.runSoon(...args),

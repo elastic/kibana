@@ -151,7 +151,7 @@ export function createBulkUnsecuredExecutionEnqueuerFunction({
         scope: ['actions'],
       };
     });
-    await taskManager.bulkSchedule(taskInstances);
+    await taskManager.createOneOffTaskBulk(taskInstances);
 
     return {
       errors: actionsOverLimit.length > 0,

@@ -330,7 +330,7 @@ const bulkEnableRulesWithOCC = async (
 
   if (tasksToSchedule.length > 0) {
     await withSpan({ name: 'taskManager.bulkSchedule', type: 'tasks' }, () =>
-      context.taskManager.bulkSchedule(tasksToSchedule)
+      context.taskManager.createRecurringTaskBulk(tasksToSchedule)
     );
   }
 

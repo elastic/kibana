@@ -17,6 +17,9 @@ import {
   TaskInstanceWithDeprecatedFields,
   TaskInstanceWithId,
   TaskStatus,
+  OneOffTask,
+  RecurringTask,
+  Require,
 } from './task';
 import { TaskStore } from './task_store';
 import { ensureDeprecatedFieldsAreCorrected } from './lib/correct_deprecated_fields';
@@ -76,6 +79,8 @@ export class TaskScheduling {
    *
    * @param task - The task being scheduled.
    * @returns {Promise<ConcreteTaskInstance>}
+   *
+   * @deprecated Use createOneOffTask or createRecurringTask instead.
    */
   public async schedule(
     taskInstance: TaskInstanceWithDeprecatedFields,
@@ -98,11 +103,51 @@ export class TaskScheduling {
     });
   }
 
+  public async createOneOffTask(task: OneOffTask, options?: Record<string, unknown>) {
+    return await this.schedule({ ...task, state: {} }, options);
+  }
+
+  public async createOneOffTaskIfMissing(
+    task: Require<OneOffTask, 'id'>,
+    options?: Record<string, unknown>
+  ) {
+    try {
+      const result = await this.createOneOffTask(task, options);
+      return { created: true, task: result };
+    } catch (err) {
+      if (err.statusCode === VERSION_CONFLICT_STATUS) {
+        return { created: false };
+      }
+      throw err;
+    }
+  }
+
+  public async createRecurringTask(task: RecurringTask, options?: Record<string, unknown>) {
+    return await this.schedule(task, options);
+  }
+
+  public async createRecurringTaskIfMissing(
+    task: Require<RecurringTask, 'id'>,
+    options?: Record<string, unknown>
+  ) {
+    try {
+      const result = await this.createRecurringTask(task, options);
+      return { created: true, task: result };
+    } catch (err) {
+      if (err.statusCode === VERSION_CONFLICT_STATUS) {
+        return { created: false };
+      }
+      throw err;
+    }
+  }
+
   /**
    * Bulk schedules a task.
    *
    * @param tasks - The tasks being scheduled.
    * @returns {Promise<ConcreteTaskInstance>}
+   *
+   * @deprecated Use createOneOffTaskBulk or createRecurringTaskBulk instead.
    */
   public async bulkSchedule(
     taskInstances: TaskInstanceWithDeprecatedFields[],
@@ -127,6 +172,17 @@ export class TaskScheduling {
     );
 
     return await this.store.bulkSchedule(modifiedTasks);
+  }
+
+  public async createOneOffTaskBulk(tasks: OneOffTask[], options?: Record<string, unknown>) {
+    return await this.bulkSchedule(
+      tasks.map((t) => ({ ...t, state: {} })),
+      options
+    );
+  }
+
+  public async createRecurringTaskBulk(tasks: RecurringTask[], options?: Record<string, unknown>) {
+    return await this.bulkSchedule(tasks, options);
   }
 
   public async bulkDisable(taskIds: string[], clearStateIdsOrBoolean?: string[] | boolean) {
@@ -266,6 +322,8 @@ export class TaskScheduling {
    *
    * @param task - The task being scheduled.
    * @returns {Promise<TaskInstanceWithId>}
+   *
+   * @deprecated Use createOneOffTaskIfMissing or createRecurringTaskIfMissing instead.
    */
   public async ensureScheduled(
     taskInstance: TaskInstanceWithId,

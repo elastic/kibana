@@ -93,7 +93,7 @@ export class ConnectorUsageReportingTask {
     }
 
     try {
-      await taskManager.ensureScheduled({
+      await taskManager.createRecurringTaskIfMissing({
         id: CONNECTOR_USAGE_REPORTING_TASK_ID,
         taskType: CONNECTOR_USAGE_REPORTING_TASK_TYPE,
         schedule: {

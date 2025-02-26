@@ -36,7 +36,7 @@ export async function scheduleAlertingHealthCheck(
 ) {
   try {
     const interval = config.healthCheck.interval;
-    await taskManager.ensureScheduled({
+    await taskManager.createRecurringTaskIfMissing({
       id: HEALTH_TASK_ID,
       taskType: HEALTH_TASK_TYPE,
       schedule: {
