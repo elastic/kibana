@@ -38,7 +38,7 @@ import {
   findInheritedLifecycle,
   findInheritingStreams,
 } from '@kbn/streams-schema';
-import { cloneDeep, keyBy, omit, orderBy } from 'lodash';
+import { cloneDeep, keyBy, orderBy } from 'lodash';
 import { AssetClient } from './assets/asset_client';
 import { ForbiddenMemberTypeError } from './errors/forbidden_member_type_error';
 import {
@@ -67,6 +67,7 @@ import { MalformedStreamIdError } from './errors/malformed_stream_id_error';
 import { SecurityError } from './errors/security_error';
 import { NameTakenError } from './errors/name_taken_error';
 import { MalformedStreamError } from './errors/malformed_stream_error';
+import { State, StreamChange } from './state_management/state';
 
 interface AcknowledgeResponse<TResult extends Result> {
   acknowledged: true;
@@ -118,6 +119,46 @@ export class StreamsClient {
     return rootLogsStreamExists;
   }
 
+  // What should this function return?
+  private async attemptChanges(requestedChanges: StreamChange[], dryRun: boolean = false) {
+    const startingState = await State.currentState(this.dependencies.storageClient);
+    // Optional: Validate the starting state for drift outside of Streams
+
+    const desiredState = startingState.applyChanges(requestedChanges);
+
+    const validationResult = await desiredState.validate(
+      startingState,
+      this.dependencies.scopedClusterClient
+    );
+
+    if (!validationResult.isValid) {
+      // How do these translate to HTTP errors?
+      throw new Error(validationResult.errors.join(', '));
+    }
+
+    if (dryRun) {
+      // Perhaps we can/should compute some kind of diff here instead to make it easier for the UI to present what (in more detail) has changed?
+      return desiredState.changes();
+    } else {
+      try {
+        await desiredState.commitChanges(
+          this.dependencies.storageClient,
+          this.dependencies.logger,
+          this.dependencies.scopedClusterClient,
+          this.dependencies.isServerless
+        );
+      } catch (error) {
+        await desiredState.attemptRollback(
+          startingState,
+          this.dependencies.storageClient,
+          this.dependencies.logger,
+          this.dependencies.scopedClusterClient,
+          this.dependencies.isServerless
+        );
+      }
+    }
+  }
+
   /**
    * Enabling streams means creating the logs root stream.
    * If it is already enabled, it is a noop.
@@ -129,13 +170,16 @@ export class StreamsClient {
       return { acknowledged: true, result: 'noop' };
     }
 
-    await this.upsertStream({
-      request: {
-        dashboards: [],
-        stream: omit(rootStreamDefinition, 'name'),
+    await this.attemptChanges([
+      {
+        target: rootStreamDefinition.name,
+        type: 'wired_upsert',
+        request: {
+          dashboards: [],
+          stream: rootStreamDefinition,
+        },
       },
-      name: rootStreamDefinition.name,
-    });
+    ]);
 
     return { acknowledged: true, result: 'created' };
   }
@@ -154,9 +198,12 @@ export class StreamsClient {
       return { acknowledged: true, result: 'noop' };
     }
 
-    const definition = await this.getStream(LOGS_ROOT_STREAM_NAME);
-
-    await this.deleteStreamFromDefinition(definition);
+    await this.attemptChanges([
+      {
+        type: 'delete',
+        target: LOGS_ROOT_STREAM_NAME,
+      },
+    ]);
 
     const { assetClient, storageClient } = this.dependencies;
     await Promise.all([assetClient.clean(), storageClient.clean()]);
