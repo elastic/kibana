@@ -13,8 +13,6 @@ import type {
   WorkChatAppPluginStartDependencies,
 } from './types';
 
-export interface PublicConfigType {}
-
 export class SearchAssistantPlugin
   implements
     Plugin<
@@ -24,11 +22,7 @@ export class SearchAssistantPlugin
       WorkChatAppPluginStartDependencies
     >
 {
-  private readonly config: PublicConfigType;
-
-  constructor(private readonly context: PluginInitializerContext) {
-    this.config = this.context.config.get();
-  }
+  constructor(context: PluginInitializerContext) {}
 
   public setup(
     core: CoreSetup<WorkChatAppPluginStartDependencies, WorkChatAppPluginStart>
