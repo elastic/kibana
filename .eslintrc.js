@@ -1019,20 +1019,6 @@ module.exports = {
         ],
       },
     },
-    {
-      files: [
-        'x-pack/solutions/observability/plugins/apm/**/*.{js,mjs,ts,tsx}',
-        'x-pack/solutions/observability/plugins/apm_data_access/**/*.{js,mjs,ts,tsx}',
-        'x-pack/solutions/observability/plugins/infra/**/*.{js,mjs,ts,tsx}',
-        'x-pack/solutions/observability/plugins/inventory/**/*.{js,mjs,ts,tsx}',
-        'x-pack/solutions/observability/plugins/metrics_data_access/**/*.{js,mjs,ts,tsx}',
-        'x-pack/solutions/observability/plugins/profiling/**/*.{js,mjs,ts,tsx}',
-        'x-pack/solutions/observability/plugins/profiling_data_access/**/*.{js,mjs,ts,tsx}',
-      ],
-      rules: {
-        '@typescript-eslint/consistent-type-imports': 'error',
-      },
-    },
 
     /**
      * Fleet overrides
@@ -1042,7 +1028,6 @@ module.exports = {
       plugins: ['testing-library'],
       rules: {
         'testing-library/await-async-utils': 'error',
-        '@typescript-eslint/consistent-type-imports': 'error',
         'import/order': [
           'warn',
           {
@@ -1064,9 +1049,6 @@ module.exports = {
       ],
       rules: {
         'import/no-nodejs-modules': 'error',
-        'no-duplicate-imports': 'off',
-        '@typescript-eslint/no-duplicate-imports': 'error',
-        '@typescript-eslint/consistent-type-imports': 'error',
         'no-restricted-imports': [
           'error',
           {
@@ -1075,23 +1057,6 @@ module.exports = {
             paths: RESTRICTED_IMPORTS,
           },
         ],
-      },
-    },
-
-    /**
-     * ML overrides
-     */
-    {
-      files: [
-        'x-pack/platform/plugins/shared/aiops/**/*.{js,mjs,ts,tsx}',
-        'x-pack/platform/plugins/private/data_visualizer/**/*.{js,mjs,ts,tsx}',
-        'x-pack/platform/plugins/shared/ml/**/*.{js,mjs,ts,tsx}',
-        'x-pack/platform/plugins/private/transform/**/*.{js,mjs,ts,tsx}',
-        'x-pack/platform/packages/shared/ml/**/*.{js,mjs,ts,tsx}',
-        'x-pack/platform/packages/private/ml/**/*.{js,mjs,ts,tsx}',
-      ],
-      rules: {
-        '@typescript-eslint/consistent-type-imports': 'error',
       },
     },
 
@@ -1125,8 +1090,6 @@ module.exports = {
       ],
       rules: {
         'import/no-nodejs-modules': 'error',
-        'no-duplicate-imports': 'off',
-        '@typescript-eslint/no-duplicate-imports': ['error'],
         'no-restricted-imports': [
           'error',
           {
@@ -1241,7 +1204,6 @@ module.exports = {
         'no-continue': 'error',
         'no-dupe-keys': 'error',
         'no-duplicate-case': 'error',
-        'no-duplicate-imports': 'off',
         'no-empty-character-class': 'error',
         'no-empty-pattern': 'error',
         'no-ex-assign': 'error',
@@ -1312,26 +1274,7 @@ module.exports = {
         'require-atomic-updates': 'error',
         'symbol-description': 'error',
         'vars-on-top': 'error',
-        '@typescript-eslint/no-duplicate-imports': ['error'],
       },
-      overrides: [
-        {
-          files: [
-            'x-pack/platform/plugins/shared/cases/**/*.{js,mjs,ts,tsx}',
-            'x-pack/solutions/security/plugins/ecs_data_quality_dashboard/**/*.{js,mjs,ts,tsx}',
-            'x-pack/solutions/security/plugins/security_solution/**/*.{js,mjs,ts,tsx}',
-            'x-pack/solutions/security/plugins/security_solution_ess/**/*.{js,mjs,ts,tsx}',
-            'x-pack/solutions/security/plugins/security_solution_serverless/**/*.{js,mjs,ts,tsx}',
-            'x-pack/solutions/security/packages/data-stream-adapter/**/*.{js,mjs,ts,tsx}',
-            'x-pack/solutions/security/packages/features/**/*.{js,mjs,ts,tsx}',
-            'x-pack/solutions/security/packages/navigation/**/*.{js,mjs,ts,tsx}',
-            'src/platform/packages/shared/kbn-cell-actions/**/*.{js,mjs,ts,tsx}',
-          ],
-          rules: {
-            '@typescript-eslint/consistent-type-imports': 'error',
-          },
-        },
-      ],
     },
     {
       files: ['x-pack/platform/plugins/shared/cases/public/**/*.{js,mjs,ts,tsx}'],
@@ -1529,7 +1472,6 @@ module.exports = {
         'no-continue': 'error',
         'no-dupe-keys': 'error',
         'no-duplicate-case': 'error',
-        'no-duplicate-imports': 'error',
         'no-empty-character-class': 'error',
         'no-empty-pattern': 'error',
         'no-ex-assign': 'error',
@@ -1883,7 +1825,6 @@ module.exports = {
         'prefer-arrow-callback': 'error',
         'no-unused-vars': 'off',
         'react/prop-types': 'off',
-        '@typescript-eslint/consistent-type-imports': 'error',
         '@typescript-eslint/explicit-module-boundary-types': 'off',
       },
     },
@@ -1926,7 +1867,6 @@ module.exports = {
         'x-pack/test/spaces_api_integration/**/*.{js,mjs,ts,tsx}',
       ],
       rules: {
-        '@typescript-eslint/consistent-type-imports': 1,
         'import/order': [
           // This rule sorts import declarations
           'error',
@@ -2110,6 +2050,13 @@ module.exports = {
       rules: {
         // disabling it since package is a CLI tool
         'no-console': 'off',
+      },
+    },
+    {
+      files: ['**/generated/**', '**/*.gen.ts'],
+      rules: {
+        // disable some ESLINT rules to prevent CI from updating auto-generated code
+        'import/no-duplicates': 'off',
       },
     },
   ],

@@ -317,6 +317,37 @@ module.exports = {
       ],
     ],
 
+    /**
+     * This is a core ESLint rule that focuses on detecting and preventing
+     * duplicate import statements that import from the exact same module specifier.
+     * It's relatively basic, checking for purely syntactical duplicates.
+     * It aims to keep your import statements concise and readable.
+     * Limitations:
+     * - It might not catch duplicates if module paths are resolved differently due to aliases or complex module resolution setups.
+     * - It does not have the ability to understand complex Typescript paths.
+     * @deprecated
+     */
+    'no-duplicate-imports': 'off',
+    /**
+     * This rule from the @typescript-eslint plugin,
+     * was created to address shortcomings of the core no-duplicate-imports rule,
+     * when used within typescript projects.
+     * It was intended to handle edge cases that the core rule could miss.
+     * However, it has been stated that the import/no-duplicates rule is a much better solution.
+     * @deprecated
+     */
+    '@typescript-eslint/no-duplicate-imports': 'off',
+    /**
+     * This rule, from the eslint-plugin-import plugin, goes beyond simple syntax checking.
+     * It utilizes module resolution to determine if imports are truly duplicates, even if their paths appear different.
+     * This makes it more effective in projects with module aliases, path mappings, or complex build setups.
+     * This plugin is more robust at identifying duplicate imports, because it understands how modules are resolved.
+     *
+     * It is also capable of understanding that an "import type" and an "import" statement are not duplicate,
+     * thus compatible with the fixStyle: 'separate-type-imports' configuration of the @typescript-eslint/consistent-type-imports rule.
+     */
+    'import/no-duplicates': 'error',
+
     '@kbn/disable/no_protected_eslint_disable': 'error',
     '@kbn/disable/no_naked_eslint_disable': 'error',
     '@kbn/eslint/no_async_promise_body': 'error',
