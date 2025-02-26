@@ -12,6 +12,22 @@ import { EuiCode, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { ToggleField } from './toggle_field';
 
+export const IgnoreMissingToggle = () => {
+  return (
+    <ToggleField
+      name="ignore_missing"
+      label={i18n.translate(
+        'xpack.streams.streamDetailView.managementTab.enrichment.processor.ignoreMissingLabel',
+        { defaultMessage: 'Ignore missing' }
+      )}
+      helpText={i18n.translate(
+        'xpack.streams.streamDetailView.managementTab.enrichment.processor.ignoreMissingHelpText',
+        { defaultMessage: 'Ignore documents with a missing field.' }
+      )}
+    />
+  );
+};
+
 export const IgnoreFailureToggle = () => {
   const value = useWatch({ name: 'ignore_failure' });
 
@@ -35,22 +51,6 @@ export const IgnoreFailureToggle = () => {
           </EuiText>
         ) : undefined
       }
-    />
-  );
-};
-
-export const IgnoreMissingToggle = () => {
-  return (
-    <ToggleField
-      name="ignore_missing"
-      label={i18n.translate(
-        'xpack.streams.streamDetailView.managementTab.enrichment.processor.ignoreMissingLabel',
-        { defaultMessage: 'Ignore missing' }
-      )}
-      helpText={i18n.translate(
-        'xpack.streams.streamDetailView.managementTab.enrichment.processor.ignoreMissingHelpText',
-        { defaultMessage: 'Ignore documents with a missing field.' }
-      )}
     />
   );
 };

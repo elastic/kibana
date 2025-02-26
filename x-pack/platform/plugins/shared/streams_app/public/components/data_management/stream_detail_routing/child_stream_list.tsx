@@ -56,7 +56,7 @@ export function ChildStreamList({
           size="s"
           className={css`
             height: 40px;
-            align-content: center;
+            align-content: flexStart;
             font-weight: bold;
           `}
         >
@@ -146,6 +146,7 @@ export function ChildStreamList({
           <NestedView last>
             <EuiPanel hasShadow={false} hasBorder paddingSize="none">
               <EuiButtonEmpty
+                color="text"
                 iconType="plus"
                 data-test-subj="streamsAppStreamDetailRoutingAddRuleButton"
                 onClick={() => {

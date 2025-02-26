@@ -28,6 +28,8 @@ export function RetentionSummary({ definition }: { definition: IngestStreamGetRe
             defaultMessage: 'Retention summary',
           })}
         </h5>
+      </EuiText>
+      <EuiText size="s" color="subdued">
         <p>{summary}</p>
       </EuiText>
     </EuiPanel>
