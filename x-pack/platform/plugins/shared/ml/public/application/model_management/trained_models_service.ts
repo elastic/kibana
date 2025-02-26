@@ -251,14 +251,7 @@ export class TrainedModelsService {
           },
         }),
         undefined,
-        i18n.translate('xpack.ml.trainedModels.modelsList.fetchDeletionErrorMessage', {
-          defaultMessage:
-            'Failed to delete the following {count, plural, one {model} other {models}}: {modelIds}',
-          values: {
-            count: failures.length,
-            modelIds: failedModelIds,
-          },
-        })
+        failedModelIds
       );
     }
 
