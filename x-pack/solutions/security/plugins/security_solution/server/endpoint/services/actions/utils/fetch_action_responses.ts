@@ -7,7 +7,7 @@
 
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { AGENT_ACTIONS_RESULTS_INDEX } from '@kbn/fleet-plugin/common';
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { estypes } from '@elastic/elasticsearch';
 import type {
   EndpointActionResponse,
   LogsEndpointActionResponse,

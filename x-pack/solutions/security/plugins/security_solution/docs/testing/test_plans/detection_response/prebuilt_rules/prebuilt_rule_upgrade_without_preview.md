@@ -2,6 +2,9 @@
 
 **Status**: `in progress`, matches [Milestone 3](https://github.com/elastic/kibana/issues/174168).
 
+> [!TIP]
+> If you're new to prebuilt rules, get started [here](./prebuilt_rules.md) and check an overview of the features of prebuilt rules in [this section](./prebuilt_rules_common_info.md#features).
+
 ## Summary <!-- omit from toc -->
 
 This is a test plan for the workflows of:
@@ -21,9 +24,10 @@ https://marketplace.visualstudio.com/items?itemName=yzhang.markdown-all-in-one
 - [Useful information](#useful-information)
   - [Tickets](#tickets)
   - [Terminology](#terminology)
+- [Requirements](#requirements)
   - [Assumptions](#assumptions)
-  - [Non-functional requirements](#non-functional-requirements)
-  - [Functional requirements](#functional-requirements)
+  - [Technical requirements](#technical-requirements)
+  - [Product requirements](#product-requirements)
 - [Scenarios](#scenarios)
   - [Rule upgrade notifications on the Rule Management page](#rule-upgrade-notifications-on-the-rule-management-page)
     - [**Scenario: User is NOT notified when all installed prebuilt rules are up to date**](#scenario-user-is-not-notified-when-all-installed-prebuilt-rules-are-up-to-date)
@@ -81,110 +85,62 @@ https://marketplace.visualstudio.com/items?itemName=yzhang.markdown-all-in-one
 
 ### Tickets
 
-- [Users can Customize Prebuilt Detection Rules](https://github.com/elastic/security-team/issues/1974) epic
-
-**Milestone 3 - Prebuilt Rules Customization:**
-
-- [Milestone 3 epic ticket](https://github.com/elastic/kibana/issues/174168)
-- [Tests for prebuilt rule upgrade workflow #202078](https://github.com/elastic/kibana/issues/202078)
-
-**Milestone 2:**
-
-- [Ensure full test coverage for existing workflows of installing and upgrading prebuilt rules](https://github.com/elastic/kibana/issues/148176)
-- [Write test plan and add test coverage for the new workflows of installing and upgrading prebuilt rules](https://github.com/elastic/kibana/issues/148192)
+- [Users can Customize Prebuilt Detection Rules](https://github.com/elastic/security-team/issues/1974) (internal)
+- [Users can Customize Prebuilt Detection Rules: Milestone 3](https://github.com/elastic/kibana/issues/174168)
+- [Tests for prebuilt rule upgrade workflow](https://github.com/elastic/kibana/issues/202078)
 
 ### Terminology
 
-- **EPR**: [Elastic Package Registry](https://github.com/elastic/package-registry), service that hosts our **Package**.
+- [Common terminology](./prebuilt_rules_common_info.md#common-terminology).
+- **CTA to install prebuilt rules**: a link button with a counter on the Rule Management page.
+- **CTA to upgrade prebuilt rules**: a tab with a counter on the Rule Management page.
 
-- **Package**: `security_detection_engine` Fleet package that we use to distribute prebuilt detection rules in the form of `security-rule` assets (saved objects).
-
-- **Real package**: actual latest stable package distributed and pulled from EPR via Fleet.
-
-- **Mock rules**: `security-rule` assets that are indexed into the `.kibana_security_solution` index directly in the test setup, either by using the ES client _in integration tests_ or by an API request _in Cypress tests_.
-
-- **Air-gapped environment**: an environment where Kibana doesn't have access to the internet. In general, EPR is not available in such environments, except the cases when the user runs a custom EPR inside the environment.
-
-- **CTA**: "call to action", usually a button, a link, or a callout message with a button, etc, that invites the user to do some action.
-  - CTA to install prebuilt rules - at this moment, it's a link button with a counter (implemented) and a callout with a link button (not yet implemented) on the Rule Management page.
-  - CTA to upgrade prebuilt rules - at this moment, it's a tab with a counter (implemented) and a callout with a link button (not yet implemented) on the Rule Management page.
+## Requirements
 
 ### Assumptions
 
-- Below scenarios only apply to prebuilt detection rules.
-- EPR is available for fetching the package with prebuilt rules unless explicitly indicated otherwise.
-- Only the latest **stable** package is checked for installation/upgrade and pre-release packages are ignored.
-- Users have the required [privileges for managing detection rules](https://www.elastic.co/guide/en/security/current/detections-permissions-section.html).
-- Users are:
-  - on the `Basic` license and higher in self-hosted and ECH environments;
-  - on the `Essentials` tier and higher in Serverless environments.
+Assumptions about test environments and scenarios outlined in this test plan.
 
-### Non-functional requirements
+- [Common assumptions](./prebuilt_rules_common_info.md#common-assumptions).
 
-- Notifications, rule installation and rule upgrade workflows should work:
-  - regardless of the package type: with historical rule versions or without;
-  - regardless of the package registry availability: i.e., they should also work in air-gapped environments.
-- Rule installation and upgrade workflows should work with packages containing up to 15000 historical rule versions. This is the max number of versions of all rules in the package. This limit is enforced by Fleet.
-- Kibana should not crash with Out Of Memory exception during package installation.
-- For test purposes, it should be possible to use detection rules package versions lower than the latest.
+### Technical requirements
 
-### Functional requirements
+Non-functional requirements for the functionality outlined in this test plan.
 
-User should be able to upgrade prebuilt rules with and without previewing what updates they would apply (rule properties of target rule versions).
+- [Common technical requirements](./prebuilt_rules_common_info.md#common-technical-requirements).
 
-User should be able to upgrade prebuilt rules with and without customizations. Where the following fields support customizations:
+### Product requirements
 
-| Rule type        | Field name in UI          | Diffable rule field       |
-| ---------------- | ------------------------- | ------------------------- |
-| All rule types   | Rule name                 | `name`                    |
-| All rule types   | Rule description          | `description`             |
-| All rule types   | Tags                      | `tags`                    |
-| All rule types   | Default severity          | `severity`                |
-| All rule types   | Severity Override         | `severity_mapping`        |
-| All rule types   | Default risk score        | `risk_score`              |
-| All rule types   | Risk score override       | `risk_score_mapping`      |
-| All rule types   | Reference URLs            | `references`              |
-| All rule types   | False positive examples   | `false_positives`         |
-| All rule types   | MITRE ATT&CK™ threats     | `threat`                  |
-| All rule types   | Setup guide               | `setup`                   |
-| All rule types   | Investigation guide       | `note`                    |
-| All rule types   | Related integrations      | `related_integrations`    |
-| All rule types   | Required fields           | `required_fields`         |
-| All rule types   | Rule schedule             | `rule_schedule`           |
-| All rule types   | Max alerts per run        | `max_signals`             |
-| All rule types   | Rule name override        | `rule_name_override`      |
-| All rule types   | Timestamp override        | `timestamp_override`      |
-| All rule types   | Timeline template         | `timeline_template`       |
-| All rule types   | Building block `*`        | `building_block`          |
-| All rule types   | Investigation fields      | `investigation_fields`    |
-| All rule types   | Data source `**`          | `data_source`             |
-| All rule types   | Suppress alerts           | `alert_suppression`       |
-| Custom Query     | Custom query              | `kql_query`               |
-| Saved Query      | Custom query              | `kql_query`               |
-| EQL              | EQL query                 | `eql_query`               |
-| ESQL             | ESQL query                | `esql_query`              |
-| Threat Match     | Custom query              | `kql_query`               |
-| Threat Match     | Indicator index patterns  | `threat_index`            |
-| Threat Match     | Indicator index query     | `threat_query`            |
-| Threat Match     | Indicator mapping         | `threat_mapping`          |
-| Threat Match     | Indicator prefix override | `threat_indicator_path`   |
-| Threshold        | Custom query              | `kql_query`               |
-| Threshold        | Threshold config          | `threshold`               |
-| Machine Learning | Machine Learning job      | `machine_learning_job_id` |
-| Machine Learning | Anomaly score threshold   | `anomaly_threshold`       |
-| New Terms        | Custom query              | `kql_query`               |
-| New Terms        | Fields                    | `new_terms_fields`        |
-| New Terms        | History Window Size       | `history_window_start`    |
+Functional requirements for the functionality outlined in this test plan.
 
-- `*` Building block field is used to mark alerts as building block alerts.
-- `**` Data Source represents index patterns or a data view. Machine Learning rules don't have data_source field.
+- [Common product requirements](./prebuilt_rules_common_info.md#common-product-requirements).
 
-User should be able to upgrade prebuilt rules with updates in the following non-customizable fields:
+User stories for upgrading single prebuilt rules one-by-one:
 
-| Field name            | Diffable rule field |
-| --------------------- | ------------------- |
-| Rule type             | `type`              |
-| Rule version          | `version`           |
+- User can upgrade a single prebuilt rule to its latest version without previewing the incoming updates:
+  - if the rule doesn't have any conflicts with its latest version.
+- User can't upgrade a single prebuilt rule to its latest version without previewing the incoming updates:
+  - if the rule has any solvable conflicts with its latest version;
+  - if the rule has any non-solvable conflicts with its latest version;
+  - if the rule's type has been changed in the latest version by Elastic (this is considered a non-solvable conflict);
+  - in these situations user is required to upgrade the rule with preview.
+
+User stories for upgrading multiple prebuilt rules in bulk:
+
+- User can bulk upgrade multiple prebuilt rules to their latest versions without previewing the incoming updates, but only those:
+  - that don't have any conflicts with their latest versions;
+  - that have some solvable conflicts but don't have any non-solvable conflicts with their latest versions.
+- User can't bulk upgrade multiple prebuilt rules to their latest versions without previewing the incoming updates:
+  - if these rules have any non-solvable conflicts with their latest versions;
+  - if these rules don't have any non-solvable conflicts, but have some solvable conflicts and the user doesn't confirm their intention to upgrade such rules;
+  - if these rules' types have been changed in their latest versions by Elastic (this is considered a non-solvable conflict);
+  - in these situations user is required to upgrade each rule one-by-one with preview.
+- User can bulk upgrade prebuilt rules with solvable conflicts only if the user confirms their intention to upgrade such rules.
+- User can "bulk upgrade" a single prebuilt rule via the bulk actions. In this case, the "user stories for upgrading multiple prebuilt rules in bulk" apply instead of the "user stories for upgrading single prebuilt rules one-by-one".
+
+User stories, misc:
+
+- In general, user can upgrade a prebuilt rule without preview regardless of the fact if the rule is customized or not. The ability to do so depends on the fact if this customization conflicts with the latest version or not, and if yes, is this conflict solvable or non-solvable.
 
 ## Scenarios
 
