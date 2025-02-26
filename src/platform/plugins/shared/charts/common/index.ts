@@ -8,7 +8,6 @@
  */
 
 export const COLOR_MAPPING_SETTING = 'visualization:colorMapping';
-export const LEGACY_TIME_AXIS = 'visualization:useLegacyTimeAxis';
 
 export type {
   CustomPaletteArguments,
@@ -34,7 +33,6 @@ export {
   ColorMode,
   LabelRotation,
   defaultCountLabel,
-  MULTILAYER_TIME_AXIS_STYLE,
 } from './static';
 
 export type { ColorSchemaParams, Labels, Style } from './types';
