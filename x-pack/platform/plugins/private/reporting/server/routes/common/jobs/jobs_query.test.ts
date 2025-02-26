@@ -44,31 +44,27 @@ describe('jobsQuery', () => {
       expect(client.search).toHaveBeenNthCalledWith(
         1,
         expect.objectContaining({
-          body: expect.objectContaining({
-            size: 10,
-            from: 10,
-            query: set(
-              {},
-              'constant_score.filter.bool.must',
-              expect.arrayContaining([
-                { term: { created_by: 'somebody' } },
-                { ids: { values: ['id1', 'id2'] } },
-              ])
-            ),
-          }),
+          size: 10,
+          from: 10,
+          query: set(
+            {},
+            'constant_score.filter.bool.must',
+            expect.arrayContaining([
+              { term: { created_by: 'somebody' } },
+              { ids: { values: ['id1', 'id2'] } },
+            ])
+          ),
         })
       );
 
       expect(client.search).toHaveBeenNthCalledWith(
         2,
         expect.objectContaining({
-          body: expect.objectContaining({
-            query: set(
-              {},
-              'constant_score.filter.bool.must',
-              expect.not.arrayContaining([{ ids: expect.any(Object) }])
-            ),
-          }),
+          query: set(
+            {},
+            'constant_score.filter.bool.must',
+            expect.not.arrayContaining([{ ids: expect.any(Object) }])
+          ),
         })
       );
     });
@@ -109,13 +105,11 @@ describe('jobsQuery', () => {
 
       expect(client.count).toHaveBeenCalledWith(
         expect.objectContaining({
-          body: expect.objectContaining({
-            query: set(
-              {},
-              'constant_score.filter.bool.must',
-              expect.arrayContaining([{ term: { created_by: 'somebody' } }])
-            ),
-          }),
+          query: set(
+            {},
+            'constant_score.filter.bool.must',
+            expect.arrayContaining([{ term: { created_by: 'somebody' } }])
+          ),
         })
       );
     });
@@ -139,16 +133,11 @@ describe('jobsQuery', () => {
 
       expect(client.search).toHaveBeenCalledWith(
         expect.objectContaining({
-          body: expect.objectContaining({
-            query: set(
-              {},
-              'constant_score.filter.bool.must',
-              expect.arrayContaining([
-                { term: { _id: 'id1' } },
-                { term: { created_by: 'somebody' } },
-              ])
-            ),
-          }),
+          query: set(
+            {},
+            'constant_score.filter.bool.must',
+            expect.arrayContaining([{ term: { _id: 'id1' } }, { term: { created_by: 'somebody' } }])
+          ),
         })
       );
     });
@@ -192,13 +181,11 @@ describe('jobsQuery', () => {
 
       expect(client.search).toHaveBeenCalledWith(
         expect.objectContaining({
-          body: expect.objectContaining({
-            query: set(
-              {},
-              'constant_score.filter.bool.must',
-              expect.arrayContaining([{ term: { _id: 'id1' } }])
-            ),
-          }),
+          query: set(
+            {},
+            'constant_score.filter.bool.must',
+            expect.arrayContaining([{ term: { _id: 'id1' } }])
+          ),
         })
       );
     });

@@ -14,7 +14,7 @@ import type { ConfigSchema } from '@kbn/unified-search-plugin/server/config';
 import { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import { getKbnServerError, reportServerError } from '@kbn/kibana-utils-plugin/server';
 import { ALERTING_CASES_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server/src/saved_objects_index_pattern';
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { estypes } from '@elastic/elasticsearch';
 
 import { verifyAccessAndContext } from '../lib';
 import { ILicenseState } from '../../lib';
