@@ -27,11 +27,13 @@ const { useGlobalFlyout } = GlobalFlyout;
 interface TableRowProps {
   deprecation: EnrichedDeprecationInfo;
   rowFieldNames: DeprecationTableColumns[];
+  mustOpenFlyout: boolean;
 }
 
 const IndexTableRowCells: React.FunctionComponent<TableRowProps> = ({
   rowFieldNames,
   deprecation,
+  mustOpenFlyout,
 }) => {
   const [showFlyout, setShowFlyout] = useState(false);
   const indexContext = useIndexContext();
@@ -69,6 +71,12 @@ const IndexTableRowCells: React.FunctionComponent<TableRowProps> = ({
       uiMetricService.trackUiMetric(METRIC_TYPE.CLICK, UIM_REINDEX_OPEN_FLYOUT_CLICK);
     }
   }, [showFlyout]);
+
+  useEffect(() => {
+    if (mustOpenFlyout) {
+      setShowFlyout(true);
+    }
+  }, [mustOpenFlyout]);
 
   return (
     <>

@@ -18,9 +18,14 @@ const { useGlobalFlyout } = GlobalFlyout;
 interface Props {
   rowFieldNames: DeprecationTableColumns[];
   deprecation: EnrichedDeprecationInfo;
+  mustOpenFlyout: boolean;
 }
 
-export const DefaultTableRow: React.FunctionComponent<Props> = ({ rowFieldNames, deprecation }) => {
+export const DefaultTableRow: React.FunctionComponent<Props> = ({
+  rowFieldNames,
+  deprecation,
+  mustOpenFlyout,
+}) => {
   const [showFlyout, setShowFlyout] = useState(false);
 
   const { addContent: addContentToGlobalFlyout, removeContent: removeContentFromGlobalFlyout } =
@@ -49,6 +54,12 @@ export const DefaultTableRow: React.FunctionComponent<Props> = ({ rowFieldNames,
       });
     }
   }, [addContentToGlobalFlyout, closeFlyout, deprecation, showFlyout]);
+
+  useEffect(() => {
+    if (mustOpenFlyout) {
+      setShowFlyout(true);
+    }
+  }, [mustOpenFlyout]);
 
   return (
     <>
