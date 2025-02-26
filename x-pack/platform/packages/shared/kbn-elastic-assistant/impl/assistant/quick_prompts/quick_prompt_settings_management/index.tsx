@@ -106,7 +106,7 @@ const QuickPromptSettingsManagementComponent = () => {
   }, [closeConfirmModal, handleSave, refetchPrompts]);
 
   const onCreate = useCallback(() => {
-    onQuickPromptSelect('');
+    onQuickPromptSelect();
     openFlyout();
   }, [onQuickPromptSelect, openFlyout]);
 
