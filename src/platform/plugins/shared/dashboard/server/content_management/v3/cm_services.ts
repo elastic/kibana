@@ -27,7 +27,6 @@ import {
 import { FilterStateStore } from '@kbn/es-query';
 import { SortDirection } from '@kbn/data-plugin/common/search';
 import {
-  DASHBOARD_GRID_COLUMN_COUNT,
   DEFAULT_PANEL_HEIGHT,
   DEFAULT_PANEL_WIDTH,
   DEFAULT_DASHBOARD_OPTIONS,
@@ -235,7 +234,6 @@ export const gridDataSchema = schema.object({
   w: schema.number({
     defaultValue: DEFAULT_PANEL_WIDTH,
     min: 1,
-    max: DASHBOARD_GRID_COLUMN_COUNT,
     meta: { description: 'The width of the panel in grid units' },
   }),
   h: schema.number({
@@ -249,6 +247,13 @@ export const gridDataSchema = schema.object({
     })
   ),
 });
+
+export const sectionSchema = schema.arrayOf(
+  schema.object({
+    title: schema.string(),
+    collapsed: schema.boolean(),
+  })
+);
 
 export const panelSchema = schema.object({
   panelConfig: schema.object(
@@ -290,6 +295,7 @@ export const panelSchema = schema.object({
       meta: { description: 'The unique ID of the panel.' },
     })
   ),
+  sectionIndex: schema.maybe(schema.number()),
   title: schema.maybe(schema.string({ meta: { description: 'The title of the panel' } })),
   version: schema.maybe(
     schema.string({
@@ -310,6 +316,10 @@ export const optionsSchema = schema.object({
   useMargins: schema.boolean({
     defaultValue: DEFAULT_DASHBOARD_OPTIONS.useMargins,
     meta: { description: 'Show margins between panels in the dashboard layout.' },
+  }),
+  lockToGrid: schema.boolean({
+    defaultValue: DEFAULT_DASHBOARD_OPTIONS.syncCursor,
+    meta: { description: 'Lock panels to a grid.' },
   }),
   syncColors: schema.boolean({
     defaultValue: DEFAULT_DASHBOARD_OPTIONS.syncColors,
@@ -398,6 +408,7 @@ export const dashboardAttributesSchema = searchResultsAttributesSchema.extends({
   // Dashboard Content
   controlGroupInput: schema.maybe(controlGroupInputSchema),
   panels: schema.arrayOf(panelSchema, { defaultValue: [] }),
+  sections: schema.maybe(sectionSchema),
   options: optionsSchema,
   version: schema.maybe(schema.number({ meta: { deprecated: true } })),
 });
@@ -419,6 +430,7 @@ const dashboardAttributesSchemaResponse = dashboardAttributesSchema.extends({
       gridData: gridDataSchema.extends({
         i: schema.string(),
       }),
+      sectionIndex: schema.maybe(schema.number()),
     }),
     { defaultValue: [] }
   ),

@@ -16,11 +16,14 @@ export interface DashboardPanelMap {
   [key: string]: DashboardPanelState;
 }
 
+export type DashboardSectionMap = Array<{ title: string; collapsed: boolean }>;
+
 export interface DashboardPanelState<PanelState = object> {
   type: string;
   explicitInput: PanelState;
   readonly gridData: GridData;
   panelRefName?: string;
+  sectionIndex?: number;
 
   /**
    * This version key was used to store Kibana version information from versions 7.3.0 -> 8.11.0.

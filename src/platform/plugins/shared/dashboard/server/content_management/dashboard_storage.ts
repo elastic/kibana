@@ -251,6 +251,7 @@ export class DashboardStorage {
       DashboardAttributes,
       DashboardAttributes
     >(data);
+
     if (dataError) {
       throw Boom.badRequest(`Invalid data. ${dataError.message}`);
     }

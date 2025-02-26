@@ -168,6 +168,9 @@ const styles = {
     height: '100%',
   }),
   grid: css({
+    '.kbnGrid--freeform &': {
+      display: 'block',
+    },
     position: 'relative',
     justifyItems: 'stretch',
     display: 'grid',

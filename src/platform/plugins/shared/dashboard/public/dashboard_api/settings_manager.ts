@@ -32,6 +32,13 @@ export function initializeSettingsManager(initialState?: DashboardState) {
   function setSyncTooltips(syncTooltips: boolean) {
     if (syncTooltips !== syncTooltips$.value) syncTooltips$.next(syncTooltips);
   }
+  const lockToGrid$ = new BehaviorSubject<boolean>(
+    initialState?.lockToGrid ?? DEFAULT_DASHBOARD_STATE.lockToGrid
+  );
+  function setLockToGrid(lockToGrid: boolean) {
+    if (lockToGrid !== lockToGrid$.value) lockToGrid$.next(lockToGrid);
+  }
+
   const tags$ = new BehaviorSubject<string[]>(initialState?.tags ?? DEFAULT_DASHBOARD_STATE.tags);
   function setTags(tags: string[]) {
     if (!fastIsEqual(tags, tags$.value)) tags$.next(tags);
@@ -57,6 +64,7 @@ export function initializeSettingsManager(initialState?: DashboardState) {
       syncCursor: syncCursor$.value,
       syncTooltips: syncTooltips$.value,
       tags: tags$.value,
+      lockToGrid: lockToGrid$.value,
       timeRestore: timeRestore$.value,
       useMargins: useMargins$.value,
     };
@@ -69,6 +77,7 @@ export function initializeSettingsManager(initialState?: DashboardState) {
     setTags(settings.tags);
     setTimeRestore(settings.timeRestore);
     setUseMargins(settings.useMargins);
+    setLockToGrid(settings.lockToGrid);
     titleManager.api.setHideTitle(settings.hidePanelTitles);
     titleManager.api.setDescription(settings.description);
     titleManager.api.setTitle(settings.title);
@@ -82,6 +91,7 @@ export function initializeSettingsManager(initialState?: DashboardState) {
         syncColors$,
         syncCursor$,
         syncTooltips$,
+        lockToGrid$,
         useMargins$,
       },
       setSettings,
@@ -93,6 +103,7 @@ export function initializeSettingsManager(initialState?: DashboardState) {
       syncColors: [syncColors$, setSyncColors],
       syncCursor: [syncCursor$, setSyncCursor],
       syncTooltips: [syncTooltips$, setSyncTooltips],
+      lockToGrid: [lockToGrid$, setLockToGrid],
       timeRestore: [timeRestore$, setTimeRestore],
       useMargins: [useMargins$, setUseMargins],
     } as StateComparators<Omit<DashboardSettings, 'tags'>>,
@@ -102,6 +113,7 @@ export function initializeSettingsManager(initialState?: DashboardState) {
         return {
           ...settings,
           title: settings.title ?? '',
+          lockToGrid: settings.lockToGrid ?? DEFAULT_DASHBOARD_STATE.lockToGrid,
           timeRestore: settings.timeRestore ?? DEFAULT_DASHBOARD_STATE.timeRestore,
           hidePanelTitles: settings.hidePanelTitles ?? DEFAULT_DASHBOARD_STATE.hidePanelTitles,
         };

@@ -58,7 +58,10 @@ export const GridLayout = ({
    * Update the `gridLayout$` behaviour subject in response to the `layout` prop changing
    */
   useEffect(() => {
-    if (!isLayoutEqual(layout, gridLayoutStateManager.gridLayout$.getValue())) {
+    if (
+      gridLayoutStateManager.runtimeSettings$.getValue() !== 'none' &&
+      !isLayoutEqual(layout, gridLayoutStateManager.gridLayout$.getValue())
+    ) {
       const newLayout = cloneDeep(layout);
       /**
        * the layout sent in as a prop is not guaranteed to be valid (i.e it may have floating panels) -
@@ -108,8 +111,15 @@ export const GridLayout = ({
     const gridLayoutClassSubscription = combineLatest([
       gridLayoutStateManager.accessMode$,
       gridLayoutStateManager.isMobileView$,
-    ]).subscribe(([currentAccessMode, isMobileView]) => {
+      gridLayoutStateManager.runtimeSettings$,
+    ]).subscribe(([currentAccessMode, isMobileView, runtimeSettings]) => {
       if (!layoutRef) return;
+
+      if (runtimeSettings === 'none') {
+        layoutRef.current?.classList.add('kbnGrid--freeform');
+      } else {
+        layoutRef.current?.classList.remove('kbnGrid--freeform');
+      }
 
       if (isMobileView) {
         layoutRef.current?.classList.add('kbnGrid--mobileView');

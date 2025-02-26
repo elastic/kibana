@@ -64,11 +64,14 @@ export const getSerializedState = ({
     timeRestore,
     description,
 
+    sections,
+
     // Dashboard options
     useMargins,
     syncColors,
     syncCursor,
     syncTooltips,
+    lockToGrid,
     hidePanelTitles,
     controlGroupInput,
   } = dashboardState;
@@ -94,6 +97,7 @@ export const getSerializedState = ({
     syncColors,
     syncCursor,
     syncTooltips,
+    lockToGrid,
     hidePanelTitles,
   };
   const savedPanels = convertPanelMapToPanelsArray(panels, true);
@@ -122,6 +126,9 @@ export const getSerializedState = ({
     timeRestore,
     options,
     panels: savedPanels,
+
+    sections,
+
     timeFrom,
     title,
     timeTo,

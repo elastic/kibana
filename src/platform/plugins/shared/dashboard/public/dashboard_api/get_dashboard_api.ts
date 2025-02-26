@@ -87,6 +87,7 @@ export function getDashboardApi({
   const panelsManager = initializePanelsManager(
     incomingEmbeddable,
     initialState.panels,
+    initialState.sections,
     initialPanelsRuntimeState ?? {},
     trackPanel,
     getPanelReferences,
@@ -120,13 +121,14 @@ export function getDashboardApi({
     referencesComparator,
   });
   function getState() {
-    const { panels, references: panelReferences } = panelsManager.internalApi.getState();
+    const { panels, sections, references: panelReferences } = panelsManager.internalApi.getState();
     const { state: unifiedSearchState, references: searchSourceReferences } =
       unifiedSearchManager.internalApi.getState();
     const dashboardState: DashboardState = {
       ...settingsManager.internalApi.getState(),
       ...unifiedSearchState,
       panels,
+      sections,
       viewMode: viewModeManager.api.viewMode$.value,
     };
 

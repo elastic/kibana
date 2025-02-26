@@ -96,6 +96,20 @@ export const moveAction = (
   })();
 
   activePanel$.next({ id: interactionEvent.id, position: previewRect });
+  if (runtimeSettings === 'none') {
+    const nextLayout = cloneDeep(currentLayout);
+    const targetRow = gridRowElements[interactionEvent.targetRowIndex];
+    nextLayout[interactionEvent.targetRowIndex].panels[interactionEvent.id] = {
+      ...currentPanelData,
+      column: previewRect.left,
+      row: previewRect.top - (targetRow?.getBoundingClientRect().top ?? 0),
+      height: previewRect.bottom - previewRect.top,
+      width: previewRect.right - previewRect.left,
+    };
+    proposedGridLayout$.next(nextLayout);
+
+    return;
+  }
 
   const { columnCount, gutterSize, rowHeight, columnPixelWidth } = runtimeSettings;
 
