@@ -5,8 +5,16 @@
  * 2.0.
  */
 
-import type { CoreStart, CoreSetup, Plugin, PluginInitializerContext } from '@kbn/core/server';
+import type {
+  CoreStart,
+  CoreSetup,
+  Plugin,
+  PluginInitializerContext,
+  LoggerFactory,
+} from '@kbn/core/server';
 import { registerRoutes } from './routes';
+import type { InternalServices } from './services/types';
+import { AgentFactory } from './services/orchestration';
 
 import type {
   WorkChatAppPluginSetup,
@@ -24,16 +32,38 @@ export class WorkChatAppPlugin
       WorkChatAppPluginStartDependencies
     >
 {
-  constructor(context: PluginInitializerContext) {}
+  private readonly logger: LoggerFactory;
+  private services?: InternalServices;
+
+  constructor(context: PluginInitializerContext) {
+    this.logger = context.logger;
+  }
 
   public setup(core: CoreSetup, pluginsDependencies: WorkChatAppPluginSetupDependencies) {
     const router = core.http.createRouter();
-    registerRoutes({ router });
+    registerRoutes({
+      router,
+      getServices: () => {
+        if (!this.services) {
+          throw new Error('getServices called before #start');
+        }
+        return this.services;
+      },
+    });
 
     return {};
   }
 
   public start(core: CoreStart, pluginsDependencies: WorkChatAppPluginStartDependencies) {
+    const agentFactory = new AgentFactory({
+      inference: pluginsDependencies.inference,
+      logger: this.logger.get('services.agentFactory'),
+    });
+
+    this.services = {
+      agentFactory,
+    };
+
     return {};
   }
 }
