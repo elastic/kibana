@@ -67,7 +67,7 @@ export const SearchIndexPipelines: React.FC = () => {
   const extractionDisabled = getContentExtractionDisabled(index);
   const buttonRef = useRef<HTMLButtonElement | null>(null);
   const pipelinesButton = Array.from(document.querySelectorAll('button')).find(
-    btn => btn.textContent?.trim() === 'Pipelines'
+    (btn) => btn.textContent?.trim() === 'Pipelines'
   );
 
   const onCloseDeleteModal = useCallback(() => {
@@ -80,12 +80,12 @@ export const SearchIndexPipelines: React.FC = () => {
   }, [closeDeleteModal, buttonRef]);
 
   const onDeletePipeline = useCallback(() => {
-    revertPipeline({ indexName })   
+    revertPipeline({ indexName });
     setTimeout(() => {
       if (pipelinesButton) {
         pipelinesButton.focus();
       }
-    }, 200); 
+    }, 200);
   }, [revertPipeline, pipelinesButton]);
 
   useEffect(() => {
