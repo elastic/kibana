@@ -16,7 +16,7 @@ import { measureInteraction } from './measure_interaction';
 
 export type CustomMetrics = Omit<PerformanceMetricEvent, 'eventName' | 'meta' | 'duration'>;
 type WithPrefix<T extends string> = `${T} ${string}`;
-type Description = WithPrefix<'[TTFMP]'>;
+export type Description = WithPrefix<'[TTFMP]'>;
 
 export interface Meta {
   rangeFrom: string;
