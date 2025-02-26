@@ -169,24 +169,31 @@ components:
 
     EndpointIds:
       type: array
+      description: List of endpoint IDs (cannot contain empty strings)
+      example: [ "endpoint-id-1", "endpoint-id-2" ]
       items:
         type: string
         minLength: 1
       minItems: 1
-      description: List of endpoint IDs (cannot contain empty strings)
+
     CaseIds:
       type: array
+      description: Case IDs to be updated (cannot contain empty strings)
+      example: [ "case-id-1", "case-id-2" ]
       items:
         type: string
         minLength: 1
       minItems: 1
-      description: Case IDs to be updated (cannot contain empty strings)
+
     Comment:
       type: string
       description: Optional comment
+      example: "This is a comment"
+
     Parameters:
       type: object
       description: Optional parameters object
+
     AgentTypes:
       type: string
       description: List of agent types to retrieve. Defaults to endpoint.
