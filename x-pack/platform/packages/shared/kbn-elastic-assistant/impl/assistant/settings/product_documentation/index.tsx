@@ -14,41 +14,27 @@ import {
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
-import React, { useEffect, useState, useCallback, useMemo } from 'react';
+import React, { useCallback, useMemo } from 'react';
+import { InstallationStatus } from '@kbn/product-doc-base-plugin/common/install_status';
 import { useInstallProductDoc } from '../../api/product_docs/use_install_product_doc';
-import { useGetProductDocStatus } from '../../api/product_docs/use_get_product_doc_status';
 import * as i18n from './translations';
 
-export const ProductDocumentationManagement: React.FC = React.memo(() => {
-  const [{ isInstalled, isInstalling }, setState] = useState({
-    isInstalled: true,
-    isInstalling: false,
-  });
+export const ProductDocumentationManagement = React.memo<{
+  status?: InstallationStatus;
+}>(({ status }) => {
+  const {
+    mutateAsync: installProductDoc,
+    isSuccess: isInstalled,
+    isLoading: isInstalling,
+  } = useInstallProductDoc();
 
-  const { mutateAsync: installProductDoc } = useInstallProductDoc();
-  const { status, isLoading: isStatusLoading } = useGetProductDocStatus();
-
-  useEffect(() => {
-    if (status) {
-      setState((prevState) => ({
-        ...prevState,
-        isInstalled: status.overall === 'installed',
-      }));
-    }
-  }, [status]);
-
-  const onClickInstall = useCallback(async () => {
-    setState((prevState) => ({ ...prevState, isInstalling: true }));
-    try {
-      await installProductDoc();
-      setState({ isInstalled: true, isInstalling: false });
-    } catch {
-      setState({ isInstalled: false, isInstalling: false });
-    }
+  const onClickInstall = useCallback(() => {
+    installProductDoc();
   }, [installProductDoc]);
 
   const content = useMemo(() => {
-    if (isStatusLoading) {
+    // Status is undefined when the status is loading from useKnowledgeBaseStatus
+    if (!status) {
       return <EuiLoadingSpinner data-test-subj="statusLoading" size="m" />;
     }
     if (isInstalling) {
@@ -72,11 +58,13 @@ export const ProductDocumentationManagement: React.FC = React.memo(() => {
         </EuiFlexItem>
       </EuiFlexGroup>
     );
-  }, [isInstalling, isStatusLoading, onClickInstall]);
+  }, [isInstalling, onClickInstall, status]);
 
-  if (isInstalled) {
+  // The last condition means that the installation was started by the plugin
+  if (status === 'installed' || isInstalled || (status === 'installing' && !isInstalling)) {
     return null;
   }
+
   return (
     <>
       <EuiCallOut title={i18n.LABEL} iconType="iInCircle">
