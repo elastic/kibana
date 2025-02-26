@@ -112,8 +112,7 @@ const isSearchBarVisible = (container: HTMLElement) => {
   return searchBarContainer === null;
 };
 
-// FLAKY: https://github.com/elastic/kibana/issues/206646
-describe.skip('GraphInvestigation Component', () => {
+describe('GraphInvestigation Component', () => {
   beforeEach(() => {
     for (const key in actionMocks) {
       if (Object.prototype.hasOwnProperty.call(actionMocks, key)) {
@@ -136,7 +135,8 @@ describe.skip('GraphInvestigation Component', () => {
     expect(getAllByText('~ an hour ago')).toHaveLength(2);
   });
 
-  it('shows error on bad kql syntax', async () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/206646
+  it.skip('shows error on bad kql syntax', async () => {
     const mockDangerToast = action(NOTIFICATIONS_ADD_ERROR_ACTION);
     const { getByTestId } = renderStory();
 
