@@ -1,0 +1,29 @@
+steps:
+  - command: |
+      ts-node .buildkite/scripts/lifecycle/comment_on_pr.ts \
+        --message "PR Cloud deployment started at: $BUILDKITE_BUILD_URL" \
+        --context "cloud-deploy-job" \
+        --clear-previous
+    label: Comment with job URL on issue
+    agents:
+      provider: gcp
+      image: family/kibana-ubuntu-2004
+      imageProject: elastic-images-prod
+      machineType: n2-standard-2
+    timeout_in_minutes: 5
+
+  - command: .buildkite/scripts/steps/linux_chromium_build/build.sh
+    label: Build headless chromium
+    timeout_in_minutes: 10
+    agents:
+      image: family/kibana-ubuntu-2004
+      imageProject: elastic-images-prod
+      provider: gcp
+      machineType: c2d-highcpu-112
+      diskSizeGb: 125
+      diskType: pd-ssd
+      network: default
+      minCpuPlatform: Intel Skylake
+      maxBuilds: 1
+      queue: chromium-linux-build
+
