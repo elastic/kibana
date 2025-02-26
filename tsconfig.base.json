@@ -858,8 +858,6 @@
       "@kbn/es-ui-shared-plugin/*": ["src/platform/plugins/shared/es_ui_shared/*"],
       "@kbn/eslint-config": ["packages/kbn-eslint-config"],
       "@kbn/eslint-config/*": ["packages/kbn-eslint-config/*"],
-      "@kbn/eslint-plugin-css": ["packages/kbn-eslint-plugin-css"],
-      "@kbn/eslint-plugin-css/*": ["packages/kbn-eslint-plugin-css/*"],
       "@kbn/eslint-plugin-disable": ["packages/kbn-eslint-plugin-disable"],
       "@kbn/eslint-plugin-disable/*": ["packages/kbn-eslint-plugin-disable/*"],
       "@kbn/eslint-plugin-eslint": ["packages/kbn-eslint-plugin-eslint"],

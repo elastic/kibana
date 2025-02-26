@@ -1457,7 +1457,6 @@
     "@kbn/es": "link:src/platform/packages/shared/kbn-es",
     "@kbn/es-archiver": "link:src/platform/packages/shared/kbn-es-archiver",
     "@kbn/eslint-config": "link:packages/kbn-eslint-config",
-    "@kbn/eslint-plugin-css": "link:packages/kbn-eslint-plugin-css",
     "@kbn/eslint-plugin-disable": "link:packages/kbn-eslint-plugin-disable",
     "@kbn/eslint-plugin-eslint": "link:packages/kbn-eslint-plugin-eslint",
     "@kbn/eslint-plugin-eui-a11y": "link:packages/kbn-eslint-plugin-eui-a11y",
