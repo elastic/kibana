@@ -56,6 +56,8 @@ import { DiscoveredPlugins, PluginsService } from '@kbn/core-plugins-server-inte
 import { CoreAppsService } from '@kbn/core-apps-server-internal';
 import { SecurityService } from '@kbn/core-security-server-internal';
 import { UserProfileService } from '@kbn/core-user-profile-server-internal';
+import { CoreInjectionService } from '@kbn/core-di-internal';
+import { http as httpModule } from '@kbn/core-di-server-internal';
 import { registerServiceConfig } from './register_service_config';
 import { MIGRATION_EXCEPTION_CODE } from './constants';
 import { coreConfig, type CoreConfigType } from './core_config';
@@ -96,6 +98,7 @@ export class Server {
   private readonly userSettingsService: UserSettingsService;
   private readonly security: SecurityService;
   private readonly userProfile: UserProfileService;
+  private readonly injectionService: CoreInjectionService;
 
   private readonly savedObjectsStartPromise: Promise<SavedObjectsServiceStart>;
   private resolveSavedObjectsStartPromise?: (value: SavedObjectsServiceStart) => void;
@@ -121,6 +124,7 @@ export class Server {
 
     const core = { coreId, configService: this.configService, env, logger: this.logger };
     this.analytics = new AnalyticsService(core);
+    this.injectionService = new CoreInjectionService();
     this.context = new ContextService(core);
     this.featureFlags = new FeatureFlagsService(core);
     this.http = new HttpService(core);
@@ -274,6 +278,8 @@ export class Server {
     const securitySetup = this.security.setup();
     const userProfileSetup = this.userProfile.setup();
 
+    const injectionSetup = this.injectionService.setup();
+
     const httpSetup = await this.http.setup({
       context: contextServiceSetup,
       executionContext: executionContextSetup,
@@ -383,7 +389,11 @@ export class Server {
       userSettings: userSettingsServiceSetup,
       security: securitySetup,
       userProfile: userProfileSetup,
+      injection: injectionSetup,
     };
+
+    const container = injectionSetup.getContainer();
+    container.load(httpModule);
 
     const pluginsSetup = await this.plugins.setup(coreSetup);
     this.#pluginsInitialized = pluginsSetup.initialized;
@@ -401,6 +411,7 @@ export class Server {
     const startStartUptime = performance.now();
     const startTransaction = apm.startTransaction('server-start', 'kibana-platform');
 
+    const injectionStart = this.injectionService.start();
     const analyticsStart = this.analytics.start();
     const securityStart = this.security.start();
     const userProfileStart = this.userProfile.start();
@@ -474,6 +485,7 @@ export class Server {
       deprecations: deprecationsStart,
       security: securityStart,
       userProfile: userProfileStart,
+      injection: injectionStart,
     };
 
     this.coreApp.start(this.coreStart);
