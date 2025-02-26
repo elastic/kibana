@@ -301,7 +301,24 @@ export const getFileCodeSignature = (
   const { file } = alertData;
   const codeSignature = file && file.Ext && file.Ext.code_signature;
 
-  return getCodeSignatureValue(codeSignature);
+  if (codeSignature) {
+    return getCodeSignatureValue(codeSignature, 'file.Ext.code_signature');
+  } else if (process?.code_signature?.trusted === true) {
+    return [
+      {
+        field: 'file.code_signature.subject_name',
+        operator: 'included' as const,
+        type: 'match' as const,
+        value: file[0]?.code_signature?.subject_name ?? '',
+      },
+      {
+        field: 'file.code_signature.trusted',
+        operator: 'included' as const,
+        type: 'match' as const,
+        value: file[0]?.code_signature?.trusted.toString() ?? '',
+      },
+    ];
+  }
 };
 
 /**
@@ -310,37 +327,116 @@ export const getFileCodeSignature = (
  */
 export const getProcessCodeSignature = (
   alertData: Flattened<Ecs>
-): Array<{ subjectName: string; trusted: string }> => {
+): Array<{ field: string; type: 'nested'; entries: EntriesArray }> | EntriesArray => {
   const { process } = alertData;
   const codeSignature = process && process.Ext && process.Ext.code_signature;
-  return getCodeSignatureValue(codeSignature);
+  if (codeSignature) {
+    return getCodeSignatureValue(codeSignature, 'process.Ext.code_signature');
+  } else if (process?.code_signature?.trusted === true) {
+    return [
+      {
+        field: 'process.code_signature.subject_name',
+        operator: 'included' as const,
+        type: 'match' as const,
+        value: process[0]?.code_signature?.subject_name ?? '',
+      },
+      {
+        field: 'process.code_signature.trusted',
+        operator: 'included' as const,
+        type: 'match' as const,
+        value: process[0]?.code_signature?.trusted.toString() ?? '',
+      },
+    ];
+  }
 };
 
+export const getDllCodeSignature = (
+  alertData: Flattened<Ecs>
+): Array<{ subjectName: string; trusted: string }> => {
+  const { dll } = alertData;
+  const codeSignature = dll && dll.Ext && dll.Ext.code_signature;
+  if (codeSignature) {
+    return getCodeSignatureValue(codeSignature, 'dll.Ext.code_signature');
+  } else if (dll[0]?.code_signature?.trusted === true) {
+    return [
+      {
+        field: 'dll.code_signature.subject_name',
+        operator: 'included' as const,
+        type: 'match' as const,
+        value: dll[0]?.code_signature?.subject_name ?? '',
+      },
+      {
+        field: 'dll.code_signature.trusted',
+        operator: 'included' as const,
+        type: 'match' as const,
+        value: dll[0]?.code_signature?.trusted.toString() ?? '',
+      },
+    ];
+  }
+};
 /**
  * Pre 7.10 `Ext.code_signature` fields were mistakenly populated as
  * a single object with subject_name and trusted.
  */
 export const getCodeSignatureValue = (
-  codeSignature: Flattened<CodeSignature> | Flattened<CodeSignature[]> | undefined
-): Array<{ subjectName: string; trusted: string }> => {
+  codeSignature: Flattened<CodeSignature> | Flattened<CodeSignature[]> | undefined,
+  field: string
+): Array<{ field: string; type: 'nested'; entries: EntriesArray }> => {
   if (Array.isArray(codeSignature) && codeSignature.length > 0) {
-    return codeSignature.map((signature) => {
-      return {
-        subjectName: signature?.subject_name ?? '',
-        trusted: signature?.trusted?.toString() ?? '',
-      };
-    });
+    return codeSignature.reduce((acc, signature) => {
+      if (signature?.trusted === true) {
+        return {
+          field,
+          type: 'nested',
+          entries: [
+            {
+              field: 'subject_name',
+              operator: 'included',
+              type: 'match',
+              value: signature?.subject_name ?? '',
+            },
+            {
+              field: 'trusted',
+              operator: 'included',
+              type: 'match',
+              value: signature?.trusted?.toString() ?? '',
+            },
+          ],
+        };
+      }
+      return acc;
+    }, []);
   } else {
     const signature: Flattened<CodeSignature> | undefined = !Array.isArray(codeSignature)
       ? codeSignature
       : undefined;
-
-    return [
+    if (signature?.trusted === true) {
+      console.log(field, 'still need to modify');
+      return {
+        field,
+        type: 'nested',
+        entries: [
+          {
+            field: 'subject_name',
+            operator: 'included',
+            type: 'match',
+            value: signature?.subject_name ?? '',
+          },
+          {
+            field: 'trusted',
+            operator: 'included',
+            type: 'match',
+            value: signature?.trusted?.toString() ?? '',
+          },
+        ],
+      };
+    }
+    /* return [
       {
         subjectName: signature?.subject_name ?? '',
         trusted: signature?.trusted ?? '',
       },
-    ];
+    ];*/
   }
 };
 
@@ -357,13 +453,14 @@ interface ExceptionEntry {
 function filterEmptyExceptionEntries<T extends ExceptionEntry>(entries: T[]): T[] {
   const finalEntries: T[] = [];
   for (const entry of entries) {
-    if (entry.entries !== undefined) {
+    if (entry?.entries !== undefined) {
       entry.entries = entry.entries.filter((el) => el.value !== undefined && el.value.length > 0);
       finalEntries.push(entry);
-    } else if (entry.value !== undefined && entry.value.length > 0) {
+    } else if (entry?.value !== undefined && entry.value.length > 0) {
       finalEntries.push(entry);
     }
   }
+
   return finalEntries;
 }
 
@@ -618,6 +715,7 @@ export const getPrepopulatedMemoryShellcodeException = ({
   };
 };
 
+/* eslint complexity: ["error", 21]*/
 export const getPrepopulatedBehaviorException = ({
   listId,
   name,
@@ -632,116 +730,160 @@ export const getPrepopulatedBehaviorException = ({
   alertEcsData: Flattened<Ecs>;
 }): ExceptionsBuilderExceptionItem => {
   const { process } = alertEcsData;
-  const entries = filterEmptyExceptionEntries([
-    {
-      field: 'rule.id',
-      operator: 'included' as const,
-      type: 'match' as const,
-      value: alertEcsData.rule?.id ?? '',
-    },
-    {
-      field: 'process.executable.caseless',
-      operator: 'included' as const,
-      type: 'match' as const,
-      value: process?.executable ?? '',
-    },
-    {
-      field: 'process.command_line',
-      operator: 'included' as const,
-      type: 'match' as const,
-      value: process?.command_line ?? '',
-    },
-    {
-      field: 'process.parent.executable',
-      operator: 'included' as const,
-      type: 'match' as const,
-      value: process?.parent?.executable ?? '',
-    },
+  const processCodeSignature = getProcessCodeSignature(alertEcsData);
+  const dllCodeSignature = getDllCodeSignature(alertEcsData);
+  console.log({ processCodeSignature });
+  console.log({ dllCodeSignature });
+  const entries = filterEmptyExceptionEntries(
+    [
+      {
+        field: 'rule.id',
+        operator: 'included' as const,
+        type: 'match' as const,
+        value: alertEcsData.rule?.id ?? '',
+      },
+      {
+        field: 'process.executable.caseless',
+        operator: 'included' as const,
+        type: 'match' as const,
+        value: process?.executable ?? '',
+      },
+      {
+        field: 'process.command_line',
+        operator: 'included' as const,
+        type: 'match' as const,
+        value: process?.command_line ?? '',
+      },
+      {
+        field: 'process.parent.executable',
+        operator: 'included' as const,
+        type: 'match' as const,
+        value: process?.parent?.executable ?? '',
+      },
+      /* {
+      field: 'process.Ext.code_signature',
+      type: 'nested',
+      entries: [
+        {
+          field: 'subject_name',
+          operator: 'included',
+          type: 'match',
+          value: processCodeSignature != null ? processCodeSignature[0].subjectName : '',
+        },
+        {
+          field: 'trusted',
+          operator: 'included',
+          type: 'match',
+          value: processCodeSignature != null ? processCodeSignature[0].trusted : '',
+        },
+      ],
+      },*/
+      /*
     {
       field: 'process.code_signature.subject_name',
       operator: 'included' as const,
       type: 'match' as const,
       value: process?.code_signature?.subject_name ?? '',
-    },
-    {
-      field: 'file.path',
-      operator: 'included' as const,
-      type: 'match' as const,
-      value: alertEcsData.file?.path ?? '',
-    },
-    {
-      field: 'file.name',
-      operator: 'included' as const,
-      type: 'match' as const,
-      value: alertEcsData.file?.name ?? '',
-    },
-    {
-      field: 'source.ip',
-      operator: 'included' as const,
-      type: 'match' as const,
-      value: alertEcsData.source?.ip ?? '',
-    },
-    {
-      field: 'destination.ip',
-      operator: 'included' as const,
-      type: 'match' as const,
-      value: alertEcsData.destination?.ip ?? '',
-    },
-    {
-      field: 'registry.path',
-      operator: 'included' as const,
-      type: 'match' as const,
-      value: alertEcsData.registry?.path ?? '',
-    },
-    {
-      field: 'registry.value',
-      operator: 'included' as const,
-      type: 'match' as const,
-      value: alertEcsData.registry?.value ?? '',
-    },
-    {
-      field: 'registry.data.strings',
-      operator: 'included' as const,
-      type: 'match' as const,
-      value: alertEcsData.registry?.data?.strings ?? '',
-    },
-    {
-      field: 'dll.path',
-      operator: 'included' as const,
-      type: 'match' as const,
-      value: alertEcsData.dll?.path ?? '',
-    },
-    {
+    },*/
+      {
+        field: 'file.path',
+        operator: 'included' as const,
+        type: 'match' as const,
+        value: alertEcsData.file?.path ?? '',
+      },
+      {
+        field: 'file.name',
+        operator: 'included' as const,
+        type: 'match' as const,
+        value: alertEcsData.file?.name ?? '',
+      },
+      {
+        field: 'source.ip',
+        operator: 'included' as const,
+        type: 'match' as const,
+        value: alertEcsData.source?.ip ?? '',
+      },
+      {
+        field: 'destination.ip',
+        operator: 'included' as const,
+        type: 'match' as const,
+        value: alertEcsData.destination?.ip ?? '',
+      },
+      {
+        field: 'registry.path',
+        operator: 'included' as const,
+        type: 'match' as const,
+        value: alertEcsData.registry?.path ?? '',
+      },
+      {
+        field: 'registry.value',
+        operator: 'included' as const,
+        type: 'match' as const,
+        value: alertEcsData.registry?.value ?? '',
+      },
+      {
+        field: 'registry.data.strings',
+        operator: 'included' as const,
+        type: 'match' as const,
+        value: alertEcsData.registry?.data?.strings ?? '',
+      },
+      {
+        field: 'dll.path',
+        operator: 'included' as const,
+        type: 'match' as const,
+        value: alertEcsData.dll?.path ?? '',
+      },
+      /* {
       field: 'dll.code_signature.subject_name',
       operator: 'included' as const,
       type: 'match' as const,
       value: alertEcsData.dll?.code_signature?.subject_name ?? '',
     },
-    {
-      field: 'dll.pe.original_file_name',
-      operator: 'included' as const,
-      type: 'match' as const,
-      value: alertEcsData.dll?.pe?.original_file_name ?? '',
-    },
-    {
-      field: 'dns.question.name',
-      operator: 'included' as const,
-      type: 'match' as const,
-      value: alertEcsData.dns?.question?.name ?? '',
-    },
-    {
-      field: 'dns.question.type',
-      operator: 'included' as const,
-      type: 'match' as const,
-      value: alertEcsData.dns?.question?.type ?? '',
-    },
-    {
-      field: 'user.id',
-      operator: 'included' as const,
-      type: 'match' as const,
-      value: alertEcsData.user?.id ?? '',
-    },
-  ]);
+      {
+        field: 'dll.Ext.code_signature',
+        type: 'nested',
+        entries: [
+          {
+            field: 'subject_name',
+            operator: 'included',
+            type: 'match',
+            value: dllCodeSignature[0] != null ? dllCodeSignature[0].subjectName : '',
+          },
+          {
+            field: 'trusted',
+            operator: 'included',
+            type: 'match',
+            value: dllCodeSignature[0] != null ? dllCodeSignature[0].trusted : '',
+          },
+        ],
+      }, */
+      {
+        field: 'dll.pe.original_file_name',
+        operator: 'included' as const,
+        type: 'match' as const,
+        value: alertEcsData.dll?.pe?.original_file_name ?? '',
+      },
+      {
+        field: 'dns.question.name',
+        operator: 'included' as const,
+        type: 'match' as const,
+        value: alertEcsData.dns?.question?.name ?? '',
+      },
+      {
+        field: 'dns.question.type',
+        operator: 'included' as const,
+        type: 'match' as const,
+        value: alertEcsData.dns?.question?.type ?? '',
+      },
+      {
+        field: 'user.id',
+        operator: 'included' as const,
+        type: 'match' as const,
+        value: alertEcsData.user?.id ?? '',
+      },
+    ].concat(getProcessCodeSignature, dllCodeSignature)
+  );
+
   return {
     ...getNewExceptionItem({ listId, namespaceType: listNamespace, name }),
     entries: addIdToEntries(entries),
@@ -757,9 +899,11 @@ export const defaultEndpointExceptionItems = (
   alertEcsData: Flattened<Ecs> & { 'event.code'?: string }
 ): ExceptionsBuilderExceptionItem[] => {
   const eventCode = alertEcsData['event.code'] ?? alertEcsData.event?.code;
+  console.log({ alertEcsData });
 
   switch (eventCode) {
     case 'behavior':
+      console.log('behavior');
       return [
         getPrepopulatedBehaviorException({
           listId,
@@ -769,6 +913,7 @@ export const defaultEndpointExceptionItems = (
         }),
       ];
     case 'memory_signature':
+      console.log('memory signature');
       return [
         getPrepopulatedMemorySignatureException({
           listId,
@@ -778,6 +923,7 @@ export const defaultEndpointExceptionItems = (
         }),
       ];
     case 'shellcode_thread':
+      console.log('shellcode');
       return [
         getPrepopulatedMemoryShellcodeException({
           listId,
@@ -787,6 +933,7 @@ export const defaultEndpointExceptionItems = (
         }),
       ];
     case 'ransomware':
+      console.log('ransomware');
       return getProcessCodeSignature(alertEcsData).map((codeSignature) =>
         getPrepopulatedRansomwareException({
           listId,
@@ -798,6 +945,7 @@ export const defaultEndpointExceptionItems = (
       );
     default:
       // By default return the standard prepopulated Endpoint Exception fields
+      console.log('default');
       return getFileCodeSignature(alertEcsData).map((codeSignature) =>
         getPrepopulatedEndpointException({
           listId,
