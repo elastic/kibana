@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { sortBy, pickBy, identity } from 'lodash';
+import { sortBy } from 'lodash';
 import type { ServiceAnomaliesResponse } from '../../server/routes/service_map/get_service_anomalies';
 import {
   SERVICE_NAME,
@@ -21,35 +21,33 @@ import type {
   ServiceConnectionNode,
   ExternalConnectionNode,
   ConnectionElement,
-  DiscoveredService,
-  ServicesResponse,
-  ServiceMapSpan,
-} from './typings';
-
+  DestinationService,
+  ServiceMapExitSpan,
+  ServiceMapService,
+  ConnectionEdge,
+  ServiceMapWithConnections,
+} from './types';
 import type { GroupResourceNodesResponse } from './group_resource_nodes';
 import { groupResourceNodes } from './group_resource_nodes';
 
-export const isSpan = (node: ConnectionNode): node is ExternalConnectionNode => {
+const FORBIDDEN_SERVICE_NAMES = ['constructor'];
+
+export const isExitSpan = (node: ConnectionNode): node is ExternalConnectionNode => {
   return !!(node as ExternalConnectionNode)[SPAN_DESTINATION_SERVICE_RESOURCE];
 };
 
-export function getConnectionNodeId(node: ConnectionNode): string {
-  if (isSpan(node)) {
-    return `>${node[SPAN_DESTINATION_SERVICE_RESOURCE]}`;
-  }
-  return node[SERVICE_NAME];
-}
-
-export const getServiceConnectionNode = (event: ServiceMapSpan): ServiceConnectionNode => {
+export const getServiceConnectionNode = (event: ServiceMapService): ServiceConnectionNode => {
   return {
+    id: event.serviceName,
     [SERVICE_NAME]: event.serviceName,
     [SERVICE_ENVIRONMENT]: event.serviceEnvironment || null,
     [AGENT_NAME]: event.agentName,
   };
 };
 
-export const getExternalConnectionNode = (event: ServiceMapSpan): ExternalConnectionNode => {
+export const getExternalConnectionNode = (event: ServiceMapExitSpan): ExternalConnectionNode => {
   return {
+    id: `>${event.serviceName}|${event.spanDestinationServiceResource}`,
     [SPAN_DESTINATION_SERVICE_RESOURCE]: event.spanDestinationServiceResource,
     [SPAN_TYPE]: event.spanType,
     [SPAN_SUBTYPE]: event.spanSubtype,
@@ -57,25 +55,22 @@ export const getExternalConnectionNode = (event: ServiceMapSpan): ExternalConnec
 };
 
 export function getConnectionId(connection: Connection) {
-  return `${getConnectionNodeId(connection.source)}~${getConnectionNodeId(connection.destination)}`;
+  return `${connection.source.id}~${connection.destination.id}`;
 }
 
 function addMessagingConnections(
   connections: Connection[],
-  discoveredServices: DiscoveredService[]
+  destinationServices: DestinationService[]
 ): Connection[] {
   // Index discoveredServices by SPAN_DESTINATION_SERVICE_RESOURCE for quick lookups
   const serviceMap = new Map(
-    discoveredServices.map(({ from, to }) => [from[SPAN_DESTINATION_SERVICE_RESOURCE], to])
+    destinationServices.map(({ from, to }) => [from[SPAN_DESTINATION_SERVICE_RESOURCE], to])
   );
 
   const newConnections: Connection[] = [];
   for (const connection of connections) {
     const destination = connection.destination;
-    if (
-      destination['span.type'] === 'messaging' &&
-      SPAN_DESTINATION_SERVICE_RESOURCE in destination
-    ) {
+    if (destination[SPAN_TYPE] === 'messaging' && isExitSpan(destination)) {
       const matchedService = serviceMap.get(destination[SPAN_DESTINATION_SERVICE_RESOURCE]);
       if (matchedService) {
         newConnections.push({
@@ -89,16 +84,16 @@ function addMessagingConnections(
   return [...connections, ...newConnections];
 }
 
-export function getAllNodes(
-  services: ServiceMapResponse['services'],
-  connections: ServiceMapResponse['connections']
+function getAllNodes(
+  services: ServiceMapWithConnections['servicesData'],
+  connections: ServiceMapWithConnections['connections']
 ) {
   const allNodes = new Map<string, ConnectionNode>();
 
   // Process connections in one pass
   connections.forEach((connection) => {
-    const sourceId = getConnectionNodeId(connection.source);
-    const destinationId = getConnectionNodeId(connection.destination);
+    const sourceId = connection.source.id;
+    const destinationId = connection.destination.id;
     if (!allNodes.has(sourceId)) {
       allNodes.set(sourceId, { ...connection.source, id: sourceId });
     }
@@ -109,212 +104,221 @@ export function getAllNodes(
 
   // Derive the rest of the map nodes from the connections and add the services
   // from the services data query
-  services.forEach((service) => {
-    const id =
-      service[SERVICE_NAME] === 'constructor'
-        ? `${service[SERVICE_NAME]}-${service[AGENT_NAME]}`
-        : service[SERVICE_NAME];
-
-    if (!allNodes.has(id)) {
-      allNodes.set(id, { ...service, id });
-    }
-  });
+  services
+    .filter((service) => !FORBIDDEN_SERVICE_NAMES.includes(service[SERVICE_NAME]))
+    .forEach((service) => {
+      const id = service[SERVICE_NAME];
+      if (!allNodes.has(id)) {
+        allNodes.set(id, { ...service, id });
+      }
+    });
 
   return allNodes;
 }
 
-export function getServiceNodes(
+function getServiceNodes(
   allNodes: Map<string, ConnectionNode>,
-  discoveredServices: Array<{
-    from: ExternalConnectionNode;
-    to: ServiceConnectionNode;
-  }>
+  destinationServices: DestinationService[]
 ) {
   const connectionFromDiscoveredServices: ServiceConnectionNode[] = [];
 
-  for (const { from, to } of discoveredServices) {
-    const fromId = getConnectionNodeId(from);
-    const toServiceName = to[SERVICE_NAME];
+  for (const { from, to } of destinationServices) {
+    const fromId = from.id;
+    const toId = to.id;
 
-    if (allNodes.has(fromId) && !allNodes.has(toServiceName)) {
-      connectionFromDiscoveredServices.push({ ...to, id: getConnectionNodeId(to) });
+    if (allNodes.has(fromId) && !allNodes.has(toId)) {
+      connectionFromDiscoveredServices.push({ ...to, id: toId });
     }
   }
 
   // List of nodes that are services
-  const serviceNodes = [
-    ...Array.from(allNodes.values()),
-    ...connectionFromDiscoveredServices,
-  ].filter((node) => SERVICE_NAME in node) as ServiceConnectionNode[];
+  const serviceNodes = new Map(
+    [...Array.from(allNodes.values()), ...connectionFromDiscoveredServices]
+      .filter((node): node is ServiceConnectionNode => !isExitSpan(node))
+      .map((node) => [node.id, node])
+  );
 
   return serviceNodes;
 }
 
-export interface ServiceMapResponse {
-  connections: Connection[];
-  discoveredServices: DiscoveredService[];
-  services: ServicesResponse[];
-  anomalies: ServiceAnomaliesResponse;
+function getExternalNodes(allNodes: Map<string, ConnectionNode>) {
+  return new Map(
+    Array.from(allNodes.values()).reduce((acc, node) => {
+      if (!isExitSpan(node)) {
+        return acc;
+      }
+
+      const nodes = acc.get(node.id) ?? [];
+      nodes.push(node as ExternalConnectionNode);
+      acc.set(node.id, nodes);
+
+      return acc;
+    }, new Map<string, ExternalConnectionNode[]>())
+  );
 }
 
-export type TransformServiceMapResponse = GroupResourceNodesResponse;
-
-export function transformServiceMapResponses({
-  discoveredServices,
-  services,
-  connections,
+function groupNodes({
+  allNodes,
+  allConnections,
   anomalies,
-}: ServiceMapResponse): TransformServiceMapResponse {
-  const allConnections = addMessagingConnections(connections, discoveredServices);
-  const allNodes = getAllNodes(services, allConnections);
-  const serviceNodes = getServiceNodes(allNodes, discoveredServices);
+  destinationServices,
+  serviceNodes,
+}: {
+  allNodes: Map<string, ConnectionNode>;
+  allConnections: Connection[];
+  destinationServices: DestinationService[];
+  anomalies: ServiceAnomaliesResponse;
+  serviceNodes: Map<string, ServiceConnectionNode>;
+}) {
+  const externalNodes = getExternalNodes(allNodes);
 
-  // List of nodes that are externals
-  const externalNodesMap = new Map<string, ExternalConnectionNode[]>();
-  const serviceNodeMap = new Map<string, ServiceConnectionNode[]>();
-
-  allNodes.forEach((node) => {
-    if (SPAN_DESTINATION_SERVICE_RESOURCE in node) {
-      const nodeId = node.id!;
-      const nodes = externalNodesMap.get(nodeId) ?? [];
-      nodes.push(node as ExternalConnectionNode);
-      externalNodesMap.set(nodeId, [node as ExternalConnectionNode]);
-    }
-  });
-
-  // Precompute service node lookups in a single iteration
-  serviceNodes.forEach((serviceNode) => {
-    const serviceName = serviceNode[SERVICE_NAME];
-    const nodes = serviceNodeMap.get(serviceName) ?? [];
-    nodes.push(serviceNode);
-    serviceNodeMap.set(serviceName, [serviceNode]);
-  });
+  const destinationServiceMap = destinationServices.reduce((acc, { from, to }) => {
+    const currentDestinations = acc.get(from.id) ?? [];
+    currentDestinations.push(to);
+    acc.set(from.id, currentDestinations);
+    return acc;
+  }, new Map<string, ServiceConnectionNode[]>());
 
   const serviceAnomalyMap = new Map(
     anomalies.serviceAnomalies.map((item) => [item.serviceName, item])
   );
 
   const outboundConnectionSet = new Set(
-    allConnections
-      .filter(
-        (connection) =>
-          SPAN_DESTINATION_SERVICE_RESOURCE in connection.source &&
-          connection.source[SPAN_DESTINATION_SERVICE_RESOURCE]
-      )
-      .map((connection) => connection.source[SPAN_DESTINATION_SERVICE_RESOURCE])
-  );
-
-  const discoveredServiceMap = new Map(
-    discoveredServices.map(({ from, to }) => [from[SPAN_DESTINATION_SERVICE_RESOURCE], to])
+    allConnections.reduce<string[]>((acc, node) => {
+      if (isExitSpan(node.source)) {
+        acc.push(node.source.id);
+      }
+      return acc;
+    }, [])
   );
 
   // 1. Map external nodes to internal services
   // 2. Collapse external nodes into one node based on span.destination.service.resource
   // 3. Pick the first available span.type/span.subtype in an alphabetically sorted list
-  const nodeMap = Array.from(allNodes.entries()).reduce((map, [id, node]) => {
-    if (!id || map[id]) {
+  return Array.from(allNodes.entries()).reduce((map, [id, node]) => {
+    if (map.has(id)) {
       return map;
     }
 
-    const outboundConnectionExists = outboundConnectionSet.has(
-      node[SPAN_DESTINATION_SERVICE_RESOURCE]
-    );
+    const outboundConnectionExists = isExitSpan(node) && outboundConnectionSet.has(node.id);
+    const matchedDestinationServices = !outboundConnectionExists
+      ? destinationServiceMap.get(node.id) ?? []
+      : [];
 
-    const matchedService = !outboundConnectionExists
-      ? discoveredServiceMap.get(node[SPAN_DESTINATION_SERVICE_RESOURCE])
-      : undefined;
+    const isServiceNode = matchedDestinationServices.length > 0 || !isExitSpan(node);
 
-    const serviceName =
-      matchedService?.[SERVICE_NAME] || (SERVICE_NAME in node ? node[SERVICE_NAME] : undefined);
+    if (isServiceNode) {
+      const destinationIds = new Set([...matchedDestinationServices.map((n) => n.id), node.id]);
 
-    if (serviceName) {
-      const matchedServiceNodes = (serviceNodeMap.get(serviceName) ?? []).map((serviceNode) =>
-        pickBy(serviceNode, identity)
-      );
-      const mergedServiceNode = Object.assign({}, ...matchedServiceNodes);
-      const serviceAnomalyStats = serviceAnomalyMap.get(serviceName);
+      destinationIds.forEach((destinationId) => {
+        const serviceNode = serviceNodes.get(destinationId);
+        const serviceAnomalyStats = serviceAnomalyMap.get(destinationId);
 
-      if (matchedServiceNodes.length) {
-        map[id] = {
-          id: matchedServiceNodes[0][SERVICE_NAME],
-          ...mergedServiceNode,
-          ...(serviceAnomalyStats ? { serviceAnomalyStats } : {}),
-        };
-      }
+        if (serviceNode) {
+          map.set(node.id, {
+            ...serviceNode,
+            ...(serviceAnomalyStats ? { serviceAnomalyStats } : {}),
+          });
+        }
+      });
     } else {
-      const allMatchedExternalNodes = externalNodesMap.get(id) ?? [];
+      const allMatchedExternalNodes = externalNodes.get(id) ?? [];
       if (allMatchedExternalNodes.length > 0) {
         const firstMatchedNode = allMatchedExternalNodes[0];
-        map[id] = {
+        map.set(id, {
           ...firstMatchedNode,
           label: firstMatchedNode[SPAN_DESTINATION_SERVICE_RESOURCE],
           [SPAN_TYPE]: allMatchedExternalNodes.map((n) => n[SPAN_TYPE]).sort()[0],
           [SPAN_SUBTYPE]: allMatchedExternalNodes.map((n) => n[SPAN_SUBTYPE]).sort()[0],
-        };
+        });
       }
     }
 
     return map;
-  }, {} as Record<string, ConnectionNode>);
+  }, new Map<string, ConnectionNode>());
+}
 
-  // Map destination.address to service.name if possible
-  function getConnectionNode(node: ConnectionNode) {
-    return nodeMap[getConnectionNodeId(node)];
-  }
+export function transformServiceMapResponses({
+  destinationServices,
+  servicesData,
+  connections,
+  anomalies,
+}: ServiceMapWithConnections): GroupResourceNodesResponse {
+  const allConnections = addMessagingConnections(connections, destinationServices);
+  const allNodes = getAllNodes(servicesData, allConnections);
+  const serviceNodes = getServiceNodes(allNodes, destinationServices);
+
+  const nodeMap = groupNodes({
+    allNodes,
+    allConnections,
+    destinationServices,
+    anomalies,
+    serviceNodes,
+  });
 
   // Build connections with mapped nodes
-  const mappedConnections = allConnections
-    .map((connection) => {
-      const sourceData = getConnectionNode(connection.source);
-      const targetData = getConnectionNode(connection.destination);
+  const uniqueConnections = allConnections.reduce((acc, connection) => {
+    const sourceData = nodeMap.get(connection.source.id);
+    const targetData = nodeMap.get(connection.destination.id);
 
-      const label =
-        sourceData[SERVICE_NAME] +
-        ' to ' +
-        (targetData[SERVICE_NAME] || targetData[SPAN_DESTINATION_SERVICE_RESOURCE]);
+    if (!sourceData || !targetData || sourceData.id === targetData.id) {
+      return acc;
+    }
 
-      return {
-        source: sourceData.id,
-        target: targetData.id,
-        label,
-        id: getConnectionId({ source: sourceData, destination: targetData }),
-        sourceData,
-        targetData,
-      };
-    })
-    .filter((connection) => connection.source !== connection.target);
+    const label =
+      sourceData[SERVICE_NAME] +
+      ' to ' +
+      (targetData[SERVICE_NAME] || targetData[SPAN_DESTINATION_SERVICE_RESOURCE]);
 
+    const id = getConnectionId({ source: sourceData, destination: targetData });
+
+    acc.set(id, {
+      source: sourceData.id,
+      target: targetData.id,
+      label,
+      id,
+      sourceData,
+      targetData,
+    });
+
+    return acc;
+  }, new Map<string, ConnectionEdge & { sourceData: ConnectionNode; targetData: ConnectionNode }>());
+
+  const mappedConnections = Array.from(uniqueConnections.values());
   const dedupedNodes = Array.from(
     new Map(
       mappedConnections
         .flatMap((connection) => [connection.sourceData, connection.targetData])
-        .concat(serviceNodes)
+        .concat(Array.from(serviceNodes.values()))
         .map((node) => [node.id, node])
     ).values()
   );
 
   // Instead of adding connections in two directions,
   // we add a `bidirectional` flag to use in styling
-  const dedupedConnections = sortBy(mappedConnections, 'id').reduce((prev, connection) => {
-    const reverseKey = `${connection.target}-${connection.source}`;
-    // Use a Map to track seen connections for fast lookup
+  const dedupedConnections = sortBy(
+    mappedConnections,
+    // make sure that order is stable
+    'id'
+  ).reduce<Array<ConnectionElement['data']>>((prev, connection) => {
+    const reversedConnection = prev.find(
+      (c) => c.target === connection.source && c.source === connection.target
+    );
 
-    const reverseConnections = prev.get(reverseKey);
-    if (reverseConnections) {
-      reverseConnections.push({
+    if (reversedConnection) {
+      reversedConnection.bidirectional = true;
+      return prev.concat({
         ...connection,
         isInverseEdge: true,
       });
-      prev.set(reverseKey, reverseConnections);
-    } else {
-      prev.set(reverseKey, [connection]);
     }
 
-    return prev;
-  }, new Map<string, Array<ConnectionElement['data']>>());
+    return prev.concat(connection);
+  }, []);
+
   // Put everything together in elements, with everything in the "data" property
   const elements: ConnectionElement[] = [
-    ...Array.from(dedupedConnections.values()).flat(),
+    ...Array.from(dedupedConnections.values()),
     ...dedupedNodes,
   ].map((element) => ({
     data: element,

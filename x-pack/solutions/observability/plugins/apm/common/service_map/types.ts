@@ -7,7 +7,7 @@
 
 import type cytoscape from 'cytoscape';
 import type { AgentName } from '@kbn/apm-types/src/es_schemas/ui/fields';
-import type { DEFAULT_ANOMALIES } from '../../server/routes/service_map/get_service_anomalies';
+import type { ServiceAnomaliesResponse } from '../../server/routes/service_map/get_service_anomalies';
 import type { Coordinate } from '../../typings/timeseries';
 import type { ServiceAnomalyStats } from '../anomaly_detection';
 
@@ -15,10 +15,16 @@ export interface ServiceMapTelemetry {
   tracesCount: number;
 }
 
+export interface ServiceMapWithConnections
+  extends Pick<ServiceMapResponse, 'servicesData' | 'anomalies'> {
+  connections: Connection[];
+  destinationServices: DestinationService[];
+}
+
 export type ServiceMapResponse = {
-  spans: ServiceMapSpan[];
+  spans: ServiceMapNode[];
   servicesData: ServicesResponse[];
-  anomalies: typeof DEFAULT_ANOMALIES;
+  anomalies: ServiceAnomaliesResponse;
 } & ServiceMapTelemetry;
 
 export interface ServicesResponse {
@@ -28,13 +34,16 @@ export interface ServicesResponse {
 }
 
 export interface ServiceConnectionNode extends cytoscape.NodeDataDefinition {
+  id: string;
   'service.name': string;
   'service.environment': string | null;
   'agent.name': string;
+  'service.node.name'?: string;
   serviceAnomalyStats?: ServiceAnomalyStats;
   label?: string;
 }
 export interface ExternalConnectionNode extends cytoscape.NodeDataDefinition {
+  id: string;
   'span.destination.service.resource': string;
   'span.type': string;
   'span.subtype': string;
@@ -90,22 +99,24 @@ export interface NodeStats {
   };
 }
 
-export interface DiscoveredService {
+export interface DestinationService {
   from: ExternalConnectionNode;
   to: ServiceConnectionNode;
 }
 
-export interface ServiceMapSpan {
+export interface ServiceMapService {
+  serviceName: string;
+  agentName: AgentName;
+  serviceEnvironment?: string;
+  serviceNodeName?: string;
+}
+
+export interface ServiceMapExitSpan extends ServiceMapService {
   spanId: string;
   spanType: string;
   spanSubtype: string;
   spanDestinationServiceResource: string;
-  serviceName: string;
-  serviceEnvironment?: string;
-  agentName: AgentName;
-  downstreamService?: {
-    agentName: AgentName;
-    serviceEnvironment?: string;
-    serviceName: string;
-  };
 }
+export type ServiceMapNode = ServiceMapExitSpan & {
+  destinationService?: ServiceMapService;
+};
