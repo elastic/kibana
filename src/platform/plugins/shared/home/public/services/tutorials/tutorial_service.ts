@@ -8,6 +8,7 @@
  */
 
 import React from 'react';
+import { HomeKibanaServices } from '../../application/kibana_services';
 
 /** @public */
 export type TutorialVariables = Partial<Record<string, unknown>>;
@@ -20,8 +21,16 @@ export type TutorialModuleNoticeComponent = React.FC<{
   moduleName: string;
 }>;
 
-type CustomStatusCheckCallback = () => Promise<boolean>;
-type CustomComponent = () => Promise<React.ReactNode>;
+export type CustomStatusCheckCallback = () => Promise<boolean>;
+export interface CustomComponentProps {
+  http: HomeKibanaServices['http'];
+  basePath: string;
+  isDarkTheme: boolean;
+  kibanaVersion: string;
+  variantId: string;
+  isCloudEnabled: boolean;
+}
+type CustomComponent = () => Promise<React.ComponentType<CustomComponentProps>>;
 
 export class TutorialService {
   private tutorialVariables: TutorialVariables = {};
