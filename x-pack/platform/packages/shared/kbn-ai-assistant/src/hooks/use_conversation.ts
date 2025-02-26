@@ -84,10 +84,6 @@ export function useConversation({
   const initialMessages = useOnce(initialMessagesFromProps);
   const initialTitle = useOnce(initialTitleFromProps);
 
-  if (initialMessages.length && initialConversationId) {
-    throw new Error('Cannot set initialMessages if initialConversationId is set');
-  }
-
   const update = (nextConversationObject: Conversation) => {
     return service
       .callApi(`PUT /internal/observability_ai_assistant/conversation/{conversationId}`, {
