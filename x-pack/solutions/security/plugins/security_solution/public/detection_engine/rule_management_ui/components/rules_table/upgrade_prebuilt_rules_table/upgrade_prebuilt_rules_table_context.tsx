@@ -11,7 +11,7 @@ import React, { createContext, useCallback, useContext, useMemo, useState } from
 import { PrebuiltRulesCustomizationDisabledReason } from '../../../../../../common/detection_engine/prebuilt_rules/prebuilt_rule_customization_status';
 import type {
   FindRulesSortField,
-  PrebuiltRuleFilter,
+  PrebuiltRulesFilter,
   RuleFieldsToUpgrade,
   RuleUpgradeSpecifier,
   SortOrder,
@@ -63,7 +63,7 @@ export interface UpgradePrebuiltRulesTableState {
   /**
    * Currently selected table filter
    */
-  filterOptions: PrebuiltRuleFilter;
+  filterOptions: PrebuiltRulesFilter;
   /**
    * All unique tags for all rules
    */
@@ -117,7 +117,7 @@ export interface UpgradePrebuiltRulesTableActions {
   reFetchRules: () => void;
   upgradeRules: (ruleIds: RuleSignatureId[]) => void;
   upgradeAllRules: () => void;
-  setFilterOptions: Dispatch<SetStateAction<PrebuiltRuleFilter>>;
+  setFilterOptions: Dispatch<SetStateAction<PrebuiltRulesFilter>>;
   setPagination: Dispatch<SetStateAction<{ page: number; perPage: number }>>;
   setSortingOptions: Dispatch<SetStateAction<UpgradePrebuiltRulesSortingOptions>>;
   openRulePreview: (ruleId: string) => void;
@@ -157,7 +157,7 @@ export const UpgradePrebuiltRulesTableContextProvider = ({
   const tags = prebuiltRulesStatusResponse?.aggregated_fields?.upgradeable_rules.tags;
 
   const [loadingRules, setLoadingRules] = useState<RuleSignatureId[]>([]);
-  const [filterOptions, setFilterOptions] = useState<PrebuiltRuleFilter>({});
+  const [filterOptions, setFilterOptions] = useState<PrebuiltRulesFilter>({});
   const isUpgradingSecurityPackages = useIsUpgradingSecurityPackages();
   const [pagination, setPagination] = useState({
     page: 1,

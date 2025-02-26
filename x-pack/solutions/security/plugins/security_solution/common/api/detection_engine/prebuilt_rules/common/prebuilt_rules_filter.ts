@@ -12,12 +12,8 @@ export enum RuleCustomizationStatus {
   NOT_CUSTOMIZED = 'NOT_CUSTOMIZED',
 }
 
-export type PrebuiltRuleFilter = z.infer<typeof PrebuiltRuleFilter>;
-export const PrebuiltRuleFilter = z.object({
-  /**
-   * Rule IDs to return upgrade info for
-   */
-  rule_ids: z.array(z.string()).optional(),
+export type PrebuiltRulesFilter = z.infer<typeof PrebuiltRulesFilter>;
+export const PrebuiltRulesFilter = z.object({
   /**
    * Tags to filter by
    */
