@@ -1627,7 +1627,10 @@ module.exports = {
       },
     },
     {
-      files: ['x-pack/test/alerting_api_integration/**/*.{ts, tsx}'],
+      files: [
+        'x-pack/test/alerting_api_integration/**/*.{ts, tsx}',
+        'x-pack/test/cases_api_integration/**/*.{ts, tsx}',
+      ],
       rules: {
         '@typescript-eslint/consistent-type-imports': 'error',
       },

@@ -6,30 +6,33 @@
  */
 
 import getPort from 'get-port';
-import http from 'http';
+import type http from 'http';
 
 import type SuperTest from 'supertest';
 import { CASE_CONFIGURE_CONNECTORS_URL } from '@kbn/cases-plugin/common/constants';
 import { getCaseConnectorsUrl } from '@kbn/cases-plugin/common/api';
-import {
+import type {
   ActionResult,
   ActionTypeExecutorResult,
   FindActionResult,
 } from '@kbn/actions-plugin/server/types';
 import { getServiceNowServer } from '@kbn/actions-simulators-plugin/server/plugin';
 import { RecordingServiceNowSimulator } from '@kbn/actions-simulators-plugin/server/servicenow_simulation';
-import {
+import type {
   Case,
   CaseConnector,
   Configuration,
   ConnectorTypes,
 } from '@kbn/cases-plugin/common/types/domain';
-import { CasePostRequest, GetCaseConnectorsResponse } from '@kbn/cases-plugin/common/types/api';
+import type {
+  CasePostRequest,
+  GetCaseConnectorsResponse,
+} from '@kbn/cases-plugin/common/types/api';
 import { camelCase, mapKeys } from 'lodash';
-import { User } from '../authentication/types';
+import type { User } from '../authentication/types';
 import { superUser } from '../authentication/users';
 import { getPostCaseRequest } from '../mock';
-import { ObjectRemover as ActionsRemover } from '../../../../alerting_api_integration/common/lib';
+import type { ObjectRemover as ActionsRemover } from '../../../../alerting_api_integration/common/lib';
 import { createConfiguration, getConfigurationRequest } from './configuration';
 import { createCase } from './case';
 import { getSpaceUrlPrefix } from './helpers';

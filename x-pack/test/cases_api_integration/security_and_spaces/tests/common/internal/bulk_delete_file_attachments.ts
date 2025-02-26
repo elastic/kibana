@@ -6,12 +6,12 @@
  */
 
 import expect from '@kbn/expect';
-import { Case } from '@kbn/cases-plugin/common';
+import type { Case } from '@kbn/cases-plugin/common';
 import { constructFileKindIdByOwner } from '@kbn/cases-plugin/common/files';
-import { Owner } from '@kbn/cases-plugin/common/constants/types';
+import type { Owner } from '@kbn/cases-plugin/common/constants/types';
 import { CASES_TEST_FIXTURE_FILE_KIND_ID } from '@kbn/cases-api-integration-test-plugin/server/files';
 import { getFilesAttachmentReq, getPostCaseRequest } from '../../../../common/lib/mock';
-import { FtrProviderContext } from '../../../../common/ftr_provider_context';
+import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import {
   bulkCreateAttachments,
   bulkGetAttachments,

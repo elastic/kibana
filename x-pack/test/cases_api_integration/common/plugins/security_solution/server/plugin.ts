@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { Plugin, CoreSetup } from '@kbn/core/server';
+import type { Plugin, CoreSetup } from '@kbn/core/server';
 import { hiddenTypes as filesSavedObjectTypes } from '@kbn/files-plugin/server/saved_objects';
-import { FeaturesPluginSetup } from '@kbn/features-plugin/server';
-import { SpacesPluginStart } from '@kbn/spaces-plugin/server';
-import { SecurityPluginStart } from '@kbn/security-plugin/server';
+import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
+import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
+import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import { KibanaFeatureScope } from '@kbn/features-plugin/common';
 
 export interface FixtureSetupDeps {
