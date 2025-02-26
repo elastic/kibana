@@ -133,7 +133,7 @@ export abstract class FieldFormat {
       this.convertObject = this.setupContentType();
     }
 
-    return this.convertObject[contentType];
+    return this.convertObject[contentType] ?? this.convertObject.text;
   }
 
   /**
