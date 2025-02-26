@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-import { DEFAULT_FLAPPING_SETTINGS, DISABLE_FLAPPING_SETTINGS } from '../../common/rules_settings';
+import {
+  DEFAULT_FLAPPING_SETTINGS,
+  DISABLE_FLAPPING_SETTINGS,
+} from '../../../common/rules_settings';
 import { atCapacity, updateFlappingHistory, isFlapping } from './flapping_utils';
 
 describe('flapping utils', () => {
