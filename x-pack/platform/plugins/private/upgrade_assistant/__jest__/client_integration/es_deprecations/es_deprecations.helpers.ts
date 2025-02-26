@@ -48,6 +48,20 @@ const createActions = (testBed: TestBed) => {
 
       component.update();
     },
+    toggleRowSelection: async (index: number) => {
+      await act(async () => {
+        find('batchSelectCheckbox').at(index).simulate('change');
+      });
+
+      component.update();
+    },
+    openBatchReindexModal: async () => {
+      await act(async () => {
+        find('openShowReindexModal').simulate('click');
+      });
+
+      component.update();
+    },
   };
 
   const clickFilterByIndex = async (index: number) => {

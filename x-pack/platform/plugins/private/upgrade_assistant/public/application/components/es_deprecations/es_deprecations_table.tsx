@@ -22,6 +22,8 @@ import {
   EuiTablePagination,
   EuiCallOut,
   EuiTableRowCell,
+  EuiTableHeaderCellCheckbox,
+  EuiCheckbox,
   Pager,
   Query,
 } from '@elastic/eui';
@@ -38,6 +40,9 @@ import {
 } from './deprecation_types';
 import { DeprecationTableColumns } from '../types';
 import { DEPRECATION_TYPE_MAP, PAGINATION_CONFIG } from '../constants';
+import { BulkReindexModal } from './bulk_reindex';
+
+type DeprecationTableColumnsWithoutSelect = Exclude<DeprecationTableColumns, 'select'>;
 
 const i18nTexts = {
   refreshButtonLabel: i18n.translate(
@@ -67,9 +72,18 @@ const i18nTexts = {
       defaultMessage: 'Filter',
     }
   ),
+  selectAllLabel: i18n.translate('xpack.upgradeAssistant.esDeprecations.table.selectAllRows', {
+    defaultMessage: 'Select all rows',
+  }),
 };
 
 const cellToLabelMap = {
+  select: {
+    label: i18n.translate('xpack.upgradeAssistant.esDeprecations.table.selectColumnTitle', {
+      defaultMessage: 'Select',
+    }),
+    width: '3px',
+  },
   isCritical: {
     label: i18n.translate('xpack.upgradeAssistant.esDeprecations.table.statusColumnTitle', {
       defaultMessage: 'Status',
@@ -107,7 +121,9 @@ const pageSizeOptions = PAGINATION_CONFIG.pageSizeOptions;
 
 const renderTableRowCells = (
   deprecation: EnrichedDeprecationInfo,
-  mlUpgradeModeEnabled: boolean
+  mlUpgradeModeEnabled: boolean,
+  selectedDeprecations: Set<string>,
+  toggleDeprecation: (id: string) => void
 ) => {
   switch (deprecation.correctiveAction?.type) {
     case 'mlSnapshot':
@@ -127,7 +143,14 @@ const renderTableRowCells = (
 
     case 'reindex':
     case 'unfreeze':
-      return <IndexTableRow deprecation={deprecation} rowFieldNames={cellTypes} />;
+      return (
+        <IndexTableRow
+          deprecation={deprecation}
+          rowFieldNames={cellTypes}
+          selectedDeprecations={selectedDeprecations}
+          toggleDeprecation={toggleDeprecation}
+        />
+      );
 
     case 'healthIndicator':
       return <HealthIndicatorTableRow deprecation={deprecation} rowFieldNames={cellTypes} />;
@@ -147,7 +170,7 @@ interface Props {
 
 interface SortConfig {
   isSortAscending: boolean;
-  sortField: DeprecationTableColumns;
+  sortField: DeprecationTableColumnsWithoutSelect;
 }
 
 const getSortedItems = (deprecations: EnrichedDeprecationInfo[], sortConfig: SortConfig) => {
@@ -190,6 +213,19 @@ export const EsDeprecationsTable: React.FunctionComponent<Props> = ({
   const { data } = api.useLoadMlUpgradeMode();
   const mlUpgradeModeEnabled = !!data?.mlUpgradeModeEnabled;
 
+  const [selectedDeprecations, setSelectedDeprecations] = useState<Set<string>>(new Set());
+  const toggleDeprecation = (id: string) => {
+    setSelectedDeprecations((prev) => {
+      const newSelection = new Set(prev);
+      if (newSelection.has(id)) {
+        newSelection.delete(id);
+      } else {
+        newSelection.add(id);
+      }
+      return newSelection;
+    });
+  };
+
   const [sortConfig, setSortConfig] = useState<SortConfig>({
     isSortAscending: true,
     sortField: 'isCritical',
@@ -215,7 +251,7 @@ export const EsDeprecationsTable: React.FunctionComponent<Props> = ({
   );
 
   const handleSort = useCallback(
-    (fieldName: DeprecationTableColumns) => {
+    (fieldName: DeprecationTableColumnsWithoutSelect) => {
       const newSortConfig = {
         isSortAscending: sortConfig.sortField === fieldName ? !sortConfig.isSortAscending : true,
         sortField: fieldName,
@@ -248,9 +284,54 @@ export const EsDeprecationsTable: React.FunctionComponent<Props> = ({
     }
   }, [deprecations, sortConfig, pager, searchQuery, filteredDeprecations.length]);
 
+  const getSelectableDeprecations = (deprecationsList: EnrichedDeprecationInfo[]) => {
+    return new Set(
+      deprecationsList
+        .filter(({ correctiveAction }) => correctiveAction?.type === 'reindex')
+        .map(({ index, message }) => index || message)
+    );
+  };
+
+  const areAllItemsSelected = () => {
+    const selectableDeprecations = getSelectableDeprecations(filteredDeprecations);
+    return (
+      selectableDeprecations.size > 0 &&
+      selectedDeprecations.size === selectableDeprecations.size &&
+      [...selectedDeprecations].every((id) => selectableDeprecations.has(id))
+    );
+  };
+
+  const toggleAll = () => {
+    setSelectedDeprecations((prev) => {
+      const selectableDeprecations = getSelectableDeprecations(filteredDeprecations);
+      return selectableDeprecations.size === prev.size &&
+        [...prev].every((id) => selectableDeprecations.has(id))
+        ? new Set() // Deselect all
+        : selectableDeprecations; // Select all
+    });
+  };
+
+  const renderSelectAll = () => {
+    return (
+      <EuiCheckbox
+        id={'selectAllCheckbox'}
+        aria-label={i18nTexts.selectAllLabel}
+        title={i18nTexts.selectAllLabel}
+        checked={areAllItemsSelected()}
+        onChange={toggleAll}
+      />
+    );
+  };
+
   return (
     <>
       <EuiFlexGroup gutterSize="m">
+        {selectedDeprecations.size > 0 && (
+          <EuiFlexItem grow={false}>
+            <BulkReindexModal indices={selectedDeprecations} />
+          </EuiFlexItem>
+        )}
+
         <EuiFlexItem data-test-subj="searchBarContainer">
           <EuiSearchBar
             box={{
@@ -310,11 +391,19 @@ export const EsDeprecationsTable: React.FunctionComponent<Props> = ({
       <EuiTable data-test-subj="esDeprecationsTable">
         <EuiTableHeader>
           {Object.entries(cellToLabelMap).map(([fieldName, cell]) => {
+            if (fieldName === 'select') {
+              return (
+                <EuiTableHeaderCellCheckbox key={cell.label} width={cell.width}>
+                  {renderSelectAll()}
+                </EuiTableHeaderCellCheckbox>
+              );
+            }
+
             return (
               <EuiTableHeaderCell
                 width={cell.width}
                 key={cell.label}
-                onSort={() => handleSort(fieldName as DeprecationTableColumns)}
+                onSort={() => handleSort(fieldName as DeprecationTableColumnsWithoutSelect)}
                 isSorted={sortConfig.sortField === fieldName}
                 isSortAscending={sortConfig.isSortAscending}
               >
@@ -341,7 +430,12 @@ export const EsDeprecationsTable: React.FunctionComponent<Props> = ({
             {visibleDeprecations.map((deprecation, index) => {
               return (
                 <EuiTableRow data-test-subj="deprecationTableRow" key={`deprecation-row-${index}`}>
-                  {renderTableRowCells(deprecation, mlUpgradeModeEnabled)}
+                  {renderTableRowCells(
+                    deprecation,
+                    mlUpgradeModeEnabled,
+                    selectedDeprecations,
+                    toggleDeprecation
+                  )}
                 </EuiTableRow>
               );
             })}
