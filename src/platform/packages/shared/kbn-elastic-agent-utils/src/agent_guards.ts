@@ -61,9 +61,7 @@ export function isOpenTelemetryAgentName(agentName: string): agentName is OpenTe
   );
 }
 
-export const isElasticAgentName = (agentName: string): agentName is ElasticAgentName => {
-  return ElasticAgentNamesSet.has(agentName as ElasticAgentName) === true;
-};
+export const isElasticAgentName = (agentName: string): agentName is ElasticAgentName =>  ElasticAgentNamesSet.has(agentName as ElasticAgentName);
 
 export function isJavaAgentName(agentName?: string): agentName is JavaAgentName {
   return (
