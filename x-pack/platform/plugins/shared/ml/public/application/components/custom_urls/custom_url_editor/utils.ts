@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { estypes } from '@elastic/elasticsearch';
 import moment, { type Moment } from 'moment';
 import { cloneDeep } from 'lodash';
 import type { SerializableRecord } from '@kbn/utility-types';
@@ -439,7 +439,7 @@ async function getAnomalyDetectionJobTestUrl(
   let testUrl = customUrl.url_value;
 
   // Query to look for the highest scoring anomaly.
-  const body: estypes.SearchRequest['body'] = {
+  const body: estypes.SearchRequest = {
     query: {
       bool: {
         must: [{ term: { job_id: job.job_id } }, { term: { result_type: 'record' } }],
@@ -454,12 +454,7 @@ async function getAnomalyDetectionJobTestUrl(
 
   let resp;
   try {
-    resp = await mlApi.results.anomalySearch(
-      {
-        body,
-      },
-      [job.job_id]
-    );
+    resp = await mlApi.results.anomalySearch(body, [job.job_id]);
   } catch (error) {
     // search may fail if the job doesn't already exist
     // ignore this error as the outer function call will raise a toast
