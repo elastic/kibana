@@ -26,6 +26,7 @@ import { DiscoverGridFlyout } from '../../components/discover_grid_flyout';
 import { SavedSearchEmbeddableBase } from './saved_search_embeddable_base';
 import { TotalDocuments } from '../../application/main/components/total_documents/total_documents';
 import { useProfileAccessor } from '../../context_awareness';
+import { useRecordCursorInCharts } from '../../hooks/use_record_cursor_in_charts';
 
 interface DiscoverGridEmbeddableProps extends Omit<UnifiedDataTableProps, 'sampleSizeState'> {
   sampleSizeState: number; // a required prop
@@ -43,8 +44,17 @@ export const DiscoverGridMemoized = React.memo(DiscoverGrid);
 
 export function DiscoverGridEmbeddable(props: DiscoverGridEmbeddableProps) {
   const { interceptedWarnings, enableDocumentViewer, ...gridProps } = props;
+  const updateRecordCursorInCharts = useRecordCursorInCharts(props.dataView);
 
   const [expandedDoc, setExpandedDoc] = useState<DataTableRecord | undefined>(undefined);
+
+  const changeExpandedDoc = useCallback(
+    (doc: DataTableRecord | undefined) => {
+      setExpandedDoc(doc);
+      updateRecordCursorInCharts(doc);
+    },
+    [setExpandedDoc, updateRecordCursorInCharts]
+  );
 
   const renderDocumentView = useCallback(
     (
@@ -64,8 +74,8 @@ export function DiscoverGridEmbeddable(props: DiscoverGridEmbeddableProps) {
         onFilter={props.onFilter}
         onRemoveColumn={props.onRemoveColumn}
         onAddColumn={props.onAddColumn}
-        onClose={() => setExpandedDoc(undefined)}
-        setExpandedDoc={setExpandedDoc}
+        onClose={() => changeExpandedDoc(undefined)}
+        setExpandedDoc={changeExpandedDoc}
         query={props.query}
         filters={props.filters}
       />
@@ -78,6 +88,7 @@ export function DiscoverGridEmbeddable(props: DiscoverGridEmbeddableProps) {
       props.query,
       props.filters,
       props.savedSearchId,
+      changeExpandedDoc,
     ]
   );
 
@@ -128,7 +139,7 @@ export function DiscoverGridEmbeddable(props: DiscoverGridEmbeddableProps) {
         {...gridProps}
         isPaginationEnabled={!gridProps.isPlainRecord}
         totalHits={props.totalHitCount}
-        setExpandedDoc={setExpandedDoc}
+        setExpandedDoc={changeExpandedDoc}
         expandedDoc={expandedDoc}
         showMultiFields={props.services.uiSettings.get(SHOW_MULTIFIELDS)}
         maxDocFieldsDisplayed={props.services.uiSettings.get(MAX_DOC_FIELDS_DISPLAYED)}
