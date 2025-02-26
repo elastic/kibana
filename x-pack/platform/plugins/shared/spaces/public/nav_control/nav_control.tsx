@@ -8,7 +8,7 @@
 import { EuiSkeletonRectangle } from '@elastic/eui';
 import { css } from '@emotion/react';
 import React, { lazy, Suspense } from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 
 import type { CoreStart } from '@kbn/core/public';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
@@ -40,7 +40,9 @@ export function initSpacesNavControl(
         }))
       );
 
-      ReactDOM.render(
+      const root = createRoot(targetDomElement);
+
+      root.render(
         <KibanaRenderContextProvider {...core}>
           <Suspense
             fallback={
@@ -66,12 +68,11 @@ export function initSpacesNavControl(
               onFinishTour={onFinishTour}
             />
           </Suspense>
-        </KibanaRenderContextProvider>,
-        targetDomElement
+        </KibanaRenderContextProvider>
       );
 
       return () => {
-        ReactDOM.unmountComponentAtNode(targetDomElement);
+        root.unmount();
       };
     },
   });
