@@ -63,7 +63,7 @@ export function initializePanelsManager(
   }
   const sections$ = new BehaviorSubject<DashboardSectionMap>(initialSections ?? []);
   function setSections(sections: DashboardSectionMap) {
-    if (!fastIsEqual(sections, sections$.value)) sections$.next(sections);
+    if (!fastIsEqual(sections ?? [], sections$.value ?? [])) sections$.next(sections);
   }
   let restoredRuntimeState: UnsavedPanelState = initialPanelsRuntimeState;
 
@@ -372,6 +372,7 @@ export function initializePanelsManager(
         sections$,
         setSections,
         (a, b) => {
+          console.log(a, b);
           return fastIsEqual(a ?? [], b ?? []);
         },
       ],
@@ -385,7 +386,7 @@ export function initializePanelsManager(
       },
       reset: (lastSavedState: DashboardState) => {
         setPanels(lastSavedState.panels);
-        setSections([]);
+        setSections(lastSavedState.sections ?? []);
         restoredRuntimeState = {};
         let resetChangedPanelCount = false;
         const currentChildren = children$.value;

@@ -61,6 +61,7 @@ export const DashboardGrid = ({
       })),
     ];
 
+    console.log(newLayout, sections, panels);
     Object.keys(panels).forEach((panelId) => {
       const gridData = panels[panelId].gridData;
       const sectionId = panels[panelId].sectionIndex ?? 0;
