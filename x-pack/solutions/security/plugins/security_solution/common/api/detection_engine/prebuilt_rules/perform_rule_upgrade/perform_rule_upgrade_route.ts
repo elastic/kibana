@@ -10,7 +10,7 @@ import { mapValues } from 'lodash';
 import { RuleResponse } from '../../model/rule_schema/rule_schemas.gen';
 import { AggregatedPrebuiltRuleError, DiffableAllFields } from '../model';
 import { RuleSignatureId, RuleVersion } from '../../model';
-import { PrebuiltRuleFilter } from '../common/prebuilt_rule_filter';
+import { PrebuiltRulesFilter } from '../common/prebuilt_rules_filter';
 
 export type Mode = z.infer<typeof Mode>;
 export const Mode = z.enum(['ALL_RULES', 'SPECIFIC_RULES']);
@@ -130,7 +130,7 @@ export type UpgradeAllRulesRequest = z.infer<typeof UpgradeAllRulesRequest>;
 export const UpgradeAllRulesRequest = z.object({
   mode: z.literal('ALL_RULES'),
   pick_version: PickVersionValues.optional(),
-  filter: PrebuiltRuleFilter.optional(),
+  filter: PrebuiltRulesFilter.optional(),
   on_conflict: UpgradeConflictResolution.optional(),
   dry_run: z.boolean().optional(),
 });
