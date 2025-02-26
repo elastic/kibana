@@ -169,15 +169,13 @@ export function ChatHeader({
 
             {conversationId && conversation ? (
               <>
-                {isConversationOwnedByCurrentUser ? (
-                  <EuiFlexItem grow={false}>
-                    <ChatSharingMenu
-                      conversationId={conversationId}
-                      isPublic={conversation.public}
-                      onChangeConversationAccess={handleConversationAccessUpdate}
-                    />
-                  </EuiFlexItem>
-                ) : null}
+                <EuiFlexItem grow={false}>
+                  <ChatSharingMenu
+                    isPublic={conversation.public}
+                    onChangeConversationAccess={handleConversationAccessUpdate}
+                    disabled={licenseInvalid || !isConversationOwnedByCurrentUser}
+                  />
+                </EuiFlexItem>
                 <EuiFlexItem grow={false}>
                   <ChatContextMenu
                     disabled={licenseInvalid}
