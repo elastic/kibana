@@ -27,41 +27,41 @@
   resolved "https://registry.yarnpkg.com/@adobe/css-tools/-/css-tools-4.4.0.tgz#728c484f4e10df03d5a3acd0d8adcbbebff8ad63"
   integrity sha512-Ff9+ksdQQB3rMncgqDK78uLznstjyfIf2Arnh22pW8kBpLs6rpKDwgnZT46hin5Hl1WzazzK64DOrhSwYpS7bQ==
 
-"@ai-sdk/provider-utils@2.0.4":
-  version "2.0.4"
-  resolved "https://registry.yarnpkg.com/@ai-sdk/provider-utils/-/provider-utils-2.0.4.tgz#e76ab8b592fb656013ada954cbbc81f41e3003a9"
-  integrity sha512-GMhcQCZbwM6RoZCri0MWeEWXRt/T+uCxsmHEsTwNvEH3GDjNzchfX25C8ftry2MeEOOn6KfqCLSKomcgK6RoOg==
+"@ai-sdk/provider-utils@2.1.9":
+  version "2.1.9"
+  resolved "https://registry.yarnpkg.com/@ai-sdk/provider-utils/-/provider-utils-2.1.9.tgz#aa1693212dbd7f36d593d20a1139bc421dfe2bda"
+  integrity sha512-NerKjTuuUUs6glJGaentaXEBH52jRM0pR+cRCzc7aWke/K5jYBD6Frv1JYBpcxS7gnnCqSQZR9woiyS+6jrdjw==
   dependencies:
-    "@ai-sdk/provider" "1.0.2"
+    "@ai-sdk/provider" "1.0.8"
     eventsource-parser "^3.0.0"
     nanoid "^3.3.8"
     secure-json-parse "^2.7.0"
 
-"@ai-sdk/provider@1.0.2":
-  version "1.0.2"
-  resolved "https://registry.yarnpkg.com/@ai-sdk/provider/-/provider-1.0.2.tgz#1d3fa62f4d242868523549eb6cdefc2452b9bfde"
-  integrity sha512-YYtP6xWQyaAf5LiWLJ+ycGTOeBLWrED7LUrvc+SQIWhGaneylqbaGsyQL7VouQUeQ4JZ1qKYZuhmi3W56HADPA==
+"@ai-sdk/provider@1.0.8":
+  version "1.0.8"
+  resolved "https://registry.yarnpkg.com/@ai-sdk/provider/-/provider-1.0.8.tgz#9029dfe8b2698e43c3012524fd1192dd546c6a6c"
+  integrity sha512-f9jSYwKMdXvm44Dmab1vUBnfCDSFfI5rOtvV1W9oKB7WYHR5dGvCC6x68Mk3NUfrdmNoMVHGoh6JT9HCVMlMow==
   dependencies:
     json-schema "^0.4.0"
 
-"@ai-sdk/react@1.0.6":
-  version "1.0.6"
-  resolved "https://registry.yarnpkg.com/@ai-sdk/react/-/react-1.0.6.tgz#8757e7bd21c6496e007d73f878bce103a483667a"
-  integrity sha512-8Hkserq0Ge6AEi7N4hlv2FkfglAGbkoAXEZ8YSp255c3PbnZz6+/5fppw+aROmZMOfNwallSRuy1i/iPa2rBpQ==
+"@ai-sdk/react@1.1.17":
+  version "1.1.17"
+  resolved "https://registry.yarnpkg.com/@ai-sdk/react/-/react-1.1.17.tgz#ba7982cba0dec4eca593569f9e1d811529b95f71"
+  integrity sha512-NAuEflFvjw1uh1AOmpyi7rBF4xasWsiWUb86JQ8ScjDGxoGDYEdBnaHOxUpooLna0dGNbSPkvDMnVRhoLKoxPQ==
   dependencies:
-    "@ai-sdk/provider-utils" "2.0.4"
-    "@ai-sdk/ui-utils" "1.0.5"
+    "@ai-sdk/provider-utils" "2.1.9"
+    "@ai-sdk/ui-utils" "1.1.15"
     swr "^2.2.5"
     throttleit "2.1.0"
 
-"@ai-sdk/ui-utils@1.0.5":
-  version "1.0.5"
-  resolved "https://registry.yarnpkg.com/@ai-sdk/ui-utils/-/ui-utils-1.0.5.tgz#096db17d070131851e5dc27dfe2131d658e00906"
-  integrity sha512-DGJSbDf+vJyWmFNexSPUsS1AAy7gtsmFmoSyNbNbJjwl9hRIf2dknfA1V0ahx6pg3NNklNYFm53L8Nphjovfvg==
+"@ai-sdk/ui-utils@1.1.15":
+  version "1.1.15"
+  resolved "https://registry.yarnpkg.com/@ai-sdk/ui-utils/-/ui-utils-1.1.15.tgz#13ce822c008237abd83a65362b13b04fe39d311d"
+  integrity sha512-NsV/3CMmjc4m53snzRdtZM6teTQUXIKi8u0Kf7GBruSzaMSuZ4DWaAAlUshhR3p2FpZgtsogW+vYG1/rXsGu+Q==
   dependencies:
-    "@ai-sdk/provider" "1.0.2"
-    "@ai-sdk/provider-utils" "2.0.4"
-    zod-to-json-schema "^3.23.5"
+    "@ai-sdk/provider" "1.0.8"
+    "@ai-sdk/provider-utils" "2.1.9"
+    zod-to-json-schema "^3.24.1"
 
 "@ampproject/remapping@^2.2.0":
   version "2.2.0"
@@ -13598,18 +13598,17 @@ aggregate-error@^3.0.0, aggregate-error@^3.1.0:
     clean-stack "^2.0.0"
     indent-string "^4.0.0"
 
-ai@^4.0.18:
-  version "4.0.18"
-  resolved "https://registry.yarnpkg.com/ai/-/ai-4.0.18.tgz#94a270165133a9327d73a1327ffefdc7b5581832"
-  integrity sha512-BTWzalLNE1LQphEka5xzJXDs5v4xXy1Uzr7dAVk+C/CnO3WNpuMBgrCymwUv0VrWaWc8xMQuh+OqsT7P7JyekQ==
+ai@^4.1.44:
+  version "4.1.45"
+  resolved "https://registry.yarnpkg.com/ai/-/ai-4.1.45.tgz#f5a73246713316264c3137934924ec16538b92e1"
+  integrity sha512-nQkxQ2zCD+O/h8zJ+PxmBv9coyMaG1uP9kGJvhNaGAA25hbZRQWL0NbTsSJ/QMOUraXKLa+6fBm3VF1NkJK9Kg==
   dependencies:
-    "@ai-sdk/provider" "1.0.2"
-    "@ai-sdk/provider-utils" "2.0.4"
-    "@ai-sdk/react" "1.0.6"
-    "@ai-sdk/ui-utils" "1.0.5"
+    "@ai-sdk/provider" "1.0.8"
+    "@ai-sdk/provider-utils" "2.1.9"
+    "@ai-sdk/react" "1.1.17"
+    "@ai-sdk/ui-utils" "1.1.15"
     "@opentelemetry/api" "1.9.0"
     jsondiffpatch "0.6.0"
-    zod-to-json-schema "^3.23.5"
 
 airbnb-js-shims@^2.2.1:
   version "2.2.1"
@@ -34450,10 +34449,15 @@ zip-stream@^6.0.1:
     compress-commons "^6.0.2"
     readable-stream "^4.0.0"
 
-zod-to-json-schema@^3.22.3, zod-to-json-schema@^3.22.4, zod-to-json-schema@^3.22.5, zod-to-json-schema@^3.23.0, zod-to-json-schema@^3.23.5:
+zod-to-json-schema@^3.22.3, zod-to-json-schema@^3.22.4, zod-to-json-schema@^3.22.5, zod-to-json-schema@^3.23.0:
   version "3.24.1"
   resolved "https://registry.yarnpkg.com/zod-to-json-schema/-/zod-to-json-schema-3.24.1.tgz#f08c6725091aadabffa820ba8d50c7ab527f227a"
   integrity sha512-3h08nf3Vw3Wl3PK+q3ow/lIil81IT2Oa7YpQyUUDsEWbXveMesdfK1xBd2RhCkynwZndAxixji/7SYJJowr62w==
+
+zod-to-json-schema@^3.24.1:
+  version "3.24.3"
+  resolved "https://registry.yarnpkg.com/zod-to-json-schema/-/zod-to-json-schema-3.24.3.tgz#5958ba111d681f8d01c5b6b647425c9b8a6059e7"
+  integrity sha512-HIAfWdYIt1sssHfYZFCXp4rU1w2r8hVVXYIlmoa0r0gABLs5di3RCqPU5DDROogVz1pAdYBaz7HK5n9pSUNs3A==
 
 zod@3.24.1:
   version "3.24.1"
