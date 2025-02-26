@@ -18,7 +18,7 @@ import { i18n } from '@kbn/i18n';
 import React, { useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { getAdvancedParameters } from '@kbn/streams-schema';
-import { SchemaField } from '../types';
+import type { SchemaField } from '../types';
 import { useKibana } from '../../../../hooks/use_kibana';
 
 const label = i18n.translate('xpack.streams.advancedFieldMappingOptions.label', {

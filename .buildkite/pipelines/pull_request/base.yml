@@ -48,19 +48,6 @@ steps:
         - exit_status: '-1'
           limit: 3
 
-  - command: .buildkite/scripts/steps/lint.sh
-    label: 'Linting'
-    agents:
-      machineType: n2-standard-16
-      preemptible: true
-      diskSizeGb: 75
-    key: linting
-    timeout_in_minutes: 60
-    retry:
-      automatic:
-        - exit_status: '-1'
-          limit: 3
-
   - command: .buildkite/scripts/steps/lint_with_types.sh
     label: 'Linting (with types)'
     agents:
@@ -68,6 +55,19 @@ steps:
       preemptible: true
       diskSizeGb: 75
     key: linting_with_types
+    timeout_in_minutes: 60
+    retry:
+      automatic:
+        - exit_status: '-1'
+          limit: 3
+
+  - command: .buildkite/scripts/steps/lint.sh
+    label: 'Linting'
+    agents:
+      machineType: n2-standard-16
+      preemptible: true
+      diskSizeGb: 75
+    key: linting
     timeout_in_minutes: 60
     retry:
       automatic:

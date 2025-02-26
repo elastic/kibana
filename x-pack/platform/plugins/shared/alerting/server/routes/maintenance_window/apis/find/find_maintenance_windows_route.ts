@@ -5,20 +5,20 @@
  * 2.0.
  */
 
-import { IRouter } from '@kbn/core/server';
-import { ILicenseState } from '../../../../lib';
+import type { IRouter } from '@kbn/core/server';
+import type { ILicenseState } from '../../../../lib';
 import { verifyAccessAndContext } from '../../../lib';
-import {
-  AlertingRequestHandlerContext,
-  INTERNAL_ALERTING_API_MAINTENANCE_WINDOW_PATH,
-} from '../../../../types';
+import type { AlertingRequestHandlerContext } from '../../../../types';
+import { INTERNAL_ALERTING_API_MAINTENANCE_WINDOW_PATH } from '../../../../types';
 import { MAINTENANCE_WINDOW_API_PRIVILEGES } from '../../../../../common';
 import type { FindMaintenanceWindowsResult } from '../../../../application/maintenance_window/methods/find/types';
-import type { FindMaintenanceWindowsResponseV1 } from '../../../../../common/routes/maintenance_window/apis/find';
 import {
   findMaintenanceWindowsRequestQuerySchemaV1,
   findMaintenanceWindowsResponseBodySchemaV1,
-  type FindMaintenanceWindowsRequestQueryV1,
+} from '../../../../../common/routes/maintenance_window/apis/find';
+import type {
+  FindMaintenanceWindowsResponseV1,
+  FindMaintenanceWindowsRequestQueryV1,
 } from '../../../../../common/routes/maintenance_window/apis/find';
 import {
   transformFindMaintenanceWindowParamsV1,

@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import type { SavedObjectsFindResponse } from '@kbn/core-saved-objects-api-server';
-
-import type { SavedObjectsFindResult } from '@kbn/core-saved-objects-api-server';
+import type {
+  SavedObjectsFindResponse,
+  SavedObjectsFindResult,
+} from '@kbn/core-saved-objects-api-server';
 
 import { mapPackagePolicySavedObjectToPackagePolicy } from '../services/package_policies';
 

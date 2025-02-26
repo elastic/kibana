@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import {
+import type {
   IlmExplainLifecycleLifecycleExplain,
   HealthStatus,
   IndicesStatsIndexMetadataState,
@@ -14,8 +14,8 @@ import {
 import type { ScopedHistory } from '@kbn/core-application-browser';
 import type { SerializableRecord } from '@kbn/utility-types';
 import type { LocatorPublic } from '@kbn/share-plugin/public';
-import { ExtensionsSetup } from './services/extensions_service';
-import { PublicApiServiceSetup } from './services/public_api_service';
+import type { ExtensionsSetup } from './services/extensions_service';
+import type { PublicApiServiceSetup } from './services/public_api_service';
 
 export type IndexManagementLocatorParams = SerializableRecord &
   (

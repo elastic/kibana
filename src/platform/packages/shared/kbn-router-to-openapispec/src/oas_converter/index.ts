@@ -8,7 +8,7 @@
  */
 
 import type { OpenAPIV3 } from 'openapi-types';
-import { KnownParameters, OpenAPIConverter } from '../type';
+import type { KnownParameters, OpenAPIConverter } from '../type';
 
 import { kbnConfigSchemaConverter } from './kbn_config_schema';
 import { zodConverter } from './zod';

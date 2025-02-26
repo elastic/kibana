@@ -24,9 +24,9 @@ import {
   EuiText,
   EuiTitle,
   EuiToolTip,
+  useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { useEuiTheme } from '@elastic/eui';
 import {
   usePermissionCheck,
   createPermissionFailureMessage,

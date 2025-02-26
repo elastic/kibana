@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { PluginName } from '@kbn/core-base-common';
+import type { PluginName } from '@kbn/core-base-common';
 import {
   type CoreStatus,
   ServiceStatusLevels,

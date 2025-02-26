@@ -19,7 +19,7 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 
-import { AppMountParameters, CoreStart } from '@kbn/core/public';
+import type { AppMountParameters, CoreStart } from '@kbn/core/public';
 
 const AppStatusApp = ({ appId }: { appId: string }) => (
   <EuiPage>

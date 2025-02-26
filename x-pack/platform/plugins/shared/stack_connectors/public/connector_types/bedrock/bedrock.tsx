@@ -8,9 +8,8 @@
 import { lazy } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { GenericValidationResult } from '@kbn/triggers-actions-ui-plugin/public/types';
-import { SUB_ACTION } from '../../../common/bedrock/constants';
-import { BEDROCK_CONNECTOR_ID, BEDROCK_TITLE } from '../../../common/bedrock/constants';
-import { BedrockActionParams, BedrockConnector } from './types';
+import { SUB_ACTION, BEDROCK_CONNECTOR_ID, BEDROCK_TITLE } from '../../../common/bedrock/constants';
+import type { BedrockActionParams, BedrockConnector } from './types';
 
 interface ValidationErrors {
   subAction: string[];

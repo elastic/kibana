@@ -9,14 +9,8 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { distinctUntilChanged, map } from 'rxjs';
 
-import {
-  EuiButtonIcon,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiText,
-  UseEuiTheme,
-  euiCanAnimate,
-} from '@elastic/eui';
+import type { UseEuiTheme } from '@elastic/eui';
+import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiText, euiCanAnimate } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 

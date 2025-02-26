@@ -13,7 +13,7 @@ import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { RuleFormAdvancedOptions } from './rule_form_advanced_options';
 import { useKibana } from '../../../common/lib/kibana';
 import userEvent from '@testing-library/user-event';
-import { ApplicationStart } from '@kbn/core-application-browser';
+import type { ApplicationStart } from '@kbn/core-application-browser';
 
 jest.mock('../../../common/lib/kibana');
 

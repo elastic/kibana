@@ -7,7 +7,7 @@
 import expect from '@kbn/expect';
 import fs from 'fs';
 import path from 'path';
-import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
+import type { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { skipIfNoDockerRegistry, isDockerRegistryEnabledOrSkipped } from '../../helpers';
 const testSpaceId = 'fleet_test_space';
 

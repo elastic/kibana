@@ -7,24 +7,24 @@
 
 import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiSpacer } from '@elastic/eui';
 import React, { useMemo, useState } from 'react';
-import {
+import type {
   IngestStreamGetResponse,
   IngestStreamLifecycle,
   IngestUpsertRequest,
+} from '@kbn/streams-schema';
+import {
   isIlmLifecycle,
   isRoot,
   isUnwiredStreamGetResponse,
   isWiredStreamGetResponse,
 } from '@kbn/streams-schema';
-import {
-  ILM_LOCATOR_ID,
-  IlmLocatorParams,
-  PolicyFromES,
-} from '@kbn/index-lifecycle-management-common-shared';
+import type { IlmLocatorParams, PolicyFromES } from '@kbn/index-lifecycle-management-common-shared';
+import { ILM_LOCATOR_ID } from '@kbn/index-lifecycle-management-common-shared';
 import { i18n } from '@kbn/i18n';
 import { useAbortController } from '@kbn/react-hooks';
 import { useKibana } from '../../../hooks/use_kibana';
-import { EditLifecycleModal, LifecycleEditAction } from './modal';
+import type { LifecycleEditAction } from './modal';
+import { EditLifecycleModal } from './modal';
 import { RetentionSummary } from './summary';
 import { RetentionMetadata } from './metadata';
 import { IlmSummary } from './ilm_summary';

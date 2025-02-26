@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { FtrConfigProviderContext } from '@kbn/test';
+import type { FtrConfigProviderContext } from '@kbn/test';
 
 /**
  * NOTE: The solution view is currently only available in the cloud environment.

@@ -12,12 +12,14 @@ import type {
   AggregationsPercentilesAggregation,
   AggregationsTermsAggregation,
 } from '@elastic/elasticsearch/lib/api/types';
-import { FIELD_ORIGIN } from '../../../common/constants';
+import type { FIELD_ORIGIN } from '../../../common/constants';
 import { ESTooltipProperty } from '../tooltips/es_tooltip_property';
-import { ITooltipProperty, TooltipProperty } from '../tooltips/tooltip_property';
-import { IField, AbstractField } from './field';
-import { IESSource } from '../sources/es_source';
-import { IVectorSource } from '../sources/vector_source';
+import type { ITooltipProperty } from '../tooltips/tooltip_property';
+import { TooltipProperty } from '../tooltips/tooltip_property';
+import type { IField } from './field';
+import { AbstractField } from './field';
+import type { IESSource } from '../sources/es_source';
+import type { IVectorSource } from '../sources/vector_source';
 
 export class ESDocField extends AbstractField implements IField {
   private readonly _source: IESSource;

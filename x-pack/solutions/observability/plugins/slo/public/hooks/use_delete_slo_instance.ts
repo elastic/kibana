@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import { IHttpFetchError, ResponseErrorBody } from '@kbn/core/public';
+import type { IHttpFetchError, ResponseErrorBody } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
-import { ALL_VALUE, SLOWithSummaryResponse } from '@kbn/slo-schema';
+import type { SLOWithSummaryResponse } from '@kbn/slo-schema';
+import { ALL_VALUE } from '@kbn/slo-schema';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useKibana } from './use_kibana';
 import { sloKeys } from './query_key_factory';

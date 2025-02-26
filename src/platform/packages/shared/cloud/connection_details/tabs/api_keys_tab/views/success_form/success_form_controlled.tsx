@@ -10,7 +10,7 @@
 import { EuiCallOut, EuiFormRow, EuiSpacer } from '@elastic/eui';
 import * as React from 'react';
 import { i18n } from '@kbn/i18n';
-import { ApiKey } from './types';
+import type { ApiKey } from './types';
 import { FormatSelect, type Format } from './format_select';
 import { CopyInput } from '../../../../components/copy_input';
 import { ManageKeysLink } from '../../components/manage_keys_link';

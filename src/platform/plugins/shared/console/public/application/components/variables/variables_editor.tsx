@@ -26,7 +26,7 @@ import {
   type EuiBasicTableColumn,
 } from '@elastic/eui';
 
-import { NotificationsSetup } from '@kbn/core/public';
+import type { NotificationsSetup } from '@kbn/core/public';
 import { useServicesContext } from '../../contexts';
 import { VariableEditorForm } from './variables_editor_form';
 import * as utils from './utils';

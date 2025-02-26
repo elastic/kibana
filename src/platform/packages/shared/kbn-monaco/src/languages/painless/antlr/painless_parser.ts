@@ -2,17 +2,18 @@
 // Generated from ./src/painless/antlr/painless_parser.g4 by ANTLR 4.13.1
 // noinspection ES6UnusedImports,JSUnusedGlobalSymbols,JSUnusedLocalSymbols
 
+import type { DecisionState,
+	RuleContext,
+	TerminalNode, TokenStream} from 'antlr4';
 import {
 	ATN,
-	ATNDeserializer, DecisionState, DFA, FailedPredicateException,
+	ATNDeserializer, DFA, FailedPredicateException,
 	RecognitionException, NoViableAltException, BailErrorStrategy,
-	Parser, ParserATNSimulator,
-	RuleContext, ParserRuleContext, PredictionMode, PredictionContextCache,
-	TerminalNode, RuleNode,
-	Token, TokenStream,
+	Parser, ParserATNSimulator, ParserRuleContext, PredictionMode, PredictionContextCache, RuleNode,
+	Token,
 	Interval, IntervalSet
 } from 'antlr4';
-import painless_parserListener from "./painless_parserListener.js";
+import type painless_parserListener from "./painless_parserListener.js";
 // for running tests with parameters, TODO: discuss strategy for typed parameters in CI
 // eslint-disable-next-line no-unused-vars
 type int = number;

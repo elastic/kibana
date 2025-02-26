@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ToolingLog } from '@kbn/tooling-log';
+import type { ToolingLog } from '@kbn/tooling-log';
 import { tmpdir } from 'os';
 import { writeFile } from 'fs/promises';
 import { v4 as uuid } from 'uuid';
@@ -13,7 +13,7 @@ import execa from 'execa';
 import path from 'path';
 import expect from '@kbn/expect';
 
-import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
+import type { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { getLatestVersion } from '../../../fleet_cypress/artifact_manager';
 import { skipIfNoDockerRegistry } from '../../helpers';
 

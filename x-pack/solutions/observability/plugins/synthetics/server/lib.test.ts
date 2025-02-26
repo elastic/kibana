@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { MsearchResponse } from '@elastic/elasticsearch/lib/api/types';
+import type { MsearchResponse } from '@elastic/elasticsearch/lib/api/types';
 import { SyntheticsEsClient } from './lib';
 import { savedObjectsClientMock, uiSettingsServiceMock } from '@kbn/core/server/mocks';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';

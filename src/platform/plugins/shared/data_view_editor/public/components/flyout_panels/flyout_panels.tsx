@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { FC, PropsWithChildren } from 'react';
 import React, {
   useState,
   createContext,
@@ -14,10 +15,9 @@ import React, {
   useCallback,
   useMemo,
   useLayoutEffect,
-  FC,
-  PropsWithChildren,
 } from 'react';
-import { EuiFlexGroup, EuiFlexGroupProps } from '@elastic/eui';
+import type { EuiFlexGroupProps } from '@elastic/eui';
+import { EuiFlexGroup } from '@elastic/eui';
 
 import './flyout_panels.scss';
 

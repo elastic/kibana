@@ -8,7 +8,7 @@
  */
 
 import { REFERENCE_LINE_LAYER, REFERENCE_LINE_DECORATION_CONFIG } from '../constants';
-import { ReferenceLineLayerFn } from '../types';
+import type { ReferenceLineLayerFn } from '../types';
 import { strings } from '../i18n';
 
 export const referenceLineLayerFunction: ReferenceLineLayerFn = {

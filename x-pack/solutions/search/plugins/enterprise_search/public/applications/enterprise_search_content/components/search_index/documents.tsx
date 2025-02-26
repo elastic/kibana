@@ -5,9 +5,7 @@
  * 2.0.
  */
 
-import { useEffect, useState } from 'react';
-
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 
 import { useActions, useValues } from 'kea';
 
@@ -29,10 +27,8 @@ import { KibanaLogic } from '../../../shared/kibana';
 import { mappingsWithPropsApiLogic } from '../../api/mappings/mappings_logic';
 import { searchDocumentsApiLogic } from '../../api/search_documents/search_documents_api_logic';
 
-import {
-  AccessControlIndexSelector,
-  AccessControlSelectorOption,
-} from './components/access_control_index_selector/access_control_index_selector';
+import type { AccessControlSelectorOption } from './components/access_control_index_selector/access_control_index_selector';
+import { AccessControlIndexSelector } from './components/access_control_index_selector/access_control_index_selector';
 import { IndexNameLogic } from './index_name_logic';
 import { IndexViewLogic } from './index_view_logic';
 

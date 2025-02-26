@@ -7,10 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { FC, PropsWithChildren } from 'react';
+import type { FC, PropsWithChildren } from 'react';
+import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiButton, EuiButtonEmpty, EuiPageHeader } from '@elastic/eui';
-import { DataView } from '@kbn/data-views-plugin/public';
+import type { DataView } from '@kbn/data-views-plugin/public';
 
 interface IndexHeaderProps {
   indexPattern: DataView;

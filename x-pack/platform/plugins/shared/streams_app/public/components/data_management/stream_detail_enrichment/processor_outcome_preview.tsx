@@ -16,18 +16,19 @@ import {
   EuiProgress,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { TimeRange } from '@kbn/es-query';
+import type { TimeRange } from '@kbn/es-query';
 import { isEmpty } from 'lodash';
-import { SampleDocument } from '@kbn/streams-schema';
+import type { SampleDocument } from '@kbn/streams-schema';
 import { useKibana } from '../../../hooks/use_kibana';
-import { StreamsAppSearchBar, StreamsAppSearchBarProps } from '../../streams_app_search_bar';
+import type { StreamsAppSearchBarProps } from '../../streams_app_search_bar';
+import { StreamsAppSearchBar } from '../../streams_app_search_bar';
 import { PreviewTable } from '../preview_table';
-import {
+import type {
   DocsFilterOption,
   TableColumn,
   UseProcessingSimulatorReturn,
-  docsFilterOptions,
 } from './hooks/use_processing_simulator';
+import { docsFilterOptions } from './hooks/use_processing_simulator';
 import { AssetImage } from '../../asset_image';
 import { useDateRange } from '../../../hooks/use_date_range';
 

@@ -5,24 +5,25 @@
  * 2.0.
  */
 
-import React, { ReactElement } from 'react';
+import type { ReactElement } from 'react';
+import React from 'react';
 
 import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { Feature } from 'geojson';
+import type { Feature } from 'geojson';
 import type {
   AggregationsCompositeAggregate,
   SearchResponse,
 } from '@elastic/elasticsearch/lib/api/types';
 import type { SearchResponseWarning } from '@kbn/search-response-warnings';
 import type { KibanaExecutionContext } from '@kbn/core/public';
-import { ISearchSource } from '@kbn/data-plugin/common/search/search_source';
-import { DataView } from '@kbn/data-plugin/common';
-import { Adapters } from '@kbn/inspector-plugin/common/adapters';
+import type { ISearchSource } from '@kbn/data-plugin/common/search/search_source';
+import type { DataView } from '@kbn/data-plugin/common';
+import type { Adapters } from '@kbn/inspector-plugin/common/adapters';
 import { ACTION_GLOBAL_APPLY_FILTER } from '@kbn/unified-search-plugin/public';
 import { getTileUrlParams } from '@kbn/maps-vector-tile-utils';
 import { type Filter, buildExistsFilter } from '@kbn/es-query';
-import { makeESBbox } from '../../../../common/elasticsearch_util';
+import { makeESBbox, buildGeoGridFilter } from '../../../../common/elasticsearch_util';
 import { convertCompositeRespToGeoJson, convertRegularRespToGeoJson } from './convert_to_geojson';
 import { UpdateSourceEditor } from './update_source_editor';
 import {
@@ -39,19 +40,15 @@ import {
   VECTOR_STYLES,
 } from '../../../../common/constants';
 import { getDataSourceLabel, getDataViewLabel } from '../../../../common/i18n_getters';
-import { buildGeoGridFilter } from '../../../../common/elasticsearch_util';
-import { AbstractESAggSource, ESAggsSourceSyncMeta } from '../es_agg_source';
+import type { ESAggsSourceSyncMeta } from '../es_agg_source';
+import { AbstractESAggSource } from '../es_agg_source';
 import { DataRequestAbortError } from '../../util/data_request';
 import { LICENSED_FEATURES } from '../../../licensed_features';
 
 import { getHttp } from '../../../kibana_services';
-import {
-  GetFeatureActionsArgs,
-  GeoJsonWithMeta,
-  IMvtVectorSource,
-  getLayerFeaturesRequestName,
-} from '../vector_source';
-import {
+import type { GetFeatureActionsArgs, GeoJsonWithMeta, IMvtVectorSource } from '../vector_source';
+import { getLayerFeaturesRequestName } from '../vector_source';
+import type {
   DataFilters,
   ESGeoGridSourceDescriptor,
   MapExtent,
@@ -59,7 +56,7 @@ import {
   TooltipFeatureAction,
   VectorSourceRequestMeta,
 } from '../../../../common/descriptor_types';
-import { ImmutableSourceProperty, OnSourceChangeArgs, SourceEditorArgs } from '../source';
+import type { ImmutableSourceProperty, OnSourceChangeArgs, SourceEditorArgs } from '../source';
 import { isValidStringConfig } from '../../util/valid_string_config';
 import { getExecutionContextId, mergeExecutionContext } from '../execution_context_utils';
 import { isMvt } from './is_mvt';

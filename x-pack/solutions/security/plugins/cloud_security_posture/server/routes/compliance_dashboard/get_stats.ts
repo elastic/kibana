@@ -5,10 +5,12 @@
  * 2.0.
  */
 
-import { ElasticsearchClient } from '@kbn/core/server';
-import type { QueryDslQueryContainer, SearchRequest } from '@elastic/elasticsearch/lib/api/types';
-import { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/types';
-import type { Logger } from '@kbn/core/server';
+import type { ElasticsearchClient, Logger } from '@kbn/core/server';
+import type {
+  QueryDslQueryContainer,
+  SearchRequest,
+  MappingRuntimeFields,
+} from '@elastic/elasticsearch/lib/api/types';
 import { calculatePostureScore } from '../../../common/utils/helpers';
 import type { ComplianceDashboardData } from '../../../common/types_old';
 

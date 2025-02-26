@@ -15,9 +15,10 @@ import {
   EuiBadge,
   EuiButtonIcon,
 } from '@elastic/eui';
-import { DraggableProvided } from '@hello-pangea/dnd';
+import type { DraggableProvided } from '@hello-pangea/dnd';
 import { i18n } from '@kbn/i18n';
-import { RoutingDefinition, isDescendantOf } from '@kbn/streams-schema';
+import type { RoutingDefinition } from '@kbn/streams-schema';
+import { isDescendantOf } from '@kbn/streams-schema';
 import React from 'react';
 import { useStreamsAppRouter } from '../../../hooks/use_streams_app_router';
 import { alwaysToEmptyEquals } from '../../../util/condition';

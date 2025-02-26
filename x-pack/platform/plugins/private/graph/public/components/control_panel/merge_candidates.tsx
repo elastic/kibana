@@ -8,7 +8,7 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiIcon, EuiToolTip } from '@elastic/eui';
-import { ControlType, TermIntersect, Workspace } from '../../types';
+import type { ControlType, TermIntersect, Workspace } from '../../types';
 import { VennDiagram } from '../venn_diagram';
 
 interface MergeCandidatesProps {

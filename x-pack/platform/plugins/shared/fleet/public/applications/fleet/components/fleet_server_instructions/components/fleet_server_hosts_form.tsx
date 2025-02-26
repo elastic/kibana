@@ -5,9 +5,8 @@
  * 2.0.
  */
 import React, { useMemo } from 'react';
-import { EuiIcon, EuiSpacer, EuiSuperSelect } from '@elastic/eui';
+import { EuiIcon, EuiSpacer, EuiSuperSelect, EuiText } from '@elastic/eui';
 
-import { EuiText } from '@elastic/eui';
 import type { EuiTheme } from '@kbn/kibana-react-plugin/common';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useTheme } from 'styled-components';

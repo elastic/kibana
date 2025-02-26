@@ -9,30 +9,29 @@ import expect from '@kbn/expect';
 import type SuperTest from 'supertest';
 import { createHash } from 'node:crypto';
 import stringify from 'json-stable-stringify';
-import {
+import type {
   CasesConnectorRunParams,
   OracleRecordAttributes,
 } from '@kbn/cases-plugin/server/connectors/cases/types';
-import { AttachmentType, CasePostRequest } from '@kbn/cases-plugin/common';
+import type { CasePostRequest } from '@kbn/cases-plugin/common';
+import { AttachmentType } from '@kbn/cases-plugin/common';
+import type { AlertAttachment, Attachments, Case } from '@kbn/cases-plugin/common/types/domain';
 import {
-  AlertAttachment,
-  Attachments,
-  Case,
   CaseStatuses,
   CaseSeverity,
   ConnectorTypes,
   CustomFieldTypes,
 } from '@kbn/cases-plugin/common/types/domain';
-import { KbnClient } from '@kbn/test';
-import { CasePersistedAttributes } from '@kbn/cases-plugin/server/common/types/case';
+import type { KbnClient } from '@kbn/test';
+import type { CasePersistedAttributes } from '@kbn/cases-plugin/server/common/types/case';
 import {
   SEVERITY_EXTERNAL_TO_ESMODEL,
   STATUS_EXTERNAL_TO_ESMODEL,
 } from '@kbn/cases-plugin/server/common/constants';
-import { Client } from '@elastic/elasticsearch';
+import type { Client } from '@elastic/elasticsearch';
 import { ALERTING_CASES_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
 import { CASE_RULES_SAVED_OBJECT } from '@kbn/cases-plugin/common/constants';
-import { User } from '../../../../../common/lib/authentication/types';
+import type { User } from '../../../../../common/lib/authentication/types';
 import {
   globalRead,
   noKibanaPrivileges,
@@ -50,7 +49,7 @@ import {
   createComment,
 } from '../../../../../common/lib/api';
 import { getPostCaseRequest, postCommentAlertReq } from '../../../../../common/lib/mock';
-import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
+import type { FtrProviderContext } from '../../../../../common/ftr_provider_context';
 import { roles as api_int_roles } from '../../../../../../api_integration/apis/cases/common/roles';
 import {
   casesAllUser,

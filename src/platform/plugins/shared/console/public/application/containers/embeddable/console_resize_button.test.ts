@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiThemeComputed } from '@elastic/eui';
+import type { EuiThemeComputed } from '@elastic/eui';
 import { getCurrentConsoleMaxSize } from './console_resize_button';
 
 describe('Console Resizing Tests', () => {

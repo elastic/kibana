@@ -20,8 +20,9 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 
-import { ClusterPayload, serializeCluster } from '../../../../../../common/lib';
-import { SNIFF_MODE, PROXY_MODE } from '../../../../../../common/constants';
+import type { ClusterPayload } from '../../../../../../common/lib';
+import { serializeCluster } from '../../../../../../common/lib';
+import type { SNIFF_MODE, PROXY_MODE } from '../../../../../../common/constants';
 
 interface Props {
   close: () => void;

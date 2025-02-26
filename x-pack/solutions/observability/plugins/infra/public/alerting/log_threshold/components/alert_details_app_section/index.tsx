@@ -5,8 +5,7 @@
  * 2.0.
  */
 import React from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
-import { EuiPanel } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiPanel, EuiTitle } from '@elastic/eui';
 import {
   ALERT_CONTEXT,
   ALERT_END,
@@ -14,7 +13,6 @@ import {
   ALERT_START,
 } from '@kbn/rule-data-utils';
 import moment from 'moment';
-import { EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { getPaddedAlertTimeRange } from '@kbn/observability-get-padded-alert-time-range-util';
 import { get, identity } from 'lodash';

@@ -9,8 +9,7 @@ import { EuiButtonEmpty, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { createExploratoryViewUrl } from '@kbn/exploratory-view-plugin/public';
-import { ALL_VALUES_SELECTED } from '@kbn/exploratory-view-plugin/public';
+import { createExploratoryViewUrl, ALL_VALUES_SELECTED } from '@kbn/exploratory-view-plugin/public';
 import { isMobileAgentName, isRumAgentName } from '../../../../../common/agent_name';
 import {
   SERVICE_ENVIRONMENT,

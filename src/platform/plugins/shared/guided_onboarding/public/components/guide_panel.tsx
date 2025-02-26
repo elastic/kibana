@@ -15,10 +15,15 @@ import { useEuiTheme } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 
-import { ApplicationStart, CoreTheme, NotificationsStart } from '@kbn/core/public';
-import type { GuideState, GuideStep as GuideStepStatus } from '@kbn/guided-onboarding';
+import type { ApplicationStart, CoreTheme, NotificationsStart } from '@kbn/core/public';
+import type {
+  GuideState,
+  GuideStep as GuideStepStatus,
+  GuideId,
+  GuideConfig,
+  StepConfig,
+} from '@kbn/guided-onboarding';
 
-import type { GuideId, GuideConfig, StepConfig } from '@kbn/guided-onboarding';
 import type { GuidedOnboardingApi } from '../types';
 
 import type { PluginState } from '../../common';

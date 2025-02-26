@@ -7,9 +7,9 @@
 
 import type { ActionsClientLlm } from '@kbn/langchain/server';
 import { ChatPromptTemplate } from '@langchain/core/prompts';
-import { Runnable } from '@langchain/core/runnables';
+import type { Runnable } from '@langchain/core/runnables';
 
-import { GenerationPrompts } from '../prompts';
+import type { GenerationPrompts } from '../prompts';
 import { getOutputParser } from '../get_output_parser';
 
 interface GetChainWithFormatInstructions {

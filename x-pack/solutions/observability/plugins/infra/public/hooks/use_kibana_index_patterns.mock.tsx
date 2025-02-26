@@ -7,8 +7,7 @@
 
 import type { FC, PropsWithChildren } from 'react';
 import React, { useMemo } from 'react';
-import { firstValueFrom, from, of } from 'rxjs';
-import { delay } from 'rxjs';
+import { firstValueFrom, from, of, delay } from 'rxjs';
 import type { CoreStart } from '@kbn/core/public';
 import type { FieldSpec } from '@kbn/data-views-plugin/common';
 import type { DataView, DataViewsContract } from '@kbn/data-views-plugin/public';

@@ -6,8 +6,7 @@
  */
 
 import type { Observable } from 'rxjs';
-import { BehaviorSubject } from 'rxjs';
-import { distinctUntilChanged } from 'rxjs';
+import { BehaviorSubject, distinctUntilChanged } from 'rxjs';
 import type { Annotation } from '../../../common/types/annotations';
 
 /*

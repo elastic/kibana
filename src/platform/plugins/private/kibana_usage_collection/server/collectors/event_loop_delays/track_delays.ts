@@ -7,10 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { takeUntil, finalize, map } from 'rxjs';
-import { Observable, timer, switchMap } from 'rxjs';
-import type { ISavedObjectsRepository } from '@kbn/core/server';
-import type { IEventLoopDelaysMonitor, IntervalHistogram } from '@kbn/core/server';
+import { takeUntil, finalize, map, timer, switchMap } from 'rxjs';
+import type { Observable } from 'rxjs';
+import type {
+  ISavedObjectsRepository,
+  IEventLoopDelaysMonitor,
+  IntervalHistogram,
+} from '@kbn/core/server';
 import {
   MONITOR_EVENT_LOOP_DELAYS_START,
   MONITOR_EVENT_LOOP_DELAYS_INTERVAL,

@@ -12,6 +12,7 @@ import type { Logger } from '@kbn/logging';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import { context } from '@opentelemetry/api';
 import { last, merge, omit } from 'lodash';
+import type { Observable } from 'rxjs';
 import {
   catchError,
   defer,
@@ -20,7 +21,6 @@ import {
   from,
   map,
   merge as mergeOperator,
-  Observable,
   of,
   shareReplay,
   switchMap,
@@ -30,21 +30,24 @@ import {
 import { v4 } from 'uuid';
 import type { AssistantScope } from '@kbn/ai-assistant-common';
 import type { InferenceClient } from '@kbn/inference-plugin/server';
-import { ChatCompleteResponse, FunctionCallingMode, ToolChoiceType } from '@kbn/inference-common';
+import type { ChatCompleteResponse, FunctionCallingMode } from '@kbn/inference-common';
+import { ToolChoiceType } from '@kbn/inference-common';
 
 import { resourceNames } from '..';
 import {
+  createConversationNotFoundError,
+  StreamingChatResponseEventType,
+} from '../../../common/conversation_complete';
+import type {
   ChatCompletionChunkEvent,
   ChatCompletionMessageEvent,
   ChatCompletionErrorEvent,
   ConversationCreateEvent,
   ConversationUpdateEvent,
-  createConversationNotFoundError,
-  StreamingChatResponseEventType,
-  type StreamingChatResponseEvent,
+  StreamingChatResponseEvent,
 } from '../../../common/conversation_complete';
 import { convertMessagesForInference } from '../../../common/convert_messages_for_inference';
-import { CompatibleJSONSchema } from '../../../common/functions/types';
+import type { CompatibleJSONSchema } from '../../../common/functions/types';
 import {
   type AdHocInstruction,
   type Conversation,
@@ -57,7 +60,7 @@ import {
 } from '../../../common/types';
 import { CONTEXT_FUNCTION_NAME } from '../../functions/context';
 import type { ChatFunctionClient } from '../chat_function_client';
-import { KnowledgeBaseService, RecalledEntry } from '../knowledge_base_service';
+import type { KnowledgeBaseService, RecalledEntry } from '../knowledge_base_service';
 import { getAccessQuery } from '../util/get_access_query';
 import { getSystemMessageFromInstructions } from '../util/get_system_message_from_instructions';
 import { failOnNonExistingFunctionCall } from './operators/fail_on_non_existing_function_call';
@@ -71,8 +74,8 @@ import {
   reIndexKnowledgeBaseAndPopulateSemanticTextField,
   scheduleKbSemanticTextMigrationTask,
 } from '../task_manager_definitions/register_kb_semantic_text_migration_task';
-import { ObservabilityAIAssistantPluginStartDependencies } from '../../types';
-import { ObservabilityAIAssistantConfig } from '../../config';
+import type { ObservabilityAIAssistantPluginStartDependencies } from '../../types';
+import type { ObservabilityAIAssistantConfig } from '../../config';
 import { getElserModelId } from '../knowledge_base_service/get_elser_model_id';
 import { apmInstrumentation } from './operators/apm_instrumentation';
 

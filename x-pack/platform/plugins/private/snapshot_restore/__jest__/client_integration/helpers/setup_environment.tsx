@@ -8,22 +8,18 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { merge } from 'lodash';
-import { LocationDescriptorObject } from 'history';
+import type { LocationDescriptorObject } from 'history';
 
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import { HttpSetup } from '@kbn/core/public';
+import type { HttpSetup } from '@kbn/core/public';
 import { coreMock, scopedHistoryMock } from '@kbn/core/public/mocks';
 import { setUiMetricService, httpService } from '../../../public/application/services/http';
 import {
   breadcrumbService,
   docTitleService,
 } from '../../../public/application/services/navigation';
-import {
-  AuthorizationContext,
-  Authorization,
-  Privileges,
-  GlobalFlyout,
-} from '../../../public/shared_imports';
+import type { Authorization, Privileges } from '../../../public/shared_imports';
+import { AuthorizationContext, GlobalFlyout } from '../../../public/shared_imports';
 import { AppContextProvider } from '../../../public/application/app_context';
 import { textService } from '../../../public/application/services/text';
 import { init as initHttpRequests } from './http_requests';

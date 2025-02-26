@@ -7,12 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { StateComparators } from '@kbn/presentation-publishing';
+import type { StateComparators } from '@kbn/presentation-publishing';
 import { debounce } from 'lodash';
 import { BehaviorSubject } from 'rxjs';
-import { TimeRangeMeta } from './get_time_range_meta';
+import type { TimeRangeMeta } from './get_time_range_meta';
 import { FROM_INDEX, TO_INDEX } from './time_utils';
-import { Timeslice, TimesliderControlState } from './types';
+import type { Timeslice, TimesliderControlState } from './types';
 
 export function initTimeRangePercentage(
   state: TimesliderControlState,

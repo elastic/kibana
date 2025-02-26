@@ -7,7 +7,7 @@
 
 import { StructuredOutputParser } from 'langchain/output_parsers';
 
-import { GenerationPrompts } from '../prompts';
+import type { GenerationPrompts } from '../prompts';
 import { getAttackDiscoveriesGenerationSchema } from '../../generate/schema';
 
 export const getOutputParser = (prompts: GenerationPrompts) =>

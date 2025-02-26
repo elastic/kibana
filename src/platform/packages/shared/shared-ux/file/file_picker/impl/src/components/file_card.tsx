@@ -13,10 +13,9 @@ import numeral from '@elastic/numeral';
 import useObservable from 'react-use/lib/useObservable';
 import { EuiCard, EuiText, EuiIcon, useEuiTheme, EuiButtonIcon } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { FileJSON } from '@kbn/shared-ux-file-types';
+import type { FileJSON, FileImageMetadata } from '@kbn/shared-ux-file-types';
 import { isImage } from '@kbn/shared-ux-file-util';
 import { FileImage as Image } from '@kbn/shared-ux-file-image';
-import type { FileImageMetadata } from '@kbn/shared-ux-file-types';
 import { useFilePickerContext } from '../context';
 import { i18nTexts } from '../i18n_texts';
 

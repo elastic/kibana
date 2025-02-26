@@ -6,7 +6,7 @@
  */
 
 import { getSimpleRuleOutput } from './get_simple_rule_output';
-import { RuleWithoutServerGeneratedProperties } from './remove_server_generated_properties';
+import type { RuleWithoutServerGeneratedProperties } from './remove_server_generated_properties';
 
 /**
  * This is the typical output of a simple rule that Kibana will output with all the defaults except

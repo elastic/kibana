@@ -13,12 +13,10 @@ import type { NotificationsStart } from '@kbn/core/public';
 import type { AssistantScope } from '@kbn/ai-assistant-common';
 import {
   MessageRole,
-  type Message,
-  ConversationCreateEvent,
-  ConversationUpdateEvent,
   isTokenLimitReachedError,
   StreamingChatResponseEventType,
 } from '../../common';
+import type { ConversationCreateEvent, ConversationUpdateEvent, Message } from '../../common';
 import type { ObservabilityAIAssistantChatService, ObservabilityAIAssistantService } from '..';
 import { useKibana } from './use_kibana';
 import { useOnce } from './use_once';

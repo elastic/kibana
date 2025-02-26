@@ -5,13 +5,15 @@
  * 2.0.
  */
 
-import { AlertInstanceState, AlertInstanceContext } from '@kbn/alerting-state-types';
-import { RuleAction, RuleNotifyWhen, RuleTypeParams } from '@kbn/alerting-types';
+import type { AlertInstanceState, AlertInstanceContext } from '@kbn/alerting-state-types';
+import type { RuleAction, RuleTypeParams } from '@kbn/alerting-types';
+import { RuleNotifyWhen } from '@kbn/alerting-types';
 import { compact } from 'lodash';
-import { RuleTypeState, RuleAlertData, parseDuration } from '../../../../common';
-import { GetSummarizedAlertsParams } from '../../../alerts_client/types';
-import { AlertHit } from '../../../types';
-import { Alert } from '../../../alert';
+import type { RuleTypeState, RuleAlertData } from '../../../../common';
+import { parseDuration } from '../../../../common';
+import type { GetSummarizedAlertsParams } from '../../../alerts_client/types';
+import type { AlertHit } from '../../../types';
+import type { Alert } from '../../../alert';
 import {
   buildRuleUrl,
   formatActionToEnqueue,
@@ -22,7 +24,7 @@ import {
   logNumberOfFilteredAlerts,
   shouldScheduleAction,
 } from '../lib';
-import {
+import type {
   ActionSchedulerOptions,
   ActionsToSchedule,
   AddSummarizedAlertsOpts,
@@ -32,7 +34,8 @@ import {
   IsExecutableActiveAlertOpts,
   IsExecutableAlertOpts,
 } from '../types';
-import { TransformActionParamsOptions, transformActionParams } from '../../transform_action_params';
+import type { TransformActionParamsOptions } from '../../transform_action_params';
+import { transformActionParams } from '../../transform_action_params';
 import { injectActionParams } from '../../inject_action_params';
 
 enum Reasons {

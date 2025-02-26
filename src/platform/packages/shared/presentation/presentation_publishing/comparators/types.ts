@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { PublishingSubject } from '../publishing_subject';
+import type { PublishingSubject } from '../publishing_subject';
 
 export type ComparatorFunction<StateType, KeyType extends keyof StateType> = (
   last: StateType[KeyType] | undefined,

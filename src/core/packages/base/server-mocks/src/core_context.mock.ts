@@ -8,7 +8,7 @@
  */
 
 import type { DeeplyMockedKeys } from '@kbn/utility-types-jest';
-import { Env, IConfigService } from '@kbn/config';
+import type { Env, IConfigService } from '@kbn/config';
 import type { LoggerFactory } from '@kbn/logging';
 import { loggerMock } from '@kbn/logging-mocks';
 import { configServiceMock, createTestEnv } from '@kbn/config-mocks';

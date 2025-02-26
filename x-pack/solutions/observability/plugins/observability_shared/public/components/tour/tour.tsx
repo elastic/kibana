@@ -5,30 +5,24 @@
  * 2.0.
  */
 
-import React, {
-  ReactNode,
-  useState,
-  useCallback,
-  useEffect,
-  createContext,
-  useContext,
-} from 'react';
+import type { ReactNode } from 'react';
+import React, { useState, useCallback, useEffect, createContext, useContext } from 'react';
 
 import { i18n } from '@kbn/i18n';
+import type { EuiTourStepProps } from '@elastic/eui';
 import {
   EuiButton,
   EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
   EuiTourStep,
-  EuiTourStepProps,
   EuiImage,
   EuiSpacer,
   EuiText,
   useIsWithinBreakpoints,
 } from '@elastic/eui';
 import { useLocation } from 'react-router-dom';
-import { ApplicationStart } from '@kbn/core/public';
+import type { ApplicationStart } from '@kbn/core/public';
 import useObservable from 'react-use/lib/useObservable';
 import { of } from 'rxjs';
 import type { GuidedOnboardingApi } from '@kbn/guided-onboarding-plugin/public/types';

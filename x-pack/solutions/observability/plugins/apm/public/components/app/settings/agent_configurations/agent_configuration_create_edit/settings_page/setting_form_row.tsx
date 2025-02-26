@@ -16,9 +16,9 @@ import {
   EuiCode,
   EuiSpacer,
   EuiIconTip,
+  EuiMarkdownFormat,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { EuiMarkdownFormat } from '@elastic/eui';
 import type { SettingDefinition } from '../../../../../../../common/agent_configuration/setting_definitions/types';
 import { validateSetting } from '../../../../../../../common/agent_configuration/setting_definitions';
 import {

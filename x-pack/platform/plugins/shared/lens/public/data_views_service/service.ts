@@ -8,7 +8,7 @@
 import type { DataViewsContract, DataView, DataViewSpec } from '@kbn/data-views-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
-import { ActionExecutionContext, UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import type { ActionExecutionContext, UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import {
   UPDATE_FILTER_REFERENCES_ACTION,
   UPDATE_FILTER_REFERENCES_TRIGGER,

@@ -9,7 +9,7 @@ import {
   DETECTION_ENGINE_RULES_BULK_ACTION,
   DETECTION_ENGINE_RULES_URL,
 } from '@kbn/security-solution-plugin/common/constants';
-import { APIRequestContext } from '@playwright/test';
+import type { APIRequestContext } from '@playwright/test';
 import { getRuleForAlertTesting } from '../../common/utils/security_solution';
 import { getCommonHeadersWithApiVersion } from './headers';
 

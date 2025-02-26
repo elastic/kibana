@@ -7,10 +7,8 @@
 
 import { expect } from 'expect';
 
-import {
-  MachineLearningRuleCreateProps,
-  RuleExecutionStatusEnum,
-} from '@kbn/security-solution-plugin/common/api/detection_engine';
+import type { MachineLearningRuleCreateProps } from '@kbn/security-solution-plugin/common/api/detection_engine';
+import { RuleExecutionStatusEnum } from '@kbn/security-solution-plugin/common/api/detection_engine';
 import type { Anomaly } from '@kbn/security-solution-plugin/server/lib/machine_learning';
 import {
   ALERT_LAST_DETECTED,
@@ -24,7 +22,7 @@ import {
 import { ALERT_ORIGINAL_TIME } from '@kbn/security-solution-plugin/common/field_maps/field_names';
 import { DETECTION_ENGINE_SIGNALS_STATUS_URL as DETECTION_ENGINE_ALERTS_STATUS_URL } from '@kbn/security-solution-plugin/common/constants';
 import { EsArchivePathBuilder } from '../../../../../../es_archive_path_builder';
-import { FtrProviderContext } from '../../../../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../../../../ftr_provider_context';
 import {
   dataGeneratorFactory,
   forceStartDatafeeds,

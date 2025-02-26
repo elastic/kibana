@@ -11,23 +11,23 @@ import { lastValueFrom } from 'rxjs';
 import type { Filter, Query } from '@kbn/es-query';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiFormRow, EuiSpacer, EuiTitle } from '@elastic/eui';
-import { IErrorObject } from '@kbn/triggers-actions-ui-plugin/public';
+import type { IErrorObject } from '@kbn/triggers-actions-ui-plugin/public';
 import type { SearchBarProps, StatefulSearchBarProps } from '@kbn/unified-search-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { mapAndFlattenFilters, getTime } from '@kbn/data-plugin/public';
 import type { SavedQuery, ISearchSource } from '@kbn/data-plugin/public';
+import type { FieldOption } from '@kbn/triggers-actions-ui-plugin/public/common';
 import {
   BUCKET_SELECTOR_FIELD,
   buildAggregation,
-  FieldOption,
   isCountAggregation,
   isGroupAggregation,
   parseAggregationResults,
 } from '@kbn/triggers-actions-ui-plugin/public/common';
 import { STACK_ALERTS_FEATURE_ID } from '@kbn/rule-data-utils';
 import { getComparatorScript } from '../../../../common';
-import { Comparator } from '../../../../common/comparator_types';
-import {
+import type { Comparator } from '../../../../common/comparator_types';
+import type {
   CommonRuleParams,
   EsQueryRuleMetaData,
   EsQueryRuleParams,

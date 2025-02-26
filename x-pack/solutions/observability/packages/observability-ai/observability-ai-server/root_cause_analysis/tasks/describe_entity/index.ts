@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { InferenceClient } from '@kbn/inference-plugin/server';
-import { TruncatedDocumentAnalysis } from '@kbn/observability-utils-common/llm/log_analysis/document_analysis';
-import { FieldPatternResultWithChanges } from '@kbn/observability-utils-server/entities/get_log_patterns';
+import type { InferenceClient } from '@kbn/inference-plugin/server';
+import type { TruncatedDocumentAnalysis } from '@kbn/observability-utils-common/llm/log_analysis/document_analysis';
+import type { FieldPatternResultWithChanges } from '@kbn/observability-utils-server/entities/get_log_patterns';
 import { RCA_SYSTEM_PROMPT_BASE } from '../../prompts';
 import { formatEntity } from '../../util/format_entity';
 import { serializeKnowledgeBaseEntries } from '../../util/serialize_knowledge_base_entries';
-import { ScoredKnowledgeBaseEntry } from '../get_knowledge_base_entries';
+import type { ScoredKnowledgeBaseEntry } from '../get_knowledge_base_entries';
 import { getInvestigateEntityTaskPrompt } from '../investigate_entity/prompts';
 
 export async function describeEntity({

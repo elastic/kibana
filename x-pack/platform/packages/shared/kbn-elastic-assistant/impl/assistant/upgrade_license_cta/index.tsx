@@ -8,7 +8,7 @@
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { HttpSetup } from '@kbn/core-http-browser';
+import type { HttpSetup } from '@kbn/core-http-browser';
 import { ENTERPRISE } from './translations';
 import { UpgradeButtons } from '../../upgrade/upgrade_buttons';
 

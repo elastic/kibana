@@ -12,7 +12,7 @@ import {
   mockSuperheroSystemPrompt,
   mockSystemPrompts,
 } from '../../../../mock/system_prompt';
-import { PromptResponse } from '@kbn/elastic-assistant-common';
+import type { PromptResponse } from '@kbn/elastic-assistant-common';
 import { useAssistantContext } from '../../../../assistant_context';
 
 jest.mock('../../../../assistant_context');

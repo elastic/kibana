@@ -7,14 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, {
-  CSSProperties,
-  FunctionComponent,
-  useCallback,
-  useEffect,
-  useRef,
-  useState,
-} from 'react';
+import type { CSSProperties, FunctionComponent } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { CodeEditor } from '@kbn/code-editor';
 import { css } from '@emotion/react';
 import { VectorTile } from '@mapbox/vector-tile';
@@ -27,7 +21,8 @@ import {
   EuiButtonIcon,
   EuiToolTip,
 } from '@elastic/eui';
-import { CONSOLE_OUTPUT_THEME_ID, CONSOLE_OUTPUT_LANG_ID, monaco } from '@kbn/monaco';
+import type { monaco } from '@kbn/monaco';
+import { CONSOLE_OUTPUT_THEME_ID, CONSOLE_OUTPUT_LANG_ID } from '@kbn/monaco';
 import {
   getStatusCodeDecorations,
   isJSONContentType,

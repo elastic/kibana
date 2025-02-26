@@ -20,7 +20,7 @@ import {
 } from '@elastic/eui';
 import React, { useCallback } from 'react';
 
-import { HttpSetup, IToasts } from '@kbn/core/public';
+import type { HttpSetup, IToasts } from '@kbn/core/public';
 import { Form, useForm } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import * as LABELS from '../translations';
 import type { InferenceEndpoint } from '../types/types';

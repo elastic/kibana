@@ -8,25 +8,19 @@
  */
 
 import React from 'react';
-import {
-  EuiInMemoryTable,
-  HorizontalAlignment,
-  EuiText,
-  EuiLink,
-  EuiTableDataType,
-} from '@elastic/eui';
-import { CoreStart } from '@kbn/core/public';
+import type { HorizontalAlignment, EuiTableDataType, SearchFilterConfig } from '@elastic/eui';
+import { EuiInMemoryTable, EuiText, EuiLink, EuiToolTip, EuiIcon } from '@elastic/eui';
+import type { CoreStart } from '@kbn/core/public';
 import { get } from 'lodash';
 import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 import { useEuiTablePersist } from '@kbn/shared-ux-table-persist';
 
-import {
+import type {
   SavedObjectRelation,
   SavedObjectManagementTypeInfo,
   SavedObjectsManagementPluginStart,
 } from '@kbn/saved-objects-management-plugin/public';
 
-import { EuiToolTip, EuiIcon, SearchFilterConfig } from '@elastic/eui';
 import { IPM_APP_ID } from '../../../plugin';
 import {
   typeFieldName,

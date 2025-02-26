@@ -7,11 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback } from 'react';
-import { useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import { EuiText, EuiButton, EuiLoadingSpinner, EuiCallOut } from '@elastic/eui';
 import { type IHttpFetchError, isHttpFetchError } from '@kbn/core-http-browser';
-import { Services } from './services';
+import type { Services } from './services';
 
 interface Props {
   fetchRandomNumber: Services['fetchRandomNumber'];

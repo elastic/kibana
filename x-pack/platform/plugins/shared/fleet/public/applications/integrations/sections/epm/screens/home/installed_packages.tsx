@@ -31,11 +31,8 @@ import {
   type ExtendedIntegrationCategory,
   UPDATE_FAILED,
 } from './category_facets';
-import { CategoryFacets } from './category_facets';
-
-import type { CategoryParams } from '.';
-import { getParams, categoryExists, mapToCard } from '.';
 import {
+  CategoryFacets,
   ALL_INSTALLED_CATEGORY,
   UPDATES_AVAILABLE,
   INSTALL_FAILED,
@@ -43,6 +40,9 @@ import {
   UPDATE_FAILED_CATEGORY,
   INSTALL_FAILED_CATEGORY,
 } from './category_facets';
+
+import type { CategoryParams } from '.';
+import { getParams, categoryExists, mapToCard } from '.';
 
 const AnnouncementLink = () => {
   const { docLinks } = useStartServices();

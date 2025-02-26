@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { ALERT_RULE_TYPE_ID } from '@kbn/rule-data-utils';
 import {
+  ALERT_RULE_TYPE_ID,
   ApmRuleType,
   LOG_THRESHOLD_ALERT_TYPE_ID,
   METRIC_THRESHOLD_ALERT_TYPE_ID,

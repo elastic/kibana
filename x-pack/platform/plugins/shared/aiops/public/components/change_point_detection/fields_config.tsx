@@ -47,11 +47,11 @@ import { MAX_CHANGE_POINT_CONFIGS, SPLIT_FIELD_CARDINALITY_LIMIT } from './const
 import { FunctionPicker } from './function_picker';
 import { MetricFieldSelector } from './metric_field_selector';
 import { SplitFieldSelector } from './split_field_selector';
-import type { SelectedChangePoint } from './change_point_detection_context';
-import {
-  type ChangePointAnnotation,
-  type FieldConfig,
-  useChangePointDetectionContext,
+import { useChangePointDetectionContext } from './change_point_detection_context';
+import type {
+  SelectedChangePoint,
+  ChangePointAnnotation,
+  FieldConfig,
 } from './change_point_detection_context';
 import { useChangePointResults } from './use_change_point_agg_request';
 import { useSplitFieldCardinality } from './use_split_field_cardinality';

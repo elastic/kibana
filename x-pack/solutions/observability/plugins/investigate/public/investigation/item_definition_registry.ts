@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { GlobalWidgetParameters } from '../../common/types';
+import type { GlobalWidgetParameters } from '../../common/types';
 
 export type ItemDefinitionData = Record<string, any>;
 export type ItemDefinitionParams = Record<string, any>;

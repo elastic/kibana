@@ -13,17 +13,17 @@ import type { IHttpFetchError } from '@kbn/core/public';
 
 import { useLoadConnectors } from '../connectorland/use_load_connectors';
 
-import { DefinedUseQueryResult, UseQueryResult } from '@tanstack/react-query';
+import type { DefinedUseQueryResult, UseQueryResult } from '@tanstack/react-query';
 
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 import useSessionStorage from 'react-use/lib/useSessionStorage';
 import { QuickPrompts } from './quick_prompts/quick_prompts';
 import { TestProviders } from '../mock/test_providers/test_providers';
 import { useFetchCurrentUserConversations } from './api';
-import { Conversation } from '../assistant_context/types';
+import type { Conversation } from '../assistant_context/types';
 import * as all from './chat_send/use_chat_send';
 import { useConversation } from './use_conversation';
-import { AIConnector } from '../connectorland/connector_selector';
+import type { AIConnector } from '../connectorland/connector_selector';
 
 jest.mock('../connectorland/use_load_connectors');
 jest.mock('../connectorland/connector_setup');

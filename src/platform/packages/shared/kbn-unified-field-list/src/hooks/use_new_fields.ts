@@ -8,8 +8,7 @@
  */
 
 import { useMemo } from 'react';
-import type { FieldSpec } from '@kbn/data-views-plugin/common';
-import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
+import type { FieldSpec, DataView, DataViewField } from '@kbn/data-views-plugin/common';
 import type { FieldListItem } from '../types';
 import type { ExistingFieldsReader } from './use_existing_fields';
 

@@ -18,8 +18,8 @@ import {
   EuiIconTip,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { DocLinksStart } from '@kbn/core/public';
-import { ReindexWarning, ReindexWarningTypes } from '../../../../../../../common/types';
+import type { DocLinksStart } from '@kbn/core/public';
+import type { ReindexWarning, ReindexWarningTypes } from '../../../../../../../common/types';
 
 export const hasReindexWarning = (
   warnings: ReindexWarning[],

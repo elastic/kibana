@@ -17,8 +17,8 @@ import {
   EuiIconTip,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { DocLinksStart } from '@kbn/core/public';
-import {
+import type { DocLinksStart } from '@kbn/core/public';
+import type {
   DataStreamReindexWarning,
   DataStreamReindexWarningTypes,
 } from '../../../../../../../../../common/types';

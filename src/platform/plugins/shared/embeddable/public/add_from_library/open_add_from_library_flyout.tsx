@@ -9,11 +9,11 @@
 
 import React, { Suspense } from 'react';
 
-import { OverlayRef } from '@kbn/core/public';
+import type { OverlayRef } from '@kbn/core/public';
 import { EuiLoadingSpinner, htmlIdGenerator } from '@elastic/eui';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 
-import { CanAddNewPanel } from '@kbn/presentation-containers';
+import type { CanAddNewPanel } from '@kbn/presentation-containers';
 import { core } from '../kibana_services';
 
 const LazyAddPanelFlyout = React.lazy(async () => {

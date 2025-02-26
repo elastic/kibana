@@ -8,7 +8,7 @@
 import { render } from '@testing-library/react';
 import React from 'react';
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
-import { LogFieldColumn } from '../../../../common/log_entry';
+import type { LogFieldColumn } from '../../../../common/log_entry';
 import { LogEntryFieldColumn } from './log_entry_field_column';
 
 describe('LogEntryFieldColumn', () => {

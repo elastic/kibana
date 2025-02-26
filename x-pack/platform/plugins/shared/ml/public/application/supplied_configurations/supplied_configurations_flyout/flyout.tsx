@@ -19,8 +19,8 @@ import {
   EuiTab,
   EuiTabs,
   EuiTitle,
+  useEuiTheme,
 } from '@elastic/eui';
-import { useEuiTheme } from '@elastic/eui';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import type { Module } from '../../../../common/types/modules';
 import { isLogoObject } from '../supplied_configurations';

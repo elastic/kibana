@@ -23,8 +23,7 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import type { FC } from 'react';
-import { useEffect, useMemo, useCallback } from 'react';
-import React, { useState } from 'react';
+import React, { useEffect, useMemo, useCallback, useState } from 'react';
 
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';

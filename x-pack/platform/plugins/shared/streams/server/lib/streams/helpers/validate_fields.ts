@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { FieldDefinition, WiredStreamDefinition } from '@kbn/streams-schema';
+import type { FieldDefinition, WiredStreamDefinition } from '@kbn/streams-schema';
 import { MalformedFieldsError } from '../errors/malformed_fields_error';
 
 export function validateAncestorFields({

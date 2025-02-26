@@ -10,9 +10,8 @@ import React, { useMemo } from 'react';
 import { isTransformListRowWithStats } from '../../../../common/transform_list';
 import { TRANSFORM_STATE } from '../../../../../../common/constants';
 
-import { useTransformCapabilities } from '../../../../hooks';
+import { useTransformCapabilities, useScheduleNowTransforms } from '../../../../hooks';
 import type { TransformListAction, TransformListRow } from '../../../../common';
-import { useScheduleNowTransforms } from '../../../../hooks';
 
 import {
   isScheduleNowActionDisabled,

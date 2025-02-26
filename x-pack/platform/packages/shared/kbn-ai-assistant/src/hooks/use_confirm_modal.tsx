@@ -4,9 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React from 'react';
+import React, { useState } from 'react';
 import { EuiConfirmModal } from '@elastic/eui';
-import { useState } from 'react';
 
 export function useConfirmModal({
   title,

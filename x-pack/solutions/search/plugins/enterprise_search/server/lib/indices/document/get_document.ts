@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { GetResponse } from '@elastic/elasticsearch/lib/api/types';
-import { IScopedClusterClient } from '@kbn/core/server';
+import type { GetResponse } from '@elastic/elasticsearch/lib/api/types';
+import type { IScopedClusterClient } from '@kbn/core/server';
 
 export const getDocument = async (
   client: IScopedClusterClient,

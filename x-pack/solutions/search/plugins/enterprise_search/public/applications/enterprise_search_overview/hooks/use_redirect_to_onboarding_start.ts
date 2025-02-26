@@ -14,7 +14,7 @@ import { SEARCH_INDICES_START } from '@kbn/deeplinks-search';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 
 import { Status } from '../../../../common/types/api';
-import { KibanaDeps } from '../../../../common/types/kibana_deps';
+import type { KibanaDeps } from '../../../../common/types/kibana_deps';
 
 import { FetchIndicesStatusAPILogic } from '../api/fetch_indices_status';
 

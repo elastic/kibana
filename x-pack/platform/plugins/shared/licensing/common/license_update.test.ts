@@ -5,10 +5,9 @@
  * 2.0.
  */
 
-import { firstValueFrom, Subject } from 'rxjs';
-import { take, toArray } from 'rxjs';
+import { firstValueFrom, Subject, take, toArray } from 'rxjs';
 
-import { ILicense } from './types';
+import type { ILicense } from './types';
 import { createLicenseUpdate } from './license_update';
 import { licenseMock } from './licensing.mock';
 

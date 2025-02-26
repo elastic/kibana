@@ -6,9 +6,8 @@
  */
 
 import type { DataViewSpec, Query } from '@kbn/data-plugin/common';
-import { Filter } from '@kbn/es-query';
-import type { TimeRange } from '@kbn/es-query';
-import { MapCenter, MapSettings } from '../../../../common/descriptor_types';
+import type { Filter, TimeRange } from '@kbn/es-query';
+import type { MapCenter, MapSettings } from '../../../../common/descriptor_types';
 
 export interface RefreshConfig {
   isPaused: boolean;

@@ -5,13 +5,8 @@
  * 2.0.
  */
 
-import {
-  Condition,
-  isFilterCondition,
-  isAndCondition,
-  isOrCondition,
-  FilterCondition,
-} from '../models';
+import type { Condition, FilterCondition } from '../models';
+import { isFilterCondition, isAndCondition, isOrCondition } from '../models';
 
 export function getFields(
   condition: Condition

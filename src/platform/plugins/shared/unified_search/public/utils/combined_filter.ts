@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { type Filter, isCombinedFilter, CombinedFilter } from '@kbn/es-query';
+import { isCombinedFilter } from '@kbn/es-query';
+import type { CombinedFilter, Filter } from '@kbn/es-query';
 
 /**
  * Defines a boolean relation type (AND/OR) from the filter otherwise returns undefined.

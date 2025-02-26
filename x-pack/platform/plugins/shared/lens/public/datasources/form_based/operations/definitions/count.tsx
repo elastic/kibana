@@ -9,13 +9,13 @@ import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { euiThemeVars } from '@kbn/ui-theme';
 import { EuiSwitch, EuiText } from '@elastic/eui';
-import { AggFunctionsMapping } from '@kbn/data-plugin/public';
+import type { AggFunctionsMapping } from '@kbn/data-plugin/public';
 import { buildExpressionFunction } from '@kbn/expressions-plugin/public';
 import { COUNT_ID, COUNT_NAME } from '@kbn/lens-formula-docs';
 import { sanitazeESQLInput } from '@kbn/esql-utils';
-import { TimeScaleUnit } from '../../../../../common/expressions';
-import { OperationDefinition, ParamEditorProps } from '.';
-import { FieldBasedIndexPatternColumn, ValueFormatConfig } from './column_types';
+import type { TimeScaleUnit } from '../../../../../common/expressions';
+import type { OperationDefinition, ParamEditorProps } from '.';
+import type { FieldBasedIndexPatternColumn, ValueFormatConfig } from './column_types';
 import type { IndexPatternField } from '../../../../types';
 import {
   getInvalidFieldMessage,

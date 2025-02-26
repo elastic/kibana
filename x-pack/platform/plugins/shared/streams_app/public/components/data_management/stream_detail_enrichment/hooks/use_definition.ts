@@ -8,16 +8,15 @@
 import { useState, useMemo, useEffect, useRef, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import { useAbortController, useBoolean } from '@kbn/react-hooks';
-import {
+import type {
   IngestStreamGetResponse,
-  isWiredStreamGetResponse,
   FieldDefinition,
   WiredStreamGetResponse,
   IngestUpsertRequest,
   ProcessorDefinition,
-  getProcessorType,
 } from '@kbn/streams-schema';
-import { DetectedField, ProcessorDefinitionWithUIAttributes } from '../types';
+import { isWiredStreamGetResponse, getProcessorType } from '@kbn/streams-schema';
+import type { DetectedField, ProcessorDefinitionWithUIAttributes } from '../types';
 import { useKibana } from '../../../../hooks/use_kibana';
 import { processorConverter } from '../utils';
 

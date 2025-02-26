@@ -15,11 +15,11 @@ import { HeaderSection } from '../../../common/components/header_section';
 
 import * as i18n from './translations';
 import type { RiskInputs } from '../../../../common/entity_analytics/risk_engine';
-import type { EntityRiskScore } from '../../../../common/search_strategy';
-import {
-  EntityType,
-  type HostRiskScore,
-  type UserRiskScore,
+import { EntityType } from '../../../../common/search_strategy';
+import type {
+  EntityRiskScore,
+  HostRiskScore,
+  UserRiskScore,
 } from '../../../../common/search_strategy';
 import { DetectionEngineAlertsTable } from '../../../detections/components/alerts_table';
 import { GroupedAlertsTable } from '../../../detections/components/alerts_table/alerts_grouping';

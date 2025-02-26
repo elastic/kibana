@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { buildEsQuery, Filter, Query, TimeRange } from '@kbn/es-query';
+import type { Filter, Query, TimeRange } from '@kbn/es-query';
+import { buildEsQuery } from '@kbn/es-query';
 import { THREAT_QUERY_BASE } from '../../../constants/common';
 import { RawIndicatorFieldId } from '../../../../common/types/indicator';
 

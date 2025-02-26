@@ -16,7 +16,7 @@ import {
 } from '@elastic/eui';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { WiredStreamDefinition } from '@kbn/streams-schema';
+import type { WiredStreamDefinition } from '@kbn/streams-schema';
 import { useStreamsAppRouter } from '../../../../hooks/use_streams_app_router';
 import { FieldParent } from '../field_parent';
 import { FieldStatusBadge } from '../field_status';
@@ -24,7 +24,7 @@ import { FieldFormFormat, typeSupportsFormat } from './field_form_format';
 import { FieldFormType } from './field_form_type';
 import { ChildrenAffectedCallout } from './children_affected_callout';
 import { EMPTY_CONTENT } from '../constants';
-import { SchemaField } from '../types';
+import type { SchemaField } from '../types';
 
 const title = i18n.translate('xpack.streams.streamDetailSchemaEditorFieldSummaryTitle', {
   defaultMessage: 'Field summary',

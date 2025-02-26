@@ -13,10 +13,9 @@ import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { syncFilterExpression } from '../../../../public/lib/sync_filter_expression';
 import { RendererStrings } from '../../../../i18n';
 import { TimeFilter } from './components';
-import { StartInitializer } from '../../../plugin';
-import { RendererHandlers } from '../../../../types';
-import { Arguments } from '../../../functions/common/timefilterControl';
-import { RendererFactory } from '../../../../types';
+import type { StartInitializer } from '../../../plugin';
+import type { RendererHandlers, RendererFactory } from '../../../../types';
+import type { Arguments } from '../../../functions/common/timefilterControl';
 
 const { timeFilter: strings } = RendererStrings;
 

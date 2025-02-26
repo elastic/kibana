@@ -5,9 +5,13 @@
  * 2.0.
  */
 
-import { HealthReportImpact } from '@elastic/elasticsearch/lib/api/types';
-import type { estypes } from '@elastic/elasticsearch';
-import { SavedObject } from '@kbn/core/types';
+import type {
+  HealthReportImpact,
+  HealthReportIndicatorHealthStatus,
+  MigrationDeprecationsDeprecation,
+  MigrationDeprecationsResponse,
+} from '@elastic/elasticsearch/lib/api/types';
+import type { SavedObject } from '@kbn/core/types';
 import type { DataStreamsAction } from './data_stream_types';
 
 export * from './data_stream_types';
@@ -226,19 +230,16 @@ export interface HealthIndicatorAction {
 }
 
 export interface EnrichedDeprecationInfo
-  extends Omit<
-    estypes.MigrationDeprecationsDeprecation,
-    'level' | 'resolve_during_rolling_upgrade'
-  > {
+  extends Omit<MigrationDeprecationsDeprecation, 'level' | 'resolve_during_rolling_upgrade'> {
   type:
-    | keyof estypes.MigrationDeprecationsResponse
+    | keyof MigrationDeprecationsResponse
     | 'data_streams'
     | 'health_indicator'
     | 'ilm_policies'
     | 'templates';
   isCritical: boolean;
   frozen?: boolean;
-  status?: estypes.HealthReportIndicatorHealthStatus;
+  status?: HealthReportIndicatorHealthStatus;
   index?: string;
   correctiveAction?:
     | ReindexAction

@@ -16,7 +16,12 @@ import axios from 'axios';
 
 import apm from 'elastic-apm-node';
 
-import { SO_SEARCH_LIMIT } from '../../constants';
+import {
+  SO_SEARCH_LIMIT,
+  AGENTLESS_GLOBAL_TAG_NAME_ORGANIZATION,
+  AGENTLESS_GLOBAL_TAG_NAME_DIVISION,
+  AGENTLESS_GLOBAL_TAG_NAME_TEAM,
+} from '../../constants';
 import type { AgentPolicy } from '../../types';
 import type { AgentlessApiResponse } from '../../../common/types';
 import {
@@ -24,11 +29,6 @@ import {
   AgentlessAgentCreateError,
   AgentlessAgentDeleteError,
 } from '../../errors';
-import {
-  AGENTLESS_GLOBAL_TAG_NAME_ORGANIZATION,
-  AGENTLESS_GLOBAL_TAG_NAME_DIVISION,
-  AGENTLESS_GLOBAL_TAG_NAME_TEAM,
-} from '../../constants';
 
 import { appContextService } from '../app_context';
 

@@ -11,8 +11,7 @@ import React, { useEffect, useMemo, useCallback } from 'react';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { EuiFlexItem } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { of, map, filter } from 'rxjs';
-import { BehaviorSubject } from 'rxjs';
+import { of, map, filter, BehaviorSubject } from 'rxjs';
 import useObservable from 'react-use/lib/useObservable';
 import {
   convertFieldsToFallbackFields,

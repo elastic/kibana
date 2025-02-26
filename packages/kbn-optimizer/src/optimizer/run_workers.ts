@@ -12,9 +12,9 @@ import { mergeMap, toArray } from 'rxjs';
 
 import { maybeMap } from '../common';
 
-import { OptimizerConfig } from './optimizer_config';
-import { BundleCacheEvent } from './bundle_cache';
-import { ChangeEvent } from './watcher';
+import type { OptimizerConfig } from './optimizer_config';
+import type { BundleCacheEvent } from './bundle_cache';
+import type { ChangeEvent } from './watcher';
 import { assignBundlesToWorkers } from './assign_bundles_to_workers';
 import { observeWorker } from './observe_worker';
 

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { SyntheticsRestApiRouteFactory } from '../types';
-import { SyntheticsServerSetup } from '../../types';
+import type { SyntheticsRestApiRouteFactory } from '../types';
+import type { SyntheticsServerSetup } from '../../types';
 import { SYNTHETICS_API_URLS } from '../../../common/constants';
 
 export const installIndexTemplatesRoute: SyntheticsRestApiRouteFactory = () => ({

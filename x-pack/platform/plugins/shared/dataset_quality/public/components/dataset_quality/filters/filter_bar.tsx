@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { ChangeEvent, useCallback } from 'react';
+import type { ChangeEvent } from 'react';
+import React, { useCallback } from 'react';
 import { EuiFieldSearch } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 

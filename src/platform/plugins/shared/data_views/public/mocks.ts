@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { DataViewsPlugin, DataViewsContract } from '.';
+import type { DataViewsPlugin, DataViewsContract } from '.';
 
 export type Setup = jest.Mocked<ReturnType<DataViewsPlugin['setup']>>;
 export type Start = jest.Mocked<ReturnType<DataViewsPlugin['start']>>;

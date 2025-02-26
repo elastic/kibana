@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { IDataStreamsStatsClient } from '@kbn/dataset-quality-plugin/public';
+import type { IDataStreamsStatsClient } from '@kbn/dataset-quality-plugin/public';
 
 export interface StreamsAppServices {
   dataStreamsClient: Promise<IDataStreamsStatsClient>;

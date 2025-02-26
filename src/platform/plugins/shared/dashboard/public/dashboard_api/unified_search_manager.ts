@@ -7,31 +7,25 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ControlGroupApi } from '@kbn/controls-plugin/public';
+import type { ControlGroupApi } from '@kbn/controls-plugin/public';
 import type { SavedObjectReference } from '@kbn/core-saved-objects-api-server';
+import type { GlobalQueryStateFromUrl, RefreshInterval } from '@kbn/data-plugin/public';
 import {
-  GlobalQueryStateFromUrl,
-  RefreshInterval,
   connectToQueryState,
   extractSearchSourceReferences,
   syncGlobalQueryStateWithUrl,
 } from '@kbn/data-plugin/public';
-import {
-  COMPARE_ALL_OPTIONS,
-  Filter,
-  Query,
-  TimeRange,
-  compareFilters,
-  isFilterPinned,
-} from '@kbn/es-query';
-import { ESQLControlVariable } from '@kbn/esql-validation-autocomplete';
-import { PublishingSubject, StateComparators } from '@kbn/presentation-publishing';
+import type { Filter, Query, TimeRange } from '@kbn/es-query';
+import { COMPARE_ALL_OPTIONS, compareFilters, isFilterPinned } from '@kbn/es-query';
+import type { ESQLControlVariable } from '@kbn/esql-validation-autocomplete';
+import type { PublishingSubject, StateComparators } from '@kbn/presentation-publishing';
 import fastIsEqual from 'fast-deep-equal';
 import { cloneDeep } from 'lodash';
-import moment, { Moment } from 'moment';
+import type { Moment } from 'moment';
+import moment from 'moment';
+import type { Observable } from 'rxjs';
 import {
   BehaviorSubject,
-  Observable,
   Subject,
   Subscription,
   combineLatest,
@@ -47,7 +41,7 @@ import { dataService } from '../services/kibana_services';
 import { cleanFiltersForSerialize } from '../utils/clean_filters_for_serialize';
 import { GLOBAL_STATE_STORAGE_KEY } from '../utils/urls';
 import { DEFAULT_DASHBOARD_STATE } from './default_dashboard_state';
-import { DashboardCreationOptions, DashboardState } from './types';
+import type { DashboardCreationOptions, DashboardState } from './types';
 
 export function initializeUnifiedSearchManager(
   initialState: DashboardState,

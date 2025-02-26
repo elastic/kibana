@@ -12,9 +12,9 @@ import type {
   ElasticsearchClient,
   SavedObjectsClientContract,
   SavedObjectsFindOptions,
+  Logger,
 } from '@kbn/core/server';
 import semverGte from 'semver/functions/gte';
-import type { Logger } from '@kbn/core/server';
 import { withSpan } from '@kbn/apm-utils';
 
 import type { IndicesDataStream, SortResults } from '@elastic/elasticsearch/lib/api/types';
@@ -38,18 +38,16 @@ import type {
   InstalledPackage,
   PackageSpecManifest,
   AssetsMap,
-} from '../../../../common/types';
-import {
-  PACKAGES_SAVED_OBJECT_TYPE,
-  MAX_CONCURRENT_EPM_PACKAGES_INSTALLATIONS,
-} from '../../../constants';
-import type {
   ArchivePackage,
   RegistryPackage,
   EpmPackageAdditions,
   GetCategoriesRequest,
   GetPackagesRequest,
 } from '../../../../common/types';
+import {
+  PACKAGES_SAVED_OBJECT_TYPE,
+  MAX_CONCURRENT_EPM_PACKAGES_INSTALLATIONS,
+} from '../../../constants';
 import type { Installation, PackageInfo, PackagePolicySOAttributes } from '../../../types';
 import {
   PackageFailedVerificationError,

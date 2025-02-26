@@ -24,13 +24,15 @@ import type { SupportedPytorchTasksType } from '@kbn/ml-trained-models-utils';
 import type { TrainedModelItem } from '../../../../common/types/trained_models';
 import type { AddInferencePipelineSteps } from '../../components/ml_inference/types';
 import { ADD_INFERENCE_PIPELINE_STEPS } from '../../components/ml_inference/constants';
-import { AddInferencePipelineFooter } from '../../components/shared';
-import { AddInferencePipelineHorizontalSteps } from '../../components/shared';
+import {
+  AddInferencePipelineFooter,
+  AddInferencePipelineHorizontalSteps,
+  OnFailureConfiguration,
+  ReviewAndCreatePipeline,
+} from '../../components/shared';
 import { getInitialState } from './state';
 import { PipelineDetails } from './pipeline_details';
 import { TestTrainedModel } from './test_trained_model';
-import { OnFailureConfiguration } from '../../components/shared';
-import { ReviewAndCreatePipeline } from '../../components/shared';
 import { useMlApi } from '../../contexts/kibana';
 import { getPipelineConfig } from './get_pipeline_config';
 import { validateInferencePipelineConfigurationStep } from '../../components/ml_inference/validation';

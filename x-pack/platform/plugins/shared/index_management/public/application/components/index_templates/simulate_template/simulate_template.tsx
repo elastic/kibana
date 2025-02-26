@@ -10,7 +10,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiCodeBlock, EuiCallOut } from '@elastic/eui';
 
 import { serializers } from '../../../../shared_imports';
-import { TemplateDeserialized } from '../../../../../common';
+import type { TemplateDeserialized } from '../../../../../common';
 import { serializeTemplate } from '../../../../../common/lib/template_serialization';
 import { simulateIndexTemplate } from '../../../services';
 

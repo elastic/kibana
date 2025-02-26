@@ -7,11 +7,11 @@
 
 import expect from '@kbn/expect';
 import type { estypes } from '@elastic/elasticsearch';
-import { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server';
+import type { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server';
 import { taskMappings as TaskManagerMapping } from '@kbn/task-manager-plugin/server/saved_objects/mappings';
 import { asyncForEach } from '@kbn/std';
 import { setTimeout as setTimeoutAsync } from 'timers/promises';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 
 const { properties: taskManagerIndexMapping } = TaskManagerMapping;
 

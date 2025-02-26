@@ -11,8 +11,8 @@ import { logViewSavedObjectName } from '@kbn/logs-shared-plugin/server';
 import {
   ML_ANOMALY_DETECTION_RULE_TYPE_ID,
   OBSERVABILITY_THRESHOLD_RULE_TYPE_ID,
+  ES_QUERY_ID,
 } from '@kbn/rule-data-utils';
-import { ES_QUERY_ID } from '@kbn/rule-data-utils';
 import { metricsDataSourceSavedObjectName } from '@kbn/metrics-data-access-plugin/server';
 import { ALERTING_FEATURE_ID } from '@kbn/alerting-plugin/common';
 import { KibanaFeatureScope } from '@kbn/features-plugin/common';

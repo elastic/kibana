@@ -7,12 +7,11 @@
 import React, { useCallback, useMemo, useState } from 'react';
 import type { AlertStatus } from '@kbn/observability-plugin/common/typings';
 import type { TimeRange } from '@kbn/es-query';
-import { useSummaryTimeRange } from '@kbn/observability-plugin/public';
+import { useSummaryTimeRange, ObservabilityAlertsTable } from '@kbn/observability-plugin/public';
 import { OBSERVABILITY_RULE_TYPE_IDS } from '@kbn/rule-data-utils';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import type { BrushEndListener, XYBrushEvent } from '@elastic/charts';
 import type { InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
-import { ObservabilityAlertsTable } from '@kbn/observability-plugin/public';
 import { INFRA_ALERT_CONSUMERS } from '../../../../common/constants';
 import type { AlertsCount } from '../../../hooks/use_alerts_count';
 import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';

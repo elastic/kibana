@@ -12,11 +12,11 @@ import type {
   SavedObjectCreateOptions,
   SavedObjectUpdateOptions,
 } from '@kbn/content-management-utils';
-import { Serializable } from '@kbn/utility-types';
-import { RefreshInterval } from '@kbn/data-plugin/common';
-import { ControlGroupChainingSystem, ControlLabelPosition } from '@kbn/controls-plugin/common';
+import type { Serializable } from '@kbn/utility-types';
+import type { RefreshInterval } from '@kbn/data-plugin/common';
+import type { ControlGroupChainingSystem, ControlLabelPosition } from '@kbn/controls-plugin/common';
 
-import { DashboardContentType } from '../types';
+import type { DashboardContentType } from '../types';
 
 export type DashboardCrudTypes = ContentManagementCrudTypes<
   DashboardContentType,

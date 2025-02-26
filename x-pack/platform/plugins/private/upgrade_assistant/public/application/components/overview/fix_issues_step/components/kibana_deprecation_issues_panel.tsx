@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { FunctionComponent, useEffect, useState } from 'react';
+import type { FunctionComponent } from 'react';
+import React, { useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { DomainDeprecationDetails } from '@kbn/core/public';
 

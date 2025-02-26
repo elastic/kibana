@@ -14,8 +14,9 @@ import type {
   SavedObjectsRepository,
   SavedObjectsServiceSetup,
   SavedObjectsServiceStart,
+  Logger,
+  LogMeta,
 } from '@kbn/core/server';
-import type { Logger, LogMeta } from '@kbn/core/server';
 
 import { type IUsageCounter, UsageCounter } from './usage_counter';
 import type { UsageCounters } from '../../common';

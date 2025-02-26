@@ -13,7 +13,7 @@
  */
 
 import { z } from '@kbn/zod';
-import { GenerationPrompts } from '../../helpers/prompts';
+import type { GenerationPrompts } from '../../helpers/prompts';
 
 export const getAttackDiscoveriesGenerationSchema = (prompts: GenerationPrompts) =>
   z.object({

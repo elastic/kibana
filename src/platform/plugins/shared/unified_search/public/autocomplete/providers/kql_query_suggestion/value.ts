@@ -8,12 +8,13 @@
  */
 
 import { flatten } from 'lodash';
-import { CoreSetup } from '@kbn/core/public';
+import type { CoreSetup } from '@kbn/core/public';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
 import { escapeQuotes } from '@kbn/es-query';
-import { KqlQuerySuggestionProvider } from './types';
+import type { KqlQuerySuggestionProvider } from './types';
 import type { UnifiedSearchPublicPluginStart } from '../../../types';
-import { QuerySuggestion, QuerySuggestionTypes } from '../query_suggestion_provider';
+import type { QuerySuggestion } from '../query_suggestion_provider';
+import { QuerySuggestionTypes } from '../query_suggestion_provider';
 
 const wrapAsSuggestions = (start: number, end: number, query: string, values: string[]) =>
   values

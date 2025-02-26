@@ -8,12 +8,12 @@
  */
 
 import assert from 'assert';
-import { ElasticsearchClient } from '@kbn/core/server';
+import type { ElasticsearchClient } from '@kbn/core/server';
 import type { InternalCoreStart } from '@kbn/core-lifecycle-server-internal';
-import {
-  createTestServers,
+import { createTestServers } from '@kbn/core-test-helpers-kbn-server';
+import type {
   createRootWithCorePlugins,
-  type TestElasticsearchUtils,
+  TestElasticsearchUtils,
 } from '@kbn/core-test-helpers-kbn-server';
 import { securityMock } from '@kbn/security-plugin/server/mocks';
 import type { AuditLogger } from '@kbn/security-plugin/server';
@@ -27,7 +27,8 @@ import {
   setFileKindsRegistry,
 } from '../../common/file_kinds_registry';
 import { BlobStorageService } from '../blob_storage_service';
-import { FileServiceStart, FileServiceFactory } from '../file_service';
+import type { FileServiceStart } from '../file_service';
+import { FileServiceFactory } from '../file_service';
 import type { CreateFileArgs } from '../file_service/file_action_types';
 
 describe('FileService', () => {

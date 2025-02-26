@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { PropsOf } from '@elastic/eui';
-import { Meta, Story } from '@storybook/react/types-6-0';
+import type { PropsOf } from '@elastic/eui';
+import type { Meta, Story } from '@storybook/react/types-6-0';
 import React from 'react';
 import { decorateWithGlobalStorybookThemeProviders } from '../test_utils/use_global_storybook_theme';
 import { DataSearchProgress } from './data_search_progress';

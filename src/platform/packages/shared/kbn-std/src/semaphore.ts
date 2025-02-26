@@ -7,9 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Observable } from 'rxjs';
+import { Observable, finalize } from 'rxjs';
 import type { OperatorFunction } from 'rxjs';
-import { finalize } from 'rxjs';
 
 type Task = () => void;
 

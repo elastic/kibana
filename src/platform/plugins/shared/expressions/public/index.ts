@@ -9,7 +9,7 @@
 
 import './index.scss';
 
-import { PluginInitializerContext } from '@kbn/core/public';
+import type { PluginInitializerContext } from '@kbn/core/public';
 import { ExpressionsPublicPlugin } from './plugin';
 
 // Kibana Platform.

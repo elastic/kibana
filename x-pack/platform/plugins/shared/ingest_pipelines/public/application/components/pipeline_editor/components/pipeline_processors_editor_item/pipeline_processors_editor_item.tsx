@@ -6,7 +6,8 @@
  */
 
 import classNames from 'classnames';
-import React, { FunctionComponent, memo, useCallback } from 'react';
+import type { FunctionComponent } from 'react';
+import React, { memo, useCallback } from 'react';
 import {
   EuiButtonIcon,
   EuiFlexGroup,
@@ -19,11 +20,11 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 
-import { ProcessorInternal, ProcessorSelector, ContextValueEditor } from '../../types';
+import type { ProcessorInternal, ProcessorSelector, ContextValueEditor } from '../../types';
 import { selectorToDataTestSubject } from '../../utils';
-import { ProcessorsDispatch } from '../../processors_reducer';
+import type { ProcessorsDispatch } from '../../processors_reducer';
 
-import { ProcessorInfo } from '../processors_tree';
+import type { ProcessorInfo } from '../processors_tree';
 import { PipelineProcessorsItemStatus } from '../pipeline_processors_editor_item_status';
 import { useTestPipelineContext } from '../../context';
 
@@ -33,7 +34,7 @@ import './pipeline_processors_editor_item.scss';
 
 import { ContextMenu } from './context_menu';
 import { i18nTexts } from './i18n_texts';
-import { Handlers } from './types';
+import type { Handlers } from './types';
 
 export interface Props {
   processor: ProcessorInternal;

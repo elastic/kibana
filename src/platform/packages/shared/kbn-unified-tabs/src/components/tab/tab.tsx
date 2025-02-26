@@ -7,17 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { MouseEvent, useCallback } from 'react';
+import type { MouseEvent } from 'react';
+import React, { useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
-import {
-  EuiButtonIcon,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiText,
-  EuiThemeComputed,
-  useEuiTheme,
-} from '@elastic/eui';
+import type { EuiThemeComputed } from '@elastic/eui';
+import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiText, useEuiTheme } from '@elastic/eui';
 import { getTabAttributes } from '../../utils/get_tab_attributes';
 import type { TabItem } from '../../types';
 

@@ -6,8 +6,8 @@
  */
 
 import { errors as EsErrors } from '@elastic/elasticsearch';
-import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
-import { Logger } from '@kbn/logging';
+import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import type { Logger } from '@kbn/logging';
 import { resourceNames } from '..';
 import { createKbConcreteIndex } from '../create_or_update_index_assets';
 

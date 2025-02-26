@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ESQLCommand } from '@kbn/esql-ast';
+import type { ESQLCommand } from '@kbn/esql-ast';
 import { i18n } from '@kbn/i18n';
 import {
   findPreviousWord,
@@ -17,7 +17,7 @@ import {
   isOptionItem,
   noCaseCompare,
 } from '../../../shared/helpers';
-import { SuggestionRawDefinition } from '../../types';
+import type { SuggestionRawDefinition } from '../../types';
 import { TIME_SYSTEM_PARAMS, TRIGGER_SUGGESTION_COMMAND } from '../../factories';
 
 /**

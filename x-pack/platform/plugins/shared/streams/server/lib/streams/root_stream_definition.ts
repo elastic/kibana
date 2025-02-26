@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { WiredStreamDefinition, getSegments } from '@kbn/streams-schema';
+import type { WiredStreamDefinition } from '@kbn/streams-schema';
+import { getSegments } from '@kbn/streams-schema';
 
 export const LOGS_ROOT_STREAM_NAME = 'logs';
 

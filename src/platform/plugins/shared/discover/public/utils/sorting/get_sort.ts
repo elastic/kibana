@@ -7,11 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { DataView } from '@kbn/data-views-plugin/common';
-import { IUiSettingsClient } from '@kbn/core/public';
+import type { DataView } from '@kbn/data-views-plugin/common';
+import type { IUiSettingsClient } from '@kbn/core/public';
 import type { SortOrder } from '@kbn/saved-search-plugin/public';
 import { DOC_HIDE_TIME_COLUMN_SETTING, SORT_DEFAULT_ORDER_SETTING } from '@kbn/discover-utils';
-import { getDefaultSort, getSortArray, SortInput } from '../../../common/utils/sorting';
+import type { SortInput } from '../../../common/utils/sorting';
+import { getDefaultSort, getSortArray } from '../../../common/utils/sorting';
 
 /**
  * sorting for embeddable, like getSortArray,but returning a default in the case the given sort or dataView is not valid

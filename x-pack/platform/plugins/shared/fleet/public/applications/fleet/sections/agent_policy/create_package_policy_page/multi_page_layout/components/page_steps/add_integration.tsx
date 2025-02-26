@@ -23,10 +23,13 @@ import { sendCreatePackagePolicy, useStartServices, useUIExtension } from '../..
 import type { RequestError } from '../../../../../../hooks';
 import { Error, ExtensionWrapper } from '../../../../../../components';
 import { sendGeneratePackagePolicy } from '../../hooks';
-import { CreatePackagePolicyBottomBar, StandaloneModeWarningCallout } from '..';
+import {
+  CreatePackagePolicyBottomBar,
+  StandaloneModeWarningCallout,
+  NotObscuredByBottomBar,
+} from '..';
 import type { PackagePolicyValidationResults } from '../../../services';
 import { validatePackagePolicy, validationHasErrors } from '../../../services';
-import { NotObscuredByBottomBar } from '..';
 import { StepConfigurePackagePolicy, StepDefinePackagePolicy } from '../../../components';
 import { prepareInputPackagePolicyDataset } from '../../../services/prepare_input_pkg_policy_dataset';
 

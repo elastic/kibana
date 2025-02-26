@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ESQLLiteral, ESQLNumericLiteralType } from '@kbn/esql-ast/src/types';
-import { FunctionParameterType } from '../definitions/types';
+import type { ESQLLiteral, ESQLNumericLiteralType } from '@kbn/esql-ast/src/types';
+import type { FunctionParameterType } from '../definitions/types';
 
 export const ESQL_COMMON_NUMERIC_TYPES = ['double', 'long', 'integer'] as const;
 export const ESQL_NUMERIC_DECIMAL_TYPES = [

@@ -7,11 +7,15 @@
 
 import { z } from '@kbn/zod';
 import { NonEmptyString } from '@kbn/zod-helpers';
-import { StreamDefinitionBase } from '../base';
-import { FieldDefinition, fieldDefinitionSchema } from './fields';
-import { ProcessorDefinition, processorDefinitionSchema } from './processors';
-import { RoutingDefinition, routingDefinitionSchema } from './routing';
-import { IngestStreamLifecycle, ingestStreamLifecycleSchema } from './lifecycle';
+import type { StreamDefinitionBase } from '../base';
+import type { FieldDefinition } from './fields';
+import { fieldDefinitionSchema } from './fields';
+import type { ProcessorDefinition } from './processors';
+import { processorDefinitionSchema } from './processors';
+import type { RoutingDefinition } from './routing';
+import { routingDefinitionSchema } from './routing';
+import type { IngestStreamLifecycle } from './lifecycle';
+import { ingestStreamLifecycleSchema } from './lifecycle';
 
 interface IngestBase {
   lifecycle: IngestStreamLifecycle;

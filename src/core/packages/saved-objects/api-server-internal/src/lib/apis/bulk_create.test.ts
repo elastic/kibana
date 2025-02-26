@@ -20,15 +20,16 @@ import {
 import type { Payload } from '@hapi/boom';
 
 import type { SavedObjectsBulkCreateObject } from '@kbn/core-saved-objects-api-server';
-import {
-  type SavedObjectsRawDoc,
-  type SavedObjectUnsanitizedDoc,
-  type SavedObjectReference,
+import type {
+  ISavedObjectsSecurityExtension,
+  SavedObjectsRawDoc,
+  SavedObjectUnsanitizedDoc,
+  SavedObjectReference,
 } from '@kbn/core-saved-objects-server';
 import { ALL_NAMESPACES_STRING } from '@kbn/core-saved-objects-utils-server';
 import { SavedObjectsRepository } from '../repository';
 import { loggerMock } from '@kbn/logging-mocks';
-import { SavedObjectsSerializer } from '@kbn/core-saved-objects-base-server-internal';
+import type { SavedObjectsSerializer } from '@kbn/core-saved-objects-base-server-internal';
 import { kibanaMigratorMock } from '../../mocks';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 
@@ -56,7 +57,6 @@ import {
   expectCreateResult,
   mockTimestampFieldsWithCreated,
 } from '../../test_helpers/repository.test.common';
-import type { ISavedObjectsSecurityExtension } from '@kbn/core-saved-objects-server';
 import { savedObjectsExtensionsMock } from '../../mocks/saved_objects_extensions.mock';
 
 // so any breaking changes to this repository are considered breaking changes to the SavedObjectsClient.

@@ -23,6 +23,14 @@ module.exports = {
   },
   plugins: ['@typescript-eslint'],
   rules: {
+    '@typescript-eslint/consistent-type-imports': [
+      'error',
+      {
+        disallowTypeAnnotations: false,
+        fixStyle: 'separate-type-imports',
+        prefer: 'type-imports',
+      },
+    ],
     '@typescript-eslint/consistent-type-exports': 'error',
   },
   overrides: [
@@ -38,6 +46,14 @@ module.exports = {
       files: ['*spaces_api_integration/common/services/basic_auth_supertest.ts'],
       rules: {
         '@typescript-eslint/no-floating-promises': 'off',
+      },
+    },
+    {
+      files: ['**/generated/**', '**/*.gen.ts'],
+      rules: {
+        // disable some ESLINT rules to prevent CI from updating auto-generated code
+        '@typescript-eslint/consistent-type-imports': 'off',
+        '@typescript-eslint/consistent-type-exports': 'off',
       },
     },
   ],

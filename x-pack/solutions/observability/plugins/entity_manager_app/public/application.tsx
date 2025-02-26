@@ -4,7 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { AppMountParameters, APP_WRAPPER_CLASS, CoreStart } from '@kbn/core/public';
+import type { AppMountParameters, CoreStart } from '@kbn/core/public';
+import { APP_WRAPPER_CLASS } from '@kbn/core/public';
 import { PerformanceContextProvider } from '@kbn/ebt-tools';
 import { EuiThemeProvider } from '@elastic/eui';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
@@ -16,10 +17,10 @@ import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 import { EntityClient } from '@kbn/entityManager-plugin/public';
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
+import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import { Router } from '@kbn/shared-ux-router';
 import { PluginContext } from './context/plugin_context';
-import { EntityManagerPluginStart } from './types';
+import type { EntityManagerPluginStart } from './types';
 import { EntityManagerOverviewPage } from './pages/overview';
 
 export function renderApp({

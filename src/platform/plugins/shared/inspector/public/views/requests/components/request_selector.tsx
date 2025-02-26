@@ -12,10 +12,10 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import PropTypes from 'prop-types';
 import { i18n } from '@kbn/i18n';
 
+import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import {
   EuiBadge,
   EuiComboBox,
-  EuiComboBoxOptionOption,
   EuiFlexGroup,
   EuiFlexItem,
   EuiLoadingSpinner,
@@ -23,7 +23,7 @@ import {
 } from '@elastic/eui';
 
 import { RequestStatus } from '../../../../common/adapters';
-import { Request } from '../../../../common/adapters/request/types';
+import type { Request } from '../../../../common/adapters/request/types';
 
 interface RequestSelectorProps {
   requests: Request[];

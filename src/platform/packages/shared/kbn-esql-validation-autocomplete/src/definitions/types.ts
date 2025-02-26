@@ -15,7 +15,7 @@ import type {
   ESQLMessage,
   ESQLSource,
 } from '@kbn/esql-ast';
-import { GetColumnsByTypeFn, SuggestionRawDefinition } from '../autocomplete/types';
+import type { GetColumnsByTypeFn, SuggestionRawDefinition } from '../autocomplete/types';
 import type {
   ESQLCallbacks,
   ESQLControlVariable,

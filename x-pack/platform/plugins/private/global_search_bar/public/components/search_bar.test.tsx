@@ -7,14 +7,16 @@
 
 import type { ChromeStyle } from '@kbn/core-chrome-browser';
 import { applicationServiceMock, coreMock } from '@kbn/core/public/mocks';
-import { GlobalSearchBatchedResults, GlobalSearchResult } from '@kbn/global-search-plugin/public';
+import type {
+  GlobalSearchBatchedResults,
+  GlobalSearchResult,
+} from '@kbn/global-search-plugin/public';
 import { globalSearchPluginMock } from '@kbn/global-search-plugin/public/mocks';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { usageCollectionPluginMock } from '@kbn/usage-collection-plugin/public/mocks';
 import { act, fireEvent, render, screen } from '@testing-library/react';
 import React from 'react';
-import { BehaviorSubject, of } from 'rxjs';
-import { filter, map } from 'rxjs';
+import { BehaviorSubject, of, filter, map } from 'rxjs';
 import { EventReporter } from '../telemetry';
 import { SearchBar } from './search_bar';
 

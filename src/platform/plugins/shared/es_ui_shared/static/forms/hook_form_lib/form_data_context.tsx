@@ -9,8 +9,8 @@
 
 import React, { createContext, useContext, useMemo } from 'react';
 
-import { FormData, FormHook } from './types';
-import { Subject } from './lib';
+import type { FormData, FormHook } from './types';
+import type { Subject } from './lib';
 
 export interface Context<T extends FormData = FormData, I extends FormData = T> {
   getFormData$: () => Subject<FormData>;

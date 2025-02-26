@@ -15,14 +15,17 @@ import {
 import { login, loginWithUserAndWaitForPage, logout } from '../tasks/login';
 import { navigateToTab, createAgentPolicy } from '../tasks/fleet';
 import { cleanupAgentPolicies, unenrollAgent } from '../tasks/cleanup';
-import { getIntegrationCard } from '../screens/integrations';
+import {
+  getIntegrationCard,
+  ADD_INTEGRATION_POLICY_BTN,
+  AGENT_POLICY_NAME_LINK,
+} from '../screens/integrations';
 
 import {
   AGENT_POLICIES_TAB,
   AGENT_POLICY_SAVE_INTEGRATION,
   ADD_PACKAGE_POLICY_BTN,
 } from '../screens/fleet';
-import { ADD_INTEGRATION_POLICY_BTN, AGENT_POLICY_NAME_LINK } from '../screens/integrations';
 import { scrollToIntegration } from '../tasks/integrations';
 
 const rolesToCreate = [FleetAllIntegrReadRole];

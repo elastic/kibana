@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import React, { useState, PropsWithChildren } from 'react';
-import { createContext, useContext } from 'react';
+import type { PropsWithChildren } from 'react';
+import React, { useState, createContext, useContext } from 'react';
 
 interface ContextValues {
   prompt?: string;

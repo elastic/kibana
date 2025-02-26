@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
+import type { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
 import { BehaviorSubject, skip, Subject } from 'rxjs';
 import { fetch$ } from './fetch';
 

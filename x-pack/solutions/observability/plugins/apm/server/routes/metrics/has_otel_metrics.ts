@@ -13,8 +13,8 @@ import {
   METRIC_OTEL_JVM_PROCESS_THREADS_COUNT,
   METRIC_OTEL_SYSTEM_CPU_UTILIZATION,
   METRIC_OTEL_SYSTEM_MEMORY_UTILIZATION,
+  SERVICE_NAME,
 } from '../../../common/es_fields/apm';
-import { SERVICE_NAME } from '../../../common/es_fields/apm';
 import { environmentQuery } from '../../../common/utils/environment_query';
 import type { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
 

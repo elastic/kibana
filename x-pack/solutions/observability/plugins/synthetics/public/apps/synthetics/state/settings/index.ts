@@ -6,16 +6,16 @@
  */
 
 import { createReducer } from '@reduxjs/toolkit';
-import { DynamicSettings } from '../../../../../common/runtime_types';
-import { IHttpSerializedFetchError } from '..';
+import type { DynamicSettings } from '../../../../../common/runtime_types';
+import type { IHttpSerializedFetchError } from '..';
 import {
   getConnectorsAction,
   getDynamicSettingsAction,
   getLocationMonitorsAction,
   setDynamicSettingsAction,
+  syncGlobalParamsAction,
 } from './actions';
-import { ActionConnector } from './api';
-import { syncGlobalParamsAction } from './actions';
+import type { ActionConnector } from './api';
 
 export interface LocationMonitor {
   id: string;

@@ -5,10 +5,9 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
-import { createContext } from 'react';
-import { IngestStreamGetResponse } from '@kbn/streams-schema';
-import { UseProcessingSimulatorReturn } from './hooks/use_processing_simulator';
+import React, { useMemo, createContext } from 'react';
+import type { IngestStreamGetResponse } from '@kbn/streams-schema';
+import type { UseProcessingSimulatorReturn } from './hooks/use_processing_simulator';
 
 export const context = createContext<SimulatorContextValue | undefined>(undefined);
 

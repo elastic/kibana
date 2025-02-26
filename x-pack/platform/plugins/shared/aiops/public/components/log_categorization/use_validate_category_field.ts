@@ -7,8 +7,10 @@
 
 import { useRef, useCallback } from 'react';
 
-import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
-import type { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/types';
+import type {
+  QueryDslQueryContainer,
+  MappingRuntimeFields,
+} from '@elastic/elasticsearch/lib/api/types';
 
 import type { FieldValidationResults } from '@kbn/ml-category-validator';
 import type { HttpFetchOptions } from '@kbn/core/public';

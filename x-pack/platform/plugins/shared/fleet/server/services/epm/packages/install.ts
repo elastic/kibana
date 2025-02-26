@@ -88,8 +88,12 @@ import { isAgentlessEnabled, isOnlyAgentlessIntegration } from '../../utils/agen
 import { _stateMachineInstallPackage } from './install_state_machine/_state_machine_package_install';
 
 import { formatVerificationResultForSO } from './package_verification';
-import { getInstallation, getInstallationObject } from './get';
-import { getInstalledPackageWithAssets, getPackageSavedObjects } from './get';
+import {
+  getInstallation,
+  getInstallationObject,
+  getInstalledPackageWithAssets,
+  getPackageSavedObjects,
+} from './get';
 import { removeOldAssets } from './cleanup';
 import { getBundledPackageByPkgKey } from './bundled_packages';
 import { convertStringToTitle, generateDescription } from './custom_integrations/utils';

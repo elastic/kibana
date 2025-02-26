@@ -6,8 +6,7 @@
  */
 
 import React from 'react';
-import { takeUntil, distinctUntilChanged, skip } from 'rxjs';
-import { from } from 'rxjs';
+import { takeUntil, distinctUntilChanged, skip, from } from 'rxjs';
 import { pick } from 'lodash';
 import type { CoreStart } from '@kbn/core/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';

@@ -5,14 +5,13 @@
  * 2.0.
  */
 import { SavedObjectsClient } from '@kbn/core/server';
-import type { CoreSetup, ElasticsearchClient, Logger } from '@kbn/core/server';
+import type { CoreSetup, ElasticsearchClient, Logger, LoggerFactory } from '@kbn/core/server';
 import type {
   ConcreteTaskInstance,
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
 import { getDeleteTaskRunResult } from '@kbn/task-manager-plugin/server/task';
-import type { LoggerFactory } from '@kbn/core/server';
 import { errors } from '@elastic/elasticsearch';
 
 import { SO_SEARCH_LIMIT, outputType } from '../../common/constants';

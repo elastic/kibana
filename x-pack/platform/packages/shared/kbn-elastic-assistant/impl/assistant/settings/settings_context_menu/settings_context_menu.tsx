@@ -6,6 +6,7 @@
  */
 
 import React, { useCallback, useMemo, useState } from 'react';
+import type { EuiSwitchEvent } from '@elastic/eui';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -21,14 +22,14 @@ import {
   EuiTitle,
   EuiHorizontalRule,
   EuiToolTip,
-  EuiSwitchEvent,
   EuiIcon,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { KnowledgeBaseTour } from '../../../tour/knowledge_base';
 import { AnonymizationSettingsManagement } from '../../../data_anonymization/settings/anonymization_settings_management';
-import { Conversation, useAssistantContext } from '../../../..';
+import type { Conversation } from '../../../..';
+import { useAssistantContext } from '../../../..';
 import * as i18n from '../../assistant_header/translations';
 import { AlertsSettingsModal } from '../alerts_settings/alerts_settings_modal';
 import { KNOWLEDGE_BASE_TAB } from '../const';

@@ -12,7 +12,7 @@ import { EuiHorizontalRule } from '@elastic/eui';
 import React, { useState, useEffect } from 'react';
 import { useTransactionContext } from '../hooks/use_transaction';
 import { FieldWithActions } from './field_with_actions/field_with_actions';
-import { FieldConfiguration } from '../resources/get_field_configuration';
+import type { FieldConfiguration } from '../resources/get_field_configuration';
 
 export interface TraceSummaryProps {
   fieldId: string;

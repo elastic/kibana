@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { AnyAction, Dispatch } from 'redux';
-import { ThunkDispatch } from 'redux-thunk';
+import type { AnyAction, Dispatch } from 'redux';
+import type { ThunkDispatch } from 'redux-thunk';
 import type { Query } from '@kbn/es-query';
-import { Adapters } from '@kbn/inspector-plugin/common/adapters';
-import { MapStoreState } from '../reducers/store';
+import type { Adapters } from '@kbn/inspector-plugin/common/adapters';
+import type { MapStoreState } from '../reducers/store';
 import {
   createLayerInstance,
   getEditState,
@@ -44,7 +44,7 @@ import {
   UPDATE_SOURCE_PROP,
 } from './map_action_constants';
 import { clearDataRequests, syncDataForLayerId, updateStyleMeta } from './data_request_actions';
-import {
+import type {
   Attribution,
   JoinDescriptor,
   LayerDescriptor,
@@ -54,21 +54,16 @@ import {
   VectorLayerDescriptor,
   VectorStyleDescriptor,
 } from '../../common/descriptor_types';
-import { ILayer } from '../classes/layers/layer';
+import type { ILayer } from '../classes/layers/layer';
 import { hasVectorLayerMethod } from '../classes/layers/vector_layer';
-import { OnSourceChangeArgs } from '../classes/sources/source';
+import type { OnSourceChangeArgs } from '../classes/sources/source';
 import { isESVectorTileSource } from '../classes/sources/es_source';
-import {
-  DRAW_MODE,
-  LAYER_STYLE_TYPE,
-  LAYER_TYPE,
-  SCALING_TYPES,
-  STYLE_TYPE,
-} from '../../common/constants';
-import { IVectorStyle } from '../classes/styles/vector/vector_style';
+import type { LAYER_TYPE } from '../../common/constants';
+import { DRAW_MODE, LAYER_STYLE_TYPE, SCALING_TYPES, STYLE_TYPE } from '../../common/constants';
+import type { IVectorStyle } from '../classes/styles/vector/vector_style';
 import { notifyLicensedFeatureUsage } from '../licensed_features';
-import { IESAggField } from '../classes/fields/agg';
-import { IField } from '../classes/fields/field';
+import type { IESAggField } from '../classes/fields/agg';
+import type { IField } from '../classes/fields/field';
 import type { IVectorSource } from '../classes/sources/vector_source';
 import { getDrawMode, getOpenTOCDetails } from '../selectors/ui_selectors';
 import { isLayerGroup, LayerGroup } from '../classes/layers/layer_group';

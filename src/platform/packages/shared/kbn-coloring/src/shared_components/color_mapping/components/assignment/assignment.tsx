@@ -13,17 +13,17 @@ import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import { euiThemeVars } from '@kbn/ui-theme';
-import { IKbnPalette, KbnPalettes } from '@kbn/palettes';
+import type { IKbnPalette, KbnPalettes } from '@kbn/palettes';
 import {
   removeAssignment,
   updateAssignmentColor,
   updateAssignmentRule,
 } from '../../state/color_mapping';
-import { ColorMapping } from '../../config';
+import type { ColorMapping } from '../../config';
 import { Range } from './range';
 import { Match } from './match';
 
-import { ColorMappingInputData } from '../../categorical_color_mapping';
+import type { ColorMappingInputData } from '../../categorical_color_mapping';
 import { ColorSwatch } from '../color_picker/color_swatch';
 
 export function Assignment({

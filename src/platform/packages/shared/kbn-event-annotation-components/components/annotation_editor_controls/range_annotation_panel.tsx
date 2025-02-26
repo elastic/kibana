@@ -9,15 +9,20 @@
 
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { EuiFormRow, EuiSwitch, EuiText, EuiDatePicker, UseEuiTheme } from '@elastic/eui';
-import moment from 'moment';
+import type { UseEuiTheme } from '@elastic/eui';
+import { EuiFormRow, EuiSwitch, EuiText, EuiDatePicker } from '@elastic/eui';
+import type moment from 'moment';
 import type {
   PointInTimeEventAnnotationConfig,
   RangeEventAnnotationConfig,
 } from '@kbn/event-annotation-common';
 import { isRangeAnnotationConfig } from '../..';
-import { defaultRangeAnnotationLabel, defaultAnnotationLabel } from './helpers';
-import { toLineAnnotationColor, toRangeAnnotationColor } from './helpers';
+import {
+  defaultRangeAnnotationLabel,
+  defaultAnnotationLabel,
+  toLineAnnotationColor,
+  toRangeAnnotationColor,
+} from './helpers';
 import type { ManualEventAnnotationType } from './types';
 
 export const ConfigPanelApplyAsRangeSwitch = ({

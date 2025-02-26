@@ -25,8 +25,7 @@ import {
   LazySavedObjectSaveModalDashboard,
   withSuspense,
 } from '@kbn/presentation-util-plugin/public';
-import React, { useCallback, useState } from 'react';
-import { useMemo } from 'react';
+import React, { useCallback, useState, useMemo } from 'react';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { EMBEDDABLE_PATTERN_ANALYSIS_TYPE } from '@kbn/aiops-log-pattern-analysis/constants';
 import { useTimeRangeUpdates } from '@kbn/ml-date-picker';

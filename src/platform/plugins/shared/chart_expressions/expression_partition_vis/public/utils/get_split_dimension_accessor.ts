@@ -7,10 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { AccessorFn } from '@elastic/charts';
-import { DatatableColumn } from '@kbn/expressions-plugin/public';
-import { FieldFormat, FormatFactory } from '@kbn/field-formats-plugin/common';
-import { ExpressionValueVisDimension } from '@kbn/visualizations-plugin/common';
+import type { AccessorFn } from '@elastic/charts';
+import type { DatatableColumn } from '@kbn/expressions-plugin/public';
+import type { FieldFormat, FormatFactory } from '@kbn/field-formats-plugin/common';
+import type { ExpressionValueVisDimension } from '@kbn/visualizations-plugin/common';
 import { getColumnByAccessor } from '@kbn/visualizations-plugin/common/utils';
 import { getFormatter } from './formatters';
 

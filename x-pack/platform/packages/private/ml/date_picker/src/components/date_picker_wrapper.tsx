@@ -10,16 +10,15 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Subscription } from 'rxjs';
 import { debounce } from 'lodash';
 
-import type { OnRefreshProps, OnTimeChangeProps } from '@elastic/eui';
 import {
   useIsWithinMaxBreakpoint,
   EuiButton,
   EuiFlexGroup,
   EuiFlexItem,
   EuiSuperDatePicker,
-  type EuiSuperDatePickerProps,
   EuiToolTip,
 } from '@elastic/eui';
+import type { OnRefreshProps, OnTimeChangeProps, EuiSuperDatePickerProps } from '@elastic/eui';
 
 import type { TimeRange } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';

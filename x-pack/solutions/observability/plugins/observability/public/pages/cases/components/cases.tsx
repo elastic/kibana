@@ -6,7 +6,7 @@
  */
 
 import React, { Suspense, useState } from 'react';
-import { CasesPermissions } from '@kbn/cases-plugin/common';
+import type { CasesPermissions } from '@kbn/cases-plugin/common';
 import { observabilityFeatureId } from '../../../../common';
 import { useKibana } from '../../../utils/kibana_react';
 import { usePluginContext } from '../../../hooks/use_plugin_context';

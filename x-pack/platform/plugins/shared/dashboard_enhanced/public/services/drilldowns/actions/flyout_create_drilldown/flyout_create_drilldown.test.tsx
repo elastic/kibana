@@ -11,14 +11,12 @@ import {
   UiActionsEnhancedDynamicActionManager as DynamicActionManager,
 } from '@kbn/ui-actions-enhanced-plugin/public';
 import type { ViewMode } from '@kbn/presentation-publishing';
-import {
-  FlyoutCreateDrilldownAction,
-  OpenFlyoutAddDrilldownParams,
-} from './flyout_create_drilldown';
+import type { OpenFlyoutAddDrilldownParams } from './flyout_create_drilldown';
+import { FlyoutCreateDrilldownAction } from './flyout_create_drilldown';
 import { coreMock } from '@kbn/core/public/mocks';
 import { uiActionsEnhancedPluginMock } from '@kbn/ui-actions-enhanced-plugin/public/mocks';
-import { UiActionsEnhancedActionFactory } from '@kbn/ui-actions-enhanced-plugin/public';
-import { DynamicActionsSerializedState } from '@kbn/embeddable-enhanced-plugin/public/plugin';
+import type { UiActionsEnhancedActionFactory } from '@kbn/ui-actions-enhanced-plugin/public';
+import type { DynamicActionsSerializedState } from '@kbn/embeddable-enhanced-plugin/public/plugin';
 
 function createAction(
   allPossibleTriggers = ['VALUE_CLICK_TRIGGER'],

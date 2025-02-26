@@ -9,10 +9,10 @@ import { EuiTourStep } from '@elastic/eui';
 import React, { useCallback, useEffect, useState } from 'react';
 import { throttle } from 'lodash';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
-import { Conversation } from '../../assistant_context/types';
+import type { Conversation } from '../../assistant_context/types';
 import { NEW_FEATURES_TOUR_STORAGE_KEYS } from '../const';
 import { anonymizedValuesAndCitationsTourStep1 } from './step_config';
-import { TourState } from '../knowledge_base';
+import type { TourState } from '../knowledge_base';
 import {
   conversationContainsAnonymizedValues,
   conversationContainsContentReferences,

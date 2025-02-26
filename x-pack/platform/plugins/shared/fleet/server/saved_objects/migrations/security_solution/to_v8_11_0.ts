@@ -7,11 +7,12 @@
 
 import type { SavedObjectUnsanitizedDoc } from '@kbn/core/server';
 
-import type { SavedObjectModelDataBackfillFn } from '@kbn/core-saved-objects-server';
+import type {
+  SavedObjectModelDataBackfillFn,
+  SavedObjectModelVersionForwardCompatibilityFn,
+} from '@kbn/core-saved-objects-server';
 
 import { omit } from 'lodash';
-
-import type { SavedObjectModelVersionForwardCompatibilityFn } from '@kbn/core-saved-objects-server';
 
 import type { PackagePolicy } from '../../../../common';
 

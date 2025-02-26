@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { SavedSearch } from '@kbn/saved-search-plugin/common';
+import type { SavedSearch } from '@kbn/saved-search-plugin/common';
 import { BehaviorSubject } from 'rxjs';
 import { savedSearchMock } from '../../__mocks__/saved_search';
 import { getDiscoverLocatorParams } from './get_discover_locator_params';

@@ -7,8 +7,8 @@
 
 import React, { useState, useCallback } from 'react';
 import type { EuiStepProps } from '@elastic/eui';
-import { EuiIconTip } from '@elastic/eui';
 import {
+  EuiIconTip,
   EuiSwitch,
   EuiButton,
   EuiCallOut,

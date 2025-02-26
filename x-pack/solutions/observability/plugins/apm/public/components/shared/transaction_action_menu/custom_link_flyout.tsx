@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import { useMemo } from 'react';
-import React from 'react';
+import React, { useMemo } from 'react';
 import type { Transaction } from '../../../../typings/es_schemas/ui/transaction';
 import type { Filter } from '../../../../common/custom_link/custom_link_types';
 import { useFetcher } from '../../../hooks/use_fetcher';

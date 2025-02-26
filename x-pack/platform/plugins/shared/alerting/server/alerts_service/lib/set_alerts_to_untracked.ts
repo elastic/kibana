@@ -6,8 +6,9 @@
  */
 
 import { isEmpty } from 'lodash';
-import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
-import { Logger } from '@kbn/logging';
+import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import type { Logger } from '@kbn/logging';
+import type { AlertStatus } from '@kbn/rule-data-utils';
 import {
   ALERT_END,
   ALERT_RULE_CONSUMER,
@@ -18,7 +19,6 @@ import {
   ALERT_STATUS_UNTRACKED,
   ALERT_TIME_RANGE,
   ALERT_UUID,
-  AlertStatus,
 } from '@kbn/rule-data-utils';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { RulesClientContext } from '../../rules_client';

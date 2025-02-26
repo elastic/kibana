@@ -6,7 +6,7 @@
  */
 
 import { BUILT_IN_ID_PREFIX } from './constants';
-import { BuiltInDefinition } from '../../types';
+import type { BuiltInDefinition } from '../../types';
 
 export const builtInHostsFromEcsEntityDefinition: BuiltInDefinition = {
   type: {

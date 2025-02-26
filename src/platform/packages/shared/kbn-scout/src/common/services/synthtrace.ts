@@ -16,8 +16,8 @@ import {
   OtelSynthtraceEsClient,
   createLogger,
 } from '@kbn/apm-synthtrace';
-import { ScoutLogger } from './logger';
-import { EsClient } from '../../types';
+import type { ScoutLogger } from './logger';
+import type { EsClient } from '../../types';
 
 let apmSynthtraceEsClientInstance: ApmSynthtraceEsClient | undefined;
 let infraSynthtraceEsClientInstance: InfraSynthtraceEsClient | undefined;

@@ -8,8 +8,7 @@
  */
 
 import React from 'react';
-import { from } from 'rxjs';
-import { take } from 'rxjs';
+import { from, take } from 'rxjs';
 import { render, act as renderAct, renderHook, act } from '@testing-library/react';
 
 import { LIGHT_THEME, DARK_THEME } from '@elastic/charts';

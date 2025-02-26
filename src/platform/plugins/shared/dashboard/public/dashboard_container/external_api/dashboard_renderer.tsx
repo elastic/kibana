@@ -15,13 +15,13 @@ import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { EuiLoadingElastic, EuiLoadingSpinner } from '@elastic/eui';
 import { SavedObjectNotFound } from '@kbn/kibana-utils-plugin/common';
 import { useStateFromPublishingSubject } from '@kbn/presentation-publishing';
-import { LocatorPublic } from '@kbn/share-plugin/common';
+import type { LocatorPublic } from '@kbn/share-plugin/common';
 
 import { ExitFullScreenButtonKibanaProvider } from '@kbn/shared-ux-button-exit-full-screen';
-import { DashboardApi, DashboardInternalApi } from '../../dashboard_api/types';
+import type { DashboardApi, DashboardInternalApi } from '../../dashboard_api/types';
 import { coreServices, screenshotModeService } from '../../services/kibana_services';
 import type { DashboardCreationOptions } from '../..';
-import { DashboardLocatorParams, DashboardRedirect } from '../types';
+import type { DashboardLocatorParams, DashboardRedirect } from '../types';
 import { Dashboard404Page } from './dashboard_404';
 import { DashboardContext } from '../../dashboard_api/use_dashboard_api';
 import { DashboardViewport } from '../component/viewport/dashboard_viewport';

@@ -9,9 +9,10 @@
 
 import React, { useRef } from 'react';
 import { EuiFormRow, EuiLink, EuiAccordion, EuiSpacer, EuiPanel } from '@elastic/eui';
-import { monaco } from '@kbn/monaco';
-import { UrlTemplateEditor, UrlTemplateEditorVariable } from '@kbn/kibana-react-plugin/public';
-import { UrlDrilldownConfig } from '../../types';
+import type { monaco } from '@kbn/monaco';
+import type { UrlTemplateEditorVariable } from '@kbn/kibana-react-plugin/public';
+import { UrlTemplateEditor } from '@kbn/kibana-react-plugin/public';
+import type { UrlDrilldownConfig } from '../../types';
 import './index.scss';
 import {
   txtUrlTemplateSyntaxHelpLinkText,

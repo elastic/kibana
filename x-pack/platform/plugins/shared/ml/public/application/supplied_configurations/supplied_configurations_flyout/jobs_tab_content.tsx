@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import { useMemo } from 'react';
+import React, { useMemo } from 'react';
 import type { FC } from 'react';
-import React from 'react';
 import {
   EuiAccordion,
   EuiCodeBlock,
@@ -15,8 +14,8 @@ import {
   EuiFlexItem,
   EuiSpacer,
   EuiText,
+  useEuiTheme,
 } from '@elastic/eui';
-import { useEuiTheme } from '@elastic/eui';
 import type { Module, ModuleJob, ModuleDatafeed } from '../../../../common/types/modules';
 
 interface Props {

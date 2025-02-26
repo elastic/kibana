@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EnrichedDeprecationInfo } from '../../../common/types';
+import type { EnrichedDeprecationInfo } from '../../../common/types';
 
 interface Action {
   action_type: 'remove_settings';

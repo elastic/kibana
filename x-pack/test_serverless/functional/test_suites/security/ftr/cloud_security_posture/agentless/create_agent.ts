@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import * as http from 'http';
+import type * as http from 'http';
 import expect from '@kbn/expect';
 import { AGENTLESS_SECURITY_POSTURE_PACKAGE_VERSION } from '../../../constants';
 import { setupMockServer } from './mock_agentless_api';

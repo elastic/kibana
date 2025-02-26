@@ -6,7 +6,8 @@
  */
 
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
-import { kqlQuerySchema, QuerySchema } from '@kbn/slo-schema';
+import type { QuerySchema } from '@kbn/slo-schema';
+import { kqlQuerySchema } from '@kbn/slo-schema';
 import { buildEsQuery, fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 
 export function getElasticsearchQueryOrThrow(kuery: QuerySchema = ''): QueryDslQueryContainer {

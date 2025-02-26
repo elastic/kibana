@@ -5,24 +5,25 @@
  * 2.0.
  */
 
-import {
-  SubActionConnectorType,
-  ValidatorType,
-} from '@kbn/actions-plugin/server/sub_action_framework/types';
+import type { SubActionConnectorType } from '@kbn/actions-plugin/server/sub_action_framework/types';
+import { ValidatorType } from '@kbn/actions-plugin/server/sub_action_framework/types';
 import { EndpointSecurityConnectorFeatureId } from '@kbn/actions-plugin/common';
 import { urlAllowListValidator, ActionExecutionSourceType } from '@kbn/actions-plugin/server';
 import {
   ENDPOINT_SECURITY_EXECUTE_PRIVILEGE,
   ENDPOINT_SECURITY_SUB_ACTIONS_EXECUTE_PRIVILEGE,
 } from '@kbn/actions-plugin/server/feature';
-import { SENTINELONE_CONNECTOR_ID, SENTINELONE_TITLE } from '../../../common/sentinelone/constants';
-import { SUB_ACTION } from '../../../common/sentinelone/constants';
+import {
+  SENTINELONE_CONNECTOR_ID,
+  SENTINELONE_TITLE,
+  SUB_ACTION,
+} from '../../../common/sentinelone/constants';
 
 import {
   SentinelOneConfigSchema,
   SentinelOneSecretsSchema,
 } from '../../../common/sentinelone/schema';
-import { SentinelOneConfig, SentinelOneSecrets } from '../../../common/sentinelone/types';
+import type { SentinelOneConfig, SentinelOneSecrets } from '../../../common/sentinelone/types';
 import { SentinelOneConnector } from './sentinelone';
 import { renderParameterTemplates } from './render';
 

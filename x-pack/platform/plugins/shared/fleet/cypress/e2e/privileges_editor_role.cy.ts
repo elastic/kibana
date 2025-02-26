@@ -9,10 +9,9 @@ import { FLEET, INTEGRATIONS, navigateTo } from '../tasks/navigation';
 import { createUsers, BuiltInEditorUser, deleteUsers } from '../tasks/privileges';
 import { login, loginWithUserAndWaitForPage, logout } from '../tasks/login';
 
-import { getIntegrationCard } from '../screens/integrations';
+import { getIntegrationCard, ADD_INTEGRATION_POLICY_BTN } from '../screens/integrations';
 
 import { ADD_AGENT_BUTTON, FLEET_SERVER_MISSING_PRIVILEGES } from '../screens/fleet';
-import { ADD_INTEGRATION_POLICY_BTN } from '../screens/integrations';
 import { scrollToIntegration } from '../tasks/integrations';
 
 const usersToCreate = [BuiltInEditorUser];

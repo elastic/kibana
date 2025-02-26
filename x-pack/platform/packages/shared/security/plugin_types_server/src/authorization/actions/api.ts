@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ApiOperation } from '@kbn/security-plugin-types-common';
+import type { ApiOperation } from '@kbn/security-plugin-types-common';
 
 export interface ApiActions {
   get(operation: ApiOperation, subject: string): string;

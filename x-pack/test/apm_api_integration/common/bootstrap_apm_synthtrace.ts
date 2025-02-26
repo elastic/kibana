@@ -12,7 +12,7 @@ import {
 } from '@kbn/apm-synthtrace';
 import url from 'url';
 import { kbnTestConfig } from '@kbn/test';
-import { InheritedFtrProviderContext } from './ftr_provider_context';
+import type { InheritedFtrProviderContext } from './ftr_provider_context';
 
 export async function getApmSynthtraceEsClient(
   context: InheritedFtrProviderContext,

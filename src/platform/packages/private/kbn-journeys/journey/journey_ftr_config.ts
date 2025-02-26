@@ -14,8 +14,8 @@ import { REPO_ROOT } from '@kbn/repo-info';
 import type { FtrConfigProviderContext, FtrConfigProvider } from '@kbn/test';
 import { services } from '../services';
 
-import { AnyStep } from './journey';
-import { JourneyConfig } from './journey_config';
+import type { AnyStep } from './journey';
+import type { JourneyConfig } from './journey_config';
 import { JOURNEY_APM_CONFIG } from './journey_apm_config';
 
 export function makeFtrConfigProvider(

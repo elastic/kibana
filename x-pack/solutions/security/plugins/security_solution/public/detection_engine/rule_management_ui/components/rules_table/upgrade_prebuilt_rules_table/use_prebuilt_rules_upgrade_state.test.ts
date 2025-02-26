@@ -6,14 +6,16 @@
  */
 
 import { FieldUpgradeStateEnum } from '../../../../rule_management/model/prebuilt_rule_upgrade';
-import type { RuleResponse } from '../../../../../../common/api/detection_engine';
-import { useAppToasts } from '../../../../../common/hooks/use_app_toasts';
 import {
-  type RuleUpgradeInfoForReview,
   ThreeWayDiffConflict,
   ThreeWayDiffOutcome,
   ThreeWayMergeOutcome,
 } from '../../../../../../common/api/detection_engine';
+import type {
+  RuleResponse,
+  RuleUpgradeInfoForReview,
+} from '../../../../../../common/api/detection_engine';
+import { useAppToasts } from '../../../../../common/hooks/use_app_toasts';
 import { act, renderHook } from '@testing-library/react';
 import { usePrebuiltRulesUpgradeState } from './use_prebuilt_rules_upgrade_state';
 import { TestProviders } from '../../../../../common/mock';

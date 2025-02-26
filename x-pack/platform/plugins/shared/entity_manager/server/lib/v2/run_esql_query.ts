@@ -6,9 +6,9 @@
  */
 
 import { withSpan } from '@kbn/apm-utils';
-import { ElasticsearchClient, Logger } from '@kbn/core/server';
-import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
-import { ESQLColumn, ESQLRow, ESQLSearchResponse } from '@kbn/es-types';
+import type { ElasticsearchClient, Logger } from '@kbn/core/server';
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
+import type { ESQLColumn, ESQLRow, ESQLSearchResponse } from '@kbn/es-types';
 
 export interface SourceAs<T> {
   _source: T;

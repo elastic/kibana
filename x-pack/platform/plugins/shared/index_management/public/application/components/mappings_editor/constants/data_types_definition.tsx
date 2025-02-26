@@ -11,7 +11,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiLink, EuiCode } from '@elastic/eui';
 
 import { documentationService } from '../../../services/documentation';
-import { MainType, SubType, DataType, DataTypeDefinition } from '../types';
+import type { MainType, SubType, DataType, DataTypeDefinition } from '../types';
 
 export const TYPE_DEFINITION: { [key in DataType]: DataTypeDefinition } = {
   text: {

@@ -6,7 +6,11 @@
  */
 
 import React, { useMemo, useCallback } from 'react';
-import { QueryObserverResult, RefetchOptions, RefetchQueryFilters } from '@tanstack/react-query';
+import type {
+  QueryObserverResult,
+  RefetchOptions,
+  RefetchQueryFilters,
+} from '@tanstack/react-query';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -17,13 +21,13 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { isEmpty } from 'lodash';
-import { DataStreamApis } from '../use_data_stream_apis';
-import { Conversation } from '../../..';
+import type { DataStreamApis } from '../use_data_stream_apis';
+import type { Conversation } from '../../..';
 import { AssistantTitle } from '../assistant_title';
 import { ConnectorSelectorInline } from '../../connectorland/connector_selector_inline/connector_selector_inline';
 import { FlyoutNavigation } from '../assistant_overlay/flyout_navigation';
 import { AssistantSettingsModal } from '../settings/assistant_settings_modal';
-import { AIConnector } from '../../connectorland/connector_selector';
+import type { AIConnector } from '../../connectorland/connector_selector';
 import { SettingsContextMenu } from '../settings/settings_context_menu/settings_context_menu';
 import * as i18n from './translations';
 

@@ -21,16 +21,17 @@ import {
   EuiBadge,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { ProcessorType, IngestStreamGetResponse } from '@kbn/streams-schema';
+import type { ProcessorType, IngestStreamGetResponse } from '@kbn/streams-schema';
 import { isEmpty, isEqual } from 'lodash';
 import React, { useEffect, useMemo, useState } from 'react';
-import { useForm, SubmitHandler, FormProvider, useWatch } from 'react-hook-form';
+import type { SubmitHandler } from 'react-hook-form';
+import { useForm, FormProvider, useWatch } from 'react-hook-form';
 import { css } from '@emotion/react';
 import { useBoolean } from '@kbn/react-hooks';
 import { DissectProcessorForm } from './dissect';
 import { GrokProcessorForm } from './grok';
 import { ProcessorTypeSelector } from './processor_type_selector';
-import { ProcessorFormState, ProcessorDefinitionWithUIAttributes } from '../types';
+import type { ProcessorFormState, ProcessorDefinitionWithUIAttributes } from '../types';
 import {
   getDefaultFormState,
   convertFormStateToProcessor,
@@ -38,9 +39,12 @@ import {
   isDissectProcessor,
 } from '../utils';
 import { useDiscardConfirm } from '../../../../hooks/use_discard_confirm';
-import { ProcessorMetrics, UseProcessingSimulatorReturn } from '../hooks/use_processing_simulator';
+import type {
+  ProcessorMetrics,
+  UseProcessingSimulatorReturn,
+} from '../hooks/use_processing_simulator';
 import { ProcessorErrors, ProcessorMetricBadges } from './processor_metrics';
-import { UseDefinitionReturn } from '../hooks/use_definition';
+import type { UseDefinitionReturn } from '../hooks/use_definition';
 
 export interface ProcessorPanelProps {
   definition: IngestStreamGetResponse;

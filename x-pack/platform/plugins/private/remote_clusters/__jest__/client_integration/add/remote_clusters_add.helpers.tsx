@@ -6,11 +6,12 @@
  */
 
 import { registerTestBed } from '@kbn/test-jest-helpers';
-import { HttpSetup } from '@kbn/core/public';
+import type { HttpSetup } from '@kbn/core/public';
 
 import { RemoteClusterAdd } from '../../../public/application/sections';
 import { createRemoteClustersStore } from '../../../public/application/store';
-import { AppRouter, registerRouter } from '../../../public/application/services';
+import type { AppRouter } from '../../../public/application/services';
+import { registerRouter } from '../../../public/application/services';
 import { createRemoteClustersActions, WithAppDependencies } from '../helpers';
 
 const testBedConfig = {

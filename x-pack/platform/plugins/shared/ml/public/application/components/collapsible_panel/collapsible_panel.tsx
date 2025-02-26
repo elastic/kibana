@@ -15,8 +15,7 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
-import type { PropsWithChildren } from 'react';
-import React, { type FC } from 'react';
+import React, { type PropsWithChildren, type FC } from 'react';
 import { i18n } from '@kbn/i18n';
 import { PanelHeaderItems } from './panel_header_items';
 

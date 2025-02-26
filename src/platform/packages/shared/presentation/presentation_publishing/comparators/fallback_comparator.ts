@@ -8,8 +8,8 @@
  */
 
 import { BehaviorSubject } from 'rxjs';
-import { PublishingSubject } from '../publishing_subject';
-import { ComparatorDefinition } from './types';
+import type { PublishingSubject } from '../publishing_subject';
+import type { ComparatorDefinition } from './types';
 
 /**
  * Comparators are required for every runtime state key. Occasionally, a comparator may

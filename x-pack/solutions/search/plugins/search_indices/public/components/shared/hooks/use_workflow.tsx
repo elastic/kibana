@@ -6,7 +6,8 @@
  */
 
 import { useEffect, useState } from 'react';
-import { WORKFLOW_LOCALSTORAGE_KEY, WorkflowId } from '@kbn/search-shared-ui';
+import type { WorkflowId } from '@kbn/search-shared-ui';
+import { WORKFLOW_LOCALSTORAGE_KEY } from '@kbn/search-shared-ui';
 import {
   DenseVectorIngestDataCodeExamples,
   SemanticIngestDataCodeExamples,

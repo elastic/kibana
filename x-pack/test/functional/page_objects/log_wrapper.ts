@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ToolingLog } from '@kbn/tooling-log';
+import type { ToolingLog } from '@kbn/tooling-log';
 
 function isPromise<T>(value: unknown): value is Promise<T> {
   return value instanceof Promise;

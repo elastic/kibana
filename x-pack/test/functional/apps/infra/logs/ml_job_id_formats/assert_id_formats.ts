@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { IdFormat } from '@kbn/infra-plugin/common/http_api/latest';
+import type { IdFormat } from '@kbn/infra-plugin/common/http_api/latest';
 
 const rateHashedPattern = /logs-[0-9a-fA-F]{32,}-log-entry-rate/;
 const rateLegacyPattern = /kibana-logs-ui-.*-.*-log-entry-rate/;

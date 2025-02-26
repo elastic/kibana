@@ -5,14 +5,11 @@
  * 2.0.
  */
 
-import { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
-import { IScopedClusterClient, Logger } from '@kbn/core/server';
-import { EntityV2 } from '@kbn/entities-schema';
-import {
-  ReadSourceDefinitionOptions,
-  readSourceDefinitions,
-  storeSourceDefinition,
-} from './definitions/source_definition';
+import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
+import type { IScopedClusterClient, Logger } from '@kbn/core/server';
+import type { EntityV2 } from '@kbn/entities-schema';
+import type { ReadSourceDefinitionOptions } from './definitions/source_definition';
+import { readSourceDefinitions, storeSourceDefinition } from './definitions/source_definition';
 import { readTypeDefinitions, storeTypeDefinition } from './definitions/type_definition';
 import { getEntityInstancesQuery, getEntityCountQuery } from './queries';
 import {
@@ -21,7 +18,7 @@ import {
   mergeEntitiesList,
   sortEntitiesList,
 } from './queries/utils';
-import {
+import type {
   EntitySourceDefinition,
   EntityTypeDefinition,
   SearchByType,

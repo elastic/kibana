@@ -17,11 +17,11 @@ import type {
 } from '../components/timeline/data_providers/data_provider';
 import { IS_OPERATOR, EXISTS_OPERATOR } from '../components/timeline/data_providers/data_provider';
 import {
-  type DataProviderType,
   DataProviderTypeEnum,
   TimelineStatusEnum,
   TimelineTypeEnum,
 } from '../../../common/api/timeline';
+import type { RowRendererId, TimelineType, DataProviderType } from '../../../common/api/timeline';
 import { TimelineId, TimelineTabs } from '../../../common/types/timeline';
 import type {
   ColumnHeaderOptions,
@@ -31,7 +31,6 @@ import type {
   SortColumnTimeline,
   SortColumnTimeline as Sort,
 } from '../../../common/types/timeline';
-import type { RowRendererId, TimelineType } from '../../../common/api/timeline';
 import { normalizeTimeRange } from '../../common/utils/normalize_time_range';
 import { getTimelineManageDefaults, timelineDefaults } from './defaults';
 import type { KqlMode, TimelineModel } from './model';

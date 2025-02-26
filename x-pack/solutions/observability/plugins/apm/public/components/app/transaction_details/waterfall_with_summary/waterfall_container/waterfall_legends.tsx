@@ -5,9 +5,7 @@
  * 2.0.
  */
 
-import { EuiFlexGroup } from '@elastic/eui';
-import { EuiFlexItem } from '@elastic/eui';
-import { EuiTitle } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { Legend } from '../../../../shared/charts/timeline/legend';

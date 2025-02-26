@@ -23,8 +23,8 @@ import type {
   ReportingSetupDeps,
   ReportingStart,
   ReportingStartDeps,
+  ReportingRequestHandlerContext,
 } from './types';
-import { ReportingRequestHandlerContext } from './types';
 import { registerReportingEventTypes, registerReportingUsageCollector } from './usage';
 import { registerFeatures } from './features';
 

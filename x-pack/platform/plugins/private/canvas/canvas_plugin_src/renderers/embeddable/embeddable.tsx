@@ -5,26 +5,21 @@
  * 2.0.
  */
 
-import { CoreStart } from '@kbn/core/public';
+import type { CoreStart } from '@kbn/core/public';
 import { ReactEmbeddableRenderer } from '@kbn/embeddable-plugin/public';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
-import React, { FC, useMemo } from 'react';
+import type { FC } from 'react';
+import React, { useMemo } from 'react';
 import ReactDOM from 'react-dom';
 import { omit } from 'lodash';
-import {
-  AggregateQuery,
-  COMPARE_ALL_OPTIONS,
-  Filter,
-  Query,
-  TimeRange,
-  onlyDisabledFiltersChanged,
-} from '@kbn/es-query';
+import type { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
+import { COMPARE_ALL_OPTIONS, onlyDisabledFiltersChanged } from '@kbn/es-query';
 import { BehaviorSubject } from 'rxjs';
 import { CANVAS_EMBEDDABLE_CLASSNAME } from '../../../common/lib';
 import { RendererStrings } from '../../../i18n';
-import { CanvasContainerApi, RendererFactory, RendererHandlers } from '../../../types';
-import { EmbeddableExpression } from '../../expression_types/embeddable';
-import { StartDeps } from '../../plugin';
+import type { CanvasContainerApi, RendererFactory, RendererHandlers } from '../../../types';
+import type { EmbeddableExpression } from '../../expression_types/embeddable';
+import type { StartDeps } from '../../plugin';
 import { embeddableInputToExpression } from './embeddable_input_to_expression';
 
 const { embeddable: strings } = RendererStrings;

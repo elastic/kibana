@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { useFormContext } from 'react-hook-form';
 import { useCreateDataView } from '../../../../../hooks/use_create_data_view';
-import { CreateSLOForm } from '../../../types';
+import type { CreateSLOForm } from '../../../types';
 import { DataPreviewChart } from '../../common/data_preview_chart';
 import { GroupByField } from '../../common/group_by_field';
 import { QueryBuilder } from '../../common/query_builder';

@@ -16,13 +16,12 @@ import { RESERVED_CONFIG_YML_KEYS } from '../../common/constants';
 import type { OutputSOAttributes } from '../types';
 import { OUTPUT_SAVED_OBJECT_TYPE } from '../constants';
 
-import { outputService, outputIdToUuid } from './output';
+import { outputService, outputIdToUuid, outputSavedObjectToOutput } from './output';
 import { appContextService } from './app_context';
 import { agentPolicyService } from './agent_policy';
 import { packagePolicyService } from './package_policy';
 import { auditLoggingService } from './audit_logging';
 import { findAgentlessPolicies } from './outputs/helpers';
-import { outputSavedObjectToOutput } from './output';
 
 jest.mock('./app_context');
 jest.mock('./agent_policy');

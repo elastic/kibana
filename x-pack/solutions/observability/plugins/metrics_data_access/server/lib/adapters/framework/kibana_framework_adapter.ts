@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import type { estypes } from '@elastic/elasticsearch';
-import type { TransportRequestParams } from '@elastic/elasticsearch';
-import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
+import type { estypes, TransportRequestParams } from '@elastic/elasticsearch';
 import type {
+  ElasticsearchClient,
+  SavedObjectsClientContract,
   CoreSetup,
   IRouter,
   RequestHandler,

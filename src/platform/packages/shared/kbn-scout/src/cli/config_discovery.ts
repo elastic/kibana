@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Command } from '@kbn/dev-cli-runner';
+import type { Command } from '@kbn/dev-cli-runner';
 import { getScoutPlaywrightConfigs, DEFAULT_TEST_PATH_PATTERNS } from '../config';
 import { measurePerformance } from '../common';
 

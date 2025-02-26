@@ -8,8 +8,11 @@ import { useCallback } from 'react';
 
 import { useAbortControllerRef } from '../../../../../../../hooks/use_abort_controller_ref';
 import { useHistoricalResultsContext } from '../../../../contexts/historical_results_context';
-import { FetchHistoricalResultsQueryState, UseHistoricalResultsFetchOpts } from '../../../types';
-import { FetchHistoricalResultsQueryAction } from '../../types';
+import type {
+  FetchHistoricalResultsQueryState,
+  UseHistoricalResultsFetchOpts,
+} from '../../../types';
+import type { FetchHistoricalResultsQueryAction } from '../../types';
 import { useIsMountedRef } from '../../../../../../../hooks/use_is_mounted_ref';
 
 export interface UseHistoricalResultsOutcomeFilterOpts {

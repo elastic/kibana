@@ -18,13 +18,13 @@ import type {
   PackagePolicy,
 } from '@kbn/fleet-plugin/common';
 import { errors } from '@elastic/elasticsearch';
-import { DataViewSavedObjectAttrs } from '@kbn/data-views-plugin/common';
+import type { DataViewSavedObjectAttrs } from '@kbn/data-views-plugin/common';
 import {
   INPUT_CONTROL,
   CLOUD_DEFEND_FLEET_PACKAGE_KUERY,
   INTEGRATION_PACKAGE_NAME,
+  POLICIES_PACKAGE_POLICY_PREFIX,
 } from '../../common/constants';
-import { POLICIES_PACKAGE_POLICY_PREFIX } from '../../common/constants';
 import type { PoliciesQueryParams } from '../../common';
 
 export const PACKAGE_POLICY_SAVED_OBJECT_TYPE = 'ingest-package-policies';

@@ -7,8 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { ComponentType } from 'react';
-import { AggParamEditorProps } from '../../agg_param_props';
+import type { ComponentType } from 'react';
+import React from 'react';
+import type { AggParamEditorProps } from '../../agg_param_props';
 
 export const wrapWithInlineComp =
   <T extends unknown>(WrapComponent: ComponentType<AggParamEditorProps<T>>) =>

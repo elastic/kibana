@@ -5,15 +5,16 @@
  * 2.0.
  */
 
-import { DiagnosticResult, errors } from '@elastic/elasticsearch';
-import {
+import type { DiagnosticResult } from '@elastic/elasticsearch';
+import { errors } from '@elastic/elasticsearch';
+import type {
   IndicesDataStream,
   QueryDslQueryContainer,
   Result,
 } from '@elastic/elasticsearch/lib/api/types';
 import type { IScopedClusterClient, Logger } from '@kbn/core/server';
 import { isResponseError } from '@kbn/es-errors';
-import {
+import type {
   Condition,
   GroupStreamDefinition,
   IngestStreamLifecycle,
@@ -21,6 +22,8 @@ import {
   StreamUpsertRequest,
   UnwiredStreamDefinition,
   WiredStreamDefinition,
+} from '@kbn/streams-schema';
+import {
   asIngestStreamDefinition,
   assertsSchema,
   getAncestors,
@@ -39,7 +42,7 @@ import {
   findInheritingStreams,
 } from '@kbn/streams-schema';
 import { cloneDeep, keyBy, omit, orderBy } from 'lodash';
-import { AssetClient } from './assets/asset_client';
+import type { AssetClient } from './assets/asset_client';
 import { ForbiddenMemberTypeError } from './errors/forbidden_member_type_error';
 import {
   syncUnwiredStreamDefinitionObjects,
@@ -53,7 +56,7 @@ import {
   validateStreamTypeChanges,
 } from './helpers/validate_stream';
 import { LOGS_ROOT_STREAM_NAME, rootStreamDefinition } from './root_stream_definition';
-import { StreamsStorageClient } from './service';
+import type { StreamsStorageClient } from './service';
 import {
   checkAccess,
   checkAccessBulk,

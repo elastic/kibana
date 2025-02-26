@@ -8,8 +8,9 @@
  */
 
 import { SOContentStorage } from './saved_object_content_storage';
-import { CMCrudTypes } from './types';
-import { loggerMock, MockedLogger } from '@kbn/logging-mocks';
+import type { CMCrudTypes } from './types';
+import type { MockedLogger } from '@kbn/logging-mocks';
+import { loggerMock } from '@kbn/logging-mocks';
 
 import { schema } from '@kbn/config-schema';
 import type {

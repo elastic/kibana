@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { FilterManager } from '@kbn/data-plugin/public';
-import { IndicatorsFiltersContextValue } from '../modules/indicators/hooks/use_filters_context';
+import type { FilterManager } from '@kbn/data-plugin/public';
+import type { IndicatorsFiltersContextValue } from '../modules/indicators/hooks/use_filters_context';
 
 export const mockTimeRange = { from: '2022-10-03T07:48:31.498Z', to: '2022-10-03T07:48:31.498Z' };
 

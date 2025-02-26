@@ -7,11 +7,11 @@
 
 import React, { useState } from 'react';
 
+import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import {
   EuiButton,
   EuiButtonEmpty,
   EuiComboBox,
-  EuiComboBoxOptionOption,
   EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
@@ -25,7 +25,7 @@ import {
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { SynonymsSynonymRule } from '@elastic/elasticsearch/lib/api/types';
+import type { SynonymsSynonymRule } from '@elastic/elasticsearch/lib/api/types';
 import {
   getExplicitSynonym,
   isExplicitSynonym,

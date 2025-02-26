@@ -22,14 +22,14 @@ import type {
   IndexedFleetAgentResponse,
 } from './index_fleet_agent';
 import { buildFleetAgentBulkCreateOperations, deleteIndexedFleetAgents } from './index_fleet_agent';
-import type {
-  DeleteIndexedEndpointFleetActionsResponse,
-  IndexedEndpointAndFleetActionsForHostResponse,
-} from './index_endpoint_fleet_actions';
 import {
   buildIEndpointAndFleetActionsBulkOperations,
   deleteIndexedEndpointAndFleetActions,
-  type IndexEndpointAndFleetActionsForHostOptions,
+} from './index_endpoint_fleet_actions';
+import type {
+  DeleteIndexedEndpointFleetActionsResponse,
+  IndexedEndpointAndFleetActionsForHostResponse,
+  IndexEndpointAndFleetActionsForHostOptions,
 } from './index_endpoint_fleet_actions';
 
 import type {

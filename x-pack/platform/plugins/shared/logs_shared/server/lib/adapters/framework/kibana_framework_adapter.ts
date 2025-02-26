@@ -5,16 +5,15 @@
  * 2.0.
  */
 
-import type { estypes } from '@elastic/elasticsearch';
-import { TransportRequestParams } from '@elastic/elasticsearch';
-import { CoreSetup, IRouter, RouteMethod } from '@kbn/core/server';
+import type { estypes, TransportRequestParams } from '@elastic/elasticsearch';
+import type { CoreSetup, IRouter, RouteMethod } from '@kbn/core/server';
 import { UI_SETTINGS } from '@kbn/data-plugin/server';
 import type {
   LogsSharedPluginRequestHandlerContext,
   LogsSharedServerPluginSetupDeps,
   LogsSharedServerPluginStartDeps,
 } from '../../../types';
-import {
+import type {
   CallWithRequestParams,
   LogsSharedDatabaseGetIndicesAliasResponse,
   LogsSharedDatabaseGetIndicesResponse,

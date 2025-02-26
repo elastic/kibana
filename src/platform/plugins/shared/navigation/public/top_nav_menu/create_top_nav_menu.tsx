@@ -9,10 +9,11 @@
 
 import React from 'react';
 import { I18nProvider } from '@kbn/i18n-react';
-import { AggregateQuery, Query } from '@kbn/es-query';
-import { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
-import { TopNavMenuProps, TopNavMenu } from './top_nav_menu';
-import { RegisteredTopNavMenuData } from './top_nav_menu_data';
+import type { AggregateQuery, Query } from '@kbn/es-query';
+import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
+import type { TopNavMenuProps } from './top_nav_menu';
+import { TopNavMenu } from './top_nav_menu';
+import type { RegisteredTopNavMenuData } from './top_nav_menu_data';
 
 export function createTopNav(
   unifiedSearch: UnifiedSearchPublicPluginStart,

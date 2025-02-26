@@ -9,7 +9,7 @@ import type { Theme } from '@elastic/charts';
 import type { RecursivePartial } from '@elastic/eui';
 import type { ReactElement } from 'react';
 import React, { useMemo } from 'react';
-import { EuiFlexItem, EuiPanel, EuiFlexGroup, EuiTitle } from '@elastic/eui';
+import { EuiFlexItem, EuiPanel, EuiFlexGroup, EuiTitle, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { BoolQuery } from '@kbn/es-query';
 import { getDurationFormatter } from '@kbn/observability-plugin/common';
@@ -21,7 +21,6 @@ import {
   AlertThresholdTimeRangeRect,
   AlertAnnotation,
 } from '@kbn/observability-alert-details';
-import { useEuiTheme } from '@elastic/eui';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { UI_SETTINGS } from '@kbn/data-plugin/public';
 import moment from 'moment';

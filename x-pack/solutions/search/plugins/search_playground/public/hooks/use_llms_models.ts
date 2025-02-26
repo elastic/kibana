@@ -8,9 +8,13 @@
 import { i18n } from '@kbn/i18n';
 import { useMemo } from 'react';
 import { SERVICE_PROVIDERS } from '@kbn/inference-endpoint-ui-common';
-import type { PlaygroundConnector, InferenceActionConnector, ActionConnector } from '../types';
+import type {
+  PlaygroundConnector,
+  InferenceActionConnector,
+  ActionConnector,
+  LLMModel,
+} from '../types';
 import { LLMs } from '../../common/types';
-import { LLMModel } from '../types';
 import { useLoadConnectors } from './use_load_connectors';
 import { MODELS } from '../../common/models';
 

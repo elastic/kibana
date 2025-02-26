@@ -8,7 +8,7 @@
 import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 import { findAttackDiscoveryByConnectorId } from './find_attack_discovery_by_connector_id';
-import { AuthenticatedUser } from '@kbn/core-security-common';
+import type { AuthenticatedUser } from '@kbn/core-security-common';
 import { getAttackDiscoverySearchEsMock } from '../../../../__mocks__/attack_discovery_schema.mock';
 
 const mockEsClient = elasticsearchServiceMock.createElasticsearchClient();

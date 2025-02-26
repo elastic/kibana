@@ -5,15 +5,15 @@
  * 2.0.
  */
 import type { Plugin as PluginClass } from '@kbn/core/public';
-import { PresentationUtilPluginStart } from '@kbn/presentation-util-plugin/public';
-import { CloudStart } from '@kbn/cloud-plugin/public';
-import { ServerlessPluginSetup, ServerlessPluginStart } from '@kbn/serverless/public';
-import {
+import type { PresentationUtilPluginStart } from '@kbn/presentation-util-plugin/public';
+import type { CloudStart } from '@kbn/cloud-plugin/public';
+import type { ServerlessPluginSetup, ServerlessPluginStart } from '@kbn/serverless/public';
+import type {
   ObservabilitySharedPluginSetup,
   ObservabilitySharedPluginStart,
 } from '@kbn/observability-shared-plugin/public';
-import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
-import { EntityManagerPublicPluginSetup } from '@kbn/entityManager-plugin/public/types';
+import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
+import type { EntityManagerPublicPluginSetup } from '@kbn/entityManager-plugin/public/types';
 
 export interface EntityManagerPluginSetup {
   observabilityShared: ObservabilitySharedPluginSetup;

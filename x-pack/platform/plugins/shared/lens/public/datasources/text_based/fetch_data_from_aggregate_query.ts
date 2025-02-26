@@ -4,12 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { pluck } from 'rxjs';
-import { lastValueFrom } from 'rxjs';
-import { Query, AggregateQuery, Filter } from '@kbn/es-query';
+import { pluck, lastValueFrom } from 'rxjs';
+import type { Query, AggregateQuery, Filter } from '@kbn/es-query';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
-import type { Datatable } from '@kbn/expressions-plugin/public';
+import type { ExpressionsStart, Datatable } from '@kbn/expressions-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { textBasedQueryStateToAstWithValidation } from '@kbn/data-plugin/common';
 

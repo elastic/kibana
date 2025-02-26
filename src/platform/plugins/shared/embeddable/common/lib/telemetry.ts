@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { SerializableRecord } from '@kbn/utility-types';
-import { CommonEmbeddableStartContract, EmbeddableStateWithType } from '../types';
+import type { SerializableRecord } from '@kbn/utility-types';
+import type { CommonEmbeddableStartContract, EmbeddableStateWithType } from '../types';
 import { telemetryBaseEmbeddableInput } from './migrate_base_input';
 
 export const getTelemetryFunction = (embeddables: CommonEmbeddableStartContract) => {

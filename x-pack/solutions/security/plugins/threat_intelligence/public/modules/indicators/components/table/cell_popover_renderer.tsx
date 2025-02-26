@@ -5,20 +5,16 @@
  * 2.0.
  */
 
-import {
-  EuiDataGridCellPopoverElementProps,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiPopoverTitle,
-} from '@elastic/eui';
+import type { EuiDataGridCellPopoverElementProps } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiPopoverTitle } from '@elastic/eui';
 import React from 'react';
 import { CopyToClipboardButtonEmpty } from '../common/copy_to_clipboard';
 import { FilterInButtonEmpty } from '../../../query_bar/components/filter_in';
 import { FilterOutButtonEmpty } from '../../../query_bar/components/filter_out';
 import { AddToTimelineButtonEmpty } from '../../../timeline/components/add_to_timeline';
 import { fieldAndValueValid, getIndicatorFieldAndValue } from '../../utils/field_value';
-import { Indicator } from '../../../../../common/types/indicator';
-import { Pagination } from '../../services/fetch_indicators';
+import type { Indicator } from '../../../../../common/types/indicator';
+import type { Pagination } from '../../services/fetch_indicators';
 import { useStyles } from './styles';
 import {
   CELL_POPOVER_FILTER_IN_BUTTON_TEST_ID,

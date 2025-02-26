@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { HttpSetup } from '@kbn/core/public';
+import type { HttpSetup } from '@kbn/core/public';
 import {
   BehaviorSubject,
   map,
@@ -29,7 +29,7 @@ import type {
 
 import { API_BASE_PATH } from '../../common';
 import type { PluginState, PluginStatus } from '../../common';
-import { GuidedOnboardingApi } from '../types';
+import type { GuidedOnboardingApi } from '../types';
 import {
   getInProgressStepId,
   getCompletedSteps,

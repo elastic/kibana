@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import type { SavedObjectsType } from '@kbn/core/server';
+import type { SavedObjectsType, SavedObjectMigrationFn } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
-import type { SavedObjectMigrationFn } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
 import { APM_SERVICE_GROUP_SAVED_OBJECT_TYPE } from '../../common/service_groups';
 

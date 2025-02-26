@@ -14,7 +14,8 @@ import { fireEvent, render, waitFor } from '@testing-library/react';
 import { take } from 'lodash';
 import { getOptionsListMocks } from '../../mocks/api_mocks';
 import { MAX_OPTIONS_LIST_REQUEST_SIZE, MIN_OPTIONS_LIST_REQUEST_SIZE } from '../constants';
-import { ContextStateManager, OptionsListControlContext } from '../options_list_context_provider';
+import type { ContextStateManager } from '../options_list_context_provider';
+import { OptionsListControlContext } from '../options_list_context_provider';
 import type { OptionsListComponentApi } from '../types';
 import { OptionsListPopoverSuggestions } from './options_list_popover_suggestions';
 

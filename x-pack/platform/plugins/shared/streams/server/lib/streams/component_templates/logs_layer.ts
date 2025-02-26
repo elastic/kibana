@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { IndicesIndexSettings } from '@elastic/elasticsearch/lib/api/types';
+import type { IndicesIndexSettings } from '@elastic/elasticsearch/lib/api/types';
 
 export const logsSettings: IndicesIndexSettings = {
   index: {

@@ -14,7 +14,7 @@ import type {
   SavedObjectsClientContract,
 } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
-import { LicensingApiRequestHandlerContext } from '@kbn/licensing-plugin/server';
+import type { LicensingApiRequestHandlerContext } from '@kbn/licensing-plugin/server';
 import type { InvestigateAppSetupDependencies, InvestigateAppStartDependencies } from '../types';
 
 export type InvestigateAppRequestHandlerContext = Omit<

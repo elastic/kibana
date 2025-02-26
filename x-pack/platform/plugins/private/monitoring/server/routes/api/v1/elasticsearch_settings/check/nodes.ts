@@ -8,7 +8,7 @@
 import { getElasticsearchSettingsNodesResponsePayloadRT } from '../../../../../../common/http_api/elasticsearch_settings';
 import { checkNodesSettings } from '../../../../../lib/elasticsearch_settings';
 import { handleSettingsError } from '../../../../../lib/errors';
-import { MonitoringCore } from '../../../../../types';
+import type { MonitoringCore } from '../../../../../types';
 
 /*
  * Cluster Settings Check Route

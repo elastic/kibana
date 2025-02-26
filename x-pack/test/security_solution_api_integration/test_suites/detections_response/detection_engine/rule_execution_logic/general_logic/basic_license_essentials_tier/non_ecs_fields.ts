@@ -17,7 +17,7 @@ import {
   deleteAllAlerts,
   getRuleForAlertTesting,
 } from '../../../../../../../common/utils/security_solution';
-import { FtrProviderContext } from '../../../../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../../../../ftr_provider_context';
 
 const getQueryRule = (docIdToQuery: string) => ({
   ...getRuleForAlertTesting(['ecs_non_compliant']),

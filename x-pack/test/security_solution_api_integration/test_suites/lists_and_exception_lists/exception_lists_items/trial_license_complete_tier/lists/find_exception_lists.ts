@@ -11,7 +11,7 @@ import { EXCEPTION_LIST_URL } from '@kbn/securitysolution-list-constants';
 import { getCreateExceptionListMinimalSchemaMock } from '@kbn/lists-plugin/common/schemas/request/create_exception_list_schema.mock';
 import { deleteAllExceptions } from '../../../utils';
 
-import { FtrProviderContext } from '../../../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../../../ftr_provider_context';
 
 export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');

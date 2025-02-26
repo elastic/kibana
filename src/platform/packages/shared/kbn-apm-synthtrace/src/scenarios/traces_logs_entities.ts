@@ -7,17 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import {
-  apm,
-  generateLongId,
-  generateShortId,
-  Instance,
-  log,
-  entities,
-  EntityFields,
-} from '@kbn/apm-synthtrace-client';
+import type { Instance, EntityFields } from '@kbn/apm-synthtrace-client';
+import { apm, generateLongId, generateShortId, log, entities } from '@kbn/apm-synthtrace-client';
 import { Readable } from 'stream';
-import { Scenario } from '../cli/scenario';
+import type { Scenario } from '../cli/scenario';
 import { getSynthtraceEnvironment } from '../lib/utils/get_synthtrace_environment';
 import { withClient } from '../lib/utils/with_client';
 import { parseLogsScenarioOpts } from './helpers/logs_scenario_opts_parser';

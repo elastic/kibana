@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { SLODefinitionResponse } from '@kbn/slo-schema';
-import { ComponentStory } from '@storybook/react';
+import type { SLODefinitionResponse } from '@kbn/slo-schema';
+import type { ComponentStory } from '@storybook/react';
 import React from 'react';
 import { KibanaReactStorybookDecorator } from '../../utils/kibana_react.storybook_decorator';
 import { SloSelector as Component } from './slo_selector';

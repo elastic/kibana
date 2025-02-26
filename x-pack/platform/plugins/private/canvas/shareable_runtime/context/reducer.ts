@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { CanvasShareableState } from '../types';
-import { CanvasShareableAction, CanvasShareableActions } from './actions';
+import type { CanvasShareableState } from '../types';
+import type { CanvasShareableAction } from './actions';
+import { CanvasShareableActions } from './actions';
 
 /**
  * The Action Reducer for the Shareable Canvas Workpad interface.

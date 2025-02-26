@@ -7,8 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { merge } from 'rxjs';
-import { debounceTime, filter, tap } from 'rxjs';
+import { merge, debounceTime, filter, tap } from 'rxjs';
 
 import type {
   AutoRefreshDoneFn,
@@ -16,8 +15,8 @@ import type {
   ISearchSource,
 } from '@kbn/data-plugin/public';
 import { FetchStatus } from '../../types';
-import { DataMain$, DataRefetch$ } from '../state_management/discover_data_state_container';
-import { DiscoverSearchSessionManager } from '../state_management/discover_search_session';
+import type { DataMain$, DataRefetch$ } from '../state_management/discover_data_state_container';
+import type { DiscoverSearchSessionManager } from '../state_management/discover_search_session';
 
 /**
  * This function returns an observable that's used to trigger data fetching

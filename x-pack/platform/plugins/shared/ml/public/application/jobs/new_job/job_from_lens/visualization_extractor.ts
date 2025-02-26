@@ -5,11 +5,10 @@
  * 2.0.
  */
 
-import type { LensPublicStart, ChartInfo } from '@kbn/lens-plugin/public';
+import type { LensPublicStart, ChartInfo, LensApi } from '@kbn/lens-plugin/public';
 import { layerTypes } from '@kbn/lens-plugin/public';
 import { i18n } from '@kbn/i18n';
 import type { ErrorType } from '@kbn/ml-error-utils';
-import type { LensApi } from '@kbn/lens-plugin/public';
 import { JOB_TYPE } from '../../../../../common/constants/new_job';
 import {
   getVisTypeFactory,

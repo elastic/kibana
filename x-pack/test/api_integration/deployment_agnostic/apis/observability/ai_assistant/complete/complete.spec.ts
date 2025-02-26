@@ -9,22 +9,22 @@ import { MessageRole, type Message } from '@kbn/observability-ai-assistant-plugi
 import { omit, pick } from 'lodash';
 import { PassThrough } from 'stream';
 import expect from '@kbn/expect';
-import {
+import type {
   ChatCompletionChunkEvent,
   ConversationCreateEvent,
   MessageAddEvent,
   StreamingChatResponseEvent,
-  StreamingChatResponseEventType,
 } from '@kbn/observability-ai-assistant-plugin/common/conversation_complete';
-import { ObservabilityAIAssistantScreenContextRequest } from '@kbn/observability-ai-assistant-plugin/common/types';
-import {
-  createLlmProxy,
+import { StreamingChatResponseEventType } from '@kbn/observability-ai-assistant-plugin/common/conversation_complete';
+import type { ObservabilityAIAssistantScreenContextRequest } from '@kbn/observability-ai-assistant-plugin/common/types';
+import type {
   LlmProxy,
   ToolMessage,
 } from '../../../../../../observability_ai_assistant_api_integration/common/create_llm_proxy';
+import { createLlmProxy } from '../../../../../../observability_ai_assistant_api_integration/common/create_llm_proxy';
 import { decodeEvents, getConversationCreatedEvent } from '../helpers';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provider_context';
-import { SupertestWithRoleScope } from '../../../../services/role_scoped_supertest';
+import type { SupertestWithRoleScope } from '../../../../services/role_scoped_supertest';
 import { clearConversations } from '../knowledge_base/helpers';
 
 export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderContext) {

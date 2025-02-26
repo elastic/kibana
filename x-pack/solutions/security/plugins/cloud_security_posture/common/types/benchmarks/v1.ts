@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { schema, TypeOf } from '@kbn/config-schema';
-import type { PackagePolicy } from '@kbn/fleet-plugin/common';
-import type { AgentPolicy } from '@kbn/fleet-plugin/common';
+import type { TypeOf } from '@kbn/config-schema';
+import { schema } from '@kbn/config-schema';
+import type { PackagePolicy, AgentPolicy } from '@kbn/fleet-plugin/common';
 
 export type AgentPolicyStatus = Pick<AgentPolicy, 'id' | 'name'> & { agents: number };
 

@@ -7,7 +7,7 @@
 import axios from 'axios';
 import { spawnSync } from 'child_process';
 import { run } from '@kbn/dev-cli-runner';
-import { ToolingLog } from '@kbn/tooling-log';
+import type { ToolingLog } from '@kbn/tooling-log';
 import { getServiceUrls } from '@kbn/observability-ai-assistant-app-plugin/scripts/evaluation/get_service_urls';
 import yargs from 'yargs';
 import fs from 'fs';

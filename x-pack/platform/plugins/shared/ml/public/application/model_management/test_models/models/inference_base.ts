@@ -6,11 +6,10 @@
  */
 
 import type { Observable } from 'rxjs';
-import { BehaviorSubject, combineLatest, Subscription } from 'rxjs';
+import { BehaviorSubject, combineLatest, Subscription, map } from 'rxjs';
 import type { estypes } from '@elastic/elasticsearch';
 import { i18n } from '@kbn/i18n';
 
-import { map } from 'rxjs';
 import type { SupportedPytorchTasksType } from '@kbn/ml-trained-models-utils';
 import { ES_FIELD_TYPES } from '@kbn/field-types';
 import type { MLHttpFetchError } from '@kbn/ml-error-utils';

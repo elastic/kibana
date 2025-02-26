@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { TimeRange } from '@kbn/es-query';
-import { TimeKey } from '@kbn/io-ts-utils';
+import type { TimeRange } from '@kbn/es-query';
+import type { TimeKey } from '@kbn/io-ts-utils';
 import createContainer from 'constate';
 import { useMemo } from 'react';
-import { ActorRefWithDeprecatedState } from 'xstate';
-import {
+import type { ActorRefWithDeprecatedState } from 'xstate';
+import type {
   MatchedStateFromActor,
   OmitDeprecatedState,
 } from '../../../observability_logs/xstate_helpers';

@@ -9,14 +9,14 @@ import React, { Fragment, useCallback, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiEmptyPrompt, EuiLink, EuiButton } from '@elastic/eui';
-import { ApplicationStart } from '@kbn/core/public';
+import type { ApplicationStart } from '@kbn/core/public';
 import { useHistory, useLocation } from 'react-router-dom';
 import { TableListView } from '@kbn/content-management-table-list-view';
 import type { UserContentCommonSchema } from '@kbn/content-management-table-list-view-common';
 import { deleteSavedWorkspace, findSavedWorkspace } from '../helpers/saved_workspace_utils';
 import { getEditPath, getEditUrl, getNewPath, setBreadcrumbs } from '../services/url';
-import { GraphWorkspaceSavedObject } from '../types';
-import { GraphServices } from '../application';
+import type { GraphWorkspaceSavedObject } from '../types';
+import type { GraphServices } from '../application';
 
 const SAVED_OBJECTS_LIMIT_SETTING = 'savedObjects:listingLimit';
 const SAVED_OBJECTS_PER_PAGE_SETTING = 'savedObjects:perPage';

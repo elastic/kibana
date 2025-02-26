@@ -18,7 +18,7 @@ import type {
   ESQLSource,
 } from '@kbn/esql-ast';
 import { mutate, synth } from '@kbn/esql-ast';
-import { FunctionDefinition } from '../definitions/types';
+import type { FunctionDefinition } from '../definitions/types';
 import { getAllArrayTypes, getAllArrayValues } from '../shared/helpers';
 import { getMessageFromId } from './errors';
 import type { ESQLPolicy, ReferenceMaps } from './types';

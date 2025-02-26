@@ -18,7 +18,7 @@ import {
   SAVE_BUTTON_LABEL,
 } from '../../constants';
 
-import { ItemWithAnID } from '../types';
+import type { ItemWithAnID } from '../types';
 
 import { InlineEditableTableLogic } from './inline_editable_table_logic';
 

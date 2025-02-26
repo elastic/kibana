@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import {
+import type {
   SavedObjectAttribute,
   SavedObjectAttributes,
   SavedObjectReference,
+  SavedObjectUnsanitizedDoc,
 } from '@kbn/core-saved-objects-server';
-import { SavedObjectUnsanitizedDoc } from '@kbn/core-saved-objects-server';
-import { EncryptedSavedObjectsPluginSetup } from '@kbn/encrypted-saved-objects-plugin/server';
+import type { EncryptedSavedObjectsPluginSetup } from '@kbn/encrypted-saved-objects-plugin/server';
 import { isString } from 'lodash/fp';
-import { RawRule } from '../../../types';
+import type { RawRule } from '../../../types';
 import { createEsoMigration, isSiemSignalsRuleType, pipeMigrations } from '../utils';
 
 /**

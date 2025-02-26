@@ -6,8 +6,7 @@
  */
 
 import { legacyExperimentalFieldMap } from '@kbn/alerts-as-data-utils';
-import type { AlertingServerSetup } from '@kbn/alerting-plugin/server';
-import { type IRuleTypeAlerts } from '@kbn/alerting-plugin/server';
+import type { AlertingServerSetup, IRuleTypeAlerts } from '@kbn/alerting-plugin/server';
 import { registerMetricThresholdRuleType } from './metric_threshold/register_metric_threshold_rule_type';
 import { registerInventoryThresholdRuleType } from './inventory_metric_threshold/register_inventory_metric_threshold_rule_type';
 import { registerLogThresholdRuleType } from './log_threshold/register_log_threshold_rule_type';

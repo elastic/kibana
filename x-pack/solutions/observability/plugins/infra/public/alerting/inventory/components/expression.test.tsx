@@ -8,8 +8,7 @@
 import { mountWithIntl, nextTick, shallowWithIntl } from '@kbn/test-jest-helpers';
 import React from 'react';
 import { act } from 'react-dom/test-utils';
-import type { DataView } from '@kbn/data-views-plugin/common';
-import { type FieldSpec } from '@kbn/data-views-plugin/common';
+import type { DataView, FieldSpec } from '@kbn/data-views-plugin/common';
 // We are using this inside a `jest.mock` call. Jest requires dynamic dependencies to be prefixed with `mock`
 import { coreMock as mockCoreMock } from '@kbn/core/public/mocks';
 import { COMPARATORS } from '@kbn/alerting-comparators';

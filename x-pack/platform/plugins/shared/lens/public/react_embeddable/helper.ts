@@ -9,16 +9,15 @@ import {
   apiHasParentApi,
   apiPublishesViewMode,
   getInheritedViewMode,
-  ViewMode,
-  type PublishingSubject,
   apiHasExecutionContext,
 } from '@kbn/presentation-publishing';
+import type { ViewMode, PublishingSubject } from '@kbn/presentation-publishing';
 import { isObject } from 'lodash';
 import { BehaviorSubject } from 'rxjs';
 import fastIsEqual from 'fast-deep-equal';
 import { isOfAggregateQueryType } from '@kbn/es-query';
-import { RenderMode } from '@kbn/expressions-plugin/common';
-import { SavedObjectReference } from '@kbn/core/types';
+import type { RenderMode } from '@kbn/expressions-plugin/common';
+import type { SavedObjectReference } from '@kbn/core/types';
 import type { LensEmbeddableStartServices, LensRuntimeState, LensSerializedState } from './types';
 import { loadESQLAttributes } from './esql';
 

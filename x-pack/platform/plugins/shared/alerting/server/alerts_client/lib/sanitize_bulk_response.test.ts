@@ -4,8 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { TransportResult } from '@elastic/elasticsearch';
-import type { estypes } from '@elastic/elasticsearch';
+import type { TransportResult, estypes } from '@elastic/elasticsearch';
 import { sanitizeBulkErrorResponse } from './sanitize_bulk_response';
 
 // Using https://www.elastic.co/guide/en/elasticsearch/reference/8.11/docs-bulk.html

@@ -5,8 +5,10 @@
  * 2.0.
  */
 
-import { AlertTagIds } from '@kbn/security-solution-plugin/common/api/detection_engine';
-import { SetAlertTagsRequestBodyInput } from '@kbn/security-solution-plugin/common/api/detection_engine';
+import type {
+  AlertTagIds,
+  SetAlertTagsRequestBodyInput,
+} from '@kbn/security-solution-plugin/common/api/detection_engine';
 
 export const setAlertTags = ({
   tagsToAdd,

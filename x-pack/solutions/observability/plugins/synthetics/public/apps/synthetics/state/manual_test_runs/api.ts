@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { ServiceLocationErrors, SyntheticsMonitor } from '../../../../../common/runtime_types';
-import { TestNowResponse } from '../../../../../common/types';
+import type { ServiceLocationErrors, SyntheticsMonitor } from '../../../../../common/runtime_types';
+import type { TestNowResponse } from '../../../../../common/types';
 import { apiService } from '../../../../utils/api_service';
 import { SYNTHETICS_API_URLS } from '../../../../../common/constants';
 

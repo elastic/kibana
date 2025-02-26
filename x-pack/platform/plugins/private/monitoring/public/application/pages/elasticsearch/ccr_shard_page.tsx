@@ -6,17 +6,16 @@
  */
 import React, { useContext, useState, useCallback, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-import { find } from 'lodash';
-import { get } from 'lodash';
+import { find, get } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { PageTemplate } from '../page_template';
 import { GlobalStateContext } from '../../contexts/global_state_context';
 import { CcrShard } from '../../../components/elasticsearch/ccr_shard';
-import { ComponentProps } from '../../route_init';
+import type { ComponentProps } from '../../route_init';
 import { SetupModeRenderer } from '../../../components/renderers/setup_mode';
 import { SetupModeContext } from '../../../components/setup_mode/setup_mode_context';
-import { AlertsByName } from '../../../alerts/types';
+import type { AlertsByName } from '../../../alerts/types';
 import { fetchAlerts } from '../../../lib/fetch_alerts';
 import { ELASTICSEARCH_SYSTEM_ID, RULE_CCR_READ_EXCEPTIONS } from '../../../../common/constants';
 import { useBreadcrumbContainerContext } from '../../hooks/use_breadcrumbs';

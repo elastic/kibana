@@ -8,12 +8,12 @@ import { coreMock } from '@kbn/core/server/mocks';
 import { inventoryTelemetryEventBasedTypes } from './telemetry_events';
 
 import { TelemetryService } from './telemetry_service';
-import type { EntityInventoryEntityTypeFilteredParams } from './types';
-import {
-  type EntityInventoryViewedParams,
-  type EntityViewClickedParams,
-  type EntityInventorySearchQuerySubmittedParams,
-  TelemetryEventTypes,
+import { TelemetryEventTypes } from './types';
+import type {
+  EntityInventoryEntityTypeFilteredParams,
+  EntityInventoryViewedParams,
+  EntityViewClickedParams,
+  EntityInventorySearchQuerySubmittedParams,
 } from './types';
 
 describe('TelemetryService', () => {

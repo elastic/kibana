@@ -17,7 +17,8 @@ import { useCanEditSynthetics } from '../../../../../hooks/use_capabilities';
 import { useMonitorSave } from '../hooks/use_monitor_save';
 import { NoPermissionsTooltip } from '../../common/components/permissions';
 import { DeleteMonitor } from '../../monitors_page/management/monitor_list_table/delete_monitor';
-import { ConfigKey, SourceType, SyntheticsMonitor } from '../types';
+import type { SyntheticsMonitor } from '../types';
+import { ConfigKey, SourceType } from '../types';
 import { format } from './formatter';
 
 import { MONITORS_ROUTE } from '../../../../../../common/constants';

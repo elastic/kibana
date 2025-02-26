@@ -5,8 +5,7 @@
  * 2.0.
  */
 import React from 'react';
-import type { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
-import type { ReactEmbeddableFactory } from '@kbn/embeddable-plugin/public';
+import type { DefaultEmbeddableApi, ReactEmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import { initializeTitleManager, useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 import { BehaviorSubject } from 'rxjs';
 import type { EmbeddableApmAlertingVizProps } from '../types';

@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
-import React, { type ChangeEvent, useCallback, useEffect, useMemo, useState } from 'react';
+import React, { type FC, type ChangeEvent, useCallback, useEffect, useMemo, useState } from 'react';
 import {
   EuiButton,
   EuiCallOut,

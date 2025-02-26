@@ -5,10 +5,9 @@
  * 2.0.
  */
 
-import { EuiPanel, EuiTitle } from '@elastic/eui';
+import { EuiPanel, EuiTitle, EuiFlexGroup, EuiFlexItem, EuiIconTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiIconTip } from '@elastic/eui';
 import { usePreviousPeriodLabel } from '../../../../hooks/use_previous_period_text';
 import { isTimeComparison } from '../../time_comparison/get_comparison_options';
 import type { APIReturnType } from '../../../../services/rest/create_call_apm_api';

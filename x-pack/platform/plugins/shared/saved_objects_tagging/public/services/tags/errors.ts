@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { TagValidation } from '../../../common/validation';
+import type { TagValidation } from '../../../common/validation';
 
 /**
  * Error returned from the server when attributes validation fails for `create` or `update` operations

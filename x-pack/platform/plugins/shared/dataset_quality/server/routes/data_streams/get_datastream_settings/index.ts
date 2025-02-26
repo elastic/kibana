@@ -7,7 +7,7 @@
 
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { datasetQualityPrivileges, dataStreamService } from '../../../services';
-import { DataStreamSettings } from '../../../../common/api_types';
+import type { DataStreamSettings } from '../../../../common/api_types';
 import { getDataStreamCreatedOn } from './get_datastream_created_on';
 
 export async function getDataStreamSettings({

@@ -36,7 +36,7 @@ import type {
   SearchItemSuccess,
   SearchItemError,
 } from './event_types';
-import { ContentStorage, ContentTypeDefinition, StorageContext } from './types';
+import type { ContentStorage, ContentTypeDefinition, StorageContext } from './types';
 
 const spyMsearch = jest.fn();
 const getmSearchSpy = () => spyMsearch;

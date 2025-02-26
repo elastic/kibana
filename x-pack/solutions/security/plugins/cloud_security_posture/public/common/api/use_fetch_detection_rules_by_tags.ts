@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { CoreStart, HttpSetup } from '@kbn/core/public';
+import type { CoreStart, HttpSetup } from '@kbn/core/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useQuery } from '@tanstack/react-query';
 import { DETECTION_RULE_RULES_API_CURRENT_VERSION } from '../../../common/constants';
-import { RuleResponse } from '../types';
+import type { RuleResponse } from '../types';
 import { DETECTION_ENGINE_RULES_KEY } from '../constants';
 import {
   convertRuleTagsToMatchAllKQL,

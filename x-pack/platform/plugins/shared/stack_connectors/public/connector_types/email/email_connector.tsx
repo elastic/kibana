@@ -7,17 +7,16 @@
 
 import React, { lazy, useEffect, useMemo } from 'react';
 import { isEmpty } from 'lodash';
-import { EuiFlexItem, EuiFlexGroup, EuiTitle, EuiSpacer } from '@elastic/eui';
+import { EuiFlexItem, EuiFlexGroup, EuiTitle, EuiSpacer, EuiLink } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiLink } from '@elastic/eui';
 import { InvalidEmailReason } from '@kbn/actions-plugin/common';
 import { fieldValidators } from '@kbn/es-ui-shared-plugin/static/forms/helpers';
-import { ActionsPublicPluginSetup } from '@kbn/actions-plugin/public';
+import type { ActionsPublicPluginSetup } from '@kbn/actions-plugin/public';
+import type { FieldConfig } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import {
   UseField,
   useFormContext,
   useFormData,
-  FieldConfig,
 } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import {
   NumericField,

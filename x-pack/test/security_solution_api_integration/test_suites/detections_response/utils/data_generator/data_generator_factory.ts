@@ -6,11 +6,12 @@
  */
 
 import type { Client } from '@elastic/elasticsearch';
-import { ToolingLog } from '@kbn/tooling-log';
+import type { ToolingLog } from '@kbn/tooling-log';
 import type { BulkResponse } from '@elastic/elasticsearch/lib/api/types';
 import { indexDocuments } from './index_documents';
 import { generateDocuments } from './generate_documents';
-import { enhanceDocuments, EnhanceDocumentsOptions } from './enhance_documents';
+import type { EnhanceDocumentsOptions } from './enhance_documents';
+import { enhanceDocuments } from './enhance_documents';
 import type { GenerateDocumentsParams } from './generate_documents';
 import type { Document } from './types';
 

@@ -14,7 +14,7 @@ import {
   TIMELINES_FAVORITE,
 } from '../../../screens/timelines';
 import { addNoteToTimeline } from '../../../tasks/api_calls/notes';
-import { createTimeline } from '../../../tasks/api_calls/timelines';
+import { createTimeline, deleteTimelines } from '../../../tasks/api_calls/timelines';
 import { login } from '../../../tasks/login';
 import { visit } from '../../../tasks/navigation';
 import {
@@ -25,7 +25,6 @@ import {
   refreshTimelinesUntilTimeLinePresent,
 } from '../../../tasks/timeline';
 import { TIMELINES_URL } from '../../../urls/navigation';
-import { deleteTimelines } from '../../../tasks/api_calls/timelines';
 
 const mockTimeline = getTimeline();
 

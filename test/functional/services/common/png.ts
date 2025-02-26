@@ -7,12 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { dirname } from 'path';
+import path, { dirname } from 'path';
 import { promisify } from 'util';
 import { promises as fs, writeFile, readFileSync, mkdir } from 'fs';
-import path from 'path';
-import { comparePngs, PngDescriptor } from '../lib/compare_pngs';
-import { FtrProviderContext, FtrService } from '../../ftr_provider_context';
+import type { PngDescriptor } from '../lib/compare_pngs';
+import { comparePngs } from '../lib/compare_pngs';
+import type { FtrProviderContext } from '../../ftr_provider_context';
+import { FtrService } from '../../ftr_provider_context';
 
 const mkdirAsync = promisify(mkdir);
 const writeFileAsync = promisify(writeFile);

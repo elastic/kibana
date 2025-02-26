@@ -4,10 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { isEmpty } from 'lodash';
+import { debounce, isEmpty } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import React, { useMemo, useState } from 'react';
-import { debounce } from 'lodash';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import { EuiComboBox } from '@elastic/eui';
 import {

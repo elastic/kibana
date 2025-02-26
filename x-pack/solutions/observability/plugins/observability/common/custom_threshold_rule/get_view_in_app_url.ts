@@ -10,9 +10,11 @@ import { getPaddedAlertTimeRange } from '@kbn/observability-get-padded-alert-tim
 import type { LocatorPublic } from '@kbn/share-plugin/common';
 import type { DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
 import { getGroupFilters } from './helpers/get_group';
-import { SearchConfigurationWithExtractedReferenceType } from './types';
-import type { CustomThresholdExpressionMetric } from './types';
-import { Group } from '../typings';
+import type {
+  SearchConfigurationWithExtractedReferenceType,
+  CustomThresholdExpressionMetric,
+} from './types';
+import type { Group } from '../typings';
 
 export interface GetViewInAppUrlArgs {
   searchConfiguration?: SearchConfigurationWithExtractedReferenceType;

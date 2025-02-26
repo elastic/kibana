@@ -6,7 +6,7 @@
  */
 
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import { AlertingAuthorizationClientFactory } from './alerting_authorization_client_factory';
+import type { AlertingAuthorizationClientFactory } from './alerting_authorization_client_factory';
 
 const creatAlertingAuthorizationClientFactoryMock = () => {
   const mocked: jest.Mocked<PublicMethodsOf<AlertingAuthorizationClientFactory>> = {

@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { RoleCredentials } from '@kbn/ftr-common-functional-services';
-import { CreateSLOInput, FindSLODefinitionsResponse, UpdateSLOInput } from '@kbn/slo-schema';
-import { DeploymentAgnosticFtrProviderContext } from '../ftr_provider_context';
+import type { RoleCredentials } from '@kbn/ftr-common-functional-services';
+import type { CreateSLOInput, FindSLODefinitionsResponse, UpdateSLOInput } from '@kbn/slo-schema';
+import type { DeploymentAgnosticFtrProviderContext } from '../ftr_provider_context';
 
 export function SloApiProvider({ getService }: DeploymentAgnosticFtrProviderContext) {
   const supertestWithoutAuth = getService('supertestWithoutAuth');

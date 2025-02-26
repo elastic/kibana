@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { FunctionComponent } from 'react';
+import type { FunctionComponent } from 'react';
+import React from 'react';
 
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { coreMock } from '@kbn/core/public/mocks';

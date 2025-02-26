@@ -7,8 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { defer, Subject } from 'rxjs';
-import { finalize, map, delayWhen, filter } from 'rxjs';
+import { defer, Subject, finalize, map, delayWhen, filter } from 'rxjs';
 import { once } from 'lodash';
 import { createPageVisibility$ } from './page_visibility';
 

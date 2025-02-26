@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { Role } from '@kbn/security-plugin/common';
+import type { Role } from '@kbn/security-plugin/common';
+import type { EndpointSecurityRoleNames } from '@kbn/security-solution-plugin/scripts/endpoint/common/roles_users';
 import {
-  EndpointSecurityRoleNames,
   ENDPOINT_SECURITY_ROLE_NAMES,
   getAllEndpointSecurityRoles,
 } from '@kbn/security-solution-plugin/scripts/endpoint/common/roles_users';
 
 import { EndpointSecurityTestRolesLoader } from '@kbn/security-solution-plugin/scripts/endpoint/common/role_and_user_loader';
-import { FtrProviderContext } from '../../ftr_provider_context_edr_workflows';
+import type { FtrProviderContext } from '../../ftr_provider_context_edr_workflows';
 
 export const ROLE = ENDPOINT_SECURITY_ROLE_NAMES;
 

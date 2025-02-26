@@ -52,9 +52,9 @@ import {
   sendGetAgentStatus,
   useAgentVersion,
   sendGetAllFleetServerAgents,
+  sendGetAgentsAvailableVersions,
 } from '../../../../hooks';
 
-import { sendGetAgentsAvailableVersions } from '../../../../hooks';
 import {
   differsOnlyInPatch,
   getNotUpgradeableMessage,

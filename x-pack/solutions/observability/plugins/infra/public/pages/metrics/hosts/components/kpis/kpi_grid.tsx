@@ -5,8 +5,7 @@
  * 2.0.
  */
 import React from 'react';
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { EuiSpacer } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 
 import { HostMetricsDocsLink } from '../../../../../components/lens';
 import { KpiCharts } from './kpi_charts';

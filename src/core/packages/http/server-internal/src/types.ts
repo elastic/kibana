@@ -17,9 +17,9 @@ import type {
   HttpServiceSetup,
   HttpServiceStart,
   RouterDeprecatedApiDetails,
+  PostValidationMetadata,
 } from '@kbn/core-http-server';
 import type { CoreKibanaRequest } from '@kbn/core-http-router-server-internal';
-import type { PostValidationMetadata } from '@kbn/core-http-server';
 import type { HttpServerSetup } from './http_server';
 import type { ExternalUrlConfig } from './external_url';
 import type { InternalStaticAssets } from './static_assets';

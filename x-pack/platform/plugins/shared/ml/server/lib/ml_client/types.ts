@@ -8,8 +8,8 @@
 import type {
   TransportRequestOptionsWithMeta,
   TransportRequestOptions,
+  estypes,
 } from '@elastic/elasticsearch';
-import type { estypes } from '@elastic/elasticsearch';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { searchProvider } from './search';
 

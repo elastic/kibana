@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import {
+import type {
   TransportRequestOptions,
   TransportResult,
   TransportRequestOptionsWithMeta,
@@ -18,14 +18,12 @@ import type {
   AggregateName,
   EqlSearchRequest,
   EqlSearchResponse,
-} from '@elastic/elasticsearch/lib/api/types';
-import type {
   SearchRequest as SearchRequestWithBody,
   AggregationsAggregate,
   EqlSearchRequest as EqlSearchRequestWithBody,
 } from '@elastic/elasticsearch/lib/api/types';
 import type { IScopedClusterClient, ElasticsearchClient, Logger } from '@kbn/core/server';
-import { SearchMetrics, RuleInfo } from './types';
+import type { SearchMetrics, RuleInfo } from './types';
 
 interface WrapScopedClusterClientFactoryOpts {
   scopedClusterClient: IScopedClusterClient;

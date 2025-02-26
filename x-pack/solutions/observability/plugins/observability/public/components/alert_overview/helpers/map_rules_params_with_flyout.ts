@@ -18,7 +18,7 @@ import {
   SLO_BURN_RATE_RULE_TYPE_ID,
   METRIC_THRESHOLD_ALERT_TYPE_ID,
 } from '@kbn/rule-data-utils';
-import { EsQueryRuleParams } from '@kbn/stack-alerts-plugin/public/rule_types/es_query/types';
+import type { EsQueryRuleParams } from '@kbn/stack-alerts-plugin/public/rule_types/es_query/types';
 import { i18n } from '@kbn/i18n';
 import { COMPARATORS } from '@kbn/alerting-comparators';
 
@@ -32,11 +32,11 @@ import { asDuration, asPercent, convertToBuiltInComparators } from '../../../../
 import { createFormatter } from '../../../../common/custom_threshold_rule/formatters';
 import { metricValueFormatter } from '../../../../common/custom_threshold_rule/metric_value_formatter';
 import { METRIC_FORMATTERS } from '../../../../common/custom_threshold_rule/formatters/snapshot_metric_formats';
-import {
+import type {
   BaseMetricExpressionParams,
   CustomMetricExpressionParams,
 } from '../../../../common/custom_threshold_rule/types';
-import { TopAlert } from '../../../typings/alerts';
+import type { TopAlert } from '../../../typings/alerts';
 import { isFieldsSameType } from './is_fields_same_type';
 export interface FlyoutThresholdData {
   observedValue: string;

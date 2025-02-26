@@ -17,8 +17,8 @@ import {
   ALERT_RULE_EXECUTION_TYPE,
 } from '@kbn/rule-data-utils';
 
-import { ThresholdRuleCreateProps } from '@kbn/security-solution-plugin/common/api/detection_engine';
-import { Ancestor } from '@kbn/security-solution-plugin/server/lib/detection_engine/rule_types/types';
+import type { ThresholdRuleCreateProps } from '@kbn/security-solution-plugin/common/api/detection_engine';
+import type { Ancestor } from '@kbn/security-solution-plugin/server/lib/detection_engine/rule_types/types';
 
 import {
   ALERT_ANCESTORS,
@@ -42,7 +42,7 @@ import {
   stopAllManualRuns,
   waitForBackfillExecuted,
 } from '../../../../utils';
-import { FtrProviderContext } from '../../../../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../../../../ftr_provider_context';
 import { EsArchivePathBuilder } from '../../../../../../es_archive_path_builder';
 
 export default ({ getService }: FtrProviderContext) => {

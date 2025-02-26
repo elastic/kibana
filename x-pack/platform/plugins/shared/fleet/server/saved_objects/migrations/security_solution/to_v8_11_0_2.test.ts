@@ -11,8 +11,10 @@ import type { SavedObjectModelTransformationContext } from '@kbn/core-saved-obje
 
 import type { PackagePolicy } from '../../../../common';
 
-import { migratePackagePolicyToV81102 as migration } from './to_v8_11_0_2';
-import { migratePackagePolicyEvictionsFromV81102 as eviction } from './to_v8_11_0_2';
+import {
+  migratePackagePolicyToV81102 as migration,
+  migratePackagePolicyEvictionsFromV81102 as eviction,
+} from './to_v8_11_0_2';
 
 describe('8.11.0-2 Endpoint Package Policy migration', () => {
   const policyDoc = ({ meta = {} }) => {

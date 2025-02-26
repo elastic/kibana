@@ -10,7 +10,7 @@ import { render, fireEvent } from '@testing-library/react';
 
 import { Toolbar } from '.';
 import * as i18n from '../translations';
-import { ContextEditorRow } from '../types';
+import type { ContextEditorRow } from '../types';
 
 const selected: ContextEditorRow[] = [
   {

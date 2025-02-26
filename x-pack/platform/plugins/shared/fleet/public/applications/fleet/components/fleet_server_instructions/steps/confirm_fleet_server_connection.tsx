@@ -8,8 +8,7 @@
 import React from 'react';
 
 import type { EuiStepProps } from '@elastic/eui';
-import { EuiButton, EuiLoadingSpinner, EuiSpacer } from '@elastic/eui';
-import { EuiText } from '@elastic/eui';
+import { EuiButton, EuiLoadingSpinner, EuiSpacer, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 

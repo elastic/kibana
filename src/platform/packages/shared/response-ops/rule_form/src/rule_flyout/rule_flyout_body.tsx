@@ -28,7 +28,7 @@ import { hasRuleErrors } from '../validation';
 import { RuleFlyoutCreateFooter } from './rule_flyout_create_footer';
 import { RuleFlyoutEditFooter } from './rule_flyout_edit_footer';
 import { RuleFlyoutEditTabs } from './rule_flyout_edit_tabs';
-import { RuleFormStepId } from '../constants';
+import type { RuleFormStepId } from '../constants';
 
 interface RuleFlyoutBodyProps {
   isEdit?: boolean;

@@ -7,8 +7,7 @@
 
 import type { FileUploadStartApi } from '@kbn/file-upload-plugin/public/api';
 
-import type { Subscription } from 'rxjs';
-import type { Observable } from 'rxjs';
+import type { Subscription, Observable } from 'rxjs';
 import { switchMap, combineLatest, BehaviorSubject, of } from 'rxjs';
 import type { HttpSetup } from '@kbn/core/public';
 import type { IImporter } from '@kbn/file-upload-plugin/public/importer/types';

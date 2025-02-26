@@ -10,7 +10,7 @@
 import React from 'react';
 import { render } from '@testing-library/react';
 import { FieldDescription } from './description';
-import { FieldDefinition } from '@kbn/management-settings-types';
+import type { FieldDefinition } from '@kbn/management-settings-types';
 import { wrap } from '../mocks';
 
 const description = 'hello world description';

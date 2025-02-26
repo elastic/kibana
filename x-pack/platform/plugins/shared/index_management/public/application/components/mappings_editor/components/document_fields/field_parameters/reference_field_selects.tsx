@@ -10,7 +10,7 @@ import React from 'react';
 import { getFieldConfig } from '../../../lib';
 import { useMappingsState } from '../../../mappings_state_context';
 import { SuperSelectField, UseField } from '../../../shared_imports';
-import { SuperSelectOption } from '../../../types';
+import type { SuperSelectOption } from '../../../types';
 
 export const ReferenceFieldSelects = () => {
   const { fields, mappingViewFields } = useMappingsState();

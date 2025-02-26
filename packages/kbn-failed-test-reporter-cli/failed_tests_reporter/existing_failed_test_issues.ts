@@ -11,10 +11,10 @@ import { setTimeout } from 'timers/promises';
 
 import Axios from 'axios';
 import { isAxiosRequestError, isAxiosResponseError } from '@kbn/dev-utils';
-import { ToolingLog } from '@kbn/tooling-log';
+import type { ToolingLog } from '@kbn/tooling-log';
 
-import { GithubIssueMini } from './github_api';
-import { TestFailure } from './get_failures';
+import type { GithubIssueMini } from './github_api';
+import type { TestFailure } from './get_failures';
 
 export interface FailedTestIssue {
   classname: string;

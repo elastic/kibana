@@ -8,7 +8,7 @@
  */
 
 import React from 'react';
-import { Meta } from '@storybook/react';
+import type { Meta } from '@storybook/react';
 
 import { ReplacementCard as ConnectedComponent } from './replacement_card';
 import { ReplacementCard as PureComponent } from './replacement_card.component';

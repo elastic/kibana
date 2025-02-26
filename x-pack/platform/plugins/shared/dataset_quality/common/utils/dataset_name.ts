@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { DataStreamType } from '../types';
+import type { DataStreamType } from '../types';
 
 export interface DataStreamNameParts {
   type: DataStreamType;

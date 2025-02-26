@@ -5,11 +5,9 @@
  * 2.0.
  */
 
-import {
-  GetInvestigationNotesResponse,
-  getInvestigationNotesResponseSchema,
-} from '@kbn/investigation-shared';
-import { InvestigationRepository } from './investigation_repository';
+import type { GetInvestigationNotesResponse } from '@kbn/investigation-shared';
+import { getInvestigationNotesResponseSchema } from '@kbn/investigation-shared';
+import type { InvestigationRepository } from './investigation_repository';
 
 export async function getInvestigationNotes(
   investigationId: string,

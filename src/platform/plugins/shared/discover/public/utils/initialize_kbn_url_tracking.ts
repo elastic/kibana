@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { AppUpdater, CoreSetup, ScopedHistory } from '@kbn/core/public';
+import type { AppUpdater, CoreSetup, ScopedHistory } from '@kbn/core/public';
 import type { BehaviorSubject } from 'rxjs';
 import { filter, map } from 'rxjs';
 import { createKbnUrlTracker } from '@kbn/kibana-utils-plugin/public';

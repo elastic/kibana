@@ -15,9 +15,11 @@ import apm from 'elastic-apm-node';
 import { v4 as uuidv4 } from 'uuid';
 import { withSpan } from '@kbn/apm-utils';
 import { flow, identity, omit } from 'lodash';
-import { ExecutionContextStart, Logger, SavedObjectsErrorHelpers } from '@kbn/core/server';
-import { UsageCounter } from '@kbn/usage-collection-plugin/server';
-import { Middleware } from '../lib/middleware';
+import type { ExecutionContextStart, Logger } from '@kbn/core/server';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
+import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
+import type { Middleware } from '../lib/middleware';
+import type { Result } from '../lib/result_type';
 import {
   asErr,
   asOk,
@@ -26,35 +28,30 @@ import {
   mapErr,
   mapOk,
   promiseResult,
-  Result,
   unwrap,
 } from '../lib/result_type';
+import type { TaskMarkRunning, TaskRun, TaskTiming, TaskManagerStat } from '../task_events';
 import {
   asTaskMarkRunningEvent,
   asTaskRunEvent,
   asTaskManagerStatEvent,
   startTaskTimerWithEventLoopMonitoring,
-  TaskMarkRunning,
   TaskPersistence,
-  TaskRun,
-  TaskTiming,
-  TaskManagerStat,
 } from '../task_events';
 import { intervalFromDate } from '../lib/intervals';
 import { createWrappedLogger } from '../lib/wrapped_logger';
-import {
+import type {
   CancelFunction,
   CancellableTask,
   ConcreteTaskInstance,
   FailedRunResult,
   FailedTaskResult,
-  isFailedRunResult,
   PartialConcreteTaskInstance,
   SuccessfulRunResult,
   TaskDefinition,
-  TaskStatus,
 } from '../task';
-import { TaskTypeDictionary } from '../task_type_dictionary';
+import { isFailedRunResult, TaskStatus } from '../task';
+import type { TaskTypeDictionary } from '../task_type_dictionary';
 import { isUnrecoverableError, isUserError } from './errors';
 import { CLAIM_STRATEGY_MGET, type TaskManagerConfig } from '../config';
 import { TaskValidator } from '../task_validator';

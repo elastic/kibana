@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { DATE_CATEGORY_LABELS } from '../i18n';
 import { ConversationList } from './conversation_list';
-import { UseConversationListResult } from '../hooks/use_conversation_list';
+import type { UseConversationListResult } from '../hooks/use_conversation_list';
 import { useConversationsByDate } from '../hooks/use_conversations_by_date';
 
 jest.mock('../hooks/use_conversations_by_date', () => ({

@@ -10,16 +10,14 @@
 import { i18n } from '@kbn/i18n';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import { castEsToKbnFieldTypeName } from '@kbn/field-types';
-import { FieldFormatsStartCommon, FORMATS_UI_SETTINGS } from '@kbn/field-formats-plugin/common';
+import type { FieldFormatsStartCommon } from '@kbn/field-formats-plugin/common';
+import { FORMATS_UI_SETTINGS } from '@kbn/field-formats-plugin/common';
 import { v4 as uuidv4 } from 'uuid';
-import { PersistenceAPI } from '../types';
-import { DataViewLazy } from './data_view_lazy';
-import { DEFAULT_DATA_VIEW_ID } from '../constants';
-import { AbstractDataView } from './abstract_data_views';
-
-import type { RuntimeField, RuntimeFieldSpec, RuntimeType } from '../types';
-import { DataView } from './data_view';
-import {
+import type {
+  PersistenceAPI,
+  RuntimeField,
+  RuntimeFieldSpec,
+  RuntimeType,
   OnNotification,
   OnError,
   UiSettingsCommon,
@@ -33,8 +31,14 @@ import {
   DataViewFieldMap,
   TypeMeta,
 } from '../types';
+import { DataViewLazy } from './data_view_lazy';
+import { DEFAULT_DATA_VIEW_ID } from '../constants';
+import type { AbstractDataView } from './abstract_data_views';
 
-import { META_FIELDS, SavedObject } from '..';
+import { DataView } from './data_view';
+
+import type { SavedObject } from '..';
+import { META_FIELDS } from '..';
 import { DataViewMissingIndices } from '../lib';
 import { findByName } from '../utils';
 import { DuplicateDataViewError, DataViewInsufficientAccessError } from '../errors';

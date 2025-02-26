@@ -19,8 +19,8 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { VisEditorOptionsProps } from '@kbn/visualizations-plugin/public';
-import { MarkdownVisParams } from './types';
+import type { VisEditorOptionsProps } from '@kbn/visualizations-plugin/public';
+import type { MarkdownVisParams } from './types';
 
 function MarkdownOptions({ stateParams, setValue }: VisEditorOptionsProps<MarkdownVisParams>) {
   const onMarkdownUpdate = useCallback(

@@ -10,12 +10,10 @@
 import { css } from '@emotion/react';
 import React from 'react';
 
-import { EuiButton, EuiEmptyPrompt, EuiPanel } from '@elastic/eui';
+import { EuiButton, EuiEmptyPrompt, EuiPanel, EuiLink, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { withSuspense } from '@kbn/shared-ux-utility';
-
-import { EuiLink, EuiTitle } from '@elastic/eui';
 
 interface DocumentationLinkProps {
   href: string;

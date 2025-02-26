@@ -10,14 +10,8 @@ import React, { useState } from 'react';
 import { SetupTechnology } from '@kbn/fleet-plugin/public';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import {
-  EuiSpacer,
-  useGeneratedHtmlId,
-  EuiRadioGroup,
-  EuiTitle,
-  EuiRadioGroupOption,
-  EuiText,
-} from '@elastic/eui';
+import type { EuiRadioGroupOption } from '@elastic/eui';
+import { EuiSpacer, useGeneratedHtmlId, EuiRadioGroup, EuiTitle, EuiText } from '@elastic/eui';
 import { SETUP_TECHNOLOGY_SELECTOR_TEST_SUBJ } from '../../test_subjects';
 
 export const SetupTechnologySelector = ({

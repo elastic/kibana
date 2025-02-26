@@ -6,7 +6,7 @@
  */
 import React from 'react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import { InvestigateAppKibanaContext } from '../../hooks/use_kibana';
+import type { InvestigateAppKibanaContext } from '../../hooks/use_kibana';
 
 export function InvestigateAppContextProvider({
   context,

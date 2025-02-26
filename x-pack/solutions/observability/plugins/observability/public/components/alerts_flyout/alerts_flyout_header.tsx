@@ -4,10 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { ComponentProps } from 'react';
+import type { ComponentProps } from 'react';
+import React from 'react';
 import { ALERT_RULE_NAME } from '@kbn/rule-data-utils';
 import { EuiSpacer, EuiTitle } from '@elastic/eui';
-import { GetObservabilityAlertsTableProp } from '../alerts_table/types';
+import type { GetObservabilityAlertsTableProp } from '../alerts_table/types';
 
 export type AlertsFlyoutHeaderProps = Pick<
   ComponentProps<GetObservabilityAlertsTableProp<'renderFlyoutHeader'>>,

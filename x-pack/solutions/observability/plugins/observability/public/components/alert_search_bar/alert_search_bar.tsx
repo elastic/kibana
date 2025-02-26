@@ -9,14 +9,14 @@ import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React, { useCallback, useEffect } from 'react';
 
 import { i18n } from '@kbn/i18n';
-import { Filter, Query } from '@kbn/es-query';
+import type { Filter, Query } from '@kbn/es-query';
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
 import { OBSERVABILITY_RULE_TYPE_IDS_WITH_SUPPORTED_STACK_RULE_TYPES } from '../../../common/constants';
 import { AlertsStatusFilter } from './components';
 import { ALERT_STATUS_QUERY, DEFAULT_QUERIES, DEFAULT_QUERY_STRING } from './constants';
-import { ObservabilityAlertSearchBarProps } from './types';
+import type { ObservabilityAlertSearchBarProps } from './types';
 import { buildEsQuery } from '../../utils/build_es_query';
-import { AlertStatus } from '../../../common/typings';
+import type { AlertStatus } from '../../../common/typings';
 
 const getAlertStatusQuery = (status: string): Query[] => {
   return ALERT_STATUS_QUERY[status]

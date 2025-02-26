@@ -20,8 +20,8 @@ import type {
   ScopeableRequest,
   UnauthorizedErrorHandler,
   ICustomClusterClient,
+  ElasticsearchClientConfig,
 } from '@kbn/core-elasticsearch-server';
-import type { ElasticsearchClientConfig } from '@kbn/core-elasticsearch-server';
 import { configureClient } from './configure_client';
 import { ScopedClusterClient } from './scoped_cluster_client';
 import { getDefaultHeaders, AUTHORIZATION_HEADER, ES_SECONDARY_AUTH_HEADER } from './headers';

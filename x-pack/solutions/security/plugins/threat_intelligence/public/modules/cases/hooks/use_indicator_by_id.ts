@@ -7,9 +7,10 @@
 
 import { useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { Indicator } from '../../../../common/types/indicator';
+import type { Indicator } from '../../../../common/types/indicator';
 import { useKibana } from '../../../hooks/use_kibana';
-import { createFetchIndicatorById, FetchParams } from '../services/fetch_indicator_by_id';
+import type { FetchParams } from '../services/fetch_indicator_by_id';
+import { createFetchIndicatorById } from '../services/fetch_indicator_by_id';
 
 const QUERY_ID = 'indicatorById';
 

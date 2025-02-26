@@ -13,7 +13,6 @@ import type { Agent, SimplifiedAgentStatus } from '../../../../types';
 
 import { AgentStatusBar } from './status_bar';
 import { AgentsSelectionStatus } from './agents_selection_status';
-import {} from '@elastic/eui';
 import { AgentStatusBadges } from './status_badges';
 import type { SelectionMode } from './types';
 

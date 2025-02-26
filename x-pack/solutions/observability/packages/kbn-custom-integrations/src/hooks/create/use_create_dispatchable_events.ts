@@ -8,8 +8,8 @@
 import { useActor, useSelector } from '@xstate/react';
 import { useMemo } from 'react';
 import { isUninitializedSelector, isValidSelector } from '../../state_machines/create/selectors';
-import { CreateCustomIntegrationActorRef } from '../../state_machines/create/state_machine';
-import { CreateCustomIntegrationOptions } from '../../state_machines/create/types';
+import type { CreateCustomIntegrationActorRef } from '../../state_machines/create/state_machine';
+import type { CreateCustomIntegrationOptions } from '../../state_machines/create/types';
 
 export const useCreateDispatchableEvents = ({
   machineRef,

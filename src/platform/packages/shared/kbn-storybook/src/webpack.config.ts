@@ -10,7 +10,8 @@
 /* eslint-disable import/no-default-export */
 import { externals } from '@kbn/ui-shared-deps-src';
 import { resolve } from 'path';
-import webpack, { Configuration } from 'webpack';
+import type { Configuration } from 'webpack';
+import type webpack from 'webpack';
 import { merge as webpackMerge } from 'webpack-merge';
 import { NodeLibsBrowserPlugin } from '@kbn/node-libs-browser-webpack-plugin';
 import { REPO_ROOT } from './lib/constants';

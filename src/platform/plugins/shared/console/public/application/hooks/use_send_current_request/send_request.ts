@@ -12,7 +12,7 @@ import { XJson } from '@kbn/es-ui-shared-plugin/public';
 import { KIBANA_API_PREFIX } from '../../../../common/constants';
 import { extractWarningMessages } from '../../../lib/utils';
 import { send } from '../../../lib/es/es';
-import { BaseResponseType } from '../../../types';
+import type { BaseResponseType } from '../../../types';
 
 const { collapseLiteralStrings } = XJson;
 

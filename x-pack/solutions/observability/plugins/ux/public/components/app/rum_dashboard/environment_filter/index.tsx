@@ -7,7 +7,7 @@
 
 import { EuiSelect } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { History } from 'history';
+import type { History } from 'history';
 import React from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
 import { fromQuery, toQuery } from '@kbn/observability-plugin/public';

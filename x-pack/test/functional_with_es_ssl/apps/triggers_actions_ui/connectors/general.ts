@@ -9,8 +9,8 @@ import { v4 as uuidv4 } from 'uuid';
 import moment from 'moment';
 import expect from '@kbn/expect';
 import { asyncForEach } from '@kbn/std';
-import { FtrProviderContext } from '../../../ftr_provider_context';
-import { ObjectRemover } from '../../../lib/object_remover';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
+import type { ObjectRemover } from '../../../lib/object_remover';
 import { generateUniqueKey } from '../../../lib/get_test_data';
 import {
   getConnectorByName,

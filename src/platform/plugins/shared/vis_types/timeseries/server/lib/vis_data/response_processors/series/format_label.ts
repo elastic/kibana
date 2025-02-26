@@ -14,11 +14,10 @@ import {
   getFieldsForTerms,
   MULTI_FIELD_VALUES_SEPARATOR,
 } from '../../../../../common/fields_utils';
-import type { Panel, PanelData, Series } from '../../../../../common/types';
+import type { Panel, PanelData, Series, SanitizedFieldType } from '../../../../../common/types';
 import type { createFieldsFetcher } from '../../../search_strategies/lib/fields_fetcher';
 import type { CachedIndexPatternFetcher } from '../../../search_strategies/lib/cached_index_pattern_fetcher';
 import type { BaseMeta } from '../../request_processors/types';
-import { SanitizedFieldType } from '../../../../../common/types';
 
 export function formatLabel(
   resp: unknown,

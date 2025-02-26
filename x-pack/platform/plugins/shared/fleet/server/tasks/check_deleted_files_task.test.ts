@@ -5,14 +5,13 @@
  * 2.0.
  */
 
-import { coreMock } from '@kbn/core/server/mocks';
+import { coreMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import type { TaskManagerSetupContract } from '@kbn/task-manager-plugin/server';
 import { TaskStatus } from '@kbn/task-manager-plugin/server';
 import { getDeleteTaskRunResult } from '@kbn/task-manager-plugin/server/task';
 import type { CoreSetup } from '@kbn/core/server';
 import type { ElasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
-import { loggingSystemMock } from '@kbn/core/server/mocks';
 
 import { getFileDataIndexName, getFileMetadataIndexName } from '../../common';
 

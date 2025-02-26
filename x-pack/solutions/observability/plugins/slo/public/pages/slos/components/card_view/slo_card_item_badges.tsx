@@ -7,12 +7,12 @@
 
 import { EuiFlexGroup } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { SLOWithSummaryResponse } from '@kbn/slo-schema';
-import { Rule } from '@kbn/triggers-actions-ui-plugin/public';
+import type { SLOWithSummaryResponse } from '@kbn/slo-schema';
+import type { Rule } from '@kbn/triggers-actions-ui-plugin/public';
 import React, { useCallback } from 'react';
 import { SloStateBadge } from '../../../../components/slo/slo_badges';
 import { SloActiveAlertsBadge } from '../../../../components/slo/slo_badges/slo_active_alerts_badge';
-import { BurnRateRuleParams } from '../../../../typings';
+import type { BurnRateRuleParams } from '../../../../typings';
 import { useUrlSearchState } from '../../hooks/use_url_search_state';
 import { LoadingBadges } from '../badges/slo_badges';
 import { SloRemoteBadge } from '../badges/slo_remote_badge';

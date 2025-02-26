@@ -23,12 +23,13 @@ import {
   EuiContextMenuPanel,
   EuiPagination,
   EuiPopover,
+  Pager,
 } from '@elastic/eui';
 
-import { Pager } from '@elastic/eui';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { INDEX_PATTERN_TYPE, MatchedItem, Tag } from '@kbn/data-views-plugin/public';
+import type { MatchedItem, Tag } from '@kbn/data-views-plugin/public';
+import { INDEX_PATTERN_TYPE } from '@kbn/data-views-plugin/public';
 import { RollupDeprecationTooltip } from '@kbn/rollup';
 
 export interface IndicesListProps {

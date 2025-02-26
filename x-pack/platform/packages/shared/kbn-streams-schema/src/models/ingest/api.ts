@@ -6,18 +6,17 @@
  */
 
 import { z } from '@kbn/zod';
-import { InheritedFieldDefinition, inheritedFieldDefinitionSchema } from './fields';
-import {
-  StreamGetResponseBase,
-  StreamUpsertRequestBase,
-  streamGetResponseSchemaBase,
-  streamUpsertRequestSchemaBase,
-} from '../base/api';
-import {
+import type { InheritedFieldDefinition } from './fields';
+import { inheritedFieldDefinitionSchema } from './fields';
+import type { StreamGetResponseBase, StreamUpsertRequestBase } from '../base/api';
+import { streamGetResponseSchemaBase, streamUpsertRequestSchemaBase } from '../base/api';
+import type {
   UnwiredIngest,
   UnwiredStreamDefinition,
   WiredIngest,
   WiredStreamDefinition,
+} from './base';
+import {
   unwiredIngestSchema,
   unwiredStreamDefinitionSchema,
   unwiredStreamDefinitionSchemaBase,
@@ -25,10 +24,13 @@ import {
   wiredStreamDefinitionSchema,
   wiredStreamDefinitionSchemaBase,
 } from './base';
-import { ElasticsearchAsset, elasticsearchAssetSchema } from './common';
-import {
+import type { ElasticsearchAsset } from './common';
+import { elasticsearchAssetSchema } from './common';
+import type {
   UnwiredIngestStreamEffectiveLifecycle,
   WiredIngestStreamEffectiveLifecycle,
+} from './lifecycle';
+import {
   unwiredIngestStreamEffectiveLifecycleSchema,
   wiredIngestStreamEffectiveLifecycleSchema,
 } from './lifecycle';

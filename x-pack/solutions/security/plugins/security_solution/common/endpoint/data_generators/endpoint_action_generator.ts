@@ -11,28 +11,28 @@ import type { estypes } from '@elastic/elasticsearch';
 import { isProcessesAction } from '../service/response_actions/type_guards';
 import { ENDPOINT_ACTION_RESPONSES_DS, ENDPOINT_ACTIONS_DS } from '../constants';
 import { BaseDataGenerator } from './base_data_generator';
-import type { GetProcessesActionOutputContent } from '../types';
-import {
-  type ActionDetails,
-  type ActionResponseOutput,
-  ActivityLogItemTypes,
-  type EndpointActionDataParameterTypes,
-  type EndpointActionResponseDataOutput,
-  type EndpointActivityLogAction,
-  type EndpointActivityLogActionResponse,
-  type EndpointPendingActions,
-  type LogsEndpointAction,
-  type LogsEndpointActionResponse,
-  type ProcessesEntry,
-  type ResponseActionExecuteOutputContent,
-  type ResponseActionGetFileOutputContent,
-  type ResponseActionGetFileParameters,
-  type ResponseActionScanOutputContent,
-  type ResponseActionsExecuteParameters,
-  type ResponseActionScanParameters,
-  type ResponseActionUploadOutputContent,
-  type ResponseActionUploadParameters,
-  type WithAllKeys,
+import { ActivityLogItemTypes } from '../types';
+import type {
+  GetProcessesActionOutputContent,
+  ActionDetails,
+  ActionResponseOutput,
+  EndpointActionDataParameterTypes,
+  EndpointActionResponseDataOutput,
+  EndpointActivityLogAction,
+  EndpointActivityLogActionResponse,
+  EndpointPendingActions,
+  LogsEndpointAction,
+  LogsEndpointActionResponse,
+  ProcessesEntry,
+  ResponseActionExecuteOutputContent,
+  ResponseActionGetFileOutputContent,
+  ResponseActionGetFileParameters,
+  ResponseActionScanOutputContent,
+  ResponseActionsExecuteParameters,
+  ResponseActionScanParameters,
+  ResponseActionUploadOutputContent,
+  ResponseActionUploadParameters,
+  WithAllKeys,
 } from '../types';
 import {
   DEFAULT_EXECUTE_ACTION_TIMEOUT,

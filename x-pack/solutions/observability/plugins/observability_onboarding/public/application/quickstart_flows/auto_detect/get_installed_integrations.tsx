@@ -5,9 +5,11 @@
  * 2.0.
  */
 
-import type { InstallIntegrationsStepPayload } from '../../../../server/routes/types';
+import type {
+  InstallIntegrationsStepPayload,
+  InstalledIntegration,
+} from '../../../../server/routes/types';
 import type { ObservabilityOnboardingFlow } from '../../../../server/saved_objects/observability_onboarding_status';
-import type { InstalledIntegration } from '../../../../server/routes/types';
 
 export function getInstalledIntegrations(
   data: Pick<ObservabilityOnboardingFlow, 'progress'> | undefined

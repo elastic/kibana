@@ -9,7 +9,7 @@
 
 import { action } from '@storybook/addon-actions';
 import { AbstractStorybookMock } from '@kbn/shared-ux-storybook-mock';
-import { RedirectAppLinksProps } from '@kbn/shared-ux-link-redirect-app-types';
+import type { RedirectAppLinksProps } from '@kbn/shared-ux-link-redirect-app-types';
 
 export class StorybookMock extends AbstractStorybookMock<RedirectAppLinksProps, {}> {
   propArguments = {};

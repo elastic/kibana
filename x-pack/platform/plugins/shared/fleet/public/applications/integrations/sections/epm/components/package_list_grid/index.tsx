@@ -6,8 +6,7 @@
  */
 
 import type { ReactNode, FunctionComponent } from 'react';
-import { useMemo } from 'react';
-import React, { useCallback, useState } from 'react';
+import React, { useMemo, useCallback, useState } from 'react';
 import styled from 'styled-components';
 
 import {

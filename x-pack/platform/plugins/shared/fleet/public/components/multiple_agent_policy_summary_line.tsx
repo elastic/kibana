@@ -21,8 +21,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { CSSProperties } from 'react';
-import { useMemo } from 'react';
-import React, { memo, useState } from 'react';
+import React, { useMemo, memo, useState } from 'react';
 
 import { FormattedMessage } from '@kbn/i18n-react';
 

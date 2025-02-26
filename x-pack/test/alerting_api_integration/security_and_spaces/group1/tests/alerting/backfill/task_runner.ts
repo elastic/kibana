@@ -26,14 +26,14 @@ import {
   TIMESTAMP,
 } from '@kbn/rule-data-utils';
 import { ESTestIndexTool, ES_TEST_INDEX_NAME } from '@kbn/alerting-api-integration-helpers';
-import { IValidatedEvent } from '@kbn/event-log-plugin/server';
+import type { IValidatedEvent } from '@kbn/event-log-plugin/server';
 import {
   AD_HOC_RUN_SAVED_OBJECT_TYPE,
   RULE_SAVED_OBJECT_TYPE,
 } from '@kbn/alerting-plugin/server/saved_objects';
 import { ALERT_ORIGINAL_TIME } from '@kbn/security-solution-plugin/common/field_maps/field_names';
 import { DOCUMENT_SOURCE } from '../../../../../spaces_only/tests/alerting/create_test_data';
-import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
+import type { FtrProviderContext } from '../../../../../common/ftr_provider_context';
 import { SuperuserAtSpace1 } from '../../../../scenarios';
 import { getTestRuleData, getUrlPrefix, ObjectRemover } from '../../../../../common/lib';
 import {

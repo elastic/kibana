@@ -8,7 +8,8 @@
  */
 
 import * as t from 'io-ts';
-import { left, right, Either } from 'fp-ts/lib/Either';
+import type { Either } from 'fp-ts/lib/Either';
+import { left, right } from 'fp-ts/lib/Either';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { exactCheck, findDifferencesRecursive } from '.';
 import { foldLeftRight, getPaths } from '../test_utils';

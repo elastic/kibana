@@ -6,8 +6,7 @@
  */
 
 import { filter, isEmpty, map, omit, reduce } from 'lodash';
-import type { EuiAccordionProps } from '@elastic/eui';
-import type { UseEuiTheme } from '@elastic/eui';
+import type { EuiAccordionProps, UseEuiTheme } from '@elastic/eui';
 import {
   EuiFlexGroup,
   EuiFlexItem,

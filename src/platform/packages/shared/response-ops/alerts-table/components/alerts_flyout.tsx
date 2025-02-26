@@ -21,7 +21,7 @@ import {
 import usePrevious from 'react-use/lib/usePrevious';
 import type { Alert } from '@kbn/alerting-types';
 import { DefaultAlertsFlyoutBody, DefaultAlertsFlyoutHeader } from './default_alerts_flyout';
-import {
+import type {
   AdditionalContext,
   FlyoutSectionProps,
   FlyoutSectionRenderer,

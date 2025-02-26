@@ -7,19 +7,19 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { DataViewField } from '@kbn/data-views-plugin/common';
-import { FieldFormatConvertFunction } from '@kbn/field-formats-plugin/common';
-import {
+import type { DataViewField } from '@kbn/data-views-plugin/common';
+import type { FieldFormatConvertFunction } from '@kbn/field-formats-plugin/common';
+import type {
   HasEditCapabilities,
   PublishesDataViews,
   PublishesTitle,
   PublishingSubject,
 } from '@kbn/presentation-publishing';
 
-import { DefaultDataControlState } from '../../../common';
-import { ControlGroupApi } from '../../control_group/types';
-import { ControlFactory, DefaultControlApi } from '../types';
-import { PublishesAsyncFilters } from './publishes_async_filters';
+import type { DefaultDataControlState } from '../../../common';
+import type { ControlGroupApi } from '../../control_group/types';
+import type { ControlFactory, DefaultControlApi } from '../types';
+import type { PublishesAsyncFilters } from './publishes_async_filters';
 
 export type DataControlFieldFormatter = FieldFormatConvertFunction | ((toFormat: any) => string);
 

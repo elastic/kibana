@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ParentNodeParams, ViewBoxParams } from '../types';
+import type { ParentNodeParams, ViewBoxParams } from '../types';
 
 export function viewBoxToString(viewBox?: ViewBoxParams): undefined | string {
   if (!viewBox) {

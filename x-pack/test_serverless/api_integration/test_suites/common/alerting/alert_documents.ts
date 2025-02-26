@@ -41,9 +41,9 @@ import {
   ALERT_RULE_EXECUTION_TIMESTAMP,
   ALERT_PREVIOUS_ACTION_GROUP,
 } from '@kbn/rule-data-utils';
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 import { ObjectRemover } from '../../../../shared/lib';
-import { RoleCredentials } from '../../../../shared/services';
+import type { RoleCredentials } from '../../../../shared/services';
 
 const OPEN_OR_ACTIVE = new Set(['open', 'active']);
 

@@ -6,15 +6,10 @@
  */
 
 import { act } from 'react-dom/test-utils';
-import { HttpSetup } from '@kbn/core/public';
+import type { HttpSetup } from '@kbn/core/public';
 
-import {
-  registerTestBed,
-  TestBed,
-  AsyncTestBedConfig,
-  findTestSubject,
-  nextTick,
-} from '@kbn/test-jest-helpers';
+import type { TestBed, AsyncTestBedConfig } from '@kbn/test-jest-helpers';
+import { registerTestBed, findTestSubject, nextTick } from '@kbn/test-jest-helpers';
 import { BASE_PATH } from '../../../../../../../common';
 import { WithAppDependencies } from './setup_environment';
 import { ComponentTemplateList } from '../../../component_template_list/component_template_list';

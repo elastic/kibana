@@ -11,10 +11,9 @@ import type { EuiDataGridSorting, EuiDataGridColumn } from '@elastic/eui';
 
 import { ES_CLIENT_TOTAL_HITS_RELATION } from '@kbn/ml-query-utils';
 
-import { INDEX_STATUS } from '../lib/common';
+import { INDEX_STATUS, MAX_ROW_COUNT, INIT_MAX_COLUMNS } from '../lib/common';
 import type { ChartData } from '../lib/field_histograms';
 import { ColumnChart } from '../components/column_chart';
-import { MAX_ROW_COUNT, INIT_MAX_COLUMNS } from '../lib/common';
 import type {
   ChartsVisible,
   ColumnId,

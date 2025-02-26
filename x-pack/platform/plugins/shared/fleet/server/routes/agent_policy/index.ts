@@ -8,7 +8,7 @@ import { schema } from '@kbn/config-schema';
 
 import type { FleetAuthzRouter } from '../../services/security';
 
-import { API_VERSIONS } from '../../../common/constants';
+import { API_VERSIONS, K8S_API_ROUTES } from '../../../common/constants';
 import { FLEET_API_PRIVILEGES } from '../../constants/api_privileges';
 import { AGENT_POLICY_API_ROUTES } from '../../constants';
 import { type FleetConfigType } from '../../config';
@@ -37,7 +37,6 @@ import {
   GetAutoUpgradeAgentsStatusResponseSchema,
 } from '../../types';
 
-import { K8S_API_ROUTES } from '../../../common/constants';
 import { parseExperimentalConfigValue } from '../../../common/experimental_features';
 
 import { genericErrorResponse } from '../schema/errors';

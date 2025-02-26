@@ -9,7 +9,7 @@ import { getKnowledgeBaseStatusRoute } from './get_knowledge_base_status';
 import { serverMock } from '../../__mocks__/server';
 import { requestContextMock } from '../../__mocks__/request_context';
 import { getGetKnowledgeBaseStatusRequest } from '../../__mocks__/request';
-import { AuthenticatedUser } from '@kbn/core-security-common';
+import type { AuthenticatedUser } from '@kbn/core-security-common';
 
 describe('Get Knowledge Base Status Route', () => {
   let server: ReturnType<typeof serverMock.create>;

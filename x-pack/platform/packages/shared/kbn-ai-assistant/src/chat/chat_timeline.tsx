@@ -11,12 +11,12 @@ import { EuiCommentList } from '@elastic/eui';
 import type { AuthenticatedUser } from '@kbn/security-plugin/common';
 import { omit } from 'lodash';
 import type { Message } from '@kbn/observability-ai-assistant-plugin/common';
-import {
+import type {
   ChatActionClickPayload,
   ChatState,
-  type Feedback,
-  type ObservabilityAIAssistantChatService,
-  type TelemetryEventTypeWithPayload,
+  Feedback,
+  ObservabilityAIAssistantChatService,
+  TelemetryEventTypeWithPayload,
 } from '@kbn/observability-ai-assistant-plugin/public';
 import type { UseKnowledgeBaseResult } from '../hooks/use_knowledge_base';
 import { ChatItem } from './chat_item';

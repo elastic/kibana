@@ -6,8 +6,16 @@
  */
 
 import type { Observable } from 'rxjs';
-import { BehaviorSubject, combineLatest, of, Subscription } from 'rxjs';
-import { distinctUntilChanged, map, skipWhile, switchMap } from 'rxjs';
+import {
+  BehaviorSubject,
+  combineLatest,
+  of,
+  Subscription,
+  distinctUntilChanged,
+  map,
+  skipWhile,
+  switchMap,
+} from 'rxjs';
 import type { UrlStateService } from '@kbn/ml-url-state';
 import { StateService } from '../services/state_service';
 import type { AnomalyExplorerCommonStateService } from './anomaly_explorer_common_state';

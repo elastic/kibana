@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { FindGapsResponseBodyV1 } from '../../../../../../../common/routes/gaps/apis/find';
+import type { FindGapsResponseBodyV1 } from '../../../../../../../common/routes/gaps/apis/find';
 
-import { Gap } from '../../../../../../lib/rule_gaps/gap';
+import type { Gap } from '../../../../../../lib/rule_gaps/gap';
 
 export const transformResponse = ({
   page,

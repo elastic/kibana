@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { EuiLink } from '@elastic/eui';
 import {
+  EuiLink,
   EuiCallOut,
   EuiCode,
   EuiDescribedFormGroup,

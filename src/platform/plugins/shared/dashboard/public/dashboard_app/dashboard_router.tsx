@@ -9,17 +9,19 @@
 
 import './_dashboard_app.scss';
 
-import { AppMountParameters, CoreStart } from '@kbn/core/public';
+import type { AppMountParameters, CoreStart } from '@kbn/core/public';
 import { createKbnUrlStateStorage, withNotifyOnErrors } from '@kbn/kibana-utils-plugin/public';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { Route, Routes } from '@kbn/shared-ux-router';
-import { parse, ParsedQuery } from 'query-string';
+import type { ParsedQuery } from 'query-string';
+import { parse } from 'query-string';
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
-import { HashRouter, Redirect, RouteComponentProps } from 'react-router-dom';
+import type { RouteComponentProps } from 'react-router-dom';
+import { HashRouter, Redirect } from 'react-router-dom';
 
 import { DASHBOARD_APP_ID, LANDING_PAGE_PATH } from '../plugin_constants';
-import { RedirectToProps } from '../dashboard_container/types';
+import type { RedirectToProps } from '../dashboard_container/types';
 import { coreServices, dataService, embeddableService } from '../services/kibana_services';
 import { getDashboardCapabilities } from '../utils/get_dashboard_capabilities';
 import { dashboardReadonlyBadge, getDashboardPageTitle } from './_dashboard_app_strings';
@@ -27,7 +29,7 @@ import { DashboardApp } from './dashboard_app';
 import { DashboardMountContext } from './hooks/dashboard_mount_context';
 import { DashboardListingPage } from './listing_page/dashboard_listing_page';
 import { DashboardNoMatch } from './listing_page/dashboard_no_match';
-import { DashboardEmbedSettings, DashboardMountContextProps } from './types';
+import type { DashboardEmbedSettings, DashboardMountContextProps } from './types';
 import {
   CREATE_NEW_DASHBOARD_URL,
   VIEW_DASHBOARD_URL,

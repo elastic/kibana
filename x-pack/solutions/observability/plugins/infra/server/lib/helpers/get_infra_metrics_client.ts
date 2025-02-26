@@ -4,13 +4,15 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { SearchRequest as ESSearchRequest } from '@elastic/elasticsearch/lib/api/types';
+import type {
+  QueryDslQueryContainer,
+  SearchRequest as ESSearchRequest,
+} from '@elastic/elasticsearch/lib/api/types';
 import type { InferSearchResponseOf } from '@kbn/es-types';
 import type { KibanaRequest } from '@kbn/core/server';
 import { searchExcludedDataTiers } from '@kbn/observability-plugin/common/ui_settings_keys';
 import type { DataTier } from '@kbn/observability-shared-plugin/common';
 import { excludeTiersQuery } from '@kbn/observability-utils-common/es/queries/exclude_tiers_query';
-import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { InfraPluginRequestHandlerContext } from '../../types';
 import type { InfraBackendLibs } from '../infra_types';
 

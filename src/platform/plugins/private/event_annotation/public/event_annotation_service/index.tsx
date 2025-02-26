@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { CoreStart } from '@kbn/core/public';
-import { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
-import { EventAnnotationServiceType } from '@kbn/event-annotation-components';
+import type { CoreStart } from '@kbn/core/public';
+import type { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
+import type { EventAnnotationServiceType } from '@kbn/event-annotation-components';
 export type { EventAnnotationServiceType };
 
 export class EventAnnotationService {

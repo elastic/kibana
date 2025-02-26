@@ -9,7 +9,7 @@ import type {
   PluginInitializerContext,
   PluginConfigDescriptor,
 } from '@kbn/core/server';
-import { InvestigateConfig } from './config';
+import type { InvestigateConfig } from './config';
 
 import { InvestigatePlugin } from './plugin';
 import type {

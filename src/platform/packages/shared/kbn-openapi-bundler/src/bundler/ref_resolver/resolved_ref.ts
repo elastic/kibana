@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { DocumentNode } from '../process_document/types/node';
-import { ResolvedDocument } from './resolved_document';
+import type { DocumentNode } from '../process_document/types/node';
+import type { ResolvedDocument } from './resolved_document';
 
 export interface ResolvedRef extends ResolvedDocument {
   /**

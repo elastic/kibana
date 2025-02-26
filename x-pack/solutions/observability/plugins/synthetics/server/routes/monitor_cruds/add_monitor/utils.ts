@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
-import { CreateMonitorPayLoad } from './add_monitor_api';
-import { MonitorFields, SyntheticsMonitor } from '../../../../common/runtime_types';
+import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
+import type { CreateMonitorPayLoad } from './add_monitor_api';
+import type { MonitorFields, SyntheticsMonitor } from '../../../../common/runtime_types';
 import { getPrivateLocations } from '../../../synthetics_service/get_private_locations';
 
 export const getPrivateLocationsForMonitor = async (

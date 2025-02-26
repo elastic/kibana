@@ -8,14 +8,14 @@
  */
 
 import type { SerializableRecord } from '@kbn/utility-types';
-import { CoreSetup, CoreStart, Plugin } from '@kbn/core/server';
+import type { CoreSetup, CoreStart, Plugin } from '@kbn/core/server';
 import { identity } from 'lodash';
-import {
+import type {
   PersistableStateService,
   PersistableStateMigrateFn,
   MigrateFunctionsObject,
 } from '@kbn/kibana-utils-plugin/common';
-import {
+import type {
   EmbeddableFactoryRegistry,
   EnhancementsRegistry,
   EnhancementRegistryDefinition,
@@ -27,7 +27,7 @@ import {
   getMigrateFunction,
   getTelemetryFunction,
 } from '../common/lib';
-import {
+import type {
   EmbeddableStateWithType,
   CommonEmbeddableStartContract,
   EmbeddableRegistryDefinition,

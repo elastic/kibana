@@ -8,9 +8,8 @@
 import type {
   SavedObjectModelDataBackfillFn,
   SavedObjectUnsanitizedDoc,
+  SavedObjectModelVersionForwardCompatibilityFn,
 } from '@kbn/core-saved-objects-server';
-
-import type { SavedObjectModelVersionForwardCompatibilityFn } from '@kbn/core-saved-objects-server';
 
 import { omit } from 'lodash';
 

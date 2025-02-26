@@ -11,9 +11,9 @@ import type { ISearchStart } from '@kbn/data-plugin/public';
 import type {
   FieldStatsCommonRequestParams,
   SupportedAggs,
+  FieldStatsError,
+  FieldStats,
 } from '../../../../../common/types/field_stats';
-import type { FieldStatsError } from '../../../../../common/types/field_stats';
-import type { FieldStats } from '../../../../../common/types/field_stats';
 import { SUPPORTED_FIELD_TYPES } from '../../../../../common/constants';
 import { fetchDateFieldsStats } from './get_date_field_stats';
 import { fetchBooleanFieldsStats } from './get_boolean_field_stats';

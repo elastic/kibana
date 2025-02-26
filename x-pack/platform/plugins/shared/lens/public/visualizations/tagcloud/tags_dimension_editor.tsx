@@ -5,28 +5,26 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useState, useCallback } from 'react';
+import type { PaletteRegistry, ColorMapping, PaletteOutput } from '@kbn/coloring';
 import {
-  PaletteRegistry,
   CategoricalColorMapping,
   DEFAULT_COLOR_MAPPING_CONFIG,
-  ColorMapping,
   SPECIAL_TOKENS_STRING_CONVERSION,
-  PaletteOutput,
 } from '@kbn/coloring';
 import { i18n } from '@kbn/i18n';
 import { EuiFlexGroup, EuiFlexItem, EuiSwitch, EuiFormRow, EuiText, EuiBadge } from '@elastic/eui';
-import { useState, MutableRefObject, useCallback } from 'react';
+import type { MutableRefObject } from 'react';
 import { useDebouncedValue } from '@kbn/visualization-utils';
 import { getColorCategories } from '@kbn/chart-expressions-common';
-import { KbnPalettes } from '@kbn/palettes';
+import type { KbnPalettes } from '@kbn/palettes';
 import type { TagcloudState } from './types';
 import {
   PalettePanelContainer,
   PalettePicker,
   getPaletteDisplayColors,
 } from '../../shared_components';
-import { FramePublicAPI } from '../../types';
+import type { FramePublicAPI } from '../../types';
 import { trackUiCounterEvents } from '../../lens_ui_telemetry';
 
 interface Props {

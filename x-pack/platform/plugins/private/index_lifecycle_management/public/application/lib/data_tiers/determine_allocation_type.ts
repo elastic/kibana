@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { AllocateAction, MigrateAction } from '../../../../common/types';
+import type { AllocateAction, MigrateAction } from '../../../../common/types';
 
 export const determineDataTierAllocationType = (
   actions: {

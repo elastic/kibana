@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { TelemetryRC } from '../config';
+import type { TelemetryRC } from '../config';
 import { ErrorReporter } from './error_reporter';
-import { ParsedUsageCollection } from '../ts_parser';
+import type { ParsedUsageCollection } from '../ts_parser';
 export interface TelemetryRoot {
   config: TelemetryRC;
   parsedCollections?: ParsedUsageCollection[];

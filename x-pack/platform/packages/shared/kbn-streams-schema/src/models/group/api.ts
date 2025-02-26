@@ -5,18 +5,10 @@
  * 2.0.
  */
 import { z } from '@kbn/zod';
-import {
-  StreamGetResponseBase,
-  streamGetResponseSchemaBase,
-  StreamUpsertRequestBase,
-  streamUpsertRequestSchemaBase,
-} from '../base/api';
-import {
-  GroupBase,
-  groupBaseSchema,
-  GroupStreamDefinitionBase,
-  groupStreamDefinitionBaseSchema,
-} from './base';
+import type { StreamGetResponseBase, StreamUpsertRequestBase } from '../base/api';
+import { streamGetResponseSchemaBase, streamUpsertRequestSchemaBase } from '../base/api';
+import type { GroupBase, GroupStreamDefinitionBase } from './base';
+import { groupBaseSchema, groupStreamDefinitionBaseSchema } from './base';
 
 /**
  * Group get response

@@ -9,7 +9,6 @@
 
 import { mergeTests } from 'playwright/test';
 import {
-  ApiFixtures,
   apiFixtures,
   coreWorkerFixtures,
   esArchiverFixture,
@@ -25,6 +24,7 @@ import type {
   ScoutTestConfig,
   UiSettingsFixture,
   SynthtraceFixture,
+  ApiFixtures,
 } from './worker';
 import {
   scoutPageFixture,

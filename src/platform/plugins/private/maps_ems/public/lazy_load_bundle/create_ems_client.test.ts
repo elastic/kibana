@@ -19,7 +19,7 @@ import {
 import { createEMSClient } from './create_ems_client';
 
 import type { EMSConfig } from '../../common/ems_settings';
-import { BuildFlavor } from '@kbn/config/src/types';
+import type { BuildFlavor } from '@kbn/config/src/types';
 import { LATEST_API_URL_PATH } from '@elastic/ems-client';
 
 const IS_ENTERPRISE_PLUS = () => true;

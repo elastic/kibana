@@ -14,7 +14,7 @@ import { useEffect, useMemo, useRef } from 'react';
 import { BehaviorSubject, combineLatest, debounceTime, distinctUntilChanged } from 'rxjs';
 import useResizeObserver, { type ObservedSize } from 'use-resize-observer/polyfilled';
 
-import {
+import type {
   ActivePanel,
   GridAccessMode,
   GridLayoutData,

@@ -6,10 +6,9 @@
  */
 
 import type { IRouter } from '@kbn/core/server';
-import type { ListWithKuery } from '@kbn/fleet-plugin/server/types';
+import type { ListWithKuery, PackagePolicy } from '@kbn/fleet-plugin/server/types';
 import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
 import { filter, flatMap, mapKeys, uniq } from 'lodash';
-import type { PackagePolicy } from '@kbn/fleet-plugin/server/types';
 import { satisfies } from 'semver';
 import type { SortResults } from '@elastic/elasticsearch/lib/api/types';
 import { processAggregations } from '../../../common/utils/aggregations';

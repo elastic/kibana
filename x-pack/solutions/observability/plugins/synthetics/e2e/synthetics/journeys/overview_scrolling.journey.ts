@@ -6,7 +6,7 @@
  */
 
 import { before, after, expect, journey, step } from '@elastic/synthetics';
-import { RetryService } from '@kbn/ftr-common-functional-services';
+import type { RetryService } from '@kbn/ftr-common-functional-services';
 import {
   addTestMonitor,
   cleanTestMonitors,

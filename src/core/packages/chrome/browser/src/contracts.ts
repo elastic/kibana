@@ -12,14 +12,13 @@ import type { ChromeNavLink, ChromeNavLinks } from './nav_links';
 import type { ChromeRecentlyAccessed } from './recently_accessed';
 import type { ChromeDocTitle } from './doc_title';
 import type { ChromeHelpMenuLink, ChromeNavControls } from './nav_controls';
-import type { ChromeHelpExtension } from './help_extension';
+import type { ChromeHelpExtension, ChromeGlobalHelpExtensionMenuLink } from './help_extension';
 import type {
   ChromeBreadcrumb,
   ChromeBreadcrumbsAppendExtension,
   ChromeSetBreadcrumbsParams,
 } from './breadcrumb';
 import type { ChromeBadge, ChromeStyle, ChromeUserBanner } from './types';
-import type { ChromeGlobalHelpExtensionMenuLink } from './help_extension';
 import type { PanelSelectedNode } from './project_navigation';
 
 /**

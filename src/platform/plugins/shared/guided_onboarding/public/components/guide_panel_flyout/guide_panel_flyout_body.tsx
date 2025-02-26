@@ -18,13 +18,13 @@ import {
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
-import { GuideConfig, GuideStep as GuideStepType, StepConfig } from '@kbn/guided-onboarding';
+import type { GuideConfig, GuideStep as GuideStepType, StepConfig } from '@kbn/guided-onboarding';
 import { i18n } from '@kbn/i18n';
 import wellDoneAnimatedDarkGif from '../../../assets/well_done_animated_dark.gif';
-import { PluginState } from '../../../common';
+import type { PluginState } from '../../../common';
 import { GuideProgress } from './guide_progress';
 import wellDoneAnimatedGif from '../../../assets/well_done_animated.gif';
-import { getGuidePanelStyles } from '../guide_panel.styles';
+import type { getGuidePanelStyles } from '../guide_panel.styles';
 
 export const GuidePanelFlyoutBody = ({
   styles,

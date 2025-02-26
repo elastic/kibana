@@ -7,8 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Subject } from 'rxjs';
-import { takeUntil, bufferCount } from 'rxjs';
+import { Subject, takeUntil, bufferCount } from 'rxjs';
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import { RecentlyAccessedService } from './recently_accessed_service';
 

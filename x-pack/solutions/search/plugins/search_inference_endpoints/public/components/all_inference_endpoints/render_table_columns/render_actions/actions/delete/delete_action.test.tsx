@@ -10,7 +10,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import React from 'react';
 
 import { DeleteAction } from './delete_action';
-import { InferenceEndpointUI } from '../../../../types';
+import type { InferenceEndpointUI } from '../../../../types';
 
 describe('Delete Action', () => {
   const mockProvider = {

@@ -13,7 +13,7 @@ import { DEFAULT_DOCS_PER_PAGE } from '@kbn/search-index-documents/types';
 import { fetchSearchResults } from '@kbn/search-index-documents/lib';
 
 import { POST_CREATE_INDEX_ROUTE, SEARCH_DOCUMENTS_ROUTE } from '../../common/routes';
-import { CreateIndexRequest } from '../../common/types';
+import type { CreateIndexRequest } from '../../common/types';
 import { createIndex } from '../lib/indices';
 
 export function registerIndicesRoutes(router: IRouter, logger: Logger) {

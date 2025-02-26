@@ -12,14 +12,14 @@ import { savedObjectsRepositoryMock, loggingSystemMock } from '@kbn/core/server/
 import {
   Collector,
   createUsageCollectionSetupMock,
+  createCollectorFetchContextMock,
 } from '@kbn/usage-collection-plugin/server/mocks';
 import { MAIN_APP_DEFAULT_VIEW_ID } from '@kbn/usage-collection-plugin/common/constants';
-import { createCollectorFetchContextMock } from '@kbn/usage-collection-plugin/server/mocks';
 import {
   registerApplicationUsageCollector,
   transformByApplicationViews,
 } from './telemetry_application_usage_collector';
-import { ApplicationUsageViews } from './types';
+import type { ApplicationUsageViews } from './types';
 
 import { SAVED_OBJECTS_DAILY_TYPE, SAVED_OBJECTS_TOTAL_TYPE } from './saved_objects_types';
 

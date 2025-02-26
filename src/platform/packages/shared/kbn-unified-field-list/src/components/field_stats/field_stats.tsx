@@ -12,7 +12,7 @@ import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
 import { getTimeZone } from '@kbn/visualization-utils';
 import { ES_FIELD_TYPES, KBN_FIELD_TYPES } from '@kbn/field-types';
 import { getEsQueryConfig } from '@kbn/data-service/src/es_query';
-import { isOfAggregateQueryType } from '@kbn/es-query';
+import { isOfAggregateQueryType, buildEsQuery } from '@kbn/es-query';
 import type { IUiSettingsClient } from '@kbn/core/public';
 import type { DataViewsContract } from '@kbn/data-views-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
@@ -28,6 +28,7 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import type { PartialTheme } from '@elastic/charts';
 import {
   Axis,
   Chart,
@@ -38,18 +39,16 @@ import {
   Settings,
   TooltipType,
   Tooltip,
-  PartialTheme,
 } from '@elastic/charts';
 import { i18n } from '@kbn/i18n';
-import { buildEsQuery, Query, Filter, AggregateQuery } from '@kbn/es-query';
-import { OverrideFieldTopValueBarCallback } from './field_top_values_bucket';
-import type { BucketedAggregation, NumberSummary } from '../../types';
+import type { Query, Filter, AggregateQuery } from '@kbn/es-query';
+import type { OverrideFieldTopValueBarCallback } from './field_top_values_bucket';
+import type { BucketedAggregation, NumberSummary, AddFieldFilterHandler } from '../../types';
 import {
   canProvideStatsForField,
   canProvideNumberSummaryForField,
 } from '../../utils/can_provide_stats';
 import { loadFieldStats } from '../../services/field_stats';
-import type { AddFieldFilterHandler } from '../../types';
 import {
   FieldTopValues,
   getOtherCount,

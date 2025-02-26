@@ -6,7 +6,7 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiText } from '@elastic/eui';
-import { HistoricalSummaryResponse, SLOWithSummaryResponse } from '@kbn/slo-schema';
+import type { HistoricalSummaryResponse, SLOWithSummaryResponse } from '@kbn/slo-schema';
 import type { Rule } from '@kbn/triggers-actions-ui-plugin/public';
 import React, { useState } from 'react';
 import { SloDeleteModal } from '../../../../components/slo/delete_confirmation_modal/slo_delete_confirmation_modal';
@@ -16,7 +16,7 @@ import { SloResetConfirmationModal } from '../../../../components/slo/reset_conf
 import { useDisableSlo } from '../../../../hooks/use_disable_slo';
 import { useEnableSlo } from '../../../../hooks/use_enable_slo';
 import { useResetSlo } from '../../../../hooks/use_reset_slo';
-import { BurnRateRuleParams } from '../../../../typings';
+import type { BurnRateRuleParams } from '../../../../typings';
 import { useSloListActions } from '../../hooks/use_slo_list_actions';
 import { useSloFormattedSummary } from '../../hooks/use_slo_summary';
 import { SloBadges } from '../badges/slo_badges';

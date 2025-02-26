@@ -7,7 +7,7 @@
 
 import { z } from '@kbn/zod';
 import { NonEmptyString } from '@kbn/zod-helpers';
-import { StreamDefinitionBase } from '../base';
+import type { StreamDefinitionBase } from '../base';
 
 interface GroupBase {
   description?: string;

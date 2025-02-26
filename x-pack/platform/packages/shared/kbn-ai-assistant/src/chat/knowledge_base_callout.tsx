@@ -17,7 +17,7 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { UseKnowledgeBaseResult } from '../hooks/use_knowledge_base';
+import type { UseKnowledgeBaseResult } from '../hooks/use_knowledge_base';
 
 export function KnowledgeBaseCallout({ knowledgeBase }: { knowledgeBase: UseKnowledgeBaseResult }) {
   let content: React.ReactNode;

@@ -12,14 +12,15 @@ import {
   isCommonError,
   LOADING_STATE_TEST_SUBJECT,
   PACKAGE_NOT_INSTALLED_TEST_SUBJECT,
+  CloudPosturePage,
 } from './cloud_posture_page';
 import { createReactQueryResponse } from '../test/fixtures/react_query';
 import { TestProvider } from '../test/test_provider';
 import { coreMock } from '@kbn/core/public/mocks';
 import { render, screen } from '@testing-library/react';
-import React, { ComponentProps } from 'react';
-import { UseQueryResult } from '@tanstack/react-query';
-import { CloudPosturePage } from './cloud_posture_page';
+import type { ComponentProps } from 'react';
+import React from 'react';
+import type { UseQueryResult } from '@tanstack/react-query';
 import { NoDataPage } from '@kbn/kibana-react-plugin/public';
 
 const chance = new Chance();

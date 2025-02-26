@@ -14,8 +14,11 @@ import useObservable from 'react-use/lib/useObservable';
 
 import { RandomSamplerRangeSlider } from './random_sampler_range_slider';
 import type { RandomSampler, RandomSamplerOption } from './random_sampler';
-import { randomSamplerText } from './random_sampler';
-import { RANDOM_SAMPLER_OPTION, RANDOM_SAMPLER_SELECT_OPTIONS } from './random_sampler';
+import {
+  randomSamplerText,
+  RANDOM_SAMPLER_OPTION,
+  RANDOM_SAMPLER_SELECT_OPTIONS,
+} from './random_sampler';
 
 interface Props {
   randomSampler: RandomSampler;

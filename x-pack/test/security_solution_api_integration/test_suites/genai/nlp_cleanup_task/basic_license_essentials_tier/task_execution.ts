@@ -8,7 +8,7 @@
 import expect from '@kbn/expect';
 import { TaskStatus } from '@kbn/task-manager-plugin/server';
 import type { MlGetTrainedModelsResponse } from '@elastic/elasticsearch/lib/api/types';
-import { FtrProviderContext } from '../../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../../ftr_provider_context';
 import { waitFor } from '../../../../../common/utils/security_solution';
 import { SUPPORTED_TRAINED_MODELS } from '../../../../../functional/services/ml/api';
 

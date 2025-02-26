@@ -7,9 +7,9 @@
 
 import React from 'react';
 import { EuiLink } from '@elastic/eui';
-import { IlmLocatorParams } from '@kbn/index-lifecycle-management-common-shared';
-import { LocatorPublic } from '@kbn/share-plugin/common';
-import { IngestStreamLifecycleILM } from '@kbn/streams-schema';
+import type { IlmLocatorParams } from '@kbn/index-lifecycle-management-common-shared';
+import type { LocatorPublic } from '@kbn/share-plugin/common';
+import type { IngestStreamLifecycleILM } from '@kbn/streams-schema';
 import { i18n } from '@kbn/i18n';
 
 export function IlmLink({

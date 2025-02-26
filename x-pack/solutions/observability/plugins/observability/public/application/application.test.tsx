@@ -7,12 +7,12 @@
 
 import { createMemoryHistory } from 'history';
 import { noop } from 'lodash';
-import React from 'react';
+import type React from 'react';
 import { Observable } from 'rxjs';
-import { AppMountParameters, CoreStart } from '@kbn/core/public';
+import type { AppMountParameters, CoreStart } from '@kbn/core/public';
 import { themeServiceMock } from '@kbn/core/public/mocks';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
-import { ConfigSchema, ObservabilityPublicPluginsStart } from '../plugin';
+import type { ConfigSchema, ObservabilityPublicPluginsStart } from '../plugin';
 import { createObservabilityRuleTypeRegistryMock } from '../rules/observability_rule_type_registry_mock';
 import { renderApp } from '.';
 import { mockService } from '@kbn/observability-ai-assistant-plugin/public/mock';

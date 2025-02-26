@@ -8,7 +8,7 @@
  */
 
 import React from 'react';
-import { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
+import type { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
 import { EuiPanel, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { PROCESSOR_EVENT_FIELD, getTraceDocumentOverview } from '@kbn/discover-utils';

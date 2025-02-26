@@ -7,8 +7,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import type { OperatorFunction, PartialObserver, Subscription } from 'rxjs';
-import { BehaviorSubject, Observable } from 'rxjs';
-import { switchMap } from 'rxjs';
+import { BehaviorSubject, Observable, switchMap } from 'rxjs';
 
 export const useLatest = <Value>(value: Value) => {
   const valueRef = useRef(value);

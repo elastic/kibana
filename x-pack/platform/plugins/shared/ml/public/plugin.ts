@@ -6,15 +6,16 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { AppStatus, DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
 import type {
   AppMountParameters,
   CoreSetup,
   CoreStart,
   Plugin,
   PluginInitializerContext,
+  AppUpdater,
 } from '@kbn/core/public';
-import { BehaviorSubject, mergeMap } from 'rxjs';
-import { take } from 'rxjs';
+import { BehaviorSubject, mergeMap, take } from 'rxjs';
 
 import type { ObservabilityAIAssistantPublicStart } from '@kbn/observability-ai-assistant-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
@@ -26,7 +27,6 @@ import type { EmbeddableSetup, EmbeddableStart } from '@kbn/embeddable-plugin/pu
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { LensPublicStart } from '@kbn/lens-plugin/public';
 
-import { AppStatus, type AppUpdater, DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
 import type { UiActionsSetup, UiActionsStart } from '@kbn/ui-actions-plugin/public';
 
 import type { LicenseManagementUIPluginSetup } from '@kbn/license-management-plugin/public';
@@ -55,8 +55,8 @@ import { ENABLE_ESQL } from '@kbn/esql-utils';
 import type { MlSharedServices } from './application/services/get_shared_ml_services';
 import { getMlSharedServices } from './application/services/get_shared_ml_services';
 import { registerManagementSection } from './application/management';
-import type { MlLocatorParams } from './locator';
-import { MlLocatorDefinition, type MlLocator } from './locator';
+import { MlLocatorDefinition } from './locator';
+import type { MlLocatorParams, MlLocator } from './locator';
 import { registerHomeFeature } from './register_home_feature';
 import { isFullLicense, isMlEnabled } from '../common/license';
 import {

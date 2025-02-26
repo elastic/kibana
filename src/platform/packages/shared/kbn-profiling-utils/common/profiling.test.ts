@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { StackFrameMetadata } from './profiling';
 import {
   createStackFrameMetadata,
   FrameSymbolStatus,
@@ -17,7 +18,6 @@ import {
   getFrameSymbolStatus,
   getLanguageType,
   normalizeFrameType,
-  StackFrameMetadata,
 } from './profiling';
 
 describe('Stack frame metadata operations', () => {

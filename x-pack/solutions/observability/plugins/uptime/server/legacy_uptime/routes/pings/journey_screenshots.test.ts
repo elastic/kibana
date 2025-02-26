@@ -4,9 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { IKibanaResponse } from '@kbn/core-http-server';
-import { createJourneyScreenshotRoute, ClientContract } from './journey_screenshots';
-import { UMServerLibs } from '../../uptime_server';
+import type { IKibanaResponse } from '@kbn/core-http-server';
+import type { ClientContract } from './journey_screenshots';
+import { createJourneyScreenshotRoute } from './journey_screenshots';
+import type { UMServerLibs } from '../../uptime_server';
 
 describe('journey screenshot route', () => {
   let handlerContext: any;

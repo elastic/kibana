@@ -10,7 +10,7 @@ import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { productDocInstallStatusSavedObjectTypeName } from '../common/consts';
 import { ProductDocBasePlugin } from './plugin';
-import { ProductDocBaseSetupDependencies, ProductDocBaseStartDependencies } from './types';
+import type { ProductDocBaseSetupDependencies, ProductDocBaseStartDependencies } from './types';
 
 jest.mock('./services/package_installer');
 jest.mock('./services/search');

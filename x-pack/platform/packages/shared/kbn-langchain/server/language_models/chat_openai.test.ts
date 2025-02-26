@@ -6,7 +6,7 @@
  */
 
 import type OpenAI from 'openai';
-import { Stream } from 'openai/streaming';
+import type { Stream } from 'openai/streaming';
 import { loggerMock } from '@kbn/logging-mocks';
 import { actionsClientMock } from '@kbn/actions-plugin/server/actions_client/actions_client.mock';
 

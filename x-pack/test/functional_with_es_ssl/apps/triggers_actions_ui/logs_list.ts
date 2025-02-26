@@ -6,8 +6,8 @@
  */
 
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../ftr_provider_context';
-import { Role, User } from '../../../cases_api_integration/common/lib/authentication/types';
+import type { FtrProviderContext } from '../../ftr_provider_context';
+import type { Role, User } from '../../../cases_api_integration/common/lib/authentication/types';
 import {
   createUsersAndRoles,
   deleteUsersAndRoles,

@@ -14,13 +14,13 @@ import type {
   SavedObjectsCollectMultiNamespaceReferencesResponse,
   SavedObjectReferenceWithContext,
 } from '@kbn/core-saved-objects-api-server';
-import {
-  type ISavedObjectsSecurityExtension,
-  type ISavedObjectTypeRegistry,
-  type SavedObject,
-  type ISavedObjectsSerializer,
-  SavedObjectsErrorHelpers,
+import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
+import type {
   WithAuditName,
+  ISavedObjectsSecurityExtension,
+  ISavedObjectTypeRegistry,
+  SavedObject,
+  ISavedObjectsSerializer,
 } from '@kbn/core-saved-objects-server';
 import { SavedObjectsUtils } from '@kbn/core-saved-objects-utils-server';
 import { getObjectKey, parseObjectKey } from '@kbn/core-saved-objects-base-server-internal';

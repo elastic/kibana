@@ -10,7 +10,7 @@ import type { ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
 import { APPLY_FILTER_TRIGGER } from '@kbn/data-plugin/public';
 import { ACTION_GLOBAL_APPLY_FILTER } from '@kbn/unified-search-plugin/public';
 import { VALUE_CLICK_TRIGGER } from '@kbn/embeddable-plugin/public';
-import { RawValue } from '../../common/constants';
+import type { RawValue } from '../../common/constants';
 import type { MapApi } from './types';
 import { getUiActions } from '../kibana_services';
 import { isUrlDrilldown, toValueClickDataFormat } from '../trigger_actions/trigger_utils';

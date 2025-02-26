@@ -8,9 +8,8 @@ import { schema } from '@kbn/config-schema';
 
 import type { FleetAuthzRouter } from '../../services/security';
 
-import { API_VERSIONS } from '../../../common/constants';
+import { API_VERSIONS, FLEET_SERVER_HOST_API_ROUTES } from '../../../common/constants';
 
-import { FLEET_SERVER_HOST_API_ROUTES } from '../../../common/constants';
 import {
   FleetServerHostResponseSchema,
   FleetServerHostSchema,

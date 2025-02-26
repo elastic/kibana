@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { CoreSetup } from '@kbn/core/server';
+import type { CoreSetup, Logger } from '@kbn/core/server';
 import type { Optional } from 'utility-types';
 
 /**
@@ -173,8 +173,6 @@ export interface EventStreamEvent {
  * Event Stream if not provided.
  */
 export type EventStreamEventPartial = Optional<EventStreamEvent, 'time'>;
-
-import type { Logger } from '@kbn/core/server';
 
 /**
  * Logger interface used in the Event Stream.

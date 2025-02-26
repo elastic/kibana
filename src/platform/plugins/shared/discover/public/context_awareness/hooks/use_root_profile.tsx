@@ -7,9 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { distinctUntilChanged, filter, switchMap, tap } from 'rxjs';
-import React from 'react';
 import { useDiscoverServices } from '../../hooks/use_discover_services';
 import type { Profile } from '../types';
 

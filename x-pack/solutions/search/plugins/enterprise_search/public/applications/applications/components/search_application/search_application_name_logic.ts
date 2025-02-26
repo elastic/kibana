@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { kea, MakeLogicType } from 'kea';
+import type { MakeLogicType } from 'kea';
+import { kea } from 'kea';
 
 export interface SearchApplicationNameProps {
   searchApplicationName: string;

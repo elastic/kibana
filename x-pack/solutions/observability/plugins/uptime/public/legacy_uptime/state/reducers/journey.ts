@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import { handleActions, Action } from 'redux-actions';
-import { JourneyStep, SyntheticsJourneyApiResponse } from '../../../../common/runtime_types';
-import { pruneJourneyState } from '../actions/journey';
+import type { Action } from 'redux-actions';
+import { handleActions } from 'redux-actions';
+import type { JourneyStep, SyntheticsJourneyApiResponse } from '../../../../common/runtime_types';
 import {
-  FetchJourneyStepsParams,
-  GetJourneyFailPayload,
+  pruneJourneyState,
   getJourneySteps,
   getJourneyStepsFail,
   getJourneyStepsSuccess,
 } from '../actions/journey';
+import type { FetchJourneyStepsParams, GetJourneyFailPayload } from '../actions/journey';
 
 export interface JourneyState {
   checkGroup: string;

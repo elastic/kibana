@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { v5 as uuidv5 } from 'uuid';
-import { omit } from 'lodash';
+import _, { omit } from 'lodash';
 import { load } from 'js-yaml';
 import deepEqual from 'fast-deep-equal';
 import { indexBy } from 'lodash/fp';
@@ -17,8 +17,6 @@ import type {
   SavedObjectsClientContract,
 } from '@kbn/core/server';
 import { SavedObjectsUtils } from '@kbn/core/server';
-
-import _ from 'lodash';
 
 import pMap from 'p-map';
 
@@ -36,6 +34,7 @@ import type {
   OutputSoKafkaAttributes,
   OutputSoRemoteElasticsearchAttributes,
   PolicySecretReference,
+  OutputType,
 } from '../types';
 import {
   LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE,
@@ -66,8 +65,6 @@ import {
   OutputUnauthorizedError,
   FleetError,
 } from '../errors';
-
-import type { OutputType } from '../types';
 
 import { agentPolicyService } from './agent_policy';
 import { packagePolicyService } from './package_policy';

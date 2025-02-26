@@ -11,14 +11,13 @@ import { URL } from 'url';
 
 import axios from 'axios';
 
-import type { InfoResponse } from '@elastic/elasticsearch/lib/api/types';
+import type { InfoResponse, LicenseGetResponse } from '@elastic/elasticsearch/lib/api/types';
 
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 
 import { MONITOR_UPDATE_CHANNEL } from './constants';
 
 import { TelemetryEventsSender } from './sender';
-import { LicenseGetResponse } from '@elastic/elasticsearch/lib/api/types';
 import { Observable } from 'rxjs';
 
 jest.mock('axios', () => {

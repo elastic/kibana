@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import type { ESQLControlVariable } from '@kbn/esql-validation-autocomplete';
-import { PublishingSubject } from '@kbn/presentation-publishing';
+import type { PublishingSubject } from '@kbn/presentation-publishing';
 
 /**
  * This should all be moved into a package and reorganized into separate files etc

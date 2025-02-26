@@ -5,13 +5,11 @@
  * 2.0.
  */
 
-import { useEffect, useState } from 'react';
-
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 
 import { useActions, useValues } from 'kea';
 
-import {
+import type {
   InferenceServiceSettings,
   MappingProperty,
   MappingPropertyBase,
@@ -21,7 +19,7 @@ import {
 import { EuiButton, EuiCallOut } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { LocalInferenceServiceSettings } from '@kbn/ml-trained-models-utils/src/constants/trained_models';
+import type { LocalInferenceServiceSettings } from '@kbn/ml-trained-models-utils/src/constants/trained_models';
 
 import { KibanaLogic } from '../../../shared/kibana';
 import { mappingsWithPropsApiLogic } from '../../api/mappings/mappings_logic';

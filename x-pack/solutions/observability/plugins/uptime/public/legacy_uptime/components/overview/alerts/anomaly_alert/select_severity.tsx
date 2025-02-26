@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { Fragment, FC, useState, useEffect } from 'react';
+import type { FC } from 'react';
+import React, { Fragment, useState, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 

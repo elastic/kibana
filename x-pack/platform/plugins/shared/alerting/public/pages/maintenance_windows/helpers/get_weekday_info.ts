@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import moment, { Moment } from 'moment';
+import type { Moment } from 'moment';
+import moment from 'moment';
 
 export const getWeekdayInfo = (date: Moment, dayOfWeekFmt: string = 'dddd') => {
   const dayOfWeek = date.format(dayOfWeekFmt);

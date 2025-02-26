@@ -7,8 +7,11 @@
 
 import { i18n } from '@kbn/i18n';
 import { CUMULATIVE_SUM_ID, CUMULATIVE_SUM_NAME } from '@kbn/lens-formula-docs';
-import { FormattedIndexPatternColumn, ReferenceBasedIndexPatternColumn } from '../column_types';
-import { FormBasedLayer } from '../../../types';
+import type {
+  FormattedIndexPatternColumn,
+  ReferenceBasedIndexPatternColumn,
+} from '../column_types';
+import type { FormBasedLayer } from '../../../types';
 import {
   checkForDateHistogram,
   getErrorsForDateReference,
@@ -17,7 +20,7 @@ import {
   buildLabelFunction,
   checkForDataLayerType,
 } from './utils';
-import { OperationDefinition } from '..';
+import type { OperationDefinition } from '..';
 import { getFormatFromPreviousColumn, getFilter } from '../helpers';
 import { DOCUMENT_FIELD_NAME } from '../../../../../../common/constants';
 

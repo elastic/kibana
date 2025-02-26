@@ -16,10 +16,9 @@ import {
   cloneLayer,
   getUnsupportedOperationsWarningMessage,
 } from './utils';
-import type { FormBasedPrivateState, GenericIndexPatternColumn } from './types';
+import type { FormBasedPrivateState, GenericIndexPatternColumn, FormBasedLayer } from './types';
 import type { FramePublicAPI, IndexPattern } from '../../types';
-import { TermsIndexPatternColumn } from './operations';
-import { FormBasedLayer } from './types';
+import type { TermsIndexPatternColumn } from './operations';
 import { createMockedIndexPatternWithAdditionalFields } from './mocks';
 import { getLongMessage } from '../../user_messages_utils';
 

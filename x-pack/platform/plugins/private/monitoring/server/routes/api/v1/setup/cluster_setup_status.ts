@@ -15,7 +15,7 @@ import { createValidationFunction } from '../../../../lib/create_route_validatio
 import { verifyMonitoringAuth } from '../../../../lib/elasticsearch/verify_monitoring_auth';
 import { handleError } from '../../../../lib/errors';
 import { getCollectionStatus } from '../../../../lib/setup/collection';
-import { MonitoringCore } from '../../../../types';
+import type { MonitoringCore } from '../../../../types';
 
 export function clusterSetupStatusRoute(server: MonitoringCore) {
   /*

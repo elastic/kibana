@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import type { ManagedUserFields } from '../../../../../common/search_strategy/security_solution/users/managed_details';
-import {
-  ManagedUserDatasetKey,
-  type ManagedUserHits,
+import { ManagedUserDatasetKey } from '../../../../../common/search_strategy/security_solution/users/managed_details';
+import type {
+  ManagedUserFields,
+  ManagedUserHits,
 } from '../../../../../common/search_strategy/security_solution/users/managed_details';
 import type { ManagedUserData } from '../types';
 import { mockAnomalies } from '../../../../common/components/ml/mock';

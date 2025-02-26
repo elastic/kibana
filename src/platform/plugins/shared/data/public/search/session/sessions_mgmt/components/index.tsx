@@ -7,9 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiLinkProps, EuiText, EuiTextProps } from '@elastic/eui';
+import type { EuiLinkProps, EuiTextProps } from '@elastic/eui';
+import { EuiText } from '@elastic/eui';
 import React from 'react';
-import extendSessionIcon from '../icons/extend_session.svg';
+import type extendSessionIcon from '../icons/extend_session.svg';
 
 export type { OnActionComplete } from './actions';
 export { PopoverActionsMenu } from './actions';

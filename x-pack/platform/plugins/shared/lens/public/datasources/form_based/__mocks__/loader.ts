@@ -6,7 +6,7 @@
  */
 
 import { createMockedIndexPattern, createMockedRestrictedIndexPattern } from '../mocks';
-import { FormBasedPrivateState } from '../types';
+import type { FormBasedPrivateState } from '../types';
 
 export function loadInitialState() {
   const indexPattern = createMockedIndexPattern();

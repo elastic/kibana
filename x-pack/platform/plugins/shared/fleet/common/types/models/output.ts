@@ -5,14 +5,18 @@
  * 2.0.
  */
 
-import type { outputType } from '../../constants';
+import type {
+  outputType,
+  kafkaAuthType,
+  kafkaCompressionType,
+  kafkaSaslMechanism,
+  kafkaPartitionType,
+  kafkaTopicWhenType,
+  kafkaAcknowledgeReliabilityLevel,
+  kafkaVerificationModes,
+  kafkaConnectionType,
+} from '../../constants';
 import type { ValueOf } from '..';
-import type { kafkaAuthType, kafkaCompressionType, kafkaSaslMechanism } from '../../constants';
-import type { kafkaPartitionType } from '../../constants';
-import type { kafkaTopicWhenType } from '../../constants';
-import type { kafkaAcknowledgeReliabilityLevel } from '../../constants';
-import type { kafkaVerificationModes } from '../../constants';
-import type { kafkaConnectionType } from '../../constants';
 
 export type OutputType = typeof outputType;
 export type KafkaCompressionType = typeof kafkaCompressionType;

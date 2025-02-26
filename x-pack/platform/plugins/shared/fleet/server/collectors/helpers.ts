@@ -5,10 +5,9 @@
  * 2.0.
  */
 
-import type { CoreSetup } from '@kbn/core/server';
+import type { CoreSetup, ElasticsearchClient } from '@kbn/core/server';
 
 import { SavedObjectsClient } from '@kbn/core/server';
-import type { ElasticsearchClient } from '@kbn/core/server';
 
 export async function getInternalClients(
   core: CoreSetup

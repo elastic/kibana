@@ -8,7 +8,8 @@
  */
 
 import { mergeTests } from 'playwright/test';
-import { FleetApiFixture, fleetApiFixture } from './fleet';
+import type { FleetApiFixture } from './fleet';
+import { fleetApiFixture } from './fleet';
 
 export const apiFixtures = mergeTests(fleetApiFixture);
 

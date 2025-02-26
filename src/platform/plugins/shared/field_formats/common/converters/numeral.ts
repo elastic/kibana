@@ -13,7 +13,7 @@ import numeral from '@elastic/numeral';
 import numeralLanguages from '@elastic/numeral/languages';
 import { KBN_FIELD_TYPES } from '@kbn/field-types';
 import { FieldFormat } from '../field_format';
-import { HtmlContextTypeConvert, TextContextTypeConvert } from '../types';
+import type { HtmlContextTypeConvert, TextContextTypeConvert } from '../types';
 import { FORMATS_UI_SETTINGS } from '../constants/ui_settings';
 import { asPrettyString } from '../utils';
 

@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import type { RequestHandler } from '@kbn/core/server';
-import {
-  SavedObjectsErrorHelpers,
-  type SavedObjectsClientContract,
-  type ElasticsearchClient,
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
+import type {
+  RequestHandler,
+  SavedObjectsClientContract,
+  ElasticsearchClient,
 } from '@kbn/core/server';
 import type { TypeOf } from '@kbn/config-schema';
 import pMap from 'p-map';

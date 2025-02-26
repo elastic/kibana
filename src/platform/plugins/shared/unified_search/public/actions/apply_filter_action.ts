@@ -8,11 +8,12 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { CoreSetup } from '@kbn/core/public';
+import type { CoreSetup } from '@kbn/core/public';
 import { toMountPoint } from '@kbn/react-kibana-mount';
-import { IncompatibleActionError, UiActionsActionDefinition } from '@kbn/ui-actions-plugin/public';
+import type { UiActionsActionDefinition } from '@kbn/ui-actions-plugin/public';
+import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 // for cleanup esFilters need to fix the issue https://github.com/elastic/kibana/issues/131292
-import { FilterManager, TimefilterContract } from '@kbn/data-plugin/public';
+import type { FilterManager, TimefilterContract } from '@kbn/data-plugin/public';
 import type { Filter, RangeFilter } from '@kbn/es-query';
 import { getIndexPatterns } from '../services';
 import { applyFiltersPopover } from '../apply_filters';

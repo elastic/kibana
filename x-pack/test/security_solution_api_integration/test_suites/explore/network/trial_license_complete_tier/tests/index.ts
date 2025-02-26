@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { FtrProviderContextWithSpaces } from '../../../../../ftr_provider_context_with_spaces';
+import type { FtrProviderContextWithSpaces } from '../../../../../ftr_provider_context_with_spaces';
 
 export default function ({ loadTestFile }: FtrProviderContextWithSpaces) {
   describe('@ess @serverless SecuritySolution Explore Network', () => {

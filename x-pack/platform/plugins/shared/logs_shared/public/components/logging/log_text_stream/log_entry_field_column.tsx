@@ -7,16 +7,16 @@
 
 import React from 'react';
 import styled from '@emotion/styled';
-import { JsonValue } from '@kbn/utility-types';
-import { LogColumn } from '../../../../common/log_entry';
+import type { JsonValue } from '@kbn/utility-types';
+import type { LogColumn } from '../../../../common/log_entry';
 import { isFieldColumn, isHighlightFieldColumn } from '../../../utils/log_entry';
 import { FieldValue } from './field_value';
 import { LogEntryColumnContent } from './log_entry_column';
+import type { WrapMode } from './text_styles';
 import {
   longWrappedContentStyle,
   preWrappedContentStyle,
   unwrappedContentStyle,
-  WrapMode,
 } from './text_styles';
 
 export interface LogEntryFieldColumnProps {

@@ -23,7 +23,7 @@ import { Star as star } from './star';
 import { Tag as tag } from './tag';
 import { Triangle as triangle } from './triangle';
 import { TriangleRight as triangleRight } from './triangle_right';
-import { ShapeType } from '../../reusable';
+import type { ShapeType } from '../../reusable';
 
 const shapes: { [key: string]: ShapeType } = {
   arrow,

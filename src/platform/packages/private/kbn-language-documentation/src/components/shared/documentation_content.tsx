@@ -9,8 +9,7 @@
 import React from 'react';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import { useEuiTheme, euiScrollBarStyles } from '@elastic/eui';
-import { EuiFlexGroup, EuiText, EuiBetaBadge } from '@elastic/eui';
+import { useEuiTheme, euiScrollBarStyles, EuiFlexGroup, EuiText, EuiBetaBadge } from '@elastic/eui';
 import type { LanguageDocumentationSections } from '../../types';
 
 interface DocumentationContentProps {

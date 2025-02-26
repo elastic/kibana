@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { Filter } from '@kbn/es-query';
+import type { Filter } from '@kbn/es-query';
 import {
   createStateContainer,
   createStateContainerReactHelpers,
 } from '@kbn/kibana-utils-plugin/public';
-import { AlertStatus } from '../../../../common/typings';
+import type { AlertStatus } from '../../../../common/typings';
 import { ALL_ALERTS } from '../constants';
-import { AlertSearchBarContainerState } from '../types';
+import type { AlertSearchBarContainerState } from '../types';
 
 interface AlertSearchBarStateTransitions {
   setRangeFrom: (

@@ -14,16 +14,13 @@ import {
   TIMELINE_URL,
   TIMELINE_PREPACKAGED_URL,
 } from '../../../../common/constants';
+import { TimelineTypeEnum, TimelineStatusEnum } from '../../../../common/api/timeline';
 import type {
   SavedTimeline,
   PatchTimelineRequestBody,
   CreateTimelinesRequestBody,
   GetTimelineRequestQuery,
-} from '../../../../common/api/timeline';
-import {
-  type TimelineType,
-  TimelineTypeEnum,
-  TimelineStatusEnum,
+  TimelineType,
 } from '../../../../common/api/timeline';
 
 import { requestMock } from '../../detection_engine/routes/__mocks__';

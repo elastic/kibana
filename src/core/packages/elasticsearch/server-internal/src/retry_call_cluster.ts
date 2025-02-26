@@ -7,8 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { defer, throwError, iif, timer } from 'rxjs';
-import { concatMap, retryWhen } from 'rxjs';
+import { defer, throwError, iif, timer, concatMap, retryWhen } from 'rxjs';
 
 const retryResponseStatuses = [
   503, // ServiceUnavailable

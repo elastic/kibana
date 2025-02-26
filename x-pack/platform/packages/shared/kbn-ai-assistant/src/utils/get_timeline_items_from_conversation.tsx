@@ -12,12 +12,11 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { AuthenticatedUser } from '@kbn/security-plugin/common';
 import type { Message } from '@kbn/observability-ai-assistant-plugin/common';
-import { MessageRole } from '@kbn/observability-ai-assistant-plugin/public';
-import {
-  ChatState,
+import { MessageRole, ChatState } from '@kbn/observability-ai-assistant-plugin/public';
+import type {
+  ChatActionClickPayload,
   ObservabilityAIAssistantChatService,
 } from '@kbn/observability-ai-assistant-plugin/public';
-import type { ChatActionClickPayload } from '@kbn/observability-ai-assistant-plugin/public';
 import { RenderFunction } from '../render_function';
 import { safeJsonParse } from './safe_json_parse';
 import type { ChatTimelineItem } from '../chat/chat_timeline';

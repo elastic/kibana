@@ -12,12 +12,14 @@ import { EuiCallOut, EuiSpacer, EuiAccordion, EuiListGroup } from '@elastic/eui'
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import type { VALIDATION_RESULT } from '@kbn/ml-category-validator';
 import {
-  type CategorizationAnalyzer,
-  type FieldExampleCheck,
   CATEGORY_EXAMPLES_VALIDATION_STATUS,
   VALIDATION_CHECK_DESCRIPTION,
+} from '@kbn/ml-category-validator';
+import type {
+  VALIDATION_RESULT,
+  CategorizationAnalyzer,
+  FieldExampleCheck,
 } from '@kbn/ml-category-validator';
 
 import { EditCategorizationAnalyzerFlyout } from '../../../common/edit_categorization_analyzer_flyout';

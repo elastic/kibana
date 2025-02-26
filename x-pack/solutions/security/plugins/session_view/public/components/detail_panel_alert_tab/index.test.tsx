@@ -7,11 +7,16 @@
 
 import React from 'react';
 
-import { AppContextTestRender, createAppRootMockRenderer } from '../../test';
-import { DetailPanelAlertTab } from '.';
+import type { AppContextTestRender } from '../../test';
+import { createAppRootMockRenderer } from '../../test';
+import {
+  DetailPanelAlertTab,
+  INVESTIGATED_ALERT_TEST_ID,
+  VIEW_MODE_TOGGLE,
+  ALERTS_TAB_EMPTY_STATE_TEST_ID,
+} from '.';
 import { mockAlerts } from '../../../common/mocks/constants/session_view_process.mock';
 import { fireEvent } from '@testing-library/react';
-import { INVESTIGATED_ALERT_TEST_ID, VIEW_MODE_TOGGLE, ALERTS_TAB_EMPTY_STATE_TEST_ID } from '.';
 import {
   ALERT_LIST_ITEM_TEST_ID,
   ALERT_LIST_ITEM_ARGS_TEST_ID,

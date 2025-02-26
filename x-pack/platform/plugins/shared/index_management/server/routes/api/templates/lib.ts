@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { IScopedClusterClient } from '@kbn/core/server';
+import type { IScopedClusterClient } from '@kbn/core/server';
 import type { IndicesPutIndexTemplateRequest } from '@elastic/elasticsearch/lib/api/types';
 import { serializeTemplate, serializeLegacyTemplate } from '../../../../common/lib';
-import { TemplateDeserialized, LegacyTemplateSerialized } from '../../../../common';
+import type { TemplateDeserialized, LegacyTemplateSerialized } from '../../../../common';
 
 export const doesTemplateExist = async ({
   name,

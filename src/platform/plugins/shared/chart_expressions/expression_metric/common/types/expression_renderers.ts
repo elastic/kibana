@@ -7,11 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ExpressionValueVisDimension } from '@kbn/visualizations-plugin/common';
-import { CustomPaletteState } from '@kbn/charts-plugin/common';
-import { LayoutDirection, MetricStyle } from '@elastic/charts';
-import { PaletteOutput } from '@kbn/coloring';
-import { TrendlineResult } from './expression_functions';
+import type { ExpressionValueVisDimension } from '@kbn/visualizations-plugin/common';
+import type { CustomPaletteState } from '@kbn/charts-plugin/common';
+import type { LayoutDirection, MetricStyle } from '@elastic/charts';
+import type { PaletteOutput } from '@kbn/coloring';
+import type { TrendlineResult } from './expression_functions';
 
 export const visType = 'metric';
 

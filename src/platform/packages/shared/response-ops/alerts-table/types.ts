@@ -20,14 +20,14 @@ import type {
   RefAttributes,
   SetStateAction,
 } from 'react';
-import {
+import type {
   AlertConsumers,
   ALERT_CASE_IDS,
   ALERT_STATUS,
   ALERT_MAINTENANCE_WINDOW_IDS,
 } from '@kbn/rule-data-utils';
 import type { HttpStart } from '@kbn/core-http-browser';
-import type { EsQuerySnapshot, LegacyField } from '@kbn/alerting-types';
+import type { EsQuerySnapshot, LegacyField, BrowserFields, Alert } from '@kbn/alerting-types';
 import type {
   EuiDataGridColumn,
   EuiDataGridColumnCellAction,
@@ -43,11 +43,9 @@ import type {
   QueryDslQueryContainer,
   SortCombinations,
 } from '@elastic/elasticsearch/lib/api/types';
-import type { BrowserFields } from '@kbn/alerting-types';
 import type { SetRequired } from 'type-fest';
 import type { MaintenanceWindow } from '@kbn/alerting-plugin/common';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
-import type { Alert } from '@kbn/alerting-types';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { FieldBrowserOptions } from '@kbn/response-ops-alerts-fields-browser';
 import type { MutedAlerts } from '@kbn/response-ops-alerts-apis/types';

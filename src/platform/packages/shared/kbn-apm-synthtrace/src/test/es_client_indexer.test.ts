@@ -9,7 +9,7 @@
 
 import { apm, timerange } from '@kbn/apm-synthtrace-client';
 import { pick, range, sum } from 'lodash';
-import { Readable } from 'stream';
+import type { Readable } from 'stream';
 import { ApmSynthtraceEsClient } from '../lib/apm/client/apm_synthtrace_es_client';
 
 describe('Synthtrace ES Client indexer', () => {

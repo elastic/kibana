@@ -19,6 +19,11 @@ import {
   itemAttrsToSavedObjectAttrs,
   savedObjectToItem,
 } from './transform_utils';
+import type {
+  ControlLabelPosition,
+  ControlGroupChainingSystem,
+  ControlWidth,
+} from '@kbn/controls-plugin/common';
 import {
   DEFAULT_AUTO_APPLY_SELECTIONS,
   DEFAULT_CONTROL_CHAINING,
@@ -26,9 +31,6 @@ import {
   DEFAULT_CONTROL_LABEL_POSITION,
   DEFAULT_CONTROL_WIDTH,
   DEFAULT_IGNORE_PARENT_SETTINGS,
-  ControlLabelPosition,
-  ControlGroupChainingSystem,
-  ControlWidth,
 } from '@kbn/controls-plugin/common';
 import { DEFAULT_DASHBOARD_OPTIONS } from '../../../common/content_management';
 

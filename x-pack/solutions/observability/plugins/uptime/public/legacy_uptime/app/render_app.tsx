@@ -8,12 +8,13 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { i18n as i18nFormatter } from '@kbn/i18n';
-import { AppMountParameters, CoreStart } from '@kbn/core/public';
+import type { AppMountParameters, CoreStart } from '@kbn/core/public';
 import { getIntegratedAppAvailability } from '../lib/adapters/framework/capabilities_adapter';
 import { DEFAULT_TIMEPICKER_QUICK_RANGES, INTEGRATED_SOLUTIONS } from '../../../common/constants';
 import type { ExperimentalFeatures } from '../../../common/config';
-import { UptimeApp, UptimeAppProps } from './uptime_app';
-import { ClientPluginsSetup, ClientPluginsStart } from '../../plugin';
+import type { UptimeAppProps } from './uptime_app';
+import { UptimeApp } from './uptime_app';
+import type { ClientPluginsSetup, ClientPluginsStart } from '../../plugin';
 
 export function renderApp(
   core: CoreStart,

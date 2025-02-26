@@ -7,10 +7,10 @@
 
 import React from 'react';
 
-import { CoreStart } from '@kbn/core/public';
-import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
-import { AggregateQuery, isOfAggregateQueryType, getAggregateQueryMode } from '@kbn/es-query';
-import type { SavedObjectReference } from '@kbn/core/public';
+import type { CoreStart, SavedObjectReference } from '@kbn/core/public';
+import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
+import type { AggregateQuery } from '@kbn/es-query';
+import { isOfAggregateQueryType, getAggregateQueryMode } from '@kbn/es-query';
 import type { ExpressionsStart, DatatableColumn } from '@kbn/expressions-plugin/public';
 import type { DataViewsPublicPluginStart, DataView } from '@kbn/data-views-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
@@ -20,7 +20,7 @@ import { TextBasedDataPanel } from './components/datapanel';
 import { TextBasedDimensionEditor } from './components/dimension_editor';
 import { TextBasedDimensionTrigger } from './components/dimension_trigger';
 import { toExpression } from './to_expression';
-import {
+import type {
   DatasourceDimensionEditorProps,
   DatasourceDataPanelProps,
   DatasourceLayerPanelProps,
@@ -31,6 +31,8 @@ import {
   DataSourceInfo,
   UserMessage,
   OperationMetadata,
+  Datasource,
+  DatasourceSuggestion,
 } from '../../types';
 import { generateId } from '../../id_generator';
 import type {
@@ -39,7 +41,6 @@ import type {
   TextBasedLayerColumn,
   TextBasedField,
 } from './types';
-import type { Datasource, DatasourceSuggestion } from '../../types';
 import { getUniqueLabelGenerator, nonNullable } from '../../utils';
 import { onDrop, getDropProps } from './dnd';
 import { removeColumn } from './remove_column';

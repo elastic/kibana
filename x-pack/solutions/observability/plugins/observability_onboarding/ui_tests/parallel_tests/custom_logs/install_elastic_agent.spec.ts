@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { expect, Locator } from '@kbn/scout-oblt';
+import type { Locator } from '@kbn/scout-oblt';
+import { expect } from '@kbn/scout-oblt';
 import { generateIntegrationName, test } from '../../fixtures';
 
 const checkAgentStatusUpdated = async (locator: Locator, status: string) =>

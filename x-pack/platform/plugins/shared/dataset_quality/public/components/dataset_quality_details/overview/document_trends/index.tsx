@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { OnTimeChangeProps } from '@elastic/eui';
 import {
   EuiAccordion,
   EuiButtonGroup,
@@ -18,7 +19,6 @@ import {
   EuiSpacer,
   EuiTitle,
   EuiToolTip,
-  OnTimeChangeProps,
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
@@ -33,7 +33,7 @@ import {
   overviewTrendsDocsText,
 } from '../../../../../common/translations';
 import { useDatasetQualityDetailsState, useQualityIssuesDocsChart } from '../../../../hooks';
-import { QualityIssueType } from '../../../../state_machines/dataset_quality_details_controller';
+import type { QualityIssueType } from '../../../../state_machines/dataset_quality_details_controller';
 import { useDatasetQualityDetailsContext } from '../../context';
 import { TrendDocsChart } from './trend_docs_chart';
 

@@ -7,11 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Reducer } from 'react';
+import type { Reducer } from 'react';
 import { produce } from 'immer';
 import { identity } from 'fp-ts/lib/function';
-import { BaseResponseType } from '../../types/common';
-import { RequestResult } from '../hooks/use_send_current_request/send_request';
+import type { BaseResponseType } from '../../types/common';
+import type { RequestResult } from '../hooks/use_send_current_request/send_request';
 
 export type Actions =
   | { type: 'sendRequest'; payload: undefined }

@@ -7,8 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { PluginInitializerContext, PluginConfigDescriptor } from '@kbn/core/server';
-import { configSchema, ConfigSchema } from './config';
+import type { PluginInitializerContext, PluginConfigDescriptor } from '@kbn/core/server';
+import type { ConfigSchema } from './config';
+import { configSchema } from './config';
 
 export const config: PluginConfigDescriptor<ConfigSchema> = {
   exposeToBrowser: {

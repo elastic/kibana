@@ -13,8 +13,7 @@ import { getInternalSavedObjectsClient } from '../utils';
 import type { DeletePacksRequestParamsSchema } from '../../../common/api';
 import { buildRouteValidation } from '../../utils/build_validation/route_validation';
 import { API_VERSIONS } from '../../../common/constants';
-import { OSQUERY_INTEGRATION_NAME } from '../../../common';
-import { PLUGIN_ID } from '../../../common';
+import { OSQUERY_INTEGRATION_NAME, PLUGIN_ID } from '../../../common';
 
 import { packSavedObjectType } from '../../../common/types';
 import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';

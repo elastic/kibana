@@ -8,10 +8,13 @@
  */
 
 import { SCOUT_SERVERS_ROOT } from '@kbn/scout-info';
-import { scoutPlaywrightReporter, scoutFailedTestsReporter } from '@kbn/scout-reporting';
+import {
+  scoutPlaywrightReporter,
+  scoutFailedTestsReporter,
+  generateTestRunId,
+} from '@kbn/scout-reporting';
 import { createPlaywrightConfig } from './create_config';
 import { VALID_CONFIG_MARKER } from '../types';
-import { generateTestRunId } from '@kbn/scout-reporting';
 
 jest.mock('@kbn/scout-reporting', () => ({
   ...jest.requireActual('@kbn/scout-reporting'),

@@ -11,7 +11,7 @@ import ReactDOM from 'react-dom';
 import { createHtmlPortalNode, OutPortal, InPortal } from 'react-reverse-portal';
 import { EuiToolTip, EuiButton, EuiFlexGroup, EuiFlexItem, EuiButtonEmpty } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { ChromeStyle } from '@kbn/core-chrome-browser';
+import type { ChromeStyle } from '@kbn/core-chrome-browser';
 import { AssistantIcon } from '@kbn/ai-assistant-icon';
 import { useAssistantContext } from '.';
 

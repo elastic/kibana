@@ -16,12 +16,11 @@ import {
   SavedObjectTimelineType,
   SavedObjectTimelineStatus,
 } from '../../../../../common/types/timeline/saved_object';
-import type { TimelineResponse } from '../../../../../common/api/timeline';
-import {
-  type TimelineType,
-  TimelineTypeEnum,
-  type TimelineStatus,
-  TimelineStatusEnum,
+import { TimelineTypeEnum, TimelineStatusEnum } from '../../../../../common/api/timeline';
+import type {
+  TimelineResponse,
+  TimelineType,
+  TimelineStatus,
 } from '../../../../../common/api/timeline';
 
 // TODO: Added to support legacy TimelineType.draft, can be removed in 7.10

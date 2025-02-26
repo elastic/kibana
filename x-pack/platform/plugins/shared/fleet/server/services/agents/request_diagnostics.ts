@@ -16,9 +16,8 @@ import { getCurrentNamespace } from '../spaces/get_current_namespace';
 import { agentsKueryNamespaceFilter } from '../spaces/agent_namespaces';
 
 import type { GetAgentsOptions } from '.';
-import { getAgents, getAgentsByKuery } from './crud';
+import { getAgents, getAgentsByKuery, openPointInTime } from './crud';
 import { createAgentAction } from './actions';
-import { openPointInTime } from './crud';
 import {
   RequestDiagnosticsActionRunner,
   requestDiagnosticsBatch,

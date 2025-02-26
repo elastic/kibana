@@ -6,11 +6,9 @@
  */
 import expect from '@kbn/expect';
 import { disableStreams, enableStreams, indexDocument } from '../helpers/requests';
-import {
-  StreamsSupertestRepositoryClient,
-  createStreamsRepositoryAdminClient,
-} from '../helpers/repository_client';
-import { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provider_context';
+import type { StreamsSupertestRepositoryClient } from '../helpers/repository_client';
+import { createStreamsRepositoryAdminClient } from '../helpers/repository_client';
+import type { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provider_context';
 
 export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   const roleScopedSupertest = getService('roleScopedSupertest');

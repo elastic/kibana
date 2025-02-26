@@ -7,10 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { of, Observable } from 'rxjs';
+import type { Observable } from 'rxjs';
+import { of, take } from 'rxjs';
 import { type ServiceStatus, ServiceStatusLevels } from '@kbn/core-status-common';
 import { calculateStatus$ } from './status';
-import { take } from 'rxjs';
 
 describe('calculateStatus$', () => {
   const expectUnavailableDueToEs = (status$: Observable<ServiceStatus>) =>

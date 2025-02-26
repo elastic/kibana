@@ -10,19 +10,13 @@
 import React, { useCallback, useState, useMemo, useEffect } from 'react';
 import useMountedState from 'react-use/lib/useMountedState';
 import { i18n } from '@kbn/i18n';
-import {
-  EuiComboBox,
-  EuiComboBoxOptionOption,
-  EuiFormRow,
-  EuiFlyoutBody,
-  EuiCallOut,
-  type EuiSwitchEvent,
-  EuiPanel,
-} from '@elastic/eui';
+import { EuiComboBox, EuiFormRow, EuiFlyoutBody, EuiCallOut, EuiPanel } from '@elastic/eui';
+import type { EuiComboBoxOptionOption, EuiSwitchEvent } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { ISearchGeneric } from '@kbn/search-types';
-import { ESQLVariableType, ESQLControlVariable } from '@kbn/esql-validation-autocomplete';
+import type { ESQLControlVariable } from '@kbn/esql-validation-autocomplete';
+import { ESQLVariableType } from '@kbn/esql-validation-autocomplete';
 import {
   getIndexPatternFromESQLQuery,
   getESQLResults,

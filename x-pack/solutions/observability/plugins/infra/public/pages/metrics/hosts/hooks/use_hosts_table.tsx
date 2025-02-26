@@ -11,15 +11,13 @@ import type {
   CriteriaWithPagination,
   EuiTableSelectionType,
 } from '@elastic/eui';
-import { EuiText, EuiLink } from '@elastic/eui';
+import { EuiText, EuiLink, EuiToolTip, EuiBadge } from '@elastic/eui';
 import createContainer from 'constate';
 import useAsync from 'react-use/lib/useAsync';
 import { isEqual } from 'lodash';
 import { isNumber } from 'lodash/fp';
 import type { CloudProvider } from '@kbn/custom-icons';
 import { findInventoryModel } from '@kbn/metrics-data-access-plugin/common';
-import { EuiToolTip } from '@elastic/eui';
-import { EuiBadge } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { APM_HOST_TROUBLESHOOTING_LINK } from '../../../../components/asset_details/constants';
 import { Popover } from '../../../../components/asset_details/tabs/common/popover';

@@ -13,7 +13,7 @@ import { NUMBER_FORMAT } from '../../../../common/constants';
 import { countColumnName, lastOccurrenceColumnName } from '../../../../common/translations';
 import { useQualityIssues } from '../../../hooks';
 import { SparkPlot } from '../../common/spark_plot';
-import { QualityIssue } from '../../../../common/api_types';
+import type { QualityIssue } from '../../../../common/api_types';
 
 export const QualityIssueFieldInfo = ({
   fieldList,

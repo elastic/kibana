@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { FindAnonymizationFieldsResponse } from '@kbn/elastic-assistant-common/impl/schemas/anonymization_fields/find_anonymization_fields_route.gen';
+import type { FindAnonymizationFieldsResponse } from '@kbn/elastic-assistant-common/impl/schemas/anonymization_fields/find_anonymization_fields_route.gen';
 import { isAllowed, isAnonymized, isDenied } from '@kbn/elastic-assistant-common';
-import { ContextEditorRow } from '../types';
+import type { ContextEditorRow } from '../types';
 
 export const getRows = ({
   anonymizationFields,

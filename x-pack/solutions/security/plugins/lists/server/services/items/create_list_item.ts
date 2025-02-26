@@ -6,8 +6,8 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
-import { ElasticsearchClient } from '@kbn/core/server';
-import {
+import type { ElasticsearchClient } from '@kbn/core/server';
+import type {
   DeserializerOrUndefined,
   IdOrUndefined,
   ListItemSchema,
@@ -19,7 +19,7 @@ import {
 import { encodeHitVersion } from '@kbn/securitysolution-es-utils';
 
 import { transformListItemToElasticQuery } from '../utils';
-import { IndexEsListItemSchema } from '../../schemas/elastic_query';
+import type { IndexEsListItemSchema } from '../../schemas/elastic_query';
 
 export interface CreateListItemOptions {
   deserializer: DeserializerOrUndefined;

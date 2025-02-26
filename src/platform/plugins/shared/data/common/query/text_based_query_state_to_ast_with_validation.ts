@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { isOfAggregateQueryType, Query } from '@kbn/es-query';
+import type { Query } from '@kbn/es-query';
+import { isOfAggregateQueryType } from '@kbn/es-query';
 import type { QueryState } from '..';
 import { textBasedQueryStateToExpressionAst } from './text_based_query_state_to_ast';
 

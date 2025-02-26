@@ -12,7 +12,7 @@ import { executionContextServiceMock } from '@kbn/core-execution-context-server-
 import { contextServiceMock } from '@kbn/core-http-context-server-mocks';
 import { createHttpService } from '@kbn/core-http-server-mocks';
 import { loggingSystemMock } from '@kbn/core-logging-browser-mocks';
-import { Server } from '@hapi/hapi';
+import type { Server } from '@hapi/hapi';
 import { MetricsService } from '@kbn/core-metrics-server-internal';
 import { Env } from '@kbn/config';
 import { REPO_ROOT } from '@kbn/repo-info';

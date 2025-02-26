@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import type { MouseEvent } from 'react';
-import React, { useState, type FC } from 'react';
+import React, { type MouseEvent, useState, type FC } from 'react';
 
 import { useEuiTheme, type EuiBasicTableProps } from '@elastic/eui';
 import { formatDate, EuiPanel, EuiBasicTable, EuiToolTip, EuiButtonIcon } from '@elastic/eui';

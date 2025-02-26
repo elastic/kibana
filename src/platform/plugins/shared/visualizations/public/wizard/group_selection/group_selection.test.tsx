@@ -9,10 +9,12 @@
 
 import React from 'react';
 import userEvent from '@testing-library/user-event';
-import { TypesStart, BaseVisType, VisGroups } from '../../vis_types';
-import { GroupSelection, GroupSelectionProps } from './group_selection';
-import { DocLinksStart } from '@kbn/core/public';
-import { VisParams } from '../../../common';
+import type { TypesStart, BaseVisType } from '../../vis_types';
+import { VisGroups } from '../../vis_types';
+import type { GroupSelectionProps } from './group_selection';
+import { GroupSelection } from './group_selection';
+import type { DocLinksStart } from '@kbn/core/public';
+import type { VisParams } from '../../../common';
 import { render, screen } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 

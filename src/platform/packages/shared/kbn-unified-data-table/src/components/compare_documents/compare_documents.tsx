@@ -7,8 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import {
-  EuiDataGrid,
+import type {
   EuiDataGridColumnVisibility,
   EuiDataGridInMemory,
   EuiDataGridProps,
@@ -16,12 +15,12 @@ import {
   EuiDataGridSchemaDetector,
   EuiDataGridStyle,
   EuiDataGridToolBarVisibilityOptions,
-  useGeneratedHtmlId,
 } from '@elastic/eui';
+import { EuiDataGrid, useGeneratedHtmlId } from '@elastic/eui';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
-import { AdditionalFieldGroups } from '@kbn/unified-field-list';
+import type { AdditionalFieldGroups } from '@kbn/unified-field-list';
 import { memoize } from 'lodash';
 import React, { useMemo, useState } from 'react';
 import useLocalStorage from 'react-use/lib/useLocalStorage';

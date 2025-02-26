@@ -18,18 +18,18 @@ import {
 import { keyBy } from 'lodash/fp';
 
 import { css } from '@emotion/react';
-import {
+import type {
   PromptResponse,
   PerformPromptsBulkActionRequestBody as PromptsPerformBulkActionRequestBody,
 } from '@kbn/elastic-assistant-common/impl/schemas/prompts/bulk_crud_prompts_route.gen';
-import { ApiConfig } from '@kbn/elastic-assistant-common';
-import { AIConnector } from '../../../../connectorland/connector_selector';
-import { Conversation } from '../../../../..';
+import type { ApiConfig } from '@kbn/elastic-assistant-common';
+import type { AIConnector } from '../../../../connectorland/connector_selector';
+import type { Conversation } from '../../../../..';
 import * as i18n from './translations';
 import { ConversationMultiSelector } from './conversation_multi_selector/conversation_multi_selector';
 import { SystemPromptSelector } from './system_prompt_selector/system_prompt_selector';
 import { TEST_IDS } from '../../../constants';
-import { ConversationsBulkActions } from '../../../api';
+import type { ConversationsBulkActions } from '../../../api';
 import { getSelectedConversations } from '../system_prompt_settings_management/utils';
 import { useSystemPromptEditor } from './use_system_prompt_editor';
 import { getConversationApiConfig } from '../../../use_conversation/helpers';

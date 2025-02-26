@@ -7,10 +7,8 @@
 
 import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiIcon, EuiText } from '@elastic/eui';
 import React from 'react';
-import {
-  ELASTIC_MODEL_DEFINITIONS,
-  InferenceAPIConfigResponse,
-} from '@kbn/ml-trained-models-utils';
+import type { InferenceAPIConfigResponse } from '@kbn/ml-trained-models-utils';
+import { ELASTIC_MODEL_DEFINITIONS } from '@kbn/ml-trained-models-utils';
 import { SERVICE_PROVIDERS, ServiceProviderKeys } from '@kbn/inference-endpoint-ui-common';
 import * as i18n from './translations';
 

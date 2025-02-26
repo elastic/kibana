@@ -16,8 +16,7 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import React, { Fragment } from 'react';
-import { useState } from 'react';
+import React, { Fragment, useState } from 'react';
 import type { UserMessage } from '../../types';
 import './info_badges.scss';
 import { getLongMessage } from '../../user_messages_utils';

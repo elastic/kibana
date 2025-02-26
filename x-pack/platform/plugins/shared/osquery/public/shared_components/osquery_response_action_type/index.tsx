@@ -8,8 +8,7 @@
 import React, { useEffect, useMemo } from 'react';
 import { EuiSpacer } from '@elastic/eui';
 import type { FieldErrors } from 'react-hook-form';
-import { useFieldArray } from 'react-hook-form';
-import { useForm as useHookForm, FormProvider } from 'react-hook-form';
+import { useFieldArray, useForm as useHookForm, FormProvider } from 'react-hook-form';
 import { map, omit } from 'lodash';
 
 import type { ECSMapping } from '@kbn/osquery-io-ts-types';

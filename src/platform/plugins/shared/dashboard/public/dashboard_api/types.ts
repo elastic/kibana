@@ -8,17 +8,17 @@
  */
 
 import type { Reference } from '@kbn/content-management-utils';
-import {
+import type {
   ControlGroupApi,
   ControlGroupRuntimeState,
   ControlGroupSerializedState,
 } from '@kbn/controls-plugin/public';
-import { RefreshInterval, SearchSessionInfoProvider } from '@kbn/data-plugin/public';
+import type { RefreshInterval, SearchSessionInfoProvider } from '@kbn/data-plugin/public';
 import type { DefaultEmbeddableApi, EmbeddablePackageState } from '@kbn/embeddable-plugin/public';
-import { Filter, Query, TimeRange } from '@kbn/es-query';
-import { PublishesESQLVariables } from '@kbn/esql-variables-types';
-import { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
-import {
+import type { Filter, Query, TimeRange } from '@kbn/es-query';
+import type { PublishesESQLVariables } from '@kbn/esql-variables-types';
+import type { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
+import type {
   CanExpandPanels,
   HasRuntimeChildState,
   HasSaveNotification,
@@ -28,7 +28,7 @@ import {
   TrackContentfulRender,
   TracksOverlays,
 } from '@kbn/presentation-containers';
-import {
+import type {
   SerializedPanelState,
   EmbeddableAppContext,
   HasAppContext,
@@ -46,14 +46,14 @@ import {
   PublishingSubject,
   ViewMode,
 } from '@kbn/presentation-publishing';
-import { PublishesReload } from '@kbn/presentation-publishing/interfaces/fetch/publishes_reload';
-import { PublishesSearchSession } from '@kbn/presentation-publishing/interfaces/fetch/publishes_search_session';
-import { LocatorPublic } from '@kbn/share-plugin/common';
-import { Observable, Subject } from 'rxjs';
-import { DashboardPanelMap, DashboardPanelState } from '../../common';
+import type { PublishesReload } from '@kbn/presentation-publishing/interfaces/fetch/publishes_reload';
+import type { PublishesSearchSession } from '@kbn/presentation-publishing/interfaces/fetch/publishes_search_session';
+import type { LocatorPublic } from '@kbn/share-plugin/common';
+import type { Observable, Subject } from 'rxjs';
+import type { DashboardPanelMap, DashboardPanelState } from '../../common';
 import type { DashboardAttributes, DashboardOptions } from '../../server/content_management';
-import { DashboardLocatorParams } from '../dashboard_container/types';
-import {
+import type { DashboardLocatorParams } from '../dashboard_container/types';
+import type {
   LoadDashboardReturn,
   SaveDashboardReturn,
 } from '../services/dashboard_content_management_service/types';

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { AttackDiscovery } from '@kbn/elastic-assistant-common';
+import type { AttackDiscovery } from '@kbn/elastic-assistant-common';
 
 export const getHasResults = (attackDiscoveries: AttackDiscovery[] | null): boolean =>
   attackDiscoveries !== null;

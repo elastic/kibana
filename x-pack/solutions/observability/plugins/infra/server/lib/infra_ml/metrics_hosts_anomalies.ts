@@ -7,14 +7,13 @@
 
 import type { ML_ANOMALY_THRESHOLD } from '@kbn/ml-anomaly-utils/anomaly_threshold';
 import { decodeOrThrow } from '@kbn/io-ts-utils';
-import type { InfraRequestHandlerContext } from '../../types';
+import type { InfraRequestHandlerContext, MlSystem, MlAnomalyDetectors } from '../../types';
 import type { TracingSpan } from '../../../common/performance_tracing';
 import { startTracingSpan } from '../../../common/performance_tracing';
 import type { MappedAnomalyHit, InfluencerFilter } from './common';
 import { fetchMlJob } from './common';
 import { getJobId, metricsHostsJobTypes } from '../../../common/infra_ml';
 import type { Sort, Pagination } from '../../../common/http_api/infra_ml';
-import type { MlSystem, MlAnomalyDetectors } from '../../types';
 import { isMlPrivilegesError } from './errors';
 import {
   metricsHostsAnomaliesResponseRT,

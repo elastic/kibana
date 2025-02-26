@@ -9,8 +9,8 @@
 
 import moment from 'moment';
 
+import type { ContentReferencesStore } from '@kbn/elastic-assistant-common';
 import {
-  ContentReferencesStore,
   DEFEND_INSIGHTS_TOOL_ID,
   DefendInsightStatus,
   DefendInsightType,

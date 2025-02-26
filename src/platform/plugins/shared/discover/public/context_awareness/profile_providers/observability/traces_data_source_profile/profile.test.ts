@@ -7,8 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { DataView } from '@kbn/data-views-plugin/common';
-import { DataSourceCategory, DataSourceProfileProviderParams } from '../../../profiles';
+import type { DataView } from '@kbn/data-views-plugin/common';
+import type { DataSourceProfileProviderParams } from '../../../profiles';
+import { DataSourceCategory } from '../../../profiles';
 import { DataSourceType, createDataViewDataSource } from '../../../../../common/data_sources';
 import { createTracesDataSourceProfileProvider } from './profile';
 

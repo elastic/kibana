@@ -14,9 +14,9 @@ import type { History } from 'history';
 import React, { useMemo } from 'react';
 import type { Observable } from 'rxjs';
 import { InvestigateAppContextProvider } from './components/investigate_app_context_provider';
-import { InvestigateAppKibanaContext } from './hooks/use_kibana';
+import type { InvestigateAppKibanaContext } from './hooks/use_kibana';
 import { getRoutes } from './routes/config';
-import { InvestigateAppServices } from './services/types';
+import type { InvestigateAppServices } from './services/types';
 import type { InvestigateAppStartDependencies } from './types';
 
 const queryClient = new QueryClient();

@@ -7,8 +7,8 @@
 
 import expect from '@kbn/expect';
 
-import { Annotation } from '@kbn/ml-plugin/common/types/annotations';
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { Annotation } from '@kbn/ml-plugin/common/types/annotations';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 import { getCommonRequestHeader } from '../../../../functional/services/ml/common_api';
 import { USER } from '../../../../functional/services/ml/security_common';
 import { createJobConfig, createAnnotationRequestBody } from './common_jobs';

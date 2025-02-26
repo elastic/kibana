@@ -6,7 +6,7 @@
  */
 
 import moment from 'moment';
-import { CanvasElement, PositionedElement } from '../../../../types';
+import type { CanvasElement, PositionedElement } from '../../../../types';
 
 const timeFormat = 'MM.dd.YYYY HH:mm';
 

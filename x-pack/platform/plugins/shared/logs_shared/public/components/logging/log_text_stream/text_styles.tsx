@@ -8,9 +8,10 @@
 import React, { useMemo, useState, useCallback } from 'react';
 import { css } from '@emotion/react';
 import styled from '@emotion/styled';
-import { EuiThemeComputed, useEuiFontSize } from '@elastic/eui';
+import type { EuiThemeComputed } from '@elastic/eui';
+import { useEuiFontSize } from '@elastic/eui';
 import { withAttrs } from '../../../utils/theme_utils/with_attrs';
-import { TextScale } from '../../../../common/log_text_scale';
+import type { TextScale } from '../../../../common/log_text_scale';
 
 export type WrapMode = 'none' | 'pre-wrapped' | 'long';
 

@@ -7,9 +7,9 @@
 
 import path from 'path';
 
+import type { FtrConfigProviderContext } from '@kbn/test';
 import {
   fleetPackageRegistryDockerImage,
-  FtrConfigProviderContext,
   defineDockerServersConfig,
   getKibanaCliLoggers,
 } from '@kbn/test';

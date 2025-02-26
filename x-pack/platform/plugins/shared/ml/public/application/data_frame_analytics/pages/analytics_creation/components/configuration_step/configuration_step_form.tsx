@@ -41,9 +41,11 @@ import { useNewJobCapsServiceAnalytics } from '../../../../../services/new_job_c
 import { useDataSource } from '../../../../../contexts/ml';
 
 import { getScatterplotMatrixLegendType } from '../../../../common/get_scatterplot_matrix_legend_type';
-import type { AnalyticsJobType } from '../../../analytics_management/hooks/use_create_analytics_form/state';
-import { Messages } from '../shared';
-import type { State } from '../../../analytics_management/hooks/use_create_analytics_form/state';
+import type {
+  AnalyticsJobType,
+  State,
+} from '../../../analytics_management/hooks/use_create_analytics_form/state';
+import { Messages, fetchExplainData } from '../shared';
 import { DEFAULT_MODEL_MEMORY_LIMIT } from '../../../analytics_management/hooks/use_create_analytics_form/state';
 import { handleExplainErrorMessage, shouldAddAsDepVarOption } from './form_options_validation';
 
@@ -52,7 +54,6 @@ import { ContinueButton } from '../continue_button';
 import { JobType } from './job_type';
 import { SupportedFieldsMessage } from './supported_fields_message';
 import { AnalysisFieldsTable } from './analysis_fields_table';
-import { fetchExplainData } from '../shared';
 import { useIndexData } from '../../hooks';
 import { ExplorationQueryBar } from '../../../analytics_exploration/components/exploration_query_bar';
 import type { SavedSearchQuery } from './use_saved_search';

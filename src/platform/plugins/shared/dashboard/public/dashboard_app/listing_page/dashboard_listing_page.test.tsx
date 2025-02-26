@@ -9,11 +9,13 @@
 
 import React from 'react';
 import { act } from 'react-dom/test-utils';
-import { mount, ReactWrapper, ComponentType } from 'enzyme';
+import type { ReactWrapper, ComponentType } from 'enzyme';
+import { mount } from 'enzyme';
 import { I18nProvider } from '@kbn/i18n-react';
 import { createKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 
-import { DashboardListingPage, DashboardListingPageProps } from './dashboard_listing_page';
+import type { DashboardListingPageProps } from './dashboard_listing_page';
+import { DashboardListingPage } from './dashboard_listing_page';
 
 // Mock child components. The Dashboard listing page mostly passes down props to shared UX components which are tested in their own packages.
 import { DashboardListing } from '../../dashboard_listing/dashboard_listing';

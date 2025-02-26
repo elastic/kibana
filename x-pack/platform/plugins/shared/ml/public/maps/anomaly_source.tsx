@@ -12,20 +12,26 @@ import type {
   FieldFormatter,
   TooltipFeatureAction,
   VectorSourceRequestMeta,
+  DataFilters,
 } from '@kbn/maps-plugin/common';
 import { MAX_ZOOM, MIN_ZOOM, SOURCE_TYPES, VECTOR_SHAPE_TYPE } from '@kbn/maps-plugin/common';
 import type { AbstractSourceDescriptor, MapExtent } from '@kbn/maps-plugin/common/descriptor_types';
 import { GEOJSON_FEATURE_ID_PROPERTY_NAME } from '@kbn/maps-plugin/public';
-import type { DataFilters } from '@kbn/maps-plugin/common';
 import type { SerializableRecord } from '@kbn/utility-types';
 import type { LocatorPublic } from '@kbn/share-plugin/common';
 import type { Adapters } from '@kbn/inspector-plugin/common/adapters';
-import type { GeoJsonWithMeta, ITooltipProperty } from '@kbn/maps-plugin/public';
-import type { IField } from '@kbn/maps-plugin/public';
-import type { Attribution, ImmutableSourceProperty } from '@kbn/maps-plugin/public';
-import type { SourceEditorArgs } from '@kbn/maps-plugin/public';
-import type { DataRequest } from '@kbn/maps-plugin/public';
-import type { GetFeatureActionsArgs, IVectorSource, SourceStatus } from '@kbn/maps-plugin/public';
+import type {
+  GeoJsonWithMeta,
+  ITooltipProperty,
+  IField,
+  Attribution,
+  ImmutableSourceProperty,
+  SourceEditorArgs,
+  DataRequest,
+  GetFeatureActionsArgs,
+  IVectorSource,
+  SourceStatus,
+} from '@kbn/maps-plugin/public';
 import {
   AnomalySourceField,
   AnomalySourceTooltipProperty,

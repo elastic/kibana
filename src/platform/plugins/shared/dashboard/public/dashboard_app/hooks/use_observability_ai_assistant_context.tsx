@@ -8,24 +8,24 @@
  */
 
 import { getESQLQueryColumns } from '@kbn/esql-utils';
-import {
-  LensConfigBuilder,
+import { LensConfigBuilder } from '@kbn/lens-embeddable-utils/config_builder';
+import type {
   LensDataset,
-  type LensConfig,
-  type LensGaugeConfig,
-  type LensHeatmapConfig,
-  type LensMetricConfig,
-  type LensMosaicConfig,
-  type LensPieConfig,
-  type LensRegionMapConfig,
-  type LensTableConfig,
-  type LensTagCloudConfig,
-  type LensTreeMapConfig,
-  type LensXYConfig,
+  LensConfig,
+  LensGaugeConfig,
+  LensHeatmapConfig,
+  LensMetricConfig,
+  LensMosaicConfig,
+  LensPieConfig,
+  LensRegionMapConfig,
+  LensTableConfig,
+  LensTagCloudConfig,
+  LensTreeMapConfig,
+  LensXYConfig,
 } from '@kbn/lens-embeddable-utils/config_builder';
-import { LensEmbeddableInput } from '@kbn/lens-plugin/public';
+import type { LensEmbeddableInput } from '@kbn/lens-plugin/public';
 import { useEffect } from 'react';
-import { DashboardApi } from '../../dashboard_api/types';
+import type { DashboardApi } from '../../dashboard_api/types';
 import { dataService, observabilityAssistantService } from '../../services/kibana_services';
 
 const chartTypes = [

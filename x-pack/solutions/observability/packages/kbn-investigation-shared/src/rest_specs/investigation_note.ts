@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
+import type { z } from '@kbn/zod';
 import { investigationNoteSchema } from '../schema';
 
 const investigationNoteResponseSchema = investigationNoteSchema;

@@ -5,8 +5,11 @@
  * 2.0.
  */
 
-import type { estypes } from '@elastic/elasticsearch';
-import type { SortResults } from '@elastic/elasticsearch/lib/api/types';
+import type {
+  GetGetResult,
+  SearchResponse,
+  SortResults,
+} from '@elastic/elasticsearch/lib/api/types';
 import type { SearchHit } from '@kbn/es-types';
 
 import type { FleetServerAgentComponent, OutputMap } from '../../../common/types';
@@ -16,8 +19,8 @@ import { appContextService } from '..';
 import type { Agent, AgentSOAttributes, AgentStatus, FleetServerAgent } from '../../types';
 
 type FleetServerAgentESResponse =
-  | estypes.GetGetResult<FleetServerAgent>
-  | estypes.SearchResponse<FleetServerAgent>['hits']['hits'][0]
+  | GetGetResult<FleetServerAgent>
+  | SearchResponse<FleetServerAgent>['hits']['hits'][0]
   | SearchHit<FleetServerAgent>;
 
 export function searchHitToAgent(

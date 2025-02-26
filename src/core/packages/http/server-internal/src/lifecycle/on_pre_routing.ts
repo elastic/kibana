@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Lifecycle, Request, ResponseToolkit as HapiResponseToolkit } from '@hapi/hapi';
+import type { Lifecycle, Request, ResponseToolkit as HapiResponseToolkit } from '@hapi/hapi';
 import type { Logger } from '@kbn/logging';
 import type {
   KibanaRequestState,
@@ -17,8 +17,7 @@ import type {
   OnPreRoutingResult,
   OnPreRoutingHandler,
 } from '@kbn/core-http-server';
-import { isKibanaResponse } from '@kbn/core-http-server';
-import { OnPreRoutingResultType } from '@kbn/core-http-server';
+import { isKibanaResponse, OnPreRoutingResultType } from '@kbn/core-http-server';
 import {
   HapiResponseAdapter,
   CoreKibanaRequest,

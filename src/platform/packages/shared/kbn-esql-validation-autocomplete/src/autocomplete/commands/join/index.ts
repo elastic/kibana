@@ -8,10 +8,10 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { ESQLCommand, mutate, LeafPrinter } from '@kbn/esql-ast';
-import type { ESQLAstJoinCommand } from '@kbn/esql-ast';
+import { mutate, LeafPrinter } from '@kbn/esql-ast';
+import type { ESQLAstJoinCommand, ESQLCommand } from '@kbn/esql-ast';
 import type { ESQLCallbacks } from '../../../shared/types';
-import {
+import type {
   CommandBaseDefinition,
   CommandDefinition,
   CommandSuggestParams,

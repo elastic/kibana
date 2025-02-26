@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { FC, VFC, PropsWithChildren } from 'react';
+import type { FC, VFC, PropsWithChildren } from 'react';
+import React from 'react';
 import { useBlockListContext } from '../hooks/use_block_list_context';
 import { BlockListProvider } from '../containers/block_list_provider';
 import { BlockListFlyout } from '../../block_list/containers/flyout';

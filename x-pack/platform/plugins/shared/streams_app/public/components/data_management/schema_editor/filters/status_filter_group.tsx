@@ -5,14 +5,13 @@
  * 2.0.
  */
 
-import { useCallback, useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import React from 'react';
-import { EuiSelectableOption, EuiSelectableProps } from '@elastic/eui';
+import type { EuiSelectableOption, EuiSelectableProps } from '@elastic/eui';
 import { FilterGroup } from './filter_group';
 import { FIELD_STATUS_MAP } from '../constants';
-import { TControlsChangeHandler } from '../hooks/use_controls';
-import { SchemaFieldStatus } from '../types';
+import type { TControlsChangeHandler } from '../hooks/use_controls';
+import type { SchemaFieldStatus } from '../types';
 
 const BUTTON_LABEL = i18n.translate(
   'xpack.streams.streamDetailSchemaEditor.fieldStatusFilterGroupButtonLabel',

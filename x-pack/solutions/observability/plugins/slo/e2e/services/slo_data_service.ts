@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { KbnClient } from '@kbn/test';
+import type { KbnClient } from '@kbn/test';
 import { cli, DEFAULTS } from '@kbn/data-forge';
 
 export class SLoDataService {

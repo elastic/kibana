@@ -7,16 +7,15 @@
 
 import React, { useMemo } from 'react';
 import { capitalize } from 'lodash';
-import type { EuiThemeComputed } from '@elastic/eui';
 import {
   EuiLoadingSpinner,
   EuiFlexItem,
   EuiText,
-  type EuiFlexGroupProps,
   useEuiTheme,
   EuiLink,
   EuiToolTip,
 } from '@elastic/eui';
+import type { EuiThemeComputed, EuiFlexGroupProps } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { InsightDistributionBar } from './insight_distribution_bar';
 import { getSeverityColor } from '../../../../detections/components/alerts_kpis/severity_level_panel/helpers';

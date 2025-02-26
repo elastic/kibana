@@ -5,9 +5,8 @@
  * 2.0.
  */
 
+import type { StreamDefinition, WiredStreamDefinition } from '@kbn/streams-schema';
 import {
-  StreamDefinition,
-  WiredStreamDefinition,
   isGroupStreamDefinition,
   isIlmLifecycle,
   isIngestStreamDefinition,

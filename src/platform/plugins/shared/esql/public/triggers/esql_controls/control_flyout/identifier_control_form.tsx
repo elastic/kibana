@@ -18,13 +18,10 @@ import {
   type EuiComboBoxOptionOption,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { monaco } from '@kbn/monaco';
+import type { monaco } from '@kbn/monaco';
 import type { ISearchGeneric } from '@kbn/search-types';
-import {
-  ESQLVariableType,
-  ESQLControlVariable,
-  aggFunctionDefinitions,
-} from '@kbn/esql-validation-autocomplete';
+import type { ESQLControlVariable } from '@kbn/esql-validation-autocomplete';
+import { ESQLVariableType, aggFunctionDefinitions } from '@kbn/esql-validation-autocomplete';
 import { getESQLQueryColumnsRaw } from '@kbn/esql-utils';
 import type { ESQLControlState, ControlWidthOptions } from '../types';
 import {

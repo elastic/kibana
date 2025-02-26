@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { useDeleteEndpoint } from '../../../../../../hooks/use_delete_endpoint';
-import { InferenceEndpointUI } from '../../../../types';
+import type { InferenceEndpointUI } from '../../../../types';
 import { ConfirmDeleteEndpointModal } from './confirm_delete_endpoint';
 
 interface DeleteActionProps {

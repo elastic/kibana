@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { KibanaRequest } from '@kbn/core/server';
-import { SpacesServiceStart } from '@kbn/spaces-plugin/server';
+import type { KibanaRequest } from '@kbn/core/server';
+import type { SpacesServiceStart } from '@kbn/spaces-plugin/server';
 
 export const getSpaceId = ({
   spaces,

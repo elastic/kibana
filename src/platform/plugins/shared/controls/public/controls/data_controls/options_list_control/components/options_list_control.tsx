@@ -26,7 +26,7 @@ import {
 } from '@kbn/presentation-publishing';
 
 import { isCompressed } from '../../../../control_group/utils/is_compressed';
-import { OptionsListSelection } from '../../../../../common/options_list/options_list_selections';
+import type { OptionsListSelection } from '../../../../../common/options_list/options_list_selections';
 import { MIN_POPOVER_WIDTH } from '../../../constants';
 import { useOptionsListContext } from '../options_list_context_provider';
 import { OptionsListPopover } from './options_list_popover';

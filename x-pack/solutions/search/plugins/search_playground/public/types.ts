@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import {
+import type {
   HealthStatus,
   IndexName,
   IndicesStatsIndexMetadataState,
   Uuid,
 } from '@elastic/elasticsearch/lib/api/types';
 import type { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
-import React from 'react';
+import type React from 'react';
 import type { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
 import type { CloudSetup, CloudStart } from '@kbn/cloud-plugin/public';
 import type { TriggersAndActionsUIPublicPluginStart } from '@kbn/triggers-actions-ui-plugin/public';
@@ -28,7 +28,7 @@ import type {
   UserConfiguredActionConnector,
 } from '@kbn/alerts-ui-shared/src/common/types';
 import type { ServiceProviderKeys } from '@kbn/inference-endpoint-ui-common';
-import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import type { ChatRequestData, MessageRole, LLMs } from '../common/types';
 
 export * from '../common/types';

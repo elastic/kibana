@@ -14,9 +14,8 @@ import React, {
   useContext,
   useMemo,
 } from 'react';
-import type { Filter, Query, TimeRange } from '@kbn/es-query';
+import type { Filter, Query, TimeRange, AggregateQuery } from '@kbn/es-query';
 import { useTimeRangeUpdates } from '@kbn/ml-date-picker';
-import { type AggregateQuery } from '@kbn/es-query';
 import type { TimeRangeBounds } from '@kbn/data-plugin/common';
 import { getBoundsRoundedToInterval, useTimeBuckets } from '@kbn/ml-time-buckets';
 import type { PublishesFilters } from '@kbn/presentation-publishing';

@@ -7,7 +7,7 @@
 import type { NewPackagePolicy } from '@kbn/fleet-plugin/public';
 import type { PackageInfo, PackagePolicyConfigRecord } from '@kbn/fleet-plugin/common';
 import { createNewPackagePolicyMock } from '@kbn/fleet-plugin/common/mocks';
-import { RegistryRelease, RegistryVarType } from '@kbn/fleet-plugin/common/types';
+import type { RegistryRelease, RegistryVarType } from '@kbn/fleet-plugin/common/types';
 import {
   CLOUDBEAT_GCP,
   CLOUDBEAT_AZURE,

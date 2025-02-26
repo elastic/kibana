@@ -6,17 +6,11 @@
  */
 
 import React from 'react';
-import { Ast } from '@kbn/interpreter';
+import type { Ast } from '@kbn/interpreter';
 import { i18n } from '@kbn/i18n';
-import { CoreTheme, ThemeServiceStart } from '@kbn/core/public';
-import {
-  PaletteRegistry,
-  CUSTOM_PALETTE,
-  PaletteOutput,
-  CustomPaletteParams,
-  applyPaletteParams,
-  getOverridePaletteStops,
-} from '@kbn/coloring';
+import type { CoreTheme, ThemeServiceStart } from '@kbn/core/public';
+import type { PaletteRegistry, PaletteOutput, CustomPaletteParams } from '@kbn/coloring';
+import { CUSTOM_PALETTE, applyPaletteParams, getOverridePaletteStops } from '@kbn/coloring';
 import { VIS_EVENT_TO_TRIGGER } from '@kbn/visualizations-plugin/public';
 import { IconChartDatatable } from '@kbn/chart-icons';
 import { getOriginalId } from '@kbn/transpose-utils';

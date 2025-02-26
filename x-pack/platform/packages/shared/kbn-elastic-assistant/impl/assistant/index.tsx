@@ -5,15 +5,8 @@
  * 2.0.
  */
 
-import React, {
-  Dispatch,
-  SetStateAction,
-  useCallback,
-  useEffect,
-  useLayoutEffect,
-  useMemo,
-  useState,
-} from 'react';
+import type { Dispatch, SetStateAction } from 'react';
+import React, { useCallback, useEffect, useLayoutEffect, useMemo, useState } from 'react';
 import {
   EuiPanel,
   EuiFlexGroup,
@@ -43,7 +36,7 @@ import { useAssistantContext } from '../assistant_context';
 import { ContextPills } from './context_pills';
 import { getNewSelectedPromptContext } from '../data_anonymization/get_new_selected_prompt_context';
 import type { PromptContext, SelectedPromptContext } from './prompt_context/types';
-import { CodeBlockDetails } from './use_conversation/helpers';
+import type { CodeBlockDetails } from './use_conversation/helpers';
 import { QuickPrompts } from './quick_prompts/quick_prompts';
 import { useLoadConnectors } from '../connectorland/use_load_connectors';
 import { ConnectorMissingCallout } from '../connectorland/connector_missing_callout';

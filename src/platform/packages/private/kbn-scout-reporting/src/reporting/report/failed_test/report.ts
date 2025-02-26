@@ -9,9 +9,9 @@
 
 import path from 'node:path';
 import fs from 'node:fs';
-import { ToolingLog } from '@kbn/tooling-log';
+import type { ToolingLog } from '@kbn/tooling-log';
 import { buildFailureHtml } from './html';
-import { TestFailure } from './test_failure';
+import type { TestFailure } from './test_failure';
 import { ScoutReport, ScoutReportError } from '../base';
 
 const saveTestFailuresReport = (

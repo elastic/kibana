@@ -9,11 +9,15 @@
 
 import { i18n } from '@kbn/i18n';
 
-import { ExpressionFunctionDefinition, Datatable, Render } from '@kbn/expressions-plugin/public';
+import type {
+  ExpressionFunctionDefinition,
+  Datatable,
+  Render,
+} from '@kbn/expressions-plugin/public';
 
 // @ts-ignore
 import { vislibSeriesResponseHandler } from './vislib/response_handler';
-import { BasicVislibParams, VislibChartType } from './types';
+import type { BasicVislibParams, VislibChartType } from './types';
 
 export const vislibVisName = 'vislib_vis';
 

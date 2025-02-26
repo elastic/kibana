@@ -5,14 +5,11 @@
  * 2.0.
  */
 
-import type { estypes } from '@elastic/elasticsearch';
-import type { TransportRequestParams } from '@elastic/elasticsearch';
+import type { estypes, TransportRequestParams } from '@elastic/elasticsearch';
 import type {
   ElasticsearchClient,
   RouteConfig,
   SavedObjectsClientContract,
-} from '@kbn/core/server';
-import type {
   CoreSetup,
   IRouter,
   KibanaRequest,

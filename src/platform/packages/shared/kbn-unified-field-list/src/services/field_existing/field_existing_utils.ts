@@ -8,8 +8,13 @@
  */
 
 import type { estypes } from '@elastic/elasticsearch';
-import type { DataViewField, RuntimeField } from '@kbn/data-views-plugin/common';
-import type { DataViewsContract, DataView, FieldSpec } from '@kbn/data-views-plugin/common';
+import type {
+  DataViewField,
+  RuntimeField,
+  DataViewsContract,
+  DataView,
+  FieldSpec,
+} from '@kbn/data-views-plugin/common';
 import type { IKibanaSearchRequest } from '@kbn/search-types';
 
 export type SearchHandler = (

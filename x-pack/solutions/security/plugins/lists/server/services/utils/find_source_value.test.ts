@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SearchEsListItemSchema } from '../../schemas/elastic_response';
+import type { SearchEsListItemSchema } from '../../schemas/elastic_response';
 import { getSearchEsListItemsAsAllUndefinedMock } from '../../schemas/elastic_response/search_es_list_item_schema.mock';
 
 import {

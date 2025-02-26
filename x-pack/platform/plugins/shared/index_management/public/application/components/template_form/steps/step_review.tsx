@@ -27,10 +27,11 @@ import { allowAutoCreateRadioIds } from '../../../../../common/constants';
 import { serializers } from '../../../../shared_imports';
 
 import { serializeLegacyTemplate, serializeTemplate } from '../../../../../common/lib';
-import { TemplateDeserialized, getTemplateParameter, Aliases } from '../../../../../common';
+import type { TemplateDeserialized, Aliases } from '../../../../../common';
+import { getTemplateParameter } from '../../../../../common';
 import { SimulateTemplate } from '../../index_templates';
 import { getLifecycleValue } from '../../../lib/data_streams';
-import { WizardSection } from '../template_form';
+import type { WizardSection } from '../template_form';
 
 const { stripEmptyFields } = serializers;
 const INFINITE_AS_ICON = true;

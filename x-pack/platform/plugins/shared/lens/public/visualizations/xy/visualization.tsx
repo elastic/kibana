@@ -11,20 +11,25 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import type { PaletteRegistry } from '@kbn/coloring';
 import { IconChartBarReferenceLine, IconChartBarAnnotations } from '@kbn/chart-icons';
-import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
-import { CoreStart, CoreTheme, SavedObjectReference, ThemeServiceStart } from '@kbn/core/public';
-import { EventAnnotationServiceType } from '@kbn/event-annotation-plugin/public';
+import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+import type {
+  CoreStart,
+  CoreTheme,
+  SavedObjectReference,
+  ThemeServiceStart,
+} from '@kbn/core/public';
+import type { EventAnnotationServiceType } from '@kbn/event-annotation-plugin/public';
 import { getAnnotationAccessor } from '@kbn/event-annotation-components';
 import { VIS_EVENT_TO_TRIGGER } from '@kbn/visualizations-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
-import { SavedObjectTaggingPluginStart } from '@kbn/saved-objects-tagging-plugin/public';
+import type { SavedObjectTaggingPluginStart } from '@kbn/saved-objects-tagging-plugin/public';
 import type { EventAnnotationGroupConfig } from '@kbn/event-annotation-common';
 import { isEqual } from 'lodash';
 import { type AccessorConfig, DimensionTrigger } from '@kbn/visualization-ui-components';
-import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { getColorsFromMapping } from '@kbn/coloring';
 import useObservable from 'react-use/lib/useObservable';
 import { EuiPopover, EuiSelectable } from '@elastic/eui';
@@ -58,23 +63,23 @@ import type {
   AnnotationGroups,
 } from '../../types';
 import type { FormBasedPersistedState } from '../../datasources/form_based/types';
-import {
-  type State,
-  type XYLayerConfig,
-  type XYDataLayerConfig,
-  type SeriesType,
-  visualizationSubtypes,
-  visualizationTypes,
+import type {
+  XYByValueAnnotationLayerConfig,
+  XYState,
+  State,
+  XYLayerConfig,
+  XYDataLayerConfig,
+  SeriesType,
 } from './types';
 import {
   getAnnotationLayerErrors,
   isHorizontalChart,
   annotationLayerHasUnsavedChanges,
   isHorizontalSeries,
+  getColumnToLabelMap,
 } from './state_helpers';
 import { toExpression, toPreviewExpression, getSortedAccessors } from './to_expression';
 import { getAccessorColorConfigs, getColorAssignments } from './color_assignment';
-import { getColumnToLabelMap } from './state_helpers';
 import {
   getGroupsAvailableInData,
   getReferenceConfiguration,
@@ -87,6 +92,7 @@ import {
   setAnnotationsDimension,
   getUniqueLabels,
   onAnnotationDrop,
+  defaultAnnotationLabel,
 } from './annotations/helpers';
 import {
   checkXAccessorCompatibility,
@@ -111,9 +117,7 @@ import {
   isTimeChart,
 } from './visualization_helpers';
 import { getAxesConfiguration, groupAxesByType } from './axes_configuration';
-import type { XYByValueAnnotationLayerConfig, XYState } from './types';
-import { defaultSeriesType } from './types';
-import { defaultAnnotationLabel } from './annotations/helpers';
+import { defaultSeriesType, visualizationSubtypes, visualizationTypes } from './types';
 import { onDropForVisualization } from '../../editor_frame_service/editor_frame/config_panel/buttons/drop_targets_utils';
 import { createAnnotationActions } from './annotations/actions';
 import { AddLayerButton } from './add_layer';
@@ -121,7 +125,8 @@ import { LayerSettings } from './layer_settings';
 import { IgnoredGlobalFiltersEntries } from '../../shared_components/ignore_global_filter';
 import { getColorMappingTelemetryEvents } from '../../lens_ui_telemetry/color_telemetry_helpers';
 import { getLegendStatsTelemetryEvents } from './legend_stats_telemetry_helpers';
-import { XYPersistedState, convertToPersistable, convertToRuntime } from './persistence';
+import type { XYPersistedState } from './persistence';
+import { convertToPersistable, convertToRuntime } from './persistence';
 import { shouldDisplayTable } from '../../shared_components/legend/legend_settings_popover';
 import {
   ANNOTATION_MISSING_DATE_HISTOGRAM,

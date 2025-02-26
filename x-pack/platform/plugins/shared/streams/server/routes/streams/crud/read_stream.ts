@@ -5,17 +5,16 @@
  * 2.0.
  */
 
+import type { StreamGetResponse, WiredStreamGetResponse } from '@kbn/streams-schema';
 import {
-  StreamGetResponse,
-  WiredStreamGetResponse,
   findInheritedLifecycle,
   getInheritedFieldsFromAncestors,
   isGroupStreamDefinition,
   isUnwiredStreamDefinition,
 } from '@kbn/streams-schema';
-import { IScopedClusterClient } from '@kbn/core/server';
-import { AssetClient } from '../../../lib/streams/assets/asset_client';
-import { StreamsClient } from '../../../lib/streams/client';
+import type { IScopedClusterClient } from '@kbn/core/server';
+import type { AssetClient } from '../../../lib/streams/assets/asset_client';
+import type { StreamsClient } from '../../../lib/streams/client';
 import {
   getDataStreamLifecycle,
   getUnmanagedElasticsearchAssets,

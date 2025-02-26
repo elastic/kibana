@@ -5,22 +5,15 @@
  * 2.0.
  */
 
-import type { IconColor } from '@elastic/eui';
-import {
-  EuiLink,
-  type EuiBasicTableColumn,
-  EuiHealth,
-  EuiScreenReaderOnly,
-  EuiButtonIcon,
-  EuiIcon,
-} from '@elastic/eui';
+import { EuiLink, EuiHealth, EuiScreenReaderOnly, EuiButtonIcon, EuiIcon } from '@elastic/eui';
+import type { IconColor, EuiBasicTableColumn } from '@elastic/eui';
 import React, { useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import {
-  EngineComponentResourceEnum,
-  type EngineComponentResource,
+import { EngineComponentResourceEnum } from '../../../../../../../common/api/entity_analytics';
+import type {
+  EngineComponentStatus,
+  EngineComponentResource,
 } from '../../../../../../../common/api/entity_analytics';
-import type { EngineComponentStatus } from '../../../../../../../common/api/entity_analytics';
 import { useKibana } from '../../../../../../common/lib/kibana';
 
 type TableColumn = EuiBasicTableColumn<EngineComponentStatus>;

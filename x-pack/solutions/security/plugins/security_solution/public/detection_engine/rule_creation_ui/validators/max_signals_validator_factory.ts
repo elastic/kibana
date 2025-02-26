@@ -6,8 +6,8 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { ERROR_CODE } from '../../../shared_imports';
-import { fieldValidators, type FormData, type ValidationFunc } from '../../../shared_imports';
+import { fieldValidators } from '../../../shared_imports';
+import type { ERROR_CODE, FormData, ValidationFunc } from '../../../shared_imports';
 
 export const MIN_VALUE = 1;
 

@@ -15,7 +15,7 @@ import {
 } from '@kbn/cases-plugin/common/types/domain';
 import { setTimeout as setTimeoutAsync } from 'timers/promises';
 
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 import {
   createUsersAndRoles,
   deleteUsersAndRoles,

@@ -7,11 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { ReactElement } from 'react';
+import type { ReactElement } from 'react';
+import React from 'react';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
-import { DiscoverTopNav, DiscoverTopNavProps } from './discover_topnav';
-import { TopNavMenu, TopNavMenuData } from '@kbn/navigation-plugin/public';
+import type { DiscoverTopNavProps } from './discover_topnav';
+import { DiscoverTopNav } from './discover_topnav';
+import type { TopNavMenuData } from '@kbn/navigation-plugin/public';
+import { TopNavMenu } from '@kbn/navigation-plugin/public';
 import { discoverServiceMock as mockDiscoverService } from '../../../../__mocks__/services';
 import { getDiscoverStateMock } from '../../../../__mocks__/discover_state.mock';
 import { DiscoverMainProvider } from '../../state_management/discover_state_provider';

@@ -15,11 +15,10 @@ import {
   FILE_STORAGE_METADATA_INDEX_PATTERN,
   FILE_STORAGE_TO_HOST_DATA_INDEX_PATTERN,
   FILE_STORAGE_TO_HOST_METADATA_INDEX_PATTERN,
+  ES_SEARCH_LIMIT,
 } from '../../../common/constants';
 
 import { getFileMetadataIndexName } from '../../../common/services';
-
-import { ES_SEARCH_LIMIT } from '../../../common/constants';
 
 import { MAX_CONCURRENT_AGENT_FILES_UPLOADS } from '../../constants';
 

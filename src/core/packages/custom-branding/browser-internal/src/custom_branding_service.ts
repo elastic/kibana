@@ -7,8 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Subject, BehaviorSubject } from 'rxjs';
-import { shareReplay, takeUntil, map } from 'rxjs';
+import { Subject, BehaviorSubject, shareReplay, takeUntil, map } from 'rxjs';
 import type {
   CustomBrandingStart,
   CustomBrandingSetup,

@@ -6,7 +6,7 @@
  */
 
 import type { RootSchema } from '@kbn/core/public';
-import { AssistantScope } from '@kbn/ai-assistant-common';
+import type { AssistantScope } from '@kbn/ai-assistant-common';
 import type { Message } from '../../../common';
 
 export const messageSchema: RootSchema<Message & { scopes: AssistantScope[] }> = {

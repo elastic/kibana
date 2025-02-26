@@ -7,7 +7,7 @@
 
 import { capitalize, last } from 'lodash';
 import React, { useMemo } from 'react';
-import {
+import type {
   IlmPolicyDeletePhase,
   IlmPolicyPhase,
   IlmPolicyPhases,
@@ -28,8 +28,8 @@ import {
   formatNumber,
   useEuiTheme,
 } from '@elastic/eui';
-import { LocatorPublic } from '@kbn/share-plugin/common';
-import { IlmLocatorParams } from '@kbn/index-lifecycle-management-common-shared';
+import type { LocatorPublic } from '@kbn/share-plugin/common';
+import type { IlmLocatorParams } from '@kbn/index-lifecycle-management-common-shared';
 import { useStreamsAppFetch } from '../../../hooks/use_streams_app_fetch';
 import { useKibana } from '../../../hooks/use_kibana';
 import { orderIlmPhases, parseDurationInSeconds } from './helpers';

@@ -6,7 +6,7 @@
  */
 
 import type { SavedQueryRuleCreateProps } from '@kbn/security-solution-plugin/common/api/detection_engine';
-import { CreateRulePropsRewrites } from './types';
+import type { CreateRulePropsRewrites } from './types';
 
 export function getSavedQueryRuleParams(
   rewrites?: CreateRulePropsRewrites<SavedQueryRuleCreateProps>

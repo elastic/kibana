@@ -7,7 +7,7 @@
 
 import { journey, step, before, after, expect } from '@elastic/synthetics';
 import { byTestId } from '@kbn/ux-plugin/e2e/journeys/utils';
-import { RetryService } from '@kbn/ftr-common-functional-services';
+import type { RetryService } from '@kbn/ftr-common-functional-services';
 import moment from 'moment';
 import { syntheticsAppPageProvider } from '../../page_objects/synthetics_app';
 import { SyntheticsServices } from '../services/synthetics_services';

@@ -5,15 +5,8 @@
  * 2.0.
  */
 
-import {
-  Chart,
-  Datum,
-  LEGACY_LIGHT_THEME,
-  PartialTheme,
-  Partition,
-  PartitionLayout,
-  Settings,
-} from '@elastic/charts';
+import type { Datum, PartialTheme } from '@elastic/charts';
+import { Chart, LEGACY_LIGHT_THEME, Partition, PartitionLayout, Settings } from '@elastic/charts';
 import {
   EuiFlexGroup,
   EuiFlexItem,

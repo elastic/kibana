@@ -7,10 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { FC, PropsWithChildren, useContext } from 'react';
+import type { FC, PropsWithChildren } from 'react';
+import React, { useContext } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 
-import {
+import type {
   RedirectAppLinksServices,
   RedirectAppLinksKibanaDependencies,
 } from '@kbn/shared-ux-link-redirect-app-types';

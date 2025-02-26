@@ -11,6 +11,12 @@ import { v4 as uuidv4 } from 'uuid';
 import deepMerge from 'deepmerge';
 import { useDiscoverInTimelineContext } from '../../../common/components/discover_in_timeline/use_discover_in_timeline_context';
 import type { ColumnHeaderOptions } from '../../../../common/types/timeline';
+import {
+  DataProviderTypeEnum,
+  RowRendererValues,
+  TimelineStatusEnum,
+  TimelineTypeEnum,
+} from '../../../../common/api/timeline';
 import type {
   TimelineResponse,
   ColumnHeaderResult,
@@ -18,13 +24,7 @@ import type {
   DataProviderResult,
   PinnedEvent,
   Note,
-} from '../../../../common/api/timeline';
-import {
-  DataProviderTypeEnum,
-  RowRendererValues,
-  TimelineStatusEnum,
-  type TimelineType,
-  TimelineTypeEnum,
+  TimelineType,
 } from '../../../../common/api/timeline';
 import { TimelineId, TimelineTabs } from '../../../../common/types/timeline';
 import { useUpdateTimeline } from './use_update_timeline';

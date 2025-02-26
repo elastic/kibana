@@ -7,8 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Capabilities } from '@kbn/core/public';
-import type { IUiSettingsClient } from '@kbn/core/public';
+import type { Capabilities, IUiSettingsClient } from '@kbn/core/public';
 import type {
   DataPublicPluginStart,
   ISearchSource,
@@ -21,10 +20,8 @@ import {
   isNestedFieldParent,
   SORT_DEFAULT_ORDER_SETTING,
 } from '@kbn/discover-utils';
-import {
-  DiscoverAppState,
-  isEqualFilters,
-} from '../application/main/state_management/discover_app_state_container';
+import type { DiscoverAppState } from '../application/main/state_management/discover_app_state_container';
+import { isEqualFilters } from '../application/main/state_management/discover_app_state_container';
 import { getSortForSearchSource } from './sorting';
 
 /**

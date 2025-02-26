@@ -5,23 +5,20 @@
  * 2.0.
  */
 import expect from '@kbn/expect';
-import {
-  FunctionDefinition,
-  MessageRole,
-  type Message,
-} from '@kbn/observability-ai-assistant-plugin/common';
-import {
+import { MessageRole } from '@kbn/observability-ai-assistant-plugin/common';
+import type { FunctionDefinition, Message } from '@kbn/observability-ai-assistant-plugin/common';
+import type {
   MessageAddEvent,
-  type StreamingChatResponseEvent,
+  StreamingChatResponseEvent,
 } from '@kbn/observability-ai-assistant-plugin/common/conversation_complete';
 import type OpenAI from 'openai';
 import { type AdHocInstruction } from '@kbn/observability-ai-assistant-plugin/common/types';
 import type { ChatCompletionChunkToolCall } from '@kbn/inference-common';
-import {
-  createLlmProxy,
+import type {
   LlmProxy,
   ToolMessage,
 } from '../../../../../../observability_ai_assistant_api_integration/common/create_llm_proxy';
+import { createLlmProxy } from '../../../../../../observability_ai_assistant_api_integration/common/create_llm_proxy';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provider_context';
 
 export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderContext) {

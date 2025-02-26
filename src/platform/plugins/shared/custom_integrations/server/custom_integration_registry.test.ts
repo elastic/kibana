@@ -8,8 +8,9 @@
  */
 
 import { CustomIntegrationRegistry } from './custom_integration_registry';
-import { loggerMock, MockedLogger } from '@kbn/logging-mocks';
-import { IntegrationCategory, CustomIntegration } from '../common';
+import type { MockedLogger } from '@kbn/logging-mocks';
+import { loggerMock } from '@kbn/logging-mocks';
+import type { IntegrationCategory, CustomIntegration } from '../common';
 
 describe('CustomIntegrationsRegistry', () => {
   let mockLogger: MockedLogger;

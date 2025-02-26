@@ -6,9 +6,9 @@
  */
 
 import type { ActionsClientLlm } from '@kbn/langchain/server';
-import { Logger } from '@kbn/core/server';
+import type { Logger } from '@kbn/core/server';
 
-import { GenerationPrompts } from '../helpers/prompts';
+import type { GenerationPrompts } from '../helpers/prompts';
 import { discardPreviousRefinements } from './helpers/discard_previous_refinements';
 import { extractJson } from '../helpers/extract_json';
 import { getChainWithFormatInstructions } from '../helpers/get_chain_with_format_instructions';

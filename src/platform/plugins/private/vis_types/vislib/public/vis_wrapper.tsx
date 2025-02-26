@@ -8,18 +8,20 @@
  */
 
 import React, { useEffect, useMemo, useRef, useCallback } from 'react';
-import { EuiResizeObserver, EuiResizeObserverProps } from '@elastic/eui';
+import type { EuiResizeObserverProps } from '@elastic/eui';
+import { EuiResizeObserver } from '@elastic/eui';
 import { debounce } from 'lodash';
 
-import { IInterpreterRenderHandlers } from '@kbn/expressions-plugin/public';
+import type { IInterpreterRenderHandlers } from '@kbn/expressions-plugin/public';
 import type { PersistedState } from '@kbn/visualizations-plugin/public';
-import { ChartsPluginSetup } from '@kbn/charts-plugin/public';
+import type { ChartsPluginSetup } from '@kbn/charts-plugin/public';
 
-import { KibanaExecutionContext } from '@kbn/core-execution-context-common';
+import type { KibanaExecutionContext } from '@kbn/core-execution-context-common';
 import { METRIC_TYPE } from '@kbn/analytics';
-import { VislibRenderValue } from './vis_type_vislib_vis_fn';
-import { createVislibVisController, VislibVisController } from './vis_controller';
-import { VisTypeVislibCoreSetup } from './plugin';
+import type { VislibRenderValue } from './vis_type_vislib_vis_fn';
+import type { VislibVisController } from './vis_controller';
+import { createVislibVisController } from './vis_controller';
+import type { VisTypeVislibCoreSetup } from './plugin';
 
 import './index.scss';
 import { getUsageCollectionStart } from './services';

@@ -5,9 +5,11 @@
  * 2.0.
  */
 
-import { EuiPopoverTitle, EuiSuperSelect, EuiToolTip } from '@elastic/eui';
-import { EuiFormRow } from '@elastic/eui';
 import {
+  EuiPopoverTitle,
+  EuiSuperSelect,
+  EuiToolTip,
+  EuiFormRow,
   EuiButtonIcon,
   EuiPanel,
   EuiPopover,

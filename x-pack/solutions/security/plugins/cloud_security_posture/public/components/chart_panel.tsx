@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { ReactNode, FC, PropsWithChildren } from 'react';
+import type { ReactNode, FC, PropsWithChildren } from 'react';
+import React from 'react';
 import {
   EuiPanel,
   EuiText,

@@ -15,9 +15,9 @@ import {
   createRootWithCorePlugins,
   type TestElasticsearchUtils,
 } from '@kbn/core-test-helpers-kbn-server';
-import { Root } from '@kbn/core-root-server-internal';
+import type { Root } from '@kbn/core-root-server-internal';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
-import { LogRecord } from '@kbn/logging';
+import type { LogRecord } from '@kbn/logging';
 import { getDocVersion } from '../test_utils';
 import { retryAsync } from '@kbn/core-saved-objects-migration-server-mocks';
 

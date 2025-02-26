@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Trigger } from '@kbn/ui-actions-plugin/public';
+import type { Trigger } from '@kbn/ui-actions-plugin/public';
 
 export const NAVIGATE_TRIGGER_ID = 'NAVIGATE_TRIGGER_ID';
 

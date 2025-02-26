@@ -8,8 +8,8 @@
 import type { Client } from '@elastic/elasticsearch';
 import type { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 import { ALERTING_CASES_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
-import { SavedObjectReference } from '@kbn/core/server';
-import { LegacyRuleNotificationRuleTypeParams } from '@kbn/security-solution-plugin/server/lib/detection_engine/rule_actions_legacy';
+import type { SavedObjectReference } from '@kbn/core/server';
+import type { LegacyRuleNotificationRuleTypeParams } from '@kbn/security-solution-plugin/server/lib/detection_engine/rule_actions_legacy';
 
 interface LegacyActionNotificationSO extends LegacyRuleNotificationRuleTypeParams {
   references: SavedObjectReference[];

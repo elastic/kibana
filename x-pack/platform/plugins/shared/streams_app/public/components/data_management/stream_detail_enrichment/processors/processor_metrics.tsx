@@ -7,12 +7,12 @@
 
 /* eslint-disable @typescript-eslint/naming-convention */
 
+import type { EuiCallOutProps } from '@elastic/eui';
 import {
   EuiBadge,
   EuiBadgeGroup,
   EuiButtonEmpty,
   EuiCallOut,
-  EuiCallOutProps,
   EuiFlexGroup,
   useEuiTheme,
 } from '@elastic/eui';
@@ -20,7 +20,7 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import useToggle from 'react-use/lib/useToggle';
 import { css } from '@emotion/react';
-import { ProcessorMetrics } from '../hooks/use_processing_simulator';
+import type { ProcessorMetrics } from '../hooks/use_processing_simulator';
 
 type ProcessorMetricBadgesProps = ProcessorMetrics;
 

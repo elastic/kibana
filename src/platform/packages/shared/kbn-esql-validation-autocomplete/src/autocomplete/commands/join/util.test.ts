@@ -14,7 +14,7 @@ import {
   suggestionIntersection,
   suggestionUnion,
 } from './util';
-import { SuggestionRawDefinition } from '../../types';
+import type { SuggestionRawDefinition } from '../../types';
 
 describe('getPosition()', () => {
   test('returns correct position on complete modifier matches', () => {

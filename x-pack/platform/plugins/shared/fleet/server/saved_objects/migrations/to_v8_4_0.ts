@@ -7,8 +7,7 @@
 
 import type { SavedObjectMigrationFn } from '@kbn/core/server';
 
-import type { PackagePolicy } from '../../../common';
-import type { Installation } from '../../../common';
+import type { PackagePolicy, Installation } from '../../../common';
 
 import type { AgentPolicy } from '../../types';
 

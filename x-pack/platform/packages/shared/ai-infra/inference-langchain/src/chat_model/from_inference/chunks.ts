@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-import { ChatCompletionChunkEvent, ChatCompletionTokenCountEvent } from '@kbn/inference-common';
+import type {
+  ChatCompletionChunkEvent,
+  ChatCompletionTokenCountEvent,
+} from '@kbn/inference-common';
 import { AIMessageChunk } from '@langchain/core/messages';
 
 // type is not exported from @langchain/core...

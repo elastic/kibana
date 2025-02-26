@@ -8,31 +8,30 @@
  */
 
 import type { ErrorNode, ParserRuleContext, TerminalNode } from 'antlr4';
-import {
-  type ShowInfoContext,
-  type SingleStatementContext,
-  type RowCommandContext,
-  type FromCommandContext,
-  type EvalCommandContext,
-  type StatsCommandContext,
-  type LimitCommandContext,
-  type SortCommandContext,
-  type KeepCommandContext,
-  type DropCommandContext,
-  type RenameCommandContext,
-  type DissectCommandContext,
-  type GrokCommandContext,
-  type MvExpandCommandContext,
-  type ShowCommandContext,
-  type EnrichCommandContext,
-  type WhereCommandContext,
-  default as esql_parser,
-  type MetricsCommandContext,
-  IndexPatternContext,
+import { IndexPatternContext, default as esql_parser } from '../antlr/esql_parser';
+import type {
+  DissectCommandContext,
+  DropCommandContext,
+  EnrichCommandContext,
+  EvalCommandContext,
+  FromCommandContext,
+  GrokCommandContext,
   InlinestatsCommandContext,
   JoinCommandContext,
+  KeepCommandContext,
+  LimitCommandContext,
+  MetricsCommandContext,
+  MvExpandCommandContext,
+  RenameCommandContext,
+  RowCommandContext,
+  ShowCommandContext,
+  ShowInfoContext,
+  SingleStatementContext,
+  SortCommandContext,
+  StatsCommandContext,
+  WhereCommandContext,
 } from '../antlr/esql_parser';
-import { default as ESQLParserListener } from '../antlr/esql_parser_listener';
+import type { default as ESQLParserListener } from '../antlr/esql_parser_listener';
 import {
   createCommand,
   createFunction,

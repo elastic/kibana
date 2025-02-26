@@ -4,7 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useCallback, FormEvent, useState } from 'react';
+import type { FormEvent } from 'react';
+import React, { useCallback, useState } from 'react';
+import type { EuiSwitchProps } from '@elastic/eui';
 import {
   EuiTextArea,
   EuiSwitch,
@@ -16,13 +18,12 @@ import {
   EuiFormRow,
   EuiFieldText,
   EuiHorizontalRule,
-  EuiSwitchProps,
 } from '@elastic/eui';
 import { INPUT_CONTROL } from '../../../common/constants';
 import { getInputFromPolicy } from '../../../common/utils/helpers';
 import * as i18n from './translations';
 import { ControlSettings } from '../control_settings';
-import { SettingsDeps, OnChangeDeps } from '../../types';
+import type { SettingsDeps, OnChangeDeps } from '../../types';
 
 export const PolicySettings = ({ policy, onChange }: SettingsDeps) => {
   const [policyHasErrors, setPolicyHasErrors] = useState(false);

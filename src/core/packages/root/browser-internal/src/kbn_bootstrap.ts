@@ -9,11 +9,9 @@
 
 import { i18n } from '@kbn/i18n';
 import type { InjectedMetadata } from '@kbn/core-injected-metadata-common-internal';
-import { KBN_LOAD_MARKS } from './events';
+import { KBN_LOAD_MARKS, LOAD_BOOTSTRAP_START } from './events';
 import { CoreSystem } from './core_system';
 import { ApmSystem } from './apm_system';
-
-import { LOAD_BOOTSTRAP_START } from './events';
 
 /** @internal */
 export async function __kbnBootstrap__() {

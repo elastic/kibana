@@ -4,14 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { RulesClientApi } from '@kbn/alerting-plugin/server/types';
-import { CoreSetup, KibanaRequest, Logger } from '@kbn/core/server';
-import { DataViewsServerPluginStart } from '@kbn/data-views-plugin/server';
-import { RuleDataPluginService } from '@kbn/rule-registry-plugin/server';
+import type { RulesClientApi } from '@kbn/alerting-plugin/server/types';
+import type { CoreSetup, KibanaRequest, Logger } from '@kbn/core/server';
+import type { DataViewsServerPluginStart } from '@kbn/data-views-plugin/server';
+import type { RuleDataPluginService } from '@kbn/rule-registry-plugin/server';
 import { registerRoutes as registerServerRoutes } from '@kbn/server-route-repository';
-import { SpacesPluginStart } from '@kbn/spaces-plugin/server';
-import { AlertDetailsContextualInsightsService } from '../services';
-import { AbstractObservabilityServerRouteRepository } from './types';
+import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
+import type { AlertDetailsContextualInsightsService } from '../services';
+import type { AbstractObservabilityServerRouteRepository } from './types';
 
 interface RegisterRoutes {
   core: CoreSetup;

@@ -8,7 +8,7 @@
  */
 
 import { setTlsConfigMock } from './http_server.test.mocks';
-import { Server } from 'http';
+import type { Server } from 'http';
 import { rm, mkdtemp, readFile, writeFile } from 'fs/promises';
 import supertest from 'supertest';
 import { omit } from 'lodash';
@@ -25,12 +25,13 @@ import type {
 } from '@kbn/core-http-server';
 import { Router, type RouterOptions } from '@kbn/core-http-router-server-internal';
 import { createServer } from '@kbn/server-http-tools';
-import { HttpConfig } from './http_config';
+import type { HttpConfig } from './http_config';
 import { HttpServer } from './http_server';
 import { Readable } from 'stream';
 import { KBN_CERT_PATH, KBN_KEY_PATH } from '@kbn/dev-utils';
 import moment from 'moment';
-import { of, Observable, BehaviorSubject } from 'rxjs';
+import type { Observable } from 'rxjs';
+import { of, BehaviorSubject } from 'rxjs';
 import { mockCoreContext } from '@kbn/core-base-server-mocks';
 import { createTestEnv, getEnvOptions } from '@kbn/config-mocks';
 

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { JsonObject } from '@kbn/utility-types';
-import { RunTimeMappings } from '../../../../../../common/api/search_strategy/model/runtime_mappings';
+import type { JsonObject } from '@kbn/utility-types';
+import type { RunTimeMappings } from '../../../../../../common/api/search_strategy/model/runtime_mappings';
 
 export const buildTimelineDetailsQuery = ({
   authFilter,

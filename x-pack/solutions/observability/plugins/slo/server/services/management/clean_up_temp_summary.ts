@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ElasticsearchClient, Logger } from '@kbn/core/server';
+import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import {
   SUMMARY_DESTINATION_INDEX_PATTERN,
   SUMMARY_TEMP_INDEX_NAME,

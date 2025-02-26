@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { resolve } from 'path';
+import path, { resolve } from 'path';
 import { format as formatUrl } from 'url';
 import Fs from 'fs';
 
@@ -15,12 +15,12 @@ import {
   kbnTestConfig,
   kibanaTestSuperuserServerless,
   getDockerFileMountPath,
+  fleetPackageRegistryDockerImage,
+  defineDockerServersConfig,
 } from '@kbn/test';
 import { CA_CERT_PATH, kibanaDevServiceAccount } from '@kbn/dev-utils';
 import { commonFunctionalServices } from '@kbn/ftr-common-functional-services';
 import { MOCK_IDP_REALM_NAME } from '@kbn/mock-idp-utils';
-import path from 'path';
-import { fleetPackageRegistryDockerImage, defineDockerServersConfig } from '@kbn/test';
 import { services } from './services';
 
 export default async () => {

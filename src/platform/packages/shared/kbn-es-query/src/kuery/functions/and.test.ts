@@ -11,8 +11,8 @@ import { nodeTypes } from '../node_types';
 import { fields } from '../../filters/stubs';
 import * as ast from '../ast';
 import * as and from './and';
-import { DataViewBase } from '../../es_query';
-import { KqlAndFunctionNode } from './and';
+import type { DataViewBase } from '../../es_query';
+import type { KqlAndFunctionNode } from './and';
 
 const childNode1 = nodeTypes.function.buildNode('is', 'machine.os', 'osx');
 const childNode2 = nodeTypes.function.buildNode('is', 'extension', 'jpg');

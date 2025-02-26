@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import type { estypes } from '@elastic/elasticsearch';
 import { find, get } from 'lodash';
-import { catchError, map } from 'rxjs';
+import { catchError, map, of } from 'rxjs';
 import type { Observable } from 'rxjs';
-import { of } from 'rxjs';
-import type { AggregationsTermsAggregation } from '@elastic/elasticsearch/lib/api/types';
+import type {
+  AggregationsTermsAggregation,
+  SearchRequest,
+} from '@elastic/elasticsearch/lib/api/types';
 import type {
   IKibanaSearchResponse,
   IKibanaSearchRequest,
@@ -27,8 +28,6 @@ import type {
   Aggs,
   Bucket,
   FieldStatsCommonRequestParams,
-} from '../../../../../common/types/field_stats';
-import type {
   Field,
   NumericFieldStats,
   FieldStatsError,
@@ -155,7 +154,7 @@ export const fetchNumericFieldsStats = (
   fields: Field[],
   options: ISearchOptions
 ): Observable<NumericFieldStats[] | FieldStatsError> => {
-  const request: estypes.SearchRequest = getNumericFieldsStatsRequest(params, fields);
+  const request: SearchRequest = getNumericFieldsStatsRequest(params, fields);
 
   return dataSearch
     .search<IKibanaSearchRequest, IKibanaSearchResponse>({ params: request }, options)

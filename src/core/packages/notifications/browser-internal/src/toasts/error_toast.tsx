@@ -24,7 +24,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import type { AnalyticsServiceStart } from '@kbn/core-analytics-browser';
 import type { I18nStart } from '@kbn/core-i18n-browser';
 import type { OverlayStart } from '@kbn/core-overlays-browser';
-import { ThemeServiceStart } from '@kbn/core-theme-browser';
+import type { ThemeServiceStart } from '@kbn/core-theme-browser';
 import type { UserProfileService } from '@kbn/core-user-profile-browser';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 

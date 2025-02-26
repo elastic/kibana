@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { BaseChatModel } from '@langchain/core/language_models/chat_models';
-import { StringWithAutocomplete } from '@langchain/core/dist/utils/types';
-import { RunnableConfig } from '@langchain/core/runnables';
+import type { BaseChatModel } from '@langchain/core/language_models/chat_models';
+import type { StringWithAutocomplete } from '@langchain/core/dist/utils/types';
+import type { RunnableConfig } from '@langchain/core/runnables';
 import { AGENT_NODE_TAG } from './run_agent';
-import { AgentState, NodeParamsBase } from '../types';
+import type { AgentState, NodeParamsBase } from '../types';
 import { NodeType } from '../constants';
 
 export interface RespondParams extends NodeParamsBase {

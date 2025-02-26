@@ -7,16 +7,16 @@
 
 import { transformError } from '@kbn/securitysolution-es-utils';
 
+import type { GetKnowledgeBaseIndicesResponse } from '@kbn/elastic-assistant-common';
 import {
   API_VERSIONS,
   ELASTIC_AI_ASSISTANT_KNOWLEDGE_BASE_INDICES_URL,
-  GetKnowledgeBaseIndicesResponse,
 } from '@kbn/elastic-assistant-common';
-import { IKibanaResponse } from '@kbn/core/server';
+import type { IKibanaResponse } from '@kbn/core/server';
 import { forEach, reduce } from 'lodash';
-import { IndicesGetMappingIndexMappingRecord } from '@elastic/elasticsearch/lib/api/types';
+import type { IndicesGetMappingIndexMappingRecord } from '@elastic/elasticsearch/lib/api/types';
 import { buildResponse } from '../../lib/build_response';
-import { ElasticAssistantPluginRouter } from '../../types';
+import type { ElasticAssistantPluginRouter } from '../../types';
 
 /**
  * Get the indices that have fields of `semantic_text` type

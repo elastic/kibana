@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EcsEvent } from '@elastic/ecs';
-import { AuditEvent } from '@kbn/security-plugin/server';
+import type { EcsEvent } from '@elastic/ecs';
+import type { AuditEvent } from '@kbn/security-plugin/server';
 
 export type AuditAction = 'create' | 'delete';
 

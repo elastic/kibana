@@ -7,11 +7,13 @@
 
 import type { AppMountParameters, CoreStart } from '@kbn/core/public';
 import { createContext } from 'react';
-import type { ObservabilityRuleTypeRegistry } from '@kbn/observability-plugin/public';
+import type {
+  ObservabilityRuleTypeRegistry,
+  ObservabilityPublicStart,
+} from '@kbn/observability-plugin/public';
 import type { MapsStartApi } from '@kbn/maps-plugin/public';
 import type { LensPublicStart } from '@kbn/lens-plugin/public';
 import type { ObservabilitySharedPluginStart } from '@kbn/observability-shared-plugin/public';
-import type { ObservabilityPublicStart } from '@kbn/observability-plugin/public';
 import type { Start as InspectorPluginStart } from '@kbn/inspector-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';

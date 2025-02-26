@@ -8,7 +8,7 @@
  */
 
 import { ESQLState } from './esql_state';
-import { ESQLToken } from './esql_token';
+import type { ESQLToken } from './esql_token';
 import { ESQLTokensProvider } from './esql_tokens_provider';
 
 describe('ES|QL Tokens Provider', () => {

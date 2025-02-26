@@ -8,11 +8,8 @@
  */
 
 import { firstValueFrom } from 'rxjs';
-import {
-  FeatureCatalogueEntry,
-  FeatureCatalogueRegistry,
-  FeatureCatalogueSolution,
-} from './feature_catalogue_registry';
+import type { FeatureCatalogueEntry, FeatureCatalogueSolution } from './feature_catalogue_registry';
+import { FeatureCatalogueRegistry } from './feature_catalogue_registry';
 
 const DASHBOARD_FEATURE: FeatureCatalogueEntry = {
   id: 'dashboard',

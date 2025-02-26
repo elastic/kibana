@@ -9,12 +9,12 @@ import { last, omit } from 'lodash';
 import { defer, switchMap, throwError, identity } from 'rxjs';
 import type { Logger } from '@kbn/logging';
 import type { KibanaRequest } from '@kbn/core-http-server';
-import {
-  type ChatCompleteAPI,
-  type ChatCompleteCompositeResponse,
-  createInferenceRequestError,
-  type ToolOptions,
+import { createInferenceRequestError } from '@kbn/inference-common';
+import type {
   ChatCompleteOptions,
+  ChatCompleteAPI,
+  ChatCompleteCompositeResponse,
+  ToolOptions,
 } from '@kbn/inference-common';
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 import { getInferenceAdapter } from './adapters';

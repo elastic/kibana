@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { AuthenticatedUser } from '@kbn/core-security-common';
-import {
+import type { AuthenticatedUser } from '@kbn/core-security-common';
+import type {
   ConversationCreateProps,
   ConversationResponse,
   ConversationUpdateProps,
@@ -17,7 +17,8 @@ import { updateConversation } from './update_conversation';
 import { getConversation } from './get_conversation';
 import { deleteConversation } from './delete_conversation';
 import { appendConversationMessages } from './append_conversation_messages';
-import { AIAssistantDataClient, AIAssistantDataClientParams } from '..';
+import type { AIAssistantDataClientParams } from '..';
+import { AIAssistantDataClient } from '..';
 
 /**
  * Params for when creating ConversationDataClient in Request Context Factory. Useful if needing to modify

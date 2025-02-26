@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { FindActionResult } from '@kbn/actions-plugin/server';
+import type { FindActionResult } from '@kbn/actions-plugin/server';
 import { isSupportedConnector } from '@kbn/inference-common';
 import { createObservabilityAIAssistantServerRoute } from '../create_observability_ai_assistant_server_route';
 

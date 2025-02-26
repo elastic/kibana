@@ -12,8 +12,8 @@ import { cloneDeep } from 'lodash';
 
 import { LegendValue } from '@elastic/charts';
 import { layerTypes } from '../../../common/layer_types';
-import { AnnotationGroups } from '../../types';
-import {
+import type { AnnotationGroups } from '../../types';
+import type {
   XYLayerConfig,
   XYDataLayerConfig,
   XYReferenceLineLayerConfig,

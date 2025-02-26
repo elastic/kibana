@@ -13,11 +13,11 @@ import type {
   SavedObjectsClientContract,
 } from '@kbn/core/server';
 
-import type { AggregationsAggregationContainer } from '@elastic/elasticsearch/lib/api/types';
-
-import type { estypes } from '@elastic/elasticsearch';
-
-import type { SortResults } from '@elastic/elasticsearch/lib/api/types';
+import type {
+  AggregationsAggregate,
+  AggregationsAggregationContainer,
+  SortResults,
+} from '@elastic/elasticsearch/lib/api/types';
 
 import type { AgentStatus, ListWithKuery } from '../../types';
 import type { Agent, GetAgentStatusResponse } from '../../../common/types';
@@ -101,7 +101,7 @@ export interface AgentClient {
     page: number;
     perPage: number;
     statusSummary?: Record<AgentStatus, number>;
-    aggregations?: Record<string, estypes.AggregationsAggregate>;
+    aggregations?: Record<string, AggregationsAggregate>;
   }>;
 
   /**

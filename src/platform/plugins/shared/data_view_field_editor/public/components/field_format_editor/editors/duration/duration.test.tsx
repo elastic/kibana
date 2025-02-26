@@ -11,7 +11,7 @@ import React from 'react';
 import { shallow } from 'enzyme';
 
 import { DurationFormatEditor } from './duration';
-import { FieldFormat } from '@kbn/field-formats-plugin/common';
+import type { FieldFormat } from '@kbn/field-formats-plugin/common';
 import { EuiSwitch } from '@elastic/eui';
 
 const fieldType = 'number';

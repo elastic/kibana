@@ -5,8 +5,15 @@
  * 2.0.
  */
 
-import { EuiToolTip } from '@elastic/eui';
-import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTitle, EuiText } from '@elastic/eui';
+import {
+  EuiToolTip,
+  EuiButton,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiSpacer,
+  EuiTitle,
+  EuiText,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { isEmpty } from 'lodash';
 import React from 'react';

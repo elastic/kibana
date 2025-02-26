@@ -5,10 +5,9 @@
  * 2.0.
  */
 
-import type { estypes } from '@elastic/elasticsearch';
 import type { Moment } from 'moment';
 
-import type { MlCustomSettings } from '@elastic/elasticsearch/lib/api/types';
+import type { MlCustomSettings, MlJobState } from '@elastic/elasticsearch/lib/api/types';
 import type { CombinedJob, CombinedJobWithStats } from './combined_job';
 import type { MlAnomalyDetectionAlertRule } from '../alerts';
 import type { MlJobBlocked } from './job';
@@ -16,7 +15,7 @@ import type { JobActionState } from '../../constants/job_actions';
 export type { Datafeed } from './datafeed';
 export type { DatafeedStats } from './datafeed_stats';
 
-export type SummaryJobState = estypes.MlJobState | JobActionState;
+export type SummaryJobState = MlJobState | JobActionState;
 
 /**
  * A summary of an anomaly detection job.

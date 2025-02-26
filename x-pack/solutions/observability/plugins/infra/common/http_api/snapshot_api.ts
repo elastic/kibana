@@ -7,8 +7,11 @@
 
 import { createLiteralValueFromUndefinedRT } from '@kbn/io-ts-utils';
 import * as rt from 'io-ts';
-import { SnapshotMetricTypeRT, ItemTypeRT } from '@kbn/metrics-data-access-plugin/common';
-import { MetricsAPISeriesRT } from '@kbn/metrics-data-access-plugin/common';
+import {
+  SnapshotMetricTypeRT,
+  ItemTypeRT,
+  MetricsAPISeriesRT,
+} from '@kbn/metrics-data-access-plugin/common';
 
 export const SnapshotNodePathRT = rt.intersection([
   rt.type({

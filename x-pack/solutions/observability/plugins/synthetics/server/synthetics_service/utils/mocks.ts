@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
+import type { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
 import { cloneDeep } from 'lodash';
 import { syntheticsParamType } from '../../../common/types/saved_objects';
 

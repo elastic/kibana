@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiComboBox, EuiComboBoxOptionOption, useEuiTheme, EuiComboBoxProps } from '@elastic/eui';
+import type { EuiComboBoxOptionOption, EuiComboBoxProps } from '@elastic/eui';
+import { EuiComboBox, useEuiTheme } from '@elastic/eui';
 import React from 'react';
 import { genericComboBoxStyle } from './generic_combo_box.styles';
 

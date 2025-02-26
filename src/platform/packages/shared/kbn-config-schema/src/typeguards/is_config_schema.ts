@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Type } from '../types';
+import type { Type } from '../types';
 
 export function isConfigSchema(obj: any): obj is Type<any> {
   return obj ? obj.__isKbnConfigSchemaType === true : false;

@@ -15,12 +15,11 @@ import {
   datasources,
   ScoutEventsReport,
   ScoutReportEventAction,
-  type ScoutTestRunInfo,
   generateTestRunId,
   getTestIDForTitle,
   uploadScoutReportEvents,
-  ScoutFileInfo,
 } from '@kbn/scout-reporting';
+import type { ScoutFileInfo, ScoutTestRunInfo } from '@kbn/scout-reporting';
 import {
   type CodeOwnersEntry,
   type CodeOwnerArea,
@@ -28,8 +27,8 @@ import {
   getCodeOwnersEntries,
   findAreaForCodeOwner,
 } from '@kbn/code-owners';
-import { Runner, Test } from '../../../fake_mocha_types';
-import { Config as FTRConfig } from '../../config';
+import type { Runner, Test } from '../../../fake_mocha_types';
+import type { Config as FTRConfig } from '../../config';
 
 /**
  * Configuration options for the Scout Mocha reporter

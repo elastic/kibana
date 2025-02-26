@@ -6,13 +6,13 @@
  */
 
 import React, { useEffect, useRef } from 'react';
-import { Subject } from 'rxjs';
+import type { Subject } from 'rxjs';
 import { useDispatch } from 'react-redux';
 import { areFiltersEmpty } from '../common/utils';
 import { getOverviewStore } from './redux_store';
 import { ShowSelectedFilters } from '../common/show_selected_filters';
 import { setOverviewPageStateAction } from '../../synthetics/state';
-import { MonitorFilters } from './types';
+import type { MonitorFilters } from './types';
 import { EmbeddablePanelWrapper } from '../../synthetics/components/common/components/embeddable_panel_wrapper';
 import { SyntheticsEmbeddableContext } from '../synthetics_embeddable_context';
 import { OverviewGrid } from '../../synthetics/components/monitors_page/overview/overview/overview_grid';

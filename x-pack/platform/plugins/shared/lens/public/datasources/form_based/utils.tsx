@@ -10,13 +10,12 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { DocLinksStart, ThemeServiceStart } from '@kbn/core/public';
 import { hasUnsupportedDownsampledAggregationFailure } from '@kbn/search-response-warnings';
-import type { DatatableUtilitiesService } from '@kbn/data-plugin/common';
-import { TimeRange } from '@kbn/es-query';
+import type { DatatableUtilitiesService, Query } from '@kbn/data-plugin/common';
+import type { TimeRange } from '@kbn/es-query';
 import { EuiLink, EuiSpacer } from '@elastic/eui';
 
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 import { groupBy, escape, uniq, uniqBy } from 'lodash';
-import type { Query } from '@kbn/data-plugin/common';
 
 import {
   type SearchResponseWarning,
@@ -56,7 +55,7 @@ import {
 } from './operations';
 
 import { getInvalidFieldMessage, isColumnOfType } from './operations/definitions/helpers';
-import { FiltersIndexPatternColumn } from './operations/definitions/filters';
+import type { FiltersIndexPatternColumn } from './operations/definitions/filters';
 import { hasField } from './pure_utils';
 import { mergeLayer } from './state_helpers';
 import { supportsRarityRanking } from './operations/definitions/terms';

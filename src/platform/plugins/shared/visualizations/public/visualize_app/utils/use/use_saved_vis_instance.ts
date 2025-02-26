@@ -8,7 +8,7 @@
  */
 
 import { useEffect, useRef, useState } from 'react';
-import { EventEmitter } from 'events';
+import type { EventEmitter } from 'events';
 import { parse } from 'query-string';
 import { i18n } from '@kbn/i18n';
 
@@ -19,7 +19,7 @@ import {
   getCreateServerlessBreadcrumbs,
   getEditServerlessBreadcrumbs,
 } from '../breadcrumbs';
-import { SavedVisInstance, VisualizeServices, IEditorController } from '../../types';
+import type { SavedVisInstance, VisualizeServices, IEditorController } from '../../types';
 import { VisualizeConstants } from '../../../../common/constants';
 import { getTypes } from '../../../services';
 import { redirectToSavedObjectPage } from '../utils';

@@ -21,7 +21,7 @@ import {
 import { init as initHttp } from '../public/application/services/http';
 import { init as initUiMetric } from '../public/application/services/ui_metric';
 import { indexLifecycleTab } from '../public/extend_index_management/components/index_lifecycle_summary';
-import { Index } from '@kbn/index-management-plugin/common';
+import type { Index } from '@kbn/index-management-plugin/common';
 import { findTestSubject } from '@elastic/eui/lib/test';
 
 const { httpSetup } = init();

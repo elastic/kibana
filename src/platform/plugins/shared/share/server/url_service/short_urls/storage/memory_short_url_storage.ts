@@ -9,9 +9,9 @@
 
 import { v4 as uuidv4 } from 'uuid';
 import type { SerializableRecord } from '@kbn/utility-types';
-import { SavedObjectReference } from '@kbn/core/server';
-import { ShortUrlData } from '../../../../common/url_service/short_urls/types';
-import { ShortUrlStorage, ShortUrlRecord } from '../types';
+import type { SavedObjectReference } from '@kbn/core/server';
+import type { ShortUrlData } from '../../../../common/url_service/short_urls/types';
+import type { ShortUrlStorage, ShortUrlRecord } from '../types';
 
 const clone = <P>(obj: P): P => JSON.parse(JSON.stringify(obj)) as P;
 

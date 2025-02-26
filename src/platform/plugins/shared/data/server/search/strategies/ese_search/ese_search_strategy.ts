@@ -9,13 +9,12 @@
 
 import type { Observable } from 'rxjs';
 import type { Logger, SharedGlobalConfig } from '@kbn/core/server';
-import { catchError, tap } from 'rxjs';
-import { firstValueFrom, from } from 'rxjs';
+import { catchError, tap, firstValueFrom, from } from 'rxjs';
 import type { ISearchOptions, IEsSearchRequest, IEsSearchResponse } from '@kbn/search-types';
 import { getKbnServerError } from '@kbn/kibana-utils-plugin/server';
 import { omit } from 'lodash';
-import { IAsyncSearchRequestParams } from '../..';
-import { getKbnSearchError, KbnSearchError } from '../../report_search_error';
+import type { IAsyncSearchRequestParams } from '../..';
+import { KbnSearchError, getKbnSearchError } from '../../report_search_error';
 import type { ISearchStrategy, SearchStrategyDependencies } from '../../types';
 import type { IAsyncSearchOptions } from '../../../../common';
 import { DataViewType, isRunningResponse, pollSearch } from '../../../../common';
@@ -25,10 +24,11 @@ import {
   getIgnoreThrottled,
 } from './request_utils';
 import { toAsyncKibanaSearchResponse, toAsyncKibanaSearchStatusResponse } from './response_utils';
-import { SearchUsage, searchUsageObserver } from '../../collectors/search';
+import type { SearchUsage } from '../../collectors/search';
+import { searchUsageObserver } from '../../collectors/search';
 import { getDefaultSearchParams, getShardTimeout } from '../es_search';
 import { getTotalLoaded, shimHitsTotal } from '../../../../common/search/strategies/es_search';
-import { SearchConfigSchema } from '../../../config';
+import type { SearchConfigSchema } from '../../../config';
 import { sanitizeRequestParams } from '../../sanitize_request_params';
 
 export const enhancedEsSearchStrategyProvider = (

@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Observable, fromEvent } from 'rxjs';
-import { scan, startWith } from 'rxjs';
+import type { Observable } from 'rxjs';
+import { fromEvent, scan, startWith } from 'rxjs';
 import type { ExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
 
 export interface CountEventArguments {

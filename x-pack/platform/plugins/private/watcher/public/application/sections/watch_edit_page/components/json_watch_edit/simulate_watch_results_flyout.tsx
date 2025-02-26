@@ -20,7 +20,7 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 
-import {
+import type {
   ExecutedWatchDetails,
   ExecutedWatchResults,
 } from '../../../../../../common/types/watch_types';

@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, useEuiFontSize } from '@elastic/eui';
-import { EuiToolTip } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, useEuiFontSize, EuiToolTip } from '@elastic/eui';
 import React from 'react';
 import styled from '@emotion/styled';
 import { truncate } from '../../../utils/style';

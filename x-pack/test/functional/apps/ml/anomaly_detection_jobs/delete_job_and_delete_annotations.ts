@@ -6,7 +6,7 @@
  */
 
 import { ANNOTATION_TYPE } from '@kbn/ml-plugin/common/constants/annotations';
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 import {
   SINGLE_METRIC_JOB_CONFIG,
   MULTI_METRIC_JOB_CONFIG,

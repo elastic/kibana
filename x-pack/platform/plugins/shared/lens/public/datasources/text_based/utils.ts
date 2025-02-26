@@ -6,12 +6,10 @@
  */
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
-import { getESQLAdHocDataview } from '@kbn/esql-utils';
+import type { ExpressionsStart, DatatableColumn } from '@kbn/expressions-plugin/public';
+import { getESQLAdHocDataview, getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
 import type { AggregateQuery } from '@kbn/es-query';
-import { getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
-import type { DatatableColumn } from '@kbn/expressions-plugin/public';
-import { ValueFormatConfig } from '../form_based/operations/definitions/column_types';
+import type { ValueFormatConfig } from '../form_based/operations/definitions/column_types';
 import { generateId } from '../../id_generator';
 import { fetchDataFromAggregateQuery } from './fetch_data_from_aggregate_query';
 import type {

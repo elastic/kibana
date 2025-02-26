@@ -8,11 +8,12 @@
 import type { ElasticsearchClient, Logger, SavedObjectsClientContract } from '@kbn/core/server';
 import pMap from 'p-map';
 
-import {
-  ElasticsearchAssetType,
-  type PackageInstallContext,
+import { ElasticsearchAssetType } from '../../../../../common/types/models';
+import type {
+  EsAssetReference,
+  RegistryDataStream,
+  PackageInstallContext,
 } from '../../../../../common/types/models';
-import type { EsAssetReference, RegistryDataStream } from '../../../../../common/types/models';
 import { updateEsAssetReferences } from '../../packages/es_assets_reference';
 import { getAssetFromAssetsMap } from '../../archive';
 

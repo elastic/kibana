@@ -9,7 +9,7 @@
 
 import { useQuery } from '@tanstack/react-query';
 
-import { SetOptional } from 'type-fest';
+import type { SetOptional } from 'type-fest';
 import { searchAlerts, type SearchAlertsParams } from '../apis/search_alerts/search_alerts';
 import { DEFAULT_ALERTS_PAGE_SIZE } from '../constants';
 import { AlertsQueryContext } from '../contexts/alerts_query_context';

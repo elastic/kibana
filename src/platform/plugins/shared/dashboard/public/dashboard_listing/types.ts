@@ -9,7 +9,7 @@
 
 import type { PropsWithChildren } from 'react';
 import type { UserContentCommonSchema } from '@kbn/content-management-table-list-view-common';
-import { ViewMode } from '@kbn/presentation-publishing';
+import type { ViewMode } from '@kbn/presentation-publishing';
 
 export type DashboardListingProps = PropsWithChildren<{
   disableCreateDashboardButton?: boolean;

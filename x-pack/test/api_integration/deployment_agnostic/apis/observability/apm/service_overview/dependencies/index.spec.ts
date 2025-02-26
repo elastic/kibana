@@ -6,11 +6,11 @@
  */
 import expect from '@kbn/expect';
 import { last, pick } from 'lodash';
-import { DependencyNode } from '@kbn/apm-plugin/common/connections';
+import { NodeType } from '@kbn/apm-plugin/common/connections';
+import type { DependencyNode, Node } from '@kbn/apm-plugin/common/connections';
 import type { ValuesType } from 'utility-types';
 import type { ApmSynthtraceEsClient } from '@kbn/apm-synthtrace';
 import type { APIReturnType } from '@kbn/apm-plugin/public/services/rest/create_call_apm_api';
-import { type Node, NodeType } from '@kbn/apm-plugin/common/connections';
 import {
   ENVIRONMENT_ALL,
   ENVIRONMENT_NOT_DEFINED,

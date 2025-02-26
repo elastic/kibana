@@ -15,8 +15,9 @@ import { mountWithIntl as mount } from '@kbn/test-jest-helpers';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { coreMock } from '@kbn/core/public/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
-import { Filter } from '@kbn/es-query';
-import { QueryBarMenuProps, QueryBarMenu } from './query_bar_menu';
+import type { Filter } from '@kbn/es-query';
+import type { QueryBarMenuProps } from './query_bar_menu';
+import { QueryBarMenu } from './query_bar_menu';
 import { EuiPopover } from '@elastic/eui';
 
 describe('Querybar Menu component', () => {

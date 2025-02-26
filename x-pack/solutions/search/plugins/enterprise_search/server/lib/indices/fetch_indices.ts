@@ -5,23 +5,25 @@
  * 2.0.
  */
 
-import { ExpandWildcard } from '@elastic/elasticsearch/lib/api/types';
-import {
+import type {
+  ExpandWildcard,
   IndicesGetResponse,
   SecurityHasPrivilegesPrivileges,
   IndicesStatsIndicesStats,
 } from '@elastic/elasticsearch/lib/api/types';
-import { IScopedClusterClient } from '@kbn/core/server';
+import type { IScopedClusterClient } from '@kbn/core/server';
 
-import { AlwaysShowPattern, ElasticsearchIndexWithPrivileges } from '../../../common/types/indices';
+import type {
+  AlwaysShowPattern,
+  ElasticsearchIndexWithPrivileges,
+} from '../../../common/types/indices';
 import { isNotNullish } from '../../../common/utils/is_not_nullish';
 
 import { fetchIndexCounts } from './fetch_index_counts';
 import { fetchIndexPrivileges } from './fetch_index_privileges';
 import { fetchIndexStats } from './fetch_index_stats';
 import { expandAliases, getAlwaysShowAliases } from './utils/extract_always_show_indices';
-import { getIndexDataMapper } from './utils/get_index_data';
-import { getIndexData, getSearchIndexData } from './utils/get_index_data';
+import { getIndexDataMapper, getIndexData, getSearchIndexData } from './utils/get_index_data';
 
 export interface TotalIndexData {
   allIndexMatches: IndicesGetResponse;

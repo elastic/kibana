@@ -15,10 +15,10 @@ import {
 } from '@kbn/presentation-publishing';
 import { noop } from 'lodash';
 import type { DataView } from '@kbn/data-views-plugin/common';
-import { BehaviorSubject } from 'rxjs';
+import type { BehaviorSubject } from 'rxjs';
 import type { IntegrationCallbacks, LensInternalApi, LensRuntimeState } from '../types';
 import { buildObservableVariable } from '../helper';
-import { SharingSavedObjectProps } from '../../types';
+import type { SharingSavedObjectProps } from '../../types';
 
 export interface StateManagementConfig {
   api: Pick<IntegrationCallbacks, 'updateAttributes' | 'updateSavedObjectId'> &

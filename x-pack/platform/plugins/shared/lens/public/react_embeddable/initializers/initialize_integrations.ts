@@ -12,10 +12,14 @@ import {
 } from '@kbn/es-query';
 import { noop, omit } from 'lodash';
 import type { HasSerializableState } from '@kbn/presentation-publishing';
-import { SavedObjectReference } from '@kbn/core/types';
+import type { SavedObjectReference } from '@kbn/core/types';
 import { emptySerializer, isTextBasedLanguage } from '../helper';
-import type { GetStateType, LensEmbeddableStartServices, LensRuntimeState } from '../types';
-import type { IntegrationCallbacks } from '../types';
+import type {
+  GetStateType,
+  LensEmbeddableStartServices,
+  LensRuntimeState,
+  IntegrationCallbacks,
+} from '../types';
 
 function cleanupSerializedState({
   rawState,

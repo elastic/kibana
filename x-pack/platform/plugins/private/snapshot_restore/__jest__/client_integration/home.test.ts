@@ -10,7 +10,7 @@ import * as fixtures from '../../test/fixtures';
 import { SNAPSHOT_STATE } from '../../public/application/constants';
 import { API_BASE_PATH } from '../../common';
 import { setupEnvironment, pageHelpers, getRandomString, findTestSubject } from './helpers';
-import { HomeTestBed } from './helpers/home.helpers';
+import type { HomeTestBed } from './helpers/home.helpers';
 import { REPOSITORY_NAME } from './helpers/constant';
 
 const { setup } = pageHelpers.home;

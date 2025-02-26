@@ -18,7 +18,7 @@ import {
   EuiPanel,
   EuiTitle,
 } from '@elastic/eui';
-import { Connector } from '@kbn/search-connectors';
+import type { Connector } from '@kbn/search-connectors';
 
 import { docLinks } from '../../../../common/doc_links';
 

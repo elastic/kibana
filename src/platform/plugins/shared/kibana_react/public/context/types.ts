@@ -7,10 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { FC, PropsWithChildren } from 'react';
-import { CoreStart } from '@kbn/core/public';
-import { KibanaReactOverlays } from '../overlays';
-import { KibanaReactNotifications } from '../notifications';
+import type { FC, PropsWithChildren } from 'react';
+import type React from 'react';
+import type { CoreStart } from '@kbn/core/public';
+import type { KibanaReactOverlays } from '../overlays';
+import type { KibanaReactNotifications } from '../notifications';
 
 export type KibanaServices = Partial<CoreStart>;
 

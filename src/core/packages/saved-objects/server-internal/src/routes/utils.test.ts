@@ -16,10 +16,10 @@ import {
   throwIfTypeNotVisibleByAPI,
   throwIfAnyTypeNotVisibleByAPI,
   logWarnOnExternalRequest,
+  catchAndReturnBoomErrors,
 } from './utils';
 import { Readable } from 'stream';
 import { createPromiseFromStreams, createConcatStream } from '@kbn/utils';
-import { catchAndReturnBoomErrors } from './utils';
 import Boom from '@hapi/boom';
 import type {
   KibanaRequest,

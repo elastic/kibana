@@ -8,11 +8,10 @@
 import type { Space } from '@kbn/spaces-plugin/common';
 import Axios from 'axios';
 import Https from 'https';
-import { format as formatUrl } from 'url';
+import Url, { format as formatUrl } from 'url';
 import util from 'util';
 import Chance from 'chance';
-import Url from 'url';
-import { FtrProviderContext } from '../ftr_provider_context';
+import type { FtrProviderContext } from '../ftr_provider_context';
 
 const chance = new Chance();
 

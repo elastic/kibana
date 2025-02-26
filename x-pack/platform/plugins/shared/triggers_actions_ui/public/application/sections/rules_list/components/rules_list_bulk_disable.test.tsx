@@ -5,7 +5,7 @@
  * 2.0.
  */
 import * as React from 'react';
-import { IToasts } from '@kbn/core/public';
+import type { IToasts } from '@kbn/core/public';
 import {
   render,
   screen,

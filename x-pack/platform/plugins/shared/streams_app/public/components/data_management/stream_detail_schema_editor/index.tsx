@@ -5,7 +5,8 @@
  * 2.0.
  */
 import React from 'react';
-import { WiredStreamGetResponse, isRootStreamDefinition } from '@kbn/streams-schema';
+import type { WiredStreamGetResponse } from '@kbn/streams-schema';
+import { isRootStreamDefinition } from '@kbn/streams-schema';
 import { SchemaEditor } from '../schema_editor';
 import { useSchemaFields } from '../schema_editor/hooks/use_schema_fields';
 

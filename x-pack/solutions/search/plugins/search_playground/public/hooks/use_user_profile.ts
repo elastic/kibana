@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { UserProfileWithAvatar } from '@kbn/user-profile-components';
+import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
 import { useQuery } from '@tanstack/react-query';
 import { useKibana } from './use_kibana';
 

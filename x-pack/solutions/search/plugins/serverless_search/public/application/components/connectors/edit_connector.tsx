@@ -5,6 +5,7 @@
  * 2.0.
  */
 import {
+  copyToClipboard,
   EuiButton,
   EuiButtonIcon,
   EuiContextMenu,
@@ -20,7 +21,6 @@ import {
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
-import { copyToClipboard } from '@elastic/eui';
 import {
   CONNECTOR_LABEL,
   COPY_CONNECTOR_ID_LABEL,

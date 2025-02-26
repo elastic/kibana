@@ -7,16 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { BUCKET_TYPES, IAggConfig, METRIC_TYPES } from '@kbn/data-plugin/common';
+import type { IAggConfig } from '@kbn/data-plugin/common';
+import { BUCKET_TYPES, METRIC_TYPES } from '@kbn/data-plugin/common';
 import { stubLogstashDataView } from '@kbn/data-views-plugin/common/data_view.stub';
-import {
+import type {
   AggBasedColumn,
   CounterRateColumn,
   GenericColumnWithMeta,
   SchemaConfig,
   SupportedAggregation,
 } from '../../common';
-import {
+import type {
   AvgColumn,
   CountColumn,
   MaxColumn,
@@ -34,7 +35,7 @@ import {
   isValidVis,
   sortColumns,
 } from './utils';
-import { Schemas } from '../vis_schemas';
+import type { Schemas } from '../vis_schemas';
 
 const mockConvertBucketToColumns = jest.fn();
 

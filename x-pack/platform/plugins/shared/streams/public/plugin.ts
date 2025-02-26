@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { CoreSetup, CoreStart, PluginInitializerContext } from '@kbn/core/public';
-import { Logger } from '@kbn/logging';
+import type { CoreSetup, CoreStart, PluginInitializerContext } from '@kbn/core/public';
+import type { Logger } from '@kbn/logging';
 
 import { createRepositoryClient } from '@kbn/server-route-repository-client';
 import { from, shareReplay, startWith } from 'rxjs';
 import { once } from 'lodash';
 import type { StreamsPublicConfig } from '../common/config';
-import { StreamsPluginClass, StreamsPluginSetup, StreamsPluginStart } from './types';
-import { StreamsRepositoryClient } from './api';
+import type { StreamsPluginClass, StreamsPluginSetup, StreamsPluginStart } from './types';
+import type { StreamsRepositoryClient } from './api';
 
 export class Plugin implements StreamsPluginClass {
   public config: StreamsPublicConfig;

@@ -26,9 +26,8 @@ import { MLJobLink } from './ml_job_link';
 import * as labels from './translations';
 import { MLFlyoutView } from './ml_flyout';
 import { UptimeRefreshContext, UptimeSettingsContext } from '../../../contexts';
-import { useGetUrlParams } from '../../../hooks';
+import { useGetUrlParams, useMonitorId } from '../../../hooks';
 import { getDynamicSettings } from '../../../state/actions/dynamic_settings';
-import { useMonitorId } from '../../../hooks';
 import { kibanaService } from '../../../state/kibana_service';
 import { CLIENT_ALERT_TYPES } from '../../../../../common/constants/uptime_alerts';
 

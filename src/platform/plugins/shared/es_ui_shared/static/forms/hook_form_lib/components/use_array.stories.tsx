@@ -8,7 +8,7 @@
  */
 
 import React from 'react';
-import { ComponentMeta } from '@storybook/react';
+import type { ComponentMeta } from '@storybook/react';
 
 import { STORYBOOK_SECTION } from '../constants';
 import { UseArray } from './use_array';

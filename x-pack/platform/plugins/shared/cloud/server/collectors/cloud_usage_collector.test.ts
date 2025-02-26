@@ -9,9 +9,12 @@ import {
   createCollectorFetchContextMock,
   usageCollectionPluginMock,
 } from '@kbn/usage-collection-plugin/server/mocks';
-import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
-import { CloudUsageCollectorConfig, createCloudUsageCollector } from './cloud_usage_collector';
-import { CollectorFetchContext } from '@kbn/usage-collection-plugin/server';
+import type {
+  UsageCollectionSetup,
+  CollectorFetchContext,
+} from '@kbn/usage-collection-plugin/server';
+import type { CloudUsageCollectorConfig } from './cloud_usage_collector';
+import { createCloudUsageCollector } from './cloud_usage_collector';
 
 describe('createCloudUsageCollector', () => {
   let usageCollection: UsageCollectionSetup;

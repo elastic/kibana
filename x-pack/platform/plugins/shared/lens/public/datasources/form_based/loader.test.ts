@@ -12,8 +12,8 @@ import {
   extractReferences,
   injectReferences,
 } from './loader';
-import { FormBasedPersistedState, FormBasedPrivateState } from './types';
-import { DateHistogramIndexPatternColumn, TermsIndexPatternColumn } from './operations';
+import type { FormBasedPersistedState, FormBasedPrivateState } from './types';
+import type { DateHistogramIndexPatternColumn, TermsIndexPatternColumn } from './operations';
 import { sampleIndexPatterns } from '../../data_views_service/mocks';
 
 const createMockStorage = (lastData?: Record<string, string>) => {

@@ -10,7 +10,7 @@ import classNames from 'classnames';
 import { EuiFlexGroup, EuiFlexItem, EuiBadge, EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { NormalizedRuntimeField } from '../../types';
+import type { NormalizedRuntimeField } from '../../types';
 import { getTypeLabelFromField } from '../../lib';
 
 import { DeleteRuntimeFieldProvider } from './delete_field_provider';

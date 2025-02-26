@@ -10,12 +10,17 @@
 import type { Request, ResponseObject, ResponseToolkit } from '@hapi/hapi';
 import type Boom from '@hapi/boom';
 import type { VersionedRouter } from '../versioning';
-import type { RouteAccess, RouteConfig, RouteDeprecationInfo, RouteMethod } from './route';
+import type {
+  RouteAccess,
+  RouteConfig,
+  RouteDeprecationInfo,
+  RouteMethod,
+  RouteConfigOptions,
+} from './route';
 import type { RequestHandler, RequestHandlerWrapper } from './request_handler';
 import type { RequestHandlerContextBase } from './request_handler_context';
-import type { RouteConfigOptions } from './route';
-import { RouteValidator } from './route_validator';
-import { InternalRouteSecurity } from './request';
+import type { RouteValidator } from './route_validator';
+import type { InternalRouteSecurity } from './request';
 
 /**
  * Route handler common definition

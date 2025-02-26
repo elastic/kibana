@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import type { CoreStart, Plugin } from '@kbn/core/public';
-import { type CoreSetup } from '@kbn/core/public';
+import type { CoreStart, Plugin, CoreSetup } from '@kbn/core/public';
 import { firstValueFrom } from 'rxjs';
 
 import { getChangePointDetectionComponent } from './shared_components';

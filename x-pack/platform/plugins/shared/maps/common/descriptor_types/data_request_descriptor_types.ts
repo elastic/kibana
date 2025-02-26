@@ -9,10 +9,9 @@
 
 import type { KibanaExecutionContext } from '@kbn/core/public';
 import type { Query } from '@kbn/data-plugin/common';
-import type { Filter } from '@kbn/es-query';
-import type { TimeRange } from '@kbn/es-query';
+import type { Filter, TimeRange } from '@kbn/es-query';
 import type { SearchResponseWarning } from '@kbn/search-response-warnings';
-import { MapExtent } from './map_descriptor';
+import type { MapExtent } from './map_descriptor';
 
 export type Timeslice = {
   from: number;

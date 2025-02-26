@@ -8,14 +8,14 @@
 import React from 'react';
 import { mountWithIntl as mount } from '@kbn/test-jest-helpers';
 import { render, screen } from '@testing-library/react';
-import { EuiButtonGroupProps, EuiButtonGroup } from '@elastic/eui';
+import type { EuiButtonGroupProps } from '@elastic/eui';
+import { EuiButtonGroup, EuiColorPicker } from '@elastic/eui';
 import { DataDimensionEditor } from './dimension_editor';
-import { FramePublicAPI, DatasourcePublicAPI } from '../../../types';
-import { State, XYState, XYDataLayerConfig } from '../types';
+import type { FramePublicAPI, DatasourcePublicAPI } from '../../../types';
+import type { State, XYState, XYDataLayerConfig } from '../types';
 import { Position } from '@elastic/charts';
 import { createMockFramePublicAPI, createMockDatasource } from '../../../mocks';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
-import { EuiColorPicker } from '@elastic/eui';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
 import { act } from 'react-dom/test-utils';
 import { getKbnPalettes } from '@kbn/palettes';

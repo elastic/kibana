@@ -26,11 +26,11 @@ import {
   EuiCode,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiTableRow,
+  EuiIcon,
+  EuiProgress,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { EuiTableRow } from '@elastic/eui';
-import { EuiIcon } from '@elastic/eui';
-import { EuiProgress } from '@elastic/eui';
 import { FORMATTERS } from '../../../../../common/formatters';
 import type { SortBy } from '../../hooks/use_process_list';
 import type { Process } from './types';

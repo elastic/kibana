@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { StreamDefinition, isUnwiredStreamDefinition } from '@kbn/streams-schema';
+import type { StreamDefinition } from '@kbn/streams-schema';
+import { isUnwiredStreamDefinition } from '@kbn/streams-schema';
 
 export function getIndexPatterns(stream: StreamDefinition | undefined) {
   if (!stream) {

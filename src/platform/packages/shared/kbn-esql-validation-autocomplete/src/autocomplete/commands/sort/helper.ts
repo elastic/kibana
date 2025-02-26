@@ -8,7 +8,7 @@
  */
 
 import { TRIGGER_SUGGESTION_COMMAND } from '../../factories';
-import { SuggestionRawDefinition } from '../../types';
+import type { SuggestionRawDefinition } from '../../types';
 
 const regexStart = /.+\|\s*so?r?(?<start>t?)(.+,)?(?<space1>\s+)?/i;
 const regex =

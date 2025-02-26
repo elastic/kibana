@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Subject, Observable, firstValueFrom, of } from 'rxjs';
-import { filter, switchMap } from 'rxjs';
+import type { Observable } from 'rxjs';
+import { Subject, firstValueFrom, of, filter, switchMap } from 'rxjs';
 import type { Logger } from '@kbn/logging';
 import { stripVersionQualifier } from '@kbn/std';
 import type { ServiceStatus } from '@kbn/core-status-common';
@@ -49,9 +49,9 @@ import {
 import {
   SavedObjectsClient,
   SavedObjectsClientProvider,
+  SavedObjectsRepository,
 } from '@kbn/core-saved-objects-api-server-internal';
 import { KibanaMigrator } from '@kbn/core-saved-objects-migration-server-internal';
-import { SavedObjectsRepository } from '@kbn/core-saved-objects-api-server-internal';
 import {
   SavedObjectsExporter,
   SavedObjectsImporter,

@@ -9,8 +9,8 @@ import React, { useEffect, useState, useCallback } from 'react';
 import styled from 'styled-components';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiSuperSelect } from '@elastic/eui';
 import {
+  EuiSuperSelect,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
@@ -23,9 +23,11 @@ import { Error } from '../../../../../components';
 
 import type { AgentPolicy, PackageInfo } from '../../../../../types';
 import { isPackageLimited, doesAgentPolicyAlreadyIncludePackage } from '../../../../../services';
-import { useFleetStatus, sendBulkGetAgentPolicies } from '../../../../../hooks';
-
-import { useMultipleAgentPolicies } from '../../../../../hooks';
+import {
+  useFleetStatus,
+  sendBulkGetAgentPolicies,
+  useMultipleAgentPolicies,
+} from '../../../../../hooks';
 
 import { AgentPolicyMultiSelect } from './components/agent_policy_multi_select';
 import { useAgentPoliciesOptions } from './components/agent_policy_options';

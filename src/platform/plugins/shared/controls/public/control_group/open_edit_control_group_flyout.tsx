@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { OverlayRef } from '@kbn/core-mount-utils-browser';
+import type { OverlayRef } from '@kbn/core-mount-utils-browser';
 import { i18n } from '@kbn/i18n';
 import { tracksOverlays } from '@kbn/presentation-containers';
 import { apiHasParentApi } from '@kbn/presentation-publishing';
@@ -15,9 +15,9 @@ import { toMountPoint } from '@kbn/react-kibana-mount';
 import React from 'react';
 import { BehaviorSubject } from 'rxjs';
 
-import { ControlStateManager } from '../controls/types';
+import type { ControlStateManager } from '../controls/types';
 import { ControlGroupEditor } from './components/control_group_editor';
-import { ControlGroupApi, ControlGroupEditorState } from './types';
+import type { ControlGroupApi, ControlGroupEditorState } from './types';
 import { coreServices } from '../services/kibana_services';
 
 export const openEditControlGroupFlyout = (

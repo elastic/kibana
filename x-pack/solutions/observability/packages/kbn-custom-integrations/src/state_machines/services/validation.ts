@@ -6,7 +6,7 @@
  */
 
 import { isEmpty } from 'lodash';
-import { InvokeCreator } from 'xstate';
+import type { InvokeCreator } from 'xstate';
 import { IntegrationError } from '../../types';
 
 export class FormattingError extends IntegrationError {

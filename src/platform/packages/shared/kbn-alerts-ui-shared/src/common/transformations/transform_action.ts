@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { RewriteRequestCase } from '@kbn/actions-types';
-import { RuleUiAction } from '..';
+import type { RewriteRequestCase } from '@kbn/actions-types';
+import type { RuleUiAction } from '..';
 
 export const transformAction: RewriteRequestCase<RuleUiAction> = (action) => {
   const { uuid, id, connector_type_id: actionTypeId, params } = action;

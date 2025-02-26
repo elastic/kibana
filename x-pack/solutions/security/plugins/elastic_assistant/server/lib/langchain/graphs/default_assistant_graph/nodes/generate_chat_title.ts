@@ -7,9 +7,9 @@
 import { StringOutputParser } from '@langchain/core/output_parsers';
 
 import { ChatPromptTemplate } from '@langchain/core/prompts';
-import { BaseChatModel } from '@langchain/core/language_models/chat_models';
+import type { BaseChatModel } from '@langchain/core/language_models/chat_models';
 import { getPrompt, promptDictionary } from '../../../../prompt';
-import { AgentState, NodeParamsBase } from '../types';
+import type { AgentState, NodeParamsBase } from '../types';
 import { NodeType } from '../constants';
 import { promptGroupId } from '../../../../prompt/local_prompt_object';
 

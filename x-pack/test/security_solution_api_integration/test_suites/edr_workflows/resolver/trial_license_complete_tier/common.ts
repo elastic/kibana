@@ -7,8 +7,8 @@
 
 import expect from '@kbn/expect';
 import { firstNonNullValue } from '@kbn/security-solution-plugin/common/endpoint/models/ecs_safety_helpers';
-import { NodeID } from '@kbn/security-solution-plugin/server/endpoint/routes/resolver/tree/utils';
-import {
+import type { NodeID } from '@kbn/security-solution-plugin/server/endpoint/routes/resolver/tree/utils';
+import type {
   SafeResolverEvent,
   ResolverNode,
   ResolverSchema,
@@ -20,13 +20,13 @@ import {
   timestampSafeVersion,
   timestampAsDateSafeVersion,
 } from '@kbn/security-solution-plugin/common/endpoint/models/event';
-import {
+import type {
   Event,
   Tree,
   TreeNode,
   RelatedEventInfo,
-  categoryMapping,
 } from '@kbn/security-solution-plugin/common/endpoint/generate_data';
+import { categoryMapping } from '@kbn/security-solution-plugin/common/endpoint/generate_data';
 
 export const HEADERS = Object.freeze({
   'kbn-xsrf': 'security_solution',

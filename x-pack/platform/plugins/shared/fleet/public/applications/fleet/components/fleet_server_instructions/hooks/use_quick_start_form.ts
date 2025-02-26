@@ -16,8 +16,7 @@ import {
   useFleetStatus,
   useStartServices,
 } from '../../../hooks';
-import type { NewAgentPolicy } from '../../../types';
-import type { FleetServerHost } from '../../../types';
+import type { NewAgentPolicy, FleetServerHost } from '../../../types';
 import { useServiceToken } from '../../../hooks/use_service_token';
 
 import { useSelectFleetServerPolicy } from './use_select_fleet_server_policy';

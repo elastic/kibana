@@ -16,7 +16,7 @@ import yaml from 'js-yaml';
 
 import { run } from '@kbn/dev-cli-runner';
 import { REPO_ROOT } from '@kbn/repo-info';
-import { ToolingLog } from '@kbn/tooling-log';
+import type { ToolingLog } from '@kbn/tooling-log';
 
 interface BuildkiteStepFull {
   agents: { queue: string };

@@ -6,7 +6,7 @@
  */
 
 import { RRule, Weekday } from '@kbn/rrule';
-import { RuleSnoozeSchedule } from '../../types';
+import type { RuleSnoozeSchedule } from '../../types';
 import { getActiveSnoozeIfExist } from './get_active_snooze_if_exist';
 
 export function isSnoozeExpired(snooze: RuleSnoozeSchedule) {

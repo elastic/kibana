@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { KbnClientRequester } from './kbn_client_requester';
+import type { KbnClientRequester } from './kbn_client_requester';
 
 interface Status {
   level: 'available' | 'degraded' | 'unavailable' | 'critical';

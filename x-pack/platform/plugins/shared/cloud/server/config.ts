@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { offeringBasedSchema, schema, TypeOf } from '@kbn/config-schema';
-import { PluginConfigDescriptor } from '@kbn/core/server';
+import type { TypeOf } from '@kbn/config-schema';
+import { offeringBasedSchema, schema } from '@kbn/config-schema';
+import type { PluginConfigDescriptor } from '@kbn/core/server';
 
 const apmConfigSchema = schema.object({
   url: schema.maybe(schema.string()),

@@ -18,14 +18,15 @@ import { getPackages } from '@kbn/repo-packages';
 import { ToolingLog } from '@kbn/tooling-log';
 import { REPO_ROOT } from '@kbn/repo-info';
 import { getFips } from 'crypto';
+import type { CreateTestEsClusterOptions } from '@kbn/test';
 import {
   createTestEsCluster,
-  CreateTestEsClusterOptions,
   esTestConfig,
   kibanaServerTestUser,
   systemIndicesSuperuser,
 } from '@kbn/test';
-import { CliArgs, Env, RawPackageInfo } from '@kbn/config';
+import type { CliArgs, RawPackageInfo } from '@kbn/config';
+import { Env } from '@kbn/config';
 
 import type { InternalCoreSetup, InternalCoreStart } from '@kbn/core-lifecycle-server-internal';
 import { Root } from '@kbn/core-root-server-internal';

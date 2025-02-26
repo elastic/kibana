@@ -14,16 +14,15 @@ import { operatorsDefinitions } from '../../definitions/all_operators';
 import { NOT_SUGGESTED_TYPES } from '../../shared/resources_helpers';
 import { aggFunctionDefinitions } from '../../definitions/generated/aggregation_functions';
 import { timeUnitsToSuggest } from '../../definitions/literals';
-import { FunctionDefinitionTypes } from '../../definitions/types';
+import { FunctionDefinitionTypes, fieldTypes } from '../../definitions/types';
 import { groupingFunctionDefinitions } from '../../definitions/generated/grouping_functions';
 import * as autocomplete from '../autocomplete';
 import type { ESQLCallbacks } from '../../shared/types';
 import type { EditorContext, SuggestionRawDefinition } from '../types';
 import { TIME_SYSTEM_PARAMS, TRIGGER_SUGGESTION_COMMAND, getSafeInsertText } from '../factories';
-import { ESQLRealField } from '../../validation/types';
-import {
+import type { ESQLRealField } from '../../validation/types';
+import type {
   FieldType,
-  fieldTypes,
   FunctionParameterType,
   FunctionReturnType,
   SupportedDataType,

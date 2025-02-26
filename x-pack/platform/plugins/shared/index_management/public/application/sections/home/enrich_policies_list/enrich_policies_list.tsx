@@ -8,8 +8,8 @@
 import React, { useState, useEffect } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiSpacer, EuiText, EuiLink } from '@elastic/eui';
-import { RouteComponentProps } from 'react-router-dom';
-import { Location } from 'history';
+import type { RouteComponentProps } from 'react-router-dom';
+import type { Location } from 'history';
 import { parse } from 'query-string';
 
 import type { SerializedEnrichPolicy } from '@kbn/index-management-shared-types';

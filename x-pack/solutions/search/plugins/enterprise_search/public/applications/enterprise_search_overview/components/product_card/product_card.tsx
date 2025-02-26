@@ -10,6 +10,7 @@ import React from 'react';
 import { useActions } from 'kea';
 import { snakeCase } from 'lodash';
 
+import type { IconType, IconSize } from '@elastic/eui';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -18,8 +19,6 @@ import {
   EuiSpacer,
   EuiText,
   EuiTitle,
-  IconType,
-  IconSize,
 } from '@elastic/eui';
 
 import { EuiButtonTo, EuiButtonEmptyTo } from '../../../shared/react_router_helpers';

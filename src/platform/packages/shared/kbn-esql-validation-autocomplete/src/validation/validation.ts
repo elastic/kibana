@@ -8,7 +8,7 @@
  */
 
 import uniqBy from 'lodash/uniqBy';
-import {
+import type {
   AstProviderFn,
   ESQLAst,
   ESQLAstItem,
@@ -20,23 +20,20 @@ import {
   ESQLFunction,
   ESQLMessage,
   ESQLSource,
-  walk,
-  isBinaryExpression,
-  isIdentifier,
-  isSource,
 } from '@kbn/esql-ast';
+import { walk, isBinaryExpression, isIdentifier, isSource } from '@kbn/esql-ast';
 import type {
   ESQLAstField,
   ESQLAstJoinCommand,
   ESQLIdentifier,
   ESQLProperNode,
 } from '@kbn/esql-ast/src/types';
-import {
+import type {
   CommandModeDefinition,
   CommandOptionsDefinition,
   FunctionParameter,
-  FunctionDefinitionTypes,
 } from '../definitions/types';
+import { FunctionDefinitionTypes } from '../definitions/types';
 import {
   areFieldAndVariableTypesCompatible,
   extractSingularType,
@@ -67,6 +64,7 @@ import {
   isFunctionOperatorParam,
   isMaybeAggFunction,
   isParametrized,
+  getParamAtPosition,
 } from '../shared/helpers';
 import { collectVariables } from '../shared/variables';
 import { getMessageFromId, errors } from './errors';
@@ -87,7 +85,6 @@ import {
   retrieveFieldsFromStringSources,
 } from './resources';
 import { collapseWrongArgumentTypeMessages, getMaxMinNumberOfParams } from './helpers';
-import { getParamAtPosition } from '../shared/helpers';
 import {
   METADATA_FIELDS,
   UNSUPPORTED_COMMANDS_BEFORE_MATCH,

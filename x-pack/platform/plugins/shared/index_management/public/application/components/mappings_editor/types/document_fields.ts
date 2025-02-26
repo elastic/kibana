@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { ReactNode } from 'react';
+import type { ReactNode } from 'react';
 
-import { InferenceTaskType } from '@elastic/elasticsearch/lib/api/types';
-import { ModelConfig } from '@kbn/inference_integration_flyout';
-import { GenericObject } from './mappings_editor';
+import type { InferenceTaskType } from '@elastic/elasticsearch/lib/api/types';
+import type { ModelConfig } from '@kbn/inference_integration_flyout';
+import type { GenericObject } from './mappings_editor';
 
-import { PARAMETERS_DEFINITION } from '../constants';
-import { FieldConfig, RuntimeField } from '../shared_imports';
+import type { PARAMETERS_DEFINITION } from '../constants';
+import type { FieldConfig, RuntimeField } from '../shared_imports';
 
 export interface DataTypeDefinition {
   label: string;

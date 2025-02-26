@@ -8,7 +8,9 @@ import React, { useState, memo, useCallback, useEffect, useMemo } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { i18n } from '@kbn/i18n';
 import InfiniteLoader from 'react-window-infinite-loader';
-import { FixedSizeList, ListChildComponentProps } from 'react-window';
+import type { ListChildComponentProps } from 'react-window';
+import { FixedSizeList } from 'react-window';
+import type { EuiAutoSize } from '@elastic/eui';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -16,11 +18,10 @@ import {
   EuiButtonEmpty,
   EuiText,
   EuiAutoSizer,
-  EuiAutoSize,
 } from '@elastic/eui';
 import { MetricItem } from './metric_item/metric_item';
 import { ShowAllSpaces } from '../../common/show_all_spaces';
-import { OverviewStatusMetaData } from '../../../../../../../common/runtime_types';
+import type { OverviewStatusMetaData } from '../../../../../../../common/runtime_types';
 import { quietFetchOverviewStatusAction } from '../../../../state/overview_status';
 import type { TrendRequest } from '../../../../../../../common/types';
 import { SYNTHETICS_MONITORS_EMBEDDABLE } from '../../../../../embeddables/constants';
@@ -28,20 +29,21 @@ import { AddToDashboard } from '../../../common/components/add_to_dashboard';
 import { useOverviewStatus } from '../../hooks/use_overview_status';
 import { GridItemsByGroup } from './grid_by_group/grid_items_by_group';
 import { GroupFields } from './grid_by_group/group_fields';
-import { selectOverviewState, setFlyoutConfig } from '../../../../state/overview';
-import { useMonitorsSortedByStatus } from '../../../../hooks/use_monitors_sorted_by_status';
 import {
+  selectOverviewState,
+  setFlyoutConfig,
   refreshOverviewTrends,
   selectOverviewTrends,
   trendStatsBatch,
 } from '../../../../state/overview';
+import { useMonitorsSortedByStatus } from '../../../../hooks/use_monitors_sorted_by_status';
 import { OverviewLoader } from './overview_loader';
 import { OverviewPaginationInfo } from './overview_pagination_info';
 import { SortFields } from './sort_fields';
 import { NoMonitorsFound } from '../../common/no_monitors_found';
 import { MonitorDetailFlyout } from './monitor_detail_flyout';
 import { useSyntheticsRefreshContext } from '../../../../contexts';
-import { FlyoutParamProps } from './types';
+import type { FlyoutParamProps } from './types';
 
 const ITEM_HEIGHT = 172;
 const ROW_COUNT = 4;

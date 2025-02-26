@@ -7,8 +7,7 @@
 
 import type { FC } from 'react';
 import React, { Suspense, lazy } from 'react';
-import { takeUntil, distinctUntilChanged, skip } from 'rxjs';
-import { from } from 'rxjs';
+import { takeUntil, distinctUntilChanged, skip, from } from 'rxjs';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';

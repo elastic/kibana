@@ -5,11 +5,10 @@
  * 2.0.
  */
 import { sha256 } from 'js-sha256';
-import type { Logger } from '@kbn/core/server';
+import type { Logger, SavedObject } from '@kbn/core/server';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
-import { SavedObject } from '@kbn/core/server';
+import type { SyntheticsMonitor } from '../../../common/runtime_types/monitor_management';
 import {
-  SyntheticsMonitor,
   ConfigKey,
   MonitorTypeEnum,
   ScheduleUnit,

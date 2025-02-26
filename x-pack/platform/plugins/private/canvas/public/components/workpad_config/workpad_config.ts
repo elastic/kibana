@@ -18,7 +18,7 @@ import {
 import { getWorkpad } from '../../state/selectors/workpad';
 import { DEFAULT_WORKPAD_CSS } from '../../../common/lib/constants';
 import { WorkpadConfig as Component } from './workpad_config.component';
-import { State, CanvasVariable } from '../../../types';
+import type { State, CanvasVariable } from '../../../types';
 
 const mapStateToProps = (state: State) => {
   const workpad = getWorkpad(state);

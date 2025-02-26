@@ -5,15 +5,16 @@
  * 2.0.
  */
 
-import { Client } from '@elastic/elasticsearch';
-import { ToolingLog } from '@kbn/tooling-log';
+import type { Client } from '@elastic/elasticsearch';
+import type { ToolingLog } from '@kbn/tooling-log';
 import type { Agent as SuperTestAgent } from 'supertest';
 import {
   deleteActionConnectorIndex,
   clearKibanaApmEventLog,
   deleteApmAlerts,
+  deleteApmRules,
+  deleteAllActionConnectors,
 } from './alerting_api_helper';
-import { deleteApmRules, deleteAllActionConnectors } from './alerting_api_helper';
 
 export async function cleanupRuleAndAlertState({
   es,

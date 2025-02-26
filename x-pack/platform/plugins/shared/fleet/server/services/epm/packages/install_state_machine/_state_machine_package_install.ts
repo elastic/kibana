@@ -17,9 +17,8 @@ import { PackageSavedObjectConflictError } from '../../../../errors';
 import type { HTTPAuthorizationHeader } from '../../../../../common/http_authorization_header';
 import { INSTALL_STATES } from '../../../../../common/types';
 import type { PackageInstallContext, StateNames, StateContext } from '../../../../../common/types';
-import type { PackageAssetReference } from '../../../../types';
-
 import type {
+  PackageAssetReference,
   Installation,
   InstallType,
   InstallSource,

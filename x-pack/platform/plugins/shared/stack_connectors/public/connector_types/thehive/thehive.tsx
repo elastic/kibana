@@ -7,10 +7,10 @@
 
 import { lazy } from 'react';
 import { i18n } from '@kbn/i18n';
-import { GenericValidationResult } from '@kbn/triggers-actions-ui-plugin/public/types';
-import { TheHiveConnector } from './types';
+import type { GenericValidationResult } from '@kbn/triggers-actions-ui-plugin/public/types';
+import type { TheHiveConnector } from './types';
 import { THEHIVE_CONNECTOR_ID, SUB_ACTION, THEHIVE_TITLE } from '../../../common/thehive/constants';
-import {
+import type {
   ExecutorParams,
   ExecutorSubActionPushParams,
   ExecutorSubActionCreateAlertParams,

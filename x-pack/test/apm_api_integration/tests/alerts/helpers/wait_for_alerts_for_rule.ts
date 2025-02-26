@@ -9,10 +9,8 @@ import type { Client } from '@elastic/elasticsearch';
 import type { AggregationsAggregate, SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 import { ToolingLog } from '@kbn/tooling-log';
 import { retryForSuccess } from '@kbn/ftr-common-functional-services';
-import {
-  APM_ALERTS_INDEX,
-  ApmAlertFields,
-} from '../../../../api_integration/deployment_agnostic/apis/observability/apm/alerts/helpers/alerting_helper';
+import type { ApmAlertFields } from '../../../../api_integration/deployment_agnostic/apis/observability/apm/alerts/helpers/alerting_helper';
+import { APM_ALERTS_INDEX } from '../../../../api_integration/deployment_agnostic/apis/observability/apm/alerts/helpers/alerting_helper';
 
 const debugLog = ToolingLog.bind(ToolingLog, { level: 'debug', writeTo: process.stdout });
 

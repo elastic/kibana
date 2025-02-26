@@ -13,12 +13,14 @@ import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { useExistingFieldsReader } from '@kbn/unified-field-list/src/hooks/use_existing_fields';
 import {
-  FieldOption,
-  FieldOptionValue,
   FieldPicker,
   FilterQueryInput,
   isFieldLensCompatible,
-  type QueryInputServices,
+} from '@kbn/visualization-ui-components';
+import type {
+  FieldOption,
+  FieldOptionValue,
+  QueryInputServices,
 } from '@kbn/visualization-ui-components';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { QueryPointEventAnnotationConfig } from '@kbn/event-annotation-common';

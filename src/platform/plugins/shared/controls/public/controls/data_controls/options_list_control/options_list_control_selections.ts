@@ -10,10 +10,10 @@
 import deepEqual from 'react-fast-compare';
 import { BehaviorSubject } from 'rxjs';
 
-import { PublishingSubject, StateComparators } from '@kbn/presentation-publishing';
+import type { PublishingSubject, StateComparators } from '@kbn/presentation-publishing';
 
-import { OptionsListControlState } from '../../../../common/options_list';
-import { OptionsListSelection } from '../../../../common/options_list/options_list_selections';
+import type { OptionsListControlState } from '../../../../common/options_list';
+import type { OptionsListSelection } from '../../../../common/options_list/options_list_selections';
 
 export function initializeOptionsListSelections(
   initialState: OptionsListControlState,

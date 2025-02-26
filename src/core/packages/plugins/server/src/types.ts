@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Observable } from 'rxjs';
-import { Type } from '@kbn/config-schema';
+import type { Observable } from 'rxjs';
+import type { Type } from '@kbn/config-schema';
 import type { RecursiveReadonly, MaybePromise } from '@kbn/utility-types';
 import type { PathConfigType } from '@kbn/utils';
 import type { LoggerFactory } from '@kbn/logging';
@@ -23,7 +23,7 @@ import type { NodeInfo } from '@kbn/core-node-server';
 import type { ElasticsearchConfigType } from '@kbn/core-elasticsearch-server-internal';
 import type { SavedObjectsConfigType } from '@kbn/core-saved-objects-base-server-internal';
 import type { CorePreboot, CoreSetup, CoreStart } from '@kbn/core-lifecycle-server';
-import { SharedGlobalConfigKeys } from './shared_global_config';
+import type { SharedGlobalConfigKeys } from './shared_global_config';
 type Maybe<T> = T | undefined;
 
 /**

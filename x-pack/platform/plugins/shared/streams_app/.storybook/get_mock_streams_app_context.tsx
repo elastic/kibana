@@ -11,11 +11,11 @@ import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { StreamsPluginStart } from '@kbn/streams-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import type { SharePublicStart } from '@kbn/share-plugin/public/plugin';
-import { NavigationPublicStart } from '@kbn/navigation-plugin/public/types';
+import type { NavigationPublicStart } from '@kbn/navigation-plugin/public/types';
 import type { SavedObjectTaggingPluginStart } from '@kbn/saved-objects-tagging-plugin/public';
 import { fieldsMetadataPluginPublicMock } from '@kbn/fields-metadata-plugin/public/mocks';
-import { DataStreamsStatsClient } from '@kbn/dataset-quality-plugin/public/services/data_streams_stats/data_streams_stats_client';
-import { LicensingPluginStart } from '@kbn/licensing-plugin/public';
+import type { DataStreamsStatsClient } from '@kbn/dataset-quality-plugin/public/services/data_streams_stats/data_streams_stats_client';
+import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import type { StreamsAppKibanaContext } from '../public/hooks/use_kibana';
 
 export function getMockStreamsAppContext(): StreamsAppKibanaContext {

@@ -12,9 +12,9 @@ import {
   getDefaultNewSystemPrompt,
   getDefaultSystemPrompt,
 } from './helpers';
-import { AIConnector } from '../../connectorland/connector_selector';
-import { Conversation } from '../../..';
-import { PromptResponse } from '@kbn/elastic-assistant-common';
+import type { AIConnector } from '../../connectorland/connector_selector';
+import type { Conversation } from '../../..';
+import type { PromptResponse } from '@kbn/elastic-assistant-common';
 
 const tilde = '`';
 const codeDelimiter = '```';

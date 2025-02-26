@@ -12,7 +12,7 @@ import React, { useEffect, useState } from 'react';
 import { syncGlobalQueryStateWithUrl } from '@kbn/data-plugin/public';
 import type { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 
-import { DashboardRedirect } from '../../dashboard_container/types';
+import type { DashboardRedirect } from '../../dashboard_container/types';
 import { DashboardListing } from '../../dashboard_listing/dashboard_listing';
 import { coreServices, dataService, serverlessService } from '../../services/kibana_services';
 import { getDashboardBreadcrumb } from '../_dashboard_app_strings';

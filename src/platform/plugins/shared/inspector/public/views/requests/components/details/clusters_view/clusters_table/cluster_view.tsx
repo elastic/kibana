@@ -11,8 +11,7 @@ import React from 'react';
 import type { estypes } from '@elastic/elasticsearch';
 import { i18n } from '@kbn/i18n';
 import { EuiCallOut, EuiText } from '@elastic/eui';
-import { ShardsView } from './shards_view';
-import { OpenShardFailureFlyoutButton } from './shards_view';
+import { ShardsView, OpenShardFailureFlyoutButton } from './shards_view';
 
 interface Props {
   clusterDetails: estypes.ClusterDetails;

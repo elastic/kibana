@@ -19,16 +19,14 @@ import type {
   AggregationsMultiBucketAggregateBase,
   AggregationsTopHitsAggregate,
   SearchHit,
+  AggregationsTermsInclude,
+  AggregationsTermsExclude,
 } from '@elastic/elasticsearch/lib/api/types';
 import type { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import { SECURITY_EXTENSION_ID, SPACES_EXTENSION_ID } from '@kbn/core-saved-objects-server';
 import { asyncForEach, asyncMap } from '@kbn/std';
 
-import type {
-  AggregationsTermsInclude,
-  AggregationsTermsExclude,
-} from '@elastic/elasticsearch/lib/api/types';
 import { isResponseError } from '@kbn/es-errors';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import { DEFAULT_NAMESPACE_STRING } from '@kbn/core-saved-objects-utils-server';

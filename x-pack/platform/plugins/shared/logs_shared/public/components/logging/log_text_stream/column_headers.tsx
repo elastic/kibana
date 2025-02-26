@@ -6,21 +6,18 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import React, { FC, PropsWithChildren } from 'react';
+import type { FC, PropsWithChildren } from 'react';
+import React from 'react';
 
 import styled from '@emotion/styled';
 
 import { useEuiFontSize } from '@elastic/eui';
-import {
-  LogEntryColumn,
-  LogEntryColumnContent,
-  LogEntryColumnWidth,
-  LogEntryColumnWidths,
-} from './log_entry_column';
+import type { LogEntryColumnWidth, LogEntryColumnWidths } from './log_entry_column';
+import { LogEntryColumn, LogEntryColumnContent } from './log_entry_column';
 import { useLogPositionStateContext } from '../../../containers/logs/log_position';
 import { localizedDate } from '../../../../common/formatters/datetime';
+import type { LogColumnRenderConfiguration } from '../../../utils/log_column_render_configuration';
 import {
-  LogColumnRenderConfiguration,
   isTimestampColumnRenderConfiguration,
   isMessageColumnRenderConfiguration,
   isFieldColumnRenderConfiguration,

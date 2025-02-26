@@ -7,8 +7,8 @@
 
 import { format as formatUrl } from 'url';
 import supertest from 'supertest';
-import { FtrProviderContextWithSpaces } from '../../ftr_provider_context_with_spaces';
-import { SecuritySolutionESSUtilsInterface, Role, User } from './types';
+import type { FtrProviderContextWithSpaces } from '../../ftr_provider_context_with_spaces';
+import type { SecuritySolutionESSUtilsInterface, Role, User } from './types';
 
 export function SecuritySolutionESSUtils({
   getService,

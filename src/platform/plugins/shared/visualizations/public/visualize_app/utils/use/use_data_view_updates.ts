@@ -15,8 +15,8 @@ import type {
   VisualizeServices,
   VisualizeAppStateContainer,
   VisualizeEditorVisInstance,
+  VisualizeAppState,
 } from '../../types';
-import { VisualizeAppState } from '../../types';
 
 const updateDataView = (
   services: VisualizeServices,

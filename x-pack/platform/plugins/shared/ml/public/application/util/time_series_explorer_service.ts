@@ -12,8 +12,11 @@ import { forkJoin, of, catchError, map } from 'rxjs';
 import { each, get } from 'lodash';
 
 import type { IUiSettingsClient } from '@kbn/core/public';
-import { aggregationTypeTransform } from '@kbn/ml-anomaly-utils';
-import { isMultiBucketAnomaly, ML_JOB_AGGREGATION } from '@kbn/ml-anomaly-utils';
+import {
+  aggregationTypeTransform,
+  isMultiBucketAnomaly,
+  ML_JOB_AGGREGATION,
+} from '@kbn/ml-anomaly-utils';
 import { extractErrorMessage } from '@kbn/ml-error-utils';
 import { type MlAnomalyRecordDoc } from '@kbn/ml-anomaly-utils';
 import type { TimeRangeBounds, TimeBucketsInterval } from '@kbn/ml-time-buckets';
@@ -22,16 +25,16 @@ import { parseInterval } from '@kbn/ml-parse-interval';
 import type { GetAnnotationsResponse } from '../../../common/types/annotations';
 import { mlFunctionToESAggregation } from '../../../common/util/job_utils';
 import { ANNOTATIONS_TABLE_DEFAULT_QUERY_SIZE } from '../../../common/constants/search';
-import { CHARTS_POINT_TARGET } from '../timeseriesexplorer/timeseriesexplorer_constants';
-import { timeBucketsServiceFactory } from './time_buckets_service';
-import type { Job } from '../../../common/types/anomaly_detection_jobs';
-import type { CriteriaField } from '../services/results_service';
 import {
+  CHARTS_POINT_TARGET,
   MAX_SCHEDULED_EVENTS,
   TIME_FIELD_NAME,
 } from '../timeseriesexplorer/timeseriesexplorer_constants';
+import { timeBucketsServiceFactory } from './time_buckets_service';
+import type { Job } from '../../../common/types/anomaly_detection_jobs';
+import { useMlResultsService } from '../services/results_service';
+import type { CriteriaField, MlResultsService } from '../services/results_service';
 import type { MlApi } from '../services/ml_api_service';
-import { useMlResultsService, type MlResultsService } from '../services/results_service';
 import { forecastServiceFactory } from '../services/forecast_service';
 import { timeSeriesSearchServiceFactory } from '../timeseriesexplorer/timeseriesexplorer_utils/time_series_search_service';
 import { useMlApi, useMlKibana } from '../contexts/kibana';

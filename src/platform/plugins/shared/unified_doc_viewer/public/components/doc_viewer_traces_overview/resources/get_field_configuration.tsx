@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { TraceDocumentOverview } from '@kbn/discover-utils';
 import {
   SPAN_NAME_FIELD,
   TRANSACTION_NAME_FIELD,
@@ -19,7 +20,6 @@ import {
   HTTP_RESPONSE_STATUS_CODE_FIELD,
   SPAN_TYPE_FIELD,
   USER_AGENT_NAME_FIELD,
-  TraceDocumentOverview,
   SPAN_SUBTYPE_FIELD,
   USER_AGENT_VERSION_FIELD,
   AGENT_NAME_FIELD,
@@ -28,7 +28,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { EuiBadge, EuiText } from '@elastic/eui';
-import { PartialFieldMetadataPlain } from '@kbn/fields-metadata-plugin/common';
+import type { PartialFieldMetadataPlain } from '@kbn/fields-metadata-plugin/common';
 import { ServiceNameLink } from '../sub_components/service_name_link';
 import { TraceIdLink } from '../sub_components/trace_id_link';
 import { TransactionNameLink } from '../sub_components/transaction_name_link';

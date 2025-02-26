@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { DatasourcePublicAPI } from '../../types';
+import type { DatasourcePublicAPI } from '../../types';
 
 /**
  * Infer the numeric type of a metric column purely on the configuration

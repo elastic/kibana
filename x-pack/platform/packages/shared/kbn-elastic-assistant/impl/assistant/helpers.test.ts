@@ -10,7 +10,7 @@ import {
   getOptionalRequestParams,
   mergeBaseWithPersistedConversations,
 } from './helpers';
-import { AIConnector } from '../connectorland/connector_selector';
+import type { AIConnector } from '../connectorland/connector_selector';
 
 describe('helpers', () => {
   describe('getDefaultConnector', () => {

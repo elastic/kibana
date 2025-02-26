@@ -7,8 +7,8 @@
 
 import type SuperTest from 'supertest';
 
-import { Rule } from '@kbn/alerting-plugin/common';
-import {
+import type { Rule } from '@kbn/alerting-plugin/common';
+import type {
   BaseRuleParams,
   InternalRuleCreate,
 } from '@kbn/security-solution-plugin/server/lib/detection_engine/rule_schema';

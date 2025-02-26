@@ -19,10 +19,11 @@ import {
   VALUE_OTEL_JVM_PROCESS_MEMORY_NON_HEAP,
   LABEL_TYPE,
   HOST_NAME,
+  SERVICE_NAME,
+  SERVICE_NODE_NAME,
 } from '../../../common/es_fields/apm';
 import { SERVICE_NODE_NAME_MISSING } from '../../../common/service_nodes';
 import { asMutableArray } from '../../../common/utils/as_mutable_array';
-import { SERVICE_NAME, SERVICE_NODE_NAME } from '../../../common/es_fields/apm';
 import { environmentQuery } from '../../../common/utils/environment_query';
 import type { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
 import { hasOTelMetrics } from './has_otel_metrics';

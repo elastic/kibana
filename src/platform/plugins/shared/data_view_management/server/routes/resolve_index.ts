@@ -8,7 +8,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { IRouter } from '@kbn/core/server';
+import type { IRouter } from '@kbn/core/server';
 import { getKbnServerError } from '@kbn/kibana-utils-plugin/server';
 
 export function registerResolveIndexRoute(router: IRouter): void {

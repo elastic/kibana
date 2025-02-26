@@ -9,7 +9,7 @@
 
 import moment from 'moment';
 import type { IScopedSearchSessionsClient } from './types';
-import { SearchSessionsConfigSchema } from '../../config';
+import type { SearchSessionsConfigSchema } from '../../config';
 
 export function createSearchSessionsClientMock(): jest.Mocked<IScopedSearchSessionsClient> {
   return {

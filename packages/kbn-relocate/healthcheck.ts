@@ -12,8 +12,7 @@ import fs from 'fs';
 import path, { join } from 'path';
 import { getPackages } from '@kbn/repo-packages';
 import { REPO_ROOT } from '@kbn/repo-info';
-import { EXCLUDED_FOLDERS, EXCLUDED_FOLDER_NAMES, EXTENSIONS } from './constants';
-import { BASE_FOLDER } from './constants';
+import { EXCLUDED_FOLDERS, EXCLUDED_FOLDER_NAMES, EXTENSIONS, BASE_FOLDER } from './constants';
 
 const findPaths = (content: string): string[] => {
   const regex = /([\.]{1,2}(\/[^\s)\]\['`#"]+)+)/g;

@@ -15,7 +15,8 @@ import userEvent from '@testing-library/user-event';
 import { getGridLayoutStateManagerMock, mockRenderPanelContents } from '../test_utils/mocks';
 import { getSampleLayout } from '../test_utils/sample_layout';
 import { GridLayoutContext, type GridLayoutContextType } from '../use_grid_layout_context';
-import { GridRow, GridRowProps } from './grid_row';
+import type { GridRowProps } from './grid_row';
+import { GridRow } from './grid_row';
 
 describe('GridRow', () => {
   const renderGridRow = (

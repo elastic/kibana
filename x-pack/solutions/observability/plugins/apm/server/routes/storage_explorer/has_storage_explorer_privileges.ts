@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import { every } from 'lodash';
-import { uniq } from 'lodash';
+import { every, uniq } from 'lodash';
 import type { ApmPluginRequestHandlerContext } from '../typings';
 import type { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
 

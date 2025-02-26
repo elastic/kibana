@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ESQLTimeInterval } from '@kbn/esql-ast';
+import type { ESQLTimeInterval } from '@kbn/esql-ast';
 
 const units = [
   'millisecond',

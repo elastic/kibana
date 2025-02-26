@@ -6,7 +6,7 @@
  */
 
 import { keyBy } from 'lodash';
-import { IndexPatternField } from '../../types';
+import type { IndexPatternField } from '../../types';
 import { documentField } from './document_field';
 
 export function getFieldByNameFactory(

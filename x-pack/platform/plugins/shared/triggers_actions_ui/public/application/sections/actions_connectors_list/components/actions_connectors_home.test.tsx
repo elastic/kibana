@@ -7,11 +7,12 @@
 
 import * as React from 'react';
 import { render, screen } from '@testing-library/react';
-import { RouteComponentProps } from 'react-router-dom';
+import type { RouteComponentProps } from 'react-router-dom';
 import { Router } from '@kbn/shared-ux-router';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { createMemoryHistory, createLocation } from 'history';
-import ActionsConnectorsHome, { MatchParams } from './actions_connectors_home';
+import type { MatchParams } from './actions_connectors_home';
+import ActionsConnectorsHome from './actions_connectors_home';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import userEvent from '@testing-library/user-event';
 

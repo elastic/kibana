@@ -8,7 +8,7 @@
 import { EuiFlexGroup, EuiFlexItem, EuiNotificationBadge } from '@elastic/eui';
 import { useStateFromPublishingSubject } from '@kbn/presentation-publishing';
 import React, { useMemo } from 'react';
-import { FlyoutEditDrilldownActionApi } from './flyout_edit_drilldown';
+import type { FlyoutEditDrilldownActionApi } from './flyout_edit_drilldown';
 import { txtDisplayName } from './i18n';
 
 export const MenuItem = ({

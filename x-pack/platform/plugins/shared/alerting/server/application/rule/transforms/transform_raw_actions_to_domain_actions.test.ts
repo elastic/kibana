@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { RawRuleAction } from '../../../types';
+import type { RawRuleAction } from '../../../types';
 import {
   transformRawActionsToDomainActions,
   transformRawActionsToDomainSystemActions,

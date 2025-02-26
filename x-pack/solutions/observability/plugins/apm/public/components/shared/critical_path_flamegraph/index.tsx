@@ -13,8 +13,7 @@ import { uniqueId } from 'lodash';
 import React, { useEffect, useMemo, useRef } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { FETCH_STATUS } from '../../../hooks/use_fetcher';
-import { isSuccess } from '../../../hooks/use_fetcher';
-import { useFetcher, isPending } from '../../../hooks/use_fetcher';
+import { isSuccess, useFetcher, isPending } from '../../../hooks/use_fetcher';
 import { CriticalPathFlamegraphTooltip } from './critical_path_flamegraph_tooltip';
 import { criticalPathToFlamegraph } from './critical_path_to_flamegraph';
 

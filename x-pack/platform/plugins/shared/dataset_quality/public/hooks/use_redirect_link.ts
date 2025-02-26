@@ -5,15 +5,17 @@
  * 2.0.
  */
 
-import { DISCOVER_APP_LOCATOR, DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
-import { AggregateQuery, Query, buildPhraseFilter } from '@kbn/es-query';
+import type { DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
+import { DISCOVER_APP_LOCATOR } from '@kbn/discover-plugin/common';
+import type { AggregateQuery, Query } from '@kbn/es-query';
+import { buildPhraseFilter } from '@kbn/es-query';
 import { getRouterLinkProps } from '@kbn/router-utils';
-import { RouterLinkProps } from '@kbn/router-utils/src/get_router_link_props';
-import { LocatorClient } from '@kbn/shared-ux-prompt-no-data-views-types';
+import type { RouterLinkProps } from '@kbn/router-utils/src/get_router_link_props';
+import type { LocatorClient } from '@kbn/shared-ux-prompt-no-data-views-types';
 import { useMemo } from 'react';
-import { BasicDataStream, DataStreamSelector, TimeRangeConfig } from '../../common/types';
+import type { BasicDataStream, DataStreamSelector, TimeRangeConfig } from '../../common/types';
 import { useKibanaContextForPlugin } from '../utils';
-import { SendTelemetryFn } from './use_redirect_link_telemetry';
+import type { SendTelemetryFn } from './use_redirect_link_telemetry';
 
 export const useRedirectLink = <T extends BasicDataStream>({
   dataStreamStat,

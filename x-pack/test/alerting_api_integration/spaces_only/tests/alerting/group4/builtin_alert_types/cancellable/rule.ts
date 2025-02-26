@@ -9,7 +9,7 @@ import expect from '@kbn/expect';
 import { ESTestIndexTool } from '@kbn/alerting-api-integration-helpers';
 
 import { Spaces } from '../../../../../scenarios';
-import { FtrProviderContext } from '../../../../../../common/ftr_provider_context';
+import type { FtrProviderContext } from '../../../../../../common/ftr_provider_context';
 import { getUrlPrefix, ObjectRemover, getEventLog } from '../../../../../../common/lib';
 import { createEsDocuments } from '../../../create_test_data';
 

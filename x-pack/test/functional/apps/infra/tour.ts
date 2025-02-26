@@ -8,7 +8,7 @@
 import expect from '@kbn/expect';
 import { observTourStepStorageKey } from '@kbn/observability-shared-plugin/public/components/tour/tour';
 import { API_BASE_PATH } from '@kbn/guided-onboarding-plugin/common';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const browser = getService('browser');

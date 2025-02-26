@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { ElasticsearchClient } from '@kbn/core/server';
+import type { ElasticsearchClient } from '@kbn/core/server';
 import moment from 'moment';
-import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { calculateAuto } from '@kbn/calculate-auto';
 import {
   type RandomSamplerWrapper,

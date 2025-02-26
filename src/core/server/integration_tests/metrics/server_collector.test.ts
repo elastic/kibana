@@ -7,10 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { BehaviorSubject, Subject } from 'rxjs';
-import { take, filter } from 'rxjs';
+import { BehaviorSubject, Subject, take, filter } from 'rxjs';
 import supertest from 'supertest';
-import { Server as HapiServer } from '@hapi/hapi';
+import type { Server as HapiServer } from '@hapi/hapi';
 import { createHttpService } from '@kbn/core-http-server-mocks';
 import type { IRouter } from '@kbn/core-http-server';
 import { contextServiceMock } from '@kbn/core-http-context-server-mocks';

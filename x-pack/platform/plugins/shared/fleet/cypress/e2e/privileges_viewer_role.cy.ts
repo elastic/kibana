@@ -9,7 +9,7 @@ import { FLEET, INTEGRATIONS } from '../tasks/navigation';
 import { createUsers, BuiltInViewerUser, deleteUsers } from '../tasks/privileges';
 import { login, loginWithUserAndWaitForPage, logout } from '../tasks/login';
 
-import { getIntegrationCard } from '../screens/integrations';
+import { getIntegrationCard, ADD_INTEGRATION_POLICY_BTN } from '../screens/integrations';
 
 import {
   MISSING_PRIVILEGES,
@@ -22,7 +22,6 @@ import {
   SETTINGS_OUTPUTS,
   SETTINGS_FLEET_SERVER_HOSTS,
 } from '../screens/fleet';
-import { ADD_INTEGRATION_POLICY_BTN } from '../screens/integrations';
 import { scrollToIntegration } from '../tasks/integrations';
 import { navigateToTab } from '../tasks/fleet';
 

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { Replacements } from '../../schemas';
-import { AnonymizationFieldResponse } from '../../schemas/anonymization_fields/bulk_crud_anonymization_fields_route.gen';
+import type { Replacements } from '../../schemas';
+import type { AnonymizationFieldResponse } from '../../schemas/anonymization_fields/bulk_crud_anonymization_fields_route.gen';
 import { getAnonymizedData } from '../get_anonymized_data';
 import { getAnonymizedValues } from '../get_anonymized_values';
 import { getCsvFromData } from '../get_csv_from_data';

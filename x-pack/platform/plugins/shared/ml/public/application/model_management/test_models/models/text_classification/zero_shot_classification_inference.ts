@@ -6,8 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { BehaviorSubject } from 'rxjs';
-import { map } from 'rxjs';
+import { BehaviorSubject, map } from 'rxjs';
 import type { estypes } from '@elastic/elasticsearch';
 import { SUPPORTED_PYTORCH_TASKS } from '@kbn/ml-trained-models-utils';
 import type { trainedModelsApiProvider } from '../../../../services/ml_api_service/trained_models';

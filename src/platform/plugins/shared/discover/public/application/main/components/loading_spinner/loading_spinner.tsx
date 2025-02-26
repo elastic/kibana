@@ -8,7 +8,8 @@
  */
 
 import React from 'react';
-import { EuiLoadingSpinner, EuiTitle, EuiSpacer, UseEuiTheme } from '@elastic/eui';
+import type { UseEuiTheme } from '@elastic/eui';
+import { EuiLoadingSpinner, EuiTitle, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
 

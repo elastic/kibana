@@ -8,10 +8,12 @@
  */
 
 import type { estypes } from '@elastic/elasticsearch';
-import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
-import { pluginInitializerContextConfigMock } from '@kbn/core/server/mocks';
+import {
+  elasticsearchServiceMock,
+  pluginInitializerContextConfigMock,
+} from '@kbn/core/server/mocks';
 import { esSearchStrategyProvider, toKibanaSearchResponse } from './es_search_strategy';
-import { SearchStrategyDependencies } from '../../types';
+import type { SearchStrategyDependencies } from '../../types';
 
 import indexNotFoundException from '../../../../common/search/test_data/index_not_found_exception.json';
 import { errors } from '@elastic/elasticsearch';

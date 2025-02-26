@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { ChangeEvent } from 'react';
+import type { ChangeEvent } from 'react';
+import React from 'react';
 
 import { useValues, useActions } from 'kea';
 

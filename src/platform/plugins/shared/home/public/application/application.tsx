@@ -9,7 +9,7 @@
 
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
-import { ScopedHistory, CoreStart } from '@kbn/core/public';
+import type { ScopedHistory, CoreStart } from '@kbn/core/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 

@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../common/ftr_provider_context';
+import type { FtrProviderContext } from '../../common/ftr_provider_context';
 import { MOCKED_KIBANA_URL, MOCKED_PUBLIC_BASE_URL } from '../../configs';
 
 export default function ApiTest({ getService }: FtrProviderContext) {

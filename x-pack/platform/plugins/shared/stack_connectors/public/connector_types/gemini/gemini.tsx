@@ -8,9 +8,8 @@
 import { lazy } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { GenericValidationResult } from '@kbn/triggers-actions-ui-plugin/public/types';
-import { SUB_ACTION } from '../../../common/gemini/constants';
-import { GEMINI_CONNECTOR_ID, GEMINI_TITLE } from '../../../common/gemini/constants';
-import { GeminiActionParams, GeminiConnector } from './types';
+import { SUB_ACTION, GEMINI_CONNECTOR_ID, GEMINI_TITLE } from '../../../common/gemini/constants';
+import type { GeminiActionParams, GeminiConnector } from './types';
 
 interface ValidationErrors {
   subAction: string[];

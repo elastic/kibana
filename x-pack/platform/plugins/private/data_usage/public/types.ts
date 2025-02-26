@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import { schema, TypeOf } from '@kbn/config-schema';
-import { ManagementSetup, ManagementStart } from '@kbn/management-plugin/public';
-import { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
+import type { TypeOf } from '@kbn/config-schema';
+import { schema } from '@kbn/config-schema';
+import type { ManagementSetup, ManagementStart } from '@kbn/management-plugin/public';
+import type { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface DataUsagePublicSetup {}

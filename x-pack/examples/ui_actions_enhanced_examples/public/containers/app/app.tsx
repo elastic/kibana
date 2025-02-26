@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { EuiPage } from '@elastic/eui';
-import { CoreStart } from '@kbn/core/public';
+import type { CoreStart } from '@kbn/core/public';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { Page } from '../../components/page';
 import { DrilldownsManager } from '../drilldowns_manager';

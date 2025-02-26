@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { CommandSuggestParams } from '../../../definitions/types';
+import type { CommandSuggestParams } from '../../../definitions/types';
 import { noCaseCompare } from '../../../shared/helpers';
 import { commaCompleteItem, pipeCompleteItem } from '../../complete_items';
 import { TRIGGER_SUGGESTION_COMMAND } from '../../factories';

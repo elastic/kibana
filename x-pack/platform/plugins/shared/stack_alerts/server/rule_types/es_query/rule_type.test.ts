@@ -7,19 +7,19 @@
 
 import { v4 as uuidv4 } from 'uuid';
 import type { Writable } from '@kbn/utility-types';
-import { RuleExecutorServices } from '@kbn/alerting-plugin/server';
-import { RuleExecutorServicesMock, alertsMock } from '@kbn/alerting-plugin/server/mocks';
-import { loggingSystemMock } from '@kbn/core/server/mocks';
+import type { RuleExecutorServices } from '@kbn/alerting-plugin/server';
+import type { RuleExecutorServicesMock } from '@kbn/alerting-plugin/server/mocks';
+import { alertsMock } from '@kbn/alerting-plugin/server/mocks';
+import { loggingSystemMock, coreMock } from '@kbn/core/server/mocks';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { getRuleType } from './rule_type';
-import { EsQueryRuleState } from './rule_type_params';
-import { EsQueryRuleParams } from '@kbn/response-ops-rule-params/es_query';
-import { ActionContext } from './action_context';
+import type { EsQueryRuleState } from './rule_type_params';
+import type { EsQueryRuleParams } from '@kbn/response-ops-rule-params/es_query';
+import type { ActionContext } from './action_context';
 import type { ESSearchResponse, ESSearchRequest } from '@kbn/es-types';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
-import { coreMock } from '@kbn/core/server/mocks';
 import { ActionGroupId, ConditionMetAlertInstanceId } from './constants';
-import {
+import type {
   OnlyEsqlQueryRuleParams,
   OnlyEsQueryRuleParams,
   OnlySearchSourceRuleParams,

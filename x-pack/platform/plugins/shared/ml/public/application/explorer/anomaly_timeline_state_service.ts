@@ -6,8 +6,12 @@
  */
 
 import type { Observable } from 'rxjs';
-import { BehaviorSubject, combineLatest, from, of, Subscription } from 'rxjs';
 import {
+  BehaviorSubject,
+  combineLatest,
+  from,
+  of,
+  Subscription,
   switchMap,
   map,
   skipWhile,

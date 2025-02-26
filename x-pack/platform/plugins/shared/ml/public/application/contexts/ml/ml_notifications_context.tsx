@@ -7,8 +7,7 @@
 
 import type { FC, PropsWithChildren } from 'react';
 import React, { useContext, useState, useEffect } from 'react';
-import { combineLatest, timer } from 'rxjs';
-import { switchMap, map, tap, retry } from 'rxjs';
+import { combineLatest, timer, switchMap, map, tap, retry } from 'rxjs';
 import moment from 'moment';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import { useStorage } from '@kbn/ml-local-storage';

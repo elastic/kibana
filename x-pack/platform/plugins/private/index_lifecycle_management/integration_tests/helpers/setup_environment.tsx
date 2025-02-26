@@ -10,7 +10,7 @@ import { merge } from 'lodash';
 
 import './global_mocks';
 
-import { HttpSetup } from '@kbn/core/public';
+import type { HttpSetup } from '@kbn/core/public';
 import { usageCollectionPluginMock } from '@kbn/usage-collection-plugin/public/mocks';
 import {
   notificationServiceMock,

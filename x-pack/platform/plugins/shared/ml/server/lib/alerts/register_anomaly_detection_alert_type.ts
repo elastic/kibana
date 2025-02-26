@@ -36,8 +36,10 @@ import { PLUGIN_ID } from '../../../common/constants/app';
 import { MINIMUM_FULL_LICENSE } from '../../../common/license';
 import type { MlAnomalyDetectionAlertParams } from '../../routes/schemas/alerting_schema';
 import type { RegisterAlertParams } from './register_ml_alerts';
-import type { InfluencerAnomalyAlertDoc } from '../../../common/types/alerts';
-import { type RecordAnomalyAlertDoc } from '../../../common/types/alerts';
+import type {
+  InfluencerAnomalyAlertDoc,
+  RecordAnomalyAlertDoc,
+} from '../../../common/types/alerts';
 import type { AnomalyDetectionRuleState } from './alerting_service';
 
 /**

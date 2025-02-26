@@ -8,10 +8,11 @@
 import fs from 'fs';
 // eslint-disable-next-line import/no-extraneous-dependencies
 import FormData from 'form-data';
-import axios, { AxiosBasicCredentials } from 'axios';
+import type { AxiosBasicCredentials } from 'axios';
+import axios from 'axios';
 import { isError } from 'lodash';
 import { KBN_CERT_PATH, KBN_KEY_PATH } from '@kbn/dev-utils';
-import { ToolingLog } from '@kbn/tooling-log';
+import type { ToolingLog } from '@kbn/tooling-log';
 import https from 'https';
 
 export async function installKibanaAssets(

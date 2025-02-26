@@ -24,7 +24,7 @@ import {
 } from '../../../common/bedrock/constants';
 import { DEFAULT_BODY } from '../../../public/connector_types/bedrock/constants';
 import { initDashboard } from '../lib/gen_ai/create_gen_ai_dashboard';
-import { AxiosError } from 'axios';
+import type { AxiosError } from 'axios';
 import { ConnectorUsageCollector } from '@kbn/actions-plugin/server/types';
 jest.mock('../lib/gen_ai/create_gen_ai_dashboard');
 

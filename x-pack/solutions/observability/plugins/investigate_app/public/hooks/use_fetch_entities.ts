@@ -6,7 +6,7 @@
  */
 
 import { useQuery } from '@tanstack/react-query';
-import { GetEntitiesResponse } from '@kbn/investigation-shared';
+import type { GetEntitiesResponse } from '@kbn/investigation-shared';
 import { useKibana } from './use_kibana';
 import { investigationKeys } from './query_key_factory';
 

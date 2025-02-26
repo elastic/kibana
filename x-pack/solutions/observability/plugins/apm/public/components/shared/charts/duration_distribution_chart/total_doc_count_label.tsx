@@ -5,8 +5,7 @@
  * 2.0.
  */
 import { css } from '@emotion/react';
-import { useEuiTheme } from '@elastic/eui';
-import { EuiText } from '@elastic/eui';
+import { useEuiTheme, EuiText } from '@elastic/eui';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';

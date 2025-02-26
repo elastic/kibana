@@ -41,8 +41,7 @@ import {
   listArtifacts,
 } from './artifacts';
 
-import type { NewArtifact } from './types';
-import type { FetchAllArtifactsOptions } from './types';
+import type { NewArtifact, FetchAllArtifactsOptions } from './types';
 
 describe('When using the artifacts services', () => {
   let esClientMock: ReturnType<typeof elasticsearchServiceMock.createInternalClient>;

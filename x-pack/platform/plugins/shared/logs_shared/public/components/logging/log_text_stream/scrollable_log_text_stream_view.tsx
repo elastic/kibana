@@ -7,26 +7,29 @@
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { Fragment, GetDerivedStateFromProps } from 'react';
+import type { GetDerivedStateFromProps } from 'react';
+import React, { Fragment } from 'react';
 import moment from 'moment';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
-import { TimeKey, UniqueTimeKey } from '@kbn/io-ts-utils';
-import { TextScale } from '../../../../common/log_text_scale';
+import type { TimeKey, UniqueTimeKey } from '@kbn/io-ts-utils';
+import type { TextScale } from '../../../../common/log_text_scale';
 import { callWithoutRepeats } from '../../../utils/handlers';
 import { AutoSizer } from '../../auto_sizer';
 import { NoData } from '../../empty_states';
 import { LogsSharedLoadingPanel } from '../../loading';
-import { getStreamItemBeforeTimeKey, getStreamItemId, parseStreamItemId, StreamItem } from './item';
+import type { StreamItem } from './item';
+import { getStreamItemBeforeTimeKey, getStreamItemId, parseStreamItemId } from './item';
 import { LogColumnHeaders } from './column_headers';
 import { LogTextStreamLoadingItemView } from './loading_item_view';
 import { LogTextStreamJumpToTail } from './jump_to_tail';
 import { LogEntryRow } from './log_entry_row';
 import { MeasurableItemView } from './measurable_item_view';
 import { VerticalScrollPanel } from './vertical_scroll_panel';
-import { useColumnWidths, LogEntryColumnWidths } from './log_entry_column';
+import type { LogEntryColumnWidths } from './log_entry_column';
+import { useColumnWidths } from './log_entry_column';
 import { LogDateRow } from './log_date_row';
-import { LogEntry } from '../../../../common/log_entry';
-import { LogColumnRenderConfiguration } from '../../../utils/log_column_render_configuration';
+import type { LogEntry } from '../../../../common/log_entry';
+import type { LogColumnRenderConfiguration } from '../../../utils/log_column_render_configuration';
 
 export interface VisibleInterval {
   pagesBeforeStart: number;

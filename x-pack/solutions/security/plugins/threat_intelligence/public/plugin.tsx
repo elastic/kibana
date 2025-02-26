@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
+import type { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { Provider as ReduxStoreProvider } from 'react-redux';
 import React, { Suspense } from 'react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
-import { ExternalReferenceAttachmentType } from '@kbn/cases-plugin/public/client/attachment_framework/types';
+import type { ExternalReferenceAttachmentType } from '@kbn/cases-plugin/public/client/attachment_framework/types';
 import { generateAttachmentType } from './modules/cases/utils/attachments';
 import { KibanaContextProvider } from './hooks/use_kibana';
-import {
+import type {
   SecuritySolutionPluginContext,
   Services,
   SetupPlugins,

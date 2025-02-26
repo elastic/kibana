@@ -7,22 +7,22 @@
 import { extractTimeRange, isFilterPinned } from '@kbn/es-query';
 import type { HasParentApi, PublishesUnifiedSearch } from '@kbn/presentation-publishing';
 import type { KibanaLocation } from '@kbn/share-plugin/public';
+import type { DashboardLocatorParams } from '@kbn/dashboard-plugin/public';
 import {
   cleanEmptyKeys,
-  DashboardLocatorParams,
   getDashboardLocatorParamsFromEmbeddable,
 } from '@kbn/dashboard-plugin/public';
 import { setStateToKbnUrl } from '@kbn/kibana-utils-plugin/public';
 import { APPLY_FILTER_TRIGGER } from '@kbn/data-plugin/public';
-import { ApplyGlobalFilterActionContext } from '@kbn/unified-search-plugin/public';
+import type { ApplyGlobalFilterActionContext } from '@kbn/unified-search-plugin/public';
 import { IMAGE_CLICK_TRIGGER } from '@kbn/image-embeddable-plugin/public';
-import {
-  AbstractDashboardDrilldown,
+import type {
   AbstractDashboardDrilldownParams,
+  AbstractDashboardDrilldownConfig as Config,
 } from '../abstract_dashboard_drilldown';
+import { AbstractDashboardDrilldown } from '../abstract_dashboard_drilldown';
 import { EMBEDDABLE_TO_DASHBOARD_DRILLDOWN } from './constants';
 import { createExtract, createInject } from '../../../../common';
-import { AbstractDashboardDrilldownConfig as Config } from '../abstract_dashboard_drilldown';
 
 export type Context = ApplyGlobalFilterActionContext & {
   embeddable: Partial<PublishesUnifiedSearch & HasParentApi<Partial<PublishesUnifiedSearch>>>;

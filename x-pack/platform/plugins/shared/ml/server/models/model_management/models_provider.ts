@@ -16,9 +16,8 @@ import type {
   MlGetTrainedModelsRequest,
   TasksTaskInfo,
   TransformGetTransformTransformSummary,
-} from '@elastic/elasticsearch/lib/api/types';
-import type { IndexName, IndicesIndexState } from '@elastic/elasticsearch/lib/api/types';
-import type {
+  IndexName,
+  IndicesIndexState,
   IngestPipeline,
   IngestSimulateRequest,
   NodesInfoResponseBase,
@@ -27,13 +26,15 @@ import {
   ELASTIC_MODEL_DEFINITIONS,
   ELASTIC_MODEL_TAG,
   MODEL_STATE,
-  type GetModelDownloadConfigOptions,
-  type ModelDefinitionResponse,
   ELASTIC_MODEL_TYPE,
   BUILT_IN_MODEL_TYPE,
 } from '@kbn/ml-trained-models-utils';
+import type {
+  ElasticCuratedModelName,
+  GetModelDownloadConfigOptions,
+  ModelDefinitionResponse,
+} from '@kbn/ml-trained-models-utils';
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
-import type { ElasticCuratedModelName } from '@kbn/ml-trained-models-utils';
 import { isDefined } from '@kbn/ml-is-defined';
 import { DEFAULT_TRAINED_MODELS_PAGE_SIZE } from '../../../common/constants/trained_models';
 import type { MlFeatures } from '../../../common/constants/app';
@@ -45,15 +46,16 @@ import type {
   TrainedModelItem,
   TrainedModelUIItem,
   TrainedModelWithPipelines,
+  ModelDownloadState,
+  PipelineDefinition,
+  TrainedModelConfigResponse,
 } from '../../../common/types/trained_models';
-import { isBuiltInModel, isExistingModel } from '../../../common/types/trained_models';
 import {
+  isBuiltInModel,
+  isExistingModel,
   isDFAModelItem,
   isElasticModel,
   isNLPModelItem,
-  type ModelDownloadState,
-  type PipelineDefinition,
-  type TrainedModelConfigResponse,
 } from '../../../common/types/trained_models';
 import type { MlClient } from '../../lib/ml_client';
 import type { MLSavedObjectService } from '../../saved_objects';

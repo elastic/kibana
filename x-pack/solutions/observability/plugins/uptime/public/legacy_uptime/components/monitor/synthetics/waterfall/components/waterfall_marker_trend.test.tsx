@@ -9,7 +9,7 @@ import React from 'react';
 import { render } from '../../../../../lib/helper/rtl_helpers';
 import { WaterfallMarkerTrend } from './waterfall_marker_trend';
 import moment from 'moment';
-import { JourneyStep } from '../../../../../../../common/runtime_types';
+import type { JourneyStep } from '../../../../../../../common/runtime_types';
 import { TestWrapper } from './waterfall_marker_test_helper';
 
 describe('<WaterfallMarkerTrend />', () => {

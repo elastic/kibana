@@ -6,7 +6,7 @@
  */
 
 import { useCallback, useEffect, useState } from 'react';
-import {
+import type {
   Start as InspectorPublicPluginStart,
   InspectorSession,
   RequestAdapter,

@@ -5,11 +5,9 @@
  * 2.0.
  */
 import type { StreamsRouteRepository } from '@kbn/streams-plugin/server';
-import { RoleScopedSupertestProvider } from '../../../../services/role_scoped_supertest';
-import {
-  RepositorySupertestClient,
-  getAdminApiClient,
-} from '../../../../../../common/utils/server_route_repository/create_admin_service_from_repository';
+import type { RoleScopedSupertestProvider } from '../../../../services/role_scoped_supertest';
+import type { RepositorySupertestClient } from '../../../../../../common/utils/server_route_repository/create_admin_service_from_repository';
+import { getAdminApiClient } from '../../../../../../common/utils/server_route_repository/create_admin_service_from_repository';
 
 export type StreamsSupertestRepositoryClient = RepositorySupertestClient<StreamsRouteRepository>;
 

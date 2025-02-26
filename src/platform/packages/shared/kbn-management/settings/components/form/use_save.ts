@@ -7,11 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { FieldDefinition } from '@kbn/management-settings-types';
+import type { FieldDefinition, UnsavedFieldChange } from '@kbn/management-settings-types';
 import { isEmpty } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { UnsavedFieldChange } from '@kbn/management-settings-types';
-import { UiSettingsScope } from '@kbn/core-ui-settings-common';
+import type { UiSettingsScope } from '@kbn/core-ui-settings-common';
 import { useServices } from './services';
 
 export interface UseSaveParameters {

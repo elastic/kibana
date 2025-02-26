@@ -7,9 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Subject } from 'rxjs';
+import { Subject, toArray } from 'rxjs';
 import { distinctUntilChangedWithInitialValue } from './distinct_until_changed_with_initial_value';
-import { toArray } from 'rxjs';
 import deepEqual from 'fast-deep-equal';
 
 describe('distinctUntilChangedWithInitialValue', () => {

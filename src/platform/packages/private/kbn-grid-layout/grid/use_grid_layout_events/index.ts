@@ -8,7 +8,7 @@
  */
 
 import { useCallback, useRef } from 'react';
-import { GridPanelData, GridLayoutStateManager, PanelInteractionEvent } from '../types';
+import type { GridPanelData, GridLayoutStateManager, PanelInteractionEvent } from '../types';
 import {
   getPointerPosition,
   isMouseEvent,
@@ -17,7 +17,7 @@ import {
   startTouchInteraction,
 } from './sensors';
 import { commitAction, moveAction, startAction } from './state_manager_actions';
-import { UserInteractionEvent } from './types';
+import type { UserInteractionEvent } from './types';
 import { useGridLayoutContext } from '../use_grid_layout_context';
 
 /*

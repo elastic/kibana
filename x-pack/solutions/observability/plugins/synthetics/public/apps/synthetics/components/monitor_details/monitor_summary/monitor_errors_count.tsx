@@ -10,7 +10,7 @@ import { ReportTypes } from '@kbn/exploratory-view-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import React, { useMemo } from 'react';
-import { ClientPluginsStart } from '../../../../../plugin';
+import type { ClientPluginsStart } from '../../../../../plugin';
 import { useMonitorQueryFilters } from '../hooks/use_monitor_query_filters';
 
 interface MonitorErrorsCountProps {

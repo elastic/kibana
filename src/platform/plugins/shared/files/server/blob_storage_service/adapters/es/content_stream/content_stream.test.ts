@@ -12,11 +12,14 @@ import { set } from '@kbn/safer-lodash-set';
 import { Readable } from 'stream';
 import { encode, decode } from '@kbn/cbor';
 import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
-import { ContentStream, ContentStreamEncoding, ContentStreamParameters } from './content_stream';
-import type { GetResponse } from '@elastic/elasticsearch/lib/api/types';
-import type { estypes } from '@elastic/elasticsearch';
-import { FileDocument } from '../../../../file_client/file_metadata_client/adapters/es_index';
-import { IndexRequest } from '@elastic/elasticsearch/lib/api/types';
+import type { ContentStreamEncoding, ContentStreamParameters } from './content_stream';
+import { ContentStream } from './content_stream';
+import type {
+  GetResponse,
+  IndexRequest,
+  SearchResponse,
+} from '@elastic/elasticsearch/lib/api/types';
+import type { FileDocument } from '../../../../file_client/file_metadata_client/adapters/es_index';
 
 describe('ContentStream', () => {
   let client: ReturnType<typeof elasticsearchServiceMock.createElasticsearchClient>;
@@ -49,7 +52,7 @@ describe('ContentStream', () => {
 
   describe('read', () => {
     describe('with `indexIsAlias` set to `true`', () => {
-      let searchResponse: estypes.SearchResponse<FileDocument<{}>>;
+      let searchResponse: SearchResponse<FileDocument<{}>>;
 
       beforeEach(() => {
         searchResponse = {

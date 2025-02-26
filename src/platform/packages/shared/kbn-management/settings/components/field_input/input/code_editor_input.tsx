@@ -10,12 +10,13 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
 import { i18n } from '@kbn/i18n';
-import { SettingType } from '@kbn/management-settings-types';
+import type { SettingType } from '@kbn/management-settings-types';
 import { getFieldInputValue, useUpdate } from '@kbn/management-settings-utilities';
 
 import { debounce } from 'lodash';
 import { useServices } from '../services';
-import { CodeEditor, CodeEditorProps } from '../code_editor';
+import type { CodeEditorProps } from '../code_editor';
+import { CodeEditor } from '../code_editor';
 import type { InputProps } from '../types';
 import { TEST_SUBJ_PREFIX_FIELD } from '.';
 

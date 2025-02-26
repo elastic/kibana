@@ -7,8 +7,8 @@
 
 import { errors } from '@elastic/elasticsearch';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
-import { rangeQuery } from '@kbn/observability-plugin/server';
 import {
+  rangeQuery,
   unwrapEsResponse,
   WrappedElasticsearchClientError,
 } from '@kbn/observability-plugin/server';

@@ -6,13 +6,8 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import {
-  type EmbeddableApiContext,
-  apiIsOfType,
-  areTriggersDisabled,
-  HasParentApi,
-  HasType,
-} from '@kbn/presentation-publishing';
+import { apiIsOfType, areTriggersDisabled } from '@kbn/presentation-publishing';
+import type { HasParentApi, HasType, EmbeddableApiContext } from '@kbn/presentation-publishing';
 import { createAction } from '@kbn/ui-actions-plugin/public';
 import { apiHasVisualizeConfig } from '@kbn/visualizations-plugin/public';
 import React, { Suspense, lazy } from 'react';

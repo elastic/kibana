@@ -18,12 +18,10 @@ import { METRIC_TYPE } from '@kbn/analytics';
 
 import moment from 'moment';
 import numeral from '@elastic/numeral';
-import {
-  DataStreamReindexStatus,
-  EnrichedDeprecationInfo,
-} from '../../../../../../../common/types';
+import type { EnrichedDeprecationInfo } from '../../../../../../../common/types';
+import { DataStreamReindexStatus } from '../../../../../../../common/types';
 
-import { ReindexStateContext } from '../context';
+import type { ReindexStateContext } from '../context';
 
 import { DeprecationBadge } from '../../../../shared';
 import {

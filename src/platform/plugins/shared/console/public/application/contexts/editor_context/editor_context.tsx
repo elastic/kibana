@@ -7,9 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { createContext, Dispatch, useReducer } from 'react';
+import type { Dispatch } from 'react';
+import React, { createContext, useReducer } from 'react';
 import * as editor from '../../stores/editor';
-import { DevToolsSettings } from '../../../services';
+import type { DevToolsSettings } from '../../../services';
 import { createUseContext } from '../create_use_context';
 
 const EditorReadContext = createContext<editor.Store>(editor.initialValue);

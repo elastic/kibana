@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ClusterPutComponentTemplateRequest } from '@elastic/elasticsearch/lib/api/types';
+import type { ClusterPutComponentTemplateRequest } from '@elastic/elasticsearch/lib/api/types';
 import { type FieldMap } from '@kbn/alerts-as-data-utils';
 import { mappingFromFieldMap } from './mapping_from_field_map';
 

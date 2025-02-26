@@ -7,8 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import {
-  actions,
+import type {
   ActorRef,
   AnyEventObject,
   EventObject,
@@ -16,6 +15,7 @@ import {
   PureAction,
   SendActionOptions,
 } from 'xstate';
+import { actions } from 'xstate';
 
 export const sendIfDefined =
   <TSentEvent extends EventObject = AnyEventObject>(target: string | ActorRef<TSentEvent>) =>

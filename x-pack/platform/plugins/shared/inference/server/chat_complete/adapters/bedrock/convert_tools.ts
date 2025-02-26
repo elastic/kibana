@@ -5,13 +5,8 @@
  * 2.0.
  */
 
-import {
-  Message,
-  MessageRole,
-  ToolChoiceType,
-  ToolSchemaType,
-  type ToolOptions,
-} from '@kbn/inference-common';
+import { MessageRole, ToolChoiceType } from '@kbn/inference-common';
+import type { Message, ToolSchemaType, ToolOptions } from '@kbn/inference-common';
 import type { BedrockToolChoice } from './types';
 
 export const toolChoiceToBedrock = (

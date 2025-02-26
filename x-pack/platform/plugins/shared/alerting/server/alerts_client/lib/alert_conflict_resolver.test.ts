@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import { loggingSystemMock } from '@kbn/core/server/mocks';
-import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
+import { loggingSystemMock, elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import {
   ALERT_CASE_IDS,
   ALERT_STATUS,
@@ -14,7 +13,7 @@ import {
   ALERT_WORKFLOW_TAGS,
   EVENT_ACTION,
 } from '@kbn/rule-data-utils';
-import {
+import type {
   BulkRequest,
   BulkResponse,
   BulkResponseItem,

@@ -8,7 +8,8 @@
  */
 
 import React from 'react';
-import { QueryLanguageSwitcher, QueryLanguageSwitcherProps } from './language_switcher';
+import type { QueryLanguageSwitcherProps } from './language_switcher';
+import { QueryLanguageSwitcher } from './language_switcher';
 import { coreMock } from '@kbn/core/public/mocks';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { EuiButtonIcon, EuiIcon, EuiPopover } from '@elastic/eui';

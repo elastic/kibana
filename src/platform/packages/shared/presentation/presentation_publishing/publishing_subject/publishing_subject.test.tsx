@@ -17,7 +17,7 @@ import {
   useBatchedOptionalPublishingSubjects,
 } from './publishing_batcher';
 import { useStateFromPublishingSubject } from './publishing_subject';
-import { PublishingSubject } from './types';
+import type { PublishingSubject } from './types';
 
 describe('publishing subject', () => {
   describe('render', () => {

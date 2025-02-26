@@ -9,7 +9,7 @@
 
 import { BehaviorSubject } from 'rxjs';
 
-import { StateComparators } from '@kbn/presentation-publishing';
+import type { StateComparators } from '@kbn/presentation-publishing';
 
 import { CONTROL_GROUP_TYPE } from '../../../common';
 import type { ControlFetchContext } from '../../control_group/control_fetch/control_fetch';

@@ -7,7 +7,8 @@
 
 import React, { memo } from 'react';
 import styled from '@emotion/styled';
-import { TimeFormat, useFormattedTime } from '../../formatted_time';
+import type { TimeFormat } from '../../formatted_time';
+import { useFormattedTime } from '../../formatted_time';
 import { LogEntryColumnContent } from './log_entry_column';
 
 export interface LogEntryTimestampColumnProps {

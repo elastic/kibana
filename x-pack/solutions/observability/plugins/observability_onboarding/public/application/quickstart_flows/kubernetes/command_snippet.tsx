@@ -9,7 +9,7 @@ import React from 'react';
 import { EuiCodeBlock, EuiLink, EuiSpacer, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import { ElasticAgentVersionInfo } from '../../../../common/types';
+import type { ElasticAgentVersionInfo } from '../../../../common/types';
 import { buildKubectlCommand } from './build_kubectl_command';
 import { CopyToClipboardButton } from '../shared/copy_to_clipboard_button';
 

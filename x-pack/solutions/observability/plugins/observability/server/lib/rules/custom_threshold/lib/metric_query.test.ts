@@ -6,11 +6,11 @@
  */
 
 import moment from 'moment';
-import {
-  Aggregators,
+import type {
   CustomMetricExpressionParams,
   SearchConfigurationType,
 } from '../../../../../common/custom_threshold_rule/types';
+import { Aggregators } from '../../../../../common/custom_threshold_rule/types';
 import { getElasticsearchMetricQuery } from './metric_query';
 import { COMPARATORS } from '@kbn/alerting-comparators';
 

@@ -6,7 +6,7 @@
  */
 import type { SerializableRecord } from '@kbn/utility-types';
 import rison from '@kbn/rison';
-import { LocatorDefinition, LocatorPublic } from '@kbn/share-plugin/common';
+import type { LocatorDefinition, LocatorPublic } from '@kbn/share-plugin/common';
 import querystring from 'querystring';
 
 export type InventoryLocator = LocatorPublic<InventoryLocatorParams>;

@@ -6,8 +6,9 @@
  */
 
 import Boom from '@hapi/boom';
-import { KueryNode, toKqlExpression } from '@kbn/es-query';
-import { KibanaRequest } from '@kbn/core/server';
+import type { KueryNode } from '@kbn/es-query';
+import { toKqlExpression } from '@kbn/es-query';
+import type { KibanaRequest } from '@kbn/core/server';
 import { ruleTypeRegistryMock } from '../rule_type_registry.mock';
 import { securityMock } from '@kbn/security-plugin/server/mocks';
 import { KibanaFeature } from '@kbn/features-plugin/server';
@@ -15,10 +16,10 @@ import { featuresPluginMock } from '@kbn/features-plugin/server/mocks';
 import { AlertingAuthorization } from './alerting_authorization';
 import { AlertingAuthorizationFilterType } from './alerting_authorization_kuery';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
-import { CheckPrivilegesResponse } from '@kbn/security-plugin-types-server';
+import type { CheckPrivilegesResponse } from '@kbn/security-plugin-types-server';
 import type { FeaturesPluginStart } from '@kbn/features-plugin/server';
 import { WriteOperations, AlertingAuthorizationEntity, ReadOperations } from './types';
-import { AlertingKibanaPrivilege } from '@kbn/features-plugin/common/alerting_kibana_privilege';
+import type { AlertingKibanaPrivilege } from '@kbn/features-plugin/common/alerting_kibana_privilege';
 
 const mockAuthorizationAction = (
   ruleType: string,

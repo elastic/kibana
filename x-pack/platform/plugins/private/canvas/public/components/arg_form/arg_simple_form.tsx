@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { ReactNode, MouseEventHandler } from 'react';
+import type { ReactNode, MouseEventHandler } from 'react';
+import React from 'react';
 import PropTypes from 'prop-types';
 import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';

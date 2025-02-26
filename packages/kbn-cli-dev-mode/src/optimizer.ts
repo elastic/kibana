@@ -9,8 +9,8 @@
 
 import Chalk from 'chalk';
 import moment from 'moment';
-import { Writable } from 'stream';
-import { tap } from 'rxjs';
+import type { Writable } from 'stream';
+import { tap, ignoreElements } from 'rxjs';
 import {
   ToolingLog,
   pickLevelFromFlags,
@@ -18,13 +18,12 @@ import {
   parseLogLevel,
 } from '@kbn/tooling-log';
 import * as Rx from 'rxjs';
-import { ignoreElements } from 'rxjs';
+import type { OptimizerUpdate } from '@kbn/optimizer';
 import {
   runOptimizer,
   OptimizerConfig,
   logOptimizerState,
   logOptimizerProgress,
-  OptimizerUpdate,
 } from '@kbn/optimizer';
 
 export interface Options {

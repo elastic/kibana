@@ -15,13 +15,13 @@ import { EuiLoadingSpinner, EuiPanel } from '@elastic/eui';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { withSuspense } from '@kbn/shared-ux-utility';
 
-import { OverlayRef } from '@kbn/core-mount-utils-browser';
+import type { OverlayRef } from '@kbn/core-mount-utils-browser';
 import { tracksOverlays } from '@kbn/presentation-containers';
 import { apiPublishesSavedObjectId } from '@kbn/presentation-publishing';
-import { LinksLayoutType } from '../../common/content_management';
+import type { LinksLayoutType } from '../../common/content_management';
 import { linksClient, runSaveToLibrary } from '../content_management';
 import { coreServices } from '../services/kibana_services';
-import { LinksRuntimeState, ResolvedLink } from '../types';
+import type { LinksRuntimeState, ResolvedLink } from '../types';
 import { serializeLinksAttributes } from '../lib/serialize_attributes';
 
 const LazyLinksEditor = React.lazy(() => import('../components/editor/links_editor'));

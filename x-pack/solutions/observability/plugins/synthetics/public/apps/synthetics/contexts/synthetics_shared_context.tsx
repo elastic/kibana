@@ -10,11 +10,11 @@ import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 import { Provider as ReduxProvider } from 'react-redux';
 import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
-import { Subject } from 'rxjs';
-import { Store } from 'redux';
+import type { Subject } from 'rxjs';
+import type { Store } from 'redux';
 import { SyntheticsRefreshContextProvider } from './synthetics_refresh_context';
 import { SyntheticsDataViewContextProvider } from './synthetics_data_view_context';
-import { SyntheticsAppProps } from './synthetics_settings_context';
+import type { SyntheticsAppProps } from './synthetics_settings_context';
 import { storage, store } from '../state';
 
 export const SyntheticsSharedContext: React.FC<

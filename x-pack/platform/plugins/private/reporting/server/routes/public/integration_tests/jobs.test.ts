@@ -21,17 +21,18 @@ import { PUBLIC_ROUTES } from '@kbn/reporting-common';
 import { ExportTypesRegistry } from '@kbn/reporting-server/export_types_registry';
 import { createMockConfigSchema } from '@kbn/reporting-mocks-server';
 import type { ExportType } from '@kbn/reporting-server';
-import { IUsageCounter } from '@kbn/usage-collection-plugin/server/usage_counters/usage_counter';
-import { ReportingCore } from '../../..';
-import { ReportingInternalSetup, ReportingInternalStart } from '../../../core';
-import { ContentStream, getContentStream } from '../../../lib';
+import type { IUsageCounter } from '@kbn/usage-collection-plugin/server/usage_counters/usage_counter';
+import type { ReportingCore } from '../../..';
+import type { ReportingInternalSetup, ReportingInternalStart } from '../../../core';
+import type { ContentStream } from '../../../lib';
+import { getContentStream } from '../../../lib';
 import { reportingMock } from '../../../mocks';
 import {
   createMockPluginSetup,
   createMockPluginStart,
   createMockReportingCore,
 } from '../../../test_helpers';
-import { ReportingRequestHandlerContext } from '../../../types';
+import type { ReportingRequestHandlerContext } from '../../../types';
 import { EventTracker } from '../../../usage';
 import { registerJobInfoRoutesPublic } from '../jobs';
 

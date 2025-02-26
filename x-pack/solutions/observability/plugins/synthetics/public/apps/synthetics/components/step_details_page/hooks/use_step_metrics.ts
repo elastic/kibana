@@ -18,7 +18,7 @@ import {
   TRANSFER_SIZE_HELP,
 } from '../step_metrics/labels';
 import { SYNTHETICS_INDEX_PATTERN } from '../../../../../../common/constants';
-import { JourneyStep } from '../../../../../../common/runtime_types';
+import type { JourneyStep } from '../../../../../../common/runtime_types';
 
 export const MONITOR_DURATION_US = 'monitor.duration.us';
 export const SYNTHETICS_CLS = 'browser.experience.cls';

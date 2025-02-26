@@ -20,9 +20,9 @@ import type {
 import type { ObservabilityAIAssistantPublicStart } from '@kbn/observability-ai-assistant-plugin/public';
 import type { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
-import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
-import { EmbeddableStart } from '@kbn/embeddable-plugin/public';
-import { SavedSearchPublicPluginStart } from '@kbn/saved-search-plugin/public';
+import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+import type { EmbeddableStart } from '@kbn/embeddable-plugin/public';
+import type { SavedSearchPublicPluginStart } from '@kbn/saved-search-plugin/public';
 import type { LogsSharedLocators } from '../common/locators';
 import type { LogAIAssistantProps } from './components/log_ai_assistant/log_ai_assistant';
 import type { SelfContainedLogsOverview } from './components/logs_overview';

@@ -10,7 +10,7 @@
 import moment from 'moment';
 import { getColumnByAccessor } from '@kbn/visualizations-plugin/common/utils';
 import type { Datatable } from '@kbn/expressions-plugin/common';
-import { ExpressionValueVisDimension } from '@kbn/visualizations-plugin/common/expression_functions';
+import type { ExpressionValueVisDimension } from '@kbn/visualizations-plugin/common/expression_functions';
 
 export function normalizeTable(data: Datatable, xAccessor?: string | ExpressionValueVisDimension) {
   const xColumn = xAccessor && getColumnByAccessor(xAccessor, data.columns);

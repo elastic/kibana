@@ -8,7 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import { compact } from 'lodash';
 import { useEuiTheme } from '@elastic/eui';
-import {
+import type {
   IlmPolicyDeletePhase,
   IlmPolicyHotPhase,
   IlmPolicyPhase,

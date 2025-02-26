@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { FtrProviderContext } from '../../../../../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../../../../../ftr_provider_context';
 import { deleteAllPrebuiltRuleAssets } from '../../../../../utils';
 import { deleteAllRules } from '../../../../../../../../common/utils/security_solution';
 import { bulkUpgradeAllPrebuiltRules } from './bulk_upgrade_all_prebuilt_rules';

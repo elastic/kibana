@@ -8,7 +8,7 @@
 import { EuiEmptyPrompt } from '@elastic/eui';
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { UserMessage } from '../../types';
+import type { UserMessage } from '../../types';
 import { getLongMessage } from '../../user_messages_utils';
 
 export function VisualizationErrorPanel({

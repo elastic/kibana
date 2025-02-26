@@ -16,7 +16,7 @@ import {
   extractVersionedResponses,
   processVersionedRouter,
 } from './process_versioned_router';
-import { VersionedRouterRoute } from '@kbn/core-http-server';
+import type { VersionedRouterRoute } from '@kbn/core-http-server';
 import { createOpIdGenerator } from './util';
 
 let oasConverter: OasConverter;

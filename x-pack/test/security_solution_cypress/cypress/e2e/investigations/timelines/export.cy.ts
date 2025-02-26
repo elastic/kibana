@@ -13,12 +13,11 @@ import {
 } from '../../../tasks/timelines';
 import { login } from '../../../tasks/login';
 import { visit } from '../../../tasks/navigation';
-import { deleteTimelines } from '../../../tasks/api_calls/timelines';
+import { deleteTimelines, createTimeline } from '../../../tasks/api_calls/timelines';
 
 import { TIMELINES_URL } from '../../../urls/navigation';
 import { TOASTER } from '../../../screens/alerts_detection_rules';
 import { TIMELINE_CHECKBOX } from '../../../screens/timelines';
-import { createTimeline } from '../../../tasks/api_calls/timelines';
 import { expectedExportedTimeline } from '../../../objects/timeline';
 import { closeToast } from '../../../tasks/common/toast';
 import { getFullname } from '../../../tasks/common';

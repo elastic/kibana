@@ -8,7 +8,12 @@
  */
 
 import { Walker } from '../../../walker';
-import { ESQLAstQueryExpression, ESQLColumn, ESQLCommand, ESQLCommandOption } from '../../../types';
+import type {
+  ESQLAstQueryExpression,
+  ESQLColumn,
+  ESQLCommand,
+  ESQLCommandOption,
+} from '../../../types';
 import { Visitor } from '../../../visitor';
 import { cmpArr, findByPredicate } from '../../util';
 import * as generic from '../../generic';

@@ -6,7 +6,7 @@
  */
 
 import { omit, get } from 'lodash';
-import {
+import type {
   ElasticsearchModifiedSource,
   ElasticsearchLegacySource,
   ElasticsearchSourceKibanaStats,

@@ -22,7 +22,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
 import React, { useEffect, useState } from 'react';
 import { ApiKeySelectableTokenField } from '@kbn/security-api-key-management';
-import {
+import type {
   SecurityCreateApiKeyResponse,
   SecurityUpdateApiKeyResponse,
 } from '@elastic/elasticsearch/lib/api/types';

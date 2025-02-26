@@ -7,7 +7,7 @@
 
 import { EMBEDDABLE_LOG_RATE_ANALYSIS_TYPE } from '@kbn/aiops-log-rate-analysis/constants';
 
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 import { logRateAnalysisTestData } from './log_rate_analysis_test_data';
 
 const testDataSetup = logRateAnalysisTestData[0];

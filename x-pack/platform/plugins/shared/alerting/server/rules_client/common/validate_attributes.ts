@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { KueryNode } from '@kbn/es-query';
+import type { KueryNode } from '@kbn/es-query';
 import { get, isEmpty } from 'lodash';
 import { alertMappings } from '../../../common/saved_objects/rules/mappings';
 import { RULE_SAVED_OBJECT_TYPE } from '../../saved_objects';

@@ -6,16 +6,16 @@
  */
 
 import globby from 'globby';
-import { Logger } from '@kbn/core/server';
+import type { Logger } from '@kbn/core/server';
 import { DirectoryLoader } from 'langchain/document_loaders/fs/directory';
 import { TextLoader } from 'langchain/document_loaders/fs/text';
 import { resolve } from 'path';
-import { Document } from 'langchain/document';
-import { Metadata } from '@kbn/elastic-assistant-common';
+import type { Document } from 'langchain/document';
+import type { Metadata } from '@kbn/elastic-assistant-common';
 import pMap from 'p-map';
 import { addRequiredKbResourceMetadata } from './add_required_kb_resource_metadata';
 import { SECURITY_LABS_RESOURCE } from '../../../routes/knowledge_base/constants';
-import { AIAssistantKnowledgeBaseDataClient } from '../../../ai_assistant_data_clients/knowledge_base';
+import type { AIAssistantKnowledgeBaseDataClient } from '../../../ai_assistant_data_clients/knowledge_base';
 
 /**
  * Loads the Elastic Security Labs mdx files into the Knowledge Base.

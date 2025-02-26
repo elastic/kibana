@@ -8,7 +8,7 @@
  */
 
 import { Entity } from '../entity';
-import { ApmFields } from './apm_fields';
+import type { ApmFields } from './apm_fields';
 import { Instance } from './instance';
 
 export class Service extends Entity<ApmFields> {

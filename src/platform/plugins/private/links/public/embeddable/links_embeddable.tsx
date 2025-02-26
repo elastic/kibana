@@ -10,27 +10,28 @@
 import React, { createContext, useMemo } from 'react';
 import { cloneDeep } from 'lodash';
 import { BehaviorSubject } from 'rxjs';
-import { EuiListGroup, EuiPanel, UseEuiTheme } from '@elastic/eui';
+import type { UseEuiTheme } from '@elastic/eui';
+import { EuiListGroup, EuiPanel } from '@elastic/eui';
 
-import { PanelIncompatibleError, ReactEmbeddableFactory } from '@kbn/embeddable-plugin/public';
+import type { ReactEmbeddableFactory } from '@kbn/embeddable-plugin/public';
+import { PanelIncompatibleError } from '@kbn/embeddable-plugin/public';
+import type { SerializedTitles, SerializedPanelState } from '@kbn/presentation-publishing';
 import {
-  SerializedTitles,
   initializeTitleManager,
-  SerializedPanelState,
   useBatchedOptionalPublishingSubjects,
 } from '@kbn/presentation-publishing';
 import { css } from '@emotion/react';
 
+import type { LinksLayoutType } from '../../common/content_management';
 import {
   CONTENT_ID,
   DASHBOARD_LINK_TYPE,
-  LinksLayoutType,
   LINKS_HORIZONTAL_LAYOUT,
   LINKS_VERTICAL_LAYOUT,
 } from '../../common/content_management';
 import { DashboardLinkComponent } from '../components/dashboard_link/dashboard_link_component';
 import { ExternalLinkComponent } from '../components/external_link/external_link_component';
-import {
+import type {
   LinksApi,
   LinksByReferenceSerializedState,
   LinksByValueSerializedState,

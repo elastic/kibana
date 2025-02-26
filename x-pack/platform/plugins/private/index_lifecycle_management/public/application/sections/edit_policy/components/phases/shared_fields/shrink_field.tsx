@@ -7,10 +7,16 @@
 
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiTextColor, EuiRadioGroup, EuiSpacer } from '@elastic/eui';
-import React, { FunctionComponent } from 'react';
+import type { FunctionComponent } from 'react';
+import React from 'react';
 
 import { get } from 'lodash';
-import { NumericField, ToggleField, useFormData } from '../../../../../../shared_imports';
+import {
+  NumericField,
+  ToggleField,
+  useFormData,
+  useKibana,
+} from '../../../../../../shared_imports';
 
 import { useEditPolicyContext } from '../../../edit_policy_context';
 import { UseField, useGlobalFields } from '../../../form';
@@ -19,7 +25,6 @@ import { i18nTexts } from '../../../i18n_texts';
 import { LearnMoreLink, DescribedFormRow } from '../..';
 import { byteSizeUnits } from '../../../constants';
 import { UnitField } from './unit_field';
-import { useKibana } from '../../../../../../shared_imports';
 
 interface Props {
   phase: 'hot' | 'warm';

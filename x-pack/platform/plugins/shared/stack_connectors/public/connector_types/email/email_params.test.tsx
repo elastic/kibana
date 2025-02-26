@@ -11,9 +11,8 @@ import { render, fireEvent, screen, within } from '@testing-library/react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { triggersActionsUiMock } from '@kbn/triggers-actions-ui-plugin/public/mocks';
-import EmailParamsFields from './email_params';
+import EmailParamsFields, { getFormattedEmailOptions } from './email_params';
 import { getIsExperimentalFeatureEnabled } from '../../common/get_experimental_features';
-import { getFormattedEmailOptions } from './email_params';
 
 jest.mock('@kbn/kibana-react-plugin/public', () => ({
   useKibana: jest.fn(),

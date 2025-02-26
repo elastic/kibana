@@ -11,8 +11,7 @@ import { useState, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 
 import type { CoreStart } from '@kbn/core/public';
-import type { SavedQuery } from '@kbn/data-plugin/public';
-import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type { SavedQuery, DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { populateStateFromSavedQuery } from './populate_state_from_saved_query';
 import { clearStateFromSavedQuery } from './clear_saved_query';
 

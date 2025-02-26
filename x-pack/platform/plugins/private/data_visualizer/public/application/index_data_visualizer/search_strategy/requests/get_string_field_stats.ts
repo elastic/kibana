@@ -4,12 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { estypes } from '@elastic/elasticsearch';
 import { get } from 'lodash';
 import type { Observable } from 'rxjs';
-import { of } from 'rxjs';
-import { catchError, map } from 'rxjs';
-import type { AggregationsTermsAggregation } from '@elastic/elasticsearch/lib/api/types';
+import { of, catchError, map } from 'rxjs';
+import type {
+  AggregationsTermsAggregation,
+  SearchRequest,
+} from '@elastic/elasticsearch/lib/api/types';
 import type {
   IKibanaSearchResponse,
   IKibanaSearchRequest,
@@ -72,7 +73,7 @@ export const fetchStringFieldsStats = (
   fields: Field[],
   options: ISearchOptions
 ): Observable<StringFieldStats[] | FieldStatsError> => {
-  const request: estypes.SearchRequest = getStringFieldStatsRequest(params, fields);
+  const request: SearchRequest = getStringFieldStatsRequest(params, fields);
 
   return dataSearch
     .search<IKibanaSearchRequest, IKibanaSearchResponse>({ params: request }, options)

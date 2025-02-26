@@ -6,7 +6,7 @@
  */
 
 import { useKibana as _useKibana } from '@kbn/kibana-react-plugin/public';
-import { AppServicesContext } from './types';
+import type { AppServicesContext } from './types';
 
 export type {
   FormHook,

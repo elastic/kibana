@@ -7,19 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { firstValueFrom, of } from 'rxjs';
-import { first, skip, toArray } from 'rxjs';
+import { firstValueFrom, of, first, skip, toArray, Observable } from 'rxjs';
 import { TestScheduler } from 'rxjs/testing';
 import { loader, ExpressionLoader } from './loader';
-import { Observable } from 'rxjs';
-import {
-  parseExpression,
+import type {
   IInterpreterRenderHandlers,
   RenderMode,
   AnyExpressionFunctionDefinition,
   ExpressionsService,
   ExecutionContract,
 } from '../common';
+import { parseExpression } from '../common';
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const { __getLastExecution, __getLastRenderMode } = require('./services');

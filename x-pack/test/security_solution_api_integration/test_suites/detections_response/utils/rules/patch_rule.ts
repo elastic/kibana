@@ -9,7 +9,7 @@ import type { ToolingLog } from '@kbn/tooling-log';
 import type SuperTest from 'supertest';
 
 import { DETECTION_ENGINE_RULES_URL } from '@kbn/security-solution-plugin/common/constants';
-import {
+import type {
   RulePatchProps,
   RuleResponse,
 } from '@kbn/security-solution-plugin/common/api/detection_engine';

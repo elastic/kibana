@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import {
+import type {
   ActionsClientChatOpenAI,
   ActionsClientSimpleChatModel,
 } from '@kbn/langchain/server/language_models';
 import { FakeLLM } from '@langchain/core/utils/testing';
 import { getLogFormatDetectionGraph } from './graph';
-import { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
+import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 
 const model = new FakeLLM({
   response: '{"log_type": "structured"}',

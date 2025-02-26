@@ -5,8 +5,7 @@
  * 2.0.
  */
 import type { FC } from 'react';
-import { useMemo } from 'react';
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useMemo, useState, useEffect, useCallback } from 'react';
 
 import { i18n } from '@kbn/i18n';
 import type { Filter } from '@kbn/es-query';

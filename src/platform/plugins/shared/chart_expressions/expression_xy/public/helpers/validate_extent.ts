@@ -7,8 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { AxisExtentConfig } from '../../common';
-import { YScaleType } from '../../common';
+import type { AxisExtentConfig, YScaleType } from '../../common';
 
 /**
  * Returns true if the provided extent includes 0

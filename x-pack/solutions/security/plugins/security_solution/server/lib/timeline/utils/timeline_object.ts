@@ -5,12 +5,8 @@
  * 2.0.
  */
 
-import type { TimelineResponse } from '../../../../common/api/timeline';
-import {
-  type TimelineType,
-  TimelineTypeEnum,
-  TimelineStatusEnum,
-} from '../../../../common/api/timeline';
+import { TimelineTypeEnum, TimelineStatusEnum } from '../../../../common/api/timeline';
+import type { TimelineResponse, TimelineType } from '../../../../common/api/timeline';
 import type { FrameworkRequest } from '../../framework';
 import { getTimelineOrNull, getTimelineTemplateOrNull } from '../saved_object/timelines';
 

@@ -5,12 +5,10 @@
  * 2.0.
  */
 
-import { ApplicationStart } from '@kbn/core/public';
-import { HttpSetup } from '@kbn/core/public';
+import type { ApplicationStart, HttpSetup } from '@kbn/core/public';
 import { Section } from '../../../common/constants';
-import type { IndexDetailsTabId } from '../../../common/constants';
-import { ExtensionsService } from '../../services/extensions_service';
-import { IndexDetailsSection } from '../../../common/constants';
+import type { IndexDetailsTabId, IndexDetailsSection } from '../../../common/constants';
+import type { ExtensionsService } from '../../services/extensions_service';
 
 export const getTemplateListLink = () => `/templates`;
 

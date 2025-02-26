@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import React, { useState, FC } from 'react';
+import type { FC } from 'react';
+import React, { useState } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiButtonIcon, EuiPopover, EuiContextMenu } from '@elastic/eui';
 import { useCanvasShareableState } from '../../../context';
-import { Refs } from '../../../types';
+import type { Refs } from '../../../types';
 import { ToolbarSettings } from './toolbar_settings';
 import { AutoplaySettings } from './autoplay_settings';
 

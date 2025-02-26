@@ -5,8 +5,15 @@
  * 2.0.
  */
 
-import { EuiLink, EuiLoadingElastic } from '@elastic/eui';
-import { EuiBadge, EuiSpacer, EuiText, EuiTitle, EuiToolTip } from '@elastic/eui';
+import {
+  EuiLink,
+  EuiLoadingElastic,
+  EuiBadge,
+  EuiSpacer,
+  EuiText,
+  EuiTitle,
+  EuiToolTip,
+} from '@elastic/eui';
 import React from 'react';
 import type { APIReturnType } from '../../../services/rest/create_call_apm_api';
 import { useApmRouter } from '../../../hooks/use_apm_router';

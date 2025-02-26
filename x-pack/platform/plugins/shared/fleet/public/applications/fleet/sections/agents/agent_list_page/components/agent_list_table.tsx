@@ -5,8 +5,7 @@
  * 2.0.
  */
 import React, { useCallback, useMemo } from 'react';
-import type { EuiBasicTableColumn } from '@elastic/eui';
-import { type CriteriaWithPagination } from '@elastic/eui';
+import type { EuiBasicTableColumn, CriteriaWithPagination } from '@elastic/eui';
 import {
   EuiBasicTable,
   EuiFlexGroup,
@@ -24,8 +23,7 @@ import { isAgentUpgradeable } from '../../../../services';
 import { AgentHealth } from '../../components';
 
 import type { Pagination } from '../../../../hooks';
-import { useAgentVersion } from '../../../../hooks';
-import { useLink, useAuthz } from '../../../../hooks';
+import { useAgentVersion, useLink, useAuthz } from '../../../../hooks';
 
 import { AgentPolicySummaryLine } from '../../../../components';
 import { Tags } from '../../components/tags';

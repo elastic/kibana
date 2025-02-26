@@ -9,7 +9,7 @@ import React, { Component } from 'react';
 import { EuiButtonEmpty, EuiPopover, EuiRadioGroup } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { MapCenter, MapSettings } from '../../../../common/descriptor_types';
+import type { MapCenter, MapSettings } from '../../../../common/descriptor_types';
 import { DecimalDegreesForm } from './decimal_degrees_form';
 import { MgrsForm } from './mgrs_form';
 import { UtmForm } from './utm_form';

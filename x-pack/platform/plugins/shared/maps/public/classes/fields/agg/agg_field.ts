@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import { DataView } from '@kbn/data-plugin/common';
+import type { DataView } from '@kbn/data-plugin/common';
 import type {
   AggregationsExtendedStatsAggregation,
   AggregationsPercentilesAggregation,
   AggregationsTermsAggregation,
 } from '@elastic/elasticsearch/lib/api/types';
 import { AGG_TYPE } from '../../../../common/constants';
-import { TileMetaFeature } from '../../../../common/descriptor_types';
+import type { TileMetaFeature } from '../../../../common/descriptor_types';
 import { CountAggField } from './count_agg_field';
 import { isMetricCountable } from '../../util/is_metric_countable';
-import { CountAggFieldParams } from './agg_field_types';
+import type { CountAggFieldParams } from './agg_field_types';
 import { addFieldToDSL, getField } from '../../../../common/elasticsearch_util';
-import { IField } from '../field';
+import type { IField } from '../field';
 import { getAggRange } from '../../util/tile_meta_feature_utils';
 
 const TERMS_AGG_SHARD_SIZE = 5;

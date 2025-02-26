@@ -25,8 +25,10 @@ import {
 } from '@kbn/aiops-log-rate-analysis/state/log_rate_analysis_table_slice';
 import { setCurrentFieldFilterSkippedItems } from '@kbn/aiops-log-rate-analysis/state/log_rate_analysis_field_candidates_slice';
 
-import { ItemFilterPopover as FieldFilterPopover } from './item_filter_popover';
-import { ItemFilterPopover as ColumnFilterPopover } from './item_filter_popover';
+import {
+  ItemFilterPopover as FieldFilterPopover,
+  ItemFilterPopover as ColumnFilterPopover,
+} from './item_filter_popover';
 
 const groupResultsMessage = i18n.translate(
   'xpack.aiops.logRateAnalysis.resultsTable.groupedSwitchLabel.groupResults',

@@ -6,8 +6,8 @@
  */
 
 import type { DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
-import { LocatorDefinition } from '@kbn/share-plugin/common';
-import { LocatorClient } from '@kbn/share-plugin/common/url_service';
+import type { LocatorDefinition } from '@kbn/share-plugin/common';
+import type { LocatorClient } from '@kbn/share-plugin/common/url_service';
 import type { LogsDataAccessPluginStart } from '@kbn/logs-data-access-plugin/public';
 import type { DataViewSpec } from '@kbn/data-views-plugin/common';
 

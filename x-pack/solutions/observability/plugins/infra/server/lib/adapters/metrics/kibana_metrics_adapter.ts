@@ -9,12 +9,15 @@ import { i18n } from '@kbn/i18n';
 import type { KibanaRequest } from '@kbn/core/server';
 import { flatten, get } from 'lodash';
 import { isVisSeriesData } from '@kbn/vis-type-timeseries-plugin/server';
-import { metrics, findInventoryFields } from '@kbn/metrics-data-access-plugin/common';
+import {
+  metrics,
+  findInventoryFields,
+  InventoryMetricRT,
+} from '@kbn/metrics-data-access-plugin/common';
 import type {
   TSVBMetricModelCreator,
   InventoryMetric,
 } from '@kbn/metrics-data-access-plugin/common';
-import { InventoryMetricRT } from '@kbn/metrics-data-access-plugin/common';
 import { TIMESTAMP_FIELD } from '../../../../common/constants';
 import type { NodeDetailsMetricData } from '../../../../common/http_api/node_details_api';
 import type { KibanaFramework } from '../framework/kibana_framework_adapter';

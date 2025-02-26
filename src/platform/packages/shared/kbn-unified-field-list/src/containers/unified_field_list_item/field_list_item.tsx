@@ -10,14 +10,18 @@
 import React, { memo, useCallback, useMemo, useState } from 'react';
 import { EuiSpacer, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { UiCounterMetricType } from '@kbn/analytics';
+import type { UiCounterMetricType } from '@kbn/analytics';
 import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
 import { Draggable } from '@kbn/dom-drag-drop';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
-import { Filter } from '@kbn/es-query';
+import type { Filter } from '@kbn/es-query';
 import { fieldSupportsBreakdown } from '@kbn/field-utils';
 import { isESQLFieldGroupable } from '@kbn/esql-utils';
-import type { SearchMode } from '../../types';
+import type {
+  SearchMode,
+  UnifiedFieldListSidebarContainerStateService,
+  AddFieldFilterHandler,
+} from '../../types';
 import { FieldItemButton, type FieldItemButtonProps } from '../../components/field_item_button';
 import {
   FieldPopover,
@@ -30,10 +34,6 @@ import {
   UnifiedFieldListItemStats,
   type UnifiedFieldListItemStatsProps,
 } from './field_list_item_stats';
-import type {
-  UnifiedFieldListSidebarContainerStateService,
-  AddFieldFilterHandler,
-} from '../../types';
 import { canProvideStatsForEsqlField } from '../../utils/can_provide_stats';
 
 interface GetCommonFieldItemButtonPropsParams {

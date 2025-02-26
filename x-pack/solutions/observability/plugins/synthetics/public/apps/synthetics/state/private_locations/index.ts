@@ -6,10 +6,17 @@
  */
 
 import { createReducer } from '@reduxjs/toolkit';
-import { PrivateLocation, SyntheticsPrivateLocations } from '../../../../../common/runtime_types';
-import { createPrivateLocationAction, deletePrivateLocationAction } from './actions';
-import { setIsCreatePrivateLocationFlyoutVisible, getPrivateLocationsAction } from './actions';
-import { IHttpSerializedFetchError } from '../utils/http_error';
+import type {
+  PrivateLocation,
+  SyntheticsPrivateLocations,
+} from '../../../../../common/runtime_types';
+import {
+  createPrivateLocationAction,
+  deletePrivateLocationAction,
+  setIsCreatePrivateLocationFlyoutVisible,
+  getPrivateLocationsAction,
+} from './actions';
+import type { IHttpSerializedFetchError } from '../utils/http_error';
 
 export interface PrivateLocationsState {
   data?: SyntheticsPrivateLocations | null;

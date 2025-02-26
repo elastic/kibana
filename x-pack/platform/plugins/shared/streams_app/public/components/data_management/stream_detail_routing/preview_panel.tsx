@@ -14,14 +14,14 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { WiredStreamGetResponse } from '@kbn/streams-schema';
+import type { WiredStreamGetResponse } from '@kbn/streams-schema';
 import { css } from '@emotion/css';
 import React from 'react';
 import { useKibana } from '../../../hooks/use_kibana';
 import { useAsyncSample } from '../../../hooks/queries/use_async_sample';
 import { PreviewTable } from '../preview_table';
 import { StreamsAppSearchBar } from '../../streams_app_search_bar';
-import { useRoutingState } from './hooks/routing_state';
+import type { useRoutingState } from './hooks/routing_state';
 import { PreviewPanelIllustration } from './preview_panel_illustration';
 import { PreviewMatches } from './preview_matches';
 import { useDateRange } from '../../../hooks/use_date_range';

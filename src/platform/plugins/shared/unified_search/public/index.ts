@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { PluginInitializerContext } from '@kbn/core/public';
+import type { PluginInitializerContext } from '@kbn/core/public';
 import type { ConfigSchema } from '../server/config';
 export type { IndexPatternSelectProps } from './index_pattern_select';
 export type { QueryStringInputProps } from './query_string_input';

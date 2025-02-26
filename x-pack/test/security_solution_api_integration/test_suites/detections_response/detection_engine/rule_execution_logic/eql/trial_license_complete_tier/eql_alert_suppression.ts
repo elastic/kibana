@@ -10,7 +10,7 @@ import { v4 as uuidv4 } from 'uuid';
 import sortBy from 'lodash/sortBy';
 import partition from 'lodash/partition';
 
-import {
+import type {
   DetectionAlert,
   EqlRuleCreateProps,
 } from '@kbn/security-solution-plugin/common/api/detection_engine';
@@ -27,8 +27,8 @@ import { DETECTION_ENGINE_SIGNALS_STATUS_URL as DETECTION_ENGINE_ALERTS_STATUS_U
 import { getSuppressionMaxSignalsWarning as getSuppressionMaxAlertsWarning } from '@kbn/security-solution-plugin/server/lib/detection_engine/rule_types/utils/utils';
 import { RuleExecutionStatusEnum } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_monitoring';
 import { ALERT_ORIGINAL_TIME } from '@kbn/security-solution-plugin/common/field_maps/field_names';
-import { RiskEnrichmentFields } from '@kbn/security-solution-plugin/server/lib/detection_engine/rule_types/utils/enrichments/types';
-import { SearchHit } from '@elastic/elasticsearch/lib/api/types';
+import type { RiskEnrichmentFields } from '@kbn/security-solution-plugin/server/lib/detection_engine/rule_types/utils/enrichments/types';
+import type { SearchHit } from '@elastic/elasticsearch/lib/api/types';
 import {
   createRule,
   deleteAllRules,
@@ -46,7 +46,7 @@ import {
   fetchRule,
   previewRuleWithExceptionEntries,
 } from '../../../../utils';
-import { FtrProviderContext } from '../../../../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../../../../ftr_provider_context';
 import { deleteAllExceptions } from '../../../../../lists_and_exception_lists/utils';
 
 const getQuery = (id: string) => `any where id == "${id}"`;

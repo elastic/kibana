@@ -15,7 +15,7 @@ import {
   EuiSpacer,
   EuiTitle,
 } from '@elastic/eui';
-import { DocLinksStart } from '@kbn/core-doc-links-browser';
+import type { DocLinksStart } from '@kbn/core-doc-links-browser';
 import './empty_connectors_prompt.scss';
 
 export const EmptyConnectorsPrompt = ({

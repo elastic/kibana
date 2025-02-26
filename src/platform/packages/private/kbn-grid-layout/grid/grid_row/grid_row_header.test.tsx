@@ -10,13 +10,16 @@ import { cloneDeep } from 'lodash';
 import React from 'react';
 
 import { EuiThemeProvider } from '@elastic/eui';
-import { RenderResult, act, render, waitFor } from '@testing-library/react';
+import type { RenderResult } from '@testing-library/react';
+import { act, render, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
 import { getGridLayoutStateManagerMock, mockRenderPanelContents } from '../test_utils/mocks';
-import { GridLayoutStateManager } from '../types';
-import { GridRowHeader, GridRowHeaderProps } from './grid_row_header';
-import { GridLayoutContext, GridLayoutContextType } from '../use_grid_layout_context';
+import type { GridLayoutStateManager } from '../types';
+import type { GridRowHeaderProps } from './grid_row_header';
+import { GridRowHeader } from './grid_row_header';
+import type { GridLayoutContextType } from '../use_grid_layout_context';
+import { GridLayoutContext } from '../use_grid_layout_context';
 
 const toggleIsCollapsed = jest
   .fn()

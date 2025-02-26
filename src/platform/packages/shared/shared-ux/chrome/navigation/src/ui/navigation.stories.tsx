@@ -7,14 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ComponentMeta } from '@storybook/react';
-import React, { EventHandler, FC, MouseEvent, useState, useEffect } from 'react';
+import type { ComponentMeta } from '@storybook/react';
+import type { EventHandler, FC, MouseEvent } from 'react';
+import React, { useState, useEffect } from 'react';
 import { of } from 'rxjs';
 
+import type { EuiCollapsibleNavBetaProps } from '@elastic/eui';
 import {
   EuiButton,
   EuiCollapsibleNavBeta,
-  EuiCollapsibleNavBetaProps,
   EuiHeader,
   EuiHeaderSection,
   EuiPageTemplate,

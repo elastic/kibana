@@ -6,7 +6,7 @@
  */
 
 import { appStateToSavedWorkspace } from './serialize';
-import {
+import type {
   GraphWorkspaceSavedObject,
   Workspace,
   WorkspaceEdge,
@@ -15,7 +15,7 @@ import {
   WorkspaceField,
 } from '../../types';
 import { outlinkEncoders } from '../../helpers/outlink_encoders';
-import { IndexpatternDatasource } from '../../state_management';
+import type { IndexpatternDatasource } from '../../state_management';
 
 describe('serialize', () => {
   let appState: {

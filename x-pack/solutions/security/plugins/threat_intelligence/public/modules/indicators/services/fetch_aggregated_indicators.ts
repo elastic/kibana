@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { EuiComboBoxOptionOption } from '@elastic/eui';
-import { TimeRangeBounds } from '@kbn/data-plugin/common';
+import type { EuiComboBoxOptionOption } from '@elastic/eui';
+import type { TimeRangeBounds } from '@kbn/data-plugin/common';
 import type { ISearchStart, QueryStart } from '@kbn/data-plugin/public';
 import type { Filter, Query, TimeRange } from '@kbn/es-query';
-import { RequestAdapter } from '@kbn/inspector-plugin/common';
+import type { RequestAdapter } from '@kbn/inspector-plugin/common';
 import moment from 'moment';
 import { BARCHART_AGGREGATION_NAME, FactoryQueryType } from '../../../../common/constants';
 import { RawIndicatorFieldId } from '../../../../common/types/indicator';

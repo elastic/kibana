@@ -9,10 +9,9 @@ import React, { useState, useEffect } from 'react';
 
 import { useValues, useActions } from 'kea';
 
+import type { EuiComboBoxProps, EuiComboBoxOptionOption } from '@elastic/eui';
 import {
   EuiComboBox,
-  EuiComboBoxProps,
-  EuiComboBoxOptionOption,
   EuiFlexGroup,
   EuiFlexItem,
   EuiHealth,
@@ -24,7 +23,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedNumber } from '@kbn/i18n-react';
 
 import { Status } from '../../../../../../common/types/api';
-import { ElasticsearchIndexWithIngestion } from '../../../../../../common/types/indices';
+import type { ElasticsearchIndexWithIngestion } from '../../../../../../common/types/indices';
 
 import { indexHealthToHealthColor } from '../../../../shared/constants/health_colors';
 import { FetchIndicesForSearchApplicationsAPILogic } from '../../../api/search_applications/fetch_indices_api_logic';

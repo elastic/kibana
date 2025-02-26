@@ -9,8 +9,7 @@ import { EuiButtonGroup, EuiCodeBlock, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useMemo, useState } from 'react';
 
-import type { PLATFORMS_FOR_UNINSTALL } from './types';
-import type { Commands } from './types';
+import type { PLATFORMS_FOR_UNINSTALL, Commands } from './types';
 
 const generateUninstallCommands = (token: string) => ({
   linuxOrMac: `sudo elastic-agent uninstall --uninstall-token ${token}`,

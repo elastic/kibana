@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { apm, timerange, ApmFields } from '@kbn/apm-synthtrace-client';
+import type { ApmFields } from '@kbn/apm-synthtrace-client';
+import { apm, timerange } from '@kbn/apm-synthtrace-client';
 import { sortBy } from 'lodash';
 import { Readable } from 'stream';
 import { createTransactionMetricsAggregator } from '../../lib/apm/aggregators/create_transaction_metrics_aggregator';

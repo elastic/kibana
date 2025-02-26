@@ -10,7 +10,7 @@ import {
   getExternalServiceSimulatorPath,
   ExternalServiceSimulator,
 } from '@kbn/actions-simulators-plugin/server/plugin';
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default ({ getPageObject, getService }: FtrProviderContext) => {
   const cases = getService('cases');

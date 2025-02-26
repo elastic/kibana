@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-import React, { ComponentProps, useMemo } from 'react';
+import type { ComponentProps } from 'react';
+import React, { useMemo } from 'react';
 import { EuiFlyoutFooter, EuiFlexGroup, EuiFlexItem, EuiButton } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useRouteMatch } from 'react-router-dom';
 import { SLO_ALERTS_TABLE_ID } from '@kbn/observability-shared-plugin/common';
 import { parseAlert } from '../../pages/alerts/helpers/parse_alert';
-import { GetObservabilityAlertsTableProp } from '../alerts_table/types';
+import type { GetObservabilityAlertsTableProp } from '../alerts_table/types';
 import { useKibana } from '../../utils/kibana_react';
 import { paths, SLO_DETAIL_PATH } from '../../../common/locators/paths';
 

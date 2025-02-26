@@ -23,8 +23,7 @@ import { getNestedProperty } from '@kbn/ml-nested-property';
 import { decode, encode } from '@kbn/rison';
 
 import type { Observable } from 'rxjs';
-import { BehaviorSubject } from 'rxjs';
-import { distinctUntilChanged } from 'rxjs';
+import { BehaviorSubject, distinctUntilChanged } from 'rxjs';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import useDeepCompareEffect from 'react-use/lib/useDeepCompareEffect';
 

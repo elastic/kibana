@@ -49,7 +49,8 @@ import type { IndexNotGreenTimeout, IndexNotYellowTimeout } from './wait_for_ind
 import { waitForIndexStatus } from './wait_for_index_status';
 
 export type { WaitForTaskResponse, WaitForTaskCompletionTimeout } from './wait_for_task';
-import { waitForTask, WaitForTaskCompletionTimeout } from './wait_for_task';
+import type { WaitForTaskCompletionTimeout } from './wait_for_task';
+import { waitForTask } from './wait_for_task';
 
 export type { UpdateByQueryResponse } from './pickup_updated_mappings';
 import { pickupUpdatedMappings } from './pickup_updated_mappings';

@@ -15,8 +15,8 @@ import type {
   IUiSettingsClient,
   ThemeServiceStart,
   UserProfileService,
+  HttpStart,
 } from '@kbn/core/public';
-import type { HttpStart } from '@kbn/core/public';
 
 /**
  * Date Picker Dependencies to be passed on via `DatePickerContextProvider`.

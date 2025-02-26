@@ -9,6 +9,18 @@
 
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { css } from '@emotion/react';
+import type {
+  ElementClickListener,
+  BrushEndListener,
+  XYBrushEvent,
+  LegendPositionConfig,
+  DisplayValueStyle,
+  RecursivePartial,
+  AxisStyle,
+  XYChartElementEvent,
+  XYChartSeriesIdentifier,
+  SettingsProps,
+} from '@elastic/charts';
 import {
   Chart,
   Settings,
@@ -17,34 +29,24 @@ import {
   VerticalAlignment,
   HorizontalAlignment,
   LayoutDirection,
-  ElementClickListener,
-  BrushEndListener,
-  XYBrushEvent,
-  LegendPositionConfig,
-  DisplayValueStyle,
-  RecursivePartial,
-  AxisStyle,
   TooltipType,
   Placement,
   Direction,
-  XYChartElementEvent,
   Tooltip,
-  XYChartSeriesIdentifier,
-  SettingsProps,
   LEGACY_LIGHT_THEME,
 } from '@elastic/charts';
 import { partition } from 'lodash';
-import { IconType } from '@elastic/eui';
+import type { IconType } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { PaletteRegistry } from '@kbn/coloring';
-import { RenderMode } from '@kbn/expressions-plugin/common';
+import type { PaletteRegistry } from '@kbn/coloring';
+import type { RenderMode } from '@kbn/expressions-plugin/common';
 import { useKbnPalettes } from '@kbn/palettes';
 import { ESQL_TABLE_TYPE } from '@kbn/data-plugin/common';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import { EmptyPlaceholder, LegendToggle } from '@kbn/charts-plugin/public';
-import { EventAnnotationServiceType } from '@kbn/event-annotation-plugin/public';
-import { PointEventAnnotationRow } from '@kbn/event-annotation-plugin/common';
-import { ChartsPluginSetup, ChartsPluginStart, useActiveCursor } from '@kbn/charts-plugin/public';
+import { EmptyPlaceholder, LegendToggle, useActiveCursor } from '@kbn/charts-plugin/public';
+import type { EventAnnotationServiceType } from '@kbn/event-annotation-plugin/public';
+import type { PointEventAnnotationRow } from '@kbn/event-annotation-plugin/common';
+import type { ChartsPluginSetup, ChartsPluginStart } from '@kbn/charts-plugin/public';
 import { MULTILAYER_TIME_AXIS_STYLE } from '@kbn/charts-plugin/common';
 import {
   getAccessorByDimension,
@@ -54,8 +56,9 @@ import {
   DEFAULT_LEGEND_SIZE,
   LegendSizeToPixels,
 } from '@kbn/visualizations-plugin/common/constants';
-import { PersistedState } from '@kbn/visualizations-plugin/public';
-import { getOverridesFor, ChartSizeSpec } from '@kbn/chart-expressions-common';
+import type { PersistedState } from '@kbn/visualizations-plugin/public';
+import type { ChartSizeSpec } from '@kbn/chart-expressions-common';
+import { getOverridesFor } from '@kbn/chart-expressions-common';
 import { useAppFixedViewport } from '@kbn/core-rendering-browser';
 import type {
   FilterEvent,
@@ -71,11 +74,12 @@ import type {
   ExtendedReferenceLineDecorationConfig,
   XYChartProps,
   AxisExtentConfigResult,
+  CommonXYLayerConfig,
 } from '../../common/types';
+import type { AxisConfiguration, GroupsConfiguration, Series } from '../helpers';
 import {
   isHorizontalChart,
   getDataLayers,
-  AxisConfiguration,
   getAxisPosition,
   getFormattedTablesByLayers,
   getLayersFormats,
@@ -85,10 +89,8 @@ import {
   getReferenceLayers,
   isDataLayer,
   getAxesConfiguration,
-  GroupsConfiguration,
   getLinesCausedPaddings,
   validateExtent,
-  Series,
   getOriginalAxisPosition,
 } from '../helpers';
 import { getXDomain, XyEndzones } from './x_domain';
@@ -100,7 +102,6 @@ import {
   getReferenceLinesFormattersMap,
 } from './reference_lines';
 import { visualizationDefinitions } from '../definitions';
-import { CommonXYLayerConfig } from '../../common/types';
 import { SplitChart } from './split_chart';
 import {
   Annotations,
@@ -111,11 +112,10 @@ import {
 } from './annotations';
 import { AxisExtentModes, SeriesTypes, ValueLabelModes, XScaleTypes } from '../../common/constants';
 import { DataLayers } from './data_layers';
-import { Tooltip as CustomTooltip } from './tooltip';
+import { Tooltip as CustomTooltip, TooltipHeader } from './tooltip';
 import { XYCurrentTime } from './xy_current_time';
 
 import './xy_chart.scss';
-import { TooltipHeader } from './tooltip';
 import { LegendColorPickerWrapperContext, LegendColorPickerWrapper } from './legend_color_picker';
 import { createSplitPoint, getTooltipActions, getXSeriesPoint } from './tooltip/tooltip_actions';
 

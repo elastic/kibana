@@ -19,8 +19,8 @@ import { i18n } from '@kbn/i18n';
 import moment from 'moment';
 import React, { useMemo } from 'react';
 import { css } from '@emotion/css';
+import type { IngestStreamGetResponse } from '@kbn/streams-schema';
 import {
-  IngestStreamGetResponse,
   isDescendantOf,
   isUnwiredStreamGetResponse,
   isWiredStreamDefinition,

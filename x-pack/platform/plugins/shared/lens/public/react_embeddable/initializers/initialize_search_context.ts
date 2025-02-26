@@ -5,20 +5,14 @@
  * 2.0.
  */
 
-import { Filter, Query, AggregateQuery } from '@kbn/es-query';
-import {
-  PublishesUnifiedSearch,
-  StateComparators,
-  getUnchangingComparator,
-  initializeTimeRange,
-} from '@kbn/presentation-publishing';
+import type { Filter, Query, AggregateQuery } from '@kbn/es-query';
+import type { PublishesUnifiedSearch, StateComparators } from '@kbn/presentation-publishing';
+import { getUnchangingComparator, initializeTimeRange } from '@kbn/presentation-publishing';
 import { noop } from 'lodash';
-import {
-  PublishesSearchSession,
-  apiPublishesSearchSession,
-} from '@kbn/presentation-publishing/interfaces/fetch/publishes_search_session';
+import type { PublishesSearchSession } from '@kbn/presentation-publishing/interfaces/fetch/publishes_search_session';
+import { apiPublishesSearchSession } from '@kbn/presentation-publishing/interfaces/fetch/publishes_search_session';
 import { buildObservableVariable } from '../helper';
-import {
+import type {
   LensEmbeddableStartServices,
   LensInternalApi,
   LensRuntimeState,

@@ -5,10 +5,9 @@
  * 2.0.
  */
 
-import { EuiCallOut, useEuiTheme } from '@elastic/eui';
+import { EuiCallOut, useEuiTheme, EuiButton } from '@elastic/eui';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiButton } from '@elastic/eui';
 import { getRouterLinkProps } from '@kbn/router-utils';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 import { css } from '@emotion/react';

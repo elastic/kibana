@@ -9,7 +9,7 @@
 
 import fastGlob from 'fast-glob';
 import path from 'path';
-import { ToolingLog } from '@kbn/tooling-log';
+import type { ToolingLog } from '@kbn/tooling-log';
 
 export const DEFAULT_TEST_PATH_PATTERNS = ['src/platform/plugins', 'x-pack/**/plugins'];
 

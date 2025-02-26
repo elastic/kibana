@@ -5,8 +5,10 @@
  * 2.0.
  */
 
-import type { MetricsUIAggregation } from '@kbn/metrics-data-access-plugin/common';
-import type { MetricsAPIRequest } from '@kbn/metrics-data-access-plugin/common';
+import type {
+  MetricsUIAggregation,
+  MetricsAPIRequest,
+} from '@kbn/metrics-data-access-plugin/common';
 
 export const createMetricsAggregations = (options: MetricsAPIRequest): MetricsUIAggregation => {
   const { metrics } = options;

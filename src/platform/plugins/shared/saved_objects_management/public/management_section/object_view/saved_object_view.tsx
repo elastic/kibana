@@ -12,7 +12,7 @@ import { i18n } from '@kbn/i18n';
 import { EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
 import { get } from 'lodash';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import {
+import type {
   Capabilities,
   OverlayStart,
   NotificationsStart,
@@ -25,7 +25,7 @@ import {
 import type { SettingsStart } from '@kbn/core-ui-settings-browser';
 import { Header, Inspect, NotFoundErrors } from './components';
 import { bulkDeleteObjects, bulkGetObjects } from '../../lib';
-import { SavedObjectWithMetadata } from '../../types';
+import type { SavedObjectWithMetadata } from '../../types';
 import './saved_object_view.scss';
 
 export interface SavedObjectEditionProps {

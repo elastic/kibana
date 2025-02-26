@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { ContentReference } from '../../schemas';
-import { ContentReferenceBlock, ContentReferenceId } from '../types';
+import type { ContentReference } from '../../schemas';
+import type { ContentReferenceBlock, ContentReferenceId } from '../types';
 
 /**
  * Returns "Arid2" from "{reference(Arid2)}"

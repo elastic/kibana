@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { FtrProviderContext } from '@kbn/ftr-common-functional-services';
+import type { FtrProviderContext } from '@kbn/ftr-common-functional-services';
 
 export const elasticAssetCheckerFactory = (getService: FtrProviderContext['getService']) => {
   const es = getService('es');

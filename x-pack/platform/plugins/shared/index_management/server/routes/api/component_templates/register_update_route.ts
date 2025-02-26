@@ -8,7 +8,7 @@
 import { schema } from '@kbn/config-schema';
 import type { estypes } from '@elastic/elasticsearch';
 
-import { RouteDependencies } from '../../../types';
+import type { RouteDependencies } from '../../../types';
 import { addBasePath } from '..';
 import { componentTemplateSchema } from './schema_validation';
 

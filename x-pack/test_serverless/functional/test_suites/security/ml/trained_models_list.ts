@@ -6,7 +6,7 @@
  */
 import { SUPPORTED_TRAINED_MODELS } from '@kbn/test-suites-xpack/functional/services/ml/api';
 import { ServerlessRoleName } from '../../../../shared/lib';
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const ml = getService('ml');

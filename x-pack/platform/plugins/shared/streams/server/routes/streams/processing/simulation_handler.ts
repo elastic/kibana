@@ -8,8 +8,7 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 
 import { errors as esErrors } from '@elastic/elasticsearch';
-import {
-  IngestDocument,
+import type {
   IngestProcessorContainer,
   IngestSimulateRequest,
   IngestPipelineConfig,
@@ -17,22 +16,25 @@ import {
   ErrorCauseKeys,
   IngestPipelineSimulation,
   IngestSimulateDocumentResult,
+  IngestDocument,
 } from '@elastic/elasticsearch/lib/api/types';
-import { IScopedClusterClient } from '@kbn/core/server';
+import type { IScopedClusterClient } from '@kbn/core/server';
 import { flattenObjectNestedLast, calculateObjectDiff } from '@kbn/object-utils';
-import {
+import type {
   FlattenRecord,
   ProcessorDefinitionWithId,
-  getProcessorType,
   ProcessorDefinition,
-  isWiredStreamDefinition,
-  getInheritedFieldsFromAncestors,
   NamedFieldDefinitionConfig,
   FieldDefinitionConfig,
   InheritedFieldDefinitionConfig,
 } from '@kbn/streams-schema';
+import {
+  getProcessorType,
+  isWiredStreamDefinition,
+  getInheritedFieldsFromAncestors,
+} from '@kbn/streams-schema';
 import { mapValues, uniq, omit, isEmpty, uniqBy, some } from 'lodash';
-import { StreamsClient } from '../../../lib/streams/client';
+import type { StreamsClient } from '../../../lib/streams/client';
 import { DetectedMappingFailureError } from '../../../lib/streams/errors/detected_mapping_failure_error';
 import { formatToIngestProcessors } from '../../../lib/streams/helpers/processing';
 

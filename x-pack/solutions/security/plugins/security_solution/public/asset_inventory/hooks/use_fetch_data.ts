@@ -8,7 +8,7 @@
 import { useInfiniteQuery } from '@tanstack/react-query';
 import { lastValueFrom } from 'rxjs';
 import { number } from 'io-ts';
-import type * as estypes from '@elastic/elasticsearch/lib/api/types';
+import type { estypes } from '@elastic/elasticsearch';
 import { buildDataTableRecord } from '@kbn/discover-utils';
 import type { EsHitRecord } from '@kbn/discover-utils/types';
 import type { RuntimePrimitiveTypes } from '@kbn/data-views-plugin/common';

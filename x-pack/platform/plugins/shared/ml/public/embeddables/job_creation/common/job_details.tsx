@@ -33,8 +33,10 @@ import { extractErrorMessage } from '@kbn/ml-error-utils';
 import type { TimeRange } from '@kbn/es-query';
 import { JOB_ID_MAX_LENGTH } from '@kbn/ml-validators';
 
-import type { QuickLensJobCreator } from '../../../application/jobs/new_job/job_from_lens';
-import type { LayerResult } from '../../../application/jobs/new_job/job_from_lens';
+import type {
+  QuickLensJobCreator,
+  LayerResult,
+} from '../../../application/jobs/new_job/job_from_lens';
 import type { CreateState } from '../../../application/jobs/new_job/job_from_dashboard';
 import { JOB_TYPE, DEFAULT_BUCKET_SPAN } from '../../../../common/constants/new_job';
 import { basicJobValidation } from '../../../../common/util/job_utils';

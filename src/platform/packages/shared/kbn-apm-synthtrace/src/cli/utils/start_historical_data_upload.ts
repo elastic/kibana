@@ -14,8 +14,8 @@ import Path from 'path';
 import { Worker } from 'worker_threads';
 import { LogLevel } from '../../..';
 import { bootstrap } from './bootstrap';
-import { RunOptions } from './parse_run_cli_flags';
-import { WorkerData } from './synthtrace_worker';
+import type { RunOptions } from './parse_run_cli_flags';
+import type { WorkerData } from './synthtrace_worker';
 
 export async function startHistoricalDataUpload({
   runOptions,

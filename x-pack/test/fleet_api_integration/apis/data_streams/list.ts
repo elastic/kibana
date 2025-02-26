@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 import { keyBy } from 'lodash';
-import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
+import type { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { skipIfNoDockerRegistry } from '../../helpers';
 
 interface IndexResponse {

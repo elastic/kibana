@@ -41,15 +41,13 @@ import type {
   NavigationTreeDefinition,
   AppDeepLinkId,
   SolutionId,
-} from '@kbn/core-chrome-browser';
-import type { CustomBrandingStart } from '@kbn/core-custom-branding-browser';
-import type {
   SideNavComponent as ISideNavComponent,
   ChromeHelpMenuLink,
 } from '@kbn/core-chrome-browser';
+import type { CustomBrandingStart } from '@kbn/core-custom-branding-browser';
 import { RecentlyAccessedService } from '@kbn/recently-accessed';
 
-import { Logger } from '@kbn/logging';
+import type { Logger } from '@kbn/logging';
 import { DocTitleService } from './doc_title';
 import { NavControlsService } from './nav_controls';
 import { NavLinksService } from './nav_links';

@@ -9,7 +9,7 @@ import {
   BENCHMARK_SCORE_INDEX_DEFAULT_NS,
   LATEST_FINDINGS_INDEX_DEFAULT_NS,
 } from '@kbn/cloud-security-posture-plugin/common/constants';
-import {
+import type {
   BenchmarkData,
   Cluster,
   ComplianceDashboardData,
@@ -17,7 +17,7 @@ import {
   PostureTrend,
 } from '@kbn/cloud-security-posture-plugin/common/types_old';
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../ftr_provider_context';
+import type { FtrProviderContext } from '../ftr_provider_context';
 import {
   getBenchmarkScoreMockData,
   kspmComplianceDashboardDataMockV1,

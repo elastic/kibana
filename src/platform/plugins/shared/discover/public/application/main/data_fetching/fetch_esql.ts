@@ -7,14 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { pluck } from 'rxjs';
-import { lastValueFrom } from 'rxjs';
+import { pluck, lastValueFrom } from 'rxjs';
 import { i18n } from '@kbn/i18n';
-import { Query, AggregateQuery, Filter, TimeRange } from '@kbn/es-query';
+import type { Query, AggregateQuery, Filter, TimeRange } from '@kbn/es-query';
 import type { Adapters } from '@kbn/inspector-plugin/common';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
-import type { Datatable } from '@kbn/expressions-plugin/public';
+import type { ExpressionsStart, Datatable } from '@kbn/expressions-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { textBasedQueryStateToAstWithValidation } from '@kbn/data-plugin/common';
 import type { DataTableRecord } from '@kbn/discover-utils';

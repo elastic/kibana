@@ -6,7 +6,7 @@
  */
 
 import { mockAuthenticatedUser } from '@kbn/core-security-common/mocks';
-import { ComponentMeta, ComponentStoryObj } from '@storybook/react';
+import type { ComponentMeta, ComponentStoryObj } from '@storybook/react';
 import React from 'react';
 import { KibanaReactStorybookDecorator } from '../../../../../.storybook/storybook_decorator';
 import { InvestigationDetails as Component } from './investigation_details';

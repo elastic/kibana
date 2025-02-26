@@ -8,9 +8,8 @@
  */
 
 import React from 'react';
-import { EuiProvider } from '@elastic/eui';
+import { EuiProvider, EuiPageSidebar } from '@elastic/eui';
 import { BehaviorSubject, of } from 'rxjs';
-import { EuiPageSidebar } from '@elastic/eui';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import type { Query, AggregateQuery } from '@kbn/es-query';
 import { DiscoverLayout } from './discover_layout';
@@ -22,7 +21,7 @@ import {
 } from '@kbn/data-plugin/common/search/search_source/mocks';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { dataViewWithTimefieldMock } from '../../../../__mocks__/data_view_with_timefield';
-import {
+import type {
   DataDocuments$,
   DataMain$,
   DataTotalHits$,

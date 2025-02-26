@@ -11,7 +11,8 @@
 
 import moment from 'moment';
 import userEvent from '@testing-library/user-event';
-import { screen, within, fireEvent, Screen } from '@testing-library/react';
+import type { Screen } from '@testing-library/react';
+import { screen, within, fireEvent } from '@testing-library/react';
 
 export const getSelectedButtonInGroup =
   (testId: string, container: Screen | ReturnType<typeof within> = screen) =>

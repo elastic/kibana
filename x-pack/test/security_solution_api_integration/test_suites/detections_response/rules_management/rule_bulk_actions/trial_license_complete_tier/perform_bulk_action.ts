@@ -20,7 +20,7 @@ import { getCreateExceptionListDetectionSchemaMock } from '@kbn/lists-plugin/com
 import { EXCEPTION_LIST_ITEM_URL, EXCEPTION_LIST_URL } from '@kbn/securitysolution-list-constants';
 import { getCreateExceptionListItemMinimalSchemaMock } from '@kbn/lists-plugin/common/schemas/request/create_exception_list_item_schema.mock';
 import { AuthType } from '@kbn/stack-connectors-plugin/common/auth/constants';
-import { BaseDefaultableFields } from '@kbn/security-solution-plugin/common/api/detection_engine';
+import type { BaseDefaultableFields } from '@kbn/security-solution-plugin/common/api/detection_engine';
 import moment from 'moment';
 import {
   binaryToString,
@@ -37,7 +37,7 @@ import {
 import { createRule, deleteAllRules } from '../../../../../../common/utils/security_solution';
 import { deleteAllExceptions } from '../../../../lists_and_exception_lists/utils';
 
-import { FtrProviderContext } from '../../../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../../../ftr_provider_context';
 
 export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');

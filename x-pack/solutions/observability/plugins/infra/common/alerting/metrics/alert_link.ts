@@ -12,10 +12,10 @@ import type { ParsedTechnicalFields } from '@kbn/rule-registry-plugin/common/par
 import { type InventoryItemType, findInventoryModel } from '@kbn/metrics-data-access-plugin/common';
 import type { LocatorPublic } from '@kbn/share-plugin/common';
 import { SupportedAssetTypes } from '@kbn/observability-shared-plugin/common';
-import type { MetricsExplorerLocatorParams } from '@kbn/observability-shared-plugin/common';
-import {
-  type AssetDetailsLocatorParams,
-  type InventoryLocatorParams,
+import type {
+  MetricsExplorerLocatorParams,
+  AssetDetailsLocatorParams,
+  InventoryLocatorParams,
 } from '@kbn/observability-shared-plugin/common';
 import { castArray } from 'lodash';
 import { fifteenMinutesInMilliseconds } from '../../constants';

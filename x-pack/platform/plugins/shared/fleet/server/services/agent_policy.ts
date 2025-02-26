@@ -47,6 +47,8 @@ import {
   FLEET_AGENT_POLICIES_SCHEMA_VERSION,
   PRECONFIGURATION_DELETION_RECORD_SAVED_OBJECT_TYPE,
   SO_SEARCH_LIMIT,
+  MAX_CONCURRENT_AGENT_POLICIES_OPERATIONS,
+  MAX_CONCURRENT_AGENT_POLICIES_OPERATIONS_20,
 } from '../constants';
 import type {
   AgentPolicy,
@@ -94,11 +96,6 @@ import {
 import type { FullAgentConfigMap } from '../../common/types/models/agent_cm';
 
 import { fullAgentConfigMapToYaml } from '../../common/services/agent_cm_to_yaml';
-
-import {
-  MAX_CONCURRENT_AGENT_POLICIES_OPERATIONS,
-  MAX_CONCURRENT_AGENT_POLICIES_OPERATIONS_20,
-} from '../constants';
 
 import { appContextService } from '.';
 

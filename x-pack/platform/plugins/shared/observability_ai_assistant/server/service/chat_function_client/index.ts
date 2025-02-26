@@ -9,7 +9,7 @@
 import Ajv, { type ErrorObject, type ValidateFunction } from 'ajv';
 import dedent from 'dedent';
 import { compact, keyBy } from 'lodash';
-import { Logger } from '@kbn/logging';
+import type { Logger } from '@kbn/logging';
 import { FunctionVisibility, type FunctionResponse } from '../../../common/functions/types';
 import type {
   AdHocInstruction,

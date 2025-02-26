@@ -5,10 +5,8 @@
  * 2.0.
  */
 
-import { IScopedClusterClient } from '@kbn/core/server';
-import { SyncJobType } from '@kbn/search-connectors';
-
-import { fetchConnectorById, startConnectorSync } from '@kbn/search-connectors';
+import type { IScopedClusterClient } from '@kbn/core/server';
+import { SyncJobType, fetchConnectorById, startConnectorSync } from '@kbn/search-connectors';
 
 import { ErrorCode } from '../../../common/types/error_codes';
 

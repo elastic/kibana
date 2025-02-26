@@ -20,16 +20,15 @@ import type {
   IoTsParamsObject,
   ServerRouteRepository,
 } from '@kbn/server-route-repository';
-import { stripNullishRequestParameters } from '@kbn/server-route-repository';
-import { merge } from 'lodash';
 import {
+  stripNullishRequestParameters,
   decodeRequestParams,
   parseEndpoint,
   passThroughValidationObject,
 } from '@kbn/server-route-repository';
+import { merge } from 'lodash';
 import { jsonRt, mergeRt } from '@kbn/io-ts-utils';
 import type { InspectResponse } from '@kbn/observability-plugin/typings/common';
-import apm from 'elastic-apm-node';
 import type { VersionedRouteRegistrar } from '@kbn/core-http-server';
 import type { IRuleDataClient } from '@kbn/rule-registry-plugin/server';
 import type { APMIndices } from '@kbn/apm-data-access-plugin/server';
@@ -39,8 +38,8 @@ import type {
   APMRouteCreateOptions,
   MinimalApmPluginRequestHandlerContext,
   TelemetryUsageCounter,
+  ApmPluginRequestHandlerContext,
 } from '../typings';
-import type { ApmPluginRequestHandlerContext } from '../typings';
 import type { APMConfig } from '../..';
 import type { APMPluginSetupDependencies, APMPluginStartDependencies } from '../../types';
 
@@ -214,7 +213,7 @@ export function registerRoutes({
         }
 
         // capture error with APM node agent
-        apm.captureError(error);
+        agent.captureError(error);
 
         return response.custom(opts);
       } finally {

@@ -16,13 +16,13 @@ import {
   EuiPanel,
   EuiFlexGrid,
   EuiSpacer,
+  useEuiTheme,
 } from '@elastic/eui';
 import { useChartThemes } from '@kbn/observability-shared-plugin/public';
 import type { Datum } from '@elastic/charts';
 import { Chart, Partition, Settings, PartitionLayout } from '@elastic/charts';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
-import { useEuiTheme } from '@elastic/eui';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import type { IndexLifecyclePhaseSelectOption } from '../../../../../common/storage_explorer_types';
 import { useApmParams } from '../../../../hooks/use_apm_params';

@@ -5,10 +5,7 @@
  * 2.0.
  */
 
-import { EuiFlexGroup } from '@elastic/eui';
-import { EuiFlexItem } from '@elastic/eui';
-import { EuiLoadingSpinner } from '@elastic/eui';
-import { EuiCard } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiCard } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 

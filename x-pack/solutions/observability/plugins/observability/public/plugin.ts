@@ -5,34 +5,35 @@
  * 2.0.
  */
 
-import { CasesDeepLinkId, CasesPublicStart, getCasesDeepLinks } from '@kbn/cases-plugin/public';
+import type { CasesPublicStart } from '@kbn/cases-plugin/public';
+import { CasesDeepLinkId, getCasesDeepLinks } from '@kbn/cases-plugin/public';
 import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import type { CloudStart } from '@kbn/cloud-plugin/public';
 import type { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
-import type { IUiSettingsClient } from '@kbn/core/public';
-import {
+import type {
+  IUiSettingsClient,
   App,
   AppDeepLink,
   AppMountParameters,
   AppUpdater,
   CoreSetup,
   CoreStart,
-  DEFAULT_APP_CATEGORIES,
   Plugin as PluginClass,
   PluginInitializerContext,
   ToastsStart,
 } from '@kbn/core/public';
+import { DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
 import type { DataPublicPluginSetup, DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { DISCOVER_APP_LOCATOR, type DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
 import type { DiscoverStart } from '@kbn/discover-plugin/public';
-import type { EmbeddableStart } from '@kbn/embeddable-plugin/public';
+import type { EmbeddableStart, EmbeddableSetup } from '@kbn/embeddable-plugin/public';
 import type { FieldFormatsSetup, FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { HomePublicPluginSetup, HomePublicPluginStart } from '@kbn/home-plugin/public';
 import { i18n } from '@kbn/i18n';
 import type { LensPublicStart } from '@kbn/lens-plugin/public';
-import type { LicensingPluginSetup } from '@kbn/licensing-plugin/public';
+import type { LicensingPluginSetup, LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import type {
   NavigationEntry,
   ObservabilitySharedPluginSetup,
@@ -43,17 +44,17 @@ import type { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/publi
 import type {
   TriggersAndActionsUIPublicPluginSetup,
   TriggersAndActionsUIPublicPluginStart,
+  ActionTypeRegistryContract,
+  RuleTypeRegistryContract,
 } from '@kbn/triggers-actions-ui-plugin/public';
 import { BehaviorSubject, from, map, mergeMap } from 'rxjs';
 
 import type { AiopsPluginStart } from '@kbn/aiops-plugin/public/types';
 import type { DataViewFieldEditorStart } from '@kbn/data-view-field-editor-plugin/public';
-import type { EmbeddableSetup } from '@kbn/embeddable-plugin/public';
 import type { ExploratoryViewPublicStart } from '@kbn/exploratory-view-plugin/public';
 import type { GuidedOnboardingPluginStart } from '@kbn/guided-onboarding-plugin/public';
 import type { InvestigatePublicStart } from '@kbn/investigate-plugin/public';
 import type { LicenseManagementUIPluginSetup } from '@kbn/license-management-plugin/public';
-import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import type { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
 import type {
   ObservabilityAIAssistantPublicSetup,
@@ -63,10 +64,6 @@ import type { PresentationUtilPluginStart } from '@kbn/presentation-util-plugin/
 import type { SecurityPluginStart } from '@kbn/security-plugin/public';
 import type { ServerlessPluginSetup, ServerlessPluginStart } from '@kbn/serverless/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
-import type {
-  ActionTypeRegistryContract,
-  RuleTypeRegistryContract,
-} from '@kbn/triggers-actions-ui-plugin/public';
 import type { UiActionsSetup, UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
@@ -83,10 +80,8 @@ import { registerDataHandler } from './context/has_data_context/data_handler';
 import { createUseRulesLink } from './hooks/create_use_rules_link';
 import { RuleDetailsLocatorDefinition } from './locators/rule_details';
 import { RulesLocatorDefinition } from './locators/rules';
-import {
-  ObservabilityRuleTypeRegistry,
-  createObservabilityRuleTypeRegistry,
-} from './rules/create_observability_rule_type_registry';
+import type { ObservabilityRuleTypeRegistry } from './rules/create_observability_rule_type_registry';
+import { createObservabilityRuleTypeRegistry } from './rules/create_observability_rule_type_registry';
 import { registerObservabilityRuleTypes } from './rules/register_observability_rule_types';
 
 export interface ConfigSchema {

@@ -17,6 +17,7 @@ import {
   sendGetOneAgentPolicyFull,
   useGetPackageInfoByKeyQuery,
   useStartServices,
+  sendCreateStandaloneAgentAPIKey,
 } from '../../hooks';
 import {
   FLEET_KUBERNETES_PACKAGE,
@@ -31,8 +32,6 @@ import {
   SUPPORTED_TEMPLATES_URL_FROM_PACKAGE_INFO_INPUT_VARS,
   SUPPORTED_TEMPLATES_URL_FROM_AGENT_POLICY_CONFIG,
 } from '../cloud_security_posture/services';
-
-import { sendCreateStandaloneAgentAPIKey } from '../../hooks';
 
 import type { FullAgentPolicy } from '../../../common';
 

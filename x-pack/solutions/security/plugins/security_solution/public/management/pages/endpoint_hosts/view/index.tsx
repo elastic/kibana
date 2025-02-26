@@ -7,21 +7,24 @@
 
 import React, { useCallback, useMemo } from 'react';
 import styled from 'styled-components';
-import type { CriteriaWithPagination, EuiSuperDatePickerProps } from '@elastic/eui';
 import {
   EuiBasicTable,
-  type EuiBasicTableColumn,
   EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
   EuiHealth,
   EuiHorizontalRule,
   EuiLoadingLogo,
-  type EuiSelectableProps,
   EuiSpacer,
   EuiSuperDatePicker,
   EuiText,
   EuiToolTip,
+} from '@elastic/eui';
+import type {
+  CriteriaWithPagination,
+  EuiSuperDatePickerProps,
+  EuiBasicTableColumn,
+  EuiSelectableProps,
 } from '@elastic/eui';
 import { useHistory, useLocation } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';

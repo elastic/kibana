@@ -23,8 +23,8 @@ import { RuleMonitorsTable } from './rule_monitors_table';
 import { apiService } from '../../../../utils/api_service';
 import { inspectStatusRuleAction } from '../../state/alert_rules';
 import { selectInspectStatusRule } from '../../state/alert_rules/selectors';
-import { StatusRuleParamsProps } from './status_rule_ui';
-import { ClientPluginsStart } from '../../../../plugin';
+import type { StatusRuleParamsProps } from './status_rule_ui';
+import type { ClientPluginsStart } from '../../../../plugin';
 
 export const StatusRuleViz = ({
   ruleParams,

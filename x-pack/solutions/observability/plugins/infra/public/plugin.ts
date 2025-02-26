@@ -5,18 +5,26 @@
  * 2.0.
  */
 
-import type { PluginInitializerContext, AppDeepLinkLocations } from '@kbn/core/public';
-import {
-  type AppMountParameters,
-  type AppUpdater,
-  type CoreStart,
-  type AppDeepLink,
-  DEFAULT_APP_CATEGORIES,
-  AppStatus,
+import { DEFAULT_APP_CATEGORIES, AppStatus } from '@kbn/core/public';
+import type {
+  PluginInitializerContext,
+  AppDeepLinkLocations,
+  AppMountParameters,
+  AppUpdater,
+  CoreStart,
+  AppDeepLink,
 } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
-import type { MetricsExplorerLocatorParams } from '@kbn/observability-shared-plugin/common';
-import { METRICS_EXPLORER_LOCATOR_ID } from '@kbn/observability-shared-plugin/common';
+import type {
+  MetricsExplorerLocatorParams,
+  AssetDetailsLocatorParams,
+  InventoryLocatorParams,
+} from '@kbn/observability-shared-plugin/common';
+import {
+  METRICS_EXPLORER_LOCATOR_ID,
+  ASSET_DETAILS_LOCATOR_ID,
+  INVENTORY_LOCATOR_ID,
+} from '@kbn/observability-shared-plugin/common';
 import {
   BehaviorSubject,
   combineLatest,
@@ -27,12 +35,6 @@ import {
   map,
   firstValueFrom,
 } from 'rxjs';
-import {
-  ASSET_DETAILS_LOCATOR_ID,
-  INVENTORY_LOCATOR_ID,
-  type AssetDetailsLocatorParams,
-  type InventoryLocatorParams,
-} from '@kbn/observability-shared-plugin/common';
 import type { NavigationEntry } from '@kbn/observability-shared-plugin/public';
 import { OBSERVABILITY_LOGS_EXPLORER_APP_ID } from '@kbn/deeplinks-observability/constants';
 import type { InfraPublicConfig } from '../common/plugin_config_types';

@@ -10,7 +10,7 @@ import { createKnowledgeBaseEntry } from './create_knowledge_base_entry';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { coreMock } from '@kbn/core/server/mocks';
 import { getKnowledgeBaseEntry } from './get_knowledge_base_entry';
-import { KnowledgeBaseEntryResponse } from '@kbn/elastic-assistant-common';
+import type { KnowledgeBaseEntryResponse } from '@kbn/elastic-assistant-common';
 import {
   getKnowledgeBaseEntryMock,
   getCreateKnowledgeBaseEntrySchemaMock,

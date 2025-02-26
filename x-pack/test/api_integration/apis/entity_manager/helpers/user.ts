@@ -6,7 +6,7 @@
  */
 
 import { mergeWith, uniq } from 'lodash';
-import { Client } from '@elastic/elasticsearch';
+import type { Client } from '@elastic/elasticsearch';
 import {
   apiKeyCreationPrivileges,
   entityDefinitionDeletionPrivileges,

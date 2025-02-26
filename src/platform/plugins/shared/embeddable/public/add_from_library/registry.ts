@@ -7,10 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { IconType } from '@elastic/eui';
-import { CanAddNewPanel } from '@kbn/presentation-containers';
-import { FinderAttributes, SavedObjectCommon } from '@kbn/saved-objects-finder-plugin/common';
-import { SavedObjectMetaData } from '@kbn/saved-objects-finder-plugin/public';
+import type { IconType } from '@elastic/eui';
+import type { CanAddNewPanel } from '@kbn/presentation-containers';
+import type { FinderAttributes, SavedObjectCommon } from '@kbn/saved-objects-finder-plugin/common';
+import type { SavedObjectMetaData } from '@kbn/saved-objects-finder-plugin/public';
 import { useMemo } from 'react';
 
 export type RegistryItem<TSavedObjectAttributes extends FinderAttributes = FinderAttributes> = {
