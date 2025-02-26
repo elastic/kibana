@@ -72,6 +72,12 @@ const i18nTexts = {
       defaultMessage: 'Filter',
     }
   ),
+  selectAllLabel: i18n.translate(
+    'xpack.upgradeAssistant.esDeprecations.table.selectAllRows',
+    {
+      defaultMessage: 'Select all rows',
+    }
+  ),
 };
 
 const cellToLabelMap = {
@@ -312,8 +318,8 @@ export const EsDeprecationsTable: React.FunctionComponent<Props> = ({
     return (
       <EuiCheckbox
         id={'selectAllCheckbox'}
-        aria-label="Select all rows"
-        title="Select all rows"
+        aria-label={i18nTexts.selectAllLabel}
+        title={i18nTexts.selectAllLabel}
         checked={areAllItemsSelected()}
         onChange={toggleAll}
       />
