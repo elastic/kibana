@@ -10,6 +10,8 @@ import type { RequestHandler, SavedObjectsClientContract } from '@kbn/core/serve
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { isEqual } from 'lodash';
 
+import Boom from '@hapi/boom';
+
 import { SERVERLESS_DEFAULT_FLEET_SERVER_HOST_ID } from '../../constants';
 
 import { FleetServerHostUnauthorizedError } from '../../errors';
@@ -23,10 +25,20 @@ import {
   updateFleetServerHost,
 } from '../../services/fleet_server_host';
 import type {
+  FleetServerHost,
   GetOneFleetServerHostRequestSchema,
   PostFleetServerHostRequestSchema,
   PutFleetServerHostRequestSchema,
 } from '../../types';
+
+function ensureNoDuplicateSecrets(fleetServerHost: Partial<FleetServerHost>) {
+  if (fleetServerHost.ssl?.key && fleetServerHost.secrets?.ssl?.key) {
+    throw Boom.badRequest('Cannot specify both ssl.key and secrets.ssl.key');
+  }
+  if (fleetServerHost.ssl?.es_key && fleetServerHost.secrets?.ssl?.es_key) {
+    throw Boom.badRequest('Cannot specify both ssl.es_key and secrets.ssl.es_key');
+  }
+}
 
 async function checkFleetServerHostsWriteAPIsAllowed(
   soClient: SavedObjectsClientContract,
@@ -62,8 +74,11 @@ export const postFleetServerHost: RequestHandler<
   await checkFleetServerHostsWriteAPIsAllowed(soClient, request.body.host_urls);
 
   const { id, ...data } = request.body;
+  ensureNoDuplicateSecrets(data);
+
   const FleetServerHost = await createFleetServerHost(
     soClient,
+    esClient,
     { ...data, is_preconfigured: false },
     { id }
   );
@@ -139,8 +154,14 @@ export const putFleetServerHostHandler: RequestHandler<
     if (request.body.host_urls) {
       await checkFleetServerHostsWriteAPIsAllowed(soClient, request.body.host_urls);
     }
+    ensureNoDuplicateSecrets(request.body);
 
-    const item = await updateFleetServerHost(soClient, request.params.itemId, request.body);
+    const item = await updateFleetServerHost(
+      soClient,
+      esClient,
+      request.params.itemId,
+      request.body
+    );
     const body = {
       item,
     };

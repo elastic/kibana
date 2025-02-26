@@ -20,6 +20,8 @@ import { PlatformSelector } from '../..';
 
 import { getInstallCommandForPlatform } from '../utils';
 
+import type { FleetServerHost } from '../../../types';
+
 import type { DeploymentMode } from './set_deployment_mode';
 
 export function getInstallFleetServerStep({
@@ -33,7 +35,7 @@ export function getInstallFleetServerStep({
   isFleetServerReady: boolean;
   disabled: boolean;
   serviceToken?: string;
-  fleetServerHost?: string;
+  fleetServerHost?: FleetServerHost | null;
   fleetServerPolicyId?: string;
   deploymentMode: DeploymentMode;
 }): EuiStepProps {
@@ -55,7 +57,7 @@ export function getInstallFleetServerStep({
 
 const InstallFleetServerStepContent: React.FunctionComponent<{
   serviceToken?: string;
-  fleetServerHost?: string;
+  fleetServerHost?: FleetServerHost | null;
   fleetServerPolicyId?: string;
   deploymentMode: DeploymentMode;
 }> = ({ serviceToken, fleetServerHost, fleetServerPolicyId, deploymentMode }) => {
