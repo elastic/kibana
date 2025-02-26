@@ -15,49 +15,42 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiCallOut,
-  useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { css } from '@emotion/react';
 import illustration from '../../../common/images/information_light.png';
-import { Title } from '../title';
+import { InventoryTitle } from '../inventory_title';
 import { CenteredWrapper } from './centered_wrapper';
 import { HoverForExplanation } from './hover_for_explanation';
 import { useGetStarted } from './hooks/use_get_started';
+import { EmptyStateIllustrationContainer } from '../empty_state_illustration_container';
 
 const ASSET_INVENTORY_DOCS_URL = 'https://ela.st/asset-inventory';
 const TEST_SUBJ = 'assetInventory:onboarding:get-started';
 
 export const GetStarted = () => {
-  const { euiTheme } = useEuiTheme();
   const { isEnabling, error, setError, handleEnableClick } = useGetStarted();
 
   return (
     <EuiFlexGroup>
       <EuiFlexItem>
-        <Title />
+        <InventoryTitle />
         <CenteredWrapper>
           <EuiEmptyPrompt
-            css={css`
-              && > .euiEmptyPrompt__main {
-                gap: ${euiTheme.size.xxl};
-              }
-            `}
             data-test-subj={TEST_SUBJ}
             icon={
-              <EuiImage
-                url={illustration}
-                alt={i18n.translate(
-                  'xpack.securitySolution.assetInventory.emptyState.illustrationAlt',
-                  {
-                    defaultMessage: 'No results',
-                  }
-                )}
-                css={css`
-                  width: 380px;
-                `}
-              />
+              <EmptyStateIllustrationContainer>
+                <EuiImage
+                  url={illustration}
+                  size="fullWidth"
+                  alt={i18n.translate(
+                    'xpack.securitySolution.assetInventory.emptyState.illustrationAlt',
+                    {
+                      defaultMessage: 'No results',
+                    }
+                  )}
+                />
+              </EmptyStateIllustrationContainer>
             }
             title={
               <h2>

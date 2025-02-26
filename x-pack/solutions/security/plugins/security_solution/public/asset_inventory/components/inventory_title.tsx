@@ -8,7 +8,7 @@ import React from 'react';
 import { EuiTitle } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-export const Title = () => {
+export const InventoryTitle = () => {
   return (
     <EuiTitle size="l" data-test-subj="inventory-title">
       <h1>

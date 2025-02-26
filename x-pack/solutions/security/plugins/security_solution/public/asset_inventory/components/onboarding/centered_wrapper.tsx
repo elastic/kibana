@@ -25,12 +25,6 @@ export const CenteredWrapper = ({
     direction="column"
     {...rest}
   >
-    <EuiFlexItem
-      css={css`
-        max-width: 854px;
-      `}
-    >
-      {children}
-    </EuiFlexItem>
+    <EuiFlexItem>{children}</EuiFlexItem>
   </EuiFlexGroup>
 );

@@ -6,7 +6,7 @@
  */
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingLogo, EuiSpacer } from '@elastic/eui';
-import { Title } from './title';
+import { InventoryTitle } from './inventory_title';
 import { CenteredWrapper } from './onboarding/centered_wrapper';
 
 /**
@@ -15,7 +15,7 @@ import { CenteredWrapper } from './onboarding/centered_wrapper';
 export const Loading = () => (
   <EuiFlexGroup>
     <EuiFlexItem>
-      <Title />
+      <InventoryTitle />
       <EuiSpacer size="l" />
       <CenteredWrapper>
         <EuiLoadingLogo logo="logoSecurity" size="xl" />
