@@ -9,8 +9,11 @@
 
 import { i18n } from '@kbn/i18n';
 
-const managementBreadcrumbText = i18n.translate('management.breadcrumb', {
+const managementBreadcrumbText = i18n.translate('management.stackManagement.breadcrumb', {
   defaultMessage: 'Stack Management',
+});
+const contentBreadcrumbText = i18n.translate('management.content.breadcrumb', {
+  defaultMessage: 'Content',
 });
 
 export const MANAGEMENT_BREADCRUMB_NO_HREF = {
@@ -20,4 +23,7 @@ export const MANAGEMENT_BREADCRUMB_NO_HREF = {
 export const MANAGEMENT_BREADCRUMB = {
   text: managementBreadcrumbText,
   href: '/',
+};
+export const CONTENT_BREADCRUMB_NO_HREF = {
+  text: contentBreadcrumbText,
 };

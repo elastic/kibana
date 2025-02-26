@@ -57,7 +57,10 @@ export const componentTemplatesDependencies = (httpSetup: HttpSetup, coreStart?:
 };
 
 export const setupEnvironment = () => {
-  breadcrumbService.setup(() => undefined);
+  breadcrumbService.setup(
+    () => undefined,
+    () => undefined
+  );
   return initHttpRequests();
 };
 
