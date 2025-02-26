@@ -307,3 +307,7 @@ export const ANOMALY_DETECTOR_SELECTOR_OPTIONS = [
 // Client side registrations:
 // x-pack/solutions/observability/plugins/apm/public/components/alerting/<alert>/index.tsx
 // x-pack/solutions/observability/plugins/apm/public/components/alerting/register_apm_alerts
+
+export interface AdditionalContext {
+  [x: string]: any;
+}
