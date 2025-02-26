@@ -4,7 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiPanel, EuiText } from '@elastic/eui';
+import {
+  EuiButtonEmpty,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiLink,
+  EuiPanel,
+  EuiText,
+} from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
@@ -32,20 +39,33 @@ const defaultLicenseMessage = (
 );
 
 const platinumLicenseMessage = (
-  <FormattedMessage
-    id="xpack.idxMgmt.indexDetails.mappings.semanticTextBanner.description"
-    defaultMessage="{label} Add a field to your mapping and choose 'Semantic text' to get started. Documents will be automatically chunked to fit model context limits, to avoid truncation."
-    values={{
-      label: (
-        <strong>
-          <FormattedMessage
-            id="xpack.idxMgmt.indexDetails.mappings.semanticTextBanner.semanticTextFieldAvailable"
-            defaultMessage="semantic_text field type now available!"
-          />
-        </strong>
-      ),
-    }}
-  />
+  <>
+    <FormattedMessage
+      id="xpack.idxMgmt.indexDetails.mappings.semanticTextBanner.description"
+      defaultMessage="{label} Add a field to your mapping and choose 'Semantic text' to get started. Documents will be automatically chunked to fit model context limits, to avoid truncation."
+      values={{
+        label: (
+          <strong>
+            <FormattedMessage
+              id="xpack.idxMgmt.indexDetails.mappings.semanticTextBanner.semanticTextFieldAvailable"
+              defaultMessage="semantic_text field type now available!"
+            />
+          </strong>
+        ),
+      }}
+    />{' '}
+    <EuiLink
+      href="https://www.elastic.co/guide/en/elasticsearch/reference/current/inference-apis.html#infer-chunking-config"
+      target="_blank"
+    >
+      <u>
+        <FormattedMessage
+          id="xpack.idxMgmt.indexDetails.mappings.semanticTextBanner.learnMore"
+          defaultMessage="Learn more"
+        />
+      </u>
+    </EuiLink>
+  </>
 );
 
 export function SemanticTextBanner({
