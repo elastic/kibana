@@ -109,9 +109,12 @@ function getXSeriesValue(dataLayers: CommonXYDataLayerConfig[], firstSeries: XYT
   return xAccessor ? firstSeries.datum?.[xAccessor] : null;
 }
 
+
+
 export const getTooltipActions = (
   dataLayers: CommonXYDataLayerConfig[],
   onClickMultiValue: (data: MultiFilterEvent['data']) => void,
+  onCreateAlertRule: (data: MultiFilterEvent['data']) => void,
   fieldFormats: LayersFieldFormats,
   formattedDatatables: DatatablesWithFormatInfo,
   xAxisFormatter: FieldFormat,
@@ -181,6 +184,57 @@ export const getTooltipActions = (
               ],
             };
             onClickMultiValue(context);
+          },
+        },
+      ]
+    : [];
+
+    const alertRulesTooltipActions : Array<TooltipAction<Datum, XYChartSeriesIdentifier>> = hasXAxis && isTimeViz
+    ? [
+        {
+          disabled: () => !hasXAxis,
+          label: (_, [firstSeries]: XYTooltipValue[]) =>  i18n.translate('expressionXY.tooltipActions.addAlertRule', {
+            defaultMessage: 'Add alert rule',
+          }),
+
+          onSelect: (_: XYTooltipValue[], [firstSeries]: XYTooltipValue[]) => {
+            const layer = dataLayers.find((l) =>
+              firstSeries.seriesIdentifier.seriesKeys.some((key: string | number) =>
+                l.accessors.some(
+                  (accessor) => getAccessorByDimension(accessor, l.table.columns) === key.toString()
+                )
+              )
+            );
+            if (!layer) return;
+
+            // TODO: here is where you should get the data you need
+
+            const value = getXSeriesValue(dataLayers, firstSeries);
+
+            const xSeriesPoint = getXSeriesPoint(
+              layer,
+              value,
+              fieldFormats,
+              formattedDatatables,
+              xAxisFormatter,
+              formatFactory
+            );
+
+            // TODO: adjust the type to what we need for alerts
+            const context: MultiFilterEvent['data'] = {
+              data: [
+                {
+                  table: xSeriesPoint.table,
+                  cells: [
+                    {
+                      row: xSeriesPoint.row,
+                      column: xSeriesPoint.column,
+                    },
+                  ],
+                },
+              ],
+            };
+            onCreateAlertRule(context);
           },
         },
       ]
@@ -256,5 +310,5 @@ export const getTooltipActions = (
           },
         ]
       : [];
-  return [...xSeriesActions, ...breakdownTooltipActions];
+  return [...xSeriesActions, ...breakdownTooltipActions, ...alertRulesTooltipActions];
 };
