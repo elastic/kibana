@@ -44,7 +44,7 @@
         "label": "InferenceServiceFormFields",
         "description": [],
         "signature": [
-          "({ http, toasts, isEdit, }: InferenceServicesProps) => React.JSX.Element | null"
+          "({ http, toasts, isEdit, isPreconfigured, }: InferenceServicesProps) => React.JSX.Element | null"
         ],
         "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/components/inference_service_form_fields.tsx",
         "deprecated": false,
@@ -55,7 +55,7 @@
             "id": "def-public.InferenceServiceFormFields.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  http,\n  toasts,\n  isEdit,\n}",
+            "label": "{\n  http,\n  toasts,\n  isEdit,\n  isPreconfigured,\n}",
             "description": [],
             "signature": [
               "InferenceServicesProps"

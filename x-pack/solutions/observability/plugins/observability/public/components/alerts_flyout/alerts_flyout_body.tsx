@@ -4,23 +4,30 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { ComponentProps, useCallback, useMemo, useState } from 'react';
 import { EuiPanel, EuiTabbedContentTab } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { AlertFieldsTable, ScrollableFlyoutTabbedContent } from '@kbn/alerts-ui-shared';
-import { AlertsTableFlyoutBaseProps } from '@kbn/triggers-actions-ui-plugin/public';
-import type { TopAlert } from '../../typings/alerts';
+import {
+  AlertFieldsTable,
+  ScrollableFlyoutTabbedContent,
+} from '@kbn/alerts-ui-shared/src/alert_fields_table';
+import { parseAlert } from '../../pages/alerts/helpers/parse_alert';
+import { GetObservabilityAlertsTableProp } from '../alerts_table/types';
 import { AlertOverview } from '../alert_overview/alert_overview';
-
-interface FlyoutProps {
-  rawAlert: AlertsTableFlyoutBaseProps['alert'];
-  alert: TopAlert;
-  id?: string;
-}
 
 type TabId = 'overview' | 'table';
 
-export function AlertsFlyoutBody({ alert, rawAlert, id: pageId }: FlyoutProps) {
+export type AlertsFlyoutBodyProps = Pick<
+  ComponentProps<GetObservabilityAlertsTableProp<'renderFlyoutBody'>>,
+  'alert' | 'tableId' | 'observabilityRuleTypeRegistry'
+>;
+
+export function AlertsFlyoutBody({
+  alert,
+  tableId,
+  observabilityRuleTypeRegistry,
+}: AlertsFlyoutBodyProps) {
+  const parsedAlert = parseAlert(observabilityRuleTypeRegistry)(alert);
   const overviewTab = useMemo(() => {
     return {
       id: 'overview',
@@ -30,11 +37,11 @@ export function AlertsFlyoutBody({ alert, rawAlert, id: pageId }: FlyoutProps) {
       }),
       content: (
         <EuiPanel hasShadow={false} data-test-subj="overviewTabPanel">
-          <AlertOverview alert={alert} pageId={pageId} />
+          <AlertOverview alert={parsedAlert} pageId={tableId} />
         </EuiPanel>
       ),
     };
-  }, [alert, pageId]);
+  }, [parsedAlert, tableId]);
 
   const metadataTab = useMemo(
     () => ({
@@ -45,11 +52,11 @@ export function AlertsFlyoutBody({ alert, rawAlert, id: pageId }: FlyoutProps) {
       }),
       content: (
         <EuiPanel hasShadow={false} data-test-subj="metadataTabPanel">
-          <AlertFieldsTable alert={rawAlert} />
+          <AlertFieldsTable alert={alert} />
         </EuiPanel>
       ),
     }),
-    [rawAlert]
+    [alert]
   );
 
   const tabs = useMemo(() => [overviewTab, metadataTab], [overviewTab, metadataTab]);

@@ -9,6 +9,7 @@
 
 import { readFileSync } from 'fs';
 import { CA_CERT_PATH, KBN_CERT_PATH, KBN_KEY_PATH } from '@kbn/dev-utils';
+import { ScoutTestRunConfigCategory } from '@kbn/scout-info';
 import { createKibanaSupertestProvider } from '../../services';
 
 export default async function ({ readConfigFile }) {
@@ -16,6 +17,7 @@ export default async function ({ readConfigFile }) {
   const certificateAuthorities = [readFileSync(CA_CERT_PATH)];
 
   return {
+    testConfigCategory: ScoutTestRunConfigCategory.UNIT_INTEGRATION_TEST,
     testFiles: [require.resolve('.')],
     services: {
       ...httpConfig.get('services'),

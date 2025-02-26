@@ -8,7 +8,7 @@
 import React from 'react';
 import moment from 'moment';
 import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiText, useEuiTheme, EuiToolTip } from '@elastic/eui';
-import { AlertLifecycleStatusBadge } from '@kbn/alerts-ui-shared';
+import { AlertLifecycleStatusBadge } from '@kbn/alerts-ui-shared/src/alert_lifecycle_status_badge';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {

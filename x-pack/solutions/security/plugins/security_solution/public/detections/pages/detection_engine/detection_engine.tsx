@@ -37,7 +37,6 @@ import type { RunTimeMappings } from '@kbn/timelines-plugin/common/search_strate
 import { DetectionEngineFilters } from '../../components/detection_engine_filters/detection_engine_filters';
 import { FilterByAssigneesPopover } from '../../../common/components/filter_by_assignees_popover/filter_by_assignees_popover';
 import type { AssigneesIdsSelection } from '../../../common/components/assignees/types';
-import { ALERTS_TABLE_REGISTRY_CONFIG_IDS } from '../../../../common/constants';
 import { useDataTableFilters } from '../../../common/hooks/use_data_table_filters';
 import { InputsModelId } from '../../../common/store/inputs/constants';
 import { useDeepEqualSelector, useShallowEqualSelector } from '../../../common/hooks/use_selector';
@@ -84,7 +83,7 @@ import { HeaderPage } from '../../../common/components/header_page';
 import { EmptyPrompt } from '../../../common/components/empty_prompt';
 import type { Status } from '../../../../common/api/detection_engine';
 import { GroupedAlertsTable } from '../../components/alerts_table/alerts_grouping';
-import { AlertsTableComponent } from '../../components/alerts_table';
+import { DetectionEngineAlertsTable } from '../../components/alerts_table';
 import type { AddFilterProps } from '../../components/alerts_kpis/common/types';
 
 /**
@@ -321,10 +320,9 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ()
   const renderAlertTable = useCallback(
     (groupingFilters: Filter[]) => {
       return (
-        <AlertsTableComponent
-          configId={ALERTS_TABLE_REGISTRY_CONFIG_IDS.ALERTS_PAGE}
+        <DetectionEngineAlertsTable
+          tableType={TableId.alertsOnAlertsPage}
           inputFilters={[...alertsTableDefaultFilters, ...groupingFilters]}
-          tableId={TableId.alertsOnAlertsPage}
           isLoading={isAlertTableLoading}
         />
       );

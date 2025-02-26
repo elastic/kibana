@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { estypes } from '@elastic/elasticsearch';
 import type { IngestPipeline } from '@elastic/elasticsearch/lib/api/types';
 
 import { useMemo } from 'react';
@@ -27,6 +27,7 @@ import type {
   ModelDownloadState,
   TrainedModelUIItem,
   TrainedModelConfigResponse,
+  StartTrainedModelDeploymentResponse,
 } from '../../../../common/types/trained_models';
 
 export interface InferenceQueryParams {
@@ -67,6 +68,12 @@ export interface AdaptiveAllocationsParams {
     min_number_of_allocations?: number;
     max_number_of_allocations?: number;
   };
+}
+
+export interface StartAllocationParams {
+  modelId: string;
+  deploymentParams: CommonDeploymentParams;
+  adaptiveAllocationsParams?: AdaptiveAllocationsParams;
 }
 
 export interface UpdateAllocationParams extends AdaptiveAllocationsParams {
@@ -227,16 +234,16 @@ export function trainedModelsApiProvider(httpService: HttpService) {
       });
     },
 
-    startModelAllocation(
-      modelId: string,
-      queryParams?: CommonDeploymentParams,
-      bodyParams?: AdaptiveAllocationsParams
-    ) {
-      return httpService.http<{ acknowledge: boolean }>({
+    startModelAllocation({
+      modelId,
+      deploymentParams,
+      adaptiveAllocationsParams,
+    }: StartAllocationParams) {
+      return httpService.http$<StartTrainedModelDeploymentResponse>({
         path: `${ML_INTERNAL_BASE_PATH}/trained_models/${modelId}/deployment/_start`,
         method: 'POST',
-        query: queryParams,
-        ...(bodyParams ? { body: JSON.stringify(bodyParams) } : {}),
+        query: deploymentParams,
+        ...(adaptiveAllocationsParams ? { body: JSON.stringify(adaptiveAllocationsParams) } : {}),
         version: '1',
       });
     },
@@ -270,7 +277,7 @@ export function trainedModelsApiProvider(httpService: HttpService) {
     inferTrainedModel(
       modelId: string,
       deploymentsId: string,
-      payload: estypes.MlInferTrainedModelRequest['body'],
+      payload: Omit<estypes.MlInferTrainedModelRequest, 'model_id'>,
       timeout?: string
     ) {
       const body = JSON.stringify(payload);
@@ -283,10 +290,7 @@ export function trainedModelsApiProvider(httpService: HttpService) {
       });
     },
 
-    trainedModelPipelineSimulate(
-      pipeline: estypes.IngestPipeline,
-      docs: estypes.IngestSimulateDocument[]
-    ) {
+    trainedModelPipelineSimulate(pipeline: estypes.IngestPipeline, docs: estypes.IngestDocument[]) {
       const body = JSON.stringify({
         pipeline,
         docs,

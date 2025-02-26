@@ -10,7 +10,7 @@
 import { METRIC_TYPES } from '@kbn/data-plugin/common';
 import { SchemaConfig } from '@kbn/visualizations-plugin/common';
 import {
-  convertToLensModule,
+  getConvertToLensModule,
   getVisSchemas,
   getDataViewByIndexPatternId,
 } from '@kbn/visualizations-plugin/public';
@@ -32,7 +32,7 @@ export const convertToLens: ConvertTableToLensVisualization = async (vis, timefi
     return null;
   }
 
-  const { getColumnsFromVis, getPercentageColumnFormulaColumn } = await convertToLensModule;
+  const { getColumnsFromVis, getPercentageColumnFormulaColumn } = await getConvertToLensModule();
   const layers = getColumnsFromVis(
     vis,
     timefilter,

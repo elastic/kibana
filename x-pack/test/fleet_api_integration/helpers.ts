@@ -65,7 +65,8 @@ export async function generateAgent(
   status: string,
   id: string,
   policyId: string,
-  version?: string
+  version?: string,
+  upgradeDetails?: any
 ) {
   let data: any = {};
   const { getService } = providerContext;
@@ -106,12 +107,15 @@ export async function generateAgent(
   await es.index({
     index: '.fleet-agents',
     id,
-    body: {
+    document: {
       id,
       active: true,
       last_checkin: new Date().toISOString(),
       policy_id: policyId,
       policy_revision: 1,
+      agent: {
+        version,
+      },
       local_metadata: {
         elastic: {
           agent: {
@@ -121,6 +125,7 @@ export async function generateAgent(
         },
       },
       ...data,
+      ...(upgradeDetails ? { upgrade_details: upgradeDetails } : {}),
     },
     refresh: 'wait_for',
   });
