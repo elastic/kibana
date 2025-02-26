@@ -5,11 +5,14 @@
  * 2.0.
  */
 
-const defaultConfig = require('@kbn/storybook').defaultConfig;
+import React from 'react';
+import { RandomSamplingIcon } from '../ui/icon/sampling_icon';
 
-module.exports = {
-  ...defaultConfig,
-  typescript: {
-    reactDocgen: 'react-docgen-typescript',
-  },
+export default {
+  title: 'Random Sampling/Icon',
+};
+
+export const BasicIcon = {
+  render: () => <RandomSamplingIcon />,
+  name: 'Basic Icon',
 };

@@ -8,7 +8,6 @@
  */
 
 import React from 'react';
-import { storiesOf } from '@storybook/react';
 import { Render } from '@kbn/presentation-util-plugin/public/__stories__';
 import { from } from 'rxjs';
 import { tagcloudRenderer } from '../expression_renderers';
@@ -81,17 +80,22 @@ const getStartDeps = (() => ({
   },
 })) as ExpressionTagcloudRendererDependencies['getStartDeps'];
 
-storiesOf('renderers/tag_cloud_vis', module)
-  .add('Default', () => {
-    return (
-      <Render
-        renderer={() => tagcloudRenderer({ getStartDeps })}
-        config={config}
-        {...containerSize}
-      />
-    );
-  })
-  .add('With log scale', () => {
+export default {
+  title: 'renderers/tag_cloud_vis',
+};
+
+export const Default = () => {
+  return (
+    <Render
+      renderer={() => tagcloudRenderer({ getStartDeps })}
+      config={config}
+      {...containerSize}
+    />
+  );
+};
+
+export const WithLogScale = {
+  render: () => {
     return (
       <Render
         renderer={() => tagcloudRenderer({ getStartDeps })}
@@ -99,8 +103,13 @@ storiesOf('renderers/tag_cloud_vis', module)
         {...containerSize}
       />
     );
-  })
-  .add('With square root scale', () => {
+  },
+
+  name: 'With log scale',
+};
+
+export const WithSquareRootScale = {
+  render: () => {
     return (
       <Render
         renderer={() => tagcloudRenderer({ getStartDeps })}
@@ -108,8 +117,13 @@ storiesOf('renderers/tag_cloud_vis', module)
         {...containerSize}
       />
     );
-  })
-  .add('With right angled orientation', () => {
+  },
+
+  name: 'With square root scale',
+};
+
+export const WithRightAngledOrientation = {
+  render: () => {
     return (
       <Render
         renderer={() => tagcloudRenderer({ getStartDeps })}
@@ -120,8 +134,13 @@ storiesOf('renderers/tag_cloud_vis', module)
         {...containerSize}
       />
     );
-  })
-  .add('With multiple orientations', () => {
+  },
+
+  name: 'With right angled orientation',
+};
+
+export const WithMultipleOrientations = {
+  render: () => {
     return (
       <Render
         renderer={() => tagcloudRenderer({ getStartDeps })}
@@ -132,8 +151,13 @@ storiesOf('renderers/tag_cloud_vis', module)
         {...containerSize}
       />
     );
-  })
-  .add('With hidden label', () => {
+  },
+
+  name: 'With multiple orientations',
+};
+
+export const WithHiddenLabel = {
+  render: () => {
     return (
       <Render
         renderer={() => tagcloudRenderer({ getStartDeps })}
@@ -141,8 +165,13 @@ storiesOf('renderers/tag_cloud_vis', module)
         {...containerSize}
       />
     );
-  })
-  .add('With empty results', () => {
+  },
+
+  name: 'With hidden label',
+};
+
+export const WithEmptyResults = {
+  render: () => {
     return (
       <Render
         renderer={() => tagcloudRenderer({ getStartDeps })}
@@ -150,4 +179,7 @@ storiesOf('renderers/tag_cloud_vis', module)
         {...containerSize}
       />
     );
-  });
+  },
+
+  name: 'With empty results',
+};
