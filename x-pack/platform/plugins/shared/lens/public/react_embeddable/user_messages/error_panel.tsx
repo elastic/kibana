@@ -8,6 +8,7 @@
 import { EuiEmptyPrompt } from '@elastic/eui';
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { css } from '@emotion/react';
 import { UserMessage } from '../../types';
 import { getLongMessage } from '../../user_messages_utils';
 
@@ -24,7 +25,16 @@ export function VisualizationErrorPanel({
   const showMore = errors.length > 1;
   const canFixInLens = canEdit && errors.some(({ fixableInEditor }) => fixableInEditor);
   return (
-    <div className="lnsEmbeddedError">
+    <div
+      className="lnsEmbeddedError"
+      css={css`
+        flex-grow: 1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        overflow: auto;
+      `}
+    >
       <EuiEmptyPrompt
         iconType="warning"
         iconColor="danger"
