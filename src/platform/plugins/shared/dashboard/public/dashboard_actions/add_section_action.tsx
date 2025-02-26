@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { apiCanExpandPanels, CanExpandPanels } from '@kbn/presentation-containers';
+import { apiCanAddNewSection, CanAddNewSection } from '@kbn/presentation-containers';
 import {
   apiHasParentApi,
   apiHasUniqueId,
@@ -19,13 +19,12 @@ import { Action, IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 import { map, skip } from 'rxjs';
 import { ADD_PANEL_ANNOTATION_GROUP } from '@kbn/embeddable-plugin/public';
 
-import { dashboardExpandPanelActionStrings } from './_dashboard_actions_strings';
 import { ACTION_ADD_SECTION } from './constants';
 
-type AddSectionActionApi = HasUniqueId & HasParentApi<CanExpandPanels>;
+type AddSectionActionApi = CanAddNewSection;
 
 const isApiCompatible = (api: unknown | null): api is AddSectionActionApi =>
-  Boolean(apiHasUniqueId(api) && apiHasParentApi(api) && apiCanExpandPanels(api.parentApi));
+  Boolean(apiCanAddNewSection(api));
 
 export class AddSectionAction implements Action<EmbeddableApiContext> {
   public readonly type = ACTION_ADD_SECTION;
@@ -33,33 +32,20 @@ export class AddSectionAction implements Action<EmbeddableApiContext> {
   public order = 9;
   public grouping = [ADD_PANEL_ANNOTATION_GROUP];
 
-  public getDisplayName({ embeddable }: EmbeddableApiContext) {
+  public getDisplayName() {
     return 'Section';
   }
 
-  public getIconType({ embeddable }: EmbeddableApiContext) {
+  public getIconType() {
     return 'section';
   }
 
   public async isCompatible({ embeddable }: EmbeddableApiContext) {
-    return true;
-  }
-
-  public couldBecomeCompatible({ embeddable }: EmbeddableApiContext) {
-    return apiHasParentApi(embeddable) && apiCanExpandPanels(embeddable.parentApi);
-  }
-
-  public getCompatibilityChangesSubject({ embeddable }: EmbeddableApiContext) {
-    return isApiCompatible(embeddable)
-      ? embeddable.parentApi.expandedPanelId$.pipe(
-          skip(1),
-          map(() => undefined)
-        )
-      : undefined;
+    return isApiCompatible(embeddable);
   }
 
   public async execute({ embeddable }: EmbeddableApiContext) {
     if (!isApiCompatible(embeddable)) throw new IncompatibleActionError();
-    embeddable.parentApi.expandPanel(embeddable.uuid);
+    embeddable.addNewSection();
   }
 }

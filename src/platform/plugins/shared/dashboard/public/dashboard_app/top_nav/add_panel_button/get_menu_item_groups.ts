@@ -40,7 +40,6 @@ export async function getMenuItemGroups(
   (
     await uiActionsService.getTriggerCompatibleActions(ADD_PANEL_TRIGGER, { embeddable: api })
   ).forEach((action) => {
-    console.log('ACTION', action);
     const actionGroups = Array.isArray(action.grouping) ? action.grouping : [ADD_PANEL_OTHER_GROUP];
     actionGroups.forEach((group) => {
       const actionName = action.getDisplayName(addPanelContext);

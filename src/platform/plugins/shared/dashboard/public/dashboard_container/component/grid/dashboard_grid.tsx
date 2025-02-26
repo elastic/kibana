@@ -23,6 +23,7 @@ import { useDashboardApi } from '../../../dashboard_api/use_dashboard_api';
 import { DASHBOARD_GRID_HEIGHT, DASHBOARD_MARGIN_SIZE } from './constants';
 import { DashboardGridItem } from './dashboard_grid_item';
 import { useLayoutStyles } from './use_layout_styles';
+import { DashboardSectionMap } from '@kbn/dashboard-plugin/common/dashboard_container/types';
 
 export const DashboardGrid = ({
   dashboardContainerRef,
@@ -34,26 +35,36 @@ export const DashboardGrid = ({
   const panelRefs = useRef<{ [panelId: string]: React.Ref<HTMLDivElement> }>({});
   const { euiTheme } = useEuiTheme();
 
-  const [expandedPanelId, panels, useMargins, lockToGrid, viewMode] = useBatchedPublishingSubjects(
-    dashboardApi.expandedPanelId$,
-    dashboardApi.panels$,
-    dashboardApi.settings.useMargins$,
-    dashboardApi.settings.lockToGrid$,
-    dashboardApi.viewMode$
-  );
+  const [expandedPanelId, panels, sections, useMargins, lockToGrid, viewMode] =
+    useBatchedPublishingSubjects(
+      dashboardApi.expandedPanelId$,
+      dashboardApi.panels$,
+      dashboardApi.sections$,
+      dashboardApi.settings.useMargins$,
+      dashboardApi.settings.lockToGrid$,
+      dashboardApi.viewMode$
+    );
 
   const appFixedViewport = useAppFixedViewport();
 
   const currentLayout: GridLayoutData = useMemo(() => {
-    const singleRow: GridLayoutData[number] = {
-      title: '', // we only support a single section currently, and it does not have a title
-      isCollapsed: false,
-      panels: {},
-    };
+    const newLayout: GridLayoutData = [
+      {
+        title: '', // first, non-collapsible section
+        isCollapsed: false,
+        panels: {},
+      },
+      ...sections.map((section) => ({
+        title: section.title,
+        isCollapsed: section.collapsed,
+        panels: {},
+      })),
+    ];
 
     Object.keys(panels).forEach((panelId) => {
       const gridData = panels[panelId].gridData;
-      singleRow.panels[panelId] = {
+      const sectionId = panels[panelId].sectionIndex ?? 0;
+      newLayout[sectionId].panels[panelId] = {
         id: panelId,
         row: gridData.y,
         column: gridData.x,
@@ -67,29 +78,36 @@ export const DashboardGrid = ({
       }
     });
 
-    return [singleRow];
-  }, [panels]);
+    return newLayout;
+  }, [panels, sections]);
 
   const onLayoutChange = useCallback(
     (newLayout: GridLayoutData) => {
       if (viewMode !== 'edit') return;
 
       const currentPanels = dashboardApi.panels$.getValue();
-      const updatedPanels: { [key: string]: DashboardPanelState } = Object.values(
-        newLayout[0].panels
-      ).reduce((updatedPanelsAcc, panelLayout) => {
-        updatedPanelsAcc[panelLayout.id] = {
-          ...currentPanels[panelLayout.id],
-          gridData: {
-            i: panelLayout.id,
-            y: panelLayout.row,
-            x: panelLayout.column,
-            w: panelLayout.width,
-            h: panelLayout.height,
-          },
+      const updatedSections: DashboardSectionMap = [];
+      const updatedPanels: { [key: string]: DashboardPanelState } = {};
+      newLayout.forEach((section, sectionIndex) => {
+        updatedSections[sectionIndex] = {
+          title: section.title,
+          collapsed: section.isCollapsed,
         };
-        return updatedPanelsAcc;
-      }, {} as { [key: string]: DashboardPanelState });
+        Object.values(section.panels).forEach((panelLayout) => {
+          updatedPanels[panelLayout.id] = {
+            ...currentPanels[panelLayout.id],
+            ...(sectionIndex > 0 ? { sectionIndex } : {}),
+            gridData: {
+              i: panelLayout.id,
+              y: panelLayout.row,
+              x: panelLayout.column,
+              w: panelLayout.width,
+              h: panelLayout.height,
+            },
+          };
+        });
+      });
+
       if (!arePanelLayoutsEqual(currentPanels, updatedPanels)) {
         dashboardApi.setPanels(updatedPanels);
       }

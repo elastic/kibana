@@ -8,6 +8,7 @@
  */
 
 import { BehaviorSubject, merge } from 'rxjs';
+import fastIsEqual from 'fast-deep-equal';
 import { filter, map, max } from 'lodash';
 import { v4 } from 'uuid';
 import { asyncForEach } from '@kbn/std';
@@ -42,10 +43,12 @@ import { arePanelLayoutsEqual } from './are_panel_layouts_equal';
 import { dashboardClonePanelActionStrings } from '../dashboard_actions/_dashboard_actions_strings';
 import { placeClonePanel } from '../dashboard_container/panel_placement/place_clone_panel_strategy';
 import { PanelPlacementStrategy } from '../plugin_constants';
+import { DashboardSectionMap } from '../../common/dashboard_container/types';
 
 export function initializePanelsManager(
   incomingEmbeddable: EmbeddablePackageState | undefined,
   initialPanels: DashboardPanelMap,
+  initialSections: DashboardSectionMap | undefined,
   initialPanelsRuntimeState: UnsavedPanelState,
   trackPanel: ReturnType<typeof initializeTrackPanel>,
   getReferencesForPanelId: (id: string) => Reference[],
@@ -57,6 +60,10 @@ export function initializePanelsManager(
   const panels$ = new BehaviorSubject(initialPanels);
   function setPanels(panels: DashboardPanelMap) {
     if (panels !== panels$.value) panels$.next(panels);
+  }
+  const sections$ = new BehaviorSubject<DashboardSectionMap>(initialSections ?? []);
+  function setSections(sections: DashboardSectionMap) {
+    if (!fastIsEqual(sections, sections$.value)) sections$.next(sections);
   }
   let restoredRuntimeState: UnsavedPanelState = initialPanelsRuntimeState;
 
@@ -150,6 +157,7 @@ export function initializePanelsManager(
       type: panel.type,
       explicitInput: { ...panel.explicitInput, ...serialized.rawState },
       gridData: panel.gridData,
+      rowIndex: panel.sectionIndex ?? 0,
       references: serialized.references,
     };
   }
@@ -337,12 +345,36 @@ export function initializePanelsManager(
         await untilEmbeddableLoaded(id);
         return id;
       },
+      sections$,
+      addNewSection: () => {
+        setSections([
+          ...sections$.getValue(),
+          {
+            title: i18n.translate('examples.gridExample.defaultSectionTitle', {
+              defaultMessage: 'New collapsible section',
+            }),
+            collapsed: false,
+          },
+        ]);
+
+        // // scroll to bottom after row is added
+        // layoutUpdated$.pipe(skip(1), take(1)).subscribe(() => {
+        //   window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+        // });
+      },
       setPanels,
       setRuntimeStateForChild,
       untilEmbeddableLoaded,
     },
     comparators: {
       panels: [panels$, setPanels, arePanelLayoutsEqual],
+      sections: [
+        sections$,
+        setSections,
+        (a, b) => {
+          return fastIsEqual(a ?? [], b ?? []);
+        },
+      ],
     } as StateComparators<Pick<DashboardState, 'panels'>>,
     internalApi: {
       registerChildApi: (api: DefaultEmbeddableApi) => {
@@ -353,6 +385,7 @@ export function initializePanelsManager(
       },
       reset: (lastSavedState: DashboardState) => {
         setPanels(lastSavedState.panels);
+        setSections([]);
         restoredRuntimeState = {};
         let resetChangedPanelCount = false;
         const currentChildren = children$.value;
@@ -379,6 +412,7 @@ export function initializePanelsManager(
       },
       getState: (): {
         panels: DashboardState['panels'];
+        sections: DashboardState['sections'];
         references: Reference[];
       } => {
         const references: Reference[] = [];
@@ -395,7 +429,7 @@ export function initializePanelsManager(
           return acc;
         }, {} as DashboardPanelMap);
 
-        return { panels, references };
+        return { panels, sections: sections$.getValue(), references };
       },
     },
   };

@@ -50,7 +50,6 @@ export const registerActions = async ({
 
   uiActions.registerActionAsync(ACTION_ADD_SECTION, async () => {
     const { AddSectionAction } = await import('./actions_module');
-    console.log('HERE!!!! 123');
     return new AddSectionAction();
   });
   uiActions.attachAction(ADD_PANEL_TRIGGER, ACTION_ADD_SECTION);
