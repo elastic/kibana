@@ -8,7 +8,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { DataView, DataViewListItem, DataViewSpec } from '@kbn/data-views-plugin/public';
+import type { DataView, DataViewSpec } from '@kbn/data-views-plugin/public';
 import type { ToastsStart } from '@kbn/core/public';
 import { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { DiscoverInternalStateContainer } from '../discover_internal_state_container';
@@ -36,20 +36,19 @@ export async function loadDataView({
   dataViewId,
   dataViewSpec,
   services: { dataViews },
-  savedDataViews,
   adHocDataViews,
 }: {
   dataViewId?: string;
   dataViewSpec?: DataViewSpec;
   services: DiscoverServices;
-  savedDataViews: DataViewListItem[];
   adHocDataViews: DataView[];
 }): Promise<DataViewData> {
   let fetchId: string | undefined = dataViewId;
 
   // Handle redirect with data view spec provided via history location state
   if (dataViewSpec) {
-    const isPersisted = savedDataViews.find(({ id: currentId }) => currentId === dataViewSpec.id);
+    const dataViewList = await dataViews.getIdsWithTitle(true);
+    const isPersisted = dataViewList.find(({ id: currentId }) => currentId === dataViewSpec.id);
     if (isPersisted) {
       // If passed a spec for a persisted data view, reassign the fetchId
       fetchId = dataViewSpec.id!;
@@ -185,7 +184,7 @@ export const loadAndResolveDataView = async ({
   services: DiscoverServices;
 }) => {
   const { dataViews, toastNotifications } = services;
-  const { adHocDataViews, savedDataViews } = internalStateContainer.getState();
+  const { adHocDataViews } = internalStateContainer.getState();
 
   // Check ad hoc data views first, unless a data view spec is supplied,
   // then attempt to load one if none is found
@@ -197,7 +196,6 @@ export const loadAndResolveDataView = async ({
       dataViewId,
       services,
       dataViewSpec,
-      savedDataViews,
       adHocDataViews,
     });
 
