@@ -20,6 +20,7 @@ import {
   getDataStreamLifecycle,
   getUnmanagedElasticsearchAssets,
 } from '../../../lib/streams/stream_crud';
+import { addAliasesForOtelFields } from '../../../lib/streams/component_templates/otel_layer';
 
 export async function readStream({
   name,
@@ -75,11 +76,16 @@ export async function readStream({
     };
   }
 
+  const inheritedFields = addAliasesForOtelFields(
+    streamDefinition,
+    getInheritedFieldsFromAncestors(ancestors)
+  );
+
   const body: WiredStreamGetResponse = {
     stream: streamDefinition,
     dashboards,
     effective_lifecycle: findInheritedLifecycle(streamDefinition, ancestors),
-    inherited_fields: getInheritedFieldsFromAncestors(ancestors),
+    inherited_fields: inheritedFields,
   };
 
   return body;
