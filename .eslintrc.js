@@ -1636,6 +1636,8 @@ module.exports = {
         'x-pack/platform/plugins/shared/task_manager/**/*.{ts, tsx}',
         'x-pack/solutions/observability/packages/kbn-alerts-grouping/**/*.{ts, tsx}',
         'src/platform/packages/shared/kbn-alerts-ui-shared/**/*.{ts, tsx}',
+        'src/platform/packages/shared/kbn-alerting-types/**/*.{ts, tsx}',
+        'src/platform/packages/shared/kbn-cases-components/**/*.{ts, tsx}',
       ],
       rules: {
         '@typescript-eslint/consistent-type-imports': 'error',
