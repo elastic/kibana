@@ -9,16 +9,17 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiEmptyPrompt } from '@elastic/eui';
+import { EuiEmptyPrompt, EuiText } from '@elastic/eui';
 import { ViewDetailsPopover } from './view_details_popover';
 import { getWarningsDescription } from './i18n_utils';
+import { FailureReasons } from './failure_reasons';
 import type { SearchResponseWarning } from '../../types';
 
 interface Props {
   warnings: SearchResponseWarning[];
 }
 
-export const SearchResponseWarningsEmptyPrompt = (props: Props) => {
+export const SearchResponseWarningsEmptyPrompt: React.FC<Props> = ({ warnings }) => {
   return (
     <EuiEmptyPrompt
       iconType="warning"
@@ -30,8 +31,17 @@ export const SearchResponseWarningsEmptyPrompt = (props: Props) => {
           })}
         </h2>
       }
-      body={getWarningsDescription(props.warnings)}
-      actions={<ViewDetailsPopover warnings={props.warnings} />}
+      body={
+        <div>
+          <div>{getWarningsDescription(warnings)}</div>
+          <div>
+            <EuiText size="s">
+              <FailureReasons warnings={warnings} />
+            </EuiText>
+          </div>
+        </div>
+      }
+      actions={<ViewDetailsPopover warnings={warnings} />}
       data-test-subj="searchResponseWarningsEmptyPrompt"
     />
   );

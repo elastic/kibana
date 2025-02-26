@@ -10,23 +10,22 @@
 import React from 'react';
 import { EuiCallOut, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { ViewDetailsPopover } from './view_details_popover';
-import { getWarningsDescription, getWarningsTitle, getWarningsParsedReasons } from './i18n_utils';
+import { getWarningsDescription, getWarningsTitle } from './i18n_utils';
+import { FailureReasons } from './failure_reasons';
 import type { SearchResponseWarning } from '../../types';
 
 interface Props {
   warnings: SearchResponseWarning[];
 }
 
-export const SearchResponseWarningsCallout = (props: Props) => {
-  if (!props.warnings.length) {
+export const SearchResponseWarningsCallout: React.FC<Props> = ({ warnings }) => {
+  if (!warnings.length) {
     return null;
   }
 
-  const reasons = getWarningsParsedReasons(props.warnings);
-
   return (
     <EuiCallOut
-      title={getWarningsTitle(props.warnings)}
+      title={getWarningsTitle(warnings)}
       color="warning"
       iconType="warning"
       size="s"
@@ -34,18 +33,12 @@ export const SearchResponseWarningsCallout = (props: Props) => {
     >
       <>
         <EuiFlexGroup gutterSize="xs" alignItems="center" direction="row">
-          <EuiFlexItem grow={false}>{getWarningsDescription(props.warnings)}</EuiFlexItem>
+          <EuiFlexItem grow={false}>{getWarningsDescription(warnings)}</EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <ViewDetailsPopover displayAsLink={true} warnings={props.warnings} />
+            <ViewDetailsPopover displayAsLink={true} warnings={warnings} />
           </EuiFlexItem>
         </EuiFlexGroup>
-        {reasons.size > 0 && (
-          <div>
-            {[...reasons].map((reason) => (
-              <div key={reason}>{reason}</div>
-            ))}
-          </div>
-        )}
+        <FailureReasons warnings={warnings} />
       </>
     </EuiCallOut>
   );

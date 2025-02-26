@@ -8,6 +8,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { ShardFailure } from '@elastic/elasticsearch/lib/api/types';
 import type { SearchResponseWarning } from '../../types';
 
 export const viewDetailsLabel = i18n.translate('searchResponseWarnings.viewDetailsButtonLabel', {
@@ -57,10 +58,27 @@ export function getWarningsDescription(warnings: SearchResponseWarning[]) {
       });
 }
 
-export function getWarningsParsedReasons(warnings: SearchResponseWarning[]) {
-  const reasons = new Set<string>();
+export function getParsedReasonFromShardFailure(failure: ShardFailure): string | null {
+  const causedBy = failure?.reason?.caused_by;
   // example of a reason: "Can't sort on field [log.level]; the field has incompatible sort types: [LONG] and [STRING] across shards!"
   const cantSortRegExp = /Can't sort on field \[(.+)\];/;
+  const matchReason = cantSortRegExp.exec(causedBy?.reason ?? '');
+
+  if (causedBy?.type === 'illegal_argument_exception' && matchReason) {
+    return i18n.translate('searchResponseWarnings.description.cantSortReasonText', {
+      defaultMessage:
+        'The results could not be sorted on field "{field}" because it has incompatible types across shards or it is unmapped in some of them. Consider updating the field mapping, adding "exist" filter for the field value to skip unmapped, or removing the sort.',
+      values: {
+        field: matchReason[1],
+      },
+    });
+  }
+
+  return null;
+}
+
+export function getWarningsParsedReasons(warnings: SearchResponseWarning[]) {
+  const reasons = new Set<string>();
 
   warnings.forEach((warning) => {
     Object.keys(warning.clusters).forEach((clusterName) => {
@@ -71,19 +89,10 @@ export function getWarningsParsedReasons(warnings: SearchResponseWarning[]) {
       const failures = warning.clusters[clusterName].failures;
 
       failures?.forEach((failure) => {
-        const causedBy = failure?.reason?.caused_by;
-        const matchReason = cantSortRegExp.exec(causedBy?.reason ?? '');
+        const reason = getParsedReasonFromShardFailure(failure);
 
-        if (causedBy?.type === 'illegal_argument_exception' && matchReason) {
-          reasons.add(
-            i18n.translate('searchResponseWarnings.description.cantSortReasonText', {
-              defaultMessage:
-                'The results cannot be sorted on field "{field}" because it has incompatible types across shards. Consider removing the sort, adding "exist" filter for the field value, or updating the field mapping.',
-              values: {
-                field: matchReason[1],
-              },
-            })
-          );
+        if (reason) {
+          reasons.add(reason);
         }
       });
     });
