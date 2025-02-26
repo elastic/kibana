@@ -310,7 +310,7 @@ export class BaseValidator {
         !(await this.endpointAuthzPromise).canManageGlobalArtifacts
       ) {
         throw new EndpointArtifactExceptionValidationError(
-          `${ENDPOINT_AUTHZ_ERROR_MESSAGE}. ${OWNER_SPACE_ID_TAG_MANAGEMENT_NOT_ALLOWED_MESSAGE}`,
+          `${ENDPOINT_AUTHZ_ERROR_MESSAGE}. ${GLOBAL_ARTIFACT_MANAGEMENT_NOT_ALLOWED_MESSAGE}`,
           403
         );
       }
