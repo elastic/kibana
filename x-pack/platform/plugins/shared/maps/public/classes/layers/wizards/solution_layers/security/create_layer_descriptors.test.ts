@@ -7,6 +7,8 @@
 
 import { getDefaultStaticProperties } from '../../../../styles/vector/vector_style_defaults';
 
+jest.mock('@kbn/mapbox-gl', () => ({}));
+
 jest.mock('../../../../../kibana_services', () => {
   return {
     getIsDarkMode() {
