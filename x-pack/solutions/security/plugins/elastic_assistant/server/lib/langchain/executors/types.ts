@@ -53,7 +53,6 @@ export interface AgentExecutorParams<T extends boolean> {
   conversationId?: string;
   contentReferencesStore: ContentReferencesStore;
   core: CoreRequestHandlerContext;
-  contentReferencesStore: ContentReferencesStore;
   dataClients?: AssistantDataClients;
   esClient: ElasticsearchClient;
   langChainMessages: BaseMessage[];
