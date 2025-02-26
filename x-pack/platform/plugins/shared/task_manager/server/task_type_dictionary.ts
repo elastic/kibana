@@ -14,6 +14,7 @@ import {
   TaskPriority,
   TaskCost,
   ConcreteTaskInstance,
+  RecurringTaskRunResult,
 } from './task';
 import { CONCURRENCY_ALLOW_LIST_BY_TASK_TYPE } from './constants';
 
@@ -203,6 +204,8 @@ export class TaskTypeDictionary {
   /**
    * Method for allowing consumers to register task definitions into the system.
    * @param taskDefinitions - The Kibana task definitions dictionary
+   *
+   * @deprecated Use registerOneTimeTaskType or registerRecurringTaskType instead.
    */
   public registerTaskDefinitions(taskDefinitions: TaskDefinitionRegistry) {
     const duplicate = Object.keys(taskDefinitions).find((type) => this.definitions.has(type));
@@ -235,6 +238,60 @@ export class TaskTypeDictionary {
     } catch (e) {
       this.logger.error(`Could not sanitize task definitions: ${e.message}`);
     }
+  }
+
+  public registerOneTimeTaskType(
+    taskType: string,
+    fn: (options: OneTimeTaskTypeFnOpts) => Promise<void>,
+    options?: OneTimeTaskTypeOpts
+  ) {
+    this.registerTaskDefinitions({
+      [taskType]: {
+        ...options,
+        title: '',
+        createTaskRunner({ taskInstance }) {
+          const abortController = new AbortController();
+          return {
+            run: async () => {
+              await fn({ abortController, params: taskInstance.params });
+              return { state: {} };
+            },
+            cancel: async () => {
+              abortController.abort();
+            },
+          };
+        },
+      },
+    });
+  }
+
+  public registerRecurringTaskType(
+    taskType: string,
+    fn: (options: RecurringTaskTypeFnOpts) => Promise<RecurringTaskRunResult>,
+    options?: RecurringTaskTypeOpts
+  ) {
+    this.registerTaskDefinitions({
+      [taskType]: {
+        ...options,
+        title: '',
+        createTaskRunner({ taskInstance }) {
+          const abortController = new AbortController();
+          return {
+            run: async () => {
+              const result = await fn({
+                abortController,
+                params: taskInstance.params,
+                state: taskInstance.state,
+              });
+              return { ...result, state: result.state || {} };
+            },
+            cancel: async () => {
+              abortController.abort();
+            },
+          };
+        },
+      },
+    });
   }
 }
 

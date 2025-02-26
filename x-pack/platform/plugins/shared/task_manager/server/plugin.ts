@@ -33,19 +33,12 @@ import { TaskManagerConfig } from './config';
 import { createInitialMiddleware, addMiddlewareToChain, Middleware } from './lib/middleware';
 import { removeIfExists } from './lib/remove_if_exists';
 import { setupSavedObjects, BACKGROUND_TASK_NODE_SO_NAME, TASK_SO_NAME } from './saved_objects';
-import {
-  TaskDefinitionRegistry,
-  TaskTypeDictionary,
-  RecurringTaskTypeOpts,
-  OneTimeTaskTypeOpts,
-  OneTimeTaskTypeFnOpts,
-  RecurringTaskTypeFnOpts,
-} from './task_type_dictionary';
+import { TaskTypeDictionary } from './task_type_dictionary';
 import { AggregationOpts, FetchResult, SearchOpts, TaskStore } from './task_store';
 import { TaskScheduling } from './task_scheduling';
 import { backgroundTaskUtilizationRoute, healthRoute, metricsRoute } from './routes';
 import { createMonitoringStats, MonitoringStats } from './monitoring';
-import { ConcreteTaskInstance, RecurringTaskRunResult } from './task';
+import { ConcreteTaskInstance } from './task';
 import { registerTaskManagerUsageCollector } from './usage';
 import { TASK_MANAGER_INDEX } from './constants';
 import { AdHocTaskCounter } from './lib/adhoc_task_counter';
@@ -60,28 +53,16 @@ import {
   scheduleMarkRemovedTasksAsUnrecognizedDefinition,
 } from './removed_tasks/mark_removed_tasks_as_unrecognized';
 
-export interface TaskManagerSetupContract {
+export type TaskManagerSetupContract = Pick<
+  TaskTypeDictionary,
+  'registerTaskDefinitions' | 'registerOneTimeTaskType' | 'registerRecurringTaskType'
+> & {
   /**
    * @deprecated
    */
   index: string;
   addMiddleware: (middleware: Middleware) => void;
-  /**
-   * Method for allowing consumers to register task definitions into the system.
-   * @param taskDefinitions - The Kibana task definitions dictionary
-   */
-  registerTaskDefinitions: (taskDefinitions: TaskDefinitionRegistry) => void;
-  registerOneTimeTaskType: (
-    taskType: string,
-    fn: (options: OneTimeTaskTypeFnOpts) => Promise<void>,
-    options?: OneTimeTaskTypeOpts
-  ) => void;
-  registerRecurringTaskType: (
-    taskType: string,
-    fn: (options: RecurringTaskTypeFnOpts) => Promise<RecurringTaskRunResult>,
-    options?: RecurringTaskTypeOpts
-  ) => void;
-}
+};
 
 export type TaskManagerStartContract = Pick<
   TaskScheduling,
@@ -284,61 +265,9 @@ export class TaskManagerPlugin
       addMiddleware: (middleware: Middleware) => {
         this.middleware = addMiddlewareToChain(this.middleware, middleware);
       },
-      registerTaskDefinitions: (taskDefinition: TaskDefinitionRegistry) => {
-        this.definitions.registerTaskDefinitions(taskDefinition);
-      },
-      registerOneTimeTaskType: (
-        taskType: string,
-        fn: (options: OneTimeTaskTypeFnOpts) => Promise<void>,
-        options?: OneTimeTaskTypeOpts
-      ) => {
-        this.definitions.registerTaskDefinitions({
-          [taskType]: {
-            ...options,
-            title: '',
-            createTaskRunner({ taskInstance }) {
-              const abortController = new AbortController();
-              return {
-                run: async () => {
-                  await fn({ abortController, params: taskInstance.params });
-                  return { state: {} };
-                },
-                cancel: async () => {
-                  abortController.abort();
-                },
-              };
-            },
-          },
-        });
-      },
-      registerRecurringTaskType: (
-        taskType: string,
-        fn: (options: RecurringTaskTypeFnOpts) => Promise<RecurringTaskRunResult>,
-        options?: RecurringTaskTypeOpts
-      ) => {
-        this.definitions.registerTaskDefinitions({
-          [taskType]: {
-            ...options,
-            title: '',
-            createTaskRunner({ taskInstance }) {
-              const abortController = new AbortController();
-              return {
-                run: async () => {
-                  const { state, schedule } = await fn({
-                    abortController,
-                    params: taskInstance.params,
-                    state: taskInstance.state,
-                  });
-                  return { state: state || {}, schedule };
-                },
-                cancel: async () => {
-                  abortController.abort();
-                },
-              };
-            },
-          },
-        });
-      },
+      registerTaskDefinitions: (...args) => this.definitions.registerTaskDefinitions(...args),
+      registerOneTimeTaskType: (...args) => this.definitions.registerOneTimeTaskType(...args),
+      registerRecurringTaskType: (...args) => this.definitions.registerRecurringTaskType(...args),
     };
   }
 
