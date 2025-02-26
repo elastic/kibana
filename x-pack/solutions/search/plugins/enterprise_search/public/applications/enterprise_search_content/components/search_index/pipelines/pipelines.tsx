@@ -66,6 +66,9 @@ export const SearchIndexPipelines: React.FC = () => {
   const apiIndex = isApiIndex(index);
   const extractionDisabled = getContentExtractionDisabled(index);
   const buttonRef = useRef<HTMLButtonElement | null>(null);
+  const pipelinesButton = Array.from(document.querySelectorAll('button')).find(
+    btn => btn.textContent?.trim() === 'Pipelines'
+  );
 
   const onCloseDeleteModal = useCallback(() => {
     closeDeleteModal();
@@ -76,17 +79,14 @@ export const SearchIndexPipelines: React.FC = () => {
     }, 0);
   }, [closeDeleteModal, buttonRef]);
 
-  const onDeletePipeline = () => {
-    revertPipeline({ indexName });
+  const onDeletePipeline = useCallback(() => {
+    revertPipeline({ indexName })   
     setTimeout(() => {
-      const button = Array.from(document.querySelectorAll('button')).find(
-        (btn) => btn.textContent?.trim() === 'Pipelines'
-      );
-      if (button) {
-        button.focus();
+      if (pipelinesButton) {
+        pipelinesButton.focus();
       }
-    }, 200);
-  };
+    }, 200); 
+  }, [revertPipeline, pipelinesButton]);
 
   useEffect(() => {
     if (index) {
