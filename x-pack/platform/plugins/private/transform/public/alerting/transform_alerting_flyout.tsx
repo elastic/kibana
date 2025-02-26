@@ -7,6 +7,7 @@
 
 import type { FC } from 'react';
 import React, { createContext, useContext, useMemo } from 'react';
+import { RuleFormFlyout } from '@kbn/response-ops-rule-form/flyout';
 import { memoize } from 'lodash';
 import type { Observable } from 'rxjs';
 import { BehaviorSubject } from 'rxjs';
@@ -32,44 +33,43 @@ export const TransformAlertFlyout: FC<TransformAlertFlyoutProps> = ({
   onCloseFlyout,
   onSave,
 }) => {
-  const { triggersActionsUi } = useAppDependencies();
+  const { triggersActionsUi, ...plugins } = useAppDependencies();
 
   const AlertFlyout = useMemo(() => {
     if (!triggersActionsUi) return;
 
+    const { ruleTypeRegistry, actionTypeRegistry } = triggersActionsUi;
+
     const commonProps = {
-      onClose: () => {
+      plugins: { ...plugins, ruleTypeRegistry, actionTypeRegistry },
+      onCancel: () => {
         onCloseFlyout();
       },
-      onSave: async () => {
+      onSubmit: async () => {
         if (onSave) {
           onSave();
         }
+        onCloseFlyout();
       },
     };
 
     if (initialAlert) {
-      return triggersActionsUi.getEditRuleFlyout({
-        ...commonProps,
-        initialRule: {
-          ...initialAlert,
-          ruleTypeId: initialAlert.alertTypeId,
-        },
-      });
+      return <RuleFormFlyout {...commonProps} id={initialAlert.id} />;
     }
 
-    return triggersActionsUi.getAddRuleFlyout({
-      ...commonProps,
-      consumer: 'stackAlerts',
-      canChangeTrigger: false,
-      ruleTypeId: TRANSFORM_RULE_TYPE.TRANSFORM_HEALTH,
-      metadata: {},
-      initialValues: {
-        params: ruleParams!,
-      },
-    });
+    return (
+      <RuleFormFlyout
+        {...commonProps}
+        consumer={'stackAlerts'}
+        ruleTypeId={TRANSFORM_RULE_TYPE.TRANSFORM_HEALTH}
+        initialMetadata={{}}
+        initialValues={{
+          params: ruleParams!,
+        }}
+      />
+    );
     // deps on id to avoid re-rendering on auto-refresh
-  }, [triggersActionsUi, initialAlert, ruleParams, onCloseFlyout, onSave]);
+  }, [triggersActionsUi, plugins, initialAlert, ruleParams, onCloseFlyout, onSave]);
 
   return <>{AlertFlyout}</>;
 };

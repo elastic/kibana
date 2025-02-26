@@ -38,7 +38,8 @@
       "triggersActionsUi",
       "usageCollection",
       "unifiedSearch",
-      "charts"
+      "charts",
+      "fieldsMetadata"
     ],
     "optionalPlugins": [
       "cloud",

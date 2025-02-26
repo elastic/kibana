@@ -21,12 +21,13 @@ export function UptimeAlertsProvider({ getService }: FtrProviderContext) {
         await testSubjects.click('xpack.synthetics.toggleTlsAlertFlyout');
       }
       // ensure the flyout has opened
-      await testSubjects.exists('ruleNameInput');
+      await testSubjects.exists('ruleFlyoutTitle');
     },
     async openMonitorStatusAlertType(alertType: string) {
       await testSubjects.click(`xpack.synthetics.alerts.${alertType}-SelectOption`);
     },
     async setAlertTags(tags: string[]) {
+      await testSubjects.click('ruleFormStep-details');
       for (let i = 0; i < tags.length; i += 1) {
         await testSubjects.click('comboBoxSearchInput');
         await testSubjects.setValue('comboBoxInput', tags[i]);
@@ -34,10 +35,12 @@ export function UptimeAlertsProvider({ getService }: FtrProviderContext) {
       }
     },
     async setAlertName(name: string) {
-      await testSubjects.setValue('ruleNameInput', name);
+      await testSubjects.click('ruleFormStep-details');
+      await testSubjects.setValue('ruleDetailsNameInput', name);
     },
     async setAlertInterval(value: string) {
-      await testSubjects.setValue('intervalInput', value);
+      await testSubjects.click('ruleFormStep-definition');
+      await testSubjects.setValue('ruleScheduleNumberInput', value);
     },
     async setAlertThrottleInterval(value: string) {
       await testSubjects.click('notifyWhenSelect');
@@ -109,11 +112,12 @@ export function UptimeAlertsProvider({ getService }: FtrProviderContext) {
        * While this field is set in previous step, it is possible that component rerendering could be
        * clearing out the value after it's filled in. To prevent this particular issue with flakiness,
        * we should attempt to set the name again before saving the alert */
-      await testSubjects.setValue('ruleNameInput', name);
-      await testSubjects.click('saveRuleButton');
+      await testSubjects.click('ruleFormStep-details');
+      await testSubjects.setValue('ruleDetailsNameInput', name);
+      await testSubjects.click('ruleFlyoutFooterSaveButton');
     },
     async clickSaveAlertsConfirmButton() {
-      await testSubjects.click('confirmRuleSaveModal > confirmModalConfirmButton', 20000);
+      await testSubjects.click('confirmModalConfirmButton', 20000);
     },
   };
 }

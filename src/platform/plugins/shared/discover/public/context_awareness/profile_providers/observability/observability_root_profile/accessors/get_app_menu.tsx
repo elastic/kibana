@@ -7,11 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import React from 'react';
 import { AppMenuActionId, AppMenuActionType, AppMenuRegistry } from '@kbn/discover-utils';
 import { DATA_QUALITY_LOCATOR_ID, DataQualityLocatorParams } from '@kbn/deeplinks-observability';
 import { OBSERVABILITY_THRESHOLD_RULE_TYPE_ID } from '@kbn/rule-data-utils';
+import { RuleFormFlyout } from '@kbn/response-ops-rule-form/flyout';
 import { isOfQueryType } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
+import { isValidRuleFormPlugins } from '@kbn/response-ops-rule-form/lib';
 import { AppMenuExtensionParams } from '../../../..';
 import type { RootProfileProvider } from '../../../../profiles';
 import { ProfileProviderServices } from '../../../profile_provider_services';
@@ -74,7 +77,11 @@ const registerDatasetQualityLink = (
 
 const registerCustomThresholdRuleAction = (
   registry: AppMenuRegistry,
-  { data, triggersActionsUi }: ProfileProviderServices,
+  {
+    data,
+    triggersActionsUi: { ruleTypeRegistry, actionTypeRegistry },
+    ...services
+  }: ProfileProviderServices,
   { dataView }: AppMenuExtensionParams
 ) => {
   registry.registerCustomActionUnderSubmenu(AppMenuActionId.alerts, {
@@ -91,21 +98,34 @@ const registerCustomThresholdRuleAction = (
         const index = dataView?.toMinimalSpec();
         const { filters, query } = data.query.getState();
 
-        return triggersActionsUi.getAddRuleFlyout({
-          consumer: 'logs',
-          ruleTypeId: OBSERVABILITY_THRESHOLD_RULE_TYPE_ID,
-          canChangeTrigger: false,
-          initialValues: {
-            params: {
-              searchConfiguration: {
-                index,
-                query,
-                filter: filters,
+        // Some of the rule form's required plugins are from x-pack, so make sure they're defined before
+        // rendering the flyout. The alerting plugin is also part of x-pack, so this check should probably never
+        // return false. This is mostly here because Typescript requires us to mark x-pack plugins as optional.
+        const plugins = { ...services, data };
+        if (!isValidRuleFormPlugins(plugins)) return null;
+
+        return (
+          <RuleFormFlyout
+            plugins={{
+              ...plugins,
+              ruleTypeRegistry,
+              actionTypeRegistry,
+            }}
+            consumer={'logs'}
+            ruleTypeId={OBSERVABILITY_THRESHOLD_RULE_TYPE_ID}
+            initialValues={{
+              params: {
+                searchConfiguration: {
+                  index,
+                  query,
+                  filter: filters,
+                },
               },
-            },
-          },
-          onClose: onFinishAction,
-        });
+            }}
+            onSubmit={onFinishAction}
+            onCancel={onFinishAction}
+          />
+        );
       },
     },
   });
