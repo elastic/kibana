@@ -2465,10 +2465,10 @@
     history "^4.9.0"
     qs "^6.7.0"
 
-"@elastic/synthetics@^1.17.2":
-  version "1.17.2"
-  resolved "https://registry.yarnpkg.com/@elastic/synthetics/-/synthetics-1.17.2.tgz#e97b22e5c51ebb3fd57981c0e7c597f27cea4d8e"
-  integrity sha512-4BV6cK0f9O3PKziC7Wd+OrveGv6l3iEpY5RqhsSMgVgYtkf9UlXyDWjV0DI9kVSPZsua1inVmXTQ78IVP7BGWQ==
+"@elastic/synthetics@^1.18.0":
+  version "1.18.0"
+  resolved "https://registry.yarnpkg.com/@elastic/synthetics/-/synthetics-1.18.0.tgz#3d4767cc1bda476009cc207eecb6ef3780fac4c0"
+  integrity sha512-TX4mrXLDNundhyPOhphF4uG0Opc8130RgTCa6EDapVsCc/w1QtA0U+4m45YDeptdV0PKby/6Lk9KsDcF48ac0A==
   dependencies:
     "@babel/code-frame" "^7.22.13"
     archiver "^7.0.1"
@@ -2490,7 +2490,8 @@
     sonic-boom "^3.3.0"
     source-map-support "^0.5.21"
     stack-utils "^2.0.6"
-    undici "^5.28.3"
+    undici "^5.28.5"
+    unzip-stream "^0.3.4"
     yaml "^2.2.2"
 
 "@elastic/transport@9.0.0-alpha.1":
@@ -14736,6 +14737,14 @@ binary-search@^1.3.3:
   resolved "https://registry.yarnpkg.com/binary-search/-/binary-search-1.3.6.tgz#e32426016a0c5092f0f3598836a1c7da3560565c"
   integrity sha512-nbE1WxOTTrUWIfsfZ4aHGYu5DOuNkbxGokjV6Z2kxfJK3uaAb8zNK1muzOeipoLHZjInT4Br88BHpzevc681xA==
 
+binary@^0.3.0:
+  version "0.3.0"
+  resolved "https://registry.yarnpkg.com/binary/-/binary-0.3.0.tgz#9f60553bc5ce8c3386f3b553cff47462adecaa79"
+  integrity sha512-D4H1y5KYwpJgK8wk1Cue5LLPgmwHKYSChkbspQg5JtVuR5ulGckxfR62H3AE9UDkdMC8yyXlqYihuz3Aqg2XZg==
+  dependencies:
+    buffers "~0.1.1"
+    chainsaw "~0.1.0"
+
 bitmap-sdf@^1.0.3:
   version "1.0.3"
   resolved "https://registry.yarnpkg.com/bitmap-sdf/-/bitmap-sdf-1.0.3.tgz#c99913e5729357a6fd350de34158180c013880b2"
@@ -15083,6 +15092,11 @@ buffer@^6.0.3:
     base64-js "^1.3.1"
     ieee754 "^1.2.1"
 
+buffers@~0.1.1:
+  version "0.1.1"
+  resolved "https://registry.yarnpkg.com/buffers/-/buffers-0.1.1.tgz#b24579c3bed4d6d396aeee6d9a8ae7f5482ab7bb"
+  integrity sha512-9q/rDEGSb/Qsvv2qvzIzdluL5k7AaJOTrw23z9reQthrbF7is4CtlT0DXyO1oei2DCp4uojjzQ7igaSHp1kAEQ==
+
 buildkite-test-collector@^1.7.0:
   version "1.7.0"
   resolved "https://registry.yarnpkg.com/buildkite-test-collector/-/buildkite-test-collector-1.7.0.tgz#3fdd753b185045c7aed0136a0e0713a77313164b"
@@ -15375,6 +15389,13 @@ ccount@^1.0.0:
   version "1.0.5"
   resolved "https://registry.yarnpkg.com/ccount/-/ccount-1.0.5.tgz#ac82a944905a65ce204eb03023157edf29425c17"
   integrity sha512-MOli1W+nfbPLlKEhInaxhRdp7KVLFxLN5ykwzHgLsLI3H3gs5jjFAK4Eoj3OzzcxCtumDaI8onoVDeQyWaNTkw==
+
+chainsaw@~0.1.0:
+  version "0.1.0"
+  resolved "https://registry.yarnpkg.com/chainsaw/-/chainsaw-0.1.0.tgz#5eab50b28afe58074d0d58291388828b5e5fbc98"
+  integrity sha512-75kWfWt6MEKNC8xYXIdRpDehRYY/tNSgwKaJq+dbbDcxORuVrrQ+SEHoWsniVn9XPYfP4gmdWIeDk/4YNp1rNQ==
+  dependencies:
+    traverse ">=0.3.0 <0.4"
 
 chalk-template@^0.4.0:
   version "0.4.0"
@@ -32001,6 +32022,11 @@ trace@^3.2.0:
   dependencies:
     stack-chain "^2.0.0"
 
+"traverse@>=0.3.0 <0.4":
+  version "0.3.9"
+  resolved "https://registry.yarnpkg.com/traverse/-/traverse-0.3.9.tgz#717b8f220cc0bb7b44e40514c22b2e8bbc70d8b9"
+  integrity sha512-iawgk0hLP3SxGKDfnDJf8wTz4p2qImnyihM5Hh/sGvQ3K37dPi/w8sRhdNIxYA1TwFwc5mDhIJq+O0RsvXBKdQ==
+
 traverse@~0.6.6:
   version "0.6.6"
   resolved "https://registry.yarnpkg.com/traverse/-/traverse-0.6.6.tgz#cbdf560fd7b9af632502fed40f918c157ea97137"
@@ -32419,10 +32445,10 @@ undici-types@~5.26.4:
   resolved "https://registry.yarnpkg.com/undici-types/-/undici-types-5.26.5.tgz#bcd539893d00b56e964fd2657a4866b221a65617"
   integrity sha512-JlCMO+ehdEIKqlFxk6IfVoAUVmgz7cU7zD/h9XZ0qzeosSHmUJVOzSQvvYSYWXkFXC+IfLKSIffhv0sVZup6pA==
 
-undici@^5.28.3:
-  version "5.28.4"
-  resolved "https://registry.yarnpkg.com/undici/-/undici-5.28.4.tgz#6b280408edb6a1a604a9b20340f45b422e373068"
-  integrity sha512-72RFADWFqKmUb2hmmvNODKL3p9hcB6Gt2DOQMis1SEBaV6a4MH8soBvzg+95CYhCKPFedut2JY9bMfrDl9D23g==
+undici@^5.28.5:
+  version "5.28.5"
+  resolved "https://registry.yarnpkg.com/undici/-/undici-5.28.5.tgz#b2b94b6bf8f1d919bc5a6f31f2c01deb02e54d4b"
+  integrity sha512-zICwjrDrcrUE0pyyJc1I2QzBkLM8FINsgOrt6WjA+BgajVq9Nxu2PbFFXUrAggLfDXlZGZBVZYw7WNV5KiBiBA==
   dependencies:
     "@fastify/busboy" "^2.0.0"
 
@@ -32689,6 +32715,14 @@ untildify@^4.0.0:
   version "4.0.0"
   resolved "https://registry.yarnpkg.com/untildify/-/untildify-4.0.0.tgz#2bc947b953652487e4600949fb091e3ae8cd919b"
   integrity sha512-KK8xQ1mkzZeg9inewmFVDNkg3l5LUhoq9kN6iWYB/CC9YMG8HA+c1Q8HwDe6dEX7kErrEVNVBO3fWsVq5iDgtw==
+
+unzip-stream@^0.3.4:
+  version "0.3.4"
+  resolved "https://registry.yarnpkg.com/unzip-stream/-/unzip-stream-0.3.4.tgz#b4576755061809cf210b776cf26888d6a7823ead"
+  integrity sha512-PyofABPVv+d7fL7GOpusx7eRT9YETY2X04PhwbSipdj6bMxVCFJrr+nm0Mxqbf9hUiTin/UsnuFWBXlDZFy0Cw==
+  dependencies:
+    binary "^0.3.0"
+    mkdirp "^0.5.1"
 
 update-browserslist-db@^1.1.1:
   version "1.1.1"
