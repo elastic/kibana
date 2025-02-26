@@ -23,6 +23,7 @@ export class SimpleHistogram {
   private maxValue: number;
   private bucketSize: number;
   private histogramBuckets: Bucket[] = [];
+  private allValues: number[] = [];
 
   constructor(max: number, bucketSize: number) {
     if (bucketSize > max) {
@@ -38,6 +39,7 @@ export class SimpleHistogram {
     for (let i = 0; i < this.histogramBuckets.length; i++) {
       this.histogramBuckets[i].count = 0;
     }
+    this.allValues = [];
   }
 
   public record(value: number, increment: number = 1) {
@@ -51,6 +53,10 @@ export class SimpleHistogram {
 
         break;
       }
+    }
+
+    for (let i = 0; i < increment; i++) {
+      this.allValues.push(value);
     }
   }
 
@@ -72,6 +78,10 @@ export class SimpleHistogram {
       count: bucket.count,
       value: bucket.max,
     }));
+  }
+
+  public getAllValues(truncate: boolean = false) {
+    return this.allValues.slice();
   }
 
   public serialize(): SerializedHistogram {
