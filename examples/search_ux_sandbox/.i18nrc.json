@@ -1,0 +1,7 @@
+{
+  "prefix": "searchUxSandbox",
+  "paths": {
+    "searchUxSandbox": "."
+  },
+  "translations": ["translations/ja-JP.json"]
+}
