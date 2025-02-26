@@ -10,6 +10,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
+  EuiSpacer,
   EuiSplitPanel,
   EuiTitle,
 } from '@elastic/eui';
@@ -25,6 +26,7 @@ import { useTheme } from '../../../../hooks/use_theme';
 import { useInvestigation } from '../../contexts/investigation_context';
 import { Note } from './note';
 import { ResizableTextInput } from './resizable_text_input';
+import { AddFile } from './add_file';
 
 export interface Props {
   user: AuthenticatedUser;
@@ -125,6 +127,8 @@ export function InvestigationNotes({ user }: Props) {
                 defaultMessage: 'Add',
               })}
             </EuiButton>
+            <EuiSpacer size="s" />
+            {investigation?.id && <AddFile investigationId={investigation.id} />}
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiSplitPanel.Inner>

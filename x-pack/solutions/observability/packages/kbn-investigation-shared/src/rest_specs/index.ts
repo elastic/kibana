@@ -26,6 +26,7 @@ export type * from './update_note';
 export type * from './get_events';
 export type * from './entity';
 export type * from './get_entities';
+export type * from './attache_file';
 
 export * from './create';
 export * from './create_item';
@@ -48,3 +49,4 @@ export * from './update_note';
 export * from './get_events';
 export * from './entity';
 export * from './get_entities';
+export * from './attache_file';

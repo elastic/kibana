@@ -28,6 +28,7 @@
       "alerting",
       "spaces",
       "slo",
+      "files",
       "apmDataAccess",
       "usageCollection"
     ],

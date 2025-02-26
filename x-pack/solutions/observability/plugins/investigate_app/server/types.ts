@@ -23,6 +23,7 @@ import type {
   ObservabilityAIAssistantServerSetup,
 } from '@kbn/observability-ai-assistant-plugin/server';
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
+import { FilesSetup, FilesStart } from '@kbn/files-plugin/server';
 
 /* eslint-disable @typescript-eslint/no-empty-interface*/
 
@@ -38,6 +39,7 @@ export interface InvestigateAppSetupDependencies {
   apmDataAccess: ApmDataAccessPluginSetup;
   observabilityAIAssistant?: ObservabilityAIAssistantServerSetup;
   usageCollection: UsageCollectionSetup;
+  files: FilesSetup;
 }
 
 export interface InvestigateAppStartDependencies {
@@ -48,6 +50,7 @@ export interface InvestigateAppStartDependencies {
   spaces?: SpacesPluginStart;
   apmDataAccess: ApmDataAccessPluginStart;
   observabilityAIAssistant?: ObservabilityAIAssistantServerStart;
+  files: FilesStart;
 }
 
 export interface InvestigateAppServerSetup {}
