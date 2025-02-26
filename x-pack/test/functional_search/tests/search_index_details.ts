@@ -118,12 +118,10 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           await pageObjects.searchIndexDetailsPage.expectQuickStatsAIMappings();
           await es.indices.putMapping({
             index: indexName,
-            body: {
-              properties: {
-                my_field: {
-                  type: 'dense_vector',
-                  dims: 3,
-                },
+            properties: {
+              my_field: {
+                type: 'dense_vector',
+                dims: 3,
               },
             },
           });
