@@ -15,6 +15,7 @@ import {
   EuiTitle,
   EuiRadioGroup,
   EuiComboBox,
+  EuiLink,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
@@ -73,7 +74,21 @@ export const OutputFormKafkaTopics: React.FunctionComponent<{ inputs: OutputForm
             label={
               <FormattedMessage
                 id="xpack.fleet.settings.editOutputFlyout.kafkaDynamicTopicLabel"
-                defaultMessage="Topic from field"
+                defaultMessage="Topic from field. For more info, see our {guideLink}"
+                values={{
+                  guideLink: (
+                    <EuiLink
+                      href="https://www.elastic.co/guide/en/beats/filebeat/current/kafka-output.html#topic-option-kafka"
+                      target="_blank"
+                      external
+                    >
+                      <FormattedMessage
+                        id="xpack.fleet.settings.fleetUserGuideLink"
+                        defaultMessage="docs."
+                      />
+                    </EuiLink>
+                  ),
+                }}
               />
             }
             {...inputs.kafkaDynamicTopicInput.formRowProps}
@@ -83,7 +98,7 @@ export const OutputFormKafkaTopics: React.FunctionComponent<{ inputs: OutputForm
               fullWidth
               isClearable={true}
               options={dynamicOptions}
-              customOptionText="Use custom field (not recommended)"
+              customOptionText="Use custom field"
               singleSelection={{ asPlainText: true }}
               {...inputs.kafkaDynamicTopicInput.props}
             />
