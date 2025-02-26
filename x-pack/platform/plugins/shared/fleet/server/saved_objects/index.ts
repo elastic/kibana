@@ -1262,6 +1262,7 @@ export const OUTPUT_INCLUDE_AAD_FIELDS = new Set([
   'channel_buffer_size',
 ]);
 
+// dangerouslyExposeValue added to allow the user with access to the SO to see and edit these values through the UI
 export const OUTPUT_ENCRYPTED_FIELDS = new Set([
   { key: 'ssl', dangerouslyExposeValue: true },
   { key: 'password', dangerouslyExposeValue: true },
@@ -1293,6 +1294,7 @@ export function registerEncryptedSavedObjects(
   encryptedSavedObjects.registerType({
     type: FLEET_SERVER_HOST_SAVED_OBJECT_TYPE,
     attributesToEncrypt: FLEET_SERVER_HOST_ENCRYPTED_FIELDS,
+    // enforceRandomId allows to create an SO with an arbitrary id
     enforceRandomId: false,
   });
 }
