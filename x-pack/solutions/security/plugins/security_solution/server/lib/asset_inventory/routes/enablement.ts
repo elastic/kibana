@@ -9,8 +9,8 @@ import { buildSiemResponse } from '@kbn/lists-plugin/server/routes/utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import type { Logger } from '@kbn/core/server';
 import { API_VERSIONS } from '../../../../common/constants';
-
 import type { AssetInventoryRoutesDeps } from '../types';
+import { checkAssetInventoryEnabled } from '../check_ui_settings';
 
 export const enableAssetInventoryRoute = (
   router: AssetInventoryRoutesDeps['router'],
@@ -34,11 +34,15 @@ export const enableAssetInventoryRoute = (
         validate: false,
       },
 
-      async (context, request, response) => {
+      async (context, _request, response) => {
         const siemResponse = buildSiemResponse(response);
-        const secSol = await context.securitySolution;
+
+        if (!(await checkAssetInventoryEnabled(context, logger))) {
+          return response.notFound();
+        }
 
         try {
+          const secSol = await context.securitySolution;
           const body = await secSol.getAssetInventoryClient().enable();
 
           return response.ok({ body });
