@@ -34,7 +34,7 @@ type OnClick = () => void;
 export const getUpdateRulesCalloutTitle = (onClick: OnClick) => (
   <FormattedMessage
     id="xpack.securitySolution.detectionEngine.rules.updatePrebuiltRulesCalloutTitle"
-    defaultMessage="Updates available for installed rules. Review and update in&nbsp;{link}."
+    defaultMessage="There are prebuilt rules with updates available, please update your rules for the best detection rule experience. Review and update in&nbsp;{link}."
     values={{
       link: (
         <EuiLink

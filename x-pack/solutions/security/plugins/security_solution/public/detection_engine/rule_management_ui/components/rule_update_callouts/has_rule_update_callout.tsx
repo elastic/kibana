@@ -13,29 +13,33 @@ import * as i18n from './translations';
 interface HasRuleUpdateCalloutComponent {
   rule: RuleResponse | null;
   hasUpdate: boolean;
-  openRulePreview: (ruleId: string) => void;
+  openRulePreview?: (ruleId: string) => void;
+  message: string;
 }
 
 const HasRuleUpdateCalloutComponent = ({
   rule,
   hasUpdate,
   openRulePreview,
+  message,
 }: HasRuleUpdateCalloutComponent) => {
   if (!rule || rule.rule_source.type !== 'external' || !hasUpdate) {
     return null;
   }
   return (
     <>
-      <EuiCallOut title={i18n.HAS_RULE_UPDATE_CALLOUT_TITLE} color="warning" iconType="warning">
-        <p>{i18n.HAS_RULE_UPDATE_CALLOUT_MESSAGE}</p>
-        <EuiLink
-          onClick={() => {
-            openRulePreview(rule.rule_id);
-          }}
-          data-test-subj="ruleName"
-        >
-          {i18n.HAS_RULE_UPDATE_CALLOUT_BUTTON}
-        </EuiLink>
+      <EuiCallOut title={i18n.HAS_RULE_UPDATE_CALLOUT_TITLE} color="primary" iconType="gear">
+        <p>{message}</p>
+        {openRulePreview && (
+          <EuiLink
+            onClick={() => {
+              openRulePreview(rule.rule_id);
+            }}
+            data-test-subj="ruleName"
+          >
+            {i18n.HAS_RULE_UPDATE_CALLOUT_BUTTON}
+          </EuiLink>
+        )}
       </EuiCallOut>
       <EuiSpacer size="l" />
     </>

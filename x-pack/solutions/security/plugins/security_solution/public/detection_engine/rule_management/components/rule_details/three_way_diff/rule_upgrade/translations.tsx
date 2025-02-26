@@ -158,3 +158,11 @@ export const FIELD_MODIFIED_BADGE_DESCRIPTION = i18n.translate(
       'This field value differs from the one provided in the original version of the rule.',
   }
 );
+
+export const RULE_BASE_VERSION_IS_MISSING_DESCRIPTION = i18n.translate(
+  'xpack.securitySolution.detectionEngine.upgradeFlyout.baseVersionMissingDescription',
+  {
+    defaultMessage:
+      'The original version of this rule is stale and cannot be fetched, the upgrade experience will only include your version and the incoming elastic version. Please keep your rules as up to date as possible in the future to avoid this.',
+  }
+);

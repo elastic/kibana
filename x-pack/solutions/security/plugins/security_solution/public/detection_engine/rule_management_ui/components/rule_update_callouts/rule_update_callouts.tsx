@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiFlexGroup } from '@elastic/eui';
+import { EuiFlexGroup, EuiSpacer } from '@elastic/eui';
 import React, { useCallback } from 'react';
 import { SecurityPageName } from '../../../../app/types';
 import { useGetSecuritySolutionLinkProps } from '../../../../common/components/links';
@@ -18,15 +18,23 @@ import {
 } from '../mini_callout/translations';
 import { AllRulesTabs } from '../rules_table/rules_table_toolbar';
 
-export const RuleUpdateCallouts = () => {
+interface RuleUpdateCalloutsProps {
+  shouldShowNewRulesCallout?: boolean;
+  shouldShowUpdateRulesCallout?: boolean;
+}
+
+export const RuleUpdateCallouts = ({
+  shouldShowNewRulesCallout = false,
+  shouldShowUpdateRulesCallout = false,
+}: RuleUpdateCalloutsProps) => {
   const { data: prebuiltRulesStatus } = usePrebuiltRulesStatus();
 
   const rulesToInstallCount = prebuiltRulesStatus?.stats.num_prebuilt_rules_to_install ?? 0;
   const rulesToUpgradeCount = prebuiltRulesStatus?.stats.num_prebuilt_rules_to_upgrade ?? 0;
 
   // Check against rulesInstalledCount since we don't want to show banners if we're showing the empty prompt
-  const shouldDisplayNewRulesCallout = rulesToInstallCount > 0;
-  const shouldDisplayUpdateRulesCallout = rulesToUpgradeCount > 0;
+  const shouldDisplayNewRulesCallout = shouldShowNewRulesCallout && rulesToInstallCount > 0;
+  const shouldDisplayUpdateRulesCallout = shouldShowUpdateRulesCallout && rulesToUpgradeCount > 0;
 
   const getSecuritySolutionLinkProps = useGetSecuritySolutionLinkProps();
   const { href } = getSecuritySolutionLinkProps({
@@ -42,22 +50,25 @@ export const RuleUpdateCallouts = () => {
   }, [navigateToUrl, href]);
 
   return (
-    <EuiFlexGroup direction="column">
-      {shouldDisplayUpdateRulesCallout && (
-        <MiniCallout
-          iconType={'iInCircle'}
-          data-test-subj="prebuilt-rules-update-callout"
-          title={getUpdateRulesCalloutTitle(updateCallOutOnClick)}
-        />
-      )}
-      {shouldDisplayNewRulesCallout && (
-        <MiniCallout
-          color="success"
-          data-test-subj="prebuilt-rules-new-callout"
-          iconType={'iInCircle'}
-          title={NEW_PREBUILT_RULES_AVAILABLE_CALLOUT_TITLE}
-        />
-      )}
-    </EuiFlexGroup>
+    <>
+      <EuiFlexGroup direction="column">
+        {shouldDisplayUpdateRulesCallout && (
+          <MiniCallout
+            iconType={'iInCircle'}
+            data-test-subj="prebuilt-rules-update-callout"
+            title={getUpdateRulesCalloutTitle(updateCallOutOnClick)}
+          />
+        )}
+        {shouldDisplayNewRulesCallout && (
+          <MiniCallout
+            color="success"
+            data-test-subj="prebuilt-rules-new-callout"
+            iconType={'iInCircle'}
+            title={NEW_PREBUILT_RULES_AVAILABLE_CALLOUT_TITLE}
+          />
+        )}
+      </EuiFlexGroup>
+      <EuiSpacer size="s" />
+    </>
   );
 };

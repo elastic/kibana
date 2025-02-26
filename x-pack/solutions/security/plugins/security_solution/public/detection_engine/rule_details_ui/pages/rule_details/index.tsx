@@ -588,6 +588,7 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
         rule={rule}
         hasUpdate={isRuleUpgradeable}
         openRulePreview={openRulePreview}
+        message={ruleI18n.HAS_RULE_UPDATE_DETAILS_CALLOUT_MESSAGE}
       />
       {isBulkDuplicateConfirmationVisible && (
         <BulkActionDuplicateExceptionsConfirmation

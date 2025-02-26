@@ -75,6 +75,8 @@ import { usePrebuiltRulesCustomizationStatus } from '../../../rule_management/lo
 import { PrebuiltRulesCustomizationDisabledReason } from '../../../../../common/detection_engine/prebuilt_rules/prebuilt_rule_customization_status';
 import { ALERT_SUPPRESSION_FIELDS_FIELD_NAME } from '../../../rule_creation/components/alert_suppression_edit';
 import { usePrebuiltRuleCustomizationUpsellingMessage } from '../../../rule_management/logic/prebuilt_rules/use_prebuilt_rule_customization_upselling_message';
+import { usePrebuiltRulesUpgrade } from '../../../rule_management_ui/components/rules_table/upgrade_prebuilt_rules_table/use_prebuilt_rules_upgrade';
+import { HasRuleUpdateCallout } from '../../../rule_management_ui/components/rule_update_callouts/has_rule_update_callout';
 
 const EditRulePageComponent: FC<{ rule: RuleResponse }> = ({ rule }) => {
   const { addSuccess } = useAppToasts();
@@ -172,7 +174,20 @@ const EditRulePageComponent: FC<{ rule: RuleResponse }> = ({ rule }) => {
     newTermsFields: defineStepData.newTermsFields,
   });
 
-  const loading = userInfoLoading || listsConfigLoading;
+  const { upgradeReviewResponse, isLoading: isRuleUpgradeReviewLoading } = usePrebuiltRulesUpgrade({
+    pagination: {
+      page: 1, // we only want to fetch one result
+      perPage: 1,
+    },
+    filter: { rule_ids: [ruleId] },
+  });
+
+  const isRuleUpgradeable = useMemo(
+    () => upgradeReviewResponse !== undefined && upgradeReviewResponse.total > 0,
+    [upgradeReviewResponse]
+  );
+
+  const loading = userInfoLoading || listsConfigLoading || isRuleUpgradeReviewLoading;
   const { isSavedQueryLoading, savedQuery } = useGetSavedQuery({
     savedQueryId: 'saved_id' in rule ? rule.saved_id : undefined,
     ruleType: rule?.type,
@@ -549,6 +564,11 @@ const EditRulePageComponent: FC<{ rule: RuleResponse }> = ({ rule }) => {
                         isRulePreviewVisible={isRulePreviewVisible}
                         setIsRulePreviewVisible={setIsRulePreviewVisible}
                         togglePanel={togglePanel}
+                      />
+                      <HasRuleUpdateCallout
+                        rule={rule}
+                        hasUpdate={isRuleUpgradeable}
+                        message={ruleI18n.HAS_RULE_UPDATE_EDITING_CALLOUT_MESSAGE}
                       />
                       {invalidSteps.length > 0 && (
                         <EuiCallOut title={i18n.SORRY_ERRORS} color="danger" iconType="warning">

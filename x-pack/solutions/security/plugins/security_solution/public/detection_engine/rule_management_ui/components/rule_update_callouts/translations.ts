@@ -10,21 +10,13 @@ import { i18n } from '@kbn/i18n';
 export const HAS_RULE_UPDATE_CALLOUT_TITLE = i18n.translate(
   'xpack.securitySolution.detectionEngine.ruleDetailsUpgrade.calloutTitle',
   {
-    defaultMessage: 'Rule has available update',
-  }
-);
-
-export const HAS_RULE_UPDATE_CALLOUT_MESSAGE = i18n.translate(
-  'xpack.securitySolution.detectionEngine.ruleDetailsUpgrade.calloutMessage',
-  {
-    defaultMessage:
-      'This prebuilt rule has an update available, please upgrade to keep your rules up to date',
+    defaultMessage: 'Rule update available',
   }
 );
 
 export const HAS_RULE_UPDATE_CALLOUT_BUTTON = i18n.translate(
   'xpack.securitySolution.detectionEngine.ruleDetailsUpgrade.calloutButton',
   {
-    defaultMessage: 'Review rule for upgrade',
+    defaultMessage: 'Review rule for update',
   }
 );
