@@ -48,11 +48,55 @@ const getESQLQueryVariables = (esql: string): string[] => {
   return usedVariablesInQuery.map((v) => v.text.replace('?', ''));
 };
 
-const createMarkdownTable = (table: Datatable) => {
-  if (!table || !table.columns || !table.rows) {
-    return undefined;
+const reorderColumns = (table: Datatable, columnName: string) => {
+  if (!table.columns || !Array.isArray(table.columns)) {
+    return table;
   }
 
+  // Find the specified column
+  const targetColumn = table.columns.find((col) => col.id === columnName);
+  if (!targetColumn) {
+    return table;
+  }
+
+  // Filter out the target column and re-add it at the beginning
+  table.columns = [targetColumn, ...table.columns.filter((col) => col.id !== columnName)];
+
+  // Reorder the row keys to match the new column order
+  table.rows = table.rows.map((row) => {
+    const reorderedRow = { [columnName]: row[columnName] };
+    for (const col of table.columns) {
+      if (col.id !== columnName) {
+        reorderedRow[col.id] = row[col.id];
+      }
+    }
+    return reorderedRow;
+  });
+
+  return table;
+};
+
+const generateMarkdownColumnsList = (table: Datatable, columnsPerRow = 5) => {
+  const firstRow = table.rows[0];
+
+  const columns = table.columns.map((col) => {
+    const previewValue = firstRow[col.id] !== undefined ? firstRow[col.id] : 'N/A';
+    return `**${col.name}** (${col.meta.type}) - Preview: ${previewValue}`;
+  });
+
+  // Generate Markdown table
+  let markdown = '| ' + columns.slice(0, columnsPerRow).join(' | ') + ' |\n'; // Header row
+  markdown +=
+    '| ' + Array(Math.min(columns.length, columnsPerRow)).fill('---').join(' | ') + ' |\n'; // Separator row
+
+  for (let i = columnsPerRow; i < columns.length; i += columnsPerRow) {
+    markdown += '| ' + columns.slice(i, i + columnsPerRow).join(' | ') + ' |\n'; // Data rows
+  }
+
+  return markdown;
+};
+
+const createMarkdownTable = (table: Datatable) => {
   // Remove empty columns
   const nonEmptyColumns = table.columns.filter((col) =>
     table.rows.some((row) => row[col.name] !== undefined && row[col.name] !== '')
@@ -76,7 +120,9 @@ const createMarkdownTable = (table: Datatable) => {
   );
 
   // Create markdown table header
-  let markdown = `| ${headers.map((header, i) => header.padEnd(columnWidths[i])).join(' | ')} |
+  let markdown = `| ${headers
+    .map((header, i) => `**${header}**`.padEnd(columnWidths[i]))
+    .join(' | ')} |
 `;
   markdown += `| ${columnWidths.map((width) => '-'.repeat(width)).join(' | ')} |
 `;
@@ -89,6 +135,18 @@ const createMarkdownTable = (table: Datatable) => {
   });
 
   return markdown;
+};
+
+const createMarkdown = (table: Datatable) => {
+  if (!table || !table.columns || !table.rows || !Array.isArray(table.columns)) {
+    return undefined;
+  }
+  const columnsCount = table.columns.length;
+
+  if (columnsCount >= 10) {
+    return generateMarkdownColumnsList(table);
+  }
+  return createMarkdownTable(table);
 };
 
 async function getHoverItemForFunction(
@@ -201,12 +259,12 @@ export async function getHoverItem(
 
   const currentPipeIndex = innerText.split('|').length;
   const validQueryOnCurrentPipe = fullText.split('|').slice(0, currentPipeIndex).join('|');
-  const previewTable = await resourceRetriever?.getHoverData?.({ query: validQueryOnCurrentPipe });
+  let previewTable = await resourceRetriever?.getHoverData?.({ query: validQueryOnCurrentPipe });
+
   const variables = resourceRetriever?.getESQLVariables?.();
   const usedVariablesInQuery = getESQLQueryVariables(fullText);
   const usedVariables = variables?.filter((v) => usedVariablesInQuery.includes(v.key));
 
-  const markdownTable = previewTable ? createMarkdownTable(previewTable) : '';
   const { getPolicyMetadata } = getPolicyHelper(resourceRetriever);
 
   const hoverContent: monaco.languages.Hover = {
@@ -215,16 +273,14 @@ export async function getHoverItem(
 
   if (usedVariables?.length) {
     usedVariables.forEach((variable) => {
-      hoverContent.contents.push({
-        value: `**${variable.key}**: ${variable.value}`,
-      });
+      if (validQueryOnCurrentPipe.includes(`?${variable.key}`)) {
+        hoverContent.contents.push({
+          value: `**${variable.key}**: ${variable.value}`,
+        });
+      }
     });
   }
 
-  if (markdownTable) {
-    const markdownHoverContent = [{ value: `**Data preview**` }, { value: markdownTable }];
-    hoverContent.contents.push(...markdownHoverContent);
-  }
   const hoverItemsForFunction = await getHoverItemForFunction(
     model,
     position,
@@ -238,8 +294,12 @@ export async function getHoverItem(
   }
 
   if (['newCommand', 'list'].includes(astContext.type)) {
+    const markdownTable = previewTable ? createMarkdown(previewTable) : '';
     if (markdownTable) {
-      const markdownHoverContent = [{ value: `**Data preview**` }, { value: markdownTable }];
+      const markdownHoverContent = [
+        { value: `### Preview of the columns at this pipe` },
+        { value: markdownTable },
+      ];
       return { contents: markdownHoverContent };
     }
     return { contents: [] };
@@ -260,6 +320,20 @@ export async function getHoverItem(
 
   if (astContext.type === 'expression') {
     if (astContext.node) {
+      const columnName = astContext.node.name;
+      if (columnName && previewTable?.columns) {
+        const column = previewTable.columns.find((col) => col.name === columnName);
+        if (column) {
+          hoverContent.contents.push(
+            ...[
+              {
+                value: `**${columnName}** -- Type: ${column.meta.type}`,
+              },
+            ]
+          );
+        }
+        previewTable = reorderColumns(previewTable, columnName);
+      }
       if (isSourceItem(astContext.node) && astContext.node.sourceType === 'policy') {
         const policyMetadata = await getPolicyMetadata(astContext.node.name);
         if (policyMetadata) {
@@ -302,6 +376,14 @@ export async function getHoverItem(
         }
       }
     }
+  }
+  const markdownTable = previewTable ? createMarkdown(previewTable) : '';
+  if (markdownTable) {
+    const markdownHoverContent = [
+      { value: `### Preview of the columns at this pipe` },
+      { value: markdownTable },
+    ];
+    hoverContent.contents.push(...markdownHoverContent);
   }
   return hoverContent;
 }

@@ -342,14 +342,18 @@ export const getEditorOverwrites = (theme: UseEuiTheme<{}>) => {
       border-radius: ${theme.euiTheme.border.radius.medium};
     }
 
-    .hover-contents th {
-      padding: 2px 2px;
-      border: 1px solid ${theme.euiTheme.colors.backgroundBasePlain};
-      color: ${theme.euiTheme.colors.textAccent};
-    }
+    .hover-contents th,
     .hover-contents td {
       padding: 2px 2px;
       border: 1px solid ${theme.euiTheme.colors.backgroundBasePlain};
+      text-align: left;
+      font-weight: normal;
     }
+    .hover-contents strong {
+      color: ${theme.euiTheme.colors.textAccentSecondary};
+    }
+
+    .hover-contents h3 {
+      color: ${theme.euiTheme.colors.textAccent};
   `;
 };
