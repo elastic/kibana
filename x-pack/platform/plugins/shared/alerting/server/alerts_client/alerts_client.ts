@@ -427,7 +427,7 @@ export class AlertsClient<
     const { rawActiveAlerts, rawRecoveredAlerts } = this.getRawAlertInstancesForState();
 
     const activeAlerts = this.legacyAlertsClient.getProcessedAlerts('active');
-    const currentRecoveredAlerts = this.legacyAlertsClient.getProcessedAlerts('recovered');
+    const recoveredAlerts = this.legacyAlertsClient.getProcessedAlerts('recovered');
 
     // TODO - Lifecycle alerts set some other fields based on alert status
     // Example: workflow status - default to 'open' if not set
@@ -504,7 +504,7 @@ export class AlertsClient<
       // If there is not, log an error because there should be
       if (Object.hasOwn(this.fetchedAlerts.data, id)) {
         recoveredAlertsToIndex.push(
-          currentRecoveredAlerts[id]
+          recoveredAlerts[id]
             ? buildRecoveredAlert<
                 AlertData,
                 LegacyState,
@@ -513,7 +513,7 @@ export class AlertsClient<
                 RecoveryActionGroupId
               >({
                 alert: this.fetchedAlerts.data[id],
-                legacyAlert: currentRecoveredAlerts[id],
+                legacyAlert: recoveredAlerts[id],
                 rule: this.rule,
                 runTimestamp: this.runTimestampString,
                 timestamp: currentTime,

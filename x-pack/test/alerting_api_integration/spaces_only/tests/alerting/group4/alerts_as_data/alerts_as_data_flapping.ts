@@ -338,7 +338,7 @@ export default function createAlertsAsDataFlappingTest({ getService }: FtrProvid
         .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
         .set('kbn-xsrf', 'foo')
         .send(
-          // notify_when is not RuleNotifyWhen.CHANGE, so it's not added to activeCurrent
+          // notify_when is not RuleNotifyWhen.CHANGE, so it's not added to active
           getTestRuleData({
             rule_type_id: 'test.patternFiringAad',
             // set the schedule long so we can use "runSoon" to specify rule runs

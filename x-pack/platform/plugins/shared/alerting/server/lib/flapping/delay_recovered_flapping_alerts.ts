@@ -11,7 +11,7 @@ import { RulesSettingsFlappingProperties } from '../../../common/rules_settings'
 import { Alert } from '../../alert';
 import { AlertInstanceState, AlertInstanceContext } from '../../types';
 
-export function dropRecoveredAlerts<
+export function delayRecoveredFlappingAlerts<
   State extends AlertInstanceState,
   Context extends AlertInstanceContext,
   ActionGroupIds extends string,

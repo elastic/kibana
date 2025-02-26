@@ -10,8 +10,8 @@ import { Alert } from '../../alert';
 import { AlertInstanceState, AlertInstanceContext } from '../../types';
 import { RulesSettingsFlappingProperties } from '../../../common/rules_settings';
 import { setFlapping } from './set_flapping';
-import { categorizeAlertsForFlapping } from './categorize_alerts_for_flapping';
-import { dropRecoveredAlerts } from './drop_recovered_alerts';
+import { setFlappingHistoryAndTrackedAlerts } from './set_flapping_history_and_tracked_alerts';
+import { delayRecoveredFlappingAlerts } from './delay_recovered_flapping_alerts';
 
 interface DetermineFlappingAlertsOpts<
   State extends AlertInstanceState,
@@ -44,24 +44,20 @@ export function determineFlappingAlerts<
   actionGroupId,
   maxAlerts,
 }: DetermineFlappingAlertsOpts<State, Context, ActionGroupIds, RecoveryActionGroupId>) {
-  // Set flapping
   setFlapping<State, Context, ActionGroupIds, RecoveryActionGroupId>(
     flappingSettings,
     activeAlerts,
     recoveredAlerts
   );
-  // Loop through alerts to determine which will be used for actions only and which will be tracked in the state
-  let alerts = categorizeAlertsForFlapping<State, Context, ActionGroupIds, RecoveryActionGroupId>(
-    flappingSettings,
-    newAlerts,
-    activeAlerts,
-    recoveredAlerts,
-    previouslyRecoveredAlerts
-  );
-  // While also updating the flapping settings
-  // Trim alerts
 
-  alerts = dropRecoveredAlerts<State, Context, ActionGroupIds, RecoveryActionGroupId>(
+  let alerts = setFlappingHistoryAndTrackedAlerts<
+    State,
+    Context,
+    ActionGroupIds,
+    RecoveryActionGroupId
+  >(flappingSettings, newAlerts, activeAlerts, recoveredAlerts, previouslyRecoveredAlerts);
+
+  alerts = delayRecoveredFlappingAlerts<State, Context, ActionGroupIds, RecoveryActionGroupId>(
     logger,
     flappingSettings,
     actionGroupId,

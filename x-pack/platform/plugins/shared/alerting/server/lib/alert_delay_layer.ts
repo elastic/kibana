@@ -50,9 +50,10 @@ export function determineDelayedAlerts<
     // do not trigger an action notification if the number of consecutive
     // active alerts is less than the rule alertDelay threshold
     if (alert.getActiveCount() < alertDelay) {
-      // remove from new alerts
+      // remove from new alerts and active alerts
       delete newAlerts[id];
-      // maybe delete activeAlerts[id];
+      delete activeAlerts[id];
+
       delayedAlertsCount += 1;
     } else {
       // if the active count is equal to the alertDelay it is considered a new alert

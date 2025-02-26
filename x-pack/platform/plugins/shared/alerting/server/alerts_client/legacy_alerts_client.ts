@@ -12,12 +12,7 @@ import {
   createAlertFactory,
   getPublicAlertFactory,
 } from '../alert/create_alert_factory';
-import {
-  toRawAlertInstances,
-  processAlerts,
-  determineFlappingAlerts,
-  determineDelayedAlerts,
-} from '../lib';
+import { toRawAlertInstances, processAlerts } from '../lib';
 import { logAlerts } from '../task_runner/log_alerts';
 import { AlertInstanceContext, AlertInstanceState, WithoutReservedActionGroups } from '../types';
 import {
@@ -35,6 +30,8 @@ import { DEFAULT_MAX_ALERTS } from '../config';
 import { UntypedNormalizedRuleType } from '../rule_type_registry';
 import { MaintenanceWindowsService } from '../task_runner/maintenance_windows';
 import { AlertingEventLogger } from '../lib/alerting_event_logger/alerting_event_logger';
+import { determineFlappingAlerts } from '../lib/flapping/flapping_layer';
+import { determineDelayedAlerts } from '../lib/alert_delay_layer';
 
 export interface LegacyAlertsClientParams {
   alertingEventLogger: AlertingEventLogger;
@@ -185,7 +182,9 @@ export class LegacyAlertsClient<
 
     this.processedAlerts.new = processedAlertsNew;
     this.processedAlerts.active = processedAlertsActive;
+    this.processedAlerts.trackedActiveAlerts = processedAlertsActive;
     this.processedAlerts.recovered = processedAlertsRecovered;
+    this.processedAlerts.trackedRecoveredAlerts = processedAlertsRecovered;
   }
 
   public logAlerts({ ruleRunMetricsStore, shouldLogAlerts }: LogAlertsOpts) {
@@ -219,26 +218,28 @@ export class LegacyAlertsClient<
     );
   }
 
-  public async flappingLayer() {
-    const alerts = determineFlappingAlerts({
-      logger: this.options.logger,
-      newAlerts: this.processedAlerts.new,
-      activeAlerts: this.processedAlerts.active,
-      recoveredAlerts: this.processedAlerts.recovered,
-      flappingSettings: this.flappingSettings,
-      previouslyRecoveredAlerts: this.trackedAlerts.recovered,
-      actionGroupId: this.options.ruleType.defaultActionGroupId,
-      maxAlerts: this.maxAlerts,
-    });
+  public flappingLayer() {
+    if (this.flappingSettings.enabled) {
+      const alerts = determineFlappingAlerts({
+        logger: this.options.logger,
+        newAlerts: this.processedAlerts.new,
+        activeAlerts: this.processedAlerts.active,
+        recoveredAlerts: this.processedAlerts.recovered,
+        flappingSettings: this.flappingSettings,
+        previouslyRecoveredAlerts: this.trackedAlerts.recovered,
+        actionGroupId: this.options.ruleType.defaultActionGroupId,
+        maxAlerts: this.maxAlerts,
+      });
 
-    this.processedAlerts.new = alerts.newAlerts;
-    this.processedAlerts.active = alerts.activeAlerts;
-    this.processedAlerts.trackedActiveAlerts = alerts.trackedActiveAlerts;
-    this.processedAlerts.recovered = alerts.recoveredAlerts;
-    this.processedAlerts.trackedRecoveredAlerts = alerts.trackedRecoveredAlerts;
+      this.processedAlerts.new = alerts.newAlerts;
+      this.processedAlerts.active = alerts.activeAlerts;
+      this.processedAlerts.trackedActiveAlerts = alerts.trackedActiveAlerts;
+      this.processedAlerts.recovered = alerts.recoveredAlerts;
+      this.processedAlerts.trackedRecoveredAlerts = alerts.trackedRecoveredAlerts;
+    }
   }
 
-  public async alertDelayLayer(opts: AlertDelayOpts) {
+  public alertDelayLayer(opts: AlertDelayOpts) {
     const alerts = determineDelayedAlerts({
       newAlerts: this.processedAlerts.new,
       activeAlerts: this.processedAlerts.active,

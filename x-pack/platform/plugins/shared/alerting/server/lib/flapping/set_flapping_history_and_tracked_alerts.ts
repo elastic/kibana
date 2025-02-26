@@ -11,7 +11,7 @@ import { AlertInstanceState, AlertInstanceContext } from '../../types';
 import { updateFlappingHistory } from './flapping_utils';
 import { RulesSettingsFlappingProperties } from '../../../common/rules_settings';
 
-export function categorizeAlertsForFlapping<
+export function setFlappingHistoryAndTrackedAlerts<
   State extends AlertInstanceState,
   Context extends AlertInstanceContext,
   ActionGroupIds extends string,

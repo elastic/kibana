@@ -285,8 +285,8 @@ export class AdHocTaskRunner implements CancellableTask {
     });
 
     await actionScheduler.run({
-      activeCurrentAlerts: alertsClient.getProcessedAlerts('activeCurrent'),
-      recoveredCurrentAlerts: alertsClient.getProcessedAlerts('recoveredCurrent'),
+      activeAlerts: alertsClient.getProcessedAlerts('active'),
+      recoveredAlerts: alertsClient.getProcessedAlerts('recovered'),
     });
 
     return ruleRunMetricsStore.getMetrics();
