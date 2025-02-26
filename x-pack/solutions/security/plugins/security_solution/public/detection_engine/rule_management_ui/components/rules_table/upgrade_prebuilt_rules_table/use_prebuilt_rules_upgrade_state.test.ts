@@ -429,6 +429,7 @@ function createRuleUpgradeInfoMock(
       num_fields_with_non_solvable_conflicts: 0,
       fields: {},
     },
+    version: 1,
     revision: 1,
     ...rewrites,
   };

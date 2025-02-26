@@ -9,5 +9,6 @@ import type { ThreeVersionsOf } from '../../../../../../../../common/api/detecti
 import { simpleDiffAlgorithm } from './simple_diff_algorithm';
 
 export const numberDiffAlgorithm = <TValue extends number | undefined>(
-  versions: ThreeVersionsOf<TValue>
-) => simpleDiffAlgorithm<TValue>(versions);
+  versions: ThreeVersionsOf<TValue>,
+  isRuleCustomized: boolean
+) => simpleDiffAlgorithm<TValue>(versions, isRuleCustomized);

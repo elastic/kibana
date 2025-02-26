@@ -1091,6 +1091,22 @@ export const CLEAR_RULES_TABLE_FILTERS = i18n.translate(
   }
 );
 
+export const HAS_RULE_UPDATE_DETAILS_CALLOUT_MESSAGE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDetailsUpgrade.calloutMessage',
+  {
+    defaultMessage:
+      'This prebuilt rule has an update available, please update to get the latest improvements.',
+  }
+);
+
+export const HAS_RULE_UPDATE_EDITING_CALLOUT_MESSAGE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDetailsUpgrade.calloutMessage',
+  {
+    defaultMessage:
+      'This prebuilt rule has an update available, please update to the latest version before making any edits.',
+  }
+);
+
 /**
  * Bulk Export
  */
