@@ -149,8 +149,8 @@ describe('EntityStoreEnablementModal', () => {
     it('should show proceed warning when riskScore is enabled but entityStore is disabled and unchecked', () => {
       renderComponent({
         ...defaultProps,
-        riskScore: { canToggle: false, checked: false }, // Enabled & Checked
-        entityStore: { canToggle: true, checked: false }, // Disabled & Unchecked
+        riskScore: { canToggle: false, checked: false },
+        entityStore: { canToggle: true, checked: false },
       });
       expect(screen.getByText('Please enable at least one option to proceed.')).toBeInTheDocument();
     });
@@ -158,8 +158,8 @@ describe('EntityStoreEnablementModal', () => {
     it('should show proceed warning when entityStore is enabled but riskScore is disabled and unchecked', () => {
       renderComponent({
         ...defaultProps,
-        entityStore: { canToggle: false, checked: false }, // Enabled & Checked
-        riskScore: { canToggle: true, checked: false }, // Disabled & Unchecked
+        entityStore: { canToggle: false, checked: false },
+        riskScore: { canToggle: true, checked: false },
       });
       expect(screen.getByText('Please enable at least one option to proceed.')).toBeInTheDocument();
     });
