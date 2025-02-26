@@ -29,6 +29,8 @@ import {
   EuiDataGridStyle,
   EuiDataGridProps,
   EuiDataGridToolBarVisibilityDisplaySelectorOptions,
+  EuiDelayRender,
+  EuiProgress,
 } from '@elastic/eui';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import {
@@ -1145,10 +1147,11 @@ export const UnifiedDataTable = ({
       onFetchMoreRecords &&
       loadingState !== DataLoadingState.loadingMore
     ) {
-      dataGridRef.current?.setFocusedCell({
-        rowIndex: displayedRows.length - 1,
-        colIndex: leadingControlColumns.length,
-      });
+      // dataGridRef.current?.setFocusedCell({
+      //   rowIndex: displayedRows.length - 1,
+      //   colIndex: leadingControlColumns.length,
+      // });
+      setHasScrolledToBottom(false);
       onFetchMoreRecords();
     }
   }, [
@@ -1159,10 +1162,33 @@ export const UnifiedDataTable = ({
     onFetchMoreRecords,
   ]);
 
-  const virtualizationOptions = useMemo(() => {
+  // useEffect(() => {
+  //   const onWheel = (event: WheelEvent) => {
+  //     console.log('they see me scrollin', dataGridWrapper, event);
+  //   };
+
+  //   // const outerRef = dataGridWrapper?.querySelector<HTMLElement>('.euiDataGrid__virtualized');
+
+  //   // if (!outerRef) {
+  //   //   return;
+  //   // }
+
+  //   dataGridWrapper?.addEventListener('wheel', onWheel);
+
+  //   return () => {
+  //     dataGridWrapper?.removeEventListener('wheel', onWheel);
+  //   };
+  // }, [dataGridWrapper]);
+
+  const virtualizationOptions = useMemo<EuiDataGridProps['virtualizationOptions']>(() => {
     // Using throttle instead of debounce to ensure it updates while user is still scrolling
     const onScroll = throttle((event: GridOnScrollProps) => {
+      // console.log(event);
       setHasScrolledToBottom((prevHasScrolledToBottom) => {
+        if (loadingState === DataLoadingState.loadingMore) {
+          return prevHasScrolledToBottom;
+        }
+
         // We need to manually query the react-window wrapper since EUI doesn't
         // expose outerRef in virtualizationOptions, but we should request it
         const outerRef = dataGridWrapper?.querySelector<HTMLElement>('.euiDataGrid__virtualized');
@@ -1172,7 +1198,8 @@ export const UnifiedDataTable = ({
         }
 
         // Account for footer height when it's visible to avoid flickering
-        const scrollBottomMargin = prevHasScrolledToBottom ? 140 : 100;
+        // const scrollBottomMargin = prevHasScrolledToBottom ? 140 : 100;
+        const scrollBottomMargin = 100;
         const isScrollable = outerRef.scrollHeight > outerRef.offsetHeight;
         const isScrolledToBottom =
           event.scrollTop + outerRef.offsetHeight >= outerRef.scrollHeight - scrollBottomMargin;
@@ -1181,8 +1208,8 @@ export const UnifiedDataTable = ({
       });
     }, 50);
 
-    return { ...VIRTUALIZATION_OPTIONS, onScroll };
-  }, [dataGridWrapper]);
+    return { ...VIRTUALIZATION_OPTIONS, onScroll, initialScrollTop: 500 };
+  }, [dataGridWrapper, defaultColumns, loadingState]);
 
   const isRenderComplete = loadingState !== DataLoadingState.loading;
 
@@ -1223,6 +1250,9 @@ export const UnifiedDataTable = ({
   return (
     <UnifiedDataTableContext.Provider value={unifiedDataTableContextValue}>
       <span className="unifiedDataTable__inner">
+        {loadingState === DataLoadingState.loadingMore && (
+          <EuiProgress size="xs" color="accent" position="absolute" />
+        )}
         <div
           ref={setDataGridWrapper}
           key={isCompareActive ? 'comparisonTable' : 'docTable'}
@@ -1286,7 +1316,7 @@ export const UnifiedDataTable = ({
             />
           )}
         </div>
-        {loadingState !== DataLoadingState.loading &&
+        {/* {loadingState !== DataLoadingState.loading &&
           isPaginationEnabled && // we hide the footer for Surrounding Documents page
           !isFilterActive && // hide footer when showing selected documents
           !isCompareActive && (
@@ -1301,7 +1331,7 @@ export const UnifiedDataTable = ({
               data={data}
               fieldFormats={fieldFormats}
             />
-          )}
+          )} */}
         {searchTitle && (
           <EuiScreenReaderOnly>
             <p id={String(randomId)}>
