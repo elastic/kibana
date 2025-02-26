@@ -8,10 +8,19 @@
  */
 
 import React from 'react';
-import { storiesOf } from '@storybook/react';
 import { Debug } from '../debug';
 import { largePayload, smallPayload } from './helpers';
 
-storiesOf('components/Elements/Debug', module)
-  .add('small payload', () => <Debug payload={smallPayload} />)
-  .add('large payload', () => <Debug payload={largePayload} />);
+export default {
+  title: 'components/Elements/Debug',
+};
+
+export const SmallPayload = {
+  render: () => <Debug payload={smallPayload} />,
+  name: 'small payload',
+};
+
+export const LargePayload = {
+  render: () => <Debug payload={largePayload} />,
+  name: 'large payload',
+};

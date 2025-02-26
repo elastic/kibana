@@ -6,7 +6,6 @@
  */
 
 import React from 'react';
-import { storiesOf } from '@storybook/react';
 import { plot } from '..';
 import { Render } from '../../__stories__/render';
 
@@ -56,15 +55,23 @@ const data = [
   },
 ];
 
-storiesOf('renderers/plot', module).add('default', () => {
-  const config = {
-    data,
-    options: plotOptions,
-    font: {
-      css: '',
-      spec: {},
-      type: 'style' as 'style',
-    },
-  };
-  return <Render renderer={plot} config={config} />;
-});
+export default {
+  title: 'renderers/plot',
+};
+
+export const Default = {
+  render: () => {
+    const config = {
+      data,
+      options: plotOptions,
+      font: {
+        css: '',
+        spec: {},
+        type: 'style' as 'style',
+      },
+    };
+    return <Render renderer={plot} config={config} />;
+  },
+
+  name: 'default',
+};
