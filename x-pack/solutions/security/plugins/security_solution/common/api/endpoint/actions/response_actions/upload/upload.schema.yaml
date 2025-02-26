@@ -20,7 +20,7 @@ paths:
         '200':
           description: OK
           content:
-            application/json:
+            multipart/form-data:
               schema:
                 $ref: '#/components/schemas/UploadRouteResponse'
 
@@ -30,7 +30,7 @@ components:
       example:
         endpoint_ids:
           - "ed518850-681a-4d60-bb98-e22640cae2a8"
-        file: "@fix-malware.sh"
+        file: "RWxhc3RpYw=="
       allOf:
         - $ref: '../../../model/schema/common.schema.yaml#/components/schemas/BaseActionSchema'
         - type: object
@@ -49,8 +49,8 @@ components:
             # File extends Blob - any binary data will be base-64 encoded
             file:
               type: string
-              description: "The file content to be uploaded or a relative path to the file. Note the path must be preceded with @."
-              example: "@fix-malware.sh"
+              description: "The binary content of the file."
+              example: "RWxhc3RpYw=="
               format: binary
     UploadRouteResponse:
       type: object
