@@ -5,10 +5,13 @@
  * 2.0.
  */
 
-import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTitle } from '@elastic/eui';
+import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiLink, EuiSpacer, EuiTitle } from '@elastic/eui';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
+import { DashboardLocatorParams } from '@kbn/dashboard-plugin/public';
+import { DASHBOARD_APP_LOCATOR } from '@kbn/deeplinks-analytics';
 import type { Dashboard } from './types';
+import { useKibana } from '../../hooks/use_kibana';
 
 interface Props {
   dashboards: Dashboard[];
@@ -16,6 +19,10 @@ interface Props {
 }
 
 export function AssignedDashboardList({ dashboards, unassign }: Props) {
+  const {
+    services: { share },
+  } = useKibana();
+  const dashboardLocator = share.url.locators.get<DashboardLocatorParams>(DASHBOARD_APP_LOCATOR);
   return (
     <EuiFlexGroup direction="column" gutterSize="xs">
       <EuiFlexItem>
@@ -29,8 +36,16 @@ export function AssignedDashboardList({ dashboards, unassign }: Props) {
       </EuiFlexItem>
       <EuiSpacer size="s" />
       {dashboards.map((dashboard) => (
-        <EuiFlexGroup direction="row" key={dashboard.id} gutterSize="s">
-          <EuiFlexItem>{dashboard.title}</EuiFlexItem>
+        <EuiFlexGroup direction="row" key={dashboard.id} gutterSize="s" alignItems="center">
+          <EuiFlexItem>
+            <EuiLink
+              data-test-subj="dashboardLink"
+              href={dashboardLocator?.getRedirectUrl({ dashboardId: dashboard.id } ?? '')}
+              target="_blank"
+            >
+              {dashboard.title}
+            </EuiLink>
+          </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiButton
               data-test-subj="sloAssignedDashboardListUnassignButton"
