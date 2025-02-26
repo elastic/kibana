@@ -70,11 +70,6 @@ const mockCreateSourcererDataView = jest.fn(() => {
   throw errToReturn;
 });
 
-jest.mock('../../common/hooks/use_selector', () => ({
-  // Mock timeline so_id return
-  useDeepEqualSelector: jest.fn().mockReturnValue({ savedObjectId: null }),
-}));
-
 jest.mock('../../common/lib/kibana', () => ({
   useToasts: () => ({
     addError: mockAddError,

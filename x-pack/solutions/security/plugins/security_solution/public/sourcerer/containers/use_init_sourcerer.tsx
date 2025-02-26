@@ -57,9 +57,7 @@ export const useInitSourcerer = (
   }, [addWarning, defaultDataView.error]);
 
   const getTimelineSelector = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
-  const { savedObjectId: timelineSavedObjectId } = useDeepEqualSelector((state) =>
-    getTimelineSelector(state, TimelineId.active)
-  );
+  const timeline = useDeepEqualSelector((state) => getTimelineSelector(state, TimelineId.active));
 
   const scopeDataViewId = useSelector((state: State) => {
     return sourcererSelectors.sourcererScopeSelectedDataViewId(state, scopeId);
@@ -178,7 +176,7 @@ export const useInitSourcerer = (
       !loadingSignalIndex &&
       signalIndexName != null &&
       signalIndexNameSourcerer == null &&
-      timelineSavedObjectId == null &&
+      timeline?.savedObjectId == null &&
       initialTimelineSourcerer.current &&
       defaultDataView.id.length > 0
     ) {
@@ -209,7 +207,7 @@ export const useInitSourcerer = (
       );
     } else if (
       signalIndexNameSourcerer != null &&
-      timelineSavedObjectId == null &&
+      timeline?.savedObjectId == null &&
       initialTimelineSourcerer.current &&
       defaultDataView.id.length > 0
     ) {
@@ -240,7 +238,7 @@ export const useInitSourcerer = (
       );
     }
   }, [
-    timelineSavedObjectId,
+    timeline?.savedObjectId,
     defaultDataView,
     dispatch,
     loadingSignalIndex,
