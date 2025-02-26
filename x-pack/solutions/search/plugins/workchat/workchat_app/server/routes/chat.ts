@@ -6,14 +6,28 @@
  */
 
 import type { IRouter } from '@kbn/core/server';
+import { observableIntoEventSourceStream } from '@kbn/sse-utils-server';
+import { InternalServices } from '../services';
 
-export const registerChatRoutes = ({ router }: { router: IRouter }) => {
+export const registerChatRoutes = ({
+  getServices,
+  router,
+}: {
+  router: IRouter;
+  getServices: () => InternalServices;
+}) => {
   router.post(
     {
       path: '/internal/workchat/chat',
       validate: false,
     },
-    async (ctx, req, res) => {
+    async (ctx, request, res) => {
+      const { agentFactory } = getServices();
+
+      const agent = await agentFactory.getAgent({ request, agentId: 'TODO', connectorId: 'TODO' });
+
+      agent.run();
+
       return res.ok();
     }
   );
