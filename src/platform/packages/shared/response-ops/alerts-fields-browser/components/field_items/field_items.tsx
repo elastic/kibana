@@ -67,28 +67,30 @@ export const getFieldItemsData = ({
     selectedCategoryIds.length > 0 ? selectedCategoryIds : Object.keys(browserFields);
   const selectedFieldIds = new Set(columnIds);
 
-  const fieldItems = uniqBy(
-    'name',
-    categoryIds.reduce<BrowserFieldItem[]>((fieldItemsAcc, categoryId) => {
+  const getFieldItems = () => {
+    let fieldItemsAcc: BrowserFieldItem[] = [];
+    for (let i = 0; i < categoryIds.length; i += 1) {
+      const categoryId = categoryIds[i];
       const categoryBrowserFields = Object.values(browserFields[categoryId]?.fields ?? {});
       if (categoryBrowserFields.length > 0) {
-        fieldItemsAcc.push(
-          ...categoryBrowserFields.map(({ name = '', ...field }) => {
-            return {
-              name,
-              type: field.type,
-              description: getDescription(name, EcsFlat as Record<string, EcsMetadata>),
-              example: field.example?.toString(),
-              category: getCategory(name),
-              selected: selectedFieldIds.has(name),
-              isRuntime: !!field.runtimeField,
-            };
-          })
-        );
+        const categoryFieldItems = categoryBrowserFields.map(({ name = '', ...field }) => {
+          return {
+            name,
+            type: field.type,
+            description: getDescription(name, EcsFlat as Record<string, EcsMetadata>),
+            example: field.example?.toString(),
+            category: getCategory(name),
+            selected: selectedFieldIds.has(name),
+            isRuntime: !!field.runtimeField,
+          };
+        });
+        fieldItemsAcc = fieldItemsAcc.concat(categoryFieldItems);
       }
-      return fieldItemsAcc;
-    }, [])
-  );
+    }
+    return fieldItemsAcc;
+  };
+
+  const fieldItems = uniqBy('name', getFieldItems());
   return { fieldItems };
 };
 
