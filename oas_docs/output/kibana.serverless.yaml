@@ -38642,7 +38642,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Security_AI_Assistant_API_KnowledgeBaseEntryUpdateProps'
+              $ref: '#/components/schemas/Security_AI_Assistant_API_KnowledgeBaseEntryUpdateRouteProps'
         required: true
       responses:
         '200':
@@ -44939,6 +44939,9 @@ components:
       allOf:
         - type: object
           properties:
+            global:
+              description: Whether this Knowledge Base Entry is global, defaults to false
+              type: boolean
             name:
               description: Name of the Knowledge Base Entry
               type: string
@@ -44953,6 +44956,7 @@ components:
           required:
             - name
             - namespace
+            - global
             - users
         - $ref: '#/components/schemas/Security_AI_Assistant_API_ResponseFields'
         - $ref: '#/components/schemas/Security_AI_Assistant_API_DocumentEntryResponseFields'
@@ -44960,6 +44964,9 @@ components:
       allOf:
         - type: object
           properties:
+            global:
+              description: Whether this Knowledge Base Entry is global, defaults to false
+              type: boolean
             name:
               description: Name of the Knowledge Base Entry
               type: string
@@ -44987,8 +44994,7 @@ components:
       type: object
       properties:
         kbResource:
-          description: Knowledge Base resource name for grouping entries, e.g. 'esql', 'lens-docs', etc
-          type: string
+          $ref: '#/components/schemas/Security_AI_Assistant_API_KnowledgeBaseResource'
         source:
           description: Source document name or filepath
           type: string
@@ -45013,6 +45019,9 @@ components:
       allOf:
         - type: object
           properties:
+            global:
+              description: Whether this Knowledge Base Entry is global, defaults to false
+              type: boolean
             id:
               $ref: '#/components/schemas/Security_AI_Assistant_API_NonEmptyString'
             name:
@@ -45092,6 +45101,9 @@ components:
       allOf:
         - type: object
           properties:
+            global:
+              description: Whether this Knowledge Base Entry is global, defaults to false
+              type: boolean
             name:
               description: Name of the Knowledge Base Entry
               type: string
@@ -45106,6 +45118,7 @@ components:
           required:
             - name
             - namespace
+            - global
             - users
         - $ref: '#/components/schemas/Security_AI_Assistant_API_ResponseFields'
         - $ref: '#/components/schemas/Security_AI_Assistant_API_IndexEntryResponseFields'
@@ -45113,6 +45126,9 @@ components:
       allOf:
         - type: object
           properties:
+            global:
+              description: Whether this Knowledge Base Entry is global, defaults to false
+              type: boolean
             name:
               description: Name of the Knowledge Base Entry
               type: string
@@ -45172,6 +45188,9 @@ components:
       allOf:
         - type: object
           properties:
+            global:
+              description: Whether this Knowledge Base Entry is global, defaults to false
+              type: boolean
             id:
               $ref: '#/components/schemas/Security_AI_Assistant_API_NonEmptyString'
             name:
@@ -45351,6 +45370,18 @@ components:
         - $ref: '#/components/schemas/Security_AI_Assistant_API_IndexEntryUpdateFields'
       discriminator:
         propertyName: type
+    Security_AI_Assistant_API_KnowledgeBaseEntryUpdateRouteProps:
+      anyOf:
+        - $ref: '#/components/schemas/Security_AI_Assistant_API_DocumentEntryCreateFields'
+        - $ref: '#/components/schemas/Security_AI_Assistant_API_IndexEntryCreateFields'
+      discriminator:
+        propertyName: type
+    Security_AI_Assistant_API_KnowledgeBaseResource:
+      description: Knowledge Base resource name for grouping entries, e.g. 'security_labs', 'user', etc
+      enum:
+        - security_labs
+        - user
+      type: string
     Security_AI_Assistant_API_KnowledgeBaseResponse:
       description: AI assistant KnowledgeBase.
       type: object
