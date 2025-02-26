@@ -94,6 +94,24 @@ export const ESQLLang: CustomLangModuleType<ESQLCallbacks> = {
       },
     };
   },
+  getInlineCompletionsProvider: (
+    callbacks?: ESQLCallbacks
+  ): monaco.languages.InlineCompletionsProvider => {
+    return {
+      provideInlineCompletions(model, position) {
+        console.log('provideInlineCompletions');
+        return {
+          items: [
+            // {
+            //   insertText: 'provide',
+            //   range: meow,
+            // },
+          ],
+        };
+      },
+      freeInlineCompletions: () => {},
+    };
+  },
   getSuggestionProvider: (callbacks?: ESQLCallbacks): monaco.languages.CompletionItemProvider => {
     return {
       triggerCharacters: [',', '(', '=', ' ', '[', ''],
