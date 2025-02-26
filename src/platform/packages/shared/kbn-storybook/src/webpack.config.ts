@@ -70,6 +70,12 @@ function isDesiredPreset(preset: Preset) {
  */
 export default ({ config: storybookConfig }: { config: Configuration }) => {
   const config: Configuration = {
+    cache: {
+      type: 'filesystem',
+      buildDependencies: {
+        config: [__filename],
+      },
+    },
     devServer: {
       devMiddleware: {
         stats: 'errors-only',
@@ -89,7 +95,7 @@ export default ({ config: storybookConfig }: { config: Configuration }) => {
         },
         {
           test: /\.(html|md|txt|tmpl)$/,
-          type: 'asset/source',
+          type: 'asset/source' as webpack.RuleSetRule['type'],
         },
         {
           test: /\.peggy$/,
@@ -142,6 +148,9 @@ export default ({ config: storybookConfig }: { config: Configuration }) => {
         core_app_image_assets: resolve(REPO_ROOT, 'src/core/public/styles/core_app/images'),
         core_styles: resolve(REPO_ROOT, 'src/core/public/index.scss'),
         vega: resolve(REPO_ROOT, 'node_modules/vega/build-es5/vega.js'),
+      },
+      fallback: {
+        timers: false,
       },
     },
     stats: 'errors-only',

@@ -6,9 +6,8 @@
  */
 
 import { action } from '@storybook/addon-actions';
-import { storiesOf } from '@storybook/react';
-import { array, radios, boolean } from '@storybook/addon-knobs';
-import React from 'react';
+import type { Meta, StoryObj } from '@storybook/react';
+import React, { useState } from 'react';
 
 import { ExtendedTemplate } from '../extended_template';
 import { ExpressionAstExpression } from '../../../../../types';
@@ -24,54 +23,77 @@ const defaultExpression: ExpressionAstExpression = {
   ],
 };
 
-const defaultValues = {
-  argValue: defaultExpression,
-};
-
-class Interactive extends React.Component<{}, { argValue: ExpressionAstExpression }> {
-  public state = defaultValues;
-
-  public render() {
-    const include = [];
-    if (boolean('Lines', true)) {
-      include.push('lines');
-    }
-    if (boolean('Bars', true)) {
-      include.push('bars');
-    }
-    if (boolean('Points', true)) {
-      include.push('points');
-    }
-    return (
-      <ExtendedTemplate
-        argValue={this.state.argValue}
-        onValueChange={(argValue) => {
-          action('onValueChange')(argValue);
-          this.setState({ argValue });
-        }}
-        resolved={{ labels: array('Series Labels', ['label1', 'label2']) }}
-        typeInstance={{
-          name: radios('Type Instance', { default: 'defaultStyle', custom: 'custom' }, 'custom'),
-          options: {
-            include,
-          },
-        }}
-      />
-    );
-  }
+interface StoryProps {
+  showLines: boolean;
+  showBars: boolean;
+  showPoints: boolean;
+  seriesLabels: string[];
+  typeInstanceName: 'defaultStyle' | 'custom';
 }
 
-storiesOf('arguments/SeriesStyle', module)
-  .addDecorator((story) => (
-    <div style={{ width: '323px', padding: '16px', background: '#fff' }}>{story()}</div>
-  ))
-  .add('extended', () => <Interactive />);
+const meta: Meta<StoryProps> = {
+  title: 'arguments/SeriesStyle',
+  decorators: [
+    (Story) => (
+      <div style={{ width: '323px', padding: '16px', background: '#fff' }}>
+        <Story />
+      </div>
+    ),
+  ],
+};
 
-storiesOf('arguments/SeriesStyle/components', module)
-  .addDecorator((story) => (
-    <div style={{ width: '323px', padding: '16px', background: '#fff' }}>{story()}</div>
-  ))
-  .add('extended: defaults', () => (
+export default meta;
+type Story = StoryObj<StoryProps>;
+
+const Component = (args: StoryProps) => {
+  const [argValue, setArgValue] = useState<ExpressionAstExpression>(defaultExpression);
+  const { showLines, showBars, showPoints, seriesLabels, typeInstanceName } = args;
+
+  const include = [];
+  if (showLines) {
+    include.push('lines');
+  }
+  if (showBars) {
+    include.push('bars');
+  }
+  if (showPoints) {
+    include.push('points');
+  }
+
+  return (
+    <ExtendedTemplate
+      argValue={argValue}
+      onValueChange={(newArgValue) => {
+        action('onValueChange')(newArgValue);
+        setArgValue(newArgValue);
+      }}
+      resolved={{ labels: seriesLabels }}
+      typeInstance={{
+        name: typeInstanceName,
+        options: {
+          include,
+        },
+      }}
+    />
+  );
+};
+
+// Interactive story with controls
+export const Extended: Story = {
+  args: {
+    showLines: true,
+    showBars: true,
+    showPoints: true,
+    seriesLabels: ['label1', 'label2'],
+    typeInstanceName: 'custom',
+  },
+  render: Component,
+};
+
+// Components story with defaults
+export const ComponentsExtendedDefaults: StoryObj = {
+  name: 'extended: defaults',
+  render: () => (
     <ExtendedTemplate
       argValue={defaultExpression}
       resolved={{ labels: [] }}
@@ -83,4 +105,5 @@ storiesOf('arguments/SeriesStyle/components', module)
         },
       }}
     />
-  ));
+  ),
+};

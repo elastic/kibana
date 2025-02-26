@@ -11,7 +11,7 @@ import type { Meta, Story } from '@storybook/react';
 import { orderBy } from 'lodash';
 import React, { useMemo, useState } from 'react';
 import { ENTITY_LAST_SEEN } from '@kbn/observability-shared-plugin/common';
-import { useArgs } from '@storybook/addons';
+import { useArgs } from '@storybook/preview-api';
 import { EntitiesGrid } from '.';
 import { entitiesMock } from './mock/entities_mock';
 
