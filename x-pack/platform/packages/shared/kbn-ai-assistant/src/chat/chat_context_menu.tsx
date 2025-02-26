@@ -76,7 +76,7 @@ export function ChatContextMenu({
   ];
 
   if (isConversationOwnedByCurrentUser) {
-    menuItems.push(<EuiHorizontalRule margin="none" />);
+    menuItems.push(<EuiHorizontalRule key="seperator" margin="none" />);
     menuItems.push(
       <EuiContextMenuItem
         key="delete"

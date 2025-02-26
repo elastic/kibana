@@ -125,7 +125,7 @@ export function ChatSharingMenu({
         renderOption={renderOption}
         onChange={(newOptions) => {
           const selectedOption = newOptions.find((option) => option.checked === 'on');
-          if (selectedOption) {
+          if (selectedOption && selectedOption.key !== selectedValue) {
             setSelectedValue(selectedOption.key as ConversationAccess);
             onChangeConversationAccess(selectedOption.key as ConversationAccess);
           }

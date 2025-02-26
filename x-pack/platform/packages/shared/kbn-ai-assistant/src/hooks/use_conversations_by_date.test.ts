@@ -21,6 +21,8 @@ const getDisplayedConversation = (conversation: Conversation) => {
     label: conversation.conversation.title,
     lastUpdated: conversation.conversation.last_updated,
     href: `/conversation/${conversation.conversation.id}`,
+    public: conversation.public,
+    conversation,
   };
 };
 
