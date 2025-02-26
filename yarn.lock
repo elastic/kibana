@@ -2321,25 +2321,27 @@
   resolved "https://registry.yarnpkg.com/@elastic/eslint-plugin-eui/-/eslint-plugin-eui-0.0.2.tgz#56b9ef03984a05cc213772ae3713ea8ef47b0314"
   integrity sha512-IoxURM5zraoQ7C8f+mJb9HYSENiZGgRVcG4tLQxE61yHNNRDXtGDWTZh8N1KIHcsqN1CEPETjuzBXkJYF/fDiQ==
 
-"@elastic/eui-theme-borealis@0.0.10":
-  version "0.0.10"
-  resolved "https://registry.yarnpkg.com/@elastic/eui-theme-borealis/-/eui-theme-borealis-0.0.10.tgz#ebc317c135220b2f17529fe4e7b235a66614006e"
-  integrity sha512-9VFpUfxtHLjChd7Q1HZry71+o1vEOaUnCSOJiJT6zi/sbt+J114k+GCukOChScK6xaX8ypYD4/I0olCBwZV5Vw==
+"@elastic/eui-theme-borealis@0.0.11":
+  version "0.0.11"
+  resolved "https://registry.yarnpkg.com/@elastic/eui-theme-borealis/-/eui-theme-borealis-0.0.11.tgz#edad01998f2de79b5d6b401f8951fbe10353e2d6"
+  integrity sha512-M8tDj6zDkbM/K4G/MVol64CUO2e+d9wAlZWZ7odcZHBTAbxD35I3HQy0l0+z6EUzE02+2jUmPCK8IykpKLjPdg==
 
-"@elastic/eui-theme-common@0.0.9":
-  version "0.0.9"
-  resolved "https://registry.yarnpkg.com/@elastic/eui-theme-common/-/eui-theme-common-0.0.9.tgz#42d4f15b6d8dd9f8976eb3f2d46fd59af3f37a9c"
-  integrity sha512-nmeqi+gZruBQtDOirPIGgZh0QejrlmeZixKaaM/iQca5rQiTNHAE29sSpGFk20+//yfiDPQMFee7PQU/A4R4Ow==
+"@elastic/eui-theme-common@0.0.10":
+  version "0.0.10"
+  resolved "https://registry.yarnpkg.com/@elastic/eui-theme-common/-/eui-theme-common-0.0.10.tgz#253da1337abae656ab93917bb3ed7e6f48e5f9a1"
+  integrity sha512-MruijLreN1VpyQgUK2pXcdFIbpYpjc3ZaZ+f0r1Aa0KON935wIf7VAb861tYPmAJxaf+4X4kyoqS0F+8rO9tbg==
   dependencies:
     "@types/lodash" "^4.14.202"
+    chroma-js "^2.4.2"
     lodash "^4.17.21"
 
-"@elastic/eui@99.2.0-borealis.0":
-  version "99.2.0-borealis.0"
-  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-99.2.0-borealis.0.tgz#44b22bd4b2177bdf860e7d5ca5f00cea123f044a"
-  integrity sha512-cjd7+awwWoBzdqFju0v3Q6Pl/GB1Y9C+3j9nNj3u5JgK62E2z9AkQvRdL6Tv8jusFwoSR9OhC3H0bmYOKLx8mg==
+"@elastic/eui@99.3.0-borealis.0":
+  version "99.3.0-borealis.0"
+  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-99.3.0-borealis.0.tgz#e8c26a9d160783682bcdeea65846d8295e7cd391"
+  integrity sha512-T88s2vQHEHy6g/mA8K2cDr3IUKFGZcdNHFIRUqJwYjBW6JwHyLkrFZuFweK88IyJv1F8vsTv1RlCeeta/AZlLA==
   dependencies:
-    "@elastic/eui-theme-common" "0.0.9"
+    "@elastic/eui-theme-common" "0.0.10"
+    "@elastic/prismjs-esql" "^1.0.0"
     "@hello-pangea/dnd" "^16.6.0"
     "@types/lodash" "^4.14.202"
     "@types/numeral" "^2.0.5"
@@ -2401,6 +2403,11 @@
   version "2.5.1"
   resolved "https://registry.yarnpkg.com/@elastic/numeral/-/numeral-2.5.1.tgz#96acf39c3d599950646ef8ccfd24a3f057cf4932"
   integrity sha512-Tby6TKjixRFY+atVNeYUdGr9m0iaOq8230KTwn8BbUhkh7LwozfgKq0U98HRX7n63ZL62szl+cDKTYzh5WPCFQ==
+
+"@elastic/prismjs-esql@^1.0.0":
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/@elastic/prismjs-esql/-/prismjs-esql-1.0.0.tgz#370c996536dcea8840f2c2288a97aca4982e13c5"
+  integrity sha512-kEQcj9wg7pUaFkW7m7zs0fz4cmg0kWUMQv6SyENXKvLGMecgDjNciEoN3CMg22PYURelbnhM7ii6nFv9hAr2NA==
 
 "@elastic/react-search-ui-views@1.20.2", "@elastic/react-search-ui-views@^1.20.2":
   version "1.20.2"
