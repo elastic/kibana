@@ -238,6 +238,8 @@ tags:
   - description: Check the upgrade status of your Elasticsearch cluster and reindex indices that were created in the previous major version. The assistant helps you prepare for the next major version of Elasticsearch.
     name: upgrade
     x-displayName: Upgrade assistant
+  - name: user session
+    x-displayName: User session management
 paths:
   /api/actions/connector_types:
     get:
@@ -42547,6 +42549,66 @@ paths:
       summary: Create or update roles
       tags:
         - roles
+  /api/security/session/_invalidate:
+    post:
+      description: 'Invalidate user sessions that match a query.<br/><br/>[Required authorization] Route required privileges: ALL of [superuser].'
+      operationId: post-security-session-invalidate
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              additionalProperties: false
+              type: object
+              properties:
+                match:
+                  enum:
+                    - all
+                    - query
+                  type: string
+                query:
+                  anyOf:
+                    - items: {}
+                      type: array
+                    - type: boolean
+                    - type: number
+                    - type: object
+                    - type: string
+                  nullable: true
+                  oneOf:
+                    - additionalProperties: false
+                      type: object
+                      properties:
+                        provider:
+                          additionalProperties: false
+                          type: object
+                          properties:
+                            name:
+                              type: string
+                            type:
+                              type: string
+                          required:
+                            - type
+                        username:
+                          type: string
+                      required:
+                        - provider
+                    - not: {}
+              required:
+                - match
+                - query
+      responses: {}
+      summary: Invalidate user sessions
+      tags:
+        - user session
+      x-state: Technical Preview
   /api/spaces/_copy_saved_objects:
     post:
       description: 'It also allows you to automatically copy related objects, so when you copy a dashboard, this can automatically copy over the associated visualizations, data views, and saved Discover sessions, as required. You can request to overwrite any objects that already exist in the target space if they share an identifier or you can use the resolve copy saved objects conflicts API to do this on a per-object basis.<br/><br/>[Required authorization] Route required privileges: ALL of [copySavedObjectsToSpaces].'
