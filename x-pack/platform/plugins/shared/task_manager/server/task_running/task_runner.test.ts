@@ -2426,7 +2426,7 @@ describe('TaskManagerRunner', () => {
     });
   });
 
-  describe('removeTask()', () => {
+  describe('markTaskAsCompleted()', () => {
     it(`should remove the task saved-object`, async () => {
       const { runner, store } = await readyToRunStageSetup({
         instance: {
@@ -2436,7 +2436,7 @@ describe('TaskManagerRunner', () => {
       });
 
       await runner.run();
-      await runner.removeTask();
+      await runner.markTaskAsCompleted();
       expect(store.remove).toHaveBeenCalledWith('foo');
     });
 

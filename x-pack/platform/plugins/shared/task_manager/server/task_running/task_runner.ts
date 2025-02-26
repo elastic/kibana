@@ -82,7 +82,8 @@ export interface TaskRunner {
   toString: () => string;
   isSameTask: (executionId: string) => boolean;
   isAdHocTaskAndOutOfAttempts: boolean;
-  removeTask: () => Promise<void>;
+  markTaskAsCompleted: (result?: Record<string, unknown>) => Promise<void>;
+  markTaskAsFailed: (result: Record<string, unknown>) => Promise<void>;
 }
 
 export enum TaskRunningStage {
@@ -429,14 +430,53 @@ export class TaskManagerRunner implements TaskRunner {
     }
   }
 
-  public async removeTask(): Promise<void> {
-    await this.bufferedTaskStore.remove(this.id);
+  public async markTaskAsCompleted(result?: Record<string, unknown>): Promise<void> {
+    await this.bufferedTaskStore.partialUpdate(
+      {
+        id: this.id,
+        state: {},
+        status: TaskStatus.Completed,
+        retryAt: null,
+        // TODO: Remove @ts-ignore
+        // @ts-ignore
+        runAt: null,
+        ownerId: null,
+        result,
+      },
+      { validate: false, doc: this.instance.task }
+    );
     if (this.task?.cleanup) {
       try {
         await this.task.cleanup();
       } catch (e) {
         this.logger.error(
-          `Error encountered when running onTaskRemoved() hook for ${this}: ${e.message}`
+          `Error encountered when running cleanup() hook for ${this}: ${e.message}`
+        );
+      }
+    }
+  }
+
+  public async markTaskAsFailed(result: Record<string, unknown>): Promise<void> {
+    await this.bufferedTaskStore.partialUpdate(
+      {
+        id: this.id,
+        state: {},
+        status: TaskStatus.Failed,
+        retryAt: null,
+        // TODO: Remove @ts-ignore
+        // @ts-ignore
+        runAt: null,
+        ownerId: null,
+        result,
+      },
+      { validate: false, doc: this.instance.task }
+    );
+    if (this.task?.cleanup) {
+      try {
+        await this.task.cleanup();
+      } catch (e) {
+        this.logger.error(
+          `Error encountered when running cleanup() hook for ${this}: ${e.message}`
         );
       }
     }
@@ -627,7 +667,7 @@ export class TaskManagerRunner implements TaskRunner {
     }
 
     // scheduling a retry isn't possible,mark task as failed
-    return asErr({ status: TaskStatus.Failed });
+    return asErr({ status: TaskStatus.Failed, result: { errorMessage: error.message } });
   };
 
   private async processResultForRecurringTask(
@@ -685,7 +725,7 @@ export class TaskManagerRunner implements TaskRunner {
     ) {
       // Delete the SO instead so it doesn't remain in the index forever
       this.instance = asRan(this.instance.task);
-      await this.removeTask();
+      await this.markTaskAsFailed(fieldUpdates.result!);
     } else {
       const { shouldValidate = true } = unwrap(result);
 
@@ -716,11 +756,11 @@ export class TaskManagerRunner implements TaskRunner {
       : TaskRunResult.RetryScheduled;
   }
 
-  private async processResultWhenDone(): Promise<TaskRunResult> {
+  private async processResultWhenDone(result?: Record<string, unknown>): Promise<TaskRunResult> {
     // not a recurring task: clean up by removing the task instance from store
     try {
       this.instance = asRan(this.instance.task);
-      await this.removeTask();
+      await this.markTaskAsCompleted(result);
     } catch (err) {
       if (err.statusCode === 404) {
         this.logger.warn(`Task cleanup of ${this} failed in processing. Was remove called twice?`);
@@ -743,7 +783,7 @@ export class TaskManagerRunner implements TaskRunner {
 
     await eitherAsync(
       result,
-      async ({ runAt, schedule, taskRunError }: SuccessfulRunResult) => {
+      async ({ runAt, schedule, taskRunError, result: taskResult }: SuccessfulRunResult) => {
         const taskPersistence =
           schedule || task.schedule ? TaskPersistence.Recurring : TaskPersistence.NonRecurring;
         try {
@@ -752,7 +792,7 @@ export class TaskManagerRunner implements TaskRunner {
             persistence: taskPersistence,
             result: await (runAt || schedule || task.schedule
               ? this.processResultForRecurringTask(result)
-              : this.processResultWhenDone()),
+              : this.processResultWhenDone(taskResult)),
           };
 
           // Alerting task runner returns SuccessfulRunResult with taskRunError

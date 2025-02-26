@@ -28,7 +28,8 @@ export function mockTask(overrides = {}, definitionOverrides = {}) {
     stage: TaskRunningStage.PENDING,
     toString: () => `TaskType "shooooo"`,
     isAdHocTaskAndOutOfAttempts: false,
-    removeTask: jest.fn(),
+    markTaskAsCompleted: jest.fn(),
+    markTaskAsFailed: jest.fn(),
     get expiration() {
       return new Date();
     },

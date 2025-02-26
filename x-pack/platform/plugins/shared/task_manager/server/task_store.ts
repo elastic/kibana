@@ -847,7 +847,13 @@ function ensureAggregationOnlyReturnsEnabledTaskObjects(opts: AggregationOpts): 
       filter: {
         bool: {
           must: [{ term: { type: 'task' } }, { term: { 'task.enabled': true } }],
-          must_not: [{ term: { 'task.status': TaskStatus.Unrecognized } }],
+          must_not: [
+            {
+              terms: {
+                'task.status': [TaskStatus.Unrecognized, TaskStatus.Failed, TaskStatus.Completed],
+              },
+            },
+          ],
         },
       },
     },

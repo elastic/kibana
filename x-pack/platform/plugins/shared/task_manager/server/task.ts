@@ -67,6 +67,7 @@ export type SuccessfulRunResult = {
   taskRunError?: DecoratedError;
   shouldValidate?: boolean;
   shouldDeleteTask?: boolean;
+  result?: Record<string, unknown>;
 } & (
   | // ensure a SuccessfulRunResult can either specify a new `runAt` or a new `schedule`, but not both
   {
@@ -234,6 +235,7 @@ export enum TaskStatus {
   ShouldDelete = 'should_delete',
   Unrecognized = 'unrecognized',
   DeadLetter = 'dead_letter',
+  Completed = 'completed',
 }
 
 export enum TaskLifecycleResult {
@@ -461,6 +463,8 @@ export interface ConcreteTaskInstance extends TaskInstance {
    * Used to break up tasks so each Kibana node can claim tasks on a subset of the partitions
    */
   partition?: number;
+
+  result?: Record<string, unknown>;
 }
 
 export type PartialConcreteTaskInstance = Partial<ConcreteTaskInstance> & {

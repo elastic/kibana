@@ -30,6 +30,7 @@ export const RiskEngineTaskStatusValues = z.enum([
   'should_delete',
   'unrecognized',
   'dead_letter',
+  'completed',
 ]);
 export type RiskEngineTaskStatusValuesEnum = typeof RiskEngineTaskStatusValues.enum;
 export const RiskEngineTaskStatusValuesEnum = RiskEngineTaskStatusValues.enum;
