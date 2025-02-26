@@ -93,7 +93,7 @@ export class TelemetryConfigWatcher {
         response = await pRetry(
           () =>
             this.policyService.list(this.makeInternalSOClient(), {
-              page: page++,
+              page,
               perPage: 100,
               kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name: endpoint`,
             }),
@@ -159,6 +159,8 @@ export class TelemetryConfigWatcher {
           );
         }
       }
+
+      page++;
     } while (response.page * response.perPage < response.total);
   }
 }

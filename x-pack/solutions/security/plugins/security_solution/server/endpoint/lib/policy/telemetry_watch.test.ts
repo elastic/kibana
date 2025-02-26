@@ -9,7 +9,11 @@ import { Subject } from 'rxjs';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { createPackagePolicyServiceMock } from '@kbn/fleet-plugin/server/mocks';
 import type { PackagePolicyClient } from '@kbn/fleet-plugin/server';
-import type { PackagePolicy, UpdatePackagePolicy } from '@kbn/fleet-plugin/common';
+import {
+  PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+  type PackagePolicy,
+  type UpdatePackagePolicy,
+} from '@kbn/fleet-plugin/common';
 import { createPackagePolicyMock } from '@kbn/fleet-plugin/common/mocks';
 import { policyFactory } from '../../../../common/endpoint/models/policy_config';
 import type { PolicyConfig } from '../../../../common/endpoint/types';
@@ -147,6 +151,13 @@ describe('Telemetry config watcher', () => {
       await telemetryWatcher.watch(true);
 
       expect(packagePolicyServiceMock.list).toBeCalledTimes(2);
+      const expectedParams = {
+        page: 1,
+        perPage: 100,
+        kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name: endpoint`,
+      };
+      expect(packagePolicyServiceMock.list.mock.calls[0][1]).toStrictEqual(expectedParams);
+      expect(packagePolicyServiceMock.list.mock.calls[1][1]).toStrictEqual(expectedParams);
 
       expect(mockedLogger.warn).not.toHaveBeenCalled();
       expect(mockedLogger.error).not.toHaveBeenCalled();
