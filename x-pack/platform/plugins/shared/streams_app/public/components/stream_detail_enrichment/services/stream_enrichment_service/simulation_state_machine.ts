@@ -387,9 +387,9 @@ function createSimulationRunFailureNofitier({ toasts }: Pick<SimulationMachineDe
   };
 }
 
-const composeSamplingCondition = (
+function composeSamplingCondition(
   processors: ProcessorDefinitionWithUIAttributes[]
-): Condition | undefined => {
+): Condition | undefined {
   if (isEmpty(processors)) {
     return undefined;
   }
@@ -406,17 +406,17 @@ const composeSamplingCondition = (
   }));
 
   return { or: conditions };
-};
+}
 
-const getSourceFields = (processors: ProcessorDefinitionWithUIAttributes[]): string[] => {
+function getSourceFields(processors: ProcessorDefinitionWithUIAttributes[]): string[] {
   return processors.map((processor) => getProcessorConfig(processor).field.trim()).filter(Boolean);
-};
+}
 
-const getTableColumns = (
+function getTableColumns(
   processors: ProcessorDefinitionWithUIAttributes[],
   fields: DetectedField[],
   filter: PreviewDocsFilterOption
-) => {
+) {
   const uniqueProcessorsFields = uniq(getSourceFields(processors));
 
   if (filter === 'outcome_filter_unmatched') {
@@ -426,12 +426,12 @@ const getTableColumns = (
   const uniqueDetectedFields = uniq(fields.map((field) => field.name));
 
   return uniq([...uniqueProcessorsFields, ...uniqueDetectedFields]);
-};
+}
 
-const filterSimulationDocuments = (
+function filterSimulationDocuments(
   documents: Simulation['documents'],
   filter: PreviewDocsFilterOption
-) => {
+) {
   switch (filter) {
     case 'outcome_filter_matched':
       return documents.filter((doc) => doc.status === 'parsed').map((doc) => doc.value);
@@ -441,12 +441,12 @@ const filterSimulationDocuments = (
     default:
       return documents.map((doc) => doc.value);
   }
-};
+}
 
-const derivePreviewColumns = (
+function derivePreviewColumns(
   context: SimulationMachineContext,
   processors: ProcessorDefinitionWithUIAttributes[]
-) => {
+) {
   const nextPreviewColumns = getTableColumns(
     processors,
     context.simulation?.detected_fields ?? [],
@@ -456,4 +456,4 @@ const derivePreviewColumns = (
   return isEqual(context.previewColumns, nextPreviewColumns)
     ? context.previewColumns
     : nextPreviewColumns;
-};
+}
