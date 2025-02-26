@@ -28,25 +28,27 @@ export default {
 const mock = new MarkdownStorybookMock();
 const argTypes = mock.getArgumentTypes();
 
-export const MarkdownStoryComponent = (params: MarkdownStorybookParams) => {
-  return (
-    <EuiFlexGroup>
-      <EuiFlexItem>
-        <Markdown
-          {...params}
-          readOnly={true}
-          markdownContent={'My content in **markdown** format set as the *markdownContent prop*'}
-        />
-        <Markdown {...params} readOnly={true}>
-          {`My content in **markdown** format passed as *children*
-            \`openLinksInNewTab\` [test link to open in new tab or not](https://www.elastic.co)
-            \`enableTooltipSupport\` !{tooltip[anchor text](Tooltip content)}
-            \`validateLinks\` [link with non-standard scheme](testing-testing-this-is-a-non-standatd-scheme://)
-           `}
-        </Markdown>
-      </EuiFlexItem>
-    </EuiFlexGroup>
-  );
-};
+export const MarkdownStoryComponent = {
+  render: (params: MarkdownStorybookParams) => {
+    return (
+      <EuiFlexGroup>
+        <EuiFlexItem>
+          <Markdown
+            {...params}
+            readOnly={true}
+            markdownContent={'My content in **markdown** format set as the *markdownContent prop*'}
+          />
+          <Markdown {...params} readOnly={true}>
+            {`My content in **markdown** format passed as *children*
+              \`openLinksInNewTab\` [test link to open in new tab or not](https://www.elastic.co)
+              \`enableTooltipSupport\` !{tooltip[anchor text](Tooltip content)}
+              \`validateLinks\` [link with non-standard scheme](testing-testing-this-is-a-non-standatd-scheme://)
+             `}
+          </Markdown>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    );
+  },
 
-MarkdownStoryComponent.argTypes = argTypes;
+  argTypes,
+};

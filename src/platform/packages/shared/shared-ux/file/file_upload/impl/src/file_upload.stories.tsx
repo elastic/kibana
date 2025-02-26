@@ -8,7 +8,7 @@
  */
 
 import React from 'react';
-import { ComponentMeta, ComponentStory } from '@storybook/react';
+import { Meta, StoryObj } from '@storybook/react';
 import { action } from '@storybook/addon-actions';
 import { FileKindBrowser, BaseFilesClient as FilesClient } from '@kbn/shared-ux-file-types';
 import { FilesContext } from '@kbn/shared-ux-file-context';
@@ -65,150 +65,162 @@ export default {
       </FilesContext>
     ),
   ],
-} as ComponentMeta<typeof FileUpload>;
+} as Meta<typeof FileUpload>;
 
-const Template: ComponentStory<typeof FileUpload> = (props: Props) => <FileUpload {...props} />;
+export const Basic = {};
 
-export const Basic = Template.bind({});
-
-export const AllowRepeatedUploads = Template.bind({});
-AllowRepeatedUploads.args = {
-  allowRepeatedUploads: true,
+export const AllowRepeatedUploads = {
+  args: {
+    allowRepeatedUploads: true,
+  },
 };
 
-export const LongErrorUX = Template.bind({});
-LongErrorUX.decorators = [
-  (Story) => (
-    <FilesContext
-      client={
-        {
-          create: async () => ({ file: { id: 'test' } }),
-          upload: async () => {
-            await sleep(1000);
-            throw new Error('Something went wrong while uploading! '.repeat(10).trim());
-          },
-          delete: async () => {},
-          getFileKind,
-        } as unknown as FilesClient
-      }
-    >
-      <Story />
-    </FilesContext>
-  ),
-];
-
-export const Abort = Template.bind({});
-Abort.decorators = [
-  (Story) => (
-    <FilesContext
-      client={
-        {
-          create: async () => ({ file: { id: 'test' } }),
-          upload: async () => {
-            await sleep(60000);
-          },
-          delete: async () => {},
-          getFileKind,
-        } as unknown as FilesClient
-      }
-    >
-      <Story />
-    </FilesContext>
-  ),
-];
-
-export const MaxSize = Template.bind({});
-MaxSize.args = {
-  kind: miniFile,
+export const LongErrorUX: StoryObj = {
+  decorators: [
+    (Story) => (
+      <FilesContext
+        client={
+          {
+            create: async () => ({ file: { id: 'test' } }),
+            upload: async () => {
+              await sleep(1000);
+              throw new Error('Something went wrong while uploading! '.repeat(10).trim());
+            },
+            delete: async () => {},
+            getFileKind,
+          } as unknown as FilesClient
+        }
+      >
+        <Story />
+      </FilesContext>
+    ),
+  ],
 };
 
-export const ZipOnly = Template.bind({});
-ZipOnly.args = {
-  kind: zipOnly,
+export const Abort: StoryObj = {
+  decorators: [
+    (Story) => (
+      <FilesContext
+        client={
+          {
+            create: async () => ({ file: { id: 'test' } }),
+            upload: async () => {
+              await sleep(60000);
+            },
+            delete: async () => {},
+            getFileKind,
+          } as unknown as FilesClient
+        }
+      >
+        <Story />
+      </FilesContext>
+    ),
+  ],
 };
 
-export const AllowClearAfterUpload = Template.bind({});
-AllowClearAfterUpload.args = {
-  allowClear: true,
+export const MaxSize = {
+  args: {
+    kind: miniFile,
+  },
 };
 
-export const ImmediateUpload = Template.bind({});
-ImmediateUpload.args = {
-  immediate: true,
+export const ZipOnly = {
+  args: {
+    kind: zipOnly,
+  },
 };
 
-export const ImmediateUploadError = Template.bind({});
-ImmediateUploadError.args = {
-  immediate: true,
-};
-ImmediateUploadError.decorators = [
-  (Story) => (
-    <FilesContext
-      client={
-        {
-          create: async () => ({ file: { id: 'test' } }),
-          upload: async () => {
-            await sleep(1000);
-            throw new Error('Something went wrong while uploading!');
-          },
-          delete: async () => {},
-          getFileKind,
-        } as unknown as FilesClient
-      }
-    >
-      <Story />
-    </FilesContext>
-  ),
-];
-
-export const ImmediateUploadAbort = Template.bind({});
-ImmediateUploadAbort.decorators = [
-  (Story) => (
-    <FilesContext
-      client={
-        {
-          create: async () => ({ file: { id: 'test' } }),
-          upload: async () => {
-            await sleep(60000);
-          },
-          delete: async () => {},
-          getFileKind,
-        } as unknown as FilesClient
-      }
-    >
-      <Story />
-    </FilesContext>
-  ),
-];
-ImmediateUploadAbort.args = {
-  immediate: true,
+export const AllowClearAfterUpload = {
+  args: {
+    allowClear: true,
+  },
 };
 
-export const Compressed = Template.bind({});
-Compressed.args = {
-  compressed: true,
+export const ImmediateUpload = {
+  args: {
+    immediate: true,
+  },
 };
 
-export const CompressedError = Template.bind({});
-CompressedError.args = {
-  compressed: true,
+export const ImmediateUploadError: StoryObj = {
+  args: {
+    immediate: true,
+  },
+
+  decorators: [
+    (Story) => (
+      <FilesContext
+        client={
+          {
+            create: async () => ({ file: { id: 'test' } }),
+            upload: async () => {
+              await sleep(1000);
+              throw new Error('Something went wrong while uploading!');
+            },
+            delete: async () => {},
+            getFileKind,
+          } as unknown as FilesClient
+        }
+      >
+        <Story />
+      </FilesContext>
+    ),
+  ],
 };
-CompressedError.decorators = [
-  (Story) => (
-    <FilesContext
-      client={
-        {
-          create: async () => ({ file: { id: 'test' } }),
-          upload: async () => {
-            await sleep(1000);
-            throw new Error('Something went wrong while uploading! '.repeat(10).trim());
-          },
-          delete: async () => {},
-          getFileKind,
-        } as unknown as FilesClient
-      }
-    >
-      <Story />
-    </FilesContext>
-  ),
-];
+
+export const ImmediateUploadAbort: StoryObj = {
+  decorators: [
+    (Story) => (
+      <FilesContext
+        client={
+          {
+            create: async () => ({ file: { id: 'test' } }),
+            upload: async () => {
+              await sleep(60000);
+            },
+            delete: async () => {},
+            getFileKind,
+          } as unknown as FilesClient
+        }
+      >
+        <Story />
+      </FilesContext>
+    ),
+  ],
+
+  args: {
+    immediate: true,
+  },
+};
+
+export const Compressed = {
+  args: {
+    compressed: true,
+  },
+};
+
+export const CompressedError: StoryObj = {
+  args: {
+    compressed: true,
+  },
+
+  decorators: [
+    (Story) => (
+      <FilesContext
+        client={
+          {
+            create: async () => ({ file: { id: 'test' } }),
+            upload: async () => {
+              await sleep(1000);
+              throw new Error('Something went wrong while uploading! '.repeat(10).trim());
+            },
+            delete: async () => {},
+            getFileKind,
+          } as unknown as FilesClient
+        }
+      >
+        <Story />
+      </FilesContext>
+    ),
+  ],
+};

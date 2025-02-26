@@ -8,7 +8,7 @@
  */
 
 import React from 'react';
-import { ComponentMeta } from '@storybook/react';
+import { Meta } from '@storybook/react';
 
 import { DemoEnvironmentPanel } from './demo_env_panel';
 
@@ -23,6 +23,6 @@ export default {
     },
   },
   decorators: [(Story) => <div style={{ width: 1200 }}>{Story()}</div>],
-} as ComponentMeta<typeof DemoEnvironmentPanel>;
+} as Meta<typeof DemoEnvironmentPanel>;
 
 export const DemoPanel = () => <DemoEnvironmentPanel demoUrl="https://google.com" />;

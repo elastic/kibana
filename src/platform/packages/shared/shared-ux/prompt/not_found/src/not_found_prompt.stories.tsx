@@ -9,7 +9,7 @@
 
 import { EuiButton, EuiPageTemplate } from '@elastic/eui';
 import React from 'react';
-import { Meta, Story } from '@storybook/react';
+import { StoryObj, StoryFn, Meta } from '@storybook/react';
 import mdx from '../README.mdx';
 
 import { NotFoundPrompt } from './not_found_prompt';
@@ -28,7 +28,7 @@ export default {
   },
 } as Meta;
 
-export const EmptyPage: Story = () => {
+export const EmptyPage: StoryFn = () => {
   return (
     <EuiPageTemplate>
       <EuiPageTemplate.Section alignment="center">
@@ -38,7 +38,7 @@ export const EmptyPage: Story = () => {
   );
 };
 
-export const PageWithSidebar: Story = () => {
+export const PageWithSidebar: StoryFn = () => {
   return (
     <EuiPageTemplate panelled>
       <EuiPageTemplate.Sidebar>sidebar</EuiPageTemplate.Sidebar>
@@ -47,25 +47,27 @@ export const PageWithSidebar: Story = () => {
   );
 };
 
-export const CustomActions: Story = (args) => {
-  return (
-    <EuiPageTemplate>
-      <EuiPageTemplate.Section alignment="center">
-        <NotFoundPrompt
-          actions={
-            <>
-              <EuiButton fill color="primary" onClick={args.onClick}>
-                Go home
-              </EuiButton>
-              <EuiButton iconType="search" onClick={args.onClick}>
-                Go to discover
-              </EuiButton>
-            </>
-          }
-          title="Customizable Title"
-          body="Customizable Body"
-        />
-      </EuiPageTemplate.Section>
-    </EuiPageTemplate>
-  );
+export const CustomActions: StoryObj<{ onClick: () => void }> = {
+  render: (args) => {
+    return (
+      <EuiPageTemplate>
+        <EuiPageTemplate.Section alignment="center">
+          <NotFoundPrompt
+            actions={
+              <>
+                <EuiButton fill color="primary" onClick={args.onClick}>
+                  Go home
+                </EuiButton>
+                <EuiButton iconType="search" onClick={args.onClick}>
+                  Go to discover
+                </EuiButton>
+              </>
+            }
+            title="Customizable Title"
+            body="Customizable Body"
+          />
+        </EuiPageTemplate.Section>
+      </EuiPageTemplate>
+    );
+  },
 };
