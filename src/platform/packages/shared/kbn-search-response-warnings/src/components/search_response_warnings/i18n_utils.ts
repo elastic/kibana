@@ -56,3 +56,38 @@ export function getWarningsDescription(warnings: SearchResponseWarning[]) {
         defaultMessage: 'These clusters had issues returning data and results might be incomplete.',
       });
 }
+
+export function getWarningsParsedReasons(warnings: SearchResponseWarning[]) {
+  const reasons = new Set<string>();
+  // example of a reason: "Can't sort on field [log.level]; the field has incompatible sort types: [LONG] and [STRING] across shards!"
+  const cantSortRegExp = /Can't sort on field \[(.+)\];/;
+
+  warnings.forEach((warning) => {
+    Object.keys(warning.clusters).forEach((clusterName) => {
+      if (warning.clusters[clusterName].status === 'successful') {
+        return;
+      }
+
+      const failures = warning.clusters[clusterName].failures;
+
+      failures?.forEach((failure) => {
+        const causedBy = failure?.reason?.caused_by;
+        const matchReason = cantSortRegExp.exec(causedBy?.reason ?? '');
+
+        if (causedBy?.type === 'illegal_argument_exception' && matchReason) {
+          reasons.add(
+            i18n.translate('searchResponseWarnings.description.cantSortReasonText', {
+              defaultMessage:
+                'The results cannot be sorted on field "{field}" because it has incompatible types across shards. Consider removing the sort, adding "exist" filter for the field value, or updating the field mapping.',
+              values: {
+                field: matchReason[1],
+              },
+            })
+          );
+        }
+      });
+    });
+  });
+
+  return reasons;
+}
