@@ -14,9 +14,12 @@ import {
   EuiIcon,
   EuiCodeBlock,
   EuiButtonEmpty,
+  EuiText,
+  EuiSpacer,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { renderSearchError } from '@kbn/search-errors';
+import { EsError, renderSearchError } from '@kbn/search-errors';
+import { getParsedReasonFromShardFailure } from '@kbn/search-response-warnings';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { useDiscoverServices } from '../../hooks/use_discover_services';
@@ -32,6 +35,10 @@ export const ErrorCallout = ({ title, error, isEsqlMode }: Props) => {
   const { euiTheme } = useEuiTheme();
 
   const searchErrorDisplay = renderSearchError(error);
+  const reason =
+    error instanceof EsError
+      ? getParsedReasonFromShardFailure(error.attributes?.error?.caused_by?.caused_by)
+      : null;
 
   return (
     <EuiEmptyPrompt
@@ -73,6 +80,12 @@ export const ErrorCallout = ({ title, error, isEsqlMode }: Props) => {
                 </EuiButton>
               )}
             </>
+          )}
+          {Boolean(reason) && (
+            <div>
+              <EuiSpacer size="s" />
+              <EuiText size="s">{reason}</EuiText>
+            </div>
           )}
         </>
       }
