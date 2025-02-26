@@ -26,6 +26,7 @@ type EsQuery = GraphRequest['query']['esQuery'];
 
 interface GraphEdge {
   badge: number;
+  docIds: string[] | string;
   ips?: string[] | string;
   hosts?: string[] | string;
   users?: string[] | string;
@@ -80,7 +81,7 @@ export const getGraph = async ({
   logger.trace(
     `Fetching graph for [originEventIds: ${originEventIds
       .map(({ id, isAlert }) => `[id: ${id} isAlert: ${isAlert}]`)
-      .join(', ')}] in [spaceId: ${spaceId}]`
+      .join(', ')}] in [spaceId: ${spaceId}] [ungroupedEntityIds: ${ungroupedEntityIds}]`
   );
 
   const results = await fetchGraph({
@@ -94,8 +95,6 @@ export const getGraph = async ({
     ungroupedEntityIds,
   });
 
-  logger.trace(JSON.stringify(results.records));
-
   // Convert results into set of nodes and edges
   return parseRecords(logger, results.records, nodesLimit);
 };
@@ -106,6 +105,7 @@ interface ParseContext {
   readonly edgesMap: Record<string, EdgeDataModel>;
   readonly edgeLabelsNodes: Record<string, string[]>;
   readonly labelEdges: Record<string, LabelEdges>;
+  readonly nodeIdentifiers: Record<string, string | string[]>;
   readonly messages: ApiMessageCode[];
   readonly logger: Logger;
 }
@@ -114,10 +114,11 @@ const parseRecords = (
   logger: Logger,
   records: GraphEdge[],
   nodesLimit?: number
-): Pick<GraphResponse, 'nodes' | 'edges' | 'messages'> => {
+): Pick<GraphResponse, 'nodes' | 'edges' | 'nodeIdentifiers' | 'messages'> => {
   const ctx: ParseContext = {
     nodesLimit,
     logger,
+    nodeIdentifiers: {},
     nodesMap: {},
     edgeLabelsNodes: {},
     edgesMap: {},
@@ -142,6 +143,7 @@ const parseRecords = (
   return {
     nodes,
     edges: Object.values(ctx.edgesMap),
+    nodeIdentifiers: ctx.nodeIdentifiers,
     messages: ctx.messages.length > 0 ? ctx.messages : undefined,
   };
 };
@@ -166,7 +168,7 @@ const fetchGraph = async ({
   esQuery?: EsQuery;
 }): Promise<EsqlToRecords<GraphEdge>> => {
   const originAlertIds = originEventIds.filter((originEventId) => originEventId.isAlert);
-  const query = `from logs-*
+  const query = `from logs-* METADATA _id
 | WHERE event.action IS NOT NULL AND actor.entity.id IS NOT NULL
 | EVAL isOrigin = ${
     originEventIds.length > 0
@@ -183,14 +185,19 @@ const fetchGraph = async ({
 // 'ungroup' will contain the entity ids that are requested to have their own representation in the graph
 | EVAL ungroup = ${
     ungroupedEntityIds.length > 0
-      ? `CASE(actor.entity.id IN (${ungroupedEntityIds
+      ? `CASE(
+event.id IN (${ungroupedEntityIds.map((_id, idx) => `?ungrp_id${idx}`).join(', ')}), event.id,
+actor.entity.id IN (${ungroupedEntityIds
           .map((_id, idx) => `?ungrp_id${idx}`)
-          .join(', ')}), actor.entity.id, target.entity.id IN (${ungroupedEntityIds
+          .join(', ')}), actor.entity.id,
+target.entity.id IN (${ungroupedEntityIds
           .map((_id, idx) => `?ungrp_id${idx}`)
-          .join(', ')}), target.entity.id, null)`
+          .join(', ')}), target.entity.id,
+null)`
       : 'null'
   }
 | STATS badge = COUNT(*),
+  docIds = VALUES(_id),
   ips = VALUES(related.ip),
   // hosts = VALUES(related.hosts),
   users = VALUES(related.user),
@@ -199,13 +206,14 @@ const fetchGraph = async ({
   targetIds = VALUES(target.entity.id),
   targetIdsCount = COUNT_DISTINCT(target.entity.id),
   successOutcomeCount = SUM(isSuccessOutcome),
-  failureOutcomeCount = SUM(isFailureOutcome)
+  failureOutcomeCount = SUM(isFailureOutcome),
+  eventIds = VALUES(event.id)
     by action = event.action,
       isOrigin,
       isOriginAlert,
       ungroup
 | LIMIT 1000
-| SORT isOrigin DESC`;
+| SORT isOrigin DESC, action, badge`;
 
   logger.trace(`Executing query [${query}]`);
 
@@ -276,7 +284,7 @@ const buildDslFilter = (
 });
 
 const createNodes = (records: GraphEdge[], context: Omit<ParseContext, 'edgesMap'>) => {
-  const { nodesMap, edgeLabelsNodes, labelEdges } = context;
+  const { nodesMap, edgeLabelsNodes, labelEdges, nodeIdentifiers } = context;
 
   for (const record of records) {
     if (context.nodesLimit !== undefined && Object.keys(nodesMap).length >= context.nodesLimit) {
@@ -290,6 +298,7 @@ const createNodes = (records: GraphEdge[], context: Omit<ParseContext, 'edgesMap
     }
 
     const {
+      docIds,
       ips,
       hosts,
       users,
@@ -337,6 +346,8 @@ const createNodes = (records: GraphEdge[], context: Omit<ParseContext, 'edgesMap
             castArray(users ?? [])
           ),
         };
+
+        nodeIdentifiers[id] = ids;
       }
     });
 
@@ -348,7 +359,7 @@ const createNodes = (records: GraphEdge[], context: Omit<ParseContext, 'edgesMap
     }
 
     const labelNode: LabelNodeDataModel = {
-      id: edgeId + `label(${action})`,
+      id: edgeId + `label(${action})(${uuidv4()})`,
       label: action,
       color: isOriginAlert ? 'danger' : badge === failureOutcomeCount ? 'warning' : 'primary',
       shape: 'label',
@@ -358,6 +369,7 @@ const createNodes = (records: GraphEdge[], context: Omit<ParseContext, 'edgesMap
     };
 
     nodesMap[labelNode.id] = labelNode;
+    nodeIdentifiers[labelNode.id] = docIds;
     edgeLabelsNodes[edgeId].push(labelNode.id);
     labelEdges[labelNode.id] = {
       source: actorId,

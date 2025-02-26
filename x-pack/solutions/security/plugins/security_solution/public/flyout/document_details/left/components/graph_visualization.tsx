@@ -5,11 +5,13 @@
  * 2.0.
  */
 
-import React, { memo, useCallback } from 'react';
+import React, { memo, useCallback, useMemo } from 'react';
 import { css } from '@emotion/react';
 import { EuiLoadingSpinner } from '@elastic/eui';
 import type { Filter, Query, TimeRange } from '@kbn/es-query';
 import dateMath from '@kbn/datemath';
+import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
+import { useSourcererDataView } from '../../../../sourcerer/containers';
 import { useGetScopedSourcererDataView } from '../../../../sourcerer/components/use_get_sourcerer_data_view';
 import { SourcererScopeName } from '../../../../sourcerer/store/model';
 import { useDocumentDetailsContext } from '../../shared/context';
@@ -17,6 +19,8 @@ import { GRAPH_VISUALIZATION_TEST_ID } from './test_ids';
 import { useGraphPreview } from '../../shared/hooks/use_graph_preview';
 import { useInvestigateInTimeline } from '../../../../common/hooks/timeline/use_investigate_in_timeline';
 import { normalizeTimeRange } from '../../../../common/utils/normalize_time_range';
+import { DocumentDetailsPreviewPanelKey } from '../../shared/constants/panel_keys';
+import { EVENT_PREVIEW_BANNER } from '../../preview/constants';
 
 const GraphInvestigationLazy = React.lazy(() =>
   import('@kbn/cloud-security-posture-graph').then((module) => ({
@@ -33,7 +37,7 @@ export const GraphVisualization: React.FC = memo(() => {
   const dataView = useGetScopedSourcererDataView({
     sourcererScope: SourcererScopeName.default,
   });
-  const { getFieldsData, dataAsNestedObject, dataFormattedForFieldBrowser } =
+  const { getFieldsData, dataAsNestedObject, scopeId, dataFormattedForFieldBrowser } =
     useDocumentDetailsContext();
   const {
     eventIds,
@@ -77,6 +81,25 @@ export const GraphVisualization: React.FC = memo(() => {
     [investigateInTimeline]
   );
 
+  const { selectedPatterns } = useSourcererDataView(SourcererScopeName.detections);
+  const eventDetailsIndex = useMemo(() => selectedPatterns.join(','), [selectedPatterns]);
+  const { openPreviewPanel } = useExpandableFlyoutApi();
+  const openEventPreview = useCallback(
+    (evtId?: string, onClose?: () => void) => {
+      openPreviewPanel({
+        id: DocumentDetailsPreviewPanelKey,
+        params: {
+          id: evtId,
+          indexName: 'logs-*',
+          scopeId,
+          banner: EVENT_PREVIEW_BANNER,
+          isPreviewMode: true,
+        },
+      });
+    },
+    [openPreviewPanel, scopeId]
+  );
+
   return (
     <div
       data-test-subj={GRAPH_VISUALIZATION_TEST_ID}
@@ -100,6 +123,7 @@ export const GraphVisualization: React.FC = memo(() => {
             showInvestigateInTimeline={true}
             showToggleSearch={true}
             onInvestigateInTimeline={openTimelineCallback}
+            openEventPreview={openEventPreview}
           />
         </React.Suspense>
       )}

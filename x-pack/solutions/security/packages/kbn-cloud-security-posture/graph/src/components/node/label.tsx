@@ -99,7 +99,7 @@ const LabelComponent = ({ text = '', badge = 0, badgeColor = 'primary' }: LabelP
           )}
         </EuiTextTruncate>
       </EuiToolTip>
-      {badge > 0 && <LabelBadge color={badgeColor}>{badge}</LabelBadge>}
+      {badge > 1 && <LabelBadge color={badgeColor}>{badge}</LabelBadge>}
     </EuiText>
   );
 };

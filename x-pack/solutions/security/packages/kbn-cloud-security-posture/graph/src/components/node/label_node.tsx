@@ -20,6 +20,7 @@ import {
 } from './styles';
 import type { LabelNodeViewModel, NodeProps } from '../types';
 import { NodeExpandButton } from './node_expand_button';
+import { calcLabelSize } from '../graph/utils';
 
 export const LabelNode = memo<NodeProps>((props: NodeProps) => {
   const {
@@ -27,22 +28,26 @@ export const LabelNode = memo<NodeProps>((props: NodeProps) => {
     color,
     label,
     badge,
-    failureOutcomeCount,
+    successOutcomeCount = 0,
+    failureOutcomeCount = 0,
     interactive,
     nodeClick,
     expandButtonClick,
   } = props.data as LabelNodeViewModel;
   const text = label ? label : id;
 
+  const size = calcLabelSize(text, successOutcomeCount, failureOutcomeCount);
+
   return (
-    <LabelNodeContainer>
+    <LabelNodeContainer data-calc-size={JSON.stringify(size)}>
       {interactive && <LabelShapeOnHover color={color} />}
       <LabelShape color={color} textAlign="center">
         <EuiText size="xs">
           {text}
-          {badge > 1 && <LabelBadge color={color}>{badge}</LabelBadge>}
-          {(failureOutcomeCount > 1 ||
-            (badge > failureOutcomeCount && failureOutcomeCount === 1)) && (
+          {(successOutcomeCount > 1 || (successOutcomeCount === 1 && failureOutcomeCount > 0)) && (
+            <LabelBadge color={color}>{successOutcomeCount}</LabelBadge>
+          )}
+          {failureOutcomeCount > 0 && (
             <LabelBadge color="warning" iconType="errorFilled">
               {failureOutcomeCount}
             </LabelBadge>

@@ -21,7 +21,8 @@ import {
 export type GraphRequest = Omit<TypeOf<typeof graphRequestSchema>, 'query.esQuery'> & {
   query: { esQuery?: { bool: Partial<BoolQuery> } };
 };
-export type GraphResponse = Omit<TypeOf<typeof graphResponseSchema>, 'messages'> & {
+export type GraphResponse = Omit<TypeOf<typeof graphResponseSchema>, 'nodes' | 'messages'> & {
+  nodes: NodeDataModel[];
   messages?: ApiMessageCode[];
 };
 

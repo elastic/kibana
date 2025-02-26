@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { NodeViewModel } from './types';
+import type { NodeViewModel, EntityNodeViewModel } from './types';
 
 export { Graph } from './graph/graph';
 export { GraphInvestigation } from './graph_investigation/graph_investigation';
@@ -21,7 +21,7 @@ export type {
   NodeProps,
 } from './types';
 
-export const isEntityNode = (node: NodeViewModel) =>
+export const isEntityNode = (node: NodeViewModel): node is EntityNodeViewModel =>
   node.shape === 'ellipse' ||
   node.shape === 'pentagon' ||
   node.shape === 'rectangle' ||

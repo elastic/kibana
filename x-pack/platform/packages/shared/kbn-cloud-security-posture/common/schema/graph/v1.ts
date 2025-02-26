@@ -38,6 +38,12 @@ export const graphResponseSchema = () =>
       schema.oneOf([entityNodeDataSchema, groupNodeDataSchema, labelNodeDataSchema])
     ),
     edges: schema.arrayOf(edgeDataSchema),
+    nodeIdentifiers: schema.maybe(
+      schema.recordOf(
+        schema.string(),
+        schema.oneOf([schema.string(), schema.arrayOf(schema.string())])
+      )
+    ),
     messages: schema.maybe(
       schema.arrayOf(schema.oneOf([schema.literal(ApiMessageCode.ReachedNodesLimit)]))
     ),

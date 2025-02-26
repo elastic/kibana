@@ -16,8 +16,10 @@ import { css } from '@emotion/react';
 import { Panel } from '@xyflow/react';
 import { getEsQueryConfig } from '@kbn/data-service';
 import { EuiFlexGroup, EuiFlexItem, EuiProgress } from '@elastic/eui';
+import type { NodeDataModel } from '@kbn/cloud-security-posture-common/types/graph/latest';
 import useSessionStorage from 'react-use/lib/useSessionStorage';
 import { Graph, isEntityNode } from '../../..';
+import type { NodeProps, NodeViewModel } from '../../..';
 import { type UseFetchGraphDataParams, useFetchGraphData } from '../../hooks/use_fetch_graph_data';
 import { GRAPH_INVESTIGATION_TEST_ID } from '../test_ids';
 import {
@@ -118,6 +120,8 @@ export interface GraphInvestigationProps {
     timeRange: TimeRange
   ) => void;
 
+  openEventPreview?: (evtId?: string) => void;
+
   /**
    * Whether to show toggle search action button. Defaults value is false.
    */
@@ -135,6 +139,7 @@ export const GraphInvestigation = memo<GraphInvestigationProps>(
     initialState: { dataView, originEventIds, timeRange: initialTimeRange },
     showInvestigateInTimeline = false,
     showToggleSearch = false,
+    openEventPreview,
     onInvestigateInTimeline,
   }: GraphInvestigationProps) => {
     const [searchFilters, setSearchFilters] = useState<Filter[]>(() => []);
@@ -198,7 +203,9 @@ export const GraphInvestigation = memo<GraphInvestigationProps>(
       ({ state: { isOpen } }) => isOpen
     );
     const ungroupedEntities = useMemo(() => {
-      return getFilterValues(searchFilters, [ACTOR_ENTITY_ID, TARGET_ENTITY_ID]).map(String);
+      return getFilterValues(searchFilters, [ACTOR_ENTITY_ID, TARGET_ENTITY_ID, EVENT_ID]).map(
+        String
+      );
     }, [searchFilters]);
     const { data, refresh, isFetching } = useFetchGraphData({
       req: {
@@ -217,17 +224,38 @@ export const GraphInvestigation = memo<GraphInvestigationProps>(
       },
     });
 
+    const nodeClickHandler = useCallback(
+      (e: React.MouseEvent<HTMLElement>, node: NodeProps) => {
+        if (
+          node.data?.shape === 'label' &&
+          node.data?.id &&
+          data?.nodeIdentifiers?.[node.data.id]
+        ) {
+          const evtIds = data.nodeIdentifiers[node.data.id];
+
+          if (Array.isArray(evtIds) && evtIds.length > 0) {
+            openEventPreview?.(evtIds[0]);
+          } else if (!Array.isArray(evtIds)) {
+            openEventPreview?.(evtIds);
+          }
+        }
+      },
+      [data?.nodeIdentifiers, openEventPreview]
+    );
+
     const nodes = useMemo(() => {
       return (
-        data?.nodes.map((node) => {
+        data?.nodes.map<NodeViewModel>((node: NodeDataModel) => {
           if (isEntityNode(node)) {
             return {
               ...node,
+              nodeClick: nodeClickHandler,
               expandButtonClick: nodeExpandButtonClickHandler,
             };
           } else if (node.shape === 'label') {
             return {
               ...node,
+              nodeClick: nodeClickHandler,
               expandButtonClick: labelExpandButtonClickHandler,
             };
           }
@@ -236,7 +264,7 @@ export const GraphInvestigation = memo<GraphInvestigationProps>(
         }) ?? []
       );
       // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [data?.nodes]);
+    }, [data?.nodes, nodeClickHandler]);
 
     const searchFilterCounter = useMemo(() => {
       const filtersCount = searchFilters
