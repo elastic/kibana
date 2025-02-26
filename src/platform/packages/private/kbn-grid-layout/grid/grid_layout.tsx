@@ -9,30 +9,27 @@
 
 import classNames from 'classnames';
 import { cloneDeep } from 'lodash';
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { combineLatest, distinctUntilChanged, map, pairwise, skip } from 'rxjs';
 
 import { css } from '@emotion/react';
 
 import { GridHeightSmoother } from './grid_height_smoother';
 import { GridRow } from './grid_row';
-import { GridAccessMode, GridLayoutData, GridSettings } from './types';
+import { GridAccessMode, GridLayoutData, GridSettings, UseCustomDragHandle } from './types';
+import { GridLayoutContext, GridLayoutContextType } from './use_grid_layout_context';
 import { useGridLayoutState } from './use_grid_layout_state';
 import { isLayoutEqual } from './utils/equality_checks';
 import { resolveGridRow } from './utils/resolve_grid_row';
 
-export interface GridLayoutProps {
+export type GridLayoutProps = {
   layout: GridLayoutData;
   gridSettings: GridSettings;
-  renderPanelContents: (
-    panelId: string,
-    setDragHandles?: (refs: Array<HTMLElement | null>) => void
-  ) => React.ReactNode;
   onLayoutChange: (newLayout: GridLayoutData) => void;
   expandedPanelId?: string;
   accessMode?: GridAccessMode;
   className?: string; // this makes it so that custom CSS can be passed via Emotion
-}
+} & UseCustomDragHandle;
 
 export const GridLayout = ({
   layout,
@@ -42,6 +39,7 @@ export const GridLayout = ({
   expandedPanelId,
   accessMode = 'EDIT',
   className,
+  useCustomDragHandle = false,
 }: GridLayoutProps) => {
   const layoutRef = useRef<HTMLDivElement | null>(null);
   const { gridLayoutStateManager, setDimensionsRef } = useGridLayoutState({
@@ -134,33 +132,38 @@ export const GridLayout = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  const memoizedContext = useMemo(
+    () =>
+      ({
+        renderPanelContents,
+        useCustomDragHandle,
+        gridLayoutStateManager,
+      } as GridLayoutContextType),
+    [renderPanelContents, useCustomDragHandle, gridLayoutStateManager]
+  );
+
   return (
-    <GridHeightSmoother gridLayoutStateManager={gridLayoutStateManager}>
-      <div
-        ref={(divElement) => {
-          layoutRef.current = divElement;
-          setDimensionsRef(divElement);
-        }}
-        className={classNames('kbnGrid', className)}
-        css={[
-          styles.layoutPadding,
-          styles.hasActivePanel,
-          styles.singleColumn,
-          styles.hasExpandedPanel,
-        ]}
-      >
-        {Array.from({ length: rowCount }, (_, rowIndex) => {
-          return (
-            <GridRow
-              key={rowIndex}
-              rowIndex={rowIndex}
-              renderPanelContents={renderPanelContents}
-              gridLayoutStateManager={gridLayoutStateManager}
-            />
-          );
-        })}
-      </div>
-    </GridHeightSmoother>
+    <GridLayoutContext.Provider value={memoizedContext}>
+      <GridHeightSmoother>
+        <div
+          ref={(divElement) => {
+            layoutRef.current = divElement;
+            setDimensionsRef(divElement);
+          }}
+          className={classNames('kbnGrid', className)}
+          css={[
+            styles.layoutPadding,
+            styles.hasActivePanel,
+            styles.singleColumn,
+            styles.hasExpandedPanel,
+          ]}
+        >
+          {Array.from({ length: rowCount }, (_, rowIndex) => {
+            return <GridRow key={rowIndex} rowIndex={rowIndex} />;
+          })}
+        </div>
+      </GridHeightSmoother>
+    </GridLayoutContext.Provider>
   );
 };
 
@@ -178,7 +181,7 @@ const styles = {
   singleColumn: css({
     '&.kbnGrid--mobileView': {
       '.kbnGridRow': {
-        gridTemplateAreas: '100%',
+        gridTemplateColumns: '100%',
         gridTemplateRows: 'auto',
         gridAutoFlow: 'row',
         gridAutoRows: 'auto',
@@ -195,6 +198,9 @@ const styles = {
       '& .kbnGridRowContainer:has(.kbnGridPanel--expanded)': {
         '.kbnGridRowHeader': {
           height: '0px', // used instead of 'display: none' due to a11y concerns
+          padding: '0px',
+          display: 'block',
+          overflow: 'hidden',
         },
         '.kbnGridRow': {
           display: 'block !important', // overwrite grid display
