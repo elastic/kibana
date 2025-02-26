@@ -25,16 +25,14 @@ export async function getExistingEnvironmentsForService({
 
   const params = {
     index: APM_AGENT_CONFIGURATION_INDEX,
-    body: {
-      size: 0,
-      query: { bool },
-      aggs: {
-        environments: {
-          terms: {
-            field: SERVICE_ENVIRONMENT,
-            missing: ALL_OPTION_VALUE,
-            size,
-          },
+    size: 0,
+    query: { bool },
+    aggs: {
+      environments: {
+        terms: {
+          field: SERVICE_ENVIRONMENT,
+          missing: ALL_OPTION_VALUE,
+          size,
         },
       },
     },
