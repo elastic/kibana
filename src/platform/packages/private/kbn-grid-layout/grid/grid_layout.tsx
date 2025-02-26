@@ -58,10 +58,6 @@ export const GridLayout = ({
    * Update the `gridLayout$` behaviour subject in response to the `layout` prop changing
    */
   useEffect(() => {
-    console.log(
-      gridLayoutStateManager.runtimeSettings$.getValue(),
-      gridLayoutStateManager.gridLayout$.getValue()
-    );
     if (
       gridLayoutStateManager.runtimeSettings$.getValue() !== 'none' &&
       !isLayoutEqual(layout, gridLayoutStateManager.gridLayout$.getValue())

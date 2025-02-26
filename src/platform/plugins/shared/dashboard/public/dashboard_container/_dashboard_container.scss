@@ -1,13 +1,17 @@
 @import './component/grid/index';
 @import './component/viewport/index';
 
+.kbnBody:has(.kbnGrid--freeform) {
+  overflow: hidden;
+  .dashboardTopNav {
+    z-index: 0;
+  }
+};
+
 .dashboardContainer, .dashboardViewport {
   flex: auto;
   display: flex;
   width: 100%;
-  &:has(.kbnGrid--freeform) {
-    overflow: hidden;
-  };
 }
 
 .dashboardViewport--loading {

@@ -372,7 +372,6 @@ export function initializePanelsManager(
         sections$,
         setSections,
         (a, b) => {
-          console.log(a, b);
           return fastIsEqual(a ?? [], b ?? []);
         },
       ],
