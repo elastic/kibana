@@ -147,6 +147,7 @@ import { registerUpgradeManagedPackagePoliciesTask } from './services/setup/mana
 import { registerDeployAgentPoliciesTask } from './services/agent_policies/deploy_agent_policies_task';
 import { DeleteUnenrolledAgentsTask } from './tasks/delete_unenrolled_agents_task';
 import { registerBumpAgentPoliciesTask } from './services/agent_policies/bump_agent_policies_task';
+import { UpgradeAgentlessDeploymentsTask } from './tasks/upgrade_agentless_deployment';
 import { SyncIntegrationsTask } from './tasks/sync_integrations_task';
 import { AutomaticAgentUpgradeTask } from './tasks/automatic_agent_upgrade_task';
 
@@ -200,6 +201,7 @@ export interface FleetAppContext {
   uninstallTokenService: UninstallTokenServiceInterface;
   unenrollInactiveAgentsTask: UnenrollInactiveAgentsTask;
   deleteUnenrolledAgentsTask: DeleteUnenrolledAgentsTask;
+  updateAgentlessDeploymentsTask: UpgradeAgentlessDeploymentsTask;
   automaticAgentUpgradeTask: AutomaticAgentUpgradeTask;
   taskManagerStart?: TaskManagerStartContract;
   fetchUsage?: (abortController: AbortController) => Promise<FleetUsage | undefined>;
@@ -305,6 +307,7 @@ export class FleetPlugin
   private fleetMetricsTask?: FleetMetricsTask;
   private unenrollInactiveAgentsTask?: UnenrollInactiveAgentsTask;
   private deleteUnenrolledAgentsTask?: DeleteUnenrolledAgentsTask;
+  private updateAgentlessDeploymentsTask?: UpgradeAgentlessDeploymentsTask;
   private syncIntegrationsTask?: SyncIntegrationsTask;
   private automaticAgentUpgradeTask?: AutomaticAgentUpgradeTask;
 
@@ -653,6 +656,11 @@ export class FleetPlugin
       taskManager: deps.taskManager,
       logFactory: this.initializerContext.logger,
     });
+    this.updateAgentlessDeploymentsTask = new UpgradeAgentlessDeploymentsTask({
+      core,
+      taskManager: deps.taskManager,
+      logFactory: this.initializerContext.logger,
+    });
     this.syncIntegrationsTask = new SyncIntegrationsTask({
       core,
       taskManager: deps.taskManager,
@@ -710,6 +718,7 @@ export class FleetPlugin
       uninstallTokenService,
       unenrollInactiveAgentsTask: this.unenrollInactiveAgentsTask!,
       deleteUnenrolledAgentsTask: this.deleteUnenrolledAgentsTask!,
+      updateAgentlessDeploymentsTask: this.updateAgentlessDeploymentsTask!,
       automaticAgentUpgradeTask: this.automaticAgentUpgradeTask!,
       taskManagerStart: plugins.taskManager,
       fetchUsage: this.fetchUsage,
@@ -722,7 +731,11 @@ export class FleetPlugin
     this.checkDeletedFilesTask?.start({ taskManager: plugins.taskManager }).catch(() => {});
     this.unenrollInactiveAgentsTask?.start({ taskManager: plugins.taskManager }).catch(() => {});
     this.deleteUnenrolledAgentsTask?.start({ taskManager: plugins.taskManager }).catch(() => {});
+    this.updateAgentlessDeploymentsTask
+      ?.start({ taskManager: plugins.taskManager })
+      .catch(() => {});
     this.automaticAgentUpgradeTask?.start({ taskManager: plugins.taskManager }).catch(() => {});
+
     startFleetUsageLogger(plugins.taskManager).catch(() => {});
     this.fleetMetricsTask
       ?.start(plugins.taskManager, core.elasticsearch.client.asInternalUser)
