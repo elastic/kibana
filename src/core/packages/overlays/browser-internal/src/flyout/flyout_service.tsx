@@ -13,7 +13,7 @@ import { css } from '@emotion/react';
 import { EuiFlyout, EuiFlyoutResizable } from '@elastic/eui';
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
-import { createRoot, Root } from 'react-dom/client';
+// import { createRoot, Root } from 'react-dom/client';
 import { Subject } from 'rxjs';
 import type { AnalyticsServiceStart } from '@kbn/core-analytics-browser';
 import type { ThemeServiceStart } from '@kbn/core-theme-browser';
@@ -160,12 +160,14 @@ export class FlyoutService {
           </KibanaRenderContextProvider>
         );
 
-        if (legacyRoot) {
-          render(flyoutEl, this.targetDomElement!);
-        } else {
-          this.root = createRoot(this.targetDomElement!);
-          this.root.render(flyoutEl);
-        }
+        render(flyoutEl, this.targetDomElement!);
+
+        // if (legacyRoot) {
+        //   render(flyoutEl, this.targetDomElement!);
+        // } else {
+        //   this.root = createRoot(this.targetDomElement!);
+        //   this.root.render(flyoutEl);
+        // }
 
         return flyout;
       },

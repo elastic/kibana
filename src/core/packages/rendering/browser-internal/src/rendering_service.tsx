@@ -8,7 +8,7 @@
  */
 
 import React from 'react';
-import { createRoot } from 'react-dom/client';
+import { render } from 'react-dom';
 import { pairwise, startWith } from 'rxjs';
 
 import type { AnalyticsServiceStart } from '@kbn/core-analytics-browser';
@@ -71,8 +71,7 @@ export class RenderingService {
         body.classList.add(...newClasses);
       });
 
-    const root = createRoot(targetDomElement);
-    root.render(
+    render(
       <KibanaRootContextProvider {...startServices} globalStyles={true}>
         <>
           {/* Global Styles that apply across the entire app */}
@@ -95,7 +94,8 @@ export class RenderingService {
 
           {toastsComponent}
         </>
-      </KibanaRootContextProvider>
+      </KibanaRootContextProvider>,
+      targetDomElement
     );
   }
 }

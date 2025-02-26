@@ -8,7 +8,6 @@
  */
 
 import React from 'react';
-import { createRoot, Root } from 'react-dom/client';
 
 import type { AnalyticsServiceStart } from '@kbn/core-analytics-browser';
 import type { ThemeServiceStart } from '@kbn/core-theme-browser';

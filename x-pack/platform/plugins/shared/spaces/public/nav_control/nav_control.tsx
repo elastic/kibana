@@ -8,7 +8,6 @@
 import { EuiSkeletonRectangle } from '@elastic/eui';
 import { css } from '@emotion/react';
 import React, { lazy, Suspense } from 'react';
-import { createRoot } from 'react-dom/client';
 
 import type { CoreStart } from '@kbn/core/public';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
@@ -39,38 +38,38 @@ export function initSpacesNavControl(
       if (core.http.anonymousPaths.isAnonymous(window.location.pathname)) {
         return () => null;
       }
-      const root = createRoot(targetDomElement);
-      root.render(
-        <KibanaRenderContextProvider {...core}>
-          <Suspense
-            fallback={
-              <EuiSkeletonRectangle
-                css={css`
-                  margin-inline: ${euiThemeVars.euiSizeS};
-                `}
-                borderRadius="m"
-                contentAriaLabel="Loading navigation"
-              />
-            }
-          >
-            <LazyNavControlPopover
-              spacesManager={spacesManager}
-              serverBasePath={core.http.basePath.serverBasePath}
-              anchorPosition="downLeft"
-              capabilities={core.application.capabilities}
-              navigateToApp={core.application.navigateToApp}
-              navigateToUrl={core.application.navigateToUrl}
-              allowSolutionVisibility={config.allowSolutionVisibility}
-              eventTracker={eventTracker}
-              showTour$={showTour$}
-              onFinishTour={onFinishTour}
-            />
-          </Suspense>
-        </KibanaRenderContextProvider>
-      );
+      // const root = createRoot(targetDomElement);
+      // root.render(
+      //   <KibanaRenderContextProvider {...core}>
+      //     <Suspense
+      //       fallback={
+      //         <EuiSkeletonRectangle
+      //           css={css`
+      //             margin-inline: ${euiThemeVars.euiSizeS};
+      //           `}
+      //           borderRadius="m"
+      //           contentAriaLabel="Loading navigation"
+      //         />
+      //       }
+      //     >
+      //       <LazyNavControlPopover
+      //         spacesManager={spacesManager}
+      //         serverBasePath={core.http.basePath.serverBasePath}
+      //         anchorPosition="downLeft"
+      //         capabilities={core.application.capabilities}
+      //         navigateToApp={core.application.navigateToApp}
+      //         navigateToUrl={core.application.navigateToUrl}
+      //         allowSolutionVisibility={config.allowSolutionVisibility}
+      //         eventTracker={eventTracker}
+      //         showTour$={showTour$}
+      //         onFinishTour={onFinishTour}
+      //       />
+      //     </Suspense>
+      //   </KibanaRenderContextProvider>
+      // );
 
       return () => {
-        root.unmount();
+        // root.unmount();
       };
     },
     Component: React.memo(() => {

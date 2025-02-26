@@ -9,7 +9,6 @@
 
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { createRoot } from 'react-dom/client';
 import type { MountPoint } from '@kbn/core-mount-utils-browser';
 import {
   KibanaRenderContextProvider,
@@ -30,17 +29,11 @@ export type ToMountPointParams = Pick<
  */
 export const toMountPoint = (node: React.ReactNode, params: ToMountPointParams): MountPoint => {
   const mount = (element: HTMLElement) => {
-    if (params.legacyRoot === false) {
-      const root = createRoot(element);
-      root.render(<KibanaRenderContextProvider {...params}>{node}</KibanaRenderContextProvider>);
-      return () => root.unmount();
-    } else {
-      ReactDOM.render(
-        <KibanaRenderContextProvider {...params}>{node}</KibanaRenderContextProvider>,
-        element
-      );
-      return () => ReactDOM.unmountComponentAtNode(element);
-    }
+    ReactDOM.render(
+      <KibanaRenderContextProvider {...params}>{node}</KibanaRenderContextProvider>,
+      element
+    );
+    return () => ReactDOM.unmountComponentAtNode(element);
   };
 
   // only used for tests and snapshots serialization

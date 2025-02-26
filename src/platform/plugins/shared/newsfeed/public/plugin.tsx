@@ -9,7 +9,7 @@
 
 import * as Rx from 'rxjs';
 import { catchError, takeUntil } from 'rxjs';
-import { createRoot } from 'react-dom/client';
+import { render } from 'react-dom';
 import React from 'react';
 import moment from 'moment';
 import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
@@ -98,16 +98,17 @@ export class NewsfeedPublicPlugin
 
   private mount(api: NewsfeedApi, targetDomElement: HTMLElement, core: CoreStart) {
     const hasCustomBranding$ = core.customBranding.hasCustomBranding$;
-    const root = createRoot(targetDomElement);
-    root.render(
-      <KibanaRenderContextProvider {...core}>
-        <NewsfeedNavButton
-          newsfeedApi={api}
-          hasCustomBranding$={hasCustomBranding$}
-          isServerless={this.isServerless}
-        />
-      </KibanaRenderContextProvider>
-    );
-    return () => root.unmount();
+    // const root = createRoot(targetDomElement);
+    // root.render(
+    //   <KibanaRenderContextProvider {...core}>
+    //     <NewsfeedNavButton
+    //       newsfeedApi={api}
+    //       hasCustomBranding$={hasCustomBranding$}
+    //       isServerless={this.isServerless}
+    //     />
+    //   </KibanaRenderContextProvider>
+    // );
+    // return () => root.unmount();
+    return () => {};
   }
 }

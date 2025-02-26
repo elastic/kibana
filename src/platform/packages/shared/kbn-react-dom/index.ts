@@ -7,8 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { createPortal, type Renderer, Container } from 'react-dom';
-import { createRoot, Root } from 'react-dom/client';
+import {
+  createPortal,
+  type Renderer,
+  Container,
+  render as _render,
+  unmountComponentAtNode as _unmountComponentAtNode,
+} from 'react-dom';
+// import { createRoot, Root } from 'react-dom/client';
 
 // @ts-ignore
 if (!window._elements) {
@@ -19,26 +25,28 @@ if (!window._elements) {
 const elements: WeakMap<Container, Root> = window._elements;
 
 const render: Renderer = (element: any, container: any, cb: any) => {
-  const root = elements.get(container) ?? createRoot(container);
-  elements.set(container, root);
-  root.render(element);
-  if (cb) {
-    requestIdleCallback(() => {
-      cb();
-    });
-  }
-
-  return element;
+  return _render(element, container, cb);
+  // const root = elements.get(container) ?? createRoot(container);
+  // elements.set(container, root);
+  // root.render(element);
+  // if (cb) {
+  //   requestIdleCallback(() => {
+  //     cb();
+  //   });
+  // }
+  //
+  // return element;
 };
 
 const unmountComponentAtNode = (container: Container): void => {
-  const root = elements.get(container);
-  if (root) {
-    root.unmount();
-    elements.delete(container);
-  } else {
-    throw new Error('Cannot unmount component that is not mounted.');
-  }
+  _unmountComponentAtNode(container);
+  // const root = elements.get(container);
+  // if (root) {
+  //   root.unmount();
+  //   elements.delete(container);
+  // } else {
+  //   throw new Error('Cannot unmount component that is not mounted.');
+  // }
 };
 
 const ReactDOM = { render, unmountComponentAtNode, createPortal };
