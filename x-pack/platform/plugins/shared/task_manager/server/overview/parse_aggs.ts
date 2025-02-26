@@ -7,7 +7,7 @@
 
 import { AggregationsAggregate } from '@elastic/elasticsearch/lib/api/types';
 
-interface ParsedClaimMetric {
+interface ClaimMetrics {
   key: number;
   count: number;
   maxDuration: number;
@@ -15,7 +15,7 @@ interface ParsedClaimMetric {
   maxLoad: number;
   avgLoad: number;
 }
-interface ParsedRunMetric {
+interface RunMetrics {
   key: number;
   count: number;
   maxDuration: number;
@@ -25,26 +25,27 @@ interface ParsedRunMetric {
   maxEventLoop: number;
 }
 
-interface ParsedResult {
+export interface NodeResult {
   serverUuid: string;
   claim?: {
     success: number;
     failure: number;
     total: number;
-    metrics: ParsedClaimMetric[];
+    metrics: ClaimMetrics[];
   };
   run?: {
     success: number;
     failure: number;
     total: number;
     by_task_type: Record<string, { success: number; failure: number; total: number }>;
-    metrics: ParsedRunMetric[];
+    metrics: RunMetrics[];
   };
 }
+
 export const parseAggs = (
   claimAggs: Record<string, AggregationsAggregate>,
   runAggs: Record<string, AggregationsAggregate>
-): ParsedResult[] => {
+): NodeResult[] => {
   const results = [];
 
   // @ts-ignore

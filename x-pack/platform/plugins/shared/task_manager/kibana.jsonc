@@ -23,6 +23,10 @@
     "optionalPlugins": [
       "cloud",
       "usageCollection"
+    ],
+    "requiredBundles": [
+      "kibanaUtils",
+      "kibanaReact",
     ]
   }
 }

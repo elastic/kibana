@@ -5,15 +5,17 @@
  * 2.0.
  */
 
-import { KibanaRequest, Logger } from '@kbn/core/server';
+import { ElasticsearchClient, KibanaRequest, Logger } from '@kbn/core/server';
 import { IEventLogClient } from '@kbn/event-log-plugin/server';
-import { parseAggs } from './parse_aggs';
+import { NodeResult, parseAggs } from './parse_aggs';
+import { TASK_MANAGER_INDEX } from '../constants';
 
 interface ConstructorOpts {
   logger: Logger;
 }
 
 interface InitializeOpts {
+  esClient: ElasticsearchClient;
   getEventLogClient: (request: KibanaRequest) => IEventLogClient;
 }
 
@@ -23,7 +25,16 @@ interface GetOverviewParams {
   end: string;
 }
 
+interface GetOverviewResult {
+  numRecurringTasks: number;
+  numNonrecurringTasks: number;
+  numTasks: number;
+  numBackgroundNodes: number;
+  byNode: NodeResult[];
+}
+
 export class OverviewService {
+  private esClient?: ElasticsearchClient;
   private getEventLogClient?: (request: KibanaRequest) => IEventLogClient;
   private initialized = false;
 
@@ -31,11 +42,12 @@ export class OverviewService {
 
   public initialize(opts: InitializeOpts) {
     this.getEventLogClient = opts.getEventLogClient;
+    this.esClient = opts.esClient;
     this.initialized = true;
   }
 
-  public async getOverview(params: GetOverviewParams) {
-    if (!this.initialized || !this.getEventLogClient) {
+  public async getOverview(params: GetOverviewParams): Promise<GetOverviewResult> {
+    if (!this.initialized || !this.getEventLogClient || !this.esClient) {
       throw new Error('overview service not initialized');
     }
 
@@ -43,6 +55,34 @@ export class OverviewService {
     const eventLogClient = await this.getEventLogClient(req);
 
     try {
+      const results = await Promise.all([
+        this.esClient.count({
+          index: TASK_MANAGER_INDEX,
+          query: {
+            bool: {
+              filter: [{ term: { type: 'task' } }, { exists: { field: 'task.schedule.interval' } }],
+            },
+          },
+        }),
+        this.esClient.count({
+          index: TASK_MANAGER_INDEX,
+          query: {
+            bool: {
+              filter: [{ term: { type: 'task' } }],
+              must_not: [{ exists: { field: 'task.schedule.interval' } }],
+            },
+          },
+        }),
+        this.esClient.count({
+          index: TASK_MANAGER_INDEX,
+          query: {
+            bool: {
+              filter: [{ term: { type: 'background-task-node' } }],
+            },
+          },
+        }),
+      ]);
+
       const claimOverview = await eventLogClient.aggregateTaskManagerEvents({
         start,
         end,
@@ -50,6 +90,7 @@ export class OverviewService {
         aggs: {
           serverUuid: {
             terms: {
+              size: 100,
               field: 'kibana.server_uuid',
             },
             aggs: {
@@ -82,6 +123,7 @@ export class OverviewService {
         aggs: {
           serverUuid: {
             terms: {
+              size: 100,
               field: 'kibana.server_uuid',
             },
             aggs: {
@@ -92,6 +134,7 @@ export class OverviewService {
               },
               type: {
                 terms: {
+                  size: 1000,
                   field: 'kibana.task.type',
                 },
                 aggs: {
@@ -120,8 +163,14 @@ export class OverviewService {
         },
       });
 
-      // @ts-ignore
-      return parseAggs(claimOverview.aggregations, runOverview.aggregations);
+      return {
+        numRecurringTasks: results[0].count,
+        numNonrecurringTasks: results[1].count,
+        numTasks: results[0].count + results[1].count,
+        numBackgroundNodes: results[2].count,
+        // @ts-ignore
+        byNode: parseAggs(claimOverview.aggregations, runOverview.aggregations),
+      };
     } catch (err) {
       this.opts.logger.info(`error searching event log for task manager events: ${err.message}`);
       throw err;

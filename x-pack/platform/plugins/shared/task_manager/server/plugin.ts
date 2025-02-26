@@ -326,6 +326,7 @@ export class TaskManagerPlugin
     });
 
     this.overviewService.initialize({
+      esClient: elasticsearch.client.asInternalUser,
       getEventLogClient: (request: KibanaRequest) => eventLog.getClient(request),
     });
 
