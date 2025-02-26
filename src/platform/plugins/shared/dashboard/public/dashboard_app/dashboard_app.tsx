@@ -8,7 +8,7 @@
  */
 
 import { History } from 'history';
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { debounceTime } from 'rxjs';
 import { v4 as uuidv4 } from 'uuid';
@@ -69,10 +69,11 @@ export function DashboardApp({
 }: DashboardAppProps) {
   const [showNoDataPage, setShowNoDataPage] = useState<boolean>(false);
   const [regenerateId, setRegenerateId] = useState(uuidv4());
-  const [dashboardApi, setDashboardApi] = useState<DashboardApi | undefined>(undefined);
-  const incomingEmbeddable = embeddableService
-    .getStateTransfer()
-    .getIncomingEmbeddablePackage(DASHBOARD_APP_ID, true);
+  const incomingEmbeddable = useMemo(() => {
+    return embeddableService
+      .getStateTransfer()
+      .getIncomingEmbeddablePackage(DASHBOARD_APP_ID, true);
+  }, []);
 
   useEffect(() => {
     let canceled = false;
@@ -95,6 +96,7 @@ export function DashboardApp({
       canceled = true;
     };
   }, [incomingEmbeddable]);
+  const [dashboardApi, setDashboardApi] = useState<DashboardApi | undefined>(undefined);
 
   const showPlainSpinner = useObservable(coreServices.customBranding.hasCustomBranding$, false);
 
@@ -110,11 +112,15 @@ export function DashboardApp({
     id: savedDashboardId || 'new',
   });
 
-  const kbnUrlStateStorage = createKbnUrlStateStorage({
-    history,
-    useHash: coreServices.uiSettings.get('state:storeInSessionStorage'),
-    ...withNotifyOnErrors(coreServices.notifications.toasts),
-  });
+  const kbnUrlStateStorage = useMemo(
+    () =>
+      createKbnUrlStateStorage({
+        history,
+        useHash: coreServices.uiSettings.get('state:storeInSessionStorage'),
+        ...withNotifyOnErrors(coreServices.notifications.toasts),
+      }),
+    [history]
+  );
 
   /**
    * Clear search session when leaving dashboard route
@@ -213,7 +219,7 @@ export function DashboardApp({
     return () => appStateSubscription.unsubscribe();
   }, [dashboardApi, kbnUrlStateStorage, savedDashboardId]);
 
-  const locator = shareService?.url.locators.get(DASHBOARD_APP_LOCATOR);
+  const locator = useMemo(() => shareService?.url.locators.get(DASHBOARD_APP_LOCATOR), []);
 
   return showNoDataPage ? (
     <DashboardAppNoDataPage onDataViewCreated={() => setShowNoDataPage(false)} />
