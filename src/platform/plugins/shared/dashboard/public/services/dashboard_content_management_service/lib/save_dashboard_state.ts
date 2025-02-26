@@ -20,6 +20,7 @@ import { getDashboardBackupService } from '../../dashboard_backup_service';
 import { contentManagementService, coreServices } from '../../kibana_services';
 import { SaveDashboardProps, SaveDashboardReturn } from '../types';
 import { getSerializedState } from '../../../dashboard_api/get_serialized_state';
+import { eventSourceClientId } from './event_source_client_id';
 
 export const saveDashboardState = async ({
   controlGroupReferences,
@@ -66,6 +67,14 @@ export const saveDashboardState = async ({
     const newId = result.item.id;
 
     if (newId) {
+      const { http } = coreServices;
+      http.post(`/api/dashboards/dashboard/${newId}/events`, {
+        body: JSON.stringify({
+          event: 'dashboard.saved',
+          source: eventSourceClientId,
+        }),
+      });
+
       coreServices.notifications.toasts.addSuccess({
         title: i18n.translate('dashboard.dashboardWasSavedSuccessMessage', {
           defaultMessage: `Dashboard ''{title}'' was saved`,

@@ -9,8 +9,9 @@
 
 import classNames from 'classnames';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { i18n } from '@kbn/i18n';
 
-import { EuiPortal } from '@elastic/eui';
+import { EuiCallOut, EuiLink, EuiPortal } from '@elastic/eui';
 import { ReactEmbeddableRenderer } from '@kbn/embeddable-plugin/public';
 import { ExitFullScreenButton } from '@kbn/shared-ux-button-exit-full-screen';
 
@@ -21,10 +22,36 @@ import {
 } from '@kbn/controls-plugin/public';
 import { CONTROL_GROUP_TYPE } from '@kbn/controls-plugin/common';
 import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
+import { type DashboardApi } from '../../../dashboard_api/types';
 import { DashboardGrid } from '../grid';
 import { useDashboardApi } from '../../../dashboard_api/use_dashboard_api';
 import { useDashboardInternalApi } from '../../../dashboard_api/use_dashboard_internal_api';
 import { DashboardEmptyScreen } from '../empty_screen/dashboard_empty_screen';
+
+const ChangeConflict = ({ dashboardApi }: { dashboardApi: DashboardApi }) => {
+  return (
+    <EuiCallOut
+      title={i18n.translate('dashboard.changeConflictTitle', { defaultMessage: 'Change conflict' })}
+      color="warning"
+      iconType="warning"
+      onDismiss={() => {
+        dashboardApi.setHasChangeConflict(false);
+      }}
+    >
+      <p>
+        {i18n.translate('dashboard.changeConflictMessage', {
+          defaultMessage: 'This dashboard has been saved by someone else.',
+        })}{' '}
+        <EuiLink onClick={() => dashboardApi.refreshPanels(true)}>
+          {i18n.translate('dashboard.acceptChanges', {
+            defaultMessage: 'Accept their changes',
+          })}
+        </EuiLink>
+        .
+      </p>
+    </EuiCallOut>
+  );
+};
 
 export const DashboardViewport = ({
   dashboardContainerRef,
@@ -43,6 +70,7 @@ export const DashboardViewport = ({
     viewMode,
     useMargins,
     fullScreenMode,
+    hasChangeConflict,
   ] = useBatchedPublishingSubjects(
     dashboardApi.controlGroupApi$,
     dashboardApi.title$,
@@ -51,7 +79,8 @@ export const DashboardViewport = ({
     dashboardApi.panels$,
     dashboardApi.viewMode$,
     dashboardApi.settings.useMargins$,
-    dashboardApi.fullScreenMode$
+    dashboardApi.fullScreenMode$,
+    dashboardApi.hasChangeConflict$
   );
   const onExit = useCallback(() => {
     dashboardApi.setFullScreenMode(false);
@@ -104,6 +133,7 @@ export const DashboardViewport = ({
         'dshDashboardViewportWrapper--isFullscreen': fullScreenMode,
       })}
     >
+      {hasChangeConflict && <ChangeConflict dashboardApi={dashboardApi} />}
       {viewMode !== 'print' ? (
         <div className={hasControls ? 'dshDashboardViewport-controls' : ''}>
           <ReactEmbeddableRenderer<
