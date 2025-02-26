@@ -78,7 +78,7 @@ export const BulkReindexModal: FunctionComponent<Props> = ({ indices }) => {
 
   return (
     <>
-      <EuiButton onClick={showModal} fill>
+      <EuiButton onClick={showModal} fill data-test-subj="openShowReindexModal">
         <FormattedMessage
           id="xpack.upgradeAssistant.esDeprecations.bulkReindex.ctaButtonLabel"
           defaultMessage="Batch reindex"
@@ -104,7 +104,12 @@ export const BulkReindexModal: FunctionComponent<Props> = ({ indices }) => {
               }}
             />
             <EuiSpacer />
-            <EuiCodeBlock language="json" isCopyable overflowHeight={250}>
+            <EuiCodeBlock
+              language="json"
+              isCopyable
+              overflowHeight={250}
+              data-test-subj="consoleRequest"
+            >
               {consoleRequest}
             </EuiCodeBlock>
           </EuiModalBody>

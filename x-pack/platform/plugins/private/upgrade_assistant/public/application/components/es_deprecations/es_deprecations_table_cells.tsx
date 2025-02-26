@@ -53,6 +53,7 @@ export const EsDeprecationsTableCells: React.FunctionComponent<Props> = ({
     return (
       <EuiCheckbox
         id={`select-${index}`}
+        data-test-subj="batchSelectCheckbox"
         disabled={isDisabled}
         checked={!isDisabled && selectedDeprecations?.has(index)}
         onChange={() => !isDisabled && toggleDeprecation?.(index)}
