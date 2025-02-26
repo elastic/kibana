@@ -17,7 +17,6 @@ import type {
   RasterTileSource,
   SourceSpecification,
   StyleSpecification,
-  MapEvent,
   MapOptions,
   MapMouseEvent,
   MapSourceDataEvent,
@@ -31,15 +30,16 @@ import type {
   FeatureIdentifier,
 } from 'maplibre-gl';
 
+import type maplibreglDist from 'maplibre-gl/dist/maplibre-gl';
 // @ts-expect-error
-import maplibreglDist from 'maplibre-gl/dist/maplibre-gl-csp';
+import maplibreglDistCsp from 'maplibre-gl/dist/maplibre-gl-csp';
 import mbRtlPlugin from '@mapbox/mapbox-gl-rtl-text/mapbox-gl-rtl-text.min.js?asUrl';
 import mbWorkerUrl from 'maplibre-gl/dist/maplibre-gl-csp-worker?asUrl';
 import 'maplibre-gl/dist/maplibre-gl.css';
 
-const maplibregl: any = maplibreglDist;
-maplibregl.workerUrl = mbWorkerUrl;
-maplibregl.setRTLTextPlugin(mbRtlPlugin);
+const maplibregl = maplibreglDistCsp as typeof maplibreglDist;
+maplibregl.setWorkerUrl(mbWorkerUrl);
+maplibregl.setRTLTextPlugin(mbRtlPlugin, true);
 
 export { maplibregl };
 
@@ -53,7 +53,6 @@ export type {
   GeoJSONSource,
   VectorTileSource,
   RasterTileSource,
-  MapEvent,
   MapOptions,
   MapMouseEvent,
   MapSourceDataEvent,

@@ -161,7 +161,9 @@ export class MbMap extends Component<Props, State> {
         attributionControl: false,
         container: this._containerRef!,
         style: mbStyle,
-        preserveDrawingBuffer: getPreserveDrawingBuffer(),
+        canvasContextAttributes: {
+          preserveDrawingBuffer: getPreserveDrawingBuffer(),
+        },
         maxZoom: this.props.settings.maxZoom,
         minZoom: this.props.settings.minZoom,
         transformRequest,
