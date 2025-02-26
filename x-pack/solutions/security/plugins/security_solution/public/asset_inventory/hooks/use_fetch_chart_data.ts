@@ -7,6 +7,7 @@
 
 import { useQuery } from '@tanstack/react-query';
 import { lastValueFrom } from 'rxjs';
+import { i18n } from '@kbn/i18n';
 import type * as estypes from '@elastic/elasticsearch/lib/api/types';
 import { showErrorToast } from '@kbn/cloud-security-posture';
 import type { IKibanaSearchResponse, IKibanaSearchRequest } from '@kbn/search-types';
@@ -24,32 +25,32 @@ const getTopAssetsQuery = ({ query, sort }: UseTopAssetsOptions) => ({
   size: 0,
   index: ASSET_INVENTORY_INDEX_PATTERN,
   aggs: {
-    '0': {
+    entityCategory: {
       terms: {
         field: 'entity.category',
         order: {
-          '2': 'desc',
+          entityId: 'desc',
         },
         size: 10,
       },
       aggs: {
-        '1': {
+        entityType: {
           terms: {
             field: 'entity.type',
             order: {
-              '2': 'desc',
+              entityId: 'desc',
             },
             size: 10,
           },
           aggs: {
-            '2': {
+            entityId: {
               value_count: {
                 field: 'entity.id',
               },
             },
           },
         },
-        '2': {
+        entityId: {
           value_count: {
             field: 'entity.id',
           },
@@ -77,9 +78,38 @@ export interface AggregationResult {
   count: number;
 }
 
-interface AssetAggs {
-  '0': { buckets: Array<{ key: string; doc_count: number }> };
+interface TypeBucket {
+  key: string;
+  doc_count: number;
+  entityId: {
+    value: number;
+  };
 }
+
+interface CategoryBucket {
+  key: string;
+  doc_count: number;
+  entityId: {
+    value: number;
+  };
+  entityType: {
+    buckets: TypeBucket[];
+    doc_count_error_upper_bound: number;
+    sum_other_doc_count: number;
+  };
+  doc_count_error_upper_bound: number;
+  sum_other_doc_count: number;
+}
+
+interface AssetAggs {
+  entityCategory: {
+    buckets: CategoryBucket[];
+  };
+}
+
+const tooltipOtherLabel = i18n.translate('xpack.assetInventory.chart.tooltip.otherLabel', {
+  defaultMessage: 'Other',
+});
 
 // Example output:
 //
@@ -89,26 +119,25 @@ interface AssetAggs {
 //   { category: 'cloud-storage', source: 'gcp-compute', count: 221, },
 //   { category: 'cloud-storage', source: 'aws-security', count: 117, },
 // ];
-function transformAggregation(
-  buckets: Array<estypes.AggregationsStringRareTermsBucket | undefined>
-) {
+function transformAggregation(agg: AssetAggs) {
   const result: AggregationResult[] = [];
-  if (!buckets) return result;
 
-  for (const categoryBucket of buckets) {
-    if (!categoryBucket) break;
+  for (const categoryBucket of agg.entityCategory.buckets) {
+    const typeBucket = categoryBucket.entityType;
 
-    const category = categoryBucket.key;
-    const innerCategory = categoryBucket[
-      '1'
-    ] as estypes.AggregationsTermsAggregateBase<estypes.AggregationsStringRareTermsBucket>;
-    const sources = innerCategory.buckets as estypes.AggregationsStringRareTermsBucketKeys[];
-
-    for (const sourceBucket of sources) {
+    for (const sourceBucket of typeBucket.buckets) {
       result.push({
-        category,
+        category: categoryBucket.key,
         source: sourceBucket.key,
         count: sourceBucket.doc_count,
+      });
+    }
+
+    if (typeBucket.sum_other_doc_count > 0) {
+      result.push({
+        category: categoryBucket.key,
+        source: `${categoryBucket.key} - ${tooltipOtherLabel}`,
+        count: typeBucket.sum_other_doc_count,
       });
     }
   }
@@ -141,7 +170,7 @@ export function useFetchChartData(options: UseTopAssetsOptions) {
         throw new Error('expected aggregations to be defined');
       }
 
-      return transformAggregation(aggregations['0'].buckets);
+      return transformAggregation(aggregations);
     },
     {
       enabled: options.enabled,
