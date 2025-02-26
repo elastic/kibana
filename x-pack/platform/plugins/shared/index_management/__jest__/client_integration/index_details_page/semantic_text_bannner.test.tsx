@@ -44,7 +44,7 @@ describe('When semantic_text is enabled', () => {
     );
 
     expect(find('indexDetailsMappingsSemanticTextBanner').text()).toContain(
-      'Documents will be automatically chunked to fit model context limits.'
+      'Documents will be automatically chunked to fit model context limits, to avoid truncation.'
     );
   });
 
