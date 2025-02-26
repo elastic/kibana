@@ -21,7 +21,7 @@ import { buildRouteValidationWithZod } from '@kbn/elastic-assistant-common/impl/
 import { ElasticAssistantPluginRouter } from '../../types';
 import { buildResponse } from '../utils';
 import { EsAnonymizationFieldsSchema } from '../../ai_assistant_data_clients/anonymization_fields/types';
-import { transformESSearchToAnonymizationFields } from '../../ai_assistant_data_clients/anonymization_fields/helpers';
+import { transformESSearchToAnonymizationFields, transformFieldNamesToSourceScheme } from '../../ai_assistant_data_clients/anonymization_fields/helpers';
 import { performChecks } from '../helpers';
 
 export const findAnonymizationFieldsRoute = (
@@ -76,7 +76,7 @@ export const findAnonymizationFieldsRoute = (
             sortField: query.sort_field,
             sortOrder: query.sort_order,
             filter: query.filter,
-            fields: query.fields,
+            fields: query.fields ? transformFieldNamesToSourceScheme(query.fields) : undefined,
           });
 
           if (result) {

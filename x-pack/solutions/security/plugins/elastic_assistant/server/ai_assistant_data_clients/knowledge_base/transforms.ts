@@ -140,3 +140,22 @@ const getDocumentEntryFromLegacyKbEntry = (
   };
   return documentEntry;
 };
+
+export const transformFieldNamesToSourceScheme = (fields: string[]) => {
+  return fields.map((f) => {
+    switch (f) {
+      case 'createdAt':
+        return 'created_at';
+      case 'updateddAt':
+        return 'updated_at';
+      case 'createdBy':
+        return 'created_by';
+      case 'updatedBy':
+        return 'updated_by';
+      case 'timestamp':
+        return '@timestamp';
+      default:
+        return f;
+    }
+  });
+};

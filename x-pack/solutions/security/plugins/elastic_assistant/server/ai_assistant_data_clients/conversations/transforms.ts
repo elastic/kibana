@@ -153,7 +153,7 @@ export const transformESToConversations = (
                 },
               }
             : {}),
-        })) ?? [],
+        })),
       updatedAt: conversationSchema.updated_at,
       replacements,
       namespace: conversationSchema.namespace,
@@ -161,5 +161,36 @@ export const transformESToConversations = (
     };
 
     return conversation;
+  });
+};
+
+export const transformFieldNamesToSourceScheme = (fields: string[]) => {
+  return fields.map((f) => {
+    switch (f) {
+      case 'createdAt':
+        return 'created_at';
+      case 'updateddAt':
+        return 'updated_at';
+      case 'createdBy':
+        return 'created_by';
+      case 'updatedBy':
+        return 'updated_by';
+      case 'timestamp':
+        return '@timestamp';
+      case 'apiConfig':
+        return 'api_config';
+      case 'apiConfig.actionTypeId':
+        return 'api_config.action_type_id';
+      case 'apiConfig.connectorId':
+        return 'api_config.connector_id';
+      case 'apiConfig.defaultSystemPromptId':
+        return 'api_config.default_system_prompt_id';
+      case 'apiConfig.model':
+        return 'api_config.model';
+      case 'apiConfig.provider':
+        return 'api_config.provider';
+      default:
+        return f;
+    }
   });
 };

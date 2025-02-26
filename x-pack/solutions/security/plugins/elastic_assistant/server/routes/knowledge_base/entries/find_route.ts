@@ -23,7 +23,7 @@ import { ElasticAssistantPluginRouter } from '../../../types';
 import { buildResponse } from '../../utils';
 
 import { performChecks } from '../../helpers';
-import { transformESSearchToKnowledgeBaseEntry } from '../../../ai_assistant_data_clients/knowledge_base/transforms';
+import { transformESSearchToKnowledgeBaseEntry, transformFieldNamesToSourceScheme } from '../../../ai_assistant_data_clients/knowledge_base/transforms';
 import { EsKnowledgeBaseEntrySchema } from '../../../ai_assistant_data_clients/knowledge_base/types';
 import { getKBUserFilter } from './utils';
 import { SECURITY_LABS_RESOURCE } from '../constants';
@@ -80,7 +80,7 @@ export const findKnowledgeBaseEntriesRoute = (router: ElasticAssistantPluginRout
             sortField: query.sort_field,
             sortOrder: query.sort_order,
             filter: `${userFilter}${systemFilter}${additionalFilter}`,
-            fields: query.fields,
+            fields: query.fields ? transformFieldNamesToSourceScheme(query.fields) : undefined,
             aggs: {
               global_aggs: {
                 global: {},
