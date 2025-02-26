@@ -123,6 +123,9 @@ export interface ExportShare
     sortOrder?: number;
     label: string;
     exportType: string;
+    /**
+     * allows disabling the export action based on there factors, for instance licensing
+     */
     disabled?: boolean;
     helpText?: ReactElement;
     renderCopyURLButton?: ReactElement;
@@ -302,7 +305,7 @@ export interface UrlParamExtension {
 
 /** @public */
 export interface ShowShareMenuOptions extends Omit<ShareContext, 'onClose'> {
-  anchorElement: HTMLElement;
+  anchorElement?: HTMLElement;
   allowShortUrl: boolean;
   onClose?: () => void;
   publicAPIEnabled?: boolean;
