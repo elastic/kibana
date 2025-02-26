@@ -179,10 +179,8 @@ export const createMigrationRules = async (
 export const deleteAllMigrationRules = async (es: Client): Promise<void> => {
   await es.deleteByQuery({
     index: [SIEM_MIGRATIONS_RULES_INDEX_PATTERN],
-    body: {
-      query: {
-        match_all: {},
-      },
+    query: {
+      match_all: {},
     },
     ignore_unavailable: true,
     refresh: true,

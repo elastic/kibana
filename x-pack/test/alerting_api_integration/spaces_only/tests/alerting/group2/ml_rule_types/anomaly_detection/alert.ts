@@ -294,13 +294,13 @@ export default function alertTests({ getService }: FtrProviderContext) {
         docTime += step;
       }
 
-      const body = docs.flatMap(({ _index, ...doc }) => {
+      const operations = docs.flatMap(({ _index, ...doc }) => {
         return [{ index: { _index } }, doc];
       });
 
       await es.bulk({
         refresh: 'wait_for',
-        body,
+        operations,
       });
 
       log.debug('> docs ingested.');
