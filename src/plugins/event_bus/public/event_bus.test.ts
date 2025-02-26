@@ -7,57 +7,19 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { createAsyncThunk, createSlice, PayloadAction, configureStore } from '@reduxjs/toolkit';
-import { EventBus } from './event_bus';
+import { configureStore, createAsyncThunk, createSlice, PayloadAction } from '@reduxjs/toolkit';
 import type { Subscription } from 'rxjs';
 
-// Mock interface and initial state for testing
-interface TestState {
-  counter: number;
-  text: string;
-  flag: boolean;
-  data: {
-    items: string[];
-  };
-}
-
-const initialState: () => TestState = () => ({
-  counter: 0,
-  text: '',
-  flag: false,
-  data: {
-    items: [],
-  },
-});
-
-// Create a test slice
-const testSlice = createSlice({
-  name: 'test',
-  initialState: initialState(),
-  reducers: {
-    increment: (state) => {
-      state.counter += 1;
-    },
-    setText: (state, action: PayloadAction<string>) => {
-      state.text = action.payload;
-    },
-    toggleFlag: (state) => {
-      state.flag = !state.flag;
-    },
-    addItem: (state, action: PayloadAction<string>) => {
-      state.data.items.push(action.payload);
-    },
-    reset: () => initialState(),
-  },
-});
+import { mockInitialState, mockTestSlice, type MockTestState } from './__mocks__/event_bus_mocks';
+import { EventBus } from './event_bus';
 
 describe('EventBus', () => {
-  let eventBus: EventBus<typeof testSlice>;
+  let eventBus: EventBus<typeof mockTestSlice>;
   let mockSubscriber: jest.Mock;
   let subscription: Subscription;
 
   beforeEach(() => {
-    eventBus = new EventBus(testSlice);
+    eventBus = new EventBus(mockTestSlice);
     mockSubscriber = jest.fn();
     subscription = eventBus.subscribe(mockSubscriber);
   });
@@ -71,11 +33,11 @@ describe('EventBus', () => {
     it('should initialize with the correct initial state', () => {
       // subscribing (via beforeEach) should trigger an initial state update
       expect(mockSubscriber).toHaveBeenCalledTimes(1);
-      expect(mockSubscriber).toHaveBeenLastCalledWith(initialState());
+      expect(mockSubscriber).toHaveBeenLastCalledWith(mockInitialState());
     });
 
     it('should wrap all slice actions', () => {
-      expect(Object.keys(eventBus.actions)).toEqual(Object.keys(testSlice.actions));
+      expect(Object.keys(eventBus.actions)).toEqual(Object.keys(mockTestSlice.actions));
     });
   });
 
@@ -87,9 +49,9 @@ describe('EventBus', () => {
       eventBus.actions.increment();
       eventBus.actions.setText('test');
 
-      expect(mockSubscriber).toHaveBeenCalledTimes(2); // 2 actions
+      expect(mockSubscriber).toHaveBeenCalledTimes(2);
       expect(mockSubscriber).toHaveBeenLastCalledWith({
-        ...initialState(),
+        ...mockInitialState(),
         counter: 1,
         text: 'test',
       });
@@ -103,9 +65,9 @@ describe('EventBus', () => {
       eventBus.actions.addItem('item2');
       eventBus.actions.toggleFlag();
 
-      expect(mockSubscriber).toHaveBeenCalledTimes(3); // 3 actions
+      expect(mockSubscriber).toHaveBeenCalledTimes(3);
       expect(mockSubscriber).toHaveBeenLastCalledWith({
-        ...initialState(),
+        ...mockInitialState(),
         flag: true,
         data: {
           items: ['item1', 'item2'],
@@ -121,14 +83,14 @@ describe('EventBus', () => {
       eventBus.actions.setText('test');
       eventBus.actions.reset();
 
-      expect(mockSubscriber).toHaveBeenCalledTimes(3); // 3 actions
-      expect(mockSubscriber.mock.calls[0][0]).toEqual({ ...initialState(), counter: 1 });
+      expect(mockSubscriber).toHaveBeenCalledTimes(3);
+      expect(mockSubscriber.mock.calls[0][0]).toEqual({ ...mockInitialState(), counter: 1 });
       expect(mockSubscriber.mock.calls[1][0]).toEqual({
-        ...initialState(),
+        ...mockInitialState(),
         counter: 1,
         text: 'test',
       });
-      expect(mockSubscriber.mock.calls[2][0]).toEqual(initialState());
+      expect(mockSubscriber.mock.calls[2][0]).toEqual(mockInitialState());
     });
 
     it('should reset state correctly', () => {
@@ -139,8 +101,8 @@ describe('EventBus', () => {
       eventBus.actions.setText('test');
       eventBus.actions.reset();
 
-      expect(mockSubscriber).toHaveBeenCalledTimes(3); // 3 actions
-      expect(mockSubscriber).toHaveBeenLastCalledWith(initialState());
+      expect(mockSubscriber).toHaveBeenCalledTimes(3);
+      expect(mockSubscriber).toHaveBeenLastCalledWith(mockInitialState());
     });
   });
 
@@ -154,7 +116,7 @@ describe('EventBus', () => {
     });
 
     it('should work with selectors', () => {
-      const counterSelector = (state: TestState) => state.counter;
+      const counterSelector = (state: MockTestState) => state.counter;
       const mockCounterSubscriber = jest.fn();
 
       selectorSubscription = eventBus.subscribe(mockCounterSubscriber, counterSelector);
@@ -167,7 +129,7 @@ describe('EventBus', () => {
     });
 
     it("should not emit when selected value hasn't changed", () => {
-      const textSelector = (state: TestState) => state.text;
+      const textSelector = (state: MockTestState) => state.text;
       const mockTextSubscriber = jest.fn();
 
       selectorSubscription = eventBus.subscribe(mockTextSubscriber, textSelector);
@@ -182,7 +144,7 @@ describe('EventBus', () => {
     });
 
     it('should handle multiple actions correctly', () => {
-      const itemsSelectors = (state: TestState) => state.data.items;
+      const itemsSelectors = (state: MockTestState) => state.data.items;
       const mockItemsSubscriber = jest.fn();
 
       eventBus.subscribe(mockItemsSubscriber, itemsSelectors);
@@ -232,7 +194,7 @@ describe('EventBus', () => {
   describe('cleanup', () => {
     it('should clean up subscriptions on dispose', () => {
       // Create a new event bus for this test since we'll be disposing it
-      const testEventBus = new EventBus(testSlice);
+      const testEventBus = new EventBus(mockTestSlice);
       const cleanupMockSubscriber = jest.fn();
 
       testEventBus.subscribe(cleanupMockSubscriber);
@@ -248,7 +210,7 @@ describe('EventBus', () => {
 
     it('should complete the subject on dispose', (done) => {
       // Create a new event bus for this test since we'll be disposing it
-      const testEventBus = new EventBus(testSlice);
+      const testEventBus = new EventBus(mockTestSlice);
 
       testEventBus.subject.subscribe({
         complete: () => {
@@ -306,13 +268,13 @@ describe('EventBus', () => {
       const mockErrorHandler = jest.fn();
 
       // Create a modified EventBus implementation that tests error handling
-      class TestErrorEventBus extends EventBus<typeof testSlice> {
+      class TestErrorEventBus extends EventBus<typeof mockTestSlice> {
         triggerError(error: Error) {
           this.subject.error(error);
         }
       }
 
-      const errorBus = new TestErrorEventBus(testSlice);
+      const errorBus = new TestErrorEventBus(mockTestSlice);
 
       const errorSubscription = errorBus.subscribe(
         () => {}, // next handler
@@ -381,11 +343,11 @@ describe('EventBus', () => {
       // Reset mock to clear initial call
       mockSubscriber.mockReset();
 
-      eventBus.dispatch(testSlice.actions.increment());
+      eventBus.dispatch(mockTestSlice.actions.increment());
 
       expect(mockSubscriber).toHaveBeenCalledTimes(1);
       expect(mockSubscriber).toHaveBeenLastCalledWith({
-        ...initialState(),
+        ...mockInitialState(),
         counter: 1,
       });
     });
@@ -486,11 +448,11 @@ describe('EventBus', () => {
     });
 
     it('should not be significantly slower than plain Redux', () => {
-      const store = configureStore({ reducer: testSlice.reducer });
+      const store = configureStore({ reducer: mockTestSlice.reducer });
 
       const reduxStart = performance.now();
       for (let i = 0; i < 1000; i++) {
-        store.dispatch(testSlice.actions.increment());
+        store.dispatch(mockTestSlice.actions.increment());
       }
       const reduxDuration = performance.now() - reduxStart;
 
