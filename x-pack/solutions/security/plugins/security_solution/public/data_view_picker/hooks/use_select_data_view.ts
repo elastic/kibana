@@ -16,7 +16,14 @@ export const useSelectDataView = () => {
   return useCallback(
     (params: {
       id?: string | null;
+      /**
+       * List of patterns that will be used to construct the adhoc data view when
+       * .id param is not provided or the data view does not exist
+       */
       fallbackPatterns?: string[];
+      /**
+       * Data view selection will be applied to the scopes listed here
+       */
       scope: DataViewPickerScopeName[];
     }) => {
       dispatch(selectDataViewAsync(params));

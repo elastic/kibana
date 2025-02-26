@@ -13,13 +13,14 @@ import { DataView, type DataViewListItem } from '@kbn/data-views-plugin/public';
 import type { DataViewPickerScopeName } from '../../constants';
 import { useKibana } from '../../../common/lib/kibana/kibana_react';
 import { DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID } from '../../constants';
-import { selectDataViewAsync } from '../../redux/actions';
 import { useDataView } from '../../hooks/use_data_view';
 import { sharedStateSelector } from '../../redux/selectors';
 import { shared } from '../../redux/slices';
+import { useSelectDataView } from '../../hooks/use_select_data_view';
 
 export const DataViewPicker = memo((props: { scope: DataViewPickerScopeName }) => {
   const dispatch = useDispatch();
+  const selectDataView = useSelectDataView();
 
   const {
     services: { dataViewEditor, data, dataViewFieldEditor, fieldFormats },
@@ -41,11 +42,11 @@ export const DataViewPicker = memo((props: { scope: DataViewPickerScopeName }) =
     closeDataViewEditor.current = dataViewEditor.openEditor({
       onSave: async (newDataView) => {
         dispatch(shared.actions.addDataView(newDataView));
-        dispatch(selectDataViewAsync({ id: newDataView.id, scope: [props.scope] }));
+        selectDataView({ id: newDataView.id, scope: [props.scope] });
       },
       allowAdHocDataView: true,
     });
-  }, [dataViewEditor, dispatch, props.scope]);
+  }, [dataViewEditor, dispatch, props.scope, selectDataView]);
 
   const onFieldEdited = useCallback(() => {}, []);
 
@@ -78,9 +79,9 @@ export const DataViewPicker = memo((props: { scope: DataViewPickerScopeName }) =
 
   const handleChangeDataView = useCallback(
     (id: string) => {
-      dispatch(selectDataViewAsync({ id, scope: [props.scope] }));
+      selectDataView({ id, scope: [props.scope] });
     },
-    [dispatch, props.scope]
+    [props.scope, selectDataView]
   );
 
   const handleEditDataView = useCallback(() => {}, []);
