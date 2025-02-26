@@ -102,6 +102,14 @@ steps:
         - exit_status: '-1'
           limit: 3
 
+  - command: .buildkite/scripts/steps/storybooks/build_and_upload.sh
+    label: 'Build Storybooks'
+    agents:
+      machineType: n2-standard-8
+      preemptible: true
+    key: storybooks
+    timeout_in_minutes: 80
+
   - wait
 
   - command: .buildkite/scripts/steps/ci_stats_ready.sh
