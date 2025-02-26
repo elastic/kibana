@@ -93,7 +93,7 @@ const configureLabel = i18n.translate(
 
 export const ConnectorStats: React.FC<ConnectorStatsProps> = ({ connector, indexData }) => {
   const { connectorTypes } = useValues(KibanaLogic);
-   // TODO service_type === "" is considered unknown/custom connector multiple places replace all of them with a better solution
+  // TODO service_type === "" is considered unknown/custom connector multiple places replace all of them with a better solution
   const CUSTOM_CONNECTOR = useMemo(
     () => connectorTypes.filter(({ serviceType }) => serviceType === ''),
     [connectorTypes]
