@@ -11,8 +11,6 @@ import { ApmRuleParamsType } from '@kbn/apm-plugin/common/rules/apm_rule_types';
 import type { Agent as SuperTestAgent } from 'supertest';
 import { ApmRuleType } from '@kbn/rule-data-utils';
 import { ObservabilityApmAlert } from '@kbn/alerts-as-data-utils';
-import { retryForSuccess } from '@kbn/ftr-common-functional-services';
-import { ToolingLog } from '@kbn/tooling-log';
 import {
   APM_ACTION_VARIABLE_INDEX,
   APM_ALERTS_INDEX,
