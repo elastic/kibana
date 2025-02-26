@@ -7,10 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { scoutFixtures, scoutParallelFixtures } from './fixtures';
+import { scoutFixtures, scoutParallelFixtures, lighthouseFixtures } from './fixtures';
 
 // Scout core fixtures: worker & test scope
 export const test = scoutFixtures;
+
+export const lighthouseTest = lighthouseFixtures;
 
 // Scout core 'space aware' fixtures: worker & test scope
 export const spaceTest = scoutParallelFixtures;
@@ -33,6 +35,3 @@ export type {
 export { tags } from './tags';
 
 export { ingestTestDataHook, ingestSynthtraceDataHook } from './global_hooks';
-
-export { trackBundleSizes, waitForJsBundles, savePageBundleStats } from './performance';
-export type { BundleInfo } from './performance';

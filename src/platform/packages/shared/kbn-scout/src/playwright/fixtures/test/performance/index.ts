@@ -7,11 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import * as Fs from 'fs';
-import path from 'path';
-import { SCOUT_OUTPUT_ROOT } from '@kbn/scout-info';
 import { CDPSession } from '@playwright/test';
-import { ScoutLogger } from '../../common';
+import { coreWorkerFixtures } from '../../worker';
 
 export interface BundleInfo {
   url: string;
@@ -38,7 +35,35 @@ interface PageInfo {
   }>;
 }
 
-export function trackBundleSizes(client: CDPSession) {
+export interface PerfTrackerFixture {
+  trackBundleResponses: (cdp: CDPSession) => Map<string, BundleInfo>;
+  waitForJsResourcesToLoad: (cdp: CDPSession, timeout?: number) => Promise<void>;
+  collectStats: (url: string, bundleResponses: Map<string, BundleInfo>) => PageInfo;
+}
+
+export const perfTrackerFixture = coreWorkerFixtures.extend<{ perfTracker: PerfTrackerFixture }>({
+  perfTracker: [
+    async ({ log }, use, testInfo) => {
+      log.serviceLoaded('perfTracker');
+
+      const collectStats = (url: string, bundleResponses: Map<string, BundleInfo>) => {
+        const stats = prepareStats(bundleResponses);
+
+        testInfo.attach('page-bundles-report', {
+          body: JSON.stringify({ url, ...stats }, null, 2),
+          contentType: 'application/json',
+        });
+
+        return stats;
+      };
+
+      await use({ trackBundleResponses, waitForJsResourcesToLoad, collectStats });
+    },
+    { scope: 'test' },
+  ],
+});
+
+function trackBundleResponses(cdp: CDPSession) {
   const bundleResponses = new Map<string, BundleInfo>();
 
   function getRequestData(requestId: string): BundleInfo {
@@ -54,7 +79,7 @@ export function trackBundleSizes(client: CDPSession) {
     return bundleResponses.get(requestId)!;
   }
 
-  client.on('Network.responseReceived', (event) => {
+  cdp.on('Network.responseReceived', (event) => {
     if (event.response.url.endsWith('.js') && event.response.url.includes('bundles')) {
       const url = event.response.url;
       const name = url.substring(url.lastIndexOf('/') + 1);
@@ -68,25 +93,22 @@ export function trackBundleSizes(client: CDPSession) {
     }
   });
 
-  client.on('Network.loadingFinished', (event) => {
+  cdp.on('Network.loadingFinished', (event) => {
     if (bundleResponses.has(event.requestId)) {
       bundleResponses.get(event.requestId)!.transferredSize = event.encodedDataLength;
     }
   });
 
-  return { bundleResponses, client };
+  return bundleResponses;
 }
 
-export async function waitForJsBundles(
-  cdpClient: CDPSession,
-  timeout: number = 2000
-): Promise<void> {
+async function waitForJsResourcesToLoad(cdp: CDPSession, timeout: number = 2000): Promise<void> {
   return new Promise<void>((resolve) => {
     let lastRequestTime = Date.now();
     let activeRequests = 0;
 
     // Track new JS requests
-    cdpClient.on('Network.requestWillBeSent', (event) => {
+    cdp.on('Network.requestWillBeSent', (event) => {
       if (event.request.url.endsWith('.js') && event.request.url.includes('bundles')) {
         activeRequests++;
         lastRequestTime = Date.now();
@@ -94,7 +116,7 @@ export async function waitForJsBundles(
     });
 
     // Track when JS requests are completed
-    cdpClient.on('Network.loadingFinished', () => {
+    cdp.on('Network.loadingFinished', () => {
       activeRequests = Math.max(0, activeRequests - 1);
     });
 
@@ -108,7 +130,7 @@ export async function waitForJsBundles(
   });
 }
 
-function parseBundleResponses(bundleResponses: Map<string, BundleInfo>): PageInfo {
+function prepareStats(bundleResponses: Map<string, BundleInfo>): PageInfo {
   const chunks = Array.from(bundleResponses.values());
   const pluginStats = chunks.reduce((acc: Map<string, PluginInfo>, { plugin, transferredSize }) => {
     if (!acc.has(plugin)) {
@@ -138,33 +160,4 @@ function parseBundleResponses(bundleResponses: Map<string, BundleInfo>): PageInf
       }))
       .sort((pluginA, pluginB) => pluginA.name.localeCompare(pluginB.name)),
   };
-}
-
-export function savePageBundleStats(
-  bundleResponses: Map<string, BundleInfo>,
-  fileName: string,
-  appPath: string,
-  log: ScoutLogger
-) {
-  const pageStats = parseBundleResponses(bundleResponses);
-  const performanceDirPath = path.join(SCOUT_OUTPUT_ROOT, 'performance');
-  const reportFilePath = path.join(
-    performanceDirPath,
-    `${fileName}-bundle-stats-${Date.now()}.json`
-  );
-
-  try {
-    const jsonData = JSON.stringify({ ...pageStats, appPath }, null, 2);
-
-    if (!Fs.existsSync(performanceDirPath)) {
-      log.debug(`scout: creating performance directory: ${performanceDirPath}`);
-      Fs.mkdirSync(performanceDirPath, { recursive: true });
-    }
-
-    Fs.writeFileSync(reportFilePath, jsonData, 'utf-8');
-    log.info(`scout: Bundles report saved at ${reportFilePath}`);
-  } catch (error) {
-    log.error(`scout: Failed to save test server configuration - ${error.message}`);
-    throw new Error(`Failed to save Bundles report at ${reportFilePath}`);
-  }
 }
