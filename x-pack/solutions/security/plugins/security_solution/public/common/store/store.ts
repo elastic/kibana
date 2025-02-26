@@ -56,6 +56,7 @@ import { createMiddlewares } from './middlewares';
 import { addNewTimeline } from '../../timelines/store/helpers';
 import { initialNotesState } from '../../notes/store/notes.slice';
 import { hasAccessToSecuritySolution } from '../../helpers_access';
+import { listenerMiddleware } from '../../data_view_picker/redux/middleware';
 
 let store: Store<State, Action> | null = null;
 
@@ -288,7 +289,8 @@ export const createStore = (
     ...createMiddlewares(kibana, storage),
     telemetryMiddleware,
     ...(additionalMiddleware ?? []),
-    thunk
+    thunk,
+    listenerMiddleware.middleware
   );
 
   store = createReduxStore(

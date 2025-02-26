@@ -17,3 +17,5 @@ export const useIsExperimentalFeatureEnabled = jest
 
     throw new Error(`Invalid experimental value ${feature}}`);
   });
+
+export const useEnableExperimental = jest.fn(() => ({ newDataViewPickerEnabled: false }));
