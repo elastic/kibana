@@ -57,11 +57,13 @@ import {
   GetAIAssistantConversationsDataClientParams,
 } from './ai_assistant_data_clients/conversations';
 import type { GetRegisteredFeatures, GetRegisteredTools } from './services/app_context';
+import { CallbackIds } from './services/app_context';
 import { AIAssistantDataClient } from './ai_assistant_data_clients';
 import { AIAssistantKnowledgeBaseDataClient } from './ai_assistant_data_clients/knowledge_base';
-import type { DefendInsightsDataClient } from './ai_assistant_data_clients/defend_insights';
+import type { DefendInsightsDataClient } from './lib/defend_insights/persistence';
 
 export const PLUGIN_ID = 'elasticAssistant' as const;
+export { CallbackIds };
 
 /** The plugin setup interface */
 export interface ElasticAssistantPluginSetup {
@@ -108,6 +110,12 @@ export interface ElasticAssistantPluginStart {
    * @param pluginName Name of the plugin to get the tools for
    */
   getRegisteredTools: GetRegisteredTools;
+  /**
+   * Register a callback to be used by the elastic assistant.
+   * @param callbackId
+   * @param callback
+   */
+  registerCallback: (callbackId: CallbackIds, callback: Function) => void;
 }
 
 export interface ElasticAssistantPluginSetupDependencies {

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { isRawDataValid } from '../is_raw_data_valid';
 import type { MaybeRawData } from '../types';
+import { isRawDataValid } from '../is_raw_data_valid';
 
 /** Returns the raw data if it valid, or a default if it's not */
 export const getRawDataOrDefault = (rawData: MaybeRawData): Record<string, unknown[]> =>

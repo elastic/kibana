@@ -19,7 +19,7 @@ import {
 } from '@elastic/elasticsearch/lib/api/types';
 import { omit } from 'lodash';
 import { attackDiscoveryFieldMap } from '../lib/attack_discovery/persistence/field_maps_configuration/field_maps_configuration';
-import { defendInsightsFieldMap } from '../ai_assistant_data_clients/defend_insights/field_maps_configuration';
+import { defendInsightsFieldMap } from '../lib/defend_insights/persistence/field_maps_configuration';
 import { getDefaultAnonymizationFields } from '../../common/anonymization';
 import { AssistantResourceNames, GetElser } from '../types';
 import {
@@ -47,7 +47,7 @@ import {
   GetAIAssistantKnowledgeBaseDataClientParams,
 } from '../ai_assistant_data_clients/knowledge_base';
 import { AttackDiscoveryDataClient } from '../lib/attack_discovery/persistence';
-import { DefendInsightsDataClient } from '../ai_assistant_data_clients/defend_insights';
+import { DefendInsightsDataClient } from '../lib/defend_insights/persistence';
 import { createGetElserId, ensureProductDocumentationInstalled } from './helpers';
 import { hasAIAssistantLicense } from '../routes/helpers';
 
