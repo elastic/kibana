@@ -16,7 +16,7 @@ import { getRequestAbortedSignal } from '@kbn/data-plugin/server';
 import { getPrompt } from '@kbn/security-ai-prompts';
 import {
   API_VERSIONS,
-  contentReferencesStoreFactory,
+  newContentReferencesStore,
   ELASTIC_AI_ASSISTANT_EVALUATE_URL,
   ExecuteConnectorRequestBody,
   INTERNAL_API_ACCESS,
@@ -294,8 +294,9 @@ export const postEvaluateRoute = (
                 assistantContext.getRegisteredFeatures(
                   DEFAULT_PLUGIN_NAME
                 ).contentReferencesEnabled;
-              const contentReferencesStore =
-                contentReferencesEnabled && contentReferencesStoreFactory();
+              const contentReferencesStore = contentReferencesEnabled
+                ? newContentReferencesStore()
+                : undefined;
 
               // Fetch any applicable tools that the source plugin may have registered
               const assistantToolParams: AssistantToolParams = {
