@@ -70,6 +70,7 @@ export async function upgradeBatch(
     upgradeDurationSeconds?: number;
     startTime?: string;
     total?: number;
+    isAutomatic?: boolean;
   },
   spaceId?: string
 ): Promise<{ actionId: string }> {
@@ -186,6 +187,7 @@ export async function upgradeBatch(
     agents: agentsToUpdate.map((agent) => agent.id),
     ...rollingUpgradeOptions,
     namespaces,
+    is_automatic: options.isAutomatic,
   });
 
   await createErrorActionResults(
