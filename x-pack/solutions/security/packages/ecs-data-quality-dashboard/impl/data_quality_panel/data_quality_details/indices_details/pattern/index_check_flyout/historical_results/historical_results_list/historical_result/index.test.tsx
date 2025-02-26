@@ -26,7 +26,7 @@ describe('HisoricalResult', () => {
         <TestDataQualityProviders>
           <TestHistoricalResultsProvider>
             <HistoricalResult
-              checkedAt={'Feb 16, 2021 @ 11:20:00'}
+              checkedAt={1706526408000}
               indexName="test"
               historicalResult={getHistoricalResultStub('test')}
             />
@@ -48,7 +48,7 @@ describe('HisoricalResult', () => {
         <TestDataQualityProviders>
           <TestHistoricalResultsProvider>
             <HistoricalResult
-              checkedAt={'Feb 16, 2021 @ 11:20:00'}
+              checkedAt={1706526408000}
               indexName="test"
               historicalResult={getHistoricalResultStub('test')}
             />
@@ -68,7 +68,7 @@ describe('HisoricalResult', () => {
           <TestDataQualityProviders>
             <TestHistoricalResultsProvider>
               <HistoricalResult
-                checkedAt={'Feb 16, 2021 @ 11:20:00'}
+                checkedAt={1706526408000}
                 indexName="test"
                 historicalResult={getLegacyHistoricalResultStub('test')}
               />

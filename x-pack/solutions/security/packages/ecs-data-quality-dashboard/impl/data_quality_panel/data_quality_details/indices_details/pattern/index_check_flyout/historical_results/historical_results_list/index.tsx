@@ -33,8 +33,8 @@ import {
 import { textCss } from '../styles';
 
 interface Props {
-  checkedAt: string;
   indexName: string;
+  checkedAt?: number;
 }
 
 export const HistoricalResultsListComponent: FC<Props> = ({ checkedAt, indexName }) => {
@@ -94,7 +94,7 @@ export const HistoricalResultsListComponent: FC<Props> = ({ checkedAt, indexName
                 <HistoricalResult
                   indexName={indexName}
                   historicalResult={result}
-                  checkedAt={checkedAt}
+                  checkedAt={result.checkedAt}
                 />
               </EuiAccordion>
             </Fragment>

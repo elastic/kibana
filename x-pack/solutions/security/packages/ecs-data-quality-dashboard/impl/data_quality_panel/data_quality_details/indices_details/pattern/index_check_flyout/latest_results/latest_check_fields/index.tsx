@@ -48,19 +48,19 @@ const styles = {
 };
 
 export interface Props {
-  checkedAt: string;
   indexName: string;
   patternRollup: PatternRollup | undefined;
   ilmPhase: IlmPhase | undefined;
   docsCount: number;
+  checkedAt?: number;
 }
 
 const LatestCheckFieldsComponent: React.FC<Props> = ({
-  checkedAt,
   indexName,
   patternRollup,
   ilmPhase,
   docsCount,
+  checkedAt,
 }) => {
   const { checkState } = useIndicesCheckContext();
   const partitionedFieldMetadata =

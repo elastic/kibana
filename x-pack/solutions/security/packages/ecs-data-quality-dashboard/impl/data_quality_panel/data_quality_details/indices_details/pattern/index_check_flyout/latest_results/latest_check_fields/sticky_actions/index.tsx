@@ -12,12 +12,12 @@ import { css } from '@emotion/react';
 import { Actions } from '../../../../../../../actions';
 
 interface Props {
-  chatTitle?: string;
   markdownComment: string;
   showAddToNewCaseAction?: boolean;
   showCopyToClipboardAction?: boolean;
   showChatAction?: boolean;
   indexName?: string;
+  checkedAt?: number;
 }
 
 const useStyles = () => {
@@ -37,19 +37,19 @@ const useStyles = () => {
 };
 
 const StickyActionsComponent: FC<Props> = ({
-  chatTitle,
   indexName,
   markdownComment,
   showCopyToClipboardAction,
   showAddToNewCaseAction,
   showChatAction,
+  checkedAt,
 }) => {
   const styles = useStyles();
 
   return (
     <div css={styles.stickyContainer}>
       <Actions
-        chatTitle={chatTitle}
+        checkedAt={checkedAt}
         indexName={indexName}
         markdownComment={markdownComment}
         showChatAction={showChatAction}

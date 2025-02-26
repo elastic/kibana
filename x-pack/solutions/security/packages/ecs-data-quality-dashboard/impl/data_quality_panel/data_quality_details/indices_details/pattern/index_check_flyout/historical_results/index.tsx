@@ -60,11 +60,10 @@ export const initialFetchHistoricalResultsQueryState: FetchHistoricalResultsQuer
 const itemsPerPageOptions = [10, 25, 50];
 
 export interface Props {
-  checkedAt: string;
   indexName: string;
 }
 
-export const HistoricalResultsComponent: FC<Props> = ({ checkedAt, indexName }) => {
+export const HistoricalResultsComponent: FC<Props> = ({ indexName }) => {
   const { formatNumber } = useDataQualityContext();
 
   // Manages state for the fetch historical results query object
@@ -179,7 +178,7 @@ export const HistoricalResultsComponent: FC<Props> = ({ checkedAt, indexName }) 
         {totalChecksText}
       </EuiText>
       <div id={historicalResultsListId}>
-        <HistoricalResultsList indexName={indexName} checkedAt={checkedAt} />
+        <HistoricalResultsList indexName={indexName} />
       </div>
       {paginationState.pageCount > 1 ? (
         <div data-test-subj="historicalResultsPagination">

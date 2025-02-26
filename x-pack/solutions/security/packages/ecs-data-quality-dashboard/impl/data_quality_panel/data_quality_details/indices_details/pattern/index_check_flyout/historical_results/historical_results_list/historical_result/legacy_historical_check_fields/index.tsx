@@ -20,7 +20,7 @@ import { historicalResultsCheckFieldsButtonGroupCss } from '../styles';
 import { NOT_INCLUDED_IN_HISTORICAL_RESULTS } from './translations';
 
 interface Props {
-  checkedAt: string;
+  checkedAt: number;
   indexName: string;
   historicalResult: LegacyHistoricalResult;
 }
@@ -35,9 +35,6 @@ const LegacyHistoricalCheckFieldsComponent: FC<Props> = ({
 
   const markdownComment = useMemo(() => markdownComments.join('\n'), [markdownComments]);
   const tablesComment = useMemo(() => markdownComments.slice(4).join('\n'), [markdownComments]);
-  const chatTitle = useMemo(() => {
-    return `${indexName} - ${checkedAt}`;
-  }, [checkedAt, indexName]);
   const tabs = useMemo(
     () => [
       {
@@ -59,12 +56,12 @@ const LegacyHistoricalCheckFieldsComponent: FC<Props> = ({
                 </EuiMarkdownFormat>
                 <EuiSpacer />
                 <Actions
-                  chatTitle={chatTitle}
                   indexName={indexName}
                   markdownComment={markdownComment}
                   showChatAction
                   showAddToNewCaseAction
                   showCopyToClipboardAction
+                  checkedAt={checkedAt}
                 />
               </>
             ) : (
@@ -83,7 +80,7 @@ const LegacyHistoricalCheckFieldsComponent: FC<Props> = ({
       },
     ],
     [
-      chatTitle,
+      checkedAt,
       ecsVersion,
       incompatibleFieldCount,
       indexName,

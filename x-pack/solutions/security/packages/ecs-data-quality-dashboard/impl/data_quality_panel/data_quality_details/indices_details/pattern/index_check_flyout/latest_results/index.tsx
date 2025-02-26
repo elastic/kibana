@@ -28,11 +28,11 @@ import {
 } from '../translations';
 
 export interface Props {
-  checkedAt: string;
   ilmExplain: Record<string, IlmExplainLifecycleLifecycleExplain> | null;
   indexName: string;
   patternRollup: PatternRollup | undefined;
   stats: Record<string, MeteringStatsIndex> | null;
+  checkedAt?: number;
 }
 
 const LatestResultsComponent: React.FC<Props> = ({

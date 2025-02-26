@@ -17,9 +17,9 @@ import { isNonLegacyHistoricalResult } from './utils/is_non_legacy_historical_re
 import { LegacyHistoricalCheckFields } from './legacy_historical_check_fields';
 
 export interface Props {
-  checkedAt: string;
   indexName: string;
   historicalResult: HistoricalResultType;
+  checkedAt: number;
 }
 
 const HistoricalResultComponent: React.FC<Props> = ({ checkedAt, indexName, historicalResult }) => {

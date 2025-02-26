@@ -26,7 +26,6 @@ import {
 import { CheckSuccessEmptyPrompt } from '../check_success_empty_prompt';
 
 interface Props {
-  checkedAt: string;
   docsCount: number;
   ilmPhase: IlmPhase | undefined;
   indexName: string;
@@ -39,10 +38,10 @@ interface Props {
   customFieldsCount: number;
   allFieldsCount: number;
   hasStickyActions?: boolean;
+  checkedAt?: number;
 }
 
 const IncompatibleTabComponent: React.FC<Props> = ({
-  checkedAt,
   docsCount,
   ilmPhase,
   indexName,
@@ -55,6 +54,7 @@ const IncompatibleTabComponent: React.FC<Props> = ({
   customFieldsCount,
   allFieldsCount,
   hasStickyActions = true,
+  checkedAt,
 }) => {
   const { isILMAvailable, formatBytes, formatNumber } = useDataQualityContext();
 
@@ -97,10 +97,6 @@ const IncompatibleTabComponent: React.FC<Props> = ({
     ]
   );
 
-  const chatTitle = useMemo(() => {
-    return `${indexName} - ${checkedAt}`;
-  }, [checkedAt, indexName]);
-
   return (
     <div data-test-subj="incompatibleTabContent">
       {incompatibleFieldCount > 0 ? (
@@ -138,7 +134,7 @@ const IncompatibleTabComponent: React.FC<Props> = ({
           <EuiSpacer size="m" />
           {hasStickyActions ? (
             <StickyActions
-              chatTitle={chatTitle}
+              checkedAt={checkedAt}
               markdownComment={markdownComment}
               indexName={indexName}
               showChatAction={true}
@@ -147,7 +143,7 @@ const IncompatibleTabComponent: React.FC<Props> = ({
             />
           ) : (
             <Actions
-              chatTitle={chatTitle}
+              checkedAt={checkedAt}
               markdownComment={markdownComment}
               indexName={indexName}
               showChatAction={true}

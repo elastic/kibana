@@ -13,21 +13,21 @@ import { CopyToClipboardAction } from './copy_to_clipboard';
 import { AddToNewCaseAction } from './add_to_new_case';
 
 export interface Props {
-  chatTitle?: string;
   markdownComment: string;
   indexName?: string;
   showAddToNewCaseAction?: boolean;
   showCopyToClipboardAction?: boolean;
   showChatAction?: boolean;
+  checkedAt?: number;
 }
 
 const ActionsComponent: React.FC<Props> = ({
-  chatTitle,
   showAddToNewCaseAction,
   showCopyToClipboardAction,
   showChatAction,
   markdownComment,
   indexName,
+  checkedAt,
 }) => {
   if (!showAddToNewCaseAction && !showCopyToClipboardAction && !showChatAction) {
     return null;
@@ -51,7 +51,7 @@ const ActionsComponent: React.FC<Props> = ({
       {showChatAction && indexName && (
         <EuiFlexItem grow={false}>
           <ChatAction
-            chatTitle={chatTitle}
+            checkedAt={checkedAt}
             indexName={indexName}
             markdownComment={markdownComment}
           />

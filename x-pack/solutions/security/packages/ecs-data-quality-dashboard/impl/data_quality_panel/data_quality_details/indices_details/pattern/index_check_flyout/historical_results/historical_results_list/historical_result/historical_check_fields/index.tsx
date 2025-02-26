@@ -19,7 +19,7 @@ import { CheckFieldsTabs } from '../../../../check_fields_tabs';
 import { historicalResultsCheckFieldsButtonGroupCss } from '../styles';
 
 export interface Props {
-  checkedAt: string;
+  checkedAt: number;
   indexName: string;
   historicalResult: NonLegacyHistoricalResult;
 }
