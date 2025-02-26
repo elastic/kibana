@@ -7,8 +7,8 @@
 import type { Client } from '@elastic/elasticsearch';
 import expect from '@kbn/expect';
 
-import { IValidatedEvent } from '@kbn/event-log-plugin/generated/schemas';
-import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
+import type { IValidatedEvent } from '@kbn/event-log-plugin/generated/schemas';
+import type { FtrProviderContext } from '../../../../../common/ftr_provider_context';
 import { getEventLog } from '../../../../../common/lib';
 
 const ES_TEST_INDEX_NAME = 'functional-test-actions-index';

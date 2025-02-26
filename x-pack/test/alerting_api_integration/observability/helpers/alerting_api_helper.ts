@@ -8,8 +8,8 @@
 import type { Client } from '@elastic/elasticsearch';
 import type { Agent as SuperTestAgent } from 'supertest';
 import expect from '@kbn/expect';
-import { ToolingLog } from '@kbn/tooling-log';
-import { ThresholdParams } from '@kbn/observability-plugin/common/custom_threshold_rule/types';
+import type { ToolingLog } from '@kbn/tooling-log';
+import type { ThresholdParams } from '@kbn/observability-plugin/common/custom_threshold_rule/types';
 import { refreshSavedObjectIndices } from './refresh_index';
 
 export async function createIndexConnector({

@@ -7,7 +7,7 @@
 
 import { v4 as uuidv4 } from 'uuid';
 import pRetry from 'p-retry';
-import {
+import type {
   CoreSetup,
   RequestHandlerContext,
   KibanaRequest,
@@ -17,24 +17,24 @@ import {
   SavedObject,
 } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
-import { InvalidatePendingApiKey } from '@kbn/alerting-plugin/server/types';
-import { RawRule } from '@kbn/alerting-plugin/server/types';
-import {
+import type { InvalidatePendingApiKey } from '@kbn/alerting-plugin/server/types';
+import type { RawRule } from '@kbn/alerting-plugin/server/types';
+import type {
   ConcreteTaskInstance,
   TaskInstance,
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
 import { SECURITY_EXTENSION_ID, SPACES_EXTENSION_ID } from '@kbn/core-saved-objects-server';
 import { queryOptionsSchema } from '@kbn/event-log-plugin/server/event_log_client';
-import { NotificationsPluginStart } from '@kbn/notifications-plugin/server';
+import type { NotificationsPluginStart } from '@kbn/notifications-plugin/server';
 import {
   RULE_SAVED_OBJECT_TYPE,
   API_KEY_PENDING_INVALIDATION_TYPE,
 } from '@kbn/alerting-plugin/server';
 import { ActionExecutionSourceType } from '@kbn/actions-plugin/server/types';
 import { AlertingEventLogger } from '@kbn/alerting-plugin/server/lib/alerting_event_logger/alerting_event_logger';
-import { IEventLogger } from '@kbn/event-log-plugin/server';
-import { FixtureStartDeps } from './plugin';
+import type { IEventLogger } from '@kbn/event-log-plugin/server';
+import type { FixtureStartDeps } from './plugin';
 import { retryIfConflicts } from './lib/retry_if_conflicts';
 
 export function defineRoutes(

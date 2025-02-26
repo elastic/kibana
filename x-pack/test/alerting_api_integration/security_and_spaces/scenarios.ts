@@ -10,7 +10,7 @@ import {
   ALL_FLAPPING_SETTINGS_SUB_FEATURE_ID,
 } from '@kbn/alerting-plugin/common';
 import { ES_TEST_INDEX_NAME } from '@kbn/alerting-api-integration-helpers';
-import { Space, User } from '../common/types';
+import type { Space, User } from '../common/types';
 
 const NoKibanaPrivileges: User = {
   username: 'no_kibana_privileges',

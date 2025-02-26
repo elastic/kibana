@@ -1626,7 +1626,12 @@ module.exports = {
         '@typescript-eslint/no-explicit-any': 'error',
       },
     },
-
+    {
+      files: ['x-pack/test/alerting_api_integration/**/*.{ts, tsx}'],
+      rules: {
+        '@typescript-eslint/consistent-type-imports': 'error',
+      },
+    },
     /**
      * Lens overrides
      */
