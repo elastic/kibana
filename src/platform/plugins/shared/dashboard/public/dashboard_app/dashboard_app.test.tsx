@@ -18,7 +18,7 @@ import { buildMockDashboardApi } from '../mocks';
 import { dataService } from '../services/kibana_services';
 import { DashboardApp } from './dashboard_app';
 
-jest.mock('../dashboard_container/external_api/dashboard_renderer');
+jest.mock('../dashboard_renderer/components/dashboard_renderer');
 jest.mock('../dashboard_top_nav');
 
 describe('Dashboard App', () => {

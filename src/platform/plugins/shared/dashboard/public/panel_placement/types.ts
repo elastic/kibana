@@ -8,9 +8,9 @@
  */
 
 import { MaybePromise } from '@kbn/utility-types';
-import { DashboardPanelState } from '../../../common';
-import type { GridData } from '../../../server/content_management';
-import { PanelPlacementStrategy } from '../../plugin_constants';
+import { DashboardPanelState } from '../../common';
+import type { GridData } from '../../server/content_management';
+import { PanelPlacementStrategy } from '../plugin_constants';
 
 export interface PanelPlacementSettings {
   strategy?: PanelPlacementStrategy;

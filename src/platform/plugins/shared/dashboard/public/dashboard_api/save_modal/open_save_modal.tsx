@@ -14,7 +14,7 @@ import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
 import { showSaveModal } from '@kbn/saved-objects-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { SaveDashboardReturn } from '../../services/dashboard_content_management_service/types';
-import { DashboardSaveOptions } from '../../dashboard_container/types';
+import { DashboardSaveOptions } from './types';
 import { coreServices, dataService, savedObjectsTaggingService } from '../../services/kibana_services';
 import { getDashboardContentManagementService } from '../../services/dashboard_content_management_service';
 import { DashboardState } from '../types';

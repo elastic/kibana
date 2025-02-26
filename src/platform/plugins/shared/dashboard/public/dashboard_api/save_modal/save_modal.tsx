@@ -15,7 +15,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { SavedObjectSaveModal } from '@kbn/saved-objects-plugin/public';
 
 import { savedObjectsTaggingService } from '../../services/kibana_services';
-import type { DashboardSaveOptions } from '../../dashboard_container/types';
+import type { DashboardSaveOptions } from './types';
 
 interface DashboardSaveModalProps {
   onSave: ({

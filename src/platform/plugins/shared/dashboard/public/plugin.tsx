@@ -75,7 +75,7 @@ import {
 import {
   GetPanelPlacementSettings,
   registerDashboardPanelPlacementSetting,
-} from './dashboard_container/panel_placement';
+} from './panel_placement';
 import type { FindDashboardsService } from './services/dashboard_content_management_service/types';
 import { setKibanaServices, untilPluginStartServicesReady } from './services/kibana_services';
 import { setLogger } from './services/logger';
