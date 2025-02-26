@@ -15,12 +15,14 @@ components:
       default: 1
       minimum: 1
       description: Page number
+      example: 1
     PageSize:
       type: integer
       default: 10
       minimum: 1
       maximum: 100
       description: Number of items per page
+      example: 10
     StartDate:
       type: string
       description: Start date
@@ -30,6 +32,43 @@ components:
     AgentId:
       type: string
       description: Agent ID
+    Kuery:
+      type: string
+      description: A KQL string.
+      example: "united.endpoint.host.os.name : 'Windows'"
+    HostStatuses:
+      type: array
+      description: A set of agent health statuses to filter by.
+      example: [ "healthy", "updating" ]
+      items:
+        type: string
+        enum:
+          - healthy
+          - offline
+          - updating
+          - inactive
+          - unenrolled
+    SortDirection:
+      type: string
+      description: Determines the sort order.
+      example: desc
+      enum:
+        - asc
+        - desc
+    SortField:
+      type: string
+      description: Determines which field is used to sort the results.
+      example: enrolled_at
+      enum:
+        - enrolled_at
+        - metadata.host.hostname
+        - host_status
+        - metadata.Endpoint.policy.applied.name
+        - metadata.Endpoint.policy.applied.status
+        - metadata.host.os.name
+        - metadata.host.ip
+        - metadata.agent.version
+        - last_checkin
 
     AgentIds:
       oneOf:
