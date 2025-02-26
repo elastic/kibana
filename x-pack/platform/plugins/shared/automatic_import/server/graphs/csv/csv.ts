@@ -4,8 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { IScopedClusterClient } from '@kbn/core/server';
 import type { LogFormatDetectionState } from '../../types';
-import type { LogDetectionNodeParams } from '../log_type_detection/types';
 import { createJSONInput } from '../../util';
 import type { ESProcessorItem } from '../../../common';
 import { createCSVProcessor, createDropProcessor } from '../../util/processors';
@@ -14,6 +14,7 @@ import {
   generateColumnNames,
   upperBoundForColumnCount,
   columnsFromHeader,
+  valuesFromHeader,
   toSafeColumnName,
   totalColumnCount,
   yieldUniqueColumnNames,
@@ -23,11 +24,70 @@ import {
 // We will only create the processor for the first MAX_CSV_COLUMNS columns.
 const MAX_CSV_COLUMNS = 100;
 
-// Converts CSV samples into JSON samples.
+interface HandleCSVState {
+  packageName: string;
+  dataStreamName: string;
+  logSamples: string[];
+  samplesFormat: {
+    columns?: string[];
+    header?: boolean;
+  };
+  additionalProcessors: ESProcessorItem[];
+}
+
+interface HandleCSVParams {
+  state: HandleCSVState;
+  client: IScopedClusterClient;
+}
+
+function createCSVPipeline(
+  prefix: string[],
+  columns: string[],
+  headerValues: Array<string | number | undefined>
+): ESProcessorItem[] {
+  const prefixedColumns = prefixColumns(columns, prefix);
+  const dropProcessors: ESProcessorItem[] = [];
+
+  if (headerValues.length !== 0) {
+    const dropValues = columns.reduce((acc, column, index) => {
+      const headerValue = headerValues[index];
+      if (headerValue !== undefined) {
+        acc[column] = headerValue;
+      }
+      return acc;
+    }, {} as Record<string, string | number>);
+
+    const dropProcessor = createDropProcessor(
+      dropValues,
+      prefix,
+      'remove_csv_header',
+      'Remove the CSV header by comparing row values to the header row.'
+    );
+    dropProcessors.push(dropProcessor);
+  }
+
+  return [createCSVProcessor('message', prefixedColumns), ...dropProcessors];
+}
+
+/**
+ * Processes CSV log data and converts it to JSON for further pipeline execution.
+ *
+ * This function attempts to parse CSV-formatted samples with temporary columns names first.
+ * If that is successful, the final column names are determined by combining the columns suggested by the LLM,
+ * the columns parsed from the header row, and the temporary columns as the last resort.
+ *
+ * We generate necessary processors to handle the CSV format, including a processor to drop the header row if it exists.
+ * The samples are then processed with these processors to convert them to JSON and stored in the state.
+ *
+ * @param param0 - An object containing the state, which holds log samples and format info, and the Elasticsearch client.
+ * @returns A promise resolving to a partial state containing JSON samples, additional processors, and the last executed chain label.
+ * @throws UnparseableCSVFormatError if CSV parsing fails for any log samples.
+ */
 export async function handleCSV({
   state,
   client,
-}: LogDetectionNodeParams): Promise<Partial<LogFormatDetectionState>> {
+}: HandleCSVParams): Promise<Partial<LogFormatDetectionState>> {
+  const jsonKey = 'json';
   const packageName = state.packageName;
   const dataStreamName = state.dataStreamName;
 
@@ -35,10 +95,10 @@ export async function handleCSV({
   const temporaryColumns = generateColumnNames(
     Math.min(upperBoundForColumnCount(samples), MAX_CSV_COLUMNS)
   );
-  const temporaryProcessor = createCSVProcessor('message', temporaryColumns);
+  const temporaryPipeline = createCSVPipeline([jsonKey], temporaryColumns, []);
 
   const { pipelineResults: tempResults, errors: tempErrors } = await createJSONInput(
-    [temporaryProcessor],
+    temporaryPipeline,
     samples,
     client
   );
@@ -55,59 +115,48 @@ export async function handleCSV({
 
   // What columns do we get by parsing the header row, if any exists?
   const headerColumns: Array<string | undefined> = [];
+  const headerValues: Array<string | number | undefined> = [];
+  const csvRows = tempResults.map((result) => result[jsonKey] as { [key: string]: unknown });
+
   if (state.samplesFormat.header) {
-    const headerResults = tempResults[0];
-    headerColumns.push(...columnsFromHeader(temporaryColumns, headerResults));
+    const headerRow = csvRows[0];
+    headerValues.push(...valuesFromHeader(temporaryColumns, headerRow));
+    headerColumns.push(...columnsFromHeader(temporaryColumns, headerRow));
   }
 
   // Combine all that information into a single list of columns
   const columns: string[] = Array.from(
     yieldUniqueColumnNames(
-      totalColumnCount(temporaryColumns, tempResults),
+      totalColumnCount(temporaryColumns, csvRows),
       [llmProvidedColumns, headerColumns],
       temporaryColumns
     )
   );
 
-  // Instantiate the processors to handle the CSV format
-  const dropProcessors: ESProcessorItem[] = [];
-  if (state.samplesFormat.header) {
-    const headerResults = tempResults[0];
-    const dropValues = columns.reduce((acc, column, index) => {
-      const headerValue = headerResults[temporaryColumns[index]];
-      if (typeof headerValue === 'string') {
-        acc[column] = headerValue;
-      }
-      return acc;
-    }, {} as Record<string, string>);
-
-    const dropProcessor = createDropProcessor(
-      dropValues,
-      prefix,
-      'remove_csv_header',
-      'Remove the CSV header line by comparing the values'
-    );
-    dropProcessors.push(dropProcessor);
-  }
-  const prefixedColumns = prefixColumns(columns, prefix);
-  const csvHandlingProcessors = [createCSVProcessor('message', prefixedColumns), ...dropProcessors];
+  // These processors extract CSV fields into a specific key.
+  const csvHandlingProcessors = createCSVPipeline(prefix, columns, headerValues);
 
   // Test the processors on the samples provided
-  const { pipelineResults: finalResults, errors: finalErrors } = await createJSONInput(
-    csvHandlingProcessors,
+  const { errors } = await createJSONInput(csvHandlingProcessors, samples, client);
+
+  if (errors.length > 0) {
+    throw new UnparseableCSVFormatError(errors as CSVParseError[]);
+  }
+
+  // These processors extract CSV fields into a specific key.
+  const csvToJSONProcessors = createCSVPipeline([jsonKey], columns, headerValues);
+
+  const { pipelineResults: jsonResults, errors: jsonErrors } = await createJSONInput(
+    csvToJSONProcessors,
     samples,
     client
   );
 
-  if (finalErrors.length > 0) {
-    throw new UnparseableCSVFormatError(finalErrors as CSVParseError[]);
+  if (jsonErrors.length > 0) {
+    throw new UnparseableCSVFormatError(jsonErrors as CSVParseError[]);
   }
 
-  // Converts JSON Object into a string and parses it as a array of JSON strings
-  const jsonSamples = finalResults
-    .map((log) => log[packageName])
-    .map((log) => (log as Record<string, unknown>)[dataStreamName])
-    .map((log) => JSON.stringify(log));
+  const jsonSamples = jsonResults.map((log) => log[jsonKey]).map((log) => JSON.stringify(log));
 
   return {
     jsonSamples,

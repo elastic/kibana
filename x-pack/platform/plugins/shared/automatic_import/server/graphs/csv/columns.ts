@@ -43,13 +43,33 @@ export function columnsFromHeader(
   tempColumnNames: string[],
   headerObject: { [key: string]: unknown }
 ): Array<string | undefined> {
+  return valuesFromHeader(tempColumnNames, headerObject).map(toSafeColumnName);
+}
+
+/**
+ * Extracts values from a header object based on column names, converting non-string/numeric values to undefined.
+ * The function processes the array up to the last non-undefined value in the header object.
+ *
+ * @param tempColumnNames - Array of column names to look up in the header object
+ * @param headerObject - Object containing header values indexed by column names
+ * @returns Array of string/number values or undefined for non-string/number values, truncated at the last non-undefined entry
+ *
+ * @example
+ * const columns = ['col1', 'col2', 'col3', 'col4'];
+ * const header = { col1: 'value1', col2: 123, col3: 'value3', 'col4': null };
+ * valuesFromHeader(columns, header); // ['value1', 123, 'value3', undefined]
+ */
+export function valuesFromHeader(
+  tempColumnNames: string[],
+  headerObject: { [key: string]: unknown }
+): Array<string | number | undefined> {
   const maxIndex = tempColumnNames.findLastIndex(
     (columnName) => headerObject[columnName] !== undefined
   );
   return tempColumnNames
     .slice(0, maxIndex + 1)
     .map((columnName) => headerObject[columnName])
-    .map(toSafeColumnName);
+    .map((value) => (typeof value === 'string' || typeof value === 'number' ? value : undefined));
 }
 
 /**
