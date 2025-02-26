@@ -270,8 +270,7 @@ export default function ({ getService }: FtrProviderContext) {
     for (const testData of testDataList) {
       describe(`${testData.suiteTitle}`, function () {
         before(async () => {
-          await ml.navigation.navigateToMl();
-          await ml.navigation.navigateToDataFrameAnalytics();
+          await ml.navigation.navigateToStackManagementMlSection('analytics', 'mlAnalyticsJobList');
           await ml.dataFrameAnalyticsTable.waitForAnalyticsToLoad();
           await ml.testResources.createDataViewIfNeeded(testData.job.dest!.index as string);
           await ml.dataFrameAnalyticsTable.openResultsView(testData.job.id as string);

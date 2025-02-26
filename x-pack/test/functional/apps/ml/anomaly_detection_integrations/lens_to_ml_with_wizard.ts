@@ -80,8 +80,7 @@ export default function ({ getService, getPageObject, getPageObjects }: FtrProvi
     await ml.jobWizardCommon.createJobAndWaitForCompletion();
 
     await ml.testExecution.logTestStep('job creation displays the created job in the job list');
-    await ml.navigation.navigateToMl();
-    await ml.navigation.navigateToJobManagement();
+    await ml.navigation.navigateToStackManagementMlSection('anomaly_detection', 'ml-jobs-list');
 
     await ml.jobTable.filterWithSearchString(jobId, 1);
 
