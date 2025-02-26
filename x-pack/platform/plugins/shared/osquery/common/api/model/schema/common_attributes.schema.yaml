@@ -247,12 +247,14 @@ components:
       nullable: true
 
     SortOrderOrUndefined:
-      description: 'Specified the sort order. Options include desc or asc. The default is desc.'
+      description: 'Specifies the sort order.'
       example: 'desc'
-      oneOf:
-        - type: string
-          nullable: true
-        - enum: [ asc, desc ]
+      enum:
+        - asc
+        - desc
+      default: desc
+      type: string
+      nullable: true
 
     Shards:
       description: 'An object with shard configuration for policies included in the pack. For each policy, set the shard configuration to a percentage (1–100) of target hosts.'
