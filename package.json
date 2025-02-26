@@ -1174,7 +1174,7 @@
     "json-stringify-safe": "5.0.1",
     "jsonwebtoken": "^9.0.2",
     "jsts": "^1.6.2",
-    "kea": "^2.6.0",
+    "kea": "^3.1.6",
     "langchain": "^0.3.15",
     "langsmith": "^0.3.7",
     "launchdarkly-js-client-sdk": "^3.5.0",
