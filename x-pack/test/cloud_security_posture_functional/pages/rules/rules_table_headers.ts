@@ -66,19 +66,15 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         'vanilla',
         'kspm'
       );
+      await rule.waitForPluginInitialized();
     });
 
     beforeEach(async () => {
-      await rule.waitForPluginInitialized();
       await findings.index.add(k8sFindingsMock);
       await rule.navigateToRulePage('cis_k8s', '1.0.1');
     });
 
     after(async () => {
-      await esArchiver.unload('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
-    });
-
-    afterEach(async () => {
       await kibanaServer.savedObjects.clean({
         types: [
           'ingest-agent-policies',
@@ -88,6 +84,10 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           'cloud-security-posture-settings',
         ],
       });
+      await esArchiver.unload('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
+    });
+
+    afterEach(async () => {
       await findings.index.remove();
     });
 
@@ -107,6 +107,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
     describe('Rules Page - CIS Section & Rule Number filters', () => {
       it('Table should only show result that has the same section as in the Section filter', async () => {
+        await rule.rulePage.closeToasts();
         await rule.rulePage.clickFilterPopover('section');
         await rule.rulePage.clickFilterPopOverOption('etcd');
         await rule.rulePage.clickFilterPopOverOption('Scheduler');
@@ -114,6 +115,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it('Table should only show result that has the same section as in the Rule number filter', async () => {
+        await rule.rulePage.closeToasts();
         await rule.rulePage.clickFilterPopover('ruleNumber');
         await rule.rulePage.clickFilterPopOverOption('1.1.1');
         await rule.rulePage.clickFilterPopOverOption('1.1.2');
@@ -121,6 +123,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it('Table should only show result that passes both Section and Rule number filter', async () => {
+        await rule.rulePage.closeToasts();
         await rule.rulePage.clickFilterPopover('section');
         await rule.rulePage.clickFilterPopOverOption('Control-Plane-Node-Configuration-Files');
         await rule.rulePage.clickFilterPopover('section');

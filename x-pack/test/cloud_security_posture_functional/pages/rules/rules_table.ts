@@ -40,16 +40,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       findings = pageObjects.findings;
       await findings.index.remove();
 
-      // cleanup agent and package policies
-      await kibanaServer.savedObjects.clean({
-        types: [
-          'ingest-agent-policies',
-          'fleet-agent-policies',
-          'ingest-package-policies',
-          'fleet-package-policies',
-          'cloud-security-posture-settings',
-        ],
-      });
       await esArchiver.load('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
 
       const { body: agentPolicyResponse } = await supertest
@@ -71,10 +61,20 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         'vanilla',
         'kspm'
       );
+      await rule.waitForPluginInitialized();
     });
 
     beforeEach(async () => {
-      await rule.waitForPluginInitialized();
+      // cleanup agent and package policies
+      await kibanaServer.savedObjects.clean({
+        types: [
+          'ingest-agent-policies',
+          'fleet-agent-policies',
+          'ingest-package-policies',
+          'fleet-package-policies',
+          'cloud-security-posture-settings',
+        ],
+      });
       await findings.index.add(k8sFindingsMock);
       await rule.navigateToRulePage('cis_k8s', '1.0.1');
     });

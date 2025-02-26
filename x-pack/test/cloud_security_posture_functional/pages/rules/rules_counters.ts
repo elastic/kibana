@@ -67,19 +67,15 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         'vanilla',
         'kspm'
       );
+      await rule.waitForPluginInitialized();
     });
 
     beforeEach(async () => {
-      await rule.waitForPluginInitialized();
       await findings.index.add(k8sFindingsMock);
       await rule.navigateToRulePage('cis_k8s', '1.0.1');
     });
 
     after(async () => {
-      await esArchiver.unload('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
-    });
-
-    afterEach(async () => {
       await kibanaServer.savedObjects.clean({
         types: [
           'ingest-agent-policies',
@@ -89,6 +85,10 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           'cloud-security-posture-settings',
         ],
       });
+      await esArchiver.unload('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
+    });
+
+    afterEach(async () => {
       await findings.index.remove();
     });
 
