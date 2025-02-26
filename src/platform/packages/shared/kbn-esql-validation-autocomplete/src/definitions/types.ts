@@ -22,6 +22,7 @@ import type {
   ESQLVariableType,
   ESQLSourceResult,
 } from '../shared/types';
+import type { ESQLPolicy } from '../validation/types';
 
 /**
  * All supported field types in ES|QL. This is all the types
@@ -197,6 +198,8 @@ export interface FunctionDefinition {
   customParametersSnippet?: string;
 }
 
+export type GetPolicyMetadataFn = (name: string) => Promise<ESQLPolicy | undefined>;
+
 export interface CommandSuggestParams<CommandName extends string> {
   /**
    * The text of the query to the left of the cursor.
@@ -207,10 +210,14 @@ export interface CommandSuggestParams<CommandName extends string> {
    */
   command: ESQLCommand<CommandName>;
   /**
-   * Get a list of columns by type. This includes fields from any sources as well as
-   * variables defined in the query.
+   * Get suggestions for columns by type. This includes fields from any sources as well as
+   * user-defined columns in the query.
    */
   getColumnsByType: GetColumnsByTypeFn;
+  /**
+   * Gets the names of all columns
+   */
+  getAllColumnNames: () => string[];
   /**
    * Check for the existence of a column by name.
    * @param column
@@ -219,9 +226,13 @@ export interface CommandSuggestParams<CommandName extends string> {
   columnExists: (column: string) => boolean;
   /**
    * Gets the name that should be used for the next variable.
+   *
+   * @param extraFieldNames — names that should be recognized as columns
+   * but that won't be found in the current table from Elasticsearch. This is currently only
+   * used to recognize enrichment fields from a policy in the ENRICH command.
    * @returns
    */
-  getSuggestedVariableName: () => string;
+  getSuggestedVariableName: (extraFieldNames?: string[]) => string;
   /**
    * Examine the AST to determine the type of an expression.
    * @param expression
@@ -242,6 +253,14 @@ export interface CommandSuggestParams<CommandName extends string> {
    * @returns
    */
   getSources: () => Promise<ESQLSourceResult[]>;
+  /**
+   * Fetch suggestions for all available policies
+   */
+  getPolicies: () => Promise<SuggestionRawDefinition[]>;
+  /**
+   * Get metadata for a policy by name
+   */
+  getPolicyMetadata: GetPolicyMetadataFn;
   /**
    * Inspect the AST and returns the sources that are used in the query.
    * @param type
