@@ -15,7 +15,7 @@ components:
           - "my_policy_id"
           - "fleet-server-policy"
         shards:
-          my_policy_id: 35,
+          my_policy_id: 35
           fleet-server-policy: 58
         queries:
           my_query:

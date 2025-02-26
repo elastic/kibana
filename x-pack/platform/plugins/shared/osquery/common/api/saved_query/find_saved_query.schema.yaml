@@ -38,7 +38,7 @@ components:
       properties: { }
       example:
         data:
-          id: "42ba9c50-0cc5-11ed-aa1d-2b27890bc90d"
+          id: "3c42c847-eb30-4452-80e0-728584042334"
           type: "osquery-saved-query"
           namespaces:
             - "default"

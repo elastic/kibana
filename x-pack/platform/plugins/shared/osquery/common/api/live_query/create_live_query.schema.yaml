@@ -43,22 +43,22 @@ components:
         pack_id:
           $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/PackIdOrUndefined'
         alert_ids:
-          description: 'A list of alert IDs associated to the live query.'
+          description: 'A list of alert IDs associated with the live query.'
           type: array
           items:
             type: string
         case_ids:
-          description: 'A list of case IDs associated to the live query.'
+          description: 'A list of case IDs associated with the live query.'
           type: array
           items:
             type: string
         event_ids:
-          description: 'A list of event IDs associated to the live query.'
+          description: 'A list of event IDs associated with the live query.'
           type: array
           items:
             type: string
         metadata:
-          description: 'Custom metadata object associated to the live query.'
+          description: 'Custom metadata object associated with the live query.'
           type: object
           nullable: true
 

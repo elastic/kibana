@@ -21,7 +21,7 @@ components:
 
 
     Platform:
-      description: 'Restricts the query to a specified platform. The default is all platforms. To specify multiple platforms, use commas. For example, linux,darwin.'
+      description: 'Restricts the query to a specified platform. The default is all platforms. To specify multiple platforms, use commas. For example, `linux,darwin`.'
       example: 'linux,darwin'
       type: string
 
@@ -99,7 +99,7 @@ components:
 
 
     PackId:
-      description: 'The ID of the pack you want to run.'
+      description: 'The ID of the pack you want to run, retrieve, update, or delete.'
       example: '3c42c847-eb30-4452-80e0-728584042334'
       type: string
 
