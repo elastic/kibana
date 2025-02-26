@@ -16,6 +16,7 @@ import {
   EuiSwitch,
   EuiText,
   EuiToolTip,
+  useEuiTheme,
 } from '@elastic/eui';
 import {
   AndCondition,
@@ -47,7 +48,7 @@ export function ConditionEditor(props: {
 
   if (props.readonly) {
     return (
-      <EuiPanel color="subdued" borderRadius="none" hasShadow={false} paddingSize="xs">
+      <EuiPanel color="subdued" hasBorder={true} hasShadow={false} paddingSize="s">
         <ConditionDisplay condition={normalizedCondition} />
       </EuiPanel>
     );
@@ -290,6 +291,7 @@ function AndDisplay(props: { condition: AndCondition }) {
 }
 
 function FilterDisplay(props: { condition: FilterCondition }) {
+  const { euiTheme } = useEuiTheme();
   return (
     <EuiFlexGroup
       gutterSize="xs"
@@ -298,19 +300,32 @@ function FilterDisplay(props: { condition: FilterCondition }) {
         // don't try to wrap the condition, render it as one line
         overflow-x: scroll;
         white-space: nowrap;
+        font-family: ${euiTheme.font.familyCode};
       `}
     >
-      <EuiBadge>
+      <EuiBadge
+        className={css`
+          font-family: ${euiTheme.font.family};
+        `}
+      >
         {i18n.translate('xpack.streams.filter.field', { defaultMessage: 'Field' })}
       </EuiBadge>
       {props.condition.field}
-      <EuiBadge>
+      <EuiBadge
+        className={css`
+          font-family: ${euiTheme.font.family};
+        `}
+      >
         {i18n.translate('xpack.streams.filter.operator', { defaultMessage: 'Operator' })}
       </EuiBadge>
       {props.condition.operator}
       {'value' in props.condition && (
         <>
-          <EuiBadge>
+          <EuiBadge
+            className={css`
+              font-family: ${euiTheme.font.family};
+            `}
+          >
             {i18n.translate('xpack.streams.filter.value', { defaultMessage: 'Value' })}
           </EuiBadge>
           {props.condition.value}

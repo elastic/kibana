@@ -176,7 +176,7 @@ export function PreviewPanel({
   return (
     <>
       <EuiFlexItem grow={false}>
-        <EuiFlexGroup alignItems="center">
+        <EuiFlexGroup alignItems="flexStart">
           <EuiFlexItem grow>
             <EuiText
               size="s"

@@ -99,18 +99,17 @@ export function StreamDetailRouting({
             overflow: auto;
             flex-grow: 1;
           `}
-          paddingSize="xs"
+          paddingSize="none"
         >
           <EuiResizableContainer>
             {(EuiResizablePanel, EuiResizableButton) => (
               <>
                 <EuiResizablePanel
                   initialSize={30}
-                  minSize="300px"
+                  minSize="400px"
                   tabIndex={0}
-                  paddingSize="s"
+                  color="subdued"
                   className={css`
-                    background-color: ${theme.colors.backgroundBaseSubdued};
                     overflow: auto;
                     display: flex;
                   `}
@@ -122,13 +121,12 @@ export function StreamDetailRouting({
                   />
                 </EuiResizablePanel>
 
-                <EuiResizableButton accountForScrollbars="both" />
+                <EuiResizableButton />
 
                 <EuiResizablePanel
                   initialSize={70}
                   tabIndex={0}
                   minSize="300px"
-                  paddingSize="s"
                   className={css`
                     display: flex;
                     flex-direction: column;

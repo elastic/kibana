@@ -37,6 +37,7 @@ export const ToggleField = ({
   return (
     <EuiFormRow helpText={helpText} fullWidth describedByIds={id ? [id] : undefined} {...rest}>
       <EuiSwitch
+        compressed
         id={id}
         label={label}
         checked={field.value ?? false}

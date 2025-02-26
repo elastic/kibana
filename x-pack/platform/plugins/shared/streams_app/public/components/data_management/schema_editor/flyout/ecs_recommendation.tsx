@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiText } from '@elastic/eui';
+import { EuiBadge, EuiText } from '@elastic/eui';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 
@@ -34,7 +34,13 @@ export const EcsRecommendation = ({
   return (
     <EuiText size="xs">
       {`${EcsRecommendationText}: `}
-      {isLoading ? LoadingText : recommendation !== undefined ? recommendation : UknownEcsFieldText}
+      <EuiBadge color="success">
+        {isLoading
+          ? LoadingText
+          : recommendation !== undefined
+          ? recommendation
+          : UknownEcsFieldText}
+      </EuiBadge>
     </EuiText>
   );
 };
