@@ -54,6 +54,7 @@ export type ActionParamsType = TypeOf<typeof ParamsSchema>;
 const ParamsSchema = schema.object({
   body: schema.string(),
 });
+const hostNameRegExp = /^hooks\.(eu\.)?torq\.io$/;
 
 export const ActionTypeId = '.torq';
 // action type definition
@@ -127,11 +128,11 @@ function validateActionTypeConfig(
     );
   }
 
-  if (configureUrlObj.hostname !== 'hooks.torq.io' && configureUrlObj.hostname !== 'localhost') {
+  if (!configureUrlObj.hostname.match(hostNameRegExp) && configureUrlObj.hostname !== 'localhost') {
     throw new Error(
       i18n.translate('xpack.stackConnectors.torq.torqConfigurationErrorInvalidHostname', {
         defaultMessage:
-          'error configuring send to Torq action: url must begin with https://hooks.torq.io',
+          'error configuring send to Torq action: url must begin with https://hooks.torq.io or https://hooks.eu.torq.io',
       })
     );
   }
