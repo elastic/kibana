@@ -16,11 +16,9 @@ export interface UseGetScopedSourcererDataViewArgs {
 }
 
 /*
- *
- * returns the created dataView based on dataView spec
- * returned from useDataView
- *
- * */
+ * This hook should be used whenever we need the actual DataView and not just the spec for the
+ * selected data view.
+ */
 export const useFullDataView = ({
   dataViewPickerScope,
 }: UseGetScopedSourcererDataViewArgs): DataView | undefined => {
