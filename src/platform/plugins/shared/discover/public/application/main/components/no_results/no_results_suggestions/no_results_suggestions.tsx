@@ -122,9 +122,11 @@ export const NoResultsSuggestions: React.FC<NoResultsSuggestionProps> = ({
             <NoResultsSuggestionWhenFilters onDisableFilters={onDisableFilters} />
           </li>
         )}
-        <li>
-          <NoResultsSuggestionWhenUnmapped />
-        </li>
+        {(hasQuery || hasFilters) && (
+          <li>
+            <NoResultsSuggestionWhenUnmapped />
+          </li>
+        )}
       </ul>
     </>
   ) : (
