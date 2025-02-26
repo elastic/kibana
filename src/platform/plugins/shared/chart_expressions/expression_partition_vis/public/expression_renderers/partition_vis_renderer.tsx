@@ -8,7 +8,7 @@
  */
 
 import React, { lazy } from 'react';
-import { render, unmountComponentAtNode } from 'react-dom';
+import { render, unmountComponentAtNode } from '@kbn/react-dom';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import type {
@@ -152,5 +152,86 @@ export const getPartitionVisRenderer: (
       </KibanaRenderContextProvider>,
       domNode
     );
+  },
+  loadComponent: async () => {
+    const { plugins } = getStartDeps();
+
+    return ({
+      config: { visConfig, visData, visType, syncColors, canNavigateToLens, overrides },
+      handlers,
+    }) => {
+      const renderComplete = () => {
+        const executionContext = handlers.getExecutionContext();
+        const containerType = extractContainerType(executionContext);
+        const visualizationType = extractVisualizationType(executionContext);
+
+        if (containerType && visualizationType) {
+          const events = [
+            `render_${visualizationType}_${visType}`,
+            canNavigateToLens ? `render_${visualizationType}_${visType}_convertable` : undefined,
+          ].filter<string>((event): event is string => Boolean(event));
+
+          plugins.usageCollection?.reportUiCounter(containerType, METRIC_TYPE.COUNT, events);
+        }
+        handlers.done();
+      };
+
+      // [columnCellValueActions, palettesRegistry]
+      const [lazyDeps, setDeps] = React.useState<
+        | null
+        | [
+            Awaited<ReturnType<typeof getColumnCellValueActions>>,
+            Awaited<ReturnType<typeof plugins.charts.palettes.getPalettes>>
+          ]
+      >(null);
+
+      React.useEffect(() => {
+        Promise.all([
+          getColumnCellValueActions(visConfig, visData, handlers.getCompatibleCellValueActions),
+          plugins.charts.palettes.getPalettes(),
+        ]).then((deps) => setDeps(deps));
+      }, [handlers.getCompatibleCellValueActions, visConfig, visData]);
+
+      const hasOpenedOnAggBasedEditor = isOnAggBasedEditor(handlers.getExecutionContext());
+
+      React.useLayoutEffect(() => {
+        if (!lazyDeps) return;
+        const chartSizeEvent: ChartSizeEvent = {
+          name: 'chartSize',
+          data: {
+            maxDimensions: {
+              x: { value: 100, unit: 'percentage' },
+              y: { value: 100, unit: 'percentage' },
+            },
+          },
+        };
+
+        handlers.event(chartSizeEvent);
+      }, [handlers, lazyDeps]);
+
+      if (!lazyDeps) return null;
+      const [columnCellValueActions, palettesRegistry] = lazyDeps;
+
+      return (
+        <div css={partitionVisRenderer}>
+          <PartitionVisComponent
+            chartsThemeService={plugins.charts.theme}
+            palettesRegistry={palettesRegistry}
+            visParams={visConfig}
+            visData={visData}
+            visType={visConfig.isDonut ? ChartTypes.DONUT : visType}
+            renderComplete={renderComplete}
+            fireEvent={handlers.event}
+            interactive={handlers.isInteractive()}
+            uiState={handlers.uiState as PersistedState}
+            services={{ data: plugins.data, fieldFormats: plugins.fieldFormats }}
+            syncColors={syncColors}
+            columnCellValueActions={columnCellValueActions}
+            overrides={overrides}
+            hasOpenedOnAggBasedEditor={hasOpenedOnAggBasedEditor}
+          />
+        </div>
+      );
+    };
   },
 });

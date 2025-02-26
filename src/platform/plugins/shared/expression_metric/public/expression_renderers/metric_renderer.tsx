@@ -8,7 +8,7 @@
  */
 
 import React, { CSSProperties } from 'react';
-import { render, unmountComponentAtNode } from 'react-dom';
+import { render, unmountComponentAtNode } from '@kbn/react-dom';
 
 import { CoreStart } from '@kbn/core/public';
 import {
@@ -43,10 +43,6 @@ export const getMetricRenderer =
       handlers: IInterpreterRenderHandlers
     ) => {
       const { MetricComponent } = await import('../components/metric_component');
-      handlers.onDestroy(() => {
-        unmountComponentAtNode(domNode);
-      });
-
       render(
         <KibanaErrorBoundaryProvider analytics={undefined}>
           <KibanaErrorBoundary>
@@ -62,8 +58,13 @@ export const getMetricRenderer =
           </KibanaErrorBoundary>
         </KibanaErrorBoundaryProvider>,
         domNode,
-        () => handlers.done()
+        () => {
+          handlers.done();
+        }
       );
+      handlers.onDestroy(() => {
+        unmountComponentAtNode(domNode);
+      });
     },
   });
 

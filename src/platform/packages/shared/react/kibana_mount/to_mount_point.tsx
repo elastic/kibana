@@ -18,7 +18,9 @@ import {
 export type ToMountPointParams = Pick<
   KibanaRenderContextProviderProps,
   'analytics' | 'i18n' | 'theme' | 'userProfile'
->;
+> & {
+  legacyRoot?: boolean;
+};
 
 /**
  * MountPoint converter for react nodes.

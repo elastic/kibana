@@ -8,6 +8,7 @@
  */
 
 import React from 'react';
+import { flushSync } from 'react-dom';
 import { BehaviorSubject, firstValueFrom, type Observable, Subject, type Subscription } from 'rxjs';
 import { map, shareReplay, takeUntil, distinctUntilChanged, filter, take } from 'rxjs';
 import { createBrowserHistory, History } from 'history';
