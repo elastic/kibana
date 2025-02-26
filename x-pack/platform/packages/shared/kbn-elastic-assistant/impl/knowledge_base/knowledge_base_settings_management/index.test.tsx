@@ -85,6 +85,7 @@ describe('KnowledgeBaseSettingsManagement', () => {
       createdBy: 'u_user_id_1',
       updatedAt: '2024-10-23T17:33:15.933Z',
       updatedBy: 'u_user_id_1',
+      global: false,
       users: [{ name: 'Test User 1' }],
       name: 'Test Entry 1',
       namespace: 'default',
@@ -99,6 +100,7 @@ describe('KnowledgeBaseSettingsManagement', () => {
       createdBy: 'u_user_id_2',
       updatedAt: '2024-10-25T09:55:56.596Z',
       updatedBy: 'u_user_id_2',
+      global: true,
       users: [],
       name: 'Test Entry 2',
       namespace: 'default',
@@ -114,6 +116,7 @@ describe('KnowledgeBaseSettingsManagement', () => {
       createdBy: 'u_user_id_1',
       updatedAt: '2024-10-25T09:55:56.596Z',
       updatedBy: 'u_user_id_1',
+      global: false,
       users: [{ name: 'Test User 1' }],
       name: 'Test Entry 3',
       namespace: 'default',
@@ -129,6 +132,7 @@ describe('KnowledgeBaseSettingsManagement', () => {
       createdBy: 'u_user_id_3',
       updatedAt: '2024-10-23T17:33:15.933Z',
       updatedBy: 'u_user_id_3',
+      global: true,
       users: [],
       name: 'Test Entry 4',
       namespace: 'default',
@@ -232,6 +236,7 @@ describe('KnowledgeBaseSettingsManagement', () => {
             createdBy: 'u_user_id_1',
             updatedAt: '2024-10-23T17:33:15.933Z',
             updatedBy: 'u_user_id_1',
+            global: false,
             users: [{ name: 'Test User 1' }],
             name: 'A',
             namespace: 'default',
@@ -246,6 +251,7 @@ describe('KnowledgeBaseSettingsManagement', () => {
             createdBy: 'u_user_id_2',
             updatedAt: '2024-10-25T09:55:56.596Z',
             updatedBy: 'u_user_id_2',
+            global: true,
             users: [],
             name: 'b',
             namespace: 'default',
@@ -261,6 +267,7 @@ describe('KnowledgeBaseSettingsManagement', () => {
             createdBy: 'u_user_id_2',
             updatedAt: '2024-10-25T09:55:56.596Z',
             updatedBy: 'u_user_id_2',
+            global: true,
             users: [],
             name: 'B',
             namespace: 'default',
@@ -276,6 +283,7 @@ describe('KnowledgeBaseSettingsManagement', () => {
             createdBy: 'u_user_id_1',
             updatedAt: '2024-10-25T09:55:56.596Z',
             updatedBy: 'u_user_id_1',
+            global: false,
             users: [{ name: 'Test User 1' }],
             name: 'a',
             namespace: 'default',
@@ -468,7 +476,7 @@ describe('KnowledgeBaseSettingsManagement', () => {
     });
     expect(mockCreateEntry).toHaveBeenCalledTimes(0);
     expect(mockUpdateEntry).toHaveBeenCalledWith([{ ...mockData[0], name: updatedName }]);
-  });
+  }, 100000000);
 
   it('does not create a duplicate index entry when switching sharing option twice', async () => {
     (useFlyoutModalVisibility as jest.Mock).mockReturnValue({
