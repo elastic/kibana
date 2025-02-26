@@ -16,21 +16,30 @@
 
 import { z } from '@kbn/zod';
 
-import { SuccessResponse, BaseActionSchema } from '../../../model/schema/common.gen';
+import { BaseActionSchema } from '../../../model/schema/common.gen';
 
 export type UploadRouteRequestBody = z.infer<typeof UploadRouteRequestBody>;
 export const UploadRouteRequestBody = BaseActionSchema.merge(
   z.object({
     parameters: z.object({
+      /**
+       * Overwrite the file on the host if it already exists.
+       */
       overwrite: z.boolean().optional().default(false),
     }),
+    /**
+     * The file content to be uploaded or a relative path to the file. Note the path must be preceded with @.
+     */
     file: z.string(),
   })
 );
+
+export type UploadRouteResponse = z.infer<typeof UploadRouteResponse>;
+export const UploadRouteResponse = z.object({});
 
 export type EndpointUploadActionRequestBody = z.infer<typeof EndpointUploadActionRequestBody>;
 export const EndpointUploadActionRequestBody = UploadRouteRequestBody;
 export type EndpointUploadActionRequestBodyInput = z.input<typeof EndpointUploadActionRequestBody>;
 
 export type EndpointUploadActionResponse = z.infer<typeof EndpointUploadActionResponse>;
-export const EndpointUploadActionResponse = SuccessResponse;
+export const EndpointUploadActionResponse = UploadRouteResponse;
