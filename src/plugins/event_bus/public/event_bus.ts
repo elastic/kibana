@@ -19,7 +19,7 @@ import {
   type Subscription,
 } from 'rxjs';
 import { isEqual } from 'lodash';
-import { Slice } from '@reduxjs/toolkit';
+import type { Slice, AnyAction, AsyncThunkAction } from '@reduxjs/toolkit';
 
 /**
  * Check if a value is a JS primitive.
@@ -48,13 +48,8 @@ export function customIsEqual(prev: any, curr: any): boolean {
   }
 }
 
-export interface Action<T = any> {
-  type: string;
-  payload: T;
-}
-
 export class EventBus<S extends Slice> {
-  public subject: BehaviorSubject<Action>;
+  public subject: BehaviorSubject<AnyAction>;
   public state: Observable<ReturnType<S['reducer']>>;
   public slice: S;
   public actions: S['actions'];
@@ -64,7 +59,7 @@ export class EventBus<S extends Slice> {
   private disposed = false;
 
   constructor(slice: S) {
-    this.subject = new BehaviorSubject<Action>({ type: '', payload: null });
+    this.subject = new BehaviorSubject<AnyAction>({ type: '', payload: null });
     this.state = this.subject.pipe(
       scan(slice.reducer, slice.getInitialState()),
       // make sure new subscribers get the latest state
@@ -72,7 +67,6 @@ export class EventBus<S extends Slice> {
     );
     this.slice = slice;
     this.actions = this.wrapActions(slice.actions);
-
     this.currentState = slice.getInitialState();
     this.currentStateSubscription = this.subscribe((state) => {
       this.currentState = state;
@@ -134,6 +128,30 @@ export class EventBus<S extends Slice> {
       }) as A[keyof A];
       return p;
     }, {} as A);
+  }
+
+  dispatchOld<A extends AnyAction>(action: A) {
+    this.subject.next(action);
+  }
+
+  // Dispatch method that can handle both regular actions and thunks.
+  dispatch<ReturnType = any>(
+    action: AnyAction | AsyncThunkAction<ReturnType, any, any>
+  ): ReturnType extends void ? void : Promise<ReturnType> {
+    // If it's a function (thunk), it needs the dispatch itself and getState
+    if (typeof action === 'function') {
+      // For thunks, we need to pass a properly typed dispatch function
+      // along with getState and extra argument (if any)
+      return action(this.dispatch.bind(this), this.getState.bind(this), undefined) as any;
+    }
+
+    // For regular actions, continue with your existing logic
+    this.subject.next(action);
+    return undefined as any;
+  }
+
+  getState() {
+    return this.currentState;
   }
 
   // Call this method when unregistering the event bus to make sure
