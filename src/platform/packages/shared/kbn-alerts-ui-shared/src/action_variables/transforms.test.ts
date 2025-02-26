@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ActionVariables, RuleType } from '@kbn/triggers-actions-ui-types';
+import type { ActionVariables, RuleType } from '@kbn/triggers-actions-ui-types';
 import { transformActionVariables } from './transforms';
 import { ALERTING_FEATURE_ID } from '../common/constants';
 

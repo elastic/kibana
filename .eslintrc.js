@@ -1634,6 +1634,8 @@ module.exports = {
         'x-pack/platform/plugins/shared/event_log/**/*.{ts, tsx}',
         'x-pack/platform/plugins/shared/rule_registry/**/*.{ts, tsx}',
         'x-pack/platform/plugins/shared/task_manager/**/*.{ts, tsx}',
+        'x-pack/solutions/observability/packages/kbn-alerts-grouping/**/*.{ts, tsx}',
+        'src/platform/packages/shared/kbn-alerts-ui-shared/**/*.{ts, tsx}',
       ],
       rules: {
         '@typescript-eslint/consistent-type-imports': 'error',
