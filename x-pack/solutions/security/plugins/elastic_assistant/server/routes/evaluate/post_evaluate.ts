@@ -35,7 +35,7 @@ import {
 import { omit } from 'lodash/fp';
 import { localToolPrompts, promptGroupId as toolsGroupId } from '../../lib/prompt/tool_prompts';
 import { promptGroupId } from '../../lib/prompt/local_prompt_object';
-import { getModelOrOss } from '../../lib/prompt/helpers';
+import { getFormattedTime, getModelOrOss } from '../../lib/prompt/helpers';
 import { getAttackDiscoveryPrompts } from '../../lib/attack_discovery/graphs/default_attack_discovery_graph/nodes/helpers/prompts';
 import {
   formatPrompt,
@@ -377,6 +377,10 @@ export const postEvaluateRoute = (
                       streamRunnable: false,
                     });
 
+              const uiSettingsDateFormatTimezone = await ctx.core.uiSettings.client.get<string>(
+                'dateFormat:tz'
+              );
+
               return {
                 connectorId: connector.id,
                 name: `${runName} - ${connector.name}`,
@@ -391,6 +395,11 @@ export const postEvaluateRoute = (
                   savedObjectsClient,
                   tools,
                   replacements: {},
+                  getFormattedTime: () =>
+                    getFormattedTime({
+                      screenContextTimezone: request.body.screenContext?.timeZone,
+                      uiSettingsDateFormatTimezone,
+                    }),
                 }),
               };
             })
