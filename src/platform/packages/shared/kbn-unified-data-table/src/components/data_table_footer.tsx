@@ -58,6 +58,13 @@ export const UnifiedDataTableFooter: FC<PropsWithChildren<UnifiedDataTableFooter
   );
 
   const { euiTheme } = useEuiTheme();
+
+  if (rowCount < sampleSize) {
+    // Either just few results available or results are incomplete due to errors on some clusters
+    // Skipping the footer
+    return null;
+  }
+
   const isOnLastPage = pageIndex === pageCount - 1 && rowCount < totalHits;
 
   if (!isOnLastPage) {

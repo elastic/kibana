@@ -15,6 +15,7 @@ export interface NoResultsSuggestionWhenSortedProps {
   onAddExistFiltersForSortedFields: () => void;
 }
 
+// TODO: integrate
 export function NoResultsSuggestionWhenSorted({
   onAddExistFiltersForSortedFields,
 }: NoResultsSuggestionWhenSortedProps) {
