@@ -55,7 +55,7 @@ export function defineInvalidateSessionsRoutes({
         description: `Invalidate user sessions that match a query.`,
         tags: ['oas-tag:user session'],
         availability: {
-          stability: 'experimental'
+          stability: 'experimental',
         },
       },
     },
