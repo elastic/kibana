@@ -26,11 +26,7 @@ import {
 import { buildRouteValidationWithZod } from '@kbn/elastic-assistant-common/impl/schemas/common';
 import { getDefaultArguments } from '@kbn/langchain/server';
 import { StructuredTool } from '@langchain/core/tools';
-import {
-  createOpenAIToolsAgent,
-  createStructuredChatAgent,
-  createToolCallingAgent,
-} from 'langchain/agents';
+import { createStructuredChatAgent, createToolCallingAgent } from 'langchain/agents';
 import { omit } from 'lodash/fp';
 import { localToolPrompts, promptGroupId as toolsGroupId } from '../../lib/prompt/tool_prompts';
 import { promptGroupId } from '../../lib/prompt/local_prompt_object';
@@ -53,7 +49,7 @@ import {
   DefaultAssistantGraph,
   getDefaultAssistantGraph,
 } from '../../lib/langchain/graphs/default_assistant_graph/graph';
-import { getLlmClass, getLlmType, isOpenSourceModel } from '../utils';
+import { getLlmType, isOpenSourceModel } from '../utils';
 import { getGraphsFromNames } from './get_graphs_from_names';
 
 const DEFAULT_SIZE = 20;
@@ -98,6 +94,7 @@ export const postEvaluateRoute = (
         const ctx = await context.resolve(['core', 'elasticAssistant', 'licensing']);
         const assistantContext = ctx.elasticAssistant;
         const actions = ctx.elasticAssistant.actions;
+        const inference = ctx.elasticAssistant.inference;
         const logger = assistantContext.logger.get('evaluate');
         const abortSignal = getRequestAbortedSignal(request.events.aborted$);
         const savedObjectsClient = ctx.elasticAssistant.savedObjectsClient;
@@ -159,7 +156,6 @@ export const postEvaluateRoute = (
           // Get a scoped esClient for esStore + writing results to the output index
           const esClient = ctx.core.elasticsearch.client.asCurrentUser;
 
-          const inference = ctx.elasticAssistant.inference;
           const productDocsAvailable =
             (await ctx.elasticAssistant.llmTasks.retrieveDocumentationAvailable()) ?? false;
 
@@ -240,22 +236,24 @@ export const postEvaluateRoute = (
             connectorId: string;
           }> = await Promise.all(
             connectors.map(async (connector) => {
+              // TODO: adapt there too
               const llmType = getLlmType(connector.actionTypeId);
               const isOssModel = isOpenSourceModel(connector);
               const isOpenAI = llmType === 'openai' && !isOssModel;
-              const llmClass = getLlmClass(llmType);
-              const createLlmInstance = () =>
-                new llmClass({
-                  actionsClient,
+              const createLlmInstance = async () => {
+                return inference.getChatModel({
                   connectorId: connector.id,
-                  llmType,
-                  logger,
-                  temperature: getDefaultArguments(llmType).temperature,
-                  signal: abortSignal,
-                  streaming: false,
-                  maxRetries: 0,
+                  request,
+                  chatModelOptions: {
+                    signal: abortSignal,
+                    temperature: getDefaultArguments(llmType).temperature,
+                    // failure could be due to bad connector, we should deliver that result to the client asap
+                    maxRetries: 0,
+                  },
                 });
-              const llm = createLlmInstance();
+              };
+
+              const llm = await createLlmInstance();
               const anonymizationFieldsRes =
                 await dataClients?.anonymizationFieldsDataClient?.findDocuments<EsAnonymizationFieldsSchema>(
                   {
@@ -334,7 +332,7 @@ export const postEvaluateRoute = (
                     }
                     return tool.getTool({
                       ...assistantToolParams,
-                      llm: createLlmInstance(),
+                      llm: await createLlmInstance(),
                       isOssModel,
                       description,
                     });
@@ -353,27 +351,22 @@ export const postEvaluateRoute = (
                 savedObjectsClient,
               });
 
-              const agentRunnable =
-                isOpenAI || llmType === 'inference'
-                  ? await createOpenAIToolsAgent({
-                      llm,
-                      tools,
-                      prompt: formatPrompt(defaultSystemPrompt),
-                      streamRunnable: false,
-                    })
-                  : llmType && ['bedrock', 'gemini'].includes(llmType)
-                  ? createToolCallingAgent({
-                      llm,
-                      tools,
-                      prompt: formatPrompt(defaultSystemPrompt),
-                      streamRunnable: false,
-                    })
-                  : await createStructuredChatAgent({
-                      llm,
-                      tools,
-                      prompt: formatPromptStructured(defaultSystemPrompt),
-                      streamRunnable: false,
-                    });
+              const canUseTools =
+                isOpenAI || (llmType && ['bedrock', 'gemini', 'inference'].includes(llmType));
+
+              const agentRunnable = canUseTools
+                ? createToolCallingAgent({
+                    llm,
+                    tools,
+                    prompt: formatPrompt(defaultSystemPrompt),
+                    streamRunnable: false,
+                  })
+                : await createStructuredChatAgent({
+                    llm,
+                    tools,
+                    prompt: formatPromptStructured(defaultSystemPrompt),
+                    streamRunnable: false,
+                  });
 
               return {
                 connectorId: connector.id,

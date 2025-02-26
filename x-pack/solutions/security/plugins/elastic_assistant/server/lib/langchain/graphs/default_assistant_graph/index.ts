@@ -7,11 +7,7 @@
 
 import { StructuredTool } from '@langchain/core/tools';
 import { getDefaultArguments } from '@kbn/langchain/server';
-import {
-  createOpenAIToolsAgent,
-  createStructuredChatAgent,
-  createToolCallingAgent,
-} from 'langchain/agents';
+import { createStructuredChatAgent, createToolCallingAgent } from 'langchain/agents';
 import { APMTracer } from '@kbn/langchain/server/tracers/apm';
 import { TelemetryTracer } from '@kbn/langchain/server/tracers/telemetry';
 import { pruneContentReferences, MessageMetadata } from '@kbn/elastic-assistant-common';
@@ -21,7 +17,6 @@ import { localToolPrompts, promptGroupId as toolsGroupId } from '../../../prompt
 import { promptGroupId } from '../../../prompt/local_prompt_object';
 import { getModelOrOss } from '../../../prompt/helpers';
 import { getPrompt as localGetPrompt, promptDictionary } from '../../../prompt';
-import { getLlmClass } from '../../../../routes/utils';
 import { EsAnonymizationFieldsSchema } from '../../../../ai_assistant_data_clients/anonymization_fields/types';
 import { AssistantToolParams } from '../../../../types';
 import { AgentExecutor } from '../../executors/types';
@@ -62,7 +57,6 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
 }) => {
   const logger = parentLogger.get('defaultAssistantGraph');
   const isOpenAI = llmType === 'openai' && !isOssModel;
-  const llmClass = getLlmClass(llmType);
 
   /**
    * Creates a new instance of llmClass.
@@ -72,24 +66,19 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
    * creating a new instance, we prevent other uses of llm from binding and changing
    * the state unintentionally. For this reason, never assign this value to a variable (ex const llm = createLlmInstance())
    */
-  const createLlmInstance = () =>
-    new llmClass({
-      actionsClient,
+  const createLlmInstance = async () => {
+    return inference.getChatModel({
       connectorId,
-      llmType,
-      logger,
-      // possible client model override,
-      // let this be undefined otherwise so the connector handles the model
-      model: request.body.model,
-      // ensure this is defined because we default to it in the language_models
-      // This is where the LangSmith logs (Metadata > Invocation Params) are set
-      temperature: getDefaultArguments(llmType).temperature,
-      signal: abortSignal,
-      streaming: isStream,
-      // prevents the agent from retrying on failure
-      // failure could be due to bad connector, we should deliver that result to the client asap
-      maxRetries: 0,
+      request,
+      chatModelOptions: {
+        signal: abortSignal,
+        model: request.body.model,
+        temperature: getDefaultArguments(llmType).temperature,
+        // failure could be due to bad connector, we should deliver that result to the client asap
+        maxRetries: 0,
+      },
     });
+  };
 
   const anonymizationFieldsRes =
     await dataClients?.anonymizationFieldsDataClient?.findDocuments<EsAnonymizationFieldsSchema>({
@@ -146,7 +135,7 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
         }
         return tool.getTool({
           ...assistantToolParams,
-          llm: createLlmInstance(),
+          llm: await createLlmInstance(),
           isOssModel,
           description,
         });
@@ -175,28 +164,21 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
     savedObjectsClient,
   });
 
-  const agentRunnable =
-    isOpenAI || llmType === 'inference'
-      ? await createOpenAIToolsAgent({
-          llm: createLlmInstance(),
-          tools,
-          prompt: formatPrompt(defaultSystemPrompt, systemPrompt),
-          streamRunnable: isStream,
-        })
-      : llmType && ['bedrock', 'gemini'].includes(llmType)
-      ? await createToolCallingAgent({
-          llm: createLlmInstance(),
-          tools,
-          prompt: formatPrompt(defaultSystemPrompt, systemPrompt),
-          streamRunnable: isStream,
-        })
-      : // used with OSS models
-        await createStructuredChatAgent({
-          llm: createLlmInstance(),
-          tools,
-          prompt: formatPromptStructured(defaultSystemPrompt, systemPrompt),
-          streamRunnable: isStream,
-        });
+  const canUseTools = isOpenAI || (llmType && ['bedrock', 'gemini', 'inference'].includes(llmType));
+
+  const agentRunnable = canUseTools
+    ? createToolCallingAgent({
+        llm: await createLlmInstance(),
+        tools,
+        prompt: formatPrompt(defaultSystemPrompt, systemPrompt),
+        streamRunnable: isStream,
+      }) // used with OSS models
+    : await createStructuredChatAgent({
+        llm: await createLlmInstance(),
+        tools,
+        prompt: formatPromptStructured(defaultSystemPrompt, systemPrompt),
+        streamRunnable: isStream,
+      });
 
   const apmTracer = new APMTracer({ projectName: traceOptions?.projectName ?? 'default' }, logger);
   const telemetryTracer = telemetryParams

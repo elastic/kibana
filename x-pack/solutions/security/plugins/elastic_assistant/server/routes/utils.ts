@@ -13,11 +13,6 @@ import type {
   KibanaResponseFactory,
   CustomHttpResponseOptions,
 } from '@kbn/core/server';
-import {
-  ActionsClientChatOpenAI,
-  ActionsClientChatBedrockConverse,
-  ActionsClientChatVertexAI,
-} from '@kbn/langchain/server';
 import { Connector } from '@kbn/actions-plugin/server/application/connector/types';
 import {
   OPENAI_CHAT_URL,
@@ -180,18 +175,6 @@ export const getLlmType = (actionTypeId: string): string | undefined => {
     [`.inference`]: `inference`,
   };
   return llmTypeDictionary[actionTypeId];
-};
-
-export const getLlmClass = (llmType?: string) => {
-  switch (llmType) {
-    case 'bedrock':
-      return ActionsClientChatBedrockConverse;
-    case 'gemini':
-      return ActionsClientChatVertexAI;
-    case 'openai':
-    default:
-      return ActionsClientChatOpenAI;
-  }
 };
 
 export const isOpenSourceModel = (connector?: Connector): boolean => {

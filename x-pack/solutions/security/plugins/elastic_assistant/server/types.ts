@@ -48,6 +48,7 @@ import {
   ActionsClientLlm,
 } from '@kbn/langchain/server';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
+import type { InferenceChatModel } from '@kbn/inference-langchain';
 
 import { ProductDocBaseStartContract } from '@kbn/product-doc-base-plugin/server';
 import type { GetAIAssistantKnowledgeBaseDataClientParams } from './ai_assistant_data_clients/knowledge_base';
@@ -231,7 +232,8 @@ export type AssistantToolLlm =
   | ActionsClientChatBedrockConverse
   | ActionsClientChatOpenAI
   | ActionsClientGeminiChatModel
-  | ActionsClientChatVertexAI;
+  | ActionsClientChatVertexAI
+  | InferenceChatModel;
 
 export interface AssistantToolParams {
   alertsIndexPattern?: string;
