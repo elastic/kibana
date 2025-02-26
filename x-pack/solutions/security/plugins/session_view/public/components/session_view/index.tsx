@@ -40,8 +40,6 @@ import { LOCAL_STORAGE_DISPLAY_OPTIONS_KEY } from '../../../common/constants';
 import {
   AUDITBEAT_DATA_SOURCE,
   AUDITBEAT_INDEX,
-  CLOUD_DEFEND_DATA_SOURCE,
-  CLOUD_DEFEND_INDEX,
   ELASTIC_DEFEND_DATA_SOURCE,
   ENDPOINT_INDEX,
 } from '../../methods';
@@ -76,7 +74,6 @@ export const SessionView = ({
   // track session open telemetry
   useEffect(() => {
     const sourceMap: Record<string, SessionViewIndices> = {
-      [CLOUD_DEFEND_INDEX]: CLOUD_DEFEND_DATA_SOURCE,
       [ENDPOINT_INDEX]: ELASTIC_DEFEND_DATA_SOURCE,
       [AUDITBEAT_INDEX]: AUDITBEAT_DATA_SOURCE,
     };

@@ -496,10 +496,6 @@ It was removed, but the plugin was left behind to register no longer used config
 |Static migration page where self-managed users can see text/copy about migrating to Elastic Cloud
 
 
-|{kib-repo}blob/{branch}/x-pack/solutions/security/plugins/cloud_defend/README.md[cloudDefend]
-|This plugin currently only exists to provide custom fleet policy UX for a set of new BPF LSM features. The first feature being container "drift prevention".
-
-
 |{kib-repo}blob/{branch}/x-pack/platform/plugins/private/cloud_integrations/cloud_experiments/README.mdx[cloudExperiments]
 |[!NOTE]
 This plugin no-longer exposes any evaluation APIs. Refer to <DocLink id="kibFeatureFlagsService" /> for more information about how to interact with feature flags.

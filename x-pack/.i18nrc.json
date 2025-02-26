@@ -20,7 +20,6 @@
     "xpack.canvas": "platform/plugins/private/canvas",
     "xpack.cases": "platform/plugins/shared/cases",
     "xpack.cloud": "platform/plugins/shared/cloud",
-    "xpack.cloudDefend": "solutions/security/plugins/cloud_defend",
     "xpack.cloudLinks": "platform/plugins/private/cloud_integrations/cloud_links",
     "xpack.cloudDataMigration": "platform/plugins/private/cloud_integrations/cloud_data_migration",
     "xpack.csp": [

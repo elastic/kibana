@@ -26,7 +26,7 @@ describe('DetailPanelProcessTab component', () => {
     it('renders DetailPanelProcessTab correctly', async () => {
       renderResult = mockedContext.render(
         <DetailPanelProcessTab
-          index={CLOUD_DEFEND_INDEX}
+          index={CLOUD_DEFEND_INDEX} // ?
           selectedProcess={{
             ...sessionViewBasicProcessMock,
             getEndTime: () => MOCK_PROCESS_END,
