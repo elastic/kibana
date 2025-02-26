@@ -55,12 +55,10 @@ export async function getShapeFilters(
   try {
     boundaryData = await esClient.search<Record<string, BoundaryHit>>({
       index: boundaryIndexTitle,
-      body: {
-        size: MAX_SHAPES_QUERY_SIZE,
-        _source: false,
-        fields: boundaryNameField ? [boundaryNameField] : [],
-        ...(boundaryIndexQuery ? { query: getQueryDsl(boundaryIndexQuery) } : {}),
-      },
+      size: MAX_SHAPES_QUERY_SIZE,
+      _source: false,
+      fields: boundaryNameField ? [boundaryNameField] : [],
+      ...(boundaryIndexQuery ? { query: getQueryDsl(boundaryIndexQuery) } : {}),
     });
   } catch (e) {
     throw new Error(

@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 import type SuperTest from 'supertest';
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { estypes } from '@elastic/elasticsearch';
 import { ToolingLog } from '@kbn/tooling-log';
 import { DETECTION_ENGINE_QUERY_SIGNALS_URL } from '@kbn/security-solution-plugin/common/constants';
 import { DetectionAlert } from '@kbn/security-solution-plugin/common/api/detection_engine';
