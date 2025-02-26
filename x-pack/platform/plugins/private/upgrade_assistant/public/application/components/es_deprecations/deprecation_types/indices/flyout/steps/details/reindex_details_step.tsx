@@ -201,7 +201,7 @@ export const ReindexDetailsFlyoutStep: React.FunctionComponent<{
                 Moving to a time series data stream and using downsampling is recommended. For your
                 existing data you can -{' '}
               </p>
-              <p>Disable rollup job and mark read only</p>
+              <p>Disable the rollup job and mark the indexread only</p>
               <p>
                 Reindex - need to try sending docs while reindexing. Stop job, reindex, create new
                 job
@@ -211,18 +211,65 @@ export const ReindexDetailsFlyoutStep: React.FunctionComponent<{
                 listItems={[
                   {
                     title: i18n.translate(
-                      'xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.detailsStep.reindex.option1.title',
+                      'xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.detailsStep.reindexRollup.option1.title',
                       {
-                        defaultMessage: 'Option 1: Reindex data',
+                        defaultMessage: 'Option 1: Manually mark read only',
                       }
                     ),
                     description: (
-                      <EuiText size="m">
+                      <Fragment>
+                        <EuiText size="m">
+                          <FormattedMessage
+                            id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.detailsStep.reindexRollup.option1.description"
+                            defaultMessage="Old indices can maintain compatibility with the next major version if they are turned into read-only mode. If you no longer need to update documents in this index (or add new ones), you might want to convert it to a read-only index. {docsLink}"
+                            values={{
+                              docsLink: (
+                                <EuiLink
+                                  target="_blank"
+                                  href={docLinks.links.upgradeAssistant.indexBlocks}
+                                >
+                                  {i18n.translate(
+                                    'xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.learnMoreLinkLabel',
+                                    {
+                                      defaultMessage: 'Learn more',
+                                    }
+                                  )}
+                                </EuiLink>
+                              ),
+                            }}
+                          />
+                        </EuiText>
+                        <br />
+                        <EuiText size="m">
+                          <FormattedMessage
+                            id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.detailsStep.reindexRollup.option1.howTo"
+                            defaultMessage="Use the Rollup Jobs management page to stop the job, then use Index Management mark the index as read-only."
+                          />
+                        </EuiText>
+                      </Fragment>
+                    ),
+                  },
+                  {
+                    title: i18n.translate(
+                      'xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.detailsStep.reindexRollup.option2.title',
+                      {
+                        defaultMessage: 'Option 2: Reindex data',
+                      }
+                    ),
+                    description: (
+                      <Fragment>
+                        <EuiText size="m">
+                          <FormattedMessage
+                            id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.detailsStep.reindex.option2.descriptionRollup"
+                            defaultMessage="The reindex operation allows transforming an index into a new, compatible one. It will copy all of the existing documents into a new index and remove the old one. Depending on size and resources, reindexing may take extended time and your data will be in a read-only state until the job has completed."
+                          />
+                        </EuiText>
+                        <br />
                         <FormattedMessage
-                          id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.detailsStep.reindex.option1.descriptionRollup"
-                          defaultMessage="The reindex operation allows transforming an index into a new, compatible one. It will copy all of the existing documents into a new index and remove the old one. Depending on size and resources, reindexing may take extended time and your data will be in a read-only state until the job has completed."
+                          id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.detailsStep.reindex.option2.howTo"
+                          defaultMessage="Stop "
                         />
-                      </EuiText>
+                      </Fragment>
                     ),
                   },
                 ]}
