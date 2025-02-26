@@ -393,7 +393,7 @@ describe('TableListView', () => {
 
       // Changing the "Rows per page" also sends the "sort" column information and thus updates the sorting.
       // We test that the "sort by" column has not changed before and after changing the number of rows
-      expect(find('tableSortSelectBtn').at(0).text()).toBe('Recently updated');
+      expect(find('tableSortSelectBtn').at(0).text()).toBe('Recent-Old');
 
       // Open the "Rows per page" drop down
       find('tablePaginationPopoverButton').simulate('click');
@@ -402,7 +402,7 @@ describe('TableListView', () => {
       ({ tableCellsValues } = table.getMetaData('itemsInMemTable'));
       expect(tableCellsValues.length).toBe(10);
 
-      expect(find('tableSortSelectBtn').at(0).text()).toBe('Recently updated'); // Still the same
+      expect(find('tableSortSelectBtn').at(0).text()).toBe('Recent-Old'); // Still the same
     });
 
     test('should navigate to page 2', async () => {
@@ -559,10 +559,10 @@ describe('TableListView', () => {
 
       expect(filterOptions.length).toBe(4);
       expect(filterOptions.map((wrapper) => wrapper.text())).toEqual([
-        'Name A-Z ',
-        'Name Z-A ',
-        'Recently updated. Checked option. ',
-        'Least recently updated ',
+        'A-Z ',
+        'Z-A ',
+        'Recent-Old. Checked option. ',
+        'Old-Recent ',
       ]);
     });
 
@@ -592,10 +592,10 @@ describe('TableListView', () => {
       component.update();
       const filterOptions = find('sortSelect').find('li');
 
-      // Check that the second option is 'Name Z-A'
-      expect(filterOptions.at(1).text()).toBe('Name Z-A ');
+      // Check that the second option is 'Z-A'
+      expect(filterOptions.at(1).text()).toBe('Z-A ');
 
-      // Click 'Name Z-A'
+      // Click 'Z-A'
       act(() => {
         filterOptions.at(1).simulate('click');
       });
@@ -664,10 +664,10 @@ describe('TableListView', () => {
       component.update();
       let filterOptions = find('sortSelect').find('li');
       expect(filterOptions.map((wrapper) => wrapper.text())).toEqual([
-        'Name A-Z ',
-        'Name Z-A ',
-        'Recently updated. Checked option. ', // checked
-        'Least recently updated ',
+        'A-Z ',
+        'Z-A ',
+        'Recent-Old. Checked option. ', // checked
+        'Old-Recent ',
       ]);
 
       const nameColumnHeaderButton = getTableColumnSortButton(testBed!, 'Name');
@@ -704,10 +704,10 @@ describe('TableListView', () => {
       filterOptions = find('sortSelect').find('li');
 
       expect(filterOptions.map((wrapper) => wrapper.text())).toEqual([
-        'Name A-Z ',
-        'Name Z-A. Checked option. ', // now this option is checked
-        'Recently updated ',
-        'Least recently updated ',
+        'A-Z ',
+        'Z-A. Checked option. ', // now this option is checked
+        'Recent-Old ',
+        'Old-Recent ',
       ]);
     });
   });
@@ -864,12 +864,12 @@ describe('TableListView', () => {
 
       expect(filterOptions.length).toBe(6);
       expect(filterOptions.map((wrapper) => wrapper.text())).toEqual([
-        'Name A-Z ',
-        'Name Z-A ',
+        'A-Z ',
+        'Z-A ',
         'Type A-Z ',
         'Type Z-A ',
-        'Recently updated. Checked option. ',
-        'Least recently updated ',
+        'Recent-Old. Checked option. ',
+        'Old-Recent ',
       ]);
 
       const typeColumnHeaderButton = getCustomTableColumnSortButton(testBed!, 'Type');
@@ -909,12 +909,12 @@ describe('TableListView', () => {
       filterOptions = find('sortSelect').find('li');
 
       expect(filterOptions.map((wrapper) => wrapper.text())).toEqual([
-        'Name A-Z ',
-        'Name Z-A ',
+        'A-Z ',
+        'Z-A ',
         'Type A-Z ',
         'Type Z-A. Checked option. ',
-        'Recently updated ',
-        'Least recently updated ',
+        'Recent-Old ',
+        'Old-Recent ',
       ]);
     });
   });
@@ -996,10 +996,10 @@ describe('TableListView', () => {
       expect(filterOptions.length).toBe(5);
       expect(filterOptions.map((wrapper) => wrapper.text())).toEqual([
         'Recently viewed. Checked option.Additional information ',
-        'Name A-Z ',
-        'Name Z-A ',
-        'Recently updated ',
-        'Least recently updated ',
+        'A-Z ',
+        'Z-A ',
+        'Recent-Old ',
+        'Old-Recent ',
       ]);
     });
   });
@@ -1771,10 +1771,10 @@ describe('TableListView', () => {
       openSortSelect();
       const filterOptions = find('sortSelect').find('li');
 
-      // Check that the second option is 'Name Z-A'
-      expect(filterOptions.at(1).text()).toBe('Name Z-A ');
+      // Check that the second option is 'Z-A'
+      expect(filterOptions.at(1).text()).toBe('Z-A ');
 
-      // Click 'Name Z-A'
+      // Click 'Z-A'
       act(() => {
         filterOptions.at(1).simulate('click');
       });
