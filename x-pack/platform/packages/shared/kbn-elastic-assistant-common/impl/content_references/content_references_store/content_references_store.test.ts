@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { contentReferencesStoreFactory } from './content_references_store_factory';
+import { newContentReferencesStore } from './content_references_store';
 import { securityAlertsPageReference } from '../references';
 import { ContentReferencesStore } from '../types';
 
-describe('contentReferencesStoreFactory', () => {
+describe('newContentReferencesStore', () => {
   let contentReferencesStore: ContentReferencesStore;
   beforeEach(() => {
-    contentReferencesStore = contentReferencesStoreFactory();
+    contentReferencesStore = newContentReferencesStore();
   });
 
   it('adds multiple content reference', async () => {

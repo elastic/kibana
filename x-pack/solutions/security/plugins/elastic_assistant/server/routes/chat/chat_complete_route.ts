@@ -16,7 +16,7 @@ import {
   transformRawData,
   getAnonymizedValue,
   ConversationResponse,
-  contentReferencesStoreFactory,
+  newContentReferencesStore,
   pruneContentReferences,
 } from '@kbn/elastic-assistant-common';
 import { buildRouteValidationWithZod } from '@kbn/elastic-assistant-common/impl/schemas/common';
@@ -27,7 +27,6 @@ import { buildResponse } from '../../lib/build_response';
 import {
   appendAssistantMessageToConversation,
   createConversationWithUserInput,
-  DEFAULT_PLUGIN_NAME,
   getIsKnowledgeBaseInstalled,
   langChainExecute,
   performChecks,
@@ -87,15 +86,8 @@ export const chatCompleteRoute = (
             return checkResponse.response;
           }
 
-          const contentReferencesEnabled =
-            ctx.elasticAssistant.getRegisteredFeatures(
-              DEFAULT_PLUGIN_NAME
-            ).contentReferencesEnabled;
-
           const conversationsDataClient =
-            await ctx.elasticAssistant.getAIAssistantConversationsDataClient({
-              contentReferencesEnabled,
-            });
+            await ctx.elasticAssistant.getAIAssistantConversationsDataClient();
 
           const anonymizationFieldsDataClient =
             await ctx.elasticAssistant.getAIAssistantAnonymizationFieldsDataClient();
@@ -190,8 +182,7 @@ export const chatCompleteRoute = (
             ? existingConversationId ?? newConversation?.id
             : undefined;
 
-          const contentReferencesStore =
-            contentReferencesEnabled && contentReferencesStoreFactory();
+          const contentReferencesStore = newContentReferencesStore();
 
           const onLlmResponse = async (
             content: string,
@@ -199,8 +190,7 @@ export const chatCompleteRoute = (
             isError = false
           ): Promise<void> => {
             if (conversationId && conversationsDataClient) {
-              const contentReferences =
-                contentReferencesStore && pruneContentReferences(content, contentReferencesStore);
+              const contentReferences = pruneContentReferences(content, contentReferencesStore);
 
               await appendAssistantMessageToConversation({
                 conversationId,
