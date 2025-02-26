@@ -68,7 +68,9 @@ module.exports = {
     '<rootDir>/src/platform/packages/shared/kbn-test/src/jest/setup/mocks.eui.js',
     '<rootDir>/src/platform/packages/shared/kbn-test/src/jest/setup/react_testing_library.js',
     '<rootDir>/src/platform/packages/shared/kbn-test/src/jest/setup/mocks.kbn_i18n_react.js',
-    process.env.CI ? '<rootDir>/src/platform/packages/shared/kbn-test/src/jest/setup/disable_console_logs.js' : [],
+    process.env.CI
+      ? '<rootDir>/src/platform/packages/shared/kbn-test/src/jest/setup/disable_console_logs.js'
+      : [],
   ].flat(),
 
   snapshotFormat: {
@@ -98,8 +100,10 @@ module.exports = {
 
   // A map from regular expressions to paths to transformers
   transform: {
-    '^.+\\.(js|tsx?)$': '<rootDir>/src/platform/packages/shared/kbn-test/src/jest/transforms/babel/index.js',
-    '^.+\\.(txt|html)?$': '<rootDir>/src/platform/packages/shared/kbn-test/src/jest/transforms/raw.js',
+    '^.+\\.(js|tsx?)$':
+      '<rootDir>/src/platform/packages/shared/kbn-test/src/jest/transforms/babel/index.js',
+    '^.+\\.(txt|html)?$':
+      '<rootDir>/src/platform/packages/shared/kbn-test/src/jest/transforms/raw.js',
     '^.+\\.peggy?$': '<rootDir>/src/platform/packages/shared/kbn-test/src/jest/transforms/peggy.js',
   },
 

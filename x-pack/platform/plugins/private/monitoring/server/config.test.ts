@@ -158,7 +158,9 @@ describe('createConfig()', () => {
     const expected = expect.objectContaining({
       certificate: 'contents-of-src/platform/packages/shared/kbn-dev-utils/certs/elasticsearch.crt',
       key: 'contents-of-src/platform/packages/shared/kbn-dev-utils/certs/elasticsearch.key',
-      certificateAuthorities: ['contents-of-src/platform/packages/shared/kbn-dev-utils/certs/ca.crt'],
+      certificateAuthorities: [
+        'contents-of-src/platform/packages/shared/kbn-dev-utils/certs/ca.crt',
+      ],
     });
     expect(config.ui.elasticsearch.ssl).toEqual(expected);
   });
