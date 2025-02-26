@@ -146,16 +146,19 @@ export const sampleStreamRoute = createServerRoute({
             getFields(condition).flatMap((field) => [
               [
                 getRealFieldName(field.name),
-                { type: field.type === 'string' ? 'keyword' : 'double' },
+                { type: field.type === 'string' ? ('keyword' as const) : ('double' as const) },
               ],
-              [field.name, { type: field.type === 'string' ? 'keyword' : 'double' }],
+              [
+                field.name,
+                { type: field.type === 'string' ? ('keyword' as const) : ('double' as const) },
+              ],
             ])
           )
         : undefined,
       sort: [
         {
           '@timestamp': {
-            order: 'desc',
+            order: 'desc' as const,
           },
         },
       ],

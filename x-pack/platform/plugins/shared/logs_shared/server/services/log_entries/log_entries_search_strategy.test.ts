@@ -70,17 +70,15 @@ describe('LogEntries search strategy', () => {
       expect.objectContaining({
         params: expect.objectContaining({
           index: 'log-indices-*',
-          body: expect.objectContaining({
-            fields: expect.arrayContaining(['event.dataset', 'message']),
-            runtime_mappings: {
-              runtime_field: {
-                type: 'keyword',
-                script: {
-                  source: 'emit("runtime value")',
-                },
+          fields: expect.arrayContaining(['event.dataset', 'message']),
+          runtime_mappings: {
+            runtime_field: {
+              type: 'keyword',
+              script: {
+                source: 'emit("runtime value")',
               },
             },
-          }),
+          },
         }),
       }),
       expect.anything(),
