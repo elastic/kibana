@@ -8,3 +8,5 @@
  */
 
 export { APP_FIXED_VIEWPORT_ID, useAppFixedViewport } from './use_app_fixed_viewport';
+
+export type { ReactElementService } from './react_element_service';

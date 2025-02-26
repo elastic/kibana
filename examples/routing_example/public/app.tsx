@@ -17,7 +17,6 @@ import {
   EuiHorizontalRule,
   EuiListGroup,
 } from '@elastic/eui';
-import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { RandomNumberRouteExample } from './random_number_example';
 import { RandomNumberBetweenRouteExample } from './random_number_between_example';
 import { Services } from './services';
@@ -27,64 +26,62 @@ import { GetMessageRouteExample } from './get_message_example';
 type Props = Services;
 
 function RoutingExplorer({
+  core,
   fetchRandomNumber,
   fetchRandomNumberBetween,
   addSuccessToast,
   postMessage,
   getMessageById,
-  startServices,
 }: Props) {
-  return (
-    <KibanaRenderContextProvider {...startServices}>
-      <EuiPageTemplate>
-        <EuiPageTemplate.Header>
+  return core.rendering.wrapReact(
+    <EuiPageTemplate>
+      <EuiPageTemplate.Header>
+        <EuiText>
+          <h1>Routing examples</h1>
+        </EuiText>
+      </EuiPageTemplate.Header>
+      <EuiPageTemplate.Section>
+        <EuiPageSection>
           <EuiText>
-            <h1>Routing examples</h1>
+            <EuiListGroup
+              listItems={[
+                {
+                  label: 'IRouter API docs',
+                  href: 'https://docs.elastic.dev/kibana-dev-docs/api/kbn-core-http-server#:~:text=IRouter',
+                  iconType: 'logoGithub',
+                  target: '_blank',
+                  size: 's',
+                },
+                {
+                  label: 'HttpHandler (core.http.fetch) API docs',
+                  href: 'https://docs.elastic.dev/kibana-dev-docs/api/kbn-core-http-browser#:~:text=HttpHandler',
+                  iconType: 'logoGithub',
+                  target: '_blank',
+                  size: 's',
+                },
+                {
+                  label: 'Conventions',
+                  href: 'https://github.com/elastic/kibana/blob/main/STYLEGUIDE.mdx#api-endpoints',
+                  iconType: 'logoGithub',
+                  target: '_blank',
+                  size: 's',
+                },
+              ]}
+            />
           </EuiText>
-        </EuiPageTemplate.Header>
-        <EuiPageTemplate.Section>
-          <EuiPageSection>
-            <EuiText>
-              <EuiListGroup
-                listItems={[
-                  {
-                    label: 'IRouter API docs',
-                    href: 'https://docs.elastic.dev/kibana-dev-docs/api/kbn-core-http-server#:~:text=IRouter',
-                    iconType: 'logoGithub',
-                    target: '_blank',
-                    size: 's',
-                  },
-                  {
-                    label: 'HttpHandler (core.http.fetch) API docs',
-                    href: 'https://docs.elastic.dev/kibana-dev-docs/api/kbn-core-http-browser#:~:text=HttpHandler',
-                    iconType: 'logoGithub',
-                    target: '_blank',
-                    size: 's',
-                  },
-                  {
-                    label: 'Conventions',
-                    href: 'https://github.com/elastic/kibana/blob/main/STYLEGUIDE.mdx#api-endpoints',
-                    iconType: 'logoGithub',
-                    target: '_blank',
-                    size: 's',
-                  },
-                ]}
-              />
-            </EuiText>
-            <EuiHorizontalRule />
-            <RandomNumberRouteExample fetchRandomNumber={fetchRandomNumber} />
-            <EuiHorizontalRule />
-            <RandomNumberBetweenRouteExample fetchRandomNumberBetween={fetchRandomNumberBetween} />
+          <EuiHorizontalRule />
+          <RandomNumberRouteExample fetchRandomNumber={fetchRandomNumber} />
+          <EuiHorizontalRule />
+          <RandomNumberBetweenRouteExample fetchRandomNumberBetween={fetchRandomNumberBetween} />
 
-            <EuiHorizontalRule />
-            <PostMessageRouteExample addSuccessToast={addSuccessToast} postMessage={postMessage} />
+          <EuiHorizontalRule />
+          <PostMessageRouteExample addSuccessToast={addSuccessToast} postMessage={postMessage} />
 
-            <EuiHorizontalRule />
-            <GetMessageRouteExample getMessageById={getMessageById} />
-          </EuiPageSection>
-        </EuiPageTemplate.Section>
-      </EuiPageTemplate>
-    </KibanaRenderContextProvider>
+          <EuiHorizontalRule />
+          <GetMessageRouteExample getMessageById={getMessageById} />
+        </EuiPageSection>
+      </EuiPageTemplate.Section>
+    </EuiPageTemplate>
   );
 }
 

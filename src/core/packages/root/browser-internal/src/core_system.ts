@@ -34,7 +34,7 @@ import { SavedObjectsService } from '@kbn/core-saved-objects-browser-internal';
 import { NotificationsService } from '@kbn/core-notifications-browser-internal';
 import { ChromeService } from '@kbn/core-chrome-browser-internal';
 import { ApplicationService } from '@kbn/core-application-browser-internal';
-import { RenderingService } from '@kbn/core-rendering-browser-internal';
+import { ReactElementService, RenderingService } from '@kbn/core-rendering-browser-internal';
 import { CoreAppsService } from '@kbn/core-apps-browser-internal';
 import type { InternalCoreSetup, InternalCoreStart } from '@kbn/core-lifecycle-browser-internal';
 import { PluginsService } from '@kbn/core-plugins-browser-internal';
@@ -101,6 +101,7 @@ export class CoreSystem {
   private readonly application: ApplicationService;
   private readonly docLinks: DocLinksService;
   private readonly rendering: RenderingService;
+  private readonly reactElementService: ReactElementService;
   private readonly integrations: IntegrationsService;
   private readonly coreApp: CoreAppsService;
   private readonly deprecations: DeprecationsService;
@@ -161,6 +162,7 @@ export class CoreSystem {
     });
     this.docLinks = new DocLinksService(this.coreContext);
     this.rendering = new RenderingService();
+    this.reactElementService = new ReactElementService();
     this.application = new ApplicationService();
     this.integrations = new IntegrationsService();
     this.deprecations = new DeprecationsService();
@@ -402,6 +404,7 @@ export class CoreSystem {
         customBranding,
         security,
         userProfile,
+        rendering: this.reactElementService,
       };
 
       await this.plugins.start(core);
@@ -427,6 +430,14 @@ export class CoreSystem {
         overlays,
         theme,
         targetDomElement: coreUiTargetDomElement,
+        userProfile,
+      });
+
+      this.reactElementService.start({
+        analytics,
+        executionContext,
+        i18n,
+        theme,
         userProfile,
       });
 
