@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { Story } from '@storybook/react';
+import type { StoryFn } from '@storybook/react';
 import { EuiComboBoxOptionOption } from '@elastic/eui';
 import { RawIndicatorFieldId } from '../../../../../common/types/indicator';
 import { IndicatorsFieldSelector } from './field_selector';
@@ -16,7 +16,7 @@ export default {
   title: 'IndicatorsFieldSelector',
 };
 
-export const Default: Story<void> = () => {
+export const Default: StoryFn = () => {
   return (
     <IndicatorsFieldSelector
       valueChange={({ label }: EuiComboBoxOptionOption<string>) =>
@@ -26,7 +26,7 @@ export const Default: Story<void> = () => {
   );
 };
 
-export const WithDefaultValue: Story<void> = () => {
+export const WithDefaultValue: StoryFn = () => {
   return (
     <IndicatorsFieldSelector
       valueChange={({ label }: EuiComboBoxOptionOption<string>) =>
@@ -37,6 +37,6 @@ export const WithDefaultValue: Story<void> = () => {
   );
 };
 
-export const NoData: Story<void> = () => {
+export const NoData: StoryFn = () => {
   return <IndicatorsFieldSelector valueChange={() => {}} />;
 };

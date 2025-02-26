@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { Story } from '@storybook/react';
+import type { StoryFn } from '@storybook/react';
 import { EuiContextMenuPanel } from '@elastic/eui';
 import { AddToNewCase } from './add_to_new_case';
 import { StoryProvidersComponent } from '../../../mocks/story_providers';
@@ -18,7 +18,7 @@ export default {
 
 const mockIndicator = generateMockUrlIndicator();
 
-export const Default: Story<void> = () => {
+export const Default: StoryFn = () => {
   const items = [
     <AddToNewCase indicator={mockIndicator} onClick={() => window.alert('Clicked')} />,
   ];
@@ -30,7 +30,7 @@ export const Default: Story<void> = () => {
   );
 };
 
-export const Disabled: Story<void> = () => {
+export const Disabled: StoryFn = () => {
   const fields = { ...mockIndicator.fields };
   delete fields['threat.indicator.name'];
   const mockIndicatorMissingName = {
