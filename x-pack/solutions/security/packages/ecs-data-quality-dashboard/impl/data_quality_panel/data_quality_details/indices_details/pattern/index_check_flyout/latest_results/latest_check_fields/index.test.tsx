@@ -26,6 +26,7 @@ describe('IndexCheckFields', () => {
             docsCount={123}
             ilmPhase="hot"
             patternRollup={auditbeatWithAllResults}
+            checkedAt={1706526408000}
           />
         </TestDataQualityProviders>
       </TestExternalProviders>

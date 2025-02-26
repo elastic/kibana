@@ -17,18 +17,16 @@ import { SystemPromptSettingsProps } from './types';
  */
 export const SystemPromptSettings: React.FC<SystemPromptSettingsProps> = React.memo(
   ({
-    connectors,
-    conversationSettings,
-    onSelectedSystemPromptChange,
+    conversations,
+    onConversationSelectionChange,
+    onNewConversationDefaultChange,
+    onPromptContentChange,
+    onSystemPromptDelete,
+    onSystemPromptSelect,
+    resetSettings,
     selectedSystemPrompt,
-    setUpdatedSystemPromptSettings,
-    setConversationSettings,
     systemPromptSettings,
-    conversationsSettingsBulkActions,
-    setConversationsSettingsBulkActions,
-    promptsBulkActions,
-    defaultConnector,
-    setPromptsBulkActions,
+    setPaginationObserver,
   }) => {
     return (
       <>
@@ -40,18 +38,16 @@ export const SystemPromptSettings: React.FC<SystemPromptSettingsProps> = React.m
         <EuiHorizontalRule margin={'s'} />
 
         <SystemPromptEditor
-          connectors={connectors}
-          conversationSettings={conversationSettings}
-          onSelectedSystemPromptChange={onSelectedSystemPromptChange}
+          conversations={conversations}
+          onConversationSelectionChange={onConversationSelectionChange}
+          onNewConversationDefaultChange={onNewConversationDefaultChange}
+          onPromptContentChange={onPromptContentChange}
+          onSystemPromptDelete={onSystemPromptDelete}
+          onSystemPromptSelect={onSystemPromptSelect}
+          resetSettings={resetSettings}
           selectedSystemPrompt={selectedSystemPrompt}
-          setUpdatedSystemPromptSettings={setUpdatedSystemPromptSettings}
-          setConversationSettings={setConversationSettings}
+          setPaginationObserver={setPaginationObserver}
           systemPromptSettings={systemPromptSettings}
-          conversationsSettingsBulkActions={conversationsSettingsBulkActions}
-          setConversationsSettingsBulkActions={setConversationsSettingsBulkActions}
-          defaultConnector={defaultConnector}
-          setPromptsBulkActions={setPromptsBulkActions}
-          promptsBulkActions={promptsBulkActions}
         />
       </>
     );

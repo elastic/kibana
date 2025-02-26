@@ -1179,9 +1179,6 @@ components:
         id:
           description: The conversation id.
           type: string
-        isDefault:
-          description: Is default conversation.
-          type: boolean
         messages:
           description: The conversation messages.
           items:
@@ -1204,16 +1201,13 @@ components:
           $ref: '#/components/schemas/ConversationCategory'
           description: The conversation category.
         createdAt:
-          description: The last time conversation was updated.
+          description: The time conversation was created.
           type: string
         excludeFromLastConversationStorage:
           description: excludeFromLastConversationStorage.
           type: boolean
         id:
           $ref: '#/components/schemas/NonEmptyString'
-        isDefault:
-          description: Is default conversation.
-          type: boolean
         messages:
           description: The conversation messages.
           items:
@@ -1448,7 +1442,6 @@ components:
     FindConversationsSortField:
       enum:
         - created_at
-        - is_default
         - title
         - updated_at
       type: string

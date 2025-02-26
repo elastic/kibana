@@ -9,5 +9,5 @@ import moment from 'moment';
 
 import { EMPTY_STAT } from '../../../../../constants';
 
-export const getFormattedCheckTime = (checkedAt: number) =>
+export const getFormattedCheckTime = (checkedAt?: number) =>
   moment(checkedAt).isValid() ? moment(checkedAt).format('MMM DD, YYYY @ HH:mm:ss') : EMPTY_STAT;

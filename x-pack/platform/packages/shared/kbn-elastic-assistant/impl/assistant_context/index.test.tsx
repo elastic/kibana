@@ -11,8 +11,12 @@ import { useAssistantContext } from '.';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 import { TestProviders } from '../mock/test_providers/test_providers';
 
-jest.mock('react-use/lib/useLocalStorage', () => jest.fn().mockReturnValue(['456', jest.fn()]));
-jest.mock('react-use/lib/useSessionStorage', () => jest.fn().mockReturnValue(['456', jest.fn()]));
+jest.mock('react-use/lib/useLocalStorage', () =>
+  jest.fn().mockReturnValue([{ id: '456' }, jest.fn()])
+);
+jest.mock('react-use/lib/useSessionStorage', () =>
+  jest.fn().mockReturnValue([{ id: '456' }, jest.fn()])
+);
 
 describe('AssistantContext', () => {
   beforeEach(() => jest.clearAllMocks());
@@ -32,22 +36,29 @@ describe('AssistantContext', () => {
     expect(result.current.http.fetch).toBeCalledWith(path);
   });
 
-  test('getLastConversationId defaults to provided id', async () => {
+  test('getLastConversation defaults to provided id', async () => {
     const { result } = renderHook(useAssistantContext, { wrapper: TestProviders });
-    const id = result.current.getLastConversationId('123');
-    expect(id).toEqual('123');
+    const id = result.current.getLastConversation({ id: '123' });
+    expect(id).toEqual({ id: '123' });
   });
 
-  test('getLastConversationId uses local storage id when no id is provided ', async () => {
+  test('getLastConversation uses local storage id when no id is provided ', async () => {
     const { result } = renderHook(useAssistantContext, { wrapper: TestProviders });
-    const id = result.current.getLastConversationId();
-    expect(id).toEqual('456');
+    const id = result.current.getLastConversation();
+    expect(id).toEqual({ id: '456' });
   });
 
-  test('getLastConversationId defaults to Welcome when no local storage id and no id is provided ', async () => {
+  test('getLastConversation defaults to empty id when no local storage id and no id is provided ', async () => {
     (useLocalStorage as jest.Mock).mockReturnValue([undefined, jest.fn()]);
     const { result } = renderHook(useAssistantContext, { wrapper: TestProviders });
-    const id = result.current.getLastConversationId();
-    expect(id).toEqual('Welcome');
+    const id = result.current.getLastConversation();
+    expect(id).toEqual({ id: '' });
+  });
+
+  test('getLastConversation defaults to empty id when title is provided and preserves title', async () => {
+    (useLocalStorage as jest.Mock).mockReturnValue([undefined, jest.fn()]);
+    const { result } = renderHook(useAssistantContext, { wrapper: TestProviders });
+    const id = result.current.getLastConversation({ title: 'something' });
+    expect(id).toEqual({ id: '', title: 'something' });
   });
 });
