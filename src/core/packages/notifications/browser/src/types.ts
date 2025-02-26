@@ -8,7 +8,7 @@
  */
 
 import type { Observable } from 'rxjs';
-import type { EuiGlobalToastListToast as EuiToast } from '@elastic/eui';
+import type { EuiGlobalToastListToast as EuiToast, EuiTourStepProps } from '@elastic/eui';
 import type { MountPoint } from '@kbn/core-mount-utils-browser';
 
 /**
@@ -76,4 +76,19 @@ export interface IToasts {
   addWarning: (toastOrTitle: ToastInput, options?: any) => Toast;
   addDanger: (toastOrTitle: ToastInput, options?: any) => Toast;
   addError: (error: Error, options: ErrorToastOptions) => Toast;
+}
+
+interface ProductInterceptSteps extends Pick<EuiTourStepProps, 'title' | 'content' | 'subtitle'> {
+  onNextClick?: () => void;
+}
+
+export interface ProductIntercept {
+  title: string;
+  steps: ProductInterceptSteps[];
+  onFinish: () => void;
+}
+
+export interface IProductInterceptPublicApi {
+  get$: () => Observable<ProductIntercept[]>;
+  add(productIntercept: ProductIntercept): string;
 }

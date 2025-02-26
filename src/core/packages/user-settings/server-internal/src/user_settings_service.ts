@@ -19,11 +19,17 @@ export interface UserSettingsServiceStartDeps {
 
 const userSettingsDataPath = 'userSettings';
 
+interface UserFeedbackMeta {
+  consent: boolean;
+  hasPendingFeedback: boolean;
+}
+
 /**
  * @internal
  */
 export interface InternalUserSettingsServiceSetup {
   getUserSettingDarkMode: (request: KibanaRequest) => Promise<DarkModeValue | undefined>;
+  getUserFeedbackMeta: (request: KibanaRequest) => Promise<UserFeedbackMeta | undefined>;
 }
 
 /**
@@ -42,6 +48,10 @@ export class UserSettingsService {
       getUserSettingDarkMode: async (request: KibanaRequest) => {
         const userSettings = await this.getSettings(request);
         return getUserSettingDarkMode(userSettings);
+      },
+      getUserFeedbackMeta: async (request: KibanaRequest) => {
+        const userSettings = await this.getSettings(request);
+        return getUserFeedbackMeta(userSettings);
       },
     };
   }
@@ -78,4 +88,21 @@ const getUserSettingDarkMode = (
     return darkMode.toUpperCase() === 'SYSTEM' ? 'system' : darkMode.toUpperCase() === 'DARK';
   }
   return undefined;
+};
+
+const getUserFeedbackMeta = (
+  userSettings: Record<string, string>
+): UserFeedbackMeta | undefined => {
+  let userFeedbackMeta: UserFeedbackMeta | undefined;
+
+  if (userSettings.userFeedbackConsent) {
+    const { userFeedbackConsent, userFeedbackPending } = userSettings;
+
+    userFeedbackMeta = {
+      consent: userFeedbackConsent === 'true',
+      hasPendingFeedback: userFeedbackPending === 'true',
+    };
+  }
+
+  return userFeedbackMeta;
 };
