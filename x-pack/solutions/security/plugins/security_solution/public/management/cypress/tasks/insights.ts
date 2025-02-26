@@ -17,6 +17,8 @@ import {
 } from '../../../../common/endpoint/constants';
 
 const INTERNAL_CLOUD_CONNECTORS = ['Elastic-Cloud-SMTP'];
+const INTERNAL_INFERENCE_CONNECTORS = ['Elastic-LLM'];
+const INTERNAL_CONNECTORS = [...INTERNAL_CLOUD_CONNECTORS, ...INTERNAL_INFERENCE_CONNECTORS];
 
 export const createBedrockAIConnector = (connectorName?: string) =>
   request<ConnectorResponse>({
@@ -48,7 +50,7 @@ export const deleteConnectors = () => {
         return connector.id;
       });
       ids.forEach((id) => {
-        if (!INTERNAL_CLOUD_CONNECTORS.includes(id)) {
+        if (!INTERNAL_CONNECTORS.includes(id)) {
           request({
             method: 'DELETE',
             url: `api/actions/connector/${id}`,
