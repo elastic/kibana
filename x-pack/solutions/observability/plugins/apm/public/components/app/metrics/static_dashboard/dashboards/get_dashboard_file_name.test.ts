@@ -7,97 +7,146 @@
 
 import { getDashboardFileName } from './get_dashboard_file_name';
 
+const apmAgent = [
+  {
+    agentName: 'java',
+    telemetrySdkName: undefined,
+    telemetrySdkLanguage: undefined,
+    filename: 'classic_apm-apm-java',
+  },
+  {
+    agentName: 'iOS/swift',
+    telemetrySdkName: undefined,
+    telemetrySdkLanguage: undefined,
+    filename: 'classic_apm-apm-ios_swift',
+  },
+  {
+    agentName: 'java',
+    telemetrySdkName: 'opentelemetry',
+    filename: 'otel_native-apm-java',
+  },
+];
+const edotSdk = [
+  {
+    agentName: 'opentelemetry/java/test/elastic',
+    filename: 'classic_apm-edot-java',
+  },
+  {
+    agentName: 'opentelemetry/java/elastic',
+    filename: 'classic_apm-edot-java',
+  },
+  {
+    agentName: 'opentelemetry/java/test/elastic',
+    filename: 'classic_apm-edot-java',
+  },
+  {
+    agentName: 'opentelemetry/java/elastic',
+    filename: 'classic_apm-edot-java',
+  },
+  {
+    agentName: 'opentelemetry/java/elastic',
+    telemetrySdkName: 'opentelemetry',
+    telemetrySdkLanguage: 'java',
+    filename: 'otel_native-edot-java',
+  },
+  {
+    agentName: 'opentelemetry/nodejs/nodejs-agent/elastic',
+    telemetrySdkName: 'opentelemetry',
+    telemetrySdkLanguage: 'nodejs',
+    filename: 'otel_native-edot-nodejs',
+  },
+];
+const vanillaOtelSdk = [
+  {
+    agentName: 'opentelemetry/java',
+    filename: 'classic_apm-otel_other-java',
+  },
+  {
+    agentName: 'opentelemetry/nodejs/test/nodejs-agent',
+    telemetrySdkName: 'opentelemetry',
+    telemetrySdkLanguage: 'nodejs',
+    filename: 'otel_native-otel_other-nodejs',
+  },
+  {
+    agentName: 'opentelemetry/java/test/something-else/',
+    telemetrySdkName: 'opentelemetry',
+    telemetrySdkLanguage: 'java',
+    filename: 'otel_native-otel_other-java',
+  },
+  {
+    agentName: 'otlp/nodejs',
+    telemetrySdkName: 'opentelemetry',
+    telemetrySdkLanguage: 'nodejs',
+    filename: 'otel_native-otel_other-nodejs',
+  },
+  {
+    agentName: 'otlp/Android',
+    telemetrySdkName: 'opentelemetry',
+    telemetrySdkLanguage: 'android',
+    filename: 'otel_native-otel_other-android',
+  },
+];
+const noFilenameCases = [
+  {
+    agentName: 'test/java/test/something-else/',
+    telemetrySdkName: undefined,
+    telemetrySdkLanguage: undefined,
+    filename: undefined,
+  },
+  {
+    agentName: 'otlp',
+    filename: undefined,
+  },
+  {
+    agentName: 'elastic',
+    filename: undefined,
+  },
+  {
+    agentName: 'my-awesome-agent/otel',
+    telemetrySdkName: 'opentelemetry',
+    filename: undefined,
+  },
+];
+
 describe('getDashboardFileName', () => {
-  it.each([
-    {
-      agentName: 'java',
-      telemetrySdkName: undefined,
-      telemetrySdkLanguage: undefined,
-      filename: 'classic_apm-apm-java',
-    },
-    {
-      agentName: 'iOS/swift',
-      telemetrySdkName: undefined,
-      telemetrySdkLanguage: undefined,
-      filename: 'classic_apm-apm-ios_swift',
-    },
-    {
-      agentName: 'android/java',
-      filename: 'classic_apm-apm-android_java',
-    },
-    {
-      agentName: 'opentelemetry/java/test/elastic',
-      filename: 'classic_apm-edot-java',
-    },
-    {
-      agentName: 'opentelemetry/java/elastic',
-      filename: 'classic_apm-edot-java',
-    },
-    {
-      agentName: 'test/test/test/something-else/elastic',
-      filename: undefined,
-    },
-    {
-      agentName: 'opentelemetry/java/elastic',
-      telemetrySdkName: 'opentelemetry',
-      telemetrySdkLanguage: 'java',
-      filename: 'otel_native-edot-java',
-    },
-    {
-      agentName: 'opentelemetry/nodejs/nodejs-agent/elastic',
-      telemetrySdkName: 'opentelemetry',
-      telemetrySdkLanguage: 'nodejs',
-      filename: 'otel_native-edot-nodejs',
-    },
-    {
-      agentName: 'opentelemetry/nodejs/test/nodejs-agent',
-      telemetrySdkName: 'opentelemetry',
-      telemetrySdkLanguage: 'nodejs',
-      filename: 'otel_native-otel_other-nodejs',
-    },
-    {
-      agentName: 'opentelemetry/java/test/something-else/',
-      telemetrySdkName: 'opentelemetry',
-      telemetrySdkLanguage: 'java',
-      filename: 'otel_native-otel_other-java',
-    },
-    {
-      agentName: 'otlp/nodejs',
-      telemetrySdkName: 'opentelemetry',
-      telemetrySdkLanguage: 'nodejs',
-      filename: 'otel_native-otel_other-nodejs',
-    },
-    {
-      agentName: 'otlp/Android',
-      telemetrySdkName: 'opentelemetry',
-      telemetrySdkLanguage: 'android',
-      filename: 'otel_native-otel_other-android',
-    },
-    {
-      agentName: 'test/java/test/something-else/',
-      telemetrySdkName: undefined,
-      telemetrySdkLanguage: undefined,
-      filename: undefined,
-    },
-    {
-      agentName: 'otlp',
-      filename: undefined,
-    },
-    {
-      agentName: 'elastic',
-      filename: undefined,
-    },
-    {
-      agentName: 'my-awesome-agent/otel',
-      telemetrySdkName: 'opentelemetry',
-      filename: undefined,
-    },
-  ])(
-    'for the agent name $agentName and open telemetry sdk name: $telemetrySdkName and language $telemetrySdkLanguage returns $filename',
-    ({ agentName, telemetrySdkName, telemetrySdkLanguage, filename }) => {
-      expect(
-        getDashboardFileName({ agentName, telemetrySdkName, telemetrySdkLanguage })
-      ).toStrictEqual(filename);
-    }
-  );
+  describe('apmAgent', () => {
+    it.each(apmAgent)(
+      'for the agent name $agentName and open telemetry sdk name: $telemetrySdkName returns $filename',
+      ({ agentName, telemetrySdkName, telemetrySdkLanguage, filename }) => {
+        expect(
+          getDashboardFileName({ agentName, telemetrySdkName, telemetrySdkLanguage })
+        ).toStrictEqual(filename);
+      }
+    );
+  });
+  describe('vanillaOtelSdk', () => {
+    it.each(vanillaOtelSdk)(
+      'for the agent name $agentName and open telemetry sdk name: $telemetrySdkName and language $telemetrySdkLanguage returns $filename',
+      ({ agentName, telemetrySdkName, telemetrySdkLanguage, filename }) => {
+        expect(
+          getDashboardFileName({ agentName, telemetrySdkName, telemetrySdkLanguage })
+        ).toStrictEqual(filename);
+      }
+    );
+  });
+  describe('edotSdk', () => {
+    it.each(edotSdk)(
+      'for the agent name $agentName and open telemetry sdk name: $telemetrySdkName and language $telemetrySdkLanguage returns $filename',
+      ({ agentName, telemetrySdkName, telemetrySdkLanguage, filename }) => {
+        expect(
+          getDashboardFileName({ agentName, telemetrySdkName, telemetrySdkLanguage })
+        ).toStrictEqual(filename);
+      }
+    );
+  });
+  describe('noFilenameCases', () => {
+    it.each(noFilenameCases)(
+      'for the agent name $agentName and open telemetry sdk name: $telemetrySdkName and language $telemetrySdkLanguage returns $filename',
+      ({ agentName, telemetrySdkName, telemetrySdkLanguage, filename }) => {
+        expect(
+          getDashboardFileName({ agentName, telemetrySdkName, telemetrySdkLanguage })
+        ).toStrictEqual(filename);
+      }
+    );
+  });
 });
