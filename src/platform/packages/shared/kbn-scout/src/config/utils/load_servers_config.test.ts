@@ -37,6 +37,7 @@ const mockScoutTestConfig: ScoutTestConfig = {
   },
   serverless: true,
   projectType: 'oblt',
+  distName: 'serverless-oblt',
   isCloud: true,
   license: 'trial',
   cloudUsersFilePath: '/path/to/users',
