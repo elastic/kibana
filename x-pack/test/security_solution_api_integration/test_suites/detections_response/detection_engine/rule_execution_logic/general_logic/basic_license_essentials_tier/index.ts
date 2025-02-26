@@ -8,7 +8,11 @@
 import { FtrProviderContext } from '../../../../../../ftr_provider_context';
 
 export default function ({ loadTestFile }: FtrProviderContext) {
-  describe('Rule execution logic API - Trial License/Complete Tier', function () {
-    loadTestFile(require.resolve('./synthetic_source'));
+  describe('Rule execution logic API - Basic License/Essentials Tier', function () {
+    loadTestFile(require.resolve('./keyword_family'));
+    loadTestFile(require.resolve('./ignore_fields'));
+    loadTestFile(require.resolve('./runtime'));
+    loadTestFile(require.resolve('./non_ecs_fields'));
+    loadTestFile(require.resolve('./timestamps'));
   });
 }
