@@ -41,6 +41,8 @@ export const LATEST_VULNERABILITIES_RETENTION_POLICY = '3d';
 // meant as a temp workaround to get good enough posture view for 3rd party integrations, see https://github.com/elastic/security-team/issues/10683
 export const CDR_3RD_PARTY_RETENTION_POLICY = '90d';
 
+export const CSP_MISCONFIGURATIONS_DATASET = 'cloud_security_posture.findings';
+
 export const VULNERABILITIES_SEVERITY: Record<VulnSeverity, VulnSeverity> = {
   LOW: 'LOW',
   MEDIUM: 'MEDIUM',
@@ -54,3 +56,12 @@ export const MISCONFIGURATION_STATUS: Record<string, MisconfigurationEvaluationS
   FAILED: 'failed',
   UNKNOWN: 'unknown',
 };
+
+export const CSP_MOMENT_FORMAT = 'MMMM D, YYYY @ HH:mm:ss.SSS';
+
+// A mapping of in-development features to their status. These features should be hidden from users but can be easily
+// activated via a simple code change in a single location.
+export const INTERNAL_FEATURE_FLAGS = {
+  showManageRulesMock: false,
+  showFindingFlyoutEvidence: true,
+} as const;

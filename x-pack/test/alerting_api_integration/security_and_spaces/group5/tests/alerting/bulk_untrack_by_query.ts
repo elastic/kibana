@@ -104,7 +104,7 @@ export default function bulkUntrackByQueryTests({ getService }: FtrProviderConte
               hits: { hits: activeAlerts },
             } = await es.search({
               index: alertAsDataIndex,
-              body: { query: { match_all: {} } },
+              query: { match_all: {} },
             });
 
             activeAlerts.forEach((activeAlert: any) => {
@@ -151,7 +151,7 @@ export default function bulkUntrackByQueryTests({ getService }: FtrProviderConte
                   hits: { hits },
                 } = await es.search({
                   index: alertAsDataIndex,
-                  body: { query: { match_all: {} } },
+                  query: { match_all: {} },
                 });
 
                 hits.forEach((alert: any) => {
