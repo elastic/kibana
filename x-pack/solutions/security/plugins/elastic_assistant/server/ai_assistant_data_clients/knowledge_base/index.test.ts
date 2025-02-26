@@ -28,6 +28,7 @@ import {
 } from '../../lib/langchain/content_loaders/security_labs_loader';
 import { DynamicStructuredTool } from '@langchain/core/tools';
 import { newContentReferencesStoreMock } from '@kbn/elastic-assistant-common/impl/content_references/content_references_store/__mocks__/content_references_store.mock';
+import { KnowledgeBaseResource } from '@kbn/elastic-assistant-common';
 jest.mock('../../lib/langchain/content_loaders/security_labs_loader');
 jest.mock('p-retry');
 const date = '2023-03-28T22:27:28.159Z';
@@ -334,7 +335,7 @@ describe('AIAssistantKnowledgeBaseDataClient', () => {
     const documents = [
       {
         pageContent: 'Document 1',
-        metadata: { kbResource: 'user', source: 'user', required: false },
+        metadata: { kbResource: KnowledgeBaseResource.enum.user, source: 'user', required: false },
       },
     ];
     it('should add documents to the knowledge base', async () => {
@@ -412,7 +413,7 @@ describe('AIAssistantKnowledgeBaseDataClient', () => {
 
       expect(results).toHaveLength(1);
       expect(results[0].pageContent).toBe('test');
-      expect(results[0].metadata.kbResource).toBe('test');
+      expect(results[0].metadata.kbResource).toBe('user');
     });
 
     it('should swallow errors during search', async () => {
@@ -505,7 +506,10 @@ describe('AIAssistantKnowledgeBaseDataClient', () => {
       mockOptions.manageGlobalKnowledgeBaseAIAssistant = false;
 
       await expect(
-        client.createKnowledgeBaseEntry({ telemetry, knowledgeBaseEntry, global: true })
+        client.createKnowledgeBaseEntry({
+          telemetry,
+          knowledgeBaseEntry: { ...knowledgeBaseEntry, global: true },
+        })
       ).rejects.toThrow('User lacks privileges to create global knowledge base entries');
     });
   });
