@@ -54,6 +54,11 @@ export interface RunContext {
   taskInstance: ConcreteTaskInstance;
 }
 
+export interface RecurringTaskRunResult {
+  schedule?: IntervalSchedule;
+  state?: Record<string, unknown>;
+}
+
 /**
  * The return value of a task's run function should be a promise of RunResult.
  */

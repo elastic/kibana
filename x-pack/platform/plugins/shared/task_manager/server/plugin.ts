@@ -33,12 +33,19 @@ import { TaskManagerConfig } from './config';
 import { createInitialMiddleware, addMiddlewareToChain, Middleware } from './lib/middleware';
 import { removeIfExists } from './lib/remove_if_exists';
 import { setupSavedObjects, BACKGROUND_TASK_NODE_SO_NAME, TASK_SO_NAME } from './saved_objects';
-import { TaskDefinitionRegistry, TaskTypeDictionary } from './task_type_dictionary';
+import {
+  TaskDefinitionRegistry,
+  TaskTypeDictionary,
+  RecurringTaskTypeOpts,
+  OneTimeTaskTypeOpts,
+  OneTimeTaskTypeFnOpts,
+  RecurringTaskTypeFnOpts,
+} from './task_type_dictionary';
 import { AggregationOpts, FetchResult, SearchOpts, TaskStore } from './task_store';
 import { TaskScheduling } from './task_scheduling';
 import { backgroundTaskUtilizationRoute, healthRoute, metricsRoute } from './routes';
 import { createMonitoringStats, MonitoringStats } from './monitoring';
-import { ConcreteTaskInstance } from './task';
+import { ConcreteTaskInstance, RecurringTaskRunResult } from './task';
 import { registerTaskManagerUsageCollector } from './usage';
 import { TASK_MANAGER_INDEX } from './constants';
 import { AdHocTaskCounter } from './lib/adhoc_task_counter';
@@ -64,6 +71,16 @@ export interface TaskManagerSetupContract {
    * @param taskDefinitions - The Kibana task definitions dictionary
    */
   registerTaskDefinitions: (taskDefinitions: TaskDefinitionRegistry) => void;
+  registerOneTimeTaskType: (
+    taskType: string,
+    fn: (options: OneTimeTaskTypeFnOpts) => Promise<void>,
+    options?: OneTimeTaskTypeOpts
+  ) => void;
+  registerRecurringTaskType: (
+    taskType: string,
+    fn: (options: RecurringTaskTypeFnOpts) => Promise<RecurringTaskRunResult>,
+    options?: RecurringTaskTypeOpts
+  ) => void;
 }
 
 export type TaskManagerStartContract = Pick<
@@ -270,6 +287,58 @@ export class TaskManagerPlugin
       registerTaskDefinitions: (taskDefinition: TaskDefinitionRegistry) => {
         this.definitions.registerTaskDefinitions(taskDefinition);
       },
+      registerOneTimeTaskType: (
+        taskType: string,
+        fn: (options: OneTimeTaskTypeFnOpts) => Promise<void>,
+        options?: OneTimeTaskTypeOpts
+      ) => {
+        this.definitions.registerTaskDefinitions({
+          [taskType]: {
+            ...options,
+            title: '',
+            createTaskRunner({ taskInstance }) {
+              const abortController = new AbortController();
+              return {
+                run: async () => {
+                  await fn({ abortController, params: taskInstance.params });
+                  return { state: {} };
+                },
+                cancel: async () => {
+                  abortController.abort();
+                },
+              };
+            },
+          },
+        });
+      },
+      registerRecurringTaskType: (
+        taskType: string,
+        fn: (options: RecurringTaskTypeFnOpts) => Promise<RecurringTaskRunResult>,
+        options?: RecurringTaskTypeOpts
+      ) => {
+        this.definitions.registerTaskDefinitions({
+          [taskType]: {
+            ...options,
+            title: '',
+            createTaskRunner({ taskInstance }) {
+              const abortController = new AbortController();
+              return {
+                run: async () => {
+                  const { state, schedule } = await fn({
+                    abortController,
+                    params: taskInstance.params,
+                    state: taskInstance.state,
+                  });
+                  return { state: state || {}, schedule };
+                },
+                cancel: async () => {
+                  abortController.abort();
+                },
+              };
+            },
+          },
+        });
+      },
     };
   }
 
@@ -404,7 +473,8 @@ export class TaskManagerPlugin
       createOneOffTask: (...args) => taskScheduling.createOneOffTask(...args),
       createOneOffTaskIfMissing: (...args) => taskScheduling.createOneOffTaskIfMissing(...args),
       createRecurringTask: (...args) => taskScheduling.createRecurringTask(...args),
-      createRecurringTaskIfMissing: (...args) => taskScheduling.createRecurringTaskIfMissing(...args),
+      createRecurringTaskIfMissing: (...args) =>
+        taskScheduling.createRecurringTaskIfMissing(...args),
       createOneOffTaskBulk: (...args) => taskScheduling.createOneOffTaskBulk(...args),
       createRecurringTaskBulk: (...args) => taskScheduling.createRecurringTaskBulk(...args),
       bulkSchedule: (...args) => taskScheduling.bulkSchedule(...args),
