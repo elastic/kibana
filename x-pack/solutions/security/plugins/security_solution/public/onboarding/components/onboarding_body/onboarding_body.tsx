@@ -61,7 +61,8 @@ export const OnboardingBody = React.memo(() => {
           <EuiSpacer size="xxl" />
           <OnboardingCardGroup title={group.title}>
             <EuiFlexGroup direction="column" gutterSize="m">
-              {group.cards.map(({ id, title, icon, Component: LazyCardComponent }) => {
+              {group.cards.map((card) => {
+                const { id, title, icon, badge, Component: LazyCardComponent } = card;
                 const cardCheckCompleteResult = getCardCheckCompleteResult(id);
                 return (
                   <EuiFlexItem key={id} grow={false}>
@@ -69,6 +70,7 @@ export const OnboardingBody = React.memo(() => {
                       id={id}
                       title={title}
                       icon={icon}
+                      badge={badge}
                       checkCompleteResult={cardCheckCompleteResult}
                       isExpanded={expandedCardId === id}
                       isComplete={isCardComplete(id)}

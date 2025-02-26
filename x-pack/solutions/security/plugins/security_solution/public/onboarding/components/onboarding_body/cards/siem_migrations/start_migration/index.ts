@@ -16,6 +16,7 @@ import { getCardIcon } from '../../common/card_icon';
 export const startMigrationCardConfig: OnboardingCardConfig<StartMigrationCardMetadata> = {
   id: OnboardingCardId.siemMigrationsStart,
   title: START_MIGRATION_CARD_TITLE,
+  badge: 'tech_preview',
   icon: () => getCardIcon(OnboardingCardId.siemMigrationsStart),
   licenseTypeRequired: 'enterprise',
   Component: React.lazy(

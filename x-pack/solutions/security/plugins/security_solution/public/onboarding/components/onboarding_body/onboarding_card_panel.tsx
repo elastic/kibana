@@ -18,15 +18,17 @@ import {
 } from '@elastic/eui';
 import classnames from 'classnames';
 import type { OnboardingCardId } from '../../constants';
-import type { CheckCompleteResult } from '../../types';
+import type { CheckCompleteResult, CardBadge } from '../../types';
 import { CARD_COMPLETE_BADGE, EXPAND_CARD_BUTTON_LABEL } from './translations';
 import { useCardPanelStyles } from './onboarding_card_panel.styles';
 import { useDelayedVisibility } from './hooks/use_delayed_visibility';
+import { OnboardingCardBadge } from './onboarding_card_panel_badge';
 
 interface OnboardingCardPanelProps {
   id: OnboardingCardId;
   title: string;
   icon: IconType;
+  badge: CardBadge | undefined;
   isExpanded: boolean;
   isComplete: boolean;
   onToggleExpanded: () => void;
@@ -38,6 +40,7 @@ export const OnboardingCardPanel = React.memo<PropsWithChildren<OnboardingCardPa
     id,
     title,
     icon,
+    badge,
     isExpanded,
     isComplete,
     onToggleExpanded,
@@ -74,9 +77,18 @@ export const OnboardingCardPanel = React.memo<PropsWithChildren<OnboardingCardPa
             </span>
           </EuiFlexItem>
           <EuiFlexItem>
-            <EuiTitle size="xxs" className="onboardingCardHeaderTitle">
-              <h3>{title}</h3>
-            </EuiTitle>
+            <EuiFlexGroup gutterSize="s" alignItems="center" direction="row">
+              <EuiFlexItem grow={false}>
+                <EuiTitle size="xxs" className="onboardingCardHeaderTitle">
+                  <h3>{title}</h3>
+                </EuiTitle>
+              </EuiFlexItem>
+              {badge && (
+                <EuiFlexItem grow={false}>
+                  <OnboardingCardBadge badge={badge} />
+                </EuiFlexItem>
+              )}
+            </EuiFlexGroup>
           </EuiFlexItem>
 
           {checkCompleteResult?.additionalBadges?.map((additionalBadge, index) => (
