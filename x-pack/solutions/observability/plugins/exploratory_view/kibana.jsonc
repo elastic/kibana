@@ -41,7 +41,6 @@
     ],
     "requiredBundles": [
       "dataViews",
-      "embeddable",
       "data",
       "kibanaReact",
       "kibanaUtils",
