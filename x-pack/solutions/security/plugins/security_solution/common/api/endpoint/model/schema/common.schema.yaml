@@ -25,7 +25,7 @@ components:
       example: 10
     StartDate:
       type: string
-      description: A start date in ISO format or Date Math format.
+      description: A start date in ISO 8601 format or Date Math format.
       example: "2023-10-31T00:00:00.000Z"
     EndDate:
       type: string
