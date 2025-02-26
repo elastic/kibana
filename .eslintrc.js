@@ -1640,6 +1640,11 @@ module.exports = {
         'src/platform/packages/shared/kbn-cases-components/**/*.{ts, tsx}',
         'src/platform/packages/shared/kbn-actions-types/**/*.{ts, tsx}',
         'src/platform/packages/shared/kbn-alerts-as-data-utils/**/*.{ts, tsx}',
+        'src/platform/packages/shared/kbn-grouping/**/*.{ts, tsx}',
+        'src/platform/packages/shared/kbn-rrule/**/*.{ts, tsx}',
+        'src/platform/packages/shared/kbn-rule-data-utils/**/*.{ts, tsx}',
+        'src/platform/packages/shared/kbn-triggers-actions-ui-types/**/*.{ts, tsx}',
+        'x-pack/platform/packages/shared/kbn-alerting-comparators/**/*.{ts, tsx}',
       ],
       rules: {
         '@typescript-eslint/consistent-type-imports': 'error',
