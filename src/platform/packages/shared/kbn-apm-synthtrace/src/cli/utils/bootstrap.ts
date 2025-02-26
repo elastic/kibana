@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Client } from '@elastic/elasticsearch';
+import { Client, HttpConnection } from '@elastic/elasticsearch';
 import { createLogger } from '../../lib/utils/create_logger';
 import { getClients } from './get_clients';
 import { getKibanaClient } from './get_kibana_client';
@@ -28,6 +28,8 @@ export async function bootstrap(runOptions: RunOptions) {
   const client = new Client({
     node: esUrl,
     tls: getEsClientTlsSettings(esUrl),
+    Connection: HttpConnection,
+    requestTimeout: 30_000,
   });
 
   const clients = await getClients({
