@@ -419,6 +419,8 @@ export class CoreSystem {
       `;
       this.rootDomElement.classList.add(coreSystemRootDomElement);
 
+      performance.mark('anton:rendering-start');
+
       this.rendering.start({
         application,
         chrome,
