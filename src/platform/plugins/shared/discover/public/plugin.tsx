@@ -28,7 +28,6 @@ import { DISCOVER_ESQL_LOCATOR } from '@kbn/deeplinks-analytics';
 import { DISCOVER_APP_LOCATOR, PLUGIN_ID } from '../common';
 import { registerFeature } from './plugin_imports/register_feature';
 import type { UrlTracker } from './build_services';
-import { ACTION_VIEW_SAVED_SEARCH } from './embeddable/actions/view_saved_search_action';
 import { initializeKbnUrlTracking } from './utils/initialize_kbn_url_tracking';
 import {
   type DiscoverContextAppLocator,
@@ -40,7 +39,10 @@ import {
 } from './application/doc/locator';
 import { type DiscoverAppLocator } from '../common';
 import { defaultCustomizationContext } from './customizations/defaults';
-import { SEARCH_EMBEDDABLE_CELL_ACTIONS_TRIGGER } from './embeddable/constants';
+import {
+  SEARCH_EMBEDDABLE_CELL_ACTIONS_TRIGGER,
+  ACTION_VIEW_SAVED_SEARCH,
+} from './embeddable/constants';
 import {
   DiscoverContainerInternal,
   type DiscoverContainerProps,
