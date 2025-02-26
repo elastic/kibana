@@ -6,5 +6,4 @@
   ],
   "group": "platform",
   "visibility": "shared",
-  "devOnly": true
 }
