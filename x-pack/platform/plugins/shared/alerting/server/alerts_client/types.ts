@@ -167,6 +167,7 @@ export interface ReportedAlert<
   state?: State;
   context?: Context;
   payload?: DeepPartial<AlertData>;
+  runtimeFields?: string[];
 }
 
 export interface RecoveredAlertData<
