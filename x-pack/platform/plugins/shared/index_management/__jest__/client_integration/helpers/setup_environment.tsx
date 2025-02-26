@@ -114,10 +114,7 @@ const { Provider: KibanaReactContextProvider } = createKibanaReactContext({
 });
 
 export const setupEnvironment = () => {
-  breadcrumbService.setup(
-    () => undefined,
-    () => undefined
-  );
+  breadcrumbService.setup(() => undefined);
   documentationService.setup(docLinksServiceMock.createStartContract());
   notificationService.setup(notificationServiceMock.createStartContract());
 

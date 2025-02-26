@@ -81,7 +81,6 @@ export interface ManagementAppMountParams {
   theme: ThemeServiceStart;
   /** @deprecated - use `theme` **/
   theme$: Observable<CoreTheme>;
-  setContentBreadcrumbs?: (showContentBreadcrumbs: boolean) => void;
 }
 
 export interface CreateManagementItemArgs {

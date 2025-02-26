@@ -9,7 +9,6 @@ import React, { useEffect } from 'react';
 import { RouteComponentProps } from 'react-router-dom';
 
 import { ScopedHistory } from '@kbn/core/public';
-import useObservable from 'react-use/lib/useObservable';
 import { APP_WRAPPER_CLASS, useExecutionContext } from '../../../../shared_imports';
 import { breadcrumbService, IndexManagementBreadcrumb } from '../../../services/breadcrumbs';
 import { useAppContext } from '../../../app_context';
@@ -17,21 +16,17 @@ import { IndexTable } from './index_table';
 
 export const IndexList: React.FunctionComponent<RouteComponentProps> = ({ history }) => {
   const {
-    core: { executionContext, chrome },
-    plugins: { cloud },
+    core: { executionContext },
   } = useAppContext();
 
   useExecutionContext(executionContext, {
     type: 'application',
     page: 'indexManagementIndicesTab',
   });
-  const activeSolutionId = useObservable(chrome.getActiveSolutionNavId$());
 
   useEffect(() => {
-    const isActiveSolutionSearch = !cloud?.isServerlessEnabled && activeSolutionId === 'es';
     breadcrumbService.setBreadcrumbs(IndexManagementBreadcrumb.indices);
-    breadcrumbService.setContentBreadcrumbs(isActiveSolutionSearch);
-  }, [activeSolutionId, cloud]);
+  }, []);
 
   return (
     <div className={`${APP_WRAPPER_CLASS} im-snapshotTestSubject`} data-test-subj="indicesList">

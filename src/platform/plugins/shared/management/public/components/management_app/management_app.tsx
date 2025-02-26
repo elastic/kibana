@@ -27,7 +27,6 @@ import {
   ManagementSection,
   MANAGEMENT_BREADCRUMB,
   MANAGEMENT_BREADCRUMB_NO_HREF,
-  CONTENT_BREADCRUMB_NO_HREF,
 } from '../../utils';
 import { ManagementRouter } from './management_router';
 import { managementSidebarNav } from '../management_sidebar_nav/management_sidebar_nav';
@@ -62,7 +61,6 @@ export const ManagementApp = ({ dependencies, history, appBasePath }: Management
     setSelectedId(id);
     window.scrollTo(0, 0);
   }, []);
-  const [showContentBreadcrumbs, setContentBreadcrumbs] = useState<boolean | undefined>(undefined);
 
   const setBreadcrumbsScoped = useCallback(
     (crumbs: ChromeBreadcrumb[] = [], appHistory?: ScopedHistory) => {
@@ -74,9 +72,7 @@ export const ManagementApp = ({ dependencies, history, appBasePath }: Management
       // Clicking the Management breadcrumb to navigate back to the "root" only
       // makes sense if there's a management app open. So when one isn't open
       // this breadcrumb shouldn't be a clickable link.
-      const managementBreadcrumb = showContentBreadcrumbs
-        ? CONTENT_BREADCRUMB_NO_HREF
-        : crumbs.length
+      const managementBreadcrumb = crumbs.length
         ? MANAGEMENT_BREADCRUMB
         : MANAGEMENT_BREADCRUMB_NO_HREF;
       setBreadcrumbs([
@@ -84,7 +80,7 @@ export const ManagementApp = ({ dependencies, history, appBasePath }: Management
         ...crumbs.map((item) => wrapBreadcrumb(item, appHistory || history)),
       ]);
     },
-    [setBreadcrumbs, history, showContentBreadcrumbs]
+    [setBreadcrumbs, history]
   );
 
   useEffect(() => {
@@ -138,7 +134,6 @@ export const ManagementApp = ({ dependencies, history, appBasePath }: Management
               onAppMounted={onAppMounted}
               sections={sections}
               analytics={coreStart.analytics}
-              setContentBreadcrumbs={(value?: boolean) => setContentBreadcrumbs(value)}
             />
           </KibanaPageTemplate>
         </AppContextProvider>

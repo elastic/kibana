@@ -27,7 +27,6 @@ interface ManagementSectionWrapperProps {
   onAppMounted: (id: string) => void;
   history: AppMountParameters['history'];
   theme: ThemeServiceStart;
-  setContentBreadcrumbs?: (value: boolean) => void;
 }
 
 interface ManagementSectionWrapperState {
@@ -47,7 +46,7 @@ export class ManagementAppWrapper extends Component<
   }
 
   componentDidMount() {
-    const { setBreadcrumbs, app, onAppMounted, history, theme, setContentBreadcrumbs } = this.props;
+    const { setBreadcrumbs, app, onAppMounted, history, theme } = this.props;
     const { mount, basePath } = app;
     const appHistory = history.createSubHistory(app.basePath);
 
@@ -61,8 +60,6 @@ export class ManagementAppWrapper extends Component<
       history: appHistory,
       theme,
       theme$,
-      setContentBreadcrumbs: (value) =>
-        setContentBreadcrumbs ? setContentBreadcrumbs(value) : undefined,
     });
 
     onAppMounted(app.id);

@@ -29,7 +29,6 @@ interface ManagementRouterProps {
   onAppMounted: (id: string) => void;
   sections: ManagementSection[];
   analytics: AnalyticsServiceStart;
-  setContentBreadcrumbs?: (value?: boolean) => void;
 }
 
 export const ManagementRouter = memo(
@@ -40,7 +39,6 @@ export const ManagementRouter = memo(
     sections,
     theme,
     analytics,
-    setContentBreadcrumbs,
   }: ManagementRouterProps) => {
     return (
       <KibanaErrorBoundaryProvider analytics={analytics}>
@@ -60,7 +58,6 @@ export const ManagementRouter = memo(
                           onAppMounted={onAppMounted}
                           history={history}
                           theme={theme}
-                          setContentBreadcrumbs={setContentBreadcrumbs}
                         />
                       )}
                     />
@@ -79,7 +76,6 @@ export const ManagementRouter = memo(
                   <ManagementLandingPage
                     setBreadcrumbs={setBreadcrumbs}
                     onAppMounted={onAppMounted}
-                    setContentBreadcrumbs={setContentBreadcrumbs}
                   />
                 )}
               />

@@ -137,7 +137,7 @@ export async function mountManagementSection({
   cloud?: CloudSetup;
   canUseSyntheticSource: boolean;
 }) {
-  const { element, setBreadcrumbs, history, setContentBreadcrumbs } = params;
+  const { element, setBreadcrumbs, history } = params;
   const [core, startDependencies] = await coreSetup.getStartServices();
   const {
     docLinks,
@@ -145,7 +145,7 @@ export async function mountManagementSection({
   } = core;
   docTitle.change(PLUGIN.getI18nName(i18n));
 
-  breadcrumbService.setup(setBreadcrumbs, setContentBreadcrumbs);
+  breadcrumbService.setup(setBreadcrumbs);
   documentationService.setup(docLinks);
 
   const { uiMetricService } = initSetup({

@@ -49,7 +49,6 @@ import { NoMatch, DataHealth } from '../../../../components';
 import { IndexActionsContextMenu } from '../index_actions_context_menu';
 import { CreateIndexButton } from '../create_index/create_index_button';
 import { IndexTablePagination, PAGE_SIZE_OPTIONS } from './index_table_pagination';
-import { breadcrumbService } from '../../../../services/breadcrumbs';
 
 const getColumnConfigs = ({
   showIndexStats,
@@ -79,8 +78,7 @@ const getColumnConfigs = ({
                   location.search || '',
                   extensionsService,
                   application,
-                  http,
-                  breadcrumbService
+                  http
                 );
               }}
             >

@@ -7,11 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export {
-  MANAGEMENT_BREADCRUMB,
-  MANAGEMENT_BREADCRUMB_NO_HREF,
-  CONTENT_BREADCRUMB_NO_HREF,
-} from './breadcrumbs';
+export { MANAGEMENT_BREADCRUMB, MANAGEMENT_BREADCRUMB_NO_HREF } from './breadcrumbs';
 export type { RegisterManagementAppArgs } from './management_app';
 export { ManagementApp } from './management_app';
 export type { RegisterManagementSectionArgs } from './management_section';

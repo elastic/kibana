@@ -9,7 +9,6 @@ import { getIndexDetailsLink, getIndexListUri, navigateToIndexDetailsPage } from
 import { applicationServiceMock, httpServiceMock } from '@kbn/core/public/mocks';
 import { ExtensionsService } from '../../services/extensions_service';
 import { IndexDetailsSection } from '../../../common/constants';
-import { BreadcrumbService } from './breadcrumbs';
 
 describe('routing', () => {
   describe('index details link', () => {
@@ -37,12 +36,7 @@ describe('routing', () => {
       const extensionService = {
         indexDetailsPageRoute: null,
       } as ExtensionsService;
-
-      const breadcrumbs = {
-        setBreadcrumbs: jest.fn(),
-      } as unknown as BreadcrumbService;
-
-      navigateToIndexDetailsPage('testIndex', '', extensionService, application, http, breadcrumbs);
+      navigateToIndexDetailsPage('testIndex', '', extensionService, application, http);
       expect(application.navigateToUrl).toHaveBeenCalled();
     });
 
@@ -54,18 +48,12 @@ describe('routing', () => {
           },
         },
       } as ExtensionsService;
-
-      const breadcrumbs = {
-        setBreadcrumbs: jest.fn(),
-      } as unknown as BreadcrumbService;
-
       navigateToIndexDetailsPage(
         'testIndex',
         '',
         extensionService,
         application,
         http,
-        breadcrumbs,
         IndexDetailsSection.Settings
       );
       expect(application.navigateToUrl).toHaveBeenCalled();
