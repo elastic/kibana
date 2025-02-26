@@ -103,6 +103,7 @@
     "globby/fast-glob": "^3.3.2"
   },
   "dependencies": {
+    "@apidevtools/json-schema-ref-parser": "^11.9.1",
     "@appland/sql-parser": "^1.5.1",
     "@aws-crypto/sha256-js": "^5.2.0",
     "@aws-crypto/util": "^5.2.0",

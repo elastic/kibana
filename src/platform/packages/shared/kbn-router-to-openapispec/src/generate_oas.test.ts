@@ -23,7 +23,7 @@ interface RecursiveType {
 
 describe('generateOpenApiDocument', () => {
   describe('@kbn/config-schema', () => {
-    it('generates the expected OpenAPI document for the shared schema', () => {
+    it('generates the expected OpenAPI document for the shared schema', async () => {
       const [routers, versionedRouters] = createTestRouters({
         routers: {
           testRouter: {
@@ -34,7 +34,7 @@ describe('generateOpenApiDocument', () => {
         bodySchema: createSharedConfigSchema(),
       });
       expect(
-        generateOpenApiDocument(
+        await generateOpenApiDocument(
           {
             routers,
             versionedRouters,
@@ -48,7 +48,7 @@ describe('generateOpenApiDocument', () => {
       ).toEqual(sharedOas);
     });
 
-    it('generates the expected OpenAPI document', () => {
+    it('generates the expected OpenAPI document', async () => {
       const [routers, versionedRouters] = createTestRouters({
         routers: {
           testRouter: {
@@ -80,7 +80,7 @@ describe('generateOpenApiDocument', () => {
         },
       });
       expect(
-        generateOpenApiDocument(
+        await generateOpenApiDocument(
           {
             routers,
             versionedRouters,
@@ -94,7 +94,7 @@ describe('generateOpenApiDocument', () => {
       ).toMatchSnapshot();
     });
 
-    it('generates references in the expected format', () => {
+    it('generates references in the expected format', async () => {
       const sharedIdSchema = schema.string({ minLength: 1, meta: { description: 'test' } });
       const sharedNameSchema = schema.string({ minLength: 1 });
       const otherSchema = schema.object(
@@ -102,7 +102,7 @@ describe('generateOpenApiDocument', () => {
         { meta: { id: 'foo' } }
       );
       expect(
-        generateOpenApiDocument(
+        await generateOpenApiDocument(
           {
             routers: [
               createRouter({
@@ -139,7 +139,7 @@ describe('generateOpenApiDocument', () => {
       ).toMatchSnapshot();
     });
 
-    it('handles recursive schemas', () => {
+    it('handles recursive schemas', async () => {
       const id = 'recursive';
       const recursiveSchema: Type<RecursiveType> = schema.object(
         {
@@ -149,7 +149,7 @@ describe('generateOpenApiDocument', () => {
         { meta: { id } }
       );
       expect(
-        generateOpenApiDocument(
+        await generateOpenApiDocument(
           {
             routers: [
               createRouter({
@@ -187,7 +187,7 @@ describe('generateOpenApiDocument', () => {
   });
 
   describe('Zod', () => {
-    it('generates the expected OpenAPI document for the shared schema', () => {
+    it('generates the expected OpenAPI document for the shared schema', async () => {
       const [routers, versionedRouters] = createTestRouters({
         routers: { testRouter: { routes: [{ method: 'get' }, { method: 'post' }] } },
         versionedRouters: { testVersionedRouter: { routes: [{}] } },
@@ -195,7 +195,7 @@ describe('generateOpenApiDocument', () => {
       });
 
       expect(
-        generateOpenApiDocument(
+        await generateOpenApiDocument(
           {
             routers,
             versionedRouters,
@@ -211,9 +211,9 @@ describe('generateOpenApiDocument', () => {
   });
 
   describe('unknown schema/validation', () => {
-    it('produces the expected output', () => {
+    it('produces the expected output', async () => {
       expect(
-        generateOpenApiDocument(
+        await generateOpenApiDocument(
           {
             routers: [
               createRouter({
@@ -275,7 +275,7 @@ describe('generateOpenApiDocument', () => {
   });
 
   describe('tags', () => {
-    it('handles tags as expected', () => {
+    it('handles tags as expected', async () => {
       const [routers, versionedRouters] = createTestRouters({
         routers: {
           testRouter1: {
@@ -314,7 +314,7 @@ describe('generateOpenApiDocument', () => {
           },
         },
       });
-      const result = generateOpenApiDocument(
+      const result = await generateOpenApiDocument(
         {
           routers,
           versionedRouters,
@@ -337,7 +337,7 @@ describe('generateOpenApiDocument', () => {
   });
 
   describe('availability', () => {
-    it('creates the expected availability entries', () => {
+    it('creates the expected availability entries', async () => {
       const [routers, versionedRouters] = createTestRouters({
         routers: {
           testRouter1: {
@@ -391,7 +391,7 @@ describe('generateOpenApiDocument', () => {
           },
         },
       });
-      const result = generateOpenApiDocument(
+      const result = await generateOpenApiDocument(
         {
           routers,
           versionedRouters,
