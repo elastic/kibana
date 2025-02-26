@@ -42,9 +42,9 @@ import {
   useStreamEnrichmentEvents,
   useStreamsEnrichmentSelector,
 } from '../services/stream_enrichment_service';
-import { ProcessorMetrics } from '../hooks/use_processing_simulator';
 import { ProcessorErrors, ProcessorMetricBadges } from './processor_metrics';
 import { StreamEnrichmentContext } from '../services/stream_enrichment_service/types';
+import { ProcessorMetrics } from '../services/stream_enrichment_service/simulation_state_machine';
 
 export function AddProcessorPanel() {
   const { euiTheme } = useEuiTheme();

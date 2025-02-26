@@ -78,6 +78,8 @@ export type DateRangeChildActor = ActorRefFrom<typeof dateRangeMachine>;
 export type SimulationParentActor = ActorRef<Snapshot<unknown>, SimulationToParentEvent>;
 
 export type Simulation = APIReturnType<'POST /api/streams/{name}/processing/_simulate'>;
+export type ProcessorMetrics =
+  Simulation['processors_metrics'][keyof Simulation['processors_metrics']];
 
 export interface SimulationMachineContext {
   dateRangeRef: DateRangeChildActor;
@@ -300,15 +302,17 @@ export const simulationMachine = setup({
   },
 });
 
+interface SimulationMachineDeps {
+  data: DataPublicPluginStart;
+  streamsRepositoryClient: StreamsRepositoryClient;
+  toasts: IToasts;
+}
+
 export const createSimulationMachineImplementations = ({
   data,
   streamsRepositoryClient,
   toasts,
-}: {
-  data: DataPublicPluginStart;
-  streamsRepositoryClient: StreamsRepositoryClient;
-  toasts: IToasts;
-}): MachineImplementationsFrom<typeof simulationMachine> => ({
+}: SimulationMachineDeps): MachineImplementationsFrom<typeof simulationMachine> => ({
   actors: {
     fetchSamples: createSamplesFetchActor({ streamsRepositoryClient }),
     runSimulation: createSimulationRunnerActor({ streamsRepositoryClient }),
@@ -329,9 +333,7 @@ interface SamplesFetchInput {
 
 function createSamplesFetchActor({
   streamsRepositoryClient,
-}: {
-  streamsRepositoryClient: StreamsRepositoryClient;
-}) {
+}: Pick<SimulationMachineDeps, 'streamsRepositoryClient'>) {
   return fromPromise<SamplesFetchOutput, SamplesFetchInput>(async ({ input, signal }) => {
     const samplesBody = await streamsRepositoryClient.fetch('POST /api/streams/{name}/_sample', {
       signal,
@@ -359,11 +361,9 @@ interface SimulationRunnerInput {
 
 function createSimulationRunnerActor({
   streamsRepositoryClient,
-}: {
-  streamsRepositoryClient: StreamsRepositoryClient;
-}) {
-  return fromPromise<SimulationRunnerOutput, SimulationRunnerInput>(({ input, signal }) => {
-    return streamsRepositoryClient.fetch('POST /api/streams/{name}/processing/_simulate', {
+}: Pick<SimulationMachineDeps, 'streamsRepositoryClient'>) {
+  return fromPromise<SimulationRunnerOutput, SimulationRunnerInput>(({ input, signal }) =>
+    streamsRepositoryClient.fetch('POST /api/streams/{name}/processing/_simulate', {
       signal,
       params: {
         path: { name: input.streamName },
@@ -372,11 +372,11 @@ function createSimulationRunnerActor({
           processing: input.processors.map(processorConverter.toSimulateDefinition),
         },
       },
-    });
-  });
+    })
+  );
 }
 
-function createSamplesFetchFailureNofitier({ toasts }: { toasts: IToasts }) {
+function createSamplesFetchFailureNofitier({ toasts }: Pick<SimulationMachineDeps, 'toasts'>) {
   return (params: { event: unknown }) => {
     const event = params.event as ErrorActorEvent<esErrors.ResponseError, string>;
     toasts.addError(new Error(event.error.body.message), {
@@ -388,7 +388,7 @@ function createSamplesFetchFailureNofitier({ toasts }: { toasts: IToasts }) {
   };
 }
 
-function createSimulationRunFailureNofitier({ toasts }: { toasts: IToasts }) {
+function createSimulationRunFailureNofitier({ toasts }: Pick<SimulationMachineDeps, 'toasts'>) {
   return (params: { event: unknown }) => {
     const event = params.event as ErrorActorEvent<esErrors.ResponseError, string>;
     toasts.addError(new Error(event.error.body.message), {
