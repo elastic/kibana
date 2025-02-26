@@ -5,23 +5,12 @@
  * 2.0.
  */
 
-import {
-  isElasticAgentName,
-  isOpenTelemetryAgentName,
-} from '@kbn/elastic-agent-utils/src/agent_guards';
+import { getSdkNameAndLanguage, getIngestionPath } from '@kbn/elastic-agent-utils';
 
 interface DashboardFileNamePartsProps {
   agentName: string;
-  hasOpenTelemetryFields?: boolean;
-}
-
-interface SdkNameAndLanguage {
-  sdkName?: 'apm' | 'edot' | 'otel_other';
-  language?: string;
-}
-
-export interface DashboardFileParts extends SdkNameAndLanguage {
-  dataFormat: 'otel_native' | 'classic_apm';
+  telemetrySdkName?: string;
+  telemetrySdkLanguage?: string;
 }
 
 // We use the language name in the filename so we want to have a valid filename
@@ -29,34 +18,16 @@ export interface DashboardFileParts extends SdkNameAndLanguage {
 const standardizeLanguageName = (languageName?: string) =>
   languageName ? languageName.toLowerCase().replace('/', '_') : undefined;
 
-const getSdkNameAndLanguage = (agentName: string): SdkNameAndLanguage => {
-  const LANGUAGE_INDEX = 1;
-  if (isElasticAgentName(agentName)) {
-    return { sdkName: 'apm', language: standardizeLanguageName(agentName) };
-  }
-  const agentNameParts = agentName.split('/');
-
-  if (isOpenTelemetryAgentName(agentName)) {
-    if (agentNameParts[agentNameParts.length - 1] === 'elastic') {
-      return { sdkName: 'edot', language: standardizeLanguageName(agentNameParts[LANGUAGE_INDEX]) };
-    }
-    return {
-      sdkName: 'otel_other',
-      language: standardizeLanguageName(agentNameParts[LANGUAGE_INDEX]),
-    };
-  }
-
-  return { sdkName: undefined, language: undefined };
-};
-
 export const getDashboardFileName = ({
   agentName,
-  hasOpenTelemetryFields,
+  telemetrySdkName,
+  telemetrySdkLanguage,
 }: DashboardFileNamePartsProps): string | undefined => {
-  const dataFormat = hasOpenTelemetryFields ? 'otel_native' : 'classic_apm';
+  const dataFormat = getIngestionPath(!!(telemetrySdkName ?? telemetrySdkLanguage));
   const { sdkName, language } = getSdkNameAndLanguage(agentName);
-  if (!dataFormat || !sdkName || !language) {
+  const sdkLanguage = standardizeLanguageName(language);
+  if (!sdkName || !sdkLanguage) {
     return undefined;
   }
-  return `${dataFormat}-${sdkName}-${language}`;
+  return `${dataFormat}-${sdkName}-${sdkLanguage}`;
 };

@@ -60,7 +60,8 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
         expect(response.body).to.eql({
           agentName: 'nodejs',
-          hasOpenTelemetryFields: false,
+          telemetrySdkName: undefined,
+          telemetrySdkLanguage: undefined,
           runtimeName: 'node',
         });
       });

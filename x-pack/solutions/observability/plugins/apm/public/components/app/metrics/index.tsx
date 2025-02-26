@@ -21,8 +21,14 @@ import { ServiceTabEmptyState } from '../service_tab_empty_state';
 import { JvmMetricsOverview } from './jvm_metrics_overview';
 
 export function Metrics() {
-  const { agentName, runtimeName, serverlessType, serviceEntitySummary, hasOpenTelemetryFields } =
-    useApmServiceContext();
+  const {
+    agentName,
+    runtimeName,
+    serverlessType,
+    serviceEntitySummary,
+    telemetrySdkName,
+    telemetrySdkLanguage,
+  } = useApmServiceContext();
   const isAWSLambda = isAWSLambdaAgentName(serverlessType);
   const { dataView } = useAdHocApmDataView();
 
@@ -38,7 +44,7 @@ export function Metrics() {
   }
 
   if (
-    !hasDashboard({ agentName, hasOpenTelemetryFields }) &&
+    !hasDashboard({ agentName, telemetrySdkName, telemetrySdkLanguage }) &&
     !isElasticAgentName(agentName ?? '')
   ) {
     return (
@@ -52,7 +58,7 @@ export function Metrics() {
     );
   }
 
-  if (hasDashboard({ agentName, hasOpenTelemetryFields }) && dataView) {
+  if (hasDashboard({ agentName, telemetrySdkName, telemetrySdkLanguage }) && dataView) {
     return (
       <JsonMetricsDashboard
         agentName={agentName}

@@ -84,7 +84,8 @@ describe('Metrics', () => {
       beforeEach(() => {
         jest.spyOn(useApmServiceContext, 'useApmServiceContext').mockReturnValue({
           agentName: 'opentelemetry/nodejs',
-          hasOpenTelemetryFields: true,
+          telemetrySdkName: 'opentelemetry',
+          telemetrySdkLanguage: 'nodejs',
           serviceName: 'testServiceName',
           transactionTypeStatus: FETCH_STATUS.SUCCESS,
           transactionTypes: [],

@@ -26,7 +26,8 @@ import { maybe } from '../../../common/utils/maybe';
 export interface ServiceAgentResponse {
   agentName?: string;
   runtimeName?: string;
-  hasOpenTelemetryFields?: boolean;
+  telemetrySdkName?: string;
+  telemetrySdkLanguage?: string;
   serverlessType?: ServerlessType;
 }
 
@@ -112,7 +113,8 @@ export async function getServiceAgent({
 
   return {
     agentName: agent?.name,
-    hasOpenTelemetryFields: !!(telemetry?.sdk?.name ?? telemetry?.sdk?.language),
+    telemetrySdkName: telemetry?.sdk?.name,
+    telemetrySdkLanguage: telemetry?.sdk?.language,
     runtimeName: service?.runtime?.name,
     serverlessType,
   };

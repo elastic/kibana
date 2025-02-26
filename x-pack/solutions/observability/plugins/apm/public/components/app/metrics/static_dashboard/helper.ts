@@ -13,15 +13,21 @@ interface DashboardFileProps {
   agentName?: string;
   runtimeName?: string;
   serverlessType?: string;
-  hasOpenTelemetryFields?: boolean;
+  telemetrySdkName?: string;
+  telemetrySdkLanguage?: string;
 }
 
 export interface MetricsDashboardProps extends DashboardFileProps {
   dataView: DataView;
 }
 
-function getDashboardFileNameFromProps({ agentName, hasOpenTelemetryFields }: DashboardFileProps) {
-  const dashboardFile = agentName && getDashboardFileName({ agentName, hasOpenTelemetryFields });
+function getDashboardFileNameFromProps({
+  agentName,
+  telemetrySdkName,
+  telemetrySdkLanguage,
+}: DashboardFileProps) {
+  const dashboardFile =
+    agentName && getDashboardFileName({ agentName, telemetrySdkName, telemetrySdkLanguage });
   return dashboardFile;
 }
 
