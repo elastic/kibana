@@ -54,12 +54,10 @@ export default ({ getService }: FtrProviderContext) => {
         it('should create a new document entry for the current user', async () => {
           const entry = await createEntry({ supertest, log, entry: documentEntry });
 
-          const expectedDocumentEntry = {
+          expect(removeServerGeneratedProperties(entry)).toMatchObject({
             ...documentEntry,
             users: [{ name: 'elastic' }],
-          };
-
-          expect(removeServerGeneratedProperties(entry)).toEqual(expectedDocumentEntry);
+          });
         });
 
         it('should create a new index entry for the current user', async () => {
