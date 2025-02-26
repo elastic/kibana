@@ -56,18 +56,24 @@ const argTypes = {
   },
 };
 
-export const AvailablePackage = ({ width, ...props }: Args) => (
-  <div style={{ width }}>
-    <PackageCard {...props} showLabels={false} />
-  </div>
-);
-AvailablePackage.args = args;
-AvailablePackage.argTypes = argTypes;
+export const AvailablePackage = {
+  render: ({ width, ...props }: Args) => (
+    <div style={{ width }}>
+      <PackageCard {...props} showLabels={false} />
+    </div>
+  ),
 
-export const InstalledPackage = ({ width, ...props }: Args) => (
-  <div style={{ width }}>
-    <PackageCard {...props} showLabels={true} />
-  </div>
-);
-InstalledPackage.args = args;
-InstalledPackage.argTypes = argTypes;
+  args,
+  argTypes,
+};
+
+export const InstalledPackage = {
+  render: ({ width, ...props }: Args) => (
+    <div style={{ width }}>
+      <PackageCard {...props} showLabels={true} />
+    </div>
+  ),
+
+  args,
+  argTypes,
+};
