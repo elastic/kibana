@@ -23,7 +23,7 @@ export const edotSDKSettings: RawSettingDefinition[] = [
         '\n' +
         'The up-to-date list of modules for which instrumentation can be disabled is language specific ' +
         'and can be found under the following links: ' +
-        '[opentelemetry/java/elastic](https://opentelemetry.io/docs/zero-code/java/agent/disable/#suppressing-specific-agent-instrumentation)',
+        '[opentelemetry/java/elastic](https://ela.st/otel-agent-instructions)',
     }),
     includeAgents: ['opentelemetry/java/elastic'],
   },

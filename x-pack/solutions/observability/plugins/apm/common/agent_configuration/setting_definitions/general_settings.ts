@@ -6,6 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { EDOT_AGENT_NAMES } from '@kbn/elastic-agent-utils/src/agent_names';
 import { captureBodyRt } from '../runtime_types/capture_body_rt';
 import { logLevelRt } from '../runtime_types/log_level_rt';
 import { logEcsReformattingRt } from '../runtime_types/log_ecs_reformatting_rt';
@@ -34,11 +35,7 @@ export const generalSettings: RawSettingDefinition[] = [
       'php',
       'android/java',
       'iOS/swift',
-      'opentelemetry/java/elastic',
-      'opentelemetry/dotnet/elastic',
-      'opentelemetry/nodejs/elastic',
-      'opentelemetry/php/elastic',
-      'opentelemetry/python/elastic',
+      ...EDOT_AGENT_NAMES,
     ],
   },
 
@@ -63,11 +60,7 @@ export const generalSettings: RawSettingDefinition[] = [
       'php',
       'android/java',
       'iOS/swift',
-      'opentelemetry/java/elastic',
-      'opentelemetry/dotnet/elastic',
-      'opentelemetry/nodejs/elastic',
-      'opentelemetry/php/elastic',
-      'opentelemetry/python/elastic',
+      ...EDOT_AGENT_NAMES,
     ],
   },
 
@@ -90,18 +83,7 @@ export const generalSettings: RawSettingDefinition[] = [
       { text: 'transactions', value: 'transactions' },
       { text: 'all', value: 'all' },
     ],
-    excludeAgents: [
-      'js-base',
-      'rum-js',
-      'php',
-      'android/java',
-      'iOS/swift',
-      'opentelemetry/java/elastic',
-      'opentelemetry/dotnet/elastic',
-      'opentelemetry/nodejs/elastic',
-      'opentelemetry/php/elastic',
-      'opentelemetry/python/elastic',
-    ],
+    excludeAgents: ['js-base', 'rum-js', 'php', 'android/java', 'iOS/swift', ...EDOT_AGENT_NAMES],
   },
 
   {
@@ -139,11 +121,7 @@ export const generalSettings: RawSettingDefinition[] = [
       'php',
       'android/java',
       'iOS/swift',
-      'opentelemetry/java/elastic',
-      'opentelemetry/dotnet/elastic',
-      'opentelemetry/nodejs/elastic',
-      'opentelemetry/php/elastic',
-      'opentelemetry/python/elastic',
+      ...EDOT_AGENT_NAMES,
     ],
   },
 
@@ -427,11 +405,7 @@ export const generalSettings: RawSettingDefinition[] = [
       'php',
       'android/java',
       'iOS/swift',
-      'opentelemetry/java/elastic',
-      'opentelemetry/dotnet/elastic',
-      'opentelemetry/nodejs/elastic',
-      'opentelemetry/php/elastic',
-      'opentelemetry/python/elastic',
+      ...EDOT_AGENT_NAMES,
     ],
   },
 
@@ -514,17 +488,7 @@ export const generalSettings: RawSettingDefinition[] = [
     description: i18n.translate('xpack.apm.agentConfig.transactionMaxSpans.description', {
       defaultMessage: 'Limits the amount of spans that are recorded per transaction.',
     }),
-    excludeAgents: [
-      'js-base',
-      'rum-js',
-      'android/java',
-      'iOS/swift',
-      'opentelemetry/java/elastic',
-      'opentelemetry/dotnet/elastic',
-      'opentelemetry/nodejs/elastic',
-      'opentelemetry/php/elastic',
-      'opentelemetry/python/elastic',
-    ],
+    excludeAgents: ['js-base', 'rum-js', 'android/java', 'iOS/swift', ...EDOT_AGENT_NAMES],
   },
 
   // Transaction sample rate
@@ -539,15 +503,7 @@ export const generalSettings: RawSettingDefinition[] = [
       defaultMessage:
         'By default, the agent will sample every transaction (e.g. request to your service). To reduce overhead and storage requirements, you can set the sample rate to a value between 0.0 and 1.0. We still record overall time and the result for unsampled transactions, but not context information, labels, or spans.',
     }),
-    excludeAgents: [
-      'android/java',
-      'iOS/swift',
-      'opentelemetry/java/elastic',
-      'opentelemetry/dotnet/elastic',
-      'opentelemetry/nodejs/elastic',
-      'opentelemetry/php/elastic',
-      'opentelemetry/python/elastic',
-    ],
+    excludeAgents: ['android/java', 'iOS/swift', ...EDOT_AGENT_NAMES],
   },
 
   // Sanitize field names
