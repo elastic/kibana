@@ -7,7 +7,7 @@
 import { savedObjectsRepositoryMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { DEFAULT_TIMEOUT, KibanaDiscoveryService } from './kibana_discovery_service';
 import { BACKGROUND_TASK_NODE_SO_NAME } from '../saved_objects';
-import { SavedObjectsBulkDeleteResponse, SavedObjectsUpdateResponse } from '@kbn/core/server';
+import type { SavedObjectsBulkDeleteResponse, SavedObjectsUpdateResponse } from '@kbn/core/server';
 
 import { createFindResponse, createFindSO } from './mock_kibana_discovery_service';
 import {

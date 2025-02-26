@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { JsonObject } from '@kbn/utility-types';
+import type { JsonObject } from '@kbn/utility-types';
 import { keys } from 'lodash';
 import { set } from '@kbn/safer-lodash-set';
 import { isOk, unwrap } from '../lib/result_type';
-import { TaskLifecycleEvent } from '../polling_lifecycle';
-import { TaskManagerMetric } from '../task_events';
+import type { TaskLifecycleEvent } from '../polling_lifecycle';
+import type { TaskManagerMetric } from '../task_events';
 import { getTaskTypeGroup, type SerializedHistogram, SimpleHistogram } from './lib';
-import { TaskManagerMetrics } from './task_metrics_collector';
-import { ITaskMetricsAggregator } from './types';
+import type { TaskManagerMetrics } from './task_metrics_collector';
+import type { ITaskMetricsAggregator } from './types';
 
 const HDR_HISTOGRAM_MAX = 5400; // 90 minutes
 const HDR_HISTOGRAM_BUCKET_SIZE = 10; // 10 seconds
