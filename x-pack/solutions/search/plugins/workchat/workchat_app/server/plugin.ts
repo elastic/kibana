@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import type { CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/server';
+import type { CoreStart, CoreSetup, Plugin, PluginInitializerContext } from '@kbn/core/server';
+import { registerRoutes } from './routes';
 
 import type {
   WorkChatAppPluginSetup,
@@ -25,11 +26,14 @@ export class WorkChatAppPlugin
 {
   constructor(context: PluginInitializerContext) {}
 
-  public setup() {
+  public setup(core: CoreSetup, pluginsDependencies: WorkChatAppPluginSetupDependencies) {
+    const router = core.http.createRouter();
+    registerRoutes({ router });
+
     return {};
   }
 
-  public start(coreStart: CoreStart, pluginsStart: WorkChatAppPluginStartDependencies) {
+  public start(core: CoreStart, pluginsDependencies: WorkChatAppPluginStartDependencies) {
     return {};
   }
 }
