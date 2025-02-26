@@ -21,7 +21,7 @@ interface ESQLControlsFlyoutProps {
   variableType: ESQLVariableType;
   queryString: string;
   esqlVariables: ESQLControlVariable[];
-  onSaveControl?: (controlState: ESQLControlState, updatedQuery: string) => Promise<void>;
+  onSaveControl?: (controlState: ESQLControlState, updatedQuery?: string) => Promise<void>;
   onCancelControl?: () => void;
   cursorPosition?: monaco.Position;
   initialState?: ESQLControlState;
