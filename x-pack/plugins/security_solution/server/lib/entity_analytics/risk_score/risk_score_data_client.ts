@@ -22,6 +22,7 @@ import {
   getIndexPatternDataStream,
   getTransformOptions,
   mappingComponentName,
+  nameSpaceAwareMappingsComponentName,
   riskScoreFieldMap,
   totalFieldsLimit,
 } from './configurations';
