@@ -9,12 +9,12 @@ import { pruneContentReferences } from './prune_content_references';
 import { securityAlertsPageReference } from '../references';
 import { contentReferenceBlock } from '../references/utils';
 import { ContentReferencesStore } from '../types';
-import { contentReferencesStoreFactory } from './content_references_store_factory';
+import { newContentReferencesStore } from './content_references_store';
 
 describe('pruneContentReferences', () => {
   let contentReferencesStore: ContentReferencesStore;
   beforeEach(() => {
-    contentReferencesStore = contentReferencesStoreFactory();
+    contentReferencesStore = newContentReferencesStore();
   });
 
   it('prunes content references correctly', async () => {
