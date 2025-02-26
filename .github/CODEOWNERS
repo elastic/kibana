@@ -1247,6 +1247,11 @@ packages/kbn-monaco/src/esql @elastic/kibana-esql
 /x-pack/solutions/observability/plugins/infra/server/services/rules @elastic/obs-ux-infra_services-team @elastic/obs-ux-logs-team
 /x-pack/test/common/utils/server_route_repository @elastic/obs-knowledge-team
 
+## Streams parts owned by Logs UX
+/x-pack/platform/plugins/shared/streams/server/routes/streams/processing @elastic/obs-ux-logs-team
+/x-pack/platform/plugins/shared/streams/server/routes/streams/schema @elastic/obs-ux-logs-team
+/x-pack/platform/plugins/shared/streams_app/public/components/data_management @elastic/obs-ux-logs-team
+
 # Infra Monitoring tests
 /x-pack/test/api_integration/apis/infra @elastic/obs-ux-infra_services-team
 /x-pack/test/functional/apps/infra @elastic/obs-ux-infra_services-team
