@@ -27,23 +27,23 @@ import { AssignedDashboardList } from './assigned_dashboard_list';
 interface Props {
   assets: Asset[];
   onClose: () => void;
-  onSave: () => void;
+  onSave: (dashboards: Dashboard[]) => void;
 }
 
 export function ManageLinkedDashboardsFlyout({ assets, onClose, onSave }: Props) {
   const flyoutId = useGeneratedHtmlId({ prefix: 'linkedDashboardFlyout' });
-  const [assignedDashboards, setSelectedDashboards] = useState<Dashboard[]>(
+  const [assignedDashboards, setAssignedDashboards] = useState<Dashboard[]>(
     assets
       .filter((asset) => asset.type === 'dashboard')
       .map((asset) => ({ id: asset.id, title: asset.label }))
   );
 
   const assign = (dashboard: Dashboard) => {
-    setSelectedDashboards((currDashboards) => currDashboards.concat(dashboard));
+    setAssignedDashboards((currDashboards) => currDashboards.concat(dashboard));
   };
 
   const unassign = (dashboard: Dashboard) => {
-    setSelectedDashboards((currDashboards) =>
+    setAssignedDashboards((currDashboards) =>
       currDashboards.filter((currDashboard) => currDashboard.id !== dashboard.id)
     );
   };
@@ -88,7 +88,11 @@ export function ManageLinkedDashboardsFlyout({ assets, onClose, onSave }: Props)
             </EuiButtonEmpty>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiButton data-test-subj="sloLinkedDashboardsFlyoutSaveButton" onClick={onSave} fill>
+            <EuiButton
+              data-test-subj="sloLinkedDashboardsFlyoutSaveButton"
+              onClick={() => onSave(assignedDashboards)}
+              fill
+            >
               {i18n.translate('xpack.slo.manageLinkedDashboardsFlyout.saveButtonLabel', {
                 defaultMessage: 'Save',
               })}

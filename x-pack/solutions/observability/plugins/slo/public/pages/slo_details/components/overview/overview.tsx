@@ -15,6 +15,7 @@ import {
   querySchema,
   rollingTimeWindowTypeSchema,
 } from '@kbn/slo-schema';
+import { isEmpty } from 'lodash';
 import React from 'react';
 import { useKibana } from '../../../../hooks/use_kibana';
 import {
@@ -183,12 +184,14 @@ export function Overview({ slo }: Props) {
           content={slo.settings.frequency}
         />
 
-        <OverviewItem
-          title={i18n.translate('xpack.slo.sloDetails.overview.dashboards', {
-            defaultMessage: 'Linked dashboards',
-          })}
-          content={<LinkedDashboards assets={slo.assets} />}
-        />
+        {!isEmpty(slo.assets) && (
+          <OverviewItem
+            title={i18n.translate('xpack.slo.sloDetails.overview.dashboards', {
+              defaultMessage: 'Linked dashboards',
+            })}
+            content={<LinkedDashboards assets={slo.assets} />}
+          />
+        )}
       </EuiFlexGrid>
     </EuiPanel>
   );

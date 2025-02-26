@@ -35,6 +35,8 @@ import { SloEnableConfirmationModal } from '../../../components/slo/enable_confi
 import { useDisableSlo } from '../../../hooks/use_disable_slo';
 import { useEnableSlo } from '../../../hooks/use_enable_slo';
 import { ManageLinkedDashboardsFlyout } from '../../../components/manage_linked_dashboards/manage_linked_dashboards_flyout';
+import { Dashboard } from '../../../components/manage_linked_dashboards/types';
+import { useUpdateSlo } from '../../../hooks/use_update_slo';
 
 export interface Props {
   slo: SLOWithSummaryResponse;
@@ -73,6 +75,7 @@ export function HeaderControl({ slo }: Props) {
   const { mutate: resetSlo, isLoading: isResetLoading } = useResetSlo();
   const { mutate: enableSlo, isLoading: isEnableLoading } = useEnableSlo();
   const { mutate: disableSlo, isLoading: isDisableLoading } = useDisableSlo();
+  const { mutate: updateSlo, isLoading: isUpdateLoading } = useUpdateSlo();
 
   const { data: rulesBySlo, refetchRules } = useFetchRulesForSlo({
     sloIds: [slo.id],
@@ -470,7 +473,17 @@ export function HeaderControl({ slo }: Props) {
           onClose={() => {
             setManageLinkedDashboardsFlyoutOpen(false);
           }}
-          onSave={() => {
+          onSave={(dashboards: Dashboard[]) => {
+            updateSlo({
+              sloId: slo.id,
+              slo: {
+                assets: dashboards.map((dashboard) => ({
+                  type: 'dashboard',
+                  id: dashboard.id,
+                  label: dashboard.title,
+                })),
+              },
+            });
             setManageLinkedDashboardsFlyoutOpen(false);
           }}
         />

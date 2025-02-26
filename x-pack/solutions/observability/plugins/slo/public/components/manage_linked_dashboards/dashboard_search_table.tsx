@@ -37,7 +37,7 @@ export function DashboardSearchTable({ assignedDashboards, assign, unassign }: P
   const [search, setSearch] = useState<string>();
   const [page, setPage] = useState(0);
   const debounceSearch = debounce((value: string) => setSearch(value), 300);
-  const { data, isLoading, isError } = useFetchDashboards({ search, page: page + 1 });
+  const { data, isLoading } = useFetchDashboards({ search, page: page + 1 });
   const dashboardLocator = share.url.locators.get<DashboardLocatorParams>(DASHBOARD_APP_LOCATOR);
 
   const columns: Array<EuiBasicTableColumn<Dashboard>> = [
@@ -109,7 +109,6 @@ export function DashboardSearchTable({ assignedDashboards, assign, unassign }: P
       </EuiFlexItem>
 
       <EuiBasicTable
-        compressed
         columns={columns}
         itemId="id"
         items={data?.results ?? []}
