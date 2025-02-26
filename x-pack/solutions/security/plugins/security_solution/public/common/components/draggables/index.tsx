@@ -7,19 +7,14 @@
 
 import type { IconType, ToolTipPositions } from '@elastic/eui';
 import { EuiBadge, EuiToolTip } from '@elastic/eui';
-import React, { useCallback, useMemo } from 'react';
+import React from 'react';
 import styled from '@emotion/styled';
-
-import type { DraggableWrapperProps } from '../drag_and_drop/draggable_wrapper';
-import { DraggableWrapper } from '../drag_and_drop/draggable_wrapper';
-import { escapeDataProviderId } from '../drag_and_drop/helpers';
+import { CellActionsWrapper } from '../drag_and_drop/cell_actions_wrapper';
 import { getEmptyStringTag } from '../empty_value';
-import type { DataProvider } from '../../../timelines/components/timeline/data_providers/data_provider';
-import { IS_OPERATOR } from '../../../timelines/components/timeline/data_providers/data_provider';
 
 export interface DefaultDraggableType {
   hideTopN?: boolean;
-  id: string;
+  id?: string;
   fieldType?: string;
   isAggregatable?: boolean;
   field: string;
@@ -81,29 +76,24 @@ export const Content = React.memo<{
 Content.displayName = 'Content';
 
 /**
- * Draggable text (or an arbitrary visualization specified by `children`)
+ * Renderedtext (or an arbitrary visualization specified by `children`)
  * that's only displayed when the specified value is non-`null`.
- *
- * @param id - a unique draggable id, which typically follows the format `${contextId}-${eventId}-${field}-${value}`
  * @param field - the name of the field, e.g. `network.transport`
  * @param value - value of the field e.g. `tcp`
- * @param name - defaulting to `field`, this optional human readable name is used by the `DataProvider` that represents the data
  * @param children - defaults to displaying `value`, this allows an arbitrary visualization to be displayed in lieu of the default behavior
  * @param tooltipContent - defaults to displaying `field`, pass `null` to
  * prevent a tooltip from being displayed, or pass arbitrary content
  * @param tooltipPosition - defaults to eui's default tooltip position
  * @param queryValue - defaults to `value`, this query overrides the `queryMatch.value` used by the `DataProvider` that represents the data
  * @param hideTopN - defaults to `false`, when true, the option to aggregate this field will be hidden
- */
+ * @param scopeId - the id of the scope, e.g. `timelineId` or `tableId`
+ * @param truncate - defaults to `false`, when true, the content will be truncated
+*/
 export const DefaultDraggable = React.memo<DefaultDraggableType>(
   ({
     hideTopN = false,
-    id,
     field,
-    fieldType = '',
-    isAggregatable = false,
     value,
-    name,
     children,
     scopeId,
     tooltipContent,
@@ -111,25 +101,16 @@ export const DefaultDraggable = React.memo<DefaultDraggableType>(
     queryValue,
     truncate,
   }) => {
-    const dataProviderProp: DataProvider = useMemo(
-      () => ({
-        and: [],
-        enabled: true,
-        id: escapeDataProviderId(id),
-        name: name ? name : value?.toString() ?? '',
-        excluded: false,
-        kqlQuery: '',
-        queryMatch: {
-          field,
-          value: queryValue ? queryValue : value ?? '',
-          operator: IS_OPERATOR,
-        },
-      }),
-      [field, id, name, queryValue, value]
-    );
+    if (value == null) return null;
 
-    const renderCallback = useCallback<DraggableWrapperProps['render']>(
-      () => (
+    return (
+      <CellActionsWrapper
+        field={field}
+        value={queryValue ? queryValue : value ?? ''}
+        hideTopN={hideTopN}
+        scopeId={scopeId}
+        truncate={truncate}
+      >
         <Content
           field={field}
           tooltipContent={tooltipContent}
@@ -138,22 +119,7 @@ export const DefaultDraggable = React.memo<DefaultDraggableType>(
         >
           {children}
         </Content>
-      ),
-      [children, field, tooltipContent, tooltipPosition, value]
-    );
-
-    if (value == null) return null;
-
-    return (
-      <DraggableWrapper
-        dataProvider={dataProviderProp}
-        fieldType={fieldType}
-        isAggregatable={isAggregatable}
-        hideTopN={hideTopN}
-        render={renderCallback}
-        scopeId={scopeId}
-        truncate={truncate}
-      />
+      </CellActionsWrapper>
     );
   }
 );
@@ -167,9 +133,12 @@ export const Badge = styled(EuiBadge)`
 Badge.displayName = 'Badge';
 
 export type BadgeDraggableType = Omit<DefaultDraggableType, 'id'> & {
-  contextId: string;
-  eventId: string;
+  contextId?: string;
+  eventId?: string;
   iconType?: IconType;
+  isAggregatable?: boolean;
+  fieldType?: string;
+  name?: string;
 };
 
 /**
@@ -201,12 +170,8 @@ const DraggableBadgeComponent: React.FC<BadgeDraggableType> = ({
   queryValue,
 }) =>
   value != null ? (
-    <DefaultDraggable
-      id={`draggable-badge-default-draggable-${contextId}-${eventId}-${field}-${value}`}
-      isAggregatable={isAggregatable}
-      fieldType={fieldType}
+    <DefaultDraggable  
       field={field}
-      name={name}
       value={value}
       scopeId={scopeId}
       tooltipContent={tooltipContent}
@@ -215,7 +180,7 @@ const DraggableBadgeComponent: React.FC<BadgeDraggableType> = ({
       <Badge iconType={iconType} color="hollow" title="">
         {children ? children : value !== '' ? value : getEmptyStringTag()}
       </Badge>
-    </DefaultDraggable>
+      </DefaultDraggable>
   ) : null;
 
 DraggableBadgeComponent.displayName = 'DraggableBadgeComponent';

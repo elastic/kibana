@@ -10,8 +10,6 @@ import { Chart, BarSeries, Axis, ScaleType } from '@elastic/charts';
 import type { ReactWrapper, ShallowWrapper } from 'enzyme';
 import { mount, shallow } from 'enzyme';
 import React from 'react';
-
-import { escapeDataProviderId } from '../drag_and_drop/helpers';
 import { TestProviders } from '../../mock';
 import '../../mock/react_beautiful_dnd';
 
@@ -367,12 +365,9 @@ describe.each(chartDataSets)('BarChart with stackByField', () => {
     expect(wrapper.find('[data-test-subj="draggable-legend"]').exists()).toBe(true);
   });
 
-  data.forEach((datum) => {
+  data.forEach((datum, idx) => {
     test(`it renders the expected draggable legend text for datum ${datum.key}`, () => {
-      const dataProviderId = `draggableId.content.draggable-legend-item-uuid_v4()-${escapeDataProviderId(
-        stackByField
-      )}-${escapeDataProviderId(datum.key)}`;
-      expect(wrapper.find(`div[data-provider-id="${dataProviderId}"]`).first().text()).toEqual(
+      expect(wrapper.find(`[data-test-subj="legend-item"]`).at(idx).text()).toEqual(
         datum.key
       );
     });
