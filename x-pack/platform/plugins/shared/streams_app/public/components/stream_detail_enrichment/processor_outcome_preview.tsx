@@ -17,6 +17,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { TimeRange } from '@kbn/es-query';
+import { useSelector } from '@xstate5/react';
 import { useKibana } from '../../hooks/use_kibana';
 import { StreamsAppSearchBar, StreamsAppSearchBarProps } from '../streams_app_search_bar';
 import { PreviewTable } from '../preview_table';
@@ -26,23 +27,14 @@ import { useSimulatorRef, useSimulatorSelector } from './services/stream_enrichm
 import { previewDocsFilterOptions } from './services/stream_enrichment_service/simulation_state_machine';
 
 export const ProcessorOutcomePreview = () => {
-  const { dependencies } = useKibana();
-  const { data } = dependencies.start;
-
   const isLoading = useSimulatorSelector(
     (state) => state?.matches('loadingSamples') || state?.matches('runningSimulation')
   );
 
-  const { timeRange, setTimeRange } = useDateRange({ data });
-
   return (
     <>
       <EuiFlexItem grow={false}>
-        <OutcomeControls
-          timeRange={timeRange}
-          onTimeRangeChange={setTimeRange}
-          onTimeRangeRefresh={() => {}}
-        />
+        <OutcomeControls />
       </EuiFlexItem>
       <EuiSpacer size="m" />
       <OutcomePreviewTable />
@@ -51,17 +43,7 @@ export const ProcessorOutcomePreview = () => {
   );
 };
 
-interface OutcomeControlsProps {
-  timeRange: TimeRange;
-  onTimeRangeChange: (timeRange: TimeRange) => void;
-  onTimeRangeRefresh: () => void;
-}
-
-const OutcomeControls = ({
-  timeRange,
-  onTimeRangeChange,
-  onTimeRangeRefresh,
-}: OutcomeControlsProps) => {
+const OutcomeControls = () => {
   const simulatorRef = useSimulatorRef();
   const previewDocsFilter = useSimulatorSelector((state) => state?.context.previewDocsFilter);
   const simulationFailureRate = useSimulatorSelector(
@@ -71,20 +53,20 @@ const OutcomeControls = ({
     (state) => state?.context.simulation?.success_rate
   );
 
+  const dateRangeRef = useSimulatorSelector((state) => state?.context.dateRangeRef);
+  const timeRange = useSelector(dateRangeRef, (state) => state?.context.timeRange);
+  const handleRefresh = () => dateRangeRef?.send({ type: 'dateRange.refresh' });
+
   const handleQuerySubmit: StreamsAppSearchBarProps['onQuerySubmit'] = (
     { dateRange },
     isUpdate
   ) => {
     if (!isUpdate) {
-      return onTimeRangeRefresh();
+      return handleRefresh();
     }
 
     if (dateRange) {
-      onTimeRangeChange({
-        from: dateRange.from,
-        to: dateRange?.to,
-        mode: dateRange.mode,
-      });
+      dateRangeRef?.send({ type: 'dateRange.update', range: dateRange });
     }
   };
 
@@ -127,9 +109,9 @@ const OutcomeControls = ({
       </EuiFilterGroup>
       <StreamsAppSearchBar
         onQuerySubmit={handleQuerySubmit}
-        onRefresh={onTimeRangeRefresh}
-        dateRangeFrom={timeRange.from}
-        dateRangeTo={timeRange.to}
+        onRefresh={handleRefresh}
+        dateRangeFrom={timeRange?.from}
+        dateRangeTo={timeRange?.to}
       />
     </EuiFlexGroup>
   );
@@ -137,10 +119,10 @@ const OutcomeControls = ({
 
 const OutcomePreviewTable = () => {
   const isMissingSamples = useSimulatorSelector((state) => state?.matches('missingSamples'));
-  const previewDocuments = useSimulatorSelector((state) => state?.context.previewDocuments);
+  const previewDocuments = useSimulatorSelector((state) => state?.context.previewDocuments ?? []);
   const previewColumns = useSimulatorSelector((state) => state?.context.previewColumns);
 
-  if (isMissingSamples || !previewDocuments) {
+  if (isMissingSamples) {
     return (
       <EuiEmptyPrompt
         titleSize="xs"

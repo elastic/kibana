@@ -59,7 +59,10 @@ export const streamEnrichmentMachine = setup({
         id: 'simulator',
         input: {
           parentRef: self,
-          processors: context.processorsRefs.map((proc) => proc.getSnapshot().context.processor),
+          processors: context.processorsRefs
+            .map((proc) => proc.getSnapshot())
+            .filter((proc) => proc.context.isNew)
+            .map((proc) => proc.context.processor),
           streamName: context.definition.stream.name,
         },
       }),
@@ -118,13 +121,19 @@ export const streamEnrichmentMachine = setup({
       })
     ),
     reorderProcessors: assign((_, params: StreamEnrichmentEventByType<'processors.reorder'>) => ({
-      processorsRefs: params.processors,
+      processorsRefs: params.processorsRefs,
     })),
     reassignProcessors: assign(({ context }) => ({
       processorsRefs: [...context.processorsRefs],
     })),
     sendChangeToSimulator: sendTo('simulator', ({ context }) => {
-      return { type: 'processors.change', processorsRefs: context.processorsRefs };
+      return {
+        type: 'processors.change',
+        processors: context.processorsRefs
+          .map((proc) => proc.getSnapshot())
+          .filter((proc) => proc.context.isNew)
+          .map((proc) => proc.context.processor),
+      };
     }),
   },
   guards: {

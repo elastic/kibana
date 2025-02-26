@@ -6,6 +6,7 @@
  */
 import {
   ActorRef,
+  ActorRefFrom,
   ErrorActorEvent,
   MachineImplementationsFrom,
   Snapshot,
@@ -32,8 +33,15 @@ import { flattenObjectNestedLast } from '@kbn/object-utils';
 import { errors as esErrors } from '@elastic/elasticsearch';
 import { isEmpty, isEqual, uniq } from 'lodash';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import { TimeRange } from '@kbn/es-query';
 import { DetectedField, ProcessorDefinitionWithUIAttributes } from '../../types';
 import { processorConverter } from '../../utils';
+import {
+  DateRangeContext,
+  DateRangeToParentEvent,
+  createDateRangeMachineImplementations,
+  dateRangeMachine,
+} from './date_range_state_machine';
 
 export const previewDocsFilterOptions = {
   outcome_filter_all: {
@@ -65,11 +73,13 @@ export interface SimulationToParentEvent {
   type: 'simulation.change';
 }
 
+export type DateRangeChildActor = ActorRefFrom<typeof dateRangeMachine>;
 export type SimulationParentActor = ActorRef<Snapshot<unknown>, SimulationToParentEvent>;
 
 export type Simulation = APIReturnType<'POST /api/streams/{name}/processing/_simulate'>;
 
 export interface SimulationMachineContext {
+  dateRangeRef: DateRangeChildActor;
   parentRef: SimulationParentActor;
   previewColumns: string[];
   previewDocsFilter: PreviewDocsFilterOption;
@@ -79,7 +89,6 @@ export interface SimulationMachineContext {
   samplingCondition?: Condition;
   simulation?: Simulation;
   streamName: string;
-  timeRange: { start: number; end: number };
 }
 
 const getParentRef = ({ context }: { context: SimulationMachineContext }) => context.parentRef;
@@ -93,17 +102,21 @@ export const simulationMachine = setup({
     },
     context: {} as SimulationMachineContext,
     events: {} as
+      | DateRangeToParentEvent
       | { type: 'simulation.refreshSamples' }
+      | { type: 'simulation.updateTimeRange'; timeRange: TimeRange }
       | { type: 'filters.changePreviewDocsFilter'; filter: PreviewDocsFilterOption }
       | { type: 'processors.change'; processors: ProcessorDefinitionWithUIAttributes[] },
   },
   actors: {
     fetchSamples: getPlaceholderFor(createSamplesFetchActor),
     runSimulation: getPlaceholderFor(createSimulationRunnerActor),
+    dateRangeMachine: getPlaceholderFor(() => dateRangeMachine),
   },
   actions: {
     notifySamplesFetchFailure: getPlaceholderFor(createSamplesFetchFailureNofitier),
     notifySimulationRunFailure: getPlaceholderFor(createSimulationRunFailureNofitier),
+    storeTimeUpdated: getPlaceholderFor(createSimulationRunFailureNofitier),
     storePreviewDocsFilter: assign((_, params: { filter: PreviewDocsFilterOption }) => ({
       previewDocsFilter: params.filter,
     })),
@@ -154,8 +167,14 @@ export const simulationMachine = setup({
 }).createMachine({
   /** @xstate-layout N4IgpgJg5mDOIC5SwJYFsCuAbAhgFxQHsA7AYlU1wJIDoAnMAMwdgAsBlHNAByzgG0ADAF1EoboVTViYkAA9EAFgBMAGhABPRAA4AbMpq7BugJy6AzIpMBWXbu0B2AL5P1FbPiLEaKYigI4WCgAXr5QpEKiSCASUl6yCgjKJuY0DmbaAIwmJsbWDtbmDupaCA6KujTmtiaZinWZ1sraLm7oHtI+fgFBocTh-JlR4pL+8dGJyanp9tm5uvmFxZqI1pmp5pnKFopFjtomLa4g7lRePhB8pNx0hADGcLCEdLA0d6w4-WCRsrFjJAlEA51jQDtpzI5FIpCplBNoSogLJlQVtdJlMg4kUZlK0Tu0zrQUJcwNdbg9YE8Xm8Pl9BsMYqNpICEOsTIo0gsjJk7BjrAcEQhFODDPk6lDBMoKvpcadPITiaRGCgsHgwFT3p8YAAFBgANxQYAA7gARe6wABiytVdB+0T+TImiHRgnZ1gq2jWGMEKW0ahWCAh7K2gmBBzZ+QcRzalDl3iwhBwEDCnB4fFgpAgJDAXV1hAA1tnZZ144nk1xeHAEL5c3dY5FbSM4gDHWUQWCIeVoZs4QLtELDA5lC6mkYTAVMjL8bGaCWk-0UxX02rbnQaLx8IxnmgaEXzrOy6nK9X7nWRA2GU2ZC3gal25Cu7D4f6CtYaMpMtpP01I5jNpOY50OAUmqBDzlO0gAEpgAAjhgKAMGgYDEHg6bnva4ygJMErIo0+hWOYliDu+ApNAYgiwkObrmM0fbmP+HTnEBsAgcm4FeFBsHwWAiHIahQy-IyGHyE6brsrs5R8mOWzUYovbItYgiKSoikEaiE7HLutBMSxYEAexMFwQhSEoREyj0uhzaYSJ-bifhn76HU1gCuJIoON62Tcoc6z0QS3h0BgxB+LpDEkBmWY5vmhZsbQ-mBaxekkFWxA1qewhoYJlnCa2t6HB2UIwj2-pDoINCKYp9iSkY1hrD506xUFUDsNFZDLs8a5UJudDbppfkBQ1TUJcQSUpdI9YiAJl7MjeoK5feBVPqUhFVNY4YYto3pCsodG4sQhAQHAsg9RN-xXlZCAALS6AKl2lWVd33XUtWdL4YyBCEYTHQ6Z3cq+JjJGiiiRnCgjmMYAoOBCNDZBKphupKkbbdGIXeGgKAUgei6fUJkyNK+tEIy6IN-SRQ5vtizSic0yjOBpzUXHwWOZYkwYODQ8ySh65j6BtJFbDQI4HIDKS7LoNNI75M4JnOjXlmmjOnVlQobLkth1LoUIesspS+q6W2mJi2wVAUT2McBdCgY1zUcYZ3HGfAdoZQrzODsi1OWLCfLGFzJMldsEoU1CVPWCbMV9fFyPy8ySs0CoZhbRDzQpARArUak76wqDHqfr65QuC4QA */
   id: 'simulation',
-  context: ({ input }) => ({
+  context: ({ input, self, spawn }) => ({
     parentRef: input.parentRef,
+    dateRangeRef: spawn('dateRangeMachine', {
+      id: 'dateRangeMachine',
+      input: {
+        parentRef: self,
+      },
+    }),
     previewColumns: [],
     previewDocsFilter: 'outcome_filter_all',
     previewDocuments: [],
@@ -163,10 +182,10 @@ export const simulationMachine = setup({
     samples: [],
     samplingCondition: composeSamplingCondition(input.processors),
     streamName: input.streamName,
-    timeRange: { start: 0, end: 0 },
   }),
   initial: 'initializing',
   on: {
+    'dateRange.update': '.loadingSamples',
     'simulation.refreshSamples': '.loadingSamples',
     'filters.changePreviewDocsFilter': {
       actions: [
@@ -177,6 +196,7 @@ export const simulationMachine = setup({
   },
   states: {
     initializing: {
+      entry: [],
       always: [
         {
           guard: 'hasProcessors',
@@ -185,16 +205,9 @@ export const simulationMachine = setup({
         { target: 'idle' },
       ],
     },
-    missingSamples: {
-      on: {
-        // 'simulation.updateTimeRange': 'loadingSamples',
-        // 'simulation.refreshSamples': 'loadingSamples',
-      },
-    },
+    missingSamples: {},
     idle: {
       on: {
-        // 'simulation.updateTimeRange': 'loadingSamples',
-        // 'simulation.refreshTimeRange': 'loadingSamples',
         'processors.change': [
           {
             guard: { type: 'hasDifferentCondition', params: ({ event }) => event },
@@ -220,11 +233,14 @@ export const simulationMachine = setup({
         input: ({ context }) => ({
           condition: context.samplingCondition,
           streamName: context.streamName,
-          timeRange: context.timeRange,
+          absoluteTimeRange: context.dateRangeRef.getSnapshot().context.absoluteTimeRange,
         }),
         onDone: {
           target: 'assertingSimulationRequirements',
-          actions: [{ type: 'storeSamples', params: ({ event }) => ({ samples: event.output }) }],
+          actions: [
+            { type: 'storeSamples', params: ({ event }) => ({ samples: event.output }) },
+            { type: 'derivePreviewConfig' },
+          ],
         },
         onError: {
           target: 'missingSamples',
@@ -285,6 +301,7 @@ export const createSimulationMachineImplementations = ({
   actors: {
     fetchSamples: createSamplesFetchActor({ streamsRepositoryClient }),
     runSimulation: createSimulationRunnerActor({ streamsRepositoryClient }),
+    dateRangeMachine: dateRangeMachine.provide(createDateRangeMachineImplementations({ data })),
   },
   actions: {
     notifySamplesFetchFailure: createSamplesFetchFailureNofitier({ toasts }),
@@ -296,7 +313,7 @@ type SamplesFetchOutput = FlattenRecord[];
 interface SamplesFetchInput {
   condition?: Condition;
   streamName: string;
-  timeRange: { start?: number; end?: number };
+  absoluteTimeRange: DateRangeContext['absoluteTimeRange'];
 }
 
 function createSamplesFetchActor({
@@ -311,8 +328,8 @@ function createSamplesFetchActor({
         path: { name: input.streamName },
         body: {
           if: input.condition,
-          start: input.timeRange.start,
-          end: input.timeRange.end,
+          start: input.absoluteTimeRange.start,
+          end: input.absoluteTimeRange.end,
           size: 100,
         },
       },
