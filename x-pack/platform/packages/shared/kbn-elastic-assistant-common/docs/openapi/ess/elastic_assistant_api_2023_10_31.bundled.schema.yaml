@@ -1301,9 +1301,6 @@ components:
       allOf:
         - type: object
           properties:
-            global:
-              description: Whether this Knowledge Base Entry is global, defaults to false
-              type: boolean
             name:
               description: Name of the Knowledge Base Entry
               type: string
@@ -1311,6 +1308,9 @@ components:
             - name
         - type: object
           properties:
+            global:
+              description: Whether this Knowledge Base Entry is global, defaults to false
+              type: boolean
             namespace:
               description: Kibana Space, defaults to 'default' space
               type: string
@@ -1487,9 +1487,6 @@ components:
       allOf:
         - type: object
           properties:
-            global:
-              description: Whether this Knowledge Base Entry is global, defaults to false
-              type: boolean
             name:
               description: Name of the Knowledge Base Entry
               type: string
@@ -1497,6 +1494,9 @@ components:
             - name
         - type: object
           properties:
+            global:
+              description: Whether this Knowledge Base Entry is global, defaults to false
+              type: boolean
             namespace:
               description: Kibana Space, defaults to 'default' space
               type: string
