@@ -449,7 +449,7 @@ export function ChatBody({
                                 })}
                               </h3>
                               <p>
-                                {i18n.translate('xpack.aiAssistant.sharedBanner.title', {
+                                {i18n.translate('xpack.aiAssistant.sharedBanner.description', {
                                   defaultMessage: `You can’t edit or continue this conversation, but you can duplicate
                                 it into a new private conversation. The original conversation will
                                 remain unchanged.`,
