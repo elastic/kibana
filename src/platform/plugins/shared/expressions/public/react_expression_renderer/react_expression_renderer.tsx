@@ -41,7 +41,7 @@ export function ReactExpressionRenderer({
 }: ReactExpressionRendererProps) {
   const nodeRef = useRef<HTMLDivElement>(null);
   const { euiTheme } = useEuiTheme();
-  const { error, isEmpty, isLoading } = useExpressionRenderer(nodeRef, {
+  const { error, isEmpty, isLoading, Component } = useExpressionRenderer(nodeRef, {
     ...expressionRendererOptions,
     hasCustomErrorRenderer: !!renderError,
   });
@@ -64,7 +64,9 @@ export function ReactExpressionRenderer({
         <EuiProgress size="xs" color="accent" position="absolute" css={{ zIndex: 1 }} />
       )}
       {!isLoading && error && renderError?.(error.message, error)}
-      <div className="expExpressionRenderer__expression" style={expressionStyles} ref={nodeRef} />
+      <div className="expExpressionRenderer__expression" style={expressionStyles} ref={nodeRef}>
+        {Component && !error && <Component />}
+      </div>
     </div>
   );
 }
