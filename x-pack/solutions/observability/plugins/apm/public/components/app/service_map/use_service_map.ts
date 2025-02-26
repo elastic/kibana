@@ -4,28 +4,24 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { useEffect, useRef, useState } from 'react';
-import { asyncScheduler, last, observeOn, of } from 'rxjs';
-import { scan, map, concatMap, Subscription } from 'rxjs';
+import { useEffect, useState } from 'react';
 import type { IHttpFetchError, ResponseErrorBody } from '@kbn/core/public';
-import type { ServiceMapResponse, ServiceMapSpan } from '../../../../common/service_map/typings';
+import type {
+  ServiceMapNode,
+  DestinationService,
+  ServiceMapResponse,
+} from '../../../../common/service_map/types';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 import { useLicenseContext } from '../../../context/license/use_license_context';
 import { isActivePlatinumLicense } from '../../../../common/license_check';
-import { AGENT_NAME, SERVICE_ENVIRONMENT, SERVICE_NAME } from '../../../../common/es_fields/apm';
 import type { Environment } from '../../../../common/environment_rt';
 import {
-  getConnectionNodeId,
   getExternalConnectionNode,
   getServiceConnectionNode,
   transformServiceMapResponses,
   getConnections,
 } from '../../../../common/service_map';
-import type {
-  ConnectionNode,
-  DiscoveredService,
-  GroupResourceNodesResponse,
-} from '../../../../common/service_map';
+import type { ConnectionNode, GroupResourceNodesResponse } from '../../../../common/service_map';
 import { FETCH_STATUS, useFetcher } from '../../../hooks/use_fetcher';
 
 export const useServiceMap = ({
@@ -46,8 +42,7 @@ export const useServiceMap = ({
   const license = useLicenseContext();
   const { config } = useApmPluginContext();
 
-  const subscriptions = useRef<Subscription>(new Subscription());
-  const [groupedNodes, setgGroupedNodes] = useState<{
+  const [groupedNodes, setGroupedNodes] = useState<{
     data: GroupResourceNodesResponse;
     error?: Error | IHttpFetchError<ResponseErrorBody>;
     status: FETCH_STATUS;
@@ -79,109 +74,81 @@ export const useServiceMap = ({
         },
       });
     },
-    [license, serviceName, environment, start, end, serviceGroupId, kuery, config.serviceMapEnabled]
+    [
+      license,
+      serviceName,
+      environment,
+      start,
+      end,
+      serviceGroupId,
+      kuery,
+      config.serviceMapEnabled,
+    ],
+    { preservePreviousData: false }
   );
 
   useEffect(() => {
-    subscriptions.current.unsubscribe();
+    if (status === FETCH_STATUS.LOADING) {
+      setGroupedNodes((prevState) => ({ ...prevState, status: FETCH_STATUS.LOADING }));
+      return;
+    }
+
+    if (status === FETCH_STATUS.FAILURE || error) {
+      setGroupedNodes({
+        data: { elements: [], nodesCount: 0 },
+        status: FETCH_STATUS.FAILURE,
+        error,
+      });
+      return;
+    }
 
     if (data) {
-      setgGroupedNodes((prevState) => ({ ...prevState, status: FETCH_STATUS.LOADING }));
-
-      const nodes$ = buildServiceMapNodes$(data);
-
-      subscriptions.current = nodes$.subscribe({
-        next: (nodes) => {
-          setgGroupedNodes({
-            data: nodes,
-            status,
-          });
-        },
-        error: (err) => {
-          setgGroupedNodes({
-            data: {
-              elements: [],
-              nodesCount: 0,
-            },
-            status: FETCH_STATUS.FAILURE,
-            error: err,
-          });
-        },
-      });
+      try {
+        const transformedData = processServiceMapData(data);
+        setGroupedNodes({ data: transformedData, status: FETCH_STATUS.SUCCESS });
+      } catch (err) {
+        setGroupedNodes({
+          data: { elements: [], nodesCount: 0 },
+          status: FETCH_STATUS.FAILURE,
+          error: err,
+        });
+      }
     }
-    return () => {
-      subscriptions.current.unsubscribe();
-    };
   }, [data, status, error]);
 
   return groupedNodes;
 };
 
-export function buildServiceMapNodes$(response: ServiceMapResponse) {
-  return of(response).pipe(
-    observeOn(asyncScheduler),
-    concatMap(({ spans }) => {
-      return of(buildPaths({ spans }));
-    }),
-    scan(
-      (acc, { connections, discoveredServices }) => {
-        return {
-          connections: acc.connections.concat(Array.from(connections.values())),
-          discoveredServices: acc.discoveredServices.concat(
-            Array.from(discoveredServices.values())
-          ),
-        };
-      },
-      { connections: [], discoveredServices: [] } as {
-        connections: ConnectionNode[][];
-        discoveredServices: DiscoveredService[];
-      }
-    ),
-    last(),
-    map(({ connections, discoveredServices }) => {
-      return transformServiceMapResponses({
-        connections: getConnections(connections),
-        discoveredServices,
-        services: response.servicesData,
-        anomalies: response.anomalies,
-      });
-    })
-  );
-}
+const processServiceMapData = (data: ServiceMapResponse): GroupResourceNodesResponse => {
+  const paths = buildPaths({ spans: data.spans });
+  return transformServiceMapResponses({
+    connections: getConnections(paths.connections),
+    destinationServices: paths.destinationServices,
+    servicesData: data.servicesData,
+    anomalies: data.anomalies,
+  });
+};
 
-const buildPaths = ({ spans }: { spans: ServiceMapSpan[] }) => {
-  const connections = new Map<string, ConnectionNode[]>();
-  const discoveredServices = new Map<string, DiscoveredService>();
+const buildPaths = ({ spans }: { spans: ServiceMapNode[] }) => {
+  const connections: ConnectionNode[][] = [];
+  const discoveredServices: DestinationService[] = [];
 
   for (const currentNode of spans) {
     const serviceConnectionNode = getServiceConnectionNode(currentNode);
     const externalConnectionNode = getExternalConnectionNode(currentNode);
 
-    const pathKey = `${getConnectionNodeId(serviceConnectionNode)}|${getConnectionNodeId(
-      externalConnectionNode
-    )}`;
-
-    if (currentNode.downstreamService) {
-      const discoveredServiceKey = `${getConnectionNodeId(externalConnectionNode)}|${
-        currentNode.downstreamService.serviceName
-      }`;
-
-      if (!discoveredServices.has(discoveredServiceKey)) {
-        discoveredServices.set(pathKey, {
-          from: externalConnectionNode,
-          to: {
-            [SERVICE_NAME]: currentNode.downstreamService.serviceName,
-            [SERVICE_ENVIRONMENT]: currentNode.downstreamService.serviceEnvironment || null,
-            [AGENT_NAME]: currentNode.downstreamService.agentName,
-          },
-        });
-      }
+    if (currentNode.destinationService) {
+      discoveredServices.push({
+        from: externalConnectionNode,
+        to: getServiceConnectionNode(currentNode.destinationService),
+      });
     }
 
-    if (!connections.has(pathKey)) {
-      connections.set(pathKey, [serviceConnectionNode, externalConnectionNode]);
-    }
+    connections.push([serviceConnectionNode, externalConnectionNode]);
   }
 
-  return { connections, discoveredServices };
+  return {
+    connections,
+    destinationServices: discoveredServices,
+  };
 };

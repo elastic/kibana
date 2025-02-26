@@ -7,16 +7,15 @@
 
 import { i18n } from '@kbn/i18n';
 import { compact, groupBy } from 'lodash';
-import type { ValuesType } from 'utility-types';
 import { SPAN_TYPE, SPAN_SUBTYPE } from '../es_fields/apm';
-import type { ConnectionEdge, ConnectionElement, ConnectionNode } from './typings';
+import type { ConnectionEdge, ConnectionElement, ConnectionNode } from './types';
 import { isSpanGroupingSupported } from './utils';
 
 const MINIMUM_GROUP_SIZE = 4;
 
 type GroupedConnection = ConnectionNode | ConnectionEdge;
 
-interface GroupedNode {
+export interface GroupedNode {
   data: {
     id: string;
     'span.type': string;
@@ -25,7 +24,7 @@ interface GroupedNode {
   };
 }
 
-interface GroupedEdge {
+export interface GroupedEdge {
   data: {
     id: string;
     source: string;
@@ -38,37 +37,46 @@ export interface GroupResourceNodesResponse {
   nodesCount: number;
 }
 
+const isEdge = (el: ConnectionElement) => Boolean(el.data.source && el.data.target);
+const isNode = (el: ConnectionElement) => !isEdge(el);
+const isElligibleGroupNode = (el: ConnectionElement) => {
+  if (isNode(el) && SPAN_TYPE in el.data) {
+    return isSpanGroupingSupported(el.data[SPAN_TYPE], el.data[SPAN_SUBTYPE]);
+  }
+  return false;
+};
+
 export function groupResourceNodes(responseData: {
   elements: ConnectionElement[];
 }): GroupResourceNodesResponse {
-  type ElementDefinition = ValuesType<(typeof responseData)['elements']>;
-  const isEdge = (el: ElementDefinition) => Boolean(el.data.source && el.data.target);
-  const isNode = (el: ElementDefinition) => !isEdge(el);
-  const isElligibleGroupNode = (el: ElementDefinition) => {
-    if (isNode(el) && 'span.type' in el.data) {
-      return isSpanGroupingSupported(el.data[SPAN_TYPE], el.data[SPAN_SUBTYPE]);
-    }
-    return false;
-  };
-  const nodes = responseData.elements.filter(isNode);
-  const edges = responseData.elements.filter(isEdge);
+  const nodesMap = new Map(
+    responseData.elements.filter(isNode).map((node) => [node.data.id, node])
+  );
+  const edgesMap = new Map(
+    responseData.elements
+      .filter(isEdge)
+      .map((edge) => [`${edge.data.source}|${edge.data.target}`, edge])
+  );
 
   // create adjacency list by targets
   const groupNodeCandidates = responseData.elements
     .filter(isElligibleGroupNode)
     .map(({ data: { id } }) => id);
-  const adjacencyListByTargetMap = new Map<string, string[]>();
-  edges.forEach(({ data: { source, target } }) => {
-    if (groupNodeCandidates.includes(target)) {
-      const sources = adjacencyListByTargetMap.get(target);
-      if (sources) {
+
+  const adjacencyListByTargetMap = Array.from(edgesMap.values()).reduce(
+    (acc, { data: { source, target } }) => {
+      if (groupNodeCandidates.includes(target)) {
+        const sources = acc.get(target) ?? [];
         sources.push(source);
-      } else {
-        adjacencyListByTargetMap.set(target, [source]);
+        acc.set(target, sources);
       }
-    }
-  });
-  const adjacencyListByTarget = [...adjacencyListByTargetMap.entries()].map(
+
+      return acc;
+    },
+    new Map<string, string[]>()
+  );
+
+  const adjacencyListByTarget = Array.from(adjacencyListByTargetMap.entries()).map(
     ([target, sources]) => ({
       target,
       sources,
@@ -85,19 +93,16 @@ export function groupResourceNodes(responseData: {
       targets: nodeGroupsById[id].map(({ target }) => target),
     }))
     .filter(({ targets }) => targets.length > MINIMUM_GROUP_SIZE - 1);
-  const ungroupedEdges = [...edges];
-  const ungroupedNodes = [...nodes];
+
+  const ungroupedEdges = new Map(edgesMap);
+  const ungroupedNodes = new Map(nodesMap);
+
   nodeGroups.forEach(({ sources, targets }) => {
     targets.forEach((target) => {
       // removes grouped nodes from original node set:
-      const groupedNodeIndex = ungroupedNodes.findIndex(({ data }) => data.id === target);
-      ungroupedNodes.splice(groupedNodeIndex, 1);
+      ungroupedNodes.delete(target);
       sources.forEach((source) => {
-        // removes edges of grouped nodes from original edge set:
-        const groupedEdgeIndex = ungroupedEdges.findIndex(
-          ({ data }) => data.source === source && data.target === target
-        );
-        ungroupedEdges.splice(groupedEdgeIndex, 1);
+        ungroupedEdges.delete(`${source}|${target}`);
       });
     });
   });
@@ -107,14 +112,14 @@ export function groupResourceNodes(responseData: {
     ({ id, targets }): GroupedNode => ({
       data: {
         id,
-        'span.type': 'external',
+        [SPAN_TYPE]: 'external',
         label: i18n.translate('xpack.apm.serviceMap.resourceCountLabel', {
           defaultMessage: '{count} resources',
           values: { count: targets.length },
         }),
         groupedConnections: compact(
           targets.map((targetId) => {
-            const targetElement = nodes.find((element) => element.data.id === targetId);
+            const targetElement = nodesMap.get(targetId);
             if (!targetElement) {
               return undefined;
             }
@@ -127,27 +132,23 @@ export function groupResourceNodes(responseData: {
   );
 
   // add new edges from source to new groups
-  const groupedEdges: Array<{
-    data: {
-      id: string;
-      source: string;
-      target: string;
-    };
-  }> = [];
-  nodeGroups.forEach(({ id, sources }) => {
-    sources.forEach((source) => {
-      groupedEdges.push({
-        data: {
-          id: `${source}~>${id}`,
-          source,
-          target: id,
-        },
-      });
-    });
-  });
+  const groupedEdges: GroupedEdge[] = nodeGroups.flatMap(({ id, sources }) =>
+    sources.map((source) => ({
+      data: {
+        id: `${source}~>${id}`,
+        source,
+        target: id,
+      },
+    }))
+  );
 
   return {
-    elements: [...ungroupedNodes, ...groupedNodes, ...ungroupedEdges, ...groupedEdges],
-    nodesCount: ungroupedNodes.length,
+    elements: [
+      ...Array.from(ungroupedNodes.values()),
+      ...groupedNodes,
+      ...Array.from(ungroupedEdges.values()),
+      ...groupedEdges,
+    ],
+    nodesCount: ungroupedNodes.size,
   };
 }

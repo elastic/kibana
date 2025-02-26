@@ -69,7 +69,7 @@ export type InferEsqlResponseOf<
 
 export type ObservabilityESSearchRequest = SearchRequest;
 
-export type ObservabilityEsQueryRequest = Omit<EsqlQueryRequest, 'columnar'>;
+export type ObservabilityEsQueryRequest = Omit<EsqlQueryRequest, 'format' | 'columnar'>;
 
 export type ParsedEsqlResponse = ParsedEsqlResponseOf<EsqlOutput, EsqlOptions>;
 export type UnparsedEsqlResponse = UnparsedEsqlResponseOf<EsqlOutput>;

@@ -30,7 +30,7 @@ export interface IEnvOptions {
   kuery?: string;
 }
 
-export async function getConnectionData({
+async function getConnectionData({
   config,
   apmEventClient,
   serviceName,
@@ -56,13 +56,12 @@ export async function getConnectionData({
 
     logger.debug(`Found ${traceIds.length} traces to inspect`);
 
-    const spans = await withApmSpan('get_service_paths_from_all_trace_ids', () =>
+    const spans = await withApmSpan('get_service_map_spans_and_transactions_from_traces', () =>
       fetchPathsFromTraceIds({
         apmEventClient,
         traceIds,
         start,
         end,
-        terminateAfter: config.serviceMapTerminateAfter,
         logger,
       })
     );

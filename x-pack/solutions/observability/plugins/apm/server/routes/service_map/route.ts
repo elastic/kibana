@@ -13,6 +13,8 @@ import { isActivePlatinumLicense } from '../../../common/license_check';
 import { invalidLicenseMessage } from '../../../common/service_map/utils';
 import { notifyFeatureUsage } from '../../feature';
 import { getSearchTransactionsEvents } from '../../lib/helpers/transactions';
+import { getMlClient } from '../../lib/helpers/get_ml_client';
+import { getServiceMap } from './get_service_map';
 import type { ServiceMapServiceDependencyInfoResponse } from './get_service_map_dependency_node_info';
 import { getServiceMapDependencyNodeInfo } from './get_service_map_dependency_node_info';
 import type { ServiceMapServiceNodeInfoResponse } from './get_service_map_service_node_info';
@@ -22,8 +24,6 @@ import { environmentRt, rangeRt, kueryRt } from '../default_api_types';
 import { getServiceGroup } from '../service_groups/get_service_group';
 import { offsetRt } from '../../../common/comparison_rt';
 import { getApmEventClient } from '../../lib/helpers/get_apm_event_client';
-import { getServiceMap } from './get_service_map';
-import { getMlClient } from '../../lib/helpers/get_ml_client';
 
 const serviceMapRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/service-map',
@@ -91,11 +91,11 @@ const serviceMapRoute = createApmServerRoute({
       serviceName,
       environment,
       searchAggregatedTransactions,
-      logger,
+      logger: logger.get('serviceMap'),
       start,
       end,
-      serviceGroupKuery: serviceGroup?.kuery,
       maxNumberOfServices,
+      serviceGroupKuery: serviceGroup?.kuery,
       kuery,
     });
   },
