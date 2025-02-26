@@ -6,13 +6,19 @@
  */
 
 import React from 'react';
-import { TaskTypes } from '../../../../common/types';
+import { InferenceTaskType } from '@elastic/elasticsearch/lib/api/types';
 import { FilterOptions } from '../types';
 import { MultiSelectFilter, MultiSelectFilterOption } from './multi_select_filter';
 import * as i18n from './translations';
 
+enum TaskTypes {
+  completion = 'completion',
+  rerank = 'rerank',
+  sparse_embedding = 'sparse_embedding',
+  text_embedding = 'text_embedding',
+}
 interface Props {
-  optionKeys: TaskTypes[];
+  optionKeys: InferenceTaskType[];
   onChange: (newFilterOptions: Partial<FilterOptions>) => void;
 }
 

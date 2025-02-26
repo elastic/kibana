@@ -5,12 +5,12 @@
  * 2.0.
  */
 
+import { InferenceTaskType } from '@elastic/elasticsearch/lib/api/types';
 import { EuiBadge } from '@elastic/eui';
 import React from 'react';
-import { TaskTypes } from '../../../../../common/types';
 
 interface TaskTypeProps {
-  type?: TaskTypes;
+  type?: InferenceTaskType;
 }
 
 export const TaskType: React.FC<TaskTypeProps> = ({ type }) => {
