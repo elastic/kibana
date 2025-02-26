@@ -15,7 +15,7 @@ import {
   EuiSpacer,
   EuiToolTip,
 } from '@elastic/eui';
-import type { Meta, Story } from '@storybook/react';
+import type { StoryFn, Meta } from '@storybook/react';
 import React, { useEffect, useState } from 'react';
 import { CodeEditor } from '@kbn/code-editor';
 import { Cytoscape } from '../cytoscape';
@@ -56,7 +56,7 @@ const stories: Meta<{}> = {
 
 export default stories;
 
-export const GenerateMap: Story<{}> = () => {
+export const GenerateMap: StoryFn<{}> = () => {
   const [size, setSize] = useState<number>(10);
   const [json, setJson] = useState<string>('');
   const [elements, setElements] = useState<any[]>(
@@ -114,7 +114,7 @@ export const GenerateMap: Story<{}> = () => {
   );
 };
 
-export const MapFromJSON: Story<{}> = () => {
+export const MapFromJSON: StoryFn<{}> = () => {
   const [json, setJson] = useState<string>(
     getSessionJson() || JSON.stringify(exampleResponseTodo, null, 2)
   );
@@ -195,7 +195,7 @@ export const MapFromJSON: Story<{}> = () => {
   );
 };
 
-export const TodoApp: Story<{}> = () => {
+export const TodoApp: StoryFn<{}> = () => {
   return (
     <div>
       <Cytoscape elements={exampleResponseTodo.elements} height={window.innerHeight}>
@@ -205,7 +205,7 @@ export const TodoApp: Story<{}> = () => {
   );
 };
 
-export const OpbeansAndBeats: Story<{}> = () => {
+export const OpbeansAndBeats: StoryFn<{}> = () => {
   return (
     <div>
       <Cytoscape elements={exampleResponseOpbeansBeats.elements} height={window.innerHeight}>
@@ -215,7 +215,7 @@ export const OpbeansAndBeats: Story<{}> = () => {
   );
 };
 
-export const HipsterStore: Story<{}> = () => {
+export const HipsterStore: StoryFn<{}> = () => {
   return (
     <div>
       <Cytoscape elements={exampleResponseHipsterStore.elements} height={window.innerHeight}>

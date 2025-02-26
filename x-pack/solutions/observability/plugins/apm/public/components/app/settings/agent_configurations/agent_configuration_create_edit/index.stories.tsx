@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { storiesOf } from '@storybook/react';
 import React from 'react';
+import type { Meta } from '@storybook/react';
 import type { CoreStart } from '@kbn/core/public';
 import type { AgentConfiguration } from '../../../../../../common/agent_configuration/configuration_types';
 import { FETCH_STATUS } from '../../../../../hooks/use_fetcher';
@@ -15,47 +15,55 @@ import { AgentConfigurationCreateEdit } from '.';
 import type { ApmPluginContextValue } from '../../../../../context/apm_plugin/apm_plugin_context';
 import { ApmPluginContext } from '../../../../../context/apm_plugin/apm_plugin_context';
 
-storiesOf('app/settings/AgentConfigurations/agent_configuration_create_edit', module)
-  .addDecorator((storyFn) => {
-    const coreMock = {} as unknown as CoreStart;
+export default {
+  title: 'app/settings/AgentConfigurations/agent_configuration_create_edit',
 
-    // mock
-    createCallApmApi(coreMock);
+  decorators: [
+    (storyFn) => {
+      const coreMock = {} as unknown as CoreStart;
 
-    const contextMock = {
-      core: {
-        notifications: {
-          toasts: { addWarning: () => {}, addDanger: () => {} },
+      // mock
+      createCallApmApi(coreMock);
+
+      const contextMock = {
+        core: {
+          notifications: {
+            toasts: { addWarning: () => {}, addDanger: () => {} },
+          },
         },
-      },
-    };
+      };
 
-    return (
-      <ApmPluginContext.Provider value={contextMock as unknown as ApmPluginContextValue}>
-        {storyFn()}
-      </ApmPluginContext.Provider>
-    );
-  })
-  .add(
-    'with config',
-    () => {
       return (
-        <AgentConfigurationCreateEdit
-          pageStep="choose-settings-step"
-          existingConfigResult={{
-            status: FETCH_STATUS.SUCCESS,
-            data: {
-              service: { name: 'opbeans-node', environment: 'production' },
-              settings: {},
-            } as AgentConfiguration,
-          }}
-        />
+        <ApmPluginContext.Provider value={contextMock as unknown as ApmPluginContextValue}>
+          {storyFn()}
+        </ApmPluginContext.Provider>
       );
     },
-    {
-      info: {
-        propTablesExclude: [AgentConfigurationCreateEdit, ApmPluginContext.Provider],
-        source: false,
-      },
-    }
-  );
+  ],
+} as Meta;
+
+export const WithConfig = {
+  render: () => {
+    return (
+      <AgentConfigurationCreateEdit
+        pageStep="choose-settings-step"
+        existingConfigResult={{
+          status: FETCH_STATUS.SUCCESS,
+          data: {
+            service: { name: 'opbeans-node', environment: 'production' },
+            settings: {},
+          } as AgentConfiguration,
+        }}
+      />
+    );
+  },
+
+  name: 'with config',
+
+  parameters: {
+    info: {
+      propTablesExclude: [AgentConfigurationCreateEdit, ApmPluginContext.Provider],
+      source: false,
+    },
+  },
+};

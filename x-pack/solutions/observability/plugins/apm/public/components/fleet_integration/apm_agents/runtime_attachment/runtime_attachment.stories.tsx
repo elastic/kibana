@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Meta, Story } from '@storybook/react';
+import type { StoryFn, Meta } from '@storybook/react';
 import React, { useState } from 'react';
 import type { CoreStart } from '@kbn/core/public';
 import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
@@ -52,7 +52,7 @@ const excludeOptions = [
 ];
 const includeOptions = [{ value: 'all', label: 'All' }, ...excludeOptions];
 
-export const RuntimeAttachmentExample: Story = () => {
+export const RuntimeAttachmentExample: StoryFn = () => {
   const [runtimeAttachmentSettings, setRuntimeAttachmentSettings] = useState({});
   const [isEnabled, setIsEnabled] = useState(true);
   return (
@@ -98,7 +98,7 @@ export const RuntimeAttachmentExample: Story = () => {
   );
 };
 
-export const JavaRuntimeAttachmentExample: Story = () => {
+export const JavaRuntimeAttachmentExample: StoryFn = () => {
   return <JavaRuntimeAttachment policy={policy} newPolicy={newPolicy} onChange={() => {}} />;
 };
 

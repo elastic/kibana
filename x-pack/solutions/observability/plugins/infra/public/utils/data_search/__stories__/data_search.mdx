@@ -1,21 +1,22 @@
-import { Canvas, Meta, Story } from '@storybook/addon-docs/blocks';
+import { Canvas, Meta, Story } from '@storybook/blocks';
+import * as DataSearchStories from './data_search.stories'
 
-<Meta title="infra/dataSearch/Overview" />
+<Meta of={DataSearchStories} />
 
 # The `data` plugin and `SearchStrategies`
 
 The search functionality abstraction provided by the `search` service of the
 `data` plugin is pretty powerful:
 
-- The execution of the request is delegated to a search strategy, which is
-    executed on the Kibana server side.
-- Any plugin can register custom search strategies with custom parameters and
-    response shapes.
-- Search requests can be cancelled via an `AbortSignal`.
-- Search requests are decoupled from the transport layer. The service will poll
-    for new results transparently.
-- Partial responses can be returned as they become available if the search
-    takes longer.
+* The execution of the request is delegated to a search strategy, which is
+  executed on the Kibana server side.
+* Any plugin can register custom search strategies with custom parameters and
+  response shapes.
+* Search requests can be cancelled via an `AbortSignal`.
+* Search requests are decoupled from the transport layer. The service will poll
+  for new results transparently.
+* Partial responses can be returned as they become available if the search
+  takes longer.
 
 # Working with `data.search.search()` in the Browser
 
@@ -49,9 +50,9 @@ an appropriate way. Because most response projections follow a similar pattern
 there's a helper `normalizeDataSearchResponses(initialResponse,
 parseRawResponse)`, which generates an RxJS operator, that...
 
-- emits an initial response containing the given `initialResponse` value
-- applies `parseRawResponse` to the `rawResponse` property of each emitted response
-- transforms transport layer errors as well as parsing errors into
+* emits an initial response containing the given `initialResponse` value
+* applies `parseRawResponse` to the `rawResponse` property of each emitted response
+* transforms transport layer errors as well as parsing errors into
   `SearchStrategyError`s
 
 ```typescript
@@ -125,9 +126,7 @@ following utility components can make that even easier.
 If `total` and `loaded` are not (yet) known, we can show an undetermined
 progress bar.
 
-<Canvas>
-  <Story id="infra-datasearch-datasearchprogress--undetermined-progress" />
-</Canvas>
+<Canvas of={DataSearchStories.UndeterminedProgress} />
 
 ### Known progress
 
@@ -135,9 +134,7 @@ If `total` and `loaded` are returned by the search strategy, they can be used
 to show a progress bar with the option to cancel the request if it takes too
 long.
 
-<Canvas>
-  <Story id="infra-datasearch-datasearchprogress--cancelable-determined-progress" />
-</Canvas>
+<Canvas of={DataSearchStories.CancelableDeterminedProgress} />
 
 ### Failed requests
 
@@ -146,7 +143,5 @@ the `latestResponseErrors` return value, they can be rendered as appropriate
 for the respective part of the UI. For many cases a `EuiCallout` is suitable,
 so the `DataSearchErrorCallout` can serve as a starting point:
 
-<Canvas>
-  <Story id="infra-datasearch-datasearcherrorcallout--error-callout-with-retry" />
-</Canvas>
+<Canvas of={DataSearchStories.ErrorCalloutWithRetry} />
 
