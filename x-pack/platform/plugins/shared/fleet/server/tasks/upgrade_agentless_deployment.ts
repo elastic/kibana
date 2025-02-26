@@ -29,7 +29,7 @@ export const UPGRADE_AGENTLESS_DEPLOYMENTS_TASK_TYPE = 'fleet:upgrade-agentless-
 export const UPGRADE_AGENT_DEPLOYMENTS_TASK_VERSION = '1.0.0';
 const TITLE = 'Fleet upgrade agentless deployments Task';
 const TIMEOUT = '2m';
-const INTERVAL = '1m';
+const INTERVAL = '1d';
 const LOGGER_SUBJECT = '[UpgradeAgentlessDeploymentsTask]';
 const BATCH_SIZE = 10;
 const AGENTLESS_DEPLOYMENTS_SIZE = 40;
@@ -273,6 +273,11 @@ export class UpgradeAgentlessDeploymentsTask {
         `${LOGGER_SUBJECT} Outdated task version: Received [${taskInstance.id}] from task instance. Current version is [${this.taskId}]`
       );
       return getDeleteTaskRunResult();
+    }
+
+    if(!appContextService.getExperimentalFeatures().enabledUpgradeAgentlessDeploymentsTask){
+      this.endRun('Upgrade Agentless Deployments Task is disabled');
+      return;
     }
 
     if (cloudSetup?.isServerlessEnabled) {

@@ -176,6 +176,10 @@ describe('Upgrade Agentless Deployments', () => {
       mockAgentPolicyService.fetchAllAgentPolicies = getMockAgentPolicyFetchAllAgentPolicies([
         mockAgentPolicy,
       ]);
+      jest
+      .spyOn(appContextService, 'getExperimentalFeatures')
+      .mockReturnValue({ enabledUpgradeAgentlessDeploymentsTask: true} as any);
+
 
       mockedGetAgentsByKuery.mockResolvedValue({
         agents,
@@ -350,7 +354,6 @@ describe('Upgrade Agentless Deployments', () => {
 
     it('should throw an error if task is aborted', async () => {
       mockTask.abortController = new AbortController();
-
       mockTask.abortController.signal.throwIfAborted = jest.fn(() => {
         throw new Error('Task aborted!');
       });
@@ -359,6 +362,16 @@ describe('Upgrade Agentless Deployments', () => {
       await runTask();
 
       expect(mockTask.abortController.signal.throwIfAborted).toHaveBeenCalled();
+    });
+
+    it('should not called upgrade agentless api to upgrade when agent policy is not found', async () => {
+      jest
+      .spyOn(appContextService, 'getExperimentalFeatures')
+      .mockReturnValue({ enabledUpgradeAgentlessDeploymentsTask: false } as any);
+
+      await runTask();
+
+      expect(agentlessAgentService.upgradeAgentlessDeployment).not.toHaveBeenCalled();
     });
   });
 });
