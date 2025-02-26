@@ -11,6 +11,7 @@ import { usePerformanceContext } from '@kbn/ebt-tools';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
+  EuiNotificationBadge,
   EuiEmptyPrompt,
   EuiPanel,
   EuiSpacer,
@@ -43,6 +44,7 @@ import { observabilityFeatureId } from '../../../common';
 import { useKibana } from '../../utils/kibana_react';
 import { useFetchRule } from '../../hooks/use_fetch_rule';
 import { usePluginContext } from '../../hooks/use_plugin_context';
+import { useFetchRecommendedDashboardsByAlert } from './hooks/use_fetch_recommended_dashboards_by_alert';
 import { AlertData, useFetchAlertDetail } from '../../hooks/use_fetch_alert_detail';
 import { HeaderActions } from './components/header_actions';
 import { CenterJustifiedSpinner } from '../../components/center_justified_spinner';
@@ -54,6 +56,7 @@ import { AlertOverview } from '../../components/alert_overview/alert_overview';
 import { CustomThresholdRule } from '../../components/custom_threshold/components/types';
 import { AlertDetailContextualInsights } from './alert_details_contextual_insights';
 import { AlertHistoryChart } from './components/alert_history';
+import { RelatedDashboards } from './components/related_dashboards';
 
 interface AlertDetailsPathParams {
   alertId: string;
@@ -71,6 +74,7 @@ export const METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID = 'metrics.alert.inventory
 const OVERVIEW_TAB_ID = 'overview';
 const METADATA_TAB_ID = 'metadata';
 const RELATED_ALERTS_TAB_ID = 'related_alerts';
+const RELATED_DASHBOARDS_TAB_ID = 'related_dashboards';
 const ALERT_DETAILS_TAB_URL_STORAGE_KEY = 'tabId';
 type TabId = typeof OVERVIEW_TAB_ID | typeof METADATA_TAB_ID | typeof RELATED_ALERTS_TAB_ID;
 
@@ -103,6 +107,9 @@ export function AlertDetails() {
   const { ObservabilityPageTemplate, config } = usePluginContext();
   const { alertId } = useParams<AlertDetailsPathParams>();
   const [isLoading, alertDetail] = useFetchAlertDetail(alertId);
+  const { data: recommendedDashboards } = useFetchRecommendedDashboardsByAlert({
+    alertId,
+  });
   const [ruleTypeModel, setRuleTypeModel] = useState<RuleTypeModel | null>(null);
   const CasesContext = getCasesContext();
   const userCasesPermissions = canUseCases([observabilityFeatureId]);
@@ -266,6 +273,15 @@ export function AlertDetails() {
     </EuiPanel>
   );
 
+  const relatedDashboardsTab = alertDetail ? (
+    <RelatedDashboards
+      recommendedDashboards={recommendedDashboards || []}
+      alert={alertDetail.formatted}
+    />
+  ) : (
+    <EuiLoadingSpinner />
+  );
+
   const tabs: EuiTabbedContentTab[] = [
     {
       id: OVERVIEW_TAB_ID,
@@ -298,6 +314,26 @@ export function AlertDetails() {
       'data-test-subj': 'relatedAlertsTab',
       content: <RelatedAlerts alert={alertDetail?.formatted} />,
     },
+    ...(recommendedDashboards?.length
+      ? [
+          {
+            id: RELATED_DASHBOARDS_TAB_ID,
+            name: (
+              <>
+                <FormattedMessage
+                  id="xpack.observability.alertDetails.tab.relatedDashboardsLabel"
+                  defaultMessage="Related dashboards"
+                />{' '}
+                <EuiNotificationBadge color="success">
+                  {recommendedDashboards?.length}
+                </EuiNotificationBadge>
+              </>
+            ),
+            'data-test-subj': 'relatedDashboardsTab',
+            content: relatedDashboardsTab,
+          },
+        ]
+      : []),
   ];
 
   return (

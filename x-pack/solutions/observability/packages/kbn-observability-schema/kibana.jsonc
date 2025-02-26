@@ -1,0 +1,7 @@
+{
+  "type": "shared-common",
+  "id": "@kbn/observability-schema",
+  "owner": "@elastic/obs-ux-management-team",
+  "group": "observability",
+  "visibility": "private",
+}
