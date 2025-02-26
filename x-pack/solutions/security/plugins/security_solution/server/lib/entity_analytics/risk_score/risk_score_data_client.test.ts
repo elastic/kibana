@@ -181,14 +181,12 @@ const assertIndexTemplate = (namespace: string) => {
   expect(createOrUpdateIndexTemplate).toHaveBeenCalledWith({
     logger,
     esClient,
-    template: {
+    template: expect.objectContaining({
       name: `.risk-score.risk-score-${namespace}-index-template`,
-      body: expect.objectContaining({
-        data_stream: { hidden: true },
-        index_patterns: [`risk-score.risk-score-${namespace}`],
-        composed_of: [`.risk-score-mappings-${namespace}`],
-      }),
-    },
+      data_stream: { hidden: true },
+      index_patterns: [`risk-score.risk-score-${namespace}`],
+      composed_of: [`.risk-score-mappings-${namespace}`],
+    }),
   });
 };
 

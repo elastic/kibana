@@ -417,7 +417,11 @@
         "label": "getAllFunctions",
         "description": [],
         "signature": [
-          "(options: { type: \"agg\" | \"operator\" | \"grouping\" | \"builtin\" | \"scalar\" | (\"agg\" | \"operator\" | \"grouping\" | \"builtin\" | \"scalar\")[]; } | undefined) => ",
+          "(options: { type: ",
+          "FunctionDefinitionTypes",
+          " | ",
+          "FunctionDefinitionTypes",
+          "[]; } | undefined) => ",
           {
             "pluginId": "@kbn/esql-validation-autocomplete",
             "scope": "common",
@@ -450,7 +454,10 @@
                 "label": "type",
                 "description": [],
                 "signature": [
-                  "\"agg\" | \"operator\" | \"grouping\" | \"builtin\" | \"scalar\" | (\"agg\" | \"operator\" | \"grouping\" | \"builtin\" | \"scalar\")[]"
+                  "FunctionDefinitionTypes",
+                  " | ",
+                  "FunctionDefinitionTypes",
+                  "[]"
                 ],
                 "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/shared/helpers.ts",
                 "deprecated": false,
@@ -2784,7 +2791,7 @@
             "references": [
               {
                 "plugin": "@kbn/monaco",
-                "path": "src/platform/packages/shared/kbn-monaco/src/esql/lib/hover/hover.ts"
+                "path": "src/platform/packages/shared/kbn-monaco/src/languages/esql/lib/hover/hover.ts"
               }
             ]
           },
@@ -3492,12 +3499,12 @@
           {
             "parentPluginId": "@kbn/esql-validation-autocomplete",
             "id": "def-common.FunctionDefinition.type",
-            "type": "CompoundType",
+            "type": "Enum",
             "tags": [],
             "label": "type",
             "description": [],
             "signature": [
-              "\"agg\" | \"operator\" | \"grouping\" | \"builtin\" | \"scalar\""
+              "FunctionDefinitionTypes"
             ],
             "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/definitions/types.ts",
             "deprecated": false,
@@ -3689,6 +3696,20 @@
             "type": "string",
             "tags": [],
             "label": "operator",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/definitions/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/esql-validation-autocomplete",
+            "id": "def-common.FunctionDefinition.customParametersSnippet",
+            "type": "string",
+            "tags": [],
+            "label": "customParametersSnippet",
             "description": [],
             "signature": [
               "string | undefined"
@@ -4403,10 +4424,10 @@
     "misc": [
       {
         "parentPluginId": "@kbn/esql-validation-autocomplete",
-        "id": "def-common.aggregationFunctionDefinitions",
+        "id": "def-common.aggFunctionDefinitions",
         "type": "Array",
         "tags": [],
-        "label": "aggregationFunctionDefinitions",
+        "label": "aggFunctionDefinitions",
         "description": [],
         "signature": [
           {

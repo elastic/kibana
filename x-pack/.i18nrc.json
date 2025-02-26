@@ -110,7 +110,7 @@
     "xpack.observability_onboarding": "solutions/observability/plugins/observability_onboarding",
     "xpack.observabilityShared": "solutions/observability/plugins/observability_shared",
     "xpack.observabilityLogsOverview": [
-      "platform/packages/shared/logs_overview/src/components"
+      "platform/packages/shared/logs-overview/src/components"
     ],
     "xpack.osquery": [
       "platform/plugins/shared/osquery"

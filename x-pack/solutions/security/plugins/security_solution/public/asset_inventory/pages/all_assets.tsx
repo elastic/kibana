@@ -50,6 +50,7 @@ import { AdditionalControls } from '../components/additional_controls';
 import { AssetInventorySearchBar } from '../components/search_bar';
 import { RiskBadge } from '../components/risk_badge';
 import { Filters } from '../components/filters/filters';
+import { EmptyState } from '../components/empty_state';
 
 import { useDataViewContext } from '../hooks/data_view_context';
 import { useStyles } from '../hooks/use_styles';
@@ -58,6 +59,8 @@ import {
   type AssetsBaseURLQuery,
   type URLQuery,
 } from '../hooks/use_asset_inventory_data_table';
+import { useFetchData } from '../hooks/use_fetch_data';
+import { DEFAULT_VISIBLE_ROWS_PER_PAGE, MAX_ASSETS_TO_LOAD } from '../constants';
 
 const gridStyle: EuiDataGridStyle = {
   border: 'horizontal',
@@ -65,8 +68,6 @@ const gridStyle: EuiDataGridStyle = {
   stripes: false,
   header: 'underline',
 };
-
-const MAX_ASSETS_TO_LOAD = 500; // equivalent to MAX_FINDINGS_TO_LOAD in @kbn/cloud-security-posture-common
 
 const title = i18n.translate('xpack.securitySolution.assetInventory.allAssets.tableRowTypeLabel', {
   defaultMessage: 'assets',
@@ -129,10 +130,7 @@ const getDefaultQuery = ({ query, filters }: AssetsBaseURLQuery): URLQuery => ({
 });
 
 export interface AllAssetsProps {
-  rows: DataTableRecord[];
-  isLoading: boolean;
   height?: number | string;
-  loadMore: () => void;
   nonPersistedFilters?: Filter[];
   hasDistributionBar?: boolean;
   /**
@@ -407,9 +405,6 @@ const getEntity = (row: DataTableRecord): EntityEcs => {
 const ASSET_INVENTORY_TABLE_ID = 'asset-inventory-table';
 
 const AllAssets = ({
-  rows,
-  isLoading,
-  loadMore,
   nonPersistedFilters,
   height,
   hasDistributionBar = true,
@@ -454,16 +449,35 @@ const AllAssets = ({
   };
 
   // -----------------------------------------------------------------------------------------
+  const {
+    filters,
+    pageSize,
+    sort,
+    query,
+    queryError,
+    urlQuery,
+    getRowsFromPages,
+    onChangeItemsPerPage,
+    onResetFilters,
+    onSort,
+    setUrlQuery,
+  } = assetInventoryDataTable;
 
   const {
-    // columnsLocalStorageKey,
-    pageSize,
-    onChangeItemsPerPage,
-    setUrlQuery,
-    onSort,
-    filters,
+    data: rowsData,
+    // error: fetchError,
+    isFetching,
+    fetchNextPage: loadMore,
+    isLoading,
+  } = useFetchData({
+    query,
     sort,
-  } = assetInventoryDataTable;
+    enabled: !queryError,
+    pageSize: DEFAULT_VISIBLE_ROWS_PER_PAGE,
+  });
+
+  const rows = getRowsFromPages(rowsData?.pages);
+  const totalHits = rowsData?.pages[0].total || 0;
 
   const [columns, setColumns] = useLocalStorage(
     columnsLocalStorageKey,
@@ -609,7 +623,7 @@ const AllAssets = ({
 
   const externalAdditionalControls = (
     <AdditionalControls
-      total={rows.length}
+      total={totalHits}
       dataView={dataView}
       title={title}
       columns={currentColumns}
@@ -647,7 +661,7 @@ const AllAssets = ({
   };
 
   const loadingState =
-    isLoading || dataViewIsLoading || dataViewIsRefetching || !dataView
+    isLoading || isFetching || dataViewIsLoading || dataViewIsRefetching || !dataView
       ? DataLoadingState.loading
       : DataLoadingState.loaded;
 
@@ -655,7 +669,7 @@ const AllAssets = ({
     <I18nProvider>
       {!dataView ? null : (
         <AssetInventorySearchBar
-          query={getDefaultQuery({ query: { query: '', language: '' }, filters: [] })}
+          query={urlQuery}
           setQuery={setUrlQuery}
           loading={loadingState === DataLoadingState.loading}
         />
@@ -686,7 +700,11 @@ const AllAssets = ({
             />
           </h1>
         </EuiTitle>
-        <Filters onFiltersChange={() => {}} />
+        <Filters
+          onFiltersChange={(newFilters: Filter[]) => {
+            setUrlQuery({ filters: newFilters });
+          }}
+        />
         <CellActionsProvider getTriggerCompatibleActions={uiActions.getTriggerCompatibleActions}>
           <div
             data-test-subj={rest['data-test-subj']}
@@ -696,7 +714,9 @@ const AllAssets = ({
             }}
           >
             <EuiProgress size="xs" color="accent" style={loadingStyle} />
-            {!dataView ? null : (
+            {!dataView ? null : loadingState === DataLoadingState.loaded && totalHits === 0 ? (
+              <EmptyState onResetFilters={onResetFilters} />
+            ) : (
               <UnifiedDataTable
                 key={computeDataTableRendering.mode}
                 className={styles.gridStyle}
@@ -715,7 +735,7 @@ const AllAssets = ({
                 renderDocumentView={EmptyComponent}
                 sort={sort}
                 rowsPerPageState={pageSize}
-                totalHits={rows.length}
+                totalHits={totalHits}
                 services={services}
                 onUpdateRowsPerPage={onChangeItemsPerPage}
                 rowHeightState={0}

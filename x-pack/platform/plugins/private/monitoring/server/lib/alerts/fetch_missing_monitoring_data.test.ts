@@ -178,43 +178,41 @@ describe('fetchMissingMonitoringData', () => {
       index:
         '*:.monitoring-es-*,.monitoring-es-*,*:metrics-elasticsearch.stack_monitoring.node_stats-*,metrics-elasticsearch.stack_monitoring.node_stats-*',
       filter_path: ['aggregations.clusters.buckets'],
-      body: {
-        size: 0,
-        query: {
-          bool: {
-            filter: [
-              { terms: { cluster_uuid: ['clusterUuid1'] } },
-              {
-                bool: {
-                  should: [
-                    { term: { type: 'node_stats' } },
-                    { term: { 'metricset.name': 'node_stats' } },
-                    {
-                      term: { 'data_stream.dataset': 'elasticsearch.stack_monitoring.node_stats' },
-                    },
-                  ],
-                  minimum_should_match: 1,
-                },
+      size: 0,
+      query: {
+        bool: {
+          filter: [
+            { terms: { cluster_uuid: ['clusterUuid1'] } },
+            {
+              bool: {
+                should: [
+                  { term: { type: 'node_stats' } },
+                  { term: { 'metricset.name': 'node_stats' } },
+                  {
+                    term: { 'data_stream.dataset': 'elasticsearch.stack_monitoring.node_stats' },
+                  },
+                ],
+                minimum_should_match: 1,
               },
-              { range: { timestamp: { format: 'epoch_millis', gte: 100, lte: 10 } } },
-            ],
-          },
+            },
+            { range: { timestamp: { format: 'epoch_millis', gte: 100, lte: 10 } } },
+          ],
         },
-        aggs: {
-          clusters: {
-            terms: { field: 'cluster_uuid', size: 10 },
-            aggs: {
-              es_uuids: {
-                terms: { field: 'node_stats.node_id', size: 10 },
-                aggs: {
-                  most_recent: { max: { field: 'timestamp' } },
-                  document: {
-                    top_hits: {
-                      size: 1,
-                      sort: [{ timestamp: { order: 'desc', unmapped_type: 'long' } }],
-                      _source: {
-                        includes: ['source_node.name', 'elasticsearch.node.name'],
-                      },
+      },
+      aggs: {
+        clusters: {
+          terms: { field: 'cluster_uuid', size: 10 },
+          aggs: {
+            es_uuids: {
+              terms: { field: 'node_stats.node_id', size: 10 },
+              aggs: {
+                most_recent: { max: { field: 'timestamp' } },
+                document: {
+                  top_hits: {
+                    size: 1,
+                    sort: [{ timestamp: { order: 'desc', unmapped_type: 'long' } }],
+                    _source: {
+                      includes: ['source_node.name', 'elasticsearch.node.name'],
                     },
                   },
                 },
