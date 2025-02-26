@@ -26,8 +26,8 @@ const imageSets = {
     }),
   },
   noProcessingForRootStreams: {
-    light: import('./no-processing-for-root-streams_light.png'),
-    dark: import('./no-processing-for-root-streams_dark.png'),
+    light: () => import('./no-processing-for-root-streams_light.png'),
+    dark: () => import('./no-processing-for-root-streams_dark.png'),
     alt: i18n.translate('xpack.streams.streamDetailView.noProcessingForRootStreams', {
       defaultMessage: 'No results image for the streams app',
     }),

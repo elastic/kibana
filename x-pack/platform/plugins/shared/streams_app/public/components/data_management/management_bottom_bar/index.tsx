@@ -66,17 +66,7 @@ export function ManagementBottomBar({
           defaultMessage: 'Cancel',
         })}
       </EuiButtonEmpty>
-
-      <EuiButton
-        data-test-subj="streamsAppManagementBottomBarButton"
-        disabled={disabled}
-        color="primary"
-        fill
-        onClick={onConfirm}
-        isLoading={isLoading}
-      >
-        {confirmButton}
-      </EuiButton>
+      {confirmButton}
     </EuiFlexGroup>
   );
 }

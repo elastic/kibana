@@ -30,6 +30,7 @@ import {
   EuiPanel,
   EuiPopover,
   EuiText,
+  EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { LifecycleEditAction } from './modal';
@@ -230,9 +231,9 @@ function MetadataRow({
   return (
     <EuiFlexGroup alignItems="center" gutterSize="xl" responsive={false}>
       <EuiFlexItem grow={1}>
-        <EuiText>
+        <EuiTitle size="xxs">
           <h5>{metadata}</h5>
-        </EuiText>
+        </EuiTitle>
       </EuiFlexItem>
       <EuiFlexItem grow={4}>{value}</EuiFlexItem>
       <EuiFlexItem grow={1}>{button}</EuiFlexItem>

@@ -50,7 +50,7 @@ export function CurrentStreamEntry({ definition }: { definition: WiredStreamGetR
           breadcrumbs={breadcrumbs}
           truncate={false}
           css={css`
-            padding-bottom: 8px;
+            padding-bottom: ${euiTheme.size.s};
           `}
         />
       )}
@@ -59,13 +59,14 @@ export function CurrentStreamEntry({ definition }: { definition: WiredStreamGetR
           hasShadow={false}
           hasBorder
           css={css`
-            padding: 8px 12px;
+            padding: ${euiTheme.size.s} ${euiTheme.size.s};
           `}
         >
           <EuiText
             size="s"
             css={css`
               font-family: ${euiTheme.font.familyCode};
+              font-weight: ${euiTheme.font.weight.bold};
             `}
           >
             {definition.stream.name}

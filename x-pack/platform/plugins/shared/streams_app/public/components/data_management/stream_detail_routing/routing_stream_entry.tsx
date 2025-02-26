@@ -75,6 +75,7 @@ export function RoutingStreamEntry({
                     size="s"
                     css={css`
                       font-family: ${euiTheme.font.familyCode};
+                      font-family: ${euiTheme.font.weight.bold};
                     `}
                   >
                     {child.destination}

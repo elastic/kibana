@@ -34,13 +34,14 @@ export const EcsRecommendation = ({
   return (
     <EuiText size="xs">
       {`${EcsRecommendationText}: `}
-      <EuiBadge color="success">
-        {isLoading
-          ? LoadingText
-          : recommendation !== undefined
-          ? recommendation
-          : UknownEcsFieldText}
-      </EuiBadge>
+
+      {isLoading ? (
+        LoadingText
+      ) : recommendation !== undefined ? (
+        <EuiBadge color="success"> {recommendation}</EuiBadge>
+      ) : (
+        UknownEcsFieldText
+      )}
     </EuiText>
   );
 };

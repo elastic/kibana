@@ -82,7 +82,7 @@ export function FieldsTable({
         rowHover: 'highlight',
         header: 'shade',
         fontSize: 's',
-        cellPadding: 'm',
+        cellPadding: 'l',
       }}
       inMemory={{ level: 'sorting' }}
     />
