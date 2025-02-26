@@ -37503,7 +37503,9 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Security_Osquery_API_DefaultSuccessResponse'
+                example: {}
+                type: object
+                properties: {}
           description: OK
       summary: Delete a pack
       tags:
@@ -54263,7 +54265,30 @@ components:
           $ref: '#/components/schemas/Security_Osquery_API_Shards'
     Security_Osquery_API_CreatePacksResponse:
       example:
-        data: {}
+        data:
+          created_at: '2025-02-26T13:37:30.452Z'
+          created_by: elastic
+          description: My pack
+          enabled: true
+          name: my_pack
+          queries:
+            ports:
+              ecs_mapping:
+                client.port:
+                  field: port
+              interval: 60
+              query: SELECT * FROM listening_ports;
+              removed: false
+              snapshot: true
+              timeout: 120
+          saved_object_id: 1c266590-381f-428c-878f-c80c1334f856
+          shards:
+            - key: 47638692-7c4c-4053-aa3e-7186f28df349
+              value: 35
+            - key: 5e267651-fe50-443e-8d3f-3bbc9171b618
+              value: 58
+          updated_at: '2025-02-26T13:37:30.452Z'
+          updated_by: elastic
       type: object
       properties: {}
     Security_Osquery_API_CreateSavedQueryRequestBody:
@@ -54672,7 +54697,30 @@ components:
           $ref: '#/components/schemas/Security_Osquery_API_Shards'
     Security_Osquery_API_UpdatePacksResponse:
       example:
-        data: {}
+        data:
+          created_at: '2025-02-26T13:37:30.452Z'
+          created_by: elastic
+          description: My pack
+          enabled: true
+          name: updated_my_pack_name
+          queries:
+            ports:
+              ecs_mapping:
+                client.port:
+                  field: port
+              interval: 60
+              query: SELECT * FROM listening_ports;
+              removed: false
+              snapshot: true
+              timeout: 120
+          saved_object_id: 1c266590-381f-428c-878f-c80c1334f856
+          shards:
+            - key: 47638692-7c4c-4053-aa3e-7186f28df349
+              value: 35
+            - key: 5e267651-fe50-443e-8d3f-3bbc9171b618
+              value: 58
+          updated_at: '2025-02-26T13:40:16.297Z'
+          updated_by: elastic
       type: object
       properties: {}
     Security_Osquery_API_UpdateSavedQueryRequestBody:
