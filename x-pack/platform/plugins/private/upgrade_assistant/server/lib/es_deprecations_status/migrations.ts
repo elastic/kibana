@@ -127,11 +127,31 @@ const normalizeEsResponse = (migrationsResponse: EsDeprecations) => {
 export const getEnrichedDeprecations = async (
   dataClient: IScopedClusterClient
 ): Promise<EnrichedDeprecationInfo[]> => {
-  const deprecations = (await dataClient.asCurrentUser.migration.deprecations()) as EsDeprecations;
-  const systemIndices = await getESSystemIndicesMigrationStatus(dataClient.asCurrentUser);
+  const asCurrentUser = dataClient.asCurrentUser;
+  const deprecationsPromise =
+    dataClient.asCurrentUser.migration.deprecations() as Promise<EsDeprecations>;
+  const systemIndicesPromise = getESSystemIndicesMigrationStatus(asCurrentUser);
+  const jobsPromise = await asCurrentUser.rollup.getJobs({ id: '_all' });
 
+  const [deprecations, systemIndices, jobs] = await Promise.all([
+    deprecationsPromise,
+    systemIndicesPromise,
+    jobsPromise,
+  ]);
+
+  const rollupIndices = Object.values(jobs.jobs).map((value) => value.config.rollup_index);
+
+  rollupIndices.forEach((index) => {
+    // if there's a corresponding deprecation for this index that requires reindexing, mark it as a rollup index
+    deprecations.index_settings[index]
+      ?.filter((deprecation) => deprecation._meta?.reindex_required)
+      .forEach((deprecation) => {
+        deprecation._meta!.isRollup = true;
+      });
+  });
   const systemIndicesList = convertFeaturesToIndicesArray(systemIndices.features);
 
+  // this is the list of indices that have deprecations
   const indexSettingsIndexNames = Object.keys(deprecations.index_settings);
   const indexSettingsIndexStates = indexSettingsIndexNames.length
     ? await esIndicesStateCheck(dataClient.asCurrentUser, indexSettingsIndexNames)
@@ -195,6 +215,7 @@ export const getEnrichedDeprecations = async (
       const enrichedDeprecation = {
         ..._.omit(deprecation, 'metadata'),
         correctiveAction,
+        isRollup: deprecation.metadata?.isRollup,
       };
 
       if (deprecation.index) {

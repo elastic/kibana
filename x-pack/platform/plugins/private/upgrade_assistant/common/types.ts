@@ -260,6 +260,7 @@ export interface EnrichedDeprecationInfo
     | DataStreamsAction
     | HealthIndicatorAction;
   resolveDuringUpgrade: boolean;
+  isRollup?: boolean;
 }
 
 export interface CloudBackupStatus {
