@@ -44,8 +44,8 @@ export type ESQLSourceDescriptor = AbstractSourceDescriptor & {
    */
   id: string;
   esql: string;
-  columns: ESQLColumn[];
-  dataViewId: string;
+  columns: ESQLColumn[]; // why is this mandatory?
+  dataViewId: string; // why is this mandatory?
   /*
    * Date field used to narrow ES|QL requests by global time range
    */
@@ -155,6 +155,12 @@ export type ESTermSourceDescriptor = AbstractESJoinSourceDescriptor & {
   type: SOURCE_TYPES.ES_TERM_SOURCE;
 };
 
+export type ESESQLTermSourceDescriptor = ESQLSourceDescriptor & {
+  term: string; // term field name (this is the "right field" from the ES|QL-query that will be joined to the left field from another dataset
+
+  type: SOURCE_TYPES.ES_ESQL_TERM_SOURCE;
+};
+
 // This is for symmetry with other sources only.
 // It takes no additional configuration since  all params are in the .yml.
 export type KibanaTilemapSourceDescriptor = AbstractSourceDescriptor;
@@ -223,4 +229,5 @@ export type TableSourceDescriptor = {
 export type JoinSourceDescriptor =
   | ESDistanceSourceDescriptor
   | ESTermSourceDescriptor
+  | ESESQLTermSourceDescriptor
   | TableSourceDescriptor;
