@@ -35,8 +35,8 @@ const defaultProps = {
   visible: true,
   toggle: mockToggle,
   enableStore: mockEnableStore,
-  riskScore: { disabled: false, checked: false },
-  entityStore: { disabled: false, checked: false },
+  riskScore: { canToggle: false, checked: false },
+  entityStore: { canToggle: false, checked: false },
 };
 
 const allEntityEnginePrivileges: EntityAnalyticsPrivileges = {
@@ -149,8 +149,8 @@ describe('EntityStoreEnablementModal', () => {
     it('should show proceed warning when riskScore is enabled but entityStore is disabled and unchecked', () => {
       renderComponent({
         ...defaultProps,
-        riskScore: { disabled: false, checked: false }, // Enabled & Checked
-        entityStore: { disabled: true, checked: false }, // Disabled & Unchecked
+        riskScore: { canToggle: false, checked: false }, // Enabled & Checked
+        entityStore: { canToggle: true, checked: false }, // Disabled & Unchecked
       });
       expect(screen.getByText('Please enable at least one option to proceed.')).toBeInTheDocument();
     });
@@ -158,8 +158,8 @@ describe('EntityStoreEnablementModal', () => {
     it('should show proceed warning when entityStore is enabled but riskScore is disabled and unchecked', () => {
       renderComponent({
         ...defaultProps,
-        entityStore: { disabled: false, checked: false }, // Enabled & Checked
-        riskScore: { disabled: true, checked: false }, // Disabled & Unchecked
+        entityStore: { canToggle: false, checked: false }, // Enabled & Checked
+        riskScore: { canToggle: true, checked: false }, // Disabled & Unchecked
       });
       expect(screen.getByText('Please enable at least one option to proceed.')).toBeInTheDocument();
     });
