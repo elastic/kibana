@@ -529,3 +529,30 @@ export const relatedResultsForJson = {
     ],
   },
 };
+
+export const analyzeApiResults = { suggestedPaths: ['/pets'] };
+
+export const celInputResults = {
+  results: {
+    configFields: {
+      limit: {
+        description: 'Maximum number of pets to return in a single request (max 100)',
+        type: 'integer',
+        default: 100,
+      },
+      api_key: {
+        description: 'API key for authentication',
+        type: 'password',
+        default: '',
+      },
+    },
+    program:
+      'state.with(\n  request("GET", state.url.trim_right("/") + "/pets?" + {\n    "limit": [string(state.?limit.orValue(100))]\n  }.format_query()).with({\n    "Header": {\n      "Accept": ["application/json"],\n      "Authorization": [state.api_key]\n    }\n  }).do_request().as(resp,\n    resp.StatusCode == 200 ?\n      bytes(resp.Body).decode_json().as(body, {\n        "events": body.map(e, {\n          "message": e.encode_json()\n        }),\n        "want_more": has(resp.Header["x-next"]),\n        "cursor": {\n          "next_page": resp.Header["x-next"].?[0]\n        }\n      })\n    :\n      {\n        "events": {\n          "error": {\n            "code": string(resp.StatusCode),\n            "id": string(resp.Status),\n            "message": "GET:" + (\n              size(resp.Body) != 0 ?\n                string(resp.Body)\n              :\n                string(resp.Status) + \' (\' + string(resp.StatusCode) + \')\'\n            )\n          }\n        },\n        "want_more": false\n      }\n  )\n)',
+    needsAuthConfigBlock: false,
+    stateSettings: {
+      limit: 100,
+      api_key: '',
+    },
+    redactVars: ['api_key'],
+  },
+};

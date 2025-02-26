@@ -21,8 +21,14 @@ export const DATASTREAM_TITLE_INPUT = 'dataStreamTitleInput';
 export const DATASTREAM_DESCRIPTION_INPUT = 'dataStreamDescriptionInput';
 export const DATASTREAM_NAME_INPUT = 'dataStreamNameInput';
 export const DATA_COLLECTION_METHOD_INPUT = 'dataCollectionMethodInput';
+export const CEL_GENERATION_FLYOUT_BUTTON = 'addOpenApiSpecButton';
 export const LOGS_SAMPLE_FILE_PICKER = 'logsSampleFilePicker';
 export const LICENSE_PAYWALL_CARD = 'LicensePaywallCard';
+
+export const API_DEFINITION_FILE_PICKER = 'apiDefinitionFilePicker';
+export const ANLAYZE_API_BUTTON = 'analyzeApiButton';
+export const GENERATE_CEL_BUTTON = 'generateCelInputButton';
+export const SAVE_CEL_CONFIG_BUTTON = 'footer-saveButton';
 
 export const EDIT_PIPELINE_BUTTON = 'editPipelineButton';
 export const SAVE_PIPELINE_BUTTON = 'savePipelineButton';
