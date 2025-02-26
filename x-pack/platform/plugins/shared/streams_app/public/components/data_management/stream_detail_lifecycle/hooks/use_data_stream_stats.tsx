@@ -34,7 +34,7 @@ export const useDataStreamStats = ({ definition }: { definition?: IngestStreamGe
       includeCreationDate: true,
     });
 
-    if (!dsStats || !dsStats.creationDate || !dsStats.sizeBytes) {
+    if (!dsStats || !dsStats.creationDate) {
       return undefined;
     }
     const daysSinceCreation = Math.max(
@@ -44,8 +44,9 @@ export const useDataStreamStats = ({ definition }: { definition?: IngestStreamGe
 
     return {
       ...dsStats,
-      bytesPerDay: dsStats.sizeBytes / daysSinceCreation,
-      bytesPerDoc: dsStats.totalDocs ? dsStats.sizeBytes / dsStats.totalDocs : 0,
+      bytesPerDay: dsStats.sizeBytes ? dsStats.sizeBytes / daysSinceCreation : 0,
+      bytesPerDoc:
+        dsStats.totalDocs && dsStats.sizeBytes ? dsStats.sizeBytes / dsStats.totalDocs : 0,
     };
   }, [dataStreamsClient, definition]);
 
