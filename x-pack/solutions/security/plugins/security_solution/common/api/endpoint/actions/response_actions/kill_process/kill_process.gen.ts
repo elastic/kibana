@@ -36,7 +36,7 @@ export const KillProcessRouteRequestBody = BaseActionSchema.merge(
       }),
       z.object({
         /**
-         * Valid for SentinelOne agent type only.
+         * The name of the process to terminate. Valid for SentinelOne agent type only.
          */
         process_name: z.string().min(1).optional(),
       }),

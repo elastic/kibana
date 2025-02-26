@@ -28,7 +28,7 @@ export const UploadRouteRequestBody = BaseActionSchema.merge(
       overwrite: z.boolean().optional().default(false),
     }),
     /**
-     * The file content to be uploaded or a relative path to the file. Note the path must be preceded with @.
+     * The binary content of the file.
      */
     file: z.string(),
   })
@@ -40,6 +40,3 @@ export const UploadRouteResponse = z.object({});
 export type EndpointUploadActionRequestBody = z.infer<typeof EndpointUploadActionRequestBody>;
 export const EndpointUploadActionRequestBody = UploadRouteRequestBody;
 export type EndpointUploadActionRequestBodyInput = z.input<typeof EndpointUploadActionRequestBody>;
-
-export type EndpointUploadActionResponse = z.infer<typeof EndpointUploadActionResponse>;
-export const EndpointUploadActionResponse = UploadRouteResponse;

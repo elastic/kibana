@@ -180,10 +180,7 @@ import type {
   EndpointUnisolateActionRequestBodyInput,
   EndpointUnisolateActionResponse,
 } from './endpoint/actions/response_actions/unisolate/unisolate.gen';
-import type {
-  EndpointUploadActionRequestBodyInput,
-  EndpointUploadActionResponse,
-} from './endpoint/actions/response_actions/upload/upload.gen';
+import type { EndpointUploadActionRequestBodyInput } from './endpoint/actions/response_actions/upload/upload.gen';
 import type { EndpointGetActionsStateResponse } from './endpoint/actions/state/state.gen';
 import type {
   EndpointGetActionsStatusRequestQueryInput,
@@ -1120,7 +1117,7 @@ If a record already exists for the specified entity, that record is overwritten 
   async endpointUploadAction(props: EndpointUploadActionProps) {
     this.log.info(`${new Date().toISOString()} Calling API EndpointUploadAction`);
     return this.kbnClient
-      .request<EndpointUploadActionResponse>({
+      .request({
         path: '/api/endpoint/action/upload',
         headers: {
           [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',

@@ -37,7 +37,7 @@ export type PageSize = z.infer<typeof PageSize>;
 export const PageSize = z.number().int().min(1).max(100).default(10);
 
 /**
- * A start date in ISO format or Date Math format.
+ * A start date in ISO 8601 format or Date Math format.
  */
 export type StartDate = z.infer<typeof StartDate>;
 export const StartDate = z.string();
