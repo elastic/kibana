@@ -295,6 +295,7 @@ export const panelSchema = schema.object({
       meta: { description: 'The unique ID of the panel.' },
     })
   ),
+  sectionIndex: schema.maybe(schema.number()),
   title: schema.maybe(schema.string({ meta: { description: 'The title of the panel' } })),
   version: schema.maybe(
     schema.string({
@@ -429,6 +430,7 @@ const dashboardAttributesSchemaResponse = dashboardAttributesSchema.extends({
       gridData: gridDataSchema.extends({
         i: schema.string(),
       }),
+      sectionIndex: schema.maybe(schema.number()),
     }),
     { defaultValue: [] }
   ),

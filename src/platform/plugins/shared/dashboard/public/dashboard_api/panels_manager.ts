@@ -157,7 +157,7 @@ export function initializePanelsManager(
       type: panel.type,
       explicitInput: { ...panel.explicitInput, ...serialized.rawState },
       gridData: panel.gridData,
-      rowIndex: panel.sectionIndex ?? 0,
+      sectionIndex: panel.sectionIndex ?? 0,
       references: serialized.references,
     };
   }
