@@ -92,7 +92,7 @@ const getPipeline = (filename: string, removeSteps = true) => {
     if (
       (await doAnyChangesMatch([
         /^x-pack\/solutions\/observability\/plugins\/apm/,
-        /^packages\/kbn-apm-synthtrace/,
+        /^src\/platform\/packages\/shared\/kbn-apm-synthtrace/,
       ])) ||
       GITHUB_PR_LABELS.includes('ci:all-cypress-suites')
     ) {
@@ -102,7 +102,7 @@ const getPipeline = (filename: string, removeSteps = true) => {
     if (
       (await doAnyChangesMatch([
         /^x-pack\/solutions\/observability\/plugins\/inventory/,
-        /^packages\/kbn-apm-synthtrace/,
+        /^src\/platform\/packages\/shared\/kbn-apm-synthtrace/,
       ])) ||
       GITHUB_PR_LABELS.includes('ci:all-cypress-suites')
     ) {
@@ -394,7 +394,7 @@ const getPipeline = (filename: string, removeSteps = true) => {
       (await doAnyChangesMatch([
         /^x-pack\/platform\/plugins\/private\/discover_enhanced\/ui_tests/,
         /^x-pack\/solutions\/observability\/plugins\/observability_onboarding/,
-        /^packages\/kbn-scout/,
+        /^src\/platform\/packages\/shared\/kbn-scout/,
       ])) ||
       GITHUB_PR_LABELS.includes('ci:scout-ui-tests')
     ) {

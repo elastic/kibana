@@ -32,55 +32,55 @@ paths-ignore:
   - packages/*/scripts
   - src/core/test-helpers/kbn-server
   - packages/kbn-ambient-*-types
-  - packages/kbn-apm-synthtrace
-  - packages/kbn-axe-config
+  - src/platform/packages/shared/kbn-apm-synthtrace
+  - src/platform/packages/shared/kbn-axe-config
   - packages/kbn-babel-*
   - packages/kbn-bazel-*
   - packages/kbn-ci-*
   - packages/kbn-cli-dev-mode
   - packages/kbn-cypress-*
-  - packages/kbn-dev-cli-errors
-  - packages/kbn-dev-cli-runner
-  - packages/kbn-dev-proc-runner
-  - packages/kbn-dev-utils
+  - src/platform/packages/shared/kbn-dev-cli-errors
+  - src/platform/packages/shared/kbn-dev-cli-runner
+  - src/platform/packages/shared/kbn-dev-proc-runner
+  - src/platform/packages/shared/kbn-dev-utils
   - packages/kbn-docs-utils
-  - packages/kbn-es
-  - packages/kbn-es-archiver
+  - src/platform/packages/shared/kbn-es
+  - src/platform/packages/shared/kbn-es-archiver
   - packages/kbn-eslint-*
-  - packages/kbn-expect
+  - src/platform/packages/shared/kbn-expect
   - packages/kbn-failed-test-reporter-cli
   - packages/kbn-find-used-node-modules
   - packages/kbn-ftr-*
   - packages/kbn-generate
-  - packages/kbn-get-repo-files
-  - packages/kbn-import-resolver
+  - src/platform/packages/private/kbn-get-repo-files
+  - src/platform/packages/private/kbn-import-resolver
   - packages/kbn-jest-*
-  - packages/kbn-journeys
+  - src/platform/packages/private/kbn-journeys
   - packages/kbn-kibana-manifest-schema
   - packages/kbn-managed-vscode-config
   - packages/kbn-managed-vscode-config-cli
   - packages/kbn-optimizer
   - packages/kbn-optimizer-*
-  - packages/kbn-peggy
+  - src/platform/packages/private/kbn-peggy
   - packages/kbn-peggy-loader
   - packages/kbn-performance-testing-dataset-extractor
   - packages/kbn-plugin-generator
   - packages/kbn-plugin-helpers
   - packages/kbn-relocate
-  - packages/kbn-repo-path
+  - src/platform/packages/private/kbn-repo-path
   - packages/kbn-repo-source-classifier
   - packages/kbn-repo-source-classifier-cli
-  - packages/kbn-scout
+  - src/platform/packages/shared/kbn-scout
   - packages/kbn-scout-*
-  - packages/kbn-some-dev-log
+  - src/platform/packages/private/kbn-some-dev-log
   - packages/kbn-sort-package-json
   - packages/kbn-spec-to-console
-  - packages/kbn-stdio-dev-helpers
-  - packages/kbn-storybook
-  - packages/kbn-telemetry-tools
-  - packages/kbn-test
+  - src/platform/packages/private/kbn-stdio-dev-helpers
+  - src/platform/packages/shared/kbn-storybook
+  - src/platform/packages/private/kbn-telemetry-tools
+  - src/platform/packages/shared/kbn-test
   - packages/kbn-test-*
-  - packages/kbn-tooling-log
+  - src/platform/packages/shared/kbn-tooling-log
   - packages/kbn-ts-*
   - packages/kbn-web-worker-stub
   - packages/kbn-yarn-lock-validator
