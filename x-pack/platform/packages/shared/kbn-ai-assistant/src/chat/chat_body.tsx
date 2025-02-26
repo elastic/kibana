@@ -443,11 +443,17 @@ export function ChatBody({
                           </EuiFlexItem>
                           <EuiFlexItem grow>
                             <EuiText size="xs">
-                              <h3>This conversation is shared with your team.</h3>
+                              <h3>
+                                {i18n.translate('xpack.aiAssistant.sharedBanner.title', {
+                                  defaultMessage: 'This conversation is shared with your team.',
+                                })}
+                              </h3>
                               <p>
-                                You can’t edit or continue this conversation, but you can duplicate
+                                {i18n.translate('xpack.aiAssistant.sharedBanner.title', {
+                                  defaultMessage: `You can’t edit or continue this conversation, but you can duplicate
                                 it into a new private conversation. The original conversation will
-                                remain unchanged.
+                                remain unchanged.`,
+                                })}
                               </p>
                               <EuiButton onClick={duplicateConversation} iconType="copy" size="s">
                                 {i18n.translate('xpack.aiAssistant.duplicateButton', {
