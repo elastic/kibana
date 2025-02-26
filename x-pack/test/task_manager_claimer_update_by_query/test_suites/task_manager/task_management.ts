@@ -8,7 +8,7 @@
 import moment from 'moment';
 import { random } from 'lodash';
 import expect from '@kbn/expect';
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { estypes } from '@elastic/elasticsearch';
 import { taskMappings as TaskManagerMapping } from '@kbn/task-manager-plugin/server/saved_objects/mappings';
 import { ConcreteTaskInstance, BulkUpdateTaskResult } from '@kbn/task-manager-plugin/server';
 import { FtrProviderContext } from '../../ftr_provider_context';
@@ -61,25 +61,23 @@ export default function ({ getService }: FtrProviderContext) {
         await es.deleteByQuery({
           index: testHistoryIndex,
           refresh: true,
-          body: { query: { term: { type: 'task' } } },
+          query: { term: { type: 'task' } },
         });
       } else {
         await es.indices.create({
           index: testHistoryIndex,
-          body: {
-            mappings: {
-              properties: {
-                type: {
-                  type: 'keyword',
-                },
-                taskId: {
-                  type: 'keyword',
-                },
-                params: taskManagerIndexMapping.params,
-                state: taskManagerIndexMapping.state,
-                runAt: taskManagerIndexMapping.runAt,
-              } as Record<string, estypes.MappingProperty>,
-            },
+          mappings: {
+            properties: {
+              type: {
+                type: 'keyword',
+              },
+              taskId: {
+                type: 'keyword',
+              },
+              params: taskManagerIndexMapping.params,
+              state: taskManagerIndexMapping.state,
+              runAt: taskManagerIndexMapping.runAt,
+            } as Record<string, estypes.MappingProperty>,
           },
         });
       }
@@ -137,10 +135,8 @@ export default function ({ getService }: FtrProviderContext) {
       return es
         .search({
           index: testHistoryIndex,
-          body: {
-            query: {
-              term: { type: 'task' },
-            },
+          query: {
+            term: { type: 'task' },
           },
         })
         .then((result) =>

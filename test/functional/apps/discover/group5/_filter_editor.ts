@@ -87,12 +87,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
           await es.indices.create({
             index: indexTitle,
-            body: {
-              mappings: {
-                properties: {
-                  version: {
-                    type: 'version',
-                  },
+            mappings: {
+              properties: {
+                version: {
+                  type: 'version',
                 },
               },
             },
@@ -100,7 +98,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
           await es.index({
             index: indexTitle,
-            body: {
+            document: {
               version: '1.0.0',
             },
             refresh: 'wait_for',
@@ -108,7 +106,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
           await es.index({
             index: indexTitle,
-            body: {
+            document: {
               version: '2.0.0',
             },
             refresh: 'wait_for',
