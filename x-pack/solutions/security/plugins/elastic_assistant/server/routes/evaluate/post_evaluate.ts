@@ -103,7 +103,7 @@ export const postEvaluateRoute = (
         const savedObjectsClient = ctx.elasticAssistant.savedObjectsClient;
 
         // Perform license, authenticated user and evaluation FF checks
-        const checkResponse = performChecks({
+        const checkResponse = await performChecks({
           capability: 'assistantModelEvaluation',
           context: ctx,
           request,
