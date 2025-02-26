@@ -11,9 +11,9 @@ import { ESProcessorItem } from '../../../common';
 import type { KVState } from '../../types';
 import { handleKV } from './kv';
 import type { KVGraphParams, KVBaseNodeParams } from './types';
-import { handleHeader } from './header';
-import { handleHeaderError, handleKVError } from './error';
-import { handleHeaderValidate, handleKVValidate } from './validate';
+import { handleHeader, handleHeaderRegex } from './header';
+import { handleHeaderError, handleHeaderRegexError, handleKVError } from './error';
+import { handleHeaderRegexValidate, handleHeaderValidate, handleKVValidate } from './validate';
 
 const graphState: StateGraphArgs<KVState>['channels'] = {
   lastExecutedChain: {
@@ -68,6 +68,10 @@ const graphState: StateGraphArgs<KVState>['channels'] = {
     value: (x: string, y?: string) => y ?? x,
     default: () => '',
   },
+  regex: {
+    value: (x: RegExp, y?: RegExp) => y ?? x,
+    default: () => new RegExp(''),
+  },
 };
 
 function modelInput({ state }: KVBaseNodeParams): Partial<KVState> {
@@ -99,6 +103,13 @@ function kvRouter({ state }: KVBaseNodeParams): string {
   return 'handleKVError';
 }
 
+function kvHeaderRegexRouter({ state }: KVBaseNodeParams): string {
+  if (Object.keys(state.errors).length === 0) {
+    return 'handleHeader';
+  }
+  return 'handleHeaderRegexError';
+}
+
 function kvHeaderRouter({ state }: KVBaseNodeParams): string {
   if (Object.keys(state.errors).length === 0) {
     return 'handleKV';
@@ -113,18 +124,35 @@ export async function getKVGraph({ model, client }: KVGraphParams) {
     .addNode('modelInput', (state: KVState) => modelInput({ state }))
     .addNode('modelOutput', (state: KVState) => modelOutput({ state }))
     .addNode('handleHeader', (state: KVState) => handleHeader({ state, model, client }))
+    .addNode('handleHeaderRegex', (state: KVState) => handleHeaderRegex({ state, model, client }))
     .addNode('handleKVError', (state: KVState) => handleKVError({ state, model, client }))
     .addNode('handleHeaderError', (state: KVState) => handleHeaderError({ state, model, client }))
+    .addNode('handleHeaderRegexError', (state: KVState) =>
+      handleHeaderRegexError({ state, model, client })
+    )
     .addNode('handleKV', (state: KVState) => handleKV({ state, model, client }))
     .addNode('handleKVValidate', (state: KVState) => handleKVValidate({ state, model, client }))
     .addNode('handleHeaderValidate', (state: KVState) =>
       handleHeaderValidate({ state, model, client })
     )
+    .addNode('handleHeaderRegexValidate', (state: KVState) =>
+      handleHeaderRegexValidate({ state, model, client })
+    )
     .addEdge(START, 'modelInput')
     .addConditionalEdges('modelInput', (state: KVState) => headerRouter({ state }), {
-      header: 'handleHeader',
+      header: 'handleHeaderRegex',
       noHeader: 'handleKV',
     })
+    .addEdge('handleHeaderRegex', 'handleHeaderRegexValidate')
+    .addConditionalEdges(
+      'handleHeaderRegexValidate',
+      (state: KVState) => kvHeaderRegexRouter({ state }),
+      {
+        handleHeaderRegexError: 'handleHeaderRegexError',
+        handleHeader: 'handleHeader',
+      }
+    )
+    .addEdge('handleHeaderRegexError', 'handleHeaderRegexValidate')
     .addEdge('handleHeader', 'handleHeaderValidate')
     .addConditionalEdges('handleHeaderValidate', (state: KVState) => kvHeaderRouter({ state }), {
       handleHeaderError: 'handleHeaderError',
