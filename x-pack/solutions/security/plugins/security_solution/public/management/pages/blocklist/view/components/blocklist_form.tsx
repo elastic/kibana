@@ -29,6 +29,7 @@ import { isOneOfOperator, isOperator } from '@kbn/securitysolution-list-utils';
 import { uniq } from 'lodash';
 
 import { ListOperatorEnum, ListOperatorTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
+import { FormattedError } from '../../../../components/formatted_error';
 import { OS_TITLES } from '../../../../common/translations';
 import type {
   ArtifactFormComponentOnChangeCallbackProps,
@@ -62,6 +63,7 @@ import {
 } from '../../../../../../common/endpoint/service/artifacts';
 import type { PolicyData } from '../../../../../../common/endpoint/types';
 import { useTestIdGenerator } from '../../../../hooks/use_test_id_generator';
+import { useGetUpdatedTags } from '../../../../hooks/artifacts';
 
 const testIdPrefix = 'blocklist-form';
 
@@ -113,7 +115,7 @@ function isValid(itemValidation: ItemValidation): boolean {
 
 // eslint-disable-next-line react/display-name
 export const BlockListForm = memo<ArtifactFormComponentProps>(
-  ({ item, policies, policiesIsLoading, onChange, mode }) => {
+  ({ item, policies, policiesIsLoading, onChange, mode, error: submitError }) => {
     const [nameVisited, setNameVisited] = useState(false);
     const [valueVisited, setValueVisited] = useState({ value: false }); // Use object to trigger re-render
     const warningsRef = useRef<ItemValidation>({ name: {}, value: {} });
@@ -123,6 +125,7 @@ export const BlockListForm = memo<ArtifactFormComponentProps>(
     const isGlobal = useMemo(() => isArtifactGlobal(item), [item]);
     const [wasByPolicy, setWasByPolicy] = useState(!isArtifactGlobal(item));
     const [hasFormChanged, setHasFormChanged] = useState(false);
+    const { getTagsUpdatedBy } = useGetUpdatedTags(item);
 
     const showAssignmentSection = useMemo(() => {
       return (
@@ -546,8 +549,7 @@ export const BlockListForm = memo<ArtifactFormComponentProps>(
 
     const handleOnPolicyChange = useCallback(
       (change: EffectedPolicySelection) => {
-        const tags = getArtifactTagsByPolicySelection(change);
-
+        const tags = getTagsUpdatedBy('policySelection', getArtifactTagsByPolicySelection(change));
         const nextItem = { ...item, tags };
 
         // Preserve old selected policies when switching to global
@@ -561,11 +563,19 @@ export const BlockListForm = memo<ArtifactFormComponentProps>(
         });
         setHasFormChanged(true);
       },
-      [validateValues, onChange, item]
+      [getTagsUpdatedBy, item, validateValues, onChange]
     );
 
     return (
-      <EuiForm component="div">
+      <EuiForm
+        component="div"
+        error={
+          submitError ? (
+            <FormattedError error={submitError} data-test-subj={getTestId('submitError')} />
+          ) : undefined
+        }
+        isInvalid={!!submitError}
+      >
         <EuiTitle size="xs">
           <h3>{DETAILS_HEADER}</h3>
         </EuiTitle>
