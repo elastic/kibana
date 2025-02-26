@@ -16,6 +16,10 @@ type PliProductFeatures = Readonly<
 export const PLI_PRODUCT_FEATURES: PliProductFeatures = {
   security: {
     essentials: [
+      ProductFeatureKey.dashboards,
+      ProductFeatureKey.detections,
+      ProductFeatureKey.timeline,
+      ProductFeatureKey.notes,
       ProductFeatureKey.endpointHostManagement,
       ProductFeatureKey.endpointPolicyManagement,
     ],
@@ -51,6 +55,16 @@ export const PLI_PRODUCT_FEATURES: PliProductFeatures = {
   },
   cloud: {
     essentials: [ProductFeatureKey.cloudSecurityPosture],
+    complete: [],
+  },
+  ai: {
+    // Not split into essentials and complete, using essentials for now
+    essentials: [
+      // I am guessing here
+      ProductFeatureKey.attackDiscovery,
+      ProductFeatureKey.assistant,
+      ProductFeatureKey.threatIntelligence,
+    ],
     complete: [],
   },
 } as const;
