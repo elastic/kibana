@@ -107,9 +107,12 @@ interface AssetAggs {
   };
 }
 
-const tooltipOtherLabel = i18n.translate('xpack.assetInventory.chart.tooltip.otherLabel', {
-  defaultMessage: 'Other',
-});
+const tooltipOtherLabel = i18n.translate(
+  'xpack.securitySolution.assetInventory.chart.tooltip.otherLabel',
+  {
+    defaultMessage: 'Other',
+  }
+);
 
 // Example output:
 //
