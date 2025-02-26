@@ -9,16 +9,18 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../../ftr_provider_context';
 import { asyncForEach } from '../../helpers';
 
-const ACTIVE_ALERTS_CELL_COUNT = 78;
-const RECOVERED_ALERTS_CELL_COUNT = 330;
+const INFRA_ACTIVE_ALERTS_CELL_COUNT = 78;
 const TOTAL_ALERTS_CELL_COUNT = 440;
+const RECOVERED_ALERTS_CELL_COUNT = 330;
+const ACTIVE_ALERTS_CELL_COUNT = 110;
 
 const DISABLED_ALERTS_CHECKBOX = 6;
 const ENABLED_ALERTS_CHECKBOX = 4;
 
-export default ({ getService }: FtrProviderContext) => {
+export default ({ getService, getPageObjects }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
   const find = getService('find');
+  const { alertControls } = getPageObjects(['alertControls']);
 
   describe('Observability alerts >', function () {
     this.tags('includeFirefox');
@@ -55,7 +57,19 @@ export default ({ getService }: FtrProviderContext) => {
         await observability.alerts.common.getTableOrFail();
       });
 
-      it('Renders the correct number of cells', async () => {
+      it('Renders the correct number of cells (active alerts)', async () => {
+        await retry.try(async () => {
+          const cells = await observability.alerts.common.getTableCells();
+          expect(cells.length).to.be(ACTIVE_ALERTS_CELL_COUNT);
+        });
+      });
+
+      it('Clear status control', async () => {
+        await alertControls.clearControlSelections('0');
+        await observability.alerts.common.waitForAlertTableToLoad();
+      });
+
+      it('Renders the correct number of cells (all alerts)', async () => {
         await retry.try(async () => {
           const cells = await observability.alerts.common.getTableCells();
           expect(cells.length).to.be(TOTAL_ALERTS_CELL_COUNT);
@@ -104,6 +118,9 @@ export default ({ getService }: FtrProviderContext) => {
       describe('Date selection', () => {
         after(async () => {
           await observability.alerts.common.navigateToTimeWithData();
+          // Clear active status
+          await alertControls.clearControlSelections('0');
+          await observability.alerts.common.waitForAlertTableToLoad();
         });
 
         it('Correctly applies date picker selections', async () => {
@@ -218,7 +235,7 @@ export default ({ getService }: FtrProviderContext) => {
           // Wait for request
           await retry.try(async () => {
             const cells = await observability.alerts.common.getTableCells();
-            expect(cells.length).to.be(ACTIVE_ALERTS_CELL_COUNT);
+            expect(cells.length).to.be(INFRA_ACTIVE_ALERTS_CELL_COUNT);
           });
         });
       });
