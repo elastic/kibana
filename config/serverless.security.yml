@@ -178,6 +178,5 @@ xpack.index_management.enableProjectLevelRetentionChecks: true
 # Experimental Security Solution features
 
 # These features are disabled in Serverless until fully tested
-xpack.securitySolution.enableExperimental:
-  - entityStoreDisabled
+xpack.securitySolution.enableExperimental: 
   - siemMigrationsDisabled
