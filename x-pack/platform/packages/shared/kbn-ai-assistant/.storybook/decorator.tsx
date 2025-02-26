@@ -13,7 +13,7 @@ import {
 } from '@kbn/observability-ai-assistant-plugin/public';
 import { Subject } from 'rxjs';
 import { coreMock } from '@kbn/core/public/mocks';
-import { AIAssistantAppService } from '../service/create_app_service';
+import { AIAssistantAppService } from '../src/service/create_app_service';
 
 const mockService: AIAssistantAppService = {
   ...createStorybookService(),
