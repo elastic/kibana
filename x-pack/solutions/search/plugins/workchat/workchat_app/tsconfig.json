@@ -14,6 +14,7 @@
   "kbn_references": [
     "@kbn/core",
     "@kbn/config-schema",
+    "@kbn/inference-plugin",
   ],
   "exclude": [
     "target/**/*",
