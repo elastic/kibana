@@ -20,7 +20,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   describe('Serverless Inference Management UI', function () {
     // see details: https://github.com/elastic/kibana/issues/204539
     this.tags(['failsOnMKI']);
-    
+
     before(async () => {
       await pageObjects.svlCommonPage.loginWithRole('developer');
     });
