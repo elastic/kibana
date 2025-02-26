@@ -18,7 +18,7 @@ describe('TestQueryRow', () => {
   it('should render the datagrid', () => {
     const result = render(
       <TestQueryRowTable
-        rawResults={{
+        preview={{
           cols: [
             {
               id: 'test',
@@ -49,7 +49,7 @@ describe('TestQueryRow', () => {
   it('should render the datagrid and alerts if provided', () => {
     const result = render(
       <TestQueryRowTable
-        rawResults={{
+        preview={{
           cols: [
             {
               id: 'test',
@@ -80,7 +80,7 @@ describe('TestQueryRow', () => {
   it('should render the datagrid if values are undefined', () => {
     const result = render(
       <TestQueryRowTable
-        rawResults={{
+        preview={{
           cols: [
             {
               id: 'test',

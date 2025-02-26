@@ -15,7 +15,8 @@ import { LocatorPublic } from '@kbn/share-plugin/common';
 import { DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
 import { DataViewsContract } from '@kbn/data-views-plugin/common';
 import { Filter, Query } from '@kbn/es-query';
-import { EsqlTable, toEsQueryHits } from '../../../../common';
+import { PublicRuleResultService } from '@kbn/alerting-plugin/server/types';
+import { EsqlTable, getEsQueryHits } from '../../../../common';
 import { OnlyEsqlQueryRuleParams } from '../types';
 
 export interface FetchEsqlQueryOpts {
@@ -28,6 +29,7 @@ export interface FetchEsqlQueryOpts {
     logger: Logger;
     scopedClusterClient: IScopedClusterClient;
     share: SharePluginStart;
+    ruleResultService?: PublicRuleResultService;
   };
   dateStart: string;
   dateEnd: string;
@@ -43,7 +45,7 @@ export async function fetchEsqlQuery({
   dateStart,
   dateEnd,
 }: FetchEsqlQueryOpts) {
-  const { logger, scopedClusterClient } = services;
+  const { logger, scopedClusterClient, ruleResultService } = services;
   const esClient = scopedClusterClient.asCurrentUser;
   const query = getEsqlQuery(params, alertLimit, dateStart, dateEnd);
 
@@ -63,23 +65,27 @@ export async function fetchEsqlQuery({
     throw e;
   }
 
-  const hits = toEsQueryHits(response);
   const sourceFields = getSourceFields(response);
-
   const link = `${publicBaseUrl}${spacePrefix}/app/management/insightsAndAlerting/triggersActions/rule/${ruleId}`;
+
+  const { results, duplicateAlertIds } = getEsQueryHits(
+    response,
+    params.esqlQuery.esql,
+    params.alertType
+  );
+
+  if (ruleResultService && duplicateAlertIds.size > 0) {
+    const warning = `Your alerts dont appear to be unique which will delay recovery of your alerts. There are duplicates for alert ID(s): ${Array.from(
+      duplicateAlertIds
+    ).join('; ')}`;
+    ruleResultService.addLastRunWarning(warning);
+    ruleResultService.setLastRunOutcomeMessage(warning);
+  }
 
   return {
     link,
-    numMatches: Number(response.values.length),
     parsedResults: parseAggregationResults({
-      isCountAgg: true,
-      isGroupAgg: false,
-      esResult: {
-        took: 0,
-        timed_out: false,
-        _shards: { failed: 0, successful: 0, total: 0 },
-        hits,
-      },
+      ...results,
       resultLimit: alertLimit,
       sourceFieldsParams: sourceFields,
       generateSourceFieldsFromHits: true,

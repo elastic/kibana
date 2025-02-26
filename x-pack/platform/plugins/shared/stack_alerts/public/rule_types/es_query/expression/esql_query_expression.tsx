@@ -7,6 +7,7 @@
 
 import React, { useState, Fragment, useEffect, useCallback } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { i18n } from '@kbn/i18n';
 import {
   EuiFieldNumber,
   EuiFlexGroup,
@@ -14,6 +15,7 @@ import {
   EuiFormRow,
   EuiSelect,
   EuiSpacer,
+  EuiRadioGroup,
 } from '@elastic/eui';
 import { getFields, RuleTypeParamsExpressionProps } from '@kbn/triggers-actions-ui-plugin/public';
 import { ESQLLangEditor } from '@kbn/esql/public';
@@ -27,18 +29,39 @@ import {
   getTimeOptions,
   parseAggregationResults,
 } from '@kbn/triggers-actions-ui-plugin/public/common';
-import { EsQueryRuleParams, EsQueryRuleMetaData, SearchType } from '../types';
+import { EsQueryRuleParams, EsQueryRuleMetaData, SearchType, ALERT_TYPE } from '../types';
 import { DEFAULT_VALUES, SERVERLESS_DEFAULT_VALUES } from '../constants';
 import { useTriggerUiActionServices } from '../util';
 import { hasExpressionValidationErrors } from '../validation';
 import { TestQueryRow } from '../test_query_row';
-import { rowToDocument, toEsQueryHits, transformDatatableToEsqlTable } from '../../../../common';
+import { transformDatatableToEsqlTable, getEsQueryHits } from '../../../../common';
+
+const ALL_DOCUMENTS = 'allDocuments';
+const alertingOptions = [
+  {
+    id: ALL_DOCUMENTS,
+    label: i18n.translate('xpack.stackAlerts.esQuery.ui.allDocumentsLabel', {
+      defaultMessage: 'Create one alert when matches are found',
+    }),
+  },
+  {
+    id: `${ALERT_TYPE.alertPerRow}`,
+    label: i18n.translate('xpack.stackAlerts.esQuery.ui.alertPerRowLabel', {
+      defaultMessage: 'Create one alert per row',
+    }),
+  },
+];
+
+const warningMessage = i18n.translate('xpack.stackAlerts.esQuery.ui.alertPerRowWarning', {
+  defaultMessage:
+    'Your alerts do not appear to be unique, which will delay recovery of your alerts.',
+});
 
 export const EsqlQueryExpression: React.FC<
   RuleTypeParamsExpressionProps<EsQueryRuleParams<SearchType.esqlQuery>, EsQueryRuleMetaData>
 > = ({ ruleParams, setRuleParams, setRuleProperty, errors }) => {
   const { expressions, http, isServerless, dataViews } = useTriggerUiActionServices();
-  const { esqlQuery, timeWindowSize, timeWindowUnit, timeField } = ruleParams;
+  const { esqlQuery, timeWindowSize, timeWindowUnit, timeField, alertType } = ruleParams;
 
   const [currentRuleParams, setCurrentRuleParams] = useState<
     EsQueryRuleParams<SearchType.esqlQuery>
@@ -58,11 +81,13 @@ export const EsqlQueryExpression: React.FC<
     searchType: SearchType.esqlQuery,
     // The sourceFields param is ignored for the ES|QL type
     sourceFields: [],
+    alertType,
   });
   const [query, setQuery] = useState<AggregateQuery>(esqlQuery ?? { esql: '' });
   const [timeFieldOptions, setTimeFieldOptions] = useState([firstFieldOption]);
   const [detectedTimestamp, setDetectedTimestamp] = useState<string | undefined>(undefined);
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [radioIdSelected, setRadioIdSelected] = useState(alertType ?? ALL_DOCUMENTS);
 
   const setParam = useCallback(
     (paramField: string, paramValue: unknown) => {
@@ -98,9 +123,9 @@ export const EsqlQueryExpression: React.FC<
     if (hasExpressionValidationErrors(currentRuleParams, isServerless)) {
       return emptyResult;
     }
+    setIsLoading(true);
     const timeWindow = parseDuration(window);
     const now = Date.now();
-    setIsLoading(true);
     const table = await fetchFieldsFromESQL(
       esqlQuery,
       expressions,
@@ -114,30 +139,29 @@ export const EsqlQueryExpression: React.FC<
     );
     if (table) {
       const esqlTable = transformDatatableToEsqlTable(table);
-      const hits = toEsQueryHits(esqlTable);
+      const { results, duplicateAlertIds, rows, cols } = getEsQueryHits(
+        esqlTable,
+        esqlQuery.esql,
+        alertType
+      );
+
       setIsLoading(false);
       return {
-        testResults: parseAggregationResults({
-          isCountAgg: true,
-          isGroupAgg: false,
-          esResult: {
-            took: 0,
-            timed_out: false,
-            _shards: { failed: 0, successful: 0, total: 0 },
-            hits,
-          },
-        }),
-        isGrouped: false,
+        testResults: parseAggregationResults(results),
+        isGrouped: !!alertType,
         timeWindow: window,
-        rawResults: {
-          cols: esqlTable.columns.map((col) => ({
-            id: col.name,
-            actions: false,
-          })),
-          rows: esqlTable.values.slice(0, 5).map((row) => rowToDocument(esqlTable.columns, row)),
+        preview: {
+          cols,
+          rows,
         },
+        ...(duplicateAlertIds.size > 0
+          ? {
+              warning: warningMessage,
+            }
+          : {}),
       };
     }
+    setIsLoading(false);
     return emptyResult;
   }, [
     timeWindowSize,
@@ -147,6 +171,7 @@ export const EsqlQueryExpression: React.FC<
     expressions,
     timeField,
     isServerless,
+    alertType,
   ]);
 
   const refreshTimeFields = useCallback(
@@ -200,6 +225,7 @@ export const EsqlQueryExpression: React.FC<
           isLoading={isLoading}
           editorIsInline
           hasOutline
+          hideRunQueryButton={true}
         />
       </EuiFormRow>
       <EuiSpacer />
@@ -226,6 +252,26 @@ export const EsqlQueryExpression: React.FC<
           value={timeField || ''}
           onChange={(e) => {
             setParam('timeField', e.target.value);
+          }}
+        />
+      </EuiFormRow>
+      <EuiSpacer />
+      <EuiFormRow
+        id="alertGroup"
+        fullWidth
+        label={
+          <FormattedMessage
+            id="xpack.stackAlerts.esQuery.ui.selectEsqlQueryAlertTypePrompt"
+            defaultMessage="Select alert group"
+          />
+        }
+      >
+        <EuiRadioGroup
+          options={alertingOptions}
+          idSelected={radioIdSelected}
+          onChange={(optionId) => {
+            setRadioIdSelected(optionId);
+            setParam('alertType', optionId !== ALL_DOCUMENTS ? optionId : undefined);
           }}
         />
       </EuiFormRow>
