@@ -19,7 +19,7 @@ import {
   constructDroppedValue,
   TotalVirusLinkSha,
   Link,
-  DraggableZeekElement,
+  ZeekElement,
   sha1StringRenderer,
   md5StringRenderer,
   droppedStringRenderer,
@@ -47,7 +47,7 @@ describe('ZeekSignature', () => {
 
   describe('rendering', () => {
     test('it renders the default Zeek', () => {
-      const wrapper = shallow(<ZeekSignature data={zeek} timelineId="test" />);
+      const wrapper = shallow(<ZeekSignature data={zeek} scopeId="test" />);
       expect(wrapper).toMatchSnapshot();
     });
   });
@@ -119,16 +119,16 @@ describe('ZeekSignature', () => {
     test('it returns null if value is null', () => {
       const wrapper = mount(
         <TestProviders>
-          <DraggableZeekElement id="id-123" field="zeek.notice" value={null} />
+          <ZeekElement field="zeek.notice" value={null} scopeId="test" />
         </TestProviders>
       );
-      expect(wrapper.find('DraggableZeekElement').children().exists()).toBeFalsy();
+      expect(wrapper.find('ZeekElement').children().exists()).toBeFalsy();
     });
 
     test('it renders the default ZeekSignature', () => {
       const wrapper = mount(
         <TestProviders>
-          <DraggableZeekElement id="id-123" field="zeek.notice" value={'mynote'} />
+          <ZeekElement field="zeek.notice" value={'mynote'} scopeId="test" />
         </TestProviders>
       );
       expect(wrapper.text()).toEqual('mynote');
@@ -137,10 +137,10 @@ describe('ZeekSignature', () => {
     test('it renders with a custom string renderer', () => {
       const wrapper = mount(
         <TestProviders>
-          <DraggableZeekElement
-            id="id-123"
+          <ZeekElement
             field="zeek.notice"
             value={'mynote'}
+            scopeId="test"
             stringRenderer={(value) => `->${value}<-`}
           />
         </TestProviders>
@@ -153,7 +153,7 @@ describe('ZeekSignature', () => {
         const field = 'zeek.notice';
         const wrapper = mount(
           <TestProviders>
-            <DraggableZeekElement id="id-123" field={field} value={'the people you love'} />
+            <ZeekElement field={field} value={'the people you love'} scopeId="test" />
           </TestProviders>
         );
 
