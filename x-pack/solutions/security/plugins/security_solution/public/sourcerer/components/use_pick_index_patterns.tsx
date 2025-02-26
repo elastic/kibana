@@ -29,7 +29,7 @@ interface UsePickIndexPatternsProps {
   signalIndexName: string | null;
 }
 
-export type ModifiedTypes = 'modified' | 'alerts' | 'deprecated' | 'missingPatterns' | '';
+export type ModifiedTypes = 'modified' | 'alerts' | 'deprecated' | 'missingPatterns' | 'adhoc' | '';
 
 interface UsePickIndexPatterns {
   allOptions: Array<EuiComboBoxOptionOption<string>>;
@@ -72,9 +72,11 @@ export const usePickIndexPatterns = ({
   const signalPatternListToOptions = useMemo(() => {
     return signalIndexName ? patternListToOptions([signalIndexName]) : [];
   }, [signalIndexName]);
+
   const selectedPatternsAsOptions = useMemo(() => {
     return patternListToOptions(selectedPatterns);
   }, [selectedPatterns]);
+
   const [selectedOptions, setSelectedOptions] = useState<Array<EuiComboBoxOptionOption<string>>>(
     isOnlyDetectionAlerts ? signalPatternListToOptions : selectedPatternsAsOptions
   );

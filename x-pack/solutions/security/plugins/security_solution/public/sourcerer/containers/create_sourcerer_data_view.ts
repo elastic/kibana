@@ -99,14 +99,15 @@ export const createSourcererDataView = async ({
   };
   return {
     defaultDataView,
-    kibanaDataViews: allDataViews.map((dv) =>
-      dv.id === dataViewId
+    kibanaDataViews: allDataViews.map((dv) => {
+      return dv.id === dataViewId
         ? defaultDataView
         : {
             id: dv.id,
             patternList: dv.title.split(','),
             title: dv.title,
-          }
-    ),
+            dataView: dv,
+          };
+    }),
   };
 };
