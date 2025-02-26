@@ -17,6 +17,7 @@ import type {
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import type { ApiKeyManager } from './auth/api_key';
 import { startPrivilegeMonitoringTask } from './tasks/privilege_monitoring_task';
+import { createOrUpdateIndex } from '../utils/create_or_update_index';
 
 interface PrivilegeMonitoringClientOpts {
   logger: Logger;
@@ -40,6 +41,7 @@ export class PrivilegeMonitoringDataClient {
   }
 
   async init() {
+    await this.createOrUpdateIndex();
     if (!this.opts.taskManager) {
       throw new Error('Task Manager is not available');
     }
@@ -47,7 +49,17 @@ export class PrivilegeMonitoringDataClient {
     await startPrivilegeMonitoringTask({
       logger: this.opts.logger,
       namespace: this.opts.namespace,
-      taskManager: this.opts.taskManager
-    })
+      taskManager: this.opts.taskManager,
+    });
+  }
+
+  public async createOrUpdateIndex() {
+    await createOrUpdateIndex({
+      esClient: this.esClient,
+      logger: this.opts.logger,
+      options: {
+        index: '', // TODO: update
+      },
+    });
   }
 }

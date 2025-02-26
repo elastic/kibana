@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-
 import type { Logger, AnalyticsServiceSetup } from '@kbn/core/server';
 import type {
   ConcreteTaskInstance,
@@ -17,7 +16,7 @@ import type {
 import type { ExperimentalFeatures } from '../../../../../common';
 import type { EntityAnalyticsRoutesDeps } from '../../types';
 
-import { TYPE, VERSION, TIMEOUT, SCOPE, INTERVAL } from './constants';
+import { TYPE, VERSION, TIMEOUT, SCOPE, INTERVAL } from '../constants';
 import { defaultState, stateSchemaByVersion } from './state';
 
 interface RegisterParams {
@@ -55,7 +54,6 @@ export const registerPrivilegeMonitoringTask = ({
   kibanaVersion,
   experimentalFeatures,
 }: RegisterParams): void => {
-  console.log(`registering GREAT SUCCESS`);
   if (!taskManager) {
     logger.info(
       '[Privilege Monitoring]  Task Manager is unavailable; skipping privilege monitoring task registration.'
@@ -85,7 +83,6 @@ const createPrivilegeMonitoringTaskRunnerFactory =
   }): TaskRunCreatorFunction =>
   ({ taskInstance }) => {
     let cancelled = false;
-    console.log(`Creating GREAT SUCCESS factory`);
     const isCancelled = () => cancelled;
     return {
       run: async () =>
@@ -109,14 +106,13 @@ const runPrivilegeMonitoringTask = async ({
   taskInstance,
   experimentalFeatures,
 }: RunParams): Promise<void> => {
-  logger.info('[Privilege Monitoring] Running privilege monitoring task');
   if (isCancelled()) {
     logger.info('[Privilege Monitoring] Task was cancelled.');
     return;
   }
 
   try {
-    console.log('GREAT SUCCESS');
+    logger.info('[Privilege Monitoring] Running privilege monitoring task');
   } catch (e) {
     logger.error('[Privilege Monitoring] Error running privilege monitoring task', e);
   }
@@ -130,7 +126,6 @@ export const startPrivilegeMonitoringTask = async ({
   const taskId = getTaskId(namespace);
 
   try {
-    console.log(`Starting the start GREAT SUCCESS`);
     await taskManager.ensureScheduled({
       id: taskId,
       taskType: getTaskName(),
