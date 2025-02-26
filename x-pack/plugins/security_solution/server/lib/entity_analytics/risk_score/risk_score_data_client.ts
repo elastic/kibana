@@ -130,7 +130,7 @@ export class RiskScoreDataClient {
           logger: this.options.logger,
           esClient,
           template: {
-            name: mappingComponentName,
+            name: nameSpaceAwareMappingsComponentName(namespace),
             _meta: {
               managed: true,
             },
@@ -151,7 +151,7 @@ export class RiskScoreDataClient {
           body: {
             data_stream: { hidden: true },
             index_patterns: [indexPatterns.alias],
-            composed_of: [mappingComponentName],
+            composed_of: [nameSpaceAwareMappingsComponentName(namespace)],
             template: {
               lifecycle: {},
               settings: {
