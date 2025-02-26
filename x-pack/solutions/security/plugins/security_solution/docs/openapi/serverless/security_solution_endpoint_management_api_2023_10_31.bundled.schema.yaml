@@ -462,7 +462,7 @@ paths:
       responses:
         '200':
           content:
-            application/json:
+            multipart/form-data:
               schema:
                 $ref: '#/components/schemas/UploadRouteResponse'
           description: OK
@@ -1182,7 +1182,9 @@ components:
                 - type: object
                   properties:
                     process_name:
-                      description: Valid for SentinelOne agent type only.
+                      description: >-
+                        The name of the process to terminate. Valid for
+                        SentinelOne agent type only.
                       example: Elastic
                       minLength: 1
                       type: string
@@ -1565,7 +1567,7 @@ components:
       example: enrolled_at
       type: string
     StartDate:
-      description: A start date in ISO format or Date Math format.
+      description: A start date in ISO 8601 format or Date Math format.
       example: '2023-10-31T00:00:00.000Z'
       type: string
     SuccessResponse:
@@ -1707,10 +1709,8 @@ components:
         - type: object
           properties:
             file:
-              description: >-
-                The file content to be uploaded or a relative path to the file.
-                Note the path must be preceded with @.
-              example: '@fix-malware.sh'
+              description: The binary content of the file.
+              example: RWxhc3RpYw==
               format: binary
               type: string
             parameters:
@@ -1727,7 +1727,7 @@ components:
       example:
         endpoint_ids:
           - ed518850-681a-4d60-bb98-e22640cae2a8
-        file: '@fix-malware.sh'
+        file: RWxhc3RpYw==
     UploadRouteResponse:
       example:
         data:
