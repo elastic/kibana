@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { InferenceServerStart } from '@kbn/inference-plugin/server';
+
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface WorkChatAppPluginSetup {}
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
@@ -12,5 +14,7 @@ export interface WorkChatAppPluginStart {}
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface WorkChatAppPluginSetupDependencies {}
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface WorkChatAppPluginStartDependencies {}
+
+export interface WorkChatAppPluginStartDependencies {
+  inference: InferenceServerStart;
+}
