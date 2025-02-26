@@ -388,6 +388,12 @@ export interface RouteConfigOptions<Method extends RouteMethod> {
   deprecated?: RouteDeprecationInfo;
 
   /**
+   * Filepath to a YAML file that should be merged with any OAS that is created
+   * for this route
+   */
+  oasFilePath?: () => string;
+
+  /**
    * Whether this route should be treated as "invisible" and excluded from router
    * OAS introspection.
    *
