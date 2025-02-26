@@ -20,7 +20,7 @@ components:
           items:
             type: string
         agent_all:
-          description: 'When true, the query runs on all agents.'
+          description: 'When `true`, the query runs on all agents.'
           type: boolean
         agent_platforms:
           description: 'A list of agent platforms to run the query on.'
