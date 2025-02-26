@@ -766,11 +766,11 @@ components:
             id: 17d9cabc-7edd-43bc-bacb-8da5f5e6c0e5
             ip:
               - 10.0.2.15
-              - fe80::21a6:63d3:d70e:e3ad
+              - 'fe80::21a6:63d3:d70e:e3ad'
               - 127.0.0.1
               - '::1'
             mac:
-              - 08:00:27:b1:1d:5a
+              - '08:00:27:b1:1d:5a'
             name: WinDev2104Eval
             os:
               Ext:
@@ -1051,9 +1051,9 @@ components:
                   - 127.0.0.1
                   - '::1'
                   - 10.0.2.15
-                  - fe80::2ac7:8e15:b957:2fa1
+                  - 'fe80::2ac7:8e15:b957:2fa1'
                 mac:
-                  - 08:00:27:e6:78:8b
+                  - '08:00:27:e6:78:8b'
                 name: david-Xubuntu
                 os:
                   Ext:
@@ -1135,11 +1135,11 @@ components:
                 id: 17d9cabc-7edd-43bc-bacb-8da5f5e6c0e5
                 ip:
                   - 10.0.2.15
-                  - fe80::21a6:63d3:d70e:e3ad
+                  - 'fe80::21a6:63d3:d70e:e3ad'
                   - 127.0.0.1
                   - '::1'
                 mac:
-                  - 08:00:27:b1:1d:5a
+                  - '08:00:27:b1:1d:5a'
                 name: WinDev2104Eval
                 os:
                   Ext:
@@ -1170,6 +1170,11 @@ components:
         total: 2
       type: object
       properties: {}
+    NonEmptyString:
+      description: A string that does not contain only whitespace characters
+      format: nonempty
+      minLength: 1
+      type: string
     Page:
       default: 1
       description: Page number
