@@ -10,7 +10,7 @@ components:
       example:
         name: "my_pack"
         description: "My pack"
-        enabled: true,
+        enabled: true
         policy_ids:
           - "my_policy_id"
           - "fleet-server-policy"
