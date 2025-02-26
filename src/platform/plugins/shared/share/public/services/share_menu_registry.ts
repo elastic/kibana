@@ -34,7 +34,7 @@ export class ShareRegistry implements ShareRegistryPublicApi {
 
   private readonly shareOptionsStore: Record<
     string,
-    Map<InternalShareActionIntent | `integration-${string}`, ShareActionIntents>
+    Map<InternalShareActionIntent | `integration-${string}` | 'legacy', ShareActionIntents>
   > = {
     [this.globalMarker]: new Map(),
   };
@@ -158,7 +158,9 @@ export class ShareRegistry implements ShareRegistryPublicApi {
         } as ShareConfigs;
       })
       .filter((shareAction) => {
-        return shareAction.config || (shareAction.shareType === 'embed' && !isServerless);
+        return isServerless
+          ? shareAction.shareType !== 'embed' && shareAction.config
+          : shareAction.config;
       });
   }
 }

@@ -29,21 +29,24 @@ export const ShareMenuTabs = () => {
 
   const tabs: Array<IModalTabDeclaration<any>> = [];
 
-  // do not show the link tab if the share url is disabled
+  // Do not show the link tab if the share url is disabled
   if (!objectTypeMeta?.config.link?.disabled) {
     tabs.push(linkTab);
   }
 
-  // do not show the export tab if the license is disabled
+  // Do not show the export tab if there's no export type enabled
   if (
     shareMenuItems.some(
-      (shareItem) => shareItem.shareType === 'integration' && shareItem.groupId === 'export'
+      (shareItem) =>
+        shareItem.shareType === 'integration' &&
+        shareItem.groupId === 'export' &&
+        !shareItem.config.disabled
     )
   ) {
     tabs.push(exportTab);
   }
 
-  // embed is disabled in the serverless offering, hence the need to check that we received it
+  // Embed is disabled in the serverless offering, hence the need to check that we received it
   if (
     shareMenuItems.some(({ shareType }) => shareType === 'embed') &&
     !objectTypeMeta?.config?.embed?.disabled
