@@ -14,8 +14,12 @@ import { PresentationContainer } from '@kbn/presentation-containers';
 import { PublishesPhaseEvents, apiPublishesPhaseEvents } from '@kbn/presentation-publishing';
 
 import { coreServices } from '../../services/kibana_services';
-import { DashboardLoadType } from '../../dashboard_container/types';
 import { DASHBOARD_LOADED_EVENT } from '../../utils/telemetry_constants';
+
+type DashboardLoadType =
+  | 'sessionFirstLoad'
+  | 'dashboardFirstLoad'
+  | 'dashboardSubsequentLoad';
 
 export interface PerformanceState {
   firstLoad: boolean;

@@ -121,6 +121,46 @@ export interface DashboardState extends DashboardSettings {
   controlGroupState?: Partial<ControlGroupRuntimeState>;
 }
 
+export type DashboardLocatorParams = Partial<
+  Omit<DashboardState, 'panels' | 'controlGroupInput' | 'references'>
+> & {
+  /**
+   * If given, the dashboard saved object with this id will be loaded. If not given,
+   * a new, unsaved dashboard will be loaded up.
+   */
+  dashboardId?: string;
+
+  /**
+   * If not given, will use the uiSettings configuration for `storeInSessionStorage`. useHash determines
+   * whether to hash the data in the url to avoid url length issues.
+   */
+  useHash?: boolean;
+
+  /**
+   * When `true` filters from saved filters from destination dashboard as merged with applied filters
+   * When `false` applied filters take precedence and override saved filters
+   *
+   * true is default
+   */
+  preserveSavedFilters?: boolean;
+
+  /**
+   * Search search session ID to restore.
+   * (Background search)
+   */
+  searchSessionId?: string;
+
+  /**
+   * List of dashboard panels
+   */
+  panels?: Array<DashboardPanel & SerializableRecord>; // used SerializableRecord here to force the GridData type to be read as serializable
+
+  /**
+   * Control group changes
+   */
+  controlGroupState?: Partial<ControlGroupRuntimeState> & SerializableRecord; // used SerializableRecord here to force the GridData type to be read as serializable
+};
+
 export type DashboardApi = CanExpandPanels &
   HasAppContext &
   HasExecutionContext &
