@@ -8,7 +8,7 @@
  */
 
 import React from 'react';
-import { EuiFormRow, EuiSpacer, EuiSwitch } from '@elastic/eui';
+import { EuiFormRow, EuiSpacer, EuiSwitch, EuiFieldText } from '@elastic/eui';
 
 import { DashboardDrilldownOptions } from './types';
 import { dashboardDrilldownConfigStrings } from '../../i18n/dashboard_drilldown_config';
@@ -51,6 +51,12 @@ export const DashboardDrilldownOptionsComponent = ({
             checked={options.openInNewTab}
             onChange={() => onOptionChange({ openInNewTab: !options.openInNewTab })}
             data-test-subj="dashboardDrillDownOptions--openInNewTab--checkbox"
+          />
+          <EuiSpacer size="s" />
+          <EuiFieldText
+            placeholder="Breakdown field"
+            value={options.breakdownField}
+            onChange={(e) => onOptionChange({ breakdownField: e.target.value })}
           />
         </div>
       </EuiFormRow>

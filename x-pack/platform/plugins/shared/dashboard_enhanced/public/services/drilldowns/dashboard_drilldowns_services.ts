@@ -12,6 +12,8 @@ import { SetupDependencies, StartDependencies } from '../../plugin';
 import { FlyoutCreateDrilldownAction, FlyoutEditDrilldownAction } from './actions';
 import { EmbeddableToDashboardDrilldown } from './embeddable_to_dashboard_drilldown';
 
+const NAVIGATE_TRIGGER = 'NAVIGATE_TRIGGER';
+
 interface BootstrapParams {
   enableDrilldowns: boolean;
 }
@@ -32,6 +34,12 @@ export class DashboardDrilldownsService {
     { uiActionsEnhanced: uiActions }: SetupDependencies
   ) {
     const start = createStartServicesGetter(core.getStartServices);
+
+    uiActions.registerTrigger({
+      id: NAVIGATE_TRIGGER,
+      title: 'Navigation',
+      description: 'Without filtering',
+    });
 
     const actionFlyoutCreateDrilldown = new FlyoutCreateDrilldownAction({ start });
     uiActions.addTriggerAction(CONTEXT_MENU_TRIGGER, actionFlyoutCreateDrilldown);

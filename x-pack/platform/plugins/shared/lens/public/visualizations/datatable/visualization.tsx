@@ -124,7 +124,11 @@ export const getDatatableVisualization = ({
 
   switchVisualizationType: (_, state) => state,
 
-  triggers: [VIS_EVENT_TO_TRIGGER.filter, VIS_EVENT_TO_TRIGGER.tableRowContextMenuClick],
+  triggers: [
+    VIS_EVENT_TO_TRIGGER.filter,
+    VIS_EVENT_TO_TRIGGER.tableRowContextMenuClick,
+    VIS_EVENT_TO_TRIGGER.navigate,
+  ],
 
   initialize(addNewLayer, state) {
     return (
@@ -613,6 +617,7 @@ export const getDatatableVisualization = ({
               columnId: column.columnId,
               hidden: column.hidden,
               oneClickFilter: column.oneClickFilter,
+              navigateOnClick: column.navigateOnClick,
               width: column.width,
               isTransposed: column.isTransposed,
               transposable: isTransposable,
