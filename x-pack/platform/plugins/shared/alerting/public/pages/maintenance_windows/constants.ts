@@ -140,3 +140,5 @@ export const STATUS_OPTIONS = [
   { value: MaintenanceWindowStatus.Finished, name: i18n.TABLE_STATUS_FINISHED },
   { value: MaintenanceWindowStatus.Archived, name: i18n.TABLE_STATUS_ARCHIVED },
 ];
+
+export const DATE_FORMAT_UI_SETTING = 'dateFormat';
