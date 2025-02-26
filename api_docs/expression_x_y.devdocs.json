@@ -591,7 +591,7 @@
             "label": "seriesType",
             "description": [],
             "signature": [
-              "\"area\" | \"line\" | \"bar\""
+              "\"line\" | \"area\" | \"bar\""
             ],
             "path": "src/platform/plugins/shared/chart_expressions/expression_xy/common/types/expression_functions.ts",
             "deprecated": false,
@@ -2961,7 +2961,7 @@
         "label": "IconPosition",
         "description": [],
         "signature": [
-          "\"right\" | \"auto\" | \"left\" | \"above\" | \"below\""
+          "\"right\" | \"left\" | \"above\" | \"below\" | \"auto\""
         ],
         "path": "src/platform/plugins/shared/chart_expressions/expression_xy/common/types/expression_functions.ts",
         "deprecated": false,
@@ -3367,7 +3367,7 @@
         "label": "SeriesType",
         "description": [],
         "signature": [
-          "\"area\" | \"line\" | \"bar\""
+          "\"line\" | \"area\" | \"bar\""
         ],
         "path": "src/platform/plugins/shared/chart_expressions/expression_xy/common/types/expression_functions.ts",
         "deprecated": false,
@@ -3641,7 +3641,7 @@
         "label": "YScaleType",
         "description": [],
         "signature": [
-          "\"log\" | \"sqrt\" | \"time\" | \"linear\""
+          "\"log\" | \"time\" | \"linear\" | \"sqrt\""
         ],
         "path": "src/platform/plugins/shared/chart_expressions/expression_xy/common/types/expression_functions.ts",
         "deprecated": false,
