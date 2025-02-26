@@ -130,11 +130,14 @@ export const responseToItemArray = (
     });
   });
   (response.aliases || []).forEach((alias) => {
-    source.push({
+    const item = {
       name: alias.name,
       tags: [{ key: 'alias', name: aliasLabel, color: 'default' }],
       item: alias,
-    });
+    };
+    // we only need to check the first index to see if its a rollup since there can only be one alias match
+    item.tags.push(...getTags(alias.indices[0]));
+    source.push(item);
   });
   (response.data_streams || []).forEach((dataStream) => {
     source.push({
