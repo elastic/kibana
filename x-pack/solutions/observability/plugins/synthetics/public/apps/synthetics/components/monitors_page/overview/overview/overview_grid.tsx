@@ -42,6 +42,8 @@ import { NoMonitorsFound } from '../../common/no_monitors_found';
 import { MonitorDetailFlyout } from './monitor_detail_flyout';
 import { useSyntheticsRefreshContext } from '../../../../contexts';
 import { FlyoutParamProps } from './types';
+import { RollupLocations } from './grid_by_group/rollup_locations';
+import { MetricItemGroup } from './metric_item/location_grouped_item';
 
 const ITEM_HEIGHT = 172;
 const ROW_COUNT = 4;
@@ -49,12 +51,21 @@ const MAX_LIST_HEIGHT = 800;
 const MIN_BATCH_SIZE = 20;
 const LIST_THRESHOLD = 12;
 
-interface ListItem {
+interface ConfigAndLocation {
   configId: string;
   locationId: string;
 }
 
+type ListItem = ConfigAndLocation | MetricItemGroupByLocation;
+
+interface MetricItemGroupByLocation {
+  configId: string;
+  name: string;
+  monitors: OverviewStatusMetaData[];
+}
+
 export const OverviewGrid = memo(() => {
+  const [rollupLocations, setRollupLocations] = useState(true);
   const { status, allConfigs, loaded } = useOverviewStatus({
     scopeStatusByLocation: true,
   });
@@ -107,12 +118,15 @@ export const OverviewGrid = memo(() => {
   );
 
   const listItems: ListItem[][] = useMemo(() => {
-    const acc: ListItem[][] = [];
-    for (let i = 0; i < monitorsSortedByStatus.length; i += ROW_COUNT) {
-      acc.push(monitorsSortedByStatus.slice(i, i + ROW_COUNT));
+    const itemsForList = rollupLocations
+      ? groupLocations(monitorsSortedByStatus)
+      : monitorsSortedByStatus;
+    const list: ListItem[][] = [];
+    for (let i = 0; i < itemsForList.length; i += ROW_COUNT) {
+      list.push(itemsForList.slice(i, i + ROW_COUNT));
     }
-    return acc;
-  }, [monitorsSortedByStatus]);
+    return list;
+  }, [monitorsSortedByStatus, rollupLocations]);
 
   useEffect(() => {
     dispatch(refreshOverviewTrends.get());
@@ -148,6 +162,12 @@ export const OverviewGrid = memo(() => {
         <EuiFlexItem grow={false}>
           <GroupFields />
         </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <RollupLocations
+            rollupLocations={rollupLocations}
+            setRollupLocations={setRollupLocations}
+          />
+        </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size="m" />
       <div style={{ height: listHeight }}>
@@ -157,7 +177,13 @@ export const OverviewGrid = memo(() => {
               {({ width }: EuiAutoSize) => (
                 <InfiniteLoader
                   isItemLoaded={(idx: number) =>
-                    listItems[idx].every((m) => !!trendData[m.configId + m.locationId])
+                    rollupLocations
+                      ? (listItems as MetricItemGroupByLocation[][])[idx].every((g) =>
+                          g.monitors.every((m) => !!trendData[m.configId + m.locationId])
+                        )
+                      : (listItems as ConfigAndLocation[][])[idx].every(
+                          (m) => !!trendData[m.configId + m.locationId]
+                        )
                   }
                   itemCount={listItems.length}
                   loadMoreItems={(_, stop: number) => setMaxItem(Math.max(maxItem, stop))}
@@ -193,10 +219,24 @@ export const OverviewGrid = memo(() => {
                                   data-test-subj="syntheticsOverviewGridItem"
                                   key={listIndex * ROW_COUNT + idx}
                                 >
-                                  <MetricItem
-                                    monitor={monitorsSortedByStatus[listIndex * ROW_COUNT + idx]}
-                                    onClick={setFlyoutConfigCallback}
-                                  />
+                                  {rollupLocations ? (
+                                    <MetricItemGroup
+                                      configId={listData[listIndex][idx].configId}
+                                      name={
+                                        (listData[listIndex][idx] as MetricItemGroupByLocation).name
+                                      }
+                                      monitors={
+                                        (listData[listIndex][idx] as MetricItemGroupByLocation)
+                                          .monitors
+                                      }
+                                      onClick={setFlyoutConfigCallback}
+                                    />
+                                  ) : (
+                                    <MetricItem
+                                      monitor={monitorsSortedByStatus[listIndex * ROW_COUNT + idx]}
+                                      onClick={setFlyoutConfigCallback}
+                                    />
+                                  )}
                                 </EuiFlexItem>
                               ))}
                               {listData[listIndex].length % ROW_COUNT !== 0 &&
@@ -267,6 +307,25 @@ export const OverviewGrid = memo(() => {
     </>
   );
 });
+
+function groupLocations(monitorsSortedByStatus: OverviewStatusMetaData[]) {
+  const configIds = new Set<string>();
+  const groupedMonitors: MetricItemGroupByLocation[] = [];
+  for (const monitor of monitorsSortedByStatus) {
+    if (configIds.has(monitor.configId)) {
+      const group = groupedMonitors.find((m) => m.configId === monitor.configId);
+      group?.monitors.push(monitor);
+    } else {
+      groupedMonitors.push({
+        configId: monitor.configId,
+        name: monitor.name,
+        monitors: [monitor],
+      });
+      configIds.add(monitor.configId);
+    }
+  }
+  return groupedMonitors;
+}
 
 const SHOWING_ALL_MONITORS_LABEL = i18n.translate(
   'xpack.synthetics.overview.grid.showingAllMonitors.label',
