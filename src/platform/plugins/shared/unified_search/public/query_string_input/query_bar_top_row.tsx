@@ -13,6 +13,7 @@ import { css } from '@emotion/react';
 import React, { ReactNode, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import deepEqual from 'fast-deep-equal';
 import useObservable from 'react-use/lib/useObservable';
+import type { ESQLControlVariable } from '@kbn/esql-validation-autocomplete';
 import type { Filter, TimeRange, Query, AggregateQuery } from '@kbn/es-query';
 import {
   getAggregateQueryMode,
@@ -187,6 +188,11 @@ export interface QueryBarTopRowProps<QT extends Query | AggregateQuery = Query> 
   renderQueryInputAppend?: () => React.ReactNode;
   disableExternalPadding?: boolean;
   onESQLDocsFlyoutVisibilityChanged?: ESQLMenuPopoverProps['onESQLDocsFlyoutVisibilityChanged'];
+  esqLVariablesConfig?: {
+    esqlVariables: ESQLControlVariable[];
+    onSaveControl: (controlState: Record<string, unknown>, updatedQuery: string) => Promise<void>;
+    onCancelControl: () => void;
+  };
   bubbleSubmitEvent?: boolean;
 }
 
@@ -741,23 +747,29 @@ export const QueryBarTopRow = React.memo(
         isQueryLangSelected &&
         props.query &&
         isOfAggregateQueryType(props.query) && (
-          <ESQLLangEditor
-            query={props.query}
-            onTextLangQueryChange={props.onTextLangQueryChange}
-            errors={props.textBasedLanguageModeErrors}
-            warning={props.textBasedLanguageModeWarning}
-            detectedTimestamp={detectedTimestamp}
-            onTextLangQuerySubmit={async () =>
-              onSubmit({
-                query: queryRef.current,
-                dateRange: dateRangeRef.current,
-              })
-            }
-            isDisabled={props.isDisabled}
-            hideRunQueryText={true}
-            data-test-subj="unifiedTextLangEditor"
-            isLoading={props.isLoading}
-          />
+          <>
+            <ESQLLangEditor
+              query={props.query}
+              onTextLangQueryChange={props.onTextLangQueryChange}
+              errors={props.textBasedLanguageModeErrors}
+              warning={props.textBasedLanguageModeWarning}
+              detectedTimestamp={detectedTimestamp}
+              onTextLangQuerySubmit={async () =>
+                onSubmit({
+                  query: queryRef.current,
+                  dateRange: dateRangeRef.current,
+                })
+              }
+              isDisabled={props.isDisabled}
+              hideRunQueryText={true}
+              data-test-subj="unifiedTextLangEditor"
+              isLoading={props.isLoading}
+              supportsControls
+              onSaveControl={props.esqLVariablesConfig?.onSaveControl}
+              onCancelControl={props.esqLVariablesConfig?.onCancelControl}
+              esqlVariables={props.esqLVariablesConfig?.esqlVariables ?? []}
+            />
+          </>
         )
       );
     }
