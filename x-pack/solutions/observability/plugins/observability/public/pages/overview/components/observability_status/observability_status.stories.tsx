@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { Story } from '@storybook/react';
+import type { StoryFn } from '@storybook/react';
 import { ObservabilityStatusBoxes, ObservabilityStatusProps } from './observability_status_boxes';
 
 export default {
@@ -99,14 +99,18 @@ const testBoxes = [
   },
 ];
 
-const Template: Story<ObservabilityStatusProps> = ({ boxes }: ObservabilityStatusProps) => {
+const Template: StoryFn<ObservabilityStatusProps> = ({ boxes }: ObservabilityStatusProps) => {
   return (
     <div style={{ width: 380, backgroundColor: '#fff', padding: 40 }}>
       <ObservabilityStatusBoxes boxes={boxes} />
     </div>
   );
 };
-export const Example = Template.bind({});
-Example.args = {
-  boxes: testBoxes,
+
+export const Example = {
+  render: Template,
+
+  args: {
+    boxes: testBoxes,
+  },
 };
