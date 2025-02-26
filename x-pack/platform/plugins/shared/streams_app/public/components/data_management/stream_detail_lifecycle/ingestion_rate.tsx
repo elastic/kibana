@@ -7,10 +7,10 @@
 
 import moment from 'moment';
 import React from 'react';
-import { lastValueFrom } from 'rxjs';
-import { IKibanaSearchRequest, IKibanaSearchResponse } from '@kbn/search-types';
+import { capitalize } from 'lodash';
+import { TimeRange } from '@kbn/data-plugin/common';
 import { i18n } from '@kbn/i18n';
-import { IngestStreamGetResponse } from '@kbn/streams-schema';
+import { IngestStreamGetResponse, PhaseName, isIlmLifecycle } from '@kbn/streams-schema';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -18,15 +18,24 @@ import {
   EuiPanel,
   EuiSpacer,
   EuiText,
+  useEuiTheme,
 } from '@elastic/eui';
-import { AreaSeries, Axis, Chart, Settings } from '@elastic/charts';
+import {
+  AreaSeries,
+  Axis,
+  BarSeries,
+  Chart,
+  DARK_THEME,
+  LIGHT_THEME,
+  Settings,
+} from '@elastic/charts';
 import { useKibana } from '../../../hooks/use_kibana';
 import { DataStreamStats } from './hooks/use_data_stream_stats';
-import { useStreamsAppFetch } from '../../../hooks/use_streams_app_fetch';
-import { ingestionRateQuery } from './helpers/ingestion_rate_query';
 import { formatBytes } from './helpers/format_bytes';
 import { StreamsAppSearchBar } from '../../streams_app_search_bar';
 import { useDateRange } from '../../../hooks/use_date_range';
+import { useIngestionRate, useIngestionRatePerTier } from './hooks/use_ingestion_rate';
+import { useIlmPhasesColorAndDescription } from './hooks/use_ilm_phases_color_and_description';
 
 export function IngestionRate({
   definition,
@@ -45,42 +54,6 @@ export function IngestionRate({
     },
   } = useKibana();
   const { timeRange, setTimeRange } = useDateRange({ data });
-
-  const {
-    loading: isLoadingIngestionRate,
-    value: ingestionRate,
-    error: ingestionRateError,
-  } = useStreamsAppFetch(
-    async ({ signal }) => {
-      if (!definition || isLoadingStats || !stats?.bytesPerDay) {
-        return;
-      }
-
-      const { rawResponse } = await lastValueFrom(
-        data.search.search<
-          IKibanaSearchRequest,
-          IKibanaSearchResponse<{
-            aggregations: { docs_count: { buckets: Array<{ key: string; doc_count: number }> } };
-          }>
-        >(
-          {
-            params: ingestionRateQuery({
-              start: timeRange.from,
-              end: timeRange.to,
-              index: definition.stream.name,
-            }),
-          },
-          { abortSignal: signal }
-        )
-      );
-
-      return rawResponse.aggregations.docs_count.buckets.map(({ key, doc_count: docCount }) => ({
-        key,
-        value: docCount * stats.bytesPerDoc,
-      }));
-    },
-    [data.search, definition, stats, isLoadingStats, timeRange]
-  );
 
   return (
     <>
@@ -119,51 +92,169 @@ export function IngestionRate({
         </EuiFlexGroup>
       </EuiPanel>
 
-      <EuiSpacer size="s" />
+      <EuiSpacer />
 
-      {ingestionRateError ? (
-        <EuiFlexGroup
-          justifyContent="center"
-          alignItems="center"
-          style={{ width: '100%', height: '250px' }}
-        >
-          Failed to load ingestion rate
-        </EuiFlexGroup>
-      ) : isLoadingIngestionRate || isLoadingStats || !ingestionRate ? (
-        <EuiFlexGroup
-          justifyContent="center"
-          alignItems="center"
-          style={{ width: '100%', height: '250px' }}
-        >
-          <EuiLoadingChart />
-        </EuiFlexGroup>
-      ) : (
-        <Chart size={{ height: 250 }}>
-          <Settings showLegend={false} />
-          <AreaSeries
-            id="ingestionRate"
-            name="Ingestion rate"
-            data={ingestionRate}
-            color="#61A2FF"
+      <EuiFlexGroup
+        justifyContent="center"
+        alignItems="center"
+        style={{ width: '100%', minHeight: '250px' }}
+        direction="column"
+        gutterSize="xs"
+      >
+        {!definition ? null : isIlmLifecycle(definition?.effective_lifecycle) ? (
+          <ChartBarSeries
+            definition={definition}
+            stats={stats}
+            timeRange={timeRange}
+            isLoadingStats={isLoadingStats}
+          />
+        ) : (
+          <ChartAreaSeries
+            definition={definition}
+            stats={stats}
+            timeRange={timeRange}
+            isLoadingStats={isLoadingStats}
+          />
+        )}
+      </EuiFlexGroup>
+    </>
+  );
+}
+
+function ChartAreaSeries({
+  definition,
+  stats,
+  timeRange,
+  isLoadingStats,
+}: {
+  definition?: IngestStreamGetResponse;
+  stats?: DataStreamStats;
+  timeRange: TimeRange;
+  isLoadingStats: boolean;
+}) {
+  const {
+    ingestionRate,
+    isLoading: isLoadingIngestionRate,
+    error: ingestionRateError,
+  } = useIngestionRate({ definition, stats, timeRange });
+  const { colorMode } = useEuiTheme();
+
+  return ingestionRateError ? (
+    'Failed to load ingestion rate'
+  ) : !definition || isLoadingStats || isLoadingIngestionRate || !ingestionRate ? (
+    <EuiLoadingChart />
+  ) : (
+    <>
+      <Chart size={{ height: 250 }}>
+        <Settings showLegend={false} baseTheme={colorMode === 'LIGHT' ? LIGHT_THEME : DARK_THEME} />
+
+        <AreaSeries
+          id="ingestionRate"
+          name="Ingestion rate"
+          data={ingestionRate.buckets}
+          color="#61A2FF"
+          xScaleType="time"
+          xAccessor={'key'}
+          yAccessors={['value']}
+        />
+
+        <Axis
+          id="bottom-axis"
+          position="bottom"
+          tickFormat={(value) => moment(value).format('YYYY-MM-DD HH:mm:ss')}
+          gridLine={{ visible: true }}
+        />
+        <Axis
+          id="left-axis"
+          position="left"
+          tickFormat={(value) => formatBytes(value)}
+          gridLine={{ visible: true }}
+        />
+      </Chart>
+
+      <EuiFlexGroup alignItems="center">
+        <EuiFlexItem grow>
+          <EuiText size="xs">
+            <b>
+              {toLegendFormat(ingestionRate.start)} - {toLegendFormat(ingestionRate.end)} (interval:{' '}
+              {ingestionRate.interval})
+            </b>
+          </EuiText>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </>
+  );
+}
+
+function ChartBarSeries({
+  definition,
+  stats,
+  timeRange,
+  isLoadingStats,
+}: {
+  definition?: IngestStreamGetResponse;
+  stats?: DataStreamStats;
+  timeRange: TimeRange;
+  isLoadingStats: boolean;
+}) {
+  const {
+    ingestionRate,
+    isLoading: isLoadingIngestionRate,
+    error: ingestionRateError,
+  } = useIngestionRatePerTier({ definition, stats, timeRange });
+  const { ilmPhases } = useIlmPhasesColorAndDescription();
+  const { colorMode } = useEuiTheme();
+
+  return ingestionRateError ? (
+    'Failed to load ingestion rate'
+  ) : !definition || isLoadingStats || isLoadingIngestionRate || !ingestionRate ? (
+    <EuiLoadingChart />
+  ) : (
+    <>
+      <Chart size={{ height: 250 }}>
+        <Settings showLegend={false} baseTheme={colorMode === 'LIGHT' ? LIGHT_THEME : DARK_THEME} />
+        {Object.entries(ingestionRate.buckets).map(([tier, buckets]) => (
+          <BarSeries
+            id={`ingestionRate-${tier}`}
+            key={`ingestionRate-${tier}`}
+            name={capitalize(tier)}
+            data={buckets}
+            color={ilmPhases[tier as PhaseName].color}
             xScaleType="time"
             xAccessor={'key'}
             yAccessors={['value']}
+            stackAccessors={[0]}
           />
+        ))}
 
-          <Axis
-            id="bottom-axis"
-            position="bottom"
-            tickFormat={(value) => moment(value).format('YYYY-MM-DD')}
-            gridLine={{ visible: false }}
-          />
-          <Axis
-            id="left-axis"
-            position="left"
-            tickFormat={(value) => formatBytes(value)}
-            gridLine={{ visible: true }}
-          />
-        </Chart>
-      )}
+        <Axis
+          id="bottom-axis"
+          position="bottom"
+          tickFormat={(value) => moment(value).format('YYYY-MM-DD HH:mm:ss')}
+          gridLine={{ visible: true }}
+        />
+        <Axis
+          id="left-axis"
+          position="left"
+          tickFormat={(value) => formatBytes(value)}
+          gridLine={{ visible: true }}
+        />
+      </Chart>
+
+      <EuiFlexGroup alignItems="center">
+        <EuiFlexItem grow>
+          <EuiText size="xs">
+            <b>
+              {toLegendFormat(ingestionRate.start)} - {toLegendFormat(ingestionRate.end)} (interval:{' '}
+              {ingestionRate.interval})
+            </b>
+          </EuiText>
+        </EuiFlexItem>
+      </EuiFlexGroup>
     </>
   );
+}
+
+function toLegendFormat(date: moment.Moment) {
+  return date.format('MMM DD, YYYY @ HH:mm:ss');
 }
