@@ -39,7 +39,7 @@ import {
   DISCOVER_SINGLE_DOC_LOCATOR,
 } from './application/doc/locator';
 import { type DiscoverAppLocator } from '../common';
-import { defaultCustomizationContext } from './customizations';
+import { defaultCustomizationContext } from './customizations/defaults';
 import { SEARCH_EMBEDDABLE_CELL_ACTIONS_TRIGGER } from './embeddable/constants';
 import {
   DiscoverContainerInternal,
