@@ -70,18 +70,19 @@ function createCSVPipeline(
 }
 
 /**
- * Processes CSV log data and converts it to JSON for further pipeline execution.
+ * Processes CSV log data by parsing, testing, and converting to JSON format.
  *
- * This function attempts to parse CSV-formatted samples with temporary columns names first.
- * If that is successful, the final column names are determined by combining the columns suggested by the LLM,
- * the columns parsed from the header row, and the temporary columns as the last resort.
+ * The process follows three stages:
+ * 1. Initial parsing with temporary column names (column1, column2, etc.)
+ * 2. Testing with actual pipeline using package.dataStream.columnName format
+ * 3. Converting to JSON format for further processing
  *
- * We generate necessary processors to handle the CSV format, including a processor to drop the header row if it exists.
- * The samples are then processed with these processors to convert them to JSON and stored in the state.
+ * Final column names are determined by combining LLM suggestions, header row parsing,
+ * and temporary columns as fallback. Includes header row handling and CSV-to-JSON conversion.
  *
- * @param param0 - An object containing the state, which holds log samples and format info, and the Elasticsearch client.
- * @returns A promise resolving to a partial state containing JSON samples, additional processors, and the last executed chain label.
- * @throws UnparseableCSVFormatError if CSV parsing fails for any log samples.
+ * @param param0 - Object containing state (log samples, format info) and Elasticsearch client
+ * @returns Promise with JSON samples, processors, and chain label
+ * @throws UnparseableCSVFormatError if CSV parsing fails
  */
 export async function handleCSV({
   state,
