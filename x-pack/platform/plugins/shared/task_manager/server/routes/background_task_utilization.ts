@@ -119,7 +119,11 @@ export function backgroundTaskUtilizationRoute(
           },
         },
         // Uncomment when we determine that we can restrict API usage to Global admins based on telemetry
-        // options: { tags: ['access:taskManager'] },
+        // security: {
+        //   authz: {
+        //     requiredPrivileges: ['taskManager'],
+        //   },
+        // },
         validate: false,
         options: {
           access: 'public', // access must be public to allow "system" users, like metrics collectors, to access these routes
@@ -141,15 +145,13 @@ export function backgroundTaskUtilizationRoute(
           const hasPrivilegesResponse = await clusterClient
             .asScoped(req)
             .asCurrentUser.security.hasPrivileges({
-              body: {
-                application: [
-                  {
-                    application: `kibana-${kibanaIndexName}`,
-                    resources: ['*'],
-                    privileges: [`api:${kibanaVersion}:taskManager`],
-                  },
-                ],
-              },
+              application: [
+                {
+                  application: `kibana-${kibanaIndexName}`,
+                  resources: ['*'],
+                  privileges: [`api:${kibanaVersion}:taskManager`],
+                },
+              ],
             });
 
           // Keep track of total access vs admin access

@@ -121,28 +121,7 @@
         "path": "src/platform/packages/shared/kbn-ui-theme/src/theme.ts",
         "deprecated": true,
         "trackAdoption": false,
-        "references": [
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/solutions/security/plugins/security_solution/public/resolver/view/use_colors.ts"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/solutions/security/plugins/security_solution/public/resolver/view/use_colors.ts"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/solutions/security/plugins/security_solution/public/resolver/view/use_colors.ts"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/solutions/security/plugins/security_solution/public/resolver/view/use_colors.ts"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/solutions/security/plugins/security_solution/public/resolver/view/use_colors.ts"
-          }
-        ],
+        "references": [],
         "initialIsOpen": false
       },
       {

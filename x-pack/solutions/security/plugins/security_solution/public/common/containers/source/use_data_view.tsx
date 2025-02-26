@@ -10,10 +10,10 @@ import type { Subscription } from 'rxjs';
 import { useDispatch } from 'react-redux';
 import memoizeOne from 'memoize-one';
 import type { BrowserFields } from '@kbn/timelines-plugin/common';
-import { getCategory } from '@kbn/triggers-actions-ui-plugin/public';
 import type { DataViewSpec } from '@kbn/data-views-plugin/public';
 import type { FieldCategory } from '@kbn/timelines-plugin/common/search_strategy';
 
+import { getCategory } from '@kbn/response-ops-alerts-fields-browser/helpers';
 import { useKibana } from '../../lib/kibana';
 import { sourcererActions } from '../../../sourcerer/store';
 import { SourcererScopeName } from '../../../sourcerer/store/model';

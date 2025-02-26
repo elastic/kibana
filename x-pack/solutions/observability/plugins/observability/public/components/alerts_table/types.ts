@@ -5,6 +5,22 @@
  * 2.0.
  */
 
+import { SetOptional } from 'type-fest';
+import type { AlertsTablePropsWithRef } from '@kbn/response-ops-alerts-table/types';
+import type { ConfigSchema, ObservabilityRuleTypeRegistry } from '../..';
+
+export interface ObservabilityAlertsTableContext {
+  observabilityRuleTypeRegistry: ObservabilityRuleTypeRegistry;
+  config: ConfigSchema;
+}
+
+export type ObservabilityAlertsTableProps = SetOptional<
+  AlertsTablePropsWithRef<ObservabilityAlertsTableContext>,
+  'ruleTypeIds'
+>;
+export type GetObservabilityAlertsTableProp<PropKey extends keyof ObservabilityAlertsTableProps> =
+  NonNullable<ObservabilityAlertsTableProps[PropKey]>;
+
 export interface BucketItem {
   key: string;
   doc_count: number;

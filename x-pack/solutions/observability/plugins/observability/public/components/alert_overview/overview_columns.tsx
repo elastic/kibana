@@ -6,7 +6,7 @@
  */
 
 import { EuiBasicTableColumn, EuiCallOut, EuiLink, EuiLoadingSpinner, EuiText } from '@elastic/eui';
-import { AlertLifecycleStatusBadge } from '@kbn/alerts-ui-shared';
+import { AlertLifecycleStatusBadge } from '@kbn/alerts-ui-shared/src/alert_lifecycle_status_badge';
 import { Cases } from '@kbn/cases-plugin/common';
 import { i18n } from '@kbn/i18n';
 import { AlertStatus } from '@kbn/rule-data-utils';

@@ -171,6 +171,7 @@ export interface QueryBarMenuPanelsProps {
   timeFilter?: SavedQueryTimeFilter;
   query?: Query;
   showSaveQuery?: boolean;
+  showSavedQueryControls?: boolean;
   showQueryInput?: boolean;
   showFilterBar?: boolean;
   savedQueryService: SavedQueryService;
@@ -199,6 +200,7 @@ export function useQueryBarMenuPanels({
   timeFilter,
   query,
   showSaveQuery,
+  showSavedQueryControls = true,
   showFilterBar,
   showQueryInput,
   savedQueryService,
@@ -220,7 +222,10 @@ export function useQueryBarMenuPanels({
   const { appName, usageCollection, uiSettings, http, storage, application } = kibana.services;
   const reportUiCounter = usageCollection?.reportUiCounter.bind(usageCollection, appName);
   const showSavedQueries =
-    showQueryInput && showFilterBar && application.capabilities.savedQueryManagement?.showQueries;
+    showSavedQueryControls &&
+    showQueryInput &&
+    showFilterBar &&
+    application.capabilities.savedQueryManagement?.showQueries;
   const cancelPendingListingRequest = useRef<() => void>(() => {});
 
   const [hasSavedQueries, setHasSavedQueries] = useState(false);

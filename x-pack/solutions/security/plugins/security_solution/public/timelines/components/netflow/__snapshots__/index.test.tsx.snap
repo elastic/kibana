@@ -10,16 +10,11 @@ exports[`Netflow renders correctly against snapshot 1`] = `
   display: inline-block;
 }
 
-.c3 svg {
-  position: relative;
-  top: -1px;
-}
-
-.c5 {
+.c4 {
   margin-right: 5px;
 }
 
-.c4 {
+.c3 {
   margin-right: 5px;
 }
 
@@ -519,7 +514,7 @@ exports[`Netflow renders correctly against snapshot 1`] = `
                                         class="euiFlexItem emotion-euiFlexItem-growZero"
                                       >
                                         <div
-                                          class="c3"
+                                          class="css-ggf2mo"
                                         >
                                           <a
                                             class="euiLink emotion-euiLink-primary"
@@ -719,7 +714,7 @@ exports[`Netflow renders correctly against snapshot 1`] = `
                         class="euiFlexItem emotion-euiFlexItem-growZero"
                       >
                         <span
-                          class="css-1io4upz"
+                          class="css-10gmjt4"
                           height="2.8"
                         />
                       </div>
@@ -757,7 +752,7 @@ exports[`Netflow renders correctly against snapshot 1`] = `
                         class="euiFlexItem emotion-euiFlexItem-growZero"
                       >
                         <span
-                          class="css-1io4upz"
+                          class="css-10gmjt4"
                           height="2.8"
                         />
                       </div>
@@ -790,7 +785,7 @@ exports[`Netflow renders correctly against snapshot 1`] = `
                         class="euiFlexItem emotion-euiFlexItem-growZero"
                       >
                         <span
-                          class="css-1io4upz"
+                          class="css-10gmjt4"
                           height="2.8"
                         />
                       </div>
@@ -824,7 +819,7 @@ exports[`Netflow renders correctly against snapshot 1`] = `
                         class="euiFlexItem emotion-euiFlexItem-growZero"
                       >
                         <span
-                          class="css-1almmfe"
+                          class="css-1aksxv4"
                           height="2.2"
                         />
                       </div>
@@ -874,7 +869,7 @@ exports[`Netflow renders correctly against snapshot 1`] = `
                         class="euiFlexItem emotion-euiFlexItem-growZero"
                       >
                         <span
-                          class="css-1almmfe"
+                          class="css-1aksxv4"
                           height="2.2"
                         />
                       </div>
@@ -907,7 +902,7 @@ exports[`Netflow renders correctly against snapshot 1`] = `
                         class="euiFlexItem emotion-euiFlexItem-growZero"
                       >
                         <span
-                          class="css-1almmfe"
+                          class="css-1aksxv4"
                           height="2.2"
                         />
                       </div>
@@ -985,7 +980,7 @@ exports[`Netflow renders correctly against snapshot 1`] = `
                                         class="euiFlexItem emotion-euiFlexItem-growZero"
                                       >
                                         <div
-                                          class="c3"
+                                          class="css-ggf2mo"
                                         >
                                           <a
                                             class="euiLink emotion-euiLink-primary"
@@ -1215,7 +1210,7 @@ exports[`Netflow renders correctly against snapshot 1`] = `
                       class="euiBadge__text emotion-euiBadge__text"
                     >
                       <span
-                        class="c4"
+                        class="c3"
                       >
                         ja3
                       </span>
@@ -1275,7 +1270,7 @@ exports[`Netflow renders correctly against snapshot 1`] = `
                       class="euiBadge__text emotion-euiBadge__text"
                     >
                       <span
-                        class="c5"
+                        class="c4"
                       >
                         client cert
                       </span>
@@ -1335,7 +1330,7 @@ exports[`Netflow renders correctly against snapshot 1`] = `
                       class="euiBadge__text emotion-euiBadge__text"
                     >
                       <span
-                        class="c5"
+                        class="c4"
                       >
                         server cert
                       </span>

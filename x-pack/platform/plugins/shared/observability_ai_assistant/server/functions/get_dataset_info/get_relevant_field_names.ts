@@ -100,20 +100,14 @@ export async function getRelevantFieldNames({
         await chat('get_relevant_dataset_names', {
           signal,
           stream: true,
-          messages: [
-            {
-              '@timestamp': new Date().toISOString(),
-              message: {
-                role: MessageRole.System,
-                content: `You are a helpful assistant for Elastic Observability.
+          systemMessage: `You are a helpful assistant for Elastic Observability.
             Your task is to create a list of field names that are relevant
             to the conversation, using ONLY the list of fields and
             types provided in the last user message. DO NOT UNDER ANY
             CIRCUMSTANCES include fields not mentioned in this list.`,
-              },
-            },
-            // remove the system message and the function request
-            ...messages.slice(1, -1),
+          messages: [
+            // remove the last function request
+            ...messages.slice(0, -1),
             {
               '@timestamp': new Date().toISOString(),
               message: {

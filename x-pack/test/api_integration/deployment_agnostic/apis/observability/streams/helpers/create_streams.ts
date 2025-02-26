@@ -128,15 +128,15 @@ const streams: StreamPutItem[] = [
 ];
 
 export async function createStreams(apiClient: StreamsSupertestRepositoryClient) {
-  for (const { name: streamId, ...stream } of streams) {
+  for (const { name, ...stream } of streams) {
     await apiClient
-      .fetch('PUT /api/streams/{id}', {
+      .fetch('PUT /api/streams/{name}', {
         params: {
           body: {
             ...stream,
             dashboards: [],
           } as StreamUpsertRequest,
-          path: { id: streamId },
+          path: { name },
         },
       })
       .expect(200)
