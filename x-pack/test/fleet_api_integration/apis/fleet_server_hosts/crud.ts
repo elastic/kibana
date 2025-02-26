@@ -29,10 +29,8 @@ export default function (providerContext: FtrProviderContext) {
     try {
       await es.deleteByQuery({
         index: '.fleet-secrets',
-        body: {
-          query: {
-            match_all: {},
-          },
+        query: {
+          match_all: {},
         },
       });
     } catch (err) {
@@ -87,10 +85,8 @@ export default function (providerContext: FtrProviderContext) {
       await es.deleteByQuery({
         index: '.fleet-agents',
         refresh: true,
-        body: {
-          query: {
-            match_all: {},
-          },
+        query: {
+          match_all: {},
         },
       });
     } catch (err) {
