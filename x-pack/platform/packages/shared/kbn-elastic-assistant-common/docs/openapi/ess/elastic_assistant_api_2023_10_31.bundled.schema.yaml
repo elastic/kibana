@@ -1301,6 +1301,9 @@ components:
       allOf:
         - type: object
           properties:
+            global:
+              description: Whether this Knowledge Base Entry is global, defaults to false
+              type: boolean
             name:
               description: Name of the Knowledge Base Entry
               type: string
@@ -1321,6 +1324,7 @@ components:
               type: array
           required:
             - namespace
+            - global
             - users
         - type: object
           properties:
@@ -1339,6 +1343,9 @@ components:
       allOf:
         - type: object
           properties:
+            global:
+              description: Whether this Knowledge Base Entry is global, defaults to false
+              type: boolean
             name:
               description: Name of the Knowledge Base Entry
               type: string
@@ -1394,6 +1401,9 @@ components:
       allOf:
         - type: object
           properties:
+            global:
+              description: Whether this Knowledge Base Entry is global, defaults to false
+              type: boolean
             id:
               $ref: '#/components/schemas/NonEmptyString'
             name:
@@ -1477,6 +1487,9 @@ components:
       allOf:
         - type: object
           properties:
+            global:
+              description: Whether this Knowledge Base Entry is global, defaults to false
+              type: boolean
             name:
               description: Name of the Knowledge Base Entry
               type: string
@@ -1497,6 +1510,7 @@ components:
               type: array
           required:
             - namespace
+            - global
             - users
         - type: object
           properties:
@@ -1515,6 +1529,9 @@ components:
       allOf:
         - type: object
           properties:
+            global:
+              description: Whether this Knowledge Base Entry is global, defaults to false
+              type: boolean
             name:
               description: Name of the Knowledge Base Entry
               type: string
@@ -1583,6 +1600,9 @@ components:
       allOf:
         - type: object
           properties:
+            global:
+              description: Whether this Knowledge Base Entry is global, defaults to false
+              type: boolean
             id:
               $ref: '#/components/schemas/NonEmptyString'
             name:

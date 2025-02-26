@@ -52,6 +52,7 @@ import {
 } from './helpers';
 import {
   getKBUserFilter,
+  isGlobalEntry,
   validateDocumentsModification,
 } from '../../routes/knowledge_base/entries/utils';
 import {
@@ -208,7 +209,7 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
       // For standardized way of checking deployment status see: https://github.com/elastic/elasticsearch/issues/106986
       const isReadyESS = (stats: MlTrainedModelStats) =>
         stats.deployment_stats?.state === 'started' &&
-        stats.deployment_stats?.allocation_status.state === 'fully_allocated';
+        stats.deployment_stats?.allocation_status?.state === 'fully_allocated';
 
       const isReadyServerless = (stats: MlTrainedModelStats) =>
         (stats.deployment_stats?.nodes as unknown as MlTrainedModelDeploymentNodesStats[])?.some(
@@ -486,8 +487,8 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
             kbResource: doc.metadata.kbResource ?? 'unknown',
             required: doc.metadata.required ?? false,
             source: doc.metadata.source ?? 'unknown',
+            global,
           },
-          global,
         });
       }),
       authenticatedUser,
@@ -728,11 +729,9 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
     auditLogger,
     knowledgeBaseEntry,
     telemetry,
-    global = false,
   }: {
     auditLogger?: AuditLogger;
     knowledgeBaseEntry: KnowledgeBaseEntryCreateProps;
-    global?: boolean;
     telemetry: AnalyticsServiceSetup;
   }): Promise<KnowledgeBaseEntryResponse | null> => {
     const authenticatedUser = this.options.currentUser;
@@ -743,7 +742,7 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
       );
     }
 
-    if (global && !this.options.manageGlobalKnowledgeBaseAIAssistant) {
+    if (isGlobalEntry(knowledgeBaseEntry) && !this.options.manageGlobalKnowledgeBaseAIAssistant) {
       throw new Error('User lacks privileges to create global knowledge base entries');
     }
 
@@ -760,7 +759,6 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
       spaceId: this.spaceId,
       user: authenticatedUser,
       knowledgeBaseEntry,
-      global,
       telemetry,
     });
   };
@@ -806,7 +804,6 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
           user: authenticatedUser,
           updatedAt: changedAt,
           entry: knowledgeBaseEntry,
-          global: knowledgeBaseEntry.users != null && knowledgeBaseEntry.users.length === 0,
         }),
       ],
       getUpdateScript: (entry: UpdateKnowledgeBaseEntrySchema) => getUpdateScript({ entry }),
@@ -889,7 +886,7 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
     contentReferencesStore,
     esClient,
   }: {
-    contentReferencesStore: ContentReferencesStore | undefined;
+    contentReferencesStore: ContentReferencesStore;
     esClient: ElasticsearchClient;
   }): Promise<StructuredTool[]> => {
     const user = this.options.currentUser;

@@ -98,127 +98,125 @@ describe('getMonitorStatus', () => {
     const [params] = esMock.search.mock.calls[0];
     expect(params).toMatchInlineSnapshot(`
       Object {
-        "body": Object {
-          "aggs": Object {
-            "monitors": Object {
-              "aggs": Object {
-                "fields": Object {
-                  "top_hits": Object {
-                    "size": 1,
-                    "sort": Array [
-                      Object {
-                        "@timestamp": "desc",
-                      },
-                    ],
-                  },
+        "aggs": Object {
+          "monitors": Object {
+            "aggs": Object {
+              "fields": Object {
+                "top_hits": Object {
+                  "size": 1,
+                  "sort": Array [
+                    Object {
+                      "@timestamp": "desc",
+                    },
+                  ],
                 },
-              },
-              "composite": Object {
-                "size": 2000,
-                "sources": Array [
-                  Object {
-                    "monitorId": Object {
-                      "terms": Object {
-                        "field": "monitor.id",
-                      },
-                    },
-                  },
-                  Object {
-                    "status": Object {
-                      "terms": Object {
-                        "field": "monitor.status",
-                      },
-                    },
-                  },
-                  Object {
-                    "location": Object {
-                      "terms": Object {
-                        "field": "observer.geo.name",
-                        "missing_bucket": true,
-                      },
-                    },
-                  },
-                ],
               },
             },
-          },
-          "query": Object {
-            "bool": Object {
-              "filter": Array [
+            "composite": Object {
+              "size": 2000,
+              "sources": Array [
                 Object {
-                  "exists": Object {
-                    "field": "summary",
-                  },
-                },
-                Object {
-                  "bool": Object {
-                    "must_not": Object {
-                      "exists": Object {
-                        "field": "run_once",
-                      },
+                  "monitorId": Object {
+                    "terms": Object {
+                      "field": "monitor.id",
                     },
                   },
                 },
                 Object {
-                  "range": Object {
-                    "summary.down": Object {
-                      "gt": "0",
+                  "status": Object {
+                    "terms": Object {
+                      "field": "monitor.status",
                     },
                   },
                 },
                 Object {
-                  "range": Object {
-                    "@timestamp": Object {
-                      "gte": "now-24h",
-                      "lte": "now",
+                  "location": Object {
+                    "terms": Object {
+                      "field": "observer.geo.name",
+                      "missing_bucket": true,
                     },
-                  },
-                },
-                Object {
-                  "range": Object {
-                    "monitor.timespan": Object {
-                      "gte": "now-10m",
-                      "lte": "now-1m",
-                    },
-                  },
-                },
-                Object {
-                  "bool": Object {
-                    "minimum_should_match": 1,
-                    "should": Array [
-                      Object {
-                        "bool": Object {
-                          "minimum_should_match": 1,
-                          "should": Array [
-                            Object {
-                              "match_phrase": Object {
-                                "monitor.id": "apm-dev",
-                              },
-                            },
-                          ],
-                        },
-                      },
-                      Object {
-                        "bool": Object {
-                          "minimum_should_match": 1,
-                          "should": Array [
-                            Object {
-                              "match_phrase": Object {
-                                "monitor.id": "auto-http-0X8D6082B94BBE3B8A",
-                              },
-                            },
-                          ],
-                        },
-                      },
-                    ],
                   },
                 },
               ],
             },
           },
-          "size": 0,
         },
         "index": "heartbeat-*",
+        "query": Object {
+          "bool": Object {
+            "filter": Array [
+              Object {
+                "exists": Object {
+                  "field": "summary",
+                },
+              },
+              Object {
+                "bool": Object {
+                  "must_not": Object {
+                    "exists": Object {
+                      "field": "run_once",
+                    },
+                  },
+                },
+              },
+              Object {
+                "range": Object {
+                  "summary.down": Object {
+                    "gt": "0",
+                  },
+                },
+              },
+              Object {
+                "range": Object {
+                  "@timestamp": Object {
+                    "gte": "now-24h",
+                    "lte": "now",
+                  },
+                },
+              },
+              Object {
+                "range": Object {
+                  "monitor.timespan": Object {
+                    "gte": "now-10m",
+                    "lte": "now-1m",
+                  },
+                },
+              },
+              Object {
+                "bool": Object {
+                  "minimum_should_match": 1,
+                  "should": Array [
+                    Object {
+                      "bool": Object {
+                        "minimum_should_match": 1,
+                        "should": Array [
+                          Object {
+                            "match_phrase": Object {
+                              "monitor.id": "apm-dev",
+                            },
+                          },
+                        ],
+                      },
+                    },
+                    Object {
+                      "bool": Object {
+                        "minimum_should_match": 1,
+                        "should": Array [
+                          Object {
+                            "match_phrase": Object {
+                              "monitor.id": "auto-http-0X8D6082B94BBE3B8A",
+                            },
+                          },
+                        ],
+                      },
+                    },
+                  ],
+                },
+              },
+            ],
+          },
+        },
+        "size": 0,
       }
     `);
   });
@@ -248,112 +246,110 @@ describe('getMonitorStatus', () => {
     const [params] = esMock.search.mock.calls[0];
     expect(params).toMatchInlineSnapshot(`
       Object {
-        "body": Object {
-          "aggs": Object {
-            "monitors": Object {
-              "aggs": Object {
-                "fields": Object {
-                  "top_hits": Object {
-                    "size": 1,
-                    "sort": Array [
-                      Object {
-                        "@timestamp": "desc",
-                      },
-                    ],
-                  },
+        "aggs": Object {
+          "monitors": Object {
+            "aggs": Object {
+              "fields": Object {
+                "top_hits": Object {
+                  "size": 1,
+                  "sort": Array [
+                    Object {
+                      "@timestamp": "desc",
+                    },
+                  ],
                 },
-              },
-              "composite": Object {
-                "size": 2000,
-                "sources": Array [
-                  Object {
-                    "monitorId": Object {
-                      "terms": Object {
-                        "field": "monitor.id",
-                      },
-                    },
-                  },
-                  Object {
-                    "status": Object {
-                      "terms": Object {
-                        "field": "monitor.status",
-                      },
-                    },
-                  },
-                  Object {
-                    "location": Object {
-                      "terms": Object {
-                        "field": "observer.geo.name",
-                        "missing_bucket": true,
-                      },
-                    },
-                  },
-                ],
               },
             },
-          },
-          "query": Object {
-            "bool": Object {
-              "filter": Array [
+            "composite": Object {
+              "size": 2000,
+              "sources": Array [
                 Object {
-                  "exists": Object {
-                    "field": "summary",
-                  },
-                },
-                Object {
-                  "bool": Object {
-                    "must_not": Object {
-                      "exists": Object {
-                        "field": "run_once",
-                      },
+                  "monitorId": Object {
+                    "terms": Object {
+                      "field": "monitor.id",
                     },
                   },
                 },
                 Object {
-                  "range": Object {
-                    "summary.down": Object {
-                      "gt": "0",
+                  "status": Object {
+                    "terms": Object {
+                      "field": "monitor.status",
                     },
                   },
                 },
                 Object {
-                  "range": Object {
-                    "@timestamp": Object {
-                      "gte": "now-24h",
-                      "lte": "now",
+                  "location": Object {
+                    "terms": Object {
+                      "field": "observer.geo.name",
+                      "missing_bucket": true,
                     },
-                  },
-                },
-                Object {
-                  "range": Object {
-                    "monitor.timespan": Object {
-                      "gte": "now-2m",
-                      "lte": "now",
-                    },
-                  },
-                },
-                Object {
-                  "bool": Object {
-                    "should": Array [
-                      Object {
-                        "term": Object {
-                          "observer.geo.name": "fairbanks",
-                        },
-                      },
-                      Object {
-                        "term": Object {
-                          "observer.geo.name": "harrisburg",
-                        },
-                      },
-                    ],
                   },
                 },
               ],
             },
           },
-          "size": 0,
         },
         "index": "heartbeat-*",
+        "query": Object {
+          "bool": Object {
+            "filter": Array [
+              Object {
+                "exists": Object {
+                  "field": "summary",
+                },
+              },
+              Object {
+                "bool": Object {
+                  "must_not": Object {
+                    "exists": Object {
+                      "field": "run_once",
+                    },
+                  },
+                },
+              },
+              Object {
+                "range": Object {
+                  "summary.down": Object {
+                    "gt": "0",
+                  },
+                },
+              },
+              Object {
+                "range": Object {
+                  "@timestamp": Object {
+                    "gte": "now-24h",
+                    "lte": "now",
+                  },
+                },
+              },
+              Object {
+                "range": Object {
+                  "monitor.timespan": Object {
+                    "gte": "now-2m",
+                    "lte": "now",
+                  },
+                },
+              },
+              Object {
+                "bool": Object {
+                  "should": Array [
+                    Object {
+                      "term": Object {
+                        "observer.geo.name": "fairbanks",
+                      },
+                    },
+                    Object {
+                      "term": Object {
+                        "observer.geo.name": "harrisburg",
+                      },
+                    },
+                  ],
+                },
+              },
+            ],
+          },
+        },
+        "size": 0,
       }
     `);
   });
@@ -435,145 +431,143 @@ describe('getMonitorStatus', () => {
     const [params] = esMock.search.mock.calls[0];
     expect(params).toMatchInlineSnapshot(`
       Object {
-        "body": Object {
-          "aggs": Object {
-            "monitors": Object {
-              "aggs": Object {
-                "fields": Object {
-                  "top_hits": Object {
-                    "size": 1,
-                    "sort": Array [
-                      Object {
-                        "@timestamp": "desc",
-                      },
-                    ],
-                  },
+        "aggs": Object {
+          "monitors": Object {
+            "aggs": Object {
+              "fields": Object {
+                "top_hits": Object {
+                  "size": 1,
+                  "sort": Array [
+                    Object {
+                      "@timestamp": "desc",
+                    },
+                  ],
                 },
-              },
-              "composite": Object {
-                "size": 2000,
-                "sources": Array [
-                  Object {
-                    "monitorId": Object {
-                      "terms": Object {
-                        "field": "monitor.id",
-                      },
-                    },
-                  },
-                  Object {
-                    "status": Object {
-                      "terms": Object {
-                        "field": "monitor.status",
-                      },
-                    },
-                  },
-                  Object {
-                    "location": Object {
-                      "terms": Object {
-                        "field": "observer.geo.name",
-                        "missing_bucket": true,
-                      },
-                    },
-                  },
-                ],
               },
             },
-          },
-          "query": Object {
-            "bool": Object {
-              "filter": Array [
+            "composite": Object {
+              "size": 2000,
+              "sources": Array [
                 Object {
-                  "exists": Object {
-                    "field": "summary",
-                  },
-                },
-                Object {
-                  "bool": Object {
-                    "must_not": Object {
-                      "exists": Object {
-                        "field": "run_once",
-                      },
+                  "monitorId": Object {
+                    "terms": Object {
+                      "field": "monitor.id",
                     },
                   },
                 },
                 Object {
-                  "range": Object {
-                    "summary.down": Object {
-                      "gt": "0",
+                  "status": Object {
+                    "terms": Object {
+                      "field": "monitor.status",
                     },
                   },
                 },
                 Object {
-                  "range": Object {
-                    "@timestamp": Object {
-                      "gte": "now-24h",
-                      "lte": "now",
+                  "location": Object {
+                    "terms": Object {
+                      "field": "observer.geo.name",
+                      "missing_bucket": true,
                     },
-                  },
-                },
-                Object {
-                  "range": Object {
-                    "monitor.timespan": Object {
-                      "gte": "now-15m",
-                      "lte": "now",
-                    },
-                  },
-                },
-                Object {
-                  "bool": Object {
-                    "filter": Array [
-                      Object {
-                        "bool": Object {
-                          "minimum_should_match": 1,
-                          "should": Array [
-                            Object {
-                              "match_phrase": Object {
-                                "tags": "org:google",
-                              },
-                            },
-                          ],
-                        },
-                      },
-                      Object {
-                        "bool": Object {
-                          "minimum_should_match": 1,
-                          "should": Array [
-                            Object {
-                              "bool": Object {
-                                "minimum_should_match": 1,
-                                "should": Array [
-                                  Object {
-                                    "match_phrase": Object {
-                                      "monitor.type": "http",
-                                    },
-                                  },
-                                ],
-                              },
-                            },
-                            Object {
-                              "bool": Object {
-                                "minimum_should_match": 1,
-                                "should": Array [
-                                  Object {
-                                    "match_phrase": Object {
-                                      "monitor.type": "tcp",
-                                    },
-                                  },
-                                ],
-                              },
-                            },
-                          ],
-                        },
-                      },
-                    ],
                   },
                 },
               ],
             },
           },
-          "size": 0,
         },
         "index": "heartbeat-*",
+        "query": Object {
+          "bool": Object {
+            "filter": Array [
+              Object {
+                "exists": Object {
+                  "field": "summary",
+                },
+              },
+              Object {
+                "bool": Object {
+                  "must_not": Object {
+                    "exists": Object {
+                      "field": "run_once",
+                    },
+                  },
+                },
+              },
+              Object {
+                "range": Object {
+                  "summary.down": Object {
+                    "gt": "0",
+                  },
+                },
+              },
+              Object {
+                "range": Object {
+                  "@timestamp": Object {
+                    "gte": "now-24h",
+                    "lte": "now",
+                  },
+                },
+              },
+              Object {
+                "range": Object {
+                  "monitor.timespan": Object {
+                    "gte": "now-15m",
+                    "lte": "now",
+                  },
+                },
+              },
+              Object {
+                "bool": Object {
+                  "filter": Array [
+                    Object {
+                      "bool": Object {
+                        "minimum_should_match": 1,
+                        "should": Array [
+                          Object {
+                            "match_phrase": Object {
+                              "tags": "org:google",
+                            },
+                          },
+                        ],
+                      },
+                    },
+                    Object {
+                      "bool": Object {
+                        "minimum_should_match": 1,
+                        "should": Array [
+                          Object {
+                            "bool": Object {
+                              "minimum_should_match": 1,
+                              "should": Array [
+                                Object {
+                                  "match_phrase": Object {
+                                    "monitor.type": "http",
+                                  },
+                                },
+                              ],
+                            },
+                          },
+                          Object {
+                            "bool": Object {
+                              "minimum_should_match": 1,
+                              "should": Array [
+                                Object {
+                                  "match_phrase": Object {
+                                    "monitor.type": "tcp",
+                                  },
+                                },
+                              ],
+                            },
+                          },
+                        ],
+                      },
+                    },
+                  ],
+                },
+              },
+            ],
+          },
+        },
+        "size": 0,
       }
     `);
   });
@@ -615,105 +609,103 @@ describe('getMonitorStatus', () => {
     const [params] = esMock.search.mock.calls[0];
     expect(params).toMatchInlineSnapshot(`
       Object {
-        "body": Object {
-          "aggs": Object {
-            "monitors": Object {
-              "aggs": Object {
-                "fields": Object {
-                  "top_hits": Object {
-                    "size": 1,
-                    "sort": Array [
-                      Object {
-                        "@timestamp": "desc",
-                      },
-                    ],
-                  },
+        "aggs": Object {
+          "monitors": Object {
+            "aggs": Object {
+              "fields": Object {
+                "top_hits": Object {
+                  "size": 1,
+                  "sort": Array [
+                    Object {
+                      "@timestamp": "desc",
+                    },
+                  ],
                 },
-              },
-              "composite": Object {
-                "size": 2000,
-                "sources": Array [
-                  Object {
-                    "monitorId": Object {
-                      "terms": Object {
-                        "field": "monitor.id",
-                      },
-                    },
-                  },
-                  Object {
-                    "status": Object {
-                      "terms": Object {
-                        "field": "monitor.status",
-                      },
-                    },
-                  },
-                  Object {
-                    "location": Object {
-                      "terms": Object {
-                        "field": "observer.geo.name",
-                        "missing_bucket": true,
-                      },
-                    },
-                  },
-                ],
               },
             },
-          },
-          "query": Object {
-            "bool": Object {
-              "filter": Array [
+            "composite": Object {
+              "size": 2000,
+              "sources": Array [
                 Object {
-                  "exists": Object {
-                    "field": "summary",
-                  },
-                },
-                Object {
-                  "bool": Object {
-                    "must_not": Object {
-                      "exists": Object {
-                        "field": "run_once",
-                      },
+                  "monitorId": Object {
+                    "terms": Object {
+                      "field": "monitor.id",
                     },
                   },
                 },
                 Object {
-                  "range": Object {
-                    "summary.down": Object {
-                      "gt": "0",
+                  "status": Object {
+                    "terms": Object {
+                      "field": "monitor.status",
                     },
                   },
                 },
                 Object {
-                  "range": Object {
-                    "@timestamp": Object {
-                      "gte": "now-24h",
-                      "lte": "now",
-                    },
-                  },
-                },
-                Object {
-                  "range": Object {
-                    "monitor.timespan": Object {
-                      "gte": "now-15m",
-                      "lte": "now",
-                    },
-                  },
-                },
-                Object {
-                  "bool": Object {
-                    "filter": Object {
-                      "exists": Object {
-                        "field": "monitor.status",
-                      },
+                  "location": Object {
+                    "terms": Object {
+                      "field": "observer.geo.name",
+                      "missing_bucket": true,
                     },
                   },
                 },
               ],
             },
           },
-          "size": 0,
         },
         "index": "heartbeat-*",
+        "query": Object {
+          "bool": Object {
+            "filter": Array [
+              Object {
+                "exists": Object {
+                  "field": "summary",
+                },
+              },
+              Object {
+                "bool": Object {
+                  "must_not": Object {
+                    "exists": Object {
+                      "field": "run_once",
+                    },
+                  },
+                },
+              },
+              Object {
+                "range": Object {
+                  "summary.down": Object {
+                    "gt": "0",
+                  },
+                },
+              },
+              Object {
+                "range": Object {
+                  "@timestamp": Object {
+                    "gte": "now-24h",
+                    "lte": "now",
+                  },
+                },
+              },
+              Object {
+                "range": Object {
+                  "monitor.timespan": Object {
+                    "gte": "now-15m",
+                    "lte": "now",
+                  },
+                },
+              },
+              Object {
+                "bool": Object {
+                  "filter": Object {
+                    "exists": Object {
+                      "field": "monitor.status",
+                    },
+                  },
+                },
+              },
+            ],
+          },
+        },
+        "size": 0,
       }
     `);
   });
@@ -770,96 +762,94 @@ describe('getMonitorStatus', () => {
     const [params] = esMock.search.mock.calls[0];
     expect(params).toMatchInlineSnapshot(`
       Object {
-        "body": Object {
-          "aggs": Object {
-            "monitors": Object {
-              "aggs": Object {
-                "fields": Object {
-                  "top_hits": Object {
-                    "size": 1,
-                    "sort": Array [
-                      Object {
-                        "@timestamp": "desc",
-                      },
-                    ],
-                  },
+        "aggs": Object {
+          "monitors": Object {
+            "aggs": Object {
+              "fields": Object {
+                "top_hits": Object {
+                  "size": 1,
+                  "sort": Array [
+                    Object {
+                      "@timestamp": "desc",
+                    },
+                  ],
                 },
-              },
-              "composite": Object {
-                "size": 2000,
-                "sources": Array [
-                  Object {
-                    "monitorId": Object {
-                      "terms": Object {
-                        "field": "monitor.id",
-                      },
-                    },
-                  },
-                  Object {
-                    "status": Object {
-                      "terms": Object {
-                        "field": "monitor.status",
-                      },
-                    },
-                  },
-                  Object {
-                    "location": Object {
-                      "terms": Object {
-                        "field": "observer.geo.name",
-                        "missing_bucket": true,
-                      },
-                    },
-                  },
-                ],
               },
             },
-          },
-          "query": Object {
-            "bool": Object {
-              "filter": Array [
+            "composite": Object {
+              "size": 2000,
+              "sources": Array [
                 Object {
-                  "exists": Object {
-                    "field": "summary",
-                  },
-                },
-                Object {
-                  "bool": Object {
-                    "must_not": Object {
-                      "exists": Object {
-                        "field": "run_once",
-                      },
+                  "monitorId": Object {
+                    "terms": Object {
+                      "field": "monitor.id",
                     },
                   },
                 },
                 Object {
-                  "range": Object {
-                    "summary.down": Object {
-                      "gt": "0",
+                  "status": Object {
+                    "terms": Object {
+                      "field": "monitor.status",
                     },
                   },
                 },
                 Object {
-                  "range": Object {
-                    "@timestamp": Object {
-                      "gte": "now-24h",
-                      "lte": "now",
-                    },
-                  },
-                },
-                Object {
-                  "range": Object {
-                    "monitor.timespan": Object {
-                      "gte": "now-12m",
-                      "lte": "now-2m",
+                  "location": Object {
+                    "terms": Object {
+                      "field": "observer.geo.name",
+                      "missing_bucket": true,
                     },
                   },
                 },
               ],
             },
           },
-          "size": 0,
         },
         "index": "heartbeat-*",
+        "query": Object {
+          "bool": Object {
+            "filter": Array [
+              Object {
+                "exists": Object {
+                  "field": "summary",
+                },
+              },
+              Object {
+                "bool": Object {
+                  "must_not": Object {
+                    "exists": Object {
+                      "field": "run_once",
+                    },
+                  },
+                },
+              },
+              Object {
+                "range": Object {
+                  "summary.down": Object {
+                    "gt": "0",
+                  },
+                },
+              },
+              Object {
+                "range": Object {
+                  "@timestamp": Object {
+                    "gte": "now-24h",
+                    "lte": "now",
+                  },
+                },
+              },
+              Object {
+                "range": Object {
+                  "monitor.timespan": Object {
+                    "gte": "now-12m",
+                    "lte": "now-2m",
+                  },
+                },
+              },
+            ],
+          },
+        },
+        "size": 0,
       }
     `);
     expect(result.length).toBe(3);

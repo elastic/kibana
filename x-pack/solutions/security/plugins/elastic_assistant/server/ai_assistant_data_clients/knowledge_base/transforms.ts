@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { estypes } from '@elastic/elasticsearch';
+import type { estypes } from '@elastic/elasticsearch';
 import {
   DocumentEntry,
   DocumentEntryType,
@@ -50,6 +50,7 @@ const transformEsSchemaToEntry = (
       createdBy: esKbEntry.created_by,
       updatedAt: esKbEntry.updated_at,
       updatedBy: esKbEntry.updated_by,
+      global: !esKbEntry.users?.length,
       users:
         esKbEntry.users?.map((user) => ({
           id: user.id,
@@ -80,6 +81,7 @@ const transformEsSchemaToEntry = (
       createdBy: esKbEntry.created_by,
       updatedAt: esKbEntry.updated_at,
       updatedBy: esKbEntry.updated_by,
+      global: !esKbEntry.users?.length,
       users:
         esKbEntry.users?.map((user) => ({
           id: user.id,
@@ -117,6 +119,7 @@ const getDocumentEntryFromLegacyKbEntry = (
     createdBy: legacyEsKbDoc.created_by,
     updatedAt: legacyEsKbDoc.updated_at,
     updatedBy: legacyEsKbDoc.updated_by,
+    global: !legacyEsKbDoc.users?.length,
     users:
       legacyEsKbDoc.users?.map((user) => ({
         id: user.id,

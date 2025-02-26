@@ -19,7 +19,7 @@ import {
   KnowledgeBaseResource,
 } from '@kbn/elastic-assistant-common';
 import { buildRouteValidationWithZod } from '@kbn/elastic-assistant-common/impl/schemas/common';
-import { estypes } from '@elastic/elasticsearch';
+import type { estypes } from '@elastic/elasticsearch';
 import { ElasticAssistantPluginRouter } from '../../../types';
 import { buildResponse } from '../../utils';
 
@@ -139,6 +139,7 @@ export const findKnowledgeBaseEntriesRoute = (router: ElasticAssistantPluginRout
                         createdBy: entry.created_by,
                         updatedAt: entry.updated_at,
                         updatedBy: entry.updated_by,
+                        global: true,
                         users: [],
                         name,
                         namespace: entry.namespace,

@@ -94,6 +94,9 @@ components:
         namespace:
           type: string
           description: Kibana Space, defaults to 'default' space
+        global:
+          type: boolean
+          description: Whether this Knowledge Base Entry is global, defaults to false
         users:
           type: array
           nullable: true
