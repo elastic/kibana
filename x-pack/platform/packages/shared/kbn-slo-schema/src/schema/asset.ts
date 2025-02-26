@@ -7,7 +7,7 @@
 import * as t from 'io-ts';
 
 // TODO: Move to union type when another type appears
-const assetSchema = t.type({ type: t.literal('dashboard'), id: t.string, name: t.string });
+const assetSchema = t.type({ type: t.literal('dashboard'), id: t.string, label: t.string });
 
 const assetsSchema = t.array(assetSchema);
 

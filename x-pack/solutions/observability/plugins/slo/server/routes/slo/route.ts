@@ -29,9 +29,11 @@ import { resetSLORoute } from './reset_slo';
 import { getSLOStatsOverview } from './get_slo_stats_overview';
 import { bulkDeleteSLORoute, getBulkDeleteStatusRoute } from './bulk_delete';
 import { bulkPurgeRollupRoute } from './purge_rollup_data';
+import { findDashboards } from './find_dashboards';
 
 export const getSloRouteRepository = (isServerless?: boolean) => {
   return {
+    ...findDashboards,
     ...fetchSloHealthRoute,
     ...getSloSettingsRoute,
     ...putSloSettings(isServerless),

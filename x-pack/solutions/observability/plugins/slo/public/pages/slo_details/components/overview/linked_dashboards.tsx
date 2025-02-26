@@ -38,7 +38,7 @@ export function LinkedDashboards({ assets }: Props) {
               href={dashboardLocator?.getRedirectUrl({ dashboardId: dashboardAsset.id })}
               target="_blank"
             >
-              {dashboardAsset.name}
+              {dashboardAsset.label}
             </EuiLink>
           </EuiFlexItem>
         );

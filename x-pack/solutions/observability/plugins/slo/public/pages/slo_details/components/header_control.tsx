@@ -28,6 +28,7 @@ import { isApmIndicatorType } from '../../../utils/slo/indicator';
 import { EditBurnRateRuleFlyout } from '../../slos/components/common/edit_burn_rate_rule_flyout';
 import { useGetQueryParams } from '../hooks/use_get_query_params';
 import { useSloActions } from '../hooks/use_slo_actions';
+import { ManageLinkedDashboardsFlyout } from '../../../components/manage_linked_dashboards/manage_linked_dashboards_flyout';
 
 export interface Props {
   slo: SLOWithSummaryResponse;
@@ -65,6 +66,7 @@ export function HeaderControl({ slo }: Props) {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const [isRuleFlyoutVisible, setRuleFlyoutVisibility] = useState<boolean>(false);
   const [isEditRuleFlyoutOpen, setIsEditRuleFlyoutOpen] = useState(false);
+  const [isManageLinkedDashboardsFlyoutOpen, setManageLinkedDashboardsFlyoutOpen] = useState(false);
 
   const { data: rulesBySlo, refetchRules } = useFetchRulesForSlo({
     sloIds: [slo.id],
@@ -74,6 +76,11 @@ export function HeaderControl({ slo }: Props) {
 
   const handleActionsClick = () => setIsPopoverOpen((value) => !value);
   const closePopover = () => setIsPopoverOpen(false);
+
+  const handleManageLinkedDashboards = () => {
+    setManageLinkedDashboardsFlyoutOpen(true);
+    setIsPopoverOpen(false);
+  };
 
   const navigate = useCallback(
     (url: string) => setTimeout(() => navigateToUrl(url)),
@@ -275,6 +282,21 @@ export function HeaderControl({ slo }: Props) {
               {showRemoteLinkIcon}
             </EuiContextMenuItem>,
             <EuiContextMenuItem
+              key="manageLinkedDashboards"
+              icon="dashboardApp"
+              disabled={!permissions?.hasAllWriteRequested || hasUndefinedRemoteKibanaUrl}
+              onClick={handleManageLinkedDashboards}
+              data-test-subj="sloDetailsHeaderControlPopoverManageLinkedDashboards"
+              toolTipContent={
+                hasUndefinedRemoteKibanaUrl ? NOT_AVAILABLE_FOR_UNDEFINED_REMOTE_KIBANA_URL : ''
+              }
+            >
+              {i18n.translate('xpack.slo.slo.item.actions.manageLinkedDashboards', {
+                defaultMessage: 'Manage linked dashboards',
+              })}
+              {showRemoteLinkIcon}
+            </EuiContextMenuItem>,
+            <EuiContextMenuItem
               key="createBurnRateRule"
               disabled={!permissions?.hasAllWriteRequested || isRemote}
               icon="bell"
@@ -440,6 +462,17 @@ export function HeaderControl({ slo }: Props) {
           onSubmit={onCloseRuleFlyout}
           initialValues={{ name: `${slo.name} burn rate`, params: { sloId: slo.id } }}
           shouldUseRuleProducer
+        />
+      ) : null}
+      {isManageLinkedDashboardsFlyoutOpen ? (
+        <ManageLinkedDashboardsFlyout
+          assets={slo.assets}
+          onClose={() => {
+            setManageLinkedDashboardsFlyoutOpen(false);
+          }}
+          onSave={() => {
+            setManageLinkedDashboardsFlyoutOpen(false);
+          }}
         />
       ) : null}
     </>
