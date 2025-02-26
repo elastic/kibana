@@ -57,5 +57,6 @@
     "@kbn/object-utils",
     "@kbn/traced-es-client",
     "@kbn/licensing-plugin",
+    "@kbn/datemath",
   ]
 }
