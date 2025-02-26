@@ -77,7 +77,6 @@ export const ProductDocumentationManagement: React.FC = React.memo(() => {
   if (isInstalled) {
     return null;
   }
-
   return (
     <>
       <EuiCallOut title={i18n.LABEL} iconType="iInCircle">

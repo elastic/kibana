@@ -123,7 +123,11 @@ export class RequestContextFactory implements IRequestContextFactory {
           modelIdOverride: params?.modelIdOverride,
           manageGlobalKnowledgeBaseAIAssistant:
             securitySolutionAssistant.manageGlobalKnowledgeBaseAIAssistant as boolean,
-          trainedModelsProvider: plugins.ml.trainedModelsProvider(request, savedObjectsClient),
+          // uses internal user to interact with ML API
+          trainedModelsProvider: plugins.ml.trainedModelsProvider(
+            {} as KibanaRequest,
+            coreStart.savedObjects.createInternalRepository()
+          ),
         });
       }),
 
