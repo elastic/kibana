@@ -165,6 +165,7 @@ export const EntityAnalyticsManagementPage = () => {
           />
         </EuiFlexItem>
       </EuiFlexGroup>
+      {/* Comment to trigger CI build */}
     </>
   );
 };
