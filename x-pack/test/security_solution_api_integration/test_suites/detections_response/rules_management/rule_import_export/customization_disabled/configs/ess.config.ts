@@ -12,12 +12,14 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
     require.resolve('../../../../../../config/ess/config.base.basic')
   );
 
-  return {
+  const testConfig = {
     ...functionalConfig.getAll(),
     testFiles: [require.resolve('..')],
     junit: {
       reportName:
-        'Rules Management - Rule Import/Export Integration Tests - ESS Env - Basic License',
+        'Rules Management - Rule Import/Export Integration Tests - Customization disabled - ESS Env',
     },
   };
+
+  return testConfig;
 }
