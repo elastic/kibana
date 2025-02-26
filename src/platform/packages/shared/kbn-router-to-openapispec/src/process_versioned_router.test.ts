@@ -121,8 +121,8 @@ describe('extractVersionedResponses', () => {
 });
 
 describe('processVersionedRouter', () => {
-  it('correctly extracts the version based on the version filter', () => {
-    const baseCase = processVersionedRouter(
+  it('correctly extracts the version based on the version filter', async () => {
+    const baseCase = await processVersionedRouter(
       { getRoutes: () => [createTestRoute()] } as unknown as CoreVersionedRouter,
       new OasConverter(),
       createOpIdGenerator(),
@@ -133,7 +133,7 @@ describe('processVersionedRouter', () => {
       'application/test+json',
     ]);
 
-    const filteredCase = processVersionedRouter(
+    const filteredCase = await processVersionedRouter(
       { getRoutes: () => [createTestRoute()] } as unknown as CoreVersionedRouter,
       new OasConverter(),
       createOpIdGenerator(),
@@ -144,8 +144,8 @@ describe('processVersionedRouter', () => {
     ]);
   });
 
-  it('correctly updates the authz description for routes that require privileges', () => {
-    const results = processVersionedRouter(
+  it('correctly updates the authz description for routes that require privileges', async () => {
+    const results = await processVersionedRouter(
       { getRoutes: () => [createTestRoute()] } as unknown as CoreVersionedRouter,
       new OasConverter(),
       createOpIdGenerator(),
