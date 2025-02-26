@@ -33,7 +33,7 @@ export const AddElasticRulesButton = ({
   });
 
   const { data: preBuiltRulesStatus } = usePrebuiltRulesStatus();
-  const newRulesCount = preBuiltRulesStatus?.num_prebuilt_rules_to_install ?? 0;
+  const newRulesCount = preBuiltRulesStatus?.stats.num_prebuilt_rules_to_install ?? 0;
 
   const ButtonComponent = fill ? EuiButton : EuiButtonEmpty;
 

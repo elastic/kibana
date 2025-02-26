@@ -10,8 +10,11 @@ import type { Dispatch, SetStateAction } from 'react';
 import React, { createContext, useCallback, useContext, useMemo, useState } from 'react';
 import { PrebuiltRulesCustomizationDisabledReason } from '../../../../../../common/detection_engine/prebuilt_rules/prebuilt_rule_customization_status';
 import type {
+  FindRulesSortField,
+  PrebuiltRulesFilter,
   RuleFieldsToUpgrade,
   RuleUpgradeSpecifier,
+  SortOrder,
 } from '../../../../../../common/api/detection_engine';
 import { usePrebuiltRulesCustomizationStatus } from '../../../../rule_management/logic/prebuilt_rules/use_prebuilt_rules_customization_status';
 import type { RuleUpgradeState } from '../../../../rule_management/model/prebuilt_rule_upgrade';
@@ -24,13 +27,11 @@ import type {
 } from '../../../../../../common/api/detection_engine/model/rule_schema';
 import { invariant } from '../../../../../../common/utils/invariant';
 import { TabContentPadding } from '../../../../rule_management/components/rule_details/rule_details_flyout';
-import { usePerformUpgradeSpecificRules } from '../../../../rule_management/logic/prebuilt_rules/use_perform_rule_upgrade';
+import { usePerformUpgradeRules } from '../../../../rule_management/logic/prebuilt_rules/use_perform_rule_upgrade';
 import { usePrebuiltRulesUpgradeReview } from '../../../../rule_management/logic/prebuilt_rules/use_prebuilt_rules_upgrade_review';
 import { RuleDiffTab } from '../../../../rule_management/components/rule_details/rule_diff_tab';
 import { FieldUpgradeStateEnum } from '../../../../rule_management/model/prebuilt_rule_upgrade/field_upgrade_state_enum';
 import { useRulePreviewFlyout } from '../use_rule_preview_flyout';
-import type { UpgradePrebuiltRulesTableFilterOptions } from './use_filter_prebuilt_rules_to_upgrade';
-import { useFilterPrebuiltRulesToUpgrade } from './use_filter_prebuilt_rules_to_upgrade';
 import { usePrebuiltRulesUpgradeState } from './use_prebuilt_rules_upgrade_state';
 import { useOutdatedMlJobsUpgradeModal } from './use_ml_jobs_upgrade_modal';
 import { useUpgradeWithConflictsModal } from './use_upgrade_with_conflicts_modal';
@@ -39,8 +40,20 @@ import { UpgradeFlyoutSubHeader } from './upgrade_flyout_subheader';
 import * as ruleDetailsI18n from '../../../../rule_management/components/rule_details/translations';
 import * as i18n from './translations';
 import { CustomizationDisabledCallout } from './customization_disabled_callout';
+import { RULES_TABLE_INITIAL_PAGE_SIZE } from '../constants';
+import type { PaginationOptions } from '../../../../rule_management/logic';
+import { usePrebuiltRulesStatus } from '../../../../rule_management/logic/prebuilt_rules/use_prebuilt_rules_status';
 
 const REVIEW_PREBUILT_RULES_UPGRADE_REFRESH_INTERVAL = 5 * 60 * 1000;
+
+export interface UpgradePrebuiltRulesSortingOptions {
+  field:
+    | 'current_rule.name'
+    | 'current_rule.risk_score'
+    | 'current_rule.severity'
+    | 'current_rule.last_updated';
+  order: SortOrder;
+}
 
 export interface UpgradePrebuiltRulesTableState {
   /**
@@ -50,7 +63,7 @@ export interface UpgradePrebuiltRulesTableState {
   /**
    * Currently selected table filter
    */
-  filterOptions: UpgradePrebuiltRulesTableFilterOptions;
+  filterOptions: PrebuiltRulesFilter;
   /**
    * All unique tags for all rules
    */
@@ -63,6 +76,10 @@ export interface UpgradePrebuiltRulesTableState {
    * Is true then there is no cached data and the query is currently fetching.
    */
   isLoading: boolean;
+  /**
+   * Is true whenever a request is in-flight, which includes initial loading as well as background refetches.
+   */
+  isFetching: boolean;
   /**
    * Will be true if the query has been fetched.
    */
@@ -84,6 +101,14 @@ export interface UpgradePrebuiltRulesTableState {
    * The timestamp for when the rules were successfully fetched
    */
   lastUpdated: number;
+  /**
+   * Current pagination state
+   */
+  pagination: PaginationOptions;
+  /**
+   * Currently selected table sorting
+   */
+  sortingOptions: UpgradePrebuiltRulesSortingOptions;
 }
 
 export const PREBUILT_RULE_UPDATE_FLYOUT_ANCHOR = 'updatePrebuiltRulePreview';
@@ -92,7 +117,9 @@ export interface UpgradePrebuiltRulesTableActions {
   reFetchRules: () => void;
   upgradeRules: (ruleIds: RuleSignatureId[]) => void;
   upgradeAllRules: () => void;
-  setFilterOptions: Dispatch<SetStateAction<UpgradePrebuiltRulesTableFilterOptions>>;
+  setFilterOptions: Dispatch<SetStateAction<PrebuiltRulesFilter>>;
+  setPagination: Dispatch<SetStateAction<{ page: number; perPage: number }>>;
+  setSortingOptions: Dispatch<SetStateAction<UpgradePrebuiltRulesSortingOptions>>;
   openRulePreview: (ruleId: string) => void;
 }
 
@@ -121,35 +148,71 @@ export const UpgradePrebuiltRulesTableContextProvider = ({
 }: UpgradePrebuiltRulesTableContextProviderProps) => {
   const { isRulesCustomizationEnabled, customizationDisabledReason } =
     usePrebuiltRulesCustomizationStatus();
+
+  // Use the data from the prebuilt rules status API to determine if there are
+  // rules to upgrade because it returns information about all rules without filters
+  const { data: prebuiltRulesStatusResponse } = usePrebuiltRulesStatus();
+  const hasRulesToUpgrade =
+    (prebuiltRulesStatusResponse?.stats.num_prebuilt_rules_to_upgrade ?? 0) > 0;
+  const tags = prebuiltRulesStatusResponse?.aggregated_fields?.upgradeable_rules.tags;
+
   const [loadingRules, setLoadingRules] = useState<RuleSignatureId[]>([]);
-  const [filterOptions, setFilterOptions] = useState<UpgradePrebuiltRulesTableFilterOptions>({
-    filter: '',
-    tags: [],
-    ruleSource: [],
-  });
+  const [filterOptions, setFilterOptions] = useState<PrebuiltRulesFilter>({});
   const isUpgradingSecurityPackages = useIsUpgradingSecurityPackages();
+  const [pagination, setPagination] = useState({
+    page: 1,
+    perPage: RULES_TABLE_INITIAL_PAGE_SIZE,
+  });
+  const [sortingOptions, setSortingOptions] = useState<UpgradePrebuiltRulesSortingOptions>({
+    field: 'current_rule.last_updated',
+    order: 'asc',
+  });
+
+  const findRulesSortField = useMemo<FindRulesSortField>(
+    () =>
+      ((
+        {
+          'current_rule.name': 'name',
+          'current_rule.risk_score': 'risk_score',
+          'current_rule.severity': 'severity',
+          'current_rule.last_updated': 'updated_at',
+        } as const
+      )[sortingOptions.field]),
+    [sortingOptions.field]
+  );
 
   const {
-    data: { rules: ruleUpgradeInfos, stats: { tags } } = {
-      rules: [],
-      stats: { tags: [] },
-    },
+    data: upgradeReviewResponse,
     refetch,
     dataUpdatedAt,
     isFetched,
     isLoading,
+    isFetching,
     isRefetching,
-  } = usePrebuiltRulesUpgradeReview({
-    refetchInterval: REVIEW_PREBUILT_RULES_UPGRADE_REFRESH_INTERVAL,
-    keepPreviousData: true, // Use this option so that the state doesn't jump between "success" and "loading" on page change
-  });
+  } = usePrebuiltRulesUpgradeReview(
+    {
+      page: pagination.page,
+      per_page: pagination.perPage,
+      sort: {
+        field: findRulesSortField,
+        order: sortingOptions.order,
+      },
+      filter: filterOptions,
+    },
+    {
+      refetchInterval: REVIEW_PREBUILT_RULES_UPGRADE_REFRESH_INTERVAL,
+      keepPreviousData: true, // Use this option so that the state doesn't jump between "success" and "loading" on page change
+    }
+  );
+
+  const upgradeableRules = useMemo(
+    () => upgradeReviewResponse?.rules ?? [],
+    [upgradeReviewResponse]
+  );
+
   const { rulesUpgradeState, setRuleFieldResolvedValue } =
-    usePrebuiltRulesUpgradeState(ruleUpgradeInfos);
+    usePrebuiltRulesUpgradeState(upgradeableRules);
   const ruleUpgradeStates = useMemo(() => Object.values(rulesUpgradeState), [rulesUpgradeState]);
-  const filteredRuleUpgradeStates = useFilterPrebuiltRulesToUpgrade({
-    filterOptions,
-    data: ruleUpgradeStates,
-  });
 
   const {
     modal: confirmLegacyMlJobsUpgradeModal,
@@ -158,7 +221,7 @@ export const UpgradePrebuiltRulesTableContextProvider = ({
   } = useOutdatedMlJobsUpgradeModal();
   const { modal: upgradeConflictsModal, confirmConflictsUpgrade } = useUpgradeWithConflictsModal();
 
-  const { mutateAsync: upgradeSpecificRulesRequest } = usePerformUpgradeSpecificRules();
+  const { mutateAsync: upgradeRulesRequest } = usePerformUpgradeRules();
 
   const upgradeRulesToResolved = useCallback(
     async (ruleIds: RuleSignatureId[]) => {
@@ -189,8 +252,9 @@ export const UpgradePrebuiltRulesTableContextProvider = ({
           return;
         }
 
-        await upgradeSpecificRulesRequest({
-          pickVersion: 'MERGED',
+        await upgradeRulesRequest({
+          mode: 'SPECIFIC_RULES',
+          pick_version: 'MERGED',
           rules: ruleUpgradeSpecifiers,
         });
       } catch {
@@ -201,7 +265,7 @@ export const UpgradePrebuiltRulesTableContextProvider = ({
         setLoadingRules((prev) => prev.filter((id) => !upgradedRuleIdsSet.has(id)));
       }
     },
-    [confirmLegacyMLJobs, confirmConflictsUpgrade, rulesUpgradeState, upgradeSpecificRulesRequest]
+    [confirmLegacyMLJobs, confirmConflictsUpgrade, rulesUpgradeState, upgradeRulesRequest]
   );
 
   const upgradeRulesToTarget = useCallback(
@@ -220,8 +284,9 @@ export const UpgradePrebuiltRulesTableContextProvider = ({
           return;
         }
 
-        await upgradeSpecificRulesRequest({
-          pickVersion: 'TARGET',
+        await upgradeRulesRequest({
+          mode: 'SPECIFIC_RULES',
+          pick_version: 'TARGET',
           rules: ruleUpgradeSpecifiers,
         });
       } catch {
@@ -232,7 +297,7 @@ export const UpgradePrebuiltRulesTableContextProvider = ({
         setLoadingRules((prev) => prev.filter((id) => !upgradedRuleIdsSet.has(id)));
       }
     },
-    [confirmLegacyMLJobs, rulesUpgradeState, upgradeSpecificRulesRequest]
+    [confirmLegacyMLJobs, rulesUpgradeState, upgradeRulesRequest]
   );
 
   const upgradeRules = useCallback(
@@ -246,11 +311,50 @@ export const UpgradePrebuiltRulesTableContextProvider = ({
     [isRulesCustomizationEnabled, upgradeRulesToResolved, upgradeRulesToTarget]
   );
 
-  const upgradeAllRules = useCallback(
-    // Upgrade all rules, ignoring filter and selection
-    () => upgradeRules(ruleUpgradeInfos.map((rule) => rule.rule_id)),
-    [ruleUpgradeInfos, upgradeRules]
-  );
+  const upgradeAllRules = useCallback(async () => {
+    setLoadingRules((prev) => [...prev, ...upgradeableRules.map((rule) => rule.rule_id)]);
+
+    try {
+      // Handle MLJobs modal
+      if (!(await confirmLegacyMLJobs())) {
+        return;
+      }
+
+      const dryRunResults = await upgradeRulesRequest({
+        mode: 'ALL_RULES',
+        pick_version: isRulesCustomizationEnabled ? 'MERGED' : 'TARGET',
+        filter: filterOptions,
+        dry_run: true,
+        on_conflict: 'SKIP',
+      });
+
+      const hasConflicts = dryRunResults.results.skipped.some(
+        (skippedRule) => skippedRule.reason === 'CONFLICT'
+      );
+
+      if (hasConflicts && !(await confirmConflictsUpgrade())) {
+        return;
+      }
+
+      await upgradeRulesRequest({
+        mode: 'ALL_RULES',
+        pick_version: isRulesCustomizationEnabled ? 'MERGED' : 'TARGET',
+        filter: filterOptions,
+        on_conflict: 'SKIP',
+      });
+    } catch {
+      // Error is handled by the mutation's onError callback, so no need to do anything here
+    } finally {
+      setLoadingRules([]);
+    }
+  }, [
+    upgradeableRules,
+    confirmLegacyMLJobs,
+    upgradeRulesRequest,
+    isRulesCustomizationEnabled,
+    filterOptions,
+    confirmConflictsUpgrade,
+  ]);
 
   const subHeaderFactory = useCallback(
     (rule: RuleResponse) =>
@@ -377,12 +481,8 @@ export const UpgradePrebuiltRulesTableContextProvider = ({
       setRuleFieldResolvedValue,
     ]
   );
-  const filteredRules = useMemo(
-    () => filteredRuleUpgradeStates.map(({ target_rule: targetRule }) => targetRule),
-    [filteredRuleUpgradeStates]
-  );
   const { rulePreviewFlyout, openRulePreview } = useRulePreviewFlyout({
-    rules: filteredRules,
+    rules: ruleUpgradeStates.map(({ target_rule: targetRule }) => targetRule),
     subHeaderFactory,
     ruleActionsFactory,
     extraTabsFactory,
@@ -399,6 +499,8 @@ export const UpgradePrebuiltRulesTableContextProvider = ({
       upgradeAllRules,
       setFilterOptions,
       openRulePreview,
+      setPagination,
+      setSortingOptions,
     }),
     [refetch, upgradeRules, upgradeAllRules, openRulePreview]
   );
@@ -406,31 +508,41 @@ export const UpgradePrebuiltRulesTableContextProvider = ({
   const providerValue = useMemo<UpgradePrebuiltRulesContextType>(
     () => ({
       state: {
-        ruleUpgradeStates: filteredRuleUpgradeStates,
-        hasRulesToUpgrade: isFetched && ruleUpgradeInfos.length > 0,
+        ruleUpgradeStates,
+        hasRulesToUpgrade,
         filterOptions,
-        tags,
+        tags: tags ?? [],
         isFetched,
         isLoading: isLoading || areMlJobsLoading,
+        isFetching,
         isRefetching,
         isUpgradingSecurityPackages,
         loadingRules,
         lastUpdated: dataUpdatedAt,
+        pagination: {
+          ...pagination,
+          total: upgradeReviewResponse?.total ?? 0,
+        },
+        sortingOptions,
       },
       actions,
     }),
     [
-      ruleUpgradeInfos.length,
-      filteredRuleUpgradeStates,
+      ruleUpgradeStates,
+      hasRulesToUpgrade,
       filterOptions,
       tags,
       isFetched,
       isLoading,
       areMlJobsLoading,
+      isFetching,
       isRefetching,
       isUpgradingSecurityPackages,
       loadingRules,
       dataUpdatedAt,
+      pagination,
+      upgradeReviewResponse?.total,
+      sortingOptions,
       actions,
     ]
   );

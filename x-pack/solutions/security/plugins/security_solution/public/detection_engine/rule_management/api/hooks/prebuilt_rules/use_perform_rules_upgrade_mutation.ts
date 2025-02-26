@@ -6,10 +6,12 @@
  */
 import type { UseMutationOptions } from '@tanstack/react-query';
 import { useMutation } from '@tanstack/react-query';
-import type { PerformRuleUpgradeResponseBody } from '../../../../../../common/api/detection_engine/prebuilt_rules';
+import type {
+  PerformRuleUpgradeRequestBody,
+  PerformRuleUpgradeResponseBody,
+} from '../../../../../../common/api/detection_engine/prebuilt_rules';
 import { PERFORM_RULE_UPGRADE_URL } from '../../../../../../common/api/detection_engine/prebuilt_rules/urls';
-import type { PerformUpgradeRequest } from '../../api';
-import { performUpgradeSpecificRules } from '../../api';
+import { performUpgradeRules } from '../../api';
 import { useInvalidateFetchCoverageOverviewQuery } from '../use_fetch_coverage_overview_query';
 import { useInvalidateFetchRuleManagementFiltersQuery } from '../use_fetch_rule_management_filters_query';
 import { useInvalidateFetchRulesSnoozeSettingsQuery } from '../use_fetch_rules_snooze_settings_query';
@@ -19,14 +21,14 @@ import { useInvalidateFetchPrebuiltRulesUpgradeReviewQuery } from './use_fetch_p
 import { retryOnRateLimitedError } from './retry_on_rate_limited_error';
 import { cappedExponentialBackoff } from './capped_exponential_backoff';
 
-export const PERFORM_SPECIFIC_RULES_UPGRADE_KEY = [
-  'POST',
-  'SPECIFIC_RULES',
-  PERFORM_RULE_UPGRADE_URL,
-];
+export const PERFORM_RULES_UPGRADE_KEY = ['POST', PERFORM_RULE_UPGRADE_URL];
 
-export const usePerformSpecificRulesUpgradeMutation = (
-  options?: UseMutationOptions<PerformRuleUpgradeResponseBody, unknown, PerformUpgradeRequest>
+export const usePerformRulesUpgradeMutation = (
+  options?: UseMutationOptions<
+    PerformRuleUpgradeResponseBody,
+    unknown,
+    PerformRuleUpgradeRequestBody
+  >
 ) => {
   const invalidateFindRulesQuery = useInvalidateFindRulesQuery();
   const invalidateFetchRulesSnoozeSettings = useInvalidateFetchRulesSnoozeSettingsQuery();
@@ -37,13 +39,13 @@ export const usePerformSpecificRulesUpgradeMutation = (
   const invalidateRuleStatus = useInvalidateFetchPrebuiltRulesStatusQuery();
   const invalidateFetchCoverageOverviewQuery = useInvalidateFetchCoverageOverviewQuery();
 
-  return useMutation<PerformRuleUpgradeResponseBody, unknown, PerformUpgradeRequest>(
-    (args: PerformUpgradeRequest) => {
-      return performUpgradeSpecificRules(args);
+  return useMutation<PerformRuleUpgradeResponseBody, unknown, PerformRuleUpgradeRequestBody>(
+    (args: PerformRuleUpgradeRequestBody) => {
+      return performUpgradeRules(args);
     },
     {
       ...options,
-      mutationKey: PERFORM_SPECIFIC_RULES_UPGRADE_KEY,
+      mutationKey: PERFORM_RULES_UPGRADE_KEY,
       onSettled: (...args) => {
         invalidatePrePackagedRulesStatus();
         invalidateFindRulesQuery();
