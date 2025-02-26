@@ -8,10 +8,14 @@
 import { Journey } from '@kbn/journeys';
 
 export const journey = new Journey({
-  kbnArchives: ['test/functional/fixtures/kbn_archiver/stress_test'],
+  kbnArchives: ['test/functional/fixtures/kbn_archiver/stress_test_4'],
   esArchives: ['test/functional/fixtures/es_archiver/stress_test'],
 }).step('Go to dashboard', async ({ page, kbnUrl, kibanaServer, kibanaPage }) => {
   await kibanaServer.uiSettings.update({ 'histogram:maxBars': 100 });
   await page.goto(kbnUrl.get(`/app/dashboards#/view/92b143a0-2e9c-11ed-b1b6-a504560b392c`));
-  await kibanaPage.waitForVisualizations({ count: 1 });
+  await kibanaPage.waitForVisualizations({ count: 4 });
+  const antonDashboardLoad = await page.evaluate(() => {
+    return window.performance.getEntriesByName('anton:dashboard-load')[0];
+  });
+  console.log('anton:dashboard-load', JSON.stringify(antonDashboardLoad));
 });
