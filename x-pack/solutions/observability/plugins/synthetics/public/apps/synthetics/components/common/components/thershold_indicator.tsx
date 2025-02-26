@@ -32,6 +32,7 @@ export const ThresholdIndicator = ({
   previousFormatted,
   currentFormatted,
   asStat = false,
+  hidePrevious = false,
 }: {
   description?: string;
   helpText?: string;
@@ -42,6 +43,7 @@ export const ThresholdIndicator = ({
   currentFormatted: string | number;
   setHasAnyDelta?: (hasDelta: boolean) => void;
   asStat?: boolean;
+  hidePrevious?: boolean;
 }) => {
   if (loading) {
     return <EuiSkeletonText lines={1} />;
@@ -79,28 +81,27 @@ export const ThresholdIndicator = ({
 
   const hasDelta = Math.abs(delta) > 0;
 
-  const content =
-    previous === null ? (
-      <EuiIcon type="minus" size={asStat ? 'l' : 'm'} color="subdued" />
-    ) : (
-      <EuiToolTip
-        content={getToolTipContent()}
-        title={i18n.translate('xpack.synthetics.stepDetails.palette.previous', {
-          defaultMessage: 'Median(24h): {previous}',
-          values: { previous: previousFormatted },
-        })}
-      >
-        {hasDelta ? (
-          <EuiIcon
-            type={delta > 0 ? 'sortUp' : 'sortDown'}
-            size={asStat ? 'l' : 'm'}
-            color={getColor()}
-          />
-        ) : (
-          <EuiIcon type="minus" size={asStat ? 'l' : 'm'} color="subdued" />
-        )}
-      </EuiToolTip>
-    );
+  const content = hidePrevious ? null : previous === null ? (
+    <EuiIcon type="minus" size={asStat ? 'l' : 'm'} color="subdued" />
+  ) : (
+    <EuiToolTip
+      content={getToolTipContent()}
+      title={i18n.translate('xpack.synthetics.stepDetails.palette.previous', {
+        defaultMessage: 'Median(24h): {previous}',
+        values: { previous: previousFormatted },
+      })}
+    >
+      {hasDelta ? (
+        <EuiIcon
+          type={delta > 0 ? 'sortUp' : 'sortDown'}
+          size={asStat ? 'l' : 'm'}
+          color={getColor()}
+        />
+      ) : (
+        <EuiIcon type="minus" size={asStat ? 'l' : 'm'} color="subdued" />
+      )}
+    </EuiToolTip>
+  );
 
   if (asStat) {
     return (
