@@ -38,6 +38,7 @@ import { handleEsError } from './shared_imports';
 import { RouteDependencies } from './types';
 import type { UpgradeAssistantConfig } from './config';
 import type { FeatureSet } from '../common/types';
+import { getEntepriseSearchRegisteredDeprecations } from './lib/enterprise_search/enterprise_search_deprecations';
 
 interface PluginsSetup {
   usageCollection: UsageCollectionSetup;
@@ -82,7 +83,7 @@ export class UpgradeAssistantServerPlugin implements Plugin {
   }
 
   setup(
-    { http, getStartServices, savedObjects }: CoreSetup,
+    { http, deprecations, getStartServices, savedObjects, docLinks }: CoreSetup,
     { usageCollection, features, licensing, logsShared, security }: PluginsSetup
   ) {
     this.licensing = licensing;
@@ -146,6 +147,11 @@ export class UpgradeAssistantServerPlugin implements Plugin {
     };
 
     registerRoutes(dependencies, this.getWorker.bind(this));
+
+    // Register deprecations for Enterprise Search pre-8 indices
+    deprecations.registerDeprecations({
+      ...getEntepriseSearchRegisteredDeprecations(docLinks.links.enterpriseSearch.upgrade9x),
+    });
 
     if (usageCollection) {
       void getStartServices().then(([{ elasticsearch }]) => {

@@ -9,7 +9,6 @@ import { schema } from '@kbn/config-schema';
 
 import { deleteConnectorById, putUpdateNative } from '@kbn/search-connectors';
 
-import { setPreEightEnterpriseSearchIndicesReadOnly } from '../../deprecations/pre_eight_index_deprecator';
 import { RouteDependencies } from '../../plugin';
 
 import { elasticsearchErrorHandler } from '../../utils/elasticsearch_error_handler';
@@ -58,31 +57,6 @@ export function registerDeprecationRoutes({ router, log }: RouteDependencies) {
       );
       return response.ok({
         body: { converted_to_client: request.body.ids },
-        headers: { 'content-type': 'application/json' },
-      });
-    })
-  );
-
-  router.post(
-    {
-      path: '/internal/enterprise_search/deprecations/set_enterprise_search_indices_read_only',
-      validate: {
-        body: schema.object({
-          deprecationDetails: schema.object({ domainId: schema.literal('enterpriseSearch') }),
-        }),
-      },
-    },
-    elasticsearchErrorHandler(log, async (context, request, response) => {
-      const { client } = (await context.core).elasticsearch;
-      const setResponse = await setPreEightEnterpriseSearchIndicesReadOnly(client.asCurrentUser);
-      if (setResponse.length > 0) {
-        return response.badRequest({
-          body: { message: setResponse },
-          headers: { 'content-type': 'application/json' },
-        });
-      }
-      return response.ok({
-        body: { acknowedged: true },
         headers: { 'content-type': 'application/json' },
       });
     })
