@@ -17,10 +17,11 @@ import type { Logger } from '@kbn/logging';
 
 import { CreateResult, DeleteResult, SearchQuery } from '@kbn/content-management-plugin/common';
 import { StorageContext } from '@kbn/content-management-plugin/server';
+import { EmbeddableStart } from '@kbn/embeddable-plugin/server';
 import { DASHBOARD_SAVED_OBJECT_TYPE } from '../dashboard_saved_object';
 import { cmServicesDefinition } from './cm_services';
 import { DashboardSavedObjectAttributes } from '../dashboard_saved_object';
-import { itemAttrsToSavedObjectAttrs, savedObjectToItem } from './latest';
+import { itemAttrsToSavedObject, savedObjectToItem } from './latest';
 import type {
   DashboardAttributes,
   DashboardItem,
@@ -62,10 +63,13 @@ export class DashboardStorage {
   constructor({
     logger,
     throwOnResultValidationError,
+    embeddable,
   }: {
     logger: Logger;
     throwOnResultValidationError: boolean;
+    embeddable: EmbeddableStart;
   }) {
+    this.embeddable = embeddable;
     this.logger = logger;
     this.throwOnResultValidationError = throwOnResultValidationError ?? false;
     this.mSearch = {
@@ -76,6 +80,7 @@ export class DashboardStorage {
 
         const { item, error: itemError } = savedObjectToItem(
           savedObject as SavedObjectsFindResult<DashboardSavedObjectAttributes>,
+          this.embeddable,
           false
         );
         if (itemError) {
@@ -110,6 +115,7 @@ export class DashboardStorage {
     };
   }
 
+  private embeddable: EmbeddableStart;
   private logger: Logger;
   private throwOnResultValidationError: boolean;
 
@@ -131,7 +137,7 @@ export class DashboardStorage {
       outcome,
     } = await soClient.resolve<DashboardSavedObjectAttributes>(DASHBOARD_SAVED_OBJECT_TYPE, id);
 
-    const { item, error: itemError } = savedObjectToItem(savedObject, false);
+    const { item, error: itemError } = savedObjectToItem(savedObject, this.embeddable, false);
     if (itemError) {
       throw Boom.badRequest(`Invalid response. ${itemError.message}`);
     }
@@ -194,8 +200,11 @@ export class DashboardStorage {
       throw Boom.badRequest(`Invalid options. ${optionsError.message}`);
     }
 
-    const { attributes: soAttributes, error: attributesError } =
-      itemAttrsToSavedObjectAttrs(dataToLatest);
+    const {
+      attributes: soAttributes,
+      references: soReferences,
+      error: attributesError,
+    } = itemAttrsToSavedObject(dataToLatest, this.embeddable, options.references);
     if (attributesError) {
       throw Boom.badRequest(`Invalid data. ${attributesError.message}`);
     }
@@ -204,10 +213,10 @@ export class DashboardStorage {
     const savedObject = await soClient.create<DashboardSavedObjectAttributes>(
       DASHBOARD_SAVED_OBJECT_TYPE,
       soAttributes,
-      optionsToLatest
+      { ...optionsToLatest, references: soReferences }
     );
 
-    const { item, error: itemError } = savedObjectToItem(savedObject, false);
+    const { item, error: itemError } = savedObjectToItem(savedObject, this.embeddable, false);
     if (itemError) {
       throw Boom.badRequest(`Invalid response. ${itemError.message}`);
     }
@@ -263,8 +272,11 @@ export class DashboardStorage {
       throw Boom.badRequest(`Invalid options. ${optionsError.message}`);
     }
 
-    const { attributes: soAttributes, error: attributesError } =
-      itemAttrsToSavedObjectAttrs(dataToLatest);
+    const {
+      attributes: soAttributes,
+      references: soReferences,
+      error: attributesError,
+    } = itemAttrsToSavedObject(dataToLatest, this.embeddable, options.references);
     if (attributesError) {
       throw Boom.badRequest(`Invalid data. ${attributesError.message}`);
     }
@@ -274,10 +286,10 @@ export class DashboardStorage {
       DASHBOARD_SAVED_OBJECT_TYPE,
       id,
       soAttributes,
-      optionsToLatest
+      { ...optionsToLatest, references: soReferences }
     );
 
-    const { item, error: itemError } = savedObjectToItem(partialSavedObject, true);
+    const { item, error: itemError } = savedObjectToItem(partialSavedObject, this.embeddable, true);
     if (itemError) {
       throw Boom.badRequest(`Invalid response. ${itemError.message}`);
     }
@@ -341,7 +353,7 @@ export class DashboardStorage {
     const soResponse = await soClient.find<DashboardSavedObjectAttributes>(soQuery);
     const hits = soResponse.saved_objects
       .map((so) => {
-        const { item } = savedObjectToItem(so, false, {
+        const { item } = savedObjectToItem(so, this.embeddable, false, {
           allowedAttributes: soQuery.fields,
           allowedReferences: optionsToLatest?.includeReferences,
         });
