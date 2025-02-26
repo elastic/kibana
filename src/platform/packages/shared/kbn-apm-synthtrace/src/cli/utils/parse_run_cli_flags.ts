@@ -79,7 +79,7 @@ export function parseRunCliFlags(flags: RunCliFlags) {
       'assume-package-version',
       'liveBucketSize'
     ),
-    scenarioOpts: flags.scenarioOpts as unknown as Record<string, unknown>,
+    scenarioOpts: flags.scenarioOpts as unknown as Record<string, any>,
     logLevel: parsedLogLevel,
     file: parsedFile,
   };
