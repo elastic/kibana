@@ -341,7 +341,8 @@ export class BaseValidator {
       // Per-space items can only be managed from one of the `ownerSpaceId`'s
       if (!itemOwnerSpaces.includes(await this.getActiveSpaceId())) {
         throw new EndpointArtifactExceptionValidationError(
-          ITEM_CANNOT_BE_MANAGED_IN_CURRENT_SPACE_MESSAGE(itemOwnerSpaces)
+          ITEM_CANNOT_BE_MANAGED_IN_CURRENT_SPACE_MESSAGE(itemOwnerSpaces),
+          403
         );
       }
     }
@@ -369,7 +370,8 @@ export class BaseValidator {
       // Per-space items can only be deleted from one of the `ownerSpaceId`'s
       if (!itemOwnerSpaces.includes(await this.getActiveSpaceId())) {
         throw new EndpointArtifactExceptionValidationError(
-          ITEM_CANNOT_BE_MANAGED_IN_CURRENT_SPACE_MESSAGE(itemOwnerSpaces)
+          ITEM_CANNOT_BE_MANAGED_IN_CURRENT_SPACE_MESSAGE(itemOwnerSpaces),
+          403
         );
       }
     }
