@@ -19,7 +19,6 @@ import { useDashboardApi } from '../../dashboard_api/use_dashboard_api';
 import { getCreateVisualizationButtonTitle } from '../_dashboard_app_strings';
 import { ControlsToolbarButton } from './controls_toolbar_button';
 import { AddPanelButton } from './add_panel_button/components/add_panel_button';
-import { addFromLibrary } from '../../dashboard_container/embeddable/api';
 import { executeAddLensPanelAction } from '../../dashboard_actions/execute_add_lens_panel_action';
 
 export function DashboardEditingToolbar({ isDisabled }: { isDisabled?: boolean }) {
@@ -33,7 +32,7 @@ export function DashboardEditingToolbar({ isDisabled }: { isDisabled?: boolean }
   const extraButtons = [
     <AddPanelButton isDisabled={isDisabled} />,
     <AddFromLibraryButton
-      onClick={() => addFromLibrary(dashboardApi)}
+      onClick={() => dashboardApi.addFromLibrary()}
       size="s"
       data-test-subj="dashboardAddFromLibraryButton"
       isDisabled={isDisabled}

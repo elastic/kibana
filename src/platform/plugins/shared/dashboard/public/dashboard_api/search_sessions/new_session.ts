@@ -11,7 +11,7 @@ import { COMPARE_ALL_OPTIONS, Filter, TimeRange, onlyDisabledFiltersChanged } fr
 import { combineLatest, distinctUntilChanged, Observable, skip } from 'rxjs';
 import { apiPublishesSettings } from '@kbn/presentation-containers/interfaces/publishes_settings';
 import { apiPublishesReload, apiPublishesUnifiedSearch } from '@kbn/presentation-publishing';
-import { areTimesEqual } from '../../../../dashboard_api/unified_search_manager';
+import { areTimesEqual } from '../unified_search_manager';
 
 const shouldRefreshFilterCompareOptions = {
   ...COMPARE_ALL_OPTIONS,

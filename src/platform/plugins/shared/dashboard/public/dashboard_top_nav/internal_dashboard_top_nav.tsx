@@ -42,7 +42,7 @@ import { DashboardEditingToolbar } from '../dashboard_app/top_nav/dashboard_edit
 import { useDashboardMenuItems } from '../dashboard_app/top_nav/use_dashboard_menu_items';
 import { DashboardEmbedSettings } from '../dashboard_app/types';
 import { LEGACY_DASHBOARD_APP_ID } from '../plugin_constants';
-import { openSettingsFlyout } from '../dashboard_container/embeddable/api';
+import { openSettingsFlyout } from '../dashboard_renderer/components/settings/open_settings_flyout';
 import { DashboardRedirect } from '../dashboard_container/types';
 import { SaveDashboardReturn } from '../services/dashboard_content_management_service/types';
 import { getDashboardRecentlyAccessedService } from '../services/dashboard_recently_accessed_service';

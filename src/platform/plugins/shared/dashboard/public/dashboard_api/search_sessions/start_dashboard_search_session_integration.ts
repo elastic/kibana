@@ -11,10 +11,10 @@ import { skip } from 'rxjs';
 
 import { noSearchSessionStorageCapabilityMessage } from '@kbn/data-plugin/public';
 
-import { dataService } from '../../../../services/kibana_services';
-import type { DashboardApi, DashboardCreationOptions } from '../../../..';
+import { dataService } from '../../services/kibana_services';
+import type { DashboardApi, DashboardCreationOptions } from '../..';
 import { newSession$ } from './new_session';
-import { getDashboardCapabilities } from '../../../../utils/get_dashboard_capabilities';
+import { getDashboardCapabilities } from '../../utils/get_dashboard_capabilities';
 
 /**
  * Enables dashboard search sessions.

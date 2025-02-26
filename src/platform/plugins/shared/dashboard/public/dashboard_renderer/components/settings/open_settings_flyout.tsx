@@ -14,7 +14,7 @@ import { toMountPoint } from '@kbn/react-kibana-mount';
 import { DashboardApi } from '../../../dashboard_api/types';
 import { DashboardContext } from '../../../dashboard_api/use_dashboard_api';
 import { coreServices } from '../../../services/kibana_services';
-import { DashboardSettingsFlyout } from '../../component/settings/settings_flyout';
+import { DashboardSettingsFlyout } from '../../../dashboard_renderer/components/settings/settings_flyout';
 
 export function openSettingsFlyout(dashboardApi: DashboardApi) {
   dashboardApi.openOverlay(

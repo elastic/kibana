@@ -14,13 +14,8 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { SavedObjectSaveModal } from '@kbn/saved-objects-plugin/public';
 
-import { savedObjectsTaggingService } from '../../../../services/kibana_services';
-import type { DashboardSaveOptions } from '../../../types';
-
-/**
- * TODO: Portable Dashboard followup, use redux for the state.
- * https://github.com/elastic/kibana/issues/147490
- */
+import { savedObjectsTaggingService } from '../../services/kibana_services';
+import type { DashboardSaveOptions } from '../../dashboard_container/types';
 
 interface DashboardSaveModalProps {
   onSave: ({

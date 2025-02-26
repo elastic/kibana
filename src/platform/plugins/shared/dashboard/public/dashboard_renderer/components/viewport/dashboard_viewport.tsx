@@ -24,7 +24,7 @@ import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 import { DashboardGrid } from '../grid';
 import { useDashboardApi } from '../../../dashboard_api/use_dashboard_api';
 import { useDashboardInternalApi } from '../../../dashboard_api/use_dashboard_internal_api';
-import { DashboardEmptyScreen } from '../empty_screen/dashboard_empty_screen';
+import { DashboardEmptyScreen } from './empty_screen/dashboard_empty_screen';
 
 export const DashboardViewport = ({
   dashboardContainerRef,

@@ -12,7 +12,7 @@ import { DashboardPanelMap } from '../../common';
 import { getDashboardContentManagementService } from '../services/dashboard_content_management_service';
 import { DashboardCreationOptions, DashboardState } from './types';
 import { getDashboardApi } from './get_dashboard_api';
-import { startQueryPerformanceTracking } from '../dashboard_container/embeddable/create/performance/query_performance_tracking';
+import { startQueryPerformanceTracking } from './performance/query_performance_tracking';
 import { coreServices } from '../services/kibana_services';
 import { logger } from '../services/logger';
 import {

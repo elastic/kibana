@@ -11,9 +11,9 @@ import { findTestSubject } from '@elastic/eui/lib/test';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import React from 'react';
 
-import { DashboardContext } from '../../../dashboard_api/use_dashboard_api';
-import { DashboardApi } from '../../../dashboard_api/types';
-import { coreServices } from '../../../services/kibana_services';
+import { DashboardContext } from '../../../../dashboard_api/use_dashboard_api';
+import { DashboardApi } from '../../../../dashboard_api/types';
+import { coreServices } from '../../../../services/kibana_services';
 import { DashboardEmptyScreen } from './dashboard_empty_screen';
 import { ViewMode } from '@kbn/presentation-publishing';
 import { BehaviorSubject } from 'rxjs';
