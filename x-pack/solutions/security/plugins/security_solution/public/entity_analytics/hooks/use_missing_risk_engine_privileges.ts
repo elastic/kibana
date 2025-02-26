@@ -48,7 +48,10 @@ export const useMissingRiskEnginePrivileges = (
 
     // privilegesResponse.has_all_required` is slightly misleading, it checks if it has *all* default required privileges.
     // Here we check if there are no missing privileges of the provided set of required privileges
-    if (indexPrivileges.every(([_, missingPrivileges]) => missingPrivileges.length === 0)) {
+    if (
+      indexPrivileges.every(([_, missingPrivileges]) => missingPrivileges.length === 0) &&
+      clusterPrivileges.length === 0
+    ) {
       return {
         isLoading: false,
         hasAllRequiredPrivileges: true,
