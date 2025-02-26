@@ -103,7 +103,11 @@ function buildTemplateVariables(logger: Logger, variables: PackagePolicyConfigRe
     if (recordEntry.type && recordEntry.type === 'yaml') {
       const yamlKeyPlaceholder = `##${key}##`;
       varPart[lastKeyPart] = recordEntry.value ? `"${yamlKeyPlaceholder}"` : null;
-      yamlValues[yamlKeyPlaceholder] = recordEntry.value ? load(recordEntry.value) : null;
+
+      // HACK! Give templates access to the value via a key that has a '_data' suffix.
+      const v = recordEntry.value ? load(recordEntry.value) : null;
+      varPart[lastKeyPart+"_data"] = v;
+      yamlValues[yamlKeyPlaceholder] = v;
     } else if (recordEntry.value && recordEntry.value.isSecretRef) {
       varPart[lastKeyPart] = toCompiledSecretRef(recordEntry.value.id);
     } else {

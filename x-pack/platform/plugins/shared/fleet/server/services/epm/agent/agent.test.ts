@@ -338,12 +338,12 @@ with new lines`,
   describe('to_json helper', () => {
     const streamTemplate = `
 input: log
-json_var: {{to_json json_var}}
+json_var: {{json_var}}
       `;
 
     const streamTemplateWithNewYaml = `
 input: log
-yaml_var: {{to_json yaml_var}}
+yaml_var: {{to_json yaml_var_data}}
       `;
 
     it('should parse a json string into a json object', () => {
@@ -384,7 +384,7 @@ yaml_var: {{to_json yaml_var}}
 
     it('should encoding strings to JSON', () => {
       const vars = {
-        user_input: `foo: "bar 'baz'"`,
+        user_input: {type: 'text', value: `foo: "bar 'baz'"}`},
       };
 
       const template = `
@@ -393,7 +393,7 @@ rendered_value: {{ to_json user_input }}
 
       const output = compileTemplate(vars, template);
       expect(output).toEqual({
-        rendered_value: `foo: "bar 'baz'"`,
+        rendered_value: "foo: \"bar 'baz'\"}"
       });
     });
   });
