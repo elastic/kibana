@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import { createTestConfig } from '../../../../../../config/serverless/config.base.essentials';
+import { createTestConfig } from '../../../../../../../config/serverless/config.base.essentials';
 
 export default createTestConfig({
   testFiles: [require.resolve('..')],
   junit: {
     reportName:
-      'Rules Management - Rule Import/Export Integration Tests - Serverless Env - Essentials Tier',
+      'Rules Management - Rule Bulk Actions Integration Tests - Bulk Export with feature flag enabled - Serverless Env',
   },
+  kbnTestServerArgs: [],
 });

@@ -443,6 +443,16 @@
     "rule_import_export:basic:server:ess": "npm run initialize-server:rm:basic_essentials rule_import_export ess",
     "rule_import_export:basic:runner:ess": "npm run run-tests:rm:basic_essentials rule_import_export ess essEnv",
 
+    "rule_export:customization_disabled:server:ess": "node ./scripts/index.js server detections_response/rules_management customization_disabled rule_import_export ess",
+    "rule_export:customization_disabled:runner:ess": "node ./scripts/index.js runner detections_response/rules_management customization_disabled rule_import_export ess essEnv",
+    "rule_export:customization_disabled:server:serverless": "node ./scripts/index.js server detections_response/rules_management customization_disabled rule_bulk_actions/export serverless",
+    "rule_export:customization_disabled:runner:serverless": "node ./scripts/index.js runner detections_response/rules_management customization_disabled rule_bulk_actions/export serverless serverlessEnv",
+
+    "rule_export:customization_enabled:server:ess": "node ./scripts/index.js server detections_response/rules_management customization_enabled rule_import_export ess",
+    "rule_export:customization_enabled:runner:ess": "node ./scripts/index.js runner detections_response/rules_management customization_enabled rule_import_export ess essEnv",
+    "rule_export:customization_enabled:server:serverless": "node ./scripts/index.js server detections_response/rules_management customization_enabled rule_bulk_actions/export serverless",
+    "rule_export:customization_enabled:runner:serverless": "node ./scripts/index.js runner detections_response/rules_management customization_enabled rule_bulk_actions/export serverless serverlessEnv",
+
     "rule_management:server:serverless": "npm run initialize-server:rm rule_management serverless",
     "rule_management:runner:serverless": "npm run run-tests:rm rule_management serverless serverlessEnv",
     "rule_management:qa:serverless": "npm run run-tests:rm rule_management serverless qaPeriodicEnv",
@@ -456,6 +466,16 @@
     "rule_bulk_actions:qa:serverless:release": "npm run run-tests:rm rule_bulk_actions serverless qaEnv",
     "rule_bulk_actions:server:ess": "npm run initialize-server:rm rule_bulk_actions ess",
     "rule_bulk_actions:runner:ess": "npm run run-tests:rm rule_bulk_actions ess essEnv",
+
+    "rule_bulk_actions_export:customization_disabled:server:ess": "node ./scripts/index.js server detections_response/rules_management customization_disabled rule_bulk_actions/export ess",
+    "rule_bulk_actions_export:customization_disabled:runner:ess": "node ./scripts/index.js runner detections_response/rules_management customization_disabled rule_bulk_actions/export ess essEnv",
+    "rule_bulk_actions_export:customization_disabled:server:serverless": "node ./scripts/index.js server detections_response/rules_management customization_disabled rule_bulk_actions/export serverless",
+    "rule_bulk_actions_export:customization_disabled:runner:serverless": "node ./scripts/index.js runner detections_response/rules_management customization_disabled rule_bulk_actions/export serverless serverlessEnv",
+    
+    "rule_bulk_actions_export:customization_enabled:server:ess": "node ./scripts/index.js server detections_response/rules_management customization_enabled rule_bulk_actions/export ess",
+    "rule_bulk_actions_export:customization_enabled:runner:ess": "node ./scripts/index.js runner detections_response/rules_management customization_enabled rule_bulk_actions/export ess essEnv",
+    "rule_bulk_actions_export:customization_enabled:server:serverless": "node ./scripts/index.js server detections_response/rules_management customization_enabled rule_bulk_actions/export serverless",
+    "rule_bulk_actions_export:customization_enabled:runner:serverless": "node ./scripts/index.js runner detections_response/rules_management customization_enabled rule_bulk_actions/export serverless serverlessEnv",
 
     "rule_read:server:serverless": "npm run initialize-server:rm rule_read serverless",
     "rule_read:runner:serverless": "npm run run-tests:rm rule_read serverless serverlessEnv",
