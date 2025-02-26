@@ -30,7 +30,6 @@ import { LoadingState } from '../../../../../../types';
 import type { MigrationState } from '../../../use_migration_state';
 import { useAppContext } from '../../../../../../../app_context';
 import { DurationClarificationCallOut } from './warnings_callout';
-import { getPrimaryButtonLabel } from '../../messages';
 
 /**
  * Displays a flyout that shows the current reindexing status for a given index.
@@ -241,7 +240,10 @@ export const DataStreamDetailsFlyoutStep: React.FunctionComponent<{
                     disabled={loading || !hasRequiredPrivileges}
                     data-test-subj="startDataStreamReindexingButton"
                   >
-                    {getPrimaryButtonLabel(status)}
+                    <FormattedMessage
+                      id="xpack.upgradeAssistant.dataStream.migration.flyout.reindexButton.initReindexButtonLabel"
+                      defaultMessage="Reindex"
+                    />
                   </EuiButton>
                 </EuiFlexItem>
               )}
@@ -254,8 +256,8 @@ export const DataStreamDetailsFlyoutStep: React.FunctionComponent<{
                   data-test-subj="startDataStreamReadonlyButton"
                 >
                   <FormattedMessage
-                    id="xpack.upgradeAssistant.dataStream.migration.flyout.checklistStep.markReadOnlyButtonLabel"
-                    defaultMessage="Mark all read only"
+                    id="xpack.upgradeAssistant.dataStream.migration.flyout.checklistStep.initMarkReadOnlyButtonLabel"
+                    defaultMessage="Mark read-only"
                   />
                 </EuiButton>
               </EuiFlexItem>

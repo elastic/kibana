@@ -67,7 +67,7 @@ interface DataStreamMigrationService {
    * Marks the given indices as read-only.
    * @param indices
    */
-  readonlyIndices: (indices: string[]) => Promise<void>;
+  readonlyIndices: (dataStreamName: string, indices: string[]) => Promise<void>;
 }
 
 export interface DataStreamMigrationServiceFactoryParams {
@@ -182,20 +182,20 @@ export const dataStreamMigrationServiceFactory = ({
           );
         }
 
-        if (taskResponse.complete) {
-          // Check that no failures occurred
-          if (taskResponse.errors.length) {
-            // Include the entire task result in the error message. This should be guaranteed
-            // to be JSON-serializable since it just came back from Elasticsearch.
-            throw error.reindexTaskFailed(
-              `Reindexing failed with ${taskResponse.errors.length} errors:\n${JSON.stringify(
-                taskResponse,
-                null,
-                2
-              )}`
-            );
-          }
+        // Propagate errors from the reindex task even if reindexing is not yet complete.
+        if (taskResponse.errors.length) {
+          // Include the entire task result in the error message. This should be guaranteed
+          // to be JSON-serializable since it just came back from Elasticsearch.
+          throw error.reindexTaskFailed(
+            `Reindexing failed with ${taskResponse.errors.length} errors:\n${JSON.stringify(
+              taskResponse,
+              null,
+              2
+            )}`
+          );
+        }
 
+        if (taskResponse.complete) {
           // Update the status
           return {
             taskPercComplete: 1,
@@ -333,7 +333,36 @@ export const dataStreamMigrationServiceFactory = ({
       }
     },
 
-    async readonlyIndices(indices: string[]) {
+    async readonlyIndices(dataStreamName: string, indices: string[]) {
+      try {
+        const { data_streams: dataStreamsDeprecations } = await esClient.migration.deprecations({
+          filter_path: `data_streams`,
+        });
+
+        const deprecationsDetails = dataStreamsDeprecations[dataStreamName];
+        if (!deprecationsDetails || !deprecationsDetails.length) {
+          throw error.cannotGrabMetadata(`Could not grab metadata for ${dataStreamName}.`);
+        }
+        // Find the first deprecation that has reindex_required set to true
+        const deprecationDetails = deprecationsDetails.find(
+          (deprecation) => deprecation._meta!.reindex_required
+        );
+        if (!deprecationDetails) {
+          throw error.cannotGrabMetadata(`Could not grab metadata for ${dataStreamName}.`);
+        }
+
+        const rollOverResponse = await esClient.transport.request({
+          method: 'POST',
+          path: `/${dataStreamName}/_rollover/`,
+        });
+
+        if (!rollOverResponse.acknowledged) {
+          throw error.readonlyTaskFailed(`Could not rollover data stream ${dataStreamName}.`);
+        }
+      } catch (err) {
+        throw error.readonlyTaskFailed(`Could not migrate data stream ${dataStreamName}.`);
+      }
+
       for (const index of indices) {
         try {
           const unfreeze = await esClient.indices.unfreeze({ index });

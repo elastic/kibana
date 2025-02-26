@@ -22,7 +22,7 @@ export const AffectExistingSetupsWarningCheckbox: React.FunctionComponent<Warnin
       label={
         <FormattedMessage
           id="xpack.upgradeAssistant.dataStream.migration.flyout.warningsStep.affectExistingSetupsWarningTitle"
-          defaultMessage="Mark as read only all incompatible data for this data stream"
+          defaultMessage="Mark as read-only all incompatible data for this data stream"
         />
       }
       description={null}
