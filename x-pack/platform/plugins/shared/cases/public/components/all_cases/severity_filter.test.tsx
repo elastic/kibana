@@ -15,7 +15,7 @@ import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 import { SeverityFilter } from './severity_filter';
 
 // Failing: See https://github.com/elastic/kibana/issues/176336
-describe.skip('Severity form field', () => {
+describe('Severity form field', () => {
   const onChange = jest.fn();
   let appMockRender: AppMockRenderer;
   const props = {

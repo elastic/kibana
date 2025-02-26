@@ -12,7 +12,7 @@ import { templatesConfigurationMock } from '../../containers/mock';
 import { TemplateSelector } from './templates';
 
 // FLAKY: https://github.com/elastic/kibana/issues/202761
-describe.skip('TemplateSelector', () => {
+describe('TemplateSelector', () => {
   const onTemplateChange = jest.fn();
 
   it('renders correctly', async () => {

@@ -25,7 +25,7 @@ const initialData = {
 };
 
 // Failing: See https://github.com/elastic/kibana/issues/207390
-describe.skip('UseInfiniteFindCaseUserActions', () => {
+describe('UseInfiniteFindCaseUserActions', () => {
   const filterActionType: CaseUserActionTypeWithAll = 'all';
   const sortOrder: 'asc' | 'desc' = 'asc';
   const params = {

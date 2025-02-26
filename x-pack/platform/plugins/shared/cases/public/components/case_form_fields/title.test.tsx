@@ -19,7 +19,7 @@ import { Title } from './title';
 import { schema } from '../create/schema';
 
 // FLAKY: https://github.com/elastic/kibana/issues/208310
-describe.skip('Title', () => {
+describe('Title', () => {
   let globalForm: FormHook;
 
   const MockHookWrapperComponent: FC<PropsWithChildren<unknown>> = ({ children }) => {

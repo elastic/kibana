@@ -21,7 +21,7 @@ const caseData: CaseUI = {
 };
 
 // Failing: See https://github.com/elastic/kibana/issues/207056
-describe.skip('Case View Page similar cases tab', () => {
+describe('Case View Page similar cases tab', () => {
   let appMockRender: AppMockRenderer;
 
   beforeEach(() => {

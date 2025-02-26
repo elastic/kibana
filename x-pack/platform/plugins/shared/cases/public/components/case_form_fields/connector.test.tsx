@@ -50,7 +50,7 @@ const defaultProps = {
 };
 
 // FLAKY: https://github.com/elastic/kibana/issues/208443
-describe.skip('Connector', () => {
+describe('Connector', () => {
   let appMockRender: AppMockRenderer;
 
   beforeEach(() => {

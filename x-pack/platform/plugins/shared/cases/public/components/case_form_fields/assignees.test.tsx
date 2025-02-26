@@ -24,7 +24,7 @@ jest.mock('../../containers/user_profiles/api');
 const currentUserProfile = userProfiles[0];
 
 // Failing: See https://github.com/elastic/kibana/issues/189719
-describe.skip('Assignees', () => {
+describe('Assignees', () => {
   let globalForm: FormHook;
   let appMockRender: AppMockRenderer;
 

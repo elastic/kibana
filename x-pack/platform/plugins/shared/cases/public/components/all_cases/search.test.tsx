@@ -13,7 +13,7 @@ import { createAppMockRenderer } from '../../common/mock';
 import { TableSearch } from './search';
 
 // FLAKY: https://github.com/elastic/kibana/issues/206366
-describe.skip('TableSearch', () => {
+describe('TableSearch', () => {
   const onFilterOptionsChange = jest.fn();
 
   let appMockRender: AppMockRenderer;

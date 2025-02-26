@@ -18,7 +18,7 @@ import * as i18n from './translations';
 import { templatesConfigurationMock } from '../../containers/mock';
 
 // FLAKY: https://github.com/elastic/kibana/issues/196628
-describe.skip('Templates', () => {
+describe('Templates', () => {
   let appMockRender: AppMockRenderer;
 
   const props = {

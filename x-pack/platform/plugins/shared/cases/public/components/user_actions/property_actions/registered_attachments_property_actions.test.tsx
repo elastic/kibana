@@ -19,7 +19,7 @@ import { RegisteredAttachmentsPropertyActions } from './registered_attachments_p
 import { AttachmentActionType } from '../../../client/attachment_framework/types';
 
 // FLAKY: https://github.com/elastic/kibana/issues/207328
-describe.skip('RegisteredAttachmentsPropertyActions', () => {
+describe('RegisteredAttachmentsPropertyActions', () => {
   let appMock: AppMockRenderer;
 
   const props = {

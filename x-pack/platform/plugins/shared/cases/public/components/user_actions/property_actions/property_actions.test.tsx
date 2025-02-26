@@ -14,7 +14,7 @@ import { UserActionPropertyActions } from './property_actions';
 import { AttachmentActionType } from '../../../client/attachment_framework/types';
 
 // FLAKY: https://github.com/elastic/kibana/issues/206056
-describe.skip('UserActionPropertyActions', () => {
+describe('UserActionPropertyActions', () => {
   let appMock: AppMockRenderer;
   const onClick = jest.fn();
 
