@@ -133,45 +133,36 @@ export const reportingCsvExportProvider = ({
     const absoluteUrl = new URL(relativePath, window.location.href).toString();
 
     return {
+      name: panelTitle,
+      toolTipContent: licenseToolTipContent,
       exportType: reportType,
       label: 'CSV',
+      ['data-test-subj']: 'Export',
+      disabled: licenseDisabled,
       generateAssetExport: generateReportingJobCSV,
       generateValueExport: () => absoluteUrl,
+      helpText: (
+        <FormattedMessage
+          id="reporting.share.csv.reporting.helpTextCSV"
+          defaultMessage="Export a CSV of this {objectType}."
+          values={{ objectType }}
+        />
+      ),
+      copyURLButton: {
+        id: 'reporting.share.modalContent.csv.copyUrlButtonLabel',
+        dataTestSubj: 'shareReportingCopyURL',
+        label: 'Post URL',
+      },
+      generateExportButton: (
+        <FormattedMessage
+          id="reporting.share.generateButtonLabelCSV"
+          data-test-subj="generateReportButton"
+          defaultMessage="Generate CSV"
+        />
+      ),
+      renderCopyURLButton: true,
+      generateCopyUrl: reportingUrl,
     };
-
-    // shareActions.push({
-    //   shareMenuItem: {
-    //     name: panelTitle,
-    //     toolTipContent: licenseToolTipContent,
-    //     disabled: licenseDisabled,
-    //     ['data-test-subj']: 'Export',
-    //   },
-    //   helpText: (
-    //     <FormattedMessage
-    //       id="reporting.share.csv.reporting.helpTextCSV"
-    //       defaultMessage="Export a CSV of this {objectType}."
-    //       values={{ objectType }}
-    //     />
-    //   ),
-    //   reportType,
-    //   label: 'CSV',
-    //   copyURLButton: {
-    //     id: 'reporting.share.modalContent.csv.copyUrlButtonLabel',
-    //     dataTestSubj: 'shareReportingCopyURL',
-    //     label: 'Post URL',
-    //   },
-    //   generateExportButton: (
-    //     <FormattedMessage
-    //       id="reporting.share.generateButtonLabelCSV"
-    //       data-test-subj="generateReportButton"
-    //       defaultMessage="Generate CSV"
-    //     />
-    //   ),
-    //   generateExport: generateReportingJobCSV,
-    //   generateExportUrl: () => absoluteUrl,
-    //   generateCopyUrl: reportingUrl,
-    //   renderCopyURLButton: true,
-    // });
   };
 
   return {
