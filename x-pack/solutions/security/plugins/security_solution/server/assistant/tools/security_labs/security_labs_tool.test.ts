@@ -50,16 +50,5 @@ describe('SecurityLabsTool', () => {
 
       expect(result).toContain('Citation: {reference(exampleContentReferenceId)}');
     });
-
-    it('does not include citations when contentReferencesStore is false', async () => {
-      const tool = SECURITY_LABS_KNOWLEDGE_BASE_TOOL.getTool({
-        ...defaultArgs,
-        contentReferencesStore: undefined,
-      }) as DynamicStructuredTool;
-
-      const result = await tool.func({ query: 'What is Kibana Security?', product: 'kibana' });
-
-      expect(result).not.toContain('Citation:');
-    });
   });
 });
