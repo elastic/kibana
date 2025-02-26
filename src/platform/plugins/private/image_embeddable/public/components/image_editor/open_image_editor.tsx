@@ -7,29 +7,33 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
+import React, { Suspense, lazy } from 'react';
 
 import { tracksOverlays, CanAddNewPanel } from '@kbn/presentation-containers';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { FilesContext } from '@kbn/shared-ux-file-context';
 
+import { EuiSkeletonText } from '@elastic/eui';
 import { ImageConfig } from '../../image_embeddable/types';
 import { FileImageMetadata, imageEmbeddableFileKind } from '../../imports';
 import { coreServices, filesService } from '../../services/kibana_services';
 import { createValidateUrl } from '../../utils/validate_url';
 import { ImageViewerContext } from '../image_viewer/image_viewer_context';
 
-export const openImageEditor = async ({
+export const openImageEditor = ({
   parentApi,
   initialImageConfig,
 }: {
   parentApi: CanAddNewPanel;
   initialImageConfig?: ImageConfig;
 }): Promise<ImageConfig> => {
-  const { ImageEditorFlyout } = await import('./image_editor_flyout');
+  const LazyFlyoutContent = lazy(async () => {
+    const { ImageEditorFlyout } = await import('./image_editor_flyout');
+    return {
+      default: ImageEditorFlyout,
+    };
+  });
 
-  const { overlays, http, security, ...startServices } = coreServices;
-  const user = await security.authc.getCurrentUser();
   const filesClient = filesService.filesClientFactory.asUnscoped<FileImageMetadata>();
 
   /**
@@ -51,29 +55,33 @@ export const openImageEditor = async ({
       overlayTracker?.clearOverlays();
     };
 
-    const flyoutSession = overlays.openFlyout(
+    const flyoutSession = coreServices.overlays.openFlyout(
       toMountPoint(
-        <FilesContext client={filesClient}>
-          <ImageViewerContext.Provider
-            value={{
-              getImageDownloadHref: (fileId: string) => {
-                return filesClient.getDownloadHref({
-                  id: fileId,
-                  fileKind: imageEmbeddableFileKind.id,
-                });
-              },
-              validateUrl: createValidateUrl(http.externalUrl),
-            }}
-          >
-            <ImageEditorFlyout
-              user={user}
-              onCancel={onCancel}
-              onSave={onSave}
-              initialImageConfig={initialImageConfig}
-            />
-          </ImageViewerContext.Provider>
-        </FilesContext>,
-        startServices
+        <Suspense fallback={<EuiSkeletonText />}>
+          <FilesContext client={filesClient}>
+            <ImageViewerContext.Provider
+              value={{
+                getImageDownloadHref: (fileId: string) => {
+                  return filesClient.getDownloadHref({
+                    id: fileId,
+                    fileKind: imageEmbeddableFileKind.id,
+                  });
+                },
+                validateUrl: createValidateUrl(coreServices.http.externalUrl),
+              }}
+            >
+              <LazyFlyoutContent
+                onCancel={onCancel}
+                onSave={onSave}
+                initialImageConfig={initialImageConfig}
+              />
+            </ImageViewerContext.Provider>
+          </FilesContext>
+        </Suspense>,
+        {
+          i18n: coreServices.i18n,
+          theme: coreServices.theme,
+        }
       ),
       {
         onClose: () => {

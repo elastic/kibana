@@ -9,7 +9,7 @@
 
 import { ImageEmbeddablePlugin } from './plugin';
 
-export { IMAGE_CLICK_TRIGGER } from './actions';
+export { IMAGE_CLICK_TRIGGER } from './ui_actions/image_click_trigger';
 
 export function plugin() {
   return new ImageEmbeddablePlugin();
