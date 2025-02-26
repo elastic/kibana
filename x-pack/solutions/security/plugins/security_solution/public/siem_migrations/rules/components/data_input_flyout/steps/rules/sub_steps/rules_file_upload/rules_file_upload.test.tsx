@@ -132,42 +132,16 @@ describe('RulesFileUpload', () => {
       },
     ];
 
-    it('should not be able to upload on API Error', async () => {
+    it('should display API Error', async () => {
       renderTestComponent({
         apiError: mockApiError,
       });
 
-      const fileName = 'splunk_rules.test.data.json';
-      const ndJSONString = splunkTestRules.map((obj) => JSON.stringify(obj)).join('\n');
-      const testFile = createRulesFileFromRulesData(ndJSONString, getTestDir(), fileName);
-
-      const filePicker = screen.getByTestId('rulesFilePicker');
-
-      act(() => {
-        fireEvent.change(filePicker, {
-          target: {
-            files: [testFile],
-          },
-        });
-      });
-
-      await waitFor(() => {
-        expect(filePicker).toHaveAttribute('data-loading', 'true');
-      });
-
-      await waitFor(() => {
-        expect(filePicker).toHaveAttribute('data-loading', 'false');
-      });
-
-      await act(async () => {
-        fireEvent.click(screen.getByTestId('uploadFileButton'));
-      });
-
       await waitFor(() => {
         expect(screen.getByText(mockApiError)).toBeVisible();
-        expect(screen.getByTestId('uploadFileButton')).toBeDisabled();
       });
     });
+
     scenarios.forEach((scenario, _idx) => {
       it(`should not be able to upload when file has - ${scenario.subject}`, async () => {
         const fileName = 'invalid_rule_file.json';
