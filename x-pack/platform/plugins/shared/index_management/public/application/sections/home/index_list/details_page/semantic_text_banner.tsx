@@ -34,7 +34,7 @@ const defaultLicenseMessage = (
 const platinumLicenseMessage = (
   <FormattedMessage
     id="xpack.idxMgmt.indexDetails.mappings.semanticTextBanner.description"
-    defaultMessage="{label} Add a field to your mapping and choose 'Semantic text' to get started."
+    defaultMessage="{label} Add a field to your mapping and choose 'Semantic text' to get started. Documents will be automatically chunked to fit model context limits."
     values={{
       label: (
         <strong>
@@ -58,7 +58,7 @@ export function SemanticTextBanner({
   return isSemanticTextBannerDisplayable && isSemanticTextEnabled ? (
     <>
       <EuiPanel color="accentSecondary" data-test-subj="indexDetailsMappingsSemanticTextBanner">
-        <EuiFlexGroup>
+        <EuiFlexGroup alignItems="center">
           <EuiFlexItem>
             <EuiText size="m" color="primary">
               {isPlatinumLicense ? platinumLicenseMessage : defaultLicenseMessage}
