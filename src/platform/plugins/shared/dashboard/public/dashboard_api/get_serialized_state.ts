@@ -64,6 +64,8 @@ export const getSerializedState = ({
     timeRestore,
     description,
 
+    sections,
+
     // Dashboard options
     useMargins,
     syncColors,
@@ -124,12 +126,13 @@ export const getSerializedState = ({
     timeRestore,
     options,
     panels: savedPanels,
+
+    sections,
+
     timeFrom,
     title,
     timeTo,
   };
-
-  console.log(rawDashboardAttributes);
 
   /**
    * Extract references from raw attributes and tags into the references array.

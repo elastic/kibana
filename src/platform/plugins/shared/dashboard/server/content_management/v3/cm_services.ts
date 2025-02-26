@@ -248,6 +248,13 @@ export const gridDataSchema = schema.object({
   ),
 });
 
+export const sectionSchema = schema.arrayOf(
+  schema.object({
+    title: schema.string(),
+    collapsed: schema.boolean(),
+  })
+);
+
 export const panelSchema = schema.object({
   panelConfig: schema.object(
     {
@@ -400,6 +407,7 @@ export const dashboardAttributesSchema = searchResultsAttributesSchema.extends({
   // Dashboard Content
   controlGroupInput: schema.maybe(controlGroupInputSchema),
   panels: schema.arrayOf(panelSchema, { defaultValue: [] }),
+  sections: schema.maybe(sectionSchema),
   options: optionsSchema,
   version: schema.maybe(schema.number({ meta: { deprecated: true } })),
 });

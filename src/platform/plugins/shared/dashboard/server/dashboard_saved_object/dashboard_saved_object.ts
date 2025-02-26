@@ -63,6 +63,25 @@ export const createDashboardSavedObjectType = ({
             },
           },
         },
+        {
+          type: 'mappings_addition',
+          addedMappings: {
+            sections: {
+              properties: {
+                title: {
+                  type: 'keyword',
+                  index: false,
+                  doc_values: false,
+                },
+                collapsed: {
+                  type: 'boolean',
+                  index: false,
+                  doc_values: false,
+                },
+              },
+            },
+          },
+        },
       ],
       schemas: {
         forwardCompatibility: dashboardAttributesSchemaV2.extends({}, { unknowns: 'ignore' }),
@@ -79,6 +98,20 @@ export const createDashboardSavedObjectType = ({
       },
       optionsJSON: { type: 'text', index: false },
       panelsJSON: { type: 'text', index: false },
+      sections: {
+        properties: {
+          title: {
+            type: 'keyword',
+            index: false,
+            doc_values: false,
+          },
+          collapsed: {
+            type: 'boolean',
+            index: false,
+            doc_values: false,
+          },
+        },
+      },
       refreshInterval: {
         properties: {
           display: { type: 'keyword', index: false, doc_values: false },
