@@ -51,106 +51,102 @@ async function fetchDependenciesTimeseriesStatistics({
     apm: {
       events: [getProcessorEventForServiceDestinationStatistics(searchServiceDestinationMetrics)],
     },
-    body: {
-      track_total_hits: false,
-      size: 0,
-      query: {
-        bool: {
-          filter: [
-            ...environmentQuery(environment),
-            ...kqlQuery(kuery),
-            ...rangeQuery(start, end),
-            ...getDocumentTypeFilterForServiceDestinationStatistics(
-              searchServiceDestinationMetrics
-            ),
-            { terms: { [SPAN_DESTINATION_SERVICE_RESOURCE]: dependencyNames } },
-          ],
-        },
+    track_total_hits: false,
+    size: 0,
+    query: {
+      bool: {
+        filter: [
+          ...environmentQuery(environment),
+          ...kqlQuery(kuery),
+          ...rangeQuery(start, end),
+          ...getDocumentTypeFilterForServiceDestinationStatistics(searchServiceDestinationMetrics),
+          { terms: { [SPAN_DESTINATION_SERVICE_RESOURCE]: dependencyNames } },
+        ],
       },
-      aggs: {
-        dependencies: {
-          terms: {
-            field: SPAN_DESTINATION_SERVICE_RESOURCE,
-          },
-          aggs: {
-            timeseries: {
-              date_histogram: {
-                field: '@timestamp',
-                fixed_interval: getBucketSize({
-                  start,
-                  end,
-                  numBuckets,
-                  minBucketSize: 60,
-                }).intervalString,
-                extended_bounds: {
-                  min: start,
-                  max: end,
+    },
+    aggs: {
+      dependencies: {
+        terms: {
+          field: SPAN_DESTINATION_SERVICE_RESOURCE,
+        },
+        aggs: {
+          timeseries: {
+            date_histogram: {
+              field: '@timestamp',
+              fixed_interval: getBucketSize({
+                start,
+                end,
+                numBuckets,
+                minBucketSize: 60,
+              }).intervalString,
+              extended_bounds: {
+                min: start,
+                max: end,
+              },
+            },
+            aggs: {
+              // latency
+              latency_sum: {
+                sum: {
+                  field: getLatencyFieldForServiceDestinationStatistics(
+                    searchServiceDestinationMetrics
+                  ),
                 },
               },
-              aggs: {
-                // latency
-                latency_sum: {
-                  sum: {
-                    field: getLatencyFieldForServiceDestinationStatistics(
-                      searchServiceDestinationMetrics
-                    ),
-                  },
-                },
-                ...(searchServiceDestinationMetrics
-                  ? {
-                      latency_count: {
-                        sum: {
-                          field: getDocCountFieldForServiceDestinationStatistics(
-                            searchServiceDestinationMetrics
-                          ),
-                        },
+              ...(searchServiceDestinationMetrics
+                ? {
+                    latency_count: {
+                      sum: {
+                        field: getDocCountFieldForServiceDestinationStatistics(
+                          searchServiceDestinationMetrics
+                        ),
                       },
-                    }
-                  : {}),
-                // error
-                ...(searchServiceDestinationMetrics
-                  ? {
-                      total_count: {
-                        sum: {
-                          field: getDocCountFieldForServiceDestinationStatistics(
-                            searchServiceDestinationMetrics
-                          ),
-                        },
-                      },
-                    }
-                  : {}),
-                failures: {
-                  filter: {
-                    term: {
-                      [EVENT_OUTCOME]: EventOutcome.failure,
                     },
-                  },
-                  aggs: {
-                    ...(searchServiceDestinationMetrics
-                      ? {
-                          total_count: {
-                            sum: {
-                              field: getDocCountFieldForServiceDestinationStatistics(
-                                searchServiceDestinationMetrics
-                              ),
-                            },
-                          },
-                        }
-                      : {}),
+                  }
+                : {}),
+              // error
+              ...(searchServiceDestinationMetrics
+                ? {
+                    total_count: {
+                      sum: {
+                        field: getDocCountFieldForServiceDestinationStatistics(
+                          searchServiceDestinationMetrics
+                        ),
+                      },
+                    },
+                  }
+                : {}),
+              failures: {
+                filter: {
+                  term: {
+                    [EVENT_OUTCOME]: EventOutcome.failure,
                   },
                 },
-                // throughput
-                throughput: {
-                  rate: {
-                    ...(searchServiceDestinationMetrics
-                      ? {
-                          field: getDocCountFieldForServiceDestinationStatistics(
-                            searchServiceDestinationMetrics
-                          ),
-                        }
-                      : {}),
-                    unit: 'minute',
-                  },
+                aggs: {
+                  ...(searchServiceDestinationMetrics
+                    ? {
+                        total_count: {
+                          sum: {
+                            field: getDocCountFieldForServiceDestinationStatistics(
+                              searchServiceDestinationMetrics
+                            ),
+                          },
+                        },
+                      }
+                    : {}),
+                },
+              },
+              // throughput
+              throughput: {
+                rate: {
+                  ...(searchServiceDestinationMetrics
+                    ? {
+                        field: getDocCountFieldForServiceDestinationStatistics(
+                          searchServiceDestinationMetrics
+                        ),
+                      }
+                    : {}),
+                  unit: 'minute',
                 },
               },
             },
