@@ -21,12 +21,12 @@ import { ExitFullScreenButtonKibanaProvider } from '@kbn/shared-ux-button-exit-f
 import { DashboardApi, DashboardInternalApi, DashboardLocatorParams } from '../../dashboard_api/types';
 import { coreServices, screenshotModeService } from '../../services/kibana_services';
 import type { DashboardCreationOptions } from '../..';
-import { DashboardRedirect } from '../../dashboard_container/types';
 import { Dashboard404Page } from './dashboard_404';
 import { DashboardContext } from '../../dashboard_api/use_dashboard_api';
 import { DashboardViewport } from './viewport/dashboard_viewport';
 import { loadDashboardApi } from '../../dashboard_api/load_dashboard_api';
 import { DashboardInternalContext } from '../../dashboard_api/use_dashboard_internal_api';
+import { DashboardRedirect } from '../../dashboard_app/types';
 
 export interface DashboardRendererProps {
   onApiAvailable?: (api: DashboardApi) => void;

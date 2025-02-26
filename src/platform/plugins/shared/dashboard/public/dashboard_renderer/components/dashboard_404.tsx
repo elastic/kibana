@@ -11,8 +11,7 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiButtonEmpty } from '@elastic/eui';
 import { NotFoundPrompt } from '@kbn/shared-ux-prompt-not-found';
-
-import { DashboardRedirect } from '../../dashboard_container/types';
+import { DashboardRedirect } from '../../dashboard_app/types';
 
 export const Dashboard404Page = ({
   dashboardRedirect,

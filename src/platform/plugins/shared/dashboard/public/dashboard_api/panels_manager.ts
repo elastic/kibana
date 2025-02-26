@@ -36,8 +36,7 @@ import { runPanelPlacementStrategy } from '../panel_placement/place_new_panel_st
 import { DEFAULT_PANEL_HEIGHT, DEFAULT_PANEL_WIDTH } from '../../common/content_management';
 import { DASHBOARD_UI_METRIC_ID } from '../utils/telemetry_constants';
 import { getDashboardPanelPlacementSetting } from '../panel_placement/panel_placement_registry';
-import { UnsavedPanelState } from '../dashboard_container/types';
-import { DashboardState } from './types';
+import { DashboardState, UnsavedPanelState } from './types';
 import { arePanelLayoutsEqual } from './are_panel_layouts_equal';
 import { dashboardClonePanelActionStrings } from '../dashboard_actions/_dashboard_actions_strings';
 import { placeClonePanel } from '../panel_placement/place_clone_panel_strategy';

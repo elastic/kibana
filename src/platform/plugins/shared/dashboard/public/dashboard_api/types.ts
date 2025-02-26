@@ -162,6 +162,10 @@ export type DashboardLocatorParams = Partial<
   controlGroupState?: Partial<ControlGroupRuntimeState> & SerializableRecord; // used SerializableRecord here to force the GridData type to be read as serializable
 };
 
+export interface UnsavedPanelState {
+  [key: string]: object | undefined;
+}
+
 export type DashboardApi = CanExpandPanels &
   HasAppContext &
   HasExecutionContext &
