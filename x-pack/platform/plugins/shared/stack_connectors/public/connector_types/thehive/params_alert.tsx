@@ -10,10 +10,21 @@ import {
   TextFieldWithMessageVariables,
   TextAreaWithMessageVariables,
   ActionParamsProps,
+  JsonEditorWithMessageVariables,
+  ActionConnectorMode,
 } from '@kbn/triggers-actions-ui-plugin/public';
-import { EuiFormRow, EuiSelect, EuiComboBox } from '@elastic/eui';
+import { EuiFormRow, EuiSelect, EuiComboBox, EuiSwitch } from '@elastic/eui';
+import { TemplateOptions, Template } from './template_component';
+import { TheHiveSeverity, TheHiveTemplate } from '../../../common/thehive/constants';
 import { ExecutorParams, ExecutorSubActionCreateAlertParams } from '../../../common/thehive/types';
-import { severityOptions, tlpOptions } from './constants';
+import {
+  bodyOption,
+  testBodyOption,
+  severityOptions,
+  tlpOptions,
+  testCustomTemplatePlaceHolder,
+  ruleCustomTemplatePlaceHolder,
+} from './constants';
 import * as translations from './translations';
 
 export const TheHiveParamsAlertFields: React.FC<ActionParamsProps<ExecutorParams>> = ({
@@ -22,6 +33,7 @@ export const TheHiveParamsAlertFields: React.FC<ActionParamsProps<ExecutorParams
   index,
   errors,
   messageVariables,
+  executionMode,
 }) => {
   const alert = useMemo(
     () =>
@@ -30,15 +42,21 @@ export const TheHiveParamsAlertFields: React.FC<ActionParamsProps<ExecutorParams
         tlp: 2,
         severity: 2,
         tags: [],
+        body: bodyOption[TheHiveTemplate.CUSTOM_TEMPLATE],
       } as unknown as ExecutorSubActionCreateAlertParams),
     [actionParams.subActionParams]
   );
+  const isTest = executionMode === ActionConnectorMode.Test;
 
   const [severity, setSeverity] = useState(alert.severity ?? severityOptions[1].value);
   const [tlp, setTlp] = useState(alert.tlp ?? tlpOptions[2].value);
   const [selectedOptions, setSelected] = useState<Array<{ label: string }>>(
     alert.tags?.map((tag) => ({ label: tag })) ?? []
   );
+  const [isRuleSeverity, setIsRuleSeverity] = useState<boolean>(
+    alert.severity === TheHiveSeverity.RULE_SEVERITY ? true : false
+  );
+  const [selectedTemplate, setSelectedTemplate] = useState('');
 
   const onCreateOption = (searchValue: string) => {
     setSelected([...selectedOptions, { label: searchValue }]);
@@ -52,6 +70,18 @@ export const TheHiveParamsAlertFields: React.FC<ActionParamsProps<ExecutorParams
       { ...alert, tags: selectedOptionList.map((option) => option.label) },
       index
     );
+  };
+
+  const onSelectTemplate = (template: Template) => {
+    editAction(
+      'subActionParams',
+      {
+        ...alert,
+        body: isTest ? testBodyOption[template.name] : bodyOption[template.name],
+      },
+      index
+    );
+    setSelectedTemplate(template.name);
   };
 
   return (
@@ -149,22 +179,51 @@ export const TheHiveParamsAlertFields: React.FC<ActionParamsProps<ExecutorParams
         }}
         errors={errors['createAlertParam.sourceRef'] as string[]}
       />
-      <EuiFormRow fullWidth label={translations.SEVERITY_LABEL}>
-        <EuiSelect
-          fullWidth
-          data-test-subj="severitySelectInput"
-          value={severity}
-          options={severityOptions}
-          onChange={(e) => {
-            editAction(
-              'subActionParams',
-              { ...alert, severity: parseInt(e.target.value, 10) },
-              index
-            );
-            setSeverity(parseInt(e.target.value, 10));
-          }}
-        />
-      </EuiFormRow>
+      {!isTest && (
+        <EuiFormRow fullWidth>
+          <EuiSwitch
+            label={translations.IS_RULE_SEVERITY_LABEL}
+            checked={isRuleSeverity}
+            compressed={true}
+            data-test-subj="rule-severity-toggle"
+            onChange={(e) => {
+              setIsRuleSeverity(e.target.checked);
+              setSeverity(
+                e.target.checked ? TheHiveSeverity.RULE_SEVERITY : TheHiveSeverity.MEDIUM
+              );
+              editAction(
+                'subActionParams',
+                {
+                  ...alert,
+                  severity: e.target.checked
+                    ? TheHiveSeverity.RULE_SEVERITY
+                    : TheHiveSeverity.MEDIUM,
+                },
+                index
+              );
+            }}
+          />
+        </EuiFormRow>
+      )}
+      {!isRuleSeverity && (
+        <EuiFormRow fullWidth label={translations.SEVERITY_LABEL}>
+          <EuiSelect
+            fullWidth
+            data-test-subj="severitySelectInput"
+            disabled={isRuleSeverity}
+            value={severity}
+            options={severityOptions}
+            onChange={(e) => {
+              editAction(
+                'subActionParams',
+                { ...alert, severity: parseInt(e.target.value, 10) },
+                index
+              );
+              setSeverity(parseInt(e.target.value, 10));
+            }}
+          />
+        </EuiFormRow>
+      )}
       <EuiFormRow fullWidth label={translations.TLP_LABEL}>
         <EuiSelect
           fullWidth
@@ -187,6 +246,37 @@ export const TheHiveParamsAlertFields: React.FC<ActionParamsProps<ExecutorParams
           noSuggestions
         />
       </EuiFormRow>
+      <JsonEditorWithMessageVariables
+        key={selectedTemplate}
+        messageVariables={messageVariables}
+        paramsProperty={'body'}
+        inputTargetValue={alert.body}
+        euiCodeEditorProps={{
+          placeholder: isTest ? testCustomTemplatePlaceHolder : ruleCustomTemplatePlaceHolder,
+          height: '320px',
+        }}
+        label={
+          <>
+            {translations.BODY_LABEL}
+            <TemplateOptions
+              buttonTitle={translations.SELECT_BODY_TEMPLATE_POPOVER_BUTTON}
+              paramsProperty="body"
+              onSelectEventHandler={onSelectTemplate}
+            />
+          </>
+        }
+        ariaLabel={translations.BODY_DESCRIPTION}
+        errors={errors.body as string[]}
+        onDocumentsChange={(json: string) =>
+          editAction('subActionParams', { ...alert, body: json }, index)
+        }
+        dataTestSubj="thehive-body"
+        onBlur={() => {
+          if (!alert.body) {
+            editAction('subActionParams', { ...alert, body: null }, index);
+          }
+        }}
+      />
     </>
   );
 };
