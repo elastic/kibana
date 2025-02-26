@@ -27,7 +27,7 @@ import {
   getSecurityLabsDocsCount,
 } from '../../lib/langchain/content_loaders/security_labs_loader';
 import { DynamicStructuredTool } from '@langchain/core/tools';
-import { contentReferencesStoreFactoryMock } from '@kbn/elastic-assistant-common/impl/content_references/content_references_store/__mocks__/content_references_store.mock';
+import { newContentReferencesStoreMock } from '@kbn/elastic-assistant-common/impl/content_references/content_references_store/__mocks__/content_references_store.mock';
 jest.mock('../../lib/langchain/content_loaders/security_labs_loader');
 jest.mock('p-retry');
 const date = '2023-03-28T22:27:28.159Z';
@@ -522,7 +522,7 @@ describe('AIAssistantKnowledgeBaseDataClient', () => {
 
       const result = await client.getAssistantTools({
         esClient: esClientMock,
-        contentReferencesStore: contentReferencesStoreFactoryMock(),
+        contentReferencesStore: newContentReferencesStoreMock(),
       });
 
       expect(result).toHaveLength(1);
@@ -537,7 +537,7 @@ describe('AIAssistantKnowledgeBaseDataClient', () => {
 
       const result = await client.getAssistantTools({
         esClient: esClientMock,
-        contentReferencesStore: contentReferencesStoreFactoryMock(),
+        contentReferencesStore: newContentReferencesStoreMock(),
       });
 
       expect(result).toEqual([]);
@@ -550,7 +550,7 @@ describe('AIAssistantKnowledgeBaseDataClient', () => {
 
       const result = await client.getAssistantTools({
         esClient: esClientMock,
-        contentReferencesStore: contentReferencesStoreFactoryMock(),
+        contentReferencesStore: newContentReferencesStoreMock(),
       });
 
       expect(result).toEqual([]);

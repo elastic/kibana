@@ -19,7 +19,7 @@ import {
   createStructuredChatAgent,
   createToolCallingAgent,
 } from 'langchain/agents';
-import { contentReferencesStoreFactoryMock } from '@kbn/elastic-assistant-common/impl/content_references/content_references_store/__mocks__/content_references_store.mock';
+import { newContentReferencesStoreMock } from '@kbn/elastic-assistant-common/impl/content_references/content_references_store/__mocks__/content_references_store.mock';
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 import { AssistantTool, AssistantToolParams } from '../../../..';
 import { promptGroupId as toolsGroupId } from '../../../prompt/tool_prompts';
@@ -84,7 +84,7 @@ describe('callAssistantGraph', () => {
     telemetryParams: {},
     traceOptions: {},
     responseLanguage: 'English',
-    contentReferencesStore: contentReferencesStoreFactoryMock(),
+    contentReferencesStore: newContentReferencesStoreMock(),
   } as unknown as AgentExecutorParams<boolean>;
 
   beforeEach(() => {
