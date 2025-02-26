@@ -77,7 +77,7 @@ export const RULE_MIGRATION_SUMMARY_CHART_TITLE = i18n.translate(
 
 export const RULE_MIGRATION_VIEW_TRANSLATED_RULES_BUTTON = i18n.translate(
   'xpack.securitySolution.siemMigrations.rules.panel.result.summary.button',
-  { defaultMessage: 'View translated rules' }
+  { defaultMessage: 'View rules' }
 );
 
 export const RULE_MIGRATION_TRANSLATION_FAILED = i18n.translate(

@@ -49,7 +49,7 @@ const StartMigrationsBody: OnboardingCardComponent = React.memo(
 
     return (
       <RuleMigrationDataInputWrapper onFlyoutClosed={refreshStats}>
-        <OnboardingCardContentPanel paddingSize="none" className={styles}>
+        <OnboardingCardContentPanel className={styles}>
           {isLoading ? (
             <CenteredLoadingSpinner />
           ) : (
@@ -60,7 +60,7 @@ const StartMigrationsBody: OnboardingCardComponent = React.memo(
             />
           )}
           <EuiSpacer size="m" />
-          <PanelText size="xs" subdued>
+          <PanelText size="xs" subdued cursive>
             <p>{i18n.START_MIGRATION_CARD_FOOTER_NOTE}</p>
           </PanelText>
         </OnboardingCardContentPanel>
