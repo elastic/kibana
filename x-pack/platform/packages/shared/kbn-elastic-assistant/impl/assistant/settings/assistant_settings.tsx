@@ -139,8 +139,13 @@ export const AssistantSettings: React.FC<Props> = React.memo(
         saveResult = await saveQuickPromptSettings();
       }
       if (selectedSettingsTab === SYSTEM_PROMPTS_TAB) {
-        const { conversationUpdates } = await saveSystemPromptSettings();
-        saveResult = await saveConversationsSettings(conversationUpdates);
+        const { success: systemPromptSuccess, conversationUpdates } =
+          await saveSystemPromptSettings();
+        if (systemPromptSuccess) {
+          saveResult = await saveConversationsSettings(conversationUpdates);
+        } else {
+          saveResult = false;
+        }
         await refetchSystemPromptConversations();
       }
       // onSave handles refetch (conversations and prompts), modal close and toast display

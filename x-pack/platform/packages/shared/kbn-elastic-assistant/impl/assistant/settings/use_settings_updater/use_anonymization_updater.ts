@@ -77,7 +77,7 @@ export const useAnonymizationUpdater = ({
       : undefined;
 
     setHasPendingChanges(false);
-    return bulkAnonymizationFieldsResult?.success ?? true;
+    return bulkAnonymizationFieldsResult?.success ?? false;
   }, [anonymizationFieldsBulkActions, http, toasts]);
 
   const onListUpdated = useCallback(

@@ -104,7 +104,7 @@ export const useConversationsUpdater = (
         });
       }
       setConversationsSettingsBulkActions({});
-      return bulkResult?.success ?? true;
+      return bulkResult?.success ?? false;
     },
     [
       http,
