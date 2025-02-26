@@ -23,32 +23,73 @@ const mockedOriginalRule = {
     '`sysmon` EventCode=7 process_name IN ("WINWORD.EXE", "EXCEL.EXE", "POWERPNT.EXE","onenote.exe","onenotem.exe","onenoteviewer.exe","onenoteim.exe","msaccess.exe") loaded_file_path IN ("*\\\\VBE7INTL.DLL","*\\\\VBE7.DLL", "*\\\\VBEUI.DLL") | stats min(_time) as firstTime max(_time) as lastTime values(loaded_file) as loaded_file count by dest EventCode process_name process_guid | `security_content_ctime(firstTime)` | `security_content_ctime(lastTime)` | `office_document_executing_macro_code_filter`',
 };
 
+const mockedIntegrationResult = {
+  id: 'testintegration',
+  title: 'testintegration',
+  description: 'testintegration',
+  data_streams: [
+    {
+      dataset: 'teststream',
+      title: 'teststream',
+      index_pattern: 'logs-testintegration-testdatastream-default',
+    },
+  ],
+  elser_embedding: 'testintegration - testintegration - teststream',
+};
+
+const mockedValidNlToEsqlResponse =
+  '```esql\nFROM logs-*\n| STATS web_event_count = COUNT(*) BY src, http_method\n| LOOKUP JOIN "app:count_by_http_method_by_src_1d" ON src\n```';
+
 const mockedOriginalInputLookup = {
   ...mockedOriginalRule,
   query: 'inputlookup something test',
 };
 
-const mockPrebuiltRules = [
-  {
-    rule_id: 'test-rule',
-    description: 'test-description',
-    name: 'Suspicious MS Office Child Process',
-  },
-];
+const mockPrebuiltRule = {
+  rule_id: 'test-rule',
+  description: 'test-description',
+  name: 'Suspicious MS Office Child Process',
+};
 
-const mockedIncorrectRuleName = [
-  {
-    rule_id: 'test-rule',
-    description: 'test-description',
-    name: 'wrong-name',
-  },
-];
+const mockedIncorrectRuleName = {
+  ...mockPrebuiltRule,
+  name: 'wrong-name',
+};
+
+const createSemanticQueryDefaultResponse = JSON.stringify({
+  semantic_query:
+    'web http abnormal high volume requests method source ip network traffic analysis datamodel web security',
+});
+
+const successfullPrebuiltMatchResponse = JSON.stringify({
+  match: 'Suspicious MS Office Child Process',
+  summary:
+    '## Prebuilt Rule Matching Summary\\nThe Splunk rule "Office Document Executing Macro Code" is closely related to the Elastic rule "Suspicious MS Office Child Process". Both rules aim to detect potentially malicious activity originating from Microsoft Office applications. While the Splunk rule specifically looks for the loading of macro-related DLLs, the Elastic rule takes a broader approach by monitoring for suspicious child processes of Office applications, which would include processes initiated by macro execution. The Elastic rule provides a more comprehensive coverage of potential threats, including but not limited to macro-based attacks, making it a suitable match for the given Splunk rule\'s intent.',
+});
+
+const noPrebuiltMatchResponse = JSON.stringify({
+  match: '',
+  summary: '## Prebuilt Rule Matching Summary\\n No matches found',
+});
+
+const noIntegrationMatchResponse = JSON.stringify({
+  match: '',
+  summary: '## Integration Matching Summary\\nNo related integration found.',
+});
+
+const integrationMatchResponse = JSON.stringify({
+  match: 'testintegration',
+  summary: '## Integration Matching Summary\\nNo Found one testintegration',
+});
 
 const mockRetriever = createRuleMigrationsRetrieverMock();
 const mockEsqlKnowledgeBase = createEsqlKnowledgeBaseMock();
 const telemetryClient = createSiemMigrationTelemetryClientMock();
 const logger = loggerMock.create();
 let fakeLLM: SiemMigrationFakeLLM;
+let mockedSearch: jest.Mock;
+let mockedEsqlKnowledgeBase: jest.Mock;
+let mockedIntegration: jest.Mock;
 
 const setupAgent = async (responses: NodeResponse[]) => {
   fakeLLM = new SiemMigrationFakeLLM({ nodeResponses: responses });
@@ -68,37 +109,28 @@ const setupAgent = async (responses: NodeResponse[]) => {
 };
 
 describe('getRuleMigrationAgent', () => {
+  beforeEach(() => {
+    mockedSearch = mockRetriever.prebuiltRules.search as jest.Mock;
+    mockedEsqlKnowledgeBase = mockEsqlKnowledgeBase.translate as jest.Mock;
+    mockedIntegration = mockRetriever.integrations.getIntegrations as jest.Mock;
+    jest.clearAllMocks();
+  });
   describe('graph compilation', () => {
-    beforeEach(() => {
-      jest.clearAllMocks();
-    });
     it('ensures that the graph compiles', async () => {
       await setupAgent([{ nodeId: '', response: '' }]);
     });
   });
   describe('prebuilt rules', () => {
-    beforeEach(() => {
-      jest.clearAllMocks();
-    });
     it('successful match', async () => {
-      const mockedSearch = mockRetriever.prebuiltRules.search as jest.Mock;
-
-      mockedSearch.mockResolvedValue(mockPrebuiltRules);
+      mockedSearch.mockResolvedValue([mockPrebuiltRule]);
       const graph = await setupAgent([
         {
           nodeId: 'createSemanticQuery',
-          response: JSON.stringify({
-            semantic_query:
-              'web http abnormal high volume requests method source ip network traffic analysis datamodel web security',
-          }),
+          response: createSemanticQueryDefaultResponse,
         },
         {
           nodeId: 'matchPrebuiltRule',
-          response: JSON.stringify({
-            match: 'Suspicious MS Office Child Process',
-            summary:
-              '## Prebuilt Rule Matching Summary\\nThe Splunk rule "Office Document Executing Macro Code" is closely related to the Elastic rule "Suspicious MS Office Child Process". Both rules aim to detect potentially malicious activity originating from Microsoft Office applications. While the Splunk rule specifically looks for the loading of macro-related DLLs, the Elastic rule takes a broader approach by monitoring for suspicious child processes of Office applications, which would include processes initiated by macro execution. The Elastic rule provides a more comprehensive coverage of potential threats, including but not limited to macro-based attacks, making it a suitable match for the given Splunk rule\'s intent.',
-          }),
+          response: successfullPrebuiltMatchResponse,
         },
       ]);
       const response = await graph.invoke({ original_rule: mockedOriginalRule });
@@ -107,24 +139,15 @@ describe('getRuleMigrationAgent', () => {
       expect(fakeLLM.getNodeCallCount('matchPrebuiltRule')).toBe(1);
     });
     it('llm respond with non existing integration name', async () => {
-      const mockedSearch = mockRetriever.prebuiltRules.search as jest.Mock;
-      mockedSearch.mockResolvedValue(mockedIncorrectRuleName);
-
+      mockedSearch.mockResolvedValue([mockedIncorrectRuleName]);
       const graph = await setupAgent([
         {
           nodeId: 'createSemanticQuery',
-          response: JSON.stringify({
-            semantic_query:
-              'web http abnormal high volume requests method source ip network traffic analysis datamodel web security',
-          }),
+          response: createSemanticQueryDefaultResponse,
         },
         {
           nodeId: 'matchPrebuiltRule',
-          response: JSON.stringify({
-            match: 'Suspicious MS Office Child Process',
-            summary:
-              '## Prebuilt Rule Matching Summary\\nThe Splunk rule "Office Document Executing Macro Code" is closely related to the Elastic rule "Suspicious MS Office Child Process". Both rules aim to detect potentially malicious activity originating from Microsoft Office applications. While the Splunk rule specifically looks for the loading of macro-related DLLs, the Elastic rule takes a broader approach by monitoring for suspicious child processes of Office applications, which would include processes initiated by macro execution. The Elastic rule provides a more comprehensive coverage of potential threats, including but not limited to macro-based attacks, making it a suitable match for the given Splunk rule\'s intent.',
-          }),
+          response: successfullPrebuiltMatchResponse,
         },
       ]);
 
@@ -135,22 +158,15 @@ describe('getRuleMigrationAgent', () => {
       expect(fakeLLM.getNodeCallCount('matchPrebuiltRule')).toBe(1);
     });
     it('no prebuilt rule matches', async () => {
-      const mockedSearch = mockRetriever.prebuiltRules.search as jest.Mock;
       mockedSearch.mockResolvedValue([]);
       const graph = await setupAgent([
         {
           nodeId: 'createSemanticQuery',
-          response: JSON.stringify({
-            semantic_query:
-              'web http abnormal high volume requests method source ip network traffic analysis datamodel web security',
-          }),
+          response: createSemanticQueryDefaultResponse,
         },
         {
           nodeId: 'matchPrebuiltRule',
-          response: JSON.stringify({
-            match: '',
-            summary: '## Prebuilt Rule Matching Summary\\n No matches found',
-          }),
+          response: noPrebuiltMatchResponse,
         },
       ]);
       const response = await graph.invoke({ original_rule: mockedOriginalRule });
@@ -159,26 +175,16 @@ describe('getRuleMigrationAgent', () => {
     });
   });
   describe('custom translation', () => {
-    beforeEach(() => {
-      jest.clearAllMocks();
-    });
     it('unsupported query', async () => {
-      const mockedSearch = mockRetriever.prebuiltRules.search as jest.Mock;
-      mockedSearch.mockResolvedValue(mockPrebuiltRules);
+      mockedSearch.mockResolvedValue([mockPrebuiltRule]);
       const graph = await setupAgent([
         {
           nodeId: 'createSemanticQuery',
-          response: JSON.stringify({
-            semantic_query:
-              'web http abnormal high volume requests method source ip network traffic analysis datamodel web security',
-          }),
+          response: createSemanticQueryDefaultResponse,
         },
         {
           nodeId: 'matchPrebuiltRule',
-          response: JSON.stringify({
-            match: '',
-            summary: '## Prebuilt Rule Matching Summary\\n No matches found',
-          }),
+          response: noPrebuiltMatchResponse,
         },
       ]);
 
@@ -189,33 +195,20 @@ describe('getRuleMigrationAgent', () => {
       expect(fakeLLM.getNodeCallCount('inlineQuery')).toBe(0);
     });
     it('no integrations found in RAG and partial results', async () => {
-      const mockedSearch = mockRetriever.prebuiltRules.search as jest.Mock;
-      const mockedEsqlKnowledgeBase = mockEsqlKnowledgeBase.translate as jest.Mock;
-      mockedEsqlKnowledgeBase.mockResolvedValue(
-        '```esql\nFROM logs-*\n| STATS web_event_count = COUNT(*) BY src, http_method\n| LOOKUP JOIN "app:count_by_http_method_by_src_1d" ON src\n```'
-      );
-      mockedSearch.mockResolvedValue(mockPrebuiltRules);
+      mockedEsqlKnowledgeBase.mockResolvedValue(mockedValidNlToEsqlResponse);
+      mockedSearch.mockResolvedValue([mockPrebuiltRule]);
       const graph = await setupAgent([
         {
           nodeId: 'createSemanticQuery',
-          response: JSON.stringify({
-            semantic_query:
-              'web http abnormal high volume requests method source ip network traffic analysis datamodel web security',
-          }),
+          response: createSemanticQueryDefaultResponse,
         },
         {
           nodeId: 'matchPrebuiltRule',
-          response: JSON.stringify({
-            match: 'test',
-            summary: '## Prebuilt Rule Matching Summary\\n No matches found',
-          }),
+          response: noPrebuiltMatchResponse,
         },
         {
           nodeId: 'retrieveIntegrations',
-          response: JSON.stringify({
-            match: '',
-            summary: '## Integration Matching Summary\\nNo related integration found.',
-          }),
+          response: noIntegrationMatchResponse,
         },
       ]);
       const response = await graph.invoke({ original_rule: mockedOriginalRule });
@@ -225,48 +218,21 @@ describe('getRuleMigrationAgent', () => {
       expect(fakeLLM.getNodeCallCount('retrieveIntegrations')).toBe(0);
     });
     it('integration found and full translation results', async () => {
-      const mockedSearch = mockRetriever.prebuiltRules.search as jest.Mock;
-      const mockedIntegration = mockRetriever.integrations.getIntegrations as jest.Mock;
-      const mockedEsqlKnowledgeBase = mockEsqlKnowledgeBase.translate as jest.Mock;
-      mockedEsqlKnowledgeBase.mockResolvedValue(
-        '```esql\nFROM logs-testintegration\n| STATS web_event_count = COUNT(*) BY src, http_method\n| LOOKUP JOIN "app:count_by_http_method_by_src_1d" ON src\n```'
-      );
-      mockedSearch.mockResolvedValue(mockPrebuiltRules);
-      const mockedIntegrationResult = {
-        id: 'testintegration',
-        title: 'testintegration',
-        description: 'testintegration',
-        data_streams: [
-          {
-            dataset: 'teststream',
-            title: 'teststream',
-            index_pattern: 'logs-testintegration-testdatastream-default',
-          },
-        ],
-        elser_embedding: 'testintegration - testintegration - teststream',
-      };
+      mockedEsqlKnowledgeBase.mockResolvedValue(mockedValidNlToEsqlResponse);
+      mockedSearch.mockResolvedValue([mockPrebuiltRule]);
       mockedIntegration.mockResolvedValue([mockedIntegrationResult]);
       const graph = await setupAgent([
         {
           nodeId: 'createSemanticQuery',
-          response: JSON.stringify({
-            semantic_query:
-              'web http abnormal high volume requests method source ip network traffic analysis datamodel web security',
-          }),
+          response: createSemanticQueryDefaultResponse,
         },
         {
           nodeId: 'matchPrebuiltRule',
-          response: JSON.stringify({
-            match: 'test',
-            summary: '## Prebuilt Rule Matching Summary\\n No matches found',
-          }),
+          response: noPrebuiltMatchResponse,
         },
         {
           nodeId: 'retrieveIntegrations',
-          response: JSON.stringify({
-            match: 'testintegration',
-            summary: '## Integration Matching Summary\\nNo related integration found.',
-          }),
+          response: integrationMatchResponse,
         },
       ]);
       const response = await graph.invoke({ original_rule: mockedOriginalRule });
