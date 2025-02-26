@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { type Subject, ReplaySubject, Observable, map, distinctUntilChanged } from 'rxjs';
-import {
+import type { Observable } from 'rxjs';
+import { type Subject, ReplaySubject, map, distinctUntilChanged } from 'rxjs';
+import type {
   PluginInitializerContext,
   Plugin,
   CoreSetup,
@@ -15,8 +16,8 @@ import {
   CoreStart,
   IContextProvider,
   CoreStatus,
-  ServiceStatusLevels,
 } from '@kbn/core/server';
+import { ServiceStatusLevels } from '@kbn/core/server';
 
 import type { AlertingServerSetup, AlertingServerStart } from '@kbn/alerting-plugin/server';
 import type { SecurityPluginSetup } from '@kbn/security-plugin/server';
