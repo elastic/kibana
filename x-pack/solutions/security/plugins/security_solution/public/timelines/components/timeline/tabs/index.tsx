@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiBadge, EuiSkeletonText, EuiTabs, EuiTab, EuiLoadingElastic } from '@elastic/eui';
+import { EuiBadge, EuiSkeletonText, EuiTabs, EuiTab } from '@elastic/eui';
 import { isEmpty } from 'lodash/fp';
 import type { Ref, ReactElement, ComponentType } from 'react';
 import React, { lazy, memo, Suspense, useCallback, useEffect, useMemo } from 'react';
