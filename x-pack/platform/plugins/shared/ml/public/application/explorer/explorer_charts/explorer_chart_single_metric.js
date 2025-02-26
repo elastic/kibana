@@ -36,7 +36,6 @@ import { formatValue } from '../../formatters/format_value';
 import {
   LINE_CHART_ANOMALY_RADIUS,
   MULTI_BUCKET_SYMBOL_SIZE,
-  SCHEDULED_EVENT_SYMBOL_HEIGHT,
   drawLineChartDots,
   getTickValues,
   numTicksForDateFormat,
@@ -475,7 +474,7 @@ export class ExplorerChartSingleMetric extends React.Component {
         .enter()
         .append('rect')
         .attr('width', LINE_CHART_ANOMALY_RADIUS * 2)
-        .attr('height', SCHEDULED_EVENT_SYMBOL_HEIGHT)
+        .attr('height', LINE_CHART_ANOMALY_RADIUS * 2)
         .attr('class', 'scheduled-event-marker')
         .attr('rx', 1)
         .attr('ry', 1);
@@ -489,7 +488,7 @@ export class ExplorerChartSingleMetric extends React.Component {
             // Fallback with domain's min value if value is null
             // To ensure event markers are rendered properly at the bottom of the chart
             lineChartYScale(d.value !== null ? d.value : lineChartYScale.domain()[0]) -
-            SCHEDULED_EVENT_SYMBOL_HEIGHT / 2
+            LINE_CHART_ANOMALY_RADIUS
         );
     }
 
