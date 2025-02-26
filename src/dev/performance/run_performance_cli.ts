@@ -42,7 +42,8 @@ interface JourneyTargetGroups {
 const journeyTargetGroups: JourneyTargetGroups = {
   kibanaStartAndLoad: ['login'],
   crud: ['tags_listing_page', 'dashboard_listing_page'],
-  dashboard: ['ecommerce_dashboard', 'data_stress_test_lens', 'flight_dashboard'],
+  // dashboard: ['ecommerce_dashboard', 'data_stress_test_lens', 'flight_dashboard'],
+  dashboard: ['data_stress_test_lens'],
   discover: ['many_fields_discover', 'many_fields_discover_esql'],
   maps: ['ecommerce_dashboard_map_only'],
   ml: ['aiops_log_rate_analysis', 'many_fields_transform', 'tsdb_logs_data_visualizer'],
@@ -172,7 +173,8 @@ run(
     const skipWarmup = flagsReader.boolean('skip-warmup');
     const kibanaInstallDir = flagsReader.path('kibana-install-dir');
     const journeyPath = flagsReader.path('journey-path');
-    const group = flagsReader.string('group');
+    // const group = flagsReader.string('group');
+    const group = 'dashboard';
 
     if (group && journeyPath) {
       throw createFlagError('--group and --journeyPath cannot be used simultaneously');

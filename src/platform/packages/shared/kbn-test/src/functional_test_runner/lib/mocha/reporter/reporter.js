@@ -73,7 +73,7 @@ export function MochaReporterProvider({ getService }) {
     }
 
     onStart = () => {
-      if (config.get('mochaReporter.captureLogOutput')) {
+      if (false && config.get('mochaReporter.captureLogOutput')) {
         log.warning(
           'debug logs are being captured, only error logs will be written to the console'
         );
