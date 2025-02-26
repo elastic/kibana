@@ -12,13 +12,14 @@ import {
   getOffsetFromNowInSeconds,
   getTimeDifferenceInSeconds,
 } from '@kbn/timerange';
-import { EventData } from '../performance_context';
+import { Description, EventData } from '../performance_context';
 import { perfomanceMarkers } from '../../performance_markers';
 
 interface PerformanceMeta {
   queryRangeSecs: number;
   queryOffsetSecs: number;
   isInitialLoad?: boolean;
+  description?: Description;
 }
 
 export function measureInteraction(pathname: string) {
@@ -35,7 +36,7 @@ export function measureInteraction(pathname: string) {
       performance.mark(perfomanceMarkers.endPageReady);
 
       if (eventData?.meta) {
-        const { rangeFrom, rangeTo } = eventData.meta;
+        const { rangeFrom, rangeTo, description } = eventData.meta;
 
         // Convert the date range  to epoch timestamps (in milliseconds)
         const dateRangesInEpoch = getDateRange({
@@ -47,6 +48,7 @@ export function measureInteraction(pathname: string) {
           queryRangeSecs: getTimeDifferenceInSeconds(dateRangesInEpoch),
           queryOffsetSecs:
             rangeTo === 'now' ? 0 : getOffsetFromNowInSeconds(dateRangesInEpoch.endDate),
+          description,
         };
       }
 
