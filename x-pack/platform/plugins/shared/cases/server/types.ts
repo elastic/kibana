@@ -64,6 +64,7 @@ export interface CasesServerStartDependencies {
 
 export interface CaseRequestContext {
   getCasesClient: () => Promise<CasesClient>;
+  spaces: CasesServerSetupDependencies['spaces'];
 }
 
 export type CasesRequestHandlerContext = CustomRequestHandlerContext<{
