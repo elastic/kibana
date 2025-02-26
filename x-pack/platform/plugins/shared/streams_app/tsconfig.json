@@ -56,5 +56,6 @@
     "@kbn/search-types",
     "@kbn/object-utils",
     "@kbn/traced-es-client",
+    "@kbn/licensing-plugin",
   ]
 }

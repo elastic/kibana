@@ -48,52 +48,50 @@ export class GetSLOStatsOverview {
           must_not: [...(parsedFilters.must_not ?? [])],
         },
       },
-      body: {
-        aggs: {
-          stale: {
-            filter: {
-              range: {
-                summaryUpdatedAt: {
-                  lt: `now-${settings.staleThresholdInHours}h`,
-                },
+      aggs: {
+        stale: {
+          filter: {
+            range: {
+              summaryUpdatedAt: {
+                lt: `now-${settings.staleThresholdInHours}h`,
               },
             },
           },
-          not_stale: {
-            filter: {
-              range: {
-                summaryUpdatedAt: {
-                  gte: `now-${settings.staleThresholdInHours}h`,
+        },
+        not_stale: {
+          filter: {
+            range: {
+              summaryUpdatedAt: {
+                gte: `now-${settings.staleThresholdInHours}h`,
+              },
+            },
+          },
+          aggs: {
+            violated: {
+              filter: {
+                term: {
+                  status: 'VIOLATED',
                 },
               },
             },
-            aggs: {
-              violated: {
-                filter: {
-                  term: {
-                    status: 'VIOLATED',
-                  },
+            healthy: {
+              filter: {
+                term: {
+                  status: 'HEALTHY',
                 },
               },
-              healthy: {
-                filter: {
-                  term: {
-                    status: 'HEALTHY',
-                  },
+            },
+            degrading: {
+              filter: {
+                term: {
+                  status: 'DEGRADING',
                 },
               },
-              degrading: {
-                filter: {
-                  term: {
-                    status: 'DEGRADING',
-                  },
-                },
-              },
-              noData: {
-                filter: {
-                  term: {
-                    status: 'NO_DATA',
-                  },
+            },
+            noData: {
+              filter: {
+                term: {
+                  status: 'NO_DATA',
                 },
               },
             },
