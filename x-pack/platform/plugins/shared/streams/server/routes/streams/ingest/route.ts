@@ -76,8 +76,8 @@ const upsertIngestRoute = createServerRoute({
     });
 
     if (
-      !(await streamsClient.isStreamsEnabled()) &&
-      isWiredStreamDefinition({ name: params.path.name, ...params.body })
+      isWiredStreamDefinition({ name: params.path.name, ...params.body }) &&
+      !(await streamsClient.isStreamsEnabled())
     ) {
       throw badData('Streams are not enabled for Wired streams.');
     }
