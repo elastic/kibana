@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { FtrProviderContext } from '../../../common/ftr_provider_context';
+import type { FtrProviderContext } from '../../../common/ftr_provider_context';
 import { createSpaces, deleteSpaces } from '../../../common/lib/authentication';
 
 // eslint-disable-next-line import/no-default-export
