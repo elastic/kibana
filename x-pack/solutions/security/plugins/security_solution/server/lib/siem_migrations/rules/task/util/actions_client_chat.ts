@@ -17,6 +17,7 @@ import type { CustomChatModelInput as ActionsClientBedrockChatModelParams } from
 import type { ActionsClientChatOpenAIParams } from '@kbn/langchain/server/language_models/chat_openai';
 import type { CustomChatModelInput as ActionsClientChatVertexAIParams } from '@kbn/langchain/server/language_models/gemini_chat';
 import type { CustomChatModelInput as ActionsClientSimpleChatModelParams } from '@kbn/langchain/server/language_models/simple_chat_model';
+import { TELEMETRY_SIEM_MIGRATION_ID } from './constants';
 
 export type ChatModel =
   | ActionsClientSimpleChatModel
@@ -42,17 +43,23 @@ const llmTypeDictionary: Record<string, string> = {
   [`.inference`]: `inference`,
 };
 
-export class ActionsClientChat {
-  constructor(
-    private readonly connectorId: string,
-    private readonly actionsClient: ActionsClient,
-    private readonly logger: Logger
-  ) {}
+interface CreateModelParams {
+  migrationId: string;
+  connectorId: string;
+  abortController: AbortController;
+}
 
-  public async createModel(params?: ChatModelParams): Promise<ChatModel> {
-    const connector = await this.actionsClient.get({ id: this.connectorId });
+export class ActionsClientChat {
+  constructor(private readonly actionsClient: ActionsClient, private readonly logger: Logger) {}
+
+  public async createModel({
+    migrationId,
+    connectorId,
+    abortController,
+  }: CreateModelParams): Promise<ChatModel> {
+    const connector = await this.actionsClient.get({ id: connectorId });
     if (!connector) {
-      throw new Error(`Connector not found: ${this.connectorId}`);
+      throw new Error(`Connector not found: ${connectorId}`);
     }
 
     const llmType = this.getLLMType(connector.actionTypeId);
@@ -60,12 +67,15 @@ export class ActionsClientChat {
 
     const model = new ChatModelClass({
       actionsClient: this.actionsClient,
-      connectorId: this.connectorId,
-      logger: this.logger,
+      connectorId,
       llmType,
       model: connector.config?.defaultModel,
-      ...params,
-      streaming: false, // disabling streaming by default
+      streaming: false,
+      temperature: 0.05,
+      maxRetries: 1, // Only retry once inside the model, we will handle backoff retries in the task runner
+      telemetryMetadata: { pluginId: TELEMETRY_SIEM_MIGRATION_ID, aggregateBy: migrationId },
+      signal: abortController.signal,
+      logger: this.logger,
     });
     return model;
   }

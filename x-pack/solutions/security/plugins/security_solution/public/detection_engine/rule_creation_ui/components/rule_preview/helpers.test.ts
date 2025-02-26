@@ -269,6 +269,78 @@ describe('query_preview/helpers', () => {
       expect(isDisabled).toEqual(false);
     });
 
+    test('disabled when eql rule with empty query and non-empty filters', () => {
+      const isDisabled = getIsRulePreviewDisabled({
+        ruleType: 'eql',
+        isQueryBarValid: true,
+        isThreatQueryBarValid: false,
+        index: ['test-*'],
+        dataViewId: undefined,
+        dataSourceType: DataSourceType.IndexPatterns,
+        threatIndex: [],
+        threatMapping: [],
+        machineLearningJobId: [],
+        queryBar: {
+          filters: [
+            {
+              meta: {},
+              query: {
+                exists: {
+                  field: '_index',
+                },
+              },
+            },
+          ],
+          query: { query: '', language: 'eql' },
+          saved_id: null,
+        },
+        newTermsFields: [],
+      });
+      expect(isDisabled).toEqual(true);
+    });
+
+    test('disabled when eql rule with empty query and empty filters', () => {
+      const isDisabled = getIsRulePreviewDisabled({
+        ruleType: 'eql',
+        isQueryBarValid: true,
+        isThreatQueryBarValid: false,
+        index: ['test-*'],
+        dataViewId: undefined,
+        dataSourceType: DataSourceType.IndexPatterns,
+        threatIndex: [],
+        threatMapping: [],
+        machineLearningJobId: [],
+        queryBar: {
+          filters: [],
+          query: { query: '', language: 'eql' },
+          saved_id: null,
+        },
+        newTermsFields: [],
+      });
+      expect(isDisabled).toEqual(true);
+    });
+
+    test('enabled when eql rule with non empty query', () => {
+      const isDisabled = getIsRulePreviewDisabled({
+        ruleType: 'eql',
+        isQueryBarValid: true,
+        isThreatQueryBarValid: false,
+        index: ['test-*'],
+        dataViewId: undefined,
+        dataSourceType: DataSourceType.IndexPatterns,
+        threatIndex: [],
+        threatMapping: [],
+        machineLearningJobId: [],
+        queryBar: {
+          filters: [],
+          query: { query: 'any where true', language: 'eql' },
+          saved_id: null,
+        },
+        newTermsFields: [],
+      });
+      expect(isDisabled).toEqual(false);
+    });
+
     // ML rule does not have index or data view id properties, so preview should not depend on these fields
     test('enabled for ML rule when index patterns and data view id are empty', () => {
       const isDisabled = getIsRulePreviewDisabled({

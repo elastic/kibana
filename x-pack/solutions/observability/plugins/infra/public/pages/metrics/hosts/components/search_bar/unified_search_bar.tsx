@@ -8,6 +8,7 @@
 import React, { useCallback } from 'react';
 import type { TimeRange } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
+import { usePerformanceContext } from '@kbn/ebt-tools';
 import { useEuiTheme, EuiHorizontalRule, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { useKibanaContextForPlugin } from '../../../../../hooks/use_kibana';
@@ -24,6 +25,7 @@ export const UnifiedSearchBar = () => {
   const { metricsView } = useMetricsDataViewContext();
   const { searchCriteria, onLimitChange, onPanelFiltersChange, onSubmit } =
     useUnifiedSearchContext();
+  const { onPageRefreshStart } = usePerformanceContext();
 
   const { SearchBar } = unifiedSearch.ui;
 
@@ -32,9 +34,10 @@ export const UnifiedSearchBar = () => {
       // This makes sure `onSubmit` is only called when the submit button is clicked
       if (isUpdate === false) {
         onSubmit(payload);
+        onPageRefreshStart();
       }
     },
-    [onSubmit]
+    [onSubmit, onPageRefreshStart]
   );
 
   return (
