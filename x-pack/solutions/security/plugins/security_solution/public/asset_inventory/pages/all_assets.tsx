@@ -19,7 +19,6 @@ import {
   type UnifiedDataTableSettingsColumn,
 } from '@kbn/unified-data-table';
 import { CellActionsProvider } from '@kbn/cell-actions';
-import { type HttpSetup } from '@kbn/core-http-browser';
 import { SHOW_MULTIFIELDS, SORT_DEFAULT_ORDER_SETTING } from '@kbn/discover-utils';
 import { type DataTableRecord } from '@kbn/discover-utils/types';
 import {
@@ -51,6 +50,7 @@ import { AssetInventorySearchBar } from '../components/search_bar';
 import { RiskBadge } from '../components/risk_badge';
 import { Filters } from '../components/filters/filters';
 import { EmptyState } from '../components/empty_state';
+import { TopAssetsBarChart } from '../components/top_assets_bar_chart';
 
 import { useDataViewContext } from '../hooks/data_view_context';
 import { useStyles } from '../hooks/use_styles';
@@ -59,8 +59,18 @@ import {
   type AssetsBaseURLQuery,
   type URLQuery,
 } from '../hooks/use_asset_inventory_data_table';
-import { useFetchData } from '../hooks/use_fetch_data';
-import { DEFAULT_VISIBLE_ROWS_PER_PAGE, MAX_ASSETS_TO_LOAD } from '../constants';
+import { useFetchGridData } from '../hooks/use_fetch_grid_data';
+import { useFetchChartData } from '../hooks/use_fetch_chart_data';
+import {
+  DEFAULT_VISIBLE_ROWS_PER_PAGE,
+  MAX_ASSETS_TO_LOAD,
+  ASSET_INVENTORY_TABLE_ID,
+  ASSET_INVENTORY_TEST_SUBJ_GRID,
+  ASSET_INVENTORY_TEST_SUBJ_PAGE_TITLE,
+  LOCAL_STORAGE_COLUMNS_KEY,
+  LOCAL_STORAGE_COLUMNS_SETTINGS_KEY,
+  LOCAL_STORAGE_DATA_TABLE_PAGE_SIZE_KEY,
+} from '../constants';
 
 const gridStyle: EuiDataGridStyle = {
   border: 'horizontal',
@@ -72,9 +82,6 @@ const gridStyle: EuiDataGridStyle = {
 const title = i18n.translate('xpack.securitySolution.assetInventory.allAssets.tableRowTypeLabel', {
   defaultMessage: 'assets',
 });
-
-const columnsLocalStorageKey = 'assetInventoryColumns';
-const LOCAL_STORAGE_DATA_TABLE_PAGE_SIZE_KEY = 'assetInventory:dataTable:pageSize';
 
 const columnHeaders: Record<string, string> = {
   'asset.risk': i18n.translate('xpack.securitySolution.assetInventory.allAssets.risk', {
@@ -129,17 +136,6 @@ const getDefaultQuery = ({ query, filters }: AssetsBaseURLQuery): URLQuery => ({
   sort: [['@timestamp', 'desc']],
 });
 
-export interface AllAssetsProps {
-  height?: number | string;
-  nonPersistedFilters?: Filter[];
-  hasDistributionBar?: boolean;
-  /**
-   * This function will be used in the control column to create a rule for a specific finding.
-   */
-  createFn?: (rowIndex: number) => ((http: HttpSetup) => Promise<unknown>) | undefined;
-  'data-test-subj'?: string;
-}
-
 // TODO: Asset Inventory - adjust and remove type casting once we have real universal entity data
 const getEntity = (row: DataTableRecord): EntityEcs => {
   return {
@@ -150,21 +146,24 @@ const getEntity = (row: DataTableRecord): EntityEcs => {
   };
 };
 
-const ASSET_INVENTORY_TABLE_ID = 'asset-inventory-table';
-
-const AllAssets = ({
-  nonPersistedFilters,
-  height,
-  hasDistributionBar = true,
-  createFn,
-  ...rest
-}: AllAssetsProps) => {
+const AllAssets = () => {
   const { euiTheme } = useEuiTheme();
-  const assetInventoryDataTable = useAssetInventoryDataTable({
+
+  const {
+    pageSize,
+    sort,
+    query,
+    queryError,
+    urlQuery,
+    getRowsFromPages,
+    onChangeItemsPerPage,
+    onResetFilters,
+    onSort,
+    setUrlQuery,
+  } = useAssetInventoryDataTable({
     paginationLocalStorageKey: LOCAL_STORAGE_DATA_TABLE_PAGE_SIZE_KEY,
-    columnsLocalStorageKey,
+    columnsLocalStorageKey: LOCAL_STORAGE_COLUMNS_KEY,
     defaultQuery: getDefaultQuery,
-    nonPersistedFilters,
   });
 
   // Table Flyout Controls -------------------------------------------------------------------
@@ -191,43 +190,41 @@ const AllAssets = ({
   };
 
   // -----------------------------------------------------------------------------------------
-  const {
-    filters,
-    pageSize,
-    sort,
-    query,
-    queryError,
-    urlQuery,
-    getRowsFromPages,
-    onChangeItemsPerPage,
-    onResetFilters,
-    onSort,
-    setUrlQuery,
-  } = assetInventoryDataTable;
 
   const {
     data: rowsData,
     // error: fetchError,
-    isFetching,
     fetchNextPage: loadMore,
-    isLoading,
-  } = useFetchData({
+    isFetching: isFetchingGridData,
+    isLoading: isLoadingGridData,
+  } = useFetchGridData({
     query,
     sort,
     enabled: !queryError,
     pageSize: DEFAULT_VISIBLE_ROWS_PER_PAGE,
   });
 
+  const {
+    data: chartData,
+    // error: fetchChartDataError,
+    isFetching: isFetchingChartData,
+    isLoading: isLoadingChartData,
+  } = useFetchChartData({
+    query,
+    sort,
+    enabled: !queryError,
+  });
+
   const rows = getRowsFromPages(rowsData?.pages);
   const totalHits = rowsData?.pages[0].total || 0;
 
   const [columns, setColumns] = useLocalStorage(
-    columnsLocalStorageKey,
+    LOCAL_STORAGE_COLUMNS_KEY,
     defaultColumns.map((c) => c.id)
   );
 
   const [persistedSettings, setPersistedSettings] = useLocalStorage<UnifiedDataTableSettings>(
-    `${columnsLocalStorageKey}:settings`,
+    LOCAL_STORAGE_COLUMNS_SETTINGS_KEY,
     {
       columns: defaultColumns.reduce((columnSettings, column) => {
         const columnDefaultSettings = column.width ? { width: column.width } : {};
@@ -260,16 +257,12 @@ const AllAssets = ({
     uiSettings,
     dataViews,
     data,
-    application,
+    application: { capabilities },
     theme,
     fieldFormats,
     notifications,
     storage,
   } = useKibana().services;
-
-  const styles = useStyles();
-
-  const { capabilities } = application;
   const { filterManager } = data.query;
 
   const services = {
@@ -280,6 +273,8 @@ const AllAssets = ({
     storage,
     data,
   };
+
+  const styles = useStyles();
 
   const {
     columns: currentColumns,
@@ -305,22 +300,18 @@ const AllAssets = ({
     const isVirtualizationEnabled = pageSize >= 100;
 
     const getWrapperHeight = () => {
-      if (height) return height;
-
       // If virtualization is not needed the table will render unconstrained.
       if (!isVirtualizationEnabled) return 'auto';
 
       const baseHeight = 362; // height of Kibana Header + Findings page header and search bar
-      const filterBarHeight = filters?.length > 0 ? 40 : 0;
-      const distributionBarHeight = hasDistributionBar ? 52 : 0;
-      return `calc(100vh - ${baseHeight}px - ${filterBarHeight}px - ${distributionBarHeight}px)`;
+      return `calc(100vh - ${baseHeight}px)`;
     };
 
     return {
       wrapperHeight: getWrapperHeight(),
       mode: isVirtualizationEnabled ? 'virtualized' : 'standard',
     };
-  }, [pageSize, height, filters?.length, hasDistributionBar]);
+  }, [pageSize]);
 
   const onAddFilter: AddFieldFilterHandler | undefined = useMemo(
     () =>
@@ -371,7 +362,6 @@ const AllAssets = ({
       columns={currentColumns}
       onAddColumn={onAddColumn}
       onRemoveColumn={onRemoveColumn}
-      // groupSelectorComponent={groupSelectorComponent}
       onResetColumns={onResetColumns}
     />
   );
@@ -381,7 +371,7 @@ const AllAssets = ({
       id: 'take-action',
       width: 20,
       headerCellRender: () => null,
-      rowCellRender: ({ rowIndex }) => (
+      rowCellRender: () => (
         <EuiButtonIcon
           aria-label={i18n.translate(
             'xpack.securitySolution.assetInventory.flyout.moreActionsButton',
@@ -391,33 +381,24 @@ const AllAssets = ({
           )}
           iconType="boxesHorizontal"
           color="primary"
-          isLoading={isLoading}
-          // onClick={() => createFn(rowIndex)}
+          isLoading={isLoadingGridData}
         />
       ),
     },
   ];
 
-  const loadingStyle = {
-    opacity: isLoading ? 1 : 0,
-  };
-
   const loadingState =
-    isLoading || isFetching || dataViewIsLoading || dataViewIsRefetching || !dataView
-      ? DataLoadingState.loading
-      : DataLoadingState.loaded;
+    isLoadingGridData || !dataView ? DataLoadingState.loading : DataLoadingState.loaded;
 
   return (
     <I18nProvider>
-      {!dataView ? null : (
-        <AssetInventorySearchBar
-          query={urlQuery}
-          setQuery={setUrlQuery}
-          loading={loadingState === DataLoadingState.loading}
-        />
-      )}
+      <AssetInventorySearchBar
+        query={urlQuery}
+        setQuery={setUrlQuery}
+        loading={loadingState === DataLoadingState.loading}
+      />
       <EuiPageTemplate.Section>
-        <EuiTitle size="l" data-test-subj="all-assets-title">
+        <EuiTitle size="l" data-test-subj={ASSET_INVENTORY_TEST_SUBJ_PAGE_TITLE}>
           <h1>
             <FormattedMessage
               id="xpack.securitySolution.assetInventory.allAssets"
@@ -447,15 +428,22 @@ const AllAssets = ({
             setUrlQuery({ filters: newFilters });
           }}
         />
+        {dataView ? (
+          <TopAssetsBarChart
+            isLoading={isLoadingChartData}
+            isFetching={isFetchingChartData}
+            entities={!!chartData && chartData.length > 0 ? chartData : []}
+          />
+        ) : null}
         <CellActionsProvider getTriggerCompatibleActions={uiActions.getTriggerCompatibleActions}>
           <div
-            data-test-subj={rest['data-test-subj']}
+            data-test-subj={ASSET_INVENTORY_TEST_SUBJ_GRID}
             className={styles.gridContainer}
             style={{
               height: computeDataTableRendering.wrapperHeight,
             }}
           >
-            <EuiProgress size="xs" color="accent" style={loadingStyle} />
+            <EuiProgress size="xs" color="accent" style={{ opacity: isFetchingGridData ? 1 : 0 }} />
             {!dataView ? null : loadingState === DataLoadingState.loaded && totalHits === 0 ? (
               <EmptyState onResetFilters={onResetFilters} />
             ) : (
@@ -491,8 +479,6 @@ const AllAssets = ({
                 gridStyleOverride={gridStyle}
                 rowLineHeightOverride="24px"
                 dataGridDensityState={DataGridDensity.EXPANDED}
-                showFullScreenButton
-                // showKeyboardShortcuts
               />
             )}
           </div>
