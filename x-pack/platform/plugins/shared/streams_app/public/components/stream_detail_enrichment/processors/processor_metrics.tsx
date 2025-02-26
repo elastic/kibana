@@ -101,7 +101,9 @@ export const ProcessorErrors = ({ metrics }: { metrics: ProcessorMetrics }) => {
   const shouldDisplayErrorToggle = remainingCount > 0;
 
   const getCalloutProps = (type: ProcessorMetrics['errors'][number]['type']): EuiCallOutProps => {
-    const isWarningError = type === 'generic_processor_failure' && success_rate > 0;
+    const isWarningError =
+      type === 'non_additive_processor_failure' ||
+      (type === 'generic_processor_failure' && success_rate > 0);
 
     return {
       color: isWarningError ? 'warning' : 'danger',

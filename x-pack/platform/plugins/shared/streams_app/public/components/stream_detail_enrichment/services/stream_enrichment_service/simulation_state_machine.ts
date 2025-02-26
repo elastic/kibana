@@ -130,13 +130,14 @@ export const simulationMachine = setup({
     storeSimulation: assign((_, params: { simulation: Simulation }) => ({
       simulation: params.simulation,
     })),
+    derivePreviewColumns: assign(
+      ({ context }, params: { processors: ProcessorDefinitionWithUIAttributes[] }) => ({
+        previewColumns: derivePreviewColumnsHelper(context, params.processors),
+      })
+    ),
     derivePreviewConfig: assign(({ context }) => {
       return {
-        previewColumns: getTableColumns(
-          context.processors,
-          context.simulation?.detected_fields ?? [],
-          context.previewDocsFilter
-        ),
+        previewColumns: derivePreviewColumnsHelper(context, context.processors),
         previewDocuments: context.simulation
           ? filterSimulationDocuments(context.simulation.documents, context.previewDocsFilter)
           : context.samples,
@@ -196,7 +197,7 @@ export const simulationMachine = setup({
       target: '.debouncingChanges',
       actions: [
         { type: 'storeProcessors', params: ({ event }) => event },
-        { type: 'derivePreviewConfig' },
+        { type: 'derivePreviewColumns', params: ({ event }) => event },
       ],
     },
   },
@@ -217,7 +218,7 @@ export const simulationMachine = setup({
           target: 'debouncingChanges',
           actions: [
             { type: 'storeProcessors', params: ({ event }) => event },
-            { type: 'derivePreviewConfig' },
+            { type: 'derivePreviewColumns', params: ({ event }) => event },
           ],
           description: 'Re-enter debouncing state and reinitialize the delayed processing.',
           reenter: true,
@@ -421,7 +422,7 @@ const composeSamplingCondition = (
 };
 
 const getSourceFields = (processors: ProcessorDefinitionWithUIAttributes[]): string[] => {
-  return processors.map((processor) => getProcessorConfig(processor).field).filter(Boolean);
+  return processors.map((processor) => getProcessorConfig(processor).field.trim()).filter(Boolean);
 };
 
 const getTableColumns = (
@@ -453,4 +454,19 @@ const filterSimulationDocuments = (
     default:
       return documents.map((doc) => doc.value);
   }
+};
+
+const derivePreviewColumnsHelper = (
+  context: SimulationMachineContext,
+  processors: ProcessorDefinitionWithUIAttributes[]
+) => {
+  const nextPreviewColumns = getTableColumns(
+    processors,
+    context.simulation?.detected_fields ?? [],
+    context.previewDocsFilter
+  );
+
+  return isEqual(context.previewColumns, nextPreviewColumns)
+    ? context.previewColumns
+    : nextPreviewColumns;
 };

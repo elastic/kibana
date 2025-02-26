@@ -17,7 +17,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useSelector } from '@xstate5/react';
-import { isEmpty } from 'lodash';
+import { isEmpty, isEqual } from 'lodash';
 import { StreamsAppSearchBar, StreamsAppSearchBarProps } from '../streams_app_search_bar';
 import { PreviewTable } from '../preview_table';
 import { AssetImage } from '../asset_image';
@@ -118,9 +118,11 @@ const OutcomeControls = () => {
   );
 };
 
+const MemoPreviewTable = React.memo(PreviewTable);
+
 const OutcomePreviewTable = () => {
-  const previewDocuments = useSimulatorSelector((state) => state?.context.previewDocuments);
   const previewColumns = useSimulatorSelector((state) => state?.context.previewColumns);
+  const previewDocuments = useSimulatorSelector((state) => state?.context.previewDocuments);
 
   if (!previewDocuments || isEmpty(previewDocuments)) {
     return (
@@ -150,5 +152,5 @@ const OutcomePreviewTable = () => {
     );
   }
 
-  return <PreviewTable documents={previewDocuments} displayColumns={previewColumns} />;
+  return <MemoPreviewTable documents={previewDocuments} displayColumns={previewColumns} />;
 };
