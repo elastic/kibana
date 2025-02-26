@@ -343,6 +343,32 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await expectFieldListDescription(
           '3 selected fields. 3 popular fields. 48 available fields. 5 empty fields. 4 meta fields.'
         );
+
+        await unifiedFieldList.clickFieldListItemRemove('@message');
+        await discover.waitUntilSearchingHasFinished();
+        await unifiedFieldList.clickFieldListItemRemove('extension');
+        await discover.waitUntilSearchingHasFinished();
+        await discover.addRuntimeField('test', `emit('test')`, undefined, 30);
+        await discover.waitUntilSearchingHasFinished();
+
+        expect((await unifiedFieldList.getSidebarSectionFieldNames('popular')).join(', ')).to.be(
+          'test, @message, extension, _id'
+        );
+
+        await expectFieldListDescription(
+          '1 selected field. 4 popular fields. 49 available fields. 5 empty fields. 4 meta fields.'
+        );
+
+        await unifiedFieldList.clickFieldListItemAdd('bytes');
+        await discover.waitUntilSearchingHasFinished();
+
+        expect((await unifiedFieldList.getSidebarSectionFieldNames('popular')).join(', ')).to.be(
+          'test, @message, extension, _id, bytes'
+        );
+
+        await expectFieldListDescription(
+          '2 selected fields. 5 popular fields. 49 available fields. 5 empty fields. 4 meta fields.'
+        );
       });
 
       it('should show selected and available fields in ES|QL mode', async function () {
