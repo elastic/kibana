@@ -21,9 +21,8 @@ import { useKibana } from './use_kibana';
 export function useCreateRule<Params extends RuleTypeParams = never>() {
   const {
     http,
-    i18n: i18nStart,
     notifications: { toasts },
-    theme,
+    ...startServices
   } = useKibana().services;
 
   return useMutation<
@@ -58,7 +57,7 @@ export function useCreateRule<Params extends RuleTypeParams = never>() {
                 <EuiLoadingSpinner size="s" />
               </EuiFlexItem>
             </EuiFlexGroup>,
-            { i18n: i18nStart, theme }
+            { coreStart: startServices }
           ),
         });
         return { loadingToastId: loadingToast.id };
