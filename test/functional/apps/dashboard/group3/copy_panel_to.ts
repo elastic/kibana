@@ -16,7 +16,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const kibanaServer = getService('kibanaServer');
 
-  const { dashboard, timePicker } = getPageObjects(['dashboard', 'timePicker']);
+  const { dashboard, timePicker, timeToVisualize } = getPageObjects([
+    'dashboard',
+    'timePicker',
+    'timeToVisualize',
+  ]);
 
   const fewPanelsTitle = 'few panels';
   const markdownTitle = 'Copy To Markdown';
@@ -26,8 +30,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     await dashboardPanelActions.openCopyToModalByTitle(panelName);
     const modalIsOpened = await testSubjects.exists('copyToDashboardPanel');
     expect(modalIsOpened).to.be(true);
-    const hasDashboardSelector = await testSubjects.exists('add-to-dashboard-options');
-    expect(hasDashboardSelector).to.be(true);
   };
 
   describe('dashboard panel copy to', function viewEditModeTests() {
@@ -72,16 +74,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('copies a panel to an existing dashboard', async () => {
       await openCopyToModal(markdownTitle);
-      const dashboardSelector = await testSubjects.find('add-to-dashboard-options');
-      const label = await dashboardSelector.findByCssSelector(
-        `label[for="existing-dashboard-option"]`
-      );
-      await label.click();
-
-      await testSubjects.click('open-dashboard-picker');
-      await testSubjects.setValue('dashboard-picker-search', fewPanelsTitle);
-      await testSubjects.existOrFail(`dashboard-picker-option-few-panels`);
-      await testSubjects.click(`dashboard-picker-option-few-panels`);
+      await timeToVisualize.clickExistingDashboardOption();
+      await timeToVisualize.selectExistingDashboard(fewPanelsTitle);
       await testSubjects.click('confirmCopyToButton');
 
       await dashboard.waitForRenderComplete();
@@ -99,11 +93,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('does not show the current dashboard in the dashboard picker', async () => {
       await openCopyToModal(markdownTitle);
-      const dashboardSelector = await testSubjects.find('add-to-dashboard-options');
-      const label = await dashboardSelector.findByCssSelector(
-        `label[for="existing-dashboard-option"]`
-      );
-      await label.click();
+      await timeToVisualize.clickExistingDashboardOption();
 
       await testSubjects.click('open-dashboard-picker');
       await testSubjects.setValue('dashboard-picker-search', fewPanelsTitle);
@@ -114,9 +104,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('copies a panel to a new dashboard', async () => {
       await openCopyToModal(markdownTitle);
-      const dashboardSelector = await testSubjects.find('add-to-dashboard-options');
-      const label = await dashboardSelector.findByCssSelector(`label[for="new-dashboard-option"]`);
-      await label.click();
+      await timeToVisualize.clickNewDashboardOption();
       await testSubjects.click('confirmCopyToButton');
 
       await dashboard.waitForRenderComplete();

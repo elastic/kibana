@@ -18,11 +18,6 @@ interface SaveModalArgs {
   description?: string;
 }
 
-type DashboardPickerOption =
-  | 'add-to-library-option'
-  | 'existing-dashboard-option'
-  | 'new-dashboard-option';
-
 export class TimeToVisualizePageObject extends FtrService {
   private readonly testSubjects = this.ctx.getService('testSubjects');
   private readonly log = this.ctx.getService('log');
@@ -30,6 +25,13 @@ export class TimeToVisualizePageObject extends FtrService {
   private readonly common = this.ctx.getPageObject('common');
   private readonly dashboard = this.ctx.getPageObject('dashboard');
   private readonly retry = this.ctx.getService('retry');
+
+  private async selectAddToDashboardOption(option: string) {
+    this.log.debug('save modal dashboard selector, choosing option:', option);
+    const dashboardSelector = await this.testSubjects.find('add-to-dashboard-options');
+    const label = await dashboardSelector.findByCssSelector(`label[for="${option}"]`);
+    await label.click();
+  }
 
   public async ensureSaveModalIsOpen() {
     await this.testSubjects.exists('savedObjectSaveModal', { timeout: 5000 });
@@ -50,7 +52,7 @@ export class TimeToVisualizePageObject extends FtrService {
     await this.dashboard.clickNewDashboard();
   }
 
-  private async selectDashboard(dashboardId: string) {
+  public async selectExistingDashboard(dashboardId: string) {
     await this.retry.try(async () => {
       await this.testSubjects.waitForEnabled('open-dashboard-picker');
       await this.testSubjects.click('open-dashboard-picker');
@@ -63,6 +65,14 @@ export class TimeToVisualizePageObject extends FtrService {
         throw new Error(`Dashboard not selected`);
       }
     });
+  }
+
+  public async clickExistingDashboardOption() {
+    await this.selectAddToDashboardOption('existing-dashboard-option');
+  }
+
+  public async clickNewDashboardOption() {
+    await this.selectAddToDashboardOption('new-dashboard-option');
   }
 
   public async setSaveModalValues(
@@ -96,18 +106,12 @@ export class TimeToVisualizePageObject extends FtrService {
     }
 
     const hasDashboardSelector = await this.testSubjects.exists('add-to-dashboard-options');
-    if (hasDashboardSelector && addToDashboard !== undefined) {
-      let option: DashboardPickerOption = 'add-to-library-option';
-      if (addToDashboard) {
-        option = dashboardId ? 'existing-dashboard-option' : 'new-dashboard-option';
-      }
-      this.log.debug('save modal dashboard selector, choosing option:', option);
-      const dashboardSelector = await this.testSubjects.find('add-to-dashboard-options');
-      const label = await dashboardSelector.findByCssSelector(`label[for="${option}"]`);
-      await label.click();
-
+    if (hasDashboardSelector && addToDashboard) {
       if (dashboardId) {
-        await this.selectDashboard(dashboardId);
+        await this.clickExistingDashboardOption();
+        await this.selectExistingDashboard(dashboardId);
+      } else {
+        await this.clickNewDashboardOption();
       }
     }
 
