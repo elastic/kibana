@@ -104,7 +104,7 @@ export const useConversationsUpdater = (
         });
       }
       setConversationsSettingsBulkActions({});
-      return bulkResult?.success ?? false;
+      return bulkResult?.success ?? didUpdateAssistantStreamingEnabled ?? false;
     },
     [
       http,
