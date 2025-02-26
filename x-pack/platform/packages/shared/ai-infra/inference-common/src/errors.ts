@@ -11,6 +11,7 @@ import { InferenceTaskEventBase, InferenceTaskEventType } from './inference_task
  * Enum for generic inference error codes.
  */
 export enum InferenceTaskErrorCode {
+  providerError = 'providerError',
   internalError = 'internalError',
   requestError = 'requestError',
   abortedError = 'requestAborted',
@@ -63,6 +64,17 @@ export type InferenceTaskInternalError = InferenceTaskError<
 >;
 
 /**
+ * Inference error thrown when calling the provider through its connector returned an error.
+ *
+ * It includes error responses returned from the provider,
+ * and any potential errors related to connectivity issue.
+ */
+export type InferenceTaskProviderError = InferenceTaskError<
+  InferenceTaskErrorCode.providerError,
+  { status?: number }
+>;
+
+/**
  * Inference error thrown when the request was considered invalid.
  *
  * Some example of reasons for invalid requests would be:
@@ -90,6 +102,13 @@ export function createInferenceInternalError(
   meta?: Record<string, any>
 ): InferenceTaskInternalError {
   return new InferenceTaskError(InferenceTaskErrorCode.internalError, message, meta ?? {});
+}
+
+export function createInferenceProviderError(
+  message = 'An internal error occurred',
+  meta?: { status?: number }
+): InferenceTaskProviderError {
+  return new InferenceTaskError(InferenceTaskErrorCode.providerError, message, meta ?? {});
 }
 
 export function createInferenceRequestError(
@@ -135,4 +154,11 @@ export function isInferenceRequestError(error: unknown): error is InferenceTaskR
  */
 export function isInferenceRequestAbortedError(error: unknown): error is InferenceTaskAbortedError {
   return isInferenceError(error) && error.code === InferenceTaskErrorCode.abortedError;
+}
+
+/**
+ * Check if the given error is an {@link InferenceTaskProviderError}
+ */
+export function isInferenceProviderError(error: unknown): error is InferenceTaskProviderError {
+  return isInferenceError(error) && error.code === InferenceTaskErrorCode.providerError;
 }
