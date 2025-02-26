@@ -237,8 +237,12 @@ components:
       nullable: true
 
     SortOrUndefined:
-      description: 'The field that is used to sort the results. Options include createdAt or updatedAt. The default is createdAt.'
+      description: 'The field that is used to sort the results.'
       example: 'createdAt'
+      enum:
+        - createdAt
+        - updatedAt
+      default: createdAt
       type: string
       nullable: true
 
