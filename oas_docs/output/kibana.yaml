@@ -60914,7 +60914,7 @@ components:
       type: object
       properties:
         agent_all:
-          description: When true, the query runs on all agents.
+          description: When `true`, the query runs on all agents.
           type: boolean
         agent_ids:
           description: A list of agent IDs to run the query on.
@@ -60932,24 +60932,24 @@ components:
             type: string
           type: array
         alert_ids:
-          description: A list of alert IDs associated to the live query.
+          description: A list of alert IDs associated with the live query.
           items:
             type: string
           type: array
         case_ids:
-          description: A list of case IDs associated to the live query.
+          description: A list of case IDs associated with the live query.
           items:
             type: string
           type: array
         ecs_mapping:
           $ref: '#/components/schemas/Security_Osquery_API_ECSMappingOrUndefined'
         event_ids:
-          description: A list of event IDs associated to the live query.
+          description: A list of event IDs associated with the live query.
           items:
             type: string
           type: array
         metadata:
-          description: Custom metadata object associated to the live query.
+          description: Custom metadata object associated with the live query.
           nullable: true
           type: object
         pack_id:
@@ -60994,7 +60994,7 @@ components:
     Security_Osquery_API_CreatePacksRequestBody:
       example:
         description: My pack
-        enabled: true,
+        enabled: true
         name: my_pack
         policy_ids:
           - my_policy_id
@@ -61013,7 +61013,7 @@ components:
             timeout: 120
         shards:
           fleet-server-policy: 58
-          my_policy_id: 35,
+          my_policy_id: 35
       type: object
       properties:
         description:
@@ -61164,7 +61164,7 @@ components:
           created_by: elastic
           description: ''
           enabled: true
-          id: bbe5b070-0c51-11ed-b0f8-ad31b008e832
+          id: 3c42c847-eb30-4452-80e0-728584042334
           name: test_pack
           namespaces:
             - default
@@ -61229,7 +61229,7 @@ components:
             updated_by: elastic
             version: 2.8.0
           coreMigrationVersion: 8.4.0
-          id: 42ba9c50-0cc5-11ed-aa1d-2b27890bc90d
+          id: 3c42c847-eb30-4452-80e0-728584042334
           namespaces:
             - default
           references: []
@@ -61319,7 +61319,7 @@ components:
       $ref: '#/components/schemas/Security_Osquery_API_PackDescription'
       nullable: true
     Security_Osquery_API_PackId:
-      description: The ID of the pack you want to run.
+      description: The ID of the pack you want to run, retrieve, update, or delete.
       example: 3c42c847-eb30-4452-80e0-728584042334
       type: string
     Security_Osquery_API_PackIdOrUndefined:
@@ -61339,7 +61339,7 @@ components:
       nullable: true
       type: integer
     Security_Osquery_API_Platform:
-      description: Restricts the query to a specified platform. The default is all platforms. To specify multiple platforms, use commas. For example, linux,darwin.
+      description: Restricts the query to a specified platform. The default is all platforms. To specify multiple platforms, use commas. For example, `linux,darwin`.
       example: linux,darwin
       type: string
     Security_Osquery_API_PlatformOrUndefined:
@@ -61403,16 +61403,20 @@ components:
       $ref: '#/components/schemas/Security_Osquery_API_Snapshot'
       nullable: true
     Security_Osquery_API_SortOrderOrUndefined:
-      description: Specified the sort order. Options include desc or asc. The default is desc.
+      default: desc
+      description: Specifies the sort order.
+      enum:
+        - asc
+        - desc
       example: desc
-      oneOf:
-        - nullable: true
-          type: string
-        - enum:
-            - asc
-            - desc
+      nullable: true
+      type: string
     Security_Osquery_API_SortOrUndefined:
-      description: The field that is used to sort the results. Options include createdAt or updatedAt. The default is createdAt.
+      default: createdAt
+      description: The field that is used to sort the results.
+      enum:
+        - createdAt
+        - updatedAt
       example: createdAt
       nullable: true
       type: string
