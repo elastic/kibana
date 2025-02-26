@@ -77,7 +77,7 @@ export const chatCompleteRoute = (
             (await ctx.elasticAssistant.llmTasks.retrieveDocumentationAvailable()) ?? false;
 
           // Perform license and authenticated user checks
-          const checkResponse = performChecks({
+          const checkResponse = await performChecks({
             context: ctx,
             request,
             response,
