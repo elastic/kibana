@@ -16,19 +16,20 @@ import {
   EuiProgress,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { TimeRange } from '@kbn/es-query';
 import { useSelector } from '@xstate5/react';
-import { useKibana } from '../../hooks/use_kibana';
+import { isEmpty } from 'lodash';
 import { StreamsAppSearchBar, StreamsAppSearchBarProps } from '../streams_app_search_bar';
 import { PreviewTable } from '../preview_table';
 import { AssetImage } from '../asset_image';
-import { useDateRange } from '../../hooks/use_date_range';
 import { useSimulatorRef, useSimulatorSelector } from './services/stream_enrichment_service';
 import { previewDocsFilterOptions } from './services/stream_enrichment_service/simulation_state_machine';
 
 export const ProcessorOutcomePreview = () => {
   const isLoading = useSimulatorSelector(
-    (state) => state?.matches('loadingSamples') || state?.matches('runningSimulation')
+    (state) =>
+      state?.matches('debouncingChanges') ||
+      state?.matches('loadingSamples') ||
+      state?.matches('runningSimulation')
   );
 
   return (
@@ -118,11 +119,10 @@ const OutcomeControls = () => {
 };
 
 const OutcomePreviewTable = () => {
-  const isMissingSamples = useSimulatorSelector((state) => state?.matches('missingSamples'));
-  const previewDocuments = useSimulatorSelector((state) => state?.context.previewDocuments ?? []);
+  const previewDocuments = useSimulatorSelector((state) => state?.context.previewDocuments);
   const previewColumns = useSimulatorSelector((state) => state?.context.previewColumns);
 
-  if (isMissingSamples) {
+  if (!previewDocuments || isEmpty(previewDocuments)) {
     return (
       <EuiEmptyPrompt
         titleSize="xs"

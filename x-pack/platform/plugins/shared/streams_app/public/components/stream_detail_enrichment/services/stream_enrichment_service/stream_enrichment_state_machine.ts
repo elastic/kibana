@@ -12,6 +12,7 @@ import {
   setup,
   sendTo,
   stopChild,
+  and,
 } from 'xstate5';
 import { getPlaceholderFor } from '@kbn/xstate-utils';
 import {
@@ -82,7 +83,6 @@ export const streamEnrichmentMachine = setup({
             parentRef: self,
             processor,
           },
-          syncSnapshot: true,
         });
       });
 
@@ -106,7 +106,6 @@ export const streamEnrichmentMachine = setup({
                 processor: { ...processor, id },
                 isNew: true,
               },
-              syncSnapshot: true,
             })
           ),
         };
@@ -216,16 +215,23 @@ export const streamEnrichmentMachine = setup({
           on: {
             'processors.add': {
               guard: not('hasPendingDraft'),
-              actions: [{ type: 'addProcessor', params: ({ event }) => event }],
+              actions: [
+                { type: 'addProcessor', params: ({ event }) => event },
+                { type: 'sendChangeToSimulator' },
+              ],
             },
             'processors.reorder': {
               guard: 'hasMultipleProcessors',
-              actions: [{ type: 'reorderProcessors', params: ({ event }) => event }],
+              actions: [
+                { type: 'reorderProcessors', params: ({ event }) => event },
+                { type: 'sendChangeToSimulator' },
+              ],
             },
             'processor.delete': {
               actions: [
                 { type: 'stopProcessor', params: ({ event }) => event },
                 { type: 'deleteProcessor', params: ({ event }) => event },
+                { type: 'sendChangeToSimulator' },
               ],
             },
             'processor.change': {
@@ -256,7 +262,7 @@ export const streamEnrichmentMachine = setup({
           target: 'initializing',
         },
         'stream.update': {
-          guard: 'hasStagedChanges',
+          guard: and(['hasStagedChanges', not('hasPendingDraft')]),
           target: 'updatingStream',
         },
       },

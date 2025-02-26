@@ -34,6 +34,7 @@ import { errors as esErrors } from '@elastic/elasticsearch';
 import { isEmpty, isEqual, uniq } from 'lodash';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { TimeRange } from '@kbn/es-query';
+import { ALWAYS_CONDITION } from '../../../../util/condition';
 import { DetectedField, ProcessorDefinitionWithUIAttributes } from '../../types';
 import { processorConverter } from '../../utils';
 import {
@@ -126,11 +127,6 @@ export const simulationMachine = setup({
     storeSamples: assign((_, params: { samples: FlattenRecord[] }) => ({
       samples: params.samples,
     })),
-    storeSamplingCondition: assign(
-      (_, params: { processors: ProcessorDefinitionWithUIAttributes[] }) => ({
-        samplingCondition: composeSamplingCondition(params.processors),
-      })
-    ),
     storeSimulation: assign((_, params: { simulation: Simulation }) => ({
       simulation: params.simulation,
     })),
@@ -146,7 +142,13 @@ export const simulationMachine = setup({
           : context.samples,
       };
     }),
+    deriveSamplingCondition: assign(({ context }) => ({
+      samplingCondition: composeSamplingCondition(context.processors),
+    })),
     emitSimulationChange: sendTo(getParentRef, { type: 'simulation.change' }),
+  },
+  delays: {
+    debounceTime: 800,
   },
   guards: {
     hasProcessors: ({ context }) => !isEmpty(context.processors),
@@ -155,17 +157,14 @@ export const simulationMachine = setup({
       context.processors
         .map(processorConverter.toAPIDefinition)
         .every((processor) => isSchema(processorDefinitionSchema, processor)),
-    hasDifferentCondition: (
-      { context },
-      params: { processors: ProcessorDefinitionWithUIAttributes[] }
-    ) =>
+    hasDifferentCondition: ({ context }) =>
       Boolean(
         context.samplingCondition &&
-          !isEqual(context.samplingCondition, composeSamplingCondition(params.processors))
+          !isEqual(context.samplingCondition, composeSamplingCondition(context.processors))
       ),
   },
 }).createMachine({
-  /** @xstate-layout N4IgpgJg5mDOIC5SwJYFsCuAbAhgFxQHsA7AYlU1wJIDoAnMAMwdgAsBlHNAByzgG0ADAF1EoboVTViYkAA9EAFgBMAGhABPRAA4AbMpq7BugJy6AzIpMBWXbu0B2AL5P1FbPiLEaKYigI4WCgAXr5QpEKiSCASUl6yCgjKJuY0DmbaAIwmJsbWDtbmDupaCA6KujTmtiaZinWZ1sraLm7oHtI+fgFBocTh-JlR4pL+8dGJyanp9tm5uvmFxZqI1pmp5pnKFopFjtomLa4g7lRePhB8pNx0hADGcLCEdLA0d6w4-WCRsrFjJAlEA51jQDtpzI5FIpCplBNoSogLJlQVtdJlMg4kUZlK0Tu0zrQUJcwNdbg9YE8Xm8Pl9BsMYqNpICEOsTIo0gsjJk7BjrAcEQhFODDPk6lDBMoKvpcadPITiaRGCgsHgwFT3p8YAAFBgANxQYAA7gARe6wABiytVdB+0T+TImiHRgnZ1gq2jWGMEKW0ahWCAh7K2gmBBzZ+QcRzalDl3iwhBwEDCnB4fFgpAgJDAXV1hAA1tnZZ144nk1xeHAEL5c3dY5FbSM4gDHWUQWCIeVoZs4QLtELDA5lC6mkYTAVMjL8bGaCWk-0UxX02rbnQaLx8IxnmgaEXzrOy6nK9X7nWRA2GU2ZC3gal25Cu7D4f6CtYaMpMtpP01I5jNpOY50OAUmqBDzlO0gAEpgAAjhgKAMGgYDEHg6bnva4ygJMErIo0+hWOYliDu+ApNAYgiwkObrmM0fbmP+HTnEBsAgcm4FeFBsHwWAiHIahQy-IyGHyE6brsrs5R8mOWzUYovbItYgiKSoikEaiE7HLutBMSxYEAexMFwQhSEoREyj0uhzaYSJ-bifhn76HU1gCuJIoON62Tcoc6z0QS3h0BgxB+LpDEkBmWY5vmhZsbQ-mBaxekkFWxA1qewhoYJlnCa2t6HB2UIwj2-pDoINCKYp9iSkY1hrD506xUFUDsNFZDLs8a5UJudDbppfkBQ1TUJcQSUpdI9YiAJl7MjeoK5feBVPqUhFVNY4YYto3pCsodG4sQhAQHAsg9RN-xXlZCAALS6AKl2lWVd33XUtWdL4YyBCEYTHQ6Z3cq+JjJGiiiRnCgjmMYAoOBCNDZBKphupKkbbdGIXeGgKAUgei6fUJkyNK+tEIy6IN-SRQ5vtizSic0yjOBpzUXHwWOZYkwYODQ8ySh65j6BtJFbDQI4HIDKS7LoNNI75M4JnOjXlmmjOnVlQobLkth1LoUIesspS+q6W2mJi2wVAUT2McBdCgY1zUcYZ3HGfAdoZQrzODsi1OWLCfLGFzJMldsEoU1CVPWCbMV9fFyPy8ySs0CoZhbRDzQpARArUak76wqDHqfr65QuC4QA */
+  /** @xstate-layout N4IgpgJg5mDOIC5SwJYFsCuAbAhgFxQHsA7AYgnzACUdiYA6DABwrzAG0AGAXUVCcKoCJPiAAeiAKwB2ADQgAnogDMkzvQCMkgJwAWZRt2dlADm2cAbBYC+1+aky5hZB9nxFi9AE5gAZj9gACwBlHDQmLDguXiQQASEPUQkEGXklBAAmbW16Cx0dEwzOaWUMk1t7dDdnUl8ULDYvWHoAY0DaGAAFHwA3FDAAdwARQhbYADF6xujReJRnJMQNQ2l6SVUtSQtdSRMNE2U0xGl9emkMov1lXW1JXRNpCpBXJw9SJi9RuFhCJtb2ugcHizQTzRKxZKpRSICwaDK5TgZDSWUrSREaGx2Z5VV4kegoYhgnBYFAALwJUFIM1icwWEJhJl0Z20FhMBwyujyul0GSOCH2ynoRj0hlh0m0ylMmMqjnceIJRJJ5LoVI0MX4oLpoGSrKZ4tZ7M5dx5fL2a04Fp2+wyOkMTxecs8EDAACNCBhiC0KQBhAEwWDvT4tb6-ZptDpA9VxTXg7UqTgmZmsiW6aQlHSSvmSDSCkySC6I6Sbfa6e04x30Z1uj1eui+iMBsSwPCUeg4XyNAAUVfdnrAABV0GAAJSkB3OSuu3u1qD1wGwakahIiekIXVJtmlI3c3nQhCp9TmPRlaT59bLMuyic9ms+v1wUhNltsNsdsBebtTmsDoej8ceSdq09O8G3YNUQWXYhFjXRkN0NLkTT3W16AMLZJHWC1WQTS9qgArBCBwCAKVCcJIgDCASDAfFiB6QgAGsqP-PF8MI4iwgiOAEAJWiWkdaJF2jSDoLhE5zQtQojAuCULD5Up1CMCxSmtHZpDZHDcU8FiiLoEiOIDd9Pi8egInwXxfjQegmM0gjtKgXSyK4mjRj4ngBNpWNxCWDJRLUcSOURLJlBkvcinUC0LVubztiyRF1IrHBYFgd8CB08tnCoMAAEcMBQHw0DAYg8ADNyYxXON+T2VYzEsMwLCKMVd3SZRzjOQwNBZZQWRtDQTjiicEqSrwUrstKPAy7LcrAfLCuK8CaVKqDV32Hr6Gq5M6ssHrGsQblVk5HkeQuHZtDzPqAIG5LiNGkhxpyvKCqKqkMijdyys8iqVrW2r6q2vlFPUMxTHFdZtBOLIzrxLwPUJVKrzeCjiCo7j6MY67PCh4gYZGuGSEcniXO4EqhNXAt1Hau5motcU9j5XRlnoYxOU4ApVGOiH0ehq6cbIAzfmMpwzK8CyrO8TnYdw3Hkd45x+OBebifK0nNFufQ0WKE6NFklbdk2c4Hm2TgNFsLFiEIZ14FiKyILBN7km0PkAFpJHobJXbdt2TGlbFueoxUyQpa2tXe1MNBQwoDl2A5OH0HM+R652OTKQ3dkRbN2foNAUEStjSLgQOPOSdrYPOPJbj2bJFNkxTWrpixtG8+5pDydOUAgSJ89txAOW5M4zBzZFo5OKF0h2Z3YTpyUix2RllHTm9gLre8LaXG3FvKzqmWuZrFIMTkj0OPcNpQ-N9lhCUdB5dOtJzvSO7X97kV2F3660Exo+jxkTC1xNkQlItFLBiUWeWIRYXSGlzCWxBbqTWmkVO+wk1CJipoydCaIMgWFUn9dqax9h5jKBYREBDyggLRqLTGECNLwKWidPU6D8jlw6rTC49AkS106ucLQJRSzGyAA */
   id: 'simulation',
   context: ({ input, self, spawn }) => ({
     parentRef: input.parentRef,
@@ -193,10 +192,16 @@ export const simulationMachine = setup({
         { type: 'derivePreviewConfig' },
       ],
     },
+    'processors.change': {
+      target: '.debouncingChanges',
+      actions: [
+        { type: 'storeProcessors', params: ({ event }) => event },
+        { type: 'derivePreviewConfig' },
+      ],
+    },
   },
   states: {
     initializing: {
-      entry: [],
       always: [
         {
           guard: 'hasProcessors',
@@ -205,24 +210,29 @@ export const simulationMachine = setup({
         { target: 'idle' },
       ],
     },
-    missingSamples: {},
-    idle: {
+    idle: {},
+    debouncingChanges: {
       on: {
-        'processors.change': [
+        'processors.change': {
+          target: 'debouncingChanges',
+          actions: [
+            { type: 'storeProcessors', params: ({ event }) => event },
+            { type: 'derivePreviewConfig' },
+          ],
+          description: 'Re-enter debouncing state and reinitialize the delayed processing.',
+          reenter: true,
+        },
+      },
+      after: {
+        debounceTime: [
           {
-            guard: { type: 'hasDifferentCondition', params: ({ event }) => event },
-            actions: [
-              { type: 'storeSamplingCondition', params: ({ event }) => event },
-              { type: 'storeProcessors', params: ({ event }) => event },
-            ],
+            guard: { type: 'hasDifferentCondition' },
+            actions: [{ type: 'deriveSamplingCondition' }],
             target: 'loadingSamples',
           },
           {
             target: 'assertingSimulationRequirements',
-            actions: [
-              { type: 'storeSamplingCondition', params: ({ event }) => event },
-              { type: 'storeProcessors', params: ({ event }) => event },
-            ],
+            actions: [{ type: 'deriveSamplingCondition' }],
           },
         ],
       },
@@ -243,7 +253,7 @@ export const simulationMachine = setup({
           ],
         },
         onError: {
-          target: 'missingSamples',
+          target: 'idle',
           actions: [
             { type: 'storeSamples', params: () => ({ samples: [] }) },
             { type: 'notifySamplesFetchFailure' },
@@ -255,7 +265,7 @@ export const simulationMachine = setup({
       always: [
         {
           guard: not('hasSamples'),
-          target: 'missingSamples',
+          target: 'idle',
         },
         {
           guard: and(['hasProcessors', 'hasValidProcessors']),
@@ -398,6 +408,10 @@ const composeSamplingCondition = (
 
   const uniqueFields = uniq(getSourceFields(processors));
 
+  if (isEmpty(uniqueFields)) {
+    return ALWAYS_CONDITION;
+  }
+
   const conditions = uniqueFields.map((field) => ({
     field,
     operator: 'exists' as UnaryOperator,
@@ -407,7 +421,7 @@ const composeSamplingCondition = (
 };
 
 const getSourceFields = (processors: ProcessorDefinitionWithUIAttributes[]): string[] => {
-  return processors.map((processor) => getProcessorConfig(processor).field);
+  return processors.map((processor) => getProcessorConfig(processor).field).filter(Boolean);
 };
 
 const getTableColumns = (
