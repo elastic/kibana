@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { apm } from '@elastic/apm-rum';
 import { LogLevel, Appender } from '@kbn/logging';
 import { getLoggerContext } from '@kbn/core-logging-common-internal';
 import { BaseLogger, BROWSER_PID } from './logger';
@@ -17,10 +18,12 @@ let logger: BaseLogger;
 const factory = {
   get: jest.fn().mockImplementation(() => logger),
 };
+let apmCaptureErrorSpy: jest.SpyInstance;
 
 const timestamp = new Date(2012, 1, 1);
 beforeEach(() => {
   jest.spyOn<any, any>(global, 'Date').mockImplementation(() => timestamp);
+  apmCaptureErrorSpy = jest.spyOn(apm, 'captureError');
 
   appenderMocks = [{ append: jest.fn() }, { append: jest.fn() }];
   logger = new BaseLogger(context, LogLevel.All, appenderMocks, factory);
@@ -60,6 +63,7 @@ test('`trace()` correctly forms `LogRecord` and passes it to all appenders.', ()
       pid: BROWSER_PID,
     });
   }
+  expect(apmCaptureErrorSpy).not.toHaveBeenCalled();
 });
 
 test('`debug()` correctly forms `LogRecord` and passes it to all appenders.', () => {
@@ -91,6 +95,7 @@ test('`debug()` correctly forms `LogRecord` and passes it to all appenders.', ()
       pid: BROWSER_PID,
     });
   }
+  expect(apmCaptureErrorSpy).not.toHaveBeenCalled();
 });
 
 test('`info()` correctly forms `LogRecord` and passes it to all appenders.', () => {
@@ -122,6 +127,7 @@ test('`info()` correctly forms `LogRecord` and passes it to all appenders.', () 
       pid: BROWSER_PID,
     });
   }
+  expect(apmCaptureErrorSpy).not.toHaveBeenCalled();
 });
 
 test('`warn()` correctly forms `LogRecord` and passes it to all appenders.', () => {
@@ -138,6 +144,7 @@ test('`warn()` correctly forms `LogRecord` and passes it to all appenders.', () 
       pid: BROWSER_PID,
     });
   }
+  expect(apmCaptureErrorSpy).not.toHaveBeenCalled();
 
   const error = new Error('message-2');
   logger.warn(error);
@@ -151,6 +158,13 @@ test('`warn()` correctly forms `LogRecord` and passes it to all appenders.', () 
       meta: undefined,
       timestamp,
       pid: BROWSER_PID,
+    });
+    expect(apmCaptureErrorSpy).toHaveBeenCalledTimes(1);
+    expect(apmCaptureErrorSpy).toHaveBeenCalledWith({
+      ...error,
+      meta: undefined,
+      context,
+      level: LogLevel.Warn,
     });
   }
 
@@ -168,6 +182,7 @@ test('`warn()` correctly forms `LogRecord` and passes it to all appenders.', () 
       pid: BROWSER_PID,
     });
   }
+  expect(apmCaptureErrorSpy).toHaveBeenCalledTimes(1); // Same as before => not called again
 });
 
 test('`error()` correctly forms `LogRecord` and passes it to all appenders.', () => {
@@ -184,6 +199,7 @@ test('`error()` correctly forms `LogRecord` and passes it to all appenders.', ()
       pid: BROWSER_PID,
     });
   }
+  expect(apmCaptureErrorSpy).not.toHaveBeenCalled();
 
   const error = new Error('message-2');
   logger.error(error);
@@ -199,6 +215,13 @@ test('`error()` correctly forms `LogRecord` and passes it to all appenders.', ()
       pid: BROWSER_PID,
     });
   }
+  expect(apmCaptureErrorSpy).toHaveBeenCalledTimes(1);
+  expect(apmCaptureErrorSpy).toHaveBeenCalledWith({
+    ...error,
+    meta: undefined,
+    context,
+    level: LogLevel.Error,
+  });
 
   // @ts-expect-error ECS custom meta
   logger.error('message-3', { error: true });
@@ -214,6 +237,7 @@ test('`error()` correctly forms `LogRecord` and passes it to all appenders.', ()
       pid: BROWSER_PID,
     });
   }
+  expect(apmCaptureErrorSpy).toHaveBeenCalledTimes(1); // Same as before => not called again
 });
 
 test('`fatal()` correctly forms `LogRecord` and passes it to all appenders.', () => {
@@ -230,6 +254,7 @@ test('`fatal()` correctly forms `LogRecord` and passes it to all appenders.', ()
       pid: BROWSER_PID,
     });
   }
+  expect(apmCaptureErrorSpy).not.toHaveBeenCalled();
 
   const error = new Error('message-2');
   logger.fatal(error);
@@ -245,6 +270,13 @@ test('`fatal()` correctly forms `LogRecord` and passes it to all appenders.', ()
       pid: BROWSER_PID,
     });
   }
+  expect(apmCaptureErrorSpy).toHaveBeenCalledTimes(1);
+  expect(apmCaptureErrorSpy).toHaveBeenCalledWith({
+    ...error,
+    meta: undefined,
+    context,
+    level: LogLevel.Fatal,
+  });
 
   // @ts-expect-error ECS custom meta
   logger.fatal('message-3', { fatal: true });
@@ -260,6 +292,7 @@ test('`fatal()` correctly forms `LogRecord` and passes it to all appenders.', ()
       pid: BROWSER_PID,
     });
   }
+  expect(apmCaptureErrorSpy).toHaveBeenCalledTimes(1); // Same as before => not called again
 });
 
 test('`log()` just passes the record to all appenders.', () => {
