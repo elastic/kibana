@@ -22,16 +22,14 @@ lighthouseTest.describe(
 
     lighthouseTest(
       `audit '/app/dashboards#/view/7adfa750-4c81-11e8-b3d7-01146121b73d'`,
-      async ({ browserAuth, lighthouse, page, pageObjects }, testInfo) => {
+      async ({ browserAuth, lighthouse, page, pageObjects }) => {
         await browserAuth.loginAsPrivilegedUser();
         await pageObjects.dashboard.goto();
         await pageObjects.dashboard.waitForListingTableToLoad();
         await page.testSubj.click('dashboardListingTitleLink-[Flights]-Global-Flight-Dashboard');
         const currentUrl = page.url();
-
-        const result = await lighthouse.runAudit(currentUrl);
-        // attach the report to the test
-        testInfo.attach('lighthouse-report', { body: result.report[0], contentType: 'text/html' });
+        // run the lighthouse audit on the current page and attach the report to the test
+        await lighthouse.runAudit(currentUrl);
       }
     );
   }

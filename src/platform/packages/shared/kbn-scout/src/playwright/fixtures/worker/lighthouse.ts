@@ -23,14 +23,14 @@ export interface LighthouseFixture {
 }
 
 export const lighthouseFixture = coreWorkerFixtures.extend<
-  {},
-  { lighthouse: LighthouseFixture; debuggingPort: number }
+  { lighthouse: LighthouseFixture },
+  { debuggingPort: number }
 >({
   /**
    * Fixture to run Lighthouse audit
    */
   lighthouse: [
-    async ({ log, debuggingPort }, use) => {
+    async ({ log, debuggingPort }, use, testInfo) => {
       // ES module import issue
       const lighthouse = (await import('lighthouse')).default;
 
@@ -63,11 +63,16 @@ export const lighthouseFixture = coreWorkerFixtures.extend<
           `Lighthouse audit completed with '${auditResult.lhr.categories.performance.score}' perf score`
         );
 
+        testInfo.attach('lighthouse-report', {
+          body: auditResult.report[0],
+          contentType: 'text/html',
+        });
+
         return auditResult;
       };
 
       use({ runAudit });
     },
-    { scope: 'worker' },
+    { scope: 'test' },
   ],
 });

@@ -28,15 +28,13 @@ lighthouseTest.describe(
 
     lighthouseTest(
       `audit '/app/discover'`,
-      async ({ browserAuth, lighthouse, page, pageObjects }, testInfo) => {
+      async ({ browserAuth, lighthouse, page, pageObjects }) => {
         await browserAuth.loginAsPrivilegedUser();
         await pageObjects.discover.goto();
         await pageObjects.discover.waitForHistogramRendered();
         const currentUrl = page.url();
-
-        const result = await lighthouse.runAudit(currentUrl);
-        // attach the report to the test
-        testInfo.attach('lighthouse-report', { body: result.report[0], contentType: 'text/html' });
+        // run the lighthouse audit on the current page and attach the report to the test
+        await lighthouse.runAudit(currentUrl);
       }
     );
   }
