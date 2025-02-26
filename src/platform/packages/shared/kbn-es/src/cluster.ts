@@ -14,7 +14,7 @@ import * as path from 'path';
 import execa from 'execa';
 import { Readable } from 'stream';
 import { combineLatest, fromEvent, first } from 'rxjs';
-import { Client } from '@elastic/elasticsearch';
+import { Client, HttpConnection } from '@elastic/elasticsearch';
 import { promisify } from 'util';
 import { CA_CERT_PATH, ES_NOPASSWORD_P12_PATH, extract } from '@kbn/dev-utils';
 import { ToolingLog } from '@kbn/tooling-log';
@@ -428,6 +428,8 @@ export class Cluster {
               rejectUnauthorized: true,
             }
           : undefined,
+        Connection: HttpConnection,
+        requestTimeout: 30_000,
       });
 
       if (!skipReadyCheck) {

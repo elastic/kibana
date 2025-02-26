@@ -144,6 +144,7 @@ export default function ({ getService }: FtrProviderContext) {
         'endpoint:user-artifact-packager',
         'entity_store:data_view:refresh',
         'entity_store:field_retention:enrichment',
+        'fleet:automatic-agent-upgrade-task',
         'fleet:bump_agent_policies',
         'fleet:check-deleted-files-task',
         'fleet:delete-unenrolled-agents-task',

@@ -149,6 +149,7 @@ import { DeleteUnenrolledAgentsTask } from './tasks/delete_unenrolled_agents_tas
 import { registerBumpAgentPoliciesTask } from './services/agent_policies/bump_agent_policies_task';
 import { UpgradeAgentlessDeploymentsTask } from './tasks/upgrade_agentless_deployment';
 import { SyncIntegrationsTask } from './tasks/sync_integrations_task';
+import { AutomaticAgentUpgradeTask } from './tasks/automatic_agent_upgrade_task';
 
 export interface FleetSetupDeps {
   security: SecurityPluginSetup;
@@ -201,6 +202,7 @@ export interface FleetAppContext {
   unenrollInactiveAgentsTask: UnenrollInactiveAgentsTask;
   deleteUnenrolledAgentsTask: DeleteUnenrolledAgentsTask;
   updateAgentlessDeploymentsTask: UpgradeAgentlessDeploymentsTask;
+  automaticAgentUpgradeTask: AutomaticAgentUpgradeTask;
   taskManagerStart?: TaskManagerStartContract;
   fetchUsage?: (abortController: AbortController) => Promise<FleetUsage | undefined>;
   syncIntegrationsTask: SyncIntegrationsTask;
@@ -307,6 +309,7 @@ export class FleetPlugin
   private deleteUnenrolledAgentsTask?: DeleteUnenrolledAgentsTask;
   private updateAgentlessDeploymentsTask?: UpgradeAgentlessDeploymentsTask;
   private syncIntegrationsTask?: SyncIntegrationsTask;
+  private automaticAgentUpgradeTask?: AutomaticAgentUpgradeTask;
 
   private agentService?: AgentService;
   private packageService?: PackageService;
@@ -632,7 +635,7 @@ export class FleetPlugin
     registerRoutes(fleetAuthzRouter, config);
 
     this.telemetryEventsSender.setup(deps.telemetry);
-    // Register task
+    // Register tasks
     registerUpgradeManagedPackagePoliciesTask(deps.taskManager);
     registerDeployAgentPoliciesTask(deps.taskManager);
     registerBumpAgentPoliciesTask(deps.taskManager);
@@ -659,6 +662,11 @@ export class FleetPlugin
       logFactory: this.initializerContext.logger,
     });
     this.syncIntegrationsTask = new SyncIntegrationsTask({
+      core,
+      taskManager: deps.taskManager,
+      logFactory: this.initializerContext.logger,
+    });
+    this.automaticAgentUpgradeTask = new AutomaticAgentUpgradeTask({
       core,
       taskManager: deps.taskManager,
       logFactory: this.initializerContext.logger,
@@ -711,6 +719,7 @@ export class FleetPlugin
       unenrollInactiveAgentsTask: this.unenrollInactiveAgentsTask!,
       deleteUnenrolledAgentsTask: this.deleteUnenrolledAgentsTask!,
       updateAgentlessDeploymentsTask: this.updateAgentlessDeploymentsTask!,
+      automaticAgentUpgradeTask: this.automaticAgentUpgradeTask!,
       taskManagerStart: plugins.taskManager,
       fetchUsage: this.fetchUsage,
       syncIntegrationsTask: this.syncIntegrationsTask!,
@@ -725,6 +734,8 @@ export class FleetPlugin
     this.updateAgentlessDeploymentsTask
       ?.start({ taskManager: plugins.taskManager })
       .catch(() => {});
+    this.automaticAgentUpgradeTask?.start({ taskManager: plugins.taskManager }).catch(() => {});
+
     startFleetUsageLogger(plugins.taskManager).catch(() => {});
     this.fleetMetricsTask
       ?.start(plugins.taskManager, core.elasticsearch.client.asInternalUser)

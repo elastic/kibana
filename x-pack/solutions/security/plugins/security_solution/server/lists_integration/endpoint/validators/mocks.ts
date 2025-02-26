@@ -45,6 +45,17 @@ export class BaseValidatorMock extends BaseValidator {
   ): boolean {
     return this.wasByPolicyEffectScopeChanged(updatedItem, currentItem);
   }
+
+  _validateCreateOwnerSpaceIds(item: ExceptionItemLikeOptions): Promise<void> {
+    return this.validateCreateOwnerSpaceIds(item);
+  }
+
+  _validateUpdateOwnerSpaceIds(
+    updatedItem: Partial<Pick<ExceptionListItemSchema, 'tags'>>,
+    currentItem: Pick<ExceptionListItemSchema, 'tags'>
+  ): Promise<void> {
+    return this.validateUpdateOwnerSpaceIds(updatedItem, currentItem);
+  }
 }
 
 export const createExceptionItemLikeOptionsMock = (

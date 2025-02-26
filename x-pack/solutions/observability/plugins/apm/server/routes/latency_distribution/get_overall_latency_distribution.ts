@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { estypes } from '@elastic/elasticsearch';
 import type { Environment } from '../../../common/environment_rt';
 import { withApmSpan } from '../../utils/with_apm_span';
 import { fetchDurationRanges } from '../correlations/queries/fetch_duration_ranges';

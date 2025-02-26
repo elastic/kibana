@@ -49,7 +49,7 @@ export const getEvaluateRoute = (router: IRouter<ElasticAssistantRequestHandlerC
         const logger = assistantContext.logger.get('evaluate');
 
         // Perform license, authenticated user and evaluation FF checks
-        const checkResponse = performChecks({
+        const checkResponse = await performChecks({
           capability: 'assistantModelEvaluation',
           context: ctx,
           request,

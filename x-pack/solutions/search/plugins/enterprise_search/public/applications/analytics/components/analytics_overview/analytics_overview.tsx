@@ -9,7 +9,7 @@ import React, { useEffect } from 'react';
 
 import { useActions, useValues } from 'kea';
 
-import { EuiFlexItem, EuiSpacer } from '@elastic/eui';
+import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTitle } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 
@@ -57,9 +57,26 @@ export const AnalyticsOverview: React.FC = () => {
               'Dashboards and tools for visualizing end-user behavior and measuring the performance of your search applications. Track trends over time, identify and investigate anomalies, and make optimizations.',
           }
         ),
-        pageTitle: i18n.translate('xpack.enterpriseSearch.analytics.collections.pageTitle', {
-          defaultMessage: 'Behavioral Analytics',
-        }),
+        pageTitle: (
+          <EuiFlexGroup responsive={false} alignItems="center">
+            <EuiFlexItem grow={false}>
+              <EuiTitle>
+                <h1>
+                  {i18n.translate('xpack.enterpriseSearch.analytics.collections.pageTitle', {
+                    defaultMessage: 'Behavioral Analytics',
+                  })}
+                </h1>
+              </EuiTitle>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiBadge color="warning">
+                {i18n.translate('xpack.enterpriseSearch.analytics.collections.deprecatedBadge', {
+                  defaultMessage: 'Deprecated',
+                })}
+              </EuiBadge>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        ),
         rightSideItems: [<AddAnalyticsCollection disabled={isGated} />],
       }}
     >
