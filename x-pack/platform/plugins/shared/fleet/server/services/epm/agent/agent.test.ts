@@ -381,6 +381,21 @@ yaml_var: {{to_json yaml_var}}
         },
       });
     });
+
+    it('should encoding strings to JSON', () => {
+      const vars = {
+        user_input: `foo: "bar 'baz'"`,
+      };
+
+      const template = `
+rendered_value: {{ to_json user_input }}
+      `;
+
+      const output = compileTemplate(vars, template);
+      expect(output).toEqual({
+        rendered_value: `foo: "bar 'baz'"`,
+      });
+    });
   });
 
   it('should support optional yaml values at root level', () => {

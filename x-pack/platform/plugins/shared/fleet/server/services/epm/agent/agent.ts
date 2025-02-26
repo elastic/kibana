@@ -148,12 +148,8 @@ function escapeMultilineStringHelper(str: string) {
 }
 handlebars.registerHelper('escape_multiline_string', escapeMultilineStringHelper);
 
-// toJsonHelper will convert any object to a Json string.
+// toJsonHelper will convert any JavaScript value to a JSON string.
 function toJsonHelper(value: any) {
-  if (typeof value === 'string') {
-    // if we get a string we assume is an already serialized json
-    return value;
-  }
   return JSON.stringify(value);
 }
 handlebars.registerHelper('to_json', toJsonHelper);
