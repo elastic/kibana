@@ -105,6 +105,7 @@ export type MapSettings = {
   keydownScrollZoom: boolean;
   maxZoom: number;
   minZoom: number;
+  projection: 'globeInterpolate' | 'mercator';
   showScaleControl: boolean;
   showSpatialFilters: boolean;
   showTimesliderToggleButton: boolean;
