@@ -33,6 +33,7 @@ import { useInitializeUrlParam, useUpdateUrlParam } from '../../common/utils/glo
 import { createSourcererDataView } from './create_sourcerer_data_view';
 import { useInitSourcerer } from './use_init_sourcerer';
 
+
 const mockRouteSpy: RouteSpyState = {
   pageName: SecurityPageName.overview,
   detailName: undefined,
@@ -69,6 +70,11 @@ const mockCreateSourcererDataView = jest.fn(() => {
   errToReturn.name = 'AbortError';
   throw errToReturn;
 });
+
+jest.mock('../../common/hooks/use_selector', () => ({
+  // Mock timeline so_id return
+  useDeepEqualSelector: jest.fn().mockReturnValue({ savedObjectId: null }),
+}));
 
 jest.mock('../../common/lib/kibana', () => ({
   useToasts: () => ({
