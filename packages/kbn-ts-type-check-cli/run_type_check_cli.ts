@@ -47,6 +47,8 @@ async function createTypeCheckConfigs(log: SomeDevLog, projects: TsProject[]) {
         ...config.compilerOptions,
         composite: true,
         rootDir: '.',
+        noEmit: false,
+        emitDeclarationOnly: true,
         paths: project.repoRel === 'tsconfig.base.json' ? config.compilerOptions?.paths : undefined,
       },
       kbn_references: undefined,
