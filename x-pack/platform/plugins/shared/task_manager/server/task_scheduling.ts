@@ -20,11 +20,13 @@ import {
   OneOffTask,
   RecurringTask,
   Require,
+  ScheduleType,
 } from './task';
 import { TaskStore } from './task_store';
 import { ensureDeprecatedFieldsAreCorrected } from './lib/correct_deprecated_fields';
 import { retryableBulkUpdate } from './lib/retryable_bulk_update';
 import { ErrorOutput } from './lib/bulk_operation_buffer';
+import { TaskTypeDictionary } from './task_type_dictionary';
 
 const VERSION_CONFLICT_STATUS = 409;
 const BULK_ACTION_SIZE = 100;
@@ -33,6 +35,7 @@ export interface TaskSchedulingOpts {
   taskStore: TaskStore;
   middleware: Middleware;
   taskManagerId: string;
+  taskDefinitions: TaskTypeDictionary;
 }
 
 /**
@@ -62,6 +65,7 @@ export class TaskScheduling {
   private store: TaskStore;
   private logger: Logger;
   private middleware: Middleware;
+  private taskDefinitions: TaskTypeDictionary;
 
   /**
    * Initializes the task manager, preventing any further addition of middleware,
@@ -72,6 +76,14 @@ export class TaskScheduling {
     this.logger = opts.logger;
     this.middleware = opts.middleware;
     this.store = opts.taskStore;
+    this.taskDefinitions = opts.taskDefinitions;
+  }
+
+  private validateTaskCompatibility(taskType: string, scheduleType: ScheduleType) {
+    const taskTypeDef = this.taskDefinitions.get(taskType);
+    if (taskTypeDef?.scheduleType && taskTypeDef.scheduleType !== scheduleType) {
+      throw new Error(`Task type ${taskType} can only create ${taskTypeDef?.scheduleType} tasks`);
+    }
   }
 
   /**
@@ -104,6 +116,7 @@ export class TaskScheduling {
   }
 
   public async createOneOffTask(task: OneOffTask, options?: Record<string, unknown>) {
+    this.validateTaskCompatibility(task.taskType, ScheduleType.OneOff);
     return await this.schedule({ ...task, state: {} }, options);
   }
 
@@ -111,6 +124,7 @@ export class TaskScheduling {
     task: Require<OneOffTask, 'id'>,
     options?: Record<string, unknown>
   ) {
+    this.validateTaskCompatibility(task.taskType, ScheduleType.OneOff);
     try {
       const result = await this.createOneOffTask(task, options);
       return { created: true, task: result };
@@ -123,6 +137,7 @@ export class TaskScheduling {
   }
 
   public async createRecurringTask(task: RecurringTask, options?: Record<string, unknown>) {
+    this.validateTaskCompatibility(task.taskType, ScheduleType.Recurring);
     return await this.schedule(task, options);
   }
 
@@ -130,6 +145,7 @@ export class TaskScheduling {
     task: Require<RecurringTask, 'id'>,
     options?: Record<string, unknown>
   ) {
+    this.validateTaskCompatibility(task.taskType, ScheduleType.Recurring);
     try {
       const result = await this.createRecurringTask(task, options);
       return { created: true, task: result };
@@ -175,6 +191,7 @@ export class TaskScheduling {
   }
 
   public async createOneOffTaskBulk(tasks: OneOffTask[], options?: Record<string, unknown>) {
+    tasks.forEach((t) => this.validateTaskCompatibility(t.taskType, ScheduleType.OneOff));
     return await this.bulkSchedule(
       tasks.map((t) => ({ ...t, state: {} })),
       options
@@ -182,6 +199,7 @@ export class TaskScheduling {
   }
 
   public async createRecurringTaskBulk(tasks: RecurringTask[], options?: Record<string, unknown>) {
+    tasks.forEach((t) => this.validateTaskCompatibility(t.taskType, ScheduleType.Recurring));
     return await this.bulkSchedule(tasks, options);
   }
 

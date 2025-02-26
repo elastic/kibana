@@ -15,6 +15,7 @@ import {
   TaskCost,
   ConcreteTaskInstance,
   RecurringTaskRunResult,
+  ScheduleType,
 } from './task';
 import { CONCURRENCY_ALLOW_LIST_BY_TASK_TYPE } from './constants';
 
@@ -78,7 +79,7 @@ export interface RecurringTaskTypeOpts extends BaseTaskTypeOpts {
   >;
 }
 
-export interface OneTimeTaskTypeOpts extends BaseTaskTypeOpts {
+export interface OneOffTaskTypeOpts extends BaseTaskTypeOpts {
   /**
    * Up to how many times the task should retry when it fails to run. This will
    * default to the global variable. The default value, if not specified, is 1.
@@ -91,7 +92,7 @@ export interface BaseTaskTypeFnOpts {
   params: ConcreteTaskInstance['params'];
 }
 
-export type OneTimeTaskTypeFnOpts = BaseTaskTypeFnOpts;
+export type OneOffTaskTypeFnOpts = BaseTaskTypeFnOpts;
 export interface RecurringTaskTypeFnOpts extends BaseTaskTypeFnOpts {
   state: ConcreteTaskInstance['state'];
 }
@@ -154,6 +155,8 @@ export interface TaskRegisterDefinition {
   >;
 
   paramsSchema?: ObjectType;
+
+  scheduleType?: ScheduleType;
 }
 
 /**
@@ -205,7 +208,7 @@ export class TaskTypeDictionary {
    * Method for allowing consumers to register task definitions into the system.
    * @param taskDefinitions - The Kibana task definitions dictionary
    *
-   * @deprecated Use registerOneTimeTaskType or registerRecurringTaskType instead.
+   * @deprecated Use registerOneOffTaskType or registerRecurringTaskType instead.
    */
   public registerTaskDefinitions(taskDefinitions: TaskDefinitionRegistry) {
     const duplicate = Object.keys(taskDefinitions).find((type) => this.definitions.has(type));
@@ -240,15 +243,15 @@ export class TaskTypeDictionary {
     }
   }
 
-  public registerOneTimeTaskType(
+  public registerOneOffTaskType(
     taskType: string,
-    fn: (options: OneTimeTaskTypeFnOpts) => Promise<void>,
-    options?: OneTimeTaskTypeOpts
+    fn: (options: OneOffTaskTypeFnOpts) => Promise<void>,
+    options?: OneOffTaskTypeOpts
   ) {
     this.registerTaskDefinitions({
       [taskType]: {
         ...options,
-        title: '',
+        scheduleType: ScheduleType.OneOff,
         createTaskRunner({ taskInstance }) {
           const abortController = new AbortController();
           return {
@@ -273,7 +276,7 @@ export class TaskTypeDictionary {
     this.registerTaskDefinitions({
       [taskType]: {
         ...options,
-        title: '',
+        scheduleType: ScheduleType.Recurring,
         createTaskRunner({ taskInstance }) {
           const abortController = new AbortController();
           return {

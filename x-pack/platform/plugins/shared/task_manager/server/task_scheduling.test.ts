@@ -46,7 +46,7 @@ describe('TaskScheduling', () => {
     taskStore: mockTaskStore,
     logger: mockLogger(),
     middleware: createInitialMiddleware(),
-    definitions,
+    taskDefinitions: definitions,
     taskManagerId: '123',
   };
 

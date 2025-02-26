@@ -7,7 +7,6 @@
 
 import { CoreStart, Logger } from '@kbn/core/server';
 import {
-  RunContext,
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';

@@ -14,7 +14,7 @@ const createSetupMock = () => {
     index: '.kibana_task_manager',
     addMiddleware: jest.fn(),
     registerTaskDefinitions: jest.fn(),
-    registerOneTimeTaskType: jest.fn(),
+    registerOneOffTaskType: jest.fn(),
     registerRecurringTaskType: jest.fn(),
   };
   return mock;

@@ -230,6 +230,7 @@ export type TaskDefinition = Omit<TypeOf<typeof taskDefinitionSchema>, 'paramsSc
     }
   >;
   paramsSchema?: ObjectType;
+  scheduleType?: ScheduleType;
 };
 
 export enum TaskStatus {
@@ -245,6 +246,11 @@ export enum TaskStatus {
 
 export enum TaskLifecycleResult {
   NotFound = 'notFound',
+}
+
+export enum ScheduleType {
+  OneOff = 'one-off',
+  Recurring = 'recurring',
 }
 
 export type TaskLifecycle = TaskStatus | TaskLifecycleResult;

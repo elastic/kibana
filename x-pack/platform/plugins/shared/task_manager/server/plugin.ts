@@ -55,7 +55,7 @@ import {
 
 export type TaskManagerSetupContract = Pick<
   TaskTypeDictionary,
-  'registerTaskDefinitions' | 'registerOneTimeTaskType' | 'registerRecurringTaskType'
+  'registerTaskDefinitions' | 'registerOneOffTaskType' | 'registerRecurringTaskType'
 > & {
   /**
    * @deprecated
@@ -266,7 +266,7 @@ export class TaskManagerPlugin
         this.middleware = addMiddlewareToChain(this.middleware, middleware);
       },
       registerTaskDefinitions: (...args) => this.definitions.registerTaskDefinitions(...args),
-      registerOneTimeTaskType: (...args) => this.definitions.registerOneTimeTaskType(...args),
+      registerOneOffTaskType: (...args) => this.definitions.registerOneOffTaskType(...args),
       registerRecurringTaskType: (...args) => this.definitions.registerRecurringTaskType(...args),
     };
   }
@@ -385,6 +385,7 @@ export class TaskManagerPlugin
       taskStore,
       middleware: this.middleware,
       taskManagerId: taskStore.taskManagerId,
+      taskDefinitions: this.definitions,
     });
 
     scheduleDeleteInactiveNodesTaskDefinition(this.logger, taskScheduling).catch(() => {});
