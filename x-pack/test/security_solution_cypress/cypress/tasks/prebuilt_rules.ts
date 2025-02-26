@@ -80,6 +80,15 @@ export const interceptUpgradeRequestToFail = (rules: Array<typeof SAMPLE_PREBUIL
         skipped: [],
         failed: rules.length,
       },
+      results: {
+        updated: [],
+        skipped: [],
+      },
+      errors: {
+        message: 'Test error',
+        status_code: 400,
+        rules: [{ rule_id: 'test_rule', name: 'Test rule' }],
+      },
     },
     delay: 500, // Add delay to give Cypress time to find the loading spinner
   }).as('updatePrebuiltRules');
