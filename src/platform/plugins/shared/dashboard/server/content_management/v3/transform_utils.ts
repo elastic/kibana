@@ -158,7 +158,7 @@ export function dashboardAttributesOut(
     kibanaSavedObjectMeta,
     optionsJSON,
     panelsJSON,
-    // sections,
+    sections,
     refreshInterval,
     timeFrom,
     timeRestore,
@@ -166,6 +166,7 @@ export function dashboardAttributesOut(
     title,
     version,
   } = attributes;
+
   // try to maintain a consistent (alphabetical) order of keys
   return {
     ...(controlGroupInput && { controlGroupInput: controlGroupInputOut(controlGroupInput) }),
@@ -178,7 +179,7 @@ export function dashboardAttributesOut(
     ...(refreshInterval && {
       refreshInterval: { pause: refreshInterval.pause, value: refreshInterval.value },
     }),
-    // sections,
+    sections,
     ...(timeFrom && { timeFrom }),
     timeRestore: timeRestore ?? false,
     ...(timeTo && { timeTo }),

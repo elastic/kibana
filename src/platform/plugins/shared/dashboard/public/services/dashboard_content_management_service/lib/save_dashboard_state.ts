@@ -45,7 +45,6 @@ export const saveDashboardState = async ({
   const idToSaveTo = saveOptions.saveAsCopy ? undefined : lastSavedId;
 
   try {
-    // console.log('before');
     const result = idToSaveTo
       ? await contentManagementService.client.update<DashboardUpdateIn, DashboardUpdateOut>({
           id: idToSaveTo,
@@ -87,7 +86,6 @@ export const saveDashboardState = async ({
     }
     return { id: newId, references };
   } catch (error) {
-    console.log('error', error);
     coreServices.notifications.toasts.addDanger({
       title: i18n.translate('dashboard.dashboardWasNotSavedDangerMessage', {
         defaultMessage: `Dashboard ''{title}'' was not saved. Error: {errorMessage}`,

@@ -245,13 +245,13 @@ export class DashboardStorage {
   ): Promise<DashboardUpdateOut> {
     const transforms = ctx.utils.getTransforms(cmServicesDefinition);
     const soClient = await savedObjectClientFromRequest(ctx);
-    console.log(data);
+
     // Validate input (data & options) & UP transform them to the latest version
     const { value: dataToLatest, error: dataError } = transforms.update.in.data.up<
       DashboardAttributes,
       DashboardAttributes
     >(data);
-    console.log(dataToLatest);
+
     if (dataError) {
       throw Boom.badRequest(`Invalid data. ${dataError.message}`);
     }
