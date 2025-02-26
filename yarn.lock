@@ -12074,7 +12074,7 @@
     "@types/tough-cookie" "*"
     parse5 "^7.0.0"
 
-"@types/json-schema@*", "@types/json-schema@^7.0.0", "@types/json-schema@^7.0.4", "@types/json-schema@^7.0.5", "@types/json-schema@^7.0.6", "@types/json-schema@^7.0.8", "@types/json-schema@^7.0.9":
+"@types/json-schema@*", "@types/json-schema@^7.0.4", "@types/json-schema@^7.0.5", "@types/json-schema@^7.0.6", "@types/json-schema@^7.0.8", "@types/json-schema@^7.0.9":
   version "7.0.11"
   resolved "https://registry.yarnpkg.com/@types/json-schema/-/json-schema-7.0.11.tgz#d421b6c527a3037f7c84433fd2c4229e016863d3"
   integrity sha512-wOuvG1SN4Us4rez+tylwwwCV1psiNVOkJeM3AUWUNWg/jDQY2+HE/444y5gc+jBmRqASOm2Oeh5c1axHobwRKQ==
@@ -25142,13 +25142,14 @@ monaco-editor@^0.44.0:
   resolved "https://registry.yarnpkg.com/monaco-editor/-/monaco-editor-0.44.0.tgz#3c0fe3655923bbf7dd647057302070b5095b6c59"
   integrity sha512-5SmjNStN6bSuSE5WPT2ZV+iYn1/yI9sd4Igtk23ChvqB7kDk9lZbB9F5frsuvpB+2njdIeGGFf2G4gbE6rCC9Q==
 
-monaco-languageserver-types@^0.2.0:
-  version "0.2.3"
-  resolved "https://registry.yarnpkg.com/monaco-languageserver-types/-/monaco-languageserver-types-0.2.3.tgz#1f98324c5b9f1ac7356ef529bd25e53a5fa97943"
-  integrity sha512-QyV5R7s+rJ87bX1sRioMJZULWiTnMp0Vm+RLILgMEL0SqWuBsQBSW0EZunr4xMZhv6Qun3UZNCN4JrCCLURcgQ==
+monaco-languageserver-types@^0.4.0:
+  version "0.4.0"
+  resolved "https://registry.yarnpkg.com/monaco-languageserver-types/-/monaco-languageserver-types-0.4.0.tgz#8f3414c1ebba786b9c9db45857cc853e50e768e8"
+  integrity sha512-QQ3BZiU5LYkJElGncSNb5AKoJ/LCs6YBMCJMAz9EA7v+JaOdn3kx2cXpPTcZfKA5AEsR0vc97sAw+5mdNhVBmw==
   dependencies:
     monaco-types "^0.1.0"
     vscode-languageserver-protocol "^3.0.0"
+    vscode-uri "^3.0.0"
 
 monaco-marker-data-provider@^1.0.0:
   version "1.1.1"
@@ -25165,19 +25166,18 @@ monaco-worker-manager@^2.0.0:
   resolved "https://registry.yarnpkg.com/monaco-worker-manager/-/monaco-worker-manager-2.0.1.tgz#f67c54dfca34ed4b225d5de84e77b24b4e36de8a"
   integrity sha512-kdPL0yvg5qjhKPNVjJoym331PY/5JC11aPJXtCZNwWRvBr6jhkIamvYAyiY5P1AWFmNOy0aRDRoMdZfa71h8kg==
 
-monaco-yaml@^5.1.0:
-  version "5.1.0"
-  resolved "https://registry.yarnpkg.com/monaco-yaml/-/monaco-yaml-5.1.0.tgz#ba3445b4f683328cb43bc31dc52bc06e66a95b81"
-  integrity sha512-DU+cgXSJdOFKQ4I4oLg0V+mHKq1dJX+7hbIE4fJsgegUf1zEHW3PNlGj6qabUU2HZIPJ5NmXEf005GU9YDzTYQ==
+monaco-yaml@^5.3.1:
+  version "5.3.1"
+  resolved "https://registry.yarnpkg.com/monaco-yaml/-/monaco-yaml-5.3.1.tgz#e37749ff8491924a7cabf9f597e746036cc6a9ea"
+  integrity sha512-1MN8i1Tnc8d8RugQGqv5jp+Ce2xtNhrnbm0ZZbe5ceExj9C2PkKZfHJhY9kbdUS4G7xSVwKlVdMTmLlStepOtw==
   dependencies:
-    "@types/json-schema" "^7.0.0"
     jsonc-parser "^3.0.0"
-    monaco-languageserver-types "^0.2.0"
+    monaco-languageserver-types "^0.4.0"
     monaco-marker-data-provider "^1.0.0"
     monaco-types "^0.1.0"
     monaco-worker-manager "^2.0.0"
     path-browserify "^1.0.0"
-    prettier "^2.0.0"
+    prettier "^3.0.0"
     vscode-languageserver-textdocument "^1.0.0"
     vscode-languageserver-types "^3.0.0"
     vscode-uri "^3.0.0"
@@ -27440,12 +27440,12 @@ prettier-linter-helpers@^1.0.0:
   resolved "https://registry.yarnpkg.com/prettier/-/prettier-2.3.0.tgz#b6a5bf1284026ae640f17f7ff5658a7567fc0d18"
   integrity sha512-kXtO4s0Lz/DW/IJ9QdWhAf7/NmPWQXkFr/r/WkR3vyI+0v8amTDxiaQSLzs8NBlytfLWX/7uQUMIW677yLKl4w==
 
-prettier@^2.0.0, prettier@^2.8.8:
+prettier@^2.8.8:
   version "2.8.8"
   resolved "https://registry.yarnpkg.com/prettier/-/prettier-2.8.8.tgz#e8c5d7e98a4305ffe3de2e1fc4aca1a71c28b1da"
   integrity sha512-tdN8qQGvNjw4CHbY+XXk0JgCXn9QiF21a55rBe5LJAU+kDyC4WQn4+awm2Xfk2lQMk5fKup9XgzTZtGkjBdP9Q==
 
-prettier@^3.2.5:
+prettier@^3.0.0, prettier@^3.2.5:
   version "3.3.3"
   resolved "https://registry.yarnpkg.com/prettier/-/prettier-3.3.3.tgz#30c54fe0be0d8d12e6ae61dbb10109ea00d53105"
   integrity sha512-i2tDNA0O5IrMO757lfrdQZCc2jPNDVntV0m/+4whiDfWaTKfMNgR7Qz0NAeGz/nRqF4m5/6CLzbP4/liHt12Ew==
