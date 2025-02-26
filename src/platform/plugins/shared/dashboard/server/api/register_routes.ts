@@ -46,7 +46,7 @@ export function registerAPIRoutes({
 }: RegisterAPIRoutesArgs) {
   const { versioned: versionedRouter } = http.createRouter();
 
-  registerEventRoutes({ router: versionedRouter, logger });
+  registerEventRoutes({ router: versionedRouter, logger, contentManagement });
 
   // Create API route
   const createRoute = versionedRouter.post({
