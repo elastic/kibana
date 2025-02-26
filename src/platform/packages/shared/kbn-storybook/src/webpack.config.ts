@@ -68,14 +68,8 @@ function isDesiredPreset(preset: Preset) {
 /**
  * @returns {import('webpack').Configuration}
  */
-export default ({ config: storybookConfig }: { config: Configuration }) => {
+export default async ({ config: storybookConfig }: { config: Configuration }) => {
   const config: Configuration = {
-    cache: {
-      type: 'filesystem',
-      buildDependencies: {
-        config: [__filename],
-      },
-    },
     devServer: {
       devMiddleware: {
         stats: 'errors-only',
@@ -95,7 +89,7 @@ export default ({ config: storybookConfig }: { config: Configuration }) => {
         },
         {
           test: /\.(html|md|txt|tmpl)$/,
-          type: 'asset/source' as webpack.RuleSetRule['type'],
+          type: 'asset/source',
         },
         {
           test: /\.peggy$/,

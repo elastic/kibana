@@ -12,6 +12,8 @@ import fs from 'fs';
 import type { StorybookConfig } from '@storybook/react-webpack5';
 import type { Configuration, Compiler } from 'webpack';
 import webpackMerge from 'webpack-merge';
+import UiSharedDepsNpm from '@kbn/ui-shared-deps-npm';
+import * as UiSharedDepsSrc from '@kbn/ui-shared-deps-src';
 
 const MOCKS_DIRECTORY = '__storybook_mocks__';
 const EXTENSIONS = ['.ts', '.js'];
@@ -28,18 +30,31 @@ const IGNORE_GLOBS = [
 ];
 
 export const defaultConfig: StorybookConfig = {
-  addons: ['@kbn/storybook/preset', '@storybook/addon-a11y', '@storybook/addon-essentials'],
+  addons: [
+    '@storybook/addon-webpack5-compiler-babel',
+    '@kbn/storybook/preset',
+    '@storybook/addon-a11y',
+    '@storybook/addon-essentials',
+  ],
   framework: '@storybook/react-webpack5',
   stories: ['../**/*.stories.tsx', '../**/*.mdx'],
   typescript: {
     reactDocgen: false,
     check: false,
-    skipCompiler: true,
   },
+  staticDirs: [
+    UiSharedDepsNpm.distDir,
+    UiSharedDepsSrc.distDir,
+    {
+      from: path.resolve(__dirname, '../../../../../plugins/shared/kibana_react/public/assets'),
+      to: 'plugins/kibanaReact/assets',
+    },
+  ],
 
   // @ts-expect-error StorybookConfig type is incomplete
   // https://storybook.js.org/docs/react/configure/babel#custom-configuration
   babel: async (options) => {
+    options.presets = options.presets || [];
     options.presets.push([
       require.resolve('@emotion/babel-preset-css-prop'),
       {
@@ -110,8 +125,14 @@ export const defaultConfig: StorybookConfig = {
     config.plugins.push(createMockPlugin(/^\.\//)); // For ./ imports
     config.plugins.push(createMockPlugin(/^\.\.\//)); // For ../ imports
 
-    //    config.node = { fs: 'empty' };
-    //    config.watch = true;
+    config.resolve = {
+      ...config.resolve,
+      fallback: {
+        ...config?.resolve?.fallback,
+        fs: false,
+      },
+    };
+
     config.watchOptions = {
       ...config.watchOptions,
       ignored: IGNORE_GLOBS,

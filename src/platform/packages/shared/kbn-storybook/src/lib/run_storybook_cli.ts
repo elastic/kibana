@@ -11,11 +11,7 @@ import { join } from 'path';
 import { logger } from '@storybook/node-logger';
 import { build } from '@storybook/core-server';
 import { Flags, run } from '@kbn/dev-cli-runner';
-import UiSharedDepsNpm from '@kbn/ui-shared-deps-npm';
-import * as UiSharedDepsSrc from '@kbn/ui-shared-deps-src';
 
-// @ts-expect-error internal dep of storybook
-import interpret from 'interpret'; // eslint-disable-line import/no-extraneous-dependencies
 import * as constants from './constants';
 
 // Convert the flags to a Storybook loglevel
@@ -40,27 +36,16 @@ export function runStorybookCli({ configDir, name }: { configDir: string; name: 
     async ({ flags, log }) => {
       log.debug('Global config:\n', constants);
 
-      const staticDir = [
-        UiSharedDepsNpm.distDir,
-        UiSharedDepsSrc.distDir,
-        'src/platform/plugins/shared/kibana_react/public/assets:plugins/kibanaReact/assets',
-      ];
       const config: Record<string, any> = {
         configDir,
         mode: flags.site ? 'static' : 'dev',
         port: 9001,
-        staticDir,
       };
       if (flags.site) {
         config.outputDir = join(constants.ASSET_DIR, name);
       }
-
+      config.debugWebpack = true;
       logger.setLevel(getLogLevelFromFlags(flags));
-
-      // force storybook to use our transpilation rather than ts-node or anything else
-      interpret.extensions['.ts'] = [require.resolve('@kbn/babel-register/install')];
-      interpret.extensions['.tsx'] = [require.resolve('@kbn/babel-register/install')];
-      interpret.extensions['.jsx'] = [require.resolve('@kbn/babel-register/install')];
 
       await build(config);
 

@@ -13,7 +13,7 @@ module.exports = {
   managerEntries: (entry = []) => {
     return [require.resolve('./src/lib/register'), ...entry];
   },
-  webpackFinal: (config) => {
+  webpackFinal: async (config) => {
     return webpackConfig({ config });
   },
   config: (entry) => {
