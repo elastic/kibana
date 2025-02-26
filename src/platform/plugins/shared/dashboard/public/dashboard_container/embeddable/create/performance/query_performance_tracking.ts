@@ -99,10 +99,17 @@ export function startQueryPerformanceTracking(
         const timeToData = now - (performanceState.lastLoadStartTime ?? now);
         const completeLoadDuration =
           (performanceState.creationEndTime ?? now) - (performanceState.creationStartTime ?? now);
+        performance.mark('anton:dashboard-render-complete');
+        const measure = performance.measure(
+          'anton:dashboard-load',
+          'anton:rendering-start',
+          'anton:dashboard-render-complete'
+        );
+
         reportPerformanceMetrics({
           timeToData,
           panelCount,
-          totalLoadTime: completeLoadDuration,
+          totalLoadTime: measure.duration,
           loadType,
         });
       }
@@ -133,6 +140,5 @@ function reportPerformanceMetrics({
     key4: 'load_type',
     value4: loadTypesMapping[loadType],
   };
-  console.error('reportPerformanceMetrics', JSON.stringify(e));
   reportPerformanceMetricEvent(coreServices.analytics, e);
 }
