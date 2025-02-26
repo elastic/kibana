@@ -11,6 +11,7 @@ import { allOrAnyStringOrArray, dateType } from './common';
 import { durationType } from './duration';
 import { indicatorSchema } from './indicators';
 import { timeWindowSchema } from './time_window';
+import { assetsSchema as assetsSchema } from './asset';
 
 const occurrencesBudgetingMethodSchema = t.literal('occurrences');
 const timeslicesBudgetingMethodSchema = t.literal('timeslices');
@@ -94,6 +95,7 @@ const sloDefinitionSchema = t.intersection([
     updatedAt: dateType,
     groupBy: groupBySchema,
     version: t.number,
+    assets: assetsSchema,
   }),
   t.partial({
     createdBy: t.string,

@@ -50,7 +50,7 @@ export function SyntheticsIndicatorOverview({ slo }: Props) {
   return (
     <OverviewItem
       title={MONITOR_LABEL}
-      subtitle={
+      content={
         <EuiFlexGroup direction="row" alignItems="flexStart" gutterSize="s" responsive={false} wrap>
           {name && (
             <EuiFlexItem grow={false}>

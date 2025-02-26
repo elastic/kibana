@@ -44,6 +44,7 @@ export function fromRemoteSummaryDocumentToSloDefinition(
     version: 1,
     createdBy: summaryDoc.slo.createdBy,
     updatedBy: summaryDoc.slo.updatedBy,
+    assets: [],
   });
 
   if (isLeft(res)) {

@@ -77,6 +77,12 @@ function generateQuery(slo: SLODefinition, params: GetSLOGroupingsParams, settin
     groupingValues[index],
   ]);
 
+  console.dir({
+    instanceId: params.instanceId,
+    groupingValues,
+    groupingKeyValuePairs,
+  });
+
   const aggs = generateAggs(params);
 
   const query = {
@@ -130,6 +136,8 @@ function generateQuery(slo: SLODefinition, params: GetSLOGroupingsParams, settin
     },
     aggs,
   };
+
+  console.dir(query, { depth: 10 });
 
   return query;
 }
