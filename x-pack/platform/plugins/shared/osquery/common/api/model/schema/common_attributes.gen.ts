@@ -32,7 +32,7 @@ export type PackDescriptionOrUndefined = z.infer<typeof PackDescriptionOrUndefin
 export const PackDescriptionOrUndefined = PackDescription.nullable();
 
 /**
- * Restricts the query to a specified platform. The default is all platforms. To specify multiple platforms, use commas. For example, linux,darwin.
+ * Restricts the query to a specified platform. The default is all platforms. To specify multiple platforms, use commas. For example, `linux,darwin`.
  */
 export type Platform = z.infer<typeof Platform>;
 export const Platform = z.string();
@@ -110,7 +110,7 @@ export type SavedQueryDescriptionOrUndefined = z.infer<typeof SavedQueryDescript
 export const SavedQueryDescriptionOrUndefined = SavedQueryDescription.nullable();
 
 /**
- * The ID of the pack you want to run.
+ * The ID of the pack you want to run, retrieve, update, or delete.
  */
 export type PackId = z.infer<typeof PackId>;
 export const PackId = z.string();
@@ -217,16 +217,20 @@ export type PageSizeOrUndefined = z.infer<typeof PageSizeOrUndefined>;
 export const PageSizeOrUndefined = z.number().int().nullable();
 
 /**
- * The field that is used to sort the results. Options include createdAt or updatedAt. The default is createdAt.
+ * The field that is used to sort the results.
  */
 export type SortOrUndefined = z.infer<typeof SortOrUndefined>;
-export const SortOrUndefined = z.string().nullable();
+export const SortOrUndefined = z.enum(['createdAt', 'updatedAt']).nullable().default('createdAt');
+export type SortOrUndefinedEnum = typeof SortOrUndefined.enum;
+export const SortOrUndefinedEnum = SortOrUndefined.enum;
 
 /**
- * Specified the sort order. Options include desc or asc. The default is desc.
+ * Specifies the sort order.
  */
 export type SortOrderOrUndefined = z.infer<typeof SortOrderOrUndefined>;
-export const SortOrderOrUndefined = z.union([z.string().nullable(), z.unknown()]);
+export const SortOrderOrUndefined = z.enum(['asc', 'desc']).nullable().default('desc');
+export type SortOrderOrUndefinedEnum = typeof SortOrderOrUndefined.enum;
+export const SortOrderOrUndefinedEnum = SortOrderOrUndefined.enum;
 
 /**
  * An object with shard configuration for policies included in the pack. For each policy, set the shard configuration to a percentage (1–100) of target hosts.

@@ -31,7 +31,7 @@ export const CreateLiveQueryRequestBody = z.object({
    */
   agent_ids: z.array(z.string()).optional(),
   /**
-   * When true, the query runs on all agents.
+   * When `true`, the query runs on all agents.
    */
   agent_all: z.boolean().optional(),
   /**
@@ -48,19 +48,19 @@ export const CreateLiveQueryRequestBody = z.object({
   ecs_mapping: ECSMappingOrUndefined.optional(),
   pack_id: PackIdOrUndefined.optional(),
   /**
-   * A list of alert IDs associated to the live query.
+   * A list of alert IDs associated with the live query.
    */
   alert_ids: z.array(z.string()).optional(),
   /**
-   * A list of case IDs associated to the live query.
+   * A list of case IDs associated with the live query.
    */
   case_ids: z.array(z.string()).optional(),
   /**
-   * A list of event IDs associated to the live query.
+   * A list of event IDs associated with the live query.
    */
   event_ids: z.array(z.string()).optional(),
   /**
-   * Custom metadata object associated to the live query.
+   * Custom metadata object associated with the live query.
    */
   metadata: z.object({}).nullable().optional(),
 });

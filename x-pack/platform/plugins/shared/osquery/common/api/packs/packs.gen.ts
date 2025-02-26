@@ -22,7 +22,6 @@ import {
   SortOrUndefined,
   SortOrderOrUndefined,
   PackId,
-  DefaultSuccessResponse,
 } from '../model/schema/common_attributes.gen';
 import { FindPacksResponse, FindPackResponse } from './find_packs.gen';
 import { CreatePacksRequestBody, CreatePacksResponse } from './create_pack.gen';
@@ -42,7 +41,7 @@ export const OsqueryDeletePacksRequestParams = z.object({
 export type OsqueryDeletePacksRequestParamsInput = z.input<typeof OsqueryDeletePacksRequestParams>;
 
 export type OsqueryDeletePacksResponse = z.infer<typeof OsqueryDeletePacksResponse>;
-export const OsqueryDeletePacksResponse = DefaultSuccessResponse;
+export const OsqueryDeletePacksResponse = z.object({});
 export type OsqueryFindPacksRequestQuery = z.infer<typeof OsqueryFindPacksRequestQuery>;
 export const OsqueryFindPacksRequestQuery = z.object({
   page: PageOrUndefined.optional(),
