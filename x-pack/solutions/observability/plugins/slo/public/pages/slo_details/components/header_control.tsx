@@ -29,6 +29,8 @@ import { EditBurnRateRuleFlyout } from '../../slos/components/common/edit_burn_r
 import { useGetQueryParams } from '../hooks/use_get_query_params';
 import { useSloActions } from '../hooks/use_slo_actions';
 import { ManageLinkedDashboardsFlyout } from '../../../components/manage_linked_dashboards/manage_linked_dashboards_flyout';
+import type { Dashboard } from '../../../components/manage_linked_dashboards/types';
+import { useUpdateSlo } from '../../../hooks/use_update_slo';
 
 export interface Props {
   slo: SLOWithSummaryResponse;
@@ -73,6 +75,8 @@ export function HeaderControl({ slo }: Props) {
   });
 
   const rules = rulesBySlo?.[slo.id] ?? [];
+
+  const { mutate: updateSlo } = useUpdateSlo();
 
   const handleActionsClick = () => setIsPopoverOpen((value) => !value);
   const closePopover = () => setIsPopoverOpen(false);
@@ -470,7 +474,17 @@ export function HeaderControl({ slo }: Props) {
           onClose={() => {
             setManageLinkedDashboardsFlyoutOpen(false);
           }}
-          onSave={() => {
+          onSave={(dashboards: Dashboard[]) => {
+            updateSlo({
+              sloId: slo.id,
+              slo: {
+                assets: dashboards.map((dashboard) => ({
+                  type: 'dashboard',
+                  id: dashboard.id,
+                  label: dashboard.title,
+                })),
+              },
+            });
             setManageLinkedDashboardsFlyoutOpen(false);
           }}
         />

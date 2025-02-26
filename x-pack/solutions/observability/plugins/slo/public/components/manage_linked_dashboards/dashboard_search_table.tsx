@@ -108,7 +108,6 @@ export function DashboardSearchTable({ assignedDashboards, assign, unassign }: P
       </EuiFlexItem>
 
       <EuiBasicTable
-        compressed
         columns={columns}
         itemId="id"
         items={data?.results ?? []}

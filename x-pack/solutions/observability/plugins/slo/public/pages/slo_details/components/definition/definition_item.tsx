@@ -11,12 +11,10 @@ import React from 'react';
 
 export interface Props {
   title: string;
-  content?: ReactNode;
+  content: ReactNode;
 }
 
 export function DefinitionItem({ title, content }: Props) {
-  if (content == null) return null;
-
   return (
     <EuiFlexGroup direction="column" gutterSize="xs">
       <EuiFlexItem grow={false}>
