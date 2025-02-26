@@ -14,7 +14,9 @@ concurrency:
 
 jobs:
   matches_label:
-    if: github.event.label.name == 'trigger-chromium-build'
+    if: | 
+      github.event.label.name == 'trigger-chromium-build'
+      && github.event.issue.author_association == 'MEMBER'
     runs-on: ubuntu-latest
     outputs:
       version_bump_config: ${{ steps.extract_version_bump_config.outputs.result }}
@@ -118,18 +120,19 @@ jobs:
     needs: [matches_label]
     if: ${{ needs.matches_label.outputs.version_bump_config }}
     steps:
-      - name: Trigger chromium build
-        uses: "buildkite/trigger-pipeline-action@v2.3.0"
+      - uses: hashicorp/vault-action@a1b77a09293a4366e48a5067a86692ac6e94fdc0 #v3.1.0
         with:
-          buildkite_api_access_token: ${{ secrets.TRIGGER_BK_BUILD_TOKEN }} 
-          pipeline: "my-org/my-deploy-pipeline"
-          branch: "main"
-          commit: "HEAD"
-          message:  ":github: Triggered from a GitHub Action"
-          build_env_vars: '{"TRIGGERED_FROM_GHA": "true"}'
-          build_meta_data: '{"FOO": "bar"}'
-          ignore_pipeline_branch_filter: true     
-          send_pull_request: true
-          wait: true
-          wait_interval: 10
-          wait_timeout: 300
+          url: ${{ inputs.vaultUrl }}
+          roleId: ${{ inputs.vaultRoleId }}
+          secretId: ${{ inputs.vaultSecretId }}
+          method: approle
+          secrets: |
+            ${{ inputs.secret }} token | BUILDKITE_TOKEN
+        continue-on-error: false
+      - uses: elastic/oblt-actions/buildkite/run@v1
+        with:
+          token: ${{ env.BUILDKITE_TOKEN }}
+          pipeline: 'my-super-pipeline'
+          env-vars: |
+            PUPPETEER_VERSION=$(echo ${{ needs.matches_label.outputs.version_bump_config }} | jq -r '.puppeteer_version')
+            
