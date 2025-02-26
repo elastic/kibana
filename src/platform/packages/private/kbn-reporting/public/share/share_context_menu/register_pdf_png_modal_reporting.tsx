@@ -164,14 +164,12 @@ export const reportingPDFExportProvider = ({
     };
 
     return {
-      shareMenuItem: {
-        name: i18n.translate('reporting.shareContextMenu.ExportsButtonLabel', {
-          defaultMessage: 'PDF',
-        }),
-        toolTipContent: licenseToolTipContent,
-        disabled: licenseDisabled || sharingData.reportingDisabled,
-        ['data-test-subj']: 'imageExports',
-      },
+      name: i18n.translate('reporting.shareContextMenu.ExportsButtonLabel', {
+        defaultMessage: 'PDF',
+      }),
+      toolTipContent: licenseToolTipContent,
+      disabled: licenseDisabled || sharingData.reportingDisabled,
+      ['data-test-subj']: 'imageExports',
       label: 'PDF' as const,
       generateAssetExport: generateReportPDF,
       generateValueExport: generateExportUrlPDF,
