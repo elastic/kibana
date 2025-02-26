@@ -8,7 +8,6 @@
  */
 
 import * as React from 'react';
-import { storiesOf } from '@storybook/react';
 import { action } from '@storybook/addon-actions';
 import { TriggerPicker } from '.';
 
@@ -36,28 +35,33 @@ const Demo: React.FC = () => {
   );
 };
 
-storiesOf('components/TriggerPicker', module)
-  .add('Default', () => {
-    return (
-      <TriggerPicker
-        items={[
-          {
-            id: 'RANGE_SELECT_TRIGGER',
-            title: 'Range selected',
-            description: 'On chart brush.',
-          },
-          {
-            id: 'VALUE_CLICK_TRIGGER',
-            title: 'Value click',
-            description: 'On point click in chart',
-          },
-        ]}
-        selected={[]}
-        onChange={action('onChange')}
-      />
-    );
-  })
-  .add('With docs', () => {
+export default {
+  title: 'components/TriggerPicker',
+};
+
+export const Default = () => {
+  return (
+    <TriggerPicker
+      items={[
+        {
+          id: 'RANGE_SELECT_TRIGGER',
+          title: 'Range selected',
+          description: 'On chart brush.',
+        },
+        {
+          id: 'VALUE_CLICK_TRIGGER',
+          title: 'Value click',
+          description: 'On point click in chart',
+        },
+      ]}
+      selected={[]}
+      onChange={action('onChange')}
+    />
+  );
+};
+
+export const WithDocs = {
+  render: () => {
     return (
       <TriggerPicker
         docs={'http://example.com'}
@@ -77,8 +81,13 @@ storiesOf('components/TriggerPicker', module)
         onChange={action('onChange')}
       />
     );
-  })
-  .add('Selected trigger', () => {
+  },
+
+  name: 'With docs',
+};
+
+export const SelectedTrigger = {
+  render: () => {
     return (
       <TriggerPicker
         docs={'http://example.com'}
@@ -98,7 +107,11 @@ storiesOf('components/TriggerPicker', module)
         onChange={action('onChange')}
       />
     );
-  })
-  .add('Interactive', () => {
-    return <Demo />;
-  });
+  },
+
+  name: 'Selected trigger',
+};
+
+export const Interactive = () => {
+  return <Demo />;
+};

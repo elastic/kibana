@@ -7,9 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { defaultConfig } from '@kbn/storybook';
+import type { ProjectAnnotations } from '@storybook/types';
+import type { ReactRenderer } from '@storybook/react';
 
-module.exports = {
-  ...defaultConfig,
-  stories: ['../**/*.stories.tsx'],
+import { decorators } from './decorators';
+
+const preview: ProjectAnnotations<ReactRenderer> = {
+  decorators,
+  initialGlobals: { euiTheme: 'v8.light' },
 };
+
+// eslint-disable-next-line import/no-default-export
+export default preview;

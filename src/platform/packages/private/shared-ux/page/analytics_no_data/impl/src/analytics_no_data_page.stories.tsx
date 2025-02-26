@@ -27,12 +27,14 @@ export default {
   },
 };
 
-export const Analytics = (params: AnalyticsNoDataPageStorybookParams) => {
-  return (
-    <AnalyticsNoDataPageProvider {...mock.getProps(params)} {...mock.getServices(params)}>
-      <Component {...mock.getProps(params)} />
-    </AnalyticsNoDataPageProvider>
-  );
-};
+export const Analytics = {
+  render: (params: AnalyticsNoDataPageStorybookParams) => {
+    return (
+      <AnalyticsNoDataPageProvider {...mock.getServices(params)}>
+        <Component {...mock.getProps()} />
+      </AnalyticsNoDataPageProvider>
+    );
+  },
 
-Analytics.argTypes = mock.getArgumentTypes();
+  argTypes: mock.getArgumentTypes(),
+};

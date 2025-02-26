@@ -6,14 +6,18 @@
  */
 
 import React from 'react';
-import { storiesOf } from '@storybook/react';
 import { coreMock } from '@kbn/core/public/mocks';
 import { getMarkdownRenderer } from '..';
 import { Render } from '../../__stories__/render';
 
 const markdown = getMarkdownRenderer(coreMock.createStart());
-storiesOf('renderers/markdown', module)
-  .add('default', () => {
+
+export default {
+  title: 'renderers/markdown',
+};
+
+export const Default = {
+  render: () => {
     const config = {
       content: '# This is Markdown',
       font: {
@@ -24,8 +28,13 @@ storiesOf('renderers/markdown', module)
       openLinksInNewTab: false,
     };
     return <Render renderer={markdown} config={config} />;
-  })
-  .add('links in new tab', () => {
+  },
+
+  name: 'default',
+};
+
+export const LinksInNewTab = {
+  render: () => {
     const config = {
       content: '[Elastic.co](https://elastic.co)',
       font: {
@@ -36,4 +45,7 @@ storiesOf('renderers/markdown', module)
       openLinksInNewTab: true,
     };
     return <Render renderer={markdown} config={config} />;
-  });
+  },
+
+  name: 'links in new tab',
+};

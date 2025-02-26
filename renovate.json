@@ -44,10 +44,25 @@
     },
     {
       "groupName": "webpack",
-      "matchDepNames": ["webpack", "@types/webpack", "webpack-cli", "webpack-dev-server", "webpack-merge"],
-      "reviewers": ["team:kibana-operations"],
-      "matchBaseBranches": ["main"],
-      "labels": ["Team:Operations", "backport:all-open", "release_note:skip", "ci:build-webpack-bundle-analyzer"],
+      "matchDepNames": [
+        "webpack",
+        "@types/webpack",
+        "webpack-cli",
+        "webpack-dev-server",
+        "webpack-merge"
+      ],
+      "reviewers": [
+        "team:kibana-operations"
+      ],
+      "matchBaseBranches": [
+        "main"
+      ],
+      "labels": [
+        "Team:Operations",
+        "backport:all-open",
+        "release_note:skip",
+        "ci:build-webpack-bundle-analyzer"
+      ],
       "minimumReleaseAge": "60 days",
       "enabled": true
     },
@@ -1396,7 +1411,8 @@
       "matchDepNames": [
         "prettier",
         "eslint-plugin-prettier",
-        "eslint-config-prettier"
+        "eslint-config-prettier",
+        "@types/prettier"
       ],
       "reviewers": [
         "team:kibana-operations"
@@ -3363,28 +3379,7 @@
       "enabled": true
     },
     {
-      "groupName": "@storybook",
-      "reviewers": [
-        "team:kibana-operations"
-      ],
-      "matchBaseBranches": [
-        "main"
-      ],
-      "matchDepPatterns": [
-        "^@storybook"
-      ],
-      "labels": [
-        "Team:Operations",
-        "release_note:skip",
-        "ci:build-storybooks",
-        "backport:skip"
-      ],
-      "minimumReleaseAge": "7 days",
-      "allowedVersions": "<7.0",
-      "enabled": true
-    },
-    {
-      "groupName": "@storybook/testing-react",
+      "groupName": "storybook",
       "reviewers": [
         "team:kibana-operations"
       ],
@@ -3392,16 +3387,20 @@
         "main"
       ],
       "matchDepNames": [
-        "@storybook/testing-react"
+        "@pmmmwh/react-refresh-webpack-plugin",
+        "fix-esm",
+        "react-refresh"
+      ],
+      "matchDepPatterns": [
+        "storybook"
       ],
       "labels": [
         "Team:Operations",
         "release_note:skip",
         "ci:build-storybooks",
-        "backport:skip"
+        "backport:prev-minor"
       ],
       "minimumReleaseAge": "7 days",
-      "allowedVersions": "<2.0",
       "enabled": true
     },
     {

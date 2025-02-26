@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { ComponentStory } from '@storybook/react';
+import type { StoryFn } from '@storybook/react';
 import { EuiFlexGroup } from '@elastic/eui';
 
 import { KibanaReactStorybookDecorator } from '../../../utils/kibana_react.storybook_decorator';
@@ -18,11 +18,13 @@ export default {
   decorators: [KibanaReactStorybookDecorator],
 };
 
-const Template: ComponentStory<typeof Component> = (props: Props) => (
+const Template: StoryFn<typeof Component> = (props: Props) => (
   <EuiFlexGroup>
     <Component {...props} />
   </EuiFlexGroup>
 );
 
-export const Default = Template.bind({});
-Default.args = { activeAlerts: 2 };
+export const Default = {
+  render: Template,
+  args: { activeAlerts: 2 },
+};

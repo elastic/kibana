@@ -8,7 +8,7 @@
  */
 
 import { EuiCard, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
-import type { Story } from '@storybook/react';
+import type { StoryFn } from '@storybook/react';
 import React from 'react';
 import { CloudProviderIcon } from '.';
 import { CloudProvider } from './get_cloud_provider_icon';
@@ -20,7 +20,7 @@ export default {
 
 const providers: CloudProvider[] = ['gcp', 'aws', 'azure', 'unknownProvider'];
 
-export const List: Story = () => {
+export const List: StoryFn = () => {
   return (
     <EuiFlexGroup gutterSize="l" wrap={true}>
       {providers.map((cloudProvider) => {

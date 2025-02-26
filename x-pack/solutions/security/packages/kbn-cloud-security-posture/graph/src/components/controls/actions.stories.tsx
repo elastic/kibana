@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import type { Meta, Story } from '@storybook/react';
+import type { Meta, StoryFn } from '@storybook/react';
 import { ThemeProvider, css } from '@emotion/react';
 import { action } from '@storybook/addon-actions';
 import { Actions as ActionsComponent, type ActionsProps } from './actions';
@@ -23,7 +23,7 @@ export default {
   decorators: [GlobalStylesStorybookDecorator],
 } as Meta;
 
-const Template: Story<ActionsProps> = (props) => {
+const Template: StoryFn<ActionsProps> = (props) => {
   return (
     <ThemeProvider theme={{ darkMode: false }}>
       <ActionsComponent

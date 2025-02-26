@@ -9,9 +9,6 @@ module.exports = {
   preset: '@kbn/test',
   rootDir: '../../../../../..',
   roots: ['<rootDir>/x-pack/platform/plugins/shared/fleet/scripts'],
-  transform: {
-    '^.+\\.stories\\.tsx?$': '@storybook/addon-storyshots/injectFileName',
-  },
   coverageDirectory:
     '<rootDir>/target/kibana-coverage/jest/x-pack/platform/plugins/shared/fleet/scripts',
   coverageReporters: ['text', 'html'],
