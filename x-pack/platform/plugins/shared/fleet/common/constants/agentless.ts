@@ -45,4 +45,5 @@ export const AGENTLESS_DISABLED_INPUTS = [
   'o365audit',
   'gcp-pubsub',
   'azure-eventhub',
+  'logfile',
 ];
