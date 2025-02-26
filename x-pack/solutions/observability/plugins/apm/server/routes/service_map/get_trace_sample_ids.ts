@@ -78,56 +78,54 @@ export async function getTraceSampleIds({
     apm: {
       events,
     },
-    body: {
-      track_total_hits: false,
-      size: 0,
-      query,
-      aggs: {
-        connections: {
-          composite: {
-            sources: asMutableArray([
-              {
-                [SPAN_DESTINATION_SERVICE_RESOURCE]: {
-                  terms: {
-                    field: SPAN_DESTINATION_SERVICE_RESOURCE,
-                    missing_bucket: true,
-                  },
+    track_total_hits: false,
+    size: 0,
+    query,
+    aggs: {
+      connections: {
+        composite: {
+          sources: asMutableArray([
+            {
+              [SPAN_DESTINATION_SERVICE_RESOURCE]: {
+                terms: {
+                  field: SPAN_DESTINATION_SERVICE_RESOURCE,
+                  missing_bucket: true,
                 },
               },
-              {
-                [SERVICE_NAME]: {
-                  terms: {
-                    field: SERVICE_NAME,
-                  },
+            },
+            {
+              [SERVICE_NAME]: {
+                terms: {
+                  field: SERVICE_NAME,
                 },
               },
-              {
-                [SERVICE_ENVIRONMENT]: {
-                  terms: {
-                    field: SERVICE_ENVIRONMENT,
-                    missing_bucket: true,
-                  },
+            },
+            {
+              [SERVICE_ENVIRONMENT]: {
+                terms: {
+                  field: SERVICE_ENVIRONMENT,
+                  missing_bucket: true,
                 },
               },
-            ] as const),
-            size: fingerprintBucketSize,
-          },
-          aggs: {
-            sample: {
-              sampler: {
-                shard_size: samplerShardSize,
-              },
-              aggs: {
-                trace_ids: {
-                  terms: {
-                    field: TRACE_ID,
-                    size: traceIdBucketSize,
-                    execution_hint: 'map' as const,
-                    // remove bias towards large traces by sorting on trace.id
-                    // which will be random-esque
-                    order: {
-                      _key: 'desc' as const,
-                    },
+            },
+          ] as const),
+          size: fingerprintBucketSize,
+        },
+        aggs: {
+          sample: {
+            sampler: {
+              shard_size: samplerShardSize,
+            },
+            aggs: {
+              trace_ids: {
+                terms: {
+                  field: TRACE_ID,
+                  size: traceIdBucketSize,
+                  execution_hint: 'map' as const,
+                  // remove bias towards large traces by sorting on trace.id
+                  // which will be random-esque
+                  order: {
+                    _key: 'desc' as const,
                   },
                 },
               },

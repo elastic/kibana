@@ -2352,7 +2352,7 @@
             "label": "operator",
             "description": [],
             "signature": [
-              "\"endsWith\" | \"startsWith\" | \"gte\" | \"lte\" | \"contains\" | \"gt\" | \"lt\" | \"eq\" | \"neq\""
+              "\"endsWith\" | \"startsWith\" | \"gte\" | \"lte\" | \"gt\" | \"lt\" | \"contains\" | \"eq\" | \"neq\""
             ],
             "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/models/ingest/conditions/index.ts",
             "deprecated": false,
@@ -3856,7 +3856,7 @@
         "label": "BinaryOperator",
         "description": [],
         "signature": [
-          "\"endsWith\" | \"startsWith\" | \"gte\" | \"lte\" | \"contains\" | \"gt\" | \"lt\" | \"eq\" | \"neq\""
+          "\"endsWith\" | \"startsWith\" | \"gte\" | \"lte\" | \"gt\" | \"lt\" | \"contains\" | \"eq\" | \"neq\""
         ],
         "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/models/ingest/conditions/index.ts",
         "deprecated": false,
