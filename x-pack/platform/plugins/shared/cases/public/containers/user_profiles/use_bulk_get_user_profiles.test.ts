@@ -20,7 +20,7 @@ jest.mock('./api');
 const useKibanaMock = useKibana as jest.Mock;
 
 // FLAKY: https://github.com/elastic/kibana/issues/176335
-describe.skip('useBulkGetUserProfiles', () => {
+describe('useBulkGetUserProfiles', () => {
   const props = {
     uids: userProfilesIds,
   };
@@ -58,8 +58,10 @@ describe.skip('useBulkGetUserProfiles', () => {
       wrapper: appMockRender.AppWrapper,
     });
 
-    await waitFor(() =>
-      expect(result.current.data).toMatchInlineSnapshot(`
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
+    await waitFor(() => expect(result.current.data).not.toBeUndefined());
+
+    expect(result.current.data).toMatchInlineSnapshot(`
       Map {
         "u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0" => Object {
           "data": Object {},
@@ -92,8 +94,7 @@ describe.skip('useBulkGetUserProfiles', () => {
           },
         },
       }
-    `)
-    );
+    `);
   });
 
   it('shows a toast error message when an error occurs in the response', async () => {

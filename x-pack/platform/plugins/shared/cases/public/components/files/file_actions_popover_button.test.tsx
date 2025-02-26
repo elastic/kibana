@@ -27,7 +27,7 @@ jest.mock('../../containers/use_delete_file_attachment');
 const useDeleteFileAttachmentMock = useDeleteFileAttachment as jest.Mock;
 
 // Failing: See https://github.com/elastic/kibana/issues/207257
-describe.skip('FileActionsPopoverButton', () => {
+describe('FileActionsPopoverButton', () => {
   let appMockRender: AppMockRenderer;
   const mutate = jest.fn();
 

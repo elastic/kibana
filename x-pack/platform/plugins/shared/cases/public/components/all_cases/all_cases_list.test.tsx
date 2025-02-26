@@ -129,7 +129,7 @@ const patchGetComputedStyle = () => {
 };
 
 // FLAKY: https://github.com/elastic/kibana/issues/192739
-describe.skip('AllCasesListGeneric', () => {
+describe('AllCasesListGeneric', () => {
   const onRowClick = jest.fn();
   const updateCaseProperty = jest.fn();
 

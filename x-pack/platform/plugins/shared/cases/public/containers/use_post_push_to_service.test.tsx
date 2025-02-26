@@ -20,7 +20,7 @@ jest.mock('./api');
 jest.mock('../common/lib/kibana');
 
 // FLAKY: https://github.com/elastic/kibana/issues/207248
-describe.skip('usePostPushToService', () => {
+describe('usePostPushToService', () => {
   const connector = {
     id: '123',
     name: 'My connector',

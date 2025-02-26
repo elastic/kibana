@@ -12,7 +12,7 @@ import { createAppMockRenderer } from '../../common/mock';
 import { CancelCreationConfirmationModal } from './cancel_creation_confirmation_modal';
 
 // FLAKY: https://github.com/elastic/kibana/issues/197304
-describe.skip('CancelCreationConfirmationModal', () => {
+describe('CancelCreationConfirmationModal', () => {
   let appMock: AppMockRenderer;
   const props = {
     title: 'My title',

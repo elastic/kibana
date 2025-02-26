@@ -17,7 +17,7 @@ import { SolutionFilter } from './solution_filter';
 import userEvent from '@testing-library/user-event';
 
 // FLAKY: https://github.com/elastic/kibana/issues/207427
-describe.skip('SolutionFilter ', () => {
+describe('SolutionFilter ', () => {
   let appMockRender: AppMockRenderer;
   const onChange = jest.fn();
   const solutions = [SECURITY_SOLUTION_OWNER, OBSERVABILITY_OWNER];
@@ -43,7 +43,7 @@ describe.skip('SolutionFilter ', () => {
     });
 
     // Flaky: https://github.com/elastic/kibana/issues/175239
-    it.skip('renders options correctly', async () => {
+    it('renders options correctly', async () => {
       appMockRender.render(
         <SolutionFilter
           onChange={onChange}
@@ -133,7 +133,7 @@ describe.skip('SolutionFilter ', () => {
     });
 
     // Flaky: https://github.com/elastic/kibana/issues/175240
-    it.skip('should call onChange with selected solution id when no option selected yet', async () => {
+    it('should call onChange with selected solution id when no option selected yet', async () => {
       const { getByTestId } = appMockRender.render(
         <SolutionFilter
           onChange={onChange}

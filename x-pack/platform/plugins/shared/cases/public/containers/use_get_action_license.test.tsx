@@ -16,7 +16,7 @@ jest.mock('./api');
 jest.mock('../common/lib/kibana');
 
 // FLAKY: https://github.com/elastic/kibana/issues/207404
-describe.skip('useGetActionLicense', () => {
+describe('useGetActionLicense', () => {
   const abortCtrl = new AbortController();
   let appMockRenderer: AppMockRenderer;
   beforeEach(() => {

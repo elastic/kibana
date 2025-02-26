@@ -15,7 +15,7 @@ import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 import { SeverityFilter } from './severity_filter';
 
 // Failing: See https://github.com/elastic/kibana/issues/176336
-describe.skip('Severity form field', () => {
+describe('Severity form field', () => {
   const onChange = jest.fn();
   let appMockRender: AppMockRenderer;
   const props = {
@@ -52,7 +52,11 @@ describe.skip('Severity form field', () => {
   it('selects the correct value when changed', async () => {
     appMockRender.render(<SeverityFilter {...props} />);
 
-    await userEvent.click(await screen.findByRole('button', { name: 'Severity' }));
+    const popoverButton = await screen.findByTestId('options-filter-popover-button-severity');
+    expect(popoverButton).toBeInTheDocument();
+    expect(popoverButton).not.toBeDisabled();
+
+    await userEvent.click(popoverButton);
 
     await waitForEuiPopoverOpen();
 

@@ -11,7 +11,7 @@ import { userProfiles } from '../../containers/user_profiles/api.mock';
 import { HoverableAvatar } from './hoverable_avatar';
 
 // Failing: See https://github.com/elastic/kibana/issues/207406
-describe.skip('HoverableAvatar', () => {
+describe('HoverableAvatar', () => {
   it('renders the avatar', async () => {
     render(<HoverableAvatar userInfo={userProfiles[0]} />);
 

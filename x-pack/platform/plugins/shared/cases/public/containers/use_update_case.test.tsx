@@ -19,7 +19,7 @@ jest.mock('./api');
 jest.mock('../common/lib/kibana');
 
 // FLAKY: https://github.com/elastic/kibana/issues/207444
-describe.skip('useUpdateCase', () => {
+describe('useUpdateCase', () => {
   const updateKey: UpdateKey = 'description';
 
   const addSuccess = jest.fn();
