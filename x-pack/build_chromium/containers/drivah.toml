@@ -1,0 +1,6 @@
+[container.image]
+names=["docker.elastic.co/ci-agent-images/cloud-tooling/buildkite-agent"]
+tags=["0.1"]
+
+[container.image.build_args]
+golang_version = "1.17.13"
