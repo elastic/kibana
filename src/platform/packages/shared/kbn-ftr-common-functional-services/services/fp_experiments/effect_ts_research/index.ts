@@ -8,9 +8,24 @@
  */
 
 import { Random, Console, Effect } from 'effect';
+import * as fs from 'node:fs';
 
 export const runEffectTSExperiments = () => {
-
+  // :: Effect.Effect<number, never, never>
+  const a = Effect.succeed(42);
+  // :: Effect.Effect<never, 'oops', never>;
+  const b = Effect.fail('oops' as const);
+  // :: Effect.Effect<number, never, never >
+  const c = Effect.sync(() => {
+    console.log('Howdy!');
+    return 42;
+  });
+  // :: Effect.Effect<string, UknownException, never>
+  const d = Effect.try(() => fs.readFileSync('file.txt', 'utf8'));
+  // :: Effect.Effect<number, never, never>
+  const e = Effect.promise(() => Promise.resolve(42));
+  // :: Effect.Effect<string, UknownException, never>
+  const f = Effect.tryPromise(() => fs.promises.readFile('file.txt', 'utf8'));
 };
 
 function coinFlip() {
@@ -20,30 +35,4 @@ function coinFlip() {
   });
 
   Effect.runFork(flipTheCoin);
-}
-
-function ep1() {
-  // Test case: successful API response
-  Effect.runFork(program('https://dummyjson.com/products/1?delay=1000'));
-  /*
-   Output:
-   ok
-   */
-
-  // Test case: API call exceeding timeout limit
-  Effect.runFork(program('https://dummyjson.com/products/1?delay=5000'));
-  /*
-   Output:
-   TimeoutException: Operation timed out before the specified duration of '4s' elapsed
-   */
-
-  // Test case: API returning an error response
-  // Effect.runFork(program('https://dummyjson.com/auth/products/1?delay=500'));
-  /*
-   Output:
-   error
-   error
-   error
-   UnknownException: An unknown error occurred
-   */
 }
