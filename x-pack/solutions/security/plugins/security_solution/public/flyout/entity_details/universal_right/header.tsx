@@ -59,7 +59,7 @@ export const UniversalEntityFlyoutHeader = ({ entity }: UniversalEntityFlyoutHea
 
 const HeaderTags = ({ entity }) => {
   const { euiTheme } = useEuiTheme();
-  const [badgesToShow, setBadgesToShow] = useState<number | 'all'>(3);
+  const [badgesToShow, setBadgesToShow] = useState<number | 'all'>(4);
 
   const tagBadges = entity.tags?.map((tag) => <EuiBadge color="hollow">{tag}</EuiBadge>);
 
@@ -90,6 +90,7 @@ const HeaderTags = ({ entity }) => {
   const remainingCount = allBadges.length - badgesToShow;
 
   return (
+    // TODO: add max height inner scrolling
     <EuiBadgeGroup gutterSize="s">
       {badgesToShow === 'all' ? allBadges : allBadges.slice(0, badgesToShow)}
       {remainingCount > 0 && badgesToShow !== 'all' && (
