@@ -9,10 +9,11 @@ import { TaskManagerPlugin, getElasticsearchAndSOAvailability } from './plugin';
 import { KibanaDiscoveryService } from './kibana_discovery_service';
 
 import { coreMock } from '@kbn/core/server/mocks';
-import { TaskManagerConfig } from './config';
+import type { TaskManagerConfig } from './config';
 import { Subject } from 'rxjs';
 import { bufferCount, take } from 'rxjs';
-import { CoreStatus, ServiceStatusLevels } from '@kbn/core/server';
+import type { CoreStatus } from '@kbn/core/server';
+import { ServiceStatusLevels } from '@kbn/core/server';
 import { cloudMock } from '@kbn/cloud-plugin/public/mocks';
 import { taskPollingLifecycleMock } from './polling_lifecycle.mock';
 import { TaskPollingLifecycle } from './polling_lifecycle';

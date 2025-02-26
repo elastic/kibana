@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { RunContext, TaskInstance } from '../task';
+import type { RunContext, TaskInstance } from '../task';
 
 type Mapper<T> = (params: T) => Promise<T>;
 interface BeforeSaveContext {

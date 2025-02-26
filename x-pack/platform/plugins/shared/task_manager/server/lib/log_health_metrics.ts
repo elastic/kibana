@@ -6,11 +6,11 @@
  */
 
 import { isEmpty } from 'lodash';
-import { Observable } from 'rxjs';
-import { Logger, DocLinksServiceSetup } from '@kbn/core/server';
+import type { Observable } from 'rxjs';
+import type { Logger, DocLinksServiceSetup } from '@kbn/core/server';
 import { HealthStatus } from '../monitoring';
-import { TaskManagerConfig } from '../config';
-import { MonitoredHealth } from '../routes/health';
+import type { TaskManagerConfig } from '../config';
+import type { MonitoredHealth } from '../routes/health';
 import { calculateHealthStatus } from './calculate_health_status';
 
 enum LogLevel {
