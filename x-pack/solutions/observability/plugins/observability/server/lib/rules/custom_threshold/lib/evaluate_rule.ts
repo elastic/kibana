@@ -6,7 +6,7 @@
  */
 
 import moment from 'moment';
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { estypes } from '@elastic/elasticsearch';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { EsQueryConfig } from '@kbn/es-query';
 import type { Logger } from '@kbn/logging';

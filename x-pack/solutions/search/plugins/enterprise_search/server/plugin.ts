@@ -149,10 +149,12 @@ export class EnterpriseSearchPlugin implements Plugin<void, void, PluginsSetup, 
           ui: [],
         },
         read: {
-          disabled: true,
+          app: ['kibana', ...PLUGIN_IDS],
+          api: [],
+          catalogue: PLUGIN_IDS,
           savedObject: {
             all: [],
-            read: [],
+            read: [ES_TELEMETRY_NAME, AS_TELEMETRY_NAME, WS_TELEMETRY_NAME],
           },
           ui: [],
         },
@@ -197,6 +199,7 @@ export class EnterpriseSearchPlugin implements Plugin<void, void, PluginsSetup, 
       scope: [KibanaFeatureScope.Spaces, KibanaFeatureScope.Security],
       app: ['kibana', ANALYTICS_PLUGIN.ID],
       catalogue: [ANALYTICS_PLUGIN.ID],
+
       privileges: {
         all: {
           app: ['kibana', ANALYTICS_PLUGIN.ID],
