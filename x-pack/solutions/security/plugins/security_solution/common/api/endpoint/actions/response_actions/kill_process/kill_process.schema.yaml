@@ -59,7 +59,7 @@ components:
                   properties:
                     process_name:
                       type: string
-                      description: Valid for SentinelOne agent type only.
+                      description: "The name of the process to terminate. Valid for SentinelOne agent type only."
                       example: "Elastic"
                       minLength: 1
     KillProcessRouteResponse:
