@@ -45,14 +45,28 @@ interface EntityStoreEnablementModalProps {
   toggle: (visible: boolean) => void;
   enableStore: (enablements: Enablements) => () => void;
   riskScore: {
-    disabled?: boolean;
+    canToggle?: boolean;
     checked?: boolean;
   };
   entityStore: {
-    disabled?: boolean;
+    canToggle?: boolean;
     checked?: boolean;
   };
 }
+
+const shouldAllowEnablement = (
+  riskScoreEnabled: boolean,
+  entityStoreEnabled: boolean,
+  userHasEnabled: Enablements
+) => {
+  if (riskScoreEnabled) {
+    return userHasEnabled.entityStore;
+  }
+  if (entityStoreEnabled) {
+    return userHasEnabled.riskScore;
+  }
+  return userHasEnabled.riskScore || userHasEnabled.entityStore;
+};
 
 export const EntityStoreEnablementModal: React.FC<EntityStoreEnablementModalProps> = ({
   visible,
@@ -69,7 +83,12 @@ export const EntityStoreEnablementModal: React.FC<EntityStoreEnablementModalProp
   const { data: entityEnginePrivileges, isLoading: isLoadingEntityEnginePrivileges } =
     useEntityEnginePrivileges();
   const riskEnginePrivileges = useMissingRiskEnginePrivileges();
-  const enablementOptions = enablements.riskScore || enablements.entityStore;
+
+  const enablementOptions = shouldAllowEnablement(
+    !riskScore.canToggle,
+    !entityStore.canToggle,
+    enablements
+  );
   const { AdditionalChargesMessage } = useContractComponents();
 
   if (!visible) {
@@ -110,7 +129,7 @@ export const EntityStoreEnablementModal: React.FC<EntityStoreEnablementModalProp
               }
               checked={enablements.riskScore}
               disabled={
-                riskScore.disabled ||
+                !riskScore.canToggle ||
                 (!riskEnginePrivileges.isLoading && !riskEnginePrivileges?.hasAllRequiredPrivileges)
               }
               onChange={() => setEnablements((prev) => ({ ...prev, riskScore: !prev.riskScore }))}
@@ -137,7 +156,7 @@ export const EntityStoreEnablementModal: React.FC<EntityStoreEnablementModalProp
                 }
                 checked={enablements.entityStore}
                 disabled={
-                  entityStore.disabled ||
+                  !entityStore.canToggle ||
                   (!isLoadingEntityEnginePrivileges && !entityEnginePrivileges?.has_all_required)
                 }
                 onChange={() =>
