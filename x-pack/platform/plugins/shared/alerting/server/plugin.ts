@@ -24,6 +24,7 @@ import {
   EncryptedSavedObjectsPluginStart,
 } from '@kbn/encrypted-saved-objects-plugin/server';
 import {
+  RunContext,
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
@@ -299,6 +300,14 @@ export class AlertingPlugin {
       taskManagerSetup: plugins.taskManager,
       taskManagerStartPromise,
       taskRunnerFactory: this.taskRunnerFactory,
+    });
+
+    // Registers the task that handles previews using the ad hoc task runner
+    plugins.taskManager.registerTaskDefinitions({
+      ['ad_hoc_run-preview']: {
+        title: 'Alerting Preview Rule Run',
+        createTaskRunner: (context: RunContext) => this.taskRunnerFactory.createAdHoc(context),
+      },
     });
 
     this.eventLogger = plugins.eventLog.getLogger({

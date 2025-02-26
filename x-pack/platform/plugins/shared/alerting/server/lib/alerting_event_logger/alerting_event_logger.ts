@@ -49,6 +49,7 @@ export type Context = ContextOpts & {
 export const executionType = {
   STANDARD: 'standard',
   BACKFILL: 'backfill',
+  PREVIEW: 'preview',
 } as const;
 export type ExecutionType = (typeof executionType)[keyof typeof executionType];
 

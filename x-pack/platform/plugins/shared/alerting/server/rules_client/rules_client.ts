@@ -85,6 +85,7 @@ import { getRuleIdsWithGaps } from '../application/rule/methods/get_rule_ids_wit
 import { getGapsSummaryByRuleIds } from '../application/rule/methods/get_gaps_summary_by_rule_ids';
 import { GetGapsSummaryByRuleIdsParams } from '../application/rule/methods/get_gaps_summary_by_rule_ids/types';
 import { FindGapsParams } from '../lib/rule_gaps/types';
+import { previewRule, PreviewRuleParams } from '../application/rule/methods/preview';
 
 export type ConstructorOptions = Omit<
   RulesClientContext,
@@ -191,6 +192,9 @@ export class RulesClient {
   public runSoon = (options: { id: string }) => runSoon(this.context, options);
 
   public listRuleTypes = () => listRuleTypes(this.context);
+
+  public preview = <Params extends RuleTypeParams = never>(params: PreviewRuleParams<Params>) =>
+    previewRule<Params>(this.context, params);
 
   public scheduleBackfill = (params: ScheduleBackfillParams) =>
     scheduleBackfill(this.context, params);
