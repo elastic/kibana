@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { estypes } from '@elastic/elasticsearch';
 import type { ESSearchRequest } from '@kbn/es-types';
 
 interface BuildSortedEventsQueryOpts {
@@ -68,23 +68,21 @@ export const buildSortedEventsQuery = ({
     size,
     ignore_unavailable: true,
     track_total_hits: track_total_hits ?? false,
-    body: {
-      docvalue_fields: docFields,
-      query: {
-        bool: {
-          filter: [...filterWithTime],
+    docvalue_fields: docFields,
+    query: {
+      bool: {
+        filter: [...filterWithTime],
+      },
+    },
+    ...(aggs ? { aggs } : {}),
+    sort: [
+      {
+        [sortField]: {
+          order: sortOrder ?? 'asc',
+          format: 'strict_date_optional_time||epoch_millis',
         },
       },
-      ...(aggs ? { aggs } : {}),
-      sort: [
-        {
-          [sortField]: {
-            order: sortOrder ?? 'asc',
-            format: 'strict_date_optional_time||epoch_millis',
-          },
-        },
-      ],
-    },
+    ],
     ...(runtime_mappings ? { runtime_mappings } : {}),
     ...(fields ? { fields } : {}),
     ...(_source != null ? { _source } : {}),
@@ -93,10 +91,7 @@ export const buildSortedEventsQuery = ({
   if (searchAfterSortId) {
     return {
       ...searchQuery,
-      body: {
-        ...searchQuery.body,
-        search_after: [searchAfterSortId],
-      },
+      search_after: [searchAfterSortId],
     } as ESSearchRequest;
   }
   return searchQuery as ESSearchRequest;

@@ -209,10 +209,8 @@ async function getLatestApmSourceMap(internalESClient: ElasticsearchClient) {
     track_total_hits: false,
     size: 1,
     _source: ['created'],
-    sort: [{ created: { order: 'desc' } }],
-    body: {
-      query: { match_all: {} },
-    },
+    sort: [{ created: { order: 'desc' as const } }],
+    query: { match_all: {} },
   };
   const res = await internalESClient.search<ApmSourceMap>(params);
   return res.hits.hits[0]?._source?.created;
