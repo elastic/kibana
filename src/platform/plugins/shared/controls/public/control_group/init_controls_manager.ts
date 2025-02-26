@@ -24,6 +24,7 @@ import {
 } from '@kbn/presentation-publishing';
 import { BehaviorSubject, first, merge } from 'rxjs';
 import type {
+  ControlGroupSerializedState,
   ControlPanelState,
   ControlPanelsState,
   ControlWidth,
@@ -151,7 +152,7 @@ export function initControlsManager(
     serializeControls: () => {
       const references: Reference[] = [];
 
-      const controls: Array<ControlPanelState & { controlConfig: object }> = [];
+      const controls: ControlGroupSerializedState['controls'] = [];
 
       controlsInOrder$.getValue().forEach(({ id }, index) => {
         const controlApi = getControlApi(id);
@@ -160,7 +161,7 @@ export function initControlsManager(
         }
 
         const {
-          rawState: { grow, width, ...rest },
+          rawState: { grow, width, ...controlConfig },
           references: controlReferences,
         } = controlApi.serializeState();
 
@@ -169,12 +170,13 @@ export function initControlsManager(
         }
 
         controls.push({
+          id,
           grow,
           order: index,
           type: controlApi.type,
           width,
           /** Re-add the `controlConfig` layer on serialize so control group saved object retains shape */
-          controlConfig: { id, ...rest },
+          controlConfig,
         });
       });
 

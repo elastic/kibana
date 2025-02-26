@@ -265,7 +265,7 @@ describe('itemAttrsToSavedObjectAttrs', () => {
             "chainingSystem": "NONE",
             "controlStyle": "twoLine",
             "ignoreParentSettingsJSON": "{\\"ignoreFilters\\":true,\\"ignoreQuery\\":true,\\"ignoreTimerange\\":true,\\"ignoreValidations\\":true}",
-            "panelsJSON": "{\\"foo\\":{\\"grow\\":false,\\"order\\":0,\\"type\\":\\"type1\\",\\"width\\":\\"small\\",\\"explicitInput\\":{\\"anyKey\\":\\"some value\\",\\"id\\":\\"foo\\"}}}",
+            "panelsJSON": "{\\"foo\\":{\\"grow\\":false,\\"order\\":0,\\"type\\":\\"type1\\",\\"width\\":\\"small\\",\\"explicitInput\\":{\\"anyKey\\":\\"some value\\"}}}",
             "showApplySelections": true,
           },
           "description": "description",
@@ -587,7 +587,7 @@ describe('getResultV3ToV2', () => {
 
     // Check transformed attributes
     expect(output.item.attributes.controlGroupInput!.panelsJSON).toMatchInlineSnapshot(
-      `"{\\"foo\\":{\\"grow\\":false,\\"order\\":0,\\"type\\":\\"type1\\",\\"width\\":\\"small\\",\\"explicitInput\\":{\\"bizz\\":\\"buzz\\",\\"id\\":\\"foo\\"}}}"`
+      `"{\\"foo\\":{\\"grow\\":false,\\"order\\":0,\\"type\\":\\"type1\\",\\"width\\":\\"small\\",\\"explicitInput\\":{\\"bizz\\":\\"buzz\\"}}}"`
     );
     expect(
       output.item.attributes.controlGroupInput!.ignoreParentSettingsJSON
