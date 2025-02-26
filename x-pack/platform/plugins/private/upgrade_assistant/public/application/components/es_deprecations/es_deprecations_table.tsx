@@ -72,12 +72,9 @@ const i18nTexts = {
       defaultMessage: 'Filter',
     }
   ),
-  selectAllLabel: i18n.translate(
-    'xpack.upgradeAssistant.esDeprecations.table.selectAllRows',
-    {
-      defaultMessage: 'Select all rows',
-    }
-  ),
+  selectAllLabel: i18n.translate('xpack.upgradeAssistant.esDeprecations.table.selectAllRows', {
+    defaultMessage: 'Select all rows',
+  }),
 };
 
 const cellToLabelMap = {
