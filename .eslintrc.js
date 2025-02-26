@@ -1626,6 +1626,19 @@ module.exports = {
         '@typescript-eslint/no-explicit-any': 'error',
       },
     },
+    /**
+     * ResponseOps overrides
+     */
+    {
+      files: [
+        'x-pack/platform/plugins/shared/event_log/**/*.{ts, tsx}',
+        'x-pack/platform/plugins/shared/rule_registry/**/*.{ts, tsx}',
+        'x-pack/platform/plugins/shared/task_manager/**/*.{ts, tsx}',
+      ],
+      rules: {
+        '@typescript-eslint/consistent-type-imports': 'error',
+      },
+    },
 
     /**
      * Lens overrides

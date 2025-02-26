@@ -6,10 +6,10 @@
  */
 
 import { nanosToMillis } from '../common';
-import { IEvent, IEventLogger, IEventLogService } from '.';
+import type { IEvent, IEventLogger, IEventLogService } from '.';
 import { ECS_VERSION } from './types';
 import { EventLogService } from './event_log_service';
-import { EsContext } from './es/context';
+import type { EsContext } from './es/context';
 import { contextMock } from './es/context.mock';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { delay } from './lib/delay';
