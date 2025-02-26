@@ -31,6 +31,7 @@ import { CONTENT_ID, LATEST_VERSION } from '../common/content_management';
 import { registerDashboardUsageCollector } from './usage/register_collector';
 import { dashboardPersistableStateServiceFactory } from './dashboard_container/dashboard_container_embeddable_factory';
 import { registerAPIRoutes } from './api';
+import { registerEventRoutes } from './api/register_event_routes';
 
 interface SetupDeps {
   embeddable: EmbeddableSetup;
@@ -117,6 +118,11 @@ export class DashboardPlugin
     registerAPIRoutes({
       http: core.http,
       contentManagement: plugins.contentManagement,
+      logger: this.logger,
+    });
+
+    registerEventRoutes({
+      http: core.http,
       logger: this.logger,
     });
 

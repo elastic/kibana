@@ -26,7 +26,6 @@ import {
   dashboardSearchResultsSchema,
   referenceSchema,
 } from '../content_management/v3';
-import { registerEventRoutes } from './register_event_routes';
 
 interface RegisterAPIRoutesArgs {
   http: HttpServiceSetup;
@@ -45,8 +44,6 @@ export function registerAPIRoutes({
   logger,
 }: RegisterAPIRoutesArgs) {
   const { versioned: versionedRouter } = http.createRouter();
-
-  registerEventRoutes({ router: versionedRouter, logger, contentManagement });
 
   // Create API route
   const createRoute = versionedRouter.post({

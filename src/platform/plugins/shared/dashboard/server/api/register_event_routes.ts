@@ -13,20 +13,19 @@ import type { Logger } from '@kbn/logging';
 import { Subject, filter } from 'rxjs';
 import { ServerSentEvent } from '@kbn/sse-utils';
 import { observableIntoEventSourceStream } from '@kbn/sse-utils-server';
-import { VersionedRouter } from '@kbn/core-http-server';
-import { ContentManagementServerSetup } from '@kbn/content-management-plugin/server';
-import { IContentClient } from '@kbn/content-management-plugin/server/content_client';
-import { CONTENT_ID, DashboardContentType } from '../../common/content_management';
+import { HttpServiceSetup } from '@kbn/core-http-server';
 import {
-  PUBLIC_API_CONTENT_MANAGEMENT_VERSION,
-  PUBLIC_API_PATH,
-  PUBLIC_API_VERSION,
-} from './constants';
+  RequestHandlerContext,
+  SECURITY_EXTENSION_ID,
+  SavedObjectsClientContract,
+} from '@kbn/core/server';
+import { PUBLIC_API_PATH, PUBLIC_API_VERSION } from './constants';
+import { DASHBOARD_SAVED_OBJECT_TYPE } from '../dashboard_saved_object';
 
-export const registerEventRoutes = registerClientToClientEventRoutes;
+// export const registerEventRoutes = registerClientToClientEventRoutes;
 
 // NOTE: uncomment this line to use the storage polling-based event system
-// export const registerEventRoutes = registerStorageBasedEventRoutes;
+export const registerEventRoutes = registerStorageBasedEventRoutes;
 
 /**
  * This function registers the routes for the storage based event system.
@@ -36,13 +35,11 @@ export const registerEventRoutes = registerClientToClientEventRoutes;
  * @param param0
  */
 function registerStorageBasedEventRoutes({
-  router,
+  http,
   logger,
-  contentManagement,
 }: {
-  router: VersionedRouter;
+  http: HttpServiceSetup<RequestHandlerContext>;
   logger: Logger;
-  contentManagement: ContentManagementServerSetup;
 }) {
   const dashboardEvents = new Map<string, Subject<ServerSentEvent>>();
   const dashboardVersions = new Map<string, string>();
@@ -56,42 +53,69 @@ function registerStorageBasedEventRoutes({
     return subject;
   };
 
-  let client: IContentClient<DashboardContentType>;
+  let globalAccessClient: SavedObjectsClientContract;
 
-  // set up polling for dashboard changes
-  setInterval(async () => {
-    if (!client) {
+  const schedulePoll = () => {
+    const POLLING_INTERVAL = 3000;
+    setTimeout(pollDashboardChanges, POLLING_INTERVAL);
+  };
+
+  const pollDashboardChanges = async () => {
+    if (!globalAccessClient) {
+      schedulePoll();
       return;
     }
 
-    const watchedDashboards = Array.from(dashboardEvents.keys());
+    try {
+      const watchedDashboards = Array.from(dashboardEvents.keys());
 
-    // can't use bulkGet because it isn't implemented for dashboards yet
-    const dashboards = await Promise.all(
-      watchedDashboards.map((id) => client.get(id).catch(() => ({ result: { item: {} } })))
-    );
-
-    for (const {
-      result: { item },
-    } of dashboards) {
-      const newVersion = item.version;
-
-      if (!dashboardVersions.has(item.id)) {
-        dashboardVersions.set(item.id, newVersion);
+      if (!watchedDashboards.length) {
+        schedulePoll();
+        return;
       }
 
-      if (newVersion !== dashboardVersions.get(item.id)) {
-        const subject = getEventSubjectForDashboard(item.id);
+      const result = await globalAccessClient.bulkGet(
+        watchedDashboards.map((id) => ({
+          id,
+          type: DASHBOARD_SAVED_OBJECT_TYPE,
+          fields: [],
+        }))
+      );
 
-        subject.next({
-          type: 'event',
-          event: 'dashboard.saved',
-        });
+      for (const dashboard of result.saved_objects) {
+        if (!dashboard.version) {
+          // TODO I don't think this should ever happen...
+          continue;
+        }
 
-        dashboardVersions.set(item.id, newVersion);
+        const newVersion = dashboard.version;
+
+        if (!dashboardVersions.has(dashboard.id)) {
+          dashboardVersions.set(dashboard.id, newVersion);
+        }
+
+        if (newVersion !== dashboardVersions.get(dashboard.id)) {
+          const subject = getEventSubjectForDashboard(dashboard.id);
+
+          subject.next({
+            type: 'event',
+            event: 'dashboard.saved',
+          });
+
+          dashboardVersions.set(dashboard.id, newVersion);
+        }
       }
+    } catch (error) {
+      logger.error(`Error during dashboard polling: ${error.message}`);
     }
-  }, 3000);
+
+    schedulePoll();
+  };
+
+  // Start the polling process
+  pollDashboardChanges();
+
+  const router = http.createRouter().versioned;
 
   const eventsRoute = router.get({
     path: `${PUBLIC_API_PATH}/{id}/events`,
@@ -121,18 +145,29 @@ function registerStorageBasedEventRoutes({
         },
       },
     },
-    async (ctx, req, res) => {
+    async ({ core }, req, res) => {
+      const coreRequestHandlerContext = await core;
+
       const { id } = req.params;
       const { source } = req.query;
 
-      // here we're taking a client out of the request context
-      // potentially problematic WRT security
-      client = contentManagement.contentClient
-        .getForRequest({ request: req, requestHandlerContext: ctx })
-        .for(CONTENT_ID, PUBLIC_API_CONTENT_MANAGEMENT_VERSION);
+      const localClient = coreRequestHandlerContext.savedObjects.getClient();
+      try {
+        // access check... we shouldn't allow users to subscribe to updates
+        // for dashboards they don't have access to
+        localClient.get(DASHBOARD_SAVED_OBJECT_TYPE, id);
+      } catch (e) {
+        return res.notFound();
+      }
 
-      logger.info(`Fetched dashboard ${id}... checking for changes...`);
+      if (!globalAccessClient) {
+        // set up a global client for the polling system
+        globalAccessClient = coreRequestHandlerContext.savedObjects.getClient({
+          excludedExtensions: [SECURITY_EXTENSION_ID],
+        });
+      }
 
+      // Now we're good to go. Set up an SSE stream for the client
       const subject = getEventSubjectForDashboard(id);
 
       const controller = new AbortController();
@@ -163,12 +198,13 @@ function registerStorageBasedEventRoutes({
  * @param param0
  */
 function registerClientToClientEventRoutes({
-  router,
+  http,
   logger,
 }: {
-  router: VersionedRouter;
+  http: HttpServiceSetup;
   logger: Logger;
 }) {
+  const router = http.createRouter().versioned;
   const dashboardEvents = new Map<string, Subject<ServerSentEvent>>();
 
   const getEventSubjectForDashboard = (id: string) => {
