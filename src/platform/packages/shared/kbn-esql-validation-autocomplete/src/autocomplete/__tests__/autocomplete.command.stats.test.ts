@@ -379,7 +379,7 @@ describe('autocomplete.suggest', () => {
           const suggestions = await suggest('FROM a | STATS /', {
             callbacks: {
               canSuggestVariables: () => true,
-              getVariablesByType: () => [],
+              getESQLVariables: () => [],
               getColumnsFor: () => Promise.resolve([{ name: 'clientip', type: 'ip' }]),
             },
           });
@@ -400,7 +400,7 @@ describe('autocomplete.suggest', () => {
           const suggestions = await suggest('FROM a | STATS var0 = /', {
             callbacks: {
               canSuggestVariables: () => true,
-              getVariablesByType: () => [
+              getESQLVariables: () => [
                 {
                   key: 'function',
                   value: 'avg',
@@ -427,7 +427,7 @@ describe('autocomplete.suggest', () => {
           const suggestions = await suggest('FROM a | STATS BY /', {
             callbacks: {
               canSuggestVariables: () => true,
-              getVariablesByType: () => [],
+              getESQLVariables: () => [],
               getColumnsFor: () => Promise.resolve([{ name: 'clientip', type: 'ip' }]),
             },
           });
@@ -448,7 +448,7 @@ describe('autocomplete.suggest', () => {
           const suggestions = await suggest('FROM a | STATS BY /', {
             callbacks: {
               canSuggestVariables: () => true,
-              getVariablesByType: () => [
+              getESQLVariables: () => [
                 {
                   key: 'field',
                   value: 'clientip',
@@ -475,7 +475,7 @@ describe('autocomplete.suggest', () => {
           const suggestions = await suggest('FROM a | STATS BY BUCKET(@timestamp, /)', {
             callbacks: {
               canSuggestVariables: () => true,
-              getVariablesByType: () => [
+              getESQLVariables: () => [
                 {
                   key: 'interval',
                   value: '1 hour',

@@ -6,9 +6,10 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-
+import { parse, Walker } from '@kbn/esql-ast';
 import { i18n } from '@kbn/i18n';
 import type { AstProviderFn, ESQLAstItem } from '@kbn/esql-ast';
+import { Datatable } from '@kbn/expressions-plugin/common';
 import {
   getAstContext,
   getFunctionDefinition,
@@ -40,6 +41,113 @@ import { monaco } from '../../../../monaco_imports';
 const ACCEPTABLE_TYPES_HOVER = i18n.translate('monaco.esql.hover.acceptableTypes', {
   defaultMessage: 'Acceptable types',
 });
+
+const getESQLQueryVariables = (esql: string): string[] => {
+  const { root } = parse(esql);
+  const usedVariablesInQuery = Walker.params(root);
+  return usedVariablesInQuery.map((v) => v.text.replace('?', ''));
+};
+
+const reorderColumns = (table: Datatable, columnName: string) => {
+  if (!table.columns || !Array.isArray(table.columns)) {
+    return table;
+  }
+
+  // Find the specified column
+  const targetColumn = table.columns.find((col) => col.id === columnName);
+  if (!targetColumn) {
+    return table;
+  }
+
+  // Filter out the target column and re-add it at the beginning
+  table.columns = [targetColumn, ...table.columns.filter((col) => col.id !== columnName)];
+
+  // Reorder the row keys to match the new column order
+  table.rows = table.rows.map((row) => {
+    const reorderedRow = { [columnName]: row[columnName] };
+    for (const col of table.columns) {
+      if (col.id !== columnName) {
+        reorderedRow[col.id] = row[col.id];
+      }
+    }
+    return reorderedRow;
+  });
+
+  return table;
+};
+
+const generateMarkdownColumnsList = (table: Datatable, columnsPerRow = 5) => {
+  const firstRow = table.rows[0];
+
+  const columns = table.columns.map((col) => {
+    const previewValue = firstRow[col.id] !== undefined ? firstRow[col.id] : 'N/A';
+    return `**${col.name}** (${col.meta.type}) - Preview: ${previewValue}`;
+  });
+
+  // Generate Markdown table
+  let markdown = '| ' + columns.slice(0, columnsPerRow).join(' | ') + ' |\n'; // Header row
+  markdown +=
+    '| ' + Array(Math.min(columns.length, columnsPerRow)).fill('---').join(' | ') + ' |\n'; // Separator row
+
+  for (let i = columnsPerRow; i < columns.length; i += columnsPerRow) {
+    markdown += '| ' + columns.slice(i, i + columnsPerRow).join(' | ') + ' |\n'; // Data rows
+  }
+
+  return markdown;
+};
+
+const createMarkdownTable = (table: Datatable) => {
+  // Remove empty columns
+  const nonEmptyColumns = table.columns.filter((col) =>
+    table.rows.some((row) => row[col.name] !== undefined && row[col.name] !== '')
+  );
+
+  const headers = nonEmptyColumns.map((col) => col.name);
+
+  // Remove empty rows
+  const filteredRows = table.rows.filter((row) =>
+    headers.some((header) => row[header] !== undefined && row[header] !== '')
+  );
+
+  if (headers.length === 0 || filteredRows.length === 0) {
+    return undefined;
+  }
+
+  // Determine max column widths with extra padding for readability
+  const columnWidths = headers.map(
+    (header) =>
+      Math.max(header.length, ...filteredRows.map((row) => String(row[header] || '').length)) + 2
+  );
+
+  // Create markdown table header
+  let markdown = `| ${headers
+    .map((header, i) => `**${header}**`.padEnd(columnWidths[i]))
+    .join(' | ')} |
+`;
+  markdown += `| ${columnWidths.map((width) => '-'.repeat(width)).join(' | ')} |
+`;
+
+  // Populate rows
+  filteredRows.forEach((row) => {
+    const rowValues = headers.map((header, i) => String(row[header] || '').padEnd(columnWidths[i]));
+    markdown += `| ${rowValues.join(' | ')} |
+`;
+  });
+
+  return markdown;
+};
+
+const createMarkdown = (table: Datatable) => {
+  if (!table || !table.columns || !table.rows || !Array.isArray(table.columns)) {
+    return undefined;
+  }
+  const columnsCount = table.columns.length;
+
+  if (columnsCount >= 10) {
+    return generateMarkdownColumnsList(table);
+  }
+  return createMarkdownTable(table);
+};
 
 async function getHoverItemForFunction(
   model: monaco.editor.ITextModel,
@@ -145,15 +253,34 @@ export async function getHoverItem(
 ) {
   const fullText = model.getValue();
   const offset = monacoPositionToOffset(fullText, position);
-
+  const innerText = fullText.substring(0, offset);
   const { ast } = await astProvider(fullText);
   const astContext = getAstContext(fullText, ast, offset);
 
+  const currentPipeIndex = innerText.split('|').length;
+  const validQueryOnCurrentPipe = fullText.split('|').slice(0, currentPipeIndex).join('|');
+  let previewTable = await resourceRetriever?.getHoverData?.({ query: validQueryOnCurrentPipe });
+
+  const variables = resourceRetriever?.getESQLVariables?.();
+  const usedVariablesInQuery = getESQLQueryVariables(fullText);
+  const usedVariables = variables?.filter((v) => usedVariablesInQuery.includes(v.key));
+
   const { getPolicyMetadata } = getPolicyHelper(resourceRetriever);
 
-  let hoverContent: monaco.languages.Hover = {
+  const hoverContent: monaco.languages.Hover = {
     contents: [],
   };
+
+  if (usedVariables?.length) {
+    usedVariables.forEach((variable) => {
+      if (validQueryOnCurrentPipe.includes(`?${variable.key}`)) {
+        hoverContent.contents.push({
+          value: `**${variable.key}**: ${variable.value}`,
+        });
+      }
+    });
+  }
+
   const hoverItemsForFunction = await getHoverItemForFunction(
     model,
     position,
@@ -162,10 +289,19 @@ export async function getHoverItem(
     resourceRetriever
   );
   if (hoverItemsForFunction) {
-    hoverContent = hoverItemsForFunction;
+    hoverContent.contents.push(...hoverItemsForFunction.contents);
+    hoverContent.range = hoverItemsForFunction.range;
   }
 
   if (['newCommand', 'list'].includes(astContext.type)) {
+    const markdownTable = previewTable ? createMarkdown(previewTable) : '';
+    if (markdownTable) {
+      const markdownHoverContent = [
+        { value: `### Preview of the columns at this pipe` },
+        { value: markdownTable },
+      ];
+      return { contents: markdownHoverContent };
+    }
     return { contents: [] };
   }
 
@@ -184,6 +320,20 @@ export async function getHoverItem(
 
   if (astContext.type === 'expression') {
     if (astContext.node) {
+      const columnName = astContext.node.name;
+      if (columnName && previewTable?.columns) {
+        const column = previewTable.columns.find((col) => col.name === columnName);
+        if (column) {
+          hoverContent.contents.push(
+            ...[
+              {
+                value: `**${columnName}** -- Type: ${column.meta.type}`,
+              },
+            ]
+          );
+        }
+        previewTable = reorderColumns(previewTable, columnName);
+      }
       if (isSourceItem(astContext.node) && astContext.node.sourceType === 'policy') {
         const policyMetadata = await getPolicyMetadata(astContext.node.name);
         if (policyMetadata) {
@@ -226,6 +376,14 @@ export async function getHoverItem(
         }
       }
     }
+  }
+  const markdownTable = previewTable ? createMarkdown(previewTable) : '';
+  if (markdownTable) {
+    const markdownHoverContent = [
+      { value: `### Preview of the columns at this pipe` },
+      { value: markdownTable },
+    ];
+    hoverContent.contents.push(...markdownHoverContent);
   }
   return hoverContent;
 }
