@@ -1638,6 +1638,8 @@ module.exports = {
         'src/platform/packages/shared/kbn-alerts-ui-shared/**/*.{ts, tsx}',
         'src/platform/packages/shared/kbn-alerting-types/**/*.{ts, tsx}',
         'src/platform/packages/shared/kbn-cases-components/**/*.{ts, tsx}',
+        'src/platform/packages/shared/kbn-actions-types/**/*.{ts, tsx}',
+        'src/platform/packages/shared/kbn-alerts-as-data-utils/**/*.{ts, tsx}',
       ],
       rules: {
         '@typescript-eslint/consistent-type-imports': 'error',
