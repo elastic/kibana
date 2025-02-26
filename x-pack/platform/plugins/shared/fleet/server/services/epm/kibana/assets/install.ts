@@ -290,7 +290,7 @@ export async function installKibanaAssetsAndReferences({
     ({ id, type, destinationId }) =>
       ({
         id: destinationId ?? id,
-        ...(id !== destinationId ? { originId: id } : {}),
+        ...(destinationId ? { originId: id } : {}),
         type,
       } as KibanaAssetReference)
   );
