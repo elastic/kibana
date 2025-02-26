@@ -28,10 +28,16 @@ import { DiscoverCustomization, DiscoverCustomizationProvider } from '../../../.
 import { createCustomizationService } from '../../../../customizations/customization_service';
 import { DiscoverGrid } from '../../../../components/discover_grid';
 import { createDataViewDataSource } from '../../../../../common/data_sources';
+import { createContextAwarenessMocks } from '../../../../context_awareness/__mocks__';
+import type { ProfilesManager } from '../../../../context_awareness';
 
 const customisationService = createCustomizationService();
 
-async function mountComponent(fetchStatus: FetchStatus, hits: EsHitRecord[]) {
+async function mountComponent(
+  fetchStatus: FetchStatus,
+  hits: EsHitRecord[],
+  profilesManager?: ProfilesManager
+) {
   const services = discoverServiceMock;
 
   services.data.query.timefilter.timefilter.getTime = () => {
@@ -68,7 +74,9 @@ async function mountComponent(fetchStatus: FetchStatus, hits: EsHitRecord[]) {
   };
 
   const component = mountWithIntl(
-    <KibanaContextProvider services={services}>
+    <KibanaContextProvider
+      services={{ ...services, profilesManager: profilesManager ?? services.profilesManager }}
+    >
       <DiscoverCustomizationProvider value={customisationService}>
         <DiscoverMainProvider value={stateContainer}>
           <EuiProvider>
@@ -99,6 +107,13 @@ describe('Discover documents layout', () => {
     const component = await mountComponent(FetchStatus.LOADING, esHitsMock);
     expect(component.find('.dscDocuments__loading').exists()).toBeFalsy();
     expect(component.find('.dscTable').exists()).toBeTruthy();
+  });
+
+  test('render default value for paginationMode as standard', async () => {
+    const component = await mountComponent(FetchStatus.COMPLETE, esHitsMock);
+    const discoverGridComponent = component.find(DiscoverGrid);
+    expect(discoverGridComponent.exists()).toBeTruthy();
+    expect(discoverGridComponent.prop('paginationMode')).toEqual('standard');
   });
 
   test('render complete', async () => {
@@ -161,6 +176,19 @@ describe('Discover documents layout', () => {
         '_source',
         'rootProfile',
       ]);
+    });
+
+    it('should pass pagination mode from profile', async () => {
+      const { profilesManagerMock, dataSourceProfileServiceMock, dataSourceProfileProviderMock } =
+        createContextAwarenessMocks();
+      jest.spyOn(dataSourceProfileProviderMock.profile, 'getPaginationConfig').mockReturnValue({
+        paginationMode: 'singlePage',
+      });
+
+      await profilesManagerMock.resolveDataSourceProfile(dataSourceProfileServiceMock);
+      const component = await mountComponent(FetchStatus.COMPLETE, esHitsMock, profilesManagerMock);
+      const discoverGridComponent = component.find(DiscoverGrid);
+      expect(discoverGridComponent.prop('paginationMode')).toEqual('singlePage');
     });
   });
 });

@@ -15,7 +15,7 @@ export {
 } from './src/components/row_height_settings';
 export { getDisplayedColumns, SOURCE_COLUMN } from './src/utils/columns';
 export { getTextBasedColumnsMeta } from './src/utils/get_columns_meta';
-export { ROWS_HEIGHT_OPTIONS, DataGridDensity } from './src/constants';
+export { ROWS_HEIGHT_OPTIONS, DataGridDensity, DEFAULT_PAGINATION_MODE } from './src/constants';
 
 export { JSONCodeEditorCommonMemoized } from './src/components/json_code_editor/json_code_editor_common';
 export { SourceDocument } from './src/components/source_document';
