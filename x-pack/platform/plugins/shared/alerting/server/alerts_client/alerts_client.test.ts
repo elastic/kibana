@@ -442,18 +442,16 @@ describe('Alerts Client', () => {
           );
 
           expect(clusterClient.search).toHaveBeenCalledWith({
-            body: {
-              query: {
-                bool: {
-                  filter: [
-                    { term: { 'kibana.alert.rule.uuid': '1' } },
-                    { terms: { 'kibana.alert.uuid': ['abc', 'def', 'xyz'] } },
-                  ],
-                },
+            query: {
+              bool: {
+                filter: [
+                  { term: { 'kibana.alert.rule.uuid': '1' } },
+                  { terms: { 'kibana.alert.uuid': ['abc', 'def', 'xyz'] } },
+                ],
               },
-              seq_no_primary_term: true,
-              size: 3,
             },
+            seq_no_primary_term: true,
+            size: 3,
             index: useDataStreamForAlerts
               ? '.alerts-test.alerts-default'
               : '.internal.alerts-test.alerts-default-*',
@@ -516,18 +514,16 @@ describe('Alerts Client', () => {
           );
 
           expect(clusterClient.search).toHaveBeenCalledWith({
-            body: {
-              query: {
-                bool: {
-                  filter: [
-                    { term: { 'kibana.alert.rule.uuid': '1' } },
-                    { terms: { 'kibana.alert.uuid': ['abc'] } },
-                  ],
-                },
+            query: {
+              bool: {
+                filter: [
+                  { term: { 'kibana.alert.rule.uuid': '1' } },
+                  { terms: { 'kibana.alert.uuid': ['abc'] } },
+                ],
               },
-              size: 1,
-              seq_no_primary_term: true,
             },
+            size: 1,
+            seq_no_primary_term: true,
             index: useDataStreamForAlerts
               ? '.alerts-test.alerts-default'
               : '.internal.alerts-test.alerts-default-*',

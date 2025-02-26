@@ -8,7 +8,7 @@
 import type {
   IndicesIndexSettings,
   MappingTypeMapping,
-} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+} from '@elastic/elasticsearch/lib/api/types';
 import type {
   IngestPipelineWrapper,
   InitializeImportResponse,
