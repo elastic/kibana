@@ -212,8 +212,7 @@ export default function ({ getService }: FtrProviderContext) {
               .expect(403);
           });
 
-          // TODO:PT Un-skip in next PR. I got a little ahead of myself and added a test for the change that wil come with the next PR.
-          it.skip('should error if attempting to update a global artifact', async () => {
+          it('should error if attempting to update a global artifact', async () => {
             await supertestArtifactManager
               .put(addSpaceIdToPath('/', spaceOneId, EXCEPTION_LIST_ITEM_URL))
               .set('elastic-api-version', '2023-10-31')
@@ -229,8 +228,7 @@ export default function ({ getService }: FtrProviderContext) {
               .expect(403);
           });
 
-          // TODO:PT Un-skip in next PR. I got a little ahead of myself and added a test for the change that wil come with the next PR.
-          it.skip('should error when attempting to change a global artifact to per-policy', async () => {
+          it('should error when attempting to change a global artifact to per-policy', async () => {
             await supertestArtifactManager
               .put(addSpaceIdToPath('/', spaceOneId, EXCEPTION_LIST_ITEM_URL))
               .set('elastic-api-version', '2023-10-31')
@@ -246,6 +244,45 @@ export default function ({ getService }: FtrProviderContext) {
                 })
               )
               .expect(403);
+          });
+
+          it('should error when attempting to update item outside of its owner space id', async () => {
+            const { body } = await supertestArtifactManager
+              .put(addSpaceIdToPath('/', spaceTwoId, EXCEPTION_LIST_ITEM_URL))
+              .set('elastic-api-version', '2023-10-31')
+              .set('x-elastic-internal-origin', 'kibana')
+              .set('kbn-xsrf', 'true')
+              .on('error', createSupertestErrorLogger(log).ignoreCodes([403]))
+              .send(
+                exceptionItemToCreateExceptionItem({
+                  ...spaceOnePerPolicyArtifact.artifact,
+                  description: 'updating item',
+                })
+              )
+              .expect(403);
+
+            expect(body.message).to.eql(
+              `EndpointArtifactError: Updates to this shared item can only be done from the following space ID: ${spaceOneId} (or by someone having global artifact management privilege)`
+            );
+          });
+
+          it('should error when attempting to delete item outside of its owner space id', async () => {
+            const { body } = await supertestArtifactManager
+              .delete(addSpaceIdToPath('/', spaceTwoId, EXCEPTION_LIST_ITEM_URL))
+              .set('elastic-api-version', '2023-10-31')
+              .set('x-elastic-internal-origin', 'kibana')
+              .set('kbn-xsrf', 'true')
+              .on('error', createSupertestErrorLogger(log).ignoreCodes([403]))
+              .query({
+                item_id: spaceOnePerPolicyArtifact.artifact.item_id,
+                namespace_type: spaceOnePerPolicyArtifact.artifact.namespace_type,
+              })
+              .send()
+              .expect(403);
+
+            expect(body.message).to.eql(
+              `EndpointArtifactError: Updates to this shared item can only be done from the following space ID: ${spaceOneId} (or by someone having global artifact management privilege)`
+            );
           });
         });
 
@@ -331,6 +368,40 @@ export default function ({ getService }: FtrProviderContext) {
                 })
               )
               .expect(200);
+          });
+
+          it('should allow updating items outside of their owner space ids', async () => {
+            await supertestGlobalArtifactManager
+              .put(addSpaceIdToPath('/', spaceTwoId, EXCEPTION_LIST_ITEM_URL))
+              .set('elastic-api-version', '2023-10-31')
+              .set('x-elastic-internal-origin', 'kibana')
+              .set('kbn-xsrf', 'true')
+              .on('error', createSupertestErrorLogger(log))
+              .send(
+                exceptionItemToCreateExceptionItem({
+                  ...spaceOneGlobalArtifact.artifact,
+                  description: 'updated from outside of its own space id',
+                })
+              )
+              .expect(200);
+          });
+
+          it('should allow deleting items outside of their owner space ids', async () => {
+            await supertestGlobalArtifactManager
+              .delete(addSpaceIdToPath('/', spaceTwoId, EXCEPTION_LIST_ITEM_URL))
+              .set('elastic-api-version', '2023-10-31')
+              .set('x-elastic-internal-origin', 'kibana')
+              .set('kbn-xsrf', 'true')
+              .on('error', createSupertestErrorLogger(log).ignoreCodes([403]))
+              .query({
+                item_id: spaceOnePerPolicyArtifact.artifact.item_id,
+                namespace_type: spaceOnePerPolicyArtifact.artifact.namespace_type,
+              })
+              .send()
+              .expect(200);
+
+            // @ts-expect-error
+            spaceOnePerPolicyArtifact = undefined;
           });
         });
       });
