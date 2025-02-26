@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 import type { Alert } from '@kbn/alerts-as-data-utils';
-import { SearchHit } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { SearchHit } from '@elastic/elasticsearch/lib/api/types';
 import {
   ALERT_ACTION_GROUP,
   ALERT_SEVERITY_IMPROVING,
@@ -115,7 +115,7 @@ export default function createAlertSeverityTests({ getService }: FtrProviderCont
   async function queryForAlertDocs<T>(): Promise<Array<SearchHit<T>>> {
     const searchResult = await es.search({
       index: alertsAsDataIndex,
-      body: { query: { match_all: {} } },
+      query: { match_all: {} },
     });
     return searchResult.hits.hits as Array<SearchHit<T>>;
   }

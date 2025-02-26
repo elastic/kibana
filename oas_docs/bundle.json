@@ -16509,6 +16509,30 @@
                                     "proxy_url": {
                                       "type": "string"
                                     },
+                                    "secrets": {
+                                      "additionalProperties": false,
+                                      "properties": {
+                                        "ssl": {
+                                          "additionalProperties": false,
+                                          "properties": {
+                                            "key": {
+                                              "additionalProperties": false,
+                                              "properties": {
+                                                "id": {
+                                                  "type": "string"
+                                                }
+                                              },
+                                              "type": "object"
+                                            }
+                                          },
+                                          "required": [
+                                            "key"
+                                          ],
+                                          "type": "object"
+                                        }
+                                      },
+                                      "type": "object"
+                                    },
                                     "ssl": {
                                       "additionalProperties": false,
                                       "properties": {
@@ -22022,21 +22046,28 @@
                                 "type": "string"
                               },
                               "type": {
-                                "enum": [
-                                  "dashboard",
-                                  "lens",
-                                  "visualization",
-                                  "search",
-                                  "index-pattern",
-                                  "map",
-                                  "ml-module",
-                                  "security-rule",
-                                  "csp-rule-template",
-                                  "osquery-pack-asset",
-                                  "osquery-saved-query",
-                                  "tag"
-                                ],
-                                "type": "string"
+                                "anyOf": [
+                                  {
+                                    "enum": [
+                                      "dashboard",
+                                      "lens",
+                                      "visualization",
+                                      "search",
+                                      "index-pattern",
+                                      "map",
+                                      "ml-module",
+                                      "security-rule",
+                                      "csp-rule-template",
+                                      "osquery-pack-asset",
+                                      "osquery-saved-query",
+                                      "tag"
+                                    ],
+                                    "type": "string"
+                                  },
+                                  {
+                                    "type": "string"
+                                  }
+                                ]
                               }
                             },
                             "required": [
@@ -22403,21 +22434,28 @@
                                         "type": "string"
                                       },
                                       "type": {
-                                        "enum": [
-                                          "dashboard",
-                                          "lens",
-                                          "visualization",
-                                          "search",
-                                          "index-pattern",
-                                          "map",
-                                          "ml-module",
-                                          "security-rule",
-                                          "csp-rule-template",
-                                          "osquery-pack-asset",
-                                          "osquery-saved-query",
-                                          "tag"
-                                        ],
-                                        "type": "string"
+                                        "anyOf": [
+                                          {
+                                            "enum": [
+                                              "dashboard",
+                                              "lens",
+                                              "visualization",
+                                              "search",
+                                              "index-pattern",
+                                              "map",
+                                              "ml-module",
+                                              "security-rule",
+                                              "csp-rule-template",
+                                              "osquery-pack-asset",
+                                              "osquery-saved-query",
+                                              "tag"
+                                            ],
+                                            "type": "string"
+                                          },
+                                          {
+                                            "type": "string"
+                                          }
+                                        ]
                                       }
                                     },
                                     "required": [
@@ -22533,21 +22571,28 @@
                                       "type": "string"
                                     },
                                     "type": {
-                                      "enum": [
-                                        "dashboard",
-                                        "lens",
-                                        "visualization",
-                                        "search",
-                                        "index-pattern",
-                                        "map",
-                                        "ml-module",
-                                        "security-rule",
-                                        "csp-rule-template",
-                                        "osquery-pack-asset",
-                                        "osquery-saved-query",
-                                        "tag"
-                                      ],
-                                      "type": "string"
+                                      "anyOf": [
+                                        {
+                                          "enum": [
+                                            "dashboard",
+                                            "lens",
+                                            "visualization",
+                                            "search",
+                                            "index-pattern",
+                                            "map",
+                                            "ml-module",
+                                            "security-rule",
+                                            "csp-rule-template",
+                                            "osquery-pack-asset",
+                                            "osquery-saved-query",
+                                            "tag"
+                                          ],
+                                          "type": "string"
+                                        },
+                                        {
+                                          "type": "string"
+                                        }
+                                      ]
                                     }
                                   },
                                   "required": [
@@ -22734,12 +22779,29 @@
                             "type": "string"
                           },
                           "type": {
-                            "enum": [
-                              "integration",
-                              "input",
-                              "content"
-                            ],
-                            "type": "string"
+                            "anyOf": [
+                              {
+                                "enum": [
+                                  "integration"
+                                ],
+                                "type": "string"
+                              },
+                              {
+                                "enum": [
+                                  "input"
+                                ],
+                                "type": "string"
+                              },
+                              {
+                                "enum": [
+                                  "content"
+                                ],
+                                "type": "string"
+                              },
+                              {
+                                "type": "string"
+                              }
+                            ]
                           },
                           "vars": {
                             "items": {
@@ -22879,21 +22941,28 @@
                                 "type": "string"
                               },
                               "type": {
-                                "enum": [
-                                  "dashboard",
-                                  "lens",
-                                  "visualization",
-                                  "search",
-                                  "index-pattern",
-                                  "map",
-                                  "ml-module",
-                                  "security-rule",
-                                  "csp-rule-template",
-                                  "osquery-pack-asset",
-                                  "osquery-saved-query",
-                                  "tag"
-                                ],
-                                "type": "string"
+                                "anyOf": [
+                                  {
+                                    "enum": [
+                                      "dashboard",
+                                      "lens",
+                                      "visualization",
+                                      "search",
+                                      "index-pattern",
+                                      "map",
+                                      "ml-module",
+                                      "security-rule",
+                                      "csp-rule-template",
+                                      "osquery-pack-asset",
+                                      "osquery-saved-query",
+                                      "tag"
+                                    ],
+                                    "type": "string"
+                                  },
+                                  {
+                                    "type": "string"
+                                  }
+                                ]
                               }
                             },
                             "required": [
@@ -23087,21 +23156,28 @@
                                               "type": "string"
                                             },
                                             "type": {
-                                              "enum": [
-                                                "dashboard",
-                                                "lens",
-                                                "visualization",
-                                                "search",
-                                                "index-pattern",
-                                                "map",
-                                                "ml-module",
-                                                "security-rule",
-                                                "csp-rule-template",
-                                                "osquery-pack-asset",
-                                                "osquery-saved-query",
-                                                "tag"
-                                              ],
-                                              "type": "string"
+                                              "anyOf": [
+                                                {
+                                                  "enum": [
+                                                    "dashboard",
+                                                    "lens",
+                                                    "visualization",
+                                                    "search",
+                                                    "index-pattern",
+                                                    "map",
+                                                    "ml-module",
+                                                    "security-rule",
+                                                    "csp-rule-template",
+                                                    "osquery-pack-asset",
+                                                    "osquery-saved-query",
+                                                    "tag"
+                                                  ],
+                                                  "type": "string"
+                                                },
+                                                {
+                                                  "type": "string"
+                                                }
+                                              ]
                                             }
                                           },
                                           "required": [
@@ -23678,21 +23754,28 @@
                                 "type": "string"
                               },
                               "type": {
-                                "enum": [
-                                  "dashboard",
-                                  "lens",
-                                  "visualization",
-                                  "search",
-                                  "index-pattern",
-                                  "map",
-                                  "ml-module",
-                                  "security-rule",
-                                  "csp-rule-template",
-                                  "osquery-pack-asset",
-                                  "osquery-saved-query",
-                                  "tag"
-                                ],
-                                "type": "string"
+                                "anyOf": [
+                                  {
+                                    "enum": [
+                                      "dashboard",
+                                      "lens",
+                                      "visualization",
+                                      "search",
+                                      "index-pattern",
+                                      "map",
+                                      "ml-module",
+                                      "security-rule",
+                                      "csp-rule-template",
+                                      "osquery-pack-asset",
+                                      "osquery-saved-query",
+                                      "tag"
+                                    ],
+                                    "type": "string"
+                                  },
+                                  {
+                                    "type": "string"
+                                  }
+                                ]
                               }
                             },
                             "required": [
@@ -24010,21 +24093,28 @@
                                       "type": "string"
                                     },
                                     "type": {
-                                      "enum": [
-                                        "dashboard",
-                                        "lens",
-                                        "visualization",
-                                        "search",
-                                        "index-pattern",
-                                        "map",
-                                        "ml-module",
-                                        "security-rule",
-                                        "csp-rule-template",
-                                        "osquery-pack-asset",
-                                        "osquery-saved-query",
-                                        "tag"
-                                      ],
-                                      "type": "string"
+                                      "anyOf": [
+                                        {
+                                          "enum": [
+                                            "dashboard",
+                                            "lens",
+                                            "visualization",
+                                            "search",
+                                            "index-pattern",
+                                            "map",
+                                            "ml-module",
+                                            "security-rule",
+                                            "csp-rule-template",
+                                            "osquery-pack-asset",
+                                            "osquery-saved-query",
+                                            "tag"
+                                          ],
+                                          "type": "string"
+                                        },
+                                        {
+                                          "type": "string"
+                                        }
+                                      ]
                                     }
                                   },
                                   "required": [
@@ -24140,21 +24230,28 @@
                                     "type": "string"
                                   },
                                   "type": {
-                                    "enum": [
-                                      "dashboard",
-                                      "lens",
-                                      "visualization",
-                                      "search",
-                                      "index-pattern",
-                                      "map",
-                                      "ml-module",
-                                      "security-rule",
-                                      "csp-rule-template",
-                                      "osquery-pack-asset",
-                                      "osquery-saved-query",
-                                      "tag"
-                                    ],
-                                    "type": "string"
+                                    "anyOf": [
+                                      {
+                                        "enum": [
+                                          "dashboard",
+                                          "lens",
+                                          "visualization",
+                                          "search",
+                                          "index-pattern",
+                                          "map",
+                                          "ml-module",
+                                          "security-rule",
+                                          "csp-rule-template",
+                                          "osquery-pack-asset",
+                                          "osquery-saved-query",
+                                          "tag"
+                                        ],
+                                        "type": "string"
+                                      },
+                                      {
+                                        "type": "string"
+                                      }
+                                    ]
                                   }
                                 },
                                 "required": [
@@ -24380,12 +24477,29 @@
                           "type": "string"
                         },
                         "type": {
-                          "enum": [
-                            "integration",
-                            "input",
-                            "content"
-                          ],
-                          "type": "string"
+                          "anyOf": [
+                            {
+                              "enum": [
+                                "integration"
+                              ],
+                              "type": "string"
+                            },
+                            {
+                              "enum": [
+                                "input"
+                              ],
+                              "type": "string"
+                            },
+                            {
+                              "enum": [
+                                "content"
+                              ],
+                              "type": "string"
+                            },
+                            {
+                              "type": "string"
+                            }
+                          ]
                         },
                         "vars": {
                           "items": {
@@ -24570,21 +24684,28 @@
                                 "type": "string"
                               },
                               "type": {
-                                "enum": [
-                                  "dashboard",
-                                  "lens",
-                                  "visualization",
-                                  "search",
-                                  "index-pattern",
-                                  "map",
-                                  "ml-module",
-                                  "security-rule",
-                                  "csp-rule-template",
-                                  "osquery-pack-asset",
-                                  "osquery-saved-query",
-                                  "tag"
-                                ],
-                                "type": "string"
+                                "anyOf": [
+                                  {
+                                    "enum": [
+                                      "dashboard",
+                                      "lens",
+                                      "visualization",
+                                      "search",
+                                      "index-pattern",
+                                      "map",
+                                      "ml-module",
+                                      "security-rule",
+                                      "csp-rule-template",
+                                      "osquery-pack-asset",
+                                      "osquery-saved-query",
+                                      "tag"
+                                    ],
+                                    "type": "string"
+                                  },
+                                  {
+                                    "type": "string"
+                                  }
+                                ]
                               }
                             },
                             "required": [
@@ -24899,21 +25020,28 @@
                                       "type": "string"
                                     },
                                     "type": {
-                                      "enum": [
-                                        "dashboard",
-                                        "lens",
-                                        "visualization",
-                                        "search",
-                                        "index-pattern",
-                                        "map",
-                                        "ml-module",
-                                        "security-rule",
-                                        "csp-rule-template",
-                                        "osquery-pack-asset",
-                                        "osquery-saved-query",
-                                        "tag"
-                                      ],
-                                      "type": "string"
+                                      "anyOf": [
+                                        {
+                                          "enum": [
+                                            "dashboard",
+                                            "lens",
+                                            "visualization",
+                                            "search",
+                                            "index-pattern",
+                                            "map",
+                                            "ml-module",
+                                            "security-rule",
+                                            "csp-rule-template",
+                                            "osquery-pack-asset",
+                                            "osquery-saved-query",
+                                            "tag"
+                                          ],
+                                          "type": "string"
+                                        },
+                                        {
+                                          "type": "string"
+                                        }
+                                      ]
                                     }
                                   },
                                   "required": [
@@ -25029,21 +25157,28 @@
                                     "type": "string"
                                   },
                                   "type": {
-                                    "enum": [
-                                      "dashboard",
-                                      "lens",
-                                      "visualization",
-                                      "search",
-                                      "index-pattern",
-                                      "map",
-                                      "ml-module",
-                                      "security-rule",
-                                      "csp-rule-template",
-                                      "osquery-pack-asset",
-                                      "osquery-saved-query",
-                                      "tag"
-                                    ],
-                                    "type": "string"
+                                    "anyOf": [
+                                      {
+                                        "enum": [
+                                          "dashboard",
+                                          "lens",
+                                          "visualization",
+                                          "search",
+                                          "index-pattern",
+                                          "map",
+                                          "ml-module",
+                                          "security-rule",
+                                          "csp-rule-template",
+                                          "osquery-pack-asset",
+                                          "osquery-saved-query",
+                                          "tag"
+                                        ],
+                                        "type": "string"
+                                      },
+                                      {
+                                        "type": "string"
+                                      }
+                                    ]
                                   }
                                 },
                                 "required": [
@@ -25269,12 +25404,29 @@
                           "type": "string"
                         },
                         "type": {
-                          "enum": [
-                            "integration",
-                            "input",
-                            "content"
-                          ],
-                          "type": "string"
+                          "anyOf": [
+                            {
+                              "enum": [
+                                "integration"
+                              ],
+                              "type": "string"
+                            },
+                            {
+                              "enum": [
+                                "input"
+                              ],
+                              "type": "string"
+                            },
+                            {
+                              "enum": [
+                                "content"
+                              ],
+                              "type": "string"
+                            },
+                            {
+                              "type": "string"
+                            }
+                          ]
                         },
                         "vars": {
                           "items": {
@@ -26897,6 +27049,37 @@
                                 "nullable": true,
                                 "type": "string"
                               },
+                              "secrets": {
+                                "additionalProperties": true,
+                                "properties": {
+                                  "ssl": {
+                                    "additionalProperties": true,
+                                    "properties": {
+                                      "key": {
+                                        "anyOf": [
+                                          {
+                                            "additionalProperties": true,
+                                            "properties": {
+                                              "id": {
+                                                "type": "string"
+                                              }
+                                            },
+                                            "required": [
+                                              "id"
+                                            ],
+                                            "type": "object"
+                                          },
+                                          {
+                                            "type": "string"
+                                          }
+                                        ]
+                                      }
+                                    },
+                                    "type": "object"
+                                  }
+                                },
+                                "type": "object"
+                              },
                               "shipper": {
                                 "additionalProperties": true,
                                 "nullable": true,
@@ -27109,6 +27292,31 @@
                                         "type": "string"
                                       }
                                     ]
+                                  },
+                                  "ssl": {
+                                    "additionalProperties": true,
+                                    "properties": {
+                                      "key": {
+                                        "anyOf": [
+                                          {
+                                            "additionalProperties": true,
+                                            "properties": {
+                                              "id": {
+                                                "type": "string"
+                                              }
+                                            },
+                                            "required": [
+                                              "id"
+                                            ],
+                                            "type": "object"
+                                          },
+                                          {
+                                            "type": "string"
+                                          }
+                                        ]
+                                      }
+                                    },
+                                    "type": "object"
                                   }
                                 },
                                 "type": "object"
@@ -28019,6 +28227,37 @@
                         "nullable": true,
                         "type": "string"
                       },
+                      "secrets": {
+                        "additionalProperties": false,
+                        "properties": {
+                          "ssl": {
+                            "additionalProperties": false,
+                            "properties": {
+                              "key": {
+                                "anyOf": [
+                                  {
+                                    "additionalProperties": false,
+                                    "properties": {
+                                      "id": {
+                                        "type": "string"
+                                      }
+                                    },
+                                    "required": [
+                                      "id"
+                                    ],
+                                    "type": "object"
+                                  },
+                                  {
+                                    "type": "string"
+                                  }
+                                ]
+                              }
+                            },
+                            "type": "object"
+                          }
+                        },
+                        "type": "object"
+                      },
                       "shipper": {
                         "additionalProperties": false,
                         "nullable": true,
@@ -28231,6 +28470,31 @@
                                 "type": "string"
                               }
                             ]
+                          },
+                          "ssl": {
+                            "additionalProperties": false,
+                            "properties": {
+                              "key": {
+                                "anyOf": [
+                                  {
+                                    "additionalProperties": false,
+                                    "properties": {
+                                      "id": {
+                                        "type": "string"
+                                      }
+                                    },
+                                    "required": [
+                                      "id"
+                                    ],
+                                    "type": "object"
+                                  },
+                                  {
+                                    "type": "string"
+                                  }
+                                ]
+                              }
+                            },
+                            "type": "object"
                           }
                         },
                         "type": "object"
@@ -29077,6 +29341,37 @@
                               "nullable": true,
                               "type": "string"
                             },
+                            "secrets": {
+                              "additionalProperties": true,
+                              "properties": {
+                                "ssl": {
+                                  "additionalProperties": true,
+                                  "properties": {
+                                    "key": {
+                                      "anyOf": [
+                                        {
+                                          "additionalProperties": true,
+                                          "properties": {
+                                            "id": {
+                                              "type": "string"
+                                            }
+                                          },
+                                          "required": [
+                                            "id"
+                                          ],
+                                          "type": "object"
+                                        },
+                                        {
+                                          "type": "string"
+                                        }
+                                      ]
+                                    }
+                                  },
+                                  "type": "object"
+                                }
+                              },
+                              "type": "object"
+                            },
                             "shipper": {
                               "additionalProperties": true,
                               "nullable": true,
@@ -29289,6 +29584,31 @@
                                       "type": "string"
                                     }
                                   ]
+                                },
+                                "ssl": {
+                                  "additionalProperties": true,
+                                  "properties": {
+                                    "key": {
+                                      "anyOf": [
+                                        {
+                                          "additionalProperties": true,
+                                          "properties": {
+                                            "id": {
+                                              "type": "string"
+                                            }
+                                          },
+                                          "required": [
+                                            "id"
+                                          ],
+                                          "type": "object"
+                                        },
+                                        {
+                                          "type": "string"
+                                        }
+                                      ]
+                                    }
+                                  },
+                                  "type": "object"
                                 }
                               },
                               "type": "object"
@@ -30291,6 +30611,37 @@
                               "nullable": true,
                               "type": "string"
                             },
+                            "secrets": {
+                              "additionalProperties": true,
+                              "properties": {
+                                "ssl": {
+                                  "additionalProperties": true,
+                                  "properties": {
+                                    "key": {
+                                      "anyOf": [
+                                        {
+                                          "additionalProperties": true,
+                                          "properties": {
+                                            "id": {
+                                              "type": "string"
+                                            }
+                                          },
+                                          "required": [
+                                            "id"
+                                          ],
+                                          "type": "object"
+                                        },
+                                        {
+                                          "type": "string"
+                                        }
+                                      ]
+                                    }
+                                  },
+                                  "type": "object"
+                                }
+                              },
+                              "type": "object"
+                            },
                             "shipper": {
                               "additionalProperties": true,
                               "nullable": true,
@@ -30503,6 +30854,31 @@
                                       "type": "string"
                                     }
                                   ]
+                                },
+                                "ssl": {
+                                  "additionalProperties": true,
+                                  "properties": {
+                                    "key": {
+                                      "anyOf": [
+                                        {
+                                          "additionalProperties": true,
+                                          "properties": {
+                                            "id": {
+                                              "type": "string"
+                                            }
+                                          },
+                                          "required": [
+                                            "id"
+                                          ],
+                                          "type": "object"
+                                        },
+                                        {
+                                          "type": "string"
+                                        }
+                                      ]
+                                    }
+                                  },
+                                  "type": "object"
                                 }
                               },
                               "type": "object"
@@ -31405,6 +31781,37 @@
                         "nullable": true,
                         "type": "string"
                       },
+                      "secrets": {
+                        "additionalProperties": false,
+                        "properties": {
+                          "ssl": {
+                            "additionalProperties": false,
+                            "properties": {
+                              "key": {
+                                "anyOf": [
+                                  {
+                                    "additionalProperties": false,
+                                    "properties": {
+                                      "id": {
+                                        "type": "string"
+                                      }
+                                    },
+                                    "required": [
+                                      "id"
+                                    ],
+                                    "type": "object"
+                                  },
+                                  {
+                                    "type": "string"
+                                  }
+                                ]
+                              }
+                            },
+                            "type": "object"
+                          }
+                        },
+                        "type": "object"
+                      },
                       "shipper": {
                         "additionalProperties": false,
                         "nullable": true,
@@ -31610,6 +32017,31 @@
                                 "type": "string"
                               }
                             ]
+                          },
+                          "ssl": {
+                            "additionalProperties": false,
+                            "properties": {
+                              "key": {
+                                "anyOf": [
+                                  {
+                                    "additionalProperties": false,
+                                    "properties": {
+                                      "id": {
+                                        "type": "string"
+                                      }
+                                    },
+                                    "required": [
+                                      "id"
+                                    ],
+                                    "type": "object"
+                                  },
+                                  {
+                                    "type": "string"
+                                  }
+                                ]
+                              }
+                            },
+                            "type": "object"
                           }
                         },
                         "type": "object"
@@ -32441,6 +32873,37 @@
                               "nullable": true,
                               "type": "string"
                             },
+                            "secrets": {
+                              "additionalProperties": true,
+                              "properties": {
+                                "ssl": {
+                                  "additionalProperties": true,
+                                  "properties": {
+                                    "key": {
+                                      "anyOf": [
+                                        {
+                                          "additionalProperties": true,
+                                          "properties": {
+                                            "id": {
+                                              "type": "string"
+                                            }
+                                          },
+                                          "required": [
+                                            "id"
+                                          ],
+                                          "type": "object"
+                                        },
+                                        {
+                                          "type": "string"
+                                        }
+                                      ]
+                                    }
+                                  },
+                                  "type": "object"
+                                }
+                              },
+                              "type": "object"
+                            },
                             "shipper": {
                               "additionalProperties": true,
                               "nullable": true,
@@ -32653,6 +33116,31 @@
                                       "type": "string"
                                     }
                                   ]
+                                },
+                                "ssl": {
+                                  "additionalProperties": true,
+                                  "properties": {
+                                    "key": {
+                                      "anyOf": [
+                                        {
+                                          "additionalProperties": true,
+                                          "properties": {
+                                            "id": {
+                                              "type": "string"
+                                            }
+                                          },
+                                          "required": [
+                                            "id"
+                                          ],
+                                          "type": "object"
+                                        },
+                                        {
+                                          "type": "string"
+                                        }
+                                      ]
+                                    }
+                                  },
+                                  "type": "object"
                                 }
                               },
                               "type": "object"
