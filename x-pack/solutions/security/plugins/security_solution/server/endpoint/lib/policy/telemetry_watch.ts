@@ -116,10 +116,16 @@ export class TelemetryConfigWatcher {
         return;
       }
 
+      this.logger.debug(
+        `1) read policies, length: ${response.items.length}: ${stringify(response.items)}`
+      );
+
       const updates: UpdatePackagePolicy[] = [];
       for (const policy of response.items as PolicyData[]) {
         const updatePolicy = getPolicyDataForUpdate(policy);
         const policyConfig = updatePolicy.inputs[0].config.policy.value;
+
+        this.logger.debug(`2) policyConfig: ${stringify(policyConfig)}`);
 
         if (isTelemetryEnabled !== policyConfig.global_telemetry_enabled) {
           policyConfig.global_telemetry_enabled = isTelemetryEnabled;
@@ -127,6 +133,8 @@ export class TelemetryConfigWatcher {
           updates.push({ ...updatePolicy, id: policy.id });
         }
       }
+
+      this.logger.debug(`3) updates length: ${updates.length}, updates: ${stringify(updates)}`);
 
       if (updates.length) {
         try {
@@ -144,6 +152,12 @@ export class TelemetryConfigWatcher {
             }
           );
 
+          this.logger.debug(`4) bulkUpdate result:
+- updated: ${updateResult.updatedPolicies?.length}
+- failed: ${updateResult.failedPolicies?.length}
+
+${stringify(updateResult)}`);
+
           if (updateResult.failedPolicies.length) {
             this.logger.warn(
               `Cannot update telemetry flag in the following policies:\n${updateResult.failedPolicies
@@ -159,6 +173,8 @@ export class TelemetryConfigWatcher {
           );
         }
       }
+
+      this.logger.debug(`5) finished with page ${response.page}`);
     } while (response.page * response.perPage < response.total);
   }
 }
