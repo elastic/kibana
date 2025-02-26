@@ -155,9 +155,6 @@ COPY --chown=1000:0 config/kibana.yml /usr/share/kibana/config/kibana.yml
 {{#serverless}}
 ENV PROFILER_SIGNAL=SIGUSR1
 {{/serverless}}
-{{^opensslLegacyProvider}}
-RUN sed 's/\(--openssl-legacy-provider\)/#\1/' -i config/node.options
-{{/opensslLegacyProvider}}
 
 # Add the launcher/wrapper script. It knows how to interpret environment
 # variables and translate them to Kibana CLI options.
