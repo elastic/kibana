@@ -15,12 +15,6 @@ module.exports = () => ({
     {
       plugins: [
         require.resolve('babel-plugin-add-module-exports'),
-        [
-          require.resolve('babel-plugin-react-compiler'),
-          {
-            target: '17',
-          },
-        ],
 
         // The class properties proposal was merged with the private fields proposal
         // into the "class fields" proposal. Babel doesn't support this combined

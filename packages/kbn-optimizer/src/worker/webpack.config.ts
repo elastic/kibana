@@ -125,33 +125,6 @@ export function getWebpackConfig(
       ],
 
       rules: [
-        // {
-        //   test: /\.[mc]?[jt]sx?$/i,
-        //   exclude: /node_modules/,
-        //   use: [
-        //     // babel-loader, swc-loader, esbuild-loader, or anything you like to transpile JSX should go here.
-        //     // If you are using rspack, the rspack's buiilt-in react transformation is sufficient.
-        //     // { loader: 'swc-loader' },
-        //     // Now add forgetti-loader
-        //     {
-        //       loader: reactCompilerLoader,
-        //       options: defineReactCompilerLoaderOption({
-        //         // React Compiler options goes here
-        //       }),
-        //     },
-        //     {
-        //       loader: 'babel-loader',
-        //       options: {
-        //         babelrc: false,
-        //         envName: worker.dist ? 'production' : 'development',
-        //         presets: [
-        //           [BABEL_PRESET, { useTransformRequireDefault: true }],
-        //           '@babel/preset-typescript',
-        //         ],
-        //       },
-        //     },
-        //   ],
-        // },
         {
           include: [ENTRY_CREATOR],
           use: [
@@ -271,16 +244,23 @@ export function getWebpackConfig(
           exclude: /node_modules/,
           use: [
             {
+              loader: reactCompilerLoader,
+              options: defineReactCompilerLoaderOption({
+                sources: (filename) => {
+                  if (filename.includes('@kbn/') || filename.includes('x-pack/')) {
+                    return true;
+                  }
+                  return filename.indexOf('node_modules') === -1;
+                },
+              }),
+            },
+            {
               loader: 'babel-loader',
               options: {
                 babelrc: false,
                 envName: worker.dist ? 'production' : 'development',
                 presets: [[BABEL_PRESET, { useTransformRequireDefault: true }]],
               },
-            },
-            {
-              loader: reactCompilerLoader,
-              options: defineReactCompilerLoaderOption({}),
             },
           ],
         },

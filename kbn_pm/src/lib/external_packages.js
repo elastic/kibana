@@ -21,8 +21,8 @@ module.exports = {
   },
 
   ['@kbn/yarn-lock-validator']() {
-    require('../../../' + 'packages/kbn-babel-register').install();
-    return require('../../../' + 'packages/kbn-yarn-lock-validator');
+    require('@kbn/babel-register').install();
+    return require('@kbn/yarn-lock-validator');
   },
 
   ['@kbn/sort-package-json']() {
