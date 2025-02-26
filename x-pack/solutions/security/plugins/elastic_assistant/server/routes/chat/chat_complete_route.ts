@@ -190,7 +190,8 @@ export const chatCompleteRoute = (
             ? existingConversationId ?? newConversation?.id
             : undefined;
 
-          const contentReferencesStore = newContentReferencesStore();
+          const contentReferencesStore =
+            contentReferencesEnabled && contentReferencesStoreFactory();
 
           const onLlmResponse = async (
             content: string,
