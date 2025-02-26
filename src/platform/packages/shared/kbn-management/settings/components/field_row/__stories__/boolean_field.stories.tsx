@@ -9,5 +9,9 @@
 
 import { getStory, getFieldRowStory } from './common';
 
-export default getStory('Boolean Row', 'A setting with a boolean value.');
+const Story = getStory('Boolean Row', 'A setting with a boolean value.');
 export const BooleanRow = getFieldRowStory('boolean' as const);
+
+export default {
+  ...Story,
+};

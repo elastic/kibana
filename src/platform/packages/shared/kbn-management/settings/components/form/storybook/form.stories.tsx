@@ -9,7 +9,7 @@
 
 import React from 'react';
 import { action } from '@storybook/addon-actions';
-import { ComponentMeta } from '@storybook/react';
+import { Meta } from '@storybook/react';
 import { FieldDefinition } from '@kbn/management-settings-types';
 import { getFieldDefinitions } from '@kbn/management-settings-field-definition';
 import { getSettingsMock } from '@kbn/management-settings-utilities/mocks/settings.mock';
@@ -20,7 +20,7 @@ import { Form as Component } from '../form';
 import { FormProvider } from '../services';
 
 export default {
-  title: `Settings/Form/Form`,
+  title: 'Settings/Form/Form',
   description: 'A form with field rows',
   argTypes: {
     isSavingEnabled: {
@@ -57,7 +57,7 @@ export default {
       default: 'ghost',
     },
   },
-} as ComponentMeta<typeof Component>;
+} as Meta<typeof Component>;
 
 interface FormStoryProps {
   /** True if saving settings is enabled, false otherwise. */
