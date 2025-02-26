@@ -52,7 +52,11 @@ describe('Severity form field', () => {
   it('selects the correct value when changed', async () => {
     appMockRender.render(<SeverityFilter {...props} />);
 
-    await userEvent.click(await screen.findByRole('button', { name: 'Severity' }));
+    const popoverButton = await screen.findByTestId('options-filter-popover-button-severity');
+    expect(popoverButton).toBeInTheDocument();
+    expect(popoverButton).not.toBeDisabled();
+
+    await userEvent.click(popoverButton);
 
     await waitForEuiPopoverOpen();
 
