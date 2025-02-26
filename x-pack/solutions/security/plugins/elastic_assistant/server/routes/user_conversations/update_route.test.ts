@@ -34,7 +34,7 @@ describe('Update conversation route', () => {
       getConversationMock(getQueryConversationParams())
     ); // successful update
 
-    context.elasticAssistant.getCurrentUser.mockReturnValue(mockUser1);
+    context.elasticAssistant.getCurrentUser.mockResolvedValue(mockUser1);
     updateConversationRoute(server.router);
   });
 

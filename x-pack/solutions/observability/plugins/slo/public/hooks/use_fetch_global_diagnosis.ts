@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { SecurityHasPrivilegesResponse } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { SecurityHasPrivilegesResponse } from '@elastic/elasticsearch/lib/api/types';
 import { i18n } from '@kbn/i18n';
 import type { PublicLicenseJSON } from '@kbn/licensing-plugin/public';
 import { useQuery } from '@tanstack/react-query';

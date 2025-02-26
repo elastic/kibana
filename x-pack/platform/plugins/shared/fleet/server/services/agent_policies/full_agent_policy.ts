@@ -268,7 +268,7 @@ export async function getFullAgentPolicy(
 
   // only add fleet server hosts if not in standalone
   if (!standalone && fleetServerHosts) {
-    fullAgentPolicy.fleet = generateFleetConfig(fleetServerHosts, proxies);
+    fullAgentPolicy.fleet = generateFleetConfig(agentPolicy, fleetServerHosts, proxies, outputs);
   }
 
   const settingsValues = getSettingsValuesForAgentPolicy(
@@ -323,12 +323,53 @@ export async function getFullAgentPolicy(
 }
 
 export function generateFleetConfig(
+  agentPolicy: AgentPolicy,
   fleetServerHosts: FleetServerHost,
-  proxies: FleetProxy[]
+  proxies: FleetProxy[],
+  outputs: Output[]
 ): FullAgentPolicy['fleet'] {
   const config: FullAgentPolicy['fleet'] = {
     hosts: fleetServerHosts.host_urls,
   };
+
+  // generating the ssl configs for checking into Fleet
+  // These are set in ES or remote ES outputs and correspond to --certificate-authorities, --elastic-agent-cert and --elastic-agent-cert-key cli options
+  const output =
+    agentPolicy?.data_output_id || agentPolicy?.monitoring_output_id
+      ? outputs.find((o) => o.id === agentPolicy.data_output_id)
+      : outputs.find((o) => o.is_default);
+
+  if (
+    output &&
+    (output.type === outputType.Elasticsearch || output.type === outputType.RemoteElasticsearch)
+  ) {
+    if (output?.ssl) {
+      config.ssl = {
+        ...(output.ssl?.certificate_authorities && {
+          certificate_authorities: output.ssl.certificate_authorities,
+        }),
+        ...(output.ssl?.certificate && {
+          certificate: output.ssl.certificate,
+        }),
+        ...(output.ssl?.key &&
+          !output?.secrets?.ssl?.key && {
+            key: output.ssl.key,
+          }),
+      };
+    }
+
+    if (output?.secrets) {
+      config.secrets = {
+        ssl: {
+          ...(output.secrets?.ssl?.key &&
+            !output?.ssl?.key && {
+              key: output.secrets.ssl.key,
+            }),
+        },
+      };
+    }
+  }
+
   const fleetServerHostproxy = fleetServerHosts.proxy_id
     ? proxies.find((proxy) => proxy.id === fleetServerHosts.proxy_id)
     : null;
@@ -353,6 +394,7 @@ export function generateFleetConfig(
       };
     }
   }
+
   return config;
 }
 
@@ -477,9 +519,13 @@ export function transformOutputToFullPolicyOutput(
     ...kafkaData,
     ...(!isShipperDisabled ? generalShipperData : {}),
     ...(ca_sha256 ? { ca_sha256 } : {}),
-    ...(ssl ? { ssl } : {}),
-    ...(secrets ? { secrets } : {}),
     ...(ca_trusted_fingerprint ? { 'ssl.ca_trusted_fingerprint': ca_trusted_fingerprint } : {}),
+    ...((output.type === outputType.Kafka || output.type === outputType.Logstash) && ssl
+      ? { ssl }
+      : {}),
+    ...((output.type === outputType.Kafka || output.type === outputType.Logstash) && secrets
+      ? { secrets }
+      : {}),
   };
 
   if (proxy) {
