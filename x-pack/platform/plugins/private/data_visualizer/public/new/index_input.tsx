@@ -9,19 +9,22 @@ import { EuiFieldText, EuiFormRow, EuiSpacer, EuiTitle } from '@elastic/eui';
 import type { FC } from 'react';
 import React, { useState } from 'react';
 import useDebounce from 'react-use/lib/useDebounce';
-import type { FileUploadStartApi } from '@kbn/file-upload-plugin/public/api';
 import { i18n } from '@kbn/i18n';
 import useMountedState from 'react-use/lib/useMountedState';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { STATUS } from './file_manager/file_manager';
+import { useDataVisualizerKibana } from '../application/kibana_context';
 
 interface Props {
   setIndexName: (name: string) => void;
   setIndexValidationStatus: (status: STATUS) => void;
-  fileUpload: FileUploadStartApi;
 }
 
-export const IndexInput: FC<Props> = ({ setIndexName, setIndexValidationStatus, fileUpload }) => {
+export const IndexInput: FC<Props> = ({ setIndexName, setIndexValidationStatus }) => {
+  const {
+    services: { fileUpload },
+  } = useDataVisualizerKibana();
+
   const [indexNameLocal, setIndexNameLocal] = useState('');
   const [indexNameError, setIndexNameError] = useState('');
   const isMounted = useMountedState();
