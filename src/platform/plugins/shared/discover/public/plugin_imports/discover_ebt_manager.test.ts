@@ -9,11 +9,8 @@
 
 import { BehaviorSubject } from 'rxjs';
 import { coreMock } from '@kbn/core/public/mocks';
-import {
-  DiscoverEBTContextProps,
-  DiscoverEBTManager,
-  registerDiscoverAnalytics,
-} from './discover_ebt_manager';
+import { DiscoverEBTContextProps, DiscoverEBTManager } from './discover_ebt_manager';
+import { registerDiscoverAnalytics } from './register_discover_analytics';
 import { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
 import { ContextualProfileLevel } from '../context_awareness/profiles_manager';
 
