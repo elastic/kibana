@@ -18,5 +18,5 @@ properties:
     type: string
     format: binary
     description: |
-      The source map. String or file upload. It must follow the
-      [source map revision 3 proposal](https://docs.google.com/document/d/1U1RGAehQwRypUTovF1KRlpiOFze0b-_2gc6fAH0KY0k).
+      The source map. It can be a string or file upload. It must follow the
+      [source map format specification](https://tc39.es/ecma426/).
