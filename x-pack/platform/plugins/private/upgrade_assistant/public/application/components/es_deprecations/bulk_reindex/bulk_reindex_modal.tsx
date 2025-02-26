@@ -81,7 +81,7 @@ export const BulkReindexModal: FunctionComponent<Props> = ({ indices }) => {
       <EuiButton onClick={showModal} fill>
         <FormattedMessage
           id="xpack.upgradeAssistant.esDeprecations.bulkReindex.ctaButtonLabel"
-          defaultMessage="Bulk reindex"
+          defaultMessage="Batch reindex"
         />
       </EuiButton>
       {isModalVisible && (
@@ -90,7 +90,7 @@ export const BulkReindexModal: FunctionComponent<Props> = ({ indices }) => {
             <EuiModalHeaderTitle id={modalTitleId}>
               <FormattedMessage
                 id="xpack.upgradeAssistant.esDeprecations.bulkReindexModal.title"
-                defaultMessage="Bulk reindexing"
+                defaultMessage="Resolve with batch reindexing?"
               />
             </EuiModalHeaderTitle>
           </EuiModalHeader>
@@ -98,7 +98,7 @@ export const BulkReindexModal: FunctionComponent<Props> = ({ indices }) => {
           <EuiModalBody>
             <FormattedMessage
               id="xpack.upgradeAssistant.esDeprecations.bulkReindexModal.description"
-              defaultMessage="This command will make use of the {docsLink} to reindex the following indices:"
+              defaultMessage="You can use a single call to the {docsLink} to update multiple indices that have compatibility issues with the version you're preparing to upgrade to. Based on the issues you selected, several indices can be reindexed using the following Console command:"
               values={{
                 docsLink: <BatchReindexApiDocsLink docLinks={docLinks} />,
               }}
