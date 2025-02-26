@@ -177,9 +177,8 @@ describe('Upgrade Agentless Deployments', () => {
         mockAgentPolicy,
       ]);
       jest
-      .spyOn(appContextService, 'getExperimentalFeatures')
-      .mockReturnValue({ enabledUpgradeAgentlessDeploymentsTask: true} as any);
-
+        .spyOn(appContextService, 'getExperimentalFeatures')
+        .mockReturnValue({ enabledUpgradeAgentlessDeploymentsTask: true } as any);
 
       mockedGetAgentsByKuery.mockResolvedValue({
         agents,
@@ -366,8 +365,8 @@ describe('Upgrade Agentless Deployments', () => {
 
     it('should not called upgrade agentless api to upgrade when agent policy is not found', async () => {
       jest
-      .spyOn(appContextService, 'getExperimentalFeatures')
-      .mockReturnValue({ enabledUpgradeAgentlessDeploymentsTask: false } as any);
+        .spyOn(appContextService, 'getExperimentalFeatures')
+        .mockReturnValue({ enabledUpgradeAgentlessDeploymentsTask: false } as any);
 
       await runTask();
 

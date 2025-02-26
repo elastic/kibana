@@ -275,7 +275,7 @@ export class UpgradeAgentlessDeploymentsTask {
       return getDeleteTaskRunResult();
     }
 
-    if(!appContextService.getExperimentalFeatures().enabledUpgradeAgentlessDeploymentsTask){
+    if (!appContextService.getExperimentalFeatures().enabledUpgradeAgentlessDeploymentsTask) {
       this.endRun('Upgrade Agentless Deployments Task is disabled');
       return;
     }
