@@ -6,7 +6,7 @@
  */
 
 import { PluginInitializer, PluginInitializerContext } from '@kbn/core/public';
-import { PublicConfigType, SearchAssistantPlugin } from './plugin';
+import { WorkChatAppPlugin } from './plugin';
 import {
   WorkChatAppPluginSetup,
   WorkChatAppPluginStart,
@@ -18,8 +18,8 @@ export const plugin: PluginInitializer<
   WorkChatAppPluginStart,
   {},
   WorkChatAppPluginStartDependencies
-> = (context: PluginInitializerContext<PublicConfigType>) => {
-  return new SearchAssistantPlugin(context);
+> = (context: PluginInitializerContext) => {
+  return new WorkChatAppPlugin(context);
 };
 
 export type { WorkChatAppPluginSetup, WorkChatAppPluginStart } from './types';

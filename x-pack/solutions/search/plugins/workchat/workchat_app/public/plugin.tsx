@@ -13,7 +13,7 @@ import type {
   WorkChatAppPluginStartDependencies,
 } from './types';
 
-export class SearchAssistantPlugin
+export class WorkChatAppPlugin
   implements
     Plugin<
       WorkChatAppPluginSetup,
