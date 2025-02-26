@@ -64,7 +64,7 @@ interface ExtractRuleEqlQueryParams {
 
 export const extractRuleEqlQuery = (params: ExtractRuleEqlQueryParams): RuleEqlQuery => {
   return {
-    query: params.query.trim(),
+    query: params.query?.trim(),
     language: params.language,
     filters: normalizeFilterArray(params.filters),
     event_category_override: params.eventCategoryOverride,
@@ -78,7 +78,7 @@ export const extractRuleEsqlQuery = (
   language: EsqlQueryLanguage
 ): RuleEsqlQuery => {
   return {
-    query: query.trim(),
+    query: query?.trim(),
     language,
   };
 };
