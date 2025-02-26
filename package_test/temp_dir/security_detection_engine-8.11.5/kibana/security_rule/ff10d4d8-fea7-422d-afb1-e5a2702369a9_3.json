@@ -1,0 +1,143 @@
+{
+    "attributes": {
+        "author": [
+            "Elastic"
+        ],
+        "description": "Linux cron jobs are scheduled tasks that can be leveraged by malicious actors for persistence, privilege escalation and command execution. By creating or modifying cron job configurations, attackers can execute malicious commands or scripts at predefined intervals, ensuring their continued presence and enabling unauthorized activities.",
+        "from": "now-9m",
+        "history_window_start": "now-7d",
+        "index": [
+            "logs-endpoint.events.*",
+            "endgame-*"
+        ],
+        "language": "kuery",
+        "license": "Elastic License v2",
+        "name": "Cron Job Created or Changed by Previously Unknown Process",
+        "new_terms_fields": [
+            "file.path",
+            "process.name"
+        ],
+        "query": "host.os.type : \"linux\" and event.action : (\"change\" or \"file_modify_event\" or \"creation\" or \"file_create_event\") and \nfile.path : (/etc/cron.allow or /etc/cron.deny or /etc/cron.d/* or /etc/cron.hourly/* or /etc/cron.daily/* or \n/etc/cron.weekly/* or /etc/cron.monthly/* or /etc/crontab or /usr/sbin/cron or /usr/sbin/anacron) \nand not (process.name : (\"dpkg\" or \"dockerd\" or \"rpm\" or \"snapd\" or \"yum\" or \"exe\" or \"dnf\" or \"5\") or \nfile.extension : (\"swp\" or \"swx\"))\n",
+        "references": [
+            "https://pberba.github.io/security/2022/01/30/linux-threat-hunting-for-persistence-systemd-timers-cron/"
+        ],
+        "related_integrations": [
+            {
+                "package": "endpoint",
+                "version": "^8.2.0"
+            }
+        ],
+        "required_fields": [
+            {
+                "ecs": true,
+                "name": "event.action",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "file.extension",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "file.path",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "host.os.type",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "process.name",
+                "type": "keyword"
+            }
+        ],
+        "risk_score": 47,
+        "rule_id": "ff10d4d8-fea7-422d-afb1-e5a2702369a9",
+        "severity": "medium",
+        "tags": [
+            "Domain: Endpoint",
+            "OS: Linux",
+            "Use Case: Threat Detection",
+            "Tactic: Persistence",
+            "Tactic: Privilege Escalation",
+            "Tactic: Execution",
+            "Data Source: Elastic Endgame"
+        ],
+        "threat": [
+            {
+                "framework": "MITRE ATT\u0026CK",
+                "tactic": {
+                    "id": "TA0003",
+                    "name": "Persistence",
+                    "reference": "https://attack.mitre.org/tactics/TA0003/"
+                },
+                "technique": [
+                    {
+                        "id": "T1053",
+                        "name": "Scheduled Task/Job",
+                        "reference": "https://attack.mitre.org/techniques/T1053/",
+                        "subtechnique": [
+                            {
+                                "id": "T1053.003",
+                                "name": "Cron",
+                                "reference": "https://attack.mitre.org/techniques/T1053/003/"
+                            }
+                        ]
+                    }
+                ]
+            },
+            {
+                "framework": "MITRE ATT\u0026CK",
+                "tactic": {
+                    "id": "TA0004",
+                    "name": "Privilege Escalation",
+                    "reference": "https://attack.mitre.org/tactics/TA0004/"
+                },
+                "technique": [
+                    {
+                        "id": "T1053",
+                        "name": "Scheduled Task/Job",
+                        "reference": "https://attack.mitre.org/techniques/T1053/",
+                        "subtechnique": [
+                            {
+                                "id": "T1053.003",
+                                "name": "Cron",
+                                "reference": "https://attack.mitre.org/techniques/T1053/003/"
+                            }
+                        ]
+                    }
+                ]
+            },
+            {
+                "framework": "MITRE ATT\u0026CK",
+                "tactic": {
+                    "id": "TA0002",
+                    "name": "Execution",
+                    "reference": "https://attack.mitre.org/tactics/TA0002/"
+                },
+                "technique": [
+                    {
+                        "id": "T1053",
+                        "name": "Scheduled Task/Job",
+                        "reference": "https://attack.mitre.org/techniques/T1053/",
+                        "subtechnique": [
+                            {
+                                "id": "T1053.003",
+                                "name": "Cron",
+                                "reference": "https://attack.mitre.org/techniques/T1053/003/"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ],
+        "timestamp_override": "event.ingested",
+        "type": "new_terms",
+        "version": 3
+    },
+    "id": "ff10d4d8-fea7-422d-afb1-e5a2702369a9_3",
+    "type": "security-rule"
+}

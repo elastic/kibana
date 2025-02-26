@@ -1,0 +1,70 @@
+{
+    "attributes": {
+        "author": [
+            "Elastic"
+        ],
+        "building_block_type": "default",
+        "description": "Adversaries may attempt to get a listing of network connections to or from a compromised system.",
+        "from": "now-119m",
+        "index": [
+            "logs-endpoint.events.*"
+        ],
+        "interval": "60m",
+        "language": "eql",
+        "license": "Elastic License v2",
+        "name": "System Network Connections Discovery",
+        "query": "process where event.type == \"start\" and\n  process.name : (\"netstat\", \"lsof\", \"who\", \"w\")\n",
+        "related_integrations": [
+            {
+                "package": "endpoint",
+                "version": "^8.2.0"
+            }
+        ],
+        "required_fields": [
+            {
+                "ecs": true,
+                "name": "event.type",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "process.name",
+                "type": "keyword"
+            }
+        ],
+        "risk_score": 21,
+        "rule_id": "e2dc8f8c-5f16-42fa-b49e-0eb8057f7444",
+        "severity": "low",
+        "tags": [
+            "Domain: Endpoint",
+            "OS: Linux",
+            "OS: macOS",
+            "Use Case: Threat Detection",
+            "Tactic: Discovery",
+            "Rule Type: BBR",
+            "Data Source: Elastic Defend"
+        ],
+        "threat": [
+            {
+                "framework": "MITRE ATT\u0026CK",
+                "tactic": {
+                    "id": "TA0007",
+                    "name": "Discovery",
+                    "reference": "https://attack.mitre.org/tactics/TA0007/"
+                },
+                "technique": [
+                    {
+                        "id": "T1049",
+                        "name": "System Network Connections Discovery",
+                        "reference": "https://attack.mitre.org/techniques/T1049/"
+                    }
+                ]
+            }
+        ],
+        "timestamp_override": "event.ingested",
+        "type": "eql",
+        "version": 2
+    },
+    "id": "e2dc8f8c-5f16-42fa-b49e-0eb8057f7444_2",
+    "type": "security-rule"
+}

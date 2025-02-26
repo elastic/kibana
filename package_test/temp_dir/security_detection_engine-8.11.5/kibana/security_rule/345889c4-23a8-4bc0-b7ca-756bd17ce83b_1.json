@@ -1,0 +1,59 @@
+{
+    "attributes": {
+        "author": [
+            "Elastic"
+        ],
+        "description": "This rule detects when a GitHub repository is deleted within your organization. Repositories are a critical component used within an organization to manage work, collaborate with others and release products to the public. Any delete action against a repository should be investigated to determine it's validity. Unauthorized deletion of organization repositories could cause irreversible loss of intellectual property and indicate compromise within your organization.",
+        "from": "now-9m",
+        "index": [
+            "logs-github.audit-*"
+        ],
+        "language": "eql",
+        "license": "Elastic License v2",
+        "name": "GitHub Repository Deleted",
+        "query": "configuration where event.module == \"github\" and event.action == \"repo.destroy\"\n",
+        "required_fields": [
+            {
+                "ecs": true,
+                "name": "event.action",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "event.module",
+                "type": "keyword"
+            }
+        ],
+        "risk_score": 47,
+        "rule_id": "345889c4-23a8-4bc0-b7ca-756bd17ce83b",
+        "severity": "medium",
+        "tags": [
+            "Domain: Cloud",
+            "Use Case: Threat Detection",
+            "Tactic: Impact",
+            "Data Source: Github"
+        ],
+        "threat": [
+            {
+                "framework": "MITRE ATT\u0026CK",
+                "tactic": {
+                    "id": "TA0040",
+                    "name": "Impact",
+                    "reference": "https://attack.mitre.org/tactics/TA0040/"
+                },
+                "technique": [
+                    {
+                        "id": "T1485",
+                        "name": "Data Destruction",
+                        "reference": "https://attack.mitre.org/techniques/T1485/"
+                    }
+                ]
+            }
+        ],
+        "timestamp_override": "event.ingested",
+        "type": "eql",
+        "version": 1
+    },
+    "id": "345889c4-23a8-4bc0-b7ca-756bd17ce83b_1",
+    "type": "security-rule"
+}

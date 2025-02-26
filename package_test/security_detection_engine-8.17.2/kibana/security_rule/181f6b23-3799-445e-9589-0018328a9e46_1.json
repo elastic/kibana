@@ -1,0 +1,123 @@
+{
+  "attributes": {
+    "author": [
+      "Elastic"
+    ],
+    "description": "Identifies the execution of scripts via HTML applications using Windows utilities rundll32.exe or mshta.exe. Adversaries may bypass process and/or signature-based defenses by proxying execution of malicious content with signed binaries.",
+    "from": "now-9m",
+    "index": [
+      "winlogbeat-*",
+      "logs-windows.*",
+      "logs-system.security*",
+      "logs-windows.sysmon_operational-*",
+      "logs-sentinel_one_cloud_funnel.*",
+      "logs-m365_defender.event-*"
+    ],
+    "language": "eql",
+    "license": "Elastic License v2",
+    "name": "Script Execution via Microsoft HTML Application",
+    "query": "process where host.os.type == \"windows\" and event.type == \"start\" and\n process.name : (\"rundll32.exe\", \"mshta.exe\") and\n  (\n     (process.command_line :\n        (\n        \"*script*eval(*\",\n         \"*script*GetObject*\",\n         \"*.regread(*\",\n         \"*WScript.Shell*\",\n         \"*.run(*\",\n         \"*).Exec()*\",\n         \"*mshta*http*\",\n         \"*mshtml*RunHTMLApplication*\",\n         \"*mshtml*,#135*\",\n         \"*StrReverse*\",\n         \"*.RegWrite*\",\n         /* Issue #379 */\n         \"*window.close(*\",\n         \"* Chr(*\"\n         )\n     and not process.parent.executable :\n                  (\"?:\\\\Program Files (x86)\\\\Citrix\\\\System32\\\\wfshell.exe\",\n                   \"?:\\\\Program Files (x86)\\\\Microsoft Office\\\\Office*\\\\MSACCESS.EXE\",\n                   \"?:\\\\Program Files\\\\Quokka.Works GTInstaller\\\\GTInstaller.exe\")\n     ) or\n\n    (process.name : \"mshta.exe\" and\n     not process.command_line : (\"*.hta*\", \"*.htm*\", \"-Embedding\") and process.args_count >=2) or\n\n     /* Execution of HTA file downloaded from the internet */\n     (process.name : \"mshta.exe\" and process.command_line : \"*\\\\Users\\\\*\\\\Downloads\\\\*.hta*\") or\n\n     /* Execution of HTA file from archive */\n     (process.name : \"mshta.exe\" and\n      process.args : (\"?:\\\\Users\\\\*\\\\Temp\\\\7z*\", \"?:\\\\Users\\\\*\\\\Temp\\\\Rar$*\", \"?:\\\\Users\\\\*\\\\Temp\\\\Temp?_*\", \"?:\\\\Users\\\\*\\\\Temp\\\\BNZ.*\"))\n   )\n",
+    "related_integrations": [
+      {
+        "package": "windows",
+        "version": "^1.5.0"
+      },
+      {
+        "package": "system",
+        "version": "^1.6.4"
+      },
+      {
+        "package": "sentinel_one_cloud_funnel",
+        "version": "^0.1.0"
+      },
+      {
+        "package": "m365_defender",
+        "version": "^2.0.0"
+      }
+    ],
+    "required_fields": [
+      {
+        "ecs": true,
+        "name": "event.type",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "host.os.type",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "process.args",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "process.args_count",
+        "type": "long"
+      },
+      {
+        "ecs": true,
+        "name": "process.command_line",
+        "type": "wildcard"
+      },
+      {
+        "ecs": true,
+        "name": "process.name",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "process.parent.executable",
+        "type": "keyword"
+      }
+    ],
+    "risk_score": 73,
+    "rule_id": "181f6b23-3799-445e-9589-0018328a9e46",
+    "severity": "high",
+    "tags": [
+      "Domain: Endpoint",
+      "OS: Windows",
+      "Use Case: Threat Detection",
+      "Tactic: Defense Evasion",
+      "Data Source: System",
+      "Data Source: Sysmon",
+      "Data Source: SentinelOne",
+      "Data Source: Microsoft Defender for Endpoint"
+    ],
+    "threat": [
+      {
+        "framework": "MITRE ATT&CK",
+        "tactic": {
+          "id": "TA0005",
+          "name": "Defense Evasion",
+          "reference": "https://attack.mitre.org/tactics/TA0005/"
+        },
+        "technique": [
+          {
+            "id": "T1218",
+            "name": "System Binary Proxy Execution",
+            "reference": "https://attack.mitre.org/techniques/T1218/",
+            "subtechnique": [
+              {
+                "id": "T1218.005",
+                "name": "Mshta",
+                "reference": "https://attack.mitre.org/techniques/T1218/005/"
+              },
+              {
+                "id": "T1218.011",
+                "name": "Rundll32",
+                "reference": "https://attack.mitre.org/techniques/T1218/011/"
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "timestamp_override": "event.ingested",
+    "type": "eql",
+    "version": 1
+  },
+  "id": "181f6b23-3799-445e-9589-0018328a9e46_1",
+  "type": "security-rule"
+}

@@ -1,0 +1,106 @@
+{
+  "attributes": {
+    "author": [
+      "Elastic"
+    ],
+    "description": "Detects PowerShell scripts that can be used to collect data from mailboxes. Adversaries may target user email to collect sensitive information.",
+    "from": "now-9m",
+    "index": [
+      "winlogbeat-*",
+      "logs-windows.*"
+    ],
+    "language": "kuery",
+    "license": "Elastic License v2",
+    "name": "PowerShell Mailbox Collection Script",
+    "query": "event.category:process and\n  (\n   powershell.file.script_block_text : (\n      \"Microsoft.Office.Interop.Outlook\" or\n      \"Interop.Outlook.olDefaultFolders\" or\n      \"::olFolderInBox\"\n   ) or\n   powershell.file.script_block_text : (\n      \"Microsoft.Exchange.WebServices.Data.Folder\" or\n      \"Microsoft.Exchange.WebServices.Data.FileAttachment\"\n   )\n   )\n",
+    "references": [
+      "https://github.com/dafthack/MailSniper/blob/master/MailSniper.ps1",
+      "https://github.com/center-for-threat-informed-defense/adversary_emulation_library/blob/master/apt29/Archive/CALDERA_DIY/evals/payloads/stepSeventeen_email.ps1"
+    ],
+    "related_integrations": [
+      {
+        "package": "windows",
+        "version": "^1.5.0"
+      }
+    ],
+    "required_fields": [
+      {
+        "ecs": true,
+        "name": "event.category",
+        "type": "keyword"
+      },
+      {
+        "ecs": false,
+        "name": "powershell.file.script_block_text",
+        "type": "unknown"
+      }
+    ],
+    "risk_score": 47,
+    "rule_id": "a2d04374-187c-4fd9-b513-3ad4e7fdd67a",
+    "severity": "medium",
+    "tags": [
+      "Elastic",
+      "Host",
+      "Windows",
+      "Threat Detection",
+      "Collection",
+      "PowerShell"
+    ],
+    "threat": [
+      {
+        "framework": "MITRE ATT&CK",
+        "tactic": {
+          "id": "TA0009",
+          "name": "Collection",
+          "reference": "https://attack.mitre.org/tactics/TA0009/"
+        },
+        "technique": [
+          {
+            "id": "T1114",
+            "name": "Email Collection",
+            "reference": "https://attack.mitre.org/techniques/T1114/",
+            "subtechnique": [
+              {
+                "id": "T1114.001",
+                "name": "Local Email Collection",
+                "reference": "https://attack.mitre.org/techniques/T1114/001/"
+              },
+              {
+                "id": "T1114.002",
+                "name": "Remote Email Collection",
+                "reference": "https://attack.mitre.org/techniques/T1114/002/"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "framework": "MITRE ATT&CK",
+        "tactic": {
+          "id": "TA0002",
+          "name": "Execution",
+          "reference": "https://attack.mitre.org/tactics/TA0002/"
+        },
+        "technique": [
+          {
+            "id": "T1059",
+            "name": "Command and Scripting Interpreter",
+            "reference": "https://attack.mitre.org/techniques/T1059/",
+            "subtechnique": [
+              {
+                "id": "T1059.001",
+                "name": "PowerShell",
+                "reference": "https://attack.mitre.org/techniques/T1059/001/"
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "timestamp_override": "event.ingested",
+    "type": "query",
+    "version": 1
+  },
+  "id": "a2d04374-187c-4fd9-b513-3ad4e7fdd67a",
+  "type": "security-rule"
+}

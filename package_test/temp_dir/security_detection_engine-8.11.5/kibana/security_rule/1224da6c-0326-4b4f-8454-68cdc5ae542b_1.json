@@ -1,0 +1,59 @@
+{
+    "attributes": {
+        "anomaly_threshold": 75,
+        "author": [
+            "Elastic"
+        ],
+        "description": "A machine learning job combination has detected a set of one or more suspicious Windows processes with unusually high scores for malicious probability. These process(es) have been classified as malicious in several ways. The process(es) were predicted to be malicious by the ProblemChild supervised ML model. If the anomaly contains a cluster of suspicious processes, each process has the same user name, and the aggregate score of the event cluster was calculated to be unusually high by an unsupervised ML model. Such a cluster often contains suspicious or malicious activity, possibly involving LOLbins, that may be resistant to detection using conventional search rules.",
+        "from": "now-45m",
+        "interval": "15m",
+        "license": "Elastic License v2",
+        "machine_learning_job_id": "problem_child_high_sum_by_user",
+        "name": "Suspicious Windows Process Cluster Spawned by a User",
+        "note": "",
+        "references": [
+            "https://www.elastic.co/guide/en/security/current/prebuilt-ml-jobs.html",
+            "https://docs.elastic.co/en/integrations/problemchild",
+            "https://www.elastic.co/security-labs/detecting-living-off-the-land-attacks-with-new-elastic-integration"
+        ],
+        "related_integrations": [
+            {
+                "package": "problemchild",
+                "version": "^2.0.0"
+            }
+        ],
+        "risk_score": 21,
+        "rule_id": "1224da6c-0326-4b4f-8454-68cdc5ae542b",
+        "setup": "The Living-off-the-Land (LotL) Detection integration must be enabled and related ML jobs configured for this rule to be effective. Please refer to this rule's references for more information.",
+        "severity": "low",
+        "tags": [
+            "Domain: Endpoint",
+            "OS: Windows",
+            "Use Case: Living off the Land Attack Detection",
+            "Rule Type: ML",
+            "Rule Type: Machine Learning",
+            "Tactic: Defense Evasion"
+        ],
+        "threat": [
+            {
+                "framework": "MITRE ATT\u0026CK",
+                "tactic": {
+                    "id": "TA0005",
+                    "name": "Defense Evasion",
+                    "reference": "https://attack.mitre.org/tactics/TA0005/"
+                },
+                "technique": [
+                    {
+                        "id": "T1036",
+                        "name": "Masquerading",
+                        "reference": "https://attack.mitre.org/techniques/T1036/"
+                    }
+                ]
+            }
+        ],
+        "type": "machine_learning",
+        "version": 1
+    },
+    "id": "1224da6c-0326-4b4f-8454-68cdc5ae542b_1",
+    "type": "security-rule"
+}

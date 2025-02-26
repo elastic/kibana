@@ -1,0 +1,142 @@
+{
+    "attributes": {
+        "author": [
+            "Elastic"
+        ],
+        "description": "Detects Linux Bash commands from the the Windows Subsystem for Linux. Adversaries may enable and use WSL for Linux to avoid detection.",
+        "from": "now-9m",
+        "index": [
+            "winlogbeat-*",
+            "logs-endpoint.events.*",
+            "logs-windows.*",
+            "endgame-*"
+        ],
+        "language": "eql",
+        "license": "Elastic License v2",
+        "name": "Suspicious Execution via Windows Subsystem for Linux",
+        "query": "process where host.os.type == \"windows\" and event.type : \"start\" and\n (\n  ((process.executable : \"?:\\\\Windows\\\\System32\\\\bash.exe\" or process.pe.original_file_name == \"Bash.exe\") and \n  not process.command_line : (\"bash\", \"bash.exe\")) or \n  process.executable : \"?:\\\\Users\\\\*\\\\AppData\\\\Local\\\\Packages\\\\*\\\\rootfs\\\\usr\\\\bin\\\\bash\" or \n  (process.parent.name : \"wsl.exe\" and process.parent.command_line : \"bash*\" and not process.name : \"wslhost.exe\") or \n  (process.name : \"wsl.exe\" and process.args : (\"curl\", \"/etc/shadow\", \"/etc/passwd\", \"cat\",\"--system\", \"root\", \"-e\", \"--exec\", \"bash\", \"/mnt/c/*\"))\n  ) and \n  not process.parent.executable : (\"?:\\\\Program Files\\\\Docker\\\\*.exe\", \"?:\\\\Program Files (x86)\\\\Docker\\\\*.exe\")\n",
+        "references": [
+            "https://blog.f-secure.com/hunting-for-windows-subsystem-for-linux/",
+            "https://lolbas-project.github.io/lolbas/OtherMSBinaries/Wsl/",
+            "https://blog.qualys.com/vulnerabilities-threat-research/2022/03/22/implications-of-windows-subsystem-for-linux-for-adversaries-defenders-part-1"
+        ],
+        "related_integrations": [
+            {
+                "package": "endpoint",
+                "version": "^8.2.0"
+            },
+            {
+                "package": "windows",
+                "version": "^1.5.0"
+            }
+        ],
+        "required_fields": [
+            {
+                "ecs": true,
+                "name": "event.type",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "host.os.type",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "process.args",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "process.command_line",
+                "type": "wildcard"
+            },
+            {
+                "ecs": true,
+                "name": "process.executable",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "process.name",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "process.parent.command_line",
+                "type": "wildcard"
+            },
+            {
+                "ecs": true,
+                "name": "process.parent.executable",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "process.parent.name",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "process.pe.original_file_name",
+                "type": "keyword"
+            }
+        ],
+        "risk_score": 47,
+        "rule_id": "3e0eeb75-16e8-4f2f-9826-62461ca128b7",
+        "severity": "medium",
+        "tags": [
+            "Domain: Endpoint",
+            "OS: Windows",
+            "Use Case: Threat Detection",
+            "Tactic: Execution",
+            "Tactic: Defense Evasion",
+            "Data Source: Elastic Endgame",
+            "Data Source: Elastic Defend"
+        ],
+        "threat": [
+            {
+                "framework": "MITRE ATT\u0026CK",
+                "tactic": {
+                    "id": "TA0005",
+                    "name": "Defense Evasion",
+                    "reference": "https://attack.mitre.org/tactics/TA0005/"
+                },
+                "technique": [
+                    {
+                        "id": "T1202",
+                        "name": "Indirect Command Execution",
+                        "reference": "https://attack.mitre.org/techniques/T1202/"
+                    }
+                ]
+            },
+            {
+                "framework": "MITRE ATT\u0026CK",
+                "tactic": {
+                    "id": "TA0002",
+                    "name": "Execution",
+                    "reference": "https://attack.mitre.org/tactics/TA0002/"
+                },
+                "technique": [
+                    {
+                        "id": "T1059",
+                        "name": "Command and Scripting Interpreter",
+                        "reference": "https://attack.mitre.org/techniques/T1059/",
+                        "subtechnique": [
+                            {
+                                "id": "T1059.004",
+                                "name": "Unix Shell",
+                                "reference": "https://attack.mitre.org/techniques/T1059/004/"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ],
+        "timestamp_override": "event.ingested",
+        "type": "eql",
+        "version": 4
+    },
+    "id": "3e0eeb75-16e8-4f2f-9826-62461ca128b7_4",
+    "type": "security-rule"
+}

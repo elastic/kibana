@@ -1,0 +1,75 @@
+{
+    "attributes": {
+        "author": [
+            "Elastic"
+        ],
+        "description": "Identifies the execution of the PRoot utility, an open-source tool for user-space implementation of chroot, mount --bind, and binfmt_misc. Adversaries can leverage an open-source tool PRoot to expand the scope of their operations to multiple Linux distributions and simplify their necessary efforts. In a normal threat scenario, the scope of an attack is limited by the varying configurations of each Linux distribution. With PRoot, it provides an attacker with a consistent operational environment across different Linux distributions, such as Ubuntu, Fedora, and Alpine. PRoot also provides emulation capabilities that allow for malware built on other architectures, such as ARM, to be run.The post-exploitation technique called bring your own filesystem (BYOF), can be used by the threat actors to execute malicious payload or elevate privileges or perform network scans or orchestrate another attack on the environment. Although PRoot was originally not developed with malicious intent it can be easily tuned to work for one.",
+        "from": "now-9m",
+        "index": [
+            "logs-endpoint.events.*"
+        ],
+        "language": "eql",
+        "license": "Elastic License v2",
+        "name": "Potential Defense Evasion via PRoot",
+        "query": "process where  event.action == \"exec\" and process.parent.name ==\"proot\" and host.os.type == \"linux\"\n",
+        "references": [
+            "https://proot-me.github.io/"
+        ],
+        "related_integrations": [
+            {
+                "package": "endpoint",
+                "version": "^8.2.0"
+            }
+        ],
+        "required_fields": [
+            {
+                "ecs": true,
+                "name": "event.action",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "host.os.type",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "process.parent.name",
+                "type": "keyword"
+            }
+        ],
+        "risk_score": 47,
+        "rule_id": "5c9ec990-37fa-4d5c-abfc-8d432f3dedd0",
+        "setup": "\nThis rule requires data coming in from Elastic Defend.\n\n### Elastic Defend Integration Setup\nElastic Defend is integrated into the Elastic Agent using Fleet. Upon configuration, the integration allows\nthe Elastic Agent to monitor events on your host and send data to the Elastic Security app.\n\n#### Prerequisite Requirements:\n- Fleet is required for Elastic Defend.\n- To configure Fleet Server refer to the [documentation](https://www.elastic.co/guide/en/fleet/current/fleet-server.html).\n\n#### The following steps should be executed in order to add the Elastic Defend integration on a Linux System:\n- Go to the Kibana home page and click Add integrations.\n- In the query bar, search for Elastic Defend and select the integration to see more details about it.\n- Click Add Elastic Defend.\n- Configure the integration name and optionally add a description.\n- Select the type of environment you want to protect, either Traditional Endpoints or Cloud Workloads.\n- Select a configuration preset. Each preset comes with different default settings for Elastic Agent, you can further customize these later by configuring the Elastic Defend integration policy. [Helper guide](https://www.elastic.co/guide/en/security/current/configure-endpoint-integration-policy.html).\n- We suggest to select \"Complete EDR (Endpoint Detection and Response)\" as a configuration setting, that provides \"All events; all preventions\"\n- Enter a name for the agent policy in New agent policy name. If other agent policies already exist, you can click the Existing hosts tab and select an existing policy instead.\nFor more details on Elastic Agent configuration settings, refer to the [helper guide](https://www.elastic.co/guide/en/fleet/8.10/agent-policy.html).\n- Click Save and Continue.\n- To complete the integration, select Add Elastic Agent to your hosts and continue to the next section to install the Elastic Agent on your hosts.\nFor more details on Elastic Defend refer to the [helper guide](https://www.elastic.co/guide/en/security/current/install-endpoint.html).\n\n",
+        "severity": "medium",
+        "tags": [
+            "Domain: Endpoint",
+            "OS: Linux",
+            "Use Case: Threat Detection",
+            "Tactic: Defense Evasion",
+            "Data Source: Elastic Defend"
+        ],
+        "threat": [
+            {
+                "framework": "MITRE ATT\u0026CK",
+                "tactic": {
+                    "id": "TA0005",
+                    "name": "Defense Evasion",
+                    "reference": "https://attack.mitre.org/tactics/TA0005/"
+                },
+                "technique": [
+                    {
+                        "id": "T1211",
+                        "name": "Exploitation for Defense Evasion",
+                        "reference": "https://attack.mitre.org/techniques/T1211/"
+                    }
+                ]
+            }
+        ],
+        "timestamp_override": "event.ingested",
+        "type": "eql",
+        "version": 4
+    },
+    "id": "5c9ec990-37fa-4d5c-abfc-8d432f3dedd0_4",
+    "type": "security-rule"
+}
