@@ -1,0 +1,10 @@
+# summary: 
+description: Run `POST /api/apm/settings/agent-configuration/search` to search configuration details.
+value: >
+    {
+        "etag": "1e58c178efeebae15c25c539da740d21dee422fc",
+        "service" : {
+            "name": "frontend",
+            "environment": "production"
+        }
+    }
