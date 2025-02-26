@@ -1,6 +1,7 @@
-import { Meta, Story, Canvas, ArgsTable } from '@storybook/addon-docs/blocks';
+import { Meta, Story, Canvas, Controls } from '@storybook/blocks';
+import * as LogStreamStories from './log_stream.stories';
 
-<Meta title="logsShared/LogStream/Overview" />
+<Meta of={LogStreamStories} />
 
 # Embeddable `<LogStream />` component
 
@@ -35,7 +36,7 @@ const startTimestamp = endTimestamp - 15 * 60 * 1000; // 15 minutes
 
 This will show a list of log entries between the specified timestamps.
 
-<Story id="logsShared-logstream--basic-date-range" />
+<Canvas of={LogStreamStories.BasicDateRange} />
 
 ## Query log entries
 
@@ -89,8 +90,7 @@ By default the component will load at the bottom of the list, showing the newest
   center={{ time: 1595146275000, tiebreaker: 150 }}
 />
 ```
-
-<Story id="logsShared-logstream--centered-on-log-entry" />
+<Canvas of={LogStreamStories.CenteredOnLogEntry} />
 
 ## Highlight a specific entry
 
@@ -99,16 +99,15 @@ The component can highlight a specific line via the `highlight` prop. It takes t
 ```tsx
 <LogStream startTimestamp={startTimestamp} endTimestamp={endTimestamp} highlight="entry-197" />
 ```
-
-<Story id="logsShared-logstream--highlighted-log-entry" />
+<Canvas of={LogStreamStories.HighlightedLogEntry} />
 
 ## Column configuration
 
 By default the component will use the same columns as the Logs UI:
 
-- `@timestamp` of the log.
-- `event.dataset` field.
-- The log message. This might be the `message` field, or a reconstruction based on other fields.
+* `@timestamp` of the log.
+* `event.dataset` field.
+* The log message. This might be the `message` field, or a reconstruction based on other fields.
 
 These columns are user-configurable. When the end user changes the default columns those changes will be reflected in the `<LogStream />` component.
 
@@ -130,8 +129,7 @@ The easiest way is to specify what columns you want with the `columns` prop.
   ]}
 />
 ```
-
-<Story id="logsShared-logstream--custom-columns" />
+<Canvas of={LogStreamStories.CustomColumns} />
 
 The rendering of the column headers and the cell contents can also be customized with the following properties:
 
@@ -141,37 +139,53 @@ The rendering of the column headers and the cell contents can also be customized
       <td>
         <code>width</code>
       </td>
+
       <td>
         <code>number | string</code>
       </td>
+
       <td>The width of the column. Accepts any valid `flex-basis` value.</td>
     </tr>
+
     <tr>
       <td>
         <code>header</code>
       </td>
+
       <td>
         <code>boolean | string</code>
+
         <br />
+
         Defaults to <code>true</code>
       </td>
+
       <td>
         When `boolean`, decide if the header should render or not.
+
         <br />
+
         When `string`, show the string contents in the header.
       </td>
     </tr>
+
     <tr>
       <td>
         <code>render</code>
       </td>
+
       <td>
         <code>(timestamp: number) => ReactNode</code> for the `timestamp` column
+
         <br />
+
         <code>(message: string) => ReactNode</code> for the `message` column.
+
         <br />
+
         <code>(value: JsonValue) => ReactNode</code> for the `field` columns.
       </td>
+
       <td>How should the column value render</td>
     </tr>
   </tbody>
@@ -205,8 +219,7 @@ The rendering of the column headers and the cell contents can also be customized
   ]}
 />
 ```
-
-<Story id="logsShared-logstream--custom-column-rendering" />
+<Canvas of={LogStreamStories.CustomColumnRendering} />
 
 ### With a static log view configuration
 
@@ -261,5 +274,4 @@ The component can render a button on the row that opens a flyout, via the `showF
   endTimestamp={...}
   showFlyoutAction />
 ```
-
-<Story id="logsShared-logstream--flyout" />
+<Canvas of={LogStreamStories.Flyout} />
