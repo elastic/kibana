@@ -16,7 +16,11 @@ export {
   PanelPlacementStrategy,
 } from './plugin_constants';
 export { DASHBOARD_GRID_COLUMN_COUNT } from '../common/content_management';
-export type { DashboardApi, DashboardCreationOptions, DashboardLocatorParams } from './dashboard_api/types';
+export type {
+  DashboardApi,
+  DashboardCreationOptions,
+  DashboardLocatorParams,
+} from './dashboard_api/types';
 export { DASHBOARD_API_TYPE } from './dashboard_api/types';
 export { LazyDashboardRenderer as DashboardRenderer } from './dashboard_renderer/lazy_dashboard_renderer';
 export type { DashboardSetup, DashboardStart, DashboardFeatureFlagConfig } from './plugin';

@@ -48,7 +48,7 @@ import {
   startSyncingExpandedPanelState,
   type SharedDashboardState,
 } from './url/url_utils';
-import { DashboardRenderer } from '../dashboard_renderer/components/dashboard_renderer';
+import { DashboardRenderer } from '../dashboard_renderer/dashboard_renderer';
 import { DASHBOARD_STATE_STORAGE_KEY, createDashboardEditUrl } from '../utils/urls';
 
 export interface DashboardAppProps {

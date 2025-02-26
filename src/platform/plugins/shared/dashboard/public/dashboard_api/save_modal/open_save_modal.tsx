@@ -15,7 +15,11 @@ import { showSaveModal } from '@kbn/saved-objects-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { SaveDashboardReturn } from '../../services/dashboard_content_management_service/types';
 import { DashboardSaveOptions } from './types';
-import { coreServices, dataService, savedObjectsTaggingService } from '../../services/kibana_services';
+import {
+  coreServices,
+  dataService,
+  savedObjectsTaggingService,
+} from '../../services/kibana_services';
 import { getDashboardContentManagementService } from '../../services/dashboard_content_management_service';
 import { DashboardState } from '../types';
 import { DASHBOARD_CONTENT_ID, SAVED_OBJECT_POST_TIME } from '../../utils/telemetry_constants';

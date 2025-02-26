@@ -9,12 +9,12 @@
 
 import React from 'react';
 import { dynamic } from '@kbn/shared-ux-utility';
-import type { DashboardRendererProps } from './components/dashboard_renderer';
+import type { DashboardRendererProps } from './dashboard_renderer';
 import { untilPluginStartServicesReady } from '../services/kibana_services';
 
 const Component = dynamic(async () => {
   const [{ DashboardRenderer }] = await Promise.all([
-    import('./components/dashboard_renderer'),
+    import('./dashboard_renderer'),
     untilPluginStartServicesReady(),
   ]);
   return {

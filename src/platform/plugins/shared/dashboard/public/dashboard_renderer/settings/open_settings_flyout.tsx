@@ -11,9 +11,9 @@ import React from 'react';
 
 import { toMountPoint } from '@kbn/react-kibana-mount';
 
-import { DashboardApi } from '../../../dashboard_api/types';
-import { DashboardContext } from '../../../dashboard_api/use_dashboard_api';
-import { coreServices } from '../../../services/kibana_services';
+import { DashboardApi } from '../../dashboard_api/types';
+import { DashboardContext } from '../../dashboard_api/use_dashboard_api';
+import { coreServices } from '../../services/kibana_services';
 import { DashboardSettingsFlyout } from './settings_flyout';
 
 export function openSettingsFlyout(dashboardApi: DashboardApi) {

@@ -22,11 +22,11 @@ import {
 import { useStateFromPublishingSubject } from '@kbn/presentation-publishing';
 
 import useMountedState from 'react-use/lib/useMountedState';
-import { useDashboardApi } from '../../../../dashboard_api/use_dashboard_api';
-import { coreServices } from '../../../../services/kibana_services';
-import { getDashboardCapabilities } from '../../../../utils/get_dashboard_capabilities';
-import { executeAddLensPanelAction } from '../../../../dashboard_actions/execute_add_lens_panel_action';
-import { addFromLibrary } from '../../../add_panel_from_library';
+import { useDashboardApi } from '../../../dashboard_api/use_dashboard_api';
+import { coreServices } from '../../../services/kibana_services';
+import { getDashboardCapabilities } from '../../../utils/get_dashboard_capabilities';
+import { executeAddLensPanelAction } from '../../../dashboard_actions/execute_add_lens_panel_action';
+import { addFromLibrary } from '../../add_panel_from_library';
 
 export function DashboardEmptyScreen() {
   const { showWriteControls } = useMemo(() => {

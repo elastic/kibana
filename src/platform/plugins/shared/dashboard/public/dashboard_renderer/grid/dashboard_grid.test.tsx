@@ -10,13 +10,13 @@
 import React from 'react';
 
 import { useBatchedPublishingSubjects as mockUseBatchedPublishingSubjects } from '@kbn/presentation-publishing';
-import { DashboardPanelMap } from '../../../../common';
+import { DashboardPanelMap } from '../../../common';
 import {
   DashboardContext,
   useDashboardApi as mockUseDashboardApi,
-} from '../../../dashboard_api/use_dashboard_api';
-import { DashboardInternalContext } from '../../../dashboard_api/use_dashboard_internal_api';
-import { buildMockDashboardApi } from '../../../mocks';
+} from '../../dashboard_api/use_dashboard_api';
+import { DashboardInternalContext } from '../../dashboard_api/use_dashboard_internal_api';
+import { buildMockDashboardApi } from '../../mocks';
 import { DashboardGrid } from './dashboard_grid';
 import type { Props as DashboardGridItemProps } from './dashboard_grid_item';
 import { RenderResult, act, render, waitFor } from '@testing-library/react';

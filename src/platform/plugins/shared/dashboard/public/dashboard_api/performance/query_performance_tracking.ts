@@ -16,10 +16,7 @@ import { PublishesPhaseEvents, apiPublishesPhaseEvents } from '@kbn/presentation
 import { coreServices } from '../../services/kibana_services';
 import { DASHBOARD_LOADED_EVENT } from '../../utils/telemetry_constants';
 
-type DashboardLoadType =
-  | 'sessionFirstLoad'
-  | 'dashboardFirstLoad'
-  | 'dashboardSubsequentLoad';
+type DashboardLoadType = 'sessionFirstLoad' | 'dashboardFirstLoad' | 'dashboardSubsequentLoad';
 
 export interface PerformanceState {
   firstLoad: boolean;

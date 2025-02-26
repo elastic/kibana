@@ -9,10 +9,10 @@
 
 import React from 'react';
 
-import { buildMockDashboardApi } from '../../../mocks';
+import { buildMockDashboardApi } from '../../mocks';
 import { Item, Props as DashboardGridItemProps } from './dashboard_grid_item';
-import { DashboardContext } from '../../../dashboard_api/use_dashboard_api';
-import { DashboardInternalContext } from '../../../dashboard_api/use_dashboard_internal_api';
+import { DashboardContext } from '../../dashboard_api/use_dashboard_api';
+import { DashboardInternalContext } from '../../dashboard_api/use_dashboard_internal_api';
 import { act, render } from '@testing-library/react';
 
 jest.mock('@kbn/embeddable-plugin/public', () => {
