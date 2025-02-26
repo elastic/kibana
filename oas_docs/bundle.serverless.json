@@ -8669,6 +8669,29 @@
         "x-state": "Technical Preview"
       }
     },
+    "/api/features": {
+      "get": {
+        "description": "Get information about all Kibana features. Features are used by spaces and security to refine and secure access to Kibana.<br/><br/>[Required authorization] Route required privileges: ALL of [read_features].",
+        "operationId": "get-features",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "ignoreValidLicenses",
+            "required": false,
+            "schema": {
+              "default": false,
+              "type": "boolean"
+            }
+          }
+        ],
+        "responses": {},
+        "summary": "Get features",
+        "tags": [
+          "system"
+        ],
+        "x-state": "Technical Preview"
+      }
+    },
     "/api/fleet/agent_download_sources": {
       "get": {
         "description": "[Required authorization] Route required privileges: ANY of [fleet-agent-policies-read OR fleet-settings-read].",
