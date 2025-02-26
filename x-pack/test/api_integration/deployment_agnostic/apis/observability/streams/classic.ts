@@ -250,18 +250,16 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       before(async () => {
         await esClient.indices.putIndexTemplate({
           name: TEMPLATE_NAME,
-          body: {
-            index_patterns: ['mytest*'],
-            priority: 1000,
-            template: {
-              lifecycle: {
-                data_retention: '7d',
-              },
+          index_patterns: ['mytest*'],
+          priority: 1000,
+          template: {
+            lifecycle: {
+              data_retention: '7d',
             },
-            data_stream: {
-              allow_custom_routing: false,
-              hidden: false,
-            },
+          },
+          data_stream: {
+            allow_custom_routing: false,
+            hidden: false,
           },
         });
 
