@@ -12,7 +12,7 @@ import type {
   TableSuggestionColumn,
   VisualizationSuggestion,
 } from '../../types';
-import { PieVisualizationState } from '../../../common/types';
+import type { PieVisualizationState, PieChartType } from '../../../common/types';
 import {
   CategoryDisplay,
   LegendDisplay,
@@ -20,7 +20,6 @@ import {
   PieChartTypes,
 } from '../../../common/constants';
 import { isPartitionShape } from '../../../common/visualizations';
-import type { PieChartType } from '../../../common/types';
 import { PartitionChartsMeta } from './partition_charts_meta';
 import { layerTypes } from '../..';
 import { getColorMappingDefaults } from '../../utils';

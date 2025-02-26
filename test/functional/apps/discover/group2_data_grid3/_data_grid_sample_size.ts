@@ -8,7 +8,7 @@
  */
 
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../ftr_provider_context';
+import type { FtrProviderContext } from '../ftr_provider_context';
 
 const DEFAULT_ROWS_PER_PAGE = 100;
 const DEFAULT_SAMPLE_SIZE = 500;

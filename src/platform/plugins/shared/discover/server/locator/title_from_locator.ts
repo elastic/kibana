@@ -8,9 +8,9 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { SavedObject } from '@kbn/core/server';
-import { LocatorServicesDeps } from '.';
-import { DiscoverAppLocatorParams } from '../../common';
+import type { SavedObject } from '@kbn/core/server';
+import type { LocatorServicesDeps } from '.';
+import type { DiscoverAppLocatorParams } from '../../common';
 
 /**
  * @internal

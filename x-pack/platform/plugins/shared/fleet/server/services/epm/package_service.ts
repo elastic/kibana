@@ -18,7 +18,7 @@ import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 
 import { HTTPAuthorizationHeader } from '../../../common/http_authorization_header';
 
-import type { PackageList } from '../../../common';
+import type { PackageList, InstallResult } from '../../../common';
 
 import type {
   ArchivePackage,
@@ -35,8 +35,6 @@ import { checkSuperuser, doesNotHaveRequiredFleetAuthz, getAuthzFromRequest } fr
 import { FleetError, FleetUnauthorizedError, PackageNotFoundError } from '../../errors';
 import { INSTALL_PACKAGES_AUTHZ, READ_PACKAGE_INFO_AUTHZ } from '../../routes/epm';
 
-import type { InstallResult } from '../../../common';
-
 import { appContextService } from '..';
 
 import {
@@ -45,9 +43,8 @@ import {
 } from './packages/install';
 
 import type { FetchFindLatestPackageOptions } from './registry';
-import { getPackageFieldsMetadata } from './registry';
+import { getPackageFieldsMetadata, fetchFindLatestPackageOrThrow, getPackage } from './registry';
 import * as Registry from './registry';
-import { fetchFindLatestPackageOrThrow, getPackage } from './registry';
 
 import { installTransforms, isTransform } from './elasticsearch/transform/install';
 import {

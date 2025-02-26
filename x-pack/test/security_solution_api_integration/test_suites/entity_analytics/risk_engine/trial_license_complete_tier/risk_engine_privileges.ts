@@ -6,7 +6,7 @@
  */
 import expect from '@kbn/expect';
 import { riskEngineRouteHelpersFactoryNoAuth } from '../../utils';
-import { FtrProviderContext } from '../../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../../ftr_provider_context';
 import { usersAndRolesFactory } from '../../utils/users_and_roles';
 const USER_PASSWORD = 'changeme';
 const ROLES = [

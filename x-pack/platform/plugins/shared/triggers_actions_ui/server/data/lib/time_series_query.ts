@@ -6,8 +6,7 @@
  */
 
 import type { estypes } from '@elastic/elasticsearch';
-import { Logger } from '@kbn/core/server';
-import type { ElasticsearchClient } from '@kbn/core/server';
+import type { Logger, ElasticsearchClient } from '@kbn/core/server';
 import { getEsErrorMessage } from '@kbn/alerting-plugin/server';
 import { toElasticsearchQuery, fromKueryExpression } from '@kbn/es-query';
 import {
@@ -17,7 +16,7 @@ import {
   isGroupAggregation,
 } from '../../../common';
 
-import {
+import type {
   TimeSeriesQuery,
   TimeSeriesResult,
   TimeSeriesResultRow,

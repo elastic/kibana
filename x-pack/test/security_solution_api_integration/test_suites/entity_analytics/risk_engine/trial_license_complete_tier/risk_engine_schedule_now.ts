@@ -14,7 +14,7 @@ import {
   waitForRiskEngineRun,
   waitForRiskScoresToBePresent,
 } from '../../utils';
-import { FtrProviderContext } from '../../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../../ftr_provider_context';
 import { dataGeneratorFactory } from '../../../detections_response/utils';
 
 export default ({ getService }: FtrProviderContext) => {

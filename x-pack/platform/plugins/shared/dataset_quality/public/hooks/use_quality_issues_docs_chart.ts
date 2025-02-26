@@ -18,7 +18,7 @@ import {
 } from '../../common/constants';
 import { getLensAttributes as getDegradedLensAttributes } from '../components/dataset_quality_details/overview/document_trends/degraded_docs/lens_attributes';
 import { getLensAttributes as getFailedLensAttributes } from '../components/dataset_quality_details/overview/document_trends/failed_docs/lens_attributes';
-import { QualityIssueType } from '../state_machines/dataset_quality_details_controller';
+import type { QualityIssueType } from '../state_machines/dataset_quality_details_controller';
 import { useKibanaContextForPlugin } from '../utils';
 import { useCreateDataView } from './use_create_dataview';
 import { useDatasetDetailsTelemetry } from './use_dataset_details_telemetry';

@@ -8,7 +8,7 @@
  */
 
 import { BasicPrettyPrinter } from '../../pretty_print';
-import { ESQLProperNode } from '../../types';
+import type { ESQLProperNode } from '../../types';
 import { Walker } from '../../walker/walker';
 import { expr } from '../expr';
 

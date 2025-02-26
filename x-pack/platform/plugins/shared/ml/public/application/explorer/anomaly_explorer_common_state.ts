@@ -6,9 +6,14 @@
  */
 
 import type { Observable } from 'rxjs';
-import { Subscription } from 'rxjs';
-import { BehaviorSubject } from 'rxjs';
-import { distinctUntilChanged, map, shareReplay, filter } from 'rxjs';
+import {
+  Subscription,
+  BehaviorSubject,
+  distinctUntilChanged,
+  map,
+  shareReplay,
+  filter,
+} from 'rxjs';
 import { isEqual } from 'lodash';
 import type { InfluencersFilterQuery } from '@kbn/ml-anomaly-utils';
 import type { GlobalState, UrlStateService } from '@kbn/ml-url-state/src/url_state';

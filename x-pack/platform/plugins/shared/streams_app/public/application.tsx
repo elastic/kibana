@@ -8,7 +8,7 @@ import React from 'react';
 import { type AppMountParameters, type CoreStart } from '@kbn/core/public';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import type { StreamsAppStartDependencies } from './types';
-import { StreamsAppServices } from './services/types';
+import type { StreamsAppServices } from './services/types';
 import { AppRoot } from './components/app_root';
 
 export const StreamsApplication = ({

@@ -7,11 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import {
-  PhaseEvent,
-  apiPublishesDataLoading,
-  apiPublishesRendered,
-} from '@kbn/presentation-publishing';
+import type { PhaseEvent } from '@kbn/presentation-publishing';
+import { apiPublishesDataLoading, apiPublishesRendered } from '@kbn/presentation-publishing';
 import { BehaviorSubject, Subscription, combineLatest } from 'rxjs';
 
 export class PhaseTracker {

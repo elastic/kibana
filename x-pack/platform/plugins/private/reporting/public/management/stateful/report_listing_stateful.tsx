@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
+import type { FC } from 'react';
+import React from 'react';
 
 import {
   EuiFlexGroup,
@@ -16,7 +17,7 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { ListingPropsInternal } from '..';
+import type { ListingPropsInternal } from '..';
 import { useIlmPolicyStatus } from '../../lib/ilm_policy_status_context';
 import { IlmPolicyLink, MigrateIlmPolicyCallOut, ReportDiagnostic } from '../components';
 import { ReportListingTable } from '../report_listing_table';

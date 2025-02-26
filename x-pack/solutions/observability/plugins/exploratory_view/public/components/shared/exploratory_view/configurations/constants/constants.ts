@@ -4,10 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { OperationType } from '@kbn/lens-plugin/public';
+import type { OperationType } from '@kbn/lens-plugin/public';
 import { DOCUMENT_FIELD_NAME } from '@kbn/lens-plugin/common/constants';
 import { i18n } from '@kbn/i18n';
-import { ReportViewType } from '../../types';
+import type { ReportViewType } from '../../types';
 import {
   CLS_FIELD,
   FCP_FIELD,

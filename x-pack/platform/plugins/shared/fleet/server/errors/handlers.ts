@@ -12,8 +12,8 @@ import type {
   IKibanaResponse,
   KibanaResponseFactory,
   RequestHandlerContext,
+  KibanaRequest,
 } from '@kbn/core/server';
-import type { KibanaRequest } from '@kbn/core/server';
 
 import { UninstallTokenError } from '../../common/errors';
 

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 import { farequoteDataViewTestData, farequoteLuceneSearchTestData } from './index_test_data';
 
 export default function ({ getPageObject, getService }: FtrProviderContext) {

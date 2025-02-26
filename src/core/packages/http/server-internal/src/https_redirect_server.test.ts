@@ -19,7 +19,7 @@ import supertest from 'supertest';
 
 import { ByteSizeValue } from '@kbn/config-schema';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
-import { HttpConfig } from '..';
+import type { HttpConfig } from '..';
 import { HttpsRedirectServer } from './https_redirect_server';
 
 const chance = new Chance();

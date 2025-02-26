@@ -6,9 +6,10 @@
  */
 
 import expect from '@kbn/expect';
-import { APIReturnType } from '@kbn/apm-plugin/public/services/rest/create_call_apm_api';
+import type { APIReturnType } from '@kbn/apm-plugin/public/services/rest/create_call_apm_api';
 import { LatencyAggregationType } from '@kbn/apm-plugin/common/latency_aggregation_types';
-import { ApmDocumentType, ApmTransactionDocumentType } from '@kbn/apm-plugin/common/document_type';
+import type { ApmTransactionDocumentType } from '@kbn/apm-plugin/common/document_type';
+import { ApmDocumentType } from '@kbn/apm-plugin/common/document_type';
 import { RollupInterval } from '@kbn/apm-plugin/common/rollup';
 import { apm, timerange } from '@kbn/apm-synthtrace-client';
 import { AggregationType } from '@kbn/apm-plugin/common/rules/apm_rule_types';

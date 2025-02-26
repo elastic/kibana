@@ -14,8 +14,8 @@ import { groupBy, keys } from 'lodash';
 
 import type { ApplicationStart } from '@kbn/core-application-browser';
 
-import { GuideId, GuideState } from '../../../types';
-import { GuideFilterValues } from './guide_filters';
+import type { GuideId, GuideState } from '../../../types';
+import type { GuideFilterValues } from './guide_filters';
 import { guideCards } from './guide_cards.constants';
 import { GuideCard } from './guide_card';
 

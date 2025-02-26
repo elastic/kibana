@@ -6,11 +6,10 @@
  */
 
 import { useEuiTheme } from '@elastic/eui';
-import { useMemo } from 'react';
+import React, { useMemo } from 'react';
 import { css } from '@emotion/react';
-import React from 'react';
 import { getLogCategoryTerms } from '../../utils/log_category';
-import { LogCategory } from '../../types';
+import type { LogCategory } from '../../types';
 
 interface LogCategoryPatternProps {
   logCategory: LogCategory;

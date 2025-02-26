@@ -7,18 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { isFieldLensCompatible } from '@kbn/visualization-ui-components';
-import React, { useCallback, useEffect, useMemo } from 'react';
-import { i18n } from '@kbn/i18n';
 import {
-  EuiFormRow,
-  EuiSwitch,
-  EuiSwitchEvent,
-  EuiButtonGroup,
-  EuiSpacer,
-  euiPaletteColorBlind,
-} from '@elastic/eui';
-import {
+  isFieldLensCompatible,
   IconSelectSetting,
   DimensionEditorSection,
   NameInput,
@@ -26,14 +16,26 @@ import {
   LineStyleSettings,
   TextDecorationSetting,
   FieldPicker,
-  FieldOption,
-  type QueryInputServices,
 } from '@kbn/visualization-ui-components';
-import type { FieldOptionValue } from '@kbn/visualization-ui-components';
-import { DataView } from '@kbn/data-views-plugin/common';
+import React, { useCallback, useEffect, useMemo } from 'react';
+import { i18n } from '@kbn/i18n';
+import type { EuiSwitchEvent } from '@elastic/eui';
+import {
+  EuiFormRow,
+  EuiSwitch,
+  EuiButtonGroup,
+  EuiSpacer,
+  euiPaletteColorBlind,
+  htmlIdGenerator,
+} from '@elastic/eui';
+import type {
+  FieldOptionValue,
+  FieldOption,
+  QueryInputServices,
+} from '@kbn/visualization-ui-components';
+import type { DataView } from '@kbn/data-views-plugin/common';
 import { useExistingFieldsReader } from '@kbn/unified-field-list/src/hooks/use_existing_fields';
 import moment from 'moment';
-import { htmlIdGenerator } from '@elastic/eui';
 import type {
   AvailableAnnotationIcon,
   EventAnnotationConfig,
@@ -47,9 +49,9 @@ import {
   defaultAnnotationRangeColor,
   defaultRangeAnnotationLabel,
   toLineAnnotationColor,
+  sanitizeProperties,
 } from './helpers';
 import { annotationsIconSet } from './icon_set';
-import { sanitizeProperties } from './helpers';
 import { TooltipSection } from './tooltip_annotation_panel';
 import { ConfigPanelManualAnnotation } from './manual_annotation_panel';
 import { ConfigPanelQueryAnnotation } from './query_annotation_panel';

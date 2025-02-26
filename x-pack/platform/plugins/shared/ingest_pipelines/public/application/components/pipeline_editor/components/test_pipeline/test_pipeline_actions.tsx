@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-import React, { FunctionComponent, useState } from 'react';
+import type { FunctionComponent } from 'react';
+import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 
 import { useTestPipelineContext, usePipelineProcessorsContext } from '../../context';
 import { DocumentsDropdown } from './documents_dropdown';
-import { TestPipelineFlyoutTab } from './test_pipeline_tabs';
+import type { TestPipelineFlyoutTab } from './test_pipeline_tabs';
 import { AddDocumentsButton } from './add_documents_button';
 import { TestOutputButton } from './test_output_button';
 import { TestPipelineFlyout } from './test_pipeline_flyout.container';

@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import type { ElasticsearchClient } from '@kbn/core/server';
+import type { ElasticsearchClient, KibanaRequest } from '@kbn/core/server';
 import type { ESSearchRequest, InferSearchResponseOf } from '@kbn/es-types';
-import type { KibanaRequest } from '@kbn/core/server';
 import { unwrapEsResponse } from '@kbn/observability-plugin/server';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type {

@@ -10,7 +10,7 @@ import { loggerMock } from '@kbn/logging-mocks';
 import { usageCollectionPluginMock } from '@kbn/usage-collection-plugin/server/mocks';
 import { configSchema, createConfig } from '../../../config';
 import { monitoringPluginMock } from '../../../mocks';
-import { LegacyRequest } from '../../../types';
+import type { LegacyRequest } from '../../../types';
 import { getCollectionStatus } from './get_collection_status';
 
 const liveClusterUuid = 'a12';

@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { Languages, LanguageDefinition } from '@kbn/search-api-panels';
+import type { LanguageDefinition } from '@kbn/search-api-panels';
+import { Languages } from '@kbn/search-api-panels';
 
 import { curlDefinition } from './curl';
 import { goDefinition } from './go';

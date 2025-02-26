@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { InferenceAPIConfigResponse } from '@kbn/ml-trained-models-utils';
+import type { InferenceAPIConfigResponse } from '@kbn/ml-trained-models-utils';
 export const isProviderTechPreview = (provider: InferenceAPIConfigResponse) => {
   const { service_settings: serviceSettings, task_type: taskType } = provider;
   const modelId = serviceSettings?.model_id;

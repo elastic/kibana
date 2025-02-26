@@ -6,7 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { UiSettingsParams } from '@kbn/core/types';
+import type { UiSettingsParams } from '@kbn/core/types';
 import { i18n } from '@kbn/i18n';
 import { observabilityFeatureId, ProgressiveLoadingQuality } from '../common';
 import {

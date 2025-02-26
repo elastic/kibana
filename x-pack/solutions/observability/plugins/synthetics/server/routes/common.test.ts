@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import { parseArrayFilters } from './common';
-import { getSavedObjectKqlFilter } from './common';
+import { parseArrayFilters, getSavedObjectKqlFilter } from './common';
 
 describe('common utils', () => {
   it('tests parseArrayFilters', () => {

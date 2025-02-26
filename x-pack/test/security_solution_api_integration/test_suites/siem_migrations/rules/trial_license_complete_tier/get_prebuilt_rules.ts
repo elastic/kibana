@@ -9,15 +9,15 @@ import expect from 'expect';
 import { v4 as uuidv4 } from 'uuid';
 import { RuleTranslationResult } from '@kbn/security-solution-plugin/common/siem_migrations/constants';
 import { deleteAllRules } from '../../../../../common/utils/security_solution';
+import type { RuleMigrationDocument } from '../../utils';
 import {
-  RuleMigrationDocument,
   createMigrationRules,
   defaultElasticRule,
   deleteAllMigrationRules,
   getMigrationRuleDocuments,
   migrationRulesRouteHelpersFactory,
 } from '../../utils';
-import { FtrProviderContext } from '../../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../../ftr_provider_context';
 import {
   createPrebuiltRuleAssetSavedObjects,
   createRuleAssetSavedObject,

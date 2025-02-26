@@ -26,7 +26,7 @@ import {
 } from './triggers/update_esql_query/update_esql_query_trigger';
 import { ACTION_UPDATE_ESQL_QUERY, ACTION_CREATE_ESQL_CONTROL } from './triggers/constants';
 import { setKibanaServices } from './kibana_services';
-import { JoinIndicesAutocompleteResult } from '../common';
+import type { JoinIndicesAutocompleteResult } from '../common';
 import { cacheNonParametrizedAsyncFunction } from './util/cache';
 import { EsqlVariablesService } from './variables_service';
 

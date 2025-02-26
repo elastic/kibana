@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { TransformPutTransformRequest } from '@elastic/elasticsearch/lib/api/types';
-import { DataViewsService } from '@kbn/data-views-plugin/common';
+import type { TransformPutTransformRequest } from '@elastic/elasticsearch/lib/api/types';
+import type { DataViewsService } from '@kbn/data-views-plugin/common';
 import { kqlCustomIndicatorSchema, timeslicesBudgetingMethodSchema } from '@kbn/slo-schema';
 import { TransformGenerator, getElasticsearchQueryOrThrow, parseIndex } from '.';
 import {
@@ -15,7 +15,7 @@ import {
   getSLOTransformId,
 } from '../../../common/constants';
 import { getSLOTransformTemplate } from '../../assets/transform_templates/slo_transform_template';
-import { KQLCustomIndicator, SLODefinition } from '../../domain/models';
+import type { KQLCustomIndicator, SLODefinition } from '../../domain/models';
 import { InvalidTransformError } from '../../errors';
 import { getFilterRange, getTimesliceTargetComparator } from './common';
 

@@ -11,7 +11,7 @@ import {
   SiemMigrationStatus,
 } from '@kbn/security-solution-plugin/common/siem_migrations/constants';
 
-import {
+import type {
   ElasticRule,
   OriginalRule,
   RuleMigration,

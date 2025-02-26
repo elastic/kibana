@@ -10,8 +10,7 @@
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { EuiEmptyPrompt, EuiLoadingSpinner } from '@elastic/eui';
-import { EuiLoadingElastic } from '@elastic/eui';
+import { EuiEmptyPrompt, EuiLoadingSpinner, EuiLoadingElastic } from '@elastic/eui';
 
 export const NewsLoadingPrompt = ({ showPlainSpinner }: { showPlainSpinner: boolean }) => {
   return (

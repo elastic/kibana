@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { FtrProviderContext } from '../../api_integration/ftr_provider_context';
+import type { FtrProviderContext } from '../../api_integration/ftr_provider_context';
 import { runPrivilegeTests } from '../privileges_helpers';
 import { setupTestUsers, testUsers } from './test_users';
 

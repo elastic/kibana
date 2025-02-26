@@ -6,18 +6,20 @@
  */
 
 import React, { useEffect, useMemo, useState } from 'react';
-import {
+import type {
   IlmLocatorParams,
   Phases,
   PolicyFromES,
 } from '@kbn/index-lifecycle-management-common-shared';
-import { LocatorPublic } from '@kbn/share-plugin/common';
-import {
+import type { LocatorPublic } from '@kbn/share-plugin/common';
+import type {
   IngestStreamGetResponse,
   IngestStreamLifecycle,
   StreamGetResponse,
   UnwiredStreamGetResponse,
   WiredStreamGetResponse,
+} from '@kbn/streams-schema';
+import {
   getAncestors,
   isIlmLifecycle,
   isUnwiredStreamGetResponse,
@@ -27,6 +29,7 @@ import {
   findInheritingStreams,
   isDslLifecycle,
 } from '@kbn/streams-schema';
+import type { EuiSelectableOption } from '@elastic/eui';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -47,7 +50,6 @@ import {
   EuiPanel,
   EuiPopover,
   EuiSelectable,
-  EuiSelectableOption,
   EuiSpacer,
   EuiSwitch,
   EuiText,

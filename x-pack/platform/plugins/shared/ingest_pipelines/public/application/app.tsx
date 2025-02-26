@@ -7,19 +7,19 @@
 
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiPageTemplate } from '@elastic/eui';
-import React, { FunctionComponent } from 'react';
+import type { FunctionComponent } from 'react';
+import React from 'react';
 import { Router, Routes, Route } from '@kbn/shared-ux-router';
 
-import { useKibana } from '../shared_imports';
-
-import { APP_CLUSTER_REQUIRED_PRIVILEGES } from '../../common/constants';
-
 import {
+  useKibana,
   SectionError,
   useAuthorizationContext,
   WithPrivileges,
   SectionLoading,
 } from '../shared_imports';
+
+import { APP_CLUSTER_REQUIRED_PRIVILEGES } from '../../common/constants';
 
 import {
   PipelinesList,

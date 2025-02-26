@@ -11,8 +11,8 @@ import React, { Component } from 'react';
 import { EuiButton, EuiButtonEmpty, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { CONTROL_TYPES } from '../../editor_utils';
-import { ListControl } from '../../control/list_control_factory';
-import { RangeControl } from '../../control/range_control_factory';
+import type { ListControl } from '../../control/list_control_factory';
+import type { RangeControl } from '../../control/range_control_factory';
 import { ListControl as ListControlComponent } from './list_control';
 import { RangeControl as RangeControlComponent } from './range_control';
 

@@ -9,27 +9,28 @@
 
 import { i18n } from '@kbn/i18n';
 import { memoize } from 'lodash';
-import { SuggestionRawDefinition } from './types';
+import type { SuggestionRawDefinition } from './types';
 import { groupingFunctionDefinitions } from '../definitions/generated/grouping_functions';
 import { aggFunctionDefinitions } from '../definitions/generated/aggregation_functions';
 import { scalarFunctionDefinitions } from '../definitions/generated/scalar_functions';
 import { getFunctionSignatures } from '../definitions/helpers';
 import { timeUnitsToSuggest } from '../definitions/literals';
-import {
+import type {
   FunctionDefinition,
   CommandOptionsDefinition,
   CommandModeDefinition,
   FunctionParameterType,
-  FunctionDefinitionTypes,
 } from '../definitions/types';
+import { FunctionDefinitionTypes } from '../definitions/types';
 import { shouldBeQuotedSource, shouldBeQuotedText } from '../shared/helpers';
 import { buildFunctionDocumentation } from './documentation_util';
 import { DOUBLE_BACKTICK, SINGLE_TICK_REGEX } from '../shared/constants';
-import { ESQLRealField } from '../validation/types';
+import type { ESQLRealField } from '../validation/types';
 import { isNumericType } from '../shared/esql_types';
 import { getTestFunctions } from '../shared/test_functions';
 import { operatorsDefinitions } from '../definitions/all_operators';
-import { ESQLVariableType, ESQLControlVariable } from '../shared/types';
+import type { ESQLControlVariable } from '../shared/types';
+import { ESQLVariableType } from '../shared/types';
 
 const techPreviewLabel = i18n.translate(
   'kbn-esql-validation-autocomplete.esql.autocomplete.techPreviewLabel',

@@ -9,10 +9,11 @@
 
 import { readFileSync } from 'fs';
 import type { Duration } from 'moment';
-import { schema, TypeOf } from '@kbn/config-schema';
-import { ServiceConfigDescriptor } from '@kbn/core-base-server-internal';
-import { IConfigService } from '@kbn/config';
-import { Logger } from '@kbn/logging';
+import type { TypeOf } from '@kbn/config-schema';
+import { schema } from '@kbn/config-schema';
+import type { ServiceConfigDescriptor } from '@kbn/core-base-server-internal';
+import type { IConfigService } from '@kbn/config';
+import type { Logger } from '@kbn/logging';
 
 const hostURISchema = schema.uri({ scheme: ['http', 'https'] });
 

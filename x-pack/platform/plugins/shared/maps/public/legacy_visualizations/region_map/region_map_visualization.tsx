@@ -8,9 +8,8 @@
 import React, { useMemo } from 'react';
 import useMountedState from 'react-use/lib/useMountedState';
 import { first } from 'rxjs';
-import type { Filter } from '@kbn/es-query';
-import type { Query, TimeRange } from '@kbn/es-query';
-import { RegionMapVisConfig } from './types';
+import type { Filter, Query, TimeRange } from '@kbn/es-query';
+import type { RegionMapVisConfig } from './types';
 import { MapRenderer } from '../../react_embeddable/map_renderer/map_renderer';
 import { createRegionMapLayerDescriptor } from '../../classes/layers/create_region_map_layer_descriptor';
 

@@ -6,7 +6,7 @@
  */
 
 import { ML_JOB_FIELD_TYPES } from '@kbn/ml-anomaly-utils';
-import { TestData } from './types';
+import type { TestData } from './types';
 
 export const farequoteDataViewTestData: TestData = {
   suiteTitle: 'farequote index pattern',

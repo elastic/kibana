@@ -5,8 +5,11 @@
  * 2.0.
  */
 
-import { IndicesIndexState, IndicesStatsIndicesStats } from '@elastic/elasticsearch/lib/api/types';
-import { Index } from '../..';
+import type {
+  IndicesIndexState,
+  IndicesStatsIndicesStats,
+} from '@elastic/elasticsearch/lib/api/types';
+import type { Index } from '../..';
 
 // fixtures return minimal index properties needed for API tests
 

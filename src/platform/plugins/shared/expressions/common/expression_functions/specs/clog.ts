@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ExpressionFunctionDefinition } from '../types';
+import type { ExpressionFunctionDefinition } from '../types';
 
 export type ExpressionFunctionClog = ExpressionFunctionDefinition<'clog', unknown, {}, unknown>;
 

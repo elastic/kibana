@@ -7,9 +7,8 @@
 
 import React, { useEffect } from 'react';
 import { usePerformanceContext } from '@kbn/ebt-tools';
-import { EuiBasicTable } from '@elastic/eui';
+import { EuiBasicTable, EuiEmptyPrompt } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { EuiEmptyPrompt } from '@elastic/eui';
 import type { HostNodeRow } from '../hooks/use_hosts_table';
 import { useHostsTableContext } from '../hooks/use_hosts_table';
 import { useHostsViewContext } from '../hooks/use_hosts_view';

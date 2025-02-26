@@ -13,7 +13,7 @@ import Path from 'path';
 
 import { REPO_ROOT } from '@kbn/repo-info';
 import { asyncMapWithLimit } from '@kbn/std';
-import { RepoPath } from '@kbn/repo-path';
+import type { RepoPath } from '@kbn/repo-path';
 import { type PluginPackageManifest } from '@kbn/repo-packages';
 
 function isObj(v: unknown): v is Record<string, unknown> {

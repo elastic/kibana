@@ -23,14 +23,15 @@ import type {
   SavedObjectsBulkUpdateObject,
   SavedObjectsBulkUpdateOptions,
 } from '@kbn/core-saved-objects-api-server';
-import { type SavedObjectReference } from '@kbn/core-saved-objects-server';
+import type {
+  ISavedObjectsSecurityExtension,
+  SavedObjectReference,
+} from '@kbn/core-saved-objects-server';
 import { ALL_NAMESPACES_STRING } from '@kbn/core-saved-objects-utils-server';
 import { SavedObjectsRepository } from '../repository';
 import { loggerMock } from '@kbn/logging-mocks';
-import {
-  SavedObjectsSerializer,
-  encodeHitVersion,
-} from '@kbn/core-saved-objects-base-server-internal';
+import type { SavedObjectsSerializer } from '@kbn/core-saved-objects-base-server-internal';
+import { encodeHitVersion } from '@kbn/core-saved-objects-base-server-internal';
 import { kibanaMigratorMock } from '../../mocks';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 
@@ -54,7 +55,6 @@ import {
   createBadRequestErrorPayload,
   expectUpdateResult,
 } from '../../test_helpers/repository.test.common';
-import type { ISavedObjectsSecurityExtension } from '@kbn/core-saved-objects-server';
 import { savedObjectsExtensionsMock } from '../../mocks/saved_objects_extensions.mock';
 
 interface ExpectedErrorResult {

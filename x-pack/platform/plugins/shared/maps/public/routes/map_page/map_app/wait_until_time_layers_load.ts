@@ -5,10 +5,9 @@
  * 2.0.
  */
 
-import { from } from 'rxjs';
-import { debounceTime, first, map, switchMap } from 'rxjs';
+import { from, debounceTime, first, map, switchMap } from 'rxjs';
 import { getLayerList, getMapZoom } from '../../../selectors/map_selectors';
-import { MapStore } from '../../../reducers/store';
+import type { MapStore } from '../../../reducers/store';
 
 export function waitUntilTimeLayersLoad$(store: MapStore) {
   const reduxState$ = from(store);

@@ -16,7 +16,7 @@ import {
   mockAnonymizedAlertsReplacements,
 } from '../../../../evaluation/__mocks__/mock_anonymized_alerts';
 import { getChainWithFormatInstructions } from '../helpers/get_chain_with_format_instructions';
-import { GraphState } from '../../types';
+import type { GraphState } from '../../types';
 import {
   getParsedAttackDiscoveriesMock,
   getRawAttackDiscoveriesMock,

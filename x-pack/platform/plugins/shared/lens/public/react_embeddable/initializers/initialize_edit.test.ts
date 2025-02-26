@@ -14,8 +14,8 @@ import {
   makeEmbeddableServices,
 } from '../mocks';
 import { BehaviorSubject } from 'rxjs';
-import { ApplicationStart } from '@kbn/core/public';
-import { LensEmbeddableStartServices } from '../types';
+import type { ApplicationStart } from '@kbn/core/public';
+import type { LensEmbeddableStartServices } from '../types';
 
 function createEditApi(servicesOverrides: Partial<LensEmbeddableStartServices> = {}) {
   const internalApi = getLensInternalApiMock();

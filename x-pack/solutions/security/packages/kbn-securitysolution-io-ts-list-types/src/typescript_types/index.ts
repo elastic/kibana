@@ -8,18 +8,18 @@
 import type { HttpStart } from '@kbn/core-http-browser';
 import type { NotificationsStart } from '@kbn/core-notifications-browser';
 import type { Filter } from '@kbn/es-query';
-import { NamespaceType } from '../common/default_namespace';
-import { ExceptionListType, ExceptionListTypeEnum } from '../common/exception_list';
-import { Page } from '../common/page';
-import { PerPage } from '../common/per_page';
-import { TotalOrUndefined } from '../common/total';
-import { CreateExceptionListItemSchema } from '../request/create_exception_list_item_schema';
-import { CreateExceptionListSchema } from '../request/create_exception_list_schema';
-import { ExceptionListId } from '../request/get_exception_filter_schema';
-import { UpdateExceptionListItemSchema } from '../request/update_exception_list_item_schema';
-import { UpdateExceptionListSchema } from '../request/update_exception_list_schema';
-import { ExceptionListItemSchema } from '../response/exception_list_item_schema';
-import { ExceptionListSchema } from '../response/exception_list_schema';
+import type { NamespaceType } from '../common/default_namespace';
+import type { ExceptionListType, ExceptionListTypeEnum } from '../common/exception_list';
+import type { Page } from '../common/page';
+import type { PerPage } from '../common/per_page';
+import type { TotalOrUndefined } from '../common/total';
+import type { CreateExceptionListItemSchema } from '../request/create_exception_list_item_schema';
+import type { CreateExceptionListSchema } from '../request/create_exception_list_schema';
+import type { ExceptionListId } from '../request/get_exception_filter_schema';
+import type { UpdateExceptionListItemSchema } from '../request/update_exception_list_item_schema';
+import type { UpdateExceptionListSchema } from '../request/update_exception_list_schema';
+import type { ExceptionListItemSchema } from '../response/exception_list_item_schema';
+import type { ExceptionListSchema } from '../response/exception_list_schema';
 
 interface BaseParams {
   http: HttpStart;

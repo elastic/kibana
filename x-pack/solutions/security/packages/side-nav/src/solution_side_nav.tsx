@@ -25,7 +25,7 @@ import { i18n } from '@kbn/i18n';
 import type { SeparatorLinkCategory } from '@kbn/security-solution-navigation';
 import { SolutionSideNavPanel } from './solution_side_nav_panel';
 import { SolutionSideNavItemPosition } from './types';
-import type { SolutionSideNavItem, Tracker } from './types';
+import type { SolutionSideNavItem as SolutionSideNavItemType, Tracker } from './types';
 import { TELEMETRY_EVENT } from './telemetry/const';
 import { TelemetryContextProvider, useTelemetryContext } from './telemetry/telemetry_context';
 import { SolutionSideNavItemStyles } from './solution_side_nav.styles';
@@ -36,7 +36,7 @@ export const TOGGLE_PANEL_LABEL = i18n.translate('securitySolutionPackages.sideN
 
 export interface SolutionSideNavProps {
   /** All the items to display in the side navigation */
-  items: SolutionSideNavItem[];
+  items: SolutionSideNavItemType[];
   /** The id of the selected item to highlight. It only affects the top level items rendered in the main panel */
   selectedId: string;
   /** The categories to group and separate the main items. Ignores `position: 'bottom'` items */
@@ -143,7 +143,7 @@ export const SolutionSideNav: React.FC<SolutionSideNavProps> = React.memo(functi
 });
 
 interface SolutionSideNavItemsProps {
-  items: SolutionSideNavItem[];
+  items: SolutionSideNavItemType[];
   selectedId: string;
   activePanelNavId: ActivePanelNav;
   isMobileSize: boolean;
@@ -184,13 +184,16 @@ const SolutionSideNavItems: React.FC<SolutionSideNavItemsProps> = React.memo(
     return (
       <>
         {categories?.map((category, categoryIndex) => {
-          const categoryItems = category.linkIds.reduce<SolutionSideNavItem[]>((acc, linkId) => {
-            const link = items.find((item) => item.id === linkId);
-            if (link) {
-              acc.push(link);
-            }
-            return acc;
-          }, []);
+          const categoryItems = category.linkIds.reduce<SolutionSideNavItemType[]>(
+            (acc, linkId) => {
+              const link = items.find((item) => item.id === linkId);
+              if (link) {
+                acc.push(link);
+              }
+              return acc;
+            },
+            []
+          );
 
           if (!categoryItems.length) {
             return null;
@@ -219,7 +222,7 @@ const SolutionSideNavItems: React.FC<SolutionSideNavItemsProps> = React.memo(
 );
 
 interface SolutionSideNavItemProps {
-  item: SolutionSideNavItem;
+  item: SolutionSideNavItemType;
   isSelected: boolean;
   isActive: boolean;
   onOpenPanelNav: (id: string) => void;
@@ -318,7 +321,7 @@ const SolutionSideNavItem: React.FC<SolutionSideNavItemProps> = React.memo(
 );
 
 interface SolutionSideNavPanelsProps {
-  items: SolutionSideNavItem[];
+  items: SolutionSideNavItemType[];
   activePanelNavId: ActivePanelNav;
   onClose: () => void;
   onOutsideClick: () => void;
@@ -338,7 +341,7 @@ const SolutionSideNavPanels: React.FC<SolutionSideNavPanelsProps> = React.memo(
     bottomOffset,
     topOffset,
   }) {
-    const activePanelNavItem = useMemo<SolutionSideNavItem | undefined>(
+    const activePanelNavItem = useMemo<SolutionSideNavItemType | undefined>(
       () => items.find(({ id }) => id === activePanelNavId),
       [items, activePanelNavId]
     );

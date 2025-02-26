@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { FC, useState, useContext, useEffect } from 'react';
+import type { FC } from 'react';
+import React, { useState, useContext, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -14,7 +15,7 @@ import { PageManager } from '../page_manager';
 import { Expression } from '../expression';
 import { Tray } from './tray';
 
-import { CanvasElement } from '../../../types';
+import type { CanvasElement } from '../../../types';
 import { RoutingButtonIcon } from '../routing';
 
 import { WorkpadRoutingContext } from '../../routes/workpad';

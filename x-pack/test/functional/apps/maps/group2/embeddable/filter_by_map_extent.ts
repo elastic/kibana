@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { FtrProviderContext } from '../../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../../ftr_provider_context';
 
 const FILTER_BY_MAP_EXTENT_DATA_TEST_SUBJ = 'embeddablePanelAction-FILTER_BY_MAP_EXTENT';
 

@@ -10,8 +10,7 @@ import { EuiPage, EuiPageBody, EuiSpacer } from '@elastic/eui';
 
 import type { HeaderProps } from './header';
 import { Header } from './header';
-import { contentCss } from './without_header';
-import { pageCss } from './without_header';
+import { contentCss, pageCss } from './without_header';
 
 export interface WithHeaderLayoutProps extends HeaderProps {
   restrictWidth?: number;

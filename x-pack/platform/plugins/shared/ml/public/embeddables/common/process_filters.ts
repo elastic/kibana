@@ -7,8 +7,12 @@
 
 import type { estypes } from '@elastic/elasticsearch';
 import type { AggregateQuery, Filter, Query } from '@kbn/es-query';
-import { isOfAggregateQueryType } from '@kbn/es-query';
-import { fromKueryExpression, luceneStringToDsl, toElasticsearchQuery } from '@kbn/es-query';
+import {
+  isOfAggregateQueryType,
+  fromKueryExpression,
+  luceneStringToDsl,
+  toElasticsearchQuery,
+} from '@kbn/es-query';
 import { getDefaultQuery } from '@kbn/data-plugin/public';
 import { isDefined } from '@kbn/ml-is-defined';
 

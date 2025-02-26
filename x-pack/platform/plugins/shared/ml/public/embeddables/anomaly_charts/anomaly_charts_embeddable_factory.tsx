@@ -10,16 +10,15 @@ import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import React from 'react';
 import type { StartServicesAccessor } from '@kbn/core/public';
 import type { Observable } from 'rxjs';
-import { Subscription, map } from 'rxjs';
-import { fetch$ } from '@kbn/presentation-publishing';
-import useUnmount from 'react-use/lib/useUnmount';
-import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { Subscription, map, distinctUntilChanged } from 'rxjs';
 import {
+  fetch$,
   apiHasExecutionContext,
   initializeTimeRange,
   initializeTitleManager,
 } from '@kbn/presentation-publishing';
-import { distinctUntilChanged } from 'rxjs';
+import useUnmount from 'react-use/lib/useUnmount';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import fastIsEqual from 'fast-deep-equal';
 import type { ReactEmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import type { TimeRange } from '@kbn/es-query';

@@ -12,11 +12,11 @@ import type {
   LoggerFactory,
   PluginInitializerContext,
 } from '@kbn/core/server';
-import { DeepReadonly } from 'utility-types';
+import type { DeepReadonly } from 'utility-types';
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
-import { FeaturesPluginSetup } from '@kbn/features-plugin/server';
-import { Observable } from 'rxjs';
-import { DataUsageConfigType } from '../config';
+import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
+import type { Observable } from 'rxjs';
+import type { DataUsageConfigType } from '../config';
 
 export interface DataUsageSetupDependencies {
   features: FeaturesPluginSetup;

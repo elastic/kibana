@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { createContext, useContext } from 'react';
-import { DataView } from '@kbn/data-views-plugin/common';
+import type { DataView } from '@kbn/data-views-plugin/common';
 
 interface DataViewContextValue {
   dataView: DataView;

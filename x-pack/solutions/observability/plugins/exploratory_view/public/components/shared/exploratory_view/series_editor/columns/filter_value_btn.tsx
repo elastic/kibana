@@ -11,8 +11,8 @@ import styled from '@emotion/styled';
 import { FieldValueSuggestions } from '@kbn/observability-shared-plugin/public';
 import { useAppDataViewContext } from '../../hooks/use_app_data_view';
 import { useSeriesFilters } from '../../hooks/use_series_filters';
-import { SeriesUrl } from '../../types';
-import { NestedFilterOpen } from './filter_expanded';
+import type { SeriesUrl } from '../../types';
+import type { NestedFilterOpen } from './filter_expanded';
 
 interface Props {
   value: string;

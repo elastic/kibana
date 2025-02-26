@@ -15,7 +15,7 @@ import {
   type DefaultDataControlState,
   type SerializedControlState,
 } from '../../common';
-import { OptionsListControlState } from '../../common/options_list';
+import type { OptionsListControlState } from '../../common/options_list';
 import { mockDataControlState, mockOptionsListControlState } from '../mocks';
 import { removeHideExcludeAndHideExists } from './control_group_migrations';
 import { getDefaultControlGroupState } from './control_group_persistence';

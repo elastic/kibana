@@ -7,7 +7,7 @@
 
 import type { Ast } from '@kbn/interpreter';
 import { Position } from '@elastic/charts';
-import { PaletteOutput, PaletteRegistry } from '@kbn/coloring';
+import type { PaletteOutput, PaletteRegistry } from '@kbn/coloring';
 
 import { buildExpression, buildExpressionFunction } from '@kbn/expressions-plugin/public';
 import type {
@@ -20,13 +20,14 @@ import type {
   LegendDisplay as PartitionVisLegendDisplay,
   WaffleVisExpressionFunctionDefinition,
 } from '@kbn/expression-partition-vis-plugin/common';
-import { ExpressionFunctionTheme } from '@kbn/expressions-plugin/common';
-import { ExpressionFunctionVisDimension } from '@kbn/visualizations-plugin/common';
+import type { ExpressionFunctionTheme } from '@kbn/expressions-plugin/common';
+import type { ExpressionFunctionVisDimension } from '@kbn/visualizations-plugin/common';
 import type { CollapseExpressionFunction } from '../../../common/expressions';
 import type { Operation, DatasourcePublicAPI, DatasourceLayers } from '../../types';
 import { DEFAULT_PERCENT_DECIMALS } from './constants';
 import { getLegendStats } from './render_helpers';
-import { PieLayerState, PieVisualizationState, EmptySizeRatios } from '../../../common/types';
+import type { PieLayerState, PieVisualizationState } from '../../../common/types';
+import { EmptySizeRatios } from '../../../common/types';
 import {
   CategoryDisplay,
   LegendDisplay,

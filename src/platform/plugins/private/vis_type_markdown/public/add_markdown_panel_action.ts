@@ -7,9 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EmbeddableApiContext, apiHasAppContext } from '@kbn/presentation-publishing';
+import type { EmbeddableApiContext } from '@kbn/presentation-publishing';
+import { apiHasAppContext } from '@kbn/presentation-publishing';
 import { ADD_PANEL_ANNOTATION_GROUP } from '@kbn/embeddable-plugin/public';
-import { MarkdownStartDependencies } from './plugin';
+import type { MarkdownStartDependencies } from './plugin';
 import { markdownVisType } from './markdown_vis';
 
 export function getAddMarkdownPanelAction(deps: MarkdownStartDependencies) {

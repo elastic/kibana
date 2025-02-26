@@ -46,14 +46,12 @@ import {
   usePermissionCheckQuery,
   useIntegrationsStateContext,
   useGetSettingsQuery,
-} from '../../../../hooks';
-import { INTEGRATIONS_ROUTING_PATHS } from '../../../../constants';
-import {
   useGetPackageInfoByKeyQuery,
   useLink,
   useAgentPolicyContext,
   useIsGuidedOnboardingActive,
 } from '../../../../hooks';
+import { INTEGRATIONS_ROUTING_PATHS } from '../../../../constants';
 import { pkgKeyFromPackageInfo } from '../../../../services';
 import type { PackageInfo } from '../../../../types';
 import { InstallStatus } from '../../../../types';

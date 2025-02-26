@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { GuidedOnboardingPluginStart } from '@kbn/guided-onboarding-plugin/public/types';
+import type { GuidedOnboardingPluginStart } from '@kbn/guided-onboarding-plugin/public/types';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface GuidedOnboardingExamplePluginSetup {}

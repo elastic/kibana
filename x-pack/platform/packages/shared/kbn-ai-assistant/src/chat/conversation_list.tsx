@@ -20,7 +20,8 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/css';
 import { i18n } from '@kbn/i18n';
-import React, { MouseEvent } from 'react';
+import type { MouseEvent } from 'react';
+import React from 'react';
 import type { UseConversationListResult } from '../hooks/use_conversation_list';
 import { useConfirmModal, useConversationsByDate } from '../hooks';
 import { DATE_CATEGORY_LABELS } from '../i18n';

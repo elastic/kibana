@@ -6,8 +6,16 @@
  */
 
 import { useState, useMemo, useEffect } from 'react';
-import { combineLatest, tap, debounceTime, switchMap, skipWhile, of } from 'rxjs';
-import { Subject, catchError } from 'rxjs';
+import {
+  combineLatest,
+  tap,
+  debounceTime,
+  switchMap,
+  skipWhile,
+  of,
+  Subject,
+  catchError,
+} from 'rxjs';
 import type { InfluencersFilterQuery } from '@kbn/ml-anomaly-utils';
 import type { CoreStart } from '@kbn/core/public';
 import { fetch$ } from '@kbn/presentation-publishing';

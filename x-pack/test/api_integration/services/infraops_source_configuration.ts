@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import {
+import type {
   PartialMetricsSourceConfiguration,
   MetricsSourceConfigurationResponse,
 } from '@kbn/infra-plugin/common/metrics_sources';
-import { FtrProviderContext } from '../ftr_provider_context';
+import type { FtrProviderContext } from '../ftr_provider_context';
 
 export function InfraOpsSourceConfigurationProvider({ getService }: FtrProviderContext) {
   const log = getService('log');

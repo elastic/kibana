@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/server';
-import {
+import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/server';
+import type {
   AdvancedUiActionsSetup,
   AdvancedUiActionsStart,
 } from '@kbn/ui-actions-enhanced-plugin/server';

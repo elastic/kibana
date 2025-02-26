@@ -7,16 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import {
-  Schema,
-  z,
-  ZodAny,
-  ZodEffects,
-  ZodFirstPartySchemaTypes,
-  ZodFirstPartyTypeKind,
-  ZodIssueCode,
-  ZodTypeAny,
-} from '@kbn/zod';
+import type { Schema, ZodAny, ZodEffects, ZodFirstPartySchemaTypes, ZodTypeAny } from '@kbn/zod';
+import { z, ZodFirstPartyTypeKind, ZodIssueCode } from '@kbn/zod';
 import { difference, isPlainObject, forEach, isArray, castArray } from 'lodash';
 
 /**

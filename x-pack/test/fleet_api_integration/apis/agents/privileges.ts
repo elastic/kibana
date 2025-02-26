@@ -15,7 +15,7 @@ import {
   FILE_STORAGE_METADATA_AGENT_INDEX,
 } from '@kbn/fleet-plugin/server/constants';
 
-import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
+import type { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { generateAgent } from '../../helpers';
 import { runPrivilegeTests } from '../../privileges_helpers';
 import { testUsers } from '../test_users';

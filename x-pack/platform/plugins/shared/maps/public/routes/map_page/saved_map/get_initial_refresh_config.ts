@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { GlobalQueryStateFromUrl } from '@kbn/data-plugin/public';
+import type { GlobalQueryStateFromUrl } from '@kbn/data-plugin/public';
 import { UI_SETTINGS } from '@kbn/data-plugin/public';
 import { getUiSettings } from '../../../kibana_services';
-import { ParsedMapStateJSON } from './types';
+import type { ParsedMapStateJSON } from './types';
 
 export function getInitialRefreshConfig({
   mapState,

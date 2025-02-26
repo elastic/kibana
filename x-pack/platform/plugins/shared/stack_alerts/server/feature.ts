@@ -6,15 +6,15 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { KibanaFeatureConfig } from '@kbn/features-plugin/common';
+import type { KibanaFeatureConfig } from '@kbn/features-plugin/common';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
 import { TRANSFORM_RULE_TYPE } from '@kbn/transform-plugin/common';
 import {
   ML_ANOMALY_DETECTION_RULE_TYPE_ID,
   OBSERVABILITY_THRESHOLD_RULE_TYPE_ID,
   STACK_ALERTS_FEATURE_ID,
+  ES_QUERY_ID as ElasticsearchQuery,
 } from '@kbn/rule-data-utils';
-import { ES_QUERY_ID as ElasticsearchQuery } from '@kbn/rule-data-utils';
 import { ALERTING_FEATURE_ID } from '@kbn/alerting-plugin/common';
 import { KibanaFeatureScope } from '@kbn/features-plugin/common';
 import { ID as IndexThreshold } from './rule_types/index_threshold/rule_type';

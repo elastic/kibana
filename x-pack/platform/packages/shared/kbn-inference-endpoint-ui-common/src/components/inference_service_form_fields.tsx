@@ -13,9 +13,9 @@ import {
   useFormData,
 } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { fieldValidators } from '@kbn/es-ui-shared-plugin/static/forms/helpers';
+import type { EuiFieldTextProps } from '@elastic/eui';
 import {
   EuiFieldText,
-  EuiFieldTextProps,
   EuiFormControlLayout,
   EuiFormRow,
   EuiHorizontalRule,
@@ -24,16 +24,17 @@ import {
   keys,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { ConnectorFormSchema } from '@kbn/triggers-actions-ui-plugin/public';
+import type { ConnectorFormSchema } from '@kbn/triggers-actions-ui-plugin/public';
 
-import { HttpSetup, IToasts } from '@kbn/core/public';
+import type { HttpSetup, IToasts } from '@kbn/core/public';
 import * as LABELS from '../translations';
-import { Config, ConfigEntryView, InferenceProvider, Secrets } from '../types/types';
+import type { Config, ConfigEntryView, InferenceProvider, Secrets } from '../types/types';
 import { SERVICE_PROVIDERS } from './providers/render_service_provider/service_provider';
-import { DEFAULT_TASK_TYPE, ServiceProviderKeys } from '../constants';
+import type { ServiceProviderKeys } from '../constants';
+import { DEFAULT_TASK_TYPE } from '../constants';
 import { SelectableProvider } from './providers/selectable';
+import type { TaskTypeOption } from '../utils/helpers';
 import {
-  TaskTypeOption,
   generateInferenceEndpointId,
   getTaskTypeOptions,
   mapProviderFields,

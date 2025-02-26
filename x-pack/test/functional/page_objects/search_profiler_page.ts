@@ -6,7 +6,7 @@
  */
 
 import { compressToEncodedURIComponent } from 'lz-string';
-import { FtrProviderContext } from '../ftr_provider_context';
+import type { FtrProviderContext } from '../ftr_provider_context';
 
 export function SearchProfilerPageProvider({ getService }: FtrProviderContext) {
   const find = getService('find');

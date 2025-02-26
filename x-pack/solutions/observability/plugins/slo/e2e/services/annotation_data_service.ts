@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { FtrProviderContext } from '@kbn/ftr-common-functional-services';
-import { KbnClient } from '@kbn/test';
+import type { FtrProviderContext } from '@kbn/ftr-common-functional-services';
+import type { KbnClient } from '@kbn/test';
 
 export class AnnotationDataService {
   kibanaUrl: string;

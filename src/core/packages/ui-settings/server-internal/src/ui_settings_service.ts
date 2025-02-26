@@ -7,11 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { firstValueFrom, Observable } from 'rxjs';
-import { mapToObject } from '@kbn/std';
+import type { Observable } from 'rxjs';
+import { firstValueFrom } from 'rxjs';
+import { mapToObject, stripVersionQualifier } from '@kbn/std';
 
 import type { Logger } from '@kbn/logging';
-import { stripVersionQualifier } from '@kbn/std';
 import type { CoreContext, CoreService } from '@kbn/core-base-server-internal';
 import type { InternalHttpServiceSetup } from '@kbn/core-http-server-internal';
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
@@ -22,8 +22,10 @@ import type {
   UiSettingsParams,
   UiSettingsScope,
 } from '@kbn/core-ui-settings-common';
-import { UiSettingsConfigType, uiSettingsConfig as uiConfigDefinition } from './ui_settings_config';
-import { UiSettingsClient, UiSettingsClientFactory, UiSettingsGlobalClient } from './clients';
+import type { UiSettingsConfigType } from './ui_settings_config';
+import { uiSettingsConfig as uiConfigDefinition } from './ui_settings_config';
+import type { UiSettingsClient, UiSettingsGlobalClient } from './clients';
+import { UiSettingsClientFactory } from './clients';
 import type {
   InternalUiSettingsServicePreboot,
   InternalUiSettingsServiceSetup,

@@ -8,7 +8,7 @@
  */
 
 import { ContentMagementWrapper } from './content_management_wrapper';
-import { ContentClient } from '@kbn/content-management-plugin/public';
+import type { ContentClient } from '@kbn/content-management-plugin/public';
 import { DataViewSavedObjectConflictError } from '../common';
 
 describe('ContentMagementWrapper', () => {

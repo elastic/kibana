@@ -7,8 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { BehaviorSubject, lastValueFrom } from 'rxjs';
-import { take, map, takeLast } from 'rxjs';
+import { BehaviorSubject, lastValueFrom, take, map, takeLast } from 'rxjs';
 import { type App, AppStatus } from '@kbn/core-application-browser';
 import { NavLinksService } from './nav_links_service';
 

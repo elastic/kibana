@@ -19,26 +19,25 @@ import type {
 import { EuiDataGrid, EuiProgress } from '@elastic/eui';
 import { getOr } from 'lodash/fp';
 import memoizeOne from 'memoize-one';
-import React, { useCallback, useContext, useEffect, useMemo, useRef, ComponentType } from 'react';
+import type { ComponentType } from 'react';
+import React, { useCallback, useContext, useEffect, useMemo, useRef } from 'react';
 import { useDispatch } from 'react-redux';
 
 import styled, { ThemeContext } from 'styled-components';
 import type { EuiTheme } from '@kbn/kibana-react-plugin/common';
 import { i18n } from '@kbn/i18n';
-import {
+import type {
   BrowserFields,
   ColumnHeaderOptions,
   DeprecatedCellValueElementProps,
   DeprecatedRowRenderer,
   TimelineItem,
 } from '@kbn/timelines-plugin/common';
-import {
-  useDataGridColumnsCellActions,
-  UseDataGridColumnsCellActionsProps,
-} from '@kbn/cell-actions';
-import { FieldSpec } from '@kbn/data-views-plugin/common';
+import type { UseDataGridColumnsCellActionsProps } from '@kbn/cell-actions';
+import { useDataGridColumnsCellActions } from '@kbn/cell-actions';
+import type { FieldSpec } from '@kbn/data-views-plugin/common';
 import { FieldBrowser, type FieldBrowserOptions } from '@kbn/response-ops-alerts-fields-browser';
-import { DataTableModel, DataTableState } from '../../store/data_table/types';
+import type { DataTableModel, DataTableState } from '../../store/data_table/types';
 
 import { getColumnHeader, getColumnHeaders } from './column_headers/helpers';
 import { addBuildingBlockStyle, mapSortDirectionToDirection, mapSortingColumns } from './helpers';

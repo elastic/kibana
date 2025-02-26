@@ -5,15 +5,16 @@
  * 2.0.
  */
 
-import { ServiceParams, SubActionConnector } from '@kbn/actions-plugin/server';
+import type { ServiceParams } from '@kbn/actions-plugin/server';
+import { SubActionConnector } from '@kbn/actions-plugin/server';
 import aws from 'aws4';
 import { BedrockRuntimeClient } from '@aws-sdk/client-bedrock-runtime';
 import { SmithyMessageDecoderStream } from '@smithy/eventstream-codec';
-import { AxiosError, Method } from 'axios';
-import { IncomingMessage } from 'http';
+import type { AxiosError, Method } from 'axios';
+import type { IncomingMessage } from 'http';
 import { PassThrough } from 'stream';
-import { SubActionRequestParams } from '@kbn/actions-plugin/server/sub_action_framework/types';
-import { ConnectorUsageCollector } from '@kbn/actions-plugin/server/types';
+import type { SubActionRequestParams } from '@kbn/actions-plugin/server/sub_action_framework/types';
+import type { ConnectorUsageCollector } from '@kbn/actions-plugin/server/types';
 import { initDashboard } from '../lib/gen_ai/create_gen_ai_dashboard';
 import {
   RunActionParamsSchema,
@@ -24,8 +25,9 @@ import {
   RunActionResponseSchema,
   RunApiLatestResponseSchema,
   BedrockClientSendParamsSchema,
+  DashboardActionParamsSchema,
 } from '../../../common/bedrock/schema';
-import {
+import type {
   Config,
   Secrets,
   RunActionParams,
@@ -39,18 +41,15 @@ import {
   BedrockToolChoice,
   ConverseActionParams,
   ConverseActionResponse,
+  DashboardActionParams,
+  DashboardActionResponse,
+  StreamingResponse,
 } from '../../../common/bedrock/types';
 import {
   SUB_ACTION,
   DEFAULT_TOKEN_LIMIT,
   DEFAULT_TIMEOUT_MS,
 } from '../../../common/bedrock/constants';
-import {
-  DashboardActionParams,
-  DashboardActionResponse,
-  StreamingResponse,
-} from '../../../common/bedrock/types';
-import { DashboardActionParamsSchema } from '../../../common/bedrock/schema';
 
 interface SignedRequest {
   host: string;

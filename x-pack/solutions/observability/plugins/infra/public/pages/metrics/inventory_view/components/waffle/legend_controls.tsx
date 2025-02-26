@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { EuiSwitchEvent } from '@elastic/eui';
+import type { EuiSwitchEvent, EuiRangeProps, EuiSelectProps } from '@elastic/eui';
 import {
   EuiButtonEmpty,
   EuiButton,
@@ -28,7 +28,6 @@ import styled from '@emotion/styled';
 import type { SyntheticEvent } from 'react';
 import React, { useState, useCallback, useEffect } from 'react';
 import { first, last } from 'lodash';
-import type { EuiRangeProps, EuiSelectProps } from '@elastic/eui';
 import type { WaffleLegendOptions } from '../../hooks/use_waffle_options';
 import {
   type InfraWaffleMapBounds,

@@ -7,10 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { CoreSetup, PluginConfigDescriptor, PluginInitializerContext } from '@kbn/core/server';
+import type { CoreSetup, PluginConfigDescriptor, PluginInitializerContext } from '@kbn/core/server';
 import type { VisualizationsServerSetup } from '@kbn/visualizations-plugin/server';
 
-import { configSchema, MetricConfig } from './config';
+import type { MetricConfig } from './config';
+import { configSchema } from './config';
 
 export const config: PluginConfigDescriptor<MetricConfig> = {
   exposeToBrowser: {

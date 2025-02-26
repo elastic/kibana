@@ -8,8 +8,11 @@
 import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 
 import { createAttackDiscovery } from './create_attack_discovery';
-import { AttackDiscoveryCreateProps, AttackDiscoveryResponse } from '@kbn/elastic-assistant-common';
-import { AuthenticatedUser } from '@kbn/core-security-common';
+import type {
+  AttackDiscoveryCreateProps,
+  AttackDiscoveryResponse,
+} from '@kbn/elastic-assistant-common';
+import type { AuthenticatedUser } from '@kbn/core-security-common';
 import { getAttackDiscovery } from '../get_attack_discovery/get_attack_discovery';
 import { loggerMock } from '@kbn/logging-mocks';
 const mockEsClient = elasticsearchServiceMock.createElasticsearchClient();

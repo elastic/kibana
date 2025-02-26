@@ -7,7 +7,7 @@
 
 import { newContentReferencesStore } from './content_references_store';
 import { securityAlertsPageReference } from '../references';
-import { ContentReferencesStore } from '../types';
+import type { ContentReferencesStore } from '../types';
 
 describe('newContentReferencesStore', () => {
   let contentReferencesStore: ContentReferencesStore;

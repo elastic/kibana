@@ -5,10 +5,9 @@
  * 2.0.
  */
 import type { Capabilities } from '@kbn/core-capabilities-common';
-import type { RuleType, RuleTypeModel } from '@kbn/triggers-actions-ui-plugin/public';
+import type { RuleType, RuleTypeModel, Rule } from '@kbn/triggers-actions-ui-plugin/public';
 import type { RecursiveReadonly } from '@kbn/utility-types';
-import type { Rule } from '@kbn/triggers-actions-ui-plugin/public';
-import { TypeRegistry } from '@kbn/triggers-actions-ui-plugin/public/application/type_registry';
+import type { TypeRegistry } from '@kbn/triggers-actions-ui-plugin/public/application/type_registry';
 
 interface Props {
   capabilities: RecursiveReadonly<Capabilities>;

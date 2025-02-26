@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import { IScopedClusterClient } from '@kbn/core/server';
+import type { IScopedClusterClient } from '@kbn/core/server';
 
+import type { Connector } from '@kbn/search-connectors';
 import {
   createConnector,
-  Connector,
   ConnectorStatus,
   deleteConnectorById,
+  fetchConnectorByIndexName,
+  NATIVE_CONNECTOR_DEFINITIONS,
 } from '@kbn/search-connectors';
-
-import { fetchConnectorByIndexName, NATIVE_CONNECTOR_DEFINITIONS } from '@kbn/search-connectors';
 
 import { ENTERPRISE_SEARCH_CONNECTOR_CRAWLER_SERVICE_TYPE } from '../../../common/constants';
 

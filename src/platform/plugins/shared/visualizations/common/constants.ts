@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { LegendValue } from '@elastic/charts';
+import type { LegendValue } from '@elastic/charts';
 import { METRIC_TYPES, BUCKET_TYPES } from '@kbn/data-plugin/common';
 
 export const SAVED_OBJECTS_LIMIT_SETTING = 'savedObjects:listingLimit';

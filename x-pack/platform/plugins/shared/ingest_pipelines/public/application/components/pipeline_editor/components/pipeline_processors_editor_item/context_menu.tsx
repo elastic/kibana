@@ -6,7 +6,8 @@
  */
 
 import classNames from 'classnames';
-import React, { FunctionComponent, useState } from 'react';
+import type { FunctionComponent } from 'react';
+import React, { useState } from 'react';
 
 import { EuiContextMenuItem, EuiContextMenuPanel, EuiPopover, EuiButtonIcon } from '@elastic/eui';
 

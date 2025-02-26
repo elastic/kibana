@@ -6,7 +6,7 @@
  */
 
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { ObservabilityOnboardingAppServices } from '..';
+import type { ObservabilityOnboardingAppServices } from '..';
 
 export function useKibanaNavigation() {
   const {

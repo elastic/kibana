@@ -11,8 +11,8 @@ import {
   RuleTranslationResult,
   SiemMigrationStatus,
 } from '@kbn/security-solution-plugin/common/siem_migrations/constants';
+import type { RuleMigrationDocument } from '../../utils';
 import {
-  RuleMigrationDocument,
   createMigrationRules,
   defaultElasticRule,
   defaultOriginalRule,
@@ -21,7 +21,7 @@ import {
   getMigrationRuleDocuments,
   migrationRulesRouteHelpersFactory,
 } from '../../utils';
-import { FtrProviderContext } from '../../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../../ftr_provider_context';
 
 export default ({ getService }: FtrProviderContext) => {
   const es = getService('es');

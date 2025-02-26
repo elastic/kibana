@@ -10,7 +10,7 @@
 import { has } from 'lodash';
 
 import { injectSearchSourceReferences } from '@kbn/data-plugin/public';
-import { Filter, Query } from '@kbn/es-query';
+import type { Filter, Query } from '@kbn/es-query';
 import { SavedObjectNotFound } from '@kbn/kibana-utils-plugin/public';
 
 import { cleanFiltersForSerialize } from '../../../utils/clean_filters_for_serialize';

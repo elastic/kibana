@@ -7,8 +7,11 @@
 
 import type { ToolingLog } from '@kbn/tooling-log';
 import type SuperTest from 'supertest';
-import type { CreateExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
-import type { ListArray, NonEmptyEntriesArray } from '@kbn/securitysolution-io-ts-list-types';
+import type {
+  CreateExceptionListItemSchema,
+  ListArray,
+  NonEmptyEntriesArray,
+} from '@kbn/securitysolution-io-ts-list-types';
 
 import { EXCEPTION_LIST_ITEM_URL } from '@kbn/securitysolution-list-constants';
 import { createExceptionList } from './create_exception_list';

@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { Config, FtrConfigProviderContext } from '@kbn/test';
-import { UrlObject } from 'url';
-import { ObservabilityAIAssistantFtrConfigName } from '../configs';
+import type { Config, FtrConfigProviderContext } from '@kbn/test';
+import type { UrlObject } from 'url';
+import type { ObservabilityAIAssistantFtrConfigName } from '../configs';
 import { getApmSynthtraceEsClient } from './create_synthtrace_client';
-import { InheritedFtrProviderContext, InheritedServices } from './ftr_provider_context';
+import type { InheritedFtrProviderContext, InheritedServices } from './ftr_provider_context';
 import { getScopedApiClient } from './observability_ai_assistant_api_client';
 import { editor, secondaryEditor, unauthorizedUser, viewer } from './users/users';
 

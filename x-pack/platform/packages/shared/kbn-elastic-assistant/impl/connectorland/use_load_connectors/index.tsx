@@ -9,13 +9,12 @@ import type { UseQueryResult } from '@tanstack/react-query';
 import { useQuery } from '@tanstack/react-query';
 import type { ServerError } from '@kbn/cases-plugin/public/types';
 import { loadAllActions as loadConnectors } from '@kbn/triggers-actions-ui-plugin/public/common/constants';
-import type { IHttpFetchError } from '@kbn/core-http-browser';
-import { HttpSetup } from '@kbn/core-http-browser';
+import type { IHttpFetchError, HttpSetup } from '@kbn/core-http-browser';
 import { isInferenceEndpointExists } from '@kbn/inference-endpoint-ui-common';
-import { IToasts } from '@kbn/core-notifications-browser';
-import { OpenAiProviderType } from '@kbn/stack-connectors-plugin/common/openai/constants';
-import { ActionConnector } from '@kbn/cases-plugin/public/containers/configure/types';
-import { AIConnector } from '../connector_selector';
+import type { IToasts } from '@kbn/core-notifications-browser';
+import type { OpenAiProviderType } from '@kbn/stack-connectors-plugin/common/openai/constants';
+import type { ActionConnector } from '@kbn/cases-plugin/public/containers/configure/types';
+import type { AIConnector } from '../connector_selector';
 import * as i18n from '../translations';
 
 /**

@@ -7,13 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { NoDataPageProps } from '@kbn/shared-ux-page-no-data-types';
+import type { NoDataPageProps } from '@kbn/shared-ux-page-no-data-types';
 
-import {
+import type {
   NoDataViewsPromptServices,
   NoDataViewsPromptKibanaDependencies,
 } from '@kbn/shared-ux-prompt-no-data-views-types';
-import {
+import type {
   NoDataCardServices,
   NoDataCardKibanaDependencies,
 } from '@kbn/shared-ux-card-no-data-types';

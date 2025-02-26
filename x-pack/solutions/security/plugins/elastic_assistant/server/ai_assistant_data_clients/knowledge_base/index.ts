@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import {
+import type {
   MlTrainedModelDeploymentNodesStats,
   MlTrainedModelStats,
   SearchTotalHits,
@@ -15,8 +15,7 @@ import type { MlPluginSetup } from '@kbn/ml-plugin/server';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import { Document } from 'langchain/document';
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
-import {
-  DocumentEntryType,
+import type {
   DocumentEntry,
   IndexEntry,
   KnowledgeBaseEntryCreateProps,
@@ -25,20 +24,22 @@ import {
   ContentReferencesStore,
   KnowledgeBaseEntryUpdateProps,
 } from '@kbn/elastic-assistant-common';
+import { DocumentEntryType } from '@kbn/elastic-assistant-common';
 import pRetry from 'p-retry';
-import { StructuredTool } from '@langchain/core/tools';
-import { AnalyticsServiceSetup, AuditLogger, ElasticsearchClient } from '@kbn/core/server';
+import type { StructuredTool } from '@langchain/core/tools';
+import type { AnalyticsServiceSetup, AuditLogger, ElasticsearchClient } from '@kbn/core/server';
 import { IndexPatternsFetcher } from '@kbn/data-views-plugin/server';
 import { map } from 'lodash';
-import { AIAssistantDataClient, AIAssistantDataClientParams } from '..';
-import { GetElser } from '../../types';
+import type { AIAssistantDataClientParams } from '..';
+import { AIAssistantDataClient } from '..';
+import type { GetElser } from '../../types';
 import {
   createKnowledgeBaseEntry,
   getUpdateScript,
   transformToCreateSchema,
   transformToUpdateSchema,
 } from './create_knowledge_base_entry';
-import {
+import type {
   EsDocumentEntry,
   EsIndexEntry,
   EsKnowledgeBaseEntrySchema,
@@ -64,7 +65,7 @@ import {
   ASSISTANT_ELSER_INFERENCE_ID,
   ELASTICSEARCH_ELSER_INFERENCE_ID,
 } from './field_maps_configuration';
-import { BulkOperationError } from '../../lib/data_stream/documents_data_writer';
+import type { BulkOperationError } from '../../lib/data_stream/documents_data_writer';
 import { AUDIT_OUTCOME, KnowledgeBaseAuditAction, knowledgeBaseAuditEvent } from './audit_events';
 
 /**

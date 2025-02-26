@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { PanelInteractionEvent } from '../types';
+import type { PanelInteractionEvent } from '../types';
 import { getPointerPosition } from './sensors';
-import { UserInteractionEvent } from './types';
+import type { UserInteractionEvent } from './types';
 
 // Calculates the preview rect coordinates for a resized panel
 export const getResizePreviewRect = ({

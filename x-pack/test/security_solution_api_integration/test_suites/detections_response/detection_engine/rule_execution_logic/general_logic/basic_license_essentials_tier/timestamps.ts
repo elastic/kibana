@@ -8,7 +8,7 @@
 import expect from '@kbn/expect';
 import { orderBy } from 'lodash';
 import { RuleExecutionStatusEnum } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_monitoring';
-import {
+import type {
   EqlRuleCreateProps,
   QueryRuleCreateProps,
 } from '@kbn/security-solution-plugin/common/api/detection_engine';
@@ -26,7 +26,7 @@ import {
   getAlertsByIds,
   waitForRulePartialFailure,
 } from '../../../../../../../common/utils/security_solution';
-import { FtrProviderContext } from '../../../../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../../../../ftr_provider_context';
 import { EsArchivePathBuilder } from '../../../../../../es_archive_path_builder';
 
 export default ({ getService }: FtrProviderContext) => {

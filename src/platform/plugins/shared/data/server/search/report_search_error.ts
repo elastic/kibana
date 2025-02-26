@@ -9,7 +9,7 @@
 
 import type { ConnectionRequestParams } from '@elastic/transport';
 import { errors } from '@elastic/elasticsearch';
-import { KibanaResponseFactory } from '@kbn/core/server';
+import type { KibanaResponseFactory } from '@kbn/core/server';
 import { KbnError } from '@kbn/kibana-utils-plugin/common';
 import type { SanitizedConnectionRequestParams } from '@kbn/search-types';
 import { sanitizeRequestParams } from './sanitize_request_params';

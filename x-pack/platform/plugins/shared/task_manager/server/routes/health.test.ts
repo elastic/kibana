@@ -8,15 +8,20 @@
 import { firstValueFrom, of, Subject, BehaviorSubject } from 'rxjs';
 import { merge } from 'lodash';
 import { v4 as uuidv4 } from 'uuid';
-import { httpServiceMock, docLinksServiceMock } from '@kbn/core/server/mocks';
+import {
+  httpServiceMock,
+  docLinksServiceMock,
+  elasticsearchServiceMock,
+  loggingSystemMock,
+} from '@kbn/core/server/mocks';
 import { healthRoute } from './health';
 import { mockHandlerArguments } from './_mock_handler_arguments';
 import { sleep } from '../test_utils';
-import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { usageCountersServiceMock } from '@kbn/usage-collection-plugin/server/usage_counters/usage_counters_service.mock';
-import { MonitoringStats, RawMonitoringStats } from '../monitoring';
+import type { MonitoringStats, RawMonitoringStats } from '../monitoring';
 import { ServiceStatusLevels } from '@kbn/core/server';
-import { configSchema, TaskManagerConfig } from '../config';
+import type { TaskManagerConfig } from '../config';
+import { configSchema } from '../config';
 import { FillPoolResult } from '../lib/fill_pool';
 
 jest.mock('../monitoring', () => {

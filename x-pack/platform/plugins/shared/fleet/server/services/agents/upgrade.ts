@@ -15,9 +15,13 @@ import { getCurrentNamespace } from '../spaces/get_current_namespace';
 
 import { createAgentAction } from './actions';
 import type { GetAgentsOptions } from './crud';
-import { openPointInTime } from './crud';
-import { getAgentsByKuery } from './crud';
-import { getAgentsById, updateAgent, getAgentPolicyForAgent } from './crud';
+import {
+  openPointInTime,
+  getAgentsByKuery,
+  getAgentsById,
+  updateAgent,
+  getAgentPolicyForAgent,
+} from './crud';
 import { UpgradeActionRunner, upgradeBatch } from './upgrade_action_runner';
 
 export async function sendUpgradeAgentAction({

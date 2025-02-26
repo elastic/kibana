@@ -7,15 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import {
-  isSchema,
-  type CustomValidator,
-  type ErrorReport,
-  type Schema,
-  type SchemaLike,
-  type WhenOptions,
+import type {
+  CustomValidator,
+  ErrorReport,
+  Schema,
+  SchemaLike,
+  WhenOptions,
   CustomHelpers,
 } from 'joi';
+import { isSchema } from 'joi';
 import { META_FIELD_X_OAS_DEPRECATED, META_FIELD_X_OAS_DISCONTINUED } from '../oas_meta_fields';
 import { SchemaTypeError, ValidationError } from '../errors';
 import { Reference } from '../references';

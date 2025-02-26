@@ -65,8 +65,7 @@ import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/
 import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
 import type { DashboardStart } from '@kbn/dashboard-plugin/public';
 import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
-import { from } from 'rxjs';
-import { map } from 'rxjs';
+import { from, map } from 'rxjs';
 import type { CloudSetup } from '@kbn/cloud-plugin/public';
 import type { ServerlessPluginStart } from '@kbn/serverless/public';
 import type { LogsSharedClientStartExports } from '@kbn/logs-shared-plugin/public';

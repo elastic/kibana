@@ -8,11 +8,6 @@
 import { i18n } from '@kbn/i18n';
 import type { ChangeEvent } from 'react';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import type {
-  EuiTableFieldDataColumnType,
-  EuiTableActionsColumnType,
-  Criteria,
-} from '@elastic/eui';
 import {
   EuiSuperDatePicker,
   useEuiTheme,
@@ -25,8 +20,13 @@ import {
   EuiButtonIcon,
   EuiPopover,
   EuiContextMenuPanel,
-  type OnTimeChangeProps,
   EuiEmptyPrompt,
+} from '@elastic/eui';
+import type {
+  EuiTableFieldDataColumnType,
+  EuiTableActionsColumnType,
+  Criteria,
+  OnTimeChangeProps,
 } from '@elastic/eui';
 import { FormattedMessage, FormattedDate } from '@kbn/i18n-react';
 import { useLinkProps, useUiTracker } from '@kbn/observability-shared-plugin/public';

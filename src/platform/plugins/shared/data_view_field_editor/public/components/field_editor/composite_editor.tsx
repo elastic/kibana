@@ -26,7 +26,7 @@ import { ScriptField } from './form_fields';
 import { useFieldEditorContext } from '../field_editor_context';
 import { RUNTIME_FIELD_OPTIONS_PRIMITIVE } from './constants';
 import { valueToComboBoxOption } from './lib';
-import { RuntimePrimitiveTypes } from '../../shared_imports';
+import type { RuntimePrimitiveTypes } from '../../shared_imports';
 
 export interface CompositeEditorProps {
   onReset: () => void;

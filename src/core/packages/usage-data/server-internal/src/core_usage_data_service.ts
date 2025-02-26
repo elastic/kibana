@@ -7,10 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Subject, Observable, firstValueFrom } from 'rxjs';
-import { takeUntil } from 'rxjs';
+import type { Observable } from 'rxjs';
+import { Subject, firstValueFrom, takeUntil } from 'rxjs';
 import { get } from 'lodash';
-import { hasConfigPathIntersection, ChangedDeprecatedPaths } from '@kbn/config';
+import type { ChangedDeprecatedPaths } from '@kbn/config';
+import { hasConfigPathIntersection } from '@kbn/config';
 
 import type {
   AggregationsMultiBucketAggregateBase,
@@ -24,9 +25,10 @@ import type { HttpConfigType, InternalHttpServiceSetup } from '@kbn/core-http-se
 import type { ElasticsearchServiceStart } from '@kbn/core-elasticsearch-server';
 import type { ElasticsearchConfigType } from '@kbn/core-elasticsearch-server-internal';
 import type { MetricsServiceSetup, OpsMetrics } from '@kbn/core-metrics-server';
-import {
-  LEGACY_URL_ALIAS_TYPE,
-  type SavedObjectsConfigType,
+import { LEGACY_URL_ALIAS_TYPE } from '@kbn/core-saved-objects-base-server-internal';
+import type {
+  SavedObjectTypeRegistry,
+  SavedObjectsConfigType,
 } from '@kbn/core-saved-objects-base-server-internal';
 import type {
   CoreServicesUsageData,
@@ -43,13 +45,12 @@ import {
   CORE_USAGE_STATS_TYPE,
   type InternalCoreUsageDataSetup,
 } from '@kbn/core-usage-data-base-server-internal';
-import type { SavedObjectTypeRegistry } from '@kbn/core-saved-objects-base-server-internal';
 import {
   MAIN_SAVED_OBJECT_INDEX,
   type SavedObjectsServiceStart,
 } from '@kbn/core-saved-objects-server';
 
-import { ISavedObjectsRepository } from '@kbn/core-saved-objects-api-server';
+import type { ISavedObjectsRepository } from '@kbn/core-saved-objects-api-server';
 import { isConfigured } from './is_configured';
 import { coreUsageStatsType } from './saved_objects';
 import { CoreUsageStatsClient } from './core_usage_stats_client';

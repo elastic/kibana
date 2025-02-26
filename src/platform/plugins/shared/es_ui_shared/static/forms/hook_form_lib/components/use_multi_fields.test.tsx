@@ -10,7 +10,7 @@
 import React, { useState } from 'react';
 
 import { registerTestBed } from '../shared_imports';
-import { FieldHook } from '../types';
+import type { FieldHook } from '../types';
 import { useForm } from '../hooks/use_form';
 import { Form } from './form';
 import { UseMultiFields } from './use_multi_fields';

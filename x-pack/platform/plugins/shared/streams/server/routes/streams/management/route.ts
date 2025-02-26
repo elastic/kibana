@@ -5,14 +5,10 @@
  * 2.0.
  */
 
-import {
-  SampleDocument,
-  conditionSchema,
-  conditionToQueryDsl,
-  getFields,
-} from '@kbn/streams-schema';
+import type { SampleDocument } from '@kbn/streams-schema';
+import { conditionSchema, conditionToQueryDsl, getFields } from '@kbn/streams-schema';
 import { z } from '@kbn/zod';
-import { ResyncStreamsResponse } from '../../../lib/streams/client';
+import type { ResyncStreamsResponse } from '../../../lib/streams/client';
 import { checkAccess } from '../../../lib/streams/stream_crud';
 import { createServerRoute } from '../../create_server_route';
 import { DefinitionNotFoundError } from '../../../lib/streams/errors/definition_not_found_error';

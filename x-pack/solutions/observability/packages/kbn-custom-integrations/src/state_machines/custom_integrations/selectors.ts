@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { CustomIntegrationsState } from './state_machine';
+import type { CustomIntegrationsState } from './state_machine';
 
 export const createIsInitializedSelector = (state: CustomIntegrationsState) =>
   state && state.matches({ create: 'initialized' });

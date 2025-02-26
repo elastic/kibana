@@ -8,9 +8,10 @@
 import moment from 'moment';
 import React from 'react';
 import { capitalize } from 'lodash';
-import { TimeRange } from '@kbn/data-plugin/common';
+import type { TimeRange } from '@kbn/data-plugin/common';
 import { i18n } from '@kbn/i18n';
-import { IngestStreamGetResponse, PhaseName, isIlmLifecycle } from '@kbn/streams-schema';
+import type { IngestStreamGetResponse, PhaseName } from '@kbn/streams-schema';
+import { isIlmLifecycle } from '@kbn/streams-schema';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -30,7 +31,7 @@ import {
   Settings,
 } from '@elastic/charts';
 import { useKibana } from '../../../hooks/use_kibana';
-import { DataStreamStats } from './hooks/use_data_stream_stats';
+import type { DataStreamStats } from './hooks/use_data_stream_stats';
 import { formatBytes } from './helpers/format_bytes';
 import { StreamsAppSearchBar } from '../../streams_app_search_bar';
 import { useDateRange } from '../../../hooks/use_date_range';

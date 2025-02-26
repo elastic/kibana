@@ -8,8 +8,9 @@
  */
 
 import { DataSourceType, isDataSourceType } from '../../../../../common/data_sources';
-import { DataSourceCategory, DataSourceProfileProvider } from '../../../profiles';
 import { getDocViewer } from './accessors/get_doc_viewer';
+import type { DataSourceProfileProvider } from '../../../profiles';
+import { DataSourceCategory } from '../../../profiles';
 import { getCellRenderers } from './accessors';
 
 export const createTracesDataSourceProfileProvider = (): DataSourceProfileProvider => ({

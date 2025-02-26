@@ -5,11 +5,10 @@
  * 2.0.
  */
 
-import { SearchTotalHits } from '@elastic/elasticsearch/lib/api/types';
+import type { SearchTotalHits } from '@elastic/elasticsearch/lib/api/types';
+import type { StreamDefinition, StreamGetResponse } from '@kbn/streams-schema';
 import {
   isGroupStreamDefinition,
-  StreamDefinition,
-  StreamGetResponse,
   isWiredStreamDefinition,
   streamUpsertRequestSchema,
   isGroupStreamDefinitionBase,
@@ -17,7 +16,7 @@ import {
 import { z } from '@kbn/zod';
 import { badData, badRequest } from '@hapi/boom';
 import { hasSupportedStreamsRoot } from '../../../lib/streams/root_stream_definition';
-import { UpsertStreamResponse } from '../../../lib/streams/client';
+import type { UpsertStreamResponse } from '../../../lib/streams/client';
 import { createServerRoute } from '../../create_server_route';
 import { readStream } from './read_stream';
 

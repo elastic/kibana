@@ -11,9 +11,9 @@ import { useTimeZone } from '@kbn/observability-shared-plugin/public';
 import { PingHistogramComponent } from '../../common/charts';
 import { getPingHistogram } from '../../../state/actions';
 import { esKuerySelector, selectPingHistogram } from '../../../state/selectors';
-import { useGetUrlParams } from '../../../hooks';
-import { useMonitorId } from '../../../hooks';
-import { ResponsiveWrapperProps, withResponsiveWrapper } from '../../common/higher_order';
+import { useGetUrlParams, useMonitorId } from '../../../hooks';
+import type { ResponsiveWrapperProps } from '../../common/higher_order';
+import { withResponsiveWrapper } from '../../common/higher_order';
 import { UptimeRefreshContext } from '../../../contexts';
 import { useOverviewFilterCheck } from '../../../hooks/use_overview_filter_check';
 

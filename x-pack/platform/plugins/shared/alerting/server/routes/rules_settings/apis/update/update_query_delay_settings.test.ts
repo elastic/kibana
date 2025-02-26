@@ -8,10 +8,8 @@
 import { httpServiceMock } from '@kbn/core/server/mocks';
 import { licenseStateMock } from '../../../../lib/license_state.mock';
 import { mockHandlerArguments } from '../../../_mock_handler_arguments';
-import {
-  rulesSettingsClientMock,
-  RulesSettingsClientMock,
-} from '../../../../rules_settings/rules_settings_client.mock';
+import type { RulesSettingsClientMock } from '../../../../rules_settings/rules_settings_client.mock';
+import { rulesSettingsClientMock } from '../../../../rules_settings/rules_settings_client.mock';
 import { updateQueryDelaySettingsRoute } from './update_query_delay_settings';
 
 let rulesSettingsClient: RulesSettingsClientMock;

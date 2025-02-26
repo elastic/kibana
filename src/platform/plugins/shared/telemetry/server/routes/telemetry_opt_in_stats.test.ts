@@ -10,7 +10,7 @@
 jest.mock('node-fetch');
 import fetch from 'node-fetch';
 import { sendTelemetryOptInStatus } from './telemetry_opt_in_stats';
-import { StatsGetterConfig } from '@kbn/telemetry-collection-manager-plugin/server';
+import type { StatsGetterConfig } from '@kbn/telemetry-collection-manager-plugin/server';
 
 describe('sendTelemetryOptInStatus', () => {
   const mockClusterUuid = 'mk_uuid';

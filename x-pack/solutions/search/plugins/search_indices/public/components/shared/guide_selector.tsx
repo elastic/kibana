@@ -9,7 +9,7 @@ import React from 'react';
 
 import { EuiCard, EuiText, EuiFlexGroup, EuiFlexItem, EuiTourStep } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { WorkflowId } from '@kbn/search-shared-ui';
+import type { WorkflowId } from '@kbn/search-shared-ui';
 import { workflows } from '../../code_examples/workflows';
 import { useGuideTour } from './hooks/use_guide_tour';
 

@@ -18,6 +18,12 @@ import type {
   AgentUpgradeDetails,
   OutputPreset,
   AgentlessPolicy,
+  KafkaAuthType,
+  KafkaCompressionType,
+  KafkaPartitionType,
+  KafkaSaslMechanism,
+  KafkaTopicWhenType,
+  SimpleSOAssetType,
 } from '../../common/types';
 import type { AgentType, FleetServerAgentComponent } from '../../common/types/models';
 
@@ -28,13 +34,6 @@ import type {
   PackagePolicyConfigRecord,
 } from '../../common/types/models/package_policy';
 import type { PolicySecretReference } from '../../common/types/models/secret';
-import type { KafkaAuthType, KafkaCompressionType } from '../../common/types';
-import type {
-  KafkaPartitionType,
-  KafkaSaslMechanism,
-  KafkaTopicWhenType,
-  SimpleSOAssetType,
-} from '../../common/types';
 
 export type AgentPolicyStatus = typeof agentPolicyStatuses;
 

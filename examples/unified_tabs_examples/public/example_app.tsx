@@ -21,12 +21,12 @@ import {
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import type { AppMountParameters } from '@kbn/core-application-browser';
-import type { DataView } from '@kbn/data-views-plugin/public';
-import type { DataViewField } from '@kbn/data-views-plugin/public';
+import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 import type { DataViewPickerProps } from '@kbn/unified-search-plugin/public';
 import { UnifiedTabs } from '@kbn/unified-tabs';
 import { PLUGIN_ID, PLUGIN_NAME } from '../common';
-import { FieldListSidebar, FieldListSidebarProps } from './field_list_sidebar';
+import type { FieldListSidebarProps } from './field_list_sidebar';
+import { FieldListSidebar } from './field_list_sidebar';
 
 let TMP_COUNTER = 0;
 

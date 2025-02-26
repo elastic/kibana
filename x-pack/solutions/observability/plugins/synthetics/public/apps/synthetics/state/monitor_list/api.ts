@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { UpsertMonitorRequest } from '..';
-import { UpsertMonitorResponse } from '../monitor_management/api';
+import type { UpsertMonitorRequest } from '..';
+import type { UpsertMonitorResponse } from '../monitor_management/api';
 import { INITIAL_REST_VERSION, SYNTHETICS_API_URLS } from '../../../../../common/constants';
-import {
+import type {
   EncryptedSyntheticsMonitor,
   FetchMonitorManagementListQueryArgs,
   MonitorManagementListResult,
@@ -17,7 +17,7 @@ import {
 } from '../../../../../common/runtime_types';
 import { apiService } from '../../../../utils/api_service';
 
-import { MonitorListPageState } from './models';
+import type { MonitorListPageState } from './models';
 
 function toMonitorManagementListQueryArgs(
   pageState: MonitorListPageState

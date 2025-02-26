@@ -7,16 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Observable } from 'rxjs';
-import {
+import type { Observable } from 'rxjs';
+import type {
   AggsStart,
   DataViewsContract,
   ExpressionValueSearchContext,
   ISearchStartSearchSource,
 } from '@kbn/data-plugin/common';
-import { ExpressionFunctionDefinition, Datatable } from '@kbn/expressions-plugin/common';
+import type { ExpressionFunctionDefinition, Datatable } from '@kbn/expressions-plugin/common';
 import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
-import { EventAnnotationGroupOutput } from '../event_annotation_group';
+import type { EventAnnotationGroupOutput } from '../event_annotation_group';
 
 export type FetchEventAnnotationsOutput = Observable<
   Datatable | { rows: never[]; columns: never[]; type: string }

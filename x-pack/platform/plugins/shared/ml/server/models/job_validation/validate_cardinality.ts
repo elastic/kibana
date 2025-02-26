@@ -9,8 +9,7 @@ import type { IScopedClusterClient } from '@kbn/core/server';
 import { DataVisualizer } from '../data_visualizer';
 
 import { validateJobObject } from './validate_job_object';
-import type { CombinedJob } from '../../../common/types/anomaly_detection_jobs';
-import type { Detector } from '../../../common/types/anomaly_detection_jobs';
+import type { CombinedJob, Detector } from '../../../common/types/anomaly_detection_jobs';
 import type { MessageId, JobValidationMessage } from '../../../common/constants/messages';
 import { isValidAggregationField } from '../../../common/util/validation_utils';
 import { getDatafeedAggregations } from '../../../common/util/datafeed_utils';

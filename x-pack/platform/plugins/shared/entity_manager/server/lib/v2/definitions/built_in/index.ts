@@ -8,7 +8,7 @@
 import { builtInServicesFromEcsEntityDefinition } from './services_from_ecs_data';
 import { builtInHostsFromEcsEntityDefinition } from './hosts_from_ecs_data';
 import { builtInContainersFromEcsEntityDefinition } from './containers_from_ecs_data';
-import { BuiltInDefinition } from '../../types';
+import type { BuiltInDefinition } from '../../types';
 
 import * as kubernetes from './kubernetes';
 

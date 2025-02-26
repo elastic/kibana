@@ -5,9 +5,12 @@
  * 2.0.
  */
 
-import type { estypes } from '@elastic/elasticsearch';
 import * as t from 'io-ts';
-import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
+import type {
+  IndicesPutIndexTemplateRequest,
+  MappingTypeMapping,
+  QueryDslQueryContainer,
+} from '@elastic/elasticsearch/lib/api/types';
 
 // note: these schemas are not exhaustive. See the `Sort` type of `@elastic/elasticsearch` if you need to enhance it.
 const fieldSchema = t.string;
@@ -400,7 +403,7 @@ declare type _ = AssertAssignable<
 
 export const alertsGroupFilterSchema = t.record(allowedFilterKeysSchema, t.any);
 
-export type PutIndexTemplateRequest = estypes.IndicesPutIndexTemplateRequest & {
+export type PutIndexTemplateRequest = IndicesPutIndexTemplateRequest & {
   body?: { composed_of?: string[] };
 };
 
@@ -410,6 +413,6 @@ export interface ClusterPutComponentTemplateBody {
       number_of_shards: number;
       'index.mapping.total_fields.limit'?: number;
     };
-    mappings: estypes.MappingTypeMapping;
+    mappings: MappingTypeMapping;
   };
 }

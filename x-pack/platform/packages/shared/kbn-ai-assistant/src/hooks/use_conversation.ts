@@ -12,9 +12,11 @@ import type {
   ConversationCreateRequest,
   Message,
 } from '@kbn/observability-ai-assistant-plugin/common';
-import type { ObservabilityAIAssistantChatService } from '@kbn/observability-ai-assistant-plugin/public';
-import type { AbortableAsyncState } from '@kbn/observability-ai-assistant-plugin/public';
-import type { UseChatResult } from '@kbn/observability-ai-assistant-plugin/public';
+import type {
+  ObservabilityAIAssistantChatService,
+  AbortableAsyncState,
+  UseChatResult,
+} from '@kbn/observability-ai-assistant-plugin/public';
 import { EMPTY_CONVERSATION_TITLE } from '../i18n';
 import { useAIAssistantAppService } from './use_ai_assistant_app_service';
 import { useKibana } from './use_kibana';

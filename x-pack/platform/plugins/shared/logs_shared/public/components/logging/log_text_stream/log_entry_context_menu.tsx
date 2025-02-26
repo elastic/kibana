@@ -7,13 +7,13 @@
 
 import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
+import type { EuiContextMenuItemProps } from '@elastic/eui';
 import {
   EuiButton,
   EuiIcon,
   EuiPopover,
   EuiContextMenuPanel,
   EuiContextMenuItem,
-  EuiContextMenuItemProps,
 } from '@elastic/eui';
 
 import styled from '@emotion/styled';

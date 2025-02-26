@@ -24,10 +24,8 @@ import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import { addExcludeFrozenToQuery } from '@kbn/ml-query-utils';
 import { TIME_FORMAT } from '@kbn/ml-date-utils';
 import { type RuntimeMappings } from '@kbn/ml-runtime-field-utils';
-import type { Module } from '../../../../../common/types/modules';
-import { useDataSource } from '../../../contexts/ml';
-import { useMlKibana, useMlLocator } from '../../../contexts/kibana';
 import type {
+  Module,
   DatafeedResponse,
   JobOverride,
   JobResponse,
@@ -36,6 +34,8 @@ import type {
   KibanaObjectResponse,
   ModuleJob,
 } from '../../../../../common/types/modules';
+import { useDataSource } from '../../../contexts/ml';
+import { useMlKibana, useMlLocator } from '../../../contexts/kibana';
 import { CreateResultCallout } from './components/create_result_callout';
 import { KibanaObjectList } from './components/kibana_objects';
 import { ModuleJobs } from './components/module_jobs';

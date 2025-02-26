@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { UserMouseEvent } from './mouse';
+import type { UserMouseEvent } from './mouse';
 
 const MIN_SPEED = 50;
 const MAX_SPEED = 150;

@@ -10,8 +10,11 @@
 import words from 'lodash/words';
 
 import { Query } from '@elastic/eui';
-import { FieldDefinition, SettingType } from '@kbn/management-settings-types';
-import { UiSettingMetadata } from '@kbn/management-settings-types';
+import type {
+  FieldDefinition,
+  SettingType,
+  UiSettingMetadata,
+} from '@kbn/management-settings-types';
 import { isSettingDefaultValue } from '@kbn/management-settings-utilities';
 
 /**

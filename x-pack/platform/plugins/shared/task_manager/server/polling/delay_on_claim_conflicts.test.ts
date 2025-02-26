@@ -5,14 +5,13 @@
  * 2.0.
  */
 
-import { Subject, of, firstValueFrom } from 'rxjs';
+import { Subject, of, firstValueFrom, bufferCount, take } from 'rxjs';
 import { fakeSchedulers } from 'rxjs-marbles/jest';
 import { sleep } from '../test_utils';
 import { asOk } from '../lib/result_type';
 import { delayOnClaimConflicts } from './delay_on_claim_conflicts';
 import { asTaskPollingCycleEvent } from '../task_events';
-import { bufferCount, take } from 'rxjs';
-import { TaskLifecycleEvent } from '../polling_lifecycle';
+import type { TaskLifecycleEvent } from '../polling_lifecycle';
 import { FillPoolResult } from '../lib/fill_pool';
 
 describe('delayOnClaimConflicts', () => {

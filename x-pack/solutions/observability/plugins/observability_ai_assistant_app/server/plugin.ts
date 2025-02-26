@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import {
-  type CoreSetup,
-  type Logger,
+import type {
   Plugin,
-  type PluginInitializerContext,
-  type CoreStart,
   KibanaRequest,
+  CoreSetup,
+  Logger,
+  PluginInitializerContext,
+  CoreStart,
 } from '@kbn/core/server';
-import {
+import type {
   ObservabilityAIAssistantRequestHandlerContext,
   ObservabilityAIAssistantRouteHandlerResources,
 } from '@kbn/observability-ai-assistant-plugin/server/routes/types';

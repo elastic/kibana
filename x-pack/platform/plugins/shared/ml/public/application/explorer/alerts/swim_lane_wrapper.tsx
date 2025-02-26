@@ -26,8 +26,7 @@ import {
   type AlertStatus,
 } from '@kbn/rule-data-utils';
 import { pick } from 'lodash';
-import type { PropsWithChildren } from 'react';
-import React, { type FC, useCallback, useMemo, useRef } from 'react';
+import React, { type PropsWithChildren, type FC, useCallback, useMemo, useRef } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { i18n } from '@kbn/i18n';
 import type { EuiBasicTableColumn } from '@elastic/eui/src/components/basic_table/basic_table';

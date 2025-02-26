@@ -7,10 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ComponentType, MouseEventHandler } from 'react';
+import type { ComponentType, MouseEventHandler, Dispatch } from 'react';
 import type { CoreStart } from '@kbn/core/public';
 import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
-import type { Dispatch } from 'react';
 
 export interface EmbeddableConsoleDependencies {
   core: CoreStart;

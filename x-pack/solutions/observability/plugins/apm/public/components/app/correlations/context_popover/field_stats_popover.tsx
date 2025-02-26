@@ -5,26 +5,33 @@
  * 2.0.
  */
 
-import { EuiButtonIcon, EuiToolTip, useEuiTheme } from '@elastic/eui';
+import {
+  EuiButtonIcon,
+  EuiToolTip,
+  useEuiTheme,
+  EuiHorizontalRule,
+  EuiText,
+  EuiSpacer,
+  EuiLoadingSpinner,
+} from '@elastic/eui';
 import React, { useCallback, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import type {
   FieldStatsServices,
   FieldStatsProps,
   FieldStatsState,
+  FieldTopValuesBucketParams,
 } from '@kbn/unified-field-list/src/components/field_stats';
-import { FieldStats } from '@kbn/unified-field-list/src/components/field_stats';
+import {
+  FieldStats,
+  FieldTopValuesBucket,
+} from '@kbn/unified-field-list/src/components/field_stats';
 import {
   FieldPopover,
   FieldPopoverHeader,
 } from '@kbn/unified-field-list/src/components/field_popover';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
-import {
-  FieldTopValuesBucket,
-  type FieldTopValuesBucketParams,
-} from '@kbn/unified-field-list/src/components/field_stats';
-import { EuiHorizontalRule, EuiText, EuiSpacer, EuiLoadingSpinner } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { estypes } from '@elastic/elasticsearch';
 import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';

@@ -6,7 +6,8 @@
  */
 
 import React from 'react';
-import { EuiStepsHorizontal, EuiStepStatus } from '@elastic/eui';
+import type { EuiStepStatus } from '@elastic/eui';
+import { EuiStepsHorizontal } from '@elastic/eui';
 import { useServices } from '../../app_context';
 
 interface Props {

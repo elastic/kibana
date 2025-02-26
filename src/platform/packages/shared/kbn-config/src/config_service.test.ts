@@ -7,8 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { BehaviorSubject, firstValueFrom, Observable } from 'rxjs';
-import { first, map, take } from 'rxjs';
+import { BehaviorSubject, firstValueFrom, Observable, first, map, take } from 'rxjs';
 
 import {
   mockApplyDeprecations,
@@ -16,15 +15,15 @@ import {
   docLinksMock,
   getDocLinksMock,
 } from './config_service.test.mocks';
-import { createRawConfigServiceMock } from './internal_mocks';
+import { createRawConfigServiceMock, getEnvOptions } from './internal_mocks';
 
 import { schema } from '@kbn/config-schema';
-import { MockedLogger, loggerMock } from '@kbn/logging-mocks';
+import type { MockedLogger } from '@kbn/logging-mocks';
+import { loggerMock } from '@kbn/logging-mocks';
 
 import type { ConfigDeprecationContext } from './deprecation';
-import { ConfigService, Env, RawPackageInfo } from '..';
-
-import { getEnvOptions } from './internal_mocks';
+import type { RawPackageInfo } from '..';
+import { ConfigService, Env } from '..';
 
 const packageInfos: RawPackageInfo = {
   branch: 'master',

@@ -9,9 +9,11 @@
 
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import type { SerializedStyles } from '@emotion/react';
-import { EuiDataGridProps, EuiDataGridRefProps, useEuiTheme } from '@elastic/eui';
-import { InTableSearchControl, InTableSearchControlProps } from './in_table_search_control';
-import { RenderCellValueWrapper } from './types';
+import type { EuiDataGridProps, EuiDataGridRefProps } from '@elastic/eui';
+import { useEuiTheme } from '@elastic/eui';
+import type { InTableSearchControlProps } from './in_table_search_control';
+import { InTableSearchControl } from './in_table_search_control';
+import type { RenderCellValueWrapper } from './types';
 import { wrapRenderCellValueWithInTableSearchSupport } from './wrap_render_cell_value';
 import { clearSearchTermRegExpCache } from './in_table_search_highlights_wrapper';
 import { getHighlightColors } from './get_highlight_colors';

@@ -5,17 +5,13 @@
  * 2.0.
  */
 
-import { Observable, OperatorFunction, filter, map } from 'rxjs';
+import type { Observable, OperatorFunction } from 'rxjs';
+import { filter, map } from 'rxjs';
 import { v4 } from 'uuid';
-import {
-  ChatCompletionEvent as InferenceChatCompletionEvent,
-  ChatCompletionEventType as InferenceChatCompletionEventType,
-} from '@kbn/inference-common';
-import {
-  ChatCompletionChunkEvent,
-  ChatCompletionMessageEvent,
-  StreamingChatResponseEventType,
-} from '../../../../common';
+import type { ChatCompletionEvent as InferenceChatCompletionEvent } from '@kbn/inference-common';
+import { ChatCompletionEventType as InferenceChatCompletionEventType } from '@kbn/inference-common';
+import type { ChatCompletionChunkEvent, ChatCompletionMessageEvent } from '../../../../common';
+import { StreamingChatResponseEventType } from '../../../../common';
 
 export function convertInferenceEventsToStreamingEvents(): OperatorFunction<
   InferenceChatCompletionEvent,

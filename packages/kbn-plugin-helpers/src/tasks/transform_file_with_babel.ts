@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import File from 'vinyl';
+import type File from 'vinyl';
 import * as Babel from '@babel/core';
 
 const transformedFiles = new WeakSet<File>();

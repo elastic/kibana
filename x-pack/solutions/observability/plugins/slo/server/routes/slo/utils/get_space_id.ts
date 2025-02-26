@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { KibanaRequest } from '@kbn/core/server';
-import { SLORoutesDependencies } from '../../types';
+import type { KibanaRequest } from '@kbn/core/server';
+import type { SLORoutesDependencies } from '../../types';
 
 export const getSpaceId = async (
   plugins: SLORoutesDependencies['plugins'],

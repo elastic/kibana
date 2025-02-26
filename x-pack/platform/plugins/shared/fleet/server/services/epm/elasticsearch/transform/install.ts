@@ -30,16 +30,14 @@ import { isFields } from '../../fields/field';
 import { getESAssetMetadata } from '../meta';
 import { updateEsAssetReferences } from '../../packages/es_assets_reference';
 import { getAssetFromAssetsMap, getPathParts } from '../../archive';
-import {
-  ElasticsearchAssetType,
-  type PackageInstallContext,
-} from '../../../../../common/types/models';
+import { ElasticsearchAssetType } from '../../../../../common/types/models';
 import type {
   EsAssetReference,
   InstallablePackage,
   ESAssetMetadata,
   IndexTemplate,
   RegistryElasticsearch,
+  PackageInstallContext,
 } from '../../../../../common/types/models';
 import { getInstallation } from '../../packages';
 import { retryTransientEsErrors } from '../retry';

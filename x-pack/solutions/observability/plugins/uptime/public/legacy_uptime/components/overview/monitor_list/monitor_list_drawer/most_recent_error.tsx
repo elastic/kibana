@@ -16,7 +16,7 @@ import { i18n } from '@kbn/i18n';
 import { stringifyUrlParams } from '../../../../lib/helper/url_params/stringify_url_params';
 import { MonitorPageLink } from '../../../common/monitor_page_link';
 import { useGetUrlParams } from '../../../../hooks';
-import { PingError } from '../../../../../../common/runtime_types';
+import type { PingError } from '../../../../../../common/runtime_types';
 
 interface MostRecentErrorProps {
   /**

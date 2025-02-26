@@ -6,8 +6,11 @@
  */
 
 import { mapValues } from 'lodash';
-import type { CoreSetup, SavedObjectUnsanitizedDoc } from '@kbn/core/server';
-import type { SavedObjectMigrationMap } from '@kbn/core/server';
+import type {
+  CoreSetup,
+  SavedObjectUnsanitizedDoc,
+  SavedObjectMigrationMap,
+} from '@kbn/core/server';
 import type { MigrateFunctionsObject } from '@kbn/kibana-utils-plugin/common';
 import { mergeSavedObjectMigrationMaps } from '@kbn/core/server';
 import { ANALYTICS_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';

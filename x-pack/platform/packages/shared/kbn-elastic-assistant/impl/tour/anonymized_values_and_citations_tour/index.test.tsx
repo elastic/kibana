@@ -15,7 +15,7 @@ import {
   welcomeConvo,
 } from '../../mock/conversation';
 import { I18nProvider } from '@kbn/i18n-react';
-import { TourState } from '../knowledge_base';
+import type { TourState } from '../knowledge_base';
 
 jest.mock('react-use/lib/useLocalStorage', () => jest.fn());
 

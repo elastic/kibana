@@ -8,7 +8,7 @@
  */
 import { cloneDeep } from 'lodash';
 
-import { GridLayoutData } from '../types';
+import type { GridLayoutData } from '../types';
 import { resolveGridRow } from './resolve_grid_row';
 
 /**

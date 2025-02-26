@@ -7,7 +7,8 @@
 
 import mapValues from 'lodash/mapValues';
 import { FieldsMetadataDictionary } from '../../../../common/fields_metadata/models/fields_metadata_dictionary';
-import { AnyFieldName, EcsFieldName, FieldMetadata, TEcsFields } from '../../../../common';
+import type { AnyFieldName, EcsFieldName, TEcsFields } from '../../../../common';
+import { FieldMetadata } from '../../../../common';
 
 interface EcsFieldsRepositoryDeps {
   ecsFields: TEcsFields;

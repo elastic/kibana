@@ -7,8 +7,7 @@
 
 import { useCallback } from 'react';
 import type { OperatorFunction } from 'rxjs';
-import { ReplaySubject } from 'rxjs';
-import { share, tap } from 'rxjs';
+import { ReplaySubject, share, tap } from 'rxjs';
 import type {
   IKibanaSearchResponse,
   IKibanaSearchRequest,

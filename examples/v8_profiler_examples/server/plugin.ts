@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Plugin, Logger, CoreSetup, PluginInitializerContext } from '@kbn/core/server';
+import type { Plugin, Logger, CoreSetup, PluginInitializerContext } from '@kbn/core/server';
 
 import { registerRoutes } from './routes';
 

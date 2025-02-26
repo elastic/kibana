@@ -15,7 +15,7 @@ import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 import { BehaviorSubject } from 'rxjs';
 import { DEFAULT_CONTROL_GROW } from '../../../common';
 
-import { DefaultControlApi } from '../../controls/types';
+import type { DefaultControlApi } from '../../controls/types';
 
 /**
  * A simplified clone version of the control which is dragged. This version only shows

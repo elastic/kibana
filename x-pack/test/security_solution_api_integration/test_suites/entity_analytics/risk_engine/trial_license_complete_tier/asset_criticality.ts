@@ -6,14 +6,13 @@
  */
 
 import expect from '@kbn/expect';
-import { omit } from 'lodash';
-import { AssetCriticalityRecord } from '@kbn/security-solution-plugin/common/api/entity_analytics';
-import _ from 'lodash';
-import { CreateAssetCriticalityRecord } from '@kbn/security-solution-plugin/common/api/entity_analytics';
-import {
-  CRITICALITY_VALUES,
-  CriticalityValues,
-} from '@kbn/security-solution-plugin/server/lib/entity_analytics/asset_criticality/constants';
+import _, { omit } from 'lodash';
+import type {
+  AssetCriticalityRecord,
+  CreateAssetCriticalityRecord,
+} from '@kbn/security-solution-plugin/common/api/entity_analytics';
+import type { CriticalityValues } from '@kbn/security-solution-plugin/server/lib/entity_analytics/asset_criticality/constants';
+import { CRITICALITY_VALUES } from '@kbn/security-solution-plugin/server/lib/entity_analytics/asset_criticality/constants';
 import {
   cleanAssetCriticality,
   assetCriticalityRouteHelpersFactory,
@@ -22,7 +21,7 @@ import {
   createAssetCriticalityRecords,
   riskEngineRouteHelpersFactory,
 } from '../../utils';
-import { FtrProviderContext } from '../../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../../ftr_provider_context';
 
 export default ({ getService }: FtrProviderContext) => {
   const es = getService('es');

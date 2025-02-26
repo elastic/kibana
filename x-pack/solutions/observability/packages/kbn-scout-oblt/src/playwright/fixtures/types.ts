@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import {
+import type {
   ScoutParallelTestFixtures,
   ScoutParallelWorkerFixtures,
   ScoutTestFixtures,
   ScoutWorkerFixtures,
 } from '@kbn/scout';
-import { ObltPageObjects } from '../page_objects';
+import type { ObltPageObjects } from '../page_objects';
 
 export interface ObltTestFixtures extends ScoutTestFixtures {
   pageObjects: ObltPageObjects;

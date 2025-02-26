@@ -4,9 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { Logger } from '@kbn/core/server';
-import { ActionsConfigurationUtilities } from '../actions_config';
-import { ConnectorToken, ConnectorTokenClientContract } from '../types';
+import type { Logger } from '@kbn/core/server';
+import type { ActionsConfigurationUtilities } from '../actions_config';
+import type { ConnectorToken, ConnectorTokenClientContract } from '../types';
 import { requestOAuthClientCredentialsToken } from './request_oauth_client_credentials_token';
 
 export interface GetOAuthClientCredentialsConfig {

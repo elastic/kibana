@@ -14,9 +14,9 @@ import {
 import { isInferenceEndpointExists } from '@kbn/inference-endpoint-ui-common';
 import { EuiTextArea, EuiFormRow, EuiSpacer, EuiSelect, EuiCallOut } from '@elastic/eui';
 import type { RuleFormParamsErrors } from '@kbn/response-ops-rule-form';
-import { ActionVariable } from '@kbn/alerting-types';
+import type { ActionVariable } from '@kbn/alerting-types';
 import { FormattedMessage } from '@kbn/i18n-react';
-import {
+import type {
   ChatCompleteParams,
   RerankParams,
   SparseEmbeddingParams,
@@ -26,7 +26,7 @@ import {
 import { DEFAULTS_BY_TASK_TYPE } from './constants';
 import * as i18n from './translations';
 import { SUB_ACTION } from '../../../common/inference/constants';
-import { InferenceActionConnector, InferenceActionParams } from './types';
+import type { InferenceActionConnector, InferenceActionParams } from './types';
 
 const InferenceServiceParamsFields: React.FunctionComponent<
   ActionParamsProps<InferenceActionParams>

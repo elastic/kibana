@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SearchableSnapshotAction } from '../../../../../common/types';
+import type { SearchableSnapshotAction } from '../../../../../common/types';
 
 export const getDefaultRepository = (
   configs: Array<SearchableSnapshotAction | undefined>

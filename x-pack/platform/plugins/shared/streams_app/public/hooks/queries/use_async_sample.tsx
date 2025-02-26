@@ -6,15 +6,13 @@
  */
 
 import { useEffect, useMemo, useState } from 'react';
-import {
-  Condition,
-  SampleDocument,
-  WiredStreamGetResponse,
-  conditionToQueryDsl,
-  getFields,
-} from '@kbn/streams-schema';
+import type { Condition, SampleDocument, WiredStreamGetResponse } from '@kbn/streams-schema';
+import { conditionToQueryDsl, getFields } from '@kbn/streams-schema';
 import useToggle from 'react-use/lib/useToggle';
-import { MappingRuntimeField, MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/types';
+import type {
+  MappingRuntimeField,
+  MappingRuntimeFields,
+} from '@elastic/elasticsearch/lib/api/types';
 import { filter, switchMap } from 'rxjs';
 import { isRunningResponse } from '@kbn/data-plugin/common';
 import { useKibana } from '../use_kibana';

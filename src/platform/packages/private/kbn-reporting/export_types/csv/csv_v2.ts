@@ -8,14 +8,14 @@
  */
 
 import Boom from '@hapi/boom';
-import { Writable } from 'stream';
+import type { Writable } from 'stream';
 
 import type { KibanaRequest } from '@kbn/core/server';
 import type { DataPluginStart } from '@kbn/data-plugin/server/plugin';
 import type { DiscoverServerPluginStart } from '@kbn/discover-plugin/server';
 import { CsvGenerator, CsvESQLGenerator } from '@kbn/generate-csv';
+import type { CancellationToken } from '@kbn/reporting-common';
 import {
-  CancellationToken,
   LICENSE_TYPE_BASIC,
   LICENSE_TYPE_CLOUD_STANDARD,
   LICENSE_TYPE_ENTERPRISE,
@@ -23,12 +23,12 @@ import {
   LICENSE_TYPE_PLATINUM,
   LICENSE_TYPE_TRIAL,
 } from '@kbn/reporting-common';
-import { TaskInstanceFields } from '@kbn/reporting-common/types';
-import {
-  CSV_REPORT_TYPE_V2,
+import type { TaskInstanceFields } from '@kbn/reporting-common/types';
+import type {
   JobParamsCsvFromSavedObject,
   TaskPayloadCsvFromSavedObject,
 } from '@kbn/reporting-export-types-csv-common';
+import { CSV_REPORT_TYPE_V2 } from '@kbn/reporting-export-types-csv-common';
 import {
   ExportType,
   decryptJobHeaders,
@@ -37,7 +37,7 @@ import {
   type BaseExportTypeStartDeps,
 } from '@kbn/reporting-server';
 
-import { ReportingRequestHandlerContext } from './types';
+import type { ReportingRequestHandlerContext } from './types';
 
 type CsvV2ExportTypeSetupDeps = BaseExportTypeSetupDeps;
 

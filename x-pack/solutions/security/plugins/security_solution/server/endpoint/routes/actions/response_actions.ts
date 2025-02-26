@@ -10,25 +10,27 @@ import type {
   ResponseActionAgentType,
   ResponseActionsApiCommandNames,
 } from '../../../../common/endpoint/service/response_actions/constants';
-import type { RunScriptActionRequestBody } from '../../../../common/api/endpoint';
 import {
   EndpointActionGetFileSchema,
-  type ExecuteActionRequestBody,
   ExecuteActionRequestSchema,
   GetProcessesRouteRequestSchema,
   IsolateRouteRequestSchema,
-  type KillProcessRequestBody,
   KillProcessRouteRequestSchema,
-  type ResponseActionGetFileRequestBody,
-  type ResponseActionsRequestBody,
-  type ScanActionRequestBody,
   ScanActionRequestSchema,
-  type SuspendProcessRequestBody,
   SuspendProcessRouteRequestSchema,
   UnisolateRouteRequestSchema,
-  type UploadActionApiRequestBody,
   UploadActionRequestSchema,
   RunScriptActionRequestSchema,
+} from '../../../../common/api/endpoint';
+import type {
+  RunScriptActionRequestBody,
+  ExecuteActionRequestBody,
+  KillProcessRequestBody,
+  ResponseActionGetFileRequestBody,
+  ResponseActionsRequestBody,
+  ScanActionRequestBody,
+  SuspendProcessRequestBody,
+  UploadActionApiRequestBody,
 } from '../../../../common/api/endpoint';
 
 import {

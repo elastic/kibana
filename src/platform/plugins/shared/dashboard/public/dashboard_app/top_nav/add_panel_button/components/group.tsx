@@ -19,7 +19,7 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { MenuItemGroup } from '../types';
+import type { MenuItemGroup } from '../types';
 
 export function Group({ group }: { group: MenuItemGroup }) {
   return (

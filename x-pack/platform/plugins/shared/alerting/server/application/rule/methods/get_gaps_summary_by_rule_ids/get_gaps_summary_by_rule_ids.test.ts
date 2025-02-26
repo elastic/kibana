@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { ActionsAuthorization } from '@kbn/actions-plugin/server';
+import type { ActionsAuthorization } from '@kbn/actions-plugin/server';
 import { actionsAuthorizationMock } from '@kbn/actions-plugin/server/mocks';
-import { AlertingAuthorization } from '../../../../authorization';
+import type { AlertingAuthorization } from '../../../../authorization';
 import { alertingAuthorizationMock } from '../../../../authorization/alerting_authorization.mock';
 import { ruleTypeRegistryMock } from '../../../../rule_type_registry.mock';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
@@ -24,7 +24,8 @@ import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/s
 import { uiSettingsServiceMock } from '@kbn/core-ui-settings-server-mocks';
 import { backfillClientMock } from '../../../../backfill_client/backfill_client.mock';
 import { ConnectorAdapterRegistry } from '../../../../connector_adapters/connector_adapter_registry';
-import { ConstructorOptions, RulesClient } from '../../../../rules_client';
+import type { ConstructorOptions } from '../../../../rules_client';
+import { RulesClient } from '../../../../rules_client';
 
 const kibanaVersion = 'v8.0.0';
 const taskManager = taskManagerMock.createStart();

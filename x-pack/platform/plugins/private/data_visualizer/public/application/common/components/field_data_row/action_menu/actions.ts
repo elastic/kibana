@@ -19,8 +19,7 @@ import { getCompatibleLensDataType, getLensAttributes } from './lens_utils';
 import type { CombinedQuery } from '../../../../index_data_visualizer/types/combined_query';
 import type { FieldVisConfig } from '../../stats_table/types';
 import type { DataVisualizerKibanaReactContextValue } from '../../../../kibana_context';
-import { SUPPORTED_FIELD_TYPES } from '../../../../../../common/constants';
-import { APP_ID } from '../../../../../../common/constants';
+import { SUPPORTED_FIELD_TYPES, APP_ID } from '../../../../../../common/constants';
 
 export function getActions(
   dataView: DataView,

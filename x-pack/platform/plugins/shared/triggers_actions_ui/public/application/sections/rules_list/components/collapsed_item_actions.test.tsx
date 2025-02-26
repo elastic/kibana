@@ -10,7 +10,7 @@ import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
 import { CollapsedItemActions } from './collapsed_item_actions';
 import { act } from 'react-dom/test-utils';
 import { ruleTypeRegistryMock } from '../../../rule_type_registry.mock';
-import { RuleTableItem, RuleTypeModel } from '../../../../types';
+import type { RuleTableItem, RuleTypeModel } from '../../../../types';
 import { useKibana } from '../../../../common/lib/kibana';
 jest.mock('../../../../common/lib/kibana');
 

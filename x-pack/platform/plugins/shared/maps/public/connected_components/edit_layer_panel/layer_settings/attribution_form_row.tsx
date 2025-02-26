@@ -8,8 +8,8 @@
 import React from 'react';
 import { EuiButtonEmpty, EuiLink, EuiPanel, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { Attribution } from '../../../../common/descriptor_types';
-import { ILayer } from '../../../classes/layers/layer';
+import type { Attribution } from '../../../../common/descriptor_types';
+import type { ILayer } from '../../../classes/layers/layer';
 import { AttributionPopover } from './attribution_popover';
 import { panelStrings } from '../../panel_strings';
 

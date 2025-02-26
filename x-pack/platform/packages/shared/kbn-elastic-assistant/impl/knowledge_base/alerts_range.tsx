@@ -13,7 +13,7 @@ import {
   MIN_LATEST_ALERTS,
   TICK_INTERVAL,
 } from '../assistant/settings/alerts_settings/alerts_settings';
-import { KnowledgeBaseConfig } from '../assistant/types';
+import type { KnowledgeBaseConfig } from '../assistant/types';
 import { ALERTS_RANGE } from './translations';
 
 export type SingleRangeChangeEvent =

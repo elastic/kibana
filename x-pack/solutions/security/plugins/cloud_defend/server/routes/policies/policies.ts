@@ -10,7 +10,7 @@ import { POLICIES_ROUTE_PATH, INTEGRATION_PACKAGE_NAME } from '../../../common/c
 import { policiesQueryParamsSchema } from '../../../common';
 import type { CloudDefendPolicy } from '../../../common';
 import { isNonNullable } from '../../../common/utils/helpers';
-import { CloudDefendRouter } from '../../types';
+import type { CloudDefendRouter } from '../../types';
 import {
   getAgentStatusesByAgentPolicies,
   type AgentStatusByAgentPolicyMap,

@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ControlGroupChainingSystem } from './control_group';
-import { ControlLabelPosition, ControlWidth } from './types';
+import type { ControlGroupChainingSystem } from './control_group';
+import type { ControlLabelPosition, ControlWidth } from './types';
 
 export const CONTROL_WIDTH_OPTIONS = { SMALL: 'small', MEDIUM: 'medium', LARGE: 'large' } as const;
 export const CONTROL_LABEL_POSITION_OPTIONS = { ONE_LINE: 'oneLine', TWO_LINE: 'twoLine' } as const;

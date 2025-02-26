@@ -8,17 +8,21 @@
  */
 
 import type { RequestAdapter } from '@kbn/inspector-plugin/common';
-import { BehaviorSubject, Observable } from 'rxjs';
-import { PublishingSubject } from '@kbn/presentation-publishing';
+import type { Observable } from 'rxjs';
+import { BehaviorSubject } from 'rxjs';
+import type { PublishingSubject } from '@kbn/presentation-publishing';
 import { UnifiedHistogramFetchStatus } from '../..';
-import type { UnifiedHistogramServices, UnifiedHistogramChartLoadEvent } from '../../types';
+import type {
+  UnifiedHistogramServices,
+  UnifiedHistogramChartLoadEvent,
+  UnifiedHistogramSuggestionContext,
+} from '../../types';
 import {
   getChartHidden,
   getTopPanelHeight,
   setChartHidden,
   setTopPanelHeight,
 } from '../utils/local_storage_utils';
-import type { UnifiedHistogramSuggestionContext } from '../../types';
 
 /**
  * The current state of the container

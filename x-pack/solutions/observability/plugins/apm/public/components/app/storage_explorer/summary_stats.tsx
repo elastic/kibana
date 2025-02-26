@@ -19,15 +19,14 @@ import {
   EuiProgress,
   EuiSkeletonText,
   EuiSpacer,
+  useEuiTheme,
 } from '@elastic/eui';
-import { useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { useApmParams } from '../../../hooks/use_apm_params';
-import { asDynamicBytes, asPercent } from '../../../../common/utils/formatters';
+import { asDynamicBytes, asPercent, asTransactionRate } from '../../../../common/utils/formatters';
 import { useApmRouter } from '../../../hooks/use_apm_router';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 
-import { asTransactionRate } from '../../../../common/utils/formatters';
 import { getIndexManagementHref } from './get_storage_explorer_links';
 import type { APIReturnType } from '../../../services/rest/create_call_apm_api';
 

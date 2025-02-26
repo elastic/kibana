@@ -8,14 +8,15 @@
  */
 
 import * as Either from 'fp-ts/lib/Either';
-import * as TaskEither from 'fp-ts/lib/TaskEither';
+import type * as TaskEither from 'fp-ts/lib/TaskEither';
 import { errors as EsErrors } from '@elastic/elasticsearch';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import {
   catchRetryableEsClientErrors,
   type RetryableEsClientError,
 } from './catch_retryable_es_client_errors';
-import { DEFAULT_TIMEOUT, IndexNotFound } from '.';
+import type { IndexNotFound } from '.';
+import { DEFAULT_TIMEOUT } from '.';
 
 /** @internal */
 export interface SetWriteBlockParams {

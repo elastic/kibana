@@ -7,8 +7,7 @@
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { OBSERVABILITY_RULE_TYPE_IDS } from '@kbn/rule-data-utils';
-import type { BrushEndListener } from '@elastic/charts';
-import { type XYBrushEvent } from '@elastic/charts';
+import type { BrushEndListener, XYBrushEvent } from '@elastic/charts';
 import { useSummaryTimeRange, ObservabilityAlertsTable } from '@kbn/observability-plugin/public';
 import { useBoolean } from '@kbn/react-hooks';
 import type { TimeRange } from '@kbn/es-query';

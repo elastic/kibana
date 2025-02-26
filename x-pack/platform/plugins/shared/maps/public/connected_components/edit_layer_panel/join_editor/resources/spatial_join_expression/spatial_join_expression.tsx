@@ -8,7 +8,7 @@
 import React, { useState } from 'react';
 import { EuiPopover, EuiExpression } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import {
+import type {
   ESDistanceSourceDescriptor,
   JoinSourceDescriptor,
 } from '../../../../../../common/descriptor_types';

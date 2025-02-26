@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ParseOptions } from '../parser';
+import type { ParseOptions } from '../parser';
 import { EsqlQuery } from '../query';
 import { firstItem } from '../visitor/utils';
 import { makeSynthNode, createSynthMethod } from './helpers';

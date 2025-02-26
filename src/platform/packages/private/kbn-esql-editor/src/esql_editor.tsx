@@ -20,7 +20,8 @@ import {
 import { i18n } from '@kbn/i18n';
 import moment from 'moment';
 import { isEqual } from 'lodash';
-import { CodeEditor, CodeEditorProps } from '@kbn/code-editor';
+import type { CodeEditorProps } from '@kbn/code-editor';
+import { CodeEditor } from '@kbn/code-editor';
 import type { CoreStart } from '@kbn/core/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { AggregateQuery, TimeRange } from '@kbn/es-query';
@@ -36,7 +37,7 @@ import {
   ESQLVariableType,
   type ESQLControlVariable,
 } from '@kbn/esql-validation-autocomplete';
-import { FieldType } from '@kbn/esql-validation-autocomplete/src/definitions/types';
+import type { FieldType } from '@kbn/esql-validation-autocomplete/src/definitions/types';
 import { EditorFooter } from './editor_footer';
 import { fetchFieldsFromESQL } from './fetch_fields_from_esql';
 import {

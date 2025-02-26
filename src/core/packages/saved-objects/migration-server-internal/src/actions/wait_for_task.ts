@@ -7,11 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { estypes } from '@elastic/elasticsearch';
+import type { estypes, errors as EsErrors } from '@elastic/elasticsearch';
 import * as Either from 'fp-ts/lib/Either';
-import * as TaskEither from 'fp-ts/lib/TaskEither';
+import type * as TaskEither from 'fp-ts/lib/TaskEither';
 import * as Option from 'fp-ts/lib/Option';
-import { errors as EsErrors } from '@elastic/elasticsearch';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import {
   catchRetryableEsClientErrors,

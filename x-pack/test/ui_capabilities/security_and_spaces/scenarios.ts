@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Space, User } from '../common/types';
+import type { Space, User } from '../common/types';
 
 const NoKibanaPrivileges: User = {
   username: 'no_kibana_privileges',

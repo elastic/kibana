@@ -7,15 +7,15 @@
 
 /* eslint-disable @typescript-eslint/naming-convention */
 
-import {
+import type {
   ProcessorDefinition,
   ProcessorDefinitionWithId,
   ProcessorType,
-  getProcessorType,
 } from '@kbn/streams-schema';
+import { getProcessorType } from '@kbn/streams-schema';
 import { htmlIdGenerator } from '@elastic/eui';
 import { isEmpty } from 'lodash';
-import {
+import type {
   DissectFormState,
   ProcessorDefinitionWithUIAttributes,
   GrokFormState,

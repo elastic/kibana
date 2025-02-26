@@ -48,27 +48,29 @@ import {
 } from '@elastic/eui';
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 import { capitalize } from 'lodash';
-import { KibanaFeature } from '@kbn/features-plugin/public';
+import type { KibanaFeature } from '@kbn/features-plugin/public';
 import {
   formatDuration,
   getDurationNumberInItsUnit,
   getDurationUnitValue,
   parseDuration,
 } from '@kbn/alerting-plugin/common/parse_duration';
-import {
+import type {
   RuleActionParam,
+  RuleActionAlertsFilterProperty,
+  RuleActionKey,
+} from '@kbn/alerting-plugin/common';
+import {
   ALERTING_FEATURE_ID,
   RecoveredActionGroup,
   isActionGroupDisabledForActionTypeId,
-  RuleActionAlertsFilterProperty,
-  RuleActionKey,
 } from '@kbn/alerting-plugin/common';
 import { AlertingConnectorFeatureId } from '@kbn/actions-plugin/common';
 import { AlertConsumers } from '@kbn/rule-data-utils';
 import { IS_RULE_SPECIFIC_FLAPPING_ENABLED } from '@kbn/alerts-ui-shared/src/common/constants/rule_flapping';
 import type { Flapping } from '@kbn/alerting-types';
-import { RuleReducerAction, InitialRule } from './rule_reducer';
-import {
+import type { RuleReducerAction, InitialRule } from './rule_reducer';
+import type {
   RuleTypeModel,
   Rule,
   IErrorObject,
@@ -85,8 +87,12 @@ import { hasAllPrivilege, hasShowActionsCapability } from '../../lib/capabilitie
 import { SolutionFilter } from './solution_filter';
 import './rule_form.scss';
 import { useKibana } from '../../../common/lib/kibana';
-import { recoveredActionGroupMessage, summaryMessage } from '../../constants';
-import { IsEnabledResult, IsDisabledResult } from '../../lib/check_rule_type_enabled';
+import {
+  recoveredActionGroupMessage,
+  summaryMessage,
+  MULTI_CONSUMER_RULE_TYPE_IDS,
+} from '../../constants';
+import type { IsEnabledResult, IsDisabledResult } from '../../lib/check_rule_type_enabled';
 import { checkRuleTypeEnabled } from '../../lib/check_rule_type_enabled';
 import {
   ruleTypeCompare,
@@ -94,7 +100,6 @@ import {
   ruleTypeUngroupedCompare,
 } from '../../lib/rule_type_compare';
 import { VIEW_LICENSE_OPTIONS_LINK } from '../../../common/constants';
-import { MULTI_CONSUMER_RULE_TYPE_IDS } from '../../constants';
 import { SectionLoading } from '../../components/section_loading';
 import { RuleFormConsumerSelection, VALID_CONSUMERS } from './rule_form_consumer_selection';
 import { getInitialInterval } from './get_initial_interval';

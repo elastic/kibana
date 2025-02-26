@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
-import { ObservabilityAIAssistantPublicStart } from '@kbn/observability-ai-assistant-plugin/public';
-import { LicensingPluginStart } from '@kbn/licensing-plugin/public';
-import { MlPluginStart } from '@kbn/ml-plugin/public';
-import { SharePluginStart } from '@kbn/share-plugin/public';
-import { TriggersAndActionsUIPublicPluginStart } from '@kbn/triggers-actions-ui-plugin/public';
+import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
+import type { ObservabilityAIAssistantPublicStart } from '@kbn/observability-ai-assistant-plugin/public';
+import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
+import type { MlPluginStart } from '@kbn/ml-plugin/public';
+import type { SharePluginStart } from '@kbn/share-plugin/public';
+import type { TriggersAndActionsUIPublicPluginStart } from '@kbn/triggers-actions-ui-plugin/public';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface SearchAssistantPluginSetup {}

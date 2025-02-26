@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ExpressionTypeDefinition } from '@kbn/expressions-plugin/common';
-import { EqlSearchStrategyResponse } from '..';
+import type { ExpressionTypeDefinition } from '@kbn/expressions-plugin/common';
+import type { EqlSearchStrategyResponse } from '..';
 
 const name = 'eql_raw_response';
 

@@ -13,8 +13,8 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { css } from '@emotion/css';
-import { InvestigationNoteResponse } from '@kbn/investigation-shared';
-import { UserProfile } from '@kbn/security-plugin/common';
+import type { InvestigationNoteResponse } from '@kbn/investigation-shared';
+import type { UserProfile } from '@kbn/security-plugin/common';
 import React, { useState } from 'react';
 import moment from 'moment';
 import { useTheme } from '../../../../hooks/use_theme';

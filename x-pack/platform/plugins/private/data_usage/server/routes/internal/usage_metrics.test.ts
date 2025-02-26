@@ -7,8 +7,7 @@
 import type { MockedKeys } from '@kbn/utility-types-jest';
 import type { CoreSetup } from '@kbn/core/server';
 import { registerUsageMetricsRoute } from './usage_metrics';
-import { coreMock } from '@kbn/core/server/mocks';
-import { httpServerMock } from '@kbn/core/server/mocks';
+import { coreMock, httpServerMock } from '@kbn/core/server/mocks';
 import { DataUsageService } from '../../services';
 import type {
   DataUsageRequestHandlerContext,

@@ -32,8 +32,8 @@ import {
   useUIExtension,
   useAuthz,
   useFleetStatus,
+  sendGetBulkAssets,
 } from '../../../../../hooks';
-import { sendGetBulkAssets } from '../../../../../hooks';
 import { SideBarColumn } from '../../../components/side_bar_column';
 
 import { DeferredAssetsSection } from './deferred_assets_accordion';

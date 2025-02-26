@@ -16,7 +16,7 @@ import supportIconUrl from './support_icon.svg';
 import demoIconUrl from './demo_icon.svg';
 import docsIconUrl from './docs_icon.svg';
 import forumIconUrl from './forum_icon.svg';
-import { ObservabilityOnboardingAppServices } from '../..';
+import type { ObservabilityOnboardingAppServices } from '../..';
 
 const URL_FORUM = 'https://discuss.elastic.co/';
 

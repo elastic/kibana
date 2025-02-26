@@ -10,7 +10,7 @@
 import React, { PureComponent } from 'react';
 import { EuiFlexItem, EuiToolTip, EuiIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { DragHandleProps } from '../../types';
+import type { DragHandleProps } from '../../types';
 
 interface SeriesDragHandlerProps {
   hideDragHandler: boolean;

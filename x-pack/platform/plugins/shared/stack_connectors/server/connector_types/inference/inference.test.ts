@@ -12,7 +12,7 @@ import { actionsMock } from '@kbn/actions-plugin/server/mocks';
 import { Readable, Transform } from 'stream';
 import {} from '@kbn/actions-plugin/server/types';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
-import { InferenceInferenceResponse } from '@elastic/elasticsearch/lib/api/types';
+import type { InferenceInferenceResponse } from '@elastic/elasticsearch/lib/api/types';
 
 const OPENAI_CONNECTOR_ID = '123';
 const DEFAULT_OPENAI_MODEL = 'gpt-4o';

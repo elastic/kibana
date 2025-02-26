@@ -20,7 +20,7 @@ import { getOtelSynthtraceEsClient } from './get_otel_es_client';
 import { getScenario } from './get_scenario';
 import { getSyntheticsEsClient } from './get_synthetics_es_client';
 import { loggerProxy } from './logger_proxy';
-import { RunOptions } from './parse_run_cli_flags';
+import type { RunOptions } from './parse_run_cli_flags';
 
 export interface WorkerData {
   bucketFrom: Date;

@@ -8,9 +8,9 @@
  */
 
 import { createEsClientForTesting, KbnClient } from '@kbn/test';
-import { ToolingLog } from '@kbn/tooling-log';
+import type { ToolingLog } from '@kbn/tooling-log';
 import { ScoutLogger } from './logger';
-import { ScoutTestConfig, EsClient } from '../../types';
+import type { ScoutTestConfig, EsClient } from '../../types';
 
 interface ClientOptions {
   serviceName: string;

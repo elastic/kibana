@@ -6,7 +6,7 @@
  */
 import { format as formatUrl } from 'url';
 import supertest from 'supertest';
-import { FtrProviderContext } from '../configs/ftr_provider_context';
+import type { FtrProviderContext } from '../configs/ftr_provider_context';
 
 export function KibanaSupertestWithCertProvider({ getService }: FtrProviderContext) {
   const config = getService('config');

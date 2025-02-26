@@ -21,20 +21,22 @@ import { i18n } from '@kbn/i18n';
 import { extractErrorProperties } from '@kbn/ml-error-utils';
 
 import type { DFAModelItem } from '../../../../common/types/trained_models';
-import type { AddInferencePipelineSteps } from './types';
+import { TEST_PIPELINE_MODE } from './types';
+import type { AddInferencePipelineSteps, MlInferenceState, InferenceModelTypes } from './types';
 import { ADD_INFERENCE_PIPELINE_STEPS } from './constants';
-import { AddInferencePipelineFooter } from '../shared';
-import { AddInferencePipelineHorizontalSteps } from '../shared';
+import {
+  AddInferencePipelineFooter,
+  AddInferencePipelineHorizontalSteps,
+  OnFailureConfiguration,
+  ReviewAndCreatePipeline,
+} from '../shared';
 import { getInitialState, getModelType } from './state';
 import { PipelineDetails } from './components/pipeline_details';
 import { ProcessorConfiguration } from './components/processor_configuration';
-import { OnFailureConfiguration } from '../shared';
 import { TestPipeline } from './components/test_pipeline';
-import { ReviewAndCreatePipeline } from '../shared';
 import { useMlApi } from '../../contexts/kibana';
 import { getPipelineConfig } from './get_pipeline_config';
 import { validateInferencePipelineConfigurationStep } from './validation';
-import { type MlInferenceState, type InferenceModelTypes, TEST_PIPELINE_MODE } from './types';
 import { useFetchPipelines } from './hooks/use_fetch_pipelines';
 
 export interface AddInferencePipelineFlyoutProps {

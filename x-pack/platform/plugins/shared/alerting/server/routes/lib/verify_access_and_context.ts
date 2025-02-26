@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import { RequestHandler } from '@kbn/core/server';
-import { ILicenseState, isErrorThatHandlesItsOwnResponse, verifyApiAccess } from '../../lib';
-import { AlertingRequestHandlerContext } from '../../types';
+import type { RequestHandler } from '@kbn/core/server';
+import type { ILicenseState } from '../../lib';
+import { isErrorThatHandlesItsOwnResponse, verifyApiAccess } from '../../lib';
+import type { AlertingRequestHandlerContext } from '../../types';
 
 type AlertingRequestHandlerWrapper = <P, Q, B>(
   licenseState: ILicenseState,

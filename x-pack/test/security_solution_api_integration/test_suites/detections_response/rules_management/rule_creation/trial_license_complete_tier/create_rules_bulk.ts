@@ -14,7 +14,7 @@ import {
   NOTIFICATION_THROTTLE_NO_ACTIONS,
   NOTIFICATION_THROTTLE_RULE,
 } from '@kbn/security-solution-plugin/common/constants';
-import { RuleCreateProps } from '@kbn/security-solution-plugin/common/api/detection_engine';
+import type { RuleCreateProps } from '@kbn/security-solution-plugin/common/api/detection_engine';
 import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 
 import {
@@ -36,7 +36,7 @@ import {
   getRuleForAlertTesting,
   waitForRuleSuccess,
 } from '../../../../../../common/utils/security_solution';
-import { FtrProviderContext } from '../../../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../../../ftr_provider_context';
 
 export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');

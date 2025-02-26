@@ -5,20 +5,18 @@
  * 2.0.
  */
 
-import { IRouter } from '@kbn/core/server';
-import { ILicenseState } from '../../../../lib';
+import type { IRouter } from '@kbn/core/server';
+import type { ILicenseState } from '../../../../lib';
 import { verifyAccessAndContext } from '../../../lib';
-import {
-  AlertingRequestHandlerContext,
-  INTERNAL_ALERTING_API_MAINTENANCE_WINDOW_PATH,
-} from '../../../../types';
+import type { AlertingRequestHandlerContext } from '../../../../types';
+import { INTERNAL_ALERTING_API_MAINTENANCE_WINDOW_PATH } from '../../../../types';
 import { MAINTENANCE_WINDOW_API_PRIVILEGES } from '../../../../../common';
-import { MaintenanceWindow } from '../../../../application/maintenance_window/types';
-import {
-  getParamsSchemaV1,
+import type { MaintenanceWindow } from '../../../../application/maintenance_window/types';
+import type {
   GetMaintenanceWindowRequestParamsV1,
   GetMaintenanceWindowResponseV1,
 } from '../../../../../common/routes/maintenance_window/apis/get';
+import { getParamsSchemaV1 } from '../../../../../common/routes/maintenance_window/apis/get';
 import { transformMaintenanceWindowToResponseV1 } from '../../transforms';
 
 export const getMaintenanceWindowRoute = (

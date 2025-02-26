@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import { EuiLoadingSpinner } from '@elastic/eui';
+import { EuiLoadingSpinner, EuiHeaderLink, EuiIcon, EuiToolTip, useEuiTheme } from '@elastic/eui';
 import type { IconType } from '@elastic/eui';
-import { EuiHeaderLink, EuiIcon, EuiToolTip, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { AnomalyDetectionSetupState } from '../../../../../common/anomaly_detection/get_anomaly_detection_setup_state';

@@ -5,9 +5,10 @@
  * 2.0.
  */
 import { filter, lastValueFrom, of, throwError } from 'rxjs';
-import { ChatCompleteResponse } from '@kbn/inference-common';
-import { Message, MessageRole } from '../../../../common';
-import { LangTracer } from '../instrumentation/lang_tracer';
+import type { ChatCompleteResponse } from '@kbn/inference-common';
+import type { Message } from '../../../../common';
+import { MessageRole } from '../../../../common';
+import type { LangTracer } from '../instrumentation/lang_tracer';
 import { TITLE_CONVERSATION_FUNCTION_NAME, getGeneratedTitle } from './get_generated_title';
 
 describe('getGeneratedTitle', () => {

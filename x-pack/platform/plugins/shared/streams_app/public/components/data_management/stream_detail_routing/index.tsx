@@ -12,7 +12,7 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/css';
-import { WiredStreamGetResponse } from '@kbn/streams-schema';
+import type { WiredStreamGetResponse } from '@kbn/streams-schema';
 import React from 'react';
 import { useUnsavedChangesPrompt } from '@kbn/unsaved-changes-prompt';
 import { useKibana } from '../../../hooks/use_kibana';

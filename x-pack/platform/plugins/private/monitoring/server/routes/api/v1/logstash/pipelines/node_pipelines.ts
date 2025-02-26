@@ -8,7 +8,7 @@
 import { getNodeInfo } from '../../../../../lib/logstash/get_node_info';
 import { handleError } from '../../../../../lib/errors';
 import { getPaginatedPipelines } from '../../../../../lib/logstash/get_paginated_pipelines';
-import { MonitoringCore, PipelineMetricKey } from '../../../../../types';
+import type { MonitoringCore, PipelineMetricKey } from '../../../../../types';
 import { createValidationFunction } from '../../../../../lib/create_route_validation_function';
 import {
   postLogstashNodePipelinesRequestParamsRT,

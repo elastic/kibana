@@ -7,11 +7,11 @@
 
 import React, { createContext, useContext } from 'react';
 
-import { CoreStart, ScopedHistory } from '@kbn/core/public';
-import { LicensingPluginSetup, ILicense } from '@kbn/licensing-plugin/public';
-import { TelemetryPluginStart } from '@kbn/telemetry-plugin/public';
-import { ClientConfigType } from '../types';
-import { BreadcrumbService } from './breadcrumbs';
+import type { CoreStart, ScopedHistory } from '@kbn/core/public';
+import type { LicensingPluginSetup, ILicense } from '@kbn/licensing-plugin/public';
+import type { TelemetryPluginStart } from '@kbn/telemetry-plugin/public';
+import type { ClientConfigType } from '../types';
+import type { BreadcrumbService } from './breadcrumbs';
 
 const AppContext = createContext<AppDependencies | undefined>(undefined);
 

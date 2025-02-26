@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { FtrConfigProviderContext } from '@kbn/test';
+import type { FtrConfigProviderContext } from '@kbn/test';
 import { generateConfig } from './config.base.edr_workflows';
 import { services } from './services_edr_workflows';
 

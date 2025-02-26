@@ -19,7 +19,7 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 
-import { RuleConditionChart } from '@kbn/observability-plugin/public';
+import { RuleConditionChart, getGroupFilters } from '@kbn/observability-plugin/public';
 import { ALERT_END, ALERT_START, ALERT_EVALUATION_VALUES, ALERT_GROUP } from '@kbn/rule-data-utils';
 import type { Rule, RuleTypeParams } from '@kbn/alerting-plugin/common';
 import { getPaddedAlertTimeRange } from '@kbn/observability-get-padded-alert-time-range-util';
@@ -29,7 +29,6 @@ import type {
   RangeEventAnnotationConfig,
 } from '@kbn/event-annotation-common';
 
-import { getGroupFilters } from '@kbn/observability-plugin/public';
 import type { GenericAggType, TopAlert } from '@kbn/observability-plugin/public';
 import { metricValueFormatter } from '../../../../common/alerting/metrics/metric_value_formatter';
 import { Threshold } from '../../common/components/threshold';

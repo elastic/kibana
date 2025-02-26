@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { ConfigFieldSchema, SecretsFieldSchema } from '@kbn/triggers-actions-ui-plugin/public';
+import type { ConfigFieldSchema, SecretsFieldSchema } from '@kbn/triggers-actions-ui-plugin/public';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiLink } from '@elastic/eui';
 import {

@@ -4,11 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { cloneDeep } from 'lodash';
-import { TransportResult } from '@elastic/elasticsearch';
-import { get } from 'lodash';
+import { cloneDeep, get } from 'lodash';
+import type { TransportResult, estypes } from '@elastic/elasticsearch';
 import { set } from '@kbn/safer-lodash-set';
-import type { estypes } from '@elastic/elasticsearch';
 
 export const sanitizeBulkErrorResponse = (
   response: TransportResult<estypes.BulkResponse, unknown> | estypes.BulkResponse

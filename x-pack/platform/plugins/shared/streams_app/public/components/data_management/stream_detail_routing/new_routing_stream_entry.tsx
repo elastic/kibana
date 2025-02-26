@@ -7,7 +7,7 @@
 
 import { EuiPanel, EuiFlexGroup, EuiFormRow, EuiFieldText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { RoutingDefinition } from '@kbn/streams-schema';
+import type { RoutingDefinition } from '@kbn/streams-schema';
 import React from 'react';
 import { ConditionEditor } from '../condition_editor';
 

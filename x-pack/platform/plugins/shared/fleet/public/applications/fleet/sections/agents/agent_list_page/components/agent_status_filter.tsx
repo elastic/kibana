@@ -6,8 +6,8 @@
  */
 
 import type { EuiSelectableOption } from '@elastic/eui';
-import { useEuiTheme } from '@elastic/eui';
 import {
+  useEuiTheme,
   EuiFilterButton,
   EuiNotificationBadge,
   EuiPopover,

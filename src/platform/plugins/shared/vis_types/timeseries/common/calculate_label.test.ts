@@ -8,8 +8,7 @@
  */
 
 import { calculateLabel } from './calculate_label';
-import type { Metric } from './types';
-import { SanitizedFieldType } from './types';
+import type { Metric, SanitizedFieldType } from './types';
 import { KBN_FIELD_TYPES } from '@kbn/data-plugin/common';
 
 describe('calculateLabel(metric, metrics)', () => {

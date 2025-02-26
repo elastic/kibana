@@ -5,20 +5,23 @@
  * 2.0.
  */
 
-import type { DataProviderType } from './components.gen';
+// FIXME Some of the auto-generated types and enums are exported at the same time
+// as Enum and as Type, using the same name :thisisfine:
+// eslint-disable @typescript-eslint/consistent-type-imports
 import {
   BareNote,
   BarePinnedEvent,
   ColumnHeaderResult,
-  DataProviderTypeEnum,
   DataProviderResult,
+  DataProviderType,
+  DataProviderTypeEnum,
   FavoriteTimelineResponse,
   FilterTimelineResult,
   ImportTimelineResult,
   ImportTimelines,
-  type Note,
-  PinnedEvent,
+  Note,
   PersistTimelineResponse,
+  PinnedEvent,
   QueryMatchResult,
   ResolvedTimeline,
   RowRendererId,
@@ -52,8 +55,8 @@ export {
   ImportTimelineResult,
   ImportTimelines,
   Note,
-  PinnedEvent,
   PersistTimelineResponse,
+  PinnedEvent,
   QueryMatchResult,
   ResolvedTimeline,
   RowRendererId,
@@ -65,9 +68,9 @@ export {
   SortFieldTimeline,
   SortFieldTimelineEnum,
   TemplateTimelineType,
+  TemplateTimelineTypeEnum,
   TimelineErrorResponse,
   TimelineResponse,
-  TemplateTimelineTypeEnum,
   TimelineSavedToReturnObject,
   TimelineStatus,
   TimelineStatusEnum,

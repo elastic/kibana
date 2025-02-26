@@ -7,10 +7,10 @@
 
 import expect from '@kbn/expect';
 import { v4 as uuidv4 } from 'uuid';
-import { GetNotesResult, Note } from '@kbn/security-solution-plugin/common/api/timeline';
+import type { GetNotesResult, Note } from '@kbn/security-solution-plugin/common/api/timeline';
 import { NOTE_URL } from '@kbn/security-solution-plugin/common/constants';
-import TestAgent from 'supertest/lib/agent';
-import { FtrProviderContextWithSpaces } from '../../../../ftr_provider_context_with_spaces';
+import type TestAgent from 'supertest/lib/agent';
+import type { FtrProviderContextWithSpaces } from '../../../../ftr_provider_context_with_spaces';
 import { createNote, deleteNotes } from '../../utils/notes';
 
 export default function ({ getService }: FtrProviderContextWithSpaces) {

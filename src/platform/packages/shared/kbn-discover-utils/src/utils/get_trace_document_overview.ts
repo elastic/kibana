@@ -8,7 +8,8 @@
  */
 
 import { castArray } from 'lodash';
-import { DataTableRecord, TraceDocumentOverview, fieldConstants } from '../..';
+import type { DataTableRecord, TraceDocumentOverview } from '../..';
+import { fieldConstants } from '../..';
 
 export function getTraceDocumentOverview(doc: DataTableRecord): TraceDocumentOverview {
   const formatField = <T extends keyof TraceDocumentOverview>(field: T) =>

@@ -8,7 +8,7 @@
  */
 
 import expect from '@kbn/expect';
-import { PluginFunctionalProviderContext } from '../../services';
+import type { PluginFunctionalProviderContext } from '../../services';
 
 export default function ({ getService, getPageObjects }: PluginFunctionalProviderContext) {
   const { common, header, dashboard, discover, unifiedFieldList } = getPageObjects([

@@ -14,14 +14,19 @@ import type {
 } from '@kbn/core/server';
 import { createExecutionContext } from '@kbn/ml-route-utils';
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
-import { AIOPS_ANALYSIS_RUN_ORIGIN, AIOPS_PLUGIN_ID } from '@kbn/aiops-common/constants';
+import {
+  AIOPS_ANALYSIS_RUN_ORIGIN,
+  AIOPS_PLUGIN_ID,
+  AIOPS_API_ENDPOINT,
+} from '@kbn/aiops-common/constants';
 import type {
   AiopsLogRateAnalysisSchema,
   AiopsLogRateAnalysisApiVersion as ApiVersion,
 } from '@kbn/aiops-log-rate-analysis/api/schema';
-import { fetchFieldCandidates } from '@kbn/aiops-log-rate-analysis/queries/fetch_field_candidates';
-import { AIOPS_API_ENDPOINT } from '@kbn/aiops-common/constants';
-import { TEXT_FIELD_SAFE_LIST } from '@kbn/aiops-log-rate-analysis/queries/fetch_field_candidates';
+import {
+  fetchFieldCandidates,
+  TEXT_FIELD_SAFE_LIST,
+} from '@kbn/aiops-log-rate-analysis/queries/fetch_field_candidates';
 
 import { trackAIOpsRouteUsage } from '../../lib/track_route_usage';
 import type { AiopsLicense } from '../../types';

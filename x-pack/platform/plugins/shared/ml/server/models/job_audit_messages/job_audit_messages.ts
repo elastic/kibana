@@ -7,8 +7,13 @@
 
 import moment from 'moment';
 import type { IScopedClusterClient } from '@kbn/core/server';
-import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
-import type { estypes } from '@elastic/elasticsearch';
+import type {
+  AggregationsRateAggregate,
+  AggregationsTermsAggregateBase,
+  QueryDslQueryContainer,
+  SearchResponse,
+  SearchTotalHits,
+} from '@elastic/elasticsearch/lib/api/types';
 import { ML_NOTIFICATION_INDEX_PATTERN } from '../../../common/constants/index_patterns';
 import { MESSAGE_LEVEL } from '../../../common/constants/message_levels';
 import type { MLSavedObjectService } from '../../saved_objects';
@@ -164,7 +169,7 @@ export function jobAuditMessagesProvider(
     let messages: JobMessage[] = [];
     const notificationIndices: string[] = [];
 
-    if ((body.hits.total as estypes.SearchTotalHits).value > 0) {
+    if ((body.hits.total as SearchTotalHits).value > 0) {
       let notificationIndex: string;
       body.hits.hits.forEach((hit) => {
         if (notificationIndex !== hit._index && isClearable(hit._index)) {
@@ -268,11 +273,11 @@ export function jobAuditMessagesProvider(
 
     interface LevelsPerJob {
       key: string;
-      levels: estypes.AggregationsTermsAggregateBase<{
+      levels: AggregationsTermsAggregateBase<{
         key: LevelName;
-        latestMessage: estypes.AggregationsTermsAggregateBase<{
+        latestMessage: AggregationsTermsAggregateBase<{
           key: string;
-          latestMessage: estypes.AggregationsRateAggregate;
+          latestMessage: AggregationsRateAggregate;
         }>;
       }>;
     }
@@ -282,11 +287,11 @@ export function jobAuditMessagesProvider(
     const jobMessages: AuditMessage[] = [];
 
     const bodyAgg = body.aggregations as {
-      levelsPerJob?: estypes.AggregationsTermsAggregateBase<LevelsPerJob>;
+      levelsPerJob?: AggregationsTermsAggregateBase<LevelsPerJob>;
     };
 
     if (
-      (body.hits.total as estypes.SearchTotalHits).value > 0 &&
+      (body.hits.total as SearchTotalHits).value > 0 &&
       bodyAgg &&
       bodyAgg.levelsPerJob &&
       bodyAgg.levelsPerJob.buckets &&
@@ -305,9 +310,9 @@ export function jobAuditMessagesProvider(
         (
           job.levels.buckets as Array<{
             key: LevelName;
-            latestMessage: estypes.AggregationsTermsAggregateBase<{
+            latestMessage: AggregationsTermsAggregateBase<{
               key: string;
-              latestMessage: estypes.AggregationsRateAggregate;
+              latestMessage: AggregationsRateAggregate;
             }>;
           }>
         ).forEach((level) => {
@@ -323,7 +328,7 @@ export function jobAuditMessagesProvider(
               (
                 level.latestMessage.buckets as Array<{
                   key: string;
-                  latestMessage: estypes.AggregationsRateAggregate;
+                  latestMessage: AggregationsRateAggregate;
                 }>
               ).forEach((msg) => {
                 // there should only be one result here.
@@ -476,17 +481,17 @@ export function jobAuditMessagesProvider(
       { maxRetries: 0 }
     );
 
-    const errors = body.aggregations!.by_job as estypes.AggregationsTermsAggregateBase<{
+    const errors = body.aggregations!.by_job as AggregationsTermsAggregateBase<{
       key: string;
       doc_count: number;
-      latest_errors: Pick<estypes.SearchResponse<JobMessage>, 'hits'>;
+      latest_errors: Pick<SearchResponse<JobMessage>, 'hits'>;
     }>;
 
     return (
       errors.buckets as Array<{
         key: string;
         doc_count: number;
-        latest_errors: Pick<estypes.SearchResponse<JobMessage>, 'hits'>;
+        latest_errors: Pick<SearchResponse<JobMessage>, 'hits'>;
       }>
     ).map((bucket) => {
       return {

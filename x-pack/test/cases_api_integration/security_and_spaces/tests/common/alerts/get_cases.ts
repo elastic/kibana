@@ -7,8 +7,8 @@
 
 import expect from '@kbn/expect';
 import { CASES_URL } from '@kbn/cases-plugin/common/constants';
-import { Case } from '@kbn/cases-plugin/common/types/domain';
-import { FtrProviderContext } from '../../../../common/ftr_provider_context';
+import type { Case } from '@kbn/cases-plugin/common/types/domain';
+import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
 import {
   getPostCaseRequest,

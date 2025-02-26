@@ -9,12 +9,8 @@
 
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
 import type { DataTableColumnsMeta, DataTableRecord } from '@kbn/discover-utils/types';
-import {
-  formatFieldValue,
-  getIgnoredReason,
-  IgnoredReason,
-  isNestedFieldParent,
-} from '@kbn/discover-utils';
+import type { IgnoredReason } from '@kbn/discover-utils';
+import { formatFieldValue, getIgnoredReason, isNestedFieldParent } from '@kbn/discover-utils';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { getFieldIconType, getTextBasedColumnIconType } from '@kbn/field-utils';
 import { getDataViewFieldOrCreateFromColumnMeta } from '@kbn/data-view-utils';

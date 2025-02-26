@@ -5,10 +5,9 @@
  * 2.0.
  */
 
-import { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
+import type { TaskManagerStartContract, TaskInstance } from '@kbn/task-manager-plugin/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import type { Logger } from '@kbn/core/server';
-import type { TaskInstance } from '@kbn/task-manager-plugin/server';
 
 type Require<T extends object, P extends keyof T> = Omit<T, P> & Required<Pick<T, P>>;
 type TaskInstanceWithId = Require<TaskInstance, 'id'>;

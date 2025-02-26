@@ -7,7 +7,8 @@
 
 import React from 'react';
 import { render, fireEvent, waitFor } from '@testing-library/react';
-import { MultiSelectFilter, MultiSelectFilterOption } from './multi_select_filter';
+import type { MultiSelectFilterOption } from './multi_select_filter';
+import { MultiSelectFilter } from './multi_select_filter';
 
 describe('MultiSelectFilter', () => {
   const options: MultiSelectFilterOption[] = [

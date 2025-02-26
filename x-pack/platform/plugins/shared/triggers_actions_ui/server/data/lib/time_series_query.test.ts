@@ -7,8 +7,9 @@
 
 import type { estypes } from '@elastic/elasticsearch';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
-import { Logger } from '@kbn/core/server';
-import { TimeSeriesQuery, timeSeriesQuery, getResultFromEs } from './time_series_query';
+import type { Logger } from '@kbn/core/server';
+import type { TimeSeriesQuery } from './time_series_query';
+import { timeSeriesQuery, getResultFromEs } from './time_series_query';
 import { alertsMock } from '@kbn/alerting-plugin/server/mocks';
 
 const DefaultQueryParams: TimeSeriesQuery = {

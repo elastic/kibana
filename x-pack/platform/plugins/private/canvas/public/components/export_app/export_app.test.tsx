@@ -8,7 +8,7 @@
 import React from 'react';
 import { mount } from 'enzyme';
 import { ExportApp } from './export_app.component';
-import { CanvasWorkpad } from '../../../types';
+import type { CanvasWorkpad } from '../../../types';
 
 jest.mock('../workpad_page', () => ({
   WorkpadPage: (props: any) => <div>Page</div>,

@@ -7,7 +7,7 @@
 
 import { i18n as kbnI18n } from '@kbn/i18n';
 
-import type { CoreSetup } from '@kbn/core/public';
+import type { CoreSetup, PluginInitializerContext } from '@kbn/core/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
@@ -22,7 +22,6 @@ import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-management-plugin/public/plugin';
 import type { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
 import type { SavedSearchPublicPluginStart } from '@kbn/saved-search-plugin/public';
-import type { PluginInitializerContext } from '@kbn/core/public';
 import type { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
 import type { ConfigSchema } from '../server/config';
 import { registerFeature } from './register_feature';

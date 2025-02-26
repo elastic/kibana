@@ -5,17 +5,18 @@
  * 2.0.
  */
 
-import { IlmLocatorParams } from '@kbn/index-lifecycle-management-common-shared';
-import { LocatorPublic } from '@kbn/share-plugin/common';
+import type { IlmLocatorParams } from '@kbn/index-lifecycle-management-common-shared';
+import type { LocatorPublic } from '@kbn/share-plugin/common';
+import type { IngestStreamGetResponse } from '@kbn/streams-schema';
 import {
-  IngestStreamGetResponse,
   isDisabledLifecycle,
   isDslLifecycle,
   isIlmLifecycle,
   isInheritLifecycle,
   isWiredStreamGetResponse,
 } from '@kbn/streams-schema';
-import React, { ReactNode } from 'react';
+import type { ReactNode } from 'react';
+import React from 'react';
 import { useBoolean } from '@kbn/react-hooks';
 import {
   EuiBadge,
@@ -33,10 +34,10 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { LifecycleEditAction } from './modal';
+import type { LifecycleEditAction } from './modal';
 import { IlmLink } from './ilm_link';
 import { useStreamsAppRouter } from '../../../hooks/use_streams_app_router';
-import { DataStreamStats } from './hooks/use_data_stream_stats';
+import type { DataStreamStats } from './hooks/use_data_stream_stats';
 import { formatBytes } from './helpers/format_bytes';
 
 export function RetentionMetadata({

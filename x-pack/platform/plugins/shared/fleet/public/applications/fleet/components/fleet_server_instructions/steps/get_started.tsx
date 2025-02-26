@@ -8,8 +8,8 @@
 import React from 'react';
 
 import type { EuiStepProps } from '@elastic/eui';
-import { EuiIconTip } from '@elastic/eui';
 import {
+  EuiIconTip,
   EuiButton,
   EuiCallOut,
   EuiCode,

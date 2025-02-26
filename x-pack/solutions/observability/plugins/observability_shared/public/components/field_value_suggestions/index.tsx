@@ -8,7 +8,7 @@
 import React, { useState } from 'react';
 import { useValuesList } from '../../hooks/use_values_list';
 import { FieldValueSelection } from './field_value_selection';
-import { FieldValueSuggestionsProps } from './types';
+import type { FieldValueSuggestionsProps } from './types';
 import { FieldValueCombobox } from './field_value_combobox';
 
 export function FieldValueSuggestions({

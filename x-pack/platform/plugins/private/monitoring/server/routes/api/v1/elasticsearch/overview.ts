@@ -20,7 +20,7 @@ import { getLastRecovery } from '../../../../lib/elasticsearch/get_last_recovery
 import { getIndicesUnassignedShardStats } from '../../../../lib/elasticsearch/shards/get_indices_unassigned_shard_stats';
 import { handleError } from '../../../../lib/errors/handle_error';
 import { getLogs } from '../../../../lib/logs';
-import { MonitoringCore } from '../../../../types';
+import type { MonitoringCore } from '../../../../types';
 import { metricSet } from './metric_set_overview';
 
 export function esOverviewRoute(server: MonitoringCore) {

@@ -7,11 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { pluck } from 'rxjs';
-import { lastValueFrom } from 'rxjs';
-import { Query, AggregateQuery, TimeRange } from '@kbn/es-query';
-import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
-import type { Datatable } from '@kbn/expressions-plugin/public';
+import { pluck, lastValueFrom } from 'rxjs';
+import type { Query, AggregateQuery, TimeRange } from '@kbn/es-query';
+import type { ExpressionsStart, Datatable } from '@kbn/expressions-plugin/public';
 import { textBasedQueryStateToAstWithValidation } from '@kbn/data-plugin/common';
 
 interface TextBasedLanguagesErrorResponse {

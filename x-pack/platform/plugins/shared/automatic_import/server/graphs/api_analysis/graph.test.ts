@@ -10,7 +10,7 @@ import {
   apiAnalysisPathSuggestionsMockedResponse,
   apiAnalysisExpectedResults,
 } from '../../../__jest__/fixtures/api_analysis';
-import {
+import type {
   ActionsClientChatOpenAI,
   ActionsClientSimpleChatModel,
 } from '@kbn/langchain/server/language_models';

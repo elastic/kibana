@@ -8,7 +8,7 @@
  */
 
 import { isRestartingExpression } from '../../../shared/helpers';
-import { CommandSuggestParams } from '../../../definitions/types';
+import type { CommandSuggestParams } from '../../../definitions/types';
 
 import type { SuggestionRawDefinition } from '../../types';
 import {

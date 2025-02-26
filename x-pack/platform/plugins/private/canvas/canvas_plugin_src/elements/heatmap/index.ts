@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { ElementFactory } from '../../../types';
+import type { ElementFactory } from '../../../types';
 
 export const heatmap: ElementFactory = () => ({
   name: 'heatmap',

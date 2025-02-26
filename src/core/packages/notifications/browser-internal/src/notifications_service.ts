@@ -9,7 +9,7 @@
 
 import { i18n } from '@kbn/i18n';
 
-import { Subscription } from 'rxjs';
+import type { Subscription } from 'rxjs';
 import type { AnalyticsServiceStart, AnalyticsServiceSetup } from '@kbn/core-analytics-browser';
 import type { ThemeServiceStart } from '@kbn/core-theme-browser';
 import type { UserProfileService } from '@kbn/core-user-profile-browser';

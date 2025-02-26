@@ -6,8 +6,8 @@
  */
 
 import React from 'react';
+import type { DragDropContextProps } from '@elastic/eui';
 import {
-  DragDropContextProps,
   EuiPanel,
   EuiResizableContainer,
   EuiSplitPanel,
@@ -18,11 +18,13 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { IngestStreamGetResponse, isRootStreamDefinition } from '@kbn/streams-schema';
+import type { IngestStreamGetResponse } from '@kbn/streams-schema';
+import { isRootStreamDefinition } from '@kbn/streams-schema';
 import { useUnsavedChangesPrompt } from '@kbn/unsaved-changes-prompt';
 import { css } from '@emotion/react';
 import { isEmpty } from 'lodash';
-import { UseDefinitionReturn, useDefinition } from './hooks/use_definition';
+import type { UseDefinitionReturn } from './hooks/use_definition';
+import { useDefinition } from './hooks/use_definition';
 import { useKibana } from '../../../hooks/use_kibana';
 import { RootStreamEmptyPrompt } from './root_stream_empty_prompt';
 import { DraggableProcessorListItem } from './processors_list';
@@ -30,10 +32,8 @@ import { SortableList } from './sortable_list';
 import { ManagementBottomBar } from '../management_bottom_bar';
 import { AddProcessorPanel } from './processors';
 import { SimulationPlayground } from './simulation_playground';
-import {
-  UseProcessingSimulatorReturn,
-  useProcessingSimulator,
-} from './hooks/use_processing_simulator';
+import type { UseProcessingSimulatorReturn } from './hooks/use_processing_simulator';
+import { useProcessingSimulator } from './hooks/use_processing_simulator';
 import { SimulatorContextProvider } from './simulator_context';
 
 const MemoSimulationPlayground = React.memo(SimulationPlayground);

@@ -8,13 +8,13 @@
 import React from 'react';
 import type { Map as MbMap } from '@kbn/mapbox-gl';
 import { EuiIcon } from '@elastic/eui';
-import { IStyle } from '../style';
+import type { IStyle } from '../style';
 import { HeatmapStyleEditor } from './components/heatmap_style_editor';
 import { HeatmapLegend } from './components/legend/heatmap_legend';
 import { DEFAULT_HEATMAP_COLOR_RAMP_NAME, getOrdinalMbColorRampStops } from '../color_palettes';
 import { LAYER_STYLE_TYPE, GRID_RESOLUTION } from '../../../../common/constants';
-import { HeatmapStyleDescriptor, StyleDescriptor } from '../../../../common/descriptor_types';
-import { IField } from '../../fields/field';
+import type { HeatmapStyleDescriptor, StyleDescriptor } from '../../../../common/descriptor_types';
+import type { IField } from '../../fields/field';
 
 // The heatmap range chosen hear runs from 0 to 1. It is arbitrary.
 // Weighting is on the raw count/sum values.

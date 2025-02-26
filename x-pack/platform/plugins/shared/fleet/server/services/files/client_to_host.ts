@@ -13,11 +13,15 @@ import { v4 as uuidV4 } from 'uuid';
 
 import { FleetFilesClientError } from '../../errors';
 
-import type { FleetFile, FleetToHostFileClientInterface } from './types';
+import type {
+  FleetFile,
+  FleetToHostFileClientInterface,
+  FileCustomMeta,
+  FleetFileUpdatableFields,
+  HapiReadableStream,
+} from './types';
 
 import { FleetFromHostFilesClient } from './client_from_host';
-import type { FileCustomMeta } from './types';
-import type { FleetFileUpdatableFields, HapiReadableStream } from './types';
 
 export class FleetToHostFilesClient
   extends FleetFromHostFilesClient

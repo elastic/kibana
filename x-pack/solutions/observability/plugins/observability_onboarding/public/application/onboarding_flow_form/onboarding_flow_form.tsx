@@ -26,12 +26,13 @@ import { css } from '@emotion/react';
 
 import { useSearchParams } from 'react-router-dom-v5-compat';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { IntegrationCardItem } from '@kbn/fleet-plugin/public';
+import type { IntegrationCardItem } from '@kbn/fleet-plugin/public';
 import { PackageListSearchForm } from '../package_list_search_form/package_list_search_form';
-import { Category } from './types';
+import type { Category } from './types';
 import { useCustomCards } from './use_custom_cards';
-import { LogoIcon, SupportedLogo } from '../shared/logo_icon';
-import { ObservabilityOnboardingAppServices } from '../..';
+import type { SupportedLogo } from '../shared/logo_icon';
+import { LogoIcon } from '../shared/logo_icon';
+import type { ObservabilityOnboardingAppServices } from '../..';
 import { PackageList } from '../package_list/package_list';
 
 interface UseCaseOption {

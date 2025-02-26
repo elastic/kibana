@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import {
+import type {
   CoreStart,
   HttpSetup,
   IUiSettingsClient,
@@ -15,14 +15,14 @@ import {
   DocLinksStart,
   ChromeStart,
   I18nStart,
+  HttpRequestInit,
 } from '@kbn/core/public';
-import { Observable } from 'rxjs';
-import { HttpRequestInit } from '@kbn/core/public';
-import { TriggersAndActionsUIPublicPluginStart } from '@kbn/triggers-actions-ui-plugin/public';
-import { TypeRegistry } from '@kbn/triggers-actions-ui-plugin/public/application/type_registry';
-import { ActionTypeModel, RuleTypeModel } from '@kbn/triggers-actions-ui-plugin/public/types';
-import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
-import {
+import type { Observable } from 'rxjs';
+import type { TriggersAndActionsUIPublicPluginStart } from '@kbn/triggers-actions-ui-plugin/public';
+import type { TypeRegistry } from '@kbn/triggers-actions-ui-plugin/public/application/type_registry';
+import type { ActionTypeModel, RuleTypeModel } from '@kbn/triggers-actions-ui-plugin/public/types';
+import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
+import type {
   MonitoringStartPluginDependencies,
   LegacyMonitoringStartPluginDependencies,
 } from './types';

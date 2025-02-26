@@ -21,7 +21,7 @@ import {
   EuiSpacer,
   EuiTitle,
 } from '@elastic/eui';
-import { EntityV2 } from '@kbn/entities-schema';
+import type { EntityV2 } from '@kbn/entities-schema';
 import { usePluginContext } from '../../hooks/use_plugin_context';
 
 function EntitySourceForm({

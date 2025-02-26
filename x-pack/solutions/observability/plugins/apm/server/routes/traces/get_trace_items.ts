@@ -6,8 +6,11 @@
  */
 
 import type { Logger } from '@kbn/logging';
-import type { SortResults } from '@elastic/elasticsearch/lib/api/types';
-import type { QueryDslQueryContainer, Sort } from '@elastic/elasticsearch/lib/api/types';
+import type {
+  SortResults,
+  QueryDslQueryContainer,
+  Sort,
+} from '@elastic/elasticsearch/lib/api/types';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { rangeQuery } from '@kbn/observability-plugin/server';
 import { last, omit } from 'lodash';

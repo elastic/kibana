@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ToolingLog } from '@kbn/tooling-log';
-import { Project } from 'ts-morph';
+import type { ToolingLog } from '@kbn/tooling-log';
+import type { Project } from 'ts-morph';
 import { getPluginApi } from './get_plugin_api';
 import type {
   AdoptionTrackedAPIsByPlugin,
@@ -18,9 +18,9 @@ import type {
   PluginOrPackage,
   ReferencedDeprecationsByPlugin,
   UnreferencedDeprecationsByPlugin,
+  AdoptionTrackedAPIStats,
 } from './types';
 import { removeBrokenLinks } from './utils';
-import { AdoptionTrackedAPIStats } from './types';
 
 export function getPluginApiMap(
   project: Project,

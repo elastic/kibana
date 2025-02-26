@@ -7,7 +7,7 @@
 
 import { useCallback, useRef, useState, useEffect, useMemo } from 'react';
 
-import { useConfig } from '../../../../../hooks';
+import { useConfig, useStartServices } from '../../../../../hooks';
 import { generateNewAgentPolicyWithDefaults } from '../../../../../../../../common/services/generate_new_agent_policy';
 import type {
   AgentPolicy,
@@ -16,7 +16,6 @@ import type {
   PackageInfo,
 } from '../../../../../types';
 import { SetupTechnology } from '../../../../../types';
-import { useStartServices } from '../../../../../hooks';
 import { SelectedPolicyTab } from '../../components';
 import {
   AGENTLESS_GLOBAL_TAG_NAME_ORGANIZATION,

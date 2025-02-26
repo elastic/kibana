@@ -15,7 +15,7 @@ import { SyntheticsService } from '../../synthetics_service/synthetics_service';
 import * as monitorUtils from '../../saved_objects/synthetics_monitor/get_all_monitors';
 import * as locationsUtils from '../../synthetics_service/get_all_locations';
 import type { PublicLocation } from '../../../common/runtime_types';
-import { SyntheticsServerSetup } from '../../types';
+import type { SyntheticsServerSetup } from '../../types';
 
 describe('tlsRuleExecutor', () => {
   const mockEsClient = elasticsearchClientMock.createElasticsearchClient();

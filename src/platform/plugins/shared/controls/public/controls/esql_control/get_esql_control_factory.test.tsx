@@ -9,7 +9,7 @@
 
 import React from 'react';
 import { BehaviorSubject } from 'rxjs';
-import { StateComparators } from '@kbn/presentation-publishing';
+import type { StateComparators } from '@kbn/presentation-publishing';
 import { fireEvent, render, waitFor } from '@testing-library/react';
 import type { ESQLControlState } from '@kbn/esql/public';
 import { getMockedControlGroupApi } from '../mocks/control_mocks';

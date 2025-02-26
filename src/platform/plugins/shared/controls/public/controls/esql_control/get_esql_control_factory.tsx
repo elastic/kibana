@@ -18,7 +18,7 @@ import { tracksOverlays } from '@kbn/presentation-containers';
 import type { ESQLControlState } from '@kbn/esql/public';
 import { ESQL_CONTROL } from '../../../common';
 import type { ESQLControlApi } from './types';
-import { ControlFactory } from '../types';
+import type { ControlFactory } from '../types';
 import { uiActionsService } from '../../services/kibana_services';
 import { initializeDefaultControlApi } from '../initialize_default_control_api';
 import { initializeESQLControlSelections } from './esql_control_selections';

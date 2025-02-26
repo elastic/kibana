@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { LoginState } from '@kbn/security-plugin/common/login_state';
+import type { LoginState } from '@kbn/security-plugin/common/login_state';
 import { KNOWN_SERVERLESS_ROLE_DEFINITIONS } from '@kbn/security-solution-plugin/common/test';
 import { LOGOUT_URL } from '../urls/navigation';
 import {

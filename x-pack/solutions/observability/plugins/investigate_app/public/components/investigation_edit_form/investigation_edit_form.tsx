@@ -20,7 +20,7 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { InvestigationResponse } from '@kbn/investigation-shared';
+import type { InvestigationResponse } from '@kbn/investigation-shared';
 import { pick } from 'lodash';
 import React from 'react';
 import { Controller, FormProvider, useForm } from 'react-hook-form';

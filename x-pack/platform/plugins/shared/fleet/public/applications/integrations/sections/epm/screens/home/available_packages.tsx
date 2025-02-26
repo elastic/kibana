@@ -11,9 +11,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiHorizontalRule, EuiFlexItem, EuiCallOut, EuiLink } from '@elastic/eui';
 
-import { useStartServices } from '../../../../hooks';
-
-import { useBreadcrumbs } from '../../../../hooks';
+import { useStartServices, useBreadcrumbs } from '../../../../hooks';
 
 import { PackageListGrid } from '../../components/package_list_grid';
 

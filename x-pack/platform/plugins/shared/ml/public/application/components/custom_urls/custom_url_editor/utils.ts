@@ -14,11 +14,9 @@ import url from 'url';
 import { setStateToKbnUrl } from '@kbn/kibana-utils-plugin/public';
 import type { DashboardStart } from '@kbn/dashboard-plugin/public';
 import { cleanEmptyKeys } from '@kbn/dashboard-plugin/public';
-import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
-import type { Filter } from '@kbn/es-query';
+import type { DataView, DataViewField, DataViewListItem } from '@kbn/data-views-plugin/common';
+import type { Filter, TimeRange as EsQueryTimeRange } from '@kbn/es-query';
 import { isFilterPinned } from '@kbn/es-query';
-import type { DataViewListItem } from '@kbn/data-views-plugin/common';
-import type { TimeRange as EsQueryTimeRange } from '@kbn/es-query';
 import type { MlKibanaUrlConfig, MlUrlConfig } from '@kbn/ml-anomaly-utils';
 import {
   isDataFrameAnalyticsConfigs,
@@ -36,13 +34,12 @@ import {
   getPartitioningFieldNames,
   getFiltersForDSLQuery,
 } from '../../../../../common/util/job_utils';
-import { replaceStringTokens } from '../../../util/string_utils';
+import { replaceStringTokens, escapeForElasticsearchQuery } from '../../../util/string_utils';
 import {
   replaceTokensInUrlValue,
   replaceTokensInDFAUrlValue,
   isValidLabel,
 } from '../../../util/custom_url_utils';
-import { escapeForElasticsearchQuery } from '../../../util/string_utils';
 
 import type { CombinedJob, Job } from '../../../../../common/types/anomaly_detection_jobs';
 import { isAnomalyDetectionJob } from '../../../../../common/types/anomaly_detection_jobs';

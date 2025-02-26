@@ -6,7 +6,7 @@
  */
 
 import { resolve } from 'path';
-import { FtrConfigProviderContext } from '@kbn/test';
+import type { FtrConfigProviderContext } from '@kbn/test';
 import { services, pageObjects } from './ftr_provider_context';
 
 export async function withLocale({ readConfigFile }: FtrConfigProviderContext, locale: string) {

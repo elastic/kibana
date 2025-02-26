@@ -22,8 +22,8 @@ import {
 import type { Props } from '.';
 import { StorageTreemap } from '.';
 import { NO_DATA_LABEL } from './translations';
-import { PatternRollup } from '../../../types';
-import { FlattenedBucket } from '../types';
+import type { PatternRollup } from '../../../types';
+import type { FlattenedBucket } from '../types';
 import { getFlattenedBuckets } from '../utils/get_flattened_buckets';
 import { getLegendItems } from './utils/get_legend_items';
 import { DEFAULT_MAX_CHART_HEIGHT } from '..';

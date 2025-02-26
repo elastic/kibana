@@ -6,7 +6,8 @@
  */
 
 import React from 'react';
-import { EuiButton, EuiButtonEmpty, EuiFlexGroup, EuiToolTip, EuiToolTipProps } from '@elastic/eui';
+import type { EuiToolTipProps } from '@elastic/eui';
+import { EuiButton, EuiButtonEmpty, EuiFlexGroup, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useDiscardConfirm } from '../../../hooks/use_discard_confirm';
 

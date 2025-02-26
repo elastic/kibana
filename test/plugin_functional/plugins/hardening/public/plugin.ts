@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { AppMountParameters, CoreSetup, Plugin } from '@kbn/core/public';
+import type { AppMountParameters, CoreSetup, Plugin } from '@kbn/core/public';
 
 export class HardeningPlugin implements Plugin<HardeningPluginSetup, HardeningPluginStart> {
   public setup(core: CoreSetup) {

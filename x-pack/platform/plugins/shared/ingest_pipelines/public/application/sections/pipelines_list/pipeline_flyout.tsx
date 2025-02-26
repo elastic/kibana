@@ -4,11 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { FunctionComponent } from 'react';
+import type { FunctionComponent } from 'react';
+import React from 'react';
 
 import { FormattedMessage } from '@kbn/i18n-react';
 import { SectionLoading, useKibana } from '../../../shared_imports';
-import { Pipeline } from '../../../../common/types';
+import type { Pipeline } from '../../../../common/types';
 import { PipelineDetailsFlyout } from './details_flyout';
 import { PipelineNotFoundFlyout } from './not_found_flyout';
 

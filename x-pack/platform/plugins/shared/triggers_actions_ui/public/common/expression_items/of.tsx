@@ -17,8 +17,8 @@ import {
   EuiComboBox,
 } from '@elastic/eui';
 import { builtInAggregationTypes } from '../constants';
-import { AggregationType, FieldOption, ValidNormalizedTypes } from '../types';
-import { IErrorObject } from '../../types';
+import type { AggregationType, FieldOption, ValidNormalizedTypes } from '../types';
+import type { IErrorObject } from '../../types';
 import { ClosablePopoverTitle } from './components';
 import './of.scss';
 

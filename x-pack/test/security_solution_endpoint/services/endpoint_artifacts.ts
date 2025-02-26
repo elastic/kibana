@@ -10,13 +10,13 @@ import type {
   CreateExceptionListSchema,
   ExceptionListItemSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
+import type { ENDPOINT_ARTIFACT_LIST_IDS } from '@kbn/securitysolution-list-constants';
 import {
   ENDPOINT_ARTIFACT_LISTS,
-  ENDPOINT_ARTIFACT_LIST_IDS,
   EXCEPTION_LIST_ITEM_URL,
   EXCEPTION_LIST_URL,
 } from '@kbn/securitysolution-list-constants';
-import { Response } from 'superagent';
+import type { Response } from 'superagent';
 import { ExceptionsListItemGenerator } from '@kbn/security-solution-plugin/common/endpoint/data_generators/exceptions_list_item_generator';
 import { TRUSTED_APPS_EXCEPTION_LIST_DEFINITION } from '@kbn/security-solution-plugin/public/management/pages/trusted_apps/constants';
 import { EndpointError } from '@kbn/security-solution-plugin/common/endpoint/errors';
@@ -24,10 +24,10 @@ import { EVENT_FILTER_LIST_DEFINITION } from '@kbn/security-solution-plugin/publ
 import { HOST_ISOLATION_EXCEPTIONS_LIST_DEFINITION } from '@kbn/security-solution-plugin/public/management/pages/host_isolation_exceptions/constants';
 import { BLOCKLISTS_LIST_DEFINITION } from '@kbn/security-solution-plugin/public/management/pages/blocklist/constants';
 import { ManifestConstants } from '@kbn/security-solution-plugin/server/endpoint/lib/artifacts';
-import TestAgent from 'supertest/lib/agent';
+import type TestAgent from 'supertest/lib/agent';
 import { addSpaceIdToPath, DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import { FtrService } from '../../functional/ftr_provider_context';
-import { InternalUnifiedManifestSchemaResponseType } from '../apps/integrations/mocks';
+import type { InternalUnifiedManifestSchemaResponseType } from '../apps/integrations/mocks';
 
 export interface ArtifactTestData {
   artifact: ExceptionListItemSchema;

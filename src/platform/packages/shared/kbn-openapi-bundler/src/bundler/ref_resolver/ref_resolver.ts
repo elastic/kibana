@@ -10,8 +10,8 @@
 import path from 'path';
 import { extractObjectByJsonPointer } from '../../utils/extract_by_json_pointer';
 import { readDocument } from '../../utils/read_document';
-import { ResolvedRef } from './resolved_ref';
-import { ResolvedDocument } from './resolved_document';
+import type { ResolvedRef } from './resolved_ref';
+import type { ResolvedDocument } from './resolved_document';
 
 export interface IRefResolver {
   resolveRef(refDocumentAbsolutePath: string, pointer: string): Promise<ResolvedRef>;

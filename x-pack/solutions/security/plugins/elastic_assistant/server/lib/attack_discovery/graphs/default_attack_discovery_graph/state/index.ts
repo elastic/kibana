@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { AttackDiscovery, Replacements } from '@kbn/elastic-assistant-common';
+import type { AttackDiscovery, Replacements } from '@kbn/elastic-assistant-common';
 import type { Document } from '@langchain/core/documents';
 import type { StateGraphArgs } from '@langchain/langgraph';
 
-import { AttackDiscoveryPrompts } from '../nodes/helpers/prompts';
+import type { AttackDiscoveryPrompts } from '../nodes/helpers/prompts';
 import {
   DEFAULT_MAX_GENERATION_ATTEMPTS,
   DEFAULT_MAX_HALLUCINATION_FAILURES,

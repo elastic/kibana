@@ -8,7 +8,7 @@
  */
 
 import moment from 'moment';
-import { VisTypeTimeseriesVisDataRequest } from '../../../types';
+import type { VisTypeTimeseriesVisDataRequest } from '../../../types';
 import { getTimerange } from './get_timerange';
 
 describe('getTimerange(req)', () => {

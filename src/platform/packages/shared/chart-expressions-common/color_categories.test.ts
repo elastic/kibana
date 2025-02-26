@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { DatatableColumn, DatatableRow } from '@kbn/expressions-plugin/common';
+import type { DatatableColumn, DatatableRow } from '@kbn/expressions-plugin/common';
 import { getColorCategories } from './color_categories';
 
 const getNextExtension = (() => {

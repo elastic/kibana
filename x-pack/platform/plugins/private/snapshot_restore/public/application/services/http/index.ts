@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { UiMetricService } from '../ui_metric';
+import type { UiMetricService } from '../ui_metric';
 import { setUiMetricServicePolicy } from './policy_requests';
 import { setUiMetricServiceRepository } from './repository_requests';
 import { setUiMetricServiceRestore } from './restore_requests';

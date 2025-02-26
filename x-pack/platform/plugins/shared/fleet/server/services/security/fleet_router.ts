@@ -21,14 +21,14 @@ import type { FleetRequestHandlerContext } from '../..';
 import { getRequestStore } from '../request_store';
 import { defaultFleetErrorHandler } from '../../errors';
 
-import type { FleetVersionedRouteConfig } from './types';
-
 import type {
+  FleetVersionedRouteConfig,
   FleetAuthzRouteConfig,
   FleetAuthzRouter,
   FleetAddVersionOpts,
   FleetHandler,
 } from './types';
+
 import {
   checkSecurityEnabled,
   getAuthzFromRequest,

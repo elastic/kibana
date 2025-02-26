@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { ReactWrapper } from 'enzyme';
-import { Component } from 'react';
+import type { ReactWrapper } from 'enzyme';
+import type { Component } from 'react';
 
 export const tick = (ms = 0) =>
   new Promise((resolve) => {

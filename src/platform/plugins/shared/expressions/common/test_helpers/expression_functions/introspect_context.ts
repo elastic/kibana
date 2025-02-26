@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ExpressionFunctionDefinition } from '../../expression_functions';
+import type { ExpressionFunctionDefinition } from '../../expression_functions';
 
 export const introspectContext: ExpressionFunctionDefinition<
   'introspectContext',

@@ -7,11 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { takeUntil, finalize } from 'rxjs';
-import { Observable, timer } from 'rxjs';
-import type { Logger } from '@kbn/core/server';
+import { takeUntil, finalize, timer } from 'rxjs';
+import type { Observable } from 'rxjs';
+import type { Logger, IEventLoopDelaysMonitor, IntervalHistogram } from '@kbn/core/server';
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
-import type { IEventLoopDelaysMonitor, IntervalHistogram } from '@kbn/core/server';
 import {
   MONITOR_EVENT_LOOP_THRESHOLD_START,
   MONITOR_EVENT_LOOP_THRESHOLD_INTERVAL,

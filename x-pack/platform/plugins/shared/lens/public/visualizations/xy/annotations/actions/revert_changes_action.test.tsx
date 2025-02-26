@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { OverlayRef } from '@kbn/core-mount-utils-browser';
-import { IToasts } from '@kbn/core-notifications-browser';
-import { PointInTimeEventAnnotationConfig } from '@kbn/event-annotation-common';
+import type { OverlayRef } from '@kbn/core-mount-utils-browser';
+import type { IToasts } from '@kbn/core-notifications-browser';
+import type { PointInTimeEventAnnotationConfig } from '@kbn/event-annotation-common';
 import { cloneDeep } from 'lodash';
-import {
+import type {
   XYByReferenceAnnotationLayerConfig,
   XYByValueAnnotationLayerConfig,
   XYState,

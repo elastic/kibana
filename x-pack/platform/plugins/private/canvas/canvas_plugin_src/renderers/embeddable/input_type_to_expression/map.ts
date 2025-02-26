@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { MapSerializedState } from '@kbn/maps-plugin/public';
+import type { MapSerializedState } from '@kbn/maps-plugin/public';
 
 export function toExpression(input: MapSerializedState & { id: string }): string {
   const expressionParts = [] as string[];

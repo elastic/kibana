@@ -10,7 +10,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiButtonEmpty } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { useKibana } from '../../common/lib/kibana';
-import { BulkEditResponse } from '../../types';
+import type { BulkEditResponse } from '../../types';
 
 const successMessage = (total: number, property: string) =>
   i18n.translate('xpack.triggersActionsUI.sections.ruleApi.bulkEditResponse.success', {

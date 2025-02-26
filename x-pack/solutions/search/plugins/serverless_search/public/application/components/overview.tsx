@@ -27,15 +27,16 @@ import {
   getLanguageDefinitionCodeSnippet,
   getConsoleRequest,
   PreprocessDataPanel,
+  CloudDetailsPanel,
 } from '@kbn/search-api-panels';
 
-import React, { useEffect, useMemo, useState, FC, PropsWithChildren } from 'react';
+import type { FC, PropsWithChildren } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import type {
   LanguageDefinition,
   LanguageDefinitionSnippetArguments,
 } from '@kbn/search-api-panels';
 import { useLocation } from 'react-router-dom';
-import { CloudDetailsPanel } from '@kbn/search-api-panels';
 import { DEFAULT_INGESTION_PIPELINE } from '../../../common';
 import { docLinks } from '../../../common/doc_links';
 import { useKibanaServices } from '../hooks/use_kibana';

@@ -8,7 +8,7 @@
  */
 
 import { getIpRangeQuery, getIsValidFullIp } from './ip_search';
-import { OptionsListSearchTechnique } from './suggestions_searching';
+import type { OptionsListSearchTechnique } from './suggestions_searching';
 
 /**
  * ipaddr is a fairly large library - therefore, this function needs to be separate from

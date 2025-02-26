@@ -11,7 +11,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule } from '@elastic/eui';
 import { RangedStyleLegendRow } from '../../../../components/ranged_style_legend_row';
 import { VECTOR_STYLES } from '../../../../../../../common/constants';
 import { CircleIcon } from '../circle_icon';
-import { IDynamicStyleProperty } from '../../../properties/dynamic_style_property';
+import type { IDynamicStyleProperty } from '../../../properties/dynamic_style_property';
 import { getMaxLabel, getMinLabel } from './get_ordinal_label';
 
 function getLineWidthIcons() {

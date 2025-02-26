@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { IndicesPutIndexTemplateRequest } from '@elastic/elasticsearch/lib/api/types';
+import type { IndicesPutIndexTemplateRequest } from '@elastic/elasticsearch/lib/api/types';
+import type { EntityDefinition } from '@kbn/entities-schema';
 import {
   ENTITY_LATEST,
   ENTITY_SCHEMA_VERSION_V1,
-  EntityDefinition,
   entitiesIndexPattern,
   entitiesAliasPattern,
 } from '@kbn/entities-schema';

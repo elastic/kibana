@@ -13,9 +13,8 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { useHistory } from 'react-router-dom';
 
 import { SO_SEARCH_LIMIT } from '../../../../../constants';
-import { useMultipleAgentPolicies } from '../../../hooks';
-
 import {
+  useMultipleAgentPolicies,
   useStartServices,
   useConfig,
   useLink,

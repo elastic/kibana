@@ -9,9 +9,10 @@
 
 import type { PluginName } from '@kbn/core-base-common';
 import { PluginsStatusService } from './plugins_status';
-import { of, Observable, BehaviorSubject, ReplaySubject, firstValueFrom } from 'rxjs';
-import { ServiceStatusLevels, CoreStatus, ServiceStatus } from '@kbn/core-status-common';
-import { first, skip } from 'rxjs';
+import type { Observable } from 'rxjs';
+import { of, BehaviorSubject, ReplaySubject, firstValueFrom, first, skip } from 'rxjs';
+import type { CoreStatus, ServiceStatus } from '@kbn/core-status-common';
+import { ServiceStatusLevels } from '@kbn/core-status-common';
 import { ServiceStatusLevelSnapshotSerializer } from './test_helpers';
 
 expect.addSnapshotSerializer(ServiceStatusLevelSnapshotSerializer);

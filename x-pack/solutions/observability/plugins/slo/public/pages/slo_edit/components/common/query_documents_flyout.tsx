@@ -15,11 +15,11 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { DataView } from '@kbn/data-views-plugin/common';
-import { TimeRange } from '@kbn/es-query';
-import { FieldPath } from 'react-hook-form';
-import { SearchBarProps } from './query_builder';
-import { CreateSLOForm } from '../../types';
+import type { DataView } from '@kbn/data-views-plugin/common';
+import type { TimeRange } from '@kbn/es-query';
+import type { FieldPath } from 'react-hook-form';
+import type { SearchBarProps } from './query_builder';
+import type { CreateSLOForm } from '../../types';
 import { DocumentsTable } from './documents_table';
 
 export function QueryDocumentsFlyout({

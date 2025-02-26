@@ -14,15 +14,13 @@ import type {
   MemoryUsageInfo,
   TrainedModelStatsResponse,
   MemoryStatsResponse,
+  NodeDeploymentStatsResponse,
+  NodesOverviewResponse,
 } from '../../../common/types/trained_models';
 
 import type { JobStats } from '../../../common/types/anomaly_detection_jobs';
 import type { MlSavedObjectType } from '../../../common/types/saved_objects';
 import type { MlClient } from '../../lib/ml_client';
-import type {
-  NodeDeploymentStatsResponse,
-  NodesOverviewResponse,
-} from '../../../common/types/trained_models';
 
 // @ts-expect-error numeral missing value
 const AD_EXTRA_MEMORY = numeral('10MB').value();

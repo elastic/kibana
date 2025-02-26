@@ -9,7 +9,7 @@ import { defineGetCloudDefendStatusRoute, INDEX_TIMEOUT_IN_MINUTES } from './sta
 import { httpServerMock } from '@kbn/core/server/mocks';
 import { mockRouter } from '@kbn/core-http-router-server-mocks';
 import type { ESSearchResponse } from '@kbn/es-types';
-import {
+import type {
   AgentClient,
   AgentPolicyServiceInterface,
   AgentService,
@@ -17,7 +17,7 @@ import {
   PackagePolicyClient,
   PackageService,
 } from '@kbn/fleet-plugin/server';
-import {
+import type {
   AgentPolicy,
   GetAgentStatusResponse,
   Installation,

@@ -8,7 +8,7 @@
 import expect from 'expect';
 import { ModeEnum } from '@kbn/security-solution-plugin/common/api/detection_engine';
 import { setUpRuleUpgrade } from '../../../../../utils/rules/prebuilt_rules/set_up_rule_upgrade';
-import { FtrProviderContext } from '../../../../../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../../../../../ftr_provider_context';
 import { performUpgradePrebuiltRules } from '../../../../../utils';
 
 export function bulkUpgradeSelectedPrebuiltRules({ getService }: FtrProviderContext): void {

@@ -7,20 +7,20 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { SavedObjectReference } from '@kbn/core/types';
-import {
+import type { SavedObjectReference } from '@kbn/core/types';
+import type {
   EmbeddableInput,
   EmbeddablePersistableStateService,
   EmbeddableStateWithType,
 } from '@kbn/embeddable-plugin/common/types';
-import { MigrateFunctionsObject } from '@kbn/kibana-utils-plugin/common';
+import type { MigrateFunctionsObject } from '@kbn/kibana-utils-plugin/common';
 
 import type { ControlPanelsState, SerializedControlState } from '../../common';
 import {
   makeControlOrdersZeroBased,
   removeHideExcludeAndHideExists,
 } from './control_group_migrations';
-import { SerializableControlGroupState } from './types';
+import type { SerializableControlGroupState } from './types';
 
 const getPanelStatePrefix = (state: SerializedControlState) => `${state.explicitInput.id}:`;
 

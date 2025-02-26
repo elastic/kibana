@@ -7,7 +7,10 @@
 
 import { useRef, useCallback, useMemo } from 'react';
 
-import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
+import type {
+  QueryDslQueryContainer,
+  MappingRuntimeFields,
+} from '@elastic/elasticsearch/lib/api/types';
 
 import { isRunningResponse } from '@kbn/data-plugin/public';
 
@@ -18,7 +21,6 @@ import {
 import { processCategoryResults } from '@kbn/aiops-log-pattern-analysis/process_category_results';
 import type { CatResponse } from '@kbn/aiops-log-pattern-analysis/types';
 
-import type { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/types';
 import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
 
 import type { RandomSamplerStorage } from './sampling_menu';

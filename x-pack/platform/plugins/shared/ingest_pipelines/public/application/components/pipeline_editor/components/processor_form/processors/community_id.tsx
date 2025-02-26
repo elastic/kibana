@@ -5,21 +5,23 @@
  * 2.0.
  */
 
-import React, { FunctionComponent } from 'react';
+import type { FunctionComponent } from 'react';
+import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiSpacer, EuiCode, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
-import { FieldsConfig, from } from './shared';
+import type { FieldsConfig } from './shared';
+import { from } from './shared';
 import { TargetField } from './common_fields/target_field';
 import { IgnoreMissingField } from './common_fields/ignore_missing_field';
+import type { SerializerFunc } from '../../../../../../shared_imports';
 import {
   Field,
   UseField,
   useFormData,
   FIELD_TYPES,
   NumericField,
-  SerializerFunc,
   fieldFormatters,
   fieldValidators,
 } from '../../../../../../shared_imports';

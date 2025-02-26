@@ -12,7 +12,7 @@ import { BehaviorSubject } from 'rxjs';
 
 import { setMockedPresentationUtilServices } from '@kbn/presentation-util-plugin/public/mocks';
 import { render, waitFor } from '@testing-library/react';
-import { Action } from '@kbn/ui-actions-plugin/public';
+import type { Action } from '@kbn/ui-actions-plugin/public';
 
 import type { ControlLabelPosition, ControlWidth } from '../../../common';
 import { uiActionsService } from '../../services/kibana_services';

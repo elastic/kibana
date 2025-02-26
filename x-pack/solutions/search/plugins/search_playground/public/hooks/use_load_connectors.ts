@@ -20,12 +20,12 @@ import {
 import { isSupportedConnector } from '@kbn/inference-common';
 import { isInferenceEndpointExists } from '@kbn/inference-endpoint-ui-common';
 import { useKibana } from './use_kibana';
-import {
-  LLMs,
-  type ActionConnector,
-  type UserConfiguredActionConnector,
-  type PlaygroundConnector,
+import { LLMs } from '../types';
+import type {
   InferenceActionConnector,
+  ActionConnector,
+  UserConfiguredActionConnector,
+  PlaygroundConnector,
 } from '../types';
 
 const QUERY_KEY = ['search-playground, load-connectors'];

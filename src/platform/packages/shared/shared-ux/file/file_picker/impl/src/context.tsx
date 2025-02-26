@@ -9,9 +9,11 @@
 
 import React, { createContext, useContext, useMemo, useEffect } from 'react';
 import type { FC, PropsWithChildren } from 'react';
-import { useFilesContext, FilesContextValue } from '@kbn/shared-ux-file-context';
-import { FileJSON } from '@kbn/shared-ux-file-types';
-import { FilePickerState, createFilePickerState } from './file_picker_state';
+import type { FilesContextValue } from '@kbn/shared-ux-file-context';
+import { useFilesContext } from '@kbn/shared-ux-file-context';
+import type { FileJSON } from '@kbn/shared-ux-file-types';
+import type { FilePickerState } from './file_picker_state';
+import { createFilePickerState } from './file_picker_state';
 
 interface FilePickerContextValue extends FilesContextValue {
   state: FilePickerState;

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { WiredStreamDefinition } from '../models/ingest/base';
+import type { WiredStreamDefinition } from '../models/ingest/base';
 import { findInheritedLifecycle, findInheritingStreams } from './lifecycle';
 
 describe('Lifecycle helpers', () => {

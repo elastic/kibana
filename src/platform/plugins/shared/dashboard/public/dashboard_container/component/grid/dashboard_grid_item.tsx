@@ -17,7 +17,7 @@ import { ReactEmbeddableRenderer } from '@kbn/embeddable-plugin/public';
 import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 import { DASHBOARD_MARGIN_SIZE } from './constants';
 import { useDashboardInternalApi } from '../../../dashboard_api/use_dashboard_internal_api';
-import { DashboardPanelState } from '../../../../common';
+import type { DashboardPanelState } from '../../../../common';
 import { useDashboardApi } from '../../../dashboard_api/use_dashboard_api';
 import { presentationUtilService } from '../../../services/kibana_services';
 

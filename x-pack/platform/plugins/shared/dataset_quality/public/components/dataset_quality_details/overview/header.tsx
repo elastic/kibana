@@ -5,15 +5,8 @@
  * 2.0.
  */
 
-import {
-  EuiFlexGroup,
-  EuiIcon,
-  EuiSuperDatePicker,
-  EuiTitle,
-  EuiToolTip,
-  OnRefreshProps,
-  OnTimeChangeProps,
-} from '@elastic/eui';
+import type { OnRefreshProps, OnTimeChangeProps } from '@elastic/eui';
+import { EuiFlexGroup, EuiIcon, EuiSuperDatePicker, EuiTitle, EuiToolTip } from '@elastic/eui';
 import { css } from '@emotion/react';
 import React, { useCallback } from 'react';
 import { useDatasetQualityDetailsState } from '../../../hooks';

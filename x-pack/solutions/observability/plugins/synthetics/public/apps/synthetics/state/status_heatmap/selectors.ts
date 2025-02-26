@@ -7,7 +7,7 @@
 
 import { createSelector } from 'reselect';
 
-import { SyntheticsAppState } from '../root_reducer';
+import type { SyntheticsAppState } from '../root_reducer';
 
 const getState = (appState: SyntheticsAppState) => appState.monitorStatusHeatmap;
 

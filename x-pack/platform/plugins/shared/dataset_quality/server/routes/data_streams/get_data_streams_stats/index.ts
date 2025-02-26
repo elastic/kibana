@@ -6,8 +6,7 @@
  */
 
 import type { ElasticsearchClient } from '@kbn/core/server';
-import { dataStreamService } from '../../../services';
-import { indexStatsService } from '../../../services';
+import { dataStreamService, indexStatsService } from '../../../services';
 
 export async function getDataStreamsStats({
   esClient,

@@ -13,14 +13,14 @@ import type { StreamsPluginSetup, StreamsPluginStart } from '@kbn/streams-plugin
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import type { SharePublicSetup, SharePublicStart } from '@kbn/share-plugin/public/plugin';
 import type { SavedObjectTaggingPluginStart } from '@kbn/saved-objects-tagging-plugin/public';
-import { NavigationPublicStart } from '@kbn/navigation-plugin/public/types';
-import { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
-import {
+import type { NavigationPublicStart } from '@kbn/navigation-plugin/public/types';
+import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
+import type {
   ObservabilityAIAssistantPublicSetup,
   ObservabilityAIAssistantPublicStart,
 } from '@kbn/observability-ai-assistant-plugin/public';
-import { AppMountParameters } from '@kbn/core/public';
-import { LicensingPluginStart } from '@kbn/licensing-plugin/public';
+import type { AppMountParameters } from '@kbn/core/public';
+import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 /* eslint-disable @typescript-eslint/no-empty-interface*/
 
 export interface ConfigSchema {}

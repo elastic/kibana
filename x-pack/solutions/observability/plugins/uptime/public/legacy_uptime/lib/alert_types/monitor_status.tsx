@@ -16,9 +16,9 @@ import {
   ALERT_REASON,
 } from '@kbn/rule-data-utils';
 
-import { ObservabilityRuleTypeModel } from '@kbn/observability-plugin/public';
-import { ValidationResult } from '@kbn/triggers-actions-ui-plugin/public';
-import { AlertTypeInitializer } from '.';
+import type { ObservabilityRuleTypeModel } from '@kbn/observability-plugin/public';
+import type { ValidationResult } from '@kbn/triggers-actions-ui-plugin/public';
+import type { AlertTypeInitializer } from '.';
 import { getMonitorRouteFromMonitorId } from '../../../../common/utils/get_monitor_url';
 import { MonitorStatusTranslations } from '../../../../common/rules/legacy_uptime/translations';
 import { CLIENT_ALERT_TYPES } from '../../../../common/constants/uptime_alerts';

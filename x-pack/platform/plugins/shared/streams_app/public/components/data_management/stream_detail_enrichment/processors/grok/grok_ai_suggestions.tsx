@@ -24,14 +24,14 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useWatch, useFormContext } from 'react-hook-form';
-import { FlattenRecord, IngestStreamGetResponse } from '@kbn/streams-schema';
+import type { FlattenRecord, IngestStreamGetResponse } from '@kbn/streams-schema';
 import type { FindActionResult } from '@kbn/actions-plugin/server';
-import { UseGenAIConnectorsResult } from '@kbn/observability-ai-assistant-plugin/public/hooks/use_genai_connectors';
+import type { UseGenAIConnectorsResult } from '@kbn/observability-ai-assistant-plugin/public/hooks/use_genai_connectors';
 import { useAbortController, useBoolean } from '@kbn/react-hooks';
 import useObservable from 'react-use/lib/useObservable';
 import { useKibana } from '../../../../../hooks/use_kibana';
-import { GrokFormState, ProcessorFormState } from '../../types';
-import { UseProcessingSimulatorReturn } from '../../hooks/use_processing_simulator';
+import type { GrokFormState, ProcessorFormState } from '../../types';
+import type { UseProcessingSimulatorReturn } from '../../hooks/use_processing_simulator';
 import { useSimulatorContext } from '../../simulator_context';
 
 const RefreshButton = ({

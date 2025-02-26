@@ -4,10 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { Logger, ICustomClusterClient, ElasticsearchClientConfig } from '@kbn/core/server';
+import type { Logger, ICustomClusterClient, ElasticsearchClientConfig } from '@kbn/core/server';
 import { monitoringBulk } from '../kibana_monitoring/lib/monitoring_bulk';
 import { monitoringEndpointDisableWatches } from './monitoring_endpoint_disable_watches';
-import { MonitoringElasticsearchConfig } from '../config';
+import type { MonitoringElasticsearchConfig } from '../config';
 
 /* Provide a dedicated Elasticsearch client for Monitoring
  * The connection options can be customized for the Monitoring application

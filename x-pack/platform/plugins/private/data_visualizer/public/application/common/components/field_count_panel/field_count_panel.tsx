@@ -5,12 +5,11 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiSwitch, useEuiTheme } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSwitch, useEuiTheme, useEuiBreakpoint } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { FC } from 'react';
 import React from 'react';
 import { css } from '@emotion/react';
-import { useEuiBreakpoint } from '@elastic/eui';
 import {
   type MetricFieldsCountProps,
   type TotalFieldsCountProps,

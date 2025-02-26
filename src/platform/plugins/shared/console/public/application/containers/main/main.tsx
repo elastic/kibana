@@ -26,23 +26,23 @@ import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { downloadFileAs } from '@kbn/share-plugin/public';
 import { getConsoleTourStepProps } from './get_console_tour_step_props';
-import { useServicesContext } from '../../contexts';
-import { MAIN_PANEL_LABELS } from './i18n';
-import { NavIconButton } from './nav_icon_button';
-import { Editor } from '../editor';
-import { Config } from '../config';
 import {
+  useServicesContext,
   useEditorReadContext,
   useEditorActionContext,
   useRequestActionContext,
 } from '../../contexts';
+import { MAIN_PANEL_LABELS } from './i18n';
+import { NavIconButton } from './nav_icon_button';
+import { Editor } from '../editor';
+import { Config } from '../config';
+import type { ConsoleTourStepProps } from '../../components';
 import {
   TopNavMenu,
   SomethingWentWrongCallout,
   HelpPopover,
   ShortcutsPopover,
   ConsoleTourStep,
-  ConsoleTourStepProps,
 } from '../../components';
 import { History } from '../history';
 import { useDataInit } from '../../hooks';

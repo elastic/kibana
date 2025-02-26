@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Client } from '@elastic/elasticsearch';
+import type { Client } from '@elastic/elasticsearch';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import type { SomeDevLog } from '@kbn/some-dev-log';
 import { checkIncompatibleMappings } from './check_incompatible_mappings';

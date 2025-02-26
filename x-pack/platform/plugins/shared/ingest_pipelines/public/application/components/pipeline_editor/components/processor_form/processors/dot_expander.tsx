@@ -5,14 +5,16 @@
  * 2.0.
  */
 
-import React, { FunctionComponent } from 'react';
+import type { FunctionComponent } from 'react';
+import React from 'react';
 import { i18n } from '@kbn/i18n';
 
 import { FIELD_TYPES, UseField, Field, ToggleField } from '../../../../../../shared_imports';
 
 import { FieldNameField } from './common_fields/field_name_field';
 
-import { FieldsConfig, from, to } from './shared';
+import type { FieldsConfig } from './shared';
+import { from, to } from './shared';
 
 const fieldsConfig: FieldsConfig = {
   /* Optional fields config */

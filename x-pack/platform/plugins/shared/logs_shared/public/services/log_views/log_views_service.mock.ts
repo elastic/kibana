@@ -6,7 +6,7 @@
  */
 
 import { createLogViewsClientMock } from './log_views_client.mock';
-import { LogViewsServiceStart } from './types';
+import type { LogViewsServiceStart } from './types';
 
 export const createLogViewsServiceStartMock = () => ({
   client: createLogViewsClientMock(),

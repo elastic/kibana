@@ -8,8 +8,8 @@
 import type SuperTest from 'supertest';
 import expect from '@kbn/expect';
 import { TaskErrorSource } from '@kbn/task-manager-plugin/common';
-import { IValidatedEvent } from '@kbn/event-log-plugin/generated/schemas';
-import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
+import type { IValidatedEvent } from '@kbn/event-log-plugin/generated/schemas';
+import type { FtrProviderContext } from '../../../../../common/ftr_provider_context';
 import { getEventLog, getUrlPrefix, ObjectRemover } from '../../../../../common/lib';
 
 /**

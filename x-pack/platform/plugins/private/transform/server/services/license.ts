@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { Logger } from '@kbn/core/server';
 import type {
+  Logger,
   CoreStart,
   IKibanaResponse,
   KibanaRequest,

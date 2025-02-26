@@ -6,9 +6,9 @@
  */
 
 import sinon from 'sinon';
-import { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
+import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 import { actionsClientMock, actionsMock } from '@kbn/actions-plugin/server/mocks';
-import { SavedObject } from '@kbn/core/server';
+import type { SavedObject } from '@kbn/core/server';
 import {
   elasticsearchServiceMock,
   executionContextServiceMock,
@@ -20,41 +20,42 @@ import {
 } from '@kbn/core/server/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/server/mocks';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
-import { DataViewsServerPluginStart } from '@kbn/data-views-plugin/server';
+import type { DataViewsServerPluginStart } from '@kbn/data-views-plugin/server';
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
-import { IEventLogger } from '@kbn/event-log-plugin/server';
+import type { IEventLogger } from '@kbn/event-log-plugin/server';
 import { eventLogClientMock, eventLoggerMock } from '@kbn/event-log-plugin/server/mocks';
-import { SharePluginStart } from '@kbn/share-plugin/server';
-import { ConcreteTaskInstance, TaskPriority, TaskStatus } from '@kbn/task-manager-plugin/server';
+import type { SharePluginStart } from '@kbn/share-plugin/server';
+import type { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server';
+import { TaskPriority, TaskStatus } from '@kbn/task-manager-plugin/server';
 import { usageCountersServiceMock } from '@kbn/usage-collection-plugin/server/usage_counters/usage_counters_service.mock';
 import { AdHocTaskRunner } from './ad_hoc_task_runner';
-import { TaskRunnerContext } from './types';
+import type { TaskRunnerContext } from './types';
 import { backfillClientMock } from '../backfill_client/backfill_client.mock';
 import { ruleTypeRegistryMock } from '../rule_type_registry.mock';
+import type { ContextOpts } from '../lib/alerting_event_logger/alerting_event_logger';
 import {
   AlertingEventLogger,
   executionType,
-  ContextOpts,
 } from '../lib/alerting_event_logger/alerting_event_logger';
-import { AdHocRunSchedule, AdHocRunSO } from '../data/ad_hoc_run/types';
+import type { AdHocRunSchedule, AdHocRunSO } from '../data/ad_hoc_run/types';
 import { AD_HOC_RUN_SAVED_OBJECT_TYPE, RULE_SAVED_OBJECT_TYPE } from '../saved_objects';
 import { adHocRunStatus } from '../../common/constants';
 import { DATE_1970, generateEnqueueFunctionInput, mockAAD, ruleType } from './fixtures';
 import { alertingEventLoggerMock } from '../lib/alerting_event_logger/alerting_event_logger.mock';
 import { alertsMock } from '../mocks';
-import { UntypedNormalizedRuleType } from '../rule_type_registry';
+import type { UntypedNormalizedRuleType } from '../rule_type_registry';
 import { AlertsService } from '../alerts_service';
 import { of, ReplaySubject } from 'rxjs';
 import { getDataStreamAdapter } from '../alerts_service/lib/data_stream_adapter';
-import {
+import type {
   AlertInstanceContext,
   AlertInstanceState,
-  DEFAULT_FLAPPING_SETTINGS,
   RuleAlertData,
   RuleExecutorOptions,
   RuleTypeParams,
   RuleTypeState,
 } from '../types';
+import { DEFAULT_FLAPPING_SETTINGS } from '../types';
 import {
   TIMESTAMP,
   EVENT_ACTION,

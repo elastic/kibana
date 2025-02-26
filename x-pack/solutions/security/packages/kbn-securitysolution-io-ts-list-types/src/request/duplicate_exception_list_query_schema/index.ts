@@ -6,7 +6,7 @@
  */
 
 import * as t from 'io-ts';
-import { NamespaceType } from '../../common';
+import type { NamespaceType } from '../../common';
 
 import { includeExpiredExceptionsOrUndefined } from '../../common/include_expired_exceptions';
 import { list_id } from '../../common/list_id';

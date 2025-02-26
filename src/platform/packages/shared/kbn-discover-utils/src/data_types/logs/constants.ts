@@ -8,7 +8,7 @@
  */
 
 import { fieldConstants } from '../..';
-import { SmartFieldGridColumnOptions } from './types';
+import type { SmartFieldGridColumnOptions } from './types';
 
 export * from '../../field_constants';
 

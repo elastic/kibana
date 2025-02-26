@@ -12,7 +12,7 @@ import {
   getOffsetFromNowInSeconds,
   getTimeDifferenceInSeconds,
 } from '@kbn/timerange';
-import { EventData } from '../performance_context';
+import type { EventData } from '../performance_context';
 import { perfomanceMarkers } from '../../performance_markers';
 
 interface PerformanceMeta {

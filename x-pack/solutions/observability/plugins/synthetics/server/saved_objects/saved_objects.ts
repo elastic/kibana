@@ -5,12 +5,9 @@
  * 2.0.
  */
 
-import {
-  SavedObjectsClientContract,
-  SavedObjectsErrorHelpers,
-  SavedObjectsServiceSetup,
-} from '@kbn/core/server';
-import { EncryptedSavedObjectsPluginSetup } from '@kbn/encrypted-saved-objects-plugin/server';
+import type { SavedObjectsClientContract, SavedObjectsServiceSetup } from '@kbn/core/server';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
+import type { EncryptedSavedObjectsPluginSetup } from '@kbn/encrypted-saved-objects-plugin/server';
 
 import { fromSettingsAttribute } from '../routes/settings/dynamic_settings';
 import {
@@ -29,7 +26,7 @@ import {
   PRIVATE_LOCATION_SAVED_OBJECT_TYPE,
 } from './private_locations';
 import { DYNAMIC_SETTINGS_DEFAULT_ATTRIBUTES } from '../constants/settings';
-import { DynamicSettingsAttributes } from '../runtime_types/settings';
+import type { DynamicSettingsAttributes } from '../runtime_types/settings';
 import {
   getSyntheticsMonitorSavedObjectType,
   SYNTHETICS_MONITOR_ENCRYPTED_TYPE,

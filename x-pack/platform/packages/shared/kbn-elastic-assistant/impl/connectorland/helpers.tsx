@@ -11,7 +11,7 @@ import type {
   ActionTypeRegistryContract,
 } from '@kbn/triggers-actions-ui-plugin/public';
 
-import { ActionConnectorProps } from '@kbn/triggers-actions-ui-plugin/public/types';
+import type { ActionConnectorProps } from '@kbn/triggers-actions-ui-plugin/public/types';
 import { PRECONFIGURED_CONNECTOR } from './translations';
 
 // aligns with OpenAiProviderType from '@kbn/stack-connectors-plugin/common/openai/types'

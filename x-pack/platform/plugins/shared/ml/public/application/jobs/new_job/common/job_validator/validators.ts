@@ -6,9 +6,16 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { distinctUntilChanged, filter, map, pluck, switchMap, startWith } from 'rxjs';
+import {
+  distinctUntilChanged,
+  filter,
+  map,
+  pluck,
+  switchMap,
+  startWith,
+  combineLatest,
+} from 'rxjs';
 import type { Observable, Subject } from 'rxjs';
-import { combineLatest } from 'rxjs';
 import type {
   CardinalityModelPlotHigh,
   CardinalityValidationResult,

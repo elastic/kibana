@@ -30,7 +30,7 @@ import {
 import { FloatingActions } from './floating_actions';
 import { DEFAULT_CONTROL_GROW, DEFAULT_CONTROL_WIDTH } from '../../../common';
 
-import { ControlPanelProps, DefaultControlApi } from '../../controls/types';
+import type { ControlPanelProps, DefaultControlApi } from '../../controls/types';
 import { ControlError } from './control_error';
 
 import './control_panel.scss';

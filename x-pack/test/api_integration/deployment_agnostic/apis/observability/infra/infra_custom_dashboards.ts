@@ -6,8 +6,8 @@
  */
 
 import expect from '@kbn/expect';
-import { InfraCustomDashboard } from '@kbn/infra-plugin/common/custom_dashboards';
-import { InfraSaveCustomDashboardsRequestPayload } from '@kbn/infra-plugin/common/http_api/custom_dashboards_api';
+import type { InfraCustomDashboard } from '@kbn/infra-plugin/common/custom_dashboards';
+import type { InfraSaveCustomDashboardsRequestPayload } from '@kbn/infra-plugin/common/http_api/custom_dashboards_api';
 import { INFRA_CUSTOM_DASHBOARDS_SAVED_OBJECT_TYPE } from '@kbn/infra-plugin/server/saved_objects';
 import { enableInfrastructureAssetCustomDashboards } from '@kbn/observability-plugin/common';
 import type { SupertestWithRoleScopeType } from '../../../services';

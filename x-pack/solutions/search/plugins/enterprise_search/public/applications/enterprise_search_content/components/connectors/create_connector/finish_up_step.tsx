@@ -32,14 +32,13 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 
 import { ELASTICSEARCH_PLUGIN } from '../../../../../../common/constants';
 
-import { KibanaDeps } from '../../../../../../common/types';
+import type { KibanaDeps } from '../../../../../../common/types';
 
 import { generateEncodedPath } from '../../../../shared/encode_path_params';
 import { HttpLogic } from '../../../../shared/http';
 import { KibanaLogic } from '../../../../shared/kibana';
-import { DEV_TOOLS_CONSOLE_PATH } from '../../../routes';
+import { DEV_TOOLS_CONSOLE_PATH, CONNECTOR_DETAIL_TAB_PATH } from '../../../routes';
 
-import { CONNECTOR_DETAIL_TAB_PATH } from '../../../routes';
 import { ConnectorDetailTabId } from '../../connector_detail/connector_detail';
 import { ConnectorViewLogic } from '../../connector_detail/connector_view_logic';
 import { IndexViewLogic } from '../../search_index/index_view_logic';

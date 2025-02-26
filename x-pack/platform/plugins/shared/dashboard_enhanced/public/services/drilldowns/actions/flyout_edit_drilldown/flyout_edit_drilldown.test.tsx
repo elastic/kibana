@@ -6,16 +6,17 @@
  */
 
 import { coreMock } from '@kbn/core/public/mocks';
-import { DynamicActionsSerializedState } from '@kbn/embeddable-enhanced-plugin/public/plugin';
+import type { DynamicActionsSerializedState } from '@kbn/embeddable-enhanced-plugin/public/plugin';
 import type { ViewMode } from '@kbn/presentation-publishing';
-import { SerializedEvent } from '@kbn/ui-actions-enhanced-plugin/common';
+import type { SerializedEvent } from '@kbn/ui-actions-enhanced-plugin/common';
 import {
   UiActionsEnhancedDynamicActionManager as DynamicActionManager,
   UiActionsEnhancedMemoryActionStorage as MemoryActionStorage,
 } from '@kbn/ui-actions-enhanced-plugin/public';
 import { uiActionsEnhancedPluginMock } from '@kbn/ui-actions-enhanced-plugin/public/mocks';
 import { BehaviorSubject, Subject } from 'rxjs';
-import { FlyoutEditDrilldownAction, FlyoutEditDrilldownParams } from './flyout_edit_drilldown';
+import type { FlyoutEditDrilldownParams } from './flyout_edit_drilldown';
+import { FlyoutEditDrilldownAction } from './flyout_edit_drilldown';
 
 function createAction(overlays = coreMock.createStart().overlays) {
   const uiActionsPlugin = uiActionsEnhancedPluginMock.createPlugin();

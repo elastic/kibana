@@ -30,7 +30,7 @@ import { EmptyPrompt } from '../shared/empty_prompt';
 import { GetStartedPanel } from '../shared/get_started_panel';
 import { FeedbackButtons } from '../shared/feedback_buttons';
 import { CopyToClipboardButton } from '../shared/copy_to_clipboard_button';
-import { ObservabilityOnboardingContextValue } from '../../../plugin';
+import type { ObservabilityOnboardingContextValue } from '../../../plugin';
 import { useKubernetesFlow } from '../kubernetes/use_kubernetes_flow';
 
 const OTEL_HELM_CHARTS_REPO = 'https://open-telemetry.github.io/opentelemetry-helm-charts';

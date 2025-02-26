@@ -6,7 +6,7 @@
  */
 
 import React, { useState } from 'react';
-import { ComponentStory } from '@storybook/react';
+import type { ComponentStory } from '@storybook/react';
 
 import { KibanaReactStorybookDecorator } from '../../../utils/kibana_react.storybook_decorator';
 import { AutoRefreshButton as Component } from './auto_refresh_button';

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { RuleTypeWithDescription } from '@kbn/alerts-ui-shared';
+import type { RuleTypeWithDescription } from '@kbn/alerts-ui-shared';
 import { getInitialMultiConsumer } from './get_initial_multi_consumer';
 
 describe('getInitialMultiConsumer', () => {

@@ -10,9 +10,8 @@
 import React from 'react';
 import { storiesOf } from '@storybook/react';
 import { coreMock } from '@kbn/core/public/mocks';
-import { Render } from '@kbn/presentation-util-plugin/public/__stories__';
+import { Render, waitFor } from '@kbn/presentation-util-plugin/public/__stories__';
 import { getElasticLogo, getElasticOutline } from '@kbn/presentation-util-plugin/common';
-import { waitFor } from '@kbn/presentation-util-plugin/public/__stories__';
 import { getRepeatImageRenderer } from '../repeat_image_renderer';
 
 const Renderer = ({

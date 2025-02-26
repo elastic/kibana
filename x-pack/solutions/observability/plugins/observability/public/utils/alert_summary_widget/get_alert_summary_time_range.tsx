@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { getAbsoluteTimeRange } from '@kbn/data-plugin/common';
-import { TimeRange } from '@kbn/es-query';
+import type { TimeRange } from '@kbn/es-query';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { AlertSummaryTimeRange } from '@kbn/triggers-actions-ui-plugin/public';
 import { defaultTimeRange } from './constants';

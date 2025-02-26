@@ -12,9 +12,8 @@ import {
   EmbeddableProfilingSearchBar,
   ProfilingEmptyState,
 } from '@kbn/observability-shared-plugin/public';
-import { EuiLoadingSpinner } from '@elastic/eui';
+import { EuiLoadingSpinner, EuiText } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { ProfilingStatus } from '@kbn/profiling-utils';
 import { isPending, useFetcher } from '../../../../hooks/use_fetcher';

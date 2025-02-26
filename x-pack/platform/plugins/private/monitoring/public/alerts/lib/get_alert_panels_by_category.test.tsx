@@ -9,17 +9,15 @@ import {
   RULE_CPU_USAGE,
   RULE_LOGSTASH_VERSION_MISMATCH,
   RULE_THREAD_POOL_WRITE_REJECTIONS,
-} from '../../../common/constants';
-import { AlertSeverity } from '../../../common/enums';
-import { getAlertPanelsByCategory } from './get_alert_panels_by_category';
-import {
   RULE_LICENSE_EXPIRATION,
   RULE_NODES_CHANGED,
   RULE_DISK_USAGE,
   RULE_MEMORY_USAGE,
 } from '../../../common/constants';
+import { AlertSeverity } from '../../../common/enums';
+import { getAlertPanelsByCategory } from './get_alert_panels_by_category';
 import { RuleExecutionStatusValues } from '@kbn/alerting-plugin/common';
-import { AlertState } from '../../../common/types/alerts';
+import type { AlertState } from '../../../common/types/alerts';
 
 jest.mock('../../legacy_shims', () => ({
   Legacy: {

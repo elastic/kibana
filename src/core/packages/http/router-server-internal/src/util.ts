@@ -10,16 +10,20 @@
 import { once } from 'lodash';
 import {
   isFullValidatorContainer,
-  type RouteValidatorFullConfigResponse,
-  type RouteMethod,
-  type RouteValidator,
   getRequestValidation,
   validBodyOutput,
 } from '@kbn/core-http-server';
+import type {
+  IKibanaResponse,
+  ResponseHeaders,
+  SafeRouteMethod,
+  RouteValidatorFullConfigResponse,
+  RouteMethod,
+  RouteValidator,
+} from '@kbn/core-http-server';
 import type { Mutable } from 'utility-types';
-import type { IKibanaResponse, ResponseHeaders, SafeRouteMethod } from '@kbn/core-http-server';
 import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
-import { Request } from '@hapi/hapi';
+import type { Request } from '@hapi/hapi';
 import type { InternalRouteConfig } from './route';
 
 function isStatusCode(key: string) {

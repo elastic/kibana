@@ -7,9 +7,8 @@
 import { schema } from '@kbn/config-schema';
 
 import type { FleetAuthzRouter } from '../../services/security';
-import { API_VERSIONS } from '../../../common/constants';
+import { API_VERSIONS, FLEET_PROXY_API_ROUTES } from '../../../common/constants';
 import { FLEET_API_PRIVILEGES } from '../../constants/api_privileges';
-import { FLEET_PROXY_API_ROUTES } from '../../../common/constants';
 import {
   FleetProxyResponseSchema,
   FleetProxySchema,

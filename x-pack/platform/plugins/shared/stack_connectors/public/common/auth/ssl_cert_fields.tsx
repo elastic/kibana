@@ -9,9 +9,8 @@ import React from 'react';
 
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTab, EuiTabs } from '@elastic/eui';
 import { UseField } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
-import { PasswordField } from '@kbn/es-ui-shared-plugin/static/forms/components';
+import { PasswordField, FilePickerField } from '@kbn/es-ui-shared-plugin/static/forms/components';
 import { fieldValidators } from '@kbn/es-ui-shared-plugin/static/forms/helpers';
-import { FilePickerField } from '@kbn/es-ui-shared-plugin/static/forms/components';
 
 import { SSLCertType } from '../../../common/auth/constants';
 import * as i18n from './translations';

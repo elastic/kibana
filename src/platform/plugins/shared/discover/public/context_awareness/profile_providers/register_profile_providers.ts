@@ -22,10 +22,8 @@ import {
 import { createObservabilityLogsDataSourceProfileProviders } from './observability/logs_data_source_profile';
 import { createObservabilityLogDocumentProfileProvider } from './observability/log_document_profile';
 import { createSecurityRootProfileProvider } from './security/security_root_profile';
-import {
-  createProfileProviderServices,
-  ProfileProviderServices,
-} from './profile_provider_services';
+import type { ProfileProviderServices } from './profile_provider_services';
+import { createProfileProviderServices } from './profile_provider_services';
 import type { DiscoverServices } from '../../build_services';
 import { createObservabilityRootProfileProvider } from './observability/observability_root_profile';
 import { createTracesDataSourceProfileProvider } from './observability/traces_data_source_profile';

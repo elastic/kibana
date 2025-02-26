@@ -5,14 +5,8 @@
  * 2.0.
  */
 
-import type { WithEuiThemeProps } from '@elastic/eui';
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiButtonEmpty,
-  withEuiTheme,
-  type EuiThemeComputed,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiButtonEmpty, withEuiTheme } from '@elastic/eui';
+import type { WithEuiThemeProps, EuiThemeComputed } from '@elastic/eui';
 import type { ReactNode } from 'react';
 import React from 'react';
 import { KubernetesTour } from './kubernetes_tour';

@@ -12,12 +12,8 @@ import {
   type ObservabilityAIAssistantChatService,
   type ObservabilityAIAssistantService,
 } from '..';
-import {
-  createInternalServerError,
-  FunctionDefinition,
-  StreamingChatResponseEventType,
-  type StreamingChatResponseEventWithoutError,
-} from '../../common';
+import { createInternalServerError, StreamingChatResponseEventType } from '../../common';
+import type { FunctionDefinition, StreamingChatResponseEventWithoutError } from '../../common';
 import { ChatState, useChat, type UseChatProps, type UseChatResult } from './use_chat';
 import * as useKibanaModule from './use_kibana';
 

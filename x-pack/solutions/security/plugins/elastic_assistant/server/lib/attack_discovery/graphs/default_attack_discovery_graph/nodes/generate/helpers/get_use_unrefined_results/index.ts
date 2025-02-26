@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { AttackDiscovery } from '@kbn/elastic-assistant-common';
+import type { AttackDiscovery } from '@kbn/elastic-assistant-common';
 
 import { getMaxRetriesReached } from '../../../../helpers/get_max_retries_reached';
 

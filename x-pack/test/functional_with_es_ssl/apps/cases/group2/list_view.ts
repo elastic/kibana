@@ -12,8 +12,8 @@ import {
   CaseStatuses,
   CustomFieldTypes,
 } from '@kbn/cases-plugin/common/types/domain';
-import { UserProfile } from '@kbn/user-profile-components';
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { UserProfile } from '@kbn/user-profile-components';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 import {
   createUsersAndRoles,
   deleteUsersAndRoles,

@@ -8,20 +8,19 @@
  */
 
 import type { FC } from 'react';
-import type { CollectConfigProps } from '@kbn/kibana-utils-plugin/public';
+import type { CollectConfigProps, Configurable } from '@kbn/kibana-utils-plugin/public';
 import type {
   MigrateFunctionsObject,
   GetMigrationFunctionObjectFn,
+  PersistableState,
 } from '@kbn/kibana-utils-plugin/common';
 import type {
   UiActionsPresentable as Presentable,
   ActionMenuItemProps,
+  UiActionsActionDefinition as ActionDefinition,
 } from '@kbn/ui-actions-plugin/public';
-import type { Configurable } from '@kbn/kibana-utils-plugin/public';
 import type { ILicense, LicensingPluginStart, LicenseType } from '@kbn/licensing-plugin/public';
-import type { UiActionsActionDefinition as ActionDefinition } from '@kbn/ui-actions-plugin/public';
 import type { SavedObjectReference } from '@kbn/core/types';
-import type { PersistableState } from '@kbn/kibana-utils-plugin/common';
 import type {
   BaseActionConfig,
   BaseActionFactoryContext,

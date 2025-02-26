@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { SLOWithSummaryResponse } from '@kbn/slo-schema';
+import type { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import { useQueryClient } from '@tanstack/react-query';
 import { SLO_BURN_RATE_RULE_TYPE_ID } from '@kbn/rule-data-utils';
 import { sloFeatureId } from '@kbn/observability-plugin/common';

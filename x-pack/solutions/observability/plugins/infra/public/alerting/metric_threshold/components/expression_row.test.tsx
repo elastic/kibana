@@ -13,8 +13,7 @@ import { COMPARATORS } from '@kbn/alerting-comparators';
 import type { MetricExpression } from '../types';
 import { ExpressionRow } from './expression_row';
 import { TIMESTAMP_FIELD } from '../../../../common/constants';
-import type { DataView } from '@kbn/data-views-plugin/common';
-import { type FieldSpec } from '@kbn/data-views-plugin/common';
+import type { DataView, FieldSpec } from '@kbn/data-views-plugin/common';
 
 const mockDataView = {
   id: 'mock-id',

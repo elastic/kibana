@@ -11,9 +11,9 @@ import React, { useEffect, useRef, useMemo, useCallback } from 'react';
 // accidentally using the non-enhanced version.
 import { UseField } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 
-import { Phases } from '../../../../../../common/types';
+import type { Phases } from '../../../../../../common/types';
 
-import { UseFieldProps, FormData } from '../../../../../shared_imports';
+import type { UseFieldProps, FormData } from '../../../../../shared_imports';
 
 import { useFormErrorsContext } from '../form_errors_context';
 

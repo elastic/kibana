@@ -21,7 +21,7 @@ import { REPO_ROOT } from '@kbn/repo-info';
 import { initApm } from '@kbn/apm-config-loader';
 
 import { writePluginDocs } from './mdx/write_plugin_mdx_docs';
-import { ApiDeclaration, ApiStats, PluginMetaInfo } from './types';
+import type { ApiDeclaration, ApiStats, PluginMetaInfo } from './types';
 import { findPlugins } from './find_plugins';
 import { pathsOutsideScopes } from './build_api_declarations/utils';
 import { getPluginApiMap } from './get_plugin_api_map';
@@ -29,7 +29,8 @@ import { writeDeprecationDocByApi } from './mdx/write_deprecations_doc_by_api';
 import { writeDeprecationDocByPlugin } from './mdx/write_deprecations_doc_by_plugin';
 import { writePluginDirectoryDoc } from './mdx/write_plugin_directory_doc';
 import { collectApiStatsForPlugin } from './stats';
-import { countEslintDisableLines, EslintDisableCounts } from './count_eslint_disable';
+import type { EslintDisableCounts } from './count_eslint_disable';
+import { countEslintDisableLines } from './count_eslint_disable';
 import { writeDeprecationDueByTeam } from './mdx/write_deprecations_due_by_team';
 import { trimDeletedDocsFromNav } from './trim_deleted_docs_from_nav';
 import { getAllDocFileIds } from './mdx/get_all_doc_file_ids';

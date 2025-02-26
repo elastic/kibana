@@ -6,15 +6,14 @@
  */
 
 import { isEmpty } from 'lodash';
-import {
-  ToolChoiceType,
+import type {
   ToolOptions,
   Message,
-  withoutOutputUpdateEvents,
   FunctionCallingMode,
   ChatCompleteMetadata,
 } from '@kbn/inference-common';
-import { InferenceClient } from '../../..';
+import { ToolChoiceType, withoutOutputUpdateEvents } from '@kbn/inference-common';
+import type { InferenceClient } from '../../..';
 import { requestDocumentationSchema } from './shared';
 
 export const requestDocumentation = ({

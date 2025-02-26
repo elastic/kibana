@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ControlGroupApi } from '@kbn/controls-plugin/public';
+import type { ControlGroupApi } from '@kbn/controls-plugin/public';
 import { childrenUnsavedChanges$, initializeUnsavedChanges } from '@kbn/presentation-containers';
-import {
+import type {
   PublishesSavedObjectId,
   PublishingSubject,
   StateComparators,
@@ -20,11 +20,11 @@ import {
   PANELS_CONTROL_GROUP_KEY,
   getDashboardBackupService,
 } from '../services/dashboard_backup_service';
-import { initializePanelsManager } from './panels_manager';
-import { initializeSettingsManager } from './settings_manager';
-import { DashboardCreationOptions, DashboardState } from './types';
-import { initializeUnifiedSearchManager } from './unified_search_manager';
-import { initializeViewModeManager } from './view_mode_manager';
+import type { initializePanelsManager } from './panels_manager';
+import type { initializeSettingsManager } from './settings_manager';
+import type { DashboardCreationOptions, DashboardState } from './types';
+import type { initializeUnifiedSearchManager } from './unified_search_manager';
+import type { initializeViewModeManager } from './view_mode_manager';
 
 export function initializeUnsavedChangesManager({
   creationOptions,

@@ -8,8 +8,7 @@
  */
 
 import { search, UI_SETTINGS } from '@kbn/data-plugin/server';
-import { overwrite } from '../../helpers';
-import { getBucketSize, getTimerange } from '../../helpers';
+import { overwrite, getBucketSize, getTimerange } from '../../helpers';
 import { validateField } from '../../../../../common/fields_utils';
 
 import type { AnnotationsRequestProcessorsFunction } from './types';

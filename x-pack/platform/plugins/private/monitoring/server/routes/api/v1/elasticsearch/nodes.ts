@@ -19,7 +19,7 @@ import { LISTING_METRICS_NAMES } from '../../../../lib/elasticsearch/nodes/get_n
 import { getIndicesUnassignedShardStats } from '../../../../lib/elasticsearch/shards/get_indices_unassigned_shard_stats';
 import { getNodesShardCount } from '../../../../lib/elasticsearch/shards/get_nodes_shard_count';
 import { handleError } from '../../../../lib/errors/handle_error';
-import { MonitoringCore } from '../../../../types';
+import type { MonitoringCore } from '../../../../types';
 
 export function esNodesRoute(server: MonitoringCore) {
   const validateParams = createValidationFunction(postElasticsearchNodesRequestParamsRT);

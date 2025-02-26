@@ -13,8 +13,8 @@ import {
 } from '@kbn/actions-simulators-plugin/server/bedrock_simulation';
 import { DEFAULT_TOKEN_LIMIT } from '@kbn/stack-connectors-plugin/common/bedrock/constants';
 import { TaskErrorSource } from '@kbn/task-manager-plugin/common';
-import { IValidatedEvent } from '@kbn/event-log-plugin/generated/schemas';
-import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
+import type { IValidatedEvent } from '@kbn/event-log-plugin/generated/schemas';
+import type { FtrProviderContext } from '../../../../../common/ftr_provider_context';
 import { getEventLog, getUrlPrefix, ObjectRemover } from '../../../../../common/lib';
 
 const connectorTypeId = '.bedrock';

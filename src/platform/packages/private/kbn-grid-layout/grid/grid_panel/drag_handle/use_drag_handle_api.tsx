@@ -10,7 +10,7 @@
 import { useCallback, useEffect, useRef } from 'react';
 
 import { useGridLayoutEvents } from '../../use_grid_layout_events';
-import { UserInteractionEvent } from '../../use_grid_layout_events/types';
+import type { UserInteractionEvent } from '../../use_grid_layout_events/types';
 import { useGridLayoutContext } from '../../use_grid_layout_context';
 
 export interface DragHandleApi {

@@ -5,7 +5,7 @@
  * 2.0.
  */
 import React, { useEffect } from 'react';
-import { Filter } from '@kbn/es-query';
+import type { Filter } from '@kbn/es-query';
 import { EuiSpacer } from '@elastic/eui';
 import { DEFAULT_GROUPING_TABLE_HEIGHT } from '../../../common/constants';
 import { EmptyState } from '../../../components/empty_state';

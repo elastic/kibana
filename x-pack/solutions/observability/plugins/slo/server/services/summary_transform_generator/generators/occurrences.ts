@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { TransformPutTransformRequest } from '@elastic/elasticsearch/lib/api/types';
+import type { TransformPutTransformRequest } from '@elastic/elasticsearch/lib/api/types';
 import { calendarAlignedTimeWindowSchema, DurationUnit } from '@kbn/slo-schema';
 import {
   getSLOSummaryPipelineId,
@@ -14,7 +14,7 @@ import {
   SLO_RESOURCES_VERSION,
   SUMMARY_DESTINATION_INDEX_NAME,
 } from '../../../../common/constants';
-import { SLODefinition } from '../../../domain/models';
+import type { SLODefinition } from '../../../domain/models';
 import { getGroupBy } from './common';
 import { buildBurnRateAgg } from './utils';
 

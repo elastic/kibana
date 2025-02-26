@@ -18,6 +18,8 @@ import {
   parseTimeIntervalForJob,
   isJobWithGeoData,
   createDatafeedId,
+  getEarliestDatafeedStartTime,
+  getLatestDataOrBucketTimestamp,
 } from '../../../common/util/job_utils';
 import { JOB_STATE, DATAFEED_STATE } from '../../../common/constants/states';
 import type { JobAction } from '../../../common/constants/job_actions';
@@ -46,10 +48,6 @@ import { jobAuditMessagesProvider } from '../job_audit_messages';
 import { resultsServiceProvider } from '../results_service';
 import { CalendarManager } from '../calendar';
 import { fillResultsWithTimeouts, isRequestTimeout } from './error_utils';
-import {
-  getEarliestDatafeedStartTime,
-  getLatestDataOrBucketTimestamp,
-} from '../../../common/util/job_utils';
 import { groupsProvider } from './groups';
 import type { MlClient } from '../../lib/ml_client';
 import { ML_ALERT_TYPES } from '../../../common/constants/alerts';

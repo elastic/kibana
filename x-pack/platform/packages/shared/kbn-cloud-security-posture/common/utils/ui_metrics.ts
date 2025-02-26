@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { UiCounterMetricType } from '@kbn/analytics';
+import type { UiCounterMetricType } from '@kbn/analytics';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 
 export const APP_NAME = 'cloud-security';

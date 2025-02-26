@@ -11,8 +11,7 @@ import type {
   InventoryItemType,
   MetricsUIAggregation,
 } from '@kbn/metrics-data-access-plugin/common';
-import { findInventoryModel } from '@kbn/metrics-data-access-plugin/common';
-import { networkTraffic } from '@kbn/metrics-data-access-plugin/common';
+import { findInventoryModel, networkTraffic } from '@kbn/metrics-data-access-plugin/common';
 import type { SnapshotMetricInput, SnapshotRequest } from '../../../../common/http_api';
 import { SnapshotCustomMetricInputRT } from '../../../../common/http_api';
 import type { InfraSourceConfiguration } from '../../../lib/sources';

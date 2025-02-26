@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { schema, TypeOf } from '@kbn/config-schema';
+import type { TypeOf } from '@kbn/config-schema';
+import { schema } from '@kbn/config-schema';
 
 import {
   deserializeTemplate,
@@ -14,7 +15,7 @@ import {
   deserializeLegacyTemplateList,
 } from '../../../../common/lib';
 import { getCloudManagedTemplatePrefix } from '../../../lib/get_managed_templates';
-import { RouteDependencies } from '../../../types';
+import type { RouteDependencies } from '../../../types';
 import { addBasePath } from '..';
 
 export function registerGetAllRoute({ router, config, lib: { handleEsError } }: RouteDependencies) {

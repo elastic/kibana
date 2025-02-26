@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 
-import React, { useState } from 'react';
 import type { Meta } from '@storybook/react';
 
 import { EuiButton } from '@elastic/eui';

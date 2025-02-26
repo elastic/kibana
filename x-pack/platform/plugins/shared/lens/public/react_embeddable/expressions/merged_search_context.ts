@@ -6,15 +6,16 @@
  */
 import type { ESQLControlVariable } from '@kbn/esql-validation-autocomplete';
 import type { DataPublicPluginStart, FilterManager } from '@kbn/data-plugin/public';
-import {
-  type AggregateQuery,
-  type Filter,
-  isOfAggregateQueryType,
-  type Query,
-  type TimeRange,
+import { isOfAggregateQueryType } from '@kbn/es-query';
+import type {
   ExecutionContextSearch,
+  AggregateQuery,
+  Filter,
+  Query,
+  TimeRange,
 } from '@kbn/es-query';
-import { PublishingSubject, apiPublishesTimeslice } from '@kbn/presentation-publishing';
+import type { PublishingSubject } from '@kbn/presentation-publishing';
+import { apiPublishesTimeslice } from '@kbn/presentation-publishing';
 import type { LensRuntimeState } from '../types';
 import { nonNullable } from '../../utils';
 

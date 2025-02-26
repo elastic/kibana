@@ -23,8 +23,8 @@ import type {
 import {
   ELASTIC_HTTP_VERSION_HEADER,
   X_ELASTIC_INTERNAL_ORIGIN_REQUEST,
+  KIBANA_BUILD_NR_HEADER,
 } from '@kbn/core-http-common';
-import { KIBANA_BUILD_NR_HEADER } from '@kbn/core-http-common';
 import { HttpFetchError } from './http_fetch_error';
 import { HttpInterceptController } from './http_intercept_controller';
 import { interceptRequest, interceptResponse } from './intercept';

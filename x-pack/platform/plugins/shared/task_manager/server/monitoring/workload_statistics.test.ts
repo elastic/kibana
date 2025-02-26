@@ -5,21 +5,23 @@
  * 2.0.
  */
 
-import { first, take, bufferCount } from 'rxjs';
+import { first, take, bufferCount, of, Subject } from 'rxjs';
 import { loggingSystemMock, elasticsearchServiceMock } from '@kbn/core/server/mocks';
-import {
+import type {
   TaskTypeAggregation,
   WorkloadAggregationResponse,
   ScheduleDensityHistogram,
+} from './workload_statistics';
+import {
   createWorkloadAggregator,
   padBuckets,
   estimateRecurringTaskScheduling,
 } from './workload_statistics';
-import { ConcreteTaskInstance, TaskCost } from '../task';
+import type { ConcreteTaskInstance } from '../task';
+import { TaskCost } from '../task';
 
 import { times } from 'lodash';
 import { taskStoreMock } from '../task_store.mock';
-import { of, Subject } from 'rxjs';
 import { sleep } from '../test_utils';
 import type { estypes } from '@elastic/elasticsearch';
 import { TaskTypeDictionary } from '../task_type_dictionary';

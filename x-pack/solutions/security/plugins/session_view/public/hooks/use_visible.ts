@@ -4,7 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { useRef, MutableRefObject, useEffect, useMemo } from 'react';
+import type { MutableRefObject } from 'react';
+import { useRef, useEffect, useMemo } from 'react';
 import { debounce } from 'lodash';
 import { DEBOUNCE_TIMEOUT } from '../../common/constants';
 

@@ -10,7 +10,7 @@
 import React from 'react';
 import deepEqual from 'react-fast-compare';
 
-import { OverlayRef } from '@kbn/core/public';
+import type { OverlayRef } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { tracksOverlays } from '@kbn/presentation-containers';
 import { apiHasParentApi } from '@kbn/presentation-publishing';

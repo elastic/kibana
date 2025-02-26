@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { BaseCallbackHandlerInput } from '@langchain/core/callbacks/base';
+import type { BaseCallbackHandlerInput } from '@langchain/core/callbacks/base';
 import type { Run } from 'langsmith/schemas';
 import { BaseTracer } from '@langchain/core/tracers/base';
 import agent from 'elastic-apm-node';

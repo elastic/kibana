@@ -9,21 +9,25 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import {
-  type EuiDataGridColumn,
-  type EuiDataGridColumnCellAction,
-  EuiScreenReaderOnly,
+import { EuiScreenReaderOnly } from '@elastic/eui';
+import type {
   EuiListGroupItemProps,
-  type EuiDataGridColumnSortingConfig,
+  EuiDataGridColumn,
+  EuiDataGridColumnCellAction,
+  EuiDataGridColumnSortingConfig,
 } from '@elastic/eui';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { getDataViewFieldOrCreateFromColumnMeta } from '@kbn/data-view-utils';
-import { ToastsStart, IUiSettingsClient } from '@kbn/core/public';
-import { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
+import type { ToastsStart, IUiSettingsClient } from '@kbn/core/public';
+import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { ExpandButton } from './data_table_expand_button';
-import { CustomGridColumnsConfiguration, UnifiedDataTableSettings } from '../types';
-import type { ValueToStringConverter, DataTableColumnsMeta } from '../types';
+import type {
+  CustomGridColumnsConfiguration,
+  UnifiedDataTableSettings,
+  ValueToStringConverter,
+  DataTableColumnsMeta,
+} from '../types';
 import { buildCellActions } from './default_cell_actions';
 import { getSchemaByKbnType } from './data_table_schema';
 import { SelectButton, getSelectAllButton } from './data_table_document_selection';
@@ -40,7 +44,7 @@ import {
   DataTableScoreColumnHeader,
   DataTableTimeColumnHeader,
 } from './data_table_column_header';
-import { UnifiedDataTableProps } from './data_table';
+import type { UnifiedDataTableProps } from './data_table';
 
 export const getColumnDisplayName = (
   columnName: string,

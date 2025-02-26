@@ -21,8 +21,8 @@ import type {
 } from '@kbn/lens-plugin/public/datasources/text_based/types';
 import type { AggregateQuery } from '@kbn/es-query';
 import { getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
-import { DataViewsCommon } from './config_builder';
-import {
+import type { DataViewsCommon } from './config_builder';
+import type {
   FormulaValueConfig,
   LensAnnotationLayer,
   LensAttributes,

@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { IInterpreterRenderHandlers } from '@kbn/expressions-plugin/common';
-import { ShapeRendererConfig } from '../../../common/types';
+import type { IInterpreterRenderHandlers } from '@kbn/expressions-plugin/common';
+import type { ShapeRendererConfig } from '../../../common/types';
 
 export interface ShapeComponentProps extends ShapeRendererConfig {
   onLoaded: IInterpreterRenderHandlers['done'];

@@ -19,7 +19,15 @@ import {
   FLEET_EVENT_INGESTED_COMPONENT_TEMPLATE_NAME,
   STACK_COMPONENT_TEMPLATE_LOGS_MAPPINGS,
 } from '../../../../constants/fleet_es_assets';
-import { MAX_CONCURRENT_DATASTREAM_OPERATIONS } from '../../../../constants';
+import {
+  MAX_CONCURRENT_DATASTREAM_OPERATIONS,
+  STACK_COMPONENT_TEMPLATE_ECS_MAPPINGS,
+  FLEET_GLOBALS_COMPONENT_TEMPLATE_NAME,
+  FLEET_AGENT_ID_VERIFY_COMPONENT_TEMPLATE_NAME,
+  STACK_COMPONENT_TEMPLATE_LOGS_SETTINGS,
+  STACK_COMPONENT_TEMPLATE_METRICS_SETTINGS,
+  STACK_COMPONENT_TEMPLATE_METRICS_TSDB_SETTINGS,
+} from '../../../../constants';
 
 import type { Field, Fields } from '../../fields/field';
 import type {
@@ -32,14 +40,6 @@ import type {
 import { appContextService } from '../../..';
 import { getRegistryDataStreamAssetBaseName } from '../../../../../common/services';
 import type { FleetConfigType } from '../../../../../common/types';
-import {
-  STACK_COMPONENT_TEMPLATE_ECS_MAPPINGS,
-  FLEET_GLOBALS_COMPONENT_TEMPLATE_NAME,
-  FLEET_AGENT_ID_VERIFY_COMPONENT_TEMPLATE_NAME,
-  STACK_COMPONENT_TEMPLATE_LOGS_SETTINGS,
-  STACK_COMPONENT_TEMPLATE_METRICS_SETTINGS,
-  STACK_COMPONENT_TEMPLATE_METRICS_TSDB_SETTINGS,
-} from '../../../../constants';
 import { getESAssetMetadata } from '../meta';
 import { retryTransientEsErrors } from '../retry';
 import { PackageESError, PackageInvalidArchiveError } from '../../../../errors';

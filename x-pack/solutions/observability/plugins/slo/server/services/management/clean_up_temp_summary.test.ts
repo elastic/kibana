@@ -5,11 +5,8 @@
  * 2.0.
  */
 
-import {
-  ElasticsearchClientMock,
-  elasticsearchServiceMock,
-  loggingSystemMock,
-} from '@kbn/core/server/mocks';
+import type { ElasticsearchClientMock } from '@kbn/core/server/mocks';
+import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { CleanUpTempSummary } from './clean_up_temp_summary';
 
 const commonEsResponse = {

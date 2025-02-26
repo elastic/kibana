@@ -5,14 +5,9 @@
  * 2.0.
  */
 
-import {
-  IngestStreamDefinition,
-  StreamDefinition,
-  getParentId,
-  isRoot,
-  isWiredStreamDefinition,
-} from '@kbn/streams-schema';
-import { IngestPutPipelineRequest } from '@elastic/elasticsearch/lib/api/types';
+import type { IngestStreamDefinition, StreamDefinition } from '@kbn/streams-schema';
+import { getParentId, isRoot, isWiredStreamDefinition } from '@kbn/streams-schema';
+import type { IngestPutPipelineRequest } from '@elastic/elasticsearch/lib/api/types';
 import { ASSET_VERSION } from '../../../../common/constants';
 import { logsDefaultPipelineProcessors } from './logs_default_pipeline';
 import { getProcessingPipelineName } from './name';

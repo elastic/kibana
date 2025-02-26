@@ -8,7 +8,7 @@
 import { spaceTest as spaceBase } from '@kbn/scout';
 
 import { extendPageObjects } from '../page_objects';
-import { ObltParallelTestFixtures, ObltParallelWorkerFixtures } from './types';
+import type { ObltParallelTestFixtures, ObltParallelWorkerFixtures } from './types';
 
 /**
  * Should be used test spec files, running in parallel in isolated spaces agaist the same Kibana instance.

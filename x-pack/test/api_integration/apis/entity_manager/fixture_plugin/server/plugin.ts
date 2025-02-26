@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { Plugin, PluginInitializerContext } from '@kbn/core/server';
-import { SecurityPluginStart } from '@kbn/security-plugin-types-server';
-import { EncryptedSavedObjectsPluginStart } from '@kbn/encrypted-saved-objects-plugin/server';
+import type { Plugin, PluginInitializerContext } from '@kbn/core/server';
+import type { SecurityPluginStart } from '@kbn/security-plugin-types-server';
+import type { EncryptedSavedObjectsPluginStart } from '@kbn/encrypted-saved-objects-plugin/server';
 
 interface FixtureStartDeps {
   encryptedSavedObjects: EncryptedSavedObjectsPluginStart;

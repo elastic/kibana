@@ -103,7 +103,8 @@ import {
   getSuggestionsToRightOfOperatorExpression,
   checkFunctionInvocationComplete,
 } from './helper';
-import { FunctionParameter, isParameterType, FunctionDefinitionTypes } from '../definitions/types';
+import type { FunctionParameter } from '../definitions/types';
+import { isParameterType, FunctionDefinitionTypes } from '../definitions/types';
 import { comparisonFunctions } from '../definitions/all_operators';
 import { getRecommendedQueriesSuggestions } from './recommended_queries/suggestions';
 

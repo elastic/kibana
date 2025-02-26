@@ -6,8 +6,7 @@
  */
 
 import type { Elasticsearch, Kibana } from '../create_apm_users';
-import { AbortError } from './call_kibana';
-import { callKibana, isAxiosError } from './call_kibana';
+import { AbortError, callKibana, isAxiosError } from './call_kibana';
 
 export async function getKibanaVersion({
   elasticsearch,

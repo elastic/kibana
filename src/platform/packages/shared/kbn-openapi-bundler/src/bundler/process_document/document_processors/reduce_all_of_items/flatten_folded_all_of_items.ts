@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { DocumentNodeProcessor } from '../types/document_node_processor';
+import type { DocumentNodeProcessor } from '../types/document_node_processor';
 
 /**
  * Creates a node processor to flatten folded `allOf` items. Folded means `allOf` has items

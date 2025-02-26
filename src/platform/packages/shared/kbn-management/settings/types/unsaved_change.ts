@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { KnownTypeToValue, SettingType } from './setting_type';
+import type { KnownTypeToValue, SettingType } from './setting_type';
 
 /**
  * A {@link UnsavedFieldChange} represents local changes to a field that have not

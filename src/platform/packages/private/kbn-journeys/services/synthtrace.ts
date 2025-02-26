@@ -13,11 +13,11 @@ import {
   InfraSynthtraceEsClient,
   InfraSynthtraceKibanaClient,
 } from '@kbn/apm-synthtrace';
-import { ToolingLog } from '@kbn/tooling-log';
+import type { ToolingLog } from '@kbn/tooling-log';
 import Url from 'url';
-import { Logger } from '@kbn/apm-synthtrace/src/lib/utils/create_logger';
-import { Auth, Es } from '.';
-import { KibanaUrl } from './kibana_url';
+import type { Logger } from '@kbn/apm-synthtrace/src/lib/utils/create_logger';
+import type { Auth, Es } from '.';
+import type { KibanaUrl } from './kibana_url';
 
 export interface SynthtraceClientOptions {
   kbnUrl: KibanaUrl;

@@ -19,9 +19,11 @@ import {
   sendPartialMsg,
 } from './use_saved_search_messages';
 import { FetchStatus } from '../../types';
-import { BehaviorSubject } from 'rxjs';
-import { DataDocumentsMsg, DataMainMsg } from '../state_management/discover_data_state_container';
-import { filter } from 'rxjs';
+import { BehaviorSubject, filter } from 'rxjs';
+import type {
+  DataDocumentsMsg,
+  DataMainMsg,
+} from '../state_management/discover_data_state_container';
 import { dataViewMock, esHitsMockWithSort } from '@kbn/discover-utils/src/__mocks__';
 import { buildDataTableRecord } from '@kbn/discover-utils';
 import { searchResponseIncompleteWarningLocalCluster } from '@kbn/search-response-warnings/src/__mocks__/search_response_warnings';

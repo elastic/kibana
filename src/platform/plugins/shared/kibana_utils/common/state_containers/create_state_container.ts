@@ -7,10 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { BehaviorSubject } from 'rxjs';
-import { skip } from 'rxjs';
+import { BehaviorSubject, skip } from 'rxjs';
 import deepFreeze from 'deep-freeze-strict';
-import {
+import type {
   PureTransitionsToTransitions,
   PureTransition,
   ReduxLikeStateContainer,

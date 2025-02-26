@@ -20,7 +20,7 @@ import { getConfigMockDecoded } from '../../config.mock';
 
 import { TestReadable } from './test_readable.mock';
 
-import { ImportListItemsToStreamOptions, WriteBufferToItemsOptions } from '.';
+import type { ImportListItemsToStreamOptions, WriteBufferToItemsOptions } from '.';
 
 export const getImportListItemsToStreamOptionsMock = (): ImportListItemsToStreamOptions => ({
   config: getConfigMockDecoded(),

@@ -6,24 +6,20 @@
  */
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
-
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
-
-import type * as estypes from '@kbn/es-types';
-
-import type { SearchRequest, SearchResponse } from '@elastic/elasticsearch/lib/api/types';
+import type { estypes } from '@elastic/elasticsearch';
 
 export interface CreateEsSearchIterableOptions<TDocument = unknown> {
   esClient: ElasticsearchClient;
-  searchRequest: Omit<SearchRequest, 'search_after' | 'from' | 'sort' | 'pit' | 'index'> &
-    Pick<Required<SearchRequest>, 'sort' | 'index'>;
+  searchRequest: Omit<estypes.SearchRequest, 'search_after' | 'from' | 'sort' | 'pit' | 'index'> &
+    Pick<Required<estypes.SearchRequest>, 'sort' | 'index'>;
   /**
    * An optional callback for mapping the results retrieved from ES. If defined, the iterator
    * `value` will be set to the data returned by this mapping function.
    *
    * @param data
    */
-  resultsMapper?: (data: SearchResponse<TDocument>) => any;
+  resultsMapper?: (data: estypes.SearchResponse<TDocument>) => any;
   /** If a Point in Time should be used while executing the search. Defaults to `true` */
   usePointInTime?: boolean;
 }
@@ -31,7 +27,7 @@ export interface CreateEsSearchIterableOptions<TDocument = unknown> {
 // FIXME:PT need to revisit this type - its not working as expected
 type InferEsSearchIteratorResultValue<TDocument = unknown> =
   CreateEsSearchIterableOptions<TDocument>['resultsMapper'] extends undefined
-    ? SearchResponse<TDocument>
+    ? estypes.SearchResponse<TDocument>
     : ReturnType<Required<CreateEsSearchIterableOptions<TDocument>>['resultsMapper']>;
 
 /**
@@ -71,7 +67,7 @@ export const createEsSearchIterable = <TDocument = unknown>({
 > => {
   const keepAliveValue = '5m';
   let done = false;
-  let value: SearchResponse<TDocument>;
+  let value: estypes.SearchResponse<TDocument>;
   let searchAfterValue: estypes.SearchHit['sort'] | undefined;
   let pointInTime: Promise<{ id: string }> = usePointInTime
     ? esClient.openPointInTime({
@@ -81,11 +77,11 @@ export const createEsSearchIterable = <TDocument = unknown>({
       })
     : Promise.resolve({ id: '' });
 
-  const createIteratorResult = (): IteratorResult<SearchResponse<TDocument>> => {
+  const createIteratorResult = (): IteratorResult<estypes.SearchResponse<TDocument>> => {
     return { done, value };
   };
 
-  const setValue = async (searchResponse: SearchResponse<TDocument>): Promise<void> => {
+  const setValue = async (searchResponse: estypes.SearchResponse<TDocument>): Promise<void> => {
     value = resultsMapper ? resultsMapper(searchResponse) : searchResponse;
 
     if (value && 'then' in value && typeof value.then === 'function') {
@@ -147,7 +143,7 @@ export const createEsSearchIterable = <TDocument = unknown>({
     if (!searchAfterValue) {
       await setDone();
       throw new Error(
-        `Unable to store 'search_after' value. Last 'SearchHit' did not include a 'sort' property \n(did you forget to set the 'sort' attribute on your SearchRequest?)':\n${JSON.stringify(
+        `Unable to store 'search_after' value. Last 'SearchHit' did not include a 'sort' property \n(did you forget to set the 'sort' attribute on your estypes.SearchRequest?)':\n${JSON.stringify(
           lastSearchHit
         )}`
       );

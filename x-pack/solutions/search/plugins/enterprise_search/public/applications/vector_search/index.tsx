@@ -12,7 +12,7 @@ import { Switch } from 'react-router-dom';
 
 import { Route } from '@kbn/shared-ux-router';
 
-import { InitialAppData } from '../../../common/types';
+import type { InitialAppData } from '../../../common/types';
 
 import { VectorSearchGuide } from './components/vector_search_guide/vector_search_guide';
 

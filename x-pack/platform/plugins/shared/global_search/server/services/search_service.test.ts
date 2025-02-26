@@ -5,15 +5,17 @@
  * 2.0.
  */
 
-import { firstValueFrom, Observable, of } from 'rxjs';
+import type { Observable } from 'rxjs';
+import { firstValueFrom, of } from 'rxjs';
 import { TestScheduler } from 'rxjs/testing';
 import { duration } from 'moment';
-import { httpServiceMock, httpServerMock, coreMock } from '@kbn/core/server/mocks';
+import type { httpServerMock } from '@kbn/core/server/mocks';
+import { httpServiceMock, coreMock } from '@kbn/core/server/mocks';
 import { licenseCheckerMock } from '../../common/license_checker.mock';
-import { GlobalSearchProviderResult } from '../../common/types';
+import type { GlobalSearchProviderResult } from '../../common/types';
 import { GlobalSearchFindError } from '../../common/errors';
-import { GlobalSearchConfigType } from '../config';
-import { GlobalSearchResultProvider } from '../types';
+import type { GlobalSearchConfigType } from '../config';
+import type { GlobalSearchResultProvider } from '../types';
 import { SearchService } from './search_service';
 
 const getTestScheduler = () =>

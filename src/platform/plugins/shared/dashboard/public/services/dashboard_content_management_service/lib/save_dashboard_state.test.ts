@@ -15,7 +15,7 @@ import {
   embeddableService,
 } from '../../kibana_services';
 import { saveDashboardState } from './save_dashboard_state';
-import { DashboardPanelMap } from '../../../../common/dashboard_container/types';
+import type { DashboardPanelMap } from '../../../../common/dashboard_container/types';
 
 contentManagementService.client.create = jest.fn().mockImplementation(({ options }) => {
   if (options.id === undefined) {

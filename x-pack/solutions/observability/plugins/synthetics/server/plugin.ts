@@ -4,18 +4,18 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import {
+import type {
   PluginInitializerContext,
   CoreStart,
   CoreSetup,
   Plugin as PluginType,
   Logger,
-  SavedObjectsClient,
   SavedObjectsClientContract,
 } from '@kbn/core/server';
+import { SavedObjectsClient } from '@kbn/core/server';
 import { mappingFromFieldMap } from '@kbn/alerting-plugin/common';
 import { Dataset } from '@kbn/rule-registry-plugin/server';
-import {
+import type {
   SyntheticsPluginsSetupDependencies,
   SyntheticsPluginsStartDependencies,
   SyntheticsServerSetup,
@@ -25,7 +25,7 @@ import { SyntheticsMonitorClient } from './synthetics_service/synthetics_monitor
 import { initSyntheticsServer } from './server';
 import { syntheticsFeature } from './feature';
 import { registerSyntheticsSavedObjects } from './saved_objects/saved_objects';
-import { UptimeConfig } from './config';
+import type { UptimeConfig } from './config';
 import { SyntheticsService } from './synthetics_service/synthetics_service';
 import { syntheticsServiceApiKey } from './saved_objects/service_api_key';
 import { SYNTHETICS_RULE_TYPES_ALERT_CONTEXT } from '../common/constants/synthetics_alerts';

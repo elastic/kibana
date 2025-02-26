@@ -8,7 +8,7 @@
 import React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
 import { RuleFormConsumerSelection } from './rule_form_consumer_selection';
-import { RuleCreationValidConsumer } from '../../../types';
+import type { RuleCreationValidConsumer } from '../../../types';
 import { useKibana } from '../../../common/lib/kibana';
 
 const mockConsumers: RuleCreationValidConsumer[] = ['logs', 'infrastructure', 'stackAlerts'];

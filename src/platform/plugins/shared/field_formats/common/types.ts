@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Serializable, SerializableRecord } from '@kbn/utility-types';
-import { FieldFormat } from './field_format';
-import { FieldFormatsRegistry } from './field_formats_registry';
+import type { Serializable, SerializableRecord } from '@kbn/utility-types';
+import type { FieldFormat } from './field_format';
+import type { FieldFormatsRegistry } from './field_formats_registry';
 
 /** @public **/
 export type FieldFormatsContentType = 'html' | 'text';

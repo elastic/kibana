@@ -6,9 +6,7 @@
  */
 
 import type { FC } from 'react';
-import { useMemo } from 'react';
-import { useState } from 'react';
-import React from 'react';
+import React, { useMemo, useState } from 'react';
 import {
   EuiDataGridToolbarControl,
   EuiPopover,

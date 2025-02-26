@@ -5,6 +5,7 @@
  * 2.0.
  */
 import React, { useState } from 'react';
+import type { PropsOf, EuiDescriptionListProps } from '@elastic/eui';
 import {
   useEuiTheme,
   EuiFlexItem,
@@ -17,14 +18,12 @@ import {
   EuiTabs,
   EuiTab,
   EuiFlexGroup,
-  PropsOf,
   EuiCodeBlock,
   EuiMarkdownFormat,
   EuiIcon,
   EuiPagination,
   EuiFlyoutFooter,
   EuiToolTip,
-  EuiDescriptionListProps,
   EuiCallOut,
   EuiLink,
 } from '@elastic/eui';
@@ -35,9 +34,9 @@ import type { HttpSetup } from '@kbn/core/public';
 import { generatePath } from 'react-router-dom';
 import { css } from '@emotion/react';
 import { CspEvaluationBadge, benchmarksNavigation } from '@kbn/cloud-security-posture';
-import type { CspFinding, BenchmarkId } from '@kbn/cloud-security-posture-common';
-import { BenchmarkName, CSP_MISCONFIGURATIONS_DATASET } from '@kbn/cloud-security-posture-common';
-import { CspVulnerabilityFinding } from '@kbn/cloud-security-posture-common/schema/vulnerabilities/csp_vulnerability_finding';
+import type { CspFinding, BenchmarkId, BenchmarkName } from '@kbn/cloud-security-posture-common';
+import { CSP_MISCONFIGURATIONS_DATASET } from '@kbn/cloud-security-posture-common';
+import type { CspVulnerabilityFinding } from '@kbn/cloud-security-posture-common/schema/vulnerabilities/csp_vulnerability_finding';
 import { isNativeCspFinding } from '../../../common/utils/is_native_csp_finding';
 import { getVendorName } from '../../../common/utils/get_vendor_name';
 import { truthy } from '../../../../common/utils/helpers';

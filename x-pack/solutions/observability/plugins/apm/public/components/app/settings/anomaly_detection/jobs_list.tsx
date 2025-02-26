@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { EuiSwitch } from '@elastic/eui';
 import {
+  EuiSwitch,
   EuiButton,
   EuiFlexGroup,
   EuiFlexItem,

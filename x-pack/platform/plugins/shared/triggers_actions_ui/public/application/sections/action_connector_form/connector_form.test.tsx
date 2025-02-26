@@ -9,9 +9,9 @@ import React, { lazy } from 'react';
 import { ConnectorForm } from './connector_form';
 import { actionTypeRegistryMock } from '../../action_type_registry.mock';
 import userEvent from '@testing-library/user-event';
-import { waitFor } from '@testing-library/react';
-import { act } from '@testing-library/react';
-import { AppMockRenderer, createAppMockRenderer } from '../test_utils';
+import { waitFor, act } from '@testing-library/react';
+import type { AppMockRenderer } from '../test_utils';
+import { createAppMockRenderer } from '../test_utils';
 
 describe('ConnectorForm', () => {
   let appMockRenderer: AppMockRenderer;

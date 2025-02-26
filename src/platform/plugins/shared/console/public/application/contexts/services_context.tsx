@@ -9,12 +9,12 @@
 
 import React, { createContext, useContext, useEffect } from 'react';
 import type { NotificationsSetup, DocLinksStart, HttpSetup } from '@kbn/core/public';
-import { RouteComponentProps } from 'react-router-dom';
+import type { RouteComponentProps } from 'react-router-dom';
 
 import type { AutocompleteInfo, History, Settings, Storage } from '../../services';
-import { ObjectStorageClient } from '../../../common/types';
-import { ConsoleStartServices, MetricsTracker } from '../../types';
-import { EsHostService } from '../lib';
+import type { ObjectStorageClient } from '../../../common/types';
+import type { ConsoleStartServices, MetricsTracker } from '../../types';
+import type { EsHostService } from '../lib';
 
 interface ContextServices {
   routeHistory?: RouteComponentProps['history'];

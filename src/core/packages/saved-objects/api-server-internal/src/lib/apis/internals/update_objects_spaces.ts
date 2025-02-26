@@ -19,6 +19,7 @@ import type {
   SavedObjectsUpdateObjectsSpacesResponse,
   SavedObjectsUpdateObjectsSpacesResponseObject,
 } from '@kbn/core-saved-objects-api-server';
+import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
 import type {
   SavedObject,
   AuthorizeObjectWithExistingSpaces,
@@ -26,9 +27,9 @@ import type {
   ISavedObjectTypeRegistry,
   ISavedObjectsSerializer,
   SavedObjectsRawDocSource,
+  DecoratedError,
 } from '@kbn/core-saved-objects-server';
 import { ALL_NAMESPACES_STRING } from '@kbn/core-saved-objects-utils-server';
-import { SavedObjectsErrorHelpers, type DecoratedError } from '@kbn/core-saved-objects-server';
 import type { IndexMapping } from '@kbn/core-saved-objects-base-server-internal';
 import {
   getBulkOperationError,

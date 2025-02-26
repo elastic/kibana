@@ -12,9 +12,9 @@ import {
   controlGroupSavedObjectStateToSerializableRuntimeState,
   serializableRuntimeStateToControlGroupSavedObjectState,
 } from '@kbn/controls-plugin/server';
-import { Serializable, SerializableRecord } from '@kbn/utility-types';
-import { SavedObjectMigrationFn } from '@kbn/core/server';
-import { MigrateFunction } from '@kbn/kibana-utils-plugin/common';
+import type { Serializable, SerializableRecord } from '@kbn/utility-types';
+import type { SavedObjectMigrationFn } from '@kbn/core/server';
+import type { MigrateFunction } from '@kbn/kibana-utils-plugin/common';
 
 import {
   convertPanelStateToSavedDashboardPanel,

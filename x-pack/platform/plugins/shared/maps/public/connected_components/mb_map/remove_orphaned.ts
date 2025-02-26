@@ -7,7 +7,7 @@
 
 import type { Map as MbMap } from '@kbn/mapbox-gl';
 import { isGlDrawLayer } from './sort_layers';
-import { ILayer } from '../../classes/layers/layer';
+import type { ILayer } from '../../classes/layers/layer';
 
 export function removeOrphanedSourcesAndLayers(
   mbMap: MbMap,

@@ -15,7 +15,7 @@ import {
   REPORTING_DATA_STREAM_WILDCARD_WITH_LEGACY,
 } from '@kbn/reporting-server';
 import rison from '@kbn/rison';
-import { FtrProviderContext } from '../ftr_provider_context';
+import type { FtrProviderContext } from '../ftr_provider_context';
 
 function removeWhitespace(str: string) {
   return str.replace(/\s/g, '');

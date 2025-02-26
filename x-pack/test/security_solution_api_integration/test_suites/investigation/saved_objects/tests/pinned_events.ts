@@ -7,8 +7,8 @@
 
 import expect from '@kbn/expect';
 import { PINNED_EVENT_URL } from '@kbn/security-solution-plugin/common/constants';
-import TestAgent from 'supertest/lib/agent';
-import { FtrProviderContextWithSpaces } from '../../../../ftr_provider_context_with_spaces';
+import type TestAgent from 'supertest/lib/agent';
+import type { FtrProviderContextWithSpaces } from '../../../../ftr_provider_context_with_spaces';
 
 export default function ({ getService }: FtrProviderContextWithSpaces) {
   const utils = getService('securitySolutionUtils');

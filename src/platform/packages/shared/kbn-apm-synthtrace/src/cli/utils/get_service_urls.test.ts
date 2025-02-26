@@ -9,7 +9,7 @@
 
 import fetch from 'node-fetch';
 import { createLogger, LogLevel } from '../../lib/utils/create_logger';
-import { RunOptions } from './parse_run_cli_flags';
+import type { RunOptions } from './parse_run_cli_flags';
 import { getServiceUrls } from './get_service_urls';
 
 jest.mock('node-fetch');

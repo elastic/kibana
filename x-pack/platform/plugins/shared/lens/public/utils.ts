@@ -10,18 +10,17 @@ import { i18n } from '@kbn/i18n';
 import moment from 'moment-timezone';
 import type { Serializable } from '@kbn/utility-types';
 import { DEFAULT_COLOR_MAPPING_CONFIG } from '@kbn/coloring';
-import type { TimefilterContract } from '@kbn/data-plugin/public';
+import type { TimefilterContract, ISearchStart } from '@kbn/data-plugin/public';
 import type { IUiSettingsClient, SavedObjectReference } from '@kbn/core/public';
 import type { DataView, DataViewsContract } from '@kbn/data-views-plugin/public';
 import type { DatatableUtilitiesService } from '@kbn/data-plugin/common';
 import { emptyTitleText } from '@kbn/visualization-ui-components';
-import { RequestAdapter } from '@kbn/inspector-plugin/common';
-import { ISearchStart } from '@kbn/data-plugin/public';
+import type { RequestAdapter } from '@kbn/inspector-plugin/common';
 import type { DraggingIdentifier, DropType } from '@kbn/dom-drag-drop';
 import { getAbsoluteTimeRange } from '@kbn/data-plugin/common';
-import { DateRange } from '../common/types';
+import type { DateRange } from '../common/types';
 import type { LensDocument } from './persistence/saved_object_store';
-import {
+import type {
   Datasource,
   DatasourceMap,
   Visualization,
@@ -29,13 +28,10 @@ import {
   IndexPatternRef,
   DraggedField,
   DragDropOperation,
-  isOperation,
   UserMessage,
   TriggerEvent,
-  isLensBrushEvent,
-  isLensMultiFilterEvent,
-  isLensFilterEvent,
 } from './types';
+import { isOperation, isLensBrushEvent, isLensMultiFilterEvent, isLensFilterEvent } from './types';
 import type { DatasourceStates, VisualizationState } from './state_management';
 import type { IndexPatternServiceAPI } from './data_views_service/service';
 import { COLOR_MAPPING_OFF_BY_DEFAULT } from '../common/constants';

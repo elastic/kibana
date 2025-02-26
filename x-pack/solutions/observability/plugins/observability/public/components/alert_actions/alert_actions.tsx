@@ -16,15 +16,15 @@ import {
 
 import React, { useMemo, useState, useCallback, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
-import { CaseAttachmentsWithoutOwner, CasesPublicStart } from '@kbn/cases-plugin/public';
+import type { CaseAttachmentsWithoutOwner, CasesPublicStart } from '@kbn/cases-plugin/public';
 import { AttachmentType } from '@kbn/cases-plugin/common';
-import { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
+import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import { useRouteMatch } from 'react-router-dom';
 import { SLO_ALERTS_TABLE_ID } from '@kbn/observability-shared-plugin/common';
 import { DefaultAlertActions } from '@kbn/response-ops-alerts-table/components/default_alert_actions';
 import { useAlertsTableContext } from '@kbn/response-ops-alerts-table/contexts/alerts_table_context';
 import type { EventNonEcsData } from '../../../common/typings';
-import { GetObservabilityAlertsTableProp } from '../alerts_table/types';
+import type { GetObservabilityAlertsTableProp } from '../alerts_table/types';
 import { RULE_DETAILS_PAGE_ID } from '../../pages/rule_details/constants';
 import { paths, SLO_DETAIL_PATH } from '../../../common/locators/paths';
 import { parseAlert } from '../../pages/alerts/helpers/parse_alert';

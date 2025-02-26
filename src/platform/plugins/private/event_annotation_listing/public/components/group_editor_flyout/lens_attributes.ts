@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EventAnnotationGroupConfig } from '@kbn/event-annotation-common';
-import { FieldBasedIndexPatternColumn, TypedLensByValueInput } from '@kbn/lens-plugin/public';
+import type { EventAnnotationGroupConfig } from '@kbn/event-annotation-common';
+import type { FieldBasedIndexPatternColumn, TypedLensByValueInput } from '@kbn/lens-plugin/public';
 
 export const DATA_LAYER_ID = 'data-layer-id';
 export const DATE_HISTOGRAM_COLUMN_ID = 'date-histogram-column-id';

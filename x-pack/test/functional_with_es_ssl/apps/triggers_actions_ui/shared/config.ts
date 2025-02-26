@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { FtrConfigProviderContext, findTestPluginPaths } from '@kbn/test';
+import type { FtrConfigProviderContext } from '@kbn/test';
+import { findTestPluginPaths } from '@kbn/test';
 import { resolve } from 'path';
 import { REPO_ROOT as KIBANA_ROOT } from '@kbn/repo-info';
 

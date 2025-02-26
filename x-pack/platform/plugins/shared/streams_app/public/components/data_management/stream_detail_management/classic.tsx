@@ -6,13 +6,14 @@
  */
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { UnwiredStreamGetResponse } from '@kbn/streams-schema';
+import type { UnwiredStreamGetResponse } from '@kbn/streams-schema';
 import { EuiCallOut, EuiFlexGroup, EuiListGroup, EuiText } from '@elastic/eui';
 import { useStreamsAppParams } from '../../../hooks/use_streams_app_params';
 import { RedirectTo } from '../../redirect_to';
 import { StreamDetailEnrichment } from '../stream_detail_enrichment';
 import { useKibana } from '../../../hooks/use_kibana';
-import { ManagementTabs, Wrapper } from './wrapper';
+import type { ManagementTabs } from './wrapper';
+import { Wrapper } from './wrapper';
 import { StreamDetailLifecycle } from '../stream_detail_lifecycle';
 
 type ManagementSubTabs = 'enrich' | 'overview' | 'lifecycle';

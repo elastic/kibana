@@ -8,8 +8,14 @@
 import type { FeatureCollection, Feature, Geometry } from 'geojson';
 import type { estypes } from '@elastic/elasticsearch';
 import { htmlIdGenerator, type EuiThemeComputed } from '@elastic/eui';
-import type { LayerDescriptor } from '@kbn/maps-plugin/common';
-import { FIELD_ORIGIN, STYLE_TYPE } from '@kbn/maps-plugin/common';
+import type { LayerDescriptor, VectorSourceRequestMeta } from '@kbn/maps-plugin/common';
+import {
+  FIELD_ORIGIN,
+  STYLE_TYPE,
+  LAYER_TYPE,
+  SOURCE_TYPES,
+  SCALING_TYPES,
+} from '@kbn/maps-plugin/common';
 import type {
   ESSearchSourceDescriptor,
   VectorStyleDescriptor,
@@ -17,16 +23,14 @@ import type {
 import type { SerializableRecord } from '@kbn/utility-types';
 import { fromKueryExpression, luceneStringToDsl, toElasticsearchQuery } from '@kbn/es-query';
 import type { ESSearchResponse } from '@kbn/es-types';
-import type { VectorSourceRequestMeta } from '@kbn/maps-plugin/common';
-import { LAYER_TYPE, SOURCE_TYPES, SCALING_TYPES } from '@kbn/maps-plugin/common';
 import { type MLAnomalyDoc, ML_SEVERITY_COLOR_RAMP } from '@kbn/ml-anomaly-utils';
 import { formatHumanReadableDateTimeSeconds } from '@kbn/ml-date-utils';
 import { SEARCH_QUERY_LANGUAGE } from '@kbn/ml-query-utils';
 import type { MlApi } from '../application/services/ml_api_service';
 import { tabColor } from '../../common/util/group_color_utils';
 import { AnomalySource } from './anomaly_source';
-import type { ExplorerJob } from '../application/explorer/explorer_utils';
-import { getIndexPattern, type SourceIndexGeoFields } from '../application/explorer/explorer_utils';
+import { getIndexPattern } from '../application/explorer/explorer_utils';
+import type { ExplorerJob, SourceIndexGeoFields } from '../application/explorer/explorer_utils';
 
 export const ML_ANOMALY_LAYERS = {
   TYPICAL: 'typical',

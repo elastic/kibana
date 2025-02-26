@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import SemVer from 'semver/classes/semver';
+import type SemVer from 'semver/classes/semver';
 import {
   deprecationsServiceMock,
   docLinksServiceMock,

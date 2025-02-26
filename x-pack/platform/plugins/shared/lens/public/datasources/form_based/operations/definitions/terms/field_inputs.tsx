@@ -15,8 +15,9 @@ import {
   DraggableBucketContainer,
 } from '@kbn/visualization-ui-components';
 import { useDebouncedValue } from '@kbn/visualization-utils';
-import { IndexPattern } from '../../../../../types';
-import { FieldChoiceWithOperationType, FieldSelect } from '../../../dimension_panel/field_select';
+import type { IndexPattern } from '../../../../../types';
+import type { FieldChoiceWithOperationType } from '../../../dimension_panel/field_select';
+import { FieldSelect } from '../../../dimension_panel/field_select';
 import type { TermsIndexPatternColumn } from './types';
 import type { OperationSupportMatrix } from '../../../dimension_panel';
 import { supportedTypes } from './constants';

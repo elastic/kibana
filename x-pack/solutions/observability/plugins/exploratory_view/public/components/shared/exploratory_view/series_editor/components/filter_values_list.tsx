@@ -12,8 +12,8 @@ import { map } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import styled from '@emotion/styled';
 import { FilterValueButton } from '../columns/filter_value_btn';
-import { FilterProps, NestedFilterOpen } from '../columns/filter_expanded';
-import { UrlFilter } from '../../types';
+import type { FilterProps, NestedFilterOpen } from '../columns/filter_expanded';
+import type { UrlFilter } from '../../types';
 
 interface Props extends FilterProps {
   values: Array<{

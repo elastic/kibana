@@ -24,6 +24,10 @@ import {
   type SavedObjectReference,
   type AuthorizeFindParams,
   MAIN_SAVED_OBJECT_INDEX,
+  type AuthorizeAndRedactInternalBulkResolveParams,
+  type GetFindRedactTypeMapParams,
+  type AuthorizationTypeMap,
+  SavedObjectsErrorHelpers,
 } from '@kbn/core-saved-objects-server';
 import type {
   SavedObjectsBaseOptions,
@@ -48,14 +52,8 @@ import {
   type ElasticsearchClientMock,
 } from '@kbn/core-elasticsearch-client-server-mocks';
 import { DocumentMigrator } from '@kbn/core-saved-objects-migration-server-internal';
-import {
-  type AuthorizeAndRedactInternalBulkResolveParams,
-  type GetFindRedactTypeMapParams,
-  type AuthorizationTypeMap,
-  SavedObjectsErrorHelpers,
-} from '@kbn/core-saved-objects-server';
 import { mockGetSearchDsl } from '../lib/repository.test.mock';
-import { SavedObjectsRepository } from '../lib/repository';
+import type { SavedObjectsRepository } from '../lib/repository';
 
 export const DEFAULT_SPACE = 'default';
 

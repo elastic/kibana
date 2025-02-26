@@ -12,7 +12,7 @@ import { EuiLink, EuiSpacer, EuiText } from '@elastic/eui';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 import type { Rule } from '@kbn/triggers-actions-ui-plugin/public';
-import { ActionConnector } from '../../../../common/rules/types';
+import type { ActionConnector } from '../../../../common/rules/types';
 import { kibanaService } from '../../state/kibana_service';
 import { getUrlForAlert } from './common';
 

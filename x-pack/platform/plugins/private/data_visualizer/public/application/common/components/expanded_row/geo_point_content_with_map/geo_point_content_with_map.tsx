@@ -5,8 +5,7 @@
  * 2.0.
  */
 import type { FC } from 'react';
-import { useMemo } from 'react';
-import React, { useEffect, useState } from 'react';
+import React, { useMemo, useEffect, useState } from 'react';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { ES_GEO_FIELD_TYPE, LayerDescriptor } from '@kbn/maps-plugin/common';
 import { INITIAL_LOCATION } from '@kbn/maps-plugin/common';

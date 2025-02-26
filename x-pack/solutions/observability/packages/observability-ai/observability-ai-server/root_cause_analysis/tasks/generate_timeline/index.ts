@@ -6,7 +6,7 @@
  */
 
 import { RCA_SYSTEM_PROMPT_BASE } from '../../prompts';
-import { RootCauseAnalysisContext } from '../../types';
+import type { RootCauseAnalysisContext } from '../../types';
 import { stringifySummaries } from '../../util/stringify_summaries';
 
 type SignificantEventSeverity = 'info' | 'unusual' | 'warning' | 'critical';

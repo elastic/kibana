@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import {
+import type {
   AggregationsCategorizeTextAnalyzer,
   QueryDslQueryContainer,
 } from '@elastic/elasticsearch/lib/api/types';
 import { calculateAuto } from '@kbn/calculate-auto';
-import { RandomSamplerWrapper } from '@kbn/ml-random-sampler-utils';
+import type { RandomSamplerWrapper } from '@kbn/ml-random-sampler-utils';
 import moment from 'moment';
 
 const isoTimestampFormat = "YYYY-MM-DD'T'HH:mm:ss.SSS'Z'";

@@ -11,11 +11,12 @@ import { EuiDelayRender, EuiSkeletonText } from '@elastic/eui';
 import type {
   FieldFormatEditor as InnerFieldFormatEditor,
   FieldFormatEditorFactory,
+  FormatEditorServiceStart,
 } from '@kbn/data-view-field-editor-plugin/public';
-import { FormatEditorServiceStart } from '@kbn/data-view-field-editor-plugin/public';
 import type { FieldFormat, FieldFormatParams } from '@kbn/field-formats-plugin/common';
 import { memoize } from 'lodash';
-import React, { LazyExoticComponent, PureComponent } from 'react';
+import type { LazyExoticComponent } from 'react';
+import React, { PureComponent } from 'react';
 
 export interface FieldFormatEditorProps {
   fieldType: string;

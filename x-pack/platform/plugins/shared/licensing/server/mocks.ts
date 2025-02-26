@@ -6,7 +6,7 @@
  */
 
 import { BehaviorSubject } from 'rxjs';
-import {
+import type {
   LicensingPluginSetup,
   LicensingPluginStart,
   LicensingApiRequestHandlerContext,

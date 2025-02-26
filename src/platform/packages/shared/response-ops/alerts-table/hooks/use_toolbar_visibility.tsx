@@ -7,13 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import {
+import type {
   EuiDataGridToolBarAdditionalControlsOptions,
   EuiDataGridToolBarVisibilityOptions,
 } from '@elastic/eui';
-import React, { lazy, memo, ReactNode, Suspense, useMemo } from 'react';
-import { Alert, BrowserFields, EsQuerySnapshot } from '@kbn/alerting-types';
-import { FieldBrowser, FieldBrowserOptions } from '@kbn/response-ops-alerts-fields-browser';
+import type { ReactNode } from 'react';
+import React, { lazy, memo, Suspense, useMemo } from 'react';
+import type { Alert, BrowserFields, EsQuerySnapshot } from '@kbn/alerting-types';
+import type { FieldBrowserOptions } from '@kbn/response-ops-alerts-fields-browser';
+import { FieldBrowser } from '@kbn/response-ops-alerts-fields-browser';
 import type { SettingsStart } from '@kbn/core-ui-settings-browser';
 import { AlertsCount } from '../components/alerts_count';
 import { useAlertsTableContext } from '../contexts/alerts_table_context';

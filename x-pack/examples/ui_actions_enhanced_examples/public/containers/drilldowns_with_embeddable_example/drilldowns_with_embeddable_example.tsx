@@ -6,10 +6,10 @@
  */
 
 import React from 'react';
+import type { EuiContextMenuPanelDescriptor } from '@elastic/eui';
 import {
   EuiText,
   EuiSpacer,
-  EuiContextMenuPanelDescriptor,
   EuiButton,
   EuiPopover,
   EuiContextMenu,

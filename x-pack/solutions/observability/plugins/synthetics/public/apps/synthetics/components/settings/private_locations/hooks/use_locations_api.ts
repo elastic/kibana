@@ -7,7 +7,7 @@
 
 import { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { NewLocation } from '../add_location_flyout';
+import type { NewLocation } from '../add_location_flyout';
 import {
   createPrivateLocationAction,
   deletePrivateLocationAction,

@@ -13,11 +13,11 @@ import {
   EuiPopover,
   EuiToolTip,
   EuiButtonEmpty,
+  useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { useEuiTheme } from '@elastic/eui';
 import { useSeriesStorage } from '../hooks/use_series_storage';
-import { SeriesUrl } from '../types';
+import type { SeriesUrl } from '../types';
 
 export function SeriesColorPicker({ seriesId, series }: { seriesId: number; series: SeriesUrl }) {
   const { euiTheme } = useEuiTheme();

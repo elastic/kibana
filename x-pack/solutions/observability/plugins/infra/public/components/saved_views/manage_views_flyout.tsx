@@ -19,11 +19,11 @@ import {
   EuiFlexGroup,
   EuiButton,
   EuiPortal,
+  EuiButtonIcon,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { EuiBasicTableColumn } from '@elastic/eui';
-import { EuiButtonIcon } from '@elastic/eui';
 import type { SavedViewOperations, SavedViewItem } from '../../../common/saved_views';
 
 export interface ManageViewsFlyoutProps<TSavedViewState extends SavedViewItem> {

@@ -7,7 +7,7 @@
 
 import { v4 as uuidv4 } from 'uuid';
 import expect from '@kbn/expect';
-import { TransformGetTransformStatsTransformStats } from '@elastic/elasticsearch/lib/api/types';
+import type { TransformGetTransformStatsTransformStats } from '@elastic/elasticsearch/lib/api/types';
 import {
   ENDPOINT_DEFAULT_SORT_DIRECTION,
   ENDPOINT_DEFAULT_SORT_FIELD,
@@ -25,13 +25,11 @@ import { indexFleetEndpointPolicy } from '@kbn/security-solution-plugin/common/e
 import { TRANSFORM_STATES } from '@kbn/security-solution-plugin/common/constants';
 import type { IndexedHostsAndAlertsResponse } from '@kbn/security-solution-plugin/common/endpoint/index_data';
 
-import {
-  EndpointSortableField,
-  MetadataListResponse,
-} from '@kbn/security-solution-plugin/common/endpoint/types';
+import type { MetadataListResponse } from '@kbn/security-solution-plugin/common/endpoint/types';
+import { EndpointSortableField } from '@kbn/security-solution-plugin/common/endpoint/types';
 
-import TestAgent from 'supertest/lib/agent';
-import { FtrProviderContext } from '../../../../ftr_provider_context_edr_workflows';
+import type TestAgent from 'supertest/lib/agent';
+import type { FtrProviderContext } from '../../../../ftr_provider_context_edr_workflows';
 import {
   generateAgentDocs,
   generateMetadataDocs,

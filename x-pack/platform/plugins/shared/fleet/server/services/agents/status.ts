@@ -6,8 +6,7 @@
  */
 
 import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
-import { toElasticsearchQuery } from '@kbn/es-query';
-import { fromKueryExpression } from '@kbn/es-query';
+import { toElasticsearchQuery, fromKueryExpression } from '@kbn/es-query';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import type {
   AggregationsTermsAggregateBase,

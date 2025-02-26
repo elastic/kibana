@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { CommonProps } from '@elastic/eui';
-import {
+import type { CommonProps } from '@elastic/eui';
+import type {
   NoDataCardProps,
   NoDataCardServices,
   NoDataCardKibanaDependencies,

@@ -11,7 +11,7 @@ import React from 'react';
 import { EuiLoadingSpinner } from '@elastic/eui';
 import useAsync from 'react-use/lib/useAsync';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import { ESQLEditorProps } from '@kbn/esql-editor';
+import type { ESQLEditorProps } from '@kbn/esql-editor';
 import { untilPluginStartServicesReady } from './kibana_services';
 
 export const ESQLLangEditor = (props: ESQLEditorProps) => {

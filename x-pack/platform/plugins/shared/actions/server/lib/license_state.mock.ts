@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ILicenseState } from './license_state';
+import type { ILicenseState } from './license_state';
 
 export const createLicenseStateMock = () => {
   const licenseState: jest.Mocked<ILicenseState> = {

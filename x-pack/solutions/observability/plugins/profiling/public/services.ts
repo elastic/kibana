@@ -6,12 +6,8 @@
  */
 
 import type { HttpFetchQuery } from '@kbn/core/public';
-import type { TopNFunctions } from '@kbn/profiling-utils';
-import {
-  createFlameGraph,
-  type BaseFlameGraph,
-  type ElasticFlameGraph,
-} from '@kbn/profiling-utils';
+import { createFlameGraph } from '@kbn/profiling-utils';
+import type { TopNFunctions, BaseFlameGraph, ElasticFlameGraph } from '@kbn/profiling-utils';
 import { getRoutePaths } from '../common';
 import type {
   IndexLifecyclePhaseSelectOption,

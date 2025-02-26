@@ -7,11 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { SetRequired } from 'type-fest';
-import React, { ComponentProps, useCallback } from 'react';
+import type { SetRequired } from 'type-fest';
+import type { ComponentProps } from 'react';
+import React, { useCallback } from 'react';
 import { EuiFlexGroup } from '@elastic/eui';
 import { typedMemo } from '../utils/react';
-import { AdditionalContext, AlertsTableProps, BulkActionsVerbs } from '../types';
+import type { AdditionalContext, AlertsTableProps } from '../types';
+import { BulkActionsVerbs } from '../types';
 import { ErrorBoundary } from './error_boundary';
 import { ErrorCell } from './error_cell';
 

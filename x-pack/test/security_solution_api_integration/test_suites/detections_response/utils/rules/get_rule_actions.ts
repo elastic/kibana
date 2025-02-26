@@ -7,9 +7,8 @@
 
 import type SuperTest from 'supertest';
 
-import { RuleActionArray } from '@kbn/securitysolution-io-ts-alerting-types';
-import { getSlackAction } from '..';
-import { getWebHookAction } from '..';
+import type { RuleActionArray } from '@kbn/securitysolution-io-ts-alerting-types';
+import { getSlackAction, getWebHookAction } from '..';
 
 const createConnector = async (supertest: SuperTest.Agent, payload: Record<string, unknown>) =>
   (await supertest.post('/api/actions/connector').set('kbn-xsrf', 'true').send(payload).expect(200))

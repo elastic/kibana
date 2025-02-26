@@ -8,7 +8,7 @@
 import type { Datatable } from '@kbn/expressions-plugin/public';
 
 import { checkTableForContainsSmallValues, getLegendStats } from './render_helpers';
-import { PieLayerState } from '../../../common/types';
+import type { PieLayerState } from '../../../common/types';
 import { PieChartTypes } from '../../../common/constants';
 import { LegendValue } from '@elastic/charts';
 

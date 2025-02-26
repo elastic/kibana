@@ -7,8 +7,8 @@
 
 import expect from '@kbn/expect';
 import { OBSERVABILITY_ONBOARDING_STATE_SAVED_OBJECT_TYPE } from '@kbn/observability-onboarding-plugin/server/saved_objects/observability_onboarding_status';
-import { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
-import { SupertestWithRoleScopeType } from '../../../services';
+import type { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
+import type { SupertestWithRoleScopeType } from '../../../services';
 
 export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   const kibanaServer = getService('kibanaServer');

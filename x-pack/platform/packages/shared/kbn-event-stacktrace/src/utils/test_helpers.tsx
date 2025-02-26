@@ -9,8 +9,10 @@ import React from 'react';
 import { EuiThemeProvider } from '@elastic/eui';
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { render } from '@testing-library/react';
+
+import type { MountRendererProps } from 'enzyme';
 // eslint-disable-next-line import/no-extraneous-dependencies
-import { mount, MountRendererProps } from 'enzyme';
+import { mount } from 'enzyme';
 
 export function renderWithTheme(component: React.ReactNode, params?: any) {
   return render(<EuiThemeProvider>{component}</EuiThemeProvider>, params);

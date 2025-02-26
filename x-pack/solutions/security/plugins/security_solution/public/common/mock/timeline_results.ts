@@ -10,13 +10,12 @@ import { FilterStateStore } from '@kbn/es-query';
 import type { DataTableModel } from '@kbn/securitysolution-data-table';
 import { VIEW_SELECTION } from '../../../common/constants';
 import { TimelineId, TimelineTabs } from '../../../common/types/timeline';
-import type { TimelineResponse } from '../../../common/api/timeline';
 import {
-  type ColumnHeaderResult,
   RowRendererIdEnum,
   TimelineTypeEnum,
   TimelineStatusEnum,
 } from '../../../common/api/timeline';
+import type { TimelineResponse, ColumnHeaderResult } from '../../../common/api/timeline';
 
 import type { OpenTimelineResult } from '../../timelines/components/open_timeline/types';
 import type { TimelineEventsDetailsItem } from '../../../common/search_strategy';

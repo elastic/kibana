@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 import { first, last } from 'lodash';
-import {
+import type {
   SnapshotNodeResponse,
   SnapshotMetricInput,
   SnapshotRequest,

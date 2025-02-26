@@ -5,10 +5,13 @@
  * 2.0.
  */
 import Boom from '@hapi/boom';
-import type { SavedObjectsFindOptions } from '@kbn/core-saved-objects-api-server';
+import type {
+  SavedObjectsFindOptions,
+  SavedObject,
+  SavedObjectReference,
+} from '@kbn/core-saved-objects-api-server';
 import type { StorageContext } from '@kbn/content-management-plugin/server';
 import { SOContentStorage, tagsToFindOptions } from '@kbn/content-management-utils';
-import type { SavedObject, SavedObjectReference } from '@kbn/core-saved-objects-api-server';
 import type { Logger } from '@kbn/logging';
 
 import {

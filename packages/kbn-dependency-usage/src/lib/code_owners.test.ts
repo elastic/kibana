@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { getCodeOwnersForFile, PathWithOwners } from './code_owners';
+import type { PathWithOwners } from './code_owners';
+import { getCodeOwnersForFile } from './code_owners';
 
 describe('getCodeOwnersForFile', () => {
   it('should return teams for exact file match', () => {

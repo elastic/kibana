@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ServerlessPluginSetup } from '@kbn/serverless/server';
+import type { ServerlessPluginSetup } from '@kbn/serverless/server';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface ServerlessObservabilityPluginSetup {}

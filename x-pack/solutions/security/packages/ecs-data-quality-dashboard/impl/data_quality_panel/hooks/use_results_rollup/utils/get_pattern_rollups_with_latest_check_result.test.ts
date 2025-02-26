@@ -9,7 +9,7 @@ import numeral from '@elastic/numeral';
 
 import { getPatternRollupsWithLatestCheckResult } from './get_pattern_rollups_with_latest_check_result';
 import { mockPacketbeatPatternRollup } from '../../../mock/pattern_rollup/mock_packetbeat_pattern_rollup';
-import { MeteringStatsIndex, PatternRollup } from '../../../types';
+import type { MeteringStatsIndex, PatternRollup } from '../../../types';
 import { EMPTY_STAT } from '../../../constants';
 import { mockPartitionedFieldMetadata } from '../../../mock/partitioned_field_metadata/mock_partitioned_field_metadata';
 import { EcsVersion } from '@elastic/ecs';

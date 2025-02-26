@@ -16,7 +16,7 @@ import {
   EuiPanel,
   EuiLoadingSpinner,
 } from '@elastic/eui';
-import { RuleSpecificFlappingProperties } from '@kbn/alerting-types/rule_settings';
+import type { RuleSpecificFlappingProperties } from '@kbn/alerting-types/rule_settings';
 import { RuleSettingsFlappingForm } from '@kbn/alerts-ui-shared/src/rule_settings/rule_settings_flapping_form';
 import { RuleSettingsFlappingTitleTooltip } from '@kbn/alerts-ui-shared/src/rule_settings/rule_settings_flapping_title_tooltip';
 import { useFetchFlappingSettings } from '@kbn/alerts-ui-shared/src/common/hooks/use_fetch_flapping_settings';

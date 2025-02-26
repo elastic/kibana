@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { ComponentMeta, ComponentStory } from '@storybook/react';
+import type { ComponentMeta, ComponentStory } from '@storybook/react';
 
 import { AssistantIcon as Component } from '../icon';
 

@@ -11,13 +11,14 @@ import { formatDate, EuiPanel, EuiSpacer, EuiInMemoryTable } from '@elastic/eui'
 
 import { i18n } from '@kbn/i18n';
 
-import { TIME_FORMAT } from '../../../../../../common/constants';
+import {
+  TIME_FORMAT,
+  mapEsHealthStatus2TransformHealthStatus,
+} from '../../../../../../common/constants';
 import type {
   TransformHealthIssue,
   TransformStats,
 } from '../../../../../../common/types/transform_stats';
-
-import { mapEsHealthStatus2TransformHealthStatus } from '../../../../../../common/constants';
 
 import { TransformHealthColoredDot } from './transform_health_colored_dot';
 

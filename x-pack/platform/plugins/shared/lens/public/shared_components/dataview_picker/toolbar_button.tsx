@@ -8,7 +8,8 @@
 import './toolbar_button.scss';
 import React from 'react';
 import classNames from 'classnames';
-import { EuiButton, PropsOf, EuiButtonProps } from '@elastic/eui';
+import type { PropsOf, EuiButtonProps } from '@elastic/eui';
+import { EuiButton } from '@elastic/eui';
 
 const groupPositionToClassMap = {
   none: null,

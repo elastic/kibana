@@ -10,13 +10,8 @@ import { get } from 'lodash';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 
-import {
-  EuiCallOut,
-  EuiComboBoxOptionOption,
-  EuiDescribedFormGroup,
-  EuiLink,
-  EuiSpacer,
-} from '@elastic/eui';
+import type { EuiComboBoxOptionOption } from '@elastic/eui';
+import { EuiCallOut, EuiDescribedFormGroup, EuiLink, EuiSpacer } from '@elastic/eui';
 
 import { ComboBoxField, useFormData, useKibana } from '../../../../../../shared_imports';
 import { useLoadSnapshotPolicies } from '../../../../../services/api';

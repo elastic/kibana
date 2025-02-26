@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { useState, ChangeEvent, useEffect, useRef, KeyboardEventHandler } from 'react';
+import type { ChangeEvent, KeyboardEventHandler } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import styled from '@emotion/styled';
 import { i18n } from '@kbn/i18n';
 import {
@@ -17,7 +18,7 @@ import {
   EuiOutsideClickDetector,
 } from '@elastic/eui';
 import { useSeriesStorage } from '../../hooks/use_series_storage';
-import { SeriesUrl } from '../../types';
+import type { SeriesUrl } from '../../types';
 
 interface Props {
   seriesId: number;

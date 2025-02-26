@@ -11,7 +11,8 @@ import { first } from 'rxjs';
 import { METRIC_TYPE } from '@kbn/analytics';
 import type { StartServicesAccessor } from '@kbn/core/public';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
-import { AUTOCOMPLETE_EVENT_TYPE, AutocompleteUsageCollector } from './types';
+import type { AutocompleteUsageCollector } from './types';
+import { AUTOCOMPLETE_EVENT_TYPE } from './types';
 
 export const createUsageCollector = (
   getStartServices: StartServicesAccessor,

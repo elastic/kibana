@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { SvgConfig } from './types';
+import type { SvgConfig } from './types';
 
 export const getDefaultShapeData = (): SvgConfig => ({
   viewBox: {

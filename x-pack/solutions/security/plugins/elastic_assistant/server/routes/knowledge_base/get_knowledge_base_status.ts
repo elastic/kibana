@@ -7,16 +7,16 @@
 
 import { transformError } from '@kbn/securitysolution-es-utils';
 
+import type { ReadKnowledgeBaseResponse } from '@kbn/elastic-assistant-common';
 import {
   API_VERSIONS,
   ELASTIC_AI_ASSISTANT_KNOWLEDGE_BASE_URL,
   ReadKnowledgeBaseRequestParams,
-  ReadKnowledgeBaseResponse,
 } from '@kbn/elastic-assistant-common';
 import { buildRouteValidationWithZod } from '@kbn/elastic-assistant-common/impl/schemas/common';
-import { KibanaRequest } from '@kbn/core/server';
+import type { KibanaRequest } from '@kbn/core/server';
 import { buildResponse } from '../../lib/build_response';
-import { ElasticAssistantPluginRouter } from '../../types';
+import type { ElasticAssistantPluginRouter } from '../../types';
 
 /**
  * Get the status of the Knowledge Base index, pipeline, and resources (collection of documents)

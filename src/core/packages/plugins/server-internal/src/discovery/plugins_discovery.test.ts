@@ -15,13 +15,13 @@ import { getEnvOptions, rawConfigServiceMock } from '@kbn/config-mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import type { Package } from '@kbn/repo-packages';
 
-import { firstValueFrom, from } from 'rxjs';
-import { map, toArray } from 'rxjs';
+import { firstValueFrom, from, map, toArray } from 'rxjs';
 import { resolve } from 'path';
 import { ConfigService, Env } from '@kbn/config';
 import type { CoreContext } from '@kbn/core-base-server-internal';
 import type { NodeInfo } from '@kbn/core-node-server';
-import { PluginsConfig, PluginsConfigType, config } from '../plugins_config';
+import type { PluginsConfigType } from '../plugins_config';
+import { PluginsConfig, config } from '../plugins_config';
 import type { InstanceInfo } from '../plugin_context';
 import { discover } from './plugins_discovery';
 import { PluginType } from '@kbn/core-base-common';

@@ -8,12 +8,15 @@
  */
 
 import { css } from '@emotion/react';
-import React, { ReactElement } from 'react';
+import type { ReactElement } from 'react';
+import React from 'react';
 
 import type { MountPoint } from '@kbn/core/public';
 import { MountPointPortal } from '@kbn/react-kibana-mount';
-import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
-import type { StatefulSearchBarProps } from '@kbn/unified-search-plugin/public';
+import type {
+  UnifiedSearchPublicPluginStart,
+  StatefulSearchBarProps,
+} from '@kbn/unified-search-plugin/public';
 import type { AggregateQuery, Query } from '@kbn/es-query';
 import type { EuiBreakpointSize } from '@elastic/eui';
 import type { TopNavMenuData } from './top_nav_menu_data';

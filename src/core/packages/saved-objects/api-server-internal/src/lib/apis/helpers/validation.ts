@@ -9,15 +9,15 @@
 
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import type { Logger } from '@kbn/logging';
-import type { ISavedObjectTypeRegistry } from '@kbn/core-saved-objects-server';
+import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
+import type {
+  ISavedObjectTypeRegistry,
+  SavedObjectSanitizedDoc,
+} from '@kbn/core-saved-objects-server';
 import {
   SavedObjectsTypeValidator,
   modelVersionToVirtualVersion,
 } from '@kbn/core-saved-objects-base-server-internal';
-import {
-  SavedObjectsErrorHelpers,
-  type SavedObjectSanitizedDoc,
-} from '@kbn/core-saved-objects-server';
 import { ALL_NAMESPACES_STRING } from '@kbn/core-saved-objects-utils-server';
 
 export type IValidationHelper = PublicMethodsOf<ValidationHelper>;

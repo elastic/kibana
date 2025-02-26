@@ -32,13 +32,18 @@ import { SpaceSettingsContextProvider } from '../../hooks/use_space_settings_con
 
 import { FleetServerFlyout } from '../fleet/components';
 
-import { AgentPolicyContextProvider, useFlyoutContext } from './hooks';
+import {
+  AgentPolicyContextProvider,
+  useFlyoutContext,
+  PackageInstallProvider,
+  UIExtensionsContext,
+  FlyoutContextProvider,
+} from './hooks';
 import { INTEGRATIONS_ROUTING_PATHS, pagePathGetters } from './constants';
 
 import type { UIExtensionsStorage } from './types';
 
 import { EPMApp } from './sections/epm';
-import { PackageInstallProvider, UIExtensionsContext, FlyoutContextProvider } from './hooks';
 import { IntegrationsHeader } from './components/header';
 import { AgentEnrollmentFlyout } from './components';
 import { ReadOnlyContextProvider } from './hooks/use_read_only_context';

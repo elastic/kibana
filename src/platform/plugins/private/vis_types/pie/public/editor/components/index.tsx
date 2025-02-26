@@ -8,9 +8,9 @@
  */
 
 import React, { lazy } from 'react';
-import { VisEditorOptionsProps } from '@kbn/visualizations-plugin/public';
-import { PartitionVisParams } from '@kbn/expression-partition-vis-plugin/common';
-import { PieTypeProps } from '../../types';
+import type { VisEditorOptionsProps } from '@kbn/visualizations-plugin/public';
+import type { PartitionVisParams } from '@kbn/expression-partition-vis-plugin/common';
+import type { PieTypeProps } from '../../types';
 
 const PieOptionsLazy = lazy(() => import('./pie'));
 

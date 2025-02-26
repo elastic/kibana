@@ -25,8 +25,8 @@ import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { VisualizationsSetup } from '@kbn/visualizations-plugin/public';
 import type { ChartsPluginSetup, ChartsPluginStart } from '@kbn/charts-plugin/public';
 
-import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
-import { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
+import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
 import { getTimelionVisualizationConfig } from './timelion_vis_fn';
 import { getTimelionVisDefinition } from './timelion_vis_type';
 import {

@@ -8,6 +8,7 @@
  */
 
 import React, { Component } from 'react';
+import type { EuiSwitchEvent } from '@elastic/eui';
 import {
   EuiButton,
   EuiCopy,
@@ -20,7 +21,6 @@ import {
   EuiLoadingSpinner,
   EuiRadioGroup,
   EuiSwitch,
-  EuiSwitchEvent,
 } from '@elastic/eui';
 
 import { format as formatUrl, parse as parseUrl } from 'url';
@@ -30,12 +30,11 @@ import { i18n } from '@kbn/i18n';
 import type { Capabilities } from '@kbn/core/public';
 
 import type { LocatorPublic } from '../../common';
-import { UrlParamExtension } from '../types';
-import {
+import type { UrlParamExtension, BrowserUrlService } from '../types';
+import type {
   AnonymousAccessServiceContract,
   AnonymousAccessState,
 } from '../../common/anonymous_access';
-import type { BrowserUrlService } from '../types';
 
 export interface UrlPanelContentProps {
   allowShortUrl: boolean;

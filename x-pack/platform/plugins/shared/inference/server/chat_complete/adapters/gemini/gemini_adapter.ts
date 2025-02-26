@@ -7,16 +7,10 @@
 
 import * as Gemini from '@google/generative-ai';
 import { from, map, switchMap, throwError } from 'rxjs';
-import { isReadable, Readable } from 'stream';
-import {
-  createInferenceInternalError,
-  Message,
-  MessageRole,
-  ToolChoiceType,
-  ToolOptions,
-  ToolSchema,
-  ToolSchemaType,
-} from '@kbn/inference-common';
+import type { Readable } from 'stream';
+import { isReadable } from 'stream';
+import type { Message, ToolOptions, ToolSchema, ToolSchemaType } from '@kbn/inference-common';
+import { createInferenceInternalError, MessageRole, ToolChoiceType } from '@kbn/inference-common';
 import type { InferenceConnectorAdapter } from '../../types';
 import { convertUpstreamError } from '../../utils';
 import { eventSourceStreamIntoObservable } from '../../../util/event_source_stream_into_observable';

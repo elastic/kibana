@@ -7,16 +7,13 @@
 
 import { act } from 'react-dom/test-utils';
 
-import {
-  registerTestBed,
-  TestBed,
-  AsyncTestBedConfig,
-  findTestSubject,
-} from '@kbn/test-jest-helpers';
-import { HttpSetup } from '@kbn/core/public';
+import type { TestBed, AsyncTestBedConfig } from '@kbn/test-jest-helpers';
+import { registerTestBed, findTestSubject } from '@kbn/test-jest-helpers';
+import type { HttpSetup } from '@kbn/core/public';
 import { IndexManagementHome } from '../../../public/application/sections/home';
 import { indexManagementStore } from '../../../public/application/store';
-import { WithAppDependencies, services, TestSubjects } from '../helpers';
+import type { TestSubjects } from '../helpers';
+import { WithAppDependencies, services } from '../helpers';
 
 const testBedConfig: AsyncTestBedConfig = {
   store: () => indexManagementStore(services as any),

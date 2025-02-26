@@ -7,15 +7,15 @@
 
 import { useRef, useCallback, useState, useEffect } from 'react';
 
-import {
-  DataStreamReindexStatus,
+import type {
   DataStreamReindexWarning,
   DataStreamMetadata,
   DataStreamReindexStatusResponse,
   DataStreamProgressDetails,
 } from '../../../../../../common/types';
+import { DataStreamReindexStatus } from '../../../../../../common/types';
 import { CancelLoadingState, LoadingState } from '../../../types';
-import { ApiService } from '../../../../lib/api';
+import type { ApiService } from '../../../../lib/api';
 
 const POLL_INTERVAL = 1000;
 

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
+import type { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
 import { FtrService } from '../../ftr_provider_context';
 
 const REMOVE_PANEL_DATA_TEST_SUBJ = 'embeddablePanelAction-deletePanel';

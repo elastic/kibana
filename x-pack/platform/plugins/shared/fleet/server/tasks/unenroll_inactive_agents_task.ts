@@ -12,6 +12,7 @@ import type {
   ElasticsearchClient,
   Logger,
   SavedObjectsClientContract,
+  LoggerFactory,
 } from '@kbn/core/server';
 import type {
   ConcreteTaskInstance,
@@ -19,7 +20,6 @@ import type {
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
 import { getDeleteTaskRunResult } from '@kbn/task-manager-plugin/server/task';
-import type { LoggerFactory } from '@kbn/core/server';
 import { errors } from '@elastic/elasticsearch';
 
 import { AGENTS_PREFIX, AGENT_POLICY_SAVED_OBJECT_TYPE } from '../constants';

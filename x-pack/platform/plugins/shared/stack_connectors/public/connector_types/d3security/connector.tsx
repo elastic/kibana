@@ -6,12 +6,12 @@
  */
 
 import React from 'react';
-import { ActionConnectorFieldsProps } from '@kbn/triggers-actions-ui-plugin/public';
-import {
+import type {
+  ActionConnectorFieldsProps,
   ConfigFieldSchema,
-  SimpleConnectorForm,
   SecretsFieldSchema,
 } from '@kbn/triggers-actions-ui-plugin/public';
+import { SimpleConnectorForm } from '@kbn/triggers-actions-ui-plugin/public';
 import * as i18n from './translations';
 
 const configFormSchema: ConfigFieldSchema[] = [

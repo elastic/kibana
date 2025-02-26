@@ -8,8 +8,7 @@
 import React, { useCallback, useMemo } from 'react';
 
 import type { EuiStepProps } from '@elastic/eui';
-import { EuiRadioGroup, EuiSpacer } from '@elastic/eui';
-import { EuiText } from '@elastic/eui';
+import { EuiRadioGroup, EuiSpacer, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 

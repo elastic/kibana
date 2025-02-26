@@ -8,12 +8,15 @@
 import { isEmpty } from 'lodash/fp';
 import { useCallback, useEffect, useState } from 'react';
 import type { HttpSetup } from '@kbn/core-http-browser';
-import type { Docs, ESProcessorItem, Pipeline, SamplesFormat } from '../../../../../../common';
-import {
-  type AnalyzeLogsRequestBody,
-  type CategorizationRequestBody,
-  type EcsMappingRequestBody,
-  type RelatedRequestBody,
+import type {
+  Docs,
+  ESProcessorItem,
+  Pipeline,
+  SamplesFormat,
+  AnalyzeLogsRequestBody,
+  CategorizationRequestBody,
+  EcsMappingRequestBody,
+  RelatedRequestBody,
 } from '../../../../../../common';
 import { isGenerationErrorBody } from '../../../../../../common/api/generation_error';
 import {

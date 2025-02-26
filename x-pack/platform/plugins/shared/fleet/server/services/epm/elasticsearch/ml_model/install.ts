@@ -9,11 +9,8 @@ import type { ElasticsearchClient, Logger, SavedObjectsClientContract } from '@k
 import { errors } from '@elastic/elasticsearch';
 
 import { getAssetFromAssetsMap, getPathParts } from '../../archive';
-import {
-  ElasticsearchAssetType,
-  type PackageInstallContext,
-} from '../../../../../common/types/models';
-import type { EsAssetReference } from '../../../../../common/types/models';
+import { ElasticsearchAssetType } from '../../../../../common/types/models';
+import type { EsAssetReference, PackageInstallContext } from '../../../../../common/types/models';
 
 import { retryTransientEsErrors } from '../retry';
 

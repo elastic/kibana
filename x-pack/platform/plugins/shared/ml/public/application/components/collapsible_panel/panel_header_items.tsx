@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
 import React, { type FC } from 'react';
-import { useEuiTheme } from '@elastic/eui';
 
 export interface PanelHeaderItems {
   headerItems: React.ReactElement[];

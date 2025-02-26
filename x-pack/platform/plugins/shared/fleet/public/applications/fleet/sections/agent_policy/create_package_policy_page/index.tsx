@@ -4,8 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useEffect } from 'react';
-import { useMemo } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { useLocation, useRouteMatch } from 'react-router-dom';
 
 import { useGetSettings } from '../../../hooks';

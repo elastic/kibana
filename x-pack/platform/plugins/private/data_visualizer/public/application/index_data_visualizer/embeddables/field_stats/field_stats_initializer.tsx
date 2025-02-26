@@ -25,8 +25,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { FC } from 'react';
-import { useEffect } from 'react';
-import React, { useMemo, useState, useCallback } from 'react';
+import React, { useEffect, useMemo, useState, useCallback } from 'react';
 import { ENABLE_ESQL, getESQLAdHocDataview } from '@kbn/esql-utils';
 import type { AggregateQuery } from '@kbn/es-query';
 import { css } from '@emotion/react';

@@ -8,15 +8,8 @@
  */
 
 import React, { useRef, useState } from 'react';
-import {
-  EuiFlexGroup,
-  EuiPopover,
-  EuiButtonIcon,
-  EuiPopoverTitle,
-  EuiToolTip,
-  PopoverAnchorPosition,
-  type EuiPopoverProps,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiPopover, EuiButtonIcon, EuiPopoverTitle, EuiToolTip } from '@elastic/eui';
+import type { PopoverAnchorPosition, EuiPopoverProps } from '@elastic/eui';
 import { useUIFieldActions } from '../../../hooks/use_field_actions';
 
 interface HoverPopoverActionProps {

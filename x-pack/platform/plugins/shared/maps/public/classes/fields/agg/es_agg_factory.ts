@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-import { AggDescriptor } from '../../../../common/descriptor_types';
-import { IESAggSource } from '../../sources/es_agg_source';
-import { AGG_TYPE, DEFAULT_PERCENTILE, FIELD_ORIGIN } from '../../../../common/constants';
+import type { AggDescriptor } from '../../../../common/descriptor_types';
+import type { IESAggSource } from '../../sources/es_agg_source';
+import type { FIELD_ORIGIN } from '../../../../common/constants';
+import { AGG_TYPE, DEFAULT_PERCENTILE } from '../../../../common/constants';
 import { ESDocField } from '../es_doc_field';
 import { TopTermPercentageField } from './top_term_percentage_field';
 import { CountAggField } from './count_agg_field';
-import { IESAggField } from './agg_field_types';
+import type { IESAggField } from './agg_field_types';
 import { AggField } from './agg_field';
 import { PercentileAggField } from './percentile_agg_field';
 

@@ -9,7 +9,7 @@ import { waitFor, renderHook } from '@testing-library/react';
 import { useIndicatorById } from './use_indicator_by_id';
 import { TestProvidersComponent } from '../../../mocks/test_providers';
 import { createFetchIndicatorById } from '../services/fetch_indicator_by_id';
-import { Indicator } from '../../../../common/types/indicator';
+import type { Indicator } from '../../../../common/types/indicator';
 
 jest.mock('../services/fetch_indicator_by_id');
 

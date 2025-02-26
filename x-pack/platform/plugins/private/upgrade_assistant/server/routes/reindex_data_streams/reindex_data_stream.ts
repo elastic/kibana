@@ -11,11 +11,11 @@ import { i18n } from '@kbn/i18n';
 
 import { error } from '../../lib/data_streams/error';
 import { API_BASE_PATH } from '../../../common/constants';
-import { DataStreamReindexStatusResponse } from '../../../common/types';
+import type { DataStreamReindexStatusResponse } from '../../../common/types';
 import { versionCheckHandlerWrapper } from '../../lib/es_version_precheck';
 import { dataStreamReindexServiceFactory } from '../../lib/data_streams';
 
-import { RouteDependencies } from '../../types';
+import type { RouteDependencies } from '../../types';
 import { mapAnyErrorToKibanaHttpResponse } from './map_any_error_to_kibana_http_response';
 
 export function registerReindexDataStreamRoutes({

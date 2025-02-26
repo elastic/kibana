@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ErrorLike } from '@kbn/expressions-plugin/common';
-import { Adapters } from '@kbn/inspector-plugin/public';
-import { Observable } from 'rxjs';
+import type { ErrorLike } from '@kbn/expressions-plugin/common';
+import type { Adapters } from '@kbn/inspector-plugin/public';
+import type { Observable } from 'rxjs';
 import type { EmbeddableInput } from '@kbn/embeddable-plugin/common';
 
 export type EmbeddableError = ErrorLike;

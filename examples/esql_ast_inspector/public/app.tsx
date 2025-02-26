@@ -8,8 +8,14 @@
  */
 
 import * as React from 'react';
-import { EuiPage, EuiPageBody, EuiPageSection, EuiPageHeader, EuiSpacer } from '@elastic/eui';
-import { EuiProvider } from '@elastic/eui';
+import {
+  EuiPage,
+  EuiPageBody,
+  EuiPageSection,
+  EuiPageHeader,
+  EuiSpacer,
+  EuiProvider,
+} from '@elastic/eui';
 import { EsqlInspector } from './components/esql_inspector';
 
 export const App = () => {

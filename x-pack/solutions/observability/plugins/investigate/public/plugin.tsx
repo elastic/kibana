@@ -5,12 +5,12 @@
  * 2.0.
  */
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
-import {
+import type {
   ItemDefinition,
   ItemDefinitionData,
   ItemDefinitionParams,
-  ItemDefinitionRegistry,
 } from './investigation/item_definition_registry';
+import { ItemDefinitionRegistry } from './investigation/item_definition_registry';
 import type {
   ConfigSchema,
   InvestigatePublicSetup,

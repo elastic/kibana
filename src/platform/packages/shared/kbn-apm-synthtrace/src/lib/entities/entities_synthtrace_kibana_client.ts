@@ -8,7 +8,7 @@
  */
 
 import fetch from 'node-fetch';
-import { Logger } from '../utils/create_logger';
+import type { Logger } from '../utils/create_logger';
 import { kibanaHeaders } from '../shared/client_headers';
 import { getFetchAgent } from '../../cli/utils/ssl';
 

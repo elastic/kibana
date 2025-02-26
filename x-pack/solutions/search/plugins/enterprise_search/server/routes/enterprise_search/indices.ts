@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import {
+import type {
   IngestPutPipelineRequest,
   IngestSimulateRequest,
 } from '@elastic/elasticsearch/lib/api/types';
@@ -27,7 +27,7 @@ import {
 
 import { DEFAULT_PIPELINE_NAME } from '../../../common/constants';
 import { ErrorCode } from '../../../common/types/error_codes';
-import { AlwaysShowPattern } from '../../../common/types/indices';
+import type { AlwaysShowPattern } from '../../../common/types/indices';
 
 import type {
   AttachMlInferencePipelineResponse,

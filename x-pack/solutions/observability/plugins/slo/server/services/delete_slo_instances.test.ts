@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ElasticsearchClient } from '@kbn/core/server';
+import type { ElasticsearchClient } from '@kbn/core/server';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { DeleteSLOInstances } from './delete_slo_instances';
 

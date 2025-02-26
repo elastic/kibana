@@ -6,9 +6,9 @@
  */
 
 import type { FromSchema } from 'json-schema-to-ts';
-import { Observable } from 'rxjs';
+import type { Observable } from 'rxjs';
 import type { AssistantScope } from '@kbn/ai-assistant-common';
-import { ChatEvent } from '../../common/conversation_complete';
+import type { ChatEvent } from '../../common/conversation_complete';
 import type {
   CompatibleJSONSchema,
   FunctionDefinition,
@@ -20,7 +20,7 @@ import type {
   AdHocInstruction,
 } from '../../common/types';
 import type { ObservabilityAIAssistantRouteHandlerResources } from '../routes/types';
-import { ChatFunctionClient } from './chat_function_client';
+import type { ChatFunctionClient } from './chat_function_client';
 import type { ObservabilityAIAssistantClient } from './client';
 
 export type RespondFunctionResources = Pick<

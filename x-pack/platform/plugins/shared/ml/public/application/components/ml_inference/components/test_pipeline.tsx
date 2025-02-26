@@ -39,9 +39,9 @@ import { CodeEditor } from '@kbn/code-editor';
 import { useMlApi, useMlKibana } from '../../../contexts/kibana';
 import { getPipelineConfig } from '../get_pipeline_config';
 import { isValidJson } from '../../../../../common/util/validation_utils';
-import type { MlInferenceState } from '../types';
+import { TEST_PIPELINE_MODE } from '../types';
+import type { MlInferenceState, TestPipelineMode } from '../types';
 import { checkIndexExists } from '../retry_create_data_view';
-import { type TestPipelineMode, TEST_PIPELINE_MODE } from '../types';
 
 const sourceIndexMissingMessage = i18n.translate(
   'xpack.ml.trainedModels.content.indices.pipelines.addInferencePipelineModal.steps.test.sourceIndexMissing',

@@ -7,13 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { JSDocTag, Node, TypeFormatFlags } from 'ts-morph';
-import { ApiDeclaration } from '../types';
+import type { JSDocTag } from 'ts-morph';
+import { Node, TypeFormatFlags } from 'ts-morph';
+import type { ApiDeclaration } from '../types';
 import { maybeCollectReferences } from './get_references';
 import { getSignature } from './get_signature';
 import { getTypeKind } from './get_type_kind';
 import { getCommentsFromNode, getJSDocTags } from './js_doc_utils';
-import { BuildApiDecOpts } from './types';
+import type { BuildApiDecOpts } from './types';
 import { getSourceForNode } from './utils';
 
 /**

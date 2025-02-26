@@ -9,8 +9,8 @@ import type { Agent as SuperTestAgent } from 'supertest';
 
 import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 import { CLOUD_SECURITY_PLUGIN_VERSION } from '@kbn/cloud-security-posture-plugin/common/constants';
-import { SecurityService } from '@kbn/ftr-common-functional-ui-services';
-import { RoleCredentials } from '@kbn/ftr-common-functional-services';
+import type { SecurityService } from '@kbn/ftr-common-functional-ui-services';
+import type { RoleCredentials } from '@kbn/ftr-common-functional-services';
 
 export async function createPackagePolicy(
   supertest: SuperTestAgent,

@@ -7,7 +7,7 @@
 
 import { commonFunctionalServices } from '@kbn/ftr-common-functional-services';
 import { ScoutTestRunConfigCategory } from '@kbn/scout-info';
-import { FtrConfigProviderContext } from '@kbn/test';
+import type { FtrConfigProviderContext } from '@kbn/test';
 import path from 'node:path';
 
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {

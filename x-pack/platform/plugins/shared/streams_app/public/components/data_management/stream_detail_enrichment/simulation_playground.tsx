@@ -8,9 +8,10 @@
 import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiFlexItem, EuiSpacer, EuiTab, EuiTabs } from '@elastic/eui';
-import { IngestStreamGetResponse, isWiredStreamGetResponse } from '@kbn/streams-schema';
+import type { IngestStreamGetResponse } from '@kbn/streams-schema';
+import { isWiredStreamGetResponse } from '@kbn/streams-schema';
 import { ProcessorOutcomePreview } from './processor_outcome_preview';
-import { TableColumn, UseProcessingSimulatorReturn } from './hooks/use_processing_simulator';
+import type { TableColumn, UseProcessingSimulatorReturn } from './hooks/use_processing_simulator';
 
 interface SimulationPlaygroundProps {
   definition: IngestStreamGetResponse;

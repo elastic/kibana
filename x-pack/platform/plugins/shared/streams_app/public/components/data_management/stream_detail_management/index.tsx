@@ -5,7 +5,8 @@
  * 2.0.
  */
 import React from 'react';
-import { IngestStreamGetResponse, isWiredStreamGetResponse } from '@kbn/streams-schema';
+import type { IngestStreamGetResponse } from '@kbn/streams-schema';
+import { isWiredStreamGetResponse } from '@kbn/streams-schema';
 import { WiredStreamDetailManagement } from './wired';
 import { ClassicStreamDetailManagement } from './classic';
 

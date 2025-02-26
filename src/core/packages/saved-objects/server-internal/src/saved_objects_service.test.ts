@@ -19,24 +19,23 @@ import {
   typeRegistryInstanceMock,
   applyTypeDefaultsMock,
 } from './saved_objects_service.test.mocks';
-import { BehaviorSubject, firstValueFrom, EMPTY } from 'rxjs';
-import { skip } from 'rxjs';
+import { BehaviorSubject, firstValueFrom, EMPTY, skip } from 'rxjs';
 import { type RawPackageInfo, Env } from '@kbn/config';
 import { ByteSizeValue } from '@kbn/config-schema';
 import { REPO_ROOT } from '@kbn/repo-info';
-import { getEnvOptions } from '@kbn/config-mocks';
-import { SavedObjectsType, MAIN_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
-import { docLinksServiceMock } from '@kbn/core-doc-links-server-mocks';
-import { nodeServiceMock } from '@kbn/core-node-server-mocks';
-import { mockCoreContext } from '@kbn/core-base-server-mocks';
-import { httpServiceMock, httpServerMock } from '@kbn/core-http-server-mocks';
-import {
+import { getEnvOptions, configServiceMock } from '@kbn/config-mocks';
+import type {
+  SavedObjectsType,
   SavedObjectsClientFactoryProvider,
   SavedObjectsEncryptionExtensionFactory,
   SavedObjectsSecurityExtensionFactory,
   SavedObjectsSpacesExtensionFactory,
 } from '@kbn/core-saved-objects-server';
-import { configServiceMock } from '@kbn/config-mocks';
+import { MAIN_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
+import { docLinksServiceMock } from '@kbn/core-doc-links-server-mocks';
+import { nodeServiceMock } from '@kbn/core-node-server-mocks';
+import { mockCoreContext } from '@kbn/core-base-server-mocks';
+import { httpServiceMock, httpServerMock } from '@kbn/core-http-server-mocks';
 import type { NodesVersionCompatibility } from '@kbn/core-elasticsearch-server-internal';
 import {
   SavedObjectsClientProvider,

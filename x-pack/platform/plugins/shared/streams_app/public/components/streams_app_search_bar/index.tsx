@@ -5,7 +5,7 @@
  * 2.0.
  */
 import type { TimeRange } from '@kbn/es-query';
-import { SearchBar } from '@kbn/unified-search-plugin/public';
+import type { SearchBar } from '@kbn/unified-search-plugin/public';
 import React, { useMemo } from 'react';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { useKibana } from '../../hooks/use_kibana';

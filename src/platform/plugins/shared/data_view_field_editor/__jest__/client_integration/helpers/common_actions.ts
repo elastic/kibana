@@ -8,7 +8,7 @@
  */
 
 import { act } from 'react-dom/test-utils';
-import { TestBed } from '@kbn/test-jest-helpers';
+import type { TestBed } from '@kbn/test-jest-helpers';
 
 /**
  * We often need to wait for both the documents & the preview to be fetched.

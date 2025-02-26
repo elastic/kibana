@@ -4,7 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { KeyboardEvent, useCallback, useEffect, useRef, useState } from 'react';
+import type { KeyboardEvent } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { css } from '@emotion/css';
 import { EuiInputPopover, EuiSelectable, EuiTextArea } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';

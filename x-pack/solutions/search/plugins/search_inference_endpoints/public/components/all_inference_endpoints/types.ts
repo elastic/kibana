@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { InferenceAPIConfigResponse } from '@kbn/ml-trained-models-utils';
-import { ServiceProviderKeys } from '@kbn/inference-endpoint-ui-common';
-import { TaskTypes } from '../../types';
+import type { InferenceAPIConfigResponse } from '@kbn/ml-trained-models-utils';
+import type { ServiceProviderKeys } from '@kbn/inference-endpoint-ui-common';
+import type { TaskTypes } from '../../types';
 export const INFERENCE_ENDPOINTS_TABLE_PER_PAGE_VALUES = [25, 50, 100];
 
 export enum SortFieldInferenceEndpoint {

@@ -6,12 +6,11 @@
  */
 
 import { ScoutTestRunConfigCategory } from '@kbn/scout-info';
-import { Config } from '@kbn/test';
-import { FtrConfigProviderContext } from '@kbn/test';
+import type { Config, FtrConfigProviderContext } from '@kbn/test';
 import { SecuritySolutionEndpointRegistryHelpers } from '../../common/services/security_solution';
 import type { TargetTags } from '../target_tags';
-import { PageObjects } from '../page_objects';
-import { Services } from '../services';
+import type { PageObjects } from '../page_objects';
+import type { Services } from '../services';
 
 export const SUITE_TAGS: Record<
   'ess' | 'serverless',

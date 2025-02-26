@@ -8,19 +8,19 @@
  */
 
 import React, {
+  type ReactNode,
   type FC,
   type PropsWithChildren,
   useCallback,
   useContext,
   useMemo,
   useState,
-  ReactNode,
   useEffect,
 } from 'react';
 import type { ChromeProjectNavigationNode, PanelSelectedNode } from '@kbn/core-chrome-browser';
 
 import { DefaultContent } from './default_content';
-import { ContentProvider } from './types';
+import type { ContentProvider } from './types';
 
 export interface PanelContext {
   isOpen: boolean;

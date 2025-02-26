@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ComponentMeta, ComponentStoryObj } from '@storybook/react';
+import type { ComponentMeta, ComponentStoryObj } from '@storybook/react';
 import React from 'react';
 import { PreviewLensSuggestion as Component } from '.';
 import { KibanaReactStorybookDecorator } from '../../../.storybook/storybook_decorator';

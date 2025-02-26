@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { FtrConfigProviderContext } from '@kbn/test';
+import type { FtrConfigProviderContext } from '@kbn/test';
 import type { ExperimentalFeatures as SecuritySolutionExperimentalFeatures } from '@kbn/security-solution-plugin/common';
 import type { ExperimentalFeatures as FleetExperimentalFeatures } from '@kbn/fleet-plugin/common/experimental_features';
 

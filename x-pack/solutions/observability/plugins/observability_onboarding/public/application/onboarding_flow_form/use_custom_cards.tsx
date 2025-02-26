@@ -8,10 +8,10 @@ import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { EuiFlexItem } from '@elastic/eui';
 import { reactRouterNavigate, useKibana } from '@kbn/kibana-react-plugin/public';
-import { IntegrationCardItem } from '@kbn/fleet-plugin/public';
+import type { IntegrationCardItem } from '@kbn/fleet-plugin/public';
 import { useHistory } from 'react-router-dom';
 import { useLocation } from 'react-router-dom-v5-compat';
-import { ObservabilityOnboardingAppServices } from '../..';
+import type { ObservabilityOnboardingAppServices } from '../..';
 import { LogoIcon } from '../shared/logo_icon';
 
 export function useCustomCards(

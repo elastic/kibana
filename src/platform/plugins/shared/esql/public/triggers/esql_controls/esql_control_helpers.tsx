@@ -14,7 +14,7 @@ import type { CoreStart } from '@kbn/core/public';
 import type { ISearchGeneric } from '@kbn/search-types';
 import type { ESQLVariableType, ESQLControlVariable } from '@kbn/esql-validation-autocomplete';
 import { toMountPoint } from '@kbn/react-kibana-mount';
-import { monaco } from '@kbn/monaco';
+import type { monaco } from '@kbn/monaco';
 import { untilPluginStartServicesReady } from '../../kibana_services';
 import type { ESQLControlState } from './types';
 

@@ -6,8 +6,7 @@
  */
 
 import type { estypes } from '@elastic/elasticsearch';
-import type { SavedObjectsClientContract } from '@kbn/core/server';
-import type { Logger } from '@kbn/core/server';
+import type { SavedObjectsClientContract, Logger } from '@kbn/core/server';
 
 import { DEFAULT_MAX_AGENT_POLICIES_WITH_INACTIVITY_TIMEOUT } from '../../../common/constants';
 

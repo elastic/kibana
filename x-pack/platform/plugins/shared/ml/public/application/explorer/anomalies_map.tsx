@@ -18,8 +18,8 @@ import {
   htmlIdGenerator,
 } from '@elastic/eui';
 import type { VectorLayerDescriptor } from '@kbn/maps-plugin/common';
-import { INITIAL_LOCATION } from '@kbn/maps-plugin/common';
 import {
+  INITIAL_LOCATION,
   FIELD_ORIGIN,
   LAYER_TYPE,
   SOURCE_TYPES,

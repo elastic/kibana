@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { FC, useCallback, useContext } from 'react';
+import type { FC } from 'react';
+import React, { useCallback, useContext } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 // @ts-expect-error untyped local
 import * as pageActions from '../../state/actions/pages';
@@ -13,7 +14,7 @@ import { canUserWrite } from '../../state/selectors/app';
 import { getSelectedPage, getWorkpad, getPages, isWriteable } from '../../state/selectors/workpad';
 import { DEFAULT_WORKPAD_CSS } from '../../../common/lib/constants';
 import { PageManager as Component } from './page_manager.component';
-import { State } from '../../../types';
+import type { State } from '../../../types';
 import { WorkpadRoutingContext } from '../../routes/workpad';
 
 export const PageManager: FC<{ onPreviousPage: () => void }> = ({ onPreviousPage }) => {

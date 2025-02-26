@@ -22,7 +22,7 @@ import type {
   ObservabilityAIAssistantServerStart,
   ObservabilityAIAssistantServerSetup,
 } from '@kbn/observability-ai-assistant-plugin/server';
-import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
+import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 
 /* eslint-disable @typescript-eslint/no-empty-interface*/
 

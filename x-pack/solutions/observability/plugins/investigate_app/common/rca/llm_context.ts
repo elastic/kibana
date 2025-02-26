@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EcsFieldsResponse } from '@kbn/rule-registry-plugin/common';
+import type { EcsFieldsResponse } from '@kbn/rule-registry-plugin/common';
 import {
   ALERT_FLAPPING_HISTORY,
   ALERT_RULE_EXECUTION_TIMESTAMP,

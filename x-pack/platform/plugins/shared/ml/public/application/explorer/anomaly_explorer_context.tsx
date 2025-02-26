@@ -5,8 +5,14 @@
  * 2.0.
  */
 
-import type { PropsWithChildren } from 'react';
-import React, { useContext, useEffect, useMemo, useState, type FC } from 'react';
+import React, {
+  type PropsWithChildren,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+  type FC,
+} from 'react';
 import { useTimefilter } from '@kbn/ml-date-picker';
 import { useGlobalUrlState } from '@kbn/ml-url-state/src/url_state';
 import { AnomalyTimelineStateService } from './anomaly_timeline_state_service';

@@ -8,9 +8,9 @@
 import * as React from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { shallow } from 'enzyme';
-import { ToastsApi } from '@kbn/core/public';
+import type { ToastsApi } from '@kbn/core/public';
 import { RuleRoute, getRuleSummary } from './rule_route';
-import { Rule, RuleSummary, RuleType } from '../../../../types';
+import type { Rule, RuleSummary, RuleType } from '../../../../types';
 import { CenterJustifiedSpinner } from '../../../components/center_justified_spinner';
 jest.mock('../../../../common/lib/kibana');
 

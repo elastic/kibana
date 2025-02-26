@@ -25,15 +25,16 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { AppMountParameters } from '@kbn/core-application-browser';
-import { CoreStart } from '@kbn/core-lifecycle-browser';
+import type { AppMountParameters } from '@kbn/core-application-browser';
+import type { CoreStart } from '@kbn/core-lifecycle-browser';
 import { AddEmbeddableButton } from '@kbn/embeddable-examples-plugin/public';
 import { ReactEmbeddableRenderer } from '@kbn/embeddable-plugin/public';
-import { GridLayout, GridLayoutData, GridSettings } from '@kbn/grid-layout';
+import { GridLayout } from '@kbn/grid-layout';
+import type { GridLayoutData, GridSettings } from '@kbn/grid-layout';
 import { i18n } from '@kbn/i18n';
 import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
-import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 
 import { GridLayoutOptions } from './grid_layout_options';
 import {
@@ -41,7 +42,7 @@ import {
   getSerializedDashboardState,
   setSerializedGridLayout,
 } from './serialized_grid_layout';
-import { MockSerializedDashboardState } from './types';
+import type { MockSerializedDashboardState } from './types';
 import { useMockDashboardApi } from './use_mock_dashboard_api';
 import { dashboardInputToGridLayout, gridLayoutToDashboardPanelMap } from './utils';
 

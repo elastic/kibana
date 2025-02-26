@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiButtonProps, EuiBetaBadgeProps } from '@elastic/eui';
-import { InjectedIntl } from '@kbn/i18n-react';
+import type { EuiButtonProps, EuiBetaBadgeProps } from '@elastic/eui';
+import type { InjectedIntl } from '@kbn/i18n-react';
 
 export type TopNavMenuAction = (anchorElement: HTMLElement) => void;
 

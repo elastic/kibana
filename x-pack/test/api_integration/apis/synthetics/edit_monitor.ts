@@ -6,14 +6,14 @@
  */
 import moment from 'moment';
 import { v4 as uuidv4 } from 'uuid';
-import {
-  ConfigKey,
+import type {
   EncryptedSyntheticsSavedMonitor,
   MonitorFields,
 } from '@kbn/synthetics-plugin/common/runtime_types';
+import { ConfigKey } from '@kbn/synthetics-plugin/common/runtime_types';
 import { SYNTHETICS_API_URLS } from '@kbn/synthetics-plugin/common/constants';
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 import { PrivateLocationTestService } from './services/private_location_test_service';
 import { SyntheticsMonitorTestService } from './services/synthetics_monitor_test_service';
 

@@ -20,8 +20,7 @@ import {
 import { UptimeSettingsContext } from '../../../contexts';
 import * as labels from './translations';
 import { getMLJobLinkHref } from './ml_job_link';
-import { useGetUrlParams } from '../../../hooks';
-import { useMonitorId } from '../../../hooks';
+import { useGetUrlParams, useMonitorId } from '../../../hooks';
 import { setAlertFlyoutType, setAlertFlyoutVisible } from '../../../state/actions';
 import { useAnomalyAlert } from './use_anomaly_alert';
 import { ConfirmAlertDeletion } from './confirm_alert_delete';

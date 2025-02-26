@@ -8,9 +8,9 @@
 import { act } from 'react-dom/test-utils';
 
 import { setupEnvironment } from '../helpers';
-import { ElasticsearchTestBed, setupElasticsearchPage } from './es_deprecations.helpers';
-import { esDeprecationsMockResponse } from './mocked_responses';
-import { MOCK_REINDEX_DEPRECATION } from './mocked_responses';
+import type { ElasticsearchTestBed } from './es_deprecations.helpers';
+import { setupElasticsearchPage } from './es_deprecations.helpers';
+import { esDeprecationsMockResponse, MOCK_REINDEX_DEPRECATION } from './mocked_responses';
 
 describe('Cluster settings deprecation flyout', () => {
   let testBed: ElasticsearchTestBed;

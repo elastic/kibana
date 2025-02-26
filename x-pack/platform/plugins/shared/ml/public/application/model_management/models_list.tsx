@@ -5,24 +5,7 @@
  * 2.0.
  */
 
-import type { HorizontalAlignment, SearchFilterConfig } from '@elastic/eui';
-import {
-  EuiBadge,
-  EuiButton,
-  EuiButtonIcon,
-  EuiCallOut,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiIcon,
-  EuiInMemoryTable,
-  EuiLink,
-  EuiSpacer,
-  EuiSwitch,
-  EuiText,
-  EuiTitle,
-  EuiToolTip,
-  type EuiSearchBarProps,
-} from '@elastic/eui';
+import type { HorizontalAlignment, SearchFilterConfig, EuiSearchBarProps } from '@elastic/eui';
 import type { EuiBasicTableColumn } from '@elastic/eui/src/components/basic_table/basic_table';
 import type { EuiTableSelectionType } from '@elastic/eui/src/components/basic_table/table_types';
 import { i18n } from '@kbn/i18n';
@@ -38,7 +21,23 @@ import type { FC } from 'react';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { useUnsavedChangesPrompt } from '@kbn/unsaved-changes-prompt';
-import { useEuiMaxBreakpoint } from '@elastic/eui';
+import {
+  useEuiMaxBreakpoint,
+  EuiBadge,
+  EuiButton,
+  EuiButtonIcon,
+  EuiCallOut,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIcon,
+  EuiInMemoryTable,
+  EuiLink,
+  EuiSpacer,
+  EuiSwitch,
+  EuiText,
+  EuiTitle,
+  EuiToolTip,
+} from '@elastic/eui';
 import { css } from '@emotion/react';
 import { ML_PAGES } from '../../../common/constants/locator';
 import { ML_ELSER_CALLOUT_DISMISSED } from '../../../common/types/storage';

@@ -8,7 +8,7 @@ import expect from '@kbn/expect';
 import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 import type { CspSetupStatus } from '@kbn/cloud-security-posture-common';
 import { generateAgent } from '../../../../fleet_api_integration/helpers';
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 import { createPackagePolicy } from '../helper';
 
 const currentTimeMinusNineMinutes = new Date(Date.now() - 300000).toISOString();

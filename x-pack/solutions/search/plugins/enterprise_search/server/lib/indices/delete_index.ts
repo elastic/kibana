@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { IScopedClusterClient } from '@kbn/core/server';
+import type { IScopedClusterClient } from '@kbn/core/server';
 
 export const deleteIndex = async (client: IScopedClusterClient, index: string) => {
   return await client.asCurrentUser.indices.delete({ index });

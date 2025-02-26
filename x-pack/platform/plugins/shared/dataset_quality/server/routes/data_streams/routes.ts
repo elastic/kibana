@@ -7,7 +7,7 @@
 
 import * as t from 'io-ts';
 import { toBooleanRt } from '@kbn/io-ts-utils';
-import {
+import type {
   CheckAndLoadIntegrationResponse,
   DataStreamDetails,
   DataStreamDocsStat,

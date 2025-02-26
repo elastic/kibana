@@ -7,22 +7,20 @@
 
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { debounce, isEmpty, isEqual, uniq, uniqBy } from 'lodash';
-import {
+import type {
   IngestStreamGetResponse,
-  getProcessorConfig,
   UnaryOperator,
   Condition,
-  processorDefinitionSchema,
-  isSchema,
   FlattenRecord,
 } from '@kbn/streams-schema';
-import { IHttpFetchError, ResponseErrorBody } from '@kbn/core/public';
-import { APIReturnType } from '@kbn/streams-plugin/public/api';
+import { getProcessorConfig, processorDefinitionSchema, isSchema } from '@kbn/streams-schema';
+import type { IHttpFetchError, ResponseErrorBody } from '@kbn/core/public';
+import type { APIReturnType } from '@kbn/streams-plugin/public/api';
 import { i18n } from '@kbn/i18n';
 import { flattenObjectNestedLast } from '@kbn/object-utils';
 import { useStreamsAppFetch } from '../../../../hooks/use_streams_app_fetch';
 import { useKibana } from '../../../../hooks/use_kibana';
-import { DetectedField, ProcessorDefinitionWithUIAttributes } from '../types';
+import type { DetectedField, ProcessorDefinitionWithUIAttributes } from '../types';
 import { processorConverter } from '../utils';
 import { useDateRange } from '../../../../hooks/use_date_range';
 

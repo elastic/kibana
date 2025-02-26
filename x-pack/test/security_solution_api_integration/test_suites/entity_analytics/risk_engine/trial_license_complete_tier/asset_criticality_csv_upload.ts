@@ -10,7 +10,7 @@ import {
   cleanAssetCriticality,
   getAssetCriticalityDoc,
 } from '../../utils';
-import { FtrProviderContext } from '../../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../../ftr_provider_context';
 export default ({ getService }: FtrProviderContext) => {
   describe('@ess @serverless @skipInServerlessMKI Entity Analytics - Asset Criticality CSV upload', () => {
     const esClient = getService('es');

@@ -8,7 +8,8 @@
 import { KibanaContext } from '../../../hooks/use_kibana';
 import { render } from '@testing-library/react';
 import React from 'react';
-import { generateMockFileIndicator, Indicator } from '../../../../common/types/indicator';
+import type { Indicator } from '../../../../common/types/indicator';
+import { generateMockFileIndicator } from '../../../../common/types/indicator';
 import { TestProvidersComponent } from '../../../mocks/test_providers';
 import { AddToNewCase } from './add_to_new_case';
 import { casesPluginMock } from '@kbn/cases-plugin/public/mocks';

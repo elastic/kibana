@@ -6,8 +6,7 @@
  */
 
 import type { FunctionComponent } from 'react';
-import { Fragment } from 'react';
-import React from 'react';
+import React, { Fragment } from 'react';
 
 import {
   EuiAccordion,

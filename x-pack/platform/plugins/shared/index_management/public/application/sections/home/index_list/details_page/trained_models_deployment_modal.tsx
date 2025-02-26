@@ -13,6 +13,7 @@ import {
   EuiSpacer,
   EuiCheckbox,
   EuiButtonEmpty,
+  EuiLink,
   EuiModal,
   EuiModalHeader,
   EuiModalHeaderTitle,
@@ -21,10 +22,8 @@ import {
   EuiModalFooter,
   EuiBadge,
 } from '@elastic/eui';
-import React from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 
-import { EuiLink } from '@elastic/eui';
-import { useEffect, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { isSemanticTextField } from '../../../../components/mappings_editor/lib/utils';
 import { deNormalize } from '../../../../components/mappings_editor/lib';

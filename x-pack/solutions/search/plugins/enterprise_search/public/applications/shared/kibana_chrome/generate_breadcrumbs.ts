@@ -7,7 +7,7 @@
 
 import { useValues } from 'kea';
 
-import { EuiBreadcrumb } from '@elastic/eui';
+import type { EuiBreadcrumb } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import {

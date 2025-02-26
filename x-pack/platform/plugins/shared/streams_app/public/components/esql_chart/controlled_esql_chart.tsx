@@ -21,9 +21,9 @@ import {
 import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/css';
-import { AbortableAsyncState } from '@kbn/react-hooks';
+import type { AbortableAsyncState } from '@kbn/react-hooks';
 import type { UnparsedEsqlResponse } from '@kbn/traced-es-client';
-import { IUiSettingsClient } from '@kbn/core/public';
+import type { IUiSettingsClient } from '@kbn/core/public';
 import { UI_SETTINGS } from '@kbn/data-plugin/public';
 import { esqlResultToTimeseries } from '../../util/esql_result_to_timeseries';
 import { useKibana } from '../../hooks/use_kibana';

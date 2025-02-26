@@ -6,15 +6,15 @@
  */
 
 import { createAction, createReducer, current } from '@reduxjs/toolkit';
-import { VisualizeFieldContext } from '@kbn/ui-actions-plugin/public';
+import type { VisualizeFieldContext } from '@kbn/ui-actions-plugin/public';
 import { mapValues, uniq } from 'lodash';
-import { Filter, Query } from '@kbn/es-query';
-import { History } from 'history';
+import type { Filter, Query } from '@kbn/es-query';
+import type { History } from 'history';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
-import { EventAnnotationGroupConfig } from '@kbn/event-annotation-common';
-import { DragDropIdentifier, DropType } from '@kbn/dom-drag-drop';
-import { SeriesType } from '@kbn/visualizations-plugin/common';
-import { TableInspectorAdapter } from '../editor_frame_service/types';
+import type { EventAnnotationGroupConfig } from '@kbn/event-annotation-common';
+import type { DragDropIdentifier, DropType } from '@kbn/dom-drag-drop';
+import type { SeriesType } from '@kbn/visualizations-plugin/common';
+import type { TableInspectorAdapter } from '../editor_frame_service/types';
 import type {
   VisualizeEditorContext,
   Suggestion,
@@ -22,14 +22,17 @@ import type {
   VisualizationMap,
   DatasourceMap,
   DragDropOperation,
+  Datasource,
+  Visualization,
+  FramePublicAPI,
+  LensEditContextMapping,
+  LensEditEvent,
 } from '../types';
 import { getInitialDatasourceId, getResolvedDateRange, getRemoveOperation } from '../utils';
 import type { DataViewsState, LensAppState, LensStoreDeps, VisualizationState } from './types';
-import type { Datasource, Visualization } from '../types';
 import { generateId } from '../id_generator';
 import type { DateRange, LayerType } from '../../common/types';
 import { getVisualizeFieldSuggestions } from '../editor_frame_service/editor_frame/suggestion_helpers';
-import type { FramePublicAPI, LensEditContextMapping, LensEditEvent } from '../types';
 import { selectDataViews, selectFramePublicAPI } from './selectors';
 import { onDropForVisualization } from '../editor_frame_service/editor_frame/config_panel/buttons/drop_targets_utils';
 import type { LensAppServices } from '../app_plugin/types';

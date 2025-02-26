@@ -15,7 +15,7 @@ import {
   USER_AGENT_NAME,
   USER_AGENT_OS,
 } from '../../../../../common/elasticsearch_fieldnames';
-import { BreakdownItem } from '../../../../../typings/ui_filters';
+import type { BreakdownItem } from '../../../../../typings/ui_filters';
 
 interface Props {
   selectedBreakdown: BreakdownItem | null;

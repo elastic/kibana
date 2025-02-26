@@ -7,8 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, useEffect, useMemo } from 'react';
-import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
+import type React from 'react';
+import { useCallback, useEffect, useMemo } from 'react';
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { ALERT_CASE_IDS, isSiemRuleType } from '@kbn/rule-data-utils';
 import type { HttpStart } from '@kbn/core-http-browser';
 import type { NotificationsStart } from '@kbn/core-notifications-browser';
@@ -20,9 +21,10 @@ import type {
   BulkActionsState,
   BulkActionsReducerAction,
   TimelineItem,
+  CasesService,
+  PublicAlertsDataGridProps,
 } from '../types';
 import { BulkActionsVerbs } from '../types';
-import type { CasesService, PublicAlertsDataGridProps } from '../types';
 import {
   ADD_TO_EXISTING_CASE,
   ADD_TO_NEW_CASE,

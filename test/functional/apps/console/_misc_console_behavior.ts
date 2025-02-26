@@ -11,7 +11,7 @@ import expect from '@kbn/expect';
 import { REPO_ROOT } from '@kbn/repo-info';
 import { existsSync, readFileSync, writeFileSync, unlinkSync } from 'fs';
 import { resolve } from 'path';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const retry = getService('retry');

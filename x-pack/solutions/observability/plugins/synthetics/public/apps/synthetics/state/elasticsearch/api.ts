@@ -7,7 +7,7 @@
 import type { IKibanaSearchResponse } from '@kbn/search-types';
 import { isRunningResponse } from '@kbn/data-plugin/common';
 import type { estypes } from '@elastic/elasticsearch';
-import { ESSearchResponse } from '@kbn/es-types';
+import type { ESSearchResponse } from '@kbn/es-types';
 import { FETCH_STATUS } from '@kbn/observability-shared-plugin/public';
 import { getInspectResponse } from '@kbn/observability-shared-plugin/common';
 import { kibanaService } from '../../../../utils/kibana_service';

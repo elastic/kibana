@@ -10,7 +10,7 @@ import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-m
 import type { estypes } from '@elastic/elasticsearch';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { findDocuments } from './find';
-import { EsConversationSchema } from './conversations/types';
+import type { EsConversationSchema } from './conversations/types';
 
 export const getSearchConversationMock = (): estypes.SearchResponse<EsConversationSchema> => ({
   _scroll_id: '123',

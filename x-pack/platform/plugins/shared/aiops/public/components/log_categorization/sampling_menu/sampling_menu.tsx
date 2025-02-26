@@ -6,8 +6,7 @@
  */
 
 import type { FC } from 'react';
-import { useMemo } from 'react';
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { EuiPopover, EuiPanel, EuiButton } from '@elastic/eui';
 
 import useObservable from 'react-use/lib/useObservable';

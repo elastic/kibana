@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { Client } from '@elastic/elasticsearch';
-import { InstallPrebuiltRulesAndTimelinesResponse } from '@kbn/security-solution-plugin/common/api/detection_engine/prebuilt_rules';
+import type { Client } from '@elastic/elasticsearch';
+import type { InstallPrebuiltRulesAndTimelinesResponse } from '@kbn/security-solution-plugin/common/api/detection_engine/prebuilt_rules';
 import type SuperTest from 'supertest';
 import { createPrebuiltRuleAssetSavedObjects } from './create_prebuilt_rule_saved_objects';
 import { installPrebuiltRulesAndTimelines } from './install_prebuilt_rules_and_timelines';

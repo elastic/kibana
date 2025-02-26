@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { PageObjects, createCorePageObjects } from '../../../page_objects';
+import type { PageObjects } from '../../../page_objects';
+import { createCorePageObjects } from '../../../page_objects';
 import { scoutPageFixture } from '../scout_page';
 
 /**

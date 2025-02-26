@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { CoreStart } from '@kbn/core/public';
-import { DataViewsContract } from '@kbn/data-views-plugin/public';
+import type { CoreStart } from '@kbn/core/public';
+import type { DataViewsContract } from '@kbn/data-views-plugin/public';
 import { createGetterSetter } from '@kbn/kibana-utils-plugin/public';
 
 export const [getCoreStart, setCoreStart] = createGetterSetter<CoreStart>('CoreStart');

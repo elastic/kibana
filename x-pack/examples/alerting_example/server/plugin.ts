@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { Plugin, CoreSetup } from '@kbn/core/server';
+import type { Plugin, CoreSetup } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
 // import directly to support examples functional tests (@kbn-test/src/functional_tests/lib/babel_register_for_test_plugins.js)
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core-application-common';
-import { AlertingServerSetup } from '@kbn/alerting-plugin/server';
-import { FeaturesPluginSetup } from '@kbn/features-plugin/server';
+import type { AlertingServerSetup } from '@kbn/alerting-plugin/server';
+import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
 
 import { ALERTING_FEATURE_ID } from '@kbn/alerting-plugin/common';
 import { KibanaFeatureScope } from '@kbn/features-plugin/common';

@@ -6,7 +6,11 @@
  */
 
 import { omit } from 'lodash';
-import { FieldDefinitionConfig, InheritedFieldDefinition, WiredStreamDefinition } from '../models';
+import type {
+  FieldDefinitionConfig,
+  InheritedFieldDefinition,
+  WiredStreamDefinition,
+} from '../models';
 
 // Parameters that we consider first class and provide a curated experience for
 const FIRST_CLASS_PARAMETERS = ['type', 'format'];

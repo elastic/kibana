@@ -8,9 +8,9 @@
  */
 
 import type { Reference } from '@kbn/content-management-utils';
-import { ControlGroupApi, ControlGroupSerializedState } from '@kbn/controls-plugin/public';
-import { EmbeddablePackageState } from '@kbn/embeddable-plugin/public';
-import { StateComparators } from '@kbn/presentation-publishing';
+import type { ControlGroupApi, ControlGroupSerializedState } from '@kbn/controls-plugin/public';
+import type { EmbeddablePackageState } from '@kbn/embeddable-plugin/public';
+import type { StateComparators } from '@kbn/presentation-publishing';
 import { omit } from 'lodash';
 import { BehaviorSubject, debounceTime, merge } from 'rxjs';
 import { v4 } from 'uuid';
@@ -18,11 +18,11 @@ import {
   getReferencesForControls,
   getReferencesForPanelId,
 } from '../../common/dashboard_container/persistable_state/dashboard_container_references';
-import { UnsavedPanelState } from '../dashboard_container/types';
+import type { UnsavedPanelState } from '../dashboard_container/types';
 import { DASHBOARD_APP_ID } from '../plugin_constants';
 import { PANELS_CONTROL_GROUP_KEY } from '../services/dashboard_backup_service';
 import { getDashboardContentManagementService } from '../services/dashboard_content_management_service';
-import { LoadDashboardReturn } from '../services/dashboard_content_management_service/types';
+import type { LoadDashboardReturn } from '../services/dashboard_content_management_service/types';
 import { initializeDataLoadingManager } from './data_loading_manager';
 import { initializeDataViewsManager } from './data_views_manager';
 import { DEFAULT_DASHBOARD_STATE } from './default_dashboard_state';
@@ -34,13 +34,13 @@ import { initializeSettingsManager } from './settings_manager';
 import { initializeTrackContentfulRender } from './track_contentful_render';
 import { initializeTrackOverlay } from './track_overlay';
 import { initializeTrackPanel } from './track_panel';
-import {
-  DASHBOARD_API_TYPE,
+import type {
   DashboardApi,
   DashboardCreationOptions,
   DashboardInternalApi,
   DashboardState,
 } from './types';
+import { DASHBOARD_API_TYPE } from './types';
 import { initializeUnifiedSearchManager } from './unified_search_manager';
 import { initializeUnsavedChangesManager } from './unsaved_changes_manager';
 import { initializeViewModeManager } from './view_mode_manager';

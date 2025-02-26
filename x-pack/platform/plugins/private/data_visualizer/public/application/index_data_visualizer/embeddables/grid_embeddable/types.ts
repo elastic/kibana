@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import type { AggregateQuery, Filter, TimeRange } from '@kbn/es-query';
-import type { Query } from '@kbn/es-query';
+import type { AggregateQuery, Filter, TimeRange, Query } from '@kbn/es-query';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 import type { SavedSearch } from '@kbn/saved-search-plugin/public';
 import type { BehaviorSubject, Observable } from 'rxjs';

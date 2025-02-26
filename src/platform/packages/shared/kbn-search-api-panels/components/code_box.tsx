@@ -28,7 +28,7 @@ import type { ConsolePluginStart } from '@kbn/console-plugin/public';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import { TryInConsoleButton } from '@kbn/try-in-console';
 
-import { LanguageDefinition } from '../types';
+import type { LanguageDefinition } from '../types';
 import './code_box.scss';
 
 interface CodeBoxProps {

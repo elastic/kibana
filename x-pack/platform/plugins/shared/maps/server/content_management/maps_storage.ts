@@ -6,7 +6,7 @@
  */
 
 import { SOContentStorage, tagsToFindOptions } from '@kbn/content-management-utils';
-import { SavedObjectsFindOptions } from '@kbn/core-saved-objects-api-server';
+import type { SavedObjectsFindOptions } from '@kbn/core-saved-objects-api-server';
 import type { Logger } from '@kbn/logging';
 import { CONTENT_ID } from '../../common/content_management';
 import { cmServicesDefinition } from './schema/cm_services';

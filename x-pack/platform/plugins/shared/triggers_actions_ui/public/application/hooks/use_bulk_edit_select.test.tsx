@@ -7,7 +7,7 @@
 
 import { renderHook, act } from '@testing-library/react';
 import { useBulkEditSelect } from './use_bulk_edit_select';
-import { RuleTableItem } from '../../types';
+import type { RuleTableItem } from '../../types';
 
 const items = [
   {

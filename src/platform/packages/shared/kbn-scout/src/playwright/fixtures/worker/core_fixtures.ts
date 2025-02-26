@@ -8,8 +8,9 @@
  */
 
 import { test as base } from '@playwright/test';
-import { KbnClient, SamlSessionManager } from '@kbn/test';
-import { Client } from '@elastic/elasticsearch';
+import type { KbnClient, SamlSessionManager } from '@kbn/test';
+import type { Client } from '@elastic/elasticsearch';
+import type { KibanaUrl } from '../../../common/services';
 import {
   createKbnUrl,
   getEsClient,
@@ -17,11 +18,10 @@ import {
   getLogger,
   createSamlSessionManager,
   createScoutConfig,
-  KibanaUrl,
 } from '../../../common/services';
-import { ScoutTestOptions } from '../../types';
-import { ScoutTestConfig } from '.';
-import { ScoutLogger } from '../../../common';
+import type { ScoutTestOptions } from '../../types';
+import type { ScoutTestConfig } from '.';
+import type { ScoutLogger } from '../../../common';
 
 // re-export to import types from '@kbn-scout'
 export type { KbnClient, SamlSessionManager } from '@kbn/test';

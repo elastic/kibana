@@ -7,15 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { EuiMarkdownEditorProps } from '@elastic/eui';
 import {
   EuiLink,
   EuiMarkdownEditor,
-  EuiMarkdownEditorProps,
   EuiMarkdownFormat,
   getDefaultEuiMarkdownPlugins,
 } from '@elastic/eui';
-import React, { useState } from 'react';
-import { useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 
 export type MarkdownProps = Partial<
   Omit<EuiMarkdownEditorProps, 'editorId' | 'uiPlugins' | 'markdownFormatProps'>

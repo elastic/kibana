@@ -17,8 +17,8 @@ import {
   EuiTableRowCell,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { Request, RequestStatistic } from '../../../../../common/adapters/request/types';
-import { DetailViewProps } from './types';
+import type { Request, RequestStatistic } from '../../../../../common/adapters/request/types';
+import type { DetailViewProps } from './types';
 
 // TODO: Replace by property once available
 interface RequestDetailsStatRow extends RequestStatistic {

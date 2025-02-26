@@ -6,23 +6,21 @@
  */
 
 import React, { useState, useMemo } from 'react';
-import {
+import type {
   EuiDataGridColumnSortingConfig,
-  EuiSearchBar,
-  EuiScreenReaderOnly,
-  EuiDataGrid,
   EuiDataGridCellProps,
   EuiDataGridControlColumn,
 } from '@elastic/eui';
+import { EuiSearchBar, EuiScreenReaderOnly, EuiDataGrid } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { WiredStreamDefinition } from '@kbn/streams-schema';
+import type { WiredStreamDefinition } from '@kbn/streams-schema';
 import { isEmpty } from 'lodash';
 import { TABLE_COLUMNS, EMPTY_CONTENT } from './constants';
 import { FieldActionsCell } from './field_actions';
 import { FieldParent } from './field_parent';
 import { FieldStatusBadge } from './field_status';
-import { TControls } from './hooks/use_controls';
-import { SchemaField } from './types';
+import type { TControls } from './hooks/use_controls';
+import type { SchemaField } from './types';
 import { FieldType } from './field_type';
 
 export function FieldsTable({

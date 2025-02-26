@@ -14,8 +14,7 @@ import type { PluginsDependencies } from '../plugin';
 
 import type { ExperimentalFeatures } from '../../server/config';
 import type { AppDependencies } from './app_dependencies';
-import { breadcrumbService } from './services/navigation';
-import { docTitleService } from './services/navigation';
+import { breadcrumbService, docTitleService } from './services/navigation';
 import { textService } from './services/text';
 import { renderApp } from './app';
 

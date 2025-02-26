@@ -7,39 +7,42 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { firstValueFrom, Observable } from 'rxjs';
+import type { Observable } from 'rxjs';
+import { firstValueFrom } from 'rxjs';
 
-import {
+import type {
   AnalyticsServiceStart,
   CoreSetup,
   CoreStart,
   I18nStart,
   NotificationsSetup,
 } from '@kbn/core/public';
-import { DataPublicPluginStart, SerializedSearchSourceFields } from '@kbn/data-plugin/public';
+import type { DataPublicPluginStart, SerializedSearchSourceFields } from '@kbn/data-plugin/public';
+import type { PublishesSavedSearch, HasTimeRange } from '@kbn/discover-plugin/public';
 import {
   loadSharingDataHelpers,
   SEARCH_EMBEDDABLE_TYPE,
   apiPublishesSavedSearch,
-  PublishesSavedSearch,
-  HasTimeRange,
 } from '@kbn/discover-plugin/public';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
-import { LicensingPluginStart } from '@kbn/licensing-plugin/public';
+import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
+import type {
+  CanAccessViewMode,
+  EmbeddableApiContext,
+  HasType,
+  PublishesTitle,
+} from '@kbn/presentation-publishing';
 import {
   apiCanAccessViewMode,
   apiHasType,
   apiIsOfType,
   apiPublishesTitle,
-  CanAccessViewMode,
-  EmbeddableApiContext,
   getInheritedViewMode,
-  HasType,
-  PublishesTitle,
 } from '@kbn/presentation-publishing';
 import { toMountPoint } from '@kbn/react-kibana-mount';
-import { CSV_REPORTING_ACTION, JobAppParamsCSV } from '@kbn/reporting-export-types-csv-common';
-import { SavedSearch } from '@kbn/saved-search-plugin/public';
+import type { JobAppParamsCSV } from '@kbn/reporting-export-types-csv-common';
+import { CSV_REPORTING_ACTION } from '@kbn/reporting-export-types-csv-common';
+import type { SavedSearch } from '@kbn/saved-search-plugin/public';
 import type { UiActionsActionDefinition as ActionDefinition } from '@kbn/ui-actions-plugin/public';
 import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 import type { ClientConfigType } from '@kbn/reporting-public/types';

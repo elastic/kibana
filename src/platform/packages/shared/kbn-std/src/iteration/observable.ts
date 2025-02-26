@@ -7,10 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { from } from 'rxjs';
-import { mergeMap } from 'rxjs';
+import { from, mergeMap } from 'rxjs';
 
-import { IterableInput, AsyncMapFn } from './types';
+import type { IterableInput, AsyncMapFn } from './types';
 
 /**
  * Creates an observable whose values are the result of calling `fn` for each

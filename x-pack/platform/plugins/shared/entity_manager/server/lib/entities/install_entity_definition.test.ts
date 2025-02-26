@@ -10,9 +10,9 @@ import moment from 'moment';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 import { loggerMock } from '@kbn/logging-mocks';
-import { EntityDefinition } from '@kbn/entities-schema';
-import { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
-import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import type { EntityDefinition } from '@kbn/entities-schema';
+import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
+import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import {
   installBuiltInEntityDefinitions,
   installEntityDefinition,

@@ -10,13 +10,14 @@
 import React from 'react';
 import { render, within, fireEvent } from '@testing-library/react';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
-import { IUiSettingsClient } from '@kbn/core/public';
+import type { IUiSettingsClient } from '@kbn/core/public';
 import { coreMock } from '@kbn/core/server/mocks';
 import { ESQLVariableType } from '@kbn/esql-validation-autocomplete';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { ValueControlForm } from './value_control_form';
-import { EsqlControlType, ESQLControlState } from '../types';
+import type { ESQLControlState } from '../types';
+import { EsqlControlType } from '../types';
 
 jest.mock('@kbn/esql-utils', () => {
   return {

@@ -7,10 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ESQLCommand } from '@kbn/esql-ast';
+import type { ESQLCommand } from '@kbn/esql-ast';
 import { i18n } from '@kbn/i18n';
-import { JoinCommandPosition, JoinPosition, JoinStaticPosition } from './types';
-import { SuggestionRawDefinition } from '../../types';
+import type { JoinCommandPosition, JoinPosition, JoinStaticPosition } from './types';
+import type { SuggestionRawDefinition } from '../../types';
 import type { JoinIndexAutocompleteItem } from '../../../validation/types';
 
 const REGEX =

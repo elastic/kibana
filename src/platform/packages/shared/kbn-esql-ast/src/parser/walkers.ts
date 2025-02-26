@@ -7,33 +7,24 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ParserRuleContext, TerminalNode } from 'antlr4';
+import type { TerminalNode } from 'antlr4';
+import { ParserRuleContext } from 'antlr4';
 import {
   default as esql_parser,
   ArithmeticBinaryContext,
   ArithmeticUnaryContext,
   BooleanArrayLiteralContext,
   BooleanDefaultContext,
-  type BooleanExpressionContext,
   BooleanLiteralContext,
   InputParameterContext,
   BooleanValueContext,
   ComparisonContext,
-  type ComparisonOperatorContext,
-  type ConstantContext,
   ConstantDefaultContext,
   DecimalLiteralContext,
   DereferenceContext,
-  type DropCommandContext,
-  type EnrichCommandContext,
-  type FieldContext,
-  type FieldsContext,
-  type AggFieldsContext,
-  type FromCommandContext,
   FunctionContext,
   IntegerLiteralContext,
   IsNullContext,
-  type KeepCommandContext,
   LogicalBinaryContext,
   LogicalInContext,
   LogicalNotContext,
@@ -42,23 +33,35 @@ import {
   NullLiteralContext,
   NumericArrayLiteralContext,
   NumericValueContext,
-  type OperatorExpressionContext,
   OperatorExpressionDefaultContext,
-  type OrderExpressionContext,
   ParenthesizedExpressionContext,
-  type PrimaryExpressionContext,
   QualifiedIntegerLiteralContext,
   RegexBooleanExpressionContext,
-  type RenameClauseContext,
-  type StatsCommandContext,
   StringArrayLiteralContext,
   StringContext,
   StringLiteralContext,
-  type ValueExpressionContext,
   ValueExpressionDefaultContext,
   InlineCastContext,
   IndexPatternContext,
+} from '../antlr/esql_parser';
+import type {
+  BooleanExpressionContext,
+  ComparisonOperatorContext,
+  ConstantContext,
+  DropCommandContext,
+  EnrichCommandContext,
+  FieldContext,
+  FieldsContext,
+  AggFieldsContext,
+  FromCommandContext,
   InlinestatsCommandContext,
+  KeepCommandContext,
+  OperatorExpressionContext,
+  OrderExpressionContext,
+  PrimaryExpressionContext,
+  RenameClauseContext,
+  StatsCommandContext,
+  ValueExpressionContext,
 } from '../antlr/esql_parser';
 import {
   createSource,
@@ -85,7 +88,7 @@ import {
   createLiteralString,
 } from './factories';
 
-import {
+import type {
   ESQLLiteral,
   ESQLColumn,
   ESQLFunction,

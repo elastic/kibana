@@ -9,8 +9,10 @@ import { forEach, keys, sortBy, reduce, size } from 'lodash';
 import { flatMap, flow, groupBy, values as valuesFP, map, pickBy } from 'lodash/fp';
 
 import type { IScopedClusterClient } from '@kbn/core/server';
-import type { estypes } from '@elastic/elasticsearch';
-import type { FieldCapsResponse } from '@elastic/elasticsearch/lib/api/types';
+import type {
+  AggregationsMultiBucketAggregateBase,
+  FieldCapsResponse,
+} from '@elastic/elasticsearch/lib/api/types';
 
 export type FieldCapsList = FieldCapsResponse['fields'];
 
@@ -37,7 +39,7 @@ interface FieldsPerIndexType {
   fields: FieldItem[];
 }
 
-interface IndicesAggs extends estypes.AggregationsMultiBucketAggregateBase {
+interface IndicesAggs extends AggregationsMultiBucketAggregateBase {
   buckets: Array<{ key: unknown }>;
 }
 

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { LogRecord } from './log_record';
+import type { LogRecord } from './log_record';
 
 /**
  * Entity that can format `LogRecord` instance into a string.

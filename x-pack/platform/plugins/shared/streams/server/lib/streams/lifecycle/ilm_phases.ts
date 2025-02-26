@@ -6,8 +6,8 @@
  */
 
 import { compact, pick } from 'lodash';
-import { IlmPolicyPhases } from '@kbn/streams-schema';
-import {
+import type { IlmPolicyPhases } from '@kbn/streams-schema';
+import type {
   IlmExplainLifecycleLifecycleExplain,
   IlmPolicy,
   IlmPhase,

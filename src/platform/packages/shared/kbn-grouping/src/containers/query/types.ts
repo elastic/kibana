@@ -11,10 +11,11 @@ import type {
   Script,
   MappingRuntimeField,
   MappingRuntimeFields,
+  AggregationsAggregationContainer,
+  QueryDslQueryContainer,
 } from '@elastic/elasticsearch/lib/api/types';
 import type { RuntimeFieldSpec, RuntimePrimitiveTypes } from '@kbn/data-views-plugin/common';
 import type { BoolQuery } from '@kbn/es-query';
-import type { estypes } from '@elastic/elasticsearch';
 
 type RunTimeMappings =
   | Record<string, Omit<RuntimeFieldSpec, 'type'> & { type: RuntimePrimitiveTypes }>
@@ -28,7 +29,7 @@ export interface RangeAgg {
   range: { '@timestamp': { gte: string; lte: string } };
 }
 
-export type NamedAggregation = Record<string, estypes.AggregationsAggregationContainer>;
+export type NamedAggregation = Record<string, AggregationsAggregationContainer>;
 
 export interface GroupingQueryArgs {
   additionalFilters: BoolAgg[];
@@ -48,7 +49,7 @@ export interface GroupingQueryArgs {
 export interface MainAggregation extends NamedAggregation {
   groupByFields: {
     aggs: NamedAggregation;
-    terms: estypes.AggregationsAggregationContainer['terms'];
+    terms: AggregationsAggregationContainer['terms'];
   };
 }
 
@@ -60,7 +61,7 @@ export interface GroupingRuntimeField extends MappingRuntimeField {
 
 type GroupingMappingRuntimeFields = Record<'groupByField', GroupingRuntimeField>;
 
-export interface GroupingQuery extends estypes.QueryDslQueryContainer {
+export interface GroupingQuery extends QueryDslQueryContainer {
   aggs: MainAggregation;
   query: {
     bool: {

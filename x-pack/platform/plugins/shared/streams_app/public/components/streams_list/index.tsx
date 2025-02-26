@@ -20,8 +20,8 @@ import { i18n } from '@kbn/i18n';
 import React, { useMemo } from 'react';
 import { euiThemeVars } from '@kbn/ui-theme';
 import { css } from '@emotion/css';
+import type { StreamDefinition } from '@kbn/streams-schema';
 import {
-  StreamDefinition,
   getSegments,
   isDescendantOf,
   isUnwiredStreamDefinition,

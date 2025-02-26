@@ -13,7 +13,7 @@ import {
   isDataViewTypeIndexPattern,
   fetchIndexPattern,
 } from './index_patterns_utils';
-import { Panel } from './types';
+import type { Panel } from './types';
 import type { DataView, DataViewsService } from '@kbn/data-views-plugin/public';
 
 describe('isStringTypeIndexPattern', () => {

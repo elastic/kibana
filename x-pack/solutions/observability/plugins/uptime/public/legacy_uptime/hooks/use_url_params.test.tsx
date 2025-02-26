@@ -7,7 +7,8 @@
 
 import DateMath from '@kbn/datemath';
 import React, { useState, Fragment } from 'react';
-import { useUrlParams, UptimeUrlParamsHook } from './use_url_params';
+import type { UptimeUrlParamsHook } from './use_url_params';
+import { useUrlParams } from './use_url_params';
 import { UptimeRefreshContext } from '../contexts';
 import { mountWithRouter, MountWithReduxProvider } from '../lib';
 import { createMemoryHistory } from 'history';

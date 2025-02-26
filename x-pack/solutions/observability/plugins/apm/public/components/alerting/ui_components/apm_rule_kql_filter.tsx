@@ -7,9 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { EuiSwitch } from '@elastic/eui';
-import { EuiFormRow } from '@elastic/eui';
-import { EuiSpacer } from '@elastic/eui';
+import { EuiSwitch, EuiFormRow, EuiSpacer } from '@elastic/eui';
 import type { EuiSwitchEvent } from '@elastic/eui';
 import type { TransactionDurationRuleParams } from '../rule_types/transaction_duration_rule_type';
 import type { ErrorRateRuleParams } from '../rule_types/transaction_error_rate_rule_type';

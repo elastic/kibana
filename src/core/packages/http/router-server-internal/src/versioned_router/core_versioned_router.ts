@@ -14,8 +14,8 @@ import type {
   VersionedRouterRoute,
 } from '@kbn/core-http-server';
 import { omit } from 'lodash';
-import { Logger } from '@kbn/logging';
-import { Env } from '@kbn/config';
+import type { Logger } from '@kbn/logging';
+import type { Env } from '@kbn/config';
 import { CoreVersionedRoute } from './core_versioned_route';
 import type { HandlerResolutionStrategy, Method } from './types';
 import type { Router } from '../router';

@@ -10,9 +10,8 @@ import React, { createContext, useEffect, useMemo, useState } from 'react';
 import { createHtmlPortalNode, type HtmlPortalNode } from 'react-reverse-portal';
 import { Redirect } from 'react-router-dom';
 import { Routes, Route } from '@kbn/shared-ux-router';
-import { Subscription } from 'rxjs';
+import { Subscription, map, distinctUntilChanged } from 'rxjs';
 import { EuiPageSection } from '@elastic/eui';
-import { map, distinctUntilChanged } from 'rxjs';
 
 import { i18n } from '@kbn/i18n';
 import { type AppMountParameters } from '@kbn/core/public';

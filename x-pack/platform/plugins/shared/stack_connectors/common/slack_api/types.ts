@@ -5,11 +5,13 @@
  * 2.0.
  */
 
-import type { ActionType as ConnectorType } from '@kbn/actions-plugin/server/types';
-import { TypeOf } from '@kbn/config-schema';
-import type { ActionTypeExecutorOptions as ConnectorTypeExecutorOptions } from '@kbn/actions-plugin/server/types';
-import type { ActionTypeExecutorResult as ConnectorTypeExecutorResult } from '@kbn/actions-plugin/server/types';
-import {
+import type {
+  ActionType as ConnectorType,
+  ActionTypeExecutorOptions as ConnectorTypeExecutorOptions,
+  ActionTypeExecutorResult as ConnectorTypeExecutorResult,
+} from '@kbn/actions-plugin/server/types';
+import type { TypeOf } from '@kbn/config-schema';
+import type {
   PostMessageParamsSchema,
   PostMessageSubActionParamsSchema,
   PostBlockkitSubActionParamsSchema,

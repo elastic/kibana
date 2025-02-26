@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ActionType } from '@kbn/actions-types';
-import { ActionVariable, RulesSettingsFlapping } from '@kbn/alerting-types';
+import type { ActionType } from '@kbn/actions-types';
+import type { ActionVariable, RulesSettingsFlapping } from '@kbn/alerting-types';
 import type { ChartsPluginSetup } from '@kbn/charts-plugin/public';
 import type { ApplicationStart } from '@kbn/core-application-browser';
 import type { DocLinksStart } from '@kbn/core-doc-links-browser';
@@ -20,10 +20,10 @@ import type { UserProfileService } from '@kbn/core-user-profile-browser';
 import type { SettingsStart } from '@kbn/core-ui-settings-browser';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
-import { RuleCreationValidConsumer } from '@kbn/rule-data-utils';
+import type { RuleCreationValidConsumer } from '@kbn/rule-data-utils';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import type { ActionConnector, ActionTypeRegistryContract } from '@kbn/alerts-ui-shared';
-import {
+import type {
   MinimumScheduleInterval,
   Rule,
   RuleFormActionsErrors,

@@ -9,24 +9,18 @@
 
 import React, { Component } from 'react';
 
-import {
-  keys,
-  EuiBasicTableColumn,
-  EuiInMemoryTable,
-  EuiFieldText,
-  EuiButtonIcon,
-  RIGHT_ALIGNMENT,
-} from '@elastic/eui';
+import type { EuiBasicTableColumn } from '@elastic/eui';
+import { keys, EuiInMemoryTable, EuiFieldText, EuiButtonIcon, RIGHT_ALIGNMENT } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { DataView } from '@kbn/data-views-plugin/public';
+import type { DataView } from '@kbn/data-views-plugin/public';
 import {
   withEuiTablePersist,
   type EuiTablePersistInjectedProps,
 } from '@kbn/shared-ux-table-persist';
 
-import { SourceFiltersTableFilter } from '../../types';
+import type { SourceFiltersTableFilter } from '../../types';
 
 const filterHeader = i18n.translate(
   'indexPatternManagement.editIndexPattern.source.table.filterHeader',

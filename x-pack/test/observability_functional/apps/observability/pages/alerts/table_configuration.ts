@@ -19,7 +19,7 @@ import {
   TAGS,
   ALERT_STATUS_ACTIVE,
 } from '@kbn/rule-data-utils';
-import { FtrProviderContext } from '../../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../../ftr_provider_context';
 
 export default ({ getService, getPageObject }: FtrProviderContext) => {
   describe('Observability alerts table configuration', function () {

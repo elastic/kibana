@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-import { ServiceParams, SubActionConnector } from '@kbn/actions-plugin/server';
-import { AxiosError, Method } from 'axios';
+import type { ServiceParams } from '@kbn/actions-plugin/server';
+import { SubActionConnector } from '@kbn/actions-plugin/server';
+import type { AxiosError, Method } from 'axios';
 import { PassThrough } from 'stream';
-import { IncomingMessage } from 'http';
-import { SubActionRequestParams } from '@kbn/actions-plugin/server/sub_action_framework/types';
+import type { IncomingMessage } from 'http';
+import type { SubActionRequestParams } from '@kbn/actions-plugin/server/sub_action_framework/types';
 import { getGoogleOAuthJwtAccessToken } from '@kbn/actions-plugin/server/lib/get_gcp_oauth_access_token';
-import {
+import type {
   ConnectorUsageCollector,
   ConnectorTokenClientContract,
 } from '@kbn/actions-plugin/server/types';
@@ -24,9 +25,10 @@ import {
   InvokeAIActionParamsSchema,
   InvokeAIRawActionParamsSchema,
   StreamingResponseSchema,
+  DashboardActionParamsSchema,
 } from '../../../common/gemini/schema';
 import { initDashboard } from '../lib/gen_ai/create_gen_ai_dashboard';
-import {
+import type {
   Config,
   Secrets,
   RunActionParams,
@@ -46,7 +48,6 @@ import {
   DEFAULT_TIMEOUT_MS,
   DEFAULT_TOKEN_LIMIT,
 } from '../../../common/gemini/constants';
-import { DashboardActionParamsSchema } from '../../../common/gemini/schema';
 /** Interfaces to define Gemini model response type */
 
 interface MessagePart {

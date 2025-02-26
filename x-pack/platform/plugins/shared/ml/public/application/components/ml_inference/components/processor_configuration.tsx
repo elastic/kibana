@@ -32,13 +32,12 @@ import {
   CREATE_FIELD_MAPPING_MESSAGE,
   CLEAR_BUTTON_LABEL,
 } from '../constants';
-import { validateInferenceConfig } from '../validation';
+import { validateInferenceConfig, validateFieldMap } from '../validation';
 import { isValidJson } from '../../../../../common/util/validation_utils';
 import { SaveChangesButton } from './save_changes_button';
 import { useMlKibana } from '../../../contexts/kibana';
 import type { MlInferenceState, InferenceModelTypes } from '../types';
 import { AdditionalAdvancedSettings } from './additional_advanced_settings';
-import { validateFieldMap } from '../validation';
 
 function getDefaultFieldMapString() {
   return JSON.stringify(

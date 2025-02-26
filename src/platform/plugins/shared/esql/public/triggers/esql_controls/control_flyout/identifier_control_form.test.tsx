@@ -9,11 +9,12 @@
 
 import React from 'react';
 import { render, within, fireEvent } from '@testing-library/react';
-import { monaco } from '@kbn/monaco';
+import type { monaco } from '@kbn/monaco';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { ESQLVariableType } from '@kbn/esql-validation-autocomplete';
 import { IdentifierControlForm } from './identifier_control_form';
-import { ESQLControlState, EsqlControlType } from '../types';
+import type { ESQLControlState } from '../types';
+import { EsqlControlType } from '../types';
 
 jest.mock('@kbn/esql-utils', () => ({
   getESQLQueryColumnsRaw: jest.fn().mockResolvedValue([{ name: 'column1' }, { name: 'column2' }]),

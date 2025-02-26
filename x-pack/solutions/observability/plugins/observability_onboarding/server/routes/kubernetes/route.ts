@@ -10,7 +10,7 @@ import * as t from 'io-ts';
 import Boom from '@hapi/boom';
 import { termQuery } from '@kbn/observability-plugin/server';
 import type { estypes } from '@elastic/elasticsearch';
-import { ElasticAgentVersionInfo } from '../../../common/types';
+import type { ElasticAgentVersionInfo } from '../../../common/types';
 import { getFallbackESUrl } from '../../lib/get_fallback_urls';
 import { createObservabilityOnboardingServerRoute } from '../create_observability_onboarding_server_route';
 import { hasLogMonitoringPrivileges } from '../../lib/api_key/has_log_monitoring_privileges';

@@ -7,10 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { SeriesColorAccessorFn } from '@elastic/charts';
+import type { SeriesColorAccessorFn } from '@elastic/charts';
 import { getColorFactory, type ColorMapping, type ColorMappingInputData } from '@kbn/coloring';
 import { MULTI_FIELD_KEY_SEPARATOR } from '@kbn/data-plugin/common';
-import { KbnPalettes } from '@kbn/palettes';
+import type { KbnPalettes } from '@kbn/palettes';
 
 /**
  * Return a color accessor function for XY charts depending on the split accessors received.

@@ -10,8 +10,7 @@ import expect from '@kbn/expect';
 import type { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
 import type { FtrProviderContext } from '../../../ftr_provider_context';
 
-import { HOSTS_VIEW_PATH } from './constants';
-import { DATES, DATE_PICKER_FORMAT } from './constants';
+import { HOSTS_VIEW_PATH, DATES, DATE_PICKER_FORMAT } from './constants';
 
 const START_DATE = moment.utc(DATES.metricsAndLogs.hosts.min);
 const END_DATE = moment.utc(DATES.metricsAndLogs.hosts.max);

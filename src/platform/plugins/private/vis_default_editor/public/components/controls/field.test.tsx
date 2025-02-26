@@ -9,14 +9,17 @@
 
 import React from 'react';
 import { act } from 'react-dom/test-utils';
-import { mount, shallow, ReactWrapper } from 'enzyme';
-import { EuiComboBoxProps, EuiComboBox } from '@elastic/eui';
+import type { ReactWrapper } from 'enzyme';
+import { mount, shallow } from 'enzyme';
+import type { EuiComboBoxProps } from '@elastic/eui';
+import { EuiComboBox } from '@elastic/eui';
 
-import { IAggConfig, AggParam } from '@kbn/data-plugin/public';
-import { DataViewField } from '@kbn/data-views-plugin/public';
-import { ComboBoxGroupedOptions } from '../../utils';
-import { FieldParamEditor, FieldParamEditorProps } from './field';
-import { EditorVisState } from '../sidebar/state/reducers';
+import type { IAggConfig, AggParam } from '@kbn/data-plugin/public';
+import type { DataViewField } from '@kbn/data-views-plugin/public';
+import type { ComboBoxGroupedOptions } from '../../utils';
+import type { FieldParamEditorProps } from './field';
+import { FieldParamEditor } from './field';
+import type { EditorVisState } from '../sidebar/state/reducers';
 
 function callComboBoxOnChange(comp: ReactWrapper, value: any = []) {
   const comboBoxProps = comp.find(EuiComboBox).props() as EuiComboBoxProps<any>;

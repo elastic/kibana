@@ -7,19 +7,23 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Transform, Readable } from 'stream';
+import type { Readable } from 'stream';
+import { Transform } from 'stream';
 import { inspect } from 'util';
 
-import type { estypes } from '@elastic/elasticsearch';
 import type { Client } from '@elastic/elasticsearch';
-import { ToolingLog } from '@kbn/tooling-log';
+import type { ToolingLog } from '@kbn/tooling-log';
 
-import { IndicesPutIndexTemplateRequest } from '@elastic/elasticsearch/lib/api/types';
+import type {
+  IndicesIndexState,
+  IndicesPutIndexTemplateRequest,
+  IndicesUpdateAliasesAction,
+} from '@elastic/elasticsearch/lib/api/types';
 import {
   MAIN_SAVED_OBJECT_INDEX,
   TASK_MANAGER_SAVED_OBJECT_INDEX,
 } from '@kbn/core-saved-objects-server';
-import { Stats } from '../stats';
+import type { Stats } from '../stats';
 import {
   cleanSavedObjectIndices,
   deleteSavedObjectIndices,
@@ -30,7 +34,7 @@ import { deleteDataStream } from './delete_data_stream';
 import { ES_CLIENT_HEADERS } from '../../client_headers';
 
 interface DocRecord {
-  value: estypes.IndicesIndexState & {
+  value: IndicesIndexState & {
     index: string;
     type: string;
     template?: IndicesPutIndexTemplateRequest;
@@ -171,15 +175,13 @@ export function createCreateIndexStream({
         );
 
         // create the aliases on a separate step (see https://github.com/elastic/kibana/issues/158918)
-        const actions: estypes.IndicesUpdateAliasesAction[] = Object.keys(aliases ?? {}).map(
-          (alias) => ({
-            add: {
-              index,
-              alias,
-              ...aliases![alias],
-            },
-          })
-        );
+        const actions: IndicesUpdateAliasesAction[] = Object.keys(aliases ?? {}).map((alias) => ({
+          add: {
+            index,
+            alias,
+            ...aliases![alias],
+          },
+        }));
 
         if (actions.length) {
           await client.indices.updateAliases({ actions });

@@ -8,10 +8,10 @@ import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiLink, EuiPanel, EuiBadge } from 
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { css } from '@emotion/css';
-import { ILM_LOCATOR_ID, IlmLocatorParams } from '@kbn/index-lifecycle-management-common-shared';
+import type { IlmLocatorParams } from '@kbn/index-lifecycle-management-common-shared';
+import { ILM_LOCATOR_ID } from '@kbn/index-lifecycle-management-common-shared';
+import type { IngestStreamEffectiveLifecycle, IngestStreamGetResponse } from '@kbn/streams-schema';
 import {
-  IngestStreamEffectiveLifecycle,
-  IngestStreamGetResponse,
   isDslLifecycle,
   isErrorLifecycle,
   isIlmLifecycle,

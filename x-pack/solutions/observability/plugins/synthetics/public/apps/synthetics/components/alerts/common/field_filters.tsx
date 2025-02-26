@@ -8,7 +8,7 @@
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import React, { useCallback, useState } from 'react';
 import { useFetchSyntheticsSuggestions } from '../hooks/use_fetch_synthetics_suggestions';
-import { StatusRuleParamsProps } from '../status_rule_ui';
+import type { StatusRuleParamsProps } from '../status_rule_ui';
 import { LocationsField, MonitorField, MonitorTypeField, ProjectsField, TagsField } from './fields';
 
 type FieldKeys = 'monitorIds' | 'projects' | 'tags' | 'locations' | 'monitorTypes';

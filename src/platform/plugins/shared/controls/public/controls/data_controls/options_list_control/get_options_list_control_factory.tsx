@@ -20,8 +20,10 @@ import {
   Subject,
 } from 'rxjs';
 
-import { buildExistsFilter, buildPhraseFilter, buildPhrasesFilter, Filter } from '@kbn/es-query';
-import { PublishingSubject, useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
+import type { Filter } from '@kbn/es-query';
+import { buildExistsFilter, buildPhraseFilter, buildPhrasesFilter } from '@kbn/es-query';
+import type { PublishingSubject } from '@kbn/presentation-publishing';
+import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 
 import { OPTIONS_LIST_CONTROL } from '../../../../common';
 import type {

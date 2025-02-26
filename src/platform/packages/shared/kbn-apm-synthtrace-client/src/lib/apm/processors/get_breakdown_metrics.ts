@@ -9,7 +9,7 @@
 
 import { pick } from 'lodash';
 import { hashKeysOf } from '../../utils/hash';
-import { ApmFields } from '../apm_fields';
+import type { ApmFields } from '../apm_fields';
 
 const KEY_FIELDS: Array<keyof ApmFields> = [
   'container.id',

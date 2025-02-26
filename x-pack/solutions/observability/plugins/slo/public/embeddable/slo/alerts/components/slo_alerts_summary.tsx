@@ -6,14 +6,15 @@
  */
 import React, { useMemo } from 'react';
 import type { TimeRange } from '@kbn/es-query';
-import { useTimeBuckets } from '@kbn/observability-plugin/public';
-import { getAlertSummaryTimeRange } from '@kbn/observability-plugin/public';
-import { calculateTimeRangeBucketSize } from '@kbn/observability-plugin/public';
+import {
+  useTimeBuckets,
+  getAlertSummaryTimeRange,
+  calculateTimeRangeBucketSize,
+} from '@kbn/observability-plugin/public';
 import { AlertConsumers, SLO_RULE_TYPE_IDS } from '@kbn/rule-data-utils';
 import { useSloAlertsQuery } from './slo_alerts_table';
 
-import { SloEmbeddableDeps } from '../types';
-import { SloItem } from '../types';
+import type { SloEmbeddableDeps, SloItem } from '../types';
 
 const DEFAULT_INTERVAL = '60s';
 const DEFAULT_DATE_FORMAT = 'YYYY-MM-DD HH:mm';

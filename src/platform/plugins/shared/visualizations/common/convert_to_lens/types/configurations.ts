@@ -7,12 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { HorizontalAlignment, LayoutDirection, Position, VerticalAlignment } from '@elastic/charts';
-import { $Values } from '@kbn/utility-types';
+import type {
+  HorizontalAlignment,
+  LayoutDirection,
+  Position,
+  VerticalAlignment,
+} from '@elastic/charts';
+import type { $Values } from '@kbn/utility-types';
 import type { CustomPaletteParams, PaletteOutput } from '@kbn/coloring';
-import { KibanaQueryOutput } from '@kbn/data-plugin/common';
-import { LegendSize, type XYLegendValue, type PartitionLegendValue } from '../../constants';
-import {
+import type { KibanaQueryOutput } from '@kbn/data-plugin/common';
+import type { LegendSize, XYLegendValue, PartitionLegendValue } from '../../constants';
+import type {
   CategoryDisplayTypes,
   PartitionChartTypes,
   NumberDisplayTypes,
@@ -29,7 +34,7 @@ import {
   GaugeCentralMajorModes,
   CollapseFunctions,
 } from '../constants';
-import { ExpressionValueVisDimension } from '../../expression_functions';
+import type { ExpressionValueVisDimension } from '../../expression_functions';
 
 export type ChartShapes = 'heatmap';
 

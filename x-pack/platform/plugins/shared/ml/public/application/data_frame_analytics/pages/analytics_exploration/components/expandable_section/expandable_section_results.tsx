@@ -28,9 +28,9 @@ import {
 
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { type MlKibanaUrlConfig } from '@kbn/ml-anomaly-utils';
-import { ES_CLIENT_TOTAL_HITS_RELATION } from '@kbn/ml-query-utils';
-import type { RowCountRelation, UseIndexDataReturnType } from '@kbn/ml-data-grid';
-import { type DataGridItem, DataGrid, INDEX_STATUS } from '@kbn/ml-data-grid';
+import { ES_CLIENT_TOTAL_HITS_RELATION, SEARCH_QUERY_LANGUAGE } from '@kbn/ml-query-utils';
+import { DataGrid, INDEX_STATUS } from '@kbn/ml-data-grid';
+import type { RowCountRelation, UseIndexDataReturnType, DataGridItem } from '@kbn/ml-data-grid';
 import {
   getAnalysisType,
   isClassificationAnalysis,
@@ -39,7 +39,6 @@ import {
 } from '@kbn/ml-data-frame-analytics-utils';
 
 import type { estypes } from '@elastic/elasticsearch';
-import { SEARCH_QUERY_LANGUAGE } from '@kbn/ml-query-utils';
 import { parseInterval } from '@kbn/ml-parse-interval';
 
 import type { useColorRange } from '../../../../../components/color_range_legend';

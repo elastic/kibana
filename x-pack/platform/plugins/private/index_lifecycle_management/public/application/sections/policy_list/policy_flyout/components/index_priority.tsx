@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import {
+import type {
   SerializedHotPhase,
   SerializedWarmPhase,
   SerializedColdPhase,

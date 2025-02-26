@@ -19,11 +19,12 @@ import { ruleRunMetricsStoreMock } from '../../lib/rule_run_metrics_store.mock';
 import { alertingEventLoggerMock } from '../../lib/alerting_event_logger/alerting_event_logger.mock';
 import { DEFAULT_FLAPPING_SETTINGS } from '../../types';
 import { alertsClientMock } from '../alerts_client.mock';
-import { UntypedNormalizedRuleType } from '../../rule_type_registry';
+import type { UntypedNormalizedRuleType } from '../../rule_type_registry';
 import { legacyAlertsClientMock } from '../legacy_alerts_client.mock';
-import { initializeAlertsClient, RuleData } from './initialize_alerts_client';
+import type { RuleData } from './initialize_alerts_client';
+import { initializeAlertsClient } from './initialize_alerts_client';
 import { maintenanceWindowsServiceMock } from '../../task_runner/maintenance_windows/maintenance_windows_service.mock';
-import { KibanaRequest } from '@kbn/core/server';
+import type { KibanaRequest } from '@kbn/core/server';
 
 const alertingEventLogger = alertingEventLoggerMock.create();
 const ruleRunMetricsStore = ruleRunMetricsStoreMock.create();

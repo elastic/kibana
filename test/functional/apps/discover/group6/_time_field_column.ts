@@ -8,7 +8,7 @@
  */
 
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../ftr_provider_context';
+import type { FtrProviderContext } from '../ftr_provider_context';
 
 const SEARCH_NO_COLUMNS = 'searchNoColumns';
 const SEARCH_WITH_ONLY_TIMESTAMP = 'searchWithOnlyTimestampColumn';

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { GlobalSearchProviderResult } from '@kbn/global-search-plugin/common/types';
+import type { GlobalSearchProviderResult } from '@kbn/global-search-plugin/common/types';
 
 export const createResult = (
   parts: Partial<GlobalSearchProviderResult>

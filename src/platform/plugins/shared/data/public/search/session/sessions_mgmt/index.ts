@@ -8,8 +8,13 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { CoreStart, HttpStart, I18nStart, IUiSettingsClient } from '@kbn/core/public';
-import { CoreSetup } from '@kbn/core/public';
+import type {
+  CoreStart,
+  HttpStart,
+  I18nStart,
+  IUiSettingsClient,
+  CoreSetup,
+} from '@kbn/core/public';
 import type { ManagementSetup } from '@kbn/management-plugin/public';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { ISessionsClient, SearchUsageCollector } from '../../..';

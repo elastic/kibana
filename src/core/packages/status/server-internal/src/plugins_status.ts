@@ -7,15 +7,20 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { Observable, Subscription } from 'rxjs';
 import {
+  map,
+  distinctUntilChanged,
+  filter,
+  tap,
+  debounceTime,
+  takeUntil,
+  delay,
   BehaviorSubject,
   merge,
-  Observable,
   ReplaySubject,
   Subject,
-  type Subscription,
 } from 'rxjs';
-import { map, distinctUntilChanged, filter, tap, debounceTime, takeUntil, delay } from 'rxjs';
 import { isDeepStrictEqual } from 'util';
 import type { PluginName } from '@kbn/core-base-common';
 import { ServiceStatusLevels, type CoreStatus, type ServiceStatus } from '@kbn/core-status-common';

@@ -9,9 +9,10 @@
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { ReactNode } from 'react';
-import { GuideId } from '../../../..';
-import { GuideCardSolutions } from './guide_cards';
+import type { ReactNode } from 'react';
+import React from 'react';
+import type { GuideId } from '../../../..';
+import type { GuideCardSolutions } from './guide_cards';
 
 export interface GuideCardConstants {
   solution: GuideCardSolutions;

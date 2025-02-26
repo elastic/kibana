@@ -10,7 +10,7 @@ import { mount, shallow } from 'enzyme';
 import React from 'react';
 import SemVer from 'semver/classes/semver';
 
-import { ReindexWarning } from '../../../../../../../common/types';
+import type { ReindexWarning } from '../../../../../../../common/types';
 import { idForWarning, WarningsFlyoutStep } from './warnings_step';
 
 const kibanaVersion = new SemVer('8.0.0');

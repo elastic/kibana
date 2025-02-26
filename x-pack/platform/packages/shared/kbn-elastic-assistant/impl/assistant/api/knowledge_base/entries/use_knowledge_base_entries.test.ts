@@ -7,8 +7,8 @@
 
 import { renderHook, waitFor } from '@testing-library/react';
 import { useKnowledgeBaseEntries } from './use_knowledge_base_entries';
-import { HttpSetup } from '@kbn/core/public';
-import { IToasts } from '@kbn/core-notifications-browser';
+import type { HttpSetup } from '@kbn/core/public';
+import type { IToasts } from '@kbn/core-notifications-browser';
 import { TestProviders } from '../../../../mock/test_providers/test_providers';
 
 describe('useKnowledgeBaseEntries', () => {

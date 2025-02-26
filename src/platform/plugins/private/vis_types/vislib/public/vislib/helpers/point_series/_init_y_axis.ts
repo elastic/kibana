@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Chart } from './point_series';
+import type { Chart } from './point_series';
 
 export function initYAxis(chart: Chart) {
   const y = chart.aspects.y;

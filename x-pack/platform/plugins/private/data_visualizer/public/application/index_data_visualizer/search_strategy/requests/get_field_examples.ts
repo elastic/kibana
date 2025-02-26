@@ -4,10 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { estypes } from '@elastic/elasticsearch';
 import { get } from 'lodash';
-import { combineLatest, of } from 'rxjs';
-import { catchError, map } from 'rxjs';
+import { combineLatest, of, catchError, map } from 'rxjs';
 import type {
   IKibanaSearchResponse,
   IKibanaSearchRequest,
@@ -15,8 +13,8 @@ import type {
 } from '@kbn/search-types';
 import type { ISearchStart } from '@kbn/data-plugin/public';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
-import type { SearchHit } from '@elastic/elasticsearch/lib/api/types';
 import { extractErrorProperties } from '@kbn/ml-error-utils';
+import type { SearchRequest, SearchHit } from '@elastic/elasticsearch/lib/api/types';
 import { getUniqGeoOrStrExamples } from '../../../common/util/example_utils';
 import type {
   Field,
@@ -71,7 +69,7 @@ export const fetchFieldsExamples = (
   const { maxExamples } = params;
   return combineLatest(
     fields.map((field) => {
-      const request: estypes.SearchRequest = getFieldExamplesRequest(params, field);
+      const request: SearchRequest = getFieldExamplesRequest(params, field);
 
       return dataSearch
         .search<IKibanaSearchRequest, IKibanaSearchResponse>({ params: request }, options)

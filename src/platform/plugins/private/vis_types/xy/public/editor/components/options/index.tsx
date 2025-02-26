@@ -9,8 +9,8 @@
 
 import React, { lazy } from 'react';
 
-import { VisParams } from '../../../types';
-import { ValidationVisOptionsProps } from '../common';
+import type { VisParams } from '../../../types';
+import type { ValidationVisOptionsProps } from '../common';
 
 const PointSeriesOptionsLazy = lazy(() => import('./point_series'));
 const MetricsAxisOptionsLazy = lazy(() => import('./metrics_axes'));

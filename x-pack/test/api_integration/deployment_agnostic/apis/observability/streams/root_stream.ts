@@ -6,13 +6,11 @@
  */
 
 import expect from '@kbn/expect';
-import { IngestStreamUpsertRequest, WiredStreamDefinition } from '@kbn/streams-schema';
-import { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
+import type { IngestStreamUpsertRequest, WiredStreamDefinition } from '@kbn/streams-schema';
+import type { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
 import { disableStreams, enableStreams, indexDocument, putStream } from './helpers/requests';
-import {
-  StreamsSupertestRepositoryClient,
-  createStreamsRepositoryAdminClient,
-} from './helpers/repository_client';
+import type { StreamsSupertestRepositoryClient } from './helpers/repository_client';
+import { createStreamsRepositoryAdminClient } from './helpers/repository_client';
 
 const rootStreamDefinition: WiredStreamDefinition = {
   name: 'logs',

@@ -7,7 +7,7 @@
 
 // @ts-ignore
 import { parse } from 'wellknown';
-import { Feature, FeatureCollection, GeoJsonProperties } from 'geojson';
+import type { Feature, FeatureCollection, GeoJsonProperties } from 'geojson';
 import type { ESQLSearchResponse } from '@kbn/es-types';
 import { EMPTY_FEATURE_COLLECTION } from '../../../../common/constants';
 import { isGeometryColumn } from './esql_utils';

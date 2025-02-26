@@ -5,16 +5,15 @@
  * 2.0.
  */
 
-import { SearchRequest as ESSearchRequest } from '@elastic/elasticsearch/lib/api/types';
-import { InferSearchResponseOf } from '@kbn/es-types';
-import type { KibanaRequest } from '@kbn/core/server';
-import { ElasticsearchClient } from '@kbn/core/server';
-import { entitiesAliasPattern, ENTITY_LATEST } from '@kbn/entities-schema';
-import { unwrapEsResponse } from '@kbn/observability-plugin/common/utils/unwrap_es_response';
-import {
+import type {
+  SearchRequest as ESSearchRequest,
   MsearchMultisearchBody,
   MsearchMultisearchHeader,
 } from '@elastic/elasticsearch/lib/api/types';
+import type { InferSearchResponseOf } from '@kbn/es-types';
+import type { KibanaRequest, ElasticsearchClient } from '@kbn/core/server';
+import { entitiesAliasPattern, ENTITY_LATEST } from '@kbn/entities-schema';
+import { unwrapEsResponse } from '@kbn/observability-plugin/common/utils/unwrap_es_response';
 
 export const SERVICE_ENTITIES_LATEST_ALIAS = entitiesAliasPattern({
   type: 'service',

@@ -6,9 +6,10 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
-import React, { FunctionComponent } from 'react';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { render, screen, within } from '@testing-library/react';
+import type { FunctionComponent } from 'react';
+import React from 'react';
+import { FormattedMessage, __IntlProvider as IntlProvider } from '@kbn/i18n-react';
+import { render, screen, within, waitFor } from '@testing-library/react';
 
 import { EuiFormLabel } from '@elastic/eui';
 import { coreMock } from '@kbn/core/public/mocks';
@@ -18,16 +19,16 @@ import { createRule } from '@kbn/response-ops-rule-form/src/common/apis/create_r
 import { fetchAlertingFrameworkHealth as fetchAlertingFrameworkHealth } from '@kbn/alerts-ui-shared/src/common/apis/fetch_alerting_framework_health';
 import { actionTypeRegistryMock } from '../../action_type_registry.mock';
 import { AlertConsumers, OBSERVABILITY_THRESHOLD_RULE_TYPE_ID } from '@kbn/rule-data-utils';
-import {
+import type {
   Rule,
   RuleAddProps,
-  RuleFlyoutCloseReason,
   GenericValidationResult,
   ValidationResult,
   RuleCreationValidConsumer,
   RuleType,
   RuleTypeModel,
 } from '../../../types';
+import { RuleFlyoutCloseReason } from '../../../types';
 import { ruleTypeRegistryMock } from '../../rule_type_registry.mock';
 import { ALERTING_FEATURE_ID } from '@kbn/alerting-plugin/common';
 import { useKibana } from '../../../common/lib/kibana';
@@ -36,8 +37,6 @@ import { fetchUiConfig } from '@kbn/response-ops-rule-form/src/common/apis/fetch
 import { fetchUiHealthStatus } from '@kbn/alerts-ui-shared/src/common/apis/fetch_ui_health_status';
 import { loadActionTypes, loadAllActions } from '../../lib/action_connector_api';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { waitFor } from '@testing-library/react';
-import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import userEvent from '@testing-library/user-event';
 jest.mock('../../../common/lib/kibana');
 

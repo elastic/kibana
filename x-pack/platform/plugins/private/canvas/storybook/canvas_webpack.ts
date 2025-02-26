@@ -8,7 +8,7 @@
 import { resolve } from 'path';
 import { defaultConfig, mergeWebpackFinal } from '@kbn/storybook';
 import type { StorybookConfig } from '@kbn/storybook';
-import { Configuration } from 'webpack';
+import type { Configuration } from 'webpack';
 import { KIBANA_ROOT } from './constants';
 
 export const canvasWebpack: Configuration = {

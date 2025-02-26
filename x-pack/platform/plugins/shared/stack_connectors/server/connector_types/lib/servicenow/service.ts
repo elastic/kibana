@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { AxiosResponse } from 'axios';
+import type { AxiosResponse } from 'axios';
 
 import { request } from '@kbn/actions-plugin/server/lib/axios_utils';
 import { isEmpty } from 'lodash';
-import {
+import type {
   ExternalService,
   ExternalServiceParamsCreate,
   ExternalServiceParamsUpdate,
@@ -19,10 +19,11 @@ import {
   GetApplicationInfoResponse,
   ServiceFactory,
   ExternalServiceParamsClose,
+  ServiceNowPublicConfigurationType,
+  ServiceNowSecretConfigurationType,
 } from './types';
 
 import * as i18n from './translations';
-import { ServiceNowPublicConfigurationType, ServiceNowSecretConfigurationType } from './types';
 import {
   createServiceError,
   getPushedDate,

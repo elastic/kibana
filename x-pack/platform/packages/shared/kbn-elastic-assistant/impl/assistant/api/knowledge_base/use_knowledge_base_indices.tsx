@@ -10,7 +10,7 @@ import { useQuery } from '@tanstack/react-query';
 import type { HttpSetup, IHttpFetchError, ResponseErrorBody } from '@kbn/core-http-browser';
 import type { IToasts } from '@kbn/core-notifications-browser';
 import { i18n } from '@kbn/i18n';
-import { GetKnowledgeBaseIndicesResponse } from '@kbn/elastic-assistant-common';
+import type { GetKnowledgeBaseIndicesResponse } from '@kbn/elastic-assistant-common';
 import { getKnowledgeBaseIndices } from './api';
 
 const KNOWLEDGE_BASE_INDICES_QUERY_KEY = ['elastic-assistant', 'knowledge-base-indices'];

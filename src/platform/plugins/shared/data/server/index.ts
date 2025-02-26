@@ -7,8 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { PluginConfigDescriptor, PluginInitializerContext } from '@kbn/core/server';
-import { ConfigSchema, configSchema } from './config';
+import type { PluginConfigDescriptor, PluginInitializerContext } from '@kbn/core/server';
+import type { ConfigSchema } from './config';
+import { configSchema } from './config';
 import type { DataServerPlugin, DataPluginSetup, DataPluginStart } from './plugin';
 
 export { getEsQueryConfig, DEFAULT_QUERY_LANGUAGE } from '../common';
@@ -19,7 +20,17 @@ export { getRequestAbortedSignal } from './lib';
  * Exporters (CSV)
  */
 
-import { datatableToCSV, CSV_MIME_TYPE } from '../common';
+import {
+  datatableToCSV,
+  CSV_MIME_TYPE,
+  // aggs
+  CidrMask,
+  dateHistogramInterval,
+  IpAddress,
+  parseInterval,
+  // tabify
+  calcAutoIntervalLessThan,
+} from '../common';
 export const exporters = {
   datatableToCSV,
   CSV_MIME_TYPE,
@@ -44,15 +55,6 @@ export {
  * Search
  */
 
-import {
-  // aggs
-  CidrMask,
-  dateHistogramInterval,
-  IpAddress,
-  parseInterval,
-  // tabify
-  calcAutoIntervalLessThan,
-} from '../common';
 import { configDeprecationProvider } from './config_deprecations';
 
 export type { ParsedInterval } from '../common';

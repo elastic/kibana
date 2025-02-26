@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { ShortDate, EuiSelectableProps } from '@elastic/eui';
 import {
   EuiButton,
   EuiFlexGroup,
@@ -17,7 +18,6 @@ import {
   EuiPopoverFooter,
   EuiButtonIcon,
   EuiConfirmModal,
-  ShortDate,
   EuiPagination,
   EuiBadge,
   EuiToolTip,
@@ -25,11 +25,11 @@ import {
   EuiHorizontalRule,
   EuiProgress,
   PrettyDuration,
-  EuiSelectableProps,
 } from '@elastic/eui';
-import { EuiContextMenuClass } from '@elastic/eui/src/components/context_menu/context_menu';
+import type { EuiContextMenuClass } from '@elastic/eui/src/components/context_menu/context_menu';
 import { i18n } from '@kbn/i18n';
-import React, { useCallback, useState, useRef, useEffect, useMemo, RefObject } from 'react';
+import type { RefObject } from 'react';
+import React, { useCallback, useState, useRef, useEffect, useMemo } from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { SavedQuery, SavedQueryService } from '@kbn/data-plugin/public';

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
+import type { CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
 import type { Logger } from '@kbn/logging';
 import { DataStreamsStatsService } from '@kbn/dataset-quality-plugin/public';
 import { dynamic } from '@kbn/shared-ux-utility';
@@ -18,7 +18,7 @@ import type {
   StreamsAppStartDependencies,
   StreamsApplicationProps,
 } from './types';
-import { StreamsAppServices } from './services/types';
+import type { StreamsAppServices } from './services/types';
 
 const StreamsApplication = dynamic(() =>
   import('./application').then((mod) => ({ default: mod.StreamsApplication }))

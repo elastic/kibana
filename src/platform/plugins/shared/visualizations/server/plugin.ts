@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { PluginSetup as DataPluginSetup } from '@kbn/data-plugin/server';
+import type { PluginSetup as DataPluginSetup } from '@kbn/data-plugin/server';
 import type {
   PluginInitializerContext,
   CoreSetup,
@@ -16,7 +16,7 @@ import type {
   Logger,
 } from '@kbn/core/server';
 import type { EmbeddableSetup } from '@kbn/embeddable-plugin/server';
-import { ContentManagementServerSetup } from '@kbn/content-management-plugin/server';
+import type { ContentManagementServerSetup } from '@kbn/content-management-plugin/server';
 import { capabilitiesProvider } from './capabilities_provider';
 import { VisualizationsStorage } from './content_management';
 

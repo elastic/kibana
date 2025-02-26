@@ -5,6 +5,6 @@
  * 2.0.
  */
 import type { TypeOf } from '@kbn/config-schema';
-import { disableRuleParamsSchema } from '../schemas';
+import type { disableRuleParamsSchema } from '../schemas';
 
 export type DisableRuleParams = TypeOf<typeof disableRuleParamsSchema>;

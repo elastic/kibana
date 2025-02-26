@@ -6,11 +6,11 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { TagWithRelations } from '../../../common/types';
+import type { TagWithRelations } from '../../../common/types';
 import { getEditModalOpener } from '../../components/edition_modal';
-import { ITagInternalClient } from '../../services/tags';
-import { StartServices } from '../../types';
-import { TagAction } from './types';
+import type { ITagInternalClient } from '../../services/tags';
+import type { StartServices } from '../../types';
+import type { TagAction } from './types';
 
 interface GetEditActionOptions extends StartServices {
   tagClient: ITagInternalClient;

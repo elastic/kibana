@@ -6,8 +6,8 @@
  */
 
 import type { HttpStart } from '@kbn/core-http-browser';
-import { DataViewField } from '@kbn/data-views-plugin/common';
-import { ActionVariable } from '@kbn/alerting-plugin/common';
+import type { DataViewField } from '@kbn/data-views-plugin/common';
+import type { ActionVariable } from '@kbn/alerting-plugin/common';
 import { useEffect, useMemo, useState } from 'react';
 import { EcsFlat } from '@elastic/ecs';
 

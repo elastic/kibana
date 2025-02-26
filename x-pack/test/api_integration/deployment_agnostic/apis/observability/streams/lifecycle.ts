@@ -7,15 +7,13 @@
 
 import rawExpect from 'expect';
 import expect from '@kbn/expect';
-import {
+import type {
   IngestStreamEffectiveLifecycle,
   IngestStreamLifecycle,
   IngestStreamUpsertRequest,
   WiredStreamGetResponse,
-  asIngestStreamGetResponse,
-  isDslLifecycle,
-  isIlmLifecycle,
 } from '@kbn/streams-schema';
+import { asIngestStreamGetResponse, isDslLifecycle, isIlmLifecycle } from '@kbn/streams-schema';
 import {
   disableStreams,
   enableStreams,
@@ -23,11 +21,9 @@ import {
   getStream,
   getIlmStats,
 } from './helpers/requests';
-import { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
-import {
-  StreamsSupertestRepositoryClient,
-  createStreamsRepositoryAdminClient,
-} from './helpers/repository_client';
+import type { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
+import type { StreamsSupertestRepositoryClient } from './helpers/repository_client';
+import { createStreamsRepositoryAdminClient } from './helpers/repository_client';
 
 export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   const config = getService('config');

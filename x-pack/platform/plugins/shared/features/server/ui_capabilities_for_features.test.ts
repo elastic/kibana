@@ -7,7 +7,8 @@
 
 import { uiCapabilitiesForFeatures } from './ui_capabilities_for_features';
 import { KibanaFeature } from '.';
-import { SubFeaturePrivilegeGroupConfig, ElasticsearchFeature } from '../common';
+import type { SubFeaturePrivilegeGroupConfig } from '../common';
+import { ElasticsearchFeature } from '../common';
 
 function createKibanaFeaturePrivilege(capabilities: string[] = []) {
   return {

@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { UnparsedEsqlResponse, createTracedEsClient } from '@kbn/traced-es-client';
+import type { UnparsedEsqlResponse } from '@kbn/traced-es-client';
+import { createTracedEsClient } from '@kbn/traced-es-client';
 import { z } from '@kbn/zod';
 import { isNumber } from 'lodash';
 import { createServerRoute } from '../create_server_route';

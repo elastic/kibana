@@ -11,7 +11,7 @@ import React, { useCallback, useState } from 'react';
 import { htmlIdGenerator, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { TabsBar } from '../tabs_bar';
 import { getTabAttributes } from '../../utils/get_tab_attributes';
-import { TabItem } from '../../types';
+import type { TabItem } from '../../types';
 
 export interface TabbedContentProps {
   initialItems: TabItem[];

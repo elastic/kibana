@@ -8,11 +8,11 @@
  */
 
 import type { SavedObjectReference } from '@kbn/core-saved-objects-server';
-import { SerializedSearchSourceFields } from '@kbn/data-plugin/common';
+import type { SerializedSearchSourceFields } from '@kbn/data-plugin/common';
 import { pick } from 'lodash';
 import type { SavedSearch, SavedSearchAttributes } from '..';
 import { fromSavedSearchAttributes as fromSavedSearchAttributesCommon } from '..';
-import { SerializableSavedSearch } from '../types';
+import type { SerializableSavedSearch } from '../types';
 
 export { getSavedSearchFullPathUrl, getSavedSearchUrl } from '..';
 

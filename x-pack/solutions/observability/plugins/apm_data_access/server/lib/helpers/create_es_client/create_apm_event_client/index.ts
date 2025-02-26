@@ -13,8 +13,8 @@ import type {
   MsearchMultisearchHeader,
   TermsEnumRequest,
   TermsEnumResponse,
+  SearchRequest as ESSearchRequest,
 } from '@elastic/elasticsearch/lib/api/types';
-import type { SearchRequest as ESSearchRequest } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient, KibanaRequest } from '@kbn/core/server';
 import type { InferSearchResponseOf } from '@kbn/es-types';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';

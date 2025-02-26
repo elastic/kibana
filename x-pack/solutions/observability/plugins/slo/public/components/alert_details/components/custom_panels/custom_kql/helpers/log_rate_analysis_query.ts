@@ -4,10 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { kqlWithFiltersSchema } from '@kbn/slo-schema';
-import { Filter, FilterStateStore } from '@kbn/es-query';
+import { kqlWithFiltersSchema, ALL_VALUE } from '@kbn/slo-schema';
+import type { Filter } from '@kbn/es-query';
+import { FilterStateStore } from '@kbn/es-query';
 import { buildEsQuery } from '@kbn/observability-plugin/public';
-import { KQLCustomIndicator, GroupingsSchema, ALL_VALUE } from '@kbn/slo-schema';
+import type { KQLCustomIndicator, GroupingsSchema } from '@kbn/slo-schema';
 import { isEmpty } from 'lodash';
 
 export const getESQueryForLogRateAnalysis = (

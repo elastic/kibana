@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { SavedObject } from '@kbn/core/server';
+import type { SavedObject } from '@kbn/core/server';
 import { RULE_SAVED_OBJECT_TYPE } from '.';
-import { RawRule } from '../types';
+import type { RawRule } from '../types';
 import { getImportWarnings } from './get_import_warnings';
 
 describe('getImportWarnings', () => {

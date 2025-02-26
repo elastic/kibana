@@ -20,15 +20,17 @@ import {
   EuiFlexItem,
   EuiStat,
 } from '@elastic/eui';
-import { withRouter, RouteComponentProps } from 'react-router-dom';
-import { CoreStart } from '@kbn/core/public';
+import type { RouteComponentProps } from 'react-router-dom';
+import { withRouter } from 'react-router-dom';
+import type { CoreStart } from '@kbn/core/public';
 import { isEmpty } from 'lodash';
 import {
   BASE_ALERTING_API_PATH,
   INTERNAL_BASE_ALERTING_API_PATH,
 } from '@kbn/alerting-plugin/common';
-import { ALERTING_EXAMPLE_APP_ID, AlwaysFiringParams } from '../../common/constants';
-import { Rule, RuleTaskState } from '../../common/types';
+import type { AlwaysFiringParams } from '../../common/constants';
+import { ALERTING_EXAMPLE_APP_ID } from '../../common/constants';
+import type { Rule, RuleTaskState } from '../../common/types';
 
 type Props = RouteComponentProps & {
   http: CoreStart['http'];

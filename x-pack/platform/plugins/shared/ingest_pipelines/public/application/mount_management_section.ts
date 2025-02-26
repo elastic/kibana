@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { CoreSetup } from '@kbn/core/public';
-import { ManagementAppMountParams } from '@kbn/management-plugin/public';
+import type { CoreSetup } from '@kbn/core/public';
+import type { ManagementAppMountParams } from '@kbn/management-plugin/public';
 
 import type { StartDependencies, ILicense, Config } from '../types';
 import {

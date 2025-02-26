@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { GridLayoutData } from '@kbn/grid-layout';
-import { MockedDashboardPanelMap, MockedDashboardRowMap } from './types';
+import type { GridLayoutData } from '@kbn/grid-layout';
+import type { MockedDashboardPanelMap, MockedDashboardRowMap } from './types';
 
 export const gridLayoutToDashboardPanelMap = (
   panelState: MockedDashboardPanelMap,

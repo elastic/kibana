@@ -8,7 +8,7 @@
  */
 
 import { METRIC_TYPES } from '@kbn/data-plugin/public';
-import { CollapseFunction, Column } from '@kbn/visualizations-plugin/common';
+import type { CollapseFunction, Column } from '@kbn/visualizations-plugin/common';
 import {
   getConvertToLensModule,
   getVisSchemas,
@@ -17,7 +17,7 @@ import {
 import { excludeMetaFromColumn } from '@kbn/visualizations-plugin/common/convert_to_lens';
 import { getDataViewsStart } from '../services';
 import { getSeriesParams } from '../utils/get_series_params';
-import { ConvertXYToLensVisualization } from './types';
+import type { ConvertXYToLensVisualization } from './types';
 import { getConfiguration } from './configurations';
 
 export interface Layer {

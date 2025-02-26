@@ -7,14 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Observable } from 'rxjs';
+import type { Observable } from 'rxjs';
 import type {
   IClusterClient,
   ICustomClusterClient,
   ElasticsearchClientConfig,
   UnauthorizedErrorHandler,
 } from './client';
-import { IElasticsearchConfig } from './elasticsearch_config';
+import type { IElasticsearchConfig } from './elasticsearch_config';
 
 /**
  * @public

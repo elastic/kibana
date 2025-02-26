@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { ToolingLog } from '@kbn/tooling-log';
-import { Agent } from 'supertest';
+import type { ToolingLog } from '@kbn/tooling-log';
+import type { Agent } from 'supertest';
 
 export async function deleteActionConnector({
   supertest,

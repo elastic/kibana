@@ -4,16 +4,16 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { Readable } from 'stream';
-import { AxiosResponse } from 'axios';
+import type { Readable } from 'stream';
+import type { AxiosResponse } from 'axios';
 import { v4 as uuidv4 } from 'uuid';
 import datemath from '@kbn/datemath';
-import { ToolingLog } from '@kbn/tooling-log';
-import { CreateInvestigationResponse } from '@kbn/investigation-shared';
+import type { ToolingLog } from '@kbn/tooling-log';
+import type { CreateInvestigationResponse } from '@kbn/investigation-shared';
 import type { EcsFieldsResponse } from '@kbn/rule-registry-plugin/common';
 import { httpResponseIntoObservable } from '@kbn/sse-utils-client';
 import { defer, lastValueFrom, toArray } from 'rxjs';
-import { KibanaClient } from '@kbn/observability-ai-assistant-app-plugin/scripts/evaluation/kibana_client';
+import type { KibanaClient } from '@kbn/observability-ai-assistant-app-plugin/scripts/evaluation/kibana_client';
 import type { RootCauseAnalysisEvent } from '@kbn/observability-ai-server/root_cause_analysis';
 import { getRCAContext } from '../../common/rca/llm_context';
 

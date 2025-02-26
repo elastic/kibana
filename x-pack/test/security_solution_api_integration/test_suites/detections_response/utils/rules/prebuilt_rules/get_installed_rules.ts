@@ -6,7 +6,7 @@
  */
 import type SuperTest from 'supertest';
 import { DETECTION_ENGINE_RULES_URL_FIND } from '@kbn/security-solution-plugin/common/constants';
-import { FindRulesResponse } from '@kbn/security-solution-plugin/common/api/detection_engine';
+import type { FindRulesResponse } from '@kbn/security-solution-plugin/common/api/detection_engine';
 
 /**
  * Get all installed security rules (both prebuilt + custom)

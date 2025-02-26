@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Moment } from 'moment';
+import type { Moment } from 'moment';
 import { ISO_WEEKDAYS_TO_RRULE } from '../constants';
 import { getWeekdayInfo } from './get_weekday_info';
 

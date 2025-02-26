@@ -8,7 +8,7 @@
 import { EuiText, EuiLoadingSpinner, EuiIconTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { AsyncSample } from '../../../hooks/queries/use_async_sample';
+import type { AsyncSample } from '../../../hooks/queries/use_async_sample';
 
 const matchText = i18n.translate('xpack.streams.streamRouting.previewMatchesText', {
   defaultMessage: 'Approximate match rate',

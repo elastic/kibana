@@ -16,9 +16,11 @@ import React, {
 import useMountedState from 'react-use/lib/useMountedState';
 
 import type { DataView } from '@kbn/data-plugin/common';
-import type { FieldStatsServices } from '@kbn/unified-field-list/src/components/field_stats';
+import type {
+  FieldStatsServices,
+  FieldStatsProps,
+} from '@kbn/unified-field-list/src/components/field_stats';
 import type { TimeRange as TimeRangeMs } from '@kbn/ml-date-picker';
-import type { FieldStatsProps } from '@kbn/unified-field-list/src/components/field_stats';
 import { stringHash } from '@kbn/ml-string-hash';
 
 import { getRangeFilter } from './populated_fields/get_range_filter';

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
+import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 import { Subject } from 'rxjs';
 
 export const clientMock = () => {

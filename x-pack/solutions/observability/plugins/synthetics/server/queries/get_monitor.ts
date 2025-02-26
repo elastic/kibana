@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { SavedObject } from '@kbn/core/server';
-import { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
+import type { SavedObject } from '@kbn/core/server';
+import type { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
 import { syntheticsMonitorType } from '../../common/types/saved_objects';
-import {
+import type {
   SyntheticsMonitorWithSecretsAttributes,
   SyntheticsMonitor,
 } from '../../common/runtime_types';

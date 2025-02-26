@@ -7,13 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { CoreSetup, CoreStart, Plugin } from '@kbn/core/server';
+import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/server';
 import type { PluginSetup as DataPluginSetup } from '@kbn/data-plugin/server';
 import type { EmbeddableSetup } from '@kbn/embeddable-plugin/server';
 import type { HomeServerPluginSetup } from '@kbn/home-plugin/server';
 import { setStateToKbnUrl } from '@kbn/kibana-utils-plugin/common';
 import type { SharePluginSetup } from '@kbn/share-plugin/server';
-import { PluginInitializerContext } from '@kbn/core/server';
 import type { DiscoverServerPluginStart, DiscoverServerPluginStartDeps } from '.';
 import { DiscoverAppLocatorDefinition } from '../common';
 import { capabilitiesProvider } from './capabilities_provider';

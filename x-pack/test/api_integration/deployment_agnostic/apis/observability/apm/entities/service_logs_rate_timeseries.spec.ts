@@ -6,10 +6,10 @@
  */
 import expect from '@kbn/expect';
 import { log, timerange } from '@kbn/apm-synthtrace-client';
-import { RecursivePartial } from '@kbn/apm-plugin/typings/common';
-import { APIClientRequestParamsOf } from '@kbn/apm-plugin/public/services/rest/create_call_apm_api';
+import type { RecursivePartial } from '@kbn/apm-plugin/typings/common';
+import type { APIClientRequestParamsOf } from '@kbn/apm-plugin/public/services/rest/create_call_apm_api';
 import { first, last } from 'lodash';
-import { LogsSynthtraceEsClient } from '@kbn/apm-synthtrace';
+import type { LogsSynthtraceEsClient } from '@kbn/apm-synthtrace';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provider_context';
 
 export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderContext) {

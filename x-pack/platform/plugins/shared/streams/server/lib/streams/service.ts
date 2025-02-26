@@ -6,11 +6,12 @@
  */
 
 import type { CoreSetup, KibanaRequest, Logger } from '@kbn/core/server';
-import { IStorageClient, StorageIndexAdapter, StorageSettings, types } from '@kbn/storage-adapter';
-import { StreamDefinition } from '@kbn/streams-schema';
+import type { IStorageClient, StorageSettings } from '@kbn/storage-adapter';
+import { StorageIndexAdapter, types } from '@kbn/storage-adapter';
+import type { StreamDefinition } from '@kbn/streams-schema';
 import type { StreamsPluginStartDependencies } from '../../types';
 import { StreamsClient } from './client';
-import { AssetClient } from './assets/asset_client';
+import type { AssetClient } from './assets/asset_client';
 
 export const streamsStorageSettings = {
   name: '.kibana_streams',

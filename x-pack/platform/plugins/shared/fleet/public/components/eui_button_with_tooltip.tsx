@@ -7,8 +7,7 @@
 
 import React from 'react';
 import type { EuiToolTipProps } from '@elastic/eui';
-import { EuiToolTip } from '@elastic/eui';
-import { EuiButton } from '@elastic/eui';
+import { EuiToolTip, EuiButton } from '@elastic/eui';
 
 type EuiButtonPropsFull = Parameters<typeof EuiButton>[0];
 

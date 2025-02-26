@@ -5,28 +5,17 @@
  * 2.0.
  */
 
-import {
-  concat,
-  from,
-  last,
-  mergeMap,
-  Observable,
-  OperatorFunction,
-  shareReplay,
-  withLatestFrom,
-  filter,
-} from 'rxjs';
-import {
-  type ChatCompletionChunkEvent,
+import type { Observable, OperatorFunction } from 'rxjs';
+import { concat, from, last, mergeMap, shareReplay, withLatestFrom, filter } from 'rxjs';
+import { StreamingChatResponseEventType } from '../conversation_complete';
+import type {
   ChatEvent,
   MessageAddEvent,
-  StreamingChatResponseEventType,
   StreamingChatResponseEvent,
+  ChatCompletionChunkEvent,
 } from '../conversation_complete';
-import {
-  concatenateChatCompletionChunks,
-  ConcatenatedMessage,
-} from './concatenate_chat_completion_chunks';
+import type { ConcatenatedMessage } from './concatenate_chat_completion_chunks';
+import { concatenateChatCompletionChunks } from './concatenate_chat_completion_chunks';
 
 type ConcatenateMessageCallback = (
   concatenatedMessage: ConcatenatedMessage

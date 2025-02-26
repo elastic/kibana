@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ActionDefinition, Action } from './action';
+import type { ActionDefinition, Action } from './action';
 
 export function createAction<Context extends object = object>(
   action: ActionDefinition<Context>

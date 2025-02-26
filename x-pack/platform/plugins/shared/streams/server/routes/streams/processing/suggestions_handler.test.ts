@@ -7,9 +7,9 @@
 
 import { handleProcessingSuggestion, extractAndGroupPatterns } from './suggestions_handler';
 import { simulateProcessing } from './simulation_handler';
-import { InferenceClient } from '@kbn/inference-plugin/server';
-import { ScopedClusterClient } from '@kbn/core-elasticsearch-client-server-internal';
-import { StreamsClient } from '../../../lib/streams/client';
+import type { InferenceClient } from '@kbn/inference-plugin/server';
+import type { ScopedClusterClient } from '@kbn/core-elasticsearch-client-server-internal';
+import type { StreamsClient } from '../../../lib/streams/client';
 
 jest.mock('./simulation_handler', () => ({
   simulateProcessing: jest.fn((params) =>

@@ -8,7 +8,7 @@
  */
 
 import { getLensAttributesFromSuggestion } from './get_lens_attributes';
-import { AggregateQuery } from '@kbn/es-query';
+import type { AggregateQuery } from '@kbn/es-query';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { currentSuggestionMock } from '../__mocks__/suggestions_mock';
 

@@ -5,10 +5,8 @@
  * 2.0.
  */
 
-import type { CoreStart, PluginInitializerContext } from '@kbn/core/public';
-import type { Plugin } from '@kbn/core/public';
+import type { CoreStart, PluginInitializerContext, Plugin, CoreSetup } from '@kbn/core/public';
 
-import type { CoreSetup } from '@kbn/core/public';
 import { dynamic } from '@kbn/shared-ux-utility';
 import { getComponents } from './api';
 import { getMaxBytesFormatted } from './application/common/util/get_max_bytes';

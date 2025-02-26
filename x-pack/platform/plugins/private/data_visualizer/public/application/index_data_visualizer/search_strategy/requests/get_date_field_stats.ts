@@ -8,8 +8,7 @@
 import type { estypes } from '@elastic/elasticsearch';
 import { get } from 'lodash';
 import type { Observable } from 'rxjs';
-import { of } from 'rxjs';
-import { catchError, map } from 'rxjs';
+import { of, catchError, map } from 'rxjs';
 import type {
   IKibanaSearchResponse,
   IKibanaSearchRequest,
@@ -22,8 +21,10 @@ import { buildAggregationWithSamplingOption } from './build_random_sampler_agg';
 import type {
   FieldStatsCommonRequestParams,
   FieldStatsError,
+  Field,
+  DateFieldStats,
+  Aggs,
 } from '../../../../../common/types/field_stats';
-import type { Field, DateFieldStats, Aggs } from '../../../../../common/types/field_stats';
 import { isIKibanaSearchResponse } from '../../../../../common/types/field_stats';
 
 export const getDateFieldsStatsRequest = (

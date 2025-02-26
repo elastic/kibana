@@ -7,9 +7,9 @@
 
 import moment from 'moment';
 import { v4 as uuidv4 } from 'uuid';
-import { Client } from '@elastic/elasticsearch';
-import { MappingProperty, PropertyName } from '@elastic/elasticsearch/lib/api/types';
-import { EntitySourceDefinition } from '@kbn/entityManager-plugin/server/lib/v2/types';
+import type { Client } from '@elastic/elasticsearch';
+import type { MappingProperty, PropertyName } from '@elastic/elasticsearch/lib/api/types';
+import type { EntitySourceDefinition } from '@kbn/entityManager-plugin/server/lib/v2/types';
 
 export async function createIndexWithDocuments(
   client: Client,

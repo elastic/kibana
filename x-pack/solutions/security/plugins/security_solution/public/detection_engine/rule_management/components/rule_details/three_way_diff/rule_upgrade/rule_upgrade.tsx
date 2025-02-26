@@ -7,11 +7,11 @@
 
 import React, { memo } from 'react';
 import { EuiSpacer } from '@elastic/eui';
-import type { FieldsUpgradeState } from '../../../../model/prebuilt_rule_upgrade';
-import {
-  FieldUpgradeStateEnum,
-  type RuleUpgradeState,
-  type SetRuleFieldResolvedValueFn,
+import { FieldUpgradeStateEnum } from '../../../../model/prebuilt_rule_upgrade';
+import type {
+  FieldsUpgradeState,
+  RuleUpgradeState,
+  SetRuleFieldResolvedValueFn,
 } from '../../../../model/prebuilt_rule_upgrade';
 import type { UpgradeableDiffableFields } from '../../../../model/prebuilt_rule_upgrade/fields';
 import { RuleUpgradeInfoBar } from './rule_upgrade_info_bar';

@@ -14,19 +14,22 @@ import {
   useFormData,
 } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { HiddenField } from '@kbn/es-ui-shared-plugin/static/forms/components';
-import type { ActionConnectorFieldsProps } from '@kbn/triggers-actions-ui-plugin/public';
+import type {
+  ActionConnectorFieldsProps,
+  ConnectorFormSchema,
+} from '@kbn/triggers-actions-ui-plugin/public';
 import { updateActionConnector, useKibana } from '@kbn/triggers-actions-ui-plugin/public';
-import type { ConnectorFormSchema } from '@kbn/triggers-actions-ui-plugin/public';
 import { snExternalServiceConfig } from '../../../../common/servicenow_config';
 import { DeprecatedCallout } from './deprecated_callout';
 import { useGetAppInfo } from './use_get_app_info';
 import { ApplicationRequiredCallout } from './application_required_callout';
 import { isRESTApiError } from './helpers';
 import { InstallationCallout } from './installation_callout';
-import { UpdateConnector, UpdateConnectorFormSchema } from './update_connector';
+import type { UpdateConnectorFormSchema } from './update_connector';
+import { UpdateConnector } from './update_connector';
 import { Credentials } from './credentials';
 import * as i18n from './translations';
-import { ServiceNowActionConnector, ServiceNowConfig, ServiceNowSecrets } from './types';
+import type { ServiceNowActionConnector, ServiceNowConfig, ServiceNowSecrets } from './types';
 
 // eslint-disable-next-line import/no-default-export
 export { ServiceNowConnectorFields as default };

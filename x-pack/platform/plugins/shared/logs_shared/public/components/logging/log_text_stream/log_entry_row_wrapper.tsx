@@ -7,7 +7,7 @@
 
 import styled from '@emotion/styled';
 import { withAttrs } from '../../../utils/theme_utils/with_attrs';
-import { TextScale } from '../../../../common/log_text_scale';
+import type { TextScale } from '../../../../common/log_text_scale';
 import { highlightedContentStyle, hoveredContentStyle, useMonospaceTextStyle } from './text_styles';
 
 export const LogEntryRowWrapper = withAttrs(

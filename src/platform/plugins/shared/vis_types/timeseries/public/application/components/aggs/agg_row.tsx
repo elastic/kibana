@@ -15,7 +15,7 @@ import { AddDeleteButtons } from '../add_delete_buttons';
 import { SeriesDragHandler } from '../series_drag_handler';
 import { tsvbEditorRowStyles, aggRowChildrenStyles } from '../../styles/common.styles';
 import type { Metric } from '../../../../common/types';
-import { DragHandleProps } from '../../../types';
+import type { DragHandleProps } from '../../../types';
 
 interface AggRowProps {
   disableDelete: boolean;

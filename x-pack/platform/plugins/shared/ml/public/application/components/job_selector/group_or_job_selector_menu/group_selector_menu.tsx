@@ -6,10 +6,9 @@
  */
 
 import type { EuiContextMenuPanelDescriptor } from '@elastic/eui';
-import { EuiContextMenu, EuiNotificationBadge, EuiPopover } from '@elastic/eui';
+import { EuiContextMenu, EuiNotificationBadge, EuiPopover, EuiButton } from '@elastic/eui';
 
 import React, { useMemo, useState } from 'react';
-import { EuiButton } from '@elastic/eui';
 import { useUrlState } from '@kbn/ml-url-state';
 import { i18n } from '@kbn/i18n';
 import type { MlPages } from '../../../../locator';

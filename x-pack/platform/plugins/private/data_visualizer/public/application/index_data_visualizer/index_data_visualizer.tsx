@@ -4,12 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { pick } from 'lodash';
+import { pick, isEqual } from 'lodash';
 import type { FC } from 'react';
 import React, { useCallback, useEffect, useState, useMemo } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
 import { parse, stringify } from 'query-string';
-import { isEqual } from 'lodash';
 import { encode } from '@kbn/rison';
 import { i18n } from '@kbn/i18n';
 import { Storage } from '@kbn/kibana-utils-plugin/public';

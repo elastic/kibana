@@ -8,7 +8,7 @@
 import { max, memoize, omit } from 'lodash';
 import type { Logger } from '@kbn/core/server';
 import type { ObjectType } from '@kbn/config-schema';
-import { TaskTypeDictionary } from './task_type_dictionary';
+import type { TaskTypeDictionary } from './task_type_dictionary';
 import type { TaskInstance, ConcreteTaskInstance, TaskDefinition } from './task';
 import { isInterval, parseIntervalAsMillisecond } from './lib/intervals';
 import { isErr, tryAsResult } from './lib/result_type';

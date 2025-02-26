@@ -6,16 +6,16 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import React, { FunctionComponent, useMemo } from 'react';
+import type { FunctionComponent } from 'react';
+import React, { useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiSpacer, EuiTextColor } from '@elastic/eui';
 
-import { NumericField } from '../../../../../../shared_imports';
+import { NumericField, useKibana } from '../../../../../../shared_imports';
 import { useEditPolicyContext } from '../../../edit_policy_context';
 
 import { UseField } from '../../../form';
 import { LearnMoreLink, DescribedFormRow } from '../..';
-import { useKibana } from '../../../../../../shared_imports';
 
 interface Props {
   phase: 'hot' | 'warm' | 'cold';

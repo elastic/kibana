@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { PluginState } from '../../common';
+import type { PluginState } from '../../common';
 
 // regex matches everything between an opening and a closing curly braces
 // and the braces themselves

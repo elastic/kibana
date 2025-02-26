@@ -6,10 +6,9 @@
  */
 
 import type { Observable } from 'rxjs';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, distinctUntilChanged } from 'rxjs';
 import { isEqual } from 'lodash';
 import type { TooltipValue, TooltipValueFormatter } from '@elastic/charts';
-import { distinctUntilChanged } from 'rxjs';
 
 export interface ChartTooltipValue extends TooltipValue {
   skipHeader?: boolean;

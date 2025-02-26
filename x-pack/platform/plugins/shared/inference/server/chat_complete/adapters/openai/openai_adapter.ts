@@ -6,7 +6,8 @@
  */
 
 import { from, identity, switchMap, throwError } from 'rxjs';
-import { isReadable, Readable } from 'stream';
+import type { Readable } from 'stream';
+import { isReadable } from 'stream';
 import { createInferenceInternalError } from '@kbn/inference-common';
 import { eventSourceStreamIntoObservable } from '../../../util/event_source_stream_into_observable';
 import type { InferenceConnectorAdapter } from '../../types';

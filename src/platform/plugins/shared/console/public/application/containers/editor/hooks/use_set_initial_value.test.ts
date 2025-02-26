@@ -9,7 +9,7 @@
 
 import { renderHook, act } from '@testing-library/react';
 import { useSetInitialValue } from './use_set_initial_value';
-import { IToasts } from '@kbn/core-notifications-browser';
+import type { IToasts } from '@kbn/core-notifications-browser';
 import { decompressFromEncodedURIComponent } from 'lz-string';
 import { DEFAULT_INPUT_VALUE } from '../../../../../common/constants';
 

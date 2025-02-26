@@ -8,11 +8,10 @@
  */
 
 import React from 'react';
-import { EuiCallOut } from '@elastic/eui';
+import { EuiCallOut, EuiLink } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiLink } from '@elastic/eui';
-import { DocLinksStart } from '@kbn/core/public';
+import type { DocLinksStart } from '@kbn/core/public';
 
 interface NotFoundErrors {
   type: string;

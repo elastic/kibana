@@ -6,8 +6,11 @@
  */
 
 import { createAction } from '@reduxjs/toolkit';
-import { NewLocation } from '../../components/settings/private_locations/add_location_flyout';
-import { PrivateLocation, SyntheticsPrivateLocations } from '../../../../../common/runtime_types';
+import type { NewLocation } from '../../components/settings/private_locations/add_location_flyout';
+import type {
+  PrivateLocation,
+  SyntheticsPrivateLocations,
+} from '../../../../../common/runtime_types';
 import { createAsyncAction } from '../utils/actions';
 
 export const getPrivateLocationsAction = createAsyncAction<void, SyntheticsPrivateLocations>(

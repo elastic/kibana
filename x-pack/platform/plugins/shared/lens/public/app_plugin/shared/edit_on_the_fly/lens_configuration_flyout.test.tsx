@@ -5,17 +5,21 @@
  * 2.0.
  */
 import React from 'react';
-import { renderWithReduxStore } from '../../../mocks';
+import {
+  renderWithReduxStore,
+  mockVisualizationMap,
+  mockDatasourceMap,
+  mockDataPlugin,
+} from '../../../mocks';
 import { screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import type { Query, AggregateQuery } from '@kbn/es-query';
 import { coreMock } from '@kbn/core/public/mocks';
-import { mockVisualizationMap, mockDatasourceMap, mockDataPlugin } from '../../../mocks';
 import type { LensPluginStartDependencies } from '../../../plugin';
 import { createMockStartDependencies } from '../../../editor_frame_service/mocks';
 import { LensEditConfigurationFlyout } from './lens_configuration_flyout';
 import type { EditConfigPanelProps } from './types';
-import { TypedLensSerializedState } from '../../../react_embeddable/types';
+import type { TypedLensSerializedState } from '../../../react_embeddable/types';
 
 jest.mock('@kbn/esql-utils', () => {
   return {

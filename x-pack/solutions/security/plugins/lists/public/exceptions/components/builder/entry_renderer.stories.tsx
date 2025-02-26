@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { Story } from '@storybook/react';
+import type { Story } from '@storybook/react';
 import { action } from '@storybook/addon-actions';
 import React from 'react';
-import { HttpStart } from '@kbn/core/public';
+import type { HttpStart } from '@kbn/core/public';
 import {
   ListOperatorEnum as OperatorEnum,
   ListOperatorTypeEnum as OperatorTypeEnum,
@@ -17,7 +17,8 @@ import type { AutocompleteStart } from '@kbn/unified-search-plugin/public';
 import { fields } from '@kbn/data-plugin/common/mocks';
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 
-import { BuilderEntryItem, EntryItemProps } from './entry_renderer';
+import type { EntryItemProps } from './entry_renderer';
+import { BuilderEntryItem } from './entry_renderer';
 
 const mockAutocompleteService = {
   getValueSuggestions: () =>

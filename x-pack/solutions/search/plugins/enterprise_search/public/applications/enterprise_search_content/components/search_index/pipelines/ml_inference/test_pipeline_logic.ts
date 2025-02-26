@@ -5,32 +5,35 @@
  * 2.0.
  */
 
-import { kea, MakeLogicType } from 'kea';
+import type { MakeLogicType } from 'kea';
+import { kea } from 'kea';
 
-import { IngestSimulateResponse } from '@elastic/elasticsearch/lib/api/types';
+import type { IngestSimulateResponse } from '@elastic/elasticsearch/lib/api/types';
 
-import { Status, HttpError } from '../../../../../../../common/types/api';
-import { MlInferencePipeline } from '../../../../../../../common/types/pipelines';
+import type { HttpError } from '../../../../../../../common/types/api';
+import { Status } from '../../../../../../../common/types/api';
+import type { MlInferencePipeline } from '../../../../../../../common/types/pipelines';
 
-import { Actions } from '../../../../../shared/api_logic/create_api_logic';
+import type { Actions } from '../../../../../shared/api_logic/create_api_logic';
 import { getErrorsFromHttpResponse } from '../../../../../shared/flash_messages/handle_api_errors';
-import {
-  GetDocumentsApiLogic,
+import type {
   GetDocumentsArgs,
   GetDocumentsResponse,
 } from '../../../../api/documents/get_document_logic';
-import {
-  SimulateExistingMlInterfacePipelineApiLogic,
+import { GetDocumentsApiLogic } from '../../../../api/documents/get_document_logic';
+import type {
   SimulateExistingMlInterfacePipelineArgs,
   SimulateExistingMlInterfacePipelineResponse,
 } from '../../../../api/pipelines/simulate_existing_ml_inference_pipeline';
-import {
-  SimulateMlInterfacePipelineApiLogic,
+import { SimulateExistingMlInterfacePipelineApiLogic } from '../../../../api/pipelines/simulate_existing_ml_inference_pipeline';
+import type {
   SimulateMlInterfacePipelineArgs,
   SimulateMlInterfacePipelineResponse,
 } from '../../../../api/pipelines/simulate_ml_inference_pipeline_processors';
+import { SimulateMlInterfacePipelineApiLogic } from '../../../../api/pipelines/simulate_ml_inference_pipeline_processors';
 
-import { AddInferencePipelineModal, MLInferenceLogic } from './ml_inference_logic';
+import type { AddInferencePipelineModal } from './ml_inference_logic';
+import { MLInferenceLogic } from './ml_inference_logic';
 
 export interface TestPipelineActions {
   getDocumentApiError: Actions<GetDocumentsArgs, GetDocumentsResponse>['apiError'];

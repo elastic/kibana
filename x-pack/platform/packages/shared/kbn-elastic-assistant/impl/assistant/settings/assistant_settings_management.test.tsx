@@ -25,7 +25,7 @@ import {
   SYSTEM_PROMPTS_TAB,
 } from './const';
 import { mockSystemPrompts } from '../../mock/system_prompt';
-import { DataViewsContract } from '@kbn/data-views-plugin/public';
+import type { DataViewsContract } from '@kbn/data-views-plugin/public';
 
 const mockConversations = {
   [alertConvo.title]: alertConvo,

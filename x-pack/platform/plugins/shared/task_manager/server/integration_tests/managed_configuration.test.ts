@@ -6,14 +6,19 @@
  */
 
 import sinon from 'sinon';
-import { Client } from '@elastic/elasticsearch';
-import { elasticsearchServiceMock, savedObjectsRepositoryMock } from '@kbn/core/server/mocks';
-import { SavedObjectsErrorHelpers, Logger } from '@kbn/core/server';
+import type { Client } from '@elastic/elasticsearch';
+import {
+  elasticsearchServiceMock,
+  savedObjectsRepositoryMock,
+  coreMock,
+} from '@kbn/core/server/mocks';
+import type { Logger } from '@kbn/core/server';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
 import { ADJUST_THROUGHPUT_INTERVAL } from '../lib/create_managed_configuration';
-import { TaskManagerPlugin, TaskManagerStartContract } from '../plugin';
-import { coreMock } from '@kbn/core/server/mocks';
-import { TaskManagerConfig } from '../config';
+import type { TaskManagerStartContract } from '../plugin';
+import { TaskManagerPlugin } from '../plugin';
+import type { TaskManagerConfig } from '../config';
 import { BulkUpdateError } from '../lib/bulk_update_error';
 
 const mockTaskTypeRunFn = jest.fn();

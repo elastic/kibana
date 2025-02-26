@@ -43,8 +43,8 @@ import type {
   CommonDeploymentParams,
   AdaptiveAllocationsParams,
   StartAllocationParams,
+  TrainedModelsApiService,
 } from '../services/ml_api_service/trained_models';
-import { type TrainedModelsApiService } from '../services/ml_api_service/trained_models';
 import type { SavedObjectsApiService } from '../services/ml_api_service/saved_objects';
 
 interface ModelDownloadStatus {

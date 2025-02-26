@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
+import type React from 'react';
 
 jest.mock('@kbn/react-kibana-mount', () => {
   const original = jest.requireActual('@kbn/react-kibana-mount');
@@ -18,7 +18,7 @@ jest.mock('@kbn/react-kibana-mount', () => {
   };
 });
 
-import { CoreStart } from '@kbn/core/public';
+import type { CoreStart } from '@kbn/core/public';
 import { coreMock } from '@kbn/core/public/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { usageCollectionPluginMock } from '@kbn/usage-collection-plugin/public/mocks';
@@ -26,7 +26,7 @@ import { usageCollectionPluginMock } from '@kbn/usage-collection-plugin/public/m
 import { DataViewEditorLazy } from './components/data_view_editor_lazy';
 import { DataViewEditorPlugin } from './plugin';
 
-import { DataViewsServicePublic } from '@kbn/data-views-plugin/public';
+import type { DataViewsServicePublic } from '@kbn/data-views-plugin/public';
 
 const noop = () => {};
 

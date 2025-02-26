@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 import {
   createConnector,
   createAlert,
@@ -16,8 +16,7 @@ import {
   snoozeAlert,
 } from '../../../lib/alert_api_actions';
 import { ObjectRemover } from '../../../lib/object_remover';
-import { generateUniqueKey } from '../../../lib/get_test_data';
-import { getTestAlertData } from '../../../lib/get_test_data';
+import { generateUniqueKey, getTestAlertData } from '../../../lib/get_test_data';
 
 export default ({ getPageObjects, getPageObject, getService }: FtrProviderContext) => {
   const testSubjects = getService('testSubjects');

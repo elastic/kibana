@@ -16,7 +16,7 @@ import type {
   VisualizationLayerHeaderContentProps,
   VisualizationLayerWidgetProps,
 } from '../../../types';
-import { State, XYAnnotationLayerConfig } from '../types';
+import type { State, XYAnnotationLayerConfig } from '../types';
 import { annotationLayerHasUnsavedChanges } from '../state_helpers';
 import { ChangeIndexPattern, StaticHeader } from '../../../shared_components';
 import {

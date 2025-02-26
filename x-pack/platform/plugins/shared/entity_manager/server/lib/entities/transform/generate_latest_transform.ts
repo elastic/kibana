@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { EntityDefinition } from '@kbn/entities-schema';
-import {
+import type { EntityDefinition } from '@kbn/entities-schema';
+import type {
   QueryDslQueryContainer,
   TransformPutTransformRequest,
 } from '@elastic/elasticsearch/lib/api/types';

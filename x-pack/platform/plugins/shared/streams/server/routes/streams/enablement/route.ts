@@ -8,7 +8,7 @@
 import { z } from '@kbn/zod';
 import { conflict } from '@hapi/boom';
 import { NameTakenError } from '../../../lib/streams/errors/name_taken_error';
-import { DisableStreamsResponse, EnableStreamsResponse } from '../../../lib/streams/client';
+import type { DisableStreamsResponse, EnableStreamsResponse } from '../../../lib/streams/client';
 import { createServerRoute } from '../../create_server_route';
 
 export const enableStreamsRoute = createServerRoute({

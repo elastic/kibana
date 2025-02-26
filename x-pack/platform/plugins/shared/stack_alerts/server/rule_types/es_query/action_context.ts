@@ -7,12 +7,11 @@
 
 import { i18n } from '@kbn/i18n';
 import type { estypes } from '@elastic/elasticsearch';
-import { AlertInstanceContext } from '@kbn/alerting-plugin/server';
+import type { AlertInstanceContext } from '@kbn/alerting-plugin/server';
 import type { EsQueryRuleParams } from '@kbn/response-ops-rule-params/es_query';
-import { Comparator } from '../../../common/comparator_types';
+import type { Comparator } from '../../../common/comparator_types';
 import { getHumanReadableComparator } from '../../../common';
-import { isEsqlQueryRule } from './util';
-import { isSearchSourceRule } from './util';
+import { isEsqlQueryRule, isSearchSourceRule } from './util';
 
 // rule type context provided to actions
 export interface ActionContext extends EsQueryRuleActionContext {

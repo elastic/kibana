@@ -7,8 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { CoreSetup, DEFAULT_APP_CATEGORIES, Plugin } from '@kbn/core/server';
-import {
+import type { CoreSetup, Plugin } from '@kbn/core/server';
+import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
+import type {
   FeaturesPluginSetup,
   // PluginStartContract as FeaturesPluginStart,
 } from '@kbn/features-plugin/server';

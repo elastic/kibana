@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import type { KibanaRequest } from '@kbn/core/server';
-import type { ElasticsearchClient } from '@kbn/core/server';
+import type { KibanaRequest, ElasticsearchClient } from '@kbn/core/server';
 
 import type { AgentPolicy } from '../../common';
 

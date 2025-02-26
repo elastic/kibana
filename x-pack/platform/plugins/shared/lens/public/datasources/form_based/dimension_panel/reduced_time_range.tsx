@@ -5,18 +5,14 @@
  * 2.0.
  */
 
-import { EuiFormRow, EuiFlexItem, EuiFlexGroup, EuiIconTip } from '@elastic/eui';
-import { EuiComboBox } from '@elastic/eui';
+import { EuiFormRow, EuiFlexItem, EuiFlexGroup, EuiIconTip, EuiComboBox } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useEffect, useState } from 'react';
 
 import { parseTimeShift } from '@kbn/data-plugin/common';
-import { Duration } from 'moment';
-import {
-  adjustTimeScaleLabelSuffix,
-  GenericIndexPatternColumn,
-  operationDefinitionMap,
-} from '../operations';
+import type { Duration } from 'moment';
+import type { GenericIndexPatternColumn } from '../operations';
+import { adjustTimeScaleLabelSuffix, operationDefinitionMap } from '../operations';
 import type { FormBasedLayer } from '../types';
 import type { IndexPattern } from '../../../types';
 import { reducedTimeRangeOptions } from '../reduced_time_range_utils';

@@ -6,7 +6,7 @@
  */
 import { EuiDataGrid } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { SampleDocument } from '@kbn/streams-schema';
+import type { SampleDocument } from '@kbn/streams-schema';
 import { isEmpty } from 'lodash';
 import React, { useMemo } from 'react';
 

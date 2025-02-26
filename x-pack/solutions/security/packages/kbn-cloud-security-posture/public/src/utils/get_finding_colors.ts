@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiThemeComputed } from '@elastic/eui';
+import type { EuiThemeComputed } from '@elastic/eui';
 import { euiThemeVars } from '@kbn/ui-theme'; // TODO: replace with euiTheme
 import type {
   VulnSeverity,

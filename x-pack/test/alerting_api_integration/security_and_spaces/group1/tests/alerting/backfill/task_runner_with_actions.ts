@@ -11,7 +11,7 @@ import { ESTestIndexTool } from '@kbn/alerting-api-integration-helpers';
 import { asyncForEach } from '../../../../../../functional/services/transform/api';
 import { SuperuserAtSpace1 } from '../../../../scenarios';
 import { getUrlPrefix, ObjectRemover } from '../../../../../common/lib';
-import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
+import type { FtrProviderContext } from '../../../../../common/ftr_provider_context';
 import {
   TEST_ACTIONS_INDEX,
   indexTestDocs,

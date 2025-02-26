@@ -6,8 +6,8 @@
  */
 
 import type { ToolingLog } from '@kbn/tooling-log';
-import { RuleResponse } from '@kbn/security-solution-plugin/common/api/detection_engine';
-import { PrebuiltRuleAsset } from '@kbn/security-solution-plugin/server/lib/detection_engine/prebuilt_rules';
+import type { RuleResponse } from '@kbn/security-solution-plugin/common/api/detection_engine';
+import type { PrebuiltRuleAsset } from '@kbn/security-solution-plugin/server/lib/detection_engine/prebuilt_rules';
 import type { Client } from '@elastic/elasticsearch';
 import type SuperTest from 'supertest';
 import {

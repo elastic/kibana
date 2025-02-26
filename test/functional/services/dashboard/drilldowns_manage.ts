@@ -8,7 +8,7 @@
  */
 
 import { Key } from 'selenium-webdriver';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 
 const CREATE_DRILLDOWN_FLYOUT_DATA_TEST_SUBJ = 'createDrilldownFlyout';
 const MANAGE_DRILLDOWNS_FLYOUT_DATA_TEST_SUBJ = 'editDrilldownFlyout';

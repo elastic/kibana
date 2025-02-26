@@ -10,7 +10,7 @@
 import React from 'react';
 import { StatusMessage } from '.';
 import { shallow } from 'enzyme';
-import { MatchedItem } from '@kbn/data-views-plugin/public';
+import type { MatchedItem } from '@kbn/data-views-plugin/public';
 
 const tagsPartial = {
   tags: [],

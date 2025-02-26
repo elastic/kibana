@@ -4,14 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { SavedObject } from '@kbn/core/server';
-import { AgentPolicyInfo } from '../../../../common/types';
-import type { SyntheticsPrivateLocations } from '../../../../common/runtime_types';
+import type { SavedObject } from '@kbn/core/server';
+import type { AgentPolicyInfo } from '../../../../common/types';
+import type { SyntheticsPrivateLocations, PrivateLocation } from '../../../../common/runtime_types';
 import type {
   SyntheticsPrivateLocationsAttributes,
   PrivateLocationAttributes,
 } from '../../../runtime_types/private_locations';
-import { PrivateLocation } from '../../../../common/runtime_types';
 
 export const toClientContract = (
   locationObject: SavedObject<PrivateLocationAttributes>

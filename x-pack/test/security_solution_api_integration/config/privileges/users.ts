@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { User } from '../services/types';
+import type { User } from '../services/types';
 import {
   secAllV1,
   secNoneV1,

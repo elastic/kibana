@@ -7,13 +7,12 @@
 
 import fs from 'fs';
 import axios from 'axios';
-import { loggingSystemMock } from '@kbn/core/server/mocks';
-import { coreMock } from '@kbn/core/server/mocks';
-import {
+import { loggingSystemMock, coreMock } from '@kbn/core/server/mocks';
+import type {
   TaskManagerSetupContract,
   TaskManagerStartContract,
-  TaskStatus,
 } from '@kbn/task-manager-plugin/server';
+import { TaskStatus } from '@kbn/task-manager-plugin/server';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import {
   CONNECTOR_USAGE_REPORTING_SOURCE_ID,
@@ -23,8 +22,8 @@ import {
   ConnectorUsageReportingTask,
 } from './connector_usage_reporting_task';
 import type { CoreSetup, ElasticsearchClient } from '@kbn/core/server';
-import { ActionsPluginsStart } from '../plugin';
-import { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
+import type { ActionsPluginsStart } from '../plugin';
+import type { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 
 jest.mock('axios');
 const mockedAxiosPost = jest.spyOn(axios, 'post');

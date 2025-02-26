@@ -6,8 +6,7 @@
  */
 
 import rison from '@kbn/rison';
-import type { Query } from '@kbn/es-query';
-import type { Filter } from '@kbn/es-query';
+import type { Query, Filter } from '@kbn/es-query';
 import type { LensPublicStart, LensSavedObjectAttributes } from '@kbn/lens-plugin/public';
 import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 import type { TimefilterContract } from '@kbn/data-plugin/public';

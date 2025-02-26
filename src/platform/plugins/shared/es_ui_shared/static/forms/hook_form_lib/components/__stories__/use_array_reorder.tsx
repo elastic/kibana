@@ -8,6 +8,7 @@
  */
 
 import React from 'react';
+import type { DropResult } from '@elastic/eui';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -18,13 +19,12 @@ import {
   EuiDroppable,
   EuiDraggable,
   EuiTitle,
-  DropResult,
   EuiIcon,
 } from '@elastic/eui';
 
 import { TextField } from '../../../components';
 import { fieldValidators } from '../../../helpers';
-import { FormConfig } from '../../types';
+import type { FormConfig } from '../../types';
 import { UseField } from '../use_field';
 import { UseArray } from '../use_array';
 import { FormWrapper } from './form_utils';

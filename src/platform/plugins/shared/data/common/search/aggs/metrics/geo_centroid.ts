@@ -12,7 +12,7 @@ import { aggGeoCentroidFnName } from './geo_centroid_fn';
 import { MetricAggType } from './metric_agg_type';
 import { METRIC_TYPES } from './metric_agg_types';
 import { KBN_FIELD_TYPES } from '../../..';
-import { BaseAggParams } from '../types';
+import type { BaseAggParams } from '../types';
 
 export interface AggParamsGeoCentroid extends BaseAggParams {
   field: string;

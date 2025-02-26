@@ -11,7 +11,7 @@ import React, { memo } from 'react';
 import { EuiBadge } from '@elastic/eui';
 
 import { getStatusConfiguration } from './config';
-import { CaseStatuses } from './types';
+import type { CaseStatuses } from './types';
 
 interface Props {
   status: CaseStatuses;

@@ -16,8 +16,9 @@ import { css } from '@emotion/react';
 
 import { GridHeightSmoother } from './grid_height_smoother';
 import { GridRow } from './grid_row';
-import { GridAccessMode, GridLayoutData, GridSettings, UseCustomDragHandle } from './types';
-import { GridLayoutContext, GridLayoutContextType } from './use_grid_layout_context';
+import type { GridAccessMode, GridLayoutData, GridSettings, UseCustomDragHandle } from './types';
+import type { GridLayoutContextType } from './use_grid_layout_context';
+import { GridLayoutContext } from './use_grid_layout_context';
 import { useGridLayoutState } from './use_grid_layout_state';
 import { isLayoutEqual } from './utils/equality_checks';
 import { resolveGridRow } from './utils/resolve_grid_row';

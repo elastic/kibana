@@ -6,10 +6,13 @@
  */
 
 import { navigateTo } from '../tasks/navigation';
-import { UPDATE_PACKAGE_BTN } from '../screens/integrations';
+import {
+  UPDATE_PACKAGE_BTN,
+  INSTALLED_VERSION,
+  INTEGRATION_POLICIES_UPGRADE_CHECKBOX,
+} from '../screens/integrations';
 import { LOADING_SPINNER } from '../screens/navigation';
 import { AGENT_POLICY_SAVE_INTEGRATION } from '../screens/fleet';
-import { INSTALLED_VERSION, INTEGRATION_POLICIES_UPGRADE_CHECKBOX } from '../screens/integrations';
 import { login } from '../tasks/login';
 
 describe('Add Integration - Mock API', () => {

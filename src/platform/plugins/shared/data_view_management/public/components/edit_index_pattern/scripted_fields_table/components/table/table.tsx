@@ -10,14 +10,15 @@
 import React, { PureComponent } from 'react';
 import { get } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { EuiInMemoryTable, EuiBasicTableColumn } from '@elastic/eui';
+import type { EuiBasicTableColumn } from '@elastic/eui';
+import { EuiInMemoryTable } from '@elastic/eui';
 
-import { DataView } from '@kbn/data-views-plugin/public';
+import type { DataView } from '@kbn/data-views-plugin/public';
 import {
   withEuiTablePersist,
   type EuiTablePersistInjectedProps,
 } from '@kbn/shared-ux-table-persist';
-import { ScriptedFieldItem } from '../../types';
+import type { ScriptedFieldItem } from '../../types';
 
 const PAGE_SIZE_OPTIONS = [5, 10, 25, 50];
 

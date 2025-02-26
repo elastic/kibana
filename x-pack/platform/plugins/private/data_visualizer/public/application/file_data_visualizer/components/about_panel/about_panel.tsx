@@ -8,12 +8,8 @@
 import React, { type FC, useMemo } from 'react';
 import { css } from '@emotion/react';
 
-import { useEuiTheme } from '@elastic/eui';
-
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
-
 import {
+  useEuiTheme,
   EuiFlexGroup,
   EuiFlexItem,
   EuiSpacer,
@@ -23,6 +19,9 @@ import {
   EuiLoadingSpinner,
   EuiTitle,
 } from '@elastic/eui';
+
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import { WelcomeContent } from './welcome_content';
 

@@ -9,8 +9,8 @@ import { EventStreamMarshaller } from '@smithy/eventstream-serde-node';
 import { fromUtf8, toUtf8 } from '@smithy/util-utf8';
 import { identity } from 'lodash';
 import { Observable } from 'rxjs';
-import { Readable } from 'stream';
-import { Message } from '@smithy/types';
+import type { Readable } from 'stream';
+import type { Message } from '@smithy/types';
 import { createInferenceInternalError } from '@kbn/inference-common';
 
 interface ModelStreamErrorException {

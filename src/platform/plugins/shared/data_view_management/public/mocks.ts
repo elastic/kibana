@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { PluginInitializerContext } from '@kbn/core/public';
+import type { PluginInitializerContext } from '@kbn/core/public';
 import { coreMock } from '@kbn/core/public/mocks';
 import { managementPluginMock } from '@kbn/management-plugin/public/mocks';
 import { noDataPagePublicMock } from '@kbn/no-data-page-plugin/public/mocks';
@@ -19,12 +19,9 @@ import { indexPatternEditorPluginMock } from '@kbn/data-view-editor-plugin/publi
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
 import { savedObjectsManagementPluginMock } from '@kbn/saved-objects-management-plugin/public/mocks';
-import {
-  IndexPatternManagementSetup,
-  IndexPatternManagementStart,
-  IndexPatternManagementPlugin,
-} from './plugin';
-import { IndexPatternManagmentContext } from './types';
+import type { IndexPatternManagementSetup, IndexPatternManagementStart } from './plugin';
+import { IndexPatternManagementPlugin } from './plugin';
+import type { IndexPatternManagmentContext } from './types';
 
 const coreSetup = coreMock.createSetup();
 const coreStart = coreMock.createStart();

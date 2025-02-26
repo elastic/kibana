@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { AsApiContract, RewriteRequestCase } from '@kbn/actions-types';
-import { AlertingFrameworkHealth, AlertsHealth } from '@kbn/alerting-types';
+import type { AsApiContract, RewriteRequestCase } from '@kbn/actions-types';
+import type { AlertingFrameworkHealth, AlertsHealth } from '@kbn/alerting-types';
 
 export const transformAlertsHealthResponse: RewriteRequestCase<AlertsHealth> = ({
   decryption_health: decryptionHealth,

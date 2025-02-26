@@ -8,7 +8,7 @@
 import { renderHook, act } from '@testing-library/react';
 
 import { SetupTechnology } from '@kbn/fleet-plugin/public';
-import { AgentPolicy, NewPackagePolicyInput } from '@kbn/fleet-plugin/common';
+import type { AgentPolicy, NewPackagePolicyInput } from '@kbn/fleet-plugin/common';
 
 import {
   CLOUDBEAT_AWS,

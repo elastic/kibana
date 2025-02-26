@@ -14,8 +14,8 @@ import {
   INFERENCE_CONNECTOR_ID,
 } from '@kbn/stack-connectors-plugin/public/common';
 import { Prompt, QuestionRewritePrompt } from '../../common/prompt';
-import { KibanaRequest, Logger } from '@kbn/core/server';
-import { PluginStartContract as ActionsPluginStartContract } from '@kbn/actions-plugin/server';
+import type { KibanaRequest, Logger } from '@kbn/core/server';
+import type { PluginStartContract as ActionsPluginStartContract } from '@kbn/actions-plugin/server';
 
 jest.mock('@kbn/langchain/server', () => {
   const original = jest.requireActual('@kbn/langchain/server');

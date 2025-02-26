@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { DropType } from '../types';
-import { DragDropAction } from './providers';
+import type { DropType } from '../types';
+import type { DragDropAction } from './providers';
 
 export interface HumanData {
   label: string;

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { AuthenticatedUser, ElasticsearchClient, Logger } from '@kbn/core/server';
-import {
+import type { AuthenticatedUser, ElasticsearchClient, Logger } from '@kbn/core/server';
+import type {
   ConversationResponse,
   Reader,
   ConversationUpdateProps,
@@ -18,7 +18,7 @@ import {
 } from '@kbn/elastic-assistant-common';
 import { getConversation } from './get_conversation';
 import { getUpdateScript } from './helpers';
-import { EsReplacementSchema } from './types';
+import type { EsReplacementSchema } from './types';
 
 export interface UpdateConversationSchema {
   id: UUID;

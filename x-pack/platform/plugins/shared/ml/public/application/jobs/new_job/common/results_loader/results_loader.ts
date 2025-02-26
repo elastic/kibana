@@ -14,10 +14,10 @@ import { parseInterval } from '@kbn/ml-parse-interval';
 
 import { JOB_TYPE } from '../../../../../../common/constants/new_job';
 
-import type { ModelPlotOutputResults } from '../../../../services/results_service';
-import {
-  mlResultsServiceProvider,
-  type MlResultsService,
+import { mlResultsServiceProvider } from '../../../../services/results_service';
+import type {
+  ModelPlotOutputResults,
+  MlResultsService,
 } from '../../../../services/results_service';
 
 import type { JobCreatorType } from '../job_creator';

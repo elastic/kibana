@@ -21,13 +21,11 @@ import {
 } from '../../hooks';
 import { FLEET_ROUTING_PATHS, pagePathGetters } from '../../constants';
 import { DefaultLayout } from '../../layouts';
-import { Loading } from '../../components';
+import { Loading, FleetServerFlyout } from '../../components';
 import {
   SERVERLESS_DEFAULT_FLEET_SERVER_HOST_ID,
   SERVERLESS_DEFAULT_OUTPUT_ID,
 } from '../../../../../common/constants';
-
-import { FleetServerFlyout } from '../../components';
 
 import { SettingsPage } from './components/settings_page';
 import { withConfirmModalProvider } from './hooks/use_confirm_modal';

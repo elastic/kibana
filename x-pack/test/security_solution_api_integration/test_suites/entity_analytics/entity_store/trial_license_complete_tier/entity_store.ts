@@ -8,7 +8,7 @@
 import expect from 'expect';
 import { defaultOptions } from '@kbn/security-solution-plugin/server/lib/entity_analytics/entity_store/constants';
 import { omit } from 'lodash/fp';
-import { FtrProviderContext } from '../../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../../ftr_provider_context';
 import { EntityStoreUtils } from '../../utils';
 import { dataViewRouteHelpersFactory } from '../../utils/data_view';
 export default ({ getService }: FtrProviderContext) => {

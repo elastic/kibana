@@ -25,11 +25,13 @@ import {
   LogColumnHeader,
 } from '@kbn/logs-shared-plugin/public';
 import { useKibanaContextForPlugin } from '../../../../../hooks/use_kibana';
-import { getFriendlyNameForPartitionId } from '../../../../../../common/log_analysis';
+import {
+  getFriendlyNameForPartitionId,
+  isCategoryAnomaly,
+} from '../../../../../../common/log_analysis';
 import type { TimeRange } from '../../../../../../common/time/time_range';
 import { partitionField } from '../../../../../../common/log_analysis/job_parameters';
-import type { LogEntryExample } from '../../../../../../common/log_analysis';
-import { isCategoryAnomaly } from '../../../../../../common/log_analysis';
+import type { LogEntryExample, LogEntryAnomaly } from '../../../../../../common/log_analysis';
 import type { LogColumnConfiguration } from '../../../../../utils/source_configuration';
 import {
   isTimestampLogColumnConfiguration,
@@ -37,7 +39,6 @@ import {
   isMessageLogColumnConfiguration,
 } from '../../../../../utils/source_configuration';
 import { localizedDate } from '../../../../../../common/formatters/datetime';
-import type { LogEntryAnomaly } from '../../../../../../common/log_analysis';
 import { useLogEntryFlyoutContext } from '../../../../../containers/logs/log_flyout';
 
 export const exampleMessageScale = 'medium' as const;

@@ -7,9 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { PropsWithChildren } from 'react';
+import type { PropsWithChildren } from 'react';
+import React from 'react';
 import { EuiPageTemplate, EuiSideNav } from '@elastic/eui';
-import { IBasePath } from '@kbn/core/public';
+import type { IBasePath } from '@kbn/core/public';
 import { PLUGIN_ID } from '../../common';
 
 export interface ExampleLink {

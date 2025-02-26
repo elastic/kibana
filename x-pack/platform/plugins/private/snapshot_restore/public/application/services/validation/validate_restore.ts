@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { RestoreSettings } from '../../../../common/types';
+import type { RestoreSettings } from '../../../../common/types';
 import { UNMODIFIABLE_INDEX_SETTINGS, UNREMOVABLE_INDEX_SETTINGS } from '../../constants';
 import { textService } from '../text';
 

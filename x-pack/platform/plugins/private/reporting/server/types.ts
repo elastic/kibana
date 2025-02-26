@@ -5,15 +5,14 @@
  * 2.0.
  */
 
-import { CustomRequestHandlerContext } from '@kbn/core-http-request-handler-context-server';
-import { IRouter } from '@kbn/core-http-server';
+import type { CustomRequestHandlerContext } from '@kbn/core-http-request-handler-context-server';
+import type { IRouter } from '@kbn/core-http-server';
 import type { DataPluginStart } from '@kbn/data-plugin/server/plugin';
 import type { DiscoverServerPluginStart } from '@kbn/discover-plugin/server';
 import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/server';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/server';
-import type { UrlOrUrlLocatorTuple } from '@kbn/reporting-common/types';
-import type { ReportApiJSON } from '@kbn/reporting-common/types';
+import type { UrlOrUrlLocatorTuple, ReportApiJSON } from '@kbn/reporting-common/types';
 import type { ReportingConfigType } from '@kbn/reporting-server';
 import type { ScreenshotModePluginSetup } from '@kbn/screenshot-mode-plugin/server';
 import type {
@@ -29,7 +28,7 @@ import type {
 } from '@kbn/task-manager-plugin/server';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 
-import { ExportTypesRegistry } from '@kbn/reporting-server/export_types_registry';
+import type { ExportTypesRegistry } from '@kbn/reporting-server/export_types_registry';
 import type { AuthenticatedUser } from '@kbn/core-security-common';
 
 /**

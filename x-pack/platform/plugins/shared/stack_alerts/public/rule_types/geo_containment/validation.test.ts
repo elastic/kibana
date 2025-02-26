@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { GeoContainmentAlertParams } from './types';
+import type { GeoContainmentAlertParams } from './types';
 import { validateExpression } from './validation';
 
 describe('expression params validation', () => {

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { FtrProviderContext } from '../../ftr_provider_context';
-import { RoleCredentials } from '../../../shared/services';
+import type { FtrProviderContext } from '../../ftr_provider_context';
+import type { RoleCredentials } from '../../../shared/services';
 
 import { testHasEmbeddedConsole } from './embedded_console';
 

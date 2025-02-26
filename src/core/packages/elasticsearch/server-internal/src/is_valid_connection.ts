@@ -7,10 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { filter } from 'rxjs';
+import { filter, firstValueFrom } from 'rxjs';
 import { errors } from '@elastic/elasticsearch';
-import { Observable, firstValueFrom } from 'rxjs';
-import { NodesVersionCompatibility } from './version_check/ensure_es_version';
+import type { Observable } from 'rxjs';
+import type { NodesVersionCompatibility } from './version_check/ensure_es_version';
 
 /**
  * Validates the output of the ES Compatibility Check and waits for a valid connection.

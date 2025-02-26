@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ServerlessType } from '@kbn/elastic-agent-utils';
+import type { ServerlessType } from '@kbn/elastic-agent-utils';
 import defaultIcon from '../../../assets/default.svg';
 import lambdaIcon from '../../../assets/lambda.svg';
 import azureFunctionsIcon from '../../../assets/functions.svg';

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 
 // It is wrapper around supertest that injects Serverless auth headers for the admin user.
 export async function SecuritySolutionServerlessSuperTest({ getService }: FtrProviderContext) {

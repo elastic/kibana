@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ChartsPluginStart } from '@kbn/charts-plugin/public';
+import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import type { EsqlService } from './esql';
 import type { InvestigateAppRepositoryClient } from '../api';
 

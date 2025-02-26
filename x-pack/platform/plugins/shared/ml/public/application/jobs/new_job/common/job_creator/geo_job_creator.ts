@@ -18,8 +18,7 @@ import type {
 } from '../../../../../../common/types/anomaly_detection_jobs';
 import { createBasicDetector } from './util/default_configs';
 import { JOB_TYPE, CREATED_BY_LABEL } from '../../../../../../common/constants/new_job';
-import { getRichDetectors } from './util/general';
-import { isSparseDataJob } from './util/general';
+import { getRichDetectors, isSparseDataJob } from './util/general';
 
 export class GeoJobCreator extends JobCreator {
   private _geoField: Field | null = null;

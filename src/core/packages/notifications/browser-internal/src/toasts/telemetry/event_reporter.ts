@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ComponentProps } from 'react';
-import { EuiToast } from '@elastic/eui';
+import type { ComponentProps } from 'react';
+import type { EuiToast } from '@elastic/eui';
 import type { AnalyticsServiceStart } from '@kbn/core-analytics-browser';
 import { EventMetric, FieldType } from './event_types';
 

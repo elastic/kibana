@@ -11,7 +11,7 @@ import { fireEvent, render } from '@testing-library/react';
 import { TestProviders } from '../../mock/test_providers/test_providers';
 import { mockConnectors } from '../../mock/connectors';
 import { ConnectorSelectorInline } from './connector_selector_inline';
-import { Conversation } from '../../..';
+import type { Conversation } from '../../..';
 import { useLoadConnectors } from '../use_load_connectors';
 
 const setApiConfig = jest.fn();

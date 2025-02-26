@@ -18,7 +18,7 @@ import { indexPatternEditorPluginMock as dataViewEditorPluginMock } from '@kbn/d
 import { ChangeDataView } from './change_dataview';
 import { DataViewSelector } from './data_view_selector';
 import { dataViewMock, dataViewMockEsql } from './mocks/dataview';
-import { DataViewPickerProps } from './data_view_picker';
+import type { DataViewPickerProps } from './data_view_picker';
 
 describe('DataView component', () => {
   const createMockWebStorage = () => ({

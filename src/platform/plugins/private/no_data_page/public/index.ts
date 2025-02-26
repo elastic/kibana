@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { PluginInitializerContext } from '@kbn/core-plugins-browser';
+import type { PluginInitializerContext } from '@kbn/core-plugins-browser';
 import { NoDataPagePlugin } from './plugin';
 
 export function plugin(ctx: PluginInitializerContext) {

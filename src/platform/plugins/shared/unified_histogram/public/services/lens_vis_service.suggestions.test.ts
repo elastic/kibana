@@ -8,7 +8,7 @@
  */
 
 import type { AggregateQuery, Query } from '@kbn/es-query';
-import { DataViewField } from '@kbn/data-views-plugin/common';
+import type { DataViewField } from '@kbn/data-views-plugin/common';
 import { deepMockedFields, buildDataViewMock } from '@kbn/discover-utils/src/__mocks__';
 import { allSuggestionsMock } from '../__mocks__/suggestions';
 import { getLensVisMock } from '../__mocks__/lens_vis';

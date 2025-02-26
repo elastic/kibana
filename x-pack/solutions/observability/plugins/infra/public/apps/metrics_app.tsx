@@ -6,11 +6,10 @@
  */
 import { PerformanceContextProvider } from '@kbn/ebt-tools';
 import type { History } from 'history';
-import type { CoreStart } from '@kbn/core/public';
+import type { CoreStart, AppMountParameters } from '@kbn/core/public';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { Router, Routes, Route } from '@kbn/shared-ux-router';
-import type { AppMountParameters } from '@kbn/core/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import type { InfraPublicConfig } from '../../common/plugin_config_types';
 import { LinkToMetricsPage } from '../pages/link_to/link_to_metrics';

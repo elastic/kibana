@@ -7,11 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { CoreStart } from '@kbn/core/public';
+import type { CoreStart } from '@kbn/core/public';
 import { createGetterSetter } from '@kbn/kibana-utils-plugin/public';
-import { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
-import { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
 
 export const [getCoreStart, setCoreStart] = createGetterSetter<CoreStart>('CoreStart');
 

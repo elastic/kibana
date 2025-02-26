@@ -4,10 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { estypes } from '@elastic/elasticsearch';
 import type {
   InferenceInferenceEndpointInfo,
   MlInferenceConfigCreateContainer,
+  MlStartTrainedModelDeploymentResponse,
+  MlTrainedModelConfig,
+  MlTrainedModelDeploymentStats,
+  MlTrainedModelStats,
 } from '@elastic/elasticsearch/lib/api/types';
 import type {
   ModelDefinitionResponse,
@@ -105,8 +108,8 @@ export type PutTrainedModelConfig = {
   }
 >; // compressed_definition and definition are mutually exclusive
 
-export type TrainedModelConfigResponse = estypes.MlTrainedModelConfig & {
-  metadata?: estypes.MlTrainedModelConfig['metadata'] & {
+export type TrainedModelConfigResponse = MlTrainedModelConfig & {
+  metadata?: MlTrainedModelConfig['metadata'] & {
     analytics_config?: DataFrameAnalyticsConfig;
     input: unknown;
     total_feature_importance?: TotalFeatureImportance[];
@@ -158,7 +161,7 @@ type NodesDeploymentStats = Array<{
   number_of_allocations: number;
 }>;
 
-export type TrainedModelDeploymentStatsResponse = estypes.MlTrainedModelDeploymentStats & {
+export type TrainedModelDeploymentStatsResponse = MlTrainedModelDeploymentStats & {
   nodes: NodesDeploymentStats;
   // TODO update types in elasticsearch-specification
   adaptive_allocations?: {
@@ -170,7 +173,7 @@ export type TrainedModelDeploymentStatsResponse = estypes.MlTrainedModelDeployme
 
 export interface StartTrainedModelDeploymentResponse {
   // TODO update types in elasticsearch-specification
-  assignment: estypes.MlStartTrainedModelDeploymentResponse['assignment'] & {
+  assignment: MlStartTrainedModelDeploymentResponse['assignment'] & {
     adaptive_allocations?: {
       enabled: boolean;
       min_number_of_allocations?: number;
@@ -301,7 +304,7 @@ export interface MemoryStatsResponse {
 }
 
 // @ts-expect-error TrainedModelDeploymentStatsResponse missing properties from MlTrainedModelDeploymentStats
-export interface TrainedModelStatsResponse extends estypes.MlTrainedModelStats {
+export interface TrainedModelStatsResponse extends MlTrainedModelStats {
   deployment_stats?: Omit<TrainedModelDeploymentStatsResponse, 'model_id'>;
   model_size_stats?: TrainedModelModelSizeStats;
 }
@@ -397,7 +400,7 @@ export type TrainedModelItem = ExistingModelBase & { stats: Stats };
 export type DFAModelItem = Omit<TrainedModelItem, 'inference_config'> & {
   origin_job_exists?: boolean;
   inference_config?: Pick<MlInferenceConfigCreateContainer, 'classification' | 'regression'>;
-  metadata?: estypes.MlTrainedModelConfig['metadata'] & {
+  metadata?: MlTrainedModelConfig['metadata'] & {
     analytics_config: DataFrameAnalyticsConfig;
     input: unknown;
     total_feature_importance?: TotalFeatureImportance[];

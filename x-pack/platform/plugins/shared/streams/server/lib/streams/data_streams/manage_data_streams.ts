@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import { ElasticsearchClient, Logger } from '@kbn/core/server';
-import { MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
-import { IngestStreamLifecycle, isDslLifecycle, isIlmLifecycle } from '@kbn/streams-schema';
+import type { ElasticsearchClient, Logger } from '@kbn/core/server';
+import type { MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
+import type { IngestStreamLifecycle } from '@kbn/streams-schema';
+import { isDslLifecycle, isIlmLifecycle } from '@kbn/streams-schema';
 import { retryTransientEsErrors } from '../helpers/retry';
 
 interface DataStreamManagementOptions {

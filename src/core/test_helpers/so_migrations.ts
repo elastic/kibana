@@ -13,8 +13,8 @@ import {
   createTestServers,
   getSupertest,
 } from '@kbn/core-test-helpers-kbn-server';
-import { SavedObject } from '../types';
-import { SavedObjectsType } from '../server';
+import type { SavedObject } from '../types';
+import type { SavedObjectsType } from '../server';
 
 type ExportOptions = { type: string } | { objects: Array<{ id: string; type: string }> };
 

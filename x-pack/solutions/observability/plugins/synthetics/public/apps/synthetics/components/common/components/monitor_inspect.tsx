@@ -24,11 +24,13 @@ import {
   EuiSwitch,
 } from '@elastic/eui';
 
-import { ClientPluginsStart } from '../../../../../plugin';
+import type { ClientPluginsStart } from '../../../../../plugin';
 import { useSyntheticsSettingsContext } from '../../../contexts';
 import { LoadingState } from '../../monitors_page/overview/overview/monitor_detail_flyout';
-import { MonitorTypeEnum, SyntheticsMonitor } from '../../../../../../common/runtime_types';
-import { inspectMonitorAPI, MonitorInspectResponse } from '../../../state/monitor_management/api';
+import type { SyntheticsMonitor } from '../../../../../../common/runtime_types';
+import { MonitorTypeEnum } from '../../../../../../common/runtime_types';
+import type { MonitorInspectResponse } from '../../../state/monitor_management/api';
+import { inspectMonitorAPI } from '../../../state/monitor_management/api';
 
 interface InspectorProps {
   isValid: boolean;

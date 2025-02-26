@@ -7,9 +7,8 @@
 import React from 'react';
 import type { MetricDatum } from '@elastic/charts';
 import { Chart, Metric } from '@elastic/charts';
-import { EuiSkeletonText, EuiPanel } from '@elastic/eui';
+import { EuiSkeletonText, EuiPanel, EuiErrorBoundary } from '@elastic/eui';
 import { isEmpty } from 'lodash';
-import { EuiErrorBoundary } from '@elastic/eui';
 
 export function MetricItem({
   data,

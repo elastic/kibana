@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { PeerCertificate } from 'tls';
-import { Logger } from '@kbn/core/server';
-import { SSLSettings } from '../types';
+import type { PeerCertificate } from 'tls';
+import type { Logger } from '@kbn/core/server';
+import type { SSLSettings } from '../types';
 
 export function getNodeSSLOptions(
   logger: Logger,

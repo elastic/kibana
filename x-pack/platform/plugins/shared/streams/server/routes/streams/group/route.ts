@@ -7,12 +7,8 @@
 
 import { z } from '@kbn/zod';
 import { badRequest } from '@hapi/boom';
-import {
-  GroupObjectGetResponse,
-  groupObjectUpsertRequestSchema,
-  GroupStreamUpsertRequest,
-  isGroupStreamDefinition,
-} from '@kbn/streams-schema';
+import type { GroupObjectGetResponse, GroupStreamUpsertRequest } from '@kbn/streams-schema';
+import { groupObjectUpsertRequestSchema, isGroupStreamDefinition } from '@kbn/streams-schema';
 import { createServerRoute } from '../../create_server_route';
 
 const readGroupRoute = createServerRoute({

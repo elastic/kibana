@@ -7,7 +7,8 @@
 
 import { z } from '@kbn/zod';
 import { NonEmptyString } from '@kbn/zod-helpers';
-import { Condition, conditionSchema } from '../conditions';
+import type { Condition } from '../conditions';
+import { conditionSchema } from '../conditions';
 import { createIsNarrowSchema } from '../../../helpers';
 
 export interface ProcessorBase {

@@ -7,8 +7,10 @@
 
 import type { TypeOf } from '@kbn/config-schema';
 
-import type { FleetRequestHandler } from '../../types';
-import type { PostResetOnePreconfiguredAgentPoliciesSchema } from '../../types';
+import type {
+  FleetRequestHandler,
+  PostResetOnePreconfiguredAgentPoliciesSchema,
+} from '../../types';
 import { resetPreconfiguredAgentPolicies } from '../../services/preconfiguration/reset_agent_policies';
 
 export const resetOnePreconfigurationHandler: FleetRequestHandler<

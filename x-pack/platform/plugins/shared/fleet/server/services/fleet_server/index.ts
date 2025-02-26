@@ -17,10 +17,9 @@ import {
   FLEET_SERVER_PACKAGE,
 } from '../../../common/constants';
 import { SO_SEARCH_LIMIT } from '../../constants';
-import { getAgentsByKuery, getAgentStatusById } from '../agents';
+import { getAgentsByKuery, getAgentStatusById, getAgentStatusForAgentPolicy } from '../agents';
 import { packagePolicyService } from '../package_policy';
 import { agentPolicyService } from '../agent_policy';
-import { getAgentStatusForAgentPolicy } from '../agents';
 import { appContextService } from '..';
 
 /**

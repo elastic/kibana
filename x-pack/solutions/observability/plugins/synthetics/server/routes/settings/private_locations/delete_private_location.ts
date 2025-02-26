@@ -11,7 +11,7 @@ import { PRIVATE_LOCATION_WRITE_API } from '../../../feature';
 import { migrateLegacyPrivateLocations } from './migrate_legacy_private_locations';
 import { getMonitorsByLocation } from './get_location_monitors';
 import { getPrivateLocationsAndAgentPolicies } from './get_private_locations';
-import { SyntheticsRestApiRouteFactory } from '../../types';
+import type { SyntheticsRestApiRouteFactory } from '../../types';
 import { SYNTHETICS_API_URLS } from '../../../../common/constants';
 import { privateLocationSavedObjectName } from '../../../../common/saved_objects/private_locations';
 

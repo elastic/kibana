@@ -7,9 +7,8 @@
 
 import React, { useState } from 'react';
 import type { DataView } from '@kbn/data-views-plugin/common';
-import { EuiSpacer } from '@elastic/eui';
+import { EuiSpacer, useEuiTheme } from '@elastic/eui';
 import type { Filter } from '@kbn/es-query';
-import { useEuiTheme } from '@elastic/eui';
 import { EmbeddedMap } from './embedded_map';
 import { MapTypes } from '../../../../../../common/mobile/constants';
 import { EmbeddedMapSelect } from './embedded_map_select';

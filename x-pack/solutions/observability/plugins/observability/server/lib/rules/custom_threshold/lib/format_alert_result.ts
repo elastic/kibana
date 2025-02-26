@@ -22,7 +22,7 @@ import {
   RATE_I18N,
   SUM_I18N,
 } from '../translations';
-import { Evaluation } from './evaluate_rule';
+import type { Evaluation } from './evaluate_rule';
 
 export type FormattedEvaluation = Omit<Evaluation, 'currentValue' | 'threshold'> & {
   currentValue: string;

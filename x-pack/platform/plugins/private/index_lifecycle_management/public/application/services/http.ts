@@ -11,8 +11,9 @@
  * in future. The pattern in this file is legacy and should be updated to conform to the plugin lifecycle.
  */
 
-import { HttpSetup } from '@kbn/core/public';
-import { UseRequestConfig, useRequest as _useRequest } from '@kbn/es-ui-shared-plugin/public';
+import type { HttpSetup } from '@kbn/core/public';
+import type { UseRequestConfig } from '@kbn/es-ui-shared-plugin/public';
+import { useRequest as _useRequest } from '@kbn/es-ui-shared-plugin/public';
 
 interface GenericObject {
   [key: string]: any;

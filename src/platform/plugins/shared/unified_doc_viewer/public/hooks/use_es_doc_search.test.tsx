@@ -14,7 +14,7 @@ import type { DataView } from '@kbn/data-views-plugin/public';
 import { ElasticRequestState } from '@kbn/unified-doc-viewer';
 import { buildDataTableRecord } from '@kbn/discover-utils';
 import { setUnifiedDocViewerServices } from '../plugin';
-import { UnifiedDocViewerServices } from '../types';
+import type { UnifiedDocViewerServices } from '../types';
 
 const index = 'test-index';
 const mockSearchResult = new Subject();

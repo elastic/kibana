@@ -10,18 +10,17 @@
 import moment from 'moment';
 import { LegendValue, Position, ScaleType as ECScaleType } from '@elastic/charts';
 import { i18n } from '@kbn/i18n';
-import {
+import type {
   VisToExpressionAst,
-  getVisSchemas,
   DateHistogramParams,
   HistogramParams,
-  LegendSize,
 } from '@kbn/visualizations-plugin/public';
+import { getVisSchemas, LegendSize } from '@kbn/visualizations-plugin/public';
 import { buildExpression, buildExpressionFunction } from '@kbn/expressions-plugin/public';
 import { BUCKET_TYPES } from '@kbn/data-plugin/public';
 import type { TimeRangeBounds } from '@kbn/data-plugin/common';
 import type { PaletteOutput } from '@kbn/charts-plugin/common/expressions/palette/types';
-import {
+import type {
   Dimensions,
   Dimension,
   VisParams,
@@ -30,13 +29,13 @@ import {
   ThresholdLine,
   ValueAxis,
   Scale,
-  ChartMode,
-  ScaleType,
 } from './types';
+import { ChartMode, ScaleType } from './types';
 import { ChartType } from '../common';
 import { getSeriesParams } from './utils/get_series_params';
 import { getSafeId } from './utils/accessors';
-import { Bounds, getCurveType, getLineStyle, getMode, getYAxisPosition } from './utils/common';
+import type { Bounds } from './utils/common';
+import { getCurveType, getLineStyle, getMode, getYAxisPosition } from './utils/common';
 
 type YDimension = Omit<Dimension, 'accessor'> & { accessor: string };
 

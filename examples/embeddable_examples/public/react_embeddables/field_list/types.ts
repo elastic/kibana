@@ -7,13 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ChartsPluginStart } from '@kbn/charts-plugin/public';
-import { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
-import { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
-import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
-import { PublishesDataViews, SerializedTitles } from '@kbn/presentation-publishing';
-import { PublishesSelectedFields } from './publishes_selected_fields';
+import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import type { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
+import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+import type { PublishesDataViews, SerializedTitles } from '@kbn/presentation-publishing';
+import type { PublishesSelectedFields } from './publishes_selected_fields';
 
 export type FieldListSerializedStateState = SerializedTitles & {
   dataViewId?: string;

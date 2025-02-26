@@ -19,16 +19,14 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import {
+import type {
   DataStreamReindexWarning,
   DataStreamReindexWarningTypes,
   DataStreamMetadata,
 } from '../../../../../../../../../common/types';
 import { useAppContext } from '../../../../../../../app_context';
-import {
-  IncompatibleDataInDataStreamWarningCheckbox,
-  WarningCheckboxProps,
-} from './warning_step_checkbox';
+import type { WarningCheckboxProps } from './warning_step_checkbox';
+import { IncompatibleDataInDataStreamWarningCheckbox } from './warning_step_checkbox';
 
 interface CheckedIds {
   [id: string]: boolean;

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ResourceFields } from '../../..';
+import type { ResourceFields } from '../../..';
 import * as constants from '../constants';
 
 const AVAILABLE_RESOURCE_FIELDS: Array<keyof ResourceFields> = [

@@ -8,7 +8,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { EuiTokensObject } from '@elastic/eui';
+import type { EuiTokensObject } from '@elastic/eui';
 
 interface EuiValues {
   [key: string]: any;

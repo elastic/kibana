@@ -6,8 +6,7 @@
  */
 
 import type { Observable } from 'rxjs';
-import { of } from 'rxjs';
-import { catchError, map, startWith } from 'rxjs';
+import { of, catchError, map, startWith } from 'rxjs';
 import type { IKibanaSearchResponse } from '@kbn/search-types';
 import { AbortError } from '@kbn/kibana-utils-plugin/public';
 import type { SearchStrategyError } from '../../../common/search_strategies/common/errors';

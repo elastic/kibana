@@ -8,13 +8,13 @@
 import { EuiFlexGroup, EuiButton, EuiFlexItem, EuiButtonEmpty } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { toMountPoint } from '@kbn/react-kibana-mount';
-import { WiredStreamGetResponse, IngestUpsertRequest } from '@kbn/streams-schema';
+import type { WiredStreamGetResponse, IngestUpsertRequest } from '@kbn/streams-schema';
 import React from 'react';
 import { useAbortController } from '@kbn/react-hooks';
 import { useKibana } from '../../../hooks/use_kibana';
 import { useStreamsAppRouter } from '../../../hooks/use_streams_app_router';
 import { emptyEqualsToAlways } from '../../../util/condition';
-import { useRoutingState } from './hooks/routing_state';
+import type { useRoutingState } from './hooks/routing_state';
 import { getFormattedError } from '../../../util/errors';
 
 export function ControlBar({

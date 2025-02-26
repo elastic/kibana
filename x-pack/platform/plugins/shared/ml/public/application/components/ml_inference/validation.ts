@@ -9,8 +9,7 @@ import type { estypes } from '@elastic/elasticsearch';
 import { i18n } from '@kbn/i18n';
 import type { IngestInferenceProcessor } from '@elastic/elasticsearch/lib/api/types';
 import type { SupportedPytorchTasksType } from '@kbn/ml-trained-models-utils';
-import type { InferenceModelTypes } from './types';
-import type { AddInferencePipelineFormErrors } from './types';
+import type { InferenceModelTypes, AddInferencePipelineFormErrors } from './types';
 
 const INVALID_PIPELINE_NAME_ERROR = i18n.translate(
   'xpack.ml.trainedModels.content.indices.pipelines.addInferencePipelineModal.steps.configure.invalidPipelineName',

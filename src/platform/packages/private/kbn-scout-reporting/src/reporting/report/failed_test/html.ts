@@ -8,7 +8,7 @@
  */
 
 import fs from 'fs';
-import { TestFailure } from './test_failure';
+import type { TestFailure } from './test_failure';
 
 export const buildFailureHtml = (testFailure: TestFailure): string => {
   const {

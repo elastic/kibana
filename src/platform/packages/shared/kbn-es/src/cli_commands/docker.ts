@@ -14,7 +14,7 @@ import { getTimeReporter } from '@kbn/ci-stats-reporter';
 
 import { Cluster } from '../cluster';
 import { DOCKER_IMG, DOCKER_REPO, DOCKER_TAG, DEFAULT_PORT } from '../utils';
-import { Command } from './types';
+import type { Command } from './types';
 
 export const docker: Command = {
   description: 'Run an Elasticsearch Docker image',

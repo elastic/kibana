@@ -14,9 +14,9 @@ import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import type { IKibanaSearchResponse } from '@kbn/search-types';
-import { DataPublicPluginStart, ISearchStart } from '@kbn/data-plugin/public';
+import type { DataPublicPluginStart, ISearchStart } from '@kbn/data-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { EsQueryRuleParams, SearchType } from '../types';
+import type { EsQueryRuleParams, SearchType } from '../types';
 import { EsQueryExpression } from './es_query_expression';
 
 jest.mock('@kbn/kibana-react-plugin/public', () => {

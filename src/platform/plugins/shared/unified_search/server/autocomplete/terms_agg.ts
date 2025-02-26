@@ -8,11 +8,11 @@
  */
 
 import { get, map } from 'lodash';
-import { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
+import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
 import type { estypes } from '@elastic/elasticsearch';
 import { getFieldSubtypeNested } from '@kbn/data-plugin/common';
 import type { FieldSpec } from '@kbn/data-views-plugin/common';
-import { ConfigSchema } from '../config';
+import type { ConfigSchema } from '../config';
 import { findIndexPatternById, getFieldByName } from '../data_views';
 
 export async function termsAggSuggestions(

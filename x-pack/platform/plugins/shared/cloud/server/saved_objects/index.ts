@@ -5,8 +5,12 @@
  * 2.0.
  */
 
-import { Logger, SavedObjectsClientContract, SavedObjectsServiceSetup } from '@kbn/core/server';
-import { CloudDataAttributes } from '../../common/types';
+import type {
+  Logger,
+  SavedObjectsClientContract,
+  SavedObjectsServiceSetup,
+} from '@kbn/core/server';
+import type { CloudDataAttributes } from '../../common/types';
 import { CLOUD_DATA_SAVED_OBJECT_ID } from '../routes/constants';
 
 export const CLOUD_DATA_SAVED_OBJECT_TYPE = 'cloud' as const;

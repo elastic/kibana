@@ -5,9 +5,12 @@
  * 2.0.
  */
 
-import { ElasticsearchClient } from '@kbn/core/server';
-import type { estypes } from '@elastic/elasticsearch';
-import type { LicenseGetLicenseInformation } from '@elastic/elasticsearch/lib/api/types';
+import type { ElasticsearchClient } from '@kbn/core/server';
+import type {
+  LicenseGetLicenseInformation,
+  SearchRequest,
+  SearchResponse,
+} from '@elastic/elasticsearch/lib/api/types';
 import { INDEX_PATTERN_ELASTICSEARCH, USAGE_FETCH_INTERVAL } from '../../common/constants';
 
 /**
@@ -38,7 +41,7 @@ export async function fetchLicenses(
   timestamp: number,
   maxBucketSize: number
 ) {
-  const params: estypes.SearchRequest = {
+  const params: SearchRequest = {
     index: INDEX_PATTERN_ELASTICSEARCH,
     ignore_unavailable: true,
     filter_path: ['hits.hits._source.cluster_uuid', 'hits.hits._source.license'],
@@ -80,7 +83,7 @@ export interface ESClusterStatsWithLicense {
 /**
  * Extract the cluster stats for each cluster.
  */
-export function handleLicenses(response: estypes.SearchResponse<ESClusterStatsWithLicense>) {
+export function handleLicenses(response: SearchResponse<ESClusterStatsWithLicense>) {
   const clusters = response.hits?.hits || [];
 
   return clusters.reduce(

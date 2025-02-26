@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { CreateCustomIntegrationNotificationEvent } from '../create/notifications';
-import { CreateInitialState } from '../create/types';
+import type { CreateCustomIntegrationNotificationEvent } from '../create/notifications';
+import type { CreateInitialState } from '../create/types';
 
 type ChildInitialStates = Partial<CreateInitialState>;
 export type InitialState = { context?: ChildInitialStates } & WithSelectedMode;

@@ -6,8 +6,8 @@
  */
 
 import { ADD_PANEL_TRIGGER } from '@kbn/ui-actions-browser/src';
-import { CoreStart } from '@kbn/core/public';
-import { ClientPluginsStart } from '../../../plugin';
+import type { CoreStart } from '@kbn/core/public';
+import type { ClientPluginsStart } from '../../../plugin';
 import {
   ADD_SYNTHETICS_MONITORS_OVERVIEW_ACTION_ID,
   ADD_SYNTHETICS_OVERVIEW_ACTION_ID,

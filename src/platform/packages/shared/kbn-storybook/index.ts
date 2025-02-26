@@ -7,12 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import {
-  defaultConfig,
-  defaultConfigWebFinal,
-  mergeWebpackFinal,
-  StorybookConfig,
-} from './src/lib/default_config';
+import type { StorybookConfig } from './src/lib/default_config';
+import { defaultConfig, defaultConfigWebFinal, mergeWebpackFinal } from './src/lib/default_config';
 export { defaultConfig, defaultConfigWebFinal, mergeWebpackFinal };
 export type { StorybookConfig };
 export { runStorybookCli } from './src/lib/run_storybook_cli';

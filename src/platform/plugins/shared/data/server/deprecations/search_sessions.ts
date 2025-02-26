@@ -16,7 +16,8 @@ import type {
 } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
 import type { DeprecationDetailsMessage } from '@kbn/core-deprecations-common';
-import { SEARCH_SESSION_TYPE, SearchSessionSavedObjectAttributes } from '../../common';
+import type { SearchSessionSavedObjectAttributes } from '../../common';
+import { SEARCH_SESSION_TYPE } from '../../common';
 
 type SearchSessionAttributes = Pick<
   SearchSessionSavedObjectAttributes,

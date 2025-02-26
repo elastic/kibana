@@ -10,14 +10,21 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { lastValueFrom } from 'rxjs';
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
 
-import type { estypes } from '@elastic/elasticsearch';
-import type { MappingRuntimeFields, QueryDslBoolQuery } from '@elastic/elasticsearch/lib/api/types';
-import type { AggregationsAggregate } from '@elastic/elasticsearch/lib/api/types';
+import type {
+  MappingRuntimeFields,
+  QueryDslBoolQuery,
+  AggregationsAggregate,
+  AggregationsAggregationContainer,
+  AggregationsMultiBucketAggregateBase,
+  AggregationsMultiTermsBucketKeys,
+  AggregationsStatsAggregate,
+  QueryDslQueryContainer,
+} from '@elastic/elasticsearch/lib/api/types';
 
 import type { IKibanaSearchRequest } from '@kbn/search-types';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
-import type { Query } from '@kbn/data-plugin/common';
+import type { Query, SearchRequest } from '@kbn/data-plugin/common';
 import type { SearchQueryLanguage } from '@kbn/ml-query-utils';
 import { getDefaultDSLQuery } from '@kbn/ml-query-utils';
 import { i18n } from '@kbn/i18n';
@@ -27,7 +34,6 @@ import { isDefined } from '@kbn/ml-is-defined';
 import { computeChi2PValue, type Histogram } from '@kbn/ml-chi2test';
 import { mapAndFlattenFilters } from '@kbn/data-plugin/public';
 
-import type { AggregationsMultiTermsBucketKeys } from '@elastic/elasticsearch/lib/api/types';
 import { buildEsQuery } from '@kbn/es-query';
 import { useDataVisualizerKibana } from '../kibana_context';
 
@@ -276,10 +282,10 @@ const getDataComparisonQuery = ({
   timeRange,
 }: {
   runtimeFields: MappingRuntimeFields;
-  searchQuery?: estypes.QueryDslQueryContainer;
+  searchQuery?: QueryDslQueryContainer;
   datetimeField?: string;
   timeRange?: TimeRange;
-}): NonNullable<estypes.SearchRequest> => {
+}): NonNullable<SearchRequest['body']> => {
   let rangeFilter;
   if (timeRange && datetimeField !== undefined && isPopulatedObject(timeRange, ['start', 'end'])) {
     rangeFilter = {
@@ -307,7 +313,7 @@ const getDataComparisonQuery = ({
     }
   }
 
-  const queryAndRuntimeMappings: NonNullable<estypes.SearchRequest> = {
+  const queryAndRuntimeMappings: NonNullable<SearchRequest['body']> = {
     query,
   };
   if (runtimeFields) {
@@ -330,7 +336,7 @@ const fetchReferenceBaselineData = async ({
   signal: AbortSignal;
 }) => {
   const baselineRequest = { ...baseRequest };
-  const baselineRequestAggs: Record<string, estypes.AggregationsAggregationContainer> = {};
+  const baselineRequestAggs: Record<string, AggregationsAggregationContainer> = {};
 
   // for each field with type "numeric", add a percentiles agg to the request
   for (const { field, type } of fields) {
@@ -389,14 +395,14 @@ const fetchComparisonDriftedData = async ({
 }) => {
   const driftedRequest = { ...baseRequest };
 
-  const driftedRequestAggs: Record<string, estypes.AggregationsAggregationContainer> = {};
+  const driftedRequestAggs: Record<string, AggregationsAggregationContainer> = {};
 
   // Since aggregation is not able to split the values into distinct 5% intervals,
   // this breaks our assumption of uniform distributed fractions in the`ks_test`.
   // So, to fix this in the general case, we need to run an additional ranges agg to get the doc count for the ranges
   // that we get from the percentiles aggregation
   // and use it in the bucket_count_ks_test
-  const rangesRequestAggs: Record<string, estypes.AggregationsAggregationContainer> = {};
+  const rangesRequestAggs: Record<string, AggregationsAggregationContainer> = {};
 
   for (const { field, type } of fields) {
     if (
@@ -462,7 +468,7 @@ const fetchComparisonDriftedData = async ({
     if (
       isPopulatedObject<
         string,
-        estypes.AggregationsMultiBucketAggregateBase<AggregationsMultiTermsBucketKeys>
+        AggregationsMultiBucketAggregateBase<AggregationsMultiTermsBucketKeys>
       >(rangesAggs, [`${field}_ranges`])
     ) {
       const buckets = rangesAggs[`${field}_ranges`].buckets;
@@ -529,10 +535,10 @@ const fetchHistogramData = async ({
   fields: DataDriftField[];
   randomSamplerWrapper: RandomSamplerWrapper;
   signal: AbortSignal;
-  baselineResponseAggs: Record<string, estypes.AggregationsStatsAggregate>;
-  driftedRespAggs: Record<string, estypes.AggregationsStatsAggregate>;
+  baselineResponseAggs: Record<string, AggregationsStatsAggregate>;
+  driftedRespAggs: Record<string, AggregationsStatsAggregate>;
 }) => {
-  const histogramRequestAggs: Record<string, estypes.AggregationsAggregationContainer> = {};
+  const histogramRequestAggs: Record<string, AggregationsAggregationContainer> = {};
   const fieldRange: { [field: string]: Range } = {};
 
   for (const { field, type } of fields) {
@@ -581,9 +587,7 @@ const fetchHistogramData = async ({
   }
 };
 
-type EsRequestParams = NonNullable<
-  IKibanaSearchRequest<NonNullable<estypes.SearchRequest>>['params']
->;
+type EsRequestParams = NonNullable<IKibanaSearchRequest<NonNullable<SearchRequest>>['params']>;
 
 interface ReturnedError {
   error?: string;
@@ -780,9 +784,11 @@ export const useFetchDataComparisonResult = (
 
           const baselineRequest: EsRequestParams = {
             index: referenceIndex,
-            size: 0,
-            aggs: {} as Record<string, estypes.AggregationsAggregationContainer>,
-            ...refDataQuery,
+            body: {
+              size: 0,
+              aggs: {} as Record<string, AggregationsAggregationContainer>,
+              ...refDataQuery,
+            },
           };
 
           const baselineResponseAggs = await fetchInParallelChunks({
@@ -841,9 +847,11 @@ export const useFetchDataComparisonResult = (
 
           const driftedRequest: EsRequestParams = {
             index: comparisonIndex,
-            size: 0,
-            aggs: {} as Record<string, estypes.AggregationsAggregationContainer>,
-            ...prodDataQuery,
+            body: {
+              size: 0,
+              aggs: {} as Record<string, AggregationsAggregationContainer>,
+              ...prodDataQuery,
+            },
           };
 
           const driftedRespAggs = await fetchInParallelChunks({
@@ -882,9 +890,11 @@ export const useFetchDataComparisonResult = (
 
           const referenceHistogramRequest: EsRequestParams = {
             index: referenceIndex,
-            size: 0,
-            aggs: {} as Record<string, estypes.AggregationsAggregationContainer>,
-            ...refDataQuery,
+            body: {
+              size: 0,
+              aggs: {} as Record<string, AggregationsAggregationContainer>,
+              ...refDataQuery,
+            },
           };
 
           const referenceHistogramRespAggs = await fetchInParallelChunks({
@@ -925,9 +935,11 @@ export const useFetchDataComparisonResult = (
 
           const comparisonHistogramRequest: EsRequestParams = {
             index: comparisonIndex,
-            size: 0,
-            aggs: {} as Record<string, estypes.AggregationsAggregationContainer>,
-            ...prodDataQuery,
+            body: {
+              size: 0,
+              aggs: {} as Record<string, AggregationsAggregationContainer>,
+              ...prodDataQuery,
+            },
           };
 
           const comparisonHistogramRespAggs = await fetchInParallelChunks({

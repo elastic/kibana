@@ -9,13 +9,12 @@ import { ESQL_ASYNC_SEARCH_STRATEGY, KBN_FIELD_TYPES } from '@kbn/data-plugin/co
 import type { QueryDslQueryContainer } from '@kbn/data-views-plugin/common/types';
 import type { AggregateQuery, TimeRange } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
-import { getStartEndParams } from '@kbn/esql-utils';
+import { getStartEndParams, getESQLWithSafeLimit, appendToESQLQuery } from '@kbn/esql-utils';
 import { useCallback, useEffect, useMemo, useReducer, useRef, useState } from 'react';
 import { type UseCancellableSearch, useCancellableSearch } from '@kbn/ml-cancellable-search';
 import type { estypes } from '@elastic/elasticsearch';
 import type { ISearchOptions } from '@kbn/search-types';
 import type { TimeBucketsInterval } from '@kbn/ml-time-buckets';
-import { getESQLWithSafeLimit, appendToESQLQuery } from '@kbn/esql-utils';
 import { isDefined } from '@kbn/ml-is-defined';
 import { ESQL_SAFE_LIMIT } from '@kbn/unified-field-list/src/constants';
 import { OMIT_FIELDS } from '../../../../../common/constants';

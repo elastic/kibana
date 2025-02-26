@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import type React from 'react';
 import {
   DRAGGABLE_KEYBOARD_WRAPPER_CLASS_NAME,
   HOVER_ACTIONS_ALWAYS_SHOW_CLASS_NAME,

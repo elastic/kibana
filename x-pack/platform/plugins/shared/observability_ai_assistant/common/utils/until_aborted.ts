@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { Observable, OperatorFunction, takeUntil } from 'rxjs';
+import type { OperatorFunction } from 'rxjs';
+import { Observable, takeUntil } from 'rxjs';
 import { AbortError } from '@kbn/kibana-utils-plugin/common';
 
 export function untilAborted<T>(signal: AbortSignal): OperatorFunction<T, T> {

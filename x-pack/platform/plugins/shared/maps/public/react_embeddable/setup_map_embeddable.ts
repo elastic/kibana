@@ -7,7 +7,7 @@
 
 import type { EmbeddableSetup } from '@kbn/embeddable-plugin/public';
 import { i18n } from '@kbn/i18n';
-import { MapAttributes } from '../../common/content_management';
+import type { MapAttributes } from '../../common/content_management';
 import { MAP_SAVED_OBJECT_TYPE, APP_ICON } from '../../common/constants';
 import { untilPluginStartServicesReady } from '../kibana_services';
 

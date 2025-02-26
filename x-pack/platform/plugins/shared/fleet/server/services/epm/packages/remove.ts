@@ -5,15 +5,16 @@
  * 2.0.
  */
 
-import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
+import type {
+  ElasticsearchClient,
+  SavedObjectsClientContract,
+  SavedObject,
+} from '@kbn/core/server';
 
-import type { SavedObject } from '@kbn/core/server';
-
-import { SavedObjectsClient } from '@kbn/core/server';
+import { SavedObjectsClient, SavedObjectsUtils, SavedObjectsErrorHelpers } from '@kbn/core/server';
 
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common/constants';
 
-import { SavedObjectsUtils, SavedObjectsErrorHelpers } from '@kbn/core/server';
 import minVersion from 'semver/ranges/min-version';
 
 import { chunk } from 'lodash';

@@ -14,8 +14,8 @@ import {
   deleteInferenceEndpoint,
   deleteKnowledgeBaseModel,
 } from '../../../observability_ai_assistant_api_integration/tests/knowledge_base/helpers';
-import { ObservabilityAIAssistantApiClient } from '../../../observability_ai_assistant_api_integration/common/observability_ai_assistant_api_client';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { ObservabilityAIAssistantApiClient } from '../../../observability_ai_assistant_api_integration/common/observability_ai_assistant_api_client';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ApiTest({ getService, getPageObjects }: FtrProviderContext) {
   const observabilityAIAssistantAPIClient = getService('observabilityAIAssistantAPIClient');

@@ -6,18 +6,15 @@
  */
 
 import type { ElasticsearchClientMock } from '@kbn/core/server/mocks';
-import { coreMock } from '@kbn/core/server/mocks';
+import { coreMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import type { TaskManagerSetupContract } from '@kbn/task-manager-plugin/server';
 import { TaskStatus } from '@kbn/task-manager-plugin/server';
 import { getDeleteTaskRunResult } from '@kbn/task-manager-plugin/server/task';
 import type { CoreSetup } from '@kbn/core/server';
-import { loggingSystemMock } from '@kbn/core/server/mocks';
 
-import { settingsService } from '../services';
+import { settingsService, appContextService } from '../services';
 import { createAppContextStartContractMock } from '../mocks';
-
-import { appContextService } from '../services';
 
 import { DeleteUnenrolledAgentsTask, TYPE, VERSION } from './delete_unenrolled_agents_task';
 

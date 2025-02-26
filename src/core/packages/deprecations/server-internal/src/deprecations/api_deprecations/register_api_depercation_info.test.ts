@@ -26,7 +26,7 @@ import {
 import { docLinksServiceMock } from '@kbn/core-doc-links-server-mocks';
 import _ from 'lodash';
 import type { DocLinksServiceSetup } from '@kbn/core-doc-links-server';
-import { CoreDeprecatedApiUsageStats } from '@kbn/core-usage-data-server';
+import type { CoreDeprecatedApiUsageStats } from '@kbn/core-usage-data-server';
 
 describe('#registerApiDeprecationsInfo', () => {
   const deprecationsFactory = mockDeprecationsFactory.create();

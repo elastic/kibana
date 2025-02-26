@@ -20,15 +20,13 @@ import {
   EuiTitle,
   EuiHorizontalRule,
 } from '@elastic/eui';
-import { SnoozeSchedule } from '../../../../types';
+import type { SnoozeSchedule } from '../../../../types';
 import { RuleStatusDropdown } from '../..';
-import {
-  ComponentOpts as RuleApis,
-  withBulkRuleOperations,
-} from '../../common/components/with_bulk_rule_api_operations';
+import type { ComponentOpts as RuleApis } from '../../common/components/with_bulk_rule_api_operations';
+import { withBulkRuleOperations } from '../../common/components/with_bulk_rule_api_operations';
 import { RulesListNotifyBadge } from '../../rules_list/components/notify_badge';
 import { useLoadRuleEventLogs } from '../../../hooks/use_load_rule_event_logs';
-import { RefreshToken } from './types';
+import type { RefreshToken } from './types';
 
 export interface RuleStatusPanelProps {
   rule: any;

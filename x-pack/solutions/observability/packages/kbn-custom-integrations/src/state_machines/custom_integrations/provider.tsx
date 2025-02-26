@@ -12,8 +12,8 @@ import { useEffect, useState } from 'react';
 import { isDevMode } from '@kbn/xstate-utils';
 import { createCustomIntegrationsStateMachine } from './state_machine';
 import { IntegrationsClient } from '../services/integrations_client';
-import { CustomIntegrationOptions, IntegrationError } from '../../types';
-import { InitialState } from './types';
+import type { CustomIntegrationOptions, IntegrationError } from '../../types';
+import type { InitialState } from './types';
 import { createCustomIntegrationsNotificationChannel } from './notifications';
 
 interface Services {

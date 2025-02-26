@@ -7,8 +7,8 @@
 
 import expect from '@kbn/expect';
 
-import { DataStream } from '@kbn/index-management-plugin/common';
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { DataStream } from '@kbn/index-management-plugin/common';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 import { API_BASE_PATH } from './constants';
 import { datastreamsHelpers } from './lib/datastreams.helpers';
 

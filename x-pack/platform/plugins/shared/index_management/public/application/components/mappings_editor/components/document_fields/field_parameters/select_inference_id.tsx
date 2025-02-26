@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { EuiSelectableOption } from '@elastic/eui';
 import {
   EuiButton,
   EuiContextMenuItem,
@@ -16,7 +17,6 @@ import {
   EuiPanel,
   EuiPopover,
   EuiSelectable,
-  EuiSelectableOption,
   EuiSpacer,
   EuiText,
   EuiIcon,

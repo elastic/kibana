@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { Logger } from '@kbn/logging';
+import type { Logger } from '@kbn/logging';
 import { parseDuration } from '../../common';
 
 export interface GetTimeRangeResult {

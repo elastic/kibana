@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { IndicesIndexTemplateSummary, Metadata } from '@elastic/elasticsearch/lib/api/types';
+import type { IndicesIndexTemplateSummary, Metadata } from '@elastic/elasticsearch/lib/api/types';
 
 export interface LatestIndexConfig {
   findings: IndexConfig;

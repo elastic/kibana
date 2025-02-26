@@ -10,7 +10,7 @@ import { callAssistantGraph } from '.';
 import { getDefaultAssistantGraph } from './graph';
 import { invokeGraph, streamGraph } from './helpers';
 import { loggerMock } from '@kbn/logging-mocks';
-import { AgentExecutorParams, AssistantDataClients } from '../../executors/types';
+import type { AgentExecutorParams, AssistantDataClients } from '../../executors/types';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { getPrompt, resolveProviderAndModel } from '@kbn/security-ai-prompts';
 import { getFindAnonymizationFieldsResultWithSingleHit } from '../../../../__mocks__/response';
@@ -21,7 +21,7 @@ import {
 } from 'langchain/agents';
 import { newContentReferencesStoreMock } from '@kbn/elastic-assistant-common/impl/content_references/content_references_store/__mocks__/content_references_store.mock';
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
-import { AssistantTool, AssistantToolParams } from '../../../..';
+import type { AssistantTool, AssistantToolParams } from '../../../..';
 import { promptGroupId as toolsGroupId } from '../../../prompt/tool_prompts';
 import { promptDictionary } from '../../../prompt';
 import { promptGroupId } from '../../../prompt/local_prompt_object';

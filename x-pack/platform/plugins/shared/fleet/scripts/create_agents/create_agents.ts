@@ -10,8 +10,7 @@ import { v4 as uuidv4 } from 'uuid';
 import yargs from 'yargs';
 import { omit } from 'lodash';
 
-import type { AgentStatus } from '../../common';
-import type { Agent } from '../../common';
+import type { AgentStatus, Agent } from '../../common';
 const printUsage = () =>
   logger.info(`
     Create mock agent documents for testing fleet queries/UIs at scale.

@@ -7,10 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { SchemaConfig } from '../../..';
-import { FormulaParams } from '../../types';
+import type { SchemaConfig } from '../../..';
+import type { FormulaParams } from '../../types';
 import { createAggregationId, createColumn, getFormat } from './column';
-import { FormulaColumn } from './types';
+import type { FormulaColumn } from './types';
 
 const convertToFormulaParams = (formula: string): FormulaParams => ({
   formula,

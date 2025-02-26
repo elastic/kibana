@@ -15,13 +15,13 @@ import {
 import { createPackagePolicyMock } from '@kbn/fleet-plugin/common/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/server/mocks';
 import { CloudDefendPlugin } from './plugin';
-import { CloudDefendPluginStartDeps } from './types';
-import { PackagePolicy, UpdatePackagePolicy } from '@kbn/fleet-plugin/common';
-import { PostPackagePolicyPostCreateCallback } from '@kbn/fleet-plugin/server';
+import type { CloudDefendPluginStartDeps } from './types';
+import type { PackagePolicy, UpdatePackagePolicy } from '@kbn/fleet-plugin/common';
+import type { PostPackagePolicyPostCreateCallback } from '@kbn/fleet-plugin/server';
 import { INTEGRATION_PACKAGE_NAME } from '../common/constants';
 import Chance from 'chance';
 import type { AwaitedProperties } from '@kbn/utility-types';
-import {
+import type {
   ElasticsearchClient,
   RequestHandlerContext,
   SavedObjectsClientContract,

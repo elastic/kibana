@@ -12,7 +12,7 @@ import type { Filter, BooleanRelation } from '@kbn/es-query';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
 import { addFilter, moveFilter, removeFilter, updateFilters } from './utils';
 import type { Operator } from '../filter_bar/filter_editor';
-import { FilterLocation } from './types';
+import type { FilterLocation } from './types';
 
 /** @internal **/
 export interface FiltersBuilderState {

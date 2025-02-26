@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import { DragStart, DropResult, euiDragDropReorder } from '@elastic/eui';
-import { IToasts, Toast } from '@kbn/core/public';
-import { RoutingDefinition, WiredStreamGetResponse } from '@kbn/streams-schema';
+import type { DragStart, DropResult } from '@elastic/eui';
+import { euiDragDropReorder } from '@elastic/eui';
+import type { IToasts, Toast } from '@kbn/core/public';
+import type { RoutingDefinition, WiredStreamGetResponse } from '@kbn/streams-schema';
 import React, { useCallback, useEffect } from 'react';
 import { useDebounced } from '../../../../util/use_debounce';
 

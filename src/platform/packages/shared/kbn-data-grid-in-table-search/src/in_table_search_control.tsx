@@ -14,7 +14,7 @@ import { i18n } from '@kbn/i18n';
 import { css, type SerializedStyles } from '@emotion/react';
 import { useFindMatches } from './matches/use_find_matches';
 import { InTableSearchInput } from './in_table_search_input';
-import { UseFindMatchesProps } from './types';
+import type { UseFindMatchesProps } from './types';
 import {
   CELL_MATCH_INDEX_ATTRIBUTE,
   HIGHLIGHT_CLASS_NAME,

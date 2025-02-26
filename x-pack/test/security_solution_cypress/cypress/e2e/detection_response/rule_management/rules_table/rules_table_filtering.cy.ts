@@ -19,6 +19,7 @@ import {
   expectManagementTableRules,
   filterByTags,
   unselectTags,
+  disableAutoRefresh,
 } from '../../../../tasks/alerts_detection_rules';
 
 import { createRule, waitForRulesToFinishExecution } from '../../../../tasks/api_calls/rules';
@@ -27,7 +28,6 @@ import {
   createIndex,
   createDocument,
 } from '../../../../tasks/api_calls/elasticsearch';
-import { disableAutoRefresh } from '../../../../tasks/alerts_detection_rules';
 import { getNewRule } from '../../../../objects/rule';
 
 describe('Rules table: filtering', { tags: ['@ess', '@serverless', '@serverlessQA'] }, () => {

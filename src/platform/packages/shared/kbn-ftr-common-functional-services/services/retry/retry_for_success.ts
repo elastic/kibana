@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ToolingLog } from '@kbn/tooling-log';
+import type { ToolingLog } from '@kbn/tooling-log';
 import { inspect } from 'util';
 
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));

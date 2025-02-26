@@ -8,7 +8,7 @@
 import { test as base } from '@kbn/scout';
 
 import { extendPageObjects } from '../page_objects';
-import { ObltTestFixtures, ObltWorkerFixtures } from './types';
+import type { ObltTestFixtures, ObltWorkerFixtures } from './types';
 
 /**
  * Should be used for the test spec files executed seqentially.

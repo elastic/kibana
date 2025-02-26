@@ -16,7 +16,7 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { Status } from '../../../types';
+import type { Status } from '../../../types';
 
 const i18nTexts = {
   deleteInProgressText: i18n.translate(

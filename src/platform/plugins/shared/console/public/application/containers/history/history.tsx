@@ -33,11 +33,11 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { SHELL_TAB_ID } from '../main';
 import { HistoryEmptyPrompt } from './history_empty';
 import { useServicesContext } from '../../contexts';
-import { useEditorActionContext } from '../../contexts/editor_context';
+import { useEditorActionContext, useEditorReadContext } from '../../contexts/editor_context';
 import { HistoryViewer } from './history_viewer_monaco';
-import { useEditorReadContext } from '../../contexts/editor_context';
 import { getFormattedRequest } from '../../lib';
-import { ESRequest, RestoreMethod } from '../../../types';
+import type { ESRequest } from '../../../types';
+import { RestoreMethod } from '../../../types';
 
 const CHILD_ELEMENT_PREFIX = 'historyReq';
 

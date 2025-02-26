@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { SettingsCapabilities } from '@kbn/management-settings-types';
+import type { SettingsCapabilities } from '@kbn/management-settings-types';
 
 export const getSettingsCapabilitiesMock = (): SettingsCapabilities => ({
   spaceSettings: {

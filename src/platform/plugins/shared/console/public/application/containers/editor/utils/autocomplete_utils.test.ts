@@ -10,8 +10,8 @@
 /*
  * Mock the function "populateContext" that accesses the autocomplete definitions
  */
-import { monaco } from '@kbn/monaco';
-import { MonacoEditorActionsProvider } from '../monaco_editor_actions_provider';
+import type { monaco } from '@kbn/monaco';
+import type { MonacoEditorActionsProvider } from '../monaco_editor_actions_provider';
 
 const mockPopulateContext = jest.fn();
 
@@ -22,7 +22,7 @@ jest.mock('../../../../lib/autocomplete/engine', () => {
     },
   };
 });
-import { AutoCompleteContext } from '../../../../lib/autocomplete/types';
+import type { AutoCompleteContext } from '../../../../lib/autocomplete/types';
 import {
   getDocumentationLinkFromAutocomplete,
   getUrlPathCompletionItems,

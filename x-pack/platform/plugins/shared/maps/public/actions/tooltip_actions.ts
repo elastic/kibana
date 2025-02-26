@@ -6,11 +6,11 @@
  */
 
 import _ from 'lodash';
-import { Dispatch } from 'redux';
+import type { Dispatch } from 'redux';
 import { getOpenTooltips } from '../selectors/map_selectors';
 import { SET_OPEN_TOOLTIPS } from './map_action_constants';
-import { TooltipState } from '../../common/descriptor_types';
-import { MapStoreState } from '../reducers/store';
+import type { TooltipState } from '../../common/descriptor_types';
+import type { MapStoreState } from '../reducers/store';
 
 export function closeOnClickTooltip(tooltipId: string) {
   return (dispatch: Dispatch, getState: () => MapStoreState) => {

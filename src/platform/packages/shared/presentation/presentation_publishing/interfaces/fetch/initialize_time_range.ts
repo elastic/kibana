@@ -9,9 +9,9 @@
 
 import { BehaviorSubject } from 'rxjs';
 import fastIsEqual from 'fast-deep-equal';
-import { TimeRange } from '@kbn/es-query';
-import { StateComparators } from '../../comparators';
-import { PublishesWritableTimeRange } from './publishes_unified_search';
+import type { TimeRange } from '@kbn/es-query';
+import type { StateComparators } from '../../comparators';
+import type { PublishesWritableTimeRange } from './publishes_unified_search';
 
 export interface SerializedTimeRange {
   timeRange?: TimeRange | undefined;

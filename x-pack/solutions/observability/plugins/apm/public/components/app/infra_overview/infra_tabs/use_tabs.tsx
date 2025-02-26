@@ -5,10 +5,9 @@
  * 2.0.
  */
 import type { EuiTabbedContentProps } from '@elastic/eui';
-import { useMemo } from 'react';
+import React, { useMemo } from 'react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
-import React from 'react';
 import { EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { ApmPluginStartDeps } from '../../../../plugin';

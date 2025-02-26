@@ -29,13 +29,16 @@ import { isEmpty } from 'lodash';
 import { downloadJson } from '../../../../utils/download_json';
 import type { AgentName } from '../../../../../typings/es_schemas/ui/fields/agent';
 import { EnvironmentBadge } from '../../../shared/environment_badge';
-import { asPercent, asTransactionRate } from '../../../../../common/utils/formatters';
+import {
+  asPercent,
+  asTransactionRate,
+  asDynamicBytes,
+} from '../../../../../common/utils/formatters';
 import { ServiceLink } from '../../../shared/links/apm/service_link';
 import { TruncateWithTooltip } from '../../../shared/truncate_with_tooltip';
 import { StorageDetailsPerService } from './storage_details_per_service';
 import { getComparisonEnabled } from '../../../shared/time_comparison/get_comparison_enabled';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
-import { asDynamicBytes } from '../../../../../common/utils/formatters';
 import { NOT_AVAILABLE_LABEL } from '../../../../../common/i18n';
 import { useApmParams } from '../../../../hooks/use_apm_params';
 import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';

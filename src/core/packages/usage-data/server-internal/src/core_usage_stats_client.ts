@@ -13,7 +13,11 @@ import type {
   SavedObjectsIncrementCounterField,
 } from '@kbn/core-saved-objects-api-server';
 import { DEFAULT_NAMESPACE_STRING } from '@kbn/core-saved-objects-utils-server';
-import type { CoreUsageStats, CoreIncrementCounterParams } from '@kbn/core-usage-data-server';
+import type {
+  CoreUsageStats,
+  CoreIncrementCounterParams,
+  DeprecatedApiUsageFetcher,
+} from '@kbn/core-usage-data-server';
 import {
   type ICoreUsageStatsClient,
   type BaseIncrementOptions,
@@ -37,7 +41,6 @@ import {
   takeUntil,
   tap,
 } from 'rxjs';
-import type { DeprecatedApiUsageFetcher } from '@kbn/core-usage-data-server';
 
 export const BULK_CREATE_STATS_PREFIX = 'apiCalls.savedObjectsBulkCreate';
 export const BULK_GET_STATS_PREFIX = 'apiCalls.savedObjectsBulkGet';

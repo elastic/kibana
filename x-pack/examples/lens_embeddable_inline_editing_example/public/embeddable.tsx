@@ -20,7 +20,7 @@ import {
   EuiButtonIcon,
   EuiTitle,
 } from '@elastic/eui';
-import { LensConfigBuilder } from '@kbn/lens-embeddable-utils/config_builder/config_builder';
+import type { LensConfigBuilder } from '@kbn/lens-embeddable-utils/config_builder/config_builder';
 import type { StartDependencies } from './plugin';
 import { getConfigOptions } from './utils';
 

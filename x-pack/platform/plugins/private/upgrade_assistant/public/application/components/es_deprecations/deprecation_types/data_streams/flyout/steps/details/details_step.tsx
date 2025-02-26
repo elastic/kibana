@@ -21,10 +21,8 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import {
-  DataStreamMetadata,
-  DataStreamReindexStatus,
-} from '../../../../../../../../../common/types';
+import type { DataStreamMetadata } from '../../../../../../../../../common/types';
+import { DataStreamReindexStatus } from '../../../../../../../../../common/types';
 import { LoadingState } from '../../../../../../types';
 import type { ReindexState } from '../../../use_reindex_state';
 import { useAppContext } from '../../../../../../../app_context';

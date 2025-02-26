@@ -7,8 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { CharStreams, type Token } from 'antlr4';
-import { CommonTokenStream, type CharStream, type ErrorListener } from 'antlr4';
+import {
+  CharStreams,
+  type Token,
+  CommonTokenStream,
+  type CharStream,
+  type ErrorListener,
+} from 'antlr4';
 import { ESQLErrorListener } from './esql_error_listener';
 import { ESQLAstBuilderListener } from './esql_ast_builder_listener';
 import { GRAMMAR_ROOT_RULE } from './constants';
@@ -17,7 +22,7 @@ import type { ESQLAst, ESQLAstQueryExpression, EditorError } from '../types';
 import { Builder } from '../builder';
 import { default as ESQLLexer } from '../antlr/esql_lexer';
 import { default as ESQLParser } from '../antlr/esql_parser';
-import { default as ESQLParserListener } from '../antlr/esql_parser_listener';
+import type { default as ESQLParserListener } from '../antlr/esql_parser_listener';
 
 export const getLexer = (inputStream: CharStream, errorListener: ErrorListener<any>) => {
   const lexer = new ESQLLexer(inputStream);

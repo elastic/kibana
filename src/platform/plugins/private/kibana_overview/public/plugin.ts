@@ -8,17 +8,10 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { from } from 'rxjs';
-import { distinct, map, switchMap } from 'rxjs';
-import {
-  AppMountParameters,
-  CoreSetup,
-  CoreStart,
-  Plugin,
-  DEFAULT_APP_CATEGORIES,
-  AppStatus,
-} from '@kbn/core/public';
-import {
+import { from, distinct, map, switchMap } from 'rxjs';
+import type { AppMountParameters, CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
+import { DEFAULT_APP_CATEGORIES, AppStatus } from '@kbn/core/public';
+import type {
   KibanaOverviewPluginSetup,
   KibanaOverviewPluginStart,
   AppPluginSetupDependencies,

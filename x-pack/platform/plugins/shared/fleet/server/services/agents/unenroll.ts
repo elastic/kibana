@@ -17,9 +17,14 @@ import { agentsKueryNamespaceFilter } from '../spaces/agent_namespaces';
 
 import { createAgentAction } from './actions';
 import type { GetAgentsOptions } from './crud';
-import { openPointInTime } from './crud';
-import { getAgentsByKuery } from './crud';
-import { getAgentById, getAgents, updateAgent, getAgentPolicyForAgent } from './crud';
+import {
+  openPointInTime,
+  getAgentsByKuery,
+  getAgentById,
+  getAgents,
+  updateAgent,
+  getAgentPolicyForAgent,
+} from './crud';
 import {
   invalidateAPIKeysForAgents,
   UnenrollActionRunner,

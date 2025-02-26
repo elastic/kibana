@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { Client } from '@elastic/elasticsearch';
+import type { Client } from '@elastic/elasticsearch';
 import {
   SLI_DESTINATION_INDEX_PATTERN,
   SUMMARY_DESTINATION_INDEX_PATTERN,

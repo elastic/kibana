@@ -16,10 +16,9 @@ import type {
 import { escape } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import type { Filter } from '@kbn/es-query';
-import type { IField, IVectorSource } from '@kbn/maps-plugin/public';
+import type { IField, IVectorSource, ITooltipProperty } from '@kbn/maps-plugin/public';
 import { FIELD_ORIGIN, DECIMAL_DEGREES_PRECISION } from '@kbn/maps-plugin/common';
 import type { TileMetaFeature } from '@kbn/maps-plugin/common/descriptor_types';
-import type { ITooltipProperty } from '@kbn/maps-plugin/public';
 import type { AnomalySource } from './anomaly_source';
 
 export const ACTUAL_LABEL = i18n.translate('xpack.ml.maps.anomalyLayerActualLabel', {

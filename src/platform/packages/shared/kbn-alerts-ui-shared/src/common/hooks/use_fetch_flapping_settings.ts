@@ -9,7 +9,7 @@
 
 import { useQuery } from '@tanstack/react-query';
 import type { HttpStart } from '@kbn/core-http-browser';
-import { RulesSettingsFlapping } from '@kbn/alerting-types/rule_settings';
+import type { RulesSettingsFlapping } from '@kbn/alerting-types/rule_settings';
 import { fetchFlappingSettings } from '../apis/fetch_flapping_settings';
 
 interface UseFetchFlappingSettingsProps {

@@ -6,7 +6,7 @@
  */
 
 import { createLogger, LogLevel, LogsSynthtraceEsClient } from '@kbn/apm-synthtrace';
-import { DeploymentAgnosticFtrProviderContext } from '../ftr_provider_context';
+import type { DeploymentAgnosticFtrProviderContext } from '../ftr_provider_context';
 
 export function LogsSynthtraceEsClientProvider({
   getService,

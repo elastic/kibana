@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import {
+import type {
   MappingTypeMapping,
   MappingProperty,
   PropertyName,
 } from '@elastic/elasticsearch/lib/api/types';
-import { DatasetQualityESClient } from '../../../utils/create_dataset_quality_es_client';
+import type { DatasetQualityESClient } from '../../../utils/create_dataset_quality_es_client';
 
 export interface DataStreamMappingResponse {
   fieldCount: number;

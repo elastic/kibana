@@ -9,7 +9,8 @@
 
 import { parse } from '@kbn/esql-ast';
 import { getBracketsToClose, getExpressionType, shouldBeQuotedSource } from './helpers';
-import { SupportedDataType, FunctionDefinitionTypes } from '../definitions/types';
+import type { SupportedDataType } from '../definitions/types';
+import { FunctionDefinitionTypes } from '../definitions/types';
 import { setTestFunctions } from './test_functions';
 
 describe('shouldBeQuotedSource', () => {

@@ -12,13 +12,8 @@ import { writeFile, readFile } from 'fs/promises';
 import { ignoreErrorsMap, validateQuery } from './validation';
 import { scalarFunctionDefinitions } from '../definitions/generated/scalar_functions';
 import { getFunctionSignatures } from '../definitions/helpers';
-import {
-  FieldType,
-  FunctionDefinition,
-  SupportedDataType,
-  dataTypes,
-  fieldTypes as _fieldTypes,
-} from '../definitions/types';
+import type { FieldType, FunctionDefinition, SupportedDataType } from '../definitions/types';
+import { dataTypes, fieldTypes as _fieldTypes } from '../definitions/types';
 import { timeUnits, timeUnitsToSuggest } from '../definitions/literals';
 import { aggFunctionDefinitions } from '../definitions/generated/aggregation_functions';
 import capitalize from 'lodash/capitalize';
@@ -34,7 +29,8 @@ import {
   unsupported_field,
 } from '../__tests__/helpers';
 import { validationFromCommandTestSuite as runFromTestSuite } from './__tests__/test_suites/validation.command.from';
-import { Setup, setup } from './__tests__/helpers';
+import type { Setup } from './__tests__/helpers';
+import { setup } from './__tests__/helpers';
 
 const fieldTypes = _fieldTypes.filter((type) => type !== 'unsupported');
 

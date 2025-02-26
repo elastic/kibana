@@ -7,8 +7,8 @@
 
 import { i18n } from '@kbn/i18n';
 import type { mapCenter } from '../../../canvas_plugin_src/functions/common/map_center';
-import { FunctionHelp } from '..';
-import { FunctionFactory } from '../../../types';
+import type { FunctionHelp } from '..';
+import type { FunctionFactory } from '../../../types';
 
 export const help: FunctionHelp<FunctionFactory<typeof mapCenter>> = {
   help: i18n.translate('xpack.canvas.functions.mapCenterHelpText', {

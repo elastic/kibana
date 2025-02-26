@@ -10,8 +10,8 @@ import { toMountPoint } from '@kbn/react-kibana-mount';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { EuiCallOut, EuiConfirmModal, EuiSpacer } from '@elastic/eui';
-import { KibanaSavedObjectType } from '@kbn/fleet-plugin/public';
-import { MonitoringStartServices } from '../../../types';
+import type { KibanaSavedObjectType } from '@kbn/fleet-plugin/public';
+import type { MonitoringStartServices } from '../../../types';
 
 const INGEST_PIPELINE_DASHBOARD_ID = 'elasticsearch-metrics-ingest-pipelines';
 

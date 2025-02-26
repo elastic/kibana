@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { PluginInitializerContext } from '@kbn/core/public';
+import type { PluginInitializerContext } from '@kbn/core/public';
 import type { ConfigSchema } from '../server/config';
 
 /*
@@ -27,7 +27,43 @@ export { convertIntervalToEsInterval } from '../common/search/aggs/buckets/lib/t
  * Exporters (CSV)
  */
 
-import { datatableToCSV, CSV_MIME_TYPE, cellHasFormulas, tableHasFormulas } from '../common';
+import {
+  datatableToCSV,
+  CSV_MIME_TYPE,
+  cellHasFormulas,
+  tableHasFormulas,
+  isNestedField,
+  isFilterable,
+  isMultiField,
+  getFieldSubtypeNested,
+  getFieldSubtypeMulti,
+  // aggs
+  CidrMask,
+  intervalOptions,
+  isDateHistogramBucketAggConfig,
+  isNumberType,
+  isStringType,
+  isType,
+  parentPipelineType,
+  propFilter,
+  siblingPipelineType,
+  termsAggFilter,
+  dateHistogramInterval,
+  InvalidEsCalendarIntervalError,
+  InvalidEsIntervalFormatError,
+  IpAddress,
+  isValidEsInterval,
+  isValidInterval,
+  parseEsInterval,
+  parseInterval,
+  toAbsoluteDates,
+  boundsDescendingRaw,
+  getResponseInspectorStats,
+  calcAutoIntervalLessThan,
+  // tabify
+  tabifyAggResponse,
+  tabifyGetColumns,
+} from '../common';
 export const exporters = {
   datatableToCSV,
   CSV_MIME_TYPE,
@@ -38,14 +74,6 @@ export const exporters = {
 /*
  * Index patterns:
  */
-
-import {
-  isNestedField,
-  isFilterable,
-  isMultiField,
-  getFieldSubtypeNested,
-  getFieldSubtypeMulti,
-} from '../common';
 
 import {
   ILLEGAL_CHARACTERS_KEY,
@@ -89,35 +117,6 @@ export {
 /*
  * Search:
  */
-
-import {
-  // aggs
-  CidrMask,
-  intervalOptions,
-  isDateHistogramBucketAggConfig,
-  isNumberType,
-  isStringType,
-  isType,
-  parentPipelineType,
-  propFilter,
-  siblingPipelineType,
-  termsAggFilter,
-  dateHistogramInterval,
-  InvalidEsCalendarIntervalError,
-  InvalidEsIntervalFormatError,
-  IpAddress,
-  isValidEsInterval,
-  isValidInterval,
-  parseEsInterval,
-  parseInterval,
-  toAbsoluteDates,
-  boundsDescendingRaw,
-  getResponseInspectorStats,
-  calcAutoIntervalLessThan,
-  // tabify
-  tabifyAggResponse,
-  tabifyGetColumns,
-} from '../common';
 
 export { AggGroupLabels, AggGroupNames, METRIC_TYPES, BUCKET_TYPES } from '../common';
 

@@ -5,13 +5,13 @@
  * 2.0.
  */
 import type SuperTest from 'supertest';
-import {
+import type {
   AnalyzeApiRequestBody,
-  ANALYZE_API_PATH,
   AnalyzeApiResponse,
 } from '@kbn/automatic-import-plugin/common';
+import { ANALYZE_API_PATH } from '@kbn/automatic-import-plugin/common';
 import { superUser } from '../authentication/users';
-import { User } from '../authentication/types';
+import type { User } from '../authentication/types';
 
 export const postAnalyzeApi = async ({
   supertest,

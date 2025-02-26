@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import TestAgent from 'supertest/lib/agent';
+import type TestAgent from 'supertest/lib/agent';
 import type { IEsSearchResponse } from '@kbn/search-types';
 
 import type { SearchSecureService } from '@kbn/test-suites-serverless/shared/services/search_secure';

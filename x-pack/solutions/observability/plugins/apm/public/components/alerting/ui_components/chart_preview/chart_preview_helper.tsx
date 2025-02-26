@@ -7,8 +7,7 @@
 
 import type { FC, PropsWithChildren } from 'react';
 import React from 'react';
-import { EuiLoadingChart } from '@elastic/eui';
-import { EuiText } from '@elastic/eui';
+import { EuiLoadingChart, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import type { Coordinate } from '../../../../../typings/timeseries';

@@ -8,8 +8,7 @@ import { EuiFlexGrid, EuiFlexGroup, EuiFlexItem, EuiPanel, EuiTitle } from '@ela
 import { i18n } from '@kbn/i18n';
 import React, { useCallback } from 'react';
 import { useMonitorDetailsPage } from '../use_monitor_details_page';
-import { useRefreshedRangeFromUrl, useUrlParams } from '../../../hooks';
-import { useDimensions } from '../../../hooks';
+import { useRefreshedRangeFromUrl, useUrlParams, useDimensions } from '../../../hooks';
 import { SyntheticsDatePicker } from '../../common/date_picker/synthetics_date_picker';
 import { AvailabilityPanel } from '../monitor_summary/availability_panel';
 import { DurationPanel } from '../monitor_summary/duration_panel';

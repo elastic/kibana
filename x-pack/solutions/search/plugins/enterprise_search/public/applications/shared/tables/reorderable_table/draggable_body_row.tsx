@@ -10,7 +10,7 @@ import React from 'react';
 import { EuiDraggable, EuiFlexGroup, EuiFlexItem, EuiIcon } from '@elastic/eui';
 
 import { BodyRow } from './body_row';
-import { Column } from './types';
+import type { Column } from './types';
 
 export interface DraggableBodyRowProps<Item> {
   columns: Array<Column<Item>>;

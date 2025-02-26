@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { Story } from '@storybook/react';
+import type { Story } from '@storybook/react';
 import { EuiText } from '@elastic/eui';
 import { DefaultPageLayout } from './layout';
 import { StoryProvidersComponent } from '../mocks/story_providers';

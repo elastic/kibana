@@ -7,8 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { getAstAndSyntaxErrors } from '@kbn/esql-ast';
-import { parse, mutate, BasicPrettyPrinter } from '@kbn/esql-ast';
+import { getAstAndSyntaxErrors, parse, mutate, BasicPrettyPrinter } from '@kbn/esql-ast';
 import { sanitazeESQLInput } from './sanitaze_input';
 
 // Append in a new line the appended text to take care of the case where the user adds a comment at the end of the query

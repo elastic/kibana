@@ -16,7 +16,8 @@ import {
   type Logger,
   type SavedObjectsClientContract,
 } from '@kbn/core/server';
-import { KibanaSavedObjectsSLORepository, SLORepository } from '../../../services';
+import type { SLORepository } from '../../../services';
+import { KibanaSavedObjectsSLORepository } from '../../../services';
 import {
   createAPMTransactionDurationIndicator,
   createAPMTransactionErrorRateIndicator,

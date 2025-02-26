@@ -10,8 +10,8 @@ import React, { useState, useEffect, useCallback, useMemo } from 'react';
 
 import type { estypes } from '@elastic/elasticsearch';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
-import { EuiHorizontalRule } from '@elastic/eui';
 import {
+  EuiHorizontalRule,
   EuiButton,
   EuiSpacer,
   EuiFlexGroup,

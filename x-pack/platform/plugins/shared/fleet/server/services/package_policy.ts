@@ -139,6 +139,7 @@ import type {
   PackagePolicyService,
   RunExternalCallbacksPackagePolicyArgument,
   RunExternalCallbacksPackagePolicyResponse,
+  PackagePolicyClientFetchAllItemIdsOptions,
 } from './package_policy_service';
 import { installAssetsForInputPackagePolicy } from './epm/packages/install';
 import { auditLoggingService } from './audit_logging';
@@ -150,7 +151,6 @@ import {
 } from './secrets';
 import { getPackageAssetsMap } from './epm/packages/get';
 import { validateAgentPolicyOutputForIntegration } from './agent_policies/outputs_helpers';
-import type { PackagePolicyClientFetchAllItemIdsOptions } from './package_policy_service';
 import {
   validateAdditionalDatastreamsPermissionsForSpace,
   validatePolicyNamespaceForSpace,

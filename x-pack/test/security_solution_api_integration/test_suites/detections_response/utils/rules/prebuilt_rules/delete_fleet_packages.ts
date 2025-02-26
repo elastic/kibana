@@ -7,12 +7,12 @@
 
 import type { Client } from '@elastic/elasticsearch';
 import { epmRouteService } from '@kbn/fleet-plugin/common';
-import { RetryService } from '@kbn/ftr-common-functional-services';
+import type { RetryService } from '@kbn/ftr-common-functional-services';
 import {
   ENDPOINT_PACKAGE_NAME,
   PREBUILT_RULES_PACKAGE_NAME,
 } from '@kbn/security-solution-plugin/common/detection_engine/constants';
-import { ToolingLog } from '@kbn/tooling-log';
+import type { ToolingLog } from '@kbn/tooling-log';
 import type SuperTest from 'supertest';
 import { refreshSavedObjectIndices } from '../../refresh_index';
 

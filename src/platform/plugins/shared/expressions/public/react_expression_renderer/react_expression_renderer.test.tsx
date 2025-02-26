@@ -9,14 +9,13 @@
 
 import React from 'react';
 import { act } from 'react-dom/test-utils';
-import { Subject } from 'rxjs';
-import { share } from 'rxjs';
+import { Subject, share } from 'rxjs';
 import { ReactExpressionRenderer } from './react_expression_renderer';
 import { mount } from 'enzyme';
 import { EuiProgress } from '@elastic/eui';
-import { IInterpreterRenderHandlers } from '../../common';
+import type { IInterpreterRenderHandlers } from '../../common';
 import { ExpressionLoader } from '../loader';
-import { RenderErrorHandlerFnType, ExpressionRendererEvent } from '../types';
+import type { RenderErrorHandlerFnType, ExpressionRendererEvent } from '../types';
 
 jest.mock('../loader', () => {
   return {

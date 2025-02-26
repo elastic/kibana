@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { SavedObject, SavedObjectMigrationFn } from '@kbn/core/server';
+import type { SavedObject, SavedObjectMigrationFn } from '@kbn/core/server';
 
 import { extractReferences, injectReferences } from '../../../common';
 import type { DashboardSavedObjectTypeMigrationsDeps } from './dashboard_saved_object_migrations';

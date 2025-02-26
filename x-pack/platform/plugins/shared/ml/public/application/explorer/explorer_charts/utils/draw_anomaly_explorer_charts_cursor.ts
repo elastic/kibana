@@ -5,8 +5,7 @@
  * 2.0.
  */
 import d3 from 'd3';
-import type { PartialTheme } from '@elastic/charts';
-import type { PointerEvent } from '@elastic/charts';
+import type { PartialTheme, PointerEvent } from '@elastic/charts';
 import { CHART_HEIGHT } from '../constants';
 interface ChartScales {
   lineChartXScale: (value: number | null | string) => number;

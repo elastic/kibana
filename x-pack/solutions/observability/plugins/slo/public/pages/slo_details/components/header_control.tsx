@@ -15,7 +15,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { sloFeatureId } from '@kbn/observability-plugin/common';
 import { SLO_BURN_RATE_RULE_TYPE_ID } from '@kbn/rule-data-utils';
-import { SLOWithSummaryResponse } from '@kbn/slo-schema';
+import type { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import React, { useCallback, useEffect, useState } from 'react';
 import { paths } from '../../../../common/locators/paths';
 import { SloDeleteModal } from '../../../components/slo/delete_confirmation_modal/slo_delete_confirmation_modal';

@@ -5,22 +5,20 @@
  * 2.0.
  */
 
-import { kea, MakeLogicType } from 'kea';
+import type { MakeLogicType } from 'kea';
+import { kea } from 'kea';
 
-import { Connector } from '@kbn/search-connectors/types';
+import type { Connector } from '@kbn/search-connectors/types';
 
 import { Status } from '../../../../../common/types/api';
 
-import { Meta } from '../../../../../common/types/pagination';
-import {
-  DeleteConnectorApiLogic,
-  DeleteConnectorApiLogicActions,
-} from '../../api/connector/delete_connector_api_logic';
-import {
-  FetchConnectorsApiLogic,
-  FetchConnectorsApiLogicActions,
-} from '../../api/connector/fetch_connectors.api';
-import { DeleteIndexApiActions, DeleteIndexApiLogic } from '../../api/index/delete_index_api_logic';
+import type { Meta } from '../../../../../common/types/pagination';
+import type { DeleteConnectorApiLogicActions } from '../../api/connector/delete_connector_api_logic';
+import { DeleteConnectorApiLogic } from '../../api/connector/delete_connector_api_logic';
+import type { FetchConnectorsApiLogicActions } from '../../api/connector/fetch_connectors.api';
+import { FetchConnectorsApiLogic } from '../../api/connector/fetch_connectors.api';
+import type { DeleteIndexApiActions } from '../../api/index/delete_index_api_logic';
+import { DeleteIndexApiLogic } from '../../api/index/delete_index_api_logic';
 
 export type ConnectorViewItem = Connector & { docsCount?: number; indexExists: boolean };
 export interface ConnectorsActions {

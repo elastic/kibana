@@ -7,10 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Observable } from 'rxjs';
+import type { Observable } from 'rxjs';
 
-import { NoDataPagePluginSetup } from '@kbn/no-data-page-plugin/public';
-import {
+import type { NoDataPagePluginSetup } from '@kbn/no-data-page-plugin/public';
+import type {
   KibanaNoDataPageServices,
   KibanaNoDataPageKibanaDependencies,
 } from '@kbn/shared-ux-page-kibana-no-data-types';

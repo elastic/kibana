@@ -7,14 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { of, BehaviorSubject, firstValueFrom, Observable } from 'rxjs';
+import { of, BehaviorSubject, firstValueFrom, Observable, first, take, toArray } from 'rxjs';
 
 import { type ServiceStatus, ServiceStatusLevels, type CoreStatus } from '@kbn/core-status-common';
 import type { ILoggingSystem } from '@kbn/core-logging-server-internal';
-import { first, take, toArray } from 'rxjs';
 import { mockCoreContext } from '@kbn/core-base-server-mocks';
 import { environmentServiceMock } from '@kbn/core-environment-server-mocks';
-import { mockRouter, RouterMock } from '@kbn/core-http-router-server-mocks';
+import type { RouterMock } from '@kbn/core-http-router-server-mocks';
+import { mockRouter } from '@kbn/core-http-router-server-mocks';
 import { httpServiceMock } from '@kbn/core-http-server-mocks';
 import { metricsServiceMock } from '@kbn/core-metrics-server-mocks';
 import { configServiceMock } from '@kbn/config-mocks';

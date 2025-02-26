@@ -5,10 +5,9 @@
  * 2.0.
  */
 
-import { map, reduce } from 'rxjs';
-import { Plugin, CoreSetup, CoreStart, AppMountParameters } from '@kbn/core/public';
-import { lastValueFrom } from 'rxjs';
-import {
+import { map, reduce, lastValueFrom } from 'rxjs';
+import type { Plugin, CoreSetup, CoreStart, AppMountParameters } from '@kbn/core/public';
+import type {
   GlobalSearchPluginSetup,
   GlobalSearchPluginStart,
   GlobalSearchResult,

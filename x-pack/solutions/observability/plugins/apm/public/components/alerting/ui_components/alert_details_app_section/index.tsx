@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiCallOut } from '@elastic/eui';
 import { COMPARATORS } from '@kbn/alerting-comparators';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -21,7 +21,6 @@ import {
   ALERT_RULE_TYPE_ID,
   ALERT_START,
 } from '@kbn/rule-data-utils';
-import { EuiCallOut } from '@elastic/eui';
 import type { CoreStart } from '@kbn/core/public';
 import {
   SERVICE_ENVIRONMENT,

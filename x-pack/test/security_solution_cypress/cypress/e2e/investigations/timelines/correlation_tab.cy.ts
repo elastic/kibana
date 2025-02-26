@@ -7,7 +7,7 @@
 
 import { openTimeline } from '../../../tasks/timelines';
 import { TIMELINE_CORRELATION_INPUT, EQL_EVENT_COUNT } from '../../../screens/timeline';
-import { createTimeline } from '../../../tasks/api_calls/timelines';
+import { createTimeline, deleteTimelines } from '../../../tasks/api_calls/timelines';
 
 import { login } from '../../../tasks/login';
 import { visit } from '../../../tasks/navigation';
@@ -15,7 +15,6 @@ import { addEqlToTimeline, saveTimeline, clearEqlInTimeline } from '../../../tas
 
 import { TIMELINES_URL } from '../../../urls/navigation';
 import { EQL_QUERY_VALIDATION_ERROR } from '../../../screens/create_new_rule';
-import { deleteTimelines } from '../../../tasks/api_calls/timelines';
 
 describe('Correlation tab', { tags: ['@ess', '@serverless'] }, () => {
   const eql = 'any where process.name == "zsh"';

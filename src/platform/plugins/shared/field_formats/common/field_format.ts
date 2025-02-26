@@ -9,7 +9,7 @@
 
 import { transform, size, cloneDeep, get, defaults } from 'lodash';
 import { createCustomFieldFormat } from './converters/custom';
-import {
+import type {
   FieldFormatsGetConfigFn,
   FieldFormatsContentType,
   FieldFormatInstanceType,
@@ -19,9 +19,10 @@ import {
   TextContextTypeOptions,
   FieldFormatMetaParams,
   FieldFormatParams,
+  HtmlContextTypeConvert,
+  TextContextTypeConvert,
 } from './types';
 import { htmlContentTypeSetup, textContentTypeSetup, TEXT_CONTEXT_TYPE } from './content_types';
-import { HtmlContextTypeConvert, TextContextTypeConvert } from './types';
 
 const DEFAULT_CONTEXT_TYPE = TEXT_CONTEXT_TYPE;
 

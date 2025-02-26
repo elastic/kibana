@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useState, useRef, useCallback, useMemo, useEffect, KeyboardEvent, FC } from 'react';
+import type { KeyboardEvent, FC } from 'react';
+import React, { useState, useRef, useCallback, useMemo, useEffect } from 'react';
 import {
   htmlIdGenerator,
   EuiToolTip,
@@ -28,7 +29,8 @@ import {
 } from '@kbn/monaco';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { css, Interpolation, Theme } from '@emotion/react';
+import type { Interpolation, Theme } from '@emotion/react';
+import { css } from '@emotion/react';
 import {
   MonacoEditor as ReactMonacoEditor,
   type MonacoEditorProps as ReactMonacoEditorProps,

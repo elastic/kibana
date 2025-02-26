@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 
 const policyName = 'testPolicy1';
 const repoName = 'found-snapshots'; // this repo already exists on cloud

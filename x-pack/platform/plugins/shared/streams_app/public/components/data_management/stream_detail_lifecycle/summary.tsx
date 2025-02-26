@@ -8,8 +8,8 @@
 import React, { useMemo } from 'react';
 import { EuiPanel, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import type { IngestStreamGetResponse } from '@kbn/streams-schema';
 import {
-  IngestStreamGetResponse,
   isDslLifecycle,
   isIlmLifecycle,
   isInheritLifecycle,

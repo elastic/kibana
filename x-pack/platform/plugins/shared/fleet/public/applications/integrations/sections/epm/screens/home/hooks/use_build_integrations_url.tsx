@@ -6,8 +6,7 @@
  */
 import { useLocation, useParams, useHistory } from 'react-router-dom';
 
-import { useStartServices } from '../../../../../hooks';
-import { useLink } from '../../../../../hooks';
+import { useStartServices, useLink } from '../../../../../hooks';
 
 import type { CategoryParams } from '..';
 import { getParams } from '..';

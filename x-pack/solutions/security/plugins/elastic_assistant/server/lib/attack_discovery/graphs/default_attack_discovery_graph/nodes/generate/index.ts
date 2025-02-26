@@ -8,7 +8,7 @@
 import type { ActionsClientLlm } from '@kbn/langchain/server';
 import type { Logger } from '@kbn/core/server';
 
-import { GenerationPrompts } from '../helpers/prompts';
+import type { GenerationPrompts } from '../helpers/prompts';
 import { discardPreviousGenerations } from './helpers/discard_previous_generations';
 import { extractJson } from '../helpers/extract_json';
 import { getAnonymizedAlertsFromState } from './helpers/get_anonymized_alerts_from_state';

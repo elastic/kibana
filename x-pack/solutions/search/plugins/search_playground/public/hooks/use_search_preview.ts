@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import { SearchHit } from '@elastic/elasticsearch/lib/api/types';
+import type { SearchHit } from '@elastic/elasticsearch/lib/api/types';
 import { useQuery } from '@tanstack/react-query';
 import { useFormContext } from 'react-hook-form';
 import type { HttpSetup } from '@kbn/core-http-browser';
-import { APIRoutes, ChatForm, ChatFormFields, Pagination } from '../types';
+import type { ChatForm, Pagination } from '../types';
+import { APIRoutes, ChatFormFields } from '../types';
 import { useKibana } from './use_kibana';
 import { DEFAULT_PAGINATION } from '../../common';
 

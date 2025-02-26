@@ -8,7 +8,7 @@
 import React from 'react';
 import { EuiBasicTable, EuiToolTip, EuiBadge } from '@elastic/eui';
 
-import { BreakdownItem } from '../../types';
+import type { BreakdownItem } from '../../types';
 import { nsToPretty } from '../../lib';
 import { PercentageBadge } from '../percentage_badge';
 

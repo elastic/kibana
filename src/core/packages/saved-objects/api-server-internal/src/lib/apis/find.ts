@@ -10,13 +10,13 @@
 import Boom from '@hapi/boom';
 import type { estypes } from '@elastic/elasticsearch';
 import { isSupportedEsServer } from '@kbn/core-elasticsearch-server-internal';
-import {
-  SavedObjectsErrorHelpers,
-  type SavedObjectsRawDoc,
+import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
+import type {
   CheckAuthorizationResult,
   SavedObjectsRawDocSource,
   GetFindRedactTypeMapParams,
   SavedObjectUnsanitizedDoc,
+  SavedObjectsRawDoc,
 } from '@kbn/core-saved-objects-server';
 import {
   DEFAULT_NAMESPACE_STRING,
@@ -24,13 +24,13 @@ import {
   FIND_DEFAULT_PER_PAGE,
   SavedObjectsUtils,
 } from '@kbn/core-saved-objects-utils-server';
-import {
+import type {
   SavedObjectsFindOptions,
   SavedObjectsFindInternalOptions,
   SavedObjectsFindResult,
   SavedObjectsFindResponse,
 } from '@kbn/core-saved-objects-api-server';
-import { ApiExecutionContext } from './types';
+import type { ApiExecutionContext } from './types';
 import {
   validateConvertFilterToKueryNode,
   getSearchDsl,

@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { estypes } from '@elastic/elasticsearch';
 import type {
   ThreatQuery,
   ThreatMapping,
@@ -18,11 +17,15 @@ import type {
   Type,
 } from '@kbn/securitysolution-io-ts-alerting-types';
 import type { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
-import type {
-  OpenPointInTimeResponse,
-  QueryDslBoolQuery,
-} from '@elastic/elasticsearch/lib/api/types';
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
+import type {
+  QueryDslBoolQuery,
+  OpenPointInTimeResponse,
+  MappingRuntimeFields,
+  SearchHit,
+  SearchResponse,
+  SortResults,
+} from '@elastic/elasticsearch/lib/api/types';
 import type { ListClient } from '@kbn/lists-plugin/server';
 import type {
   AlertInstanceContext,
@@ -75,7 +78,7 @@ export interface CreateThreatSignalsOptions {
   type: Type;
   wrapHits: WrapHits;
   wrapSuppressedHits: WrapSuppressedHits;
-  runtimeMappings: estypes.MappingRuntimeFields | undefined;
+  runtimeMappings: MappingRuntimeFields | undefined;
   primaryTimestamp: string;
   secondaryTimestamp?: string;
   exceptionFilter: Filter | undefined;
@@ -108,7 +111,7 @@ export interface CreateThreatSignalOptions {
   type: Type;
   wrapHits: WrapHits;
   wrapSuppressedHits: WrapSuppressedHits;
-  runtimeMappings: estypes.MappingRuntimeFields | undefined;
+  runtimeMappings: MappingRuntimeFields | undefined;
   primaryTimestamp: string;
   secondaryTimestamp?: string;
   exceptionFilter: Filter | undefined;
@@ -160,7 +163,7 @@ export interface CreateEventSignalOptions {
   perPage?: number;
   threatPitId: OpenPointInTimeResponse['id'];
   reassignThreatPitId: (newPitId: OpenPointInTimeResponse['id'] | undefined) => void;
-  runtimeMappings: estypes.MappingRuntimeFields | undefined;
+  runtimeMappings: MappingRuntimeFields | undefined;
   primaryTimestamp: string;
   secondaryTimestamp?: string;
   exceptionFilter: Filter | undefined;
@@ -236,12 +239,12 @@ export interface GetThreatListOptions {
   perPage?: number;
   query: string;
   ruleExecutionLogger: IRuleExecutionLogForExecutors;
-  searchAfter: estypes.SortResults | undefined;
+  searchAfter: SortResults | undefined;
   threatFilters: unknown[];
   threatListConfig: ThreatListConfig;
   pitId: OpenPointInTimeResponse['id'];
   reassignPitId: (newPitId: OpenPointInTimeResponse['id'] | undefined) => void;
-  runtimeMappings: estypes.MappingRuntimeFields | undefined;
+  runtimeMappings: MappingRuntimeFields | undefined;
   listClient: ListClient;
   exceptionFilter: Filter | undefined;
   indexFields: DataViewFieldBase[];
@@ -265,7 +268,7 @@ export interface ThreatListDoc {
  * This is an ECS document being returned, but the user could return or use non-ecs based
  * documents potentially.
  */
-export type ThreatListItem = estypes.SearchHit<ThreatListDoc>;
+export type ThreatListItem = SearchHit<ThreatListDoc>;
 
 export interface ThreatEnrichment {
   feed: Record<string, unknown>;
@@ -303,7 +306,7 @@ export interface BuildThreatEnrichmentOptions {
   listClient: ListClient;
   exceptionFilter: Filter | undefined;
   threatMapping: ThreatMapping;
-  runtimeMappings: estypes.MappingRuntimeFields | undefined;
+  runtimeMappings: MappingRuntimeFields | undefined;
   threatIndexFields: DataViewFieldBase[];
 }
 
@@ -313,13 +316,13 @@ export interface EventsOptions {
   query: string;
   language: ThreatLanguageOrUndefined;
   index: string[];
-  searchAfter: estypes.SortResults | undefined;
+  searchAfter: SortResults | undefined;
   perPage?: number;
   filters: unknown[];
   primaryTimestamp: string;
   secondaryTimestamp?: string;
   tuple: RuleRangeTuple;
-  runtimeMappings: estypes.MappingRuntimeFields | undefined;
+  runtimeMappings: MappingRuntimeFields | undefined;
   exceptionFilter: Filter | undefined;
   eventListConfig?: OverrideBodyQuery;
   indexFields: DataViewFieldBase[];
@@ -330,7 +333,7 @@ export interface EventDoc {
   [key: string]: unknown;
 }
 
-export type EventItem = estypes.SearchHit<EventDoc>;
+export type EventItem = SearchHit<EventDoc>;
 
 export interface EventCountOptions {
   esClient: ElasticsearchClient;
@@ -351,8 +354,8 @@ export interface SignalMatch {
 }
 
 export type GetDocumentListInterface = (params: {
-  searchAfter: estypes.SortResults | undefined;
-}) => Promise<estypes.SearchResponse<EventDoc | ThreatListDoc>>;
+  searchAfter: SortResults | undefined;
+}) => Promise<SearchResponse<EventDoc | ThreatListDoc>>;
 
 export type CreateSignalInterface = (
   params: EventItem[] | ThreatListItem[]

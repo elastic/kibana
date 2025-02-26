@@ -11,7 +11,7 @@ import { i18n } from '@kbn/i18n';
 import { useParams } from 'react-router-dom';
 import { EuiSpacer } from '@elastic/eui';
 import { benchmarksNavigation } from '@kbn/cloud-security-posture';
-import { CloudSecurityPolicyTemplate } from '../../../common/types_old';
+import type { CloudSecurityPolicyTemplate } from '../../../common/types_old';
 import { VULN_MGMT_POLICY_TEMPLATE } from '../../../common/constants';
 import { useKibana } from '../../common/hooks/use_kibana';
 import { cloudPosturePages } from '../../common/navigation/constants';

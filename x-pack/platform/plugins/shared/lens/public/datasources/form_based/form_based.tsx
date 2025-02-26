@@ -8,16 +8,16 @@
 import React from 'react';
 import type { CoreStart, SavedObjectReference } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
-import { Query, TimeRange } from '@kbn/es-query';
+import type { Query, TimeRange } from '@kbn/es-query';
 import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { flatten, isEqual } from 'lodash';
 import type { DataViewsPublicPluginStart, DataView } from '@kbn/data-views-plugin/public';
 import type { IndexPatternFieldEditorStart } from '@kbn/data-view-field-editor-plugin/public';
-import { DataPublicPluginStart, UI_SETTINGS } from '@kbn/data-plugin/public';
-import { VisualizeFieldContext } from '@kbn/ui-actions-plugin/public';
-import { ChartsPluginSetup } from '@kbn/charts-plugin/public';
-import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import { UI_SETTINGS } from '@kbn/data-plugin/public';
+import type { VisualizeFieldContext, UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import type { ChartsPluginSetup } from '@kbn/charts-plugin/public';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import { EuiButton } from '@elastic/eui';
@@ -40,6 +40,8 @@ import type {
   StateSetter,
   IndexPatternMap,
   DatasourceDataPanelProps,
+  Datasource,
+  VisualizeEditorContext,
 } from '../../types';
 import {
   changeIndexPattern,
@@ -69,18 +71,23 @@ import {
   cloneLayer,
   getNotifiableFeatures,
   getUnsupportedOperationsWarningMessage,
+  getPrecisionErrorWarningMessages,
 } from './utils';
 import { getUniqueLabelGenerator, isDraggedDataViewField, nonNullable } from '../../utils';
 import { hasField, normalizeOperationDataType } from './pure_utils';
 import { LayerPanel } from './layerpanel';
-import {
+import type {
   DateHistogramIndexPatternColumn,
   GenericIndexPatternColumn,
+  TermsIndexPatternColumn,
+} from './operations';
+import {
   getCurrentFieldsForOperation,
   getErrorMessages,
   insertNewColumn,
   operationDefinitionMap,
-  TermsIndexPatternColumn,
+  deleteColumn,
+  isReferenced,
 } from './operations';
 import {
   copyColumn,
@@ -88,17 +95,18 @@ import {
   getReferenceRoot,
   reorderByGroups,
 } from './operations/layer_helpers';
-import { FormBasedPrivateState, FormBasedPersistedState, DataViewDragDropOperation } from './types';
+import type {
+  FormBasedPrivateState,
+  FormBasedPersistedState,
+  DataViewDragDropOperation,
+} from './types';
 import { mergeLayer, mergeLayers } from './state_helpers';
-import type { Datasource, VisualizeEditorContext } from '../../types';
-import { deleteColumn, isReferenced } from './operations';
 import { GeoFieldWorkspacePanel } from '../../editor_frame_service/editor_frame/workspace_panel/geo_field_workspace_panel';
 import { getStateTimeShiftWarningMessages } from './time_shift_utils';
-import { getPrecisionErrorWarningMessages } from './utils';
 import { DOCUMENT_FIELD_NAME } from '../../../common/constants';
 import { isColumnOfType } from './operations/definitions/helpers';
 import { LayerSettingsPanel } from './layer_settings';
-import { FormBasedLayer, LastValueIndexPatternColumn } from '../..';
+import type { FormBasedLayer, LastValueIndexPatternColumn } from '../..';
 import { filterAndSortUserMessages } from '../../app_plugin/get_application_user_messages';
 import { EDITOR_INVALID_DIMENSION } from '../../user_messages_ids';
 import { getLongMessage } from '../../user_messages_utils';

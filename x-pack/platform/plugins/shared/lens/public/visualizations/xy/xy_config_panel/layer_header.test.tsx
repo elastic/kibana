@@ -7,10 +7,10 @@
 
 import React from 'react';
 
-import { FramePublicAPI } from '../../../types';
+import type { FramePublicAPI } from '../../../types';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { LayerHeader } from './layer_header';
-import {
+import type {
   XYByReferenceAnnotationLayerConfig,
   XYByValueAnnotationLayerConfig,
   XYLayerConfig,

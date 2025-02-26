@@ -9,13 +9,14 @@
 
 import { inspect } from 'util';
 
-import { ToolingLog } from '@kbn/tooling-log';
+import type { ToolingLog } from '@kbn/tooling-log';
 import { hasNonDefaultThemeTags } from '@kbn/core-ui-settings-common';
 import { tap } from 'rxjs';
 
-import { OptimizerConfig } from './optimizer';
-import { OptimizerUpdate$ } from './run_optimizer';
-import { CompilerMsg, pipeClosure } from './common';
+import type { OptimizerConfig } from './optimizer';
+import type { OptimizerUpdate$ } from './run_optimizer';
+import type { CompilerMsg } from './common';
+import { pipeClosure } from './common';
 
 export function logOptimizerState(log: ToolingLog, config: OptimizerConfig) {
   return pipeClosure((update$: OptimizerUpdate$) => {

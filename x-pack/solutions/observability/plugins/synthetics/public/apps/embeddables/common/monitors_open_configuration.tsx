@@ -11,8 +11,8 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { EuiSkeletonText } from '@elastic/eui';
-import { MonitorFilters } from '../monitors_overview/types';
-import { ClientPluginsStart } from '../../../plugin';
+import type { MonitorFilters } from '../monitors_overview/types';
+import type { ClientPluginsStart } from '../../../plugin';
 
 export async function openMonitorConfiguration({
   coreStart,

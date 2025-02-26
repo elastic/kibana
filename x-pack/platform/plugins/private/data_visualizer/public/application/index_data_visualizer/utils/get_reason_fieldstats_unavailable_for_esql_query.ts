@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import type { AggregateQuery } from '@kbn/es-query';
+import type { AggregateQuery, Query } from '@kbn/es-query';
 
-import type { Query } from '@kbn/es-query';
 import { queryCannotBeSampled } from '@kbn/esql-utils';
 import { i18n } from '@kbn/i18n';
 

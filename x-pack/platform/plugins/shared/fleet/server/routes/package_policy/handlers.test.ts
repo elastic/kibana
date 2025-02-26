@@ -6,8 +6,7 @@
  */
 
 import { httpServerMock, httpServiceMock } from '@kbn/core/server/mocks';
-import type { KibanaRequest } from '@kbn/core/server';
-import type { RouteConfig } from '@kbn/core/server';
+import type { KibanaRequest, RouteConfig } from '@kbn/core/server';
 
 import type {
   ListResult,
@@ -34,8 +33,6 @@ import type { PackagePolicyClient, FleetRequestHandlerContext } from '../..';
 import type { UpdatePackagePolicyRequestSchema } from '../../types/rest_spec';
 import {
   PackagePolicyResponseSchema,
-  type AgentPolicy,
-  type FleetRequestHandler,
   BulkGetPackagePoliciesResponseBodySchema,
   DeletePackagePoliciesResponseBodySchema,
   DeleteOnePackagePolicyResponseSchema,
@@ -44,7 +41,7 @@ import {
   OrphanedPackagePoliciesResponseSchema,
   CreatePackagePolicyResponseSchema,
 } from '../../types';
-import type { PackagePolicy } from '../../types';
+import type { PackagePolicy, AgentPolicy, FleetRequestHandler } from '../../types';
 
 import { ListResponseSchema } from '../schema/utils';
 

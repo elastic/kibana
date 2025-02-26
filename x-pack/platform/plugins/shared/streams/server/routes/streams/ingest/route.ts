@@ -6,9 +6,8 @@
  */
 
 import { badRequest } from '@hapi/boom';
+import type { IngestGetResponse, StreamUpsertRequest } from '@kbn/streams-schema';
 import {
-  IngestGetResponse,
-  StreamUpsertRequest,
   ingestUpsertRequestSchema,
   isUnwiredStreamDefinition,
   isWiredStreamDefinition,

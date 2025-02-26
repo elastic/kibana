@@ -6,8 +6,8 @@
  */
 
 import expect from '@kbn/expect';
-import { ObservabilityOnboardingApiClientKey } from '../../common/config';
-import { FtrProviderContext } from '../../common/ftr_provider_context';
+import type { ObservabilityOnboardingApiClientKey } from '../../common/config';
+import type { FtrProviderContext } from '../../common/ftr_provider_context';
 
 export default function ApiTest({ getService }: FtrProviderContext) {
   const registry = getService('registry');

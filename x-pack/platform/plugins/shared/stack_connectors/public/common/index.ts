@@ -7,7 +7,7 @@
 
 import OpenAILogo from '../connector_types/openai/logo';
 import BedrockLogo from '../connector_types/bedrock/logo';
-import GeminiLogo from '../connector_types/bedrock/logo';
+import GeminiLogo from '../connector_types/gemini/logo';
 
 export { GEMINI_CONNECTOR_ID } from '../../common/gemini/constants';
 

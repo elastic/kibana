@@ -10,8 +10,7 @@ import { isEqual } from 'lodash';
 import useObservable from 'react-use/lib/useObservable';
 
 import type { Observable } from 'rxjs';
-import { forkJoin, of, Subject } from 'rxjs';
-import { switchMap, map } from 'rxjs';
+import { forkJoin, of, Subject, switchMap, map } from 'rxjs';
 
 import { useCallback, useMemo } from 'react';
 import type { TimefilterContract } from '@kbn/data-plugin/public';

@@ -8,7 +8,7 @@
  */
 
 import moment from 'moment';
-import { ConnectorSyncJob } from '../types';
+import type { ConnectorSyncJob } from '../types';
 
 export function getSyncJobDuration(syncJob: ConnectorSyncJob): moment.Duration | undefined {
   return syncJob.started_at

@@ -13,7 +13,7 @@ import {
   ELASTIC_HTTP_VERSION_QUERY_PARAM,
 } from '@kbn/core-http-common';
 import { isObject, get } from 'lodash';
-import { KibanaRequest } from '@kbn/core-http-server';
+import type { KibanaRequest } from '@kbn/core-http-server';
 import moment from 'moment';
 import type { Mutable } from 'utility-types';
 

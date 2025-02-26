@@ -7,7 +7,8 @@
 
 import React from 'react';
 import { render } from '@testing-library/react';
-import { generateMockIndicator, Indicator } from '../../../../common/types/indicator';
+import type { Indicator } from '../../../../common/types/indicator';
+import { generateMockIndicator } from '../../../../common/types/indicator';
 import { EMPTY_VALUE } from '../../../constants/common';
 import {
   AddToTimelineButtonEmpty,

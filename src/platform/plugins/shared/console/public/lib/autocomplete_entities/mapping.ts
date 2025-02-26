@@ -10,13 +10,12 @@
 import _ from 'lodash';
 import { BehaviorSubject } from 'rxjs';
 import type { IndicesGetMappingResponse } from '@elastic/elasticsearch/lib/api/types';
-import { HttpSetup } from '@kbn/core-http-browser';
+import type { HttpSetup } from '@kbn/core-http-browser';
 import { type Settings } from '../../services';
 import { API_BASE_PATH } from '../../../common/constants';
 import type { ResultTerm, AutoCompleteContext } from '../autocomplete/types';
 import { expandAliases } from './expand_aliases';
-import type { Field, FieldMapping } from './types';
-import { type AutoCompleteEntitiesApiResponse } from './types';
+import type { Field, FieldMapping, AutoCompleteEntitiesApiResponse } from './types';
 
 function getFieldNamesFromProperties(properties: Record<string, FieldMapping> = {}) {
   const fieldList = Object.entries(properties).flatMap(([fieldName, fieldMapping]) => {

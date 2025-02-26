@@ -10,7 +10,16 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import moment from 'moment';
 import { first, last } from 'lodash';
-import { EuiLoadingChart, EuiText, EuiEmptyPrompt, EuiButton, useEuiTheme } from '@elastic/eui';
+import {
+  EuiLoadingChart,
+  EuiText,
+  EuiEmptyPrompt,
+  EuiButton,
+  useEuiTheme,
+  EuiFlexItem,
+  EuiFlexGroup,
+  EuiIcon,
+} from '@elastic/eui';
 import type {
   ElementClickListener,
   RectAnnotationDatum,
@@ -26,9 +35,6 @@ import {
   RectAnnotation,
   Tooltip,
 } from '@elastic/charts';
-import { EuiFlexItem } from '@elastic/eui';
-import { EuiFlexGroup } from '@elastic/eui';
-import { EuiIcon } from '@elastic/eui';
 import styled from '@emotion/styled';
 import type { Metric } from '../../../../../../common/http_api/infra_ml';
 import { useTimelineChartTheme } from '../../../../../hooks/use_timeline_chart_theme';

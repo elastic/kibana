@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { FunctionComponent, CSSProperties } from 'react';
+import type { FunctionComponent, CSSProperties } from 'react';
+import React from 'react';
 import numeral from '@elastic/numeral';
 interface Props {
   /** The text to display under the metric */

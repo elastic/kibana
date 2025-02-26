@@ -10,8 +10,8 @@ import { EuiIcon, EuiSuperSelect, EuiText, EuiFlexGroup } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { useAssetBasePath } from '../../hooks/use_asset_base_path';
-import { AvailableLanguages } from '../../code_examples';
-import { CodeLanguage } from '../../types';
+import type { AvailableLanguages } from '../../code_examples';
+import type { CodeLanguage } from '../../types';
 
 export interface LanguageSelectorProps {
   selectedLanguage: AvailableLanguages;

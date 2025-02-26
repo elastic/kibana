@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { DataViewBase } from '../../es_query';
+import type { DataViewBase } from '../../es_query';
 import { buildPhrasesFilter, getPhrasesFilterField } from './phrases_filter';
 import { fields } from '../stubs';
 

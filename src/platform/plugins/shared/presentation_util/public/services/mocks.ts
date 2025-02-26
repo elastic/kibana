@@ -8,7 +8,7 @@
  */
 
 import { contentManagementMock } from '@kbn/content-management-plugin/public/mocks';
-import { CoreStart } from '@kbn/core/public';
+import type { CoreStart } from '@kbn/core/public';
 import { coreMock } from '@kbn/core/public/mocks';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';

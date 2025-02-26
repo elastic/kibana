@@ -6,11 +6,12 @@
  */
 import moment from 'moment';
 import { tlsAlertFactory, getCertSummary } from './tls';
-import { CertResult } from '../../../../common/runtime_types';
+import type { CertResult } from '../../../../common/runtime_types';
 import { createRuleTypeMocks, bootstrapDependencies } from './test_utils';
 import { DYNAMIC_SETTINGS_DEFAULTS } from '../../../../common/constants';
 
-import { savedObjectsAdapter, UMSavedObjectsAdapter } from '../saved_objects/saved_objects';
+import type { UMSavedObjectsAdapter } from '../saved_objects/saved_objects';
+import { savedObjectsAdapter } from '../saved_objects/saved_objects';
 
 /**
  * This function aims to provide an easy way to give mock props that will

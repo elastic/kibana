@@ -24,14 +24,13 @@ import {
 import { createRule } from '../../../../tasks/api_calls/rules';
 
 import { RULES_MANAGEMENT_URL } from '../../../../urls/rules_management';
-import { getDetails } from '../../../../tasks/rule_details';
+import { getDetails, goToRuleEditSettings } from '../../../../tasks/rule_details';
 import { deleteAlertsAndRules } from '../../../../tasks/api_calls/common';
 import { login } from '../../../../tasks/login';
 
 import { editFirstRule, goToRuleDetailsOf } from '../../../../tasks/alerts_detection_rules';
 
 import { saveEditedRule } from '../../../../tasks/edit_rule';
-import { goToRuleEditSettings } from '../../../../tasks/rule_details';
 import {
   fillAlertSuppressionFields,
   selectAlertSuppressionPerRuleExecution,

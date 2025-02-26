@@ -6,7 +6,7 @@
  */
 import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { errors as EsErrors } from '@elastic/elasticsearch';
-import { IndicesGetDataStreamResponse } from '@elastic/elasticsearch/lib/api/types';
+import type { IndicesGetDataStreamResponse } from '@elastic/elasticsearch/lib/api/types';
 import { createConcreteWriteIndex, setConcreteWriteIndex } from './create_concrete_write_index';
 import { getDataStreamAdapter } from './data_stream_adapter';
 

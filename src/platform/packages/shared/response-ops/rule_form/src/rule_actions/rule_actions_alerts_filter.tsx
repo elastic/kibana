@@ -10,13 +10,12 @@
 import { EuiSpacer, EuiSwitch } from '@elastic/eui';
 import type { AlertsFilter } from '@kbn/alerting-types';
 import { AlertsSearchBar, type AlertsSearchBarProps } from '@kbn/alerts-ui-shared';
-import { Filter } from '@kbn/es-query';
+import type { Filter } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import deepEqual from 'fast-deep-equal';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useRuleFormState } from '../hooks';
-import type { RuleAction } from '../types';
-import { RuleFormPlugins } from '../types';
+import type { RuleAction, RuleFormPlugins } from '../types';
 
 const DEFAULT_QUERY = { kql: '', filters: [] };
 

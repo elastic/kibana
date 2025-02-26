@@ -5,9 +5,15 @@
  * 2.0.
  */
 
-import { EuiCallOut, EuiLoadingElastic } from '@elastic/eui';
+import {
+  EuiCallOut,
+  EuiLoadingElastic,
+  EuiBadge,
+  EuiBasicTable,
+  EuiSpacer,
+  EuiText,
+} from '@elastic/eui';
 import type { EuiBasicTableColumn } from '@elastic/eui';
-import { EuiBadge, EuiBasicTable, EuiSpacer, EuiText } from '@elastic/eui';
 import React from 'react';
 import type { APIReturnType } from '../../../services/rest/create_call_apm_api';
 import { FETCH_STATUS } from '../../../hooks/use_fetcher';

@@ -6,12 +6,11 @@
  */
 
 import type { EuiBasicTableColumn } from '@elastic/eui';
-import { EuiButtonEmpty, EuiInMemoryTable, EuiToolTip } from '@elastic/eui';
+import { EuiButtonEmpty, EuiInMemoryTable, EuiToolTip, EuiPopover } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { last, first } from 'lodash';
 import React, { useState, useMemo } from 'react';
-import { EuiPopover } from '@elastic/eui';
 import type { InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
 import { createWaffleMapNode } from '../lib/nodes_to_wafflemap';
 import type { InfraWaffleMapNode, InfraWaffleMapOptions } from '../../../../common/inventory/types';

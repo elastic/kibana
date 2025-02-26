@@ -8,7 +8,7 @@
 import type { Logger } from '@kbn/core/server';
 import type { AttackDiscovery } from '@kbn/elastic-assistant-common';
 
-import { GenerationPrompts } from '../prompts';
+import type { GenerationPrompts } from '../prompts';
 import { addTrailingBackticksIfNecessary } from '../add_trailing_backticks_if_necessary';
 import { extractJson } from '../extract_json';
 import { getAttackDiscoveriesGenerationSchema } from '../../generate/schema';

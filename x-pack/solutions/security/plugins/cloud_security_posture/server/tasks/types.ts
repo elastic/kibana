@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { LatestTaskStateSchema } from './task_state';
+import type { LatestTaskStateSchema } from './task_state';
 
 export interface ScoreByPolicyTemplateBucket {
   score_by_policy_template: {

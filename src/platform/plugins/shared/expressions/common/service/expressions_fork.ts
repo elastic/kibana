@@ -7,16 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import {
+import type {
   ExpressionExecutionParams,
   ExpressionsService,
   ExpressionsServiceSetup,
   ExpressionsServiceStart,
 } from '.';
-import { ExpressionAstExpression } from '../ast';
-import { AnyExpressionFunctionDefinition } from '../expression_functions';
-import { AnyExpressionTypeDefinition } from '../expression_types';
-import { AnyExpressionRenderDefinition } from '../expression_renderers';
+import type { ExpressionAstExpression } from '../ast';
+import type { AnyExpressionFunctionDefinition } from '../expression_functions';
+import type { AnyExpressionTypeDefinition } from '../expression_types';
+import type { AnyExpressionRenderDefinition } from '../expression_renderers';
 
 export interface ExpressionServiceFork {
   setup(): ExpressionsServiceSetup;

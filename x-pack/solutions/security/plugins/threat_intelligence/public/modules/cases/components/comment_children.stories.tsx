@@ -6,13 +6,13 @@
  */
 
 import React from 'react';
-import { Story } from '@storybook/react';
+import type { Story } from '@storybook/react';
 import { of } from 'rxjs';
 import type { IKibanaSearchResponse } from '@kbn/search-types';
 import { generateMockFileIndicator } from '../../../../common/types/indicator';
 import { CommentChildren } from './comment_children';
 import { StoryProvidersComponent } from '../../../mocks/story_providers';
-import { AttachmentMetadata } from '../utils/attachments';
+import type { AttachmentMetadata } from '../utils/attachments';
 
 export default {
   title: 'CommentChildren',

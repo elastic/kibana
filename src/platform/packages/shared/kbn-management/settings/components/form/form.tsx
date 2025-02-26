@@ -9,12 +9,16 @@
 
 import React, { Fragment } from 'react';
 
-import type { FieldDefinition, CategoryCounts } from '@kbn/management-settings-types';
+import type {
+  FieldDefinition,
+  CategoryCounts,
+  UnsavedFieldChange,
+  OnFieldChangeFn,
+} from '@kbn/management-settings-types';
 import { FieldCategories } from '@kbn/management-settings-components-field-category';
-import { UnsavedFieldChange, OnFieldChangeFn } from '@kbn/management-settings-types';
 import { isEmpty } from 'lodash';
 import { categorizeFields } from '@kbn/management-settings-utilities';
-import { UiSettingsScope } from '@kbn/core-ui-settings-common';
+import type { UiSettingsScope } from '@kbn/core-ui-settings-common';
 import { BottomBar } from './bottom_bar';
 import { useSave } from './use_save';
 

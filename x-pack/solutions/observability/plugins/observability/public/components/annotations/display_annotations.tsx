@@ -6,7 +6,7 @@
  */
 
 import React, { memo } from 'react';
-import { Annotation } from '../../../common/annotations';
+import type { Annotation } from '../../../common/annotations';
 import { ObsAnnotation } from './components/obs_annotation';
 
 export const DisplayAnnotation = memo(({ annotations }: { annotations?: Annotation[] }) => {

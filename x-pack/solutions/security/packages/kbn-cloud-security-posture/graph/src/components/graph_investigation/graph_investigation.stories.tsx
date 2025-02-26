@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { type Meta, Story } from '@storybook/react';
+import type { Story, Meta } from '@storybook/react';
 import { action } from '@storybook/addon-actions';
 import { GraphInvestigation, type GraphInvestigationProps } from './graph_investigation';
 import {

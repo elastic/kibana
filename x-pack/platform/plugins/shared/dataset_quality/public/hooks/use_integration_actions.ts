@@ -11,7 +11,7 @@ import useToggle from 'react-use/lib/useToggle';
 import { MANAGEMENT_APP_LOCATOR } from '@kbn/deeplinks-management/constants';
 import { DASHBOARD_APP_LOCATOR } from '@kbn/deeplinks-analytics';
 import { useKibanaContextForPlugin } from '../utils';
-import { Dashboard } from '../../common/api_types';
+import type { Dashboard } from '../../common/api_types';
 import { useDatasetDetailsTelemetry } from './use_dataset_details_telemetry';
 
 export const useIntegrationActions = () => {

@@ -20,8 +20,8 @@ import type { SAMPLE_PREBUILT_RULE } from './api_calls/prebuilt_rules';
 import {
   RULE_UPGRADE_TABLE_MODIFICATION_FILTER_BUTTON,
   RULE_UPGRADE_TABLE_MODIFICATION_FILTER_PANEL,
+  RULE_UPGRADE_CONFLICTS_MODAL,
 } from '../screens/rule_updates';
-import { RULE_UPGRADE_CONFLICTS_MODAL } from '../screens/rule_updates';
 
 export const clickAddElasticRulesButton = () => {
   cy.get(ADD_ELASTIC_RULES_BTN).click();

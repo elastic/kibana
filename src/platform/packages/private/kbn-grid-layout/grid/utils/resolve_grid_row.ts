@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { GridPanelData, GridRowData } from '../types';
+import type { GridPanelData, GridRowData } from '../types';
 
 const collides = (panelA: GridPanelData, panelB: GridPanelData) => {
   if (panelA.id === panelB.id) return false; // same panel

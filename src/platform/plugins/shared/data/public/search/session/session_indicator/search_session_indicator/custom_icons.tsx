@@ -8,7 +8,7 @@
  */
 
 import React from 'react';
-import { EuiIconProps } from '@elastic/eui';
+import type { EuiIconProps } from '@elastic/eui';
 
 /**
  * These are the new icons we've added for search session indicator,

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Datatable } from '@kbn/expressions-plugin/common';
+import type { Datatable } from '@kbn/expressions-plugin/common';
 import { getActiveDataFromDatatable } from './shared_logic';
 
 describe('lens shared logic', () => {

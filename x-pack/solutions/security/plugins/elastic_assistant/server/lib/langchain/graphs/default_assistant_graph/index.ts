@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { StructuredTool } from '@langchain/core/tools';
+import type { StructuredTool } from '@langchain/core/tools';
 import { getDefaultArguments } from '@kbn/langchain/server';
 import {
   createOpenAIToolsAgent,
@@ -14,7 +14,8 @@ import {
 } from 'langchain/agents';
 import { APMTracer } from '@kbn/langchain/server/tracers/apm';
 import { TelemetryTracer } from '@kbn/langchain/server/tracers/telemetry';
-import { pruneContentReferences, MessageMetadata } from '@kbn/elastic-assistant-common';
+import type { MessageMetadata } from '@kbn/elastic-assistant-common';
+import { pruneContentReferences } from '@kbn/elastic-assistant-common';
 import { getPrompt, resolveProviderAndModel } from '@kbn/security-ai-prompts';
 import { isEmpty } from 'lodash';
 import { localToolPrompts, promptGroupId as toolsGroupId } from '../../../prompt/tool_prompts';
@@ -22,11 +23,11 @@ import { promptGroupId } from '../../../prompt/local_prompt_object';
 import { getModelOrOss } from '../../../prompt/helpers';
 import { getPrompt as localGetPrompt, promptDictionary } from '../../../prompt';
 import { getLlmClass } from '../../../../routes/utils';
-import { EsAnonymizationFieldsSchema } from '../../../../ai_assistant_data_clients/anonymization_fields/types';
-import { AssistantToolParams } from '../../../../types';
-import { AgentExecutor } from '../../executors/types';
+import type { EsAnonymizationFieldsSchema } from '../../../../ai_assistant_data_clients/anonymization_fields/types';
+import type { AssistantToolParams } from '../../../../types';
+import type { AgentExecutor } from '../../executors/types';
 import { formatPrompt, formatPromptStructured } from './prompts';
-import { GraphInputs } from './types';
+import type { GraphInputs } from './types';
 import { getDefaultAssistantGraph } from './graph';
 import { invokeGraph, streamGraph } from './helpers';
 import { transformESSearchToAnonymizationFields } from '../../../../ai_assistant_data_clients/anonymization_fields/helpers';

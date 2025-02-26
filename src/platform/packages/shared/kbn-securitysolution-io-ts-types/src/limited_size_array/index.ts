@@ -8,7 +8,7 @@
  */
 
 import * as t from 'io-ts';
-import { Either } from 'fp-ts/lib/Either';
+import type { Either } from 'fp-ts/lib/Either';
 
 export const LimitedSizeArray = <C extends t.Mixed>({
   codec,

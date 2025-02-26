@@ -11,8 +11,7 @@ import { uniq } from 'lodash';
 
 import type { Datatable } from '@kbn/expressions-plugin/public';
 import { ESQL_TABLE_TYPE } from '@kbn/data-plugin/common';
-import type { ActiveCursorSyncOption, DateHistogramSyncOption } from './types';
-import type { ActiveCursorPayload } from './types';
+import type { ActiveCursorSyncOption, DateHistogramSyncOption, ActiveCursorPayload } from './types';
 
 function isDateHistogramSyncOption(
   syncOption?: ActiveCursorSyncOption

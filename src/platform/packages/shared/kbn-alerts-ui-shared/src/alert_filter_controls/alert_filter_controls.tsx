@@ -7,19 +7,19 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ComponentProps } from 'react';
+import type { ComponentProps } from 'react';
 import React, { useCallback, useEffect, useState } from 'react';
 import type { Filter } from '@kbn/es-query';
 import { EuiFlexItem } from '@elastic/eui';
 import type { DataViewSpec, DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
-import { HttpStart } from '@kbn/core-http-browser';
-import { NotificationsStart } from '@kbn/core-notifications-browser';
+import type { HttpStart } from '@kbn/core-http-browser';
+import type { NotificationsStart } from '@kbn/core-notifications-browser';
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
 import { useAlertsDataView } from '../..';
 import { FilterGroupLoading } from './loading';
 import { DEFAULT_CONTROLS } from './constants';
 import { FilterGroup } from './filter_group';
-import { FilterControlConfig } from './types';
+import type { FilterControlConfig } from './types';
 
 export type AlertFilterControlsProps = Omit<
   ComponentProps<typeof FilterGroup>,

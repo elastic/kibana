@@ -6,12 +6,12 @@
  */
 
 import expect from '@kbn/expect';
-import { Client } from '@elastic/elasticsearch';
+import type { Client } from '@elastic/elasticsearch';
 import { AI_ASSISTANT_KB_INFERENCE_ID } from '@kbn/observability-ai-assistant-plugin/server/service/inference_endpoint';
-import { ToolingLog } from '@kbn/tooling-log';
-import { RetryService } from '@kbn/ftr-common-functional-services';
+import type { ToolingLog } from '@kbn/tooling-log';
+import type { RetryService } from '@kbn/ftr-common-functional-services';
 import type { ObservabilityAIAssistantApiClient } from '../../../../services/observability_ai_assistant_api';
-import { MachineLearningProvider } from '../../../../../services/ml';
+import type { MachineLearningProvider } from '../../../../../services/ml';
 import { SUPPORTED_TRAINED_MODELS } from '../../../../../../functional/services/ml/api';
 
 export const TINY_ELSER = {

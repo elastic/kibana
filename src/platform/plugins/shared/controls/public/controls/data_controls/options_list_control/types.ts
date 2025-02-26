@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Subject } from 'rxjs';
+import type { Subject } from 'rxjs';
 
 import type { PublishingSubject } from '@kbn/presentation-publishing';
 import type {

@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 import { Key } from 'selenium-webdriver';
-import { FtrProviderContext } from '../ftr_provider_context';
+import type { FtrProviderContext } from '../ftr_provider_context';
 
 export function InfraSavedViewsProvider({ getService }: FtrProviderContext) {
   const retry = getService('retry');

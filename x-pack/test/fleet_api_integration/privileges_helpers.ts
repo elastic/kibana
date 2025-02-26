@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { SupertestWithoutAuthProviderType } from '@kbn/ftr-common-functional-services';
-import supertest from 'supertest';
+import type { SupertestWithoutAuthProviderType } from '@kbn/ftr-common-functional-services';
+import type supertest from 'supertest';
 
 interface PrivilegeTestScenario {
   user: {

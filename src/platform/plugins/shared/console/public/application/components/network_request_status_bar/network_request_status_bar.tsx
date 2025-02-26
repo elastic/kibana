@@ -8,7 +8,8 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import React, { FunctionComponent } from 'react';
+import type { FunctionComponent } from 'react';
+import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiBadge, EuiText, EuiToolTip } from '@elastic/eui';
 
 export interface Props {

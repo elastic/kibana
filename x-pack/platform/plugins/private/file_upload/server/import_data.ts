@@ -134,13 +134,13 @@ export function importDataProvider({ asCurrentUser }: IScopedClusterClient) {
 
   async function indexData(index: string, pipelineId: string | undefined, data: InputData) {
     try {
-      const body = [];
+      const operations = [];
       for (let i = 0; i < data.length; i++) {
-        body.push({ index: {} });
-        body.push(data[i]);
+        operations.push({ index: {} });
+        operations.push(data[i]);
       }
 
-      const bulkRequest: BulkRequest = { index, body };
+      const bulkRequest: BulkRequest = { index, operations };
       if (pipelineId !== undefined) {
         bulkRequest.pipeline = pipelineId;
       }

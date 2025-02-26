@@ -7,7 +7,8 @@
 
 import React from 'react';
 import { EuiBadge } from '@elastic/eui';
-import { FieldStatus, FIELD_STATUS_MAP } from './constants';
+import type { FieldStatus } from './constants';
+import { FIELD_STATUS_MAP } from './constants';
 
 export const FieldStatusBadge = ({ status }: { status: FieldStatus }) => {
   return (

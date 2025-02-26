@@ -5,12 +5,11 @@
  * 2.0.
  */
 
-import type { EuiSearchBarProps } from '@elastic/eui';
-import { EuiText, EuiIcon, EuiInMemoryTable, type HorizontalAlignment } from '@elastic/eui';
+import type { EuiSearchBarProps, HorizontalAlignment } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useCallback, useMemo, useState } from 'react';
 import { debounce } from 'lodash';
-import { Query } from '@elastic/eui';
+import { Query, EuiText, EuiIcon, EuiInMemoryTable } from '@elastic/eui';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 import { AddMetadataFilterButton } from './add_metadata_filter_button';
 import { ExpandableContent } from '../../components/expandable_content';

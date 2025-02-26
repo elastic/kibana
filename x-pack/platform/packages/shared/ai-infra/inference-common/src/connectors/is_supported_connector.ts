@@ -5,12 +5,8 @@
  * 2.0.
  */
 
-import {
-  InferenceConnectorType,
-  RawInferenceConnector,
-  RawConnector,
-  allSupportedConnectorTypes,
-} from './connectors';
+import type { RawInferenceConnector, RawConnector } from './connectors';
+import { InferenceConnectorType, allSupportedConnectorTypes } from './connectors';
 
 export const COMPLETION_TASK_TYPE = 'chat_completion';
 

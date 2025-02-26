@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import { AuthenticatedUser } from '@kbn/core-security-common';
+import type { AuthenticatedUser } from '@kbn/core-security-common';
 import { postAttackDiscoveryRoute } from './post_attack_discovery';
 import { serverMock } from '../../../__mocks__/server';
 import { requestContextMock } from '../../../__mocks__/request_context';
 import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 import { actionsMock } from '@kbn/actions-plugin/server/mocks';
-import { AttackDiscoveryDataClient } from '../../../lib/attack_discovery/persistence';
+import type { AttackDiscoveryDataClient } from '../../../lib/attack_discovery/persistence';
 import { transformESSearchToAttackDiscovery } from '../../../lib/attack_discovery/persistence/transforms/transforms';
 import { getAttackDiscoverySearchEsMock } from '../../../__mocks__/attack_discovery_schema.mock';
 import { postAttackDiscoveryRequest } from '../../../__mocks__/request';
 import { OpenAiProviderType } from '@kbn/stack-connectors-plugin/common/openai/constants';
-import { AttackDiscoveryPostRequestBody } from '@kbn/elastic-assistant-common';
+import type { AttackDiscoveryPostRequestBody } from '@kbn/elastic-assistant-common';
 
 import { updateAttackDiscoveryStatusToRunning } from '../helpers/helpers';
 

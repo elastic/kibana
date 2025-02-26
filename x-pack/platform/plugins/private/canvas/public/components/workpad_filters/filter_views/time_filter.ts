@@ -7,7 +7,8 @@
 
 import dateMath from '@kbn/datemath';
 import { i18n } from '@kbn/i18n';
-import { FilterType, FilterViewSpec, SimpleFilterViewField } from '../../../../types';
+import type { FilterViewSpec, SimpleFilterViewField } from '../../../../types';
+import { FilterType } from '../../../../types';
 import { formatByKey } from '../utils';
 import { defaultFilter } from './default_filter';
 

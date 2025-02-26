@@ -8,7 +8,7 @@
  */
 
 import supertest from 'supertest';
-import { savedObjectsClientMock } from '../../../mocks';
+import type { savedObjectsClientMock } from '../../../mocks';
 import type { ICoreUsageStatsClient } from '@kbn/core-usage-data-base-server-internal';
 import {
   coreUsageStatsClientMock,

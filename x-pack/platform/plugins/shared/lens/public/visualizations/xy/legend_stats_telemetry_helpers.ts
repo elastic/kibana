@@ -6,7 +6,7 @@
  */
 
 import { isEqual } from 'lodash';
-import { XYLegendValue } from '@kbn/visualizations-plugin/common';
+import type { XYLegendValue } from '@kbn/visualizations-plugin/common';
 import { nonNullable } from '../../utils';
 import { shouldDisplayTable } from '../../shared_components/legend/legend_settings_popover';
 

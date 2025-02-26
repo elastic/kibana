@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { GenericFtrProviderContext } from '@kbn/test';
-import { InheritedServices, InheritedFtrProviderContext } from '../../../../services';
-import { ObservabilityAIAssistantApiClient } from './observability_ai_assistant_api_client';
+import type { GenericFtrProviderContext } from '@kbn/test';
+import type { InheritedServices, InheritedFtrProviderContext } from '../../../../services';
+import type { ObservabilityAIAssistantApiClient } from './observability_ai_assistant_api_client';
 
 export type ObservabilityAIAssistantServices = InheritedServices & {
   observabilityAIAssistantAPIClient: (

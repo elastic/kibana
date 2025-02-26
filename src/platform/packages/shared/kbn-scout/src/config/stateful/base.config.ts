@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { join } from 'path';
+import path, { join } from 'path';
 import { format as formatUrl } from 'url';
 
 import {
@@ -16,10 +16,9 @@ import {
   MOCK_IDP_ATTRIBUTE_ROLES,
   MOCK_IDP_ATTRIBUTE_EMAIL,
   MOCK_IDP_ATTRIBUTE_NAME,
+  MOCK_IDP_REALM_NAME,
 } from '@kbn/mock-idp-utils';
 import { fleetPackageRegistryDockerImage, defineDockerServersConfig } from '@kbn/test';
-import path from 'path';
-import { MOCK_IDP_REALM_NAME } from '@kbn/mock-idp-utils';
 import { REPO_ROOT } from '@kbn/repo-info';
 import { STATEFUL_ROLES_ROOT_PATH } from '@kbn/es';
 import type { ScoutServerConfig } from '../../types';

@@ -6,9 +6,11 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
-import { test as base, ObltTestFixtures, ObltWorkerFixtures } from '@kbn/scout-oblt';
+import type { ObltTestFixtures, ObltWorkerFixtures } from '@kbn/scout-oblt';
+import { test as base } from '@kbn/scout-oblt';
 import { mergeTests } from 'playwright/test';
-import { onboardingApiFixture, OnboardingApiFixture } from './onboarding_api';
+import type { OnboardingApiFixture } from './onboarding_api';
+import { onboardingApiFixture } from './onboarding_api';
 
 export type ExtendedScoutTestFixtures = ObltTestFixtures;
 export interface ExtendedScoutWorkerFixtures extends ObltWorkerFixtures {

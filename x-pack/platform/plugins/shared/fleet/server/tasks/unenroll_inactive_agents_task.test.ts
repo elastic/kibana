@@ -5,20 +5,17 @@
  * 2.0.
  */
 
-import { coreMock } from '@kbn/core/server/mocks';
+import { coreMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import type { TaskManagerSetupContract } from '@kbn/task-manager-plugin/server';
 import { TaskStatus } from '@kbn/task-manager-plugin/server';
 import { getDeleteTaskRunResult } from '@kbn/task-manager-plugin/server/task';
 import type { CoreSetup } from '@kbn/core/server';
-import { loggingSystemMock } from '@kbn/core/server/mocks';
 
-import { agentPolicyService } from '../services';
+import { agentPolicyService, appContextService } from '../services';
 import { createAgentPolicyMock } from '../../common/mocks';
 import { createAppContextStartContractMock } from '../mocks';
 import { getAgentsByKuery } from '../services/agents';
-
-import { appContextService } from '../services';
 
 import { unenrollBatch } from '../services/agents/unenroll_action_runner';
 

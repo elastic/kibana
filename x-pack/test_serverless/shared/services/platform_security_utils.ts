@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { FtrProviderContext } from '../../functional/ftr_provider_context';
+import type { FtrProviderContext } from '../../functional/ftr_provider_context';
 
 export function PlatformSecurityUtilsProvider({ getService }: FtrProviderContext) {
   const es = getService('es');

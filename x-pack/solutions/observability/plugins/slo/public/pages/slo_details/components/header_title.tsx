@@ -7,7 +7,7 @@
 
 import { EuiFlexGroup, EuiFlexItem, EuiMarkdownFormat, EuiSkeletonText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { SLOWithSummaryResponse } from '@kbn/slo-schema';
+import type { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import moment from 'moment';
 import React from 'react';
 import { SloStateBadge, SloStatusBadge } from '../../../components/slo/slo_badges';

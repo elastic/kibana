@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { EntityV2 } from '@kbn/entities-schema';
+import type { EntityV2 } from '@kbn/entities-schema';
 import { orderBy, uniq } from 'lodash';
-import { EntitySourceDefinition, SortBy } from '../types';
+import type { EntitySourceDefinition, SortBy } from '../types';
 
 function getLatestDate(date1?: string, date2?: string) {
   if (!date1 && !date2) return;

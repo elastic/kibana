@@ -6,7 +6,7 @@
  */
 
 import { checkNodesSettings } from '.';
-import { LegacyRequest } from '../../types';
+import type { LegacyRequest } from '../../types';
 
 describe('Elasticsearch Nodes Settings', () => {
   const getReq = (response?: any) => {

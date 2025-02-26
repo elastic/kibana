@@ -7,8 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { LogDocument, generateLongId, generateShortId, log } from '@kbn/apm-synthtrace-client';
-import { Scenario } from '../cli/scenario';
+import type { LogDocument } from '@kbn/apm-synthtrace-client';
+import { generateLongId, generateShortId, log } from '@kbn/apm-synthtrace-client';
+import type { Scenario } from '../cli/scenario';
 import { IndexTemplateName } from '../lib/logs/custom_logsdb_index_templates';
 import { LogsCustom } from '../lib/logs/logs_synthtrace_es_client';
 import { withClient } from '../lib/utils/with_client';

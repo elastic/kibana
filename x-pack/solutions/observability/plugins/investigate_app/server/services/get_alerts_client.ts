@@ -6,12 +6,12 @@
  */
 
 import { isEmpty } from 'lodash';
-import { SearchRequest as ESSearchRequest } from '@elastic/elasticsearch/lib/api/types';
-import { InferSearchResponseOf } from '@kbn/es-types';
-import { ParsedTechnicalFields } from '@kbn/rule-registry-plugin/common';
+import type { SearchRequest as ESSearchRequest } from '@elastic/elasticsearch/lib/api/types';
+import type { InferSearchResponseOf } from '@kbn/es-types';
+import type { ParsedTechnicalFields } from '@kbn/rule-registry-plugin/common';
 import { OBSERVABILITY_RULE_TYPE_IDS } from '@kbn/rule-data-utils';
 import type { estypes } from '@elastic/elasticsearch';
-import { InvestigateAppRouteHandlerResources } from '../routes/types';
+import type { InvestigateAppRouteHandlerResources } from '../routes/types';
 
 export type AlertsClient = Awaited<ReturnType<typeof getAlertsClient>>;
 

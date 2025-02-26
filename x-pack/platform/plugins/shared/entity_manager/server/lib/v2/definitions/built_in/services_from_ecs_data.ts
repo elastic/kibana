@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { BuiltInDefinition } from '../../types';
+import type { BuiltInDefinition } from '../../types';
 import { BUILT_IN_ID_PREFIX } from './constants';
 
 export const builtInServicesFromEcsEntityDefinition: BuiltInDefinition = {

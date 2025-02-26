@@ -10,6 +10,7 @@ import { merge } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
+import type { EuiSwitchEvent } from '@elastic/eui';
 import {
   EuiCallOut,
   EuiDescribedFormGroup,
@@ -23,18 +24,17 @@ import {
   EuiDelayRender,
   EuiScreenReaderOnly,
   htmlIdGenerator,
-  EuiSwitchEvent,
   useEuiTheme,
   EuiText,
 } from '@elastic/eui';
-import { ReactNode } from 'react-markdown';
-import { Cluster, ClusterPayload } from '../../../../../../common/lib';
+import type { ReactNode } from 'react-markdown';
+import type { Cluster, ClusterPayload } from '../../../../../../common/lib';
 import { SNIFF_MODE, PROXY_MODE } from '../../../../../../common/constants';
 import { AppContext } from '../../../../app_context';
 import { skippingDisconnectedClustersUrl } from '../../../../services/documentation';
 import { ConnectionMode } from './components';
+import type { ClusterErrors } from './validators';
 import {
-  ClusterErrors,
   convertCloudRemoteAddressToProxyConnection,
   validateCluster,
   isCloudAdvancedOptionsEnabled,

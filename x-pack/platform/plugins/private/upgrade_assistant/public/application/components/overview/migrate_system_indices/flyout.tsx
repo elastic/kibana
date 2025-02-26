@@ -24,7 +24,7 @@ import {
   EuiInMemoryTable,
 } from '@elastic/eui';
 
-import {
+import type {
   SystemIndicesMigrationStatus,
   SystemIndicesMigrationFeature,
   MIGRATION_STATUS,

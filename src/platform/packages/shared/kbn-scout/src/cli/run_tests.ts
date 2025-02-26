@@ -7,10 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Command } from '@kbn/dev-cli-runner';
+import type { Command } from '@kbn/dev-cli-runner';
 import { initLogsDir } from '@kbn/test';
-import { TEST_FLAG_OPTIONS } from '../playwright/runner';
-import { parseTestFlags, runTests as runTestsFn } from '../playwright/runner';
+import { TEST_FLAG_OPTIONS, parseTestFlags, runTests as runTestsFn } from '../playwright/runner';
 
 /**
  * Start servers and run the tests

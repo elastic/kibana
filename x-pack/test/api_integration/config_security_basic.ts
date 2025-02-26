@@ -7,7 +7,7 @@
 
 /* eslint-disable import/no-default-export */
 
-import { FtrConfigProviderContext } from '@kbn/test';
+import type { FtrConfigProviderContext } from '@kbn/test';
 
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const baseIntegrationTestsConfig = await readConfigFile(require.resolve('./config.ts'));

@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiComboBoxOptionOption } from '@elastic/eui';
+import type { EuiComboBoxOptionOption } from '@elastic/eui';
 
-import { RuntimeType } from '../../shared_imports';
+import type { RuntimeType } from '../../shared_imports';
 
 export type TypeSelection = Array<EuiComboBoxOptionOption<RuntimeType>>;
 

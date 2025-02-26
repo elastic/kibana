@@ -8,7 +8,7 @@
 import React from 'react';
 import userEvent from '@testing-library/user-event';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
-import { DataViewsContract } from '@kbn/data-views-plugin/public';
+import type { DataViewsContract } from '@kbn/data-views-plugin/public';
 import { KnowledgeBaseSettingsManagement } from '.';
 import { useCreateKnowledgeBaseEntry } from '../../assistant/api/knowledge_base/entries/use_create_knowledge_base_entry';
 import { useDeleteKnowledgeBaseEntries } from '../../assistant/api/knowledge_base/entries/use_delete_knowledge_base_entries';
@@ -26,7 +26,8 @@ import { I18nProvider } from '@kbn/i18n-react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { useKnowledgeBaseIndices } from '../../assistant/api/knowledge_base/use_knowledge_base_indices';
 import { Router } from '@kbn/shared-ux-router';
-import { createMemoryHistory, History } from 'history';
+import type { History } from 'history';
+import { createMemoryHistory } from 'history';
 
 const mockContext = {
   basePromptContexts: MOCK_QUICK_PROMPTS,

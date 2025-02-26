@@ -6,7 +6,7 @@
  */
 
 import { useEuiTheme } from '@elastic/eui';
-import { VulnSeverity } from '@kbn/cloud-security-posture-common';
+import type { VulnSeverity } from '@kbn/cloud-security-posture-common';
 
 import { getSeverityStatusColor as getSeverityStatusColorUtil } from '../..';
 

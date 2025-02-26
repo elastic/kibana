@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { FullConfig } from 'playwright/test';
+import type { FullConfig } from 'playwright/test';
 import {
   getLogger,
   getEsArchiver,
@@ -16,7 +16,7 @@ import {
   getEsClient,
   getKbnClient,
 } from '../../common';
-import { ScoutTestOptions } from '../types';
+import type { ScoutTestOptions } from '../types';
 
 export async function ingestTestDataHook(config: FullConfig, archives: string[]) {
   const log = getLogger();

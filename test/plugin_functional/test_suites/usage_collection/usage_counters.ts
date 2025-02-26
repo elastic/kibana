@@ -8,11 +8,9 @@
  */
 
 import expect from '@kbn/expect';
-import {
-  UsageCountersSavedObject,
-  serializeCounterKey,
-} from '@kbn/usage-collection-plugin/server/usage_counters';
-import { PluginFunctionalProviderContext } from '../../services';
+import type { UsageCountersSavedObject } from '@kbn/usage-collection-plugin/server/usage_counters';
+import { serializeCounterKey } from '@kbn/usage-collection-plugin/server/usage_counters';
+import type { PluginFunctionalProviderContext } from '../../services';
 
 export default function ({ getService, getPageObjects }: PluginFunctionalProviderContext) {
   const supertest = getService('supertest');

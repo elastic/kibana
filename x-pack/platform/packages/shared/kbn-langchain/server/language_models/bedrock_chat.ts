@@ -7,9 +7,9 @@
 
 import { BedrockChat as _BedrockChat } from '@langchain/community/chat_models/bedrock/web';
 import type { ActionsClient } from '@kbn/actions-plugin/server';
-import { BaseChatModelParams } from '@langchain/core/language_models/chat_models';
-import { Logger } from '@kbn/logging';
-import { PublicMethodsOf } from '@kbn/utility-types';
+import type { BaseChatModelParams } from '@langchain/core/language_models/chat_models';
+import type { Logger } from '@kbn/logging';
+import type { PublicMethodsOf } from '@kbn/utility-types';
 import type { TelemetryMetadata } from '@kbn/actions-plugin/server/lib';
 import { prepareMessages, DEFAULT_BEDROCK_MODEL, DEFAULT_BEDROCK_REGION } from '../utils/bedrock';
 

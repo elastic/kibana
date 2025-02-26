@@ -11,7 +11,7 @@ import { i18n } from '@kbn/i18n';
 import { EDITOR_MARKER } from '../../../shared/constants';
 import { isSingleItem } from '../../../..';
 import { ESQL_STRING_TYPES } from '../../../shared/esql_types';
-import { CommandSuggestParams } from '../../../definitions/types';
+import type { CommandSuggestParams } from '../../../definitions/types';
 
 import type { SuggestionRawDefinition } from '../../types';
 import { TRIGGER_SUGGESTION_COMMAND, buildConstantsDefinitions } from '../../factories';

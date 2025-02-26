@@ -6,13 +6,16 @@
  */
 
 import { groupBy } from 'lodash';
-import type { estypes } from '@elastic/elasticsearch';
-import type { SortResults } from '@elastic/elasticsearch/lib/api/types';
+import type {
+  SortResults,
+  AggregationsAggregationContainer,
+  AggregationsAggregate,
+  QueryDslQueryContainer,
+} from '@elastic/elasticsearch/lib/api/types';
 import type { SavedObjectsClientContract, ElasticsearchClient } from '@kbn/core/server';
 import type { KueryNode } from '@kbn/es-query';
 import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
-import type { AggregationsAggregationContainer } from '@elastic/elasticsearch/lib/api/types';
 
 import type { AgentSOAttributes, Agent, ListWithKuery } from '../../types';
 import { appContextService, agentPolicyService } from '..';
@@ -213,7 +216,7 @@ export async function getAgentsByKuery(
   page: number;
   perPage: number;
   statusSummary?: Record<AgentStatus, number>;
-  aggregations?: Record<string, estypes.AggregationsAggregate>;
+  aggregations?: Record<string, AggregationsAggregate>;
 }> {
   const {
     page = 1,
@@ -501,7 +504,7 @@ export const getByIds = async (
 async function _filterAgents(
   esClient: ElasticsearchClient,
   soClient: SavedObjectsClientContract,
-  query: estypes.QueryDslQueryContainer,
+  query: QueryDslQueryContainer,
   options: {
     page?: number;
     perPage?: number;

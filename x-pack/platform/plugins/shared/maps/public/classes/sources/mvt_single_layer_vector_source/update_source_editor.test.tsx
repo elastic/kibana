@@ -12,7 +12,7 @@ import { shallow } from 'enzyme';
 
 import { UpdateSourceEditor } from './update_source_editor';
 import { MVTSingleLayerVectorSource } from './mvt_single_layer_vector_source';
-import { TiledSingleLayerVectorSourceDescriptor } from '../../../../common/descriptor_types';
+import type { TiledSingleLayerVectorSourceDescriptor } from '../../../../common/descriptor_types';
 import { SOURCE_TYPES } from '../../../../common/constants';
 
 const descriptor: TiledSingleLayerVectorSourceDescriptor = {

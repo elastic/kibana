@@ -8,16 +8,17 @@
  */
 
 import { has } from 'lodash';
-import {
+import type {
   PluginInitializerContext,
   CoreSetup,
   CoreStart,
   Plugin,
   IUiSettingsClient,
 } from '@kbn/core/server';
-import { FieldFormatsStart, FieldFormatsSetup } from './types';
+import type { FieldFormatsStart, FieldFormatsSetup } from './types';
 import { DateFormat, DateNanosFormat } from './lib/converters';
-import { baseFormatters, FieldFormatInstanceType, FieldFormatsRegistry } from '../common';
+import type { FieldFormatInstanceType } from '../common';
+import { baseFormatters, FieldFormatsRegistry } from '../common';
 import { getUiSettings } from './ui_settings';
 
 export class FieldFormatsPlugin implements Plugin<FieldFormatsSetup, FieldFormatsStart> {

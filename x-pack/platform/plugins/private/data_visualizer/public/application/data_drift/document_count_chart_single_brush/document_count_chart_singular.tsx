@@ -19,7 +19,7 @@ import type {
   BarStyleAccessor,
   RectAnnotationSpec,
 } from '@elastic/charts/dist/chart_types/xy_chart/utils/specs';
-import { useEuiTheme } from '@elastic/eui';
+import { useEuiTheme, EuiText } from '@elastic/eui';
 
 import { getTimeZone } from '@kbn/visualization-utils';
 import { i18n } from '@kbn/i18n';
@@ -31,7 +31,6 @@ import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { DualBrushAnnotation } from '@kbn/aiops-components';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiText } from '@elastic/eui';
 
 import {
   SingleBrush,

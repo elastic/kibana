@@ -24,7 +24,8 @@ import {
   EuiFormErrorText,
 } from '@elastic/eui';
 
-import DashboardPicker, { DashboardPickerProps } from './dashboard_picker/dashboard_picker';
+import type { DashboardPickerProps } from './dashboard_picker/dashboard_picker';
+import DashboardPicker from './dashboard_picker/dashboard_picker';
 
 export interface SaveModalDashboardSelectorProps {
   copyOnSave: boolean;

@@ -8,7 +8,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { CommandSuggestParams } from '../../../definitions/types';
+import type { CommandSuggestParams } from '../../../definitions/types';
 
 import type { SuggestionRawDefinition } from '../../types';
 import { ESQL_STRING_TYPES } from '../../../shared/esql_types';

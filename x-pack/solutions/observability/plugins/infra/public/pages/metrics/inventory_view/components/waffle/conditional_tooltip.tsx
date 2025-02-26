@@ -8,9 +8,8 @@
 import React, { useRef } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, useEuiTheme } from '@elastic/eui';
 import { first } from 'lodash';
-import { findInventoryModel } from '@kbn/metrics-data-access-plugin/common';
+import { findInventoryModel, SnapshotMetricTypeRT } from '@kbn/metrics-data-access-plugin/common';
 import type { InventoryItemType, SnapshotMetricType } from '@kbn/metrics-data-access-plugin/common';
-import { SnapshotMetricTypeRT } from '@kbn/metrics-data-access-plugin/common';
 import { getCustomMetricLabel } from '../../../../../../common/formatters/get_custom_metric_label';
 import type { SnapshotCustomMetricInput } from '../../../../../../common/http_api';
 import { useSourceContext } from '../../../../../containers/metrics_source';

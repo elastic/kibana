@@ -20,7 +20,7 @@ import classNames from 'classnames';
 import type { Code, InlineCode, Parent, Text } from 'mdast';
 import React, { useMemo, useRef } from 'react';
 import type { Node } from 'unist';
-import { ChatActionClickHandler } from '../chat/types';
+import type { ChatActionClickHandler } from '../chat/types';
 import { CodeBlock, EsqlCodeBlock } from './esql_code_block';
 
 interface Props {

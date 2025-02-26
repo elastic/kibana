@@ -8,11 +8,10 @@
 import { act } from 'react-dom/test-utils';
 import moment from 'moment';
 import { getWatchHistory } from '../../__fixtures__';
-import { WATCH_STATES, ACTION_STATES } from '../../common/constants';
+import { WATCH_STATES, ACTION_STATES, API_BASE_PATH } from '../../common/constants';
 import { setupEnvironment, pageHelpers } from './helpers';
 import type { WatchStatusTestBed } from './helpers/watch_status_page.helpers';
 import { WATCH, WATCH_ID } from './helpers/jest_constants';
-import { API_BASE_PATH } from '../../common/constants';
 
 const { setup } = pageHelpers.watchStatusPage;
 

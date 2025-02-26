@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ChangeEvent, SyntheticEvent } from 'react';
+import type { ChangeEvent, SyntheticEvent } from 'react';
 import { renderHook, act } from '@testing-library/react';
 import { useEditModal } from './use_edit_modal';
 

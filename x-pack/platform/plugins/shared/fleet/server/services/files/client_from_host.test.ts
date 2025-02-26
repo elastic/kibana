@@ -24,12 +24,11 @@ import type { File } from '@kbn/files-plugin/common';
 
 import { getFileDataIndexName, getFileMetadataIndexName } from '../../../common';
 
-import type { FileCustomMeta } from './types';
+import type { FileCustomMeta, HostUploadedFileMetadata } from './types';
 
 import { createFromHostEsSearchResponseMock } from './mocks';
 
 import { FleetFromHostFilesClient } from './client_from_host';
-import type { HostUploadedFileMetadata } from './types';
 
 jest.mock('@kbn/files-plugin/server');
 

@@ -7,20 +7,22 @@
 
 import type { Logger } from '@kbn/core/server';
 import type { ScreenshotModePluginSetup } from '@kbn/screenshot-mode-plugin/server';
-import { ConfigType, args } from '@kbn/screenshotting-server';
+import type { ConfigType } from '@kbn/screenshotting-server';
+import { args } from '@kbn/screenshotting-server';
 import { getDataPath } from '@kbn/utils';
 import { spawn } from 'child_process';
 import del from 'del';
 import fs from 'fs';
 import { uniq } from 'lodash';
 import path from 'path';
-import puppeteer, { Browser, ConsoleMessage, Page, PageEvents, Viewport } from 'puppeteer';
+import type { Browser, ConsoleMessage, Page, PageEvents, Viewport } from 'puppeteer';
+import puppeteer from 'puppeteer';
 import { createInterface } from 'readline';
 import * as Rx from 'rxjs';
 import { catchError, concatMap, ignoreElements, map, mergeMap, reduce, takeUntil, tap } from 'rxjs';
 import { getChromiumDisconnectedError } from '..';
 import { errors } from '../../../../common';
-import { PerformanceMetrics } from '../../../../common/types';
+import type { PerformanceMetrics } from '../../../../common/types';
 import { safeChildProcess } from '../../safe_child_process';
 import { HeadlessChromiumDriver } from '../driver';
 import { getMetrics } from './metrics';

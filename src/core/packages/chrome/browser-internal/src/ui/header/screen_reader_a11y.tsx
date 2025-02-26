@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { FC, useState, useEffect } from 'react';
+import type { FC } from 'react';
+import React, { useState, useEffect } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { EuiScreenReaderLive, EuiSkipLink } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';

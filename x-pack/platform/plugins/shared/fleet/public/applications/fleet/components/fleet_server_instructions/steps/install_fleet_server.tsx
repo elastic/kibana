@@ -13,8 +13,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import type { PLATFORM_TYPE } from '../../../hooks';
-import { useFleetServerHostsForPolicy } from '../../../hooks';
-import { useStartServices, useKibanaVersion } from '../../../hooks';
+import { useFleetServerHostsForPolicy, useStartServices, useKibanaVersion } from '../../../hooks';
 
 import { PlatformSelector } from '../..';
 

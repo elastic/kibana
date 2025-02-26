@@ -6,13 +6,14 @@
  */
 
 import datemath from '@elastic/datemath';
-import { TimeRange, getCalculateAutoTimeExpression } from '@kbn/data-plugin/common';
-import { IngestStreamGetResponse, PhaseName } from '@kbn/streams-schema';
+import type { TimeRange } from '@kbn/data-plugin/common';
+import { getCalculateAutoTimeExpression } from '@kbn/data-plugin/common';
+import type { IngestStreamGetResponse, PhaseName } from '@kbn/streams-schema';
 import { lastValueFrom } from 'rxjs';
-import { IKibanaSearchRequest, IKibanaSearchResponse } from '@kbn/search-types';
+import type { IKibanaSearchRequest, IKibanaSearchResponse } from '@kbn/search-types';
 import { useKibana } from '../../../../hooks/use_kibana';
 import { useStreamsAppFetch } from '../../../../hooks/use_streams_app_fetch';
-import { DataStreamStats } from './use_data_stream_stats';
+import type { DataStreamStats } from './use_data_stream_stats';
 import { useIlmPhasesColorAndDescription } from './use_ilm_phases_color_and_description';
 
 const TIMESTAMP_FIELD = '@timestamp';

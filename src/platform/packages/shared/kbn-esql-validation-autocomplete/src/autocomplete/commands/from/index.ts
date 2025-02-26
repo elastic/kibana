@@ -7,12 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ESQLCommandOption } from '@kbn/esql-ast';
+import type { ESQLCommandOption } from '@kbn/esql-ast';
 import { isMarkerNode } from '../../../shared/context';
 import { metadataOption } from '../../../definitions/options';
 import type { SuggestionRawDefinition } from '../../types';
 import { getOverlapRange, handleFragment, removeQuoteForSuggestedSources } from '../../helper';
-import { CommandSuggestParams } from '../../../definitions/types';
+import type { CommandSuggestParams } from '../../../definitions/types';
 import {
   isColumnItem,
   isOptionItem,
@@ -26,7 +26,7 @@ import {
   buildOptionDefinition,
   buildSourcesDefinitions,
 } from '../../factories';
-import { ESQLSourceResult } from '../../../shared/types';
+import type { ESQLSourceResult } from '../../../shared/types';
 import { commaCompleteItem, pipeCompleteItem } from '../../complete_items';
 import { METADATA_FIELDS } from '../../../shared/constants';
 

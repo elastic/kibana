@@ -5,11 +5,17 @@
  * 2.0.
  */
 
-import { EuiSpacer, EuiFlexGroup, EuiFlexItem, EuiButton, EuiCallOut } from '@elastic/eui';
+import {
+  EuiSpacer,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiButton,
+  EuiCallOut,
+  EuiButtonEmpty,
+} from '@elastic/eui';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { isString } from 'lodash';
-import { EuiButtonEmpty } from '@elastic/eui';
 import type { AgentConfigurationIntake } from '../../../../../../../common/agent_configuration/configuration_types';
 import {
   omitAllOption,

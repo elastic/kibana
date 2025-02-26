@@ -5,11 +5,10 @@
  * 2.0.
  */
 
-import { of, Subject } from 'rxjs';
-import { take, bufferCount } from 'rxjs';
+import { of, Subject, take, bufferCount } from 'rxjs';
 import { createMonitoringStatsStream } from './monitoring_stats_stream';
-import { JsonValue } from '@kbn/utility-types';
-import { AggregatedStat } from '../lib/runtime_statistics_aggregator';
+import type { JsonValue } from '@kbn/utility-types';
+import type { AggregatedStat } from '../lib/runtime_statistics_aggregator';
 
 beforeEach(() => {
   jest.resetAllMocks();

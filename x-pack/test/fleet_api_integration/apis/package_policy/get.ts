@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 import { INGEST_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
-import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
+import type { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { skipIfNoDockerRegistry, isDockerRegistryEnabledOrSkipped } from '../../helpers';
 import { testUsers } from '../test_users';
 

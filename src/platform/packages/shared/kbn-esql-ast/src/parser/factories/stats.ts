@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { AggFieldContext, FieldContext, StatsCommandContext } from '../../antlr/esql_parser';
+import type { AggFieldContext, FieldContext, StatsCommandContext } from '../../antlr/esql_parser';
 import { Builder } from '../../builder';
-import { ESQLCommand } from '../../types';
+import type { ESQLCommand } from '../../types';
 import { firstItem, resolveItem } from '../../visitor/utils';
 import { createCommand } from '../factories';
 import { collectBooleanExpression, visitByOption, visitField } from '../walkers';

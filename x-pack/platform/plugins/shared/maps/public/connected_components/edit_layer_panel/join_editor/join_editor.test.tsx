@@ -6,10 +6,10 @@
  */
 
 import React from 'react';
-import { IVectorLayer } from '../../../classes/layers/vector_layer';
+import type { IVectorLayer } from '../../../classes/layers/vector_layer';
 import { JoinEditor } from './join_editor';
 import { shallow } from 'enzyme';
-import { JoinDescriptor } from '../../../../common/descriptor_types';
+import type { JoinDescriptor } from '../../../../common/descriptor_types';
 import { SOURCE_TYPES } from '../../../../common/constants';
 
 class MockLayer {

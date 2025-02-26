@@ -10,7 +10,7 @@
 import * as esKuery from '@kbn/es-query';
 import { ALL_NAMESPACES_STRING } from '@kbn/core-saved-objects-utils-server';
 import { getObjectKey } from '@kbn/core-saved-objects-base-server-internal';
-import { SavedObjectsCollectMultiNamespaceReferencesPurpose } from '@kbn/core-saved-objects-api-server/src/apis';
+import type { SavedObjectsCollectMultiNamespaceReferencesPurpose } from '@kbn/core-saved-objects-api-server/src/apis';
 import {
   KQL_FUNCTION_AND,
   KQL_FUNCTION_IS,

@@ -6,7 +6,7 @@
  */
 import { useQuery } from '@tanstack/react-query';
 import { lastValueFrom } from 'rxjs';
-import { CspFinding } from '@kbn/cloud-security-posture-common';
+import type { CspFinding } from '@kbn/cloud-security-posture-common';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
 import { showErrorToast } from '../..';

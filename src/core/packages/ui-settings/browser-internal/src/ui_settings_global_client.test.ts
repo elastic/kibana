@@ -7,8 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Subject } from 'rxjs';
-import { take, toArray } from 'rxjs';
+import { Subject, take, toArray } from 'rxjs';
 
 import { UiSettingsGlobalClient } from './ui_settings_global_client';
 

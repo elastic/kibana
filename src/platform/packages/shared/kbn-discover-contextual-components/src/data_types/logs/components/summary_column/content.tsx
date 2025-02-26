@@ -9,12 +9,12 @@
 
 import React, { useMemo } from 'react';
 import { SourceDocument, type DataGridCellValueElementProps } from '@kbn/unified-data-table';
+import type { ShouldShowFieldInTableHandler } from '@kbn/discover-utils';
 import {
-  ShouldShowFieldInTableHandler,
   getLogDocumentOverview,
   getMessageFieldWithFallbacks,
+  MESSAGE_FIELD,
 } from '@kbn/discover-utils';
-import { MESSAGE_FIELD } from '@kbn/discover-utils';
 import { formatJsonDocumentForContent } from './utils';
 
 interface ContentProps extends DataGridCellValueElementProps {

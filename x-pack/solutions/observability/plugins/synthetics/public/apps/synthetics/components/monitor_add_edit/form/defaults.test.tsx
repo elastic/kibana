@@ -4,7 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { ConfigKey, MonitorTypeEnum, FormMonitorType, SyntheticsMonitor } from '../types';
+import type { SyntheticsMonitor } from '../types';
+import { ConfigKey, MonitorTypeEnum, FormMonitorType } from '../types';
 import { DEFAULT_FIELDS, PROFILE_VALUES_ENUM, PROFILES_MAP } from '../constants';
 import { formatDefaultFormValues } from './defaults';
 

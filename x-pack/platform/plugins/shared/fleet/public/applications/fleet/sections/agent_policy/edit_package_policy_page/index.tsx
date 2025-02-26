@@ -27,6 +27,7 @@ import {
   useUIExtension,
   useAuthz,
   sendBulkGetAgentPoliciesForRq,
+  useMultipleAgentPolicies,
 } from '../../../hooks';
 import {
   useBreadcrumbs as useIntegrationsBreadcrumbs,
@@ -54,7 +55,6 @@ import {
   getRootPrivilegedDataStreams,
   isRootPrivilegesRequired,
 } from '../../../../../../common/services';
-import { useMultipleAgentPolicies } from '../../../hooks';
 
 import { RootPrivilegesCallout } from '../create_package_policy_page/single_page_layout/root_callout';
 
@@ -63,9 +63,8 @@ import { StepsWithLessPadding } from '../create_package_policy_page/single_page_
 import { useAgentless } from '../create_package_policy_page/single_page_layout/hooks/setup_technology';
 
 import { UpgradeStatusCallout } from './components';
-import { usePackagePolicyWithRelatedData, useHistoryBlock } from './hooks';
+import { usePackagePolicyWithRelatedData, useHistoryBlock, usePackagePolicySteps } from './hooks';
 import { getNewSecrets } from './utils';
-import { usePackagePolicySteps } from './hooks';
 
 export const EditPackagePolicyPage = memo(() => {
   const {

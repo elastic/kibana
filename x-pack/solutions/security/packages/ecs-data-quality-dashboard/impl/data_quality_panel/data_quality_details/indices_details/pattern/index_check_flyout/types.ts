@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { HttpHandler } from '@kbn/core-http-browser';
-import { HISTORY_TAB_ID, LATEST_CHECK_TAB_ID } from '../constants';
+import type { HttpHandler } from '@kbn/core-http-browser';
+import type { HISTORY_TAB_ID, LATEST_CHECK_TAB_ID } from '../constants';
 
 export interface FetchHistoricalResultsOpts extends Partial<FetchHistoricalResultsQueryState> {
   indexName: string;

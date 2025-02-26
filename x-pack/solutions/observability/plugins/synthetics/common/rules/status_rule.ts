@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import {
+import type {
   StatusRuleCondition,
   TimeWindow,
 } from '@kbn/response-ops-rule-params/synthetics_monitor_status';

@@ -7,35 +7,37 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { PartialSuggestionWithText } from './helpers';
 import {
   setup,
   getFunctionSignaturesByReturnType,
   getFieldNamesByType,
   createCustomCallbackMocks,
   getLiteralsByType,
-  PartialSuggestionWithText,
   getDateLiteralsByFieldType,
 } from './helpers';
 import { ESQL_COMMON_NUMERIC_TYPES } from '../../shared/esql_types';
 import { scalarFunctionDefinitions } from '../../definitions/generated/scalar_functions';
 import { timeUnitsToSuggest } from '../../definitions/literals';
-import { FunctionDefinitionTypes } from '../../definitions/types';
+import {
+  FunctionDefinitionTypes,
+  isFieldType,
+  isReturnType,
+  isSupportedDataType,
+} from '../../definitions/types';
 import {
   getCompatibleTypesToSuggestNext,
   getValidFunctionSignaturesForPreviousArgs,
   strictlyGetParamAtPosition,
 } from '../helper';
 import { uniq } from 'lodash';
-import {
+import type {
   FunctionParameter,
   FunctionReturnType,
   SupportedDataType,
-  isFieldType,
-  isReturnType,
-  isSupportedDataType,
 } from '../../definitions/types';
 import { fieldNameFromType } from '../../validation/validation.test';
-import { ESQLAstItem } from '@kbn/esql-ast';
+import type { ESQLAstItem } from '@kbn/esql-ast';
 import { roundParameterTypes } from './constants';
 
 const getTypesFromParamDefs = (paramDefs: FunctionParameter[]): SupportedDataType[] =>

@@ -11,7 +11,7 @@ import React from 'react';
 
 import { I18nProvider } from '@kbn/i18n-react';
 import { KibanaContextProvider as KibanaReactProvider } from '@kbn/kibana-react-plugin/public';
-import { DecoratorFn } from '@storybook/react';
+import type { DecoratorFn } from '@storybook/react';
 import { setStubKibanaServices } from '../public/services/mocks';
 
 const settings = new Map();

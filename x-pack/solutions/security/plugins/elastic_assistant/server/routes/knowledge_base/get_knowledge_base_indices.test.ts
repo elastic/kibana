@@ -9,7 +9,7 @@ import { getKnowledgeBaseIndicesRoute } from './get_knowledge_base_indices';
 import { serverMock } from '../../__mocks__/server';
 import { requestContextMock } from '../../__mocks__/request_context';
 import { getGetKnowledgeBaseIndicesRequest } from '../../__mocks__/request';
-import { IndicesGetMappingResponse } from '@elastic/elasticsearch/lib/api/types';
+import type { IndicesGetMappingResponse } from '@elastic/elasticsearch/lib/api/types';
 
 const mockFieldCaps = {
   indices: [

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { IUiSettingsClient } from '@kbn/core/public';
+import type { IUiSettingsClient } from '@kbn/core/public';
 export {}; // Hack to declare this file as a module so TS allows us to extend the Global Window interface
 
 declare global {

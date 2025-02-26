@@ -5,15 +5,13 @@
  * 2.0.
  */
 
-import { EuiSelect } from '@elastic/eui';
+import { EuiSelect, EuiFormRow, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { defaults, map, omit } from 'lodash';
 import React, { useCallback, useEffect } from 'react';
 import type { CoreStart } from '@kbn/core/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { ForLastExpression, TIME_UNITS } from '@kbn/triggers-actions-ui-plugin/public';
-import { EuiFormRow } from '@elastic/eui';
-import { EuiSpacer } from '@elastic/eui';
 import type { EuiSwitchEvent } from '@elastic/eui';
 import type { SearchConfigurationType } from '@kbn/response-ops-rule-params/common';
 import { AggregationType } from '../../../../../common/rules/apm_rule_types';

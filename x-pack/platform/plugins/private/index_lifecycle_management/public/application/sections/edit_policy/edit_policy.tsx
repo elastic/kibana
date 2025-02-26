@@ -34,7 +34,14 @@ import {
   useFormIsModified,
 } from '../../../shared_imports';
 import { getPoliciesListPath, getPolicyViewPath } from '../../services/navigation';
-import { UseField } from './form';
+import {
+  UseField,
+  createPolicyNameValidations,
+  createSerializer,
+  createDeserializer,
+  Form,
+  getSchema,
+} from './form';
 import { savePolicy } from './save_policy';
 import {
   ColdPhase,
@@ -47,15 +54,8 @@ import {
   FormErrorsCallout,
   EditWarning,
 } from './components';
-import {
-  createPolicyNameValidations,
-  createSerializer,
-  createDeserializer,
-  Form,
-  getSchema,
-} from './form';
 import { useEditPolicyContext } from './edit_policy_context';
-import { FormInternal } from './types';
+import type { FormInternal } from './types';
 
 const policyNamePath = 'name';
 

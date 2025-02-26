@@ -17,14 +17,13 @@ import { ES_FIELD_TYPES } from '@kbn/field-types';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import type { DataView, DataViewsContract } from '@kbn/data-views-plugin/public';
 import { extractErrorMessage } from '@kbn/ml-error-utils';
-import {
-  getEntityFieldList,
-  type MlEntityField,
-  type MlInfluencer,
-  type MlRecordForInfluencer,
-  ML_JOB_AGGREGATION,
+import { getEntityFieldList, ML_JOB_AGGREGATION } from '@kbn/ml-anomaly-utils';
+import type {
+  InfluencersFilterQuery,
+  MlEntityField,
+  MlInfluencer,
+  MlRecordForInfluencer,
 } from '@kbn/ml-anomaly-utils';
-import type { InfluencersFilterQuery } from '@kbn/ml-anomaly-utils';
 import type { TimeRangeBounds } from '@kbn/ml-time-buckets';
 import type { IUiSettingsClient } from '@kbn/core/public';
 import { parseInterval } from '@kbn/ml-parse-interval';

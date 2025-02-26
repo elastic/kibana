@@ -9,7 +9,7 @@
 
 import type { MockedKeys } from '@kbn/utility-types-jest';
 import { Storage } from './storage';
-import { IStorage, IStorageWrapper } from './types';
+import type { IStorage, IStorageWrapper } from './types';
 
 const payload = { first: 'john', last: 'smith' };
 const createMockStore = (): MockedKeys<IStorage> => {

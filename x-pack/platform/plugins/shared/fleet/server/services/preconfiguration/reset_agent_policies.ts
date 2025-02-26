@@ -16,6 +16,7 @@ import {
   SO_SEARCH_LIMIT,
   PACKAGE_POLICY_SAVED_OBJECT_TYPE,
   PRECONFIGURATION_DELETION_RECORD_SAVED_OBJECT_TYPE,
+  MAX_CONCURRENT_AGENT_POLICIES_OPERATIONS_20,
 } from '../../constants';
 import { agentPolicyService, getAgentPolicySavedObjectType } from '../agent_policy';
 import { packagePolicyService } from '../package_policy';
@@ -23,8 +24,6 @@ import { getAgentsByKuery, forceUnenrollAgent } from '../agents';
 import { listEnrollmentApiKeys, deleteEnrollmentApiKey } from '../api_keys';
 import type { AgentPolicy } from '../../types';
 import { AgentPolicyInvalidError } from '../../errors';
-
-import { MAX_CONCURRENT_AGENT_POLICIES_OPERATIONS_20 } from '../../constants';
 
 export async function resetPreconfiguredAgentPolicies(
   soClient: SavedObjectsClientContract,

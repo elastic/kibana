@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { expect, Locator, Page } from '@playwright/test';
+import type { Locator, Page } from '@playwright/test';
+import { expect } from '@playwright/test';
 
 const PAGE_URL = '/app/security/rules/management';
 

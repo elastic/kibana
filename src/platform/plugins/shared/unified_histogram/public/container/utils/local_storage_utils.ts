@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Storage } from '@kbn/kibana-utils-plugin/public';
+import type { Storage } from '@kbn/kibana-utils-plugin/public';
 
 export const CHART_HIDDEN_KEY = 'chartHidden';
 export const HISTOGRAM_HEIGHT_KEY = 'histogramHeight';

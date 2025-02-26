@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { schema } from '@kbn/config-schema';
-import { IRouter, Logger } from '@kbn/core/server';
+import type { IRouter, Logger } from '@kbn/core/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import type {
   AlertsClient,

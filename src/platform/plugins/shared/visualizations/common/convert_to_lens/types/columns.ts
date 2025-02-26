@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { DataType, FilterQuery, TimeScaleUnit } from './common';
-import { Operation, OperationWithReferences, OperationWithSourceField } from './operations';
-import {
+import type { DataType, FilterQuery, TimeScaleUnit } from './common';
+import type { Operation, OperationWithReferences, OperationWithSourceField } from './operations';
+import type {
   AvgParams,
   CardinalityParams,
   DateHistogramParams,

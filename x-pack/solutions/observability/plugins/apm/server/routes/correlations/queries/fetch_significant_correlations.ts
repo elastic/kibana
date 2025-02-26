@@ -16,13 +16,12 @@ import type {
 } from '../../../../common/correlations/types';
 
 import { LatencyDistributionChartType } from '../../../../common/latency_distribution_chart_types';
-import { computeExpectationsAndRanges, splitAllSettledPromises } from '../utils';
+import { computeExpectationsAndRanges, splitAllSettledPromises, getEventType } from '../utils';
 import { fetchDurationPercentiles } from './fetch_duration_percentiles';
 import { fetchDurationCorrelationWithHistogram } from './fetch_duration_correlation_with_histogram';
 import { fetchDurationFractions } from './fetch_duration_fractions';
 import { fetchDurationHistogramRangeSteps } from './fetch_duration_histogram_range_steps';
 import { fetchDurationRanges } from './fetch_duration_ranges';
-import { getEventType } from '../utils';
 import type { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
 
 export interface SignificantCorrelationsResponse {

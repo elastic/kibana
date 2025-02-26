@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import {
+import type {
   ActionsClientChatOpenAI,
   ActionsClientSimpleChatModel,
 } from '@kbn/langchain/server/language_models';

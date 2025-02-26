@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { IRouter } from '@kbn/core/server';
+import type { IRouter } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
 import type { Logger } from '@kbn/logging';
 import { fetchInferenceEndpoints } from './lib/fetch_inference_endpoints';

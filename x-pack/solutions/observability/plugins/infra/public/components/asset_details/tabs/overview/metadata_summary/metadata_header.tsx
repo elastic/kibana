@@ -5,12 +5,11 @@
  * 2.0.
  */
 
-import { EuiDescriptionListTitle, EuiFlexGroup, EuiFlexItem, EuiLink } from '@elastic/eui';
+import { EuiDescriptionListTitle, EuiFlexGroup, EuiFlexItem, EuiLink, EuiText } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiText } from '@elastic/eui';
 import type { MetadataData } from './metadata_summary_list';
 import { Popover } from '../../common/popover';
 

@@ -9,58 +9,44 @@
 
 import { i18n } from '@kbn/i18n';
 import { capitalize, isEmpty, isEqual, sortBy } from 'lodash';
-import { KueryNode } from '@kbn/es-query';
+import type { KueryNode } from '@kbn/es-query';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { toMountPoint } from '@kbn/react-kibana-mount';
-import { parseRuleCircuitBreakerErrorMessage } from '@kbn/alerting-plugin/common';
-import { RuleTypeModal } from '@kbn/response-ops-rule-form';
-import React, {
-  lazy,
-  useEffect,
-  useState,
-  ReactNode,
-  useCallback,
-  useMemo,
-  useRef,
-  Suspense,
-} from 'react';
 import {
-  EuiSpacer,
-  EuiPageTemplate,
-  EuiTableSortingType,
-  EuiButtonIcon,
-  EuiSelectableOption,
-  EuiDescriptionList,
-} from '@elastic/eui';
-import { EuiSelectableOptionCheckedType } from '@elastic/eui/src/components/selectable/selectable_option';
-import { useHistory } from 'react-router-dom';
-
-import {
-  RuleExecutionStatus,
+  parseRuleCircuitBreakerErrorMessage,
   ALERTING_FEATURE_ID,
   RuleExecutionStatusErrorReasons,
   RuleLastRunOutcomeValues,
 } from '@kbn/alerting-plugin/common';
+import { RuleTypeModal } from '@kbn/response-ops-rule-form';
+import type { ReactNode } from 'react';
+import React, { lazy, useEffect, useState, useCallback, useMemo, useRef, Suspense } from 'react';
+import type { EuiTableSortingType, EuiSelectableOption } from '@elastic/eui';
+import { EuiSpacer, EuiPageTemplate, EuiButtonIcon, EuiDescriptionList } from '@elastic/eui';
+import type { EuiSelectableOptionCheckedType } from '@elastic/eui/src/components/selectable/selectable_option';
+import { useHistory } from 'react-router-dom';
+
+import type { RuleExecutionStatus } from '@kbn/alerting-plugin/common';
+import type { RuleCreationValidConsumer } from '@kbn/rule-data-utils';
 import {
-  RuleCreationValidConsumer,
   ruleDetailsRoute as commonRuleDetailsRoute,
   STACK_ALERTS_FEATURE_ID,
   getCreateRuleRoute,
   getEditRuleRoute,
 } from '@kbn/rule-data-utils';
 import { MaintenanceWindowCallout } from '@kbn/alerts-ui-shared';
-import {
+import type {
   Rule,
   RuleTableItem,
   RuleType,
   RuleStatus,
   Pagination,
-  Percentiles,
   SnoozeSchedule,
   UpdateFiltersProps,
   BulkEditActions,
   UpdateRulesToBulkEditProps,
 } from '../../../../types';
+import { Percentiles } from '../../../../types';
 import { BulkOperationPopover } from '../../common/components/bulk_operation_popover';
 import { RuleQuickEditButtonsWithApi as RuleQuickEditButtons } from '../../common/components/rule_quick_edit_buttons';
 import { CollapsedItemActionsWithApi as CollapsedItemActions } from './collapsed_item_actions';
@@ -78,7 +64,13 @@ import { hasAllPrivilege, hasExecuteActionsCapability } from '../../../lib/capab
 import { DEFAULT_SEARCH_PAGE_SIZE } from '../../../constants';
 import { RulesDeleteModalConfirmation } from '../../../components/rules_delete_modal_confirmation';
 import { RulesListPrompts } from './rules_list_prompts';
-import { ALERT_STATUS_LICENSE_ERROR } from '../translations';
+import {
+  ALERT_STATUS_LICENSE_ERROR,
+  getConfirmDeletionButtonText,
+  getConfirmDeletionModalText,
+  SINGLE_RULE_TITLE,
+  MULTIPLE_RULE_TITLE,
+} from '../translations';
 import { useKibana } from '../../../../common/lib/kibana';
 import './rules_list.scss';
 import { CreateRuleButton } from './create_rule_button';
@@ -100,12 +92,6 @@ import { useLoadRulesQuery } from '../../../hooks/use_load_rules_query';
 import { useLoadConfigQuery } from '../../../hooks/use_load_config_query';
 import { ToastWithCircuitBreakerContent } from '../../../components/toast_with_circuit_breaker_content';
 
-import {
-  getConfirmDeletionButtonText,
-  getConfirmDeletionModalText,
-  SINGLE_RULE_TITLE,
-  MULTIPLE_RULE_TITLE,
-} from '../translations';
 import { useBulkOperationToast } from '../../../hooks/use_bulk_operation_toast';
 import { RulesSettingsLink } from '../../../components/rules_setting/rules_settings_link';
 import { useRulesListUiState as useUiState } from '../../../hooks/use_rules_list_ui_state';

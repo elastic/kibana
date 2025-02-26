@@ -7,12 +7,14 @@
 
 import React, { useState, useMemo, useEffect, useCallback } from 'react';
 import { useHistory } from 'react-router-dom';
-import { ObservabilityAlertSearchBar } from '@kbn/observability-plugin/public';
+import {
+  ObservabilityAlertSearchBar,
+  ObservabilityAlertsTable,
+} from '@kbn/observability-plugin/public';
 import type { AlertStatus } from '@kbn/observability-plugin/common/typings';
 import { EuiPanel, EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
 import type { BoolQuery } from '@kbn/es-query';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { ObservabilityAlertsTable } from '@kbn/observability-plugin/public';
 import {
   APM_ALERTING_CONSUMERS,
   APM_ALERTING_RULE_TYPE_IDS,

@@ -7,8 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { ReactElement } from 'react';
-import { EuiBadge, EuiBadgeProps, useEuiTheme, UseEuiTheme } from '@elastic/eui';
+import type { ReactElement } from 'react';
+import React from 'react';
+import type { EuiBadgeProps, UseEuiTheme } from '@elastic/eui';
+import { EuiBadge, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { getLogLevelCoalescedValue, getLogLevelColor } from '../utils';
 

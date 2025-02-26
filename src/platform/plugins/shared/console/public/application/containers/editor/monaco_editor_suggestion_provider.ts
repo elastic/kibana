@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { monaco } from '@kbn/monaco';
-import { MutableRefObject } from 'react';
-import { MonacoEditorActionsProvider } from './monaco_editor_actions_provider';
+import type { monaco } from '@kbn/monaco';
+import type { MutableRefObject } from 'react';
+import type { MonacoEditorActionsProvider } from './monaco_editor_actions_provider';
 
 export const getSuggestionProvider = (
   actionsProvider: MutableRefObject<MonacoEditorActionsProvider | null>

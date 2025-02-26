@@ -7,10 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { History } from 'history';
+import type { History } from 'history';
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { withRouter, RouteComponentProps, Redirect } from 'react-router-dom';
+import type { RouteComponentProps } from 'react-router-dom';
+import { withRouter, Redirect } from 'react-router-dom';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { Router, Route } from '@kbn/shared-ux-router';
 
@@ -25,7 +26,7 @@ import {
   EuiSideNav,
 } from '@elastic/eui';
 
-import { CoreStart, AppMountParameters } from '@kbn/core/public';
+import type { CoreStart, AppMountParameters } from '@kbn/core/public';
 
 const Home = () => (
   <EuiPageBody data-test-subj="fooAppHome">

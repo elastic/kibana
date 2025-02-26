@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { ToolingLog } from '@kbn/tooling-log';
+import type { ToolingLog } from '@kbn/tooling-log';
 import { kibanaAssets } from '../data_sources';
-import { Config } from '../types';
+import type { Config } from '../types';
 import { installKibanaAssets } from './install_kibana_assets';
 
 export async function installAssets({ kibana, indexing }: Config, logger: ToolingLog) {

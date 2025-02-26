@@ -10,8 +10,7 @@
 import React, { useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiConfirmModal } from '@elastic/eui';
-import { useEditorActionContext } from '../../contexts';
-import { useServicesContext } from '../../contexts';
+import { useEditorActionContext, useServicesContext } from '../../contexts';
 
 interface ImportConfirmModalProps {
   onClose: () => void;

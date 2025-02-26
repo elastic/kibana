@@ -14,12 +14,8 @@ import {
   type IngestStreamGetResponse,
   type IngestStreamUpsertRequest,
 } from './ingest';
-import {
-  GroupStreamGetResponse,
-  groupStreamGetResponseSchema,
-  GroupStreamUpsertRequest,
-  groupStreamUpsertRequestSchema,
-} from './group';
+import type { GroupStreamGetResponse, GroupStreamUpsertRequest } from './group';
+import { groupStreamGetResponseSchema, groupStreamUpsertRequestSchema } from './group';
 import { createAsSchemaOrThrow, createIsNarrowSchema } from '../helpers';
 
 export const streamGetResponseSchema: z.Schema<StreamGetResponse> = z.union([

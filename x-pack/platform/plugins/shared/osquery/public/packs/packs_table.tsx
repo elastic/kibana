@@ -6,8 +6,8 @@
  */
 
 import type { EuiBasicTableColumn, EuiTableActionsColumnType } from '@elastic/eui';
-import { EuiButtonIcon } from '@elastic/eui';
 import {
+  EuiButtonIcon,
   EuiButtonEmpty,
   EuiText,
   EuiPopover,

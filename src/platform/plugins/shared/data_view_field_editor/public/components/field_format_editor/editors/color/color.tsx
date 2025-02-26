@@ -13,11 +13,12 @@ import { EuiButton, EuiFlexGroup, EuiSpacer, EuiTitle } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n-react';
 import { DEFAULT_CONVERTER_COLOR } from '@kbn/field-formats-plugin/common';
-import { Color, ColorRow } from './color_row';
+import type { Color } from './color_row';
+import { ColorRow } from './color_row';
 import { DefaultFormatEditor } from '../default/default';
 import { formatId } from './constants';
 
-import { FormatEditorProps } from '../types';
+import type { FormatEditorProps } from '../types';
 
 export interface ColorFormatEditorFormatParams {
   colors: Color[];

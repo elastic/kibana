@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { Datatable, ExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
-import { CollapseArgs } from '.';
+import type { Datatable, ExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
+import type { CollapseArgs } from '.';
 
 export type CollapseExpressionFunction = ExpressionFunctionDefinition<
   'lens_collapse',

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { IRouter, SavedObjectsClient } from '@kbn/core/server';
+import type { IRouter, SavedObjectsClient } from '@kbn/core/server';
 import { API_BASE_PATH } from '../../common';
 import { findAllGuides } from '../helpers';
 import { guideStateSavedObjectsType } from '../saved_objects';

@@ -7,12 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import {
-  type RouteMethod,
-  type SafeRouteMethod,
-  type RouteConfig,
-  getRequestValidation,
-} from '@kbn/core-http-server';
+import { getRequestValidation } from '@kbn/core-http-server';
 import type {
   RouteSecurityGetter,
   RouteSecurity,
@@ -21,13 +16,16 @@ import type {
   RouteAccess,
   RouteConfigOptions,
   PostValidationMetadata,
+  RouteMethod,
+  SafeRouteMethod,
+  RouteConfig,
 } from '@kbn/core-http-server';
 import { isConfigSchema } from '@kbn/config-schema';
 import { isZod } from '@kbn/zod';
 import type { Logger } from '@kbn/logging';
 import type { DeepPartial } from '@kbn/utility-types';
-import { Request } from '@hapi/hapi';
-import { Mutable } from 'utility-types';
+import type { Request } from '@hapi/hapi';
+import type { Mutable } from 'utility-types';
 import type { InternalRouterRoute, RequestHandlerEnhanced, Router } from './router';
 import { CoreKibanaRequest } from './request';
 import { RouteValidator } from './validator';

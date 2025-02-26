@@ -7,7 +7,7 @@
 
 import { EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { SLOWithSummaryResponse } from '@kbn/slo-schema';
+import type { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import React from 'react';
 import { SLOGroupingValueSelector } from './slo_grouping_value_selector';
 

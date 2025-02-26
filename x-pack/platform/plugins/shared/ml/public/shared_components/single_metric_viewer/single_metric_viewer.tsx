@@ -5,11 +5,10 @@
  * 2.0.
  */
 
-import { useCallback, useEffect, useMemo, useState } from 'react';
-import moment from 'moment';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import moment, { tz } from 'moment';
 import useMountedState from 'react-use/lib/useMountedState';
 import type { FC } from 'react';
-import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiResizeObserver } from '@elastic/eui';
 import type { CoreStart } from '@kbn/core-lifecycle-browser';
@@ -21,7 +20,6 @@ import { DatePickerContextProvider, type DatePickerDependencies } from '@kbn/ml-
 import type { TimeRangeBounds } from '@kbn/ml-time-buckets';
 import usePrevious from 'react-use/lib/usePrevious';
 import { extractErrorProperties } from '@kbn/ml-error-utils';
-import { tz } from 'moment';
 import { pick, throttle } from 'lodash';
 import type { MlDependencies } from '../../application/app';
 import { TimeSeriesExplorerEmbeddableChart } from '../../application/timeseriesexplorer/timeseriesexplorer_embeddable_chart';

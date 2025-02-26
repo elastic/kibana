@@ -8,10 +8,10 @@
  */
 
 import { Serializable } from '../serializable';
-import { Span } from './span';
-import { Transaction } from './transaction';
+import type { Span } from './span';
+import type { Transaction } from './transaction';
 import { generateLongId } from '../utils/generate_id';
-import { ApmFields } from './apm_fields';
+import type { ApmFields } from './apm_fields';
 
 export class BaseSpan extends Serializable<ApmFields> {
   private readonly _children: BaseSpan[] = [];

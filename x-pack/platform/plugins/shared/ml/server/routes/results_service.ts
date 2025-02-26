@@ -18,13 +18,11 @@ import {
   anomalySearchSchema,
   getAnomalyChartsSchema,
   getAnomalyRecordsSchema,
-} from './schemas/results_service_schema';
-import { resultsServiceProvider } from '../models/results_service';
-import { jobIdSchema } from './schemas/anomaly_detectors_schema';
-import {
   getCategorizerStatsSchema,
   getCategorizerStoppedPartitionsSchema,
 } from './schemas/results_service_schema';
+import { resultsServiceProvider } from '../models/results_service';
+import { jobIdSchema } from './schemas/anomaly_detectors_schema';
 import type { MlClient } from '../lib/ml_client';
 
 function getAnomaliesTableData(mlClient: MlClient, payload: any) {

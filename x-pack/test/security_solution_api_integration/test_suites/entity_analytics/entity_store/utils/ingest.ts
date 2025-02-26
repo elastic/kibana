@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { Client } from '@elastic/elasticsearch';
-import { IngestProcessorContainer } from '@elastic/elasticsearch/lib/api/types';
-import { ToolingLog } from '@kbn/tooling-log';
+import type { Client } from '@elastic/elasticsearch';
+import type { IngestProcessorContainer } from '@elastic/elasticsearch/lib/api/types';
+import type { ToolingLog } from '@kbn/tooling-log';
 
 export const applyIngestProcessorToDoc = async (
   steps: IngestProcessorContainer[],

@@ -8,8 +8,8 @@
  */
 
 import { css } from '@emotion/react';
+import type { UseEuiTheme } from '@elastic/eui';
 import {
-  UseEuiTheme,
   logicalCSS,
   logicalTextAlignCSS,
   mathWithUnits,

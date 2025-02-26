@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { RunnableConfig } from '@langchain/core/runnables';
-import { StructuredTool } from '@langchain/core/tools';
+import type { RunnableConfig } from '@langchain/core/runnables';
+import type { StructuredTool } from '@langchain/core/tools';
 import { ToolExecutor } from '@langchain/langgraph/prebuilt';
 import { castArray } from 'lodash';
-import { AgentAction } from 'langchain/agents';
-import { AgentState, NodeParamsBase } from '../types';
+import type { AgentAction } from 'langchain/agents';
+import type { AgentState, NodeParamsBase } from '../types';
 import { NodeType } from '../constants';
 
 export interface ExecuteToolsParams extends NodeParamsBase {

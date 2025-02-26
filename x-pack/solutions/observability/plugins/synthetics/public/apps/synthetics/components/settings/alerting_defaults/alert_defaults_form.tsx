@@ -30,7 +30,7 @@ import {
   setDynamicSettingsAction,
 } from '../../../state/settings/actions';
 import { DefaultConnectorField } from './connector_field';
-import { DynamicSettings } from '../../../../../../common/runtime_types';
+import type { DynamicSettings } from '../../../../../../common/runtime_types';
 import { useAlertingDefaults } from './hooks/use_alerting_defaults';
 
 interface FormFields extends Omit<DynamicSettings, 'defaultEmail'> {

@@ -7,14 +7,11 @@
 
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { loggerMock } from '@kbn/logging-mocks';
-import {
-  UpdateConversationSchema,
-  transformToUpdateScheme,
-  updateConversation,
-} from './update_conversation';
+import type { UpdateConversationSchema } from './update_conversation';
+import { transformToUpdateScheme, updateConversation } from './update_conversation';
 import { getConversation } from './get_conversation';
 import { authenticatedUser } from '../../__mocks__/user';
-import { ConversationResponse, ConversationUpdateProps } from '@kbn/elastic-assistant-common';
+import type { ConversationResponse, ConversationUpdateProps } from '@kbn/elastic-assistant-common';
 
 export const getUpdateConversationOptionsMock = (): ConversationUpdateProps => ({
   id: 'test',

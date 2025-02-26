@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { BaseSyntheticEvent, useMemo } from 'react';
+import type { BaseSyntheticEvent } from 'react';
+import React, { useMemo } from 'react';
 import { css } from '@emotion/react';
 import {
   EuiButtonEmpty,

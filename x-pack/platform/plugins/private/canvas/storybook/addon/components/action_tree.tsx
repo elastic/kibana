@@ -5,14 +5,15 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
+import type { FC } from 'react';
+import React from 'react';
 import { isObject, isDate } from 'lodash';
 import { v4 as uuidv4 } from 'uuid';
 import { EuiTreeView } from '@elastic/eui';
 
-import { Node } from '@elastic/eui/src/components/tree_view/tree_view';
+import type { Node } from '@elastic/eui/src/components/tree_view/tree_view';
 
-import { RecordedAction } from '../types';
+import type { RecordedAction } from '../types';
 
 const actionToTree = (recordedAction: RecordedAction) => {
   const { action, newState, previousState } = recordedAction;

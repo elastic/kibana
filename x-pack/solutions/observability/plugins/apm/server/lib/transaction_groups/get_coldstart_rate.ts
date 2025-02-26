@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import { kqlQuery, rangeQuery } from '@kbn/observability-plugin/server';
-import { termQuery } from '@kbn/observability-plugin/server';
+import { kqlQuery, rangeQuery, termQuery } from '@kbn/observability-plugin/server';
 import {
   FAAS_COLDSTART,
   SERVICE_NAME,

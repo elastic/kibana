@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import { ConfigKey, ICMPFields } from '../../../../common/runtime_types';
-import { secondsToCronFormatter } from './formatting_utils';
+import type { ICMPFields } from '../../../../common/runtime_types';
+import { ConfigKey } from '../../../../common/runtime_types';
+import { secondsToCronFormatter, stringToJsonFormatter } from './formatting_utils';
 
-import { Formatter, commonFormatters } from './common_formatters';
-import { stringToJsonFormatter } from './formatting_utils';
+import type { Formatter } from './common_formatters';
+import { commonFormatters } from './common_formatters';
 
 export type ICMPFormatMap = Record<keyof ICMPFields, Formatter>;
 

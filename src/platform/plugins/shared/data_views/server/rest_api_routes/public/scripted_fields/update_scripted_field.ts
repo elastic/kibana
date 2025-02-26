@@ -8,8 +8,8 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { IRouter, StartServicesAccessor } from '@kbn/core/server';
-import { FieldSpec } from '../../../../common';
+import type { IRouter, StartServicesAccessor } from '@kbn/core/server';
+import type { FieldSpec } from '../../../../common';
 import { ErrorIndexPatternFieldNotFound } from '../../../error';
 import { handleErrors } from '../util/handle_errors';
 import { fieldSpecSchemaFields } from '../../../schemas';

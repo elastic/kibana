@@ -7,24 +7,27 @@
 
 import { of, Observable } from 'rxjs';
 import { z } from '@kbn/zod';
+import type { AIMessageChunk } from '@langchain/core/messages';
 import {
   AIMessage,
-  AIMessageChunk,
   HumanMessage,
   isAIMessage,
   SystemMessage,
   ToolMessage,
 } from '@langchain/core/messages';
-import { loggerMock, MockedLogger } from '@kbn/logging-mocks';
-import {
+import type { MockedLogger } from '@kbn/logging-mocks';
+import { loggerMock } from '@kbn/logging-mocks';
+import type {
   ChatCompleteAPI,
   ChatCompleteResponse,
   ChatCompleteStreamResponse,
   ChatCompletionChunkEvent,
   ChatCompletionEvent,
-  ChatCompletionEventType,
   ChatCompletionTokenCount,
   InferenceConnector,
+} from '@kbn/inference-common';
+import {
+  ChatCompletionEventType,
   InferenceConnectorType,
   MessageRole,
   createInferenceRequestError,

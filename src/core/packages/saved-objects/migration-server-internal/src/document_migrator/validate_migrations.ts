@@ -14,12 +14,10 @@ import type {
   SavedObjectsType,
   SavedObjectsTypeMappingDefinition,
   SavedObjectsModelVersionMap,
-} from '@kbn/core-saved-objects-server';
-import { assertValidModelVersion } from '@kbn/core-saved-objects-base-server-internal';
-import {
   SavedObjectsModelChange,
   SavedObjectsModelMappingsAdditionChange,
 } from '@kbn/core-saved-objects-server';
+import { assertValidModelVersion } from '@kbn/core-saved-objects-base-server-internal';
 
 /**
  * Validates the consistency of the given type for use with the document migrator.

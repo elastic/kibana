@@ -17,8 +17,8 @@ import {
   EuiSpacer,
   EuiSplitPanel,
   EuiText,
+  useEuiTheme,
 } from '@elastic/eui';
-import { useEuiTheme } from '@elastic/eui';
 import { asyncForEach } from '@kbn/std';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
 import type { Module } from '../../../../common/types/modules';

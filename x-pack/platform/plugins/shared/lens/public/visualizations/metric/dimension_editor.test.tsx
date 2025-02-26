@@ -11,15 +11,12 @@ import { faker } from '@faker-js/faker';
 import userEvent from '@testing-library/user-event';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { euiLightVars } from '@kbn/ui-theme';
-import { CustomPaletteParams, PaletteOutput, PaletteRegistry } from '@kbn/coloring';
-import { VisualizationDimensionEditorProps } from '../../types';
-import { MetricVisualizationState } from './types';
-import {
-  DimensionEditor,
-  DimensionEditorAdditionalSection,
-  SupportingVisType,
-} from './dimension_editor';
-import { DatasourcePublicAPI } from '../..';
+import type { CustomPaletteParams, PaletteOutput, PaletteRegistry } from '@kbn/coloring';
+import type { VisualizationDimensionEditorProps } from '../../types';
+import type { MetricVisualizationState } from './types';
+import type { SupportingVisType } from './dimension_editor';
+import { DimensionEditor, DimensionEditorAdditionalSection } from './dimension_editor';
+import type { DatasourcePublicAPI } from '../..';
 import { createMockFramePublicAPI } from '../../mocks';
 
 // see https://github.com/facebook/jest/issues/4402#issuecomment-534516219

@@ -10,20 +10,20 @@ import { i18n } from '@kbn/i18n';
 import { isValidNamespace } from '@kbn/fleet-plugin/common';
 import { hasNoParams } from '../../formatters/formatting_utils';
 import { formatLocation } from '../../../../common/utils/location_formatter';
-import {
+import { ConfigKey, ScheduleUnit, SourceType } from '../../../../common/runtime_types';
+import type {
   BrowserFields,
-  ConfigKey,
   CommonFields,
   MonitorTypeEnum,
   Locations,
   ProjectMonitor,
-  ScheduleUnit,
-  SourceType,
   MonitorFields,
-  type SyntheticsPrivateLocations,
+  SyntheticsPrivateLocations,
 } from '../../../../common/runtime_types';
-import { DEFAULT_FIELDS } from '../../../../common/constants/monitor_defaults';
-import { DEFAULT_COMMON_FIELDS } from '../../../../common/constants/monitor_defaults';
+import {
+  DEFAULT_FIELDS,
+  DEFAULT_COMMON_FIELDS,
+} from '../../../../common/constants/monitor_defaults';
 import { formatKibanaNamespace } from '../../formatters/private_formatters';
 
 export interface NormalizedProjectProps {

@@ -7,8 +7,7 @@
 import { get } from 'lodash';
 import type { estypes } from '@elastic/elasticsearch';
 import type { Observable } from 'rxjs';
-import { of } from 'rxjs';
-import { catchError, map } from 'rxjs';
+import { of, catchError, map } from 'rxjs';
 import type {
   IKibanaSearchResponse,
   IKibanaSearchRequest,

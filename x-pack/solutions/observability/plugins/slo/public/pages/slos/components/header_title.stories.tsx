@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { ComponentStory } from '@storybook/react';
+import type { ComponentStory } from '@storybook/react';
 
 import { KibanaReactStorybookDecorator } from '../../../utils/kibana_react.storybook_decorator';
 import { HeaderTitle as Component } from './header_title';

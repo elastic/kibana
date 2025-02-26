@@ -6,9 +6,11 @@
  */
 
 import type { Observable } from 'rxjs';
-import { combineLatest, of, Subject, Subscription } from 'rxjs';
-import { isEqual, cloneDeep } from 'lodash';
 import {
+  combineLatest,
+  of,
+  Subject,
+  Subscription,
   catchError,
   debounceTime,
   distinctUntilChanged,
@@ -20,6 +22,7 @@ import {
   filter,
   skipWhile,
 } from 'rxjs';
+import { isEqual, cloneDeep } from 'lodash';
 import { useEffect, useMemo } from 'react';
 
 import { i18n } from '@kbn/i18n';

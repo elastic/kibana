@@ -8,7 +8,7 @@
  */
 
 import { apiCanAddNewPanel } from '@kbn/presentation-containers';
-import { EmbeddableApiContext } from '@kbn/presentation-publishing';
+import type { EmbeddableApiContext } from '@kbn/presentation-publishing';
 import {
   IncompatibleActionError,
   type UiActionsStart,
@@ -16,7 +16,7 @@ import {
 } from '@kbn/ui-actions-plugin/public';
 import { embeddableExamplesGrouping } from '../embeddable_examples_grouping';
 import { ADD_SEARCH_ACTION_ID, SEARCH_EMBEDDABLE_ID } from './constants';
-import { SearchSerializedState } from './types';
+import type { SearchSerializedState } from './types';
 
 export const registerAddSearchPanelAction = (uiActions: UiActionsStart) => {
   uiActions.registerAction<EmbeddableApiContext>({

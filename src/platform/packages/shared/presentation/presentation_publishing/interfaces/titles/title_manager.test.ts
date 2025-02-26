@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { initializeTitleManager, SerializedTitles } from './title_manager';
+import type { SerializedTitles } from './title_manager';
+import { initializeTitleManager } from './title_manager';
 
 describe('titles api', () => {
   const rawState: SerializedTitles = {

@@ -6,7 +6,7 @@
  */
 
 import Boom from '@hapi/boom';
-import { RuleTypeParams, RuleTypeParamsValidator } from '../types';
+import type { RuleTypeParams, RuleTypeParamsValidator } from '../types';
 
 export function validateMutatedRuleTypeParams<Params extends RuleTypeParams>(
   mutatedParams: Params,

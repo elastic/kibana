@@ -34,11 +34,9 @@ import type { HapiReadableStream } from '../..';
 
 import { FleetToHostFilesClient } from './client_to_host';
 
-import type { FileCustomMeta } from './types';
+import type { FileCustomMeta, HostUploadedFileMetadata } from './types';
 
 import { createFromHostEsSearchResponseMock, createHapiReadableStreamMock } from './mocks';
-
-import type { HostUploadedFileMetadata } from './types';
 
 jest.mock('@kbn/files-plugin/server');
 

@@ -7,8 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { estypes } from '@elastic/elasticsearch';
-import {
+import type {
+  AggregationsAggregationContainer,
+  Field,
+  QueryDslFieldAndFormat,
+  QueryDslQueryContainer,
+  SearchRequest,
+} from '@elastic/elasticsearch/lib/api/types';
+import type {
   InferSearchResponseOf,
   AggregateOf as AggregationResultOf,
   AggregateOfMap as AggregationResultOfMap,
@@ -20,10 +26,10 @@ import {
   ChangePointType,
 } from './search';
 
-export type ESFilter = estypes.QueryDslQueryContainer;
+export type ESFilter = QueryDslQueryContainer;
 // For now, we also accept with body to unblock the migration to without body.
-export type ESSearchRequest = estypes.SearchRequest;
-export type AggregationOptionsByType = Required<estypes.AggregationsAggregationContainer>;
+export type ESSearchRequest = SearchRequest;
+export type AggregationOptionsByType = Required<AggregationsAggregationContainer>;
 
 // Typings for Elasticsearch queries and aggregations. These are intended to be
 // moved to the Elasticsearch JS client at some point (see #77720.)
@@ -42,8 +48,8 @@ export type ESSearchResponse<
   TOptions extends { restTotalHitsAsInt: boolean } = { restTotalHitsAsInt: false }
 > = InferSearchResponseOf<TDocument, TSearchRequest, TOptions>;
 
-// `fields` parameter from a search request (estypes.SearchRequest)
-export type SearchField = estypes.QueryDslFieldAndFormat | estypes.Field;
+// `fields` parameter from a search request (SearchRequest)
+export type SearchField = QueryDslFieldAndFormat | Field;
 
 export type {
   InferSearchResponseOf,

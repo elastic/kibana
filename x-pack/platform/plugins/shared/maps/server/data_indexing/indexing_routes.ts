@@ -6,11 +6,12 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { Logger } from '@kbn/core/server';
-import { IRouter } from '@kbn/core/server';
-import type { DataRequestHandlerContext } from '@kbn/data-plugin/server';
-import { PluginStart as DataPluginStart } from '@kbn/data-plugin/server';
-import { SecurityPluginStart } from '@kbn/security-plugin/server';
+import type { Logger, IRouter } from '@kbn/core/server';
+import type {
+  DataRequestHandlerContext,
+  PluginStart as DataPluginStart,
+} from '@kbn/data-plugin/server';
+import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import {
   INDEX_SOURCE_API_PATH,
   MAX_DRAWING_SIZE_BYTES,

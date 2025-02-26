@@ -8,8 +8,8 @@
 import util from 'util';
 import { isEqual, isEqualWith } from 'lodash';
 import expect from '@kbn/expect';
-import { RawKibanaPrivileges } from '@kbn/security-plugin-types-common';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { RawKibanaPrivileges } from '@kbn/security-plugin-types-common';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');

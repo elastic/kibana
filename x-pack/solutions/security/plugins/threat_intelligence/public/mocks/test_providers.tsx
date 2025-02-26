@@ -6,7 +6,8 @@
  */
 
 import moment from 'moment/moment';
-import React, { FC, PropsWithChildren } from 'react';
+import type { FC, PropsWithChildren } from 'react';
+import React from 'react';
 import { BehaviorSubject } from 'rxjs';
 import { I18nProvider } from '@kbn/i18n-react';
 import { coreMock } from '@kbn/core/public/mocks';
@@ -21,7 +22,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { MemoryRouter } from 'react-router-dom';
 import { casesPluginMock } from '@kbn/cases-plugin/public/mocks';
 import { KibanaContext } from '../hooks/use_kibana';
-import { SecuritySolutionPluginContext } from '../types';
+import type { SecuritySolutionPluginContext } from '../types';
 import { getSecuritySolutionContextMock } from './mock_security_context';
 import { mockUiSetting } from './mock_kibana_ui_settings_service';
 import { SecuritySolutionContext } from '../containers/security_solution_context';

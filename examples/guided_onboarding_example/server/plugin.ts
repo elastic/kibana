@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { GuidedOnboardingPluginSetup } from '@kbn/guided-onboarding-plugin/server';
-import { PluginInitializerContext, CoreSetup, Plugin, Logger } from '@kbn/core/server';
+import type { GuidedOnboardingPluginSetup } from '@kbn/guided-onboarding-plugin/server';
+import type { PluginInitializerContext, CoreSetup, Plugin, Logger } from '@kbn/core/server';
 import { testGuideId, testGuideConfig } from '@kbn/guided-onboarding';
 
 interface PluginsSetup {

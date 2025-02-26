@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { createFieldsFetcher } from '../../../search_strategies/lib/fields_fetcher';
+import type { createFieldsFetcher } from '../../../search_strategies/lib/fields_fetcher';
 
 import type { ProcessorFunction } from '../../build_processor_function';
 import type { TableSearchRequestMeta } from '../../request_processors/table/types';

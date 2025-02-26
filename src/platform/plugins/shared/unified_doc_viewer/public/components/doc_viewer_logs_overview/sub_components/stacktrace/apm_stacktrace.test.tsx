@@ -11,10 +11,9 @@ import React from 'react';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import '@kbn/code-editor-mock/jest_helper';
 import * as hooks from '../../../../hooks/use_es_doc_search';
-import { EuiLoadingSpinner } from '@elastic/eui';
+import { EuiLoadingSpinner, EuiThemeProvider } from '@elastic/eui';
 import { buildDataTableRecord } from '@kbn/discover-utils';
 import { ApmStacktrace } from './apm_stacktrace';
-import { EuiThemeProvider } from '@elastic/eui';
 import { ExceptionStacktrace, PlaintextStacktrace, Stacktrace } from '@kbn/event-stacktrace';
 
 const mockDataView = {

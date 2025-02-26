@@ -17,7 +17,7 @@ import {
   EuiText,
   EuiToolTip,
 } from '@elastic/eui';
-import {
+import type {
   AndCondition,
   BinaryFilterCondition,
   Condition,

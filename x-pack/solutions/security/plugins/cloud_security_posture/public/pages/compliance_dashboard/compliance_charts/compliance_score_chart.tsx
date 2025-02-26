@@ -22,12 +22,9 @@ import {
   EuiLink,
   EuiText,
   EuiTitle,
-  type EuiLinkButtonProps,
-  type EuiTextProps,
   EuiToolTip,
-  EuiToolTipProps,
-  type CommonProps,
 } from '@elastic/eui';
+import type { EuiToolTipProps, EuiLinkButtonProps, EuiTextProps, CommonProps } from '@elastic/eui';
 import { FormattedDate, FormattedTime } from '@kbn/i18n-react';
 import moment from 'moment';
 import { i18n } from '@kbn/i18n';

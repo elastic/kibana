@@ -8,8 +8,9 @@
 import React from 'react';
 import styled from 'styled-components';
 
-import { EuiLink, EuiToolTip } from '@elastic/eui';
 import {
+  EuiLink,
+  EuiToolTip,
   EuiButton,
   EuiCallOut,
   EuiCodeBlock,

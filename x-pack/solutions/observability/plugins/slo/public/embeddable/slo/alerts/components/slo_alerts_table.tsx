@@ -20,10 +20,9 @@ import type {
   AlertsTableImperativeApi,
 } from '@kbn/response-ops-alerts-table/types';
 import { ObservabilityAlertsTable } from '@kbn/observability-plugin/public';
-import { EuiDataGridColumn } from '@elastic/eui';
+import type { EuiDataGridColumn } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { SloItem } from '../types';
-import { SloEmbeddableDeps } from '../types';
+import type { SloItem, SloEmbeddableDeps } from '../types';
 
 const ALERTS_PER_PAGE = 10;
 const ALERTS_TABLE_ID = 'xpack.observability.sloAlertsEmbeddable.alert.table';

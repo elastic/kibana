@@ -6,8 +6,7 @@
  */
 
 import type { estypes } from '@elastic/elasticsearch';
-import type { IEsSearchResponse } from '@kbn/search-types';
-import type { IKibanaSearchResponse } from '@kbn/search-types';
+import type { IEsSearchResponse, IKibanaSearchResponse } from '@kbn/search-types';
 import type { Inspect, Maybe } from '../../common';
 import type { RequestOptions, RequestOptionsPaginated } from '../..';
 

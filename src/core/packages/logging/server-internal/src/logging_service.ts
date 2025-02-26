@@ -7,12 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Observable, Subscription } from 'rxjs';
-import { Logger } from '@kbn/logging';
+import type { Observable, Subscription } from 'rxjs';
+import type { Logger } from '@kbn/logging';
 import type { CoreContext, CoreService } from '@kbn/core-base-server-internal';
 import type { LoggerContextConfigInput } from '@kbn/core-logging-server';
 import { LoggingConfig } from './logging_config';
-import { ILoggingSystem } from './logging_system';
+import type { ILoggingSystem } from './logging_system';
 
 /** @internal */
 export interface InternalLoggingServicePreboot {

@@ -9,7 +9,7 @@
 
 import ts from 'typescript';
 import * as path from 'path';
-import { TaskContext } from './task_context';
+import type { TaskContext } from './task_context';
 import { extractCollectors, getProgramPaths } from '../extract_collectors';
 
 export function extractCollectorsTask(

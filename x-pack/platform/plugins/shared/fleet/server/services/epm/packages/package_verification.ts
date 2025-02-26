@@ -10,12 +10,11 @@ import { readFile } from 'fs/promises';
 import * as openpgp from 'openpgp';
 import type { Logger } from '@kbn/logging';
 
-import type { PackageVerificationResult } from '../../../types';
+import type { PackageVerificationResult, Installation } from '../../../types';
 
 import * as Registry from '../registry';
 
 import { appContextService } from '../../app_context';
-import type { Installation } from '../../../types';
 
 interface VerificationResult {
   isVerified: boolean;

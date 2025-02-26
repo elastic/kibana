@@ -6,10 +6,10 @@
  */
 
 import { createServerRouteFactory } from '@kbn/server-route-repository';
-import { CreateServerRouteFactory } from '@kbn/server-route-repository-utils/src/typings';
+import type { CreateServerRouteFactory } from '@kbn/server-route-repository-utils/src/typings';
 import { badRequest, conflict, forbidden, internal, notFound } from '@hapi/boom';
 import { errors } from '@elastic/elasticsearch';
-import { StreamsRouteHandlerResources } from './types';
+import type { StreamsRouteHandlerResources } from './types';
 import { StatusError } from '../lib/streams/errors/status_error';
 
 const createPlainStreamsServerRoute = createServerRouteFactory<StreamsRouteHandlerResources>();

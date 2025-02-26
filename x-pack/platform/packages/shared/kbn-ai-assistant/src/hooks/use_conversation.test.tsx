@@ -7,12 +7,13 @@
 import type { DeeplyMockedKeys } from '@kbn/utility-types-jest';
 import { renderHook, act, type RenderHookResult } from '@testing-library/react';
 import { merge } from 'lodash';
-import React, { PropsWithChildren } from 'react';
+import type { PropsWithChildren } from 'react';
+import React from 'react';
 import { BehaviorSubject, Observable, of, Subject } from 'rxjs';
+import type { StreamingChatResponseEventWithoutError } from '@kbn/observability-ai-assistant-plugin/common';
 import {
   MessageRole,
   StreamingChatResponseEventType,
-  StreamingChatResponseEventWithoutError,
 } from '@kbn/observability-ai-assistant-plugin/common';
 import { EMPTY_CONVERSATION_TITLE } from '../i18n';
 import type { AIAssistantAppService } from '../service/create_app_service';
@@ -26,7 +27,7 @@ import { createMockChatService } from '../utils/create_mock_chat_service';
 import { createUseChat } from '@kbn/observability-ai-assistant-plugin/public/hooks/use_chat';
 import type { NotificationsStart } from '@kbn/core/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import { AssistantScope } from '@kbn/ai-assistant-common';
+import type { AssistantScope } from '@kbn/ai-assistant-common';
 
 let hookResult: RenderHookResult<UseConversationResult, UseConversationProps>;
 
