@@ -6,6 +6,7 @@
  */
 
 import React, { useCallback, useState } from 'react';
+import useObservable from 'react-use/lib/useObservable';
 import { i18n } from '@kbn/i18n';
 import { noop } from 'lodash';
 import { CaseAttachmentsWithoutOwner } from '@kbn/cases-plugin/public/types';
@@ -67,10 +68,15 @@ export function HeaderActions({
       hooks: { useCasesAddToExistingCaseModal },
     },
     triggersActionsUi: { getEditRuleFlyout: EditRuleFlyout, getRuleSnoozeModal: RuleSnoozeModal },
+    featureFlags,
     http,
     application: { navigateToApp },
     investigate: investigatePlugin,
   } = useKibana().services;
+
+  const isInvestigateEnabled = useObservable(
+    featureFlags.getBooleanValue$('observability.investigateEnabled', false)
+  );
 
   const { rule, refetch } = useFetchRule({
     ruleId: alert?.fields[ALERT_RULE_UUID] || '',
@@ -232,6 +238,7 @@ export function HeaderActions({
           )}
         </EuiFlexItem>
         {Boolean(investigatePlugin) &&
+          isInvestigateEnabled &&
           alert?.fields[ALERT_RULE_TYPE_ID] === OBSERVABILITY_THRESHOLD_RULE_TYPE_ID && (
             <EuiFlexItem grow={false}>
               <EuiButton
