@@ -225,7 +225,7 @@ export const EditSpace: FC<PageProps> = ({
                 <EuiFlexItem grow={true}>
                   <EuiFlexGroup justifyContent="spaceBetween">
                     <EuiFlexItem grow={true}>
-                      <EuiTitle size="l">
+                      <EuiTitle>
                         <h1 data-test-subj="spaces-view-page-title">{space.name}</h1>
                       </EuiTitle>
                     </EuiFlexItem>

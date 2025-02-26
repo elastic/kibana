@@ -170,7 +170,7 @@ export class UnifiedSearchPublicPlugin
       core.chrome.workspace.toolbox.registerTool({
         toolId: 'esql_help',
         button: {
-          iconType: 'help',
+          iconType: 'documentation',
         },
         tool: {
           title: 'ES|QL quick reference',

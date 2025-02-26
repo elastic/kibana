@@ -123,7 +123,7 @@ export const MaintenanceWindowsPage = React.memo(() => {
         <EuiPageHeaderSection>
           <EuiFlexGroup alignItems="baseline" gutterSize="m" responsive={false}>
             <EuiFlexItem grow={false}>
-              <EuiTitle size="l">
+              <EuiTitle>
                 <h1>{i18n.MAINTENANCE_WINDOWS}</h1>
               </EuiTitle>
             </EuiFlexItem>

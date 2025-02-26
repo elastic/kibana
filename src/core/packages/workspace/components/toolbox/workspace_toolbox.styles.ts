@@ -18,7 +18,7 @@ const root = css`
   width: var(--kbnWorkspace--toolbox-width, 0);
   align-self: start;
   display: flex;
-  gap: 12px;
+  gap: 8px;
   flex-direction: column;
   padding: 8px 0;
   align-items: center;

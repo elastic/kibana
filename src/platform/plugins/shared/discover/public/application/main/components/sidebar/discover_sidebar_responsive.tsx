@@ -390,7 +390,6 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
       css={css`
         height: 100%;
         display: ${isSidebarCollapsed ? 'none' : 'flex'};
-        background-color: ${euiTheme.colors.body};
       `}
     >
       <EuiFlexItem>

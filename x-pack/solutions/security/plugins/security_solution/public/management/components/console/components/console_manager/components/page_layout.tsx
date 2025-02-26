@@ -97,7 +97,7 @@ export const PageLayout = memo<PageLayoutProps>(
           {headerBackComponent && <EuiFlexItem grow={false}>{headerBackComponent}</EuiFlexItem>}
           <EuiSpacer size="m" />
           <EuiFlexItem grow={false}>
-            <EuiTitle size="l">
+            <EuiTitle>
               <span data-test-subj={getTestId('titleHolder')}>{pageTitle}</span>
             </EuiTitle>
           </EuiFlexItem>

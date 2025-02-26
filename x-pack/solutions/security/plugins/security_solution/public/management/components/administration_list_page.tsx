@@ -49,7 +49,7 @@ export const AdministrationListPage = memo<
             {headerBackComponent && <>{headerBackComponent}</>}
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiTitle size="l">
+            <EuiTitle>
               <span data-test-subj="header-page-title">{title}</span>
             </EuiTitle>
           </EuiFlexItem>

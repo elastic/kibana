@@ -417,7 +417,7 @@ const AllAssets = ({
         />
       )}
       <EuiPageTemplate.Section>
-        <EuiTitle size="l" data-test-subj="all-assets-title">
+        <EuiTitle data-test-subj="all-assets-title">
           <h1>
             <FormattedMessage
               id="xpack.securitySolution.assetInventory.allAssets"

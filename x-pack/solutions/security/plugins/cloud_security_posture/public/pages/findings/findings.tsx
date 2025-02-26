@@ -95,7 +95,7 @@ export const Findings = () => {
     <>
       {showHeader && (
         <>
-          <EuiTitle size="l">
+          <EuiTitle>
             <h1>
               <FormattedMessage id="xpack.csp.findings.title" defaultMessage="Findings" />
             </h1>

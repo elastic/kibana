@@ -42,7 +42,7 @@ const TitleComponent: React.FC<Props> = ({ title, releasePhase, children }) => (
     <EuiFlexItem grow={false}>
       <EuiFlexGroup alignItems="center" gutterSize="none" responsive={false}>
         <EuiFlexItem grow={false}>
-          <EuiTitle size="l">
+          <EuiTitle>
             <h1 data-test-subj="header-page-title">
               {isString(title) ? <TruncatedText text={title} /> : title}
             </h1>

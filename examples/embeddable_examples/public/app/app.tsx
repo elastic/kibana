@@ -69,7 +69,7 @@ const App = ({
         render={(props) => (
           <>
             <EuiPageTemplate.Header>
-              <EuiTitle size="l">
+              <EuiTitle>
                 <h1 data-test-subj="responseStreamPageTitle">{page.title}</h1>
               </EuiTitle>
             </EuiPageTemplate.Header>

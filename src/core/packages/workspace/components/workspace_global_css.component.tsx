@@ -35,7 +35,7 @@ const dimensions = {
     height: 48,
   },
   toolbox: {
-    width: 56,
+    width: 48,
   },
   tool: {
     width: {
@@ -151,13 +151,18 @@ export const WorkspaceGlobalCSSComponent = ({
 
       /* Alterations */
       .kbnBody .euiFlyout:not(.euiCollapsibleNavBeta) {
-        inset-block-start: calc(var(--kbnWorkspace--application-top, 0) + ${euiTheme.size.m});
-        inset-block-end: ${euiTheme.size.s};
-        inset-inline-end: calc(var(--kbnWorkspace--application-right, 0) + ${euiTheme.size.m});
+        inset-block-start: calc(var(--kbnWorkspace--application-top, 0) + ${euiTheme.size.xs});
+        inset-block-end: ${euiTheme.size.xs};
+        inset-inline-end: calc(var(--kbnWorkspace--application-right, 0) + ${euiTheme.size.xs});
         border-radius: ${euiTheme.border.radius.medium};
         clip-path: none;
         border: ${euiTheme.border.thin};
         ${shadow}
+
+        .euiResizableButton {
+          margin: ${euiTheme.size.s} 0;
+          height: calc(100% - ${euiTheme.size.base});
+        }
       }
 
       .kbnBody .euiOverlayMask {

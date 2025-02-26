@@ -90,7 +90,7 @@ export const RuleFlyout = ({ onClose, rule }: RuleFlyoutProps) => {
       outsideClickCloses
     >
       <EuiFlyoutHeader>
-        <EuiTitle size="l">
+        <EuiTitle>
           <h2>{rule.metadata.name}</h2>
         </EuiTitle>
         <EuiTabs>

@@ -63,7 +63,7 @@ export const OpenTimelineModalBody = memo<OpenTimelineProps>(
     return (
       <>
         <EuiModalHeader>
-          <EuiTitle size="l">
+          <EuiTitle>
             <h2 data-test-subj="open-timeline-modal-title">{title}</h2>
           </EuiTitle>
         </EuiModalHeader>

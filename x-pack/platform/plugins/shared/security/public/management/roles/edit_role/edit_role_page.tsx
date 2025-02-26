@@ -430,7 +430,7 @@ export const EditRolePage: FunctionComponent<Props> = ({
     }
 
     return (
-      <EuiTitle size="l">
+      <EuiTitle>
         <h1 {...props}>
           {titleText} <ReservedRoleBadge role={role} />
         </h1>

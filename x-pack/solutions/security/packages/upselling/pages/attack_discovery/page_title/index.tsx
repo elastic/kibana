@@ -20,7 +20,6 @@ const PageTitleComponent: React.FC = () => {
         margin-bottom: ${euiTheme.size.s};
       `}
       data-test-subj="attackDiscoveryPageTitle"
-      size="l"
     >
       <h1>{i18n.ATTACK_DISCOVERY_PAGE_TITLE}</h1>
     </EuiTitle>

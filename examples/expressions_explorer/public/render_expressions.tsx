@@ -46,7 +46,7 @@ export function RenderExpressionsExample({ expressions, inspector }: Props) {
     <EuiPageBody>
       <EuiPageHeader>
         <EuiPageHeaderSection>
-          <EuiTitle size="l">
+          <EuiTitle>
             <h1>Render expressions</h1>
           </EuiTitle>
         </EuiPageHeaderSection>

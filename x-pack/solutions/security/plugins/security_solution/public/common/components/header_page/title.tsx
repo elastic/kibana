@@ -36,7 +36,7 @@ interface Props {
 }
 
 const TitleComponent: React.FC<Props> = ({ title, badgeOptions }) => (
-  <EuiTitle size="l">
+  <EuiTitle>
     <Header data-test-subj="header-page-title">
       <TitleWrapper>
         <TruncatableText tooltipContent={typeof title === 'string' ? title : null}>
