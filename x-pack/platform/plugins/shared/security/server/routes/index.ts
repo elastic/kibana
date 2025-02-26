@@ -38,6 +38,7 @@ import type { SecurityFeatureUsageServiceStart } from '../feature_usage';
 import type { Session } from '../session_management';
 import type { SecurityRouter } from '../types';
 import type { UserProfileServiceStartInternal } from '../user_profile';
+import { defineKeyDerivationRoutes } from './key_derivation/key_derivation';
 
 /**
  * Describes parameters used to define HTTP routes.
