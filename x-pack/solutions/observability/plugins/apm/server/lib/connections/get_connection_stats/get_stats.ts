@@ -7,7 +7,7 @@
 
 import { sum } from 'lodash';
 import objectHash from 'object-hash';
-import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { rangeQuery } from '@kbn/observability-plugin/server';
 import type { AgentName } from '../../../../typings/es_schemas/ui/fields/agent';
 import { getOffsetInMs } from '../../../../common/utils/get_offset_in_ms';
@@ -135,107 +135,105 @@ async function getConnectionStats({
         },
       ],
     },
-    body: {
-      track_total_hits: true,
-      size: 0,
-      query: {
-        bool: {
-          filter: [
-            ...filter,
-            ...getDocumentTypeFilterForServiceDestinationStatistics(true),
-            ...rangeQuery(startWithOffset, endWithOffset),
-            ...excludeRumExitSpansQuery(),
-          ],
-        },
+    track_total_hits: true,
+    size: 0,
+    query: {
+      bool: {
+        filter: [
+          ...filter,
+          ...getDocumentTypeFilterForServiceDestinationStatistics(true),
+          ...rangeQuery(startWithOffset, endWithOffset),
+          ...excludeRumExitSpansQuery(),
+        ],
       },
-      aggs: {
-        connections: {
-          composite: {
-            size: MAX_ITEMS,
-            sources: asMutableArray([
-              {
-                serviceName: {
-                  terms: {
-                    field: SERVICE_NAME,
-                  },
+    },
+    aggs: {
+      connections: {
+        composite: {
+          size: MAX_ITEMS,
+          sources: asMutableArray([
+            {
+              serviceName: {
+                terms: {
+                  field: SERVICE_NAME,
                 },
               },
-              {
-                dependencyName: {
-                  terms: {
-                    field: SPAN_DESTINATION_SERVICE_RESOURCE,
-                  },
+            },
+            {
+              dependencyName: {
+                terms: {
+                  field: SPAN_DESTINATION_SERVICE_RESOURCE,
                 },
               },
-            ] as const),
+            },
+          ] as const),
+        },
+        aggs: {
+          sample: {
+            top_metrics: {
+              size: 1,
+              metrics: asMutableArray([
+                {
+                  field: SERVICE_ENVIRONMENT,
+                },
+                {
+                  field: AGENT_NAME,
+                },
+                {
+                  field: SPAN_TYPE,
+                },
+                {
+                  field: SPAN_SUBTYPE,
+                },
+              ] as const),
+              sort: {
+                '@timestamp': 'desc',
+              },
+            },
           },
-          aggs: {
-            sample: {
-              top_metrics: {
-                size: 1,
-                metrics: asMutableArray([
-                  {
-                    field: SERVICE_ENVIRONMENT,
-                  },
-                  {
-                    field: AGENT_NAME,
-                  },
-                  {
-                    field: SPAN_TYPE,
-                  },
-                  {
-                    field: SPAN_SUBTYPE,
-                  },
-                ] as const),
-                sort: {
-                  '@timestamp': 'desc',
-                },
+          total_latency_sum: {
+            sum: {
+              field: SPAN_DESTINATION_SERVICE_RESPONSE_TIME_SUM,
+            },
+          },
+          total_latency_count: {
+            sum: {
+              field: SPAN_DESTINATION_SERVICE_RESPONSE_TIME_COUNT,
+            },
+          },
+          timeseries: {
+            date_histogram: {
+              field: '@timestamp',
+              fixed_interval: getBucketSize({
+                start: startWithOffset,
+                end: endWithOffset,
+                numBuckets,
+                minBucketSize: 60,
+              }).intervalString,
+              extended_bounds: {
+                min: startWithOffset,
+                max: endWithOffset,
               },
             },
-            total_latency_sum: {
-              sum: {
-                field: SPAN_DESTINATION_SERVICE_RESPONSE_TIME_SUM,
-              },
-            },
-            total_latency_count: {
-              sum: {
-                field: SPAN_DESTINATION_SERVICE_RESPONSE_TIME_COUNT,
-              },
-            },
-            timeseries: {
-              date_histogram: {
-                field: '@timestamp',
-                fixed_interval: getBucketSize({
-                  start: startWithOffset,
-                  end: endWithOffset,
-                  numBuckets,
-                  minBucketSize: 60,
-                }).intervalString,
-                extended_bounds: {
-                  min: startWithOffset,
-                  max: endWithOffset,
+            aggs: {
+              latency_sum: {
+                sum: {
+                  field: SPAN_DESTINATION_SERVICE_RESPONSE_TIME_SUM,
                 },
               },
-              aggs: {
-                latency_sum: {
-                  sum: {
-                    field: SPAN_DESTINATION_SERVICE_RESPONSE_TIME_SUM,
-                  },
+              count: {
+                sum: {
+                  field: SPAN_DESTINATION_SERVICE_RESPONSE_TIME_COUNT,
                 },
-                count: {
-                  sum: {
-                    field: SPAN_DESTINATION_SERVICE_RESPONSE_TIME_COUNT,
-                  },
+              },
+              [EVENT_OUTCOME]: {
+                terms: {
+                  field: EVENT_OUTCOME,
                 },
-                [EVENT_OUTCOME]: {
-                  terms: {
-                    field: EVENT_OUTCOME,
-                  },
-                  aggs: {
-                    count: {
-                      sum: {
-                        field: SPAN_DESTINATION_SERVICE_RESPONSE_TIME_COUNT,
-                      },
+                aggs: {
+                  count: {
+                    sum: {
+                      field: SPAN_DESTINATION_SERVICE_RESPONSE_TIME_COUNT,
                     },
                   },
                 },
