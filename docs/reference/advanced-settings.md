@@ -56,6 +56,9 @@ $$$csv-quotevalues$$$`csv:quoteValues`
 $$$csv-separator$$$`csv:separator`
 :   A string that serves as the separator for exported values.
 
+$$$data_views-fields_excluded_data_tiers$$$`data_views:fields_excluded_data_tiers`
+:   Allows the exclusion of listed data tiers when getting a field list for faster performance.
+
 $$$dateformat$$$`dateFormat`
 :   The format to use for displaying [pretty formatted dates](https://momentjs.com/docs/#/displaying/format/).
 
