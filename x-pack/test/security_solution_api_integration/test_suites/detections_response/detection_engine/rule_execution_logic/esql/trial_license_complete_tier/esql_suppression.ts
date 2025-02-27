@@ -2106,7 +2106,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
     });
 
-    describe.only('mv_expand command', () => {
+    describe('mv_expand command', () => {
       it('should suppress alerts generated from expanded rows', async () => {
         const id = uuidv4();
         const interval: [string, string] = ['2020-10-28T06:00:00.000Z', '2020-10-28T06:10:00.000Z'];

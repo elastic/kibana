@@ -369,7 +369,7 @@ export default ({ getService }: FtrProviderContext) => {
         expect(previewAlerts[0]._source).not.toHaveProperty('agent.type');
       });
 
-      describe.only('mv_expand command', () => {
+      describe('mv_expand command', () => {
         it('should generate alert per expanded row', async () => {
           const id = uuidv4();
           const interval: [string, string] = [
