@@ -61,7 +61,12 @@ export const ProductDocumentationManagement = React.memo<{
   }, [isInstalling, onClickInstall, status]);
 
   // The last condition means that the installation was started by the plugin
-  if (status === 'installed' || isInstalled || (status === 'installing' && !isInstalling)) {
+  if (
+    !status ||
+    status === 'installed' ||
+    isInstalled ||
+    (status === 'installing' && !isInstalling)
+  ) {
     return null;
   }
 
