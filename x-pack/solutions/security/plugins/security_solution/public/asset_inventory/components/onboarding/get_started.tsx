@@ -21,7 +21,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import illustration from '../../../common/images/information_light.png';
 import { InventoryTitle } from '../inventory_title';
 import { CenteredWrapper } from './centered_wrapper';
-import { HoverForExplanation } from './hover_for_explanation';
+import { HoverForExplanationTooltip } from './hover_for_explanation_tooltip';
 import { useGetStarted } from './hooks/use_get_started';
 import { EmptyStateIllustrationContainer } from '../empty_state_illustration_container';
 
@@ -70,8 +70,8 @@ export const GetStarted = () => {
                     defaultMessage="Asset Inventory gives you a unified view of all assets detected by Elastic Security, including those observed in logs, events, or discovered through integrations with sources like {identity_providers}, {cloud_services}, {mdms}, and configuration management {databases}."
                     values={{
                       identity_providers: (
-                        <HoverForExplanation
-                          tooltipContent={
+                        <HoverForExplanationTooltip
+                          content={
                             <FormattedMessage
                               id="xpack.securitySolution.assetInventory.onboarding.getStarted.description.identityProviders.helperText"
                               defaultMessage="Identity providers are services that store and manage user identities."
@@ -82,11 +82,11 @@ export const GetStarted = () => {
                             id="xpack.securitySolution.assetInventory.onboarding.getStarted.description.identityProviders"
                             defaultMessage="identity providers"
                           />
-                        </HoverForExplanation>
+                        </HoverForExplanationTooltip>
                       ),
                       cloud_services: (
-                        <HoverForExplanation
-                          tooltipContent={
+                        <HoverForExplanationTooltip
+                          content={
                             <FormattedMessage
                               id="xpack.securitySolution.assetInventory.onboarding.getStarted.description.cloudServices.helperText"
                               defaultMessage="Cloud services are services that provide cloud-based infrastructure, platforms, or software."
@@ -97,11 +97,11 @@ export const GetStarted = () => {
                             id="xpack.securitySolution.assetInventory.onboarding.getStarted.description.cloudServices"
                             defaultMessage="cloud services"
                           />
-                        </HoverForExplanation>
+                        </HoverForExplanationTooltip>
                       ),
                       mdms: (
-                        <HoverForExplanation
-                          tooltipContent={
+                        <HoverForExplanationTooltip
+                          content={
                             <FormattedMessage
                               id="xpack.securitySolution.assetInventory.onboarding.getStarted.description.mdms.helperText"
                               defaultMessage="Mobile Device Managers (MDMs) are services that manage mobile devices."
@@ -109,11 +109,11 @@ export const GetStarted = () => {
                           }
                         >
                           {'MDMs'}
-                        </HoverForExplanation>
+                        </HoverForExplanationTooltip>
                       ),
                       databases: (
-                        <HoverForExplanation
-                          tooltipContent={
+                        <HoverForExplanationTooltip
+                          content={
                             <FormattedMessage
                               id="xpack.securitySolution.assetInventory.onboarding.getStarted.description.databases.helperText"
                               defaultMessage="Databases are services that store and manage data."
@@ -124,7 +124,7 @@ export const GetStarted = () => {
                             id="xpack.securitySolution.assetInventory.onboarding.getStarted.description.databases"
                             defaultMessage="databases"
                           />
-                        </HoverForExplanation>
+                        </HoverForExplanationTooltip>
                       ),
                     }}
                   />
