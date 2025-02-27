@@ -16,7 +16,7 @@ describe('Color Format', () => {
     color: string = 'blue',
     backgroundColor: string = 'yellow'
   ) =>
-    `<span class="euiBadge css-1ms2k9q-EuiInnerText" style="--euiBadgeBackgroundColor:${backgroundColor};--euiBadgeTextColor:#07101F;color:${color}"><span class="euiBadge__content css-1yj2yi7-euiBadge__content"><span class="euiBadge__text css-1vg55k4-euiBadge__text">${text}</span></span></span>`;
+    `<span style=\"color:${color};background-color:${backgroundColor}\" css=\"[object Object]\">${text}</span>`;
 
   describe('field is a number', () => {
     test('should add colors if the value is in range', () => {
@@ -105,7 +105,7 @@ describe('Color Format', () => {
       expect(converter('B', HTML_CONTEXT_TYPE)).toBe('B');
       expect(converter('AAA', HTML_CONTEXT_TYPE)).toBe(checkResult('AAA', 'white', 'red'));
       expect(converter('AB', HTML_CONTEXT_TYPE)).toBe(checkResult('AB', 'white', 'red'));
-      expect(converter('AB <', HTML_CONTEXT_TYPE)).toBe(checkResult('AB &amp;lt;', 'white', 'red'));
+      expect(converter('AB <', HTML_CONTEXT_TYPE)).toBe(checkResult('AB &lt;', 'white', 'red'));
       expect(converter('a', HTML_CONTEXT_TYPE)).toBe('a');
     });
 

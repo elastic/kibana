@@ -10,7 +10,6 @@
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import ReactDOM from 'react-dom/server';
-import { EuiBadge } from '@elastic/eui';
 import { findLast, cloneDeep, escape } from 'lodash';
 import { KBN_FIELD_TYPES } from '@kbn/field-types';
 import { FieldFormat } from '../field_format';
@@ -69,19 +68,22 @@ export class ColorFormat extends FieldFormat {
     if (!color) return displayVal;
 
     return ReactDOM.renderToStaticMarkup(
-      <EuiBadge
-        color={color.background}
-        style={{ color: color.text }}
+      <span
+        // using `style` to keep "testable"
+        style={{ color: color.text, backgroundColor: color.background }}
+        // EuiBadge is not multiline, so we define custom styles instead
         css={{
+          display: 'inline-block',
+          verticalAlign: 'middle',
+          paddingBlock: '0',
+          paddingInline: '8px',
+          borderRadius: '3px',
           '.euiDataGrid &': {
             marginTop: '-4px',
           },
         }}
-      >
-        <span
-          dangerouslySetInnerHTML={{ __html: displayVal }} // eslint-disable-line react/no-danger
-        />
-      </EuiBadge>
+        dangerouslySetInnerHTML={{ __html: displayVal }} // eslint-disable-line react/no-danger
+      />
     );
   };
 }
