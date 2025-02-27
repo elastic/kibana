@@ -20,14 +20,16 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
-import { ControlGroupRenderer, ControlGroupRendererApi } from '@kbn/controls-plugin/public';
+import {
+  ControlGroupRenderer,
+  ControlGroupRendererApi,
+  DefaultControlApi,
+  OptionsListControlApi,
+} from '@kbn/controls-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { Filter, Query, TimeRange } from '@kbn/es-query';
 import type { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
-
-import { DefaultControlApi } from '@kbn/controls-plugin/public/controls/types';
-import { OptionsListControlApi } from '@kbn/controls-plugin/public/controls/data_controls/options_list_control/types';
 import { PLUGIN_ID } from '../../constants';
 
 interface Props {
