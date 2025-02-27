@@ -110,7 +110,9 @@ export class SearchNavigationPlugin
       this.pluginsStart.serverless.setBreadcrumbs(breadcrumbs);
     } else {
       const searchBreadcrumbs = [this.getSearchHomeBreadcrumb(), ...breadcrumbs];
-      this.coreStart?.chrome.setBreadcrumbs(searchBreadcrumbs, { project: { value: breadcrumbs, absolute: true },});
+      this.coreStart?.chrome.setBreadcrumbs(searchBreadcrumbs, {
+        project: { value: breadcrumbs, absolute: true },
+      });
     }
   }
 

@@ -273,6 +273,5 @@ export default function searchSolutionNavigation({
         'monitoring',
       ]);
     });
-
   });
 }
