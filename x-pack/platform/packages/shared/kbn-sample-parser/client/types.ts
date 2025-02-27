@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { LoghubQuery } from '../src/validate_queries';
+
 export interface StreamLogDocument {
   [x: string]: unknown;
   filepath: string;
@@ -12,5 +14,8 @@ export interface StreamLogDocument {
 }
 
 export interface StreamLogGenerator {
+  name: string;
+  filepath: string;
+  queries: LoghubQuery[];
   next: (timestamp: number) => StreamLogDocument[];
 }

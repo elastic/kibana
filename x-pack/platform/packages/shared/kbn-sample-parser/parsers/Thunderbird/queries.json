@@ -1,0 +1,360 @@
+{
+  "queries": [
+    {
+      "id": "gmetad_startup",
+      "title": "Gmetad Startup Succeeded",
+      "description": "Identifies logs where gmetad startup succeeded.",
+      "query": {
+        "bool": {
+          "filter": [
+            {
+              "match": {
+                "message": {
+                  "query": "gmetad startup succeeded",
+                  "operator": "AND"
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "portmap_startup",
+      "title": "Portmap Startup Succeeded",
+      "description": "Identifies logs where portmap startup succeeded.",
+      "query": {
+        "bool": {
+          "filter": [
+            {
+              "match": {
+                "message": {
+                  "query": "portmap startup succeeded",
+                  "operator": "AND"
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "rpc_statd_startup",
+      "title": "RPC.Statd Startup Succeeded",
+      "description": "Identifies logs where rpc.statd startup succeeded.",
+      "query": {
+        "bool": {
+          "filter": [
+            {
+              "match": {
+                "message": {
+                  "query": "rpc.statd startup succeeded",
+                  "operator": "AND"
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "syslog_ng_startup",
+      "title": "Syslog-NG Startup Succeeded",
+      "description": "Identifies logs where syslog-ng startup succeeded.",
+      "query": {
+        "bool": {
+          "filter": [
+            {
+              "match": {
+                "message": {
+                  "query": "syslog-ng startup succeeded",
+                  "operator": "AND"
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "xinetd_startup",
+      "title": "Xinetd Startup Succeeded",
+      "description": "Identifies logs where xinetd startup succeeded.",
+      "query": {
+        "bool": {
+          "filter": [
+            {
+              "match": {
+                "message": {
+                  "query": "xinetd startup succeeded",
+                  "operator": "AND"
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "bind_port_failed",
+      "title": "Bind to Port Failed",
+      "description": "Identifies logs where binding to a port failed due to address already in use.",
+      "query": {
+        "bool": {
+          "filter": [
+            {
+              "regexp": {
+                "message": "error: Bind to port .* on .* failed: Address already in use."
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "local_disconnected",
+      "title": "Local Disconnected",
+      "description": "Identifies logs where a local connection was disconnected.",
+      "query": {
+        "bool": {
+          "filter": [
+            {
+              "match": {
+                "message": {
+                  "query": "Local disconnected: Connection closed",
+                  "operator": "AND"
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "connection_lost",
+      "title": "Connection Lost",
+      "description": "Identifies logs where a connection was lost.",
+      "query": {
+        "bool": {
+          "filter": [
+            {
+              "match": {
+                "message": {
+                  "query": "connection lost: 'Connection closed.'",
+                  "operator": "AND"
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "cannot_open_file",
+      "title": "Cannot Open File",
+      "description": "Identifies logs where a file could not be opened for writing.",
+      "query": {
+        "bool": {
+          "filter": [
+            {
+              "match": {
+                "message": {
+                  "query": "Cannot open file /dev/logsurfer for writing (No such file or directory)",
+                  "operator": "AND"
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "resolve_data_source_failed",
+      "title": "Failed to Resolve Data Source",
+      "description": "Identifies logs where resolving a data source name failed.",
+      "query": {
+        "bool": {
+          "filter": [
+            {
+              "regexp": {
+                "message": "Warning: we failed to resolve data source name .*"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "resolve_trusted_host_failed",
+      "title": "Failed to Resolve Trusted Host",
+      "description": "Identifies logs where resolving a trusted host name failed.",
+      "query": {
+        "bool": {
+          "filter": [
+            {
+              "regexp": {
+                "message": "Warning: we failed to resolve trusted host name .*"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "wait_for_ready_failed",
+      "title": "Wait for Ready Failed",
+      "description": "Identifies logs where waiting for ready state before probe failed.",
+      "query": {
+        "bool": {
+          "filter": [
+            {
+              "match": {
+                "message": {
+                  "query": "Wait for ready failed before probe !",
+                  "operator": "AND"
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "cache_data_failed",
+      "title": "Cache Data Request Failed",
+      "description": "Identifies logs where asking for cache data failed.",
+      "query": {
+        "bool": {
+          "filter": [
+            {
+              "match": {
+                "message": {
+                  "query": "asking for cache data failed",
+                  "operator": "AND"
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "probe_failed",
+      "title": "Probe Failed",
+      "description": "Identifies logs where probing vesafb0 failed with an error.",
+      "query": {
+        "bool": {
+          "filter": [
+            {
+              "regexp": {
+                "message": "probe of vesafb0 failed with error .*"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "dhcpdiscover_no_free_leases",
+      "title": "DHCPDISCOVER No Free Leases",
+      "description": "Identifies logs where a DHCPDISCOVER request found no free leases.",
+      "query": {
+        "bool": {
+          "filter": [
+            {
+              "regexp": {
+                "message": "DHCPDISCOVER from .* via eth1: network A_net: no free leases"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "dhcprequest_unknown_lease",
+      "title": "DHCPREQUEST Unknown Lease",
+      "description": "Identifies logs where a DHCPREQUEST was made for an unknown lease.",
+      "query": {
+        "bool": {
+          "filter": [
+            {
+              "regexp": {
+                "message": "DHCPREQUEST for .* \\(.*\\) from .* via eth1: unknown lease .*"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "unqualified_host_name",
+      "title": "Unqualified Host Name",
+      "description": "Identifies logs where an unqualified host name was unknown, leading to a retry.",
+      "query": {
+        "bool": {
+          "filter": [
+            {
+              "regexp": {
+                "message": "My unqualified host name \\(.*\\) unknown; sleeping for retry"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "unable_to_qualify_domain",
+      "title": "Unable to Qualify Domain",
+      "description": "Identifies logs where the system was unable to qualify its own domain name.",
+      "query": {
+        "bool": {
+          "filter": [
+            {
+              "regexp": {
+                "message": "unable to qualify my own domain name \\(.*\\) -- using short name"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "session_closed_root",
+      "title": "Session Closed for Root",
+      "description": "Identifies logs where a session was closed for the root user.",
+      "query": {
+        "bool": {
+          "filter": [
+            {
+              "match": {
+                "message": {
+                  "query": "session closed for user root",
+                  "operator": "AND"
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "session_opened_root",
+      "title": "Session Opened for Root",
+      "description": "Identifies logs where a session was opened for the root user by uid=0.",
+      "query": {
+        "bool": {
+          "filter": [
+            {
+              "match": {
+                "message": {
+                  "query": "session opened for user root by (uid=0)",
+                  "operator": "AND"
+                }
+              }
+            }
+          ]
+        }
+      }
+    }
+  ]
+}

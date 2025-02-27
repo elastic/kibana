@@ -18,7 +18,7 @@ import { getFetchAgent } from '../../cli/utils/ssl';
 type KibanaClientFetchOptions = RequestInit;
 
 export class KibanaClientHttpError extends Error {
-  constructor(message: string, public readonly statusCode: number) {
+  constructor(message: string, public readonly statusCode: number, public readonly data?: unknown) {
     super(message);
   }
 }
@@ -43,7 +43,13 @@ export class KibanaClient {
       agent: getFetchAgent(url),
     }).then(async (response) => {
       if (response.status >= 400) {
-        throw new KibanaClientHttpError(`Response error for ${url}`, response.status);
+        throw new KibanaClientHttpError(
+          `Response error for ${options.method?.toUpperCase() ?? 'GET'} ${url}`,
+          response.status,
+          await response.json().catch((error) => {
+            return undefined;
+          })
+        );
       }
       return response.json();
     });

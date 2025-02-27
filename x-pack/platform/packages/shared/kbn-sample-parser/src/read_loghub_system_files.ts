@@ -9,11 +9,20 @@ import { promises as Fs } from 'fs';
 import Path from 'path';
 import { ToolingLog } from '@kbn/tooling-log';
 import { LOGHUB_DIR } from './constants';
+import { getFileOrThrow } from './utils';
 
 export interface LoghubSystem {
   name: string;
   readme: string;
+  templates: string[];
   logLines: string[];
+}
+
+function toLines(contents: string) {
+  return contents
+    .split('\n')
+    .map((line) => line.trim())
+    .filter(Boolean);
 }
 
 export async function readLoghubSystemFiles({ log }: { log: ToolingLog }): Promise<LoghubSystem[]> {
@@ -32,28 +41,31 @@ export async function readLoghubSystemFiles({ log }: { log: ToolingLog }): Promi
       const fileNames = await Fs.readdir(dirName);
       const readmeFileName = fileNames.find((fileName) => fileName.toLowerCase() === 'readme.md');
       const logFileName = fileNames.find((fileName) => Path.extname(fileName) === '.log');
+      const templateFileName = fileNames.find((fileName) => fileName.endsWith('_templates.csv'));
 
       if (!logFileName) {
         throw new Error(`Could not find log file in ${dir.name}`);
       }
 
-      const [readmeFile, logFile] = await Promise.all(
-        [readmeFileName, logFileName].map(async (fileName) => {
+      if (!templateFileName) {
+        throw new Error(`Could not find template file in ${dir.name}`);
+      }
+
+      const [readmeFile, logFile, templateFile] = await Promise.all(
+        [readmeFileName, logFileName, templateFileName].map(async (fileName) => {
           if (!fileName) {
             return '';
           }
-          return await Fs.readFile(Path.join(dirName, fileName), 'utf-8');
+          return getFileOrThrow(Path.join(dirName, fileName));
         })
       );
 
       return [
         {
           name: dir.name,
-          logLines: logFile
-            .split('\n')
-            .map((line) => line.trim())
-            .filter(Boolean),
+          logLines: toLines(logFile),
           readme: readmeFile,
+          templates: toLines(templateFile),
         },
       ];
     })

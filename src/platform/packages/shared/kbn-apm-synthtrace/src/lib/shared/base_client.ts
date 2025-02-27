@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Client } from '@elastic/elasticsearch';
+import { Client, errors } from '@elastic/elasticsearch';
 import {
   ESDocumentWithOperation,
   Fields,
@@ -73,10 +73,17 @@ export class SynthtraceEsClient<TFields extends Fields> {
     await Promise.all([
       ...(this.dataStreams.length
         ? [
-            this.client.indices.deleteDataStream({
-              name: this.dataStreams.join(','),
-              expand_wildcards: ['open', 'hidden'],
-            }),
+            this.client.indices
+              .deleteDataStream({
+                name: this.dataStreams.join(','),
+                expand_wildcards: ['open', 'hidden'],
+              })
+              .catch((error) => {
+                if (error instanceof errors.ResponseError && error.statusCode === 404) {
+                  return;
+                }
+                throw error;
+              }),
           ]
         : []),
       ...(resolvedIndices.length

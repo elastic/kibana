@@ -10,14 +10,17 @@ import { LoghubSystem } from '../src/read_loghub_system_files';
 import { LoghubParser } from '../src/types';
 import { StreamLogDocument, StreamLogGenerator } from './types';
 import { parseDataset } from './parse_dataset';
+import { LoghubQuery } from '../src/validate_queries';
 
 export function createLoghubGenerator({
   system,
+  queries,
   parser,
   log,
   targetRpm,
 }: {
   system: LoghubSystem;
+  queries: LoghubQuery[];
   parser: LoghubParser;
   log: ToolingLog;
   targetRpm?: number;
@@ -31,9 +34,14 @@ export function createLoghubGenerator({
 
   const speed = targetRpm === undefined ? 1 : targetRpm / systemRpm;
 
+  const filepath = `${system.name}.log`;
+
   log.debug(`Indexing data for ${system.name} at ${speed.toPrecision(4)}`);
 
   return {
+    name: system.name,
+    filepath,
+    queries,
     next: (timestamp) => {
       if (index === 0) {
         start = timestamp;
@@ -61,7 +69,7 @@ export function createLoghubGenerator({
         const next = {
           '@timestamp': simulatedTimestamp,
           message: parser.replaceTimestamp(line.message, simulatedTimestamp),
-          filepath: `${system.name}_2k.log`,
+          filepath,
         };
 
         docs.push(next);

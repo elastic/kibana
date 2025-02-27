@@ -10,8 +10,10 @@
 import { Readable, Transform, pipeline } from 'stream';
 import { ESDocumentWithOperation } from '@kbn/apm-synthtrace-client';
 import { Required } from 'utility-types';
+import { Condition, StreamUpsertRequest } from '@kbn/streams-schema';
 import { SynthtraceEsClient, SynthtraceEsClientOptions } from '../shared/base_client';
 import { getSerializeTransform } from '../shared/get_serialize_transform';
+import { internalKibanaHeaders } from '../shared/client_headers';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 interface StreamsDocument {}
@@ -25,23 +27,53 @@ export class StreamsSynthtraceClient extends SynthtraceEsClient<StreamsDocument>
     this.dataStreams = ['logs', 'logs.*'];
   }
 
+  async forkStream(
+    streamName: string,
+    request: { stream: { name: string }; if: Condition }
+  ): Promise<{ acknowledged: true }> {
+    return this.kibana!.fetch(`/api/streams/${streamName}/_fork`, {
+      method: 'POST',
+      headers: {
+        ...internalKibanaHeaders(),
+      },
+      body: JSON.stringify(request),
+    });
+  }
+
+  async putStream(
+    streamName: string,
+    request: StreamUpsertRequest
+  ): Promise<{ acknowledged: true; result: 'created' | 'updated' }> {
+    return this.kibana!.fetch(`/api/streams/${streamName}`, {
+      method: 'PUT',
+      headers: {
+        ...internalKibanaHeaders(),
+      },
+      body: JSON.stringify(request),
+    });
+  }
+
   async enable() {
     await this.kibana!.fetch('/api/streams/_enable', {
       method: 'POST',
-      headers: { 'x-elastic-internal-origin': 'kibana' },
+      headers: {
+        ...internalKibanaHeaders(),
+      },
     });
   }
 
   async disable() {
     await this.kibana!.fetch('/api/streams/_disable', {
       method: 'POST',
-      headers: { 'x-elastic-internal-origin': 'kibana' },
+      headers: {
+        ...internalKibanaHeaders(),
+      },
     });
   }
 
   override async clean(): Promise<void> {
-    await super.clean();
     await this.disable();
+    await super.clean();
   }
 }
 
