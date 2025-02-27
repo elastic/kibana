@@ -11,6 +11,13 @@ import { ColorFormat } from './color';
 import { HTML_CONTEXT_TYPE } from '../content_types';
 
 describe('Color Format', () => {
+  const checkResult = (
+    text: string | number,
+    color: string = 'blue',
+    backgroundColor: string = 'yellow'
+  ) =>
+    `<span class="euiBadge css-1ms2k9q-EuiInnerText" style="--euiBadgeBackgroundColor:${backgroundColor};--euiBadgeTextColor:#07101F;color:${color}"><span class="euiBadge__content css-1yj2yi7-euiBadge__content"><span class="euiBadge__text css-1vg55k4-euiBadge__text">${text}</span></span></span>`;
+
   describe('field is a number', () => {
     test('should add colors if the value is in range', () => {
       const colorer = new ColorFormat(
@@ -28,12 +35,8 @@ describe('Color Format', () => {
       );
 
       expect(colorer.convert(99, HTML_CONTEXT_TYPE)).toBe('99');
-      expect(colorer.convert(100, HTML_CONTEXT_TYPE)).toBe(
-        '<span class="euiBadge css-aai6qf-euiBadge" style="--euiBadgeBackgroundColor:yellow;--euiBadgeTextColor:#000;color:blue"><span class="euiBadge__content css-1yj2yi7-euiBadge__content"><span class="euiBadge__text css-1vg55k4-euiBadge__text">100</span></span></span>'
-      );
-      expect(colorer.convert(150, HTML_CONTEXT_TYPE)).toBe(
-        '<span class="euiBadge css-aai6qf-euiBadge" style="--euiBadgeBackgroundColor:yellow;--euiBadgeTextColor:#000;color:blue"><span class="euiBadge__content css-1yj2yi7-euiBadge__content"><span class="euiBadge__text css-1vg55k4-euiBadge__text">150</span></span></span>'
-      );
+      expect(colorer.convert(100, HTML_CONTEXT_TYPE)).toBe(checkResult(100));
+      expect(colorer.convert(150, HTML_CONTEXT_TYPE)).toBe(checkResult(150));
       expect(colorer.convert(151, HTML_CONTEXT_TYPE)).toBe('151');
     });
 
@@ -72,9 +75,7 @@ describe('Color Format', () => {
         jest.fn()
       );
 
-      expect(colorer.convert(true, HTML_CONTEXT_TYPE)).toBe(
-        '<span style="color:blue;background-color:yellow">true</span>'
-      );
+      expect(colorer.convert(true, HTML_CONTEXT_TYPE)).toBe(checkResult('true'));
       expect(colorer.convert(false, HTML_CONTEXT_TYPE)).toBe('false');
     });
   });
@@ -87,8 +88,8 @@ describe('Color Format', () => {
           colors: [
             {
               regex: 'A.*',
-              text: 'blue',
-              background: 'yellow',
+              text: 'white',
+              background: 'red',
             },
           ],
         },
@@ -96,18 +97,15 @@ describe('Color Format', () => {
       );
       const converter = colorer.getConverterFor(HTML_CONTEXT_TYPE) as Function;
 
-      const checkResult = (text: string) =>
-        `<span class="euiBadge css-aai6qf-euiBadge" style="--euiBadgeBackgroundColor:yellow;--euiBadgeTextColor:#000;color:blue"><span class="euiBadge__content css-1yj2yi7-euiBadge__content"><span class="euiBadge__text css-1vg55k4-euiBadge__text">${text}</span></span></span>`;
-
       expect(converter('B', HTML_CONTEXT_TYPE)).toBe('B');
-      expect(converter('AAA', HTML_CONTEXT_TYPE)).toBe(checkResult('AAA'));
-      expect(converter('AB', HTML_CONTEXT_TYPE)).toBe(checkResult('AB'));
+      expect(converter('AAA', HTML_CONTEXT_TYPE)).toBe(checkResult('AAA', 'white', 'red'));
+      expect(converter('AB', HTML_CONTEXT_TYPE)).toBe(checkResult('AB', 'white', 'red'));
       expect(converter('a', HTML_CONTEXT_TYPE)).toBe('a');
 
       expect(converter('B', HTML_CONTEXT_TYPE)).toBe('B');
-      expect(converter('AAA', HTML_CONTEXT_TYPE)).toBe(checkResult('AAA'));
-      expect(converter('AB', HTML_CONTEXT_TYPE)).toBe(checkResult('AB'));
-      expect(converter('AB <', HTML_CONTEXT_TYPE)).toBe(checkResult('AB &amp;lt;'));
+      expect(converter('AAA', HTML_CONTEXT_TYPE)).toBe(checkResult('AAA', 'white', 'red'));
+      expect(converter('AB', HTML_CONTEXT_TYPE)).toBe(checkResult('AB', 'white', 'red'));
+      expect(converter('AB <', HTML_CONTEXT_TYPE)).toBe(checkResult('AB &amp;lt;', 'white', 'red'));
       expect(converter('a', HTML_CONTEXT_TYPE)).toBe('a');
     });
 

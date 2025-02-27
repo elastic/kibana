@@ -71,8 +71,8 @@ export class ColorFormat extends FieldFormat {
     return ReactDOM.renderToStaticMarkup(
       <EuiBadge
         color={color.background}
+        style={{ color: color.text }}
         css={{
-          color: color.text,
           '.euiDataGrid &': {
             marginTop: '-4px',
           },
