@@ -23,8 +23,9 @@ import { usageCountersServiceMock } from '@kbn/usage-collection-plugin/server/us
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { Logger } from '@kbn/logging';
 import { eventLogClientMock } from '@kbn/event-log-plugin/server/event_log_client.mock';
-import { ActionTypeRegistry } from '../../../../action_type_registry';
 import { getAllUnsecured } from './get_all';
+import { actionTypeRegistryMock } from '../../../../action_type_registry.mock';
+import { ActionTypeRegistry } from '../../../../action_type_registry';
 
 jest.mock('@kbn/core-saved-objects-utils-server', () => {
   const actual = jest.requireActual('@kbn/core-saved-objects-utils-server');
@@ -64,11 +65,14 @@ const connectorTokenClient = connectorTokenClientMock.create();
 const internalSavedObjectsRepository = savedObjectsRepositoryMock.create();
 
 let actionsClient: ActionsClient;
-let actionTypeRegistry: ActionTypeRegistry;
+const actionTypeRegistry = actionTypeRegistryMock.create() as jest.Mocked<ActionTypeRegistry>;
+const actionTestTypes = ['.slack', '.cases'];
 
 describe('getAll()', () => {
   beforeEach(() => {
     jest.resetAllMocks();
+    actionTypeRegistry.getAllTypes.mockReturnValue(actionTestTypes);
+    actionTypeRegistry.has.mockImplementation((value) => actionTestTypes.includes(value));
     actionsClient = new ActionsClient({
       logger,
       actionTypeRegistry,
@@ -440,6 +444,104 @@ describe('getAll()', () => {
           isSystemAction: false,
           isDeprecated: false,
           referencedByCount: 2,
+        },
+      ]);
+    });
+
+    test('removes not supported preconfigured connectors correctly', async () => {
+      const expectedResult = {
+        total: 1,
+        per_page: 10,
+        page: 1,
+        saved_objects: [
+          {
+            id: '1',
+            type: 'type',
+            attributes: {
+              name: 'test',
+              isMissingSecrets: false,
+              config: {
+                foo: 'bar',
+              },
+            },
+            score: 1,
+            references: [],
+          },
+        ],
+      };
+
+      unsecuredSavedObjectsClient.find.mockResolvedValueOnce(expectedResult);
+      scopedClusterClient.asInternalUser.search.mockResponse(
+        // @ts-expect-error not full search response
+        {
+          aggregations: {
+            '1': { doc_count: 6 },
+            testPreconfigured: { doc_count: 2 },
+            'system-connector-.cases': { doc_count: 2 },
+          },
+        }
+      );
+
+      actionsClient = new ActionsClient({
+        logger,
+        actionTypeRegistry,
+        unsecuredSavedObjectsClient,
+        scopedClusterClient,
+        kibanaIndices,
+        actionExecutor,
+        bulkExecutionEnqueuer,
+        request,
+        authorization: authorization as unknown as ActionsAuthorization,
+        inMemoryConnectors: [
+          {
+            id: 'testPreconfigured',
+            actionTypeId: '.inference',
+            secrets: {},
+            isPreconfigured: true,
+            isDeprecated: false,
+            isSystemAction: false,
+            name: 'test',
+            config: {
+              foo: 'bar',
+            },
+          },
+          {
+            id: 'system-connector-.cases',
+            actionTypeId: '.cases',
+            name: 'System action: .cases',
+            config: {},
+            secrets: {},
+            isDeprecated: false,
+            isMissingSecrets: false,
+            isPreconfigured: false,
+            isSystemAction: true,
+          },
+        ],
+        connectorTokenClient: connectorTokenClientMock.create(),
+        getEventLogClient,
+      });
+
+      const result = await actionsClient.getAll({ includeSystemActions: true });
+
+      expect(result).toEqual([
+        {
+          actionTypeId: '.cases',
+          id: 'system-connector-.cases',
+          isDeprecated: false,
+          isPreconfigured: false,
+          isSystemAction: true,
+          name: 'System action: .cases',
+          referencedByCount: 2,
+        },
+        {
+          id: '1',
+          name: 'test',
+          isMissingSecrets: false,
+          config: { foo: 'bar' },
+          isPreconfigured: false,
+          isDeprecated: false,
+          isSystemAction: false,
+          referencedByCount: 6,
         },
       ]);
     });

@@ -12,6 +12,7 @@ import type { estypes } from '@elastic/elasticsearch';
 import { AuditLogger } from '@kbn/security-plugin-types-server';
 import { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { omit } from 'lodash';
+import { ActionTypeRegistry } from '../../../../action_type_registry';
 import { InMemoryConnector } from '../../../..';
 import { SavedObjectClientForFind } from '../../../../data/connector/types/params';
 import { connectorWithExtraFindDataSchema } from '../../schemas';
@@ -30,6 +31,7 @@ interface GetAllHelperOpts {
   logger: Logger;
   namespace?: string;
   savedObjectsClient: SavedObjectClientForFind;
+  actionTypeRegistry?: ActionTypeRegistry;
 }
 
 export async function getAll({
@@ -57,6 +59,7 @@ export async function getAll({
     kibanaIndices: context.kibanaIndices,
     logger: context.logger,
     savedObjectsClient: context.unsecuredSavedObjectsClient,
+    actionTypeRegistry: context.actionTypeRegistry,
   });
 }
 
@@ -89,6 +92,7 @@ async function getAllHelper({
   logger,
   namespace,
   savedObjectsClient,
+  actionTypeRegistry,
 }: GetAllHelperOpts): Promise<ConnectorWithExtraFindData[]> {
   const savedObjectsActions = (
     await findConnectorsSo({ savedObjectsClient, namespace })
@@ -113,15 +117,21 @@ async function getAllHelper({
 
   const mergedResult = [
     ...savedObjectsActions,
-    ...inMemoryConnectors.map((inMemoryConnector) => ({
-      id: inMemoryConnector.id,
-      actionTypeId: inMemoryConnector.actionTypeId,
-      name: inMemoryConnector.name,
-      isPreconfigured: inMemoryConnector.isPreconfigured,
-      isDeprecated: isConnectorDeprecated(inMemoryConnector),
-      isSystemAction: inMemoryConnector.isSystemAction,
-      ...(inMemoryConnector.exposeConfig ? { config: inMemoryConnector.config } : {}),
-    })),
+    ...inMemoryConnectors
+      .filter((connector) =>
+        connector.isPreconfigured && actionTypeRegistry && connector.actionTypeId
+          ? actionTypeRegistry.has(connector.actionTypeId)
+          : true
+      )
+      .map((inMemoryConnector) => ({
+        id: inMemoryConnector.id,
+        actionTypeId: inMemoryConnector.actionTypeId,
+        name: inMemoryConnector.name,
+        isPreconfigured: inMemoryConnector.isPreconfigured,
+        isDeprecated: isConnectorDeprecated(inMemoryConnector),
+        isSystemAction: inMemoryConnector.isSystemAction,
+        ...(inMemoryConnector.exposeConfig ? { config: inMemoryConnector.config } : {}),
+      })),
   ].sort((a, b) => a.name.localeCompare(b.name));
 
   const connectors = await injectExtraFindData({
