@@ -7,10 +7,11 @@
 
 /* eslint-disable no-console */
 
+import type { ReactElement } from 'react';
 import React, { useMemo } from 'react';
 import { MemoryRouter } from 'react-router-dom';
-import { render as reactRender, waitFor } from '@testing-library/react';
-import type { RenderOptions, RenderResult } from '@testing-library/react';
+import { render } from '@testing-library/react';
+import type { RenderOptions } from '@testing-library/react';
 import type { ILicense } from '@kbn/licensing-plugin/public';
 import type { ScopedFilesClient } from '@kbn/files-plugin/public';
 import { createMockFilesClient } from '@kbn/shared-ux-file-mocks';
@@ -22,9 +23,9 @@ import { coreMock } from '@kbn/core/public/mocks';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 
 import type { CasesFeatures, CasesPermissions } from '../../../common/ui/types';
-import type { StartServices } from '../../types';
 import type { ReleasePhase } from '../../components/types';
 import { SECURITY_SOLUTION_OWNER } from '../../../common/constants';
+import type { CasesContextProps } from '../../components/cases_context';
 import { CasesProvider } from '../../components/cases_context';
 import { createStartServicesMock } from '../lib/kibana/kibana_react.mock';
 import { ExternalReferenceAttachmentTypeRegistry } from '../../client/attachment_framework/external_reference_registry';
@@ -41,7 +42,6 @@ interface TestProviderProps {
   persistableStateAttachmentTypeRegistry?: PersistableStateAttachmentTypeRegistry;
   license?: ILicense;
 }
-type UiRender = (ui: React.ReactElement, options?: RenderOptions) => RenderResult;
 
 window.scrollTo = jest.fn();
 
@@ -65,137 +65,99 @@ export const mockedTestProvidersOwner = [SECURITY_SOLUTION_OWNER];
 const TestProvidersComponent: React.FC<TestProviderProps> = ({
   children,
   features,
-  owner = mockedTestProvidersOwner,
-  permissions = allCasesPermissions(),
-  releasePhase = 'ga',
-  externalReferenceAttachmentTypeRegistry = new ExternalReferenceAttachmentTypeRegistry(),
-  persistableStateAttachmentTypeRegistry = new PersistableStateAttachmentTypeRegistry(),
+  owner,
+  permissions,
+  releasePhase,
+  externalReferenceAttachmentTypeRegistry,
+  persistableStateAttachmentTypeRegistry,
   license,
 }) => {
   const coreStart = useMemo(() => coreMock.createStart(), []);
   const services = useMemo(() => createStartServicesMock({ license }), [license]);
 
-  const queryClient = new QueryClient({
-    defaultOptions: {
-      queries: {
-        retry: false,
-      },
-    },
-    logger: {
-      log: console.log,
-      warn: console.warn,
-      error: () => {},
-    },
-  });
+  const queryClient = useMemo(
+    () =>
+      new QueryClient({
+        defaultOptions: {
+          queries: {
+            retry: false,
+          },
+        },
+        logger: {
+          log: console.log,
+          warn: console.warn,
+          error: () => {},
+        },
+      }),
+    []
+  );
 
-  const getFilesClient = mockGetFilesClient();
-  const casesProviderValue = {
-    externalReferenceAttachmentTypeRegistry,
-    persistableStateAttachmentTypeRegistry,
-    features,
-    owner,
-    permissions,
-    getFilesClient,
-  };
+  const getFilesClient = useMemo(() => mockGetFilesClient(), []);
+  const defaultPermissions = useMemo(() => allCasesPermissions(), []);
+  const filesClient = useMemo(() => createMockFilesClient(), []);
+
+  const defaultExternalReferenceAttachmentTypeRegistry = useMemo(
+    () => new ExternalReferenceAttachmentTypeRegistry(),
+    []
+  );
+
+  const defaultPersistableStateAttachmentTypeRegistry = useMemo(
+    () => new PersistableStateAttachmentTypeRegistry(),
+    []
+  );
+
+  const casesProviderValue: CasesContextProps = useMemo(
+    () => ({
+      externalReferenceAttachmentTypeRegistry:
+        externalReferenceAttachmentTypeRegistry ?? defaultExternalReferenceAttachmentTypeRegistry,
+      persistableStateAttachmentTypeRegistry:
+        persistableStateAttachmentTypeRegistry ?? defaultPersistableStateAttachmentTypeRegistry,
+      features,
+      owner: owner ?? mockedTestProvidersOwner,
+      permissions: permissions ?? defaultPermissions,
+      releasePhase: releasePhase ?? 'ga',
+      getFilesClient,
+    }),
+    [
+      defaultExternalReferenceAttachmentTypeRegistry,
+      defaultPermissions,
+      defaultPersistableStateAttachmentTypeRegistry,
+      externalReferenceAttachmentTypeRegistry,
+      features,
+      getFilesClient,
+      owner,
+      permissions,
+      persistableStateAttachmentTypeRegistry,
+      releasePhase,
+    ]
+  );
 
   return (
     <KibanaRenderContextProvider {...coreStart}>
       <KibanaContextProvider services={services}>
         <MemoryRouter>
           <CasesProvider value={casesProviderValue} queryClient={queryClient}>
-            <FilesContext client={createMockFilesClient()}>{children}</FilesContext>
+            <FilesContext client={filesClient}>{children}</FilesContext>
           </CasesProvider>
         </MemoryRouter>
       </KibanaContextProvider>
     </KibanaRenderContextProvider>
   );
 };
+
 TestProvidersComponent.displayName = 'TestProviders';
 
 export const TestProviders = React.memo(TestProvidersComponent);
 
-export interface AppMockRenderer {
-  externalReferenceAttachmentTypeRegistry: ExternalReferenceAttachmentTypeRegistry;
-  persistableStateAttachmentTypeRegistry: PersistableStateAttachmentTypeRegistry;
-  render: UiRender;
-  coreStart: StartServices;
-  queryClient: QueryClient;
-  AppWrapper: React.FC<{ children: React.ReactNode }>;
-  getFilesClient: () => ScopedFilesClient;
-  clearQueryCache: () => Promise<void>;
-}
+type CustomRenderOptions = Omit<RenderOptions, 'wrapper'> & {
+  wrapperProps?: Omit<TestProviderProps, 'children'>;
+};
 
-export const createAppMockRenderer = ({
-  features,
-  owner = mockedTestProvidersOwner,
-  permissions = allCasesPermissions(),
-  releasePhase = 'ga',
-  externalReferenceAttachmentTypeRegistry = new ExternalReferenceAttachmentTypeRegistry(),
-  persistableStateAttachmentTypeRegistry = new PersistableStateAttachmentTypeRegistry(),
-  license,
-}: Omit<TestProviderProps, 'children'> = {}): AppMockRenderer => {
-  const coreStart = coreMock.createStart();
-  const services = createStartServicesMock({ license });
+export const renderWithTestingProviders = (ui: ReactElement, options?: CustomRenderOptions) => {
+  const { wrapperProps, ...renderOptions } = options ?? {};
 
-  const queryClient = new QueryClient({
-    defaultOptions: {
-      queries: {
-        retry: false,
-      },
-    },
-    logger: {
-      log: console.log,
-      warn: console.warn,
-      error: () => {},
-    },
+  return render(ui, {
+    wrapper: (props) => <TestProviders {...props} {...wrapperProps} />,
+    ...renderOptions,
   });
-
-  const getFilesClient = mockGetFilesClient();
-  const casesProviderValue = {
-    externalReferenceAttachmentTypeRegistry,
-    persistableStateAttachmentTypeRegistry,
-    features,
-    owner,
-    permissions,
-    releasePhase,
-    getFilesClient,
-  };
-  const AppWrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => (
-    <KibanaRenderContextProvider {...coreStart}>
-      <KibanaContextProvider services={services}>
-        <MemoryRouter>
-          <CasesProvider value={casesProviderValue} queryClient={queryClient}>
-            {children}
-          </CasesProvider>
-        </MemoryRouter>
-      </KibanaContextProvider>
-    </KibanaRenderContextProvider>
-  );
-
-  AppWrapper.displayName = 'AppWrapper';
-  const memoizedAppWrapper = React.memo(AppWrapper);
-
-  const render: UiRender = (ui, options) => {
-    return reactRender(ui, {
-      wrapper: memoizedAppWrapper,
-      ...options,
-    });
-  };
-
-  const clearQueryCache = async () => {
-    queryClient.getQueryCache().clear();
-
-    await waitFor(() => expect(queryClient.isFetching()).toBe(0));
-  };
-
-  return {
-    coreStart: services,
-    queryClient,
-    render,
-    AppWrapper,
-    externalReferenceAttachmentTypeRegistry,
-    persistableStateAttachmentTypeRegistry,
-    getFilesClient,
-    clearQueryCache,
-  };
 };
