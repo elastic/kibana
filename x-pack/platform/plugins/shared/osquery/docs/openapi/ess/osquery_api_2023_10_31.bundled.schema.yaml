@@ -944,20 +944,15 @@ components:
       $ref: '#/components/schemas/Snapshot'
       nullable: true
     SortOrderOrUndefined:
-      default: desc
       description: Specifies the sort order.
       enum:
         - asc
         - desc
       example: desc
-      nullable: true
       type: string
     SortOrUndefined:
       default: createdAt
       description: The field that is used to sort the results.
-      enum:
-        - createdAt
-        - updatedAt
       example: createdAt
       nullable: true
       type: string
