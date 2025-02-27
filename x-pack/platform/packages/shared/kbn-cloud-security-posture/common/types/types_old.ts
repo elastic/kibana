@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-module.exports = {
-  preset: '@kbn/test',
-  rootDir: '../../../../../..',
-  roots: ['<rootDir>/x-pack/platform/packages/private/ml/inference_integration_flyout'],
-};
+import type { CspBenchmarkRuleMetadata } from '../schema/rules/latest';
+
+export type BenchmarkId = CspBenchmarkRuleMetadata['benchmark']['id'];
+export type BenchmarkName = CspBenchmarkRuleMetadata['benchmark']['name'];
