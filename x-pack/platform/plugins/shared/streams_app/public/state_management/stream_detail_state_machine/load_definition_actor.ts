@@ -7,7 +7,7 @@
 
 import { StreamGetResponse } from '@kbn/streams-schema';
 import { fromPromise } from 'xstate5';
-import { StreamEnrichmentServiceDependencies } from '../stream_enrichment_service/types';
+import { StreamDetailServiceDependencies } from './types';
 
 interface LoadStreamInput {
   name: string;
@@ -15,7 +15,7 @@ interface LoadStreamInput {
 
 export function createLoadDefinitionActor({
   streamsRepositoryClient,
-}: Pick<StreamEnrichmentServiceDependencies, 'streamsRepositoryClient'>) {
+}: Pick<StreamDetailServiceDependencies, 'streamsRepositoryClient'>) {
   return fromPromise<StreamGetResponse, LoadStreamInput>(({ input, signal }) => {
     return streamsRepositoryClient.fetch('GET /api/streams/{name}', {
       signal,

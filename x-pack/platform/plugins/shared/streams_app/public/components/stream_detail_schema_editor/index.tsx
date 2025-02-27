@@ -8,11 +8,11 @@ import React from 'react';
 import { WiredStreamGetResponse, isRootStreamDefinition } from '@kbn/streams-schema';
 import { SchemaEditor } from '../schema_editor';
 import { useSchemaFields } from '../schema_editor/hooks/use_schema_fields';
+import { useStreamDetailSelector } from '../../state_management/stream_detail_state_machine';
 
 interface SchemaEditorProps {
   definition?: WiredStreamGetResponse;
   refreshDefinition: () => void;
-  isLoadingDefinition: boolean;
 }
 
 export function StreamDetailSchemaEditor(props: SchemaEditorProps) {
@@ -20,11 +20,10 @@ export function StreamDetailSchemaEditor(props: SchemaEditorProps) {
   return <Content definition={props.definition} {...props} />;
 }
 
-const Content = ({
-  definition,
-  refreshDefinition,
-  isLoadingDefinition,
-}: Required<SchemaEditorProps>) => {
+const Content = ({ definition, refreshDefinition }: Required<SchemaEditorProps>) => {
+  const isLoadingDefinition = useStreamDetailSelector((state) =>
+    state.matches({ initialized: 'loadingDefinition' })
+  );
   const { fields, isLoadingUnmappedFields, refreshFields, unmapField, updateField } =
     useSchemaFields({
       definition,

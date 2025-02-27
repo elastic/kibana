@@ -23,8 +23,7 @@ import { ProcessorDefinitionWithUIAttributes } from '../../types';
 
 export type ProcessorToParentEvent =
   | { type: 'processor.change' }
-  | { type: 'processor.delete'; id: string }
-  | { type: 'processor.changesDiscarded' };
+  | { type: 'processor.delete'; id: string };
 
 export type ProcessorParentActor = ActorRef<Snapshot<unknown>, ProcessorToParentEvent>;
 
@@ -53,6 +52,7 @@ export const processorMachine = setup({
       | { type: 'processor.edit' }
       | { type: 'processor.stage' }
       | { type: 'processor.update' },
+    emitted: {} as { type: 'processor.changesDiscarded' },
   },
   actors: {
     confirmDiscardChanges: getPlaceholderFor(createConfirmDiscardChangesActor),

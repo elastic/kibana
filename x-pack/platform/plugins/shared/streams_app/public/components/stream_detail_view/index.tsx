@@ -36,9 +36,7 @@ export function StreamDetailView() {
 
 export function StreamDetailViewContent({ name, tab }: { name: string; tab: string }) {
   const { reload } = useStreamDetailEvents();
-  const streamDetailState = useStreamDetailSelector((state) => state);
-
-  const { definition } = streamDetailState.context;
+  const definition = useStreamDetailSelector((state) => state.context.definition);
 
   const entity = {
     id: name,
@@ -62,13 +60,7 @@ export function StreamDetailViewContent({ name, tab }: { name: string; tab: stri
     },
     {
       name: 'management',
-      content: (
-        <StreamDetailManagement
-          definition={definition}
-          refreshDefinition={reload}
-          isLoadingDefinition={streamDetailState.matches({ initialized: 'loadingDefinition' })}
-        />
-      ),
+      content: <StreamDetailManagement definition={definition} refreshDefinition={reload} />,
       label: i18n.translate('xpack.streams.streamDetailView.managementTab', {
         defaultMessage: 'Management',
       }),
