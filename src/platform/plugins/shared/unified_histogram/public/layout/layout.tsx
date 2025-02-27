@@ -14,6 +14,7 @@ import { createHtmlPortalNode, InPortal, OutPortal } from 'react-reverse-portal'
 import { css } from '@emotion/css';
 import type { Datatable, DatatableColumn } from '@kbn/expressions-plugin/common';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
+import type { ESQLControlVariable } from '@kbn/esql-validation-autocomplete';
 import type {
   EmbeddableComponentProps,
   LensEmbeddableInput,
@@ -192,6 +193,7 @@ export interface UnifiedHistogramLayoutProps extends PropsWithChildren<unknown> 
 
   table?: Datatable;
   abortController?: AbortController;
+  esqlVariables?: ESQLControlVariable[];
 }
 
 export const UnifiedHistogramLayout = ({
@@ -233,6 +235,7 @@ export const UnifiedHistogramLayout = ({
   children,
   withDefaultActions,
   abortController,
+  esqlVariables,
 }: UnifiedHistogramLayoutProps) => {
   const columnsMap = useMemo(() => {
     if (!columns?.length) {
@@ -368,6 +371,7 @@ export const UnifiedHistogramLayout = ({
           dataLoading$={dataLoading$}
           withDefaultActions={withDefaultActions}
           columns={columns}
+          esqlVariables={esqlVariables}
         />
       </InPortal>
       <InPortal node={mainPanelNode}>
