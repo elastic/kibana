@@ -24,8 +24,8 @@ import { AssetImage } from '../asset_image';
 import {
   useSimulatorSelector,
   useStreamEnrichmentEvents,
-} from './state_management/stream_enrichment_service';
-import { previewDocsFilterOptions } from './state_management/stream_enrichment_service/simulation_state_machine';
+} from './state_management/stream_enrichment_state_machine';
+import { previewDocsFilterOptions } from './state_management/simulation_state_machine/simulation_state_machine';
 
 export const ProcessorOutcomePreview = () => {
   const isLoading = useSimulatorSelector(

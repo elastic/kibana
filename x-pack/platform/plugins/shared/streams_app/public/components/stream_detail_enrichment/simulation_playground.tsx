@@ -13,7 +13,7 @@ import { ProcessorOutcomePreview } from './processor_outcome_preview';
 import {
   useStreamEnrichmentEvents,
   useStreamsEnrichmentSelector,
-} from './state_management/stream_enrichment_service';
+} from './state_management/stream_enrichment_state_machine';
 
 export const SimulationPlayground = () => {
   const isViewingDataPreview = useStreamsEnrichmentSelector((state) =>

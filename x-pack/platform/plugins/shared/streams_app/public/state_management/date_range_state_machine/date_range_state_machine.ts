@@ -12,10 +12,13 @@ import {
   enqueueActions,
   setup,
   assign,
+  ActorRefFrom,
 } from 'xstate5';
 import type { DataPublicPluginStart, TimefilterContract } from '@kbn/data-plugin/public';
 import { getPlaceholderFor } from '@kbn/xstate-utils';
 import { DateRangeContext, DateRangeEvent, DateRangeInput } from './types';
+
+export type DateRangeActorRef = ActorRefFrom<typeof dateRangeMachine>;
 
 export const dateRangeMachine = setup({
   types: {

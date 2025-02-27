@@ -13,12 +13,13 @@ import {
   streamEnrichmentMachine,
   createStreamEnrichmentMachineImplementations,
 } from './stream_enrichment_state_machine';
+import { StreamEnrichmentInput, StreamEnrichmentServiceDependencies } from './types';
 import {
-  StreamEnrichmentEventParams,
-  StreamEnrichmentInput,
-  StreamEnrichmentServiceDependencies,
-} from './types';
-import { PreviewDocsFilterOption, simulationMachine } from './simulation_state_machine';
+  PreviewDocsFilterOption,
+  simulationMachine,
+} from '../simulation_state_machine/simulation_state_machine';
+import { ProcessorDefinitionWithUIAttributes } from '../../types';
+import { ProcessorActorRef } from '../processor_state_machine';
 
 const consoleInspector = createConsoleInspector();
 
@@ -33,12 +34,10 @@ export const useStreamEnrichmentEvents = () => {
 
   return useMemo(
     () => ({
-      addProcessor: (processor: StreamEnrichmentEventParams<'processors.add'>['processor']) => {
+      addProcessor: (processor: ProcessorDefinitionWithUIAttributes) => {
         service.send({ type: 'processors.add', processor });
       },
-      reorderProcessors: (
-        processorsRefs: StreamEnrichmentEventParams<'processors.reorder'>['processorsRefs']
-      ) => {
+      reorderProcessors: (processorsRefs: ProcessorActorRef[]) => {
         service.send({ type: 'processors.reorder', processorsRefs });
       },
       resetChanges: () => {

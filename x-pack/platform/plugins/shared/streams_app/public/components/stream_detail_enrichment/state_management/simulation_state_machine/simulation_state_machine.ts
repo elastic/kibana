@@ -4,106 +4,39 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import {
-  ActorRef,
-  ActorRefFrom,
-  ErrorActorEvent,
-  MachineImplementationsFrom,
-  Snapshot,
-  and,
-  assign,
-  fromPromise,
-  sendTo,
-  setup,
-} from 'xstate5';
-import { IToasts } from '@kbn/core/public';
-import { i18n } from '@kbn/i18n';
+import { MachineImplementationsFrom, and, assign, sendTo, setup } from 'xstate5';
 import { getPlaceholderFor } from '@kbn/xstate-utils';
-import {
-  Condition,
-  FlattenRecord,
-  UnaryOperator,
-  getProcessorConfig,
-  isSchema,
-  processorDefinitionSchema,
-} from '@kbn/streams-schema';
-import { APIReturnType, StreamsRepositoryClient } from '@kbn/streams-plugin/public/api';
-import { flattenObjectNestedLast } from '@kbn/object-utils';
-import { errors as esErrors } from '@elastic/elasticsearch';
-import { isEmpty, isEqual, uniq } from 'lodash';
-import { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import { FlattenRecord, isSchema, processorDefinitionSchema } from '@kbn/streams-schema';
+import { isEmpty, isEqual } from 'lodash';
 import {
   dateRangeMachine,
   createDateRangeMachineImplementations,
-  DateRangeToParentEvent,
-  DateRangeContext,
 } from '../../../../state_management/date_range_state_machine';
-import { ALWAYS_CONDITION } from '../../../../util/condition';
-import { DetectedField, ProcessorDefinitionWithUIAttributes } from '../../types';
+import { ProcessorDefinitionWithUIAttributes } from '../../types';
 import { processorConverter } from '../../utils';
-
-export const previewDocsFilterOptions = {
-  outcome_filter_all: {
-    id: 'outcome_filter_all',
-    label: i18n.translate(
-      'xpack.streams.streamDetailView.managementTab.enrichment.processor.outcomeControls.all',
-      { defaultMessage: 'All samples' }
-    ),
-  },
-  outcome_filter_matched: {
-    id: 'outcome_filter_matched',
-    label: i18n.translate(
-      'xpack.streams.streamDetailView.managementTab.enrichment.processor.outcomeControls.matched',
-      { defaultMessage: 'Matched' }
-    ),
-  },
-  outcome_filter_unmatched: {
-    id: 'outcome_filter_unmatched',
-    label: i18n.translate(
-      'xpack.streams.streamDetailView.managementTab.enrichment.processor.outcomeControls.unmatched',
-      { defaultMessage: 'Unmatched' }
-    ),
-  },
-} as const;
-
-export type PreviewDocsFilterOption = keyof typeof previewDocsFilterOptions;
-
-export interface SimulationToParentEvent {
-  type: 'simulation.change';
-}
-
-export type DateRangeChildActor = ActorRefFrom<typeof dateRangeMachine>;
-export type SimulationParentActor = ActorRef<Snapshot<unknown>, SimulationToParentEvent>;
-
-export type Simulation = APIReturnType<'POST /api/streams/{name}/processing/_simulate'>;
-export type ProcessorMetrics =
-  Simulation['processors_metrics'][keyof Simulation['processors_metrics']];
-
-export interface SimulationMachineContext {
-  dateRangeRef: DateRangeChildActor;
-  parentRef: SimulationParentActor;
-  previewColumns: string[];
-  previewDocsFilter: PreviewDocsFilterOption;
-  previewDocuments: FlattenRecord[];
-  processors: ProcessorDefinitionWithUIAttributes[];
-  samples: FlattenRecord[];
-  samplingCondition?: Condition;
-  simulation?: Simulation;
-  streamName: string;
-}
+import {
+  SimulationInput,
+  SimulationContext,
+  SimulationEvent,
+  Simulation,
+  SimulationMachineDeps,
+} from './types';
+import { PreviewDocsFilterOption } from './preview_docs_filter';
+import {
+  createSamplesFetchActor,
+  createSamplesFetchFailureNofitier,
+} from './samples_fetcher_actor';
+import {
+  createSimulationRunnerActor,
+  createSimulationRunFailureNofitier,
+} from './simulation_runner_actor';
+import { derivePreviewColumns, filterSimulationDocuments, composeSamplingCondition } from './utils';
 
 export const simulationMachine = setup({
   types: {
-    input: {} as {
-      parentRef: SimulationParentActor;
-      processors: ProcessorDefinitionWithUIAttributes[];
-      streamName: string;
-    },
-    context: {} as SimulationMachineContext,
-    events: {} as
-      | DateRangeToParentEvent
-      | { type: 'simulation.changePreviewDocsFilter'; filter: PreviewDocsFilterOption }
-      | { type: 'processors.change'; processors: ProcessorDefinitionWithUIAttributes[] },
+    input: {} as SimulationInput,
+    context: {} as SimulationContext,
+    events: {} as SimulationEvent,
   },
   actors: {
     fetchSamples: getPlaceholderFor(createSamplesFetchActor),
@@ -288,12 +221,6 @@ export const simulationMachine = setup({
   },
 });
 
-interface SimulationMachineDeps {
-  data: DataPublicPluginStart;
-  streamsRepositoryClient: StreamsRepositoryClient;
-  toasts: IToasts;
-}
-
 export const createSimulationMachineImplementations = ({
   data,
   streamsRepositoryClient,
@@ -309,150 +236,3 @@ export const createSimulationMachineImplementations = ({
     notifySimulationRunFailure: createSimulationRunFailureNofitier({ toasts }),
   },
 });
-
-type SamplesFetchOutput = FlattenRecord[];
-interface SamplesFetchInput {
-  condition?: Condition;
-  streamName: string;
-  absoluteTimeRange: DateRangeContext['absoluteTimeRange'];
-}
-
-function createSamplesFetchActor({
-  streamsRepositoryClient,
-}: Pick<SimulationMachineDeps, 'streamsRepositoryClient'>) {
-  return fromPromise<SamplesFetchOutput, SamplesFetchInput>(async ({ input, signal }) => {
-    const samplesBody = await streamsRepositoryClient.fetch('POST /api/streams/{name}/_sample', {
-      signal,
-      params: {
-        path: { name: input.streamName },
-        body: {
-          if: input.condition,
-          start: input.absoluteTimeRange.start,
-          end: input.absoluteTimeRange.end,
-          size: 100,
-        },
-      },
-    });
-
-    return samplesBody.documents.map(flattenObjectNestedLast) as FlattenRecord[];
-  });
-}
-
-type SimulationRunnerOutput = Simulation;
-interface SimulationRunnerInput {
-  streamName: string;
-  documents: FlattenRecord[];
-  processors: ProcessorDefinitionWithUIAttributes[];
-}
-
-function createSimulationRunnerActor({
-  streamsRepositoryClient,
-}: Pick<SimulationMachineDeps, 'streamsRepositoryClient'>) {
-  return fromPromise<SimulationRunnerOutput, SimulationRunnerInput>(({ input, signal }) =>
-    streamsRepositoryClient.fetch('POST /api/streams/{name}/processing/_simulate', {
-      signal,
-      params: {
-        path: { name: input.streamName },
-        body: {
-          documents: input.documents,
-          processing: input.processors.map(processorConverter.toSimulateDefinition),
-        },
-      },
-    })
-  );
-}
-
-function createSamplesFetchFailureNofitier({ toasts }: Pick<SimulationMachineDeps, 'toasts'>) {
-  return (params: { event: unknown }) => {
-    const event = params.event as ErrorActorEvent<esErrors.ResponseError, string>;
-    toasts.addError(new Error(event.error.body.message), {
-      title: i18n.translate('xpack.streams.enrichment.simulation.samplesFetchError', {
-        defaultMessage: 'An issue occurred retrieving samples.',
-      }),
-      toastMessage: event.error.body.message,
-    });
-  };
-}
-
-function createSimulationRunFailureNofitier({ toasts }: Pick<SimulationMachineDeps, 'toasts'>) {
-  return (params: { event: unknown }) => {
-    const event = params.event as ErrorActorEvent<esErrors.ResponseError, string>;
-    toasts.addError(new Error(event.error.body.message), {
-      title: i18n.translate('xpack.streams.enrichment.simulation.simulationRunError', {
-        defaultMessage: 'An issue occurred running the simulation.',
-      }),
-      toastMessage: event.error.body.message,
-    });
-  };
-}
-
-function composeSamplingCondition(
-  processors: ProcessorDefinitionWithUIAttributes[]
-): Condition | undefined {
-  if (isEmpty(processors)) {
-    return undefined;
-  }
-
-  const uniqueFields = uniq(getSourceFields(processors));
-
-  if (isEmpty(uniqueFields)) {
-    return ALWAYS_CONDITION;
-  }
-
-  const conditions = uniqueFields.map((field) => ({
-    field,
-    operator: 'exists' as UnaryOperator,
-  }));
-
-  return { or: conditions };
-}
-
-function getSourceFields(processors: ProcessorDefinitionWithUIAttributes[]): string[] {
-  return processors.map((processor) => getProcessorConfig(processor).field.trim()).filter(Boolean);
-}
-
-function getTableColumns(
-  processors: ProcessorDefinitionWithUIAttributes[],
-  fields: DetectedField[],
-  filter: PreviewDocsFilterOption
-) {
-  const uniqueProcessorsFields = uniq(getSourceFields(processors));
-
-  if (filter === 'outcome_filter_unmatched') {
-    return uniqueProcessorsFields;
-  }
-
-  const uniqueDetectedFields = uniq(fields.map((field) => field.name));
-
-  return uniq([...uniqueProcessorsFields, ...uniqueDetectedFields]);
-}
-
-function filterSimulationDocuments(
-  documents: Simulation['documents'],
-  filter: PreviewDocsFilterOption
-) {
-  switch (filter) {
-    case 'outcome_filter_matched':
-      return documents.filter((doc) => doc.status === 'parsed').map((doc) => doc.value);
-    case 'outcome_filter_unmatched':
-      return documents.filter((doc) => doc.status !== 'parsed').map((doc) => doc.value);
-    case 'outcome_filter_all':
-    default:
-      return documents.map((doc) => doc.value);
-  }
-}
-
-function derivePreviewColumns(
-  context: SimulationMachineContext,
-  processors: ProcessorDefinitionWithUIAttributes[]
-) {
-  const nextPreviewColumns = getTableColumns(
-    processors,
-    context.simulation?.detected_fields ?? [],
-    context.previewDocsFilter
-  );
-
-  return isEqual(context.previewColumns, nextPreviewColumns)
-    ? context.previewColumns
-    : nextPreviewColumns;
-}

@@ -13,6 +13,7 @@ import {
   sendTo,
   stopChild,
   and,
+  ActorRefFrom,
 } from 'xstate5';
 import { getPlaceholderFor } from '@kbn/xstate-utils';
 import {
@@ -23,9 +24,9 @@ import {
 } from '@kbn/streams-schema';
 import { htmlIdGenerator } from '@elastic/eui';
 import {
+  ProcessorActorRef,
   StreamEnrichmentContext,
   StreamEnrichmentEvent,
-  StreamEnrichmentEventByType,
   StreamEnrichmentInput,
   StreamEnrichmentServiceDependencies,
 } from './types';
@@ -34,15 +35,21 @@ import {
   createUpsertStreamActor,
   createUpsertStreamFailureNofitier,
   createUpsertStreamSuccessNofitier,
-} from './upsert_stream';
-import { processorMachine, createProcessorMachineImplementations } from './processor_state_machine';
+} from './upsert_stream_actor';
+import {
+  processorMachine,
+  createProcessorMachineImplementations,
+} from '../processor_state_machine/processor_state_machine';
 import {
   PreviewDocsFilterOption,
   createSimulationMachineImplementations,
   simulationMachine,
-} from './simulation_state_machine';
+} from '../simulation_state_machine/simulation_state_machine';
+import { ProcessorDefinitionWithUIAttributes } from '../../types';
 
 const createId = htmlIdGenerator();
+
+export type StreamEnrichmentActorRef = ActorRefFrom<typeof streamEnrichmentMachine>;
 
 export const streamEnrichmentMachine = setup({
   types: {
@@ -96,7 +103,10 @@ export const streamEnrichmentMachine = setup({
       fields: params.definition.stream.ingest.wired.fields,
     })),
     addProcessor: assign(
-      ({ context, spawn, self }, { processor }: StreamEnrichmentEventByType<'processors.add'>) => {
+      (
+        { context, spawn, self },
+        { processor }: { processor: ProcessorDefinitionWithUIAttributes }
+      ) => {
         const id = createId();
         return {
           processorsRefs: context.processorsRefs.concat(
@@ -112,15 +122,11 @@ export const streamEnrichmentMachine = setup({
         };
       }
     ),
-    stopProcessor: stopChild(
-      (_, params: StreamEnrichmentEventByType<'processor.delete'>) => params.id
-    ),
-    deleteProcessor: assign(
-      ({ context }, params: StreamEnrichmentEventByType<'processor.delete'>) => ({
-        processorsRefs: context.processorsRefs.filter((proc) => proc.id !== params.id),
-      })
-    ),
-    reorderProcessors: assign((_, params: StreamEnrichmentEventByType<'processors.reorder'>) => ({
+    stopProcessor: stopChild((_, params: { id: string }) => params.id),
+    deleteProcessor: assign(({ context }, params: { id: string }) => ({
+      processorsRefs: context.processorsRefs.filter((proc) => proc.id !== params.id),
+    })),
+    reorderProcessors: assign((_, params: { processorsRefs: ProcessorActorRef[] }) => ({
       processorsRefs: params.processorsRefs,
     })),
     reassignProcessors: assign(({ context }) => ({

@@ -11,12 +11,9 @@ import { StreamsRepositoryClient } from '@kbn/streams-plugin/public/api';
 import { FieldDefinition, IngestStreamGetResponse } from '@kbn/streams-schema';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { ProcessorDefinitionWithUIAttributes } from '../../types';
-import { ProcessorToParentEvent, processorMachine } from './processor_state_machine';
-import {
-  PreviewDocsFilterOption,
-  SimulationToParentEvent,
-  simulationMachine,
-} from './simulation_state_machine';
+import { simulationMachine } from '../simulation_state_machine/simulation_state_machine';
+import { ProcessorActorRef, ProcessorToParentEvent } from '../processor_state_machine';
+import { SimulationToParentEvent, PreviewDocsFilterOption } from '../simulation_state_machine';
 
 export interface StreamEnrichmentServiceDependencies {
   refreshDefinition: () => void;
@@ -31,8 +28,8 @@ export interface StreamEnrichmentInput {
 
 export interface StreamEnrichmentContext {
   definition: IngestStreamGetResponse;
-  initialProcessorsRefs: Array<ActorRefFrom<typeof processorMachine>>;
-  processorsRefs: Array<ActorRefFrom<typeof processorMachine>>;
+  initialProcessorsRefs: ProcessorActorRef[];
+  processorsRefs: ProcessorActorRef[];
   simulatorRef?: ActorRefFrom<typeof simulationMachine>;
   fields?: FieldDefinition;
 }
@@ -47,14 +44,4 @@ export type StreamEnrichmentEvent =
   | { type: 'simulation.viewDetectedFields' }
   | { type: 'simulation.changePreviewDocsFilter'; filter: PreviewDocsFilterOption }
   | { type: 'processors.add'; processor: ProcessorDefinitionWithUIAttributes }
-  | { type: 'processors.reorder'; processorsRefs: Array<ActorRefFrom<typeof processorMachine>> };
-
-export type StreamEnrichmentEventByType<TEventType extends StreamEnrichmentEvent['type']> = Extract<
-  StreamEnrichmentEvent,
-  { type: TEventType }
->;
-
-export type StreamEnrichmentEventParams<TEventType extends StreamEnrichmentEvent['type']> = Omit<
-  StreamEnrichmentEventByType<TEventType>,
-  'type'
->;
+  | { type: 'processors.reorder'; processorsRefs: ProcessorActorRef[] };

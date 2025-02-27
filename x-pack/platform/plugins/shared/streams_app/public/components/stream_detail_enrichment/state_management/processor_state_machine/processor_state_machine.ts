@@ -4,59 +4,29 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import {
-  ActorRef,
-  MachineImplementationsFrom,
-  Snapshot,
-  assign,
-  emit,
-  fromPromise,
-  sendTo,
-  setup,
-} from 'xstate5';
+import { ActorRefFrom, MachineImplementationsFrom, assign, emit, sendTo, setup } from 'xstate5';
 import { isEqual } from 'lodash';
 import { OverlayStart } from '@kbn/core/public';
-import { i18n } from '@kbn/i18n';
 import { getPlaceholderFor } from '@kbn/xstate-utils';
 import { ProcessorDefinition, getProcessorType } from '@kbn/streams-schema';
-import { ProcessorDefinitionWithUIAttributes } from '../../types';
+import { ProcessorInput, ProcessorContext, ProcessorEvent, ProcessorEmittedEvent } from './types';
+import {
+  createConfirmPromptActor,
+  deleteProcessorPromptInput,
+  discardChangesPromptInput,
+} from './confirm_prompt_actor';
 
-export type ProcessorToParentEvent =
-  | { type: 'processor.change' }
-  | { type: 'processor.delete'; id: string };
-
-export type ProcessorParentActor = ActorRef<Snapshot<unknown>, ProcessorToParentEvent>;
-
-export interface ProcessorMachineContext {
-  parentRef: ProcessorParentActor;
-  initialProcessor: ProcessorDefinitionWithUIAttributes;
-  processor: ProcessorDefinitionWithUIAttributes;
-  isNew: boolean;
-  isUpdated?: boolean;
-}
-
-const getParentRef = ({ context }: { context: ProcessorMachineContext }) => context.parentRef;
+export type ProcessorActorRef = ActorRefFrom<typeof processorMachine>;
 
 export const processorMachine = setup({
   types: {
-    input: {} as {
-      parentRef: ProcessorParentActor;
-      processor: ProcessorDefinitionWithUIAttributes;
-      isNew?: boolean;
-    },
-    context: {} as ProcessorMachineContext,
-    events: {} as
-      | { type: 'processor.cancel' }
-      | { type: 'processor.change'; processor: ProcessorDefinition }
-      | { type: 'processor.delete' }
-      | { type: 'processor.edit' }
-      | { type: 'processor.stage' }
-      | { type: 'processor.update' },
-    emitted: {} as { type: 'processor.changesDiscarded' },
+    input: {} as ProcessorInput,
+    context: {} as ProcessorContext,
+    events: {} as ProcessorEvent,
+    emitted: {} as ProcessorEmittedEvent,
   },
   actors: {
-    confirmDiscardChanges: getPlaceholderFor(createConfirmDiscardChangesActor),
-    confirmProcessorDelete: getPlaceholderFor(createConfirmProcessorDeleteActor),
+    confirmPrompt: getPlaceholderFor(createConfirmPromptActor),
   },
   actions: {
     changeProcessor: assign(({ context }, params: { processor: ProcessorDefinition }) => ({
@@ -73,11 +43,14 @@ export const processorMachine = setup({
       initialProcessor: context.processor,
       isUpdated: true,
     })),
-    emitProcessorChange: sendTo(getParentRef, { type: 'processor.change' }),
-    emitProcessorDelete: sendTo(getParentRef, ({ context }) => ({
-      type: 'processor.delete',
-      id: context.processor.id,
-    })),
+    notifyProcessorChange: sendTo(({ context }) => context.parentRef, { type: 'processor.change' }),
+    notifyProcessorDelete: sendTo(
+      ({ context }) => context.parentRef,
+      ({ context }) => ({
+        type: 'processor.delete',
+        id: context.processor.id,
+      })
+    ),
     emitChangesDiscarded: emit({ type: 'processor.changesDiscarded' }),
   },
   guards: {
@@ -105,7 +78,7 @@ export const processorMachine = setup({
           on: {
             'processor.stage': {
               target: '#configured',
-              actions: [{ type: 'updateProcessor' }, { type: 'emitProcessorChange' }],
+              actions: [{ type: 'updateProcessor' }, { type: 'notifyProcessorChange' }],
             },
             'processor.cancel': [
               {
@@ -119,14 +92,15 @@ export const processorMachine = setup({
             'processor.change': {
               actions: [
                 { type: 'changeProcessor', params: ({ event }) => event },
-                { type: 'emitProcessorChange' },
+                { type: 'notifyProcessorChange' },
               ],
             },
           },
         },
         confirmingDiscardChanges: {
           invoke: {
-            src: 'confirmDiscardChanges',
+            src: 'confirmPrompt',
+            input: discardChangesPromptInput,
             onDone: {
               target: '#deleted',
               actions: [{ type: 'restoreInitialProcessor' }],
@@ -151,7 +125,7 @@ export const processorMachine = setup({
                 'processor.update': {
                   guard: 'hasEditingChanges',
                   target: '#configured.idle',
-                  actions: [{ type: 'updateProcessor' }, { type: 'emitProcessorChange' }],
+                  actions: [{ type: 'updateProcessor' }, { type: 'notifyProcessorChange' }],
                 },
                 'processor.cancel': [
                   {
@@ -160,26 +134,27 @@ export const processorMachine = setup({
                   },
                   {
                     target: '#configured.idle',
-                    actions: [{ type: 'emitProcessorChange' }, { type: 'emitChangesDiscarded' }],
+                    actions: [{ type: 'notifyProcessorChange' }, { type: 'emitChangesDiscarded' }],
                   },
                 ],
                 'processor.delete': 'confirmingDeleteProcessor',
                 'processor.change': {
                   actions: [
                     { type: 'changeProcessor', params: ({ event }) => event },
-                    { type: 'emitProcessorChange' },
+                    { type: 'notifyProcessorChange' },
                   ],
                 },
               },
             },
             confirmingDiscardChanges: {
               invoke: {
-                src: 'confirmDiscardChanges',
+                src: 'confirmPrompt',
+                input: discardChangesPromptInput,
                 onDone: {
                   target: '#configured.idle',
                   actions: [
                     { type: 'restoreInitialProcessor' },
-                    { type: 'emitProcessorChange' },
+                    { type: 'notifyProcessorChange' },
                     { type: 'emitChangesDiscarded' },
                   ],
                 },
@@ -188,7 +163,8 @@ export const processorMachine = setup({
             },
             confirmingDeleteProcessor: {
               invoke: {
-                src: 'confirmProcessorDelete',
+                src: 'confirmPrompt',
+                input: deleteProcessorPromptInput,
                 onDone: '#deleted',
                 onError: 'editing',
               },
@@ -200,7 +176,7 @@ export const processorMachine = setup({
     deleted: {
       id: 'deleted',
       type: 'final',
-      entry: [{ type: 'emitProcessorDelete' }],
+      entry: [{ type: 'notifyProcessorDelete' }],
     },
   },
 });
@@ -211,73 +187,6 @@ export const createProcessorMachineImplementations = ({
   overlays: OverlayStart;
 }): MachineImplementationsFrom<typeof processorMachine> => ({
   actors: {
-    confirmDiscardChanges: createConfirmDiscardChangesActor({ overlays }),
-    confirmProcessorDelete: createConfirmProcessorDeleteActor({ overlays }),
+    confirmPrompt: createConfirmPromptActor({ overlays }),
   },
 });
-
-function createConfirmDiscardChangesActor({ overlays }: { overlays: OverlayStart }) {
-  return fromPromise(async () => {
-    const hasConfirmed = await overlays.openConfirm(discardChangesMessage, {
-      buttonColor: 'danger',
-      title: discardChangesTitle,
-      confirmButtonText: discardChangesConfirmButtonText,
-      cancelButtonText: discardChangesCancelButtonText,
-    });
-
-    return hasConfirmed || throwUnhandledError();
-  });
-}
-
-function createConfirmProcessorDeleteActor({ overlays }: { overlays: OverlayStart }) {
-  return fromPromise(async () => {
-    const hasConfirmed = await overlays.openConfirm(deleteProcessorMessage, {
-      buttonColor: 'danger',
-      title: deleteProcessorTitle,
-      confirmButtonText: deleteProcessorConfirmButtonText,
-      cancelButtonText: deleteProcessorCancelButtonText,
-    });
-
-    return hasConfirmed || throwUnhandledError();
-  });
-}
-
-const throwUnhandledError = () => {
-  throw new Error('Unhandled event');
-};
-
-// Discard changes prompt copies
-const discardChangesMessage = i18n.translate(
-  'xpack.streams.enrichment.processor.discardChanges.message',
-  { defaultMessage: 'Are you sure you want to discard your changes?' }
-);
-const discardChangesTitle = i18n.translate(
-  'xpack.streams.enrichment.processor.discardChanges.title',
-  { defaultMessage: 'Discard changes?' }
-);
-const discardChangesConfirmButtonText = i18n.translate(
-  'xpack.streams.enrichment.processor.discardChanges.confirmButtonText',
-  { defaultMessage: 'Discard' }
-);
-const discardChangesCancelButtonText = i18n.translate(
-  'xpack.streams.enrichment.processor.discardChanges.cancelButtonText',
-  { defaultMessage: 'Keep editing' }
-);
-
-// Delete processor prompt copies
-const deleteProcessorMessage = i18n.translate(
-  'xpack.streams.enrichment.processor.deleteProcessor.message',
-  { defaultMessage: 'Deleting this processor will permanently impact the field configuration.' }
-);
-const deleteProcessorTitle = i18n.translate(
-  'xpack.streams.enrichment.processor.deleteProcessor.title',
-  { defaultMessage: 'Are you sure you want to delete this processor?' }
-);
-const deleteProcessorConfirmButtonText = i18n.translate(
-  'xpack.streams.enrichment.processor.deleteProcessor.confirmButtonText',
-  { defaultMessage: 'Delete processor' }
-);
-const deleteProcessorCancelButtonText = i18n.translate(
-  'xpack.streams.enrichment.processor.deleteProcessor.cancelButtonText',
-  { defaultMessage: 'Cancel' }
-);

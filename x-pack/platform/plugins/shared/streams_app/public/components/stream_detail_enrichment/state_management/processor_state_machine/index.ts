@@ -5,4 +5,5 @@
  * 2.0.
  */
 
-export * from './use_streams_enrichment';
+export * from './processor_state_machine';
+export * from './types';
