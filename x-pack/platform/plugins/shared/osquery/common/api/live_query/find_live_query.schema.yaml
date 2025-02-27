@@ -5,16 +5,51 @@ info:
 paths: { }
 components:
   schemas:
-    FindLiveQueryRequestQuery:
+    FindLiveQueryResponse:
+      example:
+        data:
+          items:
+            - fields:
+                action_id: '3c42c847-eb30-4452-80e0-728584042334'
+                expiration: '2023-10-31T00:00:00Z'
+                "@timestamp": '2023-10-31T00:00:00Z'
+                agents: [ '16d7caf5-efd2-4212-9b62-73dafc91fa13' ]
+                user_id: 'elastic'
+                queries:
+                  - action_id: "609c4c66-ba3d-43fa-afdd-53e244577aa0"
+                    id: "6724a474-cbba-41ef-a1aa-66aebf0879e2"
+                    query: "select * from uptime;"
+                    saved_query_id: "42ba9c50-0cc5-11ed-aa1d-2b27890bc90d"
+                    ecs_mapping:
+                      host.uptime:
+                        field: "total_seconds"
+                    agents: [ "16d7caf5-efd2-4212-9b62-73dafc91fa13" ]
       type: object
-      properties:
-        kuery:
-          $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/KueryOrUndefined'
-        page:
-          $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/PageOrUndefined'
-        pageSize:
-          $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/PageSizeOrUndefined'
-        sort:
-          $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/SortOrUndefined'
-        sortOrder:
-          $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/SortOrderOrUndefined'
+      properties: { }
+    FindLiveQueryDetailsResponse:
+      example:
+        data:
+          action_id: "3c42c847-eb30-4452-80e0-728584042334"
+          expiration: "2022-07-26T10:04:32.220Z"
+          "@timestamp": "2022-07-26T09:59:32.220Z"
+          agents: [ "16d7caf5-efd2-4212-9b62-73dafc91fa13" ]
+          user_id: "elastic"
+          queries:
+            - action_id: "609c4c66-ba3d-43fa-afdd-53e244577aa0"
+              id: "6724a474-cbba-41ef-a1aa-66aebf0879e2"
+              query: "select * from uptime;"
+              saved_query_id: "42ba9c50-0cc5-11ed-aa1d-2b27890bc90d"
+              ecs_mapping:
+                host.uptime:
+                  field: "total_seconds"
+              agents:
+                - "16d7caf5-efd2-4212-9b62-73dafc91fa13"
+              docs: 0  # results count
+              failed: 1  # failed queries
+              pending: 0  # pending agents
+              responded: 1  # total responded agents
+              successful: 0  # successful agents
+              status: "completed"  # single query status
+          status: "completed"  # global status of the live query (completed, pending)
+      type: object
+      properties: { }
