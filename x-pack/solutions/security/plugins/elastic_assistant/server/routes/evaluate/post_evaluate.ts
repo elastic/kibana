@@ -56,7 +56,7 @@ import {
 } from '../../lib/langchain/graphs/default_assistant_graph/graph';
 import { getLlmClass, getLlmType, isOpenSourceModel } from '../utils';
 import { getGraphsFromNames } from './get_graphs_from_names';
-import { DEFAULT_DATE_FORMAT_TZ } from '@kbn/elastic-assistant-plugin/common/constants';
+import { DEFAULT_DATE_FORMAT_TZ } from '../../../common/constants';
 
 const DEFAULT_SIZE = 20;
 const ROUTE_HANDLER_TIMEOUT = 10 * 60 * 1000; // 10 * 60 seconds = 10 minutes

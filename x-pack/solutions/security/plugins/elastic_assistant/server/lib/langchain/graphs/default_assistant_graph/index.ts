@@ -30,7 +30,7 @@ import { GraphInputs } from './types';
 import { getDefaultAssistantGraph } from './graph';
 import { invokeGraph, streamGraph } from './helpers';
 import { transformESSearchToAnonymizationFields } from '../../../../ai_assistant_data_clients/anonymization_fields/helpers';
-import { DEFAULT_DATE_FORMAT_TZ } from '@kbn/elastic-assistant-plugin/common/constants';
+import { DEFAULT_DATE_FORMAT_TZ } from '../../../../../common/constants';
 
 export const callAssistantGraph: AgentExecutor<true | false> = async ({
   abortSignal,
