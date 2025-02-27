@@ -5,15 +5,13 @@
  * 2.0.
  */
 
+import type { PublicMethodsOf } from '@kbn/utility-types';
 import type { RuleMigrationsRetriever } from '..';
-import type { RuleMigrationsDataClient } from '../../../data/rule_migrations_data_client';
 
 export const createRuleMigrationsRetrieverMock = () => {
   const mockResources = {
     initialize: jest.fn().mockResolvedValue(undefined),
     getResources: jest.fn().mockResolvedValue({}),
-    migrationId: 'test-migration-id',
-    dataClient: {} as RuleMigrationsDataClient,
   };
 
   const mockIntegrations = {
@@ -26,12 +24,14 @@ export const createRuleMigrationsRetrieverMock = () => {
     search: jest.fn().mockResolvedValue([]),
   };
 
-  return {
+  const mockRetriever = {
     resources: mockResources,
     integrations: mockIntegrations,
     prebuiltRules: mockPrebuiltRules,
     initialize: jest.fn().mockResolvedValue(undefined),
-  } as unknown as RuleMigrationsRetriever;
+  };
+
+  return mockRetriever as jest.Mocked<PublicMethodsOf<RuleMigrationsRetriever>>;
 };
 
 export const MockRuleMigrationsRetriever = jest

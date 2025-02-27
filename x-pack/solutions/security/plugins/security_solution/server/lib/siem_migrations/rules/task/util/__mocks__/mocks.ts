@@ -6,11 +6,12 @@
  */
 
 import type { EsqlKnowledgeBase } from '../esql_knowledge_base';
+import type { PublicMethodsOf } from '@kbn/utility-types';
 
 export const createEsqlKnowledgeBaseMock = () => {
   return {
     translate: jest.fn().mockResolvedValue(''),
-  } as unknown as EsqlKnowledgeBase;
+  } as jest.Mocked<PublicMethodsOf<EsqlKnowledgeBase>>;
 };
 
 // Factory function for the mock class
