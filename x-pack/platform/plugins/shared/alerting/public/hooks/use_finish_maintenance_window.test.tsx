@@ -49,11 +49,11 @@ describe('useFinishMaintenanceWindow', () => {
   beforeEach(() => {
     jest.clearAllMocks();
 
-    appMockRenderer = createAppMockRenderer();
     finishMaintenanceWindow.mockResolvedValue(maintenanceWindow);
   });
 
   it('should call onSuccess if api succeeds', async () => {
+    appMockRenderer = createAppMockRenderer();
     const { result } = renderHook(() => useFinishMaintenanceWindow(), {
       wrapper: appMockRenderer.AppWrapper,
     });
@@ -67,6 +67,7 @@ describe('useFinishMaintenanceWindow', () => {
   });
 
   it('should call onError if api fails', async () => {
+    appMockRenderer = createAppMockRenderer();
     finishMaintenanceWindow.mockRejectedValue('');
 
     const { result } = renderHook(() => useFinishMaintenanceWindow(), {

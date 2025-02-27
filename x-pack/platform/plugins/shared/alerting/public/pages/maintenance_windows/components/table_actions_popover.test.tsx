@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { fireEvent } from '@testing-library/react';
+import { fireEvent, screen } from '@testing-library/react';
 import React from 'react';
 import userEvent from '@testing-library/user-event';
 
@@ -35,11 +35,11 @@ describe('TableActionsPopover', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    appMockRenderer = createAppMockRenderer();
   });
 
   test('it renders', () => {
-    const result = appMockRenderer.render(
+    appMockRenderer = createAppMockRenderer();
+    appMockRenderer.render(
       <TableActionsPopover
         id={'123'}
         isLoading={false}
@@ -51,11 +51,12 @@ describe('TableActionsPopover', () => {
       />
     );
 
-    expect(result.getByTestId('table-actions-icon-button')).toBeInTheDocument();
+    expect(screen.getByTestId('table-actions-icon-button')).toBeInTheDocument();
   });
 
   test('it shows the correct actions when a maintenance window is running', () => {
-    const result = appMockRenderer.render(
+    appMockRenderer = createAppMockRenderer();
+    appMockRenderer.render(
       <TableActionsPopover
         id={'123'}
         isLoading={false}
@@ -66,14 +67,15 @@ describe('TableActionsPopover', () => {
         onCancelAndArchive={() => {}}
       />
     );
-    fireEvent.click(result.getByTestId('table-actions-icon-button'));
-    expect(result.getByTestId('table-actions-edit')).toBeInTheDocument();
-    expect(result.getByTestId('table-actions-cancel')).toBeInTheDocument();
-    expect(result.getByTestId('table-actions-cancel-and-archive')).toBeInTheDocument();
+    fireEvent.click(screen.getByTestId('table-actions-icon-button'));
+    expect(screen.getByTestId('table-actions-edit')).toBeInTheDocument();
+    expect(screen.getByTestId('table-actions-cancel')).toBeInTheDocument();
+    expect(screen.getByTestId('table-actions-cancel-and-archive')).toBeInTheDocument();
   });
 
   test('it shows the correct actions when a maintenance window is upcoming', () => {
-    const result = appMockRenderer.render(
+    appMockRenderer = createAppMockRenderer();
+    appMockRenderer.render(
       <TableActionsPopover
         id={'123'}
         isLoading={false}
@@ -84,13 +86,14 @@ describe('TableActionsPopover', () => {
         onCancelAndArchive={() => {}}
       />
     );
-    fireEvent.click(result.getByTestId('table-actions-icon-button'));
-    expect(result.getByTestId('table-actions-edit')).toBeInTheDocument();
-    expect(result.getByTestId('table-actions-archive')).toBeInTheDocument();
+    fireEvent.click(screen.getByTestId('table-actions-icon-button'));
+    expect(screen.getByTestId('table-actions-edit')).toBeInTheDocument();
+    expect(screen.getByTestId('table-actions-archive')).toBeInTheDocument();
   });
 
   test('it shows the correct actions when a maintenance window is finished', () => {
-    const result = appMockRenderer.render(
+    appMockRenderer = createAppMockRenderer();
+    appMockRenderer.render(
       <TableActionsPopover
         id={'123'}
         isLoading={false}
@@ -101,13 +104,14 @@ describe('TableActionsPopover', () => {
         onCancelAndArchive={() => {}}
       />
     );
-    fireEvent.click(result.getByTestId('table-actions-icon-button'));
-    expect(result.getByTestId('table-actions-edit')).toBeInTheDocument();
-    expect(result.getByTestId('table-actions-archive')).toBeInTheDocument();
+    fireEvent.click(screen.getByTestId('table-actions-icon-button'));
+    expect(screen.getByTestId('table-actions-edit')).toBeInTheDocument();
+    expect(screen.getByTestId('table-actions-archive')).toBeInTheDocument();
   });
 
   test('it shows the correct actions when a maintenance window is archived', () => {
-    const result = appMockRenderer.render(
+    appMockRenderer = createAppMockRenderer();
+    appMockRenderer.render(
       <TableActionsPopover
         id={'123'}
         isLoading={false}
@@ -118,18 +122,19 @@ describe('TableActionsPopover', () => {
         onCancelAndArchive={() => {}}
       />
     );
-    fireEvent.click(result.getByTestId('table-actions-icon-button'));
-    expect(result.getByTestId('table-actions-unarchive')).toBeInTheDocument();
+    fireEvent.click(screen.getByTestId('table-actions-icon-button'));
+    expect(screen.getByTestId('table-actions-unarchive')).toBeInTheDocument();
   });
 
   test('it shows the success toast when maintenance window id is copied', async () => {
+    appMockRenderer = createAppMockRenderer();
     Object.assign(navigator, {
       clipboard: {
         writeText: jest.fn().mockResolvedValue(''),
       },
     });
 
-    const result = appMockRenderer.render(
+    appMockRenderer.render(
       <TableActionsPopover
         id={'123'}
         isLoading={false}
@@ -141,10 +146,10 @@ describe('TableActionsPopover', () => {
       />
     );
 
-    await userEvent.click(await result.findByTestId('table-actions-icon-button'));
-    expect(await result.findByTestId('table-actions-copy-id')).toBeInTheDocument();
+    await userEvent.click(await screen.findByTestId('table-actions-icon-button'));
+    expect(await screen.findByTestId('table-actions-copy-id')).toBeInTheDocument();
 
-    await userEvent.click(await result.findByTestId('table-actions-copy-id'));
+    await userEvent.click(await screen.findByTestId('table-actions-copy-id'));
     expect(navigator.clipboard.writeText).toHaveBeenCalledWith('123');
     expect(mockAddSuccess).toBeCalledWith('Copied maintenance window ID to clipboard');
 

@@ -42,11 +42,10 @@ let appMockRenderer: AppMockRenderer;
 describe('useFindMaintenanceWindows', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-
-    appMockRenderer = createAppMockRenderer();
   });
 
   it('should call findMaintenanceWindows with correct arguments on successful scenario', async () => {
+    appMockRenderer = createAppMockRenderer();
     renderHook(() => useFindMaintenanceWindows({ ...defaultHookProps }), {
       wrapper: appMockRenderer.AppWrapper,
     });
@@ -57,6 +56,7 @@ describe('useFindMaintenanceWindows', () => {
   });
 
   it('should call onError if api fails', async () => {
+    appMockRenderer = createAppMockRenderer();
     findMaintenanceWindows.mockRejectedValue('This is an error.');
 
     renderHook(() => useFindMaintenanceWindows({ ...defaultHookProps }), {
@@ -69,6 +69,7 @@ describe('useFindMaintenanceWindows', () => {
   });
 
   it('should not try to find maintenance windows if not enabled', async () => {
+    appMockRenderer = createAppMockRenderer();
     renderHook(() => useFindMaintenanceWindows({ enabled: false, ...defaultHookProps }), {
       wrapper: appMockRenderer.AppWrapper,
     });

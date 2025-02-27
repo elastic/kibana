@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { fireEvent } from '@testing-library/react';
+import { fireEvent, screen } from '@testing-library/react';
 import * as React from 'react';
 import { AppMockRenderer, createAppMockRenderer } from '../../../lib/test_utils';
 import { UpcomingEventsPopover } from './upcoming_events_popover';
@@ -15,11 +15,11 @@ describe('rule_actions_popover', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    appMockRenderer = createAppMockRenderer();
   });
 
   it('renders the top 3 events', () => {
-    const result = appMockRenderer.render(
+    appMockRenderer = createAppMockRenderer();
+    appMockRenderer.render(
       <UpcomingEventsPopover
         maintenanceWindowFindResponse={{
           title: 'test MW',
@@ -53,14 +53,14 @@ describe('rule_actions_popover', () => {
       />
     );
 
-    const popoverButton = result.getByTestId('upcoming-events-icon-button');
+    const popoverButton = screen.getByTestId('upcoming-events-icon-button');
     expect(popoverButton).toBeInTheDocument();
     fireEvent.click(popoverButton);
 
-    expect(result.getByTestId('upcoming-events-popover-title')).toBeInTheDocument();
-    expect(result.getByTestId('upcoming-events-popover-title')).toHaveTextContent(
+    expect(screen.getByTestId('upcoming-events-popover-title')).toBeInTheDocument();
+    expect(screen.getByTestId('upcoming-events-popover-title')).toHaveTextContent(
       'Repeats every Friday'
     );
-    expect(result.getAllByTestId('upcoming-events-popover-item').length).toBe(3);
+    expect(screen.getAllByTestId('upcoming-events-popover-item').length).toBe(3);
   });
 });

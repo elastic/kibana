@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import { screen } from '@testing-library/react';
 import { within, fireEvent, waitFor } from '@testing-library/react';
 import { AppMockRenderer, createAppMockRenderer } from '../../../lib/test_utils';
 import {
@@ -54,56 +55,58 @@ describe('CreateMaintenanceWindowForm', () => {
     });
 
     useUiSetting.mockReturnValue('America/New_York');
-    appMockRenderer = createAppMockRenderer();
   });
 
   it('renders all form fields except the recurring form fields', async () => {
-    const result = appMockRenderer.render(<CreateMaintenanceWindowForm {...formProps} />);
+    appMockRenderer = createAppMockRenderer();
+    appMockRenderer.render(<CreateMaintenanceWindowForm {...formProps} />);
 
     await waitFor(() => {
       expect(
-        result.queryByTestId('maintenanceWindowCategorySelectionLoading')
+        screen.queryByTestId('maintenanceWindowCategorySelectionLoading')
       ).not.toBeInTheDocument();
     });
 
-    expect(result.getByTestId('title-field')).toBeInTheDocument();
-    expect(result.getByTestId('date-field')).toBeInTheDocument();
-    expect(result.getByTestId('recurring-field')).toBeInTheDocument();
-    expect(result.getByTestId('maintenanceWindowCategorySelection')).toBeInTheDocument();
-    expect(result.queryByTestId('recurring-form')).not.toBeInTheDocument();
-    expect(result.queryByTestId('timezone-field')).not.toBeInTheDocument();
+    expect(screen.getByTestId('title-field')).toBeInTheDocument();
+    expect(screen.getByTestId('date-field')).toBeInTheDocument();
+    expect(screen.getByTestId('recurring-field')).toBeInTheDocument();
+    expect(screen.getByTestId('maintenanceWindowCategorySelection')).toBeInTheDocument();
+    expect(screen.queryByTestId('recurring-form')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('timezone-field')).not.toBeInTheDocument();
   });
 
   it('renders timezone field when the kibana setting is set to browser', async () => {
+    appMockRenderer = createAppMockRenderer();
     useUiSetting.mockReturnValue('Browser');
 
-    const result = appMockRenderer.render(<CreateMaintenanceWindowForm {...formProps} />);
+    appMockRenderer.render(<CreateMaintenanceWindowForm {...formProps} />);
 
     await waitFor(() => {
       expect(
-        result.queryByTestId('maintenanceWindowCategorySelectionLoading')
+        screen.queryByTestId('maintenanceWindowCategorySelectionLoading')
       ).not.toBeInTheDocument();
     });
 
-    expect(result.getByTestId('title-field')).toBeInTheDocument();
-    expect(result.getByTestId('date-field')).toBeInTheDocument();
-    expect(result.getByTestId('recurring-field')).toBeInTheDocument();
-    expect(result.getByTestId('maintenanceWindowCategorySelection')).toBeInTheDocument();
-    expect(result.queryByTestId('recurring-form')).not.toBeInTheDocument();
-    expect(result.getByTestId('timezone-field')).toBeInTheDocument();
+    expect(screen.getByTestId('title-field')).toBeInTheDocument();
+    expect(screen.getByTestId('date-field')).toBeInTheDocument();
+    expect(screen.getByTestId('recurring-field')).toBeInTheDocument();
+    expect(screen.getByTestId('maintenanceWindowCategorySelection')).toBeInTheDocument();
+    expect(screen.queryByTestId('recurring-form')).not.toBeInTheDocument();
+    expect(screen.getByTestId('timezone-field')).toBeInTheDocument();
   });
 
   it('should initialize the form when no initialValue provided', () => {
-    const result = appMockRenderer.render(<CreateMaintenanceWindowForm {...formProps} />);
+    appMockRenderer = createAppMockRenderer();
+    appMockRenderer.render(<CreateMaintenanceWindowForm {...formProps} />);
 
-    const titleInput = within(result.getByTestId('title-field')).getByTestId(
+    const titleInput = within(screen.getByTestId('title-field')).getByTestId(
       'createMaintenanceWindowFormNameInput'
     );
-    const dateInputs = within(result.getByTestId('date-field')).getAllByLabelText(
+    const dateInputs = within(screen.getByTestId('date-field')).getAllByLabelText(
       // using the aria-label to query for the date-picker input
       'Press the down key to open a popover containing a calendar.'
     );
-    const recurringInput = within(result.getByTestId('recurring-field')).getByTestId(
+    const recurringInput = within(screen.getByTestId('recurring-field')).getByTestId(
       'createMaintenanceWindowRepeatSwitch'
     );
 
@@ -115,7 +118,8 @@ describe('CreateMaintenanceWindowForm', () => {
   });
 
   it('should prefill the form when provided with initialValue', async () => {
-    const result = appMockRenderer.render(
+    appMockRenderer = createAppMockRenderer();
+    appMockRenderer.render(
       <CreateMaintenanceWindowForm
         {...formProps}
         initialValue={{
@@ -129,34 +133,34 @@ describe('CreateMaintenanceWindowForm', () => {
       />
     );
 
-    const titleInput = within(result.getByTestId('title-field')).getByTestId(
+    const titleInput = within(screen.getByTestId('title-field')).getByTestId(
       'createMaintenanceWindowFormNameInput'
     );
-    const dateInputs = within(result.getByTestId('date-field')).getAllByLabelText(
+    const dateInputs = within(screen.getByTestId('date-field')).getAllByLabelText(
       // using the aria-label to query for the date-picker input
       'Press the down key to open a popover containing a calendar.'
     );
-    const recurringInput = within(result.getByTestId('recurring-field')).getByTestId(
+    const recurringInput = within(screen.getByTestId('recurring-field')).getByTestId(
       'createMaintenanceWindowRepeatSwitch'
     );
-    const timezoneInput = within(result.getByTestId('timezone-field')).getByTestId(
+    const timezoneInput = within(screen.getByTestId('timezone-field')).getByTestId(
       'comboBoxSearchInput'
     );
 
     await waitFor(() => {
       expect(
-        result.queryByTestId('maintenanceWindowCategorySelectionLoading')
+        screen.queryByTestId('maintenanceWindowCategorySelectionLoading')
       ).not.toBeInTheDocument();
     });
 
     const observabilityInput = within(
-      result.getByTestId('maintenanceWindowCategorySelection')
+      screen.getByTestId('maintenanceWindowCategorySelection')
     ).getByTestId('option-observability');
     const securityInput = within(
-      result.getByTestId('maintenanceWindowCategorySelection')
+      screen.getByTestId('maintenanceWindowCategorySelection')
     ).getByTestId('option-securitySolution');
     const managementInput = within(
-      result.getByTestId('maintenanceWindowCategorySelection')
+      screen.getByTestId('maintenanceWindowCategorySelection')
     ).getByTestId('option-management');
 
     expect(observabilityInput).toBeChecked();
@@ -170,7 +174,8 @@ describe('CreateMaintenanceWindowForm', () => {
   });
 
   it('should initialize MWs without category ids properly', async () => {
-    const result = appMockRenderer.render(
+    appMockRenderer = createAppMockRenderer();
+    appMockRenderer.render(
       <CreateMaintenanceWindowForm
         {...formProps}
         initialValue={{
@@ -185,18 +190,18 @@ describe('CreateMaintenanceWindowForm', () => {
 
     await waitFor(() => {
       expect(
-        result.queryByTestId('maintenanceWindowCategorySelectionLoading')
+        screen.queryByTestId('maintenanceWindowCategorySelectionLoading')
       ).not.toBeInTheDocument();
     });
 
     const observabilityInput = within(
-      result.getByTestId('maintenanceWindowCategorySelection')
+      screen.getByTestId('maintenanceWindowCategorySelection')
     ).getByTestId('option-observability');
     const securityInput = within(
-      result.getByTestId('maintenanceWindowCategorySelection')
+      screen.getByTestId('maintenanceWindowCategorySelection')
     ).getByTestId('option-securitySolution');
     const managementInput = within(
-      result.getByTestId('maintenanceWindowCategorySelection')
+      screen.getByTestId('maintenanceWindowCategorySelection')
     ).getByTestId('option-management');
 
     expect(observabilityInput).toBeChecked();
@@ -205,7 +210,8 @@ describe('CreateMaintenanceWindowForm', () => {
   });
 
   it('should initialize MWs with selected category ids properly', async () => {
-    const result = appMockRenderer.render(
+    appMockRenderer = createAppMockRenderer();
+    appMockRenderer.render(
       <CreateMaintenanceWindowForm
         {...formProps}
         initialValue={{
@@ -222,18 +228,18 @@ describe('CreateMaintenanceWindowForm', () => {
 
     await waitFor(() => {
       expect(
-        result.queryByTestId('maintenanceWindowCategorySelectionLoading')
+        screen.queryByTestId('maintenanceWindowCategorySelectionLoading')
       ).not.toBeInTheDocument();
     });
 
     const observabilityInput = within(
-      result.getByTestId('maintenanceWindowCategorySelection')
+      screen.getByTestId('maintenanceWindowCategorySelection')
     ).getByTestId('option-observability');
     const securityInput = within(
-      result.getByTestId('maintenanceWindowCategorySelection')
+      screen.getByTestId('maintenanceWindowCategorySelection')
     ).getByTestId('option-securitySolution');
     const managementInput = within(
-      result.getByTestId('maintenanceWindowCategorySelection')
+      screen.getByTestId('maintenanceWindowCategorySelection')
     ).getByTestId('option-management');
 
     expect(observabilityInput).toBeChecked();
@@ -242,22 +248,23 @@ describe('CreateMaintenanceWindowForm', () => {
   });
 
   it('can select category IDs', async () => {
-    const result = appMockRenderer.render(<CreateMaintenanceWindowForm {...formProps} />);
+    appMockRenderer = createAppMockRenderer();
+    appMockRenderer.render(<CreateMaintenanceWindowForm {...formProps} />);
 
     await waitFor(() => {
       expect(
-        result.queryByTestId('maintenanceWindowCategorySelectionLoading')
+        screen.queryByTestId('maintenanceWindowCategorySelectionLoading')
       ).not.toBeInTheDocument();
     });
 
     const observabilityInput = within(
-      result.getByTestId('maintenanceWindowCategorySelection')
+      screen.getByTestId('maintenanceWindowCategorySelection')
     ).getByTestId('option-observability');
     const securityInput = within(
-      result.getByTestId('maintenanceWindowCategorySelection')
+      screen.getByTestId('maintenanceWindowCategorySelection')
     ).getByTestId('option-securitySolution');
     const managementInput = within(
-      result.getByTestId('maintenanceWindowCategorySelection')
+      screen.getByTestId('maintenanceWindowCategorySelection')
     ).getByTestId('option-management');
 
     expect(observabilityInput).toBeChecked();

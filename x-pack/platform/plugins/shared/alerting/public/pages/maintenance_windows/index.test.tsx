@@ -7,6 +7,7 @@
 import React from 'react';
 import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
 import type { Capabilities } from '@kbn/core-capabilities-common';
+import { screen } from '@testing-library/react';
 import { AppMockRenderer, createAppMockRenderer } from '../../lib/test_utils';
 import { useFindMaintenanceWindows } from '../../hooks/use_find_maintenance_windows';
 import { MaintenanceWindowsPage } from '.';
@@ -50,7 +51,6 @@ describe('Maintenance windows page', () => {
       management: {},
       catalogue: {},
     };
-    appMockRenderer = createAppMockRenderer({ capabilities, license });
   });
 
   test('show license prompt', () => {
@@ -58,13 +58,14 @@ describe('Maintenance windows page', () => {
       license: { type: 'gold' },
     });
     appMockRenderer = createAppMockRenderer({ capabilities, license });
-    const result = appMockRenderer.render(<MaintenanceWindowsPage />);
-    expect(result.queryByTestId('mw-license-prompt')).toBeInTheDocument();
+    appMockRenderer.render(<MaintenanceWindowsPage />);
+    expect(screen.getByTestId('mw-license-prompt')).toBeInTheDocument();
   });
 
   test('show empty prompt', () => {
-    const result = appMockRenderer.render(<MaintenanceWindowsPage />);
-    expect(result.queryByTestId('mw-empty-prompt')).toBeInTheDocument();
+    appMockRenderer = createAppMockRenderer({ capabilities, license });
+    appMockRenderer.render(<MaintenanceWindowsPage />);
+    expect(screen.getByTestId('mw-empty-prompt')).toBeInTheDocument();
     expect(appMockRenderer.mocked.setBadge).not.toBeCalled();
   });
 
@@ -77,8 +78,8 @@ describe('Maintenance windows page', () => {
       },
     };
     appMockRenderer = createAppMockRenderer({ capabilities, license });
-    const result = appMockRenderer.render(<MaintenanceWindowsPage />);
-    expect(result.queryByTestId('maintenance-windows-table')).toBeInTheDocument();
+    appMockRenderer.render(<MaintenanceWindowsPage />);
+    expect(screen.getByTestId('maintenance-windows-table')).toBeInTheDocument();
     expect(appMockRenderer.mocked.setBadge).toBeCalledTimes(1);
   });
 });

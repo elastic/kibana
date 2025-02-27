@@ -6,7 +6,7 @@
  */
 
 import React, { FC, PropsWithChildren } from 'react';
-import { fireEvent, waitFor } from '@testing-library/react';
+import { fireEvent, waitFor, screen } from '@testing-library/react';
 
 import { useForm, Form } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { SubmitButton } from './submit_button';
@@ -33,38 +33,40 @@ describe('SubmitButton', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    appMockRenderer = createAppMockRenderer();
   });
 
   it('it renders', async () => {
-    const result = appMockRenderer.render(
+    appMockRenderer = createAppMockRenderer();
+    appMockRenderer.render(
       <MockHookWrapperComponent>
         <SubmitButton isLoading={false} />
       </MockHookWrapperComponent>
     );
 
-    expect(result.getByTestId('create-submit')).toBeInTheDocument();
+    expect(screen.getByTestId('create-submit')).toBeInTheDocument();
   });
 
   it('it submits', async () => {
-    const result = appMockRenderer.render(
+    appMockRenderer = createAppMockRenderer();
+    appMockRenderer.render(
       <MockHookWrapperComponent>
         <SubmitButton isLoading={false} />
       </MockHookWrapperComponent>
     );
 
-    fireEvent.click(result.getByTestId('create-submit'));
+    fireEvent.click(screen.getByTestId('create-submit'));
     await waitFor(() => expect(onSubmit).toBeCalled());
   });
 
   it('it disables when submitting', async () => {
-    const result = appMockRenderer.render(
+    appMockRenderer = createAppMockRenderer();
+    appMockRenderer.render(
       <MockHookWrapperComponent>
         <SubmitButton isLoading={false} />
       </MockHookWrapperComponent>
     );
 
-    fireEvent.click(result.getByTestId('create-submit'));
-    await waitFor(() => expect(result.getByTestId('create-submit')).toBeDisabled());
+    fireEvent.click(screen.getByTestId('create-submit'));
+    await waitFor(() => expect(screen.getByTestId('create-submit')).toBeDisabled());
   });
 });
