@@ -39,33 +39,31 @@ const defaultLicenseMessage = (
 );
 
 const platinumLicenseMessage = (
-  <>
-    <FormattedMessage
-      id="xpack.idxMgmt.indexDetails.mappings.semanticTextBanner.description"
-      defaultMessage="{label} Add a field to your mapping and choose 'Semantic text' to get started. Documents will be automatically chunked to fit model context limits, to avoid truncation."
-      values={{
-        label: (
-          <strong>
-            <FormattedMessage
-              id="xpack.idxMgmt.indexDetails.mappings.semanticTextBanner.semanticTextFieldAvailable"
-              defaultMessage="semantic_text field type now available!"
-            />
-          </strong>
-        ),
-      }}
-    />{' '}
-    <EuiLink
-      href="https://www.elastic.co/guide/en/elasticsearch/reference/current/inference-apis.html#infer-chunking-config"
-      target="_blank"
-    >
-      <u>
-        <FormattedMessage
-          id="xpack.idxMgmt.indexDetails.mappings.semanticTextBanner.learnMore"
-          defaultMessage="Learn more"
-        />
-      </u>
-    </EuiLink>
-  </>
+  <FormattedMessage
+    id="xpack.idxMgmt.indexDetails.mappings.semanticTextBanner.description"
+    defaultMessage="{label} Add a field to your mapping and choose 'Semantic text' to get started. Documents will be automatically chunked to fit model context limits, to avoid truncation. {learnMore}"
+    values={{
+      label: (
+        <strong>
+          <FormattedMessage
+            id="xpack.idxMgmt.indexDetails.mappings.semanticTextBanner.semanticTextFieldAvailable"
+            defaultMessage="semantic_text field type now available!"
+          />
+        </strong>
+      ),
+      learnMore: (
+        <EuiLink
+          href="https://www.elastic.co/guide/en/elasticsearch/reference/current/inference-apis.html#infer-chunking-config"
+          target="_blank"
+        >
+          <FormattedMessage
+            id="xpack.idxMgmt.indexDetails.mappings.semanticTextBanner.learnMore"
+            defaultMessage="Learn more"
+          />
+        </EuiLink>
+      ),
+    }}
+  />
 );
 
 export function SemanticTextBanner({
