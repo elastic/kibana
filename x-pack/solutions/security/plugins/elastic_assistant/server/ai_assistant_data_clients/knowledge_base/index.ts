@@ -158,7 +158,7 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
 
   public getInferenceEndpointId = async () => {
     const elserId = await this.options.getElserId();
-    if (!this.options.assistantDefaultInferenceEndpoint || elserId !== ELSER_MODEL_2) {
+    if (!this.options.assistantDefaultInferenceEndpoint || !ELSER_MODEL_2.includes(elserId)) {
       return ASSISTANT_ELSER_INFERENCE_ID;
     }
     const esClient = await this.options.elasticsearchClientPromise;
