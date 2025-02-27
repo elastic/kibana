@@ -90,7 +90,7 @@ import type { ITelemetryClient } from './services/telemetry';
 import { TelemetryService } from './services/telemetry';
 
 export type ApmPluginSetup = ReturnType<ApmPlugin['setup']>;
-export type ApmPluginStart = void;
+export type ApmPluginStart = ReturnType<ApmPlugin['start']>;
 
 export interface ApmPluginSetupDeps {
   alerting?: AlertingPluginPublicSetup;

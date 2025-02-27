@@ -4,12 +4,16 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { CoreStart, Logger, ISavedObjectsRepository } from '@kbn/core/server';
-import { SavedObjectsErrorHelpers } from '@kbn/core/server';
-import type { APMIndices } from '../..';
-
-import type { APMIndicesSavedObjectBody } from '../apm_indices';
 import {
+  type CoreStart,
+  type Logger,
+  type ISavedObjectsRepository,
+  SavedObjectsErrorHelpers,
+} from '@kbn/core/server';
+import type { APMIndices } from '../../../common/config_schema';
+
+import {
+  type APMIndicesSavedObjectBody,
   APM_INDEX_SETTINGS_SAVED_OBJECT_ID,
   APM_INDEX_SETTINGS_SAVED_OBJECT_TYPE,
 } from '../apm_indices';

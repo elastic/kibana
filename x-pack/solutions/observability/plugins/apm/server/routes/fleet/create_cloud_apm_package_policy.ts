@@ -12,7 +12,7 @@ import type {
   KibanaRequest,
 } from '@kbn/core/server';
 import type { PackagePolicy } from '@kbn/fleet-plugin/common';
-import type { APMIndices } from '@kbn/apm-data-access-plugin/server';
+import type { APMIndices } from '@kbn/apm-sources-access-plugin/server';
 import {
   APM_SERVER_SCHEMA_SAVED_OBJECT_TYPE,
   APM_SERVER_SCHEMA_SAVED_OBJECT_ID,

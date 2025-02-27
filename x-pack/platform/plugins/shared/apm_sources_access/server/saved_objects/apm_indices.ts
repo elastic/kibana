@@ -11,7 +11,7 @@ import { schema } from '@kbn/config-schema';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 import { updateApmOssIndexPaths } from './migrations/update_apm_oss_index_paths';
-import type { APMIndices } from '..';
+import type { APMIndices } from '../../common/config_schema';
 
 export const APM_INDEX_SETTINGS_SAVED_OBJECT_TYPE = 'apm-indices';
 export const APM_INDEX_SETTINGS_SAVED_OBJECT_ID = 'apm-indices';

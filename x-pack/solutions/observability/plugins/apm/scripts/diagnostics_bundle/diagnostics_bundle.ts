@@ -11,7 +11,7 @@ import { Client, HttpConnection } from '@elastic/elasticsearch';
 import fs from 'fs/promises';
 import type { AxiosRequestConfig } from 'axios';
 import axios from 'axios';
-import type { APMIndices } from '@kbn/apm-data-access-plugin/server';
+import type { APMIndices } from '@kbn/apm-sources-access-plugin/server';
 import type { APIReturnType } from '../../public/services/rest/create_call_apm_api';
 import { getDiagnosticsBundle } from '../../server/routes/diagnostics/get_diagnostics_bundle';
 

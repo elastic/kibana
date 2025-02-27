@@ -9,7 +9,7 @@ import {
   APMIndicesSavedObjectBody,
   APM_INDEX_SETTINGS_SAVED_OBJECT_ID,
   APM_INDEX_SETTINGS_SAVED_OBJECT_TYPE,
-} from '@kbn/apm-data-access-plugin/server/saved_objects/apm_indices';
+} from '@kbn/apm-sources-access-plugin/server/saved_objects/apm_indices';
 import expect from '@kbn/expect';
 import { ApmApiError } from '../../../common/apm_api_supertest';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';

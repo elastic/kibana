@@ -7,8 +7,8 @@
 
 import * as t from 'io-ts';
 import type { SavedObject } from '@kbn/core/server';
-import type { APMIndices } from '@kbn/apm-data-access-plugin/server';
-import { saveApmIndices } from '@kbn/apm-data-access-plugin/server/saved_objects/apm_indices';
+import type { APMIndices } from '@kbn/apm-sources-access-plugin/server';
+import { saveApmIndices } from '@kbn/apm-sources-access-plugin/server/saved_objects/apm_indices';
 import { createApmServerRoute } from '../../apm_routes/create_apm_server_route';
 import type { ApmIndexSettingsResponse } from './get_apm_indices';
 import { getApmIndexSettings } from './get_apm_indices';
