@@ -5,10 +5,16 @@
  * 2.0.
  */
 
+import { Observable, EMPTY } from 'rxjs';
 import type { InferenceChatModel } from '@kbn/inference-langchain';
+import { ChatEvent } from '../../../common/chat_events';
+
+interface AgentRunResult {
+  events$: Observable<ChatEvent>;
+}
 
 export interface Agent {
-  run(): void;
+  run(): Promise<AgentRunResult>;
 }
 
 export const createAgent = async ({
@@ -20,6 +26,10 @@ export const createAgent = async ({
 }): Promise<Agent> => {
   // TODO: everything
   return {
-    run: () => undefined,
+    run: async (): Promise<AgentRunResult> => {
+      return {
+        events$: EMPTY,
+      };
+    },
   };
 };

@@ -5,15 +5,19 @@
  * 2.0.
  */
 
-import type { IRouter } from '@kbn/core/server';
+import { Observable } from 'rxjs';
+import { ServerSentEvent } from '@kbn/sse-utils';
 import { observableIntoEventSourceStream } from '@kbn/sse-utils-server';
+import type { IRouter, Logger } from '@kbn/core/server';
 import { InternalServices } from '../services';
 
 export const registerChatRoutes = ({
   getServices,
   router,
+  logger,
 }: {
   router: IRouter;
+  logger: Logger;
   getServices: () => InternalServices;
 }) => {
   router.post(
@@ -24,11 +28,21 @@ export const registerChatRoutes = ({
     async (ctx, request, res) => {
       const { agentFactory } = getServices();
 
+      const abortController = new AbortController();
+      request.events.aborted$.subscribe(() => {
+        abortController.abort();
+      });
+
       const agent = await agentFactory.getAgent({ request, agentId: 'TODO', connectorId: 'TODO' });
 
-      agent.run();
+      const { events$ } = await agent.run();
 
-      return res.ok();
+      return res.ok({
+        body: observableIntoEventSourceStream(events$ as unknown as Observable<ServerSentEvent>, {
+          signal: abortController.signal,
+          logger,
+        }),
+      });
     }
   );
 };

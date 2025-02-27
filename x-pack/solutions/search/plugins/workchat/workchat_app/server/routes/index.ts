@@ -5,16 +5,18 @@
  * 2.0.
  */
 
-import type { IRouter } from '@kbn/core/server';
+import type { IRouter, Logger } from '@kbn/core/server';
 import { InternalServices } from '../services';
 import { registerChatRoutes } from './chat';
 
 export const registerRoutes = ({
   router,
+  logger,
   getServices,
 }: {
   router: IRouter;
+  logger: Logger;
   getServices: () => InternalServices;
 }) => {
-  registerChatRoutes({ router, getServices });
+  registerChatRoutes({ router, logger, getServices });
 };

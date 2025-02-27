@@ -43,6 +43,7 @@ export class WorkChatAppPlugin
     const router = core.http.createRouter();
     registerRoutes({
       router,
+      logger: this.logger.get('routes'),
       getServices: () => {
         if (!this.services) {
           throw new Error('getServices called before #start');

@@ -12,6 +12,7 @@ import type {
   WorkChatAppPluginSetupDependencies,
   WorkChatAppPluginStartDependencies,
 } from './types';
+import { registerApp } from './application';
 
 export class WorkChatAppPlugin
   implements
@@ -27,6 +28,8 @@ export class WorkChatAppPlugin
   public setup(
     core: CoreSetup<WorkChatAppPluginStartDependencies, WorkChatAppPluginStart>
   ): WorkChatAppPluginSetup {
+    registerApp({ core });
+
     return {};
   }
 

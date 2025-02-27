@@ -9,9 +9,14 @@ interface ChatEventBase {
   type: string;
 }
 
-interface ChunkEvent extends ChatEventBase {
+export interface ChunkEvent extends ChatEventBase {
   type: 'message_chunk';
   text_chunk: string;
 }
 
-export type ChatEvent = ChunkEvent;
+export interface CustomEvent extends ChatEventBase {
+  type: 'custom';
+  content: Record<string, any>;
+}
+
+export type ChatEvent = ChunkEvent | CustomEvent;
