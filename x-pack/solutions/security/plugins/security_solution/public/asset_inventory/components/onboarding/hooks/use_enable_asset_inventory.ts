@@ -37,6 +37,8 @@ export const useEnableAssetInventory = () => {
     });
 
   return {
+    // isEnabling is true when the mutation is loading and after it has succeeded so that the UI
+    // can show a loading spinner while the status is being re-fetched
     isEnabling: mutation.isLoading || mutation.isSuccess,
     error: mutation.isError ? error : null,
     reset: mutation.reset,
