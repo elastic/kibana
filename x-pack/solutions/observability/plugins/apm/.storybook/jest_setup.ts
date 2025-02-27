@@ -5,9 +5,7 @@
  * 2.0.
  */
 
-import { EuiThemeProviderDecorator } from '@kbn/kibana-react-plugin/common';
-import * as jest from 'jest-mock';
+import { setProjectAnnotations } from '@storybook/react';
+import * as globalStorybookConfig from './preview';
 
-window.jest = jest;
-export const decorators = [EuiThemeProviderDecorator];
-export const tags = ['autodocs'];
+setProjectAnnotations(globalStorybookConfig);

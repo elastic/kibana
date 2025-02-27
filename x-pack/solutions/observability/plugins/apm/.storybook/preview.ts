@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { setGlobalConfig } from '@storybook/react';
-import * as globalStorybookConfig from './preview';
+import * as jest from 'jest-mock';
 
-setGlobalConfig(globalStorybookConfig);
+// @ts-expect-error missing types
+window.jest = jest;
