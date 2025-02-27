@@ -424,7 +424,7 @@ components:
       type: object
       properties:
         agent_all:
-          description: When `true`, the query runs on all agents.
+          description: 'When `true`, the query runs on all agents.'
           type: boolean
         agent_ids:
           description: A list of agent IDs to run the query on.
@@ -574,7 +574,7 @@ components:
             field: total_seconds
         id: saved_query_id
         interval: '60'
-        platform: linux,darwin
+        platform: 'linux,darwin'
         query: select * from uptime;
         timeout: 120
         version: 2.8.0
@@ -757,7 +757,7 @@ components:
                 field: total_seconds
             id: saved_query_id
             interval: '60'
-            platform: linux,darwin
+            platform: 'linux,darwin'
             prebuilt: false
             query: select * from uptime;
             updated_at: '2022-07-26T09:28:08.597Z'
@@ -785,7 +785,7 @@ components:
                   field: total_seconds
               id: saved_query_id
               interval: '60'
-              platform: linux,darwin
+              platform: 'linux,darwin'
               prebuilt: false
               query: select * from uptime;
               updated_at: '2022-07-26T09:28:08.597Z'
@@ -811,7 +811,7 @@ components:
       type: object
       properties: {}
     Interval:
-      description: An interval, in seconds, on which to run the query.
+      description: 'An interval, in seconds, on which to run the query.'
       example: '60'
       type: string
     IntervalOrUndefined:
@@ -854,7 +854,7 @@ components:
       $ref: '#/components/schemas/PackDescription'
       nullable: true
     PackId:
-      description: The ID of the pack you want to run, retrieve, update, or delete.
+      description: 'The ID of the pack you want to run, retrieve, update, or delete.'
       example: 3c42c847-eb30-4452-80e0-728584042334
       type: string
     PackIdOrUndefined:
@@ -878,7 +878,7 @@ components:
         Restricts the query to a specified platform. The default is all
         platforms. To specify multiple platforms, use commas. For example,
         `linux,darwin`.
-      example: linux,darwin
+      example: 'linux,darwin'
       type: string
     PlatformOrUndefined:
       $ref: '#/components/schemas/Platform'
