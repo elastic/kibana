@@ -72,7 +72,7 @@ export const fetchIndex = async (
     throw new Error('404');
   }
   const indexStats = indices[index];
-  let connector: Connector | undefined = undefined;
+  let connector: Connector | undefined;
   try {
     connector = await fetchConnectorByIndexName(client.asCurrentUser, index);
   } catch (error) {

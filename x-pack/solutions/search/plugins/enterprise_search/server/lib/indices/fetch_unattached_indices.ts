@@ -26,7 +26,7 @@ export const fetchUnattachedIndices = async (
   try {
     connectors = await fetchConnectors(client.asCurrentUser, indexNames);
   } catch (error) {
-    connectors = []
+    connectors = [];
   }
 
   const connectedIndexNames = [...connectors.map((con) => con.index_name).filter(isNotNullish)];

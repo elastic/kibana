@@ -121,8 +121,8 @@ export function registerIndexRoutes({ router, log, ml }: RouteDependencies) {
         size
       );
       let connectors: Connector[] = [];
-      // If the user doesn't have permissions, fetchConnectors will error out. We still want to return indices in that case. 
-      try { 
+      // If the user doesn't have permissions, fetchConnectors will error out. We still want to return indices in that case.
+      try {
         connectors = await fetchConnectors(client.asCurrentUser, indexNames);
       } catch {
         connectors = [];
@@ -196,12 +196,12 @@ export function registerIndexRoutes({ router, log, ml }: RouteDependencies) {
       const { client } = (await context.core).elasticsearch;
 
       try {
-        let connector: Connector | undefined = undefined;
+        let connector: Connector | undefined;
         // users without permissions to fetch connectors should still see a result
         try {
           connector = await fetchConnectorByIndexName(client.asCurrentUser, indexName);
         } catch (error) {
-          log.error(`Error fetching connector for index ${indexName}: ${error}`)
+          log.error(`Error fetching connector for index ${indexName}: ${error}`);
         }
 
         if (connector) {
@@ -580,15 +580,12 @@ export function registerIndexRoutes({ router, log, ml }: RouteDependencies) {
           statusCode: 409,
         });
       }
-      let connector: Connector | undefined 
+      let connector: Connector | undefined;
       // users without permissions to fetch connectors should still be able to create an index
       try {
-        connector = await fetchConnectorByIndexName(
-          client.asCurrentUser,
-          indexName
-        );
+        connector = await fetchConnectorByIndexName(client.asCurrentUser, indexName);
       } catch (error) {
-        log.error(`Error fetching connector for index ${indexName}: ${error}`)
+        log.error(`Error fetching connector for index ${indexName}: ${error}`);
       }
 
       if (connector) {
