@@ -77,13 +77,6 @@ export const DiscoverTopNav = ({
     controlGroupAPI,
     onTextLangQueryChange: stateContainer.actions.updateESQLQuery,
   });
-  const stateControlGroupApi = useInternalStateSelector((state) => state.controlGroupApi);
-
-  useEffect(() => {
-    if (controlGroupAPI && !stateControlGroupApi) {
-      stateContainer.internalState.transitions.setControlGroupApi(controlGroupAPI);
-    }
-  }, [controlGroupAPI, stateContainer.internalState.transitions, stateControlGroupApi]);
 
   const savedSearch = useSavedSearchInitial();
   const isEsqlMode = useIsEsqlMode();

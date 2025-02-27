@@ -13,7 +13,6 @@ import {
   createStateContainerReactHelpers,
   ReduxLikeStateContainer,
 } from '@kbn/kibana-utils-plugin/common';
-import { type ControlGroupRendererApi } from '@kbn/controls-plugin/public';
 import type { DataView, DataViewListItem } from '@kbn/data-views-plugin/common';
 import type { ESQLControlVariable } from '@kbn/esql-validation-autocomplete';
 import type { Filter, TimeRange } from '@kbn/es-query';
@@ -33,7 +32,6 @@ export interface InternalState {
   adHocDataViews: DataView[];
   defaultProfileAdHocDataViewIds: string[];
   esqlVariables: ESQLControlVariable[];
-  controlGroupApi?: ControlGroupRendererApi;
   expandedDoc: DataTableRecord | undefined;
   customFilters: Filter[];
   overriddenVisContextAfterInvalidation: UnifiedHistogramVisContext | {} | undefined; // it will be used during saved search saving
@@ -77,9 +75,6 @@ export interface InternalStateTransitions {
   setESQLVariables: (
     state: InternalState
   ) => (esqlVariables: ESQLControlVariable[]) => InternalState;
-  setControlGroupApi: (
-    state: InternalState
-  ) => (controlGroupApi: ControlGroupRendererApi) => InternalState;
   setResetDefaultProfileState: (
     state: InternalState
   ) => (
@@ -138,11 +133,6 @@ export function getInternalStateContainer() {
         ...prevState,
         esqlVariables,
       }),
-      setControlGroupApi:
-        (prevState: InternalState) => (controlGroupApi: ControlGroupRendererApi) => ({
-          ...prevState,
-          controlGroupApi,
-        }),
       setSavedDataViews: (prevState: InternalState) => (nextDataViewList: DataViewListItem[]) => ({
         ...prevState,
         savedDataViews: nextDataViewList,
