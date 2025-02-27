@@ -12,6 +12,7 @@ import { lastValueFrom } from 'rxjs';
 import { v4 as uuidv4 } from 'uuid';
 
 import {
+  EuiButton,
   EuiCallOut,
   EuiLoadingSpinner,
   EuiPanel,
@@ -25,6 +26,8 @@ import type { DataView } from '@kbn/data-views-plugin/public';
 import type { Filter, Query, TimeRange } from '@kbn/es-query';
 import type { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
 
+import { DefaultControlApi } from '@kbn/controls-plugin/public/controls/types';
+import { OptionsListControlApi } from '@kbn/controls-plugin/public/controls/data_controls/options_list_control/types';
 import { PLUGIN_ID } from '../../constants';
 
 interface Props {
@@ -32,6 +35,8 @@ interface Props {
   dataView: DataView;
   navigation: NavigationPublicPluginStart;
 }
+
+const DEST_COUNTRY_CONTROL_ID = 'DEST_COUNTRY_CONTROL_ID';
 
 export const SearchExample = ({ data, dataView, navigation }: Props) => {
   const [controlFilters, setControlFilters] = useState<Filter[]>([]);
@@ -107,7 +112,8 @@ export const SearchExample = ({ data, dataView, navigation }: Props) => {
       <EuiText>
         <p>
           Pass filters, query, and time range to narrow controls. Combine search bar filters with
-          controls filters to narrow results.
+          controls filters to narrow results. Programmatically interact with individual controls by
+          accessing their API from controlGroupApi.children$.
         </p>
       </EuiText>
       <EuiSpacer size="m" />
@@ -130,16 +136,21 @@ export const SearchExample = ({ data, dataView, navigation }: Props) => {
           query={query}
           showSearchBar={true}
         />
+
         <ControlGroupRenderer
           filters={filters}
           getCreationOptions={async (initialState, builder) => {
-            await builder.addDataControlFromField(initialState, {
-              dataViewId: dataView.id!,
-              title: 'Destintion country',
-              fieldName: 'geo.dest',
-              width: 'medium',
-              grow: false,
-            });
+            await builder.addDataControlFromField(
+              initialState,
+              {
+                dataViewId: dataView.id!,
+                title: 'Destintion country',
+                fieldName: 'geo.dest',
+                width: 'medium',
+                grow: false,
+              },
+              DEST_COUNTRY_CONTROL_ID
+            );
             await builder.addDataControlFromField(initialState, {
               dataViewId: dataView.id!,
               fieldName: 'bytes',
@@ -155,9 +166,42 @@ export const SearchExample = ({ data, dataView, navigation }: Props) => {
           onApiAvailable={setControlGroupAPI}
           timeRange={timeRange}
         />
+        <EuiSpacer />
         <EuiCallOut title="Search results">
           {isSearching ? <EuiLoadingSpinner size="l" /> : <p>Hits: {hits}</p>}
         </EuiCallOut>
+
+        <EuiSpacer />
+        <EuiButton
+          color="text"
+          isDisabled={!Boolean(controlGroupAPI)}
+          onClick={() => {
+            if (controlGroupAPI) {
+              Object.values(controlGroupAPI.children$.getValue()).forEach((controlApi) => {
+                (controlApi as DefaultControlApi)?.clearSelections();
+              });
+            }
+          }}
+        >
+          Clear all controls
+        </EuiButton>
+        <EuiSpacer />
+        <EuiButton
+          color="text"
+          isDisabled={!Boolean(controlGroupAPI)}
+          onClick={() => {
+            if (controlGroupAPI) {
+              const controlApi = controlGroupAPI.children$.getValue()[
+                DEST_COUNTRY_CONTROL_ID
+              ] as Partial<OptionsListControlApi>;
+              if (controlApi && controlApi.setSelectedOptions) {
+                controlApi.setSelectedOptions(['CN']);
+              }
+            }
+          }}
+        >
+          Set destination country to CN
+        </EuiButton>
       </EuiPanel>
     </>
   );
