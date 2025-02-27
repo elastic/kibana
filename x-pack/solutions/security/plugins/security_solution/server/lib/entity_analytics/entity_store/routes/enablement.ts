@@ -15,6 +15,7 @@ import { InitEntityStoreRequestBody } from '../../../../../common/api/entity_ana
 import { API_VERSIONS, APP_ID } from '../../../../../common/constants';
 import type { EntityAnalyticsRoutesDeps } from '../../types';
 import { checkAndInitAssetCriticalityResources } from '../../asset_criticality/check_and_init_asset_criticality_resources';
+import { validateInitializationRequestBody } from './validation';
 
 export const enableEntityStoreRoute = (
   router: EntityAnalyticsRoutesDeps['router'],
@@ -52,6 +53,8 @@ export const enableEntityStoreRoute = (
           const body: InitEntityStoreResponse = await secSol
             .getEntityStoreDataClient()
             .enable(request.body, { pipelineDebugMode });
+
+          validateInitializationRequestBody(request.body);
 
           return response.ok({ body });
         } catch (e) {
