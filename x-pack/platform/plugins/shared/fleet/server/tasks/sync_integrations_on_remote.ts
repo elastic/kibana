@@ -52,6 +52,70 @@ const getSyncedIntegrationsCCRDoc = async (
   return response.hits.hits[0]._source as SyncIntegrationsData;
 };
 
+async function getSyncIntegrationsEnabled(
+  soClient: SavedObjectsClient,
+  remoteEsHosts: SyncIntegrationsData['remote_es_hosts'] | undefined
+): Promise<boolean> {
+  const outputs = await outputService.list(soClient);
+  const esHosts = outputs.items
+    .filter((output) => output.type === 'elasticsearch')
+    .flatMap((output) => output.hosts);
+
+  const isSyncIntegrationsEnabled = remoteEsHosts?.some((remoteEsHost) => {
+    return (
+      remoteEsHost.sync_integrations && remoteEsHost.hosts.some((host) => esHosts.includes(host))
+    );
+  });
+  return isSyncIntegrationsEnabled ?? false;
+}
+
+async function installPackageIfNotInstalled(
+  pkg: { package_name: string; package_version: string },
+  packageClient: PackageClient,
+  logger: Logger
+) {
+  const installation = await packageClient.getInstallation(pkg.package_name);
+  if (
+    installation &&
+    installation.install_status === 'installed' &&
+    semverGte(installation.version, pkg.package_version)
+  ) {
+    logger.debug(
+      `Package ${pkg.package_name} already installed with version ${pkg.package_version}`
+    );
+    return;
+  }
+  if (installation && installation.install_status === 'install_failed') {
+    // TODO retry
+    logger.debug(`Package ${pkg.package_name} install failed on version ${installation.version}`);
+  }
+
+  try {
+    const installResult = await packageClient.installPackage({
+      pkgName: pkg.package_name,
+      pkgVersion: pkg.package_version,
+    });
+    if (installResult.status === 'installed') {
+      logger.info(`Package ${pkg.package_name} installed with version ${pkg.package_version}`);
+    }
+    if (installResult.error instanceof PackageNotFoundError) {
+      logger.warn(
+        `Package ${pkg.package_name} with version ${pkg.package_version} not found, trying to install latest version`
+      );
+      const installLatestResult = await packageClient.installPackage({
+        pkgName: pkg.package_name,
+      });
+      if (installLatestResult.status === 'installed') {
+        logger.info(`Package ${pkg.package_name} installed with version ${pkg.package_version}`);
+      }
+    }
+  } catch (error) {
+    logger.error(
+      `Failed to install package ${pkg.package_name} with version ${pkg.package_version}, error: ${error}`
+    );
+  }
+}
+
 export const syncIntegrationsOnRemote = async (
   esClient: ElasticsearchClient,
   soClient: SavedObjectsClient,
@@ -61,61 +125,16 @@ export const syncIntegrationsOnRemote = async (
 ) => {
   const syncIntegrationsDoc = await getSyncedIntegrationsCCRDoc(esClient, abortController);
 
-  const outputs = await outputService.list(soClient);
-  const esHosts = outputs.items
-    .filter((output) => output.type === 'elasticsearch')
-    .flatMap((output) => output.hosts);
-
-  const isSyncIntegrationsEnabled = syncIntegrationsDoc?.remote_es_hosts.some((remoteEsHost) => {
-    return (
-      remoteEsHost.sync_integrations && remoteEsHost.hosts.some((host) => esHosts.includes(host))
-    );
-  });
+  const isSyncIntegrationsEnabled = await getSyncIntegrationsEnabled(
+    soClient,
+    syncIntegrationsDoc?.remote_es_hosts
+  );
 
   if (!isSyncIntegrationsEnabled) {
     return;
   }
 
   for (const pkg of syncIntegrationsDoc?.integrations ?? []) {
-    const installation = await packageClient.getInstallation(pkg.package_name);
-    if (
-      installation &&
-      installation.install_status === 'installed' &&
-      semverGte(installation.version, pkg.package_version)
-    ) {
-      logger.debug(
-        `Package ${pkg.package_name} already installed with version ${pkg.package_version}`
-      );
-      continue;
-    }
-    if (installation && installation.install_status === 'install_failed') {
-      // TODO retry
-      logger.debug(`Package ${pkg.package_name} install failed on version ${installation.version}`);
-    }
-
-    try {
-      const installResult = await packageClient.installPackage({
-        pkgName: pkg.package_name,
-        pkgVersion: pkg.package_version,
-      });
-      if (installResult.status === 'installed') {
-        logger.info(`Package ${pkg.package_name} installed with version ${pkg.package_version}`);
-      }
-      if (installResult.error instanceof PackageNotFoundError) {
-        logger.warn(
-          `Package ${pkg.package_name} with version ${pkg.package_version} not found, trying to install latest version`
-        );
-        const installLatestResult = await packageClient.installPackage({
-          pkgName: pkg.package_name,
-        });
-        if (installLatestResult.status === 'installed') {
-          logger.info(`Package ${pkg.package_name} installed with version ${pkg.package_version}`);
-        }
-      }
-    } catch (error) {
-      logger.error(
-        `Failed to install package ${pkg.package_name} with version ${pkg.package_version}, error: ${error}`
-      );
-    }
+    await installPackageIfNotInstalled(pkg, packageClient, logger);
   }
 };
