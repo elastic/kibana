@@ -5,6 +5,7 @@
  * 2.0.
  */
 import { ScreenContext } from '@kbn/elastic-assistant-common';
+import moment from 'moment-timezone';
 
 /**
  * use oss as model when using openai and oss
@@ -21,29 +22,7 @@ export const getModelOrOss = (
 ): string | undefined => (llmType === 'openai' && isOssModel ? 'oss' : model);
 
 /** Formats time e.g. '14/02/2025, 09:33:12 UTC' */
-const getTimeFormatter = (timezone: string | undefined) => {
-  const options = {
-    timeZone: timezone,
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit',
-    hour: '2-digit',
-    minute: '2-digit',
-    second: '2-digit',
-    hour12: false,
-    timeZoneName: 'shortOffset',
-  } as Intl.DateTimeFormatOptions;
-
-  const formatter = new Intl.DateTimeFormat('en-GB', options);
-  return formatter;
-};
-
-const getShortOffsetTimezone = (formatter: Intl.DateTimeFormat) => {
-  const offset = formatter
-    .formatToParts(new Date())
-    .find((part) => part.type === 'timeZoneName')?.value;
-  return offset;
-};
+const TIME_FORMAT = 'DD/MM/YYYY, HH:mm:ss [UTC]Z';
 
 export const getFormattedTime = ({
   screenContextTimezone,
@@ -57,16 +36,17 @@ export const getFormattedTime = ({
       ? screenContextTimezone
       : uiSettingsDateFormatTimezone) ?? 'UTC';
 
-  const currentFormatter = getTimeFormatter(currentTimezone);
-  const utcFormatter = getTimeFormatter('UTC');
+  const now = new Date();
+
+  const currentFormatter = moment.tz(now, currentTimezone);
+  const utcFormatter = moment.tz(now, 'UTC');
 
   // If the local timezone is different from UTC, we should show the UTC time as well
   const utcConversionRequired =
-    getShortOffsetTimezone(currentFormatter) !== getShortOffsetTimezone(utcFormatter);
+      currentFormatter.format('[UTC]Z') !== utcFormatter.format('[UTC]Z');
 
-  const now = new Date();
-  const utcConversion = utcConversionRequired ? utcFormatter.format(now) : undefined;
-  const currentTime = currentFormatter.format(now);
+  const utcConversion = utcConversionRequired ? utcFormatter.format(TIME_FORMAT) : undefined;
+  const currentTime = currentFormatter.format(TIME_FORMAT);
 
   return `Current time: ${currentTime} ${utcConversion ? `(${utcConversion})` : ''}`.trim();
 };

@@ -30,6 +30,7 @@ import { GraphInputs } from './types';
 import { getDefaultAssistantGraph } from './graph';
 import { invokeGraph, streamGraph } from './helpers';
 import { transformESSearchToAnonymizationFields } from '../../../../ai_assistant_data_clients/anonymization_fields/helpers';
+import { DEFAULT_DATE_FORMAT_TZ } from '@kbn/elastic-assistant-plugin/common/constants';
 
 export const callAssistantGraph: AgentExecutor<true | false> = async ({
   abortSignal,
@@ -221,7 +222,7 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
         })
       : { provider: llmType };
 
-  const uiSettingsDateFormatTimezone = await core.uiSettings.client.get<string>('dateFormat:tz');
+  const uiSettingsDateFormatTimezone = await core.uiSettings.client.get<string>(DEFAULT_DATE_FORMAT_TZ);
 
   const assistantGraph = getDefaultAssistantGraph({
     agentRunnable,

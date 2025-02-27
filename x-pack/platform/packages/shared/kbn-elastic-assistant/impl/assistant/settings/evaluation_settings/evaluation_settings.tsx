@@ -42,6 +42,7 @@ import { getActionTypeTitle, getGenAiConfig } from '../../../connectorland/helpe
 import { PRECONFIGURED_CONNECTOR } from '../../../connectorland/translations';
 import { usePerformEvaluation } from '../../api/evaluate/use_perform_evaluation';
 import { useEvaluationData } from '../../api/evaluate/use_evaluation_data';
+import moment from 'moment';
 
 const AS_PLAIN_TEXT: EuiComboBoxSingleSelectionShape = { asPlainText: true };
 
@@ -211,7 +212,7 @@ export const EvaluationSettings: React.FC = React.memo(() => {
       runName,
       size: Number(size),
       screenContext: {
-        timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+        timeZone: moment.tz.guess(),
       },
     };
     performEvaluation(evalParams);
