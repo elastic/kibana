@@ -544,7 +544,7 @@ export const ESQLEditor = memo(function ESQLEditor({
               timeRange,
               abortController,
               undefined,
-              esqlVariables
+              variablesService?.esqlVariables
             ).result;
 
             return table;
