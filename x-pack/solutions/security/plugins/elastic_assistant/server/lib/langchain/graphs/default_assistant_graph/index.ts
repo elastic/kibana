@@ -89,6 +89,7 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
       // prevents the agent from retrying on failure
       // failure could be due to bad connector, we should deliver that result to the client asap
       maxRetries: 0,
+      convertSystemMessageToHumanContent: false,
     });
 
   const anonymizationFieldsRes =
