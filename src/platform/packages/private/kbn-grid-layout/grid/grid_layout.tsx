@@ -181,7 +181,7 @@ const styles = {
   singleColumn: css({
     '&.kbnGrid--mobileView': {
       '.kbnGridRow': {
-        gridTemplateAreas: '100%',
+        gridTemplateColumns: '100%',
         gridTemplateRows: 'auto',
         gridAutoFlow: 'row',
         gridAutoRows: 'auto',
@@ -198,6 +198,9 @@ const styles = {
       '& .kbnGridRowContainer:has(.kbnGridPanel--expanded)': {
         '.kbnGridRowHeader': {
           height: '0px', // used instead of 'display: none' due to a11y concerns
+          padding: '0px',
+          display: 'block',
+          overflow: 'hidden',
         },
         '.kbnGridRow': {
           display: 'block !important', // overwrite grid display

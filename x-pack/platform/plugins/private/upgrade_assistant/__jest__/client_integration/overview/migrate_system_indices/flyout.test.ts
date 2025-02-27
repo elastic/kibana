@@ -40,6 +40,60 @@ describe('Overview - Migrate system indices - Flyout', () => {
     expect(tableCellsValues).toMatchSnapshot();
   });
 
+  test('can trigger the migration', async () => {
+    const { exists, find, component } = testBed;
+
+    // Expect the migration button to be present
+    expect(exists('startSystemIndicesMigrationButton')).toBe(true);
+
+    await act(async () => {
+      find('startSystemIndicesMigrationButton').simulate('click');
+    });
+    component.update();
+
+    expect(exists('migrationConfirmModal')).toBe(true);
+
+    const modal = document.body.querySelector('[data-test-subj="migrationConfirmModal"]');
+    const confirmButton: HTMLButtonElement | null = modal!.querySelector(
+      '[data-test-subj="confirmModalConfirmButton"]'
+    );
+
+    await act(async () => {
+      confirmButton!.click();
+    });
+    component.update();
+
+    expect(exists('migrationConfirmModal')).toBe(false);
+  });
+
+  test('disables migrate button when migrating', async () => {
+    httpRequestsMockHelpers.setLoadSystemIndicesMigrationStatus({
+      migration_status: 'IN_PROGRESS',
+    });
+
+    testBed = await setupOverviewPage(httpSetup);
+
+    const { find, component } = testBed;
+
+    component.update();
+
+    expect(find('startSystemIndicesMigrationButton').props().disabled).toBe(true);
+  });
+
+  test('hides the start migration button when finished', async () => {
+    httpRequestsMockHelpers.setLoadSystemIndicesMigrationStatus({
+      migration_status: 'NO_MIGRATION_NEEDED',
+    });
+
+    testBed = await setupOverviewPage(httpSetup);
+
+    const { exists, component } = testBed;
+
+    component.update();
+
+    expect(exists('startSystemIndicesMigrationButton')).toBe(false);
+  });
+
   test('shows migration errors inline within the table row', async () => {
     httpRequestsMockHelpers.setLoadSystemIndicesMigrationStatus(systemIndicesMigrationErrorStatus);
 
