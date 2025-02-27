@@ -52,6 +52,7 @@ export const FileDataVisualizer: FC<Props> = ({
   const EmptyContext: FC<PropsWithChildren<unknown>> = ({ children }) => <>{children}</>;
   const CloudContext = cloud?.CloudContextProvider || EmptyContext;
 
+  const existingIndex = undefined;
   const autoAddInference = undefined;
   const autoCreateDataView = true;
   const indexSettings = undefined;
@@ -62,6 +63,7 @@ export const FileDataVisualizer: FC<Props> = ({
         fileUpload,
         coreStart.http,
         data.dataViews,
+        existingIndex ?? null,
         autoAddInference ?? null,
         autoCreateDataView,
         true,
@@ -72,6 +74,7 @@ export const FileDataVisualizer: FC<Props> = ({
       autoCreateDataView,
       coreStart.http,
       data.dataViews,
+      existingIndex,
       fileUpload,
       indexSettings,
     ]

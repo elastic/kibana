@@ -20,6 +20,7 @@ export interface Props {
   resultLinks?: ResultLinks;
   getAdditionalLinks?: GetAdditionalLinks;
   setUploadResults?: (results: FileUploadResults) => void;
+  existingIndex?: string;
   autoAddInference?: string;
   autoCreateDataView?: boolean;
   indexSettings?: IndicesIndexSettings;
@@ -30,6 +31,7 @@ export const FileDataVisualizerLite: FC<Props> = ({
   getAdditionalLinks,
   resultLinks,
   setUploadResults,
+  existingIndex,
   autoAddInference,
   autoCreateDataView,
   indexSettings,
@@ -53,6 +55,7 @@ export const FileDataVisualizerLite: FC<Props> = ({
         fileUpload,
         coreStart.http,
         data.dataViews,
+        existingIndex ?? null,
         autoAddInference ?? null,
         autoCreateDataView,
         true,
@@ -63,6 +66,7 @@ export const FileDataVisualizerLite: FC<Props> = ({
       autoCreateDataView,
       coreStart.http,
       data.dataViews,
+      existingIndex,
       fileUpload,
       indexSettings,
     ]

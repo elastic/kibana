@@ -27,7 +27,7 @@ export const FlyoutContents: FC<Props> = ({
   coreStart,
   share,
   data,
-  props: { autoAddInference, autoCreateDataView, indexSettings },
+  props: { existingIndex, autoAddInference, autoCreateDataView, indexSettings },
   onFlyoutClose,
   setUploadResults,
 }) => {
@@ -40,6 +40,7 @@ export const FlyoutContents: FC<Props> = ({
       }}
     >
       <FileUploadLiteFlyoutContents
+        existingIndex={existingIndex}
         autoAddInference={autoAddInference}
         autoCreateDataView={autoCreateDataView}
         indexSettings={indexSettings}

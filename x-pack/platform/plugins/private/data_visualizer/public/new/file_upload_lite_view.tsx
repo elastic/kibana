@@ -52,8 +52,12 @@ export const FileUploadLiteView: FC<Props> = ({ fileUploadManager, setUploadResu
     },
   } = useDataVisualizerKibana();
 
-  const [indexName, setIndexName] = useState<string>('');
-  const [indexValidationStatus, setIndexValidationStatus] = useState<STATUS>(STATUS.NOT_STARTED);
+  const [indexName, setIndexName] = useState<string>(
+    fileUploadManager.getExistingIndexName() ?? ''
+  );
+  const [indexValidationStatus, setIndexValidationStatus] = useState<STATUS>(
+    fileUploadManager.getExistingIndexName() ? STATUS.COMPLETED : STATUS.NOT_STARTED
+  );
 
   const deleteFile = useCallback(
     (i: number) => fileUploadManager.removeFile(i),
@@ -94,15 +98,31 @@ export const FileUploadLiteView: FC<Props> = ({ fileUploadManager, setUploadResu
     });
   }, [fileUploadManager, indexName, setUploadResults]);
 
+  const canImport = useMemo(() => {
+    return (
+      uploadStatus.analysisOk && indexValidationStatus === STATUS.COMPLETED && indexName !== ''
+    );
+  }, [indexName, indexValidationStatus, uploadStatus.analysisOk]);
+
+  const existingIndexName = fileUploadManager.getExistingIndexName();
+
   return (
     <>
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="s">
           <h3>
-            <FormattedMessage
-              id="xpack.dataVisualizer.file.uploadView.uploadFileTitle"
-              defaultMessage="Upload a file"
-            />
+            {existingIndexName ? (
+              <FormattedMessage
+                id="xpack.dataVisualizer.file.uploadView.uploadFileTitle"
+                defaultMessage="Upload a file to {indexName}"
+                values={{ indexName: existingIndexName }}
+              />
+            ) : (
+              <FormattedMessage
+                id="xpack.dataVisualizer.file.uploadView.uploadFileTitle"
+                defaultMessage="Upload a file"
+              />
+            )}
           </h3>
         </EuiTitle>
       </EuiFlyoutHeader>
@@ -118,22 +138,26 @@ export const FileUploadLiteView: FC<Props> = ({ fileUploadManager, setUploadResu
                     defaultMessage="Upload your file, analyze its data, and import the data into an Elasticsearch index. The data can also be automatically vectorized using semantic text."
                   />
 
-                  <br />
+                  {existingIndexName === null ? (
+                    <>
+                      <br />
 
-                  <FormattedMessage
-                    id="xpack.dataVisualizer.file.uploadView.uploadFileDescriptionLink"
-                    defaultMessage="If you need to customize the file upload process, the full version is available {fullToolLink}."
-                    values={{
-                      fullToolLink: (
-                        <EuiLink onClick={fullFileUpload}>
-                          <FormattedMessage
-                            id="xpack.dataVisualizer.file.uploadView.uploadFileDescriptionLinkText"
-                            defaultMessage="here"
-                          />
-                        </EuiLink>
-                      ),
-                    }}
-                  />
+                      <FormattedMessage
+                        id="xpack.dataVisualizer.file.uploadView.uploadFileDescriptionLink"
+                        defaultMessage="If you need to customize the file upload process, the full version is available {fullToolLink}."
+                        values={{
+                          fullToolLink: (
+                            <EuiLink onClick={fullFileUpload}>
+                              <FormattedMessage
+                                id="xpack.dataVisualizer.file.uploadView.uploadFileDescriptionLinkText"
+                                defaultMessage="here"
+                              />
+                            </EuiLink>
+                          ),
+                        }}
+                      />
+                    </>
+                  ) : null}
                 </p>
               </EuiText>
 
@@ -173,10 +197,12 @@ export const FileUploadLiteView: FC<Props> = ({ fileUploadManager, setUploadResu
           filesStatus.length > 0 &&
           uploadStatus.analysisOk ? (
             <>
-              <IndexInput
-                setIndexName={setIndexName}
-                setIndexValidationStatus={setIndexValidationStatus}
-              />
+              {fileUploadManager.isExistingIndexUpload() === false ? (
+                <IndexInput
+                  setIndexName={setIndexName}
+                  setIndexValidationStatus={setIndexValidationStatus}
+                />
+              ) : null}
             </>
           ) : null}
           {uploadInProgress ? (
@@ -228,10 +254,7 @@ export const FileUploadLiteView: FC<Props> = ({ fileUploadManager, setUploadResu
               </EuiFlexGroup>
             ) : null}
             {uploadStatus.overallImportStatus === STATUS.NOT_STARTED ? (
-              <EuiButton
-                disabled={indexName === '' || indexValidationStatus !== STATUS.COMPLETED}
-                onClick={onImportClick}
-              >
+              <EuiButton disabled={canImport === false} onClick={onImportClick}>
                 <FormattedMessage
                   id="xpack.dataVisualizer.file.uploadView.importButton"
                   defaultMessage="Import"

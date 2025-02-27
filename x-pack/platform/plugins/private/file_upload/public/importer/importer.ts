@@ -123,7 +123,8 @@ export abstract class Importer implements IImporter {
     index: string,
     settings: IndicesIndexSettings,
     mappings: MappingTypeMapping,
-    pipelines: Array<IngestPipeline | undefined>
+    pipelines: Array<IngestPipeline | undefined>,
+    existingIndex: boolean = false
   ) {
     this._initialize(index, mappings, pipelines);
 
@@ -132,6 +133,7 @@ export abstract class Importer implements IImporter {
       settings,
       mappings,
       ingestPipelines: this._pipelines,
+      existingIndex,
     });
   }
 

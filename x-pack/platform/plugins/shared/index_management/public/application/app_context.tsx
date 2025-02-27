@@ -30,6 +30,7 @@ import type { ConsolePluginStart } from '@kbn/console-plugin/public';
 import { EuiBreadcrumb } from '@elastic/eui';
 import { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { ExtensionsService } from '../services';
 import { HttpService, NotificationService, UiMetricService } from './services';
 import { IndexManagementBreadcrumb } from './services/breadcrumbs';
@@ -78,6 +79,7 @@ export interface AppDependencies {
   setBreadcrumbs: (type: IndexManagementBreadcrumb, additionalBreadcrumb?: EuiBreadcrumb) => void;
   uiSettings: IUiSettingsClient;
   settings: SettingsStart;
+  uiActions: UiActionsStart;
   url: SharePluginStart['url'];
   docLinks: DocLinksStart;
   kibanaVersion: SemVer;

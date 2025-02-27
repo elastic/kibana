@@ -17,6 +17,9 @@ interface Props {
 }
 
 export const FileClashResult: FC<Props> = ({ fileClash }) => {
+  // eslint-disable-next-line no-console
+  console.log(fileClash);
+
   return fileClash.clash ? (
     <>
       {fileClash.clashType === CLASH_TYPE.FORMAT ? (
@@ -43,6 +46,18 @@ export const FileClashResult: FC<Props> = ({ fileClash }) => {
         </>
       ) : null}
 
+      {fileClash.clashType === CLASH_TYPE.EXISTING_INDEX_MAPPING ? (
+        <>
+          <EuiSpacer size="s" />
+          <EuiText size="xs" color="danger">
+            <FormattedMessage
+              id="xpack.dataVisualizer.file.fileStatus.existingIndexMappingClash"
+              defaultMessage="Mappings incompatible with existing index"
+            />
+          </EuiText>
+        </>
+      ) : null}
+
       {fileClash.clashType === CLASH_TYPE.UNSUPPORTED ? (
         <>
           <EuiSpacer size="s" />
@@ -55,5 +70,35 @@ export const FileClashResult: FC<Props> = ({ fileClash }) => {
         </>
       ) : null}
     </>
-  ) : null;
+  ) : (
+    <>
+      {fileClash.newFields?.length || fileClash.missingFields?.length ? (
+        <EuiSpacer size="s" />
+      ) : null}
+
+      {fileClash.newFields?.length ? (
+        <>
+          <EuiText size="xs">
+            <FormattedMessage
+              id="xpack.dataVisualizer.file.fileStatus.newFields"
+              defaultMessage="File contains {count} new fields"
+              values={{ count: fileClash.newFields.length }}
+            />
+          </EuiText>
+        </>
+      ) : null}
+
+      {fileClash.missingFields?.length ? (
+        <>
+          <EuiText size="xs">
+            <FormattedMessage
+              id="xpack.dataVisualizer.file.fileStatus.missingFields"
+              defaultMessage="File is missing {count} fields"
+              values={{ count: fileClash.missingFields.length }}
+            />
+          </EuiText>
+        </>
+      ) : null}
+    </>
+  );
 };

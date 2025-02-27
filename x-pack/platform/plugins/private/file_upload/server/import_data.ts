@@ -26,13 +26,18 @@ export function importDataProvider({ asCurrentUser }: IScopedClusterClient) {
     index: string,
     settings: IndicesIndexSettings,
     mappings: MappingTypeMapping,
-    ingestPipelines: IngestPipelineWrapper[]
+    ingestPipelines: IngestPipelineWrapper[],
+    existingIndex: boolean = false
   ): Promise<InitializeImportResponse> {
     let createdIndex;
     const createdPipelineIds: Array<string | undefined> = [];
     const id = generateId();
     try {
-      await createIndex(index, settings, mappings);
+      if (existingIndex) {
+        await updateMappings(index, mappings);
+      } else {
+        await createIndex(index, settings, mappings);
+      }
       createdIndex = index;
 
       // create the pipeline if one has been supplied
@@ -130,6 +135,14 @@ export function importDataProvider({ asCurrentUser }: IScopedClusterClient) {
     }
 
     await asCurrentUser.indices.create({ index, ...body }, { maxRetries: 0 });
+  }
+
+  async function updateMappings(index: string, mappings: MappingTypeMapping) {
+    const resp = await asCurrentUser.indices.getMapping({ index });
+    const existingMappings = resp[index]?.mappings;
+    if (JSON.stringify(existingMappings.properties) !== JSON.stringify(mappings.properties)) {
+      await asCurrentUser.indices.putMapping({ index, ...mappings });
+    }
   }
 
   async function indexData(index: string, pipelineId: string | undefined, data: InputData) {

@@ -26,6 +26,8 @@ export const FileClashWarning: FC<Props> = ({ uploadStatus, filesStatus, removeC
     ? CLASH_TYPE.FORMAT
     : fileClashes.some((fileClash) => fileClash.clashType === CLASH_TYPE.MAPPING)
     ? CLASH_TYPE.MAPPING
+    : fileClashes.some((fileClash) => fileClash.clashType === CLASH_TYPE.EXISTING_INDEX_MAPPING)
+    ? CLASH_TYPE.EXISTING_INDEX_MAPPING
     : CLASH_TYPE.UNSUPPORTED;
 
   const { title, description } =
@@ -51,6 +53,22 @@ export const FileClashWarning: FC<Props> = ({ uploadStatus, filesStatus, removeC
             {
               defaultMessage:
                 'The selected files must have the same format. e.g. all CSV or all log files',
+            }
+          ),
+        }
+      : clashType === CLASH_TYPE.EXISTING_INDEX_MAPPING
+      ? {
+          title: i18n.translate(
+            'xpack.dataVisualizer.file.fileClashWarning.existingIndexMappingClashTitle',
+            {
+              defaultMessage: 'Incompatible mapping',
+            }
+          ),
+          description: i18n.translate(
+            'xpack.dataVisualizer.file.fileClashWarning.existingIndexMappingClashDescription',
+            {
+              defaultMessage:
+                'Mappings in the selected files are not compatible with the existing index',
             }
           ),
         }

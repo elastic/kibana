@@ -47,7 +47,9 @@ export const FileUploadView: FC<Props> = ({ fileUploadManager, setUploadResults,
   //   },
   // } = useDataVisualizerKibana();
 
-  const [indexName, setIndexName] = useState<string>('');
+  const [indexName, setIndexName] = useState<string>(
+    fileUploadManager.getExistingIndexName() ?? ''
+  );
   const [indexValidationStatus, setIndexValidationStatus] = useState<STATUS>(STATUS.NOT_STARTED);
 
   const deleteFile = useCallback(
@@ -83,6 +85,12 @@ export const FileUploadView: FC<Props> = ({ fileUploadManager, setUploadResults,
       }
     });
   }, [fileUploadManager, indexName, setUploadResults]);
+
+  const canImport = useMemo(() => {
+    return (
+      uploadStatus.analysisOk && indexValidationStatus === STATUS.COMPLETED && indexName !== ''
+    );
+  }, [indexName, indexValidationStatus, uploadStatus.analysisOk]);
 
   return (
     <>
@@ -181,10 +189,7 @@ export const FileUploadView: FC<Props> = ({ fileUploadManager, setUploadResults,
             </EuiFlexGroup>
           ) : null}
           {uploadStatus.overallImportStatus === STATUS.NOT_STARTED ? (
-            <EuiButton
-              disabled={indexName === '' || indexValidationStatus !== STATUS.COMPLETED}
-              onClick={onImportClick}
-            >
+            <EuiButton disabled={canImport === false} onClick={onImportClick}>
               <FormattedMessage
                 id="xpack.dataVisualizer.file.uploadView.importButton"
                 defaultMessage="Import"

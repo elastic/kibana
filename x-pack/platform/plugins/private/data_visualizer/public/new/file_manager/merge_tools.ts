@@ -5,13 +5,21 @@
  * 2.0.
  */
 
+import type { FindFileStructureResponse } from '@kbn/file-upload-plugin/common/types';
+import type { MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
 import type { FileAnalysis, FileWrapper } from './file_wrapper';
 
 export enum CLASH_TYPE {
   MAPPING,
   FORMAT,
   UNSUPPORTED,
+  EXISTING_INDEX_MAPPING,
+  MANY_NEW_FIELDS,
+  MANY_UNUSED_FIELDS,
 }
+
+export const NEW_FIELD_THRESHOLD = 10;
+export const UNUSED_FIELD_THRESHOLD = 10;
 
 export interface MappingClash {
   fieldName: string;
@@ -23,16 +31,48 @@ export interface FileClash {
   fileName: string;
   clash: boolean;
   clashType?: CLASH_TYPE;
+  newFields?: string[];
+  missingFields?: string[];
+  commonFields?: string[];
 }
 
-export function createMergedMappings(files: FileWrapper[]) {
+interface MergedMappings {
+  mergedMappings: MappingTypeMapping;
+  mappingClashes: MappingClash[];
+  existingIndexChecks?: ExistingIndexChecks;
+}
+
+interface FieldsPerFile {
+  fileName: string;
+  fileIndex: number;
+  fields: string[];
+}
+
+interface ExistingIndexChecks {
+  existingFields: string[];
+  newFieldsPerFile: FieldsPerFile[];
+  mappingClashes: MappingClash[];
+  unmappedFieldsPerFile: FieldsPerFile[];
+  commonFieldsPerFile: FieldsPerFile[];
+}
+
+export function createMergedMappings(
+  files: FileWrapper[],
+  existingIndexMappings: FindFileStructureResponse['mappings'] | null
+): MergedMappings {
+  const checkExistingIndexMappings = existingIndexMappings !== null;
+
   const mappings = files.map((file) => file.getMappings() ?? { properties: {} });
 
   // stringify each mappings and see if they are the same, if so return the first one.
   // otherwise drill down and extract each field with it's type.
   const mappingsString = mappings.map((m) => JSON.stringify(m));
-  if (mappingsString.every((m) => m === mappingsString[0])) {
-    return { mergedMappings: mappings[0], mappingClashes: [] };
+  const mappingComparator = checkExistingIndexMappings
+    ? JSON.stringify(existingIndexMappings)
+    : mappingsString[0];
+
+  if (mappingsString.every((m) => m === mappingComparator)) {
+    return { mergedMappings: mappings[0] as MappingTypeMapping, mappingClashes: [] };
   }
 
   const fieldsPerFile = mappings.map((m) => {
@@ -84,24 +124,88 @@ export function createMergedMappings(files: FileWrapper[]) {
     properties: Object.fromEntries(mergedMappingsMap),
   };
 
+  if (checkExistingIndexMappings === true) {
+    const existingIndexChecks: ExistingIndexChecks = {
+      existingFields: [],
+      newFieldsPerFile: [],
+      mappingClashes: [],
+      unmappedFieldsPerFile: [],
+      commonFieldsPerFile: [],
+    };
+
+    if (existingIndexMappings?.properties) {
+      existingIndexChecks.existingFields = Object.keys(existingIndexMappings.properties);
+    }
+
+    for (const [i, fields] of fieldsPerFile.entries()) {
+      const newFieldsPerFile: FieldsPerFile = {
+        fileName: files[i].getFileName(),
+        fileIndex: i,
+        fields: [],
+      };
+      const commonFieldsPerFile: FieldsPerFile = {
+        fileName: files[i].getFileName(),
+        fileIndex: i,
+        fields: [],
+      };
+
+      for (const field of fields) {
+        if (existingIndexMappings?.properties && existingIndexMappings?.properties[field.name]) {
+          commonFieldsPerFile.fields.push(field.name);
+
+          const existingType = existingIndexMappings.properties[field.name].type;
+          if (existingType !== field.value.type) {
+            if (existingType === 'text' && field.value.type === 'keyword') {
+              // do nothing, is this correct?!!!!!!!!!!!!!!!!!
+            } else {
+              existingIndexChecks.mappingClashes.push({
+                fieldName: field.name,
+                existingType,
+                clashingType: {
+                  fileName: files[i].getFileName(),
+                  newType: field.value.type,
+                  fileIndex: i,
+                },
+              });
+            }
+          }
+        } else {
+          newFieldsPerFile.fields.push(field.name);
+        }
+      }
+
+      existingIndexChecks.newFieldsPerFile.push(newFieldsPerFile);
+      existingIndexChecks.commonFieldsPerFile.push(commonFieldsPerFile);
+      existingIndexChecks.unmappedFieldsPerFile.push({
+        fileName: files[i].getFileName(),
+        fileIndex: i,
+        fields: existingIndexChecks.existingFields.filter(
+          (field) => !commonFieldsPerFile.fields.includes(field)
+        ),
+      });
+    }
+
+    return { mergedMappings, mappingClashes, existingIndexChecks };
+  }
+
   return { mergedMappings, mappingClashes };
 }
 
 export function getMappingClashInfo(
   mappingClashes: MappingClash[],
+  existingIndexChecks: ExistingIndexChecks | undefined,
   filesStatus: FileAnalysis[]
 ): FileClash[] {
-  const clashCounts = filesStatus
-    .reduce<Array<{ index: number; count: number }>>((acc, file, i) => {
-      const ff = { index: i, count: 0 };
+  const clashCounts: Array<{ index: number; count: number }> = filesStatus
+    .map((file, i) => {
+      const counts = { index: i, count: 0 };
       mappingClashes.forEach((clash) => {
         if (clash.clashingType.fileIndex === i) {
-          ff.count++;
+          counts.count++;
         }
       });
-      acc.push(ff);
-      return acc;
-    }, [])
+      return counts;
+    })
     .sort((a, b) => b.count - a.count);
 
   const middleIndex = Math.floor(clashCounts.length / 2);
@@ -115,15 +219,47 @@ export function getMappingClashInfo(
 
   clashCounts.sort((a, b) => a.index - b.index);
 
-  return clashCounts.map((c) => {
-    return {
-      fileName: filesStatus[c.index].fileName,
-      clash:
-        allClash ||
-        (medianAboveZero === false && c.count > 0) ||
-        (medianAboveZero && c.count === 0),
-      clashType: CLASH_TYPE.MAPPING,
-    };
+  const existingIndexClashes = (existingIndexChecks?.mappingClashes ?? []).reduce((acc, clash) => {
+    acc.set(clash.clashingType.fileIndex, true);
+    return acc;
+  }, new Map<number, boolean>());
+
+  return clashCounts.map((c, i) => {
+    const fileName = filesStatus[c.index].fileName;
+    let fileClash: FileClash;
+    if (existingIndexClashes.has(c.index)) {
+      fileClash = {
+        fileName,
+        clash: true,
+        clashType: CLASH_TYPE.EXISTING_INDEX_MAPPING,
+      };
+    } else {
+      fileClash = {
+        fileName,
+        clash:
+          allClash ||
+          (medianAboveZero === false && c.count > 0) ||
+          (medianAboveZero && c.count === 0),
+        clashType: CLASH_TYPE.MAPPING,
+      };
+    }
+    if (existingIndexChecks?.newFieldsPerFile) {
+      const newFields = existingIndexChecks.newFieldsPerFile[i];
+      if (newFields) {
+        fileClash.newFields = newFields.fields;
+      }
+    }
+    if (existingIndexChecks?.unmappedFieldsPerFile) {
+      const unmappedFieldsPerFile = existingIndexChecks.unmappedFieldsPerFile;
+      fileClash.missingFields = unmappedFieldsPerFile[i].fields;
+    }
+    if (existingIndexChecks?.commonFieldsPerFile) {
+      const commonFields = existingIndexChecks.commonFieldsPerFile[i];
+      if (commonFields) {
+        fileClash.commonFields = commonFields.fields;
+      }
+    }
+    return fileClash;
   });
 }
 

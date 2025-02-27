@@ -15,6 +15,7 @@ import { getFileDataVisualizerLiteWrapper } from './component_wrapper';
 interface Props {
   onClose?: () => void;
   setUploadResults?: (results: FileUploadResults) => void;
+  existingIndex?: string;
   autoAddInference?: string;
   autoCreateDataView?: boolean;
   indexSettings?: IndicesIndexSettings;
@@ -23,6 +24,7 @@ interface Props {
 export const FileUploadLiteFlyoutContents: FC<Props> = ({
   onClose,
   setUploadResults,
+  existingIndex,
   autoAddInference,
   autoCreateDataView,
   indexSettings,
@@ -30,6 +32,7 @@ export const FileUploadLiteFlyoutContents: FC<Props> = ({
   const Wrapper = getFileDataVisualizerLiteWrapper(
     undefined,
     setUploadResults,
+    existingIndex,
     autoAddInference,
     autoCreateDataView,
     indexSettings,
