@@ -29,30 +29,6 @@ describe('startMigrationCheckComplete', () => {
     expect(result).toEqual({ isComplete: false, metadata: { missingCapabilities: [] } });
   });
 
-  test('should return default values if there are missing Capabilities', async () => {
-    const siemMigrations = {
-      rules: {
-        getMissingCapabilities: jest.fn().mockReturnValue([
-          {
-            description: 'missing_capability',
-          },
-        ]),
-        isAvailable: jest.fn().mockReturnValue(true),
-      },
-    } as unknown as SiemMigrationsService;
-
-    const services = {
-      ...createStartServicesMock(),
-      siemMigrations,
-    };
-    const result = await checkStartMigrationCardComplete(services);
-
-    expect(result).toEqual({
-      isComplete: false,
-      metadata: { missingCapabilities: ['missing_capability'] },
-    });
-  });
-
   test('should query Stats if siem migrations are available', async () => {
     const siemMigrations = {
       rules: {
