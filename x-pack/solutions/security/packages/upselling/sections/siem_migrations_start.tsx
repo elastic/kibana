@@ -8,7 +8,7 @@
 import { EuiButton, EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiPanel, EuiText } from '@elastic/eui';
 import React from 'react';
 
-export const SiemMigrationStartUpsellSection = ({
+export const SiemMigrationStartUpsellSection = React.memo(function SiemMigrationStartUpsellSection({
   title,
   upgradeMessage,
   upgradeHref,
@@ -16,7 +16,7 @@ export const SiemMigrationStartUpsellSection = ({
   title: React.ReactNode;
   upgradeMessage: React.ReactNode;
   upgradeHref?: string;
-}) => {
+}) {
   return (
     <>
       <EuiPanel data-test-subj="siemMigrationStartUpsellSection" paddingSize="none" hasBorder>
@@ -49,4 +49,4 @@ export const SiemMigrationStartUpsellSection = ({
       </EuiPanel>
     </>
   );
-};
+});
