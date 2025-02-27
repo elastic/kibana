@@ -14,5 +14,13 @@
   "exclude": [
     "target/**/*"
   ],
-  "kbn_references": []
+  "kbn_references": [
+    "@kbn/core-analytics-browser",
+    "@kbn/core-execution-context-browser",
+    "@kbn/core-i18n-browser",
+    "@kbn/render-context-browser",
+    "@kbn/core-user-profile-browser",
+    "@kbn/react-kibana-context-common",
+    "@kbn/react-kibana-context-render",
+  ]
 }
