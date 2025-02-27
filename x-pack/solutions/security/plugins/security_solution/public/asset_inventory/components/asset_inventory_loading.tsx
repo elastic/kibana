@@ -12,7 +12,7 @@ import { CenteredWrapper } from './onboarding/centered_wrapper';
 /**
  * A loading state for the asset inventory page.
  */
-export const Loading = () => (
+export const AssetInventoryLoading = () => (
   <EuiFlexGroup>
     <EuiFlexItem>
       <InventoryTitle />

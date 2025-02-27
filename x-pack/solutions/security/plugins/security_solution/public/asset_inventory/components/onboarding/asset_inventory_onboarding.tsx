@@ -8,7 +8,7 @@
 import React from 'react';
 import type { FC, PropsWithChildren } from 'react';
 import { GetStarted } from './get_started';
-import { Loading } from '../loading';
+import { AssetInventoryLoading } from '../asset_inventory_loading';
 import { useAssetInventoryStatus } from '../../hooks/use_asset_inventory_status';
 
 /**
@@ -20,7 +20,7 @@ export const AssetInventoryOnboarding: FC<PropsWithChildren> = ({ children }) =>
   const { data, isLoading } = useAssetInventoryStatus();
 
   if (isLoading || !data) {
-    return <Loading />;
+    return <AssetInventoryLoading />;
   }
 
   const { status, privileges } = data;

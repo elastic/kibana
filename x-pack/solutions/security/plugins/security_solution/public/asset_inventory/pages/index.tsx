@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { AssetInventoryOnboarding } from '../components/onboarding';
+import { AssetInventoryOnboarding } from '../components/onboarding/asset_inventory_onboarding';
 import { AllAssets } from './all_assets';
 
 const AssetInventoryPage = () => {

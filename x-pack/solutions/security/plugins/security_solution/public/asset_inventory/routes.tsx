@@ -15,7 +15,7 @@ import { PluginTemplateWrapper } from '../common/components/plugin_template_wrap
 import { SecurityRoutePageWrapper } from '../common/components/security_route_page_wrapper';
 import { DataViewContext } from './hooks/data_view_context';
 import { useDataView } from './hooks/use_asset_inventory_data_table/use_data_view';
-import { Loading } from './components/loading';
+import { AssetInventoryLoading } from './components/asset_inventory_loading';
 import { ASSET_INVENTORY_INDEX_PATTERN } from './constants';
 
 const AssetsPageLazy = lazy(() => import('./pages'));
@@ -47,7 +47,7 @@ export const AssetInventoryRoutes = () => {
         <SecurityRoutePageWrapper pageName={SecurityPageName.assetInventory}>
           <DataViewContext.Provider value={dataViewContextValue}>
             <SecuritySolutionPageWrapper noPadding>
-              <Suspense fallback={<Loading />}>
+              <Suspense fallback={<AssetInventoryLoading />}>
                 <AssetsPageLazy />
               </Suspense>
             </SecuritySolutionPageWrapper>
