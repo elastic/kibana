@@ -29,7 +29,11 @@ import {
 } from '../utils/utils';
 import type { GenericBulkCreateResponse } from '../utils/bulk_create_with_suppression';
 
-import type { RuleServices, SearchAfterAndBulkCreateReturnType, RunOpts } from '../types';
+import type {
+  RuleServices,
+  SearchAfterAndBulkCreateReturnType,
+  SecuritySharedParams,
+} from '../types';
 import type { RulePreviewLoggedRequest } from '../../../../../common/api/detection_engine/rule_preview/rule_preview.gen';
 import * as i18n from '../translations';
 
@@ -40,6 +44,7 @@ import * as i18n from '../translations';
 const BATCH_SIZE = 500;
 
 interface MultiTermsCompositeArgsBase {
+  sharedParams: SecuritySharedParams<NewTermsRuleParams>;
   filterArgs: GetFilterArgs;
   buckets: Array<{
     doc_count: number;
@@ -51,7 +56,6 @@ interface MultiTermsCompositeArgsBase {
   services: RuleServices;
   result: SearchAfterAndBulkCreateReturnType;
   logger: Logger;
-  runOpts: RunOpts<NewTermsRuleParams>;
   afterKey: Record<string, string | number | null> | undefined;
   createAlertsHook: CreateAlertsHook;
   isAlertSuppressionActive: boolean;
@@ -79,6 +83,7 @@ type MultiTermsCompositeResult =
  * It pages through though all 10,000 results from phase1 until maxSize alerts found
  */
 const multiTermsCompositeNonRetryable = async ({
+  sharedParams,
   filterArgs,
   buckets,
   params,
@@ -87,7 +92,6 @@ const multiTermsCompositeNonRetryable = async ({
   services,
   result,
   logger,
-  runOpts,
   afterKey,
   createAlertsHook,
   batchSize,
@@ -101,7 +105,7 @@ const multiTermsCompositeNonRetryable = async ({
     runtimeMappings,
     primaryTimestamp,
     secondaryTimestamp,
-  } = runOpts;
+  } = sharedParams;
 
   const loggedRequests: RulePreviewLoggedRequest[] = [];
 
@@ -252,7 +256,7 @@ export const multiTermsComposite = async (
   args: MultiTermsCompositeArgsBase
 ): Promise<MultiTermsCompositeResult> => {
   let retryBatchSize = BATCH_SIZE;
-  const ruleExecutionLogger = args.runOpts.ruleExecutionLogger;
+  const ruleExecutionLogger = args.sharedParams.ruleExecutionLogger;
   return pRetry(
     async (retryCount) => {
       try {

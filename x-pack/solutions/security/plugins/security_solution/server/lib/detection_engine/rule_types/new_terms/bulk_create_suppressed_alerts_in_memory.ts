@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { SuppressedAlertService } from '@kbn/rule-registry-plugin/server';
 
 import type { SuppressionFieldsLatest } from '@kbn/rule-registry-plugin/common/schemas';
 import type {
@@ -29,20 +28,12 @@ import type { ExperimentalFeatures } from '../../../../../common';
 
 interface SearchAfterAndBulkCreateSuppressedAlertsParams extends SearchAfterAndBulkCreateParams {
   wrapSuppressedHits: WrapSuppressedHits;
-  alertTimestampOverride: Date | undefined;
-  alertWithSuppression: SuppressedAlertService;
   alertSuppression?: AlertSuppressionCamel;
 }
 export interface BulkCreateSuppressedAlertsParams
   extends Pick<
     SearchAfterAndBulkCreateSuppressedAlertsParams,
-    | 'bulkCreate'
-    | 'services'
-    | 'ruleExecutionLogger'
-    | 'tuple'
-    | 'alertSuppression'
-    | 'alertWithSuppression'
-    | 'alertTimestampOverride'
+    'sharedParams' | 'services' | 'alertSuppression'
   > {
   wrapHits: (
     events: EventsAndTerms[]
@@ -63,17 +54,13 @@ export interface BulkCreateSuppressedAlertsParams
  * it operates with new terms specific eventsAndTerms{@link EventsAndTerms} parameter property, instead of regular events as common utility
  */
 export const bulkCreateSuppressedNewTermsAlertsInMemory = async ({
+  sharedParams,
   eventsAndTerms,
   wrapHits,
   wrapSuppressedHits,
   toReturn,
-  bulkCreate,
   services,
-  ruleExecutionLogger,
-  tuple,
   alertSuppression,
-  alertWithSuppression,
-  alertTimestampOverride,
   experimentalFeatures,
 }: BulkCreateSuppressedAlertsParams) => {
   const suppressOnMissingFields =
@@ -98,16 +85,12 @@ export const bulkCreateSuppressedNewTermsAlertsInMemory = async ({
   const suppressibleWrappedDocs = wrapSuppressedHits(suppressibleEvents);
 
   return executeBulkCreateAlerts({
+    sharedParams,
     suppressibleWrappedDocs,
     unsuppressibleWrappedDocs,
     toReturn,
-    bulkCreate,
     services,
-    ruleExecutionLogger,
-    tuple,
     alertSuppression,
-    alertWithSuppression,
-    alertTimestampOverride,
     experimentalFeatures,
   });
 };

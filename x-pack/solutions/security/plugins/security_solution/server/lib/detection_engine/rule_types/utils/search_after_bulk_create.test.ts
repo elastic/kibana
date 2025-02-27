@@ -39,8 +39,7 @@ import {
   SPACE_IDS,
   TIMESTAMP,
 } from '@kbn/rule-data-utils';
-import type { BulkCreate, BulkResponse, RuleRangeTuple, WrapHits } from '../types';
-import { getRuleRangeTuples } from './utils';
+import type { BulkCreate, BulkResponse, WrapHits } from '../types';
 import { getCompleteRuleMock, getQueryRuleParams } from '../../rule_schema/mocks';
 import { bulkCreateFactory } from '../factories/bulk_create_factory';
 import { wrapHitsFactory } from '../factories/wrap_hits_factory';
@@ -48,21 +47,38 @@ import { ruleExecutionLogMock } from '../../rule_monitoring/mocks';
 import type { BuildReasonMessage } from './reason_formatters';
 import type { QueryRuleParams } from '../../rule_schema';
 import { SERVER_APP_ID } from '../../../../../common/constants';
-import type { AlertingServerSetup } from '@kbn/alerting-plugin/server';
+import { getSharedParamsMock } from '../__mocks__/shared_params';
 
 describe('searchAfterAndBulkCreate', () => {
-  let mockService: RuleExecutorServicesMock;
-  let mockPersistenceServices: jest.Mocked<PersistenceServices>;
-  let buildReasonMessage: BuildReasonMessage;
-  let bulkCreate: BulkCreate;
-  let wrapHits: WrapHits;
-  let inputIndexPattern: string[] = [];
+  const mockService: RuleExecutorServicesMock = alertsMock.createRuleExecutorServices();
+  const mockPersistenceServices: jest.Mocked<PersistenceServices> = createPersistenceServicesMock();
+  let buildReasonMessage: BuildReasonMessage = jest
+    .fn()
+    .mockResolvedValue('some alert reason message');
   let listClient = listMock.getListClient();
-  let alerting: AlertingServerSetup;
+  listClient.searchListItemByValues = jest.fn().mockResolvedValue([]);
   const ruleExecutionLogger = ruleExecutionLogMock.forExecutors.create();
   const someGuids = Array.from({ length: 13 }).map(() => uuidv4());
   const sampleParams = getQueryRuleParams();
   const queryCompleteRule = getCompleteRuleMock<QueryRuleParams>(sampleParams);
+  const inputIndex = ['auditbeat-*'];
+  const wrapHits: WrapHits = wrapHitsFactory({
+    completeRule: queryCompleteRule,
+    mergeStrategy: 'missingFields',
+    ignoreFields: {},
+    ignoreFieldsRegexes: [],
+    spaceId: 'default',
+    indicesToQuery: inputIndex,
+    alertTimestampOverride: undefined,
+    ruleExecutionLogger,
+    publicBaseUrl: 'http://testkibanabaseurl.com',
+    intendedTimestamp: undefined,
+  });
+  let bulkCreate: BulkCreate = bulkCreateFactory(
+    mockPersistenceServices.alertWithPersistence,
+    false,
+    ruleExecutionLogger
+  );
   const defaultFilter = {
     match_all: {},
   };
@@ -81,47 +97,21 @@ describe('searchAfterAndBulkCreate', () => {
     [TIMESTAMP]: '2020-04-20T21:27:45+0000',
   };
   sampleParams.maxSignals = 30;
-  let tuple: RuleRangeTuple;
+  const sharedParams = getSharedParamsMock({
+    ruleParams: sampleParams,
+    rewrites: {
+      inputIndex,
+      bulkCreate,
+      wrapHits,
+      searchAfterSize: 1,
+      listClient,
+    },
+  });
 
   beforeEach(async () => {
     jest.clearAllMocks();
-    buildReasonMessage = jest.fn().mockResolvedValue('some alert reason message');
-    listClient = listMock.getListClient();
     listClient.searchListItemByValues = jest.fn().mockResolvedValue([]);
-    inputIndexPattern = ['auditbeat-*'];
-    mockService = alertsMock.createRuleExecutorServices();
-    alerting = alertsMock.createSetup();
-    alerting.getConfig = jest.fn().mockReturnValue({ run: { alerts: { max: 1000 } } });
-    tuple = (
-      await getRuleRangeTuples({
-        previousStartedAt: new Date(),
-        startedAt: new Date(),
-        from: sampleParams.from,
-        to: sampleParams.to,
-        interval: '5m',
-        maxSignals: sampleParams.maxSignals,
-        ruleExecutionLogger,
-        alerting,
-      })
-    ).tuples[0];
-    mockPersistenceServices = createPersistenceServicesMock();
-    bulkCreate = bulkCreateFactory(
-      mockPersistenceServices.alertWithPersistence,
-      false,
-      ruleExecutionLogger
-    );
-    wrapHits = wrapHitsFactory({
-      completeRule: queryCompleteRule,
-      mergeStrategy: 'missingFields',
-      ignoreFields: {},
-      ignoreFieldsRegexes: [],
-      spaceId: 'default',
-      indicesToQuery: inputIndexPattern,
-      alertTimestampOverride: undefined,
-      ruleExecutionLogger,
-      publicBaseUrl: 'http://testkibanabaseurl.com',
-      intendedTimestamp: undefined,
-    });
+    buildReasonMessage = jest.fn().mockResolvedValue('some alert reason message');
   });
 
   test('should return success with number of searches less than max signals', async () => {
@@ -216,22 +206,18 @@ describe('searchAfterAndBulkCreate', () => {
       },
     ];
 
-    const { success, createdSignalsCount, lastLookBackDate } = await searchAfterAndBulkCreate({
-      tuple,
-      listClient,
-      exceptionsList: [exceptionItem],
-      services: mockService,
-      ruleExecutionLogger,
-      eventsTelemetry: undefined,
-      inputIndexPattern,
-      pageSize: 1,
-      filter: defaultFilter,
-      buildReasonMessage,
-      bulkCreate,
-      wrapHits,
-      runtimeMappings: undefined,
-      primaryTimestamp: '@timestamp',
-    });
+    const { success, createdSignalsCount, lastLookBackDate, errors } =
+      await searchAfterAndBulkCreate({
+        sharedParams: {
+          ...sharedParams,
+          unprocessedExceptions: [exceptionItem],
+        },
+        services: mockService,
+        eventsTelemetry: undefined,
+        filter: defaultFilter,
+        buildReasonMessage,
+      });
+    console.log(JSON.stringify(errors));
     expect(success).toEqual(true);
     expect(mockService.scopedClusterClient.asCurrentUser.search).toHaveBeenCalledTimes(5);
     expect(createdSignalsCount).toEqual(4);
@@ -311,20 +297,15 @@ describe('searchAfterAndBulkCreate', () => {
       },
     ];
     const { success, createdSignalsCount, lastLookBackDate } = await searchAfterAndBulkCreate({
-      tuple,
-      listClient,
-      exceptionsList: [exceptionItem],
+      sharedParams: {
+        ...sharedParams,
+        unprocessedExceptions: [exceptionItem],
+        listClient,
+      },
       services: mockService,
-      ruleExecutionLogger,
       eventsTelemetry: undefined,
-      inputIndexPattern,
-      pageSize: 1,
       filter: defaultFilter,
       buildReasonMessage,
-      bulkCreate,
-      wrapHits,
-      runtimeMappings: undefined,
-      primaryTimestamp: '@timestamp',
     });
     expect(success).toEqual(true);
     expect(mockService.scopedClusterClient.asCurrentUser.search).toHaveBeenCalledTimes(4);
@@ -385,20 +366,14 @@ describe('searchAfterAndBulkCreate', () => {
       },
     ];
     const { success, createdSignalsCount, lastLookBackDate } = await searchAfterAndBulkCreate({
-      tuple,
-      listClient,
-      exceptionsList: [exceptionItem],
+      sharedParams: {
+        ...sharedParams,
+        unprocessedExceptions: [exceptionItem],
+      },
       services: mockService,
-      ruleExecutionLogger,
       eventsTelemetry: undefined,
-      inputIndexPattern,
-      pageSize: 1,
       filter: defaultFilter,
       buildReasonMessage,
-      bulkCreate,
-      wrapHits,
-      runtimeMappings: undefined,
-      primaryTimestamp: '@timestamp',
     });
     expect(success).toEqual(true);
     expect(mockService.scopedClusterClient.asCurrentUser.search).toHaveBeenCalledTimes(2);
@@ -443,20 +418,14 @@ describe('searchAfterAndBulkCreate', () => {
       },
     ];
     const { success, createdSignalsCount, lastLookBackDate } = await searchAfterAndBulkCreate({
-      tuple,
-      listClient,
-      exceptionsList: [exceptionItem],
+      sharedParams: {
+        ...sharedParams,
+        unprocessedExceptions: [exceptionItem],
+      },
       services: mockService,
-      ruleExecutionLogger,
       eventsTelemetry: undefined,
-      inputIndexPattern,
-      pageSize: 1,
       filter: defaultFilter,
       buildReasonMessage,
-      bulkCreate,
-      wrapHits,
-      runtimeMappings: undefined,
-      primaryTimestamp: '@timestamp',
     });
     expect(success).toEqual(true);
     expect(mockService.scopedClusterClient.asCurrentUser.search).toHaveBeenCalledTimes(2);
@@ -511,20 +480,11 @@ describe('searchAfterAndBulkCreate', () => {
       );
 
     const { success, createdSignalsCount, lastLookBackDate } = await searchAfterAndBulkCreate({
-      tuple,
-      listClient,
-      exceptionsList: [],
+      sharedParams,
       services: mockService,
-      ruleExecutionLogger,
       eventsTelemetry: undefined,
-      inputIndexPattern,
-      pageSize: 1,
       filter: defaultFilter,
       buildReasonMessage,
-      bulkCreate,
-      wrapHits,
-      runtimeMappings: undefined,
-      primaryTimestamp: '@timestamp',
     });
     expect(success).toEqual(true);
     expect(mockService.scopedClusterClient.asCurrentUser.search).toHaveBeenCalledTimes(2);
@@ -565,20 +525,14 @@ describe('searchAfterAndBulkCreate', () => {
       },
     ];
     const { success, createdSignalsCount, lastLookBackDate } = await searchAfterAndBulkCreate({
-      tuple,
-      listClient,
-      exceptionsList: [exceptionItem],
+      sharedParams: {
+        ...sharedParams,
+        unprocessedExceptions: [exceptionItem],
+      },
       services: mockService,
-      ruleExecutionLogger,
       eventsTelemetry: undefined,
-      inputIndexPattern,
-      pageSize: 1,
       filter: defaultFilter,
       buildReasonMessage,
-      bulkCreate,
-      wrapHits,
-      runtimeMappings: undefined,
-      primaryTimestamp: '@timestamp',
     });
     expect(success).toEqual(true);
     expect(mockService.scopedClusterClient.asCurrentUser.search).toHaveBeenCalledTimes(1);
@@ -633,20 +587,14 @@ describe('searchAfterAndBulkCreate', () => {
       },
     ];
     const { success, createdSignalsCount, lastLookBackDate } = await searchAfterAndBulkCreate({
-      tuple,
-      listClient,
-      exceptionsList: [exceptionItem],
+      sharedParams: {
+        ...sharedParams,
+        unprocessedExceptions: [exceptionItem],
+      },
       services: mockService,
-      ruleExecutionLogger,
       eventsTelemetry: undefined,
-      inputIndexPattern,
-      pageSize: 1,
       filter: defaultFilter,
       buildReasonMessage,
-      bulkCreate,
-      wrapHits,
-      runtimeMappings: undefined,
-      primaryTimestamp: '@timestamp',
     });
     expect(success).toEqual(true);
     expect(mockService.scopedClusterClient.asCurrentUser.search).toHaveBeenCalledTimes(1);
@@ -703,20 +651,11 @@ describe('searchAfterAndBulkCreate', () => {
       )
     );
     const { success, createdSignalsCount, lastLookBackDate } = await searchAfterAndBulkCreate({
-      tuple,
-      listClient,
-      exceptionsList: [],
+      sharedParams,
       services: mockService,
-      ruleExecutionLogger,
       eventsTelemetry: undefined,
-      inputIndexPattern,
-      pageSize: 1,
       filter: defaultFilter,
       buildReasonMessage,
-      bulkCreate,
-      wrapHits,
-      runtimeMappings: undefined,
-      primaryTimestamp: '@timestamp',
     });
     expect(success).toEqual(true);
     expect(mockService.scopedClusterClient.asCurrentUser.search).toHaveBeenCalledTimes(2);
@@ -749,20 +688,14 @@ describe('searchAfterAndBulkCreate', () => {
       )
     );
     const { success, createdSignalsCount, lastLookBackDate } = await searchAfterAndBulkCreate({
-      listClient,
-      exceptionsList: [exceptionItem],
-      tuple,
+      sharedParams: {
+        ...sharedParams,
+        unprocessedExceptions: [exceptionItem],
+      },
       services: mockService,
-      ruleExecutionLogger,
       eventsTelemetry: undefined,
-      inputIndexPattern,
-      pageSize: 1,
       filter: defaultFilter,
       buildReasonMessage,
-      bulkCreate,
-      wrapHits,
-      runtimeMappings: undefined,
-      primaryTimestamp: '@timestamp',
     });
     expect(success).toEqual(true);
     expect(createdSignalsCount).toEqual(0);
@@ -794,20 +727,14 @@ describe('searchAfterAndBulkCreate', () => {
       },
     ];
     const { success, createdSignalsCount, lastLookBackDate } = await searchAfterAndBulkCreate({
-      listClient,
-      exceptionsList: [exceptionItem],
-      tuple,
+      sharedParams: {
+        ...sharedParams,
+        unprocessedExceptions: [exceptionItem],
+      },
       services: mockService,
-      ruleExecutionLogger,
       eventsTelemetry: undefined,
-      inputIndexPattern,
-      pageSize: 1,
       filter: defaultFilter,
       buildReasonMessage,
-      bulkCreate,
-      wrapHits,
-      runtimeMappings: undefined,
-      primaryTimestamp: '@timestamp',
     });
     expect(success).toEqual(false);
     expect(createdSignalsCount).toEqual(0); // should not create signals if search threw error
@@ -921,20 +848,11 @@ describe('searchAfterAndBulkCreate', () => {
     );
     const { success, createdSignalsCount, lastLookBackDate, errors } =
       await searchAfterAndBulkCreate({
-        tuple,
-        listClient,
-        exceptionsList: [],
+        sharedParams,
         services: mockService,
-        ruleExecutionLogger,
         eventsTelemetry: undefined,
-        inputIndexPattern,
-        pageSize: 1,
         filter: defaultFilter,
         buildReasonMessage,
-        bulkCreate,
-        wrapHits,
-        runtimeMappings: undefined,
-        primaryTimestamp: '@timestamp',
       });
     expect(success).toEqual(false);
     expect(errors).toEqual(['error on creation']);
@@ -1006,21 +924,12 @@ describe('searchAfterAndBulkCreate', () => {
 
     const mockEnrichment = jest.fn((a) => a);
     const { success, createdSignalsCount, lastLookBackDate } = await searchAfterAndBulkCreate({
+      sharedParams,
       enrichment: mockEnrichment,
-      tuple,
-      listClient,
-      exceptionsList: [],
       services: mockService,
-      ruleExecutionLogger,
       eventsTelemetry: undefined,
-      inputIndexPattern,
-      pageSize: 1,
       filter: defaultFilter,
       buildReasonMessage,
-      bulkCreate,
-      wrapHits,
-      runtimeMappings: undefined,
-      primaryTimestamp: '@timestamp',
     });
 
     expect(mockEnrichment).toHaveBeenCalledWith(
