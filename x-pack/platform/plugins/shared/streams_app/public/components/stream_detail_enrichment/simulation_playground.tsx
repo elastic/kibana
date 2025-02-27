@@ -18,12 +18,12 @@ import {
 export const SimulationPlayground = () => {
   const isViewingDataPreview = useStreamsEnrichmentSelector((state) =>
     state.matches({
-      resolvedChildStream: { displayingSimulation: 'viewDataPreview' },
+      ready: { enrichment: { displayingSimulation: 'viewDataPreview' } },
     })
   );
   const isViewingDetectedFields = useStreamsEnrichmentSelector((state) =>
     state.matches({
-      resolvedChildStream: { displayingSimulation: 'viewDetectedFields' },
+      ready: { enrichment: { displayingSimulation: 'viewDetectedFields' } },
     })
   );
   const canViewDetectedFields = useStreamsEnrichmentSelector((state) =>

@@ -9,7 +9,7 @@ import { OverlayModalConfirmOptions, OverlayStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { fromPromise } from 'xstate5';
 
-interface ConfirmPromptActorInput extends OverlayModalConfirmOptions {
+export interface ConfirmPromptActorInput extends OverlayModalConfirmOptions {
   message: string;
 }
 

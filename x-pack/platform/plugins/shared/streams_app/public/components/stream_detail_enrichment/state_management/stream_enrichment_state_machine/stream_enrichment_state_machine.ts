@@ -172,135 +172,145 @@ export const streamEnrichmentMachine = setup({
     isWiredStream: ({ context }) => isWiredStreamGetResponse(context.definition),
   },
 }).createMachine({
-  /** @xstate-layout N4IgpgJg5mDOIC5RgHYCcCWBjAFgZQBc0wBDAWwGJYjSyA6YrMDAN0gG0AGAXUVAAcA9rAwEMglHxAAPRAA4ATABoQAT3kBOACx05AVg0KNANgDspgMxatARgC+dlaky5CxcnQA2GaqgwooADFBNAARMAAzf1FxFABhHBIAuCoaD0ZmNgguXiQQIRExCSlZBEUVdQRTDTk6LU5jBTkLfVN9Y3tHcHRsfDT6aLESbwAvfygKHKkCmOK80osNPTqGpua5Yz1WrQrEExs6Tn05DU49Tg02i4cnHtd+ukGMYYwxgMmbXIFhWcl5xEWy3qjTk602212ZRstWMFiaFwUpmMWlhchu3RcfXc9GIsEEniyCQwnggbloqWxDDgYAIUzyMyKf1ACyWKxBYK2elMOzUexsnDonNOcJsizM6OcvTJ6Tg+MJOGJpP6FNodAArvwICQCGA6d9CrESogFI06BYLAY4Rp+RZOJweZU5ActBpXa6LXpjHJrBK7ljVbi5ZAiSTpfQID5+J4SKpxgAFNCCJiwPFoWAUfiJ5Op2B0EgQbI8aY-RlGhAWMx0Dpw4ycCzchRbC2QmzGU66BRaPSNjp6LTehS+zFhql4gnBhWhh4R2BRmPxrNwHMZxcpkK54ghCBgNB6-Ilw3-BBGDR0JrnNtI6FbGwtz2mOrQoz20ycBRGPRDqUPQPjiAhpVKRnOdYwCBMkyXdcVwgtc0DobdPBpXUi3pA85mZAFK2rBRoVFSwOlMFtbAfM5QXNC49FtF0v3uSlf3lRUR2A6NQKgcDsygzMYNTOhcCSGA9wZQ8MPLLDRRwp16wrGxCN5BBxIFWsuQtV8DBNUwaP9GUxwYqcgMjFjxjwDAyDVaNGToFgMDAAB3UJtRIBMwCs2yqBMsztViSzrLspCsB1CBAmsklYEEtCmRkAELAOZEGjfE1mnqW85JsV0H0sTgkU9btWxsQcuklWiA1lP8AKYgz5wCYzTPMryXN8nV-MgIKwBCtyas8iRvNs+yCEc4h6rCg10Mi8tzkOBRzWML0rHtJ09BbbQH0mo4FDODQ4S0FpNJHDUtTEKrlQgCQwEeFAWEEABrU7Cq0+g9s8w7sQQfwLqwTqUByIbfjLE0FDNC0NqMG07QdAFJsOO031BMilhNHaHgeg6oDDCgd0TOC5wICIQnoW7ds1R6Uf6F7zqTD6vpQ-UfqPQxITMYw2RNGS4UWGoHC6FBBG3eA8nx-pi2GiLSgAWmMSExchqHpelj0EcpbxfBQcZgjCSIngkBJ+LgQWaZE85ljrU5+yN7lTC5SELVqLtotMRE5AuRZ5dVJ4XjeKBddLI8-sFRZVqdORVLBhBrQOI41K2zabD0T8Cr9Ed6InRiBdQoWyz0ZLKjy806H5LktCRLa320Z3tKDf9J0A1VmMqtjVxzT3hNG1KdGi5EY-BY5LBbJ1TxWpFMtrSwNFLnESt0quPBr1jqo8r3qfn0bXR7gw6AywOC7MTs4VH0dy7K6cKpn9zaq6+rev65yfMbkbShsAvFsos176Ob1KI2cxd8Tivk-02dDKqifD63UGpgCaoFYKEBeYLybqUDotRo4EVfNadaygUpLGWE6Ww1gkSXAsLvJGRkU4wNvogLQaCs5IjXucTgMkcL1HPF-cekAABKghBAEDDDfYWiALZyRwtCM8tpTD8hEaIxQHM7BAA */
+  /** @xstate-layout N4IgpgJg5mDOIC5RgHYCcCWBjAFgZQBc0wBDAWwDoMUMCMSAbDAL2qgGIBtABgF1FQABwD2sWhmEoBIAB6IAtACYKAdgBsKgKwBmAJxruurZoAci3QBoQAT0SLuARgrdt3e9o+ntm3ZoC+flaomLiExORUNHSMLGxcDvxIICJidJLScgj2JhRqXkbaJkUmeipWtlmOzq7uniVqAUHo2PhEpJThENbssG0RxFhgGABukDyJQqLi6UmZDooALLkLCwaK5poL5rqWNohqBhRbJQ4mKouKDtoNgeDNoX0dpF0UveGUGBAMYD2PFMSwMAEcbSFLTKSzRBXFTaVTaBYmHa6IoOXSFcpQzSnCjXByaHTwkxuUyNO4hVrvf7PayvP6fb6-SkAV0EEBIBDAIKSYLSENAmRhygOC24eRFp00ZT2CAcIs0FF0bj0Cx0+N8-luwRaYXaVJILzeupZbLoKA4EEkYEiw2EAGsrVqHpTOjTDRFjey2AhqDasJ7JOMuZNUhI+bJECoHGoFSpVldHIUHA4pRU8SYlroVoptLGVOdDKTHRTdS7aczWZ6zewwGg0MI0BRBAx2QAzeuUIs6-rUstGiumqDelC+-0oQN8UFTXkZCMeZYq3QSha+LQYmULLRHAzcFwJkybQv3Yvd-U0otkVAECgQDCwJskaxsAAKdcGsFg9dg7EEr7gH7QsAUPqEBBskU6hjOCCaGoSxEoo+7ptBBirtKIrKHmBw+MYJjJjcTTkl2TynhQ56Xtet73o+ZovsIb7-l+P60X+n5UvWEA1qBPIQZCCD6CoCqonoPgIiUKi7BUajrLk6g7vBiowRq+Han8pakSgV43nezZUVANF0Z+36-u+9bXmA3wcpx4EzPyUJuEK2iovY9iGPCihrjm0ZqGiMI7qsLkmIeBEqT2akaRR2nPkZ9GGUxxkNrgJBmpyE7clZYaZNBsFuAhKoHNwsZrsKFBXK4SbIpJ2aBcpzohUeF7qeRWkPmweAYGQTLNryFDDBgYAAO4ACLsiQL5gD1-U9G1HWjt1vWDUCYBYByEAAGK9QwECwJZIbWeGvEuMVkrrAsDmSRua5Jg5xVeRolwqviAWakehF6i8oWNZRLVTZ1oazf1Q0ECNxDjX1k3tT9kgUAlSWjSDA20bAa0MByaDbeCkGSroCpeSo3DLgiirIhddnFR4pzqK4+J4WS1UlrV5L1WFTU6a14MzXDC1LZAa1mZtYPTV1cPDbDc1o9OPG6JcFCbI4ktXCYaj7gsxNErkN03Qrlx6AEtwoMI7HwEknaPJOO3pQoOgKkSeZ4xVKglMr0ryLCyaaE5ihqDULi+NoVVOrq1DiDErBmqb6M8Q43AUPumynDsmwIliKaIOmOKLHBeNu3lDh+8eRFdGH4s2QgQlHI4bsuFh3D4hdmy5N5Dl2R7yYLLnL2lm6ZCF9xxcrLC4oV94RjV5oF0OTkaE5jhspaJVT1BTVxGd1QXxgN3u1zJX0n7jsZz40YtdJkckabPCcuPUp-sngafwegO6-mwgy5OAP7hVzX0p4pHh3ItCrgaGcNuwViKhQfpBBEsJ9DD3xoiQwJg1xyWKt5K4kk3aaFFCoIBi83p1TIppT61EoqfjATxMSTg8yom4PUewWI1BrlPs4DQHhEJfxzFgumIDcENXwRFM0rMBY9zAmbDGV0oG4xgYTeB0oij8U9g5TY5gNyJ3YdfM8XCmYEKgPwiGKA-qDWFsDOaJDi55HISdK4f9PZ0M-vMWEphPYuVWIoTYmD5601USRdRH1eFaO+uzOaA1ObLR5htQ2wZw7FyTIiaS5gxIGBWPbKRqZ5jRioQ4tETiXEqKeB+BgowIAACVhDCAIIRYxe15DymRPlcRdsHbaHcpKCg6xf4pLRGcA8OsgA */
   id: 'enrichStream',
   context: ({ input }) => ({
     definition: input.definition,
     initialProcessorsRefs: [],
     processorsRefs: [],
   }),
-  initial: 'listeningForDefinitionChanges',
-  on: {
-    'stream.received': {
-      target: '.initializing',
-      actions: [{ type: 'storeDefinition', params: ({ event }) => event }],
-    },
-  },
+  initial: 'initializing',
   states: {
-    listeningForDefinitionChanges: {
-      on: {
-        'stream.received': {
-          target: 'initializing',
-          actions: [{ type: 'storeDefinition', params: ({ event }) => event }],
-        },
-      },
-    },
     initializing: {
       always: [
         {
           target: 'resolvedRootStream',
           guard: 'isRootStream',
         },
-        {
-          target: 'resolvedChildStream',
-          actions: enqueueActions(({ check, enqueue }) => {
-            enqueue({
-              type: 'setupProcessors',
-              params: ({ context }) => ({ definition: context.definition }),
-            });
-            // Setup fields for wired stream only
-            if (check('isWiredStream')) {
-              enqueue({
-                type: 'setupFields',
-                params: ({ context }) => ({
-                  definition: context.definition as WiredStreamGetResponse,
-                }),
-              });
-            }
-          }),
-        },
+        { target: 'ready' },
       ],
     },
-    resolvedChildStream: {
+    ready: {
+      id: 'ready',
       type: 'parallel',
-      states: {
-        displayingProcessors: {
-          on: {
-            'processors.add': {
-              guard: not('hasPendingDraft'),
-              actions: [
-                { type: 'addProcessor', params: ({ event }) => event },
-                { type: 'sendProcessorChangeToSimulator' },
-              ],
-            },
-            'processors.reorder': {
-              guard: 'hasMultipleProcessors',
-              actions: [
-                { type: 'reorderProcessors', params: ({ event }) => event },
-                { type: 'sendProcessorChangeToSimulator' },
-              ],
-            },
-            'processor.delete': {
-              actions: [
-                { type: 'stopProcessor', params: ({ event }) => event },
-                { type: 'deleteProcessor', params: ({ event }) => event },
-                { type: 'sendProcessorChangeToSimulator' },
-              ],
-            },
-            'processor.change': {
-              actions: [{ type: 'reassignProcessors' }, { type: 'sendProcessorChangeToSimulator' }],
-            },
-          },
+      entry: enqueueActions(({ check, enqueue }) => {
+        enqueue({
+          type: 'setupProcessors',
+          params: ({ context }) => ({ definition: context.definition }),
+        });
+        // Setup fields for wired stream only
+        if (check('isWiredStream')) {
+          enqueue({
+            type: 'setupFields',
+            params: ({ context }) => ({
+              definition: context.definition as WiredStreamGetResponse,
+            }),
+          });
+        }
+      }),
+      on: {
+        'stream.received': {
+          target: '#ready',
+          actions: [{ type: 'storeDefinition', params: ({ event }) => event }],
+          reenter: true,
         },
-        displayingSimulation: {
-          entry: [{ type: 'spawnSimulationMachine' }],
-          initial: 'viewDataPreview',
+      },
+      states: {
+        stream: {
+          initial: 'idle',
           states: {
-            viewDataPreview: {
+            idle: {
               on: {
-                'simulation.viewDetectedFields': 'viewDetectedFields',
-                'simulation.changePreviewDocsFilter': {
-                  actions: [{ type: 'sendFilterChangeToSimulator', params: ({ event }) => event }],
+                'stream.reset': {
+                  guard: 'hasStagedChanges',
+                  target: '#ready',
+                  reenter: true,
+                },
+                'stream.update': {
+                  guard: and(['hasStagedChanges', not('hasPendingDraft')]),
+                  target: 'updating',
                 },
               },
             },
-            viewDetectedFields: {
-              on: {
-                'simulation.viewDataPreview': 'viewDataPreview',
+            updating: {
+              invoke: {
+                src: 'upsertStream',
+                input: ({ context }) => ({
+                  definition: context.definition,
+                  processors: context.processorsRefs
+                    .map((proc) => proc.getSnapshot())
+                    .filter((proc) => proc.matches('configured'))
+                    .map((proc) => proc.context.processor),
+                  fields: context.fields,
+                }),
+                onDone: {
+                  target: 'idle',
+                  actions: [{ type: 'notifyUpsertStreamSuccess' }, { type: 'refreshDefinition' }],
+                },
+                onError: {
+                  target: 'idle',
+                  actions: [{ type: 'notifyUpsertStreamFailure' }],
+                },
               },
             },
           },
         },
-      },
-      on: {
-        'stream.reset': {
-          guard: 'hasStagedChanges',
-          target: 'initializing',
-        },
-        'stream.update': {
-          guard: and(['hasStagedChanges', not('hasPendingDraft')]),
-          target: 'updatingStream',
-        },
-      },
-    },
-    updatingStream: {
-      invoke: {
-        src: 'upsertStream',
-        input: ({ context }) => ({
-          definition: context.definition,
-          processors: context.processorsRefs
-            .map((proc) => proc.getSnapshot())
-            .filter((proc) => proc.matches('configured'))
-            .map((proc) => proc.context.processor),
-          fields: context.fields,
-        }),
-        onDone: {
-          target: 'listeningForDefinitionChanges',
-          actions: [{ type: 'notifyUpsertStreamSuccess' }, { type: 'refreshDefinition' }],
-        },
-        onError: {
-          target: 'resolvedChildStream',
-          actions: [{ type: 'notifyUpsertStreamFailure' }],
+        enrichment: {
+          type: 'parallel',
+          states: {
+            displayingProcessors: {
+              on: {
+                'processors.add': {
+                  guard: not('hasPendingDraft'),
+                  actions: [
+                    { type: 'addProcessor', params: ({ event }) => event },
+                    { type: 'sendProcessorChangeToSimulator' },
+                  ],
+                },
+                'processors.reorder': {
+                  guard: 'hasMultipleProcessors',
+                  actions: [
+                    { type: 'reorderProcessors', params: ({ event }) => event },
+                    { type: 'sendProcessorChangeToSimulator' },
+                  ],
+                },
+                'processor.delete': {
+                  actions: [
+                    { type: 'stopProcessor', params: ({ event }) => event },
+                    { type: 'deleteProcessor', params: ({ event }) => event },
+                    { type: 'sendProcessorChangeToSimulator' },
+                  ],
+                },
+                'processor.change': {
+                  actions: [
+                    { type: 'reassignProcessors' },
+                    { type: 'sendProcessorChangeToSimulator' },
+                  ],
+                },
+              },
+            },
+            displayingSimulation: {
+              entry: [{ type: 'spawnSimulationMachine' }],
+              initial: 'viewDataPreview',
+              states: {
+                viewDataPreview: {
+                  on: {
+                    'simulation.viewDetectedFields': 'viewDetectedFields',
+                    'simulation.changePreviewDocsFilter': {
+                      actions: [
+                        { type: 'sendFilterChangeToSimulator', params: ({ event }) => event },
+                      ],
+                    },
+                  },
+                },
+                viewDetectedFields: {
+                  on: {
+                    'simulation.viewDataPreview': 'viewDataPreview',
+                  },
+                },
+              },
+            },
+          },
         },
       },
     },

@@ -13,7 +13,7 @@ import { ProcessorDefinitionWithUIAttributes } from '../../types';
 import { processorConverter } from '../../utils';
 import { Simulation, SimulationMachineDeps } from './types';
 
-interface SimulationRunnerInput {
+export interface SimulationRunnerInput {
   streamName: string;
   documents: FlattenRecord[];
   processors: ProcessorDefinitionWithUIAttributes[];

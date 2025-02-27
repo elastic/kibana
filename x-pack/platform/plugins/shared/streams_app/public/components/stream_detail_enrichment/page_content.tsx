@@ -68,7 +68,9 @@ export function StreamDetailEnrichmentContentImpl() {
   const { resetChanges, saveChanges } = useStreamEnrichmentEvents();
 
   const hasChanges = useStreamsEnrichmentSelector((state) => state.can({ type: 'stream.update' }));
-  const isSavingChanges = useStreamsEnrichmentSelector((state) => state.matches('updatingStream'));
+  const isSavingChanges = useStreamsEnrichmentSelector((state) =>
+    state.matches({ ready: { stream: 'updating' } })
+  );
 
   useUnsavedChangesPrompt({
     hasUnsavedChanges: hasChanges,

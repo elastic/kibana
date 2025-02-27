@@ -13,7 +13,7 @@ import { errors as esErrors } from '@elastic/elasticsearch';
 import { DateRangeContext } from '../../../../state_management/date_range_state_machine';
 import { SimulationMachineDeps } from './types';
 
-interface SamplesFetchInput {
+export interface SamplesFetchInput {
   condition?: Condition;
   streamName: string;
   absoluteTimeRange: DateRangeContext['absoluteTimeRange'];

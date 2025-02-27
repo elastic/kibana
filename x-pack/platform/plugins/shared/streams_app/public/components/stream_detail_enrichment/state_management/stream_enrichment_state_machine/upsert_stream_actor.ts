@@ -15,9 +15,9 @@ import { StreamEnrichmentServiceDependencies } from './types';
 import { processorConverter } from '../../utils';
 import { ProcessorDefinitionWithUIAttributes } from '../../types';
 
-type UpsertStreamResponse = APIReturnType<'PUT /api/streams/{name}/_ingest'>;
+export type UpsertStreamResponse = APIReturnType<'PUT /api/streams/{name}/_ingest'>;
 
-interface UpsertStreamInput {
+export interface UpsertStreamInput {
   definition: IngestStreamGetResponse;
   processors: ProcessorDefinitionWithUIAttributes[];
   fields?: FieldDefinition;

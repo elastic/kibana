@@ -75,7 +75,7 @@ export const getFormStateFrom = (
     });
   }
 
-  throw new Error(`Default state not found for unsupported processor type: ${type}`);
+  throw new Error(`Form state for processor type "${processor.type}" is not implemented.`);
 };
 
 export const convertFormStateToProcessor = (formState: ProcessorFormState): ProcessorDefinition => {
