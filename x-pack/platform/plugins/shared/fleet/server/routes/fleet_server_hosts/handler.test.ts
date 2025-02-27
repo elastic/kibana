@@ -7,7 +7,7 @@
 
 import { SERVERLESS_DEFAULT_FLEET_SERVER_HOST_ID } from '../../constants';
 import { agentPolicyService, appContextService } from '../../services';
-import * as fleetServerService from '../../services/fleet_server_host';
+import { fleetServerHostService } from '../../services/fleet_server_host';
 import { withDefaultErrorHandler } from '../../services/security/fleet_router';
 
 import { postFleetServerHost, putFleetServerHostHandler } from './handler';
@@ -32,13 +32,9 @@ describe('fleet server hosts handler', () => {
 
   beforeEach(() => {
     jest.spyOn(appContextService, 'getLogger').mockReturnValue({ error: jest.fn() } as any);
-    jest
-      .spyOn(fleetServerService, 'createFleetServerHost')
-      .mockResolvedValue({ id: 'host1' } as any);
-    jest
-      .spyOn(fleetServerService, 'updateFleetServerHost')
-      .mockResolvedValue({ id: 'host1' } as any);
-    jest.spyOn(fleetServerService, 'getFleetServerHost').mockResolvedValue({
+    jest.spyOn(fleetServerHostService, 'create').mockResolvedValue({ id: 'host1' } as any);
+    jest.spyOn(fleetServerHostService, 'update').mockResolvedValue({ id: 'host1' } as any);
+    jest.spyOn(fleetServerHostService, 'get').mockResolvedValue({
       id: SERVERLESS_DEFAULT_FLEET_SERVER_HOST_ID,
       host_urls: ['http://elasticsearch:9200'],
     } as any);

@@ -15,15 +15,8 @@ import Boom from '@hapi/boom';
 import { SERVERLESS_DEFAULT_FLEET_SERVER_HOST_ID } from '../../constants';
 
 import { FleetServerHostUnauthorizedError } from '../../errors';
-import { agentPolicyService, appContextService } from '../../services';
+import { agentPolicyService, appContextService, fleetServerHostService } from '../../services';
 
-import {
-  createFleetServerHost,
-  deleteFleetServerHost,
-  getFleetServerHost,
-  listFleetServerHosts,
-  updateFleetServerHost,
-} from '../../services/fleet_server_host';
 import type {
   FleetServerHost,
   GetOneFleetServerHostRequestSchema,
@@ -50,7 +43,7 @@ async function checkFleetServerHostsWriteAPIsAllowed(
   }
 
   // Fleet Server hosts must have the default host URL in serverless.
-  const serverlessDefaultFleetServerHost = await getFleetServerHost(
+  const serverlessDefaultFleetServerHost = await fleetServerHostService.get(
     soClient,
     SERVERLESS_DEFAULT_FLEET_SERVER_HOST_ID
   );
@@ -76,7 +69,7 @@ export const postFleetServerHost: RequestHandler<
   const { id, ...data } = request.body;
   ensureNoDuplicateSecrets(data);
 
-  const FleetServerHost = await createFleetServerHost(
+  const FleetServerHost = await fleetServerHostService.create(
     soClient,
     esClient,
     { ...data, is_preconfigured: false },
@@ -98,7 +91,7 @@ export const getFleetServerHostHandler: RequestHandler<
 > = async (context, request, response) => {
   const soClient = (await context.core).savedObjects.client;
   try {
-    const item = await getFleetServerHost(soClient, request.params.itemId);
+    const item = await fleetServerHostService.get(soClient, request.params.itemId);
     const body = {
       item,
     };
@@ -123,7 +116,7 @@ export const deleteFleetServerHostHandler: RequestHandler<
     const soClient = coreContext.savedObjects.client;
     const esClient = coreContext.elasticsearch.client.asInternalUser;
 
-    await deleteFleetServerHost(soClient, esClient, request.params.itemId);
+    await fleetServerHostService.delete(soClient, esClient, request.params.itemId);
     const body = {
       id: request.params.itemId,
     };
@@ -156,7 +149,7 @@ export const putFleetServerHostHandler: RequestHandler<
     }
     ensureNoDuplicateSecrets(request.body);
 
-    const item = await updateFleetServerHost(
+    const item = await fleetServerHostService.update(
       soClient,
       esClient,
       request.params.itemId,
@@ -186,7 +179,7 @@ export const putFleetServerHostHandler: RequestHandler<
 
 export const getAllFleetServerHostsHandler: RequestHandler = async (context, request, response) => {
   const soClient = (await context.core).savedObjects.client;
-  const res = await listFleetServerHosts(soClient);
+  const res = await fleetServerHostService.list(soClient);
   const body = {
     items: res.items,
     page: res.page,

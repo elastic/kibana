@@ -15,14 +15,8 @@ import { FleetError } from '../../errors';
 
 import type { FleetServerHost } from '../../types';
 import { appContextService } from '../app_context';
-import {
-  bulkGetFleetServerHosts,
-  createFleetServerHost,
-  deleteFleetServerHost,
-  listFleetServerHosts,
-  updateFleetServerHost,
-  getDefaultFleetServerHost,
-} from '../fleet_server_host';
+import { fleetServerHostService } from '../fleet_server_host';
+
 import { agentPolicyService } from '../agent_policy';
 
 import { isDifferent } from './utils';
@@ -91,7 +85,7 @@ export async function createOrUpdatePreconfiguredFleetServerHosts(
   esClient: ElasticsearchClient,
   preconfiguredFleetServerHosts: FleetServerHost[]
 ) {
-  const existingFleetServerHosts = await bulkGetFleetServerHosts(
+  const existingFleetServerHosts = await fleetServerHostService.bulkGet(
     soClient,
     preconfiguredFleetServerHosts.map(({ id }) => id),
     { ignoreNotFound: true }
@@ -118,7 +112,7 @@ export async function createOrUpdatePreconfiguredFleetServerHosts(
       const secretHashes = await hashSecrets(preconfiguredFleetServerHost);
 
       if (isCreate) {
-        await createFleetServerHost(
+        await fleetServerHostService.create(
           soClient,
           esClient,
           {
@@ -128,7 +122,7 @@ export async function createOrUpdatePreconfiguredFleetServerHosts(
           { id, overwrite: true, fromPreconfiguration: true, secretHashes }
         );
       } else if (isUpdateWithNewData) {
-        await updateFleetServerHost(
+        await fleetServerHostService.update(
           soClient,
           esClient,
           id,
@@ -157,9 +151,9 @@ export async function createCloudFleetServerHostIfNeeded(
     return;
   }
 
-  const defaultFleetServerHost = await getDefaultFleetServerHost(soClient);
+  const defaultFleetServerHost = await fleetServerHostService.getDefaultFleetServerHost(soClient);
   if (!defaultFleetServerHost) {
-    await createFleetServerHost(
+    await fleetServerHostService.create(
       soClient,
       esClient,
       {
@@ -178,7 +172,7 @@ export async function cleanPreconfiguredFleetServerHosts(
   esClient: ElasticsearchClient,
   preconfiguredFleetServerHosts: FleetServerHost[]
 ) {
-  const existingFleetServerHosts = await listFleetServerHosts(soClient);
+  const existingFleetServerHosts = await fleetServerHostService.list(soClient);
   const existingPreconfiguredHosts = existingFleetServerHosts.items.filter(
     (o) => o.is_preconfigured === true
   );
@@ -192,7 +186,7 @@ export async function cleanPreconfiguredFleetServerHosts(
     }
 
     if (existingFleetServerHost.is_default) {
-      await updateFleetServerHost(
+      await fleetServerHostService.update(
         soClient,
         esClient,
         existingFleetServerHost.id,
@@ -202,7 +196,7 @@ export async function cleanPreconfiguredFleetServerHosts(
         }
       );
     } else {
-      await deleteFleetServerHost(soClient, esClient, existingFleetServerHost.id, {
+      await fleetServerHostService.delete(soClient, esClient, existingFleetServerHost.id, {
         fromPreconfiguration: true,
       });
     }
