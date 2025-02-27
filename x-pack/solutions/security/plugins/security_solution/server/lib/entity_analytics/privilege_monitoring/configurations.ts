@@ -4,9 +4,3 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import type { FieldMap } from '@kbn/alerts-as-data-utils';
-
-export const privilegedMonitorUserFieldMap: FieldMap = {
-  // TODO: fill this in.
-};
