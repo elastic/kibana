@@ -13,12 +13,12 @@ import { buildDataTableRecord } from '@kbn/discover-utils';
 import type { EsHitRecord } from '@kbn/discover-utils/types';
 import { showErrorToast } from '@kbn/cloud-security-posture';
 import type { IKibanaSearchResponse, IKibanaSearchRequest } from '@kbn/search-types';
-import type { FindingsBaseEsQuery } from '@kbn/cloud-security-posture';
+import type { BaseEsQuery } from '@kbn/cloud-security-posture';
 import { useKibana } from '../../common/lib/kibana';
 import { MAX_ASSETS_TO_LOAD, ASSET_INVENTORY_INDEX_PATTERN } from '../constants';
 import { getRuntimeMappingsFromSort, getMultiFieldsSort } from './fetch_utils';
 
-interface UseAssetsOptions extends FindingsBaseEsQuery {
+interface UseAssetsOptions extends BaseEsQuery {
   sort: string[][];
   enabled: boolean;
   pageSize: number;
