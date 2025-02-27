@@ -38,16 +38,16 @@ export const getFindingsDetectionRuleSearchTags = (
 };
 
 export const generateBenchmarkRuleTags = (rule: CspBenchmarkRuleMetadata) => {
-    return [STATIC_RULE_TAGS]
-      .concat(getFindingsDetectionRuleSearchTags(rule))
-      .concat(
-        rule.benchmark.posture_type
-          ? [
-              rule.benchmark.posture_type.toUpperCase(),
-              `${CSP_RULE_TAG_DATA_SOURCE_PREFIX}${rule.benchmark.posture_type.toUpperCase()}`,
-            ]
-          : []
-      )
-      .concat(rule.benchmark.posture_type === 'cspm' ? ['Domain: Cloud'] : ['Domain: Container'])
-      .flat();
-  };
+  return [STATIC_RULE_TAGS]
+    .concat(getFindingsDetectionRuleSearchTags(rule))
+    .concat(
+      rule.benchmark.posture_type
+        ? [
+            rule.benchmark.posture_type.toUpperCase(),
+            `${CSP_RULE_TAG_DATA_SOURCE_PREFIX}${rule.benchmark.posture_type.toUpperCase()}`,
+          ]
+        : []
+    )
+    .concat(rule.benchmark.posture_type === 'cspm' ? ['Domain: Cloud'] : ['Domain: Container'])
+    .flat();
+};

@@ -29,7 +29,7 @@ import { isEmpty } from 'lodash';
 import type { CspFinding } from '@kbn/cloud-security-posture-common';
 import { useDataView } from '@kbn/cloud-security-posture/src/hooks/use_data_view';
 import { getVendorName } from '@kbn/cloud-security-posture/src/utils/get_vendor_name';
-import { truthy } from '@kbn/cloud-security-posture/src/utils/helpers'
+import { truthy } from '@kbn/cloud-security-posture/src/utils/helpers';
 import type { CoreStart } from '@kbn/core/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { CspClientPluginStartDeps } from '@kbn/cloud-security-posture';

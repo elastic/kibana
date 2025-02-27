@@ -5,6 +5,6 @@
  * 2.0.
  */
 
-import { Truthy } from "lodash";
+import { Truthy } from 'lodash';
 
 export const truthy = <T>(value: T): value is Truthy<T> => !!value;

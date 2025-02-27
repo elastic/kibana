@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { Truthy } from 'lodash';
 import type { BaseCspSetupStatus, BenchmarksCisId } from '@kbn/cloud-security-posture-common';
 import {
   NewPackagePolicy,
