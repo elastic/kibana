@@ -17,7 +17,6 @@ import {
   EuiBadge,
   EuiScreenReaderOnly,
 } from '@elastic/eui';
-import { uniqBy } from 'lodash/fp';
 import type { BrowserFields } from '@kbn/rule-registry-plugin/common';
 import { EcsFlat } from '@elastic/ecs';
 import { EcsMetadata } from '@kbn/alerts-as-data-utils/src/field_maps/types';
