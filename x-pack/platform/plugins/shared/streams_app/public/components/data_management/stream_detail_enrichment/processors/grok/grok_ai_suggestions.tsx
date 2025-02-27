@@ -332,7 +332,7 @@ export function GrokAiSuggestions() {
     core: { http },
   } = useKibana();
   const { enabled: isAiEnabled, couldBeEnabled } = useAiEnabled();
-  const definition = useStreamDetailSelector((state) => state.context.definition);
+  const definition = useStreamDetailSelector((state) => state.context.definition!);
   const previewDocuments = useSimulatorSelector((state) => state?.context.previewDocuments);
 
   if (!isAiEnabled && couldBeEnabled) {
