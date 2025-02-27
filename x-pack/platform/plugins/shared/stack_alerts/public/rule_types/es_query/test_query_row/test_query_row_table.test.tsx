@@ -6,7 +6,7 @@
  */
 
 import React, { PropsWithChildren } from 'react';
-import { render } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { TestQueryRowTable } from './test_query_row_table';
 
@@ -16,7 +16,7 @@ const AppWrapper = React.memo<PropsWithChildren<unknown>>(({ children }) => (
 
 describe('TestQueryRow', () => {
   it('should render the datagrid', () => {
-    const result = render(
+    render(
       <TestQueryRowTable
         rawResults={{
           cols: [
@@ -40,14 +40,14 @@ describe('TestQueryRow', () => {
       }
     );
 
-    expect(result.getByTestId('test-query-row-datagrid')).toBeInTheDocument();
-    expect(result.getAllByTestId('dataGridRowCell')).toHaveLength(2);
-    expect(result.queryByText('Alerts generated')).not.toBeInTheDocument();
-    expect(result.queryAllByTestId('alert-badge')).toHaveLength(0);
+    expect(screen.getByTestId('test-query-row-datagrid')).toBeInTheDocument();
+    expect(screen.getAllByTestId('dataGridRowCell')).toHaveLength(2);
+    expect(screen.queryByText('Alerts generated')).not.toBeInTheDocument();
+    expect(screen.queryAllByTestId('alert-badge')).toHaveLength(0);
   });
 
   it('should render the datagrid and alerts if provided', () => {
-    const result = render(
+    render(
       <TestQueryRowTable
         rawResults={{
           cols: [
@@ -71,14 +71,14 @@ describe('TestQueryRow', () => {
       }
     );
 
-    expect(result.getByTestId('test-query-row-datagrid')).toBeInTheDocument();
-    expect(result.getAllByTestId('dataGridRowCell')).toHaveLength(2);
-    expect(result.getByText('Alerts generated')).toBeInTheDocument();
-    expect(result.getAllByTestId('alert-badge')).toHaveLength(2);
+    expect(screen.getByTestId('test-query-row-datagrid')).toBeInTheDocument();
+    expect(screen.getAllByTestId('dataGridRowCell')).toHaveLength(2);
+    expect(screen.getByText('Alerts generated')).toBeInTheDocument();
+    expect(screen.getAllByTestId('alert-badge')).toHaveLength(2);
   });
 
   it('should render the datagrid if values are undefined', () => {
-    const result = render(
+    render(
       <TestQueryRowTable
         rawResults={{
           cols: [
@@ -102,9 +102,9 @@ describe('TestQueryRow', () => {
       }
     );
 
-    expect(result.getByTestId('test-query-row-datagrid')).toBeInTheDocument();
-    expect(result.getAllByTestId('dataGridRowCell')).toHaveLength(2);
-    expect(result.queryByText('Alerts generated')).not.toBeInTheDocument();
-    expect(result.queryAllByTestId('alert-badge')).toHaveLength(0);
+    expect(screen.getByTestId('test-query-row-datagrid')).toBeInTheDocument();
+    expect(screen.getAllByTestId('dataGridRowCell')).toHaveLength(2);
+    expect(screen.queryByText('Alerts generated')).not.toBeInTheDocument();
+    expect(screen.queryAllByTestId('alert-badge')).toHaveLength(0);
   });
 });
