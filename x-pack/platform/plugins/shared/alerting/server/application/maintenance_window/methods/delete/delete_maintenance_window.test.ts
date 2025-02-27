@@ -15,6 +15,7 @@ import {
   MaintenanceWindowClientContext,
   MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE,
 } from '../../../../../common';
+import { maintenanceWindowRegistry } from '../../../../maintenance_window_client/maintenance_windows_registry';
 
 const savedObjectsClient = savedObjectsClientMock.create();
 const uiSettings = uiSettingsServiceMock.createClient();
@@ -37,6 +38,8 @@ describe('MaintenanceWindowClient - delete', () => {
 
   it('should delete maintenance window by id', async () => {
     savedObjectsClient.delete.mockResolvedValueOnce({});
+    const callback = jest.fn();
+    maintenanceWindowRegistry.register('post_delete', callback);
 
     const result = await deleteMaintenanceWindow(mockContext, { id: 'test-id' });
 
@@ -47,6 +50,7 @@ describe('MaintenanceWindowClient - delete', () => {
     );
 
     expect(result).toEqual({});
+    expect(callback).toHaveBeenCalledWith({ type: 'post_delete', data: 'test-id' });
   });
 
   it('should errors when deletion fails', async () => {

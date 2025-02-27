@@ -8,6 +8,7 @@
 import moment from 'moment';
 import Boom from '@hapi/boom';
 import { buildEsQuery, Filter } from '@kbn/es-query';
+import { maintenanceWindowRegistry } from '../../../../maintenance_window_client/maintenance_windows_registry';
 import type { MaintenanceWindowClientContext } from '../../../../../common';
 import { getScopedQueryErrorMessage } from '../../../../../common';
 import { getEsQueryConfig } from '../../../../lib/get_es_query_config';
@@ -148,10 +149,17 @@ async function updateWithOCC(
       },
     });
 
-    return transformMaintenanceWindowAttributesToMaintenanceWindow({
+    const resultData = transformMaintenanceWindowAttributesToMaintenanceWindow({
       attributes: result.attributes,
       id: result.id,
     });
+
+    await maintenanceWindowRegistry.trigger({
+      type: 'post_update',
+      data: resultData,
+    });
+
+    return resultData;
   } catch (e) {
     const errorMessage = `Failed to update maintenance window by id: ${id}, Error: ${e}`;
     logger.error(errorMessage);

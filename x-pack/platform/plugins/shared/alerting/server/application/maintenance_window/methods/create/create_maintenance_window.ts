@@ -9,6 +9,7 @@ import moment from 'moment';
 import Boom from '@hapi/boom';
 import { SavedObjectsUtils } from '@kbn/core/server';
 import { buildEsQuery, Filter } from '@kbn/es-query';
+import { maintenanceWindowRegistry } from '../../../../maintenance_window_client/maintenance_windows_registry';
 import { getEsQueryConfig } from '../../../../lib/get_es_query_config';
 import { generateMaintenanceWindowEvents } from '../../lib/generate_maintenance_window_events';
 import type { MaintenanceWindowClientContext } from '../../../../../common';
@@ -97,10 +98,15 @@ export async function createMaintenanceWindow(
       },
     });
 
-    return transformMaintenanceWindowAttributesToMaintenanceWindow({
+    const resultData = transformMaintenanceWindowAttributesToMaintenanceWindow({
       attributes: result.attributes,
       id: result.id,
     });
+    await maintenanceWindowRegistry.trigger({
+      type: 'post_save',
+      data: resultData,
+    });
+    return resultData;
   } catch (e) {
     const errorMessage = `Failed to create maintenance window, Error: ${e}`;
     logger.error(errorMessage);

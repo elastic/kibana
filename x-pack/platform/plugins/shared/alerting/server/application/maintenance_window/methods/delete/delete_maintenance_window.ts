@@ -6,6 +6,7 @@
  */
 
 import Boom from '@hapi/boom';
+import { maintenanceWindowRegistry } from '../../../../maintenance_window_client/maintenance_windows_registry';
 import type { MaintenanceWindowClientContext } from '../../../../../common';
 import type { DeleteMaintenanceWindowParams } from './types';
 import { deleteMaintenanceWindowParamsSchema } from './schemas';
@@ -37,7 +38,12 @@ async function deleteWithOCC(
   }
 
   try {
-    return await deleteMaintenanceWindowSo({ id, savedObjectsClient });
+    const result = await deleteMaintenanceWindowSo({ id, savedObjectsClient });
+    await maintenanceWindowRegistry.trigger({
+      type: 'post_delete',
+      data: id,
+    });
+    return result;
   } catch (e) {
     const errorMessage = `Failed to delete maintenance window by id: ${id}, Error: ${e}`;
     logger.error(errorMessage);
