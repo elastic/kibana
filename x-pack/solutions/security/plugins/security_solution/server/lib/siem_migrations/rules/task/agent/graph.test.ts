@@ -15,7 +15,8 @@ import { getRuleMigrationAgent } from './graph';
 
 const mockOriginalRule = {
   id: 'b12c89bc-9d06-11eb-a592-acde48001122',
-  vendor: 'splunk',
+  vendor: 'splunk' as const,
+  query_language: 'spl',
   title: 'Office Document Executing Macro Code',
   description:
     'The following analytic identifies office documents executing macro code. It leverages Sysmon EventCode 7 to detect when processes like WINWORD.EXE or EXCEL.EXE load specific DLLs associated with macros (e.g., VBE7.DLL). This activity is significant because macros are a common attack vector for delivering malicious payloads, such as malware. If confirmed malicious, this could lead to unauthorized code execution, data exfiltration, or further compromise of the system. Disabling macros by default is recommended to mitigate this risk.',
@@ -129,7 +130,9 @@ describe('getRuleMigrationAgent', () => {
           response: mockPrebuiltRuleMatchResponse,
         },
       ]);
-      const response = await graph.invoke({ original_rule: mockOriginalRule });
+      const response = await graph.invoke({
+        original_rule: mockOriginalRule,
+      });
       expect(response.elastic_rule?.prebuilt_rule_id).toEqual('test-rule');
       expect(response.translation_result).toEqual('full');
       expect(fakeLLM.getNodeCallCount('matchPrebuiltRule')).toBe(1);

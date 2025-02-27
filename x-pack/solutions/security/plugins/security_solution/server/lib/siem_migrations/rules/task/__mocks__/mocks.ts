@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import type { PublicMethodsOf } from '@kbn/utility-types';
 import { FakeLLM } from '@langchain/core/utils/testing';
 import { AsyncLocalStorageProviderSingleton } from '@langchain/core/singletons';
 import type { SiemMigrationTelemetryClient } from '../rule_migrations_telemetry_client';
@@ -30,7 +31,7 @@ export const createSiemMigrationTelemetryClientMock = () => {
     reportIntegrationsMatch: jest.fn(),
     reportPrebuiltRulesMatch: jest.fn(),
     startSiemMigrationTask: jest.fn().mockReturnValue(mockStartSiemMigrationTaskReturn),
-  } as unknown as SiemMigrationTelemetryClient;
+  } as jest.Mocked<PublicMethodsOf<SiemMigrationTelemetryClient>>;
 };
 
 // Factory function for the mock class
