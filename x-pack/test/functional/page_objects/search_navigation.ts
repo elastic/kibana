@@ -39,7 +39,7 @@ export function SearchNavigationProvider({ getService, getPageObjects }: FtrProv
     async navigateToIndexDetailPage(indexName: string) {
       await solutionNavigation.sidenav.expectLinkExists({ text: 'Index Management' });
       await solutionNavigation.sidenav.clickLink({
-        deepLinkId: 'management:index_management',
+        deepLinkId: 'elasticsearchIndexManagement',
       });
       const indexNamesList = await testSubjects.findAll('indexTableIndexNameLink');
       for (const indexNameLink of indexNamesList) {

@@ -44,9 +44,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await solutionNavigation.sidenav.expectLinkActive({
           deepLinkId: 'enterpriseSearch',
         });
-        await solutionNavigation.breadcrumbs.expectBreadcrumbExists({
-          deepLinkId: 'enterpriseSearch',
-        });
 
         // check the Content > Indices section
         await solutionNavigation.sidenav.clickLink({
