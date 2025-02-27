@@ -78,7 +78,9 @@ export class ColorFormat extends FieldFormat {
           },
         }}
       >
-        {displayVal}
+        <span
+          dangerouslySetInnerHTML={{ __html: displayVal }} // eslint-disable-line react/no-danger
+        />
       </EuiBadge>
     );
   };
