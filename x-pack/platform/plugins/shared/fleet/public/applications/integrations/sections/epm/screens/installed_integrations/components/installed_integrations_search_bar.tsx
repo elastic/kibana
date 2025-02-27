@@ -13,19 +13,35 @@ import {
   useEuiTheme,
   EuiFieldSearch,
 } from '@elastic/eui';
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
+import { i18n } from '@kbn/i18n';
+import useDebounce from 'react-use/lib/useDebounce';
 
 import type { InstalledIntegrationsFilter, PackageInstallationStatus } from '../types';
 import { useAddUrlFilters } from '../hooks/use_url_filters';
+
+import { InstalledIntegrationsActionMenu } from './installed_integration_action_menu';
+
+const SEARCH_DEBOUNCE_MS = 250;
 
 export const InstalledIntegrationsSearchBar: React.FunctionComponent<{
   filters: InstalledIntegrationsFilter;
 }> = ({ filters }) => {
   const addUrlFilter = useAddUrlFilters();
   const theme = useEuiTheme();
+  const [searchTermas, setSearchTerms] = useState(filters.q);
 
+  useDebounce(
+    () => {
+      addUrlFilter({
+        q: searchTermas,
+      });
+    },
+    SEARCH_DEBOUNCE_MS,
+    [searchTermas]
+  );
   const statuses: Array<{
     iconType: string;
     iconColor: string;
@@ -88,7 +104,14 @@ export const InstalledIntegrationsSearchBar: React.FunctionComponent<{
     <div>
       <EuiFlexGroup gutterSize="s">
         <EuiFlexItem>
-          <EuiFieldSearch fullWidth />
+          <EuiFieldSearch
+            defaultValue={filters.q}
+            onChange={(e) => setSearchTerms(e.target.value)}
+            placeholder={i18n.translate('xpack.fleet.serachBarPlaceholder', {
+              defaultMessage: 'Search',
+            })}
+            fullWidth
+          />
         </EuiFlexItem>
         {statuses.map((item) => (
           <EuiFlexItem grow={false}>
@@ -119,6 +142,34 @@ export const InstalledIntegrationsSearchBar: React.FunctionComponent<{
             </EuiFilterGroup>
           </EuiFlexItem>
         ))}
+
+        <EuiFlexItem grow={false}>
+          <EuiFilterGroup>
+            <EuiFilterButton
+              hasActiveFilters={false} // TODO
+              onClick={() => {
+                // TODO
+                // if (!filters.installationStatus?.includes(item.status)) {
+                //   addUrlFilter({
+                //     installationStatus: [item.status],
+                //   });
+                // } else {
+                //   addUrlFilter({
+                //     installationStatus: [],
+                //   });
+                // }
+              }}
+            >
+              <FormattedMessage
+                id="xpack.fleet.epmInstalledIntegrations.customFilterLabel"
+                defaultMessage="Custom"
+              />
+            </EuiFilterButton>
+          </EuiFilterGroup>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <InstalledIntegrationsActionMenu />
+        </EuiFlexItem>
       </EuiFlexGroup>
     </div>
   );

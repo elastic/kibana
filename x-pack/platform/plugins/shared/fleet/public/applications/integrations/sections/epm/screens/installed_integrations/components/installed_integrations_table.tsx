@@ -6,28 +6,54 @@
  */
 
 import React from 'react';
-import { EuiBasicTable, EuiLink, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import {
+  EuiBasicTable,
+  EuiLink,
+  EuiFlexGroup,
+  EuiFlexItem,
+  type CriteriaWithPagination,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import { TableIcon } from '../../../../../../../components/package_icon';
 import type { PackageListItem } from '../../../../../../../../common';
-import { useLink } from '../../../../../../../hooks';
+import { type UrlPagination, useLink } from '../../../../../../../hooks';
 import type { PackageListItemWithExtra } from '../types';
 
 import { InstallationStatus } from './installation_status';
 
 export const InstalledIntegrationsTable: React.FunctionComponent<{
   installedPackages: PackageListItemWithExtra[];
+  total: number;
   isLoading: boolean;
-}> = ({ installedPackages, isLoading }) => {
+  pagination: UrlPagination;
+}> = ({ installedPackages, total, isLoading, pagination }) => {
   const { getHref } = useLink();
 
-  // TODO pagination
+  const { setPagination } = pagination;
+  const handleTablePagination = React.useCallback(
+    ({ page }: CriteriaWithPagination<PackageListItemWithExtra>) => {
+      setPagination({
+        currentPage: page.index + 1,
+        pageSize: page.size,
+      });
+    },
+    [setPagination]
+  );
 
   return (
     <EuiBasicTable
-      isLoading={isLoading}
+      loading={isLoading}
       items={installedPackages}
+      pagination={{
+        pageIndex: pagination.pagination.currentPage - 1,
+        totalItemCount: total,
+        pageSize: pagination.pagination.pageSize,
+        showPerPageOptions: true,
+        pageSizeOptions: pagination.pageSizeOptions,
+      }}
+      onChange={handleTablePagination}
       selection={{
         selectable: () => true,
       }}
@@ -68,6 +94,7 @@ export const InstalledIntegrationsTable: React.FunctionComponent<{
         },
         {
           field: 'version',
+          width: '126px',
           name: i18n.translate('xpack.fleet.epmInstalledIntegrations.versionColumnTitle', {
             defaultMessage: 'Version',
           }),
@@ -76,21 +103,41 @@ export const InstalledIntegrationsTable: React.FunctionComponent<{
           name: i18n.translate('xpack.fleet.epmInstalledIntegrations.attachedPoliciesColumnTitle', {
             defaultMessage: 'Attached policies',
           }),
-          // TODO custom render
-          render: (item: PackageListItemWithExtra) => <>TODO</>,
+          width: '206px',
+          render: (item: PackageListItemWithExtra) => {
+            const policyCount = item.packagePoliciesInfo?.count ?? 0;
+            if (!policyCount) {
+              return null;
+            }
+
+            return (
+              <EuiLink onClick={() => {}}>
+                <FormattedMessage
+                  id="xpack.fleet.epmInstalledIntegrations.viewAttachedPoliciesButton"
+                  defaultMessage={'View {policyCount, plural, one {# policies} other {# policies}}'}
+                  values={{
+                    policyCount,
+                  }}
+                />
+              </EuiLink>
+            );
+          },
         },
         {
           actions: [
             {
               name: 'test1',
+              description: 'test1',
               onClick: () => {},
             },
             {
               name: 'test2',
+              description: 'test2',
               onClick: () => {},
             },
             {
               name: 'test3',
+              description: 'test3',
               onClick: () => {},
             },
           ],

@@ -7,9 +7,10 @@
 
 import { useMemo } from 'react';
 import semverLt from 'semver/functions/lt';
+import { Search as LocalSearch, PrefixIndexStrategy } from 'js-search';
 
 import type { PackageListItem } from '../../../../../../../../common';
-import { useGetPackagesQuery } from '../../../../../../../hooks';
+import { type UrlPagination, useGetPackagesQuery } from '../../../../../../../hooks';
 import type {
   InstalledIntegrationsFilter,
   PackageInstallationStatus,
@@ -38,10 +39,30 @@ function getIntegrationStatus(item: PackageListItem): PackageInstallationStatus 
   return item.status ?? 'not_installed';
 }
 
-export function useInstalledIntegrations(filters: InstalledIntegrationsFilter) {
-  const { data, isInitialLoading, isLoading } = useGetPackagesQuery({});
+const fieldsToSearch = ['name', 'title', 'description'];
+function useLocalSearch(packageList: PackageListItemWithExtra[], isInitialLoading: boolean) {
+  return useMemo(() => {
+    if (isInitialLoading) {
+      return null;
+    }
+    const localSearch = new LocalSearch('id');
+    localSearch.indexStrategy = new PrefixIndexStrategy();
+    fieldsToSearch.forEach((field) => localSearch.addIndex(field));
+    localSearch.addDocuments(packageList);
 
-  const installedPackages: PackageListItemWithExtra[] = useMemo(
+    return localSearch;
+  }, [isInitialLoading, packageList]);
+}
+
+export function useInstalledIntegrations(
+  filters: InstalledIntegrationsFilter,
+  pagination: UrlPagination
+) {
+  const { data, isInitialLoading, isLoading } = useGetPackagesQuery({
+    withPackagePoliciesCount: true,
+  });
+
+  const internalInstalledPackages: PackageListItemWithExtra[] = useMemo(
     () =>
       // Filter not installed packages
       (data?.items.filter((item) => item.status !== 'not_installed') ?? [])
@@ -51,19 +72,46 @@ export function useInstalledIntegrations(filters: InstalledIntegrationsFilter) {
           extra: {
             installation_status: getIntegrationStatus(item),
           },
-        }))
-        // Filter according to filters
-        .filter((item) => {
-          if (filters.installationStatus) {
-            return filters.installationStatus.includes(item.extra.installation_status);
-          }
-
-          return true;
-        }),
-    [data, filters]
+        })),
+    [data]
   );
 
+  const localSearch = useLocalSearch(internalInstalledPackages, isInitialLoading);
+
+  const internalInstalledPackagesFiltered: PackageListItemWithExtra[] = useMemo(() => {
+    const searchResults: PackageListItemWithExtra[] =
+      filters.q && localSearch ? (localSearch.search(filters.q) as PackageListItemWithExtra[]) : [];
+
+    return (
+      internalInstalledPackages
+        // Filter according to filters
+        .filter((item) => {
+          const validInstalationStatus = filters.installationStatus
+            ? filters.installationStatus.includes(item.extra.installation_status)
+            : true;
+
+          const validSearchTerms = filters.q ? searchResults.find((s) => s.id === item.id) : true;
+
+          return validInstalationStatus && validSearchTerms;
+        })
+    );
+  }, [internalInstalledPackages, localSearch, filters]);
+
+  const installedPackages: PackageListItemWithExtra[] = useMemo(() => {
+    // Pagination
+    const startAt = (pagination.pagination.currentPage - 1) * pagination.pagination.pageSize;
+    return internalInstalledPackagesFiltered.slice(
+      startAt,
+      startAt + pagination.pagination.pageSize
+    );
+  }, [
+    internalInstalledPackagesFiltered,
+    pagination.pagination.currentPage,
+    pagination.pagination.pageSize,
+  ]);
+
   return {
+    total: internalInstalledPackagesFiltered.length,
     installedPackages,
     isInitialLoading,
     isLoading,

@@ -56,6 +56,7 @@ export const InstallationStatus: React.FunctionComponent<{ status: PackageInstal
 
     return (
       <EuiButtonEmpty
+        size="s"
         onClick={(e: React.MouseEvent) => {
           e.preventDefault();
           addUrlFilter({

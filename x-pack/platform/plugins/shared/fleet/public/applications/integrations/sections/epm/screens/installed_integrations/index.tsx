@@ -8,6 +8,8 @@
 import React from 'react';
 import { EuiSpacer } from '@elastic/eui';
 
+import { useUrlPagination } from '../../../../../../hooks';
+
 import { InstalledIntegrationsTable } from './components/installed_integrations_table';
 import { useInstalledIntegrations } from './hooks/use_installed_integrations';
 import { useUrlFilters } from './hooks/use_url_filters';
@@ -16,15 +18,21 @@ import { InstalledIntegrationsSearchBar } from './components/installed_integrati
 export const InstalledIntegrationsPage: React.FunctionComponent = () => {
   // State management
   const filters = useUrlFilters();
-  const { installedPackages, isLoading, isInitialLoading } = useInstalledIntegrations(filters);
+  const pagination = useUrlPagination();
+  const { installedPackages, isLoading, isInitialLoading, total } = useInstalledIntegrations(
+    filters,
+    pagination
+  );
 
-  // Todo loading/error state
+  // TODO loading/error state
 
   return (
     <>
       <InstalledIntegrationsSearchBar filters={filters} />
       <EuiSpacer size="m" />
       <InstalledIntegrationsTable
+        total={total}
+        pagination={pagination}
         isLoading={isInitialLoading || isLoading}
         installedPackages={installedPackages}
       />
