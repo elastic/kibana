@@ -14,10 +14,8 @@ describe('getRequestBase', () => {
   beforeEach(() => {
     const request = {
       apm: { events: ['transaction', 'error'] },
-      body: {
-        track_total_hits: false,
-        size: 0,
-      },
+      track_total_hits: false,
+      size: 0,
     } as APMEventESSearchRequest;
 
     const indices = {

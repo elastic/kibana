@@ -131,7 +131,7 @@ const applicationsLinks: AppDeepLink[] = [
         defaultMessage: 'Search Applications',
       }
     ),
-    visibleIn: ['globalSearch'],
+    visibleIn: [],
   },
 ];
 
@@ -389,6 +389,7 @@ export class EnterpriseSearchPlugin implements Plugin {
         return renderApp(Analytics, kibanaDeps, pluginData);
       },
       title: ANALYTICS_PLUGIN.NAME,
+      visibleIn: [],
     });
 
     core.application.register({

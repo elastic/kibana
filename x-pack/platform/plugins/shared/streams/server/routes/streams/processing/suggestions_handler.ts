@@ -22,6 +22,36 @@ export const handleProcessingSuggestion = async (
 ) => {
   const { field, samples } = body;
   // Turn sample messages into patterns to group by
+  const patternsToProcess = extractAndGroupPatterns(samples, field);
+  const results = await Promise.all(
+    patternsToProcess.map((sample) =>
+      processPattern(
+        sample,
+        name,
+        body,
+        inferenceClient,
+        scopedClusterClient,
+        streamsClient,
+        field,
+        samples
+      )
+    )
+  );
+
+  const deduplicatedSimulations = uniqBy(
+    results.flatMap((result) => result.simulations),
+    (simulation) => simulation!.pattern
+  );
+
+  return {
+    patterns: deduplicatedSimulations.map((simulation) => simulation!.pattern),
+    simulations: deduplicatedSimulations as SimulationWithPattern[],
+  };
+};
+
+type SimulationWithPattern = ReturnType<typeof simulateProcessing> & { pattern: string };
+
+export function extractAndGroupPatterns(samples: FlattenRecord[], field: string) {
   const evalPattern = (sample: string) => {
     return sample
       .replace(/[ \t\n]+/g, ' ')
@@ -67,34 +97,8 @@ export const handleProcessingSuggestion = async (
     0,
     NUMBER_PATTERN_CATEGORIES
   );
-
-  const results = await Promise.all(
-    patternsToProcess.map((sample) =>
-      processPattern(
-        sample,
-        name,
-        body,
-        inferenceClient,
-        scopedClusterClient,
-        streamsClient,
-        field,
-        samples
-      )
-    )
-  );
-
-  const deduplicatedSimulations = uniqBy(
-    results.flatMap((result) => result.simulations),
-    (simulation) => simulation!.pattern
-  );
-
-  return {
-    patterns: deduplicatedSimulations.map((simulation) => simulation!.pattern),
-    simulations: deduplicatedSimulations as SimulationWithPattern[],
-  };
-};
-
-type SimulationWithPattern = ReturnType<typeof simulateProcessing> & { pattern: string };
+  return patternsToProcess;
+}
 
 async function processPattern(
   sample: { truncatedPattern: string; count: number; exampleValues: string[] },

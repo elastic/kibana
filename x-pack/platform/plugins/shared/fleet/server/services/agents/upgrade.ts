@@ -73,6 +73,7 @@ export async function sendUpgradeAgentsActions(
     upgradeDurationSeconds?: number;
     startTime?: string;
     batchSize?: number;
+    isAutomatic?: boolean;
   }
 ): Promise<{ actionId: string }> {
   const currentSpaceId = getCurrentNamespace(soClient);
