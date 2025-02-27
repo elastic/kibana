@@ -39,7 +39,7 @@ const defaultLicenseMessage = (
   />
 );
 
-const platinumLicenseMessage = (
+const getPlatinumLicenseMessage = () => (
   <FormattedMessage
     id="xpack.idxMgmt.indexDetails.mappings.semanticTextBanner.description"
     defaultMessage="{label} Add a field to your mapping and choose 'Semantic text' to get started. Documents will be automatically chunked to fit model context limits, to avoid truncation. {learnMore}"
@@ -53,7 +53,7 @@ const platinumLicenseMessage = (
         </strong>
       ),
       learnMore: (
-        <EuiLink href={documentationService.getMappingDocumentationLink()} target="_blank">
+        <EuiLink href={documentationService.getConfigureChunkingDocLink()} target="_blank">
           <FormattedMessage
             id="xpack.idxMgmt.indexDetails.mappings.semanticTextBanner.learnMore"
             defaultMessage="Learn more"
@@ -77,7 +77,7 @@ export function SemanticTextBanner({
         <EuiFlexGroup alignItems="center">
           <EuiFlexItem>
             <EuiText size="m" color="primary">
-              {isPlatinumLicense ? platinumLicenseMessage : defaultLicenseMessage}
+              {isPlatinumLicense ? getPlatinumLicenseMessage() : defaultLicenseMessage}
             </EuiText>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
