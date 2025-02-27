@@ -90,7 +90,6 @@
       "platform/packages/private/ml/data_view_utils",
       "platform/packages/private/ml/date_picker",
       "platform/packages/private/ml/field_stats_flyout",
-      "platform/packages/private/ml/inference_integration_flyout",
       "platform/packages/shared/ml/trained_models_utils",
       "platform/packages/private/ml/category_validator",
       "platform/packages/private/ml/ui_actions",

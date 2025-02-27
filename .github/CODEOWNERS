@@ -540,7 +540,6 @@ x-pack/platform/plugins/private/index_lifecycle_management @elastic/kibana-manag
 x-pack/platform/plugins/shared/index_management @elastic/kibana-management
 x-pack/platform/packages/shared/index-management/index_management_shared_types @elastic/kibana-management
 test/plugin_functional/plugins/index_patterns @elastic/kibana-data-discovery
-x-pack/platform/packages/private/ml/inference_integration_flyout @elastic/ml-ui
 x-pack/platform/packages/shared/ai-infra/inference-common @elastic/appex-ai-infra
 x-pack/platform/plugins/shared/inference_endpoint @elastic/ml-ui
 x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common @elastic/response-ops @elastic/appex-ai-infra @elastic/obs-ai-assistant @elastic/security-generative-ai
