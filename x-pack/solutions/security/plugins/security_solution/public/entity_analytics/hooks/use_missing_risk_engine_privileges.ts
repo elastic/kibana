@@ -22,8 +22,14 @@ export type RiskEngineMissingPrivilegesResponse =
       hasAllRequiredPrivileges: false;
     };
 
+interface UseMissingRiskEnginePrivilegesParams {
+  /**
+   * If `true`, only read privileges are required.
+   */
+  readonly: boolean;
+}
 export const useMissingRiskEnginePrivileges = (
-  required: NonEmptyArray<RiskEngineIndexPrivilege> = ['read', 'write']
+  { readonly }: UseMissingRiskEnginePrivilegesParams = { readonly: false }
 ): RiskEngineMissingPrivilegesResponse => {
   const { data: privilegesResponse, isLoading } = useRiskEnginePrivileges();
 
@@ -41,14 +47,21 @@ export const useMissingRiskEnginePrivileges = (
       };
     }
 
+    const requiredIndexPrivileges: NonEmptyArray<RiskEngineIndexPrivilege> = readonly
+      ? ['read']
+      : ['read', 'write'];
+
     const { indexPrivileges, clusterPrivileges } = getMissingRiskEnginePrivileges(
       privilegesResponse.privileges,
-      required
+      requiredIndexPrivileges
     );
 
     // privilegesResponse.has_all_required` is slightly misleading, it checks if it has *all* default required privileges.
     // Here we check if there are no missing privileges of the provided set of required privileges
-    if (indexPrivileges.every(([_, missingPrivileges]) => missingPrivileges.length === 0)) {
+    if (
+      indexPrivileges.every(([_, missingPrivileges]) => missingPrivileges.length === 0) &&
+      (readonly || clusterPrivileges.length === 0) // cluster privileges check is required for write operations
+    ) {
       return {
         isLoading: false,
         hasAllRequiredPrivileges: true,
@@ -63,5 +76,5 @@ export const useMissingRiskEnginePrivileges = (
         clusterPrivileges,
       },
     };
-  }, [isLoading, privilegesResponse, required]);
+  }, [isLoading, privilegesResponse, readonly]);
 };
