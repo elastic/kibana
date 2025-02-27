@@ -5,8 +5,5 @@
  * 2.0.
  */
 
-module.exports = {
-  preset: '@kbn/test',
-  rootDir: '../../../../../..',
-  roots: ['<rootDir>/x-pack/platform/packages/private/ml/inference_integration_flyout'],
-};
+import { mockRuleMigrationsDataPrebuiltRulesClient } from './mocks';
+export const RuleMigrationsDataPrebuiltRulesClient = mockRuleMigrationsDataPrebuiltRulesClient;
