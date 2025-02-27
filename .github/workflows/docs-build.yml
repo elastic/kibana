@@ -4,8 +4,11 @@ on:
   push:
     branches:
       - main
-  pull_request_target: ~
-  merge_group: ~
+  pull_request_target:
+    types:
+      - opened
+      - reopened
+      - synchronize
 
 jobs:
   docs-preview:
