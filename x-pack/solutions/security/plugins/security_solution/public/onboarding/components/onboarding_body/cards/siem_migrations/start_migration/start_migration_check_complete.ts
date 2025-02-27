@@ -19,16 +19,11 @@ export const checkStartMigrationCardComplete: OnboardingCardCheckComplete<
 
   let isComplete = false;
 
-  if (!siemMigrations.rules.isAvailable()) {
-    return { isComplete: true, metadata: { missingCapabilities } };
-  }
-
-  if (missingCapabilities.length === 0) {
+  if (siemMigrations.rules.isAvailable() && missingCapabilities.length === 0) {
     const migrationsStats = await siemMigrations.rules.getRuleMigrationsStats();
     isComplete = migrationsStats.some(
       (migrationStats) => migrationStats.status === SiemMigrationTaskStatus.FINISHED
     );
   }
-
   return { isComplete, metadata: { missingCapabilities } };
 };
