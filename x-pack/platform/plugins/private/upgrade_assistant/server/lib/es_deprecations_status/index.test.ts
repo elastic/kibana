@@ -238,7 +238,7 @@ describe('getESUpgradeStatus', () => {
     expect(upgradeStatus.totalCriticalDeprecations).toBe(0);
   });
 
-  it('filters out old index deprecations enterprise search indices', async () => {
+  it('filters out old index deprecations enterprise search indices and data streams', async () => {
     esClient.asCurrentUser.migration.deprecations.mockResponse({
       cluster_settings: [],
       node_settings: [],
@@ -275,7 +275,24 @@ describe('getESUpgradeStatus', () => {
           },
         ],
       },
-      data_streams: {},
+      data_streams: {
+        'logs-workplace_search.test': [
+          {
+            level: 'critical',
+            message: 'Old data stream with a compatibility version < 8.0',
+            url: 'https://www.elastic.co/guide/en/elasticsearch/reference/master/breaking-changes-9.0.html',
+            details:
+              'This data stream has backing indices that were created before Elasticsearch 8.0.0',
+            resolve_during_rolling_upgrade: false,
+            _meta: {
+              indices_requiring_upgrade: ['.ds-some-backing-index-5-2024.11.07-000001'],
+              indices_requiring_upgrade_count: 1,
+              total_backing_indices: 2,
+              reindex_required: true,
+            },
+          },
+        ],
+      },
       // @ts-expect-error not in types yet
       ilm_policies: {},
       templates: {},
@@ -287,7 +304,10 @@ describe('getESUpgradeStatus', () => {
 
     expect(upgradeStatus.migrationsDeprecations).toHaveLength(2);
     expect(
-      upgradeStatus.migrationsDeprecations.find((dep) => dep.correctiveAction?.type === 'reindex')
+      upgradeStatus.migrationsDeprecations.find(
+        (dep) =>
+          dep.correctiveAction?.type === 'reindex' || dep.correctiveAction?.type === 'dataStream'
+      )
     ).toBeUndefined();
 
     expect(

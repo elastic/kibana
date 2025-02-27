@@ -50,6 +50,7 @@ export function FieldComparisonSide(): JSX.Element {
   useEffect(() => {
     if (
       selectedOption !== VersionsPickerOptionEnum.MyChanges &&
+      prevResolvedValue !== undefined &&
       !isEqual(prevResolvedValue, resolvedValue)
     ) {
       setSelectedOption(VersionsPickerOptionEnum.MyChanges);
