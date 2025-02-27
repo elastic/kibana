@@ -108,7 +108,7 @@ export const GetStarted = () => {
                             />
                           }
                         >
-                          {'MDMs'}
+                          <>{'MDMs'}</>
                         </HoverForExplanationTooltip>
                       ),
                       databases: (

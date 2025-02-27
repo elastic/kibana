@@ -9,18 +9,11 @@ import type { EuiToolTipProps } from '@elastic/eui';
 import { EuiToolTip, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 
-type HoverForExplanationTooltipProps = {
-  children: React.ReactNode;
-} & Partial<Omit<EuiToolTipProps, 'children'>>;
-
 /**
  * A component that adds a tooltip to its children and adds an underline to indicate that
  * the children can be hovered for more information.
  */
-export const HoverForExplanationTooltip = ({
-  children,
-  ...rest
-}: HoverForExplanationTooltipProps) => {
+export const HoverForExplanationTooltip = ({ children, ...rest }: Partial<EuiToolTipProps>) => {
   const { euiTheme } = useEuiTheme();
 
   return (
