@@ -25,10 +25,16 @@ import {
 } from '@kbn/elastic-assistant-common';
 import pRetry from 'p-retry';
 import { StructuredTool } from '@langchain/core/tools';
-import { AnalyticsServiceSetup, AuditLogger, ElasticsearchClient } from '@kbn/core/server';
+import {
+  AnalyticsServiceSetup,
+  AuditLogger,
+  ElasticsearchClient,
+  IScopedClusterClient,
+} from '@kbn/core/server';
 import { IndexPatternsFetcher } from '@kbn/data-views-plugin/server';
 import { map } from 'lodash';
 import type { TrainedModelsProvider } from '@kbn/ml-plugin/server/shared_services/providers';
+import { getMlNodeCount } from '@kbn/ml-plugin/server/lib/node_utils';
 import { AIAssistantDataClient, AIAssistantDataClientParams } from '..';
 import { GetElser } from '../../types';
 import {
@@ -342,9 +348,18 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
   }: {
     ignoreSecurityLabs?: boolean;
   }): Promise<void> => {
+    const esClient = await this.options.elasticsearchClientPromise;
+
     if (this.options.getIsKBSetupInProgress(this.spaceId)) {
       this.options.logger.debug('Knowledge Base setup already in progress');
       return;
+    }
+
+    this.options.logger.debug('Checking if ML nodes are available...');
+    const mlNodesCount = await getMlNodeCount({ asInternalUser: esClient } as IScopedClusterClient);
+
+    if (mlNodesCount.count === 0 && mlNodesCount.lazyNodeCount === 0) {
+      throw new Error('No ML nodes available');
     }
 
     this.options.logger.debug('Starting Knowledge Base setup...');
@@ -353,7 +368,6 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
 
     // Delete legacy ESQL knowledge base docs if they exist, and silence the error if they do not
     try {
-      const esClient = await this.options.elasticsearchClientPromise;
       const legacyESQL = await esClient.deleteByQuery({
         index: this.indexTemplateAndPattern.alias,
         query: {
