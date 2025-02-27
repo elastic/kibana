@@ -69,9 +69,9 @@ export class ColorFormat extends FieldFormat {
 
     return ReactDOM.renderToStaticMarkup(
       <span
-        // using `style` to keep "testable"
+        // using `style` so we can test with jest
         style={{ color: color.text, backgroundColor: color.background }}
-        // EuiBadge is not multiline, so we define custom styles instead
+        // EuiBadge is not multiline, so we define custom styles here instead of using it.
         css={{
           display: 'inline-block',
           verticalAlign: 'middle',
