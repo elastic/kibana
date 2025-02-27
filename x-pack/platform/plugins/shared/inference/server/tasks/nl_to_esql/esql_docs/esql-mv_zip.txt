@@ -1,0 +1,37 @@
+# MV_ZIP
+
+The MV_ZIP function combines the values from two multivalued fields with a specified delimiter.
+
+## Syntax
+
+`MV_ZIP(string1, string2, delim)`
+
+### Parameters
+
+#### string1
+
+A multivalue expression.
+
+#### string2
+
+A multivalue expression.
+
+#### delim
+
+An optional parameter that specifies the delimiter used to join the values. If omitted, a comma (`,`) is used as the default delimiter.
+
+## Examples
+
+The following example demonstrates how to use the MV_ZIP function:
+
+```esql
+ROW a = ["x", "y", "z"], b = ["1", "2"]
+| EVAL c = MV_ZIP(a, b, "-")
+| KEEP a, b, c
+```
+
+```esql
+ROW names = ["Alice", "Bob", "Charlie"], ids = ["001", "002", "003"]
+| EVAL combined = MV_ZIP(names, ids, ":")
+| KEEP names, ids, combined
+```

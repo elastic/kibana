@@ -25,6 +25,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await pageObjects.indexManagement.toggleHiddenIndices();
       // click the first index in the table and wait for the index details page
       await pageObjects.indexManagement.indexDetailsPage.openIndexDetailsPage(0);
+      await pageObjects.indexManagement.indexDetailsPage.expectIndexDetailsPageIsLoaded();
     });
   });
 };

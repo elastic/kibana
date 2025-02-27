@@ -1,0 +1,125 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`TableActions getFieldCellActions should render correctly for undefined functions 1`] = `
+Array [
+  <ToggleColumn
+    Component={[Function]}
+    isEsqlMode={false}
+    onToggleColumn={[MockFunction]}
+    row={
+      FieldRow {
+        "columnsMeta": undefined,
+        "dataViewField": Object {
+          "aggregatable": false,
+          "displayName": "message",
+          "filterable": false,
+          "name": "message",
+          "scripted": false,
+          "type": "string",
+        },
+        "flattenedValue": "test",
+        "isPinned": false,
+        "name": "message",
+      }
+    }
+  />,
+]
+`;
+
+exports[`TableActions getFieldCellActions should render correctly for undefined functions 2`] = `Array []`;
+
+exports[`TableActions getFieldCellActions should render the panels correctly for defined onFilter function 1`] = `
+Array [
+  <FilterExist
+    Component={[Function]}
+    isEsqlMode={false}
+    onFilter={[MockFunction]}
+    row={
+      FieldRow {
+        "columnsMeta": undefined,
+        "dataViewField": Object {
+          "aggregatable": false,
+          "displayName": "message",
+          "filterable": false,
+          "name": "message",
+          "scripted": false,
+          "type": "string",
+        },
+        "flattenedValue": "test",
+        "isPinned": false,
+        "name": "message",
+      }
+    }
+  />,
+  <ToggleColumn
+    Component={[Function]}
+    isEsqlMode={false}
+    onToggleColumn={[MockFunction]}
+    row={
+      FieldRow {
+        "columnsMeta": undefined,
+        "dataViewField": Object {
+          "aggregatable": false,
+          "displayName": "message",
+          "filterable": false,
+          "name": "message",
+          "scripted": false,
+          "type": "string",
+        },
+        "flattenedValue": "test",
+        "isPinned": false,
+        "name": "message",
+      }
+    }
+  />,
+]
+`;
+
+exports[`TableActions getFieldValueCellActions should render correctly for undefined functions 1`] = `Array []`;
+
+exports[`TableActions getFieldValueCellActions should render the panels correctly for defined onFilter function 1`] = `
+Array [
+  <FilterIn
+    Component={[Function]}
+    isEsqlMode={false}
+    onFilter={[MockFunction]}
+    row={
+      FieldRow {
+        "columnsMeta": undefined,
+        "dataViewField": Object {
+          "aggregatable": false,
+          "displayName": "message",
+          "filterable": false,
+          "name": "message",
+          "scripted": false,
+          "type": "string",
+        },
+        "flattenedValue": "test",
+        "isPinned": false,
+        "name": "message",
+      }
+    }
+  />,
+  <FilterOut
+    Component={[Function]}
+    isEsqlMode={false}
+    onFilter={[MockFunction]}
+    row={
+      FieldRow {
+        "columnsMeta": undefined,
+        "dataViewField": Object {
+          "aggregatable": false,
+          "displayName": "message",
+          "filterable": false,
+          "name": "message",
+          "scripted": false,
+          "type": "string",
+        },
+        "flattenedValue": "test",
+        "isPinned": false,
+        "name": "message",
+      }
+    }
+  />,
+]
+`;

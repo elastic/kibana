@@ -1,0 +1,26 @@
+{
+  "security.bulk_put_role": {
+    "url_params": {
+      "error_trace": "__flag__",
+      "filter_path": [],
+      "human": "__flag__",
+      "pretty": "__flag__",
+      "refresh": [
+        "true",
+        "false",
+        "wait_for"
+      ]
+    },
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "_security/role"
+    ],
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/security-api-bulk-put-role.html",
+    "availability": {
+      "stack": true,
+      "serverless": false
+    }
+  }
+}

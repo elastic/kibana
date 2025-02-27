@@ -8,7 +8,7 @@
 import expect from '@kbn/expect';
 
 export default function ({ getPageObjects, getService }) {
-  const PageObjects = getPageObjects(['maps']);
+  const { maps } = getPageObjects(['maps']);
   const inspector = getService('inspector');
   const security = getService('security');
 
@@ -19,8 +19,8 @@ export default function ({ getPageObjects, getService }) {
         ['global_maps_all', 'geoshape_data_reader', 'meta_for_geoshape_data_reader'],
         { skipBrowserRefresh: true }
       );
-      await PageObjects.maps.loadSavedMap('join example');
-      mapboxStyle = await PageObjects.maps.getMapboxStyle();
+      await maps.loadSavedMap('join example');
+      mapboxStyle = await maps.getMapboxStyle();
     });
 
     after(async () => {
@@ -83,24 +83,24 @@ export default function ({ getPageObjects, getService }) {
             2,
             'rgba(0,0,0,0)',
             3,
-            '#ecf1f7',
+            '#e4eefd',
             4.125,
-            '#d9e3ef',
+            '#d3e3fe',
             5.25,
-            '#c5d5e7',
+            '#c1d8fe',
             6.375,
-            '#b2c7df',
+            '#afceff',
             7.5,
-            '#9eb9d8',
+            '#9dc3ff',
             8.625,
-            '#8bacd0',
+            '#8bb8ff',
             9.75,
-            '#769fc8',
+            '#77adff',
             10.875,
-            '#6092c0',
+            '#61a2ff',
           ],
           'circle-opacity': 0.75,
-          'circle-stroke-color': '#41937c',
+          'circle-stroke-color': '#119793',
           'circle-stroke-opacity': 0.75,
           'circle-stroke-width': 1,
           'circle-radius': 10,
@@ -162,28 +162,28 @@ export default function ({ getPageObjects, getService }) {
             2,
             'rgba(0,0,0,0)',
             3,
-            '#ecf1f7',
+            '#e4eefd',
             4.125,
-            '#d9e3ef',
+            '#d3e3fe',
             5.25,
-            '#c5d5e7',
+            '#c1d8fe',
             6.375,
-            '#b2c7df',
+            '#afceff',
             7.5,
-            '#9eb9d8',
+            '#9dc3ff',
             8.625,
-            '#8bacd0',
+            '#8bb8ff',
             9.75,
-            '#769fc8',
+            '#77adff',
             10.875,
-            '#6092c0',
+            '#61a2ff',
           ],
           'fill-opacity': 0.75,
         },
       });
     });
 
-    it('should style fill layer as expected', async () => {
+    it('should style fill layer as expected again', async () => {
       const layer = mapboxStyle.layers.find((mbLayer) => {
         return mbLayer.id === 'n1t6f_line';
       });
@@ -205,7 +205,7 @@ export default function ({ getPageObjects, getService }) {
           ['==', ['get', '__kbn_isvisibleduetojoin__'], true],
         ],
         layout: { visibility: 'visible' },
-        paint: { 'line-color': '#41937c', 'line-opacity': 0.75, 'line-width': 1 },
+        paint: { 'line-color': '#119793', 'line-opacity': 0.75, 'line-width': 1 },
       });
     });
   });

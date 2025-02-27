@@ -1,0 +1,9 @@
+{
+  "type": "shared-server",
+  "id": "@kbn/search-api-keys-server",
+  "owner": [
+    "@elastic/search-kibana"
+  ],
+  "group": "search",
+  "visibility": "private"
+}

@@ -169,7 +169,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           ensureCurrentUrl: false,
           shouldLoginIfPrompted: false,
         });
-        PageObjects.error.expectForbidden();
+        await PageObjects.error.expectForbidden();
       });
     });
   });

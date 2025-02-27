@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { ToolingLog } from '@kbn/tooling-log';
@@ -30,7 +31,6 @@ export interface BuildOptions {
   createRpmPackage: boolean;
   createDebPackage: boolean;
   createDockerUBI: boolean;
-  createDockerUbuntu: boolean;
   createDockerWolfi: boolean;
   createDockerCloud: boolean;
   createDockerServerless: boolean;
@@ -143,11 +143,6 @@ export async function buildDistributables(log: ToolingLog, options: BuildOptions
   if (options.createDockerUBI) {
     // control w/ --docker-images or --skip-docker-ubi or --skip-os-packages
     await run(Tasks.CreateDockerUBI);
-  }
-
-  if (options.createDockerUbuntu) {
-    // control w/ --docker-images or --skip-docker-ubuntu or --skip-os-packages
-    await run(Tasks.CreateDockerUbuntu);
   }
 
   if (options.createDockerWolfi) {

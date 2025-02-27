@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { FtrService } from '../ftr_provider_context';
@@ -88,6 +89,17 @@ export class DataViewsService extends FtrService {
     const dataView = await this.testSubjects.getAttribute('*dataView-switch-link', 'title');
     await this.testSubjects.click('*dataView-switch-link');
     const hasBadge = await this.testSubjects.exists(`dataViewItemTempBadge-${dataView}`);
+    await this.testSubjects.click('*dataView-switch-link');
+    return hasBadge;
+  }
+
+  /**
+   * Checks if currently selected Data View has managed badge
+   */
+  async isManaged() {
+    const dataView = await this.testSubjects.getAttribute('*dataView-switch-link', 'title');
+    await this.testSubjects.click('*dataView-switch-link');
+    const hasBadge = await this.testSubjects.exists(`dataViewItemManagedBadge-${dataView}`);
     await this.testSubjects.click('*dataView-switch-link');
     return hasBadge;
   }

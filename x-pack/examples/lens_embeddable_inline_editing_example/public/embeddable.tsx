@@ -64,13 +64,13 @@ export const LensChart = (props: {
     (
       isLoading: boolean,
       adapters: InlineEditLensEmbeddableContext['lensEvent']['adapters'] | undefined,
-      lensEmbeddableOutput$?: InlineEditLensEmbeddableContext['lensEvent']['embeddableOutput$']
+      dataLoading$?: InlineEditLensEmbeddableContext['lensEvent']['dataLoading$']
     ) => {
       const adapterTables = adapters?.tables?.tables;
       if (adapterTables && !isLoading) {
         setLensLoadEvent({
           adapters,
-          embeddableOutput$: lensEmbeddableOutput$,
+          dataLoading$,
         });
       }
     },

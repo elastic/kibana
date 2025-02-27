@@ -1,4 +1,4 @@
-[[tsvb]]
+[[tsvb-panel]]
 === TSVB
 
 *TSVB* is a set of visualization types that you configure and display on dashboards.
@@ -31,7 +31,7 @@ When you use only {data-sources}, you are able to:
 
 * Improve performance
 
-[[tsvb-index-pattern-mode]]
+[[tsvb-index-patterns-mode]]
 
 IMPORTANT: Creating *TSVB* visualizations with an {es} index string is deprecated and will be removed in a future release. By default, you create *TSVB* visualizations with only {data-sources}. To use an {es} index string, contact your administrator, or go to <<advanced-options, Advanced Settings>> and set `metrics:allowStringIndices` to `true`.
 
@@ -233,7 +233,7 @@ For example `https://example.org/{{key}}`
 
 This instructs TSVB to substitute the value from your visualization wherever it sees `{{key}}`.
 
-If your data contain reserved or invalid URL characters such as "#" or "&", you should apply a transform to URL-encode the key like this `{{encodeURIComponent key}}`. If you are dynamically constructing a drilldown to another location in Kibana (for example, clicking a table row takes to you a value-scoped saved search), you will likely want to Rison-encode your key as it may contain invalid Rison characters. (https://github.com/Nanonid/rison#rison---compact-data-in-uris[Rison] is the serialization format many parts of Kibana use to store information in their URL.)
+If your data contain reserved or invalid URL characters such as "#" or "&", you should apply a transform to URL-encode the key like this `{{encodeURIComponent key}}`. If you are dynamically constructing a drilldown to another location in Kibana (for example, clicking a table row takes to you a value-scoped Discover session), you will likely want to Rison-encode your key as it may contain invalid Rison characters. (https://github.com/Nanonid/rison#rison---compact-data-in-uris[Rison] is the serialization format many parts of Kibana use to store information in their URL.)
 
 For example: `discover#/view/0ac50180-82d9-11ec-9f4a-55de56b00cc0?_a=(filters:!((query:(match_phrase:(foo.keyword:{{rison key}})))))`
 

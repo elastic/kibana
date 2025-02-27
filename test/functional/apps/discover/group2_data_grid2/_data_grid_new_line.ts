@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import expect from '@kbn/expect';
@@ -20,11 +21,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
   const dataGrid = getService('dataGrid');
   const dataViews = getService('dataViews');
-  const PageObjects = getPageObjects([
-    'settings',
+  const { common, discover, timePicker, unifiedFieldList } = getPageObjects([
     'common',
     'discover',
-    'header',
     'timePicker',
     'unifiedFieldList',
   ]);
@@ -59,12 +58,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     beforeEach(async function () {
-      await PageObjects.timePicker.setDefaultAbsoluteRangeViaUiSettings();
+      await timePicker.setDefaultAbsoluteRangeViaUiSettings();
       await kibanaServer.uiSettings.update(defaultSettings);
-      await PageObjects.common.navigateToApp('discover');
-      await PageObjects.discover.waitUntilSearchingHasFinished();
+      await common.navigateToApp('discover');
+      await discover.waitUntilSearchingHasFinished();
       await dataViews.createFromSearchBar({ name: INDEX_NAME, adHoc: true, hasTimeField: false });
-      await PageObjects.discover.waitUntilSearchingHasFinished();
+      await discover.waitUntilSearchingHasFinished();
     });
 
     it('should not show new lines for Document column', async () => {
@@ -78,8 +77,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should show new lines for "message" column except for Single row height setting', async () => {
-      await PageObjects.unifiedFieldList.clickFieldListItemAdd('message');
-      await PageObjects.discover.waitUntilSearchingHasFinished();
+      await unifiedFieldList.clickFieldListItemAdd('message');
+      await discover.waitUntilSearchingHasFinished();
 
       let cell = await dataGrid.getCellElementExcludingControlColumns(0, 0);
       let content = await cell.findByCssSelector('.unifiedDataTable__cellValue');
@@ -88,7 +87,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await dataGrid.clickGridSettings();
       expect(await dataGrid.getCurrentRowHeightValue()).to.be('Custom');
-      await dataGrid.changeRowHeightValue('Auto fit');
+      await dataGrid.changeRowHeightValue('Auto');
       await dataGrid.clickGridSettings();
 
       cell = await dataGrid.getCellElementExcludingControlColumns(0, 0);
@@ -97,8 +96,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(await content.getComputedStyle('white-space')).to.be('pre-wrap');
 
       await dataGrid.clickGridSettings();
-      expect(await dataGrid.getCurrentRowHeightValue()).to.be('Auto fit');
-      await dataGrid.changeRowHeightValue('Single');
+      expect(await dataGrid.getCurrentRowHeightValue()).to.be('Auto');
+      await dataGrid.changeRowHeightValue('Custom');
+      await dataGrid.changeCustomRowHeightNumber(1);
       await dataGrid.clickGridSettings();
 
       cell = await dataGrid.getCellElementExcludingControlColumns(0, 0);

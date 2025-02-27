@@ -24,7 +24,7 @@ export default ({ getService }: FtrProviderContext): void => {
   const log = getService('log');
   const utils = getService('securitySolutionUtils');
 
-  describe('@ess @serverless find_rules', () => {
+  describe('@ess @serverless @serverlessQA find_rules', () => {
     beforeEach(async () => {
       await deleteAllRules(supertest, log);
     });

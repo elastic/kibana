@@ -1,0 +1,39 @@
+openapi: 3.0.0
+info:
+  title: Suspend Process Schema
+  version: '2023-10-31'
+paths:
+  /api/endpoint/action/suspend_process:
+    post:
+      summary: Suspend a process
+      operationId: EndpointSuspendProcessAction
+      description: Suspend a running process on an endpoint.
+      x-codegen-enabled: true
+      x-labels: [ess, serverless]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SuspendProcessRouteRequestBody'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '../../../model/schema/common.schema.yaml#/components/schemas/SuccessResponse'
+
+components:
+  schemas:
+    SuspendProcessRouteRequestBody:
+      allOf:
+        - $ref: '../../../model/schema/common.schema.yaml#/components/schemas/BaseActionSchema'
+        - type: object
+          required:
+            - parameters
+          properties:
+            parameters:
+              oneOf:
+                - $ref: "../../../model/schema/common.schema.yaml#/components/schemas/Pid"
+                - $ref: "../../../model/schema/common.schema.yaml#/components/schemas/EntityId"

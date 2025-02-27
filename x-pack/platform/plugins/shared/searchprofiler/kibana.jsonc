@@ -1,0 +1,27 @@
+{
+  "type": "plugin",
+  "id": "@kbn/searchprofiler-plugin",
+  "owner": [
+    "@elastic/kibana-management"
+  ],
+  "group": "platform",
+  "visibility": "shared",
+  "plugin": {
+    "id": "searchprofiler",
+    "browser": true,
+    "server": true,
+    "configPath": [
+      "xpack",
+      "searchprofiler"
+    ],
+    "requiredPlugins": [
+      "devTools",
+      "home",
+      "licensing",
+      "share"
+    ],
+    "requiredBundles": [
+      "esUiShared"
+    ]
+  }
+}

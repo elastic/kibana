@@ -9,7 +9,6 @@ import { wrapErrorAndRejectPromise } from '@kbn/security-solution-plugin/common/
 import {
   ACTION_DETAILS_ROUTE,
   ACTION_STATUS_ROUTE,
-  AGENT_POLICY_SUMMARY_ROUTE,
   BASE_ENDPOINT_ACTION_ROUTE,
   BASE_POLICY_RESPONSE_ROUTE,
   EXECUTE_ROUTE,
@@ -19,21 +18,22 @@ import {
   HOST_METADATA_LIST_ROUTE,
   ISOLATE_HOST_ROUTE_V2,
   KILL_PROCESS_ROUTE,
-  METADATA_TRANSFORMS_STATUS_ROUTE,
+  METADATA_TRANSFORMS_STATUS_INTERNAL_ROUTE,
   SUSPEND_PROCESS_ROUTE,
   UNISOLATE_HOST_ROUTE_V2,
 } from '@kbn/security-solution-plugin/common/endpoint/constants';
 import { IndexedHostsAndAlertsResponse } from '@kbn/security-solution-plugin/common/endpoint/index_data';
+import TestAgent from 'supertest/lib/agent';
 import { FtrProviderContext } from '../../../../ftr_provider_context_edr_workflows';
 import { ROLE } from '../../../../config/services/security_solution_edr_workflows_roles_users';
 
 export default function ({ getService }: FtrProviderContext) {
-  const supertestWithoutAuth = getService('supertestWithoutAuth');
-  const supertest = getService('supertest');
   const endpointTestResources = getService('endpointTestResources');
+  const utils = getService('securitySolutionUtils');
+  const samlAuth = getService('samlAuth');
 
   interface ApiCallsInterface {
-    method: keyof Pick<typeof supertest, 'post' | 'get'>;
+    method: keyof Pick<TestAgent, 'post' | 'get'>;
     path: string;
     version?: string;
     body: Record<string, unknown> | (() => Record<string, unknown>) | undefined;
@@ -70,7 +70,8 @@ export default function ({ getService }: FtrProviderContext) {
       },
       {
         method: 'get',
-        path: METADATA_TRANSFORMS_STATUS_ROUTE,
+        path: METADATA_TRANSFORMS_STATUS_INTERNAL_ROUTE,
+        version: '1',
         body: undefined,
       },
       {
@@ -143,15 +144,6 @@ export default function ({ getService }: FtrProviderContext) {
       },
     ];
 
-    const superuserApiList: ApiCallsInterface[] = [
-      {
-        method: 'get',
-        path: `${AGENT_POLICY_SUMMARY_ROUTE}?package_name=endpoint`,
-        version: '2023-10-31',
-        body: undefined,
-      },
-    ];
-
     function replacePathIds(path: string) {
       return path.replace('{action_id}', actionId).replace('{agentId}', agentId);
     }
@@ -160,7 +152,18 @@ export default function ({ getService }: FtrProviderContext) {
       return typeof apiCall.body === 'function' ? apiCall.body() : apiCall.body;
     }
 
+    let adminSupertest: TestAgent;
+    let t1AnalystSupertest: TestAgent;
+    let endpointOperationsAnalystSupertest: TestAgent;
+    let platformEnginnerSupertest: TestAgent;
     before(async () => {
+      adminSupertest = await utils.createSuperTest();
+      t1AnalystSupertest = await utils.createSuperTest(ROLE.t1_analyst);
+      endpointOperationsAnalystSupertest = await utils.createSuperTest(
+        ROLE.endpoint_operations_analyst
+      );
+      platformEnginnerSupertest = await utils.createSuperTest(ROLE.platform_engineer);
+
       indexedData = await endpointTestResources.loadEndpointData();
       agentId = indexedData.hosts[0].agent.id;
       actionId = indexedData.actions[0].action_id;
@@ -175,13 +178,11 @@ export default function ({ getService }: FtrProviderContext) {
         ...canReadActionsLogManagementApiList,
         ...canIsolateHostApiList,
         ...canWriteProcessOperationsApiList,
-        ...superuserApiList,
       ]) {
         it(`should return 403 when [${apiListItem.method.toUpperCase()} ${
           apiListItem.path
         }]`, async () => {
-          await supertestWithoutAuth[apiListItem.method](replacePathIds(apiListItem.path))
-            .auth(ROLE.t1_analyst, 'changeme')
+          await t1AnalystSupertest[apiListItem.method](replacePathIds(apiListItem.path))
             .set('kbn-xsrf', 'xxx')
             .set(apiListItem.version ? 'Elastic-Api-Version' : 'foo', '2023-10-31')
             .send(getBodyPayload(apiListItem))
@@ -198,9 +199,13 @@ export default function ({ getService }: FtrProviderContext) {
         it(`should return 200 when [${apiListItem.method.toUpperCase()} ${
           apiListItem.path
         }]`, async () => {
-          await supertestWithoutAuth[apiListItem.method](replacePathIds(apiListItem.path))
-            .auth(ROLE.t1_analyst, 'changeme')
+          await t1AnalystSupertest[apiListItem.method](replacePathIds(apiListItem.path))
             .set('kbn-xsrf', 'xxx')
+            .set(
+              apiListItem.version ? 'Elastic-Api-Version' : 'foo',
+              apiListItem.version || '2023-10-31'
+            )
+            .set(samlAuth.getInternalRequestHeader())
             .send(getBodyPayload(apiListItem))
             .expect(200);
         });
@@ -208,16 +213,11 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     describe('with minimal_all and actions_log_management_read', () => {
-      for (const apiListItem of [
-        ...canIsolateHostApiList,
-        ...canWriteProcessOperationsApiList,
-        ...superuserApiList,
-      ]) {
+      for (const apiListItem of [...canIsolateHostApiList, ...canWriteProcessOperationsApiList]) {
         it(`should return 403 when [${apiListItem.method.toUpperCase()} ${
           apiListItem.path
         }]`, async () => {
-          await supertestWithoutAuth[apiListItem.method](replacePathIds(apiListItem.path))
-            .auth(ROLE.platform_engineer, 'changeme')
+          await platformEnginnerSupertest[apiListItem.method](replacePathIds(apiListItem.path))
             .set('kbn-xsrf', 'xxx')
             .send(getBodyPayload(apiListItem))
             .expect(403, {
@@ -236,9 +236,13 @@ export default function ({ getService }: FtrProviderContext) {
         it(`should return 200 when [${apiListItem.method.toUpperCase()} ${
           apiListItem.path
         }]`, async () => {
-          await supertestWithoutAuth[apiListItem.method](replacePathIds(apiListItem.path))
-            .auth(ROLE.platform_engineer, 'changeme')
+          await platformEnginnerSupertest[apiListItem.method](replacePathIds(apiListItem.path))
             .set('kbn-xsrf', 'xxx')
+            .set(
+              apiListItem.version ? 'Elastic-Api-Version' : 'foo',
+              apiListItem.version || '2023-10-31'
+            )
+            .set(samlAuth.getInternalRequestHeader())
             .send(getBodyPayload(apiListItem))
             .expect(200);
         });
@@ -246,23 +250,6 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     describe('with minimal_all, actions_log_management_all, host_isolation_all, and process_operations_all', () => {
-      for (const apiListItem of superuserApiList) {
-        it(`should return 403 when [${apiListItem.method.toUpperCase()} ${
-          apiListItem.path
-        }]`, async () => {
-          await supertestWithoutAuth[apiListItem.method](replacePathIds(apiListItem.path))
-            .auth(ROLE.endpoint_operations_analyst, 'changeme')
-            .set('kbn-xsrf', 'xxx')
-            .send(getBodyPayload(apiListItem))
-            .expect(403, {
-              statusCode: 403,
-              error: 'Forbidden',
-              message: 'Endpoint authorization failure',
-            })
-            .catch(wrapErrorAndRejectPromise);
-        });
-      }
-
       for (const apiListItem of [
         ...canReadSecuritySolutionApiList,
         ...canReadActionsLogManagementApiList,
@@ -272,8 +259,14 @@ export default function ({ getService }: FtrProviderContext) {
         it(`should return 200 when [${apiListItem.method.toUpperCase()} ${
           apiListItem.path
         }]`, async () => {
-          await supertestWithoutAuth[apiListItem.method](replacePathIds(apiListItem.path))
-            .auth(ROLE.endpoint_operations_analyst, 'changeme')
+          await endpointOperationsAnalystSupertest[apiListItem.method](
+            replacePathIds(apiListItem.path)
+          )
+            .set(
+              apiListItem.version ? 'Elastic-Api-Version' : 'foo',
+              apiListItem.version || '2023-10-31'
+            )
+            .set(samlAuth.getInternalRequestHeader())
             .set('kbn-xsrf', 'xxx')
             .send(getBodyPayload(apiListItem))
             .expect(200);
@@ -289,13 +282,17 @@ export default function ({ getService }: FtrProviderContext) {
         ...canWriteProcessOperationsApiList,
         ...canWriteExecuteOperationsApiList,
         ...canWriteFileOperationsApiList,
-        ...superuserApiList,
       ]) {
         it(`should return 200 when [${apiListItem.method.toUpperCase()} ${
           apiListItem.path
         }]`, async () => {
-          await supertest[apiListItem.method](replacePathIds(apiListItem.path))
+          await adminSupertest[apiListItem.method](replacePathIds(apiListItem.path))
             .set('kbn-xsrf', 'xxx')
+            .set(
+              apiListItem.version ? 'Elastic-Api-Version' : 'foo',
+              apiListItem.version || '2023-10-31'
+            )
+            .set(samlAuth.getInternalRequestHeader())
             .send(getBodyPayload(apiListItem))
             .expect(200);
         });

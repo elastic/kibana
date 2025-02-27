@@ -1,0 +1,48 @@
+{
+  "id": "@kbn/charts-theme",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/charts-theme",
+        "id": "def-common.useElasticChartsTheme",
+        "type": "Function",
+        "tags": [],
+        "label": "useElasticChartsTheme",
+        "description": [
+          "\nA hook used to get the `@elastic/charts` theme based on the current eui theme."
+        ],
+        "signature": [
+          "() => ",
+          "Theme"
+        ],
+        "path": "src/platform/packages/shared/kbn-charts-theme/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

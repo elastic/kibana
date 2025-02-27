@@ -30,9 +30,10 @@ export default function checkAlertSchemasTest({ getService }: FtrProviderContext
   // node scripts/functional_tests_server.js --config x-pack/test/alerting_api_integration/spaces_only/tests/alerting/group4/config.ts
   // node scripts/functional_test_runner --config=x-pack/test/alerting_api_integration/spaces_only/tests/alerting/group4/config.ts --grep "check alert schemas"
   //
-  // and commit the changed schema files in packages/kbn-alerts-as-data-utils/src/schemas/generated/
+  // and commit the changed schema files in src/platform/packages/shared/kbn-alerts-as-data-utils/src/schemas/generated/
 
-  describe('check alert schemas', () => {
+  describe('check alert schemas', function () {
+    this.tags('skipFIPS');
     it('should not have discrepancies from the alert field map or the field map specific to a rule type', async () => {
       // Generate base alert schema
       createSchemaFromFieldMap({
@@ -91,7 +92,9 @@ export default function checkAlertSchemasTest({ getService }: FtrProviderContext
         '--exclude-standard',
       ]);
 
-      expect(stdout).not.to.contain('packages/kbn-alerts-as-data-utils/src/schemas/generated');
+      expect(stdout).not.to.contain(
+        'src/platform/packages/shared/kbn-alerts-as-data-utils/src/schemas/generated'
+      );
     });
   });
 }

@@ -1,0 +1,8 @@
+{
+  "name": "@kbn/securitysolution-io-ts-list-types",
+  "version": "1.0.0",
+  "description": "io ts utilities and types to be shared with plugins from the security solution project",
+  "license": "Elastic License 2.0",
+  "private": true,
+  "sideEffects": false
+}

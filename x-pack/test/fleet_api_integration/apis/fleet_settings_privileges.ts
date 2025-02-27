@@ -51,6 +51,49 @@ const READ_SCENARIOS = [
     statusCode: 403,
   },
 ];
+// Scenarios updated for download_source and outputs routes that are slightly different
+const READ_SCENARIOS_2 = [
+  {
+    user: testUsers.fleet_all_only,
+    statusCode: 200,
+  },
+  {
+    user: testUsers.fleet_read_only,
+    statusCode: 200,
+  },
+  {
+    user: testUsers.fleet_settings_all_only,
+    statusCode: 200,
+  },
+  {
+    user: testUsers.fleet_settings_read_only,
+    statusCode: 200,
+  },
+  {
+    user: testUsers.fleet_agent_policies_read_only,
+    statusCode: 200,
+  },
+  {
+    user: testUsers.fleet_agent_policies_all_only,
+    statusCode: 200,
+  },
+  {
+    user: testUsers.fleet_agents_read_only,
+    statusCode: 403,
+  },
+  {
+    user: testUsers.fleet_no_access,
+    statusCode: 403,
+  },
+  {
+    user: testUsers.fleet_minimal_all_only,
+    statusCode: 403,
+  },
+  {
+    user: testUsers.fleet_minimal_read_only,
+    statusCode: 403,
+  },
+];
 
 const ALL_SCENARIOS = [
   {
@@ -106,12 +149,12 @@ export default function (providerContext: FtrProviderContext) {
     {
       method: 'GET',
       path: '/api/fleet/outputs',
-      scenarios: READ_SCENARIOS,
+      scenarios: READ_SCENARIOS_2,
     },
     {
       method: 'GET',
       path: '/api/fleet/outputs/test-privileges-output-1',
-      scenarios: READ_SCENARIOS,
+      scenarios: READ_SCENARIOS_2,
     },
     {
       method: 'POST',
@@ -226,12 +269,12 @@ export default function (providerContext: FtrProviderContext) {
     {
       method: 'GET',
       path: '/api/fleet/agent_download_sources',
-      scenarios: READ_SCENARIOS,
+      scenarios: READ_SCENARIOS_2,
     },
     {
       method: 'GET',
       path: '/api/fleet/agent_download_sources/test-privileges-download-source-1',
-      scenarios: READ_SCENARIOS,
+      scenarios: READ_SCENARIOS_2,
     },
     {
       method: 'POST',
@@ -256,10 +299,8 @@ export default function (providerContext: FtrProviderContext) {
       await esArchiver.load('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
       await kibanaServer.savedObjects.cleanStandardList();
       await setupTestUsers(getService('security'));
-    });
 
-    before('create output', () =>
-      supertest
+      await supertest
         .post(`/api/fleet/outputs`)
         .set('kbn-xsrf', 'xxxx')
         .send({
@@ -268,10 +309,9 @@ export default function (providerContext: FtrProviderContext) {
           type: 'elasticsearch',
           hosts: ['https://test.fr'],
         })
-        .expect(200)
-    );
-    before('create fleet server hosts', () =>
-      supertest
+        .expect(200);
+
+      await supertest
         .post(`/api/fleet/fleet_server_hosts`)
         .set('kbn-xsrf', 'xxxx')
         .send({
@@ -280,10 +320,9 @@ export default function (providerContext: FtrProviderContext) {
           is_default: false,
           host_urls: ['https://test.fr:8080', 'https://test.fr:8081'],
         })
-        .expect(200)
-    );
-    before('create proxy', () =>
-      supertest
+        .expect(200);
+
+      await supertest
         .post(`/api/fleet/proxies`)
         .set('kbn-xsrf', 'xxxx')
         .send({
@@ -291,10 +330,9 @@ export default function (providerContext: FtrProviderContext) {
           name: 'Test privileges proxy 1 ' + new Date().toISOString(),
           url: 'https://test.fr:3232',
         })
-        .expect(200)
-    );
-    before('create download source', () =>
-      supertest
+        .expect(200);
+
+      await supertest
         .post(`/api/fleet/agent_download_sources`)
         .set('kbn-xsrf', 'xxxx')
         .send({
@@ -303,8 +341,8 @@ export default function (providerContext: FtrProviderContext) {
           host: 'http://test.fr:443',
           is_default: false,
         })
-        .expect(200)
-    );
+        .expect(200);
+    });
 
     after(async () => {
       await kibanaServer.savedObjects.cleanStandardList();

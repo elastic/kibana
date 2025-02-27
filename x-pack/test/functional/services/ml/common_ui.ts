@@ -224,15 +224,15 @@ export function MachineLearningCommonUIProvider({
         } else {
           if (currentDiff > 0) {
             if (Math.abs(currentDiff) >= 10) {
-              slider.type(browser.keys.PAGE_DOWN);
+              await slider.type(browser.keys.PAGE_DOWN);
             } else {
-              slider.type(browser.keys.ARROW_LEFT);
+              await slider.type(browser.keys.ARROW_LEFT);
             }
           } else {
             if (Math.abs(currentDiff) >= 10) {
-              slider.type(browser.keys.PAGE_UP);
+              await slider.type(browser.keys.PAGE_UP);
             } else {
-              slider.type(browser.keys.ARROW_RIGHT);
+              await slider.type(browser.keys.ARROW_RIGHT);
             }
           }
           await retry.tryForTime(1000, async () => {
@@ -450,6 +450,49 @@ export function MachineLearningCommonUIProvider({
 
     async toggleSwitchIfNeeded(testSubj: string, targetState: boolean) {
       await testSubjects.setEuiSwitch(testSubj, targetState ? 'check' : 'uncheck');
+    },
+
+    /** Set value for OptionListWithFieldStats component */
+    async setOptionsListWithFieldStatsValue(selector: string, value: string) {
+      await testSubjects.click(selector);
+      await testSubjects.existOrFail('optionsListControlAvailableOptions');
+
+      await retry.tryForTime(1000, async () => {
+        const enabled =
+          (await testSubjects.getAttribute(`optionsListIncludeEmptyFields`, 'aria-checked')) ===
+          'true';
+        if (!enabled) {
+          await testSubjects.click(`optionsListIncludeEmptyFields`);
+          expect(
+            (await testSubjects.getAttribute(`optionsListIncludeEmptyFields`, 'aria-checked')) ===
+              'true'
+          ).to.eql(true, `Expected optionsListIncludeEmptyFields to be enabled.`);
+        }
+      });
+      await retry.tryForTime(5 * 1000, async () => {
+        await testSubjects.find('optionsListFilterInput');
+
+        await testSubjects.setValue('optionsListFilterInput', value);
+        await testSubjects.click(`optionsListControlSelection-${value}`);
+      });
+    },
+
+    async assertOptionsListWithFieldStatsValue(
+      selector: string,
+      expectedIdentifiers?: string[] | string,
+      label?: string
+    ) {
+      const expectedValue =
+        (Array.isArray(expectedIdentifiers) ? expectedIdentifiers.join('') : expectedIdentifiers) ??
+        '';
+      const actualValue = await testSubjects.getAttribute(
+        `${selector} > comboBoxSearchInput`,
+        'value'
+      );
+      expect(actualValue).to.eql(
+        expectedValue,
+        `Expected ${label ?? selector} value should be '${expectedValue}' (got '${actualValue}')`
+      );
     },
   };
 }

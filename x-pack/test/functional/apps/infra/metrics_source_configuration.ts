@@ -7,13 +7,10 @@
 
 import { cleanup, Dataset, generate, PartialConfig } from '@kbn/data-forge';
 import expect from '@kbn/expect';
-import {
-  Aggregators,
-  InfraRuleType,
-  MetricThresholdParams,
-} from '@kbn/infra-plugin/common/alerting/metrics';
+import { Aggregators, MetricThresholdParams } from '@kbn/infra-plugin/common/alerting/metrics';
 
 import { COMPARATORS } from '@kbn/alerting-comparators';
+import { InfraRuleType } from '@kbn/rule-data-utils';
 import { createRule } from '../../../alerting_api_integration/observability/helpers/alerting_api_helper';
 import {
   waitForDocumentInIndex,
@@ -31,17 +28,22 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const kibanaServer = getService('kibanaServer');
 
   describe('Infrastructure Source Configuration', function () {
-    before(async () => kibanaServer.savedObjects.cleanStandardList());
-    after(async () => kibanaServer.savedObjects.cleanStandardList());
+    before(async () =>
+      Promise.all([
+        esArchiver.load('x-pack/test/functional/es_archives/infra/alerts'),
+        esArchiver.load('x-pack/test/functional/es_archives/infra/metrics_and_logs'),
+        kibanaServer.savedObjects.cleanStandardList(),
+      ])
+    );
+    after(async () =>
+      Promise.all([
+        esArchiver.unload('x-pack/test/functional/es_archives/infra/alerts'),
+        esArchiver.unload('x-pack/test/functional/es_archives/infra/metrics_and_logs'),
+        kibanaServer.savedObjects.cleanStandardList(),
+      ])
+    );
 
     describe('with metrics present', () => {
-      before(async () =>
-        esArchiver.load('x-pack/test/functional/es_archives/infra/metrics_and_logs')
-      );
-      after(async () =>
-        esArchiver.unload('x-pack/test/functional/es_archives/infra/metrics_and_logs')
-      );
-
       it('renders the waffle map', async () => {
         await pageObjects.common.navigateToApp('infraOps');
         await pageObjects.infraHome.goToTime(DATE_WITH_DATA);
@@ -86,7 +88,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       it('renders the no indices screen when no indices match the pattern', async () => {
         await pageObjects.common.navigateToApp('infraOps');
-        await pageObjects.infraHome.getNoMetricsIndicesPrompt();
+        await pageObjects.infraHome.noDataPromptExists();
       });
 
       it('can change the metric indices to a remote cluster when connection does not exist', async () => {

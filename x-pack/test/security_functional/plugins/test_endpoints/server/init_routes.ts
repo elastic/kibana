@@ -5,17 +5,19 @@
  * 2.0.
  */
 
+import { type DiagnosticResult, errors } from '@elastic/elasticsearch';
+
 import { schema } from '@kbn/config-schema';
-import { errors } from '@elastic/elasticsearch';
-import { CoreSetup, CoreStart, PluginInitializerContext } from '@kbn/core/server';
-import type {
-  TaskManagerStartContract,
-  ConcreteTaskInstance,
-  BulkUpdateTaskResult,
-} from '@kbn/task-manager-plugin/server';
-import { restApiKeySchema } from '@kbn/security-plugin-types-server';
+import type { CoreSetup, CoreStart, PluginInitializerContext } from '@kbn/core/server';
 import { ROUTE_TAG_AUTH_FLOW } from '@kbn/security-plugin/server';
-import { PluginStartDependencies } from '.';
+import { restApiKeySchema } from '@kbn/security-plugin-types-server';
+import type {
+  BulkUpdateTaskResult,
+  ConcreteTaskInstance,
+  TaskManagerStartContract,
+} from '@kbn/task-manager-plugin/server';
+
+import type { PluginStartDependencies } from '.';
 
 export const SESSION_INDEX_CLEANUP_TASK_NAME = 'session_cleanup';
 
@@ -286,6 +288,60 @@ export function initRoutes(
       );
 
       return response.ok();
+    }
+  );
+
+  router.post(
+    {
+      path: '/simulate_point_in_time_failure',
+      validate: { body: schema.object({ simulateOpenPointInTimeFailure: schema.boolean() }) },
+      options: { authRequired: false, xsrfRequired: false },
+    },
+    async (context, request, response) => {
+      const esClient = (await context.core).elasticsearch.client.asInternalUser;
+      const originalOpenPointInTime = esClient.openPointInTime;
+
+      if (request.body.simulateOpenPointInTimeFailure) {
+        // @ts-expect-error
+        esClient.openPointInTime = async function (params, options) {
+          const { index } = params;
+          if (index.includes('kibana_security_session')) {
+            return {
+              statusCode: 503,
+              meta: {},
+              body: {
+                error: {
+                  type: 'no_shard_available_action_exception',
+                  reason: 'no shard available for [open]',
+                },
+              },
+            };
+            return {
+              statusCode: 503,
+              message: 'no_shard_available_action_exception',
+            } as unknown as DiagnosticResult;
+          }
+          return originalOpenPointInTime.call(this, params, options);
+        };
+      } else {
+        esClient.openPointInTime = originalOpenPointInTime;
+      }
+
+      return response.ok();
+    }
+  );
+
+  router.get(
+    {
+      path: '/cleanup_task_status',
+      validate: false,
+      options: { authRequired: false },
+    },
+    async (context, request, response) => {
+      const [, { taskManager }] = await core.getStartServices();
+      const res = await taskManager.get(SESSION_INDEX_CLEANUP_TASK_NAME);
+      const { attempts, state, status } = res;
+      return response.ok({ body: { attempts, state, status } });
     }
   );
 }

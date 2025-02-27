@@ -9,7 +9,13 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getPageObjects }: FtrProviderContext) {
-  const PageObjects = getPageObjects(['common', 'header', 'home', 'discover', 'timePicker']);
+  const { common, header, home, discover, timePicker } = getPageObjects([
+    'common',
+    'header',
+    'home',
+    'discover',
+    'timePicker',
+  ]);
 
   describe('upgrade discover smoke tests', function describeIndexTests() {
     const spaces = [
@@ -27,25 +33,25 @@ export default function ({ getPageObjects }: FtrProviderContext) {
       discoverTests.forEach(({ name, timefield, hits }) => {
         describe('space: ' + space + ', name: ' + name, () => {
           before(async () => {
-            await PageObjects.common.navigateToApp('discover', {
+            await common.navigateToApp('discover', {
               basePath,
             });
-            await PageObjects.header.waitUntilLoadingHasFinished();
-            const indices = await PageObjects.discover.getIndexPatterns();
+            await header.waitUntilLoadingHasFinished();
+            const indices = await discover.getIndexPatterns();
             const index = indices.find((element) => {
               if (element.toLowerCase().includes(name)) {
                 return true;
               }
             });
-            await PageObjects.discover.selectIndexPattern(String(index));
-            await PageObjects.discover.waitUntilSearchingHasFinished();
+            await discover.selectIndexPattern(String(index));
+            await discover.waitUntilSearchingHasFinished();
             if (timefield) {
-              await PageObjects.timePicker.setCommonlyUsedTime('Last_1 year');
-              await PageObjects.discover.waitUntilSearchingHasFinished();
+              await timePicker.setCommonlyUsedTime('Last_1 year');
+              await discover.waitUntilSearchingHasFinished();
             }
           });
           it('shows hit count greater than zero', async () => {
-            const hitCount = await PageObjects.discover.getHitCountInt();
+            const hitCount = await discover.getHitCountInt();
             if (hits === '') {
               expect(hitCount).to.be.greaterThan(0);
             } else {
@@ -53,7 +59,7 @@ export default function ({ getPageObjects }: FtrProviderContext) {
             }
           });
           it('shows table rows not empty', async () => {
-            const tableRows = await PageObjects.discover.getDocTableRows();
+            const tableRows = await discover.getDocTableRows();
             expect(tableRows.length).to.be.greaterThan(0);
           });
         });
@@ -62,19 +68,19 @@ export default function ({ getPageObjects }: FtrProviderContext) {
       discoverTests.forEach(({ name, timefield, hits }) => {
         describe('space: ' + space + ', name: ' + name, () => {
           before(async () => {
-            await PageObjects.common.navigateToActualUrl('home', '/tutorial_directory/sampleData', {
+            await common.navigateToActualUrl('home', '/tutorial_directory/sampleData', {
               basePath,
             });
-            await PageObjects.header.waitUntilLoadingHasFinished();
-            await PageObjects.home.launchSampleDiscover(name);
-            await PageObjects.header.waitUntilLoadingHasFinished();
+            await header.waitUntilLoadingHasFinished();
+            await home.launchSampleDiscover(name);
+            await header.waitUntilLoadingHasFinished();
             if (timefield) {
-              await PageObjects.timePicker.setCommonlyUsedTime('Last_1 year');
-              await PageObjects.discover.waitUntilSearchingHasFinished();
+              await timePicker.setCommonlyUsedTime('Last_1 year');
+              await discover.waitUntilSearchingHasFinished();
             }
           });
           it('shows hit count greater than zero', async () => {
-            const hitCount = await PageObjects.discover.getHitCountInt();
+            const hitCount = await discover.getHitCountInt();
             if (hits === '') {
               expect(hitCount).to.be.greaterThan(0);
             } else {
@@ -82,7 +88,7 @@ export default function ({ getPageObjects }: FtrProviderContext) {
             }
           });
           it('shows table rows not empty', async () => {
-            const tableRows = await PageObjects.discover.getDocTableRows();
+            const tableRows = await discover.getDocTableRows();
             expect(tableRows.length).to.be.greaterThan(0);
           });
         });

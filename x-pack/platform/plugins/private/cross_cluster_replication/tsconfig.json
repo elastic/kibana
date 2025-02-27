@@ -1,0 +1,37 @@
+{
+  "extends": "../../../../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "target/types",
+  },
+  "include": [
+    "common/**/*",
+    "public/**/*",
+    "server/**/*",
+  ],
+  "kbn_references": [
+    "@kbn/core",
+    // required plugins
+    "@kbn/licensing-plugin",
+    "@kbn/management-plugin",
+    "@kbn/remote-clusters-plugin",
+    "@kbn/index-management-plugin",
+    "@kbn/features-plugin",
+    // optional plugins
+    "@kbn/usage-collection-plugin",
+    // required bundles
+    "@kbn/kibana-react-plugin",
+    "@kbn/es-ui-shared-plugin",
+    "@kbn/data-plugin",
+    "@kbn/license-api-guard-plugin",
+    "@kbn/i18n",
+    "@kbn/i18n-react",
+    "@kbn/analytics",
+    "@kbn/test-jest-helpers",
+    "@kbn/config-schema",
+    "@kbn/shared-ux-router",
+    "@kbn/react-kibana-context-render",
+  ],
+  "exclude": [
+    "target/**/*",
+  ]
+}

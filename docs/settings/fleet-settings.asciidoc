@@ -112,6 +112,8 @@ List of agent policies that are configured when the {fleet} app starts.
     ID of the output to send data. (Need to be identical to `monitoring_output_id`)
   `monitoring_output_id`::: 
     ID of the output to send monitoring data. (Need to be identical to `data_output_id`)
+  `fleet_server_host_id`:::
+    ID of the fleet server.
   `package_policies`::: 
     List of integration policies to add to this policy.
 +
@@ -317,4 +319,7 @@ Experimental features should not be enabled in production environments.
 The features in this section are experimental and may be changed or removed completely in future releases.
 Elastic will make a best effort to fix any issues, but experimental features are not supported to the same level as generally available (GA) features.
 ====
+
+`xpack.fleet.enableManagedLogsAndMetricsDataviews`::
+Set to `true` (default), to enable the automatic creation of global `logs-*` and `metrics-*` data views.
 

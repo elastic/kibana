@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { migratorInstanceMock } from './migrate.test.mocks';
@@ -30,18 +31,30 @@ describe('SavedObjects /_migrate endpoint', () => {
   });
 
   it('calls runMigrations on the migrator with rerun=true when accessed', async () => {
-    await request.post(root, '/internal/saved_objects/_migrate').send({}).expect(200);
+    await request
+      .post(root, '/internal/saved_objects/_migrate')
+      .set('x-elastic-internal-origin', 'kibana')
+      .send({})
+      .expect(200);
 
     expect(migratorInstanceMock.runMigrations).toHaveBeenCalledTimes(1);
     expect(migratorInstanceMock.runMigrations).toHaveBeenCalledWith({ rerun: true });
   });
 
   it('calls runMigrations multiple time when multiple access', async () => {
-    await request.post(root, '/internal/saved_objects/_migrate').send({}).expect(200);
+    await request
+      .post(root, '/internal/saved_objects/_migrate')
+      .set('x-elastic-internal-origin', 'kibana')
+      .send({})
+      .expect(200);
 
     expect(migratorInstanceMock.runMigrations).toHaveBeenCalledTimes(1);
 
-    await request.post(root, '/internal/saved_objects/_migrate').send({}).expect(200);
+    await request
+      .post(root, '/internal/saved_objects/_migrate')
+      .set('x-elastic-internal-origin', 'kibana')
+      .send({})
+      .expect(200);
 
     expect(migratorInstanceMock.runMigrations).toHaveBeenCalledTimes(2);
   });

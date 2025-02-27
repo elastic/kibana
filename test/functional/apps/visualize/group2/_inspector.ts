@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import expect from '@kbn/expect';
@@ -14,29 +15,34 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const log = getService('log');
   const inspector = getService('inspector');
   const filterBar = getService('filterBar');
-  const PageObjects = getPageObjects(['visualize', 'visEditor', 'visChart', 'timePicker']);
+  const { visualize, visEditor, visChart, timePicker } = getPageObjects([
+    'visualize',
+    'visEditor',
+    'visChart',
+    'timePicker',
+  ]);
 
   describe('inspector', function describeIndexTests() {
     before(async function () {
-      await PageObjects.visualize.initTests();
-      await PageObjects.visualize.navigateToNewAggBasedVisualization();
-      await PageObjects.visualize.clickVerticalBarChart();
-      await PageObjects.visualize.clickNewSearch();
+      await visualize.initTests();
+      await visualize.navigateToNewAggBasedVisualization();
+      await visualize.clickVerticalBarChart();
+      await visualize.clickNewSearch();
 
-      await PageObjects.timePicker.setDefaultAbsoluteRange();
+      await timePicker.setDefaultAbsoluteRange();
     });
 
     describe('advanced input JSON', () => {
       it('should have "missing" property with value 10', async () => {
         log.debug('Add Max Metric on memory field');
-        await PageObjects.visEditor.clickBucket('Y-axis', 'metrics');
-        await PageObjects.visEditor.selectAggregation('Max', 'metrics');
-        await PageObjects.visEditor.selectField('memory', 'metrics');
+        await visEditor.clickBucket('Y-axis', 'metrics');
+        await visEditor.selectAggregation('Max', 'metrics');
+        await visEditor.selectField('memory', 'metrics');
 
         log.debug('Add value to advanced JSON input');
-        await PageObjects.visEditor.toggleAdvancedParams('2');
-        await PageObjects.visEditor.inputValueInCodeEditor('{ "missing": 10 }');
-        await PageObjects.visEditor.clickGo();
+        await visEditor.toggleAdvancedParams('2');
+        await visEditor.inputValueInCodeEditor('{ "missing": 10 }');
+        await visEditor.clickGo();
 
         await inspector.open();
         await inspector.openInspectorRequestsView();
@@ -46,8 +52,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       after(async () => {
         await inspector.close();
-        await PageObjects.visEditor.removeDimension(2);
-        await PageObjects.visEditor.clickGo();
+        await visEditor.removeDimension(2);
+        await visEditor.clickGo();
       });
     });
 
@@ -58,10 +64,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await inspector.close();
 
         log.debug('Add Average Metric on machine.ram field');
-        await PageObjects.visEditor.clickBucket('Y-axis', 'metrics');
-        await PageObjects.visEditor.selectAggregation('Average', 'metrics');
-        await PageObjects.visEditor.selectField('machine.ram', 'metrics');
-        await PageObjects.visEditor.clickGo();
+        await visEditor.clickBucket('Y-axis', 'metrics');
+        await visEditor.selectAggregation('Average', 'metrics');
+        await visEditor.selectField('machine.ram', 'metrics');
+        await visEditor.clickGo();
         await inspector.open();
         await inspector.expectTableHeaders(['Count', 'Average machine.ram', 'All docs']);
         await inspector.close();
@@ -70,23 +76,23 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       describe('filtering on inspector table values', function () {
         before(async function () {
           log.debug('Add X-axis terms agg on machine.os.raw');
-          await PageObjects.visEditor.clickBucket('X-axis');
-          await PageObjects.visEditor.selectAggregation('Terms');
-          await PageObjects.visEditor.selectField('machine.os.raw');
-          await PageObjects.visEditor.setSize(2);
-          await PageObjects.visEditor.toggleOtherBucket(3);
-          await PageObjects.visEditor.clickGo();
+          await visEditor.clickBucket('X-axis');
+          await visEditor.selectAggregation('Terms');
+          await visEditor.selectField('machine.os.raw');
+          await visEditor.setSize(2);
+          await visEditor.toggleOtherBucket(3);
+          await visEditor.clickGo();
         });
 
         beforeEach(async function () {
           await inspector.open();
-          await PageObjects.visChart.waitForVisualizationRenderingStabilized();
+          await visChart.waitForVisualizationRenderingStabilized();
         });
 
         afterEach(async function () {
           await inspector.close();
           await filterBar.removeFilter('machine.os.raw');
-          await PageObjects.visChart.waitForVisualizationRenderingStabilized();
+          await visChart.waitForVisualizationRenderingStabilized();
         });
 
         it('should allow filtering for values', async function () {
@@ -97,13 +103,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           ]);
 
           await inspector.filterForTableCell({ column: 1, row: 1, filter: 'in' });
-          await PageObjects.visChart.waitForVisualization();
+          await visChart.waitForVisualization();
           await inspector.expectTableData([['win 8', '2,904', '13,031,579,645.108']]);
         });
 
         it('should allow filtering out values', async function () {
           await inspector.filterForTableCell({ column: 1, row: 1, filter: 'out' });
-          await PageObjects.visChart.waitForVisualization();
+          await visChart.waitForVisualization();
           await inspector.expectTableData([
             ['win xp', '2,858', '13,073,190,186.423'],
             ['win 7', '2,814', '13,186,695,551.251'],
@@ -113,7 +119,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         it('should allow filtering for other values', async function () {
           await inspector.filterForTableCell({ column: 1, row: 3, filter: 'in' });
-          await PageObjects.visChart.waitForVisualization();
+          await visChart.waitForVisualization();
           await inspector.expectTableData([
             ['win 7', '2,814', '13,186,695,551.251'],
             ['ios', '2,784', '13,009,497,206.823'],
@@ -123,7 +129,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         it('should allow filtering out other values', async function () {
           await inspector.filterForTableCell({ column: 1, row: 3, filter: 'out' });
-          await PageObjects.visChart.waitForVisualization();
+          await visChart.waitForVisualization();
           await inspector.expectTableData([
             ['win 8', '2,904', '13,031,579,645.108'],
             ['win xp', '2,858', '13,073,190,186.423'],

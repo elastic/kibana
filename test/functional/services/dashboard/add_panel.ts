@@ -1,10 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
+
 import { FtrService } from '../../ftr_provider_context';
 
 export class DashboardAddPanelService extends FtrService {
@@ -39,14 +41,19 @@ export class DashboardAddPanelService extends FtrService {
     });
   }
 
-  async clickMarkdownQuickButton() {
+  async clickAddMarkdownPanel() {
     await this.clickEditorMenuButton();
-    await this.clickVisType('markdown');
+    await this.clickAddNewPanelFromUIActionLink('Markdown text');
   }
 
-  async clickMapQuickButton() {
+  async clickAddMapPanel() {
     await this.clickEditorMenuButton();
-    await this.clickVisType('map');
+    await this.clickAddNewPanelFromUIActionLink('Maps');
+  }
+
+  async clickAddLensPanel() {
+    await this.clickEditorMenuButton();
+    await this.clickAddNewPanelFromUIActionLink('Lens');
   }
 
   async clickEditorMenuButton() {
@@ -60,16 +67,6 @@ export class DashboardAddPanelService extends FtrService {
 
   async expectEditorMenuClosed() {
     await this.testSubjects.missingOrFail('dashboardPanelSelectionFlyout');
-  }
-
-  async clickAggBasedVisualizations() {
-    this.log.debug('DashboardAddPanel.clickEditorMenuAggBasedMenuItem');
-    await this.clickAddNewPanelFromUIActionLink('Aggregation based');
-  }
-
-  async clickVisType(visType: string) {
-    this.log.debug('DashboardAddPanel.clickVisType');
-    await this.testSubjects.click(`visType-${visType}`);
   }
 
   async verifyEmbeddableFactoryGroupExists(groupId: string, expectExist: boolean = true) {
@@ -87,6 +84,7 @@ export class DashboardAddPanelService extends FtrService {
   }
 
   async clickAddNewPanelFromUIActionLink(type: string) {
+    await this.testSubjects.setValue('dashboardPanelSelectionFlyout__searchInput', type);
     await this.testSubjects.click(`create-action-${type}`);
   }
 

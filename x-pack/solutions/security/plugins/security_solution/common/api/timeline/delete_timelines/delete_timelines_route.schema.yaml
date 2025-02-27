@@ -1,0 +1,38 @@
+openapi: 3.0.0
+info:
+  title: Elastic Security - Timeline - Delete Timelines API
+  version: '2023-10-31'
+externalDocs:
+  url: https://www.elastic.co/guide/en/security/current/timeline-api-delete.html
+  description: Documentation
+paths:
+  /api/timeline:
+    delete:
+      x-labels: [serverless, ess]
+      x-codegen-enabled: true
+      operationId: DeleteTimelines
+      summary: Delete Timelines or Timeline templates
+      description: Delete one or more Timelines or Timeline templates.
+      tags:
+        - access:securitySolution
+      requestBody:
+        description: The IDs of the Timelines or Timeline templates to delete.
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [savedObjectIds]
+              properties:
+                savedObjectIds:
+                  type: array
+                  items:
+                    type: string
+                searchIds:
+                  type: array
+                  description: Saved search ids that should be deleted alongside the timelines
+                  items:
+                    type: string
+      responses:
+        '200':
+          description: Indicates the Timeline was successfully deleted.

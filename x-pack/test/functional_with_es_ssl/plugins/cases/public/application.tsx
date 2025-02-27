@@ -42,6 +42,9 @@ const permissions = {
   push: true,
   connectors: true,
   settings: true,
+  createComment: true,
+  reopenCase: true,
+  assign: true,
 };
 
 const attachments = [{ type: AttachmentType.user as const, comment: 'test' }];
@@ -53,7 +56,7 @@ const CasesFixtureAppWithContext: React.FC<CasesFixtureAppDeps> = (props) => {
   const selectCaseModal = cases.hooks.useCasesAddToExistingCaseModal();
 
   return (
-    <EuiPageTemplate template="empty">
+    <EuiPageTemplate>
       <EuiFlexGrid columns={1}>
         <EuiFlexItem>
           <EuiPanel style={{ height: 200 }}>

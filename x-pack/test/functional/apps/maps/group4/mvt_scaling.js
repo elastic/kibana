@@ -8,7 +8,7 @@
 import expect from '@kbn/expect';
 
 export default function ({ getPageObjects, getService }) {
-  const PageObjects = getPageObjects(['maps']);
+  const { maps } = getPageObjects(['maps']);
   const inspector = getService('inspector');
   const security = getService('security');
   const testSubjects = getService('testSubjects');
@@ -31,8 +31,8 @@ export default function ({ getPageObjects, getService }) {
 
       let mapboxStyle;
       before(async () => {
-        await PageObjects.maps.loadSavedMap('geo_shape_mvt');
-        mapboxStyle = await PageObjects.maps.getMapboxStyle();
+        await maps.loadSavedMap('geo_shape_mvt');
+        mapboxStyle = await maps.getMapboxStyle();
       });
 
       it('should request tiles from /internal/maps/mvt/getTile', async () => {
@@ -85,21 +85,21 @@ export default function ({ getPageObjects, getService }) {
             0.3819660112501051,
             'rgba(0,0,0,0)',
             1.381966011250105,
-            '#ecf1f7',
+            '#e4eefd',
             1.6614745084375788,
-            '#d9e3ef',
+            '#d3e3fe',
             1.9409830056250525,
-            '#c5d5e7',
+            '#c1d8fe',
             2.2204915028125263,
-            '#b2c7df',
+            '#afceff',
             2.5,
-            '#9eb9d8',
+            '#9dc3ff',
             2.7795084971874737,
-            '#8bacd0',
+            '#8bb8ff',
             3.0590169943749475,
-            '#769fc8',
+            '#77adff',
             3.338525491562421,
-            '#6092c0',
+            '#61a2ff',
           ],
           'fill-opacity': 1,
         });
@@ -124,7 +124,7 @@ export default function ({ getPageObjects, getService }) {
           ],
           layout: { visibility: 'visible' },
           paint: {
-            'line-color': '#9eb9d8',
+            'line-color': '#9dc3ff',
             'line-width': 3,
             'line-dasharray': [2, 1],
             'line-opacity': 1,
@@ -135,43 +135,37 @@ export default function ({ getPageObjects, getService }) {
 
     describe('filtering', () => {
       before(async () => {
-        await PageObjects.maps.loadSavedMap('MVT documents');
+        await maps.loadSavedMap('MVT documents');
       });
 
       async function getTileUrl() {
-        const mapboxStyle = await PageObjects.maps.getMapboxStyle();
+        const mapboxStyle = await maps.getMapboxStyle();
         return mapboxStyle.sources['a7ab2e06-145b-48c5-bd86-b633849017ad'].tiles[0];
       }
 
       describe('applyGlobalQuery: true, applyGlobalTime: true, applyForceRefresh: true', () => {
         after(async () => {
-          await PageObjects.maps.setAbsoluteRange(
-            'Sep 20, 2015 @ 00:00:00.000',
-            'Sep 20, 2015 @ 01:00:00.000'
-          );
-          await PageObjects.maps.setAndSubmitQuery('');
+          await maps.setAbsoluteRange('Sep 20, 2015 @ 00:00:00.000', 'Sep 20, 2015 @ 01:00:00.000');
+          await maps.setAndSubmitQuery('');
         });
 
         it('should update MVT URL when query changes', async () => {
           const prevTileUrl = await getTileUrl();
-          await PageObjects.maps.setAndSubmitQuery('machine.os.raw : "win 8"');
+          await maps.setAndSubmitQuery('machine.os.raw : "win 8"');
           const nextTileUrl = await getTileUrl();
           expect(prevTileUrl).to.not.eql(nextTileUrl);
         });
 
         it('should update MVT URL when time changes', async () => {
           const prevTileUrl = await getTileUrl();
-          await PageObjects.maps.setAbsoluteRange(
-            'Sep 20, 2015 @ 00:00:00.000',
-            'Sep 20, 2015 @ 03:00:00.000'
-          );
+          await maps.setAbsoluteRange('Sep 20, 2015 @ 00:00:00.000', 'Sep 20, 2015 @ 03:00:00.000');
           const nextTileUrl = await getTileUrl();
           expect(prevTileUrl).to.not.eql(nextTileUrl);
         });
 
         it('should update MVT URL when refresh clicked', async () => {
           const prevTileUrl = await getTileUrl();
-          await PageObjects.maps.refreshQuery();
+          await maps.refreshQuery();
           const nextTileUrl = await getTileUrl();
           expect(prevTileUrl).to.not.eql(nextTileUrl);
         });
@@ -179,40 +173,34 @@ export default function ({ getPageObjects, getService }) {
 
       describe('applyGlobalQuery: false, applyGlobalTime: true, applyForceRefresh: true', () => {
         before(async () => {
-          await PageObjects.maps.openLayerPanel('logstash-*');
+          await maps.openLayerPanel('logstash-*');
           await testSubjects.click('mapLayerPanelApplyGlobalQueryCheckbox');
-          await PageObjects.maps.waitForLayersToLoad();
+          await maps.waitForLayersToLoad();
         });
 
         after(async () => {
-          await PageObjects.maps.closeLayerPanel();
-          await PageObjects.maps.setAbsoluteRange(
-            'Sep 20, 2015 @ 00:00:00.000',
-            'Sep 20, 2015 @ 01:00:00.000'
-          );
-          await PageObjects.maps.setAndSubmitQuery('');
+          await maps.closeLayerPanel();
+          await maps.setAbsoluteRange('Sep 20, 2015 @ 00:00:00.000', 'Sep 20, 2015 @ 01:00:00.000');
+          await maps.setAndSubmitQuery('');
         });
 
         it('should not update MVT URL when query changes', async () => {
           const prevTileUrl = await getTileUrl();
-          await PageObjects.maps.setAndSubmitQuery('machine.os.raw : "win 8"');
+          await maps.setAndSubmitQuery('machine.os.raw : "win 8"');
           const nextTileUrl = await getTileUrl();
           expect(prevTileUrl).to.eql(nextTileUrl);
         });
 
         it('should update MVT URL when time changes', async () => {
           const prevTileUrl = await getTileUrl();
-          await PageObjects.maps.setAbsoluteRange(
-            'Sep 20, 2015 @ 00:00:00.000',
-            'Sep 20, 2015 @ 03:00:00.000'
-          );
+          await maps.setAbsoluteRange('Sep 20, 2015 @ 00:00:00.000', 'Sep 20, 2015 @ 03:00:00.000');
           const nextTileUrl = await getTileUrl();
           expect(prevTileUrl).to.not.eql(nextTileUrl);
         });
 
         it('should update MVT URL when refresh clicked', async () => {
           const prevTileUrl = await getTileUrl();
-          await PageObjects.maps.refreshQuery();
+          await maps.refreshQuery();
           const nextTileUrl = await getTileUrl();
           expect(prevTileUrl).to.not.eql(nextTileUrl);
         });
@@ -220,40 +208,34 @@ export default function ({ getPageObjects, getService }) {
 
       describe('applyGlobalQuery: true, applyGlobalTime: false, applyForceRefresh: true', () => {
         before(async () => {
-          await PageObjects.maps.openLayerPanel('logstash-*');
+          await maps.openLayerPanel('logstash-*');
           await testSubjects.click('mapLayerPanelApplyGlobalTimeCheckbox');
-          await PageObjects.maps.waitForLayersToLoad();
+          await maps.waitForLayersToLoad();
         });
 
         after(async () => {
-          await PageObjects.maps.closeLayerPanel();
-          await PageObjects.maps.setAbsoluteRange(
-            'Sep 20, 2015 @ 00:00:00.000',
-            'Sep 20, 2015 @ 01:00:00.000'
-          );
-          await PageObjects.maps.setAndSubmitQuery('');
+          await maps.closeLayerPanel();
+          await maps.setAbsoluteRange('Sep 20, 2015 @ 00:00:00.000', 'Sep 20, 2015 @ 01:00:00.000');
+          await maps.setAndSubmitQuery('');
         });
 
         it('should update MVT URL when query changes', async () => {
           const prevTileUrl = await getTileUrl();
-          await PageObjects.maps.setAndSubmitQuery('machine.os.raw : "win 8"');
+          await maps.setAndSubmitQuery('machine.os.raw : "win 8"');
           const nextTileUrl = await getTileUrl();
           expect(prevTileUrl).to.not.eql(nextTileUrl);
         });
 
         it('should not update MVT URL when time changes', async () => {
           const prevTileUrl = await getTileUrl();
-          await PageObjects.maps.setAbsoluteRange(
-            'Sep 20, 2015 @ 00:00:00.000',
-            'Sep 20, 2015 @ 03:00:00.000'
-          );
+          await maps.setAbsoluteRange('Sep 20, 2015 @ 00:00:00.000', 'Sep 20, 2015 @ 03:00:00.000');
           const nextTileUrl = await getTileUrl();
           expect(prevTileUrl).to.eql(nextTileUrl);
         });
 
         it('should update MVT URL when refresh clicked', async () => {
           const prevTileUrl = await getTileUrl();
-          await PageObjects.maps.refreshQuery();
+          await maps.refreshQuery();
           const nextTileUrl = await getTileUrl();
           expect(prevTileUrl).to.not.eql(nextTileUrl);
         });
@@ -261,40 +243,34 @@ export default function ({ getPageObjects, getService }) {
 
       describe('applyGlobalQuery: true, applyGlobalTime: true, applyForceRefresh: false', () => {
         before(async () => {
-          await PageObjects.maps.openLayerPanel('logstash-*');
+          await maps.openLayerPanel('logstash-*');
           await testSubjects.click('mapLayerPanelRespondToForceRefreshCheckbox');
-          await PageObjects.maps.waitForLayersToLoad();
+          await maps.waitForLayersToLoad();
         });
 
         after(async () => {
-          await PageObjects.maps.closeLayerPanel();
-          await PageObjects.maps.setAbsoluteRange(
-            'Sep 20, 2015 @ 00:00:00.000',
-            'Sep 20, 2015 @ 01:00:00.000'
-          );
-          await PageObjects.maps.setAndSubmitQuery('');
+          await maps.closeLayerPanel();
+          await maps.setAbsoluteRange('Sep 20, 2015 @ 00:00:00.000', 'Sep 20, 2015 @ 01:00:00.000');
+          await maps.setAndSubmitQuery('');
         });
 
         it('should update MVT URL when query changes', async () => {
           const prevTileUrl = await getTileUrl();
-          await PageObjects.maps.setAndSubmitQuery('machine.os.raw : "win 8"');
+          await maps.setAndSubmitQuery('machine.os.raw : "win 8"');
           const nextTileUrl = await getTileUrl();
           expect(prevTileUrl).to.not.eql(nextTileUrl);
         });
 
         it('should update MVT URL when time changes', async () => {
           const prevTileUrl = await getTileUrl();
-          await PageObjects.maps.setAbsoluteRange(
-            'Sep 20, 2015 @ 00:00:00.000',
-            'Sep 20, 2015 @ 03:00:00.000'
-          );
+          await maps.setAbsoluteRange('Sep 20, 2015 @ 00:00:00.000', 'Sep 20, 2015 @ 03:00:00.000');
           const nextTileUrl = await getTileUrl();
           expect(prevTileUrl).to.not.eql(nextTileUrl);
         });
 
         it('should not update MVT URL when refresh clicked', async () => {
           const prevTileUrl = await getTileUrl();
-          await PageObjects.maps.refreshQuery();
+          await maps.refreshQuery();
           const nextTileUrl = await getTileUrl();
           expect(prevTileUrl).to.eql(nextTileUrl);
         });

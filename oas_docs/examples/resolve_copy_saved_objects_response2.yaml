@@ -1,0 +1,24 @@
+summary: Resolve conflict errors
+description: >
+  The response for resolving missing reference errors for a visualization.
+  The result indicates a successful copy and all three objects are created.
+value:
+  marketing:
+    success: true
+    successCount: 3
+    successResults:
+      - id: my-vis
+        type: visualization
+        meta:
+          icon: visualizeApp
+          title: Look at my visualization
+      - id: my-canvas
+        type: canvas-workpad
+        meta:
+          icon: canvasApp
+          title: Look at my canvas
+      - id: my-dashboard
+        type: dashboard
+        meta:
+          icon: dashboardApp
+          title: Look at my dashboard

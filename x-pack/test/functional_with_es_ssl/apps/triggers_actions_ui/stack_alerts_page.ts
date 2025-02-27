@@ -26,6 +26,12 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const pageObjects = getPageObjects(['common', 'triggersActionsUI', 'header']);
   const log = getService('log');
   const retry = getService('retry');
+  const browser = getService('browser');
+
+  const loadAlertsPage = () =>
+    pageObjects.common.navigateToUrl('management', 'insightsAndAlerting/triggersActionsAlerts', {
+      shouldUseHashForSubUrl: false,
+    });
 
   describe('Stack alerts page', function () {
     describe('Loads the page with limited privileges', () => {
@@ -34,73 +40,75 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await security.testUser.setRoles(['alerts_and_actions_role']);
       });
 
+      after(async () => {
+        await security.testUser.restoreDefaults();
+      });
+
       it('Loads the page', async () => {
-        await pageObjects.common.navigateToUrl(
-          'management',
-          'insightsAndAlerting/triggersActionsAlerts',
-          {
-            shouldUseHashForSubUrl: false,
-          }
-        );
+        await loadAlertsPage();
         const headingText = await pageObjects.triggersActionsUI.getSectionHeadingText();
         expect(headingText).to.be('Alerts');
       });
 
-      it('Shows only allowed feature filters', async () => {
-        await pageObjects.common.navigateToUrl(
-          'management',
-          'insightsAndAlerting/triggersActionsAlerts',
-          {
-            shouldUseHashForSubUrl: false,
-          }
+      it('Loads the page with a pre-saved filters configuration', async () => {
+        await pageObjects.common.navigateToUrl('management');
+        await browser.setLocalStorageItem(
+          'alertsSearchBar.default.filterControls',
+          `{"initialChildControlState":{"0":{"type":"optionsListControl","order":0,"hideExclude":true,"hideSort":true,"placeholder":"","width":"small","grow":true,"dataViewId":"unified-alerts-dv","title":"Status","fieldName":"kibana.alert.status","selectedOptions":["active"],"hideActionBar":true,"persist":true,"hideExists":true},"1":{"type":"optionsListControl","order":1,"hideExclude":true,"hideSort":true,"placeholder":"","width":"small","grow":true,"dataViewId":"unified-alerts-dv","title":"Rule","fieldName":"kibana.alert.rule.name","hideExists":true},"2":{"type":"optionsListControl","order":2,"hideExclude":true,"hideSort":true,"placeholder":"","width":"small","grow":true,"dataViewId":"unified-alerts-dv","title":"Group","fieldName":"kibana.alert.group.value"},"3":{"type":"optionsListControl","order":3,"hideExclude":true,"hideSort":true,"placeholder":"","width":"small","grow":true,"dataViewId":"unified-alerts-dv","title":"Tags","fieldName":"tags"}},"labelPosition":"oneLine","chainingSystem":"HIERARCHICAL","autoApplySelections":true,"ignoreParentSettings":{"ignoreValidations":true},"editorConfig":{"hideWidthSettings":true,"hideDataViewSelector":true,"hideAdditionalSettings":true}}`
         );
+        await loadAlertsPage();
+        const filtersBar = await pageObjects.triggersActionsUI.getFilterGroupWrapper();
+        expect(filtersBar).to.not.be(null);
+      });
 
-        await pageObjects.header.waitUntilLoadingHasFinished();
+      describe('feature filters', function () {
+        this.tags('skipFIPS');
+        it('Shows only allowed feature filters', async () => {
+          await loadAlertsPage();
 
-        await retry.try(async () => {
-          if (!(await testSubjects.exists('queryBarMenuPanel'))) {
-            await pageObjects.triggersActionsUI.clickAlertsPageShowQueryMenuButton();
-          }
-          const quickFilters = await pageObjects.triggersActionsUI.getAlertsPageQuickFilters();
-          const solutionFilters = getSolutionNamesFromFilters(quickFilters);
-          expect(solutionFilters).to.have.length(2);
-          expect(solutionFilters[0]).to.equal('Stack');
-          // Observability is included because of multi-consumer rules
-          expect(solutionFilters[1]).to.equal('Observability');
+          await pageObjects.header.waitUntilLoadingHasFinished();
+
+          await retry.try(async () => {
+            if (!(await testSubjects.exists('queryBarMenuPanel'))) {
+              await pageObjects.triggersActionsUI.clickAlertsPageShowQueryMenuButton();
+            }
+            const quickFilters = await pageObjects.triggersActionsUI.getAlertsPageQuickFilters();
+            const solutionFilters = getSolutionNamesFromFilters(quickFilters);
+            expect(solutionFilters).to.have.length(2);
+            expect(solutionFilters[0]).to.equal('Stack');
+            // Observability is included because of multi-consumer rules
+            expect(solutionFilters[1]).to.equal('Observability');
+          });
         });
       });
     });
 
-    describe('Loads the page with actions but not alerting privilege', () => {
+    describe('Loads the page with actions but not alerting privilege', function () {
+      this.tags('skipFIPS');
       beforeEach(async () => {
         await security.testUser.restoreDefaults();
         await security.testUser.setRoles(['only_actions_role']);
       });
 
+      after(async () => {
+        await security.testUser.restoreDefaults();
+      });
+
       it('Loads the page but shows missing permission prompt', async () => {
-        await pageObjects.common.navigateToUrl(
-          'management',
-          'insightsAndAlerting/triggersActionsAlerts',
-          {
-            shouldUseHashForSubUrl: false,
-          }
-        );
+        await loadAlertsPage();
         const exists = await testSubjects.exists('noPermissionPrompt');
         expect(exists).to.be(true);
       });
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/184882
-    describe.skip('Loads the page', () => {
+    describe('Loads the page', () => {
       beforeEach(async () => {
         await security.testUser.restoreDefaults();
-        await pageObjects.common.navigateToUrl(
-          'management',
-          'insightsAndAlerting/triggersActionsAlerts',
-          {
-            shouldUseHashForSubUrl: false,
-          }
-        );
+        await loadAlertsPage();
+      });
+
+      after(async () => {
+        await security.testUser.restoreDefaults();
       });
 
       it('Loads the page', async () => {
@@ -129,10 +137,11 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           firstSolutionFilter = quickFilters
             .filter((_: number, f: any) => f.attribs['data-test-subj'].endsWith('rule types'))
             .first();
-          expect(firstSolutionFilter).to.not.be(null);
+
+          expect(typeof firstSolutionFilter?.attr('data-test-subj')).to.be('string');
         });
 
-        await testSubjects.click(firstSolutionFilter!.attr('data-test-subj'));
+        await testSubjects.click(firstSolutionFilter.attr('data-test-subj'));
 
         await retry.try(async () => {
           const appliedFilters = await pageObjects.triggersActionsUI.getAlertsPageAppliedFilters();
@@ -153,9 +162,11 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
               f.attribs['data-test-subj'].includes('Security rule types')
             )
             .first();
-          expect(filter).to.not.be(null);
+
+          expect(typeof filter?.attr('data-test-subj')).to.be('string');
         });
-        await testSubjects.click(filter!.attr('data-test-subj'));
+
+        await testSubjects.click(filter.attr('data-test-subj'));
 
         await retry.try(async () => {
           quickFilters = await pageObjects.triggersActionsUI.getAlertsPageQuickFilters();
@@ -184,10 +195,11 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
               return testSubj.includes('rule types') && !testSubj.includes('Security');
             })
             .first();
-          expect(filter).to.not.be(null);
+
+          expect(typeof filter?.attr('data-test-subj')).to.be('string');
         });
 
-        await testSubjects.click(filter!.attr('data-test-subj'));
+        await testSubjects.click(filter.attr('data-test-subj'));
 
         await retry.try(async () => {
           quickFilters = await pageObjects.triggersActionsUI.getAlertsPageQuickFilters();

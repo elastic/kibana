@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import { parse as parseCookie } from 'tough-cookie';
 import { expect } from 'expect';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import { parse as parseCookie } from 'tough-cookie';
+
+import type { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
   const supertestWithoutAuth = getService('supertestWithoutAuth');

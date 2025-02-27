@@ -1,5 +1,0 @@
-{
-  "type": "shared-common",
-  "id": "@kbn/unsaved-changes-prompt",
-  "owner": "@elastic/kibana-management"
-}

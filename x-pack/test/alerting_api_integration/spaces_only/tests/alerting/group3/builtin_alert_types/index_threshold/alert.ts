@@ -41,7 +41,7 @@ export default function ruleTests({ getService }: FtrProviderContext) {
     `.internal.alerts-${STACK_AAD_INDEX_NAME}.alerts-default-000001`
   );
 
-  describe('rule', async () => {
+  describe('rule', () => {
     let endDate: string;
     let connectorId: string;
     const objectRemover = new ObjectRemover(supertest);

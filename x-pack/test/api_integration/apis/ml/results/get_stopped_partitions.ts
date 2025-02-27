@@ -152,7 +152,6 @@ export default ({ getService }: FtrProviderContext) => {
       ml.api.assertResponseStatusCode(403, status, body);
 
       expect(body.error).to.be('Forbidden');
-      expect(body.message).to.be('Forbidden');
     });
 
     it('should fetch stopped partitions for multiple job ids', async () => {

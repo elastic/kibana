@@ -30,6 +30,9 @@ export function IndexLifecycleManagementPageProvider({ getService }: FtrProvider
     async clickCreatePolicyButton() {
       return await testSubjects.click('createPolicyButton');
     },
+    async createPolicyButtonExists() {
+      return await testSubjects.exists('createPolicyButton');
+    },
     async fillNewPolicyForm(policy: Policy) {
       const {
         policyName,
@@ -87,6 +90,20 @@ export function IndexLifecycleManagementPageProvider({ getService }: FtrProvider
 
     async getPolicyRow(name: string) {
       return await testSubjects.findAll(`policyTableRow-${name}`);
+    },
+
+    async flyoutHeaderText() {
+      return await testSubjects.getVisibleText('policyFlyoutTitle');
+    },
+    async closePolicyFlyout() {
+      await testSubjects.click('policyFlyoutCloseButton');
+    },
+    async flyoutHeader() {
+      return await testSubjects.find('policyFlyoutTitle');
+    },
+    async clickPolicyNameLink(index: number) {
+      const links = await testSubjects.findAll('policyTablePolicyNameLink');
+      await links[index].click();
     },
   };
 }

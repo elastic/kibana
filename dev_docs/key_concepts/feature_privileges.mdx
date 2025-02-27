@@ -179,8 +179,10 @@ public setup(core: CoreSetup, deps: FeatureControlExampleDeps) {
       {
         path: '/internal/my_plugin/sensitive_action',
         validate: false,
-        options: {
-          tags: ['access:my_closed_example_api'],
+        security: {
+          authz: {
+            requiredPrivileges: ['my_closed_example_api']
+          }
         },
       },
       async (context, request, response) => {
@@ -193,8 +195,11 @@ public setup(core: CoreSetup, deps: FeatureControlExampleDeps) {
     );
 }
 ```
+<DocCallOut>
+  For more information on the `security.authz` object and API authorization, please refer to our guide on <DocLink id="kibDevDocsSecurityAPIAuthorization" text="Configuring authorization on routes"/>
+</DocCallOut>
 
-Notice, we've added an `options.tags` property for the API route that returns sensitive information. This tag is then used in the privileges object as follow
+Notice, we've added a `security.authz.requiredPrivileges` property for the API route that returns sensitive information. This added configuration is then used in the privileges object as follow
 
 ```ts
 {
@@ -346,7 +351,6 @@ A deep dive into every option for the Kibana Feature configuration and what they
     ]
   }
   ```
-
 
 ### FeatureKibanaPrivileges Interface
 

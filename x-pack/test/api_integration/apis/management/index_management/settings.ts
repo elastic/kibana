@@ -47,7 +47,6 @@ export default function ({ getService }: FtrProviderContext) {
         'max_script_fields',
         'query',
         'format',
-        'frozen',
         'sort',
         'priority',
         'codec',
@@ -84,7 +83,7 @@ export default function ({ getService }: FtrProviderContext) {
       // Make sure none of the settings have been removed from ES API
       expectedSettings.forEach((setting) => {
         try {
-          expect(body.defaults.index.hasOwnProperty(setting)).to.be(true);
+          expect(Object.hasOwn(body.defaults.index, setting)).to.be(true);
         } catch {
           throw new Error(`Expected setting "${setting}" not found.`);
         }

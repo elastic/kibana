@@ -1,0 +1,86 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`List Custom Links fetches all custom links 1`] = `
+Object {
+  "index": ".apm-custom-link",
+  "query": Object {
+    "bool": Object {
+      "filter": Array [],
+    },
+  },
+  "size": 500,
+  "sort": Array [
+    Object {
+      "label.keyword": Object {
+        "order": "asc",
+      },
+    },
+  ],
+}
+`;
+
+exports[`List Custom Links filters custom links 1`] = `
+Object {
+  "index": ".apm-custom-link",
+  "query": Object {
+    "bool": Object {
+      "filter": Array [
+        Object {
+          "bool": Object {
+            "minimum_should_match": 1,
+            "should": Array [
+              Object {
+                "term": Object {
+                  "service.name": "foo",
+                },
+              },
+              Object {
+                "bool": Object {
+                  "must_not": Array [
+                    Object {
+                      "exists": Object {
+                        "field": "service.name",
+                      },
+                    },
+                  ],
+                },
+              },
+            ],
+          },
+        },
+        Object {
+          "bool": Object {
+            "minimum_should_match": 1,
+            "should": Array [
+              Object {
+                "term": Object {
+                  "transaction.name": "bar",
+                },
+              },
+              Object {
+                "bool": Object {
+                  "must_not": Array [
+                    Object {
+                      "exists": Object {
+                        "field": "transaction.name",
+                      },
+                    },
+                  ],
+                },
+              },
+            ],
+          },
+        },
+      ],
+    },
+  },
+  "size": 500,
+  "sort": Array [
+    Object {
+      "label.keyword": Object {
+        "order": "asc",
+      },
+    },
+  ],
+}
+`;

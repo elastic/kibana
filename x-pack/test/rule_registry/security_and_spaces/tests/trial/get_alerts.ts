@@ -47,6 +47,11 @@ export default ({ getService }: FtrProviderContext) => {
     before(async () => {
       await esArchiver.load('x-pack/test/functional/es_archives/rule_registry/alerts');
     });
+
+    after(async () => {
+      await esArchiver.unload('x-pack/test/functional/es_archives/rule_registry/alerts');
+    });
+
     describe('Users:', () => {
       // user with minimal_read and alerts_read privileges should be able to access apm alert
       it(`${obsMinReadAlertsRead.username} should be able to access the APM alert in ${SPACE1}`, async () => {

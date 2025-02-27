@@ -13,23 +13,26 @@ import {
 } from '@kbn/fleet-plugin/common';
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { skipIfNoDockerRegistry } from '../../helpers';
-import { setupFleetAndAgents } from '../agents/services';
 import { testUsers } from '../test_users';
 
 export default function (providerContext: FtrProviderContext) {
   const { getService } = providerContext;
   const supertest = getService('supertest');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
+  const fleetAndAgents = getService('fleetAndAgents');
 
   const deletePackage = async (name: string, version: string) => {
     await supertest.delete(`/api/fleet/epm/packages/${name}/${version}`).set('kbn-xsrf', 'xxxx');
   };
 
-  describe('bulk package upgrade api', async () => {
+  describe('bulk package upgrade api', () => {
     skipIfNoDockerRegistry(providerContext);
-    setupFleetAndAgents(providerContext);
 
-    describe('bulk package upgrade with a package already installed', async () => {
+    before(async () => {
+      await fleetAndAgents.setup();
+    });
+
+    describe('bulk package upgrade with a package already installed', () => {
       beforeEach(async () => {
         await supertest
           .post(`/api/fleet/epm/packages/multiple_versions/0.1.0`)
@@ -105,7 +108,7 @@ export default function (providerContext: FtrProviderContext) {
       });
     });
 
-    describe('bulk upgrade without package already installed', async () => {
+    describe('bulk upgrade without package already installed', () => {
       afterEach(async () => {
         await deletePackage('multiple_versions', '0.3.0');
       });

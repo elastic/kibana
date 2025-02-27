@@ -8,14 +8,7 @@
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const PageObjects = getPageObjects([
-    'common',
-    'spaceSelector',
-    'home',
-    'header',
-    'security',
-    'settings',
-  ]);
+  const { settings } = getPageObjects(['settings']);
   const spacesService = getService('spaces');
   const esArchiver = getService('esArchiver');
   const testSubjects = getService('testSubjects');
@@ -36,11 +29,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         disabledFeatures: [],
       });
 
-      await PageObjects.settings.navigateTo();
-      await PageObjects.settings.clickKibanaIndexPatterns();
-      await PageObjects.settings.createIndexPattern('log*');
+      await settings.navigateTo();
+      await settings.clickKibanaIndexPatterns();
+      await settings.createIndexPattern('log*');
 
-      await PageObjects.settings.clickKibanaIndexPatterns();
+      await settings.clickKibanaIndexPatterns();
 
       // click manage spaces on first entry
       // first avatar is in header, so we want the second one

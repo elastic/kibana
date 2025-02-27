@@ -5,8 +5,11 @@
  * 2.0.
  */
 
-import { FtrConfigProviderContext } from '@kbn/test';
 import { resolve } from 'path';
+
+import { ScoutTestRunConfigCategory } from '@kbn/scout-info';
+import type { FtrConfigProviderContext } from '@kbn/test';
+
 import { services } from './services';
 
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
@@ -16,6 +19,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const jwksPath = require.resolve('@kbn/security-api-integration-helpers/oidc/jwks.json');
 
   return {
+    testConfigCategory: ScoutTestRunConfigCategory.API_TEST,
     testFiles: [require.resolve('./tests/http_bearer')],
     servers: xPackAPITestsConfig.get('servers'),
     security: { disableTestUser: true },

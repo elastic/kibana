@@ -10,7 +10,7 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
-  const PageObjects = getPageObjects([
+  const { common, visualize, discover, visChart, visEditor, unifiedFieldList } = getPageObjects([
     'common',
     'visualize',
     'discover',
@@ -33,28 +33,28 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('appears correctly in discover', async function () {
-      await PageObjects.common.navigateToApp('discover');
-      await PageObjects.discover.waitUntilSearchingHasFinished();
-      await PageObjects.unifiedFieldList.clickFieldListItemAdd('histogram-content');
-      const rowData = await PageObjects.discover.getDocTableIndex(1);
+      await common.navigateToApp('discover');
+      await discover.waitUntilSearchingHasFinished();
+      await unifiedFieldList.clickFieldListItemAdd('histogram-content');
+      const rowData = await discover.getDocTableIndex(1);
       expect(rowData).to.contain('"values":[0.3,1,3,4.2,4.8]');
     });
 
     describe('works in visualizations', () => {
       before(async () => {
-        await PageObjects.visualize.navigateToNewAggBasedVisualization();
-        await PageObjects.visualize.clickDataTable();
-        await PageObjects.visualize.clickNewSearch('histogram-test');
-        await PageObjects.visChart.waitForVisualization();
-        await PageObjects.visEditor.clickMetricEditor();
+        await visualize.navigateToNewAggBasedVisualization();
+        await visualize.clickDataTable();
+        await visualize.clickNewSearch('histogram-test');
+        await visChart.waitForVisualization();
+        await visEditor.clickMetricEditor();
       });
 
       const renderTableForAggregation = async (aggregation: string) => {
-        await PageObjects.visEditor.selectAggregation(aggregation, 'metrics');
-        await PageObjects.visEditor.selectField('histogram-content', 'metrics');
-        await PageObjects.visEditor.clickGo();
+        await visEditor.selectAggregation(aggregation, 'metrics');
+        await visEditor.selectField('histogram-content', 'metrics');
+        await visEditor.clickGo();
 
-        return await PageObjects.visChart.getTableVisContent();
+        return visChart.getTableVisContent();
       };
 
       it('with percentiles aggregation', async () => {

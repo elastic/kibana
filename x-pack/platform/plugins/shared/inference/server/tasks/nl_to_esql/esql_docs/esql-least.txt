@@ -1,0 +1,29 @@
+# LEAST
+
+The LEAST function returns the smallest value from multiple columns.
+
+## Syntax
+
+`LEAST(first, rest)`
+
+### Parameters
+
+#### first
+
+The first column to evaluate.
+
+#### rest
+
+The remaining columns to evaluate.
+
+## Examples
+
+```esql
+ROW a = 10, b = 20
+| EVAL l = LEAST(a, b)
+```
+
+```esql
+ROW x = 5, y = 15, z = 10
+| EVAL min_value = LEAST(x, y, z)
+```

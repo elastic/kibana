@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { schema } from '@kbn/config-schema';
@@ -27,6 +28,7 @@ function applyTestsWithDisableUnsafeEvalSetTo(disableUnsafeEval: boolean) {
         csp: { disableUnsafeEval },
         plugins: { initialize: false },
         elasticsearch: { skipStartupConnectionCheck: true },
+        server: { restrictInternalApis: false },
       });
       await root.preboot();
     });
@@ -196,6 +198,21 @@ function applyTestsWithDisableUnsafeEvalSetTo(disableUnsafeEval: boolean) {
 
         expect(response.text).toBe('window.alert(42);');
       });
+    });
+
+    it('responses do not contain the elastic-api-version header', async () => {
+      const { http, httpResources } = await root.setup();
+
+      const router = http.createRouter('');
+      const resources = httpResources.createRegistrar(router);
+      const htmlBody = `<p>HtMlr00lz</p>`;
+      resources.register({ path: '/render-html', validate: false }, (context, req, res) =>
+        res.renderHtml({ body: htmlBody })
+      );
+
+      await root.start();
+      const { header } = await request.get(root, '/render-html').expect(200);
+      expect(header).not.toMatchObject({ 'elastic-api-version': expect.any(String) });
     });
   });
 }

@@ -1,0 +1,1321 @@
+openapi: 3.0.3
+info:
+  description: Interact with and manage endpoints running the Elastic Defend integration.
+  title: Security Endpoint Management API (Elastic Cloud and self-hosted)
+  version: '2023-10-31'
+servers:
+  - url: http://{kibana_host}:{port}
+    variables:
+      kibana_host:
+        default: localhost
+      port:
+        default: '5601'
+paths:
+  /api/endpoint/action:
+    get:
+      description: Get a list of all response actions.
+      operationId: EndpointGetActionsList
+      parameters:
+        - in: query
+          name: query
+          required: true
+          schema:
+            $ref: '#/components/schemas/GetEndpointActionListRouteQuery'
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+          description: OK
+      summary: Get response actions
+      tags:
+        - Security Endpoint Management API
+  /api/endpoint/action_status:
+    get:
+      description: Get the status of response actions for the specified agent IDs.
+      operationId: EndpointGetActionsStatus
+      parameters:
+        - in: query
+          name: query
+          required: true
+          schema:
+            type: object
+            properties:
+              agent_ids:
+                $ref: '#/components/schemas/AgentIds'
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ActionStatusSuccessResponse'
+          description: OK
+      summary: Get response actions status
+      tags:
+        - Security Endpoint Management API
+  /api/endpoint/action/{action_id}:
+    get:
+      description: Get the details of a response action using the action ID.
+      operationId: EndpointGetActionsDetails
+      parameters:
+        - in: path
+          name: action_id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+          description: OK
+      summary: Get action details
+      tags:
+        - Security Endpoint Management API
+  /api/endpoint/action/{action_id}/file/{file_id}:
+    get:
+      description: Get information for the specified file using the file ID.
+      operationId: EndpointFileInfo
+      parameters:
+        - in: path
+          name: action_id
+          required: true
+          schema:
+            type: string
+        - in: path
+          name: file_id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+          description: OK
+      summary: Get file information
+      tags:
+        - Security Endpoint Management API
+  /api/endpoint/action/{action_id}/file/{file_id}/download:
+    get:
+      description: Download a file from an endpoint.
+      operationId: EndpointFileDownload
+      parameters:
+        - in: path
+          name: action_id
+          required: true
+          schema:
+            type: string
+        - in: path
+          name: file_id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+          description: OK
+      summary: Download a file
+      tags:
+        - Security Endpoint Management API
+  /api/endpoint/action/execute:
+    post:
+      description: Run a shell command on an endpoint.
+      operationId: EndpointExecuteAction
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ExecuteRouteRequestBody'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+          description: OK
+      summary: Run a command
+      tags:
+        - Security Endpoint Management API
+  /api/endpoint/action/get_file:
+    post:
+      description: Get a file from an endpoint.
+      operationId: EndpointGetFileAction
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GetFileRouteRequestBody'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+          description: OK
+      summary: Get a file
+      tags:
+        - Security Endpoint Management API
+  /api/endpoint/action/isolate:
+    post:
+      description: >-
+        Isolate an endpoint from the network. The endpoint remains isolated
+        until it's released.
+      operationId: EndpointIsolateAction
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/IsolateRouteRequestBody'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+          description: OK
+      summary: Isolate an endpoint
+      tags:
+        - Security Endpoint Management API
+  /api/endpoint/action/kill_process:
+    post:
+      description: Terminate a running process on an endpoint.
+      operationId: EndpointKillProcessAction
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/KillProcessRouteRequestBody'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+          description: OK
+      summary: Terminate a process
+      tags:
+        - Security Endpoint Management API
+  /api/endpoint/action/running_procs:
+    post:
+      description: Get a list of all processes running on an endpoint.
+      operationId: EndpointGetProcessesAction
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GetProcessesRouteRequestBody'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+          description: OK
+      summary: Get running processes
+      tags:
+        - Security Endpoint Management API
+  /api/endpoint/action/runscript:
+    post:
+      description: Run a shell command on an endpoint.
+      operationId: RunScriptAction
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RunScriptRouteRequestBody'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+          description: OK
+      summary: Run a script
+      tags:
+        - Security Endpoint Management API
+  /api/endpoint/action/scan:
+    post:
+      description: Scan a specific file or directory on an endpoint for malware.
+      operationId: EndpointScanAction
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ScanRouteRequestBody'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+          description: OK
+      summary: Scan a file or directory
+      tags:
+        - Security Endpoint Management API
+  /api/endpoint/action/state:
+    get:
+      description: >-
+        Get a response actions state, which reports whether encryption is
+        enabled.
+      operationId: EndpointGetActionsState
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ActionStateSuccessResponse'
+          description: OK
+      summary: Get actions state
+      tags:
+        - Security Endpoint Management API
+  /api/endpoint/action/suspend_process:
+    post:
+      description: Suspend a running process on an endpoint.
+      operationId: EndpointSuspendProcessAction
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SuspendProcessRouteRequestBody'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+          description: OK
+      summary: Suspend a process
+      tags:
+        - Security Endpoint Management API
+  /api/endpoint/action/unisolate:
+    post:
+      description: Release an isolated endpoint, allowing it to rejoin a network.
+      operationId: EndpointUnisolateAction
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UnisolateRouteRequestBody'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+          description: OK
+      summary: Release an isolated endpoint
+      tags:
+        - Security Endpoint Management API
+  /api/endpoint/action/upload:
+    post:
+      description: Upload a file to an endpoint.
+      operationId: EndpointUploadAction
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UploadRouteRequestBody'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+          description: OK
+      summary: Upload a file
+      tags:
+        - Security Endpoint Management API
+  /api/endpoint/metadata:
+    get:
+      operationId: GetEndpointMetadataList
+      parameters:
+        - in: query
+          name: page
+          required: false
+          schema:
+            $ref: '#/components/schemas/Page'
+        - in: query
+          name: pageSize
+          required: false
+          schema:
+            $ref: '#/components/schemas/PageSize'
+        - in: query
+          name: kuery
+          required: false
+          schema:
+            $ref: '#/components/schemas/Kuery'
+        - in: query
+          name: hostStatuses
+          required: true
+          schema:
+            $ref: '#/components/schemas/HostStatuses'
+        - in: query
+          name: sortField
+          required: false
+          schema:
+            $ref: '#/components/schemas/SortField'
+        - in: query
+          name: sortDirection
+          required: false
+          schema:
+            $ref: '#/components/schemas/SortDirection'
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MetadataListResponse'
+          description: OK
+      summary: Get a metadata list
+      tags:
+        - Security Endpoint Management API
+  /api/endpoint/metadata/{id}:
+    get:
+      operationId: GetEndpointMetadata
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            example: ed518850-681a-4d60-bb98-e22640cae2a8
+            type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EndpointMetadataResponse'
+          description: OK
+      summary: Get metadata
+      tags:
+        - Security Endpoint Management API
+  /api/endpoint/policy_response:
+    get:
+      operationId: GetPolicyResponse
+      parameters:
+        - in: query
+          name: query
+          required: true
+          schema:
+            type: object
+            properties:
+              agentId:
+                $ref: '#/components/schemas/AgentId'
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+          description: OK
+      summary: Get a policy response
+      tags:
+        - Security Endpoint Management API
+  /api/endpoint/protection_updates_note/{package_policy_id}:
+    get:
+      operationId: GetProtectionUpdatesNote
+      parameters:
+        - in: path
+          name: package_policy_id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProtectionUpdatesNoteResponse'
+          description: OK
+      summary: Get a protection updates note
+      tags:
+        - Security Endpoint Management API
+    post:
+      operationId: CreateUpdateProtectionUpdatesNote
+      parameters:
+        - in: path
+          name: package_policy_id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                note:
+                  type: string
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProtectionUpdatesNoteResponse'
+          description: OK
+      summary: Create or update a protection updates note
+      tags:
+        - Security Endpoint Management API
+components:
+  schemas:
+    ActionStateSuccessResponse:
+      type: object
+      properties:
+        body:
+          type: object
+          properties:
+            data:
+              type: object
+              properties:
+                canEncrypt:
+                  type: boolean
+          required:
+            - data
+      required:
+        - body
+    ActionStatusSuccessResponse:
+      type: object
+      properties:
+        body:
+          type: object
+          properties:
+            data:
+              type: object
+              properties:
+                agent_id:
+                  $ref: '#/components/schemas/AgentId'
+                pending_actions:
+                  $ref: '#/components/schemas/PendingActionsSchema'
+              required:
+                - agent_id
+                - pending_actions
+          required:
+            - data
+      required:
+        - body
+    AgentId:
+      description: Agent ID
+      type: string
+    AgentIds:
+      minLength: 1
+      oneOf:
+        - items:
+            minLength: 1
+            type: string
+          maxItems: 50
+          minItems: 1
+          type: array
+        - minLength: 1
+          type: string
+    AgentTypes:
+      description: The host agent type (optional). Defaults to endpoint.
+      enum:
+        - endpoint
+        - sentinel_one
+        - crowdstrike
+        - microsoft_defender_endpoint
+      type: string
+    AlertIds:
+      description: A list of alerts `id`s.
+      items:
+        format: nonempty
+        minLength: 1
+        type: string
+      minItems: 1
+      type: array
+    CaseIds:
+      description: Case IDs to be updated (cannot contain empty strings)
+      items:
+        minLength: 1
+        type: string
+      minItems: 1
+      type: array
+    CloudFileScriptParameters:
+      type: object
+      properties:
+        cloudFile:
+          description: Script name in cloud storage.
+          minLength: 1
+          type: string
+        commandLine:
+          description: Command line arguments.
+          minLength: 1
+          type: string
+        timeout:
+          description: Timeout in seconds.
+          minimum: 1
+          type: integer
+      required:
+        - cloudFile
+    Command:
+      description: The command to be executed (cannot be an empty string)
+      enum:
+        - isolate
+        - unisolate
+        - kill-process
+        - suspend-process
+        - running-processes
+        - get-file
+        - execute
+        - upload
+        - scan
+      minLength: 1
+      type: string
+    Commands:
+      items:
+        $ref: '#/components/schemas/Command'
+      type: array
+    Comment:
+      description: Optional comment
+      type: string
+    EndDate:
+      description: End date
+      type: string
+    EndpointIds:
+      description: List of endpoint IDs (cannot contain empty strings)
+      items:
+        minLength: 1
+        type: string
+      minItems: 1
+      type: array
+    EndpointMetadataResponse:
+      example:
+        host_status: healthy
+        last_checkin: '2023-07-04T15:48:57.360Z'
+        metadata:
+          '@timestamp': '2023-07-04T15:48:57.3609346Z'
+          agent:
+            build:
+              original: >-
+                version: 7.16.0, compiled: Tue Nov 16 17:00:00 2021, branch:
+                7.16, commit: 73a51033db85e0fb3be1c934697ef6a2b08979ab
+            id: abb8a826-6812-448c-a571-6d8269b51449
+            type: endpoint
+            version: 7.16.0
+          data_stream:
+            dataset: endpoint.metadata
+            namespace: default
+            type: metrics
+          ecs:
+            version: 1.11.0
+          elastic:
+            agent:
+              id: abb8a826-6812-448c-a571-6d8269b51449
+          Endpoint:
+            capabilities:
+              - isolation
+            configuration:
+              isolation: false
+            policy:
+              applied:
+                endpoint_policy_version: '2'
+                id: d5371dcd-93b7-4627-af88-4084f7d6aa3e
+                name: test
+                status: success
+                version: '3'
+            state:
+              isolation: false
+            status: enrolled
+          event:
+            action: endpoint_metadata
+            agent_id_status: verified
+            category:
+              - host
+            created: '2023-07-04T15:48:57.3609346Z'
+            dataset: endpoint.metadata
+            id: MNtRc++KoKHXXwlj+++++OhZ
+            ingested: '2023-07-04T15:48:58Z'
+            kind: metric
+            module: endpoint
+            sequence: 43757
+            type:
+              - info
+          host:
+            architecture: x86_64
+            hostname: WinDev2104Eval
+            id: 17d9cabc-7edd-43bc-bacb-8da5f5e6c0e5
+            ip:
+              - 10.0.2.15
+              - fe80::21a6:63d3:d70e:e3ad
+              - 127.0.0.1
+              - '::1'
+            mac:
+              - 08:00:27:b1:1d:5a
+            name: WinDev2104Eval
+            os:
+              Ext:
+                variant: Windows 10 Enterprise Evaluation
+              family: windows
+              full: Windows 10 Enterprise Evaluation 20H2 (10.0.19042.906)
+              kernel: 20H2 (10.0.19042.906)
+              name: Windows
+              platform: windows
+              type: windows
+              version: 20H2 (10.0.19042.906)
+          message: Endpoint metadata
+          policy_info:
+            agent:
+              applied:
+                id: ed7e3720-4bad-11ec-a2a8-fb22e62a5753
+                revision: 3
+              configured:
+                id: ed7e3720-4bad-11ec-a2a8-fb22e62a5753
+                revision: 3
+            endpoint:
+              id: d5371dcd-93b7-4627-af88-4084f7d6aa3e
+              revision: 2
+      type: object
+      properties: {}
+    EntityId:
+      type: object
+      properties:
+        entity_id:
+          minLength: 1
+          type: string
+    ExecuteRouteRequestBody:
+      allOf:
+        - type: object
+          properties:
+            agent_type:
+              $ref: '#/components/schemas/AgentTypes'
+            alert_ids:
+              $ref: '#/components/schemas/AlertIds'
+            case_ids:
+              $ref: '#/components/schemas/CaseIds'
+            comment:
+              $ref: '#/components/schemas/Comment'
+            endpoint_ids:
+              $ref: '#/components/schemas/EndpointIds'
+            parameters:
+              $ref: '#/components/schemas/Parameters'
+          required:
+            - endpoint_ids
+        - type: object
+          properties:
+            parameters:
+              type: object
+              properties:
+                command:
+                  $ref: '#/components/schemas/Command'
+                timeout:
+                  $ref: '#/components/schemas/Timeout'
+              required:
+                - command
+          required:
+            - parameters
+    GetEndpointActionListRouteQuery:
+      type: object
+      properties:
+        agentIds:
+          $ref: '#/components/schemas/AgentIds'
+        agentTypes:
+          $ref: '#/components/schemas/AgentTypes'
+        commands:
+          $ref: '#/components/schemas/Commands'
+        endDate:
+          $ref: '#/components/schemas/EndDate'
+        page:
+          $ref: '#/components/schemas/Page'
+        pageSize:
+          default: 10
+          description: Number of items per page
+          maximum: 10000
+          minimum: 1
+          type: integer
+        startDate:
+          $ref: '#/components/schemas/StartDate'
+        types:
+          $ref: '#/components/schemas/Types'
+        userIds:
+          $ref: '#/components/schemas/UserIds'
+        withOutputs:
+          $ref: '#/components/schemas/WithOutputs'
+    GetFileRouteRequestBody:
+      allOf:
+        - type: object
+          properties:
+            agent_type:
+              $ref: '#/components/schemas/AgentTypes'
+            alert_ids:
+              $ref: '#/components/schemas/AlertIds'
+            case_ids:
+              $ref: '#/components/schemas/CaseIds'
+            comment:
+              $ref: '#/components/schemas/Comment'
+            endpoint_ids:
+              $ref: '#/components/schemas/EndpointIds'
+            parameters:
+              $ref: '#/components/schemas/Parameters'
+          required:
+            - endpoint_ids
+        - type: object
+          properties:
+            parameters:
+              type: object
+              properties:
+                path:
+                  type: string
+              required:
+                - path
+          required:
+            - parameters
+    GetProcessesRouteRequestBody:
+      type: object
+      properties:
+        agent_type:
+          $ref: '#/components/schemas/AgentTypes'
+        alert_ids:
+          $ref: '#/components/schemas/AlertIds'
+        case_ids:
+          $ref: '#/components/schemas/CaseIds'
+        comment:
+          $ref: '#/components/schemas/Comment'
+        endpoint_ids:
+          $ref: '#/components/schemas/EndpointIds'
+        parameters:
+          $ref: '#/components/schemas/Parameters'
+      required:
+        - endpoint_ids
+    HostPathScriptParameters:
+      type: object
+      properties:
+        commandLine:
+          description: Command line arguments.
+          minLength: 1
+          type: string
+        hostPath:
+          description: Absolute or relative path of script on host machine.
+          minLength: 1
+          type: string
+        timeout:
+          description: Timeout in seconds.
+          minimum: 1
+          type: integer
+      required:
+        - hostPath
+    HostStatuses:
+      description: A set of agent health statuses to filter by.
+      example:
+        - healthy
+        - updating
+      items:
+        enum:
+          - healthy
+          - offline
+          - updating
+          - inactive
+          - unenrolled
+        type: string
+      type: array
+    IsolateRouteRequestBody:
+      type: object
+      properties:
+        agent_type:
+          $ref: '#/components/schemas/AgentTypes'
+        alert_ids:
+          $ref: '#/components/schemas/AlertIds'
+        case_ids:
+          $ref: '#/components/schemas/CaseIds'
+        comment:
+          $ref: '#/components/schemas/Comment'
+        endpoint_ids:
+          $ref: '#/components/schemas/EndpointIds'
+        parameters:
+          $ref: '#/components/schemas/Parameters'
+      required:
+        - endpoint_ids
+    KillProcessRouteRequestBody:
+      allOf:
+        - type: object
+          properties:
+            agent_type:
+              $ref: '#/components/schemas/AgentTypes'
+            alert_ids:
+              $ref: '#/components/schemas/AlertIds'
+            case_ids:
+              $ref: '#/components/schemas/CaseIds'
+            comment:
+              $ref: '#/components/schemas/Comment'
+            endpoint_ids:
+              $ref: '#/components/schemas/EndpointIds'
+            parameters:
+              $ref: '#/components/schemas/Parameters'
+          required:
+            - endpoint_ids
+        - type: object
+          properties:
+            parameters:
+              oneOf:
+                - $ref: '#/components/schemas/Pid'
+                - $ref: '#/components/schemas/EntityId'
+                - type: object
+                  properties:
+                    process_name:
+                      description: Valid for SentinelOne agent type only
+                      minLength: 1
+                      type: string
+          required:
+            - parameters
+    Kuery:
+      description: A KQL string.
+      example: 'united.endpoint.host.os.name : ''Windows'''
+      type: string
+    MetadataListResponse:
+      example:
+        data:
+          - host_status: healthy
+            last_checkin: '2023-07-04T15:47:57.432Z'
+            metadata:
+              '@timestamp': '2023-07-04T15:47:57.432173535Z'
+              agent:
+                build:
+                  original: >-
+                    version: 7.16.0, compiled: Tue Nov 16 16:00:00 2021, branch:
+                    7.16, commit: 73a51033db85e0fb3be1c934697ef6a2b08979ab
+                id: 285297c6-3bff-4b83-9a07-f3e749801123
+                type: endpoint
+                version: 7.16.0
+              data_stream:
+                dataset: endpoint.metadata
+                namespace: default
+                type: metrics
+              ecs:
+                version: 1.11.0
+              elastic:
+                agent:
+                  id: 285297c6-3bff-4b83-9a07-f3e749801123
+              Endpoint:
+                capabilities:
+                  - isolation
+                configuration:
+                  isolation: false
+                policy:
+                  applied:
+                    endpoint_policy_version: '2'
+                    id: d5371dcd-93b7-4627-af88-4084f7d6aa3e
+                    name: test
+                    status: success
+                    version: '3'
+                state:
+                  isolation: false
+                status: enrolled
+              event:
+                action: endpoint_metadata
+                agent_id_status: verified
+                category:
+                  - host
+                created: '2023-07-04T15:47:57.432173535Z'
+                dataset: endpoint.metadata
+                id: MNtSXK/SkhEBnmgt++++++7S
+                ingested: '2023-07-04T15:47:58Z'
+                kind: metric
+                module: endpoint
+                sequence: 400
+                type:
+                  - info
+              host:
+                architecture: x86_64
+                hostname: david-Xubuntu
+                id: 0cfead88e2024bd8a27476352b5ab264
+                ip:
+                  - 127.0.0.1
+                  - '::1'
+                  - 10.0.2.15
+                  - fe80::2ac7:8e15:b957:2fa1
+                mac:
+                  - 08:00:27:e6:78:8b
+                name: david-Xubuntu
+                os:
+                  Ext:
+                    variant: Ubuntu
+                  family: ubuntu
+                  full: Ubuntu 20.04.2
+                  kernel: >-
+                    5.8.0-59-generic #66~20.04.1-Ubuntu SMP Thu Jun 17 11:14:10
+                    UTC 2021
+                  name: Linux
+                  platform: ubuntu
+                  type: linux
+                  version: 20.04.2
+              message: Endpoint metadata
+            policy_info:
+              agent:
+                applied:
+                  id: ed7e3720-4bad-11ec-a2a8-fb22e62a5753
+                  revision: 0
+                configured:
+                  id: ed7e3720-4bad-11ec-a2a8-fb22e62a5753
+                  revision: 3
+              endpoint:
+                id: d5371dcd-93b7-4627-af88-4084f7d6aa3e
+                revision: 2
+          - host_status: healthy
+            last_checkin: '2023-07-04T15:44:31.491Z'
+            metadata:
+              '@timestamp': '2023-07-04T15:44:31.4917849Z'
+              agent:
+                build:
+                  original: >-
+                    version: 7.16.0, compiled: Tue Nov 16 17:00:00 2021, branch:
+                    7.16, commit: 73a51033db85e0fb3be1c934697ef6a2b08979ab
+                id: abb8a826-6812-448c-a571-6d8269b51449
+                type: endpoint
+                version: 7.16.0
+              data_stream:
+                dataset: endpoint.metadata
+                namespace: default
+                type: metrics
+              ecs:
+                version: 1.11.0
+              elastic:
+                agent:
+                  id: abb8a826-6812-448c-a571-6d8269b51449
+              Endpoint:
+                capabilities:
+                  - isolation
+                configuration:
+                  isolation: false
+                policy:
+                  applied:
+                    endpoint_policy_version: '2'
+                    id: d5371dcd-93b7-4627-af88-4084f7d6aa3e
+                    name: test
+                    status: success
+                    version: '3'
+                state:
+                  isolation: false
+                status: enrolled
+              event:
+                action: endpoint_metadata
+                agent_id_status: verified
+                category:
+                  - host
+                created: '2023-07-04T15:44:31.4917849Z'
+                dataset: endpoint.metadata
+                id: MNtRc++KoKHXXwlj+++++/N9
+                ingested: '2023-07-04T15:44:33Z'
+                kind: metric
+                module: endpoint
+                sequence: 5159
+                type:
+                  - info
+              host:
+                architecture: x86_64
+                hostname: WinDev2104Eval
+                id: 17d9cabc-7edd-43bc-bacb-8da5f5e6c0e5
+                ip:
+                  - 10.0.2.15
+                  - fe80::21a6:63d3:d70e:e3ad
+                  - 127.0.0.1
+                  - '::1'
+                mac:
+                  - 08:00:27:b1:1d:5a
+                name: WinDev2104Eval
+                os:
+                  Ext:
+                    variant: Windows 10 Enterprise Evaluation
+                  family: windows
+                  full: Windows 10 Enterprise Evaluation 20H2 (10.0.19042.906)
+                  kernel: 20H2 (10.0.19042.906)
+                  name: Windows
+                  platform: windows
+                  type: windows
+                  version: 20H2 (10.0.19042.906)
+              message: Endpoint metadata
+            policy_info:
+              agent:
+                applied:
+                  id: ed7e3720-4bad-11ec-a2a8-fb22e62a5753
+                  revision: 0
+                configured:
+                  id: ed7e3720-4bad-11ec-a2a8-fb22e62a5753
+                  revision: 3
+              endpoint:
+                id: d5371dcd-93b7-4627-af88-4084f7d6aa3e
+                revision: 2
+        page: 0
+        pageSize: 10
+        sortDirection: desc
+        sortField: enrolled_at
+        total: 2
+      type: object
+      properties: {}
+    Page:
+      default: 1
+      description: Page number
+      example: 1
+      minimum: 1
+      type: integer
+    PageSize:
+      default: 10
+      description: Number of items per page
+      example: 10
+      maximum: 100
+      minimum: 1
+      type: integer
+    Parameters:
+      description: Optional parameters object
+      type: object
+    PendingActionDataType:
+      type: integer
+    PendingActionsSchema:
+      oneOf:
+        - type: object
+          properties:
+            execute:
+              $ref: '#/components/schemas/PendingActionDataType'
+            get-file:
+              $ref: '#/components/schemas/PendingActionDataType'
+            isolate:
+              $ref: '#/components/schemas/PendingActionDataType'
+            kill-process:
+              $ref: '#/components/schemas/PendingActionDataType'
+            running-processes:
+              $ref: '#/components/schemas/PendingActionDataType'
+            scan:
+              $ref: '#/components/schemas/PendingActionDataType'
+            suspend-process:
+              $ref: '#/components/schemas/PendingActionDataType'
+            unisolate:
+              $ref: '#/components/schemas/PendingActionDataType'
+            upload:
+              $ref: '#/components/schemas/PendingActionDataType'
+        - additionalProperties: true
+          type: object
+    Pid:
+      type: object
+      properties:
+        pid:
+          minimum: 1
+          type: integer
+    ProtectionUpdatesNoteResponse:
+      type: object
+      properties:
+        note:
+          type: string
+    RawScriptParameters:
+      type: object
+      properties:
+        commandLine:
+          description: Command line arguments.
+          minLength: 1
+          type: string
+        raw:
+          description: Raw script content.
+          minLength: 1
+          type: string
+        timeout:
+          description: Timeout in seconds.
+          minimum: 1
+          type: integer
+      required:
+        - raw
+    RunScriptRouteRequestBody:
+      type: object
+      properties:
+        parameters:
+          description: >-
+            Exactly one of 'Raw', 'HostPath', or 'CloudFile' must be provided.
+            CommandLine and Timeout are optional for all.
+          oneOf:
+            - $ref: '#/components/schemas/RawScriptParameters'
+            - $ref: '#/components/schemas/HostPathScriptParameters'
+            - $ref: '#/components/schemas/CloudFileScriptParameters'
+      required:
+        - parameters
+    ScanRouteRequestBody:
+      allOf:
+        - type: object
+          properties:
+            agent_type:
+              $ref: '#/components/schemas/AgentTypes'
+            alert_ids:
+              $ref: '#/components/schemas/AlertIds'
+            case_ids:
+              $ref: '#/components/schemas/CaseIds'
+            comment:
+              $ref: '#/components/schemas/Comment'
+            endpoint_ids:
+              $ref: '#/components/schemas/EndpointIds'
+            parameters:
+              $ref: '#/components/schemas/Parameters'
+          required:
+            - endpoint_ids
+        - type: object
+          properties:
+            parameters:
+              type: object
+              properties:
+                path:
+                  type: string
+              required:
+                - path
+          required:
+            - parameters
+    SortDirection:
+      description: Determines the sort order.
+      enum:
+        - asc
+        - desc
+      example: desc
+      type: string
+    SortField:
+      description: Determines which field is used to sort the results.
+      enum:
+        - enrolled_at
+        - metadata.host.hostname
+        - host_status
+        - metadata.Endpoint.policy.applied.name
+        - metadata.Endpoint.policy.applied.status
+        - metadata.host.os.name
+        - metadata.host.ip
+        - metadata.agent.version
+        - last_checkin
+      example: enrolled_at
+      type: string
+    StartDate:
+      description: Start date
+      type: string
+    SuccessResponse:
+      type: object
+      properties: {}
+    SuspendProcessRouteRequestBody:
+      allOf:
+        - type: object
+          properties:
+            agent_type:
+              $ref: '#/components/schemas/AgentTypes'
+            alert_ids:
+              $ref: '#/components/schemas/AlertIds'
+            case_ids:
+              $ref: '#/components/schemas/CaseIds'
+            comment:
+              $ref: '#/components/schemas/Comment'
+            endpoint_ids:
+              $ref: '#/components/schemas/EndpointIds'
+            parameters:
+              $ref: '#/components/schemas/Parameters'
+          required:
+            - endpoint_ids
+        - type: object
+          properties:
+            parameters:
+              oneOf:
+                - $ref: '#/components/schemas/Pid'
+                - $ref: '#/components/schemas/EntityId'
+          required:
+            - parameters
+    Timeout:
+      description: The maximum timeout value in milliseconds (optional)
+      minimum: 1
+      type: integer
+    Type:
+      description: Type of response action
+      enum:
+        - automated
+        - manual
+      type: string
+    Types:
+      description: List of types of response actions
+      items:
+        $ref: '#/components/schemas/Type'
+      maxLength: 2
+      minLength: 1
+      type: array
+    UnisolateRouteRequestBody:
+      type: object
+      properties:
+        agent_type:
+          $ref: '#/components/schemas/AgentTypes'
+        alert_ids:
+          $ref: '#/components/schemas/AlertIds'
+        case_ids:
+          $ref: '#/components/schemas/CaseIds'
+        comment:
+          $ref: '#/components/schemas/Comment'
+        endpoint_ids:
+          $ref: '#/components/schemas/EndpointIds'
+        parameters:
+          $ref: '#/components/schemas/Parameters'
+      required:
+        - endpoint_ids
+    UploadRouteRequestBody:
+      allOf:
+        - type: object
+          properties:
+            agent_type:
+              $ref: '#/components/schemas/AgentTypes'
+            alert_ids:
+              $ref: '#/components/schemas/AlertIds'
+            case_ids:
+              $ref: '#/components/schemas/CaseIds'
+            comment:
+              $ref: '#/components/schemas/Comment'
+            endpoint_ids:
+              $ref: '#/components/schemas/EndpointIds'
+            parameters:
+              $ref: '#/components/schemas/Parameters'
+          required:
+            - endpoint_ids
+        - type: object
+          properties:
+            file:
+              format: binary
+              type: string
+            parameters:
+              type: object
+              properties:
+                overwrite:
+                  default: false
+                  type: boolean
+          required:
+            - parameters
+            - file
+    UserIds:
+      description: User IDs
+      oneOf:
+        - items:
+            minLength: 1
+            type: string
+          minItems: 1
+          type: array
+        - minLength: 1
+          type: string
+    WithOutputs:
+      description: Shows detailed outputs for an action response
+      oneOf:
+        - items:
+            minLength: 1
+            type: string
+          minItems: 1
+          type: array
+        - minLength: 1
+          type: string
+  securitySchemes:
+    BasicAuth:
+      scheme: basic
+      type: http
+security:
+  - BasicAuth: []
+tags:
+  - description: Interact with and manage endpoints running the Elastic Defend integration.
+    name: Security Endpoint Management API
+    x-displayName: Security endpoint management

@@ -16,7 +16,7 @@ Journey runs a flow of user interactions with Kibana in a browser and collects A
 It is possible to instrument Kibana with [custom performance metrics](https://docs.elastic.dev/kibana-dev-docs/tutorial/performance/adding_custom_performance_metrics),
 that will provide more detailed information about feature performance.
 
-Journeys core is [kbn-journeys](packages/kbn-journeys/README.mdx) package. It is a function test by design and is powered
+Journeys core is [kbn-journeys](src/platform/packages/private/kbn-journeys/README.mdx) package. It is a function test by design and is powered
 by [Playwright](https://playwright.dev/) end-to-end testing tool.
 
 ### Adding a new performance journey
@@ -88,6 +88,27 @@ simulate real life internet connection. This means that all requests have a fixe
 
 In order to keep track on performance metrics stability, journeys are run on main branch with a scheduled interval.
 Bare metal machine is used to produce results as stable and reproducible as possible.
+
+#### Running subset of journeys for the PR
+
+Some code changes might affect the Kibana performance and it might be benefitial to run relevant journeys against the PR
+and compare performance metrics vs. the ones on main branch.
+
+In oder to trigger the build for Kibana PR, you can follow these steps:
+
+- Create a new kibana-single-user-performance [build](https://buildkite.com/elastic/kibana-single-user-performance#new)
+- Provide the following arguments:
+  - Branch: `refs/pull/<PR_number>/head`
+  - Under Options, set the environment variable: `JOURNEYS_GROUP=<group_name>`
+
+Currently supported journey groups:
+
+- kibanaStartAndLoad
+- crud
+- dashboard
+- discover
+- maps
+- ml
 
 #### Machine specifications
 

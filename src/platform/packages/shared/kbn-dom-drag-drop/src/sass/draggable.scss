@@ -1,0 +1,45 @@
+@import './drag_drop_mixins';
+
+// Draggable item
+.domDraggable {
+  cursor: grab;
+  @include mixinDomDragDrop;
+  @include mixinDomDraggableHover;
+
+  // Include a possible nested button like when using FieldButton
+  & .kbnFieldButton__button,
+  & .euiLink {
+    cursor: grab;
+  }
+
+  &:focus {
+    @include euiFocusRing;
+  }
+}
+
+.domDraggable--reorderable {
+  transform: translateY(0);
+  transition: transform $euiAnimSpeedFast ease-in-out;
+  position: relative;
+  z-index: $domDragDropZLevel1;
+}
+
+.domDraggable__keyboardHandler {
+  top: 0;
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  border-radius: $euiBorderRadius;
+
+  &:focus,
+  &:focus-within {
+    pointer-events: none;
+    z-index: $domDragDropZLevel2;
+
+    @include euiFocusRing;
+  }
+}
+
+.domDraggable_active--move, .domDraggable_dragover_keyboard--move {
+  opacity: 0;
+}

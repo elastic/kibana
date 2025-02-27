@@ -9,15 +9,15 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const PageObjects = getPageObjects(['visualize', 'lens', 'common', 'header']);
+  const { visualize, lens } = getPageObjects(['visualize', 'lens']);
   const find = getService('find');
   const listingTable = getService('listingTable');
   const kibanaServer = getService('kibanaServer');
 
   async function loadSavedLens(title: string) {
-    await PageObjects.visualize.gotoVisualizationLandingPage();
+    await visualize.gotoVisualizationLandingPage();
     await listingTable.searchForItemWithName(title);
-    await PageObjects.lens.clickVisualizeListItemTitle(title);
+    await lens.clickVisualizeListItemTitle(title);
   }
 
   async function expectLegendOneItem(name: string, value?: string) {
@@ -47,15 +47,15 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         'timepicker:timeDefaults':
           '{  "from": "2015-09-18T19:37:13.000Z",  "to": "2015-09-22T23:30:30.000Z"}',
       });
-      await PageObjects.visualize.gotoVisualizationLandingPage({ forceRefresh: true });
+      await visualize.gotoVisualizationLandingPage({ forceRefresh: true });
     });
 
     describe('xy chart legend statistics', () => {
       it('shows table with legend statistics', async () => {
         await loadSavedLens('lnsXYvis');
 
-        await PageObjects.lens.toggleToolbarPopover('lnsLegendButton');
-        await PageObjects.lens.selectOptionFromComboBox('lnsLegendStatisticsSelect', [
+        await lens.toggleToolbarPopover('lnsLegendButton');
+        await lens.selectOptionFromComboBox('lnsLegendStatisticsSelect', [
           'average',
           'minimum',
           'maximum',
@@ -89,7 +89,7 @@ Max
           const title = 'xyValuesInLegendTrue';
           await loadSavedLens(title);
           await expectLegendOneItem('Count of records', '2');
-          await PageObjects.lens.save(title);
+          await lens.save(title);
           await loadSavedLens(title);
           await expectLegendOneItem('Count of records', '2');
         });

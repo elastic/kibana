@@ -1,0 +1,41 @@
+title: Create or update case request properties for a Jira connector
+required:
+  - fields
+  - id
+  - name
+  - type
+description: Defines properties for connectors when type is `.jira`.
+type: object
+properties:
+  fields:
+    description: An object containing the connector fields. If you want to omit any individual field, specify null as its value.
+    type: object
+    required: 
+      - issueType
+      - parent
+      - priority
+    properties:
+      issueType:
+        description: The type of issue.
+        type: string
+        nullable: true
+      parent:
+        description: The key of the parent issue, when the issue type is sub-task.
+        type: string
+        nullable: true
+      priority:
+        description: The priority of the issue.
+        type: string
+        nullable: true
+  id:
+    description: The identifier for the connector. To retrieve connector IDs, use the find connectors API.
+    type: string
+  name:
+    description: The name of the connector. 
+    type: string
+  type:
+    description: The type of connector.
+    type: string
+    example: .jira
+    enum:
+      - .jira

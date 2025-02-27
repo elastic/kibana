@@ -15,7 +15,13 @@ export default function ({
   getService,
   updateBaselines,
 }: FtrProviderContext & { updateBaselines: boolean }) {
-  const PageObjects = getPageObjects(['common', 'maps', 'header', 'home', 'timePicker']);
+  const { common, maps, header, home, timePicker } = getPageObjects([
+    'common',
+    'maps',
+    'header',
+    'home',
+    'timePicker',
+  ]);
   const mapsHelper = getService('mapsHelper');
   const screenshot = getService('screenshots');
   const testSubjects = getService('testSubjects');
@@ -103,21 +109,21 @@ export default function ({
     spaces.forEach(({ space, basePath }) => {
       describe('space: ' + space + ', name: ecommerce', () => {
         before(async () => {
-          await PageObjects.common.navigateToActualUrl('home', '/tutorial_directory/sampleData', {
+          await common.navigateToActualUrl('home', '/tutorial_directory/sampleData', {
             basePath,
           });
-          await PageObjects.header.waitUntilLoadingHasFinished();
-          await PageObjects.home.launchSampleMap('ecommerce');
-          await PageObjects.header.waitUntilLoadingHasFinished();
-          await PageObjects.maps.waitForLayersToLoad();
-          await PageObjects.maps.toggleEmsBasemapLayerVisibility();
-          await PageObjects.maps.toggleLayerVisibility('United Kingdom');
-          await PageObjects.maps.toggleLayerVisibility('France');
-          await PageObjects.maps.toggleLayerVisibility('United States');
-          await PageObjects.maps.toggleLayerVisibility('World Countries');
-          await PageObjects.timePicker.setCommonlyUsedTime('sample_data range');
-          await PageObjects.maps.enterFullScreen();
-          await PageObjects.maps.closeLegend();
+          await header.waitUntilLoadingHasFinished();
+          await home.launchSampleMap('ecommerce');
+          await header.waitUntilLoadingHasFinished();
+          await maps.waitForLayersToLoad();
+          await maps.toggleEmsBasemapLayerVisibility();
+          await maps.toggleLayerVisibility('United Kingdom');
+          await maps.toggleLayerVisibility('France');
+          await maps.toggleLayerVisibility('United States');
+          await maps.toggleLayerVisibility('World Countries');
+          await timePicker.setCommonlyUsedTime('sample_data range');
+          await maps.enterFullScreen();
+          await maps.closeLegend();
           const mapContainerElement = await testSubjects.find('mapContainer');
           await mapContainerElement.moveMouseTo({ xOffset: 0, yOffset: 0 });
         });
@@ -131,17 +137,17 @@ export default function ({
       });
       describe('space: ' + space + ', name: flights', () => {
         before(async () => {
-          await PageObjects.common.navigateToActualUrl('home', '/tutorial_directory/sampleData', {
+          await common.navigateToActualUrl('home', '/tutorial_directory/sampleData', {
             basePath,
           });
-          await PageObjects.header.waitUntilLoadingHasFinished();
-          await PageObjects.home.launchSampleMap('flights');
-          await PageObjects.header.waitUntilLoadingHasFinished();
-          await PageObjects.maps.waitForLayersToLoad();
-          await PageObjects.maps.toggleEmsBasemapLayerVisibility();
-          await PageObjects.timePicker.setCommonlyUsedTime('sample_data range');
-          await PageObjects.maps.enterFullScreen();
-          await PageObjects.maps.closeLegend();
+          await header.waitUntilLoadingHasFinished();
+          await home.launchSampleMap('flights');
+          await header.waitUntilLoadingHasFinished();
+          await maps.waitForLayersToLoad();
+          await maps.toggleEmsBasemapLayerVisibility();
+          await timePicker.setCommonlyUsedTime('sample_data range');
+          await maps.enterFullScreen();
+          await maps.closeLegend();
           const mapContainerElement = await testSubjects.find('mapContainer');
           await mapContainerElement.moveMouseTo({ xOffset: 0, yOffset: 0 });
         });
@@ -155,18 +161,18 @@ export default function ({
       });
       describe('space: ' + space + ', name: web logs', () => {
         before(async () => {
-          await PageObjects.common.navigateToActualUrl('home', '/tutorial_directory/sampleData', {
+          await common.navigateToActualUrl('home', '/tutorial_directory/sampleData', {
             basePath,
           });
-          await PageObjects.header.waitUntilLoadingHasFinished();
-          await PageObjects.home.launchSampleMap('logs');
-          await PageObjects.header.waitUntilLoadingHasFinished();
-          await PageObjects.maps.waitForLayersToLoad();
-          await PageObjects.maps.toggleEmsBasemapLayerVisibility();
+          await header.waitUntilLoadingHasFinished();
+          await home.launchSampleMap('logs');
+          await header.waitUntilLoadingHasFinished();
+          await maps.waitForLayersToLoad();
+          await maps.toggleEmsBasemapLayerVisibility();
           await mapsHelper.toggleLayerVisibilityTotalRequests();
-          await PageObjects.timePicker.setCommonlyUsedTime('sample_data range');
-          await PageObjects.maps.enterFullScreen();
-          await PageObjects.maps.closeLegend();
+          await timePicker.setCommonlyUsedTime('sample_data range');
+          await maps.enterFullScreen();
+          await maps.closeLegend();
           const mapContainerElement = await testSubjects.find('mapContainer');
           await mapContainerElement.moveMouseTo({ xOffset: 0, yOffset: 0 });
         });

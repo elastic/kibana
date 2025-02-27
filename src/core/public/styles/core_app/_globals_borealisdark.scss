@@ -1,0 +1,9 @@
+// v9 borealis theme global scope
+//
+// prepended to all .scss imports (from JS, when borealis dark theme selected)
+
+@import '@elastic/eui-theme-borealis/src/theme_dark.scss';
+
+@import './mixins';
+
+$kbnThemeVersion: 'borealisdark';

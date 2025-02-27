@@ -1,0 +1,28 @@
+# TO_IP
+
+The TO_IP function converts an input string into an IP value.
+
+## Syntax
+
+`TO_IP(field)`
+
+### Parameters
+
+#### field
+
+This is the input value. It can be a single or multi-valued column or an expression.
+
+## Examples
+
+```esql
+ROW str1 = "1.1.1.1", str2 = "foo"
+| EVAL ip1 = TO_IP(str1), ip2 = TO_IP(str2)
+| WHERE CIDR_MATCH(ip1, "1.0.0.0/8")
+```
+
+```esql
+ROW ip_str = "192.168.1.1"
+| EVAL ip = TO_IP(ip_str)
+| KEEP ip
+```
+

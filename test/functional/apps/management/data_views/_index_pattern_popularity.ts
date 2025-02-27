@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import expect from '@kbn/expect';
@@ -64,6 +65,26 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const popularity = await PageObjects.settings.getPopularity();
       log.debug('popularity = ' + popularity);
       expect(popularity).to.be('1');
+    });
+
+    it('changing popularity for one field does not affect the other', async function () {
+      expect(await PageObjects.settings.getPopularity()).to.be('1');
+      await PageObjects.settings.setPopularity(5);
+      await PageObjects.settings.controlChangeSave();
+
+      await PageObjects.settings.openControlsByName('bytes');
+      expect(await PageObjects.settings.getPopularity()).to.be('0');
+      await testSubjects.click('toggleAdvancedSetting');
+      await PageObjects.settings.setPopularity(7);
+      await PageObjects.settings.controlChangeSave();
+
+      await browser.refresh();
+
+      await PageObjects.settings.openControlsByName('geo.coordinates');
+      expect(await PageObjects.settings.getPopularity()).to.be('5');
+      await PageObjects.settings.closeIndexPatternFieldEditor();
+      await PageObjects.settings.openControlsByName('bytes');
+      expect(await PageObjects.settings.getPopularity()).to.be('7');
     });
   }); // end 'change popularity'
 }

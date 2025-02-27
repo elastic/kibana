@@ -91,8 +91,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         require.resolve('./acme_text.png')
       );
       await goToSettings();
-      const logo = await testSubjects.find('logo');
-      const img = await logo.findByCssSelector('.chrHeaderLogo__mark');
+      const img = await testSubjects.find('logoMark');
       const imgSrc = (await img.getAttribute('src')) ?? '';
       expect(imgSrc.startsWith('data:image/png')).to.be(true);
     });

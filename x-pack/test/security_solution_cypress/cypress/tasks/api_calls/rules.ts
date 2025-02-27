@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import moment from 'moment';
+import moment from 'moment-timezone';
 import {
   DETECTION_ENGINE_RULES_BULK_ACTION,
   DETECTION_ENGINE_RULES_URL,
@@ -39,6 +39,37 @@ export const createRule = (
   );
 };
 
+export const patchRule = (
+  ruleId: string,
+  updateData: Partial<RuleCreateProps>
+): Cypress.Chainable<Cypress.Response<RuleResponse>> => {
+  return cy.currentSpace().then((spaceId) =>
+    rootRequest<RuleResponse>({
+      method: 'PATCH',
+      url: spaceId ? getSpaceUrl(spaceId, DETECTION_ENGINE_RULES_URL) : DETECTION_ENGINE_RULES_URL,
+      body: {
+        rule_id: ruleId,
+        ...updateData,
+      },
+      failOnStatusCode: false,
+    })
+  );
+};
+
+export const findRuleByRuleId = (
+  ruleId: string
+): Cypress.Chainable<Cypress.Response<RuleResponse>> => {
+  return cy.currentSpace().then((spaceId) =>
+    rootRequest<RuleResponse>({
+      method: 'GET',
+      url: `${
+        spaceId ? getSpaceUrl(spaceId, DETECTION_ENGINE_RULES_URL) : DETECTION_ENGINE_RULES_URL
+      }?rule_id=${ruleId}`,
+      failOnStatusCode: false,
+    })
+  );
+};
+
 /**
  * Snoozes a rule via API
  *
@@ -52,7 +83,7 @@ export const snoozeRule = (id: string, duration: number): Cypress.Chainable =>
     body: {
       snooze_schedule: {
         duration,
-        rRule: { dtstart: new Date().toISOString(), count: 1, tzid: moment().format('zz') },
+        rRule: { dtstart: new Date().toISOString(), count: 1, tzid: moment.tz.guess() },
       },
     },
     failOnStatusCode: false,

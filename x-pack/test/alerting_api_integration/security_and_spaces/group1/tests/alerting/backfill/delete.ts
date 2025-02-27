@@ -8,7 +8,7 @@
 import expect from '@kbn/expect';
 import moment from 'moment';
 import { asyncForEach } from '@kbn/std';
-import { GetResponse } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { GetResponse } from '@elastic/elasticsearch/lib/api/types';
 import { UserAtSpaceScenarios } from '../../../../scenarios';
 import {
   getTestRuleData,
@@ -31,7 +31,7 @@ export default function deleteBackfillTests({ getService }: FtrProviderContext) 
     const end = moment().utc().startOf('day').subtract(1, 'day').toISOString();
 
     afterEach(async () => {
-      asyncForEach(backfillIds, async ({ id, spaceId }: { id: string; spaceId: string }) => {
+      await asyncForEach(backfillIds, async ({ id, spaceId }: { id: string; spaceId: string }) => {
         await supertest
           .delete(`${getUrlPrefix(spaceId)}/internal/alerting/rules/backfill/${id}`)
           .set('kbn-xsrf', 'foo');

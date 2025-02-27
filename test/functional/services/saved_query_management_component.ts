@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import expect from '@kbn/expect';
@@ -191,6 +192,14 @@ export class SavedQueryManagementComponentService extends FtrService {
     await this.closeSavedQueryManagementComponent();
   }
 
+  async savedQueryLoadButtonMissingOrFail() {
+    await this.retry.try(async () => {
+      await this.openSavedQueryManagementComponent();
+      await this.testSubjects.missingOrFail('saved-query-management-load-button');
+    });
+    await this.closeSavedQueryManagementComponent();
+  }
+
   async openSavedQueryManagementComponent() {
     const isOpenAlready = await this.testSubjects.exists('queryBarMenuPanel');
     if (isOpenAlready) return;
@@ -219,11 +228,16 @@ export class SavedQueryManagementComponentService extends FtrService {
     });
   }
 
-  async saveNewQueryMissingOrFail() {
+  async saveNewQueryMissingOrFail(expectedButtonState: 'disabled' | 'hidden' = 'disabled') {
     await this.openSavedQueryManagementComponent();
-    const saveFilterSetBtn = await this.testSubjects.find('saved-query-management-save-button');
-    const isDisabled = await saveFilterSetBtn.getAttribute('disabled');
-    expect(isDisabled).to.equal('true');
+
+    if (expectedButtonState === 'disabled') {
+      const saveFilterSetBtn = await this.testSubjects.find('saved-query-management-save-button');
+      const isDisabled = await saveFilterSetBtn.getAttribute('disabled');
+      expect(isDisabled).to.equal('true');
+    } else {
+      await this.testSubjects.missingOrFail('saved-query-management-save-button');
+    }
   }
 
   async updateCurrentlyLoadedQueryMissingOrFail() {

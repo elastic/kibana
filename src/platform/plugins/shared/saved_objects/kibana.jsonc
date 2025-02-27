@@ -1,0 +1,18 @@
+{
+  "type": "plugin",
+  "id": "@kbn/saved-objects-plugin",
+  "owner": [
+    "@elastic/appex-sharedux"
+  ],
+  "group": "platform",
+  "visibility": "shared",
+  "plugin": {
+    "id": "savedObjects",
+    "browser": true,
+    "server": false,
+    "requiredPlugins": [
+      "data",
+      "dataViews"
+    ]
+  }
+}

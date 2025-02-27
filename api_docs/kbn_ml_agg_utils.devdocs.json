@@ -33,7 +33,7 @@
           "AggregationsAggregationContainer",
           ">"
         ],
-        "path": "x-pack/packages/ml/agg_utils/src/build_sampler_aggregation.ts",
+        "path": "x-pack/platform/packages/private/ml/agg_utils/src/build_sampler_aggregation.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -49,7 +49,7 @@
             "signature": [
               "any"
             ],
-            "path": "x-pack/packages/ml/agg_utils/src/build_sampler_aggregation.ts",
+            "path": "x-pack/platform/packages/private/ml/agg_utils/src/build_sampler_aggregation.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -66,7 +66,7 @@
             "signature": [
               "number"
             ],
-            "path": "x-pack/packages/ml/agg_utils/src/build_sampler_aggregation.ts",
+            "path": "x-pack/platform/packages/private/ml/agg_utils/src/build_sampler_aggregation.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -105,7 +105,7 @@
           },
           ">"
         ],
-        "path": "x-pack/packages/ml/agg_utils/src/fetch_agg_intervals.ts",
+        "path": "x-pack/platform/packages/private/ml/agg_utils/src/fetch_agg_intervals.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -127,7 +127,7 @@
                 "text": "FetchAggIntervalsParams"
               }
             ],
-            "path": "x-pack/packages/ml/agg_utils/src/fetch_agg_intervals.ts",
+            "path": "x-pack/platform/packages/private/ml/agg_utils/src/fetch_agg_intervals.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -158,7 +158,7 @@
           },
           " | OrdinalChartData | UnsupportedChartData)[]>"
         ],
-        "path": "x-pack/packages/ml/agg_utils/src/fetch_histograms_for_fields.ts",
+        "path": "x-pack/platform/packages/private/ml/agg_utils/src/fetch_histograms_for_fields.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -174,7 +174,7 @@
             "signature": [
               "FetchHistogramsForFieldsParams"
             ],
-            "path": "x-pack/packages/ml/agg_utils/src/fetch_histograms_for_fields.ts",
+            "path": "x-pack/platform/packages/private/ml/agg_utils/src/fetch_histograms_for_fields.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -197,7 +197,7 @@
         "signature": [
           "(samplerShardSize: number) => string[]"
         ],
-        "path": "x-pack/packages/ml/agg_utils/src/get_sampler_aggregations_response_path.ts",
+        "path": "x-pack/platform/packages/private/ml/agg_utils/src/get_sampler_aggregations_response_path.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -213,7 +213,7 @@
             "signature": [
               "number"
             ],
-            "path": "x-pack/packages/ml/agg_utils/src/get_sampler_aggregations_response_path.ts",
+            "path": "x-pack/platform/packages/private/ml/agg_utils/src/get_sampler_aggregations_response_path.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -244,7 +244,7 @@
           },
           " | undefined) => boolean"
         ],
-        "path": "x-pack/packages/ml/agg_utils/src/time_series_metric_fields.ts",
+        "path": "x-pack/platform/packages/private/ml/agg_utils/src/time_series_metric_fields.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -267,7 +267,7 @@
               },
               " | undefined"
             ],
-            "path": "x-pack/packages/ml/agg_utils/src/time_series_metric_fields.ts",
+            "path": "x-pack/platform/packages/private/ml/agg_utils/src/time_series_metric_fields.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -298,7 +298,7 @@
           },
           " | undefined) => boolean"
         ],
-        "path": "x-pack/packages/ml/agg_utils/src/time_series_metric_fields.ts",
+        "path": "x-pack/platform/packages/private/ml/agg_utils/src/time_series_metric_fields.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -321,7 +321,7 @@
               },
               " | undefined"
             ],
-            "path": "x-pack/packages/ml/agg_utils/src/time_series_metric_fields.ts",
+            "path": "x-pack/platform/packages/private/ml/agg_utils/src/time_series_metric_fields.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -348,7 +348,7 @@
           "AggregationsMultiBucketAggregateBase",
           "<TBucket>"
         ],
-        "path": "x-pack/packages/ml/agg_utils/src/is_multi_bucket_aggregate.ts",
+        "path": "x-pack/platform/packages/private/ml/agg_utils/src/is_multi_bucket_aggregate.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -364,7 +364,7 @@
             "signature": [
               "unknown"
             ],
-            "path": "x-pack/packages/ml/agg_utils/src/is_multi_bucket_aggregate.ts",
+            "path": "x-pack/platform/packages/private/ml/agg_utils/src/is_multi_bucket_aggregate.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -385,7 +385,7 @@
         "signature": [
           "(arg: unknown) => boolean"
         ],
-        "path": "x-pack/packages/ml/agg_utils/src/type_guards.ts",
+        "path": "x-pack/platform/packages/private/ml/agg_utils/src/type_guards.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -401,14 +401,53 @@
             "signature": [
               "unknown"
             ],
-            "path": "x-pack/packages/ml/agg_utils/src/type_guards.ts",
+            "path": "x-pack/platform/packages/private/ml/agg_utils/src/type_guards.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
           }
         ],
         "returnComment": [
-          "whether arg is of type SignificantItem"
+          "Return whether arg is of type SignificantItem"
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ml-agg-utils",
+        "id": "def-common.isSignificantItemGroup",
+        "type": "Function",
+        "tags": [],
+        "label": "isSignificantItemGroup",
+        "description": [
+          "\nType guard to check if the given argument is a SignificantItemGroup."
+        ],
+        "signature": [
+          "(arg: unknown) => boolean"
+        ],
+        "path": "x-pack/platform/packages/private/ml/agg_utils/src/type_guards.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ml-agg-utils",
+            "id": "def-common.isSignificantItemGroup.$1",
+            "type": "Unknown",
+            "tags": [],
+            "label": "arg",
+            "description": [
+              "The unknown type to be evaluated"
+            ],
+            "signature": [
+              "unknown"
+            ],
+            "path": "x-pack/platform/packages/private/ml/agg_utils/src/type_guards.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [
+          "Return whether arg is of type SignificantItemGroup"
         ],
         "initialIsOpen": false
       },
@@ -424,7 +463,7 @@
           "\nValidate if a number is within specified minimum and maximum bounds.\n"
         ],
         "signature": [
-          "(conditions: NumberValidatorConditions | undefined) => ((value: number) => ",
+          "(conditions: NumberValidatorConditions | undefined) => ((value: number | undefined) => ",
           {
             "pluginId": "@kbn/ml-agg-utils",
             "scope": "common",
@@ -432,10 +471,9 @@
             "section": "def-common.NumberValidationResult",
             "text": "NumberValidationResult"
           },
-          " | null) & ",
-          "MemoizedFunction"
+          " | null) & _.MemoizedFunction"
         ],
-        "path": "x-pack/packages/ml/agg_utils/src/validate_number.ts",
+        "path": "x-pack/platform/packages/private/ml/agg_utils/src/validate_number.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -451,7 +489,7 @@
             "signature": [
               "NumberValidatorConditions | undefined"
             ],
-            "path": "x-pack/packages/ml/agg_utils/src/validate_number.ts",
+            "path": "x-pack/platform/packages/private/ml/agg_utils/src/validate_number.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -475,7 +513,7 @@
         "description": [
           "\nInterface for cardinality aggregation."
         ],
-        "path": "x-pack/packages/ml/agg_utils/src/types.ts",
+        "path": "x-pack/platform/packages/private/ml/agg_utils/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -491,7 +529,7 @@
             "signature": [
               "FieldAggCardinality | ScriptAggCardinality"
             ],
-            "path": "x-pack/packages/ml/agg_utils/src/types.ts",
+            "path": "x-pack/platform/packages/private/ml/agg_utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -507,7 +545,7 @@
         "description": [
           "\nInterface for the parameters required to fetch aggregation intervals."
         ],
-        "path": "x-pack/packages/ml/agg_utils/src/fetch_agg_intervals.ts",
+        "path": "x-pack/platform/packages/private/ml/agg_utils/src/fetch_agg_intervals.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -523,15 +561,11 @@
             "signature": [
               "{ create: { <TDocument = unknown>(this: That, params: ",
               "CreateRequest",
-              "<TDocument> | ",
-              "CreateRequest",
               "<TDocument>, options?: ",
               "TransportRequestOptionsWithOutMeta",
               " | undefined): Promise<",
               "WriteResponseBase",
               ">; <TDocument = unknown>(this: That, params: ",
-              "CreateRequest",
-              "<TDocument> | ",
               "CreateRequest",
               "<TDocument>, options?: ",
               "TransportRequestOptionsWithMeta",
@@ -541,23 +575,17 @@
               "WriteResponseBase",
               ", unknown>>; <TDocument = unknown>(this: That, params: ",
               "CreateRequest",
-              "<TDocument> | ",
-              "CreateRequest",
               "<TDocument>, options?: ",
               "TransportRequestOptions",
               " | undefined): Promise<",
               "WriteResponseBase",
               ">; }; update: { <TDocument = unknown, TPartialDocument = unknown, TDocumentR = unknown>(this: That, params: ",
               "UpdateRequest",
-              "<TDocument, TPartialDocument> | ",
-              "UpdateRequest",
               "<TDocument, TPartialDocument>, options?: ",
               "TransportRequestOptionsWithOutMeta",
               " | undefined): Promise<",
               "UpdateResponse",
               "<TDocumentR>>; <TDocument = unknown, TPartialDocument = unknown, TDocumentR = unknown>(this: That, params: ",
-              "UpdateRequest",
-              "<TDocument, TPartialDocument> | ",
               "UpdateRequest",
               "<TDocument, TPartialDocument>, options?: ",
               "TransportRequestOptionsWithMeta",
@@ -567,23 +595,17 @@
               "UpdateResponse",
               "<TDocumentR>, unknown>>; <TDocument = unknown, TPartialDocument = unknown, TDocumentR = unknown>(this: That, params: ",
               "UpdateRequest",
-              "<TDocument, TPartialDocument> | ",
-              "UpdateRequest",
               "<TDocument, TPartialDocument>, options?: ",
               "TransportRequestOptions",
               " | undefined): Promise<",
               "UpdateResponse",
               "<TDocumentR>>; }; get: { <TDocument = unknown>(this: That, params: ",
               "GetRequest",
-              " | ",
-              "GetRequest",
               ", options?: ",
               "TransportRequestOptionsWithOutMeta",
               " | undefined): Promise<",
               "GetResponse",
               "<TDocument>>; <TDocument = unknown>(this: That, params: ",
-              "GetRequest",
-              " | ",
               "GetRequest",
               ", options?: ",
               "TransportRequestOptionsWithMeta",
@@ -593,23 +615,17 @@
               "GetResponse",
               "<TDocument>, unknown>>; <TDocument = unknown>(this: That, params: ",
               "GetRequest",
-              " | ",
-              "GetRequest",
               ", options?: ",
               "TransportRequestOptions",
               " | undefined): Promise<",
               "GetResponse",
               "<TDocument>>; }; delete: { (this: That, params: ",
               "DeleteRequest",
-              " | ",
-              "DeleteRequest",
               ", options?: ",
               "TransportRequestOptionsWithOutMeta",
               " | undefined): Promise<",
               "WriteResponseBase",
               ">; (this: That, params: ",
-              "DeleteRequest",
-              " | ",
               "DeleteRequest",
               ", options?: ",
               "TransportRequestOptionsWithMeta",
@@ -618,8 +634,6 @@
               "<",
               "WriteResponseBase",
               ", unknown>>; (this: That, params: ",
-              "DeleteRequest",
-              " | ",
               "DeleteRequest",
               ", options?: ",
               "TransportRequestOptions",
@@ -631,8 +645,6 @@
               "AggregationsAggregate",
               ">>(this: That, params?: ",
               "SearchRequest",
-              " | ",
-              "SearchRequest",
               " | undefined, options?: ",
               "TransportRequestOptionsWithOutMeta",
               " | undefined): Promise<",
@@ -640,8 +652,6 @@
               "<TDocument, TAggregations>>; <TDocument = unknown, TAggregations = Record<string, ",
               "AggregationsAggregate",
               ">>(this: That, params?: ",
-              "SearchRequest",
-              " | ",
               "SearchRequest",
               " | undefined, options?: ",
               "TransportRequestOptionsWithMeta",
@@ -653,13 +663,11 @@
               "AggregationsAggregate",
               ">>(this: That, params?: ",
               "SearchRequest",
-              " | ",
-              "SearchRequest",
               " | undefined, options?: ",
               "TransportRequestOptions",
               " | undefined): Promise<",
               "SearchResponse",
-              "<TDocument, TAggregations>>; }; name: string | symbol; [kAsyncSearch]: symbol | null; [kAutoscaling]: symbol | null; [kCat]: symbol | null; [kCcr]: symbol | null; [kCluster]: symbol | null; [kDanglingIndices]: symbol | null; [kEnrich]: symbol | null; [kEql]: symbol | null; [kEsql]: symbol | null; [kFeatures]: symbol | null; [kFleet]: symbol | null; [kGraph]: symbol | null; [kIlm]: symbol | null; [kIndices]: symbol | null; [kInference]: symbol | null; [kIngest]: symbol | null; [kLicense]: symbol | null; [kLogstash]: symbol | null; [kMigration]: symbol | null; [kMl]: symbol | null; [kMonitoring]: symbol | null; [kNodes]: symbol | null; [kQueryRuleset]: symbol | null; [kRollup]: symbol | null; [kSearchApplication]: symbol | null; [kSearchableSnapshots]: symbol | null; [kSecurity]: symbol | null; [kShutdown]: symbol | null; [kSlm]: symbol | null; [kSnapshot]: symbol | null; [kSql]: symbol | null; [kSsl]: symbol | null; [kSynonyms]: symbol | null; [kTasks]: symbol | null; [kTextStructure]: symbol | null; [kTransform]: symbol | null; [kWatcher]: symbol | null; [kXpack]: symbol | null; transport: ",
+              "<TDocument, TAggregations>>; }; name: string | symbol; [kAsyncSearch]: symbol | null; [kAutoscaling]: symbol | null; [kCat]: symbol | null; [kCcr]: symbol | null; [kCluster]: symbol | null; [kConnector]: symbol | null; [kDanglingIndices]: symbol | null; [kEnrich]: symbol | null; [kEql]: symbol | null; [kEsql]: symbol | null; [kFeatures]: symbol | null; [kFleet]: symbol | null; [kGraph]: symbol | null; [kIlm]: symbol | null; [kIndices]: symbol | null; [kInference]: symbol | null; [kIngest]: symbol | null; [kLicense]: symbol | null; [kLogstash]: symbol | null; [kMigration]: symbol | null; [kMl]: symbol | null; [kMonitoring]: symbol | null; [kNodes]: symbol | null; [kProfiling]: symbol | null; [kQueryRules]: symbol | null; [kRollup]: symbol | null; [kSearchApplication]: symbol | null; [kSearchableSnapshots]: symbol | null; [kSecurity]: symbol | null; [kShutdown]: symbol | null; [kSimulate]: symbol | null; [kSlm]: symbol | null; [kSnapshot]: symbol | null; [kSql]: symbol | null; [kSsl]: symbol | null; [kSynonyms]: symbol | null; [kTasks]: symbol | null; [kTextStructure]: symbol | null; [kTransform]: symbol | null; [kWatcher]: symbol | null; [kXpack]: symbol | null; transport: ",
               "default",
               "; child: (opts: ",
               "ClientOptions",
@@ -671,15 +679,11 @@
               "default",
               "; bulk: { <TDocument = unknown, TPartialDocument = unknown>(this: That, params: ",
               "BulkRequest",
-              "<TDocument, TPartialDocument> | ",
-              "BulkRequest",
               "<TDocument, TPartialDocument>, options?: ",
               "TransportRequestOptionsWithOutMeta",
               " | undefined): Promise<",
               "BulkResponse",
               ">; <TDocument = unknown, TPartialDocument = unknown>(this: That, params: ",
-              "BulkRequest",
-              "<TDocument, TPartialDocument> | ",
               "BulkRequest",
               "<TDocument, TPartialDocument>, options?: ",
               "TransportRequestOptionsWithMeta",
@@ -689,27 +693,41 @@
               "BulkResponse",
               ", unknown>>; <TDocument = unknown, TPartialDocument = unknown>(this: That, params: ",
               "BulkRequest",
-              "<TDocument, TPartialDocument> | ",
-              "BulkRequest",
               "<TDocument, TPartialDocument>, options?: ",
               "TransportRequestOptions",
               " | undefined): Promise<",
               "BulkResponse",
+              ">; }; capabilities: { (this: That, params?: ",
+              "TODO",
+              " | undefined, options?: ",
+              "TransportRequestOptionsWithOutMeta",
+              " | undefined): Promise<",
+              "TODO",
+              ">; (this: That, params?: ",
+              "TODO",
+              " | undefined, options?: ",
+              "TransportRequestOptionsWithMeta",
+              " | undefined): Promise<",
+              "TransportResult",
+              "<",
+              "TODO",
+              ", unknown>>; (this: That, params?: ",
+              "TODO",
+              " | undefined, options?: ",
+              "TransportRequestOptions",
+              " | undefined): Promise<",
+              "TODO",
               ">; }; cat: ",
               "default",
               "; ccr: ",
               "default",
               "; clearScroll: { (this: That, params?: ",
               "ClearScrollRequest",
-              " | ",
-              "ClearScrollRequest",
               " | undefined, options?: ",
               "TransportRequestOptionsWithOutMeta",
               " | undefined): Promise<",
               "ClearScrollResponse",
               ">; (this: That, params?: ",
-              "ClearScrollRequest",
-              " | ",
               "ClearScrollRequest",
               " | undefined, options?: ",
               "TransportRequestOptionsWithMeta",
@@ -719,23 +737,17 @@
               "ClearScrollResponse",
               ", unknown>>; (this: That, params?: ",
               "ClearScrollRequest",
-              " | ",
-              "ClearScrollRequest",
               " | undefined, options?: ",
               "TransportRequestOptions",
               " | undefined): Promise<",
               "ClearScrollResponse",
               ">; }; closePointInTime: { (this: That, params: ",
               "ClosePointInTimeRequest",
-              " | ",
-              "ClosePointInTimeRequest",
               ", options?: ",
               "TransportRequestOptionsWithOutMeta",
               " | undefined): Promise<",
               "ClosePointInTimeResponse",
               ">; (this: That, params: ",
-              "ClosePointInTimeRequest",
-              " | ",
               "ClosePointInTimeRequest",
               ", options?: ",
               "TransportRequestOptionsWithMeta",
@@ -745,25 +757,21 @@
               "ClosePointInTimeResponse",
               ", unknown>>; (this: That, params: ",
               "ClosePointInTimeRequest",
-              " | ",
-              "ClosePointInTimeRequest",
               ", options?: ",
               "TransportRequestOptions",
               " | undefined): Promise<",
               "ClosePointInTimeResponse",
               ">; }; cluster: ",
               "default",
+              "; connector: ",
+              "default",
               "; count: { (this: That, params?: ",
-              "CountRequest",
-              " | ",
               "CountRequest",
               " | undefined, options?: ",
               "TransportRequestOptionsWithOutMeta",
               " | undefined): Promise<",
               "CountResponse",
               ">; (this: That, params?: ",
-              "CountRequest",
-              " | ",
               "CountRequest",
               " | undefined, options?: ",
               "TransportRequestOptionsWithMeta",
@@ -772,8 +780,6 @@
               "<",
               "CountResponse",
               ", unknown>>; (this: That, params?: ",
-              "CountRequest",
-              " | ",
               "CountRequest",
               " | undefined, options?: ",
               "TransportRequestOptions",
@@ -783,15 +789,11 @@
               "default",
               "; deleteByQuery: { (this: That, params: ",
               "DeleteByQueryRequest",
-              " | ",
-              "DeleteByQueryRequest",
               ", options?: ",
               "TransportRequestOptionsWithOutMeta",
               " | undefined): Promise<",
               "DeleteByQueryResponse",
               ">; (this: That, params: ",
-              "DeleteByQueryRequest",
-              " | ",
               "DeleteByQueryRequest",
               ", options?: ",
               "TransportRequestOptionsWithMeta",
@@ -800,8 +802,6 @@
               "<",
               "DeleteByQueryResponse",
               ", unknown>>; (this: That, params: ",
-              "DeleteByQueryRequest",
-              " | ",
               "DeleteByQueryRequest",
               ", options?: ",
               "TransportRequestOptions",
@@ -809,15 +809,11 @@
               "DeleteByQueryResponse",
               ">; }; deleteByQueryRethrottle: { (this: That, params: ",
               "DeleteByQueryRethrottleRequest",
-              " | ",
-              "DeleteByQueryRethrottleRequest",
               ", options?: ",
               "TransportRequestOptionsWithOutMeta",
               " | undefined): Promise<",
               "TasksTaskListResponseBase",
               ">; (this: That, params: ",
-              "DeleteByQueryRethrottleRequest",
-              " | ",
               "DeleteByQueryRethrottleRequest",
               ", options?: ",
               "TransportRequestOptionsWithMeta",
@@ -826,8 +822,6 @@
               "<",
               "TasksTaskListResponseBase",
               ", unknown>>; (this: That, params: ",
-              "DeleteByQueryRethrottleRequest",
-              " | ",
               "DeleteByQueryRethrottleRequest",
               ", options?: ",
               "TransportRequestOptions",
@@ -835,15 +829,11 @@
               "TasksTaskListResponseBase",
               ">; }; deleteScript: { (this: That, params: ",
               "DeleteScriptRequest",
-              " | ",
-              "DeleteScriptRequest",
               ", options?: ",
               "TransportRequestOptionsWithOutMeta",
               " | undefined): Promise<",
               "AcknowledgedResponseBase",
               ">; (this: That, params: ",
-              "DeleteScriptRequest",
-              " | ",
               "DeleteScriptRequest",
               ", options?: ",
               "TransportRequestOptionsWithMeta",
@@ -852,8 +842,6 @@
               "<",
               "AcknowledgedResponseBase",
               ", unknown>>; (this: That, params: ",
-              "DeleteScriptRequest",
-              " | ",
               "DeleteScriptRequest",
               ", options?: ",
               "TransportRequestOptions",
@@ -867,33 +855,23 @@
               "default",
               "; exists: { (this: That, params: ",
               "ExistsRequest",
-              " | ",
-              "ExistsRequest",
               ", options?: ",
               "TransportRequestOptionsWithOutMeta",
               " | undefined): Promise<boolean>; (this: That, params: ",
-              "ExistsRequest",
-              " | ",
               "ExistsRequest",
               ", options?: ",
               "TransportRequestOptionsWithMeta",
               " | undefined): Promise<",
               "TransportResult",
               "<boolean, unknown>>; (this: That, params: ",
-              "ExistsRequest",
-              " | ",
               "ExistsRequest",
               ", options?: ",
               "TransportRequestOptions",
               " | undefined): Promise<boolean>; }; existsSource: { (this: That, params: ",
               "ExistsSourceRequest",
-              " | ",
-              "ExistsSourceRequest",
               ", options?: ",
               "TransportRequestOptionsWithOutMeta",
               " | undefined): Promise<boolean>; (this: That, params: ",
-              "ExistsSourceRequest",
-              " | ",
               "ExistsSourceRequest",
               ", options?: ",
               "TransportRequestOptionsWithMeta",
@@ -901,21 +879,15 @@
               "TransportResult",
               "<boolean, unknown>>; (this: That, params: ",
               "ExistsSourceRequest",
-              " | ",
-              "ExistsSourceRequest",
               ", options?: ",
               "TransportRequestOptions",
               " | undefined): Promise<boolean>; }; explain: { <TDocument = unknown>(this: That, params: ",
-              "ExplainRequest",
-              " | ",
               "ExplainRequest",
               ", options?: ",
               "TransportRequestOptionsWithOutMeta",
               " | undefined): Promise<",
               "ExplainResponse",
               "<TDocument>>; <TDocument = unknown>(this: That, params: ",
-              "ExplainRequest",
-              " | ",
               "ExplainRequest",
               ", options?: ",
               "TransportRequestOptionsWithMeta",
@@ -925,8 +897,6 @@
               "ExplainResponse",
               "<TDocument>, unknown>>; <TDocument = unknown>(this: That, params: ",
               "ExplainRequest",
-              " | ",
-              "ExplainRequest",
               ", options?: ",
               "TransportRequestOptions",
               " | undefined): Promise<",
@@ -935,15 +905,11 @@
               "default",
               "; fieldCaps: { (this: That, params?: ",
               "FieldCapsRequest",
-              " | ",
-              "FieldCapsRequest",
               " | undefined, options?: ",
               "TransportRequestOptionsWithOutMeta",
               " | undefined): Promise<",
               "FieldCapsResponse",
               ">; (this: That, params?: ",
-              "FieldCapsRequest",
-              " | ",
               "FieldCapsRequest",
               " | undefined, options?: ",
               "TransportRequestOptionsWithMeta",
@@ -952,8 +918,6 @@
               "<",
               "FieldCapsResponse",
               ", unknown>>; (this: That, params?: ",
-              "FieldCapsRequest",
-              " | ",
               "FieldCapsRequest",
               " | undefined, options?: ",
               "TransportRequestOptions",
@@ -963,15 +927,11 @@
               "default",
               "; getScript: { (this: That, params: ",
               "GetScriptRequest",
-              " | ",
-              "GetScriptRequest",
               ", options?: ",
               "TransportRequestOptionsWithOutMeta",
               " | undefined): Promise<",
               "GetScriptResponse",
               ">; (this: That, params: ",
-              "GetScriptRequest",
-              " | ",
               "GetScriptRequest",
               ", options?: ",
               "TransportRequestOptionsWithMeta",
@@ -981,23 +941,17 @@
               "GetScriptResponse",
               ", unknown>>; (this: That, params: ",
               "GetScriptRequest",
-              " | ",
-              "GetScriptRequest",
               ", options?: ",
               "TransportRequestOptions",
               " | undefined): Promise<",
               "GetScriptResponse",
               ">; }; getScriptContext: { (this: That, params?: ",
               "GetScriptContextRequest",
-              " | ",
-              "GetScriptContextRequest",
               " | undefined, options?: ",
               "TransportRequestOptionsWithOutMeta",
               " | undefined): Promise<",
               "GetScriptContextResponse",
               ">; (this: That, params?: ",
-              "GetScriptContextRequest",
-              " | ",
               "GetScriptContextRequest",
               " | undefined, options?: ",
               "TransportRequestOptionsWithMeta",
@@ -1006,8 +960,6 @@
               "<",
               "GetScriptContextResponse",
               ", unknown>>; (this: That, params?: ",
-              "GetScriptContextRequest",
-              " | ",
               "GetScriptContextRequest",
               " | undefined, options?: ",
               "TransportRequestOptions",
@@ -1015,15 +967,11 @@
               "GetScriptContextResponse",
               ">; }; getScriptLanguages: { (this: That, params?: ",
               "GetScriptLanguagesRequest",
-              " | ",
-              "GetScriptLanguagesRequest",
               " | undefined, options?: ",
               "TransportRequestOptionsWithOutMeta",
               " | undefined): Promise<",
               "GetScriptLanguagesResponse",
               ">; (this: That, params?: ",
-              "GetScriptLanguagesRequest",
-              " | ",
               "GetScriptLanguagesRequest",
               " | undefined, options?: ",
               "TransportRequestOptionsWithMeta",
@@ -1032,8 +980,6 @@
               "<",
               "GetScriptLanguagesResponse",
               ", unknown>>; (this: That, params?: ",
-              "GetScriptLanguagesRequest",
-              " | ",
               "GetScriptLanguagesRequest",
               " | undefined, options?: ",
               "TransportRequestOptions",
@@ -1041,13 +987,9 @@
               "GetScriptLanguagesResponse",
               ">; }; getSource: { <TDocument = unknown>(this: That, params: ",
               "GetSourceRequest",
-              " | ",
-              "GetSourceRequest",
               ", options?: ",
               "TransportRequestOptionsWithOutMeta",
               " | undefined): Promise<TDocument>; <TDocument = unknown>(this: That, params: ",
-              "GetSourceRequest",
-              " | ",
               "GetSourceRequest",
               ", options?: ",
               "TransportRequestOptionsWithMeta",
@@ -1055,23 +997,17 @@
               "TransportResult",
               "<TDocument, unknown>>; <TDocument = unknown>(this: That, params: ",
               "GetSourceRequest",
-              " | ",
-              "GetSourceRequest",
               ", options?: ",
               "TransportRequestOptions",
               " | undefined): Promise<TDocument>; }; graph: ",
               "default",
               "; healthReport: { (this: That, params?: ",
               "HealthReportRequest",
-              " | ",
-              "HealthReportRequest",
               " | undefined, options?: ",
               "TransportRequestOptionsWithOutMeta",
               " | undefined): Promise<",
               "HealthReportResponse",
               ">; (this: That, params?: ",
-              "HealthReportRequest",
-              " | ",
               "HealthReportRequest",
               " | undefined, options?: ",
               "TransportRequestOptionsWithMeta",
@@ -1080,8 +1016,6 @@
               "<",
               "HealthReportResponse",
               ", unknown>>; (this: That, params?: ",
-              "HealthReportRequest",
-              " | ",
               "HealthReportRequest",
               " | undefined, options?: ",
               "TransportRequestOptions",
@@ -1091,15 +1025,11 @@
               "default",
               "; index: { <TDocument = unknown>(this: That, params: ",
               "IndexRequest",
-              "<TDocument> | ",
-              "IndexRequest",
               "<TDocument>, options?: ",
               "TransportRequestOptionsWithOutMeta",
               " | undefined): Promise<",
               "WriteResponseBase",
               ">; <TDocument = unknown>(this: That, params: ",
-              "IndexRequest",
-              "<TDocument> | ",
               "IndexRequest",
               "<TDocument>, options?: ",
               "TransportRequestOptionsWithMeta",
@@ -1108,8 +1038,6 @@
               "<",
               "WriteResponseBase",
               ", unknown>>; <TDocument = unknown>(this: That, params: ",
-              "IndexRequest",
-              "<TDocument> | ",
               "IndexRequest",
               "<TDocument>, options?: ",
               "TransportRequestOptions",
@@ -1121,15 +1049,11 @@
               "default",
               "; info: { (this: That, params?: ",
               "InfoRequest",
-              " | ",
-              "InfoRequest",
               " | undefined, options?: ",
               "TransportRequestOptionsWithOutMeta",
               " | undefined): Promise<",
               "InfoResponse",
               ">; (this: That, params?: ",
-              "InfoRequest",
-              " | ",
               "InfoRequest",
               " | undefined, options?: ",
               "TransportRequestOptionsWithMeta",
@@ -1139,8 +1063,6 @@
               "InfoResponse",
               ", unknown>>; (this: That, params?: ",
               "InfoRequest",
-              " | ",
-              "InfoRequest",
               " | undefined, options?: ",
               "TransportRequestOptions",
               " | undefined): Promise<",
@@ -1149,15 +1071,11 @@
               "default",
               "; knnSearch: { <TDocument = unknown>(this: That, params: ",
               "KnnSearchRequest",
-              " | ",
-              "KnnSearchRequest",
               ", options?: ",
               "TransportRequestOptionsWithOutMeta",
               " | undefined): Promise<",
               "KnnSearchResponse",
               "<TDocument>>; <TDocument = unknown>(this: That, params: ",
-              "KnnSearchRequest",
-              " | ",
               "KnnSearchRequest",
               ", options?: ",
               "TransportRequestOptionsWithMeta",
@@ -1166,8 +1084,6 @@
               "<",
               "KnnSearchResponse",
               "<TDocument>, unknown>>; <TDocument = unknown>(this: That, params: ",
-              "KnnSearchRequest",
-              " | ",
               "KnnSearchRequest",
               ", options?: ",
               "TransportRequestOptions",
@@ -1179,15 +1095,11 @@
               "default",
               "; mget: { <TDocument = unknown>(this: That, params?: ",
               "MgetRequest",
-              " | ",
-              "MgetRequest",
               " | undefined, options?: ",
               "TransportRequestOptionsWithOutMeta",
               " | undefined): Promise<",
               "MgetResponse",
               "<TDocument>>; <TDocument = unknown>(this: That, params?: ",
-              "MgetRequest",
-              " | ",
               "MgetRequest",
               " | undefined, options?: ",
               "TransportRequestOptionsWithMeta",
@@ -1196,8 +1108,6 @@
               "<",
               "MgetResponse",
               "<TDocument>, unknown>>; <TDocument = unknown>(this: That, params?: ",
-              "MgetRequest",
-              " | ",
               "MgetRequest",
               " | undefined, options?: ",
               "TransportRequestOptions",
@@ -1213,8 +1123,6 @@
               "AggregationsAggregate",
               ">>(this: That, params: ",
               "MsearchRequest",
-              " | ",
-              "MsearchRequest",
               ", options?: ",
               "TransportRequestOptionsWithOutMeta",
               " | undefined): Promise<",
@@ -1222,8 +1130,6 @@
               "<TDocument, TAggregations>>; <TDocument = unknown, TAggregations = Record<string, ",
               "AggregationsAggregate",
               ">>(this: That, params: ",
-              "MsearchRequest",
-              " | ",
               "MsearchRequest",
               ", options?: ",
               "TransportRequestOptionsWithMeta",
@@ -1234,8 +1140,6 @@
               "<TDocument, TAggregations>, unknown>>; <TDocument = unknown, TAggregations = Record<string, ",
               "AggregationsAggregate",
               ">>(this: That, params: ",
-              "MsearchRequest",
-              " | ",
               "MsearchRequest",
               ", options?: ",
               "TransportRequestOptions",
@@ -1245,8 +1149,6 @@
               "AggregationsAggregate",
               ">>(this: That, params: ",
               "MsearchTemplateRequest",
-              " | ",
-              "MsearchTemplateRequest",
               ", options?: ",
               "TransportRequestOptionsWithOutMeta",
               " | undefined): Promise<",
@@ -1254,8 +1156,6 @@
               "<TDocument, TAggregations>>; <TDocument = unknown, TAggregations = Record<string, ",
               "AggregationsAggregate",
               ">>(this: That, params: ",
-              "MsearchTemplateRequest",
-              " | ",
               "MsearchTemplateRequest",
               ", options?: ",
               "TransportRequestOptionsWithMeta",
@@ -1267,23 +1167,17 @@
               "AggregationsAggregate",
               ">>(this: That, params: ",
               "MsearchTemplateRequest",
-              " | ",
-              "MsearchTemplateRequest",
               ", options?: ",
               "TransportRequestOptions",
               " | undefined): Promise<",
               "MsearchTemplateResponse",
               "<TDocument, TAggregations>>; }; mtermvectors: { (this: That, params?: ",
               "MtermvectorsRequest",
-              " | ",
-              "MtermvectorsRequest",
               " | undefined, options?: ",
               "TransportRequestOptionsWithOutMeta",
               " | undefined): Promise<",
               "MtermvectorsResponse",
               ">; (this: That, params?: ",
-              "MtermvectorsRequest",
-              " | ",
               "MtermvectorsRequest",
               " | undefined, options?: ",
               "TransportRequestOptionsWithMeta",
@@ -1292,8 +1186,6 @@
               "<",
               "MtermvectorsResponse",
               ", unknown>>; (this: That, params?: ",
-              "MtermvectorsRequest",
-              " | ",
               "MtermvectorsRequest",
               " | undefined, options?: ",
               "TransportRequestOptions",
@@ -1303,15 +1195,11 @@
               "default",
               "; openPointInTime: { (this: That, params: ",
               "OpenPointInTimeRequest",
-              " | ",
-              "OpenPointInTimeRequest",
               ", options?: ",
               "TransportRequestOptionsWithOutMeta",
               " | undefined): Promise<",
               "OpenPointInTimeResponse",
               ">; (this: That, params: ",
-              "OpenPointInTimeRequest",
-              " | ",
               "OpenPointInTimeRequest",
               ", options?: ",
               "TransportRequestOptionsWithMeta",
@@ -1320,8 +1208,6 @@
               "<",
               "OpenPointInTimeResponse",
               ", unknown>>; (this: That, params: ",
-              "OpenPointInTimeRequest",
-              " | ",
               "OpenPointInTimeRequest",
               ", options?: ",
               "TransportRequestOptions",
@@ -1329,13 +1215,9 @@
               "OpenPointInTimeResponse",
               ">; }; ping: { (this: That, params?: ",
               "PingRequest",
-              " | ",
-              "PingRequest",
               " | undefined, options?: ",
               "TransportRequestOptionsWithOutMeta",
               " | undefined): Promise<boolean>; (this: That, params?: ",
-              "PingRequest",
-              " | ",
               "PingRequest",
               " | undefined, options?: ",
               "TransportRequestOptionsWithMeta",
@@ -1343,21 +1225,17 @@
               "TransportResult",
               "<boolean, unknown>>; (this: That, params?: ",
               "PingRequest",
-              " | ",
-              "PingRequest",
               " | undefined, options?: ",
               "TransportRequestOptions",
-              " | undefined): Promise<boolean>; }; putScript: { (this: That, params: ",
-              "PutScriptRequest",
-              " | ",
+              " | undefined): Promise<boolean>; }; profiling: ",
+              "default",
+              "; putScript: { (this: That, params: ",
               "PutScriptRequest",
               ", options?: ",
               "TransportRequestOptionsWithOutMeta",
               " | undefined): Promise<",
               "AcknowledgedResponseBase",
               ">; (this: That, params: ",
-              "PutScriptRequest",
-              " | ",
               "PutScriptRequest",
               ", options?: ",
               "TransportRequestOptionsWithMeta",
@@ -1367,25 +1245,19 @@
               "AcknowledgedResponseBase",
               ", unknown>>; (this: That, params: ",
               "PutScriptRequest",
-              " | ",
-              "PutScriptRequest",
               ", options?: ",
               "TransportRequestOptions",
               " | undefined): Promise<",
               "AcknowledgedResponseBase",
-              ">; }; queryRuleset: ",
+              ">; }; queryRules: ",
               "default",
               "; rankEval: { (this: That, params: ",
               "RankEvalRequest",
-              " | ",
-              "RankEvalRequest",
               ", options?: ",
               "TransportRequestOptionsWithOutMeta",
               " | undefined): Promise<",
               "RankEvalResponse",
               ">; (this: That, params: ",
-              "RankEvalRequest",
-              " | ",
               "RankEvalRequest",
               ", options?: ",
               "TransportRequestOptionsWithMeta",
@@ -1394,8 +1266,6 @@
               "<",
               "RankEvalResponse",
               ", unknown>>; (this: That, params: ",
-              "RankEvalRequest",
-              " | ",
               "RankEvalRequest",
               ", options?: ",
               "TransportRequestOptions",
@@ -1403,15 +1273,11 @@
               "RankEvalResponse",
               ">; }; reindex: { (this: That, params: ",
               "ReindexRequest",
-              " | ",
-              "ReindexRequest",
               ", options?: ",
               "TransportRequestOptionsWithOutMeta",
               " | undefined): Promise<",
               "ReindexResponse",
               ">; (this: That, params: ",
-              "ReindexRequest",
-              " | ",
               "ReindexRequest",
               ", options?: ",
               "TransportRequestOptionsWithMeta",
@@ -1420,8 +1286,6 @@
               "<",
               "ReindexResponse",
               ", unknown>>; (this: That, params: ",
-              "ReindexRequest",
-              " | ",
               "ReindexRequest",
               ", options?: ",
               "TransportRequestOptions",
@@ -1429,15 +1293,11 @@
               "ReindexResponse",
               ">; }; reindexRethrottle: { (this: That, params: ",
               "ReindexRethrottleRequest",
-              " | ",
-              "ReindexRethrottleRequest",
               ", options?: ",
               "TransportRequestOptionsWithOutMeta",
               " | undefined): Promise<",
               "ReindexRethrottleResponse",
               ">; (this: That, params: ",
-              "ReindexRethrottleRequest",
-              " | ",
               "ReindexRethrottleRequest",
               ", options?: ",
               "TransportRequestOptionsWithMeta",
@@ -1447,23 +1307,17 @@
               "ReindexRethrottleResponse",
               ", unknown>>; (this: That, params: ",
               "ReindexRethrottleRequest",
-              " | ",
-              "ReindexRethrottleRequest",
               ", options?: ",
               "TransportRequestOptions",
               " | undefined): Promise<",
               "ReindexRethrottleResponse",
               ">; }; renderSearchTemplate: { (this: That, params?: ",
               "RenderSearchTemplateRequest",
-              " | ",
-              "RenderSearchTemplateRequest",
               " | undefined, options?: ",
               "TransportRequestOptionsWithOutMeta",
               " | undefined): Promise<",
               "RenderSearchTemplateResponse",
               ">; (this: That, params?: ",
-              "RenderSearchTemplateRequest",
-              " | ",
               "RenderSearchTemplateRequest",
               " | undefined, options?: ",
               "TransportRequestOptionsWithMeta",
@@ -1473,8 +1327,6 @@
               "RenderSearchTemplateResponse",
               ", unknown>>; (this: That, params?: ",
               "RenderSearchTemplateRequest",
-              " | ",
-              "RenderSearchTemplateRequest",
               " | undefined, options?: ",
               "TransportRequestOptions",
               " | undefined): Promise<",
@@ -1483,15 +1335,11 @@
               "default",
               "; scriptsPainlessExecute: { <TResult = unknown>(this: That, params?: ",
               "ScriptsPainlessExecuteRequest",
-              " | ",
-              "ScriptsPainlessExecuteRequest",
               " | undefined, options?: ",
               "TransportRequestOptionsWithOutMeta",
               " | undefined): Promise<",
               "ScriptsPainlessExecuteResponse",
               "<TResult>>; <TResult = unknown>(this: That, params?: ",
-              "ScriptsPainlessExecuteRequest",
-              " | ",
               "ScriptsPainlessExecuteRequest",
               " | undefined, options?: ",
               "TransportRequestOptionsWithMeta",
@@ -1501,8 +1349,6 @@
               "ScriptsPainlessExecuteResponse",
               "<TResult>, unknown>>; <TResult = unknown>(this: That, params?: ",
               "ScriptsPainlessExecuteRequest",
-              " | ",
-              "ScriptsPainlessExecuteRequest",
               " | undefined, options?: ",
               "TransportRequestOptions",
               " | undefined): Promise<",
@@ -1511,8 +1357,6 @@
               "AggregationsAggregate",
               ">>(this: That, params: ",
               "ScrollRequest",
-              " | ",
-              "ScrollRequest",
               ", options?: ",
               "TransportRequestOptionsWithOutMeta",
               " | undefined): Promise<",
@@ -1520,8 +1364,6 @@
               "<TDocument, TAggregations>>; <TDocument = unknown, TAggregations = Record<string, ",
               "AggregationsAggregate",
               ">>(this: That, params: ",
-              "ScrollRequest",
-              " | ",
               "ScrollRequest",
               ", options?: ",
               "TransportRequestOptionsWithMeta",
@@ -1533,8 +1375,6 @@
               "AggregationsAggregate",
               ">>(this: That, params: ",
               "ScrollRequest",
-              " | ",
-              "ScrollRequest",
               ", options?: ",
               "TransportRequestOptions",
               " | undefined): Promise<",
@@ -1543,13 +1383,9 @@
               "default",
               "; searchMvt: { (this: That, params: ",
               "SearchMvtRequest",
-              " | ",
-              "SearchMvtRequest",
               ", options?: ",
               "TransportRequestOptionsWithOutMeta",
               " | undefined): Promise<ArrayBuffer>; (this: That, params: ",
-              "SearchMvtRequest",
-              " | ",
               "SearchMvtRequest",
               ", options?: ",
               "TransportRequestOptionsWithMeta",
@@ -1557,21 +1393,15 @@
               "TransportResult",
               "<ArrayBuffer, unknown>>; (this: That, params: ",
               "SearchMvtRequest",
-              " | ",
-              "SearchMvtRequest",
               ", options?: ",
               "TransportRequestOptions",
               " | undefined): Promise<ArrayBuffer>; }; searchShards: { (this: That, params?: ",
-              "SearchShardsRequest",
-              " | ",
               "SearchShardsRequest",
               " | undefined, options?: ",
               "TransportRequestOptionsWithOutMeta",
               " | undefined): Promise<",
               "SearchShardsResponse",
               ">; (this: That, params?: ",
-              "SearchShardsRequest",
-              " | ",
               "SearchShardsRequest",
               " | undefined, options?: ",
               "TransportRequestOptionsWithMeta",
@@ -1581,23 +1411,17 @@
               "SearchShardsResponse",
               ", unknown>>; (this: That, params?: ",
               "SearchShardsRequest",
-              " | ",
-              "SearchShardsRequest",
               " | undefined, options?: ",
               "TransportRequestOptions",
               " | undefined): Promise<",
               "SearchShardsResponse",
               ">; }; searchTemplate: { <TDocument = unknown>(this: That, params?: ",
               "SearchTemplateRequest",
-              " | ",
-              "SearchTemplateRequest",
               " | undefined, options?: ",
               "TransportRequestOptionsWithOutMeta",
               " | undefined): Promise<",
               "SearchTemplateResponse",
               "<TDocument>>; <TDocument = unknown>(this: That, params?: ",
-              "SearchTemplateRequest",
-              " | ",
               "SearchTemplateRequest",
               " | undefined, options?: ",
               "TransportRequestOptionsWithMeta",
@@ -1606,8 +1430,6 @@
               "<",
               "SearchTemplateResponse",
               "<TDocument>, unknown>>; <TDocument = unknown>(this: That, params?: ",
-              "SearchTemplateRequest",
-              " | ",
               "SearchTemplateRequest",
               " | undefined, options?: ",
               "TransportRequestOptions",
@@ -1618,6 +1440,8 @@
               "; security: ",
               "default",
               "; shutdown: ",
+              "default",
+              "; simulate: ",
               "default",
               "; slm: ",
               "default",
@@ -1633,15 +1457,11 @@
               "default",
               "; termsEnum: { (this: That, params: ",
               "TermsEnumRequest",
-              " | ",
-              "TermsEnumRequest",
               ", options?: ",
               "TransportRequestOptionsWithOutMeta",
               " | undefined): Promise<",
               "TermsEnumResponse",
               ">; (this: That, params: ",
-              "TermsEnumRequest",
-              " | ",
               "TermsEnumRequest",
               ", options?: ",
               "TransportRequestOptionsWithMeta",
@@ -1651,23 +1471,17 @@
               "TermsEnumResponse",
               ", unknown>>; (this: That, params: ",
               "TermsEnumRequest",
-              " | ",
-              "TermsEnumRequest",
               ", options?: ",
               "TransportRequestOptions",
               " | undefined): Promise<",
               "TermsEnumResponse",
               ">; }; termvectors: { <TDocument = unknown>(this: That, params: ",
               "TermvectorsRequest",
-              "<TDocument> | ",
-              "TermvectorsRequest",
               "<TDocument>, options?: ",
               "TransportRequestOptionsWithOutMeta",
               " | undefined): Promise<",
               "TermvectorsResponse",
               ">; <TDocument = unknown>(this: That, params: ",
-              "TermvectorsRequest",
-              "<TDocument> | ",
               "TermvectorsRequest",
               "<TDocument>, options?: ",
               "TransportRequestOptionsWithMeta",
@@ -1676,8 +1490,6 @@
               "<",
               "TermvectorsResponse",
               ", unknown>>; <TDocument = unknown>(this: That, params: ",
-              "TermvectorsRequest",
-              "<TDocument> | ",
               "TermvectorsRequest",
               "<TDocument>, options?: ",
               "TransportRequestOptions",
@@ -1689,15 +1501,11 @@
               "default",
               "; updateByQuery: { (this: That, params: ",
               "UpdateByQueryRequest",
-              " | ",
-              "UpdateByQueryRequest",
               ", options?: ",
               "TransportRequestOptionsWithOutMeta",
               " | undefined): Promise<",
               "UpdateByQueryResponse",
               ">; (this: That, params: ",
-              "UpdateByQueryRequest",
-              " | ",
               "UpdateByQueryRequest",
               ", options?: ",
               "TransportRequestOptionsWithMeta",
@@ -1706,8 +1514,6 @@
               "<",
               "UpdateByQueryResponse",
               ", unknown>>; (this: That, params: ",
-              "UpdateByQueryRequest",
-              " | ",
               "UpdateByQueryRequest",
               ", options?: ",
               "TransportRequestOptions",
@@ -1715,15 +1521,11 @@
               "UpdateByQueryResponse",
               ">; }; updateByQueryRethrottle: { (this: That, params: ",
               "UpdateByQueryRethrottleRequest",
-              " | ",
-              "UpdateByQueryRethrottleRequest",
               ", options?: ",
               "TransportRequestOptionsWithOutMeta",
               " | undefined): Promise<",
               "UpdateByQueryRethrottleResponse",
               ">; (this: That, params: ",
-              "UpdateByQueryRethrottleRequest",
-              " | ",
               "UpdateByQueryRethrottleRequest",
               ", options?: ",
               "TransportRequestOptionsWithMeta",
@@ -1732,8 +1534,6 @@
               "<",
               "UpdateByQueryRethrottleResponse",
               ", unknown>>; (this: That, params: ",
-              "UpdateByQueryRethrottleRequest",
-              " | ",
               "UpdateByQueryRethrottleRequest",
               ", options?: ",
               "TransportRequestOptions",
@@ -1745,7 +1545,7 @@
               "default",
               "; }"
             ],
-            "path": "x-pack/packages/ml/agg_utils/src/fetch_agg_intervals.ts",
+            "path": "x-pack/platform/packages/private/ml/agg_utils/src/fetch_agg_intervals.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1761,7 +1561,7 @@
             "signature": [
               "AbortSignal | undefined"
             ],
-            "path": "x-pack/packages/ml/agg_utils/src/fetch_agg_intervals.ts",
+            "path": "x-pack/platform/packages/private/ml/agg_utils/src/fetch_agg_intervals.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1789,7 +1589,7 @@
               "MappingRuntimeFields",
               " | undefined; randomSamplerProbability?: number | undefined; randomSamplerSeed?: number | undefined; }"
             ],
-            "path": "x-pack/packages/ml/agg_utils/src/fetch_agg_intervals.ts",
+            "path": "x-pack/platform/packages/private/ml/agg_utils/src/fetch_agg_intervals.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1805,7 +1605,7 @@
         "description": [
           "\nField/value pair definition."
         ],
-        "path": "x-pack/packages/ml/agg_utils/src/types.ts",
+        "path": "x-pack/platform/packages/private/ml/agg_utils/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1818,7 +1618,7 @@
             "description": [
               "The field name."
             ],
-            "path": "x-pack/packages/ml/agg_utils/src/types.ts",
+            "path": "x-pack/platform/packages/private/ml/agg_utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1834,7 +1634,7 @@
             "signature": [
               "string | number"
             ],
-            "path": "x-pack/packages/ml/agg_utils/src/types.ts",
+            "path": "x-pack/platform/packages/private/ml/agg_utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1852,7 +1652,7 @@
         "description": [
           "\nRepresents parameters used to identify which histogram data needs to be generated for a field."
         ],
-        "path": "x-pack/packages/ml/agg_utils/src/types.ts",
+        "path": "x-pack/platform/packages/private/ml/agg_utils/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1865,7 +1665,7 @@
             "description": [
               "\nThe name of the field for which histogram data is generated."
             ],
-            "path": "x-pack/packages/ml/agg_utils/src/types.ts",
+            "path": "x-pack/platform/packages/private/ml/agg_utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1887,7 +1687,7 @@
                 "text": "KBN_FIELD_TYPES"
               }
             ],
-            "path": "x-pack/packages/ml/agg_utils/src/types.ts",
+            "path": "x-pack/platform/packages/private/ml/agg_utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1903,7 +1703,7 @@
         "description": [
           "\nRepresents an item set returned from `frequent_item_sets` augmented\nwith some metadata related to log rate analysis."
         ],
-        "path": "x-pack/packages/ml/agg_utils/src/types.ts",
+        "path": "x-pack/platform/packages/private/ml/agg_utils/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1926,7 +1726,7 @@
               },
               "[]"
             ],
-            "path": "x-pack/packages/ml/agg_utils/src/types.ts",
+            "path": "x-pack/platform/packages/private/ml/agg_utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1939,7 +1739,7 @@
             "description": [
               "The size of the item set."
             ],
-            "path": "x-pack/packages/ml/agg_utils/src/types.ts",
+            "path": "x-pack/platform/packages/private/ml/agg_utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1952,7 +1752,7 @@
             "description": [
               "The maximum p-value associated with the item set."
             ],
-            "path": "x-pack/packages/ml/agg_utils/src/types.ts",
+            "path": "x-pack/platform/packages/private/ml/agg_utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1965,7 +1765,7 @@
             "description": [
               "The document count of the item set."
             ],
-            "path": "x-pack/packages/ml/agg_utils/src/types.ts",
+            "path": "x-pack/platform/packages/private/ml/agg_utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1978,7 +1778,7 @@
             "description": [
               "The support value of the item set."
             ],
-            "path": "x-pack/packages/ml/agg_utils/src/types.ts",
+            "path": "x-pack/platform/packages/private/ml/agg_utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1991,64 +1791,7 @@
             "description": [
               "The total document count."
             ],
-            "path": "x-pack/packages/ml/agg_utils/src/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/ml-agg-utils",
-        "id": "def-common.NumberValidationResult",
-        "type": "Interface",
-        "tags": [
-          "interface"
-        ],
-        "label": "NumberValidationResult",
-        "description": [
-          "\nRepresents the result of number validation."
-        ],
-        "path": "x-pack/packages/ml/agg_utils/src/validate_number.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/ml-agg-utils",
-            "id": "def-common.NumberValidationResult.min",
-            "type": "boolean",
-            "tags": [],
-            "label": "min",
-            "description": [
-              "The minimum allowed value."
-            ],
-            "path": "x-pack/packages/ml/agg_utils/src/validate_number.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/ml-agg-utils",
-            "id": "def-common.NumberValidationResult.max",
-            "type": "boolean",
-            "tags": [],
-            "label": "max",
-            "description": [
-              "The maximum allowed value."
-            ],
-            "path": "x-pack/packages/ml/agg_utils/src/validate_number.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/ml-agg-utils",
-            "id": "def-common.NumberValidationResult.integerOnly",
-            "type": "boolean",
-            "tags": [],
-            "label": "integerOnly",
-            "description": [
-              "Boolean flag to allow integer values only."
-            ],
-            "path": "x-pack/packages/ml/agg_utils/src/validate_number.ts",
+            "path": "x-pack/platform/packages/private/ml/agg_utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2066,7 +1809,7 @@
         "description": [
           "\nInterface describing the data structure returned for numeric-based charts."
         ],
-        "path": "x-pack/packages/ml/agg_utils/src/fetch_histograms_for_fields.ts",
+        "path": "x-pack/platform/packages/private/ml/agg_utils/src/fetch_histograms_for_fields.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2080,9 +1823,16 @@
               "\nAn array of data points, each represented by a NumericDataItem."
             ],
             "signature": [
-              "NumericDataItem[]"
+              {
+                "pluginId": "@kbn/ml-agg-utils",
+                "scope": "common",
+                "docId": "kibKbnMlAggUtilsPluginApi",
+                "section": "def-common.NumericDataItem",
+                "text": "NumericDataItem"
+              },
+              "[]"
             ],
-            "path": "x-pack/packages/ml/agg_utils/src/fetch_histograms_for_fields.ts",
+            "path": "x-pack/platform/packages/private/ml/agg_utils/src/fetch_histograms_for_fields.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2095,7 +1845,7 @@
             "description": [
               "\nThe identifier for the data set."
             ],
-            "path": "x-pack/packages/ml/agg_utils/src/fetch_histograms_for_fields.ts",
+            "path": "x-pack/platform/packages/private/ml/agg_utils/src/fetch_histograms_for_fields.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2108,7 +1858,7 @@
             "description": [
               "\nThe interval value for the data."
             ],
-            "path": "x-pack/packages/ml/agg_utils/src/fetch_histograms_for_fields.ts",
+            "path": "x-pack/platform/packages/private/ml/agg_utils/src/fetch_histograms_for_fields.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2124,7 +1874,7 @@
             "signature": [
               "[number, number]"
             ],
-            "path": "x-pack/packages/ml/agg_utils/src/fetch_histograms_for_fields.ts",
+            "path": "x-pack/platform/packages/private/ml/agg_utils/src/fetch_histograms_for_fields.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2140,7 +1890,7 @@
             "signature": [
               "\"numeric\""
             ],
-            "path": "x-pack/packages/ml/agg_utils/src/fetch_histograms_for_fields.ts",
+            "path": "x-pack/platform/packages/private/ml/agg_utils/src/fetch_histograms_for_fields.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2158,7 +1908,7 @@
         "description": [
           "\nInterface describing attributes used for numeric histograms."
         ],
-        "path": "x-pack/packages/ml/agg_utils/src/types.ts",
+        "path": "x-pack/platform/packages/private/ml/agg_utils/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2171,7 +1921,7 @@
             "description": [
               "The interval value for the histogram."
             ],
-            "path": "x-pack/packages/ml/agg_utils/src/types.ts",
+            "path": "x-pack/platform/packages/private/ml/agg_utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2184,7 +1934,7 @@
             "description": [
               "The minimum value in the histogram."
             ],
-            "path": "x-pack/packages/ml/agg_utils/src/types.ts",
+            "path": "x-pack/platform/packages/private/ml/agg_utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2197,7 +1947,67 @@
             "description": [
               "The maximum value in the histogram."
             ],
-            "path": "x-pack/packages/ml/agg_utils/src/types.ts",
+            "path": "x-pack/platform/packages/private/ml/agg_utils/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ml-agg-utils",
+        "id": "def-common.NumericDataItem",
+        "type": "Interface",
+        "tags": [
+          "interface"
+        ],
+        "label": "NumericDataItem",
+        "description": [
+          "\nRepresents an item in numeric data."
+        ],
+        "path": "x-pack/platform/packages/private/ml/agg_utils/src/fetch_histograms_for_fields.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ml-agg-utils",
+            "id": "def-common.NumericDataItem.key",
+            "type": "number",
+            "tags": [],
+            "label": "key",
+            "description": [
+              "\nThe numeric key."
+            ],
+            "path": "x-pack/platform/packages/private/ml/agg_utils/src/fetch_histograms_for_fields.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ml-agg-utils",
+            "id": "def-common.NumericDataItem.key_as_string",
+            "type": "string",
+            "tags": [],
+            "label": "key_as_string",
+            "description": [
+              "\nAn optional string representation of the key."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/platform/packages/private/ml/agg_utils/src/fetch_histograms_for_fields.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ml-agg-utils",
+            "id": "def-common.NumericDataItem.doc_count",
+            "type": "number",
+            "tags": [],
+            "label": "doc_count",
+            "description": [
+              "\nThe document count associated with the key."
+            ],
+            "path": "x-pack/platform/packages/private/ml/agg_utils/src/fetch_histograms_for_fields.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2230,7 +2040,7 @@
             "text": "HistogramField"
           }
         ],
-        "path": "x-pack/packages/ml/agg_utils/src/fetch_histograms_for_fields.ts",
+        "path": "x-pack/platform/packages/private/ml/agg_utils/src/fetch_histograms_for_fields.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2261,7 +2071,7 @@
               },
               ".NUMBER"
             ],
-            "path": "x-pack/packages/ml/agg_utils/src/fetch_histograms_for_fields.ts",
+            "path": "x-pack/platform/packages/private/ml/agg_utils/src/fetch_histograms_for_fields.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2297,7 +2107,7 @@
             "text": "FieldValuePair"
           }
         ],
-        "path": "x-pack/packages/ml/agg_utils/src/types.ts",
+        "path": "x-pack/platform/packages/private/ml/agg_utils/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2310,7 +2120,7 @@
             "description": [
               "The key associated with the significant item."
             ],
-            "path": "x-pack/packages/ml/agg_utils/src/types.ts",
+            "path": "x-pack/platform/packages/private/ml/agg_utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2326,7 +2136,7 @@
             "signature": [
               "\"keyword\" | \"log_pattern\""
             ],
-            "path": "x-pack/packages/ml/agg_utils/src/types.ts",
+            "path": "x-pack/platform/packages/private/ml/agg_utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2339,7 +2149,7 @@
             "description": [
               "The document count for the significant item."
             ],
-            "path": "x-pack/packages/ml/agg_utils/src/types.ts",
+            "path": "x-pack/platform/packages/private/ml/agg_utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2352,7 +2162,7 @@
             "description": [
               "The background count for the significant item."
             ],
-            "path": "x-pack/packages/ml/agg_utils/src/types.ts",
+            "path": "x-pack/platform/packages/private/ml/agg_utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2365,7 +2175,7 @@
             "description": [
               "The total document count for all items."
             ],
-            "path": "x-pack/packages/ml/agg_utils/src/types.ts",
+            "path": "x-pack/platform/packages/private/ml/agg_utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2378,7 +2188,7 @@
             "description": [
               "The total background count for all items."
             ],
-            "path": "x-pack/packages/ml/agg_utils/src/types.ts",
+            "path": "x-pack/platform/packages/private/ml/agg_utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2391,7 +2201,7 @@
             "description": [
               "The score associated with the significant item."
             ],
-            "path": "x-pack/packages/ml/agg_utils/src/types.ts",
+            "path": "x-pack/platform/packages/private/ml/agg_utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2407,7 +2217,7 @@
             "signature": [
               "number | null"
             ],
-            "path": "x-pack/packages/ml/agg_utils/src/types.ts",
+            "path": "x-pack/platform/packages/private/ml/agg_utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2420,7 +2230,7 @@
             "description": [
               "The normalized score for the significant item."
             ],
-            "path": "x-pack/packages/ml/agg_utils/src/types.ts",
+            "path": "x-pack/platform/packages/private/ml/agg_utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2443,7 +2253,7 @@
               },
               "[] | undefined"
             ],
-            "path": "x-pack/packages/ml/agg_utils/src/types.ts",
+            "path": "x-pack/platform/packages/private/ml/agg_utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2459,7 +2269,23 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "x-pack/packages/ml/agg_utils/src/types.ts",
+            "path": "x-pack/platform/packages/private/ml/agg_utils/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ml-agg-utils",
+            "id": "def-common.SignificantItem.logRateChangeSort",
+            "type": "number",
+            "tags": [],
+            "label": "logRateChangeSort",
+            "description": [
+              "Calculates a numerical value based on bg_count and doc_count for which to sort log rate change"
+            ],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "x-pack/platform/packages/private/ml/agg_utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2477,7 +2303,7 @@
         "description": [
           "\nRepresents a significant item group."
         ],
-        "path": "x-pack/packages/ml/agg_utils/src/types.ts",
+        "path": "x-pack/platform/packages/private/ml/agg_utils/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2490,7 +2316,7 @@
             "description": [
               "The identifier for the item."
             ],
-            "path": "x-pack/packages/ml/agg_utils/src/types.ts",
+            "path": "x-pack/platform/packages/private/ml/agg_utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2513,7 +2339,7 @@
               },
               "[]"
             ],
-            "path": "x-pack/packages/ml/agg_utils/src/types.ts",
+            "path": "x-pack/platform/packages/private/ml/agg_utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2526,7 +2352,7 @@
             "description": [
               "The document count associated with this item."
             ],
-            "path": "x-pack/packages/ml/agg_utils/src/types.ts",
+            "path": "x-pack/platform/packages/private/ml/agg_utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2542,7 +2368,7 @@
             "signature": [
               "number | null"
             ],
-            "path": "x-pack/packages/ml/agg_utils/src/types.ts",
+            "path": "x-pack/platform/packages/private/ml/agg_utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2565,7 +2391,7 @@
               },
               "[] | undefined"
             ],
-            "path": "x-pack/packages/ml/agg_utils/src/types.ts",
+            "path": "x-pack/platform/packages/private/ml/agg_utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2583,7 +2409,7 @@
         "description": [
           "\nRepresents histogram data for a group of field/value pairs."
         ],
-        "path": "x-pack/packages/ml/agg_utils/src/types.ts",
+        "path": "x-pack/platform/packages/private/ml/agg_utils/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2596,7 +2422,7 @@
             "description": [
               "The identifier for the group."
             ],
-            "path": "x-pack/packages/ml/agg_utils/src/types.ts",
+            "path": "x-pack/platform/packages/private/ml/agg_utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2619,7 +2445,7 @@
               },
               "[]"
             ],
-            "path": "x-pack/packages/ml/agg_utils/src/types.ts",
+            "path": "x-pack/platform/packages/private/ml/agg_utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2654,7 +2480,7 @@
             "text": "FieldValuePair"
           }
         ],
-        "path": "x-pack/packages/ml/agg_utils/src/types.ts",
+        "path": "x-pack/platform/packages/private/ml/agg_utils/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2667,7 +2493,7 @@
             "description": [
               "The key associated with the significant item."
             ],
-            "path": "x-pack/packages/ml/agg_utils/src/types.ts",
+            "path": "x-pack/platform/packages/private/ml/agg_utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2683,7 +2509,7 @@
             "signature": [
               "\"keyword\" | \"log_pattern\""
             ],
-            "path": "x-pack/packages/ml/agg_utils/src/types.ts",
+            "path": "x-pack/platform/packages/private/ml/agg_utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2696,7 +2522,7 @@
             "description": [
               "The document count associated with this item."
             ],
-            "path": "x-pack/packages/ml/agg_utils/src/types.ts",
+            "path": "x-pack/platform/packages/private/ml/agg_utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2712,7 +2538,7 @@
             "signature": [
               "number | null"
             ],
-            "path": "x-pack/packages/ml/agg_utils/src/types.ts",
+            "path": "x-pack/platform/packages/private/ml/agg_utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2728,7 +2554,7 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "x-pack/packages/ml/agg_utils/src/types.ts",
+            "path": "x-pack/platform/packages/private/ml/agg_utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2763,7 +2589,7 @@
             "text": "FieldValuePair"
           }
         ],
-        "path": "x-pack/packages/ml/agg_utils/src/types.ts",
+        "path": "x-pack/platform/packages/private/ml/agg_utils/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2786,7 +2612,46 @@
               },
               "[]"
             ],
-            "path": "x-pack/packages/ml/agg_utils/src/types.ts",
+            "path": "x-pack/platform/packages/private/ml/agg_utils/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ml-agg-utils",
+        "id": "def-common.SignificantItemHistogramItem",
+        "type": "Interface",
+        "tags": [],
+        "label": "SignificantItemHistogramItem",
+        "description": [
+          "\nRepresents a data item in a significant term histogram."
+        ],
+        "signature": [
+          {
+            "pluginId": "@kbn/ml-agg-utils",
+            "scope": "common",
+            "docId": "kibKbnMlAggUtilsPluginApi",
+            "section": "def-common.SignificantItemHistogramItem",
+            "text": "SignificantItemHistogramItem"
+          },
+          " extends SignificantItemHistogramItemBase"
+        ],
+        "path": "x-pack/platform/packages/private/ml/agg_utils/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ml-agg-utils",
+            "id": "def-common.SignificantItemHistogramItem.doc_count_significant_item",
+            "type": "number",
+            "tags": [],
+            "label": "doc_count_significant_item",
+            "description": [
+              "The document count for this histogram item in the significant item context."
+            ],
+            "path": "x-pack/platform/packages/private/ml/agg_utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2804,7 +2669,7 @@
         "description": [
           "\nAll available types for time series metric fields"
         ],
-        "path": "x-pack/packages/ml/agg_utils/src/time_series_metric_fields.ts",
+        "path": "x-pack/platform/packages/private/ml/agg_utils/src/time_series_metric_fields.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2823,7 +2688,7 @@
         "signature": [
           "5000"
         ],
-        "path": "x-pack/packages/ml/agg_utils/src/field_histograms.ts",
+        "path": "x-pack/platform/packages/private/ml/agg_utils/src/field_histograms.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2848,7 +2713,26 @@
           },
           " | NumericHistogramFieldWithColumnStats | OrdinalHistogramField | UnsupportedHistogramField)[]"
         ],
-        "path": "x-pack/packages/ml/agg_utils/src/fetch_histograms_for_fields.ts",
+        "path": "x-pack/platform/packages/private/ml/agg_utils/src/fetch_histograms_for_fields.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ml-agg-utils",
+        "id": "def-common.NumberValidationResult",
+        "type": "Type",
+        "tags": [
+          "interface"
+        ],
+        "label": "NumberValidationResult",
+        "description": [
+          "\nRepresents the result of number validation."
+        ],
+        "signature": [
+          "{ [key: string]: boolean; } & { min?: boolean | undefined; max?: boolean | undefined; integerOnly?: boolean | undefined; }"
+        ],
+        "path": "x-pack/platform/packages/private/ml/agg_utils/src/validate_number.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2873,24 +2757,7 @@
           },
           "; }"
         ],
-        "path": "x-pack/packages/ml/agg_utils/src/types.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/ml-agg-utils",
-        "id": "def-common.SignificantItemHistogramItem",
-        "type": "Type",
-        "tags": [],
-        "label": "SignificantItemHistogramItem",
-        "description": [
-          "\nRepresents a data item in a significant term histogram."
-        ],
-        "signature": [
-          "SignificantItemHistogramItemV1 | SignificantItemHistogramItemV2"
-        ],
-        "path": "x-pack/packages/ml/agg_utils/src/types.ts",
+        "path": "x-pack/platform/packages/private/ml/agg_utils/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2907,7 +2774,7 @@
         "signature": [
           "\"keyword\" | \"log_pattern\""
         ],
-        "path": "x-pack/packages/ml/agg_utils/src/types.ts",
+        "path": "x-pack/platform/packages/private/ml/agg_utils/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2926,7 +2793,7 @@
         "signature": [
           "{ readonly KEYWORD: \"keyword\"; readonly LOG_PATTERN: \"log_pattern\"; }"
         ],
-        "path": "x-pack/packages/ml/agg_utils/src/types.ts",
+        "path": "x-pack/platform/packages/private/ml/agg_utils/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

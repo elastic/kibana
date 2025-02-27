@@ -13,23 +13,28 @@ import {
   GLOBAL_ARTIFACT_TAG,
 } from '@kbn/security-solution-plugin/common/endpoint/service/artifacts';
 import { ExceptionsListItemGenerator } from '@kbn/security-solution-plugin/common/endpoint/data_generators/exceptions_list_item_generator';
+import TestAgent from 'supertest/lib/agent';
 import { PolicyTestResourceInfo } from '../../../../../security_solution_endpoint/services/endpoint_policy';
 import { ArtifactTestData } from '../../../../../security_solution_endpoint/services/endpoint_artifacts';
 import { FtrProviderContext } from '../../../../ftr_provider_context_edr_workflows';
 import { ROLE } from '../../../../config/services/security_solution_edr_workflows_roles_users';
 
 export default function ({ getService }: FtrProviderContext) {
-  const supertest = getService('supertest');
-  const supertestWithoutAuth = getService('supertestWithoutAuth');
   const endpointPolicyTestResources = getService('endpointPolicyTestResources');
   const endpointArtifactTestResources = getService('endpointArtifactTestResources');
+  const utils = getService('securitySolutionUtils');
 
   // @skipInServerlessMKI due to authentication issues - we should migrate from Basic to Bearer token when available
   // @skipInServerlessMKI - if you are removing this annotation, make sure to add the test suite to the MKI pipeline in .buildkite/pipelines/security_solution_quality_gate/mki_periodic/mki_periodic_defend_workflows.yml
   describe('@ess @serverless @skipInServerlessMKI Endpoint artifacts (via lists plugin): Trusted Applications', function () {
     let fleetEndpointPolicy: PolicyTestResourceInfo;
+    let t1AnalystSupertest: TestAgent;
+    let endpointPolicyManagerSupertest: TestAgent;
 
     before(async () => {
+      t1AnalystSupertest = await utils.createSuperTest(ROLE.t1_analyst);
+      endpointPolicyManagerSupertest = await utils.createSuperTest(ROLE.endpoint_policy_manager);
+
       fleetEndpointPolicy = await endpointPolicyTestResources.createPolicy();
     });
 
@@ -59,7 +64,7 @@ export default function ({ getService }: FtrProviderContext) {
       let trustedAppData: ArtifactTestData;
 
       type TrustedAppApiCallsInterface<BodyReturnType = unknown> = Array<{
-        method: keyof Pick<typeof supertest, 'post' | 'put' | 'get' | 'delete' | 'patch'>;
+        method: keyof Pick<TestAgent, 'post' | 'put' | 'get' | 'delete' | 'patch'>;
         info?: string;
         path: string;
         // The body just needs to have the properties we care about in the tests. This should cover most
@@ -156,8 +161,7 @@ export default function ({ getService }: FtrProviderContext) {
 
             body.entries[0].field = 'some.invalid.field';
 
-            await supertestWithoutAuth[trustedAppApiCall.method](trustedAppApiCall.path)
-              .auth(ROLE.endpoint_policy_manager, 'changeme')
+            await endpointPolicyManagerSupertest[trustedAppApiCall.method](trustedAppApiCall.path)
               .set('kbn-xsrf', 'true')
               .send(body)
               .expect(400)
@@ -170,8 +174,7 @@ export default function ({ getService }: FtrProviderContext) {
 
             body.entries.push({ ...body.entries[0] });
 
-            await supertestWithoutAuth[trustedAppApiCall.method](trustedAppApiCall.path)
-              .auth(ROLE.endpoint_policy_manager, 'changeme')
+            await endpointPolicyManagerSupertest[trustedAppApiCall.method](trustedAppApiCall.path)
               .set('kbn-xsrf', 'true')
               .send(body)
               .expect(400)
@@ -191,8 +194,7 @@ export default function ({ getService }: FtrProviderContext) {
               },
             ];
 
-            await supertestWithoutAuth[trustedAppApiCall.method](trustedAppApiCall.path)
-              .auth(ROLE.endpoint_policy_manager, 'changeme')
+            await endpointPolicyManagerSupertest[trustedAppApiCall.method](trustedAppApiCall.path)
               .set('kbn-xsrf', 'true')
               .send(body)
               .expect(400)
@@ -204,29 +206,9 @@ export default function ({ getService }: FtrProviderContext) {
             const body = trustedAppApiCall.getBody();
 
             body.os_types = ['linux'];
-            body.entries = [
-              {
-                field: 'process.Ext.code_signature',
-                entries: [
-                  {
-                    field: 'trusted',
-                    value: 'true',
-                    type: 'match',
-                    operator: 'included',
-                  },
-                  {
-                    field: 'subject_name',
-                    value: 'foo',
-                    type: 'match',
-                    operator: 'included',
-                  },
-                ],
-                type: 'nested',
-              },
-            ];
+            body.entries = exceptionsGenerator.generateTrustedAppSignerEntry();
 
-            await supertestWithoutAuth[trustedAppApiCall.method](trustedAppApiCall.path)
-              .auth(ROLE.endpoint_policy_manager, 'changeme')
+            await endpointPolicyManagerSupertest[trustedAppApiCall.method](trustedAppApiCall.path)
               .set('kbn-xsrf', 'true')
               .send(body)
               .expect(400)
@@ -234,13 +216,64 @@ export default function ({ getService }: FtrProviderContext) {
               .expect(anErrorMessageWith(/^.*(?!process\.Ext\.code_signature)/));
           });
 
+          it(`should error on [${trustedAppApiCall.method} if Mac signer field is used for Windows entry`, async () => {
+            const body = trustedAppApiCall.getBody();
+
+            body.os_types = ['windows'];
+            body.entries = exceptionsGenerator.generateTrustedAppSignerEntry('mac');
+
+            await endpointPolicyManagerSupertest[trustedAppApiCall.method](trustedAppApiCall.path)
+              .set('kbn-xsrf', 'true')
+              .send(body)
+              .expect(400);
+          });
+
+          it(`should error on [${trustedAppApiCall.method} if Windows signer field is used for Mac entry`, async () => {
+            const body = trustedAppApiCall.getBody();
+
+            body.os_types = ['macos'];
+            body.entries = exceptionsGenerator.generateTrustedAppSignerEntry();
+
+            await endpointPolicyManagerSupertest[trustedAppApiCall.method](trustedAppApiCall.path)
+              .set('kbn-xsrf', 'true')
+              .send(body)
+              .expect(400);
+          });
+
+          it('should not error if signer is set for a windows os entry item', async () => {
+            const body = trustedAppApiCalls[0].getBody();
+
+            body.os_types = ['windows'];
+            body.entries = exceptionsGenerator.generateTrustedAppSignerEntry();
+
+            await endpointPolicyManagerSupertest[trustedAppApiCalls[0].method](
+              trustedAppApiCalls[0].path
+            )
+              .set('kbn-xsrf', 'true')
+              .send(body)
+              .expect(200);
+          });
+
+          it('should not error if signer is set for a mac os entry item', async () => {
+            const body = trustedAppApiCalls[0].getBody();
+
+            body.os_types = ['macos'];
+            body.entries = exceptionsGenerator.generateTrustedAppSignerEntry('mac');
+
+            await endpointPolicyManagerSupertest[trustedAppApiCalls[0].method](
+              trustedAppApiCalls[0].path
+            )
+              .set('kbn-xsrf', 'true')
+              .send(body)
+              .expect(200);
+          });
+
           it(`should error on [${trustedAppApiCall.method}] if more than one OS is set`, async () => {
             const body = trustedAppApiCall.getBody();
 
             body.os_types = ['linux', 'windows'];
 
-            await supertestWithoutAuth[trustedAppApiCall.method](trustedAppApiCall.path)
-              .auth(ROLE.endpoint_policy_manager, 'changeme')
+            await endpointPolicyManagerSupertest[trustedAppApiCall.method](trustedAppApiCall.path)
               .set('kbn-xsrf', 'true')
               .send(body)
               .expect(400)
@@ -254,8 +287,7 @@ export default function ({ getService }: FtrProviderContext) {
             body.tags = [`${BY_POLICY_ARTIFACT_TAG_PREFIX}123`];
 
             // Using superuser here as we need custom license for this action
-            await supertest[trustedAppApiCall.method](trustedAppApiCall.path)
-              .auth(ROLE.endpoint_policy_manager, 'changeme')
+            await endpointPolicyManagerSupertest[trustedAppApiCall.method](trustedAppApiCall.path)
               .set('kbn-xsrf', 'true')
               .send(body)
               .expect(400)
@@ -265,8 +297,7 @@ export default function ({ getService }: FtrProviderContext) {
         }
         for (const trustedAppApiCall of [...needsWritePrivilege, ...needsReadPrivilege]) {
           it(`should not error on [${trustedAppApiCall.method}] - [${trustedAppApiCall.info}]`, async () => {
-            await supertestWithoutAuth[trustedAppApiCall.method](trustedAppApiCall.path)
-              .auth(ROLE.endpoint_policy_manager, 'changeme')
+            await endpointPolicyManagerSupertest[trustedAppApiCall.method](trustedAppApiCall.path)
               .set('kbn-xsrf', 'true')
               .send(trustedAppApiCall.getBody() as object)
               .expect(200);
@@ -276,10 +307,14 @@ export default function ({ getService }: FtrProviderContext) {
 
       // no such role in serverless
       describe('@skipInServerless and user has authorization to read trusted apps', function () {
+        let hunterSupertest: TestAgent;
+        before(async () => {
+          hunterSupertest = await utils.createSuperTest(ROLE.hunter);
+        });
+
         for (const trustedAppApiCall of [...trustedAppApiCalls, ...needsWritePrivilege]) {
           it(`should error on [${trustedAppApiCall.method}] - [${trustedAppApiCall.info}]`, async () => {
-            await supertestWithoutAuth[trustedAppApiCall.method](trustedAppApiCall.path)
-              .auth(ROLE.hunter, 'changeme')
+            await hunterSupertest[trustedAppApiCall.method](trustedAppApiCall.path)
               .set('kbn-xsrf', 'true')
               .send(trustedAppApiCall.getBody() as object)
               .expect(403);
@@ -288,8 +323,7 @@ export default function ({ getService }: FtrProviderContext) {
 
         for (const trustedAppApiCall of needsReadPrivilege) {
           it(`should not error on [${trustedAppApiCall.method}] - [${trustedAppApiCall.info}]`, async () => {
-            await supertestWithoutAuth[trustedAppApiCall.method](trustedAppApiCall.path)
-              .auth(ROLE.hunter, 'changeme')
+            await hunterSupertest[trustedAppApiCall.method](trustedAppApiCall.path)
               .set('kbn-xsrf', 'true')
               .send(trustedAppApiCall.getBody() as object)
               .expect(200);
@@ -304,8 +338,7 @@ export default function ({ getService }: FtrProviderContext) {
           ...needsReadPrivilege,
         ]) {
           it(`should error on [${trustedAppApiCall.method}] - [${trustedAppApiCall.info}]`, async () => {
-            await supertestWithoutAuth[trustedAppApiCall.method](trustedAppApiCall.path)
-              .auth(ROLE.t1_analyst, 'changeme')
+            await t1AnalystSupertest[trustedAppApiCall.method](trustedAppApiCall.path)
               .set('kbn-xsrf', 'true')
               .send(trustedAppApiCall.getBody() as object)
               .expect(403);

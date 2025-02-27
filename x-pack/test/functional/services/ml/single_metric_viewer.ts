@@ -74,6 +74,10 @@ export function MachineLearningSingleMetricViewerProvider(
       await testSubjects.existOrFail('mlSingleMetricViewerChart');
     },
 
+    async assertChartNotExist() {
+      await testSubjects.missingOrFail('mlSingleMetricViewerChart');
+    },
+
     async assertAnomalyMarkerExist() {
       await testSubjects.existOrFail('mlAnomalyMarker');
     },
@@ -181,7 +185,10 @@ export function MachineLearningSingleMetricViewerProvider(
         `mlSingleMetricViewerEntitySelectionConfigOrder_${entityFieldName}`,
         order
       );
-      await this.assertEntityConfig(entityFieldName, anomalousOnly, sortBy, order);
+
+      await retry.tryForTime(30 * 1000, async () => {
+        await this.assertEntityConfig(entityFieldName, anomalousOnly, sortBy, order);
+      });
     },
 
     async assertToastMessageExists(dataTestSubj: string) {

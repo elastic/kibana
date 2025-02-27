@@ -1,10 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
+
 import { ES_FIELD_TYPES } from '@kbn/field-types';
 import expect from '@kbn/expect';
 import { FIELD_FORMAT_IDS } from '@kbn/field-formats-plugin/common';
@@ -313,6 +315,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             // check available formats for ES_FIELD_TYPES.BOOLEAN
             expectFormatterTypes: [
               FIELD_FORMAT_IDS.BOOLEAN,
+              FIELD_FORMAT_IDS.COLOR,
               FIELD_FORMAT_IDS.STATIC_LOOKUP,
               FIELD_FORMAT_IDS.STRING,
               FIELD_FORMAT_IDS.URL,
@@ -401,8 +404,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             beforeSave: async () => {
               await testSubjects.click('colorEditorAddColor');
               await testSubjects.setValue('~colorEditorKeyPattern', 'red');
-              await testSubjects.setValue('~colorEditorColorPicker', '#ffffff');
-              await testSubjects.setValue('~colorEditorBackgroundPicker', '#ff0000');
+              await testSubjects.click('~colorEditorColorPicker');
+              await testSubjects.setValue('~euiColorPickerInput_bottom', '#ffffff');
+              await testSubjects.click('~colorEditorBackgroundPicker');
+              await testSubjects.setValue('~euiColorPickerInput_bottom', '#ff0000');
             },
             expect: async (renderedValueContainer) => {
               const span = await renderedValueContainer.findByTagName('span');
@@ -426,18 +431,16 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       it('should apply default formatter by field meta value', async () => {
         await es.indices.create({
           index: indexTitle,
-          body: {
-            mappings: {
-              properties: {
-                seconds: { type: 'long', meta: { unit: 's' } },
-              },
+          mappings: {
+            properties: {
+              seconds: { type: 'long', meta: { unit: 's' } },
             },
           },
         });
 
         const docResult = await es.index({
           index: indexTitle,
-          body: { seconds: 1234 },
+          document: { seconds: 1234 },
           refresh: 'wait_for',
         });
 
@@ -477,20 +480,18 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await es.indices.create({
         index: indexTitle,
-        body: {
-          mappings: {
-            // @ts-expect-error Type 'Record<string, { type: ES_FIELD_TYPES; }>' is not assignable to type 'Record<string, MappingProperty>'.
-            properties: specs.reduce((properties, spec, index) => {
-              properties[`${index}`] = { type: spec.fieldType };
-              return properties;
-            }, {} as Record<string, { type: ES_FIELD_TYPES }>),
-          },
+        mappings: {
+          // @ts-expect-error Type 'Record<string, { type: ES_FIELD_TYPES; }>' is not assignable to type 'Record<string, MappingProperty>'.
+          properties: specs.reduce((properties, spec, index) => {
+            properties[`${index}`] = { type: spec.fieldType };
+            return properties;
+          }, {} as Record<string, { type: ES_FIELD_TYPES }>),
         },
       });
 
       const docResult = await es.index({
         index: indexTitle,
-        body: specs.reduce((properties, spec, index) => {
+        document: specs.reduce((properties, spec, index) => {
           properties[`${index}`] = spec.fieldValue;
           return properties;
         }, {} as Record<string, FieldFormatEditorSpecDescriptor['fieldValue']>),
@@ -549,13 +550,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
           await PageObjects.settings.setFieldFormat(spec.applyFormatterType);
           if (spec.beforeSave) {
-            await spec.beforeSave(await testSubjects.find('formatRow'));
+            await spec.beforeSave();
           }
         });
       });
     });
 
-    describe('check formats', async () => {
+    describe('check formats', () => {
       before(async () => {
         await PageObjects.common.navigateToApp('discover', {
           hash: `/doc/${indexPatternId}/${indexTitle}?id=${testDocumentId}`,
@@ -604,7 +605,7 @@ interface FieldFormatEditorSpecDescriptor {
    * Use it set specific configuration params for applied field formatter
    * @param formatRowContainer - field format editor container
    */
-  beforeSave?: (formatRowContainer: WebElementWrapper) => Promise<void>;
+  beforeSave?: () => Promise<void>;
 
   /**
    * An expected formatted value rendered by Discover app,

@@ -31,6 +31,21 @@ multi-node cluster with {kib}, use Docker Compose instead. Refer to
 {ref}/docker.html#docker-compose-file[Start a multi-node cluster with Docker
 Compose] in the {es} documentation.
 
+==== Hardened Docker images
+
+You can also use the hardened link:https://wolfi.dev/[Wolfi] image for additional security. Using Wolfi images requires Docker version 20.10.10 or higher.
+
+To use the Wolfi image, append `-wolfi` to the image tag in the Docker command.
+
+For example:
+
+[source,sh,subs="attributes"]
+----
+docker pull docker.elastic.co/elasticsearch/elasticsearch-wolfi:{version}
+----
+
+==== Start a single node cluster
+
 . Install Docker. Visit https://docs.docker.com/get-docker/[Get Docker] to
 install Docker for your environment.
 +

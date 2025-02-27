@@ -1,0 +1,75 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+ {{> disclaimer}}
+
+import type { KbnClient } from '@kbn/test';
+import { ToolingLog } from '@kbn/tooling-log';
+import { ELASTIC_HTTP_VERSION_HEADER, X_ELASTIC_INTERNAL_ORIGIN_REQUEST } from '@kbn/core-http-common';
+import { replaceParams } from '@kbn/openapi-common/shared';
+import { catchAxiosErrorFormatAndThrow } from '@kbn/securitysolution-utils';
+import { FtrProviderContext } from 'x-pack/test/api_integration/ftr_provider_context';
+
+{{#each sources}}
+{{#if generationContext.operations}}
+import type {
+{{#each generationContext.operations}}
+  {{operationId}}RequestQueryInput,
+  {{operationId}}RequestParamsInput,
+  {{operationId}}RequestBodyInput,
+  {{operationId}}Response,
+{{/each}}
+} from '{{generatedPath}}';
+{{/if}}
+{{/each}}
+
+export interface ClientOptions {
+  kbnClient: KbnClient;
+  log: ToolingLog;
+}
+
+export class Client {
+  readonly kbnClient: KbnClient;
+  readonly log: ToolingLog;
+
+  constructor(options: ClientOptions) {
+    this.kbnClient = options.kbnClient;
+    this.log = options.log;
+  }
+{{#each operations}}
+{{#if description}}
+/**
+    * {{{description}}}
+    */
+{{/if}}
+async {{camelCase operationId}} ({{#if (or requestQuery requestParams requestBody requestAttachment)}}props: {{operationId}}Props{{/if}}) {
+  this.log.info(`${new Date().toISOString()} Calling API {{operationId}}`);
+    return this.kbnClient
+    .request{{#if response}}<{{operationId}}Response>{{/if}}({
+        path: {{#if requestParams}}replaceParams('{{path}}', props.params){{else}}'{{path}}'{{/if}},
+        headers: {
+            [ELASTIC_HTTP_VERSION_HEADER]: '{{version}}',
+        },
+        method: '{{upperCase method}}',
+        {{#if requestBody}}body: props.body,{{else if requestAttachment}}body: props.attachment,{{/if}}
+        {{#if requestQuery}}query: props.query,{{/if}}
+})
+.catch(catchAxiosErrorFormatAndThrow)
+}
+{{/each}}
+}
+
+{{#each operations}}
+{{#if (or requestQuery requestParams requestBody requestAttachment)}}
+export interface {{operationId}}Props {
+  {{~#if requestQuery}}query: {{operationId}}RequestQueryInput;{{/if}}
+  {{~#if requestParams}}params: {{operationId}}RequestParamsInput;{{/if}}
+  {{~#if requestBody}}body: {{operationId}}RequestBodyInput;{{/if}}
+  {{~#if requestAttachment}}attachment: FormData;{{/if}}
+}
+{{/if}}
+{{/each}}

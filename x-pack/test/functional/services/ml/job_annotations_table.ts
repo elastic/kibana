@@ -285,7 +285,7 @@ export function MachineLearningJobAnnotationsProvider({ getService }: FtrProvide
 
     public async openCreateAnnotationFlyout() {
       await retry.tryForTime(30 * 1000, async () => {
-        const el = await find.byClassName('mlAnnotationBrush');
+        const el = await find.byClassName('ml-annotation__brush');
 
         // simulate click and drag on the focus chart
         // to generate annotation

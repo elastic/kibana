@@ -22,9 +22,9 @@ export const journey = new Journey({
     await page.waitForSelector('[data-test-subj="discoverDocTable"][data-render-complete="true"]');
     await page.waitForSelector(subj('globalLoadingIndicator-hidden'));
   })
-  .step('Expand the first document', async ({ page }) => {
+  .step('Expand a document', async ({ page }) => {
     const expandButtons = page.locator(subj('docTableExpandToggleColumn'));
-    await expandButtons.first().click();
+    await expandButtons.nth(3).click();
     await page.waitForSelector(subj('docTableRowAction'));
     await page.click(subj('docTableRowAction'));
     await page.waitForSelector(subj('globalLoadingIndicator-hidden'));

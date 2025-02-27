@@ -148,7 +148,7 @@
           },
           " & { context: string[]; }"
         ],
-        "path": "packages/kbn-logging-mocks/src/logger.mock.ts",
+        "path": "src/platform/packages/shared/kbn-logging-mocks/src/logger.mock.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -162,7 +162,7 @@
         "tags": [],
         "label": "loggerMock",
         "description": [],
-        "path": "packages/kbn-logging-mocks/src/logger.mock.ts",
+        "path": "src/platform/packages/shared/kbn-logging-mocks/src/logger.mock.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -183,7 +183,7 @@
                 "text": "MockedLogger"
               }
             ],
-            "path": "packages/kbn-logging-mocks/src/logger.mock.ts",
+            "path": "src/platform/packages/shared/kbn-logging-mocks/src/logger.mock.ts",
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -198,7 +198,7 @@
                 "signature": [
                   "string[]"
                 ],
-                "path": "packages/kbn-logging-mocks/src/logger.mock.ts",
+                "path": "src/platform/packages/shared/kbn-logging-mocks/src/logger.mock.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -222,7 +222,7 @@
               },
               ") => void"
             ],
-            "path": "packages/kbn-logging-mocks/src/logger.mock.ts",
+            "path": "src/platform/packages/shared/kbn-logging-mocks/src/logger.mock.ts",
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -353,7 +353,7 @@
                   },
                   " & { context: string[]; }"
                 ],
-                "path": "packages/kbn-logging-mocks/src/logger.mock.ts",
+                "path": "src/platform/packages/shared/kbn-logging-mocks/src/logger.mock.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -427,7 +427,7 @@
               },
               " | undefined])[]; }"
             ],
-            "path": "packages/kbn-logging-mocks/src/logger.mock.ts",
+            "path": "src/platform/packages/shared/kbn-logging-mocks/src/logger.mock.ts",
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -558,7 +558,7 @@
                   },
                   " & { context: string[]; }"
                 ],
-                "path": "packages/kbn-logging-mocks/src/logger.mock.ts",
+                "path": "src/platform/packages/shared/kbn-logging-mocks/src/logger.mock.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }

@@ -1,0 +1,17 @@
+{
+  "type": "plugin",
+  "id": "@kbn/saved-objects-tagging-oss-plugin",
+  "owner": [
+    "@elastic/appex-sharedux"
+  ],
+  "group": "platform",
+  "visibility": "shared",
+  "plugin": {
+    "id": "savedObjectsTaggingOss",
+    "browser": true,
+    "server": false,
+    "optionalPlugins": [
+      "savedObjects"
+    ]
+  }
+}

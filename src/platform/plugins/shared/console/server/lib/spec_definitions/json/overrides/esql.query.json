@@ -1,0 +1,10 @@
+{
+  "esql.query": {
+    "data_autocomplete_rules": {
+      "columnar": false,
+      "locale": "",
+      "params": [],
+      "query": ""
+    }
+  }
+}

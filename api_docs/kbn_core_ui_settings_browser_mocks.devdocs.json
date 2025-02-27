@@ -6,7 +6,144 @@
     "interfaces": [],
     "enums": [],
     "misc": [],
-    "objects": []
+    "objects": [
+      {
+        "parentPluginId": "@kbn/core-ui-settings-browser-mocks",
+        "id": "def-public.settingsServiceMock",
+        "type": "Object",
+        "tags": [],
+        "label": "settingsServiceMock",
+        "description": [],
+        "path": "src/core/packages/ui-settings/browser-mocks/src/settings_service.mock.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-ui-settings-browser-mocks",
+            "id": "def-public.settingsServiceMock.create",
+            "type": "Function",
+            "tags": [],
+            "label": "create",
+            "description": [],
+            "signature": [
+              "() => any"
+            ],
+            "path": "src/core/packages/ui-settings/browser-mocks/src/settings_service.mock.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": []
+          },
+          {
+            "parentPluginId": "@kbn/core-ui-settings-browser-mocks",
+            "id": "def-public.settingsServiceMock.createSetupContract",
+            "type": "Function",
+            "tags": [],
+            "label": "createSetupContract",
+            "description": [],
+            "signature": [
+              "() => { client: jest.Mocked<",
+              "IUiSettingsClient",
+              ">; globalClient: jest.Mocked<",
+              "IUiSettingsClient",
+              ">; }"
+            ],
+            "path": "src/core/packages/ui-settings/browser-mocks/src/settings_service.mock.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": []
+          },
+          {
+            "parentPluginId": "@kbn/core-ui-settings-browser-mocks",
+            "id": "def-public.settingsServiceMock.createStartContract",
+            "type": "Function",
+            "tags": [],
+            "label": "createStartContract",
+            "description": [],
+            "signature": [
+              "() => { client: jest.Mocked<",
+              "IUiSettingsClient",
+              ">; globalClient: jest.Mocked<",
+              "IUiSettingsClient",
+              ">; }"
+            ],
+            "path": "src/core/packages/ui-settings/browser-mocks/src/settings_service.mock.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-ui-settings-browser-mocks",
+        "id": "def-public.uiSettingsServiceMock",
+        "type": "Object",
+        "tags": [],
+        "label": "uiSettingsServiceMock",
+        "description": [],
+        "path": "src/core/packages/ui-settings/browser-mocks/src/ui_settings_service.mock.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-ui-settings-browser-mocks",
+            "id": "def-public.uiSettingsServiceMock.create",
+            "type": "Function",
+            "tags": [],
+            "label": "create",
+            "description": [],
+            "signature": [
+              "() => any"
+            ],
+            "path": "src/core/packages/ui-settings/browser-mocks/src/ui_settings_service.mock.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": []
+          },
+          {
+            "parentPluginId": "@kbn/core-ui-settings-browser-mocks",
+            "id": "def-public.uiSettingsServiceMock.createSetupContract",
+            "type": "Function",
+            "tags": [],
+            "label": "createSetupContract",
+            "description": [],
+            "signature": [
+              "() => jest.Mocked<",
+              "IUiSettingsClient",
+              ">"
+            ],
+            "path": "src/core/packages/ui-settings/browser-mocks/src/ui_settings_service.mock.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": []
+          },
+          {
+            "parentPluginId": "@kbn/core-ui-settings-browser-mocks",
+            "id": "def-public.uiSettingsServiceMock.createStartContract",
+            "type": "Function",
+            "tags": [],
+            "label": "createStartContract",
+            "description": [],
+            "signature": [
+              "() => jest.Mocked<",
+              "IUiSettingsClient",
+              ">"
+            ],
+            "path": "src/core/packages/ui-settings/browser-mocks/src/ui_settings_service.mock.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": []
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ]
   },
   "server": {
     "classes": [],
@@ -22,179 +159,6 @@
     "interfaces": [],
     "enums": [],
     "misc": [],
-    "objects": [
-      {
-        "parentPluginId": "@kbn/core-ui-settings-browser-mocks",
-        "id": "def-common.settingsServiceMock",
-        "type": "Object",
-        "tags": [],
-        "label": "settingsServiceMock",
-        "description": [],
-        "path": "packages/core/ui-settings/core-ui-settings-browser-mocks/src/settings_service.mock.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/core-ui-settings-browser-mocks",
-            "id": "def-common.settingsServiceMock.create",
-            "type": "Function",
-            "tags": [],
-            "label": "create",
-            "description": [],
-            "signature": [
-              "() => any"
-            ],
-            "path": "packages/core/ui-settings/core-ui-settings-browser-mocks/src/settings_service.mock.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "returnComment": [],
-            "children": []
-          },
-          {
-            "parentPluginId": "@kbn/core-ui-settings-browser-mocks",
-            "id": "def-common.settingsServiceMock.createSetupContract",
-            "type": "Function",
-            "tags": [],
-            "label": "createSetupContract",
-            "description": [],
-            "signature": [
-              "() => { client: jest.Mocked<",
-              {
-                "pluginId": "@kbn/core-ui-settings-browser",
-                "scope": "common",
-                "docId": "kibKbnCoreUiSettingsBrowserPluginApi",
-                "section": "def-common.IUiSettingsClient",
-                "text": "IUiSettingsClient"
-              },
-              ">; globalClient: jest.Mocked<",
-              {
-                "pluginId": "@kbn/core-ui-settings-browser",
-                "scope": "common",
-                "docId": "kibKbnCoreUiSettingsBrowserPluginApi",
-                "section": "def-common.IUiSettingsClient",
-                "text": "IUiSettingsClient"
-              },
-              ">; }"
-            ],
-            "path": "packages/core/ui-settings/core-ui-settings-browser-mocks/src/settings_service.mock.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "returnComment": [],
-            "children": []
-          },
-          {
-            "parentPluginId": "@kbn/core-ui-settings-browser-mocks",
-            "id": "def-common.settingsServiceMock.createStartContract",
-            "type": "Function",
-            "tags": [],
-            "label": "createStartContract",
-            "description": [],
-            "signature": [
-              "() => { client: jest.Mocked<",
-              {
-                "pluginId": "@kbn/core-ui-settings-browser",
-                "scope": "common",
-                "docId": "kibKbnCoreUiSettingsBrowserPluginApi",
-                "section": "def-common.IUiSettingsClient",
-                "text": "IUiSettingsClient"
-              },
-              ">; globalClient: jest.Mocked<",
-              {
-                "pluginId": "@kbn/core-ui-settings-browser",
-                "scope": "common",
-                "docId": "kibKbnCoreUiSettingsBrowserPluginApi",
-                "section": "def-common.IUiSettingsClient",
-                "text": "IUiSettingsClient"
-              },
-              ">; }"
-            ],
-            "path": "packages/core/ui-settings/core-ui-settings-browser-mocks/src/settings_service.mock.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "returnComment": [],
-            "children": []
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/core-ui-settings-browser-mocks",
-        "id": "def-common.uiSettingsServiceMock",
-        "type": "Object",
-        "tags": [],
-        "label": "uiSettingsServiceMock",
-        "description": [],
-        "path": "packages/core/ui-settings/core-ui-settings-browser-mocks/src/ui_settings_service.mock.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/core-ui-settings-browser-mocks",
-            "id": "def-common.uiSettingsServiceMock.create",
-            "type": "Function",
-            "tags": [],
-            "label": "create",
-            "description": [],
-            "signature": [
-              "() => any"
-            ],
-            "path": "packages/core/ui-settings/core-ui-settings-browser-mocks/src/ui_settings_service.mock.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "returnComment": [],
-            "children": []
-          },
-          {
-            "parentPluginId": "@kbn/core-ui-settings-browser-mocks",
-            "id": "def-common.uiSettingsServiceMock.createSetupContract",
-            "type": "Function",
-            "tags": [],
-            "label": "createSetupContract",
-            "description": [],
-            "signature": [
-              "() => jest.Mocked<",
-              {
-                "pluginId": "@kbn/core-ui-settings-browser",
-                "scope": "common",
-                "docId": "kibKbnCoreUiSettingsBrowserPluginApi",
-                "section": "def-common.IUiSettingsClient",
-                "text": "IUiSettingsClient"
-              },
-              ">"
-            ],
-            "path": "packages/core/ui-settings/core-ui-settings-browser-mocks/src/ui_settings_service.mock.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "returnComment": [],
-            "children": []
-          },
-          {
-            "parentPluginId": "@kbn/core-ui-settings-browser-mocks",
-            "id": "def-common.uiSettingsServiceMock.createStartContract",
-            "type": "Function",
-            "tags": [],
-            "label": "createStartContract",
-            "description": [],
-            "signature": [
-              "() => jest.Mocked<",
-              {
-                "pluginId": "@kbn/core-ui-settings-browser",
-                "scope": "common",
-                "docId": "kibKbnCoreUiSettingsBrowserPluginApi",
-                "section": "def-common.IUiSettingsClient",
-                "text": "IUiSettingsClient"
-              },
-              ">"
-            ],
-            "path": "packages/core/ui-settings/core-ui-settings-browser-mocks/src/ui_settings_service.mock.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "returnComment": [],
-            "children": []
-          }
-        ],
-        "initialIsOpen": false
-      }
-    ]
+    "objects": []
   }
 }

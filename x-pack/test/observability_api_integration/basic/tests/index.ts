@@ -10,6 +10,7 @@ import { FtrProviderContext } from '../../common/ftr_provider_context';
 // eslint-disable-next-line import/no-default-export
 export default function observabilityApiIntegrationTests({ loadTestFile }: FtrProviderContext) {
   describe('Observability specs (basic)', function () {
+    this.tags('skipFIPS');
     loadTestFile(require.resolve('./annotations'));
   });
 }

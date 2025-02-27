@@ -1,0 +1,241 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import type { estypes } from '@elastic/elasticsearch';
+import { map, reduce, mapValues, has, get, keys, pickBy } from 'lodash';
+import type { SerializableRecord } from '@kbn/utility-types';
+import type { Filter, FilterMeta, FilterMetaParams } from './types';
+import { FILTERS } from './types';
+import type { DataViewFieldBase, DataViewBaseNoFields } from '../../es_query';
+
+const OPERANDS_IN_RANGE = 2;
+
+const operators = {
+  gt: '>',
+  gte: '>=',
+  lte: '<=',
+  lt: '<',
+};
+const comparators = {
+  gt: 'boolean gt(Supplier s, def v) {return s.get() > v}',
+  gte: 'boolean gte(Supplier s, def v) {return s.get() >= v}',
+  lte: 'boolean lte(Supplier s, def v) {return s.get() <= v}',
+  lt: 'boolean lt(Supplier s, def v) {return s.get() < v}',
+};
+
+const dateComparators = {
+  gt: 'boolean gt(Supplier s, def v) {return s.get().toInstant().isAfter(Instant.parse(v))}',
+  gte: 'boolean gte(Supplier s, def v) {return !s.get().toInstant().isBefore(Instant.parse(v))}',
+  lte: 'boolean lte(Supplier s, def v) {return !s.get().toInstant().isAfter(Instant.parse(v))}',
+  lt: 'boolean lt(Supplier s, def v) {return s.get().toInstant().isBefore(Instant.parse(v))}',
+};
+
+/**
+ * An interface for all possible range filter params
+ * It is similar, but not identical to estypes.QueryDslRangeQuery
+ * @public
+ */
+export interface RangeFilterParams extends SerializableRecord {
+  from?: number | string;
+  to?: number | string;
+  gt?: number | string;
+  lt?: number | string;
+  gte?: number | string;
+  lte?: number | string;
+  format?: string;
+}
+
+export const hasRangeKeys = (params: RangeFilterParams) =>
+  Boolean(
+    keys(params).find((key: string) => ['gte', 'gt', 'lte', 'lt', 'from', 'to'].includes(key))
+  );
+
+export type RangeFilterMeta = FilterMeta & {
+  params?: RangeFilterParams;
+  field?: string;
+  formattedValue?: string;
+  type: 'range';
+};
+
+export type ScriptedRangeFilter = Filter & {
+  meta: RangeFilterMeta;
+  query: {
+    script: {
+      script: estypes.Script;
+    };
+  };
+};
+
+export type MatchAllRangeFilter = Filter & {
+  meta: RangeFilterMeta;
+  query: {
+    match_all: estypes.QueryDslQueryContainer['match_all'];
+  };
+};
+
+/**
+ * @public
+ */
+export type RangeFilter = Filter & {
+  meta: RangeFilterMeta;
+  query: {
+    range: { [key: string]: RangeFilterParams };
+  };
+};
+
+/**
+ * @param filter
+ * @returns `true` if a filter is an `RangeFilter`
+ *
+ * @public
+ */
+export function isRangeFilter(filter?: Filter): filter is RangeFilter {
+  if (filter?.meta?.type) return filter.meta.type === FILTERS.RANGE;
+  return has(filter, 'query.range');
+}
+
+export function isRangeFilterParams(
+  params: FilterMetaParams | undefined
+): params is RangeFilterParams {
+  return typeof params === 'object' && get(params, 'type', '') === 'range';
+}
+
+/**
+ *
+ * @param filter
+ * @returns `true` if a filter is a scripted `RangeFilter`
+ *
+ * @public
+ */
+export const isScriptedRangeFilter = (filter: Filter): filter is ScriptedRangeFilter => {
+  const params: RangeFilterParams = get(filter, 'query.script.script.params', {});
+
+  return hasRangeKeys(params);
+};
+
+/**
+ * @internal
+ */
+export const getRangeFilterField = (filter: RangeFilter | ScriptedRangeFilter) => {
+  return filter.meta?.field ?? (filter.query.range && Object.keys(filter.query.range)[0]);
+};
+
+const formatValue = (params: any[]) =>
+  map(params, (val: any, key: string) => get(operators, key) + val).join(' ');
+
+/**
+ * Creates a filter where the value for the given field is in the given range
+ * params should be an object containing `lt`, `lte`, `gt`, and/or `gte`
+ *
+ * @param field
+ * @param params
+ * @param dataView
+ * @param formattedValue
+ * @returns
+ *
+ * @public
+ */
+export const buildRangeFilter = (
+  field: DataViewFieldBase,
+  params: RangeFilterParams,
+  indexPattern?: DataViewBaseNoFields,
+  formattedValue?: string
+): RangeFilter | ScriptedRangeFilter | MatchAllRangeFilter => {
+  params = mapValues(params, (value: any) => (field.type === 'number' ? parseFloat(value) : value));
+
+  if ('gte' in params && 'gt' in params) throw new Error('gte and gt are mutually exclusive');
+  if ('lte' in params && 'lt' in params) throw new Error('lte and lt are mutually exclusive');
+
+  const totalInfinite = ['gt', 'lt'].reduce((acc, op) => {
+    const key = op in params ? op : `${op}e`;
+    const value = get(params, key);
+    const numericValue = typeof value === 'number' ? value : 0;
+    const isInfinite = Math.abs(numericValue) === Infinity;
+
+    if (isInfinite) {
+      acc++;
+
+      // @ts-ignore
+      delete params[key];
+    }
+
+    return acc;
+  }, 0);
+
+  const meta = {
+    index: indexPattern?.id,
+    params: {},
+    field: field.name,
+    ...(formattedValue ? { formattedValue } : {}),
+  };
+
+  if (totalInfinite === OPERANDS_IN_RANGE) {
+    return { meta, query: { match_all: {} } } as MatchAllRangeFilter;
+  } else if (field.scripted) {
+    const scr = getRangeScript(field, params);
+    // TODO: type mismatch enforced
+    scr.script.params.value = formatValue(scr.script.params as any);
+    return { meta, query: { script: scr } } as ScriptedRangeFilter;
+  } else {
+    return { meta, query: { range: { [field.name]: params } } } as RangeFilter;
+  }
+};
+
+export const buildSimpleNumberRangeFilter = (
+  fieldName: string,
+  params: RangeFilterParams,
+  value: string,
+  dataViewId: string
+) => {
+  return buildRangeFilter(
+    { name: fieldName, type: 'number' },
+    params,
+    { id: dataViewId, title: dataViewId },
+    value
+  );
+};
+
+/**
+ * @internal
+ */
+export const getRangeScript = (field: DataViewFieldBase, params: RangeFilterParams) => {
+  const knownParams: estypes.Script['params'] = mapValues(
+    pickBy(params, (val, key) => key in operators),
+    (value) => (field.type === 'number' && typeof value === 'string' ? parseFloat(value) : value)
+  );
+  let script = map(
+    knownParams,
+    (_: unknown, key) => '(' + field.script + ')' + get(operators, key) + key
+  ).join(' && ');
+
+  // We must wrap painless scripts in a lambda in case they're more than a simple expression
+  if (field.lang === 'painless') {
+    const comp = field.type === 'date' ? dateComparators : comparators;
+    const currentComparators = reduce(
+      knownParams,
+      (acc, val, key) => acc.concat(get(comp, key)),
+      []
+    ).join(' ');
+
+    const comparisons = map(
+      knownParams,
+      (val, key) => `${key}(() -> { ${field.script} }, params.${key})`
+    ).join(' && ');
+
+    script = `${currentComparators}${comparisons}`;
+  }
+
+  return {
+    script: {
+      source: script,
+      params: knownParams,
+      lang: field.lang!,
+    },
+  };
+};

@@ -172,7 +172,7 @@ export default function ({ getService }: FtrProviderContext) {
       // customize the lifecycle policy
       await es.ilm.putLifecycle({
         name: ILM_POLICY_NAME,
-        body: customLifecycle,
+        ...customLifecycle,
       });
 
       await runMigrate();
@@ -199,13 +199,29 @@ export default function ({ getService }: FtrProviderContext) {
           .put(INTERNAL_ROUTES.MIGRATE.MIGRATE_ILM_POLICY)
           .auth(UNAUTHZD_TEST_USERNAME, UNAUTHZD_TEST_USER_PASSWORD)
           .set('kbn-xsrf', 'xxx')
-          .expect(404);
+          .expect(403)
+          .then(({ body }: any) => {
+            expect(body).to.eql({
+              statusCode: 403,
+              error: 'Forbidden',
+              message:
+                'The current user requires "manage" privilege on the ".reporting-*,.kibana-reporting*" indices.',
+            });
+          });
 
         await supertestWithoutAuth
           .get(INTERNAL_ROUTES.MIGRATE.GET_ILM_POLICY_STATUS)
           .auth(UNAUTHZD_TEST_USERNAME, UNAUTHZD_TEST_USER_PASSWORD)
           .set('kbn-xsrf', 'xxx')
-          .expect(404);
+          .expect(403)
+          .then(({ body }: any) => {
+            expect(body).to.eql({
+              statusCode: 403,
+              error: 'Forbidden',
+              message:
+                'The current user requires "manage" privilege on the ".reporting-*,.kibana-reporting*" indices.',
+            });
+          });
       } finally {
         await security.user.delete(UNAUTHZD_TEST_USERNAME);
       }

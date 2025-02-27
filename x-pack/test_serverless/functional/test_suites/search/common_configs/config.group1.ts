@@ -20,6 +20,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
       require.resolve('../../common/reporting'),
       require.resolve('../../common/console'),
       require.resolve('../../common/spaces'),
+      require.resolve('../../common/data_usage'),
     ],
     junit: {
       reportName: 'Serverless Search Functional Tests - Common Group 1',

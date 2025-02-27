@@ -1,16 +1,17 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import Fsp from 'fs/promises';
 import Path from 'path';
 
 import JSON5 from 'json5';
-import { safeLoad, safeDump } from 'js-yaml';
+import { load, dump } from 'js-yaml';
 import { asyncForEach } from '@kbn/std';
 import { ToolingLog } from '@kbn/tooling-log';
 
@@ -87,10 +88,10 @@ export async function bundleFleetPackages(pkgDir: string, log: ToolingLog, confi
           return;
         }
 
-        const manifestYml = await safeLoad(manifestEntry.buffer.toString('utf8'));
+        const manifestYml = await load(manifestEntry.buffer.toString('utf8'));
         manifestYml.version = stackVersion;
 
-        const newManifestYml = safeDump(manifestYml);
+        const newManifestYml = dump(manifestYml);
         manifestEntry.buffer = Buffer.from(newManifestYml, 'utf8');
 
         // Update all paths to use the new version

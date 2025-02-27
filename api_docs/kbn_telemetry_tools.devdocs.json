@@ -10,18 +10,10 @@
   },
   "server": {
     "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
-    "objects": []
-  },
-  "common": {
-    "classes": [],
     "functions": [
       {
         "parentPluginId": "@kbn/telemetry-tools",
-        "id": "def-common.assertTelemetryPayload",
+        "id": "def-server.assertTelemetryPayload",
         "type": "Function",
         "tags": [],
         "label": "assertTelemetryPayload",
@@ -35,24 +27,24 @@
           "TelemetrySchemaObject",
           "; }, stats: unknown) => void"
         ],
-        "path": "packages/kbn-telemetry-tools/src/schema_ftr_validations/schema_to_config_schema.ts",
+        "path": "src/platform/packages/private/kbn-telemetry-tools/src/schema_ftr_validations/schema_to_config_schema.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/telemetry-tools",
-            "id": "def-common.assertTelemetryPayload.$1",
+            "id": "def-server.assertTelemetryPayload.$1",
             "type": "Object",
             "tags": [],
             "label": "telemetrySchema",
             "description": [],
-            "path": "packages/kbn-telemetry-tools/src/schema_ftr_validations/schema_to_config_schema.ts",
+            "path": "src/platform/packages/private/kbn-telemetry-tools/src/schema_ftr_validations/schema_to_config_schema.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/telemetry-tools",
-                "id": "def-common.assertTelemetryPayload.$1.root",
+                "id": "def-server.assertTelemetryPayload.$1.root",
                 "type": "Object",
                 "tags": [],
                 "label": "root",
@@ -60,13 +52,13 @@
                 "signature": [
                   "TelemetrySchemaObject"
                 ],
-                "path": "packages/kbn-telemetry-tools/src/schema_ftr_validations/schema_to_config_schema.ts",
+                "path": "src/platform/packages/private/kbn-telemetry-tools/src/schema_ftr_validations/schema_to_config_schema.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
               {
                 "parentPluginId": "@kbn/telemetry-tools",
-                "id": "def-common.assertTelemetryPayload.$1.plugins",
+                "id": "def-server.assertTelemetryPayload.$1.plugins",
                 "type": "Object",
                 "tags": [],
                 "label": "plugins",
@@ -74,7 +66,7 @@
                 "signature": [
                   "TelemetrySchemaObject"
                 ],
-                "path": "packages/kbn-telemetry-tools/src/schema_ftr_validations/schema_to_config_schema.ts",
+                "path": "src/platform/packages/private/kbn-telemetry-tools/src/schema_ftr_validations/schema_to_config_schema.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -82,7 +74,7 @@
           },
           {
             "parentPluginId": "@kbn/telemetry-tools",
-            "id": "def-common.assertTelemetryPayload.$2",
+            "id": "def-server.assertTelemetryPayload.$2",
             "type": "Unknown",
             "tags": [],
             "label": "stats",
@@ -92,7 +84,7 @@
             "signature": [
               "unknown"
             ],
-            "path": "packages/kbn-telemetry-tools/src/schema_ftr_validations/schema_to_config_schema.ts",
+            "path": "src/platform/packages/private/kbn-telemetry-tools/src/schema_ftr_validations/schema_to_config_schema.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -103,7 +95,7 @@
       },
       {
         "parentPluginId": "@kbn/telemetry-tools",
-        "id": "def-common.runTelemetryCheck",
+        "id": "def-server.runTelemetryCheck",
         "type": "Function",
         "tags": [],
         "label": "runTelemetryCheck",
@@ -111,7 +103,7 @@
         "signature": [
           "() => void"
         ],
-        "path": "packages/kbn-telemetry-tools/src/cli/run_telemetry_check.ts",
+        "path": "src/platform/packages/private/kbn-telemetry-tools/src/cli/run_telemetry_check.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [],
@@ -120,7 +112,7 @@
       },
       {
         "parentPluginId": "@kbn/telemetry-tools",
-        "id": "def-common.runTelemetryExtract",
+        "id": "def-server.runTelemetryExtract",
         "type": "Function",
         "tags": [],
         "label": "runTelemetryExtract",
@@ -128,7 +120,7 @@
         "signature": [
           "() => void"
         ],
-        "path": "packages/kbn-telemetry-tools/src/cli/run_telemetry_extract.ts",
+        "path": "src/platform/packages/private/kbn-telemetry-tools/src/cli/run_telemetry_extract.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [],
@@ -136,6 +128,14 @@
         "initialIsOpen": false
       }
     ],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
     "interfaces": [],
     "enums": [],
     "misc": [],

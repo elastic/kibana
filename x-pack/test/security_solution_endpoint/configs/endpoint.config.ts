@@ -9,6 +9,7 @@ import { FtrConfigProviderContext } from '@kbn/test';
 import { resolve } from 'path';
 import { generateConfig } from './config.base';
 import { services } from '../services';
+import { pageObjects } from '../page_objects';
 
 // eslint-disable-next-line import/no-default-export
 export default async function (ftrConfigProviderContext: FtrConfigProviderContext) {
@@ -25,5 +26,6 @@ export default async function (ftrConfigProviderContext: FtrConfigProviderContex
     junitReportName: 'X-Pack Endpoint Functional Tests on ESS',
     target: 'ess',
     services,
+    pageObjects,
   });
 }

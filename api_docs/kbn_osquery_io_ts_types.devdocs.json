@@ -32,7 +32,7 @@
         "signature": [
           "{ agents: string[]; allAgentsSelected: boolean; platformsSelected: string[]; policiesSelected: string[]; }"
         ],
-        "path": "packages/kbn-osquery-io-ts-types/src/live_query/index.ts",
+        "path": "src/platform/packages/shared/kbn-osquery-io-ts-types/src/live_query/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -47,7 +47,7 @@
         "signature": [
           "{ agents: string[]; allAgentsSelected: boolean; platformsSelected: string[]; policiesSelected: string[]; } | undefined"
         ],
-        "path": "packages/kbn-osquery-io-ts-types/src/live_query/index.ts",
+        "path": "src/platform/packages/shared/kbn-osquery-io-ts-types/src/live_query/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -62,7 +62,7 @@
         "signature": [
           "{ id: string; query: string; ecs_mapping: { [x: string]: { field?: string | undefined; value?: string | string[] | undefined; }; } | undefined; version: string | undefined; platform: string | undefined; removed: boolean | undefined; snapshot: boolean | undefined; }[]"
         ],
-        "path": "packages/kbn-osquery-io-ts-types/src/live_query/index.ts",
+        "path": "src/platform/packages/shared/kbn-osquery-io-ts-types/src/live_query/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -77,7 +77,7 @@
         "signature": [
           "string"
         ],
-        "path": "packages/kbn-osquery-io-ts-types/src/live_query/index.ts",
+        "path": "src/platform/packages/shared/kbn-osquery-io-ts-types/src/live_query/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -92,7 +92,7 @@
         "signature": [
           "string | undefined"
         ],
-        "path": "packages/kbn-osquery-io-ts-types/src/live_query/index.ts",
+        "path": "src/platform/packages/shared/kbn-osquery-io-ts-types/src/live_query/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -107,7 +107,7 @@
         "signature": [
           "{ [x: string]: { field?: string | undefined; value?: string | string[] | undefined; }; }"
         ],
-        "path": "packages/kbn-osquery-io-ts-types/src/live_query/index.ts",
+        "path": "src/platform/packages/shared/kbn-osquery-io-ts-types/src/live_query/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -122,7 +122,7 @@
         "signature": [
           "{ [x: string]: { field?: string | undefined; value?: string | string[] | undefined; }; } | undefined"
         ],
-        "path": "packages/kbn-osquery-io-ts-types/src/live_query/index.ts",
+        "path": "src/platform/packages/shared/kbn-osquery-io-ts-types/src/live_query/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -137,7 +137,7 @@
         "signature": [
           "{ name: string | undefined; url: string | undefined; }"
         ],
-        "path": "packages/kbn-osquery-io-ts-types/src/live_query/index.ts",
+        "path": "src/platform/packages/shared/kbn-osquery-io-ts-types/src/live_query/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -152,7 +152,7 @@
         "signature": [
           "{ name: string | undefined; url: string | undefined; } | undefined"
         ],
-        "path": "packages/kbn-osquery-io-ts-types/src/live_query/index.ts",
+        "path": "src/platform/packages/shared/kbn-osquery-io-ts-types/src/live_query/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -167,7 +167,7 @@
         "signature": [
           "string"
         ],
-        "path": "packages/kbn-osquery-io-ts-types/src/live_query/index.ts",
+        "path": "src/platform/packages/shared/kbn-osquery-io-ts-types/src/live_query/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -182,7 +182,7 @@
         "signature": [
           "string | undefined"
         ],
-        "path": "packages/kbn-osquery-io-ts-types/src/live_query/index.ts",
+        "path": "src/platform/packages/shared/kbn-osquery-io-ts-types/src/live_query/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -197,7 +197,7 @@
         "signature": [
           "string"
         ],
-        "path": "packages/kbn-osquery-io-ts-types/src/live_query/index.ts",
+        "path": "src/platform/packages/shared/kbn-osquery-io-ts-types/src/live_query/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -212,7 +212,7 @@
         "signature": [
           "string | undefined"
         ],
-        "path": "packages/kbn-osquery-io-ts-types/src/live_query/index.ts",
+        "path": "src/platform/packages/shared/kbn-osquery-io-ts-types/src/live_query/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -227,7 +227,7 @@
         "signature": [
           "{ [x: string]: { query: string; id: string; ecs_mapping: { [x: string]: { field?: string | undefined; value?: string | string[] | undefined; }; } | undefined; version: string | undefined; platform: string | undefined; saved_query_id: string | undefined; removed: boolean | undefined; snapshot: boolean | undefined; }; }"
         ],
-        "path": "packages/kbn-osquery-io-ts-types/src/live_query/index.ts",
+        "path": "src/platform/packages/shared/kbn-osquery-io-ts-types/src/live_query/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -242,7 +242,7 @@
         "signature": [
           "string"
         ],
-        "path": "packages/kbn-osquery-io-ts-types/src/live_query/index.ts",
+        "path": "src/platform/packages/shared/kbn-osquery-io-ts-types/src/live_query/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -257,7 +257,7 @@
         "signature": [
           "string | undefined"
         ],
-        "path": "packages/kbn-osquery-io-ts-types/src/live_query/index.ts",
+        "path": "src/platform/packages/shared/kbn-osquery-io-ts-types/src/live_query/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -272,7 +272,7 @@
         "signature": [
           "string"
         ],
-        "path": "packages/kbn-osquery-io-ts-types/src/live_query/index.ts",
+        "path": "src/platform/packages/shared/kbn-osquery-io-ts-types/src/live_query/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -287,7 +287,7 @@
         "signature": [
           "string | undefined"
         ],
-        "path": "packages/kbn-osquery-io-ts-types/src/live_query/index.ts",
+        "path": "src/platform/packages/shared/kbn-osquery-io-ts-types/src/live_query/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -302,7 +302,7 @@
         "signature": [
           "{ id: string; query: string; ecs_mapping: { [x: string]: { field?: string | undefined; value?: string | string[] | undefined; }; } | undefined; version: string | undefined; platform: string | undefined; removed: boolean | undefined; snapshot: boolean | undefined; }[] | { [x: string]: { query: string; id: string; ecs_mapping: { [x: string]: { field?: string | undefined; value?: string | string[] | undefined; }; } | undefined; version: string | undefined; platform: string | undefined; saved_query_id: string | undefined; removed: boolean | undefined; snapshot: boolean | undefined; }; }"
         ],
-        "path": "packages/kbn-osquery-io-ts-types/src/live_query/index.ts",
+        "path": "src/platform/packages/shared/kbn-osquery-io-ts-types/src/live_query/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -317,7 +317,7 @@
         "signature": [
           "{ id: string; query: string; ecs_mapping: { [x: string]: { field?: string | undefined; value?: string | string[] | undefined; }; } | undefined; version: string | undefined; platform: string | undefined; removed: boolean | undefined; snapshot: boolean | undefined; }[] | undefined"
         ],
-        "path": "packages/kbn-osquery-io-ts-types/src/live_query/index.ts",
+        "path": "src/platform/packages/shared/kbn-osquery-io-ts-types/src/live_query/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -332,7 +332,7 @@
         "signature": [
           "string"
         ],
-        "path": "packages/kbn-osquery-io-ts-types/src/live_query/index.ts",
+        "path": "src/platform/packages/shared/kbn-osquery-io-ts-types/src/live_query/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -347,7 +347,7 @@
         "signature": [
           "string | undefined"
         ],
-        "path": "packages/kbn-osquery-io-ts-types/src/live_query/index.ts",
+        "path": "src/platform/packages/shared/kbn-osquery-io-ts-types/src/live_query/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -362,7 +362,7 @@
         "signature": [
           "boolean"
         ],
-        "path": "packages/kbn-osquery-io-ts-types/src/live_query/index.ts",
+        "path": "src/platform/packages/shared/kbn-osquery-io-ts-types/src/live_query/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -377,7 +377,7 @@
         "signature": [
           "boolean | undefined"
         ],
-        "path": "packages/kbn-osquery-io-ts-types/src/live_query/index.ts",
+        "path": "src/platform/packages/shared/kbn-osquery-io-ts-types/src/live_query/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -392,7 +392,7 @@
         "signature": [
           "string"
         ],
-        "path": "packages/kbn-osquery-io-ts-types/src/live_query/index.ts",
+        "path": "src/platform/packages/shared/kbn-osquery-io-ts-types/src/live_query/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -407,7 +407,7 @@
         "signature": [
           "string | undefined"
         ],
-        "path": "packages/kbn-osquery-io-ts-types/src/live_query/index.ts",
+        "path": "src/platform/packages/shared/kbn-osquery-io-ts-types/src/live_query/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -422,7 +422,7 @@
         "signature": [
           "boolean"
         ],
-        "path": "packages/kbn-osquery-io-ts-types/src/live_query/index.ts",
+        "path": "src/platform/packages/shared/kbn-osquery-io-ts-types/src/live_query/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -437,7 +437,7 @@
         "signature": [
           "boolean | undefined"
         ],
-        "path": "packages/kbn-osquery-io-ts-types/src/live_query/index.ts",
+        "path": "src/platform/packages/shared/kbn-osquery-io-ts-types/src/live_query/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -452,7 +452,7 @@
         "signature": [
           "string[] | undefined"
         ],
-        "path": "packages/kbn-osquery-io-ts-types/src/live_query/index.ts",
+        "path": "src/platform/packages/shared/kbn-osquery-io-ts-types/src/live_query/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -467,7 +467,7 @@
         "signature": [
           "number"
         ],
-        "path": "packages/kbn-osquery-io-ts-types/src/live_query/index.ts",
+        "path": "src/platform/packages/shared/kbn-osquery-io-ts-types/src/live_query/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -482,7 +482,7 @@
         "signature": [
           "number | undefined"
         ],
-        "path": "packages/kbn-osquery-io-ts-types/src/live_query/index.ts",
+        "path": "src/platform/packages/shared/kbn-osquery-io-ts-types/src/live_query/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -497,7 +497,7 @@
         "signature": [
           "string"
         ],
-        "path": "packages/kbn-osquery-io-ts-types/src/live_query/index.ts",
+        "path": "src/platform/packages/shared/kbn-osquery-io-ts-types/src/live_query/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -512,7 +512,7 @@
         "signature": [
           "string | undefined"
         ],
-        "path": "packages/kbn-osquery-io-ts-types/src/live_query/index.ts",
+        "path": "src/platform/packages/shared/kbn-osquery-io-ts-types/src/live_query/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -544,7 +544,7 @@
           "StringC",
           ">; }>"
         ],
-        "path": "packages/kbn-osquery-io-ts-types/src/live_query/index.ts",
+        "path": "src/platform/packages/shared/kbn-osquery-io-ts-types/src/live_query/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -578,7 +578,7 @@
           "UndefinedC",
           "]>"
         ],
-        "path": "packages/kbn-osquery-io-ts-types/src/live_query/index.ts",
+        "path": "src/platform/packages/shared/kbn-osquery-io-ts-types/src/live_query/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -644,7 +644,7 @@
           "UndefinedC",
           "]>; }>>"
         ],
-        "path": "packages/kbn-osquery-io-ts-types/src/live_query/index.ts",
+        "path": "src/platform/packages/shared/kbn-osquery-io-ts-types/src/live_query/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -659,7 +659,7 @@
         "signature": [
           "StringC"
         ],
-        "path": "packages/kbn-osquery-io-ts-types/src/live_query/index.ts",
+        "path": "src/platform/packages/shared/kbn-osquery-io-ts-types/src/live_query/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -679,7 +679,7 @@
           "UndefinedC",
           "]>"
         ],
-        "path": "packages/kbn-osquery-io-ts-types/src/live_query/index.ts",
+        "path": "src/platform/packages/shared/kbn-osquery-io-ts-types/src/live_query/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -709,7 +709,7 @@
           "StringC",
           ">]>; }>>"
         ],
-        "path": "packages/kbn-osquery-io-ts-types/src/live_query/index.ts",
+        "path": "src/platform/packages/shared/kbn-osquery-io-ts-types/src/live_query/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -743,7 +743,7 @@
           "UndefinedC",
           "]>"
         ],
-        "path": "packages/kbn-osquery-io-ts-types/src/live_query/index.ts",
+        "path": "src/platform/packages/shared/kbn-osquery-io-ts-types/src/live_query/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -771,7 +771,7 @@
           "UndefinedC",
           "]>; }>"
         ],
-        "path": "packages/kbn-osquery-io-ts-types/src/live_query/index.ts",
+        "path": "src/platform/packages/shared/kbn-osquery-io-ts-types/src/live_query/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -803,7 +803,7 @@
           "UndefinedC",
           "]>"
         ],
-        "path": "packages/kbn-osquery-io-ts-types/src/live_query/index.ts",
+        "path": "src/platform/packages/shared/kbn-osquery-io-ts-types/src/live_query/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -818,7 +818,7 @@
         "signature": [
           "StringC"
         ],
-        "path": "packages/kbn-osquery-io-ts-types/src/live_query/index.ts",
+        "path": "src/platform/packages/shared/kbn-osquery-io-ts-types/src/live_query/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -838,7 +838,7 @@
           "UndefinedC",
           "]>"
         ],
-        "path": "packages/kbn-osquery-io-ts-types/src/live_query/index.ts",
+        "path": "src/platform/packages/shared/kbn-osquery-io-ts-types/src/live_query/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -853,7 +853,7 @@
         "signature": [
           "StringC"
         ],
-        "path": "packages/kbn-osquery-io-ts-types/src/live_query/index.ts",
+        "path": "src/platform/packages/shared/kbn-osquery-io-ts-types/src/live_query/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -873,7 +873,7 @@
           "UndefinedC",
           "]>"
         ],
-        "path": "packages/kbn-osquery-io-ts-types/src/live_query/index.ts",
+        "path": "src/platform/packages/shared/kbn-osquery-io-ts-types/src/live_query/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -947,7 +947,7 @@
           "UndefinedC",
           "]>; }>>"
         ],
-        "path": "packages/kbn-osquery-io-ts-types/src/live_query/index.ts",
+        "path": "src/platform/packages/shared/kbn-osquery-io-ts-types/src/live_query/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -962,7 +962,7 @@
         "signature": [
           "StringC"
         ],
-        "path": "packages/kbn-osquery-io-ts-types/src/live_query/index.ts",
+        "path": "src/platform/packages/shared/kbn-osquery-io-ts-types/src/live_query/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -982,7 +982,7 @@
           "UndefinedC",
           "]>"
         ],
-        "path": "packages/kbn-osquery-io-ts-types/src/live_query/index.ts",
+        "path": "src/platform/packages/shared/kbn-osquery-io-ts-types/src/live_query/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -997,7 +997,7 @@
         "signature": [
           "StringC"
         ],
-        "path": "packages/kbn-osquery-io-ts-types/src/live_query/index.ts",
+        "path": "src/platform/packages/shared/kbn-osquery-io-ts-types/src/live_query/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1017,7 +1017,7 @@
           "UndefinedC",
           "]>"
         ],
-        "path": "packages/kbn-osquery-io-ts-types/src/live_query/index.ts",
+        "path": "src/platform/packages/shared/kbn-osquery-io-ts-types/src/live_query/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1145,7 +1145,7 @@
           "UndefinedC",
           "]>; }>>]>"
         ],
-        "path": "packages/kbn-osquery-io-ts-types/src/live_query/index.ts",
+        "path": "src/platform/packages/shared/kbn-osquery-io-ts-types/src/live_query/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1215,7 +1215,7 @@
           "UndefinedC",
           "]>"
         ],
-        "path": "packages/kbn-osquery-io-ts-types/src/live_query/index.ts",
+        "path": "src/platform/packages/shared/kbn-osquery-io-ts-types/src/live_query/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1230,7 +1230,7 @@
         "signature": [
           "StringC"
         ],
-        "path": "packages/kbn-osquery-io-ts-types/src/live_query/index.ts",
+        "path": "src/platform/packages/shared/kbn-osquery-io-ts-types/src/live_query/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1250,7 +1250,7 @@
           "UndefinedC",
           "]>"
         ],
-        "path": "packages/kbn-osquery-io-ts-types/src/live_query/index.ts",
+        "path": "src/platform/packages/shared/kbn-osquery-io-ts-types/src/live_query/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1265,7 +1265,7 @@
         "signature": [
           "BooleanC"
         ],
-        "path": "packages/kbn-osquery-io-ts-types/src/live_query/index.ts",
+        "path": "src/platform/packages/shared/kbn-osquery-io-ts-types/src/live_query/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1285,7 +1285,7 @@
           "UndefinedC",
           "]>"
         ],
-        "path": "packages/kbn-osquery-io-ts-types/src/live_query/index.ts",
+        "path": "src/platform/packages/shared/kbn-osquery-io-ts-types/src/live_query/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1300,7 +1300,7 @@
         "signature": [
           "StringC"
         ],
-        "path": "packages/kbn-osquery-io-ts-types/src/live_query/index.ts",
+        "path": "src/platform/packages/shared/kbn-osquery-io-ts-types/src/live_query/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1320,7 +1320,7 @@
           "UndefinedC",
           "]>"
         ],
-        "path": "packages/kbn-osquery-io-ts-types/src/live_query/index.ts",
+        "path": "src/platform/packages/shared/kbn-osquery-io-ts-types/src/live_query/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1335,7 +1335,7 @@
         "signature": [
           "BooleanC"
         ],
-        "path": "packages/kbn-osquery-io-ts-types/src/live_query/index.ts",
+        "path": "src/platform/packages/shared/kbn-osquery-io-ts-types/src/live_query/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1355,7 +1355,7 @@
           "UndefinedC",
           "]>"
         ],
-        "path": "packages/kbn-osquery-io-ts-types/src/live_query/index.ts",
+        "path": "src/platform/packages/shared/kbn-osquery-io-ts-types/src/live_query/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1377,7 +1377,7 @@
           "UndefinedC",
           "]>"
         ],
-        "path": "packages/kbn-osquery-io-ts-types/src/live_query/index.ts",
+        "path": "src/platform/packages/shared/kbn-osquery-io-ts-types/src/live_query/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1393,7 +1393,7 @@
           "Type",
           "<number, number, unknown>"
         ],
-        "path": "packages/kbn-osquery-io-ts-types/src/live_query/index.ts",
+        "path": "src/platform/packages/shared/kbn-osquery-io-ts-types/src/live_query/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1413,7 +1413,7 @@
           "UndefinedC",
           "]>"
         ],
-        "path": "packages/kbn-osquery-io-ts-types/src/live_query/index.ts",
+        "path": "src/platform/packages/shared/kbn-osquery-io-ts-types/src/live_query/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1428,7 +1428,7 @@
         "signature": [
           "StringC"
         ],
-        "path": "packages/kbn-osquery-io-ts-types/src/live_query/index.ts",
+        "path": "src/platform/packages/shared/kbn-osquery-io-ts-types/src/live_query/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1448,7 +1448,7 @@
           "UndefinedC",
           "]>"
         ],
-        "path": "packages/kbn-osquery-io-ts-types/src/live_query/index.ts",
+        "path": "src/platform/packages/shared/kbn-osquery-io-ts-types/src/live_query/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

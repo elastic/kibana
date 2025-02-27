@@ -7,8 +7,6 @@
 
 import { login } from '../../../tasks/login';
 import { visitHostDetailsPage } from '../../../tasks/navigation';
-
-import { TABLE_CELL, TABLE_ROWS } from '../../../screens/alerts_details';
 import { deleteRiskEngineConfiguration } from '../../../tasks/api_calls/risk_engine';
 import { openRiskInformationFlyout, mockRiskEngineEnabled } from '../../../tasks/entity_analytics';
 import { ALERTS_COUNT, ALERT_GRID_CELL } from '../../../screens/alerts';
@@ -16,71 +14,37 @@ import { RISK_INFORMATION_FLYOUT_HEADER } from '../../../screens/entity_analytic
 import { navigateToHostRiskDetailTab } from '../../../tasks/host_risk';
 import { deleteAlertsAndRules } from '../../../tasks/api_calls/common';
 
-describe('risk tab', { tags: ['@ess'] }, () => {
-  describe('with legacy risk score', () => {
-    beforeEach(() => {
-      cy.task('esArchiverLoad', { archiveName: 'risk_hosts' });
-      login();
-      deleteRiskEngineConfiguration();
-    });
-
-    after(() => {
-      cy.task('esArchiverUnload', { archiveName: 'risk_hosts' });
-    });
-
-    it('renders risk tab', () => {
-      visitHostDetailsPage('siem-kibana');
-      navigateToHostRiskDetailTab();
-
-      cy.get('[data-test-subj="topRiskScoreContributors"]')
-        .find(TABLE_ROWS)
-        .within(() => {
-          cy.get(TABLE_CELL).contains('Unusual Linux Username');
-        });
-    });
-
-    it('shows risk information overlay when button is clicked', () => {
-      visitHostDetailsPage('siem-kibana');
-      navigateToHostRiskDetailTab();
-
-      openRiskInformationFlyout();
-
-      cy.get(RISK_INFORMATION_FLYOUT_HEADER).contains('Entity Risk Analytics');
-    });
+describe('risk tab', { tags: ['@ess', '@serverless'] }, () => {
+  before(() => {
+    cy.task('esArchiverLoad', { archiveName: 'risk_scores_new_complete_data' });
+    cy.task('esArchiverLoad', { archiveName: 'query_alert', useCreate: true, docsOnly: true });
   });
 
-  describe('with new risk score', { tags: ['@serverless'] }, () => {
-    before(() => {
-      cy.task('esArchiverLoad', { archiveName: 'risk_scores_new_complete_data' });
-      cy.task('esArchiverLoad', { archiveName: 'query_alert', useCreate: true, docsOnly: true });
-    });
+  beforeEach(() => {
+    mockRiskEngineEnabled();
+    login();
+  });
 
-    beforeEach(() => {
-      mockRiskEngineEnabled();
-      login();
-    });
+  after(() => {
+    cy.task('esArchiverUnload', { archiveName: 'risk_scores_new_complete_data' });
+    deleteAlertsAndRules(); // esArchiverUnload doesn't work properly when using with `useCreate` and `docsOnly` flags
+    deleteRiskEngineConfiguration();
+  });
 
-    after(() => {
-      cy.task('esArchiverUnload', { archiveName: 'risk_scores_new_complete_data' });
-      deleteAlertsAndRules(); // esArchiverUnload doesn't work properly when using with `useCreate` and `docsOnly` flags
-      deleteRiskEngineConfiguration();
-    });
+  it('renders risk tab', () => {
+    visitHostDetailsPage('Host-fwarau82er');
+    navigateToHostRiskDetailTab();
 
-    it('renders risk tab', () => {
-      visitHostDetailsPage('Host-fwarau82er');
-      navigateToHostRiskDetailTab();
+    cy.get(ALERTS_COUNT).should('have.text', '1 alert');
+    cy.get(ALERT_GRID_CELL).contains('Endpoint Security');
+  });
 
-      cy.get(ALERTS_COUNT).should('have.text', '1 alert');
-      cy.get(ALERT_GRID_CELL).contains('Endpoint Security');
-    });
+  it('shows risk information overlay when button is clicked', () => {
+    visitHostDetailsPage('siem-kibana');
+    navigateToHostRiskDetailTab();
 
-    it('shows risk information overlay when button is clicked', () => {
-      visitHostDetailsPage('siem-kibana');
-      navigateToHostRiskDetailTab();
+    openRiskInformationFlyout();
 
-      openRiskInformationFlyout();
-
-      cy.get(RISK_INFORMATION_FLYOUT_HEADER).contains('Entity Risk Analytics');
-    });
+    cy.get(RISK_INFORMATION_FLYOUT_HEADER).contains('Entity Risk Analytics');
   });
 });

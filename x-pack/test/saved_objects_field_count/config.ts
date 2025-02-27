@@ -5,15 +5,22 @@
  * 2.0.
  */
 
+import { ScoutTestRunConfigCategory } from '@kbn/scout-info';
 import { FtrConfigProviderContext } from '@kbn/test';
+import { commonFunctionalServices } from '@kbn/ftr-common-functional-services';
 
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const kibanaCommonTestsConfig = await readConfigFile(
-    require.resolve('../../../test/common/config.js')
+    require.resolve('@kbn/test-suites-src/common/config')
   );
 
   return {
     ...kibanaCommonTestsConfig.getAll(),
+    testConfigCategory: ScoutTestRunConfigCategory.API_TEST,
+
+    services: {
+      ...commonFunctionalServices,
+    },
 
     testFiles: [require.resolve('./test')],
 

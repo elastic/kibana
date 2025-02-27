@@ -1,10 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
+
 /* eslint-disable @typescript-eslint/no-unused-expressions */
 
 import { getVersionsFile } from '#pipeline-utils';
@@ -23,7 +25,7 @@ describe('pipeline trigger combinations', () => {
   it('should trigger the correct pipelines for "es-forward"', () => {
     const esForwardTriggers = getESForwardPipelineTriggers();
     // tests 7.17 against 8.x versions
-    const targets = versionsFile.versions.filter((v) => v.currentMajor === true);
+    const targets = versionsFile.versions.filter((v) => v.branch.startsWith('8.'));
 
     expect(esForwardTriggers.length).to.eql(targets.length);
 
@@ -41,7 +43,6 @@ describe('pipeline trigger combinations', () => {
     const snapshotTriggers = getArtifactSnapshotPipelineTriggers();
     // triggers for all open branches
     const branches = versionsFile.versions.map((v) => v.branch);
-
     expect(snapshotTriggers.length).to.eql(branches.length);
 
     branches.forEach((b) => {
@@ -51,9 +52,10 @@ describe('pipeline trigger combinations', () => {
 
   it('should trigger the correct pipelines for "artifacts-trigger"', () => {
     const triggerTriggers = getArtifactBuildTriggers();
-    // all currentMajor+prevMinor branches
+    // all branches that have fixed versions, and excluding 7.17 (i.e. not 7.17, [0-9].x and main)
     const branches = versionsFile.versions
-      .filter((v) => v.currentMajor === true && v.previousMinor === true)
+      .filter((v) => v.branch.match(/[0-9]{1,2}\.[0-9]{1,2}/))
+      .filter((v) => v.previousMajor === true)
       .map((v) => v.branch);
 
     expect(triggerTriggers.length).to.eql(branches.length);
@@ -64,9 +66,9 @@ describe('pipeline trigger combinations', () => {
 
   it('should trigger the correct pipelines for "artifacts-staging"', () => {
     const stagingTriggers = getArtifactStagingPipelineTriggers();
-    // all branches that are not currentMajor+currentMinor
+    // all branches that have fixed versions (i.e. not [0-9].x and main)
     const branches = versionsFile.versions
-      .filter((v) => !v.currentMajor || !v.currentMinor)
+      .filter((v) => v.branch.match(/[0-9]{1,2}\.[0-9]{1,2}/))
       .map((v) => v.branch);
 
     expect(stagingTriggers.length).to.eql(branches.length);

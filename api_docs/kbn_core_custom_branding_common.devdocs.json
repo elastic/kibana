@@ -27,7 +27,7 @@
         "tags": [],
         "label": "CustomBranding",
         "description": [],
-        "path": "packages/core/custom-branding/core-custom-branding-common/index.ts",
+        "path": "src/core/packages/custom-branding/common/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -43,7 +43,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "packages/core/custom-branding/core-custom-branding-common/index.ts",
+            "path": "src/core/packages/custom-branding/common/index.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -59,7 +59,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "packages/core/custom-branding/core-custom-branding-common/index.ts",
+            "path": "src/core/packages/custom-branding/common/index.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -75,7 +75,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "packages/core/custom-branding/core-custom-branding-common/index.ts",
+            "path": "src/core/packages/custom-branding/common/index.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -91,7 +91,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "packages/core/custom-branding/core-custom-branding-common/index.ts",
+            "path": "src/core/packages/custom-branding/common/index.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -107,7 +107,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "packages/core/custom-branding/core-custom-branding-common/index.ts",
+            "path": "src/core/packages/custom-branding/common/index.ts",
             "deprecated": false,
             "trackAdoption": false
           }

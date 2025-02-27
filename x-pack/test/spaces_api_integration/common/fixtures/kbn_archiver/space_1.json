@@ -139,7 +139,7 @@
   "id": "conflict_2_space_1",
   "originId": "conflict_2",
   "references": [],
-  "type": "sharedtype",
+  "type": "event-annotation-group",
   "updated_at": "2017-09-21T18:59:16.270Z",
   "version": "WzUxMCwxXQ=="
 }
@@ -151,7 +151,7 @@
   "id": "conflict_1b_space_1",
   "originId": "conflict_1b_space_2",
   "references": [],
-  "type": "sharedtype",
+  "type": "event-annotation-group",
   "updated_at": "2017-09-21T18:59:16.270Z",
   "version": "WzUwNCwxXQ=="
 }
@@ -163,7 +163,7 @@
   "id": "conflict_1a_space_1",
   "originId": "conflict_1a",
   "references": [],
-  "type": "sharedtype",
+  "type": "event-annotation-group",
   "updated_at": "2017-09-21T18:59:16.270Z",
   "version": "WzUwMSwxXQ=="
 }
@@ -177,10 +177,10 @@
     {
       "id": "each_space",
       "name": "refname",
-      "type": "sharedtype"
+      "type": "event-annotation-group"
     }
   ],
-  "type": "sharedtype",
+  "type": "event-annotation-group",
   "updated_at": "2017-09-21T18:59:16.270Z",
   "version": "WzQ4OSwxXQ=="
 }
@@ -191,7 +191,7 @@
   },
   "id": "my_isolated_object",
   "references": [],
-  "type": "isolatedtype",
+  "type": "url",
   "updated_at": "2017-09-21T18:49:16.270Z",
   "version": "WzQ4NywxXQ=="
 }

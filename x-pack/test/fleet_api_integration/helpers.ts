@@ -65,7 +65,8 @@ export async function generateAgent(
   status: string,
   id: string,
   policyId: string,
-  version?: string
+  version?: string,
+  upgradeDetails?: any
 ) {
   let data: any = {};
   const { getService } = providerContext;
@@ -106,12 +107,15 @@ export async function generateAgent(
   await es.index({
     index: '.fleet-agents',
     id,
-    body: {
+    document: {
       id,
       active: true,
       last_checkin: new Date().toISOString(),
       policy_id: policyId,
       policy_revision: 1,
+      agent: {
+        version,
+      },
       local_metadata: {
         elastic: {
           agent: {
@@ -121,6 +125,7 @@ export async function generateAgent(
         },
       },
       ...data,
+      ...(upgradeDetails ? { upgrade_details: upgradeDetails } : {}),
     },
     refresh: 'wait_for',
   });
@@ -143,14 +148,30 @@ export function setPrereleaseSetting(supertest: SuperTestAgent) {
 }
 
 export async function enableSecrets(providerContext: FtrProviderContext) {
-  await providerContext.getService('kibanaServer').savedObjects.update({
-    type: GLOBAL_SETTINGS_SAVED_OBJECT_TYPE,
-    id: 'fleet-default-settings',
-    attributes: {
-      secret_storage_requirements_met: true,
-    },
-    overwrite: false,
-  });
+  const settingsSO = await providerContext
+    .getService('kibanaServer')
+    .savedObjects.get({ type: GLOBAL_SETTINGS_SAVED_OBJECT_TYPE, id: 'fleet-default-settings' })
+    .catch((err) => {});
+
+  if (settingsSO) {
+    await providerContext.getService('kibanaServer').savedObjects.update({
+      type: GLOBAL_SETTINGS_SAVED_OBJECT_TYPE,
+      id: 'fleet-default-settings',
+      attributes: {
+        secret_storage_requirements_met: true,
+      },
+      overwrite: false,
+    });
+  } else {
+    await providerContext.getService('kibanaServer').savedObjects.create({
+      type: GLOBAL_SETTINGS_SAVED_OBJECT_TYPE,
+      id: 'fleet-default-settings',
+      attributes: {
+        secret_storage_requirements_met: true,
+      },
+      overwrite: true,
+    });
+  }
 }
 
 export const generateNAgentPolicies = async (

@@ -1,5 +1,7 @@
-The reporting APIs use HTTP response codes to give feedback. In automation,
-this helps external systems track the various possible job states:
+The response payload of a request to generate a report includes the path to
+download a report. The API to download a report uses HTTP response codes to give
+feedback. In automation, this helps external systems track the various possible
+job states:
 
 - **`200` (OK)**: As expected, Kibana returns `200` status in the response for
   successful requests to queue or download reports.
