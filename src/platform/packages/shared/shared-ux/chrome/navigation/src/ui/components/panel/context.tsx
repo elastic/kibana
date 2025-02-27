@@ -92,14 +92,14 @@ export const PanelProvider: FC<PropsWithChildren<Props>> = ({
     if (selectedNodeProp === undefined) return;
 
     setActiveNode(selectedNodeProp);
-    selectedNodeEl.current = getSelectedNodeEl(selectedNode);
+    selectedNodeEl.current = getSelectedNodeEl(selectedNodeProp);
 
     if (selectedNodeProp) {
       setIsOpen(true);
     } else {
       setIsOpen(false);
     }
-  }, [selectedNodeProp, selectedNode]);
+  }, [selectedNodeProp]);
 
   const getContent = useCallback(() => {
     if (!selectedNode) {

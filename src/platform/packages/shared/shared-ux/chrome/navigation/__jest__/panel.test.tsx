@@ -154,7 +154,7 @@ describe('Panel', () => {
       expect(queryByTestId(/sideNavPanel/)).toBeNull();
     });
 
-    test('should allow the the button label to toggle', async () => {
+    test('should allow the button label to toggle', async () => {
       const { findByTestId, queryByTestId, container } = renderNavigation({
         navTreeDef: of(navigationTree),
       });
@@ -171,7 +171,7 @@ describe('Panel', () => {
       expect(queryByTestId(/sideNavPanel/)).toBeNull();
     });
 
-    test('should allow the the button icon to toggle', async () => {
+    test('should allow the button icon to toggle', async () => {
       const { findByTestId, queryByTestId, container } = renderNavigation({
         navTreeDef: of(navigationTree),
       });
