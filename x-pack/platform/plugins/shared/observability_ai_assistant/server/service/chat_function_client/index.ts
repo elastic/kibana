@@ -11,18 +11,13 @@ import dedent from 'dedent';
 import { compact, keyBy } from 'lodash';
 import { Logger } from '@kbn/logging';
 import { FunctionVisibility, type FunctionResponse } from '../../../common/functions/types';
-import type {
-  AdHocInstruction,
-  Message,
-  ObservabilityAIAssistantScreenContextRequest,
-} from '../../../common/types';
+import type { Message, ObservabilityAIAssistantScreenContextRequest } from '../../../common/types';
 import { filterFunctionDefinitions } from '../../../common/utils/filter_function_definitions';
 import type {
   FunctionCallChatFunction,
   FunctionHandler,
   FunctionHandlerRegistry,
   InstructionOrCallback,
-  RegisterAdHocInstruction,
   RegisterFunction,
   RegisterInstruction,
 } from '../types';
@@ -41,7 +36,6 @@ export const GET_DATA_ON_SCREEN_FUNCTION_NAME = 'get_data_on_screen';
 
 export class ChatFunctionClient {
   private readonly instructions: InstructionOrCallback[] = [];
-  private readonly adhocInstructions: AdHocInstruction[] = [];
 
   private readonly functionRegistry: FunctionHandlerRegistry = new Map();
   private readonly validators: Map<string, ValidateFunction> = new Map();
@@ -82,12 +76,13 @@ export class ChatFunctionClient {
         }
       );
 
-      this.registerAdhocInstruction({
-        text: `The ${GET_DATA_ON_SCREEN_FUNCTION_NAME} function will retrieve specific content from the user's screen by specifying a data key. Use this tool to provide context-aware responses. Available data: ${dedent(
-          allData.map((data) => `${data.name}: ${data.description}`).join('\n')
-        )}`,
-        instruction_type: 'application_instruction',
-      });
+      this.registerInstruction(({ availableFunctionNames }) =>
+        availableFunctionNames.includes(GET_DATA_ON_SCREEN_FUNCTION_NAME)
+          ? `The ${GET_DATA_ON_SCREEN_FUNCTION_NAME} function will retrieve specific content from the user's screen by specifying a data key. Use this tool to provide context-aware responses. Available data: ${dedent(
+              allData.map((data) => `${data.name}: ${data.description}`).join('\n')
+            )}`
+          : undefined
+      );
     }
 
     this.actions.forEach((action) => {
@@ -108,10 +103,6 @@ export class ChatFunctionClient {
     this.instructions.push(instruction);
   };
 
-  registerAdhocInstruction: RegisterAdHocInstruction = (instruction: AdHocInstruction) => {
-    this.adhocInstructions.push(instruction);
-  };
-
   validate(name: string, parameters: unknown) {
     const validator = this.validators.get(name)!;
     if (!validator) {
@@ -126,10 +117,6 @@ export class ChatFunctionClient {
 
   getInstructions(): InstructionOrCallback[] {
     return this.instructions;
-  }
-
-  getAdhocInstructions(): AdHocInstruction[] {
-    return this.adhocInstructions;
   }
 
   hasAction(name: string) {

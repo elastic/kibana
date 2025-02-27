@@ -28,7 +28,7 @@ import {
   MessageOrChatEvent,
 } from '../../../../common/conversation_complete';
 import { FunctionVisibility } from '../../../../common/functions/types';
-import { AdHocInstruction, Instruction } from '../../../../common/types';
+import { InstructionOrPlainText, Instruction } from '../../../../common/types';
 import { createFunctionResponseMessage } from '../../../../common/utils/create_function_response_message';
 import { emitWithConcatenatedMessage } from '../../../../common/utils/emit_with_concatenated_message';
 import type { ChatFunctionClient } from '../../chat_function_client';
@@ -173,7 +173,7 @@ export function continueConversation({
   chat,
   signal,
   functionCallsLeft,
-  adHocInstructions = [],
+  adHocUserInstructions = [],
   userInstructions,
   logger,
   disableFunctions,
@@ -186,7 +186,7 @@ export function continueConversation({
   chat: AutoAbortedChatFunction;
   signal: AbortSignal;
   functionCallsLeft: number;
-  adHocInstructions: AdHocInstruction[];
+  adHocUserInstructions: InstructionOrPlainText[];
   userInstructions: Instruction[];
   logger: Logger;
   disableFunctions:
@@ -324,7 +324,7 @@ export function continueConversation({
               functionClient,
               signal,
               userInstructions,
-              adHocInstructions,
+              adHocUserInstructions,
               logger,
               disableFunctions,
               tracer,

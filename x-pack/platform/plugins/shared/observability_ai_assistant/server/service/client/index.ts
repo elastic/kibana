@@ -46,7 +46,7 @@ import {
 import { convertMessagesForInference } from '../../../common/convert_messages_for_inference';
 import { CompatibleJSONSchema } from '../../../common/functions/types';
 import {
-  type AdHocInstruction,
+  type InstructionOrPlainText,
   type Conversation,
   type ConversationCreateRequest,
   type ConversationUpdateRequest,
@@ -161,7 +161,7 @@ export class ObservabilityAIAssistantClient {
     functionClient,
     connectorId,
     simulateFunctionCalling = false,
-    instructions: adHocInstructions = [],
+    userInstructions: adHocUserInstructions = [],
     messages: initialMessages,
     signal,
     persist,
@@ -180,7 +180,7 @@ export class ObservabilityAIAssistantClient {
     title?: string;
     isPublic?: boolean;
     kibanaPublicUrl?: string;
-    instructions?: AdHocInstruction[];
+    userInstructions?: InstructionOrPlainText[];
     simulateFunctionCalling?: boolean;
     disableFunctions?:
       | boolean
@@ -196,18 +196,14 @@ export class ObservabilityAIAssistantClient {
         const conversationId = persist ? predefinedConversationId || v4() : '';
 
         if (persist && !isConversationUpdate && kibanaPublicUrl) {
-          adHocInstructions.push({
-            instruction_type: 'application_instruction',
-            text: `This conversation will be persisted in Kibana and available at this url: ${
+          functionClient.registerInstruction(
+            `This conversation will be persisted in Kibana and available at this url: ${
               kibanaPublicUrl + `/app/observabilityAIAssistant/conversations/${conversationId}`
-            }.`,
-          });
+            }.`
+          );
         }
 
         const userInstructions$ = from(this.getKnowledgeBaseUserInstructions()).pipe(shareReplay());
-
-        const registeredAdhocInstructions = functionClient.getAdhocInstructions();
-        const allAdHocInstructions = adHocInstructions.concat(registeredAdhocInstructions);
 
         // if it is:
         // - a new conversation
@@ -237,7 +233,7 @@ export class ObservabilityAIAssistantClient {
             return getSystemMessageFromInstructions({
               applicationInstructions: functionClient.getInstructions(),
               userInstructions,
-              adHocInstructions: allAdHocInstructions,
+              adHocUserInstructions,
               availableFunctionNames: functionClient.getFunctions().map((fn) => fn.definition.name),
             });
           }),
@@ -275,7 +271,7 @@ export class ObservabilityAIAssistantClient {
                 functionCallsLeft: MAX_FUNCTION_CALLS,
                 functionClient,
                 userInstructions,
-                adHocInstructions,
+                adHocUserInstructions,
                 signal,
                 logger: this.dependencies.logger,
                 disableFunctions,

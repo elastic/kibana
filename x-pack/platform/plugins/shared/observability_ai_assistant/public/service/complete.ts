@@ -42,7 +42,7 @@ export function complete(
     persist,
     disableFunctions,
     signal,
-    instructions,
+    userInstructions,
     scopes,
   }: {
     client: Pick<ObservabilityAIAssistantChatService, 'chat' | 'complete'>;
@@ -65,7 +65,7 @@ export function complete(
           disableFunctions,
           screenContexts,
           conversationId,
-          instructions,
+          userInstructions,
           scopes,
         },
       },
@@ -132,7 +132,7 @@ export function complete(
               signal,
               persist,
               disableFunctions,
-              instructions,
+              userInstructions,
               scopes,
             },
             requestCallback
