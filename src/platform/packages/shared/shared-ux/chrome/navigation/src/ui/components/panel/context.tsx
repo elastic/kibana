@@ -16,6 +16,7 @@ import React, {
   useState,
   ReactNode,
   useEffect,
+  useRef,
 } from 'react';
 import type { ChromeProjectNavigationNode, PanelSelectedNode } from '@kbn/core-chrome-browser';
 
@@ -30,7 +31,7 @@ export interface PanelContext {
   /** The selected node is the node in the main panel that opens the Panel */
   selectedNode: PanelSelectedNode | null;
   /** Reference to the selected nav node element in the DOM */
-  selectedNodeEl: Node | null;
+  selectedNodeEl: React.MutableRefObject<Element | null>;
   /** Handler to retrieve the component to render in the panel */
   getContent: () => React.ReactNode;
 }
@@ -49,7 +50,10 @@ const getSelectedNodeEl = (selectedNode: PanelSelectedNode | null) => {
     return null;
   }
 
-  return document.querySelector(`[data-test-subj~="nav-item-${selectedNode.path}"]`);
+  return (
+    document.querySelector(`[data-test-subj~="panelOpener-${selectedNode.path}"]`) ??
+    document.querySelector(`[data-test-subj~="nav-item-${selectedNode.path}"]`)
+  );
 };
 
 export const PanelProvider: FC<PropsWithChildren<Props>> = ({
@@ -61,7 +65,7 @@ export const PanelProvider: FC<PropsWithChildren<Props>> = ({
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [selectedNode, setActiveNode] = useState<PanelSelectedNode | null>(selectedNodeProp);
-  const [selectedNodeEl, setSelectedNodeEl] = useState<Node | null>(null);
+  const selectedNodeEl = useRef<Element | null>(null);
 
   const toggle = useCallback(() => {
     setIsOpen((prev) => !prev);
@@ -70,7 +74,7 @@ export const PanelProvider: FC<PropsWithChildren<Props>> = ({
   const open = useCallback(
     (navNode: PanelSelectedNode) => {
       setActiveNode(navNode);
-      setSelectedNodeEl(getSelectedNodeEl(navNode));
+      selectedNodeEl.current = getSelectedNodeEl(navNode);
       setIsOpen(true);
       setSelectedNode?.(navNode);
     },
@@ -79,7 +83,7 @@ export const PanelProvider: FC<PropsWithChildren<Props>> = ({
 
   const close = useCallback(() => {
     setActiveNode(null);
-    setSelectedNodeEl(null);
+    selectedNodeEl.current = null;
     setIsOpen(false);
     setSelectedNode?.(null);
   }, [setSelectedNode]);
@@ -88,7 +92,7 @@ export const PanelProvider: FC<PropsWithChildren<Props>> = ({
     if (selectedNodeProp === undefined) return;
 
     setActiveNode(selectedNodeProp);
-    setSelectedNodeEl(getSelectedNodeEl(selectedNode));
+    selectedNodeEl.current = getSelectedNodeEl(selectedNode);
 
     if (selectedNodeProp) {
       setIsOpen(true);

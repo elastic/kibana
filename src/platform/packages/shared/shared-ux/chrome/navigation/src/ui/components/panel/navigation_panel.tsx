@@ -57,7 +57,7 @@ export const NavigationPanel: FC = () => {
 
       // Do not close if clicking on the button (or child of the button) of the currently selected node,
       // because we must defer to allowing the button's click handler to manage toggling.
-      if (selectedNodeEl && selectedNodeEl.contains(target as Node)) {
+      if (selectedNodeEl && selectedNodeEl.current?.contains(target as Node)) {
         doClose = false;
       }
 
