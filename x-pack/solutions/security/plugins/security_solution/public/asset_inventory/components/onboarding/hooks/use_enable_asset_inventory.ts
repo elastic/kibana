@@ -30,17 +30,19 @@ export const useEnableAssetInventory = () => {
     }
   );
 
-  const error =
+  const errorMessage =
     mutation.error?.body?.message ||
     i18n.translate('xpack.securitySolution.assetInventory.onboarding.enableAssetInventory.error', {
       defaultMessage: 'Failed to enable Asset Inventory. Please try again.',
     });
 
+  // isEnabling is true when the mutation is loading and after it has succeeded so that the UI
+  // can show a loading spinner while the status is being re-fetched
+  const isEnabling = mutation.isLoading || mutation.isSuccess;
+
   return {
-    // isEnabling is true when the mutation is loading and after it has succeeded so that the UI
-    // can show a loading spinner while the status is being re-fetched
-    isEnabling: mutation.isLoading || mutation.isSuccess,
-    error: mutation.isError ? error : null,
+    isEnabling,
+    error: mutation.isError ? errorMessage : null,
     reset: mutation.reset,
     enableAssetInventory: () => mutation.mutate(),
   };
