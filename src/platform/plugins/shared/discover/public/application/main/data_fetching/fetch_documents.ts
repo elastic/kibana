@@ -24,11 +24,18 @@ import { FetchDeps } from './fetch_all';
  */
 export const fetchDocuments = (
   searchSource: ISearchSource,
-  { abortController, inspectorAdapters, searchSessionId, services, getAppState }: FetchDeps
+  {
+    abortController,
+    inspectorAdapters,
+    searchSessionId,
+    services,
+    getAppState,
+    trackHits,
+  }: FetchDeps & { trackHits?: boolean }
 ): Promise<RecordsFetchResponse> => {
   const sampleSize = getAppState().sampleSize;
   searchSource.setField('size', getAllowedSampleSize(sampleSize, services.uiSettings));
-  searchSource.setField('trackTotalHits', false);
+  if (!trackHits) searchSource.setField('trackTotalHits', false);
   searchSource.setField('highlightAll', true);
   searchSource.setField('version', true);
   if (searchSource.getField('index')?.type === DataViewType.ROLLUP) {
@@ -67,16 +74,17 @@ export const fetchDocuments = (
     })
     .pipe(
       filter((res) => !isRunningResponse(res)),
-      map((res) => {
-        return buildDataTableRecordList({
+      map((res) => ({
+        records: buildDataTableRecordList({
           records: res.rawResponse.hits.hits,
           dataView,
           processRecord: (record) => services.profilesManager.resolveDocumentProfile({ record }),
-        });
-      })
+        }),
+        totalHits: res.rawResponse.hits.total,
+      }))
     );
 
-  return lastValueFrom(fetch$).then((records) => {
+  return lastValueFrom(fetch$).then(({ records, totalHits }) => {
     const adapter = inspectorAdapters.requests;
     const interceptedWarnings: SearchResponseWarning[] = [];
     if (adapter) {
@@ -88,6 +96,7 @@ export const fetchDocuments = (
 
     return {
       records,
+      totalHits: totalHits as number,
       interceptedWarnings,
     };
   });
