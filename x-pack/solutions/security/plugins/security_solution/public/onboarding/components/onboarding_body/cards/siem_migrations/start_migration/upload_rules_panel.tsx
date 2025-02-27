@@ -27,16 +27,14 @@ export interface UploadRulesPanelProps {
   isUploadMore?: boolean;
   isDisabled?: boolean;
 }
-export const UploadRulesPanel = React.memo<UploadRulesPanelProps>(
-  ({ isUploadMore = false, isDisabled = false }) => {
-    const styles = useStyles(isUploadMore);
-    const { telemetry } = useKibana().services.siemMigrations.rules;
-    const { openFlyout } = useRuleMigrationDataInputContext();
 
-    const onOpenFlyout = useCallback<React.MouseEventHandler>(() => {
-      openFlyout();
-      telemetry.reportSetupMigrationOpen({ isFirstMigration: !isUploadMore });
-    }, [openFlyout, telemetry, isUploadMore]);
+export interface UploadRulesSectionPanelProps extends UploadRulesPanelProps {
+  onOpenFlyout?: React.MouseEventHandler;
+}
+
+export const UploadRulesSectionPanel = React.memo<UploadRulesSectionPanelProps>(
+  function UploadRulesSectionPanel({ isUploadMore = false, isDisabled = false, onOpenFlyout }) {
+    const styles = useStyles(isUploadMore);
 
     return (
       <EuiPanel hasShadow={false} hasBorder paddingSize={isUploadMore ? 'm' : 'l'}>
@@ -98,4 +96,26 @@ export const UploadRulesPanel = React.memo<UploadRulesPanelProps>(
     );
   }
 );
+
+export const UploadRulesPanel = React.memo<UploadRulesPanelProps>(function UploadRulesPanel({
+  isUploadMore = false,
+  isDisabled = false,
+}: UploadRulesPanelProps) {
+  const { telemetry } = useKibana().services.siemMigrations.rules;
+  const { openFlyout } = useRuleMigrationDataInputContext();
+
+  const onOpenFlyout = useCallback<React.MouseEventHandler>(() => {
+    openFlyout();
+    telemetry.reportSetupMigrationOpen({ isFirstMigration: !isUploadMore });
+  }, [openFlyout, telemetry, isUploadMore]);
+
+  return (
+    <UploadRulesSectionPanel
+      isDisabled={isDisabled}
+      isUploadMore={isUploadMore}
+      onOpenFlyout={onOpenFlyout}
+    />
+  );
+});
+
 UploadRulesPanel.displayName = 'UploadRulesPanel';
