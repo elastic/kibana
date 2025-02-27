@@ -58,6 +58,7 @@ export const dateRangeMachine = setup({
   }),
   entry: 'storeTimeUpdates',
   invoke: {
+    id: 'dateRangeSubscriptionActor',
     src: 'subscribeTimeUpdates',
     onSnapshot: {
       actions: [{ type: 'storeTimeUpdates' }, { type: 'notifyDateRangeUpdate' }],

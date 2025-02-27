@@ -69,6 +69,7 @@ export const streamDetailMachine = setup({
         },
         loadingDefinition: {
           invoke: {
+            id: 'loadingDefinitionActor',
             src: 'loadDefinition',
             input: ({ context }) => ({
               name: context.name,

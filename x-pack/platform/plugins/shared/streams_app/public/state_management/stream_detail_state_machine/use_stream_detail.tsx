@@ -45,6 +45,7 @@ export const StreamDetailContextProvider = ({
     <StreamDetailContext.Provider
       logic={streamDetailMachine.provide(createStreamDetailMachineImplementations(deps))}
       options={{
+        id: 'streamDetail',
         inspect: consoleInspector,
         input: {
           name,

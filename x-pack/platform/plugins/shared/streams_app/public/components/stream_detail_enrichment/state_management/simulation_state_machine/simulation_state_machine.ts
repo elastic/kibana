@@ -97,12 +97,12 @@ export const simulationMachine = setup({
       ),
   },
 }).createMachine({
-  /** @xstate-layout N4IgpgJg5mDOIC5SwJYFsCuAbAhgFxQHsA7AYgnzACUdiYA6DABwrzAG0AGAXUVCcKoCJPiAAeiAEySAHPQBsATgCsARgDsqmasUrlAGhABPKQGYALPRWnV8m+eXrp65QF9Xh1JlzCyAMxQsNgAnWHoAYwALWhgABWCwADcUMAB3ABFCcNgAMUCQrl4kEAEhImJRCQRVTnllehlZThlFGXVzRU1DEwRtS05zdXUVeRklFpl3T3RsfHLSJmCsuFhCUIjoug4eUVKUX0rEZVN6cx1HTlVVU0kVLW6j8zkz5TtTRVHdD6mQL1nfegoYj7FA4LAoABeQKgpEKu0EIJExSq8nMnHo6jqqM4jlMphkTwe1Uk6noyk4FLxnEx+Opih+fx85UBwIIYMh0NhqiK-ARB2RiEUA3oNTOQoc8kk5MkRNUJLJFM4VJpMjpDJmTJI9AgYAARoQMMRwtCAMKbGCwBZLcIrNZhKIxbY8kp88qHBCSG70SQ1Ank5Ro9qDImmNSnbRXUwDVH4yYeX4auZanX6w3Guhmx2WsSwPCUeg4PwhAAUKYNRrAABV0GAAJSkRlJ4javXl9NQTNbWBw4p7fmgFF4jGKG6ScyDRrSGRE5TSU4OWrS2wteTq7xNlupo2m81wUg5vNsAtFsDBUuttNVmv1xsAstpndZ9jc+FlJEDxBXCkNTG2Cnjj4ZWMI453Hck6k4H1PlXeNb2ZLBCBwCBoQAZRwNAmCwPcIBIMAWUSQgAGs8LgrUEKQ1D0MwuAECBAjwibQoe15N8KgFYkpQaIV5HaUx1G0H11BDZQ5BkNR5FsNRVHJUM13+eDEOQug0IwrDLVPJZgnoTD8D8NY0HoUjm3IpSoBU6jYFo4h6MYnhmJdVj3TlTiWlqXj+LlDQiUkb9FUgxpFAAmw42mdcARwWBYFPAhlMTXwqDAABHDAUASNAwGIPBLXsvs3XYjQ7B-SVTDqWd5CJcwh3kAZdGka5jneOTNWbCKouCGKzLi8oEuS1KwHSzLspfXtXXfcQzHJBpUX9dQbiuadgIQSVVAxKVaUUL83iajdgkNYFYrC+YcOIPC6KIkiuq1XbiH2zrDpIKybN8JidhGxz2J9MMROq94eNDClysWyqVrxKcHEUKUJJg0L5KuvbUMusgNLWbSfD04IDKM+hrtulDEcerJbO4HLRrYj8PWuRQFFnd4ZBsCGPm8xoGiVJU2g+CxmnMdx42IQgdXgYojNfREyfGhB6jFC5I1uNQFp6ABaEG8RsW4SVeSMCW2gEgRBdkoToEX+3F8x5VDaSCSuDpx3lxAxhFeRHeGES5c4elYMRwEICwo28vJsdahFYZGhuCkCUBnpaQxMYxPJMZySVbmPfu5t723DNd0FljRfdf76FVuPBLafEhMWkTLBj1UfLsAD1G1hSKOUqi1N9saqhqGp88aOmVEgqNhm8yR5G9JUrmq5QPmueutVa6KEZTnqUrSjKstbsX2-B-PWnEyVJSFW2EDRFblADTFqqUK5VAcafmxx+fYbF3K28-EdJAxPu-1NqNjgqyCyRkOm1UpSaEtjzVwQA */
+  /** @xstate-layout N4IgpgJg5mDOIC5SwJYFsCuAbAhgFxQHsA7AYgnzACUdiYA6DABwrzAG0AGAXUVCcKoCJPiAAeiAKwB2ADQgAnogCMANgCc9AEycAzMuWdlAFmWTdqgL6X5qTLmFk72fEWL0AxgAtaMAAoATmAAbihgAO4AIoQesABiKFhsAVy8SCACQm6iEggGWlr0xqqc6mXqehbGWvJKCKqq0vRGkpIAHG3qutKSqrrG1rboLo6kTAExcLCEAbCePnQcPKKZKI45UnKKiNWS9GaqWuacbcoWBZKDIM4ObvQoxGsoOFgoAF4PUKSpK4JPIulcqpjJx6NJVK1wcpwRVpOpaiotE1JJxUSc2tI9H1pMorjdXCR7o8CC93p9vso0vw-utAYhgaDwZDVNCNJw4QiEKciuVTlpDpwtGY2njhrdCRAwAAjQgYYgeT4AYQWMFgYwmHimMzm3l8SypGRp2TpCH5xjBEJZqjaMjZ5k5Wk69HUx3UEM4xlMul0ovsBPckplcoVdGVerVYlgeEo9BwADNkgAKQOy+VgAAq6DAAEpSPjHPQU8GlSq4D90qtaaAgSCLczWbD4dsEJ7QW6WazUdCjL6Rnci-KS+HSJHo2xYwmwAFk9LU5rM2gc3mxf7C7Pi6HS7B2JTflkAdX6bWmbaG+ym3VzObTF09NIQeotLotL3xe4sIQcBBPgBlHBoJgsDgcgSDAIlgkIABrMD8zuD8v1-f9ALgBAHggjx-VSctqX3YgNjyC56E6ThJGMUiXTUN0HR6ehgWfGR1GUCoMXUV9V3g786D-ACgLVKcJgCehAPwOMZjQehYMJDjEJ4lC0JiTCeGww1cPw5RCOI0jyMkSjVE5AxNHKMoUQaJj+UuGxrhXAscFgWApwILjrLcKgwAARwwFAgkXYg8DVZTK2NQ88h6TRHQMXRGOKUp7WbfRdFouEcV5LQ3RdNibLshzf2ckhXI8rywB8vyKQNQKD3EFRQu0U4ziikoXV0Tl2k0FoNBBdSjhkDK7gCOVHicv1RggUDwKgmDcvcPriAGqAf0m1DiHQxTuACo0KtyIU2gSloZF0HT1JtNpOQsTQDiOe8zGMHp9p6wlptm+ahrcUh+JmISHFEgJxMkqb+py56SEW5bHCw5YK3WvCTS2nazD2g7HXaai9kxXR2XU+9pAKF8rmIQhJXgdJfr3f4oeCi9EAAWlUZo0Tp+mTDu9wHieUkPjoEmq0qlskXofazChN1SmhTk2hptQGkxNotGqe9iiZ+4ICAzmgu5mXeYayKSOfTFjGO5tUqaRo3WkOFpYKMwFYHEMoDDRZCZw0n8P20F9BlzoZa6Npii2Opik0faveBR1Dm9iyhkB99P04uakN4lWNpUIxXelnpMaRExJH04ptD0QUTjMfpUQGSzftjLKAkcubJvyzzvLAXyHZUp2TUzgP1G2nSMTF4wTuUNo+eKfpnyYvR+QVh6Ab7CryrJ7mmMaehSON4w0dKdRqgdDoilSiFau9DeRWsSwgA */
   id: 'simulation',
   context: ({ input, self, spawn }) => ({
     parentRef: input.parentRef,
     dateRangeRef: spawn('dateRangeMachine', {
-      id: 'dateRangeMachine',
+      id: 'dateRange',
       input: {
         parentRef: self,
       },
@@ -168,6 +168,7 @@ export const simulationMachine = setup({
     },
     loadingSamples: {
       invoke: {
+        id: 'samplesFetcherActor',
         src: 'fetchSamples',
         input: ({ context }) => ({
           condition: context.samplingCondition,
@@ -201,6 +202,7 @@ export const simulationMachine = setup({
     },
     runningSimulation: {
       invoke: {
+        id: 'simulationRunnerActor',
         src: 'runSimulation',
         input: ({ context }) => ({
           streamName: context.streamName,

@@ -65,17 +65,19 @@ export const streamEnrichmentMachine = setup({
   },
   actions: {
     spawnSimulationMachine: assign(({ context, self, spawn }) => ({
-      simulatorRef: spawn('simulationMachine', {
-        id: 'simulator',
-        input: {
-          parentRef: self,
-          processors: context.processorsRefs
-            .map((proc) => proc.getSnapshot())
-            .filter((proc) => proc.context.isNew)
-            .map((proc) => proc.context.processor),
-          streamName: context.definition.stream.name,
-        },
-      }),
+      simulatorRef:
+        context.simulatorRef ||
+        spawn('simulationMachine', {
+          id: 'simulator',
+          input: {
+            parentRef: self,
+            processors: context.processorsRefs
+              .map((proc) => proc.getSnapshot())
+              .filter((proc) => proc.context.isNew)
+              .map((proc) => proc.context.processor),
+            streamName: context.definition.stream.name,
+          },
+        }),
     })),
     notifyUpsertStreamSuccess: getPlaceholderFor(createUpsertStreamSuccessNofitier),
     notifyUpsertStreamFailure: getPlaceholderFor(createUpsertStreamFailureNofitier),
@@ -83,6 +85,7 @@ export const streamEnrichmentMachine = setup({
     storeDefinition: assign((_, params: { definition: IngestStreamGetResponse }) => ({
       definition: params.definition,
     })),
+    stopProcessors: ({ context }) => context.processorsRefs.forEach(stopChild),
     setupProcessors: assign(({ self, spawn }, params: { definition: IngestStreamGetResponse }) => {
       const processorsRefs = params.definition.stream.ingest.processing.map((proc) => {
         const processor = processorConverter.toUIDefinition(proc);
@@ -196,6 +199,7 @@ export const streamEnrichmentMachine = setup({
       id: 'ready',
       type: 'parallel',
       entry: enqueueActions(({ check, enqueue }) => {
+        enqueue({ type: 'stopProcessors' });
         enqueue({
           type: 'setupProcessors',
           params: ({ context }) => ({ definition: context.definition }),
@@ -236,6 +240,7 @@ export const streamEnrichmentMachine = setup({
             },
             updating: {
               invoke: {
+                id: 'upsertStreamActor',
                 src: 'upsertStream',
                 input: ({ context }) => ({
                   definition: context.definition,

@@ -66,6 +66,7 @@ export const StreamEnrichmentContextProvider = ({
     <StreamEnrichmentContext.Provider
       logic={streamEnrichmentMachine.provide(createStreamEnrichmentMachineImplementations(deps))}
       options={{
+        id: 'streamEnrichment',
         inspect: consoleInspector,
         input: {
           definition,
