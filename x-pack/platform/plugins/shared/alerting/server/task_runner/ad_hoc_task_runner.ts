@@ -235,9 +235,12 @@ export class AdHocTaskRunner implements CancellableTask {
       ruleTaskTimeout: ruleType.ruleTaskTimeout,
     });
 
+    const actionsClient = await this.context.actionsPlugin.getActionsClientWithRequest(fakeRequest);
+
     const { error, stackTrace } = await this.ruleTypeRunner.run({
       context: ruleTypeRunnerContext,
       alertsClient,
+      actionsClient,
       executionId: this.executionId,
       executorServices,
       rule: {
@@ -279,7 +282,7 @@ export class AdHocTaskRunner implements CancellableTask {
       ruleLabel,
       previousStartedAt: null,
       alertingEventLogger: this.alertingEventLogger,
-      actionsClient: await this.context.actionsPlugin.getActionsClientWithRequest(fakeRequest),
+      actionsClient,
       alertsClient,
       priority: TaskPriority.Low,
     });

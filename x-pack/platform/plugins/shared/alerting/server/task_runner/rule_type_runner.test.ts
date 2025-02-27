@@ -31,9 +31,11 @@ import {
 import { getErrorSource } from '@kbn/task-manager-plugin/server/task_running';
 import { maintenanceWindowsServiceMock } from './maintenance_windows/maintenance_windows_service.mock';
 import { KibanaRequest } from '@kbn/core/server';
+import { actionsClientMock } from '@kbn/actions-plugin/server/mocks';
 
 const alertingEventLogger = alertingEventLoggerMock.create();
 const alertsClient = alertsClientMock.create();
+const actionsClient = actionsClientMock.create();
 const dataViews = dataViewPluginMocks.createStartContract();
 const logger = loggingSystemMock.create().get();
 const maintenanceWindowsService = maintenanceWindowsServiceMock.create();
@@ -192,6 +194,7 @@ describe('RuleTypeRunner', () => {
           isServerless: false,
         },
         alertsClient,
+        actionsClient,
         executionId: 'abc',
         executorServices: {
           getDataViews,
@@ -214,6 +217,7 @@ describe('RuleTypeRunner', () => {
         services: {
           alertFactory: alertsClient.factory(),
           alertsClient: alertsClient.client(),
+          actionsClient,
           getDataViews: expect.any(Function),
           getMaintenanceWindowIds: expect.any(Function),
           ruleMonitoringService: publicRuleMonitoringService,
@@ -300,6 +304,7 @@ describe('RuleTypeRunner', () => {
           isServerless: false,
         },
         alertsClient,
+        actionsClient,
         executionId: 'abc',
         executorServices: {
           getDataViews,
@@ -322,6 +327,7 @@ describe('RuleTypeRunner', () => {
         services: {
           alertFactory: alertsClient.factory(),
           alertsClient: alertsClient.client(),
+          actionsClient,
           getDataViews: expect.any(Function),
           getMaintenanceWindowIds: expect.any(Function),
           ruleMonitoringService: publicRuleMonitoringService,
@@ -411,6 +417,7 @@ describe('RuleTypeRunner', () => {
           isServerless: false,
         },
         alertsClient,
+        actionsClient,
         executionId: 'abc',
         executorServices: {
           getDataViews,
@@ -473,6 +480,7 @@ describe('RuleTypeRunner', () => {
           isServerless: false,
         },
         alertsClient,
+        actionsClient,
         executionId: 'abc',
         executorServices: {
           getDataViews,
@@ -495,6 +503,7 @@ describe('RuleTypeRunner', () => {
         services: {
           alertFactory: alertsClient.factory(),
           alertsClient: alertsClient.client(),
+          actionsClient,
           getDataViews: expect.any(Function),
           getMaintenanceWindowIds: expect.any(Function),
           ruleMonitoringService: publicRuleMonitoringService,
@@ -577,6 +586,7 @@ describe('RuleTypeRunner', () => {
           isServerless: false,
         },
         alertsClient,
+        actionsClient,
         executionId: 'abc',
         executorServices: {
           getDataViews,
@@ -599,6 +609,7 @@ describe('RuleTypeRunner', () => {
         services: {
           alertFactory: alertsClient.factory(),
           alertsClient: alertsClient.client(),
+          actionsClient,
           getDataViews: expect.any(Function),
           getMaintenanceWindowIds: expect.any(Function),
           ruleMonitoringService: publicRuleMonitoringService,
@@ -681,6 +692,7 @@ describe('RuleTypeRunner', () => {
           isServerless: false,
         },
         alertsClient,
+        actionsClient,
         executionId: 'abc',
         executorServices: {
           getDataViews,
@@ -719,6 +731,7 @@ describe('RuleTypeRunner', () => {
           isServerless: false,
         },
         alertsClient,
+        actionsClient,
         executionId: 'abc',
         executorServices: {
           getDataViews,
@@ -741,6 +754,7 @@ describe('RuleTypeRunner', () => {
         services: {
           alertFactory: alertsClient.factory(),
           alertsClient: alertsClient.client(),
+          actionsClient,
           getDataViews: expect.any(Function),
           getMaintenanceWindowIds: expect.any(Function),
           ruleMonitoringService: publicRuleMonitoringService,
@@ -834,6 +848,7 @@ describe('RuleTypeRunner', () => {
           isServerless: false,
         },
         alertsClient,
+        actionsClient,
         executionId: 'abc',
         executorServices: {
           getDataViews,
@@ -856,6 +871,7 @@ describe('RuleTypeRunner', () => {
         services: {
           alertFactory: alertsClient.factory(),
           alertsClient: alertsClient.client(),
+          actionsClient,
           getDataViews: expect.any(Function),
           getMaintenanceWindowIds: expect.any(Function),
           ruleMonitoringService: publicRuleMonitoringService,
@@ -949,6 +965,7 @@ describe('RuleTypeRunner', () => {
             isServerless: false,
           },
           alertsClient,
+          actionsClient,
           executionId: 'abc',
           executorServices: {
             getDataViews,
@@ -972,6 +989,7 @@ describe('RuleTypeRunner', () => {
         services: {
           alertFactory: alertsClient.factory(),
           alertsClient: alertsClient.client(),
+          actionsClient,
           getDataViews: expect.any(Function),
           getMaintenanceWindowIds: expect.any(Function),
           ruleMonitoringService: publicRuleMonitoringService,
@@ -1055,6 +1073,7 @@ describe('RuleTypeRunner', () => {
             isServerless: false,
           },
           alertsClient,
+          actionsClient,
           executionId: 'abc',
           executorServices: {
             getDataViews,
@@ -1078,6 +1097,7 @@ describe('RuleTypeRunner', () => {
         services: {
           alertFactory: alertsClient.factory(),
           alertsClient: alertsClient.client(),
+          actionsClient,
           getDataViews: expect.any(Function),
           getMaintenanceWindowIds: expect.any(Function),
           ruleMonitoringService: publicRuleMonitoringService,
@@ -1161,6 +1181,7 @@ describe('RuleTypeRunner', () => {
             isServerless: false,
           },
           alertsClient,
+          actionsClient,
           executionId: 'abc',
           executorServices: {
             getDataViews,
@@ -1184,6 +1205,7 @@ describe('RuleTypeRunner', () => {
         services: {
           alertFactory: alertsClient.factory(),
           alertsClient: alertsClient.client(),
+          actionsClient,
           getMaintenanceWindowIds: expect.any(Function),
           getDataViews: expect.any(Function),
           ruleMonitoringService: publicRuleMonitoringService,

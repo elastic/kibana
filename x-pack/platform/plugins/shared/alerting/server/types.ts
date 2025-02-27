@@ -26,7 +26,7 @@ import type { PublicMethodsOf } from '@kbn/utility-types';
 import { SharePluginStart } from '@kbn/share-plugin/server';
 import type { DefaultAlert, FieldMap } from '@kbn/alerts-as-data-utils';
 import { Alert } from '@kbn/alerts-as-data-utils';
-import { ActionsApiRequestHandlerContext } from '@kbn/actions-plugin/server';
+import { ActionsApiRequestHandlerContext, ActionsClient } from '@kbn/actions-plugin/server';
 import { AlertsHealth } from '@kbn/alerting-types';
 import { RuleTypeRegistry as OrigruleTypeRegistry } from './rule_type_registry';
 import { AlertingServerSetup, AlertingServerStart } from './plugin';
@@ -99,6 +99,7 @@ export interface RuleExecutorServices<
    * @deprecated
    */
   alertFactory: PublicAlertFactory<State, Context, ActionGroupIds>;
+  actionsClient: PublicMethodsOf<ActionsClient>;
   getDataViews: () => Promise<DataViewsContract>;
   getMaintenanceWindowIds: () => Promise<string[]>;
   getSearchSourceClient: () => Promise<ISearchStartSearchSource>;
