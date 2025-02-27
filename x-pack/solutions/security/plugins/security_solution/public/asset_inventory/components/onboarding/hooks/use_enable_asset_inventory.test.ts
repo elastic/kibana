@@ -5,96 +5,99 @@
  * 2.0.
  */
 
-import { renderHook, act } from '@testing-library/react';
+import { renderHook, waitFor } from '@testing-library/react';
 import { useEnableAssetInventory } from './use_enable_asset_inventory';
-import { useMutation } from '@tanstack/react-query';
-import { useAssetInventoryRoutes } from '../../../hooks/use_asset_inventory_routes';
-import { useAssetInventoryStatus } from '../../../hooks/use_asset_inventory_status';
+import { createTestProviderWrapper } from '../../../test/test_provider';
 
-jest.mock('@tanstack/react-query', () => ({
-  useMutation: jest.fn(),
-}));
+const mockPostEnableAssetInventory = jest.fn();
+const mockRefetchStatus = jest.fn();
 
 jest.mock('../../../hooks/use_asset_inventory_routes', () => ({
-  useAssetInventoryRoutes: jest.fn(),
+  useAssetInventoryRoutes: () => ({
+    postEnableAssetInventory: mockPostEnableAssetInventory,
+  }),
 }));
 
 jest.mock('../../../hooks/use_asset_inventory_status', () => ({
-  useAssetInventoryStatus: jest.fn(),
+  useAssetInventoryStatus: () => ({
+    refetch: mockRefetchStatus,
+  }),
 }));
 
+const renderHookWithWrapper = () =>
+  renderHook(() => useEnableAssetInventory(), {
+    wrapper: createTestProviderWrapper(),
+  });
+
 describe('useEnableAssetInventory', () => {
-  let refetchStatus: jest.Mock;
-  let postEnableAssetInventory: jest.Mock;
-
   beforeEach(() => {
-    refetchStatus = jest.fn();
-    postEnableAssetInventory = jest.fn();
-
-    (useAssetInventoryRoutes as jest.Mock).mockReturnValue({
-      postEnableAssetInventory,
-    });
-
-    (useAssetInventoryStatus as jest.Mock).mockReturnValue({
-      refetch: refetchStatus,
-    });
-
-    (useMutation as jest.Mock).mockImplementation((_fn, options) => ({
-      mutate: () => {
-        try {
-          options.onMutate?.();
-          postEnableAssetInventory.mockResolvedValue({});
-          options.onSuccess?.();
-        } catch (error) {
-          options.onError?.(error);
-        }
-      },
-    }));
+    jest.clearAllMocks();
   });
 
-  it('should initialize with default values', () => {
-    const { result } = renderHook(() => useEnableAssetInventory());
+  describe('Success', () => {
+    it('should call postEnableAssetInventory when enabling asset inventory', async () => {
+      const { result } = renderHookWithWrapper();
 
-    expect(result.current.isEnabling).toBe(false);
-    expect(result.current.error).toBeNull();
-  });
+      result.current.enableAssetInventory();
 
-  it('should set isEnabling to true on mutation start', () => {
-    const { result } = renderHook(() => useEnableAssetInventory());
-
-    act(() => {
-      result.current.handleEnableClick();
+      await waitFor(() => {
+        expect(mockPostEnableAssetInventory).toHaveBeenCalled();
+      });
     });
 
-    expect(result.current.isEnabling).toBe(true);
-    expect(result.current.error).toBeNull();
-  });
+    it('should set isEnabling to true when enabling asset inventory', async () => {
+      const { result } = renderHookWithWrapper();
 
-  it('should call refetchStatus on success', async () => {
-    const { result } = renderHook(() => useEnableAssetInventory());
+      result.current.enableAssetInventory();
 
-    act(() => {
-      result.current.handleEnableClick();
+      await waitFor(() => {
+        expect(result.current.isEnabling).toBe(true);
+      });
     });
 
-    expect(refetchStatus).toHaveBeenCalled();
+    it('should refetch status when asset inventory is enabled', async () => {
+      mockPostEnableAssetInventory.mockResolvedValue({});
+
+      const { result } = renderHookWithWrapper();
+
+      result.current.enableAssetInventory();
+
+      await waitFor(() => {
+        expect(mockRefetchStatus).toHaveBeenCalled();
+      });
+    });
   });
 
-  it('should handle errors and update the error state', async () => {
-    (useMutation as jest.Mock).mockImplementation((_fn, options) => ({
-      mutate: () => {
-        options.onMutate?.();
-        options.onError?.({ body: { message: 'Server error' } });
-      },
-    }));
+  describe('Error', () => {
+    it('should handle error message when enabling asset inventory', async () => {
+      // suppress expected console error messages
+      jest.spyOn(console, 'error').mockReturnValue();
 
-    const { result } = renderHook(() => useEnableAssetInventory());
+      mockPostEnableAssetInventory.mockRejectedValue({
+        body: {
+          message: 'Unexpected error occurred',
+        },
+      });
 
-    act(() => {
-      result.current.handleEnableClick();
+      const { result } = renderHookWithWrapper();
+
+      result.current.enableAssetInventory();
+
+      await waitFor(() => {
+        expect(result.current.error).toBe('Unexpected error occurred');
+      });
     });
 
-    expect(result.current.error).toBe('Server error');
-    expect(result.current.isEnabling).toBe(false);
+    it('should include default error message when enabling asset inventory rejects with unexpected error message', async () => {
+      mockPostEnableAssetInventory.mockRejectedValue({});
+
+      const { result } = renderHookWithWrapper();
+
+      result.current.enableAssetInventory();
+
+      await waitFor(() => {
+        expect(result.current.error).toBe('Failed to enable Asset Inventory. Please try again.');
+      });
+    });
   });
 });

@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { I18nProvider } from '@kbn/i18n-react';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 interface TestProviderProps {
   children: React.ReactNode;
 }
@@ -15,5 +16,17 @@ interface TestProviderProps {
  * A provider that wraps the necessary context for testing components.
  */
 export const TestProvider: React.FC<Partial<TestProviderProps>> = ({ children } = {}) => {
-  return <I18nProvider>{children}</I18nProvider>;
+  const queryClient = new QueryClient();
+
+  return (
+    <QueryClientProvider client={queryClient}>
+      <I18nProvider>{children}</I18nProvider>
+    </QueryClientProvider>
+  );
+};
+
+export const createTestProviderWrapper = () => {
+  return function Wrapper({ children }: { children: React.ReactNode }) {
+    return <TestProvider>{children}</TestProvider>;
+  };
 };

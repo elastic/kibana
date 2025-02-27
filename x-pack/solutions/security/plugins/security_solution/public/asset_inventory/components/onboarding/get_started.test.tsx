@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-// src/components/get_started.test.tsx
 import React from 'react';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import { GetStarted } from './get_started';
 import { useEnableAssetInventory } from './hooks/use_enable_asset_inventory';
 import { TestProvider } from '../../test/test_provider';
+import { userEvent } from '@testing-library/user-event';
 
 jest.mock('./hooks/use_enable_asset_inventory', () => ({
   useEnableAssetInventory: jest.fn(),
@@ -19,8 +19,8 @@ jest.mock('./hooks/use_enable_asset_inventory', () => ({
 const mockGetStarted = {
   isEnabling: false,
   error: null,
-  setError: jest.fn(),
-  handleEnableClick: jest.fn(),
+  reset: jest.fn(),
+  enableAssetInventory: jest.fn(),
 };
 
 const renderWithProvider = (children: React.ReactNode) => {
@@ -39,20 +39,18 @@ describe('GetStarted Component', () => {
     expect(screen.getByText(/get started with asset inventory/i)).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /enable asset inventory/i })).toBeInTheDocument();
 
-    expect(screen.getByText(/read documentation/i)).toBeInTheDocument();
     expect(screen.getByText(/read documentation/i).closest('a')).toHaveAttribute(
       'href',
       'https://ela.st/asset-inventory'
     );
   });
 
-  it('calls handleEnableClick when enable asset inventory button is clicked', () => {
+  it('calls enableAssetInventory when enable asset inventory button is clicked', async () => {
     renderWithProvider(<GetStarted />);
 
-    const button = screen.getByRole('button', { name: /enable asset inventory/i });
-    fireEvent.click(button);
+    await userEvent.click(screen.getByRole('button', { name: /enable asset inventory/i }));
 
-    expect(mockGetStarted.handleEnableClick).toHaveBeenCalled();
+    expect(mockGetStarted.enableAssetInventory).toHaveBeenCalled();
   });
 
   it('shows a loading spinner when enabling', () => {
@@ -64,9 +62,10 @@ describe('GetStarted Component', () => {
     renderWithProvider(<GetStarted />);
 
     expect(screen.getByRole('progressbar')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /enabling asset inventory/i })).toBeInTheDocument();
   });
 
-  it('displays an error message when there is an error', async () => {
+  it('displays an error message when there is an error', () => {
     const errorMessage = 'Task Manager is not available';
     (useEnableAssetInventory as jest.Mock).mockReturnValue({
       ...mockGetStarted,
@@ -79,7 +78,7 @@ describe('GetStarted Component', () => {
     expect(screen.getByText(errorMessage)).toBeInTheDocument();
   });
 
-  it('dismisses error message when dismissed', async () => {
+  it('calls reset when error message is dismissed', async () => {
     (useEnableAssetInventory as jest.Mock).mockReturnValue({
       ...mockGetStarted,
       error: 'Task Manager is not available',
@@ -87,9 +86,8 @@ describe('GetStarted Component', () => {
 
     renderWithProvider(<GetStarted />);
 
-    const dismissButton = screen.getByRole('button', { name: /dismiss/i });
-    fireEvent.click(dismissButton);
+    await userEvent.click(screen.getByRole('button', { name: /dismiss/i }));
 
-    await waitFor(() => expect(mockGetStarted.setError).toHaveBeenCalledWith(null));
+    await waitFor(() => expect(mockGetStarted.reset).toHaveBeenCalled());
   });
 });

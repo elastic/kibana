@@ -5,10 +5,12 @@
  * 2.0.
  */
 
-import { useState } from 'react';
 import { useMutation } from '@tanstack/react-query';
 import { i18n } from '@kbn/i18n';
-import type { ServerApiError } from '../../../../common/types';
+import type {
+  AssetInventoryEnableResponse,
+  AssetInventoryServerApiError,
+} from '../../../../../common/api/asset_inventory/types';
 import { useAssetInventoryRoutes } from '../../../hooks/use_asset_inventory_routes';
 import { useAssetInventoryStatus } from '../../../hooks/use_asset_inventory_status';
 
@@ -19,35 +21,25 @@ export const useEnableAssetInventory = () => {
   const { postEnableAssetInventory } = useAssetInventoryRoutes();
   const { refetch: refetchStatus } = useAssetInventoryStatus();
 
-  const [error, setError] = useState<string | null>(null);
-  const [isEnabling, setIsEnabling] = useState(false);
+  const mutation = useMutation<AssetInventoryEnableResponse, AssetInventoryServerApiError>(
+    postEnableAssetInventory,
+    {
+      onSuccess: () => {
+        refetchStatus();
+      },
+    }
+  );
 
-  const mutation = useMutation(postEnableAssetInventory, {
-    onMutate: () => {
-      setIsEnabling(true);
-      setError(null);
-    },
-    onSuccess: () => {
-      refetchStatus();
-    },
-    onError: (err: { body?: ServerApiError }) => {
-      const errorMessage =
-        err?.body?.message ||
-        i18n.translate(
-          'xpack.securitySolution.assetInventory.onboarding.enableAssetInventory.error',
-          {
-            defaultMessage: 'Failed to enable Asset Inventory. Please try again.',
-          }
-        );
-      setError(errorMessage);
-      setIsEnabling(false);
-    },
-  });
+  const error =
+    mutation.error?.body?.message ||
+    i18n.translate('xpack.securitySolution.assetInventory.onboarding.enableAssetInventory.error', {
+      defaultMessage: 'Failed to enable Asset Inventory. Please try again.',
+    });
 
   return {
-    isEnabling,
-    error,
-    setError,
-    handleEnableClick: () => mutation.mutate(),
+    isEnabling: mutation.isLoading || mutation.isSuccess,
+    error: mutation.isError ? error : null,
+    reset: mutation.reset,
+    enableAssetInventory: () => mutation.mutate(),
   };
 };

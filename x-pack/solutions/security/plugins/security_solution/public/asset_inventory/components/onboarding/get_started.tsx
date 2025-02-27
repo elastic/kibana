@@ -29,7 +29,7 @@ const ASSET_INVENTORY_DOCS_URL = 'https://ela.st/asset-inventory';
 const TEST_SUBJ = 'assetInventory:onboarding:get-started';
 
 export const GetStarted = () => {
-  const { isEnabling, error, setError, handleEnableClick } = useEnableAssetInventory();
+  const { isEnabling, error, reset, enableAssetInventory } = useEnableAssetInventory();
 
   return (
     <EuiFlexGroup>
@@ -131,7 +131,7 @@ export const GetStarted = () => {
                 </p>
                 {error && (
                   <EuiCallOut
-                    onDismiss={() => setError(null)}
+                    onDismiss={reset}
                     title={
                       <FormattedMessage
                         id="xpack.securitySolution.assetInventory.onboarding.getStarted.errorTitle"
@@ -150,7 +150,7 @@ export const GetStarted = () => {
               <EuiButton
                 color="primary"
                 fill
-                onClick={handleEnableClick}
+                onClick={enableAssetInventory}
                 iconType="plusInCircle"
                 isLoading={isEnabling}
               >
