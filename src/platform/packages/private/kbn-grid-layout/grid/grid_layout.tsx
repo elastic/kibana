@@ -140,8 +140,12 @@ export const GridLayout = ({
 
     const activeSectionSubscription = gridLayoutStateManager.activeSection$
       .pipe(skip(1), distinctUntilChanged())
-      .subscribe((section) => {
-        onSectionChange?.(section);
+      .subscribe((activeSection) => {
+        onSectionChange?.(
+          activeSection !== undefined
+            ? Math.min(activeSection, gridLayoutStateManager.gridLayout$.getValue().length - 1)
+            : undefined
+        );
       });
 
     return () => {

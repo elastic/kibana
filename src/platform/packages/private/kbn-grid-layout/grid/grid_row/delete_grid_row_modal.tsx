@@ -66,7 +66,8 @@ export const DeleteGridRowModal = ({
             let newLayout = movePanelsToRow(
               gridLayoutStateManager.gridLayout$.getValue(),
               rowIndex,
-              0
+              0,
+              gridLayoutStateManager.runtimeSettings$.getValue() !== 'none'
             );
             newLayout = deleteRow(newLayout, rowIndex);
             gridLayoutStateManager.gridLayout$.next(newLayout);

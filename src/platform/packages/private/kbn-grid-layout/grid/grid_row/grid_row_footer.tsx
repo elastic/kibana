@@ -15,24 +15,20 @@ import {
   EuiFlexItem,
   EuiInlineEditTitle,
   EuiPagination,
-  EuiText,
   UseEuiTheme,
-  euiCanAnimate,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 
-import { useGridLayoutContext } from '../use_grid_layout_context';
-import { deleteRow } from '../utils/row_management';
-import { DeleteGridRowModal } from './delete_grid_row_modal';
-import { GridRowTitle } from './grid_row_title';
 import { cloneDeep } from 'lodash';
+import { useGridLayoutContext } from '../use_grid_layout_context';
 
 export interface GridRowFooterProps {
   rowIndex: number;
+  confirmDeleteRow: () => void;
 }
 
-export const GridRowFooter = React.memo(({ rowIndex }: GridRowFooterProps) => {
+export const GridRowFooter = React.memo(({ rowIndex, confirmDeleteRow }: GridRowFooterProps) => {
   const { gridLayoutStateManager } = useGridLayoutContext();
   const currentRow = gridLayoutStateManager.gridLayout$.getValue()[rowIndex];
 
@@ -76,21 +72,23 @@ export const GridRowFooter = React.memo(({ rowIndex }: GridRowFooterProps) => {
     [rowIndex, gridLayoutStateManager.gridLayout$]
   );
 
-  // const confirmDeleteRow = useCallback(() => {
-  //   /**
-  //    * Memoization of this callback does not need to be dependant on the React panel count
-  //    * state, so just grab the panel count via gridLayoutStateManager instead
-  //    */
-  //   const count = Object.keys(
-  //     gridLayoutStateManager.gridLayout$.getValue()[rowIndex].panels
-  //   ).length;
-  //   if (!Boolean(count)) {
-  //     const newLayout = deleteRow(gridLayoutStateManager.gridLayout$.getValue(), rowIndex);
-  //     gridLayoutStateManager.gridLayout$.next(newLayout);
-  //   } else {
-  //     setDeleteModalVisible(true);
-  //   }
-  // }, [gridLayoutStateManager.gridLayout$, rowIndex]);
+  const addNewSection = useCallback(() => {
+    gridLayoutStateManager.gridLayout$.next([
+      ...gridLayoutStateManager.gridLayout$.getValue(),
+      {
+        title: i18n.translate('examples.gridExample.defaultSectionTitle', {
+          defaultMessage: 'New collapsible section',
+        }),
+        isCollapsed: false,
+        panels: {},
+      },
+    ]);
+    if (gridLayoutStateManager.runtimeSettings$.getValue() === 'none') {
+      gridLayoutStateManager.activeSection$.next(
+        gridLayoutStateManager.gridLayout$.getValue().length - 1
+      );
+    }
+  }, [gridLayoutStateManager]);
 
   return (
     <EuiFlexGroup css={styles.footerStyles} alignItems="center" justifyContent="center">
@@ -120,8 +118,22 @@ export const GridRowFooter = React.memo(({ rowIndex }: GridRowFooterProps) => {
       </EuiFlexItem>
       <EuiFlexItem grow={true}>
         <div>
-          <EuiButtonIcon iconType="trash" color="danger" iconSize="m" size="m" onClick={() => {}} />
-          <EuiButtonIcon iconType="plusInCircleFilled" color="text" iconSize="l" size="m" />
+          {rowIndex !== 0 && (
+            <EuiButtonIcon
+              iconType="trash"
+              color="danger"
+              iconSize="m"
+              size="s"
+              onClick={confirmDeleteRow}
+            />
+          )}
+          <EuiButtonIcon
+            iconType="plusInCircleFilled"
+            color="text"
+            iconSize="m"
+            size="s"
+            onClick={addNewSection}
+          />
         </div>
       </EuiFlexItem>
     </EuiFlexGroup>
