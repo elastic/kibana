@@ -30,7 +30,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { useTimefilter } from '@kbn/ml-date-picker';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import { useStorage } from '@kbn/ml-local-storage';
-import { ELSER_ID_V1 } from '@kbn/ml-trained-models-utils';
+import { ELSER_ID_V1, MODEL_STATE } from '@kbn/ml-trained-models-utils';
 import type { ListingPageUrlState } from '@kbn/ml-url-state';
 import { usePageUrlState } from '@kbn/ml-url-state';
 import { dynamic } from '@kbn/shared-ux-utility';
@@ -98,6 +98,9 @@ export const getDefaultModelsListState = (): ListingPageUrlState => ({
   sortDirection: 'asc',
   showAll: false,
 });
+
+const isModelDeployed = (item: TrainedModelUIItem) =>
+  isNLPModelItem(item) && item.state === MODEL_STATE.STARTED;
 
 interface Props {
   pageState?: ListingPageUrlState;
@@ -513,13 +516,22 @@ export const ModelsList: FC<Props> = ({
               defaultMessage: 'Built-in model',
             });
           }
+          if (isModelDeployed(item)) {
+            return i18n.translate('xpack.ml.trainedModels.modelsList.deployedModelMessage', {
+              defaultMessage: 'Model is deployed',
+            });
+          }
           return '';
         },
         selectable: (item) =>
-          !isModelDownloadItem(item) && !isPopulatedObject(item.pipelines) && !isBuiltInModel(item),
+          !isModelDownloadItem(item) &&
+          !isPopulatedObject(item.pipelines) &&
+          !isBuiltInModel(item) &&
+          !isModelDeployed(item),
         onSelectionChange: (selectedItems) => {
           setSelectedModels(selectedItems);
         },
+        selected: selectedModels,
       }
     : undefined;
 
@@ -676,11 +688,10 @@ export const ModelsList: FC<Props> = ({
         </div>
         {modelsToDelete.length > 0 && (
           <DeleteModelsModal
-            onClose={(refreshList) => {
-              modelsToDelete.forEach((model) => {
-                trainedModelsService.removeScheduledDeployments({ modelId: model.model_id });
-              });
-
+            onClose={() => {
+              setModelsToDelete([]);
+            }}
+            onDelete={(refreshList) => {
               setItemIdToExpandedRowMap((prev) => {
                 const newMap = { ...prev };
                 modelsToDelete.forEach((model) => {
@@ -690,6 +701,7 @@ export const ModelsList: FC<Props> = ({
               });
 
               setModelsToDelete([]);
+              setSelectedModels([]);
 
               if (refreshList) {
                 fetchModels();

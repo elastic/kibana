@@ -16,19 +16,8 @@
 
 import { z } from '@kbn/zod';
 
-import {
-  KueryOrUndefined,
-  PageOrUndefined,
-  PageSizeOrUndefined,
-  SortOrUndefined,
-  SortOrderOrUndefined,
-} from '../model/schema/common_attributes.gen';
+export type FindLiveQueryResponse = z.infer<typeof FindLiveQueryResponse>;
+export const FindLiveQueryResponse = z.object({});
 
-export type FindLiveQueryRequestQuery = z.infer<typeof FindLiveQueryRequestQuery>;
-export const FindLiveQueryRequestQuery = z.object({
-  kuery: KueryOrUndefined.optional(),
-  page: PageOrUndefined.optional(),
-  pageSize: PageSizeOrUndefined.optional(),
-  sort: SortOrUndefined.optional(),
-  sortOrder: SortOrderOrUndefined.optional(),
-});
+export type FindLiveQueryDetailsResponse = z.infer<typeof FindLiveQueryDetailsResponse>;
+export const FindLiveQueryDetailsResponse = z.object({});
