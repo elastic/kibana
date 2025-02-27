@@ -56,6 +56,7 @@ class BreadcrumbService {
 
   public setup(setBreadcrumbsHandler: SetBreadcrumbs): void {
     this.setBreadcrumbsHandler = setBreadcrumbsHandler;
+
     this.breadcrumbs.home = [
       {
         text: i18n.translate('xpack.idxMgmt.breadcrumb.homeLabel', {

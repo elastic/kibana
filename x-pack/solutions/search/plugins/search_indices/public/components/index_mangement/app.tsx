@@ -21,12 +21,11 @@ const breadcrumb = {
   text: breadcrumbText,
 };
 
-interface IndexManagementAppProps {
-  indexManagement: IndexManagementPluginSetup;
-}
-export const IndexManagementApp: React.FC<IndexManagementAppProps> = ({ indexManagement }) => {
+export const IndexManagementApp: React.FC<{ indexManagement: IndexManagementPluginSetup }> = ({
+  indexManagement,
+}) => {
   const { history, searchNavigation, cloud } = useKibana().services;
-  const managementRef = useRef(null);
+  const indexManagementRef = useRef(null);
   const setBreadcrumbs = useCallback(
     (crumbs: ChromeBreadcrumb[] = [], appHistory?: ScopedHistory) => {
       const wrapBreadcrumb = (item: ChromeBreadcrumb, scopedHistory: ScopedHistory) => ({
@@ -50,11 +49,15 @@ export const IndexManagementApp: React.FC<IndexManagementAppProps> = ({ indexMan
 
   useEffect(() => {
     const unmount = () => {
-      indexManagement.managementApp({ element: managementRef.current, setBreadcrumbs, history });
+      indexManagement.indexManagementApp({
+        element: indexManagementRef.current,
+        setBreadcrumbs,
+        history,
+      });
     };
 
     return unmount();
-  }, [indexManagement, managementRef, setBreadcrumbs, history, cloud]);
+  }, [indexManagement, indexManagementRef, setBreadcrumbs, history, cloud]);
   return (
     <KibanaPageTemplate
       offset={0}
@@ -64,7 +67,7 @@ export const IndexManagementApp: React.FC<IndexManagementAppProps> = ({ indexMan
       solutionNav={searchNavigation?.useClassicNavigation(history)}
     >
       <KibanaPageTemplate.Section>
-        <div ref={managementRef} />
+        <div ref={indexManagementRef} />
       </KibanaPageTemplate.Section>
     </KibanaPageTemplate>
   );
