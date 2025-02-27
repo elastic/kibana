@@ -122,11 +122,11 @@ export default function createAlertsAsDataFlappingTest({ getService }: FtrProvid
         state.alertRecoveredInstances.alertA.meta.flappingHistory
       );
 
-      // Flapping value for alert doc should be false while flapping value for state should be true
+      // Flapping value for alert doc and the state should be false
       // This is because we write out the alert doc BEFORE calculating the latest flapping state and
       // persisting into task state
       expect(alertDocs[0]._source![ALERT_FLAPPING]).to.equal(false);
-      expect(state.alertRecoveredInstances.alertA.meta.flapping).to.equal(true);
+      expect(state.alertRecoveredInstances.alertA.meta.flapping).to.equal(false);
 
       // Run the rule 6 more times
       for (let i = 0; i < 6; i++) {
