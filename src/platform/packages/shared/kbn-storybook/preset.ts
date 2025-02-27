@@ -7,16 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-const webpackConfig = require('./src/webpack.config');
-
-module.exports = {
-  managerEntries: (entry = []) => {
-    return [require.resolve('./src/lib/register'), ...entry];
-  },
-  webpackFinal: async (config) => {
-    return webpackConfig({ config });
-  },
-  config: (entry) => {
-    return [...entry, require.resolve('./src/lib/decorators')];
-  },
+const managerEntries = (entry = []) => {
+  return [require.resolve('./src/lib/register'), ...entry];
 };
+
+const previewAnnotations = (entry = []) => {
+  // this file needs to be loaded here as we run this after the webpack alias config
+  return [...entry, require.resolve('./src/lib/decorators')];
+};
+
+export { managerEntries, previewAnnotations };

@@ -5,4 +5,7 @@
  * 2.0.
  */
 
-module.exports = require('@kbn/storybook').defaultConfig;
+import { defaultConfig } from '@kbn/storybook';
+
+// eslint-disable-next-line import/no-default-export
+export default defaultConfig;
