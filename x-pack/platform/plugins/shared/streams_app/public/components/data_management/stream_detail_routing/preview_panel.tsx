@@ -69,12 +69,14 @@ export function PreviewPanel({
     content = (
       <PreviewPanelIllustration>
         <>
-          <EuiText size="m" textAlign="center">
-            {i18n.translate('xpack.streams.streamDetail.preview.editPreviewMessageEmpty', {
-              defaultMessage: 'Your preview will appear here',
-            })}
+          <EuiText size="s" textAlign="center">
+            <h2>
+              {i18n.translate('xpack.streams.streamDetail.preview.editPreviewMessageEmpty', {
+                defaultMessage: 'Your preview will appear here',
+              })}
+            </h2>
           </EuiText>
-          <EuiText size="xs" textAlign="center">
+          <EuiText size="s" textAlign="center">
             {i18n.translate(
               'xpack.streams.streamDetail.preview.editPreviewMessageEmptyDescription',
               {
@@ -121,9 +123,9 @@ export function PreviewPanel({
   ) {
     content = (
       <PreviewPanelIllustration>
-        <EuiText size="xs" textAlign="center">
+        <EuiText size="s" textAlign="center">
           {i18n.translate('xpack.streams.streamDetail.preview.empty', {
-            defaultMessage: 'No documents to preview',
+            defaultMessage: 'No documents to preview, make sure to refine your conditions.',
           })}
         </EuiText>
       </PreviewPanelIllustration>

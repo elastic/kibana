@@ -313,7 +313,7 @@ function ChildStreamList({ definition }: { definition?: IngestStreamGetResponse 
           >
             <EuiFlexGroup direction="column" gutterSize="s">
               <AssetImage type="welcome" />
-              <EuiText size="m" textAlign="center">
+              <EuiText size="s" textAlign="center">
                 <h2>
                   {i18n.translate('xpack.streams.entityDetailOverview.noChildStreams', {
                     defaultMessage: 'Create streams for your logs',
