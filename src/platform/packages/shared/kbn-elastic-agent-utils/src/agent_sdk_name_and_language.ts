@@ -14,8 +14,9 @@ interface SdkNameAndLanguage {
   language?: string;
 }
 
+const LANGUAGE_INDEX = 1;
+
 export const getSdkNameAndLanguage = (agentName: string): SdkNameAndLanguage => {
-  const LANGUAGE_INDEX = 1;
   if (isElasticAgentName(agentName)) {
     return { sdkName: 'apm', language: agentName };
   }
