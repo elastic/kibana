@@ -120,19 +120,10 @@ jobs:
     needs: [matches_label]
     if: ${{ needs.matches_label.outputs.version_bump_config }}
     steps:
-      - uses: hashicorp/vault-action@a1b77a09293a4366e48a5067a86692ac6e94fdc0 #v3.1.0
-        with:
-          url: ${{ inputs.vaultUrl }}
-          roleId: ${{ inputs.vaultRoleId }}
-          secretId: ${{ inputs.vaultSecretId }}
-          method: approle
-          secrets: |
-            ${{ inputs.secret }} token | BUILDKITE_TOKEN
-        continue-on-error: false
       - uses: elastic/oblt-actions/buildkite/run@v1
         with:
-          token: ${{ env.BUILDKITE_TOKEN }}
-          pipeline: 'my-super-pipeline'
+          token: ${{ secrets.SHAREDUX_BUILDKITE_TOKEN }}
+          pipeline: 'kibana-chromium-linux-build'
           env-vars: |
+            GITHUB_ISSUE_NUMBER=${{ github.event.issue.number }}
             PUPPETEER_VERSION=$(echo ${{ needs.matches_label.outputs.version_bump_config }} | jq -r '.puppeteer_version')
-            
