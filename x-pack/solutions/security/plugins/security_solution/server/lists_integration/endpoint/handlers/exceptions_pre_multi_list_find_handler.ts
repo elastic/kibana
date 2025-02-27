@@ -26,7 +26,9 @@ export const getExceptionsPreMultiListFindHandler = (
 
     // validate Trusted application
     if (data.listId.some((id) => TrustedAppValidator.isTrustedApp({ listId: id }))) {
-      await new TrustedAppValidator(endpointAppContextService, request).validatePreMultiListFind();
+      await new TrustedAppValidator(endpointAppContextService, request).validatePreMultiListFind(
+        data
+      );
       return data;
     }
 
@@ -39,19 +41,23 @@ export const getExceptionsPreMultiListFindHandler = (
       await new HostIsolationExceptionsValidator(
         endpointAppContextService,
         request
-      ).validatePreMultiListFind();
+      ).validatePreMultiListFind(data);
       return data;
     }
 
     // Event Filters Exceptions
     if (data.listId.some((listId) => EventFilterValidator.isEventFilter({ listId }))) {
-      await new EventFilterValidator(endpointAppContextService, request).validatePreMultiListFind();
+      await new EventFilterValidator(endpointAppContextService, request).validatePreMultiListFind(
+        data
+      );
       return data;
     }
 
     // validate Blocklist
     if (data.listId.some((id) => BlocklistValidator.isBlocklist({ listId: id }))) {
-      await new BlocklistValidator(endpointAppContextService, request).validatePreMultiListFind();
+      await new BlocklistValidator(endpointAppContextService, request).validatePreMultiListFind(
+        data
+      );
       return data;
     }
 
@@ -60,7 +66,7 @@ export const getExceptionsPreMultiListFindHandler = (
       await new EndpointExceptionsValidator(
         endpointAppContextService,
         request
-      ).validatePreMultiListFind();
+      ).validatePreMultiListFind(data);
       return data;
     }
 
