@@ -57,6 +57,15 @@ export const GridRow = React.memo(({ rowIndex }: GridRowProps) => {
           }
         });
 
+      const sectionSubscription = combineLatest([
+        gridLayoutStateManager.gridLayout$,
+        gridLayoutStateManager.activeSection$,
+      ]).subscribe(([gridLayout, activeSection]) => {
+        setActiveSection(activeSection);
+        setIsCollapsed(gridLayout[rowIndex]?.isCollapsed ?? false);
+        setPageCount(gridLayout.length);
+      });
+
       /**
        * This subscription ensures that the row will re-render when one of the following changes:
        * - Collapsed state
@@ -65,24 +74,18 @@ export const GridRow = React.memo(({ rowIndex }: GridRowProps) => {
       const rowStateSubscription = combineLatest([
         gridLayoutStateManager.proposedGridLayout$,
         gridLayoutStateManager.gridLayout$,
-        gridLayoutStateManager.activeSection$,
       ])
         .pipe(
-          map(([proposedGridLayout, gridLayout, activeSection]) => {
+          map(([proposedGridLayout, gridLayout]) => {
+            console.log('fire', proposedGridLayout, gridLayout);
             const displayedGridLayout = proposedGridLayout ?? gridLayout;
             return {
-              activeSection,
-              sectionCount: gridLayout.length,
-              isCollapsed: displayedGridLayout[rowIndex]?.isCollapsed ?? false,
               panelIds: Object.keys(displayedGridLayout[rowIndex]?.panels ?? {}),
             };
           }),
           pairwise()
         )
         .subscribe(([oldRowData, newRowData]) => {
-          setActiveSection(newRowData.activeSection);
-          setIsCollapsed(newRowData.isCollapsed);
-          setPageCount(newRowData.sectionCount);
           if (
             oldRowData.panelIds.length !== newRowData.panelIds.length ||
             !(
@@ -126,6 +129,7 @@ export const GridRow = React.memo(({ rowIndex }: GridRowProps) => {
       return () => {
         interactionStyleSubscription.unsubscribe();
         gridLayoutSubscription.unsubscribe();
+        sectionSubscription.unsubscribe();
         rowStateSubscription.unsubscribe();
       };
     },
