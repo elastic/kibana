@@ -12,6 +12,7 @@ const CUSTOM_THRESHOLD_RULE_TYPE_SELECTOR = 'observability.rules.custom_threshol
 export function ObservabilityAlertsRulesProvider({ getService }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const find = getService('find');
+  const log = getService('log');
 
   const getManageRulesPageHref = async () => {
     const manageRulesPageButton = await testSubjects.find('manageRulesPageButton');
@@ -21,6 +22,7 @@ export function ObservabilityAlertsRulesProvider({ getService }: FtrProviderCont
   const clickCreateRuleButton = async () => {
     await testSubjects.existOrFail('createRuleButton');
     const createRuleButton = await testSubjects.find('createRuleButton');
+    log.debug(`clicking on ${await createRuleButton.getAttribute('innerText')}`);
     return await createRuleButton.click();
   };
 

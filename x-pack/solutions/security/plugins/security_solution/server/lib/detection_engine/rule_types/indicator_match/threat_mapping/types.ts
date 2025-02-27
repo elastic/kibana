@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { estypes } from '@elastic/elasticsearch';
 import type {
   ThreatMapping,
   ThreatMappingEntries,
@@ -13,8 +13,10 @@ import type {
   ThreatIndicatorPath,
 } from '@kbn/securitysolution-io-ts-alerting-types';
 import type { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
-import type { QueryDslBoolQuery } from '@elastic/elasticsearch/lib/api/types';
-import type { OpenPointInTimeResponse } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type {
+  OpenPointInTimeResponse,
+  QueryDslBoolQuery,
+} from '@elastic/elasticsearch/lib/api/types';
 import type {
   AlertInstanceContext,
   AlertInstanceState,

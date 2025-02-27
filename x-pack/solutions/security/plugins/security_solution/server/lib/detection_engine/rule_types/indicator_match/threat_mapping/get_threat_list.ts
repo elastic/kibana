@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { estypes } from '@elastic/elasticsearch';
 import { getQueryFilter } from '../../utils/get_query_filter';
 import type {
   GetThreatListOptions,
@@ -61,16 +61,14 @@ export const getThreatList = async ({
     ThreatListDoc,
     Record<string, estypes.AggregationsAggregate>
   >({
-    body: {
-      ...threatListConfig,
-      query: queryFilter,
-      search_after: searchAfter,
-      runtime_mappings: runtimeMappings,
-      sort: getSortForThreatList({
-        index: threatIndex,
-        listItemIndex: listClient.getListItemName(),
-      }),
-    },
+    ...threatListConfig,
+    query: queryFilter,
+    search_after: searchAfter,
+    runtime_mappings: runtimeMappings,
+    sort: getSortForThreatList({
+      index: threatIndex,
+      listItemIndex: listClient.getListItemName(),
+    }),
     track_total_hits: false,
     size: calculatedPerPage,
     pit: { id: pitId },
@@ -113,9 +111,7 @@ export const getThreatListCount = async ({
     fields: indexFields,
   });
   const response = await esClient.count({
-    body: {
-      query: queryFilter,
-    },
+    query: queryFilter,
     ignore_unavailable: true,
     index,
   });

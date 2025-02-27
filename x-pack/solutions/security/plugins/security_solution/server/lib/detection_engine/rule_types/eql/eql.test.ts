@@ -123,7 +123,7 @@ describe('eql_executor', () => {
         alertServices.scopedClusterClient.asCurrentUser.eql.search.mock.calls[0][0];
 
       expect(searchArgs).toHaveProperty(
-        'body.filter.bool.filter',
+        'filter.bool.filter',
         expect.arrayContaining([
           {
             bool: {
