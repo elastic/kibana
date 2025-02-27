@@ -489,7 +489,12 @@ const StatefulEventsViewerComponent: React.FC<EventsViewerProps & PropsFromRedux
   );
 
   return (
-    <div data-test-subj="events-viewer-panel">
+    <div
+      data-test-subj="events-viewer-panel"
+      css={css`
+        width: 100%;
+      `}
+    >
       {showFullLoading && <TableLoading height="short" />}
 
       {graphOverlay}

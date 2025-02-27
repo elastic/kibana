@@ -16,6 +16,7 @@ import type { estypes } from '@elastic/elasticsearch';
 import {
   computeIsESQLQueryAggregating,
   getIndexListFromEsqlQuery,
+  getMvExpandDetails,
 } from '@kbn/securitysolution-utils';
 import type { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
 import { buildEsqlSearchRequest } from './build_esql_search_request';
@@ -150,6 +151,7 @@ export const esqlExecutor = async ({
           .slice(size - tuple.maxSignals)
           .map((row) => rowToDocument(response.columns, row));
 
+        const columns = response.columns.map((column) => column.name);
         const index = getIndexListFromEsqlQuery(completeRule.ruleParams.query);
 
         const sourceDocuments = await fetchSourceDocuments({
@@ -177,6 +179,7 @@ export const esqlExecutor = async ({
             publicBaseUrl,
             tuple,
             intendedTimestamp,
+            columns,
           });
 
         const syntheticHits: Array<estypes.SearchHit<SignalSource>> = results.map((document) => {
@@ -207,6 +210,7 @@ export const esqlExecutor = async ({
               secondaryTimestamp,
               tuple,
               intendedTimestamp,
+              columns,
             });
 
           const bulkCreateResult = await bulkCreateSuppressedAlertsInMemory({

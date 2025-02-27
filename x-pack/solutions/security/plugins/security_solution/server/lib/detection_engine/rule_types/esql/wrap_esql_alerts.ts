@@ -31,6 +31,7 @@ export const wrapEsqlAlerts = ({
   tuple,
   isRuleAggregating,
   intendedTimestamp,
+  columns,
 }: {
   isRuleAggregating: boolean;
   events: Array<estypes.SearchHit<SignalSource>>;
@@ -46,7 +47,16 @@ export const wrapEsqlAlerts = ({
     maxSignals: number;
   };
   intendedTimestamp: Date | undefined;
+  columns: string[];
 }): Array<WrappedFieldsLatest<BaseFieldsLatest>> => {
+  const duplicatedEventIds = events.reduce<Record<string, number>>((acc, event) => {
+    const id = event?._id;
+    if (id) {
+      acc[id] = (acc[id] ?? 0) + 1;
+    }
+
+    return acc;
+  }, {});
   const wrapped = events.map<WrappedFieldsLatest<BaseFieldsLatest>>((event, i) => {
     const id = generateAlertId({
       event,
@@ -55,6 +65,8 @@ export const wrapEsqlAlerts = ({
       tuple,
       isRuleAggregating,
       index: i,
+      duplicatedEventIds,
+      columns,
     });
 
     const baseAlert: BaseFieldsLatest = transformHitToAlert({
@@ -77,9 +89,7 @@ export const wrapEsqlAlerts = ({
     return {
       _id: id,
       _index: event._index ?? '',
-      _source: {
-        ...baseAlert,
-      },
+      _source: baseAlert,
     };
   });
 
