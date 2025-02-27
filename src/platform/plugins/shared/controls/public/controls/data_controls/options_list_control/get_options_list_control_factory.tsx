@@ -301,7 +301,7 @@ export const getOptionsListControlFactory = (): DataControlFactory<
           hasSelections$: hasSelections$ as PublishingSubject<boolean | undefined>,
           setSelectedOptions: (options: OptionsListSelection[] | undefined) => {
             selections.setSelectedOptions(options);
-          }
+          },
         },
         {
           ...dataControl.comparators,
