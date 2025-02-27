@@ -8,6 +8,7 @@
 import React, { FC } from 'react';
 import { EuiPageHeaderSection, EuiTitle } from '@elastic/eui';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
+import { Chat } from '../components/chat';
 
 export const WorkchatChatPage: FC<{}> = () => {
   return (
@@ -29,6 +30,7 @@ export const WorkchatChatPage: FC<{}> = () => {
 
       <KibanaPageTemplate.Section>
         <div>You know, for chat!</div>
+        <Chat />
       </KibanaPageTemplate.Section>
     </KibanaPageTemplate>
   );

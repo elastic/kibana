@@ -6,8 +6,15 @@
  */
 
 import { type CoreSetup, AppStatus, DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
+import { WorkChatServices } from '../services';
 
-export const registerApp = ({ core }: { core: CoreSetup }) => {
+export const registerApp = ({
+  core,
+  getServices,
+}: {
+  core: CoreSetup;
+  getServices: () => WorkChatServices;
+}) => {
   core.application.register({
     id: 'workchat',
     appRoute: '/app/workchat',
@@ -19,8 +26,9 @@ export const registerApp = ({ core }: { core: CoreSetup }) => {
     visibleIn: ['sideNav', 'globalSearch'],
     async mount({ element, history }) {
       const [coreStart] = await core.getStartServices();
+      const services = getServices();
       const { mountApp } = await import('./mount');
-      return mountApp({ core: coreStart, element, history });
+      return mountApp({ core: coreStart, services, element, history });
     },
   });
 };
