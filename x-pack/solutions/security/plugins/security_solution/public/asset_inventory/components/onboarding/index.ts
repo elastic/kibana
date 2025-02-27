@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { Onboarding } from './onboarding';
+export { AssetInventoryOnboarding } from './asset_inventory_onboarding';

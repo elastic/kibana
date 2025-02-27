@@ -6,18 +6,18 @@
  */
 
 import React from 'react';
-import { Onboarding } from '../components/onboarding';
+import { AssetInventoryOnboarding } from '../components/onboarding';
 import { AllAssets } from './all_assets';
 
-const AssetsPage = () => {
+const AssetInventoryPage = () => {
   return (
-    <Onboarding>
+    <AssetInventoryOnboarding>
       <AllAssets />
-    </Onboarding>
+    </AssetInventoryOnboarding>
   );
 };
 
-AssetsPage.displayName = 'AssetsPage';
+AssetInventoryPage.displayName = 'AssetInventoryPage';
 
 // eslint-disable-next-line import/no-default-export
-export default AssetsPage;
+export default AssetInventoryPage;

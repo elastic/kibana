@@ -16,7 +16,7 @@ import { Loading } from '../loading';
  * based on the current onboarding status. If no specific onboarding status
  * matches, it will render the child components.
  */
-export const Onboarding: FC<PropsWithChildren> = ({ children }) => {
+export const AssetInventoryOnboarding: FC<PropsWithChildren> = ({ children }) => {
   const { status, privileges, isLoading } = useAssetInventoryContext();
 
   if (isLoading) {
