@@ -51,7 +51,11 @@ const StartMigrationsBody: OnboardingCardComponent = React.memo(
 
     return (
       <RuleMigrationDataInputWrapper onFlyoutClosed={refreshStats}>
-        <OnboardingCardContentPanel paddingSize="none" className={styles}>
+        <OnboardingCardContentPanel
+          data-test-subj="StartMigrationsCardBody"
+          paddingSize="none"
+          className={styles}
+        >
           {isLoading ? (
             <CenteredLoadingSpinner />
           ) : (

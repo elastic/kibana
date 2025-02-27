@@ -19,15 +19,25 @@ export const SiemMigrationStartUpsellSection = ({
 }) => {
   return (
     <>
-      <EuiPanel paddingSize="none" hasBorder>
-        <EuiCallOut title={title} color="warning" iconType="lock">
+      <EuiPanel data-test-subj="siemMigrationStartUpsellSection" paddingSize="none" hasBorder>
+        <EuiCallOut
+          data-test-subj="siemMigrationStartUpsellTitle"
+          title={title}
+          color="warning"
+          iconType="lock"
+        >
           <EuiFlexGroup>
             <EuiFlexItem grow={true}>
-              <p>{upgradeMessage}</p>
+              <p data-test-subj="siemMigrationStartUpsellMessage">{upgradeMessage}</p>
             </EuiFlexItem>
             {upgradeHref ? (
               <EuiFlexItem grow={false}>
-                <EuiButton href={upgradeHref} color="warning" fill>
+                <EuiButton
+                  data-test-subj="siemMigrationStartUpsellHref"
+                  href={upgradeHref}
+                  color="warning"
+                  fill
+                >
                   {'Manage License'}
                 </EuiButton>
               </EuiFlexItem>

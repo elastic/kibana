@@ -73,6 +73,7 @@ export const UploadRulesSectionPanel = React.memo<UploadRulesSectionPanelProps>(
           <EuiFlexItem grow={false}>
             {isUploadMore ? (
               <EuiButtonEmpty
+                data-test-subj="startMigrationUploadMoreButton"
                 iconType="download"
                 iconSide="right"
                 onClick={onOpenFlyout}
@@ -82,6 +83,7 @@ export const UploadRulesSectionPanel = React.memo<UploadRulesSectionPanelProps>(
               </EuiButtonEmpty>
             ) : (
               <EuiButton
+                data-test-subj="startMigrationUploadRulesButton"
                 iconType="download"
                 iconSide="right"
                 onClick={onOpenFlyout}
