@@ -9,6 +9,7 @@
 
 import type { ApmSourceAccessPluginStart } from '@kbn/apm-sources-access-plugin/public';
 import { createRegExpPatternFrom, testPatternAgainstAllowedList } from '@kbn/data-view-utils';
+import { containsIndexPattern, combineUnique } from './utils';
 
 export interface TracesContextService {
   getAllTracesIndexPattern(): string | undefined;
@@ -35,24 +36,18 @@ export const createTracesContextService = async ({
 
   if (apmSourcesAccess) {
     const { transaction, span } = await apmSourcesAccess.getApmSources();
-    const uniqIndices = flattenUnique(transaction.split(','), span.split(','));
+    const uniqIndices = combineUnique(transaction.split(','), span.split(','));
     traces = uniqIndices.join();
     allowedDataSources = allowedDataSources.concat(createRegExpPatternFrom(uniqIndices, 'data'));
   } else {
     traces = DEFAULT_ALLOWED_TRACES_BASE_PATTERNS.join();
   }
 
-  return {
-    getAllTracesIndexPattern: () => traces,
-    isTracesIndexPattern: testPatternAgainstAllowedList(allowedDataSources),
-    containsTracesIndexPattern: containsTracesIndexPattern(allowedDataSources),
-  };
+  return getTracesContextService(traces, allowedDataSources);
 };
 
-const flattenUnique = <T>(...items: T[][]): T[] => [...new Set(items.flat())];
-
-const containsTracesIndexPattern = (allowedDataSources: RegExp[]) => (indexPattern: unknown) =>
-  typeof indexPattern === 'string' &&
-  indexPattern
-    .split(',')
-    .some((index) => allowedDataSources.some((pattern) => pattern.test(index)));
+export const getTracesContextService = (traces: string, allowedDataSources: RegExp[]) => ({
+  getAllTracesIndexPattern: () => traces,
+  isTracesIndexPattern: testPatternAgainstAllowedList(allowedDataSources),
+  containsTracesIndexPattern: containsIndexPattern(allowedDataSources),
+});

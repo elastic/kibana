@@ -7,8 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export * from './data_view';
-export * from './es_hits';
-export * from './additional_field_groups';
-export * from './logs_context_service';
-export * from './traces_context_service';
+import {
+  DEFAULT_ALLOWED_TRACES_BASE_PATTERNS_REGEXP,
+  getTracesContextService,
+} from '../data_types';
+
+export const createTracesContextServiceMock = () =>
+  getTracesContextService('traces-*', [DEFAULT_ALLOWED_TRACES_BASE_PATTERNS_REGEXP]);

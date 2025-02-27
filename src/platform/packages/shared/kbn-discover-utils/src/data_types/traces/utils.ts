@@ -7,8 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export * from './data_view';
-export * from './es_hits';
-export * from './additional_field_groups';
-export * from './logs_context_service';
-export * from './traces_context_service';
+export const combineUnique = <T>(...items: T[][]): T[] => [...new Set(items.flat())];
+
+export const containsIndexPattern = (allowedDataSources: RegExp[]) => (indexPattern: unknown) =>
+  typeof indexPattern === 'string' &&
+  indexPattern
+    .split(',')
+    .some((index) => allowedDataSources.some((pattern) => pattern.test(index)));

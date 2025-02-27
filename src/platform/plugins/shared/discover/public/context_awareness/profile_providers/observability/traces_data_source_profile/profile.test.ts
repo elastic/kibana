@@ -28,7 +28,7 @@ describe('tracesDataSourceProfileProvider', () => {
     isMatch: false,
   };
 
-  it('should match when the data source type is a data view for APM', () => {
+  it('should match when the index is for traces', () => {
     expect(
       tracesDataSourceProfileProvider.resolve({
         dataSource: createDataViewDataSource({ dataViewId: 'apm_static_data_view_id_default' }),
@@ -46,16 +46,23 @@ describe('tracesDataSourceProfileProvider', () => {
         } as unknown as DataView,
       } as DataSourceProfileProviderParams)
     ).toEqual(RESOLUTION_MATCH);
-  });
 
-  it('should NOT match when the data source is not the APM data view', () => {
+    expect(
+      tracesDataSourceProfileProvider.resolve({
+        dataSource: createDataViewDataSource({ dataViewId: 'other_view_id' }),
+        dataView: { getIndexPattern: () => 'traces-*' } as unknown as DataView,
+      } as DataSourceProfileProviderParams)
+    ).toEqual(RESOLUTION_MATCH);
+
     expect(
       tracesDataSourceProfileProvider.resolve({
         dataSource: { type: DataSourceType.Esql },
         query: { esql: 'FROM traces' },
       } as DataSourceProfileProviderParams)
-    ).toEqual(RESOLUTION_MISMATCH);
+    ).toEqual(RESOLUTION_MATCH);
+  });
 
+  it('should NOT match when the index is not for traces', () => {
     expect(
       tracesDataSourceProfileProvider.resolve({
         dataSource: { type: DataSourceType.Esql },
@@ -65,7 +72,7 @@ describe('tracesDataSourceProfileProvider', () => {
 
     expect(
       tracesDataSourceProfileProvider.resolve({
-        dataSource: createDataViewDataSource({ dataViewId: 'other_view_id' }),
+        dataSource: createDataViewDataSource({ dataViewId: 'other_logs_view_id' }),
         dataView: { getIndexPattern: () => 'logs-*' } as unknown as DataView,
       } as DataSourceProfileProviderParams)
     ).toEqual(RESOLUTION_MISMATCH);
