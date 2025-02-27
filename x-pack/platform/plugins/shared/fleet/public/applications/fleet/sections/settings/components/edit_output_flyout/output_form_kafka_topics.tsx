@@ -83,7 +83,7 @@ export const OutputFormKafkaTopics: React.FunctionComponent<{ inputs: OutputForm
                   guideLink: (
                     <EuiLink href={docLinks.links.filebeat.kafkaOutput} target="_blank" external>
                       <FormattedMessage
-                        id="xpack.fleet.settings.editOutputFlyout.kafkaGuideLink"
+                        id="xpack.fleet.settings.kafkaGuideLink"
                         defaultMessage="docs."
                       />
                     </EuiLink>
