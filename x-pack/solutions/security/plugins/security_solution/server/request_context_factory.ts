@@ -37,7 +37,7 @@ import type {
   SecuritySolutionApiRequestHandlerContext,
   SecuritySolutionRequestHandlerContext,
 } from './types';
-import { PrivilegeMonitoringDataClient } from './lib/entity_analytics/privilege_monitoring/PrivilegeMonitoringDataClient';
+import { PrivilegeMonitoringDataClient } from './lib/entity_analytics/privilege_monitoring/privilege_monitoring_data_client';
 
 export interface IRequestContextFactory {
   create(

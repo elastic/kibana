@@ -18,6 +18,7 @@ import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import type { ApiKeyManager } from './auth/api_key';
 import { startPrivilegeMonitoringTask } from './tasks/privilege_monitoring_task';
 import { createOrUpdateIndex } from '../utils/create_or_update_index';
+import { generateUserIndexMappings, getPrivilegedMonitorUsersIndex } from './indicies';
 
 interface PrivilegeMonitoringClientOpts {
   logger: Logger;
@@ -58,8 +59,13 @@ export class PrivilegeMonitoringDataClient {
       esClient: this.esClient,
       logger: this.opts.logger,
       options: {
-        index: '', // TODO: update
+        index: this.getIndex(),
+        mappings: generateUserIndexMappings(),
       },
     });
+  }
+
+  public getIndex(){ 
+    return getPrivilegedMonitorUsersIndex(this.opts.namespace);
   }
 }
