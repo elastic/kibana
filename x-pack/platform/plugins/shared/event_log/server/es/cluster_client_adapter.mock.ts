@@ -27,6 +27,7 @@ const createClusterClientMock = () => {
     queryEventsWithAuthFilter: jest.fn(),
     aggregateEventsBySavedObjects: jest.fn(),
     aggregateEventsWithAuthFilter: jest.fn(),
+    aggregateTaskManagerEvents: jest.fn(),
     shutdown: jest.fn(),
     updateDocuments: jest.fn(),
     queryEventsByDocumentIds: jest.fn(),
