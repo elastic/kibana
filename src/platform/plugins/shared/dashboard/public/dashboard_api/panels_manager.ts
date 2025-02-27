@@ -112,6 +112,7 @@ export function initializePanelsManager(
     } else {
       // otherwise this incoming embeddable is brand new.
       setRuntimeStateForChild(incomingPanelId, incomingEmbeddable.input);
+      const sectionIndex = activeSection$.value ?? 0;
       const { newPanelPlacement } = runPanelPlacementStrategy(
         PanelPlacementStrategy.findTopLeftMostOpenSpace,
         {
@@ -127,6 +128,7 @@ export function initializePanelsManager(
           ...newPanelPlacement,
           i: incomingPanelId,
         },
+        ...(sectionIndex > 0 ? { sectionIndex } : {}),
       };
     }
 
@@ -142,10 +144,10 @@ export function initializePanelsManager(
     if (!panels$.value[id]) {
       throw new PanelNotFoundError();
     }
-    const { lockToGrid } = getSettings();
+    const sectionIndex = activeSection$.value ?? 0;
+    if ((panels$.value[id].sectionIndex ?? 0) !== sectionIndex) return undefined;
 
-    if (children$.value[id] || !lockToGrid) {
-      // this is a bad shortcut
+    if (children$.value[id]) {
       return children$.value[id] as ApiType;
     }
 
@@ -300,9 +302,10 @@ export function initializePanelsManager(
             ? { sectionIndex: panelToClone.sectionIndex }
             : {}),
         };
+        const { lockToGrid } = getSettings();
 
         setPanels({
-          ...otherPanels,
+          ...(lockToGrid ? otherPanels : panels$.value),
           [id]: newPanel,
         });
       },
