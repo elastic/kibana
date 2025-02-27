@@ -36,7 +36,20 @@ export const defaultConfig: StorybookConfig = {
     '@storybook/addon-a11y',
     '@storybook/addon-essentials',
   ],
-  framework: '@storybook/react-webpack5',
+  framework: {
+    name: '@storybook/react-webpack5',
+    options: {
+      fastRefresh: true,
+      builder: {
+        fsCache: true,
+        lazyCompilation: true,
+      },
+    },
+  },
+  core: {
+    disableTelemetry: true,
+    enableCrashReports: false,
+  },
   stories: ['../**/*.stories.tsx', '../**/*.mdx'],
   typescript: {
     reactDocgen: false,
