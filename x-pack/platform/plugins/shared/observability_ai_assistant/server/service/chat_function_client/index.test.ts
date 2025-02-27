@@ -8,6 +8,7 @@ import dedent from 'dedent';
 import { ChatFunctionClient, GET_DATA_ON_SCREEN_FUNCTION_NAME } from '.';
 import { FunctionVisibility } from '../../../common/functions/types';
 import { Logger } from '@kbn/logging';
+import { RegisterInstructionCallback } from '../types';
 
 describe('chatFunctionClient', () => {
   describe('when executing a function with invalid arguments', () => {
@@ -100,7 +101,11 @@ describe('chatFunctionClient', () => {
         respond: expect.any(Function),
       });
 
-      expect(instructions[0]).toContain(
+      expect(
+        (instructions[0] as RegisterInstructionCallback)({
+          availableFunctionNames: [GET_DATA_ON_SCREEN_FUNCTION_NAME],
+        })
+      ).toContain(
         dedent(`my_dummy_data: My dummy data
         my_other_dummy_data: My other dummy data
         `)
