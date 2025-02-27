@@ -36,6 +36,11 @@ import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import { getEndpointAuthzInitialStateMock } from '../../../../common/endpoint/service/authz/mocks';
 import type { EndpointAuthz } from '../../../../common/endpoint/types/authz';
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
+import type {
+  FindExceptionListItemOptions,
+  FindExceptionListsItemOptions,
+} from '@kbn/lists-plugin/server/services/exception_lists/exception_list_client_types';
+import { ENDPOINT_ARTIFACT_LISTS } from '@kbn/securitysolution-list-constants';
 
 describe('When using Artifacts Exceptions BaseValidator', () => {
   let endpointAppContextServices: EndpointAppContextService;
@@ -227,6 +232,8 @@ describe('When using Artifacts Exceptions BaseValidator', () => {
       (endpointAppContextServices.getEndpointAuthz as jest.Mock).mockResolvedValue(authzMock);
       setArtifactOwnerSpaceId(exceptionLikeItem, DEFAULT_SPACE_ID);
       validator = new BaseValidatorMock(endpointAppContextServices, kibanaRequest);
+      packagePolicyService = endpointAppContextServices.getInternalFleetServices()
+        .packagePolicy as jest.Mocked<PackagePolicyClient>;
     });
 
     describe('#validateCreateOnwerSpaceIds()', () => {
@@ -450,6 +457,87 @@ describe('When using Artifacts Exceptions BaseValidator', () => {
         await expect(
           validator._validateCanDeleteItemInActiveSpace(savedExceptionItem)
         ).resolves.toBeUndefined();
+      });
+    });
+
+    describe('#setFindFilterScopeToActiveSpace()', () => {
+      let findOptionsMock: FindExceptionListItemOptions | FindExceptionListsItemOptions;
+
+      beforeEach(() => {
+        packagePolicyService.listIds.mockResolvedValue({
+          items: ['policy-1', 'policy-2'],
+          total: 2,
+          page: 1,
+          perPage: 20,
+        });
+
+        findOptionsMock = {
+          listId: ENDPOINT_ARTIFACT_LISTS.trustedApps.id,
+          namespaceType: 'agnostic',
+          filter: undefined,
+          perPage: 20,
+          page: 1,
+          sortField: undefined,
+          sortOrder: undefined,
+        };
+      });
+
+      it('should nothing if feature flag is disabled', async () => {
+        setSpaceAwarenessFeatureFlag('disabled');
+        await validator._setFindFilterScopeToActiveSpace(findOptionsMock);
+
+        expect(findOptionsMock.filter).toBeUndefined();
+      });
+
+      it('should inject additional filtering into find request', async () => {
+        await validator._setFindFilterScopeToActiveSpace(findOptionsMock);
+
+        expect(findOptionsMock.filter).toEqual(`
+      (
+        (
+          exception-list-agnostic.attributes.tags:("policy:all" OR "policy:policy-1" OR "policy:policy-2"
+          )
+        )
+        OR
+        (
+          NOT exception-list-agnostic.attributes.tags:"policy:*"
+          AND
+          exception-list-agnostic.attributes.tags:"ownerSpaceId:default"
+        )
+      )`);
+      });
+
+      it('should inject additional filtering into find request when it already has a filter value', async () => {
+        findOptionsMock.filter = 'somevalue:match-this';
+        await validator._setFindFilterScopeToActiveSpace(findOptionsMock);
+
+        expect(findOptionsMock.filter).toEqual(`
+      (
+        (
+          exception-list-agnostic.attributes.tags:("policy:all" OR "policy:policy-1" OR "policy:policy-2"
+          )
+        )
+        OR
+        (
+          NOT exception-list-agnostic.attributes.tags:"policy:*"
+          AND
+          exception-list-agnostic.attributes.tags:"ownerSpaceId:default"
+        )
+      ) AND (somevalue:match-this)`);
+      });
+
+      it('should inject additional filtering when using multi-list search format', async () => {
+        findOptionsMock.listId = [
+          ENDPOINT_ARTIFACT_LISTS.trustedApps.id,
+          ENDPOINT_ARTIFACT_LISTS.eventFilters.id,
+        ];
+        findOptionsMock.filter = ['', 'somevalue:match-this'];
+        await validator._setFindFilterScopeToActiveSpace(findOptionsMock);
+
+        expect(findOptionsMock.filter).toEqual([
+          '\n      (\n        (\n          exception-list-agnostic.attributes.tags:("policy:all" OR "policy:policy-1" OR "policy:policy-2"\n          )\n        )\n        OR\n        (\n          NOT exception-list-agnostic.attributes.tags:"policy:*"\n          AND\n          exception-list-agnostic.attributes.tags:"ownerSpaceId:default"\n        )\n      )',
+          '\n      (\n        (\n          exception-list-agnostic.attributes.tags:("policy:all" OR "policy:policy-1" OR "policy:policy-2"\n          )\n        )\n        OR\n        (\n          NOT exception-list-agnostic.attributes.tags:"policy:*"\n          AND\n          exception-list-agnostic.attributes.tags:"ownerSpaceId:default"\n        )\n      ) AND (somevalue:match-this)',
+        ]);
       });
     });
   });

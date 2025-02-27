@@ -357,7 +357,7 @@ export class BaseValidator {
 
       if (isSingleListFindOptions(findOptions)) {
         findOptions.filter = `${spaceVisibleDataFilter}${
-          findOptions.filter ? `AND (${findOptions.filter})` : ''
+          findOptions.filter ? ` AND (${findOptions.filter})` : ''
         }`;
       } else {
         if (!findOptions.filter) {
@@ -368,7 +368,7 @@ export class BaseValidator {
         findOptions.listId.forEach((listId, index) => {
           const userFilter = findOptions.filter[index];
           findOptions.filter[index] = `${spaceVisibleDataFilter}${
-            userFilter ? `AND (${userFilter})` : ''
+            userFilter ? ` AND (${userFilter})` : ''
           }`;
         });
       }
