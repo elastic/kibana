@@ -13,8 +13,7 @@ import { ContentManagementServerSetup } from '@kbn/content-management-plugin/ser
 export interface DashboardPluginSetup {}
 export interface DashboardPluginStart {
   /**
-   * The return value of the contentClient.getForRequest method is a scoped client that can be used to perform CRUD and
-   * search operations for dashboards using the methods available in the {@link DashboardStorage} class.
+   * Use contentClient.getForRequest to get a scoped client to perform CRUD and search operations for dashboards using the methods available in the {@link DashboardStorage} class.
    *
    * @example
    * Get a dashboard client for the current request

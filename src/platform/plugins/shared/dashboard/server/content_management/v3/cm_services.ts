@@ -458,7 +458,10 @@ export const dashboardSearchOptionsSchema = schema.maybe(
       limit: schema.maybe(schema.number()),
       spaces: schema.maybe(
         schema.arrayOf(schema.string(), {
-          meta: { description: 'An array of spaces to search or "*" to search all spaces' },
+          meta: {
+            description:
+              'An array of spaces to search or "*" to search all spaces. Defaults to the current space if not specified.',
+          },
         })
       ),
     },
