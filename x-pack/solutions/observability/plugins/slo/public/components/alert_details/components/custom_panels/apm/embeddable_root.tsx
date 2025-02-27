@@ -79,6 +79,10 @@ export function APMEmbeddableRoot({
     ...groupingsInput.input,
   };
 
+  if (!input.serviceName || !input.transactionType) {
+    return null;
+  }
+
   return (
     <ReactEmbeddableRenderer
       type={embeddableId}

@@ -163,7 +163,7 @@ export const reindexServiceFactory = (
     const { indexName } = reindexOp.attributes;
     const putReadonly = await esClient.indices.putSettings({
       index: indexName,
-      body: { blocks: { write: true } },
+      settings: { blocks: { write: true } },
     });
 
     if (!putReadonly.acknowledged) {
@@ -349,6 +349,12 @@ export const reindexServiceFactory = (
     return response[indexName]?.aliases ?? {};
   };
 
+  const isIndexHidden = async (indexName: string) => {
+    const response = await esClient.indices.getSettings({ index: indexName });
+    const isHidden = response[indexName]?.settings?.index?.hidden;
+    return isHidden === true || isHidden === 'true';
+  };
+
   /**
    * Restores the original index settings in the new index that had other defaults for reindexing performance reasons
    * @param reindexOp
@@ -391,9 +397,11 @@ export const reindexServiceFactory = (
       add: { index: newIndexName, alias: aliasName, ...existingAliases[aliasName] },
     }));
 
+    const isHidden = await isIndexHidden(indexName);
+
     const aliasResponse = await esClient.indices.updateAliases({
       actions: [
-        { add: { index: newIndexName, alias: indexName } },
+        { add: { index: newIndexName, alias: indexName, is_hidden: isHidden } },
         { remove_index: { index: indexName } },
         ...extraAliases,
       ],
@@ -441,20 +449,18 @@ export const reindexServiceFactory = (
       }
 
       const resp = await esClient.security.hasPrivileges({
-        body: {
-          cluster: ['manage'],
-          index: [
-            {
-              names,
-              allow_restricted_indices: true,
-              privileges: ['all'],
-            },
-            {
-              names: ['.tasks'],
-              privileges: ['read'],
-            },
-          ],
-        },
+        cluster: ['manage'],
+        index: [
+          {
+            names,
+            allow_restricted_indices: true,
+            privileges: ['all'],
+          },
+          {
+            names: ['.tasks'],
+            privileges: ['read'],
+          },
+        ],
       });
 
       return resp.has_all_requested;

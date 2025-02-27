@@ -260,6 +260,10 @@ export class LegacyAlertsClient<
     return this.alertFactory!.hasReachedAlertLimit();
   }
 
+  public getMaxAlertLimit(): number {
+    return this.maxAlerts;
+  }
+
   public checkLimitUsage() {
     return this.alertFactory!.alertLimit.checkLimitUsage();
   }

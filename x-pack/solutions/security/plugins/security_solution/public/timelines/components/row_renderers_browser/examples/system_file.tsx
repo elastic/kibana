@@ -22,7 +22,6 @@ const SystemFileExampleComponent: React.FC = () => {
     <>
       {systemFileRowRenderer.renderRow({
         data: demoEndgameFileDeleteEvent,
-        isDraggable: false,
         scopeId: ROW_RENDERER_BROWSER_EXAMPLE_TIMELINE_ID,
       })}
     </>

@@ -130,6 +130,7 @@ export const mockState: SyntheticsAppState = {
     locationMonitors: [],
   },
   defaultAlerting: {
+    inspectLoading: false,
     loading: false,
     error: null,
     success: null,
@@ -197,6 +198,9 @@ function getBrowserJourneyMockSlice() {
 
 function getMonitorDetailsMockSlice() {
   return {
+    lastErrorRun: {
+      loading: false,
+    },
     lastRun: {
       loading: false,
       loaded: true,

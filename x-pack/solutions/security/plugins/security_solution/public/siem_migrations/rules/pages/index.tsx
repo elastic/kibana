@@ -18,7 +18,7 @@ import { SecurityPageName } from '../../../app/types';
 
 import { MigrationRulesTable } from '../components/rules_table';
 import { NeedAdminForUpdateRulesCallOut } from '../../../detections/components/callouts/need_admin_for_update_callout';
-import { MissingPrivilegesCallOut } from '../../../detections/components/callouts/missing_privileges_callout';
+import { MissingPrivilegesCallOut } from './missing_privileges_callout';
 import { HeaderButtons } from '../components/header_buttons';
 import { UnknownMigration } from '../components/unknown_migration';
 import { useLatestStats } from '../service/hooks/use_latest_stats';
@@ -130,30 +130,27 @@ export const MigrationRulesPage: React.FC<MigrationRulesPageProps> = React.memo(
     }, [migrationId, refetchData, ruleMigrationsStats, integrations, isIntegrationsLoading]);
 
     return (
-      <>
+      <SecuritySolutionPageWrapper>
+        <HeaderPage title={pageTitle} border>
+          <HeaderButtons
+            ruleMigrationsStats={ruleMigrationsStats}
+            selectedMigrationId={migrationId}
+            onMigrationIdChange={onMigrationIdChange}
+          />
+        </HeaderPage>
         <NeedAdminForUpdateRulesCallOut />
         <MissingPrivilegesCallOut />
-
-        <SecuritySolutionPageWrapper>
-          <HeaderPage title={pageTitle} border>
-            <HeaderButtons
-              ruleMigrationsStats={ruleMigrationsStats}
-              selectedMigrationId={migrationId}
-              onMigrationIdChange={onMigrationIdChange}
-            />
-          </HeaderPage>
-          <EuiSkeletonLoading
-            isLoading={isLoading}
-            loadingContent={
-              <>
-                <EuiSkeletonTitle />
-                <EuiSkeletonText />
-              </>
-            }
-            loadedContent={content}
-          />
-        </SecuritySolutionPageWrapper>
-      </>
+        <EuiSkeletonLoading
+          isLoading={isLoading}
+          loadingContent={
+            <>
+              <EuiSkeletonTitle />
+              <EuiSkeletonText />
+            </>
+          }
+          loadedContent={content}
+        />
+      </SecuritySolutionPageWrapper>
     );
   }
 );

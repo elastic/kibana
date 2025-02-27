@@ -34,19 +34,18 @@ export class PreviewTaskMetricsService implements ITaskMetricsService {
   }
 
   public start(name: string): Trace {
-    this.logger.error('Simulating TaskMetricsService.start');
+    this.logger.info('Simulating TaskMetricsService.start');
     return this.composite.start(name);
   }
 
   public createTaskMetric(trace: Trace, error?: Error): TaskMetric {
-    this.logger.error('Simulating TaskMetricsService.createTaskMetric');
+    this.logger.info('Simulating TaskMetricsService.createTaskMetric');
     return this.composite.createTaskMetric(trace, error);
   }
 
   public async end(trace: Trace, error?: Error): Promise<void> {
-    this.logger.error('Simulating TaskMetricsService.end');
+    this.logger.info('Simulating TaskMetricsService.end');
     const metric = this.composite.createTaskMetric(trace, error);
-    const result = this.sender.simulateSendAsync(TelemetryChannel.TASK_METRICS, [metric]);
-    this.sentMessages = [...this.sentMessages, ...result];
+    this.sender.simulateSendAsync(TelemetryChannel.TASK_METRICS, [metric]);
   }
 }

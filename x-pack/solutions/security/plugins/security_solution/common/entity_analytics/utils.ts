@@ -13,16 +13,6 @@ export const getDisabledEntityTypes = (
   experimentalFeatures: ExperimentalFeatures
 ): EntityType[] => {
   const disabledEntityTypes: EntityType[] = [];
-  const isServiceEntityStoreEnabled = experimentalFeatures.serviceEntityStoreEnabled;
-  const isUniversalEntityStoreEnabled = experimentalFeatures.assetInventoryStoreEnabled;
-
-  if (!isServiceEntityStoreEnabled) {
-    disabledEntityTypes.push(EntityType.service);
-  }
-
-  if (!isUniversalEntityStoreEnabled) {
-    disabledEntityTypes.push(EntityType.universal);
-  }
 
   return disabledEntityTypes;
 };

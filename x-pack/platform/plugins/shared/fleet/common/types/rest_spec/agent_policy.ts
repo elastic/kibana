@@ -37,6 +37,17 @@ export interface GetOneAgentPolicyResponse {
   item: AgentPolicy;
 }
 
+export interface CurrentVersionCount {
+  version: string;
+  agents: number;
+  failedUpgradeAgents: number;
+}
+
+export interface GetAutoUpgradeAgentsStatusResponse {
+  currentVersions: CurrentVersionCount[];
+  totalAgents: number;
+}
+
 export interface CreateAgentPolicyRequest {
   body: NewAgentPolicy;
 }
@@ -46,7 +57,9 @@ export interface CreateAgentPolicyResponse {
 }
 
 export type UpdateAgentPolicyRequest = GetOneAgentPolicyRequest & {
-  body: NewAgentPolicy;
+  body: NewAgentPolicy & {
+    bumpRevision?: boolean;
+  };
 };
 
 export interface UpdateAgentPolicyResponse {
@@ -93,7 +106,7 @@ export interface GetFullAgentManifestResponse {
 export type FetchAllAgentPoliciesOptions = Pick<
   ListWithKuery,
   'perPage' | 'kuery' | 'sortField' | 'sortOrder'
-> & { fields?: string[] };
+> & { fields?: string[]; spaceId?: string };
 
 export type FetchAllAgentPolicyIdsOptions = Pick<ListWithKuery, 'perPage' | 'kuery'> & {
   spaceId?: string;

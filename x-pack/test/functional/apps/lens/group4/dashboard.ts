@@ -75,6 +75,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await dashboardAddPanel.closeAddPanel();
       await retry.try(async () => {
         await clickInChart(30, 5); // hardcoded position of bar, depends heavy on data and charts implementation
+        const filters = await find.allByCssSelector('.euiCheckbox');
+        expect(filters).length(2);
+        const [timeFilter, ipFilter] = filters;
+        expect(await timeFilter.getVisibleText()).to.be(
+          '@timestamp: Sep 21, 2015 @ 09:00:00.000 to Sep 21, 2015 @ 12:00:00.000'
+        );
+        expect(await ipFilter.getVisibleText()).to.be('ip: 97.220.3.248');
+
         await testSubjects.existOrFail('applyFiltersPopoverButton', { timeout: 2500 });
       });
 
@@ -296,8 +304,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       // create a new dashboard, then a new visualization in Lens.
       await dashboard.navigateToApp();
       await dashboard.clickNewDashboard();
-      await testSubjects.click('dashboardEditorMenuButton');
-      await testSubjects.click('visType-lens');
+      await dashboardAddPanel.clickAddLensPanel();
       // Configure it and save to return to the dashboard.
       await lens.waitForField('@timestamp');
       await lens.configureDimension({

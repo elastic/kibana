@@ -25,7 +25,7 @@ import {
 } from '../helpers/process_slo_form_values';
 import { CreateSLOForm } from '../types';
 import { EquivalentApiRequest } from './common/equivalent_api_request';
-import { SLOInspectWrapper } from './common/slo_inspect/slo_inspect';
+import { SLOInspect } from './common/slo_inspect/slo_inspect';
 
 export interface Props {
   slo?: GetSLOResponse;
@@ -133,7 +133,7 @@ export function SloEditFormFooter({ slo, onSave }: Props) {
               />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <SLOInspectWrapper
+              <SLOInspect
                 slo={slo}
                 disabled={isCreateSloLoading || isUpdateSloLoading || isCreateBurnRateRuleLoading}
               />

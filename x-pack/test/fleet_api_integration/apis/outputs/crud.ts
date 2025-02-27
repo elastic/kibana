@@ -36,10 +36,8 @@ export default function (providerContext: FtrProviderContext) {
     try {
       await es.deleteByQuery({
         index: '.fleet-secrets',
-        body: {
-          query: {
-            match_all: {},
-          },
+        query: {
+          match_all: {},
         },
       });
     } catch (err) {
@@ -85,7 +83,7 @@ export default function (providerContext: FtrProviderContext) {
     const agentResponse = await es.index({
       index: '.fleet-agents',
       refresh: true,
-      body: {
+      document: {
         access_api_key_id: 'api-key-3',
         active: true,
         policy_id: agentPolicyId,
@@ -109,10 +107,8 @@ export default function (providerContext: FtrProviderContext) {
       await es.deleteByQuery({
         index: '.fleet-agents',
         refresh: true,
-        body: {
-          query: {
-            match_all: {},
-          },
+        query: {
+          match_all: {},
         },
       });
     } catch (err) {
@@ -1492,6 +1488,48 @@ export default function (providerContext: FtrProviderContext) {
         expect(res.body.message).to.equal('Cannot specify both ssl.key and secrets.ssl.key');
       });
 
+      it('should not allow ssl.key and secrets.ssl.key to be set for elasticsearch output ', async function () {
+        const res = await supertest
+          .post(`/api/fleet/outputs`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: 'ES Output',
+            type: 'elasticsearch',
+            hosts: ['https://test.fr'],
+            ssl: {
+              certificate: 'CERTIFICATE',
+              key: 'KEY',
+              certificate_authorities: ['CA1', 'CA2'],
+            },
+            config_yaml: 'shipper: {}',
+            secrets: { ssl: { key: 'KEY' } },
+          })
+          .expect(400);
+
+        expect(res.body.message).to.equal('Cannot specify both ssl.key and secrets.ssl.key');
+      });
+
+      it('should not allow ssl.key and secrets.ssl.key to be set for remote_elasticsearch output ', async function () {
+        const res = await supertest
+          .post(`/api/fleet/outputs`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: 'ES Output',
+            type: 'remote_elasticsearch',
+            hosts: ['https://test.fr'],
+            ssl: {
+              certificate: 'CERTIFICATE',
+              key: 'KEY',
+              certificate_authorities: ['CA1', 'CA2'],
+            },
+            config_yaml: 'shipper: {}',
+            secrets: { ssl: { key: 'KEY' } },
+          })
+          .expect(400);
+
+        expect(res.body.message).to.equal('Cannot specify both ssl.key and secrets.ssl.key');
+      });
+
       it('should create ssl.key secret correctly', async function () {
         const res = await supertest
           .post(`/api/fleet/outputs`)
@@ -1651,6 +1689,110 @@ export default function (providerContext: FtrProviderContext) {
         expect(Object.keys(res.body.item)).to.contain('ssl');
         expect(Object.keys(res.body.item.ssl)).to.contain('key');
         expect(res.body.item.ssl.key).to.equal('KEY');
+      });
+
+      it('should allow to create a new elasticsearch output with ssl values', async function () {
+        const { body: postResponse } = await supertest
+          .post(`/api/fleet/outputs`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: 'My ES Output',
+            type: 'elasticsearch',
+            hosts: ['https://test.fr'],
+            ssl: {
+              certificate: 'CERTIFICATE',
+              key: 'KEY',
+              certificate_authorities: ['CA1', 'CA2'],
+            },
+          })
+          .expect(200);
+
+        const { id: _, ...itemWithoutId } = postResponse.item;
+        expect(itemWithoutId).to.eql({
+          name: 'My ES Output',
+          type: 'elasticsearch',
+          hosts: ['https://test.fr:443'],
+          is_default: false,
+          is_default_monitoring: false,
+          preset: 'balanced',
+          ssl: {
+            certificate: 'CERTIFICATE',
+            key: 'KEY',
+            certificate_authorities: ['CA1', 'CA2'],
+          },
+        });
+      });
+
+      it('should allow to create a new remote_elasticsearch output with ssl values', async function () {
+        const { body: postResponse } = await supertest
+          .post(`/api/fleet/outputs`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: 'My remote ES Output',
+            type: 'remote_elasticsearch',
+            hosts: ['https://test.fr:443'],
+            ssl: {
+              certificate: 'CERTIFICATE',
+              key: 'KEY',
+              certificate_authorities: ['CA1', 'CA2'],
+            },
+          })
+          .expect(200);
+
+        const { id: _, ...itemWithoutId } = postResponse.item;
+        expect(itemWithoutId).to.eql({
+          name: 'My remote ES Output',
+          type: 'remote_elasticsearch',
+          hosts: ['https://test.fr:443'],
+          is_default: false,
+          is_default_monitoring: false,
+          ssl: {
+            certificate: 'CERTIFICATE',
+            key: 'KEY',
+            certificate_authorities: ['CA1', 'CA2'],
+          },
+        });
+      });
+      it('should allow to create a new elasticsearch output with ssl values and secrets', async function () {
+        await supertest
+          .post(`/api/fleet/outputs`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: 'My ES Output',
+            type: 'elasticsearch',
+            hosts: ['https://test.fr'],
+            ssl: {
+              certificate: 'CERTIFICATE',
+              certificate_authorities: ['CA1', 'CA2'],
+            },
+            secrets: {
+              ssl: {
+                key: 'KEY',
+              },
+            },
+          })
+          .expect(200);
+      });
+
+      it('should allow to create a new remote_elasticsearch output with ssl values and secrets', async function () {
+        await supertest
+          .post(`/api/fleet/outputs`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: 'My remote ES Output',
+            type: 'remote_elasticsearch',
+            hosts: ['https://test.fr:443'],
+            ssl: {
+              certificate: 'CERTIFICATE',
+              certificate_authorities: ['CA1', 'CA2'],
+            },
+            secrets: {
+              ssl: {
+                key: 'KEY',
+              },
+            },
+          })
+          .expect(200);
       });
     });
 

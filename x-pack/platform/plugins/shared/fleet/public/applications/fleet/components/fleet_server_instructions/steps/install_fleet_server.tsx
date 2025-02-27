@@ -71,26 +71,35 @@ const InstallFleetServerStepContent: React.FunctionComponent<{
         : null
     );
 
-  const installCommands = (['linux', 'mac', 'windows', 'deb', 'rpm'] as PLATFORM_TYPE[]).reduce(
-    (acc, platform) => {
-      acc[platform] = getInstallCommandForPlatform({
-        platform,
-        esOutputHost: esOutput?.hosts?.[0] ?? '<ELASTICSEARCH_HOST>',
-        esOutputProxy,
-        serviceToken: serviceToken ?? '',
-        policyId: fleetServerPolicyId,
-        fleetServerHost,
-        isProductionDeployment: deploymentMode === 'production',
-        sslCATrustedFingerprint: esOutput?.ca_trusted_fingerprint ?? undefined,
-        kibanaVersion,
-        downloadSource,
-        downloadSourceProxy,
-      });
+  const installCommands = (
+    [
+      'linux_aarch64',
+      'linux_x86_64',
+      'mac_aarch64',
+      'mac_x86_64',
+      'windows',
+      'rpm_aarch64',
+      'rpm_x86_64',
+      'deb_aarch64',
+      'deb_x86_64',
+    ] as PLATFORM_TYPE[]
+  ).reduce((acc, platform) => {
+    acc[platform] = getInstallCommandForPlatform({
+      platform,
+      esOutputHost: esOutput?.hosts?.[0] ?? '<ELASTICSEARCH_HOST>',
+      esOutputProxy,
+      serviceToken: serviceToken ?? '',
+      policyId: fleetServerPolicyId,
+      fleetServerHost,
+      isProductionDeployment: deploymentMode === 'production',
+      sslCATrustedFingerprint: esOutput?.ca_trusted_fingerprint ?? undefined,
+      kibanaVersion,
+      downloadSource,
+      downloadSourceProxy,
+    });
 
-      return acc;
-    },
-    {} as Record<PLATFORM_TYPE, string>
-  );
+    return acc;
+  }, {} as Record<PLATFORM_TYPE, string>);
 
   return (
     <>
@@ -114,12 +123,7 @@ const InstallFleetServerStepContent: React.FunctionComponent<{
       <EuiSpacer size="l" />
 
       <PlatformSelector
-        linuxCommand={installCommands.linux}
-        macCommand={installCommands.mac}
-        windowsCommand={installCommands.windows}
-        linuxDebCommand={installCommands.deb}
-        linuxRpmCommand={installCommands.rpm}
-        k8sCommand={installCommands.kubernetes}
+        installCommand={installCommands}
         hasK8sIntegration={false}
         hasK8sIntegrationMultiPage={false}
         hasFleetServer={true}

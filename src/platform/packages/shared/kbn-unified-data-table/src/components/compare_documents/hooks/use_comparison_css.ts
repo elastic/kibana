@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { useEuiBackgroundColor, useEuiTheme } from '@elastic/eui';
+import { useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { CELL_CLASS } from '../../../utils/get_render_cell_value';
 import { DocumentDiffMode } from '../types';
@@ -28,9 +28,9 @@ export const useComparisonCss = ({
   showDiffDecorations?: boolean;
 }) => {
   const { euiTheme } = useEuiTheme();
-  const baseCellBackgroundColor = useEuiBackgroundColor('subdued', { method: 'transparent' });
-  const matchSegmentBackgroundColor = useEuiBackgroundColor('success');
-  const diffSegmentBackgroundColor = useEuiBackgroundColor('danger');
+  const baseCellBackgroundColor = euiTheme.colors.backgroundBaseSubdued;
+  const matchSegmentBackgroundColor = euiTheme.colors.backgroundBaseSuccess;
+  const diffSegmentBackgroundColor = euiTheme.colors.backgroundBaseDanger;
 
   const indicatorCss = css`
     position: absolute;

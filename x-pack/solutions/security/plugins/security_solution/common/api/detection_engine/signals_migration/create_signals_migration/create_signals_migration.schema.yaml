@@ -25,13 +25,19 @@ paths:
                 - type: object
                   properties:
                     index:
+                      description: Array of index names to migrate.
                       type: array
                       items:
-                        $ref: '../../../model/primitives.schema.yaml#/components/schemas/NonEmptyString'
+                        type: string
+                        format: nonempty
+                        minLength: 1
                       minItems: 1
                   required: [index]
                 - $ref: '#/components/schemas/AlertsReindexOptions'
-
+            examples:
+              singleIndex:
+                value:
+                  index: [.siem-signals-default-000001]
       responses:
         200:
           description: Successful response
@@ -48,6 +54,13 @@ paths:
                         - $ref: '#/components/schemas/AlertsIndexMigrationError'
                         - $ref: '#/components/schemas/SkippedAlertsIndexMigration'
                 required: [indices]
+              examples:
+                success:
+                  value:
+                    indices:
+                      - index: .siem-signals-default-000001,
+                        migration_id: 923f7c50-505f-11eb-ae0a-3fa2e626a51d
+                        migration_index: .siem-signals-default-000001-r000016
         400:
           description: Invalid input data response
           content:
@@ -77,12 +90,15 @@ components:
         requests_per_second:
           type: integer
           minimum: 1
+          description: The throttle for the migration task in sub-requests per second. Corresponds to requests_per_second on the Reindex API.
         size:
           type: integer
           minimum: 1
+          description: Number of alerts to migrate per batch. Corresponds to the source.size option on the Reindex API.
         slices:
           type: integer
           minimum: 1
+          description: The number of subtasks for the migration task. Corresponds to slices on the Reindex API.
 
     AlertsIndexMigrationSuccess:
       type: object

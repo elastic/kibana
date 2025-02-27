@@ -85,6 +85,10 @@
       "type": "date_nanos"
     },
     {
+      "name": "functionNamedParametersField",
+      "type": "function_named_parameters"
+    },
+    {
       "name": "any#Char$Field",
       "type": "double"
     },
@@ -2267,28 +2271,28 @@
     {
       "query": "from index | project ",
       "error": [
-        "SyntaxError: mismatched input 'project' expecting {'dissect', 'drop', 'enrich', 'eval', 'grok', 'keep', 'limit', 'mv_expand', 'rename', 'sort', 'stats', 'where'}"
+        "SyntaxError: mismatched input 'project' expecting {'dissect', 'drop', 'enrich', 'eval', 'grok', 'keep', 'limit', 'mv_expand', 'rename', 'sort', 'stats', 'where', 'lookup'}"
       ],
       "warning": []
     },
     {
       "query": "from index | project textField, doubleField, dateField",
       "error": [
-        "SyntaxError: mismatched input 'project' expecting {'dissect', 'drop', 'enrich', 'eval', 'grok', 'keep', 'limit', 'mv_expand', 'rename', 'sort', 'stats', 'where'}"
+        "SyntaxError: mismatched input 'project' expecting {'dissect', 'drop', 'enrich', 'eval', 'grok', 'keep', 'limit', 'mv_expand', 'rename', 'sort', 'stats', 'where', 'lookup'}"
       ],
       "warning": []
     },
     {
       "query": "from index | PROJECT textField, doubleField, dateField",
       "error": [
-        "SyntaxError: mismatched input 'PROJECT' expecting {'dissect', 'drop', 'enrich', 'eval', 'grok', 'keep', 'limit', 'mv_expand', 'rename', 'sort', 'stats', 'where'}"
+        "SyntaxError: mismatched input 'PROJECT' expecting {'dissect', 'drop', 'enrich', 'eval', 'grok', 'keep', 'limit', 'mv_expand', 'rename', 'sort', 'stats', 'where', 'lookup'}"
       ],
       "warning": []
     },
     {
       "query": "from index | project missingField, doubleField, dateField",
       "error": [
-        "SyntaxError: mismatched input 'project' expecting {'dissect', 'drop', 'enrich', 'eval', 'grok', 'keep', 'limit', 'mv_expand', 'rename', 'sort', 'stats', 'where'}"
+        "SyntaxError: mismatched input 'project' expecting {'dissect', 'drop', 'enrich', 'eval', 'grok', 'keep', 'limit', 'mv_expand', 'rename', 'sort', 'stats', 'where', 'lookup'}"
       ],
       "warning": []
     },
@@ -4448,6 +4452,46 @@
       "warning": []
     },
     {
+      "query": "from a_index | where functionNamedParametersField IS NULL",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where functionNamedParametersField IS null",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where functionNamedParametersField is null",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where functionNamedParametersField is NULL",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where functionNamedParametersField IS NOT NULL",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where functionNamedParametersField IS NOT null",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where functionNamedParametersField IS not NULL",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where functionNamedParametersField Is nOt NuLL",
+      "error": [],
+      "warning": []
+    },
+    {
       "query": "from a_index | where textField == \"a\" or null",
       "error": [],
       "warning": []
@@ -5205,6 +5249,41 @@
     },
     {
       "query": "from a_index | eval dateNanosField IS not NULL",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval functionNamedParametersField IS NULL",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval functionNamedParametersField IS null",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval functionNamedParametersField is null",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval functionNamedParametersField is NULL",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval functionNamedParametersField IS NOT NULL",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval functionNamedParametersField IS NOT null",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval functionNamedParametersField IS not NULL",
       "error": [],
       "warning": []
     },

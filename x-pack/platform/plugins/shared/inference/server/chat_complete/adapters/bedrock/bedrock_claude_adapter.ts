@@ -35,6 +35,7 @@ export const bedrockClaudeAdapter: InferenceConnectorAdapter = {
     temperature = 0,
     modelName,
     abortSignal,
+    metadata,
   }) => {
     const noToolUsage = toolChoice === ToolChoiceType.none;
 
@@ -47,6 +48,7 @@ export const bedrockClaudeAdapter: InferenceConnectorAdapter = {
       model: modelName,
       stopSequences: ['\n\nHuman:'],
       signal: abortSignal,
+      ...(metadata?.connectorTelemetry ? { telemetryMetadata: metadata.connectorTelemetry } : {}),
     };
 
     return from(

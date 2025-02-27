@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import React, { type FC, useState } from 'react';
 import {
   EuiButtonGroup,
   EuiFlexGroup,
@@ -12,52 +13,132 @@ import {
   EuiNotificationBadge,
   EuiSpacer,
   EuiLoadingSpinner,
+  type EuiDataGridColumn,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { ALERT_STATUS_ACTIVE, type AlertStatus } from '@kbn/rule-data-utils';
-import type { AlertsTableStateProps } from '@kbn/triggers-actions-ui-plugin/public/application/sections/alerts_table/alerts_table_state';
-import React, { type FC, useState } from 'react';
+import {
+  ALERT_DURATION,
+  ALERT_END,
+  ALERT_REASON,
+  ALERT_RULE_NAME,
+  ALERT_START,
+  ALERT_STATUS,
+  ALERT_STATUS_ACTIVE,
+  type AlertStatus,
+} from '@kbn/rule-data-utils';
 import useObservable from 'react-use/lib/useObservable';
-import { ML_VALID_CONSUMERS } from '../../../../common/constants/alerts';
+import { MANAGEMENT_APP_ID } from '@kbn/deeplinks-management/constants';
+import { APP_ID as CASE_APP_ID, FEATURE_ID as CASE_GENERAL_ID } from '@kbn/cases-plugin/common';
+import type { SortCombinations, SortOrder } from '@elastic/elasticsearch/lib/api/types';
+import { AlertsTable } from '@kbn/response-ops-alerts-table';
 import { ML_RULE_TYPE_IDS } from '../../../../common';
-import { ML_ALERTS_CONFIG_ID } from '../../../alerting/anomaly_detection_alerts_table/register_alerts_table_configuration';
+import { ML_VALID_CONSUMERS } from '../../../../common/constants/alerts';
+import { AlertActions } from '../../../alerting/anomaly_detection_alerts_table/alert_actions';
+import { AlertsTableFlyoutBody } from '../../../alerting/anomaly_detection_alerts_table/flyout_body';
 import { CollapsiblePanel } from '../../components/collapsible_panel';
 import { useMlKibana } from '../../contexts/kibana';
 import { useAnomalyExplorerContext } from '../anomaly_explorer_context';
 import { AlertsSummary } from './alerts_summary';
 import { AnomalyDetectionAlertsOverviewChart } from './chart';
 import { statusNameMap } from './const';
+import {
+  ALERT_ANOMALY_DETECTION_JOB_ID,
+  ALERT_ANOMALY_SCORE,
+  ALERT_ANOMALY_TIMESTAMP,
+} from '../../../../common/constants/alerts';
+import { AlertsTableCellValue } from '../../../alerting/anomaly_detection_alerts_table/render_cell_value';
+
+const columns: EuiDataGridColumn[] = [
+  {
+    id: ALERT_STATUS,
+    displayAsText: i18n.translate('xpack.ml.alertsTable.columns.status', {
+      defaultMessage: 'Status',
+    }),
+    initialWidth: 150,
+  },
+  {
+    id: ALERT_REASON,
+    displayAsText: i18n.translate('xpack.ml.alertsTable.columns.reason', {
+      defaultMessage: 'Reason',
+    }),
+    initialWidth: 150,
+  },
+  {
+    id: ALERT_RULE_NAME,
+    displayAsText: i18n.translate('xpack.ml.alertsTable.columns.ruleName', {
+      defaultMessage: 'Rule name',
+    }),
+    initialWidth: 150,
+  },
+  {
+    id: ALERT_ANOMALY_DETECTION_JOB_ID,
+    displayAsText: i18n.translate('xpack.ml.alertsTable.columns.jobId', {
+      defaultMessage: 'Job ID',
+    }),
+    initialWidth: 150,
+  },
+  {
+    id: ALERT_ANOMALY_SCORE,
+    displayAsText: i18n.translate('xpack.ml.alertsTable.columns.anomalyScore', {
+      defaultMessage: 'Latest anomaly score',
+    }),
+    initialWidth: 150,
+    isSortable: true,
+  },
+  {
+    id: ALERT_START,
+    displayAsText: i18n.translate('xpack.ml.alertsTable.columns.triggeredAt', {
+      defaultMessage: 'Triggered at',
+    }),
+    initialWidth: 250,
+    schema: 'datetime',
+  },
+  {
+    id: ALERT_END,
+    displayAsText: i18n.translate('xpack.ml.alertsTable.columns.recoveredAt', {
+      defaultMessage: 'Recovered at',
+    }),
+    initialWidth: 250,
+    schema: 'datetime',
+  },
+  {
+    id: ALERT_ANOMALY_TIMESTAMP,
+    displayAsText: i18n.translate('xpack.ml.alertsTable.columns.anomalyTime', {
+      defaultMessage: 'Latest anomaly time',
+    }),
+    initialWidth: 250,
+    schema: 'datetime',
+  },
+  {
+    id: ALERT_DURATION,
+    displayAsText: i18n.translate('xpack.ml.alertsTable.columns.duration', {
+      defaultMessage: 'Duration',
+    }),
+    initialWidth: 150,
+    schema: 'numeric',
+  },
+];
+
+const sort: SortCombinations[] = [
+  {
+    [ALERT_START]: {
+      order: 'desc' as SortOrder,
+    },
+  },
+];
 
 export const AlertsPanel: FC = () => {
-  const {
-    services: { triggersActionsUi },
-  } = useMlKibana();
+  const { data, http, notifications, fieldFormats, application, licensing, settings } =
+    useMlKibana().services;
 
   const [isOpen, setIsOpen] = useState(true);
   const [toggleSelected, setToggleSelected] = useState(`alertsSummary`);
-  const {
-    services: { fieldFormats },
-  } = useMlKibana();
   const { anomalyDetectionAlertsStateService } = useAnomalyExplorerContext();
 
   const countByStatus = useObservable(anomalyDetectionAlertsStateService.countByStatus$);
   const alertsQuery = useObservable(anomalyDetectionAlertsStateService.alertsQuery$, {});
   const isLoading = useObservable(anomalyDetectionAlertsStateService.isLoading$, true);
-
-  const alertStateProps: AlertsTableStateProps = {
-    alertsTableConfigurationRegistry: triggersActionsUi!.alertsTableConfigurationRegistry,
-    configurationId: ML_ALERTS_CONFIG_ID,
-    id: `ml-details-alerts`,
-    ruleTypeIds: ML_RULE_TYPE_IDS,
-    consumers: ML_VALID_CONSUMERS,
-    query: alertsQuery,
-    showAlertStatusWithFlapping: true,
-    cellContext: {
-      fieldFormats,
-    },
-  };
-  const alertsStateTable = triggersActionsUi!.getAlertsStateTable(alertStateProps);
 
   const toggleButtons = [
     {
@@ -121,7 +202,37 @@ export const AlertsPanel: FC = () => {
         />
         <EuiSpacer size="m" />
 
-        {toggleSelected === 'alertsTable' ? alertsStateTable : <AlertsSummary />}
+        {toggleSelected === 'alertsTable' ? (
+          <AlertsTable
+            id={`ml-details-alerts`}
+            ruleTypeIds={ML_RULE_TYPE_IDS}
+            consumers={ML_VALID_CONSUMERS}
+            query={alertsQuery}
+            columns={columns}
+            initialSort={sort}
+            renderCellValue={AlertsTableCellValue}
+            renderFlyoutBody={AlertsTableFlyoutBody}
+            renderActionsCell={AlertActions}
+            casesConfiguration={{
+              appId: MANAGEMENT_APP_ID,
+              featureId: CASE_GENERAL_ID,
+              owner: [CASE_APP_ID],
+              syncAlerts: false,
+            }}
+            showAlertStatusWithFlapping
+            services={{
+              data,
+              http,
+              notifications,
+              fieldFormats,
+              application,
+              licensing,
+              settings,
+            }}
+          />
+        ) : (
+          <AlertsSummary />
+        )}
       </CollapsiblePanel>
       <EuiSpacer size="m" />
     </>

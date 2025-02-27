@@ -95,14 +95,14 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await searchStart.expectToBeOnIndexListPage();
       });
       it('should redirect to indices list if single index exist on page load', async () => {
-        await searchNavigation.navigateToElasticsearchStartPage();
+        await searchNavigation.navigateToElasticsearchStartPage(false, `/s/${spaceCreated.id}`);
         await es.indices.create({ index: 'test-my-index-001' });
         await searchNavigation.navigateToElasticsearchStartPage(true);
         await searchStart.expectToBeOnIndexListPage();
       });
 
       it('should support switching between UI and Code Views', async () => {
-        await searchNavigation.navigateToElasticsearchStartPage();
+        await searchNavigation.navigateToElasticsearchStartPage(false, `/s/${spaceCreated.id}`);
         await searchStart.expectCreateIndexUIView();
         await searchStart.clickCodeViewButton();
         await searchStart.expectCreateIndexCodeView();
@@ -150,6 +150,28 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await searchStart.expectAPIKeyVisibleInCodeBlock(newApiKeyUI);
       });
 
+      it('should create a new api key when the existing one is invalidated', async () => {
+        await searchStart.expectToBeOnStartPage();
+        await searchStart.clickCodeViewButton();
+        await searchApiKeys.expectAPIKeyAvailable();
+
+        // Get initial API key
+        const initialApiKey = await searchApiKeys.getAPIKeyFromSessionStorage();
+        expect(initialApiKey.id).to.not.be(null);
+
+        // Navigate away to keep key in current session, invalidate key and return back
+        await searchNavigation.navigateToIndexManagementPage();
+        await searchApiKeys.invalidateAPIKey(initialApiKey.id);
+        await searchNavigation.navigateToElasticsearchStartPage(false, `/s/${spaceCreated.id}`);
+        await searchStart.clickCodeViewButton();
+
+        // Check that new key was generated
+        await searchApiKeys.expectAPIKeyAvailable();
+        const newApiKey = await searchApiKeys.getAPIKeyFromSessionStorage();
+        expect(newApiKey).to.not.be(null);
+        expect(newApiKey.id).to.not.eql(initialApiKey.id);
+      });
+
       it('should explicitly ask to create api key when project already has an apikey', async () => {
         await searchApiKeys.clearAPIKeySessionStorage();
         await searchApiKeys.createAPIKey();
@@ -168,7 +190,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await searchStart.clickCreateIndexButton();
         await searchStart.expectToBeOnIndexDetailsPage();
 
-        await searchApiKeys.expectAPIKeyAvailable();
+        await searchApiKeys.expectShownAPIKeyAvailable();
         const indexDetailsApiKey = await searchApiKeys.getAPIKeyFromUI();
 
         expect(apiKeyUI).to.eql(indexDetailsApiKey);

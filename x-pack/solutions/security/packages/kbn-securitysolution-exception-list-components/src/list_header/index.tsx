@@ -10,7 +10,14 @@
 import React from 'react';
 import { css } from '@emotion/react';
 import type { FC } from 'react';
-import { EuiIcon, EuiPageHeader, EuiText, useEuiFontSize, useEuiTheme } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiIcon,
+  EuiPageHeader,
+  EuiText,
+  useEuiFontSize,
+  useEuiTheme,
+} from '@elastic/eui';
 import * as i18n from '../translations';
 import { MenuItems } from './menu_items';
 import { TextWithEdit } from '../text_with_edit';
@@ -76,7 +83,8 @@ const ExceptionListHeaderComponent: FC<ExceptionListHeaderComponentProps> = ({
   `;
   const descriptionContainerStyles = css`
     // negates the static EuiSpacer when using Title + Description in PageHeader
-    margin-top: -${euiTheme.size.l};
+    margin-top: -${euiTheme.size.m};
+    margin-bottom: ${euiTheme.size.s};
   `;
 
   return (
@@ -95,7 +103,12 @@ const ExceptionListHeaderComponent: FC<ExceptionListHeaderComponentProps> = ({
         responsive
         data-test-subj={`${dataTestSubj || ''}PageHeader`}
         description={
-          <div css={descriptionContainerStyles}>
+          <EuiFlexGroup
+            direction="column"
+            gutterSize="s"
+            css={descriptionContainerStyles}
+            component="span"
+          >
             <TextWithEdit
               dataTestSubj={`${dataTestSubj || ''}Description`}
               textCss={subduedTextStyles}
@@ -103,11 +116,15 @@ const ExceptionListHeaderComponent: FC<ExceptionListHeaderComponentProps> = ({
               text={listDetails.description || i18n.EXCEPTION_LIST_HEADER_DESCRIPTION}
               onEdit={onEdit}
             />
-            <div css={textWithEditContainerCss} data-test-subj={`${dataTestSubj || ''}ListID`}>
-              <EuiText css={subduedTextStyles}>{i18n.EXCEPTION_LIST_HEADER_LIST_ID}:</EuiText>
-              <EuiText css={subduedTextStyles}>{listId}</EuiText>
-            </div>
-          </div>
+            <span css={textWithEditContainerCss} data-test-subj={`${dataTestSubj || ''}ListID`}>
+              <EuiText css={subduedTextStyles} component="span">
+                {i18n.EXCEPTION_LIST_HEADER_LIST_ID}:
+              </EuiText>
+              <EuiText css={subduedTextStyles} component="span">
+                {listId}
+              </EuiText>
+            </span>
+          </EuiFlexGroup>
         }
         rightSideItems={[
           <MenuItems

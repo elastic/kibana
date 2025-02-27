@@ -396,5 +396,46 @@ describe('RoleMappingsGridPage', () => {
       const actionMenuButton = wrapper.find('[data-test-subj="euiCollapsedItemActionsButton"]');
       expect(actionMenuButton).toHaveLength(0);
     });
+
+    it('hides controls when role mapping is read only', async () => {
+      const roleMappingsAPI = roleMappingsAPIClientMock.create();
+      const securityFeaturesAPI = securityFeaturesAPIClientMock.create();
+      roleMappingsAPI.getRoleMappings.mockResolvedValue([
+        {
+          name: 'some-realm',
+          enabled: true,
+          roles: ['superuser'],
+          metadata: { _read_only: true },
+          rules: { field: { username: '*' } },
+        },
+      ]);
+      securityFeaturesAPI.checkFeatures.mockResolvedValue({
+        canReadSecurity: true,
+        hasCompatibleRealms: true,
+      });
+      roleMappingsAPI.deleteRoleMappings.mockResolvedValue([
+        {
+          name: 'some-realm',
+          success: true,
+        },
+      ]);
+
+      const wrapper = renderView(roleMappingsAPI, securityFeaturesAPI);
+      await nextTick();
+      wrapper.update();
+
+      // role mapping actions are hidden
+      const editButton = wrapper.find('[data-test-subj="editRoleMappingButton-some-realm"]');
+      expect(editButton).toHaveLength(0);
+
+      const cloneButton = wrapper.find('[data-test-subj="cloneRoleMappingButton-some-realm"]');
+      expect(cloneButton).toHaveLength(0);
+
+      const deleteButton = wrapper.find('[data-test-subj="deleteRoleMappingButton-some-realm"]');
+      expect(deleteButton).toHaveLength(0);
+
+      const actionMenuButton = wrapper.find('[data-test-subj="euiCollapsedItemActionsButton"]');
+      expect(actionMenuButton).toHaveLength(0);
+    });
   });
 });

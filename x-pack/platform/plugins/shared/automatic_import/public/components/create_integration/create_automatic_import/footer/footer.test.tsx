@@ -11,16 +11,12 @@ import { TestProvider } from '../../../../mocks/test_provider';
 import { Footer } from './footer';
 import { ActionsProvider } from '../state';
 import { mockActions } from '../mocks/state';
-import { ExperimentalFeaturesService } from '../../../../services';
 
 const mockNavigate = jest.fn();
 jest.mock('../../../../common/hooks/use_navigate', () => ({
   ...jest.requireActual('../../../../common/hooks/use_navigate'),
   useNavigate: () => mockNavigate,
 }));
-
-jest.mock('../../../../services');
-const mockedExperimentalFeaturesService = jest.mocked(ExperimentalFeaturesService);
 
 const wrapper: React.FC<React.PropsWithChildren<{}>> = ({ children }) => (
   <TestProvider>
@@ -31,10 +27,6 @@ const wrapper: React.FC<React.PropsWithChildren<{}>> = ({ children }) => (
 describe('Footer', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-
-    mockedExperimentalFeaturesService.get.mockReturnValue({
-      generateCel: false,
-    } as never);
   });
 
   describe('when rendered for the most common case', () => {

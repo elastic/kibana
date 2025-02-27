@@ -113,8 +113,16 @@ describe('unrecognized task types', () => {
     taskIdsToRemove.push(notRegisteredTypeId);
 
     // To be sure that the background task that marks removed tasks as unrecognized has run after the tasks were created
-    const runSoonResponse = await taskManagerPlugin.runSoon('mark_removed_tasks_as_unrecognized');
-    expect(runSoonResponse).toEqual({ id: 'mark_removed_tasks_as_unrecognized' });
+    await retry(async () => {
+      try {
+        const runSoonResponse = await taskManagerPlugin.runSoon(
+          'mark_removed_tasks_as_unrecognized'
+        );
+        expect(runSoonResponse).toEqual({ id: 'mark_removed_tasks_as_unrecognized' });
+      } catch (err) {
+        // ignore errors and retry
+      }
+    });
 
     await retry(async () => {
       const task = await getTask(kibanaServer.coreStart.elasticsearch.client.asInternalUser);
@@ -142,17 +150,15 @@ describe('unrecognized task types', () => {
 async function getTask(esClient: ElasticsearchClient) {
   const response = await esClient.search<{ task: ConcreteTaskInstance }>({
     index: '.kibana_task_manager',
-    body: {
-      query: {
-        bool: {
-          filter: [
-            {
-              term: {
-                'task.taskType': 'sampleTaskRemovedType',
-              },
+    query: {
+      bool: {
+        filter: [
+          {
+            term: {
+              'task.taskType': 'sampleTaskRemovedType',
             },
-          ],
-        },
+          },
+        ],
       },
     },
   });

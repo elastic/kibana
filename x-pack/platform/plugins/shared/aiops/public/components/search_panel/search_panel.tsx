@@ -98,6 +98,7 @@ export const SearchPanel: FC<Props> = ({ searchString, searchQueryLanguage, setS
           showFilterBar={true}
           showDatePicker={false}
           showQueryInput={true}
+          showSavedQueryControls={false}
           query={searchInput}
           onQuerySubmit={(params: { dateRange: TimeRange; query?: Query | undefined }) =>
             searchHandler({ query: params.query })

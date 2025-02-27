@@ -407,10 +407,19 @@ export class SettingsPageObject extends FtrService {
       `table.euiTable tbody tr.euiTableRow:nth-child(${tableFields.indexOf(name) + 1})
         td:nth-last-child(2) button`
     );
+    await this.retry.waitFor('flyout to open', async () => {
+      return await this.testSubjects.exists('flyoutTitle');
+    });
+  }
+
+  async setPopularity(value: number) {
+    await this.testSubjects.setValue('editorFieldCount', String(value), {
+      clearWithKeyboard: true,
+    });
   }
 
   async increasePopularity() {
-    await this.testSubjects.setValue('editorFieldCount', '1', { clearWithKeyboard: true });
+    await this.setPopularity(Number(await this.getPopularity()) + 1);
   }
 
   async getPopularity() {

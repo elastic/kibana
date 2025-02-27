@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
 import {
   EuiButton,
@@ -39,6 +39,16 @@ export const RulesWithGapsOverviewPanel = () => {
   });
   const [isPopoverOpen, setPopover] = useState(false);
 
+  useEffect(() => {
+    return () => {
+      // reset filter options when unmounting
+      setFilterOptions({
+        gapSearchRange: defaultRangeValue,
+        showRulesWithGaps: false,
+      });
+    };
+  }, [setFilterOptions]);
+
   const rangeValueToLabel = {
     [GapRangeValue.LAST_24_H]: i18n.RULE_GAPS_OVERVIEW_PANEL_LAST_24_HOURS_LABEL,
     [GapRangeValue.LAST_3_D]: i18n.RULE_GAPS_OVERVIEW_PANEL_LAST_3_DAYS_LABEL,
@@ -64,9 +74,9 @@ export const RulesWithGapsOverviewPanel = () => {
     </EuiButton>
   );
 
-  const handleShowRulesWithGapsFilterButtonClick = (value: boolean) => {
+  const handleShowRulesWithGapsFilterButtonClick = () => {
     setFilterOptions({
-      showRulesWithGaps: value,
+      showRulesWithGaps: !showRulesWithGaps,
     });
   };
 
@@ -120,15 +130,9 @@ export const RulesWithGapsOverviewPanel = () => {
         <EuiFlexItem grow={false}>
           <EuiFilterGroup>
             <EuiFilterButton
-              withNext
-              hasActiveFilters={!showRulesWithGaps}
-              onClick={() => handleShowRulesWithGapsFilterButtonClick(false)}
-            >
-              {i18n.RULE_GAPS_OVERVIEW_PANEL_SHOW_ALL_RULES_LABEL}
-            </EuiFilterButton>
-            <EuiFilterButton
               hasActiveFilters={showRulesWithGaps}
-              onClick={() => handleShowRulesWithGapsFilterButtonClick(true)}
+              onClick={handleShowRulesWithGapsFilterButtonClick}
+              iconType={showRulesWithGaps ? `checkInCircleFilled` : undefined}
             >
               {i18n.RULE_GAPS_OVERVIEW_PANEL_SHOW_RULES_WITH_GAPS_LABEL}
             </EuiFilterButton>
