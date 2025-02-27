@@ -1,0 +1,9 @@
+{
+  "type": "shared-server",
+  "id": "@kbn/wci-gateway",
+  "owner": [
+    "@elastic/search-kibana"
+  ],
+  "group": "search",
+  "visibility": "private"
+} 
