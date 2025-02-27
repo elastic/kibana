@@ -32,8 +32,9 @@ const preview: Preview = {
     },
   },
   initialGlobals: {
-    theme: 'light',
+    theme: 'v8.light',
   },
+  tags: ['autodocs'],
 };
 
 // eslint-disable-next-line import/no-default-export
