@@ -246,7 +246,6 @@ export const DiscoverTopNav = ({
   return (
     <>
       <EuiSpacer />
-      <ControlGroupRenderer onApiAvailable={setControlGroupAPI} timeRange={timeRange} />
       <SearchBar
         {...topNavProps}
         appName="discover"
@@ -283,6 +282,9 @@ export const DiscoverTopNav = ({
           esqlVariables: stateEsqlVariables ?? [],
           onSaveControl,
           onCancelControl,
+          controlsWrapper: (
+            <ControlGroupRenderer onApiAvailable={setControlGroupAPI} timeRange={timeRange} />
+          ),
         }}
       />
       {isESQLToDataViewTransitionModalVisible && (

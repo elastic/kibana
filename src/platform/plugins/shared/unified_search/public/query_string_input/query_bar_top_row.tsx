@@ -192,6 +192,7 @@ export interface QueryBarTopRowProps<QT extends Query | AggregateQuery = Query> 
     esqlVariables: ESQLControlVariable[];
     onSaveControl: (controlState: Record<string, unknown>, updatedQuery: string) => Promise<void>;
     onCancelControl: () => void;
+    controlsWrapper: React.ReactNode;
   };
   bubbleSubmitEvent?: boolean;
 }
@@ -810,6 +811,9 @@ export const QueryBarTopRow = React.memo(
                   }}
                   adHocDataview={props.indexPatterns?.[0]}
                 />
+              )}
+              {Boolean(props.esqLVariablesConfig?.controlsWrapper) && (
+                <EuiFlexItem grow={false}>{props.esqLVariablesConfig?.controlsWrapper}</EuiFlexItem>
               )}
               {renderQueryInput()}
               {props.renderQueryInputAppend?.()}
