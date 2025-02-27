@@ -52,7 +52,19 @@ export function initializePanelsManager(
   initialPanelsRuntimeState: UnsavedPanelState,
   trackPanel: ReturnType<typeof initializeTrackPanel>,
   getReferencesForPanelId: (id: string) => Reference[],
-  pushReferences: (references: Reference[]) => void
+  pushReferences: (references: Reference[]) => void,
+  getSettings: () => {
+    syncColors: boolean;
+    syncCursor: boolean;
+    syncTooltips: boolean;
+    tags: string[];
+    lockToGrid: boolean;
+    timeRestore: boolean | undefined;
+    useMargins: boolean;
+    title?: string | undefined;
+    description?: string | undefined;
+    hidePanelTitles?: boolean | undefined;
+  }
 ) {
   const children$ = new BehaviorSubject<{
     [key: string]: unknown;
@@ -127,8 +139,10 @@ export function initializePanelsManager(
     if (!panels$.value[id]) {
       throw new PanelNotFoundError();
     }
+    const { lockToGrid } = getSettings();
 
-    if (children$.value[id]) {
+    if (children$.value[id] || !lockToGrid) {
+      // this is a bad shortcut
       return children$.value[id] as ApiType;
     }
 
@@ -190,12 +204,13 @@ export function initializePanelsManager(
           ? await getCustomPlacementSettingFunc(initialState)
           : undefined;
 
+        const { lockToGrid } = getSettings();
         const { newPanelPlacement, otherPanels } = runPanelPlacementStrategy(
           customPlacementSettings?.strategy ?? PanelPlacementStrategy.findTopLeftMostOpenSpace,
           {
             currentPanels: panels$.value,
-            height: customPlacementSettings?.height ?? DEFAULT_PANEL_HEIGHT,
-            width: customPlacementSettings?.width ?? DEFAULT_PANEL_WIDTH,
+            height: customPlacementSettings?.height ?? (lockToGrid ? DEFAULT_PANEL_HEIGHT : 300),
+            width: customPlacementSettings?.width ?? (lockToGrid ? DEFAULT_PANEL_WIDTH : 400),
           }
         );
 
@@ -229,16 +244,18 @@ export function initializePanelsManager(
       children$,
       duplicatePanel: async (idToDuplicate: string) => {
         const panelToClone = getDashboardPanelFromId(idToDuplicate);
+
         const childApi = children$.value[idToDuplicate];
+
         if (!apiHasSerializableState(childApi)) {
           throw new Error('cannot duplicate a non-serializable panel');
         }
 
         const id = v4();
         const allPanelTitles = await getPanelTitles();
+
         const lastTitle = apiPublishesTitle(childApi) ? getTitle(childApi) ?? '' : '';
         const newTitle = getClonedPanelTitle(allPanelTitles, lastTitle);
-
         /**
          * For embeddables that have library transforms, we need to ensure
          * to clone them with by value serialized state.
@@ -274,6 +291,9 @@ export function initializePanelsManager(
             ...newPanelPlacement,
             i: id,
           },
+          ...((panelToClone.sectionIndex ?? 0) > 0
+            ? { sectionIndex: panelToClone.sectionIndex }
+            : {}),
         };
 
         setPanels({
@@ -348,7 +368,7 @@ export function initializePanelsManager(
       sections$,
       addNewSection: () => {
         setSections([
-          ...sections$.getValue(),
+          ...(sections$.getValue() ?? {}),
           {
             title: i18n.translate('examples.gridExample.defaultSectionTitle', {
               defaultMessage: 'New collapsible section',
@@ -373,7 +393,6 @@ export function initializePanelsManager(
         sections$,
         setSections,
         (a, b) => {
-          console.log(a, b, fastIsEqual(a ?? [], b ?? []));
           return fastIsEqual(a ?? [], b ?? []);
         },
       ],

@@ -84,6 +84,7 @@ export function getDashboardApi({
     references: [references$, (nextRefs) => references$.next(nextRefs)],
   };
 
+  const settingsManager = initializeSettingsManager(initialState);
   const panelsManager = initializePanelsManager(
     incomingEmbeddable,
     initialState.panels,
@@ -91,14 +92,14 @@ export function getDashboardApi({
     initialPanelsRuntimeState ?? {},
     trackPanel,
     getPanelReferences,
-    pushPanelReferences
+    pushPanelReferences,
+    settingsManager.api.getSettings
   );
   const dataLoadingManager = initializeDataLoadingManager(panelsManager.api.children$);
   const dataViewsManager = initializeDataViewsManager(
     controlGroupApi$,
     panelsManager.api.children$
   );
-  const settingsManager = initializeSettingsManager(initialState);
   const unifiedSearchManager = initializeUnifiedSearchManager(
     initialState,
     controlGroupApi$,
