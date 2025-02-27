@@ -220,15 +220,13 @@ export const PageSizeOrUndefined = z.number().int().nullable();
  * The field that is used to sort the results.
  */
 export type SortOrUndefined = z.infer<typeof SortOrUndefined>;
-export const SortOrUndefined = z.enum(['createdAt', 'updatedAt']).nullable().default('createdAt');
-export type SortOrUndefinedEnum = typeof SortOrUndefined.enum;
-export const SortOrUndefinedEnum = SortOrUndefined.enum;
+export const SortOrUndefined = z.string().nullable().default('createdAt');
 
 /**
  * Specifies the sort order.
  */
 export type SortOrderOrUndefined = z.infer<typeof SortOrderOrUndefined>;
-export const SortOrderOrUndefined = z.enum(['asc', 'desc']).nullable().default('desc');
+export const SortOrderOrUndefined = z.enum(['asc', 'desc']);
 export type SortOrderOrUndefinedEnum = typeof SortOrderOrUndefined.enum;
 export const SortOrderOrUndefinedEnum = SortOrderOrUndefined.enum;
 
