@@ -207,6 +207,7 @@ export class TrustedAppValidator extends BaseValidator {
     await this.validateTrustedAppData(item);
     await this.validateCanCreateByPolicyArtifacts(item);
     await this.validateByPolicyItem(item);
+    await this.validateCreateOwnerSpaceIds(item);
 
     await this.setOwnerSpaceId(item);
 
@@ -258,6 +259,7 @@ export class TrustedAppValidator extends BaseValidator {
     }
 
     await this.validateByPolicyItem(updatedItem);
+    await this.validateUpdateOwnerSpaceIds(_updatedItem, currentItem);
 
     if (!hasArtifactOwnerSpaceId(_updatedItem)) {
       await this.setOwnerSpaceId(_updatedItem);

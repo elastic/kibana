@@ -865,7 +865,7 @@
                 "label": "access",
                 "description": [],
                 "signature": [
-                  "\"internal\" | \"public\""
+                  "\"public\" | \"internal\""
                 ],
                 "path": "src/core/packages/saved-objects/server-internal/src/routes/legacy_import_export/export.ts",
                 "deprecated": false,
@@ -1000,7 +1000,7 @@
                 "label": "access",
                 "description": [],
                 "signature": [
-                  "\"internal\" | \"public\""
+                  "\"public\" | \"internal\""
                 ],
                 "path": "src/core/packages/saved-objects/server-internal/src/routes/legacy_import_export/import.ts",
                 "deprecated": false,
