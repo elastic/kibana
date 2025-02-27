@@ -30,7 +30,7 @@ import * as TEST_SUBJECTS from './test_subjects';
 import { useChangeCspRuleState } from './use_change_csp_rule_state';
 import { CspBenchmarkRulesWithStates } from './rules_container';
 import { TakeAction } from '../../components/take_action';
-import { createDetectionRuleFromBenchmarkRule } from '../configurations/utils/create_detection_rule_from_benchmark';
+import { createDetectionRuleFromBenchmarkRule } from '@kbn/cloud-security-posture/src/utils/create_detection_rule_from_benchmark';
 
 export const RULES_FLYOUT_SWITCH_BUTTON = 'rule-flyout-switch-button';
 
