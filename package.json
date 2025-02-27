@@ -588,7 +588,6 @@
     "@kbn/inference-endpoint-ui-common": "link:x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common",
     "@kbn/inference-langchain": "link:x-pack/platform/packages/shared/ai-infra/inference-langchain",
     "@kbn/inference-plugin": "link:x-pack/platform/plugins/shared/inference",
-    "@kbn/inference_integration_flyout": "link:x-pack/platform/packages/private/ml/inference_integration_flyout",
     "@kbn/infra-forge": "link:x-pack/platform/packages/private/kbn-infra-forge",
     "@kbn/infra-plugin": "link:x-pack/solutions/observability/plugins/infra",
     "@kbn/ingest-pipelines-plugin": "link:x-pack/platform/plugins/shared/ingest_pipelines",
