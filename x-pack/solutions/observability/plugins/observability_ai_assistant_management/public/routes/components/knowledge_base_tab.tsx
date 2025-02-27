@@ -227,7 +227,7 @@ export function KnowledgeBaseTab() {
     return (
       <EuiFlexGroup alignItems="center" direction="column">
         <EuiFlexItem grow>
-          <EuiLoadingSpinner size="xl" />
+          <EuiLoadingSpinner size="xl" data-test-subj="knowledgeBaseTabLoader" />
         </EuiFlexItem>
       </EuiFlexGroup>
     );
