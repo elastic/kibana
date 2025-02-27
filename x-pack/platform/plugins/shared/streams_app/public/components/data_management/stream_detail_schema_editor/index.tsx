@@ -6,9 +6,9 @@
  */
 import React from 'react';
 import { WiredStreamGetResponse, isRootStreamDefinition } from '@kbn/streams-schema';
+import { useStreamDetailSelector } from '../../../state_management/stream_detail_state_machine';
 import { SchemaEditor } from '../schema_editor';
 import { useSchemaFields } from '../schema_editor/hooks/use_schema_fields';
-import { useStreamDetailSelector } from '../../state_management/stream_detail_state_machine';
 
 interface SchemaEditorProps {
   definition?: WiredStreamGetResponse;

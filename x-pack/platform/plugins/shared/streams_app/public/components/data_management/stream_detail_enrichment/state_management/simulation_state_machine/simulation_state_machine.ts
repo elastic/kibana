@@ -11,7 +11,7 @@ import { isEmpty, isEqual } from 'lodash';
 import {
   dateRangeMachine,
   createDateRangeMachineImplementations,
-} from '../../../../state_management/date_range_state_machine';
+} from '../../../../../state_management/date_range_state_machine';
 import { ProcessorDefinitionWithUIAttributes } from '../../types';
 import { processorConverter } from '../../utils';
 import {

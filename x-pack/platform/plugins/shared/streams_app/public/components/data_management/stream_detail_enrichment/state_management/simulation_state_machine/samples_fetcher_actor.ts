@@ -10,7 +10,7 @@ import { flattenObjectNestedLast } from '@kbn/object-utils';
 import { Condition, FlattenRecord } from '@kbn/streams-schema';
 import { fromPromise, ErrorActorEvent } from 'xstate5';
 import { errors as esErrors } from '@elastic/elasticsearch';
-import { DateRangeContext } from '../../../../state_management/date_range_state_machine';
+import { DateRangeContext } from '../../../../../state_management/date_range_state_machine';
 import { SimulationMachineDeps } from './types';
 
 export interface SamplesFetchInput {

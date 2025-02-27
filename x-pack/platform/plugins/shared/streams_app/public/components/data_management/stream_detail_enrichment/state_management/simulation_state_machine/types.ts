@@ -13,7 +13,7 @@ import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import {
   DateRangeToParentEvent,
   DateRangeActorRef,
-} from '../../../../state_management/date_range_state_machine';
+} from '../../../../../state_management/date_range_state_machine';
 import { ProcessorDefinitionWithUIAttributes } from '../../types';
 import { PreviewDocsFilterOption } from './preview_docs_filter';
 

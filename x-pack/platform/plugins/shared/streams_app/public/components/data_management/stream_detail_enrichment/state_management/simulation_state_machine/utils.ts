@@ -7,7 +7,7 @@
 
 import { Condition, UnaryOperator, getProcessorConfig } from '@kbn/streams-schema';
 import { isEmpty, uniq, isEqual } from 'lodash';
-import { ALWAYS_CONDITION } from '../../../../util/condition';
+import { ALWAYS_CONDITION } from '../../../../../util/condition';
 import { ProcessorDefinitionWithUIAttributes, DetectedField } from '../../types';
 import { PreviewDocsFilterOption } from './preview_docs_filter';
 import { Simulation, SimulationContext } from './types';
