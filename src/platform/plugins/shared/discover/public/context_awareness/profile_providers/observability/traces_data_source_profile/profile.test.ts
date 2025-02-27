@@ -11,9 +11,12 @@ import { DataView } from '@kbn/data-views-plugin/common';
 import { DataSourceCategory, DataSourceProfileProviderParams } from '../../../profiles';
 import { DataSourceType, createDataViewDataSource } from '../../../../../common/data_sources';
 import { createTracesDataSourceProfileProvider } from './profile';
+import { createContextAwarenessMocks } from '../../../__mocks__';
+
+const mockServices = createContextAwarenessMocks().profileProviderServices;
 
 describe('tracesDataSourceProfileProvider', () => {
-  const tracesDataSourceProfileProvider = createTracesDataSourceProfileProvider();
+  const tracesDataSourceProfileProvider = createTracesDataSourceProfileProvider(mockServices);
 
   const RESOLUTION_MATCH = {
     isMatch: true,

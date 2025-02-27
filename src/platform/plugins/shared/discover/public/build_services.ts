@@ -60,8 +60,9 @@ import type { NoDataPagePluginStart } from '@kbn/no-data-page-plugin/public';
 import type { AiopsPluginStart } from '@kbn/aiops-plugin/public';
 import type { DataVisualizerPluginStart } from '@kbn/data-visualizer-plugin/public';
 import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
-import { LogsDataAccessPluginStart } from '@kbn/logs-data-access-plugin/public';
-import { DiscoverSharedPublicStart } from '@kbn/discover-shared-plugin/public';
+import type { LogsDataAccessPluginStart } from '@kbn/logs-data-access-plugin/public';
+import type { ApmSourceAccessPluginStart } from '@kbn/apm-sources-access-plugin/public';
+import type { DiscoverSharedPublicStart } from '@kbn/discover-shared-plugin/public';
 import type { EmbeddableEnhancedPluginStart } from '@kbn/embeddable-enhanced-plugin/public';
 import type { DiscoverStartPlugins } from './types';
 import type { DiscoverContextAppLocator } from './application/context/services/locator';
@@ -142,6 +143,7 @@ export interface DiscoverServices {
   fieldsMetadata?: FieldsMetadataPublicStart;
   logsDataAccess?: LogsDataAccessPluginStart;
   embeddableEnhanced?: EmbeddableEnhancedPluginStart;
+  apmSourcesAccess?: ApmSourceAccessPluginStart;
 }
 
 export const buildServices = memoize(
@@ -236,6 +238,7 @@ export const buildServices = memoize(
       fieldsMetadata: plugins.fieldsMetadata,
       logsDataAccess: plugins.logsDataAccess,
       embeddableEnhanced: plugins.embeddableEnhanced,
+      apmSourcesAccess: plugins.apmSourcesAccess,
     };
   }
 );

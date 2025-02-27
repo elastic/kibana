@@ -1,0 +1,58 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import type { ApmSourceAccessPluginStart } from '@kbn/apm-sources-access-plugin/public';
+import { createRegExpPatternFrom, testPatternAgainstAllowedList } from '@kbn/data-view-utils';
+
+export interface TracesContextService {
+  getAllTracesIndexPattern(): string | undefined;
+  isTracesIndexPattern(indexPattern: unknown): boolean;
+  containsTracesIndexPattern(indexPattern: unknown): boolean;
+}
+
+export interface TracesContextServiceDeps {
+  apmSourcesAccess?: ApmSourceAccessPluginStart;
+}
+
+export const DEFAULT_ALLOWED_TRACES_BASE_PATTERNS = ['trace', 'traces'];
+
+export const DEFAULT_ALLOWED_TRACES_BASE_PATTERNS_REGEXP = createRegExpPatternFrom(
+  DEFAULT_ALLOWED_TRACES_BASE_PATTERNS,
+  'data'
+);
+
+export const createTracesContextService = async ({
+  apmSourcesAccess,
+}: TracesContextServiceDeps): Promise<TracesContextService> => {
+  let traces: string;
+  let allowedDataSources: RegExp[] = [DEFAULT_ALLOWED_TRACES_BASE_PATTERNS_REGEXP];
+
+  if (apmSourcesAccess) {
+    const { transaction, span } = await apmSourcesAccess.getApmSources();
+    const uniqIndices = flattenUnique(transaction.split(','), span.split(','));
+    traces = uniqIndices.join();
+    allowedDataSources = allowedDataSources.concat(createRegExpPatternFrom(uniqIndices, 'data'));
+  } else {
+    traces = DEFAULT_ALLOWED_TRACES_BASE_PATTERNS.join();
+  }
+
+  return {
+    getAllTracesIndexPattern: () => traces,
+    isTracesIndexPattern: testPatternAgainstAllowedList(allowedDataSources),
+    containsTracesIndexPattern: containsTracesIndexPattern(allowedDataSources),
+  };
+};
+
+const flattenUnique = <T>(...items: T[][]): T[] => [...new Set(items.flat())];
+
+const containsTracesIndexPattern = (allowedDataSources: RegExp[]) => (indexPattern: unknown) =>
+  typeof indexPattern === 'string' &&
+  indexPattern
+    .split(',')
+    .some((index) => allowedDataSources.some((pattern) => pattern.test(index)));
