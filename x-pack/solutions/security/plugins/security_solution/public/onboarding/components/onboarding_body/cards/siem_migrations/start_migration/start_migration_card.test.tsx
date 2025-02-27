@@ -116,7 +116,7 @@ describe('StartMigrationsBody', () => {
     expect(screen.getByTestId('startMigrationUploadRulesButton')).toBeDisabled();
   });
 
-  it('should render missing Privileges Callout when missing capabilities and no Upsell', () => {
+  it('should render missing Privileges Callout when there are missing capabilities but NO Upsell', () => {
     renderTestComponent({
       checkCompleteMetadata: {
         missingCapabilities: ['missingPrivileges'],

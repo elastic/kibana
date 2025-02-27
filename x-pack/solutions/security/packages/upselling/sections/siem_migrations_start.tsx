@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiButton, EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
+import { EuiButton, EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiPanel, EuiText } from '@elastic/eui';
 import React from 'react';
 
 export const SiemMigrationStartUpsellSection = ({
@@ -28,7 +28,9 @@ export const SiemMigrationStartUpsellSection = ({
         >
           <EuiFlexGroup>
             <EuiFlexItem grow={true}>
-              <p data-test-subj="siemMigrationStartUpsellMessage">{upgradeMessage}</p>
+              <EuiText size="s" data-test-subj="siemMigrationStartUpsellMessage">
+                {upgradeMessage}
+              </EuiText>
             </EuiFlexItem>
             {upgradeHref ? (
               <EuiFlexItem grow={false}>

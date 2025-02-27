@@ -31,7 +31,7 @@ export const SIEM_MIGRATION_UPSELLING_TITLE = (requiredTier: string) =>
   i18n.translate('xpack.securitySolutionServerless.upselling.siemMigrations.title', {
     defaultMessage: 'Security {requiredTier} tier required',
     values: {
-      requiredLicense: requiredTier,
+      requiredTier,
     },
   });
 
