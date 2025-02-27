@@ -119,7 +119,7 @@ export function fetchAll(
           expressions,
           profilesManager,
           timeRange: getInternalState().dataRequestParams.timeRangeAbsolute,
-          esqlVariables: getInternalState().esqlVariables,
+          esqlVariables: getAppState().esqlVariables,
         })
       : fetchDocuments(searchSource, fetchDeps);
     const fetchType = isEsqlQuery ? 'fetchTextBased' : 'fetchDocuments';

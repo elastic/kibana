@@ -22,6 +22,7 @@ import {
   selectDataViewsForPicker,
   useInternalStateSelector,
 } from '../../state_management/discover_internal_state_container';
+import { FetchStatus } from '../../../types';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import type { DiscoverStateContainer } from '../../state_management/discover_state';
 import { onSaveSearch } from './on_save_search';
@@ -55,6 +56,7 @@ export const DiscoverTopNav = ({
   const services = useDiscoverServices();
   const { dataViewEditor, navigation, dataViewFieldEditor, data, uiSettings, setHeaderActionMenu } =
     services;
+  const documents$ = stateContainer.dataState.data$.documents$;
   const { timefilter } = data.query.timefilter;
   const timeRange = timefilter.getTime();
   const [controlGroupAPI, setControlGroupAPI] = useState<ControlGroupRendererApi | undefined>();
@@ -62,15 +64,16 @@ export const DiscoverTopNav = ({
   const { savedDataViews, managedDataViews, adHocDataViews } =
     useInternalStateSelector(selectDataViewsForPicker);
   const dataView = useInternalStateSelector((state) => state.dataView!);
+  const isEsqlMode = useIsEsqlMode();
   const isESQLToDataViewTransitionModalVisible = useInternalStateSelector(
     (state) => state.isESQLToDataViewTransitionModalVisible
   );
-  const stateEsqlVariables = useInternalStateSelector((state) => state.esqlVariables);
+  const stateEsqlVariables = useAppStateSelector((state) => state.esqlVariables);
 
   controlGroupAPI?.esqlVariables$.subscribe((newESQLVariables) => {
-    stateContainer.internalState.transitions.setESQLVariables(newESQLVariables);
-    if (!isEqual(newESQLVariables, stateEsqlVariables)) {
-      stateContainer.actions.fetchData();
+    if (!isEqual(newESQLVariables, stateEsqlVariables) && isEsqlMode) {
+      stateContainer.appState.update({ esqlVariables: newESQLVariables });
+      documents$.next({ fetchStatus: FetchStatus.PARTIAL });
     }
   });
   const { onSaveControl, onCancelControl } = useESQLVariables({
@@ -79,7 +82,6 @@ export const DiscoverTopNav = ({
   });
 
   const savedSearch = useSavedSearchInitial();
-  const isEsqlMode = useIsEsqlMode();
   const showDatePicker = useMemo(() => {
     // always show the timepicker for ES|QL mode
     return (

@@ -14,7 +14,6 @@ import {
   ReduxLikeStateContainer,
 } from '@kbn/kibana-utils-plugin/common';
 import type { DataView, DataViewListItem } from '@kbn/data-views-plugin/common';
-import type { ESQLControlVariable } from '@kbn/esql-validation-autocomplete';
 import type { Filter, TimeRange } from '@kbn/es-query';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
 import type { UnifiedHistogramVisContext } from '@kbn/unified-histogram-plugin/public';
@@ -31,7 +30,6 @@ export interface InternalState {
   savedDataViews: DataViewListItem[];
   adHocDataViews: DataView[];
   defaultProfileAdHocDataViewIds: string[];
-  esqlVariables: ESQLControlVariable[];
   expandedDoc: DataTableRecord | undefined;
   customFilters: Filter[];
   overriddenVisContextAfterInvalidation: UnifiedHistogramVisContext | {} | undefined; // it will be used during saved search saving
@@ -72,9 +70,6 @@ export interface InternalStateTransitions {
   setIsESQLToDataViewTransitionModalVisible: (
     state: InternalState
   ) => (isVisible: boolean) => InternalState;
-  setESQLVariables: (
-    state: InternalState
-  ) => (esqlVariables: ESQLControlVariable[]) => InternalState;
   setResetDefaultProfileState: (
     state: InternalState
   ) => (
@@ -97,7 +92,6 @@ export function getInternalStateContainer() {
   return createStateContainer<InternalState, InternalStateTransitions, {}>(
     {
       dataView: undefined,
-      esqlVariables: [],
       isDataViewLoading: false,
       adHocDataViews: [],
       defaultProfileAdHocDataViewIds: [],
@@ -129,10 +123,6 @@ export function getInternalStateContainer() {
           ...prevState,
           isESQLToDataViewTransitionModalVisible: isVisible,
         }),
-      setESQLVariables: (prevState: InternalState) => (esqlVariables: ESQLControlVariable[]) => ({
-        ...prevState,
-        esqlVariables,
-      }),
       setSavedDataViews: (prevState: InternalState) => (nextDataViewList: DataViewListItem[]) => ({
         ...prevState,
         savedDataViews: nextDataViewList,
