@@ -10,6 +10,7 @@
 import { CoreSetup, CoreStart, Logger, Plugin, PluginInitializerContext } from '@kbn/core/server';
 import type { ContentManagementServerSetup } from '@kbn/content-management-plugin/server';
 import { DashboardPluginStart } from '@kbn/dashboard-plugin/server';
+import { schema } from '@kbn/config-schema';
 import { CONTENT_ID, LATEST_VERSION } from '../common';
 import { LinksAttributes } from '../common/content_management';
 import { LinksStorage } from './content_management';
@@ -45,17 +46,29 @@ export class LinksServerPlugin implements Plugin<object, object> {
 
     router.get(
       {
-        path: '/api/links',
-        validate: false,
+        path: '/api/search_dashboards',
+        validate: {
+          query: schema.object({
+            spaces: schema.maybe(
+              schema.oneOf([schema.string(), schema.literal('*')], {
+                meta: { description: 'Comma separated list of spaces or "*" for all spaces' },
+              })
+            ),
+            text: schema.maybe(schema.string()),
+          }),
+        },
       },
       async (context, req, res) => {
         const [_, { dashboard }] = await core.getStartServices();
+        const { text, spaces: spacesString } = req.query;
+        const spaces = spacesString?.split(',');
         const { contentClient } = dashboard;
         const dashboardClient = contentClient!.getForRequest({
           requestHandlerContext: context,
           request: req,
+          version: 3,
         });
-        const dashboards = await dashboardClient.search({ text: 'web traffic' });
+        const dashboards = await dashboardClient.search({ text }, { spaces });
         return res.ok({ body: dashboards });
       }
     );
