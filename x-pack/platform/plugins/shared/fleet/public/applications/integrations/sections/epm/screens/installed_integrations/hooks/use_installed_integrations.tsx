@@ -97,6 +97,17 @@ export function useInstalledIntegrations(
     );
   }, [internalInstalledPackages, localSearch, filters]);
 
+  const countPerStatus = useMemo(() => {
+    return internalInstalledPackagesFiltered.reduce((acc, item) => {
+      if (!acc[item.extra.installation_status]) {
+        acc[item.extra.installation_status] = 0;
+      }
+      (acc[item.extra.installation_status] as number)++;
+
+      return acc;
+    }, {} as { [k: string]: number | undefined });
+  }, [internalInstalledPackagesFiltered]);
+
   const installedPackages: PackageListItemWithExtra[] = useMemo(() => {
     // Pagination
     const startAt = (pagination.pagination.currentPage - 1) * pagination.pagination.pageSize;
@@ -112,6 +123,7 @@ export function useInstalledIntegrations(
 
   return {
     total: internalInstalledPackagesFiltered.length,
+    countPerStatus,
     installedPackages,
     isInitialLoading,
     isLoading,

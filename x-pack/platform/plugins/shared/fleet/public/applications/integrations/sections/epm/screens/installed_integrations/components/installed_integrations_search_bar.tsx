@@ -28,7 +28,8 @@ const SEARCH_DEBOUNCE_MS = 250;
 
 export const InstalledIntegrationsSearchBar: React.FunctionComponent<{
   filters: InstalledIntegrationsFilter;
-}> = ({ filters }) => {
+  countPerStatus: { [k: string]: number | undefined };
+}> = ({ filters, countPerStatus }) => {
   const addUrlFilter = useAddUrlFilters();
   const theme = useEuiTheme();
   const [searchTermas, setSearchTerms] = useState(filters.q);
@@ -125,6 +126,7 @@ export const InstalledIntegrationsSearchBar: React.FunctionComponent<{
                   }
                 `}
                 hasActiveFilters={filters.installationStatus?.includes(item.status)}
+                numFilters={countPerStatus[item.status] ?? 0}
                 onClick={() => {
                   if (!filters.installationStatus?.includes(item.status)) {
                     addUrlFilter({

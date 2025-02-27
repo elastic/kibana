@@ -19,16 +19,14 @@ export const InstalledIntegrationsPage: React.FunctionComponent = () => {
   // State management
   const filters = useUrlFilters();
   const pagination = useUrlPagination();
-  const { installedPackages, isLoading, isInitialLoading, total } = useInstalledIntegrations(
-    filters,
-    pagination
-  );
+  const { installedPackages, countPerStatus, isLoading, isInitialLoading, total } =
+    useInstalledIntegrations(filters, pagination);
 
   // TODO loading/error state
 
   return (
     <>
-      <InstalledIntegrationsSearchBar filters={filters} />
+      <InstalledIntegrationsSearchBar filters={filters} countPerStatus={countPerStatus} />
       <EuiSpacer size="m" />
       <InstalledIntegrationsTable
         total={total}
