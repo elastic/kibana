@@ -15,6 +15,7 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
+import { documentationService } from '../../../../services';
 
 interface SemanticTextBannerProps {
   isSemanticTextEnabled: boolean;
@@ -52,10 +53,7 @@ const platinumLicenseMessage = (
         </strong>
       ),
       learnMore: (
-        <EuiLink
-          href="https://www.elastic.co/guide/en/elasticsearch/reference/current/inference-apis.html#infer-chunking-config"
-          target="_blank"
-        >
+        <EuiLink href={documentationService.getMappingDocumentationLink()} target="_blank">
           <FormattedMessage
             id="xpack.idxMgmt.indexDetails.mappings.semanticTextBanner.learnMore"
             defaultMessage="Learn more"
