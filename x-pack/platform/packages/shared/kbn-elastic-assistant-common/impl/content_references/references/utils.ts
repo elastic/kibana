@@ -33,8 +33,11 @@ export const getContentReferenceIds = (
  * @returns ContentReferenceBlock
  */
 export const contentReferenceBlock = (
-  contentReference: ContentReference
-): ContentReferenceBlock => {
+  contentReference: ContentReference | undefined
+): ContentReferenceBlock | '' => {
+  if (!contentReference) {
+    return '';
+  }
   return `{reference(${contentReference.id})}`;
 };
 
@@ -43,7 +46,10 @@ export const contentReferenceBlock = (
  * @param contentReference A ContentReference
  * @returns the string: `Reference: <contentReferenceBlock>`
  */
-export const contentReferenceString = (contentReference: ContentReference) => {
+export const contentReferenceString = (contentReference: ContentReference | undefined) => {
+  if (!contentReference) {
+    return '';
+  }
   return `Citation: ${contentReferenceBlock(contentReference)}` as const;
 };
 

@@ -151,11 +151,9 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     it('Doc is searchable', async () => {
       const response = await esClient.search({
         index: 'logs.nginx',
-        body: {
-          query: {
-            match: {
-              message2: 'mylogger',
-            },
+        query: {
+          match: {
+            message2: 'mylogger',
           },
         },
       });
@@ -165,11 +163,9 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     it('Non-indexed field is not searchable', async () => {
       const response = await esClient.search({
         index: 'logs.nginx',
-        body: {
-          query: {
-            match: {
-              'log.logger': 'mylogger',
-            },
+        query: {
+          match: {
+            'log.logger': 'mylogger',
           },
         },
       });

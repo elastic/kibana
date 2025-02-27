@@ -47,10 +47,8 @@ export const useIndicatorsTotalCount = () => {
     const req = {
       params: {
         index: selectedPatterns,
-        body: {
-          size: 0,
-          query,
-        },
+        size: 0,
+        query,
       },
     };
 

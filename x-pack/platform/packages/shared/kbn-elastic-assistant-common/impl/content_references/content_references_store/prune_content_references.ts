@@ -19,7 +19,7 @@ import { ContentReferencesStore, ContentReferenceBlock } from '../types';
 export const pruneContentReferences = (
   content: string,
   contentReferencesStore: ContentReferencesStore
-): ContentReferences | undefined => {
+): ContentReferences => {
   const fullStore = contentReferencesStore.getStore();
   const prunedStore: Record<string, ContentReference> = {};
   const matches = content.matchAll(/\{reference\([0-9a-zA-Z, ]+\)\}/g);
@@ -35,10 +35,6 @@ export const pruneContentReferences = (
         }
       }
     }
-  }
-
-  if (isEmpty(prunedStore)) {
-    return undefined;
   }
 
   return prunedStore;

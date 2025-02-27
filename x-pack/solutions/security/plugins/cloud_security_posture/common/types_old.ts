@@ -103,8 +103,6 @@ export interface ComplianceDashboardDataV2 {
   benchmarks: BenchmarkData[];
 }
 
-export type BenchmarkId = CspBenchmarkRuleMetadata['benchmark']['id'];
-export type BenchmarkName = CspBenchmarkRuleMetadata['benchmark']['name'];
 export type RuleSection = CspBenchmarkRuleMetadata['section'];
 
 // Fleet Integration types

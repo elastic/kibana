@@ -52,12 +52,10 @@ import { collectVariables, excludeVariablesFromCurrentCommand } from '../shared/
 import type { ESQLPolicy, ESQLRealField, ESQLVariable, ReferenceMaps } from '../validation/types';
 import {
   allStarConstant,
-  colonCompleteItem,
   commaCompleteItem,
   getAssignmentDefinitionCompletitionItem,
   getCommandAutocompleteDefinitions,
   pipeCompleteItem,
-  semiColonCompleteItem,
 } from './complete_items';
 import {
   buildFieldsDefinitions,
@@ -105,8 +103,8 @@ import {
   getSuggestionsToRightOfOperatorExpression,
   checkFunctionInvocationComplete,
 } from './helper';
-import { FunctionParameter, isParameterType } from '../definitions/types';
-import { comparisonFunctions } from '../definitions/builtin';
+import { FunctionParameter, isParameterType, FunctionDefinitionTypes } from '../definitions/types';
+import { comparisonFunctions } from '../definitions/all_operators';
 import { getRecommendedQueriesSuggestions } from './recommended_queries/suggestions';
 
 type GetFieldsMapFn = () => Promise<Map<string, ESQLRealField>>;
@@ -210,6 +208,7 @@ export async function suggest(
   if (
     astContext.type === 'expression' ||
     (astContext.type === 'option' && astContext.command?.name === 'join') ||
+    (astContext.type === 'option' && astContext.command?.name === 'dissect') ||
     (astContext.type === 'option' && astContext.command?.name === 'from')
   ) {
     return getSuggestionsWithinCommandExpression(
@@ -285,7 +284,7 @@ export function getFieldsByTypeRetriever(
   const supportsControls = resourceRetriever?.canSuggestVariables?.() ?? false;
   return {
     getFieldsByType: async (
-      expectedType: string | string[] = 'any',
+      expectedType: Readonly<string> | Readonly<string[]> = 'any',
       ignored: string[] = [],
       options
     ) => {
@@ -791,7 +790,7 @@ async function getExpressionSuggestionsByType(
       // it can be just literal values (i.e. "string")
       if (argDef.constantOnly) {
         // ... | <COMMAND> ... <suggest>
-        suggestions.push(...getCompatibleLiterals(command.name, [argDef.type], [argDef.name]));
+        suggestions.push(...getCompatibleLiterals(command.name, [argDef.type]));
       } else {
         // or it can be anything else as long as it is of the right type and the end (i.e. column or function)
         if (!nodeArg) {
@@ -993,11 +992,13 @@ async function getFunctionArgsSuggestions(
 
   const shouldAddComma =
     hasMoreMandatoryArgs &&
-    fnDefinition.type !== 'builtin' &&
+    fnDefinition.type !== FunctionDefinitionTypes.OPERATOR &&
     !isCursorFollowedByComma &&
     !canBeBooleanCondition;
   const shouldAdvanceCursor =
-    hasMoreMandatoryArgs && fnDefinition.type !== 'builtin' && !isCursorFollowedByComma;
+    hasMoreMandatoryArgs &&
+    fnDefinition.type !== FunctionDefinitionTypes.OPERATOR &&
+    !isCursorFollowedByComma;
 
   const suggestedConstants = uniq(
     typesToSuggestNext
@@ -1049,9 +1050,9 @@ async function getFunctionArgsSuggestions(
       fnToIgnore.push(
         ...getFunctionsToIgnoreForStats(command, finalCommandArgIndex),
         // ignore grouping functions, they are only used for grouping
-        ...getAllFunctions({ type: 'grouping' }).map(({ name }) => name),
+        ...getAllFunctions({ type: FunctionDefinitionTypes.GROUPING }).map(({ name }) => name),
         ...(isAggFunctionUsedAlready(command, finalCommandArgIndex)
-          ? getAllFunctions({ type: 'agg' }).map(({ name }) => name)
+          ? getAllFunctions({ type: FunctionDefinitionTypes.AGG }).map(({ name }) => name)
           : [])
       );
     }
@@ -1078,7 +1079,6 @@ async function getFunctionArgsSuggestions(
       ...getCompatibleLiterals(
         command.name,
         getTypesFromParamDefs(constantOnlyParamDefs) as string[],
-        undefined,
         {
           addComma: shouldAddComma,
           advanceCursorAndOpenSuggestions: hasMoreMandatoryArgs,
@@ -1151,7 +1151,7 @@ async function getFunctionArgsSuggestions(
       if (isLiteralItem(arg) && isNumericType(arg.literalType)) {
         // ... | EVAL fn(2 <suggest>)
         suggestions.push(
-          ...getCompatibleLiterals(command.name, ['time_literal_unit'], undefined, {
+          ...getCompatibleLiterals(command.name, ['time_literal_unit'], {
             addComma: shouldAddComma,
             advanceCursorAndOpenSuggestions: hasMoreMandatoryArgs,
           })
@@ -1400,15 +1400,6 @@ async function getOptionArgsSuggestions(
   if (command.name === 'rename') {
     if (option.args.length < 2) {
       suggestions.push(...buildVariablesDefinitions([findNewVariable(anyVariables)]));
-    }
-  }
-
-  if (command.name === 'dissect') {
-    if (
-      option.args.filter((arg) => !(isSingleItem(arg) && arg.type === 'unknown')).length < 1 &&
-      optionDef
-    ) {
-      suggestions.push(colonCompleteItem, semiColonCompleteItem);
     }
   }
 

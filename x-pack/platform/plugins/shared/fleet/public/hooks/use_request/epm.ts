@@ -30,7 +30,11 @@ import type {
   GetInputsTemplatesRequest,
   GetInputsTemplatesResponse,
 } from '../../types';
-import type { FleetErrorResponse, GetStatsResponse } from '../../../common/types';
+import type {
+  FleetErrorResponse,
+  GetEpmDataStreamsResponse,
+  GetStatsResponse,
+} from '../../../common/types';
 import { API_VERSIONS } from '../../../common/constants';
 
 import { getCustomIntegrations } from '../../services/custom_integrations';
@@ -234,6 +238,16 @@ export const useGetFileByPathQuery = (filePath: string) => {
   return useQuery<SendRequestResponse<string>, RequestError>(['get-file', filePath], () =>
     sendRequest<string>({
       path: epmRouteService.getFilePath(filePath),
+      method: 'get',
+      version: API_VERSIONS.public.v1,
+    })
+  );
+};
+
+export const useGetEpmDatastreams = () => {
+  return useQuery<GetEpmDataStreamsResponse, RequestError>(['get-epm-datastreams'], () =>
+    sendRequestForRq<GetEpmDataStreamsResponse>({
+      path: epmRouteService.getDatastreamsPath(),
       method: 'get',
       version: API_VERSIONS.public.v1,
     })

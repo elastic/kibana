@@ -1994,5 +1994,48 @@ export default function (providerContext: FtrProviderContext) {
         expect(items.length).equal(1);
       });
     });
+
+    describe('GET /api/fleet/agent_policies/{id}/auto_upgrade_agents_status', () => {
+      it('should get auto upgrade agents status', async () => {
+        const {
+          body: { item: policyWithAgents },
+        } = await supertest
+          .post(`/api/fleet/agent_policies`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: 'Policy with agents 2',
+            namespace: 'default',
+          })
+          .expect(200);
+        await generateAgent(providerContext, 'healhty', 'agent-1', policyWithAgents.id, '8.16.1');
+        await generateAgent(providerContext, 'healhty', 'agent-2', policyWithAgents.id, '8.16.1', {
+          state: 'UPG_FAILED',
+          target_version: '8.16.3',
+        });
+        const { body } = await supertest
+          .get(`/api/fleet/agent_policies/${policyWithAgents.id}/auto_upgrade_agents_status`)
+          .set('kbn-xsrf', 'xxx')
+          .expect(200);
+
+        expect(body).to.eql({
+          currentVersions: [
+            {
+              agents: 2,
+              failedUpgradeAgents: 0,
+              version: '8.16.1',
+            },
+            {
+              agents: 0,
+              failedUpgradeAgents: 1,
+              version: '8.16.3',
+            },
+          ],
+          totalAgents: 2,
+        });
+
+        await supertest.delete(`/api/fleet/agents/agent-1`).set('kbn-xsrf', 'xx').expect(200);
+        await supertest.delete(`/api/fleet/agents/agent-2`).set('kbn-xsrf', 'xx').expect(200);
+      });
+    });
   });
 }

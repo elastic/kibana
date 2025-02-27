@@ -10,7 +10,7 @@ import {
   addMessages,
   getContextConditionsDescription,
 } from './action_context';
-import { EsQueryRuleParams, EsQueryRuleParamsSchema } from './rule_type_params';
+import { EsQueryRuleParams, EsQueryRuleParamsSchema } from '@kbn/response-ops-rule-params/es_query';
 import { Comparator } from '../../../common/comparator_types';
 
 describe('addMessages', () => {
