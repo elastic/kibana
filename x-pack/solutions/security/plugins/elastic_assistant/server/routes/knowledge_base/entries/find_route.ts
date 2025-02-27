@@ -16,6 +16,7 @@ import {
   ELASTIC_AI_ASSISTANT_KNOWLEDGE_BASE_ENTRIES_URL_FIND,
   FindKnowledgeBaseEntriesRequestQuery,
   FindKnowledgeBaseEntriesResponse,
+  KnowledgeBaseResource,
 } from '@kbn/elastic-assistant-common';
 import { buildRouteValidationWithZod } from '@kbn/elastic-assistant-common/impl/schemas/common';
 import { estypes } from '@elastic/elasticsearch';
@@ -59,7 +60,7 @@ export const findKnowledgeBaseEntriesRoute = (router: ElasticAssistantPluginRout
           const ctx = await context.resolve(['core', 'elasticAssistant', 'licensing']);
 
           // Perform license, authenticated user and FF checks
-          const checkResponse = performChecks({
+          const checkResponse = await performChecks({
             context: ctx,
             request,
             response,
@@ -107,7 +108,7 @@ export const findKnowledgeBaseEntriesRoute = (router: ElasticAssistantPluginRout
           const systemEntries = [
             {
               bucketId: 'securityLabsId',
-              kbResource: SECURITY_LABS_RESOURCE,
+              kbResource: SECURITY_LABS_RESOURCE as KnowledgeBaseResource,
               name: 'Security Labs',
               required: true,
             },
@@ -138,6 +139,7 @@ export const findKnowledgeBaseEntriesRoute = (router: ElasticAssistantPluginRout
                         createdBy: entry.created_by,
                         updatedAt: entry.updated_at,
                         updatedBy: entry.updated_by,
+                        global: true,
                         users: [],
                         name,
                         namespace: entry.namespace,
