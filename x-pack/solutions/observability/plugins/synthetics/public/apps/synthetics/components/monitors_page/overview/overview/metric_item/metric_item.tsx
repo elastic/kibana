@@ -15,7 +15,7 @@ import { useTheme } from '@kbn/observability-shared-plugin/public';
 import moment from 'moment';
 import { useSelector, useDispatch } from 'react-redux';
 
-import { FlyoutParamProps } from './../types';
+import { FlyoutParamProps } from '../types';
 import { MetricItemBody } from './metric_item_body';
 import {
   selectErrorPopoverState,
@@ -25,7 +25,7 @@ import {
 import { useLocationName, useStatusByLocationOverview } from '../../../../../hooks';
 import { formatDuration } from '../../../../../utils/formatting';
 import { OverviewStatusMetaData } from '../../../../../../../../common/runtime_types';
-import { ActionsPopover } from './../actions_popover';
+import { ActionsPopover } from '../actions_popover';
 import {
   hideTestNowFlyoutAction,
   manualTestRunInProgressSelector,
