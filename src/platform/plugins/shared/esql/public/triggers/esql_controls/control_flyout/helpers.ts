@@ -16,9 +16,10 @@ function inKnownTimeInterval(timeIntervalUnit: string): boolean {
 export const updateQueryStringWithVariable = (
   queryString: string,
   variable: string,
-  cursorPosition: monaco.Position
+  cursorPosition: monaco.Position,
+  variableType: ESQLVariableType
 ) => {
-  const variableName = `?${variable}`;
+  const variableName = variableType !== ESQLVariableType.UNKNOWN ? `?${variable}` : variable;
   const cursorColumn = cursorPosition?.column ?? 0;
   const cursorLine = cursorPosition?.lineNumber ?? 0;
   const lines = queryString.split('\n');

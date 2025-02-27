@@ -10,11 +10,11 @@
 import React, { useCallback, useState, useMemo, useEffect } from 'react';
 import useMountedState from 'react-use/lib/useMountedState';
 import { i18n } from '@kbn/i18n';
+import { isEqual } from 'lodash';
 import {
   EuiComboBox,
   EuiComboBoxOptionOption,
   EuiFormRow,
-  EuiFlyoutBody,
   EuiCallOut,
   type EuiSwitchEvent,
   EuiPanel,
@@ -31,33 +31,20 @@ import {
 } from '@kbn/esql-utils';
 import { ESQLLangEditor } from '../../../create_editor';
 import type { ESQLControlState, ControlWidthOptions } from '../types';
-import {
-  Header,
-  Footer,
-  ControlWidth,
-  ControlType,
-  VariableName,
-  ControlLabel,
-} from './shared_form_components';
-import {
-  getRecurrentVariableName,
-  getFlyoutStyling,
-  areValuesIntervalsValid,
-  validateVariableName,
-  getVariablePrefix,
-} from './helpers';
+import { ControlWidth, ControlLabel } from './shared_form_components';
+import { getRecurrentVariableName, getVariablePrefix } from './helpers';
 import { EsqlControlType } from '../types';
 import { ChooseColumnPopover } from './choose_column_popover';
 
 interface ValueControlFormProps {
   search: ISearchGeneric;
   variableType: ESQLVariableType;
+  variableName: string;
+  controlFlyoutType: EsqlControlType;
   queryString: string;
   esqlVariables: ESQLControlVariable[];
-  closeFlyout: () => void;
-  onCreateControl: (state: ESQLControlState, variableName: string) => void;
-  onEditControl: (state: ESQLControlState) => void;
-  onCancelControl?: () => void;
+  controlState?: ESQLControlState;
+  setControlState: (state: ESQLControlState) => void;
   initialState?: ESQLControlState;
 }
 
@@ -65,14 +52,13 @@ const SUGGESTED_INTERVAL_VALUES = ['5 minutes', '1 hour', '1 day', '1 week', '1 
 
 export function ValueControlForm({
   variableType,
+  variableName,
+  controlFlyoutType,
   initialState,
-  onCancelControl,
+  setControlState,
   queryString,
   esqlVariables,
   search,
-  closeFlyout,
-  onCreateControl,
-  onEditControl,
 }: ValueControlFormProps) {
   const isMounted = useMountedState();
   const valuesField = useMemo(() => {
@@ -103,13 +89,6 @@ export function ValueControlForm({
     return getRecurrentVariableName(variablePrefix, existingVariables);
   }, [esqlVariables, initialState, valuesField, variableType]);
 
-  const [controlFlyoutType, setControlFlyoutType] = useState<EsqlControlType>(
-    initialState?.controlType ??
-      (variableType === ESQLVariableType.TIME_LITERAL
-        ? EsqlControlType.STATIC_VALUES
-        : EsqlControlType.VALUES_FROM_QUERY)
-  );
-
   const [availableValuesOptions, setAvailableValuesOptions] = useState<EuiComboBoxOptionOption[]>(
     variableType === ESQLVariableType.TIME_LITERAL
       ? SUGGESTED_INTERVAL_VALUES.map((option) => {
@@ -138,48 +117,14 @@ export function ValueControlForm({
     variableType === ESQLVariableType.VALUES ? initialState?.esqlQuery ?? '' : ''
   );
   const [esqlQueryErrors, setEsqlQueryErrors] = useState<Error[] | undefined>();
-  const [formIsInvalid, setFormIsInvalid] = useState(false);
   const [queryColumns, setQueryColumns] = useState<string[]>(valuesField ? [valuesField] : []);
-  const [variableName, setVariableName] = useState(suggestedVariableName);
   const [label, setLabel] = useState(initialState?.title ?? '');
   const [minimumWidth, setMinimumWidth] = useState(initialState?.width ?? 'medium');
   const [grow, setGrow] = useState(initialState?.grow ?? false);
 
-  const isControlInEditMode = useMemo(() => !!initialState, [initialState]);
-
-  const areValuesValid = useMemo(() => {
-    return variableType === ESQLVariableType.TIME_LITERAL
-      ? areValuesIntervalsValid(selectedValues.map((option) => option.label))
-      : true;
-  }, [variableType, selectedValues]);
-
-  useEffect(() => {
-    const variableExists =
-      esqlVariables.some((variable) => variable.key === variableName.replace('?', '')) &&
-      !isControlInEditMode;
-    setFormIsInvalid(!variableName || variableExists || !areValuesValid || !selectedValues.length);
-  }, [
-    areValuesValid,
-    esqlVariables,
-    isControlInEditMode,
-    selectedValues.length,
-    valuesQuery,
-    variableName,
-  ]);
-
   const onValuesChange = useCallback((selectedOptions: EuiComboBoxOptionOption[]) => {
     setSelectedValues(selectedOptions);
   }, []);
-
-  const onFlyoutTypeChange = useCallback(
-    (type: EsqlControlType) => {
-      setControlFlyoutType(type);
-      if (type !== controlFlyoutType && variableType === ESQLVariableType.TIME_LITERAL) {
-        setSelectedValues([]);
-      }
-    },
-    [controlFlyoutType, variableType]
-  );
 
   const onCreateOption = useCallback(
     (searchValue: string, flattenedOptions: EuiComboBoxOptionOption[] = []) => {
@@ -206,14 +151,6 @@ export function ValueControlForm({
       setSelectedValues((prevSelected) => [...prevSelected, newOption]);
     },
     [availableValuesOptions]
-  );
-
-  const onVariableNameChange = useCallback(
-    (e: { target: { value: React.SetStateAction<string> } }) => {
-      const text = validateVariableName(String(e.target.value));
-      setVariableName(text);
-    },
-    []
   );
 
   const onLabelChange = useCallback((e: { target: { value: React.SetStateAction<string> } }) => {
@@ -292,7 +229,7 @@ export function ValueControlForm({
     variableName,
   ]);
 
-  const onCreateValueControl = useCallback(async () => {
+  useEffect(() => {
     const availableOptions = selectedValues.map((value) => value.label);
     const state = {
       availableOptions,
@@ -300,34 +237,27 @@ export function ValueControlForm({
       width: minimumWidth,
       title: label || variableName,
       variableName,
-      variableType,
+      variableType:
+        variableType === ESQLVariableType.UNKNOWN ? ESQLVariableType.VALUES : variableType,
       esqlQuery: valuesQuery || queryString,
       controlType: controlFlyoutType,
       grow,
     };
-
-    if (availableOptions.length) {
-      if (!isControlInEditMode) {
-        await onCreateControl(state, variableName);
-      } else {
-        onEditControl(state);
-      }
+    if (!isEqual(state, initialState)) {
+      setControlState(state);
     }
-    closeFlyout();
   }, [
-    selectedValues,
     controlFlyoutType,
-    minimumWidth,
+    grow,
+    initialState,
     label,
+    minimumWidth,
+    queryString,
+    selectedValues,
+    setControlState,
+    valuesQuery,
     variableName,
     variableType,
-    valuesQuery,
-    queryString,
-    grow,
-    closeFlyout,
-    isControlInEditMode,
-    onCreateControl,
-    onEditControl,
   ]);
 
   const updateQuery = useCallback(
@@ -338,149 +268,119 @@ export function ValueControlForm({
     [onValuesQuerySubmit, valuesQuery]
   );
 
-  const styling = useMemo(() => getFlyoutStyling(), []);
-
   return (
     <>
-      <Header isInEditMode={isControlInEditMode} />
-      <EuiFlyoutBody
-        css={css`
-          ${styling}
-        `}
-      >
-        <ControlType
-          isDisabled={false}
-          initialControlFlyoutType={controlFlyoutType}
-          onFlyoutTypeChange={onFlyoutTypeChange}
-        />
-
-        <VariableName
-          variableName={variableName}
-          isControlInEditMode={isControlInEditMode}
-          onVariableNameChange={onVariableNameChange}
-          esqlVariables={esqlVariables}
-        />
-
-        {controlFlyoutType === EsqlControlType.VALUES_FROM_QUERY && (
-          <>
-            <EuiFormRow
-              label={i18n.translate('esql.flyout.valuesQueryEditor.label', {
-                defaultMessage: 'Values query',
-              })}
-              fullWidth
-            >
-              <ESQLLangEditor
-                query={{ esql: valuesQuery }}
-                onTextLangQueryChange={(q) => {
-                  setValuesQuery(q.esql);
-                }}
-                hideTimeFilterInfo={true}
-                disableAutoFocus={true}
-                errors={esqlQueryErrors}
-                editorIsInline
-                hideRunQueryText
-                onTextLangQuerySubmit={async (q, a) => {
-                  if (q) {
-                    await onValuesQuerySubmit(q.esql);
-                  }
-                }}
-                isDisabled={false}
-                isLoading={false}
-              />
-            </EuiFormRow>
-            {queryColumns.length > 0 && (
-              <EuiFormRow
-                label={i18n.translate('esql.flyout.previewValues.placeholder', {
-                  defaultMessage: 'Values preview',
-                })}
-                fullWidth
-              >
-                {queryColumns.length === 1 ? (
-                  <EuiPanel
-                    paddingSize="s"
-                    color="primary"
-                    css={css`
-                      white-space: wrap;
-                      overflow-y: auto;
-                      max-height: 200px;
-                    `}
-                    data-test-subj="esqlValuesPreview"
-                  >
-                    {selectedValues.map((value) => value.label).join(', ')}
-                  </EuiPanel>
-                ) : (
-                  <EuiCallOut
-                    title={i18n.translate('esql.flyout.displayMultipleColsCallout.title', {
-                      defaultMessage: 'Your query must return a single column',
-                    })}
-                    color="warning"
-                    iconType="warning"
-                    size="s"
-                    data-test-subj="esqlMoreThanOneColumnCallout"
-                  >
-                    <p>
-                      <FormattedMessage
-                        id="esql.flyout.displayMultipleColsCallout.description"
-                        defaultMessage="Your query is currently returning {totalColumns} columns. Choose column {chooseColumnPopover} or use {boldText}."
-                        values={{
-                          totalColumns: queryColumns.length,
-                          boldText: <strong>STATS BY</strong>,
-                          chooseColumnPopover: (
-                            <ChooseColumnPopover columns={queryColumns} updateQuery={updateQuery} />
-                          ),
-                        }}
-                      />
-                    </p>
-                  </EuiCallOut>
-                )}
-              </EuiFormRow>
-            )}
-          </>
-        )}
-        {controlFlyoutType === EsqlControlType.STATIC_VALUES && (
+      {controlFlyoutType === EsqlControlType.VALUES_FROM_QUERY && (
+        <>
           <EuiFormRow
-            label={i18n.translate('esql.flyout.values.label', {
-              defaultMessage: 'Values',
+            label={i18n.translate('esql.flyout.valuesQueryEditor.label', {
+              defaultMessage: 'Values query',
             })}
             fullWidth
           >
-            <EuiComboBox
-              aria-label={i18n.translate('esql.flyout.values.placeholder', {
-                defaultMessage: 'Select or add values',
-              })}
-              placeholder={i18n.translate('esql.flyout.values.placeholder', {
-                defaultMessage: 'Select or add values',
-              })}
-              data-test-subj="esqlValuesOptions"
-              options={availableValuesOptions}
-              selectedOptions={selectedValues}
-              onChange={onValuesChange}
-              onCreateOption={onCreateOption}
-              fullWidth
-              compressed
-              css={css`
-                max-height: 200px;
-                overflow-y: auto;
-              `}
+            <ESQLLangEditor
+              query={{ esql: valuesQuery }}
+              onTextLangQueryChange={(q) => {
+                setValuesQuery(q.esql);
+              }}
+              hideTimeFilterInfo={true}
+              disableAutoFocus={true}
+              errors={esqlQueryErrors}
+              editorIsInline
+              hideRunQueryText
+              onTextLangQuerySubmit={async (q, a) => {
+                if (q) {
+                  await onValuesQuerySubmit(q.esql);
+                }
+              }}
+              isDisabled={false}
+              isLoading={false}
             />
           </EuiFormRow>
-        )}
-        <ControlLabel label={label} onLabelChange={onLabelChange} />
+          {queryColumns.length > 0 && (
+            <EuiFormRow
+              label={i18n.translate('esql.flyout.previewValues.placeholder', {
+                defaultMessage: 'Values preview',
+              })}
+              fullWidth
+            >
+              {queryColumns.length === 1 ? (
+                <EuiPanel
+                  paddingSize="s"
+                  color="primary"
+                  css={css`
+                    white-space: wrap;
+                    overflow-y: auto;
+                    max-height: 200px;
+                  `}
+                  data-test-subj="esqlValuesPreview"
+                >
+                  {selectedValues.map((value) => value.label).join(', ')}
+                </EuiPanel>
+              ) : (
+                <EuiCallOut
+                  title={i18n.translate('esql.flyout.displayMultipleColsCallout.title', {
+                    defaultMessage: 'Your query must return a single column',
+                  })}
+                  color="warning"
+                  iconType="warning"
+                  size="s"
+                  data-test-subj="esqlMoreThanOneColumnCallout"
+                >
+                  <p>
+                    <FormattedMessage
+                      id="esql.flyout.displayMultipleColsCallout.description"
+                      defaultMessage="Your query is currently returning {totalColumns} columns. Choose column {chooseColumnPopover} or use {boldText}."
+                      values={{
+                        totalColumns: queryColumns.length,
+                        boldText: <strong>STATS BY</strong>,
+                        chooseColumnPopover: (
+                          <ChooseColumnPopover columns={queryColumns} updateQuery={updateQuery} />
+                        ),
+                      }}
+                    />
+                  </p>
+                </EuiCallOut>
+              )}
+            </EuiFormRow>
+          )}
+        </>
+      )}
+      {controlFlyoutType === EsqlControlType.STATIC_VALUES && (
+        <EuiFormRow
+          label={i18n.translate('esql.flyout.values.label', {
+            defaultMessage: 'Values',
+          })}
+          fullWidth
+        >
+          <EuiComboBox
+            aria-label={i18n.translate('esql.flyout.values.placeholder', {
+              defaultMessage: 'Select or add values',
+            })}
+            placeholder={i18n.translate('esql.flyout.values.placeholder', {
+              defaultMessage: 'Select or add values',
+            })}
+            data-test-subj="esqlValuesOptions"
+            options={availableValuesOptions}
+            selectedOptions={selectedValues}
+            onChange={onValuesChange}
+            onCreateOption={onCreateOption}
+            fullWidth
+            compressed
+            css={css`
+              max-height: 200px;
+              overflow-y: auto;
+            `}
+          />
+        </EuiFormRow>
+      )}
+      <ControlLabel label={label} onLabelChange={onLabelChange} />
 
-        <ControlWidth
-          minimumWidth={minimumWidth}
-          grow={grow}
-          onMinimumSizeChange={onMinimumSizeChange}
-          onGrowChange={onGrowChange}
-        />
-      </EuiFlyoutBody>
-      <Footer
-        isControlInEditMode={isControlInEditMode}
-        variableName={variableName}
-        onCancelControl={onCancelControl}
-        isSaveDisabled={formIsInvalid}
-        closeFlyout={closeFlyout}
-        onCreateControl={onCreateValueControl}
+      <ControlWidth
+        minimumWidth={minimumWidth}
+        grow={grow}
+        onMinimumSizeChange={onMinimumSizeChange}
+        onGrowChange={onGrowChange}
       />
     </>
   );

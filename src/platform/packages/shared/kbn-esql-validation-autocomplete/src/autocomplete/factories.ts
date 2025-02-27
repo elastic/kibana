@@ -575,7 +575,7 @@ export function getControlSuggestionIfSupported(
   supportsControls: boolean,
   type: ESQLVariableType,
   getVariablesByType?: (type: ESQLVariableType) => ESQLControlVariable[] | undefined
-) {
+): SuggestionRawDefinition[] {
   if (!supportsControls) {
     return [];
   }
