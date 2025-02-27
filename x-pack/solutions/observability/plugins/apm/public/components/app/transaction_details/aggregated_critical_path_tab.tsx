@@ -7,7 +7,8 @@
 
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { useMemo } from 'react';
+import React, { useMemo, useCallback } from 'react';
+import { usePerformanceContext } from '@kbn/ebt-tools';
 import { useAnyOfApmParams } from '../../../hooks/use_apm_params';
 import { useTimeRange } from '../../../hooks/use_time_range';
 import { CriticalPathFlamegraph } from '../../shared/critical_path_flamegraph';
@@ -23,11 +24,26 @@ function TransactionDetailAggregatedCriticalPath({ traceSamplesFetchResult }: Ta
     '/mobile-services/{serviceName}/transactions/view'
   );
 
+  const { onPageReady } = usePerformanceContext();
+
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 
   const traceIds = useMemo(() => {
     return traceSamplesFetchResult.data?.traceSamples.map((sample) => sample.traceId) ?? [];
   }, [traceSamplesFetchResult.data]);
+
+  const handleOnLoadTable = useCallback(() => {
+    onPageReady({
+      meta: {
+        rangeFrom: start,
+        rangeTo: end,
+      },
+      customMetrics: {
+        key1: 'traceIds',
+        value1: traceIds.length,
+      },
+    });
+  }, [start, end, traceIds, onPageReady]);
 
   return (
     <CriticalPathFlamegraph
@@ -37,6 +53,7 @@ function TransactionDetailAggregatedCriticalPath({ traceSamplesFetchResult }: Ta
       traceIds={traceIds}
       serviceName={serviceName}
       transactionName={transactionName}
+      onLoadTable={handleOnLoadTable}
     />
   );
 }

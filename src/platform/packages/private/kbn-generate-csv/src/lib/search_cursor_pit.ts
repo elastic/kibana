@@ -80,7 +80,7 @@ export class SearchCursorPit extends SearchCursor {
 
     const searchParamsPit = {
       params: {
-        body: searchBody,
+        ...searchBody,
         max_concurrent_shard_requests: effectiveMaxConcurrentShardRequests,
       },
     };
@@ -164,7 +164,7 @@ export class SearchCursorPit extends SearchCursor {
   public async closeCursor() {
     if (this.cursorId) {
       this.logger.debug(`Executing close PIT on ${this.formatCursorId(this.cursorId)}`);
-      await this.clients.es.asCurrentUser.closePointInTime({ body: { id: this.cursorId } });
+      await this.clients.es.asCurrentUser.closePointInTime({ id: this.cursorId });
     } else {
       this.logger.warn(`No PIT Id to clear!`);
     }

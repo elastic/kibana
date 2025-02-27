@@ -11,7 +11,7 @@ import type { IScopedClusterClient, Logger } from '@kbn/core/server';
 import { catchError, tap } from 'rxjs';
 import { getKbnServerError } from '@kbn/kibana-utils-plugin/server';
 import type { IKibanaSearchResponse, IKibanaSearchRequest } from '@kbn/search-types';
-import { SqlQueryRequest } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { SqlQueryRequest } from '@elastic/elasticsearch/lib/api/types';
 import { SqlGetAsyncResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { ESQLSearchParams } from '@kbn/es-types';
 import { toAsyncKibanaSearchResponse } from './response_utils';
@@ -29,7 +29,7 @@ import { SearchConfigSchema } from '../../../config';
 // now we get `all_columns` and `columns`
 // `columns` contain only columns with data
 // `all_columns` contain everything
-type ESQLQueryRequest = ESQLSearchParams & SqlQueryRequest['body'];
+type ESQLQueryRequest = ESQLSearchParams & SqlQueryRequest;
 
 export const esqlAsyncSearchStrategyProvider = (
   searchConfig: SearchConfigSchema,
