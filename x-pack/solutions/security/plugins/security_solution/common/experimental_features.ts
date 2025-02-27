@@ -262,6 +262,11 @@ export const allowedExperimentalValues = Object.freeze({
    * Enables banner for informing users about changes in data collection.
    */
   eventCollectionDataReductionBannerEnabled: false,
+
+  /**
+   * New alert summary page for AI for SOC
+   */
+  AIForSOCAlertSummaryPageEnabled: false,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;

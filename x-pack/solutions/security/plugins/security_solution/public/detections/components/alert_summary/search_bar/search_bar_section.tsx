@@ -1,0 +1,181 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import React, { memo, useCallback, useState } from 'react';
+import { SearchBar } from '@kbn/unified-search-plugin/public';
+import type { DataView } from '@kbn/data-views-plugin/common';
+import type { AggregateQuery, Query, TimeRange } from '@kbn/es-query';
+import { useDispatch } from 'react-redux';
+import { InputsModelId } from '../../../../common/store/inputs/constants';
+import { inputsActions } from '../../../../common/store/inputs';
+import { formatDate } from '../../../../common/components/super_date_picker';
+
+const defaultQuery: Query = {
+  language: 'kuery',
+  query: '',
+};
+const defaultTimeRange = {
+  from: 'now/d',
+  to: 'now/d',
+};
+
+export interface SearchBarSectionProps {
+  /**
+   *
+   */
+  dataView: DataView;
+}
+
+/**
+ *
+ */
+export const SearchBarSection = memo(({ dataView }: SearchBarSectionProps) => {
+  const dispatch = useDispatch();
+  // const [filters, setFilters] = useState<Filter[]>([]);
+  const [dateRange, setDateRange] = useState<TimeRange>(defaultTimeRange);
+  const [query, setQuery] = useState<Query>(defaultQuery);
+
+  // const [query, setQuery] = useState<Query | AggregateQuery | undefined>(defaultQuery);
+  // const [timeRange, setTimeRange] = useState<TimeRange>({ from: 'now/d', to: 'now/d' });
+
+  // const filterQuery = useSelector(getFilterQuery);
+  //
+  // const getEndSelector = useMemo(() => endSelector(), []);
+  // const end = useDeepEqualSelector((state: State) => getEndSelector(state.inputs.global));
+  //
+  // const getStartSelector = useMemo(() => startSelector(), []);
+  // const start = useDeepEqualSelector((state: State) => getStartSelector(state.inputs.global));
+  //
+  // const getQueriesSelector = useMemo(() => queriesSelector(), []);
+  // const queries = useDeepEqualSelector((state: State) =>
+  //   getQueriesSelector(state, InputsModelId.global)
+  // );
+  //
+  // const getIsLoadingSelector = useMemo(() => isLoadingSelector(), []);
+  // const isLoading = useDeepEqualSelector((state: State) =>
+  //   getIsLoadingSelector(state.inputs.global)
+  // );
+
+  // const {
+  //   data: {
+  //     query: { filterManager },
+  //   },
+  // } = useKibana().services;
+
+  // useEffect(() => {
+  //   let isSubscribed = true;
+  //   const subscriptions = new Subscription();
+  //
+  //   subscriptions.add(
+  //     filterManager.getUpdates$().subscribe({
+  //       next: () => {
+  //         if (isSubscribed) {
+  //           setFilters(filterManager.getFilters());
+  //         }
+  //       },
+  //     })
+  //   );
+  //
+  //   return () => {
+  //     isSubscribed = false;
+  //     subscriptions.unsubscribe();
+  //   };
+  //   // eslint-disable-next-line react-hooks/exhaustive-deps
+  // }, []);
+
+  const onQuerySubmit = useCallback(
+    (
+      {
+        dateRange: dr,
+        query: qr,
+      }: {
+        dateRange: TimeRange;
+        query?: Query | AggregateQuery | undefined;
+      },
+      isUpdate?: boolean
+    ) => {
+      setDateRange(dr);
+      const { from, to } = dr;
+      const isQuickSelection = from.includes('now') || to.includes('now');
+      const absoluteFrom = formatDate(from);
+      const absoluteTo = formatDate(to, { roundUp: true });
+      if (isQuickSelection) {
+        const actionPayload = {
+          id: InputsModelId.global,
+          fromStr: from,
+          toStr: to,
+          from: absoluteFrom,
+          to: absoluteTo,
+        };
+        if (from === to) {
+          dispatch(inputsActions.setAbsoluteRangeDatePicker(actionPayload));
+        } else {
+          dispatch(inputsActions.setRelativeRangeDatePicker(actionPayload));
+        }
+      } else {
+        dispatch(
+          inputsActions.setAbsoluteRangeDatePicker({
+            id: InputsModelId.global,
+            from: formatDate(from),
+            to: formatDate(to),
+          })
+        );
+      }
+
+      if (qr != null) {
+        setQuery(qr);
+        dispatch(
+          inputsActions.setFilterQuery({
+            id: InputsModelId.global,
+            ...qr,
+          })
+        );
+      }
+    },
+    [dispatch]
+  );
+
+  return (
+    <>
+      <SearchBar
+        dateRangeFrom={dateRange.from}
+        dateRangeTo={dateRange.to}
+        // filters={filters}
+        indexPatterns={[dataView]}
+        onQuerySubmit={onQuerySubmit}
+        query={query}
+        showFilterBar={false}
+        showQueryMenu={false}
+      />
+      {/* <SiemSearchBar*/}
+      {/*  id={InputsModelId.global}*/}
+      {/*  dataView={dataView}*/}
+      {/*  hideFilterBar={true}*/}
+      {/*  hideQueryInput={true}*/}
+      {/* />*/}
+      {/* <SearchBarComponent*/}
+      {/*  id={InputsModelId.global}*/}
+      {/*  dataView={dataView}*/}
+      {/*  end={end}*/}
+      {/*  filterQuery={filterQuery}*/}
+      {/*  fromStr={undefined}*/}
+      {/*  hideFilterBar={true}*/}
+      {/*  hideQueryInput={true}*/}
+      {/*  isLoading={isLoading}*/}
+      {/*  savedQuery={undefined}*/}
+      {/*  setSavedQuery={() => window.alert('setSavedQuery')}*/}
+      {/*  setSearchBarFilter={() => window.alert('setSearchBarFilter')}*/}
+      {/*  start={start}*/}
+      {/*  queries={queries}*/}
+      {/*  toStr={undefined}*/}
+      {/*  updateSearch={() => window.alert('updateSearch')}*/}
+      {/* />*/}
+    </>
+  );
+});
+
+SearchBarSection.displayName = 'SearchBarSection';

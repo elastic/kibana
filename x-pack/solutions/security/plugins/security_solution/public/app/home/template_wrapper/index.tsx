@@ -7,10 +7,10 @@
 
 import React, { type ReactNode, useMemo } from 'react';
 import styled from 'styled-components';
-import { EuiThemeProvider, useEuiTheme, type EuiThemeComputed } from '@elastic/eui';
+import { type EuiThemeComputed, EuiThemeProvider, useEuiTheme } from '@elastic/eui';
 import { IS_DRAGGING_CLASS_NAME } from '@kbn/securitysolution-t-grid';
-import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import type { KibanaPageTemplateProps } from '@kbn/shared-ux-page-kibana-template';
+import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { ExpandableFlyoutProvider } from '@kbn/expandable-flyout';
 import { AlertsContextProvider } from '../../../detections/components/alerts_table/alerts_context';
 import { URL_PARAM_KEY } from '../../../common/hooks/use_url_state';
@@ -36,15 +36,15 @@ const StyledKibanaPageTemplate = styled(KibanaPageTemplate)<
     theme: EuiThemeComputed; // using computed EUI theme to be consistent with user profile theming
   }
 >`
-  .kbnSolutionNav__sidebar:not(.kbnSolutionNav__sidebar--shrink) {
-    background-color: ${({ theme }) => theme.colors.emptyShade};
-  }
+    .kbnSolutionNav__sidebar:not(.kbnSolutionNav__sidebar--shrink) {
+        background-color: ${({ theme }) => theme.colors.emptyShade};
+    }
 
     .${IS_DRAGGING_CLASS_NAME} & {
-      // When a drag is in process the bottom flyout should slide up to allow a drop
-      transform: none;
+        // When a drag is in process the bottom flyout should slide up to allow a drop
+        transform: none;
     }
-  }
+}
 `;
 
 export type SecuritySolutionTemplateWrapperProps = Omit<KibanaPageTemplateProps, 'ref'> & {
@@ -63,7 +63,9 @@ export const SecuritySolutionTemplateWrapper: React.FC<SecuritySolutionTemplateW
       getTimelineShowStatus(state, TimelineId.active)
     );
     const [routeProps] = useRouteSpy();
-    const isPreview = routeProps?.pageName === SecurityPageName.rulesCreate;
+    const isPreview =
+      routeProps?.pageName === SecurityPageName.rulesCreate ||
+      routeProps?.pageName === SecurityPageName.alertSummary;
 
     // The bottomBar by default has a set 'dark' colorMode that doesn't match the global colorMode from the Advanced Settings
     // To keep the mode in sync, we pass in the globalColorMode to the bottom bar here

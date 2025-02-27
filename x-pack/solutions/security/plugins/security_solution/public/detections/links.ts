@@ -5,11 +5,16 @@
  * 2.0.
  */
 import { i18n } from '@kbn/i18n';
-import { ALERTS_PATH, SecurityPageName, SECURITY_FEATURE_ID } from '../../common/constants';
-import { ALERTS } from '../app/translations';
+import {
+  ALERT_SUMMARY_PATH,
+  ALERTS_PATH,
+  SECURITY_FEATURE_ID,
+  SecurityPageName,
+} from '../../common/constants';
+import { ALERT_SUMMARY, ALERTS } from '../app/translations';
 import type { LinkItem } from '../common/links/types';
 
-export const links: LinkItem = {
+export const alertsLink: LinkItem = {
   id: SecurityPageName.alerts,
   title: ALERTS,
   path: ALERTS_PATH,
@@ -20,4 +25,18 @@ export const links: LinkItem = {
       defaultMessage: 'Alerts',
     }),
   ],
+};
+
+export const alertSummaryLink: LinkItem = {
+  id: SecurityPageName.alertSummary,
+  path: ALERT_SUMMARY_PATH,
+  title: ALERT_SUMMARY,
+  capabilities: [`${SECURITY_FEATURE_ID}.show`], // TODO figure out how to enable this only for the new tier
+  globalNavPosition: 3,
+  globalSearchKeywords: [
+    i18n.translate('xpack.securitySolution.appLinks.alertSummary', {
+      defaultMessage: 'Alert summary',
+    }),
+  ],
+  hideTimeline: true,
 };

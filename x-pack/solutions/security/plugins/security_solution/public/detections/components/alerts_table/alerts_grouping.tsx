@@ -13,6 +13,7 @@ import { isEmpty, isEqual } from 'lodash/fp';
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
 import type { TableIdLiteral } from '@kbn/securitysolution-data-table';
 import type { GroupingArgs } from '@kbn/grouping/src';
+import type { DataView } from '@kbn/data-views-plugin/common';
 import { groupIdSelector } from '../../../common/store/grouping/selectors';
 import { getDefaultGroupingOptions } from '../../../common/utils/alerts';
 import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
@@ -28,6 +29,7 @@ import { GroupedSubLevel } from './alerts_sub_grouping';
 import { AlertsEventTypes, track } from '../../../common/lib/telemetry';
 
 export interface AlertsTableComponentProps {
+  dataView?: DataView;
   currentAlertStatusFilterValue?: Status[];
   defaultFilters?: Filter[];
   from: string;
@@ -108,7 +110,13 @@ const GroupedAlertsTableComponent: React.FC<AlertsTableComponentProps> = (props)
     [dispatch, props.tableId]
   );
 
-  const fields = useMemo(() => Object.values(sourcererDataView.fields || {}), [sourcererDataView]);
+  const fields = useMemo(
+    () =>
+      props.dataView
+        ? Object.values(props.dataView.fields || {})
+        : Object.values(sourcererDataView.fields || {}),
+    [props.dataView, sourcererDataView]
+  );
 
   const { getGrouping, selectedGroups, setSelectedGroups } = useGrouping({
     componentProps: {
@@ -259,7 +267,7 @@ const GroupedAlertsTableComponent: React.FC<AlertsTableComponentProps> = (props)
     [getGrouping, pageIndex, pageSize, props, selectedGroups, setPageVar]
   );
 
-  if (isEmpty(selectedPatterns)) {
+  if ((props.dataView && isEmpty(props.dataView.getIndexPattern())) || isEmpty(selectedPatterns)) {
     return null;
   }
 

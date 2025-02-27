@@ -10,11 +10,11 @@ import { links as attackDiscoveryLinks } from './attack_discovery/links';
 import { links as assetInventoryLinks } from './asset_inventory/links';
 import type { AppLinkItems } from './common/links/types';
 import { indicatorsLinks } from './threat_intelligence/links';
-import { links as alertsLinks } from './detections/links';
+import { alertsLink, alertSummaryLink } from './detections/links';
 import { links as rulesLinks } from './rules/links';
 import { links as timelinesLinks } from './timelines/links';
 import { links as casesLinks } from './cases/links';
-import { links as managementLinks, getManagementFilteredLinks } from './management/links';
+import { getManagementFilteredLinks, links as managementLinks } from './management/links';
 import { exploreLinks } from './explore/links';
 import { onboardingLinks } from './onboarding/links';
 import { findingsLinks } from './cloud_security_posture/links';
@@ -26,7 +26,7 @@ export { solutionAppLinksSwitcher } from './app/solution_navigation/links/app_li
 
 export const appLinks: AppLinkItems = Object.freeze([
   dashboardsLinks,
-  alertsLinks,
+  alertsLink,
   attackDiscoveryLinks,
   findingsLinks,
   casesLinks,
@@ -37,6 +37,7 @@ export const appLinks: AppLinkItems = Object.freeze([
   rulesLinks,
   onboardingLinks,
   managementLinks,
+  alertSummaryLink,
 ]);
 
 export const getFilteredLinks = async (
@@ -47,7 +48,7 @@ export const getFilteredLinks = async (
 
   return Object.freeze([
     dashboardsLinks,
-    alertsLinks,
+    alertsLink,
     attackDiscoveryLinks,
     findingsLinks,
     casesLinks,
@@ -58,5 +59,6 @@ export const getFilteredLinks = async (
     rulesLinks,
     onboardingLinks,
     managementFilteredLinks,
+    alertSummaryLink,
   ]);
 };
