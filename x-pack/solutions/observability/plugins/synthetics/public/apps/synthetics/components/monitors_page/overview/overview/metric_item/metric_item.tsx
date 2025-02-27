@@ -15,24 +15,24 @@ import { useTheme } from '@kbn/observability-shared-plugin/public';
 import moment from 'moment';
 import { useSelector, useDispatch } from 'react-redux';
 
-import { FlyoutParamProps } from './types';
-import { MetricItemBody } from './metric_item/metric_item_body';
+import { FlyoutParamProps } from './../types';
+import { MetricItemBody } from './metric_item_body';
 import {
   selectErrorPopoverState,
   selectOverviewTrends,
   toggleErrorPopoverOpen,
-} from '../../../../state';
-import { useLocationName, useStatusByLocationOverview } from '../../../../hooks';
-import { formatDuration } from '../../../../utils/formatting';
-import { OverviewStatusMetaData } from '../../../../../../../common/runtime_types';
-import { ActionsPopover } from './actions_popover';
+} from '../../../../../state';
+import { useLocationName, useStatusByLocationOverview } from '../../../../../hooks';
+import { formatDuration } from '../../../../../utils/formatting';
+import { OverviewStatusMetaData } from '../../../../../../../../common/runtime_types';
+import { ActionsPopover } from './../actions_popover';
 import {
   hideTestNowFlyoutAction,
   manualTestRunInProgressSelector,
   toggleTestNowFlyoutAction,
-} from '../../../../state/manual_test_runs';
+} from '../../../../../state/manual_test_runs';
 import { MetricItemIcon } from './metric_item_icon';
-import { MetricItemExtra } from './metric_item/metric_item_extra';
+import { MetricItemExtra } from './metric_item_extra';
 
 const METRIC_ITEM_HEIGHT = 160;
 
