@@ -28,9 +28,26 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const filterBar = getService('filterBar');
   const fieldEditor = getService('fieldEditor');
   const dataViews = getService('dataViews');
+  const queryBar = getService('queryBar');
   const retry = getService('retry');
   const dataGrid = getService('dataGrid');
+  const log = getService('log');
   const INITIAL_FIELD_LIST_SUMMARY = '48 available fields. 5 empty fields. 4 meta fields.';
+
+  const expectFieldListDescription = async (expectedNumber: string) => {
+    return await retry.try(async () => {
+      await discover.waitUntilSearchingHasFinished();
+      await unifiedFieldList.waitUntilSidebarHasLoaded();
+      const ariaDescription = await unifiedFieldList.getSidebarAriaDescription();
+      if (ariaDescription !== expectedNumber) {
+        log.warning(
+          `Expected Sidebar Aria Description: ${expectedNumber}, got: ${ariaDescription}`
+        );
+        await queryBar.submitQuery();
+      }
+      expect(ariaDescription).to.be(expectedNumber);
+    });
+  };
 
   describe('discover sidebar', function describeIndexTests() {
     before(async function () {
@@ -435,6 +452,32 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await unifiedFieldList.waitUntilSidebarHasLoaded();
         expect(await unifiedFieldList.getSidebarAriaDescription()).to.be(
           '3 selected fields. 3 popular fields. 48 available fields. 5 empty fields. 4 meta fields.'
+        );
+
+        await unifiedFieldList.clickFieldListItemRemove('@message');
+        await discover.waitUntilSearchingHasFinished();
+        await unifiedFieldList.clickFieldListItemRemove('extension');
+        await discover.waitUntilSearchingHasFinished();
+        await discover.addRuntimeField('test', `emit('test')`, undefined, 30);
+        await discover.waitUntilSearchingHasFinished();
+
+        expect((await unifiedFieldList.getSidebarSectionFieldNames('popular')).join(', ')).to.be(
+          'test, @message, extension, _id'
+        );
+
+        await expectFieldListDescription(
+          '1 selected field. 4 popular fields. 49 available fields. 5 empty fields. 4 meta fields.'
+        );
+
+        await unifiedFieldList.clickFieldListItemAdd('bytes');
+        await discover.waitUntilSearchingHasFinished();
+
+        expect((await unifiedFieldList.getSidebarSectionFieldNames('popular')).join(', ')).to.be(
+          'test, @message, extension, _id, bytes'
+        );
+
+        await expectFieldListDescription(
+          '2 selected fields. 5 popular fields. 49 available fields. 5 empty fields. 4 meta fields.'
         );
       });
 
