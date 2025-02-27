@@ -182,23 +182,19 @@ export function ESQLControlsFlyout({
         queryString={queryString}
         variableName={variableName}
         controlFlyoutType={controlFlyoutType}
-        esqlVariables={esqlVariables}
         variableType={variableType}
         initialState={initialState}
         search={search}
-        controlState={controlState}
         setControlState={setControlState}
       />
     ) : (
       <IdentifierControlForm
         variableType={variableType}
         variableName={variableName}
-        esqlVariables={esqlVariables}
         queryString={queryString}
         initialState={initialState}
         search={search}
         cursorPosition={cursorPosition}
-        controlState={controlState}
         setControlState={setControlState}
       />
     );

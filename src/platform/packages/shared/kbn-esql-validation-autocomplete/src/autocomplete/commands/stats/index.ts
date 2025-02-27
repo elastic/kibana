@@ -26,7 +26,7 @@ export async function suggest({
   getColumnsByType,
   getSuggestedVariableName,
   getPreferences,
-  getVariablesByType,
+  getESQLVariables,
   supportsControls,
 }: CommandSuggestParams<'stats'>): Promise<SuggestionRawDefinition[]> {
   const pos = getPosition(innerText, command);
@@ -42,7 +42,7 @@ export async function suggest({
       ? getControlSuggestionIfSupported(
           Boolean(supportsControls),
           ESQLVariableType.FUNCTIONS,
-          getVariablesByType
+          getESQLVariables
         )
       : [];
 

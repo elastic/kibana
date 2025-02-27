@@ -76,7 +76,7 @@ export const DiscoverTopNav = ({
       documents$.next({ fetchStatus: FetchStatus.PARTIAL });
     }
   });
-  const { onSaveControl, onCancelControl } = useESQLVariables({
+  const { onSaveControl, onCancelControl, dashboardESQLControls } = useESQLVariables({
     controlGroupAPI,
     onTextLangQueryChange: stateContainer.actions.updateESQLQuery,
   });
@@ -282,6 +282,7 @@ export const DiscoverTopNav = ({
           esqlVariables: stateEsqlVariables ?? [],
           onSaveControl,
           onCancelControl,
+          esqlControls: dashboardESQLControls,
           controlsWrapper: (
             <ControlGroupRenderer onApiAvailable={setControlGroupAPI} timeRange={timeRange} />
           ),

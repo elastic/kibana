@@ -173,7 +173,7 @@ export async function suggest(
     innerText
   );
   const supportsControls = resourceRetriever?.canSuggestVariables?.() ?? false;
-  const getVariablesByType = resourceRetriever?.getVariablesByType;
+  const getESQLVariables = resourceRetriever?.getESQLVariables;
   const getSources = getSourcesHelper(resourceRetriever);
   const { getPolicies, getPolicyMetadata } = getPolicyRetriever(resourceRetriever);
   const lastChar = innerText[innerText.length - 1];
@@ -230,7 +230,7 @@ export async function suggest(
       getFieldsByType,
       getFieldsMap,
       getPolicies,
-      getVariablesByType,
+      getESQLVariables,
       resourceRetriever?.getPreferences,
       resourceRetriever,
       supportsControls
@@ -270,7 +270,7 @@ export async function suggest(
       getFieldsMap,
       fullText,
       offset,
-      getVariablesByType,
+      getESQLVariables,
       supportsControls
     );
     return [...functionsSpecificSuggestions, ...controlSuggestions];
@@ -295,12 +295,12 @@ export function getFieldsByTypeRetriever(
   fullQuery?: string
 ): { getFieldsByType: GetColumnsByTypeFn; getFieldsMap: GetFieldsMapFn } {
   const helpers = getFieldsByTypeHelper(queryForFields, resourceRetriever);
-  const getVariablesByType = resourceRetriever?.getVariablesByType;
   const canSuggestVariables = resourceRetriever?.canSuggestVariables?.() ?? false;
 
   const queryString = fullQuery ?? queryForFields;
   const lastChar = queryString[queryString.length - 1];
   const lastCharIsQuestionMark = lastChar === '?';
+  const getESQLVariables = resourceRetriever?.getESQLVariables;
   return {
     getFieldsByType: async (
       expectedType: Readonly<string> | Readonly<string[]> = 'any',
@@ -312,7 +312,7 @@ export function getFieldsByTypeRetriever(
         supportsControls: canSuggestVariables && !lastCharIsQuestionMark,
       };
       const fields = await helpers.getFieldsByType(expectedType, ignored);
-      return buildFieldsDefinitionsWithMetadata(fields, updatedOptions, getVariablesByType);
+      return buildFieldsDefinitionsWithMetadata(fields, updatedOptions, getESQLVariables);
     },
     getFieldsMap: helpers.getFieldsMap,
   };
@@ -414,7 +414,7 @@ async function getSuggestionsWithinCommandExpression(
   getColumnsByType: GetColumnsByTypeFn,
   getFieldsMap: GetFieldsMapFn,
   getPolicies: GetPoliciesFn,
-  getVariablesByType?: (type: ESQLVariableType) => ESQLControlVariable[] | undefined,
+  getESQLVariables?: () => ESQLControlVariable[] | undefined,
   getPreferences?: () => Promise<{ histogramBarTarget: number } | undefined>,
   callbacks?: ESQLCallbacks,
   supportsControls?: boolean
@@ -444,7 +444,7 @@ async function getSuggestionsWithinCommandExpression(
       getSourcesFromQuery: (type) => getSourcesFromCommands(commands, type),
       previousCommands: commands,
       callbacks,
-      getVariablesByType,
+      getESQLVariables,
       supportsControls,
     });
   } else {
@@ -972,7 +972,7 @@ async function getFunctionArgsSuggestions(
   getFieldsMap: GetFieldsMapFn,
   fullText: string,
   offset: number,
-  getVariablesByType?: (type: ESQLVariableType) => ESQLControlVariable[] | undefined,
+  getESQLVariables?: () => ESQLControlVariable[] | undefined,
   supportsControls?: boolean
 ): Promise<SuggestionRawDefinition[]> {
   const fnDefinition = getFunctionDefinition(node.name);
@@ -1103,7 +1103,7 @@ async function getFunctionArgsSuggestions(
           advanceCursorAndOpenSuggestions: hasMoreMandatoryArgs,
           supportsControls,
         },
-        getVariablesByType
+        getESQLVariables
       )
     );
 

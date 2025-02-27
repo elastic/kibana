@@ -263,7 +263,7 @@ export const ESQLEditor = memo(function ESQLEditor({
       editor1?.current?.removeDecorations(decorations.map((d) => d.id));
     }
 
-    const variables = esqlVariables ?? [];
+    const variables = variablesService?.esqlVariables ?? [];
 
     for (let i = 0; i < variables.length; i++) {
       const variable = variables[i];
@@ -290,7 +290,7 @@ export const ESQLEditor = memo(function ESQLEditor({
         ]);
       });
     }
-  }, [esqlVariables]);
+  }, [variablesService?.esqlVariables]);
 
   const openTimePickerPopover = useCallback(() => {
     const currentCursorPosition = editor1.current?.getPosition();
@@ -463,7 +463,16 @@ export const ESQLEditor = memo(function ESQLEditor({
   const { cache: esqlFieldsCache, memoizedFieldsFromESQL } = useMemo(() => {
     // need to store the timing of the first request so we can atomically clear the cache per query
     const fn = memoize(
-      (...args: [{ esql: string }, ExpressionsStart, TimeRange, AbortController?]) => ({
+      (
+        ...args: [
+          { esql: string },
+          ExpressionsStart,
+          TimeRange,
+          AbortController?,
+          string?,
+          ESQLControlVariable[]?
+        ]
+      ) => ({
         timestamp: Date.now(),
         result: fetchFieldsFromESQL(...args),
       }),
@@ -503,7 +512,9 @@ export const ESQLEditor = memo(function ESQLEditor({
               esqlQuery,
               expressions,
               timeRange,
-              abortController
+              abortController,
+              undefined,
+              esqlVariables
             ).result;
             const columns: ESQLRealField[] =
               table?.columns.map((c) => {
@@ -520,6 +531,29 @@ export const ESQLEditor = memo(function ESQLEditor({
         }
         return [];
       },
+      getHoverData: async ({ query: queryToExecute }: { query?: string } | undefined = {}) => {
+        if (queryToExecute) {
+          const esqlQuery = {
+            esql: `${queryToExecute} | limit 5`,
+          };
+          const timeRange = data.query.timefilter.timefilter.getTime();
+          try {
+            const table = await memoizedFieldsFromESQL(
+              esqlQuery,
+              expressions,
+              timeRange,
+              abortController,
+              undefined,
+              esqlVariables
+            ).result;
+
+            return table;
+          } catch (e) {
+            // no action yet
+          }
+        }
+        return undefined;
+      },
       getPolicies: async () => {
         const { data: policies, error } =
           (await indexManagementApiService?.getAllEnrichPolicies()) || {};
@@ -535,8 +569,8 @@ export const ESQLEditor = memo(function ESQLEditor({
       },
       // @ts-expect-error To prevent circular type import, type defined here is partial of full client
       getFieldsMetadata: fieldsMetadata?.getClient(),
-      getVariablesByType: (type: ESQLVariableType) => {
-        return variablesService?.esqlVariables.filter((variable) => variable.type === type);
+      getESQLVariables: () => {
+        return variablesService?.esqlVariables;
       },
       canSuggestVariables: () => {
         return variablesService?.areSuggestionsEnabled ?? false;
@@ -546,6 +580,7 @@ export const ESQLEditor = memo(function ESQLEditor({
     return callbacks;
   }, [
     fieldsMetadata,
+    esqlVariables,
     kibana.services?.esql?.getJoinIndicesAutocomplete,
     dataSourcesCache,
     query.esql,
@@ -762,6 +797,46 @@ export const ESQLEditor = memo(function ESQLEditor({
     [isDisabled]
   );
 
+  // this is fixing a bug between the EUIPopover and the monaco editor
+  // when the user clicks the editor, we force it to focus and the onDidFocusEditorText
+  // to fire, the timeout is needed because otherwise it refocuses on the popover icon
+  // and the user needs to click again the editor.
+  // IMPORTANT: The popover needs to be wrapped with the EuiOutsideClickDetector component.
+  editor1.current?.onMouseDown(async (e) => {
+    setTimeout(() => {
+      editor1.current?.focus();
+    }, 100);
+    if (datePickerOpenStatusRef.current) {
+      setPopoverPosition({});
+    }
+
+    const mousePosition = e.target.position;
+    if (mousePosition) {
+      const currentWord = editorModel.current?.getWordAtPosition(mousePosition);
+      const variables = variablesService?.esqlVariables ?? [];
+      const clickedVariable = variables.find((v) => currentWord?.word.includes(v.key));
+
+      if (clickedVariable) {
+        const position = editor1.current?.getPosition();
+        const initialState = esqlControls?.find((c) =>
+          clickedVariable.key.includes(c.variableName)
+        );
+        if (initialState) {
+          await triggerControl(
+            editor1.current?.getValue() ?? code,
+            clickedVariable.type,
+            position,
+            uiActions,
+            esqlVariables,
+            onSaveControl,
+            onCancelControl,
+            initialState
+          );
+        }
+      }
+    }
+  });
+
   const editorPanel = (
     <>
       {Boolean(editorIsInline) && !hideRunQueryButton && (
@@ -840,45 +915,46 @@ export const ESQLEditor = memo(function ESQLEditor({
                     monaco.languages.setLanguageConfiguration(ESQL_LANG_ID, {
                       wordPattern: /'?\w[\w'-.]*[?!,;:"]*/,
                     });
-                    // this is fixing a bug between the EUIPopover and the monaco editor
-                    // when the user clicks the editor, we force it to focus and the onDidFocusEditorText
-                    // to fire, the timeout is needed because otherwise it refocuses on the popover icon
-                    // and the user needs to click again the editor.
-                    // IMPORTANT: The popover needs to be wrapped with the EuiOutsideClickDetector component.
-                    editor.onMouseDown(async (e) => {
-                      setTimeout(() => {
-                        editor.focus();
-                      }, 100);
-                      if (datePickerOpenStatusRef.current) {
-                        setPopoverPosition({});
-                      }
+                    // // this is fixing a bug between the EUIPopover and the monaco editor
+                    // // when the user clicks the editor, we force it to focus and the onDidFocusEditorText
+                    // // to fire, the timeout is needed because otherwise it refocuses on the popover icon
+                    // // and the user needs to click again the editor.
+                    // // IMPORTANT: The popover needs to be wrapped with the EuiOutsideClickDetector component.
+                    // editor.onMouseDown(async (e) => {
+                    //   setTimeout(() => {
+                    //     editor.focus();
+                    //   }, 100);
+                    //   if (datePickerOpenStatusRef.current) {
+                    //     setPopoverPosition({});
+                    //   }
 
-                      const mousePosition = e.target.position;
-                      if (mousePosition) {
-                        const currentWord = model?.getWordAtPosition(mousePosition);
-                        const variables = esqlVariables ?? [];
-                        const clickedVariable = variables.find((v) =>
-                          currentWord?.word.includes(v.key)
-                        );
+                    //   const mousePosition = e.target.position;
+                    //   if (mousePosition) {
+                    //     const currentWord = model?.getWordAtPosition(mousePosition);
+                    //     const variables = variablesService?.esqlVariables ?? [];
+                    //     const clickedVariable = variables.find((v) =>
+                    //       currentWord?.word.includes(v.key)
+                    //     );
 
-                        if (clickedVariable) {
-                          const position = editor1.current?.getPosition();
-                          const initialState = esqlControls?.find(
-                            (c) => c.variableName === clickedVariable.key
-                          );
-                          await triggerControl(
-                            editor1.current?.getValue() ?? code,
-                            clickedVariable.type,
-                            position,
-                            uiActions,
-                            esqlVariables,
-                            onSaveControl,
-                            onCancelControl,
-                            initialState
-                          );
-                        }
-                      }
-                    });
+                    //     if (clickedVariable) {
+                    //       const position = editor1.current?.getPosition();
+                    //       console.dir(esqlControls);
+                    //       const initialState = esqlControls?.find((c) =>
+                    //         clickedVariable.key.includes(c.variableName)
+                    //       );
+                    //       await triggerControl(
+                    //         editor1.current?.getValue() ?? code,
+                    //         clickedVariable.type,
+                    //         position,
+                    //         uiActions,
+                    //         esqlVariables,
+                    //         onSaveControl,
+                    //         onCancelControl,
+                    //         initialState
+                    //       );
+                    //     }
+                    //   }
+                    // });
 
                     editor.onDidFocusEditorText(() => {
                       onEditorFocus();
@@ -900,7 +976,10 @@ export const ESQLEditor = memo(function ESQLEditor({
                       onLayoutChangeRef.current(layoutInfoEvent);
                     });
 
-                    editor.onDidChangeModelContent(showSuggestionsIfEmptyQuery);
+                    editor.onDidChangeModelContent(() => {
+                      addVariablesDecoration();
+                      showSuggestionsIfEmptyQuery();
+                    });
 
                     // Auto-focus the editor and move the cursor to the end.
                     if (!disableAutoFocus) {

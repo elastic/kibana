@@ -22,7 +22,7 @@ import {
 import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { ISearchGeneric } from '@kbn/search-types';
-import { ESQLVariableType, ESQLControlVariable } from '@kbn/esql-validation-autocomplete';
+import { ESQLVariableType } from '@kbn/esql-validation-autocomplete';
 import {
   getIndexPatternFromESQLQuery,
   getESQLResults,
@@ -32,7 +32,6 @@ import {
 import { ESQLLangEditor } from '../../../create_editor';
 import type { ESQLControlState, ControlWidthOptions } from '../types';
 import { ControlWidth, ControlLabel } from './shared_form_components';
-import { getRecurrentVariableName, getVariablePrefix } from './helpers';
 import { EsqlControlType } from '../types';
 import { ChooseColumnPopover } from './choose_column_popover';
 
@@ -42,8 +41,6 @@ interface ValueControlFormProps {
   variableName: string;
   controlFlyoutType: EsqlControlType;
   queryString: string;
-  esqlVariables: ESQLControlVariable[];
-  controlState?: ESQLControlState;
   setControlState: (state: ESQLControlState) => void;
   initialState?: ESQLControlState;
 }
@@ -57,7 +54,6 @@ export function ValueControlForm({
   initialState,
   setControlState,
   queryString,
-  esqlVariables,
   search,
 }: ValueControlFormProps) {
   const isMounted = useMountedState();
@@ -67,28 +63,6 @@ export function ValueControlForm({
     }
     return null;
   }, [variableType, queryString]);
-  const suggestedVariableName = useMemo(() => {
-    const existingVariables = new Set(
-      esqlVariables
-        .filter((variable) => variable.type === variableType)
-        .map((variable) => variable.key)
-    );
-
-    if (initialState) {
-      return initialState.variableName;
-    }
-
-    let variablePrefix = getVariablePrefix(variableType);
-
-    if (valuesField && variableType === ESQLVariableType.VALUES) {
-      // variables names can't have special characters, only underscore
-      const fieldVariableName = valuesField.replace(/[^a-zA-Z0-9]/g, '_');
-      variablePrefix = fieldVariableName;
-    }
-
-    return getRecurrentVariableName(variablePrefix, existingVariables);
-  }, [esqlVariables, initialState, valuesField, variableType]);
-
   const [availableValuesOptions, setAvailableValuesOptions] = useState<EuiComboBoxOptionOption[]>(
     variableType === ESQLVariableType.TIME_LITERAL
       ? SUGGESTED_INTERVAL_VALUES.map((option) => {
@@ -214,7 +188,7 @@ export function ValueControlForm({
       valuesField
     ) {
       const queryForValues =
-        suggestedVariableName !== ''
+        variableName !== ''
           ? `FROM ${getIndexPatternFromESQLQuery(queryString)} | STATS BY ${valuesField}`
           : '';
       onValuesQuerySubmit(queryForValues);
@@ -224,7 +198,6 @@ export function ValueControlForm({
     onValuesQuerySubmit,
     queryString,
     selectedValues?.length,
-    suggestedVariableName,
     valuesField,
     variableName,
   ]);

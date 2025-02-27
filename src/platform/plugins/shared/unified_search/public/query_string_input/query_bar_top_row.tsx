@@ -14,6 +14,7 @@ import React, { ReactNode, useCallback, useEffect, useMemo, useRef, useState } f
 import deepEqual from 'fast-deep-equal';
 import useObservable from 'react-use/lib/useObservable';
 import type { ESQLControlVariable } from '@kbn/esql-validation-autocomplete';
+import type { ESQLControlState } from '@kbn/esql/public';
 import type { Filter, TimeRange, Query, AggregateQuery } from '@kbn/es-query';
 import {
   getAggregateQueryMode,
@@ -193,6 +194,7 @@ export interface QueryBarTopRowProps<QT extends Query | AggregateQuery = Query> 
     onSaveControl: (controlState: Record<string, unknown>, updatedQuery: string) => Promise<void>;
     onCancelControl: () => void;
     controlsWrapper: React.ReactNode;
+    esqlControls?: ESQLControlState[];
   };
   bubbleSubmitEvent?: boolean;
 }
@@ -769,6 +771,7 @@ export const QueryBarTopRow = React.memo(
               onSaveControl={props.esqLVariablesConfig?.onSaveControl}
               onCancelControl={props.esqLVariablesConfig?.onCancelControl}
               esqlVariables={props.esqLVariablesConfig?.esqlVariables ?? []}
+              esqlControls={props.esqLVariablesConfig?.esqlControls}
             />
           </>
         )

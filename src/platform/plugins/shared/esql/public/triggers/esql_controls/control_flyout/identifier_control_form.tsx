@@ -18,11 +18,7 @@ import {
 } from '@elastic/eui';
 import { monaco } from '@kbn/monaco';
 import type { ISearchGeneric } from '@kbn/search-types';
-import {
-  ESQLVariableType,
-  ESQLControlVariable,
-  aggFunctionDefinitions,
-} from '@kbn/esql-validation-autocomplete';
+import { ESQLVariableType, aggFunctionDefinitions } from '@kbn/esql-validation-autocomplete';
 import { getESQLQueryColumnsRaw } from '@kbn/esql-utils';
 import { isEqual } from 'lodash';
 import { type ESQLControlState, type ControlWidthOptions, EsqlControlType } from '../types';
@@ -34,8 +30,6 @@ interface IdentifierControlFormProps {
   variableType: ESQLVariableType;
   variableName: string;
   queryString: string;
-  esqlVariables: ESQLControlVariable[];
-  controlState?: ESQLControlState;
   setControlState: (state: ESQLControlState) => void;
   cursorPosition?: monaco.Position;
   initialState?: ESQLControlState;
@@ -46,9 +40,7 @@ export function IdentifierControlForm({
   variableName,
   initialState,
   queryString,
-  esqlVariables,
   cursorPosition,
-  controlState,
   setControlState,
   search,
 }: IdentifierControlFormProps) {
