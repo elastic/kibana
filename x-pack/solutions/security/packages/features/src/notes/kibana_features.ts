@@ -36,8 +36,8 @@ export const getNotesBaseKibanaFeature = (
         all: params.savedObjects,
         read: params.savedObjects,
       },
-      ui: [],
-      api: [],
+      ui: ['read', 'crud'],
+      api: ['notes_read', 'notes_write'],
     },
     read: {
       app: [NOTES_FEATURE_ID, 'kibana'],
@@ -46,8 +46,8 @@ export const getNotesBaseKibanaFeature = (
         all: [],
         read: params.savedObjects,
       },
-      ui: [],
-      api: [],
+      ui: ['read'],
+      api: ['notes_read'],
     },
   },
 });

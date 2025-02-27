@@ -38,7 +38,7 @@ export const links: LinkItem = {
   hideTimeline: true,
   skipUrlState: true,
   globalNavPosition: 2,
-  capabilities: `${SECURITY_FEATURE_ID}.show`,
+  capabilities: [`${SECURITY_FEATURE_ID}.show`],
   links: [
     {
       id: SecurityPageName.rules,

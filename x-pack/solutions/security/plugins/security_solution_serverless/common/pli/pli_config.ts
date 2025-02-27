@@ -28,8 +28,6 @@ export const PLI_PRODUCT_FEATURES: PliProductFeatures = {
   },
   security: {
     essentials: [
-      ProductFeatureKey.timeline,
-      ProductFeatureKey.notes,
       ProductFeatureKey.endpointHostManagement,
       ProductFeatureKey.endpointPolicyManagement,
     ],
