@@ -297,13 +297,13 @@ export const lowercaseHashValues = (
  */
 export const getFileCodeSignature = (
   alertData: Flattened<Ecs>
-): Array<{ subjectName: string; trusted: string }> => {
+): Array<{ field: string; type: 'nested'; entries: EntriesArray }> => {
   const { file } = alertData;
   const codeSignature = file && file.Ext && file.Ext.code_signature;
 
   if (codeSignature) {
     return getCodeSignatureValue(codeSignature, 'file.Ext.code_signature');
-  } else if (process?.code_signature?.trusted === true) {
+  } else if (file?.code_signature?.trusted === true) {
     return [
       {
         field: 'file.code_signature.subject_name',
@@ -470,7 +470,6 @@ function filterEmptyExceptionEntries<T extends ExceptionEntry>(entries: T[]): T[
 export const getPrepopulatedEndpointException = ({
   listId,
   name,
-  codeSignature,
   eventCode,
   listNamespace = 'agnostic',
   alertEcsData,
@@ -478,11 +477,11 @@ export const getPrepopulatedEndpointException = ({
   listId: string;
   listNamespace?: NamespaceType;
   name: string;
-  codeSignature: { subjectName: string; trusted: string };
   eventCode: string;
   alertEcsData: Flattened<Ecs>;
 }): ExceptionsBuilderExceptionItem => {
   const { file, host } = alertEcsData;
+  const fileCodeSignature = getFileCodeSignature(alertEcsData);
   const filePath = file?.path ?? '';
   const sha256Hash = file?.hash?.sha256 ?? '';
   const isLinux = host?.os?.name === 'Linux';
@@ -492,7 +491,7 @@ export const getPrepopulatedEndpointException = ({
     operator: 'excluded' | 'included';
     type: 'match';
     value: string;
-  }> = [
+  }> = filterEmptyExceptionEntries([
     {
       field: isLinux ? 'file.path' : 'file.path.caseless',
       operator: 'included',
@@ -511,32 +510,12 @@ export const getPrepopulatedEndpointException = ({
       type: 'match',
       value: eventCode ?? '',
     },
-  ];
+  ]);
   const entriesToAdd = () => {
     if (isLinux) {
       return addIdToEntries(commonFields);
     } else {
-      return addIdToEntries([
-        {
-          field: 'file.Ext.code_signature',
-          type: 'nested',
-          entries: [
-            {
-              field: 'subject_name',
-              operator: 'included',
-              type: 'match',
-              value: codeSignature != null ? codeSignature.subjectName : '',
-            },
-            {
-              field: 'trusted',
-              operator: 'included',
-              type: 'match',
-              value: codeSignature != null ? codeSignature.trusted : '',
-            },
-          ],
-        },
-        ...commonFields,
-      ]);
+      return addIdToEntries([fileCodeSignature, ...commonFields]);
     }
   };
 
@@ -552,7 +531,6 @@ export const getPrepopulatedEndpointException = ({
 export const getPrepopulatedRansomwareException = ({
   listId,
   name,
-  codeSignature,
   eventCode,
   listNamespace = 'agnostic',
   alertEcsData,
@@ -560,60 +538,44 @@ export const getPrepopulatedRansomwareException = ({
   listId: string;
   listNamespace?: NamespaceType;
   name: string;
-  codeSignature: { subjectName: string; trusted: string };
   eventCode: string;
   alertEcsData: Flattened<Ecs>;
 }): ExceptionsBuilderExceptionItem => {
   const { process, Ransomware } = alertEcsData;
+  const processCodeSignature = getProcessCodeSignature(alertEcsData);
   const sha256Hash = process?.hash?.sha256 ?? '';
   const executable = process?.executable ?? '';
   const ransomwareFeature = Ransomware?.feature ?? '';
   return {
     ...getNewExceptionItem({ listId, namespaceType: listNamespace, name }),
-    entries: addIdToEntries([
-      {
-        field: 'process.Ext.code_signature',
-        type: 'nested',
-        entries: [
-          {
-            field: 'subject_name',
-            operator: 'included',
-            type: 'match',
-            value: codeSignature != null ? codeSignature.subjectName : '',
-          },
-          {
-            field: 'trusted',
-            operator: 'included',
-            type: 'match',
-            value: codeSignature != null ? codeSignature.trusted : '',
-          },
-        ],
-      },
-      {
-        field: 'process.executable',
-        operator: 'included',
-        type: 'match',
-        value: executable ?? '',
-      },
-      {
-        field: 'process.hash.sha256',
-        operator: 'included',
-        type: 'match',
-        value: sha256Hash ?? '',
-      },
-      {
-        field: 'Ransomware.feature',
-        operator: 'included',
-        type: 'match',
-        value: ransomwareFeature ?? '',
-      },
-      {
-        field: 'event.code',
-        operator: 'included',
-        type: 'match',
-        value: eventCode ?? '',
-      },
-    ]),
+    entries: addIdToEntries(
+      [
+        {
+          field: 'process.executable',
+          operator: 'included',
+          type: 'match',
+          value: executable ?? '',
+        },
+        {
+          field: 'process.hash.sha256',
+          operator: 'included',
+          type: 'match',
+          value: sha256Hash ?? '',
+        },
+        {
+          field: 'Ransomware.feature',
+          operator: 'included',
+          type: 'match',
+          value: ransomwareFeature ?? '',
+        },
+        {
+          field: 'event.code',
+          operator: 'included',
+          type: 'match',
+          value: eventCode ?? '',
+        },
+      ].concat(processCodeSignature)
+    ),
   };
 };
 
@@ -760,31 +722,6 @@ export const getPrepopulatedBehaviorException = ({
         type: 'match' as const,
         value: process?.parent?.executable ?? '',
       },
-      /* {
-      field: 'process.Ext.code_signature',
-      type: 'nested',
-      entries: [
-        {
-          field: 'subject_name',
-          operator: 'included',
-          type: 'match',
-          value: processCodeSignature != null ? processCodeSignature[0].subjectName : '',
-        },
-        {
-          field: 'trusted',
-          operator: 'included',
-          type: 'match',
-          value: processCodeSignature != null ? processCodeSignature[0].trusted : '',
-        },
-      ],
-      },*/
-      /*
-    {
-      field: 'process.code_signature.subject_name',
-      operator: 'included' as const,
-      type: 'match' as const,
-      value: process?.code_signature?.subject_name ?? '',
-    },*/
       {
         field: 'file.path',
         operator: 'included' as const,
@@ -833,30 +770,6 @@ export const getPrepopulatedBehaviorException = ({
         type: 'match' as const,
         value: alertEcsData.dll?.path ?? '',
       },
-      /* {
-      field: 'dll.code_signature.subject_name',
-      operator: 'included' as const,
-      type: 'match' as const,
-      value: alertEcsData.dll?.code_signature?.subject_name ?? '',
-    },
-      {
-        field: 'dll.Ext.code_signature',
-        type: 'nested',
-        entries: [
-          {
-            field: 'subject_name',
-            operator: 'included',
-            type: 'match',
-            value: dllCodeSignature[0] != null ? dllCodeSignature[0].subjectName : '',
-          },
-          {
-            field: 'trusted',
-            operator: 'included',
-            type: 'match',
-            value: dllCodeSignature[0] != null ? dllCodeSignature[0].trusted : '',
-          },
-        ],
-      }, */
       {
         field: 'dll.pe.original_file_name',
         operator: 'included' as const,
@@ -934,27 +847,26 @@ export const defaultEndpointExceptionItems = (
       ];
     case 'ransomware':
       console.log('ransomware');
-      return getProcessCodeSignature(alertEcsData).map((codeSignature) =>
+      return [
         getPrepopulatedRansomwareException({
           listId,
           name,
           eventCode,
           codeSignature,
           alertEcsData,
-        })
-      );
+        }),
+      ];
     default:
       // By default return the standard prepopulated Endpoint Exception fields
       console.log('default');
-      return getFileCodeSignature(alertEcsData).map((codeSignature) =>
+      return [
         getPrepopulatedEndpointException({
           listId,
           name,
           eventCode: eventCode ?? '',
-          codeSignature,
           alertEcsData,
-        })
-      );
+        }),
+      ];
   }
 };
 
