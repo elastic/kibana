@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import { SECURITY_FEATURE_ID } from '../../../../../../common';
 import type { OnboardingCardConfig } from '../../../../types';
 import { OnboardingCardId } from '../../../../constants';
 import { ALERTS_CARD_TITLE } from './translations';
@@ -22,4 +23,5 @@ export const alertsCardConfig: OnboardingCardConfig = {
         './alerts_card'
       )
   ),
+  capabilitiesRequired: [`${SECURITY_FEATURE_ID}.show`],
 };

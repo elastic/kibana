@@ -11,7 +11,7 @@ import produce from 'immer';
 import { map } from 'rxjs';
 import type { SecurityProductTypes } from '../../common/config';
 import { type Services } from '../common/services';
-import { applyAiSocNavigation, shouldUseAINavigation } from './ai_soc_navigation';
+import { applyAiSocNavigation } from './ai_soc_navigation';
 
 const PROJECT_SETTINGS_TITLE = i18n.translate(
   'xpack.securitySolutionServerless.navLinks.projectSettings.title',
@@ -23,7 +23,6 @@ export const initSideNavigation = async (
   productTypes: SecurityProductTypes
 ) => {
   services.securitySolution.setIsSolutionNavigationEnabled(true);
-  const showAINavigation = shouldUseAINavigation(productTypes);
 
   const { navigationTree$, panelContentProvider } =
     await services.securitySolution.getSolutionNavigation();
@@ -48,9 +47,7 @@ export const initSideNavigation = async (
           footerGroup.children.push({ cloudLink: 'billingAndSub', openInNewTab: true });
         }
 
-        if (showAINavigation) {
-          applyAiSocNavigation(draft);
-        }
+        applyAiSocNavigation(draft, productTypes);
       })
     )
   );

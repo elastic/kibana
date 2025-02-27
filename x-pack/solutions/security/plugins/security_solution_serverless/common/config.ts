@@ -9,8 +9,8 @@ import { schema, type TypeOf } from '@kbn/config-schema';
 import { ProductLine, ProductTier } from './product';
 
 export const productLine = schema.oneOf([
-  schema.literal(ProductLine.security),
   schema.literal(ProductLine.ai),
+  schema.literal(ProductLine.security),
   schema.literal(ProductLine.endpoint),
   schema.literal(ProductLine.cloud),
 ]);

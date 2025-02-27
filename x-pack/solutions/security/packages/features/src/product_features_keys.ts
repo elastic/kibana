@@ -6,10 +6,6 @@
  */
 
 export enum ProductFeatureSecurityKey {
-  /** Enables Detections workflows, with rules and alerts management */
-  detections = 'detections',
-  /** Enables Security dashboards */
-  dashboards = 'dashboards',
   /** Enables Advanced Insights (Entity Risk, GenAI) */
   advancedInsights = 'advanced_insights',
   /**

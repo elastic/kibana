@@ -13,7 +13,7 @@ import { PLI_PRODUCT_FEATURES } from './pli_config';
 /**
  * Returns the U (union) of all PLIs from the enabled productTypes in a single array.
  */
-export const getProductProductFeatures = (
+export const getEnabledProductFeatures = (
   productTypes: SecurityProductTypes
 ): ProductFeatureKeys => {
   const productFeatureKeys = productTypes.reduce<ProductFeatureKeys>(

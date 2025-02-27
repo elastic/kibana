@@ -8,7 +8,8 @@
 import type { Logger } from '@kbn/logging';
 
 import { ProductFeatureKey } from '@kbn/security-solution-features/keys';
-import type { ProductFeatureKeys } from '@kbn/security-solution-features';
+import type { ProductFeaturesConfigurator } from '@kbn/security-solution-features';
+import { getEnabledProductFeatures } from '../../common/pli/pli_features';
 import { getCasesProductFeaturesConfigurator } from './cases_product_features_config';
 import { getSecurityProductFeaturesConfigurator } from './security_product_features_config';
 import { getSecurityAssistantProductFeaturesConfigurator } from './assistant_product_features_config';
@@ -23,7 +24,6 @@ import { ProductLine } from '../../common/product';
 
 export const registerProductFeatures = (
   pluginsSetup: SecuritySolutionServerlessPluginSetupDeps,
-  enabledProductFeatureKeys: ProductFeatureKeys,
   config: ServerlessSecurityConfig
 ): void => {
   // securitySolutionEss plugin should always be disabled when securitySolutionServerless is enabled.
@@ -34,19 +34,36 @@ export const registerProductFeatures = (
     return;
   }
 
-  // register product features for the main security solution product features service
-  pluginsSetup.securitySolution.setProductFeaturesConfigurator({
-    security: getSecurityProductFeaturesConfigurator(
+  // Register product features
+  const enabledProductFeatureKeys = getEnabledProductFeatures(config.productTypes);
+  const productLines = Object.fromEntries(
+    config.productTypes.map((productType) => [productType.product_line, true])
+  );
+
+  const configurator: ProductFeaturesConfigurator = {};
+  if (productLines[ProductLine.security]) {
+    configurator.security = getSecurityProductFeaturesConfigurator(
       enabledProductFeatureKeys,
       config.experimentalFeatures
-    ),
-    cases: getCasesProductFeaturesConfigurator(enabledProductFeatureKeys),
-    securityAssistant: getSecurityAssistantProductFeaturesConfigurator(enabledProductFeatureKeys),
-    attackDiscovery: getAttackDiscoveryProductFeaturesConfigurator(enabledProductFeatureKeys),
-    timeline: getTimelineProductFeaturesConfigurator(enabledProductFeatureKeys),
-    notes: getNotesProductFeaturesConfigurator(enabledProductFeatureKeys),
-    siemMigrations: getSiemMigrationsProductFeaturesConfigurator(enabledProductFeatureKeys),
-  });
+    );
+    configurator.cases = getCasesProductFeaturesConfigurator(enabledProductFeatureKeys);
+    configurator.timeline = getTimelineProductFeaturesConfigurator(enabledProductFeatureKeys);
+    configurator.notes = getNotesProductFeaturesConfigurator(enabledProductFeatureKeys);
+  }
+
+  if (productLines[ProductLine.ai]) {
+    configurator.attackDiscovery =
+      getAttackDiscoveryProductFeaturesConfigurator(enabledProductFeatureKeys);
+    configurator.securityAssistant =
+      getSecurityAssistantProductFeaturesConfigurator(enabledProductFeatureKeys);
+    if (productLines[ProductLine.security] && !config.experimentalFeatures.siemMigrationsDisabled) {
+      configurator.siemMigrations =
+        getSiemMigrationsProductFeaturesConfigurator(enabledProductFeatureKeys);
+    }
+  }
+
+  // register product features for the main security solution product features service
+  pluginsSetup.securitySolution.setProductFeaturesConfigurator(configurator);
 
   // enable rule actions based on the enabled product features
   enableRuleActions({

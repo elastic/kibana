@@ -19,8 +19,22 @@ import { SecurityPageName } from '@kbn/deeplinks-security';
 import { ProductLine } from '../../common/product';
 import type { SecurityProductTypes } from '../../common/config';
 
-export const shouldUseAINavigation = (productTypes: SecurityProductTypes) => {
+const shouldUseAINavigation = (productTypes: SecurityProductTypes) => {
   return productTypes.some((productType) => productType.product_line === ProductLine.ai);
+};
+const isAIStandalone = (productTypes: SecurityProductTypes) => {
+  return !productTypes.some((productType) => productType.product_line === ProductLine.security);
+};
+
+const aiGroup: GroupDefinition<AppDeepLinkId, string, string> = {
+  type: 'navGroup',
+  id: 'security_solution_ai_nav',
+  title: 'AI for SOC',
+  icon: AssistantIcon,
+  breadcrumbStatus: 'hidden',
+  defaultIsCollapsed: false,
+  isCollapsible: false,
+  children: [],
 };
 
 // Apply AI for SOC navigation tree changes.
@@ -28,10 +42,23 @@ export const shouldUseAINavigation = (productTypes: SecurityProductTypes) => {
 // An example of static navigation tree: x-pack/solutions/observability/plugins/observability/public/navigation_tree.ts
 // This is a temporary solution until the "classic" navigation is deprecated and the "generated" navigationTree is replaced by a static navigationTree (probably multiple of them).
 export const applyAiSocNavigation = (
-  draft: WritableDraft<NavigationTreeDefinition<AppDeepLinkId>>
+  draft: WritableDraft<NavigationTreeDefinition<AppDeepLinkId>>,
+  productTypes: SecurityProductTypes
 ): void => {
-  const group = draft.body[0] as WritableDraft<GroupDefinition<AppDeepLinkId, string, string>>;
-  const [attachDiscovery] = group.children.reduce<Array<NodeDefinition<AppDeepLinkId>>>(
+  if (!shouldUseAINavigation(productTypes)) {
+    return;
+  }
+
+  const securityGroup = draft.body[0] as WritableDraft<
+    GroupDefinition<AppDeepLinkId, string, string>
+  >;
+
+  if (isAIStandalone(productTypes)) {
+    draft.body = [{ ...aiGroup, children: securityGroup.children }];
+    return;
+  }
+
+  const [attachDiscovery] = securityGroup.children.reduce<Array<NodeDefinition<AppDeepLinkId>>>(
     (nodes, category) => {
       const [attachDiscoveryNode] = remove(category.children ?? [], {
         id: SecurityPageName.attackDiscovery,
@@ -45,18 +72,7 @@ export const applyAiSocNavigation = (
   );
 
   if (attachDiscovery) {
-    group.appendHorizontalRule = true; // does not seem to work :( talk with sharedUx team
-
-    const aiGroup: GroupDefinition<AppDeepLinkId, string, string> = {
-      type: 'navGroup',
-      id: 'security_solution_ai_nav',
-      title: 'AI for SOC',
-      icon: AssistantIcon,
-      children: [attachDiscovery],
-      breadcrumbStatus: 'hidden',
-      defaultIsCollapsed: false,
-      isCollapsible: false,
-    };
-    draft.body.push(aiGroup);
+    securityGroup.appendHorizontalRule = true; // does not seem to work :( talk with sharedUx team
+    draft.body.push({ ...aiGroup, children: [attachDiscovery] });
   }
 };

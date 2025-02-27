@@ -10,6 +10,7 @@ import type { OnboardingCardConfig } from '../../../../types';
 import { OnboardingCardId } from '../../../../constants';
 import { RULES_CARD_TITLE } from './translations';
 import { checkRulesComplete } from './rules_check_complete';
+import { SECURITY_FEATURE_ID } from '../../../../../../common';
 import { getCardIcon } from '../common/card_icon';
 
 export const rulesCardConfig: OnboardingCardConfig = {
@@ -24,4 +25,5 @@ export const rulesCardConfig: OnboardingCardConfig = {
       )
   ),
   checkComplete: checkRulesComplete,
+  capabilitiesRequired: [`${SECURITY_FEATURE_ID}.show`],
 };

@@ -12,6 +12,7 @@ import { checkIntegrationsCardComplete } from './integrations_check_complete';
 import { OnboardingCardId } from '../../../../constants';
 import type { IntegrationCardMetadata } from './types';
 import { getCardIcon } from '../common/card_icon';
+import { SECURITY_FEATURE_ID } from '../../../../../../common';
 
 export const integrationsCardConfig: OnboardingCardConfig<IntegrationCardMetadata> = {
   id: OnboardingCardId.integrations,
@@ -27,5 +28,5 @@ export const integrationsCardConfig: OnboardingCardConfig<IntegrationCardMetadat
       )
   ),
   checkComplete: checkIntegrationsCardComplete,
-  capabilitiesRequired: 'fleet.read',
+  capabilitiesRequired: [[`${SECURITY_FEATURE_ID}.show`, 'fleet.read']],
 };

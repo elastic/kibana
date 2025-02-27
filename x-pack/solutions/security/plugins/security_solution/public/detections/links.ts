@@ -13,7 +13,7 @@ export const links: LinkItem = {
   id: SecurityPageName.alerts,
   title: ALERTS,
   path: ALERTS_PATH,
-  capabilities: [[`${SECURITY_FEATURE_ID}.show`, `${SECURITY_FEATURE_ID}.alerts`]],
+  capabilities: `${SECURITY_FEATURE_ID}.show`,
   globalNavPosition: 3,
   globalSearchKeywords: [
     i18n.translate('xpack.securitySolution.appLinks.alerts', {
