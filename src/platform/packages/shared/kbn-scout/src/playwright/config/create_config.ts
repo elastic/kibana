@@ -47,6 +47,8 @@ export function createPlaywrightConfig(options: ScoutPlaywrightOptions): Playwri
     ],
     /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
     use: {
+      actionTimeout: 10000, // Shorten timeout for actions like `click()`
+      navigationTimeout: 20000, // Shorter timeout for page navigations
       testIdAttribute: 'data-test-subj',
       serversConfigDir: SCOUT_SERVERS_ROOT,
       [VALID_CONFIG_MARKER]: true,

@@ -9,24 +9,31 @@
 
 import { Locator } from 'playwright/test';
 import { ScoutPage } from '..';
+import { ScoutTestConfig } from '../../types';
 
 export class CollapsibleNav {
   private toggleNavButton: Locator;
 
-  constructor(private readonly page: ScoutPage) {
-    this.page = page;
-    this.toggleNavButton = this.page.testSubj.locator('toggleNavButton');
+  constructor(private readonly page: ScoutPage, private readonly config: ScoutTestConfig) {
+    this.toggleNavButton = this.page.testSubj.locator(
+      this.config.serverless ? 'euiCollapsibleNavButton' : 'toggleNavButton'
+    );
   }
 
   async expandNav() {
-    const isExpanded = await this.toggleNavButton.getAttribute('aria-expanded');
-    if (isExpanded === 'false') {
-      return this.toggleNavButton.click();
+    if (await this.toggleNavButton.isVisible()) {
+      const isExpanded = await this.toggleNavButton.getAttribute('aria-expanded');
+      if (isExpanded === 'false') {
+        await this.toggleNavButton.click();
+      }
     }
   }
 
   async clickItem(itemName: string) {
     await this.expandNav();
-    return this.page.click(`[title="${itemName}"]`);
+    const itemLocator = this.config.serverless
+      ? `a#${itemName.toLowerCase()}`
+      : `[title="${itemName}"]`;
+    return this.page.click(itemLocator);
   }
 }

@@ -59,7 +59,7 @@ export const lighthouseFixture = coreWorkerFixtures.extend<
           throw new Error('Lighthouse audit failed');
         }
 
-        log.debug(
+        log.info(
           `Lighthouse audit completed with '${auditResult.lhr.categories.performance.score}' perf score`
         );
 
