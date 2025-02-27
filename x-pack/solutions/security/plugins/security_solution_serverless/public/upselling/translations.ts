@@ -39,6 +39,6 @@ export const SIEM_MIGRATION_UPGRADE_MESSAGE = i18n.translate(
   'xpack.securitySolutionServerless.upselling.siemMigrations.upgradeTierMessage',
   {
     defaultMessage:
-      'To use this feature, you’ll need to upgrade your Elastic Cloud Serverless feature tier.',
+      'To use this feature, you need to upgrade your Elastic Cloud Serverless feature tier. Update your subscription or contact your administrator for assistance.',
   }
 );

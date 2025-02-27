@@ -12,7 +12,7 @@ import * as i18n from '../../translations';
 export const SiemMigrationStartUpsellSection = () => {
   return (
     <SiemMigrationStartUpsellSectionCommon
-      title={i18n.SIEM_MIGRATION_UPSELL_TITLE('Complete')}
+      title={i18n.SIEM_MIGRATION_UPSELLING_TITLE('Complete')}
       upgradeMessage={i18n.SIEM_MIGRATION_UPGRADE_MESSAGE}
     />
   );
