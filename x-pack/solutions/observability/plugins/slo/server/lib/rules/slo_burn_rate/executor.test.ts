@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { actionsClientMock } from '@kbn/actions-plugin/server/mocks';
 import { Rule, SanitizedRuleConfig } from '@kbn/alerting-plugin/common';
 import { DEFAULT_FLAPPING_SETTINGS } from '@kbn/alerting-plugin/common/rules_settings';
 import { RuleExecutorServices } from '@kbn/alerting-plugin/server';
@@ -169,6 +170,7 @@ describe('BurnRateRuleExecutor', () => {
         asSecondaryAuthUser: esClientMock,
       },
       alertsClient: publicAlertsClientMock.create(),
+      actionsClient: actionsClientMock.create(),
       alertFactory: {
         create: jest.fn(),
         done: jest.fn(),
