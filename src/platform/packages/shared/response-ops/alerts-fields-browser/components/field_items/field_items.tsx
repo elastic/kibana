@@ -68,13 +68,18 @@ export const getFieldItemsData = ({
   const selectedFieldIds = new Set(columnIds);
 
   const getFieldItems = () => {
-    let fieldItemsAcc: BrowserFieldItem[] = [];
+    const fieldItemsAcc: BrowserFieldItem[] = [];
+    const fieldSeen: Map<string, boolean> = new Map();
+
     for (let i = 0; i < categoryIds.length; i += 1) {
       const categoryId = categoryIds[i];
       const categoryBrowserFields = Object.values(browserFields[categoryId]?.fields ?? {});
       if (categoryBrowserFields.length > 0) {
-        const categoryFieldItems = categoryBrowserFields.map(({ name = '', ...field }) => {
-          return {
+        for (let j = 0; j < categoryBrowserFields.length; j += 1) {
+          const { name = '', ...field } = categoryBrowserFields[j];
+          if (fieldSeen.has(name)) continue;
+          fieldSeen.set(name, true);
+          const categoryFieldItem = {
             name,
             type: field.type,
             description: getDescription(name, EcsFlat as Record<string, EcsMetadata>),
@@ -83,15 +88,14 @@ export const getFieldItemsData = ({
             selected: selectedFieldIds.has(name),
             isRuntime: !!field.runtimeField,
           };
-        });
-        fieldItemsAcc = fieldItemsAcc.concat(categoryFieldItems);
+          fieldItemsAcc.push(categoryFieldItem);
+        }
       }
     }
     return fieldItemsAcc;
   };
 
-  const fieldItems = uniqBy('name', getFieldItems());
-  return { fieldItems };
+  return { fieldItems: getFieldItems() };
 };
 
 const getDefaultFieldTableColumns = ({ highlight }: { highlight: string }): FieldTableColumns => {
