@@ -5,12 +5,12 @@
  * 2.0.
  */
 
+import type { ThreatIndicatorPath } from '../../../../../../common/api/detection_engine';
 import type { GetThreatListOptions } from './types';
 import type { SignalSourceHit } from '../../types';
 import { getThreatList } from './get_threat_list';
 import { enrichSignalThreatMatchesFromSignalsMap } from './enrich_signal_threat_matches';
 import { type SignalsQueryMap } from './get_signals_map_from_threat_index';
-import { ThreatIndicatorPath } from '@kbn/security-solution-plugin/common/api/detection_engine';
 
 interface ThreatEnrichmentFactoryOptions {
   threatIndicatorPath: ThreatIndicatorPath;

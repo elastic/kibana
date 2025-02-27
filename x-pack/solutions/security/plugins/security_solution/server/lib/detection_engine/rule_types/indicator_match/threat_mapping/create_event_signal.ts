@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { DEFAULT_INDICATOR_SOURCE_PATH } from '../../../../../../common/constants';
 import { buildThreatMappingFilter } from './build_threat_mapping_filter';
 import { getFilter } from '../../utils/get_filter';
 import { searchAfterAndBulkCreate } from '../../utils/search_after_bulk_create';
@@ -23,7 +24,6 @@ import {
   getSignalValueMap,
   MANY_NESTED_CLAUSES_ERR,
 } from './utils';
-import { DEFAULT_INDICATOR_SOURCE_PATH } from '@kbn/security-solution-plugin/common/constants';
 
 export const createEventSignal = async ({
   sharedParams,

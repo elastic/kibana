@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { DEFAULT_INDICATOR_SOURCE_PATH } from '../../../../../../common/constants';
 import { buildThreatMappingFilter } from './build_threat_mapping_filter';
 import { getFilter } from '../../utils/get_filter';
 import { searchAfterAndBulkCreate } from '../../utils/search_after_bulk_create';
@@ -17,7 +18,6 @@ import type {
 import { searchAfterAndBulkCreateSuppressedAlerts } from '../../utils/search_after_bulk_create_suppressed_alerts';
 
 import { buildThreatEnrichment } from './build_threat_enrichment';
-import { DEFAULT_INDICATOR_SOURCE_PATH } from '@kbn/security-solution-plugin/common/constants';
 export const createThreatSignal = async ({
   sharedParams,
   currentResult,

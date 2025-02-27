@@ -10,8 +10,8 @@ import { isEmpty } from 'lodash/fp';
 import type { RuleFilterArray } from '../../../../../common/api/detection_engine/model/rule_schema';
 import { buildTimeRangeFilter } from '../utils/build_events_query';
 import { getQueryFilter } from '../utils/get_query_filter';
-import { SecuritySharedParams } from '../types';
-import { EqlRuleParams } from '../../rule_schema';
+import type { SecuritySharedParams } from '../types';
+import type { EqlRuleParams } from '../../rule_schema';
 
 interface BuildEqlSearchRequestParams {
   sharedParams: SecuritySharedParams<EqlRuleParams>;

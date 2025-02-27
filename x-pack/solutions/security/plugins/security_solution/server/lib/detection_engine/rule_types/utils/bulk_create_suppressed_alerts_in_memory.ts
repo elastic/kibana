@@ -34,7 +34,7 @@ import type {
 } from '../../../../../common/api/detection_engine/model/alerts';
 import { robustGet } from './source_fields_merging/utils/robust_field_access';
 import { buildAlertGroupFromSequence } from '../eql/build_alert_group_from_sequence';
-import { EqlRuleParams } from '../../rule_schema';
+import type { EqlRuleParams } from '../../rule_schema';
 
 interface SearchAfterAndBulkCreateSuppressedAlertsParams extends SearchAfterAndBulkCreateParams {
   wrapSuppressedHits: WrapSuppressedHits;

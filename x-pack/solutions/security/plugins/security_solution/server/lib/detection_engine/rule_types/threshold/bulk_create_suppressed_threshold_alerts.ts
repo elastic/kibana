@@ -72,19 +72,19 @@ export const bulkCreateSuppressedThresholdAlerts = async ({
     buckets,
     spaceId: sharedParams.spaceId,
     completeRule,
-    mergeStrategy: mergeStrategy,
+    mergeStrategy,
     indicesToQuery: inputIndex,
     buildReasonMessage: buildReasonMessageForThresholdAlert,
-    alertTimestampOverride: alertTimestampOverride,
+    alertTimestampOverride,
     ruleExecutionLogger,
-    publicBaseUrl: publicBaseUrl,
+    publicBaseUrl,
     inputIndex: inputIndex.join(','),
     startedAt,
     from,
     to,
     suppressionWindow,
     threshold: ruleParams.threshold,
-    intendedTimestamp: intendedTimestamp,
+    intendedTimestamp,
   });
 
   const bulkCreateResult = await bulkCreateWithSuppression({

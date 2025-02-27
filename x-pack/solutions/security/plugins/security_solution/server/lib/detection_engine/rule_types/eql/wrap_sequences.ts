@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { EqlSequence } from '../../../../../common/detection_engine/types';
 import type { SecuritySharedParams, SignalSource } from '../types';
 import { buildAlertGroupFromSequence } from './build_alert_group_from_sequence';
 import type { EqlRuleParams } from '../../rule_schema';
@@ -13,8 +14,7 @@ import type {
   EqlShellFieldsLatest,
   WrappedFieldsLatest,
 } from '../../../../../common/api/detection_engine/model/alerts';
-import { EqlSequence } from '@kbn/security-solution-plugin/common/detection_engine/types';
-import { BuildReasonMessage } from '../utils/reason_formatters';
+import type { BuildReasonMessage } from '../utils/reason_formatters';
 
 export const wrapSequences = ({
   sharedParams,

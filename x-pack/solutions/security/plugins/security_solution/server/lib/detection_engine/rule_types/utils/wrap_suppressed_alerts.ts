@@ -20,7 +20,7 @@ import { transformHitToAlert } from '../factories/utils/transform_hit_to_alert';
 import { getSuppressionAlertFields, getSuppressionTerms } from './suppression_utils';
 import { generateId } from './utils';
 import type { BuildReasonMessage } from './reason_formatters';
-import { EqlRuleParams, MachineLearningRuleParams, ThreatRuleParams } from '../../rule_schema';
+import type { EqlRuleParams, MachineLearningRuleParams, ThreatRuleParams } from '../../rule_schema';
 
 /**
  * wraps suppressed alerts

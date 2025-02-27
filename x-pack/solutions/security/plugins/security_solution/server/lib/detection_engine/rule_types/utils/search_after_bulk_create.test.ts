@@ -55,7 +55,7 @@ describe('searchAfterAndBulkCreate', () => {
   let buildReasonMessage: BuildReasonMessage = jest
     .fn()
     .mockResolvedValue('some alert reason message');
-  let listClient = listMock.getListClient();
+  const listClient = listMock.getListClient();
   listClient.searchListItemByValues = jest.fn().mockResolvedValue([]);
   const ruleExecutionLogger = ruleExecutionLogMock.forExecutors.create();
   const someGuids = Array.from({ length: 13 }).map(() => uuidv4());
@@ -74,7 +74,7 @@ describe('searchAfterAndBulkCreate', () => {
     publicBaseUrl: 'http://testkibanabaseurl.com',
     intendedTimestamp: undefined,
   });
-  let bulkCreate: BulkCreate = bulkCreateFactory(
+  const bulkCreate: BulkCreate = bulkCreateFactory(
     mockPersistenceServices.alertWithPersistence,
     false,
     ruleExecutionLogger

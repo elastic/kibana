@@ -9,7 +9,7 @@ import dateMath from '@kbn/datemath';
 import { DEFAULT_INDEX_PATTERN } from '../../../../../common/constants';
 import { ruleExecutionLogMock } from '../../rule_monitoring/mocks';
 import type { QueryRuleParams, RuleParams } from '../../rule_schema';
-import { SecuritySharedParams } from '../types';
+import type { SecuritySharedParams } from '../types';
 import { getListClientMock } from '@kbn/lists-plugin/server/services/lists/list_client.mock';
 import { createRuleDataClientMock } from '@kbn/rule-registry-plugin/server/rule_data_client/rule_data_client.mock';
 import { getCompleteRuleMock } from '../../rule_schema/mocks';
