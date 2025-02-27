@@ -28,7 +28,7 @@ import { genericErrorResponse } from '../schema/errors';
 
 import {
   deleteOutputHandler,
-  getOneOuputHandler,
+  getOneOutputHandler,
   getOutputsHandler,
   postOutputHandler,
   putOutputHandler,
@@ -110,7 +110,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
           },
         },
       },
-      getOneOuputHandler
+      getOneOutputHandler
     );
   router.versioned
     .put({
