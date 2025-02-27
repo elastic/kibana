@@ -11,7 +11,7 @@ import { useDispatch, useSelector } from 'react-redux';
 
 import { DataView, type DataViewListItem } from '@kbn/data-views-plugin/public';
 import type { DataViewPickerScopeName } from '../../constants';
-import { useKibana } from '../../../common/lib/kibana/kibana_react';
+import { useKibana } from '../../../common/lib/kibana';
 import { DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID } from '../../constants';
 import { useDataView } from '../../hooks/use_data_view';
 import { sharedStateSelector } from '../../redux/selectors';

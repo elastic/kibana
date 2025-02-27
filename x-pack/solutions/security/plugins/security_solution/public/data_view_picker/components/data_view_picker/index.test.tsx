@@ -8,7 +8,6 @@
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { DataViewPicker } from '.';
-import { selectDataViewAsync } from '../../redux/actions';
 import { useDataView } from '../../hooks/use_data_view';
 import { DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID, DataViewPickerScopeName } from '../../constants';
 import { shared } from '../../redux/slices';
@@ -83,6 +82,7 @@ describe('DataViewPicker', () => {
     jest.mocked(useKibana).mockReturnValue({
       services: {
         dataViewFieldEditor: { openEditor: jest.fn() },
+        dataViewEditor: { openEditor: jest.fn() },
         data: { dataViews: { get: jest.fn() } },
       },
     } as unknown as ReturnType<typeof useKibana>);
@@ -118,7 +118,7 @@ describe('DataViewPicker', () => {
     });
   });
 
-  it.skip('opens data view editor when creating a new data view', async () => {
+  it('opens data view editor when creating a new data view', async () => {
     render(
       <TestProviders>
         <DataViewPicker scope={DataViewPickerScopeName.default} />
@@ -132,6 +132,7 @@ describe('DataViewPicker', () => {
     // Test the onSave callback
     const onSaveCallback = jest.mocked(useKibana().services.dataViewEditor.openEditor).mock
       .calls[0][0].onSave;
+
     const newDataView = new DataView({
       spec: { id: 'new-data-view-id', name: 'New Data View' },
       fieldFormats: new FieldFormatsRegistry(),
@@ -140,13 +141,13 @@ describe('DataViewPicker', () => {
     onSaveCallback(newDataView);
 
     expect(mockDispatch).toHaveBeenCalledWith(shared.actions.addDataView(newDataView));
-    expect(selectDataViewAsync).toHaveBeenCalledWith({
+    expect(jest.mocked(useSelectDataView())).toHaveBeenCalledWith({
       id: 'new-data-view-id',
-      scope: ['timeline'],
+      scope: ['default'],
     });
   });
 
-  it.skip('opens field editor when adding a field', async () => {
+  it('opens field editor when adding a field', async () => {
     const mockFieldEditorClose = jest.fn();
     jest
       .mocked(useKibana().services.dataViewFieldEditor.openEditor)
@@ -162,7 +163,7 @@ describe('DataViewPicker', () => {
 
     await waitFor(() => {
       expect(jest.mocked(useKibana().services.data.dataViews.get)).toHaveBeenCalledWith(
-        'test-data-view-id'
+        'security-solution-default'
       );
       expect(jest.mocked(useKibana().services.dataViewFieldEditor.openEditor)).toHaveBeenCalled();
     });
