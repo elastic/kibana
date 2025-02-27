@@ -9,15 +9,8 @@
     "@kbn/config-schema",
     "@kbn/core",
     "@kbn/i18n",
-    "@kbn/core-saved-objects-api-server",
-    "@kbn/data-plugin",
-    "@kbn/inspector-plugin",
-    "@kbn/es-types",
-    "@kbn/apm-types",
-    "@kbn/core-http-server-mocks",
-    "@kbn/apm-utils",
-    "@kbn/core-http-server",
-    "@kbn/utility-types",
-    "@kbn/elastic-agent-utils",
+    "@kbn/core-ui-settings-common",
+    "@kbn/management-settings-ids",
+    "@kbn/core-ui-settings-browser",
   ]
 }
