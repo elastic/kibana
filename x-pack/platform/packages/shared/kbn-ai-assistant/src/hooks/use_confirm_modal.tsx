@@ -10,17 +10,6 @@ import { EuiCheckbox, EuiConfirmModal, EuiText } from '@elastic/eui';
 import { useState } from 'react';
 import { css } from '@emotion/css';
 
-export interface UseConfirmModalProps {
-  title: React.ReactNode;
-  children: React.ReactNode;
-  confirmButtonText: React.ReactNode;
-}
-
-export interface UseConfirmModalResult {
-  element: React.ReactNode | undefined;
-  confirm: (checkBoxLabel: string) => Promise<boolean>;
-}
-
 const ConfirmModal = ({
   checkboxLabel,
   onClose,
@@ -73,7 +62,14 @@ export function useConfirmModal({
   title,
   children,
   confirmButtonText,
-}: UseConfirmModalProps): UseConfirmModalResult {
+}: {
+  title: React.ReactNode;
+  children: React.ReactNode;
+  confirmButtonText: React.ReactNode;
+}): {
+  element: React.ReactNode | undefined;
+  confirm: (checkBoxLabel: string) => Promise<boolean>;
+} {
   const [element, setElement] = useState<React.ReactNode | undefined>(undefined);
 
   const confirm = (checkboxLabel: string) => {
