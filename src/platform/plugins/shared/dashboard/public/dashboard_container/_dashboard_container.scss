@@ -6,12 +6,19 @@
   .dashboardTopNav {
     z-index: 0;
   }
+  .kbnAppWrapper {
+    overflow: clip;
+  }
   .dshDashboardViewportWrapper, .dshDashboardViewport, .dshLayout, .kbnGridWrapper, .kbnGrid  {
     display: flex;
     flex: auto;
     width: 100%;
     flex-direction: column;
     background-color: $euiColorBackgroundBasePlain;
+  }
+
+  .embPanel {
+    background-color: transparent;
   }
 };
 

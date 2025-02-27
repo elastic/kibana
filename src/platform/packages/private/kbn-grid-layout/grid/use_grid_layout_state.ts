@@ -29,12 +29,14 @@ import { getKeysInOrder, resolveGridRow } from './utils/resolve_grid_row';
 
 export const useGridLayoutState = ({
   layout,
+  section,
   layoutRef,
   gridSettings,
   expandedPanelId,
   accessMode,
 }: {
   layout: GridLayoutData;
+  section?: number;
   layoutRef: React.MutableRefObject<HTMLDivElement | null>;
   gridSettings: GridSettings;
   expandedPanelId?: string;
@@ -96,7 +98,7 @@ export const useGridLayoutState = ({
       layout.map(({ panels }) => Object.keys(panels))
     );
     const activeSection$ = new BehaviorSubject<number | undefined>(
-      gridSettings === 'none' ? 0 : undefined
+      gridSettings === 'none' ? section : undefined
     );
 
     return {

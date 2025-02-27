@@ -36,14 +36,15 @@ export const DashboardGrid = ({
   const panelRefs = useRef<{ [panelId: string]: React.Ref<HTMLDivElement> }>({});
   const { euiTheme } = useEuiTheme();
 
-  const [expandedPanelId, panels, sections, useMargins, lockToGrid, viewMode] =
+  const [expandedPanelId, panels, sections, useMargins, lockToGrid, viewMode, activeSection] =
     useBatchedPublishingSubjects(
       dashboardApi.expandedPanelId$,
       dashboardApi.panels$,
       dashboardApi.sections$,
       dashboardApi.settings.useMargins$,
       dashboardApi.settings.lockToGrid$,
-      dashboardApi.viewMode$
+      dashboardApi.viewMode$,
+      dashboardApi.activeSection$
     );
 
   const appFixedViewport = useAppFixedViewport();
@@ -152,6 +153,7 @@ export const DashboardGrid = ({
     // memoizing this component reduces the number of times it gets re-rendered to a minimum
     return (
       <GridLayout
+        section={activeSection}
         onSectionChange={dashboardApi.setActiveSection}
         css={layoutStyles}
         layout={currentLayout}
@@ -180,6 +182,8 @@ export const DashboardGrid = ({
     viewMode,
     useMargins,
     lockToGrid,
+    activeSection,
+    dashboardApi.setActiveSection,
   ]);
 
   const { dashboardClasses, dashboardStyles } = useMemo(() => {

@@ -12,6 +12,7 @@ import { cloneDeep } from 'lodash';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { combineLatest, distinctUntilChanged, map, pairwise, skip } from 'rxjs';
 
+import { EuiPagination } from '@elastic/eui';
 import { css } from '@emotion/react';
 
 import { DragPreview } from '../drag_preview';
@@ -19,7 +20,7 @@ import { GridPanel } from '../grid_panel';
 import { useGridLayoutContext } from '../use_grid_layout_context';
 import { getKeysInOrder } from '../utils/resolve_grid_row';
 import { GridRowHeader } from './grid_row_header';
-import { EuiPagination } from '@elastic/eui';
+import { GridRowFooter } from './grid_row_footer';
 
 export interface GridRowProps {
   rowIndex: number;
@@ -33,9 +34,12 @@ export const GridRow = React.memo(({ rowIndex }: GridRowProps) => {
   const [panelIdsInOrder, setPanelIdsInOrder] = useState<string[]>(() =>
     getKeysInOrder(currentRow.panels)
   );
-  const [pageCount, setPageCount] = useState<number>(
-    gridLayoutStateManager.gridLayout$.getValue().length
-  );
+  // const [hasActiveSection, setHasActiveSection] = useState<boolean>(
+  //   gridLayoutStateManager.activeSection$.getValue() !== undefined
+  // );
+  // const [pageCount, setPageCount] = useState<number>(
+  //   gridLayoutStateManager.gridLayout$.getValue().length
+  // );
   const [activeSectionIndex, setActiveSection] = useState<number | undefined>(
     gridLayoutStateManager.activeSection$.getValue()
   );
@@ -63,7 +67,6 @@ export const GridRow = React.memo(({ rowIndex }: GridRowProps) => {
       ]).subscribe(([gridLayout, activeSection]) => {
         setActiveSection(activeSection);
         setIsCollapsed(gridLayout[rowIndex]?.isCollapsed ?? false);
-        setPageCount(gridLayout.length);
       });
 
       /**
@@ -94,7 +97,6 @@ export const GridRow = React.memo(({ rowIndex }: GridRowProps) => {
         interactionStyleSubscription.unsubscribe();
         gridLayoutSubscription.unsubscribe();
         sectionSubscription.unsubscribe();
-        rowStateSubscription.unsubscribe();
       };
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -125,16 +127,7 @@ export const GridRow = React.memo(({ rowIndex }: GridRowProps) => {
         })}
       >
         {activeSectionIndex !== undefined ? (
-          <div className={'kbnGridRowHeader'}>
-            <EuiPagination
-              aria-label="Many pages example"
-              pageCount={pageCount}
-              activePage={activeSectionIndex}
-              onPageClick={(activePage) => {
-                gridLayoutStateManager.activeSection$.next(activePage);
-              }}
-            />
-          </div>
+          <GridRowFooter rowIndex={rowIndex} />
         ) : (
           rowIndex !== 0 && (
             <GridRowHeader
@@ -182,6 +175,7 @@ const styles = {
         backgroundColor: '#f6f9fc',
         borderTop: '1px solid #E3E8F2',
         padding: '12px',
+        zIndex: 10000,
       },
       '.kbnGridRow': {
         flex: 1,

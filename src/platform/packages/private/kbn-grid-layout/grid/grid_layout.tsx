@@ -24,6 +24,7 @@ import { resolveGridRow } from './utils/resolve_grid_row';
 
 export type GridLayoutProps = {
   layout: GridLayoutData;
+  section?: number;
   gridSettings: GridSettings;
   onLayoutChange: (newLayout: GridLayoutData) => void;
   onSectionChange?: (section?: number) => void;
@@ -34,6 +35,7 @@ export type GridLayoutProps = {
 
 export const GridLayout = ({
   layout,
+  section,
   gridSettings,
   renderPanelContents,
   onLayoutChange,
@@ -50,6 +52,7 @@ export const GridLayout = ({
     gridSettings,
     expandedPanelId,
     accessMode,
+    section,
   });
 
   const [rowCount, setRowCount] = useState<number>(

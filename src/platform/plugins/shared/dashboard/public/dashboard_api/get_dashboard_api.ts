@@ -86,6 +86,7 @@ export function getDashboardApi({
 
   const settingsManager = initializeSettingsManager(initialState);
   const panelsManager = initializePanelsManager(
+    savedObjectId$,
     incomingEmbeddable,
     initialState.panels,
     initialState.sections,

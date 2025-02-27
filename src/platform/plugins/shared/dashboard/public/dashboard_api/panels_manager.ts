@@ -44,8 +44,10 @@ import { dashboardClonePanelActionStrings } from '../dashboard_actions/_dashboar
 import { placeClonePanel } from '../dashboard_container/panel_placement/place_clone_panel_strategy';
 import { PanelPlacementStrategy } from '../plugin_constants';
 import { DashboardSectionMap } from '../../common/dashboard_container/types';
+import { getDashboardBackupService } from '../services/dashboard_backup_service';
 
 export function initializePanelsManager(
+  savedObjectId$: BehaviorSubject<string | undefined>,
   incomingEmbeddable: EmbeddablePackageState | undefined,
   initialPanels: DashboardPanelMap,
   initialSections: DashboardSectionMap | undefined,
@@ -78,7 +80,9 @@ export function initializePanelsManager(
     if (!fastIsEqual(sections ?? [], sections$.value ?? [])) sections$.next(sections);
   }
   const activeSection$ = new BehaviorSubject<number | undefined>(
-    getSettings().lockToGrid ? undefined : 0
+    getSettings().lockToGrid
+      ? undefined
+      : getDashboardBackupService().getSectionIndex(savedObjectId$.value) ?? 0
   );
   let restoredRuntimeState: UnsavedPanelState = initialPanelsRuntimeState;
 
@@ -113,14 +117,22 @@ export function initializePanelsManager(
       // otherwise this incoming embeddable is brand new.
       setRuntimeStateForChild(incomingPanelId, incomingEmbeddable.input);
       const sectionIndex = activeSection$.value ?? 0;
-      const { newPanelPlacement } = runPanelPlacementStrategy(
-        PanelPlacementStrategy.findTopLeftMostOpenSpace,
-        {
-          width: incomingEmbeddable.size?.width ?? DEFAULT_PANEL_WIDTH,
-          height: incomingEmbeddable.size?.height ?? DEFAULT_PANEL_HEIGHT,
-          currentPanels: panels$.value,
-        }
-      );
+
+      let newPanelPlacement;
+      const { lockToGrid } = getSettings();
+      if (lockToGrid) {
+        ({ newPanelPlacement } = runPanelPlacementStrategy(
+          PanelPlacementStrategy.findTopLeftMostOpenSpace,
+          {
+            width: incomingEmbeddable.size?.width ?? DEFAULT_PANEL_WIDTH,
+            height: incomingEmbeddable.size?.height ?? DEFAULT_PANEL_HEIGHT,
+            currentPanels: panels$.value,
+          }
+        ));
+      } else {
+        newPanelPlacement = { x: 0, y: 0, w: 400, h: 300 };
+      }
+
       incomingPanelState = {
         explicitInput: {},
         type: incomingEmbeddable.type,
@@ -210,14 +222,21 @@ export function initializePanelsManager(
           : undefined;
 
         const { lockToGrid } = getSettings();
-        const { newPanelPlacement, otherPanels } = runPanelPlacementStrategy(
-          customPlacementSettings?.strategy ?? PanelPlacementStrategy.findTopLeftMostOpenSpace,
-          {
-            currentPanels: panels$.value,
-            height: customPlacementSettings?.height ?? (lockToGrid ? DEFAULT_PANEL_HEIGHT : 300),
-            width: customPlacementSettings?.width ?? (lockToGrid ? DEFAULT_PANEL_WIDTH : 400),
-          }
-        );
+        let newPanelPlacement;
+        let otherPanels;
+        if (lockToGrid) {
+          ({ newPanelPlacement, otherPanels } = runPanelPlacementStrategy(
+            customPlacementSettings?.strategy ?? PanelPlacementStrategy.findTopLeftMostOpenSpace,
+            {
+              currentPanels: panels$.value,
+              height: customPlacementSettings?.height ?? DEFAULT_PANEL_HEIGHT,
+              width: customPlacementSettings?.width ?? DEFAULT_PANEL_WIDTH,
+            }
+          ));
+        } else {
+          newPanelPlacement = { x: 0, y: 0, w: 400, h: 300 };
+          otherPanels = panels$.getValue();
+        }
 
         if (serializedState?.references && serializedState.references.length > 0) {
           pushReferences(prefixReferencesFromPanel(newId, serializedState.references));
@@ -374,8 +393,10 @@ export function initializePanelsManager(
         return id;
       },
       sections$,
+      activeSection$,
       setActiveSection: (section?: number) => {
         activeSection$.next(section);
+        getDashboardBackupService().storeSectionIndex(savedObjectId$.value, section);
       },
       addNewSection: () => {
         setSections([

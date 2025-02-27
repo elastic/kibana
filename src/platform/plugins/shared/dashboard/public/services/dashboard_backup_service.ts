@@ -24,6 +24,7 @@ export const DASHBOARD_PANELS_UNSAVED_ID = 'unsavedDashboard';
 export const PANELS_CONTROL_GROUP_KEY = 'controlGroup';
 const DASHBOARD_PANELS_SESSION_KEY = 'dashboardPanels';
 const DASHBOARD_VIEWMODE_LOCAL_KEY = 'dashboardViewMode';
+const DASHBOARD_ACTIVE_SECTION_LOCAL_KEY = 'dashboardActiveSection';
 
 // this key is named `panels` for BWC reasons, but actually contains the entire dashboard state
 const DASHBOARD_STATE_SESSION_KEY = 'dashboardStateManagerPanels';
@@ -71,6 +72,20 @@ class DashboardBackupService implements DashboardBackupServiceType {
       });
     }
   }
+
+  public getSectionIndex = (id: string = DASHBOARD_PANELS_UNSAVED_ID): number | undefined => {
+    return this.sessionStorage.get(DASHBOARD_ACTIVE_SECTION_LOCAL_KEY)?.[id];
+  };
+
+  public storeSectionIndex = (
+    id: string = DASHBOARD_PANELS_UNSAVED_ID,
+    index: number | undefined
+  ): void => {
+    this.sessionStorage.set(DASHBOARD_ACTIVE_SECTION_LOCAL_KEY, {
+      ...(this.sessionStorage.get(DASHBOARD_ACTIVE_SECTION_LOCAL_KEY) ?? {}),
+      [id]: index,
+    });
+  };
 
   public getViewMode = (): ViewMode => {
     return this.localStorage.get(DASHBOARD_VIEWMODE_LOCAL_KEY) ?? DEFAULT_DASHBOARD_STATE.viewMode;

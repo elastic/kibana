@@ -170,6 +170,7 @@ export type DashboardApi = CanExpandPanels &
     panels$: PublishingSubject<DashboardPanelMap>;
     sections$: PublishingSubject<DashboardSectionMap>;
     setActiveSection: (section?: number) => void;
+    activeSection$: PublishingSubject<number | undefined>;
     runInteractiveSave: () => Promise<SaveDashboardReturn | undefined>;
     runQuickSave: () => Promise<void>;
     scrollToPanel: (panelRef: HTMLDivElement) => void;
