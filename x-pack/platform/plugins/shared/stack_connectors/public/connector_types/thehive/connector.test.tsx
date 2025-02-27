@@ -8,7 +8,7 @@
 import React from 'react';
 import TheHiveConnectorFields from './connector';
 import { ConnectorFormTestProvider } from '../lib/test_utils';
-import { act, render, waitFor } from '@testing-library/react';
+import { render, waitFor, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
 jest.mock('@kbn/triggers-actions-ui-plugin/public/common/lib/kibana');
@@ -27,7 +27,7 @@ describe('TheHiveActionConnectorFields renders', () => {
   };
 
   it('TheHive connector fields are rendered', () => {
-    const { getByTestId } = render(
+    render(
       <ConnectorFormTestProvider connector={actionConnector}>
         <TheHiveConnectorFields
           readOnly={false}
@@ -37,8 +37,8 @@ describe('TheHiveActionConnectorFields renders', () => {
       </ConnectorFormTestProvider>
     );
 
-    expect(getByTestId('config.url-input')).toBeInTheDocument();
-    expect(getByTestId('secrets.apiKey-input')).toBeInTheDocument();
+    expect(screen.getByTestId('config.url-input')).toBeInTheDocument();
+    expect(screen.getByTestId('secrets.apiKey-input')).toBeInTheDocument();
   });
 
   describe('Validation', () => {
@@ -54,7 +54,7 @@ describe('TheHiveActionConnectorFields renders', () => {
     ];
 
     it('connector validation succeeds when connector config is valid', async () => {
-      const { getByTestId } = render(
+      render(
         <ConnectorFormTestProvider connector={actionConnector} onSubmit={onSubmit}>
           <TheHiveConnectorFields
             readOnly={false}
@@ -64,11 +64,9 @@ describe('TheHiveActionConnectorFields renders', () => {
         </ConnectorFormTestProvider>
       );
 
-      await act(async () => {
-        await userEvent.click(getByTestId('form-test-provide-submit'));
-      });
+      await userEvent.click(screen.getByTestId('form-test-provide-submit'));
 
-      waitFor(() => {
+      await waitFor(() => {
         expect(onSubmit).toBeCalledWith({
           data: {
             actionTypeId: '.thehive',
@@ -87,7 +85,7 @@ describe('TheHiveActionConnectorFields renders', () => {
     });
 
     it.each(tests)('validates correctly %p', async (field, value) => {
-      const res = render(
+      render(
         <ConnectorFormTestProvider connector={actionConnector} onSubmit={onSubmit}>
           <TheHiveConnectorFields
             readOnly={false}
@@ -97,14 +95,14 @@ describe('TheHiveActionConnectorFields renders', () => {
         </ConnectorFormTestProvider>
       );
 
-      await userEvent.clear(res.getByTestId(field));
+      await userEvent.clear(screen.getByTestId(field));
       if (value !== '') {
-        await userEvent.type(res.getByTestId(field), value, {
+        await userEvent.type(screen.getByTestId(field), value, {
           delay: 10,
         });
       }
 
-      await userEvent.click(res.getByTestId('form-test-provide-submit'));
+      await userEvent.click(screen.getByTestId('form-test-provide-submit'));
 
       expect(onSubmit).toHaveBeenCalledWith({ data: {}, isValid: false });
     });

@@ -10,7 +10,7 @@ import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
 import { act } from 'react-dom/test-utils';
 import PagerDutyActionConnectorFields from './pagerduty_connectors';
 import { ConnectorFormTestProvider } from '../lib/test_utils';
-import { render } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
 jest.mock('@kbn/triggers-actions-ui-plugin/public/common/lib/kibana');
@@ -73,7 +73,7 @@ describe('PagerDutyActionConnectorFields renders', () => {
         isDeprecated: false,
       };
 
-      const res = render(
+      render(
         <ConnectorFormTestProvider connector={actionConnector} onSubmit={onSubmit}>
           <PagerDutyActionConnectorFields
             readOnly={false}
@@ -83,9 +83,7 @@ describe('PagerDutyActionConnectorFields renders', () => {
         </ConnectorFormTestProvider>
       );
 
-      await act(async () => {
-        await userEvent.click(res.getByTestId('form-test-provide-submit'));
-      });
+      await userEvent.click(screen.getByTestId('form-test-provide-submit'));
 
       expect(onSubmit).toBeCalledWith({
         data: {
@@ -118,7 +116,7 @@ describe('PagerDutyActionConnectorFields renders', () => {
         isDeprecated: false,
       };
 
-      const res = render(
+      render(
         <ConnectorFormTestProvider connector={actionConnector} onSubmit={onSubmit}>
           <PagerDutyActionConnectorFields
             readOnly={false}
@@ -128,9 +126,7 @@ describe('PagerDutyActionConnectorFields renders', () => {
         </ConnectorFormTestProvider>
       );
 
-      await act(async () => {
-        await userEvent.click(res.getByTestId('form-test-provide-submit'));
-      });
+      await userEvent.click(screen.getByTestId('form-test-provide-submit'));
 
       expect(onSubmit).toBeCalledWith({
         data: {
@@ -160,7 +156,7 @@ describe('PagerDutyActionConnectorFields renders', () => {
         isDeprecated: false,
       };
 
-      const res = render(
+      render(
         <ConnectorFormTestProvider connector={actionConnector} onSubmit={onSubmit}>
           <PagerDutyActionConnectorFields
             readOnly={false}
@@ -170,9 +166,7 @@ describe('PagerDutyActionConnectorFields renders', () => {
         </ConnectorFormTestProvider>
       );
 
-      await act(async () => {
-        await userEvent.click(res.getByTestId('form-test-provide-submit'));
-      });
+      await userEvent.click(screen.getByTestId('form-test-provide-submit'));
 
       expect(onSubmit).toBeCalledWith({
         data: {},
@@ -194,7 +188,7 @@ describe('PagerDutyActionConnectorFields renders', () => {
         isDeprecated: false,
       };
 
-      const res = render(
+      render(
         <ConnectorFormTestProvider connector={actionConnector} onSubmit={onSubmit}>
           <PagerDutyActionConnectorFields
             readOnly={false}
@@ -204,9 +198,7 @@ describe('PagerDutyActionConnectorFields renders', () => {
         </ConnectorFormTestProvider>
       );
 
-      await act(async () => {
-        await userEvent.click(res.getByTestId('form-test-provide-submit'));
-      });
+      await userEvent.click(screen.getByTestId('form-test-provide-submit'));
 
       expect(onSubmit).toBeCalledWith({
         data: {},

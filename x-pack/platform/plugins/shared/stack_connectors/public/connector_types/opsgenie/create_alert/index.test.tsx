@@ -100,10 +100,10 @@ describe('CreateAlert', () => {
 
     await waitFor(() => {
       expect(screen.getByTestId('actionJsonEditor')).toBeInTheDocument();
-      expect(screen.queryByTestId('opsgenie-message-row')).not.toBeInTheDocument();
-      expect(screen.queryByTestId('opsgenie-alias-row')).not.toBeInTheDocument();
-      expect(screen.queryByText('Description')).not.toBeInTheDocument();
     });
+    expect(screen.queryByTestId('opsgenie-message-row')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('opsgenie-alias-row')).not.toBeInTheDocument();
+    expect(screen.queryByText('Description')).not.toBeInTheDocument();
   });
 
   it('shows the additional options when clicking the more options button', async () => {
@@ -126,22 +126,25 @@ describe('CreateAlert', () => {
     await userEvent.click(screen.getByTestId('opsgenie-show-json-editor-toggle'));
 
     await waitFor(() => {
-      expect(screen.queryByTestId('actionJsonEditor')).not.toBeInTheDocument();
-      // first call to edit actions is because the editor was rendered and validation failed
-      expect(editAction.mock.calls).toMatchInlineSnapshot(`
+      expect(editAction.mock.calls).toBeDefined();
+    });
+    expect(editAction.mock.calls).toMatchInlineSnapshot(`
+      Array [
         Array [
-          Array [
-            "jsonEditorError",
-            true,
-            0,
-          ],
-          Array [
-            "jsonEditorError",
-            undefined,
-            0,
-          ],
-        ]
-      `);
+          "jsonEditorError",
+          true,
+          0,
+        ],
+        Array [
+          "jsonEditorError",
+          undefined,
+          0,
+        ],
+      ]
+    `);
+
+    await waitFor(() => {
+      expect(screen.queryByTestId('actionJsonEditor')).not.toBeInTheDocument();
     });
   });
 

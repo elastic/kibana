@@ -9,7 +9,7 @@ import React from 'react';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import WebhookActionConnectorFields from './webhook_connectors';
 import { ConnectorFormTestProvider, waitForComponentToUpdate } from '../lib/test_utils';
-import { act, render } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { AuthType, SSLCertType } from '../../../common/auth/constants';
 
@@ -81,7 +81,7 @@ describe('WebhookActionConnectorFields renders', () => {
     ];
 
     it('connector validation succeeds when connector config is valid', async () => {
-      const { getByTestId } = render(
+      render(
         <ConnectorFormTestProvider connector={actionConnector} onSubmit={onSubmit}>
           <WebhookActionConnectorFields
             readOnly={false}
@@ -91,9 +91,7 @@ describe('WebhookActionConnectorFields renders', () => {
         </ConnectorFormTestProvider>
       );
 
-      await act(async () => {
-        await userEvent.click(getByTestId('form-test-provide-submit'));
-      });
+      await userEvent.click(screen.getByTestId('form-test-provide-submit'));
 
       expect(onSubmit).toBeCalledWith({
         data: {
@@ -129,7 +127,7 @@ describe('WebhookActionConnectorFields renders', () => {
         },
       };
 
-      const { getByTestId } = render(
+      render(
         <ConnectorFormTestProvider connector={connector} onSubmit={onSubmit}>
           <WebhookActionConnectorFields
             readOnly={false}
@@ -139,9 +137,7 @@ describe('WebhookActionConnectorFields renders', () => {
         </ConnectorFormTestProvider>
       );
 
-      await act(async () => {
-        await userEvent.click(getByTestId('form-test-provide-submit'));
-      });
+      await userEvent.click(screen.getByTestId('form-test-provide-submit'));
 
       expect(onSubmit).toBeCalledWith({
         data: {
@@ -175,7 +171,7 @@ describe('WebhookActionConnectorFields renders', () => {
         },
       };
 
-      const { getByTestId } = render(
+      render(
         <ConnectorFormTestProvider connector={connector} onSubmit={onSubmit}>
           <WebhookActionConnectorFields
             readOnly={false}
@@ -185,9 +181,7 @@ describe('WebhookActionConnectorFields renders', () => {
         </ConnectorFormTestProvider>
       );
 
-      await act(async () => {
-        await userEvent.click(getByTestId('form-test-provide-submit'));
-      });
+      await userEvent.click(screen.getByTestId('form-test-provide-submit'));
 
       expect(onSubmit).toBeCalledWith({
         data: {
@@ -222,7 +216,7 @@ describe('WebhookActionConnectorFields renders', () => {
         },
       };
 
-      const res = render(
+      render(
         <ConnectorFormTestProvider connector={connector} onSubmit={onSubmit}>
           <WebhookActionConnectorFields
             readOnly={false}
@@ -232,9 +226,7 @@ describe('WebhookActionConnectorFields renders', () => {
         </ConnectorFormTestProvider>
       );
 
-      await act(async () => {
-        await userEvent.click(res.getByTestId('form-test-provide-submit'));
-      });
+      await userEvent.click(screen.getByTestId('form-test-provide-submit'));
 
       expect(onSubmit).toHaveBeenCalledWith({ data: {}, isValid: false });
     });
@@ -248,7 +240,7 @@ describe('WebhookActionConnectorFields renders', () => {
         },
       };
 
-      const res = render(
+      render(
         <ConnectorFormTestProvider connector={connector} onSubmit={onSubmit}>
           <WebhookActionConnectorFields
             readOnly={false}
@@ -258,14 +250,14 @@ describe('WebhookActionConnectorFields renders', () => {
         </ConnectorFormTestProvider>
       );
 
-      await userEvent.clear(res.getByTestId(field));
+      await userEvent.clear(screen.getByTestId(field));
       if (value !== '') {
-        await userEvent.type(res.getByTestId(field), value, {
+        await userEvent.type(screen.getByTestId(field), value, {
           delay: 10,
         });
       }
 
-      await userEvent.click(res.getByTestId('form-test-provide-submit'));
+      await userEvent.click(screen.getByTestId('form-test-provide-submit'));
 
       expect(onSubmit).toHaveBeenCalledWith({ data: {}, isValid: false });
     });
@@ -280,7 +272,7 @@ describe('WebhookActionConnectorFields renders', () => {
         },
       };
 
-      const res = render(
+      render(
         <ConnectorFormTestProvider connector={connector} onSubmit={onSubmit}>
           <WebhookActionConnectorFields
             readOnly={false}
@@ -290,9 +282,7 @@ describe('WebhookActionConnectorFields renders', () => {
         </ConnectorFormTestProvider>
       );
 
-      await act(async () => {
-        await userEvent.click(res.getByTestId('form-test-provide-submit'));
-      });
+      await userEvent.click(screen.getByTestId('form-test-provide-submit'));
 
       expect(onSubmit).toHaveBeenCalledWith({
         data: {
@@ -335,7 +325,7 @@ describe('WebhookActionConnectorFields renders', () => {
         },
       };
 
-      const res = render(
+      render(
         <ConnectorFormTestProvider connector={connector} onSubmit={onSubmit}>
           <WebhookActionConnectorFields
             readOnly={false}
@@ -345,9 +335,7 @@ describe('WebhookActionConnectorFields renders', () => {
         </ConnectorFormTestProvider>
       );
 
-      await act(async () => {
-        await userEvent.click(res.getByTestId('form-test-provide-submit'));
-      });
+      await userEvent.click(screen.getByTestId('form-test-provide-submit'));
 
       expect(onSubmit).toHaveBeenCalledWith({
         data: {
@@ -388,7 +376,7 @@ describe('WebhookActionConnectorFields renders', () => {
         },
       };
 
-      const res = render(
+      render(
         <ConnectorFormTestProvider connector={connector} onSubmit={onSubmit}>
           <WebhookActionConnectorFields
             readOnly={false}
@@ -398,9 +386,7 @@ describe('WebhookActionConnectorFields renders', () => {
         </ConnectorFormTestProvider>
       );
 
-      await act(async () => {
-        await userEvent.click(res.getByTestId('form-test-provide-submit'));
-      });
+      await userEvent.click(screen.getByTestId('form-test-provide-submit'));
 
       expect(onSubmit).toHaveBeenCalledWith({
         data: {
@@ -440,7 +426,7 @@ describe('WebhookActionConnectorFields renders', () => {
         },
       };
 
-      const res = render(
+      render(
         <ConnectorFormTestProvider connector={connector} onSubmit={onSubmit}>
           <WebhookActionConnectorFields
             readOnly={false}
@@ -450,9 +436,7 @@ describe('WebhookActionConnectorFields renders', () => {
         </ConnectorFormTestProvider>
       );
 
-      await act(async () => {
-        await userEvent.click(res.getByTestId('form-test-provide-submit'));
-      });
+      await userEvent.click(screen.getByTestId('form-test-provide-submit'));
 
       expect(onSubmit).toHaveBeenCalledWith({
         data: {},

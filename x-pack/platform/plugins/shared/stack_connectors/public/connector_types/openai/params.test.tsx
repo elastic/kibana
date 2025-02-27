@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { fireEvent, render } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import ParamsFields from './params';
 import { OpenAiProviderType, SUB_ACTION } from '../../../common/openai/constants';
 import { DEFAULT_URL, getDefaultBody } from './constants';
@@ -21,7 +21,7 @@ const messageVariables = [
 
 describe('Gen AI Params Fields renders', () => {
   test('all params fields are rendered', () => {
-    const { getByTestId } = render(
+    render(
       <ParamsFields
         actionParams={{
           subAction: SUB_ACTION.RUN,
@@ -33,9 +33,9 @@ describe('Gen AI Params Fields renders', () => {
         messageVariables={messageVariables}
       />
     );
-    expect(getByTestId('bodyJsonEditor')).toBeInTheDocument();
-    expect(getByTestId('bodyJsonEditor')).toHaveProperty('value', '{"message": "test"}');
-    expect(getByTestId('bodyAddVariableButton')).toBeInTheDocument();
+    expect(screen.getByTestId('bodyJsonEditor')).toBeInTheDocument();
+    expect(screen.getByTestId('bodyJsonEditor')).toHaveProperty('value', '{"message": "test"}');
+    expect(screen.getByTestId('bodyAddVariableButton')).toBeInTheDocument();
   });
   test.each([OpenAiProviderType.OpenAi, OpenAiProviderType.AzureAi, OpenAiProviderType.Other])(
     'useEffect handles the case when subAction and subActionParams are undefined and apiProvider is %p',
@@ -111,7 +111,7 @@ describe('Gen AI Params Fields renders', () => {
   it('calls editAction function with the correct arguments ', () => {
     const editAction = jest.fn();
     const errors = {};
-    const { getByTestId } = render(
+    render(
       <ParamsFields
         actionParams={{
           subAction: SUB_ACTION.RUN,
@@ -125,7 +125,7 @@ describe('Gen AI Params Fields renders', () => {
         errors={errors}
       />
     );
-    const jsonEditor = getByTestId('bodyJsonEditor');
+    const jsonEditor = screen.getByTestId('bodyJsonEditor');
     fireEvent.change(jsonEditor, { target: { value: '{"new_key": "new_value"}' } });
     expect(editAction).toHaveBeenCalledWith(
       'subActionParams',

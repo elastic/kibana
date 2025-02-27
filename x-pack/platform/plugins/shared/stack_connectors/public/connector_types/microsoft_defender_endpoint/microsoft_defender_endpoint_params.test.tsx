@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { render as reactRender, type RenderResult } from '@testing-library/react';
+import { render as reactRender, type RenderResult, screen } from '@testing-library/react';
 import MicrosoftDefenderEndpointParamsFields from './microsoft_defender_endpoint_params';
 import type { ActionParamsProps } from '@kbn/alerts-ui-shared';
 import { MicrosoftDefenderEndpointActionParams } from '../../../common/microsoft_defender_endpoint/types';
@@ -22,13 +22,13 @@ describe('Microsoft Defender for Endpoint Params.', () => {
       actionParams: {},
       index: 0,
     };
-    render = () => reactRender(<MicrosoftDefenderEndpointParamsFields {...renderProps} />);
   });
 
   it('should render UI with expected message', () => {
-    const { getByTestId } = render();
+    render = () => reactRender(<MicrosoftDefenderEndpointParamsFields {...renderProps} />);
+    render();
 
-    expect(getByTestId('msDefenderParams')).toHaveTextContent(RUN_CONNECTOR_TEST_MESSAGE);
+    expect(screen.getByTestId('msDefenderParams')).toHaveTextContent(RUN_CONNECTOR_TEST_MESSAGE);
   });
 
   it('should set subAction to test_connector', () => {

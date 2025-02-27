@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { type RenderResult } from '@testing-library/react';
+import { type RenderResult, screen } from '@testing-library/react';
 import { ConnectorFormTestProvider, createAppMockRenderer } from '../lib/test_utils';
 import MicrosoftDefenderEndpointActionConnectorFields from './microsoft_defender_endpoint_connector';
 import { ActionConnectorFieldsProps } from '@kbn/alerts-ui-shared';
@@ -19,8 +19,6 @@ describe('Microsoft Defender for Endpoint Connector UI', () => {
   let connectorFormProps: ConnectorFormSchema;
 
   beforeEach(() => {
-    const appMockRenderer = createAppMockRenderer();
-
     renderProps = {
       readOnly: false,
       isEdit: false,
@@ -42,14 +40,6 @@ describe('Microsoft Defender for Endpoint Connector UI', () => {
         apiUrl: 'https://api.t_e_s_t.com',
       },
     };
-
-    render = () => {
-      return appMockRenderer.render(
-        <ConnectorFormTestProvider connector={connectorFormProps}>
-          <MicrosoftDefenderEndpointActionConnectorFields {...renderProps} />
-        </ConnectorFormTestProvider>
-      );
-    };
   });
 
   it.each([
@@ -60,17 +50,27 @@ describe('Microsoft Defender for Endpoint Connector UI', () => {
     'config.apiUrl',
     'secrets.clientSecret',
   ])('should display input for setting: %s', (field: string) => {
-    const { getByTestId } = render();
+    const appMockRenderer = createAppMockRenderer();
+    appMockRenderer.render(
+      <ConnectorFormTestProvider connector={connectorFormProps}>
+        <MicrosoftDefenderEndpointActionConnectorFields {...renderProps} />
+      </ConnectorFormTestProvider>
+    );
 
-    expect(getByTestId(`${field}-input`)).not.toBeNull();
+    expect(screen.getByTestId(`${field}-input`)).not.toBeNull();
   });
 
   it.each(['config.oAuthServerUrl', 'config.oAuthScope', 'config.apiUrl'])(
     'should include default value for field: %s',
     (field: string) => {
-      const { getByTestId } = render();
+      const appMockRenderer = createAppMockRenderer();
+      appMockRenderer.render(
+        <ConnectorFormTestProvider connector={connectorFormProps}>
+          <MicrosoftDefenderEndpointActionConnectorFields {...renderProps} />
+        </ConnectorFormTestProvider>
+      );
 
-      expect(getByTestId(`${field}-input`)).toHaveValue();
+      expect(screen.getByTestId(`${field}-input`)).toHaveValue();
     }
   );
 });

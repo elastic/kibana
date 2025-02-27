@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import { screen } from '@testing-library/react';
 import { fireEvent, render } from '@testing-library/react';
 import D3ParamsFields from './params';
 import { SUB_ACTION } from '../../../common/d3security/constants';
@@ -28,7 +29,7 @@ describe('D3SecurityParamsFields renders', () => {
       },
     };
 
-    const { getByTestId } = render(
+    render(
       <D3ParamsFields
         actionParams={actionParams}
         errors={{ body: [] }}
@@ -43,9 +44,9 @@ describe('D3SecurityParamsFields renders', () => {
         ]}
       />
     );
-    expect(getByTestId('bodyJsonEditor')).toBeInTheDocument();
-    expect(getByTestId('bodyJsonEditor')).toHaveProperty('value', 'test message');
-    expect(getByTestId('bodyAddVariableButton')).toBeInTheDocument();
+    expect(screen.getByTestId('bodyJsonEditor')).toBeInTheDocument();
+    expect(screen.getByTestId('bodyJsonEditor')).toHaveProperty('value', 'test message');
+    expect(screen.getByTestId('bodyAddVariableButton')).toBeInTheDocument();
   });
 
   it('calls editAction function with the correct arguments ', () => {
@@ -57,7 +58,7 @@ describe('D3SecurityParamsFields renders', () => {
     };
     const editAction = jest.fn();
     const errors = {};
-    const { getByTestId, rerender } = render(
+    const { rerender } = render(
       <D3ParamsFields
         actionParams={actionParams}
         editAction={editAction}
@@ -66,7 +67,7 @@ describe('D3SecurityParamsFields renders', () => {
         errors={errors}
       />
     );
-    const jsonEditor = getByTestId('bodyJsonEditor');
+    const jsonEditor = screen.getByTestId('bodyJsonEditor');
     fireEvent.change(jsonEditor, { target: { value: '{"new_key": "new_value"}' } });
     expect(editAction).toHaveBeenCalledWith(
       'subActionParams',
@@ -82,7 +83,7 @@ describe('D3SecurityParamsFields renders', () => {
         errors={errors}
       />
     );
-    fireEvent.change(getByTestId('severityInput'), { target: { value: 'cool rad' } });
+    fireEvent.change(screen.getByTestId('severityInput'), { target: { value: 'cool rad' } });
     expect(editAction).toHaveBeenNthCalledWith(
       2,
       'subActionParams',

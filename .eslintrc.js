@@ -1642,6 +1642,9 @@ module.exports = {
         'src/platform/packages/shared/kbn-cases-components/**/*.{test,mock,test_helper}.{ts,tsx}',
       ],
       extends: ['plugin:testing-library/react'],
+      rules: {
+        'testing-library/render-result-naming-convention': 'off',
+      },
     },
     /**
      * Lens overrides

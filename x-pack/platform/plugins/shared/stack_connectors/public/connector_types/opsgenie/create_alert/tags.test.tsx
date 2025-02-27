@@ -38,14 +38,16 @@ describe('Tags', () => {
 
     await userEvent.click(screen.getByTestId('comboBoxClearButton'));
 
-    await waitFor(() =>
-      expect(onChange.mock.calls[0]).toMatchInlineSnapshot(`
+    await waitFor(() => {
+      expect(onChange.mock.calls[0]).toBeDefined();
+    });
+
+    expect(onChange.mock.calls[0]).toMatchInlineSnapshot(`
         Array [
           "tags",
           Array [],
         ]
-      `)
-    );
+      `);
   });
 
   it('calls onChange when removing a tag', async () => {
@@ -57,16 +59,18 @@ describe('Tags', () => {
 
     await userEvent.click(screen.getByTitle('Remove super from selection in this group'));
 
-    await waitFor(() =>
-      expect(onChange.mock.calls[0]).toMatchInlineSnapshot(`
+    await waitFor(() => {
+      expect(onChange.mock.calls[0]).toBeDefined();
+    });
+
+    expect(onChange.mock.calls[0]).toMatchInlineSnapshot(`
+      Array [
+        "tags",
         Array [
-          "tags",
-          Array [
-            "hello",
-          ],
-        ]
-      `)
-    );
+          "hello",
+        ],
+      ]
+    `);
   });
 
   it('calls onChange when adding a tag', async () => {
@@ -80,16 +84,18 @@ describe('Tags', () => {
 
     await userEvent.type(screen.getByTestId('comboBoxSearchInput'), 'awesome{enter}');
 
-    await waitFor(() =>
-      expect(onChange.mock.calls[0]).toMatchInlineSnapshot(`
+    await waitFor(() => {
+      expect(onChange.mock.calls[0]).toBeDefined();
+    });
+
+    expect(onChange.mock.calls[0]).toMatchInlineSnapshot(`
+      Array [
+        "tags",
         Array [
-          "tags",
-          Array [
-            "awesome",
-          ],
-        ]
-      `)
-    );
+          "awesome",
+        ],
+      ]
+    `);
   });
 
   it('shows the rule tags as an option to select', async () => {
@@ -103,8 +109,8 @@ describe('Tags', () => {
 
     await waitFor(() => {
       expect(screen.getByTestId('opsgenie-tags-rule-tags')).toBeInTheDocument();
-      expect(screen.getByText('The tags of the rule.')).toBeInTheDocument();
     });
+    expect(screen.getByText('The tags of the rule.')).toBeInTheDocument();
   });
 
   it('calls onChange when clicking the rule tags option', async () => {
@@ -118,21 +124,23 @@ describe('Tags', () => {
 
     await waitFor(() => {
       expect(screen.getByTestId('opsgenie-tags-rule-tags')).toBeInTheDocument();
-      expect(screen.getByText('The tags of the rule.')).toBeInTheDocument();
     });
+    expect(screen.getByText('The tags of the rule.')).toBeInTheDocument();
 
     await userEvent.click(screen.getByText('The tags of the rule.'), { pointerEventsCheck: 0 });
 
-    await waitFor(() =>
-      expect(onChange.mock.calls[0]).toMatchInlineSnapshot(`
+    await waitFor(() => {
+      expect(onChange.mock.calls[0]).toBeDefined();
+    });
+
+    expect(onChange.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
         "tags",
         Array [
           "{{rule.tags}}",
         ],
       ]
-    `)
-    );
+    `);
   });
 
   it('does not contain the rule.tags option when in test mode', async () => {
@@ -146,7 +154,7 @@ describe('Tags', () => {
 
     await waitFor(() => {
       expect(screen.queryByTestId('opsgenie-tags-rule-tags')).not.toBeInTheDocument();
-      expect(screen.queryByText('The tags of the rule.')).not.toBeInTheDocument();
     });
+    expect(screen.queryByText('The tags of the rule.')).not.toBeInTheDocument();
   });
 });

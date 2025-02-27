@@ -784,32 +784,34 @@ const googleaistudioConnector = {
 
 describe('ConnectorFields renders', () => {
   test('openai provider fields are rendered', () => {
-    const { getAllByTestId } = render(
+    render(
       <ConnectorFormTestProvider connector={openAiConnector}>
         <ConnectorFields readOnly={false} isEdit={true} registerPreSubmitValidator={() => {}} />
       </ConnectorFormTestProvider>
     );
-    expect(getAllByTestId('provider-select')[0]).toBeInTheDocument();
-    expect(getAllByTestId('provider-select')[0]).toHaveValue('OpenAI');
+    expect(screen.getAllByTestId('provider-select')[0]).toBeInTheDocument();
+    expect(screen.getAllByTestId('provider-select')[0]).toHaveValue('OpenAI');
 
-    expect(getAllByTestId('url-input')[0]).toBeInTheDocument();
-    expect(getAllByTestId('url-input')[0]).toHaveValue(openAiConnector.config?.providerConfig?.url);
-    expect(getAllByTestId('taskTypeSelectDisabled')[0]).toBeInTheDocument();
-    expect(getAllByTestId('taskTypeSelectDisabled')[0]).toHaveTextContent('completion');
+    expect(screen.getAllByTestId('url-input')[0]).toBeInTheDocument();
+    expect(screen.getAllByTestId('url-input')[0]).toHaveValue(
+      openAiConnector.config?.providerConfig?.url
+    );
+    expect(screen.getAllByTestId('taskTypeSelectDisabled')[0]).toBeInTheDocument();
+    expect(screen.getAllByTestId('taskTypeSelectDisabled')[0]).toHaveTextContent('completion');
   });
 
   test('googleaistudio provider fields are rendered', () => {
-    const { getAllByTestId } = render(
+    render(
       <ConnectorFormTestProvider connector={googleaistudioConnector}>
         <ConnectorFields readOnly={false} isEdit={true} registerPreSubmitValidator={() => {}} />
       </ConnectorFormTestProvider>
     );
-    expect(getAllByTestId('api_key-password')[0]).toBeInTheDocument();
-    expect(getAllByTestId('api_key-password')[0]).toHaveValue('');
-    expect(getAllByTestId('provider-select')[0]).toBeInTheDocument();
-    expect(getAllByTestId('provider-select')[0]).toHaveValue('Google AI Studio');
-    expect(getAllByTestId('model_id-input')[0]).toBeInTheDocument();
-    expect(getAllByTestId('model_id-input')[0]).toHaveValue(
+    expect(screen.getAllByTestId('api_key-password')[0]).toBeInTheDocument();
+    expect(screen.getAllByTestId('api_key-password')[0]).toHaveValue('');
+    expect(screen.getAllByTestId('provider-select')[0]).toBeInTheDocument();
+    expect(screen.getAllByTestId('provider-select')[0]).toHaveValue('Google AI Studio');
+    expect(screen.getAllByTestId('model_id-input')[0]).toBeInTheDocument();
+    expect(screen.getAllByTestId('model_id-input')[0]).toHaveValue(
       googleaistudioConnector.config?.providerConfig.model_id
     );
   });
