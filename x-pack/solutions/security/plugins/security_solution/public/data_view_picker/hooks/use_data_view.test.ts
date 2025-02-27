@@ -11,20 +11,22 @@ import { DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID, DataViewPickerScopeName } from 
 import { useDataView } from './use_data_view';
 
 describe('useDataView', () => {
-  describe('when data view is available in the store', () => {
-    it('should return dataView from the store', () => {
-      const wrapper = renderHook(() => useDataView(DataViewPickerScopeName.default), {
-        wrapper: TestProviders,
-      });
-
-      expect(wrapper.result.current.status).toEqual('ready');
-      expect(wrapper.result.current.dataView).toMatchObject({
-        id: DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID,
-      });
+  it('should return correct dataView from the store, based on the provided scope', () => {
+    const wrapper = renderHook((scope) => useDataView(scope), {
+      wrapper: TestProviders,
+      initialProps: DataViewPickerScopeName.default,
     });
-  });
 
-  describe('when data view is not available in the store', () => {
-    it.todo('should return null');
+    expect(wrapper.result.current.status).toEqual('ready');
+    expect(wrapper.result.current.dataView).toMatchObject({
+      id: DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID,
+    });
+
+    wrapper.rerender(DataViewPickerScopeName.timeline);
+
+    expect(wrapper.result.current.status).toEqual('ready');
+    expect(wrapper.result.current.dataView).toMatchObject({
+      id: 'mock-timeline-data-view',
+    });
   });
 });

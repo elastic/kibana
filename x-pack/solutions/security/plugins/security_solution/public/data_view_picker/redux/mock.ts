@@ -37,7 +37,7 @@ export const mockDataViewPickerState: RootState = {
     ...dataViewPickerState,
     timeline: {
       ...dataViewPickerState.timeline,
-      dataView: mockDefaultDataViewSpec,
+      dataView: { ...mockDefaultDataViewSpec, id: 'mock-timeline-data-view' },
       status: 'ready',
     },
     default: {
