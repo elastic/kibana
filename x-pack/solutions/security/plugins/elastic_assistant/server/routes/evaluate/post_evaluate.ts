@@ -27,6 +27,7 @@ import { buildRouteValidationWithZod } from '@kbn/elastic-assistant-common/impl/
 import { getDefaultArguments } from '@kbn/langchain/server';
 import { StructuredTool } from '@langchain/core/tools';
 import {
+  AgentFinish,
   createOpenAIToolsAgent,
   createStructuredChatAgent,
   createToolCallingAgent,
@@ -254,6 +255,7 @@ export const postEvaluateRoute = (
                   signal: abortSignal,
                   streaming: false,
                   maxRetries: 0,
+                  convertSystemMessageToHumanContent: false,
                 });
               const llm = createLlmInstance();
               const anonymizationFieldsRes =
@@ -400,14 +402,14 @@ export const postEvaluateRoute = (
             const predict = async (input: { input: string }) => {
               logger.debug(`input:\n ${JSON.stringify(input, null, 2)}`);
 
-              const r = await graph.invoke(
+              const result = await graph.invoke(
                 {
                   input: input.input,
                   connectorId,
                   conversationId: undefined,
                   responseLanguage: 'English',
                   llmType,
-                  isStreaming: false,
+                  isStream: false,
                   isOssModel,
                 }, // TODO: Update to use the correct input format per dataset type
                 {
@@ -415,7 +417,7 @@ export const postEvaluateRoute = (
                   tags: ['evaluation'],
                 }
               );
-              const output = r.agentOutcome.returnValues.output;
+              const output = (result.agentOutcome as AgentFinish).returnValues.output;
               return output;
             };
 
