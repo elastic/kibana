@@ -32,6 +32,21 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const dataGrid = getService('dataGrid');
   const INITIAL_FIELD_LIST_SUMMARY = '48 available fields. 5 empty fields. 4 meta fields.';
 
+  const expectFieldListDescription = async (expectedNumber: string) => {
+    return await retry.try(async () => {
+      await discover.waitUntilSearchingHasFinished();
+      await unifiedFieldList.waitUntilSidebarHasLoaded();
+      const ariaDescription = await unifiedFieldList.getSidebarAriaDescription();
+      if (ariaDescription !== expectedNumber) {
+        log.warning(
+          `Expected Sidebar Aria Description: ${expectedNumber}, got: ${ariaDescription}`
+        );
+        await queryBar.submitQuery();
+      }
+      expect(ariaDescription).to.be(expectedNumber);
+    });
+  };
+
   describe('discover sidebar', function describeIndexTests() {
     before(async function () {
       await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/logstash_functional');
