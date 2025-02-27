@@ -15,7 +15,7 @@ import type {
 } from '@elastic/elasticsearch/lib/api/types';
 import supertest from 'supertest';
 import { APMEventClient, type APMEventESSearchRequest, type APMEventFieldCapsRequest } from '.';
-import type { APMIndices } from '../../../..';
+import type { APMIndices } from '@kbn/apm-sources-access-plugin/server';
 
 import * as cancelEsRequestOnAbortModule from '../cancel_es_request_on_abort';
 import * as observabilityPluginModule from '@kbn/observability-plugin/server';

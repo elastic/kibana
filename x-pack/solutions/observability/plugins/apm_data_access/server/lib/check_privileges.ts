@@ -8,7 +8,7 @@
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { SecurityPluginStart } from '@kbn/security-plugin-types-server';
 import { mapValues } from 'lodash';
-import type { APMIndices } from '..';
+import type { APMIndices } from '@kbn/apm-sources-access-plugin/server';
 
 export interface ApmDataAccessPrivilegesCheck {
   request: KibanaRequest;

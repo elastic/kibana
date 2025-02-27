@@ -12,7 +12,7 @@ import type {
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
-import type { APMDataAccessConfig } from '@kbn/apm-data-access-plugin/server';
+import type { APMDataAccessConfig } from '@kbn/apm-sources-access-plugin/server';
 import {
   APM_TELEMETRY_SAVED_OBJECT_ID,
   APM_TELEMETRY_SAVED_OBJECT_TYPE,

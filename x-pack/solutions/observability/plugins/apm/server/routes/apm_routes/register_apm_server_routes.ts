@@ -32,7 +32,7 @@ import type { InspectResponse } from '@kbn/observability-plugin/typings/common';
 import apm from 'elastic-apm-node';
 import type { VersionedRouteRegistrar } from '@kbn/core-http-server';
 import type { IRuleDataClient } from '@kbn/rule-registry-plugin/server';
-import type { APMIndices } from '@kbn/apm-data-access-plugin/server';
+import type { APMIndices } from '@kbn/apm-sources-access-plugin/server';
 import type { ApmFeatureFlags } from '../../../common/apm_feature_flags';
 import type {
   APMCore,

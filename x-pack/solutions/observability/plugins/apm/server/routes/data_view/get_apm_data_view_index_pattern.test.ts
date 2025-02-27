@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { APMIndices } from '@kbn/apm-data-access-plugin/server';
+import type { APMIndices } from '@kbn/apm-sources-access-plugin/server';
 import { getApmDataViewIndexPattern } from './get_apm_data_view_index_pattern';
 
 describe('getApmDataViewIndexPattern', () => {

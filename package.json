@@ -193,6 +193,7 @@
     "@kbn/apm-data-access-plugin": "link:x-pack/solutions/observability/plugins/apm_data_access",
     "@kbn/apm-data-view": "link:src/platform/packages/shared/kbn-apm-data-view",
     "@kbn/apm-plugin": "link:x-pack/solutions/observability/plugins/apm",
+    "@kbn/apm-sources-access-plugin": "link:x-pack/platform/plugins/shared/apm_sources_access",
     "@kbn/apm-types": "link:x-pack/platform/packages/shared/kbn-apm-types",
     "@kbn/apm-utils": "link:src/platform/packages/shared/kbn-apm-utils",
     "@kbn/app-link-test-plugin": "link:test/plugin_functional/plugins/app_link_test",
