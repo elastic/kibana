@@ -175,7 +175,7 @@ export const DashboardGrid = ({
 
   const { dashboardClasses, dashboardStyles } = useMemo(() => {
     return {
-      dashboardClasses: classNames({
+      dashboardClasses: classNames('dshLayout', {
         'dshLayout-withoutMargins': !useMargins,
         'dshLayout--viewing': viewMode === 'view',
         'dshLayout--editing': viewMode !== 'view',

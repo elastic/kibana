@@ -95,6 +95,9 @@ export const useGridLayoutState = ({
     const panelIds$ = new BehaviorSubject<string[][]>(
       layout.map(({ panels }) => Object.keys(panels))
     );
+    const activeSection$ = new BehaviorSubject<number | undefined>(
+      gridSettings === 'none' ? 0 : undefined
+    );
 
     return {
       rowRefs,
@@ -111,6 +114,7 @@ export const useGridLayoutState = ({
       isMobileView$: new BehaviorSubject<boolean>(
         shouldShowMobileView(accessMode, euiTheme.breakpoint.m)
       ),
+      activeSection$,
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -153,6 +157,7 @@ export const useGridLayoutState = ({
       });
       runtimeSettings$.next('none');
       gridLayoutStateManager.gridLayout$.next(newLayout);
+      gridLayoutStateManager.activeSection$.next(0);
     } else if (runtimeSettings === 'none' && gridSettings !== 'none') {
       // convert freeform to grid lock
       const currentLayout = gridLayoutStateManager.gridLayout$.getValue();
@@ -189,6 +194,7 @@ export const useGridLayoutState = ({
           gridSettings.columnCount,
       });
       gridLayoutStateManager.gridLayout$.next(newLayout);
+      gridLayoutStateManager.activeSection$.next(undefined);
     } else if (
       runtimeSettings !== 'none' &&
       gridSettings !== 'none' &&

@@ -19,6 +19,7 @@ import { GridPanel } from '../grid_panel';
 import { useGridLayoutContext } from '../use_grid_layout_context';
 import { getKeysInOrder } from '../utils/resolve_grid_row';
 import { GridRowHeader } from './grid_row_header';
+import { EuiPagination } from '@elastic/eui';
 
 export interface GridRowProps {
   rowIndex: number;
@@ -31,6 +32,13 @@ export const GridRow = React.memo(({ rowIndex }: GridRowProps) => {
 
   const [panelIdsInOrder, setPanelIdsInOrder] = useState<string[]>(() =>
     getKeysInOrder(currentRow.panels)
+  );
+
+  const [pageCount, setPageCount] = useState<number>(
+    gridLayoutStateManager.gridLayout$.getValue().length
+  );
+  const [activeSectionIndex, setActiveSection] = useState<number | undefined>(
+    gridLayoutStateManager.activeSection$.getValue()
   );
   const [isCollapsed, setIsCollapsed] = useState<boolean>(currentRow.isCollapsed);
 
@@ -58,11 +66,14 @@ export const GridRow = React.memo(({ rowIndex }: GridRowProps) => {
       const rowStateSubscription = combineLatest([
         gridLayoutStateManager.proposedGridLayout$,
         gridLayoutStateManager.gridLayout$,
+        gridLayoutStateManager.activeSection$,
       ])
         .pipe(
-          map(([proposedGridLayout, gridLayout]) => {
+          map(([proposedGridLayout, gridLayout, activeSection]) => {
             const displayedGridLayout = proposedGridLayout ?? gridLayout;
             return {
+              activeSection,
+              sectionCount: gridLayout.length,
               isCollapsed: displayedGridLayout[rowIndex]?.isCollapsed ?? false,
               panelIds: Object.keys(displayedGridLayout[rowIndex]?.panels ?? {}),
             };
@@ -70,9 +81,9 @@ export const GridRow = React.memo(({ rowIndex }: GridRowProps) => {
           pairwise()
         )
         .subscribe(([oldRowData, newRowData]) => {
-          if (oldRowData.isCollapsed !== newRowData.isCollapsed) {
-            setIsCollapsed(newRowData.isCollapsed);
-          }
+          setActiveSection(newRowData.activeSection);
+          setIsCollapsed(newRowData.isCollapsed);
+          setPageCount(newRowData.sectionCount);
           if (
             oldRowData.panelIds.length !== newRowData.panelIds.length ||
             !(
@@ -117,7 +128,7 @@ export const GridRow = React.memo(({ rowIndex }: GridRowProps) => {
     newLayout[rowIndex].isCollapsed = !newLayout[rowIndex].isCollapsed;
     gridLayoutStateManager.gridLayout$.next(newLayout);
   }, [rowIndex, gridLayoutStateManager.gridLayout$]);
-
+  console.log(isCollapsed);
   useEffect(() => {
     /**
      * Set `aria-expanded` without passing the expanded state as a prop to `GridRowHeader` in order
@@ -127,45 +138,77 @@ export const GridRow = React.memo(({ rowIndex }: GridRowProps) => {
     collapseButtonRef.current.ariaExpanded = `${!isCollapsed}`;
   }, [isCollapsed]);
 
+  console.log(activeSectionIndex, rowIndex);
+
   return (
-    <div
-      css={styles.fullHeight}
-      className={classNames('kbnGridRowContainer', {
-        'kbnGridRowContainer--collapsed': isCollapsed,
-      })}
-    >
-      {rowIndex !== 0 && (
-        <GridRowHeader
-          rowIndex={rowIndex}
-          toggleIsCollapsed={toggleIsCollapsed}
-          collapseButtonRef={collapseButtonRef}
-        />
-      )}
-      {!isCollapsed && (
-        <div
-          id={`kbnGridRow-${rowIndex}`}
-          className={'kbnGridRow'}
-          ref={(element: HTMLDivElement | null) =>
-            (gridLayoutStateManager.rowRefs.current[rowIndex] = element)
-          }
-          css={[styles.fullHeight, styles.grid]}
-          role="region"
-          aria-labelledby={`kbnGridRowTile-${rowIndex}`}
-        >
-          {/* render the panels **in order** for accessibility, using the memoized panel components */}
-          {panelIdsInOrder.map((panelId) => (
-            <GridPanel key={panelId} panelId={panelId} rowIndex={rowIndex} />
-          ))}
-          <DragPreview rowIndex={rowIndex} />
-        </div>
-      )}
-    </div>
+    (activeSectionIndex === undefined || activeSectionIndex === rowIndex) && (
+      <div
+        css={[styles.fullHeight, styles.freeform]}
+        className={classNames('kbnGridRowContainer', {
+          'kbnGridRowContainer--collapsed': isCollapsed,
+        })}
+      >
+        {activeSectionIndex !== undefined ? (
+          <div className={'kbnGridRowHeader'}>
+            <EuiPagination
+              aria-label="Many pages example"
+              pageCount={pageCount}
+              activePage={activeSectionIndex}
+              onPageClick={(activePage) => {
+                gridLayoutStateManager.activeSection$.next(activePage);
+              }}
+            />
+          </div>
+        ) : (
+          rowIndex !== 0 && (
+            <GridRowHeader
+              rowIndex={rowIndex}
+              toggleIsCollapsed={toggleIsCollapsed}
+              collapseButtonRef={collapseButtonRef}
+            />
+          )
+        )}
+        {!isCollapsed && (
+          <div
+            id={`kbnGridRow-${rowIndex}`}
+            className={'kbnGridRow'}
+            ref={(element: HTMLDivElement | null) =>
+              (gridLayoutStateManager.rowRefs.current[rowIndex] = element)
+            }
+            css={[styles.fullHeight, styles.grid]}
+            role="region"
+            aria-labelledby={`kbnGridRowTile-${rowIndex}`}
+          >
+            {/* render the panels **in order** for accessibility, using the memoized panel components */}
+            {panelIdsInOrder.map((panelId) => (
+              <GridPanel key={panelId} panelId={panelId} rowIndex={rowIndex} />
+            ))}
+            <DragPreview rowIndex={rowIndex} />
+          </div>
+        )}
+      </div>
+    )
   );
 });
 
 const styles = {
   fullHeight: css({
     height: '100%',
+  }),
+  freeform: css({
+    '.kbnGrid--freeform &': {
+      display: 'flex',
+      flexDirection: 'column-reverse',
+      '.kbnGridRowHeader': {
+        display: 'block',
+        flex: 0,
+        backgroundColor: '#f6f9fc',
+        borderTop: '1px solid #E3E8F2',
+      },
+      '.kbnGridRow': {
+        flex: 1,
+      },
+    },
   }),
   grid: css({
     '.kbnGrid--freeform &': {

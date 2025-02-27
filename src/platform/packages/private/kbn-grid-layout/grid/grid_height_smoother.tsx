@@ -53,6 +53,20 @@ export const GridHeightSmoother = React.memo(
         css={[styles.heightSmoothing, styles.hasActivePanel]}
       >
         {children}
+        {/* <div
+          css={css({
+            position: 'fixed',
+            height: '100px',
+            width: '100%',
+            bottom: 0,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 100000,
+          })}
+        >
+          <div>test</div>
+        </div> */}
       </div>
     );
   }

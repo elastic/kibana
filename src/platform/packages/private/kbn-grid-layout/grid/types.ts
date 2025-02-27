@@ -68,6 +68,7 @@ export interface GridLayoutStateManager {
   runtimeSettings$: BehaviorSubject<RuntimeGridSettings>;
   activePanel$: BehaviorSubject<ActivePanel | undefined>;
   interactionEvent$: BehaviorSubject<PanelInteractionEvent | undefined>;
+  activeSection$: BehaviorSubject<number | undefined>;
 
   rowRefs: React.MutableRefObject<Array<HTMLDivElement | null>>;
   panelRefs: React.MutableRefObject<Array<{ [id: string]: HTMLDivElement | null }>>;

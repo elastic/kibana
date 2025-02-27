@@ -6,6 +6,14 @@
   .dashboardTopNav {
     z-index: 0;
   }
+  .dshDashboardViewportWrapper, .dshDashboardViewport, .dshLayout, .kbnGridWrapper {
+    display: flex;
+    flex: auto;
+    &, .kbnGrid {
+      width: 100%;
+      background-color: $euiColorBackgroundBasePlain;
+    }
+  }
 };
 
 .dashboardContainer, .dashboardViewport {
