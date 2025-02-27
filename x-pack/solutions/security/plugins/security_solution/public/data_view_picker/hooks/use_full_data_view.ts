@@ -28,7 +28,7 @@ export const useFullDataView = ({
   const { dataView: dataViewSpec } = useDataView(dataViewPickerScope);
 
   const dataView = useMemo(() => {
-    if (Object.keys(dataViewSpec).length) {
+    if (Object.keys(dataViewSpec?.fields ?? {}).length) {
       return new DataView({ spec: dataViewSpec, fieldFormats });
     } else {
       return undefined;

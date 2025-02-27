@@ -5,8 +5,14 @@
  * 2.0.
  */
 
+import type { AnyAction, Dispatch, ListenerEffectAPI } from '@reduxjs/toolkit';
+import { mockDataViewPickerState } from '../mock';
 import { createInitListener } from './init_listener';
 import type { DataViewsServicePublic } from '@kbn/data-views-plugin/public';
+import type { RootState } from '../reducer';
+import { shared } from '../slices';
+import { DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID, DataViewPickerScopeName } from '../../constants';
+import { selectDataViewAsync } from '../actions';
 
 const mockDataViewsService = {
   get: jest.fn(),
@@ -15,7 +21,16 @@ const mockDataViewsService = {
     isPersisted: () => false,
     toSpec: () => ({ id: 'adhoc_test-*', title: 'test-*' }),
   }),
+  getAllDataViewLazy: jest.fn().mockReturnValue([]),
 } as unknown as DataViewsServicePublic;
+
+const mockDispatch = jest.fn();
+const mockGetState = jest.fn(() => mockDataViewPickerState);
+
+const mockListenerApi = {
+  dispatch: mockDispatch,
+  getState: mockGetState,
+} as unknown as ListenerEffectAPI<RootState, Dispatch<AnyAction>>;
 
 describe('createInitListener', () => {
   let listener: ReturnType<typeof createInitListener>;
@@ -25,5 +40,23 @@ describe('createInitListener', () => {
     listener = createInitListener({ dataViews: mockDataViewsService });
   });
 
-  it.todo('should load the data views and dispatch further actions');
+  it('should load the data views and dispatch further actions', async () => {
+    await listener.effect(shared.actions.init(), mockListenerApi);
+
+    expect(jest.mocked(mockDataViewsService.getAllDataViewLazy)).toHaveBeenCalled();
+
+    expect(jest.mocked(mockListenerApi.dispatch)).toBeCalledWith(shared.actions.setDataViews([]));
+    expect(jest.mocked(mockListenerApi.dispatch)).toBeCalledWith(
+      selectDataViewAsync({
+        id: DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID,
+        scope: [
+          DataViewPickerScopeName.default,
+          DataViewPickerScopeName.timeline,
+          DataViewPickerScopeName.analyzer,
+        ],
+      })
+    );
+  });
+
+  it.todo('should dispatch error correctly');
 });

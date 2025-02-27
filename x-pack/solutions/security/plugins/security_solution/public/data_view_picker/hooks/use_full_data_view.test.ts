@@ -47,7 +47,27 @@ describe('useFullDataView', () => {
     });
   });
 
-  describe('when data view is not available', () => {
-    it.todo('should return undefined');
+  describe('when data view fields are not available', () => {
+    beforeEach(() => {
+      jest.mocked(useDataView).mockReturnValue({
+        dataView: {
+          id: DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID,
+          title: DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID,
+        },
+        status: 'pristine',
+        indicesExist: true,
+      });
+    });
+
+    it('should return undefined', () => {
+      const wrapper = renderHook(
+        () => useFullDataView({ dataViewPickerScope: DataViewPickerScopeName.default }),
+        {
+          wrapper: TestProviders,
+        }
+      );
+
+      expect(wrapper.result.current).toBeUndefined();
+    });
   });
 });

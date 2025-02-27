@@ -32,6 +32,7 @@ const mockDefaultDataViewSpec: DataViewSpec = {
     '-*elastic-cloud-logs-*',
   ].join(),
 };
+
 export const mockDataViewPickerState: RootState = {
   dataViewPicker: {
     ...dataViewPickerState,
