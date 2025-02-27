@@ -38,9 +38,18 @@ export function AssetImage({ type = 'welcome', ...props }: AssetImageProps) {
   const [imageSrc, setImageSrc] = useState<string>();
 
   useEffect(() => {
+    let isMounted = true;
     const dynamicImageImport = colorMode === 'LIGHT' ? light() : dark();
 
-    dynamicImageImport.then((module) => setImageSrc(module.default));
+    dynamicImageImport.then((module) => {
+      if (isMounted) {
+        setImageSrc(module.default);
+      }
+    });
+
+    return () => {
+      isMounted = false;
+    };
   }, [colorMode, dark, light]);
 
   return imageSrc ? <EuiImage size="l" {...props} alt={alt} src={imageSrc} /> : null;
