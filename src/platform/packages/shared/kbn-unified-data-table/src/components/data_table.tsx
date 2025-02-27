@@ -29,7 +29,6 @@ import {
   EuiDataGridStyle,
   EuiDataGridProps,
   EuiDataGridToolBarVisibilityDisplaySelectorOptions,
-  EuiDelayRender,
   EuiProgress,
 } from '@elastic/eui';
 import type { DataView } from '@kbn/data-views-plugin/public';
@@ -84,7 +83,6 @@ import {
   toolbarVisibility as toolbarVisibilityDefaults,
   DataGridDensity,
 } from '../constants';
-import { UnifiedDataTableFooter } from './data_table_footer';
 import { UnifiedDataTableAdditionalDisplaySettings } from './data_table_additional_display_settings';
 import { useRowHeight } from '../hooks/use_row_height';
 import { CompareDocuments } from './compare_documents';
@@ -338,7 +336,7 @@ export interface UnifiedDataTableProps {
   /**
    * To fetch more
    */
-  onFetchMoreRecords?: () => void;
+  onFetchMoreRecords?: (direction: 'next' | 'previous') => void;
   /**
    * Optional value for providing the additional controls available in the UnifiedDataTable toolbar to manage it's records or state. UnifiedDataTable includes Columns, Sorting and Bulk Actions.
    */
@@ -753,7 +751,15 @@ export const UnifiedDataTable = ({
     ]
   );
 
-  const { dataGridId, dataGridWrapper, setDataGridWrapper } = useFullScreenWatcher();
+  const { dataGridId, dataGridWrapper, dataGrid, setDataGridWrapper } = useFullScreenWatcher();
+
+  useEffect(() => {
+    if (dataGrid) {
+      requestAnimationFrame(() => {
+        dataGridRef.current?.scrollTo?.({ scrollTop: 2 });
+      });
+    }
+  }, [dataGrid]);
 
   const {
     inTableSearchTermCss,
@@ -1141,75 +1147,49 @@ export const UnifiedDataTable = ({
     rowLineHeight: rowLineHeightOverride,
   });
 
-  useEffect(() => {
-    if (
-      hasScrolledToBottom &&
-      onFetchMoreRecords &&
-      loadingState !== DataLoadingState.loadingMore
-    ) {
-      // dataGridRef.current?.setFocusedCell({
-      //   rowIndex: displayedRows.length - 1,
-      //   colIndex: leadingControlColumns.length,
-      // });
-      setHasScrolledToBottom(false);
-      onFetchMoreRecords();
+  const virtualizationOptions = useMemo(() => {
+    const options: EuiDataGridProps['virtualizationOptions'] = {};
+
+    if (onFetchMoreRecords) {
+      // Using throttle instead of debounce to ensure it updates while user is still scrolling
+      options.onScroll = throttle(
+        (event: GridOnScrollProps) => {
+          if (loadingState === DataLoadingState.loadingMore) {
+            return;
+          }
+
+          // We need to manually query the react-window wrapper since EUI doesn't
+          // expose outerRef in virtualizationOptions, but we should request it
+          const outerRef = dataGridWrapper?.querySelector<HTMLElement>('.euiDataGrid__virtualized');
+
+          if (!outerRef) {
+            return;
+          }
+
+          const isScrollable = outerRef.scrollHeight > outerRef.offsetHeight;
+          const isScrolledToTop =
+            event.verticalScrollDirection === 'backward' && event.scrollTop === 0;
+          const isScrolledToBottom =
+            event.verticalScrollDirection === 'forward' &&
+            event.scrollTop + outerRef.offsetHeight >= outerRef.scrollHeight - 100;
+
+          if (isScrollable && (isScrolledToTop || isScrolledToBottom)) {
+            onFetchMoreRecords(isScrolledToBottom ? 'next' : 'previous');
+          }
+        },
+        50,
+        { trailing: true }
+      );
     }
-  }, [
-    displayedRows.length,
-    hasScrolledToBottom,
-    leadingControlColumns.length,
-    loadingState,
-    onFetchMoreRecords,
-  ]);
 
-  // useEffect(() => {
-  //   const onWheel = (event: WheelEvent) => {
-  //     console.log('they see me scrollin', dataGridWrapper, event);
-  //   };
+    // Don't use row overscan when showing Document column since
+    // rendering so much DOM content in each cell impacts performance
+    if (defaultColumns) {
+      return options;
+    }
 
-  //   // const outerRef = dataGridWrapper?.querySelector<HTMLElement>('.euiDataGrid__virtualized');
-
-  //   // if (!outerRef) {
-  //   //   return;
-  //   // }
-
-  //   dataGridWrapper?.addEventListener('wheel', onWheel);
-
-  //   return () => {
-  //     dataGridWrapper?.removeEventListener('wheel', onWheel);
-  //   };
-  // }, [dataGridWrapper]);
-
-  const virtualizationOptions = useMemo<EuiDataGridProps['virtualizationOptions']>(() => {
-    // Using throttle instead of debounce to ensure it updates while user is still scrolling
-    const onScroll = throttle((event: GridOnScrollProps) => {
-      // console.log(event);
-      setHasScrolledToBottom((prevHasScrolledToBottom) => {
-        if (loadingState === DataLoadingState.loadingMore) {
-          return prevHasScrolledToBottom;
-        }
-
-        // We need to manually query the react-window wrapper since EUI doesn't
-        // expose outerRef in virtualizationOptions, but we should request it
-        const outerRef = dataGridWrapper?.querySelector<HTMLElement>('.euiDataGrid__virtualized');
-
-        if (!outerRef) {
-          return prevHasScrolledToBottom;
-        }
-
-        // Account for footer height when it's visible to avoid flickering
-        // const scrollBottomMargin = prevHasScrolledToBottom ? 140 : 100;
-        const scrollBottomMargin = 100;
-        const isScrollable = outerRef.scrollHeight > outerRef.offsetHeight;
-        const isScrolledToBottom =
-          event.scrollTop + outerRef.offsetHeight >= outerRef.scrollHeight - scrollBottomMargin;
-
-        return isScrollable && isScrolledToBottom;
-      });
-    }, 50);
-
-    return { ...VIRTUALIZATION_OPTIONS, onScroll, initialScrollTop: 500 };
-  }, [dataGridWrapper, defaultColumns, loadingState]);
+    return { ...VIRTUALIZATION_OPTIONS, ...options };
+  }, [dataGridWrapper, defaultColumns, loadingState, onFetchMoreRecords]);
 
   const isRenderComplete = loadingState !== DataLoadingState.loading;
 
