@@ -76,7 +76,7 @@ export default function navLinksTests({ getService }: FtrProviderContext) {
                 {
                   feature: 'enterpriseSearch',
                   apps: ['appSearch', 'workplaceSearch'],
-                },
+                }
               )
             );
             break;
