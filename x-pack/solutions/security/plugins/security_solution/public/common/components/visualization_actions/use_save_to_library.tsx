@@ -8,12 +8,12 @@
 import React, { useCallback, useMemo } from 'react';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { unmountComponentAtNode } from 'react-dom';
+import type { SaveModalContainerProps } from '@kbn/lens-plugin/public/async_services';
 import { useKibana } from '../../lib/kibana';
 import type { LensAttributes } from './types';
 import { useRedirectToDashboardFromLens } from './use_redirect_to_dashboard_from_lens';
 import { APP_UI_ID, SecurityPageName } from '../../../../common';
 import { useGetSecuritySolutionUrl } from '../link_to';
-import { SaveModalContainerProps } from '../../../../../../../../platform/plugins/shared/lens/public/async_services';
 
 export const useSaveToLibrary = ({
   attributes,
@@ -32,7 +32,7 @@ export const useSaveToLibrary = ({
     const targetDomElement = document.createElement('div');
     const mount = toMountPoint(
       <SaveModalComponent
-        initialInput={{ attributes: attributes  } as SaveModalContainerProps['initialInput']}
+        initialInput={{ attributes } as SaveModalContainerProps['initialInput']}
         onSave={() => unmountComponentAtNode(targetDomElement)}
         onClose={() => unmountComponentAtNode(targetDomElement)}
         originatingApp={APP_UI_ID}
