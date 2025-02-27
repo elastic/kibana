@@ -26,12 +26,10 @@ import {
   EuiFlexItem,
   EuiHorizontalRule,
   EuiIconTip,
-  EuiLink,
   EuiLoadingSpinner,
   EuiPanel,
   EuiPopover,
   EuiText,
-  EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { LifecycleEditAction } from './modal';
@@ -236,7 +234,6 @@ function MetadataRow({
             </EuiFlexItem>
           ) : null}
         </EuiFlexGroup>
-
       </EuiFlexItem>
       <EuiFlexItem grow={4}>{value}</EuiFlexItem>
       <EuiFlexItem grow={1}>{button}</EuiFlexItem>
