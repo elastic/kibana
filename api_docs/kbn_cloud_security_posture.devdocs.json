@@ -1268,6 +1268,69 @@
     "objects": [
       {
         "parentPluginId": "@kbn/cloud-security-posture",
+        "id": "def-public.benchmarksNavigation",
+        "type": "Object",
+        "tags": [],
+        "label": "benchmarksNavigation",
+        "description": [],
+        "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/public/src/constants/navigation.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/cloud-security-posture",
+            "id": "def-public.benchmarksNavigation.rules",
+            "type": "Object",
+            "tags": [],
+            "label": "rules",
+            "description": [],
+            "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/public/src/constants/navigation.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/cloud-security-posture",
+                "id": "def-public.benchmarksNavigation.rules.name",
+                "type": "string",
+                "tags": [],
+                "label": "name",
+                "description": [],
+                "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/public/src/constants/navigation.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/cloud-security-posture",
+                "id": "def-public.benchmarksNavigation.rules.path",
+                "type": "string",
+                "tags": [],
+                "label": "path",
+                "description": [],
+                "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/public/src/constants/navigation.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/cloud-security-posture",
+                "id": "def-public.benchmarksNavigation.rules.id",
+                "type": "string",
+                "tags": [],
+                "label": "id",
+                "description": [],
+                "signature": [
+                  "\"cloud_security_posture-benchmarks-rules\""
+                ],
+                "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/public/src/constants/navigation.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/cloud-security-posture",
         "id": "def-public.findingsNavigation",
         "type": "Object",
         "tags": [],
