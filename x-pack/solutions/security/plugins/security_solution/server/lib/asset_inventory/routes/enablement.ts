@@ -13,6 +13,7 @@ import { API_VERSIONS } from '../../../../common/constants';
 
 import type { AssetInventoryRoutesDeps } from '../types';
 import { InitEntityStoreRequestBody } from '../../../../common/api/entity_analytics/entity_store/enable.gen';
+import { ASSET_INVENTORY_ENABLE_API_PATH } from '../../../../common/api/asset_inventory/constants';
 
 export const enableAssetInventoryRoute = (
   router: AssetInventoryRoutesDeps['router'],
@@ -21,7 +22,7 @@ export const enableAssetInventoryRoute = (
   router.versioned
     .post({
       access: 'public',
-      path: '/api/asset_inventory/enable',
+      path: ASSET_INVENTORY_ENABLE_API_PATH,
       security: {
         authz: {
           requiredPrivileges: ['securitySolution'],

@@ -6,6 +6,10 @@
  */
 
 import { useMemo } from 'react';
+import {
+  ASSET_INVENTORY_ENABLE_API_PATH,
+  ASSET_INVENTORY_STATUS_API_PATH,
+} from '../../../common/api/asset_inventory/constants';
 import type {
   AssetInventoryEnableResponse,
   AssetInventoryStatusResponse,
@@ -18,7 +22,7 @@ export const useAssetInventoryRoutes = () => {
 
   return useMemo(() => {
     const postEnableAssetInventory = async () => {
-      return http.fetch<AssetInventoryEnableResponse>('/api/asset_inventory/enable', {
+      return http.fetch<AssetInventoryEnableResponse>(ASSET_INVENTORY_ENABLE_API_PATH, {
         method: 'POST',
         version: API_VERSIONS.public.v1,
         body: JSON.stringify({}),
@@ -26,7 +30,7 @@ export const useAssetInventoryRoutes = () => {
     };
 
     const getAssetInventoryStatus = async () => {
-      return http.fetch<AssetInventoryStatusResponse>('/api/asset_inventory/status', {
+      return http.fetch<AssetInventoryStatusResponse>(ASSET_INVENTORY_STATUS_API_PATH, {
         method: 'GET',
         version: API_VERSIONS.public.v1,
         query: {},
