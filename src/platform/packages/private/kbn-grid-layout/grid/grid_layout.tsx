@@ -26,6 +26,7 @@ export type GridLayoutProps = {
   layout: GridLayoutData;
   gridSettings: GridSettings;
   onLayoutChange: (newLayout: GridLayoutData) => void;
+  onSectionChange?: (section?: number) => void;
   expandedPanelId?: string;
   accessMode?: GridAccessMode;
   className?: string; // this makes it so that custom CSS can be passed via Emotion
@@ -39,6 +40,7 @@ export const GridLayout = ({
   expandedPanelId,
   accessMode = 'EDIT',
   className,
+  onSectionChange,
   useCustomDragHandle = false,
 }: GridLayoutProps) => {
   const layoutRef = useRef<HTMLDivElement | null>(null);
@@ -133,10 +135,17 @@ export const GridLayout = ({
       }
     });
 
+    const activeSectionSubscription = gridLayoutStateManager.activeSection$
+      .pipe(skip(1), distinctUntilChanged())
+      .subscribe((section) => {
+        onSectionChange?.(section);
+      });
+
     return () => {
       rowCountSubscription.unsubscribe();
       onLayoutChangeSubscription.unsubscribe();
       gridLayoutClassSubscription.unsubscribe();
+      activeSectionSubscription.unsubscribe();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);

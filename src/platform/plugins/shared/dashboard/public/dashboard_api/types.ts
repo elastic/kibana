@@ -169,6 +169,7 @@ export type DashboardApi = CanExpandPanels &
     locator?: Pick<LocatorPublic<DashboardLocatorParams>, 'navigate' | 'getRedirectUrl'>;
     panels$: PublishingSubject<DashboardPanelMap>;
     sections$: PublishingSubject<DashboardSectionMap>;
+    setActiveSection: (section?: number) => void;
     runInteractiveSave: () => Promise<SaveDashboardReturn | undefined>;
     runQuickSave: () => Promise<void>;
     scrollToPanel: (panelRef: HTMLDivElement) => void;

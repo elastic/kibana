@@ -152,6 +152,7 @@ export const DashboardGrid = ({
     // memoizing this component reduces the number of times it gets re-rendered to a minimum
     return (
       <GridLayout
+        onSectionChange={dashboardApi.setActiveSection}
         css={layoutStyles}
         layout={currentLayout}
         gridSettings={

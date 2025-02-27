@@ -77,6 +77,9 @@ export function initializePanelsManager(
   function setSections(sections?: DashboardSectionMap) {
     if (!fastIsEqual(sections ?? [], sections$.value ?? [])) sections$.next(sections);
   }
+  const activeSection$ = new BehaviorSubject<number | undefined>(
+    getSettings().lockToGrid ? undefined : 0
+  );
   let restoredRuntimeState: UnsavedPanelState = initialPanelsRuntimeState;
 
   function setRuntimeStateForChild(childId: string, state: object) {
@@ -217,6 +220,7 @@ export function initializePanelsManager(
         if (serializedState?.references && serializedState.references.length > 0) {
           pushReferences(prefixReferencesFromPanel(newId, serializedState.references));
         }
+        const sectionIndex = activeSection$.value ?? 0;
         const newPanel: DashboardPanelState = {
           type,
           gridData: {
@@ -226,6 +230,7 @@ export function initializePanelsManager(
           explicitInput: {
             ...serializedState?.rawState,
           },
+          ...(sectionIndex > 0 ? { sectionIndex } : {}),
         };
         if (initialState) setRuntimeStateForChild(newId, initialState);
 
@@ -366,6 +371,9 @@ export function initializePanelsManager(
         return id;
       },
       sections$,
+      setActiveSection: (section?: number) => {
+        activeSection$.next(section);
+      },
       addNewSection: () => {
         setSections([
           ...(sections$.getValue() ?? {}),
