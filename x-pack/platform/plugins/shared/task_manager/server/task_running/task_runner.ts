@@ -17,6 +17,7 @@ import { withSpan } from '@kbn/apm-utils';
 import { flow, identity, omit } from 'lodash';
 import { ExecutionContextStart, Logger, SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { UsageCounter } from '@kbn/usage-collection-plugin/server';
+import { IEventLogger } from '@kbn/event-log-plugin/server';
 import { Middleware } from '../lib/middleware';
 import {
   asErr,
@@ -119,6 +120,7 @@ type Opts = {
   allowReadingInvalidState: boolean;
   strategy: string;
   getPollInterval: () => number;
+  eventLogger: IEventLogger;
 } & Pick<Middleware, 'beforeRun' | 'beforeMarkRunning'>;
 
 export enum TaskRunResult {
@@ -147,6 +149,9 @@ export type RanTask = TaskRunning<TaskRunningStage.RAN, ConcreteTaskInstance>;
 
 export type TaskRunningInstance = PendingTask | ReadyToRunTask | RanTask;
 
+// 1,000,000 nanoseconds in 1 millisecond
+const Millis2Nanos = 1000 * 1000;
+
 /**
  * Runs a background task, ensures that errors are properly handled,
  * allows for cancellation.
@@ -172,6 +177,7 @@ export class TaskManagerRunner implements TaskRunner {
   private readonly taskValidator: TaskValidator;
   private readonly claimStrategy: string;
   private getPollInterval: () => number;
+  private eventLogger: IEventLogger;
 
   /**
    * Creates an instance of TaskManagerRunner.
@@ -198,6 +204,7 @@ export class TaskManagerRunner implements TaskRunner {
     allowReadingInvalidState,
     strategy,
     getPollInterval,
+    eventLogger,
   }: Opts) {
     this.instance = asPending(sanitizeInstance(instance));
     this.definitions = definitions;
@@ -218,6 +225,7 @@ export class TaskManagerRunner implements TaskRunner {
     });
     this.claimStrategy = strategy;
     this.getPollInterval = getPollInterval;
+    this.eventLogger = eventLogger;
   }
 
   /**
@@ -341,6 +349,9 @@ export class TaskManagerRunner implements TaskRunner {
         }`
       );
     }
+    const start = Date.now();
+    const scheduled = this.instance.task.runAt.toISOString();
+    const scheduleDelay = Millis2Nanos * (Date.now() - this.instance.task.runAt.getTime());
     this.logger.debug(`Running task ${this}`, { tags: ['task:start', this.id, this.taskType] });
 
     const apmTrans = apm.startTransaction(this.taskType, TASK_MANAGER_RUN_TRANSACTION_TYPE, {
@@ -363,6 +374,35 @@ export class TaskManagerRunner implements TaskRunner {
         )
       );
       if (apmTrans) apmTrans.end('failure');
+      this.eventLogger.logEvent({
+        event: {
+          kind: 'task',
+          action: 'run',
+          outcome: 'failure',
+          duration: (Date.now() - start) * Millis2Nanos,
+          start: new Date(start).toISOString(),
+          end: new Date().toISOString(),
+        },
+        kibana: {
+          saved_objects: [
+            {
+              type: 'task',
+              id: this.id,
+            },
+          ],
+          task: {
+            scheduled,
+            schedule_delay: scheduleDelay,
+            task_type: this.instance.task.taskType,
+            schedule_type: this.definition?.scheduleType,
+          },
+        },
+        message: `Task ${this} failed due to the task state being invalid: ${stateValidationResult.error.message}`,
+        error: {
+          message: stateValidationResult.error.message,
+          stack_trace: stateValidationResult.error.stack_trace,
+        },
+      });
       return processedResult;
     }
 
@@ -395,6 +435,31 @@ export class TaskManagerRunner implements TaskRunner {
       const processedResult = await withSpan({ name: 'process result', type: 'task manager' }, () =>
         this.processResult(validatedResult, stopTaskTimer())
       );
+      this.eventLogger.logEvent({
+        event: {
+          kind: 'task',
+          action: 'run',
+          outcome: 'success',
+          duration: (Date.now() - start) * Millis2Nanos,
+          start: new Date(start).toISOString(),
+          end: new Date().toISOString(),
+        },
+        kibana: {
+          saved_objects: [
+            {
+              type: 'task',
+              id: this.id,
+            },
+          ],
+          task: {
+            scheduled,
+            schedule_delay: scheduleDelay,
+            task_type: this.instance.task.taskType,
+            schedule_type: this.definition?.scheduleType,
+          },
+        },
+        message: `Task ${this} ran successfully`,
+      });
       if (apmTrans) apmTrans.end('success');
       return processedResult;
     } catch (err) {
@@ -412,6 +477,35 @@ export class TaskManagerRunner implements TaskRunner {
         )
       );
       if (apmTrans) apmTrans.end('failure');
+      this.eventLogger.logEvent({
+        event: {
+          kind: 'task',
+          action: 'run',
+          outcome: 'failure',
+          duration: (Date.now() - start) * Millis2Nanos,
+          start: new Date(start).toISOString(),
+          end: new Date().toISOString(),
+        },
+        kibana: {
+          saved_objects: [
+            {
+              type: 'task',
+              id: this.id,
+            },
+          ],
+          task: {
+            scheduled,
+            schedule_delay: scheduleDelay,
+            task_type: this.instance.task.taskType,
+            schedule_type: this.definition?.scheduleType,
+          },
+        },
+        message: `Task ${this} failed: ${err}`,
+        error: {
+          message: err.message,
+          stack_trace: err.stack_trace,
+        },
+      });
       return processedResult;
     } finally {
       this.logger.debug(`Task ${this} ended`, { tags: ['task:end', this.id, this.taskType] });

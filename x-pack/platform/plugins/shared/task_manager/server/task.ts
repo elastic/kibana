@@ -190,6 +190,7 @@ export const taskDefinitionSchema = schema.object(
     ),
 
     paramsSchema: schema.maybe(schema.any()),
+    scheduleType: schema.maybe(schema.any()),
   },
   {
     validate({ timeout, priority, cost }) {

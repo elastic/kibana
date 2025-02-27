@@ -29,6 +29,7 @@
     "@kbn/cloud-plugin",
     "@kbn/core-saved-objects-base-server-internal",
     "@kbn/core-elasticsearch-server",
+    "@kbn/event-log-plugin"
   ],
   "exclude": ["target/**/*"]
 }

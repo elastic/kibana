@@ -22,6 +22,11 @@ import {
   ServiceStatusLevels,
   CoreStatus,
 } from '@kbn/core/server';
+import {
+  IEventLogger,
+  IEventLogService,
+  IEventLogClientService,
+} from '@kbn/event-log-plugin/server';
 import type { CloudSetup, CloudStart } from '@kbn/cloud-plugin/server';
 import {
   registerDeleteInactiveNodesTaskDefinition,
@@ -90,11 +95,13 @@ export type TaskManagerStartContract = Pick<
 export interface TaskManagerPluginsStart {
   cloud?: CloudStart;
   usageCollection?: UsageCollectionStart;
+  eventLog: IEventLogClientService;
 }
 
 export interface TaskManagerPluginsSetup {
   cloud?: CloudSetup;
   usageCollection?: UsageCollectionSetup;
+  eventLog: IEventLogService;
 }
 
 const LogHealthForBackgroundTasksOnlyMinutes = 60;
@@ -127,6 +134,7 @@ export class TaskManagerPlugin
   private kibanaDiscoveryService?: KibanaDiscoveryService;
   private heapSizeLimit: number = 0;
   private numOfKibanaInstances$: Subject<number> = new BehaviorSubject(1);
+  private eventLogger?: IEventLogger;
 
   constructor(private readonly initContext: PluginInitializerContext) {
     this.initContext = initContext;
@@ -260,6 +268,11 @@ export class TaskManagerPlugin
       setupIntervalLogging(monitoredHealth$, this.logger, LogHealthForBackgroundTasksOnlyMinutes);
     }
 
+    this.eventLogger = plugins.eventLog.getLogger({
+      event: { provider: 'task_manager' },
+    });
+    plugins.eventLog.registerProviderActions('task_manager', ['run']);
+
     return {
       index: TASK_MANAGER_INDEX,
       addMiddleware: (middleware: Middleware) => {
@@ -358,6 +371,7 @@ export class TaskManagerPlugin
         elasticsearchAndSOAvailability$: this.elasticsearchAndSOAvailability$!,
         taskPartitioner,
         startingCapacity,
+        eventLogger: this.eventLogger!,
       });
     }
 

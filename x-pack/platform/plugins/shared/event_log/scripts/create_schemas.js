@@ -114,7 +114,7 @@ function writeEventLogConfigSchema(elSchema, ecsVersion) {
   console.log('generated:', EVENT_LOG_CONFIG_SCHEMA_FILE);
 }
 
-const StringTypes = new Set(['string', 'keyword', 'text', 'ip']);
+const StringTypes = new Set(['string', 'keyword', 'text', 'ip', 'match_only_text']);
 const NumberTypes = new Set(['integer', 'float']);
 const StringOrNumberTypes = new Set(['long']);
 

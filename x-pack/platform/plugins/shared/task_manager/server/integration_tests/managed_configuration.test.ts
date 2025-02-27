@@ -10,6 +10,7 @@ import { Client } from '@elastic/elasticsearch';
 import { elasticsearchServiceMock, savedObjectsRepositoryMock } from '@kbn/core/server/mocks';
 import { SavedObjectsErrorHelpers, Logger } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
+import { eventLogMock } from '@kbn/event-log-plugin/server/mocks';
 import { ADJUST_THROUGHPUT_INTERVAL } from '../lib/create_managed_configuration';
 import { TaskManagerPlugin, TaskManagerStartContract } from '../plugin';
 import { coreMock } from '@kbn/core/server/mocks';
@@ -113,7 +114,10 @@ describe('managed configuration', () => {
 
       const taskManager = new TaskManagerPlugin(context);
       (
-        await taskManager.setup(coreMock.createSetup(), { usageCollection: undefined })
+        await taskManager.setup(coreMock.createSetup(), {
+          usageCollection: undefined,
+          eventLog: eventLogMock.createSetup(),
+        })
       ).registerTaskDefinitions({
         foo: {
           title: 'Foo',
@@ -127,7 +131,9 @@ describe('managed configuration', () => {
         esStart.client.asInternalUser as unknown as Client
       );
       coreStart.savedObjects.createInternalRepository.mockReturnValue(savedObjectsClient);
-      taskManagerStart = await taskManager.start(coreStart, {});
+      taskManagerStart = await taskManager.start(coreStart, {
+        eventLog: eventLogMock.createStart(),
+      });
 
       // force rxjs timers to fire when they are scheduled for setTimeout(0) as the
       // sinon fake timers cause them to stall
@@ -212,7 +218,10 @@ describe('managed configuration', () => {
 
       const taskManager = new TaskManagerPlugin(context);
       (
-        await taskManager.setup(coreMock.createSetup(), { usageCollection: undefined })
+        await taskManager.setup(coreMock.createSetup(), {
+          usageCollection: undefined,
+          eventLog: eventLogMock.createSetup(),
+        })
       ).registerTaskDefinitions({
         fooType: mockTaskType,
       });
@@ -223,7 +232,7 @@ describe('managed configuration', () => {
         esStart.client.asInternalUser as unknown as Client
       );
       coreStart.savedObjects.createInternalRepository.mockReturnValue(savedObjectsClient);
-      taskManagerStart = taskManager.start(coreStart, {});
+      taskManagerStart = taskManager.start(coreStart, { eventLog: eventLogMock.createStart() });
 
       // force rxjs timers to fire when they are scheduled for setTimeout(0) as the
       // sinon fake timers cause them to stall
@@ -309,7 +318,10 @@ describe('managed configuration', () => {
 
       const taskManager = new TaskManagerPlugin(context);
       (
-        await taskManager.setup(coreMock.createSetup(), { usageCollection: undefined })
+        await taskManager.setup(coreMock.createSetup(), {
+          usageCollection: undefined,
+          eventLog: eventLogMock.createSetup(),
+        })
       ).registerTaskDefinitions({
         foo: {
           title: 'Foo',
@@ -323,7 +335,9 @@ describe('managed configuration', () => {
         esStart.client.asInternalUser as unknown as Client
       );
       coreStart.savedObjects.createInternalRepository.mockReturnValue(savedObjectsClient);
-      taskManagerStart = await taskManager.start(coreStart, {});
+      taskManagerStart = await taskManager.start(coreStart, {
+        eventLog: eventLogMock.createStart(),
+      });
 
       // force rxjs timers to fire when they are scheduled for setTimeout(0) as the
       // sinon fake timers cause them to stall
@@ -392,7 +406,10 @@ describe('managed configuration', () => {
 
       const taskManager = new TaskManagerPlugin(context);
       (
-        await taskManager.setup(coreMock.createSetup(), { usageCollection: undefined })
+        await taskManager.setup(coreMock.createSetup(), {
+          usageCollection: undefined,
+          eventLog: eventLogMock.createSetup(),
+        })
       ).registerTaskDefinitions({
         foo: {
           title: 'Foo',
@@ -406,7 +423,9 @@ describe('managed configuration', () => {
         esStart.client.asInternalUser as unknown as Client
       );
       coreStart.savedObjects.createInternalRepository.mockReturnValue(savedObjectsClient);
-      taskManagerStart = await taskManager.start(coreStart, {});
+      taskManagerStart = await taskManager.start(coreStart, {
+        eventLog: eventLogMock.createStart(),
+      });
 
       // force rxjs timers to fire when they are scheduled for setTimeout(0) as the
       // sinon fake timers cause them to stall

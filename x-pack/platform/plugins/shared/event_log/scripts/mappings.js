@@ -29,6 +29,12 @@ exports.EcsCustomPropertyMappings = {
           schedule_delay: {
             type: 'long',
           },
+          task_type: {
+            type: 'keyword',
+          },
+          schedule_type: {
+            type: 'keyword',
+          },
         },
       },
       // alerting specific fields

@@ -9,6 +9,7 @@ import { TaskManagerPlugin, getElasticsearchAndSOAvailability } from './plugin';
 import { KibanaDiscoveryService } from './kibana_discovery_service';
 
 import { coreMock } from '@kbn/core/server/mocks';
+import { eventLogMock } from '@kbn/event-log-plugin/server/mocks';
 import { TaskManagerConfig } from './config';
 import { Subject } from 'rxjs';
 import { bufferCount, take } from 'rxjs';
@@ -90,7 +91,10 @@ describe('TaskManagerPlugin', () => {
 
       const taskManagerPlugin = new TaskManagerPlugin(pluginInitializerContext);
       expect(() =>
-        taskManagerPlugin.setup(coreMock.createSetup(), { usageCollection: undefined })
+        taskManagerPlugin.setup(coreMock.createSetup(), {
+          usageCollection: undefined,
+          eventLog: eventLogMock.createSetup(),
+        })
       ).toThrow(
         new Error(`TaskManager is unable to start as Kibana has no valid UUID assigned to it.`)
       );
@@ -107,7 +111,10 @@ describe('TaskManagerPlugin', () => {
 
       const logger = pluginInitializerContext.logger.get();
       const taskManagerPlugin = new TaskManagerPlugin(pluginInitializerContext);
-      taskManagerPlugin.setup(coreMock.createSetup(), { usageCollection: undefined });
+      taskManagerPlugin.setup(coreMock.createSetup(), {
+        usageCollection: undefined,
+        eventLog: eventLogMock.createSetup(),
+      });
       expect((logger.warn as jest.Mock).mock.calls.length).toBe(1);
       expect((logger.warn as jest.Mock).mock.calls[0][0]).toBe(
         'Excluding task types from execution: *'
@@ -125,7 +132,10 @@ describe('TaskManagerPlugin', () => {
 
       const logger = pluginInitializerContext.logger.get();
       const taskManagerPlugin = new TaskManagerPlugin(pluginInitializerContext);
-      taskManagerPlugin.setup(coreMock.createSetup(), { usageCollection: undefined });
+      taskManagerPlugin.setup(coreMock.createSetup(), {
+        usageCollection: undefined,
+        eventLog: eventLogMock.createSetup(),
+      });
       expect((logger.warn as jest.Mock).mock.calls.length).toBe(1);
       expect((logger.warn as jest.Mock).mock.calls[0][0]).toBe(
         'Disabling authentication for background task utilization API'
@@ -140,9 +150,13 @@ describe('TaskManagerPlugin', () => {
       );
       pluginInitializerContext.node.roles.backgroundTasks = true;
       const taskManagerPlugin = new TaskManagerPlugin(pluginInitializerContext);
-      taskManagerPlugin.setup(coreMock.createSetup(), { usageCollection: undefined });
+      taskManagerPlugin.setup(coreMock.createSetup(), {
+        usageCollection: undefined,
+        eventLog: eventLogMock.createSetup(),
+      });
       taskManagerPlugin.start(coreStart, {
         cloud: cloudMock.createStart(),
+        eventLog: eventLogMock.createStart(),
       });
 
       expect(TaskPollingLifecycle as jest.Mock<TaskPollingLifecycleClass>).toHaveBeenCalledTimes(1);
@@ -154,9 +168,13 @@ describe('TaskManagerPlugin', () => {
       );
       pluginInitializerContext.node.roles.backgroundTasks = false;
       const taskManagerPlugin = new TaskManagerPlugin(pluginInitializerContext);
-      taskManagerPlugin.setup(coreMock.createSetup(), { usageCollection: undefined });
+      taskManagerPlugin.setup(coreMock.createSetup(), {
+        usageCollection: undefined,
+        eventLog: eventLogMock.createSetup(),
+      });
       taskManagerPlugin.start(coreStart, {
         cloud: cloudMock.createStart(),
+        eventLog: eventLogMock.createStart(),
       });
 
       expect(TaskPollingLifecycle as jest.Mock<TaskPollingLifecycleClass>).not.toHaveBeenCalled();
@@ -170,9 +188,13 @@ describe('TaskManagerPlugin', () => {
       );
       pluginInitializerContext.node.roles.backgroundTasks = true;
       const taskManagerPlugin = new TaskManagerPlugin(pluginInitializerContext);
-      taskManagerPlugin.setup(coreMock.createSetup(), { usageCollection: undefined });
+      taskManagerPlugin.setup(coreMock.createSetup(), {
+        usageCollection: undefined,
+        eventLog: eventLogMock.createSetup(),
+      });
       taskManagerPlugin.start(coreStart, {
         cloud: cloudMock.createStart(),
+        eventLog: eventLogMock.createStart(),
       });
 
       expect(TaskPollingLifecycle as jest.Mock<TaskPollingLifecycleClass>).toHaveBeenCalledTimes(1);
@@ -188,9 +210,13 @@ describe('TaskManagerPlugin', () => {
       );
       pluginInitializerContext.node.roles.backgroundTasks = false;
       const taskManagerPlugin = new TaskManagerPlugin(pluginInitializerContext);
-      taskManagerPlugin.setup(coreMock.createSetup(), { usageCollection: undefined });
+      taskManagerPlugin.setup(coreMock.createSetup(), {
+        usageCollection: undefined,
+        eventLog: eventLogMock.createSetup(),
+      });
       taskManagerPlugin.start(coreStart, {
         cloud: cloudMock.createStart(),
+        eventLog: eventLogMock.createStart(),
       });
 
       await taskManagerPlugin.stop();
@@ -204,9 +230,13 @@ describe('TaskManagerPlugin', () => {
       );
       pluginInitializerContext.node.roles.backgroundTasks = true;
       const taskManagerPlugin = new TaskManagerPlugin(pluginInitializerContext);
-      taskManagerPlugin.setup(coreMock.createSetup(), { usageCollection: undefined });
+      taskManagerPlugin.setup(coreMock.createSetup(), {
+        usageCollection: undefined,
+        eventLog: eventLogMock.createSetup(),
+      });
       taskManagerPlugin.start(coreStart, {
         cloud: cloudMock.createStart(),
+        eventLog: eventLogMock.createStart(),
       });
 
       discoveryIsStarted.mockReturnValueOnce(true);
