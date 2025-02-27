@@ -20,7 +20,7 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import useToggle from 'react-use/lib/useToggle';
 import { css } from '@emotion/react';
-import { ProcessorMetrics } from '../services/stream_enrichment_service/simulation_state_machine';
+import { ProcessorMetrics } from '../../../state_management/stream_enrichment_service/simulation_state_machine';
 
 type ProcessorMetricBadgesProps = ProcessorMetrics;
 

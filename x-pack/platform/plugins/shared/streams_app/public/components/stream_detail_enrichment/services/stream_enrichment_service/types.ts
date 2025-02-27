@@ -12,7 +12,11 @@ import { FieldDefinition, IngestStreamGetResponse } from '@kbn/streams-schema';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { ProcessorDefinitionWithUIAttributes } from '../../types';
 import { ProcessorToParentEvent, processorMachine } from './processor_state_machine';
-import { SimulationToParentEvent, simulationMachine } from './simulation_state_machine';
+import {
+  PreviewDocsFilterOption,
+  SimulationToParentEvent,
+  simulationMachine,
+} from './simulation_state_machine';
 
 export interface StreamEnrichmentServiceDependencies {
   refreshDefinition: () => void;
@@ -41,6 +45,7 @@ export type StreamEnrichmentEvent =
   | { type: 'stream.update' }
   | { type: 'simulation.viewDataPreview' }
   | { type: 'simulation.viewDetectedFields' }
+  | { type: 'simulation.changePreviewDocsFilter'; filter: PreviewDocsFilterOption }
   | { type: 'processors.add'; processor: ProcessorDefinitionWithUIAttributes }
   | { type: 'processors.reorder'; processorsRefs: Array<ActorRefFrom<typeof processorMachine>> };
 

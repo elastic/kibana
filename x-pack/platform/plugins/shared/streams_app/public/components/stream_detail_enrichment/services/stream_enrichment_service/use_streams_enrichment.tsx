@@ -18,7 +18,7 @@ import {
   StreamEnrichmentInput,
   StreamEnrichmentServiceDependencies,
 } from './types';
-import { simulationMachine } from './simulation_state_machine';
+import { PreviewDocsFilterOption, simulationMachine } from './simulation_state_machine';
 
 const consoleInspector = createConsoleInspector();
 
@@ -52,6 +52,9 @@ export const useStreamEnrichmentEvents = () => {
       },
       viewSimulationDetectedFields: () => {
         service.send({ type: 'simulation.viewDetectedFields' });
+      },
+      changePreviewDocsFilter: (filter: PreviewDocsFilterOption) => {
+        service.send({ type: 'simulation.changePreviewDocsFilter', filter });
       },
     }),
     [service]

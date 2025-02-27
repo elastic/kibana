@@ -31,7 +31,7 @@ import { GrokFormState, ProcessorFormState } from '../../types';
 import {
   useSimulatorSelector,
   useStreamsEnrichmentSelector,
-} from '../../services/stream_enrichment_service';
+} from '../../../../state_management/stream_enrichment_service';
 
 const RefreshButton = ({
   generatePatterns,

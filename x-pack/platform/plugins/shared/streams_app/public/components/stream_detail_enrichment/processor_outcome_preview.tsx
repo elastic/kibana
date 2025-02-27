@@ -21,8 +21,12 @@ import { isEmpty, isEqual } from 'lodash';
 import { StreamsAppSearchBar, StreamsAppSearchBarProps } from '../streams_app_search_bar';
 import { PreviewTable } from '../preview_table';
 import { AssetImage } from '../asset_image';
-import { useSimulatorRef, useSimulatorSelector } from './services/stream_enrichment_service';
-import { previewDocsFilterOptions } from './services/stream_enrichment_service/simulation_state_machine';
+import {
+  useSimulatorRef,
+  useSimulatorSelector,
+  useStreamEnrichmentEvents,
+} from '../../state_management/stream_enrichment_service';
+import { previewDocsFilterOptions } from '../../state_management/stream_enrichment_service/simulation_state_machine';
 
 export const ProcessorOutcomePreview = () => {
   const isLoading = useSimulatorSelector(
@@ -45,7 +49,8 @@ export const ProcessorOutcomePreview = () => {
 };
 
 const OutcomeControls = () => {
-  const simulatorRef = useSimulatorRef();
+  const { changePreviewDocsFilter } = useStreamEnrichmentEvents();
+
   const previewDocsFilter = useSimulatorSelector((state) => state?.context.previewDocsFilter);
   const simulationFailureRate = useSimulatorSelector(
     (state) => state?.context.simulation?.failure_rate
@@ -73,7 +78,7 @@ const OutcomeControls = () => {
 
   const getFilterButtonPropsFor = (filter: NonNullable<typeof previewDocsFilter>) => ({
     hasActiveFilters: previewDocsFilter === filter,
-    onClick: () => simulatorRef?.send({ type: 'filters.changePreviewDocsFilter', filter }),
+    onClick: () => changePreviewDocsFilter(filter),
   });
 
   return (

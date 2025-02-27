@@ -103,7 +103,7 @@ export const simulationMachine = setup({
     context: {} as SimulationMachineContext,
     events: {} as
       | DateRangeToParentEvent
-      | { type: 'filters.changePreviewDocsFilter'; filter: PreviewDocsFilterOption }
+      | { type: 'simulation.changePreviewDocsFilter'; filter: PreviewDocsFilterOption }
       | { type: 'processors.change'; processors: ProcessorDefinitionWithUIAttributes[] },
   },
   actors: {
