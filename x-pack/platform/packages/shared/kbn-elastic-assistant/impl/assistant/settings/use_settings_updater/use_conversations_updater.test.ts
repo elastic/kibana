@@ -177,7 +177,9 @@ describe('useConversationsUpdater', () => {
 
   it('should not call bulkUpdateConversations if there are no pending actions', async () => {
     const { result } = renderHook(() => useConversationsUpdater(mockConversations, true));
-
+    await act(async () => {
+      result.current.setUpdatedAssistantStreamingEnabled(false);
+    });
     await act(async () => {
       const success = await result.current.saveConversationsSettings();
       expect(success).toBe(true);

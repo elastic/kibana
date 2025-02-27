@@ -23,7 +23,9 @@ const mockSystemUpdater = {
   onSystemPromptSelect: jest.fn(),
   refetchSystemPromptConversations: jest.fn(),
   resetSystemPromptSettings: jest.fn(),
-  saveSystemPromptSettings: jest.fn().mockResolvedValue({ conversationUpdates: { updates: [] } }),
+  saveSystemPromptSettings: jest
+    .fn()
+    .mockResolvedValue({ success: true, conversationUpdates: { updates: [] } }),
   selectedSystemPrompt: undefined,
   systemPromptSettings: [],
 };
