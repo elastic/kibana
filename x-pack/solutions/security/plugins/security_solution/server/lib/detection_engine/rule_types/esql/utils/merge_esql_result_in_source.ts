@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { cloneDeep } from 'lodash';
 import type { SignalSource } from '../../types';
 import {
   robustGet,
@@ -16,7 +15,7 @@ export const mergeEsqlResultInSource = (
   source: SignalSource | undefined,
   esqlResult: Record<string, string>
 ): SignalSource => {
-  const document = cloneDeep(source) ?? {};
+  const document = source ?? {};
   Object.keys(esqlResult).forEach((field) => {
     if (robustGet({ key: field, document })) {
       robustUnset({ key: field, document });

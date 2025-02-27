@@ -37,7 +37,7 @@ export const wrapSuppressedEsqlAlerts = ({
   primaryTimestamp,
   secondaryTimestamp,
   intendedTimestamp,
-  columns,
+  expandedFields,
 }: {
   isRuleAggregating: boolean;
   events: Array<estypes.SearchHit<SignalSource>>;
@@ -55,17 +55,8 @@ export const wrapSuppressedEsqlAlerts = ({
   primaryTimestamp: string;
   secondaryTimestamp?: string;
   intendedTimestamp: Date | undefined;
-  columns: string[];
+  expandedFields?: string[];
 }): Array<WrappedFieldsLatest<BaseFieldsLatest & SuppressionFieldsLatest>> => {
-  const duplicatedEventIds = events.reduce<Record<string, number>>((acc, event) => {
-    const id = event?._id;
-    if (id) {
-      acc[id] = (acc[id] ?? 0) + 1;
-    }
-
-    return acc;
-  }, {});
-
   const wrapped = events.map<WrappedFieldsLatest<BaseFieldsLatest & SuppressionFieldsLatest>>(
     (event, i) => {
       const combinedFields = { ...event?.fields, ...event._source };
@@ -82,8 +73,7 @@ export const wrapSuppressedEsqlAlerts = ({
         tuple,
         isRuleAggregating,
         index: i,
-        duplicatedEventIds,
-        columns,
+        expandedFields,
       });
 
       const instanceId = objectHash([suppressionTerms, completeRule.alertId, spaceId]);

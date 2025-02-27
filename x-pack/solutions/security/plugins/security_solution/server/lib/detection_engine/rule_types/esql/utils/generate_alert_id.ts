@@ -24,8 +24,7 @@ export const generateAlertId = ({
   tuple,
   isRuleAggregating,
   index,
-  duplicatedEventIds,
-  columns,
+  expandedFields,
 }: {
   isRuleAggregating: boolean;
   event: estypes.SearchHit<SignalSource>;
@@ -37,26 +36,20 @@ export const generateAlertId = ({
     maxSignals: number;
   };
   index: number;
-  duplicatedEventIds: Record<string, number>;
-  columns: string[];
+  expandedFields?: string[];
 }) => {
   const ruleRunId = tuple.from.toISOString() + tuple.to.toISOString();
-  const mvExpandCommands = getMvExpandDetails(completeRule.ruleParams.query);
 
-  const hasMvCommand = mvExpandCommands.length > 0;
   if (!isRuleAggregating && event._id) {
     const idFields = [
       event._id,
       event._version,
       event._index,
       `${spaceId}:${completeRule.alertId}`,
-      ...(hasMvCommand
+      ...(expandedFields
         ? retrieveExpandedValues({
-            duplicatedEventIds,
             event,
-            fields: mvExpandCommands.map((command) => command.field),
-            columns,
-            index,
+            fields: expandedFields,
           })
         : []),
     ];
@@ -74,22 +67,16 @@ export const generateAlertId = ({
 const retrieveExpandedValues = ({
   event,
   fields,
-  columns,
 }: {
   event: estypes.SearchHit<SignalSource>;
   fields: string[];
-  duplicatedEventIds: Record<string, number>;
-  columns: string[];
-  index: number;
 }) => {
   if (!event._source) {
     return [];
   }
 
-  const columnsSet = new Set(columns);
-  const hasExpandedFieldsMissed = fields.some((f) => !columnsSet.has(f));
   const values = fields.map((field) =>
     event._source ? robustGet({ key: field, document: event._source }) : undefined
   );
-  return hasExpandedFieldsMissed ? [event] : values.filter(Boolean);
+  return fields.length === 0 ? [event] : values.filter(Boolean);
 };

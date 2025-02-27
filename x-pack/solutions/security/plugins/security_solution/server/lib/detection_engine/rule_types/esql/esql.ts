@@ -12,6 +12,7 @@ import type {
   RuleExecutorServices,
 } from '@kbn/alerting-plugin/server';
 import type { estypes } from '@elastic/elasticsearch';
+import { cloneDeep } from 'lodash';
 
 import {
   computeIsESQLQueryAggregating,
@@ -167,6 +168,12 @@ export const esqlExecutor = async ({
           licensing,
         });
 
+        const mvExpandCommands = getMvExpandDetails(completeRule.ruleParams.query);
+        const columnsSet = new Set(columns);
+        const expandedFieldsFromQuery = mvExpandCommands.map((command) => command.field);
+        const hasExpandedFieldsMissed = expandedFieldsFromQuery.some((f) => !columnsSet.has(f));
+        const expandedFields = hasExpandedFieldsMissed ? [] : expandedFieldsFromQuery;
+
         const wrapHits = (events: Array<estypes.SearchHit<SignalSource>>) =>
           wrapEsqlAlerts({
             events,
@@ -179,15 +186,19 @@ export const esqlExecutor = async ({
             publicBaseUrl,
             tuple,
             intendedTimestamp,
-            columns,
+            expandedFields,
           });
 
         const syntheticHits: Array<estypes.SearchHit<SignalSource>> = results.map((document) => {
           const { _id, _version, _index, ...esqlResult } = document;
 
           const sourceDocument = _id ? sourceDocuments[_id] : undefined;
+          const source = mvExpandCommands.length
+            ? cloneDeep(sourceDocument?._source)
+            : sourceDocument?._source;
+
           return {
-            _source: mergeEsqlResultInSource(sourceDocument?._source, esqlResult),
+            _source: mergeEsqlResultInSource(source, esqlResult),
             fields: sourceDocument?.fields,
             _id: _id ?? '',
             _index: _index || sourceDocument?._index || '',
@@ -210,7 +221,7 @@ export const esqlExecutor = async ({
               secondaryTimestamp,
               tuple,
               intendedTimestamp,
-              columns,
+              expandedFields,
             });
 
           const bulkCreateResult = await bulkCreateSuppressedAlertsInMemory({
