@@ -39,7 +39,7 @@ export const NL_TO_ESQL_TOOL: AssistantTool = {
     const { inference, connectorId } = params;
     return inference != null && connectorId != null;
   },
-  getTool(params: ESQLToolParams) {
+  async getTool(params: ESQLToolParams) {
     if (!this.isSupported(params)) return null;
 
     const { connectorId, inference, logger, request, isOssModel } = params as ESQLToolParams;

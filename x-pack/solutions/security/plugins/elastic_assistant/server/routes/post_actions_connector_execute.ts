@@ -22,7 +22,7 @@ import { buildRouteValidationWithZod } from '@kbn/elastic-assistant-common/impl/
 import { INVOKE_ASSISTANT_ERROR_EVENT } from '../lib/telemetry/event_based_telemetry';
 import { POST_ACTIONS_CONNECTOR_EXECUTE } from '../../common/constants';
 import { buildResponse } from '../lib/build_response';
-import { ElasticAssistantRequestHandlerContext, GetElser } from '../types';
+import { ElasticAssistantPluginCoreSetupDependencies, ElasticAssistantRequestHandlerContext, GetElser } from '../types';
 import {
   appendAssistantMessageToConversation,
   getIsKnowledgeBaseInstalled,
@@ -66,7 +66,7 @@ export const postActionsConnectorExecuteRoute = (
         const assistantContext = ctx.elasticAssistant;
         const logger: Logger = assistantContext.logger;
         const telemetry = assistantContext.telemetry;
-        let onLlmResponse;
+      let onLlmResponse;
 
         try {
           const checkResponse = await performChecks({
@@ -142,6 +142,7 @@ export const postActionsConnectorExecuteRoute = (
               promptsDataClient,
             });
           }
+
           return await langChainExecute({
             abortSignal,
             isStream: request.body.subAction !== 'invokeAI',

@@ -6,7 +6,7 @@
  */
 
 import type { RetrievalQAChain } from 'langchain/chains';
-import type { DynamicTool } from '@langchain/core/tools';
+import type { DynamicStructuredTool, DynamicTool } from '@langchain/core/tools';
 import { NL_TO_ESQL_TOOL } from './nl_to_esql_tool';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { KibanaRequest } from '@kbn/core-http-server';
@@ -53,8 +53,8 @@ describe('NaturalLanguageESQLTool', () => {
   });
 
   describe('getTool', () => {
-    it('returns null if inference plugin is not provided', () => {
-      const tool = NL_TO_ESQL_TOOL.getTool({
+    it('returns null if inference plugin is not provided', async () => {
+      const tool = await NL_TO_ESQL_TOOL.getTool({
         ...rest,
         inference: undefined,
       });
@@ -62,8 +62,8 @@ describe('NaturalLanguageESQLTool', () => {
       expect(tool).toBeNull();
     });
 
-    it('returns null if connectorId is not provided', () => {
-      const tool = NL_TO_ESQL_TOOL.getTool({
+    it('returns null if connectorId is not provided', async () => {
+      const tool = await NL_TO_ESQL_TOOL.getTool({
         ...rest,
         connectorId: undefined,
       });
@@ -71,24 +71,24 @@ describe('NaturalLanguageESQLTool', () => {
       expect(tool).toBeNull();
     });
 
-    it('should return a Tool instance when given required properties', () => {
-      const tool = NL_TO_ESQL_TOOL.getTool({
+    it('should return a Tool instance when given required properties', async () => {
+      const tool = await NL_TO_ESQL_TOOL.getTool({
         ...rest,
-      });
+      }) as DynamicStructuredTool;
 
       expect(tool?.name).toEqual('NaturalLanguageESQLTool');
     });
 
-    it('should return a tool with the expected tags', () => {
-      const tool = NL_TO_ESQL_TOOL.getTool({
+    it('should return a tool with the expected tags', async () => {
+      const tool = await NL_TO_ESQL_TOOL.getTool({
         ...rest,
       }) as DynamicTool;
 
       expect(tool.tags).toEqual(['esql', 'query-generation', 'knowledge-base']);
     });
 
-    it('should return tool with the expected description for OSS model', () => {
-      const tool = NL_TO_ESQL_TOOL.getTool({
+    it('should return tool with the expected description for OSS model', async () => {
+      const tool = await NL_TO_ESQL_TOOL.getTool({
         isOssModel: true,
         ...rest,
       }) as DynamicTool;
@@ -96,8 +96,8 @@ describe('NaturalLanguageESQLTool', () => {
       expect(tool.description).toContain(getPromptSuffixForOssModel('NaturalLanguageESQLTool'));
     });
 
-    it('should return tool with the expected description for non-OSS model', () => {
-      const tool = NL_TO_ESQL_TOOL.getTool({
+    it('should return tool with the expected description for non-OSS model', async () => {
+      const tool = await NL_TO_ESQL_TOOL.getTool({
         isOssModel: false,
         ...rest,
       }) as DynamicTool;

@@ -146,23 +146,17 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
           logger.error(`Failed to get prompt for tool: ${tool.name}`);
         }
 
-        const result = tool.getTool({
+        const result = await tool.getTool({
           ...assistantToolParams,
           llm: createLlmInstance(),
           isOssModel,
           description,
         })
 
-        // check if result is promise
-        if (result instanceof Promise) {
-          const awaited = await result;
-          return awaited;
-        }
-
         return result;
-      })
+      }).flat()
     )
-  ).flat().filter((e) => e != null) as StructuredTool[];
+  ).flat().filter((e) => e != null)
 
   // If KB enabled, fetch for any KB IndexEntries and generate a tool for each
   if (isEnabledKnowledgeBase) {

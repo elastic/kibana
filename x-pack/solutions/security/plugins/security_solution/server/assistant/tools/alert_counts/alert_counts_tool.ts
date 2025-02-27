@@ -32,7 +32,7 @@ export const ALERT_COUNTS_TOOL: AssistantTool = {
     const { request, alertsIndexPattern } = params;
     return requestHasRequiredAnonymizationParams(request) && alertsIndexPattern != null;
   },
-  getTool(params: AssistantToolParams) {
+  async getTool(params: AssistantToolParams) {
     if (!this.isSupported(params)) return null;
     const { alertsIndexPattern, esClient, contentReferencesStore } =
       params as AlertCountsToolParams;

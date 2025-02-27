@@ -224,7 +224,7 @@ export interface AssistantTool {
   description: string;
   sourceRegister: string;
   isSupported: (params: AssistantToolParams) => boolean;
-  getTool: (params: AssistantToolParams) => Tool | DynamicStructuredTool | null;
+  getTool: (params: AssistantToolParams) => Promise<Tool | DynamicStructuredTool | null | (Tool | DynamicStructuredTool | null)[]>;
 }
 
 export type AssistantToolLlm =
@@ -257,5 +257,4 @@ export interface AssistantToolParams {
   >;
   size?: number;
   telemetry?: AnalyticsServiceSetup;
-  kibanaClient: KibanaAPIClient
 }

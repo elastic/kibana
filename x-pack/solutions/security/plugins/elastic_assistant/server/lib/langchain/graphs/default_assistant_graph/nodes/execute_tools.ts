@@ -40,6 +40,13 @@ export async function executeTools({
 
   const toolExecutor = new ToolExecutor({ tools });
 
+  for (const tool of tools) {
+    if(tool.invoke == undefined){
+      console.log("Tool does not have invoke method", tool.invoke)
+      console.log(tool)
+    }
+  }
+
   const steps = await Promise.all(
     castArray(state.agentOutcome as AgentAction)?.map(async (action) => {
       let out;
