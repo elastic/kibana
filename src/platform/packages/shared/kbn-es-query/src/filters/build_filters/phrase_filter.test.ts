@@ -18,7 +18,7 @@ import {
 } from './phrase_filter';
 import { fields, getField } from '../stubs';
 import { DataViewBase } from '../../es_query';
-import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { estypes } from '@elastic/elasticsearch';
 import { Filter } from './types';
 
 describe('Phrase filter builder', () => {
