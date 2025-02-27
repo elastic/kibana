@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { estypes } from '@elastic/elasticsearch';
 import type { IngestPipeline } from '@elastic/elasticsearch/lib/api/types';
 
 import { useMemo } from 'react';
@@ -27,6 +27,7 @@ import type {
   ModelDownloadState,
   TrainedModelUIItem,
   TrainedModelConfigResponse,
+  StartTrainedModelDeploymentResponse,
 } from '../../../../common/types/trained_models';
 
 export interface InferenceQueryParams {
@@ -69,6 +70,16 @@ export interface AdaptiveAllocationsParams {
   };
 }
 
+export interface StartAllocationParams {
+  modelId: string;
+  deploymentParams: CommonDeploymentParams;
+  adaptiveAllocationsParams?: AdaptiveAllocationsParams;
+}
+
+export interface DeleteModelParams {
+  modelId: string;
+  options?: { with_pipelines?: boolean; force?: boolean };
+}
 export interface UpdateAllocationParams extends AdaptiveAllocationsParams {
   number_of_allocations?: number;
 }
@@ -192,13 +203,13 @@ export function trainedModelsApiProvider(httpService: HttpService) {
      * Deletes an existing trained inference model.
      * @param modelId - Model ID
      */
-    deleteTrainedModel(
-      modelId: string,
-      options: { with_pipelines?: boolean; force?: boolean } = {
+    deleteTrainedModel({
+      modelId,
+      options = {
         with_pipelines: false,
         force: false,
-      }
-    ) {
+      },
+    }: DeleteModelParams) {
       return httpService.http<{ acknowledge: boolean }>({
         path: `${ML_INTERNAL_BASE_PATH}/trained_models/${modelId}`,
         method: 'DELETE',
@@ -227,16 +238,16 @@ export function trainedModelsApiProvider(httpService: HttpService) {
       });
     },
 
-    startModelAllocation(
-      modelId: string,
-      queryParams?: CommonDeploymentParams,
-      bodyParams?: AdaptiveAllocationsParams
-    ) {
-      return httpService.http<{ acknowledge: boolean }>({
+    startModelAllocation({
+      modelId,
+      deploymentParams,
+      adaptiveAllocationsParams,
+    }: StartAllocationParams) {
+      return httpService.http$<StartTrainedModelDeploymentResponse>({
         path: `${ML_INTERNAL_BASE_PATH}/trained_models/${modelId}/deployment/_start`,
         method: 'POST',
-        query: queryParams,
-        ...(bodyParams ? { body: JSON.stringify(bodyParams) } : {}),
+        query: deploymentParams,
+        ...(adaptiveAllocationsParams ? { body: JSON.stringify(adaptiveAllocationsParams) } : {}),
         version: '1',
       });
     },
@@ -270,7 +281,7 @@ export function trainedModelsApiProvider(httpService: HttpService) {
     inferTrainedModel(
       modelId: string,
       deploymentsId: string,
-      payload: estypes.MlInferTrainedModelRequest['body'],
+      payload: Omit<estypes.MlInferTrainedModelRequest, 'model_id'>,
       timeout?: string
     ) {
       const body = JSON.stringify(payload);
@@ -283,10 +294,7 @@ export function trainedModelsApiProvider(httpService: HttpService) {
       });
     },
 
-    trainedModelPipelineSimulate(
-      pipeline: estypes.IngestPipeline,
-      docs: estypes.IngestSimulateDocument[]
-    ) {
+    trainedModelPipelineSimulate(pipeline: estypes.IngestPipeline, docs: estypes.IngestDocument[]) {
       const body = JSON.stringify({
         pipeline,
         docs,

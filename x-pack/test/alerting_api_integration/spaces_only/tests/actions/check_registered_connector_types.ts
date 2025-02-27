@@ -31,6 +31,7 @@ export default function createRegisteredConnectorTypeTests({ getService }: FtrPr
           '.d3security',
           '.email',
           '.index',
+          '.inference',
           '.pagerduty',
           '.swimlane',
           '.server-log',

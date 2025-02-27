@@ -22,6 +22,7 @@ import {
   EuiText,
   EuiTitle,
   useGeneratedHtmlId,
+  useEuiBreakpoint,
   EuiToolTip,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
@@ -402,24 +403,27 @@ export const DetailsPageMappingsContent: FunctionComponent<{
       <EuiSpacer />
     </EuiFlexItem>
   );
+
+  const showAboutMappingsStyles = css`
+    ${useEuiBreakpoint(['xl'])} {
+      max-width: 480px;
+    }
+  `;
+
+  const mappingsWrapperStyles = css`
+    height: 100%;
+    ${useEuiBreakpoint(['xl'])} {
+      flex-wrap: nowrap;
+    }
+  `;
+
   return (
     // using "rowReverse" to keep docs links on the top of the mappings code block on smaller screen
     <>
-      <EuiFlexGroup
-        wrap
-        direction="rowReverse"
-        css={css`
-          height: 100%;
-        `}
-      >
+      <EuiFlexGroup wrap direction="rowReverse" css={mappingsWrapperStyles}>
         {showAboutMappings && (
-          <EuiFlexItem
-            grow={1}
-            css={css`
-              min-width: 400px;
-            `}
-          >
-            <EuiPanel grow={false} paddingSize="l">
+          <EuiFlexItem grow={false} css={showAboutMappingsStyles}>
+            <EuiPanel grow={false} paddingSize="l" color="subdued">
               <EuiFlexGroup alignItems="center" gutterSize="s">
                 <EuiFlexItem grow={false}>
                   <EuiIcon type="iInCircle" />
@@ -467,7 +471,7 @@ export const DetailsPageMappingsContent: FunctionComponent<{
             )}
           </EuiFlexItem>
         )}
-        <EuiFlexGroup direction="column">
+        <EuiFlexGroup direction="column" gutterSize="s">
           <EuiFlexGroup gutterSize="s" justifyContent="spaceBetween">
             <EuiFlexItem grow={false}>
               <MappingsFilter
@@ -551,14 +555,14 @@ export const DetailsPageMappingsContent: FunctionComponent<{
               </EuiFilterGroup>
             </EuiFlexItem>
           </EuiFlexGroup>
-          <EuiFlexItem grow={true}>
-            {hasMLPermissions && (
+          {hasMLPermissions && (
+            <EuiFlexItem grow={true}>
               <SemanticTextBanner
                 isSemanticTextEnabled={isSemanticTextEnabled}
                 isPlatinumLicense={isPlatinumLicense}
               />
-            )}
-          </EuiFlexItem>
+            </EuiFlexItem>
+          )}
           {errorSavingMappings}
           {isAddingFields && (
             <EuiFlexItem grow={false} ref={pendingFieldsRef} tabIndex={0}>

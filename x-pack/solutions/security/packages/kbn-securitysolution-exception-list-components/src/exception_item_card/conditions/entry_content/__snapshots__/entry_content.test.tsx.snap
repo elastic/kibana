@@ -6,49 +6,45 @@ exports[`EntryContent should render a nested value 1`] = `
     data-test-subj="EntryContentlistlist_id0EntryContent"
   >
     <div
-      css="You have tried to stringify object returned from \`css\` function. It isn't supposed to be used directly (e.g. as value of the \`className\` prop), but rather handed to emotion so it can handle it (e.g. as value of \`css\` prop)."
+      class="euiFlexGroup emotion-euiFlexGroup-l-flexStart-center-row"
+      data-test-subj="EntryContentNestedEntry"
     >
-      <div
-        class="euiFlexGroup emotion-euiFlexGroup-responsive-m-flexStart-center-row"
-        data-test-subj="EntryContentNestedEntry"
+      <span
+        class="euiToken emotion-euiToken-circle-light-s-euiColorVis4"
+        data-test-subj="nstedEntryIcon"
       >
         <span
-          class="euiToken emotion-euiToken-circle-light-s-euiColorVis2"
-          data-test-subj="nstedEntryIcon"
+          data-euiicon-type="tokenNested"
+        />
+      </span>
+      <div
+        class="euiFlexItem emotion-euiFlexItem-grow-1"
+      >
+        <span
+          class="euiExpression emotion-euiExpression-subdued"
         >
           <span
-            data-euiicon-type="tokenNested"
+            class="euiExpression__description emotion-euiExpression__description-subdued-isUppercase"
           />
+           
+          
         </span>
-        <div
-          css="You have tried to stringify object returned from \`css\` function. It isn't supposed to be used directly (e.g. as value of the \`className\` prop), but rather handed to emotion so it can handle it (e.g. as value of \`css\` prop)."
+        <span
+          class="euiExpression emotion-euiExpression-success"
+          data-test-subj="entryValueExpression"
         >
           <span
-            class="euiExpression emotion-euiExpression-subdued"
+            class="euiExpression__description emotion-euiExpression__description-success-isUppercase"
           >
-            <span
-              class="euiExpression__description emotion-euiExpression__description-subdued-isUppercase"
-            />
-             
-            
+            included in
           </span>
+           
           <span
-            class="euiExpression emotion-euiExpression-success"
-            data-test-subj="entryValueExpression"
+            class="euiExpression__value emotion-euiExpression__value"
           >
-            <span
-              class="euiExpression__description emotion-euiExpression__description-success-isUppercase"
-            >
-              included in
-            </span>
-             
-            <span
-              class="euiExpression__value emotion-euiExpression__value"
-            >
-              list_id
-            </span>
+            list_id
           </span>
-        </div>
+        </span>
       </div>
     </div>
   </div>

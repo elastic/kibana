@@ -8,13 +8,14 @@
 import React, { ComponentType } from 'react';
 import { ALERT_UUID } from '@kbn/rule-data-utils';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import type { Alert } from '@kbn/alerting-types';
 import { PluginContext, PluginContextValue } from '../../context/plugin_context/plugin_context';
 import { createObservabilityRuleTypeRegistryMock } from '../../rules/observability_rule_type_registry_mock';
 import { apmAlertResponseExample } from './alerts_flyout.mock';
 import { AlertsFlyout } from './alerts_flyout';
 
 interface Args {
-  alerts: Array<Record<string, unknown>>;
+  alerts: Alert[];
 }
 
 export default {
@@ -48,7 +49,7 @@ export default {
 };
 
 export function Example({ alerts }: Args) {
-  const selectedAlertId = apmAlertResponseExample[0]![ALERT_UUID]![0];
+  const selectedAlertId = apmAlertResponseExample[0]![ALERT_UUID]![0] as string;
   const observabilityRuleTypeRegistry = createObservabilityRuleTypeRegistryMock();
   return (
     <AlertsFlyout

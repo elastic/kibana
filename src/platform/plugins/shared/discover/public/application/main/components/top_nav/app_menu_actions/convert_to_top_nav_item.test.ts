@@ -26,6 +26,7 @@ describe('convertAppMenuItemToTopNavItem', () => {
         testId: 'action-1',
         iconType: 'share',
         onClick: jest.fn(),
+        href: '/test-href',
       },
     };
 
@@ -42,6 +43,7 @@ describe('convertAppMenuItemToTopNavItem', () => {
       run: expect.any(Function),
       iconType: 'share',
       iconOnly: true,
+      href: '/test-href',
     });
   });
 

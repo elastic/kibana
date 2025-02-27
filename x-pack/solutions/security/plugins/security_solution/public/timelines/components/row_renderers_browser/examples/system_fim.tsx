@@ -22,7 +22,6 @@ const SystemFimExampleComponent: React.FC = () => {
     <>
       {systemFimRowRenderer.renderRow({
         data: demoEndgameFileCreateEvent,
-        isDraggable: false,
         scopeId: ROW_RENDERER_BROWSER_EXAMPLE_TIMELINE_ID,
       })}
     </>

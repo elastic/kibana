@@ -13,6 +13,7 @@ import type {
   FunctionCallingMode,
   Message,
   ToolOptions,
+  ChatCompleteMetadata,
 } from '@kbn/inference-common';
 import type { InferenceExecutor } from './utils';
 
@@ -36,12 +37,13 @@ export interface InferenceConnectorAdapter {
 export type InferenceAdapterChatCompleteOptions = {
   executor: InferenceExecutor;
   messages: Message[];
+  logger: Logger;
   system?: string;
   functionCalling?: FunctionCallingMode;
   temperature?: number;
   modelName?: string;
   abortSignal?: AbortSignal;
-  logger: Logger;
+  metadata?: ChatCompleteMetadata;
 } & ToolOptions;
 
 /**

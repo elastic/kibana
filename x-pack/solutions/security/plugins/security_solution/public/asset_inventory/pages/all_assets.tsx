@@ -39,6 +39,9 @@ import { type DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 import { css } from '@emotion/react';
 
+import type { EntityEcs } from '@kbn/securitysolution-ecs/src/entity';
+import { EmptyComponent } from '../../common/lib/cell_actions/helpers';
+import { useDynamicEntityFlyout } from '../hooks/use_dynamic_entity_flyout';
 import { type CriticalityLevelWithUnassigned } from '../../../common/entity_analytics/asset_criticality/types';
 import { useKibana } from '../../common/lib/kibana';
 
@@ -46,6 +49,9 @@ import { AssetCriticalityBadge } from '../../entity_analytics/components/asset_c
 import { AdditionalControls } from '../components/additional_controls';
 import { AssetInventorySearchBar } from '../components/search_bar';
 import { RiskBadge } from '../components/risk_badge';
+import { Filters } from '../components/filters/filters';
+import { EmptyState } from '../components/empty_state';
+import { TopAssetsBarChart } from '../components/top_assets_bar_chart';
 
 import { useDataViewContext } from '../hooks/data_view_context';
 import { useStyles } from '../hooks/use_styles';
@@ -54,6 +60,9 @@ import {
   type AssetsBaseURLQuery,
   type URLQuery,
 } from '../hooks/use_asset_inventory_data_table';
+import { useFetchData } from '../hooks/use_fetch_data';
+import { useFetchChartData } from '../hooks/use_fetch_chart_data';
+import { DEFAULT_VISIBLE_ROWS_PER_PAGE, MAX_ASSETS_TO_LOAD } from '../constants';
 
 const gridStyle: EuiDataGridStyle = {
   border: 'horizontal',
@@ -61,8 +70,6 @@ const gridStyle: EuiDataGridStyle = {
   stripes: false,
   header: 'underline',
 };
-
-const MAX_ASSETS_TO_LOAD = 500; // equivalent to MAX_FINDINGS_TO_LOAD in @kbn/cloud-security-posture-common
 
 const title = i18n.translate('xpack.securitySolution.assetInventory.allAssets.tableRowTypeLabel', {
   defaultMessage: 'assets',
@@ -125,33 +132,33 @@ const getDefaultQuery = ({ query, filters }: AssetsBaseURLQuery): URLQuery => ({
 });
 
 export interface AllAssetsProps {
-  rows: DataTableRecord[];
-  isLoading: boolean;
   height?: number | string;
-  loadMore: () => void;
   nonPersistedFilters?: Filter[];
   hasDistributionBar?: boolean;
   /**
    * This function will be used in the control column to create a rule for a specific finding.
    */
   createFn?: (rowIndex: number) => ((http: HttpSetup) => Promise<unknown>) | undefined;
-  /**
-   * This is the component that will be rendered in the flyout when a row is expanded.
-   * This component will receive the row data and a function to close the flyout.
-   */
-  flyoutComponent: (hit: DataTableRecord, onCloseFlyout: () => void) => JSX.Element;
   'data-test-subj'?: string;
 }
 
+// TODO: Asset Inventory - adjust and remove type casting once we have real universal entity data
+const getEntity = (row: DataTableRecord): EntityEcs => {
+  return {
+    id: (row.flattened['asset.name'] as string) || '',
+    name: (row.flattened['asset.name'] as string) || '',
+    timestamp: row.flattened['@timestamp'] as Date,
+    type: 'universal',
+  };
+};
+
+const ASSET_INVENTORY_TABLE_ID = 'asset-inventory-table';
+
 const AllAssets = ({
-  rows,
-  isLoading,
-  loadMore,
   nonPersistedFilters,
   height,
   hasDistributionBar = true,
   createFn,
-  flyoutComponent,
   ...rest
 }: AllAssetsProps) => {
   const { euiTheme } = useEuiTheme();
@@ -162,15 +169,70 @@ const AllAssets = ({
     nonPersistedFilters,
   });
 
+  // Table Flyout Controls -------------------------------------------------------------------
+
+  const [expandedDoc, setExpandedDoc] = useState<DataTableRecord | undefined>(undefined);
+
+  const { openDynamicFlyout, closeDynamicFlyout } = useDynamicEntityFlyout({
+    onFlyoutClose: () => setExpandedDoc(undefined),
+  });
+
+  const onExpandDocClick = (doc?: DataTableRecord | undefined) => {
+    if (doc) {
+      const entity = getEntity(doc);
+      setExpandedDoc(doc); // Table is expecting the same doc ref to highlight the selected row
+      openDynamicFlyout({
+        entity,
+        scopeId: ASSET_INVENTORY_TABLE_ID,
+        contextId: ASSET_INVENTORY_TABLE_ID,
+      });
+    } else {
+      closeDynamicFlyout();
+      setExpandedDoc(undefined);
+    }
+  };
+
+  // -----------------------------------------------------------------------------------------
   const {
-    // columnsLocalStorageKey,
-    pageSize,
-    onChangeItemsPerPage,
-    setUrlQuery,
-    onSort,
     filters,
+    pageSize,
     sort,
+    query,
+    queryError,
+    urlQuery,
+    getRowsFromPages,
+    onChangeItemsPerPage,
+    onResetFilters,
+    onSort,
+    setUrlQuery,
   } = assetInventoryDataTable;
+
+  const {
+    data: rowsData,
+    // error: fetchError,
+    isFetching,
+    fetchNextPage: loadMore,
+    isLoading,
+  } = useFetchData({
+    query,
+    sort,
+    enabled: !queryError,
+    pageSize: DEFAULT_VISIBLE_ROWS_PER_PAGE,
+  });
+
+  const {
+    data: chartData,
+    // error: fetchChartDataError,
+    isFetching: isFetchingChartData,
+    isLoading: isLoadingChartData,
+  } = useFetchChartData({
+    query,
+    sort,
+    enabled: !queryError,
+  });
+
+  const rows = getRowsFromPages(rowsData?.pages);
+  const totalHits = rowsData?.pages[0].total || 0;
 
   const [columns, setColumns] = useLocalStorage(
     columnsLocalStorageKey,
@@ -204,12 +266,7 @@ const AllAssets = ({
     };
   }, [persistedSettings]);
 
-  const { dataView, dataViewIsLoading, dataViewIsRefetching } = useDataViewContext();
-
-  const [expandedDoc, setExpandedDoc] = useState<DataTableRecord | undefined>(undefined);
-
-  const renderDocumentView = (hit: DataTableRecord) =>
-    flyoutComponent(hit, () => setExpandedDoc(undefined));
+  const { dataView } = useDataViewContext();
 
   const {
     uiActions,
@@ -321,7 +378,7 @@ const AllAssets = ({
 
   const externalAdditionalControls = (
     <AdditionalControls
-      total={rows.length}
+      total={totalHits}
       dataView={dataView}
       title={title}
       columns={currentColumns}
@@ -354,20 +411,13 @@ const AllAssets = ({
     },
   ];
 
-  const loadingStyle = {
-    opacity: isLoading ? 1 : 0,
-  };
-
-  const loadingState =
-    isLoading || dataViewIsLoading || dataViewIsRefetching || !dataView
-      ? DataLoadingState.loading
-      : DataLoadingState.loaded;
+  const loadingState = isLoading || !dataView ? DataLoadingState.loading : DataLoadingState.loaded;
 
   return (
     <I18nProvider>
       {!dataView ? null : (
         <AssetInventorySearchBar
-          query={getDefaultQuery({ query: { query: '', language: '' }, filters: [] })}
+          query={urlQuery}
           setQuery={setUrlQuery}
           loading={loadingState === DataLoadingState.loading}
         />
@@ -398,6 +448,18 @@ const AllAssets = ({
             />
           </h1>
         </EuiTitle>
+        <Filters
+          onFiltersChange={(newFilters: Filter[]) => {
+            setUrlQuery({ filters: newFilters });
+          }}
+        />
+        {dataView ? (
+          <TopAssetsBarChart
+            isLoading={isLoadingChartData}
+            isFetching={isFetchingChartData}
+            entities={!!chartData && chartData.length > 0 ? chartData : []}
+          />
+        ) : null}
         <CellActionsProvider getTriggerCompatibleActions={uiActions.getTriggerCompatibleActions}>
           <div
             data-test-subj={rest['data-test-subj']}
@@ -406,14 +468,15 @@ const AllAssets = ({
               height: computeDataTableRendering.wrapperHeight,
             }}
           >
-            <EuiProgress size="xs" color="accent" style={loadingStyle} />
-            {!dataView ? null : (
+            <EuiProgress size="xs" color="accent" style={{ opacity: isFetching ? 1 : 0 }} />
+            {!dataView ? null : loadingState === DataLoadingState.loaded && totalHits === 0 ? (
+              <EmptyState onResetFilters={onResetFilters} />
+            ) : (
               <UnifiedDataTable
                 key={computeDataTableRendering.mode}
                 className={styles.gridStyle}
                 ariaLabelledBy={title}
                 columns={currentColumns}
-                expandedDoc={expandedDoc}
                 dataView={dataView}
                 loadingState={loadingState}
                 onFilter={onAddFilter as DocViewFilterFn}
@@ -422,11 +485,12 @@ const AllAssets = ({
                 onSort={onSort}
                 rows={rows}
                 sampleSizeState={MAX_ASSETS_TO_LOAD}
-                setExpandedDoc={setExpandedDoc}
-                renderDocumentView={renderDocumentView}
+                expandedDoc={expandedDoc}
+                setExpandedDoc={onExpandDocClick}
+                renderDocumentView={EmptyComponent}
                 sort={sort}
                 rowsPerPageState={pageSize}
-                totalHits={rows.length}
+                totalHits={totalHits}
                 services={services}
                 onUpdateRowsPerPage={onChangeItemsPerPage}
                 rowHeightState={0}

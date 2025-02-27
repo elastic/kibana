@@ -10,6 +10,7 @@ import { load, dump } from 'js-yaml';
 import type { Logger } from '@kbn/core/server';
 
 import type { PackagePolicyConfigRecord } from '../../../../common/types';
+import { PackagePolicyValidationError } from '../../../../common/errors';
 import { toCompiledSecretRef } from '../../secrets';
 import { PackageInvalidArchiveError } from '../../../errors';
 import { appContextService } from '../..';
@@ -28,23 +29,27 @@ export function compileTemplate(variables: PackagePolicyConfigRecord, templateSt
   }
 
   compiledTemplate = replaceRootLevelYamlVariables(yamlValues, compiledTemplate);
-  const yamlFromCompiledTemplate = load(compiledTemplate, {});
+  try {
+    const yamlFromCompiledTemplate = load(compiledTemplate, {});
 
-  // Hack to keep empty string ('') values around in the end yaml because
-  // `load` replaces empty strings with null
-  const patchedYamlFromCompiledTemplate = Object.entries(yamlFromCompiledTemplate).reduce(
-    (acc, [key, value]) => {
-      if (value === null && typeof vars[key] === 'string' && vars[key].trim() === '') {
-        acc[key] = '';
-      } else {
-        acc[key] = value;
-      }
-      return acc;
-    },
-    {} as { [k: string]: any }
-  );
+    // Hack to keep empty string ('') values around in the end yaml because
+    // `load` replaces empty strings with null
+    const patchedYamlFromCompiledTemplate = Object.entries(yamlFromCompiledTemplate).reduce(
+      (acc, [key, value]) => {
+        if (value === null && typeof vars[key] === 'string' && vars[key].trim() === '') {
+          acc[key] = '';
+        } else {
+          acc[key] = value;
+        }
+        return acc;
+      },
+      {} as { [k: string]: any }
+    );
 
-  return replaceVariablesInYaml(yamlValues, patchedYamlFromCompiledTemplate);
+    return replaceVariablesInYaml(yamlValues, patchedYamlFromCompiledTemplate);
+  } catch (error) {
+    throw new PackagePolicyValidationError(error);
+  }
 }
 
 function isValidKey(key: string) {

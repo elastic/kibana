@@ -84,7 +84,7 @@ describe('structurally can walk all nodes', () => {
     });
 
     test('can traverse JOIN command', () => {
-      const { ast } = parse('FROM index | LEFT JOIN a AS b ON c, d');
+      const { ast } = parse('FROM index | LEFT JOIN a ON c, d');
       const commands: ESQLCommand[] = [];
       const sources: ESQLSource[] = [];
       const identifiers: ESQLIdentifier[] = [];
@@ -99,7 +99,7 @@ describe('structurally can walk all nodes', () => {
 
       expect(commands.map(({ name }) => name).sort()).toStrictEqual(['from', 'join']);
       expect(sources.map(({ name }) => name).sort()).toStrictEqual(['a', 'index']);
-      expect(identifiers.map(({ name }) => name).sort()).toStrictEqual(['as', 'b', 'c', 'd']);
+      expect(identifiers.map(({ name }) => name).sort()).toStrictEqual(['c', 'd']);
       expect(columns.map(({ name }) => name).sort()).toStrictEqual(['c', 'd']);
     });
 

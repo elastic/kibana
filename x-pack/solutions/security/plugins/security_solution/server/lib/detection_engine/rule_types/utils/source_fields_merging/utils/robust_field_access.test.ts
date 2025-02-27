@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { robustGet, robustSet } from './robust_field_access';
+import { robustGet, robustSet, robustUnset } from './robust_field_access';
 
 describe('robust field access', () => {
   describe('get', () => {
@@ -115,6 +115,63 @@ describe('robust field access', () => {
           document: { 'a.b': {} },
         })
       ).toEqual({ 'a.b': 'test-new' });
+    });
+  });
+
+  describe('unset', () => {
+    it('unsets a value with a basic key', () => {
+      const document = { a: { b: { c: 'test-value', d: 'x' } } };
+      robustUnset({ key: 'a.b.c', document });
+
+      expect(document).toEqual({
+        a: { b: { d: 'x' } },
+      });
+    });
+
+    it('unsets a value with a basic key and remove empty objects', () => {
+      const document = { a: { b: { c: 'test-value' } } };
+      robustUnset({ key: 'a.b.c', document });
+
+      expect(document).toEqual({});
+    });
+
+    it('unsets a value inside an object at a dot notation path', () => {
+      const document = { 'a.b': { c: 'test-value', d: 'x' } };
+      robustUnset({ key: 'a.b.c', document });
+
+      expect(document).toEqual({
+        'a.b': { d: 'x' },
+      });
+    });
+
+    it('unsets a value inside an object at a dot notation path and removed empty object', () => {
+      const document = { 'a.b': { c: 'test-value' } };
+      robustUnset({ key: 'a.b.c', document });
+
+      expect(document).toEqual({});
+    });
+
+    it('unsets a value with dot notation key', () => {
+      const document = { 'a.b.c': 'test-value' };
+      robustUnset({ key: 'a.b.c', document });
+
+      expect(document).toEqual({});
+    });
+
+    it('ignores non-object values on the path', () => {
+      const document = { 'a.b': 'test-ignore' };
+      robustUnset({ key: 'a.b.c', document });
+
+      expect(document).toEqual({
+        'a.b': 'test-ignore',
+      });
+    });
+
+    it('unsets object value', () => {
+      const document = { 'a.b': { c: 1 } };
+      robustUnset({ key: 'a.b', document });
+
+      expect(document).toEqual({});
     });
   });
 });

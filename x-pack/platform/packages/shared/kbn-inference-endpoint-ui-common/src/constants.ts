@@ -20,6 +20,7 @@ export enum ServiceProviderKeys {
   anthropic = 'anthropic',
   watsonxai = 'watsonxai',
   'alibabacloud-ai-search' = 'alibabacloud-ai-search',
+  jinaai = 'jinaai',
 }
 
 export const DEFAULT_TASK_TYPE = 'completion';

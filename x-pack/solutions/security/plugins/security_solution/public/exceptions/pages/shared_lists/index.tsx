@@ -22,14 +22,13 @@ import {
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
+import styled from '@emotion/styled';
 
 import type { ExceptionListFilter, NamespaceType } from '@kbn/securitysolution-io-ts-list-types';
 import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 import { useApi, useExceptionLists } from '@kbn/securitysolution-list-hooks';
 import { EmptyViewerState, ViewerStatus } from '@kbn/securitysolution-exception-list-components';
 
-import styled from 'styled-components';
-import { euiThemeVars } from '@kbn/ui-theme';
 import { AutoDownload } from '../../../common/components/auto_download/auto_download';
 import { useKibana } from '../../../common/lib/kibana';
 import { useAppToasts } from '../../../common/hooks/use_app_toasts';
@@ -82,7 +81,7 @@ const SORT_FIELDS: Array<{ field: string; label: string; defaultOrder: 'asc' | '
 ];
 
 const ExceptionsTable = styled(EuiFlexGroup)`
-  padding: ${euiThemeVars.euiSizeL} 0;
+  padding: ${({ theme }) => theme.euiTheme.size.l} 0;
 `;
 
 export const SharedLists = React.memo(() => {

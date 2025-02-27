@@ -53,10 +53,10 @@ exports[`ExceptionListHeader should render edit modal 1`] = `
             <h1
               class="euiTitle emotion-euiTitle-l"
             >
-              <div
-                class="euiFlexGroup emotion-euiFlexGroup-responsive-l-flexStart-stretch-row"
+              <span
+                class="euiFlexGroup emotion-euiFlexGroup-responsive-xs-flexStart-stretch-row"
               >
-                <div
+                <span
                   class="euiFlexItem emotion-euiFlexItem-grow-10"
                 >
                   <span
@@ -64,8 +64,8 @@ exports[`ExceptionListHeader should render edit modal 1`] = `
                   >
                     List Name
                   </span>
-                </div>
-                <div
+                </span>
+                <span
                   class="euiFlexItem emotion-euiFlexItem-growZero"
                 >
                   <button
@@ -81,8 +81,8 @@ exports[`ExceptionListHeader should render edit modal 1`] = `
                       data-euiicon-type="pencil"
                     />
                   </button>
-                </div>
-              </div>
+                </span>
+              </span>
             </h1>
             <div
               class="euiSpacer euiSpacer--l emotion-euiSpacer-l"
@@ -91,13 +91,13 @@ exports[`ExceptionListHeader should render edit modal 1`] = `
               class="euiText emotion-euiText-constrainedWidth-m"
             >
               <p>
-                <div
-                  css="You have tried to stringify object returned from \`css\` function. It isn't supposed to be used directly (e.g. as value of the \`className\` prop), but rather handed to emotion so it can handle it (e.g. as value of \`css\` prop)."
+                <span
+                  class="euiFlexGroup emotion-euiFlexGroup-s-flexStart-stretch-column"
                 >
-                  <div
-                    class="euiFlexGroup emotion-euiFlexGroup-responsive-l-flexStart-stretch-row"
+                  <span
+                    class="euiFlexGroup emotion-euiFlexGroup-responsive-xs-flexStart-stretch-row"
                   >
-                    <div
+                    <span
                       class="euiFlexItem emotion-euiFlexItem-grow-10"
                     >
                       <span
@@ -106,8 +106,8 @@ exports[`ExceptionListHeader should render edit modal 1`] = `
                       >
                         List description
                       </span>
-                    </div>
-                    <div
+                    </span>
+                    <span
                       class="euiFlexItem emotion-euiFlexItem-growZero"
                     >
                       <button
@@ -123,25 +123,25 @@ exports[`ExceptionListHeader should render edit modal 1`] = `
                           data-euiicon-type="pencil"
                         />
                       </button>
-                    </div>
-                  </div>
-                  <div
+                    </span>
+                  </span>
+                  <span
                     css="You have tried to stringify object returned from \`css\` function. It isn't supposed to be used directly (e.g. as value of the \`className\` prop), but rather handed to emotion so it can handle it (e.g. as value of \`css\` prop)."
                     data-test-subj="ListID"
                   >
-                    <div
+                    <span
                       class="euiText emotion-EuiText"
                     >
                       List ID
                       :
-                    </div>
-                    <div
+                    </span>
+                    <span
                       class="euiText emotion-EuiText"
                     >
                       List_Id
-                    </div>
-                  </div>
-                </div>
+                    </span>
+                  </span>
+                </span>
               </p>
             </div>
           </div>
@@ -273,10 +273,10 @@ exports[`ExceptionListHeader should render the List Header with name, default de
             <h1
               class="euiTitle emotion-euiTitle-l"
             >
-              <div
-                class="euiFlexGroup emotion-euiFlexGroup-responsive-l-flexStart-stretch-row"
+              <span
+                class="euiFlexGroup emotion-euiFlexGroup-responsive-xs-flexStart-stretch-row"
               >
-                <div
+                <span
                   class="euiFlexItem emotion-euiFlexItem-grow-10"
                 >
                   <span
@@ -284,8 +284,8 @@ exports[`ExceptionListHeader should render the List Header with name, default de
                   >
                     List Name
                   </span>
-                </div>
-                <div
+                </span>
+                <span
                   class="euiFlexItem emotion-euiFlexItem-growZero"
                 >
                   <button
@@ -301,8 +301,8 @@ exports[`ExceptionListHeader should render the List Header with name, default de
                       data-euiicon-type="pencil"
                     />
                   </button>
-                </div>
-              </div>
+                </span>
+              </span>
             </h1>
             <div
               class="euiSpacer euiSpacer--l emotion-euiSpacer-l"
@@ -311,13 +311,13 @@ exports[`ExceptionListHeader should render the List Header with name, default de
               class="euiText emotion-euiText-constrainedWidth-m"
             >
               <p>
-                <div
-                  css="You have tried to stringify object returned from \`css\` function. It isn't supposed to be used directly (e.g. as value of the \`className\` prop), but rather handed to emotion so it can handle it (e.g. as value of \`css\` prop)."
+                <span
+                  class="euiFlexGroup emotion-euiFlexGroup-s-flexStart-stretch-column"
                 >
-                  <div
-                    class="euiFlexGroup emotion-euiFlexGroup-responsive-l-flexStart-stretch-row"
+                  <span
+                    class="euiFlexGroup emotion-euiFlexGroup-responsive-xs-flexStart-stretch-row"
                   >
-                    <div
+                    <span
                       class="euiFlexItem emotion-euiFlexItem-grow-10"
                     >
                       <span
@@ -326,8 +326,8 @@ exports[`ExceptionListHeader should render the List Header with name, default de
                       >
                         Add a description
                       </span>
-                    </div>
-                    <div
+                    </span>
+                    <span
                       class="euiFlexItem emotion-euiFlexItem-growZero"
                     >
                       <button
@@ -343,25 +343,25 @@ exports[`ExceptionListHeader should render the List Header with name, default de
                           data-euiicon-type="pencil"
                         />
                       </button>
-                    </div>
-                  </div>
-                  <div
+                    </span>
+                  </span>
+                  <span
                     css="You have tried to stringify object returned from \`css\` function. It isn't supposed to be used directly (e.g. as value of the \`className\` prop), but rather handed to emotion so it can handle it (e.g. as value of \`css\` prop)."
                     data-test-subj="ListID"
                   >
-                    <div
+                    <span
                       class="euiText emotion-EuiText"
                     >
                       List ID
                       :
-                    </div>
-                    <div
+                    </span>
+                    <span
                       class="euiText emotion-EuiText"
                     >
                       List_Id
-                    </div>
-                  </div>
-                </div>
+                    </span>
+                  </span>
+                </span>
               </p>
             </div>
           </div>
@@ -493,10 +493,10 @@ exports[`ExceptionListHeader should render the List Header with name, default de
             <h1
               class="euiTitle emotion-euiTitle-l"
             >
-              <div
-                class="euiFlexGroup emotion-euiFlexGroup-responsive-l-flexStart-stretch-row"
+              <span
+                class="euiFlexGroup emotion-euiFlexGroup-responsive-xs-flexStart-stretch-row"
               >
-                <div
+                <span
                   class="euiFlexItem emotion-euiFlexItem-grow-10"
                 >
                   <span
@@ -504,11 +504,11 @@ exports[`ExceptionListHeader should render the List Header with name, default de
                   >
                     List Name
                   </span>
-                </div>
-                <div
+                </span>
+                <span
                   class="euiFlexItem emotion-euiFlexItem-growZero"
                 />
-              </div>
+              </span>
             </h1>
             <div
               class="euiSpacer euiSpacer--l emotion-euiSpacer-l"
@@ -517,13 +517,13 @@ exports[`ExceptionListHeader should render the List Header with name, default de
               class="euiText emotion-euiText-constrainedWidth-m"
             >
               <p>
-                <div
-                  css="You have tried to stringify object returned from \`css\` function. It isn't supposed to be used directly (e.g. as value of the \`className\` prop), but rather handed to emotion so it can handle it (e.g. as value of \`css\` prop)."
+                <span
+                  class="euiFlexGroup emotion-euiFlexGroup-s-flexStart-stretch-column"
                 >
-                  <div
-                    class="euiFlexGroup emotion-euiFlexGroup-responsive-l-flexStart-stretch-row"
+                  <span
+                    class="euiFlexGroup emotion-euiFlexGroup-responsive-xs-flexStart-stretch-row"
                   >
-                    <div
+                    <span
                       class="euiFlexItem emotion-euiFlexItem-grow-10"
                     >
                       <span
@@ -532,28 +532,28 @@ exports[`ExceptionListHeader should render the List Header with name, default de
                       >
                         Add a description
                       </span>
-                    </div>
-                    <div
+                    </span>
+                    <span
                       class="euiFlexItem emotion-euiFlexItem-growZero"
                     />
-                  </div>
-                  <div
+                  </span>
+                  <span
                     css="You have tried to stringify object returned from \`css\` function. It isn't supposed to be used directly (e.g. as value of the \`className\` prop), but rather handed to emotion so it can handle it (e.g. as value of \`css\` prop)."
                     data-test-subj="ListID"
                   >
-                    <div
+                    <span
                       class="euiText emotion-EuiText"
                     >
                       List ID
                       :
-                    </div>
-                    <div
+                    </span>
+                    <span
                       class="euiText emotion-EuiText"
                     >
                       List_Id
-                    </div>
-                  </div>
-                </div>
+                    </span>
+                  </span>
+                </span>
               </p>
             </div>
           </div>
@@ -686,10 +686,10 @@ exports[`ExceptionListHeader should render the List Header with name, default de
             <h1
               class="euiTitle emotion-euiTitle-l"
             >
-              <div
-                class="euiFlexGroup emotion-euiFlexGroup-responsive-l-flexStart-stretch-row"
+              <span
+                class="euiFlexGroup emotion-euiFlexGroup-responsive-xs-flexStart-stretch-row"
               >
-                <div
+                <span
                   class="euiFlexItem emotion-euiFlexItem-grow-10"
                 >
                   <span
@@ -697,11 +697,11 @@ exports[`ExceptionListHeader should render the List Header with name, default de
                   >
                     List Name
                   </span>
-                </div>
-                <div
+                </span>
+                <span
                   class="euiFlexItem emotion-euiFlexItem-growZero"
                 />
-              </div>
+              </span>
             </h1>
             <div
               class="euiSpacer euiSpacer--l emotion-euiSpacer-l"
@@ -710,13 +710,13 @@ exports[`ExceptionListHeader should render the List Header with name, default de
               class="euiText emotion-euiText-constrainedWidth-m"
             >
               <p>
-                <div
-                  css="You have tried to stringify object returned from \`css\` function. It isn't supposed to be used directly (e.g. as value of the \`className\` prop), but rather handed to emotion so it can handle it (e.g. as value of \`css\` prop)."
+                <span
+                  class="euiFlexGroup emotion-euiFlexGroup-s-flexStart-stretch-column"
                 >
-                  <div
-                    class="euiFlexGroup emotion-euiFlexGroup-responsive-l-flexStart-stretch-row"
+                  <span
+                    class="euiFlexGroup emotion-euiFlexGroup-responsive-xs-flexStart-stretch-row"
                   >
-                    <div
+                    <span
                       class="euiFlexItem emotion-euiFlexItem-grow-10"
                     >
                       <span
@@ -725,28 +725,28 @@ exports[`ExceptionListHeader should render the List Header with name, default de
                       >
                         Add a description
                       </span>
-                    </div>
-                    <div
+                    </span>
+                    <span
                       class="euiFlexItem emotion-euiFlexItem-growZero"
                     />
-                  </div>
-                  <div
+                  </span>
+                  <span
                     css="You have tried to stringify object returned from \`css\` function. It isn't supposed to be used directly (e.g. as value of the \`className\` prop), but rather handed to emotion so it can handle it (e.g. as value of \`css\` prop)."
                     data-test-subj="ListID"
                   >
-                    <div
+                    <span
                       class="euiText emotion-EuiText"
                     >
                       List ID
                       :
-                    </div>
-                    <div
+                    </span>
+                    <span
                       class="euiText emotion-EuiText"
                     >
                       List_Id
-                    </div>
-                  </div>
-                </div>
+                    </span>
+                  </span>
+                </span>
               </p>
             </div>
           </div>

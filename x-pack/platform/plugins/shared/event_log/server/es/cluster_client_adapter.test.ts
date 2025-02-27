@@ -20,7 +20,7 @@ import {
 import { AggregateOptionsType, queryOptionsSchema } from '../event_log_client';
 import { delay } from '../lib/delay';
 import { pick, times } from 'lodash';
-import type * as estypes from '@elastic/elasticsearch/lib/api/types';
+import type { estypes } from '@elastic/elasticsearch';
 import { fromKueryExpression } from '@kbn/es-query';
 import { getEsNames } from './names';
 
@@ -443,7 +443,7 @@ describe('setIndexToHidden', () => {
     await clusterClientAdapter.setIndexToHidden('foo-bar-000001');
     expect(clusterClient.indices.putSettings).toHaveBeenCalledWith({
       index: 'foo-bar-000001',
-      body: {
+      settings: {
         index: {
           hidden: true,
         },
@@ -502,18 +502,16 @@ describe('setIndexAliasToHidden', () => {
       { alias: 'foo-bar', indexName: 'foo-bar-000001', is_write_index: true },
     ]);
     expect(clusterClient.indices.updateAliases).toHaveBeenCalledWith({
-      body: {
-        actions: [
-          {
-            add: {
-              index: 'foo-bar-000001',
-              alias: 'foo-bar',
-              is_hidden: true,
-              is_write_index: true,
-            },
+      actions: [
+        {
+          add: {
+            index: 'foo-bar-000001',
+            alias: 'foo-bar',
+            is_hidden: true,
+            is_write_index: true,
           },
-        ],
-      },
+        },
+      ],
     });
   });
 
@@ -523,27 +521,25 @@ describe('setIndexAliasToHidden', () => {
       { alias: 'foo-bar', indexName: 'foo-bar-000002', index_routing: 'index', routing: 'route' },
     ]);
     expect(clusterClient.indices.updateAliases).toHaveBeenCalledWith({
-      body: {
-        actions: [
-          {
-            add: {
-              index: 'foo-bar-000001',
-              alias: 'foo-bar',
-              is_hidden: true,
-              is_write_index: true,
-            },
+      actions: [
+        {
+          add: {
+            index: 'foo-bar-000001',
+            alias: 'foo-bar',
+            is_hidden: true,
+            is_write_index: true,
           },
-          {
-            add: {
-              index: 'foo-bar-000002',
-              alias: 'foo-bar',
-              is_hidden: true,
-              index_routing: 'index',
-              routing: 'route',
-            },
+        },
+        {
+          add: {
+            index: 'foo-bar-000002',
+            alias: 'foo-bar',
+            is_hidden: true,
+            index_routing: 'index',
+            routing: 'route',
           },
-        ],
-      },
+        },
+      ],
     });
   });
 
@@ -777,12 +773,10 @@ describe('queryEventsBySavedObject', () => {
       index: 'index-name',
       track_total_hits: true,
       seq_no_primary_term: true,
-      body: {
-        size: 6,
-        from: 12,
-        query: getQueryBody(logger, options, pick(options.findOptions, ['start', 'end', 'filter'])),
-        sort: [{ '@timestamp': { order: 'asc' } }, { 'event.end': { order: 'desc' } }],
-      },
+      size: 6,
+      from: 12,
+      query: getQueryBody(logger, options, pick(options.findOptions, ['start', 'end', 'filter'])),
+      sort: [{ '@timestamp': { order: 'asc' } }, { 'event.end': { order: 'desc' } }],
     });
     expect(result).toEqual({
       page: 3,
@@ -851,19 +845,17 @@ describe('aggregateEventsBySavedObject', () => {
     const [query] = clusterClient.search.mock.calls[0];
     expect(query).toEqual({
       index: 'index-name',
-      body: {
-        size: 0,
-        query: getQueryBody(
-          logger,
-          options,
-          pick(options.aggregateOptions, ['start', 'end', 'filter'])
-        ),
-        aggs: {
-          genericAgg: {
-            term: {
-              field: 'event.action',
-              size: 10,
-            },
+      size: 0,
+      query: getQueryBody(
+        logger,
+        options,
+        pick(options.aggregateOptions, ['start', 'end', 'filter'])
+      ),
+      aggs: {
+        genericAgg: {
+          term: {
+            field: 'event.action',
+            size: 10,
           },
         },
       },
@@ -956,19 +948,17 @@ describe('aggregateEventsWithAuthFilter', () => {
     const [query] = clusterClient.search.mock.calls[0];
     expect(query).toEqual({
       index: 'index-name',
-      body: {
-        size: 0,
-        query: getQueryBodyWithAuthFilter(
-          logger,
-          options,
-          pick(options.aggregateOptions, ['start', 'end', 'filter'])
-        ),
-        aggs: {
-          genericAgg: {
-            term: {
-              field: 'event.action',
-              size: 10,
-            },
+      size: 0,
+      query: getQueryBodyWithAuthFilter(
+        logger,
+        options,
+        pick(options.aggregateOptions, ['start', 'end', 'filter'])
+      ),
+      aggs: {
+        genericAgg: {
+          term: {
+            field: 'event.action',
+            size: 10,
           },
         },
       },
@@ -1048,82 +1038,80 @@ describe('aggregateEventsWithAuthFilter', () => {
     const [query] = clusterClient.search.mock.calls[0];
     expect(query).toEqual({
       index: 'index-name',
-      body: {
-        size: 0,
-        query: {
-          bool: {
-            filter: {
-              bool: {
-                minimum_should_match: 1,
-                should: [
-                  {
-                    match: {
-                      test: 'test',
-                    },
+      size: 0,
+      query: {
+        bool: {
+          filter: {
+            bool: {
+              minimum_should_match: 1,
+              should: [
+                {
+                  match: {
+                    test: 'test',
                   },
-                ],
-              },
+                },
+              ],
             },
-            must: [
-              {
-                nested: {
-                  path: 'kibana.saved_objects',
-                  query: {
-                    bool: {
-                      must: [
-                        {
-                          term: {
-                            'kibana.saved_objects.rel': {
-                              value: 'primary',
-                            },
+          },
+          must: [
+            {
+              nested: {
+                path: 'kibana.saved_objects',
+                query: {
+                  bool: {
+                    must: [
+                      {
+                        term: {
+                          'kibana.saved_objects.rel': {
+                            value: 'primary',
                           },
                         },
-                        {
-                          term: {
-                            'kibana.saved_objects.type': {
-                              value: 'saved-object-type',
-                            },
+                      },
+                      {
+                        term: {
+                          'kibana.saved_objects.type': {
+                            value: 'saved-object-type',
                           },
                         },
-                        {
-                          bool: {
-                            should: [
-                              {
-                                bool: {
-                                  should: [
-                                    {
-                                      term: {
-                                        'kibana.saved_objects.namespace': {
-                                          value: 'namespace',
-                                        },
+                      },
+                      {
+                        bool: {
+                          should: [
+                            {
+                              bool: {
+                                should: [
+                                  {
+                                    term: {
+                                      'kibana.saved_objects.namespace': {
+                                        value: 'namespace',
                                       },
                                     },
-                                  ],
-                                },
+                                  },
+                                ],
                               },
-                              {
-                                match: {
-                                  'kibana.saved_objects.space_agnostic': true,
-                                },
+                            },
+                            {
+                              match: {
+                                'kibana.saved_objects.space_agnostic': true,
                               },
-                            ],
-                          },
+                            },
+                          ],
                         },
-                      ],
-                    },
+                      },
+                    ],
                   },
                 },
               },
-            ],
-          },
-        },
-
-        aggs: {
-          genericAgg: {
-            term: {
-              field: 'event.action',
-              size: 10,
             },
+          ],
+        },
+      },
+
+      aggs: {
+        genericAgg: {
+          term: {
+            field: 'event.action',
+            size: 10,
           },
         },
       },
@@ -2595,6 +2583,25 @@ describe('queryEventsByDocumentIds', () => {
   });
 });
 
+describe('refreshIndex', () => {
+  test('should successfully refresh index', async () => {
+    clusterClient.indices.refresh.mockResolvedValue({});
+
+    await clusterClientAdapter.refreshIndex();
+
+    expect(clusterClient.indices.refresh).toHaveBeenCalledWith({
+      index: 'kibana-event-log-ds',
+    });
+  });
+
+  test('should throw error when refresh fails', async () => {
+    clusterClient.indices.refresh.mockRejectedValue(new Error('Failed to refresh index'));
+
+    await expect(clusterClientAdapter.refreshIndex()).rejects.toThrowErrorMatchingInlineSnapshot(
+      `"Failed to refresh index"`
+    );
+  });
+});
 type RetryableFunction = () => boolean;
 
 const RETRY_UNTIL_DEFAULT_COUNT = 20;

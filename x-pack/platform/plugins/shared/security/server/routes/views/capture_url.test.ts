@@ -34,7 +34,17 @@ describe('Capture URL view routes', () => {
   });
 
   it('correctly defines route.', () => {
-    expect(routeConfig.options).toEqual({ authRequired: false, excludeFromOAS: true });
+    expect(routeConfig.options).toEqual({ excludeFromOAS: true });
+
+    expect(routeConfig.security).toEqual(
+      expect.objectContaining({
+        authc: { enabled: false, reason: expect.any(String) },
+        authz: {
+          enabled: false,
+          reason: expect.any(String),
+        },
+      })
+    );
 
     expect(routeConfig.validate).toEqual({
       body: undefined,

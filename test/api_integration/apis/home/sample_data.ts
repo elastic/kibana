@@ -9,8 +9,8 @@
 
 import expect from '@kbn/expect';
 import type { Response } from 'superagent';
-import differenceInMilliseconds from 'date-fns/differenceInMilliseconds';
 import { X_ELASTIC_INTERNAL_ORIGIN_REQUEST } from '@kbn/core-http-common';
+import moment from 'moment';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
@@ -75,9 +75,9 @@ export default function ({ getService }: FtrProviderContext) {
         describe('dates', () => {
           // dates being compared are not arbitrary, but rather the dates of the earliest and latest timestamp of the flight sample data
           // this can be verified in the flight data archive here {@link src/platform/plugins/shared/home/server/services/sample_data/data_sets/flights/flights.json.gz}
-          const sampleDataTimeIntervalInMS = differenceInMilliseconds(
-            new Date('2018-02-11T14:54:34'),
-            new Date('2018-01-01T00:00:00')
+          const sampleDataTimeIntervalInMS = moment('2018-02-11T14:54:34').diff(
+            moment('2018-01-01T00:00:00'),
+            'milliseconds'
           );
 
           it('should load elasticsearch index containing sample data with dates relative to current time', async () => {

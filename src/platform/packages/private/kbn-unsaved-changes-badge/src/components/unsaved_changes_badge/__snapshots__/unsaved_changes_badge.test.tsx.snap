@@ -10,7 +10,7 @@ exports[`<UnsavedChangesBadge /> should show all menu items 1`] = `
       aria-label="View available actions"
       class="euiBadge emotion-euiBadge-clickable"
       data-test-subj="unsavedChangesBadge"
-      style="--euiBadgeBackgroundColor: #F6E58D; --euiBadgeTextColor: #000000;"
+      style="--euiBadgeBackgroundColor: #F6E58D; --euiBadgeTextColor: #07101F;"
       title="test"
     >
       <span

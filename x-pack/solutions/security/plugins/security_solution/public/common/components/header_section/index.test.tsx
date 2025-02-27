@@ -5,13 +5,17 @@
  * 2.0.
  */
 
-import { euiDarkVars } from '@kbn/ui-theme';
 import { mount, shallow } from 'enzyme';
 import React from 'react';
+import { matchers } from '@emotion/jest';
+
+expect.extend(matchers);
 
 import { TestProviders } from '../../mock';
 import { getHeaderAlignment, HeaderSection } from '.';
 import { ModalInspectQuery } from '../inspect/modal';
+import { renderHook } from '@testing-library/react';
+import { useEuiTheme } from '@elastic/eui';
 
 jest.mock('../inspect/modal', () => {
   const actual = jest.requireActual('../inspect/modal');
@@ -118,8 +122,12 @@ describe('HeaderSection', () => {
     );
     const siemHeaderSection = wrapper.find('.siemHeaderSection').first();
 
-    expect(siemHeaderSection).toHaveStyleRule('border-bottom', euiDarkVars.euiBorderThin);
-    expect(siemHeaderSection).toHaveStyleRule('padding-bottom', euiDarkVars.euiSizeL);
+    expect(siemHeaderSection.exists()).toBe(true);
+
+    const { result } = renderHook(() => useEuiTheme());
+
+    expect(siemHeaderSection).toHaveStyleRule('border-bottom', result.current.euiTheme.border.thin);
+    expect(siemHeaderSection).toHaveStyleRule('padding-bottom', result.current.euiTheme.size.l);
   });
 
   test('it DOES NOT apply border styles when border is false', () => {
@@ -130,8 +138,13 @@ describe('HeaderSection', () => {
     );
     const siemHeaderSection = wrapper.find('.siemHeaderSection').first();
 
-    expect(siemHeaderSection).not.toHaveStyleRule('border-bottom', euiDarkVars.euiBorderThin);
-    expect(siemHeaderSection).not.toHaveStyleRule('padding-bottom', euiDarkVars.euiSizeL);
+    const { result } = renderHook(() => useEuiTheme());
+
+    expect(siemHeaderSection).not.toHaveStyleRule(
+      'border-bottom',
+      result.current.euiTheme.border.thin
+    );
+    expect(siemHeaderSection).not.toHaveStyleRule('padding-bottom', result.current.euiTheme.size.l);
   });
 
   test('it splits the title and supplement areas evenly when split is true', () => {
