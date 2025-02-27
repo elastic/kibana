@@ -113,6 +113,7 @@ const SystemPromptSettingsManagementComponent = ({ connectors, defaultConnector 
     async (param?: { callback?: () => void }) => {
       const { conversationUpdates } = await saveSystemPromptSettings();
       await saveConversationsSettings(conversationUpdates);
+      await refetchPrompts();
       await refetchSystemPromptConversations();
       toasts?.addSuccess({
         iconType: 'check',
@@ -120,7 +121,13 @@ const SystemPromptSettingsManagementComponent = ({ connectors, defaultConnector 
       });
       param?.callback?.();
     },
-    [refetchSystemPromptConversations, saveConversationsSettings, saveSystemPromptSettings, toasts]
+    [
+      refetchPrompts,
+      refetchSystemPromptConversations,
+      saveConversationsSettings,
+      saveSystemPromptSettings,
+      toasts,
+    ]
   );
 
   const onCancelClick = useCallback(() => {
@@ -129,7 +136,7 @@ const SystemPromptSettingsManagementComponent = ({ connectors, defaultConnector 
   }, [resetConversationsSettings, resetSystemPromptSettings]);
 
   const onCreate = useCallback(() => {
-    onSystemPromptSelect('');
+    onSystemPromptSelect();
     openFlyout();
   }, [onSystemPromptSelect, openFlyout]);
 

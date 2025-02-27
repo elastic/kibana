@@ -501,7 +501,7 @@ export const useSystemPromptUpdater = ({
         },
       };
     }
-
+    setPromptsBulkActions({});
     return { success: bulkPromptsResult?.success ?? false, conversationUpdates };
   }, [
     conversationsSettingsBulkActions,
