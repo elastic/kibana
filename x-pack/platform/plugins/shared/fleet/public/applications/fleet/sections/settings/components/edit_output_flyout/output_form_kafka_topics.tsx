@@ -20,6 +20,8 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 
+import { useStartServices } from '../../../../hooks';
+
 import {
   kafkaTopicsType,
   KAFKA_DYNAMIC_FIELDS,
@@ -31,6 +33,8 @@ import type { OutputFormInputsType } from './use_output_form';
 export const OutputFormKafkaTopics: React.FunctionComponent<{ inputs: OutputFormInputsType }> = ({
   inputs,
 }) => {
+  const { docLinks } = useStartServices();
+
   const dynamicOptions: Array<EuiComboBoxOptionOption<string>> = useMemo(() => {
     const options = KAFKA_DYNAMIC_FIELDS.map((option) => ({
       label: option,
@@ -77,11 +81,7 @@ export const OutputFormKafkaTopics: React.FunctionComponent<{ inputs: OutputForm
                 defaultMessage="Topic from field(s). For more info, see our {guideLink}"
                 values={{
                   guideLink: (
-                    <EuiLink
-                      href="https://www.elastic.co/guide/en/beats/filebeat/current/kafka-output.html#topic-option-kafka"
-                      target="_blank"
-                      external
-                    >
+                    <EuiLink href={docLinks.links.filebeat.kafkaOutput} target="_blank" external>
                       <FormattedMessage
                         id="xpack.fleet.settings.kafkaGuideLink"
                         defaultMessage="docs."
