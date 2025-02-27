@@ -6,13 +6,12 @@
  */
 
 import React, { useCallback, useEffect, useMemo } from 'react';
-import type { DashboardApi } from '@kbn/dashboard-plugin/public';
+import type { DashboardApi, RedirectToProps } from '@kbn/dashboard-plugin/public';
 import { DashboardTopNav } from '@kbn/dashboard-plugin/public';
 import type { ViewMode } from '@kbn/embeddable-plugin/public';
 
 import type { ChromeBreadcrumb } from '@kbn/core/public';
 import type { DashboardCapabilities } from '@kbn/dashboard-plugin/common';
-import type { RedirectToProps } from '@kbn/dashboard-plugin/public/dashboard_container/types';
 import { useStateFromPublishingSubject } from '@kbn/presentation-publishing';
 import { SecurityPageName } from '../../../common';
 import { useCapabilities, useKibana, useNavigation } from '../../common/lib/kibana';

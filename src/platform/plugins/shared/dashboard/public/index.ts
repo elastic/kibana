@@ -22,11 +22,13 @@ export type {
   DashboardLocatorParams,
 } from './dashboard_api/types';
 export { DASHBOARD_API_TYPE } from './dashboard_api/types';
+export type { DashboardRendererProps } from './dashboard_renderer/dashboard_renderer';
 export { LazyDashboardRenderer as DashboardRenderer } from './dashboard_renderer/lazy_dashboard_renderer';
 export type { DashboardSetup, DashboardStart, DashboardFeatureFlagConfig } from './plugin';
 
 export { DashboardListingTable } from './dashboard_listing';
 export { DashboardTopNav } from './dashboard_top_nav';
+export type { RedirectToProps } from './dashboard_app/types';
 export { type DashboardAppLocator, cleanEmptyKeys } from './dashboard_app/locator/locator';
 export { getDashboardLocatorParamsFromEmbeddable } from './dashboard_app/locator/get_dashboard_locator_params';
 

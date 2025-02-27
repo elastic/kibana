@@ -18,7 +18,7 @@ import type { Filter, Query } from '@kbn/es-query';
 
 import { useDispatch } from 'react-redux';
 import { BehaviorSubject } from 'rxjs';
-import type { DashboardRendererProps } from '@kbn/dashboard-plugin/public/dashboard_container/external_api/dashboard_renderer';
+import type { DashboardRendererProps } from '@kbn/dashboard-plugin/public';
 import { APP_UI_ID } from '../../../common';
 import { DASHBOARDS_PATH, SecurityPageName } from '../../../common/constants';
 import { useGetSecuritySolutionUrl } from '../../common/components/link_to';
