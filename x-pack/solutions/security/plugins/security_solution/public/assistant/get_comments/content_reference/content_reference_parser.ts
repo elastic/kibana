@@ -166,18 +166,17 @@ export const contentReferenceParser: (params: Params) => Plugin = ({ contentRefe
 
           eat(toEat)(contentReferenceNode);
         } else {
+          // The message has finished streaming and the content reference details were found
+          const contentReferenceNode: ResolvedContentReferenceNode<ContentReference> = {
+            type: 'contentReference',
+            contentReferenceId,
+            contentReferenceCount: getContentReferenceCount(contentReferenceId),
+            contentReferenceBlock,
+            contentReference,
+          };
 
-        // The message has finished streaming and the content reference details were found
-        const contentReferenceNode: ResolvedContentReferenceNode<ContentReference> = {
-          type: 'contentReference',
-          contentReferenceId,
-          contentReferenceCount: getContentReferenceCount(contentReferenceId),
-          contentReferenceBlock,
-          contentReference,
-        };
-
-        eat(toEat)(contentReferenceNode);
-      }
+          eat(toEat)(contentReferenceNode);
+        }
       }
     };
 

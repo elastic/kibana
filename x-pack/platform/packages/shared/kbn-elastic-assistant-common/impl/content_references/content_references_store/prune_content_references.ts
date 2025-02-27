@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { isEmpty } from 'lodash';
 import { ContentReferences, ContentReference } from '../../schemas';
 import { getContentReferenceIds } from '../references/utils';
 import { ContentReferencesStore, ContentReferenceBlock } from '../types';
