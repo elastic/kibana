@@ -19,7 +19,7 @@ export const EntityAnalyticsUpsellingSectionLazy = withSuspenseUpsell(
   )
 );
 
-export const SiemMigrationsUpsellingSectionLazy = withSuspenseUpsell(
+export const SiemMigrationsStartUpsellSectionLazy = withSuspenseUpsell(
   lazy(() =>
     import('./sections/siem_migration_start').then(({ SiemMigrationStartUpsellSection }) => ({
       default: SiemMigrationStartUpsellSection,
