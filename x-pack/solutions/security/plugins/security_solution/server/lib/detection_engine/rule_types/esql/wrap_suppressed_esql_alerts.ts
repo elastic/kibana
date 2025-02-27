@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { uniqBy } from 'lodash';
 import objectHash from 'object-hash';
 import type { Moment } from 'moment';
 import type { estypes } from '@elastic/elasticsearch';
@@ -113,5 +114,5 @@ export const wrapSuppressedEsqlAlerts = ({
     }
   );
 
-  return wrapped;
+  return uniqBy(wrapped, (alert) => alert._id);
 };

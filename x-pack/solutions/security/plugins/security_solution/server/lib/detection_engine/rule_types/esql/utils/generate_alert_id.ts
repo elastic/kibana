@@ -8,7 +8,6 @@
 import objectHash from 'object-hash';
 import type { Moment } from 'moment';
 import type { estypes } from '@elastic/elasticsearch';
-import { getMvExpandDetails } from '@kbn/securitysolution-utils';
 import { robustGet } from '../../utils/source_fields_merging/utils/robust_field_access';
 import type { CompleteRule, EsqlRuleParams } from '../../../rule_schema';
 import type { SignalSource } from '../../types';

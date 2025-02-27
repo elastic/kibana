@@ -7,6 +7,7 @@
 
 import type { Moment } from 'moment';
 import type { estypes } from '@elastic/elasticsearch';
+import { uniqBy } from 'lodash';
 
 import type {
   BaseFieldsLatest,
@@ -84,5 +85,5 @@ export const wrapEsqlAlerts = ({
     };
   });
 
-  return wrapped;
+  return uniqBy(wrapped, (alert) => alert._id);
 };
