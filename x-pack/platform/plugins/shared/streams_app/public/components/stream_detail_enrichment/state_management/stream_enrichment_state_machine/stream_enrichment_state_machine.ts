@@ -168,6 +168,8 @@ export const streamEnrichmentMachine = setup({
     },
     hasPendingDraft: ({ context }) =>
       Boolean(context.processorsRefs.find((p) => p.getSnapshot().matches('draft'))),
+    '!hasPendingDraft': not('hasPendingDraft'),
+    canUpdateStream: and(['hasStagedChanges', '!hasPendingDraft']),
     isRootStream: ({ context }) => isRootStreamDefinition(context.definition.stream),
     isWiredStream: ({ context }) => isWiredStreamGetResponse(context.definition),
   },
@@ -227,7 +229,7 @@ export const streamEnrichmentMachine = setup({
                   reenter: true,
                 },
                 'stream.update': {
-                  guard: and(['hasStagedChanges', not('hasPendingDraft')]),
+                  guard: 'canUpdateStream',
                   target: 'updating',
                 },
               },
@@ -261,7 +263,7 @@ export const streamEnrichmentMachine = setup({
             displayingProcessors: {
               on: {
                 'processors.add': {
-                  guard: not('hasPendingDraft'),
+                  guard: '!hasPendingDraft',
                   actions: [
                     { type: 'addProcessor', params: ({ event }) => event },
                     { type: 'sendProcessorChangeToSimulator' },

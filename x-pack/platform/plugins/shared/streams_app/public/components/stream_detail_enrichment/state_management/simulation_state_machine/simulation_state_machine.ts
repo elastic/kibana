@@ -83,6 +83,7 @@ export const simulationMachine = setup({
     debounceTime: 800,
   },
   guards: {
+    canRunSimulation: and(['hasSamples', 'hasProcessors', 'hasValidProcessors']),
     hasProcessors: ({ context }) => !isEmpty(context.processors),
     hasSamples: ({ context }) => !isEmpty(context.samples),
     hasValidProcessors: ({ context }) =>
@@ -192,7 +193,7 @@ export const simulationMachine = setup({
     assertingSimulationRequirements: {
       always: [
         {
-          guard: and(['hasSamples', 'hasProcessors', 'hasValidProcessors']),
+          guard: 'canRunSimulation',
           target: 'runningSimulation',
         },
         { target: 'idle' },

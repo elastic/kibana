@@ -9,7 +9,7 @@ import { StreamGetResponse } from '@kbn/streams-schema';
 import { fromPromise } from 'xstate5';
 import { StreamDetailServiceDependencies } from './types';
 
-interface LoadDefinitionInput {
+export interface LoadDefinitionInput {
   name: string;
 }
 
