@@ -25,6 +25,10 @@ interface RunMetrics {
   avgScheduleDelay: number;
   maxEventLoop: number;
 }
+export interface RunErrors {
+  message: string;
+  byTaskType: Array<{ type: string; count: number }>;
+}
 
 interface NodeResult {
   serverUuid: string;
@@ -40,6 +44,7 @@ interface NodeResult {
     total: number;
     by_task_type: Record<string, { success: number; failure: number; total: number }>;
     metrics: RunMetrics[];
+    errors: RunErrors[];
   };
 }
 
@@ -66,6 +71,7 @@ export interface Result {
   runDurationMetric: Series[];
   scheduleDelayMetric: Series[];
   taskTypeSuccess: TaskTypeData[];
+  taskRunErrors: RunErrors[];
 }
 
 export const formatData = (data: Data, nodeId?: string): Result => {
@@ -106,11 +112,48 @@ export const formatData = (data: Data, nodeId?: string): Result => {
         }
       });
     });
+
+  const taskRunErrors: RunErrors[] = [];
+
+  data.byNode
+    .filter((nodeResult) => {
+      if (nodeId) {
+        return nodeResult.serverUuid === nodeId;
+      }
+      return true;
+    })
+    .forEach((nodeResult) => {
+      const errors = nodeResult.run?.errors ?? [];
+      errors.forEach((error) => {
+        const index = taskRunErrors.findIndex((e) => e.message === error.message);
+        if (index > -1) {
+          const existingErrors = taskRunErrors[index];
+          error.byTaskType.forEach((taskType) => {
+            const taskTypeIndex = existingErrors.byTaskType.findIndex(
+              (t) => t.type === taskType.type
+            );
+
+            if (taskTypeIndex > -1) {
+              existingErrors.byTaskType[taskTypeIndex] = {
+                type: taskType.type,
+                count: existingErrors.byTaskType[taskTypeIndex].count + taskType.count,
+              };
+            } else {
+              existingErrors.byTaskType.push(taskType);
+            }
+          });
+          taskRunErrors.splice(index, 1, existingErrors);
+        } else {
+          taskRunErrors.push(error);
+        }
+      });
+    });
   return {
     numBackgroundNodes: data.numBackgroundNodes,
     numTasks: data.numTasks,
     numRecurringTasks: data.numRecurringTasks,
     taskTypeSuccess: taskTypeSuccessRate,
+    taskRunErrors,
     claimDurationMetric: concat(
       nodeResults.map((nodeResult) => {
         return {

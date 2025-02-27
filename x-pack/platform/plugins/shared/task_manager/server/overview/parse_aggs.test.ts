@@ -335,6 +335,26 @@ describe('parseAggs', () => {
                     },
                   ],
                 },
+                errors: {
+                  buckets: [
+                    {
+                      doc_count: 38,
+                      key: 'fail fail fail',
+                      regex: '.*?fail.+?fail.+?fail.*?',
+                      max_matching_length: 15,
+                      taskType: {
+                        doc_count_error_upper_bound: 0,
+                        sum_other_doc_count: 0,
+                        buckets: [
+                          {
+                            key: 'alerting:example.always-firing',
+                            doc_count: 38,
+                          },
+                        ],
+                      },
+                    },
+                  ],
+                },
               },
               {
                 key: 'af7f16b1-8882-43fe-9942-c690b0a6da1d',
@@ -495,6 +515,46 @@ describe('parseAggs', () => {
                     },
                   ],
                 },
+                errors: {
+                  buckets: [
+                    {
+                      doc_count: 21,
+                      key: 'fail fail fail',
+                      regex: '.*?fail.+?fail.+?fail.*?',
+                      max_matching_length: 15,
+                      taskType: {
+                        doc_count_error_upper_bound: 0,
+                        sum_other_doc_count: 0,
+                        buckets: [
+                          {
+                            key: 'alerting:example.always-firing',
+                            doc_count: 21,
+                          },
+                        ],
+                      },
+                    },
+                    {
+                      doc_count: 12,
+                      key: 'something went wrong',
+                      regex: '.*?something.+?went.+?wrong.*?',
+                      max_matching_length: 15,
+                      taskType: {
+                        doc_count_error_upper_bound: 0,
+                        sum_other_doc_count: 0,
+                        buckets: [
+                          {
+                            key: 'test.ruleType1',
+                            doc_count: 3,
+                          },
+                          {
+                            key: 'test.ruleType2',
+                            doc_count: 9,
+                          },
+                        ],
+                      },
+                    },
+                  ],
+                },
               },
             ],
           },
@@ -634,6 +694,17 @@ describe('parseAggs', () => {
               maxEventLoop: 0,
             },
           ],
+          errors: [
+            {
+              message: 'fail fail fail',
+              byTaskType: [
+                {
+                  count: 38,
+                  type: 'alerting:example.always-firing',
+                },
+              ],
+            },
+          ],
         },
       },
       {
@@ -766,6 +837,30 @@ describe('parseAggs', () => {
               maxScheduleDelay: 1092,
               avgScheduleDelay: 1091.5,
               maxEventLoop: 0,
+            },
+          ],
+          errors: [
+            {
+              message: 'fail fail fail',
+              byTaskType: [
+                {
+                  count: 21,
+                  type: 'alerting:example.always-firing',
+                },
+              ],
+            },
+            {
+              message: 'something went wrong',
+              byTaskType: [
+                {
+                  count: 3,
+                  type: 'test.ruleType1',
+                },
+                {
+                  count: 9,
+                  type: 'test.ruleType2',
+                },
+              ],
             },
           ],
         },

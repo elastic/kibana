@@ -121,6 +121,20 @@ export const parseAggs = (
       };
     });
 
+    const errorsBuckets = bucket.errors?.buckets ?? [];
+    // @ts-ignore
+    const errorMessages = errorsBuckets.map((errorsBucket) => {
+      const message = errorsBucket.key;
+      const taskTypes = errorsBucket.type.buckets ?? [];
+      return {
+        message,
+        byTaskType: taskTypes.map((t: { key: string; doc_count: number }) => ({
+          type: t.key,
+          count: t.doc_count,
+        })),
+      };
+    });
+
     const index: number = results.findIndex((result) => result.serverUuid === serverUuid);
     if (index > -1) {
       results[index] = {
@@ -131,6 +145,7 @@ export const parseAggs = (
           total: success + failure,
           by_task_type: groupedByTaskType,
           metrics,
+          errors: errorMessages,
         },
       };
     } else {
@@ -142,6 +157,7 @@ export const parseAggs = (
           total: success + failure,
           by_task_type: groupedByTaskType,
           metrics,
+          errors: errorMessages,
         },
       });
     }

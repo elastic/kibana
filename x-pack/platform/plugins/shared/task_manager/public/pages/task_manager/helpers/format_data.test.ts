@@ -93,6 +93,17 @@ describe('formatData', () => {
                 'Fleet-Usage-Logger': { success: 1, failure: 0, total: 1 },
                 'ML:saved-objects-sync': { success: 0, failure: 1, total: 1 },
               },
+              errors: [
+                {
+                  message: 'fail fail fail',
+                  byTaskType: [
+                    {
+                      count: 38,
+                      type: 'alerting:example.always-firing',
+                    },
+                  ],
+                },
+              ],
               metrics: [
                 {
                   key: 1740512130000,
@@ -227,6 +238,30 @@ describe('formatData', () => {
                 'Fleet-Usage-Logger': { success: 1, failure: 0, total: 1 },
                 'ML:saved-objects-sync': { success: 1, failure: 0, total: 1 },
               },
+              errors: [
+                {
+                  message: 'fail fail fail',
+                  byTaskType: [
+                    {
+                      count: 21,
+                      type: 'alerting:example.always-firing',
+                    },
+                  ],
+                },
+                {
+                  message: 'something went wrong',
+                  byTaskType: [
+                    {
+                      count: 3,
+                      type: 'test.ruleType1',
+                    },
+                    {
+                      count: 9,
+                      type: 'test.ruleType2',
+                    },
+                  ],
+                },
+              ],
               metrics: [
                 {
                   key: 1740512130000,
@@ -291,7 +326,43 @@ describe('formatData', () => {
       numBackgroundNodes: 2,
       numTasks: 37,
       numRecurringTasks: 36,
-      avgClaimDurationMetric: [
+      taskRunErrors: [
+        {
+          message: 'fail fail fail',
+          byTaskType: [
+            {
+              count: 59,
+              type: 'alerting:example.always-firing',
+            },
+          ],
+        },
+        {
+          message: 'something went wrong',
+          byTaskType: [
+            {
+              count: 3,
+              type: 'test.ruleType1',
+            },
+            {
+              count: 9,
+              type: 'test.ruleType2',
+            },
+          ],
+        },
+      ],
+      taskTypeSuccess: [
+        { success: 16, total: 16, type: 'Fleet-Metrics-Task' },
+        { success: 8, total: 8, type: 'endpoint:complete-external-response-actions' },
+        { success: 16, total: 16, type: 'endpoint:user-artifact-packager' },
+        { success: 16, total: 16, type: 'task_manager:delete_inactive_background_task_nodes' },
+        { success: 4, total: 4, type: 'alerting_health_check' },
+        { success: 4, total: 4, type: 'alerts_invalidate_api_keys' },
+        { success: 4, total: 4, type: 'fleet:sync-integrations-task' },
+        { success: 2, total: 4, type: 'security:endpoint-diagnostics' },
+        { success: 2, total: 2, type: 'Fleet-Usage-Logger' },
+        { success: 1, total: 2, type: 'ML:saved-objects-sync' },
+      ],
+      claimDurationMetric: [
         {
           bucket_size: '10 seconds',
           data: [
@@ -306,7 +377,7 @@ describe('formatData', () => {
             app: 'kibana',
             description: 'Duration of each claim cycle',
             format: '0,0.[00]',
-            label: `server uuid 5b2de169-2785-441b-ae8c-186a1936b17d`,
+            label: `avg 5b2de169-2785-441b-ae8c-186a1936b17d`,
             metricAgg: 'avg',
             title: 'Avg Claim Duration',
             units: 'ms',
@@ -330,7 +401,7 @@ describe('formatData', () => {
             app: 'kibana',
             description: 'Duration of each claim cycle',
             format: '0,0.[00]',
-            label: `server uuid af7f16b1-8882-43fe-9942-c690b0a6da1d`,
+            label: `avg af7f16b1-8882-43fe-9942-c690b0a6da1d`,
             metricAgg: 'avg',
             title: 'Avg Claim Duration',
             units: 'ms',
@@ -340,8 +411,56 @@ describe('formatData', () => {
             max: 1740512180000,
           },
         },
+        {
+          bucket_size: '10 seconds',
+          data: [
+            [1740512130000, 2233],
+            [1740512140000, 25],
+            [1740512150000, 36],
+            [1740512160000, 62],
+            [1740512170000, 34],
+            [1740512180000, 77],
+          ],
+          metric: {
+            app: 'kibana',
+            description: 'Duration of each claim cycle',
+            format: '0,0.[00]',
+            label: `max 5b2de169-2785-441b-ae8c-186a1936b17d`,
+            metricAgg: 'max',
+            title: 'Max Claim Duration',
+            units: 'ms',
+          },
+          timeRange: {
+            min: 1740512130000,
+            max: 1740512180000,
+          },
+        },
+        {
+          bucket_size: '10 seconds',
+          data: [
+            [1740512130000, 54],
+            [1740512140000, 78],
+            [1740512150000, 120],
+            [1740512160000, 99],
+            [1740512170000, 44],
+            [1740512180000, 20],
+          ],
+          metric: {
+            app: 'kibana',
+            description: 'Duration of each claim cycle',
+            format: '0,0.[00]',
+            label: `max af7f16b1-8882-43fe-9942-c690b0a6da1d`,
+            metricAgg: 'max',
+            title: 'Max Claim Duration',
+            units: 'ms',
+          },
+          timeRange: {
+            min: 1740512130000,
+            max: 1740512180000,
+          },
+        },
       ],
-      avgLoadMetric: [
+      loadMetric: [
         {
           bucket_size: '10 seconds',
           data: [
@@ -356,7 +475,7 @@ describe('formatData', () => {
             app: 'kibana',
             description: 'Task load during each claim cycle',
             format: '0,0.[00]',
-            label: `server uuid 5b2de169-2785-441b-ae8c-186a1936b17d`,
+            label: `avg 5b2de169-2785-441b-ae8c-186a1936b17d`,
             metricAgg: 'avg',
             title: 'Avg Load',
             units: '%',
@@ -380,7 +499,7 @@ describe('formatData', () => {
             app: 'kibana',
             description: 'Task load during each claim cycle',
             format: '0,0.[00]',
-            label: `server uuid af7f16b1-8882-43fe-9942-c690b0a6da1d`,
+            label: `avg af7f16b1-8882-43fe-9942-c690b0a6da1d`,
             metricAgg: 'avg',
             title: 'Avg Load',
             units: '%',
@@ -390,8 +509,56 @@ describe('formatData', () => {
             max: 1740512180000,
           },
         },
+        {
+          bucket_size: '10 seconds',
+          data: [
+            [1740512130000, 100],
+            [1740512140000, 0],
+            [1740512150000, 0],
+            [1740512160000, 0],
+            [1740512170000, 0],
+            [1740512180000, 20],
+          ],
+          metric: {
+            app: 'kibana',
+            description: 'Task load during each claim cycle',
+            format: '0,0.[00]',
+            label: `max 5b2de169-2785-441b-ae8c-186a1936b17d`,
+            metricAgg: 'max',
+            title: 'Max Load',
+            units: '%',
+          },
+          timeRange: {
+            min: 1740512130000,
+            max: 1740512180000,
+          },
+        },
+        {
+          bucket_size: '10 seconds',
+          data: [
+            [1740512130000, 20],
+            [1740512140000, 60],
+            [1740512150000, 80],
+            [1740512160000, 30],
+            [1740512170000, 0],
+            [1740512180000, 10],
+          ],
+          metric: {
+            app: 'kibana',
+            description: 'Task load during each claim cycle',
+            format: '0,0.[00]',
+            label: `max af7f16b1-8882-43fe-9942-c690b0a6da1d`,
+            metricAgg: 'max',
+            title: 'Max Load',
+            units: '%',
+          },
+          timeRange: {
+            min: 1740512130000,
+            max: 1740512180000,
+          },
+        },
       ],
-      avgRunDurationMetric: [
+      runDurationMetric: [
         {
           bucket_size: '10 seconds',
           data: [
@@ -406,7 +573,7 @@ describe('formatData', () => {
             app: 'kibana',
             description: 'Duration of each task run',
             format: '0,0.[00]',
-            label: `server uuid 5b2de169-2785-441b-ae8c-186a1936b17d`,
+            label: `avg 5b2de169-2785-441b-ae8c-186a1936b17d`,
             metricAgg: 'avg',
             title: 'Avg Task Run Duration',
             units: 'ms',
@@ -430,7 +597,7 @@ describe('formatData', () => {
             app: 'kibana',
             description: 'Duration of each task run',
             format: '0,0.[00]',
-            label: `server uuid af7f16b1-8882-43fe-9942-c690b0a6da1d`,
+            label: `avg af7f16b1-8882-43fe-9942-c690b0a6da1d`,
             metricAgg: 'avg',
             title: 'Avg Task Run Duration',
             units: 'ms',
@@ -440,8 +607,56 @@ describe('formatData', () => {
             max: 1740512180000,
           },
         },
+        {
+          bucket_size: '10 seconds',
+          data: [
+            [1740512130000, 630],
+            [1740512140000, 1272],
+            [1740512150000, 39],
+            [1740512160000, 22],
+            [1740512170000, 18],
+            [1740512180000, 13],
+          ],
+          metric: {
+            app: 'kibana',
+            description: 'Duration of each task run',
+            format: '0,0.[00]',
+            label: `max 5b2de169-2785-441b-ae8c-186a1936b17d`,
+            metricAgg: 'max',
+            title: 'Max Task Run Duration',
+            units: 'ms',
+          },
+          timeRange: {
+            min: 1740512130000,
+            max: 1740512180000,
+          },
+        },
+        {
+          bucket_size: '10 seconds',
+          data: [
+            [1740512130000, 630],
+            [1740512140000, 1272],
+            [1740512150000, 39],
+            [1740512160000, 22],
+            [1740512170000, 18],
+            [1740512180000, 13],
+          ],
+          metric: {
+            app: 'kibana',
+            description: 'Duration of each task run',
+            format: '0,0.[00]',
+            label: `max af7f16b1-8882-43fe-9942-c690b0a6da1d`,
+            metricAgg: 'max',
+            title: 'Max Task Run Duration',
+            units: 'ms',
+          },
+          timeRange: {
+            min: 1740512130000,
+            max: 1740512180000,
+          },
+        },
       ],
-      avgScheduleDelayMetric: [
+      scheduleDelayMetric: [
         {
           bucket_size: '10 seconds',
           data: [
@@ -456,7 +671,7 @@ describe('formatData', () => {
             app: 'kibana',
             description: 'Schedule delay of each task',
             format: '0,0.[00]',
-            label: `server uuid 5b2de169-2785-441b-ae8c-186a1936b17d`,
+            label: `avg 5b2de169-2785-441b-ae8c-186a1936b17d`,
             metricAgg: 'avg',
             title: 'Avg Schedule Delay',
             units: 'ms',
@@ -480,9 +695,57 @@ describe('formatData', () => {
             app: 'kibana',
             description: 'Schedule delay of each task',
             format: '0,0.[00]',
-            label: `server uuid af7f16b1-8882-43fe-9942-c690b0a6da1d`,
+            label: `avg af7f16b1-8882-43fe-9942-c690b0a6da1d`,
             metricAgg: 'avg',
             title: 'Avg Schedule Delay',
+            units: 'ms',
+          },
+          timeRange: {
+            min: 1740512130000,
+            max: 1740512180000,
+          },
+        },
+        {
+          bucket_size: '10 seconds',
+          data: [
+            [1740512130000, 454572],
+            [1740512140000, 214574],
+            [1740512150000, 1110],
+            [1740512160000, 2770],
+            [1740512170000, 2844],
+            [1740512180000, 1092],
+          ],
+          metric: {
+            app: 'kibana',
+            description: 'Schedule delay of each task',
+            format: '0,0.[00]',
+            label: `max 5b2de169-2785-441b-ae8c-186a1936b17d`,
+            metricAgg: 'max',
+            title: 'Max Schedule Delay',
+            units: 'ms',
+          },
+          timeRange: {
+            min: 1740512130000,
+            max: 1740512180000,
+          },
+        },
+        {
+          bucket_size: '10 seconds',
+          data: [
+            [1740512130000, 2453],
+            [1740512140000, 214574],
+            [1740512150000, 1110],
+            [1740512160000, 2770],
+            [1740512170000, 2844],
+            [1740512180000, 1092],
+          ],
+          metric: {
+            app: 'kibana',
+            description: 'Schedule delay of each task',
+            format: '0,0.[00]',
+            label: `max af7f16b1-8882-43fe-9942-c690b0a6da1d`,
+            metricAgg: 'max',
+            title: 'Max Schedule Delay',
             units: 'ms',
           },
           timeRange: {

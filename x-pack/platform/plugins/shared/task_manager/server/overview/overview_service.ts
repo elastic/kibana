@@ -158,6 +158,19 @@ export class OverviewService {
                   maxEventLoop: { max: { field: 'kibana.task.event_loop_blockages' } },
                 },
               },
+              errors: {
+                categorize_text: {
+                  field: 'error.message',
+                },
+                aggs: {
+                  type: {
+                    terms: {
+                      size: 1000,
+                      field: 'kibana.task.type',
+                    },
+                  },
+                },
+              },
             },
           },
         },

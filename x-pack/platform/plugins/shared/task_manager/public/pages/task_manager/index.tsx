@@ -19,7 +19,7 @@ import {
   EuiPageHeader,
   EuiPageTemplate,
   EuiPanel,
-  EuiProgress,
+  EuiCallOut,
   EuiRange,
   EuiSpacer,
   EuiStat,
@@ -32,7 +32,7 @@ import {
 import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
 import { Timeseries } from './timeseries';
 import { useGetOverview } from '../../hooks/use_get_overview';
-import { Result, TaskTypeData, formatData } from './helpers/format_data';
+import { Result, RunErrors, TaskTypeData, formatData } from './helpers/format_data';
 
 const wrapperStyle = css`
   &:hover .rhythmChart__zoom {
@@ -354,7 +354,53 @@ export const TaskManagerPage = React.memo(() => {
                                 </EuiFlexItem>
                               </EuiFlexGroup>
                             </EuiFlexItem>
-                            <EuiFlexItem style={{ minHeight: '200px' }} />
+                            {formattedData?.taskRunErrors?.length > 0 ? (
+                              <EuiFlexItem style={{ minHeight: '100px' }}>
+                                <EuiBasicTable
+                                  items={formattedData.taskRunErrors ?? []}
+                                  columns={[
+                                    {
+                                      field: 'message',
+                                      sortable: false,
+                                      name: 'Log message',
+                                      width: '70%',
+                                    },
+                                    {
+                                      render: (item: RunErrors) => {
+                                        if (!item) return null;
+                                        const numAffectedTasks = item.byTaskType.reduce(
+                                          (acc, task) => acc + task.count,
+                                          0
+                                        );
+                                        return (
+                                          <EuiFlexGroup
+                                            alignItems="center"
+                                            justifyContent="flexStart"
+                                          >
+                                            <EuiFlexItem style={{ maxWidth: '300px' }}>
+                                              <EuiText size="s">
+                                                <p>
+                                                  {numAffectedTasks}
+                                                  {' task runs across '}
+                                                  {item.byTaskType.length}
+                                                  {' task types'}
+                                                </p>
+                                              </EuiText>
+                                            </EuiFlexItem>
+                                          </EuiFlexGroup>
+                                        );
+                                      },
+                                    },
+                                  ]}
+                                />
+                              </EuiFlexItem>
+                            ) : (
+                              <EuiFlexItem style={{ minHeight: '80px' }}>
+                                <EuiCallOut title="No recent errors!" color="success">
+                                  <p>There have been no task run errors in the last 15 minutes</p>
+                                </EuiCallOut>
+                              </EuiFlexItem>
+                            )}
                           </EuiFlexGroup>
                           <EuiSpacer />
                         </EuiFlexItem>
