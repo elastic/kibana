@@ -21,6 +21,6 @@ export const links: LinkItem = {
   capabilities: [`${SERVER_APP_ID}.show`],
   landingIcon: 'filebeatApp',
   skipUrlState: true,
-  hideTimeline: true,
+  hideTimeline: false,
   hideWhenExperimentalKey: 'securitySolutionNotesDisabled',
 };
