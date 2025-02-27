@@ -11,6 +11,7 @@ import type {
   DashboardApi,
   DashboardCreationOptions,
   DashboardLocatorParams,
+  DashboardRendererProps,
 } from '@kbn/dashboard-plugin/public';
 import { DashboardRenderer as DashboardContainerRenderer } from '@kbn/dashboard-plugin/public';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
@@ -18,7 +19,6 @@ import type { Filter, Query } from '@kbn/es-query';
 
 import { useDispatch } from 'react-redux';
 import { BehaviorSubject } from 'rxjs';
-import type { DashboardRendererProps } from '@kbn/dashboard-plugin/public';
 import { APP_UI_ID } from '../../../common';
 import { DASHBOARDS_PATH, SecurityPageName } from '../../../common/constants';
 import { useGetSecuritySolutionUrl } from '../../common/components/link_to';
