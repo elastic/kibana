@@ -25,7 +25,7 @@ import {
 } from '../../common/missing_privileges';
 
 const StartMigrationsBody: OnboardingCardComponent = React.memo(
-  ({ setComplete, isCardComplete, setExpandedCardId }) => {
+  ({ setComplete, isCardComplete, setExpandedCardId, checkComplete }) => {
     const styles = useStyles();
     const { data: migrationsStats, isLoading, refreshStats } = useLatestStats();
 
@@ -47,8 +47,13 @@ const StartMigrationsBody: OnboardingCardComponent = React.memo(
       setExpandedCardId(OnboardingCardId.siemMigrationsAiConnectors);
     }, [setExpandedCardId]);
 
+    const onFlyoutClosed = useCallback(() => {
+      refreshStats();
+      checkComplete();
+    }, [refreshStats, checkComplete]);
+
     return (
-      <RuleMigrationDataInputWrapper onFlyoutClosed={refreshStats}>
+      <RuleMigrationDataInputWrapper onFlyoutClosed={onFlyoutClosed}>
         <OnboardingCardContentPanel className={styles}>
           {isLoading ? (
             <CenteredLoadingSpinner />

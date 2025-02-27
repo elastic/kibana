@@ -12,7 +12,7 @@ export const HEIGHT_ANIMATION_DURATION = 250;
 
 export const useCardPanelStyles = () => {
   const { euiTheme, colorMode } = useEuiTheme();
-  const successBackgroundColor = euiTheme.colors.backgroundBaseSuccess;
+  const successBackgroundColor = euiTheme.colors.backgroundLightSuccess;
   const isDarkMode = colorMode === COLOR_MODES_STANDARD.dark;
   const darkModeStyles = useDarkPanelStyles(isDarkMode);
 

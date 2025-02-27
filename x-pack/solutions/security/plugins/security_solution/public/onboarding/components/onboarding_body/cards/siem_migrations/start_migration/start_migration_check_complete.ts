@@ -5,10 +5,18 @@
  * 2.0.
  */
 
+import { i18n } from '@kbn/i18n';
 import { SiemMigrationTaskStatus } from '../../../../../../../common/siem_migrations/constants';
 
 import type { OnboardingCardCheckComplete } from '../../../../../types';
 import type { StartMigrationCardMetadata } from './types';
+
+const COMPLETE_BADGE_TEXT = (migrationsCount: number) =>
+  i18n.translate('xpack.securitySolution.onboarding.siemMigrations.startMigration.completeBadge', {
+    defaultMessage:
+      '{migrationsCount} {migrationsCount, plural, one {migration} other {migrations}}',
+    values: { migrationsCount },
+  });
 
 export const checkStartMigrationCardComplete: OnboardingCardCheckComplete<
   StartMigrationCardMetadata
@@ -18,13 +26,19 @@ export const checkStartMigrationCardComplete: OnboardingCardCheckComplete<
     .map(({ description }) => description);
 
   let isComplete = false;
+  let migrationsCount = 0;
 
-  if (missingCapabilities.length === 0) {
+  if (siemMigrations.rules.isAvailable()) {
     const migrationsStats = await siemMigrations.rules.getRuleMigrationsStats();
     isComplete = migrationsStats.some(
       (migrationStats) => migrationStats.status === SiemMigrationTaskStatus.FINISHED
     );
+    migrationsCount = migrationsStats.length;
   }
 
-  return { isComplete, metadata: { missingCapabilities } };
+  return {
+    isComplete,
+    completeBadgeText: COMPLETE_BADGE_TEXT(migrationsCount),
+    metadata: { missingCapabilities },
+  };
 };

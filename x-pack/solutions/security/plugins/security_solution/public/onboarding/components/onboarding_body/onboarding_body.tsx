@@ -19,9 +19,9 @@ import type { IsCardAvailable } from '../../types';
 export const OnboardingBody = React.memo(() => {
   const bodyConfig = useBodyConfig();
   const { expandedCardId, setExpandedCardId } = useExpandedCard();
-  const { isCardComplete, setCardComplete, getCardCheckCompleteResult, checkCardComplete } =
+  const { setCardComplete, getCardCheckCompleteResult, checkCardComplete } =
     useCompletedCards(bodyConfig);
-
+  const isCardComplete = () => false;
   const createOnToggleExpanded = useCallback(
     (cardId: OnboardingCardId) => () => {
       if (expandedCardId === cardId) {
