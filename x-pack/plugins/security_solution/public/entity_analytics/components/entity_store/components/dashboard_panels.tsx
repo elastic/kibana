@@ -236,10 +236,13 @@ const EntityStoreDashboardPanelsComponent = () => {
         visible={modal.visible}
         toggle={(visible) => setModalState({ visible })}
         enableStore={enableEntityStore}
-        riskScore={{ disabled: isRiskScoreAvailable, checked: !isRiskScoreAvailable }}
+        riskScore={{
+          canToggle: !isRiskScoreAvailable,
+          checked: true,
+        }}
         entityStore={{
-          disabled: entityStore.status === 'enabled',
-          checked: entityStore.status !== 'enabled',
+          canToggle: entityStore.status !== 'enabled',
+          checked: true,
         }}
       />
     </EuiFlexGroup>
