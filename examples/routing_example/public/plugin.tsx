@@ -25,7 +25,7 @@ export class RoutingExamplePlugin implements Plugin<{}, {}, SetupDeps, {}> {
         const [coreStart] = await core.getStartServices();
         const startServices = getServices(coreStart);
         const { renderApp } = await import('./app');
-        return renderApp(startServices, params.element);
+        return renderApp(coreStart, startServices, params.element);
       },
     });
 
