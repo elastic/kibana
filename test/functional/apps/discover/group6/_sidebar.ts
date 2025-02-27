@@ -28,8 +28,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const filterBar = getService('filterBar');
   const fieldEditor = getService('fieldEditor');
   const dataViews = getService('dataViews');
+  const queryBar = getService('queryBar');
   const retry = getService('retry');
   const dataGrid = getService('dataGrid');
+  const log = getService('log');
   const INITIAL_FIELD_LIST_SUMMARY = '48 available fields. 5 empty fields. 4 meta fields.';
 
   const expectFieldListDescription = async (expectedNumber: string) => {
