@@ -5,6 +5,5 @@
  * 2.0.
  */
 
-export { InferenceFlyoutWrapper } from './components/inference_flyout_wrapper';
-export { ElandPythonClient } from './components/eland_python_client';
-export { type ModelConfig } from './types';
+import { MockSiemMigrationTelemetryClient } from './mocks';
+export const SiemMigrationTelemetryClient = MockSiemMigrationTelemetryClient;
