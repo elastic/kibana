@@ -17,7 +17,7 @@ import {
   API_VERSIONS,
   ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL_FIND,
 } from '@kbn/elastic-assistant-common';
-import { useCallback, useEffect, useRef } from 'react';
+import { useCallback, useEffect, useMemo, useRef } from 'react';
 import { Conversation } from '../../../assistant_context/types';
 
 export interface FetchConversationsResponse {
@@ -144,7 +144,7 @@ export const useFetchCurrentUserConversations = ({
     }
   }, [data?.pages, setTotalItemCount]);
 
-  const formatted = formatFetchedData(data);
+  const formatted = useMemo(() => formatFetchedData(data), [data]);
 
   const observerRef = useRef<IntersectionObserver>();
   const fetchNext = useCallback(
