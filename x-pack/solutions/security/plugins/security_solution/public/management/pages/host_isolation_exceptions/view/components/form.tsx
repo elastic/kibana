@@ -41,6 +41,7 @@ import {
 } from './translations';
 import type { ArtifactFormComponentProps } from '../../../../components/artifact_list_page';
 import { FormattedError } from '../../../../components/formatted_error';
+import { useGetUpdatedTags } from '../../../../hooks/artifacts';
 
 export const testIdPrefix = 'hostIsolationExceptions-form';
 
@@ -66,8 +67,8 @@ export const HostIsolationExceptionsForm = memo<ArtifactFormComponentProps>(
     const [hasBeenInputIpVisited, setHasBeenInputIpVisited] = useState(false);
     const [hasNameError, setHasNameError] = useState(!exception.name);
     const [hasIpError, setHasIpError] = useState(!ipEntry.value);
-
     const getTestId = useTestIdGenerator(testIdPrefix);
+    const { getTagsUpdatedBy } = useGetUpdatedTags(exception);
 
     const [selectedPolicies, setSelectedPolicies] = useState<EffectedPolicySelection>({
       isGlobal: isArtifactGlobal(exception),
@@ -137,11 +138,14 @@ export const HostIsolationExceptionsForm = memo<ArtifactFormComponentProps>(
           setSelectedPolicies(selection);
         }
 
-        notifyOfChange({
-          tags: getArtifactTagsByPolicySelection(selection),
-        });
+        const tags = getTagsUpdatedBy(
+          'policySelection',
+          getArtifactTagsByPolicySelection(selection)
+        );
+
+        notifyOfChange({ tags });
       },
-      [notifyOfChange]
+      [getTagsUpdatedBy, notifyOfChange]
     );
 
     const handleOnDescriptionChange = useCallback(
@@ -254,7 +258,14 @@ export const HostIsolationExceptionsForm = memo<ArtifactFormComponentProps>(
     return (
       <EuiForm
         component="div"
-        error={error && <FormattedError error={error} />}
+        error={
+          error && (
+            <FormattedError
+              error={error}
+              data-test-subj={'hostIsolationExceptions-form-submitError'}
+            />
+          )
+        }
         isInvalid={!!error}
         data-test-subj="hostIsolationExceptions-form"
       >
