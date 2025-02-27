@@ -68,9 +68,7 @@ const readIndexPrivileges = async (
 ): Promise<SecurityHasPrivilegesResponse> => {
   const response = await esClient.security.hasPrivileges(
     {
-      body: {
-        index: [{ names: [index], privileges: ['read', 'write', 'manage', 'create_index'] }],
-      },
+      index: [{ names: [index], privileges: ['read', 'write', 'manage', 'create_index'] }],
     },
     { meta: true }
   );

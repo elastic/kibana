@@ -50,44 +50,42 @@ export async function getServiceAgent({
     apm: {
       events: [ProcessorEvent.error, ProcessorEvent.transaction, ProcessorEvent.metric],
     },
-    body: {
-      track_total_hits: 1,
-      size: 1,
-      _source: [AGENT_NAME, SERVICE_RUNTIME_NAME, CLOUD_PROVIDER, CLOUD_SERVICE_NAME],
-      query: {
-        bool: {
-          filter: [
-            { term: { [SERVICE_NAME]: serviceName } },
-            ...rangeQuery(start, end),
-            {
-              exists: {
-                field: AGENT_NAME,
-              },
+    track_total_hits: 1,
+    size: 1,
+    _source: [AGENT_NAME, SERVICE_RUNTIME_NAME, CLOUD_PROVIDER, CLOUD_SERVICE_NAME],
+    query: {
+      bool: {
+        filter: [
+          { term: { [SERVICE_NAME]: serviceName } },
+          ...rangeQuery(start, end),
+          {
+            exists: {
+              field: AGENT_NAME,
             },
-          ],
-          should: [
-            {
-              exists: {
-                field: SERVICE_RUNTIME_NAME,
-              },
+          },
+        ],
+        should: [
+          {
+            exists: {
+              field: SERVICE_RUNTIME_NAME,
             },
-            {
-              exists: {
-                field: CLOUD_PROVIDER,
-              },
+          },
+          {
+            exists: {
+              field: CLOUD_PROVIDER,
             },
-            {
-              exists: {
-                field: CLOUD_SERVICE_NAME,
-              },
+          },
+          {
+            exists: {
+              field: CLOUD_SERVICE_NAME,
             },
-          ],
-        },
+          },
+        ],
       },
-      fields,
-      sort: {
-        _score: { order: 'desc' as const },
-      },
+    },
+    fields,
+    sort: {
+      _score: { order: 'desc' as const },
     },
   };
 
