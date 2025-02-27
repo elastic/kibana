@@ -98,8 +98,7 @@ describe('ruleActionsConnectorsBody', () => {
     );
   });
 
-  test('warns when no connector matched action type id', async () => {
-    jest.spyOn(console, 'warn');
+  test('filters out when no connector matched action type id', async () => {
     const actionTypeRegistry = new TypeRegistry<ActionTypeModel>();
     actionTypeRegistry.register(getActionTypeModel('1', { id: 'actionType-1' }));
 
@@ -135,15 +134,7 @@ describe('ruleActionsConnectorsBody', () => {
     expect(screen.queryByText('connector-foobar')).not.toBeInTheDocument();
     expect(screen.queryByText('connector-2')).not.toBeInTheDocument();
 
-    // eslint-disable-next-line no-console
-    expect(console.warn).toHaveBeenCalledWith(
-      'Action type "actionType-2" not found in action registry.'
-    );
-    // eslint-disable-next-line no-console
-    expect(console.warn).toHaveBeenCalledWith(
-      'Action type "actionType-foobar" not found in action registry.'
-    );
-
-    expect(screen.getByText('connector-1')).toBeInTheDocument();
+    expect(await screen.findAllByTestId('ruleActionsConnectorsModalCard')).toHaveLength(1);
+    expect(await screen.findByText('connector-1')).toBeInTheDocument();
   });
 });

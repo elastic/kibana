@@ -126,15 +126,12 @@ export const RuleActionsConnectorsBody = ({
   const availableConnectors = useMemo(() => {
     return connectors.filter(({ actionTypeId }) => {
       const actionType = connectorTypes.find(({ id }) => id === actionTypeId);
-      let actionTypeModel;
-      try {
-        actionTypeModel = actionTypeRegistry.get(actionTypeId);
-      } catch (error) {
-        // If the action type is not found, we do not show that connector
-        // eslint-disable-next-line no-console
-        console.warn(`Action type "${actionTypeId}" not found in action registry.`);
+
+      if (!actionTypeRegistry.has(actionTypeId)) {
         return false;
       }
+
+      const actionTypeModel = actionTypeRegistry.get(actionTypeId);
 
       if (!actionType) {
         return false;
