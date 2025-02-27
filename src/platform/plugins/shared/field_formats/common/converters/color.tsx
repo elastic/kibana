@@ -78,7 +78,7 @@ export class ColorFormat extends FieldFormat {
           paddingBlock: '0',
           paddingInline: '8px',
           borderRadius: '3px',
-          '.euiDataGridRowCell__content--defaultHeight &': {
+          '.euiDataGrid &': {
             marginTop: '-4px',
           },
         }}
