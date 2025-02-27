@@ -12,6 +12,8 @@ const _allowedExperimentalValues = {
   useSpaceAwareness: false,
   enableAutomaticAgentUpgrades: false,
   enableSyncIntegrationsOnRemote: false,
+  enableSSLSecrets: false,
+  enabledUpgradeAgentlessDeploymentsTask: false,
 };
 
 /**

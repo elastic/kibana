@@ -8,6 +8,7 @@
 import { MappingProperty } from '@elastic/elasticsearch/lib/api/types';
 import { z } from '@kbn/zod';
 import { NonEmptyString } from '@kbn/zod-helpers';
+import { recursiveRecord } from '../../record_types';
 
 export const FIELD_DEFINITION_TYPES = [
   'keyword',
@@ -34,7 +35,7 @@ export type FieldDefinitionConfigAdvancedParameters = Omit<
 >;
 
 export const fieldDefinitionConfigSchema: z.Schema<FieldDefinitionConfig> = z.intersection(
-  z.record(z.string(), z.unknown()),
+  recursiveRecord,
   z.object({
     type: z.enum(FIELD_DEFINITION_TYPES),
     format: z.optional(NonEmptyString),
