@@ -42,8 +42,7 @@ export const getFormattedTime = ({
   const utcFormatter = moment.tz(now, 'UTC');
 
   // If the local timezone is different from UTC, we should show the UTC time as well
-  const utcConversionRequired =
-      currentFormatter.format('[UTC]Z') !== utcFormatter.format('[UTC]Z');
+  const utcConversionRequired = currentFormatter.format('[UTC]Z') !== utcFormatter.format('[UTC]Z');
 
   const utcConversion = utcConversionRequired ? utcFormatter.format(TIME_FORMAT) : undefined;
   const currentTime = currentFormatter.format(TIME_FORMAT);

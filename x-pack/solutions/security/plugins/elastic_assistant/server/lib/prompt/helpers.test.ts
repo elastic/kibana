@@ -35,7 +35,11 @@ describe('helper', () => {
         undefined,
         'Current time: 14/02/2025, 00:33:12 UTC-07:00 (14/02/2025, 07:33:12 UTC+00:00)',
       ],
-      ['MST', undefined, 'Current time: 14/02/2025, 00:33:12 UTC-07:00 (14/02/2025, 07:33:12 UTC+00:00)'],
+      [
+        'MST',
+        undefined,
+        'Current time: 14/02/2025, 00:33:12 UTC-07:00 (14/02/2025, 07:33:12 UTC+00:00)',
+      ],
       [
         'America/Los_Angeles',
         undefined,
@@ -86,7 +90,11 @@ describe('helper', () => {
         'America/Denver',
         'Current time: 14/02/2025, 00:33:12 UTC-07:00 (14/02/2025, 07:33:12 UTC+00:00)',
       ],
-      ['Browser', 'MST', 'Current time: 14/02/2025, 00:33:12 UTC-07:00 (14/02/2025, 07:33:12 UTC+00:00)'],
+      [
+        'Browser',
+        'MST',
+        'Current time: 14/02/2025, 00:33:12 UTC-07:00 (14/02/2025, 07:33:12 UTC+00:00)',
+      ],
       [
         'Browser',
         'America/Los_Angeles',
