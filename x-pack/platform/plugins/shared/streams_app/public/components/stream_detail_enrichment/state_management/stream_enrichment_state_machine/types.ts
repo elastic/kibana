@@ -5,15 +5,17 @@
  * 2.0.
  */
 
-import { ActorRefFrom } from 'xstate5';
 import { CoreStart } from '@kbn/core/public';
 import { StreamsRepositoryClient } from '@kbn/streams-plugin/public/api';
 import { FieldDefinition, IngestStreamGetResponse } from '@kbn/streams-schema';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { ProcessorDefinitionWithUIAttributes } from '../../types';
-import { simulationMachine } from '../simulation_state_machine/simulation_state_machine';
 import { ProcessorActorRef, ProcessorToParentEvent } from '../processor_state_machine';
-import { SimulationToParentEvent, PreviewDocsFilterOption } from '../simulation_state_machine';
+import {
+  SimulationToParentEvent,
+  PreviewDocsFilterOption,
+  SimulationActorRef,
+} from '../simulation_state_machine';
 
 export interface StreamEnrichmentServiceDependencies {
   refreshDefinition: () => void;
@@ -30,7 +32,7 @@ export interface StreamEnrichmentContext {
   definition: IngestStreamGetResponse;
   initialProcessorsRefs: ProcessorActorRef[];
   processorsRefs: ProcessorActorRef[];
-  simulatorRef?: ActorRefFrom<typeof simulationMachine>;
+  simulatorRef?: SimulationActorRef;
   fields?: FieldDefinition;
 }
 

@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { MachineImplementationsFrom, and, assign, sendTo, setup } from 'xstate5';
+import { ActorRefFrom, MachineImplementationsFrom, and, assign, sendTo, setup } from 'xstate5';
 import { getPlaceholderFor } from '@kbn/xstate-utils';
 import { FlattenRecord, isSchema, processorDefinitionSchema } from '@kbn/streams-schema';
 import { isEmpty, isEqual } from 'lodash';
@@ -31,6 +31,8 @@ import {
   createSimulationRunFailureNofitier,
 } from './simulation_runner_actor';
 import { derivePreviewColumns, filterSimulationDocuments, composeSamplingCondition } from './utils';
+
+export type SimulationActorRef = ActorRefFrom<typeof simulationMachine>;
 
 export const simulationMachine = setup({
   types: {
@@ -115,7 +117,7 @@ export const simulationMachine = setup({
   initial: 'initializing',
   on: {
     'dateRange.update': '.loadingSamples',
-    'filters.changePreviewDocsFilter': {
+    'simulation.changePreviewDocsFilter': {
       actions: [
         { type: 'storePreviewDocsFilter', params: ({ event }) => event },
         { type: 'derivePreviewConfig' },

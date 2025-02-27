@@ -24,7 +24,6 @@ import {
 } from '@kbn/streams-schema';
 import { htmlIdGenerator } from '@elastic/eui';
 import {
-  ProcessorActorRef,
   StreamEnrichmentContext,
   StreamEnrichmentEvent,
   StreamEnrichmentInput,
@@ -36,16 +35,18 @@ import {
   createUpsertStreamFailureNofitier,
   createUpsertStreamSuccessNofitier,
 } from './upsert_stream_actor';
+
+import { ProcessorDefinitionWithUIAttributes } from '../../types';
 import {
-  processorMachine,
-  createProcessorMachineImplementations,
-} from '../processor_state_machine/processor_state_machine';
-import {
+  simulationMachine,
   PreviewDocsFilterOption,
   createSimulationMachineImplementations,
-  simulationMachine,
-} from '../simulation_state_machine/simulation_state_machine';
-import { ProcessorDefinitionWithUIAttributes } from '../../types';
+} from '../simulation_state_machine';
+import {
+  processorMachine,
+  ProcessorActorRef,
+  createProcessorMachineImplementations,
+} from '../processor_state_machine';
 
 const createId = htmlIdGenerator();
 

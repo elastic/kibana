@@ -25,7 +25,7 @@ import {
   useSimulatorSelector,
   useStreamEnrichmentEvents,
 } from './state_management/stream_enrichment_state_machine';
-import { previewDocsFilterOptions } from './state_management/simulation_state_machine/simulation_state_machine';
+import { previewDocsFilterOptions } from './state_management/simulation_state_machine';
 
 export const ProcessorOutcomePreview = () => {
   const isLoading = useSimulatorSelector(

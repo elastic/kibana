@@ -6,3 +6,4 @@
  */
 
 export * from './use_stream_enrichment';
+export * from './types';
