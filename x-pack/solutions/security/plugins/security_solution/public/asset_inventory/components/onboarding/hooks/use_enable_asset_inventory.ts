@@ -10,12 +10,15 @@ import { useMutation } from '@tanstack/react-query';
 import { i18n } from '@kbn/i18n';
 import type { ServerApiError } from '../../../../common/types';
 import { useAssetInventoryRoutes } from '../../../hooks/use_asset_inventory_routes';
+import { useAssetInventoryStatus } from '../../../hooks/use_asset_inventory_status';
 
 /**
  * Hook with related business logic for enabling Asset Inventory
  */
-export const useEnableAssetInventory = (refetchStatusFn: () => void) => {
+export const useEnableAssetInventory = () => {
   const { postEnableAssetInventory } = useAssetInventoryRoutes();
+  const { refetch: refetchStatus } = useAssetInventoryStatus();
+
   const [error, setError] = useState<string | null>(null);
   const [isEnabling, setIsEnabling] = useState(false);
 
@@ -25,7 +28,7 @@ export const useEnableAssetInventory = (refetchStatusFn: () => void) => {
       setError(null);
     },
     onSuccess: () => {
-      refetchStatusFn();
+      refetchStatus();
     },
     onError: (err: { body?: ServerApiError }) => {
       const errorMessage =

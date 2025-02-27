@@ -11,17 +11,10 @@ import { useAssetInventoryRoutes } from './use_asset_inventory_routes';
 
 const ASSET_INVENTORY_STATUS_KEY = ['GET', 'ASSET_INVENTORY_STATUS'];
 
-export interface UseAssetInventory {
-  isLoading: boolean;
-  status?: AssetInventoryStatusResponse['status'];
-  privileges?: AssetInventoryStatusResponse['privileges'];
-  refetchStatusFn: () => void;
-}
-
 export const useAssetInventoryStatus = () => {
   const { getAssetInventoryStatus } = useAssetInventoryRoutes();
 
-  return useQuery({
+  return useQuery<AssetInventoryStatusResponse>({
     queryKey: ASSET_INVENTORY_STATUS_KEY,
     queryFn: () => getAssetInventoryStatus(),
     refetchInterval: (data) => {
@@ -32,15 +25,4 @@ export const useAssetInventoryStatus = () => {
     },
     refetchOnMount: true,
   });
-};
-
-export const useAssetInventory = (): UseAssetInventory => {
-  const { data, isLoading, refetch: refetchStatusFn } = useAssetInventoryStatus();
-
-  return {
-    isLoading,
-    status: data?.status,
-    privileges: data?.privileges,
-    refetchStatusFn,
-  };
 };

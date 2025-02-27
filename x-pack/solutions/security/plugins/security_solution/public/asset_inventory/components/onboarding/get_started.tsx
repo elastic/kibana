@@ -22,14 +22,14 @@ import illustration from '../../../common/images/information_light.png';
 import { InventoryTitle } from '../inventory_title';
 import { CenteredWrapper } from './centered_wrapper';
 import { HoverForExplanationTooltip } from './hover_for_explanation_tooltip';
-import { useGetStarted } from './hooks/use_get_started';
 import { EmptyStateIllustrationContainer } from '../empty_state_illustration_container';
+import { useEnableAssetInventory } from './hooks/use_enable_asset_inventory';
 
 const ASSET_INVENTORY_DOCS_URL = 'https://ela.st/asset-inventory';
 const TEST_SUBJ = 'assetInventory:onboarding:get-started';
 
 export const GetStarted = () => {
-  const { isEnabling, error, setError, handleEnableClick } = useGetStarted();
+  const { isEnabling, error, setError, handleEnableClick } = useEnableAssetInventory();
 
   return (
     <EuiFlexGroup>

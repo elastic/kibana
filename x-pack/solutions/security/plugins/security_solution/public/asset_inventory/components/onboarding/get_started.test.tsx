@@ -9,11 +9,11 @@
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { GetStarted } from './get_started';
-import { useGetStarted } from './hooks/use_get_started';
+import { useEnableAssetInventory } from './hooks/use_enable_asset_inventory';
 import { TestProvider } from '../../test/test_provider';
 
-jest.mock('./hooks/use_get_started', () => ({
-  useGetStarted: jest.fn(),
+jest.mock('./hooks/use_enable_asset_inventory', () => ({
+  useEnableAssetInventory: jest.fn(),
 }));
 
 const mockGetStarted = {
@@ -30,7 +30,7 @@ const renderWithProvider = (children: React.ReactNode) => {
 describe('GetStarted Component', () => {
   beforeEach(() => {
     jest.resetAllMocks();
-    (useGetStarted as jest.Mock).mockReturnValue(mockGetStarted);
+    (useEnableAssetInventory as jest.Mock).mockReturnValue(mockGetStarted);
   });
 
   it('renders the component', () => {
@@ -56,7 +56,7 @@ describe('GetStarted Component', () => {
   });
 
   it('shows a loading spinner when enabling', () => {
-    (useGetStarted as jest.Mock).mockReturnValue({
+    (useEnableAssetInventory as jest.Mock).mockReturnValue({
       ...mockGetStarted,
       isEnabling: true,
     });
@@ -68,7 +68,7 @@ describe('GetStarted Component', () => {
 
   it('displays an error message when there is an error', async () => {
     const errorMessage = 'Task Manager is not available';
-    (useGetStarted as jest.Mock).mockReturnValue({
+    (useEnableAssetInventory as jest.Mock).mockReturnValue({
       ...mockGetStarted,
       error: errorMessage,
     });
@@ -80,7 +80,7 @@ describe('GetStarted Component', () => {
   });
 
   it('dismisses error message when dismissed', async () => {
-    (useGetStarted as jest.Mock).mockReturnValue({
+    (useEnableAssetInventory as jest.Mock).mockReturnValue({
       ...mockGetStarted,
       error: 'Task Manager is not available',
     });

@@ -8,8 +8,8 @@
 import React from 'react';
 import type { FC, PropsWithChildren } from 'react';
 import { GetStarted } from './get_started';
-import { useAssetInventoryContext } from '../../context';
 import { Loading } from '../loading';
+import { useAssetInventoryStatus } from '../../hooks/use_asset_inventory_status';
 
 /**
  * This component serves as a wrapper to render appropriate onboarding screens
@@ -17,11 +17,13 @@ import { Loading } from '../loading';
  * matches, it will render the child components.
  */
 export const AssetInventoryOnboarding: FC<PropsWithChildren> = ({ children }) => {
-  const { status, privileges, isLoading } = useAssetInventoryContext();
+  const { data, isLoading } = useAssetInventoryStatus();
 
-  if (isLoading) {
+  if (isLoading || !data) {
     return <Loading />;
   }
+
+  const { status, privileges } = data;
 
   // Render different screens based on the onboarding status.
   switch (status) {

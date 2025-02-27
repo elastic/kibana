@@ -9,6 +9,7 @@ import { renderHook, act } from '@testing-library/react';
 import { useEnableAssetInventory } from './use_enable_asset_inventory';
 import { useMutation } from '@tanstack/react-query';
 import { useAssetInventoryRoutes } from '../../../hooks/use_asset_inventory_routes';
+import { useAssetInventoryStatus } from '../../../hooks/use_asset_inventory_status';
 
 jest.mock('@tanstack/react-query', () => ({
   useMutation: jest.fn(),
@@ -18,16 +19,24 @@ jest.mock('../../../hooks/use_asset_inventory_routes', () => ({
   useAssetInventoryRoutes: jest.fn(),
 }));
 
+jest.mock('../../../hooks/use_asset_inventory_status', () => ({
+  useAssetInventoryStatus: jest.fn(),
+}));
+
 describe('useEnableAssetInventory', () => {
-  let refetchStatusFn: jest.Mock;
+  let refetchStatus: jest.Mock;
   let postEnableAssetInventory: jest.Mock;
 
   beforeEach(() => {
-    refetchStatusFn = jest.fn();
+    refetchStatus = jest.fn();
     postEnableAssetInventory = jest.fn();
 
     (useAssetInventoryRoutes as jest.Mock).mockReturnValue({
       postEnableAssetInventory,
+    });
+
+    (useAssetInventoryStatus as jest.Mock).mockReturnValue({
+      refetch: refetchStatus,
     });
 
     (useMutation as jest.Mock).mockImplementation((_fn, options) => ({
@@ -44,14 +53,14 @@ describe('useEnableAssetInventory', () => {
   });
 
   it('should initialize with default values', () => {
-    const { result } = renderHook(() => useEnableAssetInventory(refetchStatusFn));
+    const { result } = renderHook(() => useEnableAssetInventory());
 
     expect(result.current.isEnabling).toBe(false);
     expect(result.current.error).toBeNull();
   });
 
   it('should set isEnabling to true on mutation start', () => {
-    const { result } = renderHook(() => useEnableAssetInventory(refetchStatusFn));
+    const { result } = renderHook(() => useEnableAssetInventory());
 
     act(() => {
       result.current.handleEnableClick();
@@ -61,14 +70,14 @@ describe('useEnableAssetInventory', () => {
     expect(result.current.error).toBeNull();
   });
 
-  it('should call refetchStatusFn on success', async () => {
-    const { result } = renderHook(() => useEnableAssetInventory(refetchStatusFn));
+  it('should call refetchStatus on success', async () => {
+    const { result } = renderHook(() => useEnableAssetInventory());
 
     act(() => {
       result.current.handleEnableClick();
     });
 
-    expect(refetchStatusFn).toHaveBeenCalled();
+    expect(refetchStatus).toHaveBeenCalled();
   });
 
   it('should handle errors and update the error state', async () => {
@@ -79,7 +88,7 @@ describe('useEnableAssetInventory', () => {
       },
     }));
 
-    const { result } = renderHook(() => useEnableAssetInventory(refetchStatusFn));
+    const { result } = renderHook(() => useEnableAssetInventory());
 
     act(() => {
       result.current.handleEnableClick();

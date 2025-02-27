@@ -14,7 +14,6 @@ import { SecuritySolutionPageWrapper } from '../common/components/page_wrapper';
 import { PluginTemplateWrapper } from '../common/components/plugin_template_wrapper';
 import { SecurityRoutePageWrapper } from '../common/components/security_route_page_wrapper';
 import { DataViewContext } from './hooks/data_view_context';
-import { AssetInventoryProvider } from './provider';
 import { useDataView } from './hooks/use_asset_inventory_data_table/use_data_view';
 import { Loading } from './components/loading';
 import { ASSET_INVENTORY_INDEX_PATTERN } from './constants';
@@ -49,9 +48,7 @@ export const AssetInventoryRoutes = () => {
           <DataViewContext.Provider value={dataViewContextValue}>
             <SecuritySolutionPageWrapper noPadding>
               <Suspense fallback={<Loading />}>
-                <AssetInventoryProvider>
-                  <AssetsPageLazy />
-                </AssetInventoryProvider>
+                <AssetsPageLazy />
               </Suspense>
             </SecuritySolutionPageWrapper>
           </DataViewContext.Provider>
