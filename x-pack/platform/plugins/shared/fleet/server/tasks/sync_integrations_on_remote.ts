@@ -12,9 +12,11 @@ import semverGte from 'semver/functions/gte';
 import type { PackageClient } from '../services';
 import { outputService } from '../services';
 
+import { PackageNotFoundError } from '../errors';
+
 import type { SyncIntegrationsData } from './sync_integrations_task';
 
-const FLEET_SYNCED_INTEGRATIONS_CCR_INDEX_PREFIX = 'fleet-synced-integrations-ccr-*'; // -ccr-*
+const FLEET_SYNCED_INTEGRATIONS_CCR_INDEX_PREFIX = 'fleet-synced-integrations-ccr-*';
 
 const getSyncedIntegrationsCCRDoc = async (
   esClient: ElasticsearchClient,
@@ -88,14 +90,32 @@ export const syncIntegrationsOnRemote = async (
     }
     if (installation && installation.install_status === 'install_failed') {
       // TODO retry
+      logger.debug(`Package ${pkg.package_name} install failed on version ${installation.version}`);
     }
-    // try - catch?
-    const installResult = await packageClient.installPackage({
-      pkgName: pkg.package_name,
-      pkgVersion: pkg.package_version,
-    });
-    if (installResult.status === 'installed') {
-      logger.debug(`Package ${pkg.package_name} installed with version ${pkg.package_version}`);
+
+    try {
+      const installResult = await packageClient.installPackage({
+        pkgName: pkg.package_name,
+        pkgVersion: pkg.package_version,
+      });
+      if (installResult.status === 'installed') {
+        logger.info(`Package ${pkg.package_name} installed with version ${pkg.package_version}`);
+      }
+      if (installResult.error instanceof PackageNotFoundError) {
+        logger.warn(
+          `Package ${pkg.package_name} with version ${pkg.package_version} not found, trying to install latest version`
+        );
+        const installLatestResult = await packageClient.installPackage({
+          pkgName: pkg.package_name,
+        });
+        if (installLatestResult.status === 'installed') {
+          logger.info(`Package ${pkg.package_name} installed with version ${pkg.package_version}`);
+        }
+      }
+    } catch (error) {
+      logger.error(
+        `Failed to install package ${pkg.package_name} with version ${pkg.package_version}, error: ${error}`
+      );
     }
   }
 };

@@ -22,7 +22,7 @@ import { appContextService, outputService } from '../services';
 import { getInstalledPackageSavedObjects } from '../services/epm/packages/get';
 import { FLEET_SYNCED_INTEGRATIONS_INDEX_NAME } from '../services/setup/fleet_synced_integrations';
 
-import { syncIntegrationsOnRemote } from './sync_integration_on_remote';
+import { syncIntegrationsOnRemote } from './sync_integrations_on_remote';
 
 export const TYPE = 'fleet:sync-integrations-task';
 export const VERSION = '1.0.1';

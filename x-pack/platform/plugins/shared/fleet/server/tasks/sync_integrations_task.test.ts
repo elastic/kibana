@@ -14,7 +14,7 @@ import { getDeleteTaskRunResult } from '@kbn/task-manager-plugin/server/task';
 import type { CoreSetup } from '@kbn/core/server';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 
-import { createAppContextStartContractMock } from '../mocks';
+import { createAppContextStartContractMock, createMockPackageService } from '../mocks';
 
 import { appContextService, outputService } from '../services';
 
@@ -53,6 +53,8 @@ jest.mock('../services/epm/packages/get', () => ({
   }),
 }));
 
+jest.mock('./sync_integrations_on_remote');
+
 const MOCK_TASK_INSTANCE = {
   id: `${TYPE}:${VERSION}`,
   runAt: new Date(),
@@ -79,7 +81,11 @@ describe('SyncIntegrationsTask', () => {
   beforeEach(() => {
     mockContract = createAppContextStartContractMock();
     appContextService.start(mockContract);
-    mockCore = coreSetupMock();
+    mockCore = coreSetupMock({
+      pluginStartContract: {
+        packageService: createMockPackageService(),
+      },
+    });
     mockTaskManagerSetup = tmSetupMock();
     mockTask = new SyncIntegrationsTask({
       core: mockCore,
