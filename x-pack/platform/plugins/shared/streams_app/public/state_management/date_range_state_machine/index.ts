@@ -5,5 +5,5 @@
  * 2.0.
  */
 
-export * from './use_stream_detail';
+export * from './date_range_state_machine';
 export * from './types';

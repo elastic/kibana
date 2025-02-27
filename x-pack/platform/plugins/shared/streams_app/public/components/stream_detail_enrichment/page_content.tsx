@@ -33,7 +33,7 @@ import {
   useSimulatorSelector,
   useStreamEnrichmentEvents,
   useStreamsEnrichmentSelector,
-} from '../../state_management/stream_enrichment_service';
+} from './state_management/stream_enrichment_service';
 
 const MemoSimulationPlayground = React.memo(SimulationPlayground);
 

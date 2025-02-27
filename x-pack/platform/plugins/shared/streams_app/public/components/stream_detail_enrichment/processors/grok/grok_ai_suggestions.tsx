@@ -29,9 +29,9 @@ import { useAbortController, useBoolean } from '@kbn/react-hooks';
 import { useKibana } from '../../../../hooks/use_kibana';
 import { GrokFormState, ProcessorFormState } from '../../types';
 import {
-  useSimulatorSelector,
   useStreamsEnrichmentSelector,
-} from '../../../../state_management/stream_enrichment_service';
+  useSimulatorSelector,
+} from '../../state_management/stream_enrichment_service';
 
 const RefreshButton = ({
   generatePatterns,

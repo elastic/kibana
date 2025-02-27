@@ -6,45 +6,22 @@
  */
 
 import {
-  ActorRef,
   MachineImplementationsFrom,
-  Snapshot,
   assertEvent,
   fromObservable,
   enqueueActions,
   setup,
   assign,
 } from 'xstate5';
-import type { TimeRange } from '@kbn/data-plugin/common';
 import type { DataPublicPluginStart, TimefilterContract } from '@kbn/data-plugin/public';
 import { getPlaceholderFor } from '@kbn/xstate-utils';
-
-export interface DateRangeToParentEvent {
-  type: 'dateRange.update';
-}
-
-export type DateRangeParentActor = ActorRef<Snapshot<unknown>, DateRangeToParentEvent>;
-
-export interface DateRangeContext {
-  parentRef?: DateRangeParentActor;
-  timeRange: TimeRange;
-  absoluteTimeRange: {
-    start?: number;
-    end?: number;
-  };
-}
-
-type DateRangeEvent =
-  | { type: 'dateRange.refresh' }
-  | { type: 'dateRange.update'; range: TimeRange };
+import { DateRangeContext, DateRangeEvent, DateRangeInput } from './types';
 
 export const dateRangeMachine = setup({
   types: {
     context: {} as DateRangeContext,
     events: {} as DateRangeEvent,
-    input: {} as {
-      parentRef?: DateRangeParentActor;
-    },
+    input: {} as DateRangeInput,
   },
   actors: {
     subscribeTimeUpdates: getPlaceholderFor(createTimeUpdatesActor),
@@ -56,7 +33,7 @@ export const dateRangeMachine = setup({
     storeTimeUpdates: () => {
       throw new Error('Not implemented');
     },
-    emitDateRangeUpdate: enqueueActions(({ enqueue, context }) => {
+    notifyDateRangeUpdate: enqueueActions(({ enqueue, context }) => {
       if (context.parentRef) {
         enqueue.sendTo(context.parentRef, { type: 'dateRange.update' });
       }
@@ -80,7 +57,7 @@ export const dateRangeMachine = setup({
   invoke: {
     src: 'subscribeTimeUpdates',
     onSnapshot: {
-      actions: [{ type: 'storeTimeUpdates' }, { type: 'emitDateRangeUpdate' }],
+      actions: [{ type: 'storeTimeUpdates' }, { type: 'notifyDateRangeUpdate' }],
     },
   },
   on: {
@@ -88,7 +65,7 @@ export const dateRangeMachine = setup({
       actions: [{ type: 'setTimeUpdates' }],
     },
     'dateRange.refresh': {
-      actions: [{ type: 'storeTimeUpdates' }, { type: 'emitDateRangeUpdate' }],
+      actions: [{ type: 'storeTimeUpdates' }, { type: 'notifyDateRangeUpdate' }],
     },
   },
 });

@@ -13,7 +13,6 @@ import {
   and,
   assign,
   fromPromise,
-  not,
   sendTo,
   setup,
 } from 'xstate5';
@@ -33,15 +32,15 @@ import { flattenObjectNestedLast } from '@kbn/object-utils';
 import { errors as esErrors } from '@elastic/elasticsearch';
 import { isEmpty, isEqual, uniq } from 'lodash';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import {
+  dateRangeMachine,
+  createDateRangeMachineImplementations,
+  DateRangeToParentEvent,
+  DateRangeContext,
+} from '../../../../state_management/date_range_state_machine';
 import { ALWAYS_CONDITION } from '../../../../util/condition';
 import { DetectedField, ProcessorDefinitionWithUIAttributes } from '../../types';
 import { processorConverter } from '../../utils';
-import {
-  DateRangeContext,
-  DateRangeToParentEvent,
-  createDateRangeMachineImplementations,
-  dateRangeMachine,
-} from './date_range_state_machine';
 
 export const previewDocsFilterOptions = {
   outcome_filter_all: {

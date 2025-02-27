@@ -17,16 +17,15 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useSelector } from '@xstate5/react';
-import { isEmpty, isEqual } from 'lodash';
+import { isEmpty } from 'lodash';
 import { StreamsAppSearchBar, StreamsAppSearchBarProps } from '../streams_app_search_bar';
 import { PreviewTable } from '../preview_table';
 import { AssetImage } from '../asset_image';
 import {
-  useSimulatorRef,
   useSimulatorSelector,
   useStreamEnrichmentEvents,
-} from '../../state_management/stream_enrichment_service';
-import { previewDocsFilterOptions } from '../../state_management/stream_enrichment_service/simulation_state_machine';
+} from './state_management/stream_enrichment_service';
+import { previewDocsFilterOptions } from './state_management/stream_enrichment_service/simulation_state_machine';
 
 export const ProcessorOutcomePreview = () => {
   const isLoading = useSimulatorSelector(

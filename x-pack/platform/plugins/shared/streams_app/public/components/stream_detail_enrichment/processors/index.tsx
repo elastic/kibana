@@ -37,14 +37,14 @@ import {
   isDissectProcessor,
   getDefaultFormStateByType,
 } from '../utils';
+import { ProcessorErrors, ProcessorMetricBadges } from './processor_metrics';
 import {
-  useSimulatorSelector,
   useStreamEnrichmentEvents,
   useStreamsEnrichmentSelector,
-} from '../../../state_management/stream_enrichment_service';
-import { ProcessorErrors, ProcessorMetricBadges } from './processor_metrics';
-import { StreamEnrichmentContext } from '../../../state_management/stream_enrichment_service/types';
-import { ProcessorMetrics } from '../../../state_management/stream_enrichment_service/simulation_state_machine';
+  useSimulatorSelector,
+} from '../state_management/stream_enrichment_service';
+import { ProcessorMetrics } from '../state_management/stream_enrichment_service/simulation_state_machine';
+import { StreamEnrichmentContext } from '../state_management/stream_enrichment_service/types';
 
 export function AddProcessorPanel() {
   const { euiTheme } = useEuiTheme();
