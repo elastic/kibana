@@ -2,17 +2,16 @@
 @import './component/viewport/index';
 
 .kbnBody:has(.kbnGrid--freeform) {
-  overflow: hidden;
+  // overflow: hidden;
   .dashboardTopNav {
     z-index: 0;
   }
-  .dshDashboardViewportWrapper, .dshDashboardViewport, .dshLayout, .kbnGridWrapper {
+  .dshDashboardViewportWrapper, .dshDashboardViewport, .dshLayout, .kbnGridWrapper, .kbnGrid  {
     display: flex;
     flex: auto;
-    &, .kbnGrid {
-      width: 100%;
-      background-color: $euiColorBackgroundBasePlain;
-    }
+    width: 100%;
+    flex-direction: column;
+    background-color: $euiColorBackgroundBasePlain;
   }
 };
 

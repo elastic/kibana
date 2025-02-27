@@ -362,6 +362,7 @@ export function initializePanelsManager(
         //   window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
         // });
       },
+      setSections,
       setPanels,
       setRuntimeStateForChild,
       untilEmbeddableLoaded,

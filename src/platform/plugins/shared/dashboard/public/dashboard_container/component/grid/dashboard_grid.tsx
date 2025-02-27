@@ -9,6 +9,7 @@
 
 import classNames from 'classnames';
 import React, { useCallback, useMemo, useRef } from 'react';
+import deepEqual from 'fast-deep-equal';
 
 import { css } from '@emotion/react';
 import { useAppFixedViewport } from '@kbn/core-rendering-browser';
@@ -23,7 +24,7 @@ import { useDashboardApi } from '../../../dashboard_api/use_dashboard_api';
 import { DASHBOARD_GRID_HEIGHT, DASHBOARD_MARGIN_SIZE } from './constants';
 import { DashboardGridItem } from './dashboard_grid_item';
 import { useLayoutStyles } from './use_layout_styles';
-import { DashboardSectionMap } from '@kbn/dashboard-plugin/common/dashboard_container/types';
+import { DashboardSectionMap } from '../../../../common/dashboard_container/types';
 
 export const DashboardGrid = ({
   dashboardContainerRef,
@@ -86,13 +87,17 @@ export const DashboardGrid = ({
       if (viewMode !== 'edit') return;
 
       const currentPanels = dashboardApi.panels$.getValue();
+      const currentSections = dashboardApi.sections$.getValue();
       const updatedSections: DashboardSectionMap = [];
       const updatedPanels: { [key: string]: DashboardPanelState } = {};
       newLayout.forEach((section, sectionIndex) => {
-        updatedSections[sectionIndex] = {
-          title: section.title,
-          collapsed: section.isCollapsed,
-        };
+        if (sectionIndex !== 0) {
+          updatedSections.push({
+            title: section.title,
+            collapsed: section.isCollapsed,
+          });
+        }
+
         Object.values(section.panels).forEach((panelLayout) => {
           updatedPanels[panelLayout.id] = {
             ...currentPanels[panelLayout.id],
@@ -110,6 +115,9 @@ export const DashboardGrid = ({
 
       if (!arePanelLayoutsEqual(currentPanels, updatedPanels)) {
         dashboardApi.setPanels(updatedPanels);
+      }
+      if (!deepEqual(currentSections ?? [], updatedSections ?? [])) {
+        dashboardApi.setSections(updatedSections);
       }
     },
     [dashboardApi, viewMode]

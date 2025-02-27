@@ -10,7 +10,7 @@
 import classNames from 'classnames';
 import { cloneDeep } from 'lodash';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { combineLatest, map, pairwise, skip } from 'rxjs';
+import { combineLatest, distinctUntilChanged, map, pairwise, skip } from 'rxjs';
 
 import { css } from '@emotion/react';
 
@@ -33,7 +33,6 @@ export const GridRow = React.memo(({ rowIndex }: GridRowProps) => {
   const [panelIdsInOrder, setPanelIdsInOrder] = useState<string[]>(() =>
     getKeysInOrder(currentRow.panels)
   );
-
   const [pageCount, setPageCount] = useState<number>(
     gridLayoutStateManager.gridLayout$.getValue().length
   );
@@ -105,13 +104,24 @@ export const GridRow = React.memo(({ rowIndex }: GridRowProps) => {
        * the order of rendered panels need to be aligned with how they are displayed in the grid for accessibility
        * reasons (screen readers and focus management).
        */
-      const gridLayoutSubscription = gridLayoutStateManager.gridLayout$.subscribe((gridLayout) => {
-        if (!gridLayout[rowIndex]) return;
-        const newPanelIdsInOrder = getKeysInOrder(gridLayout[rowIndex].panels);
-        if (panelIdsInOrder.join() !== newPanelIdsInOrder.join()) {
-          setPanelIdsInOrder(newPanelIdsInOrder);
-        }
-      });
+      const gridLayoutSubscription = gridLayoutStateManager.gridLayout$
+        .pipe(
+          pairwise(),
+          map(([layoutBefore, layoutAfter]) => {
+            if (!layoutBefore[rowIndex] || !layoutAfter[rowIndex]) return;
+            return {
+              oldKeysInOrder: getKeysInOrder(layoutBefore[rowIndex].panels),
+              newKeysInOrder: getKeysInOrder(layoutAfter[rowIndex].panels),
+            };
+          })
+        )
+        .subscribe((result) => {
+          if (!result) return;
+          const { oldKeysInOrder, newKeysInOrder } = result;
+          if (oldKeysInOrder.join() !== newKeysInOrder.join()) {
+            setPanelIdsInOrder(newKeysInOrder);
+          }
+        });
 
       return () => {
         interactionStyleSubscription.unsubscribe();
@@ -128,7 +138,7 @@ export const GridRow = React.memo(({ rowIndex }: GridRowProps) => {
     newLayout[rowIndex].isCollapsed = !newLayout[rowIndex].isCollapsed;
     gridLayoutStateManager.gridLayout$.next(newLayout);
   }, [rowIndex, gridLayoutStateManager.gridLayout$]);
-  console.log(isCollapsed);
+
   useEffect(() => {
     /**
      * Set `aria-expanded` without passing the expanded state as a prop to `GridRowHeader` in order
@@ -137,8 +147,6 @@ export const GridRow = React.memo(({ rowIndex }: GridRowProps) => {
     if (!collapseButtonRef.current) return;
     collapseButtonRef.current.ariaExpanded = `${!isCollapsed}`;
   }, [isCollapsed]);
-
-  console.log(activeSectionIndex, rowIndex);
 
   return (
     (activeSectionIndex === undefined || activeSectionIndex === rowIndex) && (
@@ -200,10 +208,12 @@ const styles = {
       display: 'flex',
       flexDirection: 'column-reverse',
       '.kbnGridRowHeader': {
-        display: 'block',
+        display: 'flex',
+        justifyContent: 'center',
         flex: 0,
         backgroundColor: '#f6f9fc',
         borderTop: '1px solid #E3E8F2',
+        padding: '12px',
       },
       '.kbnGridRow': {
         flex: 1,
