@@ -12,6 +12,7 @@ import {
   setFlyoutConfig,
   setOverviewGroupByAction,
   setOverviewPageStateAction,
+  setRollupLocations,
   toggleErrorPopoverOpen,
   trendStatsBatch,
 } from './actions';
@@ -26,6 +27,7 @@ const initialState: MonitorOverviewState = {
   groupBy: { field: 'none', order: 'asc' },
   flyoutConfig: null,
   isErrorPopoverOpen: null,
+  rollupLocations: null,
 };
 
 export const monitorOverviewReducer = createReducer(initialState, (builder) => {
@@ -72,6 +74,9 @@ export const monitorOverviewReducer = createReducer(initialState, (builder) => {
           state.trendStats[configId + locationId] = null;
         }
       }
+    })
+    .addCase(setRollupLocations, (state, action) => {
+      state.rollupLocations = action.payload;
     });
 });
 

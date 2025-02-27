@@ -65,7 +65,6 @@ interface MetricItemGroupByLocation {
 }
 
 export const OverviewGrid = memo(() => {
-  const [rollupLocations, setRollupLocations] = useState(true);
   const { status, allConfigs, loaded } = useOverviewStatus({
     scopeStatusByLocation: true,
   });
@@ -75,6 +74,7 @@ export const OverviewGrid = memo(() => {
     flyoutConfig,
     pageState,
     groupBy: { field: groupField },
+    rollupLocations,
   } = useSelector(selectOverviewState);
   const trendData = useSelector(selectOverviewTrends);
   const { perPage } = pageState;
@@ -163,10 +163,7 @@ export const OverviewGrid = memo(() => {
           <GroupFields />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <RollupLocations
-            rollupLocations={rollupLocations}
-            setRollupLocations={setRollupLocations}
-          />
+          <RollupLocations />
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size="m" />
@@ -221,7 +218,6 @@ export const OverviewGrid = memo(() => {
                                 >
                                   {rollupLocations ? (
                                     <MetricItemGroup
-                                      configId={listData[listIndex][idx].configId}
                                       name={
                                         (listData[listIndex][idx] as MetricItemGroupByLocation).name
                                       }

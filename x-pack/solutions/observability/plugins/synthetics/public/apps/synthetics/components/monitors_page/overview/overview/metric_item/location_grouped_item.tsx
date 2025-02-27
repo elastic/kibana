@@ -16,11 +16,10 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import moment, { Moment } from 'moment';
+import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { OverviewStatusMetaData } from '../../../../../../../../common/runtime_types';
-import { useStatusByAllLocationsOverview } from '../../../../../hooks';
 import {
   selectErrorPopoverState,
   selectOverviewTrends,
@@ -33,13 +32,11 @@ import { getColor } from './get_color';
 import { METRIC_ITEM_HEIGHT } from './constants';
 
 export const MetricItemGroup = ({
-  configId,
   name,
   monitors,
   style,
   onClick,
 }: {
-  configId: string;
   name: string;
   monitors: OverviewStatusMetaData[];
   style?: React.CSSProperties;
@@ -49,15 +46,7 @@ export const MetricItemGroup = ({
   const statuses = new Set(monitors.map((m) => m.status));
   const { euiTheme } = useEuiTheme();
   const isErrorPopoverOpen = useSelector(selectErrorPopoverState);
-  const statusesByLocation = useStatusByAllLocationsOverview({
-    configId,
-    locationIds: monitors.map((m) => m.locationId),
-  });
   const trendData = useSelector(selectOverviewTrends);
-  const timestamp: Moment = statusesByLocation.reduce((acc, curr) => {
-    const currMoment = moment(curr.timestamp);
-    return currMoment.isAfter(acc) ? currMoment : acc;
-  }, moment(0));
 
   // KEEPING this here commented in case we want to do something with metrics for the locations
   //   const testInProgress = useSelector(manualTestRunInProgressSelector(configId));
@@ -135,7 +124,9 @@ export const MetricItemGroup = ({
             opacity: 1;
           }
         `}
-        title={timestamp.format('LLL')}
+        title={i18n.translate('xpack.synthetics.overview.locationGroupedItem.title', {
+          defaultMessage: 'Open detail page',
+        })}
       >
         <div
           css={css`

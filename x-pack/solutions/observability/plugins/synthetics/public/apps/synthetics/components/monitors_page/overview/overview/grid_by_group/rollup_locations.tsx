@@ -7,15 +7,19 @@
 
 import { EuiFlexGroup, EuiFlexItem, EuiTitle, EuiSwitch } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React from 'react';
+import React, { useCallback, useEffect, useRef } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { useUrlParams } from '../../../../../hooks';
+import { selectOverviewState } from '../../../../../state';
+import { setRollupLocations as setRollupLocationsAction } from '../../../../../state/overview';
 
-export function RollupLocations({
-  rollupLocations,
-  setRollupLocations,
-}: {
-  rollupLocations: boolean;
-  setRollupLocations: React.Dispatch<React.SetStateAction<boolean>>;
-}) {
+export function RollupLocations() {
+  const { rollupLocations } = useSelector(selectOverviewState);
+  const dispatch = useDispatch();
+  const setRollupLocations = useCallback(() => {
+    dispatch(setRollupLocationsAction(!rollupLocations));
+  }, [dispatch, rollupLocations]);
+  useRollupUrlParamFlag({ rollupLocations, setRollupLocations });
   return (
     <EuiFlexGroup gutterSize="s" alignItems="center">
       <EuiFlexItem grow={false}>
@@ -28,8 +32,8 @@ export function RollupLocations({
           <EuiFlexItem grow={false}>
             <EuiSwitch
               compressed
-              checked={rollupLocations}
-              onChange={() => setRollupLocations(!rollupLocations)}
+              checked={!!rollupLocations}
+              onChange={() => setRollupLocations()}
               showLabel={false}
               label=""
             />
@@ -38,6 +42,36 @@ export function RollupLocations({
       </EuiFlexItem>
     </EuiFlexGroup>
   );
+}
+
+function useRollupUrlParamFlag({
+  rollupLocations,
+  setRollupLocations,
+}: {
+  rollupLocations: boolean | null;
+  setRollupLocations: React.Dispatch<React.SetStateAction<boolean | null>>;
+}) {
+  const [urlParams, updateUrlParams] = useUrlParams();
+  const params = urlParams();
+  const { rollupLocations: urlRollupLocations } = params;
+  const isUrlHydrated = useRef(false);
+  useEffect(() => {
+    if (rollupLocations !== null && Boolean(urlRollupLocations) !== rollupLocations) {
+      updateUrlParams({ rollupLocations: String(rollupLocations) });
+    }
+    isUrlHydrated.current = true;
+  }, [rollupLocations, updateUrlParams, urlRollupLocations]);
+  useEffect(() => {
+    if (isUrlHydrated.current && rollupLocations === null && urlRollupLocations !== '') {
+      setRollupLocations(urlRollupLocations === 'true');
+    }
+  }, [rollupLocations, setRollupLocations, urlRollupLocations]);
+  useEffect(() => {
+    const strFlag = String(rollupLocations);
+    if (isUrlHydrated.current && rollupLocations !== null && strFlag !== urlRollupLocations) {
+      updateUrlParams({ rollupLocations: strFlag });
+    }
+  });
 }
 
 const BY_LOCATION_TITLE = i18n.translate('xpack.synthetics.overview.controls.byLocation', {
