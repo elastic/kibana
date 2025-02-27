@@ -206,18 +206,16 @@ describe('searchAfterAndBulkCreate', () => {
       },
     ];
 
-    const { success, createdSignalsCount, lastLookBackDate, errors } =
-      await searchAfterAndBulkCreate({
-        sharedParams: {
-          ...sharedParams,
-          unprocessedExceptions: [exceptionItem],
-        },
-        services: mockService,
-        eventsTelemetry: undefined,
-        filter: defaultFilter,
-        buildReasonMessage,
-      });
-    console.log(JSON.stringify(errors));
+    const { success, createdSignalsCount, lastLookBackDate } = await searchAfterAndBulkCreate({
+      sharedParams: {
+        ...sharedParams,
+        unprocessedExceptions: [exceptionItem],
+      },
+      services: mockService,
+      eventsTelemetry: undefined,
+      filter: defaultFilter,
+      buildReasonMessage,
+    });
     expect(success).toEqual(true);
     expect(mockService.scopedClusterClient.asCurrentUser.search).toHaveBeenCalledTimes(5);
     expect(createdSignalsCount).toEqual(4);

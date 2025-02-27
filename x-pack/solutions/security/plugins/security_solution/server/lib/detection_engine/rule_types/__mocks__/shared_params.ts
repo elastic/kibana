@@ -32,8 +32,8 @@ export const getSharedParamsMock = <T extends RuleParams = QueryRuleParams>({
   primaryTimestamp: '@timestamp',
   listClient: getListClientMock(),
   tuple: {
-    from: dateMath.parse(ruleParams.from)!,
-    to: dateMath.parse(ruleParams.to)!,
+    from: dateMath.parse(ruleParams.from) as moment.Moment,
+    to: dateMath.parse(ruleParams.to) as moment.Moment,
     maxSignals: ruleParams.maxSignals,
   },
   searchAfterSize: 100,

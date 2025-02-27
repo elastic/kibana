@@ -75,16 +75,12 @@ describe('buildEqlSearchRequest', () => {
   });
 
   test('should build a request with timestamp and event category overrides', () => {
-    const sharedParams = getSharedParamsMock({
-      ruleParams,
-      rewrites: {
-        inputIndex: ['testindex1', 'testindex2'],
+    const request = buildEqlSearchRequest({
+      sharedParams: {
+        ...sharedParams,
         primaryTimestamp: 'event.ingested',
         secondaryTimestamp: '@timestamp',
       },
-    });
-    const request = buildEqlSearchRequest({
-      sharedParams,
       query: 'process where true',
       from: 'now-5m',
       to: 'now',
@@ -166,12 +162,11 @@ describe('buildEqlSearchRequest', () => {
   });
 
   test('should build a request without @timestamp fallback if secondaryTimestamp is not specified', () => {
-    const sharedParams = getSharedParamsMock({
-      ruleParams,
-      rewrites: { inputIndex: ['testindex1', 'testindex2'], primaryTimestamp: 'event.ingested' },
-    });
     const request = buildEqlSearchRequest({
-      sharedParams,
+      sharedParams: {
+        ...sharedParams,
+        primaryTimestamp: 'event.ingested',
+      },
       query: 'process where true',
       from: 'now-5m',
       to: 'now',
@@ -226,12 +221,11 @@ describe('buildEqlSearchRequest', () => {
       excludeExceptions: true,
       startedAt: new Date(),
     });
-    const sharedParams = getSharedParamsMock({
-      ruleParams,
-      rewrites: { inputIndex: ['testindex1', 'testindex2'], exceptionFilter: filter },
-    });
     const request = buildEqlSearchRequest({
-      sharedParams,
+      sharedParams: {
+        ...sharedParams,
+        exceptionFilter: filter,
+      },
       query: 'process where true',
       from: 'now-5m',
       to: 'now',
