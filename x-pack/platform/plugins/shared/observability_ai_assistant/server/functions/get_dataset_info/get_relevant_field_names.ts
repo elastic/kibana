@@ -13,6 +13,8 @@ import { MessageRole, ShortIdTable, type Message } from '../../../common';
 import { concatenateChatCompletionChunks } from '../../../common/utils/concatenate_chat_completion_chunks';
 import { FunctionCallChatFunction } from '../../service/types';
 
+const SELECT_RELEVANT_FIELDS_NAME = 'select_relevant_fields';
+
 export async function getRelevantFieldNames({
   index,
   start,
@@ -122,7 +124,7 @@ export async function getRelevantFieldNames({
           ],
           functions: [
             {
-              name: 'select_relevant_fields',
+              name: SELECT_RELEVANT_FIELDS_NAME,
               description: 'The IDs of the fields you consider relevant to the conversation',
               parameters: {
                 type: 'object',
@@ -138,7 +140,7 @@ export async function getRelevantFieldNames({
               } as const,
             },
           ],
-          functionCall: 'select_relevant_fields',
+          functionCall: SELECT_RELEVANT_FIELDS_NAME,
         })
       ).pipe(concatenateChatCompletionChunks());
 
