@@ -92,7 +92,11 @@ export function useInstalledIntegrations(
 
           const validSearchTerms = filters.q ? searchResults.find((s) => s.id === item.id) : true;
 
-          return validInstalationStatus && validSearchTerms;
+          const validCustomIntegrations = filters.customIntegrations
+            ? item?.installationInfo?.install_source === 'custom'
+            : true;
+
+          return validInstalationStatus && validSearchTerms && validCustomIntegrations;
         })
     );
   }, [internalInstalledPackages, localSearch, filters]);
@@ -108,6 +112,12 @@ export function useInstalledIntegrations(
     }, {} as { [k: string]: number | undefined });
   }, [internalInstalledPackagesFiltered]);
 
+  const customIntegrationsCount = useMemo(() => {
+    return internalInstalledPackagesFiltered.reduce((acc, item) => {
+      return item?.installationInfo?.install_source === 'custom' ? acc + 1 : acc;
+    }, 0);
+  }, [internalInstalledPackagesFiltered]);
+
   const installedPackages: PackageListItemWithExtra[] = useMemo(() => {
     // Pagination
     const startAt = (pagination.currentPage - 1) * pagination.pageSize;
@@ -117,6 +127,7 @@ export function useInstalledIntegrations(
   return {
     total: internalInstalledPackagesFiltered.length,
     countPerStatus,
+    customIntegrationsCount,
     installedPackages,
     isInitialLoading,
     isLoading,

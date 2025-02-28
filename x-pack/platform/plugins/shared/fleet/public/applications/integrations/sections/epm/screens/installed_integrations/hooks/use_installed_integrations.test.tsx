@@ -78,6 +78,7 @@ describe('useInstalledIntegrations', () => {
         upgrade_failed: 1,
         upgrade_available: 1,
       },
+      customIntegrationsCount: 0,
       installedPackages: [
         expect.objectContaining({ id: 'aws', extra: { installation_status: 'installed' } }),
         expect.objectContaining({ id: 'azure', extra: { installation_status: 'upgrade_failed' } }),
@@ -106,6 +107,7 @@ describe('useInstalledIntegrations', () => {
       countPerStatus: {
         install_failed: 2,
       },
+      customIntegrationsCount: 0,
       installedPackages: [
         expect.objectContaining({ id: 'nginx', extra: { installation_status: 'install_failed' } }),
         expect.objectContaining({ id: 'apache', extra: { installation_status: 'install_failed' } }),

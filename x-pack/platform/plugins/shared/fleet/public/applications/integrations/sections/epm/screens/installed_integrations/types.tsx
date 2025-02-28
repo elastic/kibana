@@ -23,5 +23,6 @@ export type PackageListItemWithExtra = PackageListItem & {
 
 export interface InstalledIntegrationsFilter {
   installationStatus?: PackageInstallationStatus[];
+  customIntegrations?: boolean;
   q?: string;
 }

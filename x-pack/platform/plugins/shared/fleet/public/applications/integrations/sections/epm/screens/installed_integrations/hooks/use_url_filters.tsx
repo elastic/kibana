@@ -23,15 +23,23 @@ export function useAddUrlFilters() {
       const newFilters = { ...urlFilters, ...filters };
 
       history.push({
-        search: toUrlParams({
-          ...omit(urlParams, 'installationStatus', 'q'),
-          // Reset current page when changing filters
-          currentPage: '1',
-          ...(newFilters.installationStatus
-            ? { installationStatus: newFilters.installationStatus }
-            : {}),
-          ...(newFilters.q ? { q: newFilters.q } : {}),
-        }),
+        search: toUrlParams(
+          {
+            ...omit(urlParams, 'installationStatus', 'q'),
+            // Reset current page when changing filters
+            currentPage: '1',
+            ...(Object.hasOwn(newFilters, 'installationStatus')
+              ? { installationStatus: newFilters.installationStatus }
+              : {}),
+            ...(Object.hasOwn(newFilters, 'customIntegrations')
+              ? { customIntegrations: newFilters.customIntegrations?.toString() }
+              : {}),
+            ...(Object.hasOwn(newFilters, 'q') ? { q: newFilters.q } : {}),
+          },
+          {
+            skipEmptyString: true,
+          }
+        ),
       });
     },
     [urlFilters, urlParams, toUrlParams, history]
@@ -56,8 +64,17 @@ export function useUrlFilters(): InstalledIntegrationsFilter {
       q = urlParams.q;
     }
 
+    let customIntegrations: InstalledIntegrationsFilter['customIntegrations'];
+    if (
+      typeof urlParams.customIntegrations === 'string' &&
+      urlParams.customIntegrations === 'true'
+    ) {
+      customIntegrations = true;
+    }
+
     return {
       installationStatus,
+      customIntegrations,
       q,
     };
   }, [urlParams]);

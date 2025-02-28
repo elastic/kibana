@@ -13,6 +13,8 @@ import {
   EuiFlexItem,
   type CriteriaWithPagination,
   EuiToolTip,
+  EuiText,
+  EuiSpacer,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -62,127 +64,145 @@ export const InstalledIntegrationsTable: React.FunctionComponent<{
   );
 
   return (
-    <EuiBasicTable
-      loading={isLoading}
-      items={installedPackages}
-      itemId="name"
-      pagination={{
-        pageIndex: pagination.pagination.currentPage - 1,
-        totalItemCount: total,
-        pageSize: pagination.pagination.pageSize,
-        showPerPageOptions: true,
-        pageSizeOptions: pagination.pageSizeOptions,
-      }}
-      onChange={handleTablePagination}
-      selection={{
-        selectable: () => true,
-        selected: selectedItems,
-        onSelectionChange: (newSelectedItems) => {
-          setSelectedItems(newSelectedItems);
-        },
-      }}
-      columns={[
-        {
-          name: i18n.translate('xpack.fleet.epmInstalledIntegrations.integrationNameColumnTitle', {
-            defaultMessage: 'Integration name',
-          }),
-          render: (item: PackageListItem) => {
-            const url = getHref('integration_details_overview', {
-              pkgkey: `${item.name}-${item.version}`,
-            });
-
-            return (
-              <EuiLink href={url}>
-                <EuiFlexGroup gutterSize="s" alignItems="center">
-                  <EuiFlexItem grow={false}>
-                    <TableIcon
-                      size="m"
-                      icons={item.icons}
-                      packageName={item.name}
-                      version={item.version}
-                    />
-                  </EuiFlexItem>
-                  <EuiFlexItem grow={false}>{item.title}</EuiFlexItem>
-                </EuiFlexGroup>
-              </EuiLink>
-            );
+    <>
+      <EuiText color="subdued" size="s">
+        <FormattedMessage
+          id="xpack.fleet.epmInstalledIntegrations.tableTotalCount"
+          defaultMessage={'Showing {total, plural, one {# integration} other {# integrations}}'}
+          values={{
+            total,
+          }}
+        />
+      </EuiText>
+      <EuiSpacer size="s" />
+      <EuiBasicTable
+        loading={isLoading}
+        items={installedPackages}
+        itemId="name"
+        pagination={{
+          pageIndex: pagination.pagination.currentPage - 1,
+          totalItemCount: total,
+          pageSize: pagination.pagination.pageSize,
+          showPerPageOptions: true,
+          pageSizeOptions: pagination.pageSizeOptions,
+        }}
+        onChange={handleTablePagination}
+        selection={{
+          selectable: () => true,
+          selected: selectedItems,
+          onSelectionChange: (newSelectedItems) => {
+            setSelectedItems(newSelectedItems);
           },
-        },
-        {
-          name: i18n.translate('xpack.fleet.epmInstalledIntegrations.statusColumnTitle', {
-            defaultMessage: 'Status',
-          }),
-          render: (item: PackageListItemWithExtra) => (
-            <InstallationStatus status={item.extra.installation_status} />
-          ),
-        },
-        {
-          field: 'version',
-          width: '126px',
-          name: i18n.translate('xpack.fleet.epmInstalledIntegrations.versionColumnTitle', {
-            defaultMessage: 'Version',
-          }),
-        },
-        {
-          name: i18n.translate('xpack.fleet.epmInstalledIntegrations.attachedPoliciesColumnTitle', {
-            defaultMessage: 'Attached policies',
-          }),
-          width: '206px',
-          render: (item: PackageListItemWithExtra) => {
-            const policyCount = item.packagePoliciesInfo?.count ?? 0;
-            if (!policyCount) {
-              return null;
-            }
+        }}
+        columns={[
+          {
+            name: i18n.translate(
+              'xpack.fleet.epmInstalledIntegrations.integrationNameColumnTitle',
+              {
+                defaultMessage: 'Integration name',
+              }
+            ),
+            render: (item: PackageListItem) => {
+              const url = getHref('integration_details_overview', {
+                pkgkey: `${item.name}-${item.version}`,
+              });
 
-            const isDisabled = !authz.fleet.readAgentPolicies;
-
-            return (
-              <DisabledWrapperTooltip
-                tooltipContent={
-                  <FormattedMessage
-                    id="xpack.fleet.epmInstalledIntegrations.agentPoliciesRequiredPermissionTooltip"
-                    defaultMessage={
-                      'You need AgentPolicies:Read privileges to view those policies.'
-                    }
-                  />
-                }
-                disabled={isDisabled}
-              >
-                <EuiLink onClick={() => {}} disabled={isDisabled}>
-                  <FormattedMessage
-                    id="xpack.fleet.epmInstalledIntegrations.viewAttachedPoliciesButton"
-                    defaultMessage={
-                      'View {policyCount, plural, one {# policies} other {# policies}}'
-                    }
-                    values={{
-                      policyCount,
-                    }}
-                  />
+              return (
+                <EuiLink href={url}>
+                  <EuiFlexGroup gutterSize="s" alignItems="center">
+                    <EuiFlexItem grow={false}>
+                      <TableIcon
+                        size="m"
+                        icons={item.icons}
+                        packageName={item.name}
+                        version={item.version}
+                      />
+                    </EuiFlexItem>
+                    <EuiFlexItem grow={false}>{item.title}</EuiFlexItem>
+                  </EuiFlexGroup>
                 </EuiLink>
-              </DisabledWrapperTooltip>
-            );
+              );
+            },
           },
-        },
-        {
-          actions: [
-            {
-              render: () => {
-                return <p>test</p>;
+          {
+            name: i18n.translate('xpack.fleet.epmInstalledIntegrations.statusColumnTitle', {
+              defaultMessage: 'Status',
+            }),
+            render: (item: PackageListItemWithExtra) => (
+              <InstallationStatus status={item.extra.installation_status} />
+            ),
+          },
+          {
+            field: 'version',
+            width: '126px',
+            name: i18n.translate('xpack.fleet.epmInstalledIntegrations.versionColumnTitle', {
+              defaultMessage: 'Version',
+            }),
+          },
+          {
+            name: i18n.translate(
+              'xpack.fleet.epmInstalledIntegrations.attachedPoliciesColumnTitle',
+              {
+                defaultMessage: 'Attached policies',
+              }
+            ),
+            width: '206px',
+            render: (item: PackageListItemWithExtra) => {
+              const policyCount = item.packagePoliciesInfo?.count ?? 0;
+              if (!policyCount) {
+                return null;
+              }
+
+              const isDisabled = !authz.fleet.readAgentPolicies;
+
+              return (
+                <DisabledWrapperTooltip
+                  tooltipContent={
+                    <FormattedMessage
+                      id="xpack.fleet.epmInstalledIntegrations.agentPoliciesRequiredPermissionTooltip"
+                      defaultMessage={
+                        "You don't have permissions to view these policies. Contact your administrator."
+                      }
+                    />
+                  }
+                  disabled={isDisabled}
+                >
+                  <EuiLink onClick={() => {}} disabled={isDisabled}>
+                    <FormattedMessage
+                      id="xpack.fleet.epmInstalledIntegrations.viewAttachedPoliciesButton"
+                      defaultMessage={
+                        'View {policyCount, plural, one {# policies} other {# policies}}'
+                      }
+                      values={{
+                        policyCount,
+                      }}
+                    />
+                  </EuiLink>
+                </DisabledWrapperTooltip>
+              );
+            },
+          },
+          {
+            actions: [
+              {
+                render: () => {
+                  return <p>test</p>;
+                },
               },
-            },
-            {
-              name: 'test2',
-              description: 'test2',
-              onClick: () => {},
-            },
-            {
-              name: 'test3',
-              description: 'test3',
-              onClick: () => {},
-            },
-          ],
-        },
-      ]}
-    />
+              {
+                name: 'test2',
+                description: 'test2',
+                onClick: () => {},
+              },
+              {
+                name: 'test3',
+                description: 'test3',
+                onClick: () => {},
+              },
+            ],
+          },
+        ]}
+      />
+    </>
   );
 };

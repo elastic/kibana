@@ -29,7 +29,8 @@ const SEARCH_DEBOUNCE_MS = 250;
 export const InstalledIntegrationsSearchBar: React.FunctionComponent<{
   filters: InstalledIntegrationsFilter;
   countPerStatus: { [k: string]: number | undefined };
-}> = ({ filters, countPerStatus }) => {
+  customIntegrationsCount: number;
+}> = ({ filters, countPerStatus, customIntegrationsCount }) => {
   const addUrlFilter = useAddUrlFilters();
   const theme = useEuiTheme();
   const [searchTermas, setSearchTerms] = useState(filters.q);
@@ -148,18 +149,18 @@ export const InstalledIntegrationsSearchBar: React.FunctionComponent<{
         <EuiFlexItem grow={false}>
           <EuiFilterGroup>
             <EuiFilterButton
-              hasActiveFilters={false} // TODO
+              hasActiveFilters={filters.customIntegrations}
+              numFilters={customIntegrationsCount}
               onClick={() => {
-                // TODO
-                // if (!filters.installationStatus?.includes(item.status)) {
-                //   addUrlFilter({
-                //     installationStatus: [item.status],
-                //   });
-                // } else {
-                //   addUrlFilter({
-                //     installationStatus: [],
-                //   });
-                // }
+                if (filters.customIntegrations) {
+                  addUrlFilter({
+                    customIntegrations: undefined,
+                  });
+                } else {
+                  addUrlFilter({
+                    customIntegrations: true,
+                  });
+                }
               }}
             >
               <FormattedMessage
