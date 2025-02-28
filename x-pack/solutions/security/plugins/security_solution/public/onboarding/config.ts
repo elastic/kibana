@@ -6,7 +6,6 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { SIEM_MIGRATIONS_FEATURE_ID } from '@kbn/security-solution-features/constants';
 import { OnboardingTopicId } from './constants';
 import {
   defaultBodyConfig,
@@ -28,8 +27,6 @@ export const onboardingConfig: TopicConfig[] = [
       defaultMessage: 'SIEM Rule migration',
     }),
     body: siemMigrationsBodyConfig,
-    licenseTypeRequired: 'enterprise',
-    capabilitiesRequired: `${SIEM_MIGRATIONS_FEATURE_ID}.all`,
     disabledExperimentalFlagRequired: 'siemMigrationsDisabled',
   },
 ];

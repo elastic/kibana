@@ -11,7 +11,11 @@ import {
   createMockEndpointAppContextServiceSetupContract,
   createMockEndpointAppContextServiceStartContract,
 } from '../../../endpoint/mocks';
-import { BaseValidatorMock, createExceptionItemLikeOptionsMock } from './mocks';
+import {
+  BaseValidatorMock,
+  createExceptionItemLikeOptionsMock,
+  createExceptionListItemMock,
+} from './mocks';
 import { EndpointArtifactExceptionValidationError } from './errors';
 import { httpServerMock } from '@kbn/core/server/mocks';
 import type { PackagePolicy } from '@kbn/fleet-plugin/common';
@@ -23,10 +27,15 @@ import {
   GLOBAL_ARTIFACT_TAG,
 } from '../../../../common/endpoint/service/artifacts';
 import { securityMock } from '@kbn/security-plugin/server/mocks';
-import { setArtifactOwnerSpaceId } from '../../../../common/endpoint/service/artifacts/utils';
+import {
+  buildPerPolicyTag,
+  buildSpaceOwnerIdTag,
+  setArtifactOwnerSpaceId,
+} from '../../../../common/endpoint/service/artifacts/utils';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import { getEndpointAuthzInitialStateMock } from '../../../../common/endpoint/service/authz/mocks';
 import type { EndpointAuthz } from '../../../../common/endpoint/types/authz';
+import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 
 describe('When using Artifacts Exceptions BaseValidator', () => {
   let endpointAppContextServices: EndpointAppContextService;
@@ -198,16 +207,23 @@ describe('When using Artifacts Exceptions BaseValidator', () => {
   });
 
   describe('with space awareness', () => {
-    const noGlobalArtifactManagementAuthzMessage =
+    const noAuthzToManageOwnerSpaceIdError =
       'EndpointArtifactError: Endpoint authorization failure. Management of "ownerSpaceId" tag requires global artifact management privilege';
+    const noAuthzToManageGlobalArtifactsError =
+      'EndpointArtifactError: Endpoint authorization failure. Management of global artifacts requires additional privilege (global artifact management)';
+    const itemCanNotBeManagedInActiveSpaceErrorMessage =
+      'EndpointArtifactError: Updates to this shared item can only be done from the following space ID: foo (or by someone having global artifact management privilege)';
+    const setSpaceAwarenessFeatureFlag = (value: 'enabled' | 'disabled'): void => {
+      // @ts-expect-error updating a readonly field
+      endpointAppContextServices.experimentalFeatures.endpointManagementSpaceAwarenessEnabled =
+        value === 'enabled';
+    };
     let authzMock: EndpointAuthz;
 
     beforeEach(() => {
       authzMock = getEndpointAuthzInitialStateMock();
       endpointAppContextServices = createMockEndpointAppContextService();
-      // @ts-expect-error updating a readonly field
-      endpointAppContextServices.experimentalFeatures.endpointManagementSpaceAwarenessEnabled =
-        true;
+      setSpaceAwarenessFeatureFlag('enabled');
       (endpointAppContextServices.getEndpointAuthz as jest.Mock).mockResolvedValue(authzMock);
       setArtifactOwnerSpaceId(exceptionLikeItem, DEFAULT_SPACE_ID);
       validator = new BaseValidatorMock(endpointAppContextServices, kibanaRequest);
@@ -219,7 +235,7 @@ describe('When using Artifacts Exceptions BaseValidator', () => {
         authzMock.canManageGlobalArtifacts = false;
 
         await expect(validator._validateCreateOwnerSpaceIds(exceptionLikeItem)).rejects.toThrow(
-          noGlobalArtifactManagementAuthzMessage
+          noAuthzToManageOwnerSpaceIdError
         );
       });
 
@@ -240,9 +256,7 @@ describe('When using Artifacts Exceptions BaseValidator', () => {
       });
 
       it('should not error if feature flag is disabled', async () => {
-        // @ts-expect-error updating a readonly field
-        endpointAppContextServices.experimentalFeatures.endpointManagementSpaceAwarenessEnabled =
-          false;
+        setSpaceAwarenessFeatureFlag('disabled');
         authzMock.canManageGlobalArtifacts = false;
         setArtifactOwnerSpaceId(exceptionLikeItem, 'foo');
         setArtifactOwnerSpaceId(exceptionLikeItem, 'bar');
@@ -267,7 +281,7 @@ describe('When using Artifacts Exceptions BaseValidator', () => {
 
         await expect(
           validator._validateUpdateOwnerSpaceIds(exceptionLikeItem, savedExceptionLikeItem)
-        ).rejects.toThrow(noGlobalArtifactManagementAuthzMessage);
+        ).rejects.toThrow(noAuthzToManageOwnerSpaceIdError);
       });
 
       it('should allow changes to spaceOwnerId tags if user has global artifact management authz', async () => {
@@ -279,15 +293,162 @@ describe('When using Artifacts Exceptions BaseValidator', () => {
       });
 
       it('should not error if feature flag is disabled', async () => {
-        // @ts-expect-error updating a readonly field
-        endpointAppContextServices.experimentalFeatures.endpointManagementSpaceAwarenessEnabled =
-          false;
+        setSpaceAwarenessFeatureFlag('disabled');
         authzMock.canManageGlobalArtifacts = false;
         setArtifactOwnerSpaceId(exceptionLikeItem, 'foo');
         setArtifactOwnerSpaceId(exceptionLikeItem, 'bar');
 
         await expect(
           validator._validateUpdateOwnerSpaceIds(exceptionLikeItem, savedExceptionLikeItem)
+        ).resolves.toBeUndefined();
+      });
+    });
+
+    describe('#validateCanCreateGlobalArtifacts()', () => {
+      beforeEach(() => {
+        exceptionLikeItem.tags = [GLOBAL_ARTIFACT_TAG];
+      });
+
+      it('should do nothing if feature flag is turned off', async () => {
+        authzMock.canManageGlobalArtifacts = false;
+        setSpaceAwarenessFeatureFlag('disabled');
+
+        await expect(
+          validator._validateCanCreateGlobalArtifacts(exceptionLikeItem)
+        ).resolves.toBeUndefined();
+      });
+
+      it('should error is user does not have new global artifact management privilege', async () => {
+        authzMock.canManageGlobalArtifacts = false;
+
+        await expect(
+          validator._validateCanCreateGlobalArtifacts(exceptionLikeItem)
+        ).rejects.toThrow(noAuthzToManageGlobalArtifactsError);
+      });
+
+      it('should allow creation of global artifacts when user has privilege', async () => {
+        await expect(
+          validator._validateCanCreateGlobalArtifacts(exceptionLikeItem)
+        ).resolves.toBeUndefined();
+      });
+    });
+
+    describe('#validateCanUpdateItemInActiveSpace()', () => {
+      let savedExceptionItem: ExceptionListItemSchema;
+
+      beforeEach(() => {
+        savedExceptionItem = createExceptionListItemMock({
+          // Saved item is owned by different space id
+          tags: [buildPerPolicyTag('123'), buildSpaceOwnerIdTag('foo')],
+        });
+      });
+
+      it('should do nothing if feature flag is turned off', async () => {
+        setSpaceAwarenessFeatureFlag('disabled');
+        authzMock.canManageGlobalArtifacts = false;
+
+        await expect(
+          validator._validateCanUpdateItemInActiveSpace(exceptionLikeItem, savedExceptionItem)
+        ).resolves.toBeUndefined();
+      });
+
+      it('should error if updating a global item when user does not have global artifact privilege', async () => {
+        authzMock.canManageGlobalArtifacts = false;
+        savedExceptionItem.tags = [GLOBAL_ARTIFACT_TAG, buildSpaceOwnerIdTag('foo')];
+
+        await expect(
+          validator._validateCanUpdateItemInActiveSpace(exceptionLikeItem, savedExceptionItem)
+        ).rejects.toThrow(noAuthzToManageGlobalArtifactsError);
+      });
+
+      it('should error if updating an item outside of its owner space id when user does not have global artifact privilege', async () => {
+        authzMock.canManageGlobalArtifacts = false;
+
+        await expect(
+          validator._validateCanUpdateItemInActiveSpace(exceptionLikeItem, savedExceptionItem)
+        ).rejects.toThrow(itemCanNotBeManagedInActiveSpaceErrorMessage);
+      });
+
+      it('should allow updates to global items when user has global artifact privilege', async () => {
+        savedExceptionItem.tags = [GLOBAL_ARTIFACT_TAG, buildSpaceOwnerIdTag('foo')];
+
+        await expect(
+          validator._validateCanUpdateItemInActiveSpace(exceptionLikeItem, savedExceptionItem)
+        ).resolves.toBeUndefined();
+      });
+
+      it('should allow update to item outside of owner space id when user has global artifact privilege', async () => {
+        await expect(
+          validator._validateCanUpdateItemInActiveSpace(exceptionLikeItem, savedExceptionItem)
+        ).resolves.toBeUndefined();
+      });
+
+      it('should allow update to item inside of owner space id when user has no global artifact privilege', async () => {
+        authzMock.canManageGlobalArtifacts = false;
+        savedExceptionItem.tags = [buildPerPolicyTag('123'), buildSpaceOwnerIdTag('default')];
+
+        await expect(
+          validator._validateCanUpdateItemInActiveSpace(exceptionLikeItem, savedExceptionItem)
+        ).resolves.toBeUndefined();
+      });
+    });
+
+    describe('#validateCanDeleteItemInActiveSpace()', () => {
+      let savedExceptionItem: ExceptionListItemSchema;
+
+      beforeEach(() => {
+        savedExceptionItem = createExceptionListItemMock({
+          // Saved item is owned by different space id
+          tags: [buildPerPolicyTag('123'), buildSpaceOwnerIdTag('foo')],
+        });
+      });
+
+      it('should do nothing if feature flag is turned off', async () => {
+        authzMock.canManageGlobalArtifacts = false;
+        setSpaceAwarenessFeatureFlag('disabled');
+
+        await expect(
+          validator._validateCanDeleteItemInActiveSpace(savedExceptionItem)
+        ).resolves.toBeUndefined();
+      });
+
+      it('should error if deleting a global artifact when user does not have global artifact privilege', async () => {
+        authzMock.canManageGlobalArtifacts = false;
+        savedExceptionItem.tags = [GLOBAL_ARTIFACT_TAG, buildSpaceOwnerIdTag('foo')];
+
+        await expect(
+          validator._validateCanDeleteItemInActiveSpace(savedExceptionItem)
+        ).rejects.toThrow(noAuthzToManageGlobalArtifactsError);
+      });
+
+      it('should error if deleting item outside of its owner space id when user does not have global artifact privilege', async () => {
+        authzMock.canManageGlobalArtifacts = false;
+
+        await expect(
+          validator._validateCanDeleteItemInActiveSpace(savedExceptionItem)
+        ).rejects.toThrow(itemCanNotBeManagedInActiveSpaceErrorMessage);
+      });
+
+      it('should allow delete of global item when user has global artifact privilege', async () => {
+        savedExceptionItem.tags = [GLOBAL_ARTIFACT_TAG, buildSpaceOwnerIdTag('foo')];
+
+        await expect(
+          validator._validateCanDeleteItemInActiveSpace(savedExceptionItem)
+        ).resolves.toBeUndefined();
+      });
+
+      it('should allow deleting item from outside of its owner space id when user has global artifact privilege', async () => {
+        await expect(
+          validator._validateCanDeleteItemInActiveSpace(savedExceptionItem)
+        ).resolves.toBeUndefined();
+      });
+
+      it('should allow deleting of item inside from owner space id when user has no global artifact privilege', async () => {
+        authzMock.canManageGlobalArtifacts = false;
+        savedExceptionItem.tags = [buildPerPolicyTag('123'), buildSpaceOwnerIdTag('default')];
+
+        await expect(
+          validator._validateCanDeleteItemInActiveSpace(savedExceptionItem)
         ).resolves.toBeUndefined();
       });
     });

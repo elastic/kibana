@@ -180,10 +180,7 @@ import type {
   EndpointUnisolateActionRequestBodyInput,
   EndpointUnisolateActionResponse,
 } from './endpoint/actions/response_actions/unisolate/unisolate.gen';
-import type {
-  EndpointUploadActionRequestBodyInput,
-  EndpointUploadActionResponse,
-} from './endpoint/actions/response_actions/upload/upload.gen';
+import type { EndpointUploadActionResponse } from './endpoint/actions/response_actions/upload/upload.gen';
 import type { EndpointGetActionsStateResponse } from './endpoint/actions/state/state.gen';
 import type {
   EndpointGetActionsStatusRequestQueryInput,
@@ -1126,7 +1123,7 @@ If a record already exists for the specified entity, that record is overwritten 
           [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
         },
         method: 'POST',
-        body: props.body,
+        body: props.attachment,
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
@@ -2433,7 +2430,7 @@ export interface EndpointUnisolateActionProps {
   body: EndpointUnisolateActionRequestBodyInput;
 }
 export interface EndpointUploadActionProps {
-  body: EndpointUploadActionRequestBodyInput;
+  attachment: FormData;
 }
 export interface ExportRulesProps {
   query: ExportRulesRequestQueryInput;

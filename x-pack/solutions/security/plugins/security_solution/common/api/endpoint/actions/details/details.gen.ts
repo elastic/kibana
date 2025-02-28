@@ -16,7 +16,8 @@
 
 import { z } from '@kbn/zod';
 
-import { SuccessResponse } from '../../model/schema/common.gen';
+export type GetEndpointActionResponse = z.infer<typeof GetEndpointActionResponse>;
+export const GetEndpointActionResponse = z.object({});
 
 export type EndpointGetActionsDetailsRequestParams = z.infer<
   typeof EndpointGetActionsDetailsRequestParams
@@ -29,4 +30,4 @@ export type EndpointGetActionsDetailsRequestParamsInput = z.input<
 >;
 
 export type EndpointGetActionsDetailsResponse = z.infer<typeof EndpointGetActionsDetailsResponse>;
-export const EndpointGetActionsDetailsResponse = SuccessResponse;
+export const EndpointGetActionsDetailsResponse = GetEndpointActionResponse;

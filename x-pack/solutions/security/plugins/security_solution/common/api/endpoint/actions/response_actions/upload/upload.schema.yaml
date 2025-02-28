@@ -13,7 +13,7 @@ paths:
       requestBody:
         required: true
         content:
-          application/json:
+          multipart/form-data:
             schema:
               $ref: '#/components/schemas/UploadRouteRequestBody'
       responses:
@@ -22,11 +22,16 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '../../../model/schema/common.schema.yaml#/components/schemas/SuccessResponse'
+                $ref: '#/components/schemas/UploadRouteResponse'
 
 components:
   schemas:
     UploadRouteRequestBody:
+      example:
+        endpoint_ids:
+          - "ed518850-681a-4d60-bb98-e22640cae2a8"
+        file: "RWxhc3RpYw=="
+        parameters: { }
       allOf:
         - $ref: '../../../model/schema/common.schema.yaml#/components/schemas/BaseActionSchema'
         - type: object
@@ -39,8 +44,41 @@ components:
               properties:
                 overwrite:
                   type: boolean
+                  description: "Overwrite the file on the host if it already exists."
+                  example: false
                   default: false
             # File extends Blob - any binary data will be base-64 encoded
             file:
               type: string
+              description: "The binary content of the file."
+              example: "RWxhc3RpYw=="
               format: binary
+    UploadRouteResponse:
+      type: object
+      properties: { }
+      example:
+        data:
+          id: "9ff6aebc-2cb6-481e-8869-9b30036c9731"
+          agents:
+            - "ed518850-681a-4d60-bb98-e22640cae2a8"
+          hosts:
+            ed518850-681a-4d60-bb98-e22640cae2a8:
+              name: "Host-5i6cuc8kdv"
+          command: "upload"
+          agentType: "endpoint"
+          startedAt: "2023-07-03T15:07:22.837Z"
+          isCompleted: false
+          wasSuccessful: false
+          isExpired: false
+          status: "pending"
+          outputs: { }
+          agentState:
+            ed518850-681a-4d60-bb98-e22640cae2a8:
+              isCompleted: false
+              wasSuccessful: false
+          createdBy: "elastic"
+          parameters:
+            file_name: "fix-malware.sh"
+            file_id: "10e4ce3d-4abb-4f93-a0cd-eaf63a489280"
+            file_sha256: "a0bed94220193ba4895c0aa5b4e7e293381d15765cb164ddf7be5cdd010ae42a"
+            file_size: 69

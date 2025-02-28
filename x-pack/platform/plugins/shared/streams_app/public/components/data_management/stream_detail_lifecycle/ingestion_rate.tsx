@@ -33,7 +33,6 @@ import { useKibana } from '../../../hooks/use_kibana';
 import { DataStreamStats } from './hooks/use_data_stream_stats';
 import { formatBytes } from './helpers/format_bytes';
 import { StreamsAppSearchBar } from '../../streams_app_search_bar';
-import { useDateRange } from '../../../hooks/use_date_range';
 import { useIngestionRate, useIngestionRatePerTier } from './hooks/use_ingestion_rate';
 import { useIlmPhasesColorAndDescription } from './hooks/use_ilm_phases_color_and_description';
 
@@ -53,7 +52,7 @@ export function IngestionRate({
       start: { data },
     },
   } = useKibana();
-  const { timeRange, setTimeRange } = useDateRange({ data });
+  const { timeRange, setTimeRange } = data.query.timefilter.timefilter.useTimefilter();
 
   return (
     <>

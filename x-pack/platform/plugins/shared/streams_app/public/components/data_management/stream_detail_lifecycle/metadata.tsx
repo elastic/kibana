@@ -103,7 +103,7 @@ export function RetentionMetadata({
   ) : null;
 
   const lifecycleOrigin = isInheritLifecycle(definition.stream.ingest.lifecycle) ? (
-    <EuiText>
+    <EuiText size="s">
       {i18n.translate('xpack.streams.streamDetailLifecycle.inheritedFrom', {
         defaultMessage: 'Inherited from',
       })}{' '}
@@ -127,9 +127,11 @@ export function RetentionMetadata({
       )}
     </EuiText>
   ) : (
-    i18n.translate('xpack.streams.streamDetailLifecycle.localOverride', {
-      defaultMessage: 'Local override',
-    })
+    <EuiText size="s">
+      {i18n.translate('xpack.streams.streamDetailLifecycle.localOverride', {
+        defaultMessage: 'Local override',
+      })}
+    </EuiText>
   );
 
   return (

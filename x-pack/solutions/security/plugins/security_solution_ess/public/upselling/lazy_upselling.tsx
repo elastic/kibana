@@ -19,6 +19,14 @@ export const EntityAnalyticsUpsellingSectionLazy = withSuspenseUpsell(
   )
 );
 
+export const SiemMigrationsStartUpsellSectionLazy = withSuspenseUpsell(
+  lazy(() =>
+    import('./sections/siem_migration_start').then(({ SiemMigrationStartUpsellSection }) => ({
+      default: SiemMigrationStartUpsellSection,
+    }))
+  )
+);
+
 export const EntityAnalyticsUpsellingPageLazy = lazy(() =>
   import('./pages/entity_analytics_upselling').then(({ EntityAnalyticsUpsellingPageESS }) => ({
     default: EntityAnalyticsUpsellingPageESS,
