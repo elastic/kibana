@@ -68,6 +68,7 @@ export const FilterByAssigneesPopover: FC<FilterByAssigneesPopoverProps> = memo(
             badgeColor="subdued"
             disabled={!isPlatinumPlus}
             onClick={togglePopover}
+            isToggle={false}
             isSelected={isPopoverOpen}
             hasActiveFilters={selectedUserIds.length > 0}
             numActiveFilters={selectedUserIds.length}

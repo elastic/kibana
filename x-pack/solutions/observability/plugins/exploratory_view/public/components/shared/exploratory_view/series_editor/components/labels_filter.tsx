@@ -39,7 +39,13 @@ export function LabelsFieldFilter(props: FilterProps) {
   };
 
   const button = (
-    <EuiFilterButton iconType="arrowDown" iconSide="right" onClick={onButtonClick}>
+    <EuiFilterButton
+      iconType="arrowDown"
+      iconSide="right"
+      onClick={onButtonClick}
+      isToggle={false}
+      isSelected={isPopoverOpen}
+    >
       {LABELS_LABEL}
     </EuiFilterButton>
   );

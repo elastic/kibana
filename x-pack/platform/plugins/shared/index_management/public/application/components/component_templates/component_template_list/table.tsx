@@ -127,6 +127,7 @@ export const ComponentTable: FunctionComponent<Props> = ({
       iconType="arrowDown"
       badgeColor="success"
       onClick={onButtonClick}
+      isToggle={false}
       isSelected={isPopoverOpen}
       numFilters={filterOptions.filter((item) => item.checked !== 'off').length}
       hasActiveFilters={!!filterOptions.find((item) => item.checked === 'on')}

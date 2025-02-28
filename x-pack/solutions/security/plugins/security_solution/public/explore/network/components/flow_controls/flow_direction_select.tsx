@@ -20,6 +20,7 @@ export const FlowDirectionSelect = React.memo<Props>(({ onChangeDirection, selec
   <EuiFilterGroup>
     <EuiFilterButton
       withNext
+      isSelected={selectedDirection === FlowDirection.uniDirectional}
       hasActiveFilters={selectedDirection === FlowDirection.uniDirectional}
       onClick={() => onChangeDirection(FlowDirection.uniDirectional)}
       data-test-subj={FlowDirection.uniDirectional}
@@ -28,6 +29,7 @@ export const FlowDirectionSelect = React.memo<Props>(({ onChangeDirection, selec
     </EuiFilterButton>
 
     <EuiFilterButton
+      isSelected={selectedDirection === FlowDirection.biDirectional}
       hasActiveFilters={selectedDirection === FlowDirection.biDirectional}
       onClick={() => onChangeDirection(FlowDirection.biDirectional)}
       data-test-subj={FlowDirection.biDirectional}

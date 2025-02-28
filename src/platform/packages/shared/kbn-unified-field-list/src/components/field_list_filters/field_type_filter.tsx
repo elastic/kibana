@@ -164,6 +164,7 @@ export function FieldTypeFilter<T extends FieldListItem = DataViewField>({
             defaultMessage: 'Filter by type',
           })}
           color="primary"
+          isToggle={false}
           isSelected={isOpen}
           numFilters={selectedFieldTypes.length}
           hasActiveFilters={!!selectedFieldTypes.length}

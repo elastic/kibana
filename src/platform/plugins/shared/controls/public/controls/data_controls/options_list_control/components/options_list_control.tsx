@@ -163,6 +163,7 @@ export const OptionsListControl = ({
         hasActiveFilters={Boolean(selectedOptionsCount)}
         textProps={{ className: 'optionsList--selectionText' }}
         aria-label={panelTitle ?? defaultPanelTitle}
+        isToggle={false}
         aria-expanded={isPopoverOpen}
         aria-controls={popoverId}
         role="combobox"

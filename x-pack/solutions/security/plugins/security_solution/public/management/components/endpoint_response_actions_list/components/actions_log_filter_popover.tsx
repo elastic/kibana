@@ -48,6 +48,7 @@ export const ActionsLogFilterPopover = memo(
         <EuiFilterButton
           data-test-subj={getTestId(`${filterName}-filter-popoverButton`)}
           iconType="arrowDown"
+          isToggle={false}
           onClick={onButtonClick}
           isSelected={isPopoverOpen}
           numFilters={numFilters}

@@ -158,6 +158,7 @@ export const WaterfallFilter = ({
           <EuiFilterGroup>
             {MIME_FILTERS.map(({ label, mimeType }) => (
               <EuiFilterButton
+                isSelected={activeFilters.includes(mimeType)}
                 hasActiveFilters={activeFilters.includes(mimeType)}
                 onClick={() => toggleFilters(mimeType)}
                 key={label}

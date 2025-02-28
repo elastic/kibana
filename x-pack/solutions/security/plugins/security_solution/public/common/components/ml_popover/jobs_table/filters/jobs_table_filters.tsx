@@ -86,6 +86,7 @@ export const JobsTableFiltersComponent = ({
       <EuiFlexItem grow={false}>
         <EuiFilterGroup>
           <EuiFilterButton
+            isSelected={showElasticJobs}
             hasActiveFilters={showElasticJobs}
             onClick={handleElasticJobsClick}
             data-test-subj="show-elastic-jobs-filter-button"
@@ -94,6 +95,7 @@ export const JobsTableFiltersComponent = ({
             {i18n.SHOW_ELASTIC_JOBS}
           </EuiFilterButton>
           <EuiFilterButton
+            isSelected={showCustomJobs}
             hasActiveFilters={showCustomJobs}
             onClick={handleCustomJobsClick}
             data-test-subj="show-custom-jobs-filter-button"

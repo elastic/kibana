@@ -138,6 +138,7 @@ export const RulesWithGapsOverviewPanel = () => {
         <EuiFlexItem grow={false}>
           <EuiFilterGroup>
             <EuiFilterButton
+              isSelected={showRulesWithGaps}
               hasActiveFilters={showRulesWithGaps}
               onClick={handleShowRulesWithGapsFilterButtonClick}
               iconType={showRulesWithGaps ? `checkInCircleFilled` : undefined}

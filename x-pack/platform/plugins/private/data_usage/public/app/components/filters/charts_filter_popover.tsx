@@ -45,6 +45,7 @@ export const ChartsFilterPopover = memo(
           data-test-subj={getTestId(`${filterName}-popoverButton`)}
           iconType="arrowDown"
           onClick={onButtonClick}
+          isToggle={false}
           isSelected={isPopoverOpen}
           numFilters={numFilters}
           hasActiveFilters={hasActiveFilters}

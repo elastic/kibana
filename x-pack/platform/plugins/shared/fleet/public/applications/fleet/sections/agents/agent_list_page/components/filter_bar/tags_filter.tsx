@@ -56,6 +56,7 @@ export const TagsFilter: React.FunctionComponent<Props> = ({
         <EuiFilterButton
           iconType="arrowDown"
           onClick={() => setIsTagsFilterOpen(!isTagsFilterOpen)}
+          isToggle={false}
           isSelected={isTagsFilterOpen}
           hasActiveFilters={selectedTags.length > 0}
           numActiveFilters={selectedTags.length}

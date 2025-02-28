@@ -72,6 +72,7 @@ const RuleExecutionStatusSelectorComponent = ({
     <EuiFilterButton
       grow
       iconType="arrowDown"
+      isToggle={false}
       onClick={() => {
         setIsExecutionStatusPopoverOpen(!isExecutionStatusPopoverOpen);
       }}

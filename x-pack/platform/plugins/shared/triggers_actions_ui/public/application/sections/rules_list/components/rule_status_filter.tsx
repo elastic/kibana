@@ -105,6 +105,8 @@ export const RuleStatusFilter = (props: RuleStatusFilterProps) => {
           <EuiFilterButton
             data-test-subj={buttonDataTestSubj}
             iconType="arrowDown"
+            isToggle={false}
+            isSelected={isPopoverOpen}
             hasActiveFilters={selectedStatuses.length > 0}
             numActiveFilters={selectedStatuses.length}
             numFilters={selectedStatuses.length}

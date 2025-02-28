@@ -36,6 +36,7 @@ export const FilterGroup = ({
       iconType="arrowDown"
       badgeColor="success"
       onClick={toggle}
+      isToggle={false}
       isSelected={isPopoverOpen}
       numFilters={items.length}
       hasActiveFilters={!!items.find((item) => item.checked === 'on')}

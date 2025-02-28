@@ -120,6 +120,7 @@ const AssigneesFilterPopoverComponent: React.FC<AssigneesFilterPopoverProps> = (
             iconType="arrowDown"
             onClick={togglePopover}
             isLoading={isLoadingData}
+            isToggle={false}
             isSelected={isPopoverOpen}
             hasActiveFilters={selectedAssignees.length > 0}
             numActiveFilters={selectedAssignees.length}

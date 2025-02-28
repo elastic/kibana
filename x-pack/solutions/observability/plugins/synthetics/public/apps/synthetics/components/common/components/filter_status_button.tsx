@@ -36,6 +36,7 @@ export const FilterStatusButton = ({
   return (
     <EuiFilterButton
       data-test-subj={dataTestSubj}
+      isSelected={isActive}
       hasActiveFilters={isActive}
       isDisabled={isDisabled}
       onClick={() => {

@@ -84,6 +84,7 @@ export function EntityTypesMultiSelect() {
             iconType="arrowDown"
             badgeColor="success"
             onClick={() => setIsPopoverOpen((state) => !state)}
+            isToggle={false}
             isSelected={isPopoverOpen}
             numFilters={items.filter((item) => item.checked !== 'off').length}
             hasActiveFilters={!!items.find((item) => item.checked === 'on')}

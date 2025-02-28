@@ -47,6 +47,8 @@ export const StatusFilter: React.FC<RuleStatusFilterProps> = React.memo(
             <EuiFilterButton
               data-test-subj="status-filter-button"
               iconType="arrowDown"
+              isToggle={false}
+              isSelected={isPopoverOpen}
               hasActiveFilters={selectedStatus.length > 0}
               numActiveFilters={selectedStatus.length}
               numFilters={selectedStatus.length}

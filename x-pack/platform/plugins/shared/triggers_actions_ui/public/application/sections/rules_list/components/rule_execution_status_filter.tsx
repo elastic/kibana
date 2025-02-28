@@ -59,6 +59,8 @@ export const RuleExecutionStatusFilter: React.FunctionComponent<RuleExecutionSta
       button={
         <EuiFilterButton
           iconType="arrowDown"
+          isToggle={false}
+          isSelected={isPopoverOpen}
           hasActiveFilters={selectedValues.length > 0}
           numActiveFilters={selectedValues.length}
           numFilters={selectedValues.length}

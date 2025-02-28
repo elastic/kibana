@@ -76,12 +76,14 @@ const CoverageOverviewFiltersPanelComponent = () => {
               <EuiFilterGroup>
                 <EuiFilterButton
                   withNext
+                  isSelected={!showExpandedCells}
                   hasActiveFilters={!showExpandedCells}
                   onClick={handleCollapseCellsFilterClick}
                 >
                   {i18n.COLLAPSE_CELLS_FILTER_BUTTON}
                 </EuiFilterButton>
                 <EuiFilterButton
+                  isSelected={showExpandedCells}
                   hasActiveFilters={showExpandedCells}
                   onClick={handleExpandCellsFilterClick}
                 >

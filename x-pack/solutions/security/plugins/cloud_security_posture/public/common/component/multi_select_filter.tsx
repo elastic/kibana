@@ -123,6 +123,7 @@ export const MultiSelectFilter = <T extends string, K extends string = string>({
             data-test-subj={`options-filter-popover-button-${id}`}
             iconType={buttonIconType || 'arrowDown'}
             onClick={toggleIsPopoverOpen}
+            isToggle={false}
             isSelected={isPopoverOpen}
             numFilters={showActiveOptionsNumber ? options.length : undefined}
             hasActiveFilters={showActiveOptionsNumber ? selectedOptionKeys.length > 0 : undefined}

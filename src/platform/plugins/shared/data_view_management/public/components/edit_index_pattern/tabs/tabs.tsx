@@ -327,6 +327,7 @@ export const Tabs: React.FC<TabsProps> = ({
                         data-test-subj="indexedFieldTypeFilterDropdown"
                         iconType="arrowDown"
                         onClick={() => setIsIndexedFilterOpen(!isIndexedFilterOpen)}
+                        isToggle={false}
                         isSelected={isIndexedFilterOpen}
                         numFilters={indexedFieldTypes.length}
                         hasActiveFilters={filteredIndexedFieldTypeFilter.length > 0}
@@ -369,6 +370,7 @@ export const Tabs: React.FC<TabsProps> = ({
                         data-test-subj="schemaFieldTypeFilterDropdown"
                         iconType="arrowDown"
                         onClick={() => setIsSchemaFilterOpen(!isSchemaFilterOpen)}
+                        isToggle={false}
                         isSelected={isSchemaFilterOpen}
                         numFilters={SCHEMA_ITEMS.length}
                         hasActiveFilters={filteredSchemaFieldTypeFilter.length > 0}
@@ -457,6 +459,7 @@ export const Tabs: React.FC<TabsProps> = ({
                       data-test-subj="scriptedFieldLanguageFilterDropdown"
                       iconType="arrowDown"
                       onClick={() => setIsScriptedFieldFilterOpen(!isScriptedFieldFilterOpen)}
+                      isToggle={false}
                       isSelected={isScriptedFieldFilterOpen}
                       numFilters={scriptedFieldLanguages.length}
                       hasActiveFilters={

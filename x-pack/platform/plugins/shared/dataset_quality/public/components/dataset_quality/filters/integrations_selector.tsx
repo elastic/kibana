@@ -93,6 +93,7 @@ export function IntegrationsSelector({
       iconType="arrowDown"
       badgeColor="success"
       onClick={onButtonClick}
+      isToggle={false}
       isSelected={isPopoverOpen}
       numFilters={integrations.length}
       hasActiveFilters={!!integrations.find((item) => item.checked === 'on')}

@@ -54,6 +54,7 @@ export const MultiSelectPopover = React.memo(
               data-test-subj={'multiselect-popover-button'}
               iconType="arrowDown"
               onClick={() => togglePopover()}
+              isToggle={false}
               numFilters={allItems.length}
               isSelected={isItemPopoverOpen}
               hasActiveFilters={selectedItems.length > 0}

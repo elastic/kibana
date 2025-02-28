@@ -60,6 +60,8 @@ export const EntityFilter: FC<CustomComponentProps> = React.memo(({ query, onCha
       iconType="arrowDown"
       iconSide="right"
       onClick={setIsOpen.bind(null, (prev) => !prev)}
+      isToggle={false}
+      isSelected={isOpen}
       hasActiveFilters={hasActiveFilters}
       numActiveFilters={hasActiveFilters ? selectedOptions.length : undefined}
       grow
