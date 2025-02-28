@@ -165,6 +165,7 @@ enabled:
   - x-pack/test/api_integration/apis/monitoring/config.ts
   - x-pack/test/api_integration/apis/monitoring_collection/config.ts
   - x-pack/test/api_integration/apis/osquery/config.ts
+  - x-pack/test/api_integration/apis/random_actions/config.ts
   - x-pack/test/api_integration/apis/search/config.ts
   - x-pack/test/api_integration/apis/searchprofiler/config.ts
   - x-pack/test/api_integration/apis/security/config.ts
