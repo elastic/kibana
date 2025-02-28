@@ -350,6 +350,7 @@ describe('EditOutputFlyout', () => {
 
     expect(utils.queryByTestId('serviceTokenSecretInput')).not.toBeNull();
 
+    expect(utils.queryByTestId('remoteClusterConfigurationCallout')).not.toBeNull();
     expect(utils.queryByTestId('kibanaAPIKeyCallout')).not.toBeNull();
     expect(
       (utils.getByTestId('settingsOutputsFlyout.kibanaURLInput') as HTMLInputElement).value
@@ -376,12 +377,21 @@ describe('EditOutputFlyout', () => {
       is_default_monitoring: false,
       service_token: '1234',
       hosts: ['https://localhost:9200'],
+      kibana_url: 'http://localhost:5601',
       kibana_api_key: 'key',
     });
 
     expect((utils.getByTestId('serviceTokenSecretInput') as HTMLInputElement).value).toEqual(
       '1234'
     );
+
+    expect(utils.queryByTestId('settingsOutputsFlyout.kibanaURLInput')).toBeNull();
+    expect(utils.queryByTestId('kibanaAPIKeySecretInput')).toBeNull();
+
+    fireEvent.click(utils.getByTestId('syncIntegrationsSwitch'));
+    expect(
+      (utils.getByTestId('settingsOutputsFlyout.kibanaURLInput') as HTMLInputElement).value
+    ).toEqual('http://localhost:5601');
     expect((utils.getByTestId('kibanaAPIKeySecretInput') as HTMLInputElement).value).toEqual('key');
 
     fireEvent.click(utils.getByText('Save and apply settings'));
@@ -390,9 +400,11 @@ describe('EditOutputFlyout', () => {
       expect(mockSendPutOutput).toHaveBeenCalledWith(
         'outputR',
         expect.objectContaining({
+          sync_integrations: true,
           secrets: { service_token: '1234', kibana_api_key: 'key' },
           service_token: undefined,
           kibana_api_key: undefined,
+          kibana_url: 'http://localhost:5601',
         })
       );
     });
