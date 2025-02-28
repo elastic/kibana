@@ -165,6 +165,12 @@ export class AutomaticAgentUpgradeTask {
     this.logger.info(`[AutomaticAgentUpgradeTask] runTask() ended${msg ? ': ' + msg : ''}`);
   }
 
+  private throwIfAborted() {
+    if (this.abortController.signal.aborted) {
+      throw new Error('Task was aborted');
+    }
+  }
+
   private async checkAgentPoliciesForAutomaticUpgrades(
     esClient: ElasticsearchClient,
     soClient: SavedObjectsClientContract
@@ -184,10 +190,7 @@ export class AutomaticAgentUpgradeTask {
         return;
       }
       for (const agentPolicy of agentPolicyPageResults) {
-        if (this.abortController.signal.aborted) {
-          throw new Error('Task was aborted');
-        }
-
+        this.throwIfAborted();
         await this.checkAgentPolicyForAutomaticUpgrades(esClient, soClient, agentPolicy);
       }
     }
@@ -209,7 +212,7 @@ export class AutomaticAgentUpgradeTask {
     const totalActiveAgents = await this.getAgentCount(
       esClient,
       soClient,
-      this.getActiveAgentsKuery(agentPolicy)
+      `policy_id:${agentPolicy.id} AND ${AgentStatusKueryHelper.buildKueryForActiveAgents()}`
     );
     if (totalActiveAgents === 0) {
       this.logger.debug(
@@ -242,15 +245,6 @@ export class AutomaticAgentUpgradeTask {
     return res.total;
   }
 
-  private getActiveAgentsKuery(agentPolicy: AgentPolicy) {
-    return `policy_id:${agentPolicy.id} AND ${AgentStatusKueryHelper.buildKueryForActiveAgents()}`;
-  }
-
-  private getOnOrUpdatingToVersionKuery(agentPolicy: AgentPolicy, version: string) {
-    const updatingToKuery = `(upgrade_details.target_version:${version} AND NOT upgrade_details.state:UPG_FAILED)`;
-    return `policy_id:${agentPolicy.id} AND (agent.version:${version} OR ${updatingToKuery})`;
-  }
-
   private async processRequiredVersion(
     esClient: ElasticsearchClient,
     soClient: SavedObjectsClientContract,
@@ -267,10 +261,11 @@ export class AutomaticAgentUpgradeTask {
       (totalActiveAgents * requiredVersion.percentage) / 100
     );
     // Subtract total number of agents already or on or updating to target version.
+    const updatingToKuery = `(upgrade_details.target_version:${requiredVersion.version} AND NOT upgrade_details.state:UPG_FAILED)`;
     const totalOnOrUpdatingToTargetVersionAgents = await this.getAgentCount(
       esClient,
       soClient,
-      this.getOnOrUpdatingToVersionKuery(agentPolicy, requiredVersion.version)
+      `policy_id:${agentPolicy.id} AND (agent.version:${requiredVersion.version} OR ${updatingToKuery})`
     );
     numberOfAgentsForUpgrade -= totalOnOrUpdatingToTargetVersionAgents;
     // Return if target is already met.
@@ -293,21 +288,26 @@ export class AutomaticAgentUpgradeTask {
       return;
     }
 
-    // Fetch all active agents assigned to the policy in batches.
+    // Fetch candidate agents assigned to the policy in batches.
     // NB: ideally, we would query active agents on or below the target version. Unfortunately, this is not possible because agent.version
     //     is stored as text, so semver comparison cannot be done in the ES query (cf. https://github.com/elastic/kibana/issues/168604).
     //     As an imperfect alternative, sort agents by version. Since versions sort alphabetically, this will not always result in ascending semver sorting.
-    const activeAgentsFetcher = await fetchAllAgentsByKuery(esClient, soClient, {
-      kuery: this.getActiveAgentsKuery(agentPolicy),
+    const statusKuery =
+      '(status:online OR status:offline OR status:enrolling OR status:degraded OR status:error OR status:orphaned)'; // active status except updating
+    const oldStuckInUpdatingKuery = `(NOT upgrade_details AND status:updating AND NOT upgraded_at AND upgrade_started_at < now-2h)`; // agents pre 8.12.0 (without upgrade_details)
+    const newStuckInUpdatingKuery = `(NOT upgrade_attempts:* AND upgrade_details.target_version:{version} AND upgrade_details.state:UPG_FAILED)`;
+    const agentsFetcher = await fetchAllAgentsByKuery(esClient, soClient, {
+      kuery: `policy_id:${agentPolicy.id} AND (${statusKuery} OR ${oldStuckInUpdatingKuery} OR ${newStuckInUpdatingKuery})`,
       perPage: AGENTS_BATCHSIZE,
       sortField: 'agent.version',
       sortOrder: 'asc',
     });
 
-    let { done, agents } = await this.getNextAgentsBatch(activeAgentsFetcher);
+    let { done, agents } = await this.getNextAgentsBatch(agentsFetcher);
     let shouldProcessAgents = true;
 
     while (shouldProcessAgents) {
+      this.throwIfAborted();
       numberOfAgentsForUpgrade = await this.findAndUpgradeCandidateAgents(
         esClient,
         soClient,
@@ -317,7 +317,7 @@ export class AutomaticAgentUpgradeTask {
         agents
       );
       if (!done && numberOfAgentsForUpgrade > 0) {
-        ({ done, agents } = await this.getNextAgentsBatch(activeAgentsFetcher));
+        ({ done, agents } = await this.getNextAgentsBatch(agentsFetcher));
       } else {
         shouldProcessAgents = false;
       }
@@ -346,6 +346,7 @@ export class AutomaticAgentUpgradeTask {
     });
 
     for await (const retryingAgentsPageResults of retryingAgentsFetcher) {
+      this.throwIfAborted();
       // This function will return the total number of agents marked for retry so they're included in the count of agents for upgrade.
       retriedAgentsCounter += retryingAgentsPageResults.length;
 
@@ -380,9 +381,7 @@ export class AutomaticAgentUpgradeTask {
     const currentRetryDelay = moment
       .duration('PT' + this.retryDelays[agent.upgrade_attempts.length - 1].toUpperCase()) // https://momentjs.com/docs/#/durations/
       .asMilliseconds();
-    const lastUpgradeAttempt = Date.parse(
-      agent.upgrade_attempts[agent.upgrade_attempts.length - 1]
-    );
+    const lastUpgradeAttempt = Date.parse(agent.upgrade_attempts[0]);
     return Date.now() - lastUpgradeAttempt >= currentRetryDelay;
   }
 
@@ -431,14 +430,7 @@ export class AutomaticAgentUpgradeTask {
   }
 
   private isAgentEligibleForUpgrade(agent: AgentWithDefinedVersion, version: string) {
-    return (
-      isAgentUpgradeable(agent) &&
-      (agent.status !== 'updating' ||
-        (!agent.upgrade_attempts &&
-          AgentStatusKueryHelper.isStuckInUpdating(agent) &&
-          agent.upgrade_details?.target_version === version)) &&
-      semverGt(version, agent.agent.version)
-    );
+    return isAgentUpgradeable(agent) && semverGt(version, agent.agent.version);
   }
 
   private getUpgradeDurationSeconds(nAgents: number) {

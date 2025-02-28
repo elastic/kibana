@@ -169,7 +169,7 @@ export async function upgradeBatch(
         upgraded_at: null,
         upgrade_started_at: now,
         ...(options.isAutomatic
-          ? { upgrade_attempts: [...(agent.upgrade_attempts ?? []), now] }
+          ? { upgrade_attempts: [now, ...(agent.upgrade_attempts ?? [])] }
           : {}),
       },
     })),
