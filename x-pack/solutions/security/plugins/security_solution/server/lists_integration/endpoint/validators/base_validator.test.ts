@@ -545,6 +545,8 @@ describe('When using Artifacts Exceptions BaseValidator', () => {
     });
 
     describe('#validateCanReadItemInActiveSpace()', () => {
+      const itemNotFoundInSpaceErrorMessage =
+        'EndpointExceptionsError: Item not found in space [default]';
       let savedExceptionItem: ExceptionListItemSchema;
 
       beforeEach(async () => {
@@ -601,7 +603,7 @@ describe('When using Artifacts Exceptions BaseValidator', () => {
 
         await expect(
           validator._validateCanReadItemInActiveSpace(savedExceptionItem)
-        ).rejects.toThrowError('EndpointExceptionsError: Item not found in space [default]');
+        ).rejects.toThrowError(itemNotFoundInSpaceErrorMessage);
       });
 
       it('should allow read if per-policy item has at least one policy that is visible in active space', async () => {
@@ -618,7 +620,7 @@ describe('When using Artifacts Exceptions BaseValidator', () => {
 
         await expect(
           validator._validateCanReadItemInActiveSpace(savedExceptionItem)
-        ).rejects.toThrowError('EndpointExceptionsError: Item not found in space [default]');
+        ).rejects.toThrowError(itemNotFoundInSpaceErrorMessage);
       });
     });
   });
