@@ -382,6 +382,15 @@ describe('When using Artifacts Exceptions BaseValidator', () => {
           validator._validateCanUpdateItemInActiveSpace(exceptionLikeItem, savedExceptionItem)
         ).resolves.toBeUndefined();
       });
+
+      it('should allow update to item inside of owner space id when user has no global artifact privilege', async () => {
+        authzMock.canManageGlobalArtifacts = false;
+        savedExceptionItem.tags = [buildPerPolicyTag('123'), buildSpaceOwnerIdTag('default')];
+
+        await expect(
+          validator._validateCanUpdateItemInActiveSpace(exceptionLikeItem, savedExceptionItem)
+        ).resolves.toBeUndefined();
+      });
     });
 
     describe('#validateCanDeleteItemInActiveSpace()', () => {
@@ -429,6 +438,15 @@ describe('When using Artifacts Exceptions BaseValidator', () => {
       });
 
       it('should allow deleting item from outside of its owner space id when user has global artifact privilege', async () => {
+        await expect(
+          validator._validateCanDeleteItemInActiveSpace(savedExceptionItem)
+        ).resolves.toBeUndefined();
+      });
+
+      it('should allow deleting of item inside from owner space id when user has no global artifact privilege', async () => {
+        authzMock.canManageGlobalArtifacts = false;
+        savedExceptionItem.tags = [buildPerPolicyTag('123'), buildSpaceOwnerIdTag('default')];
+
         await expect(
           validator._validateCanDeleteItemInActiveSpace(savedExceptionItem)
         ).resolves.toBeUndefined();

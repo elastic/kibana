@@ -67,6 +67,7 @@ export class EndpointExceptionsValidator extends BaseValidator {
 
   async validatePreDeleteItem(currentItem: ExceptionListItemSchema): Promise<void> {
     await this.validateHasWritePrivilege();
+    await this.validateCanDeleteItemInActiveSpace(currentItem);
   }
 
   async validatePreGetOneItem(): Promise<void> {
