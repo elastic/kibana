@@ -39,6 +39,7 @@ describe('Get Knowledge Base Status Route', () => {
       isSetupInProgress: false,
       isSecurityLabsDocsLoaded: jest.fn().mockResolvedValue(true),
       isUserDataExists: jest.fn().mockResolvedValue(true),
+      getLoadedSecurityLabsDocsCount: jest.fn().mockResolvedValue(0),
     });
 
     getKnowledgeBaseStatusRoute(server.router);
