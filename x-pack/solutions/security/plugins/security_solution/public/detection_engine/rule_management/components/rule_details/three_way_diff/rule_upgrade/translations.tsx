@@ -163,6 +163,6 @@ export const RULE_BASE_VERSION_IS_MISSING_DESCRIPTION = i18n.translate(
   'xpack.securitySolution.detectionEngine.upgradeFlyout.baseVersionMissingDescription',
   {
     defaultMessage:
-      'The original version of this rule is stale and cannot be fetched, the upgrade experience will only include your version and the incoming elastic version. Please keep your rules as up to date as possible in the future to avoid this.',
+      "The original, unedited version of this Elastic rule couldn't be found. This sometimes happens when a rule hasn't been updated in a while. You can still update this rule, but will only have access to its current version and the incoming Elastic update. Updating Elastic rules more often can help you avoid this in the future. We encourage you to review this update carefully and ensure your changes are not accidentally overwritten.",
   }
 );

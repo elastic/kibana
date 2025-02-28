@@ -1094,8 +1094,7 @@ export const CLEAR_RULES_TABLE_FILTERS = i18n.translate(
 export const HAS_RULE_UPDATE_DETAILS_CALLOUT_MESSAGE = i18n.translate(
   'xpack.securitySolution.detectionEngine.ruleDetailsUpgrade.calloutMessage',
   {
-    defaultMessage:
-      'This prebuilt rule has an update available, please update to get the latest improvements.',
+    defaultMessage: 'Review the update to see the latest improvements, then update your rule.',
   }
 );
 
@@ -1103,7 +1102,21 @@ export const HAS_RULE_UPDATE_EDITING_CALLOUT_MESSAGE = i18n.translate(
   'xpack.securitySolution.detectionEngine.ruleDetailsUpgrade.calloutMessage',
   {
     defaultMessage:
-      'This prebuilt rule has an update available, please update to the latest version before making any edits.',
+      'Before editing this rule, we strongly recommend that you update it to ensure you get the latest improvements.',
+  }
+);
+
+export const HAS_RULE_UPDATE_CALLOUT_BUTTON = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDetailsUpdate.calloutButton',
+  {
+    defaultMessage: 'Review update',
+  }
+);
+
+export const HAS_RULE_UPDATE_EDITING_CALLOUT_BUTTON = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleEditingUpdate.calloutButton',
+  {
+    defaultMessage: 'Return to details',
   }
 );
 
@@ -1446,6 +1459,13 @@ export const UPDATE_RULE_BUTTON = i18n.translate(
   'xpack.securitySolution.addRules.upgradeRuleButton',
   {
     defaultMessage: 'Update rule',
+  }
+);
+
+export const REVIEW_RULE_BUTTON = i18n.translate(
+  'xpack.securitySolution.addRules.reviewRuleButton',
+  {
+    defaultMessage: 'Review rule',
   }
 );
 

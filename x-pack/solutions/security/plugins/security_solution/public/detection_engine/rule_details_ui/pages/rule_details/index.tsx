@@ -13,6 +13,7 @@ import {
   EuiConfirmModal,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiLink,
   EuiLoadingSpinner,
   EuiSpacer,
   EuiToolTip,
@@ -423,6 +424,20 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
   const lastExecutionDate = lastExecution?.date ?? '';
   const lastExecutionMessage = lastExecution?.message ?? '';
 
+  const updateCallToActionButton = useMemo(
+    () => (
+      <EuiLink
+        onClick={() => {
+          openRulePreview(ruleRuleId);
+        }}
+        data-test-subj="ruleDetailsUpdateRuleCalloutButton"
+      >
+        {ruleI18n.HAS_RULE_UPDATE_CALLOUT_BUTTON}
+      </EuiLink>
+    ),
+    [openRulePreview, ruleRuleId]
+  );
+
   const ruleStatusInfo = useMemo(() => {
     return (
       <>
@@ -587,7 +602,7 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
       <HasRuleUpdateCallout
         rule={rule}
         hasUpdate={isRuleUpgradeable}
-        openRulePreview={openRulePreview}
+        actionButton={updateCallToActionButton}
         message={ruleI18n.HAS_RULE_UPDATE_DETAILS_CALLOUT_MESSAGE}
       />
       {isBulkDuplicateConfirmationVisible && (

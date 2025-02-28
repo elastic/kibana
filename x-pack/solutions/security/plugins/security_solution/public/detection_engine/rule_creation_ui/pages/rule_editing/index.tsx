@@ -11,6 +11,7 @@ import {
   EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiLink,
   EuiResizableContainer,
   EuiSpacer,
   EuiTab,
@@ -524,6 +525,15 @@ const EditRulePageComponent: FC<{ rule: RuleResponse }> = ({ rule }) => {
     [navigateToApp, ruleId]
   );
 
+  const updateCallToActionButton = useMemo(
+    () => (
+      <EuiLink onClick={goToDetailsRule} data-test-subj="ruleEditingUpdateRuleCalloutButton">
+        {ruleI18n.HAS_RULE_UPDATE_EDITING_CALLOUT_BUTTON}
+      </EuiLink>
+    ),
+    [goToDetailsRule]
+  );
+
   if (
     redirectToDetections(
       isSignalIndexExists,
@@ -569,6 +579,7 @@ const EditRulePageComponent: FC<{ rule: RuleResponse }> = ({ rule }) => {
                         rule={rule}
                         hasUpdate={isRuleUpgradeable}
                         message={ruleI18n.HAS_RULE_UPDATE_EDITING_CALLOUT_MESSAGE}
+                        actionButton={updateCallToActionButton}
                       />
                       {invalidSteps.length > 0 && (
                         <EuiCallOut title={i18n.SORRY_ERRORS} color="danger" iconType="warning">
