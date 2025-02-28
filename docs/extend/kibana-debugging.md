@@ -31,7 +31,7 @@ This type of data can help us identify unknown bottlenecks, spot when a performa
 
 The default APM configuration is meant to be used by core {{kib}} developers only, but it can easily be re-configured to your needs. In its default configuration it’s disabled and will, once enabled, send APM data to a centrally managed {{es}} cluster accessible only to Elastic employees.
 
-To change the location where data is sent, use the [`serverUrl`](apm-agent-nodejs://docs/reference/configuration.md#server-url) APM config option. To activate the APM agent, use the [`active`](apm-agent-nodejs://docs/reference/configuration.md#active) APM config option.
+To change the location where data is sent, use the [`serverUrl`](apm-agent-nodejs://reference/configuration.md#server-url) APM config option. To activate the APM agent, use the [`active`](apm-agent-nodejs://reference/configuration.md#active) APM config option.
 
 All config options can be set by creating an appropriate config file under `config/kibana.dev.yml`.
 
@@ -43,7 +43,7 @@ elastic:
     active: true
 ```
 
-APM [Real User Monitoring agent](apm-agent-rum-js://docs/reference/index.md) is not available in the {{kib}} distributables, however the agent can be enabled by setting `ELASTIC_APM_ACTIVE` to `true`. flags
+APM [Real User Monitoring agent](apm-agent-rum-js://reference/index.md) is not available in the {{kib}} distributables, however the agent can be enabled by setting `ELASTIC_APM_ACTIVE` to `true`. flags
 
 ```
 ELASTIC_APM_ACTIVE=true yarn start

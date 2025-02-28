@@ -78,5 +78,5 @@ The message contains fields such as `alertId`, `date`, `_index`, `kibanaBaseUrl`
 
 The number of alerts (signals) can be found at `state.signals_count`.
 
-The alerts (signals) data is stored in the `context.alerts` array, following the [ECS](ecs://docs/reference/ecs-field-reference.md) format.
+The alerts (signals) data is stored in the `context.alerts` array, following the [ECS](ecs://reference/ecs-field-reference.md) format.
 

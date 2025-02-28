@@ -11,7 +11,7 @@ By default, **{{stack-monitor-app}}** is enabled, but data collection is disable
 
 You can adjust how monitoring data is collected from {{kib}} and displayed in {{kib}} by configuring settings in the `kibana.yml` file. There are also `monitoring.ui.elasticsearch.*` settings, which support the same values as [{{kib}} configuration settings](/reference/configuration-reference/general-settings.md).
 
-To control how data is collected from your {{es}} nodes, you configure [`xpack.monitoring.collection` settings](elasticsearch://docs/reference/elasticsearch/configuration-reference/monitoring-settings.md) in `elasticsearch.yml`. To control how monitoring data is collected from Logstash, configure monitoring settings in `logstash.yml`.
+To control how data is collected from your {{es}} nodes, you configure [`xpack.monitoring.collection` settings](elasticsearch://reference/elasticsearch/configuration-reference/monitoring-settings.md) in `elasticsearch.yml`. To control how monitoring data is collected from Logstash, configure monitoring settings in `logstash.yml`.
 
 For more information, see [Monitor a cluster](docs-content://deploy-manage/monitor.md).
 
@@ -87,7 +87,7 @@ $$$monitoring-ui-enabled$$$ `monitoring.ui.enabled`
 :   [8.1.1] Used as a workaround to avoid querying `metricbeat-*` indices which are now no longer queried. The default value is `metricbeat-*`.
 
 `monitoring.ui.max_bucket_size`
-:   Specifies the number of term buckets to return out of the overall terms list when performing terms aggregations to retrieve index and node metrics. For more information about the `size` parameter, see [Terms Aggregation](elasticsearch://docs/reference/data-analysis/aggregations/search-aggregations-bucket-terms-aggregation.md#search-aggregations-bucket-terms-aggregation-size). Defaults to `10000`.
+:   Specifies the number of term buckets to return out of the overall terms list when performing terms aggregations to retrieve index and node metrics. For more information about the `size` parameter, see [Terms Aggregation](elasticsearch://reference/data-analysis/aggregations/search-aggregations-bucket-terms-aggregation.md#search-aggregations-bucket-terms-aggregation-size). Defaults to `10000`.
 
 `monitoring.ui.min_interval_seconds` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ess}}")
 :   Specifies the minimum number of seconds that a time bucket in a chart can represent. Defaults to 10. If you modify the `monitoring.ui.collection.interval` in `elasticsearch.yml`, use the same value in this setting.

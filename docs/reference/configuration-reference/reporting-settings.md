@@ -69,10 +69,10 @@ Running multiple instances of {{kib}} in a cluster for load balancing of reporti
 
 
 `xpack.reporting.queue.pollInterval`
-:   Specifies the [time](elasticsearch://docs/reference/elasticsearch/rest-apis/api-conventions.md#time-units) that the reporting poller waits between polling the index for any pending Reporting jobs. Can be specified as a number of milliseconds. Defaults to `3s`.
+:   Specifies the [time](elasticsearch://reference/elasticsearch/rest-apis/api-conventions.md#time-units) that the reporting poller waits between polling the index for any pending Reporting jobs. Can be specified as a number of milliseconds. Defaults to `3s`.
 
 $$$xpack-reporting-q-timeout$$$ `xpack.reporting.queue.timeout` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ess}}")
-:   [How long](elasticsearch://docs/reference/elasticsearch/rest-apis/api-conventions.md#time-units) each worker has to produce a report. If your machine is slow or under heavy load, you might need to increase this timeout. If a Reporting job execution goes over this time limit, the job is marked as a failure and no download will be available. Can be specified as a number of milliseconds. Defaults to `4m`.
+:   [How long](elasticsearch://reference/elasticsearch/rest-apis/api-conventions.md#time-units) each worker has to produce a report. If your machine is slow or under heavy load, you might need to increase this timeout. If a Reporting job execution goes over this time limit, the job is marked as a failure and no download will be available. Can be specified as a number of milliseconds. Defaults to `4m`.
 
 
 ## PNG/PDF settings [reporting-capture-settings]
@@ -90,13 +90,13 @@ To generate PDF and PNG files, Reporting uses an internal "screenshotting" plugi
 The following settings control the capturing process.
 
 `xpack.screenshotting.capture.timeouts.openUrl` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ess}}")
-:   Specify the [time](elasticsearch://docs/reference/elasticsearch/rest-apis/api-conventions.md#time-units) to allow the Reporting browser to wait for the "Loading…​" screen to dismiss and find the initial data for the page. If the time is exceeded, a screenshot is captured showing the current page, and the download link shows a warning message. Can be specified as number of milliseconds. Defaults to `1m`.
+:   Specify the [time](elasticsearch://reference/elasticsearch/rest-apis/api-conventions.md#time-units) to allow the Reporting browser to wait for the "Loading…​" screen to dismiss and find the initial data for the page. If the time is exceeded, a screenshot is captured showing the current page, and the download link shows a warning message. Can be specified as number of milliseconds. Defaults to `1m`.
 
 `xpack.screenshotting.capture.timeouts.waitForElements` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ess}}")
-:   Specify the [time](elasticsearch://docs/reference/elasticsearch/rest-apis/api-conventions.md#time-units) to allow the Reporting browser to wait for all visualization panels to load on the page. If the time is exceeded, a screenshot is captured showing the current page, and the download link shows a warning message. Can be specified as number of milliseconds. Defaults to `1m`.
+:   Specify the [time](elasticsearch://reference/elasticsearch/rest-apis/api-conventions.md#time-units) to allow the Reporting browser to wait for all visualization panels to load on the page. If the time is exceeded, a screenshot is captured showing the current page, and the download link shows a warning message. Can be specified as number of milliseconds. Defaults to `1m`.
 
 `xpack.screenshotting.capture.timeouts.renderComplete` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ess}}")
-:   Specify the [time](elasticsearch://docs/reference/elasticsearch/rest-apis/api-conventions.md#time-units) to allow the Reporting browser to wait for all visualizations to fetch and render the data. If the time is exceeded, a screenshot is captured showing the current page, and the download link shows a warning message. Can be specified as number of milliseconds. Defaults to `2m`.
+:   Specify the [time](elasticsearch://reference/elasticsearch/rest-apis/api-conventions.md#time-units) to allow the Reporting browser to wait for all visualizations to fetch and render the data. If the time is exceeded, a screenshot is captured showing the current page, and the download link shows a warning message. Can be specified as number of milliseconds. Defaults to `2m`.
 
 ::::{note}
 If any timeouts from `xpack.screenshotting.capture.timeouts.*` settings occur when running a report job, Reporting will log the error and try to continue capturing the page with a screenshot. As a result, a download will be available, but there will likely be errors in the visualizations in the report.
@@ -104,7 +104,7 @@ If any timeouts from `xpack.screenshotting.capture.timeouts.*` settings occur wh
 
 
 `xpack.screenshotting.capture.loadDelay`
-:   [8.0.0] Specify the [amount of time](elasticsearch://docs/reference/elasticsearch/rest-apis/api-conventions.md#time-units) before taking a screenshot when visualizations are not evented. All visualizations that ship with {{kib}} are evented, so this setting should not have much effect. If you are seeing empty images instead of visualizations, try increasing this value. **NOTE**: This setting exists for backwards compatibility, but is unused and therefore does not have an affect on reporting performance.
+:   [8.0.0] Specify the [amount of time](elasticsearch://reference/elasticsearch/rest-apis/api-conventions.md#time-units) before taking a screenshot when visualizations are not evented. All visualizations that ship with {{kib}} are evented, so this setting should not have much effect. If you are seeing empty images instead of visualizations, try increasing this value. **NOTE**: This setting exists for backwards compatibility, but is unused and therefore does not have an affect on reporting performance.
 
 
 ### Chromium headless browser settings [reporting-chromium-settings]
@@ -226,7 +226,7 @@ Reporting parameters can be adjusted to overcome some of these limiting scenario
 
 
 $$$xpack-reporting-csv$$$ `xpack.reporting.csv.maxSizeBytes` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ess}}")
-:   The maximum [byte size](elasticsearch://docs/reference/elasticsearch/rest-apis/api-conventions.md#byte-units) of a CSV file before being truncated. This setting exists to prevent large exports from causing performance and storage issues. Can be specified as a number of bytes. Defaults to `250mb`.
+:   The maximum [byte size](elasticsearch://reference/elasticsearch/rest-apis/api-conventions.md#byte-units) of a CSV file before being truncated. This setting exists to prevent large exports from causing performance and storage issues. Can be specified as a number of bytes. Defaults to `250mb`.
 
 `xpack.reporting.csv.scroll.size`
 :   Number of documents retrieved from {{es}} for each scroll iteration during a CSV export. The maximum value is `10000`. Defaults to `500`.
@@ -238,7 +238,7 @@ You may need to lower this setting if the default number of documents creates a 
 
 
 `xpack.reporting.csv.scroll.duration`
-:   Amount of [time](elasticsearch://docs/reference/elasticsearch/rest-apis/api-conventions.md#time-units) allowed before {{kib}} cleans the scroll context during a CSV export. Valid option is either `auto` or [time](elasticsearch://docs/reference/elasticsearch/rest-apis/api-conventions.md#time-units), Defaults to `30s`.
+:   Amount of [time](elasticsearch://reference/elasticsearch/rest-apis/api-conventions.md#time-units) allowed before {{kib}} cleans the scroll context during a CSV export. Valid option is either `auto` or [time](elasticsearch://reference/elasticsearch/rest-apis/api-conventions.md#time-units), Defaults to `30s`.
 
 ::::{note}
 If search latency in {{es}} is sufficiently high, such as if you are using {{ccs}}, you may either need to increase the time setting or set this config value to `auto`. When the config value is set to `auto` the scroll context will be preserved for as long as possible, before the report task is terminated due to the limits of `xpack.reporting.queue.timeout`.

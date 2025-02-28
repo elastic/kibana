@@ -316,7 +316,7 @@ To ensure that a record of every operation is persisted even in case of an unexp
 
 ## Audit schema [xpack-security-ecs-audit-schema]
 
-Audit logs are written in JSON using [Elastic Common Schema (ECS)][Elastic Common Schema (ECS)](ecs://docs/reference/index.md)) specification.
+Audit logs are written in JSON using [Elastic Common Schema (ECS)][Elastic Common Schema (ECS)](ecs://reference/index.md)) specification.
 
 ### Base fields
 

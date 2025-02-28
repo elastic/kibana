@@ -380,16 +380,16 @@ xpack.security.audit.ignore_filters[].actions[] ![logo cloud](https://doc-icons.
 :   List of values matched against the `event.action` field of an audit event. Refer to [Audit logs](/reference/kibana-audit-events.md) for a list of available events.
 
 xpack.security.audit.ignore_filters[].categories[] ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ess}}")
-:   List of values matched against the `event.category` field of an audit event. Refer to [ECS categorization field](ecs://docs/reference/ecs-allowed-values-event-category.md) for allowed values.
+:   List of values matched against the `event.category` field of an audit event. Refer to [ECS categorization field](ecs://reference/ecs-allowed-values-event-category.md) for allowed values.
 
 xpack.security.audit.ignore_filters[].outcomes[] ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ess}}")
-:   List of values matched against the `event.outcome` field of an audit event. Refer to [ECS outcome field](ecs://docs/reference/ecs-allowed-values-event-outcome.md) for allowed values.
+:   List of values matched against the `event.outcome` field of an audit event. Refer to [ECS outcome field](ecs://reference/ecs-allowed-values-event-outcome.md) for allowed values.
 
 xpack.security.audit.ignore_filters[].spaces[] ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ess}}")
 :   List of values matched against the `kibana.space_id` field of an audit event. This represents the space id in which the event took place.
 
 xpack.security.audit.ignore_filters[].types[] ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ess}}")
-:   List of values matched against the `event.type` field of an audit event. Refer to [ECS type field](ecs://docs/reference/ecs-allowed-values-event-type.md) for allowed values.
+:   List of values matched against the `event.type` field of an audit event. Refer to [ECS type field](ecs://reference/ecs-allowed-values-event-type.md) for allowed values.
 
 xpack.security.audit.ignore_filters[].users[] ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ess}}")
 :   List of values matched against the `user.name` field of an audit event. This represents the `username` associated with the audit event.

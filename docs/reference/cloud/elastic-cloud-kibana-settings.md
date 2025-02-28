@@ -593,7 +593,7 @@ This setting is not available in versions 8.0.0 through 8.2.0. As such, this set
 :   When enabled, specifies the email address to receive cluster alert notifications.
 
 `xpack.monitoring.kibana.collection.interval`
-:   Controls [how often data samples are collected](elasticsearch://docs/reference/elasticsearch/configuration-reference/monitoring-settings.md#monitoring-collection-settings).
+:   Controls [how often data samples are collected](elasticsearch://reference/elasticsearch/configuration-reference/monitoring-settings.md#monitoring-collection-settings).
 
 `xpack.monitoring.min_interval_seconds`
 :   Specifies the minimum number of seconds that a time bucket in a chart can represent. If you modify the `xpack.monitoring.kibana.collection.interval`, use the same value in this setting.
@@ -604,7 +604,7 @@ This setting is not available in versions 8.0.0 through 8.2.0. As such, this set
 `xpack.ml.enabled`
 :   Set to true (default) to enable machine learning.
 
-    If set to `false` in `kibana.yml`, the machine learning icon is hidden in this Kibana instance. If `xpack.ml.enabled` is set to `true` in `elasticsearch.yml`, however, you can still use the machine learning APIs. To disable machine learning entirely, check the [Elasticsearch Machine Learning Settings](elasticsearch://docs/reference/elasticsearch/configuration-reference/machine-learning-settings.md).
+    If set to `false` in `kibana.yml`, the machine learning icon is hidden in this Kibana instance. If `xpack.ml.enabled` is set to `true` in `elasticsearch.yml`, however, you can still use the machine learning APIs. To disable machine learning entirely, check the [Elasticsearch Machine Learning Settings](elasticsearch://reference/elasticsearch/configuration-reference/machine-learning-settings.md).
 
 
 #### Content security policy configuration [ec_content_security_policy_configuration]
@@ -697,7 +697,7 @@ Each method has its own unique limitations which are important to understand.
 
 
 `xpack.reporting.csv.scroll.duration`
-:   Amount of [time](elasticsearch://docs/reference/elasticsearch/rest-apis/api-conventions.md#time-units) allowed before {{kib}} cleans the scroll context during a CSV export. Valid option is either `auto` or [time](elasticsearch://docs/reference/elasticsearch/rest-apis/api-conventions.md#time-units), Defaults to `30s`.
+:   Amount of [time](elasticsearch://reference/elasticsearch/rest-apis/api-conventions.md#time-units) allowed before {{kib}} cleans the scroll context during a CSV export. Valid option is either `auto` or [time](elasticsearch://reference/elasticsearch/rest-apis/api-conventions.md#time-units), Defaults to `30s`.
 
 ::::{note}
 Support for the The option `auto` was included here, when the config value is set to `auto` the scroll context will be preserved for as long as is possible, before the report task is terminated due to the limits of `xpack.reporting.queue.timeout`.
@@ -762,7 +762,7 @@ Support for the The option `auto` was included here, when the config value is se
 Defaults to `true`.
 
 `xpack.reporting.csv.scroll.duration`
-:   Amount of [time](elasticsearch://docs/reference/elasticsearch/rest-apis/api-conventions.md#time-units) allowed before {{kib}} cleans the scroll context during a CSV export.
+:   Amount of [time](elasticsearch://reference/elasticsearch/rest-apis/api-conventions.md#time-units) allowed before {{kib}} cleans the scroll context during a CSV export.
 
 Defaults to `30s` (30 seconds).
 

@@ -15,7 +15,7 @@ However, with the changes that role-based access control (RBAC) introduces, this
 
 ## Role-based access control [development-rbac]
 
-Role-based access control (RBAC) in {{kib}} relies upon the [application privileges](elasticsearch://docs/reference/elasticsearch/security-privileges.md#application-privileges) that {{es}} exposes. This allows {{kib}} to define the privileges that {{kib}} wishes to grant to users, assign them to the relevant users using roles, and then authorize the user to perform a specific action. This is handled within a secured instance of the `SavedObjectsClient` and available transparently to consumers when using `request.getSavedObjectsClient()` or `savedObjects.getScopedSavedObjectsClient()`.
+Role-based access control (RBAC) in {{kib}} relies upon the [application privileges](elasticsearch://reference/elasticsearch/security-privileges.md#application-privileges) that {{es}} exposes. This allows {{kib}} to define the privileges that {{kib}} wishes to grant to users, assign them to the relevant users using roles, and then authorize the user to perform a specific action. This is handled within a secured instance of the `SavedObjectsClient` and available transparently to consumers when using `request.getSavedObjectsClient()` or `savedObjects.getScopedSavedObjectsClient()`.
 
 ### {{kib}} Privileges [development-rbac-privileges]
 

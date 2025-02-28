@@ -72,7 +72,7 @@ $$$dateformat-tz$$$`dateFormat:tz`
 :   The timezone that Kibana uses. The default value of `Browser` uses the timezone detected by the browser.
 
 $$$datenanosformat$$$`dateNanosFormat`
-:   The format to use for displaying [pretty formatted dates](https://momentjs.com/docs/#/displaying/format/) of [Elasticsearch date_nanos type](elasticsearch://docs/reference/elasticsearch/mapping-reference/date_nanos.md).
+:   The format to use for displaying [pretty formatted dates](https://momentjs.com/docs/#/displaying/format/) of [Elasticsearch date_nanos type](elasticsearch://reference/elasticsearch/mapping-reference/date_nanos.md).
 
 $$$defaultindex$$$`defaultIndex`
 :   The index to access if no index is set. The default is `null`.
@@ -147,13 +147,13 @@ $$$savedobjects-perpage$$$`savedObjects:perPage`
 :   The number of objects to show on each page of the list of saved objects. The default is 5.
 
 $$$search-querylanguage$$$`search:queryLanguage`
-:   The query language to use in the query bar. Choices are [KQL](elasticsearch://docs/reference/query-languages/kql.md), a language built specifically for {{kib}}, and the [Lucene query syntax](docs-content://explore-analyze/query-filter/languages/lucene-query-syntax.md).
+:   The query language to use in the query bar. Choices are [KQL](elasticsearch://reference/query-languages/kql.md), a language built specifically for {{kib}}, and the [Lucene query syntax](docs-content://explore-analyze/query-filter/languages/lucene-query-syntax.md).
 
 $$$shortdots-enable$$$`shortDots:enable`
 :   Set this property to `true` to shorten long field names in visualizations. For example, show `f.b.baz` instead of `foo.bar.baz`.
 
 $$$sort-options$$$`sort:options`
-:   Options for the Elasticsearch [sort](elasticsearch://docs/reference/elasticsearch/rest-apis/sort-search-results.md) parameter.
+:   Options for the Elasticsearch [sort](elasticsearch://reference/elasticsearch/rest-apis/sort-search-results.md) parameter.
 
 $$$state-storeinsessionstorage$$$`state:storeInSessionStorage`
 :   [preview] Kibana tracks UI state in the URL, which can lead to problems when there is a lot of state information, and the URL gets very long. Enabling this setting stores part of the URL in your browser session to keep the URL short.
@@ -165,7 +165,7 @@ $$$theme-version$$$`theme:version`
 :   Kibana only ships with the v8 theme now, so this setting can no longer be edited.
 
 $$$timepicker-quickranges$$$`timepicker:quickRanges`
-:   The list of ranges to show in the Quick section of the time filter. This should be an array of objects, with each object containing `from`, `to` (see [accepted formats](elasticsearch://docs/reference/elasticsearch/rest-apis/common-options.md#date-math)), and `display` (the title to be displayed).
+:   The list of ranges to show in the Quick section of the time filter. This should be an array of objects, with each object containing `from`, `to` (see [accepted formats](elasticsearch://reference/elasticsearch/rest-apis/common-options.md#date-math)), and `display` (the title to be displayed).
 
 $$$timepicker-refreshintervaldefaults$$$`timepicker:refreshIntervalDefaults`
 :   The default refresh interval for the time filter. Example: `{ "pause": true, "value": 15000 }`.
@@ -276,7 +276,7 @@ $$$ml-anomalydetection-results-enabletimedefaults$$$`ml:anomalyDetection:results
 :   Use the default time filter in the **Single Metric Viewer** and **Anomaly Explorer**. If this setting is disabled, the results for the full time range are shown.
 
 $$$ml-anomalydetection-results-timedefaults$$$`ml:anomalyDetection:results:timeDefaults`
-:   Sets the default time filter for viewing {{anomaly-job}} results. This setting must contain `from` and `to` values (see [accepted formats](elasticsearch://docs/reference/elasticsearch/rest-apis/common-options.md#date-math)). It is ignored unless `ml:anomalyDetection:results:enableTimeDefaults` is enabled.
+:   Sets the default time filter for viewing {{anomaly-job}} results. This setting must contain `from` and `to` values (see [accepted formats](elasticsearch://reference/elasticsearch/rest-apis/common-options.md#date-math)). It is ignored unless `ml:anomalyDetection:results:enableTimeDefaults` is enabled.
 
 
 ### Notifications [kibana-notification-settings]
