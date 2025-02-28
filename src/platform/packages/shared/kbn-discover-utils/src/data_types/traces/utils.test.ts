@@ -21,14 +21,20 @@ describe('containsIndexPattern', () => {
   const isTraceIndex = containsIndexPattern(allowed);
 
   const testCases: Array<[string, boolean]> = [
-    ['.traces-default', true],
-    ['.logs-default', false],
-    ['remote_cluster:.ds-traces-apm.rum-default-2025.02.25-000005,.logs-default', true],
-    ['.logs-default,.ds-traces-apm.rum-default-2025.02.25-000005', true],
-    ['.logs-default,remote_cluster:.ds-metrics-apm.internal-default-2025.02.25-000002', false],
+    ['traces-*', true],
+    ['logs-*', false],
+    ['otel-*,apm-*,traces-apm*,traces-*.otel-*', true],
+    [
+      'remote_cluster:apm-*,remote_cluster:traces-apm*,remote_cluster:traces-*.otel-*,apm-*,traces-apm*,traces-*.otel-*',
+      true,
+    ],
+    [
+      'remote_cluster:filebeat-*,remote_cluster:logs-*,remote_cluster:kibana_sample_data_logs*,filebeat-*,kibana_sample_data_logs*,logs-*',
+      false,
+    ],
   ];
 
-  it.each(testCases)('Evaluates index "%s" as %p', (index, expected) => {
+  it.each(testCases)('Evaluates a traces index "%s" as %p', (index, expected) => {
     expect(isTraceIndex(index)).toBe(expected);
   });
 });
