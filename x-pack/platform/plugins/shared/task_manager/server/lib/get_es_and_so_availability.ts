@@ -32,25 +32,33 @@ export function getElasticsearchAndSOAvailability({
     result.next(isEsHealthy && isEsServiceAvailable && isSoServiceAvailable);
   });
   // Load cluster health to ensure task index is ready
-  getClusterClient().then((client) => {
-    client.asInternalUser.cluster
-      .health({
-        wait_for_status: isServerless ? 'green' : 'yellow',
-        timeout: '30s',
-        index: TASK_MANAGER_INDEX,
-      })
-      .then((healthResult) => {
-        logger.debug(`Cluster health: ${healthResult}`);
-        isEsHealthy = true;
-        result.next(isEsHealthy && isEsServiceAvailable && isSoServiceAvailable);
-      })
-      .catch((e) => {
-        logger.error(`Failed to load cluster health: ${e.message}`);
-        // Even if we can't load the cluster health, we should start the task
-        // poller in case the issue is unrelated.
-        isEsHealthy = true;
-        result.next(isEsHealthy && isEsServiceAvailable && isSoServiceAvailable);
-      });
-  });
+  getClusterClient()
+    .then((client) => {
+      client.asInternalUser.cluster
+        .health({
+          wait_for_status: isServerless ? 'green' : 'yellow',
+          timeout: '30s',
+          index: TASK_MANAGER_INDEX,
+        })
+        .then((healthResult) => {
+          logger.debug(`Cluster health: ${healthResult}`);
+          isEsHealthy = true;
+          result.next(isEsHealthy && isEsServiceAvailable && isSoServiceAvailable);
+        })
+        .catch((e) => {
+          logger.error(`Failed to load cluster health: ${e.message}`);
+          // Even if we can't load the cluster health, we should start the task
+          // poller in case the issue is unrelated.
+          isEsHealthy = true;
+          result.next(isEsHealthy && isEsServiceAvailable && isSoServiceAvailable);
+        });
+    })
+    .catch((e) => {
+      logger.error(`Failed to load cluster client to fetch cluster health: ${e.message}`);
+      // Even if we can't load the cluster health, we should start the task
+      // poller in case the issue is unrelated.
+      isEsHealthy = true;
+      result.next(isEsHealthy && isEsServiceAvailable && isSoServiceAvailable);
+    });
   return result;
 }

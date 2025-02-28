@@ -143,6 +143,20 @@ describe('getElasticsearchAndSOAvailability', () => {
     });
     core$.complete();
   });
+
+  test('returns true when both services are available and elasticsearch cluster client fails to load', async () => {
+    const core$ = new Subject<CoreStatus>();
+    const availability = getElasticsearchAndSOAvailability(
+      getOpts({ core$, getClusterClient: jest.fn().mockRejectedValue(new Error('Failed to load')) })
+    )
+      .pipe(take(3), bufferCount(3))
+      .toPromise();
+
+    core$.next(mockCoreStatusAvailability({ elasticsearch: true, savedObjects: true }));
+
+    expect(await availability).toEqual([false, false, true]);
+    core$.complete();
+  });
 });
 
 function mockCoreStatusAvailability({
