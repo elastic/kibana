@@ -7,7 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { apiCanExpandPanels, CanExpandPanels } from '@kbn/presentation-containers';
+import {
+  apiCanExpandPanels,
+  apiPublishesSettings,
+  CanExpandPanels,
+} from '@kbn/presentation-containers';
 import {
   apiHasParentApi,
   apiHasUniqueId,
@@ -16,7 +20,7 @@ import {
   HasUniqueId,
 } from '@kbn/presentation-publishing';
 import { Action, IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
-import { map, skip } from 'rxjs';
+import { combineLatest, map, of, skip } from 'rxjs';
 
 import { dashboardExpandPanelActionStrings } from './_dashboard_actions_strings';
 import { ACTION_EXPAND_PANEL, DASHBOARD_ACTION_GROUP } from './constants';
@@ -24,7 +28,14 @@ import { ACTION_EXPAND_PANEL, DASHBOARD_ACTION_GROUP } from './constants';
 export type ExpandPanelActionApi = HasUniqueId & HasParentApi<CanExpandPanels>;
 
 const isApiCompatible = (api: unknown | null): api is ExpandPanelActionApi =>
-  Boolean(apiHasUniqueId(api) && apiHasParentApi(api) && apiCanExpandPanels(api.parentApi));
+  Boolean(
+    apiHasUniqueId(api) &&
+      apiHasParentApi(api) &&
+      apiCanExpandPanels(api.parentApi) &&
+      (apiPublishesSettings(api.parentApi) && api.parentApi.settings.lockToGrid$
+        ? api.parentApi.settings.lockToGrid$.getValue() === true
+        : true)
+  );
 
 export class ExpandPanelAction implements Action<EmbeddableApiContext> {
   public readonly type = ACTION_EXPAND_PANEL;
@@ -54,7 +65,12 @@ export class ExpandPanelAction implements Action<EmbeddableApiContext> {
 
   public getCompatibilityChangesSubject({ embeddable }: EmbeddableApiContext) {
     return isApiCompatible(embeddable)
-      ? embeddable.parentApi.expandedPanelId$.pipe(
+      ? combineLatest([
+          embeddable.parentApi.expandedPanelId$,
+          apiPublishesSettings(embeddable.parentApi)
+            ? embeddable.parentApi.settings.lockToGrid$
+            : of(undefined),
+        ]).pipe(
           skip(1),
           map(() => undefined)
         )

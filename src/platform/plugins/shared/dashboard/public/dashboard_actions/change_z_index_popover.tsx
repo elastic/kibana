@@ -7,36 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useState } from 'react';
 
-import {
-  EuiButton,
-  EuiButtonIcon,
-  EuiCodeBlock,
-  EuiContextMenuItem,
-  EuiContextMenuPanel,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiForm,
-  EuiFormRow,
-  EuiPopover,
-  EuiPopoverFooter,
-} from '@elastic/eui';
+import { EuiButtonIcon, EuiContextMenuItem, EuiContextMenuPanel, EuiPopover } from '@elastic/eui';
 
-import { css } from '@emotion/react';
-import { AggregateQuery, getAggregateQueryMode, isOfQueryType } from '@kbn/es-query';
-import { ACTION_EDIT_PANEL } from '@kbn/presentation-panel-plugin/public';
-import { FilterItems } from '@kbn/unified-search-plugin/public';
-import {
-  EmbeddableApiContext,
-  apiCanLockHoverActions,
-  getViewModeSubject,
-  useBatchedOptionalPublishingSubjects,
-} from '@kbn/presentation-publishing';
-import { ActionExecutionMeta } from '@kbn/ui-actions-plugin/public';
-import { CONTEXT_MENU_TRIGGER } from '@kbn/embeddable-plugin/public';
-import { uiActionsService } from '../services/kibana_services';
-import { dashboardFilterNotificationActionStrings } from './_dashboard_actions_strings';
+import { apiCanLockHoverActions } from '@kbn/presentation-publishing';
 import { ChangeZIndexActionApi } from './change_z_index_action';
 
 export function ChangeZIndexPopover({ api }: { api: ChangeZIndexActionApi }) {

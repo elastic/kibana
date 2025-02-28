@@ -6,30 +6,25 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import React, { useCallback, useMemo, useState } from 'react';
+import React from 'react';
 
-import {
-  apiCanExpandPanels,
-  apiPublishesSettings,
-  CanExpandPanels,
-  PublishesSettings,
-} from '@kbn/presentation-containers';
+import { apiPublishesSettings, PublishesSettings } from '@kbn/presentation-containers';
 import {
   apiHasParentApi,
   apiHasUniqueId,
+  apiPublishesViewMode,
   EmbeddableApiContext,
   HasParentApi,
   HasUniqueId,
+  PublishesViewMode,
 } from '@kbn/presentation-publishing';
 import { Action, IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
-import { map, skip } from 'rxjs';
 
-import { dashboardExpandPanelActionStrings } from './_dashboard_actions_strings';
-import { ACTION_CHANGE_Z_INDEX, DASHBOARD_ACTION_GROUP } from './constants';
-import { coreServices } from '../services/kibana_services';
-import { EuiButtonIcon, EuiPopover } from '@elastic/eui';
-import { ChangeZIndexPopover } from './change_z_index_popover';
 import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
+import { coreServices } from '../services/kibana_services';
+import { ChangeZIndexPopover } from './change_z_index_popover';
+import { ACTION_CHANGE_Z_INDEX, DASHBOARD_ACTION_GROUP } from './constants';
+import { combineLatest, map, skip } from 'rxjs';
 
 interface CanIncreaseZIndex {
   bringToFront: (panelId: string) => void;
@@ -37,7 +32,7 @@ interface CanIncreaseZIndex {
 }
 
 export type ChangeZIndexActionApi = HasUniqueId &
-  HasParentApi<CanIncreaseZIndex & PublishesSettings>;
+  HasParentApi<CanIncreaseZIndex & PublishesSettings & PublishesViewMode>;
 
 const isApiCompatible = (api: unknown | null): api is ChangeZIndexActionApi =>
   Boolean(
@@ -46,7 +41,9 @@ const isApiCompatible = (api: unknown | null): api is ChangeZIndexActionApi =>
       (api.parentApi as CanIncreaseZIndex).bringToFront &&
       (api.parentApi as CanIncreaseZIndex).sendToBack &&
       apiPublishesSettings(api.parentApi) &&
-      api.parentApi.settings.lockToGrid$.getValue() === false
+      api.parentApi.settings.lockToGrid$.getValue() === false &&
+      apiPublishesViewMode(api.parentApi) &&
+      api.parentApi.viewMode$.getValue() === 'edit'
   );
 
 export class ChangeZIndexAction implements Action<EmbeddableApiContext> {
@@ -57,7 +54,7 @@ export class ChangeZIndexAction implements Action<EmbeddableApiContext> {
 
   public readonly MenuItem = ({ context }: { context: EmbeddableApiContext }) => {
     const { embeddable } = context;
-    if (!isApiCompatible(embeddable)) throw new IncompatibleActionError();
+    if (!isApiCompatible(embeddable)) return null;
 
     const { Provider: KibanaReactContextProvider } = createKibanaReactContext({
       uiSettings: coreServices.uiSettings,
@@ -70,13 +67,27 @@ export class ChangeZIndexAction implements Action<EmbeddableApiContext> {
   };
 
   public getDisplayName({ embeddable }: EmbeddableApiContext) {
-    if (!isApiCompatible(embeddable)) throw new IncompatibleActionError();
     return 'Order';
   }
 
   public getIconType({ embeddable }: EmbeddableApiContext) {
-    if (!isApiCompatible(embeddable)) throw new IncompatibleActionError();
     return 'layers';
+  }
+
+  public couldBecomeCompatible({ embeddable }: EmbeddableApiContext) {
+    return isApiCompatible(embeddable);
+  }
+
+  public getCompatibilityChangesSubject({ embeddable }: EmbeddableApiContext) {
+    return isApiCompatible(embeddable)
+      ? combineLatest([
+          embeddable.parentApi.settings.lockToGrid$,
+          embeddable.parentApi.viewMode$,
+        ]).pipe(
+          skip(1),
+          map(() => undefined)
+        )
+      : undefined;
   }
 
   public async isCompatible({ embeddable }: EmbeddableApiContext) {
