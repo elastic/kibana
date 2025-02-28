@@ -948,12 +948,12 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
               provider: 'alerting',
               actions: new Map([
                 // make sure the counts of the # of events per type are as expected
-                ['execute-start', { gte: 14 }],
-                ['execute', { gte: 14 }],
-                ['execute-action', { equal: 5 }],
+                ['execute-start', { gte: 6 }],
+                ['execute', { gte: 6 }],
+                ['execute-action', { equal: 6 }],
                 ['new-instance', { equal: 3 }],
                 ['active-instance', { gte: 3 }],
-                ['recovered-instance', { equal: 2 }],
+                ['recovered-instance', { equal: 3 }],
               ]),
             });
           });

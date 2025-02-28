@@ -46,7 +46,6 @@ export function determineDelayedAlerts<
   for (const id of keys(activeAlerts)) {
     const alert = activeAlerts[id];
     alert.incrementActiveCount();
-    alert.resetPendingRecoveredCount();
     // do not trigger an action notification if the number of consecutive
     // active alerts is less than the rule alertDelay threshold
     if (alert.getActiveCount() < alertDelay) {
