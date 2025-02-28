@@ -12,4 +12,4 @@ type InfraPageId = 'hosts';
 
 export type Key = `${ApmPageId}` | `${InfraPageId}`;
 
-export type WithPrefix<T extends string> = `[${T}_${Key}] ${string}`;
+export type DescriptionWithPrefix = `[ttfmp_${Key}] ${string}`;
