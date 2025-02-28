@@ -25,4 +25,4 @@ export interface SharedDataViewSelectionState {
   status: 'pristine' | 'loading' | 'error' | 'ready';
 }
 
-export { DataViewSpec };
+export { type DataViewSpec };
