@@ -68,7 +68,7 @@ export const updateRiskScoreMappings = async ({
       });
 
       await riskScoreDataClient.createOrUpdateRiskScoreLatestIndex();
-      await riskScoreDataClient.createOrUpdateRiskScoreIndexTemplate();
+      await riskScoreDataClient.createOrUpdateRiskScoreComponentTemplate(); // wrong name, it should be createOrUpdateRiskScoreComponentTemplate
       await riskScoreDataClient.updateRiskScoreTimeSeriesIndexMappings();
       await riskEngineDataClient.updateConfiguration({
         _meta: {
