@@ -544,12 +544,12 @@ export class SearchSource {
     options: SearchSourceSearchOptions
   ): Observable<IKibanaSearchResponse<unknown>> {
     const { search, getConfig, onResponse } = this.dependencies;
-
-    const params = getSearchParamsFromRequest(searchRequest, {
+    const { indexType, ...restRequest } = searchRequest;
+    const params = getSearchParamsFromRequest(restRequest, {
       getConfig,
     });
 
-    return search({ params, indexType: searchRequest.indexType }, options).pipe(
+    return search({ params, indexType }, options).pipe(
       switchMap((response) => {
         // For testing timeout messages in UI, uncomment the next line
         // response.rawResponse.timed_out = true;
