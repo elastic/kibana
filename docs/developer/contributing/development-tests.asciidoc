@@ -29,7 +29,7 @@ the relative path to the test file.
 
 === Unit Testing
 
-Kibana primarily uses Jest for unit testing. Each plugin or package defines a `jest.config.js` that extends link:{kib-repo}tree/{branch}/packages/kbn-test/jest-preset.js[a preset] provided by the link:{kib-repo}tree/{branch}/packages/kbn-test[`@kbn/test`] package. Unless you intend to run all unit tests within the project, it's most efficient to provide the Jest configuration file for the plugin or package you're testing.
+Kibana primarily uses Jest for unit testing. Each plugin or package defines a `jest.config.js` that extends link:{kib-repo}tree/{branch}/src/platform/packages/shared/kbn-test/jest-preset.js[a preset] provided by the link:{kib-repo}tree/{branch}/src/platform/packages/shared/kbn-test[`@kbn/test`] package. Unless you intend to run all unit tests within the project, it's most efficient to provide the Jest configuration file for the plugin or package you're testing.
 
 [source,bash]
 ----

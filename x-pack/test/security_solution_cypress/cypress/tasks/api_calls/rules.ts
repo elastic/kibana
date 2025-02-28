@@ -56,6 +56,20 @@ export const patchRule = (
   );
 };
 
+export const findRuleByRuleId = (
+  ruleId: string
+): Cypress.Chainable<Cypress.Response<RuleResponse>> => {
+  return cy.currentSpace().then((spaceId) =>
+    rootRequest<RuleResponse>({
+      method: 'GET',
+      url: `${
+        spaceId ? getSpaceUrl(spaceId, DETECTION_ENGINE_RULES_URL) : DETECTION_ENGINE_RULES_URL
+      }?rule_id=${ruleId}`,
+      failOnStatusCode: false,
+    })
+  );
+};
+
 /**
  * Snoozes a rule via API
  *

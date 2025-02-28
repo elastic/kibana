@@ -43,25 +43,23 @@ export const fetchDurationPercentiles = async ({
 
   const params = {
     apm: { events: [getEventType(chartType, searchMetrics)] },
-    body: {
-      track_total_hits: true,
-      query: getCommonCorrelationsQuery({
-        start,
-        end,
-        environment,
-        kuery,
-        query: filteredQuery,
-      }),
-      size: 0,
-      aggs: {
-        duration_percentiles: {
-          percentiles: {
-            hdr: {
-              number_of_significant_value_digits: SIGNIFICANT_VALUE_DIGITS,
-            },
-            field: getDurationField(chartType, searchMetrics),
-            ...(Array.isArray(percents) ? { percents } : {}),
+    track_total_hits: true,
+    query: getCommonCorrelationsQuery({
+      start,
+      end,
+      environment,
+      kuery,
+      query: filteredQuery,
+    }),
+    size: 0,
+    aggs: {
+      duration_percentiles: {
+        percentiles: {
+          hdr: {
+            number_of_significant_value_digits: SIGNIFICANT_VALUE_DIGITS,
           },
+          field: getDurationField(chartType, searchMetrics),
+          ...(Array.isArray(percents) ? { percents } : {}),
         },
       },
     },
