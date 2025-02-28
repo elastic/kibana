@@ -13,7 +13,7 @@ import { useKibana } from '../hooks/use_kibana';
 
 export const ProjectExample = () => {
   const {
-    services: { console: consolePlugin, history },
+    services: { console: consolePlugin, history, searchNavigation },
   } = useKibana();
 
   const embeddableConsole = useMemo(
@@ -25,6 +25,7 @@ export const ProjectExample = () => {
       offset={0}
       restrictWidth={false}
       grow={false}
+      solutionNav={searchNavigation?.useClassicNavigation(history)}
       data-test-subj="searchUxSandboxOverviewPage"
       color="primary"
     >
@@ -39,10 +40,7 @@ export const ProjectExample = () => {
           </span>
         </EuiText>
         <EuiSpacer />
-        <EuiText>
-          This example does not load the left navigation intentionally. You can add it on demand if
-          needed.
-        </EuiText>
+        <EuiText>This example loads the Classic Navigation as an example.</EuiText>
         <EuiSpacer />
         <EuiButton
           data-test-subj="ProjectExampleBackButton"

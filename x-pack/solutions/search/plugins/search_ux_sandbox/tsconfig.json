@@ -4,9 +4,9 @@
     "outDir": "target/types",
   },
   "include": [
+    "__mocks__/**/*",
     "common/**/*",
     "public/**/*",
-    "server/**/*",
   ],
   "kbn_references": [
     "@kbn/core",

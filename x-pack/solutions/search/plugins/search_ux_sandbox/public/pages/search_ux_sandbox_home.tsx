@@ -21,7 +21,7 @@ import {
 
 export const SearchUxSandboxHome = () => {
   const {
-    services: { history, searchNavigation },
+    services: { history },
   } = useKibana();
 
   return (
@@ -30,7 +30,6 @@ export const SearchUxSandboxHome = () => {
       restrictWidth={false}
       grow={false}
       data-test-subj="searchUxSandboxOverviewPage"
-      solutionNav={searchNavigation?.useClassicNavigation(history)}
       color="primary"
     >
       <KibanaPageTemplate.Header pageTitle="Search UX Sandbox" restrictWidth color="primary">
