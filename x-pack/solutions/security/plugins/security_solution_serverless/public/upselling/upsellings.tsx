@@ -33,6 +33,7 @@ import {
   EntityAnalyticsUpsellingPageLazy,
   EntityAnalyticsUpsellingSectionLazy,
   OsqueryResponseActionsUpsellingSectionLazy,
+  SiemMigrationsStartUpsellSectionLazy,
   ThreatIntelligencePaywallLazy,
 } from './lazy_upselling';
 import * as i18n from './translations';
@@ -147,7 +148,11 @@ export const upsellingSections: UpsellingSections = [
     component: () => (
       <IntegrationsAssistantLazy requiredPLI={ProductFeatureKey.integrationAssistant} />
     ),
-  },
+  },{
+    id: 'siem_migrations_start',
+    pli: ProductFeatureKey.siemMigrations,
+    component: SiemMigrationsStartUpsellSectionLazy,
+  }
 ];
 
 // Upselling for sections, linked by arbitrary ids

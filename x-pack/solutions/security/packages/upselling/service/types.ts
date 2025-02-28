@@ -21,6 +21,7 @@ export type UpsellingSectionId =
   | 'cloud_security_posture_integration_installation'
   | 'ruleDetailsEndpointExceptions'
   | 'integration_assistant';
+  | 'siem_migrations_start';
 
 export type UpsellingMessageId =
   | 'investigation_guide'
