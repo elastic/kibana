@@ -14,3 +14,18 @@ export const UPGRADE_LICENSE_MESSAGE = (requiredLicense: string) =>
       requiredLicense,
     },
   });
+
+export const SIEM_MIGRATION_UPSELLING_TITLE = (requiredLicense: string) =>
+  i18n.translate('xpack.securitySolutionEss.upselling.siemMigrations.title', {
+    defaultMessage: '{requiredLicense} license required',
+    values: {
+      requiredLicense,
+    },
+  });
+
+export const SIEM_MIGRATION_UPGRADE_LICENSE_MESSAGE = i18n.translate(
+  'xpack.securitySolutionEss.upselling.siemMigrations.upgradeLicenseMessage',
+  {
+    defaultMessage: 'To use this feature, upgrade your Elastic subscription level.',
+  }
+);
