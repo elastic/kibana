@@ -5,43 +5,82 @@
  * 2.0.
  */
 
-import type { ConnectionElement } from './types';
+import type { ConnectionElement, ServiceMapExitSpan, ServiceMapService } from './types';
 import type { GroupedNode } from './group_resource_nodes';
 import { groupResourceNodes } from './group_resource_nodes';
 import expectedGroupedData from '../../server/routes/service_map/mock_responses/group_resource_nodes_grouped.json';
 import preGroupedData from '../../server/routes/service_map/mock_responses/group_resource_nodes_pregrouped.json';
+import { getEdgeId, getExternalConnectionNode, getServiceConnectionNode } from './utils';
 
 describe('groupResourceNodes', () => {
-  const createMockExitSpanNode = (
-    id: string,
-    spanType: string,
-    spanSubtype: string,
-    spanDestinationServiceResource: string,
-    serviceName: string
-  ): ConnectionElement => ({
-    data: {
-      id,
-      'service.name': serviceName,
-      'span.type': spanType,
-      'span.subtype': spanSubtype,
-      'span.destination.service.resource': spanDestinationServiceResource,
-      label: `Node ${id}`,
-    },
+  const createService = (service: { serviceName: string; agentName: string }) =>
+    ({
+      ...service,
+      serviceEnvironment: 'production',
+    } as ServiceMapService);
+
+  /**
+   * Helper function to generate an external connection node.
+   */
+  const createExitSpan = (exitSpan: {
+    agentName?: string;
+    serviceName?: string;
+    spanType: string;
+    spanSubtype: string;
+    spanDestinationServiceResource: string;
+  }) =>
+    ({
+      ...exitSpan,
+      serviceEnvironment: 'production',
+    } as ServiceMapExitSpan);
+
+  const nodejsService = createService({ serviceName: 'opbeans-node', agentName: 'nodejs' });
+
+  const mockServiceNode = (service: ServiceMapService): ConnectionElement => ({
+    data: getServiceConnectionNode(service),
   });
 
-  const createMockServiceNode = (id: string): ConnectionElement => ({
-    data: {
-      id,
-      'service.name': id,
-      'agent.name': 'java',
-      'service.environment': 'production',
-      label: `Node ${id}`,
-    },
+  const mockExitSpanNode = (exitSpan: ServiceMapExitSpan): ConnectionElement => ({
+    data: getExternalConnectionNode(exitSpan),
   });
+
+  const nodeJsServiceNode = mockServiceNode(nodejsService);
+  const nodeJsExitSpanQuora = mockExitSpanNode(
+    createExitSpan({
+      ...nodejsService,
+      spanType: 'http',
+      spanSubtype: 'external',
+      spanDestinationServiceResource: 'a.quora.com:443',
+    })
+  );
+  const nodeJsExitSpanReddit = mockExitSpanNode(
+    createExitSpan({
+      ...nodejsService,
+      spanType: 'http',
+      spanSubtype: 'external',
+      spanDestinationServiceResource: 'alb.reddit.com:443',
+    })
+  );
+  const nodeJsExitSpanDoubleClick = mockExitSpanNode(
+    createExitSpan({
+      ...nodejsService,
+      spanType: 'http',
+      spanSubtype: 'external',
+      spanDestinationServiceResource: 'ad.doubleclick.net:443',
+    })
+  );
+  const nodeJsExitSpanOptimizely = mockExitSpanNode(
+    createExitSpan({
+      ...nodejsService,
+      spanType: 'http',
+      spanSubtype: 'external',
+      spanDestinationServiceResource: 'tapi.optimizely.com:443',
+    })
+  );
 
   const createMockEdge = (source: string, target: string): ConnectionElement => ({
     data: {
-      id: `${source}-${target}`,
+      id: getEdgeId({ source, target }),
       source,
       target,
     },
@@ -63,16 +102,15 @@ describe('groupResourceNodes', () => {
 
     it('should group nodes when they meet minimum group size', () => {
       const elements: ConnectionElement[] = [
-        // Create nodes
-        createMockServiceNode('service1'),
-        createMockExitSpanNode('service1', 'resource1', 'http', 'external', 'some-url'),
-        createMockExitSpanNode('service1', 'resource2', 'http', 'external', 'some-url'),
-        createMockExitSpanNode('service1', 'resource3', 'http', 'external', 'some-url'),
-        createMockExitSpanNode('service1', 'resource4', 'http', 'external', 'some-url'),
-        createMockEdge('service1', 'resource1'),
-        createMockEdge('service1', 'resource2'),
-        createMockEdge('service1', 'resource3'),
-        createMockEdge('service1', 'resource4'),
+        nodeJsServiceNode,
+        nodeJsExitSpanQuora,
+        nodeJsExitSpanReddit,
+        nodeJsExitSpanDoubleClick,
+        nodeJsExitSpanOptimizely,
+        createMockEdge(nodeJsServiceNode.data.id, nodeJsExitSpanQuora.data.id),
+        createMockEdge(nodeJsServiceNode.data.id, nodeJsExitSpanReddit.data.id),
+        createMockEdge(nodeJsServiceNode.data.id, nodeJsExitSpanDoubleClick.data.id),
+        createMockEdge(nodeJsServiceNode.data.id, nodeJsExitSpanOptimizely.data.id),
       ];
 
       const result = groupResourceNodes({ elements });
@@ -86,7 +124,7 @@ describe('groupResourceNodes', () => {
       );
 
       expect(groupedNode).toBeDefined();
-      expect(groupedNode?.data.id).toBe(`resourceGroup{service1}`);
+      expect(groupedNode?.data.id).toBe(`resourceGroup{opbeans-node}`);
       expect(groupedNode?.data.groupedConnections.length).toBe(4);
 
       expect(result.elements.length).toBeLessThan(elements.length);
@@ -95,11 +133,11 @@ describe('groupResourceNodes', () => {
 
     it('should not group nodes when below minimum group size', () => {
       const elements: ConnectionElement[] = [
-        createMockServiceNode('service1'),
-        createMockExitSpanNode('service1', 'resource1', 'http', 'external', 'some-url'),
-        createMockExitSpanNode('service1', 'resource2', 'http', 'external', 'some-url'),
-        createMockEdge('service1', 'resource1'),
-        createMockEdge('service1', 'resource2'),
+        nodeJsServiceNode,
+        nodeJsExitSpanQuora,
+        nodeJsExitSpanReddit,
+        createMockEdge(nodeJsServiceNode.data.id, nodeJsExitSpanQuora.data.id),
+        createMockEdge(nodeJsServiceNode.data.id, nodeJsExitSpanReddit.data.id),
       ];
 
       const result = groupResourceNodes({ elements });
@@ -117,10 +155,12 @@ describe('groupResourceNodes', () => {
     });
 
     it('should handle input with no groupable nodes', () => {
+      const svc1 = mockServiceNode(createService({ serviceName: 'service1', agentName: 'nodejs' }));
+      const svc2 = mockServiceNode(createService({ serviceName: 'service2', agentName: 'nodejs' }));
       const elements: ConnectionElement[] = [
-        createMockServiceNode('service1'),
-        createMockServiceNode('service2'),
-        createMockEdge('service1', 'service2'),
+        svc1,
+        svc2,
+        createMockEdge(svc1.data.id, svc2.data.id),
       ];
 
       const result = groupResourceNodes({ elements });

@@ -18,7 +18,7 @@ export interface ServiceMapTelemetry {
 export interface ServiceMapWithConnections
   extends Pick<ServiceMapResponse, 'servicesData' | 'anomalies'> {
   connections: Connection[];
-  destinationServices: DestinationService[];
+  exitSpanDestinations: ExitSpanDestination[];
 }
 
 export type ServiceMapResponse = {
@@ -99,7 +99,7 @@ export interface NodeStats {
   };
 }
 
-export interface DestinationService {
+export interface ExitSpanDestination {
   from: ExternalConnectionNode;
   to: ServiceConnectionNode;
 }
