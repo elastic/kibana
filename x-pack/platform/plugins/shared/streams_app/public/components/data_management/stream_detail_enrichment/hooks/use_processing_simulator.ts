@@ -24,7 +24,6 @@ import { useStreamsAppFetch } from '../../../../hooks/use_streams_app_fetch';
 import { useKibana } from '../../../../hooks/use_kibana';
 import { DetectedField, ProcessorDefinitionWithUIAttributes } from '../types';
 import { processorConverter } from '../utils';
-import { useDateRange } from '../../../../hooks/use_date_range';
 
 export type Simulation = APIReturnType<'POST /api/streams/{name}/processing/_simulate'>;
 export type ProcessorMetrics =
@@ -95,7 +94,7 @@ export const useProcessingSimulator = ({
 
   const {
     absoluteTimeRange: { start, end },
-  } = useDateRange({ data });
+  } = data.query.timefilter.timefilter.useTimefilter();
 
   const draftProcessors = useMemo(
     () => processors.filter((processor) => processor.status === 'draft'),

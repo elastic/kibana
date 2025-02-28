@@ -147,6 +147,7 @@ export function MessageText({ loading, content, onActionClick }: Props) {
           <>
             <EsqlCodeBlock
               value={props.value}
+              lang={props.lang}
               actionsDisabled={loading}
               onActionClick={onActionClickRef.current}
             />

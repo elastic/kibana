@@ -24,7 +24,6 @@ import { StreamsAppSearchBar } from '../../streams_app_search_bar';
 import { useRoutingState } from './hooks/routing_state';
 import { PreviewPanelIllustration } from './preview_panel_illustration';
 import { PreviewMatches } from './preview_matches';
-import { useDateRange } from '../../../hooks/use_date_range';
 
 export function PreviewPanel({
   definition,
@@ -41,9 +40,9 @@ export function PreviewPanel({
 
   const {
     timeRange,
-    absoluteTimeRange: { start, end },
     setTimeRange,
-  } = useDateRange({ data });
+    absoluteTimeRange: { start, end },
+  } = data.query.timefilter.timefilter.useTimefilter();
 
   const {
     isLoadingDocuments,
