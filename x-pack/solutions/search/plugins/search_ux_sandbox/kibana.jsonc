@@ -1,0 +1,24 @@
+{
+  "type": "plugin",
+  "id": "@kbn/search-ux-sandbox",
+  "owner": "@elastic/search-design",
+  "group": "search",
+  "visibility": "private",
+  "description": "Search UX Sandbox application for prototyping and testing search experiences",
+  "plugin": {
+    "id": "searchUxSandbox",
+    "server": false,
+    "browser": true,
+    "configPath": ["xpack", "searchUxSandbox"],
+    "requiredPlugins": [
+      "features",
+    ],
+    "optionalPlugins": [
+      "console",
+      "searchNavigation",
+    ],
+    "requiredBundles": [
+      "kibanaReact",
+    ]
+  }
+} 

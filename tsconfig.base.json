@@ -1624,6 +1624,8 @@
       "@kbn/search-synonyms/*": ["x-pack/solutions/search/plugins/search_synonyms/*"],
       "@kbn/search-types": ["src/platform/packages/shared/kbn-search-types"],
       "@kbn/search-types/*": ["src/platform/packages/shared/kbn-search-types/*"],
+      "@kbn/search-ux-sandbox": ["x-pack/solutions/search/plugins/search_ux_sandbox"],
+      "@kbn/search-ux-sandbox/*": ["x-pack/solutions/search/plugins/search_ux_sandbox/*"],
       "@kbn/searchprofiler-plugin": ["x-pack/platform/plugins/shared/searchprofiler"],
       "@kbn/searchprofiler-plugin/*": ["x-pack/platform/plugins/shared/searchprofiler/*"],
       "@kbn/security-ai-prompts": ["x-pack/solutions/security/packages/security-ai-prompts"],
