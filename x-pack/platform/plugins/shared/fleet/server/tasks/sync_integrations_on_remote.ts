@@ -75,7 +75,8 @@ async function getSyncIntegrationsEnabled(
 async function installPackageIfNotInstalled(
   pkg: { package_name: string; package_version: string },
   packageClient: PackageClient,
-  logger: Logger
+  logger: Logger,
+  abortController: AbortController
 ) {
   const installation = await packageClient.getInstallation(pkg.package_name);
   if (
@@ -83,9 +84,6 @@ async function installPackageIfNotInstalled(
     installation.install_status === 'installed' &&
     semverGte(installation.version, pkg.package_version)
   ) {
-    logger.debug(
-      `Package ${pkg.package_name} already installed with version ${pkg.package_version}`
-    );
     return;
   }
   if (installation && installation.install_status === 'install_failed') {
@@ -117,6 +115,9 @@ async function installPackageIfNotInstalled(
       logger.info(`Package ${pkg.package_name} installed with version ${pkg.package_version}`);
     }
     if (installResult.error instanceof PackageNotFoundError) {
+      if (abortController.signal.aborted) {
+        throw new Error('Task was aborted');
+      }
       logger.warn(
         `Package ${pkg.package_name} with version ${pkg.package_version} not found, trying to install latest version`
       );
@@ -154,6 +155,9 @@ export const syncIntegrationsOnRemote = async (
   }
 
   for (const pkg of syncIntegrationsDoc?.integrations ?? []) {
-    await installPackageIfNotInstalled(pkg, packageClient, logger);
+    if (abortController.signal.aborted) {
+      throw new Error('Task was aborted');
+    }
+    await installPackageIfNotInstalled(pkg, packageClient, logger, abortController);
   }
 };
