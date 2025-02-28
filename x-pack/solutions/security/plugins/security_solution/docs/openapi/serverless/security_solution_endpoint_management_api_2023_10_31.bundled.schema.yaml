@@ -455,14 +455,14 @@ paths:
       operationId: EndpointUploadAction
       requestBody:
         content:
-          application/json:
+          multipart/form-data:
             schema:
               $ref: '#/components/schemas/UploadRouteRequestBody'
         required: true
       responses:
         '200':
           content:
-            multipart/form-data:
+            application/json:
               schema:
                 $ref: '#/components/schemas/UploadRouteResponse'
           description: OK
@@ -1728,6 +1728,7 @@ components:
         endpoint_ids:
           - ed518850-681a-4d60-bb98-e22640cae2a8
         file: RWxhc3RpYw==
+        parameters: {}
     UploadRouteResponse:
       example:
         data:
