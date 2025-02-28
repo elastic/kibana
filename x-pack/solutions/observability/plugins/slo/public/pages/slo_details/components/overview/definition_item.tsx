@@ -13,7 +13,7 @@ export interface Props {
   subtitle: ReactNode;
 }
 
-export function OverviewItem({ title, subtitle }: Props) {
+export function DefinitionItem({ title, subtitle }: Props) {
   return (
     <EuiFlexGroup direction="column" gutterSize="xs">
       <EuiFlexItem grow={false}>
