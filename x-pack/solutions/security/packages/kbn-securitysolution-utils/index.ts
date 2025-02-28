@@ -6,6 +6,7 @@
  */
 
 export * from './src/add_remove_id_to_item';
+export * from './src/apm_utils';
 export * from './src/axios';
 export * from './src/transform_data_to_ndjson';
 export * from './src/path_validations';
