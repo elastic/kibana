@@ -12,6 +12,7 @@ import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiText, EuiToolTip } from '@
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { ML_ENTITY_FIELD_OPERATIONS, MLCATEGORY } from '@kbn/ml-anomaly-utils';
+import { useEntityCellStyles } from './entity_cell_styles';
 import { EMPTY_FIELD_VALUE_LABEL } from '../../timeseriesexplorer/components/entity_control/entity_control';
 import { blurButtonOnClick } from '../../util/component_utils';
 
@@ -28,7 +29,8 @@ interface EntityCellProps {
   wrapText?: boolean;
 }
 
-function getAddFilter({ entityName, entityValue, filter }: EntityCellProps) {
+const AddFilter: FC<EntityCellProps> = ({ entityName, entityValue, filter }) => {
+  const { filterButton } = useEntityCellStyles();
   if (filter !== undefined) {
     return (
       <EuiToolTip
@@ -42,7 +44,7 @@ function getAddFilter({ entityName, entityValue, filter }: EntityCellProps) {
         <EuiButtonIcon
           size="s"
           data-test-subj={`mlAnomaliesTableEntityCellAddFilterButton-${entityValue}`}
-          className="filter-button"
+          css={filterButton}
           onClick={blurButtonOnClick(() => {
             filter(entityName, entityValue, ML_ENTITY_FIELD_OPERATIONS.ADD);
           })}
@@ -53,10 +55,13 @@ function getAddFilter({ entityName, entityValue, filter }: EntityCellProps) {
         />
       </EuiToolTip>
     );
+  } else {
+    return null;
   }
-}
+};
 
-function getRemoveFilter({ entityName, entityValue, filter }: EntityCellProps) {
+const RemoveFilter: FC<EntityCellProps> = ({ entityName, entityValue, filter }) => {
+  const { filterButton } = useEntityCellStyles();
   if (filter !== undefined) {
     return (
       <EuiToolTip
@@ -70,7 +75,7 @@ function getRemoveFilter({ entityName, entityValue, filter }: EntityCellProps) {
         <EuiButtonIcon
           size="s"
           data-test-subj={`mlAnomaliesTableEntityCellRemoveFilterButton-${entityValue}`}
-          className="filter-button"
+          css={filterButton}
           onClick={blurButtonOnClick(() => {
             filter(entityName, entityValue, ML_ENTITY_FIELD_OPERATIONS.REMOVE);
           })}
@@ -81,8 +86,10 @@ function getRemoveFilter({ entityName, entityValue, filter }: EntityCellProps) {
         />
       </EuiToolTip>
     );
+  } else {
+    return null;
   }
-}
+};
 
 /*
  * Component for rendering an entity, displaying the value
@@ -100,20 +107,21 @@ export const EntityCell: FC<EntityCellProps> = ({
     valueText = `${MLCATEGORY} ${valueText}`;
   }
 
+  const { fieldValueShort, fieldValueLong } = useEntityCellStyles();
   const textStyle = { maxWidth: '100%' };
-  const textWrapperClass = wrapText ? 'field-value-long' : 'field-value-short';
+  const textWrapperCss = wrapText ? fieldValueLong : fieldValueShort;
   const shouldDisplayIcons =
     filter !== undefined && entityName !== undefined && entityValue !== undefined;
 
   if (wrapText === true) {
     return (
       <div>
-        <span className={textWrapperClass}>{valueText}</span>
+        <span css={textWrapperCss}>{valueText}</span>
         {shouldDisplayIcons && (
-          <React.Fragment>
-            {getAddFilter({ entityName, entityValue, filter })}
-            {getRemoveFilter({ entityName, entityValue, filter })}
-          </React.Fragment>
+          <>
+            <AddFilter entityName={entityName} entityValue={entityValue} filter={filter} />
+            <RemoveFilter entityName={entityName} entityValue={entityValue} filter={filter} />
+          </>
         )}
       </div>
     );
@@ -121,7 +129,7 @@ export const EntityCell: FC<EntityCellProps> = ({
     return (
       <EuiFlexGroup direction="row" alignItems="center" gutterSize="none">
         <EuiFlexItem grow={false} style={textStyle}>
-          <EuiText size="xs" className={textWrapperClass}>
+          <EuiText size="xs" css={textWrapperCss}>
             {valueText}
           </EuiText>
         </EuiFlexItem>
@@ -129,10 +137,10 @@ export const EntityCell: FC<EntityCellProps> = ({
           <EuiFlexItem grow={false}>
             <EuiFlexGroup direction="row" alignItems="center" gutterSize="none">
               <EuiFlexItem grow={false}>
-                {getAddFilter({ entityName, entityValue, filter })}
+                <AddFilter entityName={entityName} entityValue={entityValue} filter={filter} />
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                {getRemoveFilter({ entityName, entityValue, filter })}
+                <RemoveFilter entityName={entityName} entityValue={entityValue} filter={filter} />
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiFlexItem>
