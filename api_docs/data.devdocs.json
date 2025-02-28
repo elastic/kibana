@@ -13597,6 +13597,40 @@
           },
           {
             "parentPluginId": "data",
+            "id": "def-server.DataViewsService.clearDataViewLazyCache",
+            "type": "Function",
+            "tags": [],
+            "label": "clearDataViewLazyCache",
+            "description": [
+              "\nClear instance in data view lazy cache"
+            ],
+            "signature": [
+              "(id: string) => void"
+            ],
+            "path": "src/platform/plugins/shared/data_views/common/data_views/data_views.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "data",
+                "id": "def-server.DataViewsService.clearDataViewLazyCache.$1",
+                "type": "string",
+                "tags": [],
+                "label": "id",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/platform/plugins/shared/data_views/common/data_views/data_views.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "data",
             "id": "def-server.DataViewsService.getCache",
             "type": "Function",
             "tags": [],
@@ -20769,6 +20803,40 @@
           },
           {
             "parentPluginId": "data",
+            "id": "def-common.DataViewsService.clearDataViewLazyCache",
+            "type": "Function",
+            "tags": [],
+            "label": "clearDataViewLazyCache",
+            "description": [
+              "\nClear instance in data view lazy cache"
+            ],
+            "signature": [
+              "(id: string) => void"
+            ],
+            "path": "src/platform/plugins/shared/data_views/common/data_views/data_views.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "data",
+                "id": "def-common.DataViewsService.clearDataViewLazyCache.$1",
+                "type": "string",
+                "tags": [],
+                "label": "id",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/platform/plugins/shared/data_views/common/data_views/data_views.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "data",
             "id": "def-common.DataViewsService.getCache",
             "type": "Function",
             "tags": [],
@@ -24714,7 +24782,7 @@
             "section": "def-common.DataViewLazy",
             "text": "DataViewLazy"
           },
-          "[]>; clearCache: () => void; clearInstanceCache: (id?: string | undefined) => void; getCache: () => Promise<",
+          "[]>; clearCache: () => void; clearInstanceCache: (id?: string | undefined) => void; clearDataViewLazyCache: (id: string) => void; getCache: () => Promise<",
           "SavedObject",
           "<",
           {
