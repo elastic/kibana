@@ -102,7 +102,7 @@ Elastic Observability solution::
 Elastic Security solution::
 For the Elastic Security 8.17.3 release information, refer to {security-guide}/release-notes.html[_Elastic Security Solution Release Notes_].
 Kibana security::
-* Fixes generated name for integration title ({kibana-pull}210916[#210916]).
+* Fixes the generated name for imported package titles ({kibana-pull}210916[#210916]).
 * Fixes package name validation on the Data streams page ({kibana-pull}210770[#210770]).
 * Handles empty categorization results from LLM ({kibana-pull}210420[#210420]).
 Platform::
