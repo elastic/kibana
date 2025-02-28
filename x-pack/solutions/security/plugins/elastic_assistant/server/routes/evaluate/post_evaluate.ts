@@ -35,7 +35,7 @@ import {
 import { omit } from 'lodash/fp';
 import { localToolPrompts, promptGroupId as toolsGroupId } from '../../lib/prompt/tool_prompts';
 import { promptGroupId } from '../../lib/prompt/local_prompt_object';
-import { getModelOrOss } from '../../lib/prompt/helpers';
+import { getFormattedTime, getModelOrOss } from '../../lib/prompt/helpers';
 import { getAttackDiscoveryPrompts } from '../../lib/attack_discovery/graphs/default_attack_discovery_graph/nodes/helpers/prompts';
 import {
   formatPrompt,
@@ -56,6 +56,7 @@ import {
 } from '../../lib/langchain/graphs/default_assistant_graph/graph';
 import { getLlmClass, getLlmType, isOpenSourceModel } from '../utils';
 import { getGraphsFromNames } from './get_graphs_from_names';
+import { DEFAULT_DATE_FORMAT_TZ } from '../../../common/constants';
 
 const DEFAULT_SIZE = 20;
 const ROUTE_HANDLER_TIMEOUT = 10 * 60 * 1000; // 10 * 60 seconds = 10 minutes
@@ -377,6 +378,10 @@ export const postEvaluateRoute = (
                       streamRunnable: false,
                     });
 
+              const uiSettingsDateFormatTimezone = await ctx.core.uiSettings.client.get<string>(
+                DEFAULT_DATE_FORMAT_TZ
+              );
+
               return {
                 connectorId: connector.id,
                 name: `${runName} - ${connector.name}`,
@@ -391,6 +396,11 @@ export const postEvaluateRoute = (
                   savedObjectsClient,
                   tools,
                   replacements: {},
+                  getFormattedTime: () =>
+                    getFormattedTime({
+                      screenContextTimezone: request.body.screenContext?.timeZone,
+                      uiSettingsDateFormatTimezone,
+                    }),
                 }),
               };
             })

@@ -217,6 +217,9 @@ export const ENABLE_VISUALIZATIONS_IN_FLYOUT_SETTING =
 export const ENABLE_GRAPH_VISUALIZATION_SETTING =
   'securitySolution:enableGraphVisualization' as const;
 
+/** This Kibana Advanced Setting allows users to enable/disable the Asset Inventory feature */
+export const ENABLE_ASSET_INVENTORY_SETTING = 'securitySolution:enableAssetInventory' as const;
+
 /**
  * Id for the notifications alerting type
  * @deprecated Once we are confident all rules relying on side-car actions SO's have been migrated to SO references we should remove this function
