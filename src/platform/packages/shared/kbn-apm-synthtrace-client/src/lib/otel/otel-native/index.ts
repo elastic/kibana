@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Fields } from '../entity';
-import { Serializable } from '../serializable';
+import type { Fields } from '../../entity';
+import { Serializable } from '../../serializable';
 import { OtelError } from './error';
 import { OtelMetric } from './metric';
 import { OtelTransaction } from './transaction';
@@ -69,6 +69,11 @@ class Otel extends Serializable<OtelDocument> {
   error(spanId: string) {
     return new OtelError({
       ...this.fields,
+      data_stream: {
+        dataset: 'generic.otel',
+        namespace: 'default',
+        type: 'logs',
+      },
       attributes: {
         'exception.message': 'boom',
         'exception.handled': false,
@@ -79,11 +84,6 @@ class Otel extends Serializable<OtelDocument> {
         'event.name': 'exception',
         'error.id': `error-${spanId}`,
         'error.grouping_key': `errorGroup-${spanId}`,
-      },
-      data_stream: {
-        dataset: 'generic.otel',
-        namespace: 'default',
-        type: 'logs',
       },
       'event.name': 'exception',
       dropped_attributes_count: 0,
@@ -131,13 +131,11 @@ class Otel extends Serializable<OtelDocument> {
       },
       resource: {
         attributes: {
-          'agent.name': 'opentelemetry/nodejs',
+          'agent.name': 'otlp',
           'agent.version': '1.28.0',
           'service.instance.id': '89117ac1-0dbf-4488-9e17-4c2c3b76943a',
           'service.name': 'sendotlp-otel-native-synth',
           'metricset.interval': '10m',
-          'telemetry.sdk.name': 'opentelemetry',
-          'telemetry.sdk.language': 'nodejs',
         },
         dropped_attributes_count: 0,
       },
