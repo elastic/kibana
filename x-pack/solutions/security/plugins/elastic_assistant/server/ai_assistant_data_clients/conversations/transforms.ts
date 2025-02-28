@@ -11,6 +11,7 @@ import {
   Replacements,
   replaceOriginalValuesWithUuidValues,
 } from '@kbn/elastic-assistant-common';
+import _ from 'lodash';
 import { EsConversationSchema } from './types';
 
 export const transformESSearchToConversations = (
@@ -167,14 +168,6 @@ export const transformESToConversations = (
 export const transformFieldNamesToSourceScheme = (fields: string[]) => {
   return fields.map((f) => {
     switch (f) {
-      case 'createdAt':
-        return 'created_at';
-      case 'updateddAt':
-        return 'updated_at';
-      case 'createdBy':
-        return 'created_by';
-      case 'updatedBy':
-        return 'updated_by';
       case 'timestamp':
         return '@timestamp';
       case 'apiConfig':
@@ -190,7 +183,7 @@ export const transformFieldNamesToSourceScheme = (fields: string[]) => {
       case 'apiConfig.provider':
         return 'api_config.provider';
       default:
-        return f;
+        return _.snakeCase(f);
     }
   });
 };

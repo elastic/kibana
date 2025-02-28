@@ -7,7 +7,7 @@
 
 import type { IKibanaResponse } from '@kbn/core/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
-import { find } from 'lodash';
+import _ from 'lodash';
 
 import {
   API_VERSIONS,
@@ -24,7 +24,7 @@ import { ElasticAssistantPluginRouter } from '../../../types';
 import { buildResponse } from '../../utils';
 
 import { performChecks } from '../../helpers';
-import { transformESSearchToKnowledgeBaseEntry, transformFieldNamesToSourceScheme } from '../../../ai_assistant_data_clients/knowledge_base/transforms';
+import { transformESSearchToKnowledgeBaseEntry } from '../../../ai_assistant_data_clients/knowledge_base/transforms';
 import { EsKnowledgeBaseEntrySchema } from '../../../ai_assistant_data_clients/knowledge_base/types';
 import { getKBUserFilter } from './utils';
 import { SECURITY_LABS_RESOURCE } from '../constants';
@@ -81,7 +81,7 @@ export const findKnowledgeBaseEntriesRoute = (router: ElasticAssistantPluginRout
             sortField: query.sort_field,
             sortOrder: query.sort_order,
             filter: `${userFilter}${systemFilter}${additionalFilter}`,
-            fields: query.fields ? transformFieldNamesToSourceScheme(query.fields) : undefined,
+            fields: query.fields?.map((f) => _.snakeCase(f)),
             aggs: {
               global_aggs: {
                 global: {},
@@ -114,7 +114,7 @@ export const findKnowledgeBaseEntriesRoute = (router: ElasticAssistantPluginRout
             },
           ]
             .map(({ bucketId, kbResource, name, required }) => {
-              const bucket = find(
+              const bucket = _.find(
                 (
                   (result?.data.aggregations?.global_aggs as estypes.AggregationsGlobalAggregate)
                     ?.kb_resource_aggregation as {
