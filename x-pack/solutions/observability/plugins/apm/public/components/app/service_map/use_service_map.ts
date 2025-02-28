@@ -7,9 +7,9 @@
 import { useEffect, useState } from 'react';
 import type { IHttpFetchError, ResponseErrorBody } from '@kbn/core/public';
 import type {
-  ServiceMapNode,
+  ServiceMapSpan,
   ExitSpanDestination,
-  ServiceMapResponse,
+  ServiceMapRawResponse,
 } from '../../../../common/service_map/types';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 import { useLicenseContext } from '../../../context/license/use_license_context';
@@ -103,14 +103,21 @@ export const useServiceMap = ({
     }
 
     if (data) {
-      try {
-        const transformedData = processServiceMapData(data);
-        setServiceMapNodes({ data: transformedData, status: FETCH_STATUS.SUCCESS });
-      } catch (err) {
+      if ('spans' in data) {
+        try {
+          const transformedData = processServiceMapData(data);
+          setServiceMapNodes({ data: transformedData, status: FETCH_STATUS.SUCCESS });
+        } catch (err) {
+          setServiceMapNodes({
+            data: { elements: [], nodesCount: 0 },
+            status: FETCH_STATUS.FAILURE,
+            error: err,
+          });
+        }
+      } else {
         setServiceMapNodes({
-          data: { elements: [], nodesCount: 0 },
-          status: FETCH_STATUS.FAILURE,
-          error: err,
+          data,
+          status: FETCH_STATUS.SUCCESS,
         });
       }
     }
@@ -119,7 +126,7 @@ export const useServiceMap = ({
   return serviceMapNodes;
 };
 
-const processServiceMapData = (data: ServiceMapResponse): GroupResourceNodesResponse => {
+const processServiceMapData = (data: ServiceMapRawResponse): GroupResourceNodesResponse => {
   const paths = getPaths({ spans: data.spans });
   return getServiceMapNodes({
     connections: getConnections(paths.connections),
@@ -129,7 +136,7 @@ const processServiceMapData = (data: ServiceMapResponse): GroupResourceNodesResp
   });
 };
 
-const getPaths = ({ spans }: { spans: ServiceMapNode[] }) => {
+const getPaths = ({ spans }: { spans: ServiceMapSpan[] }) => {
   const connections: ConnectionNode[][] = [];
   const exitSpanDestinations: ExitSpanDestination[] = [];
 

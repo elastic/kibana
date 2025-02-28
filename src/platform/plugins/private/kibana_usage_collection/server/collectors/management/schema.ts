@@ -476,6 +476,10 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },
+  'observability:apmEnableServiceMapV2': {
+    type: 'boolean',
+    _meta: { description: 'Non-default value of setting.' },
+  },
   'observability:entityCentricExperience': {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },

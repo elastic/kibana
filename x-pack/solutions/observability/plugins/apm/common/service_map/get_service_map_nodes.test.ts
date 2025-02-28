@@ -7,7 +7,7 @@
 
 import { ServiceHealthStatus } from '../service_health_status';
 import { SERVICE_NAME, SPAN_SUBTYPE, SPAN_TYPE } from '../es_fields/apm';
-import type { ServiceMapExitSpan, ServiceMapService, ServiceMapWithConnections } from './types';
+import type { ServiceMapExitSpan, ServiceMapService, ServiceMapConnections } from './types';
 import { getServiceMapNodes } from './get_service_map_nodes';
 import { getExternalConnectionNode, getServiceConnectionNode } from './utils';
 
@@ -75,7 +75,7 @@ const anomalies = {
 
 describe('getServiceMapNodes', () => {
   it('maps external destinations to internal services', () => {
-    const response: ServiceMapWithConnections = {
+    const response: ServiceMapConnections = {
       servicesData: [
         getServiceConnectionNode(nodejsService),
         getServiceConnectionNode(javaService),
@@ -107,7 +107,7 @@ describe('getServiceMapNodes', () => {
   });
 
   it('adds connection for messaging-based external destinations', () => {
-    const response: ServiceMapWithConnections = {
+    const response: ServiceMapConnections = {
       servicesData: [
         getServiceConnectionNode(nodejsService),
         getServiceConnectionNode(javaService),
@@ -162,7 +162,7 @@ describe('getServiceMapNodes', () => {
   });
 
   it('collapses external destinations based on span.destination.resource.name', () => {
-    const response: ServiceMapWithConnections = {
+    const response: ServiceMapConnections = {
       servicesData: [
         getServiceConnectionNode(nodejsService),
         getServiceConnectionNode(javaService),
@@ -197,7 +197,7 @@ describe('getServiceMapNodes', () => {
   });
 
   it('picks the first span.type/subtype in an alphabetically sorted list', () => {
-    const response: ServiceMapWithConnections = {
+    const response: ServiceMapConnections = {
       servicesData: [getServiceConnectionNode(javaService)],
       exitSpanDestinations: [],
       connections: [
@@ -235,7 +235,7 @@ describe('getServiceMapNodes', () => {
   });
 
   it('processes connections without a matching "service" aggregation', () => {
-    const response: ServiceMapWithConnections = {
+    const response: ServiceMapConnections = {
       servicesData: [getServiceConnectionNode(javaService)],
       exitSpanDestinations: [],
       connections: [
@@ -252,7 +252,7 @@ describe('getServiceMapNodes', () => {
   });
 
   it('maps routing services child transasctions to their corresponding upstream service', () => {
-    const response: ServiceMapWithConnections = {
+    const response: ServiceMapConnections = {
       servicesData: [getServiceConnectionNode(javaService)],
       exitSpanDestinations: [
         {
