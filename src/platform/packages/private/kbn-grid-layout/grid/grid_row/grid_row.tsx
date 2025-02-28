@@ -72,6 +72,38 @@ export const GridRow = React.memo(({ rowIndex }: GridRowProps) => {
       });
 
       /**
+       * This subscription ensures that the row will re-render when one of the following changes:
+       * - Panel IDs (adding/removing/replacing, but not reordering)
+       */
+      const rowStateSubscription = gridLayoutStateManager.proposedGridLayout$
+        .pipe(
+          map((proposedGridLayout) => {
+            return {
+              panelIds: proposedGridLayout
+                ? Object.keys(proposedGridLayout[rowIndex]?.panels ?? {})
+                : [],
+            };
+          }),
+          pairwise()
+        )
+        .subscribe(([oldRowData, newRowData]) => {
+          if (
+            oldRowData.panelIds.length !== newRowData.panelIds.length ||
+            !(
+              oldRowData.panelIds.every((p) => newRowData.panelIds.includes(p)) &&
+              newRowData.panelIds.every((p) => oldRowData.panelIds.includes(p))
+            )
+          ) {
+            setPanelIdsInOrder(
+              getKeysInOrder(
+                (gridLayoutStateManager.proposedGridLayout$.getValue() ??
+                  gridLayoutStateManager.gridLayout$.getValue())[rowIndex]?.panels ?? {}
+              )
+            );
+          }
+        });
+
+      /**
        * Ensure the row re-renders to reflect the new panel order after a drag-and-drop interaction, since
        * the order of rendered panels need to be aligned with how they are displayed in the grid for accessibility
        * reasons (screen readers and focus management).

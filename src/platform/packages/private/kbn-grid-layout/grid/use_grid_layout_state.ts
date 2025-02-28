@@ -132,12 +132,12 @@ export const useGridLayoutState = ({
       const elementWidth = dimensions.width ?? 0;
       const columnPixelWidth = elementWidth / runtimeSettings.columnCount;
 
-      const rowOffsets: { [key: number]: number } = {};
       newLayout.forEach((row, rowIndex) => {
         const { panels } = row;
         const newPanels: {
           [key: string]: GridPanelData;
         } = {};
+        const rowOffsets: { [key: number]: number } = {};
         getKeysInOrder(panels).forEach((panelId) => {
           const oldPanel = panels[panelId];
           const width = oldPanel.width * columnPixelWidth;
