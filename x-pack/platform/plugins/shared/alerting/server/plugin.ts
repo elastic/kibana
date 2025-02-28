@@ -62,7 +62,6 @@ import { PluginStart as DataPluginStart } from '@kbn/data-plugin/server';
 import { MonitoringCollectionSetup } from '@kbn/monitoring-collection-plugin/server';
 import { SharePluginStart } from '@kbn/share-plugin/server';
 
-import type { MaintenanceWindow } from './application/maintenance_window/types';
 import {
   CallbackType,
   maintenanceWindowRegistry,
@@ -185,7 +184,8 @@ export interface AlertingServerStart {
   ): Promise<PublicMethodsOf<AlertingAuthorization>>;
   getFrameworkHealth: () => Promise<AlertsHealth>;
   registerMaintenanceWindowsCallback: (
-    callback: (event: { type: CallbackType; data: MaintenanceWindow }) => void
+    eventType: CallbackType,
+    callback: (event: { type: CallbackType }) => Promise<void>
   ) => void;
 }
 
