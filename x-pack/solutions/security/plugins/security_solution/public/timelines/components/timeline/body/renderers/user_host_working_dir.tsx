@@ -21,6 +21,7 @@ interface Props {
   userName: string | null | undefined;
   userNameField?: string;
   workingDirectory: string | null | undefined;
+  scopeId: string;
 }
 
 export const UserHostWorkingDir = React.memo<Props>(
@@ -34,6 +35,7 @@ export const UserHostWorkingDir = React.memo<Props>(
     userName,
     userNameField = 'user.name',
     workingDirectory,
+    scopeId,
   }) =>
     userName != null || userDomain != null || hostName != null || workingDirectory != null ? (
       <>
@@ -46,6 +48,7 @@ export const UserHostWorkingDir = React.memo<Props>(
             iconType="user"
             fieldType="keyword"
             isAggregatable={true}
+            scopeId={scopeId}
           />
         </TokensFlexItem>
 
@@ -66,6 +69,7 @@ export const UserHostWorkingDir = React.memo<Props>(
                 value={userDomain}
                 fieldType="keyword"
                 isAggregatable={true}
+                scopeId={scopeId}
               />
             </TokensFlexItem>
           </>
@@ -77,6 +81,7 @@ export const UserHostWorkingDir = React.memo<Props>(
           </TokensFlexItem>
         )}
         <HostWorkingDir
+          scopeId={scopeId}
           contextId={contextId}
           eventId={eventId}
           hostName={hostName}
