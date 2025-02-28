@@ -16,14 +16,18 @@ import type { WritableDraft } from 'immer/dist/internal';
 import { AssistantIcon } from '@kbn/ai-assistant-icon';
 import { remove } from 'lodash';
 import { SecurityPageName } from '@kbn/deeplinks-security';
-import { ProductLine } from '../../common/product';
-import type { SecurityProductTypes } from '../../common/config';
+import { ProductLine, ProductTier } from '../../common/product';
+import { type SecurityProductTypes } from '../../common/config';
 
 const shouldUseAINavigation = (productTypes: SecurityProductTypes) => {
-  return productTypes.some((productType) => productType.product_line === ProductLine.ai);
+  return productTypes.some((productType) => productType.product_line === ProductLine.aiSoc);
 };
 const isAIStandalone = (productTypes: SecurityProductTypes) => {
-  return !productTypes.some((productType) => productType.product_line === ProductLine.security);
+  return productTypes.some(
+    (productType) =>
+      productType.product_line === ProductLine.security &&
+      productType.product_tier === ProductTier.minimal
+  );
 };
 
 const aiGroup: GroupDefinition<AppDeepLinkId, string, string> = {

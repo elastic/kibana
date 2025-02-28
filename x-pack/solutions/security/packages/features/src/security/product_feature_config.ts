@@ -20,6 +20,40 @@ import type { DefaultSecurityProductFeaturesConfig } from './types';
  * - `subFeaturesPrivileges`: the privileges that will be added into the existing Security subFeature with the privilege `id` specified.
  */
 export const securityDefaultProductFeaturesConfig: DefaultSecurityProductFeaturesConfig = {
+  [ProductFeatureSecurityKey.detections]: {
+    privileges: {
+      all: {
+        ui: ['show', 'crud'],
+        api: [
+          APP_ID,
+          'lists-all',
+          'lists-read',
+          'lists-summary',
+          'rac',
+          'cloud-security-posture-all',
+          'cloud-security-posture-read',
+          'cloud-defend-all',
+          'cloud-defend-read',
+        ],
+      },
+      read: {
+        ui: ['show'],
+        api: [APP_ID, 'lists-read', 'rac', 'cloud-security-posture-read', 'cloud-defend-read'],
+      },
+    },
+  },
+  [ProductFeatureSecurityKey.externalDetections]: {
+    privileges: {
+      all: {
+        ui: ['alerts_summary', 'basic_rule_management'],
+        api: [`${APP_ID}-external`],
+      },
+      read: {
+        ui: ['alerts_summary_read', 'basic_rule_management_read'],
+        api: [`${APP_ID}-external`],
+      },
+    },
+  },
   [ProductFeatureSecurityKey.advancedInsights]: {
     privileges: {
       all: {

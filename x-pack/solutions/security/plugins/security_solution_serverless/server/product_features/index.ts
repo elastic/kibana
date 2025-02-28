@@ -47,15 +47,17 @@ export const registerProductFeatures = (
       config.experimentalFeatures
     );
     configurator.cases = getCasesProductFeaturesConfigurator(enabledProductFeatureKeys);
+    // TODO: don't register timeline and notes for security "minimal" tier
     configurator.timeline = getTimelineProductFeaturesConfigurator(enabledProductFeatureKeys);
     configurator.notes = getNotesProductFeaturesConfigurator(enabledProductFeatureKeys);
   }
 
-  if (productLines[ProductLine.ai]) {
+  if (productLines[ProductLine.aiSoc]) {
     configurator.attackDiscovery =
       getAttackDiscoveryProductFeaturesConfigurator(enabledProductFeatureKeys);
     configurator.securityAssistant =
       getSecurityAssistantProductFeaturesConfigurator(enabledProductFeatureKeys);
+    // TODO: clarify what happens with siem migrations
     if (productLines[ProductLine.security] && !config.experimentalFeatures.siemMigrationsDisabled) {
       configurator.siemMigrations =
         getSiemMigrationsProductFeaturesConfigurator(enabledProductFeatureKeys);

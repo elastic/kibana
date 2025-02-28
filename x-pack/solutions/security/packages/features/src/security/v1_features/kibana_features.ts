@@ -104,21 +104,6 @@ export const getSecurityBaseKibanaFeature = ({
       },
       app: [APP_ID, CLOUD_POSTURE_APP_ID, CLOUD_DEFEND_APP_ID, 'kibana'],
       catalogue: [APP_ID],
-      api: [
-        APP_ID,
-        'lists-all',
-        'lists-read',
-        'lists-summary',
-        'rac',
-        'cloud-security-posture-all',
-        'cloud-security-posture-read',
-        'cloud-defend-all',
-        'cloud-defend-read',
-        'timeline_write',
-        'timeline_read',
-        'notes_write',
-        'notes_read',
-      ],
       savedObject: {
         all: ['alert', ...savedObjects],
         read: [],
@@ -134,7 +119,9 @@ export const getSecurityBaseKibanaFeature = ({
       management: {
         insightsAndAlerting: ['triggersActions'],
       },
-      ui: ['show', 'crud'],
+
+      api: [],
+      ui: [],
     },
     read: {
       replacedBy: {
@@ -151,15 +138,6 @@ export const getSecurityBaseKibanaFeature = ({
       },
       app: [APP_ID, CLOUD_POSTURE_APP_ID, CLOUD_DEFEND_APP_ID, 'kibana'],
       catalogue: [APP_ID],
-      api: [
-        APP_ID,
-        'lists-read',
-        'rac',
-        'cloud-security-posture-read',
-        'cloud-defend-read',
-        'timeline_read',
-        'notes_read',
-      ],
       savedObject: {
         all: [],
         read: [...savedObjects],
@@ -175,7 +153,8 @@ export const getSecurityBaseKibanaFeature = ({
       management: {
         insightsAndAlerting: ['triggersActions'],
       },
-      ui: ['show'],
+      api: [],
+      ui: [],
     },
   },
 });
