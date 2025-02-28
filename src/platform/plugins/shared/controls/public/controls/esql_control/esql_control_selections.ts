@@ -36,7 +36,9 @@ export function initializeESQLControlSelections(initialState: ESQLControlState) 
   // derive ESQL control variable from state.
   const getEsqlVariable = () => ({
     key: variableName$.value,
-    value: selectedOptions$.value[0],
+    value: Number.isNaN(selectedOptions$.value[0])
+      ? selectedOptions$.value[0]
+      : Number(selectedOptions$.value[0]),
     type: variableType$.value,
   });
   const esqlVariable$ = new BehaviorSubject<ESQLControlVariable>(getEsqlVariable());
