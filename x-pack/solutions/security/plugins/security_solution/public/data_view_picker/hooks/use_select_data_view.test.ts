@@ -7,9 +7,15 @@
 
 import { renderHook } from '@testing-library/react';
 import { TestProviders } from '../../common/mock';
+import { useSelectDataView } from './use_select_data_view';
 
 describe('useSelectDataView', () => {
-  describe('when', () => {
-    it.todo('should work');
+  it('should render', () => {
+    renderHook(
+      () => {
+        return useSelectDataView();
+      },
+      { wrapper: TestProviders }
+    );
   });
 });
