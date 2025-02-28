@@ -6,10 +6,10 @@
  */
 
 import React from 'react';
-import { SiemMigrationsTranslatedRulesUpsellPage } from './siem_migration_translated_rules';
+import { SiemMigrationsTranslatedRulesUpsellPage } from './siem_migrations_translated_rules';
 import { render, screen } from '@testing-library/react';
 
-describe('SiemMigrationTranslatedRulesUpsellPage', () => {
+describe('SiemMigrationsTranslatedRulesUpsellPage', () => {
   it('should render the component with all sections correctly', () => {
     render(
       <SiemMigrationsTranslatedRulesUpsellPage

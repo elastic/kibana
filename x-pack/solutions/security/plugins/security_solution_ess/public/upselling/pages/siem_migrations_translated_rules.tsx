@@ -6,12 +6,12 @@
  */
 
 import React from 'react';
-import { SiemMigrationsTranslatedRulesUpsellPage as SiemMigrationsTranslatedRulesUpsellPageCommonn } from '@kbn/security-solution-upselling/pages/siem_migration_translated_rules';
+import { SiemMigrationsTranslatedRulesUpsellPage as SiemMigrationsTranslatedRulesUpsellPageCommonn } from '@kbn/security-solution-upselling/pages/siem_migrations_translated_rules';
 import { useKibana } from '../../common/services';
 import * as i18n from '../translations';
 
 export const SiemMigrationsTranslatedRulesPage = React.memo(
-  function SiemMigrationTranslatedRulesPage() {
+  function SiemMigrationsTranslatedRulesPage() {
     const { services } = useKibana();
 
     return (

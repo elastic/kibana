@@ -6,13 +6,13 @@
  */
 
 import React from 'react';
-import { SiemMigrationsTranslatedRulesUpsellPage as SiemMigrationTranslatedRulesUpsellPageCommon } from '@kbn/security-solution-upselling/pages/siem_migration_translated_rules';
+import { SiemMigrationsTranslatedRulesUpsellPage as SiemMigrationsTranslatedRulesUpsellPageCommon } from '@kbn/security-solution-upselling/pages/siem_migrations_translated_rules';
 import * as i18n from '../translations';
 
-export const SiemMigrationTranslatedRulesUpsellPage = React.memo(
-  function SiemMigrationTranslatedRulesUpsellPage() {
+export const SiemMigrationsTranslatedRulesUpsellPage = React.memo(
+  function SiemMigrationsTranslatedRulesUpsellPage() {
     return (
-      <SiemMigrationTranslatedRulesUpsellPageCommon
+      <SiemMigrationsTranslatedRulesUpsellPageCommon
         title={i18n.SIEM_MIGRATION_UPSELLING_TITLE('Complete')}
         upgradeMessage={i18n.SIEM_MIGRATION_RULES_PAGE_UPGRADE_LICENSE_MESSAGE}
       />

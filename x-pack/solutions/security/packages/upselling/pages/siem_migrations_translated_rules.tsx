@@ -12,7 +12,7 @@ import { SIEM_MIGRATION_MANAGER_LICENSE_BTN } from '../messages';
 import * as i18n from './translations';
 
 export const SiemMigrationsTranslatedRulesUpsellPage = React.memo(
-  function SiemMigrationTranslatedRulesUpsellPage({
+  function SiemMigrationsTranslatedRulesUpsellPage({
     title,
     upgradeMessage,
     upgradeHref,
