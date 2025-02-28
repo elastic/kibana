@@ -1,4 +1,5 @@
 env:
+  GITHUB_PR_TARGET_BRANCH: 'main' # common utils needs this value to be set
   GITHUB_PR_NUMBER: $GITHUB_ISSUE_NUMBER
 
 steps:
