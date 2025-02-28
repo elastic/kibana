@@ -938,7 +938,7 @@
             "text": "InferenceChatModelParams"
           },
           " extends ",
-          "BaseLanguageModelParams"
+          "BaseChatModelParams"
         ],
         "path": "x-pack/platform/packages/shared/ai-infra/inference-langchain/src/chat_model/inference_chat_model.ts",
         "deprecated": false,

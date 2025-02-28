@@ -20,8 +20,11 @@ import { buildRouteValidationWithZod } from '@kbn/elastic-assistant-common/impl/
 import { ElasticAssistantPluginRouter } from '../../types';
 import { buildResponse } from '../utils';
 import { EsConversationSchema } from '../../ai_assistant_data_clients/conversations/types';
-import { transformESSearchToConversations, transformFieldNamesToSourceScheme } from '../../ai_assistant_data_clients/conversations/transforms';
-import { DEFAULT_PLUGIN_NAME, performChecks } from '../helpers';
+import {
+  transformESSearchToConversations,
+  transformFieldNamesToSourceScheme,
+} from '../../ai_assistant_data_clients/conversations/transforms';
+import { performChecks } from '../helpers';
 
 export const findUserConversationsRoute = (router: ElasticAssistantPluginRouter) => {
   router.versioned
@@ -49,7 +52,7 @@ export const findUserConversationsRoute = (router: ElasticAssistantPluginRouter)
           const { query } = request;
           const ctx = await context.resolve(['core', 'elasticAssistant', 'licensing']);
           // Perform license and authenticated user checks
-          const checkResponse = performChecks({
+          const checkResponse = await performChecks({
             context: ctx,
             request,
             response,
@@ -58,15 +61,8 @@ export const findUserConversationsRoute = (router: ElasticAssistantPluginRouter)
             return checkResponse.response;
           }
 
-          const contentReferencesEnabled =
-            ctx.elasticAssistant.getRegisteredFeatures(
-              DEFAULT_PLUGIN_NAME
-            ).contentReferencesEnabled;
-
-          const dataClient = await ctx.elasticAssistant.getAIAssistantConversationsDataClient({
-            contentReferencesEnabled,
-          });
-          const currentUser = checkResponse.currentUser;
+          const dataClient = await ctx.elasticAssistant.getAIAssistantConversationsDataClient();
+          const currentUser = await checkResponse.currentUser;
 
           const additionalFilter = query.filter ? ` AND ${query.filter}` : '';
           const userFilter = currentUser?.username
