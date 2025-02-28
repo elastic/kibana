@@ -48,7 +48,7 @@ describe('fetchIndex lib function', () => {
   });
 
   const logger = {
-    error: jest.fn()
+    error: jest.fn(),
   } as any as Logger;
 
   const statsResponse = {
