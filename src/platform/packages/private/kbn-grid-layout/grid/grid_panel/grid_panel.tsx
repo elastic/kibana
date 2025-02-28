@@ -7,16 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useEffect, useMemo } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { combineLatest, skip } from 'rxjs';
 
-import { UseEuiTheme, useEuiTheme } from '@elastic/eui';
+import { UseEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 
 import { useGridLayoutContext } from '../use_grid_layout_context';
 import { DefaultDragHandle } from './drag_handle/default_drag_handle';
 import { useDragHandleApi } from './drag_handle/use_drag_handle_api';
 import { ResizeHandle } from './resize_handle';
+import { RotateHandle } from './rotate_handle';
 
 export interface GridPanelProps {
   panelId: string;
@@ -28,6 +29,9 @@ export const GridPanel = React.memo(({ panelId, rowIndex }: GridPanelProps) => {
     useGridLayoutContext();
 
   const dragHandleApi = useDragHandleApi({ panelId, rowIndex });
+  const [freeform, setFreeform] = useState<boolean>(
+    gridLayoutStateManager.runtimeSettings$.getValue() === 'none'
+  );
 
   /** Set initial styles based on state at mount to prevent styles from "blipping" */
   const initialStyles = useMemo(() => {
@@ -156,6 +160,7 @@ export const GridPanel = React.memo(({ panelId, rowIndex }: GridPanelProps) => {
       {!useCustomDragHandle && <DefaultDragHandle dragHandleApi={dragHandleApi} />}
       {panelContents}
       <ResizeHandle panelId={panelId} rowIndex={rowIndex} />
+      {freeform && <RotateHandle panelId={panelId} rowIndex={rowIndex} />}
     </div>
   );
 });
@@ -163,6 +168,7 @@ export const GridPanel = React.memo(({ panelId, rowIndex }: GridPanelProps) => {
 GridPanel.displayName = 'KbnGridLayoutPanel';
 
 const panelStyles = ({ euiTheme }: UseEuiTheme) =>
+  // @ts-ignore We are using a variable to set the z-index and it hates it
   css({
     position: 'relative',
     height: `calc(

@@ -22,6 +22,7 @@ export interface GridRect extends GridCoordinate {
 export interface GridPanelData extends GridRect {
   id: string;
   zIndex?: number;
+  rotate?: number;
 }
 
 export interface GridRowData {
