@@ -229,9 +229,22 @@ export const updateGaps = async (params: UpdateGapsParams) => {
     let hasErrors = false;
     let searchAfter: SortResults[] | undefined;
     let pitId: string | undefined;
+    let iterationCount = 0;
+    // Circuit breaker to prevent infinite loops
+    // It should be enough to update 50,000,000 gaps
+    // 100000 * 500 = 50,000,000 millions gaps
+    const MAX_ITERATIONS = 100000;
 
     try {
       while (true) {
+        if (iterationCount >= MAX_ITERATIONS) {
+          logger.warn(
+            `Circuit breaker triggered: Reached maximum number of iterations (${MAX_ITERATIONS}) while updating gaps for rule ${ruleId}`
+          );
+          break;
+        }
+        iterationCount++;
+
         const gapsResponse = await findGapsSearchAfter({
           eventLogClient,
           logger,

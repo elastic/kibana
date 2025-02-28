@@ -105,7 +105,6 @@ export const findGapsSearchAfter = async ({
       pitId: gapsResponse.pit_id,
     };
   } catch (err) {
-    // Clean up PIT if there's an error and we created it
     logger.error(`Failed to find gaps with search after for rule ${ruleId}: ${err.message}`);
     throw err;
   }
