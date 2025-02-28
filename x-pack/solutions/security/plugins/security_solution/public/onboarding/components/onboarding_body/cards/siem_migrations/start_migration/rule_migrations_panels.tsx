@@ -53,7 +53,7 @@ export const RuleMigrationsPanels = React.memo<RuleMigrationsPanelsProps>(
     );
 
     return (
-      <EuiFlexGroup direction="column" gutterSize="m">
+      <EuiFlexGroup data-test-subj="ruleMigrationPanelGroup" direction="column" gutterSize="m">
         <EuiFlexItem grow={false}>
           {!isConnectorsCardComplete && (
             <>

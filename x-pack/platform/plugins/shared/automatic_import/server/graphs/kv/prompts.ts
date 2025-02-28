@@ -29,8 +29,8 @@ export const KV_MAIN_PROMPT = ChatPromptTemplate.fromMessages([
  4. The \`value_split\` is the delimeter regex pattern to use for splitting the key from the value within a key-value pair (e.g., ':' or '=' )
  5. The \`field_split\` is the regex pattern to use for splitting key-value pairs in the log. Make sure the regex pattern breaks the log into key-value pairs.
  6. Ensure that the KV processor can handle different scenarios, such as: Optional or missing fields in the logs , Varying delimiters between keys and values (e.g., = or :), Complex log structures (e.g., nested key-value pairs or key-value pairs within strings, whitespaces , urls, ipv4 , ipv6 address, mac address etc.,).
- 7. Use \`trim_key\` for string of characters to trim from extracted keys.
- 8. Use \`trim_value\` for string of characters to trim from extracted values.
+ 7. Use \`trim_key\` for string of characters to trim from extracted keys. Make sure to escape single quotes like \`\\'\`.
+ 8. Use \`trim_value\` for string of characters to trim from extracted values. Make sure to escape single quotes like  \`\\'\`.
 
  You ALWAYS follow these guidelines when writing your response:
  <guidelines>
@@ -68,22 +68,33 @@ export const KV_HEADER_PROMPT = ChatPromptTemplate.fromMessages([
   ],
   [
     'human',
-    `Looking at the multiple syslog samples provided in the context, your task is to separate the "header" and the "message body" from this log. Our goal is to identify which RFC they belong to. Then create a regex pattern that can separate the header and the structured body.
-You then have to create a grok pattern using the regex pattern.
-You are given a log entry in a structured format. 
+    `Here are a series of syslog samples in a structured log format, and your task is to create a regex and a grok pattern that will correctly parse only the header part of these logs. The pattern should be critical about the following points:
 
-Follow these steps to identify the header pattern:
 1. Identify if the log samples fall under RFC5424 or RFC3164. If not, return 'Custom Format'.
-2. The log samples contain the header and structured body. The header may contain any or all of priority, timestamp, loglevel, hostname, ipAddress, messageId or any free-form text or non key-value information etc.,
-3. Make sure the regex and grok pattern matches all the header information. Only the structured message body should be under GREEDYDATA in grok pattern.
+2. If the log samples fall under RFC3164 or RFC5424 then parse the header and structured body according to the RFC definition.
+3. If the log sampels are in custom format , pay special attention to the special characters like brackets , colons or any punctuation marks in the syslog header, and ensure they are properly escaped.
+4. The log samples contain the header and structured body. The header may contain any or all of priority, timestamp, loglevel, hostname, ipAddress, messageId or any free-form text or non key-value information etc.,
 
- You ALWAYS follow these guidelines when writing your response:
+You ALWAYS follow these guidelines when writing your response:
  <guidelines>
  - Do not parse the message part in the regex. Just the header part should be in regex and grok_pattern.
+ - Timestamp Handling: Pay close attention to the timestamp format, ensuring that it is handled correctly with respect to any variations in date or time formatting. The timestamp should be extracted accurately, and make sure the pattern accounts for any variations in timezone representation, like time zone offsets or 'UTC' markers.
+Also look for special characters around the timestamp in Custom Format, Like a timestamp enclosed in [] or <> or (). Match these characters in the grok pattern with appropriate excaping.
+ - Special Characters: Ensure that all special characters, like brackets, colons, or any punctuation marks in the syslog header, are properly escaped. Be particularly cautious with characters that could interfere with the regex engine, such as periods (.), asterisks (*), or square brackets ([]), and ensure they are treated correctly in the pattern.
+ - Strict Parsing of the Header: The regex and grok pattern should strictly focus on parsing only the header part of the syslog sample. Do not include any logic for parsing the structured message body. The message body should be captured using the GREEDYDATA field in the grok pattern, and any non-header content should be left out of the main pattern.
+ - Pattern Efficiency: Ensure that both the regex and the grok pattern are as efficient as possible while still accurately capturing the header components. Avoid overly complex or overly broad patterns that could capture unintended data.
  - Make sure to map the remaining message body to \'message\' in grok pattern.
+ - If there are special characters between header and message body like space character, make sure to include that character in the header grok pattern
  - Make sure to add \`{packageName}.{dataStreamName}\` as a prefix to each field in the pattern. Refer to example response.
  - Do not respond with anything except the processor as a JSON object enclosed with 3 backticks (\`), see example response above. Use strict JSON response format.
  </guidelines>
+
+ Some of the example samples look like this:
+ <example_logs>
+\`\`\`json
+ {example_logs}
+\`\`\`
+ </example_logs>
 
  You are required to provide the output in the following example response format:
 
@@ -120,6 +131,7 @@ Follow these steps to fix the errors in the header pattern:
 2. The log samples contain the header and structured body. The header may contain any or all of priority, timestamp, loglevel, hostname, ipAddress, messageId or any free-form text or non key-value information etc.,
 3. The message body may start with a description, followed by structured key-value pairs.
 4. Make sure the regex and grok pattern matches all the header information. Only the structured message body should be under GREEDYDATA in grok pattern.
+
 You ALWAYS follow these guidelines when writing your response:
  <guidelines>
  - Do not parse the message part in the regex. Just the header part should be in regex and grok_pattern.

@@ -25,5 +25,4 @@ export const aiConnectorCardConfig: OnboardingCardConfig<AIConnectorCardMetadata
       )
   ),
   checkComplete: checkAiConnectorsCardComplete,
-  licenseTypeRequired: 'enterprise',
 };

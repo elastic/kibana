@@ -20,3 +20,4 @@ export * from './timeline_results';
 export * from './utils';
 export * from './create_store';
 export * from './create_react_query_wrapper';
+export * from './mock_siem_migrations_service';

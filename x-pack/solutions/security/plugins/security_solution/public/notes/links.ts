@@ -27,6 +27,6 @@ export const links: LinkItem = {
   capabilities: [[`${SECURITY_FEATURE_ID}.show`, `${NOTES_FEATURE_ID}.read`]],
   landingIcon: 'filebeatApp',
   skipUrlState: true,
-  hideTimeline: true,
+  hideTimeline: false,
   hideWhenExperimentalKey: 'securitySolutionNotesDisabled',
 };
