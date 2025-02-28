@@ -5,7 +5,7 @@
   },
   "include": [
     "**/*.ts",
-    "**/*.tsx", "../../../../../platform/packages/shared/kbn-cloud-security-posture/common/utils/detection_rules.test.ts", "../../../../../platform/packages/shared/kbn-cloud-security-posture/common/utils/detection_rules.ts",
+    "**/*.tsx",
   ],
   "exclude": [
     "target/**/*"
