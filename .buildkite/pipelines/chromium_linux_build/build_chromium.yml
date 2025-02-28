@@ -18,6 +18,7 @@ steps:
   - command: |
       .buildkite/scripts/pipelines/chromium_linux_build/chromium_version.sh
     label: Infer chromium version for puppeteer version
+    key: infer_chromium_version
     agents:
       provider: gcp
       image: family/kibana-ubuntu-2004
@@ -28,6 +29,7 @@ steps:
   - command: "PLATFORM_VARIANT={{matrix}} .buildkite/scripts/pipelines/chromium_linux_build/build.sh"
     label: "Build {{matrix}} linux headless chromium"
     timeout_in_minutes: 10
+    depends_on: "infer_chromium_version"
     agents:
       image: family/kibana-ubuntu-2004
       imageProject: elastic-images-prod
