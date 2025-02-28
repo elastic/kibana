@@ -58,5 +58,17 @@ describe('createInitListener', () => {
     );
   });
 
-  it.todo('should dispatch error correctly');
+  describe('when data views fetch returns an error', () => {
+    beforeEach(() => {
+      jest
+        .mocked(mockDataViewsService.getAllDataViewLazy)
+        .mockRejectedValue(new Error('some loading error'));
+    });
+
+    it('should dispatch error correctly', async () => {
+      await listener.effect(shared.actions.init(), mockListenerApi);
+
+      expect(jest.mocked(mockListenerApi.dispatch)).toBeCalledWith(shared.actions.error());
+    });
+  });
 });
