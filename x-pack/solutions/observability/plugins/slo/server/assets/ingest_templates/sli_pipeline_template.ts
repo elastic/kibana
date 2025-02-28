@@ -77,6 +77,20 @@ export const getSLIPipelineTemplate = (slo: SLODefinition) => ({
         name: `slo-${slo.id}@custom`,
       },
     },
+    {
+      pipeline: {
+        ignore_missing_pipeline: true,
+        ignore_failure: true,
+        name: `slo-${slo.id}@maintenance`,
+      },
+    },
+    {
+      pipeline: {
+        ignore_missing_pipeline: true,
+        ignore_failure: true,
+        name: `slo@maintenance`,
+      },
+    },
   ],
   _meta: {
     description: 'Ingest pipeline for SLO rollup data',

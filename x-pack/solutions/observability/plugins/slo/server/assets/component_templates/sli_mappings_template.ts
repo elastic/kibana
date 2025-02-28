@@ -103,6 +103,9 @@ export const SLI_MAPPINGS_TEMPLATE: ClusterPutComponentTemplateRequest = {
             },
           },
         },
+        isDuringMaintenanceWindow: {
+          type: 'boolean',
+        },
       },
     },
   },

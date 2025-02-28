@@ -111,6 +111,11 @@ function commonQuery(
     size: 0,
     query: {
       bool: {
+        must_not: {
+          term: {
+            isDuringMaintenanceWindow: true,
+          },
+        },
         filter,
       },
     },

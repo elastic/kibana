@@ -305,6 +305,11 @@ function generateSearchQuery({
     size: 0,
     query: {
       bool: {
+        must_not: {
+          term: {
+            isDuringMaintenanceWindow: true,
+          },
+        },
         filter: [
           { term: { 'slo.id': sloId } },
           { term: { 'slo.revision': revision } },
