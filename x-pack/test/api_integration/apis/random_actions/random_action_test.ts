@@ -12,8 +12,20 @@ export default ({ getService }: FtrProviderContext) => {
   const randomAction = getService('randomAction');
 
   describe('Random Actions Suite', () => {
-    it('performs 100 random actions', async () => {
-      for (let i = 0; i < 100; i++) {
+    it('performs 20 random create actions', async () => {
+      for (let i = 0; i < 20; i++) {
+        await randomAction.performRandomAction({ actionDistribution: 'createOnly' });
+      }
+    });
+
+    it('performs 20 random actions with a higher chance of create', async () => {
+      for (let i = 0; i < 20; i++) {
+        await randomAction.performRandomAction({ actionDistribution: 'preferCreate' });
+      }
+    });
+
+    it('performs 20 random actions with equal action distribution', async () => {
+      for (let i = 0; i < 20; i++) {
         await randomAction.performRandomAction();
       }
     });

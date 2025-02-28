@@ -22,6 +22,33 @@ enum ResourceType {
   DASHBOARD = 'Dashboard',
 }
 
+type ActionDistribution = 'equal' | 'preferCreate' | 'createOnly';
+const actionDistributionWeights: Record<ActionDistribution, Record<ResourceAction, number>> = {
+  equal: {
+    [ResourceAction.CREATE]: 1,
+    [ResourceAction.UPDATE]: 1,
+    [ResourceAction.DELETE]: 1,
+  },
+  preferCreate: {
+    [ResourceAction.CREATE]: 3,
+    [ResourceAction.UPDATE]: 1,
+    [ResourceAction.DELETE]: 1,
+  },
+  createOnly: {
+    [ResourceAction.CREATE]: 1,
+    [ResourceAction.UPDATE]: 0,
+    [ResourceAction.DELETE]: 0,
+  },
+};
+
+function getActionsWithDistribution(distribution: ActionDistribution): ResourceAction[] {
+  const actions: ResourceAction[] = [];
+  for (const [action, weight] of Object.entries(actionDistributionWeights[distribution])) {
+    actions.push(...Array(weight).fill(action as ResourceAction));
+  }
+  return actions;
+}
+
 export class RandomActionService extends FtrService {
   private readonly randomness = this.ctx.getService('randomness');
   private readonly randomDashboard = new RandomDashboardService(this.ctx);
@@ -51,8 +78,11 @@ export class RandomActionService extends FtrService {
     await this.randomDashboard.deleteDashboard();
   }
 
-  async performRandomAction() {
-    const action = this.randomness.pickFromArray(Object.values(ResourceAction));
+  async performRandomAction(
+    options: { actionDistribution: ActionDistribution } = { actionDistribution: 'equal' }
+  ) {
+    const actionOptions = getActionsWithDistribution(options.actionDistribution);
+    const action = this.randomness.pickFromArray(Object.values(actionOptions));
     const type = this.randomness.pickFromArray(Object.values(ResourceType));
     await this[`${action}Random${type}`]();
   }
