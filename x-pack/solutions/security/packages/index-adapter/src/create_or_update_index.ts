@@ -5,8 +5,10 @@
  * 2.0.
  */
 
-import type { IndexName } from '@elastic/elasticsearch/lib/api/types';
-import type { IndicesSimulateIndexTemplateResponse } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type {
+  IndexName,
+  IndicesSimulateIndexTemplateResponse,
+} from '@elastic/elasticsearch/lib/api/types';
 import type { Logger, ElasticsearchClient } from '@kbn/core/server';
 import { get } from 'lodash';
 import { retryTransientEsErrors } from './retry_transient_es_errors';
@@ -36,10 +38,11 @@ const updateTotalFieldLimitSetting = async ({
   logger.debug(`Updating total field limit setting for ${indexName} data stream.`);
 
   try {
-    const body = { 'index.mapping.total_fields.limit': totalFieldsLimit };
-    await retryTransientEsErrors(() => esClient.indices.putSettings({ index: indexName, body }), {
-      logger,
-    });
+    const settings = { 'index.mapping.total_fields.limit': totalFieldsLimit };
+    await retryTransientEsErrors(
+      () => esClient.indices.putSettings({ index: indexName, settings }),
+      { logger }
+    );
   } catch (err) {
     logger.error(
       `Failed to PUT index.mapping.total_fields.limit settings for ${indexName}: ${err.message}`
@@ -80,6 +83,7 @@ const updateMapping = async ({ logger, esClient, indexName, writeIndexOnly }: Up
       () =>
         esClient.indices.putMapping({
           index: indexName,
+          // @ts-expect-error elasticsearch@9.0.0 https://github.com/elastic/elasticsearch-js/issues/2584
           body: simulatedMapping,
           write_index_only: writeIndexOnly,
         }),
