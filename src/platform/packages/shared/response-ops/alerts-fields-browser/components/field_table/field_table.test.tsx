@@ -162,11 +162,11 @@ describe('FieldTable', () => {
     it('should paginate on page clicked', () => {
       const result = renderComponent(paginationProps);
 
-      expect(isAtFirstPage(result)).toBeTruthy();
+      expect(isAtFirstPage()).toBeTruthy();
 
       changePage(result);
 
-      expect(isAtFirstPage(result)).toBeFalsy();
+      expect(isAtFirstPage()).toBeFalsy();
     });
 
     it('should not reset on field checked', () => {
@@ -177,7 +177,7 @@ describe('FieldTable', () => {
       screen.getAllByRole('checkbox').at(0)?.click();
       expect(mockOnToggleColumn).toHaveBeenCalled(); // assert some field has been selected
 
-      expect(isAtFirstPage(result)).toBeFalsy();
+      expect(isAtFirstPage()).toBeFalsy();
     });
 
     it('should reset on filter change', () => {
@@ -187,7 +187,7 @@ describe('FieldTable', () => {
       });
 
       changePage(result);
-      expect(isAtFirstPage(result)).toBeFalsy();
+      expect(isAtFirstPage()).toBeFalsy();
 
       result.rerender(
         getComponent({
@@ -196,7 +196,7 @@ describe('FieldTable', () => {
         })
       );
 
-      expect(isAtFirstPage(result)).toBeTruthy();
+      expect(isAtFirstPage()).toBeTruthy();
     });
   });
 });

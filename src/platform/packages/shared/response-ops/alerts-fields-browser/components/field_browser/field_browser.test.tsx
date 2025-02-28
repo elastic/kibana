@@ -117,7 +117,7 @@ describe('FieldsBrowser', () => {
 
   it('should render the Fields Browser button as a settings gear when the isEventViewer prop is true', () => {
     const isEventViewer = true;
-    const result = renderComponent({ isEventViewer });
+    renderComponent({ isEventViewer });
 
     expect(screen.getByTestId('show-field-browser')).toBeInTheDocument();
   });
@@ -125,7 +125,7 @@ describe('FieldsBrowser', () => {
   it('should render the Fields Browser button as a settings gear when the isEventViewer prop is false', () => {
     const isEventViewer = false;
 
-    const result = renderComponent({ isEventViewer, width: FIELD_BROWSER_WIDTH });
+    renderComponent({ isEventViewer, width: FIELD_BROWSER_WIDTH });
     expect(screen.getByTestId('show-field-browser')).toBeInTheDocument();
   });
 
@@ -134,7 +134,7 @@ describe('FieldsBrowser', () => {
       const agentFieldsCount = Object.keys(mockBrowserFields.agent?.fields || {}).length;
 
       // Narrowing the selection to 'agent' only
-      const result = renderComponent({ options: { preselectedCategoryIds: ['agent'] } });
+      renderComponent({ options: { preselectedCategoryIds: ['agent'] } });
 
       screen.getByTestId('show-field-browser').click();
 
