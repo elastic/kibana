@@ -103,7 +103,7 @@ Elastic Security solution::
 For the Elastic Security 8.17.3 release information, refer to {security-guide}/release-notes.html[_Elastic Security Solution Release Notes_].
 Kibana security::
 * Fixes generated name for integration title ({kibana-pull}210916[#210916]).
-* Fixes package name validation on Datastream page ({kibana-pull}210770[#210770]).
+* Fixes package name validation on the Data streams page ({kibana-pull}210770[#210770]).
 * Handles empty categorization results from LLM ({kibana-pull}210420[#210420]).
 Platform::
 * Adds versioning to inventory_view_saved_object ({kibana-pull}207007[#207007]).
