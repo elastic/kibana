@@ -172,6 +172,7 @@ describe('syncIntegrationsOnRemote', () => {
       pkgName: 'nginx',
       pkgVersion: '2.2.0',
       keepFailedInstallation: true,
+      force: true,
     });
   });
 

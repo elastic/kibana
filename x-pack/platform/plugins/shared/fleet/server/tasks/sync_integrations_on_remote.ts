@@ -110,6 +110,8 @@ async function installPackageIfNotInstalled(
       pkgName: pkg.package_name,
       pkgVersion: pkg.package_version,
       keepFailedInstallation: true,
+      // using force flag because the package version might not be the latest on this cluster
+      force: true,
     });
     if (installResult.status === 'installed') {
       logger.info(`Package ${pkg.package_name} installed with version ${pkg.package_version}`);
@@ -124,6 +126,7 @@ async function installPackageIfNotInstalled(
       const installLatestResult = await packageClient.installPackage({
         pkgName: pkg.package_name,
         keepFailedInstallation: true,
+        force: true,
       });
       if (installLatestResult.status === 'installed') {
         logger.info(`Package ${pkg.package_name} installed with version ${pkg.package_version}`);
