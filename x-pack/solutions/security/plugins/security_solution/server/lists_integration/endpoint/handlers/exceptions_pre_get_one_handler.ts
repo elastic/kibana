@@ -40,7 +40,9 @@ export const getExceptionsPreGetOneHandler = (
 
     // Validate Trusted Applications
     if (TrustedAppValidator.isTrustedApp({ listId })) {
-      await new TrustedAppValidator(endpointAppContextService, request).validatePreGetOneItem();
+      await new TrustedAppValidator(endpointAppContextService, request).validatePreGetOneItem(
+        exceptionItem
+      );
       return data;
     }
 
@@ -49,19 +51,23 @@ export const getExceptionsPreGetOneHandler = (
       await new HostIsolationExceptionsValidator(
         endpointAppContextService,
         request
-      ).validatePreGetOneItem();
+      ).validatePreGetOneItem(exceptionItem);
       return data;
     }
 
     // Event Filters Exception
     if (EventFilterValidator.isEventFilter({ listId })) {
-      await new EventFilterValidator(endpointAppContextService, request).validatePreGetOneItem();
+      await new EventFilterValidator(endpointAppContextService, request).validatePreGetOneItem(
+        exceptionItem
+      );
       return data;
     }
 
     // Validate Blocklists
     if (BlocklistValidator.isBlocklist({ listId })) {
-      await new BlocklistValidator(endpointAppContextService, request).validatePreGetOneItem();
+      await new BlocklistValidator(endpointAppContextService, request).validatePreGetOneItem(
+        exceptionItem
+      );
       return data;
     }
 
@@ -70,7 +76,7 @@ export const getExceptionsPreGetOneHandler = (
       await new EndpointExceptionsValidator(
         endpointAppContextService,
         request
-      ).validatePreGetOneItem();
+      ).validatePreGetOneItem(exceptionItem);
       return data;
     }
 

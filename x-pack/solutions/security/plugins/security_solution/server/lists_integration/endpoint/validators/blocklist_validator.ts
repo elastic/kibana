@@ -259,8 +259,9 @@ export class BlocklistValidator extends BaseValidator {
     await this.validateCanDeleteItemInActiveSpace(currentItem);
   }
 
-  async validatePreGetOneItem(): Promise<void> {
+  async validatePreGetOneItem(currentItem: ExceptionListItemSchema): Promise<void> {
     await this.validateHasReadPrivilege();
+    await this.validateCanReadItemInActiveSpace(currentItem);
   }
 
   async validatePreMultiListFind(findOptions: FindExceptionListsItemOptions): Promise<void> {

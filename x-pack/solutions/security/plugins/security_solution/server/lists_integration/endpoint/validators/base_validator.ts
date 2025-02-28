@@ -17,12 +17,14 @@ import type {
   FindExceptionListsItemOptions,
 } from '@kbn/lists-plugin/server/services/exception_lists/exception_list_client_types';
 import {} from '@kbn/lists-plugin/server/services/exception_lists/exception_list_client_types';
+import { groupBy } from 'lodash';
 import { stringify } from '../../../endpoint/utils/stringify';
 import { ENDPOINT_AUTHZ_ERROR_MESSAGE } from '../../../endpoint/errors';
 import {
   buildPerPolicyTag,
   buildSpaceOwnerIdTag,
   getArtifactOwnerSpaceIds,
+  isArtifactGlobal,
   setArtifactOwnerSpaceId,
 } from '../../../../common/endpoint/service/artifacts/utils';
 import type { FeatureKeys } from '../../../endpoint/services';
@@ -463,6 +465,57 @@ export class BaseValidator {
           403
         );
       }
+    }
+  }
+
+  protected async validateCanReadItemInActiveSpace(
+    currentSavedItem: ExceptionListItemSchema
+  ): Promise<void> {
+    if (this.endpointAppContext.experimentalFeatures.endpointManagementSpaceAwarenessEnabled) {
+      // Everyone can read global artifacts and those with global artifact management privilege can do it all
+      if (
+        isArtifactGlobal(currentSavedItem) ||
+        (await this.endpointAuthzPromise).canManageGlobalArtifacts
+      ) {
+        return;
+      }
+
+      const activeSpaceId = await this.getActiveSpaceId();
+      const ownerSpaceIds = getArtifactOwnerSpaceIds(currentSavedItem);
+      const policyIds = getPolicyIdsFromArtifact(currentSavedItem);
+
+      // If per-policy item is not assigned to any policy (dangling artifact) and this artifact
+      // is owned by the active space, then allow read.
+      if (policyIds.length === 0 && ownerSpaceIds.includes(activeSpaceId)) {
+        return;
+      }
+
+      // if at least one policy is visible in active space, then allow read
+      if (policyIds.length > 0) {
+        const { packagePolicy, savedObjects } =
+          this.endpointAppContext.getInternalFleetServices(activeSpaceId);
+        const soClient = savedObjects.createInternalScopedSoClient({ spaceId: activeSpaceId });
+        const policiesFromFleet = await packagePolicy
+          .getByIDs(soClient, policyIds, {
+            ignoreMissing: true,
+          })
+          .then((packagePolicies) => {
+            return groupBy(packagePolicies ?? [], 'id');
+          });
+
+        if (policyIds.some((policyId) => Boolean(policiesFromFleet[policyId]))) {
+          return;
+        }
+      }
+
+      this.logger.debug(
+        () => `item can not be read from space [${activeSpaceId}]:\n${stringify(currentSavedItem)}`
+      );
+
+      throw new EndpointExceptionsValidationError(
+        `Item not found in space[ ${activeSpaceId}]`,
+        404
+      );
     }
   }
 }
