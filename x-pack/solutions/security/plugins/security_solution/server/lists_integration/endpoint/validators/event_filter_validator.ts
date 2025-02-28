@@ -89,6 +89,7 @@ export class EventFilterValidator extends BaseValidator {
 
     await this.validateByPolicyItem(updatedItem);
     await this.validateUpdateOwnerSpaceIds(_updatedItem, currentItem);
+    await this.validateCanUpdateItemInActiveSpace(_updatedItem, currentItem);
 
     if (!hasArtifactOwnerSpaceId(_updatedItem)) {
       await this.setOwnerSpaceId(_updatedItem);
@@ -115,8 +116,9 @@ export class EventFilterValidator extends BaseValidator {
     await this.validateHasReadPrivilege();
   }
 
-  async validatePreDeleteItem(): Promise<void> {
+  async validatePreDeleteItem(currentItem: ExceptionListItemSchema): Promise<void> {
     await this.validateHasWritePrivilege();
+    await this.validateCanDeleteItemInActiveSpace(currentItem);
   }
 
   async validatePreExport(): Promise<void> {

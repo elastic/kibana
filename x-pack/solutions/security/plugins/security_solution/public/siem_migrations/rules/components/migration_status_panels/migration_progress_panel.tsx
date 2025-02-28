@@ -33,7 +33,7 @@ export const MigrationProgressPanel = React.memo<MigrationProgressPanelProps>(
     const preparing = migrationStats.rules.pending === migrationStats.rules.total;
 
     return (
-      <EuiPanel hasShadow={false} hasBorder paddingSize="m">
+      <EuiPanel data-test-subj="migrationProgressPanel" hasShadow={false} hasBorder paddingSize="m">
         <EuiFlexGroup direction="column" gutterSize="xs">
           <EuiFlexItem grow={false}>
             <PanelText size="s" semiBold>
