@@ -196,7 +196,7 @@ components:
 
     AgentTypes:
       type: string
-      description: List of agent types to retrieve. Defaults to endpoint.
+      description: List of agent types to retrieve. Defaults to `endpoint`.
       example: endpoint
       enum:
         - endpoint
