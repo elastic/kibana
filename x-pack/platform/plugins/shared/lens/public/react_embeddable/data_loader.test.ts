@@ -36,7 +36,7 @@ import { PublishesSearchSession } from '@kbn/presentation-publishing/interfaces/
 import { isObject } from 'lodash';
 import { createMockDatasource, defaultDoc } from '../mocks';
 import { ESQLVariableType } from '@kbn/esql-types';
-import { ESQLControlVariable } from '@kbn/esql-validation-autocomplete';
+import { ESQLControlVariable } from '@kbn/esql-types';
 import * as Logger from './logger';
 import { buildObservableVariable } from './helper';
 

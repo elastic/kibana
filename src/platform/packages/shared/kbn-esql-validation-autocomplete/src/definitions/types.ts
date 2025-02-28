@@ -6,7 +6,7 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import type { ESQLVariableType } from '@kbn/esql-types';
+import type { ESQLVariableType, ESQLControlVariable } from '@kbn/esql-types';
 import type {
   ESQLAstItem,
   ESQLCommand,
@@ -16,7 +16,7 @@ import type {
   ESQLSource,
 } from '@kbn/esql-ast';
 import { GetColumnsByTypeFn, SuggestionRawDefinition } from '../autocomplete/types';
-import type { ESQLCallbacks, ESQLControlVariable, ESQLSourceResult } from '../shared/types';
+import type { ESQLCallbacks, ESQLSourceResult } from '../shared/types';
 
 /**
  * All supported field types in ES|QL. This is all the types

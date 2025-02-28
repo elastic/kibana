@@ -12,7 +12,7 @@ import type { Action } from '@kbn/ui-actions-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
 import type { ISearchGeneric } from '@kbn/search-types';
 import type { ESQLVariableType } from '@kbn/esql-types';
-import type { ESQLControlVariable } from '@kbn/esql-validation-autocomplete';
+import type { ESQLControlVariable } from '@kbn/esql-types';
 import { monaco } from '@kbn/monaco';
 import type { ESQLControlState } from './types';
 import { isActionCompatible, executeAction } from './esql_control_helpers';

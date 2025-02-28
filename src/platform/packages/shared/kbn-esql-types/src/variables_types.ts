@@ -13,3 +13,9 @@ export enum ESQLVariableType {
   VALUES = 'values',
   FUNCTIONS = 'functions',
 }
+
+export interface ESQLControlVariable {
+  key: string;
+  value: string | number;
+  type: ESQLVariableType;
+}

@@ -23,7 +23,7 @@ import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { ISearchGeneric } from '@kbn/search-types';
 import { ESQLVariableType } from '@kbn/esql-types';
-import { ESQLControlVariable } from '@kbn/esql-validation-autocomplete';
+import { ESQLControlVariable } from '@kbn/esql-types';
 import {
   getIndexPatternFromESQLQuery,
   getESQLResults,
