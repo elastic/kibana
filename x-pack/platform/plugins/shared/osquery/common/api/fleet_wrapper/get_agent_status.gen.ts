@@ -16,7 +16,7 @@
 
 import { z } from '@kbn/zod';
 
-import { KueryOrUndefined, Id } from '../model/schema/common_attributes.gen';
+import { KueryOrUndefined } from '../model/schema/common_attributes.gen';
 
 export type GetAgentStatusRequestParams = z.infer<typeof GetAgentStatusRequestParams>;
 export const GetAgentStatusRequestParams = z.object({});
@@ -24,5 +24,5 @@ export const GetAgentStatusRequestParams = z.object({});
 export type GetAgentStatusRequestQueryParams = z.infer<typeof GetAgentStatusRequestQueryParams>;
 export const GetAgentStatusRequestQueryParams = z.object({
   kuery: KueryOrUndefined.optional(),
-  policyId: Id.optional(),
+  policyId: z.string().optional(),
 });
