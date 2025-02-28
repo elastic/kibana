@@ -17,7 +17,6 @@ import { cloneDeep } from 'lodash';
 import {
   computeIsESQLQueryAggregating,
   getIndexListFromEsqlQuery,
-  getMvExpandFields,
 } from '@kbn/securitysolution-utils';
 import type { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
 import { buildEsqlSearchRequest } from './build_esql_search_request';
@@ -26,7 +25,7 @@ import { wrapEsqlAlerts } from './wrap_esql_alerts';
 import { wrapSuppressedEsqlAlerts } from './wrap_suppressed_esql_alerts';
 import { bulkCreateSuppressedAlertsInMemory } from '../utils/bulk_create_suppressed_alerts_in_memory';
 import { createEnrichEventsFunction } from '../utils/enrichments';
-import { rowToDocument, mergeEsqlResultInSource } from './utils';
+import { rowToDocument, mergeEsqlResultInSource, getMvExpandUsage } from './utils';
 import { fetchSourceDocuments } from './fetch_source_documents';
 import { buildReasonMessageForEsqlAlert } from '../utils/reason_formatters';
 import type { RulePreviewLoggedRequest } from '../../../../../common/api/detection_engine/rule_preview/rule_preview.gen';
@@ -166,15 +165,10 @@ export const esqlExecutor = async ({
           licensing,
         });
 
-        const expandedFieldsFromQuery = getMvExpandFields(completeRule.ruleParams.query);
-        const columnNamesSet = response.columns.reduce<Set<string>>((acc, column) => {
-          acc.add(column.name);
-          return acc;
-        }, new Set());
-        const hasExpandedFieldsMissed = expandedFieldsFromQuery.some(
-          (field) => !columnNamesSet.has(field)
+        const { expandedFieldsInResponse: expandedFields, hasMvExpand } = getMvExpandUsage(
+          response.columns,
+          completeRule.ruleParams.query
         );
-        const expandedFields = hasExpandedFieldsMissed ? [] : expandedFieldsFromQuery;
 
         const wrapHits = (events: Array<estypes.SearchHit<SignalSource>>) =>
           wrapEsqlAlerts({
@@ -195,9 +189,8 @@ export const esqlExecutor = async ({
           const { _id, _version, _index, ...esqlResult } = document;
 
           const sourceDocument = _id ? sourceDocuments[_id] : undefined;
-          const source = expandedFieldsFromQuery.length
-            ? cloneDeep(sourceDocument?._source)
-            : sourceDocument?._source;
+          // when mv_expand command present we must clone source, since the reference will be used multiple times
+          const source = hasMvExpand ? cloneDeep(sourceDocument?._source) : sourceDocument?._source;
 
           return {
             _source: mergeEsqlResultInSource(source, esqlResult),

@@ -156,7 +156,7 @@ describe('generateAlertId', () => {
       expect(id).toBe(generateAlertId(modifiedIdParams));
     });
 
-    // when expanded fields empty, it means expanded field was dropped from ES|QL response, so wee need to hash the whole event source object to properly deduplicate alerts
+    // when expanded fields empty, it means expanded field was dropped from ES|QL response, so we need to hash the whole event source object to properly deduplicate alerts
     it('creates id not dependant on empty expandedFields fields', () => {
       modifiedIdParams.expandedFields = [];
       expect(id).not.toBe(generateAlertId(modifiedIdParams));
