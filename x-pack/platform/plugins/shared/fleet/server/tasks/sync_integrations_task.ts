@@ -173,6 +173,24 @@ export class SyncIntegrationsTask {
     );
   };
 
+  private hadAnyRemoteESSyncEnabled = async (esClient: ElasticsearchClient): Promise<boolean> => {
+    try {
+      const res = await esClient.get({
+        id: FLEET_SYNCED_INTEGRATIONS_INDEX_NAME,
+        index: FLEET_SYNCED_INTEGRATIONS_INDEX_NAME,
+      });
+      if (!res._source?.remote_es_hosts.some((host: any) => host.sync_integrations)) {
+        return false;
+      }
+    } catch (error) {
+      if (error.statusCode === 404) {
+        return false;
+      }
+      throw error;
+    }
+    return true;
+  };
+
   private updateSyncedIntegrationsData = async (
     esClient: ElasticsearchClient,
     soClient: SavedObjectsClient
@@ -195,7 +213,10 @@ export class SyncIntegrationsTask {
     );
 
     if (!isSyncEnabled) {
-      return;
+      const hadAnyRemoteESSyncEnabled = await this.hadAnyRemoteESSyncEnabled(esClient);
+      if (!hadAnyRemoteESSyncEnabled) {
+        return;
+      }
     }
 
     const newDoc: SyncIntegrationsData = {

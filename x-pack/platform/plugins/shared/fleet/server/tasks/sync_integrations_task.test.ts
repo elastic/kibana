@@ -203,5 +203,68 @@ describe('SyncIntegrationsTask', () => {
 
       expect(esClient.update).not.toHaveBeenCalled();
     });
+
+    it('Should update fleet-synced-integrations doc if sync flag changed from true to false', async () => {
+      mockOutputService.list.mockResolvedValue({
+        items: [
+          {
+            type: 'remote_elasticsearch',
+            name: 'remote2',
+            hosts: ['https://remote2:9200'],
+            sync_integrations: false,
+          },
+        ],
+      } as any);
+      esClient.get.mockResolvedValue({
+        _source: {
+          remote_es_hosts: [
+            { hosts: ['https://remote1:9200'], name: 'remote1', sync_integrations: true },
+          ],
+        },
+      });
+      await runTask();
+
+      expect(esClient.update).toHaveBeenCalled();
+    });
+
+    it('Should not update fleet-synced-integrations doc if sync flag already false', async () => {
+      mockOutputService.list.mockResolvedValue({
+        items: [
+          {
+            type: 'remote_elasticsearch',
+            name: 'remote2',
+            hosts: ['https://remote2:9200'],
+            sync_integrations: false,
+          },
+        ],
+      } as any);
+      esClient.get.mockResolvedValue({
+        _source: {
+          remote_es_hosts: [
+            { hosts: ['https://remote1:9200'], name: 'remote1', sync_integrations: false },
+          ],
+        },
+      });
+      await runTask();
+
+      expect(esClient.update).not.toHaveBeenCalled();
+    });
+
+    it('Should not update fleet-synced-integrations doc if sync doc does not exist', async () => {
+      mockOutputService.list.mockResolvedValue({
+        items: [
+          {
+            type: 'remote_elasticsearch',
+            name: 'remote2',
+            hosts: ['https://remote2:9200'],
+            sync_integrations: false,
+          },
+        ],
+      } as any);
+      esClient.get.mockRejectedValue({ statusCode: 404 });
+      await runTask();
+
+      expect(esClient.update).not.toHaveBeenCalled();
+    });
   });
 });
