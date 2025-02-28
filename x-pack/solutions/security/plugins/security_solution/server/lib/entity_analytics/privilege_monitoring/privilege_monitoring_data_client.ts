@@ -37,7 +37,7 @@ export class PrivilegeMonitoringDataClient {
   private esClient: ElasticsearchClient;
 
   constructor(private readonly opts: PrivilegeMonitoringClientOpts) {
-    this.esClient = opts.clusterClient.asInternalUser;
+    this.esClient = opts.clusterClient.asCurrentUser;
     this.apiKeyGenerator = opts.apiKeyManager;
   }
 
