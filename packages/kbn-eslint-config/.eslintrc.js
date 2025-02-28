@@ -20,7 +20,13 @@
 const { USES_STYLED_COMPONENTS } = require('@kbn/babel-preset/styled_components_files');
 
 module.exports = {
-  extends: ['./javascript.js', './typescript.js', './jest.js', './react.js', 'plugin:@elastic/eui/recommended'],
+  extends: [
+    './javascript.js',
+    './typescript.js',
+    './jest.js',
+    './react.js',
+    'plugin:@elastic/eui/recommended',
+  ],
 
   plugins: [
     '@kbn/eslint-plugin-disable',
@@ -328,5 +334,17 @@ module.exports = {
     'no-new-func': 'error',
     'no-implied-eval': 'error',
     'no-prototype-builtins': 'error',
+
+    /**
+     * EUI Team rules
+     */
+
+    '@elastic/eui/no-restricted-eui-imports': [
+      'warn',
+      {
+        patterns: ['@kbn/ui-theme'],
+        message: 'For client-side, please use `useEuiTheme` instead.',
+      },
+    ],
   },
 };
