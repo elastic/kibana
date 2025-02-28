@@ -44,7 +44,7 @@ export class SearchUxSandboxPlugin
 
         return renderApp(coreStart, startDeps, element);
       },
-      visibleIn: ['sideNav', 'globalSearch'],
+      visibleIn: ['sideNav'],
       order: 3,
     });
 
