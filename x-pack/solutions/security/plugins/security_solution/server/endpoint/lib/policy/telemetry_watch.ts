@@ -83,6 +83,8 @@ export class TelemetryConfigWatcher {
       page: number;
       perPage: number;
     };
+    let updated = 0;
+    let failed = 0;
 
     this.logger.debug(
       `Checking Endpoint policies to update due to changed global telemetry config setting. (New value: ${isTelemetryEnabled})`
@@ -102,7 +104,7 @@ export class TelemetryConfigWatcher {
               this.logger.debug(
                 `Failed to read package policies on ${
                   error.attemptNumber
-                }. attempt, reason: ${stringify(error)}`
+                }. attempt on page ${page}, reason: ${stringify(error)}`
               ),
             ...this.retryOptions,
           }
@@ -151,16 +153,25 @@ export class TelemetryConfigWatcher {
                 .join('\n')}`
             );
           }
+
+          updated += updateResult.updatedPolicies?.length ?? 0;
+          failed += updateResult.failedPolicies.length;
         } catch (e) {
           this.logger.warn(
             `Unable to update telemetry config state to ${isTelemetryEnabled} in policies: ${updates.map(
               (update) => update.id
             )}\n\n${stringify(e)}`
           );
+
+          failed += updates.length;
         }
       }
 
       page++;
     } while (response.page * response.perPage < response.total);
+
+    this.logger.info(
+      `Finished updating global_telemetry_enabled flag to ${isTelemetryEnabled} in Defend package policies: ${updated} succeeded, ${failed} failed.`
+    );
   }
 }
