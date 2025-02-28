@@ -752,14 +752,14 @@ describe('autocomplete', () => {
       // nothing fancy with this field list
       testSuggestions('FROM a | ENRICH policy ON @timestamp WITH /', [
         'var0 = ',
-        ...getPolicyFields('policy').map(attachTriggerCommand),
+        ...getPolicyFields('policy'),
       ]);
       describe('replacement range', () => {
         testSuggestions('FROM a | ENRICH policy ON @timestamp WITH othe/', [
           'var0 = ',
           ...getPolicyFields('policy').map((name) => ({
             text: name,
-            command: TRIGGER_SUGGESTION_COMMAND,
+            command: undefined,
             rangeToReplace: { start: 43, end: 47 },
           })),
         ]);
@@ -767,7 +767,7 @@ describe('autocomplete', () => {
           'FROM a | ENRICH policy ON @timestamp WITH var0 = othe/',
           getPolicyFields('policy').map((name) => ({
             text: name,
-            command: TRIGGER_SUGGESTION_COMMAND,
+            command: undefined,
             rangeToReplace: { start: 50, end: 54 },
           }))
         );
