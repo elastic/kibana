@@ -30,31 +30,31 @@ export const EndpointModelInfo: React.FC<EndpointModelInfoProps> = ({ endpointIn
 
   return (
     <EuiFlexGroup gutterSize="xs" direction="column">
-      <EuiFlexItem>
-        <EuiFlexGroup gutterSize="xs" direction="row">
-          <EuiFlexItem grow={0}>
-            {modelId && (
+      {modelId && (
+        <EuiFlexItem>
+          <EuiFlexGroup gutterSize="xs" direction="row">
+            <EuiFlexItem grow={0}>
               <EuiText size="s" color="subdued">
                 {modelId}
               </EuiText>
-            )}
-          </EuiFlexItem>
-          <EuiFlexItem grow={0}>
+            </EuiFlexItem>
             {isEligibleForMITBadge ? (
-              <EuiBadge
-                color="hollow"
-                iconType="popout"
-                iconSide="right"
-                href={ELASTIC_MODEL_DEFINITIONS[modelId].licenseUrl ?? ''}
-                target="_blank"
-                data-test-subj={'mit-license-badge'}
-              >
-                {i18n.MIT_LICENSE}
-              </EuiBadge>
+              <EuiFlexItem grow={0}>
+                <EuiBadge
+                  color="hollow"
+                  iconType="popout"
+                  iconSide="right"
+                  href={ELASTIC_MODEL_DEFINITIONS[modelId].licenseUrl ?? ''}
+                  target="_blank"
+                  data-test-subj={'mit-license-badge'}
+                >
+                  {i18n.MIT_LICENSE}
+                </EuiBadge>
+              </EuiFlexItem>
             ) : null}{' '}
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlexItem>
+      )}
       <EuiFlexItem>{endpointModelAtrributes(endpointInfo)}</EuiFlexItem>
     </EuiFlexGroup>
   );
