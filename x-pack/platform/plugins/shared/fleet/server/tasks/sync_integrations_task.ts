@@ -179,7 +179,7 @@ export class SyncIntegrationsTask {
         id: FLEET_SYNCED_INTEGRATIONS_INDEX_NAME,
         index: FLEET_SYNCED_INTEGRATIONS_INDEX_NAME,
       });
-      if (!res._source?.remote_es_hosts.some((host: any) => host.sync_integrations)) {
+      if (!(res._source as any)?.remote_es_hosts.some((host: any) => host.sync_integrations)) {
         return false;
       }
     } catch (error) {

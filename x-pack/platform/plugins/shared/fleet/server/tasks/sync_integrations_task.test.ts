@@ -221,7 +221,7 @@ describe('SyncIntegrationsTask', () => {
             { hosts: ['https://remote1:9200'], name: 'remote1', sync_integrations: true },
           ],
         },
-      });
+      } as any);
       await runTask();
 
       expect(esClient.update).toHaveBeenCalled();
@@ -244,7 +244,7 @@ describe('SyncIntegrationsTask', () => {
             { hosts: ['https://remote1:9200'], name: 'remote1', sync_integrations: false },
           ],
         },
-      });
+      } as any);
       await runTask();
 
       expect(esClient.update).not.toHaveBeenCalled();
