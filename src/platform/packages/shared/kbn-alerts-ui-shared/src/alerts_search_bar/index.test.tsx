@@ -143,8 +143,8 @@ describe('AlertsSearchBar', () => {
 
     await waitFor(() => {
       expect(onFiltersUpdatedMock).toHaveBeenCalledWith(filters);
-      expect(mockDataPlugin.query.filterManager.setFilters).toHaveBeenCalledWith(filters);
     });
+    expect(mockDataPlugin.query.filterManager.setFilters).toHaveBeenCalledWith(filters);
   });
 
   it('calls the unifiedSearchBar correctly for security rule types', async () => {

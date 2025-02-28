@@ -127,8 +127,8 @@ describe('AddMessageVariables', () => {
 
     fireEvent.click(await screen.findByTestId('fooAddVariableButton'));
     fireEvent.click(screen.getByText('Show all'));
-    expect(screen.queryByTestId('myVar-selectableOption')).toBeInTheDocument();
-    expect(screen.queryByTestId('deprecatedVar-selectableOption')).toBeInTheDocument();
+    expect(screen.getByTestId('myVar-selectableOption')).toBeInTheDocument();
+    expect(screen.getByTestId('deprecatedVar-selectableOption')).toBeInTheDocument();
   });
 
   test(`it does't render when no variables exist`, async () => {

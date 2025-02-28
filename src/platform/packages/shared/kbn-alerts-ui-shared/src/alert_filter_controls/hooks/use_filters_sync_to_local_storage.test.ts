@@ -80,17 +80,17 @@ describe('Filters Sync to Local Storage', () => {
     );
     await waitFor(() => {
       expect(result.current.controlGroupState).toBeUndefined();
-      expect(result.current.setControlGroupState).toBeTruthy();
     });
+    expect(result.current.setControlGroupState).toBeTruthy();
     act(() => {
       result.current.setControlGroupState(DEFAULT_STORED_VALUE);
     });
     await waitFor(() => {
       expect(result.current.controlGroupState).toMatchObject(DEFAULT_STORED_VALUE);
-      expect(global.localStorage.getItem(TEST_STORAGE_KEY)).toBe(
-        JSON.stringify(DEFAULT_STORED_VALUE)
-      );
     });
+    expect(global.localStorage.getItem(TEST_STORAGE_KEY)).toBe(
+      JSON.stringify(DEFAULT_STORED_VALUE)
+    );
   });
   it('should not update values to local storage when sync is OFF', async () => {
     const initialProps = {
@@ -106,8 +106,8 @@ describe('Filters Sync to Local Storage', () => {
     // Sync is ON
     await waitFor(() => {
       expect(result.current.controlGroupState).toBeUndefined();
-      expect(result.current.setControlGroupState).toBeTruthy();
     });
+    expect(result.current.setControlGroupState).toBeTruthy();
 
     act(() => {
       result.current.setControlGroupState(DEFAULT_STORED_VALUE);
@@ -126,10 +126,10 @@ describe('Filters Sync to Local Storage', () => {
 
     await waitFor(() => {
       expect(result.current.controlGroupState).toMatchObject(ANOTHER_SAMPLE_VALUE);
-      // old value
-      expect(global.localStorage.getItem(TEST_STORAGE_KEY)).toBe(
-        JSON.stringify(DEFAULT_STORED_VALUE)
-      );
     });
+    // old value
+    expect(global.localStorage.getItem(TEST_STORAGE_KEY)).toBe(
+      JSON.stringify(DEFAULT_STORED_VALUE)
+    );
   });
 });
