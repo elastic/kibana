@@ -41,6 +41,7 @@ export interface GridData {
   x: number;
   y: number;
   i: string;
+  z?: number;
 }
 
 /**

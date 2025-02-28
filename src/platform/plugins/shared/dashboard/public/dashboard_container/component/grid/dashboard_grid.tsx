@@ -72,6 +72,7 @@ export const DashboardGrid = ({
         column: gridData.x,
         width: gridData.w,
         height: gridData.h,
+        zIndex: gridData.z,
       };
       // update `data-grid-row` attribute for all panels because it is used for some styling
       const panelRef = panelRefs.current[panelId];
@@ -109,6 +110,7 @@ export const DashboardGrid = ({
               x: panelLayout.column,
               w: panelLayout.width,
               h: panelLayout.height,
+              z: panelLayout.zIndex,
             },
           };
         });

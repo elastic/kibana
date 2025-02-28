@@ -138,7 +138,7 @@ export const useGridLayoutState = ({
           [key: string]: GridPanelData;
         } = {};
         const rowOffsets: { [key: number]: number } = {};
-        getKeysInOrder(panels).forEach((panelId) => {
+        getKeysInOrder(panels).forEach((panelId, panelIndex) => {
           const oldPanel = panels[panelId];
           const width = oldPanel.width * columnPixelWidth;
           const rowNum = oldPanel.row * runtimeSettings.rowHeight;
@@ -152,6 +152,7 @@ export const useGridLayoutState = ({
             width,
             row: rowNum,
             height: oldPanel.height * runtimeSettings.rowHeight,
+            zIndex: panelIndex, // 0
           };
           rowOffsets[rowNum] += width;
         });

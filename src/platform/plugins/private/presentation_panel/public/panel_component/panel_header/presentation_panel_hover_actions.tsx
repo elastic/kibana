@@ -78,6 +78,7 @@ const QUICK_ACTION_IDS = {
     'ACTION_CUSTOMIZE_PANEL',
     'ACTION_OPEN_IN_DISCOVER',
     'ACTION_VIEW_SAVED_SEARCH',
+    'changePanelZIndex',
   ],
   view: ['ACTION_OPEN_IN_DISCOVER', 'ACTION_VIEW_SAVED_SEARCH', 'openInspector', 'togglePanel'],
 } as const;
@@ -326,6 +327,15 @@ export const PresentationPanelHoverActions = ({
           onClick: createClickHandler(action, apiContext),
           name,
           id,
+          menuItem: action.MenuItem
+            ? React.createElement(action.MenuItem, {
+                key: id,
+                context: {
+                  embeddable: api,
+                  trigger: panelNotificationTrigger,
+                },
+              })
+            : undefined,
         };
       });
   }, [api, quickActions]);
@@ -473,17 +483,20 @@ export const PresentationPanelHoverActions = ({
               />
             )}
             {quickActionElements.map(
-              ({ iconType, 'data-test-subj': dataTestSubj, onClick, name }, i) => (
-                <EuiToolTip key={`main_action_${dataTestSubj}_${api?.uuid}`} content={name}>
-                  <EuiButtonIcon
-                    iconType={iconType}
-                    color="text"
-                    onClick={onClick as MouseEventHandler}
-                    data-test-subj={dataTestSubj}
-                    aria-label={name as string}
-                  />
-                </EuiToolTip>
-              )
+              ({ iconType, 'data-test-subj': dataTestSubj, onClick, name, menuItem }, i) =>
+                menuItem ? (
+                  menuItem
+                ) : (
+                  <EuiToolTip key={`main_action_${dataTestSubj}_${api?.uuid}`} content={name}>
+                    <EuiButtonIcon
+                      iconType={iconType}
+                      color="text"
+                      onClick={onClick as MouseEventHandler}
+                      data-test-subj={dataTestSubj}
+                      aria-label={name as string}
+                    />
+                  </EuiToolTip>
+                )
             )}
             {contextMenuPanels.length ? (
               <EuiPopover

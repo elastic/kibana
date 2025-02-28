@@ -38,6 +38,7 @@ export const GridPanel = React.memo(({ panelId, rowIndex }: GridPanelProps) => {
       --kbnGridPanelWidth: ${initialPanel.width};
       --kbnGridPanelX: ${initialPanel.column};
       --kbnGridPanelY: ${initialPanel.row};
+      --kbnGridPanelZ: ${initialPanel.zIndex ?? 1};
     `;
   }, [gridLayoutStateManager, rowIndex, panelId]);
 
@@ -103,6 +104,7 @@ export const GridPanel = React.memo(({ panelId, rowIndex }: GridPanelProps) => {
             ref.style.setProperty('--kbnGridPanelHeight', `${panel.height}`);
             ref.style.setProperty('--kbnGridPanelX', `${Math.max(0, panel.column)}`);
             ref.style.setProperty('--kbnGridPanelY', `${Math.max(0, panel.row)}`);
+            ref.style.setProperty('--kbnGridPanelZ', `${panel.zIndex ?? 1}`);
           }
         });
 
@@ -177,7 +179,7 @@ const panelStyles = ({ euiTheme }: UseEuiTheme) =>
     gridRowEnd: `calc(var(--kbnGridPanelY) + 1 + var(--kbnGridPanelHeight))`,
     '.kbnGrid--freeform &': {
       position: 'absolute',
-      zIndex: 1,
+      zIndex: 'var(--kbnGridPanelZ)',
       gridArea: 'auto', // shortcut to set all grid styles to `auto`
       left: 'calc(var(--kbnGridPanelX) * 1px)',
       top: 'calc(var(--kbnGridPanelY) * 1px)',

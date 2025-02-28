@@ -15,3 +15,4 @@ export { AddToLibraryAction } from './library_add_action';
 export { UnlinkFromLibraryAction } from './library_unlink_action';
 export { CopyToDashboardAction } from './copy_to_dashboard_action';
 export { AddSectionAction } from './add_section_action';
+export { ChangeZIndexAction } from './change_z_index_action';

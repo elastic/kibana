@@ -246,6 +246,13 @@ export const gridDataSchema = schema.object({
       meta: { description: 'The unique identifier of the panel' },
     })
   ),
+  z: schema.maybe(
+    schema.number({
+      defaultValue: 1,
+      min: 0,
+      meta: { description: 'The z coordinate of the panel - corresponds to z-index' },
+    })
+  ),
 });
 
 export const sectionSchema = schema.arrayOf(

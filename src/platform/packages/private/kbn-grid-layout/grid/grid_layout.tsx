@@ -45,6 +45,7 @@ export const GridLayout = ({
   onSectionChange,
   useCustomDragHandle = false,
 }: GridLayoutProps) => {
+  console.log(layout);
   const layoutRef = useRef<HTMLDivElement | null>(null);
   const { gridLayoutStateManager, setDimensionsRef } = useGridLayoutState({
     layout,

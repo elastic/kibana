@@ -416,6 +416,58 @@ export function initializePanelsManager(
       },
       setSections,
       setPanels,
+      bringToFront: (id: string) => {
+        const panelsByZIndex = Object.values(panels$.getValue())
+          .filter((panel) => {
+            return panel.sectionIndex === activeSection$.getValue();
+          })
+          .sort((a, b) => {
+            if (a.gridData.i === id) {
+              return Infinity;
+            }
+            if (b.gridData.i === id) {
+              return -Infinity;
+            }
+            return (a.gridData.z ?? 0) - (b.gridData.z ?? 0);
+          });
+        const newPanels: DashboardPanelMap = {};
+        panelsByZIndex.forEach((panel, index) => {
+          newPanels[panel.gridData.i] = {
+            ...panel,
+            gridData: {
+              ...panel.gridData,
+              z: index,
+            },
+          };
+        });
+        setPanels({ ...panels$.getValue(), ...newPanels });
+      },
+      sendToBack: (id: string) => {
+        const panelsByZIndex = Object.values(panels$.getValue())
+          .filter((panel) => {
+            return panel.sectionIndex === activeSection$.getValue();
+          })
+          .sort((a, b) => {
+            if (a.gridData.i === id) {
+              return -Infinity;
+            }
+            if (b.gridData.i === id) {
+              return Infinity;
+            }
+            return (b.gridData.z ?? 0) - (a.gridData.z ?? 0);
+          });
+        const newPanels: DashboardPanelMap = {};
+        panelsByZIndex.forEach((panel, index) => {
+          newPanels[panel.gridData.i] = {
+            ...panel,
+            gridData: {
+              ...panel.gridData,
+              z: index,
+            },
+          };
+        });
+        setPanels({ ...panels$.getValue(), ...newPanels });
+      },
       setRuntimeStateForChild,
       untilEmbeddableLoaded,
     },

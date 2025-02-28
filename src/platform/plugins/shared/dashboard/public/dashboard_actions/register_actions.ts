@@ -13,6 +13,7 @@ import { DashboardStartDependencies } from '../plugin';
 import {
   ACTION_ADD_SECTION,
   ACTION_ADD_TO_LIBRARY,
+  ACTION_CHANGE_Z_INDEX,
   ACTION_CLONE_PANEL,
   ACTION_COPY_TO_DASHBOARD,
   ACTION_EXPAND_PANEL,
@@ -41,6 +42,12 @@ export const registerActions = async ({
     return new ExpandPanelAction();
   });
   uiActions.attachAction(CONTEXT_MENU_TRIGGER, ACTION_EXPAND_PANEL);
+
+  uiActions.registerActionAsync(ACTION_CHANGE_Z_INDEX, async () => {
+    const { ChangeZIndexAction } = await import('./actions_module');
+    return new ChangeZIndexAction();
+  });
+  uiActions.attachAction(CONTEXT_MENU_TRIGGER, ACTION_CHANGE_Z_INDEX);
 
   uiActions.registerActionAsync(BADGE_FILTERS_NOTIFICATION, async () => {
     const { FiltersNotificationAction } = await import('./actions_module');
