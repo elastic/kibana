@@ -7,8 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Random, Console, Effect } from 'effect';
+import { Effect } from 'effect';
 import * as fs from 'node:fs';
+import { helloAgain } from './hello_world/hello_again';
 
 export const runEffectTSExperiments = () => {
   // :: Effect.Effect<number, never, never>
@@ -26,13 +27,8 @@ export const runEffectTSExperiments = () => {
   const e = Effect.promise(() => Promise.resolve(42));
   // :: Effect.Effect<string, UknownException, never>
   const f = Effect.tryPromise(() => fs.promises.readFile('file.txt', 'utf8'));
+
+  // errorHandlingResearch();
+  // streamResearch()
+  helloAgain();
 };
-
-function coinFlip() {
-  const flipTheCoin = Effect.if(Random.nextBoolean, {
-    onTrue: () => Console.log('Head'), // Runs if the predicate is true
-    onFalse: () => Console.log('Tail'), // Runs if the predicate is false
-  });
-
-  Effect.runFork(flipTheCoin);
-}
