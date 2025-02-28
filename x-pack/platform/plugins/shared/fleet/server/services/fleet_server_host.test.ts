@@ -28,17 +28,6 @@ jest.mock('./app_context');
 jest.mock('./agent_policy');
 jest.mock('./agents');
 
-jest.mock('./fleet_server_host', () => ({
-  ...jest.requireActual('./fleet_server_host'),
-  fleetServerHostService: {
-    list: jest.fn(),
-    get: jest.fn(),
-    create: jest.fn(),
-    update: jest.fn().mockResolvedValue({}),
-    delete: jest.fn(),
-  },
-}));
-
 const mockedAppContextService = appContextService as jest.Mocked<typeof appContextService>;
 mockedAppContextService.getSecuritySetup.mockImplementation(() => ({
   ...securityMock.createSetup(),
@@ -51,6 +40,13 @@ const mockedGetAgentsByKuery = getAgentsByKuery as jest.MockedFunction<typeof ge
 function getMockedSoClient(options?: { id?: string; findHosts?: boolean; findSettings?: boolean }) {
   const soClient = savedObjectsClientMock.create();
   mockedAppContextService.getInternalUserSOClient.mockReturnValue(soClient);
+
+  soClient.get.mockImplementation(async (t: string, id: string) => {
+    return {
+      id: 'test1',
+      attributes: {},
+    } as any;
+  });
 
   soClient.create.mockImplementation(async (type, data, createOptions) => {
     return {
@@ -121,14 +117,6 @@ function getMockedSoClient(options?: { id?: string; findHosts?: boolean; findSet
         ],
       } as any;
     }
-
-    soClient.get.mockImplementation(async () => {
-      return {
-        id: 'test1',
-        attributes: {},
-      } as any;
-    });
-
     throw new Error('Not mocked');
   });
 
@@ -214,15 +202,52 @@ describe('migrateSettingsToFleetServerHost', () => {
   });
 });
 
+describe('create', () => {
+  beforeEach(() => {
+    mockedLogger = loggerMock.create();
+    mockedAppContextService.getLogger.mockReturnValue(mockedLogger);
+    mockedAppContextService.getEncryptedSavedObjectsSetup.mockReturnValue({
+      canEncrypt: true,
+    } as any);
+  });
+  afterEach(() => {
+    jest.resetAllMocks();
+  });
+
+  it('should throw if encryptedSavedObject is not configured', async () => {
+    const soMock = getMockedSoClient();
+    const esMock = elasticsearchServiceMock.createInternalClient();
+    mockedAppContextService.getEncryptedSavedObjectsSetup.mockReturnValue({
+      canEncrypt: false,
+    } as any);
+
+    await expect(
+      fleetServerHostService.create(
+        soMock,
+        esMock,
+        {
+          name: 'Test',
+          host_urls: [],
+          is_default: false,
+          is_preconfigured: false,
+        },
+        { id: 'output-test' }
+      )
+    ).rejects.toThrow(`Fleet server host needs encrypted saved object api key to be set`);
+  });
+});
+
 describe('delete fleetServerHost', () => {
   beforeEach(() => {
     mockedLogger = loggerMock.create();
     mockedAppContextService.getLogger.mockReturnValue(mockedLogger);
   });
+  afterEach(() => {
+    jest.resetAllMocks();
+  });
 
   it('should removeFleetServerHostFromAll agent policies without force if not deleted from preconfiguration', async () => {
     const soMock = getMockedSoClient();
-
     const esMock = elasticsearchServiceMock.createInternalClient();
     await fleetServerHostService.delete(soMock, esMock, 'test1', {});
 
