@@ -58652,7 +58652,7 @@ components:
         - minLength: 1
           type: string
     Security_Endpoint_Management_API_AgentTypes:
-      description: List of agent types to retrieve. Defaults to endpoint.
+      description: List of agent types to retrieve. Defaults to `endpoint`.
       enum:
         - endpoint
         - sentinel_one
