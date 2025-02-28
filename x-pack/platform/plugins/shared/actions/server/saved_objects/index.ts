@@ -138,7 +138,6 @@ export function setupSavedObjects(
           'createdAt',
           'updatedAt',
         ]),
-        esoAADVersion: '1',
       },
     },
     modelVersions: connectorTokenModelVersions,
