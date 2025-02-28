@@ -7,8 +7,6 @@
 
 import { MappingTypeMapping } from "@elastic/elasticsearch/lib/api/types";
 
-type PrincipalType = 'user' | 'group';
-
 // Static index names: may be more obvious and easier to manage.
 export const privilegedMonitorBaseIndexName = '.entity_analytics.monitoring';
 // Used in Phase 0.
@@ -17,10 +15,6 @@ export const getPrivilegedMonitorUsersIndex = (namespace: string) =>
 // Not required in phase 0.
 export const getPrivilegedMonitorGroupsIndex = (namespace: string) =>
   `${privilegedMonitorBaseIndexName}.groups-${namespace}`;
-
-// Dynamic Index names: based on user or group usage. Not sure if this is good practice within Kibana, TODO: ask around.
-export const getPrivilegedMonitorIndex = (namespace: string, principleType: PrincipalType) =>
-  `${privilegedMonitorBaseIndexName}.${principleType}-${namespace}`;
 
 export type MappingProperties = NonNullable<MappingTypeMapping['properties']>;
 
