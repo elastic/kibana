@@ -18928,6 +18928,11 @@ paths:
                         upgraded_at:
                           nullable: true
                           type: string
+                        upgrade_attempts:
+                          nullable: true
+                          type: array
+                          items:
+                            type: string
                         user_provided_metadata:
                           additionalProperties: {}
                           type: object
@@ -19383,6 +19388,11 @@ paths:
                       upgraded_at:
                         nullable: true
                         type: string
+                      upgrade_attempts:
+                          nullable: true
+                          type: array
+                          items:
+                            type: string
                       user_provided_metadata:
                         additionalProperties: {}
                         type: object
@@ -19726,6 +19736,11 @@ paths:
                       upgraded_at:
                         nullable: true
                         type: string
+                      upgrade_attempts:
+                          nullable: true
+                          type: array
+                          items:
+                            type: string
                       user_provided_metadata:
                         additionalProperties: {}
                         type: object

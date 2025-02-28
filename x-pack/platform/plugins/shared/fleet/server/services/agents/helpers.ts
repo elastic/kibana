@@ -69,6 +69,7 @@ export function searchHitToAgent(
     upgraded_at: hit._source?.upgraded_at,
     upgrade_started_at: hit._source?.upgrade_started_at,
     upgrade_details: hit._source?.upgrade_details,
+    upgrade_attempts: hit._source?.upgrade_attempts,
     access_api_key_id: hit._source?.access_api_key_id,
     default_api_key_id: hit._source?.default_api_key_id,
     policy_id: hit._source?.policy_id,

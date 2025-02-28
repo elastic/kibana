@@ -21,7 +21,9 @@ import { getDeleteTaskRunResult } from '@kbn/task-manager-plugin/server/task';
 import type { LoggerFactory } from '@kbn/core/server';
 import { errors } from '@elastic/elasticsearch';
 import semverGt from 'semver/functions/gt';
+import moment from 'moment';
 
+import { AUTO_UPGRADE_DEFAULT_RETRIES } from '../../common/constants';
 import type {
   Agent,
   AgentPolicy,
@@ -33,7 +35,7 @@ import { agentPolicyService, appContextService } from '../services';
 import {
   fetchAllAgentsByKuery,
   getAgentsByKuery,
-  sendUpgradeAgentsActions,
+  sendAutomaticUpgradeAgentsActions,
 } from '../services/agents';
 import { AGENT_POLICY_SAVED_OBJECT_TYPE } from '../constants';
 import { AgentStatusKueryHelper, isAgentUpgradeable } from '../../common/services';
@@ -42,7 +44,7 @@ export const TYPE = 'fleet:automatic-agent-upgrade-task';
 export const VERSION = '1.0.0';
 const TITLE = 'Fleet Automatic agent upgrades';
 const SCOPE = ['fleet'];
-const INTERVAL = '1h';
+const INTERVAL = '30m';
 const TIMEOUT = '10m';
 const AGENT_POLICIES_BATCHSIZE = 500;
 const AGENTS_BATCHSIZE = 10000;
@@ -64,6 +66,7 @@ export class AutomaticAgentUpgradeTask {
   private logger: Logger;
   private wasStarted: boolean = false;
   private abortController = new AbortController();
+  private retryDelays: string[] = [];
 
   constructor(setupContract: AutomaticAgentUpgradeTaskSetupContract) {
     const { core, taskManager, logFactory } = setupContract;
@@ -141,6 +144,8 @@ export class AutomaticAgentUpgradeTask {
     const [coreStart] = await core.getStartServices();
     const esClient = coreStart.elasticsearch.client.asInternalUser;
     const soClient = new SavedObjectsClient(coreStart.savedObjects.createInternalRepository());
+    this.retryDelays =
+      appContextService.getConfig()?.autoUpgrades?.retryDelays ?? AUTO_UPGRADE_DEFAULT_RETRIES;
 
     try {
       await this.checkAgentPoliciesForAutomaticUpgrades(esClient, soClient);
@@ -276,6 +281,18 @@ export class AutomaticAgentUpgradeTask {
       return;
     }
 
+    // Handle retries.
+    const numberOfRetriedAgents = await this.processRetries(
+      esClient,
+      soClient,
+      agentPolicy,
+      requiredVersion.version
+    );
+    numberOfAgentsForUpgrade -= numberOfRetriedAgents;
+    if (numberOfAgentsForUpgrade <= 0) {
+      return;
+    }
+
     // Fetch all active agents assigned to the policy in batches.
     // NB: ideally, we would query active agents on or below the target version. Unfortunately, this is not possible because agent.version
     //     is stored as text, so semver comparison cannot be done in the ES query (cf. https://github.com/elastic/kibana/issues/168604).
@@ -313,6 +330,62 @@ export class AutomaticAgentUpgradeTask {
     }
   }
 
+  private async processRetries(
+    esClient: ElasticsearchClient,
+    soClient: SavedObjectsClientContract,
+    agentPolicy: AgentPolicy,
+    version: string
+  ) {
+    let retriedAgentsCounter = 0;
+
+    const retryingAgentsFetcher = await fetchAllAgentsByKuery(esClient, soClient, {
+      kuery: `policy_id:${agentPolicy.id} AND upgrade_details.target_version:${version} AND upgrade_details.state:UPG_FAILED AND upgrade_attempts:*`,
+      perPage: AGENTS_BATCHSIZE,
+      sortField: 'agent.version',
+      sortOrder: 'asc',
+    });
+
+    for await (const retryingAgentsPageResults of retryingAgentsFetcher) {
+      // This function will return the total number of agents marked for retry so they're included in the count of agents for upgrade.
+      retriedAgentsCounter += retryingAgentsPageResults.length;
+
+      const agentsReadyForRetry = retryingAgentsPageResults.filter((agent) =>
+        this.isAgentReadyForRetry(agent, agentPolicy)
+      );
+      if (agentsReadyForRetry.length > 0) {
+        this.logger.info(
+          `[AutomaticAgentUpgradeTask] Agent policy ${agentPolicy.id}: retrying upgrade to ${version} for ${agentsReadyForRetry.length} agents`
+        );
+        await sendAutomaticUpgradeAgentsActions(soClient, esClient, {
+          agents: agentsReadyForRetry,
+          version,
+          ...this.getUpgradeDurationSeconds(agentsReadyForRetry.length),
+        });
+      }
+    }
+
+    return retriedAgentsCounter;
+  }
+
+  private isAgentReadyForRetry(agent: Agent, agentPolicy: AgentPolicy) {
+    if (!agent.upgrade_attempts) {
+      return false;
+    }
+    if (agent.upgrade_attempts.length > this.retryDelays.length) {
+      this.logger.debug(
+        `[AutomaticAgentUpgradeTask] Agent policy ${agentPolicy.id}: max retry attempts exceeded for agent ${agent.id}`
+      );
+      return false;
+    }
+    const currentRetryDelay = moment
+      .duration('PT' + this.retryDelays[agent.upgrade_attempts.length - 1].toUpperCase()) // https://momentjs.com/docs/#/durations/
+      .asMilliseconds();
+    const lastUpgradeAttempt = Date.parse(
+      agent.upgrade_attempts[agent.upgrade_attempts.length - 1]
+    );
+    return Date.now() - lastUpgradeAttempt >= currentRetryDelay;
+  }
+
   private async getNextAgentsBatch(agentsFetcher: AsyncIterable<Agent[]>) {
     const agentsFetcherIter = agentsFetcher[Symbol.asyncIterator]();
     const agentsBatch = await agentsFetcherIter.next();
@@ -347,11 +420,10 @@ export class AutomaticAgentUpgradeTask {
       this.logger.info(
         `[AutomaticAgentUpgradeTask] Agent policy ${agentPolicy.id}: sending bulk upgrade to ${version} for ${agentsForUpgrade.length} agents`
       );
-      await sendUpgradeAgentsActions(soClient, esClient, {
+      await sendAutomaticUpgradeAgentsActions(soClient, esClient, {
         agents: agentsForUpgrade,
         version,
         ...this.getUpgradeDurationSeconds(agentsForUpgrade.length),
-        isAutomatic: true,
       });
     }
 
@@ -362,7 +434,8 @@ export class AutomaticAgentUpgradeTask {
     return (
       isAgentUpgradeable(agent) &&
       (agent.status !== 'updating' ||
-        (AgentStatusKueryHelper.isStuckInUpdating(agent) &&
+        (!agent.upgrade_attempts &&
+          AgentStatusKueryHelper.isStuckInUpdating(agent) &&
           agent.upgrade_details?.target_version === version)) &&
       semverGt(version, agent.agent.version)
     );

@@ -57,6 +57,9 @@ Hostnames used by {agent} for accessing {es}.
 `xpack.fleet.agents.elasticsearch.ca_sha256`::
 Hash pin used for certificate verification. The pin is a base64-encoded string of the SHA-256 fingerprint.
 
+`xpack.fleet.autoUpgrades.retryDelays`::
+List of delays for retrying failed automatic agent upgrades. Overrides default exponential backoff strategy.
+
 [role="child_attributes"]
 ==== Preconfiguration settings (for advanced use cases)
 
