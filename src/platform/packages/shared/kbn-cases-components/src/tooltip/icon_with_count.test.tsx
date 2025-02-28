@@ -8,20 +8,20 @@
  */
 
 import React from 'react';
-import { render } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 
 import { IconWithCount } from './icon_with_count';
 
 describe('IconWithCount', () => {
   it('renders component correctly', () => {
-    const res = render(<IconWithCount count={5} icon={'editorComment'} />);
+    render(<IconWithCount count={5} icon={'editorComment'} />);
 
-    expect(res.getByTestId('comment-count-icon')).toBeInTheDocument();
+    expect(screen.getByTestId('comment-count-icon')).toBeInTheDocument();
   });
 
   it('renders count correctly', () => {
-    const res = render(<IconWithCount count={100} icon={'editorComment'} />);
+    render(<IconWithCount count={100} icon={'editorComment'} />);
 
-    expect(res.getByText(100)).toBeInTheDocument();
+    expect(screen.getByText(100)).toBeInTheDocument();
   });
 });

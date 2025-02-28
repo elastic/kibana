@@ -1640,6 +1640,8 @@ module.exports = {
         'src/platform/packages/shared/kbn-alerts-ui-shared/**/*.{test,mock,test_helper}.{ts,tsx}',
         'x-pack/solutions/observability/packages/kbn-alerts-grouping/**/*.{test,mock,test_helper}.{ts,tsx}',
         'src/platform/packages/shared/kbn-cases-components/**/*.{test,mock,test_helper}.{ts,tsx}',
+        'src/platform/packages/shared/kbn-rrule/**/*.{test,mock,test_helper}.{ts,tsx}',
+        'src/platform/packages/shared/response-ops/**/*.{test,mock,test_helper}.{ts,tsx}',
       ],
       extends: ['plugin:testing-library/react'],
       rules: {

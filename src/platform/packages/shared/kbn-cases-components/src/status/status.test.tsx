@@ -8,7 +8,7 @@
  */
 
 import React from 'react';
-import { render } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 
 import { Status } from './status';
 import { CaseStatuses } from './types';
@@ -20,10 +20,10 @@ describe('Stats', () => {
   it.each([[CaseStatuses.open], [CaseStatuses['in-progress']], [CaseStatuses.closed]])(
     'renders correctly with status: %s',
     async (status) => {
-      const res = render(<Status status={status} />);
+      render(<Status status={status} />);
       const label = statusConfiguration[status].label;
 
-      expect(res.getByText(label)).toBeInTheDocument();
+      expect(screen.getByText(label)).toBeInTheDocument();
     }
   );
 });
