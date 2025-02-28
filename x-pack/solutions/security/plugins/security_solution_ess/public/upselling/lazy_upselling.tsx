@@ -27,6 +27,16 @@ export const SiemMigrationsStartUpsellSectionLazy = withSuspenseUpsell(
   )
 );
 
+export const SiemMigrationsTranslatedRulesUpsellPageLazy = withSuspenseUpsell(
+  lazy(() =>
+    import('./pages/siem_migrations_translated_rules').then(
+      ({ SiemMigrationTranslatedRulesPage }) => ({
+        default: SiemMigrationTranslatedRulesPage,
+      })
+    )
+  )
+);
+
 export const EntityAnalyticsUpsellingPageLazy = lazy(() =>
   import('./pages/entity_analytics_upselling').then(({ EntityAnalyticsUpsellingPageESS }) => ({
     default: EntityAnalyticsUpsellingPageESS,

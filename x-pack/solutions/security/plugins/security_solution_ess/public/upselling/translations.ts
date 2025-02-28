@@ -29,3 +29,11 @@ export const SIEM_MIGRATION_UPGRADE_LICENSE_MESSAGE = i18n.translate(
     defaultMessage: 'To use this feature, upgrade your Elastic subscription level.',
   }
 );
+
+export const SIEM_MIGRATION_RULES_PAGE_UPGRADE_LICENSE_MESSAGE = i18n.translate(
+  'xpack.securitySolutionEss.upselling.siemMigrations.rulesPageUpgradeLicenseMessage',
+  {
+    defaultMessage:
+      'To use this feature, upgrade your Elastic subscription level. If you have created a migration previously, you will be able to access it after upgrade.',
+  }
+);
