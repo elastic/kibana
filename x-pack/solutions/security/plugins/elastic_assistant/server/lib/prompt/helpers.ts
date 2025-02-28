@@ -21,9 +21,8 @@ export const getModelOrOss = (
   model?: string
 ): string | undefined => (llmType === 'openai' && isOssModel ? 'oss' : model);
 
-/** Formats time e.g. '14/02/2025, 09:33:12 UTC' */
-const TIME_FORMAT = 'ddd, MMM Do YYYY, HH:mm:ss [UTC]Z';
-const UTC_CONVERSION_TIME_FORMAT = 'HH:mm:ss [UTC]';
+const TIME_FORMAT = 'llll [UTC]Z';
+const UTC_CONVERSION_TIME_FORMAT = 'LT [UTC]';
 
 export const getFormattedTime = ({
   screenContextTimezone,
