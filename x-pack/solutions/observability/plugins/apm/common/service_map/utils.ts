@@ -15,7 +15,12 @@ import {
   SPAN_SUBTYPE,
   SPAN_TYPE,
 } from '../es_fields/apm';
-import type { ConnectionEdge, ServiceMapExitSpan, ServiceMapService } from './types';
+import type {
+  ConnectionEdge,
+  ConnectionNodeLegacy,
+  ServiceMapExitSpan,
+  ServiceMapService,
+} from './types';
 
 export const invalidLicenseMessage = i18n.translate('xpack.apm.serviceMap.invalidLicenseMessage', {
   defaultMessage:
@@ -47,7 +52,9 @@ export function isSpanGroupingSupported(type?: string, subtype?: string) {
  * 2.0.
  */
 
-export function getConnections(paths: ConnectionNode[][] | undefined): Connection[] {
+export function getConnections(
+  paths: Array<Array<ConnectionNode | ConnectionNodeLegacy>> | undefined
+): Connection[] {
   if (!paths) {
     return [];
   }
@@ -57,11 +64,18 @@ export function getConnections(paths: ConnectionNode[][] | undefined): Connectio
 
   paths.forEach((path) => {
     for (let i = 1; i < path.length; i++) {
-      const connectionId = getConnectionId({ source: path[i - 1], destination: path[i] });
+      const sourceNode = (
+        'id' in path[i - 1] ? path[i - 1] : { ...path[i - 1], id: getLegacyNodeId(path[i - 1]) }
+      ) as ConnectionNode;
+      const destinationNode = (
+        'id' in path[i] ? path[i] : { ...path[i], id: getLegacyNodeId(path[i]) }
+      ) as ConnectionNode;
+
+      const connectionId = getConnectionId({ source: sourceNode, destination: destinationNode });
 
       if (!connectionsById.has(connectionId)) {
         connectionsById.add(connectionId);
-        connections.push({ source: path[i - 1], destination: path[i] });
+        connections.push({ source: sourceNode, destination: destinationNode });
       }
     }
   });
@@ -69,8 +83,18 @@ export function getConnections(paths: ConnectionNode[][] | undefined): Connectio
   return connections;
 }
 
-export const isExitSpan = (node: ConnectionNode): node is ExternalConnectionNode => {
+export const isExitSpan = (
+  node: ConnectionNode | ConnectionNodeLegacy
+): node is ExternalConnectionNode => {
   return !!(node as ExternalConnectionNode)[SPAN_DESTINATION_SERVICE_RESOURCE];
+};
+
+// backward compatibility with scrited_metric versions
+export const getLegacyNodeId = (node: ConnectionNodeLegacy) => {
+  if (isExitSpan(node)) {
+    return `>${node[SERVICE_NAME]}|${node[SPAN_DESTINATION_SERVICE_RESOURCE]}`;
+  }
+  return `${node[SERVICE_NAME]}`;
 };
 
 export const getServiceConnectionNode = (event: ServiceMapService): ServiceConnectionNode => {

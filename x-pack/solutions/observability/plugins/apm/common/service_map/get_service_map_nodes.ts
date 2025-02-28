@@ -13,7 +13,7 @@ import {
   SPAN_TYPE,
   SPAN_SUBTYPE,
 } from '../es_fields/apm';
-import type { ExitSpanDestination } from './types';
+import type { ExitSpanDestination, ServicesResponse } from './types';
 import type {
   Connection,
   ConnectionNode,
@@ -21,9 +21,10 @@ import type {
   ExternalConnectionNode,
   ConnectionElement,
   ConnectionEdge,
-  ServiceMapWithConnections,
+  ServiceMapConnections,
+  GroupResourceNodesResponse,
 } from './types';
-import type { GroupResourceNodesResponse } from './group_resource_nodes';
+
 import { groupResourceNodes } from './group_resource_nodes';
 import { getConnectionId, isExitSpan } from './utils';
 
@@ -55,10 +56,7 @@ function addMessagingConnections(
   return [...connections, ...messagingConnections];
 }
 
-function getAllNodes(
-  services: ServiceMapWithConnections['servicesData'],
-  connections: ServiceMapWithConnections['connections']
-) {
+function getAllNodes(services: ServicesResponse[], connections: Connection[]) {
   const allNodesMap = new Map<string, ConnectionNode>();
 
   // Process connections in one pass
@@ -257,7 +255,7 @@ export function getServiceMapNodes({
   exitSpanDestinations,
   servicesData,
   anomalies,
-}: ServiceMapWithConnections): GroupResourceNodesResponse {
+}: ServiceMapConnections): GroupResourceNodesResponse {
   const allConnections = addMessagingConnections(connections, exitSpanDestinations);
   const allNodes = getAllNodes(servicesData, allConnections);
   const allServices = getAllServices(allNodes, exitSpanDestinations);

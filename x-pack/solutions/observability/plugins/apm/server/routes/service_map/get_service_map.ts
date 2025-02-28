@@ -6,15 +6,22 @@
  */
 
 import type { Logger } from '@kbn/core/server';
-import type { ServiceMapResponse } from '../../../common/service_map';
+import { chunk } from 'lodash';
+import type {
+  Connection,
+  ExitSpanDestination,
+  ServiceMapSpan,
+} from '../../../common/service_map/types';
+import { getServiceMapNodes, type ServiceMapResponse } from '../../../common/service_map';
 import type { APMConfig } from '../..';
 import type { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
 import type { MlClient } from '../../lib/helpers/get_ml_client';
 import { withApmSpan } from '../../utils/with_apm_span';
 import { getTraceSampleIds } from './get_trace_sample_ids';
-import { fetchPathsFromTraceIds } from './fetch_service_paths_from_trace_ids';
 import { DEFAULT_ANOMALIES, getServiceAnomalies } from './get_service_anomalies';
 import { getServiceStats } from './get_service_stats';
+import { getServiceMapFromTraceIds } from './get_service_map_from_trace_ids';
+import { fetchExitSpanSamplesFromTraceIds } from './fetch_exit_span_samples';
 
 export interface IEnvOptions {
   mlClient?: MlClient;
@@ -28,6 +35,7 @@ export interface IEnvOptions {
   end: number;
   serviceGroupKuery?: string;
   kuery?: string;
+  serviceMapV2Enabled?: boolean;
 }
 
 async function getConnectionData({
@@ -40,7 +48,13 @@ async function getConnectionData({
   serviceGroupKuery,
   kuery,
   logger,
-}: IEnvOptions) {
+  serviceMapV2Enabled = false,
+}: IEnvOptions): Promise<
+  { tracesCount: number } & (
+    | { connections: Connection[]; discoveredServices: ExitSpanDestination[] }
+    | { spans: ServiceMapSpan[] }
+  )
+> {
   return withApmSpan('get_service_map_connections', async () => {
     logger.debug('Getting trace sample IDs');
     const { traceIds } = await getTraceSampleIds({
@@ -56,19 +70,57 @@ async function getConnectionData({
 
     logger.debug(`Found ${traceIds.length} traces to inspect`);
 
-    const spans = await withApmSpan('get_service_map_spans_and_transactions_from_traces', () =>
-      fetchPathsFromTraceIds({
-        apmEventClient,
-        traceIds,
-        start,
-        end,
-        logger,
-      })
-    );
+    if (serviceMapV2Enabled) {
+      const spans = await withApmSpan(
+        'get_service_map_exit_spans_and_transactions_from_traces',
+        () =>
+          fetchExitSpanSamplesFromTraceIds({
+            apmEventClient,
+            traceIds,
+            start,
+            end,
+          })
+      );
+
+      return {
+        tracesCount: traceIds.length,
+        spans,
+      };
+    }
+
+    const chunkedResponses = await withApmSpan('get_service_paths_from_all_trace_ids', () => {
+      const chunks = chunk(traceIds, config.serviceMapMaxTracesPerRequest);
+      return Promise.all(
+        chunks.map((traceIdsChunk) =>
+          getServiceMapFromTraceIds({
+            apmEventClient,
+            traceIds: traceIdsChunk,
+            start,
+            end,
+            terminateAfter: config.serviceMapTerminateAfter,
+            serviceMapMaxAllowableBytes: config.serviceMapMaxAllowableBytes,
+            numOfRequests: chunks.length,
+            logger,
+          })
+        )
+      );
+    });
+
+    logger.debug('Received chunk responses');
+
+    const mergedResponses = chunkedResponses.reduce((prev, current) => {
+      return {
+        connections: prev.connections.concat(current.connections),
+        discoveredServices: prev.discoveredServices.concat(current.discoveredServices),
+      };
+    });
+
+    logger.debug('Merged responses');
 
     return {
+      connections: mergedResponses.connections,
+      discoveredServices: mergedResponses.discoveredServices,
       tracesCount: traceIds.length,
-      spans,
     };
   });
 }
@@ -96,11 +148,26 @@ export function getServiceMap(
 
     logger.debug('Received and parsed all responses');
 
-    return {
-      spans: connectionData.spans,
-      tracesCount: connectionData.tracesCount,
+    if ('spans' in connectionData) {
+      return {
+        spans: connectionData.spans,
+        tracesCount: connectionData.tracesCount,
+        servicesData,
+        anomalies,
+      };
+    }
+
+    const serviceMapNodes = getServiceMapNodes({
+      connections: connectionData.connections,
+      exitSpanDestinations: connectionData.discoveredServices,
       servicesData,
       anomalies,
+    });
+
+    return {
+      ...serviceMapNodes,
+      tracesCount: connectionData.tracesCount,
+      nodesCount: serviceMapNodes.nodesCount,
     };
   });
 }

@@ -8,39 +8,22 @@
 import { i18n } from '@kbn/i18n';
 import { compact, groupBy } from 'lodash';
 import { SPAN_TYPE, SPAN_SUBTYPE } from '../es_fields/apm';
-import type { ConnectionEdge, ConnectionElement, ConnectionNode } from './types';
+import type {
+  ConnectionEdge,
+  ConnectionElement,
+  ConnectionNode,
+  GroupResourceNodesResponse,
+  GroupedEdge,
+  GroupedNode,
+} from './types';
 import { getEdgeId, isSpanGroupingSupported } from './utils';
 
 const MINIMUM_GROUP_SIZE = 4;
 
-type GroupedConnection = ConnectionNode | ConnectionEdge;
-
-export interface GroupedNode {
-  data: {
-    id: string;
-    'span.type': string;
-    label: string;
-    groupedConnections: GroupedConnection[];
-  };
-}
-
-export interface GroupedEdge {
-  data: {
-    id: string;
-    source: string;
-    target: string;
-  };
-}
-
-export interface GroupResourceNodesResponse {
-  elements: Array<GroupedNode | GroupedEdge | ConnectionElement>;
-  nodesCount: number;
-}
-
 const isEdge = (el: ConnectionElement): el is { data: ConnectionEdge } =>
   Boolean(el.data.source && el.data.target);
 const isNode = (el: ConnectionElement): el is { data: ConnectionNode } => !isEdge(el);
-const isElligibleGroupNode = (el: ConnectionElement) => {
+const isElligibleGroupNode = (el: ConnectionElement): el is { data: ConnectionNode } => {
   if (isNode(el) && SPAN_TYPE in el.data) {
     return isSpanGroupingSupported(el.data[SPAN_TYPE], el.data[SPAN_SUBTYPE]);
   }

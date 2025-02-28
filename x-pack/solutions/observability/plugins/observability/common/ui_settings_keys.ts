@@ -23,6 +23,7 @@ export const enableInfrastructureAssetCustomDashboards =
 export const enableAwsLambdaMetrics = 'observability:enableAwsLambdaMetrics';
 export const enableAgentExplorerView = 'observability:apmAgentExplorerView';
 export const apmEnableTableSearchBar = 'observability:apmEnableTableSearchBar';
+export const apmEnableServiceMapV2 = 'observability:apmEnableServiceMapV2';
 export const entityCentricExperience = 'observability:entityCentricExperience';
 export const apmEnableServiceInventoryTableSearchBar =
   'observability:apmEnableServiceInventoryTableSearchBar';

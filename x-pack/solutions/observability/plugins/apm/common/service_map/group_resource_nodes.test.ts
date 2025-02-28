@@ -6,10 +6,8 @@
  */
 
 import type { ConnectionElement, ServiceMapExitSpan, ServiceMapService } from './types';
-import type { GroupedNode } from './group_resource_nodes';
+import type { GroupedNode } from './types';
 import { groupResourceNodes } from './group_resource_nodes';
-import expectedGroupedData from '../../server/routes/service_map/mock_responses/group_resource_nodes_grouped.json';
-import preGroupedData from '../../server/routes/service_map/mock_responses/group_resource_nodes_pregrouped.json';
 import { getEdgeId, getExternalConnectionNode, getServiceConnectionNode } from './utils';
 
 describe('groupResourceNodes', () => {
@@ -88,19 +86,6 @@ describe('groupResourceNodes', () => {
 
   describe('basic grouping', () => {
     it('should group external nodes', () => {
-      const responseWithGroups = groupResourceNodes(
-        preGroupedData as { elements: ConnectionElement[] }
-      );
-      expect(responseWithGroups.elements).toHaveLength(expectedGroupedData.elements.length);
-      for (const element of responseWithGroups.elements) {
-        const expectedElement = expectedGroupedData.elements.find(
-          ({ data: { id } }: { data: { id: string } }) => id === element.data.id
-        )!;
-        expect(element).toMatchObject(expectedElement);
-      }
-    });
-
-    it('should group nodes when they meet minimum group size', () => {
       const elements: ConnectionElement[] = [
         nodeJsServiceNode,
         nodeJsExitSpanQuora,

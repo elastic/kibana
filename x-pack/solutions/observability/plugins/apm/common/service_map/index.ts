@@ -12,15 +12,15 @@ import type {
   ExitSpanDestination,
   ConnectionElement,
   ExternalConnectionNode,
+  GroupResourceNodesResponse,
   ServiceConnectionNode,
   ServicesResponse,
   ServiceMapResponse,
-  ServiceMapWithConnections,
+  ServiceMapConnections,
   ServiceMapTelemetry,
   NodeStats,
   NodeItem,
 } from './types';
-import type { GroupResourceNodesResponse } from './group_resource_nodes';
 
 export * from './utils';
 export { getServiceMapNodes } from './get_service_map_nodes';
@@ -35,7 +35,7 @@ export {
   ExternalConnectionNode,
   ServiceConnectionNode,
   ServicesResponse,
-  ServiceMapWithConnections,
+  ServiceMapConnections as ServiceMapWithConnections,
   ServiceMapResponse,
   ServiceMapTelemetry,
   NodeStats,

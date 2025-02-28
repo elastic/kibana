@@ -34,6 +34,7 @@ export {
   enableInfrastructureAssetCustomDashboards,
   enableAwsLambdaMetrics,
   enableAgentExplorerView,
+  apmEnableServiceMapV2,
   apmEnableTableSearchBar,
   entityCentricExperience,
   apmAWSLambdaPriceFactor,
