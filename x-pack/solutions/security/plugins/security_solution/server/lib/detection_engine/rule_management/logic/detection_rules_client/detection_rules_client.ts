@@ -63,9 +63,7 @@ export const createDetectionRulesClient = ({
   return {
     getRuleCustomizationStatus() {
       /**
-       * The prebuilt rules customization feature is gated by two things:
-       * 1. The feature flag `prebuiltRulesCustomizationEnabled` in the config.
-       * 2. The license level.
+       * The prebuilt rules customization feature is gated by the license level.
        *
        * The license level is verified against the minimum required level for
        * the feature (Enterprise). However, since Serverless always operates at
@@ -74,16 +72,12 @@ export const createDetectionRulesClient = ({
        * unavailable features are disabled.
        */
       const isRulesCustomizationEnabled =
-        experimentalFeatures.prebuiltRulesCustomizationEnabled &&
         license.hasAtLeast(MINIMUM_RULE_CUSTOMIZATION_LICENSE) &&
         productFeaturesService.isEnabled(ProductFeatureKey.prebuiltRuleCustomization);
 
-      let customizationDisabledReason;
-      if (!isRulesCustomizationEnabled) {
-        customizationDisabledReason = !experimentalFeatures.prebuiltRulesCustomizationEnabled
-          ? PrebuiltRulesCustomizationDisabledReason.FeatureFlag
-          : PrebuiltRulesCustomizationDisabledReason.License;
-      }
+      const customizationDisabledReason = isRulesCustomizationEnabled
+        ? undefined
+        : PrebuiltRulesCustomizationDisabledReason.License;
 
       return {
         isRulesCustomizationEnabled,
