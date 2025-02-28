@@ -14,6 +14,7 @@ import {
 import { authenticatedUser } from '../../__mocks__/user';
 import { IndexPatternsFetcher } from '@kbn/data-plugin/server';
 import type { MlPluginSetup } from '@kbn/ml-plugin/server';
+import { getMlNodeCount } from '@kbn/ml-plugin/server/lib/node_utils';
 import { mlPluginMock } from '@kbn/ml-plugin/public/mocks';
 import pRetry from 'p-retry';
 
@@ -27,6 +28,7 @@ import { KnowledgeBaseResource } from '@kbn/elastic-assistant-common';
 import { createTrainedModelsProviderMock } from '@kbn/ml-plugin/server/shared_services/providers/__mocks__/trained_models';
 import { ASSISTANT_ELSER_INFERENCE_ID } from './field_maps_configuration';
 
+jest.mock('@kbn/ml-plugin/server/lib/node_utils');
 jest.mock('../../lib/langchain/content_loaders/security_labs_loader');
 jest.mock('p-retry');
 const date = '2023-03-28T22:27:28.159Z';
@@ -261,6 +263,7 @@ describe('AIAssistantKnowledgeBaseDataClient', () => {
 
   describe('setupKnowledgeBase', () => {
     it('should install, deploy, and load docs if not already done', async () => {
+      (getMlNodeCount as jest.Mock).mockResolvedValue({ count: 1, lazyNodeCount: 0 });
       // @ts-expect-error not full response interface
       esClientMock.search.mockResolvedValue({});
       trainedModelsProviderMock.startTrainedModelDeployment.mockResolvedValue({});
@@ -289,6 +292,7 @@ describe('AIAssistantKnowledgeBaseDataClient', () => {
     });
 
     it('should skip installation and deployment if model is already installed and deployed', async () => {
+      (getMlNodeCount as jest.Mock).mockResolvedValue({ count: 1, lazyNodeCount: 0 });
       mockGetSecurityLabsDocsCount.mockResolvedValue(1);
       trainedModelsProviderMock.getTrainedModels.mockResolvedValue({
         count: 1,
