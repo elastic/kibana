@@ -6,6 +6,7 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
+import { ESQLVariableType } from '@kbn/esql-types';
 import type { ESQLRealField, JoinIndexAutocompleteItem } from '../validation/types';
 
 /** @internal **/
@@ -40,13 +41,6 @@ export interface ESQLControlVariable {
   key: string;
   value: string | number;
   type: ESQLVariableType;
-}
-
-export enum ESQLVariableType {
-  TIME_LITERAL = 'time_literal',
-  FIELDS = 'fields',
-  VALUES = 'values',
-  FUNCTIONS = 'functions',
 }
 
 export interface ESQLCallbacks {

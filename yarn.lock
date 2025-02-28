@@ -5603,6 +5603,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/esql-types@link:src/platform/packages/shared/kbn-esql-types":
+  version "0.0.0"
+  uid ""
+
 "@kbn/esql-utils@link:src/platform/packages/shared/kbn-esql-utils":
   version "0.0.0"
   uid ""

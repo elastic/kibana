@@ -498,6 +498,7 @@
     "@kbn/esql-ast-inspector-plugin": "link:examples/esql_ast_inspector",
     "@kbn/esql-datagrid": "link:src/platform/plugins/shared/esql_datagrid",
     "@kbn/esql-editor": "link:src/platform/packages/private/kbn-esql-editor",
+    "@kbn/esql-types": "link:src/platform/packages/shared/kbn-esql-types",
     "@kbn/esql-utils": "link:src/platform/packages/shared/kbn-esql-utils",
     "@kbn/esql-validation-autocomplete": "link:src/platform/packages/shared/kbn-esql-validation-autocomplete",
     "@kbn/esql-validation-example-plugin": "link:examples/esql_validation_example",

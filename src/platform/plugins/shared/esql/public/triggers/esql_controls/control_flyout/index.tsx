@@ -8,7 +8,8 @@
  */
 
 import React, { useCallback } from 'react';
-import { ESQLVariableType, ESQLControlVariable } from '@kbn/esql-validation-autocomplete';
+import { ESQLVariableType } from '@kbn/esql-types';
+import { ESQLControlVariable } from '@kbn/esql-validation-autocomplete';
 import type { ISearchGeneric } from '@kbn/search-types';
 import { monaco } from '@kbn/monaco';
 import type { ESQLControlState } from '../types';
