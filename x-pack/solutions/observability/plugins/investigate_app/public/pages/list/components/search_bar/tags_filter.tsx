@@ -45,6 +45,7 @@ export function TagsFilter({ isLoading, onChange }: Props) {
       iconType="arrowDown"
       badgeColor="success"
       onClick={() => setIsPopoverOpen(!isPopoverOpen)}
+      isToggle={false}
       isSelected={isPopoverOpen}
       numFilters={items.length}
       hasActiveFilters={!!items.find((item) => item.checked === 'on')}

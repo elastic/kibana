@@ -64,6 +64,7 @@ export function Selector({
       iconType="arrowDown"
       badgeColor="success"
       onClick={onButtonClick}
+      isToggle={false}
       isSelected={isPopoverOpen}
       numFilters={options.length}
       hasActiveFilters={!!options.find((item) => item.checked === 'on')}

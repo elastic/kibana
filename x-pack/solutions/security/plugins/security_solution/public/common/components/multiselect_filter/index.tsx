@@ -91,6 +91,7 @@ const MultiselectFilterComponent = <T extends unknown>({
           data-test-subj={`${dataTestSubj}-popoverButton`}
           iconType="arrowDown"
           grow={false}
+          isToggle={false}
           numFilters={items.length}
           numActiveFilters={selectedItems.length}
           hasActiveFilters={selectedItems.length > 0}

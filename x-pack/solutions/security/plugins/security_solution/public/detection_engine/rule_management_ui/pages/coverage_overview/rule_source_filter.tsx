@@ -73,6 +73,7 @@ const RuleSourceFilterComponent = ({
         data-test-subj="coverageOverviewRuleSourceFilterButton"
         isLoading={isLoading}
         iconType="arrowDown"
+        isToggle={false}
         onClick={onButtonClick}
         isSelected={isPopoverOpen}
         hasActiveFilters={numActiveFilters > 0}

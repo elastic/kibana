@@ -71,6 +71,7 @@ const RuleActivityFilterComponent = ({
         data-test-subj="coverageOverviewRuleActivityFilterButton"
         isLoading={isLoading}
         iconType="arrowDown"
+        isToggle={false}
         onClick={onButtonClick}
         isSelected={isPopoverOpen}
         hasActiveFilters={numActiveFilters > 0}

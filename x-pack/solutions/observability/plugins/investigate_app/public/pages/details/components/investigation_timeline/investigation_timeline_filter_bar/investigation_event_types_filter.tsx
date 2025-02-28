@@ -66,6 +66,7 @@ export function InvestigationEventTypesFilter({ onSelected }: Props) {
       iconType="arrowDown"
       badgeColor="success"
       onClick={togglePopover}
+      isToggle={false}
       isSelected={isPopoverOpen}
       numFilters={items.filter((item) => item.checked !== 'off').length}
       hasActiveFilters={!!items.find((item) => item.checked === 'on')}

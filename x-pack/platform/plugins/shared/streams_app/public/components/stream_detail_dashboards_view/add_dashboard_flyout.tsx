@@ -99,6 +99,7 @@ export function AddDashboardFlyout({
       iconType="arrowDown"
       badgeColor="success"
       onClick={() => setIsPopoverOpen(!isPopoverOpen)}
+      isToggle={false}
       isSelected={isPopoverOpen}
       numFilters={tagList.length}
       hasActiveFilters={selectedTags.length > 0}

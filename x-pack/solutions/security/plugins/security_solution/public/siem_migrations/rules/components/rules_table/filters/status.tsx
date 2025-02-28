@@ -74,6 +74,7 @@ export const StatusFilterButton: React.FC<StatusFilterButtonProps> = React.memo(
       <EuiFilterButton
         grow
         iconType="arrowDown"
+        isToggle={false}
         onClick={() => {
           setIsPopoverOpen(!isPopoverOpen);
         }}

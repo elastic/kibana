@@ -60,6 +60,7 @@ export const AuthorFilterButton: React.FC<AuthorFilterButtonProps> = React.memo(
       <EuiFilterButton
         grow
         iconType="arrowDown"
+        isToggle={false}
         onClick={() => {
           setIsPopoverOpen(!isPopoverOpen);
         }}

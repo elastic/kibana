@@ -64,6 +64,7 @@ export const MultiSelectFilter: React.FC<UseFilterParams> = ({
           <EuiFilterButton
             iconType={'arrowDown'}
             onClick={toggleIsPopoverOpen}
+            isToggle={false}
             isSelected={isPopoverOpen}
             numFilters={options.length}
             hasActiveFilters={selectedOptionKeys.length > 0}

@@ -156,6 +156,7 @@ export const PoliciesSelector = memo<PoliciesSelectorProps>(
       () => (
         <EuiFilterButton
           iconType="arrowDown"
+          isToggle={false}
           data-test-subj="policiesSelectorButton"
           onClick={onButtonClick}
           isSelected={isPopoverOpen}

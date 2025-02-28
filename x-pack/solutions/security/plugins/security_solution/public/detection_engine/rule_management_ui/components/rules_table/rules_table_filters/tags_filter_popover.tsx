@@ -67,6 +67,7 @@ const TagsFilterPopoverComponent = ({
     <EuiFilterButton
       grow
       iconType="arrowDown"
+      isToggle={false}
       onClick={() => setIsTagPopoverOpen(!isTagPopoverOpen)}
       numFilters={tags.length}
       isSelected={isTagPopoverOpen}

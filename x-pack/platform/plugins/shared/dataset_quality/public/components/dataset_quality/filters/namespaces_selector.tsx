@@ -73,6 +73,7 @@ export function NamespacesSelector({
       iconType="arrowDown"
       badgeColor="success"
       onClick={onButtonClick}
+      isToggle={false}
       isSelected={isPopoverOpen}
       numFilters={namespaces.length}
       hasActiveFilters={!!namespaces.find((item) => item.checked === 'on')}

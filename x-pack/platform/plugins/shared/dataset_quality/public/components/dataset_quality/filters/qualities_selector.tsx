@@ -77,6 +77,7 @@ export function QualitiesSelector({
       iconType="arrowDown"
       badgeColor="success"
       onClick={onButtonClick}
+      isToggle={false}
       isSelected={isPopoverOpen}
       numFilters={qualities.length}
       hasActiveFilters={!!qualities.find((item) => item.checked === 'on')}

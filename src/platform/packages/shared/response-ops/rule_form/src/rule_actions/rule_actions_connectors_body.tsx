@@ -281,6 +281,7 @@ export const RuleActionsConnectorsBody = ({
       <EuiFilterButton
         iconType="arrowDown"
         badgeColor="accent"
+        isToggle={false}
         hasActiveFilters={selectedConnectorType !== 'all'}
         numActiveFilters={selectedConnectorType !== 'all' ? 1 : undefined}
         onClick={toggleFilterPopover}

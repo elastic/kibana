@@ -71,8 +71,10 @@ const RuleTagFilterPopoverButton = memo(
     selectedTags,
     onClosePopover,
     buttonDataTestSubj,
+    isSelected,
   }: {
     selectedTags: string[];
+    isSelected: boolean;
     onClosePopover: () => void;
     buttonDataTestSubj?: string;
   }) => {
@@ -80,6 +82,8 @@ const RuleTagFilterPopoverButton = memo(
       <EuiFilterButton
         data-test-subj={buttonDataTestSubj}
         iconType="arrowDown"
+        isToggle={false}
+        isSelected={isSelected}
         hasActiveFilters={selectedTags.length > 0}
         numActiveFilters={selectedTags.length}
         numFilters={selectedTags.length}
@@ -273,6 +277,7 @@ export const RuleTagFilter = memo((props: RuleTagFilterProps) => {
         closePopover={onClosePopover}
         button={
           <RuleTagFilterPopoverButton
+            isSelected={isPopoverOpen}
             selectedTags={selectedTags}
             onClosePopover={onClosePopover}
             buttonDataTestSubj={buttonDataTestSubj}

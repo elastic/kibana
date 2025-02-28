@@ -138,6 +138,8 @@ export function FieldValueSelection({
       })}
       hasActiveFilters={numOfFilters > 0}
       iconType="arrowDown"
+      isToggle={false}
+      isSelected={isPopoverOpen}
       numActiveFilters={numOfFilters}
       numFilters={options.length}
       onClick={onButtonClick}

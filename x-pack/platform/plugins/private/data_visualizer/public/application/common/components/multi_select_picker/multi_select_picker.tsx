@@ -103,6 +103,7 @@ export const MultiSelectPicker: FC<{
       data-test-subj={`${dataTestSubj}-button`}
       iconType="arrowDown"
       onClick={onButtonClick}
+      isToggle={false}
       isSelected={isPopoverOpen}
       numFilters={items.length}
       hasActiveFilters={checkedOptions && checkedOptions.length > 0}

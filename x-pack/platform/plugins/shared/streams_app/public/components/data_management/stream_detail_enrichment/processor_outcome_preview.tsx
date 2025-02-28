@@ -82,6 +82,7 @@ const OutcomeControls = () => {
   };
 
   const getFilterButtonPropsFor = (filter: PreviewDocsFilterOption) => ({
+    isSelected: previewDocsFilter === filter,
     hasActiveFilters: previewDocsFilter === filter,
     onClick: () => changePreviewDocsFilter(filter),
   });

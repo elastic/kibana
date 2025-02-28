@@ -50,6 +50,7 @@ export const JobIdFilter: React.FC<{
         data-test-subj="job-id-filter-button"
         hasActiveFilters={selectedJobIds.length > 0}
         iconType="arrowDown"
+        isToggle={false}
         isSelected={isPopoverOpen}
         numActiveFilters={selectedJobIds.length}
         onClick={onButtonClick}

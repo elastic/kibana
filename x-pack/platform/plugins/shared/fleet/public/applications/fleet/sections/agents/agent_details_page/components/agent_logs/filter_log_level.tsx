@@ -36,6 +36,7 @@ export const LogLevelFilter: React.FunctionComponent<{
           data-test-subj="agentList.logLevelFilterBtn"
           iconType="arrowDown"
           onClick={togglePopover}
+          isToggle={false}
           isSelected={isOpen}
           numFilters={options.length}
           hasActiveFilters={selectedLevels.length > 0}

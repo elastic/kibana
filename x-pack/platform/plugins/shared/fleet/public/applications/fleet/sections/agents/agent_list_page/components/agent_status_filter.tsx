@@ -230,6 +230,7 @@ export const AgentStatusFilter: React.FC<{
           <EuiFilterButton
             iconType="arrowDown"
             onClick={() => updateIsStatusFilterOpen(!isStatusFilterOpen)}
+            isToggle={false}
             isSelected={isStatusFilterOpen}
             hasActiveFilters={selectedStatus.length > 0}
             numActiveFilters={selectedStatus.length}

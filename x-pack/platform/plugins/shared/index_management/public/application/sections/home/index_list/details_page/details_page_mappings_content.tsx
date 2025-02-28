@@ -541,13 +541,17 @@ export const DetailsPageMappingsContent: FunctionComponent<{
                 )}
                 onClick={onToggleChange}
               >
-                <EuiFilterButton hasActiveFilters={!isJSONVisible} withNext>
+                <EuiFilterButton
+                  isSelected={!isJSONVisible}
+                  hasActiveFilters={!isJSONVisible}
+                  withNext
+                >
                   <FormattedMessage
                     id="xpack.idxMgmt.indexDetails.mappings.tableView"
                     defaultMessage="List"
                   />
                 </EuiFilterButton>
-                <EuiFilterButton hasActiveFilters={isJSONVisible}>
+                <EuiFilterButton isSelected={isJSONVisible} hasActiveFilters={isJSONVisible}>
                   <FormattedMessage
                     id="xpack.idxMgmt.indexDetails.mappings.json"
                     defaultMessage="JSON"

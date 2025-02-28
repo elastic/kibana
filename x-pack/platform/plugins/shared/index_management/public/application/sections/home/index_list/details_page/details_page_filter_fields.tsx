@@ -88,6 +88,7 @@ export const MappingsFilter: React.FC<Props> = ({
       iconSide="right"
       isDisabled={isJSONVisible}
       onClick={() => setIsFilterPopoverVisible(!isFilterByPopoverVisible)}
+      isToggle={false}
       numFilters={
         !isAddingFields
           ? state.filter.selectedOptions.length

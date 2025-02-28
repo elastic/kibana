@@ -49,6 +49,7 @@ export function FieldTypeFilter({
       {...buttonProps}
       data-test-subj="toggleFieldFilterButton"
       iconType="arrowDown"
+      isToggle={false}
       isSelected={fieldTypesValue.length > 0}
       numFilters={0}
       hasActiveFilters={fieldTypesValue.length > 0}

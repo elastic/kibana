@@ -59,6 +59,7 @@ export const GroupsFilterPopoverComponent = ({
           data-test-subj={'groups-filter-popover-button'}
           iconType="arrowDown"
           onClick={() => setIsGroupPopoverOpen(!isGroupPopoverOpen)}
+          isToggle={false}
           isSelected={isGroupPopoverOpen}
           numFilters={uniqueGroups.length}
           hasActiveFilters={selectedGroups.length > 0}

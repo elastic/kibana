@@ -152,6 +152,7 @@ export const PlatformSelector: React.FunctionComponent<Props> = ({
             {VISIBLE_PALFORM_OPTIONS.map((option) => (
               <EuiFilterButton
                 key={option.id}
+                isSelected={platform === option.id}
                 hasActiveFilters={platform === option.id}
                 onClick={() => setPlatform(option.id)}
                 data-test-subj={option['data-test-subj']}
@@ -165,6 +166,7 @@ export const PlatformSelector: React.FunctionComponent<Props> = ({
                   iconType="arrowDown"
                   data-test-subj="platformSelectorExtended"
                   onClick={() => setShowExtendedPlatforms(!showExtendedPlatforms)}
+                  isToggle={false}
                   isSelected={showExtendedPlatforms}
                   hasActiveFilters={extendedPlatforms.includes(platform)}
                   numActiveFilters={extendedPlatforms.includes(platform) ? 1 : 0}

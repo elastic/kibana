@@ -82,6 +82,7 @@ export const DatasetFilter: React.FunctionComponent<{
           data-test-subj="agentList.datasetFilterBtn"
           iconType="arrowDown"
           onClick={togglePopover}
+          isToggle={false}
           isSelected={isOpen}
           isLoading={isLoading}
           numFilters={datasetValues.length}

@@ -74,6 +74,7 @@ export const FilterPopoverComponent = ({
           data-test-subj={`options-filter-popover-button-${buttonLabel}`}
           iconType="arrowDown"
           onClick={setIsPopoverOpenCb}
+          isToggle={false}
           isSelected={isPopoverOpen}
           numFilters={options.length}
           hasActiveFilters={selectedOptions.length > 0}

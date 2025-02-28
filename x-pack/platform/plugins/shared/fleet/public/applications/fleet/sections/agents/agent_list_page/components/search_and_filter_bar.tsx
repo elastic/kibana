@@ -197,6 +197,7 @@ export const SearchAndFilterBar: React.FunctionComponent<SearchAndFilterBarProps
                   agentPolicies={agentPolicies}
                 />
                 <EuiFilterButton
+                  isSelected={showUpgradeable}
                   hasActiveFilters={showUpgradeable}
                   onClick={() => {
                     onShowUpgradeableChange(!showUpgradeable);

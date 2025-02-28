@@ -117,7 +117,9 @@ export const TagFilterPanel: FC<{}> = ({}) => {
           <EuiFilterButton
             iconType="arrowDown"
             iconSide="right"
+            isToggle={false}
             onClick={onFilterButtonClick}
+            isSelected={isPopoverOpen}
             data-test-subj="tagFilterPopoverButton"
             hasActiveFilters={totalActiveFilters > 0}
             numActiveFilters={totalActiveFilters}

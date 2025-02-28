@@ -104,6 +104,8 @@ export const UserFilterPanel: FC<{}> = () => {
           <EuiFilterButton
             iconType="arrowDown"
             iconSide="right"
+            isToggle={false}
+            isSelected={isPopoverOpen}
             data-test-subj="userFilterPopoverButton"
             onClick={() => setPopoverOpen(!isPopoverOpen)}
             hasActiveFilters={selectedUsers.length > 0}

@@ -203,6 +203,7 @@ export const PipelineTable: FunctionComponent<Props> = ({
       badgeColor="success"
       data-test-subj="filtersDropdown"
       onClick={onButtonClick}
+      isToggle={false}
       isSelected={isPopoverOpen}
       numFilters={filterOptions.filter((item) => item.checked !== 'off').length}
       hasActiveFilters={!!filterOptions.find((item) => item.checked === 'on')}

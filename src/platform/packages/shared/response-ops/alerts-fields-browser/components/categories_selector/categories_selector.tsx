@@ -134,6 +134,7 @@ const CategoriesSelectorComponent: React.FC<CategoriesSelectorProps> = ({
             data-test-subj="categories-filter-button"
             hasActiveFilters={selectedCategoryIds.length > 0}
             iconType="arrowDown"
+            isToggle={false}
             isSelected={isPopoverOpen}
             numActiveFilters={selectedCategoryIds.length}
             numFilters={totalCategories}

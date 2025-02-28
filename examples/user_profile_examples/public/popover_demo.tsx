@@ -129,6 +129,8 @@ export const PopoverDemo: FunctionComponent = () => {
           button={
             <EuiFilterButton
               iconType="arrowDown"
+              isToggle={false}
+              isSelected={isOpen2}
               numFilters={options2.length}
               hasActiveFilters={selectedOptions2.length > 0}
               numActiveFilters={selectedOptions2.length}
