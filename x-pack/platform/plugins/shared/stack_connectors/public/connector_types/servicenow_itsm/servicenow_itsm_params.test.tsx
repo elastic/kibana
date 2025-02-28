@@ -451,7 +451,7 @@ describe('ServiceNowITSMParamsFields renders', () => {
       theField.prop('onChange')!(changeEvent);
 
       await waitFor(() => {
-        expect(editAction.mock.calls[0][1]).toEqual('closeIncident');
+        expect(editAction.mock.lastCall[1]).toEqual('closeIncident');
       });
 
       wrapper.update();
@@ -468,7 +468,7 @@ describe('ServiceNowITSMParamsFields renders', () => {
       expect(wrapper.find('[data-test-subj="commentsTextArea"]').exists()).toBeFalsy();
     });
 
-    test('resets form fields on action change', async () => {
+    test('resets form fields on action change', () => {
       const changeEvent = { target: { value: 'resolve' } } as React.ChangeEvent<HTMLSelectElement>;
       const wrapper = mountWithIntl(<ServiceNowITSMParamsFields {...newDefaultProps} />);
 
@@ -478,7 +478,8 @@ describe('ServiceNowITSMParamsFields renders', () => {
         target: { value: 'updated correlation id' },
       });
 
-      await waitFor(() => {
+      // eslint-disable-next-line testing-library/await-async-utils
+      waitFor(() => {
         expect(correlationIdField.contains('updated correlation id')).toBe(true);
       });
 
@@ -487,7 +488,10 @@ describe('ServiceNowITSMParamsFields renders', () => {
 
       wrapper.update();
 
-      expect(correlationIdField.contains('')).toBe(true);
+      // eslint-disable-next-line testing-library/await-async-utils
+      waitFor(() => {
+        expect(correlationIdField.contains('')).toBe(true);
+      });
     });
   });
 });
