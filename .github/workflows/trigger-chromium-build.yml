@@ -2,7 +2,7 @@ name: Trigger Chromium Build
 
 on:
   issues:
-    types: [labeled, reopened]
+    types: [labeled, opened, reopened, edited]
 
 permissions:
   contents: read
