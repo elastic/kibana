@@ -71,7 +71,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           deepLinkId: 'enterpriseSearch',
         });
         await solutionNavigation.breadcrumbs.expectBreadcrumbExists({
-          deepLinkId: 'enterpriseSearch',
+          text: 'Content',
         });
 
         await expectNoPageReload();
