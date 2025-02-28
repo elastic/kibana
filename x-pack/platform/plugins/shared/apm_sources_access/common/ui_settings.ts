@@ -16,10 +16,10 @@ import { indicesSchema } from './config_schema';
 export const uiSettings: Record<string, UiSettingsParams> = {
   [OBSERVABILITY_APM_DATA_ACCESS_APM_SOURCES_ID]: {
     category: ['observability'],
-    name: i18n.translate('xpack.apmDataAccess.apmSources', {
+    name: i18n.translate('xpack.apmSourcesAccess.apmSources', {
       defaultMessage: 'APM sources',
     }),
-    description: i18n.translate('xpack.apmDataAccess.apmSourcesDescription', {
+    description: i18n.translate('xpack.apmSourcesAccess.apmSourcesDescription', {
       defaultMessage: 'Sources to be used for apm data.',
     }),
     type: 'json',
