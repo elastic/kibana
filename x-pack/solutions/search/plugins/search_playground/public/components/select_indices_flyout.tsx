@@ -62,6 +62,7 @@ export const SelectIndicesFlyout: React.FC<SelectIndicesFlyout> = ({ onClose }) 
           <EuiSpacer />
           <EuiSelectable
             searchable
+            height={650}
             searchProps={{
               onChange: handleSearchChange,
             }}
