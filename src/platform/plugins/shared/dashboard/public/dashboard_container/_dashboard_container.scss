@@ -17,7 +17,7 @@
     background-color: $euiColorBackgroundBasePlain;
   }
 
-  .embPanel {
+  .embPanel:has(.euiImageWrapper), .embPanel:has(.mkdVis), .embPanel:has(.euiMarkdownFormat)  {
     background-color: transparent;
   }
 };

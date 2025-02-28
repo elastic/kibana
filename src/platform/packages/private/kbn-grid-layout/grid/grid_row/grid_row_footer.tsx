@@ -39,8 +39,21 @@ export const GridRowFooter = React.memo(({ rowIndex, confirmDeleteRow }: GridRow
     gridLayoutStateManager.activeSection$.getValue()
   );
   const [rowTitle, setRowTitle] = useState<string>(currentRow.title);
+  const [readOnly, setReadOnly] = useState<boolean>(
+    gridLayoutStateManager.accessMode$.getValue() === 'VIEW'
+  );
 
   useEffect(() => {
+    /**
+     * This subscription is responsible for controlling whether or not the section title is
+     * editable and hiding all other "edit mode" actions (delete section, move section, etc)
+     */
+    const accessModeSubscription = gridLayoutStateManager.accessMode$
+      .pipe(distinctUntilChanged())
+      .subscribe((accessMode) => {
+        setReadOnly(accessMode === 'VIEW');
+      });
+
     const sectionSubscription = combineLatest([
       gridLayoutStateManager.gridLayout$,
       gridLayoutStateManager.activeSection$,
@@ -58,6 +71,7 @@ export const GridRowFooter = React.memo(({ rowIndex, confirmDeleteRow }: GridRow
         setRowTitle(title);
       });
     return () => {
+      accessModeSubscription.unsubscribe();
       sectionSubscription.unsubscribe();
       titleSubscription.unsubscribe();
     };
@@ -96,6 +110,7 @@ export const GridRowFooter = React.memo(({ rowIndex, confirmDeleteRow }: GridRow
         {rowIndex !== 0 && (
           <EuiInlineEditTitle
             size="xs"
+            isReadOnly={readOnly}
             heading="h2"
             defaultValue={rowTitle}
             onSave={updateTitle}
@@ -117,24 +132,26 @@ export const GridRowFooter = React.memo(({ rowIndex, confirmDeleteRow }: GridRow
         />
       </EuiFlexItem>
       <EuiFlexItem grow={true}>
-        <div>
-          {rowIndex !== 0 && (
+        {!readOnly && (
+          <div>
+            {rowIndex !== 0 && (
+              <EuiButtonIcon
+                iconType="trash"
+                color="danger"
+                iconSize="m"
+                size="s"
+                onClick={confirmDeleteRow}
+              />
+            )}
             <EuiButtonIcon
-              iconType="trash"
-              color="danger"
+              iconType="plusInCircleFilled"
+              color="text"
               iconSize="m"
               size="s"
-              onClick={confirmDeleteRow}
+              onClick={addNewSection}
             />
-          )}
-          <EuiButtonIcon
-            iconType="plusInCircleFilled"
-            color="text"
-            iconSize="m"
-            size="s"
-            onClick={addNewSection}
-          />
-        </div>
+          </div>
+        )}
       </EuiFlexItem>
     </EuiFlexGroup>
   );
