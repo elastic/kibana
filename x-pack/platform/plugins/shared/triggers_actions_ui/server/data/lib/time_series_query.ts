@@ -64,43 +64,40 @@ export async function timeSeriesQuery(
   // core query
   // Constructing a typesafe ES query in JS is problematic, use any escapehatch for now
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const esQuery: any = {
+  const esQuery = {
     index,
-    body: {
-      size: 0,
-      query: {
-        bool: {
-          filter: [
-            {
-              range: {
-                [timeField]: {
-                  gte: useCalculatedDateRange ? dateRangeInfo.dateStart : dateStart,
-                  lt: useCalculatedDateRange ? dateRangeInfo.dateEnd : dateEnd,
-                  format: 'strict_date_time',
-                },
+    size: 0,
+    query: {
+      bool: {
+        filter: [
+          {
+            range: {
+              [timeField]: {
+                gte: useCalculatedDateRange ? dateRangeInfo.dateStart : dateStart,
+                lt: useCalculatedDateRange ? dateRangeInfo.dateEnd : dateEnd,
+                format: 'strict_date_time',
               },
             },
-            ...(filterKuery ? [toElasticsearchQuery(fromKueryExpression(filterKuery))] : []),
-          ],
-        },
+          },
+          ...(!!filterKuery ? [toElasticsearchQuery(fromKueryExpression(filterKuery))] : []),
+        ],
       },
-      aggs: buildAggregation({
-        timeSeries: {
-          timeField,
-          timeWindowSize,
-          timeWindowUnit,
-          dateStart,
-          dateEnd,
-          interval,
-        },
-        aggType,
-        aggField,
-        termField,
-        termSize,
-        condition: conditionParams,
-      }),
     },
+    aggs: buildAggregation({
+      timeSeries: {
+        timeField,
+        timeWindowSize,
+        timeWindowUnit,
+        dateStart,
+        dateEnd,
+        interval,
+      },
+      aggType,
+      aggField,
+      termField,
+      termSize,
+      condition: conditionParams,
+    }),
     ignore_unavailable: true,
     allow_no_indices: true,
   };

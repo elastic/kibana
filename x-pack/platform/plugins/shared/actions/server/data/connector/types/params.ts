@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';

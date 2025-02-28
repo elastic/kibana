@@ -82,7 +82,7 @@ export default function bulkUntrackTests({ getService }: FtrProviderContext) {
               hits: { hits: activeAlerts },
             } = await es.search({
               index: alertAsDataIndex,
-              body: { query: { match_all: {} } },
+              query: { match_all: {} },
             });
 
             activeAlerts.forEach((activeAlert: any) => {
@@ -94,7 +94,7 @@ export default function bulkUntrackTests({ getService }: FtrProviderContext) {
             hits: { hits: activeAlerts },
           } = await es.search({
             index: alertAsDataIndex,
-            body: { query: { match_all: {} } },
+            query: { match_all: {} },
           });
 
           const ids = activeAlerts.map((activeAlert: any) => activeAlert._source[ALERT_UUID]);
@@ -124,7 +124,7 @@ export default function bulkUntrackTests({ getService }: FtrProviderContext) {
                   hits: { hits: untrackedAlerts },
                 } = await es.search({
                   index: alertAsDataIndex,
-                  body: { query: { match_all: {} } },
+                  query: { match_all: {} },
                 });
 
                 untrackedAlerts.forEach((untrackedAlert: any) => {
@@ -174,7 +174,7 @@ export default function bulkUntrackTests({ getService }: FtrProviderContext) {
         hits: { hits: activeAlerts },
       } = await es.search({
         index: alertAsDataIndex,
-        body: { query: { match_all: {} } },
+        query: { match_all: {} },
       });
 
       const ids = activeAlerts.map((activeAlert: any) => activeAlert._source[ALERT_UUID]);
@@ -205,7 +205,7 @@ export default function bulkUntrackTests({ getService }: FtrProviderContext) {
           hits: { hits: alerts },
         } = await es.search({
           index: alertAsDataIndex,
-          body: { query: { match_all: {} } },
+          query: { match_all: {} },
         });
 
         const activeAlertsRemaining = [];
