@@ -29,7 +29,6 @@ import {
   docsFilterOptions,
 } from './hooks/use_processing_simulator';
 import { AssetImage } from '../../asset_image';
-import { useDateRange } from '../../../hooks/use_date_range';
 
 interface ProcessorOutcomePreviewProps {
   columns: TableColumn[];
@@ -53,7 +52,7 @@ export const ProcessorOutcomePreview = ({
   const { dependencies } = useKibana();
   const { data } = dependencies.start;
 
-  const { timeRange, setTimeRange } = useDateRange({ data });
+  const { timeRange, setTimeRange } = data.query.timefilter.timefilter.useTimefilter();
 
   const tableColumns = useMemo(() => {
     switch (selectedDocsFilter) {
