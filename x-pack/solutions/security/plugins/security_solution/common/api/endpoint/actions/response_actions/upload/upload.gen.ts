@@ -37,6 +37,5 @@ export const UploadRouteRequestBody = BaseActionSchema.merge(
 export type UploadRouteResponse = z.infer<typeof UploadRouteResponse>;
 export const UploadRouteResponse = z.object({});
 
-export type EndpointUploadActionRequestBody = z.infer<typeof EndpointUploadActionRequestBody>;
-export const EndpointUploadActionRequestBody = UploadRouteRequestBody;
-export type EndpointUploadActionRequestBodyInput = z.input<typeof EndpointUploadActionRequestBody>;
+export type EndpointUploadActionResponse = z.infer<typeof EndpointUploadActionResponse>;
+export const EndpointUploadActionResponse = UploadRouteResponse;

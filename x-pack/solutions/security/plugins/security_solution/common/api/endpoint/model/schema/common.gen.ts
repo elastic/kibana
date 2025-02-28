@@ -189,7 +189,7 @@ export type Parameters = z.infer<typeof Parameters>;
 export const Parameters = z.object({});
 
 /**
- * List of agent types to retrieve. Defaults to endpoint.
+ * List of agent types to retrieve. Defaults to `endpoint`.
  */
 export type AgentTypes = z.infer<typeof AgentTypes>;
 export const AgentTypes = z.enum([
