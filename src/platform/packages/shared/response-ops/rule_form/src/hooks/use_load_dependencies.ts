@@ -17,6 +17,7 @@ import {
   useLoadRuleTypesQuery,
   useFetchFlappingSettings,
 } from '@kbn/alerts-ui-shared';
+import { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
 import {
   useLoadConnectors,
   useLoadConnectorTypes,
@@ -38,6 +39,7 @@ export interface UseLoadDependencies {
   validConsumers?: RuleCreationValidConsumer[];
   filteredRuleTypes?: string[];
   connectorFeatureId?: string;
+  fieldsMetadata?: FieldsMetadataPublicStart;
 }
 
 export const useLoadDependencies = (props: UseLoadDependencies) => {
@@ -50,6 +52,7 @@ export const useLoadDependencies = (props: UseLoadDependencies) => {
     capabilities,
     filteredRuleTypes = [],
     connectorFeatureId,
+    fieldsMetadata,
   } = props;
 
   const canReadConnectors = !!capabilities.actions?.show;
@@ -129,6 +132,7 @@ export const useLoadDependencies = (props: UseLoadDependencies) => {
     ruleTypeId: computedRuleTypeId,
     enabled: !!computedRuleTypeId && canReadConnectors,
     cacheTime: 0,
+    fieldsMetadata,
   });
 
   const ruleType = useMemo(() => {

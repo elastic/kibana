@@ -6,7 +6,7 @@
  */
 
 import { EuiButton, EuiButtonEmpty, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { RuleTypeModal } from '@kbn/response-ops-rule-form/src/rule_type_modal';
+import { RuleTypeModal } from '@kbn/response-ops-rule-form';
 import { ALERTING_FEATURE_ID } from '@kbn/alerting-plugin/common';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -30,6 +30,7 @@ interface RulesPageProps {
   activeTab?: string;
 }
 export function RulesPage({ activeTab = RULES_TAB_NAME }: RulesPageProps) {
+  const { services } = useKibana();
   const {
     http,
     docLinks,
@@ -38,7 +39,7 @@ export function RulesPage({ activeTab = RULES_TAB_NAME }: RulesPageProps) {
     application,
     triggersActionsUi: { ruleTypeRegistry, getRulesSettingsLink: RulesSettingsLink },
     serverless,
-  } = useKibana().services;
+  } = services;
   const { ObservabilityPageTemplate } = usePluginContext();
   const history = useHistory();
   const [ruleTypeModalVisibility, setRuleTypeModalVisibility] = useState<boolean>(false);

@@ -21,6 +21,7 @@ export const RuleFormErrorPromptWrapper: React.FC<
   const styles = {
     backgroundColor: 'transparent',
   };
+
   return (
     <EuiPageTemplate offset={0} css={styles}>
       <EuiPageTemplate.EmptyPrompt paddingSize="none" hasBorder={hasBorder} hasShadow={hasShadow}>
