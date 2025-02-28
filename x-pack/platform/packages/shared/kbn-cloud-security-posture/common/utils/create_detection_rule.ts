@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { HttpSetup } from '@kbn/core/public';
+import type { HttpSetup } from '@kbn/core/public';
 import { RuleCreateProps, RuleResponse } from '../types/rule';
 import { DETECTION_RULE_RULES_API_CURRENT_VERSION } from '../constants';
 

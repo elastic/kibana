@@ -68,7 +68,7 @@ export const createDetectionRuleFromBenchmarkRule = async (
   if (!benchmarkRule.benchmark?.posture_type) {
     throw new Error(
       i18n.translate(
-        'xpack.securitySolutionPackages.createDetectionRuleFromBenchmarkRule.createRuleErrorMessage',
+        'securitySolutionPackages.createDetectionRuleFromBenchmarkRule.createRuleErrorMessage',
         {
           defaultMessage: 'Rule creation is currently only available for Elastic findings',
         }
