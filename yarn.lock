@@ -2167,26 +2167,22 @@
   resolved "https://registry.yarnpkg.com/@elastic/eslint-plugin-eui/-/eslint-plugin-eui-0.1.1.tgz#2829b0f3cc750c582baa683c2f503594676ba08a"
   integrity sha512-dCoXcCT8V1djwWrP0XSG0gXN5fYDtAw5aF88BPArVBbuCQSWPEBpR9avaWJ6uVjAsOteQ7tdwLMtzrvMKgKKIA==
 
-"@elastic/eui-theme-borealis@0.1.0":
-  version "0.1.0"
-  resolved "https://registry.yarnpkg.com/@elastic/eui-theme-borealis/-/eui-theme-borealis-0.1.0.tgz#5b7151c9dae093b945060b3f9c1ac9461092fac0"
-  integrity sha512-eoQw+IHK+R1RHjl4VEVyWY6cWovLXddGl/u7XvIyiRZk+oEiM1ksuk0ZkO9nSkTI/j+tA7Z5aRbivhLhvCGjuA==
+"@elastic/eui-theme-borealis@file:./elastic_eui_theme_borealis_0.0.11_v_2_poc_01.tgz":
+  version "0.0.11"
+  resolved "file:./elastic_eui_theme_borealis_0.0.11_v_2_poc_01.tgz#111c21867e4e0b014ca43795654168ffa266c6c9"
 
-"@elastic/eui-theme-common@0.1.0":
-  version "0.1.0"
-  resolved "https://registry.yarnpkg.com/@elastic/eui-theme-common/-/eui-theme-common-0.1.0.tgz#fa74c7f72b4ca69ff1f7a5cf45e55c979064ab73"
-  integrity sha512-2Pm9PeEr4QXjtL/YYM6faXbQ2Fm/mJXzV7QLBxUW8iHov70IHZy1e3xJOio0lI1IbO3S7t79EIS6J3/uNffJfA==
+"@elastic/eui-theme-common@file:./elastic_eui_theme_common_0.0.9_v_2_poc_01.tgz":
+  version "0.0.9"
+  resolved "file:./elastic_eui_theme_common_0.0.9_v_2_poc_01.tgz#87dee27c5d1a61b9171fdd02ed4cda2b34b21554"
   dependencies:
     "@types/lodash" "^4.14.202"
     chroma-js "^2.4.2"
     lodash "^4.17.21"
 
-"@elastic/eui@101.3.0":
-  version "101.3.0"
-  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-101.3.0.tgz#17bb2d0ead708f46a0518c97972f742555694417"
-  integrity sha512-59WT6+qTo43qYw7o9phZpD5OhZNicZ3oYRZcYMp6ro+M59asZAbTzaDZMouh+KghnVqKNevCiOIDpu7gMIJoAA==
+"@elastic/eui@file:./elastic_eui_99.3.0_borealis.0_v_2_poc_02.tgz":
+  version "99.3.0-borealis.0"
+  resolved "file:./elastic_eui_99.3.0_borealis.0_v_2_poc_02.tgz#4a30e9399ada81f8dd08f87b1c8bf6ea720ab0ce"
   dependencies:
-    "@elastic/eui-theme-common" "0.1.0"
     "@elastic/prismjs-esql" "^1.0.0"
     "@hello-pangea/dnd" "^16.6.0"
     "@types/lodash" "^4.14.202"
