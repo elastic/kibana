@@ -8,3 +8,4 @@
 export * from './compute_if_esql_query_aggregating';
 export * from './get_index_list_from_esql_query';
 export * from './parse_esql_query';
+export * from './get_mv_expand_fields';

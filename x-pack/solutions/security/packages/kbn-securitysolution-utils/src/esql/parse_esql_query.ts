@@ -67,19 +67,3 @@ function getMetadataOption(astExpression: ESQLAstQueryExpression): ESQLCommandOp
 
   return undefined;
 }
-
-export const getMvExpandDetails = (query: string): Array<{ field: string }> => {
-  const { root } = parse(query);
-
-  const mvExpandCommands = root.commands.filter((command) => command.name === 'mv_expand');
-
-  return mvExpandCommands.reduce<Array<{ field: string }>>((acc, command) => {
-    const argument = command.args[0];
-
-    if (isColumnItem(argument) && argument.name) {
-      acc.push({ field: argument.name });
-    }
-
-    return acc;
-  }, []);
-};

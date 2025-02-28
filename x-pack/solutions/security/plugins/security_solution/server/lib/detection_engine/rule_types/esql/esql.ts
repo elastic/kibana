@@ -17,7 +17,7 @@ import { cloneDeep } from 'lodash';
 import {
   computeIsESQLQueryAggregating,
   getIndexListFromEsqlQuery,
-  getMvExpandDetails,
+  getMvExpandFields,
 } from '@kbn/securitysolution-utils';
 import type { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
 import { buildEsqlSearchRequest } from './build_esql_search_request';
@@ -151,8 +151,6 @@ export const esqlExecutor = async ({
           // slicing already processed results in previous iterations
           .slice(size - tuple.maxSignals)
           .map((row) => rowToDocument(response.columns, row));
-
-        const columns = response.columns.map((column) => column.name);
         const index = getIndexListFromEsqlQuery(completeRule.ruleParams.query);
 
         const sourceDocuments = await fetchSourceDocuments({
@@ -168,10 +166,14 @@ export const esqlExecutor = async ({
           licensing,
         });
 
-        const mvExpandCommands = getMvExpandDetails(completeRule.ruleParams.query);
-        const columnsSet = new Set(columns);
-        const expandedFieldsFromQuery = mvExpandCommands.map((command) => command.field);
-        const hasExpandedFieldsMissed = expandedFieldsFromQuery.some((f) => !columnsSet.has(f));
+        const expandedFieldsFromQuery = getMvExpandFields(completeRule.ruleParams.query);
+        const columnNamesSet = response.columns.reduce<Set<string>>((acc, column) => {
+          acc.add(column.name);
+          return acc;
+        }, new Set());
+        const hasExpandedFieldsMissed = expandedFieldsFromQuery.some(
+          (field) => !columnNamesSet.has(field)
+        );
         const expandedFields = hasExpandedFieldsMissed ? [] : expandedFieldsFromQuery;
 
         const wrapHits = (events: Array<estypes.SearchHit<SignalSource>>) =>
@@ -193,7 +195,7 @@ export const esqlExecutor = async ({
           const { _id, _version, _index, ...esqlResult } = document;
 
           const sourceDocument = _id ? sourceDocuments[_id] : undefined;
-          const source = mvExpandCommands.length
+          const source = expandedFieldsFromQuery.length
             ? cloneDeep(sourceDocument?._source)
             : sourceDocument?._source;
 

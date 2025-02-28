@@ -11,6 +11,7 @@ import type { estypes } from '@elastic/elasticsearch';
 import { robustGet } from '../../utils/source_fields_merging/utils/robust_field_access';
 import type { CompleteRule, EsqlRuleParams } from '../../../rule_schema';
 import type { SignalSource } from '../../types';
+
 /**
  * Generates id for ES|QL alert.
  * Id is generated as hash of event properties and rule/space config identifiers.
@@ -45,12 +46,10 @@ export const generateAlertId = ({
       event._version,
       event._index,
       `${spaceId}:${completeRule.alertId}`,
-      ...(expandedFields
-        ? retrieveExpandedValues({
-            event,
-            fields: expandedFields,
-          })
-        : []),
+      ...retrieveExpandedValues({
+        event,
+        fields: expandedFields,
+      }),
     ];
     return objectHash(idFields);
   } else {
@@ -63,14 +62,18 @@ export const generateAlertId = ({
   }
 };
 
+/**
+ * returns array of values from source event for requested list of fields
+ * undefined values are dropped
+ */
 const retrieveExpandedValues = ({
   event,
   fields,
 }: {
   event: estypes.SearchHit<SignalSource>;
-  fields: string[];
+  fields?: string[];
 }) => {
-  if (!event._source) {
+  if (!fields || !event._source) {
     return [];
   }
 
