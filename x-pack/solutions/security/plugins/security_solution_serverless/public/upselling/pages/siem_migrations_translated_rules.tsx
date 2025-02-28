@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { SiemMigrationTranslatedRulesUpsellPage as SiemMigrationTranslatedRulesUpsellPageCommon } from '@kbn/security-solution-upselling/pages/siem_migration_translated_rules';
+import { SiemMigrationsTranslatedRulesUpsellPage as SiemMigrationTranslatedRulesUpsellPageCommon } from '@kbn/security-solution-upselling/pages/siem_migration_translated_rules';
 import * as i18n from '../translations';
 
 export const SiemMigrationTranslatedRulesUpsellPage = React.memo(

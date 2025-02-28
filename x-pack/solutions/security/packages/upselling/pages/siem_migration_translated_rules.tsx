@@ -11,7 +11,7 @@ import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { SIEM_MIGRATION_MANAGER_LICENSE_BTN } from '../messages';
 import * as i18n from './translations';
 
-export const SiemMigrationTranslatedRulesUpsellPage = React.memo(
+export const SiemMigrationsTranslatedRulesUpsellPage = React.memo(
   function SiemMigrationTranslatedRulesUpsellPage({
     title,
     upgradeMessage,

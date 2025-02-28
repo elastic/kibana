@@ -6,13 +6,13 @@
  */
 
 import React from 'react';
-import { SiemMigrationTranslatedRulesUpsellPage } from './siem_migration_translated_rules';
+import { SiemMigrationsTranslatedRulesUpsellPage } from './siem_migration_translated_rules';
 import { render, screen } from '@testing-library/react';
 
 describe('SiemMigrationTranslatedRulesUpsellPage', () => {
   it('should render the component with all sections correctly', () => {
     render(
-      <SiemMigrationTranslatedRulesUpsellPage
+      <SiemMigrationsTranslatedRulesUpsellPage
         title="title"
         upgradeMessage="upgradeMessage"
         upgradeHref="https://upgrade.Href"
@@ -40,7 +40,7 @@ describe('SiemMigrationTranslatedRulesUpsellPage', () => {
 
   it('should render the component without upgradeHref', () => {
     render(
-      <SiemMigrationTranslatedRulesUpsellPage title="title" upgradeMessage="upgradeMessage" />
+      <SiemMigrationsTranslatedRulesUpsellPage title="title" upgradeMessage="upgradeMessage" />
     );
 
     expect(

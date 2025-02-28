@@ -6,16 +6,16 @@
  */
 
 import React from 'react';
-import { SiemMigrationTranslatedRulesUpsellPage as SiemMigrationTranslatedRulesUpsellPageCommon } from '@kbn/security-solution-upselling/pages/siem_migration_translated_rules';
+import { SiemMigrationsTranslatedRulesUpsellPage as SiemMigrationsTranslatedRulesUpsellPageCommonn } from '@kbn/security-solution-upselling/pages/siem_migration_translated_rules';
 import { useKibana } from '../../common/services';
 import * as i18n from '../translations';
 
-export const SiemMigrationTranslatedRulesPage = React.memo(
+export const SiemMigrationsTranslatedRulesPage = React.memo(
   function SiemMigrationTranslatedRulesPage() {
     const { services } = useKibana();
 
     return (
-      <SiemMigrationTranslatedRulesUpsellPageCommon
+      <SiemMigrationsTranslatedRulesUpsellPageCommonn
         title={i18n.SIEM_MIGRATION_UPSELLING_TITLE('Enterprise')}
         upgradeMessage={i18n.SIEM_MIGRATION_RULES_PAGE_UPGRADE_LICENSE_MESSAGE}
         upgradeHref={services.application.getUrlForApp('management', {

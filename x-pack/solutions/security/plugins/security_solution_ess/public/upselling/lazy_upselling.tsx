@@ -30,8 +30,8 @@ export const SiemMigrationsStartUpsellSectionLazy = withSuspenseUpsell(
 export const SiemMigrationsTranslatedRulesUpsellPageLazy = withSuspenseUpsell(
   lazy(() =>
     import('./pages/siem_migrations_translated_rules').then(
-      ({ SiemMigrationTranslatedRulesPage }) => ({
-        default: SiemMigrationTranslatedRulesPage,
+      ({ SiemMigrationsTranslatedRulesPage }) => ({
+        default: SiemMigrationsTranslatedRulesPage,
       })
     )
   )
