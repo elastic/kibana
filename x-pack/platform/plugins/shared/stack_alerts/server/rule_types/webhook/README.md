@@ -12,6 +12,8 @@ source code for the webhook:
 - https://glitch.com/edit/#!/kibana-webhook-alerting-rule-poc-2025
 
 ## create a rule in DevTools
+
+```json
 POST kbn:/api/alerting/rule
 {
   "rule_type_id": ".webhook",
@@ -26,3 +28,4 @@ POST kbn:/api/alerting/rule
   "consumer": "alerts",
   "actions": []
 }
+```
