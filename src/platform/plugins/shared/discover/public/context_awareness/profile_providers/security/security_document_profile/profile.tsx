@@ -17,7 +17,7 @@ import * as i18n from '../translations';
 
 export const createSecurityDocumentProfileProvider: SecurityProfileProviderFactory<
   DocumentProfileProvider
-> = (_services: ProfileProviderServices) => {
+> = (services: ProfileProviderServices) => {
   return {
     profileId: SECURITY_PROFILE_ID.document,
     experimental: true,

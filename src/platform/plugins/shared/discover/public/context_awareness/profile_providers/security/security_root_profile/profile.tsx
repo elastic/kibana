@@ -16,6 +16,7 @@ import { createCellRendererAccessor } from '../accessors/get_cell_renderer_acces
 import { createAppWrapperAccessor } from '../accessors/create_app_wrapper_accessor';
 import { getDefaultSecuritySolutionAppState } from '../accessors/get_default_app_state';
 import { getAlertEventRowIndicator } from '../accessors/get_row_indicator';
+import { getRowAdditionalLeadingControls } from '../accessors/get_row_additional_control';
 
 interface SecurityRootProfileContext {
   appWrapper?: FunctionComponent<PropsWithChildren<{}>>;
@@ -38,6 +39,14 @@ export const createSecurityRootProfileProvider: SecurityProfileProviderFactory<
     profileId: 'security-root-profile',
     isExperimental: true,
     profile: {
+      getRowAdditionalLeadingControls: (prev) => (params) => {
+        const additionalControls = prev(params) || [];
+
+        return getRowAdditionalLeadingControls({
+          services,
+          additionalControls,
+        });
+      },
       getRenderAppWrapper: (PrevWrapper, params) => {
         const AppWrapper = params.context.appWrapper ?? EmptyAppWrapper;
         return ({ children }) => (
