@@ -31,7 +31,7 @@ import {
 
 const logger = loggingSystemMock.create().get() as jest.Mocked<Logger>;
 
-const CERT_DIR = '../../../../../../../../packages/kbn-dev-utils/certs';
+const CERT_DIR = '../../../../../../../../src/platform/packages/shared/kbn-dev-utils/certs';
 
 const KIBANA_CRT_FILE = pathResolve(__filename, pathJoin(CERT_DIR, 'kibana.crt'));
 const KIBANA_KEY_FILE = pathResolve(__filename, pathJoin(CERT_DIR, 'kibana.key'));
