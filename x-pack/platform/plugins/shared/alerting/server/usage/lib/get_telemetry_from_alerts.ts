@@ -39,16 +39,14 @@ export async function getTotalAlertsCountAggregations({
     const query = {
       index: AAD_INDEX_PATTERN,
       size: 0,
-      body: {
-        query: {
-          match_all: {},
-        },
-        aggs: {
-          by_rule_type_id: {
-            terms: {
-              field: 'kibana.alert.rule.rule_type_id',
-              size: NUM_ALERTING_RULE_TYPES,
-            },
+      query: {
+        match_all: {},
+      },
+      aggs: {
+        by_rule_type_id: {
+          terms: {
+            field: 'kibana.alert.rule.rule_type_id',
+            size: NUM_ALERTING_RULE_TYPES,
           },
         },
       },

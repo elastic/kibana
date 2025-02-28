@@ -93,16 +93,14 @@ export const dataStreamReindexServiceFactory = ({
 
       const names = [dataStreamName];
       const resp = await esClient.security.hasPrivileges({
-        body: {
-          cluster: ['manage', 'cancel_task'],
-          index: [
-            {
-              names,
-              allow_restricted_indices: true,
-              privileges: ['all'],
-            },
-          ],
-        },
+        cluster: ['manage', 'cancel_task'],
+        index: [
+          {
+            names,
+            allow_restricted_indices: true,
+            privileges: ['all'],
+          },
+        ],
       });
 
       return resp.has_all_requested;

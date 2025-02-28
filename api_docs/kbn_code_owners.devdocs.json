@@ -31,7 +31,7 @@
         "signature": [
           "(owner: string) => \"search\" | \"security\" | \"observability\" | \"platform\" | undefined"
         ],
-        "path": "packages/kbn-code-owners/src/code_owner_areas.ts",
+        "path": "src/platform/packages/private/kbn-code-owners/src/code_owner_areas.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -47,7 +47,7 @@
             "signature": [
               "string"
             ],
-            "path": "packages/kbn-code-owners/src/code_owner_areas.ts",
+            "path": "src/platform/packages/private/kbn-code-owners/src/code_owner_areas.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -88,7 +88,7 @@
           },
           " | undefined"
         ],
-        "path": "packages/kbn-code-owners/src/code_owners.ts",
+        "path": "src/platform/packages/private/kbn-code-owners/src/code_owners.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -104,7 +104,7 @@
             "signature": [
               "string"
             ],
-            "path": "packages/kbn-code-owners/src/code_owners.ts",
+            "path": "src/platform/packages/private/kbn-code-owners/src/code_owners.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -128,7 +128,7 @@
               },
               "[] | undefined"
             ],
-            "path": "packages/kbn-code-owners/src/code_owners.ts",
+            "path": "src/platform/packages/private/kbn-code-owners/src/code_owners.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -159,7 +159,7 @@
           },
           "[]"
         ],
-        "path": "packages/kbn-code-owners/src/code_owners.ts",
+        "path": "src/platform/packages/private/kbn-code-owners/src/code_owners.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [],
@@ -188,7 +188,7 @@
           },
           "[] | undefined) => string[]"
         ],
-        "path": "packages/kbn-code-owners/src/code_owners.ts",
+        "path": "src/platform/packages/private/kbn-code-owners/src/code_owners.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -204,7 +204,7 @@
             "signature": [
               "string"
             ],
-            "path": "packages/kbn-code-owners/src/code_owners.ts",
+            "path": "src/platform/packages/private/kbn-code-owners/src/code_owners.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -228,7 +228,7 @@
               },
               "[] | undefined"
             ],
-            "path": "packages/kbn-code-owners/src/code_owners.ts",
+            "path": "src/platform/packages/private/kbn-code-owners/src/code_owners.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -248,7 +248,7 @@
         "tags": [],
         "label": "CodeOwnersEntry",
         "description": [],
-        "path": "packages/kbn-code-owners/src/code_owners.ts",
+        "path": "src/platform/packages/private/kbn-code-owners/src/code_owners.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -259,7 +259,7 @@
             "tags": [],
             "label": "pattern",
             "description": [],
-            "path": "packages/kbn-code-owners/src/code_owners.ts",
+            "path": "src/platform/packages/private/kbn-code-owners/src/code_owners.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -273,7 +273,7 @@
             "signature": [
               "Ignore"
             ],
-            "path": "packages/kbn-code-owners/src/code_owners.ts",
+            "path": "src/platform/packages/private/kbn-code-owners/src/code_owners.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -287,7 +287,7 @@
             "signature": [
               "string[]"
             ],
-            "path": "packages/kbn-code-owners/src/code_owners.ts",
+            "path": "src/platform/packages/private/kbn-code-owners/src/code_owners.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -301,7 +301,7 @@
             "signature": [
               "(\"search\" | \"security\" | \"observability\" | \"platform\")[]"
             ],
-            "path": "packages/kbn-code-owners/src/code_owners.ts",
+            "path": "src/platform/packages/private/kbn-code-owners/src/code_owners.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -315,7 +315,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "packages/kbn-code-owners/src/code_owners.ts",
+            "path": "src/platform/packages/private/kbn-code-owners/src/code_owners.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -335,7 +335,7 @@
         "signature": [
           "\"search\" | \"security\" | \"observability\" | \"platform\""
         ],
-        "path": "packages/kbn-code-owners/src/code_owner_areas.ts",
+        "path": "src/platform/packages/private/kbn-code-owners/src/code_owner_areas.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -351,7 +351,7 @@
         "description": [
           "\nArea mappings for code owners"
         ],
-        "path": "packages/kbn-code-owners/src/code_owner_areas.ts",
+        "path": "src/platform/packages/private/kbn-code-owners/src/code_owner_areas.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -365,7 +365,7 @@
             "signature": [
               "string[]"
             ],
-            "path": "packages/kbn-code-owners/src/code_owner_areas.ts",
+            "path": "src/platform/packages/private/kbn-code-owners/src/code_owner_areas.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -379,7 +379,7 @@
             "signature": [
               "string[]"
             ],
-            "path": "packages/kbn-code-owners/src/code_owner_areas.ts",
+            "path": "src/platform/packages/private/kbn-code-owners/src/code_owner_areas.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -393,7 +393,7 @@
             "signature": [
               "string[]"
             ],
-            "path": "packages/kbn-code-owners/src/code_owner_areas.ts",
+            "path": "src/platform/packages/private/kbn-code-owners/src/code_owner_areas.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -407,7 +407,7 @@
             "signature": [
               "string[]"
             ],
-            "path": "packages/kbn-code-owners/src/code_owner_areas.ts",
+            "path": "src/platform/packages/private/kbn-code-owners/src/code_owner_areas.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -426,7 +426,7 @@
         "signature": [
           "readonly [\"platform\", \"search\", \"observability\", \"security\"]"
         ],
-        "path": "packages/kbn-code-owners/src/code_owner_areas.ts",
+        "path": "src/platform/packages/private/kbn-code-owners/src/code_owner_areas.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

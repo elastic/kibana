@@ -26,7 +26,7 @@ import {
 } from '@kbn/unified-field-list/src/components/field_stats';
 import { EuiHorizontalRule, EuiText, EuiSpacer, EuiLoadingSpinner } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { estypes } from '@elastic/elasticsearch';
 import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 import numeral from '@elastic/numeral';
 import { css } from '@emotion/react';
