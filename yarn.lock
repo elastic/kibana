@@ -7095,6 +7095,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/search-ux-sandbox@link:x-pack/solutions/search/plugins/search_ux_sandbox":
+  version "0.0.0"
+  uid ""
+
 "@kbn/searchprofiler-plugin@link:x-pack/platform/plugins/shared/searchprofiler":
   version "0.0.0"
   uid ""
