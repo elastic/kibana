@@ -318,7 +318,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
       });
 
-      it('should show available data views after switching to classic mode', async () => {
+      it('should show available data views and search results after switching to classic mode', async () => {
         await PageObjects.discover.selectTextBaseLang();
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.discover.waitUntilSearchingHasFinished();
@@ -329,6 +329,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.unifiedSearch.switchToDataViewMode();
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.discover.waitUntilSearchingHasFinished();
+        await PageObjects.discover.assertHitCount('14,004');
         const availableDataViews = await PageObjects.unifiedSearch.getDataViewList(
           'discover-dataView-switch-link'
         );
