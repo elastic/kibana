@@ -518,7 +518,7 @@ export class BaseValidator {
       );
 
       throw new EndpointExceptionsValidationError(
-        `Item not found in space[ ${activeSpaceId}]`,
+        `Item not found in space [${activeSpaceId}]`,
         404
       );
     }

@@ -86,6 +86,10 @@ export class BaseValidatorMock extends BaseValidator {
   ): Promise<void> {
     return this.setFindFilterScopeToActiveSpace(findOptions);
   }
+
+  _validateCanReadItemInActiveSpace(currentSavedItem: ExceptionListItemSchema): Promise<void> {
+    return this.validateCanReadItemInActiveSpace(currentSavedItem);
+  }
 }
 
 export const createExceptionItemLikeOptionsMock = (
