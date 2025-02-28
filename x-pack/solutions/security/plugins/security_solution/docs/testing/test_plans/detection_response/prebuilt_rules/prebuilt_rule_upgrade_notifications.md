@@ -37,15 +37,15 @@ https://marketplace.visualstudio.com/items?itemName=yzhang.markdown-all-in-one
     - [**Scenario: User can open the Rule Upgrade table on the Rule Management page**](#scenario-user-can-open-the-rule-upgrade-table-on-the-rule-management-page)
     - [**Scenario: User can dismiss the prebuilt rule upgrade callout on the Rule Management page**](#scenario-user-can-dismiss-the-prebuilt-rule-upgrade-callout-on-the-rule-management-page)
   - [Rule upgrade notifications on the Rule Details page](#rule-upgrade-notifications-on-the-rule-details-page)
-    - [**User is NOT notified on the Rule Details page when the rule is up to date**](#user-is-not-notified-on-the-rule-details-page-when-the-rule-is-up-to-date)
-    - [**User is notified on the Rule Details page when the rule is outdated and can be upgraded to a new version**](#user-is-notified-on-the-rule-details-page-when-the-rule-is-outdated-and-can-be-upgraded-to-a-new-version)
+    - [**Scenario: User is NOT notified on the Rule Details page when the rule is up to date**](#scenario-user-is-not-notified-on-the-rule-details-page-when-the-rule-is-up-to-date)
+    - [**Scenario: User is notified on the Rule Details page when the rule is outdated and can be upgraded to a new version**](#scenario-user-is-notified-on-the-rule-details-page-when-the-rule-is-outdated-and-can-be-upgraded-to-a-new-version)
     - [**Scenario: User can open the Rule Upgrade flyout on the Rule Details page**](#scenario-user-can-open-the-rule-upgrade-flyout-on-the-rule-details-page)
-    - [**User cannot dismiss the prebuilt rule upgrade callout on the Rule Details page**](#user-cannot-dismiss-the-prebuilt-rule-upgrade-callout-on-the-rule-details-page)
+    - [**Scenario: User cannot dismiss the prebuilt rule upgrade callout on the Rule Details page**](#scenario-user-cannot-dismiss-the-prebuilt-rule-upgrade-callout-on-the-rule-details-page)
   - [Rule upgrade notifications on the Rule Editing page](#rule-upgrade-notifications-on-the-rule-editing-page)
-    - [**User is NOT notified on the Rule Editing page when the rule is up to date**](#user-is-not-notified-on-the-rule-editing-page-when-the-rule-is-up-to-date)
-    - [**User is notified on the Rule Editing page when the rule is outdated and can be upgraded to a new version**](#user-is-notified-on-the-rule-editing-page-when-the-rule-is-outdated-and-can-be-upgraded-to-a-new-version)
+    - [**Scenario: User is NOT notified on the Rule Editing page when the rule is up to date**](#scenario-user-is-not-notified-on-the-rule-editing-page-when-the-rule-is-up-to-date)
+    - [**Scenario: User is notified on the Rule Editing page when the rule is outdated and can be upgraded to a new version**](#scenario-user-is-notified-on-the-rule-editing-page-when-the-rule-is-outdated-and-can-be-upgraded-to-a-new-version)
     - [**Scenario: User can navigate from the Rule Editing page to the Rule Details page in order to upgrade the rule**](#scenario-user-can-navigate-from-the-rule-editing-page-to-the-rule-details-page-in-order-to-upgrade-the-rule)
-    - [**User cannot dismiss the prebuilt rule upgrade callout on the Rule Editing page**](#user-cannot-dismiss-the-prebuilt-rule-upgrade-callout-on-the-rule-editing-page)
+    - [**Scenario: User cannot dismiss the prebuilt rule upgrade callout on the Rule Editing page**](#scenario-user-cannot-dismiss-the-prebuilt-rule-upgrade-callout-on-the-rule-editing-page)
 
 ## Useful information
 
@@ -232,7 +232,7 @@ Then user should NOT see the callout
 
 ### Rule upgrade notifications on the Rule Details page
 
-#### **User is NOT notified on the Rule Details page when the rule is up to date**
+#### **Scenario: User is NOT notified on the Rule Details page when the rule is up to date**
 
 **Automation**: 1 e2e test with mock rules.
 
@@ -243,7 +243,7 @@ When user opens the Rule Details page
 Then user should NOT see the callout to upgrade the rule
 ```
 
-#### **User is notified on the Rule Details page when the rule is outdated and can be upgraded to a new version**
+#### **Scenario: User is notified on the Rule Details page when the rule is outdated and can be upgraded to a new version**
 
 **Automation**: 1 e2e test with mock rules.
 
@@ -267,7 +267,7 @@ When user clicks on the callout's CTA button
 Then the Rule Upgrade flyout should be displayed
 ```
 
-#### **User cannot dismiss the prebuilt rule upgrade callout on the Rule Details page**
+#### **Scenario: User cannot dismiss the prebuilt rule upgrade callout on the Rule Details page**
 
 **Automation**: unit tests for the callout component.
 
@@ -282,7 +282,7 @@ And user should NOT be able to dismiss it
 
 ### Rule upgrade notifications on the Rule Editing page
 
-#### **User is NOT notified on the Rule Editing page when the rule is up to date**
+#### **Scenario: User is NOT notified on the Rule Editing page when the rule is up to date**
 
 **Automation**: 1 e2e test with mock rules.
 
@@ -293,7 +293,7 @@ When user opens the Rule Editing page
 Then user should NOT see the callout to upgrade the rule
 ```
 
-#### **User is notified on the Rule Editing page when the rule is outdated and can be upgraded to a new version**
+#### **Scenario: User is notified on the Rule Editing page when the rule is outdated and can be upgraded to a new version**
 
 **Automation**: 1 e2e test with mock rules.
 
@@ -317,7 +317,7 @@ When user clicks on the callout's CTA button
 Then user should be navigated to the Rule Details page
 ```
 
-#### **User cannot dismiss the prebuilt rule upgrade callout on the Rule Editing page**
+#### **Scenario: User cannot dismiss the prebuilt rule upgrade callout on the Rule Editing page**
 
 **Automation**: unit tests for the callout component.
 
