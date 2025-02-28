@@ -17,6 +17,6 @@ export const plugin: PluginInitializer<
   ApmSourceAccessPluginStart
 > = () => new ApmSourceAccessPlugin();
 
-export { ApmSourceAccessPluginStart, ApmSourceAccessPluginSetup };
+export type { ApmSourceAccessPluginStart, ApmSourceAccessPluginSetup };
 
 export type { APMIndices } from '../common/config_schema';
