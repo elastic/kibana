@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { HttpSetup } from '@kbn/core/public';
-import { DETECTION_RULE_RULES_API_CURRENT_VERSION } from '../../../common/constants';
+import { DETECTION_RULE_RULES_API_CURRENT_VERSION } from '@kbn/cloud-security-posture-common';
 import { RuleCreateProps, RuleResponse } from '../types';
 
 const DETECTION_ENGINE_URL = '/api/detection_engine' as const;
