@@ -56,7 +56,7 @@ export const DashboardGrid = ({
         isCollapsed: false,
         panels: {},
       },
-      ...sections.map((section) => ({
+      ...(sections ?? []).map((section) => ({
         title: section.title,
         isCollapsed: section.collapsed,
         panels: {},
