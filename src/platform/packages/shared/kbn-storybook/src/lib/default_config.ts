@@ -11,9 +11,9 @@ import * as path from 'path';
 import fs from 'fs';
 import type { StorybookConfig } from '@storybook/react-webpack5';
 import type { Configuration, Compiler } from 'webpack';
-import webpackMerge from 'webpack-merge';
 import UiSharedDepsNpm from '@kbn/ui-shared-deps-npm';
 import * as UiSharedDepsSrc from '@kbn/ui-shared-deps-src';
+import { default as webpackConfig } from '../webpack.config';
 
 const MOCKS_DIRECTORY = '__storybook_mocks__';
 const EXTENSIONS = ['.ts', '.js'];
@@ -42,7 +42,6 @@ export const defaultConfig: StorybookConfig = {
       fastRefresh: true,
       builder: {
         fsCache: true,
-        lazyCompilation: true,
       },
     },
   },
@@ -50,6 +49,25 @@ export const defaultConfig: StorybookConfig = {
     disableTelemetry: true,
     enableCrashReports: false,
   },
+  previewAnnotations: [path.resolve(__dirname, './preview.ts')],
+  previewHead: (head) => `
+  ${head}
+      <script>
+        window.__kbnPublicPath__ = { 'kbn-ui-shared-deps-npm': '', 'kbn-ui-shared-deps-src': '' };
+        window.__kbnHardenPrototypes__ = false;
+      </script>
+      <meta name="eui-global" />
+      <meta name="emotion" />
+      <script src="kbn-ui-shared-deps-npm.dll.js"></script>
+      <script src="kbn-ui-shared-deps-src.js"></script>
+      <link href="kbn-ui-shared-deps-npm.css" rel="stylesheet" />
+      <link rel="preconnect" href="https://fonts.googleapis.com">
+      <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+      <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300..700&family=Roboto+Mono:ital,wght@0,400..700;1,400..700&display=swap"
+        rel="stylesheet">
+      <meta name="eui-utilities" />
+  `,
   stories: ['../**/*.stories.tsx', '../**/*.mdx'],
   typescript: {
     reactDocgen: false,
@@ -64,9 +82,7 @@ export const defaultConfig: StorybookConfig = {
     },
   ],
 
-  // @ts-expect-error StorybookConfig type is incomplete
-  // https://storybook.js.org/docs/react/configure/babel#custom-configuration
-  babel: async (options) => {
+  babel: async (options: Record<string, any>) => {
     options.presets = options.presets || [];
     options.presets.push([
       require.resolve('@emotion/babel-preset-css-prop'),
@@ -138,28 +154,11 @@ export const defaultConfig: StorybookConfig = {
     config.plugins.push(createMockPlugin(/^\.\//)); // For ./ imports
     config.plugins.push(createMockPlugin(/^\.\.\//)); // For ../ imports
 
-    config.resolve = {
-      ...config.resolve,
-      fallback: {
-        ...config?.resolve?.fallback,
-        fs: false,
-      },
-    };
-
     config.watchOptions = {
       ...config.watchOptions,
       ignored: IGNORE_GLOBS,
     };
 
-    return config;
+    return webpackConfig({ config });
   },
-};
-
-// mergeWebpackFinal have been moved here  because webpackFinal usage in
-// storybook main.ts somehow is  causing issues with newly added dependency of ts-node most likely
-// an issue with storybook typescript setup see this issue for more details
-// https://github.com/storybookjs/storybook/issues/9610
-
-export const mergeWebpackFinal = (extraConfig: Configuration) => {
-  return { webpackFinal: (config: Configuration) => webpackMerge(config, extraConfig) };
 };
