@@ -177,9 +177,7 @@ describe('LensEditConfigurationFlyout', () => {
       displayFlyoutHeader: true,
       isNewPanel: true,
     });
-    expect(screen.getByTestId('inlineEditingFlyoutLabel').textContent).toBe(
-      'Create ES|QL visualization'
-    );
+    expect(screen.getByTestId('inlineEditingFlyoutLabel').textContent).toBe('Configuration');
   });
 
   it('should call the closeFlyout callback if cancel button is clicked', async () => {

@@ -16,6 +16,7 @@ import {
   CUSTOM_TIME_RANGE_BADGE,
 } from './customize_panel_action/constants';
 import { CONTEXT_MENU_TRIGGER, PANEL_BADGE_TRIGGER } from './triggers';
+import { ACTION_SHOW_CONFIG_PANEL } from './show_config_panel_action/constants';
 
 export const registerActions = () => {
   uiActions.registerActionAsync(ACTION_REMOVE_PANEL, async () => {
@@ -47,4 +48,10 @@ export const registerActions = () => {
     return new CustomizePanelAction();
   });
   uiActions.attachAction(CONTEXT_MENU_TRIGGER, ACTION_CUSTOMIZE_PANEL);
+
+  uiActions.registerActionAsync(ACTION_SHOW_CONFIG_PANEL, async () => {
+    const { ShowConfigPanelAction } = await import('../panel_component/panel_module');
+    return new ShowConfigPanelAction();
+  });
+  uiActions.attachAction(CONTEXT_MENU_TRIGGER, ACTION_SHOW_CONFIG_PANEL);
 };
