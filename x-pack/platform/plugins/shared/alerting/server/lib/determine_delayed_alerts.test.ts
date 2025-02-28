@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { determineDelayedAlerts } from './alert_delay_layer';
+import { determineDelayedAlerts } from './determine_delayed_alerts';
 import { Alert } from '../alert';
 import { alertsWithAnyUUID } from '../test_utils';
 import { ruleRunMetricsStoreMock } from './rule_run_metrics_store.mock';

@@ -37,7 +37,7 @@ import {
   IIndexPatternString,
 } from '../alerts_service/resource_installer_utils';
 import { CreateAlertsClientParams } from '../alerts_service/alerts_service';
-import type { AlertRule, LogAlertsOpts, SearchResult, AlertDelayOpts } from './types';
+import type { AlertRule, LogAlertsOpts, SearchResult, DetermineDelayedAlertsOpts } from './types';
 import {
   IAlertsClient,
   InitializeExecutionOpts,
@@ -322,12 +322,12 @@ export class AlertsClient<
     await this.legacyAlertsClient.processAlerts();
   }
 
-  public flappingLayer() {
-    this.legacyAlertsClient.flappingLayer();
+  public determineFlappingAlerts() {
+    this.legacyAlertsClient.determineFlappingAlerts();
   }
 
-  public alertDelayLayer(opts: AlertDelayOpts) {
-    this.legacyAlertsClient.alertDelayLayer(opts);
+  public determineDelayedAlerts(opts: DetermineDelayedAlertsOpts) {
+    this.legacyAlertsClient.determineDelayedAlerts(opts);
   }
 
   public logAlerts(opts: LogAlertsOpts) {

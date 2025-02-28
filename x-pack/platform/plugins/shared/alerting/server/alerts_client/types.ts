@@ -100,8 +100,8 @@ export interface IAlertsClient<
     Context,
     WithoutReservedActionGroups<ActionGroupIds, RecoveryActionGroupId>
   > | null;
-  flappingLayer(): void;
-  alertDelayLayer(opts: AlertDelayOpts): void;
+  determineFlappingAlerts(): void;
+  determineDelayedAlerts(opts: DetermineDelayedAlertsOpts): void;
 }
 
 export interface ProcessAndLogAlertsOpts {
@@ -113,7 +113,7 @@ export interface ProcessAndLogAlertsOpts {
   alertDelay: number;
 }
 
-export interface AlertDelayOpts {
+export interface DetermineDelayedAlertsOpts {
   alertDelay: number;
   ruleRunMetricsStore: RuleRunMetricsStore;
 }

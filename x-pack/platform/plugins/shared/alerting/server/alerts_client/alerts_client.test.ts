@@ -56,7 +56,7 @@ import { AlertsClient, AlertsClientParams } from './alerts_client';
 import {
   GetSummarizedAlertsParams,
   GetMaintenanceWindowScopedQueryAlertsParams,
-  AlertDelayOpts,
+  DetermineDelayedAlertsOpts,
   LogAlertsOpts,
 } from './types';
 import { legacyAlertsClientMock } from './legacy_alerts_client.mock';
@@ -317,7 +317,7 @@ const logTags = { tags: ['test.rule-type', '1', 'alerts-client'] };
 
 describe('Alerts Client', () => {
   let alertsClientParams: AlertsClientParams;
-  let alertDelayOpts: AlertDelayOpts;
+  let determineDelayedAlertsOpts: DetermineDelayedAlertsOpts;
   let logAlertsOpts: LogAlertsOpts;
 
   beforeAll(() => {
@@ -369,7 +369,7 @@ describe('Alerts Client', () => {
           ],
           maintenanceWindowsWithoutScopedQueryIds: ['test-id1', 'test-id2'],
         });
-        alertDelayOpts = {
+        determineDelayedAlertsOpts = {
           ruleRunMetricsStore,
           alertDelay: 0,
         };
@@ -553,8 +553,8 @@ describe('Alerts Client', () => {
           alertExecutorService.create('2').scheduleActions('default');
 
           await alertsClient.processAlerts();
-          alertsClient.flappingLayer();
-          alertsClient.alertDelayLayer(alertDelayOpts);
+          alertsClient.determineFlappingAlerts();
+          alertsClient.determineDelayedAlerts(determineDelayedAlertsOpts);
           alertsClient.logAlerts(logAlertsOpts);
 
           await alertsClient.persistAlerts();
@@ -602,8 +602,8 @@ describe('Alerts Client', () => {
           alertExecutorService.create('2').scheduleActions('default');
 
           await alertsClient.processAlerts();
-          alertsClient.flappingLayer();
-          alertsClient.alertDelayLayer(alertDelayOpts);
+          alertsClient.determineFlappingAlerts();
+          alertsClient.determineDelayedAlerts(determineDelayedAlertsOpts);
           alertsClient.logAlerts(logAlertsOpts);
 
           await alertsClient.persistAlerts();
@@ -650,8 +650,8 @@ describe('Alerts Client', () => {
           alertExecutorService.create('1').scheduleActions('default');
 
           await alertsClient.processAlerts();
-          alertsClient.flappingLayer();
-          alertsClient.alertDelayLayer(alertDelayOpts);
+          alertsClient.determineFlappingAlerts();
+          alertsClient.determineDelayedAlerts(determineDelayedAlertsOpts);
           alertsClient.logAlerts(logAlertsOpts);
 
           await alertsClient.persistAlerts();
@@ -700,8 +700,8 @@ describe('Alerts Client', () => {
           alertExecutorService.create('2').scheduleActions('default');
 
           await alertsClient.processAlerts();
-          alertsClient.flappingLayer();
-          alertsClient.alertDelayLayer(alertDelayOpts);
+          alertsClient.determineFlappingAlerts();
+          alertsClient.determineDelayedAlerts(determineDelayedAlertsOpts);
           alertsClient.logAlerts(logAlertsOpts);
 
           await alertsClient.persistAlerts();
@@ -775,8 +775,8 @@ describe('Alerts Client', () => {
           alertExecutorService.create('2').scheduleActions('default');
 
           await alertsClient.processAlerts();
-          alertsClient.flappingLayer();
-          alertsClient.alertDelayLayer(alertDelayOpts);
+          alertsClient.determineFlappingAlerts();
+          alertsClient.determineDelayedAlerts(determineDelayedAlertsOpts);
           alertsClient.logAlerts(logAlertsOpts);
 
           await alertsClient.persistAlerts();
@@ -904,8 +904,8 @@ describe('Alerts Client', () => {
           alertExecutorService.create('2').scheduleActions('default'); // will be skipped as getProcessedAlerts does not return it
 
           await alertsClient.processAlerts();
-          alertsClient.flappingLayer();
-          alertsClient.alertDelayLayer(alertDelayOpts);
+          alertsClient.determineFlappingAlerts();
+          alertsClient.determineDelayedAlerts(determineDelayedAlertsOpts);
           alertsClient.logAlerts(logAlertsOpts);
 
           await alertsClient.persistAlerts();
@@ -987,8 +987,8 @@ describe('Alerts Client', () => {
           alertExecutorService.create('3').scheduleActions('default');
 
           await alertsClient.processAlerts();
-          alertsClient.flappingLayer();
-          alertsClient.alertDelayLayer(alertDelayOpts);
+          alertsClient.determineFlappingAlerts();
+          alertsClient.determineDelayedAlerts(determineDelayedAlertsOpts);
           alertsClient.logAlerts(logAlertsOpts);
 
           await alertsClient.persistAlerts();
@@ -1088,8 +1088,8 @@ describe('Alerts Client', () => {
           alertExecutorService.create('3').scheduleActions('default');
 
           await alertsClient.processAlerts();
-          alertsClient.flappingLayer();
-          alertsClient.alertDelayLayer(alertDelayOpts);
+          alertsClient.determineFlappingAlerts();
+          alertsClient.determineDelayedAlerts(determineDelayedAlertsOpts);
           alertsClient.logAlerts(logAlertsOpts);
 
           await alertsClient.persistAlerts();
@@ -1247,8 +1247,8 @@ describe('Alerts Client', () => {
           alertExecutorService.create('3').scheduleActions('default');
 
           await alertsClient.processAlerts();
-          alertsClient.flappingLayer();
-          alertsClient.alertDelayLayer(alertDelayOpts);
+          alertsClient.determineFlappingAlerts();
+          alertsClient.determineDelayedAlerts(determineDelayedAlertsOpts);
           alertsClient.logAlerts(logAlertsOpts);
 
           await alertsClient.persistAlerts();
@@ -1367,8 +1367,8 @@ describe('Alerts Client', () => {
           alertExecutorService.create('3').scheduleActions('default');
 
           await alertsClient.processAlerts();
-          alertsClient.flappingLayer();
-          alertsClient.alertDelayLayer(alertDelayOpts);
+          alertsClient.determineFlappingAlerts();
+          alertsClient.determineDelayedAlerts(determineDelayedAlertsOpts);
           alertsClient.logAlerts(logAlertsOpts);
 
           await alertsClient.persistAlerts();
@@ -1451,8 +1451,8 @@ describe('Alerts Client', () => {
           // Report no alerts
 
           await alertsClient.processAlerts();
-          alertsClient.flappingLayer();
-          alertsClient.alertDelayLayer(alertDelayOpts);
+          alertsClient.determineFlappingAlerts();
+          alertsClient.determineDelayedAlerts(determineDelayedAlertsOpts);
           alertsClient.logAlerts(logAlertsOpts);
 
           await alertsClient.persistAlerts();
@@ -1518,8 +1518,8 @@ describe('Alerts Client', () => {
           alertExecutorService.create('2').scheduleActions('default');
 
           await alertsClient.processAlerts();
-          alertsClient.flappingLayer();
-          alertsClient.alertDelayLayer(alertDelayOpts);
+          alertsClient.determineFlappingAlerts();
+          alertsClient.determineDelayedAlerts(determineDelayedAlertsOpts);
           alertsClient.logAlerts(logAlertsOpts);
 
           await alertsClient.persistAlerts();
@@ -1580,8 +1580,8 @@ describe('Alerts Client', () => {
           alertExecutorService.create('2').scheduleActions('default');
 
           await alertsClient.processAlerts();
-          alertsClient.flappingLayer();
-          alertsClient.alertDelayLayer(alertDelayOpts);
+          alertsClient.determineFlappingAlerts();
+          alertsClient.determineDelayedAlerts(determineDelayedAlertsOpts);
           alertsClient.logAlerts(logAlertsOpts);
 
           await alertsClient.persistAlerts();
@@ -1641,8 +1641,8 @@ describe('Alerts Client', () => {
           alertExecutorService.create('2').scheduleActions('default');
 
           await alertsClient.processAlerts();
-          alertsClient.flappingLayer();
-          alertsClient.alertDelayLayer(alertDelayOpts);
+          alertsClient.determineFlappingAlerts();
+          alertsClient.determineDelayedAlerts(determineDelayedAlertsOpts);
           alertsClient.logAlerts(logAlertsOpts);
 
           await alertsClient.persistAlerts();
@@ -1729,8 +1729,8 @@ describe('Alerts Client', () => {
           alertExecutorService.create('1').scheduleActions('default');
 
           await alertsClient.processAlerts();
-          alertsClient.flappingLayer();
-          alertsClient.alertDelayLayer(alertDelayOpts);
+          alertsClient.determineFlappingAlerts();
+          alertsClient.determineDelayedAlerts(determineDelayedAlertsOpts);
           alertsClient.logAlerts(logAlertsOpts);
 
           await expect(alertsClient.persistAlerts()).rejects.toThrowError(
@@ -2553,8 +2553,8 @@ describe('Alerts Client', () => {
           });
 
           await alertsClient.processAlerts();
-          alertsClient.flappingLayer();
-          alertsClient.alertDelayLayer(alertDelayOpts);
+          alertsClient.determineFlappingAlerts();
+          alertsClient.determineDelayedAlerts(determineDelayedAlertsOpts);
           alertsClient.logAlerts(logAlertsOpts);
 
           await alertsClient.persistAlerts();
@@ -2833,8 +2833,8 @@ describe('Alerts Client', () => {
           });
 
           await alertsClient.processAlerts();
-          alertsClient.flappingLayer();
-          alertsClient.alertDelayLayer(alertDelayOpts);
+          alertsClient.determineFlappingAlerts();
+          alertsClient.determineDelayedAlerts(determineDelayedAlertsOpts);
           alertsClient.logAlerts(logAlertsOpts);
 
           await alertsClient.persistAlerts();
@@ -2936,8 +2936,8 @@ describe('Alerts Client', () => {
           });
 
           await alertsClient.processAlerts();
-          alertsClient.flappingLayer();
-          alertsClient.alertDelayLayer(alertDelayOpts);
+          alertsClient.determineFlappingAlerts();
+          alertsClient.determineDelayedAlerts(determineDelayedAlertsOpts);
           alertsClient.logAlerts(logAlertsOpts);
 
           await alertsClient.persistAlerts();
@@ -3035,8 +3035,8 @@ describe('Alerts Client', () => {
           });
 
           await alertsClient.processAlerts();
-          alertsClient.flappingLayer();
-          alertsClient.alertDelayLayer(alertDelayOpts);
+          alertsClient.determineFlappingAlerts();
+          alertsClient.determineDelayedAlerts(determineDelayedAlertsOpts);
           alertsClient.logAlerts(logAlertsOpts);
 
           await alertsClient.persistAlerts();

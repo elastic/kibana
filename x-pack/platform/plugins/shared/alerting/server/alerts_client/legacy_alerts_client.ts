@@ -24,14 +24,14 @@ import {
   InitializeExecutionOpts,
   LogAlertsOpts,
   TrackedAlerts,
-  AlertDelayOpts,
+  DetermineDelayedAlertsOpts,
 } from './types';
 import { DEFAULT_MAX_ALERTS } from '../config';
 import { UntypedNormalizedRuleType } from '../rule_type_registry';
 import { MaintenanceWindowsService } from '../task_runner/maintenance_windows';
 import { AlertingEventLogger } from '../lib/alerting_event_logger/alerting_event_logger';
-import { determineFlappingAlerts } from '../lib/flapping/flapping_layer';
-import { determineDelayedAlerts } from '../lib/alert_delay_layer';
+import { determineFlappingAlerts } from '../lib/flapping/determine_flapping_alerts';
+import { determineDelayedAlerts } from '../lib/determine_delayed_alerts';
 
 export interface LegacyAlertsClientParams {
   alertingEventLogger: AlertingEventLogger;
@@ -218,7 +218,7 @@ export class LegacyAlertsClient<
     );
   }
 
-  public flappingLayer() {
+  public determineFlappingAlerts() {
     if (this.flappingSettings.enabled) {
       const alerts = determineFlappingAlerts({
         logger: this.options.logger,
@@ -239,7 +239,7 @@ export class LegacyAlertsClient<
     }
   }
 
-  public alertDelayLayer(opts: AlertDelayOpts) {
+  public determineDelayedAlerts(opts: DetermineDelayedAlertsOpts) {
     const alerts = determineDelayedAlerts({
       newAlerts: this.processedAlerts.new,
       activeAlerts: this.processedAlerts.active,

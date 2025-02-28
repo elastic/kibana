@@ -18,8 +18,8 @@ import { maintenanceWindowsServiceMock } from '../task_runner/maintenance_window
 import { getMockMaintenanceWindow } from '../data/maintenance_window/test_helpers';
 import { KibanaRequest } from '@kbn/core/server';
 import { alertingEventLoggerMock } from '../lib/alerting_event_logger/alerting_event_logger.mock';
-import { determineFlappingAlerts } from '../lib/flapping/flapping_layer';
-import { determineDelayedAlerts } from '../lib/alert_delay_layer';
+import { determineFlappingAlerts } from '../lib/flapping/determine_flapping_alerts';
+import { determineDelayedAlerts } from '../lib/determine_delayed_alerts';
 
 const maintenanceWindowsService = maintenanceWindowsServiceMock.create();
 const scheduleActions = jest.fn();
@@ -70,13 +70,13 @@ jest.mock('../lib', () => {
   };
 });
 
-jest.mock('../lib/flapping/flapping_layer', () => {
+jest.mock('../lib/flapping/determine_flapping_alerts', () => {
   return {
     determineFlappingAlerts: jest.fn(),
   };
 });
 
-jest.mock('../lib/alert_delay_layer', () => {
+jest.mock('../lib/determine_delayed_alerts', () => {
   return {
     determineDelayedAlerts: jest.fn(),
   };
@@ -399,7 +399,7 @@ describe('Legacy Alerts Client', () => {
     expect(alertsClient.isTrackedAlert('3')).toBe(false);
   });
 
-  test('flappingLayer() should call determineFlappingAlerts', async () => {
+  test('determineFlappingAlerts() should call determineFlappingAlerts', async () => {
     (determineFlappingAlerts as jest.Mock).mockReturnValue({
       newAlerts: {},
       activeAlerts: {
@@ -424,7 +424,7 @@ describe('Legacy Alerts Client', () => {
 
     await alertsClient.initializeExecution(defaultExecutionOpts);
 
-    alertsClient.flappingLayer();
+    alertsClient.determineFlappingAlerts();
 
     expect(determineFlappingAlerts).toHaveBeenCalledWith({
       logger,
@@ -447,7 +447,7 @@ describe('Legacy Alerts Client', () => {
     });
   });
 
-  test('alertDelayLayer() should call determineDelayedAlerts', async () => {
+  test('determineDelayedAlerts() should call determineDelayedAlerts', async () => {
     (determineDelayedAlerts as jest.Mock).mockReturnValue({
       newAlerts: {},
       activeAlerts: {
@@ -470,7 +470,7 @@ describe('Legacy Alerts Client', () => {
 
     await alertsClient.initializeExecution(defaultExecutionOpts);
 
-    alertsClient.alertDelayLayer({
+    alertsClient.determineDelayedAlerts({
       ruleRunMetricsStore,
       alertDelay: 5,
     });

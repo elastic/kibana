@@ -339,8 +339,8 @@ export class RuleTypeRunner<
     await withAlertingSpan('alerting:process-alerts', () =>
       this.options.timer.runWithTimer(TaskRunnerTimerSpan.ProcessAlerts, async () => {
         await alertsClient.processAlerts();
-        await alertsClient.flappingLayer();
-        await alertsClient.alertDelayLayer({
+        alertsClient.determineFlappingAlerts();
+        alertsClient.determineDelayedAlerts({
           alertDelay: alertDelay?.active ?? 0,
           ruleRunMetricsStore: context.ruleRunMetricsStore,
         });

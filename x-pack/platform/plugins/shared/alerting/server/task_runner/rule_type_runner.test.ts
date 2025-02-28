@@ -270,8 +270,8 @@ describe('RuleTypeRunner', () => {
       );
       expect(ruleRunMetricsStore.setSearchMetrics).toHaveBeenCalled();
       expect(alertsClient.processAlerts).toHaveBeenCalledWith();
-      expect(alertsClient.flappingLayer).toHaveBeenCalledWith();
-      expect(alertsClient.alertDelayLayer).toHaveBeenCalledWith({
+      expect(alertsClient.determineFlappingAlerts).toHaveBeenCalledWith();
+      expect(alertsClient.determineDelayedAlerts).toHaveBeenCalledWith({
         alertDelay: 0,
         ruleRunMetricsStore,
       });
@@ -379,8 +379,8 @@ describe('RuleTypeRunner', () => {
       );
       expect(ruleRunMetricsStore.setSearchMetrics).toHaveBeenCalled();
       expect(alertsClient.processAlerts).toHaveBeenCalledWith();
-      expect(alertsClient.flappingLayer).toHaveBeenCalledWith();
-      expect(alertsClient.alertDelayLayer).toHaveBeenCalledWith({
+      expect(alertsClient.determineFlappingAlerts).toHaveBeenCalledWith();
+      expect(alertsClient.determineDelayedAlerts).toHaveBeenCalledWith({
         alertDelay: 0,
         ruleRunMetricsStore,
       });
@@ -442,8 +442,8 @@ describe('RuleTypeRunner', () => {
       );
       expect(ruleRunMetricsStore.setSearchMetrics).toHaveBeenCalled();
       expect(alertsClient.processAlerts).toHaveBeenCalledWith();
-      expect(alertsClient.flappingLayer).toHaveBeenCalledWith();
-      expect(alertsClient.alertDelayLayer).toHaveBeenCalledWith({
+      expect(alertsClient.determineFlappingAlerts).toHaveBeenCalledWith();
+      expect(alertsClient.determineDelayedAlerts).toHaveBeenCalledWith({
         alertDelay: 0,
         ruleRunMetricsStore,
       });
@@ -556,8 +556,8 @@ describe('RuleTypeRunner', () => {
       );
       expect(ruleRunMetricsStore.setSearchMetrics).not.toHaveBeenCalled();
       expect(alertsClient.processAlerts).not.toHaveBeenCalled();
-      expect(alertsClient.flappingLayer).not.toHaveBeenCalled();
-      expect(alertsClient.alertDelayLayer).not.toHaveBeenCalled();
+      expect(alertsClient.determineFlappingAlerts).not.toHaveBeenCalled();
+      expect(alertsClient.determineDelayedAlerts).not.toHaveBeenCalled();
       expect(alertsClient.persistAlerts).not.toHaveBeenCalled();
       expect(alertsClient.logAlerts).not.toHaveBeenCalled();
     });
@@ -662,8 +662,8 @@ describe('RuleTypeRunner', () => {
       );
       expect(ruleRunMetricsStore.setSearchMetrics).not.toHaveBeenCalled();
       expect(alertsClient.processAlerts).not.toHaveBeenCalled();
-      expect(alertsClient.flappingLayer).not.toHaveBeenCalled();
-      expect(alertsClient.alertDelayLayer).not.toHaveBeenCalled();
+      expect(alertsClient.determineFlappingAlerts).not.toHaveBeenCalled();
+      expect(alertsClient.determineDelayedAlerts).not.toHaveBeenCalled();
       expect(alertsClient.persistAlerts).not.toHaveBeenCalled();
       expect(alertsClient.logAlerts).not.toHaveBeenCalled();
     });
@@ -808,8 +808,8 @@ describe('RuleTypeRunner', () => {
       );
       expect(ruleRunMetricsStore.setSearchMetrics).toHaveBeenCalled();
       expect(alertsClient.processAlerts).toHaveBeenCalledWith();
-      expect(alertsClient.flappingLayer).toHaveBeenCalledWith();
-      expect(alertsClient.alertDelayLayer).toHaveBeenCalledWith({
+      expect(alertsClient.determineFlappingAlerts).toHaveBeenCalledWith();
+      expect(alertsClient.determineDelayedAlerts).toHaveBeenCalledWith({
         alertDelay: 0,
         ruleRunMetricsStore,
       });
@@ -924,8 +924,8 @@ describe('RuleTypeRunner', () => {
       );
       expect(ruleRunMetricsStore.setSearchMetrics).toHaveBeenCalled();
       expect(alertsClient.processAlerts).toHaveBeenCalledWith();
-      expect(alertsClient.flappingLayer).toHaveBeenCalledWith();
-      expect(alertsClient.alertDelayLayer).toHaveBeenCalledWith({
+      expect(alertsClient.determineFlappingAlerts).toHaveBeenCalledWith();
+      expect(alertsClient.determineDelayedAlerts).toHaveBeenCalledWith({
         alertDelay: 0,
         ruleRunMetricsStore,
       });
@@ -1034,8 +1034,8 @@ describe('RuleTypeRunner', () => {
       );
       expect(ruleRunMetricsStore.setSearchMetrics).toHaveBeenCalled();
       expect(alertsClient.processAlerts).toHaveBeenCalledWith();
-      expect(alertsClient.flappingLayer).not.toHaveBeenCalled();
-      expect(alertsClient.alertDelayLayer).not.toHaveBeenCalled();
+      expect(alertsClient.determineFlappingAlerts).not.toHaveBeenCalled();
+      expect(alertsClient.determineDelayedAlerts).not.toHaveBeenCalled();
       expect(alertsClient.persistAlerts).not.toHaveBeenCalled();
       expect(alertsClient.logAlerts).not.toHaveBeenCalled();
     });
@@ -1138,8 +1138,8 @@ describe('RuleTypeRunner', () => {
       );
       expect(ruleRunMetricsStore.setSearchMetrics).toHaveBeenCalled();
       expect(alertsClient.processAlerts).toHaveBeenCalledWith();
-      expect(alertsClient.flappingLayer).toHaveBeenCalledWith();
-      expect(alertsClient.alertDelayLayer).toHaveBeenCalledWith({
+      expect(alertsClient.determineFlappingAlerts).toHaveBeenCalledWith();
+      expect(alertsClient.determineDelayedAlerts).toHaveBeenCalledWith({
         alertDelay: 0,
         ruleRunMetricsStore,
       });
@@ -1245,8 +1245,8 @@ describe('RuleTypeRunner', () => {
       );
       expect(ruleRunMetricsStore.setSearchMetrics).toHaveBeenCalled();
       expect(alertsClient.processAlerts).toHaveBeenCalledWith();
-      expect(alertsClient.flappingLayer).toHaveBeenCalledWith();
-      expect(alertsClient.alertDelayLayer).toHaveBeenCalledWith({
+      expect(alertsClient.determineFlappingAlerts).toHaveBeenCalledWith();
+      expect(alertsClient.determineDelayedAlerts).toHaveBeenCalledWith({
         alertDelay: 0,
         ruleRunMetricsStore,
       });

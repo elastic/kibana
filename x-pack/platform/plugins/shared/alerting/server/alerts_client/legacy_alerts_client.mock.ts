@@ -20,8 +20,8 @@ const createLegacyAlertsClientMock = () => {
       getAlert: jest.fn(),
       factory: jest.fn(),
       client: jest.fn(),
-      alertDelayLayer: jest.fn(),
-      flappingLayer: jest.fn(),
+      determineDelayedAlerts: jest.fn(),
+      determineFlappingAlerts: jest.fn(),
     };
   });
 };
