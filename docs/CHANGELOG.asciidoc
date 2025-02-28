@@ -98,7 +98,7 @@ The 8.17.3 release includes the following bug fixes.
 === Bug fixes
 Elastic Observability solution::
 * Allows editing of non-resolving log views ({kibana-pull}210633[#210633]).
-* Removes `error.id` in `getErrorGroupMainStatistics` query ({kibana-pull}210613[#210613]).
+* Removes `error.id` in `getErrorGroupMainStatistics` queries ({kibana-pull}210613[#210613]).
 Elastic Security solution::
 For the Elastic Security 8.17.3 release information, refer to {security-guide}/release-notes.html[_Elastic Security Solution Release Notes_].
 Kibana security::
