@@ -287,7 +287,7 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
       await pRetry(async () => this.dryRunTrainedModelDeployment(), {
         minTimeout: 10000,
         maxTimeout: 10000,
-        retries: 10,
+        retries: 1,
       });
 
       try {
