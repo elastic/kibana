@@ -181,3 +181,6 @@ xpack.index_management.enableProjectLevelRetentionChecks: true
 xpack.securitySolution.enableExperimental:
   - entityStoreDisabled
   - siemMigrationsDisabled
+
+# Double task manager capacity (default 10 -> 20) because we have twice as many resources by default (2GB mem)
+xpack.task_manager.capacity: 20
