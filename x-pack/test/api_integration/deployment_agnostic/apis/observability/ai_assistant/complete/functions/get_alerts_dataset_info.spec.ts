@@ -69,7 +69,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
       llmProxy.interceptToolChoice({
         toolName: 'select_relevant_fields',
-        response: (requestBody) => {
+        toolArguments: (requestBody) => {
           const messageWithFieldIds = requestBody.messages.find((message) => {
             const content = message?.content as string;
             return content.includes('This is the list:') && content.includes('@timestamp');
@@ -85,19 +85,8 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
           expectedRelevantFieldNames = topFields.map(({ field }) => field);
 
           const fieldIds = topFields.map(({ id }) => id);
-          return {
-            content: '',
-            tool_calls: [
-              {
-                function: {
-                  name: 'select_relevant_fields',
-                  arguments: JSON.stringify({ fieldIds }),
-                },
-                index: 0,
-                toolCallId: 'call_khfIcRe5V0M3ZaX2GFvFQVQt',
-              },
-            ],
-          };
+
+          return JSON.stringify({ fieldIds });
         },
       });
 

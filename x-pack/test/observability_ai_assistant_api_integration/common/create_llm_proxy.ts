@@ -8,7 +8,7 @@
 import { ToolingLog } from '@kbn/tooling-log';
 import getPort from 'get-port';
 import http, { type Server } from 'http';
-import { isString, once, pull, isFunction } from 'lodash';
+import { isString, once, pull, isFunction, uniqueId } from 'lodash';
 import OpenAI from 'openai';
 import { TITLE_CONVERSATION_FUNCTION_NAME } from '@kbn/observability-ai-assistant-plugin/server/service/client/operators/get_generated_title';
 import pRetry from 'p-retry';
@@ -156,42 +156,38 @@ export class LlmProxy {
 
   interceptToolChoice({
     toolName,
-    response,
+    toolArguments,
   }: {
     toolName: string;
-    response:
-      | LLMMessage
-      | ((body: OpenAI.Chat.Completions.ChatCompletionCreateParamsNonStreaming) => LLMMessage);
+    toolArguments: (body: OpenAI.Chat.Completions.ChatCompletionCreateParamsNonStreaming) => string;
   }) {
     return this.intercept(
       `Tool choice interceptor: "${toolName}"`,
+      // @ts-expect-error
+      (body) => body.tool_choice?.function?.name === toolName,
       (body) => {
-        // @ts-expect-error
-        return body.tool_choice?.function?.name === toolName;
-      },
-      response
+        return {
+          content: '',
+          tool_calls: [
+            {
+              function: {
+                name: toolName,
+                arguments: toolArguments(body),
+              },
+              index: 0,
+              toolCallId: uniqueId('call_'),
+            },
+          ],
+        };
+      }
     ).completeAfterIntercept();
   }
 
   interceptTitle(title: string) {
-    return this.intercept(
-      `Title interceptor: "${title}"`,
-      // @ts-expect-error
-      (body) => body.tool_choice?.function.name === TITLE_CONVERSATION_FUNCTION_NAME,
-      {
-        content: '',
-        tool_calls: [
-          {
-            index: 0,
-            toolCallId: 'id',
-            function: {
-              name: TITLE_CONVERSATION_FUNCTION_NAME,
-              arguments: JSON.stringify({ title }),
-            },
-          },
-        ],
-      }
-    ).completeAfterIntercept();
+    return this.interceptToolChoice({
+      toolName: TITLE_CONVERSATION_FUNCTION_NAME,
+      toolArguments: () => JSON.stringify({ title }),
+    });
   }
 
   intercept(
