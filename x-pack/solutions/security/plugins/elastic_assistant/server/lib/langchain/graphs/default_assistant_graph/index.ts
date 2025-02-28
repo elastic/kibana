@@ -19,7 +19,7 @@ import { getPrompt, resolveProviderAndModel } from '@kbn/security-ai-prompts';
 import { isEmpty } from 'lodash';
 import { localToolPrompts, promptGroupId as toolsGroupId } from '../../../prompt/tool_prompts';
 import { promptGroupId } from '../../../prompt/local_prompt_object';
-import { getModelOrOss } from '../../../prompt/helpers';
+import { getFormattedTime, getModelOrOss } from '../../../prompt/helpers';
 import { getPrompt as localGetPrompt, promptDictionary } from '../../../prompt';
 import { getLlmClass } from '../../../../routes/utils';
 import { EsAnonymizationFieldsSchema } from '../../../../ai_assistant_data_clients/anonymization_fields/types';
@@ -30,6 +30,7 @@ import { GraphInputs } from './types';
 import { getDefaultAssistantGraph } from './graph';
 import { invokeGraph, streamGraph } from './helpers';
 import { transformESSearchToAnonymizationFields } from '../../../../ai_assistant_data_clients/anonymization_fields/helpers';
+import { DEFAULT_DATE_FORMAT_TZ } from '../../../../../common/constants';
 
 export const callAssistantGraph: AgentExecutor<true | false> = async ({
   abortSignal,
@@ -39,6 +40,7 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
   connectorId,
   contentReferencesStore,
   conversationId,
+  core,
   dataClients,
   esClient,
   inference,
@@ -53,6 +55,7 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
   replacements,
   request,
   savedObjectsClient,
+  screenContext,
   size,
   systemPrompt,
   telemetry,
@@ -218,6 +221,11 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
           actionsClient,
         })
       : { provider: llmType };
+
+  const uiSettingsDateFormatTimezone = await core.uiSettings.client.get<string>(
+    DEFAULT_DATE_FORMAT_TZ
+  );
+
   const assistantGraph = getDefaultAssistantGraph({
     agentRunnable,
     dataClients,
@@ -230,6 +238,11 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
     replacements,
     // some chat models (bedrock) require a signal to be passed on agent invoke rather than the signal passed to the chat model
     ...(llmType === 'bedrock' ? { signal: abortSignal } : {}),
+    getFormattedTime: () =>
+      getFormattedTime({
+        screenContextTimezone: request.body.screenContext?.timeZone,
+        uiSettingsDateFormatTimezone,
+      }),
   });
   const inputs: GraphInputs = {
     responseLanguage,
