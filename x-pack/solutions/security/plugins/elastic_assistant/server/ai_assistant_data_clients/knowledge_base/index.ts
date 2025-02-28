@@ -30,6 +30,7 @@ import { StructuredTool } from '@langchain/core/tools';
 import { AnalyticsServiceSetup, AuditLogger, ElasticsearchClient } from '@kbn/core/server';
 import { IndexPatternsFetcher } from '@kbn/data-views-plugin/server';
 import { map } from 'lodash';
+import { InstallationStatus } from '@kbn/product-doc-base-plugin/common/install_status';
 import { AIAssistantDataClient, AIAssistantDataClientParams } from '..';
 import { GetElser } from '../../types';
 import {
@@ -80,6 +81,7 @@ export interface KnowledgeBaseDataClientParams extends AIAssistantDataClientPara
   ml: MlPluginSetup;
   getElserId: GetElser;
   getIsKBSetupInProgress: () => boolean;
+  getProductDocumentationStatus: () => Promise<InstallationStatus>;
   ingestPipelineResourceName: string;
   setIsKBSetupInProgress: (isInProgress: boolean) => void;
   manageGlobalKnowledgeBaseAIAssistant: boolean;
@@ -93,6 +95,11 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
   public get isSetupInProgress() {
     return this.options.getIsKBSetupInProgress();
   }
+
+  public getProductDocumentationStatus = async () => {
+    return this.options.getProductDocumentationStatus();
+  };
+
   /**
    * Returns whether setup of the Knowledge Base can be performed (essentially an ML features check)
    *

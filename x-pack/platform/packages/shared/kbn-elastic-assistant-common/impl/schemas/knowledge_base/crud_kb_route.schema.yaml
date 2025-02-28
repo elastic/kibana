@@ -87,6 +87,8 @@ paths:
                     type: boolean
                   user_data_exists:
                     type: boolean
+                  product_documentation_status:
+                    type: string
         400:
           description: Generic Error
           content:
