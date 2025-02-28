@@ -5,23 +5,39 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 import {
   EuiBasicTable,
   EuiLink,
   EuiFlexGroup,
   EuiFlexItem,
   type CriteriaWithPagination,
+  EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import { TableIcon } from '../../../../../../../components/package_icon';
 import type { PackageListItem } from '../../../../../../../../common';
-import { type UrlPagination, useLink } from '../../../../../../../hooks';
+import { type UrlPagination, useLink, useAuthz } from '../../../../../../../hooks';
 import type { PackageListItemWithExtra } from '../types';
 
 import { InstallationStatus } from './installation_status';
+
+/**
+ * Wrapper to display a tooltip if
+ */
+const DisabledWrapperTooltip: React.FunctionComponent<{
+  children: React.ReactElement;
+  disabled: boolean;
+  tooltipContent: React.ReactNode;
+}> = ({ children, disabled, tooltipContent }) => {
+  if (disabled) {
+    return <EuiToolTip content={tooltipContent}>{children}</EuiToolTip>;
+  } else {
+    return <>{children}</>;
+  }
+};
 
 export const InstalledIntegrationsTable: React.FunctionComponent<{
   installedPackages: PackageListItemWithExtra[];
@@ -29,7 +45,10 @@ export const InstalledIntegrationsTable: React.FunctionComponent<{
   isLoading: boolean;
   pagination: UrlPagination;
 }> = ({ installedPackages, total, isLoading, pagination }) => {
+  const authz = useAuthz();
   const { getHref } = useLink();
+
+  const [selectedItems, setSelectedItems] = useState<PackageListItemWithExtra[]>([]);
 
   const { setPagination } = pagination;
   const handleTablePagination = React.useCallback(
@@ -46,6 +65,7 @@ export const InstalledIntegrationsTable: React.FunctionComponent<{
     <EuiBasicTable
       loading={isLoading}
       items={installedPackages}
+      itemId="name"
       pagination={{
         pageIndex: pagination.pagination.currentPage - 1,
         totalItemCount: total,
@@ -56,6 +76,10 @@ export const InstalledIntegrationsTable: React.FunctionComponent<{
       onChange={handleTablePagination}
       selection={{
         selectable: () => true,
+        selected: selectedItems,
+        onSelectionChange: (newSelectedItems) => {
+          setSelectedItems(newSelectedItems);
+        },
       }}
       columns={[
         {
@@ -110,25 +134,41 @@ export const InstalledIntegrationsTable: React.FunctionComponent<{
               return null;
             }
 
+            const isDisabled = !authz.fleet.readAgentPolicies;
+
             return (
-              <EuiLink onClick={() => {}}>
-                <FormattedMessage
-                  id="xpack.fleet.epmInstalledIntegrations.viewAttachedPoliciesButton"
-                  defaultMessage={'View {policyCount, plural, one {# policies} other {# policies}}'}
-                  values={{
-                    policyCount,
-                  }}
-                />
-              </EuiLink>
+              <DisabledWrapperTooltip
+                tooltipContent={
+                  <FormattedMessage
+                    id="xpack.fleet.epmInstalledIntegrations.agentPoliciesRequiredPermissionTooltip"
+                    defaultMessage={
+                      'You need AgentPolicies:Read privileges to view those policies.'
+                    }
+                  />
+                }
+                disabled={isDisabled}
+              >
+                <EuiLink onClick={() => {}} disabled={isDisabled}>
+                  <FormattedMessage
+                    id="xpack.fleet.epmInstalledIntegrations.viewAttachedPoliciesButton"
+                    defaultMessage={
+                      'View {policyCount, plural, one {# policies} other {# policies}}'
+                    }
+                    values={{
+                      policyCount,
+                    }}
+                  />
+                </EuiLink>
+              </DisabledWrapperTooltip>
             );
           },
         },
         {
           actions: [
             {
-              name: 'test1',
-              description: 'test1',
-              onClick: () => {},
+              render: () => {
+                return <p>test</p>;
+              },
             },
             {
               name: 'test2',

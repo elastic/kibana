@@ -10,7 +10,7 @@ import semverLt from 'semver/functions/lt';
 import { Search as LocalSearch, PrefixIndexStrategy } from 'js-search';
 
 import type { PackageListItem } from '../../../../../../../../common';
-import { type UrlPagination, useGetPackagesQuery } from '../../../../../../../hooks';
+import { useGetPackagesQuery, type Pagination } from '../../../../../../../hooks';
 import type {
   InstalledIntegrationsFilter,
   PackageInstallationStatus,
@@ -56,7 +56,7 @@ function useLocalSearch(packageList: PackageListItemWithExtra[], isInitialLoadin
 
 export function useInstalledIntegrations(
   filters: InstalledIntegrationsFilter,
-  pagination: UrlPagination
+  pagination: Pagination
 ) {
   const { data, isInitialLoading, isLoading } = useGetPackagesQuery({
     withPackagePoliciesCount: true,
@@ -110,16 +110,9 @@ export function useInstalledIntegrations(
 
   const installedPackages: PackageListItemWithExtra[] = useMemo(() => {
     // Pagination
-    const startAt = (pagination.pagination.currentPage - 1) * pagination.pagination.pageSize;
-    return internalInstalledPackagesFiltered.slice(
-      startAt,
-      startAt + pagination.pagination.pageSize
-    );
-  }, [
-    internalInstalledPackagesFiltered,
-    pagination.pagination.currentPage,
-    pagination.pagination.pageSize,
-  ]);
+    const startAt = (pagination.currentPage - 1) * pagination.pageSize;
+    return internalInstalledPackagesFiltered.slice(startAt, startAt + pagination.pageSize);
+  }, [internalInstalledPackagesFiltered, pagination.currentPage, pagination.pageSize]);
 
   return {
     total: internalInstalledPackagesFiltered.length,

@@ -8,6 +8,7 @@
 import React from 'react';
 import { EuiSpacer } from '@elastic/eui';
 
+import { Loading } from '../../../../../../components';
 import { useUrlPagination } from '../../../../../../hooks';
 
 import { InstalledIntegrationsTable } from './components/installed_integrations_table';
@@ -20,9 +21,11 @@ export const InstalledIntegrationsPage: React.FunctionComponent = () => {
   const filters = useUrlFilters();
   const pagination = useUrlPagination();
   const { installedPackages, countPerStatus, isLoading, isInitialLoading, total } =
-    useInstalledIntegrations(filters, pagination);
+    useInstalledIntegrations(filters, pagination.pagination);
 
-  // TODO loading/error state
+  if (isInitialLoading) {
+    return <Loading />;
+  }
 
   return (
     <>

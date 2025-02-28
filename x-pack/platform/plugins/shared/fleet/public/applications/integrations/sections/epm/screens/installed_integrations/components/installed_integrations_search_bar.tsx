@@ -114,9 +114,9 @@ export const InstalledIntegrationsSearchBar: React.FunctionComponent<{
             fullWidth
           />
         </EuiFlexItem>
-        {statuses.map((item) => (
-          <EuiFlexItem grow={false}>
-            <EuiFilterGroup>
+        <EuiFlexItem grow={false}>
+          <EuiFilterGroup>
+            {statuses.map((item) => (
               <EuiFilterButton
                 iconType={item.iconType}
                 iconSide="left"
@@ -141,9 +141,9 @@ export const InstalledIntegrationsSearchBar: React.FunctionComponent<{
               >
                 {item.label}
               </EuiFilterButton>
-            </EuiFilterGroup>
-          </EuiFlexItem>
-        ))}
+            ))}
+          </EuiFilterGroup>
+        </EuiFlexItem>
 
         <EuiFlexItem grow={false}>
           <EuiFilterGroup>
