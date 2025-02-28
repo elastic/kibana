@@ -23,12 +23,12 @@ export async function handleUnstructured({
   const pattern = (await grokMainGraph.invoke({
     packageName: state.packageName,
     dataStreamName: state.dataStreamName,
-    samples: samples[0],
+    samples,
     ex_answer: JSON.stringify(GROK_EXAMPLE_ANSWER, null, 2),
   })) as GrokResult;
 
   return {
-    grokPatterns: pattern.grok_patterns,
+    currentPattern: pattern.grok_pattern,
     lastExecutedChain: 'handleUnstructured',
   };
 }

@@ -30,6 +30,14 @@ const graphState: StateGraphArgs<UnstructuredLogState>['channels'] = {
     value: (x: string[], y?: string[]) => y ?? x,
     default: () => [],
   },
+  erroredSamples: {
+    value: (x: string[], y?: string[]) => y ?? x,
+    default: () => [],
+  },
+  currentPattern: {
+    value: (x: string, y?: string) => y ?? x,
+    default: () => '',
+  },
   grokPatterns: {
     value: (x: string[], y?: string[]) => y ?? x,
     default: () => [],
@@ -42,7 +50,7 @@ const graphState: StateGraphArgs<UnstructuredLogState>['channels'] = {
     value: (x: boolean, y?: boolean) => y ?? x,
     default: () => false,
   },
-  errors: {
+  errorsAndSamples: {
     value: (x: object, y?: object) => y ?? x,
     default: () => [],
   },
@@ -72,7 +80,7 @@ function modelOutput({ state }: UnstructuredBaseNodeParams): Partial<Unstructure
 }
 
 function validationRouter({ state }: UnstructuredBaseNodeParams): string {
-  if (Object.keys(state.errors).length === 0) {
+  if (Object.keys(state.errorsAndSamples).length === 0) {
     return 'modelOutput';
   }
   return 'handleUnstructuredError';
