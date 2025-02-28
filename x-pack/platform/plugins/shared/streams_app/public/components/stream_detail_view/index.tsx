@@ -12,7 +12,7 @@ import { useStreamsAppFetch } from '../../hooks/use_streams_app_fetch';
 import { useStreamsAppParams } from '../../hooks/use_streams_app_params';
 import { EntityDetailViewWithoutParams, EntityViewTab } from '../entity_detail_view';
 import { StreamDetailDashboardsView } from '../stream_detail_dashboards_view';
-import { StreamDetailManagement } from '../stream_detail_management';
+import { StreamDetailManagement } from '../data_management/stream_detail_management';
 import { StreamDetailOverview } from '../stream_detail_overview';
 
 export function StreamDetailView() {
