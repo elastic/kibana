@@ -13,8 +13,6 @@ import {
   TaskRunCreatorFunction,
   TaskPriority,
   TaskCost,
-  ConcreteTaskInstance,
-  RecurringTaskRunResult,
   ScheduleType,
 } from './task';
 import { CONCURRENCY_ALLOW_LIST_BY_TASK_TYPE } from './constants';
@@ -39,63 +37,6 @@ export const REMOVED_TYPES: string[] = [
   'cleanup_failed_action_executions',
   'reports:monitor',
 ];
-
-export interface BaseTaskTypeOpts {
-  /**
-   * How long, in minutes or seconds, the system should wait for the task to complete
-   * before it is considered to be timed out. (e.g. '5m', the default). If
-   * the task takes longer than this, Kibana will send it a kill command and
-   * the task will be re-attempted.
-   */
-  timeout?: string;
-  /**
-   * An optional definition of task priority. Tasks will be sorted by priority prior to claiming
-   * so high priority tasks will always be claimed before normal priority, which will always be
-   * claimed before low priority
-   */
-  priority?: TaskPriority;
-  /**
-   * An optional definition of the cost associated with running the task.
-   */
-  cost?: TaskCost;
-  /**
-   * The maximum number tasks of this type that can be run concurrently per Kibana instance.
-   * Setting this value will force Task Manager to poll for this task type separately from other task types
-   * which can add significant load to the ES cluster, so please use this configuration only when absolutely necessary.
-   * The default value, if not given, is 0.
-   */
-  maxConcurrency?: number;
-
-  paramsSchema?: ObjectType;
-}
-
-export interface RecurringTaskTypeOpts extends BaseTaskTypeOpts {
-  stateSchemaByVersion?: Record<
-    number,
-    {
-      schema: ObjectType;
-      up: (state: Record<string, unknown>) => Record<string, unknown>;
-    }
-  >;
-}
-
-export interface OneOffTaskTypeOpts extends BaseTaskTypeOpts {
-  /**
-   * Up to how many times the task should retry when it fails to run. This will
-   * default to the global variable. The default value, if not specified, is 1.
-   */
-  maxAttempts?: number;
-}
-
-export interface BaseTaskTypeFnOpts {
-  abortController: AbortController;
-  params: ConcreteTaskInstance['params'];
-}
-
-export type OneOffTaskTypeFnOpts = BaseTaskTypeFnOpts;
-export interface RecurringTaskTypeFnOpts extends BaseTaskTypeFnOpts {
-  state: ConcreteTaskInstance['state'];
-}
 
 /**
  * Defines a task which can be scheduled and run by the Kibana
@@ -241,60 +182,6 @@ export class TaskTypeDictionary {
     } catch (e) {
       this.logger.error(`Could not sanitize task definitions: ${e.message}`);
     }
-  }
-
-  public registerOneOffTaskType(
-    taskType: string,
-    fn: (options: OneOffTaskTypeFnOpts) => Promise<void>,
-    options?: OneOffTaskTypeOpts
-  ) {
-    this.registerTaskDefinitions({
-      [taskType]: {
-        ...options,
-        scheduleType: ScheduleType.OneOff,
-        createTaskRunner({ taskInstance }) {
-          const abortController = new AbortController();
-          return {
-            run: async () => {
-              await fn({ abortController, params: taskInstance.params });
-              return { state: {} };
-            },
-            cancel: async () => {
-              abortController.abort();
-            },
-          };
-        },
-      },
-    });
-  }
-
-  public registerRecurringTaskType(
-    taskType: string,
-    fn: (options: RecurringTaskTypeFnOpts) => Promise<RecurringTaskRunResult>,
-    options?: RecurringTaskTypeOpts
-  ) {
-    this.registerTaskDefinitions({
-      [taskType]: {
-        ...options,
-        scheduleType: ScheduleType.Recurring,
-        createTaskRunner({ taskInstance }) {
-          const abortController = new AbortController();
-          return {
-            run: async () => {
-              const result = await fn({
-                abortController,
-                params: taskInstance.params,
-                state: taskInstance.state,
-              });
-              return { ...result, state: result.state || {} };
-            },
-            cancel: async () => {
-              abortController.abort();
-            },
-          };
-        },
-      },
-    });
   }
 }
 

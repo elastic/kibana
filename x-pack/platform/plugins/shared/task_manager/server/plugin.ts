@@ -43,7 +43,7 @@ import { AggregationOpts, FetchResult, SearchOpts, TaskStore } from './task_stor
 import { TaskScheduling } from './task_scheduling';
 import { backgroundTaskUtilizationRoute, healthRoute, metricsRoute } from './routes';
 import { createMonitoringStats, MonitoringStats } from './monitoring';
-import { ConcreteTaskInstance } from './task';
+import { ConcreteTaskInstance, RecurringTaskRunResult } from './task';
 import { registerTaskManagerUsageCollector } from './usage';
 import { TASK_MANAGER_INDEX } from './constants';
 import { AdHocTaskCounter } from './lib/adhoc_task_counter';
@@ -57,16 +57,30 @@ import {
   registerMarkRemovedTasksAsUnrecognizedDefinition,
   scheduleMarkRemovedTasksAsUnrecognizedDefinition,
 } from './removed_tasks/mark_removed_tasks_as_unrecognized';
+import {
+  OneOffTaskTypeFnOpts,
+  OneOffTaskTypeOpts,
+  RecurringTaskTypeFnOpts,
+  RecurringTaskTypeOpts,
+  TaskTypeFactory,
+} from './lib/task_type_factory';
 
-export type TaskManagerSetupContract = Pick<
-  TaskTypeDictionary,
-  'registerTaskDefinitions' | 'registerOneOffTaskType' | 'registerRecurringTaskType'
-> & {
+export type TaskManagerSetupContract = Pick<TaskTypeDictionary, 'registerTaskDefinitions'> & {
   /**
    * @deprecated
    */
   index: string;
   addMiddleware: (middleware: Middleware) => void;
+  registerOneOffTaskType: (
+    taskTypeId: string,
+    fn: (options: OneOffTaskTypeFnOpts) => Promise<void>,
+    options?: OneOffTaskTypeOpts
+  ) => void;
+  registerRecurringTaskType: (
+    taskTypeId: string,
+    fn: (options: RecurringTaskTypeFnOpts) => Promise<RecurringTaskRunResult>,
+    options?: RecurringTaskTypeOpts
+  ) => void;
 };
 
 export type TaskManagerStartContract = Pick<
@@ -179,6 +193,7 @@ export class TaskManagerPlugin
 
     const startServicesPromise = core.getStartServices().then(([coreServices]) => ({
       elasticsearch: coreServices.elasticsearch,
+      savedObjects: coreServices.savedObjects,
     }));
 
     this.usageCounter = plugins.usageCollection?.createUsageCounter(`taskManager`);
@@ -273,14 +288,40 @@ export class TaskManagerPlugin
     });
     plugins.eventLog.registerProviderActions('task_manager', ['run']);
 
+    const taskTypeFactory = new TaskTypeFactory({
+      logger: this.logger,
+      getClusterClient: () =>
+        startServicesPromise.then(({ elasticsearch }) => elasticsearch.client),
+      getSavedObjectsRepository: (includedHiddenTypes?: string[]) =>
+        startServicesPromise.then(({ savedObjects }) =>
+          savedObjects.createInternalRepository(includedHiddenTypes)
+        ),
+    });
+
     return {
       index: TASK_MANAGER_INDEX,
       addMiddleware: (middleware: Middleware) => {
         this.middleware = addMiddlewareToChain(this.middleware, middleware);
       },
       registerTaskDefinitions: (...args) => this.definitions.registerTaskDefinitions(...args),
-      registerOneOffTaskType: (...args) => this.definitions.registerOneOffTaskType(...args),
-      registerRecurringTaskType: (...args) => this.definitions.registerRecurringTaskType(...args),
+      registerOneOffTaskType: (
+        taskTypeId: string,
+        fn: (options: OneOffTaskTypeFnOpts) => Promise<void>,
+        options?: OneOffTaskTypeOpts
+      ) => {
+        this.definitions.registerTaskDefinitions({
+          [taskTypeId]: taskTypeFactory.createOneOffTaskType(fn, options),
+        });
+      },
+      registerRecurringTaskType: (
+        taskTypeId: string,
+        fn: (options: RecurringTaskTypeFnOpts) => Promise<RecurringTaskRunResult>,
+        options?: RecurringTaskTypeOpts
+      ) => {
+        this.definitions.registerTaskDefinitions({
+          [taskTypeId]: taskTypeFactory.createRecurringTaskType(fn, options),
+        });
+      },
     };
   }
 
