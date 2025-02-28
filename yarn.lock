@@ -3942,19 +3942,19 @@
   version "0.0.0"
   uid ""
 
-"@kbn/ambient-common-types@link:packages/kbn-ambient-common-types":
+"@kbn/ambient-common-types@link:src/platform/packages/private/kbn-ambient-common-types":
   version "0.0.0"
   uid ""
 
-"@kbn/ambient-ftr-types@link:packages/kbn-ambient-ftr-types":
+"@kbn/ambient-ftr-types@link:src/platform/packages/private/kbn-ambient-ftr-types":
   version "0.0.0"
   uid ""
 
-"@kbn/ambient-storybook-types@link:packages/kbn-ambient-storybook-types":
+"@kbn/ambient-storybook-types@link:src/platform/packages/shared/kbn-ambient-storybook-types":
   version "0.0.0"
   uid ""
 
-"@kbn/ambient-ui-types@link:packages/kbn-ambient-ui-types":
+"@kbn/ambient-ui-types@link:src/platform/packages/shared/kbn-ambient-ui-types":
   version "0.0.0"
   uid ""
 
@@ -3994,11 +3994,11 @@
   version "0.0.0"
   uid ""
 
-"@kbn/apm-synthtrace-client@link:packages/kbn-apm-synthtrace-client":
+"@kbn/apm-synthtrace-client@link:src/platform/packages/shared/kbn-apm-synthtrace-client":
   version "0.0.0"
   uid ""
 
-"@kbn/apm-synthtrace@link:packages/kbn-apm-synthtrace":
+"@kbn/apm-synthtrace@link:src/platform/packages/shared/kbn-apm-synthtrace":
   version "0.0.0"
   uid ""
 
@@ -4026,7 +4026,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/axe-config@link:packages/kbn-axe-config":
+"@kbn/axe-config@link:src/platform/packages/shared/kbn-axe-config":
   version "0.0.0"
   uid ""
 
@@ -4034,11 +4034,11 @@
   version "0.0.0"
   uid ""
 
-"@kbn/babel-register@link:packages/kbn-babel-register":
+"@kbn/babel-register@link:src/platform/packages/shared/kbn-babel-register":
   version "0.0.0"
   uid ""
 
-"@kbn/babel-transform@link:packages/kbn-babel-transform":
+"@kbn/babel-transform@link:src/platform/packages/private/kbn-babel-transform":
   version "0.0.0"
   uid ""
 
@@ -4122,7 +4122,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/ci-stats-core@link:packages/kbn-ci-stats-core":
+"@kbn/ci-stats-core@link:src/platform/packages/private/kbn-ci-stats-core":
   version "0.0.0"
   uid ""
 
@@ -4130,7 +4130,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/ci-stats-reporter@link:packages/kbn-ci-stats-reporter":
+"@kbn/ci-stats-reporter@link:src/platform/packages/private/kbn-ci-stats-reporter":
   version "0.0.0"
   uid ""
 
@@ -4202,7 +4202,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/code-owners@link:packages/kbn-code-owners":
+"@kbn/code-owners@link:src/platform/packages/private/kbn-code-owners":
   version "0.0.0"
   uid ""
 
@@ -5218,7 +5218,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/cypress-config@link:packages/kbn-cypress-config":
+"@kbn/cypress-config@link:src/platform/packages/shared/kbn-cypress-config":
   version "0.0.0"
   uid ""
 
@@ -5358,15 +5358,15 @@
   version "0.0.0"
   uid ""
 
-"@kbn/dev-cli-errors@link:packages/kbn-dev-cli-errors":
+"@kbn/dev-cli-errors@link:src/platform/packages/shared/kbn-dev-cli-errors":
   version "0.0.0"
   uid ""
 
-"@kbn/dev-cli-runner@link:packages/kbn-dev-cli-runner":
+"@kbn/dev-cli-runner@link:src/platform/packages/shared/kbn-dev-cli-runner":
   version "0.0.0"
   uid ""
 
-"@kbn/dev-proc-runner@link:packages/kbn-dev-proc-runner":
+"@kbn/dev-proc-runner@link:src/platform/packages/shared/kbn-dev-proc-runner":
   version "0.0.0"
   uid ""
 
@@ -5374,7 +5374,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/dev-utils@link:packages/kbn-dev-utils":
+"@kbn/dev-utils@link:src/platform/packages/shared/kbn-dev-utils":
   version "0.0.0"
   uid ""
 
@@ -5502,7 +5502,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/es-archiver@link:packages/kbn-es-archiver":
+"@kbn/es-archiver@link:src/platform/packages/shared/kbn-es-archiver":
   version "0.0.0"
   uid ""
 
@@ -5522,7 +5522,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/es@link:packages/kbn-es":
+"@kbn/es@link:src/platform/packages/shared/kbn-es":
   version "0.0.0"
   uid ""
 
@@ -5634,7 +5634,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/expect@link:packages/kbn-expect":
+"@kbn/expect@link:src/platform/packages/shared/kbn-expect":
   version "0.0.0"
   uid ""
 
@@ -5794,15 +5794,15 @@
   version "0.0.0"
   uid ""
 
-"@kbn/ftr-common-functional-services@link:packages/kbn-ftr-common-functional-services":
+"@kbn/ftr-common-functional-services@link:src/platform/packages/shared/kbn-ftr-common-functional-services":
   version "0.0.0"
   uid ""
 
-"@kbn/ftr-common-functional-ui-services@link:packages/kbn-ftr-common-functional-ui-services":
+"@kbn/ftr-common-functional-ui-services@link:src/platform/packages/shared/kbn-ftr-common-functional-ui-services":
   version "0.0.0"
   uid ""
 
-"@kbn/ftr-screenshot-filename@link:packages/kbn-ftr-screenshot-filename":
+"@kbn/ftr-screenshot-filename@link:src/platform/packages/private/kbn-ftr-screenshot-filename":
   version "0.0.0"
   uid ""
 
@@ -5810,7 +5810,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/gen-ai-functional-testing@link:packages/kbn-gen-ai-functional-testing":
+"@kbn/gen-ai-functional-testing@link:src/platform/packages/private/kbn-gen-ai-functional-testing":
   version "0.0.0"
   uid ""
 
@@ -5830,7 +5830,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/get-repo-files@link:packages/kbn-get-repo-files":
+"@kbn/get-repo-files@link:src/platform/packages/private/kbn-get-repo-files":
   version "0.0.0"
   uid ""
 
@@ -5938,7 +5938,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/import-resolver@link:packages/kbn-import-resolver":
+"@kbn/import-resolver@link:src/platform/packages/private/kbn-import-resolver":
   version "0.0.0"
   uid ""
 
@@ -6050,11 +6050,11 @@
   version "0.0.0"
   uid ""
 
-"@kbn/jest-serializers@link:packages/kbn-jest-serializers":
+"@kbn/jest-serializers@link:src/platform/packages/private/kbn-jest-serializers":
   version "0.0.0"
   uid ""
 
-"@kbn/journeys@link:packages/kbn-journeys":
+"@kbn/journeys@link:src/platform/packages/private/kbn-journeys":
   version "0.0.0"
   uid ""
 
@@ -6446,7 +6446,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/mock-idp-utils@link:packages/kbn-mock-idp-utils":
+"@kbn/mock-idp-utils@link:src/platform/packages/private/kbn-mock-idp-utils":
   version "0.0.0"
   uid ""
 
@@ -6478,7 +6478,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/node-libs-browser-webpack-plugin@link:packages/kbn-node-libs-browser-webpack-plugin":
+"@kbn/node-libs-browser-webpack-plugin@link:src/platform/packages/private/kbn-node-libs-browser-webpack-plugin":
   version "0.0.0"
   uid ""
 
@@ -6574,7 +6574,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/openapi-bundler@link:packages/kbn-openapi-bundler":
+"@kbn/openapi-bundler@link:src/platform/packages/shared/kbn-openapi-bundler":
   version "0.0.0"
   uid ""
 
@@ -6582,11 +6582,11 @@
   version "0.0.0"
   uid ""
 
-"@kbn/openapi-generator@link:packages/kbn-openapi-generator":
+"@kbn/openapi-generator@link:src/platform/packages/shared/kbn-openapi-generator":
   version "0.0.0"
   uid ""
 
-"@kbn/optimizer-webpack-helpers@link:packages/kbn-optimizer-webpack-helpers":
+"@kbn/optimizer-webpack-helpers@link:src/platform/packages/private/kbn-optimizer-webpack-helpers":
   version "0.0.0"
   uid ""
 
@@ -6618,7 +6618,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/peggy@link:packages/kbn-peggy":
+"@kbn/peggy@link:src/platform/packages/private/kbn-peggy":
   version "0.0.0"
   uid ""
 
@@ -6762,7 +6762,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/repo-path@link:packages/kbn-repo-path":
+"@kbn/repo-path@link:src/platform/packages/private/kbn-repo-path":
   version "0.0.0"
   uid ""
 
@@ -6966,7 +6966,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/scout-info@link:packages/kbn-scout-info":
+"@kbn/scout-info@link:src/platform/packages/private/kbn-scout-info":
   version "0.0.0"
   uid ""
 
@@ -6974,11 +6974,11 @@
   version "0.0.0"
   uid ""
 
-"@kbn/scout-reporting@link:packages/kbn-scout-reporting":
+"@kbn/scout-reporting@link:src/platform/packages/private/kbn-scout-reporting":
   version "0.0.0"
   uid ""
 
-"@kbn/scout@link:packages/kbn-scout":
+"@kbn/scout@link:src/platform/packages/shared/kbn-scout":
   version "0.0.0"
   uid ""
 
@@ -7554,7 +7554,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/some-dev-log@link:packages/kbn-some-dev-log":
+"@kbn/some-dev-log@link:src/platform/packages/private/kbn-some-dev-log":
   version "0.0.0"
   uid ""
 
@@ -7618,7 +7618,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/stdio-dev-helpers@link:packages/kbn-stdio-dev-helpers":
+"@kbn/stdio-dev-helpers@link:src/platform/packages/private/kbn-stdio-dev-helpers":
   version "0.0.0"
   uid ""
 
@@ -7626,7 +7626,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/storybook@link:packages/kbn-storybook":
+"@kbn/storybook@link:src/platform/packages/shared/kbn-storybook":
   version "0.0.0"
   uid ""
 
@@ -7694,11 +7694,11 @@
   version "0.0.0"
   uid ""
 
-"@kbn/telemetry-tools@link:packages/kbn-telemetry-tools":
+"@kbn/telemetry-tools@link:src/platform/packages/private/kbn-telemetry-tools":
   version "0.0.0"
   uid ""
 
-"@kbn/test-eui-helpers@link:packages/kbn-test-eui-helpers":
+"@kbn/test-eui-helpers@link:src/platform/packages/private/kbn-test-eui-helpers":
   version "0.0.0"
   uid ""
 
@@ -7706,11 +7706,11 @@
   version "0.0.0"
   uid ""
 
-"@kbn/test-jest-helpers@link:packages/kbn-test-jest-helpers":
+"@kbn/test-jest-helpers@link:src/platform/packages/shared/kbn-test-jest-helpers":
   version "0.0.0"
   uid ""
 
-"@kbn/test-subj-selector@link:packages/kbn-test-subj-selector":
+"@kbn/test-subj-selector@link:src/platform/packages/shared/kbn-test-subj-selector":
   version "0.0.0"
   uid ""
 
@@ -7730,7 +7730,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/test@link:packages/kbn-test":
+"@kbn/test@link:src/platform/packages/shared/kbn-test":
   version "0.0.0"
   uid ""
 
@@ -7766,7 +7766,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/tooling-log@link:packages/kbn-tooling-log":
+"@kbn/tooling-log@link:src/platform/packages/shared/kbn-tooling-log":
   version "0.0.0"
   uid ""
 

@@ -194,7 +194,7 @@ export const getStructuredToolForIndexEntry = ({
 
       const params: SearchRequest = {
         index: indexEntry.index,
-        size: 10,
+        size: 100,
         query: {
           bool: {
             must: [
@@ -213,6 +213,7 @@ export const getStructuredToolForIndexEntry = ({
             [indexEntry.field]: {
               type: 'semantic',
               number_of_fragments: 2,
+              order: 'score',
             },
           },
         },
@@ -244,9 +245,9 @@ export const getStructuredToolForIndexEntry = ({
         logger.debug(() => `Similarity Search Results:\n ${JSON.stringify(result)}`);
         logger.debug(() => `Similarity Text Extract Results:\n ${JSON.stringify(kbDocs)}`);
 
-        return `###\nBelow are all relevant documents in JSON format:\n${JSON.stringify(
-          kbDocs
-        )}###`;
+        const prunedResult = JSON.stringify(kbDocs).substring(0, 20000);
+
+        return `###\nBelow are all relevant documents in JSON format:\n${prunedResult}###`;
       } catch (e) {
         logger.error(`Error performing IndexEntry KB Similarity Search: ${e.message}`);
         return `I'm sorry, but I was unable to find any information in the knowledge base. Perhaps this error would be useful to deliver to the user. Be sure to print it below your response and in a codeblock so it is rendered nicely: ${e.message}`;
