@@ -29,7 +29,7 @@ interface GetInstallPkgRouteOptionsParams {
   isCloud: boolean;
   isFirstTimeAgentUser: boolean;
   isGuidedOnboardingActive: boolean;
-  isAgentlessIntegration: boolean;
+  isAgentlessIntegration?: boolean;
 }
 
 export type InstallPkgRouteOptions = [
