@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import agent from 'elastic-apm-node';
 import type { Logger } from '@kbn/core/server';
 import { sum } from 'lodash';
 import type { Duration } from 'moment';
@@ -13,7 +14,6 @@ import type {
   PublicRuleMonitoringService,
   PublicRuleResultService,
 } from '@kbn/alerting-plugin/server/types';
-import { conditionalAddLabels } from '@kbn/securitysolution-utils';
 import type {
   RuleExecutionSettings,
   RuleExecutionStatus,
@@ -86,7 +86,7 @@ export const createRuleExecutionLogClientForExecutors = (
         const correlationIds = baseCorrelationIds.withStatus(args.newStatus);
         const logMeta = correlationIds.getLogMeta();
 
-        conditionalAddLabels({ [SECURITY_RULE_STATUS]: args.newStatus });
+        agent.addLabels({ [SECURITY_RULE_STATUS]: args.newStatus });
 
         try {
           const normalizedArgs = normalizeStatusChangeArgs(args);

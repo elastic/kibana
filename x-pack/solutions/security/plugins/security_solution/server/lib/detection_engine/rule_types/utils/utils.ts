@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import agent from 'elastic-apm-node';
 import { createHash } from 'crypto';
 import { chunk, get, invert, isEmpty, merge, partition } from 'lodash';
 import moment from 'moment';
@@ -29,7 +30,6 @@ import type {
   ExceptionListItemSchema,
   FoundExceptionListItemSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
-import { conditionalAddLabels, conditionalSetCustomContext } from '@kbn/securitysolution-utils';
 
 import type {
   ElasticsearchClient,
@@ -152,7 +152,7 @@ export const hasTimestampFields = async (args: {
   const { timestampField, timestampFieldCapsResponse, inputIndices, ruleExecutionLogger } = args;
   const { ruleName } = ruleExecutionLogger.context;
 
-  conditionalSetCustomContext({
+  agent.setCustomContext({
     [SECURITY_NUM_INDICES_MATCHING_PATTERN]: timestampFieldCapsResponse.body.indices?.length,
   });
 
@@ -310,7 +310,7 @@ export const getExceptions = async ({
           sortOrder: undefined,
           sortField: undefined,
         });
-        conditionalSetCustomContext({ [SECURITY_NUM_EXCEPTION_ITEMS]: items.length });
+        agent.setCustomContext({ [SECURITY_NUM_EXCEPTION_ITEMS]: items.length });
         return items;
       } catch (e) {
         throw new Error(
@@ -400,7 +400,7 @@ export const getGapBetweenRuns = ({
     return moment.duration(0);
   }
   const driftTolerance = moment.duration(originalTo.diff(originalFrom));
-  conditionalAddLabels({ [SECURITY_QUERY_SPAN_S]: driftTolerance.asSeconds() }, false);
+  agent.addLabels({ [SECURITY_QUERY_SPAN_S]: driftTolerance.asSeconds() }, false);
   const currentDuration = moment.duration(moment(startedAt).diff(previousStartedAt));
   return currentDuration.subtract(driftTolerance);
 };

@@ -16,11 +16,7 @@ import { buildExceptionFilter } from '@kbn/lists-plugin/server/services/exceptio
 import { technicalRuleFieldMap } from '@kbn/rule-registry-plugin/common/assets/field_maps/technical_rule_field_map';
 import type { FieldMap } from '@kbn/alerts-as-data-utils';
 import { parseScheduleDates } from '@kbn/securitysolution-io-ts-utils';
-import {
-  getIndexListFromEsqlQuery,
-  conditionalAddLabels,
-  conditionalSetCustomContext,
-} from '@kbn/securitysolution-utils';
+import { getIndexListFromEsqlQuery } from '@kbn/securitysolution-utils';
 import type { FormatAlert } from '@kbn/alerting-plugin/server/types';
 import {
   checkPrivilegesFromEsClient,
@@ -77,7 +73,7 @@ Object.entries(aadFieldConversion).forEach(([key, value]) => {
 });
 
 const addApmLabelsFromParams = (params: RuleParams) => {
-  conditionalAddLabels(
+  agent.addLabels(
     {
       [SECURITY_FROM]: params.from,
       [SECURITY_IMMUTABLE]: params.immutable,
@@ -168,8 +164,8 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
             rule,
           } = options;
           addApmLabelsFromParams(params);
-          conditionalSetCustomContext({ [SECURITY_MERGE_STRATEGY]: mergeStrategy });
-          conditionalSetCustomContext({ [SECURITY_PARAMS]: params });
+          agent.setCustomContext({ [SECURITY_MERGE_STRATEGY]: mergeStrategy });
+          agent.setCustomContext({ [SECURITY_PARAMS]: params });
           let runState = state;
           let inputIndex: string[] = [];
           let runtimeMappings: estypes.MappingRuntimeFields | undefined;
@@ -289,7 +285,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
 
           // Make a copy of `inputIndex` or else the APM agent reports it as [Circular] for most rule types because it's the same object
           // as `index`
-          conditionalSetCustomContext({ [SECURITY_INPUT_INDEX]: [...inputIndex] });
+          agent.setCustomContext({ [SECURITY_INPUT_INDEX]: [...inputIndex] });
 
           // check if rule has permissions to access given index pattern
           // move this collection of lines into a function in utils
@@ -367,7 +363,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
             wrapperWarnings.push(rangeTuplesWarningMessage);
           }
 
-          conditionalSetCustomContext({ [SECURITY_NUM_RANGE_TUPLES]: tuples.length });
+          agent.setCustomContext({ [SECURITY_NUM_RANGE_TUPLES]: tuples.length });
 
           if (remainingGap.asMilliseconds() > 0) {
             const gapDuration = `${remainingGap.humanize()} (${remainingGap.asMilliseconds()}ms)`;
@@ -415,7 +411,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
               ignoreFieldsObject[field] = true;
             });
 
-            conditionalSetCustomContext({
+            agent.setCustomContext({
               [SECURITY_NUM_IGNORE_FIELDS_STANDARD]: ignoreFieldsStandard.length,
               [SECURITY_NUM_IGNORE_FIELDS_REGEX]: ignoreFieldsRegexes.length,
             });
@@ -533,7 +529,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
 
             const createdSignalsCount = result.createdSignals.length;
 
-            conditionalSetCustomContext({ [SECURITY_NUM_ALERTS_CREATED]: createdSignalsCount });
+            agent.setCustomContext({ [SECURITY_NUM_ALERTS_CREATED]: createdSignalsCount });
 
             if (disabledActions.length > 0) {
               const disabledActionsWarning = getDisabledActionsWarningText({
