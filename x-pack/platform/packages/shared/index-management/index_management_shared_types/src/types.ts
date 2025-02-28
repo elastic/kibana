@@ -39,6 +39,10 @@ export type IndexManagementLocatorParams = SerializableRecord &
         page: 'clone_component_template';
         componentTemplate: string;
       }
+    | {
+        page: 'create_component_template';
+        componentTemplate: string;
+      }
   );
 
 export type IndexManagementLocator = LocatorPublic<IndexManagementLocatorParams>;

@@ -23,13 +23,13 @@ import {
   EuiCode,
 } from '@elastic/eui';
 
+import { IndexManagementLocatorParams } from '@kbn/index-management-shared-types';
 import {
   SectionLoading,
   TabSettings,
   TabAliases,
   TabMappings,
   attemptToURIDecode,
-  reactRouterNavigate,
 } from '../shared_imports';
 import { useAppContext } from '../../../app_context';
 import { useComponentTemplatesContext } from '../component_templates_context';
@@ -37,6 +37,7 @@ import { DeprecatedBadge } from '../components';
 import { TabSummary } from './tab_summary';
 import { ComponentTemplateTabs, TabType } from './tabs';
 import { ManageButton, ManageAction } from './manage_button';
+import { INDEX_MANAGEMENT_LOCATOR_ID } from '../../../../locator';
 
 export interface Props {
   componentTemplateName: string;
@@ -61,8 +62,10 @@ export const ComponentTemplateDetailsFlyoutContent: React.FunctionComponent<Prop
   actions,
   showSummaryCallToAction,
 }) => {
-  const { history } = useAppContext();
+  const { url } = useAppContext();
   const { api } = useComponentTemplatesContext();
+
+  const locator = url.locators.get<IndexManagementLocatorParams>(INDEX_MANAGEMENT_LOCATOR_ID);
 
   const decodedComponentTemplateName = attemptToURIDecode(componentTemplateName)!;
 
@@ -113,10 +116,12 @@ export const ComponentTemplateDetailsFlyoutContent: React.FunctionComponent<Prop
           </p>
           <EuiButton
             color="warning"
-            {...reactRouterNavigate(
-              history,
-              `/create_component_template?name=${decodedComponentTemplateName}`
-            )}
+            href={
+              locator?.getRedirectUrl({
+                page: 'create_component_template',
+                componentTemplate: decodedComponentTemplateName,
+              }) || ''
+            }
           >
             <FormattedMessage
               id="xpack.idxMgmt.componentTemplateDetails.createMissingIntegrationTemplate.button"

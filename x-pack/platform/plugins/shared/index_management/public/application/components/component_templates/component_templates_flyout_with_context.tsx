@@ -91,7 +91,7 @@ export const ComponentTemplatesFlyoutWithContext: React.FC<
   ];
   return (
     <IndexManagementAppContext core={core} dependencies={newDependencies}>
-      <EuiFlyout onClose={() => {}}>
+      <EuiFlyout onClose={onClose}>
         <ComponentTemplateDetailsFlyoutContent
           componentTemplateName={componentTemplateName}
           onClose={onClose}

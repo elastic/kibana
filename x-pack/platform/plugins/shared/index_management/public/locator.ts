@@ -10,6 +10,7 @@ import { LocatorDefinition } from '@kbn/share-plugin/public';
 import { IndexManagementLocatorParams } from '@kbn/index-management-shared-types';
 import {
   getComponentTemplateCloneLink,
+  getComponentTemplateCreateLink,
   getComponentTemplateDetailLink,
   getComponentTemplateEditLink,
   getDataStreamDetailsLink,
@@ -65,6 +66,12 @@ export class IndexManagementLocatorDefinition
         return {
           ...location,
           path: location.path + getComponentTemplateCloneLink(params.componentTemplate),
+        };
+      }
+      case 'create_component_template': {
+        return {
+          ...location,
+          path: location.path + getComponentTemplateCreateLink(params.componentTemplate),
         };
       }
     }
