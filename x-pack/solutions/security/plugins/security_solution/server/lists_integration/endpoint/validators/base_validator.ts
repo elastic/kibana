@@ -202,6 +202,13 @@ export class BaseValidator {
         ignoreMissing: true,
       });
 
+      this.logger.debug(
+        () =>
+          `Lookup of policy ids:\n[${policyIds.join(
+            ' | '
+          )}] for space [${spaceId}] returned:\n${stringify(policiesFromFleet)}`
+      );
+
       if (!policiesFromFleet) {
         throw new EndpointArtifactExceptionValidationError(
           `invalid policy ids: ${policyIds.join(', ')}`
@@ -329,7 +336,12 @@ export class BaseValidator {
         }
       );
 
-      // Filter to scope down the data visible in active space id:
+      this.logger.debug(
+        () =>
+          `policies currently visible in space ID [${spaceId}]:\n${stringify(allEndpointPolicyIds)}`
+      );
+
+      // Filter to scope down the data visible in active space id by appending to the Find options the following filter:
       //      (
       //         All global artifacts
       //         -OR-
@@ -505,6 +517,15 @@ export class BaseValidator {
             ignoreMissing: true,
           })
           .then((packagePolicies) => {
+            this.logger.debug(
+              () =>
+                `Lookup of policy ids:\n[${policyIds.join(
+                  ' | '
+                )}]\nvia fleet for space ID [${activeSpaceId}] returned:\n${stringify(
+                  packagePolicies
+                )}`
+            );
+
             return groupBy(packagePolicies ?? [], 'id');
           });
 
