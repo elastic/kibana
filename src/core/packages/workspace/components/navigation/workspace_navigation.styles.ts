@@ -33,6 +33,12 @@ const root: EmotionFn = ({ euiTheme }) => css`
     .euiCollapsibleNavGroup__children .euiSpacer:first-child {
       display: none;
     }
+
+    .sideNavPanel {
+      background-color: ${euiTheme.colors.backgroundBasePlain};
+      margin-top: 1px;
+      border-top-left-radius: ${euiTheme.border.radius.medium};
+    }
   }
 
   & .euiCollapsibleNav__footer {

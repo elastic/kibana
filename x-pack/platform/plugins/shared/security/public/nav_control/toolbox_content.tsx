@@ -8,7 +8,6 @@
 // THIS COMPONENT IS ULTRA-HACKY AND FOR DEMO PURPOSES ONLY
 // DO NOT USE THIS AS A REFERENCE FOR MUCH IF ANYTHING
 
-import type { EuiListGroupItemProps } from '@elastic/eui';
 import {
   EuiBadge,
   EuiButtonEmpty,
@@ -17,17 +16,13 @@ import {
   EuiIcon,
   EuiKeyPadMenu,
   EuiKeyPadMenuItem,
-  EuiListGroup,
   EuiSwitch,
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import React from 'react';
-import useObservable from 'react-use/lib/useObservable';
-import type { Observable } from 'rxjs';
 
-import type { ChromeRecentlyAccessedHistoryItem } from '@kbn/core/public';
 import { useIs2030, useWorkspaceDispatch } from '@kbn/core-workspace-state';
 import { setIs2030 } from '@kbn/core-workspace-state/workspace/slice';
 import type { AuthenticatedUser } from '@kbn/security-plugin-types-common';
@@ -40,11 +35,8 @@ type UserProfile = ReturnType<typeof useUserProfile<{ avatar: UserProfileAvatarD
 type UserProfileValue = GetUserProfileResponse<{ avatar: UserProfileAvatarData }>;
 
 interface Props {
-  recentlyAccessed$: Observable<ChromeRecentlyAccessedHistoryItem[]>;
   logoutUrl: string;
 }
-
-const MAX_RECENTLY_ACCESS_ITEMS = 5;
 
 export const ToolboxContent = (props: Props) => {
   const userProfile: UserProfile = useUserProfile<{ avatar: UserProfileAvatarData }>(
@@ -77,23 +69,11 @@ const UserProfileContent = ({
 
 const CurrentUserContent = ({
   user,
-  recentlyAccessed$,
   logoutUrl,
 }: { user: Pick<AuthenticatedUser, 'roles' | 'username'> } & Props) => {
   const [selectedValue, setSelectedValue] = React.useState('light');
-  const recentlyAccessed = useObservable(recentlyAccessed$, []);
   const is2030 = useIs2030();
   const dispatch = useWorkspaceDispatch();
-
-  const items: EuiListGroupItemProps[] = recentlyAccessed
-    .slice(0, MAX_RECENTLY_ACCESS_ITEMS)
-    .map((recent) => ({
-      label: recent.label,
-      href: recent.link,
-      color: 'primary',
-      iconType: 'clock',
-    }));
-  const itemList = <EuiListGroup listItems={items} size="s" gutterSize="none" flush={true} />;
 
   return (
     <>
@@ -133,16 +113,6 @@ const CurrentUserContent = ({
                 ))}
               </div>
             </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiFlexGroup direction="column" gutterSize="s">
-            <EuiFlexItem grow={false}>
-              <EuiTitle size="xs">
-                <h5>Recently Accessed</h5>
-              </EuiTitle>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>{itemList}</EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>

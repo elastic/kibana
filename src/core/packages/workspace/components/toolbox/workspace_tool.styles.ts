@@ -26,6 +26,7 @@ const panel: EmotionFn = ({ euiTheme }) => css`
   display: flex;
   flex-direction: column;
   flex-grow: 1;
+  width: var(--kbnWorkspace--tool-width, 0);
 
   .euiFlyoutFooter {
     border-bottom-right-radius: ${euiTheme.border.radius.small};
@@ -39,9 +40,10 @@ const container = css`
   flex-direction: column;
 `;
 
-const header: EmotionFn = ({ euiTheme }) => css`
+const header: EmotionFn = ({ euiTheme, colorMode }) => css`
   padding: ${euiTheme.size.s};
-  border-bottom: 1px solid ${euiTheme.colors.borderBaseSubdued};
+  border-bottom: 1px solid
+    ${colorMode === 'LIGHT' ? euiTheme.colors.borderBaseSubdued : euiTheme.colors.borderBasePlain};
   flex-grow: 0;
 `;
 

@@ -7,7 +7,5 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { Workspace, type WorkspaceProps } from './workspace';
-export { KibanaWorkspace, type KibanaWorkspaceProps } from './kibana';
-export type { WorkspaceToolProps, WorkspaceToolboxButtonProps } from './toolbox';
-export { RecentlyAccessedTool, type RecentlyAccessedToolProps, FeedbackTool } from './tools';
+export { RecentlyAccessedTool, type RecentlyAccessedToolProps } from './recently_accessed';
+export { FeedbackTool } from './feedback';

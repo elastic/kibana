@@ -7,8 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiThemeComputed } from '@elastic/eui';
+import { EuiThemeColorMode, EuiThemeComputed } from '@elastic/eui';
 import { SerializedStyles } from '@emotion/serialize';
 
-export type EmotionFn = ({ euiTheme }: { euiTheme: EuiThemeComputed }) => SerializedStyles;
+export type EmotionFn = ({
+  euiTheme,
+  colorMode,
+}: {
+  euiTheme: EuiThemeComputed;
+  colorMode: EuiThemeColorMode;
+}) => SerializedStyles;
+
 export type ToolboxSize = 'regular' | 'wide' | 'fullWidth';

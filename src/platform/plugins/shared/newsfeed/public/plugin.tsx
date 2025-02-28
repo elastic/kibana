@@ -102,7 +102,7 @@ export class NewsfeedPublicPlugin
     newsfeedId: NewsfeedApiEndpoint,
     isScreenshotMode: boolean
   ): NewsfeedApi {
-    const api = getApi(config, this.kibanaVersion, newsfeedId, isScreenshotMode);
+    const api = getApi(config, '8.17.0', newsfeedId, isScreenshotMode);
     return {
       markAsRead: api.markAsRead,
       fetchResults$: api.fetchResults$.pipe(

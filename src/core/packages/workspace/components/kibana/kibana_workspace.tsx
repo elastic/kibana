@@ -9,7 +9,7 @@
 
 import React from 'react';
 
-import { WorkspaceService } from '@kbn/core-workspace-browser';
+import { WORKSPACE_TOOL_PROFILE, WorkspaceService } from '@kbn/core-workspace-browser';
 import { WorkspaceProvider } from '@kbn/core-workspace-state';
 
 import { useEuiTheme } from '@elastic/eui';
@@ -19,6 +19,7 @@ import { WorkspaceHeaderLogo } from '../header/workspace_header_logo';
 import { KibanaSideNavProps, KibanaSideNavigation } from './kibana_side_navigation';
 import { useDistinctObservable } from './use_distinct_observable';
 import { WorkspaceToolboxButton } from '../toolbox';
+import { WorkspaceToolboxSearchButton } from '../toolbox/workspace_toolbox_search_button';
 
 export interface KibanaWorkspaceProps extends KibanaSideNavProps, KibanaActionMenuMountProps {
   children: React.ReactNode;
@@ -39,6 +40,7 @@ export const KibanaWorkspace = ({
   // TODO: clintandrewhall - All of this needs to GO AWAY.  Observables should not be props.
   const breadcrumbs = useDistinctObservable(getBreadcrumbs$(), []);
   const tools = useDistinctObservable(workspace.toolbox.getTools$(), []);
+  const search = workspace.toolbox.getSearchControl();
   const actionMenu = <KibanaActionMenuMount {...{ currentActionMenu$ }} />;
   const sideNav = <KibanaSideNavigation {...{ getActiveNodes$, getProjectSideNavComponent$ }} />;
 
@@ -57,7 +59,14 @@ export const KibanaWorkspace = ({
           toolbox: (
             <Workspace.Toolbox>
               {tools.map(({ toolId, button, size }) => (
-                <WorkspaceToolboxButton {...{ toolId, size, ...button }} />
+                <>
+                  <WorkspaceToolboxButton key={toolId} {...{ toolId, size, ...button }} />
+                  {toolId === WORKSPACE_TOOL_PROFILE && search && (
+                    <WorkspaceToolboxSearchButton key="search">
+                      {search}
+                    </WorkspaceToolboxSearchButton>
+                  )}
+                </>
               ))}
             </Workspace.Toolbox>
           ),

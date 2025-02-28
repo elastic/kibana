@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import React from 'react';
 import {
   ReplaySubject,
   BehaviorSubject,
@@ -21,6 +22,8 @@ import {
   type WorkspaceTool,
   type WorkspaceStart,
   WORKSPACE_KNOWN_TOOLS,
+  WORKSPACE_TOOL_RECENT,
+  WORKSPACE_TOOL_FEEDBACK,
 } from '@kbn/core-workspace-browser';
 import type { FeatureFlagsStart } from '@kbn/core-feature-flags-browser';
 import type { InternalChromeStart } from '@kbn/core-chrome-browser-internal';
@@ -33,6 +36,8 @@ import {
   setHomeHref,
   setIconType,
 } from '@kbn/core-workspace-state';
+import { FeedbackTool, RecentlyAccessedTool } from '@kbn/core-workspace-components';
+import { ApplicationStart } from '@kbn/core-application-browser';
 
 const isKnownTool = (toolId: string): toolId is WorkspaceKnownTool => {
   return WORKSPACE_KNOWN_TOOLS.includes(toolId as WorkspaceKnownTool);
@@ -58,12 +63,14 @@ const sortTools = (tools: ReadonlySet<WorkspaceTool>) => {
 
 export interface WorkspaceServiceStartDeps {
   featureFlags: FeatureFlagsStart;
+  application: Pick<ApplicationStart, 'navigateToUrl'>;
   chrome: {
     projectNavigation: Pick<
       InternalChromeStart['projectNavigation'],
       'getProjectHome$' | 'getProjectBreadcrumbs$'
     >;
     getIsVisible$: InternalChromeStart['getIsVisible$'];
+    recentlyAccessed: InternalChromeStart['recentlyAccessed'];
   };
   http: {
     basePath: Pick<HttpStart['basePath'], 'prepend'>;
@@ -80,12 +87,14 @@ export class WorkspaceService {
   private isVisible$: Subscription | null = null;
   private homeHref$: Subscription | null = null;
   private iconType$: Subscription | null = null;
+  private search: JSX.Element | null = null;
 
   public start({
     featureFlags,
     chrome,
     http,
     customBranding,
+    application: { navigateToUrl },
   }: WorkspaceServiceStartDeps): WorkspaceStart {
     const tools$ = new BehaviorSubject<ReadonlySet<WorkspaceTool>>(new Set());
     const breadcrumbs$ = chrome.projectNavigation
@@ -125,14 +134,49 @@ export class WorkspaceService {
         store.dispatch(setIconType(iconType));
       });
 
+    const registerTool = (tool: WorkspaceTool) => {
+      tools$.next(new Set([...tools$.value.values(), tool]));
+    };
+
+    registerTool({
+      toolId: WORKSPACE_TOOL_RECENT,
+      button: {
+        iconType: 'clock',
+      },
+      tool: {
+        title: 'Recently viewed',
+        children: (
+          <RecentlyAccessedTool
+            recentlyAccessed$={chrome.recentlyAccessed.get$()}
+            navigateToUrl={navigateToUrl}
+          />
+        ),
+      },
+    });
+
+    registerTool({
+      toolId: WORKSPACE_TOOL_FEEDBACK,
+      button: {
+        iconType: 'editorComment',
+      },
+      tool: {
+        title: 'Feedback',
+        children: <FeedbackTool />,
+      },
+    });
+
     return {
       isEnabled: () => featureFlags.getBooleanValue('workbench', false),
       header: {
         getBreadcrumbs$: () => breadcrumbs$,
       },
       toolbox: {
-        registerTool: (tool: WorkspaceTool) => {
-          tools$.next(new Set([...tools$.value.values(), tool]));
+        registerTool,
+        registerSearchControl: (control) => {
+          if (this.search) {
+            throw new Error('Search control is already registered');
+          }
+          this.search = control;
         },
         getTools$: () => {
           return tools$.pipe(map(sortTools), takeUntil(this.stop$));
@@ -142,6 +186,9 @@ export class WorkspaceService {
             map((tools) => Array.from(tools).find((tool) => tool.toolId === toolId)),
             takeUntil(this.stop$)
           );
+        },
+        getSearchControl: () => {
+          return this.search;
         },
       },
     };

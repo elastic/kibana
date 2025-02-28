@@ -15,16 +15,19 @@ import { Observable } from 'rxjs';
 import { ChromeBreadcrumb } from '@kbn/core-chrome-browser';
 
 export const WORKSPACE_TOOL_PROFILE = 'profile';
+export const WORKSPACE_TOOL_RECENT = 'recent';
+export const WORKSPACE_TOOL_FEEDBACK = 'feedback';
 export const WORKSPACE_TOOL_NEWSFEED = 'newsfeed';
+export const WORKSPACE_TOOL_HELP = 'help';
 export const WORKSPACE_TOOL_AI_ASSISTANT = 'aiAssistant';
 
 export const WORKSPACE_KNOWN_TOOLS = [
   WORKSPACE_TOOL_PROFILE,
-  WORKSPACE_TOOL_AI_ASSISTANT,
-  'search',
-  'notifications',
+  WORKSPACE_TOOL_RECENT,
   WORKSPACE_TOOL_NEWSFEED,
-  'help',
+  WORKSPACE_TOOL_FEEDBACK,
+  WORKSPACE_TOOL_HELP,
+  WORKSPACE_TOOL_AI_ASSISTANT,
 ] as const;
 
 export type WorkspaceKnownTool = (typeof WORKSPACE_KNOWN_TOOLS)[number];
@@ -47,6 +50,8 @@ export interface WorkspaceHeaderService {
 export interface WorkspaceToolboxService {
   getTools$: () => Observable<Array<Readonly<WorkspaceTool>>>;
   getTool$: (toolId: string | null) => Observable<WorkspaceTool | undefined>;
+  registerSearchControl: (control: JSX.Element) => void;
+  getSearchControl: () => JSX.Element | null;
   registerTool: (tool: WorkspaceTool) => void;
 }
 

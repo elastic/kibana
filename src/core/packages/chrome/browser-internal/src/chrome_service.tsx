@@ -537,7 +537,8 @@ export class ChromeService {
 
     const workspace = this.workspaceService.start({
       featureFlags,
-      chrome: { projectNavigation, getIsVisible$: () => this.isVisible$ },
+      application,
+      chrome: { projectNavigation, getIsVisible$: () => this.isVisible$, recentlyAccessed },
       http: { basePath: http.basePath, getLoadingCount$: http.getLoadingCount$ },
       customBranding: { customBranding$ },
     });

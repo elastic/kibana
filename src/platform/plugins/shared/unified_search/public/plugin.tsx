@@ -14,6 +14,7 @@ import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import { APPLY_FILTER_TRIGGER } from '@kbn/data-plugin/public';
 
 import { LanguageDocumentationSections } from '@kbn/language-documentation';
+import { WORKSPACE_TOOL_HELP } from '@kbn/core-workspace-browser';
 
 import {
   DocumentationMainContent,
@@ -168,9 +169,9 @@ export class UnifiedSearchPublicPlugin
       };
 
       core.chrome.workspace.toolbox.registerTool({
-        toolId: 'esql_help',
+        toolId: WORKSPACE_TOOL_HELP,
         button: {
-          iconType: 'help',
+          iconType: 'documentation',
         },
         tool: {
           title: 'ES|QL quick reference',

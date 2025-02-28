@@ -114,8 +114,6 @@ export class SecurityNavControlService {
 
   private registerSecurityNavControl(core: CoreStart, authc: AuthenticationServiceSetup) {
     if (core.chrome.workspace.isEnabled()) {
-      const recentlyAccessed$ = core.chrome.recentlyAccessed.get$();
-
       core.chrome.workspace.toolbox.registerTool({
         button: {
           iconType: () => (
@@ -131,7 +129,7 @@ export class SecurityNavControlService {
           title: 'Profile',
           children: (
             <Providers services={core} authc={authc} securityApiClients={this.securityApiClients}>
-              <ToolboxContent {...{ recentlyAccessed$, logoutUrl: this.logoutUrl }} />
+              <ToolboxContent {...{ logoutUrl: this.logoutUrl }} />
             </Providers>
           ),
         },
