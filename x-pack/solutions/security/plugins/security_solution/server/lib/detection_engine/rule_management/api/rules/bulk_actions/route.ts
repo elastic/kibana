@@ -282,9 +282,8 @@ export const performBulkActionRoute = (
                 detectionRulesClient.getRuleCustomizationStatus();
 
               const isPrebuiltRulesExportAllowed =
-                prebuiltRulesCustomizationStatus.isRulesCustomizationEnabled ||
                 prebuiltRulesCustomizationStatus.customizationDisabledReason ===
-                  PrebuiltRulesCustomizationDisabledReason.License;
+                PrebuiltRulesCustomizationDisabledReason.License;
 
               const exported = await getExportByObjectIds(
                 rulesClient,

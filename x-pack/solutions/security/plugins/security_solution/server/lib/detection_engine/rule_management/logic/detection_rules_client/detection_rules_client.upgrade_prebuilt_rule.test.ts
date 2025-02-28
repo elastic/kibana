@@ -52,7 +52,7 @@ describe('DetectionRulesClient.upgradePrebuiltRule', () => {
       mlAuthz,
       savedObjectsClient,
       license: licenseMock.createLicenseMock(),
-      experimentalFeatures: { prebuiltRulesCustomizationEnabled: true } as ExperimentalFeatures,
+      experimentalFeatures: {} as ExperimentalFeatures,
       productFeaturesService: createProductFeaturesServiceMock(),
     });
   });
