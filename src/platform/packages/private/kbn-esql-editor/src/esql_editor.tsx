@@ -226,35 +226,6 @@ export const ESQLEditor = memo(function ESQLEditor({
     }
   }, [code, query.esql]);
 
-  // Enable the variables service if the feature is supported in the consumer app
-  useEffect(() => {
-    if (supportsControls) {
-      variablesService?.enableSuggestions();
-
-      const variables = variablesService?.esqlVariables;
-      if (!isEqual(variables, esqlVariables)) {
-        variablesService?.clearVariables();
-        esqlVariables?.forEach((variable) => {
-          variablesService?.addVariable(variable);
-        });
-      }
-    } else {
-      variablesService?.disableSuggestions();
-    }
-  }, [variablesService, supportsControls, esqlVariables]);
-
-  const toggleHistory = useCallback((status: boolean) => {
-    setIsHistoryOpen(status);
-  }, []);
-
-  const showSuggestionsIfEmptyQuery = useCallback(() => {
-    if (editorModel.current?.getValueLength() === 0) {
-      setTimeout(() => {
-        editor1.current?.trigger(undefined, 'editor.action.triggerSuggest', {});
-      }, 0);
-    }
-  }, []);
-
   const addVariablesDecoration = useCallback(() => {
     // we need to remove the previous decorations first
     const lineCount = editorModel.current?.getLineCount() || 1;
@@ -291,6 +262,35 @@ export const ESQLEditor = memo(function ESQLEditor({
       });
     }
   }, [variablesService?.esqlVariables]);
+  // Enable the variables service if the feature is supported in the consumer app
+  useEffect(() => {
+    if (supportsControls) {
+      variablesService?.enableSuggestions();
+
+      const variables = variablesService?.esqlVariables;
+      if (!isEqual(variables, esqlVariables)) {
+        variablesService?.clearVariables();
+        esqlVariables?.forEach((variable) => {
+          variablesService?.addVariable(variable);
+        });
+        addVariablesDecoration();
+      }
+    } else {
+      variablesService?.disableSuggestions();
+    }
+  }, [variablesService, supportsControls, esqlVariables, addVariablesDecoration]);
+
+  const toggleHistory = useCallback((status: boolean) => {
+    setIsHistoryOpen(status);
+  }, []);
+
+  const showSuggestionsIfEmptyQuery = useCallback(() => {
+    if (editorModel.current?.getValueLength() === 0) {
+      setTimeout(() => {
+        editor1.current?.trigger(undefined, 'editor.action.triggerSuggest', {});
+      }, 0);
+    }
+  }, []);
 
   const openTimePickerPopover = useCallback(() => {
     const currentCursorPosition = editor1.current?.getPosition();
@@ -915,46 +915,6 @@ export const ESQLEditor = memo(function ESQLEditor({
                     monaco.languages.setLanguageConfiguration(ESQL_LANG_ID, {
                       wordPattern: /'?\w[\w'-.]*[?!,;:"]*/,
                     });
-                    // // this is fixing a bug between the EUIPopover and the monaco editor
-                    // // when the user clicks the editor, we force it to focus and the onDidFocusEditorText
-                    // // to fire, the timeout is needed because otherwise it refocuses on the popover icon
-                    // // and the user needs to click again the editor.
-                    // // IMPORTANT: The popover needs to be wrapped with the EuiOutsideClickDetector component.
-                    // editor.onMouseDown(async (e) => {
-                    //   setTimeout(() => {
-                    //     editor.focus();
-                    //   }, 100);
-                    //   if (datePickerOpenStatusRef.current) {
-                    //     setPopoverPosition({});
-                    //   }
-
-                    //   const mousePosition = e.target.position;
-                    //   if (mousePosition) {
-                    //     const currentWord = model?.getWordAtPosition(mousePosition);
-                    //     const variables = variablesService?.esqlVariables ?? [];
-                    //     const clickedVariable = variables.find((v) =>
-                    //       currentWord?.word.includes(v.key)
-                    //     );
-
-                    //     if (clickedVariable) {
-                    //       const position = editor1.current?.getPosition();
-                    //       console.dir(esqlControls);
-                    //       const initialState = esqlControls?.find((c) =>
-                    //         clickedVariable.key.includes(c.variableName)
-                    //       );
-                    //       await triggerControl(
-                    //         editor1.current?.getValue() ?? code,
-                    //         clickedVariable.type,
-                    //         position,
-                    //         uiActions,
-                    //         esqlVariables,
-                    //         onSaveControl,
-                    //         onCancelControl,
-                    //         initialState
-                    //       );
-                    //     }
-                    //   }
-                    // });
 
                     editor.onDidFocusEditorText(() => {
                       onEditorFocus();
@@ -977,7 +937,7 @@ export const ESQLEditor = memo(function ESQLEditor({
                     });
 
                     editor.onDidChangeModelContent(() => {
-                      addVariablesDecoration();
+                      // addVariablesDecoration();
                       showSuggestionsIfEmptyQuery();
                     });
 
