@@ -296,6 +296,10 @@ export const RuleMigrationTaskStats = z.object({
    * The moment of the last update.
    */
   last_updated_at: z.string(),
+  /**
+   * The last error message if the migration task execution failed.
+   */
+  last_error: z.string().optional(),
 });
 
 /**
