@@ -144,22 +144,16 @@ async function fetchExitSpanIdsFromTraceIds({
   const destinationsBySpanId = new Map<string, ServiceMapNode>();
 
   sampleExitSpans.aggregations?.exitSpans.buckets.forEach((bucket) => {
+    const { success, others } = bucket.eventOutcomeGroup.buckets;
     const eventOutcomeGroup =
-      bucket.eventOutcomeGroup.buckets.success.sample.top.length > 0
-        ? bucket.eventOutcomeGroup.buckets.success
-        : bucket.eventOutcomeGroup.buckets.others.sample.top.length > 0
-        ? bucket.eventOutcomeGroup.buckets.others
-        : undefined;
+      success.sample.top.length > 0 ? success : others.sample.top.length > 0 ? others : undefined;
 
-    const sample = eventOutcomeGroup?.sample.top[0].metrics;
+    const sample = eventOutcomeGroup?.sample.top[0]?.metrics;
     if (!sample) {
       return;
     }
 
     const spanId = sample[SPAN_ID] as string;
-    if (!sample || !spanId) {
-      return;
-    }
 
     destinationsBySpanId.set(spanId, {
       spanId,

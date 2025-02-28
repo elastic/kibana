@@ -8,16 +8,13 @@
 import { ServiceHealthStatus } from '../service_health_status';
 import { SERVICE_NAME, SPAN_SUBTYPE, SPAN_TYPE } from '../es_fields/apm';
 import type { ServiceMapExitSpan, ServiceMapService, ServiceMapWithConnections } from './types';
-import {
-  getExternalConnectionNode,
-  getServiceConnectionNode,
-  transformServiceMapResponses,
-} from './transform_service_map_responses';
+import { getServiceMapNodes } from './get_service_map_nodes';
+import { getExternalConnectionNode, getServiceConnectionNode } from './utils';
 
 /**
  * Helper function to generate a service connection node.
  */
-const createService = (service: { serviceName: string; agentName: string }): ServiceMapService =>
+const createService = (service: { serviceName: string; agentName: string }) =>
   ({
     ...service,
     serviceEnvironment: 'production',
@@ -26,13 +23,13 @@ const createService = (service: { serviceName: string; agentName: string }): Ser
 /**
  * Helper function to generate an external connection node.
  */
-const createExternalNode = (exitSpan: {
+const createExitSpan = (exitSpan: {
   agentName?: string;
   serviceName?: string;
   spanType: string;
   spanSubtype: string;
   spanDestinationServiceResource: string;
-}): ServiceMapExitSpan =>
+}) =>
   ({
     ...exitSpan,
     serviceEnvironment: 'production',
@@ -43,19 +40,19 @@ const javaService = createService({ serviceName: 'opbeans-java', agentName: 'jav
 const goService = createService({ serviceName: 'opbeans-go', agentName: 'go' });
 const pythonService = createService({ serviceName: 'opbeans-python', agentName: 'python' });
 
-const kafkaExternal = createExternalNode({
+const kafkaExternal = createExitSpan({
   spanDestinationServiceResource: 'kafka/some-queue',
   spanType: 'messaging',
   spanSubtype: 'kafka',
 });
 
-const nodejsExternal = createExternalNode({
+const nodejsExternal = createExitSpan({
   spanDestinationServiceResource: 'opbeans-node',
   spanType: 'external',
   spanSubtype: 'aa',
 });
 
-const httpLoadBalancer = createExternalNode({
+const httpLoadBalancer = createExitSpan({
   spanDestinationServiceResource: 'opbeans:3000',
   spanType: 'external',
   spanSubtype: 'http',
@@ -76,14 +73,14 @@ const anomalies = {
   ],
 };
 
-describe('transformServiceMapResponses', () => {
+describe('getServiceMapNodes', () => {
   it('maps external destinations to internal services', () => {
     const response: ServiceMapWithConnections = {
       servicesData: [
         getServiceConnectionNode(nodejsService),
         getServiceConnectionNode(javaService),
       ],
-      destinationServices: [
+      exitSpanDestinations: [
         {
           from: getExternalConnectionNode(nodejsExternal),
           to: getServiceConnectionNode(nodejsService),
@@ -98,7 +95,7 @@ describe('transformServiceMapResponses', () => {
       anomalies,
     };
 
-    const { elements } = transformServiceMapResponses(response);
+    const { elements } = getServiceMapNodes(response);
 
     const connection = elements.find((e) => 'source' in e.data && 'target' in e.data);
 
@@ -115,7 +112,7 @@ describe('transformServiceMapResponses', () => {
         getServiceConnectionNode(nodejsService),
         getServiceConnectionNode(javaService),
       ],
-      destinationServices: [
+      exitSpanDestinations: [
         {
           from: getExternalConnectionNode({ ...kafkaExternal, ...javaService }),
           to: getServiceConnectionNode(nodejsService),
@@ -130,7 +127,7 @@ describe('transformServiceMapResponses', () => {
       anomalies,
     };
 
-    const { elements } = transformServiceMapResponses(response);
+    const { elements } = getServiceMapNodes(response);
 
     expect(elements.length).toBe(5);
 
@@ -170,7 +167,7 @@ describe('transformServiceMapResponses', () => {
         getServiceConnectionNode(nodejsService),
         getServiceConnectionNode(javaService),
       ],
-      destinationServices: [
+      exitSpanDestinations: [
         {
           from: getExternalConnectionNode({ ...nodejsExternal, ...javaService }),
           to: getServiceConnectionNode(nodejsService),
@@ -193,7 +190,7 @@ describe('transformServiceMapResponses', () => {
       anomalies,
     };
 
-    const { elements } = transformServiceMapResponses(response);
+    const { elements } = getServiceMapNodes(response);
 
     expect(elements.filter((element) => 'source' in element.data).length).toBe(1);
     expect(elements.filter((element) => !('source' in element.data)).length).toBe(2);
@@ -202,7 +199,7 @@ describe('transformServiceMapResponses', () => {
   it('picks the first span.type/subtype in an alphabetically sorted list', () => {
     const response: ServiceMapWithConnections = {
       servicesData: [getServiceConnectionNode(javaService)],
-      destinationServices: [],
+      exitSpanDestinations: [],
       connections: [
         {
           source: getServiceConnectionNode(javaService),
@@ -212,7 +209,7 @@ describe('transformServiceMapResponses', () => {
         {
           source: getServiceConnectionNode(javaService),
           destination: getExternalConnectionNode(
-            createExternalNode({ ...nodejsExternal, ...javaService, spanType: 'foo' })
+            createExitSpan({ ...nodejsExternal, ...javaService, spanType: 'foo' })
           ),
         },
         {
@@ -227,7 +224,7 @@ describe('transformServiceMapResponses', () => {
       anomalies,
     };
 
-    const { elements } = transformServiceMapResponses(response);
+    const { elements } = getServiceMapNodes(response);
 
     const nodejsNode = elements.find((node) => node.data.id === '>opbeans-java|opbeans-node');
 
@@ -240,7 +237,7 @@ describe('transformServiceMapResponses', () => {
   it('processes connections without a matching "service" aggregation', () => {
     const response: ServiceMapWithConnections = {
       servicesData: [getServiceConnectionNode(javaService)],
-      destinationServices: [],
+      exitSpanDestinations: [],
       connections: [
         {
           source: getServiceConnectionNode(javaService),
@@ -250,14 +247,14 @@ describe('transformServiceMapResponses', () => {
       anomalies,
     };
 
-    const { elements } = transformServiceMapResponses(response);
+    const { elements } = getServiceMapNodes(response);
     expect(elements.length).toBe(3);
   });
 
   it('maps routing services child transasctions to their corresponding upstream service', () => {
     const response: ServiceMapWithConnections = {
       servicesData: [getServiceConnectionNode(javaService)],
-      destinationServices: [
+      exitSpanDestinations: [
         {
           from: getExternalConnectionNode({ ...httpLoadBalancer, ...javaService }),
           to: getServiceConnectionNode(nodejsService),
@@ -288,7 +285,7 @@ describe('transformServiceMapResponses', () => {
       anomalies,
     };
 
-    const { elements } = transformServiceMapResponses(response);
+    const { elements } = getServiceMapNodes(response);
 
     expect(elements).toEqual(
       expect.arrayContaining([

@@ -9,7 +9,7 @@ import type {
   Connection,
   ConnectionEdge,
   ConnectionNode,
-  DestinationService,
+  ExitSpanDestination,
   ConnectionElement,
   ExternalConnectionNode,
   ServiceConnectionNode,
@@ -23,20 +23,13 @@ import type {
 import type { GroupResourceNodesResponse } from './group_resource_nodes';
 
 export * from './utils';
-export { getConnections } from './get_service_map_from_trace_ids';
-export {
-  transformServiceMapResponses,
-  getExternalConnectionNode,
-  getServiceConnectionNode,
-  getConnectionId,
-  isExitSpan,
-} from './transform_service_map_responses';
+export { getServiceMapNodes } from './get_service_map_nodes';
 
 export {
   Connection,
   ConnectionEdge,
   ConnectionNode,
-  DestinationService,
+  ExitSpanDestination as DestinationService,
   ConnectionElement,
   GroupResourceNodesResponse,
   ExternalConnectionNode,

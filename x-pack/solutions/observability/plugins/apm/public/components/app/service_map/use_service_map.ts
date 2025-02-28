@@ -8,7 +8,7 @@ import { useEffect, useState } from 'react';
 import type { IHttpFetchError, ResponseErrorBody } from '@kbn/core/public';
 import type {
   ServiceMapNode,
-  DestinationService,
+  ExitSpanDestination,
   ServiceMapResponse,
 } from '../../../../common/service_map/types';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
@@ -18,7 +18,7 @@ import type { Environment } from '../../../../common/environment_rt';
 import {
   getExternalConnectionNode,
   getServiceConnectionNode,
-  transformServiceMapResponses,
+  getServiceMapNodes,
   getConnections,
 } from '../../../../common/service_map';
 import type { ConnectionNode, GroupResourceNodesResponse } from '../../../../common/service_map';
@@ -42,7 +42,7 @@ export const useServiceMap = ({
   const license = useLicenseContext();
   const { config } = useApmPluginContext();
 
-  const [groupedNodes, setGroupedNodes] = useState<{
+  const [serviceMapNodes, setServiceMapNodes] = useState<{
     data: GroupResourceNodesResponse;
     error?: Error | IHttpFetchError<ResponseErrorBody>;
     status: FETCH_STATUS;
@@ -89,12 +89,12 @@ export const useServiceMap = ({
 
   useEffect(() => {
     if (status === FETCH_STATUS.LOADING) {
-      setGroupedNodes((prevState) => ({ ...prevState, status: FETCH_STATUS.LOADING }));
+      setServiceMapNodes((prevState) => ({ ...prevState, status: FETCH_STATUS.LOADING }));
       return;
     }
 
     if (status === FETCH_STATUS.FAILURE || error) {
-      setGroupedNodes({
+      setServiceMapNodes({
         data: { elements: [], nodesCount: 0 },
         status: FETCH_STATUS.FAILURE,
         error,
@@ -105,9 +105,9 @@ export const useServiceMap = ({
     if (data) {
       try {
         const transformedData = processServiceMapData(data);
-        setGroupedNodes({ data: transformedData, status: FETCH_STATUS.SUCCESS });
+        setServiceMapNodes({ data: transformedData, status: FETCH_STATUS.SUCCESS });
       } catch (err) {
-        setGroupedNodes({
+        setServiceMapNodes({
           data: { elements: [], nodesCount: 0 },
           status: FETCH_STATUS.FAILURE,
           error: err,
@@ -116,39 +116,41 @@ export const useServiceMap = ({
     }
   }, [data, status, error]);
 
-  return groupedNodes;
+  return serviceMapNodes;
 };
 
 const processServiceMapData = (data: ServiceMapResponse): GroupResourceNodesResponse => {
-  const paths = buildPaths({ spans: data.spans });
-  return transformServiceMapResponses({
+  const paths = getPaths({ spans: data.spans });
+  return getServiceMapNodes({
     connections: getConnections(paths.connections),
-    destinationServices: paths.destinationServices,
+    exitSpanDestinations: paths.exitSpanDestinations,
     servicesData: data.servicesData,
     anomalies: data.anomalies,
   });
 };
 
-const buildPaths = ({ spans }: { spans: ServiceMapNode[] }) => {
+const getPaths = ({ spans }: { spans: ServiceMapNode[] }) => {
   const connections: ConnectionNode[][] = [];
-  const discoveredServices: DestinationService[] = [];
+  const exitSpanDestinations: ExitSpanDestination[] = [];
 
   for (const currentNode of spans) {
-    const serviceConnectionNode = getServiceConnectionNode(currentNode);
-    const externalConnectionNode = getExternalConnectionNode(currentNode);
+    const exitSpanNode = getExternalConnectionNode(currentNode);
+    const serviceNode = getServiceConnectionNode(currentNode);
 
     if (currentNode.destinationService) {
-      discoveredServices.push({
-        from: externalConnectionNode,
+      // maps an exit span to its destination service
+      exitSpanDestinations.push({
+        from: exitSpanNode,
         to: getServiceConnectionNode(currentNode.destinationService),
       });
     }
 
-    connections.push([serviceConnectionNode, externalConnectionNode]);
+    // builds a connection between a service and an exit span
+    connections.push([serviceNode, exitSpanNode]);
   }
 
   return {
     connections,
-    destinationServices: discoveredServices,
+    exitSpanDestinations,
   };
 };

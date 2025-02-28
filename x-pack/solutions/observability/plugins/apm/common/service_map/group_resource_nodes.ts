@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 import { compact, groupBy } from 'lodash';
 import { SPAN_TYPE, SPAN_SUBTYPE } from '../es_fields/apm';
 import type { ConnectionEdge, ConnectionElement, ConnectionNode } from './types';
-import { isSpanGroupingSupported } from './utils';
+import { getEdgeId, isSpanGroupingSupported } from './utils';
 
 const MINIMUM_GROUP_SIZE = 4;
 
@@ -37,8 +37,9 @@ export interface GroupResourceNodesResponse {
   nodesCount: number;
 }
 
-const isEdge = (el: ConnectionElement) => Boolean(el.data.source && el.data.target);
-const isNode = (el: ConnectionElement) => !isEdge(el);
+const isEdge = (el: ConnectionElement): el is { data: ConnectionEdge } =>
+  Boolean(el.data.source && el.data.target);
+const isNode = (el: ConnectionElement): el is { data: ConnectionNode } => !isEdge(el);
 const isElligibleGroupNode = (el: ConnectionElement) => {
   if (isNode(el) && SPAN_TYPE in el.data) {
     return isSpanGroupingSupported(el.data[SPAN_TYPE], el.data[SPAN_SUBTYPE]);
@@ -46,26 +47,16 @@ const isElligibleGroupNode = (el: ConnectionElement) => {
   return false;
 };
 
-export function groupResourceNodes(responseData: {
-  elements: ConnectionElement[];
-}): GroupResourceNodesResponse {
-  const nodesMap = new Map(
-    responseData.elements.filter(isNode).map((node) => [node.data.id, node])
-  );
-  const edgesMap = new Map(
-    responseData.elements
-      .filter(isEdge)
-      .map((edge) => [`${edge.data.source}|${edge.data.target}`, edge])
-  );
-
-  // create adjacency list by targets
-  const groupNodeCandidates = responseData.elements
-    .filter(isElligibleGroupNode)
-    .map(({ data: { id } }) => id);
-
-  const adjacencyListByTargetMap = Array.from(edgesMap.values()).reduce(
+function groupConnections({
+  edgesMap,
+  groupableNodeIds,
+}: {
+  edgesMap: Map<string, ConnectionElement>;
+  groupableNodeIds: Set<string>;
+}) {
+  const groupedTargets = Array.from(edgesMap.values()).reduce(
     (acc, { data: { source, target } }) => {
-      if (groupNodeCandidates.includes(target)) {
+      if (groupableNodeIds.has(target)) {
         const sources = acc.get(target) ?? [];
         sources.push(source);
         acc.set(target, sources);
@@ -76,39 +67,57 @@ export function groupResourceNodes(responseData: {
     new Map<string, string[]>()
   );
 
-  const adjacencyListByTarget = Array.from(adjacencyListByTargetMap.entries()).map(
-    ([target, sources]) => ({
-      target,
-      sources,
-      groupId: `resourceGroup{${sources.sort().join(';')}}`,
-    })
-  );
+  const adjacencyList = Array.from(groupedTargets.entries()).map(([target, sources]) => ({
+    target,
+    sources,
+    groupId: `resourceGroup{${[...sources].sort().join(';')}}`,
+  }));
 
-  // group by members
-  const nodeGroupsById = groupBy(adjacencyListByTarget, 'groupId');
-  const nodeGroups = Object.keys(nodeGroupsById)
-    .map((id) => ({
+  const grouped = groupBy(adjacencyList, 'groupId');
+  return Object.entries(grouped)
+    .map(([id, group]) => ({
       id,
-      sources: nodeGroupsById[id][0].sources,
-      targets: nodeGroupsById[id].map(({ target }) => target),
+      sources: group[0].sources,
+      targets: group.map(({ target }) => target),
     }))
-    .filter(({ targets }) => targets.length > MINIMUM_GROUP_SIZE - 1);
+    .filter(({ targets }) => targets.length >= MINIMUM_GROUP_SIZE);
+}
 
+function getUngroupedNodesAndEdges({
+  nodesMap,
+  edgesMap,
+  groupedConnections,
+}: {
+  nodesMap: Map<string, { data: ConnectionNode }>;
+  edgesMap: Map<string, { data: ConnectionEdge }>;
+  groupedConnections: ReturnType<typeof groupConnections>;
+}) {
   const ungroupedEdges = new Map(edgesMap);
   const ungroupedNodes = new Map(nodesMap);
 
-  nodeGroups.forEach(({ sources, targets }) => {
+  groupedConnections.forEach(({ sources, targets }) => {
     targets.forEach((target) => {
-      // removes grouped nodes from original node set:
       ungroupedNodes.delete(target);
       sources.forEach((source) => {
-        ungroupedEdges.delete(`${source}|${target}`);
+        ungroupedEdges.delete(getEdgeId({ source, target }));
       });
     });
   });
 
-  // add in a composite node for each new group
-  const groupedNodes = nodeGroups.map(
+  return {
+    ungroupedNodes: Array.from(ungroupedNodes.values()),
+    ungroupedEdges: Array.from(ungroupedEdges.values()),
+  };
+}
+
+function groupNodes({
+  nodesMap,
+  groupedConnections,
+}: {
+  nodesMap: Map<string, ConnectionElement>;
+  groupedConnections: ReturnType<typeof groupConnections>;
+}) {
+  return groupedConnections.map(
     ({ id, targets }): GroupedNode => ({
       data: {
         id,
@@ -118,37 +127,59 @@ export function groupResourceNodes(responseData: {
           values: { count: targets.length },
         }),
         groupedConnections: compact(
-          targets.map((targetId) => {
-            const targetElement = nodesMap.get(targetId);
-            if (!targetElement) {
-              return undefined;
-            }
-            const { data } = targetElement;
-            return { label: data.label || data.id, ...data };
+          targets.map((target) => {
+            const targetElement = nodesMap.get(target);
+            return targetElement
+              ? { label: targetElement.data.label || targetElement.data.id, ...targetElement.data }
+              : undefined;
           })
         ),
       },
     })
   );
+}
 
-  // add new edges from source to new groups
-  const groupedEdges: GroupedEdge[] = nodeGroups.flatMap(({ id, sources }) =>
-    sources.map((source) => ({
-      data: {
-        id: `${source}~>${id}`,
-        source,
-        target: id,
-      },
-    }))
+function groupEdges({
+  groupedConnections,
+}: {
+  groupedConnections: ReturnType<typeof groupConnections>;
+}) {
+  return groupedConnections.flatMap(({ id, sources }) =>
+    sources.map(
+      (source): GroupedEdge => ({
+        data: {
+          id: `${source}~>${id}`,
+          source,
+          target: id,
+        },
+      })
+    )
+  );
+}
+
+export function groupResourceNodes({
+  elements,
+}: {
+  elements: ConnectionElement[];
+}): GroupResourceNodesResponse {
+  const nodesMap = new Map(elements.filter(isNode).map((node) => [node.data.id, node]));
+  const edgesMap = new Map(elements.filter(isEdge).map((edge) => [getEdgeId(edge.data), edge]));
+  const groupableNodeIds = new Set(
+    elements.filter(isElligibleGroupNode).map(({ data: { id } }) => id)
   );
 
+  const groupedConnections = groupConnections({ edgesMap, groupableNodeIds });
+  const { ungroupedEdges, ungroupedNodes } = getUngroupedNodesAndEdges({
+    nodesMap,
+    edgesMap,
+    groupedConnections,
+  });
+
+  const groupedNodes = groupNodes({ nodesMap, groupedConnections });
+  const groupedEdges = groupEdges({ groupedConnections });
+
   return {
-    elements: [
-      ...Array.from(ungroupedNodes.values()),
-      ...groupedNodes,
-      ...Array.from(ungroupedEdges.values()),
-      ...groupedEdges,
-    ],
-    nodesCount: ungroupedNodes.size,
+    elements: [...ungroupedNodes, ...groupedNodes, ...ungroupedEdges, ...groupedEdges],
+    nodesCount: ungroupedNodes.length,
   };
 }
