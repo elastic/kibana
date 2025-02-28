@@ -2,38 +2,36 @@
 
 set -euo pipefail
 
+CHROMIUM_COMMIT_HASH=$(buildkite-agent meta-data get "chromium_commit_hash")
+
+echo "---Preparing to build Chromium of commit hash: $CHROMIUM_COMMIT_HASH"
+
 sudo apt-get update && \
     apt-get install -y curl git-all build-essential pkg-config gcc gperf python3 && \
     rm -rf /var/lib/apt/lists/*
 
 BUILD_ROOT_DIR="$HOME/chromium"
 
-# Create a dedicated working directory for this directory of Python scripts.
+BUILD_SCRIPT="$(pwd)/x-pack/build_chromium"
+
+# Create a dedicated working directory outside of the default buildkite working directory.
 mkdir "$BUILD_ROOT_DIR" && cd "$BUILD_ROOT_DIR"
 
-FETCHED_BUILD_SCRIPT_DIR="$BUILD_ROOT_DIR/build_scripts"
+BUILD_SCRIPT_SYMLINK="$BUILD_ROOT_DIR/build_scripts"
 
-# Checkout the x-pack/build_chromium directory only from kibana
-git clone -n --depth=1 --filter=tree:0  https://github.com/elastic/kibana "$FETCHED_BUILD_SCRIPT_DIR"
-cd "$FETCHED_BUILD_SCRIPT_DIR"
-git sparse-checkout set --no-cone x-pack/build_chromium
-git checkout main
-
-# return to chromium directory
-cd "$BUILD_ROOT_DIR"
+# link existing build_chromium directory from kibana
+ln -s "$BUILD_SCRIPT" "$BUILD_SCRIPT_SYMLINK"
 
 # Allow our scripts to use depot_tools commands
-export PATH=$HOME/chromium/depot_tools:$PATH
+export PATH=$BUILD_ROOT_DIR/depot_tools:$PATH
 
-# Install the OS packages, configure the environment, download the chromium source (25GB)
-python3 "$FETCHED_BUILD_SCRIPT_DIR/x-pack/build_chromium/init.py"
-
-CHROMIUM_COMMIT_HASH=$(buildkite-agent meta-data get "chromium_commit_hash")
+# Install the OS packages, configure the environment, download the chromium source (56GB)
+python3 "$BUILD_SCRIPT_SYMLINK/init.py"
 
 echo "---Building $PLATFORM_VARIANT Chromium of commit hash: $CHROMIUM_COMMIT_HASH"
 
 # Run the build script with the path to the chromium src directory, the git commit hash
-python3 ./build_chromium/build.py "$CHROMIUM_COMMIT_HASH" "$PLATFORM_VARIANT"
+python3 "$BUILD_SCRIPT_SYMLINK/build.py" "$CHROMIUM_COMMIT_HASH" "$PLATFORM_VARIANT"
 
 # TODO: set up output as buildkite artefact
-buildkite-agent artifact upload chromium/src/out/chromium-*
+buildkite-agent artifact upload "$BUILD_ROOT_DIR/src/out/chromium-*"

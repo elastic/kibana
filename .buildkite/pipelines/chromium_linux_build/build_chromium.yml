@@ -29,14 +29,14 @@ steps:
 
   - command: "PLATFORM_VARIANT={{matrix}} .buildkite/scripts/pipelines/chromium_linux_build/build.sh"
     label: "Build {{matrix}} linux headless chromium"
-    timeout_in_minutes: 10
+    # timeout_in_minutes: 10
     depends_on: "infer_chromium_version"
     agents:
       image: family/kibana-ubuntu-2004
       imageProject: elastic-images-prod
       provider: gcp
       machineType: c2d-highcpu-112
-      diskSizeGb: 125
+      diskSizeGb: 275
     matrix:
       - "x64"
       - "arm64"
