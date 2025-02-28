@@ -31,6 +31,14 @@ export type IndexManagementLocatorParams = SerializableRecord &
         page: 'component_template';
         componentTemplate: string;
       }
+    | {
+        page: 'edit_component_template';
+        componentTemplate: string;
+      }
+    | {
+        page: 'clone_component_template';
+        componentTemplate: string;
+      }
   );
 
 export type IndexManagementLocator = LocatorPublic<IndexManagementLocatorParams>;
@@ -49,6 +57,9 @@ export interface IndexManagementPluginStart {
   getIndexSettingsComponent: (deps: {
     history: ScopedHistory<unknown>;
   }) => React.FC<IndexSettingProps>;
+  getComponentTemplateFlyoutComponent: (deps: {
+    history: ScopedHistory<unknown>;
+  }) => React.FC<ComponentTemplateFlyoutProps>;
 }
 
 export interface Index {
@@ -74,6 +85,11 @@ export interface Index {
   size?: string;
   primary_size?: string;
   documents_deleted?: number;
+}
+
+export interface ComponentTemplateFlyoutProps {
+  componentTemplateName: string;
+  onClose: () => void;
 }
 
 export interface IndexMappingProps {

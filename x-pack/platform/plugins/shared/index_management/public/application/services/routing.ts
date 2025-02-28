@@ -87,6 +87,14 @@ export const getComponentTemplateDetailLink = (name: string) => {
   return `/component_templates/${encodeURIComponent(name)}`;
 };
 
+export const getComponentTemplateEditLink = (name: string) => {
+  return `/edit_component_template/${encodeURIComponent(name)}`;
+};
+
+export const getComponentTemplateCloneLink = (name: string) => {
+  return `/ccreate_component_template/${encodeURIComponent(name)}`;
+};
+
 export const navigateToIndexDetailsPage = (
   indexName: string,
   indicesListURLParams: string,

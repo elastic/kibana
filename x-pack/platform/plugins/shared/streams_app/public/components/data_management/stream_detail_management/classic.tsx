@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React from 'react';
+import React, { useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { UnwiredStreamGetResponse } from '@kbn/streams-schema';
 import { EuiCallOut, EuiFlexGroup, EuiListGroup, EuiText } from '@elastic/eui';
@@ -75,10 +75,23 @@ export function ClassicStreamDetailManagement({
 
 function UnmanagedStreamOverview({ definition }: { definition: UnwiredStreamGetResponse }) {
   const {
+    appParams: { history },
+    dependencies: {
+      start: { indexManagement },
+    },
     core: {
       http: { basePath },
     },
   } = useKibana();
+
+  const [currentComponentTemplate, setCurrentComponentTemplate] = useState<string | undefined>(
+    undefined
+  );
+  const ComponentTemplateFlyout = useMemo(
+    () => indexManagement.getComponentTemplateFlyoutComponent({ history }),
+    [history, indexManagement]
+  );
+
   const groupedAssets = (definition.elasticsearch_assets ?? []).reduce((acc, asset) => {
     const title = assetToTitle(asset);
     if (title) {
@@ -106,31 +119,44 @@ function UnmanagedStreamOverview({ definition }: { definition: UnwiredStreamGetR
     );
   }
   return (
-    <EuiFlexGroup direction="column" gutterSize="m">
-      <EuiText>
-        <p>
-          {i18n.translate('xpack.streams.streamDetailView.unmanagedStreamOverview', {
-            defaultMessage:
-              'This stream is not managed. Follow the links to stack management to change the related Elasticsearch objects.',
-          })}
-        </p>
-      </EuiText>
-      {Object.entries(groupedAssets).map(([title, assets]) => (
-        <div key={title}>
-          <EuiText>
-            <h3>{title}</h3>
-          </EuiText>
-          <EuiListGroup
-            listItems={assets.map((asset) => ({
-              label: asset.id,
-              href: basePath.prepend(assetToLink(asset)),
-              iconType: 'index',
-              target: '_blank',
-            }))}
-          />
-        </div>
-      ))}
-    </EuiFlexGroup>
+    <>
+      <EuiFlexGroup direction="column" gutterSize="m">
+        <EuiText>
+          <p>
+            {i18n.translate('xpack.streams.streamDetailView.unmanagedStreamOverview', {
+              defaultMessage:
+                'This stream is not managed. Follow the links to stack management to change the related Elasticsearch objects.',
+            })}
+          </p>
+        </EuiText>
+        {Object.entries(groupedAssets).map(([title, assets]) => (
+          <div key={title}>
+            <EuiText>
+              <h3>{title}</h3>
+            </EuiText>
+            <EuiListGroup
+              listItems={assets.map((asset) => ({
+                label: asset.id,
+                href: basePath.prepend(assetToLink(asset)),
+                onClick: (e) => {
+                  if (asset.type === 'component_template') {
+                    e.preventDefault();
+                    setCurrentComponentTemplate(asset.id);
+                  }
+                },
+                iconType: 'index',
+              }))}
+            />
+          </div>
+        ))}
+      </EuiFlexGroup>
+      {currentComponentTemplate && (
+        <ComponentTemplateFlyout
+          onClose={() => setCurrentComponentTemplate(undefined)}
+          componentTemplateName={currentComponentTemplate}
+        />
+      )}
+    </>
   );
 }
 
