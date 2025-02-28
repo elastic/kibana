@@ -36,7 +36,9 @@ export const useMlManagementHref = (
 
       getUrl();
     },
-    [appId, params, ml]
+    // Stringifying params to avoid rerender on object reference change
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [appId, JSON.stringify(params), ml]
   );
 
   return mlManagementUrl;
