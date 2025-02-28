@@ -105,12 +105,12 @@ describe('CustomFields', () => {
         />
       </FormTestComponent>
     );
-    const customFieldsWrapper = await screen.findByTestId('caseCustomFields');
 
-    const customFields = customFieldsWrapper.querySelectorAll('.euiFormRow');
+    const customFields = screen.getAllByText(/My test label [1-6]/);
 
     expect(customFields).toHaveLength(6);
 
+    expect(customFields[0]).toHaveTextContent('My test label 1');
     expect(customFields[0]).toHaveTextContent('My test label 1');
     expect(customFields[1]).toHaveTextContent('My test label 2');
     expect(customFields[2]).toHaveTextContent('My test label 3');

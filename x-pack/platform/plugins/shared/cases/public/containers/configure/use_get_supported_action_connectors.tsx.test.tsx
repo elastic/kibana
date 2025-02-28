@@ -65,8 +65,9 @@ describe('useConnectors', () => {
 
     await waitFor(() => {
       expect(spyOnFetchConnectors).not.toHaveBeenCalled();
-      expect(result.current.data).toEqual([]);
     });
+
+    expect(result.current.data).toEqual([]);
   });
 
   it('does not fetch connectors when the user does not has access to connectors', async () => {
@@ -81,7 +82,8 @@ describe('useConnectors', () => {
 
     await waitFor(() => {
       expect(spyOnFetchConnectors).not.toHaveBeenCalled();
-      expect(result.current.data).toEqual([]);
     });
+
+    expect(result.current.data).toEqual([]);
   });
 });

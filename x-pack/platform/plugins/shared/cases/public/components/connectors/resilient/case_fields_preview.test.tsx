@@ -76,9 +76,9 @@ describe('Jira Fields: Preview', () => {
   it('renders all fields correctly', () => {
     renderWithTestingProviders(<FieldsPreview connector={connector} fields={fields} />);
 
-    const getByText = createQueryWithMarkup(screen.getByText);
+    const getByTextWithMarkup = createQueryWithMarkup(screen.getByText);
 
-    expect(getByText('Incident types: Malware, Denial of Service')).toBeInTheDocument();
-    expect(getByText('Severity: Medium')).toBeInTheDocument();
+    expect(getByTextWithMarkup('Incident types: Malware, Denial of Service')).toBeInTheDocument();
+    expect(getByTextWithMarkup('Severity: Medium')).toBeInTheDocument();
   });
 });

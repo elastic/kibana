@@ -22,7 +22,6 @@ import { useGetCasesMockState, connectorsMock } from '../../containers/mock';
 import { SortFieldCase } from '../../../common/ui/types';
 import { CaseSeverity, CaseStatuses } from '../../../common/types/domain';
 import { SECURITY_SOLUTION_OWNER } from '../../../common/constants';
-import { getEmptyCellValue } from '../empty_value';
 import { useKibana } from '../../common/lib/kibana';
 import { AllCasesList } from './all_cases_list';
 import { useCasesColumns } from './use_cases_columns';
@@ -132,8 +131,6 @@ describe('AllCasesListGeneric', () => {
   const onRowClick = jest.fn();
   const updateCaseProperty = jest.fn();
 
-  const emptyTag = getEmptyCellValue().props.children;
-
   const defaultGetCases = {
     ...useGetCasesMockState,
   };
@@ -195,15 +192,18 @@ describe('AllCasesListGeneric', () => {
     expect(
       (await screen.findAllByTestId('case-user-profile-avatar-damaged_raccoon'))[0]
     ).toHaveTextContent('DR');
+
     expect((await screen.findAllByTestId('case-table-column-tags-coke'))[0]).toHaveAttribute(
       'title',
       useGetCasesMockState.data.cases[0].tags[0]
     );
-    expect(
-      (await screen.findAllByTestId('case-table-column-createdAt'))[0].querySelector(
-        '.euiToolTipAnchor'
-      )
-    ).toHaveTextContent(removeMsFromDate(useGetCasesMockState.data.cases[0].createdAt));
+
+    const createdAtColumn = screen.getAllByTestId('case-table-column-createdAt')[0];
+
+    within(createdAtColumn).getByText(
+      removeMsFromDate(useGetCasesMockState.data.cases[0].createdAt)
+    );
+
     expect(await screen.findByTestId('case-table-case-count')).toHaveTextContent(
       `Showing 10 of ${useGetCasesMockState.data.total} cases`
     );
@@ -261,15 +261,10 @@ describe('AllCasesListGeneric', () => {
     renderWithTestingProviders(<AllCasesList />);
 
     const checkIt = async (columnName: string, key: number) => {
-      const column = (await screen.findByTestId('cases-table')).querySelectorAll(
-        'tbody .euiTableRowCell'
-      );
+      const column = screen.getByText(columnName);
 
-      expect(column[key].querySelector('.euiTableRowCell--hideForDesktop')).toHaveTextContent(
-        columnName
-      );
-
-      expect(column[key].querySelector('span')).toHaveTextContent(emptyTag);
+      expect(column).toBeInTheDocument();
+      expect(within(column).getByText('-')).toBeInTheDocument();
     };
 
     const { result } = renderHook(() => useCasesColumns(defaultColumnArgs), {

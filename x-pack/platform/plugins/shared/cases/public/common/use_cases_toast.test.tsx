@@ -12,7 +12,7 @@ import { alertComment, basicComment, mockCase } from '../containers/mock';
 import React from 'react';
 import userEvent from '@testing-library/user-event';
 import type { SupportedCaseAttachment } from '../types';
-import { screen, renderHook } from '@testing-library/react';
+import { screen, renderHook, getByTestId, queryByTestId } from '@testing-library/react';
 import { OWNER_INFO } from '../../common/constants';
 import { useApplication } from './lib/kibana/use_application';
 
@@ -48,6 +48,7 @@ describe('Use cases toast hook', () => {
     const mockParams = successMock.mock.calls[0][0];
     const el = document.createElement('div');
     mockParams.text(el);
+    // eslint-disable-next-line testing-library/prefer-screen-queries
     const button = getByTestId(el, 'toaster-content-case-view-link');
     await userEvent.click(button);
   }
@@ -294,6 +295,7 @@ describe('Use cases toast hook', () => {
         const mockParams = successMock.mock.calls[0][0];
         const el = document.createElement('div');
         mockParams.text(el);
+        // eslint-disable-next-line testing-library/prefer-screen-queries
         const button = queryByTestId(el, 'toaster-content-case-view-link');
 
         expect(button).toBeNull();

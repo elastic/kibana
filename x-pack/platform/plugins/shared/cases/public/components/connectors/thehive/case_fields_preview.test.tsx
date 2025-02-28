@@ -25,7 +25,7 @@ describe('TheHive Fields: Preview', () => {
   it('renders all fields correctly', () => {
     renderWithTestingProviders(<FieldsPreview connector={theHiveConnector} fields={fields} />);
 
-    const getByText = createQueryWithMarkup(screen.getByText);
-    expect(getByText('TLP: GREEN')).toBeInTheDocument();
+    const getByTextWithMarkup = createQueryWithMarkup(screen.getByText);
+    expect(getByTextWithMarkup('TLP: GREEN')).toBeInTheDocument();
   });
 });

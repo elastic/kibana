@@ -119,9 +119,9 @@ describe('useDeleteComment', () => {
         caseId: basicCaseId,
         commentId,
       });
-
-      expect(addError).toHaveBeenCalled();
-      expect(result.current.isError).toBe(true);
     });
+
+    expect(addError).toHaveBeenCalled();
+    expect(result.current.isError).toBe(true);
   });
 });

@@ -43,16 +43,16 @@ describe('ServiceNowITSM Fields: Preview', () => {
   it('renders all fields correctly', () => {
     renderWithTestingProviders(<FieldsPreview connector={connector} fields={fields} />);
 
-    const getByText = createQueryWithMarkup(screen.getByText);
+    const getByTextWithMarkup = createQueryWithMarkup(screen.getByText);
 
-    expect(getByText('Destination IPs: Yes')).toBeInTheDocument();
-    expect(getByText('Source IPs: Yes')).toBeInTheDocument();
-    expect(getByText('Malware URLs: Yes')).toBeInTheDocument();
-    expect(getByText('Malware Hashes: Yes')).toBeInTheDocument();
-    expect(getByText('Priority: 2 - High')).toBeInTheDocument();
-    expect(getByText('Category: Denial of Service')).toBeInTheDocument();
-    expect(getByText('Subcategory: Inbound or outbound')).toBeInTheDocument();
-    expect(getByText('Additional Fields:')).toBeInTheDocument();
-    expect(getByText('{"foo": "bar"}')).toBeInTheDocument();
+    expect(getByTextWithMarkup('Destination IPs: Yes')).toBeInTheDocument();
+    expect(getByTextWithMarkup('Source IPs: Yes')).toBeInTheDocument();
+    expect(getByTextWithMarkup('Malware URLs: Yes')).toBeInTheDocument();
+    expect(getByTextWithMarkup('Malware Hashes: Yes')).toBeInTheDocument();
+    expect(getByTextWithMarkup('Priority: 2 - High')).toBeInTheDocument();
+    expect(getByTextWithMarkup('Category: Denial of Service')).toBeInTheDocument();
+    expect(getByTextWithMarkup('Subcategory: Inbound or outbound')).toBeInTheDocument();
+    expect(getByTextWithMarkup('Additional Fields:')).toBeInTheDocument();
+    expect(getByTextWithMarkup('{"foo": "bar"}')).toBeInTheDocument();
   });
 });

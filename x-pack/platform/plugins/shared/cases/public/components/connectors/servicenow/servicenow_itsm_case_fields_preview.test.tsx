@@ -41,14 +41,14 @@ describe('ServiceNowITSM Fields: Preview', () => {
   it('renders all fields correctly', () => {
     renderWithTestingProviders(<FieldsPreview connector={connector} fields={fields} />);
 
-    const getByText = createQueryWithMarkup(screen.getByText);
+    const getByTextWithMarkup = createQueryWithMarkup(screen.getByText);
 
-    expect(getByText('Urgency: 2 - High')).toBeInTheDocument();
-    expect(getByText('Severity: 1 - Critical')).toBeInTheDocument();
-    expect(getByText('Impact: 3 - Moderate')).toBeInTheDocument();
-    expect(getByText('Category: Denial of Service')).toBeInTheDocument();
-    expect(getByText('Subcategory: Inbound or outbound')).toBeInTheDocument();
-    expect(getByText('Additional Fields:')).toBeInTheDocument();
-    expect(getByText('{"foo": "bar"}')).toBeInTheDocument();
+    expect(getByTextWithMarkup('Urgency: 2 - High')).toBeInTheDocument();
+    expect(getByTextWithMarkup('Severity: 1 - Critical')).toBeInTheDocument();
+    expect(getByTextWithMarkup('Impact: 3 - Moderate')).toBeInTheDocument();
+    expect(getByTextWithMarkup('Category: Denial of Service')).toBeInTheDocument();
+    expect(getByTextWithMarkup('Subcategory: Inbound or outbound')).toBeInTheDocument();
+    expect(getByTextWithMarkup('Additional Fields:')).toBeInTheDocument();
+    expect(getByTextWithMarkup('{"foo": "bar"}')).toBeInTheDocument();
   });
 });

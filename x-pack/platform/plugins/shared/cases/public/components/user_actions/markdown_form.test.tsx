@@ -135,11 +135,11 @@ describe('UserActionMarkdown ', () => {
         );
       };
 
-      const { container } = renderWithTestingProviders(<TestComponent />);
+      renderWithTestingProviders(<TestComponent />);
       expect(screen.getByTestId('editable-markdown-form')).toBeTruthy();
 
       // append content and save
-      await userEvent.type(container.querySelector('textarea')!, appendContent);
+      await userEvent.type(screen.getByTestId('euiMarkdownEditorTextArea')!, appendContent);
       await userEvent.click(screen.getByTestId('editable-save-markdown'));
 
       // wait for the state to update
@@ -155,8 +155,8 @@ describe('UserActionMarkdown ', () => {
       await userEvent.click(screen.getByTestId('test-button'));
 
       // this is the correct behaviour. The textarea holds the new content
-      expect(container.querySelector('textarea')!.value).toEqual(newContent);
-      expect(container.querySelector('textarea')!.value).not.toEqual(oldContent);
+      expect(screen.getByTestId('euiMarkdownEditorTextArea').textContent).toEqual(newContent);
+      expect(screen.getByTestId('euiMarkdownEditorTextArea').textContent).not.toEqual(oldContent);
     });
   });
 });

@@ -51,10 +51,10 @@ describe('Jira Fields: Preview', () => {
   it('renders all fields correctly', () => {
     renderWithTestingProviders(<FieldsPreview connector={connector} fields={fields} />);
 
-    const getByText = createQueryWithMarkup(screen.getByText);
+    const getByTextWithMarkup = createQueryWithMarkup(screen.getByText);
 
-    expect(getByText('Issue type: Task')).toBeInTheDocument();
-    expect(getByText('Parent issue: Parent Task')).toBeInTheDocument();
-    expect(getByText('Priority: High')).toBeInTheDocument();
+    expect(getByTextWithMarkup('Issue type: Task')).toBeInTheDocument();
+    expect(getByTextWithMarkup('Parent issue: Parent Task')).toBeInTheDocument();
+    expect(getByTextWithMarkup('Priority: High')).toBeInTheDocument();
   });
 });

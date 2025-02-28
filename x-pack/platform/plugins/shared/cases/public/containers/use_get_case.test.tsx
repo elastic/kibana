@@ -50,7 +50,8 @@ describe('Use get case hook', () => {
         caseId: 'case-1',
         signal: expect.any(AbortSignal),
       });
-      expect(addError).toHaveBeenCalled();
     });
+
+    expect(addError).toHaveBeenCalled();
   });
 });

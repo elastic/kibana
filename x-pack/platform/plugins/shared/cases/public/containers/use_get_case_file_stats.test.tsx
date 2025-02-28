@@ -5,10 +5,11 @@
  * 2.0.
  */
 
+import React from 'react';
 import { waitFor, renderHook } from '@testing-library/react';
+import { createMockFilesClient } from '@kbn/shared-ux-file-mocks';
 
 import { basicCase } from './mock';
-
 import { TestProviders, mockedTestProvidersOwner } from '../common/mock';
 import { useToasts } from '../common/lib/kibana';
 import { useGetCaseFileStats } from './use_get_case_file_stats';
@@ -33,27 +34,33 @@ describe('useGetCaseFileStats', () => {
   });
 
   it('calls filesClient.list with correct arguments', async () => {
+    const filesClient = createMockFilesClient();
+
     renderHook(() => useGetCaseFileStats(hookParams), {
-      wrapper: TestProviders,
+      wrapper: (props) => <TestProviders {...props} filesClient={filesClient} />,
     });
-    await waitFor(() =>
-      expect(appMockRender.getFilesClient().list).toHaveBeenCalledWith(expectedCallParams)
-    );
+
+    await waitFor(() => expect(filesClient.list).toHaveBeenCalledWith(expectedCallParams));
   });
 
   it('shows an error toast when filesClient.list throws', async () => {
+    const filesClient = createMockFilesClient();
     const addError = jest.fn();
     (useToasts as jest.Mock).mockReturnValue({ addError });
 
-    appMockRender.getFilesClient().list = jest.fn().mockImplementation(() => {
+    filesClient.list = jest.fn().mockImplementation(() => {
       throw new Error('Something went wrong');
     });
 
     renderHook(() => useGetCaseFileStats(hookParams), {
-      wrapper: TestProviders,
+      wrapper: (props) => <TestProviders {...props} filesClient={filesClient} />,
     });
+
     await waitFor(() => {
-      expect(appMockRender.getFilesClient().list).toHaveBeenCalledWith(expectedCallParams);
+      expect(filesClient.list).toHaveBeenCalledWith(expectedCallParams);
+    });
+
+    await waitFor(() => {
       expect(addError).toHaveBeenCalled();
     });
   });

@@ -8,21 +8,21 @@
 /* eslint-disable no-console */
 
 import type { ReactElement } from 'react';
-import React, { useMemo } from 'react';
+import React, { useMemo, useCallback } from 'react';
 import { MemoryRouter } from 'react-router-dom';
 import { render } from '@testing-library/react';
 import type { RenderOptions } from '@testing-library/react';
 import type { ILicense } from '@kbn/licensing-plugin/public';
-import type { ScopedFilesClient } from '@kbn/files-plugin/public';
+import type { FilesClient, ScopedFilesClient } from '@kbn/files-plugin/public';
 import { createMockFilesClient } from '@kbn/shared-ux-file-mocks';
 import { QueryClient } from '@tanstack/react-query';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { FilesContext } from '@kbn/shared-ux-file-context';
-import type { DeeplyMockedKeys } from '@kbn/utility-types-jest';
 import { coreMock } from '@kbn/core/public/mocks';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 
 import type { CoreStart } from '@kbn/core/public';
+import type { BaseFilesClient } from '@kbn/shared-ux-file-types';
 import type { CasesFeatures, CasesPermissions } from '../../../common/ui/types';
 import type { ReleasePhase } from '../../components/types';
 import { SECURITY_SOLUTION_OWNER } from '../../../common/constants';
@@ -32,6 +32,7 @@ import { createStartServicesMock } from '../lib/kibana/kibana_react.mock';
 import { ExternalReferenceAttachmentTypeRegistry } from '../../client/attachment_framework/external_reference_registry';
 import { PersistableStateAttachmentTypeRegistry } from '../../client/attachment_framework/persistable_state_registry';
 import { allCasesPermissions } from './permissions';
+import type { CasesPublicStartDependencies } from '../../types';
 
 interface TestProviderProps {
   children: React.ReactNode;
@@ -42,17 +43,16 @@ interface TestProviderProps {
   externalReferenceAttachmentTypeRegistry?: ExternalReferenceAttachmentTypeRegistry;
   persistableStateAttachmentTypeRegistry?: PersistableStateAttachmentTypeRegistry;
   license?: ILicense;
-  coreStart?: CoreStart;
+  services?: CasesPublicStartDependencies;
   queryClient?: QueryClient;
+  coreStart?: CoreStart;
+  filesClient?: BaseFilesClient;
 }
 
 window.scrollTo = jest.fn();
 
-const mockGetFilesClient = () => {
-  const mockedFilesClient = createMockFilesClient() as unknown as DeeplyMockedKeys<
-    ScopedFilesClient<unknown>
-  >;
-
+const mockGetFilesClient = (): (() => BaseFilesClient) => {
+  const mockedFilesClient = createMockFilesClient();
   mockedFilesClient.getFileKind.mockImplementation(() => ({
     id: 'test',
     maxSizeBytes: 10000,
@@ -89,10 +89,16 @@ const TestProvidersComponent: React.FC<TestProviderProps> = ({
   persistableStateAttachmentTypeRegistry,
   license,
   coreStart,
+  services,
   queryClient,
+  filesClient,
 }) => {
   const finalCoreStart = useMemo(() => coreStart ?? coreMock.createStart(), [coreStart]);
-  const services = useMemo(() => createStartServicesMock({ license }), [license]);
+  const finalServices = useMemo(
+    () => ({ ...createStartServicesMock({ license }), ...coreStart, ...services }),
+    [coreStart, license, services]
+  );
+
   const defaultQueryClient = useMemo(() => createTestQueryClient(), []);
 
   const finalQueryClient = useMemo(
@@ -100,9 +106,16 @@ const TestProvidersComponent: React.FC<TestProviderProps> = ({
     [defaultQueryClient, queryClient]
   );
 
-  const getFilesClient = useMemo(() => mockGetFilesClient(), []);
   const defaultPermissions = useMemo(() => allCasesPermissions(), []);
-  const filesClient = useMemo(() => createMockFilesClient(), []);
+  const finalFilesClient = useMemo(
+    () => filesClient ?? mockGetFilesClient(),
+    [filesClient]
+  ) as FilesClient;
+
+  const getFilesClientFinal = useCallback(
+    () => finalFilesClient as unknown as ScopedFilesClient,
+    [finalFilesClient]
+  );
 
   const defaultExternalReferenceAttachmentTypeRegistry = useMemo(
     () => new ExternalReferenceAttachmentTypeRegistry(),
@@ -124,7 +137,7 @@ const TestProvidersComponent: React.FC<TestProviderProps> = ({
       owner: owner ?? mockedTestProvidersOwner,
       permissions: permissions ?? defaultPermissions,
       releasePhase: releasePhase ?? 'ga',
-      getFilesClient,
+      getFilesClient: getFilesClientFinal,
     }),
     [
       defaultExternalReferenceAttachmentTypeRegistry,
@@ -132,7 +145,7 @@ const TestProvidersComponent: React.FC<TestProviderProps> = ({
       defaultPersistableStateAttachmentTypeRegistry,
       externalReferenceAttachmentTypeRegistry,
       features,
-      getFilesClient,
+      getFilesClientFinal,
       owner,
       permissions,
       persistableStateAttachmentTypeRegistry,
@@ -142,10 +155,10 @@ const TestProvidersComponent: React.FC<TestProviderProps> = ({
 
   return (
     <KibanaRenderContextProvider {...finalCoreStart}>
-      <KibanaContextProvider services={services}>
+      <KibanaContextProvider services={finalServices}>
         <MemoryRouter>
           <CasesProvider value={casesProviderValue} queryClient={finalQueryClient}>
-            <FilesContext client={filesClient}>{children}</FilesContext>
+            <FilesContext client={finalFilesClient}>{children}</FilesContext>
           </CasesProvider>
         </MemoryRouter>
       </KibanaContextProvider>
