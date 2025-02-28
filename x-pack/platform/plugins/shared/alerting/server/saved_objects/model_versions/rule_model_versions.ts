@@ -20,6 +20,31 @@ export const ruleModelVersions: SavedObjectsModelVersionMap = {
       forwardCompatibility: rawRuleSchemaV1.extends({}, { unknowns: 'ignore' }),
       create: rawRuleSchemaV1,
     },
+    // As there were previous migrations defined, we will put the first
+    // encrtyption defintion into the first model version.
+    encryptionDefinition: {
+      attributesToEncrypt: new Set(['apiKey']),
+      attributesToIncludeInAAD: new Set([
+        'enabled',
+        'name',
+        'tags',
+        'alertTypeId',
+        'consumer',
+        'legacyId',
+        'schedule',
+        'actions',
+        'params',
+        'mapped_params',
+        'createdBy',
+        'createdAt',
+        'apiKeyOwner',
+        'apiKeyCreatedByUser',
+        'throttle',
+        'notifyWhen',
+        'meta',
+        'alertDelay',
+      ]),
+    },
   },
   '2': {
     changes: [],

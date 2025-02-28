@@ -25,4 +25,10 @@ export const syntheticsParamSavedObjectType: SavedObjectsType = {
     importableAndExportable: false,
     icon: 'uptimeApp',
   },
+  encryption: {
+    definition: {
+      attributesToEncrypt: SYNTHETICS_SECRET_ENCRYPTED_TYPE.attributesToEncrypt,
+      attributesToIncludeInAAD: SYNTHETICS_SECRET_ENCRYPTED_TYPE.attributesToIncludeInAAD,
+    },
+  },
 };

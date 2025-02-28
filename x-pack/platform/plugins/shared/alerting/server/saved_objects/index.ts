@@ -10,6 +10,7 @@ import type {
   SavedObject,
   SavedObjectsExportTransformContext,
   SavedObjectsServiceSetup,
+  SavedObjectsType,
 } from '@kbn/core/server';
 import { EncryptedSavedObjectsPluginSetup } from '@kbn/encrypted-saved-objects-plugin/server';
 import { MigrateFunctionsObject } from '@kbn/kibana-utils-plugin/common';
@@ -104,7 +105,7 @@ export function setupSavedObjects(
   isPreconfigured: (connectorId: string) => boolean,
   getSearchSourceMigrations: () => MigrateFunctionsObject
 ) {
-  savedObjects.registerType({
+  const ruleSavedObjectType: SavedObjectsType = {
     name: RULE_SAVED_OBJECT_TYPE,
     indexPattern: ALERTING_CASES_SAVED_OBJECT_INDEX,
     hidden: true,
@@ -134,9 +135,10 @@ export function setupSavedObjects(
       },
     },
     modelVersions: ruleModelVersions,
-  });
+  };
+  savedObjects.registerType(ruleSavedObjectType);
 
-  savedObjects.registerType({
+  const apiKeyPendingInvalidationSavedObjectType: SavedObjectsType = {
     name: API_KEY_PENDING_INVALIDATION_TYPE,
     indexPattern: ALERTING_CASES_SAVED_OBJECT_INDEX,
     hidden: true,
@@ -151,8 +153,15 @@ export function setupSavedObjects(
         },
       },
     },
+    encryption: {
+      definition: {
+        attributesToEncrypt: new Set(['apiKeyId']),
+        attributesToIncludeInAAD: new Set(['createdAt']),
+      },
+    },
     modelVersions: apiKeyPendingInvalidationModelVersions,
-  });
+  };
+  savedObjects.registerType(apiKeyPendingInvalidationSavedObjectType);
 
   savedObjects.registerType({
     name: RULES_SETTINGS_SAVED_OBJECT_TYPE,
@@ -172,7 +181,7 @@ export function setupSavedObjects(
     modelVersions: maintenanceWindowModelVersions,
   });
 
-  savedObjects.registerType({
+  const adHocRunSavedObjectType: SavedObjectsType = {
     name: AD_HOC_RUN_SAVED_OBJECT_TYPE,
     indexPattern: ALERTING_CASES_SAVED_OBJECT_INDEX,
     hidden: true,
@@ -211,32 +220,49 @@ export function setupSavedObjects(
     management: {
       importableAndExportable: false,
     },
+    encryption: {
+      definition: {
+        attributesToEncrypt: new Set(AdHocRunAttributesToEncrypt),
+        attributesToIncludeInAAD: new Set(AdHocRunAttributesIncludedInAAD),
+      },
+    },
     modelVersions: adHocRunParamsModelVersions,
-  });
+  };
+  savedObjects.registerType(adHocRunSavedObjectType);
 
   // Encrypted attributes
-  encryptedSavedObjects.registerType({
-    type: RULE_SAVED_OBJECT_TYPE,
-    /**
-     * We disable enforcing random SO IDs for the rule SO
-     * to allow users creating rules with a predefined ID.
-     */
-    enforceRandomId: false,
-    attributesToEncrypt: new Set(RuleAttributesToEncrypt),
-    attributesToIncludeInAAD: new Set(RuleAttributesIncludedInAAD),
-  });
+
+  // The replacements below are just here to test out how the future ESO service will convert
+  // the augmented SO type definitions into CES encryption schemas.
+  // Note: The parameter to the new encryptedSavedObjects.registerType2 function is the same as
+  // what is passed to the savedObjectsService.registerType function. In the end, only the
+  // savedObjectsService function will be needed.
+
+  // encryptedSavedObjects.registerType({
+  //   type: RULE_SAVED_OBJECT_TYPE,
+  //   /**
+  //    * We disable enforcing random SO IDs for the rule SO
+  //    * to allow users creating rules with a predefined ID.
+  //    */
+  //   enforceRandomId: false,
+  //   attributesToEncrypt: new Set(RuleAttributesToEncrypt),
+  //   attributesToIncludeInAAD: new Set(RuleAttributesIncludedInAAD),
+  // });
+  encryptedSavedObjects.registerType2(ruleSavedObjectType);
 
   // Encrypted attributes
-  encryptedSavedObjects.registerType({
-    type: API_KEY_PENDING_INVALIDATION_TYPE,
-    attributesToEncrypt: new Set(['apiKeyId']),
-    attributesToIncludeInAAD: new Set(['createdAt']),
-  });
+  // encryptedSavedObjects.registerType({
+  //   type: API_KEY_PENDING_INVALIDATION_TYPE,
+  //   attributesToEncrypt: new Set(['apiKeyId']),
+  //   attributesToIncludeInAAD: new Set(['createdAt']),
+  // });
+  encryptedSavedObjects.registerType2(apiKeyPendingInvalidationSavedObjectType);
 
   // Encrypted attributes
-  encryptedSavedObjects.registerType({
-    type: AD_HOC_RUN_SAVED_OBJECT_TYPE,
-    attributesToEncrypt: new Set(AdHocRunAttributesToEncrypt),
-    attributesToIncludeInAAD: new Set(AdHocRunAttributesIncludedInAAD),
-  });
+  // encryptedSavedObjects.registerType({
+  //   type: AD_HOC_RUN_SAVED_OBJECT_TYPE,
+  //   attributesToEncrypt: new Set(AdHocRunAttributesToEncrypt),
+  //   attributesToIncludeInAAD: new Set(AdHocRunAttributesIncludedInAAD),
+  // });
+  encryptedSavedObjects.registerType2(adHocRunSavedObjectType);
 }

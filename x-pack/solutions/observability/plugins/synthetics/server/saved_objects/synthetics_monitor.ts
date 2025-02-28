@@ -268,6 +268,12 @@ export const getSyntheticsMonitorSavedObjectType = (
             },
           },
         ],
+        // As there were previous migrations defined, we will put the first
+        // encrtyption defintion into the first model version.
+        encryptionDefinition: {
+          attributesToEncrypt: SYNTHETICS_MONITOR_ENCRYPTED_TYPE.attributesToEncrypt,
+          attributesToIncludeInAAD: SYNTHETICS_MONITOR_ENCRYPTED_TYPE.attributesToIncludeInAAD,
+        },
       },
     },
   };

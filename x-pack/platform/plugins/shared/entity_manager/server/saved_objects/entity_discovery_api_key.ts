@@ -23,4 +23,10 @@ export const EntityDiscoveryApiKeyType: SavedObjectsType = {
     importableAndExportable: false,
     displayName: 'Entity discovery API key',
   },
+  encryption: {
+    definition: {
+      attributesToEncrypt: new Set(['apiKey']),
+      attributesToIncludeInAAD: new Set(['id', 'name']),
+    },
+  },
 };

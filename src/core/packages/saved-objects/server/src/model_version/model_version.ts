@@ -9,6 +9,7 @@
 
 import type { SavedObjectsModelVersionSchemaDefinitions } from './schemas';
 import type { SavedObjectsModelChange } from './model_change';
+import { SavedObjectsEncryptionDefinition } from '../saved_objects_encryption';
 
 /**
  * Represents a model version of a given saved object type.
@@ -77,6 +78,11 @@ export interface SavedObjectsModelVersion {
    * Schemas are used to validate / convert the shape and/or content of the documents at various stages of their usages.
    */
   schemas?: SavedObjectsModelVersionSchemaDefinitions;
+
+  /**
+   * The encryption defintion associated with this model version
+   */
+  encryptionDefinition?: SavedObjectsEncryptionDefinition;
 }
 
 /**

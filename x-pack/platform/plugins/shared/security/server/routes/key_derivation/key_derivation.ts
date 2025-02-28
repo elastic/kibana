@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { schema } from '@kbn/config-schema';
 import * as crypto from 'crypto';
+
+import { schema } from '@kbn/config-schema';
 
 import type { RouteDefinitionParams } from '..';
 import { wrapIntoCustomErrorResponse } from '../../errors';

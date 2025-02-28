@@ -15,6 +15,7 @@ import type { SavedObjectsTypeManagementDefinition } from './saved_objects_manag
 import type { SavedObjectsValidationMap } from './validation';
 import type { SavedObjectMigrationMap } from './migration';
 import type { SavedObjectsTypeMappingDefinition } from './mapping_definition';
+import type { SavedObjectsTypeEncryptionOptions } from './saved_objects_encryption';
 import type {
   SavedObjectsModelVersionMap,
   SavedObjectsModelVersionMapProvider,
@@ -149,6 +150,8 @@ export interface SavedObjectsType<Attributes = any> {
    * An optional {@link SavedObjectsTypeManagementDefinition | saved objects management section} definition for the type.
    */
   management?: SavedObjectsTypeManagementDefinition<Attributes>;
+
+  encryption?: SavedObjectsTypeEncryptionOptions;
 
   /**
    * A map of model versions associated with this type.

@@ -104,6 +104,321 @@ import { backfillAgentPolicyToV4 } from './model_versions/agent_policy_v4';
 import { backfillOutputPolicyToV7 } from './model_versions/outputs';
 import { packagePolicyV17AdvancedFieldsForEndpointV818 } from './model_versions/security_solution/v17_advanced_package_policy_fields';
 
+export const OUTPUT_INCLUDE_AAD_FIELDS = new Set([
+  'service_token',
+  'shipper',
+  'allow_edit',
+  'broker_ack_reliability',
+  'broker_buffer_size',
+  'channel_buffer_size',
+]);
+
+export const OUTPUT_ENCRYPTED_FIELDS = new Set([
+  { key: 'ssl', dangerouslyExposeValue: true },
+  { key: 'password', dangerouslyExposeValue: true },
+]);
+
+// These consts wouldeventually be moved back inline in return of the getSavedObjectTypes
+// function below. They were extracted here just for the sake of ease in reusing the
+// definitions in the eso registerType2 function.
+const outputSavedObjectType: SavedObjectsType = {
+  name: OUTPUT_SAVED_OBJECT_TYPE,
+  indexPattern: INGEST_SAVED_OBJECT_INDEX,
+  hidden: false,
+  namespaceType: 'agnostic',
+  management: {
+    importableAndExportable: false,
+  },
+  mappings: {
+    dynamic: false,
+    properties: {
+      output_id: { type: 'keyword', index: false },
+      name: { type: 'keyword' },
+      type: { type: 'keyword' },
+      is_default: { type: 'boolean' },
+      is_default_monitoring: { type: 'boolean' },
+      hosts: { type: 'keyword' },
+      ca_sha256: { type: 'keyword', index: false },
+      ca_trusted_fingerprint: { type: 'keyword', index: false },
+      service_token: { type: 'keyword', index: false },
+      config: { type: 'flattened' },
+      config_yaml: { type: 'text' },
+      is_preconfigured: { type: 'boolean', index: false },
+      is_internal: { type: 'boolean', index: false },
+      ssl: { type: 'binary' },
+      proxy_id: { type: 'keyword' },
+      shipper: {
+        dynamic: false, // we aren't querying or aggregating over this data, so we don't need to specify any fields
+        properties: {},
+      },
+      allow_edit: { enabled: false },
+      version: { type: 'keyword' },
+      key: { type: 'keyword' },
+      compression: { type: 'keyword' },
+      compression_level: { type: 'integer' },
+      client_id: { type: 'keyword' },
+      auth_type: { type: 'keyword' },
+      connection_type: { type: 'keyword' },
+      username: { type: 'keyword' },
+      password: { type: 'text', index: false },
+      sasl: {
+        dynamic: false,
+        properties: {
+          mechanism: { type: 'text' },
+        },
+      },
+      partition: { type: 'keyword' },
+      random: {
+        dynamic: false,
+        properties: {
+          group_events: { type: 'integer' },
+        },
+      },
+      round_robin: {
+        dynamic: false,
+        properties: {
+          group_events: { type: 'integer' },
+        },
+      },
+      hash: {
+        dynamic: false,
+        properties: {
+          hash: { type: 'text' },
+          random: { type: 'boolean' },
+        },
+      },
+      topic: { type: 'text', index: false },
+      topics: {
+        dynamic: false,
+        properties: {
+          topic: { type: 'keyword' },
+          when: {
+            dynamic: false,
+            properties: {
+              type: { type: 'text' },
+              condition: { type: 'text' },
+            },
+          },
+        },
+      },
+      headers: {
+        dynamic: false,
+        properties: {
+          key: { type: 'text' },
+          value: { type: 'text' },
+        },
+      },
+      timeout: { type: 'integer' },
+      broker_timeout: { type: 'integer' },
+      broker_ack_reliability: { type: 'text' },
+      broker_buffer_size: { type: 'integer' },
+      required_acks: { type: 'integer' },
+      channel_buffer_size: { type: 'integer' },
+      secrets: {
+        dynamic: false,
+        properties: {
+          password: {
+            dynamic: false,
+            properties: {
+              id: { type: 'keyword' },
+            },
+          },
+          ssl: {
+            dynamic: false,
+            properties: {
+              key: {
+                dynamic: false,
+                properties: {
+                  id: { type: 'keyword' },
+                },
+              },
+            },
+          },
+          service_token: {
+            dynamic: false,
+            properties: {
+              id: { type: 'keyword' },
+            },
+          },
+        },
+      },
+      preset: {
+        type: 'keyword',
+        index: false,
+      },
+    },
+  },
+  modelVersions: {
+    '1': {
+      changes: [
+        {
+          type: 'mappings_deprecation',
+          deprecatedMappings: [
+            'broker_ack_reliability',
+            'broker_buffer_size',
+            'channel_buffer_size',
+          ],
+        },
+        {
+          type: 'data_backfill',
+          backfillFn: migrateOutputToV8100,
+        },
+      ],
+      schemas: {
+        forwardCompatibility: migrateOutputEvictionsFromV8100,
+      },
+      // As there were previous migrations defined, we will put the first
+      // encrtyption defintion into the first model version.
+      encryptionDefinition: {
+        attributesToEncrypt: OUTPUT_ENCRYPTED_FIELDS,
+        attributesToIncludeInAAD: OUTPUT_INCLUDE_AAD_FIELDS,
+      },
+    },
+    '2': {
+      changes: [
+        {
+          type: 'mappings_addition',
+          addedMappings: {
+            service_token: { type: 'keyword', index: false },
+          },
+        },
+      ],
+    },
+    '3': {
+      changes: [
+        {
+          type: 'mappings_addition',
+          addedMappings: {
+            secrets: {
+              properties: {
+                service_token: {
+                  dynamic: false,
+                  properties: {
+                    id: { type: 'keyword' },
+                  },
+                },
+              },
+            },
+          },
+        },
+      ],
+    },
+    '4': {
+      changes: [
+        {
+          type: 'mappings_addition',
+          addedMappings: {
+            preset: {
+              type: 'keyword',
+              index: false,
+            },
+          },
+        },
+      ],
+    },
+    '5': {
+      changes: [
+        {
+          type: 'mappings_addition',
+          addedMappings: {
+            is_internal: { type: 'boolean', index: false },
+          },
+        },
+      ],
+    },
+    '6': {
+      changes: [
+        {
+          type: 'mappings_addition',
+          addedMappings: {
+            topic: { type: 'text', index: false },
+          },
+        },
+      ],
+    },
+    '7': {
+      changes: [
+        {
+          type: 'mappings_deprecation',
+          deprecatedMappings: ['topics'],
+        },
+        {
+          type: 'data_backfill',
+          backfillFn: backfillOutputPolicyToV7,
+        },
+      ],
+    },
+    '8': {
+      changes: [
+        {
+          type: 'mappings_addition',
+          addedMappings: {},
+        },
+      ],
+    },
+  },
+  migrations: {
+    '7.13.0': migrateOutputToV7130,
+    '8.0.0': migrateOutputToV800,
+  },
+};
+
+const messageSigningKeysSavedObjectType: SavedObjectsType = {
+  name: MESSAGE_SIGNING_KEYS_SAVED_OBJECT_TYPE,
+  indexPattern: INGEST_SAVED_OBJECT_INDEX,
+  hidden: true,
+  namespaceType: 'agnostic',
+  management: {
+    importableAndExportable: false,
+  },
+  mappings: {
+    dynamic: false,
+    properties: {},
+  },
+  encryption: {
+    definition: {
+      attributesToEncrypt: new Set(['passphrase']),
+      attributesToIncludeInAAD: new Set(['private_key', 'public_key', 'passphrase_plain']),
+    },
+  },
+};
+
+const uninstallTokensSavedObjectType: SavedObjectsType = {
+  name: UNINSTALL_TOKENS_SAVED_OBJECT_TYPE,
+  indexPattern: INGEST_SAVED_OBJECT_INDEX,
+  hidden: true,
+  namespaceType: 'agnostic',
+  management: {
+    importableAndExportable: false,
+  },
+  mappings: {
+    dynamic: false,
+    properties: {
+      policy_id: { type: 'keyword' },
+      token_plain: { type: 'keyword' },
+      namespaces: { type: 'keyword' },
+    },
+  },
+  encryption: {
+    definition: {
+      attributesToEncrypt: new Set(['token']),
+      attributesToIncludeInAAD: new Set(['policy_id', 'token_plain']),
+    },
+  },
+  modelVersions: {
+    '1': {
+      changes: [
+        {
+          type: 'mappings_addition',
+          addedMappings: {
+            namespaces: { type: 'keyword' },
+          },
+        },
+      ],
+    },
+  },
+};
+
 /*
  * Saved object types and mappings
  *
@@ -393,241 +708,7 @@ export const getSavedObjectTypes = (
         },
       },
     },
-    [OUTPUT_SAVED_OBJECT_TYPE]: {
-      name: OUTPUT_SAVED_OBJECT_TYPE,
-      indexPattern: INGEST_SAVED_OBJECT_INDEX,
-      hidden: false,
-      namespaceType: 'agnostic',
-      management: {
-        importableAndExportable: false,
-      },
-      mappings: {
-        dynamic: false,
-        properties: {
-          output_id: { type: 'keyword', index: false },
-          name: { type: 'keyword' },
-          type: { type: 'keyword' },
-          is_default: { type: 'boolean' },
-          is_default_monitoring: { type: 'boolean' },
-          hosts: { type: 'keyword' },
-          ca_sha256: { type: 'keyword', index: false },
-          ca_trusted_fingerprint: { type: 'keyword', index: false },
-          service_token: { type: 'keyword', index: false },
-          config: { type: 'flattened' },
-          config_yaml: { type: 'text' },
-          is_preconfigured: { type: 'boolean', index: false },
-          is_internal: { type: 'boolean', index: false },
-          ssl: { type: 'binary' },
-          proxy_id: { type: 'keyword' },
-          shipper: {
-            dynamic: false, // we aren't querying or aggregating over this data, so we don't need to specify any fields
-            properties: {},
-          },
-          allow_edit: { enabled: false },
-          version: { type: 'keyword' },
-          key: { type: 'keyword' },
-          compression: { type: 'keyword' },
-          compression_level: { type: 'integer' },
-          client_id: { type: 'keyword' },
-          auth_type: { type: 'keyword' },
-          connection_type: { type: 'keyword' },
-          username: { type: 'keyword' },
-          password: { type: 'text', index: false },
-          sasl: {
-            dynamic: false,
-            properties: {
-              mechanism: { type: 'text' },
-            },
-          },
-          partition: { type: 'keyword' },
-          random: {
-            dynamic: false,
-            properties: {
-              group_events: { type: 'integer' },
-            },
-          },
-          round_robin: {
-            dynamic: false,
-            properties: {
-              group_events: { type: 'integer' },
-            },
-          },
-          hash: {
-            dynamic: false,
-            properties: {
-              hash: { type: 'text' },
-              random: { type: 'boolean' },
-            },
-          },
-          topic: { type: 'text', index: false },
-          topics: {
-            dynamic: false,
-            properties: {
-              topic: { type: 'keyword' },
-              when: {
-                dynamic: false,
-                properties: {
-                  type: { type: 'text' },
-                  condition: { type: 'text' },
-                },
-              },
-            },
-          },
-          headers: {
-            dynamic: false,
-            properties: {
-              key: { type: 'text' },
-              value: { type: 'text' },
-            },
-          },
-          timeout: { type: 'integer' },
-          broker_timeout: { type: 'integer' },
-          broker_ack_reliability: { type: 'text' },
-          broker_buffer_size: { type: 'integer' },
-          required_acks: { type: 'integer' },
-          channel_buffer_size: { type: 'integer' },
-          secrets: {
-            dynamic: false,
-            properties: {
-              password: {
-                dynamic: false,
-                properties: {
-                  id: { type: 'keyword' },
-                },
-              },
-              ssl: {
-                dynamic: false,
-                properties: {
-                  key: {
-                    dynamic: false,
-                    properties: {
-                      id: { type: 'keyword' },
-                    },
-                  },
-                },
-              },
-              service_token: {
-                dynamic: false,
-                properties: {
-                  id: { type: 'keyword' },
-                },
-              },
-            },
-          },
-          preset: {
-            type: 'keyword',
-            index: false,
-          },
-        },
-      },
-      modelVersions: {
-        '1': {
-          changes: [
-            {
-              type: 'mappings_deprecation',
-              deprecatedMappings: [
-                'broker_ack_reliability',
-                'broker_buffer_size',
-                'channel_buffer_size',
-              ],
-            },
-            {
-              type: 'data_backfill',
-              backfillFn: migrateOutputToV8100,
-            },
-          ],
-          schemas: {
-            forwardCompatibility: migrateOutputEvictionsFromV8100,
-          },
-        },
-        '2': {
-          changes: [
-            {
-              type: 'mappings_addition',
-              addedMappings: {
-                service_token: { type: 'keyword', index: false },
-              },
-            },
-          ],
-        },
-        '3': {
-          changes: [
-            {
-              type: 'mappings_addition',
-              addedMappings: {
-                secrets: {
-                  properties: {
-                    service_token: {
-                      dynamic: false,
-                      properties: {
-                        id: { type: 'keyword' },
-                      },
-                    },
-                  },
-                },
-              },
-            },
-          ],
-        },
-        '4': {
-          changes: [
-            {
-              type: 'mappings_addition',
-              addedMappings: {
-                preset: {
-                  type: 'keyword',
-                  index: false,
-                },
-              },
-            },
-          ],
-        },
-        '5': {
-          changes: [
-            {
-              type: 'mappings_addition',
-              addedMappings: {
-                is_internal: { type: 'boolean', index: false },
-              },
-            },
-          ],
-        },
-        '6': {
-          changes: [
-            {
-              type: 'mappings_addition',
-              addedMappings: {
-                topic: { type: 'text', index: false },
-              },
-            },
-          ],
-        },
-        '7': {
-          changes: [
-            {
-              type: 'mappings_deprecation',
-              deprecatedMappings: ['topics'],
-            },
-            {
-              type: 'data_backfill',
-              backfillFn: backfillOutputPolicyToV7,
-            },
-          ],
-        },
-        '8': {
-          changes: [
-            {
-              type: 'mappings_addition',
-              addedMappings: {},
-            },
-          ],
-        },
-      },
-      migrations: {
-        '7.13.0': migrateOutputToV7130,
-        '8.0.0': migrateOutputToV800,
-      },
-    },
+    [OUTPUT_SAVED_OBJECT_TYPE]: outputSavedObjectType,
     [LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE]: {
       name: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
       indexPattern: INGEST_SAVED_OBJECT_INDEX,
@@ -1167,48 +1248,8 @@ export const getSavedObjectTypes = (
         },
       },
     },
-    [MESSAGE_SIGNING_KEYS_SAVED_OBJECT_TYPE]: {
-      name: MESSAGE_SIGNING_KEYS_SAVED_OBJECT_TYPE,
-      indexPattern: INGEST_SAVED_OBJECT_INDEX,
-      hidden: true,
-      namespaceType: 'agnostic',
-      management: {
-        importableAndExportable: false,
-      },
-      mappings: {
-        dynamic: false,
-        properties: {},
-      },
-    },
-    [UNINSTALL_TOKENS_SAVED_OBJECT_TYPE]: {
-      name: UNINSTALL_TOKENS_SAVED_OBJECT_TYPE,
-      indexPattern: INGEST_SAVED_OBJECT_INDEX,
-      hidden: true,
-      namespaceType: 'agnostic',
-      management: {
-        importableAndExportable: false,
-      },
-      mappings: {
-        dynamic: false,
-        properties: {
-          policy_id: { type: 'keyword' },
-          token_plain: { type: 'keyword' },
-          namespaces: { type: 'keyword' },
-        },
-      },
-      modelVersions: {
-        '1': {
-          changes: [
-            {
-              type: 'mappings_addition',
-              addedMappings: {
-                namespaces: { type: 'keyword' },
-              },
-            },
-          ],
-        },
-      },
-    },
+    [MESSAGE_SIGNING_KEYS_SAVED_OBJECT_TYPE]: messageSigningKeysSavedObjectType,
+    [UNINSTALL_TOKENS_SAVED_OBJECT_TYPE]: uninstallTokensSavedObjectType,
   };
 };
 
@@ -1222,37 +1263,33 @@ export function registerSavedObjects(
   });
 }
 
-export const OUTPUT_INCLUDE_AAD_FIELDS = new Set([
-  'service_token',
-  'shipper',
-  'allow_edit',
-  'broker_ack_reliability',
-  'broker_buffer_size',
-  'channel_buffer_size',
-]);
-
-export const OUTPUT_ENCRYPTED_FIELDS = new Set([
-  { key: 'ssl', dangerouslyExposeValue: true },
-  { key: 'password', dangerouslyExposeValue: true },
-]);
-
+// Encrypted saved objects
+// The replacements below are just here to test out how the future ESO service will convert
+// the augmented SO type definitions into CES encryption schemas.
+// Note: The parameter to the new encryptedSavedObjects.registerType2 function is the same as
+// what is passed to the savedObjectsService.registerType function. In the end, only the
+// savedObjectsService function will be needed.
 export function registerEncryptedSavedObjects(
   encryptedSavedObjects: EncryptedSavedObjectsPluginSetup
 ) {
-  encryptedSavedObjects.registerType({
-    type: OUTPUT_SAVED_OBJECT_TYPE,
-    attributesToEncrypt: OUTPUT_ENCRYPTED_FIELDS,
-    attributesToIncludeInAAD: OUTPUT_INCLUDE_AAD_FIELDS,
-  });
-  // Encrypted saved objects
-  encryptedSavedObjects.registerType({
-    type: MESSAGE_SIGNING_KEYS_SAVED_OBJECT_TYPE,
-    attributesToEncrypt: new Set(['passphrase']),
-    attributesToIncludeInAAD: new Set(['private_key', 'public_key', 'passphrase_plain']),
-  });
-  encryptedSavedObjects.registerType({
-    type: UNINSTALL_TOKENS_SAVED_OBJECT_TYPE,
-    attributesToEncrypt: new Set(['token']),
-    attributesToIncludeInAAD: new Set(['policy_id', 'token_plain']),
-  });
+  // encryptedSavedObjects.registerType({
+  //   type: OUTPUT_SAVED_OBJECT_TYPE,
+  //   attributesToEncrypt: OUTPUT_ENCRYPTED_FIELDS,
+  //   attributesToIncludeInAAD: OUTPUT_INCLUDE_AAD_FIELDS,
+  // });
+  encryptedSavedObjects.registerType2(outputSavedObjectType);
+
+  // encryptedSavedObjects.registerType({
+  //   type: MESSAGE_SIGNING_KEYS_SAVED_OBJECT_TYPE,
+  //   attributesToEncrypt: new Set(['passphrase']),
+  //   attributesToIncludeInAAD: new Set(['private_key', 'public_key', 'passphrase_plain']),
+  // });
+  encryptedSavedObjects.registerType2(messageSigningKeysSavedObjectType);
+
+  // encryptedSavedObjects.registerType({
+  //   type: UNINSTALL_TOKENS_SAVED_OBJECT_TYPE,
+  //   attributesToEncrypt: new Set(['token']),
+  //   attributesToIncludeInAAD: new Set(['policy_id', 'token_plain']),
+  // });
+  encryptedSavedObjects.registerType2(uninstallTokensSavedObjectType);
 }

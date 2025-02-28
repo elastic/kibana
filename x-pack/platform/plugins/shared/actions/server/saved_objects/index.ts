@@ -9,6 +9,7 @@ import type {
   SavedObject,
   SavedObjectsExportTransformContext,
   SavedObjectsServiceSetup,
+  SavedObjectsType,
 } from '@kbn/core/server';
 import { EncryptedSavedObjectsPluginSetup } from '@kbn/encrypted-saved-objects-plugin/server';
 import { getOldestIdleActionTask } from '@kbn/task-manager-plugin/server';
@@ -38,7 +39,7 @@ export function setupSavedObjects(
   taskManagerIndex: string,
   inMemoryConnectors: InMemoryConnector[]
 ) {
-  savedObjects.registerType({
+  const actionSavedObjectType: SavedObjectsType = {
     name: ACTION_SAVED_OBJECT_TYPE,
     indexPattern: ALERTING_CASES_SAVED_OBJECT_INDEX,
     hidden: true,
@@ -66,19 +67,20 @@ export function setupSavedObjects(
       },
     },
     modelVersions: connectorModelVersions,
-  });
-
+  };
+  savedObjects.registerType(actionSavedObjectType);
   // Encrypted attributes
   // - `secrets` properties will be encrypted
   // - `config` will be included in AAD
   // - everything else excluded from AAD
-  encryptedSavedObjects.registerType({
-    type: ACTION_SAVED_OBJECT_TYPE,
-    attributesToEncrypt: new Set(['secrets']),
-    attributesToIncludeInAAD: new Set(['actionTypeId', 'isMissingSecrets', 'config']),
-  });
+  // encryptedSavedObjects.registerType({
+  //   type: ACTION_SAVED_OBJECT_TYPE,
+  //   attributesToEncrypt: new Set(['secrets']),
+  //   attributesToIncludeInAAD: new Set(['actionTypeId', 'isMissingSecrets', 'config']),
+  // });
+  encryptedSavedObjects.registerType2(actionSavedObjectType);
 
-  savedObjects.registerType({
+  const actionTaskParamsSavedObjectType: SavedObjectsType = {
     name: ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE,
     indexPattern: ALERTING_CASES_SAVED_OBJECT_INDEX,
     hidden: true,
@@ -101,21 +103,23 @@ export function setupSavedObjects(
       };
     },
     modelVersions: actionTaskParamsModelVersions,
-  });
-  encryptedSavedObjects.registerType({
-    type: ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE,
-    attributesToEncrypt: new Set(['apiKey']),
-    attributesToIncludeInAAD: new Set([
-      'actionId',
-      'consumer',
-      'params',
-      'executionId',
-      'relatedSavedObjects',
-      'source',
-    ]),
-  });
+  };
+  savedObjects.registerType(actionTaskParamsSavedObjectType);
+  // encryptedSavedObjects.registerType({
+  //   type: ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE,
+  //   attributesToEncrypt: new Set(['apiKey']),
+  //   attributesToIncludeInAAD: new Set([
+  //     'actionId',
+  //     'consumer',
+  //     'params',
+  //     'executionId',
+  //     'relatedSavedObjects',
+  //     'source',
+  //   ]),
+  // });
+  encryptedSavedObjects.registerType2(actionTaskParamsSavedObjectType);
 
-  savedObjects.registerType({
+  const connectorTokenSavedObjectType: SavedObjectsType = {
     name: CONNECTOR_TOKEN_SAVED_OBJECT_TYPE,
     indexPattern: ALERTING_CASES_SAVED_OBJECT_INDEX,
     hidden: true,
@@ -124,18 +128,32 @@ export function setupSavedObjects(
     management: {
       importableAndExportable: false,
     },
+    encryption: {
+      definition: {
+        attributesToEncrypt: new Set(['token']),
+        attributesToIncludeInAAD: new Set([
+          'connectorId',
+          'tokenType',
+          'expiresAt',
+          'createdAt',
+          'updatedAt',
+        ]),
+        esoAADVersion: '1',
+      },
+    },
     modelVersions: connectorTokenModelVersions,
-  });
-
-  encryptedSavedObjects.registerType({
-    type: CONNECTOR_TOKEN_SAVED_OBJECT_TYPE,
-    attributesToEncrypt: new Set(['token']),
-    attributesToIncludeInAAD: new Set([
-      'connectorId',
-      'tokenType',
-      'expiresAt',
-      'createdAt',
-      'updatedAt',
-    ]),
-  });
+  };
+  savedObjects.registerType(connectorTokenSavedObjectType);
+  // encryptedSavedObjects.registerType({
+  //   type: CONNECTOR_TOKEN_SAVED_OBJECT_TYPE,
+  //   attributesToEncrypt: new Set(['token']),
+  //   attributesToIncludeInAAD: new Set([
+  //     'connectorId',
+  //     'tokenType',
+  //     'expiresAt',
+  //     'createdAt',
+  //     'updatedAt',
+  //   ]),
+  // });
+  encryptedSavedObjects.registerType2(connectorTokenSavedObjectType);
 }

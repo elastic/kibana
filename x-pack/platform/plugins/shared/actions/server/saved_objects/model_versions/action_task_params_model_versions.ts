@@ -15,6 +15,19 @@ export const actionTaskParamsModelVersions: SavedObjectsModelVersionMap = {
       forwardCompatibility: actionTaskParamsSchemaV1.extends({}, { unknowns: 'ignore' }),
       create: actionTaskParamsSchemaV1,
     },
+    // As there were previous migrations defined, we will put the first
+    // encrtyption defintion into the first model version.
+    encryptionDefinition: {
+      attributesToEncrypt: new Set(['apiKey']),
+      attributesToIncludeInAAD: new Set([
+        'actionId',
+        'consumer',
+        'params',
+        'executionId',
+        'relatedSavedObjects',
+        'source',
+      ]),
+    },
   },
   '2': {
     changes: [
