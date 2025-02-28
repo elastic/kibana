@@ -20,7 +20,7 @@ import {
 
 import { appContextService } from './app_context';
 
-import { deleteFleetServerHost, migrateSettingsToFleetServerHost } from './fleet_server_host';
+import { fleetServerHostService, migrateSettingsToFleetServerHost } from './fleet_server_host';
 import { agentPolicyService } from './agent_policy';
 import { getAgentsByKuery } from './agents';
 
@@ -28,15 +28,112 @@ jest.mock('./app_context');
 jest.mock('./agent_policy');
 jest.mock('./agents');
 
+jest.mock('./fleet_server_host', () => ({
+  ...jest.requireActual('./fleet_server_host'),
+  fleetServerHostService: {
+    list: jest.fn(),
+    get: jest.fn(),
+    create: jest.fn(),
+    update: jest.fn().mockResolvedValue({}),
+    delete: jest.fn(),
+  },
+}));
+
 const mockedAppContextService = appContextService as jest.Mocked<typeof appContextService>;
 mockedAppContextService.getSecuritySetup.mockImplementation(() => ({
   ...securityMock.createSetup(),
 }));
 
 mockedAppContextService.getExperimentalFeatures.mockReturnValue({} as any);
-
 let mockedLogger: jest.Mocked<Logger>;
 const mockedGetAgentsByKuery = getAgentsByKuery as jest.MockedFunction<typeof getAgentsByKuery>;
+
+function getMockedSoClient(options?: { id?: string; findHosts?: boolean; findSettings?: boolean }) {
+  const soClient = savedObjectsClientMock.create();
+  mockedAppContextService.getInternalUserSOClient.mockReturnValue(soClient);
+
+  soClient.create.mockImplementation(async (type, data, createOptions) => {
+    return {
+      id: createOptions?.id || 'generated-id',
+      type,
+      attributes: {},
+      references: [],
+    };
+  });
+
+  soClient.find.mockImplementation(({ type }) => {
+    if (type === FLEET_SERVER_HOST_SAVED_OBJECT_TYPE) {
+      if (options?.findHosts) {
+        return {
+          saved_objects: [
+            {
+              id: 'test123',
+              attributes: { name: 'fleetServerHost', host_urls: [], is_default: true },
+            },
+          ],
+        } as any;
+      }
+      return { saved_objects: [] } as any;
+    }
+
+    if (type === GLOBAL_SETTINGS_SAVED_OBJECT_TYPE) {
+      if (options?.findSettings) {
+        return {
+          saved_objects: [
+            {
+              attributes: {
+                fleet_server_hosts: ['https://fleetserver:8220'],
+              },
+            },
+          ],
+        } as any;
+      }
+
+      return {
+        saved_objects: [],
+      } as any;
+    }
+
+    if (type === PACKAGE_POLICY_SAVED_OBJECT_TYPE) {
+      return {
+        saved_objects: [
+          {
+            id: 'existing-package-policy',
+            type: 'ingest-package-policies',
+            score: 1,
+            references: [],
+            version: '1.0.0',
+            attributes: {
+              name: 'fleet-server',
+              description: '',
+              namespace: 'default',
+              enabled: true,
+              policy_id: 'fleet-server-id-1',
+              policy_ids: ['fleet-server-id-1'],
+              package: {
+                name: 'fleet-server',
+                title: 'Fleet Server',
+                version: '0.9.0',
+              },
+              inputs: [],
+            },
+          },
+        ],
+      } as any;
+    }
+
+    soClient.get.mockImplementation(async () => {
+      return {
+        id: 'test1',
+        attributes: {},
+      } as any;
+    });
+
+    throw new Error('Not mocked');
+  });
+
+  return soClient;
+}
 
 describe('migrateSettingsToFleetServerHost', () => {
   beforeEach(() => {
@@ -49,102 +146,22 @@ describe('migrateSettingsToFleetServerHost', () => {
   const esMock = elasticsearchServiceMock.createInternalClient();
 
   it('should not migrate settings if a default fleet server policy config exists', async () => {
-    const soClient = savedObjectsClientMock.create();
-
-    soClient.find.mockImplementation(({ type }) => {
-      if (type === FLEET_SERVER_HOST_SAVED_OBJECT_TYPE) {
-        return {
-          saved_objects: [
-            {
-              id: 'test123',
-              attributes: { name: 'fleetServerHost', host_urls: [], is_default: true },
-            },
-          ],
-        } as any;
-      }
-
-      throw new Error('Not mocked');
-    });
-
+    const soClient = getMockedSoClient({ id: DEFAULT_FLEET_SERVER_HOST_ID, findHosts: true });
     await migrateSettingsToFleetServerHost(soClient, esMock);
 
     expect(soClient.create).not.toBeCalled();
   });
 
-  it('should not migrate settings if there is not old settings', async () => {
-    const soClient = savedObjectsClientMock.create();
-    soClient.find.mockImplementation(({ type }) => {
-      if (type === FLEET_SERVER_HOST_SAVED_OBJECT_TYPE) {
-        return { saved_objects: [] } as any;
-      }
-
-      if (type === GLOBAL_SETTINGS_SAVED_OBJECT_TYPE) {
-        return {
-          saved_objects: [],
-        } as any;
-      }
-
-      throw new Error('Not mocked');
-    });
-
-    soClient.create.mockResolvedValue({
-      id: DEFAULT_FLEET_SERVER_HOST_ID,
-      attributes: {},
-    } as any);
+  it('should not migrate settings if there is no old settings', async () => {
+    const soClient = getMockedSoClient({ id: DEFAULT_FLEET_SERVER_HOST_ID });
+    mockedGetAgentsByKuery.mockResolvedValueOnce({ agents: [] } as any);
 
     await migrateSettingsToFleetServerHost(soClient, esMock);
     expect(soClient.create).not.toBeCalled();
   });
 
   it('should migrate settings to new saved object', async () => {
-    const soClient = savedObjectsClientMock.create();
-    soClient.find.mockImplementation(({ type }) => {
-      if (type === FLEET_SERVER_HOST_SAVED_OBJECT_TYPE) {
-        return { saved_objects: [] } as any;
-      }
-
-      if (type === GLOBAL_SETTINGS_SAVED_OBJECT_TYPE) {
-        return {
-          saved_objects: [
-            {
-              attributes: {
-                fleet_server_hosts: ['https://fleetserver:8220'],
-              },
-            },
-          ],
-        } as any;
-      }
-
-      if (type === PACKAGE_POLICY_SAVED_OBJECT_TYPE) {
-        return {
-          saved_objects: [
-            {
-              id: 'existing-package-policy',
-              type: 'ingest-package-policies',
-              score: 1,
-              references: [],
-              version: '1.0.0',
-              attributes: {
-                name: 'fleet-server',
-                description: '',
-                namespace: 'default',
-                enabled: true,
-                policy_id: 'fleet-server-id-1',
-                policy_ids: ['fleet-server-id-1'],
-                package: {
-                  name: 'fleet-server',
-                  title: 'Fleet Server',
-                  version: '0.9.0',
-                },
-                inputs: [],
-              },
-            },
-          ],
-        } as any;
-      }
-
-      throw new Error('Not mocked');
-    });
+    const soClient = getMockedSoClient({ findSettings: true });
 
     mockedGetAgentsByKuery.mockResolvedValueOnce({
       agents: [
@@ -171,12 +188,8 @@ describe('migrateSettingsToFleetServerHost', () => {
       ],
     } as any);
 
-    soClient.create.mockResolvedValue({
-      id: DEFAULT_FLEET_SERVER_HOST_ID,
-      attributes: {},
-    } as any);
-
     await migrateSettingsToFleetServerHost(soClient, esMock);
+
     expect(soClient.create).toBeCalledWith(
       FLEET_SERVER_HOST_SAVED_OBJECT_TYPE,
       expect.objectContaining({
@@ -190,57 +203,28 @@ describe('migrateSettingsToFleetServerHost', () => {
   });
 
   it('should not work if getEncryptedSavedObjectsSetup is not set', async () => {
-    const soClient = savedObjectsClientMock.create();
+    const soClient = getMockedSoClient({ findSettings: true });
+
     mockedAppContextService.getEncryptedSavedObjectsSetup.mockReturnValue({
       canEncrypt: false,
     } as any);
-
-    soClient.find.mockImplementation(({ type }) => {
-      if (type === FLEET_SERVER_HOST_SAVED_OBJECT_TYPE) {
-        return { saved_objects: [] } as any;
-      }
-
-      if (type === GLOBAL_SETTINGS_SAVED_OBJECT_TYPE) {
-        return {
-          saved_objects: [
-            {
-              attributes: {
-                fleet_server_hosts: ['https://fleetserver:8220'],
-              },
-            },
-          ],
-        } as any;
-      }
-
-      throw new Error('Not mocked');
-    });
-
-    soClient.create.mockResolvedValue({
-      id: DEFAULT_FLEET_SERVER_HOST_ID,
-      attributes: {},
-    } as any);
-
     await expect(() => migrateSettingsToFleetServerHost(soClient, esMock)).rejects.toThrow(
       'Fleet server host needs encrypted saved object api key to be set'
     );
   });
 });
 
-describe('deleteFleetServerHost', () => {
+describe('delete fleetServerHost', () => {
   beforeEach(() => {
     mockedLogger = loggerMock.create();
     mockedAppContextService.getLogger.mockReturnValue(mockedLogger);
   });
 
   it('should removeFleetServerHostFromAll agent policies without force if not deleted from preconfiguration', async () => {
-    const soMock = savedObjectsClientMock.create();
+    const soMock = getMockedSoClient();
 
-    soMock.get.mockResolvedValue({
-      id: 'test1',
-      attributes: {},
-    } as any);
     const esMock = elasticsearchServiceMock.createInternalClient();
-    await deleteFleetServerHost(soMock, esMock, 'test1', {});
+    await fleetServerHostService.delete(soMock, esMock, 'test1', {});
 
     expect(jest.mocked(agentPolicyService.removeFleetServerHostFromAll)).toBeCalledWith(
       esMock,
@@ -251,14 +235,10 @@ describe('deleteFleetServerHost', () => {
     );
   });
   it('should removeFleetServerHostFromAll agent policies with force if deleted from preconfiguration', async () => {
-    const soMock = savedObjectsClientMock.create();
+    const soMock = getMockedSoClient();
 
-    soMock.get.mockResolvedValue({
-      id: 'test1',
-      attributes: {},
-    } as any);
     const esMock = elasticsearchServiceMock.createInternalClient();
-    await deleteFleetServerHost(soMock, esMock, 'test1', {
+    await (fleetServerHostService.delete as jest.Mock)(soMock, esMock, 'test1', {
       fromPreconfiguration: true,
     });
 
