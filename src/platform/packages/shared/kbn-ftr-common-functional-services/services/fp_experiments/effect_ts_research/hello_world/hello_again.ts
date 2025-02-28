@@ -49,9 +49,14 @@ export const helloAgain = () => {
 
   type SendGreetingsShape = Context.Tag.Service<SendGreetings>;
 
-  const program = Effect.provideService(camelot, SendGreetings, {
-    sendGreetings: Effect.sync(() => `Sent!!!`),
-  });
+  const program = camelot.pipe(
+    Effect.provideService(SendGreetings, {
+      sendGreetings: (x) => Effect.sync(() => console.log(`Sent x: ${x}`)),
+    }),
+    Effect.provideService(TranslateGreeting, {
+      translate: (x) => Effect.sync(() => `translated to ${x}`),
+    })
+  );
 
   Effect.runSync(program);
 };
