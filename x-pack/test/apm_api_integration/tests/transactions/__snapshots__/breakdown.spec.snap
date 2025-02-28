@@ -4,7 +4,7 @@ exports[`APM API tests transactions/breakdown.spec.ts basic apm_8.0.0 Breakdown 
 Object {
   "timeseries": Array [
     Object {
-      "color": "#54b399",
+      "color": "#54B399",
       "data": Array [
         Object {
           "x": 1627973400000,
@@ -257,7 +257,7 @@ Object {
       "type": "areaStacked",
     },
     Object {
-      "color": "#6092c0",
+      "color": "#6092C0",
       "data": Array [
         Object {
           "x": 1627973400000,
@@ -510,7 +510,7 @@ Object {
       "type": "areaStacked",
     },
     Object {
-      "color": "#d36086",
+      "color": "#D36086",
       "data": Array [
         Object {
           "x": 1627973400000,
@@ -763,7 +763,7 @@ Object {
       "type": "areaStacked",
     },
     Object {
-      "color": "#9170b8",
+      "color": "#9170B8",
       "data": Array [
         Object {
           "x": 1627973400000,

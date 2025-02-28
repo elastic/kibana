@@ -18,7 +18,7 @@ import type {
   ContentReferencesStore,
   SecurityAlertContentReference,
 } from '@kbn/elastic-assistant-common';
-import { contentReferencesStoreFactoryMock } from '@kbn/elastic-assistant-common/impl/content_references/content_references_store/__mocks__/content_references_store.mock';
+import { newContentReferencesStoreMock } from '@kbn/elastic-assistant-common/impl/content_references/content_references_store/__mocks__/content_references_store.mock';
 
 const MAX_SIZE = 10000;
 
@@ -44,7 +44,7 @@ describe('OpenAndAcknowledgedAlertsTool', () => {
   const isEnabledKnowledgeBase = true;
   const chain = {} as unknown as RetrievalQAChain;
   const logger = loggerMock.create();
-  const contentReferencesStore = contentReferencesStoreFactoryMock();
+  const contentReferencesStore = newContentReferencesStoreMock();
   const rest = {
     isEnabledKnowledgeBase,
     esClient,
@@ -263,29 +263,6 @@ describe('OpenAndAcknowledgedAlertsTool', () => {
       const result = await tool.func('');
 
       expect(result).toContain('Citation,{reference(exampleContentReferenceId)}');
-    });
-
-    it('does not include citations if content references store is false', async () => {
-      const tool: DynamicTool = OPEN_AND_ACKNOWLEDGED_ALERTS_TOOL.getTool({
-        alertsIndexPattern,
-        anonymizationFields,
-        onNewReplacements: jest.fn(),
-        replacements,
-        request,
-        size: request.body.size,
-        ...rest,
-        contentReferencesStore: false,
-      }) as DynamicTool;
-
-      (esClient.search as jest.Mock).mockResolvedValue({
-        hits: {
-          hits: [{ _id: 4 }],
-        },
-      });
-
-      const result = await tool.func('');
-
-      expect(result).not.toContain('Citation');
     });
 
     it('returns null when alertsIndexPattern is undefined', () => {

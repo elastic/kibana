@@ -16,7 +16,7 @@ import { getRequestAbortedSignal } from '@kbn/data-plugin/server';
 import { getPrompt } from '@kbn/security-ai-prompts';
 import {
   API_VERSIONS,
-  contentReferencesStoreFactory,
+  newContentReferencesStore,
   ELASTIC_AI_ASSISTANT_EVALUATE_URL,
   ExecuteConnectorRequestBody,
   INTERNAL_API_ACCESS,
@@ -27,6 +27,7 @@ import { buildRouteValidationWithZod } from '@kbn/elastic-assistant-common/impl/
 import { getDefaultArguments } from '@kbn/langchain/server';
 import { StructuredTool } from '@langchain/core/tools';
 import {
+  AgentFinish,
   createOpenAIToolsAgent,
   createStructuredChatAgent,
   createToolCallingAgent,
@@ -103,7 +104,7 @@ export const postEvaluateRoute = (
         const savedObjectsClient = ctx.elasticAssistant.savedObjectsClient;
 
         // Perform license, authenticated user and evaluation FF checks
-        const checkResponse = performChecks({
+        const checkResponse = await performChecks({
           capability: 'assistantModelEvaluation',
           context: ctx,
           request,
@@ -254,6 +255,7 @@ export const postEvaluateRoute = (
                   signal: abortSignal,
                   streaming: false,
                   maxRetries: 0,
+                  convertSystemMessageToHumanContent: false,
                 });
               const llm = createLlmInstance();
               const anonymizationFieldsRes =
@@ -290,12 +292,7 @@ export const postEvaluateRoute = (
                   },
                 };
 
-              const contentReferencesEnabled =
-                assistantContext.getRegisteredFeatures(
-                  DEFAULT_PLUGIN_NAME
-                ).contentReferencesEnabled;
-              const contentReferencesStore =
-                contentReferencesEnabled && contentReferencesStoreFactory();
+              const contentReferencesStore = newContentReferencesStore();
 
               // Fetch any applicable tools that the source plugin may have registered
               const assistantToolParams: AssistantToolParams = {
@@ -394,7 +391,6 @@ export const postEvaluateRoute = (
                   savedObjectsClient,
                   tools,
                   replacements: {},
-                  contentReferencesEnabled: Boolean(contentReferencesStore),
                 }),
               };
             })
@@ -406,14 +402,14 @@ export const postEvaluateRoute = (
             const predict = async (input: { input: string }) => {
               logger.debug(`input:\n ${JSON.stringify(input, null, 2)}`);
 
-              const r = await graph.invoke(
+              const result = await graph.invoke(
                 {
                   input: input.input,
                   connectorId,
                   conversationId: undefined,
                   responseLanguage: 'English',
                   llmType,
-                  isStreaming: false,
+                  isStream: false,
                   isOssModel,
                 }, // TODO: Update to use the correct input format per dataset type
                 {
@@ -421,7 +417,7 @@ export const postEvaluateRoute = (
                   tags: ['evaluation'],
                 }
               );
-              const output = r.agentOutcome.returnValues.output;
+              const output = (result.agentOutcome as AgentFinish).returnValues.output;
               return output;
             };
 
