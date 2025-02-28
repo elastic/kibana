@@ -58,11 +58,7 @@ describe('helper', () => {
         'Europe/Warsaw',
         'Current time: Fri, Feb 14, 2025 12:33 AM UTC-07:00 (7:33 AM UTC)',
       ],
-      [
-        'MST',
-        'Europe/Warsaw',
-        'Current time: Fri, Feb 14, 2025 12:33 AM UTC-07:00 (7:33 AM UTC)',
-      ],
+      ['MST', 'Europe/Warsaw', 'Current time: Fri, Feb 14, 2025 12:33 AM UTC-07:00 (7:33 AM UTC)'],
       [
         'America/Los_Angeles',
         'Europe/Warsaw',

@@ -45,7 +45,9 @@ export const getFormattedTime = ({
   const utcConversionRequired = currentFormatter.format('[UTC]Z') !== utcFormatter.format('[UTC]Z');
 
   const currentTime = currentFormatter.format(TIME_FORMAT);
-  const utcConversion = utcConversionRequired ? utcFormatter.format(UTC_CONVERSION_TIME_FORMAT) : undefined;
+  const utcConversion = utcConversionRequired
+    ? utcFormatter.format(UTC_CONVERSION_TIME_FORMAT)
+    : undefined;
 
   return `Current time: ${currentTime} ${utcConversion ? `(${utcConversion})` : ''}`.trim();
 };
