@@ -32,7 +32,6 @@ storiesOf('Components/HostPanelContent', module)
       riskScoreState={riskScoreData}
       contextID={'test-host-details'}
       scopeId={'test-scopeId'}
-      isDraggable={false}
       openDetailsPanel={() => {}}
       hostName={'test-host-name'}
       onAssetCriticalityChange={() => {}}
@@ -58,7 +57,6 @@ storiesOf('Components/HostPanelContent', module)
       riskScoreState={riskScoreData}
       contextID={'test-host-details'}
       scopeId={'test-scopeId'}
-      isDraggable={false}
       openDetailsPanel={() => {}}
       hostName={'test-host-name'}
       onAssetCriticalityChange={() => {}}
@@ -84,7 +82,6 @@ storiesOf('Components/HostPanelContent', module)
       riskScoreState={riskScoreData}
       contextID={'test-host-details'}
       scopeId={'test-scopeId'}
-      isDraggable={false}
       openDetailsPanel={() => {}}
       hostName={'test-host-name'}
       onAssetCriticalityChange={() => {}}

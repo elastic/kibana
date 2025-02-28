@@ -41,7 +41,6 @@ describe('zeek_row_renderer', () => {
   test('renders correctly against snapshot', () => {
     const children = zeekRowRenderer.renderRow({
       data: nonZeek,
-      isDraggable: true,
       scopeId: TimelineId.test,
     });
 
@@ -60,7 +59,6 @@ describe('zeek_row_renderer', () => {
   test('should render a zeek row', () => {
     const children = zeekRowRenderer.renderRow({
       data: zeek,
-      isDraggable: true,
       scopeId: TimelineId.test,
     });
     const wrapper = mount(

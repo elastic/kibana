@@ -244,7 +244,14 @@ export const MigrationRuleDetailsFlyout: React.FC<MigrationRuleDetailsFlyoutProp
           <EuiSpacer size="s" />
           <UpdatedByLabel ruleMigration={ruleMigration} />
         </EuiFlyoutHeader>
-        <EuiFlyoutBody>
+        <EuiFlyoutBody
+          // EUI TODO: We need to set transform to 'none' to avoid drag/drop issues in the flyout caused by the
+          // `transform: translateZ(0)` workaround for the mask image bug in Chromium.
+          // https://github.com/elastic/eui/pull/7855.
+          // We need to remove this workaround once it is fixed in EUI:
+          // https://github.com/elastic/eui/issues/8269.
+          css={{ '.euiFlyoutBody__overflow': { transform: 'none' } }}
+        >
           <EuiSkeletonLoading
             isLoading={isLoading}
             loadingContent={

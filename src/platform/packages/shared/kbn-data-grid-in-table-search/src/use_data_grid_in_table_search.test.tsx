@@ -13,6 +13,7 @@ import {
   DataGridWithInTableSearchExample,
   generateMockData,
   getRenderCellValueMock,
+  MockContext,
 } from './__mocks__';
 import { useDataGridInTableSearch } from './use_data_grid_in_table_search';
 import {
@@ -64,6 +65,8 @@ describe('useDataGridInTableSearch', () => {
       } as RenderCellValuePropsWithInTableSearch)
     ).toMatchInlineSnapshot(`
       <InTableSearchHighlightsWrapper
+        highlightBackgroundColor="#FDDDE9"
+        highlightColor="#A11262"
         inTableSearchTerm="test"
       >
         <OriginalRenderCellValue
@@ -133,6 +136,29 @@ describe('useDataGridInTableSearch', () => {
             highlight.tagName === 'MARK' && highlight.classList.contains(HIGHLIGHT_CLASS_NAME)
         )
       ).toBe(true);
+    });
+  });
+
+  it('should handle parent contexts correctly', async () => {
+    render(
+      <MockContext.Provider value={{ mockContextValue: 'test access to any parent context' }}>
+        <DataGridWithInTableSearchExample rowsCount={100} columnsCount={2} pageSize={null} />
+      </MockContext.Provider>
+    );
+
+    screen.getByTestId(BUTTON_TEST_SUBJ).click();
+
+    await waitFor(() => {
+      expect(screen.getByTestId(INPUT_TEST_SUBJ)).toBeInTheDocument();
+    });
+
+    const searchTerm = 'test access';
+    const input = screen.getByTestId(INPUT_TEST_SUBJ);
+    fireEvent.change(input, { target: { value: searchTerm } });
+    expect(input).toHaveValue(searchTerm);
+
+    await waitFor(() => {
+      expect(screen.getByTestId(COUNTER_TEST_SUBJ)).toHaveTextContent('1/200');
     });
   });
 });

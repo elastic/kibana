@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+// eslint-disable-next-line import/no-extraneous-dependencies
+const rootConfig = require('@kbn/test/jest-preset');
+
 module.exports = {
   preset: '@kbn/test',
   rootDir: '../../../../../../..',
@@ -16,4 +19,9 @@ module.exports = {
     '<rootDir>/x-pack/solutions/security/plugins/security_solution/public/common/**/*.{ts,tsx}',
   ],
   moduleNameMapper: require('../../server/__mocks__/module_name_map'),
+  transform: {
+    ...rootConfig.transform,
+    '^.+\\.(js|tsx?)$':
+      '<rootDir>/x-pack/solutions/security/plugins/security_solution/jest/babel-transformer.js',
+  },
 };

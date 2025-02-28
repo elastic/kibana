@@ -305,8 +305,7 @@ describe('Multiple indicators', { tags: ['@ess'] }, () => {
   });
 });
 
-// FAILING ES PROMOTION: https://github.com/elastic/kibana/issues/209039
-describe.skip('Invalid Indicators', { tags: ['@ess'] }, () => {
+describe('Invalid Indicators', { tags: ['@ess'] }, () => {
   before(() => cy.task('esArchiverLoad', { archiveName: 'ti_indicators_data_invalid' }));
 
   after(() => cy.task('esArchiverUnload', { archiveName: 'ti_indicators_data_invalid' }));

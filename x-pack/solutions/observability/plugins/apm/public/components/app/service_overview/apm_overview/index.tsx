@@ -7,7 +7,8 @@
 import type { EuiFlexGroupProps } from '@elastic/eui';
 import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiPanel, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
+import { usePerformanceContext } from '@kbn/ebt-tools';
 import { chartHeight } from '..';
 import type { AgentName } from '../../../../../typings/es_schemas/ui/fields/agent';
 import {
@@ -35,6 +36,12 @@ import { useLocalStorage } from '../../../../hooks/use_local_storage';
 
 const latencyChartHeight = 200;
 
+export interface TablesLoadedState {
+  transactions: boolean;
+  dependencies: boolean;
+  errors: boolean;
+}
+
 export function ApmOverview() {
   const router = useApmRouter();
   const { serviceName, fallbackToTransactions, agentName, serverlessType } = useApmServiceContext();
@@ -44,6 +51,24 @@ export function ApmOverview() {
   } = useApmParams('/services/{serviceName}/overview');
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
+  const [haveTablesLoaded, setHaveTablesLoaded] = useState<TablesLoadedState>({
+    transactions: false,
+    dependencies: false,
+    errors: false,
+  });
+  const { onPageReady } = usePerformanceContext();
+
+  useEffect(() => {
+    const { transactions, dependencies, errors } = haveTablesLoaded;
+    if (transactions && dependencies && errors) {
+      onPageReady({
+        meta: {
+          rangeFrom,
+          rangeTo,
+        },
+      });
+    }
+  }, [haveTablesLoaded, onPageReady, rangeFrom, rangeTo]);
 
   const isRumAgent = isRumAgentName(agentName);
   const isOpenTelemetryAgent = isOpenTelemetryAgentName(agentName as AgentName);
@@ -61,6 +86,13 @@ export function ApmOverview() {
     'apm.sloCalloutDismissed',
     false
   );
+
+  const handleOnLoadTable = (key: keyof TablesLoadedState) =>
+    setHaveTablesLoaded((currentValues) => ({ ...currentValues, [key]: true }));
+
+  const onTransactionsTableLoad = useCallback(() => handleOnLoadTable('transactions'), []);
+  const onErrorsTableLoad = useCallback(() => handleOnLoadTable('errors'), []);
+  const onDependenciesTableLoad = useCallback(() => handleOnLoadTable('dependencies'), []);
 
   return (
     <>
@@ -98,6 +130,7 @@ export function ApmOverview() {
                 kuery={kuery}
                 environment={environment}
                 fixedHeight={true}
+                onLoadTable={onTransactionsTableLoad}
                 start={start}
                 end={end}
                 showPerPageOptions={false}
@@ -121,7 +154,10 @@ export function ApmOverview() {
           )}
           <EuiFlexItem grow={7}>
             <EuiPanel hasBorder={true}>
-              <ServiceOverviewErrorsTable serviceName={serviceName} />
+              <ServiceOverviewErrorsTable
+                serviceName={serviceName}
+                onLoadTable={onErrorsTableLoad}
+              />
             </EuiPanel>
           </EuiFlexItem>
         </EuiFlexGroup>
@@ -151,6 +187,7 @@ export function ApmOverview() {
             <EuiFlexItem grow={7}>
               <EuiPanel hasBorder={true}>
                 <ServiceOverviewDependenciesTable
+                  onLoadTable={onDependenciesTableLoad}
                   fixedHeight={true}
                   showPerPageOptions={false}
                   link={

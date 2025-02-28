@@ -14,7 +14,7 @@ import {
   parseInlineFunctionCalls,
   wrapWithSimulatedFunctionCalling,
 } from '../../simulated_function_calling';
-import { isNativeFunctionCallingSupported } from '../../utils/function_calling_support';
+import { convertUpstreamError, isNativeFunctionCallingSupported } from '../../utils';
 import type { OpenAIRequest } from './types';
 import { messagesToOpenAI, toolsToOpenAI, toolChoiceToOpenAI } from './to_openai';
 import { processOpenAIStream } from './process_openai_stream';
@@ -32,6 +32,7 @@ export const openAIAdapter: InferenceConnectorAdapter = {
     modelName,
     logger,
     abortSignal,
+    metadata,
   }) => {
     const useSimulatedFunctionCalling =
       functionCalling === 'auto'
@@ -70,14 +71,17 @@ export const openAIAdapter: InferenceConnectorAdapter = {
           body: JSON.stringify(request),
           signal: abortSignal,
           stream: true,
+          ...(metadata?.connectorTelemetry
+            ? { telemetryMetadata: metadata.connectorTelemetry }
+            : {}),
         },
       })
     ).pipe(
       switchMap((response) => {
         if (response.status === 'error') {
           return throwError(() =>
-            createInferenceInternalError(`Error calling connector: ${response.serviceMessage}`, {
-              rootError: response.serviceMessage,
+            convertUpstreamError(response.serviceMessage!, {
+              messagePrefix: 'Error calling connector:',
             })
           );
         }

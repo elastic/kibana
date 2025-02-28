@@ -18,12 +18,11 @@ import {
   useEuiTheme,
   useEuiShadow,
 } from '@elastic/eui';
-import { css } from '@emotion/css';
+import { css } from '@emotion/react';
+import styled from '@emotion/styled';
 import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 import type { NamespaceType } from '@kbn/securitysolution-io-ts-list-types';
 import { HeaderMenu } from '@kbn/securitysolution-exception-list-components';
-import styled from 'styled-components';
-import { euiThemeVars } from '@kbn/ui-theme';
 import type { Rule } from '../../../detection_engine/rule_management/logic/types';
 import { EditExceptionFlyout } from '../../../detection_engine/rule_exceptions/components/edit_exception_flyout';
 import { AddExceptionFlyout } from '../../../detection_engine/rule_exceptions/components/add_exception_flyout';
@@ -75,12 +74,17 @@ interface ExceptionsListCardProps {
 }
 
 const ExceptionPanel = styled(EuiPanel)`
-  margin: -${euiThemeVars.euiSizeS} ${euiThemeVars.euiSizeM} 0 ${euiThemeVars.euiSizeM};
+  margin: ${({
+    theme: {
+      euiTheme: { size },
+    },
+  }) => `-${size.s} ${size.m} 0 ${size.m}`};
 `;
 const ListHeaderContainer = styled(EuiFlexGroup)`
-  padding: ${euiThemeVars.euiSizeS};
+  padding: ${({ theme }) => theme.euiTheme.size.s};
   text-align: initial;
 `;
+
 export const ExceptionsListCard = memo<ExceptionsListCardProps>(
   ({ exceptionsList, handleDelete, handleExport, handleDuplicate, readOnly }) => {
     const {
@@ -156,10 +160,7 @@ export const ExceptionsListCard = memo<ExceptionsListCardProps>(
     return (
       <>
         <EuiAccordion
-          // Note: this uses `className` instead of the `css` prop, because a plugin
-          // cannot be set up for styled-components and `@emotion/react` at the same time
-          // @see https://github.com/elastic/eui/discussions/6828#discussioncomment-6076157
-          className={euiAccordionStyles}
+          css={euiAccordionStyles}
           id={openAccordionId}
           buttonElement="div"
           onToggle={() => setToggleAccordion(!toggleAccordion)}

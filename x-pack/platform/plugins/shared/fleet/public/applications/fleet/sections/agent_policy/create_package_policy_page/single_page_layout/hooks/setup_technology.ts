@@ -100,13 +100,14 @@ export function useSetupTechnology({
   );
   useEffect(() => {
     const shouldBeDefault =
-      isOnlyAgentlessIntegration(packageInfo, integrationToEnable) ||
-      isAgentlessSetupDefault(packageInfo, integrationToEnable)
+      isAgentlessEnabled &&
+      (isOnlyAgentlessIntegration(packageInfo, integrationToEnable) ||
+        isAgentlessSetupDefault(packageInfo, integrationToEnable))
         ? SetupTechnology.AGENTLESS
         : SetupTechnology.AGENT_BASED;
     setDefaultSetupTechnology(shouldBeDefault);
     setSelectedSetupTechnology(shouldBeDefault);
-  }, [packageInfo, integrationToEnable]);
+  }, [isAgentlessEnabled, packageInfo, integrationToEnable]);
 
   const agentlessPolicyName = getAgentlessAgentPolicyNameFromPackagePolicyName(packagePolicy.name);
 

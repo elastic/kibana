@@ -6,7 +6,7 @@
  */
 
 import moment from 'moment';
-import { get as _get, uniqBy } from 'lodash';
+import { uniqBy } from 'lodash';
 
 import type { DefendInsight } from '@kbn/elastic-assistant-common';
 
@@ -23,22 +23,8 @@ import {
   SourceType,
   TargetType,
 } from '../../../../../common/endpoint/types/workflow_insights';
-import { groupEndpointIdsByOS } from '../helpers';
-
-interface FileEventDoc {
-  process: {
-    code_signature?: {
-      subject_name: string;
-      trusted: boolean;
-    };
-    Ext?: {
-      code_signature?: {
-        subject_name: string;
-        trusted: boolean;
-      };
-    };
-  };
-}
+import type { FileEventDoc } from '../helpers';
+import { getValidCodeSignature, groupEndpointIdsByOS } from '../helpers';
 
 export async function buildIncompatibleAntivirusWorkflowInsights(
   params: BuildWorkflowInsightParams
@@ -163,14 +149,10 @@ export async function buildIncompatibleAntivirusWorkflowInsights(
             const codeSignatureSearchHit = codeSignaturesHits.find((hit) => hit._id === id);
 
             if (codeSignatureSearchHit) {
-              const extPath = os === 'windows' ? '.Ext' : '';
-              const field = `process${extPath}.code_signature`;
-              const value = _get(
-                codeSignatureSearchHit,
-                `_source.${field}.subject_name`,
-                'invalid subject name'
-              );
-              return createRemediation(filePath, os, field, value);
+              const signature = getValidCodeSignature(os, codeSignatureSearchHit._source);
+              if (signature) {
+                return createRemediation(filePath, os, signature.field, signature.value);
+              }
             }
           }
 

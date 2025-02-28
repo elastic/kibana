@@ -112,19 +112,15 @@ export default function (providerContext: FtrProviderContext) {
         es.deleteByQuery({
           index: ENROLLMENT_API_KEYS_INDEX,
           refresh: true,
-          body: {
-            query: {
-              match_all: {},
-            },
+          query: {
+            match_all: {},
           },
         }),
         es.deleteByQuery({
           index: AGENT_POLICY_INDEX,
           refresh: true,
-          body: {
-            query: {
-              match_all: {},
-            },
+          query: {
+            match_all: {},
           },
         }),
       ]).catch((err) => {
@@ -137,10 +133,8 @@ export default function (providerContext: FtrProviderContext) {
         await es.deleteByQuery({
           index: AGENTS_INDEX,
           refresh: true,
-          body: {
-            query: {
-              match_all: {},
-            },
+          query: {
+            match_all: {},
           },
         });
       } catch (err) {
@@ -153,10 +147,8 @@ export default function (providerContext: FtrProviderContext) {
         await es.deleteByQuery({
           index: SECRETS_INDEX_NAME,
           refresh: true,
-          body: {
-            query: {
-              match_all: {},
-            },
+          query: {
+            match_all: {},
           },
         });
       } catch (err) {
@@ -239,7 +231,8 @@ export default function (providerContext: FtrProviderContext) {
             disk_queue_encryption_enabled: true,
           },
           secrets: { password: 'pass' },
-        });
+        })
+        .expect(200);
 
       return res.body.item;
     };
@@ -253,7 +246,7 @@ export default function (providerContext: FtrProviderContext) {
       const agentResponse = await es.index({
         index: '.fleet-agents',
         refresh: true,
-        body: {
+        document: {
           access_api_key_id: 'api-key-3',
           active: true,
           policy_id: policyId,
@@ -282,9 +275,7 @@ export default function (providerContext: FtrProviderContext) {
       const query = ids ? { terms: { _id: ids } } : { match_all: {} };
       return es.search({
         index: SECRETS_INDEX_NAME,
-        body: {
-          query,
-        },
+        query,
       });
     };
 
@@ -301,27 +292,25 @@ export default function (providerContext: FtrProviderContext) {
     const getLatestPolicyRevision = async (id: string): Promise<{ data: FullAgentPolicy }> => {
       const res = await es.search({
         index: '.fleet-policies',
-        body: {
-          query: {
-            bool: {
-              filter: [
-                {
-                  term: {
-                    policy_id: id,
-                  },
+        query: {
+          bool: {
+            filter: [
+              {
+                term: {
+                  policy_id: id,
                 },
-              ],
+              },
+            ],
+          },
+        },
+        sort: [
+          {
+            revision_idx: {
+              order: 'desc',
             },
           },
-          sort: [
-            {
-              revision_idx: {
-                order: 'desc',
-              },
-            },
-          ],
-          size: 1,
-        },
+        ],
+        size: 1,
       });
       return res.hits.hits[0]._source as any as { data: FullAgentPolicy };
     };
@@ -1174,8 +1163,9 @@ export default function (providerContext: FtrProviderContext) {
         expect(fullAgentPolicy.secret_references).to.eql([{ id: passwordSecretId }]);
 
         const output = Object.entries(fullAgentPolicy.outputs)[0][1];
+
         // @ts-expect-error
-        expect(output.secrets.password.id).to.eql(passwordSecretId);
+        expect(output?.secrets?.password?.id).to.eql(passwordSecretId);
 
         // delete output with secret
         await supertest

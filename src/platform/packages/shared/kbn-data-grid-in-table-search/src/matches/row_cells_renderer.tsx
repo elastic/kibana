@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, useEffect, useRef } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { AllCellsProps, RowMatches } from '../types';
 
 const TIMEOUT_PER_ROW = 2000; // 2 sec per row max
@@ -28,14 +28,15 @@ export function RowCellsRenderer({
   const matchesCountPerColumnIdRef = useRef<Record<string, number>>({});
   const rowMatchesCountRef = useRef<number>(0);
   const remainingNumberOfResultsRef = useRef<number>(visibleColumns.length);
-  const isCompletedRef = useRef<boolean>(false);
+  const hasCompletedRef = useRef<boolean>(false);
+  const [hasTimedOut, setHasTimedOut] = useState<boolean>(false);
 
   // all cells in the row were processed
   const onComplete = useCallback(() => {
-    if (isCompletedRef.current) {
+    if (hasCompletedRef.current) {
       return;
     }
-    isCompletedRef.current = true; // report only once
+    hasCompletedRef.current = true; // report only once
     onRowProcessed({
       rowIndex,
       rowMatchesCount: rowMatchesCountRef.current,
@@ -69,7 +70,8 @@ export function RowCellsRenderer({
     }
 
     timerRef.current = setTimeout(() => {
-      onCompleteRef.current?.();
+      onCompleteRef.current?.(); // at least report back the already collected results
+      setHasTimedOut(true);
     }, TIMEOUT_PER_ROW);
 
     return () => {
@@ -77,7 +79,12 @@ export function RowCellsRenderer({
         clearTimeout(timerRef.current);
       }
     };
-  }, [rowIndex]);
+  }, [rowIndex, setHasTimedOut]);
+
+  if (hasTimedOut) {
+    // stop any further processing
+    return null;
+  }
 
   return (
     <>

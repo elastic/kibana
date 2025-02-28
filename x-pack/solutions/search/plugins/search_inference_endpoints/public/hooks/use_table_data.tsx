@@ -9,6 +9,7 @@ import type { EuiTableSortingType } from '@elastic/eui';
 import { Pagination } from '@elastic/eui';
 import { InferenceAPIConfigResponse } from '@kbn/ml-trained-models-utils';
 import { useMemo } from 'react';
+import { ServiceProviderKeys } from '@kbn/inference-endpoint-ui-common';
 import { TaskTypes } from '../../common/types';
 import { DEFAULT_TABLE_LIMIT } from '../components/all_inference_endpoints/constants';
 import {
@@ -17,7 +18,6 @@ import {
   InferenceEndpointUI,
   QueryParams,
   SortOrder,
-  ServiceProviderKeys,
 } from '../components/all_inference_endpoints/types';
 
 interface UseTableDataReturn {

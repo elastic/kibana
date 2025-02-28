@@ -22,11 +22,15 @@ import { createPrebuiltRuleAssetsClient } from '../../logic/rule_assets/prebuilt
 import { createPrebuiltRuleObjectsClient } from '../../logic/rule_objects/prebuilt_rule_objects_client';
 import { upgradePrebuiltRules } from '../../logic/rule_objects/upgrade_prebuilt_rules';
 import { fetchRuleVersionsTriad } from '../../logic/rule_versions/fetch_rule_versions_triad';
-import { PREBUILT_RULES_OPERATION_SOCKET_TIMEOUT_MS } from '../../constants';
+import {
+  PREBUILT_RULES_OPERATION_SOCKET_TIMEOUT_MS,
+  PREBUILT_RULES_OPERATION_CONCURRENCY,
+} from '../../constants';
 import { getUpgradeableRules } from './get_upgradeable_rules';
 import { createModifiedPrebuiltRuleAssets } from './create_upgradeable_rules_payload';
 import { getRuleGroups } from '../../model/rule_groups/get_rule_groups';
 import { validatePerformRuleUpgradeRequest } from './validate_perform_rule_upgrade_request';
+import { routeLimitedConcurrencyTag } from '../../../../../utils/route_limited_concurrency_tag';
 
 export const performRuleUpgradeRoute = (router: SecuritySolutionPluginRouter) => {
   router.versioned
@@ -39,6 +43,7 @@ export const performRuleUpgradeRoute = (router: SecuritySolutionPluginRouter) =>
         },
       },
       options: {
+        tags: [routeLimitedConcurrencyTag(PREBUILT_RULES_OPERATION_CONCURRENCY)],
         timeout: {
           idleSocket: PREBUILT_RULES_OPERATION_SOCKET_TIMEOUT_MS,
         },

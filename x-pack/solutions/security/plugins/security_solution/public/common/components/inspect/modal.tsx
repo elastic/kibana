@@ -21,7 +21,7 @@ import {
 import numeral from '@elastic/numeral';
 import type { ReactNode } from 'react';
 import React, { useMemo, Fragment } from 'react';
-import styled from 'styled-components';
+import styled from '@emotion/styled';
 
 import { useLocation } from 'react-router-dom';
 import type { InputsModelId } from '../../store/inputs/constants';

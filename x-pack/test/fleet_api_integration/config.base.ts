@@ -13,6 +13,7 @@ import {
   defineDockerServersConfig,
   getKibanaCliLoggers,
 } from '@kbn/test';
+import { ScoutTestRunConfigCategory } from '@kbn/scout-info';
 
 const getFullPath = (relativePath: string) => path.join(path.dirname(__filename), relativePath);
 
@@ -60,6 +61,7 @@ export default async function ({ readConfigFile, log }: FtrConfigProviderContext
   }
 
   return {
+    testConfigCategory: ScoutTestRunConfigCategory.API_TEST,
     servers: xPackAPITestsConfig.get('servers'),
     dockerServers,
     services: xPackAPITestsConfig.get('services'),
@@ -90,6 +92,7 @@ export default async function ({ readConfigFile, log }: FtrConfigProviderContext
         `--xpack.fleet.agentless.api.tls.certificate=./config/node.crt`,
         `--xpack.fleet.agentless.api.tls.key=./config/node.key`,
         `--xpack.fleet.agentless.api.tls.ca=./config/ca.crt`,
+        `--xpack.fleet.internal.registry.kibanaVersionCheckEnabled=false`,
         `--logging.loggers=${JSON.stringify([
           ...getKibanaCliLoggers(xPackAPITestsConfig.get('kbnTestServer.serverArgs')),
 

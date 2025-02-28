@@ -21,7 +21,6 @@ import {
   keys,
 } from '@elastic/eui';
 import { euiThemeVars } from '@kbn/ui-theme';
-import type { Datatable } from '@kbn/expressions-plugin/public';
 import {
   getAggregateQueryMode,
   isOfAggregateQueryType,
@@ -40,11 +39,7 @@ import {
   onActiveDataChange,
   useLensDispatch,
 } from '../../../state_management';
-import {
-  EXPRESSION_BUILD_ERROR_ID,
-  extractReferencesFromState,
-  getAbsoluteDateRange,
-} from '../../../utils';
+import { EXPRESSION_BUILD_ERROR_ID, getAbsoluteDateRange } from '../../../utils';
 import { LayerConfiguration } from './layer_configuration_section';
 import type { EditConfigPanelProps } from './types';
 import { FlyoutWrapper } from './flyout_wrapper';
@@ -55,6 +50,8 @@ import { trackSaveUiCounterEvents } from '../../../lens_ui_telemetry';
 import { ESQLDataGridAccordion } from './esql_data_grid_accordion';
 import { isApiESQLVariablesCompatible } from '../../../react_embeddable/types';
 import { useESQLVariables } from './use_esql_variables';
+import { getActiveDataFromDatatable } from '../../../state_management/shared_logic';
+import { useCurrentAttributes } from './use_current_attributes';
 
 export function LensEditConfigurationFlyout({
   attributes,
@@ -138,23 +135,29 @@ export function LensEditConfigurationFlyout({
       if (isDataLoading) {
         return;
       }
-      const activeData: Record<string, Datatable> = {};
-      const adaptersTables = previousAdapters.current?.tables?.tables;
-      const [table] = Object.values(adaptersTables || {});
-      if (table) {
-        // there are cases where a query can return a big amount of columns
-        // at this case we don't suggest all columns in a table but the first
-        // MAX_NUM_OF_COLUMNS
-        setSuggestsLimitedColumns(table.columns.length >= MAX_NUM_OF_COLUMNS);
-        layers.forEach((layer) => {
-          activeData[layer] = table;
-        });
 
+      const [defaultLayerId] = Object.keys(framePublicAPI.datasourceLayers);
+      const activeData = getActiveDataFromDatatable(
+        defaultLayerId,
+        previousAdapters.current?.tables?.tables
+      );
+
+      layers.forEach((layer) => {
+        const table = activeData[layer];
+
+        if (table) {
+          // there are cases where a query can return a big amount of columns
+          // at this case we don't suggest all columns in a table but the first `MAX_NUM_OF_COLUMNS`
+          setSuggestsLimitedColumns(table.columns.length >= MAX_NUM_OF_COLUMNS);
+        }
+      });
+
+      if (Object.keys(activeData).length > 0) {
         dispatch(onActiveDataChange({ activeData }));
       }
     });
     return () => s?.unsubscribe();
-  }, [dispatch, dataLoading$, layers]);
+  }, [dispatch, dataLoading$, layers, framePublicAPI.datasourceLayers]);
 
   const attributesChanged: boolean = useMemo(() => {
     const previousAttrs = previousAttributes.current;
@@ -236,43 +239,19 @@ export function LensEditConfigurationFlyout({
     [query]
   );
 
+  const currentAttributes = useCurrentAttributes({
+    textBasedMode,
+    initialAttributes: attributes,
+    datasourceMap,
+    visualizationMap,
+  });
+
   const onApply = useCallback(() => {
     if (visualization.activeId == null) {
       return;
     }
-    const dsStates = Object.fromEntries(
-      Object.entries(datasourceStates).map(([id, ds]) => {
-        const dsState = ds.state;
-        return [id, dsState];
-      })
-    );
-    // as ES|QL queries are using adHoc dataviews, we don't want to pass references
-    const references = !textBasedMode
-      ? extractReferencesFromState({
-          activeDatasources: Object.keys(datasourceStates).reduce(
-            (acc, id) => ({
-              ...acc,
-              [id]: datasourceMap[id],
-            }),
-            {}
-          ),
-          datasourceStates,
-          visualizationState: visualization.state,
-          activeVisualization,
-        })
-      : [];
-    const attrs: TypedLensSerializedState['attributes'] = {
-      ...attributes,
-      state: {
-        ...attributes.state,
-        visualization: visualization.state,
-        datasourceStates: dsStates,
-      },
-      references,
-      visualizationType: visualization.activeId,
-    };
     if (savedObjectId) {
-      saveByRef?.(attrs);
+      saveByRef?.(currentAttributes);
       updateByRefInput?.(savedObjectId);
     }
 
@@ -289,19 +268,16 @@ export function LensEditConfigurationFlyout({
       trackSaveUiCounterEvents(telemetryEvents);
     }
 
-    onApplyCallback?.(attrs);
+    onApplyCallback?.(currentAttributes);
     closeFlyout?.();
   }, [
     visualization.activeId,
-    savedObjectId,
-    closeFlyout,
-    onApplyCallback,
-    datasourceStates,
-    textBasedMode,
     visualization.state,
+    savedObjectId,
     activeVisualization,
-    attributes,
-    datasourceMap,
+    onApplyCallback,
+    currentAttributes,
+    closeFlyout,
     saveByRef,
     updateByRefInput,
   ]);
@@ -330,7 +306,8 @@ export function LensEditConfigurationFlyout({
         abortController,
         setDataGridAttrs,
         esqlVariables,
-        shouldUpdateAttrs
+        shouldUpdateAttrs,
+        currentAttributes
       );
       if (attrs) {
         setCurrentAttributes?.(attrs);
@@ -345,9 +322,10 @@ export function LensEditConfigurationFlyout({
       datasourceMap,
       visualizationMap,
       adHocDataViews,
+      esqlVariables,
+      currentAttributes,
       setCurrentAttributes,
       updateSuggestion,
-      esqlVariables,
     ]
   );
 

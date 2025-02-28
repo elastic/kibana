@@ -134,7 +134,7 @@ export interface ElasticAssistantApiRequestHandlerContext {
   logger: Logger;
   getServerBasePath: () => string;
   getSpaceId: () => string;
-  getCurrentUser: () => AuthenticatedUser | null;
+  getCurrentUser: () => Promise<AuthenticatedUser | null>;
   getAIAssistantConversationsDataClient: (
     params?: GetAIAssistantConversationsDataClientParams
   ) => Promise<AIAssistantConversationsDataClient | null>;
@@ -239,7 +239,8 @@ export interface AssistantToolParams {
   inference?: InferenceServerStart;
   isEnabledKnowledgeBase: boolean;
   connectorId?: string;
-  contentReferencesStore: ContentReferencesStore | false;
+  contentReferencesStore: ContentReferencesStore | undefined;
+  description?: string;
   esClient: ElasticsearchClient;
   kbDataClient?: AIAssistantKnowledgeBaseDataClient;
   langChainTimeout?: number;

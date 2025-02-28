@@ -35,11 +35,10 @@ export const createGenericAuditRowRenderer = ({
       action.toLowerCase() === actionName
     );
   },
-  renderRow: ({ data, isDraggable, scopeId }) => (
+  renderRow: ({ data, scopeId }) => (
     <RowRendererContainer>
       <AuditdGenericDetails
         data={data}
-        isDraggable={isDraggable}
         contextId={`${actionName}-${scopeId}`}
         text={text}
         timelineId={scopeId}
@@ -68,13 +67,12 @@ export const createGenericFileRowRenderer = ({
       action.toLowerCase() === actionName
     );
   },
-  renderRow: ({ data, isDraggable, scopeId }) => (
+  renderRow: ({ data, scopeId }) => (
     <RowRendererContainer>
       <AuditdGenericFileDetails
         contextId={`${actionName}-${scopeId}`}
         data={data}
         fileIcon={fileIcon}
-        isDraggable={isDraggable}
         text={text}
         timelineId={scopeId}
       />

@@ -1,12 +1,12 @@
 # Observability Project config
 
 ## Disable plugins
-enterpriseSearch.enabled: false
+xpack.search.enabled: false
 xpack.cloudSecurityPosture.enabled: false
 xpack.infra.enabled: true
 xpack.uptime.enabled: true
 xpack.securitySolution.enabled: false
-xpack.search.notebooks.enabled: false
+xpack.searchNotebooks.enabled: false
 xpack.searchPlayground.enabled: false
 xpack.searchInferenceEndpoints.enabled: false
 xpack.searchIndices.enabled: false
@@ -138,9 +138,6 @@ uiSettings.overrides.defaultRoute: /app/observability/landing
 # Customize empty page state for analytics apps
 no_data_page.analyticsNoDataPageFlavor: 'serverless_observability'
 
-## Set the dev project switch current type
-xpack.serverless.plugin.developer.projectSwitcher.currentType: 'observability'
-
 ## Disable adding the component template `.fleet_agent_id_verification-1` to every index template for each datastream for each integration
 xpack.fleet.agentIdVerificationEnabled: false
 
@@ -192,6 +189,9 @@ xpack.fleet.internal.registry.excludePackages: [
 
     # Profiling integrations
     'profiler_agent',
+
+    # Search connectors
+    'elastic_connectors',
   ]
 
 ## Required for force installation of integration packages

@@ -5,19 +5,11 @@
  * 2.0.
  */
 
-import {
-  AppMountParameters,
-  CoreSetup,
-  CoreStart,
-  Plugin,
-  PluginInitializerContext,
-} from '@kbn/core/public';
+import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
 import { OBSERVABILITY_LOGS_EXPLORER_APP_ID } from '@kbn/deeplinks-observability';
-import { type ObservabilityLogsExplorerConfig } from '../common/plugin_config';
-import { DATA_RECEIVED_TELEMETRY_EVENT } from '../common/telemetry_events';
-import { logsExplorerAppTitle } from '../common/translations';
+import { i18n } from '@kbn/i18n';
+import type { ObservabilityLogsExplorerConfig } from '../common';
 import type {
-  ObservabilityLogsExplorerAppMountParameters,
   ObservabilityLogsExplorerPluginSetup,
   ObservabilityLogsExplorerPluginStart,
   ObservabilityLogsExplorerSetupDeps,
@@ -33,14 +25,18 @@ export class ObservabilityLogsExplorerPlugin
     core: CoreSetup<ObservabilityLogsExplorerStartDeps, ObservabilityLogsExplorerPluginStart>,
     _pluginsSetup: ObservabilityLogsExplorerSetupDeps
   ) {
+    const title = i18n.translate('xpack.observabilityLogsExplorer.appTitle', {
+      defaultMessage: 'Logs Explorer',
+    });
+
     // App used solely to redirect from "/app/observability-logs-explorer" to "/app/discover"
     core.application.register({
       id: OBSERVABILITY_LOGS_EXPLORER_APP_ID,
-      title: logsExplorerAppTitle,
+      title,
       visibleIn: [],
-      mount: async (appMountParams: ObservabilityLogsExplorerAppMountParameters) => {
+      mount: async (appMountParams) => {
         const [coreStart] = await core.getStartServices();
-        const { renderDiscoverRedirect } = await import('./applications/redirect_to_discover');
+        const { renderDiscoverRedirect } = await import('./redirect_to_discover');
         return renderDiscoverRedirect(coreStart, appMountParams);
       },
     });
@@ -48,16 +44,14 @@ export class ObservabilityLogsExplorerPlugin
     // App used solely to redirect from "/app/observability-log-explorer" to "/app/discover"
     core.application.register({
       id: 'observability-log-explorer',
-      title: logsExplorerAppTitle,
+      title,
       visibleIn: [],
-      mount: async (appMountParams: AppMountParameters) => {
+      mount: async (appMountParams) => {
         const [coreStart] = await core.getStartServices();
-        const { renderDiscoverRedirect } = await import('./applications/redirect_to_discover');
+        const { renderDiscoverRedirect } = await import('./redirect_to_discover');
         return renderDiscoverRedirect(coreStart, appMountParams);
       },
     });
-
-    core.analytics.registerEventType(DATA_RECEIVED_TELEMETRY_EVENT);
 
     return {};
   }

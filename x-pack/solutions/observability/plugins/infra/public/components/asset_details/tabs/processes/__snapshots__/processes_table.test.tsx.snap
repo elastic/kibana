@@ -1,0 +1,588 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Processes Table should match a snapshot with a single process with long command found 1`] = `
+Object {
+  "asFragment": [Function],
+  "baseElement": <body>
+    <div>
+      <table
+        class="euiTable emotion-euiTable-fixed-uncompressed-desktop"
+        data-test-subj="infraAssetDetailsProcessesTable"
+        tabindex="-1"
+      >
+        <thead>
+          <tr>
+            <td
+              class="euiTableHeaderCell emotion-euiTableHeaderCell"
+              role="columnheader"
+              style="width: 24px;"
+            >
+              <div
+                class="euiTableCellContent emotion-euiTableCellContent-euiTableHeaderCell__content"
+              >
+                <span
+                  class="eui-textTruncate"
+                />
+              </div>
+            </td>
+            <th
+              class="euiTableHeaderCell emotion-euiTableHeaderCell"
+              data-test-subj="state-header"
+              role="columnheader"
+              scope="col"
+              style="width: 84px;"
+            >
+              <div
+                class="euiTableCellContent emotion-euiTableCellContent-euiTableHeaderCell__content"
+              >
+                <span
+                  class="eui-textTruncate"
+                  title="State"
+                >
+                  State
+                </span>
+              </div>
+            </th>
+            <th
+              class="euiTableHeaderCell emotion-euiTableHeaderCell"
+              data-test-subj="command-header"
+              role="columnheader"
+              scope="col"
+              style="width: 40%;"
+            >
+              <div
+                class="euiTableCellContent emotion-euiTableCellContent-euiTableHeaderCell__content"
+              >
+                <span
+                  class="eui-textTruncate"
+                  title="Command"
+                >
+                  Command
+                </span>
+              </div>
+            </th>
+            <th
+              aria-sort="none"
+              class="euiTableHeaderCell emotion-euiTableHeaderCell"
+              data-test-subj="startTime-header"
+              role="columnheader"
+              scope="col"
+            >
+              <button
+                class="euiTableHeaderButton emotion-euiTableHeaderCell__button"
+                data-test-subj="tableHeaderSortButton"
+                type="button"
+              >
+                <div
+                  class="euiTableCellContent emotion-euiTableCellContent-right-euiTableHeaderCell__content"
+                >
+                  <span
+                    class="eui-textTruncate"
+                    title="Time"
+                  >
+                    Time
+                  </span>
+                  <span
+                    class="euiTableSortIcon euiTableSortIcon--sortable"
+                    color="subdued"
+                    data-euiicon-type="sortable"
+                  />
+                </div>
+              </button>
+            </th>
+            <th
+              aria-sort="descending"
+              class="euiTableHeaderCell emotion-euiTableHeaderCell"
+              data-test-subj="cpu-header"
+              role="columnheader"
+              scope="col"
+            >
+              <button
+                class="euiTableHeaderButton euiTableHeaderButton-isSorted emotion-euiTableHeaderCell__button"
+                data-test-subj="tableHeaderSortButton"
+                type="button"
+              >
+                <div
+                  class="euiTableCellContent emotion-euiTableCellContent-euiTableHeaderCell__content"
+                >
+                  <span
+                    class="eui-textTruncate"
+                    title="CPU"
+                  >
+                    CPU
+                  </span>
+                  <span
+                    class="euiTableSortIcon"
+                    data-euiicon-type="sortDown"
+                  />
+                </div>
+              </button>
+            </th>
+            <th
+              aria-sort="none"
+              class="euiTableHeaderCell emotion-euiTableHeaderCell"
+              data-test-subj="memory-header"
+              role="columnheader"
+              scope="col"
+            >
+              <button
+                class="euiTableHeaderButton emotion-euiTableHeaderCell__button"
+                data-test-subj="tableHeaderSortButton"
+                type="button"
+              >
+                <div
+                  class="euiTableCellContent emotion-euiTableCellContent-euiTableHeaderCell__content"
+                >
+                  <span
+                    class="eui-textTruncate"
+                    title="Mem."
+                  >
+                    Mem.
+                  </span>
+                  <span
+                    class="euiTableSortIcon euiTableSortIcon--sortable"
+                    color="subdued"
+                    data-euiicon-type="sortable"
+                  />
+                </div>
+              </button>
+            </th>
+          </tr>
+        </thead>
+        <tbody
+          class="emotion-EuiTableBody"
+        >
+          <tr
+            class="euiTableRow emotion-euiTableRow-desktop"
+          >
+            <td
+              class="euiTableRowCell euiTableRowCell--isExpander emotion-euiTableRowCell-isExpander-middle-desktop"
+            >
+              <div
+                class="euiTableCellContent emotion-euiTableCellContent-wrapText-actions-desktop"
+              >
+                <button
+                  aria-expanded="false"
+                  class="euiButtonEmpty emotion-euiButtonDisplay-euiButtonEmpty-m-empty-primary"
+                  data-test-subj="infraProcessRowButton"
+                  type="button"
+                >
+                  <span
+                    class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
+                  >
+                    <span
+                      color="inherit"
+                      data-euiicon-type="arrowRight"
+                    />
+                    <span
+                      class="eui-textTruncate euiButtonEmpty__text"
+                    />
+                  </span>
+                </button>
+              </div>
+            </td>
+            <td
+              class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
+            >
+              <div
+                class="euiTableCellContent emotion-euiTableCellContent-wrapText"
+              >
+                <span
+                  class="euiBadge emotion-euiBadge-danger"
+                  title="Dead"
+                >
+                  <span
+                    class="euiBadge__content emotion-euiBadge__content"
+                  >
+                    <span
+                      class="euiBadge__text emotion-euiBadge__text"
+                    >
+                      Dead
+                    </span>
+                  </span>
+                </span>
+              </div>
+            </td>
+            <td
+              class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
+            >
+              <div
+                class="euiTableCellContent emotion-euiTableCellContent-truncateText"
+              >
+                <span
+                  class="euiTableCellContent__text"
+                >
+                  <div
+                    css="You have tried to stringify object returned from \`css\` function. It isn't supposed to be used directly (e.g. as value of the \`className\` prop), but rather handed to emotion so it can handle it (e.g. as value of \`css\` prop)."
+                  >
+                    <code>
+                      /some/test/command here 3
+                    </code>
+                  </div>
+                </span>
+              </div>
+            </td>
+            <td
+              class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
+            >
+              <div
+                class="euiTableCellContent emotion-euiTableCellContent-right-wrapText"
+              >
+                <span
+                  class="euiTableCellContent__text"
+                >
+                  112:51:24
+                </span>
+              </div>
+            </td>
+            <td
+              class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
+            >
+              <div
+                class="euiTableCellContent emotion-euiTableCellContent-wrapText"
+              >
+                <span
+                  class="euiTableCellContent__text"
+                >
+                  0.5%
+                </span>
+              </div>
+            </td>
+            <td
+              class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
+            >
+              <div
+                class="euiTableCellContent emotion-euiTableCellContent-wrapText"
+              >
+                <span
+                  class="euiTableCellContent__text"
+                >
+                  0.5%
+                </span>
+              </div>
+            </td>
+          </tr>
+          <tr
+            class="euiTableRow euiTableRow-isExpandable emotion-euiTableRow-desktop"
+          />
+        </tbody>
+      </table>
+    </div>
+  </body>,
+  "container": <div>
+    <table
+      class="euiTable emotion-euiTable-fixed-uncompressed-desktop"
+      data-test-subj="infraAssetDetailsProcessesTable"
+      tabindex="-1"
+    >
+      <thead>
+        <tr>
+          <td
+            class="euiTableHeaderCell emotion-euiTableHeaderCell"
+            role="columnheader"
+            style="width: 24px;"
+          >
+            <div
+              class="euiTableCellContent emotion-euiTableCellContent-euiTableHeaderCell__content"
+            >
+              <span
+                class="eui-textTruncate"
+              />
+            </div>
+          </td>
+          <th
+            class="euiTableHeaderCell emotion-euiTableHeaderCell"
+            data-test-subj="state-header"
+            role="columnheader"
+            scope="col"
+            style="width: 84px;"
+          >
+            <div
+              class="euiTableCellContent emotion-euiTableCellContent-euiTableHeaderCell__content"
+            >
+              <span
+                class="eui-textTruncate"
+                title="State"
+              >
+                State
+              </span>
+            </div>
+          </th>
+          <th
+            class="euiTableHeaderCell emotion-euiTableHeaderCell"
+            data-test-subj="command-header"
+            role="columnheader"
+            scope="col"
+            style="width: 40%;"
+          >
+            <div
+              class="euiTableCellContent emotion-euiTableCellContent-euiTableHeaderCell__content"
+            >
+              <span
+                class="eui-textTruncate"
+                title="Command"
+              >
+                Command
+              </span>
+            </div>
+          </th>
+          <th
+            aria-sort="none"
+            class="euiTableHeaderCell emotion-euiTableHeaderCell"
+            data-test-subj="startTime-header"
+            role="columnheader"
+            scope="col"
+          >
+            <button
+              class="euiTableHeaderButton emotion-euiTableHeaderCell__button"
+              data-test-subj="tableHeaderSortButton"
+              type="button"
+            >
+              <div
+                class="euiTableCellContent emotion-euiTableCellContent-right-euiTableHeaderCell__content"
+              >
+                <span
+                  class="eui-textTruncate"
+                  title="Time"
+                >
+                  Time
+                </span>
+                <span
+                  class="euiTableSortIcon euiTableSortIcon--sortable"
+                  color="subdued"
+                  data-euiicon-type="sortable"
+                />
+              </div>
+            </button>
+          </th>
+          <th
+            aria-sort="descending"
+            class="euiTableHeaderCell emotion-euiTableHeaderCell"
+            data-test-subj="cpu-header"
+            role="columnheader"
+            scope="col"
+          >
+            <button
+              class="euiTableHeaderButton euiTableHeaderButton-isSorted emotion-euiTableHeaderCell__button"
+              data-test-subj="tableHeaderSortButton"
+              type="button"
+            >
+              <div
+                class="euiTableCellContent emotion-euiTableCellContent-euiTableHeaderCell__content"
+              >
+                <span
+                  class="eui-textTruncate"
+                  title="CPU"
+                >
+                  CPU
+                </span>
+                <span
+                  class="euiTableSortIcon"
+                  data-euiicon-type="sortDown"
+                />
+              </div>
+            </button>
+          </th>
+          <th
+            aria-sort="none"
+            class="euiTableHeaderCell emotion-euiTableHeaderCell"
+            data-test-subj="memory-header"
+            role="columnheader"
+            scope="col"
+          >
+            <button
+              class="euiTableHeaderButton emotion-euiTableHeaderCell__button"
+              data-test-subj="tableHeaderSortButton"
+              type="button"
+            >
+              <div
+                class="euiTableCellContent emotion-euiTableCellContent-euiTableHeaderCell__content"
+              >
+                <span
+                  class="eui-textTruncate"
+                  title="Mem."
+                >
+                  Mem.
+                </span>
+                <span
+                  class="euiTableSortIcon euiTableSortIcon--sortable"
+                  color="subdued"
+                  data-euiicon-type="sortable"
+                />
+              </div>
+            </button>
+          </th>
+        </tr>
+      </thead>
+      <tbody
+        class="emotion-EuiTableBody"
+      >
+        <tr
+          class="euiTableRow emotion-euiTableRow-desktop"
+        >
+          <td
+            class="euiTableRowCell euiTableRowCell--isExpander emotion-euiTableRowCell-isExpander-middle-desktop"
+          >
+            <div
+              class="euiTableCellContent emotion-euiTableCellContent-wrapText-actions-desktop"
+            >
+              <button
+                aria-expanded="false"
+                class="euiButtonEmpty emotion-euiButtonDisplay-euiButtonEmpty-m-empty-primary"
+                data-test-subj="infraProcessRowButton"
+                type="button"
+              >
+                <span
+                  class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
+                >
+                  <span
+                    color="inherit"
+                    data-euiicon-type="arrowRight"
+                  />
+                  <span
+                    class="eui-textTruncate euiButtonEmpty__text"
+                  />
+                </span>
+              </button>
+            </div>
+          </td>
+          <td
+            class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
+          >
+            <div
+              class="euiTableCellContent emotion-euiTableCellContent-wrapText"
+            >
+              <span
+                class="euiBadge emotion-euiBadge-danger"
+                title="Dead"
+              >
+                <span
+                  class="euiBadge__content emotion-euiBadge__content"
+                >
+                  <span
+                    class="euiBadge__text emotion-euiBadge__text"
+                  >
+                    Dead
+                  </span>
+                </span>
+              </span>
+            </div>
+          </td>
+          <td
+            class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
+          >
+            <div
+              class="euiTableCellContent emotion-euiTableCellContent-truncateText"
+            >
+              <span
+                class="euiTableCellContent__text"
+              >
+                <div
+                  css="You have tried to stringify object returned from \`css\` function. It isn't supposed to be used directly (e.g. as value of the \`className\` prop), but rather handed to emotion so it can handle it (e.g. as value of \`css\` prop)."
+                >
+                  <code>
+                    /some/test/command here 3
+                  </code>
+                </div>
+              </span>
+            </div>
+          </td>
+          <td
+            class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
+          >
+            <div
+              class="euiTableCellContent emotion-euiTableCellContent-right-wrapText"
+            >
+              <span
+                class="euiTableCellContent__text"
+              >
+                112:51:24
+              </span>
+            </div>
+          </td>
+          <td
+            class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
+          >
+            <div
+              class="euiTableCellContent emotion-euiTableCellContent-wrapText"
+            >
+              <span
+                class="euiTableCellContent__text"
+              >
+                0.5%
+              </span>
+            </div>
+          </td>
+          <td
+            class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
+          >
+            <div
+              class="euiTableCellContent emotion-euiTableCellContent-wrapText"
+            >
+              <span
+                class="euiTableCellContent__text"
+              >
+                0.5%
+              </span>
+            </div>
+          </td>
+        </tr>
+        <tr
+          class="euiTableRow euiTableRow-isExpandable emotion-euiTableRow-desktop"
+        />
+      </tbody>
+    </table>
+  </div>,
+  "debug": [Function],
+  "findAllByAltText": [Function],
+  "findAllByDisplayValue": [Function],
+  "findAllByLabelText": [Function],
+  "findAllByPlaceholderText": [Function],
+  "findAllByRole": [Function],
+  "findAllByTestId": [Function],
+  "findAllByText": [Function],
+  "findAllByTitle": [Function],
+  "findByAltText": [Function],
+  "findByDisplayValue": [Function],
+  "findByLabelText": [Function],
+  "findByPlaceholderText": [Function],
+  "findByRole": [Function],
+  "findByTestId": [Function],
+  "findByText": [Function],
+  "findByTitle": [Function],
+  "getAllByAltText": [Function],
+  "getAllByDisplayValue": [Function],
+  "getAllByLabelText": [Function],
+  "getAllByPlaceholderText": [Function],
+  "getAllByRole": [Function],
+  "getAllByTestId": [Function],
+  "getAllByText": [Function],
+  "getAllByTitle": [Function],
+  "getByAltText": [Function],
+  "getByDisplayValue": [Function],
+  "getByLabelText": [Function],
+  "getByPlaceholderText": [Function],
+  "getByRole": [Function],
+  "getByTestId": [Function],
+  "getByText": [Function],
+  "getByTitle": [Function],
+  "queryAllByAltText": [Function],
+  "queryAllByDisplayValue": [Function],
+  "queryAllByLabelText": [Function],
+  "queryAllByPlaceholderText": [Function],
+  "queryAllByRole": [Function],
+  "queryAllByTestId": [Function],
+  "queryAllByText": [Function],
+  "queryAllByTitle": [Function],
+  "queryByAltText": [Function],
+  "queryByDisplayValue": [Function],
+  "queryByLabelText": [Function],
+  "queryByPlaceholderText": [Function],
+  "queryByRole": [Function],
+  "queryByTestId": [Function],
+  "queryByText": [Function],
+  "queryByTitle": [Function],
+  "rerender": [Function],
+  "unmount": [Function],
+}
+`;

@@ -243,20 +243,18 @@ const updateIndexTemplate = async (
   try {
     await esClient.indices.putIndexTemplate({
       name: indexTemplateName,
-      body: {
-        index_patterns: indexPattern,
-        priority: 500,
-        template: {
-          mappings: template?.mappings,
-          settings,
-          aliases: template?.aliases,
-        },
-        _meta,
-        composed_of: composedOf.filter((ct) => ct !== STACK_COMPONENT_TEMPLATE_LOGS_SETTINGS),
-        ignore_missing_component_templates: composedOf.filter((templateName) =>
-          templateName.endsWith('@custom')
-        ),
+      index_patterns: indexPattern,
+      priority: 500,
+      template: {
+        mappings: template?.mappings,
+        settings,
+        aliases: template?.aliases,
       },
+      _meta,
+      composed_of: composedOf.filter((ct) => ct !== STACK_COMPONENT_TEMPLATE_LOGS_SETTINGS),
+      ignore_missing_component_templates: composedOf.filter((templateName) =>
+        templateName.endsWith('@custom')
+      ),
     });
 
     logger.info(`Updated index template successfully [Name: ${indexTemplateName}]`);

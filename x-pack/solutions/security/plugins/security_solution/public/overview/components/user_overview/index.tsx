@@ -9,7 +9,7 @@ import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { euiDarkVars as darkTheme, euiLightVars as lightTheme } from '@kbn/ui-theme';
 import { getOr } from 'lodash/fp';
 import React, { useCallback, useMemo } from 'react';
-import styled from 'styled-components';
+import styled from '@emotion/styled';
 import { buildUserNamesFilter } from '../../../../common/search_strategy';
 import { RiskScoreHeaderTitle } from '../../../entity_analytics/components/risk_score_header_title';
 import { useGlobalTime } from '../../../common/containers/use_global_time';
@@ -46,7 +46,6 @@ export interface UserSummaryProps {
   scopeId?: string;
   data: UserItem;
   id: string;
-  isDraggable?: boolean;
   isInDetailsSidePanel: boolean;
   loading: boolean;
   isLoadingAnomaliesData: boolean;
@@ -60,7 +59,7 @@ export interface UserSummaryProps {
 }
 
 const UserRiskOverviewWrapper = styled(EuiFlexGroup)`
-  padding-top: ${({ theme }) => theme.eui.euiSizeM};
+  padding-top: ${({ theme: { euiTheme } }) => euiTheme.size.m};
   width: ${({ $width }: { $width: string }) => $width};
 `;
 
@@ -73,7 +72,6 @@ export const UserOverview = React.memo<UserSummaryProps>(
     scopeId,
     data,
     id,
-    isDraggable = false,
     isInDetailsSidePanel = false, // Rather than duplicate the component, alter the structure based on it's location
     isLoadingAnomaliesData,
     loading,
@@ -122,11 +120,10 @@ export const UserOverview = React.memo<UserSummaryProps>(
           rowItems={getOr([], fieldName, fieldData)}
           attrName={fieldName}
           idPrefix={contextID ? `user-overview-${contextID}` : 'user-overview'}
-          isDraggable={isDraggable}
           scopeId={scopeId}
         />
       ),
-      [contextID, isDraggable, scopeId]
+      [contextID, scopeId]
     );
 
     const [userRiskScore, userRiskLevel] = useMemo(() => {
@@ -266,23 +263,13 @@ export const UserOverview = React.memo<UserSummaryProps>(
                 attrName={'host.ip'}
                 idPrefix={contextID ? `user-overview-${contextID}` : 'user-overview'}
                 scopeId={scopeId}
-                isDraggable={isDraggable}
                 render={(ip) => (ip != null ? <NetworkDetailsLink ip={ip} /> : getEmptyTagValue())}
               />
             ),
           },
         ],
       ],
-      [
-        data,
-        indexPatterns,
-        getDefaultRenderer,
-        contextID,
-        scopeId,
-        isDraggable,
-        userName,
-        firstColumn,
-      ]
+      [data, indexPatterns, getDefaultRenderer, contextID, scopeId, userName, firstColumn]
     );
     return (
       <>
