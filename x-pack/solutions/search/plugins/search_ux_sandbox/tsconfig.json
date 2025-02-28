@@ -1,8 +1,7 @@
 {
   "extends": "../../../../../tsconfig.base.json",
   "compilerOptions": {
-    "outDir": "./target",
-    "skipLibCheck": true
+    "outDir": "target/types",
   },
   "include": [
     "common/**/*",
@@ -10,7 +9,6 @@
     "server/**/*",
   ],
   "kbn_references": [
-    "@kbn/config-schema",
     "@kbn/core",
     "@kbn/i18n",
     "@kbn/i18n-react",
@@ -19,11 +17,7 @@
     "@kbn/react-kibana-context-render",
     "@kbn/console-plugin",
     "@kbn/search-navigation",
-    "@kbn/doc-links",
     "@kbn/shared-ux-page-kibana-template",
-    "@kbn/core-http-server",
-    "@kbn/kibana-utils-plugin",
-    "@kbn/logging",
   ],
   "exclude": [
     "target/**/*",
