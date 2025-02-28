@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import agent from 'elastic-apm-node';
 import { createHash } from 'crypto';
 import { chunk, get, invert, isEmpty, merge, partition } from 'lodash';
 import moment from 'moment';
