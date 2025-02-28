@@ -43,7 +43,7 @@ export function HeaderTitle({ isLoading, slo }: Props) {
         <SloStatusBadge slo={slo} isLoading={isLoading} />
         <SloStateBadge slo={slo} />
         <SloRemoteBadge slo={slo} />
-        {slo?.tags?.length && (
+        {!!slo?.tags?.length && (
           <EuiFlexItem grow={true}>
             <TagsList tags={slo.tags} />
           </EuiFlexItem>
