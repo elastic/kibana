@@ -12,6 +12,13 @@ import { EuiCard, EuiFlexGrid, EuiFlexItem, EuiIcon, EuiLink, EuiText } from '@e
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useKibana } from '../hooks/use_kibana';
 
+import {
+  SEARCH_UX_GITHUB_TEAM_HANDLER,
+  SEARCH_UX_GITHUB_TEAM_URL,
+  SEARCH_UX_SLACK_CHANNEL_NAME,
+  SEARCH_UX_SLACK_CHANNEL_URL,
+} from '../../common/constants';
+
 export const SearchUxSandboxHome = () => {
   const {
     services: { history, searchNavigation },
@@ -34,17 +41,17 @@ export const SearchUxSandboxHome = () => {
           />
           <EuiLink
             data-test-subj="SearchUxSandboxHomeSearchUxLink"
-            href="https://elastic.slack.com/archives/CA2JBRTEX"
+            href={SEARCH_UX_SLACK_CHANNEL_URL}
             external
           >
-            #search-ux
+            {SEARCH_UX_SLACK_CHANNEL_NAME}
           </EuiLink>{' '}
           <EuiLink
             data-test-subj="SearchUxSandboxHomeSearchDesignLink"
-            href="https://github.com/orgs/elastic/teams/search-design"
+            href={SEARCH_UX_GITHUB_TEAM_URL}
             external
           >
-            @search-design
+            {SEARCH_UX_GITHUB_TEAM_HANDLER}
           </EuiLink>
         </EuiText>
       </KibanaPageTemplate.Header>
