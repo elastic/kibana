@@ -366,7 +366,7 @@ export const initUiSettings = (
       value: DEFAULT_MAX_UNASSOCIATED_NOTES,
       schema: schema.number({
         min: 1,
-        max: 1000,
+        max: 10000,
         defaultValue: DEFAULT_MAX_UNASSOCIATED_NOTES,
       }),
       category: [APP_ID],
