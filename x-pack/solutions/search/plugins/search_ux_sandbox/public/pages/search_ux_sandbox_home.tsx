@@ -33,7 +33,7 @@ export const SearchUxSandboxHome = () => {
       solutionNav={searchNavigation?.useClassicNavigation(history)}
       color="primary"
     >
-      <KibanaPageTemplate.Header pageTitle="Search UX Sandbox 🕹️" restrictWidth color="primary">
+      <KibanaPageTemplate.Header pageTitle="Search UX Sandbox" restrictWidth color="primary">
         <EuiText>
           <FormattedMessage
             id="xpack.searchUxSandbox.searchUxSandboxOverview.description"
@@ -62,7 +62,7 @@ export const SearchUxSandboxHome = () => {
             <EuiCard
               icon={<EuiIcon size="xxl" type="beaker" />}
               title="Project example"
-              description="Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua."
+              description="Basic example to start with."
               onClick={() => {
                 history.push('/project-example');
               }}
