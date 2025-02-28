@@ -11,7 +11,7 @@ import { schema } from '@kbn/config-schema';
 import {
   InferenceInferenceEndpointInfo,
   InferenceTaskType,
-} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+} from '@elastic/elasticsearch/lib/api/types';
 
 import { InferenceServicesGetResponse } from '../types';
 import { INFERENCE_ENDPOINT_INTERNAL_API_VERSION } from '../../common';

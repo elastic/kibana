@@ -7,34 +7,32 @@ Object {
       "metric",
     ],
   },
-  "body": Object {
-    "query": Object {
-      "bool": Object {
-        "filter": Array [
-          Object {
-            "exists": Object {
-              "field": "transaction.duration.histogram",
-            },
+  "query": Object {
+    "bool": Object {
+      "filter": Array [
+        Object {
+          "exists": Object {
+            "field": "transaction.duration.histogram",
           },
-          Object {
-            "bool": Object {
-              "minimum_should_match": 1,
-              "should": Array [
-                Object {
-                  "match_phrase": Object {
-                    "proccessor.event": "transaction",
-                  },
+        },
+        Object {
+          "bool": Object {
+            "minimum_should_match": 1,
+            "should": Array [
+              Object {
+                "match_phrase": Object {
+                  "proccessor.event": "transaction",
                 },
-              ],
-            },
+              },
+            ],
           },
-        ],
-      },
+        },
+      ],
     },
-    "size": 0,
-    "terminate_after": 1,
-    "track_total_hits": 1,
   },
+  "size": 0,
+  "terminate_after": 1,
+  "track_total_hits": 1,
 }
 `;
 
@@ -45,22 +43,20 @@ Object {
       "metric",
     ],
   },
-  "body": Object {
-    "query": Object {
-      "bool": Object {
-        "filter": Array [
-          Object {
-            "exists": Object {
-              "field": "transaction.duration.histogram",
-            },
+  "query": Object {
+    "bool": Object {
+      "filter": Array [
+        Object {
+          "exists": Object {
+            "field": "transaction.duration.histogram",
           },
-        ],
-      },
+        },
+      ],
     },
-    "size": 0,
-    "terminate_after": 1,
-    "track_total_hits": 1,
   },
+  "size": 0,
+  "terminate_after": 1,
+  "track_total_hits": 1,
 }
 `;
 
@@ -74,22 +70,20 @@ Array [
           "metric",
         ],
       },
-      "body": Object {
-        "query": Object {
-          "bool": Object {
-            "filter": Array [
-              Object {
-                "exists": Object {
-                  "field": "transaction.duration.histogram",
-                },
+      "query": Object {
+        "bool": Object {
+          "filter": Array [
+            Object {
+              "exists": Object {
+                "field": "transaction.duration.histogram",
               },
-            ],
-          },
+            },
+          ],
         },
-        "size": 0,
-        "terminate_after": 1,
-        "track_total_hits": 1,
       },
+      "size": 0,
+      "terminate_after": 1,
+      "track_total_hits": 1,
     },
   ],
   Array [
@@ -103,16 +97,14 @@ Array [
           },
         ],
       },
-      "body": Object {
-        "query": Object {
-          "bool": Object {
-            "filter": Array [],
-          },
+      "query": Object {
+        "bool": Object {
+          "filter": Array [],
         },
-        "size": 0,
-        "track_total_hits": 1,
       },
+      "size": 0,
       "terminate_after": 1,
+      "track_total_hits": 1,
     },
   ],
 ]
