@@ -42,7 +42,7 @@ export interface Enablements {
   entityStore: boolean;
 }
 
-interface EntityStoreEnablementModalProps {
+export interface EntityStoreEnablementModalProps {
   visible: boolean;
   toggle: (visible: boolean) => void;
   enableStore: (enablements: Enablements) => () => void;
