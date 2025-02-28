@@ -5,96 +5,96 @@
  * 2.0.
  */
 
-import { useState } from '@storybook/preview-api';
-import { addParameters } from '@storybook/react';
-import React from 'react';
+import React, { useState } from 'react';
+import type { Meta, StoryObj } from '@storybook/react';
 
 import { MultiRowInput as Component } from '.';
-
-addParameters({
-  options: {
-    enableShortcuts: false,
-  },
-});
-
-export default {
-  component: Component,
-  title: 'Sections/Fleet/Settings/MultiRowInput',
-};
 
 interface Args {
   width: number;
   label: string;
   helpText: string;
   disabled: boolean;
+  value?: string[];
+  isUrl?: boolean;
 }
 
-const args: Args = {
-  width: 250,
-  label: 'Demo label',
-  helpText: 'Demo helpText',
-  disabled: false,
+const meta: Meta<typeof Component> = {
+  component: Component,
+  title: 'Sections/Fleet/Settings/MultiRowInput',
+  parameters: {
+    options: {
+      enableShortcuts: false,
+    },
+  },
 };
 
-export const HostsInput = ({ width, label, helpText, disabled }: Args) => {
-  const [value, setValue] = useState<string[]>([]);
+export default meta;
+type Story = StoryObj<typeof Component>;
+
+const HostsInputTemplate: Story['render'] = (args) => {
+  const [value, setValue] = useState<string[]>(args.value || []);
   return (
-    <div style={{ width }}>
+    <div style={{ width: args.width || 350 }}>
       <Component
         id="test-host-input"
-        helpText={helpText}
+        helpText={args.helpText}
         value={value}
         onChange={setValue}
-        label={label}
-        disabled={disabled}
+        label={args.label}
+        disabled={args.disabled}
+        isUrl={args.isUrl}
       />
     </div>
   );
 };
-HostsInput.args = args;
 
-export const HostsInputDisabled = ({ value }: { value: string[] }) => {
-  return (
+export const HostsInput: Story = {
+  render: HostsInputTemplate,
+  args: {
+    width: 250,
+    label: 'Demo label',
+    helpText: 'Demo helpText',
+    disabled: false,
+  },
+};
+
+export const HostsInputDisabled: Story = {
+  render: (args) => (
     <div style={{ maxWidth: '350px' }}>
       <Component
         id="test-host-input"
         helpText={'Host input help text'}
-        value={value}
+        value={args.value}
         onChange={() => {}}
         label={'Host input label'}
         disabled={true}
       />
     </div>
-  );
-};
-
-HostsInputDisabled.args = { value: ['http://test1.fr', 'http://test2.fr'] };
-HostsInputDisabled.argTypes = {
-  value: {
-    control: { type: 'object' },
+  ),
+  args: {
+    value: ['http://test1.fr', 'http://test2.fr'],
+  },
+  argTypes: {
+    value: {
+      control: { type: 'object' },
+    },
   },
 };
 
-export const HostsInputUrl = () => {
-  const [value, setValue] = useState<string[]>([]);
-  return (
-    <div style={{ maxWidth: '350px' }}>
-      <Component
-        id="test-host-input"
-        helpText={'Host input help text'}
-        value={value}
-        onChange={setValue}
-        label={'Host input label'}
-        disabled={false}
-        isUrl={true}
-      />
-    </div>
-  );
-};
-
-HostsInputUrl.args = { value: ['https://test1.com', 'https://test2.com', 'https://test3.com'] };
-HostsInputUrl.argTypes = {
-  value: {
-    control: { type: 'object' },
+export const HostsInputUrl: Story = {
+  render: HostsInputTemplate,
+  args: {
+    width: 350,
+    label: 'Host input label',
+    helpText: 'Host input help text',
+    disabled: false,
+    value: ['https://test1.com', 'https://test2.com', 'https://test3.com'],
+    isUrl: true,
+  },
+  argTypes: {
+    value: {
+      control: { type: 'object' },
+    },
   },
 };
