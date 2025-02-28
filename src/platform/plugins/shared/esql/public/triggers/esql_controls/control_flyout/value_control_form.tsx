@@ -25,10 +25,10 @@ import type { ISearchGeneric } from '@kbn/search-types';
 import { ESQLVariableType, ESQLControlVariable } from '@kbn/esql-validation-autocomplete';
 import {
   getIndexPatternFromESQLQuery,
-  getESQLResults,
-  appendStatsByToQuery,
   getValuesFromQueryField,
-} from '@kbn/esql-utils';
+} from '@kbn/esql-utils/src/utils/query_parsing_helpers';
+import { getESQLResults } from '@kbn/esql-utils/src/utils/run_query';
+import { appendStatsByToQuery } from '@kbn/esql-utils/src/utils/append_to_query';
 import { ESQLLangEditor } from '../../../create_editor';
 import type { ESQLControlState, ControlWidthOptions } from '../types';
 import {

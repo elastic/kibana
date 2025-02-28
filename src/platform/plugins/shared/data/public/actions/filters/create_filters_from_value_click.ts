@@ -16,7 +16,7 @@ import {
   toggleFilterNegated,
   type AggregateQuery,
 } from '@kbn/es-query';
-import { appendWhereClauseToESQLQuery } from '@kbn/esql-utils';
+import { appendWhereClauseToESQLQuery } from '@kbn/esql-utils/src/utils/append_to_query';
 import {
   buildSimpleExistFilter,
   buildSimpleNumberRangeFilter,
