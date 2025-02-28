@@ -43,6 +43,9 @@ export const transformCreateRuleBody: RewriteResponseCase<CreateRuleBody> = ({
               notify_when: action.frequency!.notifyWhen,
               throttle: action.frequency!.throttle,
               summary: action.frequency!.summary,
+              ...(action.frequency.advancedThrottle
+                ? { advanced_throttle: action.frequency.advancedThrottle }
+                : {}),
             },
           }
         : {}),

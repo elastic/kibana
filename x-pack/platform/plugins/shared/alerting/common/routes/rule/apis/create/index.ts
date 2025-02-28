@@ -36,3 +36,20 @@ export type {
   CreateRuleRequestBody as CreateRuleRequestBodyV1,
   CreateRuleResponse as CreateRuleResponseV1,
 } from './types/v1';
+
+// v2
+export {
+  actionFrequencySchema as actionFrequencySchemaV2,
+  actionAlertsFilterSchema as actionAlertsFilterSchemaV2,
+  actionSchema as actionSchemaV2,
+  createParamsSchema as createParamsSchemaV2,
+  createBodySchema as createBodySchemaV2,
+} from './schemas/v2';
+
+export type {
+  CreateRuleAction as CreateRuleActionV2,
+  CreateRuleActionFrequency as CreateRuleActionFrequencyV2,
+  CreateRuleRequestParams as CreateRuleRequestParamsV2,
+  CreateRuleRequestBody as CreateRuleRequestBodyV2,
+  CreateRuleResponse as CreateRuleResponseV2,
+} from './types/v2';

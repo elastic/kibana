@@ -21,6 +21,9 @@ import {
 } from '../../common';
 
 import { parseDuration } from '../lib';
+import { AdvancedThrottle } from '@kbn/alerting-types';
+import { isAdvancedThrottled } from '../task_runner/action_scheduler/lib/advanced_throttle_helper';
+import { Logger } from '@kbn/logging';
 
 interface ScheduledExecutionOptions<
   State extends AlertInstanceState,
@@ -103,12 +106,16 @@ export class Alert<
 
   isThrottled({
     throttle,
+    advancedThrottle,
     actionHash,
     uuid,
+    logger,
   }: {
     throttle: string | null;
+    advancedThrottle?: AdvancedThrottle;
     actionHash?: string;
     uuid?: string;
+    logger: Logger;
   }) {
     if (this.scheduledExecutionOptions === undefined) {
       return false;
@@ -127,13 +134,22 @@ export class Alert<
             this.meta.lastScheduledActions.actions[uuid] ||
             this.meta.lastScheduledActions.actions[actionHash]; // actionHash must be removed once all the hash identifiers removed from the task state
           const lastTriggerDate = actionInState?.date;
-          return !!(
-            lastTriggerDate && new Date(lastTriggerDate).getTime() + throttleMills > Date.now()
-          );
+
+          return isAdvancedThrottled({
+            advancedThrottle,
+            throttleMills,
+            date: new Date(lastTriggerDate),
+            logger,
+          });
         }
         return false;
       } else {
-        return new Date(this.meta.lastScheduledActions.date).getTime() + throttleMills > Date.now();
+        return isAdvancedThrottled({
+          advancedThrottle,
+          throttleMills,
+          date: new Date(this.meta.lastScheduledActions.date),
+          logger,
+        });
       }
     }
     return false;
