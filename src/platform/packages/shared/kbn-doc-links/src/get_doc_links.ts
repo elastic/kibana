@@ -411,6 +411,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       troubleshootGaps: `${SECURITY_SOLUTION_DOCS}alerts-ui-monitor.html#troubleshoot-gaps`,
       ruleApiOverview: `${SECURITY_SOLUTION_DOCS}rule-api-overview.html`,
       configureAlertSuppression: `${SECURITY_SOLUTION_DOCS}alert-suppression.html#_configure_alert_suppression`,
+      siemMigrations: `${SECURITY_SOLUTION_DOCS}siem-migrations.html`,
     },
     server: {
       protocol: `${KIBANA_DOCS}settings.html#server-protocol`,

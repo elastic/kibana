@@ -276,6 +276,7 @@ export interface DocLinks {
     readonly troubleshootGaps: string;
     readonly ruleApiOverview: string;
     readonly configureAlertSuppression: string;
+    readonly siemMigrations: string;
   };
   readonly server: {
     readonly protocol: string;
