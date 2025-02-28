@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
-import { render, cleanup } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import { ShowRequestModal, ShowRequestModalProps } from './show_request_modal';
 import { Rule, RuleTypeParams, RuleUpdates } from '../../../types';
 import { InitialRule } from './rule_reducer';
@@ -110,7 +110,6 @@ const ShowRequestModalWithProviders: React.FunctionComponent<ShowRequestModalPro
 describe('showRequestModal', () => {
   afterEach(() => {
     jest.clearAllMocks();
-    cleanup();
   });
 
   test('renders create request correctly', async () => {
@@ -120,12 +119,12 @@ describe('showRequestModal', () => {
       } as RuleUpdates,
       onClose: jest.fn(),
     };
-    const result = render(<ShowRequestModalWithProviders {...modalProps} />);
-    expect(result.getByTestId('modalHeaderTitle').textContent).toBe('Create alerting rule request');
-    expect(result.getByTestId('modalSubtitle').textContent).toBe(
+    render(<ShowRequestModalWithProviders {...modalProps} />);
+    expect(screen.getByTestId('modalHeaderTitle').textContent).toBe('Create alerting rule request');
+    expect(screen.getByTestId('modalSubtitle').textContent).toBe(
       'This Kibana request will create this rule.'
     );
-    expect(result.getByTestId('modalRequestCodeBlock').textContent).toMatchInlineSnapshot(`
+    expect(screen.getByTestId('modalRequestCodeBlock').textContent).toMatchInlineSnapshot(`
       "POST kbn:/api/alerting/rule
       {
         \\"params\\": {
@@ -185,12 +184,12 @@ describe('showRequestModal', () => {
       } as RuleUpdates,
       onClose: jest.fn(),
     };
-    const result = render(<ShowRequestModalWithProviders {...modalProps} />);
-    expect(result.getByTestId('modalHeaderTitle').textContent).toBe('Edit alerting rule request');
-    expect(result.getByTestId('modalSubtitle').textContent).toBe(
+    render(<ShowRequestModalWithProviders {...modalProps} />);
+    expect(screen.getByTestId('modalHeaderTitle').textContent).toBe('Edit alerting rule request');
+    expect(screen.getByTestId('modalSubtitle').textContent).toBe(
       'This Kibana request will edit this rule.'
     );
-    expect(result.getByTestId('modalRequestCodeBlock').textContent).toMatchInlineSnapshot(`
+    expect(screen.getByTestId('modalRequestCodeBlock').textContent).toMatchInlineSnapshot(`
       "PUT kbn:/api/alerting/rule/0de7273e-c5db-4d5c-8e28-1aab363e1abc
       {
         \\"name\\": \\"test\\",

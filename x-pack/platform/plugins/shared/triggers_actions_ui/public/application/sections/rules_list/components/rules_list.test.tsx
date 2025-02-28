@@ -12,7 +12,6 @@ import {
   screen,
   waitFor,
   waitForElementToBeRemoved,
-  cleanup,
 } from '@testing-library/react';
 
 import { fetchActiveMaintenanceWindows } from '@kbn/alerts-ui-shared/src/maintenance_window_callout/api';
@@ -209,7 +208,6 @@ describe('Update Api Key', () => {
   afterEach(() => {
     jest.clearAllMocks();
     queryClient.clear();
-    cleanup();
   });
 
   it('Have the option to update API key', async () => {
@@ -221,7 +219,7 @@ describe('Update Api Key', () => {
     fireEvent.click((await screen.findAllByTestId('selectActionButton'))[1]);
     expect(screen.getByTestId('collapsedActionPanel')).toBeInTheDocument();
 
-    expect(screen.queryByText('Update API key')).toBeInTheDocument();
+    expect(screen.getByText('Update API key')).toBeInTheDocument();
   });
 });
 
@@ -273,7 +271,6 @@ describe('rules_list component empty', () => {
   afterEach(() => {
     jest.clearAllMocks();
     queryClient.clear();
-    cleanup();
   });
 
   it('renders empty list', async () => {
@@ -359,7 +356,6 @@ describe('rules_list ', () => {
   afterEach(() => {
     jest.clearAllMocks();
     queryClient.clear();
-    cleanup();
   });
 
   it('can filter by rule states', async () => {
@@ -402,7 +398,7 @@ describe('rules_list ', () => {
         ruleLastRunOutcomesFilter: ['failed', 'succeeded'],
       })
     );
-    await waitFor(() => screen.getByTestId('ruleLastRunOutcomeFilterButton'));
+    await waitFor(() => screen.findByTestId('ruleLastRunOutcomeFilterButton'));
     fireEvent.click(screen.getAllByTestId('ruleLastRunOutcomeFilterButton')[0]);
     fireEvent.click(screen.getAllByTestId('ruleLastRunOutcomefailedFilterOption')[0]);
     expect(loadRulesWithKueryFilter).toHaveBeenLastCalledWith(
@@ -548,7 +544,7 @@ describe('rules_list ', () => {
       );
 
       // show warning if duration is long
-      await waitFor(() => screen.getAllByText('Info'));
+      await waitFor(() => screen.findAllByText('Info'));
       const durationWarningIcon = screen.getAllByText('Info');
       expect(durationWarningIcon).toHaveLength(
         mockedRulesData.filter(
@@ -621,17 +617,11 @@ describe('rules_list ', () => {
 
     it('P50 column is rendered initially', async () => {
       renderWithProviders(<RulesList />);
-      await waitFor(() =>
-        expect(screen.getByTestId(`rulesTable-${Percentiles.P50}ColumnName`)).toBeDefined()
-      );
+      expect(screen.getByTestId(`rulesTable-${Percentiles.P50}ColumnName`)).toBeDefined();
 
       let percentiles: HTMLElement[] = [];
       await waitFor(() => {
-        percentiles = Array.from(
-          document.body.querySelectorAll(
-            '[data-test-subj="rulesTableCell-ruleExecutionPercentile"] span[data-test-subj="rule-duration-format-value"]'
-          )
-        );
+        percentiles = screen.getAllByTestId('rule-duration-format-value');
         return expect(percentiles.length).toBeGreaterThan(0);
       });
 
@@ -704,11 +694,7 @@ describe('rules_list ', () => {
         screen.queryAllByTestId(`rulesTable-${Percentiles.P95}ColumnName`).length
       ).toBeGreaterThan(0);
 
-      const percentiles: HTMLElement[] = Array.from(
-        document.body.querySelectorAll(
-          '[data-test-subj="rulesTableCell-ruleExecutionPercentile"] [data-test-subj="rule-duration-format-value"]'
-        )
-      );
+      const percentiles: HTMLElement[] = screen.getAllByTestId('rule-duration-format-value');
 
       mockedRulesData.forEach((rule, index) => {
         if (typeof rule.monitoring?.run.calculated_metrics.p95 === 'number') {
@@ -757,7 +743,7 @@ describe('rules_list ', () => {
     it('renders license errors and manage license modal on click', async () => {
       global.open = jest.fn();
       renderWithProviders(<RulesList />);
-      await waitFor(() => screen.getByTestId('ruleStatus-error-license-fix'));
+      await waitFor(() => screen.findByTestId('ruleStatus-error-license-fix'));
       fireEvent.click(screen.getByTestId('ruleStatus-error-license-fix'));
 
       expect(screen.queryAllByTestId('manageLicenseModal').length).toBeGreaterThan(0);
@@ -770,6 +756,8 @@ describe('rules_list ', () => {
       renderWithProviders(<RulesList />);
 
       const nameColumnTableHeaderEl = await screen.findByTestId('tableHeaderCell_name_1');
+
+      // eslint-disable-next-line testing-library/no-node-access
       const el = nameColumnTableHeaderEl.querySelector(
         '[data-test-subj="tableHeaderCell_name_1"] .euiTableHeaderButton'
       ) as HTMLElement;
@@ -790,6 +778,7 @@ describe('rules_list ', () => {
       renderWithProviders(<RulesList />);
 
       const enabledColumnTableHeaderEl = await screen.findByTestId('tableHeaderCell_enabled_10');
+      // eslint-disable-next-line testing-library/no-node-access
       const el = enabledColumnTableHeaderEl.querySelector(
         '[data-test-subj="tableHeaderCell_enabled_10"] .euiTableHeaderButton'
       ) as HTMLElement;
@@ -858,7 +847,7 @@ describe('rules_list ', () => {
       renderWithProviders(<RulesList />);
       await waitForElementToBeRemoved(() => screen.queryByTestId('centerJustifiedSpinner'));
 
-      expect(screen.queryByTestId('ruleStatusFilter')).toBeInTheDocument();
+      expect(screen.getByTestId('ruleStatusFilter')).toBeInTheDocument();
     });
 
     it('can filter by rule states', async () => {
@@ -910,14 +899,16 @@ describe('rules_list ', () => {
       renderWithProviders(<RulesList />);
       await waitForElementToBeRemoved(() => screen.queryByTestId('centerJustifiedSpinner'));
 
-      expect(screen.queryByTestId('ruleTagFilter')).toBeInTheDocument();
+      expect(screen.getByTestId('ruleTagFilter')).toBeInTheDocument();
     });
 
     it('rule list items with actions are editable if canExecuteAction is true', async () => {
       renderWithProviders(<RulesList />);
       await waitForElementToBeRemoved(() => screen.queryByTestId('centerJustifiedSpinner'));
 
+      // eslint-disable-next-line testing-library/no-node-access
       const selectActionButtons = document.body.querySelectorAll('.euiButtonIcon[disabled]');
+
       expect(selectActionButtons).toHaveLength(2);
     });
 
@@ -927,6 +918,7 @@ describe('rules_list ', () => {
       renderWithProviders(<RulesList />);
       await waitForElementToBeRemoved(() => screen.queryByTestId('centerJustifiedSpinner'));
 
+      // eslint-disable-next-line testing-library/no-node-access
       expect(document.body.querySelectorAll('button.euiButtonIcon[disabled]')).toHaveLength(8);
       hasExecuteActionsCapability.mockReturnValue(true);
     });
@@ -1149,7 +1141,6 @@ describe('rule list with different rule types', () => {
   afterEach(() => {
     jest.clearAllMocks();
     queryClient.clear();
-    cleanup();
   });
 
   describe('filteredRuleTypes prop', () => {
@@ -1192,7 +1183,6 @@ describe('rules_list with show only capability', () => {
   afterEach(() => {
     jest.clearAllMocks();
     queryClient.clear();
-    cleanup();
   });
 
   describe('rules_list with enabled items', () => {
@@ -1434,7 +1424,6 @@ describe.skip('MaintenanceWindowsMock', () => {
   afterEach(() => {
     jest.clearAllMocks();
     queryClient.clear();
-    cleanup();
   });
 
   it('renders MaintenanceWindowCallout if one exists', async () => {

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { act, waitFor, renderHook } from '@testing-library/react';
+import { waitFor, renderHook } from '@testing-library/react';
 import { useKibana } from '../../common/lib/kibana';
 import { useSubAction, UseSubActionParams } from './use_sub_action';
 
@@ -54,9 +54,7 @@ describe('useSubAction', () => {
     const { rerender } = renderHook(useSubAction, { initialProps: params });
     await waitFor(() => expect(mockHttpPost).toHaveBeenCalledTimes(1));
 
-    await act(async () => {
-      rerender({ ...params, subAction: 'test-2' });
-    });
+    rerender({ ...params, subAction: 'test-2' });
 
     await waitFor(() => expect(mockHttpPost).toHaveBeenCalledTimes(2));
   });
@@ -65,9 +63,7 @@ describe('useSubAction', () => {
     const { rerender } = renderHook(useSubAction, { initialProps: params });
     await waitFor(() => expect(mockHttpPost).toHaveBeenCalledTimes(1));
 
-    await act(async () => {
-      rerender({ ...params, connectorId: 'test-id-2' });
-    });
+    rerender({ ...params, connectorId: 'test-id-2' });
 
     await waitFor(() => expect(mockHttpPost).toHaveBeenCalledTimes(2));
   });
@@ -80,14 +76,12 @@ describe('useSubAction', () => {
 
     const previous = result.current;
 
-    await act(async () => {
-      rerender({ ...params, subActionParams: { foo: 'bar' } });
-    });
+    rerender({ ...params, subActionParams: { foo: 'bar' } });
 
     await waitFor(() => {
       expect(result.current.response).toBe(previous.response);
-      expect(mockHttpPost).toHaveBeenCalledTimes(1);
     });
+    expect(mockHttpPost).toHaveBeenCalledTimes(1);
   });
 
   it('executes sub action if subActionParams changes and values are not equal', async () => {
@@ -98,14 +92,12 @@ describe('useSubAction', () => {
 
     const previous = result.current;
 
-    await act(async () => {
-      rerender({ ...params, subActionParams: { foo: 'baz' } });
-    });
+    rerender({ ...params, subActionParams: { foo: 'baz' } });
 
     await waitFor(() => {
       expect(result.current.response).not.toBe(previous.response);
-      expect(mockHttpPost).toHaveBeenCalledTimes(2);
     });
+    expect(mockHttpPost).toHaveBeenCalledTimes(2);
   });
 
   it('returns an error correctly', async () => {

@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { fromKueryExpression } from '@kbn/es-query';
@@ -89,8 +89,8 @@ describe('Connector rules list', () => {
 
     await waitFor(() => {
       expect(screen.getByTestId('connectorRulesList')).toBeInTheDocument();
-      expect(screen.queryAllByTestId('connectorRuleRow')).toHaveLength(mockedRulesData.length);
     });
+    expect(screen.queryAllByTestId('connectorRuleRow')).toHaveLength(mockedRulesData.length);
   });
 
   it('should allow for sorting by name', async () => {
@@ -116,10 +116,9 @@ describe('Connector rules list', () => {
 
     const nameColumnTableHeaderEl = await screen.findByTestId('tableHeaderCell_name_0');
 
-    const el = nameColumnTableHeaderEl.querySelector(
-      '[data-test-subj="tableHeaderCell_name_0"] .euiTableHeaderButton'
-    ) as HTMLElement;
-
+    const el = within(nameColumnTableHeaderEl).getByRole('button', {
+      name: /name/i,
+    });
     fireEvent.click(el);
 
     expect(loadRulesWithKueryFilter).toHaveBeenLastCalledWith(

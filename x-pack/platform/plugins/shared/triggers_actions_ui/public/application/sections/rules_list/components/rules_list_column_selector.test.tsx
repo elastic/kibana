@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { render, renderHook } from '@testing-library/react';
+import { render, renderHook, screen } from '@testing-library/react';
 import React from 'react';
 import {
   RulesListColumns,
@@ -80,8 +80,8 @@ describe('useRulesListColumnSelector', () => {
       },
     ]);
 
-    const { getByText } = render(<>{ColumnSelector}</>);
-    expect(getByText('Columns')).toBeInTheDocument();
+    render(<>{ColumnSelector}</>);
+    expect(screen.getByText('Columns')).toBeInTheDocument();
   });
 
   it('Lets hide last duration column', () => {
@@ -107,8 +107,8 @@ describe('useRulesListColumnSelector', () => {
       { field: 'schedule.interval', name: 'Interval' },
     ]);
 
-    const { getByLabelText } = render(<>{ColumnSelector}</>);
-    expect(getByLabelText('- Active: 5 out of 6')).toBeInTheDocument();
+    render(<>{ColumnSelector}</>);
+    expect(screen.getByLabelText('- Active: 5 out of 6')).toBeInTheDocument();
   });
 
   it('Lets hide last lastExecutionDate, Interval and duration columns', () => {
@@ -126,7 +126,7 @@ describe('useRulesListColumnSelector', () => {
       { field: 'notify', name: 'Html Notify' },
     ]);
 
-    const { getByLabelText } = render(<>{ColumnSelector}</>);
-    expect(getByLabelText('- Active: 3 out of 6')).toBeInTheDocument();
+    render(<>{ColumnSelector}</>);
+    expect(screen.getByLabelText('- Active: 3 out of 6')).toBeInTheDocument();
   });
 });

@@ -547,11 +547,12 @@ describe('rule_add', () => {
     );
 
     await waitFor(() => {
-      expect(fetchUiHealthStatus).toHaveBeenCalledTimes(1);
-      expect(fetchAlertingFrameworkHealth).toHaveBeenCalledTimes(1);
       expect(loadActionTypes).toHaveBeenCalledTimes(1);
-      expect(loadAllActions).toHaveBeenCalledTimes(1);
     });
+    expect(fetchUiHealthStatus).toHaveBeenCalledTimes(1);
+    expect(fetchAlertingFrameworkHealth).toHaveBeenCalledTimes(1);
+
+    expect(loadAllActions).toHaveBeenCalledTimes(1);
   });
 
   it('should not load connectors and connector types when there is not an encryptionKey', async () => {
@@ -580,10 +581,10 @@ describe('rule_add', () => {
 
     await waitFor(() => {
       expect(fetchUiHealthStatus).toHaveBeenCalledTimes(1);
-      expect(fetchAlertingFrameworkHealth).toHaveBeenCalledTimes(1);
-      expect(loadActionTypes).not.toHaveBeenCalled();
-      expect(loadAllActions).not.toHaveBeenCalled();
     });
+    expect(fetchAlertingFrameworkHealth).toHaveBeenCalledTimes(1);
+    expect(loadActionTypes).not.toHaveBeenCalled();
+    expect(loadAllActions).not.toHaveBeenCalled();
 
     expect(
       await screen.findByText('You must configure an encryption key to use Alerting.', {
