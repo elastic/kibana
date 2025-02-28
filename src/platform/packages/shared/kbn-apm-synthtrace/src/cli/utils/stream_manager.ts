@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { pull } from 'lodash';
+import { once, pull } from 'lodash';
 import { PassThrough, finished } from 'stream';
 
 export class StreamManager {
@@ -46,9 +46,9 @@ export class StreamManager {
       });
   }
 
-  init() {
+  init = once(() => {
     process.on('SIGINT', () => this.teardown());
     process.on('SIGTERM', () => this.teardown());
     process.on('SIGQUIT', () => this.teardown());
-  }
+  });
 }

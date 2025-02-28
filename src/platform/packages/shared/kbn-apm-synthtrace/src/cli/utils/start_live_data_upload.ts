@@ -27,22 +27,6 @@ export async function startLiveDataUpload({
 }) {
   const file = runOptions.file;
 
-  const { logger, clients } = await bootstrap(runOptions);
-
-  const scenario = await getScenario({ file, logger });
-  const {
-    generate,
-    bootstrap: scenarioBootsrap,
-    teardown: scenarioTearDown,
-  } = await scenario({ ...runOptions, logger });
-
-  if (scenarioBootsrap) {
-    await scenarioBootsrap(clients);
-  }
-
-  const bucketSizeInMs = runOptions.liveBucketSize;
-  let requestedUntil = start;
-
   const streamManager = new StreamManager(async () => {
     if (scenarioTearDown) {
       try {
@@ -54,6 +38,24 @@ export async function startLiveDataUpload({
     }
   });
 
+  streamManager.init();
+
+  const { logger, clients } = await bootstrap(runOptions);
+
+  const scenario = await getScenario({ file, logger });
+  const {
+    generate,
+    bootstrap: scenarioBootstrap,
+    teardown: scenarioTearDown,
+  } = await scenario({ ...runOptions, logger });
+
+  if (scenarioBootstrap) {
+    await scenarioBootstrap(clients);
+  }
+
+  const bucketSizeInMs = runOptions.liveBucketSize;
+  let requestedUntil = start;
+
   // @ts-expect-error upgrade typescript v4.9.5
   const cachedStreams: WeakMap<SynthtraceEsClient, PassThrough> = new WeakMap();
 
@@ -61,15 +63,19 @@ export async function startLiveDataUpload({
     const now = Date.now();
 
     if (now > requestedUntil.getTime()) {
-      const bucketFrom = requestedUntil;
-      const bucketTo = new Date(requestedUntil.getTime() + bucketSizeInMs);
+      const bucketCount = Math.floor((now - requestedUntil.getTime()) / bucketSizeInMs);
+
+      const rangeStart = requestedUntil.getTime();
+      const rangeEnd = rangeStart + bucketCount * bucketSizeInMs;
 
       logger.info(
-        `Requesting ${new Date(bucketFrom).toISOString()} to ${new Date(bucketTo).toISOString()}`
+        `Requesting ${new Date(rangeStart).toISOString()} to ${new Date(
+          rangeEnd
+        ).toISOString()} in ${bucketCount} bucket(s)`
       );
 
       const generatorsAndClients = generate({
-        range: timerange(bucketFrom.getTime(), bucketTo.getTime()),
+        range: timerange(rangeStart, rangeEnd),
         clients,
       });
 
@@ -118,7 +124,7 @@ export async function startLiveDataUpload({
 
       logger.info('Refreshing completed');
 
-      requestedUntil = bucketTo;
+      requestedUntil = new Date(rangeEnd);
     }
   }
 

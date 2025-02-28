@@ -22,12 +22,20 @@ const scenario: Scenario<LogDocument> = async (runOptions) => {
     rpm,
   });
 
+  const log = runOptions.logger;
+
   return {
     bootstrap: async ({ streamsClient }) => {
+      log.debug('Enabling streams');
       await streamsClient.enable();
+
+      log.debug('Forking streams');
 
       for (const generator of generators) {
         const streamName = `logs.${generator.name.toLowerCase()}`;
+
+        log.verbose(`Forking ${streamName}`);
+
         await streamsClient.forkStream('logs', {
           stream: {
             name: streamName,
@@ -38,6 +46,8 @@ const scenario: Scenario<LogDocument> = async (runOptions) => {
             value: generator.filepath,
           },
         });
+
+        log.verbose(`Installing critical events for ${streamName}`);
 
         await streamsClient.putStream(streamName, {
           dashboards: [],
@@ -65,6 +75,8 @@ const scenario: Scenario<LogDocument> = async (runOptions) => {
           }),
         });
       }
+
+      log.debug(`Completed bootsrap`);
     },
     teardown: async ({ streamsClient }) => {
       await streamsClient.disable();

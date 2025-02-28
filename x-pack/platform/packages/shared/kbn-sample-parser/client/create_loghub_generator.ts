@@ -36,7 +36,9 @@ export function createLoghubGenerator({
 
   const filepath = `${system.name}.log`;
 
-  log.debug(`Indexing data for ${system.name} at ${speed.toPrecision(4)}`);
+  log.debug(
+    `Throughput for ${system.name} will be around ${Math.round(targetRpm ?? systemRpm)}rpm`
+  );
 
   return {
     name: system.name,

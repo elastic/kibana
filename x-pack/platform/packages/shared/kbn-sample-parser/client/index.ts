@@ -23,7 +23,13 @@ export class SampleParserClient {
     this.logger = options.logger;
   }
 
-  async getLogGenerators({ rpm }: { rpm?: number }): Promise<StreamLogGenerator[]> {
+  async getLogGenerators({
+    rpm = 10000,
+    distribution = 'uniform',
+  }: {
+    rpm?: number;
+    distribution?: 'relative' | 'uniform';
+  }): Promise<StreamLogGenerator[]> {
     await ensureLoghubRepo({ log: this.logger });
     const systems = await readLoghubSystemFiles({ log: this.logger });
 
@@ -49,8 +55,13 @@ export class SampleParserClient {
 
     return await Promise.all(
       results.map(({ system, parser, rpm: systemRpm, queries }) => {
-        const share = systemRpm / totalRpm;
-        const targetRpm = rpm === undefined ? Math.min(100, systemRpm) : share * rpm;
+        let targetRpm: number;
+        if (distribution === 'relative') {
+          const share = systemRpm / totalRpm;
+          targetRpm = rpm === undefined ? Math.min(100, systemRpm) : share * rpm;
+        } else {
+          targetRpm = Math.round(rpm / results.length);
+        }
 
         return createLoghubGenerator({
           system,

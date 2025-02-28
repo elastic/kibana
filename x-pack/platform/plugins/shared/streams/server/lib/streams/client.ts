@@ -993,7 +993,7 @@ export class StreamsClient {
               references: [],
               version: 1,
               exceptionsList: [],
-              index: [],
+              index: [name, `${name}.*`],
               ...('esql' in query.query
                 ? {
                     type: 'esql',
@@ -1009,7 +1009,7 @@ export class StreamsClient {
             },
             tags: ['streams'],
             schedule: {
-              interval: '1m',
+              interval: '5m',
             },
           },
           options: {

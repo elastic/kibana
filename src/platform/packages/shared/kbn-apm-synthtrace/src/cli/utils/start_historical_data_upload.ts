@@ -46,11 +46,11 @@ export async function startHistoricalDataUpload({
     }
   });
 
+  streamManager.init();
+
   if (scenario.bootstrap) {
     await scenario.bootstrap(clients);
   }
-
-  streamManager.init();
 
   const cores = cpus().length;
 
