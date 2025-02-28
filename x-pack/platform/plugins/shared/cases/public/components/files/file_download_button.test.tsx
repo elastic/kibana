@@ -8,23 +8,19 @@
 import React from 'react';
 import { screen } from '@testing-library/react';
 
-import type { AppMockRenderer } from '../../common/mock';
-import { createAppMockRenderer, mockedTestProvidersOwner } from '../../common/mock';
+import { mockedTestProvidersOwner, renderWithTestingProviders } from '../../common/mock';
 import { FileDownloadButton } from './file_download_button';
 import { basicFileMock } from '../../containers/mock';
 import { constructFileKindIdByOwner } from '../../../common/files';
 
 describe('FileDownloadButton', () => {
-  let appMockRender: AppMockRenderer;
-
   describe('isIcon', () => {
     beforeEach(() => {
       jest.clearAllMocks();
-      appMockRender = createAppMockRenderer();
     });
 
     it('renders download button with correct href', async () => {
-      appMockRender.render(<FileDownloadButton fileId={basicFileMock.id} isIcon={true} />);
+      renderWithTestingProviders(<FileDownloadButton fileId={basicFileMock.id} isIcon={true} />);
 
       expect(await screen.findByTestId('cases-files-download-button')).toBeInTheDocument();
 
@@ -40,11 +36,10 @@ describe('FileDownloadButton', () => {
   describe('not isIcon', () => {
     beforeEach(() => {
       jest.clearAllMocks();
-      appMockRender = createAppMockRenderer();
     });
 
     it('renders download button with correct href', async () => {
-      appMockRender.render(<FileDownloadButton fileId={basicFileMock.id} />);
+      renderWithTestingProviders(<FileDownloadButton fileId={basicFileMock.id} />);
 
       expect(await screen.findByTestId('cases-files-download-button')).toBeInTheDocument();
 

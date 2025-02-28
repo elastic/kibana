@@ -15,8 +15,7 @@ import routeData from 'react-router';
 import { useUpdateComment } from '../../containers/use_update_comment';
 import { basicCase, caseUserActions, getUserAction } from '../../containers/mock';
 import { UserActions } from '.';
-import type { AppMockRenderer } from '../../common/mock';
-import { createAppMockRenderer } from '../../common/mock';
+
 import { getCaseConnectorsMockResponse } from '../../common/mock/connectors';
 import type { UserActivityParams } from '../user_actions_activity_bar/types';
 import { useFindCaseUserActions } from '../../containers/use_find_case_user_actions';
@@ -24,6 +23,7 @@ import { defaultUseFindCaseUserActions } from '../case_view/mocks';
 import { waitForComponentToUpdate } from '../../common/test_utils';
 import { useInfiniteFindCaseUserActions } from '../../containers/use_infinite_find_case_user_actions';
 import { getMockBuilderArgs } from './mock';
+import { renderWithTestingProviders } from '../../common/mock';
 
 const onUpdateField = jest.fn();
 
@@ -75,7 +75,6 @@ describe(`UserActions`, () => {
   const sampleData = {
     content: 'what a great comment update',
   };
-  let appMockRender: AppMockRenderer;
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -87,7 +86,6 @@ describe(`UserActions`, () => {
     useInfiniteFindCaseUserActionsMock.mockReturnValue({ isLoading: false, data: undefined });
 
     jest.spyOn(routeData, 'useParams').mockReturnValue({ detailName: 'case-id' });
-    appMockRender = createAppMockRenderer();
   });
 
   it('Renders service now update line with top and bottom when push is required', async () => {
@@ -108,7 +106,7 @@ describe(`UserActions`, () => {
       caseConnectors,
     };
 
-    appMockRender.render(<UserActions {...props} />);
+    renderWithTestingProviders(<UserActions {...props} />);
 
     await waitForComponentToUpdate();
 
@@ -128,14 +126,14 @@ describe(`UserActions`, () => {
       data: { userActions: ourActions },
     });
 
-    appMockRender.render(<UserActions {...defaultProps} />);
+    renderWithTestingProviders(<UserActions {...defaultProps} />);
 
     expect(await screen.findByTestId('top-footer')).toBeInTheDocument();
     expect(screen.queryByTestId('bottom-footer')).not.toBeInTheDocument();
   });
 
   it('Switches to markdown when edit is clicked and back to panel when canceled', async () => {
-    appMockRender.render(<UserActions {...defaultProps} />);
+    renderWithTestingProviders(<UserActions {...defaultProps} />);
 
     await userEvent.click(
       await within(
@@ -161,7 +159,7 @@ describe(`UserActions`, () => {
   });
 
   it('calls update comment when comment markdown is saved', async () => {
-    appMockRender.render(<UserActions {...defaultProps} />);
+    renderWithTestingProviders(<UserActions {...defaultProps} />);
 
     await userEvent.click(
       await within(
@@ -205,7 +203,7 @@ describe(`UserActions`, () => {
   it('shows quoted text in last MarkdownEditorTextArea', async () => {
     const quoteableText = `> Solve this fast! \n\n`;
 
-    appMockRender.render(<UserActions {...defaultProps} />);
+    renderWithTestingProviders(<UserActions {...defaultProps} />);
 
     expect((await screen.findByTestId(`euiMarkdownEditorTextArea`)).textContent).not.toContain(
       quoteableText
@@ -225,7 +223,7 @@ describe(`UserActions`, () => {
   });
 
   it('does not show add comment markdown when history filter is selected', async () => {
-    appMockRender.render(
+    renderWithTestingProviders(
       <UserActions
         {...defaultProps}
         userActivityQueryParams={{ ...userActivityQueryParams, type: 'action' }}

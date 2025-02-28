@@ -6,11 +6,11 @@
  */
 
 import React from 'react';
-import { waitFor } from '@testing-library/react';
+import { waitFor, screen } from '@testing-library/react';
 
 import { AllCases } from '.';
-import type { AppMockRenderer } from '../../common/mock';
-import { createAppMockRenderer, noCreateCasesPermissions } from '../../common/mock';
+
+import { noCreateCasesPermissions, renderWithTestingProviders } from '../../common/mock';
 import { useGetActionLicense } from '../../containers/use_get_action_license';
 import { connectorsMock, useGetCasesMockState } from '../../containers/mock';
 import { useGetSupportedActionConnectors } from '../../containers/configure/use_get_supported_action_connectors';
@@ -81,12 +81,6 @@ describe('AllCases', () => {
     jest.useRealTimers();
   });
 
-  let appMockRender: AppMockRenderer;
-
-  beforeEach(() => {
-    appMockRender = createAppMockRenderer();
-  });
-
   afterEach(() => {
     jest.clearAllMocks();
   });
@@ -105,17 +99,19 @@ describe('AllCases', () => {
     });
 
     it('should render the create new case link when the user has create privileges', async () => {
-      const result = appMockRender.render(<AllCases />);
+      renderWithTestingProviders(<AllCases />);
       await waitFor(() => {
-        expect(result.getByTestId('cases-table-add-case')).toBeInTheDocument();
+        expect(screen.getByTestId('cases-table-add-case')).toBeInTheDocument();
       });
     });
 
     it('should not render the create new case link when the user does not have create privileges', async () => {
-      appMockRender = createAppMockRenderer({ permissions: noCreateCasesPermissions() });
-      const result = appMockRender.render(<AllCases />);
+      renderWithTestingProviders(<AllCases />, {
+        wrapperProps: { permissions: noCreateCasesPermissions() },
+      });
+
       await waitFor(() => {
-        expect(result.queryByTestId('cases-table-add-case')).not.toBeInTheDocument();
+        expect(screen.queryByTestId('cases-table-add-case')).not.toBeInTheDocument();
       });
     });
   });
@@ -125,38 +121,33 @@ describe('AllCases', () => {
       ...defaultGetCases,
     });
 
-    const result = appMockRender.render(<AllCases />);
+    renderWithTestingProviders(<AllCases />);
 
-    await waitFor(() => {
-      expect(result.getByTestId('openStatsHeader')).toBeInTheDocument();
-      expect(result.getByText('20')).toBeInTheDocument();
-    });
+    expect(await screen.findByTestId('openStatsHeader')).toBeInTheDocument();
+    expect(screen.getByText('20')).toBeInTheDocument();
 
-    await waitFor(() => {
-      expect(result.getByTestId('inProgressStatsHeader')).toBeInTheDocument();
-      expect(result.getByText('40')).toBeInTheDocument();
-    });
+    expect(await screen.findByTestId('inProgressStatsHeader')).toBeInTheDocument();
+    expect(screen.getByText('40')).toBeInTheDocument();
 
-    await waitFor(() => {
-      expect(result.getByTestId('closedStatsHeader')).toBeInTheDocument();
-      expect(result.getByText('130')).toBeInTheDocument();
-    });
+    expect(await screen.findByTestId('closedStatsHeader')).toBeInTheDocument();
+    expect(screen.getByText('130')).toBeInTheDocument();
   });
 
   it('should render the loading spinner when loading stats', async () => {
-    const result = appMockRender.render(<AllCases />);
+    renderWithTestingProviders(<AllCases />);
 
     await waitFor(() => {
-      expect(result.getByTestId('openStatsHeader-loading-spinner')).toBeInTheDocument();
-      expect(result.getByTestId('inProgressStatsHeader-loading-spinner')).toBeInTheDocument();
-      expect(result.getByTestId('closedStatsHeader-loading-spinner')).toBeInTheDocument();
+      expect(screen.getByTestId('openStatsHeader-loading-spinner')).toBeInTheDocument();
     });
+
+    expect(screen.getByTestId('inProgressStatsHeader-loading-spinner')).toBeInTheDocument();
+    expect(screen.getByTestId('closedStatsHeader-loading-spinner')).toBeInTheDocument();
   });
 
   it('should render the case callouts', async () => {
-    const result = appMockRender.render(<AllCases />);
+    renderWithTestingProviders(<AllCases />);
     await waitFor(() => {
-      expect(result.getByTestId('case-callouts')).toBeInTheDocument();
+      expect(screen.getByTestId('case-callouts')).toBeInTheDocument();
     });
   });
 });

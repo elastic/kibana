@@ -10,11 +10,10 @@ import React from 'react';
 import { screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
-import type { AppMockRenderer } from '../../common/mock';
 import {
   buildCasesPermissions,
-  createAppMockRenderer,
   mockedTestProvidersOwner,
+  renderWithTestingProviders,
 } from '../../common/mock';
 import { constructFileKindIdByOwner } from '../../../common/files';
 
@@ -28,18 +27,18 @@ const useDeleteFileAttachmentMock = useDeleteFileAttachment as jest.Mock;
 
 // Failing: See https://github.com/elastic/kibana/issues/207257
 describe('FileActionsPopoverButton', () => {
-  let appMockRender: AppMockRenderer;
   const mutate = jest.fn();
 
   useDeleteFileAttachmentMock.mockReturnValue({ isLoading: false, mutate });
 
   beforeEach(() => {
     jest.clearAllMocks();
-    appMockRender = createAppMockRenderer();
   });
 
   it('renders file actions popover button correctly', async () => {
-    appMockRender.render(<FileActionsPopoverButton caseId={basicCaseId} theFile={basicFileMock} />);
+    renderWithTestingProviders(
+      <FileActionsPopoverButton caseId={basicCaseId} theFile={basicFileMock} />
+    );
 
     expect(
       await screen.findByTestId(`cases-files-actions-popover-button-${basicFileMock.id}`)
@@ -47,7 +46,9 @@ describe('FileActionsPopoverButton', () => {
   });
 
   it('clicking the button opens the popover', async () => {
-    appMockRender.render(<FileActionsPopoverButton caseId={basicCaseId} theFile={basicFileMock} />);
+    renderWithTestingProviders(
+      <FileActionsPopoverButton caseId={basicCaseId} theFile={basicFileMock} />
+    );
 
     await userEvent.click(
       await screen.findByTestId(`cases-files-actions-popover-button-${basicFileMock.id}`)
@@ -62,7 +63,7 @@ describe('FileActionsPopoverButton', () => {
   });
 
   it('does not render the copy hash button if the file has no hashes', async () => {
-    appMockRender.render(
+    renderWithTestingProviders(
       <FileActionsPopoverButton caseId={basicCaseId} theFile={{ ...basicFileMock, hash: {} }} />
     );
 
@@ -74,11 +75,11 @@ describe('FileActionsPopoverButton', () => {
       await screen.findByTestId(`cases-files-popover-${basicFileMock.id}`)
     ).toBeInTheDocument();
 
-    expect(await screen.queryByTestId('cases-files-copy-hash-button')).not.toBeInTheDocument();
+    expect(await screen.findByTestId('cases-files-copy-hash-button')).not.toBeInTheDocument();
   });
 
   it('only renders menu items for the enabled hashes', async () => {
-    appMockRender.render(
+    renderWithTestingProviders(
       <FileActionsPopoverButton
         caseId={basicCaseId}
         theFile={{ ...basicFileMock, hash: { sha1: 'sha1' } }}
@@ -108,7 +109,9 @@ describe('FileActionsPopoverButton', () => {
   });
 
   it('clicking the copy file hash button rerenders the popover correctly', async () => {
-    appMockRender.render(<FileActionsPopoverButton caseId={basicCaseId} theFile={basicFileMock} />);
+    renderWithTestingProviders(
+      <FileActionsPopoverButton caseId={basicCaseId} theFile={basicFileMock} />
+    );
 
     const popoverButton = await screen.findByTestId(
       `cases-files-actions-popover-button-${basicFileMock.id}`
@@ -159,7 +162,7 @@ describe('FileActionsPopoverButton', () => {
     });
 
     it('clicking copy md5 file hash copies the hash to the clipboard', async () => {
-      appMockRender.render(
+      irenderWithTestingProviders(
         <FileActionsPopoverButton caseId={basicCaseId} theFile={basicFileMock} />
       );
 
@@ -181,7 +184,7 @@ describe('FileActionsPopoverButton', () => {
     });
 
     it('clicking copy SHA1 file hash copies the hash to the clipboard', async () => {
-      appMockRender.render(
+      renderWithTestingProviders(
         <FileActionsPopoverButton caseId={basicCaseId} theFile={basicFileMock} />
       );
 
@@ -203,7 +206,7 @@ describe('FileActionsPopoverButton', () => {
     });
 
     it('clicking copy SHA256 file hash copies the hash to the clipboard', async () => {
-      appMockRender.render(
+      renderWithTestingProviders(
         <FileActionsPopoverButton caseId={basicCaseId} theFile={basicFileMock} />
       );
 
@@ -227,7 +230,7 @@ describe('FileActionsPopoverButton', () => {
 
   describe('delete button', () => {
     it('clicking delete button opens the confirmation modal', async () => {
-      appMockRender.render(
+      renderWithTestingProviders(
         <FileActionsPopoverButton caseId={basicCaseId} theFile={basicFileMock} />
       );
 
@@ -243,7 +246,7 @@ describe('FileActionsPopoverButton', () => {
     });
 
     it('clicking delete button in the confirmation modal calls deleteFileAttachment with proper params', async () => {
-      appMockRender.render(
+      renderWithTestingProviders(
         <FileActionsPopoverButton caseId={basicCaseId} theFile={basicFileMock} />
       );
 
@@ -261,20 +264,22 @@ describe('FileActionsPopoverButton', () => {
 
       await waitFor(() => {
         expect(mutate).toHaveBeenCalledTimes(1);
-        expect(mutate).toHaveBeenCalledWith({
-          caseId: basicCaseId,
-          fileId: basicFileMock.id,
-        });
+      });
+
+      expect(mutate).toHaveBeenCalledWith({
+        caseId: basicCaseId,
+        fileId: basicFileMock.id,
       });
     });
 
     it('delete button is not rendered if user has no delete permission', async () => {
-      appMockRender = createAppMockRenderer({
-        permissions: buildCasesPermissions({ delete: false }),
-      });
-
-      appMockRender.render(
-        <FileActionsPopoverButton caseId={basicCaseId} theFile={basicFileMock} />
+      renderWithTestingProviders(
+        <FileActionsPopoverButton caseId={basicCaseId} theFile={basicFileMock} />,
+        {
+          wrapperProps: {
+            permissions: buildCasesPermissions({ delete: false }),
+          },
+        }
       );
 
       await userEvent.click(
@@ -287,7 +292,7 @@ describe('FileActionsPopoverButton', () => {
 
   describe('download button', () => {
     it('renders download button with correct href', async () => {
-      appMockRender.render(
+      renderWithTestingProviders(
         <FileActionsPopoverButton caseId={basicCaseId} theFile={basicFileMock} />
       );
 
@@ -299,10 +304,11 @@ describe('FileActionsPopoverButton', () => {
 
       await waitFor(() => {
         expect(appMockRender.getFilesClient().getDownloadHref).toBeCalled();
-        expect(appMockRender.getFilesClient().getDownloadHref).toHaveBeenCalledWith({
-          fileKind: constructFileKindIdByOwner(mockedTestProvidersOwner[0]),
-          id: basicFileMock.id,
-        });
+      });
+
+      expect(appMockRender.getFilesClient().getDownloadHref).toHaveBeenCalledWith({
+        fileKind: constructFileKindIdByOwner(mockedTestProvidersOwner[0]),
+        id: basicFileMock.id,
       });
     });
   });

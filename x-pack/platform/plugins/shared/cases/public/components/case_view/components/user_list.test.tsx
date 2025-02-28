@@ -11,10 +11,9 @@ import { UserList } from './user_list';
 import * as i18n from '../translations';
 import { basicCase } from '../../../containers/mock';
 import { useCaseViewNavigation } from '../../../common/navigation/hooks';
-import type { AppMockRenderer } from '../../../common/mock';
-import { createAppMockRenderer } from '../../../common/mock';
 import userEvent from '@testing-library/user-event';
 import { userProfilesMap } from '../../../containers/user_profiles/api.mock';
+import { renderWithTestingProviders } from '../../../common/mock';
 
 jest.mock('../../../common/navigation/hooks');
 
@@ -32,17 +31,16 @@ describe('UserList ', () => {
 
   const open = jest.fn();
   const getCaseViewUrl = jest.fn().mockReturnValue(caseLink);
-  let appMockRender: AppMockRenderer;
 
   beforeEach(() => {
     jest.clearAllMocks();
-    appMockRender = createAppMockRenderer();
+
     useCaseViewNavigationMock.mockReturnValue({ getCaseViewUrl });
     window.open = open;
   });
 
   it('triggers mailto when email icon clicked', async () => {
-    appMockRender.render(
+    renderWithTestingProviders(
       <UserList
         theCase={basicCase}
         headline={i18n.REPORTER}
@@ -63,7 +61,7 @@ describe('UserList ', () => {
   });
 
   it('sort the users correctly', () => {
-    appMockRender.render(
+    renderWithTestingProviders(
       <UserList
         theCase={basicCase}
         headline={i18n.REPORTER}
@@ -89,15 +87,20 @@ describe('UserList ', () => {
   });
 
   it('return null if no users', () => {
-    const result = appMockRender.render(
-      <UserList theCase={basicCase} headline={i18n.REPORTER} users={[]} />
+    renderWithTestingProviders(
+      <UserList
+        theCase={basicCase}
+        headline={i18n.REPORTER}
+        users={[]}
+        dataTestSubj={'user-list-wrapper'}
+      />
     );
 
-    expect(result.container).toBeEmptyDOMElement();
+    expect(screen.queryByTestId('user-list-wrapper')).not.toBeInTheDocument();
   });
 
   it('shows the loading spinner if loading', () => {
-    appMockRender.render(
+    renderWithTestingProviders(
       <UserList
         theCase={basicCase}
         headline={i18n.REPORTER}
@@ -114,7 +117,7 @@ describe('UserList ', () => {
   });
 
   it('should render users with user profiles correctly', () => {
-    appMockRender.render(
+    renderWithTestingProviders(
       <UserList
         theCase={basicCase}
         headline={i18n.REPORTER}
@@ -137,7 +140,7 @@ describe('UserList ', () => {
   });
 
   it('should not render invalid users', () => {
-    appMockRender.render(
+    renderWithTestingProviders(
       <UserList
         theCase={basicCase}
         headline={i18n.REPORTER}
@@ -171,7 +174,7 @@ describe('UserList ', () => {
   });
 
   it('should render Unknown users correctly', () => {
-    appMockRender.render(
+    renderWithTestingProviders(
       <UserList
         theCase={basicCase}
         headline={i18n.REPORTER}

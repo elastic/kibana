@@ -9,17 +9,14 @@ import React from 'react';
 import { screen, waitFor } from '@testing-library/react';
 import userEvent, { type UserEvent } from '@testing-library/user-event';
 
-import type { AppMockRenderer } from '../../common/mock';
-
 import { constructFileKindIdByOwner } from '../../../common/files';
-import { createAppMockRenderer, mockedTestProvidersOwner } from '../../common/mock';
+import { mockedTestProvidersOwner, renderWithTestingProviders } from '../../common/mock';
 import { basicFileMock } from '../../containers/mock';
 import { FilePreview } from './file_preview';
 
 // FLAKY: https://github.com/elastic/kibana/issues/182364
 describe('FilePreview', () => {
   let user: UserEvent;
-  let appMockRender: AppMockRenderer;
 
   beforeAll(() => {
     jest.useFakeTimers();
@@ -33,15 +30,12 @@ describe('FilePreview', () => {
     jest.clearAllMocks();
     // Workaround for timeout via https://github.com/testing-library/user-event/issues/833#issuecomment-1171452841
     user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
-    appMockRender = createAppMockRenderer();
-  });
-
-  afterEach(async () => {
-    await appMockRender.clearQueryCache();
   });
 
   it('FilePreview rendered correctly', async () => {
-    appMockRender.render(<FilePreview closePreview={jest.fn()} selectedFile={basicFileMock} />);
+    renderWithTestingProviders(
+      <FilePreview closePreview={jest.fn()} selectedFile={basicFileMock} />
+    );
 
     await waitFor(() =>
       expect(appMockRender.getFilesClient().getDownloadHref).toHaveBeenCalledWith({
@@ -56,7 +50,9 @@ describe('FilePreview', () => {
   it('pressing escape calls closePreview', async () => {
     const closePreview = jest.fn();
 
-    appMockRender.render(<FilePreview closePreview={closePreview} selectedFile={basicFileMock} />);
+    renderWithTestingProviders(
+      <FilePreview closePreview={closePreview} selectedFile={basicFileMock} />
+    );
 
     await waitFor(() =>
       expect(appMockRender.getFilesClient().getDownloadHref).toHaveBeenCalledWith({

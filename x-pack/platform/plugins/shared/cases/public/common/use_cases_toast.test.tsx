@@ -6,14 +6,13 @@
  */
 
 import { useKibana, useToasts } from './lib/kibana';
-import type { AppMockRenderer } from './mock';
-import { createAppMockRenderer, TestProviders } from './mock';
+import { TestProviders, renderWithTestingProviders } from './mock';
 import { CaseToastSuccessContent, useCasesToast } from './use_cases_toast';
 import { alertComment, basicComment, mockCase } from '../containers/mock';
 import React from 'react';
 import userEvent from '@testing-library/user-event';
 import type { SupportedCaseAttachment } from '../types';
-import { getByTestId, queryByTestId, screen, renderHook } from '@testing-library/react';
+import { screen, renderHook } from '@testing-library/react';
 import { OWNER_INFO } from '../../common/constants';
 import { useApplication } from './lib/kibana/use_application';
 
@@ -149,11 +148,9 @@ describe('Use cases toast hook', () => {
     });
 
     describe('Toast content', () => {
-      let appMockRender: AppMockRenderer;
       const onViewCaseClick = jest.fn();
 
       beforeEach(() => {
-        appMockRender = createAppMockRenderer();
         onViewCaseClick.mockReset();
       });
 
@@ -197,34 +194,30 @@ describe('Use cases toast hook', () => {
       });
 
       it('renders a correct successful message content', () => {
-        const result = appMockRender.render(
+        renderWithTestingProviders(
           <CaseToastSuccessContent content={'my content'} onViewCaseClick={onViewCaseClick} />
         );
-        expect(result.getByTestId('toaster-content-sync-text')).toHaveTextContent('my content');
-        expect(result.getByTestId('toaster-content-case-view-link')).toHaveTextContent('View case');
+        expect(screen.getByTestId('toaster-content-sync-text')).toHaveTextContent('my content');
+        expect(screen.getByTestId('toaster-content-case-view-link')).toHaveTextContent('View case');
         expect(onViewCaseClick).not.toHaveBeenCalled();
       });
 
       it('renders a correct successful message without content', () => {
-        const result = appMockRender.render(
-          <CaseToastSuccessContent onViewCaseClick={onViewCaseClick} />
-        );
-        expect(result.queryByTestId('toaster-content-sync-text')).toBeFalsy();
-        expect(result.getByTestId('toaster-content-case-view-link')).toHaveTextContent('View case');
+        renderWithTestingProviders(<CaseToastSuccessContent onViewCaseClick={onViewCaseClick} />);
+        expect(screen.queryByTestId('toaster-content-sync-text')).toBeFalsy();
+        expect(screen.getByTestId('toaster-content-case-view-link')).toHaveTextContent('View case');
         expect(onViewCaseClick).not.toHaveBeenCalled();
       });
 
       it('Calls the onViewCaseClick when clicked', async () => {
-        const result = appMockRender.render(
-          <CaseToastSuccessContent onViewCaseClick={onViewCaseClick} />
-        );
+        renderWithTestingProviders(<CaseToastSuccessContent onViewCaseClick={onViewCaseClick} />);
 
-        await userEvent.click(result.getByTestId('toaster-content-case-view-link'));
+        await userEvent.click(screen.getByTestId('toaster-content-case-view-link'));
         expect(onViewCaseClick).toHaveBeenCalled();
       });
 
       it('hides the view case link when onViewCaseClick is not defined', () => {
-        appMockRender.render(<CaseToastSuccessContent />);
+        <CaseToastSuccessContent />;
 
         expect(screen.queryByTestId('toaster-content-case-view-link')).not.toBeInTheDocument();
       });

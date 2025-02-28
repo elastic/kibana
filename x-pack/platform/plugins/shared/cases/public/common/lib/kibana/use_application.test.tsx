@@ -9,16 +9,14 @@ import type { PublicAppInfo } from '@kbn/core-application-browser';
 import { AppStatus } from '@kbn/core-application-browser';
 import { renderHook } from '@testing-library/react';
 import { BehaviorSubject, Subject } from 'rxjs';
-import type { AppMockRenderer } from '../../mock';
-import { createAppMockRenderer } from '../../mock';
 import { useApplication } from './use_application';
+import { TestProviders } from '../../mock';
+import { coreMock } from '@kbn/core/public/mocks';
+import React from 'react';
 
 describe('useApplication', () => {
-  let appMockRender: AppMockRenderer;
-
   beforeEach(() => {
     jest.clearAllMocks();
-    appMockRender = createAppMockRenderer();
   });
 
   const getApp = (props: Partial<PublicAppInfo> = {}): PublicAppInfo => ({
@@ -34,7 +32,7 @@ describe('useApplication', () => {
 
   it('returns the appId and the appTitle correctly', () => {
     const { result } = renderHook(() => useApplication(), {
-      wrapper: appMockRender.AppWrapper,
+      wrapper: TestProviders,
     });
 
     expect(result.current).toEqual({
@@ -44,20 +42,22 @@ describe('useApplication', () => {
   });
 
   it('returns undefined appId and appTitle if the currentAppId observable is not defined', () => {
-    appMockRender.coreStart.application.currentAppId$ = new Subject();
+    const coreStart = coreMock.createStart();
+    coreStart.application.currentAppId$ = new Subject();
 
     const { result } = renderHook(() => useApplication(), {
-      wrapper: appMockRender.AppWrapper,
+      wrapper: (props) => <TestProviders {...props} coreStart={coreStart} />,
     });
 
     expect(result.current).toEqual({});
   });
 
   it('returns undefined appTitle if the applications observable is not defined', () => {
-    appMockRender.coreStart.application.applications$ = new Subject();
+    const coreStart = coreMock.createStart();
+    coreStart.application.applications$ = new Subject();
 
     const { result } = renderHook(() => useApplication(), {
-      wrapper: appMockRender.AppWrapper,
+      wrapper: (props) => <TestProviders {...props} coreStart={coreStart} />,
     });
 
     expect(result.current).toEqual({
@@ -67,12 +67,13 @@ describe('useApplication', () => {
   });
 
   it('returns the label as appTitle', () => {
-    appMockRender.coreStart.application.applications$ = new BehaviorSubject(
+    const coreStart = coreMock.createStart();
+    coreStart.application.applications$ = new BehaviorSubject(
       new Map([['testAppId', getApp({ category: { id: 'test-label-id', label: 'Test label' } })]])
     );
 
     const { result } = renderHook(() => useApplication(), {
-      wrapper: appMockRender.AppWrapper,
+      wrapper: (props) => <TestProviders {...props} coreStart={coreStart} />,
     });
 
     expect(result.current).toEqual({
@@ -82,12 +83,13 @@ describe('useApplication', () => {
   });
 
   it('returns the title as appTitle if the categories label is missing', () => {
-    appMockRender.coreStart.application.applications$ = new BehaviorSubject(
+    const coreStart = coreMock.createStart();
+    coreStart.application.applications$ = new BehaviorSubject(
       new Map([['testAppId', getApp({ title: 'Test title' })]])
     );
 
     const { result } = renderHook(() => useApplication(), {
-      wrapper: appMockRender.AppWrapper,
+      wrapper: (props) => <TestProviders {...props} coreStart={coreStart} />,
     });
 
     expect(result.current).toEqual({
@@ -97,10 +99,11 @@ describe('useApplication', () => {
   });
 
   it('gets the value from the default value of the currentAppId observable if it exists', () => {
-    appMockRender.coreStart.application.currentAppId$ = new BehaviorSubject('new-test-id');
+    const coreStart = coreMock.createStart();
+    coreStart.application.currentAppId$ = new BehaviorSubject('new-test-id');
 
     const { result } = renderHook(() => useApplication(), {
-      wrapper: appMockRender.AppWrapper,
+      wrapper: (props) => <TestProviders {...props} coreStart={coreStart} />,
     });
 
     expect(result.current).toEqual({ appId: 'new-test-id' });

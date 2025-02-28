@@ -9,8 +9,7 @@ import React from 'react';
 import { screen, waitFor, within } from '@testing-library/react';
 import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
 
-import type { AppMockRenderer } from '../../common/mock';
-import { createAppMockRenderer } from '../../common/mock';
+import { renderWithTestingProviders } from '../../common/mock';
 import { FormTestComponent } from '../../common/test_utils';
 import { customFieldsConfigurationMock } from '../../containers/mock';
 import { userProfiles } from '../../containers/user_profiles/api.mock';
@@ -23,7 +22,7 @@ jest.mock('../../containers/user_profiles/api');
 
 describe('CaseFormFields', () => {
   let user: UserEvent;
-  let appMock: AppMockRenderer;
+
   const onSubmit = jest.fn();
   const formDefaultValue = { tags: [] };
   const defaultProps = {
@@ -42,7 +41,6 @@ describe('CaseFormFields', () => {
   beforeEach(() => {
     // Workaround for timeout via https://github.com/testing-library/user-event/issues/833#issuecomment-1171452841
     user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
-    appMock = createAppMockRenderer();
   });
 
   afterEach(() => {
@@ -50,7 +48,7 @@ describe('CaseFormFields', () => {
   });
 
   it('renders correctly', async () => {
-    appMock.render(
+    renderWithTestingProviders(
       <FormTestComponent formDefaultValue={formDefaultValue} onSubmit={onSubmit}>
         <CaseFormFields {...defaultProps} />
       </FormTestComponent>
@@ -60,7 +58,7 @@ describe('CaseFormFields', () => {
   });
 
   it('renders case fields correctly', async () => {
-    appMock.render(
+    renderWithTestingProviders(
       <FormTestComponent formDefaultValue={formDefaultValue} onSubmit={onSubmit}>
         <CaseFormFields {...defaultProps} />
       </FormTestComponent>
@@ -74,7 +72,7 @@ describe('CaseFormFields', () => {
   });
 
   it('does not render customFields when empty', () => {
-    appMock.render(
+    renderWithTestingProviders(
       <FormTestComponent formDefaultValue={formDefaultValue} onSubmit={onSubmit}>
         <CaseFormFields {...defaultProps} />
       </FormTestComponent>
@@ -84,7 +82,7 @@ describe('CaseFormFields', () => {
   });
 
   it('renders customFields when not empty', async () => {
-    appMock.render(
+    renderWithTestingProviders(
       <FormTestComponent formDefaultValue={formDefaultValue} onSubmit={onSubmit}>
         <CaseFormFields
           isLoading={false}
@@ -97,7 +95,7 @@ describe('CaseFormFields', () => {
   });
 
   it('does not render assignees when no platinum license', () => {
-    appMock.render(
+    renderWithTestingProviders(
       <FormTestComponent formDefaultValue={formDefaultValue} onSubmit={onSubmit}>
         <CaseFormFields {...defaultProps} />
       </FormTestComponent>
@@ -111,19 +109,18 @@ describe('CaseFormFields', () => {
       license: { type: 'platinum' },
     });
 
-    appMock = createAppMockRenderer({ license });
-
-    appMock.render(
+    renderWithTestingProviders(
       <FormTestComponent formDefaultValue={formDefaultValue} onSubmit={onSubmit}>
         <CaseFormFields {...defaultProps} />
-      </FormTestComponent>
+      </FormTestComponent>,
+      { wrapperProps: { license } }
     );
 
     expect(await screen.findByTestId('createCaseAssigneesComboBox')).toBeInTheDocument();
   });
 
   it('calls onSubmit with case fields', async () => {
-    appMock.render(
+    renderWithTestingProviders(
       <FormTestComponent formDefaultValue={formDefaultValue} onSubmit={onSubmit}>
         <CaseFormFields {...defaultProps} />
       </FormTestComponent>
@@ -161,7 +158,7 @@ describe('CaseFormFields', () => {
   });
 
   it('calls onSubmit with existing case fields', async () => {
-    appMock.render(
+    renderWithTestingProviders(
       <FormTestComponent
         formDefaultValue={{
           title: 'Case with Template 1',
@@ -196,7 +193,7 @@ describe('CaseFormFields', () => {
       configurationCustomFields: customFieldsConfigurationMock,
     };
 
-    appMock.render(
+    renderWithTestingProviders(
       <FormTestComponent formDefaultValue={formDefaultValue} onSubmit={onSubmit}>
         <CaseFormFields {...newProps} />
       </FormTestComponent>
@@ -252,7 +249,7 @@ describe('CaseFormFields', () => {
       configurationCustomFields: customFieldsConfigurationMock,
     };
 
-    appMock.render(
+    renderWithTestingProviders(
       <FormTestComponent
         formDefaultValue={{
           customFields: { [customFieldsConfigurationMock[0].key]: 'Test custom filed value' },
@@ -290,12 +287,11 @@ describe('CaseFormFields', () => {
       license: { type: 'platinum' },
     });
 
-    appMock = createAppMockRenderer({ license });
-
-    appMock.render(
+    renderWithTestingProviders(
       <FormTestComponent formDefaultValue={formDefaultValue} onSubmit={onSubmit}>
         <CaseFormFields {...defaultProps} />
-      </FormTestComponent>
+      </FormTestComponent>,
+      { wrapperProps: { license } }
     );
 
     const assigneesComboBox = await screen.findByTestId('createCaseAssigneesComboBox');
@@ -325,9 +321,7 @@ describe('CaseFormFields', () => {
       license: { type: 'platinum' },
     });
 
-    appMock = createAppMockRenderer({ license });
-
-    appMock.render(
+    renderWithTestingProviders(
       <FormTestComponent
         formDefaultValue={{
           assignees: [{ uid: userProfiles[1].uid }],
@@ -336,7 +330,8 @@ describe('CaseFormFields', () => {
         onSubmit={onSubmit}
       >
         <CaseFormFields {...defaultProps} />
-      </FormTestComponent>
+      </FormTestComponent>,
+      { wrapperProps: { license } }
     );
 
     await user.click(await screen.findByText('Submit'));

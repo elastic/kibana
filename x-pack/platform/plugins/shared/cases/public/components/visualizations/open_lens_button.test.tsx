@@ -8,11 +8,11 @@
 import { set } from '@kbn/safer-lodash-set';
 import React from 'react';
 import { screen } from '@testing-library/react';
-import type { AppMockRenderer } from '../../common/mock';
-import { createAppMockRenderer } from '../../common/mock';
+
 import { OpenLensButton } from './open_lens_button';
 import { lensVisualization } from './index.mock';
 import userEvent from '@testing-library/user-event';
+import { coreMock } from '@kbn/core/public/mocks';
 
 describe('OpenLensButton', () => {
   const props = {
@@ -20,19 +20,18 @@ describe('OpenLensButton', () => {
     ...lensVisualization,
   };
 
-  let appMockRender: AppMockRenderer;
-
   beforeEach(() => {
     jest.clearAllMocks();
-    appMockRender = createAppMockRenderer();
-    appMockRender.coreStart.lens.canUseEditor = () => true;
   });
 
   it('renders the button correctly', () => {
+    const coreStart = coreMock.createStart();
+    coreStart.lens.canUseEditor = () => true;
+
     const navigateToPrefilledEditor = jest.fn();
     appMockRender.coreStart.lens.navigateToPrefilledEditor = navigateToPrefilledEditor;
     // @ts-expect-error: props are correct
-    appMockRender.render(<OpenLensButton {...props} />);
+    <OpenLensButton {...props} />;
 
     expect(screen.getByText('Open visualization')).toBeInTheDocument();
   });
@@ -41,7 +40,7 @@ describe('OpenLensButton', () => {
     const navigateToPrefilledEditor = jest.fn();
     appMockRender.coreStart.lens.navigateToPrefilledEditor = navigateToPrefilledEditor;
     // @ts-expect-error: props are correct
-    appMockRender.render(<OpenLensButton {...props} />);
+    <OpenLensButton {...props} />;
 
     await userEvent.click(screen.getByTestId('cases-open-in-visualization-btn'));
 
@@ -57,7 +56,7 @@ describe('OpenLensButton', () => {
   it('returns null if the user does not have access to lens', () => {
     appMockRender.coreStart.lens.canUseEditor = () => false;
     // @ts-expect-error: props are correct
-    appMockRender.render(<OpenLensButton {...props} />);
+    <OpenLensButton {...props} />;
 
     expect(screen.queryByText('Open visualization')).not.toBeInTheDocument();
   });
@@ -71,7 +70,7 @@ describe('OpenLensButton', () => {
     set(esqlProps, 'attributes.state.query', { esql: '' });
 
     // @ts-expect-error: props are correct
-    appMockRender.render(<OpenLensButton {...esqlProps} />);
+    <OpenLensButton {...esqlProps} />;
 
     expect(screen.queryByText('Open visualization')).not.toBeInTheDocument();
   });

@@ -11,8 +11,8 @@ import { screen } from '@testing-library/react';
 import { connector, choices } from '../mock';
 import { useGetChoices } from './use_get_choices';
 import FieldsPreview from './servicenow_sir_case_fields_preview';
-import type { AppMockRenderer } from '../../../common/mock';
-import { createAppMockRenderer } from '../../../common/mock';
+
+import { renderWithTestingProviders } from '../../../common/mock';
 import { createQueryWithMarkup } from '../../../common/test_utils';
 
 jest.mock('./use_get_choices');
@@ -31,10 +31,7 @@ describe('ServiceNowITSM Fields: Preview', () => {
     additionalFields: '{"foo": "bar"}',
   };
 
-  let appMockRenderer: AppMockRenderer;
-
   beforeEach(() => {
-    appMockRenderer = createAppMockRenderer();
     useGetChoicesMock.mockReturnValue({
       isLoading: false,
       isFetching: false,
@@ -44,7 +41,7 @@ describe('ServiceNowITSM Fields: Preview', () => {
   });
 
   it('renders all fields correctly', () => {
-    appMockRenderer.render(<FieldsPreview connector={connector} fields={fields} />);
+    renderWithTestingProviders(<FieldsPreview connector={connector} fields={fields} />);
 
     const getByText = createQueryWithMarkup(screen.getByText);
 

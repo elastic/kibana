@@ -7,12 +7,12 @@
 
 import { renderHook, waitFor } from '@testing-library/react';
 import { useToasts, useKibana } from '../../common/lib/kibana';
-import type { AppMockRenderer } from '../../common/mock';
-import { createAppMockRenderer } from '../../common/mock';
+
 import * as api from './api';
 import { useBulkGetUserProfiles } from './use_bulk_get_user_profiles';
 import { userProfilesIds } from './api.mock';
 import { createStartServicesMock } from '../../common/lib/kibana/kibana_react.mock';
+import { TestProviders } from '../../common/mock';
 
 jest.mock('../../common/lib/kibana');
 jest.mock('./api');
@@ -28,10 +28,7 @@ describe('useBulkGetUserProfiles', () => {
   const addSuccess = jest.fn();
   (useToasts as jest.Mock).mockReturnValue({ addSuccess, addError: jest.fn() });
 
-  let appMockRender: AppMockRenderer;
-
   beforeEach(() => {
-    appMockRender = createAppMockRenderer();
     jest.clearAllMocks();
     useKibanaMock.mockReturnValue({
       services: { ...createStartServicesMock() },
@@ -42,7 +39,7 @@ describe('useBulkGetUserProfiles', () => {
     const spyOnBulkGetUserProfiles = jest.spyOn(api, 'bulkGetUserProfiles');
 
     renderHook(() => useBulkGetUserProfiles(props), {
-      wrapper: appMockRender.AppWrapper,
+      wrapper: TestProviders,
     });
 
     await waitFor(() =>
@@ -55,7 +52,7 @@ describe('useBulkGetUserProfiles', () => {
 
   it('returns a mapping with user profiles', async () => {
     const { result } = renderHook(() => useBulkGetUserProfiles(props), {
-      wrapper: appMockRender.AppWrapper,
+      wrapper: TestProviders,
     });
 
     await waitFor(() => expect(result.current.isLoading).toBe(false));
@@ -108,7 +105,7 @@ describe('useBulkGetUserProfiles', () => {
     (useToasts as jest.Mock).mockReturnValue({ addSuccess, addError });
 
     renderHook(() => useBulkGetUserProfiles(props), {
-      wrapper: appMockRender.AppWrapper,
+      wrapper: TestProviders,
     });
 
     await waitFor(() => expect(addError).toHaveBeenCalled());
@@ -118,7 +115,7 @@ describe('useBulkGetUserProfiles', () => {
     const spyOnBulkGetUserProfiles = jest.spyOn(api, 'bulkGetUserProfiles');
 
     renderHook(() => useBulkGetUserProfiles({ uids: [] }), {
-      wrapper: appMockRender.AppWrapper,
+      wrapper: TestProviders,
     });
 
     expect(spyOnBulkGetUserProfiles).not.toHaveBeenCalled();

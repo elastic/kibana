@@ -9,15 +9,13 @@ import React from 'react';
 import { screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
-import type { AppMockRenderer } from '../../common/mock';
-import { createAppMockRenderer } from '../../common/mock';
 import { FormTestComponent } from '../../common/test_utils';
 import { customFieldsConfigurationMock } from '../../containers/mock';
 import { CustomFields } from './custom_fields';
+import { renderWithTestingProviders } from '../../common/mock';
 
 // Failing: See https://github.com/elastic/kibana/issues/188133
 describe('CustomFields', () => {
-  let appMockRender: AppMockRenderer;
   const onSubmit = jest.fn();
 
   const defaultProps = {
@@ -29,11 +27,10 @@ describe('CustomFields', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    appMockRender = createAppMockRenderer();
   });
 
   it('renders correctly', async () => {
-    appMockRender.render(
+    renderWithTestingProviders(
       <FormTestComponent onSubmit={onSubmit}>
         <CustomFields {...defaultProps} />
       </FormTestComponent>
@@ -53,7 +50,7 @@ describe('CustomFields', () => {
   });
 
   it('should not show the custom fields if the configuration is empty', async () => {
-    appMockRender.render(
+    renderWithTestingProviders(
       <FormTestComponent onSubmit={onSubmit}>
         <CustomFields
           isLoading={false}
@@ -62,13 +59,12 @@ describe('CustomFields', () => {
         />
       </FormTestComponent>
     );
-
     expect(screen.queryByTestId('caseCustomFields')).not.toBeInTheDocument();
     expect(screen.queryAllByTestId('create-custom-field', { exact: false }).length).toEqual(0);
   });
 
   it('should render as optional fields for text custom fields', async () => {
-    appMockRender.render(
+    renderWithTestingProviders(
       <FormTestComponent onSubmit={onSubmit}>
         <CustomFields
           isLoading={false}
@@ -77,12 +73,11 @@ describe('CustomFields', () => {
         />
       </FormTestComponent>
     );
-
     expect(await screen.findAllByTestId('form-optional-field-label')).toHaveLength(4);
   });
 
   it('should not set default value when in edit mode', async () => {
-    appMockRender.render(
+    renderWithTestingProviders(
       <FormTestComponent onSubmit={onSubmit}>
         <CustomFields
           isLoading={false}
@@ -101,7 +96,7 @@ describe('CustomFields', () => {
   it('should sort the custom fields correctly', async () => {
     const reversedCustomFieldsConfiguration = [...customFieldsConfigurationMock].reverse();
 
-    appMockRender.render(
+    renderWithTestingProviders(
       <FormTestComponent onSubmit={onSubmit}>
         <CustomFields
           isLoading={false}
@@ -110,7 +105,6 @@ describe('CustomFields', () => {
         />
       </FormTestComponent>
     );
-
     const customFieldsWrapper = await screen.findByTestId('caseCustomFields');
 
     const customFields = customFieldsWrapper.querySelectorAll('.euiFormRow');
@@ -126,7 +120,7 @@ describe('CustomFields', () => {
   });
 
   it('should update the custom fields', async () => {
-    appMockRender.render(
+    renderWithTestingProviders(
       <FormTestComponent onSubmit={onSubmit}>
         <CustomFields {...defaultProps} />
       </FormTestComponent>

@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render, waitFor } from '@testing-library/react';
+import { waitFor, screen } from '@testing-library/react';
 import {
   basicCaseMetrics,
   basicCaseNumericValueFeatures,
@@ -14,7 +14,7 @@ import {
 } from '../../../containers/mock';
 import { CaseViewMetrics } from '.';
 import type { SingleCaseMetrics, SingleCaseMetricsFeature } from '../../../../common/ui';
-import { TestProviders } from '../../../common/mock';
+import { renderWithTestingProviders } from '../../../common/mock';
 import { useGetCaseMetrics } from '../../../containers/use_get_case_metrics';
 import { useCasesFeatures } from '../../../common/use_cases_features';
 import { CaseMetricsFeature } from '../../../../common/types/api';
@@ -40,11 +40,7 @@ const renderCaseMetrics = ({
   }));
 
   useCasesFeaturesMock.mockReturnValue({ metricsFeatures: features });
-  return render(
-    <TestProviders>
-      <CaseViewMetrics caseId={'1234'} />
-    </TestProviders>
-  );
+  return renderWithTestingProviders(<CaseViewMetrics caseId={'1234'} />);
 };
 
 interface FeatureTest {
@@ -107,40 +103,40 @@ const metricsFeaturesTests: FeatureTest[] = [
 ];
 
 describe('CaseViewMetrics', () => {
-  beforeEach(() => {});
   it('should render', () => {
-    const { getByTestId } = renderCaseMetrics();
-    expect(getByTestId('case-view-metrics-panel')).toBeInTheDocument();
+    renderCaseMetrics();
+    expect(screen.getByTestId('case-view-metrics-panel')).toBeInTheDocument();
   });
 
   it('should render loading spinner', () => {
-    const { getByTestId } = renderCaseMetrics({ isLoading: true });
-    expect(getByTestId('case-view-metrics-spinner')).toBeInTheDocument();
+    renderCaseMetrics({ isLoading: true });
+    expect(screen.getByTestId('case-view-metrics-spinner')).toBeInTheDocument();
   });
 
   it('should render metrics with default value 0', async () => {
-    const { getAllByText } = renderCaseMetrics({
+    renderCaseMetrics({
       metrics: {},
       features: basicCaseNumericValueFeatures,
     });
+
     await waitFor(() => {
-      expect(getAllByText('0')).toHaveLength(basicCaseNumericValueFeatures.length);
+      expect(screen.getAllByText('0')).toHaveLength(basicCaseNumericValueFeatures.length);
     });
   });
 
   it('should render status metrics with default value of a dash', () => {
-    const { getAllByText } = renderCaseMetrics({ metrics: {} });
+    renderCaseMetrics({ metrics: {} });
     // \u2014 is the unicode for a long dash
-    expect(getAllByText('\u2014')).toHaveLength(3);
+    expect(screen.getAllByText('\u2014')).toHaveLength(3);
   });
 
   it('should not render if no features are returned', () => {
-    const result = renderCaseMetrics({ features: [] });
-    expect(result.container.innerHTML).toEqual('');
+    renderCaseMetrics({ features: [] });
+    expect(screen.queryByTestId('case-view-metrics-panel')).not.toBeInTheDocument();
   });
 
   it('should render open to close duration with the icon when it is reopened', () => {
-    const { getByText, getByTestId } = renderCaseMetrics({
+    renderCaseMetrics({
       metrics: {
         lifespan: {
           creationDate: new Date(0).toISOString(),
@@ -154,12 +150,12 @@ describe('CaseViewMetrics', () => {
       },
     });
 
-    expect(getByText('2 milliseconds (reopened)')).toBeInTheDocument();
-    expect(getByTestId('case-metrics-lifespan-reopen-icon')).toBeInTheDocument();
+    expect(screen.getByText('2 milliseconds (reopened)')).toBeInTheDocument();
+    expect(screen.getByTestId('case-metrics-lifespan-reopen-icon')).toBeInTheDocument();
   });
 
   it('should not render open to close duration with the icon when it is not reopened', () => {
-    const { getByText, queryByTestId } = renderCaseMetrics({
+    renderCaseMetrics({
       metrics: {
         lifespan: {
           creationDate: new Date(0).toISOString(),
@@ -173,8 +169,8 @@ describe('CaseViewMetrics', () => {
       },
     });
 
-    expect(getByText('2 milliseconds')).toBeInTheDocument();
-    expect(queryByTestId('case-metrics-lifespan-reopen-icon')).not.toBeInTheDocument();
+    expect(screen.getByText('2 milliseconds')).toBeInTheDocument();
+    expect(screen.queryByTestId('case-metrics-lifespan-reopen-icon')).not.toBeInTheDocument();
   });
 
   it('should prevent negative value for isolateHost actions', () => {
@@ -186,21 +182,22 @@ describe('CaseViewMetrics', () => {
         },
       },
     };
-    const { getByText } = renderCaseMetrics({
+
+    renderCaseMetrics({
       metrics: incosistentMetrics,
       features: [CaseMetricsFeature.ACTIONS_ISOLATE_HOST],
     });
-    expect(getByText('Isolated hosts')).toBeInTheDocument();
-    expect(getByText('0')).toBeInTheDocument();
+    expect(screen.getByText('Isolated hosts')).toBeInTheDocument();
+    expect(screen.getByText('0')).toBeInTheDocument();
   });
 
   describe.each(metricsFeaturesTests)('Metrics feature tests', ({ feature, items }) => {
     it(`should not render other metrics when rendering feature: ${feature}`, () => {
-      const { queryByText } = renderCaseMetrics({ features: [feature] });
+      renderCaseMetrics({ features: [feature] });
       metricsFeaturesTests.forEach(({ feature: otherFeature, items: otherItems }) => {
         if (feature !== otherFeature) {
           otherItems.forEach(({ title }) => {
-            expect(queryByText(title)).toBeNull();
+            expect(screen.queryByText(title)).toBeNull();
           });
         }
       });
@@ -208,9 +205,9 @@ describe('CaseViewMetrics', () => {
 
     describe.each(items)(`Metric feature: ${feature} item: %s`, ({ title, value }) => {
       it('should render metric', () => {
-        const { getByText } = renderCaseMetrics({ features: [feature] });
-        expect(getByText(title)).toBeInTheDocument();
-        expect(getByText(value)).toBeInTheDocument();
+        renderCaseMetrics({ features: [feature] });
+        expect(screen.getByText(title)).toBeInTheDocument();
+        expect(screen.getByText(value)).toBeInTheDocument();
       });
     });
   });

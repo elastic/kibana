@@ -9,8 +9,7 @@ import React from 'react';
 import { fireEvent, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
-import type { AppMockRenderer } from '../../common/mock';
-import { createAppMockRenderer, mockedTestProvidersOwner } from '../../common/mock';
+import { mockedTestProvidersOwner, renderWithTestingProviders } from '../../common/mock';
 import {
   connectorsMock,
   customFieldsConfigurationMock,
@@ -41,8 +40,6 @@ jest.mock('../../containers/user_profiles/api');
 const useGetChoicesMock = useGetChoices as jest.Mock;
 
 describe('CommonFlyout ', () => {
-  let appMockRender: AppMockRenderer;
-
   const props = {
     onCloseFlyout: jest.fn(),
     onSaveField: jest.fn(),
@@ -57,11 +54,10 @@ describe('CommonFlyout ', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    appMockRender = createAppMockRenderer();
   });
 
   it('renders flyout correctly', async () => {
-    appMockRender.render(<CommonFlyout {...props}>{children}</CommonFlyout>);
+    renderWithTestingProviders(<CommonFlyout {...props}>{children}</CommonFlyout>);
 
     expect(await screen.findByTestId('common-flyout')).toBeInTheDocument();
     expect(await screen.findByTestId('common-flyout-header')).toBeInTheDocument();
@@ -70,28 +66,26 @@ describe('CommonFlyout ', () => {
   });
 
   it('renders flyout header correctly', async () => {
-    appMockRender.render(<CommonFlyout {...props}>{children}</CommonFlyout>);
+    renderWithTestingProviders(<CommonFlyout {...props}>{children}</CommonFlyout>);
 
     expect(await screen.findByText('Flyout header'));
   });
 
   it('renders loading state correctly', async () => {
-    appMockRender.render(
-      <CommonFlyout {...{ ...props, isLoading: true }}>{children}</CommonFlyout>
-    );
+    <CommonFlyout {...{ ...props, isLoading: true }}>{children}</CommonFlyout>;
 
     expect(await screen.findAllByRole('progressbar')).toHaveLength(2);
   });
 
   it('renders disable state correctly', async () => {
-    appMockRender.render(<CommonFlyout {...{ ...props, disabled: true }}>{children}</CommonFlyout>);
+    <CommonFlyout {...{ ...props, disabled: true }}>{children}</CommonFlyout>;
 
     expect(await screen.findByTestId('common-flyout-cancel')).toBeDisabled();
     expect(await screen.findByTestId('common-flyout-save')).toBeDisabled();
   });
 
   it('calls onCloseFlyout on cancel', async () => {
-    appMockRender.render(<CommonFlyout {...props}>{children}</CommonFlyout>);
+    renderWithTestingProviders(<CommonFlyout {...props}>{children}</CommonFlyout>);
 
     await userEvent.click(await screen.findByTestId('common-flyout-cancel'));
 
@@ -101,7 +95,7 @@ describe('CommonFlyout ', () => {
   });
 
   it('calls onCloseFlyout on close', async () => {
-    appMockRender.render(<CommonFlyout {...props}>{children}</CommonFlyout>);
+    renderWithTestingProviders(<CommonFlyout {...props}>{children}</CommonFlyout>);
 
     await userEvent.click(await screen.findByTestId('euiFlyoutCloseButton'));
 
@@ -111,7 +105,7 @@ describe('CommonFlyout ', () => {
   });
 
   it('does not call onSaveField when not valid data', async () => {
-    appMockRender.render(<CommonFlyout {...props}>{children}</CommonFlyout>);
+    renderWithTestingProviders(<CommonFlyout {...props}>{children}</CommonFlyout>);
 
     await userEvent.click(await screen.findByTestId('common-flyout-save'));
 
@@ -124,7 +118,7 @@ describe('CommonFlyout ', () => {
     );
 
     it('should render custom field form in flyout', async () => {
-      appMockRender.render(<CommonFlyout {...props}>{renderBody}</CommonFlyout>);
+      renderWithTestingProviders(<CommonFlyout {...props}>{renderBody}</CommonFlyout>);
 
       expect(await screen.findByTestId('custom-field-label-input')).toBeInTheDocument();
       expect(await screen.findByTestId('custom-field-type-selector')).toBeInTheDocument();
@@ -133,7 +127,7 @@ describe('CommonFlyout ', () => {
     });
 
     it('calls onSaveField form correctly', async () => {
-      appMockRender.render(<CommonFlyout {...props}>{renderBody}</CommonFlyout>);
+      renderWithTestingProviders(<CommonFlyout {...props}>{renderBody}</CommonFlyout>);
 
       await userEvent.click(await screen.findByTestId('custom-field-label-input'));
       await userEvent.paste('Summary');
@@ -150,7 +144,7 @@ describe('CommonFlyout ', () => {
     });
 
     it('shows error if field label is too long', async () => {
-      appMockRender.render(<CommonFlyout {...props}>{renderBody}</CommonFlyout>);
+      renderWithTestingProviders(<CommonFlyout {...props}>{renderBody}</CommonFlyout>);
 
       const message = 'z'.repeat(MAX_CUSTOM_FIELD_LABEL_LENGTH + 1);
 
@@ -165,7 +159,7 @@ describe('CommonFlyout ', () => {
 
     describe('Text custom field', () => {
       it('calls onSaveField with correct params when a custom field is NOT required', async () => {
-        appMockRender.render(<CommonFlyout {...props}>{renderBody}</CommonFlyout>);
+        renderWithTestingProviders(<CommonFlyout {...props}>{renderBody}</CommonFlyout>);
 
         await userEvent.click(await screen.findByTestId('custom-field-label-input'));
         await userEvent.paste('Summary');
@@ -182,7 +176,7 @@ describe('CommonFlyout ', () => {
       });
 
       it('calls onSaveField with correct params when a custom field is NOT required and has a default value', async () => {
-        appMockRender.render(<CommonFlyout {...props}>{renderBody}</CommonFlyout>);
+        renderWithTestingProviders(<CommonFlyout {...props}>{renderBody}</CommonFlyout>);
 
         await userEvent.click(await screen.findByTestId('custom-field-label-input'));
         await userEvent.paste('Summary');
@@ -202,7 +196,7 @@ describe('CommonFlyout ', () => {
       });
 
       it('calls onSaveField with the correct params when a custom field is required', async () => {
-        appMockRender.render(<CommonFlyout {...props}>{renderBody}</CommonFlyout>);
+        renderWithTestingProviders(<CommonFlyout {...props}>{renderBody}</CommonFlyout>);
 
         await userEvent.click(await screen.findByTestId('custom-field-label-input'));
         await userEvent.paste('Summary');
@@ -223,7 +217,7 @@ describe('CommonFlyout ', () => {
       });
 
       it('calls onSaveField with the correct params when a custom field is required and the defaultValue is missing', async () => {
-        appMockRender.render(<CommonFlyout {...props}>{renderBody}</CommonFlyout>);
+        renderWithTestingProviders(<CommonFlyout {...props}>{renderBody}</CommonFlyout>);
 
         await userEvent.click(await screen.findByTestId('custom-field-label-input'));
         await userEvent.paste('Summary');
@@ -250,7 +244,7 @@ describe('CommonFlyout ', () => {
           data: customFieldsConfigurationMock[0],
         };
 
-        appMockRender.render(<CommonFlyout {...modifiedProps}>{newRenderBody}</CommonFlyout>);
+        renderWithTestingProviders(<CommonFlyout {...modifiedProps}>{newRenderBody}</CommonFlyout>);
 
         expect(await screen.findByTestId('custom-field-label-input')).toHaveAttribute(
           'value',
@@ -265,7 +259,7 @@ describe('CommonFlyout ', () => {
       });
 
       it('shows an error if default value is too long', async () => {
-        appMockRender.render(<CommonFlyout {...props}>{renderBody}</CommonFlyout>);
+        renderWithTestingProviders(<CommonFlyout {...props}>{renderBody}</CommonFlyout>);
 
         await userEvent.click(await screen.findByTestId('custom-field-label-input'));
         await userEvent.paste('Summary');
@@ -283,7 +277,7 @@ describe('CommonFlyout ', () => {
 
     describe('Toggle custom field', () => {
       it('calls onSaveField with correct params when a custom field is NOT required', async () => {
-        appMockRender.render(<CommonFlyout {...props}>{renderBody}</CommonFlyout>);
+        renderWithTestingProviders(<CommonFlyout {...props}>{renderBody}</CommonFlyout>);
 
         fireEvent.change(await screen.findByTestId('custom-field-type-selector'), {
           target: { value: CustomFieldTypes.TOGGLE },
@@ -305,7 +299,7 @@ describe('CommonFlyout ', () => {
       });
 
       it('calls onSaveField with the correct default value when a custom field is required', async () => {
-        appMockRender.render(<CommonFlyout {...props}>{renderBody}</CommonFlyout>);
+        renderWithTestingProviders(<CommonFlyout {...props}>{renderBody}</CommonFlyout>);
 
         fireEvent.change(await screen.findByTestId('custom-field-type-selector'), {
           target: { value: CustomFieldTypes.TOGGLE },
@@ -332,7 +326,7 @@ describe('CommonFlyout ', () => {
           <CustomFieldsForm onChange={onChange} initialValue={customFieldsConfigurationMock[1]} />
         );
 
-        appMockRender.render(<CommonFlyout {...props}>{newRenderBody}</CommonFlyout>);
+        renderWithTestingProviders(<CommonFlyout {...props}>{newRenderBody}</CommonFlyout>);
 
         expect(await screen.findByTestId('custom-field-label-input')).toHaveAttribute(
           'value',
@@ -378,7 +372,7 @@ describe('CommonFlyout ', () => {
     );
 
     it('should render template form in flyout', async () => {
-      appMockRender.render(<CommonFlyout {...props}>{renderBody}</CommonFlyout>);
+      renderWithTestingProviders(<CommonFlyout {...props}>{renderBody}</CommonFlyout>);
 
       expect(await screen.findByTestId('common-flyout')).toBeInTheDocument();
       expect(await screen.findByTestId('template-creation-form-steps')).toBeInTheDocument();
@@ -401,9 +395,7 @@ describe('CommonFlyout ', () => {
         ],
       };
 
-      appMockRender = createAppMockRenderer({ license });
-
-      appMockRender.render(
+      renderWithTestingProviders(
         <CommonFlyout {...props}>
           {({ onChange }: FlyOutBodyProps<TemplateFormProps>) => (
             <TemplateForm
@@ -413,7 +405,8 @@ describe('CommonFlyout ', () => {
               onChange={onChange}
             />
           )}
-        </CommonFlyout>
+        </CommonFlyout>,
+        { wrapperProps: { license } }
       );
 
       // template fields
@@ -458,7 +451,7 @@ describe('CommonFlyout ', () => {
     });
 
     it('calls onSaveField form correctly', async () => {
-      appMockRender.render(<CommonFlyout {...props}>{renderBody}</CommonFlyout>);
+      renderWithTestingProviders(<CommonFlyout {...props}>{renderBody}</CommonFlyout>);
 
       await userEvent.click(await screen.findByTestId('template-name-input'));
       await userEvent.paste('Template name');
@@ -508,7 +501,7 @@ describe('CommonFlyout ', () => {
         />
       );
 
-      appMockRender.render(<CommonFlyout {...props}>{newRenderBody}</CommonFlyout>);
+      renderWithTestingProviders(<CommonFlyout {...props}>{newRenderBody}</CommonFlyout>);
 
       const caseTitle = await screen.findByTestId('caseTitle');
       await userEvent.click(within(caseTitle).getByTestId('input'));
@@ -564,7 +557,7 @@ describe('CommonFlyout ', () => {
         />
       );
 
-      appMockRender.render(<CommonFlyout {...props}>{newRenderBody}</CommonFlyout>);
+      renderWithTestingProviders(<CommonFlyout {...props}>{newRenderBody}</CommonFlyout>);
 
       const textCustomField = await screen.findByTestId(
         `${customFieldsConfigurationMock[0].key}-text-create-custom-field`
@@ -658,7 +651,7 @@ describe('CommonFlyout ', () => {
         />
       );
 
-      appMockRender.render(<CommonFlyout {...props}>{newRenderBody}</CommonFlyout>);
+      renderWithTestingProviders(<CommonFlyout {...props}>{newRenderBody}</CommonFlyout>);
 
       expect(await screen.findByTestId('connector-fields-sn-itsm')).toBeInTheDocument();
 
@@ -722,7 +715,7 @@ describe('CommonFlyout ', () => {
         />
       );
 
-      appMockRender.render(<CommonFlyout {...props}>{newRenderBody}</CommonFlyout>);
+      renderWithTestingProviders(<CommonFlyout {...props}>{newRenderBody}</CommonFlyout>);
 
       await userEvent.clear(await screen.findByTestId('template-name-input'));
       await userEvent.click(await screen.findByTestId('template-name-input'));
@@ -775,7 +768,7 @@ describe('CommonFlyout ', () => {
     });
 
     it('shows error when template name is empty', async () => {
-      appMockRender.render(<CommonFlyout {...props}>{renderBody}</CommonFlyout>);
+      renderWithTestingProviders(<CommonFlyout {...props}>{renderBody}</CommonFlyout>);
 
       await userEvent.click(await screen.findByTestId('template-description-input'));
       await userEvent.paste('Template description');
@@ -790,7 +783,7 @@ describe('CommonFlyout ', () => {
     });
 
     it('shows error if template name is too long', async () => {
-      appMockRender.render(<CommonFlyout {...props}>{renderBody}</CommonFlyout>);
+      renderWithTestingProviders(<CommonFlyout {...props}>{renderBody}</CommonFlyout>);
 
       const message = 'z'.repeat(MAX_TEMPLATE_NAME_LENGTH + 1);
 
@@ -803,7 +796,7 @@ describe('CommonFlyout ', () => {
     });
 
     it('shows error if template description is too long', async () => {
-      appMockRender.render(<CommonFlyout {...props}>{renderBody}</CommonFlyout>);
+      renderWithTestingProviders(<CommonFlyout {...props}>{renderBody}</CommonFlyout>);
 
       const message = 'z'.repeat(MAX_TEMPLATE_DESCRIPTION_LENGTH + 1);
 

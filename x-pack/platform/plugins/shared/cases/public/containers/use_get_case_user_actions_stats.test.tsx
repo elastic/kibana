@@ -8,11 +8,10 @@
 import { waitFor, renderHook } from '@testing-library/react';
 
 import { useToasts } from '../common/lib/kibana';
-import type { AppMockRenderer } from '../common/mock';
-import { createAppMockRenderer } from '../common/mock';
 import { useGetCaseUserActionsStats } from './use_get_case_user_actions_stats';
 import { basicCase } from './mock';
 import * as api from './api';
+import { TestProviders } from '../common/mock';
 
 jest.mock('./api');
 jest.mock('../common/lib/kibana');
@@ -24,16 +23,13 @@ const initialData = {
 };
 
 describe('useGetCaseUserActionsStats', () => {
-  let appMockRender: AppMockRenderer;
-
   beforeEach(() => {
-    appMockRender = createAppMockRenderer();
     jest.clearAllMocks();
   });
 
   it('returns proper state on getCaseUserActionsStats', async () => {
     const { result } = renderHook(() => useGetCaseUserActionsStats(basicCase.id), {
-      wrapper: appMockRender.AppWrapper,
+      wrapper: TestProviders,
     });
 
     await waitFor(() => expect(result.current.isLoading).toBe(false));
@@ -62,20 +58,21 @@ describe('useGetCaseUserActionsStats', () => {
     (useToasts as jest.Mock).mockReturnValue({ addError });
 
     renderHook(() => useGetCaseUserActionsStats(basicCase.id), {
-      wrapper: appMockRender.AppWrapper,
+      wrapper: TestProviders,
     });
 
     await waitFor(() => {
       expect(spy).toHaveBeenCalledWith(basicCase.id, expect.any(AbortSignal));
-      expect(addError).toHaveBeenCalled();
     });
+
+    expect(addError).toHaveBeenCalled();
   });
 
   it('calls the api when invoked with the correct parameters', async () => {
     const spy = jest.spyOn(api, 'getCaseUserActionsStats');
 
     renderHook(() => useGetCaseUserActionsStats(basicCase.id), {
-      wrapper: appMockRender.AppWrapper,
+      wrapper: TestProviders,
     });
 
     await waitFor(() => expect(spy).toHaveBeenCalledWith(basicCase.id, expect.any(AbortSignal)));

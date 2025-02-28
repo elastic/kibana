@@ -22,6 +22,7 @@ import type { DeeplyMockedKeys } from '@kbn/utility-types-jest';
 import { coreMock } from '@kbn/core/public/mocks';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 
+import type { CoreStart } from '@kbn/core/public';
 import type { CasesFeatures, CasesPermissions } from '../../../common/ui/types';
 import type { ReleasePhase } from '../../components/types';
 import { SECURITY_SOLUTION_OWNER } from '../../../common/constants';
@@ -41,6 +42,8 @@ interface TestProviderProps {
   externalReferenceAttachmentTypeRegistry?: ExternalReferenceAttachmentTypeRegistry;
   persistableStateAttachmentTypeRegistry?: PersistableStateAttachmentTypeRegistry;
   license?: ILicense;
+  coreStart?: CoreStart;
+  queryClient?: QueryClient;
 }
 
 window.scrollTo = jest.fn();
@@ -61,6 +64,20 @@ const mockGetFilesClient = () => {
 
 export const mockedTestProvidersOwner = [SECURITY_SOLUTION_OWNER];
 
+export const createTestQueryClient = () =>
+  new QueryClient({
+    defaultOptions: {
+      queries: {
+        retry: false,
+      },
+    },
+    logger: {
+      log: console.log,
+      warn: console.warn,
+      error: () => {},
+    },
+  });
+
 /** A utility for wrapping children in the providers required to run most tests */
 const TestProvidersComponent: React.FC<TestProviderProps> = ({
   children,
@@ -71,25 +88,16 @@ const TestProvidersComponent: React.FC<TestProviderProps> = ({
   externalReferenceAttachmentTypeRegistry,
   persistableStateAttachmentTypeRegistry,
   license,
+  coreStart,
+  queryClient,
 }) => {
-  const coreStart = useMemo(() => coreMock.createStart(), []);
+  const finalCoreStart = useMemo(() => coreStart ?? coreMock.createStart(), [coreStart]);
   const services = useMemo(() => createStartServicesMock({ license }), [license]);
+  const defaultQueryClient = useMemo(() => createTestQueryClient(), []);
 
-  const queryClient = useMemo(
-    () =>
-      new QueryClient({
-        defaultOptions: {
-          queries: {
-            retry: false,
-          },
-        },
-        logger: {
-          log: console.log,
-          warn: console.warn,
-          error: () => {},
-        },
-      }),
-    []
+  const finalQueryClient = useMemo(
+    () => queryClient ?? defaultQueryClient,
+    [defaultQueryClient, queryClient]
   );
 
   const getFilesClient = useMemo(() => mockGetFilesClient(), []);
@@ -133,10 +141,10 @@ const TestProvidersComponent: React.FC<TestProviderProps> = ({
   );
 
   return (
-    <KibanaRenderContextProvider {...coreStart}>
+    <KibanaRenderContextProvider {...finalCoreStart}>
       <KibanaContextProvider services={services}>
         <MemoryRouter>
-          <CasesProvider value={casesProviderValue} queryClient={queryClient}>
+          <CasesProvider value={casesProviderValue} queryClient={finalQueryClient}>
             <FilesContext client={filesClient}>{children}</FilesContext>
           </CasesProvider>
         </MemoryRouter>

@@ -10,10 +10,10 @@ import { screen } from '@testing-library/react';
 
 import { basicCase, caseUserActions } from '../../containers/mock';
 import { UserActionsList } from './user_actions_list';
-import type { AppMockRenderer } from '../../common/mock';
-import { createAppMockRenderer } from '../../common/mock';
+
 import { getCaseConnectorsMockResponse } from '../../common/mock/connectors';
 import { getMockBuilderArgs } from './mock';
+import { renderWithTestingProviders } from '../../common/mock';
 
 const builderArgs = getMockBuilderArgs();
 
@@ -34,28 +34,24 @@ jest.mock('../../common/lib/kibana');
 
 // FLAKY: https://github.com/elastic/kibana/issues/176524
 describe(`UserActionsList`, () => {
-  let appMockRender: AppMockRenderer;
-
   beforeEach(() => {
     jest.clearAllMocks();
-
-    appMockRender = createAppMockRenderer();
   });
 
   it('renders list correctly with isExpandable option', async () => {
-    appMockRender.render(<UserActionsList {...defaultProps} isExpandable />);
+    renderWithTestingProviders(<UserActionsList {...defaultProps} isExpandable />);
 
     expect(await screen.findByTestId('user-actions-list')).toBeInTheDocument();
   });
 
   it('renders list correctly with isExpandable=false option', async () => {
-    appMockRender.render(<UserActionsList {...defaultProps} />);
+    renderWithTestingProviders(<UserActionsList {...defaultProps} />);
 
     expect(await screen.findByTestId('user-actions-list')).toBeInTheDocument();
   });
 
   it('renders user actions correctly', async () => {
-    appMockRender.render(<UserActionsList {...defaultProps} />);
+    renderWithTestingProviders(<UserActionsList {...defaultProps} />);
 
     expect(await screen.findByTestId(`description-create-action-${caseUserActions[0].id}`));
     expect(await screen.findByTestId(`comment-create-action-${caseUserActions[1].commentId}`));
@@ -76,7 +72,7 @@ describe(`UserActionsList`, () => {
       },
     ];
 
-    appMockRender.render(<UserActionsList {...defaultProps} bottomActions={bottomActions} />);
+    renderWithTestingProviders(<UserActionsList {...defaultProps} bottomActions={bottomActions} />);
 
     expect(await screen.findByTestId('user-actions-list')).toBeInTheDocument();
     expect(await screen.findByTestId('add-comment')).toBeInTheDocument();

@@ -11,8 +11,7 @@ import { useKibana, useToasts } from '../../../common/lib/kibana';
 import { connector } from '../mock';
 import { useGetIncidentTypes } from './use_get_incident_types';
 import * as api from './api';
-import type { AppMockRenderer } from '../../../common/mock';
-import { createAppMockRenderer } from '../../../common/mock';
+import { TestProviders } from '../../../common/mock';
 
 jest.mock('../../../common/lib/kibana');
 jest.mock('./api');
@@ -21,11 +20,9 @@ const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
 
 describe('useGetIncidentTypes', () => {
   const { http } = useKibanaMock().services;
-  let appMockRender: AppMockRenderer;
 
   beforeEach(() => {
     jest.clearAllMocks();
-    appMockRender = createAppMockRenderer();
   });
 
   it('calls the api when invoked with the correct parameters', async () => {
@@ -36,7 +33,7 @@ describe('useGetIncidentTypes', () => {
           http,
           connector,
         }),
-      { wrapper: appMockRender.AppWrapper }
+      { wrapper: TestProviders }
     );
 
     await waitFor(() => result.current.isSuccess);
@@ -55,7 +52,7 @@ describe('useGetIncidentTypes', () => {
         useGetIncidentTypes({
           http,
         }),
-      { wrapper: appMockRender.AppWrapper }
+      { wrapper: TestProviders }
     );
 
     expect(spy).not.toHaveBeenCalledWith();
@@ -76,7 +73,7 @@ describe('useGetIncidentTypes', () => {
           http,
           connector,
         }),
-      { wrapper: appMockRender.AppWrapper }
+      { wrapper: TestProviders }
     );
 
     await waitFor(() => {
@@ -101,7 +98,7 @@ describe('useGetIncidentTypes', () => {
           http,
           connector,
         }),
-      { wrapper: appMockRender.AppWrapper }
+      { wrapper: TestProviders }
     );
 
     await waitFor(() => {

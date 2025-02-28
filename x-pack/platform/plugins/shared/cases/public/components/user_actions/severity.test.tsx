@@ -6,10 +6,11 @@
  */
 
 import { EuiCommentList } from '@elastic/eui';
+import { screen } from '@testing-library/react';
 import { CaseSeverity, UserActionActions } from '../../../common/types/domain';
 import React from 'react';
-import type { AppMockRenderer } from '../../common/mock';
-import { createAppMockRenderer } from '../../common/mock';
+
+import { renderWithTestingProviders } from '../../common/mock';
 import { getUserAction } from '../../containers/mock';
 import { getMockBuilderArgs } from './mock';
 import { createSeverityUserActionBuilder } from './severity';
@@ -19,10 +20,6 @@ jest.mock('../../common/navigation/hooks');
 
 const builderArgs = getMockBuilderArgs();
 describe('createSeverityUserActionBuilder', () => {
-  let appMockRenderer: AppMockRenderer;
-  beforeEach(() => {
-    appMockRenderer = createAppMockRenderer();
-  });
   it('renders correctly', () => {
     const userAction = getUserAction('severity', UserActionActions.update, {
       payload: { severity: CaseSeverity.LOW },
@@ -33,8 +30,8 @@ describe('createSeverityUserActionBuilder', () => {
     });
     const createdUserAction = builder.build();
 
-    const result = appMockRenderer.render(<EuiCommentList comments={createdUserAction} />);
-    expect(result.getByTestId('severity-update-user-action-severity-title')).toBeTruthy();
-    expect(result.getByTestId('severity-update-user-action-severity-title-low')).toBeTruthy();
+    renderWithTestingProviders(<EuiCommentList comments={createdUserAction} />);
+    expect(screen.getByTestId('severity-update-user-action-severity-title')).toBeTruthy();
+    expect(screen.getByTestId('severity-update-user-action-severity-title-low')).toBeTruthy();
   });
 });

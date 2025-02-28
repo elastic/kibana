@@ -9,8 +9,7 @@ import { waitFor, renderHook } from '@testing-library/react';
 
 import { basicCase } from './mock';
 
-import type { AppMockRenderer } from '../common/mock';
-import { mockedTestProvidersOwner, createAppMockRenderer } from '../common/mock';
+import { TestProviders, mockedTestProvidersOwner } from '../common/mock';
 import { useToasts } from '../common/lib/kibana';
 import { useGetCaseFiles } from './use_get_case_files';
 import { constructFileKindIdByOwner } from '../../common/files';
@@ -33,10 +32,7 @@ const expectedCallParams = {
 };
 
 describe('useGetCaseFiles', () => {
-  let appMockRender: AppMockRenderer;
-
   beforeEach(() => {
-    appMockRender = createAppMockRenderer();
     jest.clearAllMocks();
   });
 
@@ -49,17 +45,18 @@ describe('useGetCaseFiles', () => {
     });
 
     renderHook(() => useGetCaseFiles(hookParams), {
-      wrapper: appMockRender.AppWrapper,
+      wrapper: TestProviders,
     });
     await waitFor(() => {
       expect(appMockRender.getFilesClient().list).toBeCalledWith(expectedCallParams);
-      expect(addError).toHaveBeenCalled();
     });
+
+    expect(addError).toHaveBeenCalled();
   });
 
   it('calls filesClient.list with correct arguments', async () => {
     renderHook(() => useGetCaseFiles(hookParams), {
-      wrapper: appMockRender.AppWrapper,
+      wrapper: TestProviders,
     });
 
     await waitFor(() =>

@@ -10,8 +10,7 @@ import { screen, waitFor } from '@testing-library/react';
 import { LENS_ATTACHMENT_TYPE } from '../../../common';
 import type { PersistableStateAttachmentViewProps } from '../../client/attachment_framework/types';
 import { AttachmentActionType } from '../../client/attachment_framework/types';
-import type { AppMockRenderer } from '../../common/mock';
-import { createAppMockRenderer } from '../../common/mock';
+
 import { basicCase } from '../../containers/mock';
 import { getVisualizationAttachmentType } from './attachment';
 
@@ -19,8 +18,6 @@ describe('getVisualizationAttachmentType', () => {
   const mockEmbeddableComponent = jest
     .fn()
     .mockReturnValue(<div data-test-subj="embeddableComponent" />);
-
-  let appMockRender: AppMockRenderer;
 
   const attachmentViewProps: PersistableStateAttachmentViewProps = {
     persistableStateAttachmentTypeId: LENS_ATTACHMENT_TYPE,
@@ -34,7 +31,7 @@ describe('getVisualizationAttachmentType', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    appMockRender = createAppMockRenderer();
+
     appMockRender.coreStart.lens.EmbeddableComponent = mockEmbeddableComponent;
   });
 
@@ -99,7 +96,7 @@ describe('getVisualizationAttachmentType', () => {
       const openLensButton = actions[0];
 
       // @ts-expect-error: render exists on CustomAttachmentAction
-      appMockRender.render(openLensButton.render());
+      openLensButton.render();
 
       expect(screen.getByTestId('cases-open-in-visualization-btn')).toBeInTheDocument();
     });
@@ -108,11 +105,9 @@ describe('getVisualizationAttachmentType', () => {
       const lensType = getVisualizationAttachmentType();
       const Component = lensType.getAttachmentViewObject(attachmentViewProps).children!;
 
-      appMockRender.render(
-        <Suspense fallback={'Loading...'}>
-          <Component {...attachmentViewProps} />
-        </Suspense>
-      );
+      <Suspense fallback={'Loading...'}>
+        <Component {...attachmentViewProps} />
+      </Suspense>;
 
       await waitFor(() => {
         expect(screen.getByTestId('embeddableComponent'));
