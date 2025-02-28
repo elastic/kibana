@@ -118,8 +118,6 @@ export function DiscoverMainRoute({
       try {
         const { dataSource } = stateContainer.appState.getState();
         const isEsqlQuery = isDataSourceType(dataSource, DataSourceType.Esql);
-        // Cleaning the cache to make sure added/edited data views show up correctly
-        dataViews.clearCache();
 
         if (savedSearchId || isEsqlQuery || nextDataView) {
           return true;
