@@ -15,9 +15,7 @@ import type {
   RulesToUpdate,
   CspSettings,
 } from '@kbn/cloud-security-posture-common/schema/rules/v4';
-import {
-  convertRuleTagsToMatchAllKQL,
-} from '../../../../common/utils/detection_rules';
+import { convertRuleTagsToMatchAllKQL } from '../../../../common/utils/detection_rules';
 
 import {
   CSP_BENCHMARK_RULE_SAVED_OBJECT_TYPE,
