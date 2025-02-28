@@ -56,7 +56,6 @@
     "@kbn/core-saved-objects-api-server-mocks",
     "@kbn/security-ai-prompts",
     "@kbn/datemath",
-    "@kbn/elastic-assistant-plugin"
   ],
   "exclude": [
     "target/**/*",

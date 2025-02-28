@@ -222,7 +222,9 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
         })
       : { provider: llmType };
 
-  const uiSettingsDateFormatTimezone = await core.uiSettings.client.get<string>(DEFAULT_DATE_FORMAT_TZ);
+  const uiSettingsDateFormatTimezone = await core.uiSettings.client.get<string>(
+    DEFAULT_DATE_FORMAT_TZ
+  );
 
   const assistantGraph = getDefaultAssistantGraph({
     agentRunnable,

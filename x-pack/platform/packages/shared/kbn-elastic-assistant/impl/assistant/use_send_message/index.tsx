@@ -8,10 +8,10 @@
 import { HttpSetup } from '@kbn/core-http-browser';
 import { useCallback, useRef, useState } from 'react';
 import { ApiConfig, Replacements } from '@kbn/elastic-assistant-common';
+import moment from 'moment';
 import { useAssistantContext } from '../../assistant_context';
 import { fetchConnectorExecuteAction, FetchConnectorExecuteResponse } from '../api';
 import * as i18n from './translations';
-import moment from 'moment';
 
 /**
  * TODO: This is a workaround to solve the issue with the long standing server tasks while cahtting with the assistant.

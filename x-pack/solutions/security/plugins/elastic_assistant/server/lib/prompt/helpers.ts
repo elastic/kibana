@@ -23,7 +23,7 @@ export const getModelOrOss = (
 
 /** Formats time e.g. '14/02/2025, 09:33:12 UTC' */
 const TIME_FORMAT = 'ddd, MMM Do YYYY, HH:mm:ss [UTC]Z';
-const CONVERSION_TIME_FORMAT = 'HH:mm:ss [UTC]';
+const UTC_CONVERSION_TIME_FORMAT = 'HH:mm:ss [UTC]';
 
 export const getFormattedTime = ({
   screenContextTimezone,
@@ -43,11 +43,10 @@ export const getFormattedTime = ({
   const utcFormatter = moment.tz(now, 'UTC');
 
   // If the local timezone is different from UTC, we should show the UTC time as well
-  const utcConversionRequired =
-      currentFormatter.format('[UTC]Z') !== utcFormatter.format('[UTC]Z');
+  const utcConversionRequired = currentFormatter.format('[UTC]Z') !== utcFormatter.format('[UTC]Z');
 
   const currentTime = currentFormatter.format(TIME_FORMAT);
-  const utcConversion = utcConversionRequired ? utcFormatter.format(CONVERSION_TIME_FORMAT) : undefined;
+  const utcConversion = utcConversionRequired ? utcFormatter.format(UTC_CONVERSION_TIME_FORMAT) : undefined;
 
   return `Current time: ${currentTime} ${utcConversion ? `(${utcConversion})` : ''}`.trim();
 };
