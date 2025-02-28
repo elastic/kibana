@@ -185,9 +185,14 @@ export class BaseValidator {
    */
   protected async validateByPolicyItem(item: ExceptionItemLikeOptions): Promise<void> {
     if (this.isItemByPolicy(item)) {
-      const { packagePolicy, savedObjects } = this.endpointAppContext.getInternalFleetServices();
+      const spaceId = this.endpointAppContext.experimentalFeatures
+        .endpointManagementSpaceAwarenessEnabled
+        ? await this.getActiveSpaceId()
+        : undefined;
+      const { packagePolicy, savedObjects } =
+        this.endpointAppContext.getInternalFleetServices(spaceId);
       const policyIds = getPolicyIdsFromArtifact(item);
-      const soClient = savedObjects.createInternalScopedSoClient();
+      const soClient = savedObjects.createInternalScopedSoClient({ spaceId });
 
       if (policyIds.length === 0) {
         return;
