@@ -105,7 +105,7 @@ export const findDocuments = async <TSearchSchema>({
           sort,
           _source: {
             includes: fields,
-          }
+          },
         },
         { index },
         {
@@ -117,7 +117,7 @@ export const findDocuments = async <TSearchSchema>({
           sort,
           _source: {
             includes: fields,
-          }
+          },
         },
       ],
       ignore_unavailable: true,
