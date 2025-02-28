@@ -77,3 +77,4 @@ describe('Detection rules utils', () => {
     const result = getFindingsDetectionRuleSearchTagsFromArrayOfRules(cspBenchmarkRule);
     expect(result).toEqual(expectedTags);
   });
+});

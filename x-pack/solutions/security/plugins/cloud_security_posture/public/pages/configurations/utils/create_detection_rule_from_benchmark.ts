@@ -8,9 +8,12 @@
 import { HttpSetup } from '@kbn/core/public';
 import { LATEST_FINDINGS_RETENTION_POLICY } from '@kbn/cloud-security-posture-common';
 import type { CspBenchmarkRule } from '@kbn/cloud-security-posture-common/schema/rules/latest';
-import { generateBenchmarkRuleTags } from '@kbn/cloud-security-posture/src/utils/detection_rules';
 import { i18n } from '@kbn/i18n';
-import { createDetectionRule, FINDINGS_INDEX_PATTERN } from '@kbn/cloud-security-posture-common';
+import {
+  createDetectionRule,
+  FINDINGS_INDEX_PATTERN,
+  generateBenchmarkRuleTags,
+} from '@kbn/cloud-security-posture-common';
 
 const DEFAULT_RULE_RISK_SCORE = 0;
 const DEFAULT_RULE_SEVERITY = 'low';
