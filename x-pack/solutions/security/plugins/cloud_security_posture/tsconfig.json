@@ -12,7 +12,7 @@
     "server/**/*.json",
     "public/**/*.json",
     "../../../../../typings/**/*"
-, "../../packages/kbn-cloud-security-posture/public/src/utils/get_vendor_name.test.ts", "../../packages/kbn-cloud-security-posture/public/src/utils/get_vendor_name.ts", "../../packages/kbn-cloud-security-posture/public/src/utils/is_native_csp_finding.test.ts", "../../packages/kbn-cloud-security-posture/public/src/utils/is_native_csp_finding.ts"  ],
+    , "../../packages/kbn-cloud-security-posture/public/src/utils/get_vendor_name.test.ts", "../../packages/kbn-cloud-security-posture/public/src/utils/get_vendor_name.ts", "../../packages/kbn-cloud-security-posture/public/src/utils/is_native_csp_finding.test.ts", "../../packages/kbn-cloud-security-posture/public/src/utils/is_native_csp_finding.ts"  ],
   "kbn_references": [
     "@kbn/core",
     "@kbn/data-plugin",
