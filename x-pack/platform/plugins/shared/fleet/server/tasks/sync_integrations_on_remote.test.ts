@@ -376,4 +376,32 @@ describe('syncIntegrationsOnRemote', () => {
 
     expect(packageClientMock.installPackage).toHaveBeenCalled();
   });
+
+  it('should do nothing if sync enabled and the package is installing', async () => {
+    getIndicesMock.mockResolvedValue({
+      'fleet-synced-integrations-ccr-remote1': {},
+    });
+    searchMock.mockResolvedValue(getSyncedIntegrationsCCRDoc(true));
+    packageClientMock.getInstallation.mockImplementation((packageName: string) =>
+      packageName === 'nginx'
+        ? {
+            install_status: 'installing',
+            version: '2.1.0',
+          }
+        : {
+            install_status: 'installed',
+            version: '2.3.0',
+          }
+    );
+
+    await syncIntegrationsOnRemote(
+      esClientMock,
+      {} as any,
+      packageClientMock,
+      abortController,
+      loggerMock
+    );
+
+    expect(packageClientMock.installPackage).not.toHaveBeenCalled();
+  });
 });

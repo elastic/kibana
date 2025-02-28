@@ -80,13 +80,17 @@ async function installPackageIfNotInstalled(
 ) {
   const installation = await packageClient.getInstallation(pkg.package_name);
   if (
-    installation &&
-    installation.install_status === 'installed' &&
+    installation?.install_status === 'installed' &&
     semverGte(installation.version, pkg.package_version)
   ) {
     return;
   }
-  if (installation && installation.install_status === 'install_failed') {
+
+  if (installation?.install_status === 'installing') {
+    return;
+  }
+
+  if (installation?.install_status === 'install_failed') {
     const attempt = installation.latest_install_failed_attempts?.length ?? 0;
 
     if (attempt >= MAX_RETRY_ATTEMPTS) {
