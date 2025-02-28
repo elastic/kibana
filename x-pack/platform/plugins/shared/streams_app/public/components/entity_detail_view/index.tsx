@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiLink, EuiPanel, EuiBadge } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiBadge } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { css } from '@emotion/css';
@@ -91,20 +91,7 @@ export function EntityDetailViewWithoutParams({
       `}
     >
       <EuiFlexItem grow={false}>
-        <EuiPanel color="transparent">
-          <EuiLink data-test-subj="streamsEntityDetailViewGoBackHref" href={router.link('/')}>
-            <EuiFlexGroup direction="row" alignItems="center" gutterSize="s">
-              <EuiIcon type="arrowLeft" />
-              {i18n.translate('xpack.streams.entityDetailView.goBackLinkLabel', {
-                defaultMessage: 'Back',
-              })}
-            </EuiFlexGroup>
-          </EuiLink>
-        </EuiPanel>
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
         <StreamsAppPageHeader
-          verticalPaddingSize="none"
           title={
             <StreamsAppPageHeaderTitle
               title={
