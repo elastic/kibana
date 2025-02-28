@@ -40,7 +40,7 @@ export const apmIndicesSavedObjectDefinition: SavedObjectsType = {
     importableAndExportable: true,
     icon: 'apmApp',
     getTitle: () =>
-      i18n.translate('xpack.apmDataAccess.apmSettings.index', {
+      i18n.translate('xpack.apmSourcesAccess.apmSettings.index', {
         defaultMessage: 'APM Settings - Index',
       }),
   },

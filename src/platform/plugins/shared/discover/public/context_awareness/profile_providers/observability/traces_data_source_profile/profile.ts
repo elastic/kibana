@@ -7,14 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { DataSourceCategory, DataSourceProfileProvider } from '../../../profiles';
+import { DataSourceCategory, type DataSourceProfileProvider } from '../../../profiles';
 import { extractIndexPatternFrom } from '../../extract_index_pattern_from';
-import { ProfileProviderServices } from '../../profile_provider_services';
+import type { ProfileProviderServices } from '../../profile_provider_services';
+import { OBSERVABILITY_ROOT_PROFILE_ID } from '../consts';
 import { getCellRenderers, getDocViewer } from './accessors';
 
-export const createTracesDataSourceProfileProvider = (
-  services: ProfileProviderServices
-): DataSourceProfileProvider => ({
+export const createTracesDataSourceProfileProvider = ({
+  tracesContextService,
+}: ProfileProviderServices): DataSourceProfileProvider => ({
   profileId: 'traces-data-source-profile',
   isExperimental: true,
   profile: {
@@ -34,9 +35,10 @@ export const createTracesDataSourceProfileProvider = (
     getCellRenderers,
   },
   resolve: (params) => {
-    const indexPattern = extractIndexPatternFrom(params);
-
-    if (services.tracesContextService.containsTracesIndexPattern(indexPattern)) {
+    if (
+      params.rootContext.profileId === OBSERVABILITY_ROOT_PROFILE_ID &&
+      tracesContextService.containsTracesIndexPattern(extractIndexPatternFrom(params))
+    ) {
       return {
         isMatch: true,
         context: {
