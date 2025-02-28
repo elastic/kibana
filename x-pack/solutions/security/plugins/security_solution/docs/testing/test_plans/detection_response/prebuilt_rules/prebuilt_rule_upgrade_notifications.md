@@ -66,9 +66,25 @@ Functional requirements for the functionality outlined in this test plan.
 
 - [Common product requirements](./prebuilt_rules_common_info.md#common-product-requirements).
 
-User stories:
+User stories for the Rule Management page:
 
-- TBD
+- User can see a notification callout on the Rule Management page when some of the currently installed prebuilt rules can be upgraded to new versions. The callout encourages the user to keep prebuilt rules up-to-date and regularly upgrade them to their latest versions.
+  - User can dismiss the callout.
+- User can see a Rule Updates tab on the Rule Management page when some of the currently installed prebuilt rules can be upgraded to new versions.
+  - User can see the total number of rules available for upgrade on this tab.
+  - User can click on the tab which opens the Rule Upgrade table.
+
+User stories for the Rule Details page:
+
+- User can see a notification callout on the Rule Details page when the rule shown on this page can be upgraded to a new version. The callout encourages the user to upgrade the rule.
+  - User can open a Rule Upgrade flyout to review updates in the latest rule version and perform the upgrade.
+  - User can't dismiss the callout.
+
+User stories for the Rule Editing page:
+
+- User can see a notification callout on the Rule Editing page when the rule shown on this page can be upgraded to a new version. The callout encourages the user to upgrade the rule before editing it.
+  - User can navigate back to the Rule Details page where they can review updates in the latest rule version and perform the upgrade.
+  - User can't dismiss the callout.
 
 ## Scenarios
 
