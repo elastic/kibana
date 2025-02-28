@@ -36,7 +36,7 @@ describe('detectionRulesClient.importRules', () => {
       mlAuthz: buildMlAuthz(),
       savedObjectsClient: savedObjectsClientMock.create(),
       license: licenseMock.createLicenseMock(),
-      experimentalFeatures: { prebuiltRulesCustomizationEnabled: true } as ExperimentalFeatures,
+      experimentalFeatures: {} as ExperimentalFeatures,
       productFeaturesService: createProductFeaturesServiceMock(),
     });
 
