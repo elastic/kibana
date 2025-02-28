@@ -135,9 +135,7 @@
               "Tool",
               " | ",
               "DynamicStructuredTool",
-              "<",
-              "ZodObjectAny",
-              "> | null"
+              "<ZodObjectAny> | null"
             ],
             "path": "x-pack/solutions/security/plugins/elastic_assistant/server/types.ts",
             "deprecated": false,

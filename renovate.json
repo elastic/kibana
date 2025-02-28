@@ -123,8 +123,6 @@
         "@langtrase/trace-attributes",
         "@opentelemetry/sdk-trace-base",
         "@smithy/eventstream-serde-node",
-        "@smithy/protocol-http",
-        "@smithy/signature-v4",
         "@smithy/types",
         "@types/aws4",
         "ajv",
@@ -3737,67 +3735,15 @@
         "@langchain/google-genai",
         "@langchain/google-vertexai",
         "@langchain/langgraph",
-        "@langchain/openai"
-      ],
-      "reviewers": [
-        "team:security-generative-ai"
-      ],
-      "matchBaseBranches": [
-        "main"
-      ],
-      "labels": [
-        "Team:Security Generative AI",
-        "release_note:skip",
-        "backport:all-open"
-      ],
-      "minimumReleaseAge": "7 days",
-      "enabled": true
-    },
-    {
-      "groupName": "@google/generative-ai",
-      "matchDepNames": [
-        "@google/generative-ai"
-      ],
-      "reviewers": [
-        "team:security-generative-ai"
-      ],
-      "matchBaseBranches": [
-        "main"
-      ],
-      "labels": [
-        "Team:Security Generative AI",
-        "release_note:skip",
-        "backport:all-open"
-      ],
-      "minimumReleaseAge": "7 days",
-      "enabled": true
-    },
-    {
-      "groupName": "@smithy",
-      "matchDepNames": [
+        "@langchain/openai",
+        "@google/generative-ai",
         "@smithy/eventstream-codec",
         "@smithy/middleware-stack",
-        "@smithy/node-http-handler",
-        "@smithy/util-utf8"
-      ],
-      "reviewers": [
-        "team:security-generative-ai"
-      ],
-      "matchBaseBranches": [
-        "main"
-      ],
-      "labels": [
-        "Team:Security Generative AI",
-        "release_note:skip",
-        "backport:all-open"
-      ],
-      "minimumReleaseAge": "7 days",
-      "enabled": true
-    },
-    {
-      "groupName": "@aws-sdk/client-bedrock-runtime",
-      "matchDepNames": [
-        "@aws-sdk/client-bedrock-runtime"
+        "@smithy/util-utf8",
+        "@aws-sdk/client-bedrock-agent-runtime",
+        "@aws-sdk/client-bedrock-runtime",
+        "@aws-sdk/client-kendra",
+        "@aws-sdk/credential-provider-node"
       ],
       "reviewers": [
         "team:security-generative-ai"

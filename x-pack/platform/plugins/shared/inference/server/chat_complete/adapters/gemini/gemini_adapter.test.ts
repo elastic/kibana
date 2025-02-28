@@ -117,7 +117,7 @@ describe('geminiAdapter', () => {
               name: 'myFunction',
               parameters: {
                 properties: {},
-                type: 'OBJECT',
+                type: 'object',
               },
             },
             {
@@ -128,11 +128,11 @@ describe('geminiAdapter', () => {
                   foo: {
                     description: 'foo',
                     enum: undefined,
-                    type: 'STRING',
+                    type: 'string',
                   },
                 },
                 required: ['foo'],
-                type: 'OBJECT',
+                type: 'object',
               },
             },
           ],

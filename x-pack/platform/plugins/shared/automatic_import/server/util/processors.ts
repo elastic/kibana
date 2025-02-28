@@ -69,6 +69,13 @@ export function createKVProcessor(kvInput: KVProcessor, state: KVState): ESProce
     autoescape: false,
   });
   const template = env.getTemplate('kv.yml.njk');
+  if (kvInput.trim_key) {
+    kvInput.trim_key = kvInput.trim_key.replace(/['"]/g, '\\$&');
+  }
+
+  if (kvInput.trim_value) {
+    kvInput.trim_value = kvInput.trim_value.replace(/['"]/g, '\\$&');
+  }
   const renderedTemplate = template.render({
     kvInput,
     packageName: state.packageName,

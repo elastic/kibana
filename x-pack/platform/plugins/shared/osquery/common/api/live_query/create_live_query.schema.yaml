@@ -7,18 +7,28 @@ components:
   schemas:
     CreateLiveQueryRequestBody:
       type: object
+      example:
+        query: 'select * from uptime;'
+        agent_all: true
+        ecs_mapping:
+          host.uptime:
+            field: 'total_seconds'
       properties:
         agent_ids:
+          description: 'A list of agent IDs to run the query on.'
           type: array
           items:
             type: string
         agent_all:
+          description: 'When `true`, the query runs on all agents.'
           type: boolean
         agent_platforms:
+          description: 'A list of agent platforms to run the query on.'
           type: array
           items:
             type: string
         agent_policy_ids:
+          description: 'A list of agent policy IDs to run the query on.'
           type: array
           items:
             type: string
@@ -33,17 +43,54 @@ components:
         pack_id:
           $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/PackIdOrUndefined'
         alert_ids:
+          description: 'A list of alert IDs associated with the live query.'
           type: array
           items:
             type: string
         case_ids:
+          description: 'A list of case IDs associated with the live query.'
           type: array
           items:
             type: string
         event_ids:
+          description: 'A list of event IDs associated with the live query.'
           type: array
           items:
             type: string
         metadata:
+          description: 'Custom metadata object associated with the live query.'
           type: object
           nullable: true
+
+    CreateLiveQueryResponse:
+      type: object
+      properties: { }
+      example:
+        data:
+           action_id: '3c42c847-eb30-4452-80e0-728584042334'
+           '@timestamp': '2022-07-26T09:59:32.220Z'
+           expiration: '2022-07-26T10:04:32.220Z'
+           type: 'INPUT_ACTION'
+           input_type: 'osquery'
+           agent_ids: [ ]
+           agent_all: true
+           agent_platforms: [ ]
+           agent_policy_ids: [ ]
+           agents:
+             - '16d7caf5-efd2-4212-9b62-73dafc91fa13'
+           user_id: 'elastic'
+           metadata:
+             execution_context:
+               name: 'osquery'
+               url: '/app/osquery/live_queries/new'
+           queries:
+             - action_id: '609c4c66-ba3d-43fa-afdd-53e244577aa0'
+               id: '6724a474-cbba-41ef-a1aa-66aebf0879e2'
+               query: 'select * from uptime;'
+               timeout: 120
+               ecs_mapping:
+                 host.uptime:
+                   field: 'total_seconds'
+               agents:
+                 - '16d7caf5-efd2-4212-9b62-73dafc91fa13'
+

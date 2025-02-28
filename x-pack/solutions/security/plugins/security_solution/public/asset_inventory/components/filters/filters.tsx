@@ -50,7 +50,7 @@ export interface FiltersProps {
 }
 
 export const Filters = ({ onFiltersChange }: FiltersProps) => {
-  const { dataView, dataViewIsLoading, dataViewIsRefetching } = useDataViewContext();
+  const { dataView, dataViewIsLoading } = useDataViewContext();
   const spaceId = useSpaceId();
 
   const dataViewSpec = useMemo(
@@ -72,7 +72,7 @@ export const Filters = ({ onFiltersChange }: FiltersProps) => {
     return null;
   }
 
-  if (dataViewIsLoading || dataViewIsRefetching) {
+  if (dataViewIsLoading) {
     return (
       <EuiFlexItem grow={true}>
         <FilterGroupLoading />

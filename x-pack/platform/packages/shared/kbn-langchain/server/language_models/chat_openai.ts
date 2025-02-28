@@ -90,12 +90,6 @@ export class ActionsClientChatOpenAI extends ChatOpenAI {
       streaming,
       // matters only for the LangSmith logs (Metadata > Invocation Params), which are misleading if this is not set
       modelName: model ?? DEFAULT_OPEN_AI_MODEL,
-      // these have to be initialized, but are not actually used since we override the openai client with the actions client
-      azureOpenAIApiKey: 'nothing',
-      azureOpenAIApiDeploymentName: 'nothing',
-      azureOpenAIApiInstanceName: 'nothing',
-      azureOpenAIBasePath: 'nothing',
-      azureOpenAIApiVersion: 'nothing',
       openAIApiKey: '',
     });
     this.#actionsClient = actionsClient;

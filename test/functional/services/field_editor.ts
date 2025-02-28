@@ -34,6 +34,13 @@ export class FieldEditorService extends FtrService {
   public async setCustomDescription(description: string) {
     await this.testSubjects.setValue('customDescriptionRow > input', description);
   }
+  public async setPopularity(value: number) {
+    await this.testSubjects.click('toggleAdvancedSetting');
+    await this.testSubjects.setEuiSwitch('popularityRow > toggle', 'check');
+    await this.testSubjects.setValue('editorFieldCount', String(value), {
+      clearWithKeyboard: true,
+    });
+  }
   public async getFormError() {
     const alert = await this.find.byCssSelector(
       '[data-test-subj=indexPatternFieldEditorForm] > [role="alert"]'

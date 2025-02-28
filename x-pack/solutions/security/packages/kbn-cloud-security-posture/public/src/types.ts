@@ -27,7 +27,7 @@ import type { estypes } from '@elastic/elasticsearch';
 import type { IKibanaSearchResponse, IKibanaSearchRequest } from '@kbn/search-types';
 
 import type { BoolQuery } from '@kbn/es-query';
-export interface FindingsBaseEsQuery {
+export interface BaseEsQuery {
   query?: {
     bool: BoolQuery;
   };

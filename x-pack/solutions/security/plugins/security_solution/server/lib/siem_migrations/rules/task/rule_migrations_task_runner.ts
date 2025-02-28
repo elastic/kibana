@@ -9,6 +9,7 @@ import assert from 'assert';
 import type { AuthenticatedUser, Logger } from '@kbn/core/server';
 import { abortSignalToPromise, AbortError } from '@kbn/kibana-utils-plugin/server';
 import type { RunnableConfig } from '@langchain/core/runnables';
+import type { ElasticRule } from '../../../../../common/siem_migrations/model/rule_migration.gen';
 import { SiemMigrationStatus } from '../../../../../common/siem_migrations/constants';
 import { initPromisePool } from '../../../../utils/promise_pool';
 import type { RuleMigrationsDataClient } from '../data/rule_migrations_data_client';
@@ -336,7 +337,7 @@ export class RuleMigrationTaskRunner {
     this.logger.debug(`Translation of rule "${ruleMigration.id}" succeeded`);
     const ruleMigrationTranslated = {
       ...ruleMigration,
-      elastic_rule: migrationResult.elastic_rule,
+      elastic_rule: migrationResult.elastic_rule as ElasticRule,
       translation_result: migrationResult.translation_result,
       comments: migrationResult.comments,
     };
