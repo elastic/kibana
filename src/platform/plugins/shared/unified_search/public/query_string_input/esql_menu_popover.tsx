@@ -18,7 +18,7 @@ import {
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { i18n } from '@kbn/i18n';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import { FEEDBACK_LINK } from '@kbn/esql-utils';
+import { FEEDBACK_LINK } from '@kbn/esql-utils/constants';
 import { getRecommendedQueries } from '@kbn/esql-validation-autocomplete';
 import { LanguageDocumentationFlyout } from '@kbn/language-documentation';
 import type { IUnifiedSearchPluginServices } from '../types';

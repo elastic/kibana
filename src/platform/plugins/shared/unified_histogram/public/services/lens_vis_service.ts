@@ -11,10 +11,10 @@ import { BehaviorSubject, distinctUntilChanged, map, Observable } from 'rxjs';
 import { isEqual } from 'lodash';
 import {
   removeDropCommandsFromESQLQuery,
-  appendToESQLQuery,
-  isESQLColumnSortable,
   hasTransformationalCommand,
-} from '@kbn/esql-utils';
+} from '@kbn/esql-utils/src/utils/query_parsing_helpers';
+import { appendToESQLQuery } from '@kbn/esql-utils/src/utils/append_to_query';
+import { isESQLColumnSortable } from '@kbn/esql-utils/src/utils/esql_fields_utils';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
 import type {
   CountIndexPatternColumn,

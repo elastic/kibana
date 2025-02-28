@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { getESQLQueryColumns } from '@kbn/esql-utils';
+import { getESQLQueryColumns } from '@kbn/esql-utils/src/utils/run_query';
 import {
   LensConfigBuilder,
   LensDataset,

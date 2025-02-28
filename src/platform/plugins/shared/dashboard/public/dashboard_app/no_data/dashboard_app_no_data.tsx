@@ -13,10 +13,10 @@ import useAsync from 'react-use/lib/useAsync';
 import { v4 as uuidv4 } from 'uuid';
 import {
   getESQLAdHocDataview,
-  getESQLQueryColumns,
   getIndexForESQLQuery,
-  getInitialESQLQuery,
-} from '@kbn/esql-utils';
+} from '@kbn/esql-utils/src/utils/get_esql_adhoc_dataview';
+import { getESQLQueryColumns } from '@kbn/esql-utils/src/utils/run_query';
+import { getInitialESQLQuery } from '@kbn/esql-utils/src/utils/get_initial_esql_query';
 import { withSuspense } from '@kbn/shared-ux-utility';
 import type { TypedLensByValueInput } from '@kbn/lens-plugin/public';
 import { getLensAttributesFromSuggestion } from '@kbn/visualization-utils';

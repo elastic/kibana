@@ -22,7 +22,7 @@ import { monaco } from '@kbn/monaco';
 import type { ISearchGeneric } from '@kbn/search-types';
 import { ESQLVariableType, type ESQLControlVariable } from '@kbn/esql-types';
 import { aggFunctionDefinitions } from '@kbn/esql-validation-autocomplete';
-import { getESQLQueryColumnsRaw } from '@kbn/esql-utils';
+import { getESQLQueryColumnsRaw } from '@kbn/esql-utils/src/utils/run_query';
 import type { ESQLControlState, ControlWidthOptions } from '../types';
 import {
   Header,

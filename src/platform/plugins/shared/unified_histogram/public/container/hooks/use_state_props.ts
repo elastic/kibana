@@ -9,7 +9,7 @@
 
 import { DataView, DataViewField, DataViewType } from '@kbn/data-views-plugin/common';
 import { AggregateQuery, isOfAggregateQueryType, Query } from '@kbn/es-query';
-import { hasTransformationalCommand } from '@kbn/esql-utils';
+import { hasTransformationalCommand } from '@kbn/esql-utils/src/utils/query_parsing_helpers';
 import type { RequestAdapter } from '@kbn/inspector-plugin/public';
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 import { convertDatatableColumnToDataViewFieldSpec } from '@kbn/data-view-utils';
