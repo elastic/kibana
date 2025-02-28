@@ -87,8 +87,8 @@ export class XSOARConnector extends SubActionConnector<Config, Secrets> {
       return mergedIncident;
     } catch (err) {
       throw new Error(
-        i18n.translate('xpack.stackConnectors.xsoar.alertBodyParsingError', {
-          defaultMessage: 'Error parsing alert body for xSOAR: {err}',
+        i18n.translate('xpack.stackConnectors.xsoar.incidentBodyParsingError', {
+          defaultMessage: 'Error parsing incident body for xSOAR: {err}',
           values: {
             err: err.toString(),
           },

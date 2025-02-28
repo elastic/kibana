@@ -246,7 +246,6 @@ describe('XSOARParamsFields renders', () => {
       const props = { ...defaultProps, actionParams: {} };
       render(<XSOARParamsFields {...props} />);
 
-      expect(mockUseSubAction).toHaveBeenCalledTimes(1);
       expect(mockUseSubActionPlaybooks).toHaveBeenCalledWith(
         expect.objectContaining({ subAction: 'getPlaybooks' })
       );

@@ -83,6 +83,7 @@ const XSOARParamsFields: React.FunctionComponent<ActionParamsProps<ExecutorParam
   const [isRuleSeverity, setIsRuleSeverity] = useState<boolean>(
     incident.severity === XSOARSeverity.RULE_SEVERITY ? true : false
   );
+  const [playbooks, setPlaybooks] = useState<XSOARPlaybooksObject[]>();
 
   useEffect(() => {
     if (actionConnector != null && connectorId !== actionConnector.id) {
@@ -112,7 +113,7 @@ const XSOARParamsFields: React.FunctionComponent<ActionParamsProps<ExecutorParam
   }, [actionParams]);
 
   const {
-    response: { playbooks } = {},
+    response: { playbooks: fetchedPlaybooks } = {},
     isLoading: isLoadingPlaybooks,
     error: playbooksError,
   } = useSubAction<XSOARPlaybooksActionParams, XSOARPlaybooksActionResponse>({
@@ -120,16 +121,19 @@ const XSOARParamsFields: React.FunctionComponent<ActionParamsProps<ExecutorParam
     subAction: 'getPlaybooks',
   });
 
-  const playbooksOptions = useMemo(() => playbooks?.map(createOption) ?? [], [playbooks]);
-
   useEffect(() => {
     if (playbooksError) {
       toasts.danger({ title: translations.PLAYBOOKS_ERROR, body: playbooksError.message });
+      setPlaybooks([]);
+    } else {
+      setPlaybooks(fetchedPlaybooks);
     }
-  }, [toasts, playbooksError]);
+  }, [toasts, playbooksError, fetchedPlaybooks]);
+
+  const playbooksOptions = useMemo(() => playbooks?.map(createOption) ?? [], [playbooks]);
 
   useEffect(() => {
-    if (selectedPlaybookOption === undefined && incident.playbookId && playbooks) {
+    if (selectedPlaybookOption === undefined && incident.playbookId && playbooks !== undefined) {
       const selectedPlaybook = playbooks.find(({ id }) => id === incident.playbookId);
       if (selectedPlaybook) {
         setSelectedPlaybookOption(createOption(selectedPlaybook));
