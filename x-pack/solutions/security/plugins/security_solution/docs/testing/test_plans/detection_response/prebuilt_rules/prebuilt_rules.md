@@ -11,7 +11,7 @@ See [common information](./prebuilt_rules_common_info.md) about prebuilt rules, 
 
 ## Test plans
 
-Understand how we distribute prebuilt rules via a Fleet package and how prebuilt rules become available for installation and upgrade in the system.
+Understand how we distribute prebuilt rules via a Fleet package and how prebuilt rules become available for installation and upgrade in the system:
 
 - [Test plan: prebuilt rules package](./prebuilt_rules_package.md)
 
