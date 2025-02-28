@@ -93,7 +93,7 @@ include::upgrade-notes.asciidoc[]
 
 coming::[8.18.0]
 
-For information about the {kib} 8.18.0 release, review the following information.
+Review the following information about the {kib} 8.18.0 release.
 
 [float]
 [[breaking-changes-8.18.0]]
@@ -102,16 +102,14 @@ For information about the {kib} 8.18.0 release, review the following information
 Breaking changes can prevent your application from optimal operation and performance.
 Before you upgrade to 8.18.0, review the breaking changes, then mitigate the impact to your application.
 
+
 [discrete]
 [[breaking-201100]]
-* Sub-feature for managing private locations !!.
+.Added sub-feature privileges for managing Synthetics private locations.
 [%collapsible]
 ====
 *Details* +
-!!TODO!! For more information, refer to ({kibana-pull}201100[#201100]).
-
-*Impact* +
-!!TODO!!
+Permissions to manage private locations in the Synthetics app can now be granted with sub-feature privileges using the API or Kibana's role management UI. For more information, refer to ({kibana-pull}201100[#201100]).
 ====
       
 [float]
@@ -123,75 +121,34 @@ Deprecated functionality does not have an immediate impact on your application, 
 you make the necessary updates after you upgrade to 8.18.0.
 
 [discrete]
-[[deprecation-206904]]
-* Adds management deprecated apis to the upgrade assistant.
+.Deprecated all security v1 endpoints
 [%collapsible]
 ====
 *Details* +
-!!TODO!! For more information, refer to ({kibana-pull}206904[#206904]).
+All `v1` Kibana security HTTP endpoints have been removed.
+`GET /api/security/v1/logout` has been replaced by `GET /api/security/logout`
+`GET /api/security/v1/oidc/implicit` has been replaced by `GET /api/security/oidc/implicit`
+`GET /api/security/v1/oidc` has been replaced by GET `/api/security/oidc/callback`
+`POST /api/security/v1/oidc` has been replaced by POST `/api/security/oidc/initiate_login`
+`POST /api/security/v1/saml` has been replaced by POST `/api/security/saml/callback`
+`GET /api/security/v1/me` has been removed with no replacement.
+For more information, refer to {kibana-pull}199656[#199656].
+*Impact* + 
+Any HTTP API calls to the `v1` Kibana security endpoints will fail with a 404 status code starting from version 9.0.0.
+Third party OIDC and SAML identity providers configured with `v1` endpoints will no longer work.
+*Action* +
+Update any OIDC and SAML identity providers to reference the corresponding replacement endpoint listed above.
+Remove references to the `/api/security/v1/me` endpoint from any automations, applications, tooling, and scripts.
+====
 
-*Impact* +
-!!TODO!!
-====
-      
-[discrete]
-[[deprecation-206903]]
-* Adds upgrade notes for management deprecated apis.
-[%collapsible]
-====
-*Details* +
-!!TODO!! For more information, refer to ({kibana-pull}206903[#206903]).
 
-*Impact* +
-!!TODO!!
-====
-      
-[discrete]
-[[deprecation-202775]]
-* Adds deprecation warning for the legacy risk score modules.
-[%collapsible]
-====
-*Details* +
-!!TODO!! For more information, refer to ({kibana-pull}202775[#202775]).
-
-*Impact* +
-!!TODO!!
-====
-      
-[discrete]
-[[deprecation-202662]]
-* Deprecates siem signals migration APIs.
-[%collapsible]
-====
-*Details* +
-!!TODO!! For more information, refer to ({kibana-pull}202662[#202662]).
-
-*Impact* +
-!!TODO!!
-====
-      
 [discrete]
 [[deprecation-201625]]
-* Deprecate configuration settings.
+.Deprecated Logs UI configuration settings.
 [%collapsible]
 ====
 *Details* +
-!!TODO!! For more information, refer to ({kibana-pull}201625[#201625]).
-
-*Impact* +
-!!TODO!!
-====
-      
-[discrete]
-[[deprecation-199656]]
-* See `docs/upgrade-notes.asciidoc` in file changes.
-[%collapsible]
-====
-*Details* +
-!!TODO!! For more information, refer to ({kibana-pull}199656[#199656]).
-
-*Impact* +
-!!TODO!!
+Legacy and unused configuration settings were deprecated for the Logs UI. For more information, refer to ({kibana-pull}201625[#201625]).
 ====
       
 [float]
@@ -200,44 +157,29 @@ you make the necessary updates after you upgrade to 8.18.0.
 {kib} 8.18.0 adds the following new and notable features.
 
 Dashboards & Visualizations::
-* Improves Dashboard layout engine by switching to the internally developed `kbn-grid-layout` ({kibana-pull}205341[#205341]).
-* [Heatmap] Add ability to rotate X axis label in *Lens* ({kibana-pull}202143[#202143]).
+* ES|QL charts now allow the creation of controls in dashboards. You can control a part of the query such as a field, an interval or a value.
+* Improves Dashboard layout engine ({kibana-pull}205341[#205341]).
+* Adds the ability to rotate the X axis label in *Lens* heatmaps ({kibana-pull}202143[#202143]).
 Data ingestion and Fleet::
-* Display next steps and actions in agentless integrations flyout ({kibana-pull}203824[#203824]).
-* Feature to support columns when exporting agents to CSV ({kibana-pull}203103[#203103]).
+* Adds next steps and actions to the agentless integrations flyout ({kibana-pull}203824[#203824]).
+* Adds support for columns when exporting agents to CSV ({kibana-pull}203103[#203103]).
 * Adds status tracking for agentless integrations ({kibana-pull}199567[#199567]).
 Discover::
-* In-table search ({kibana-pull}206454[#206454]).
-* Refactor RowHeightSettings component to EUI layout ({kibana-pull}203606[#203606]).
+* Adds in-table search ({kibana-pull}206454[#206454]).
 Elastic Observability solution::
-* Rule connector - handle multiple prompt ({kibana-pull}209221[#209221]).
-* Chat history details in conversation list ({kibana-pull}207426[#207426]).
-* Added createdBy and updatedBy fields in summary documents !! ({kibana-pull}205784[#205784]).
-* Space aware private locations !! ({kibana-pull}202634[#202634]).
-* Sub-feature for managing private locations !! ({kibana-pull}201100[#201100]).
-////
-!!TODO!! The above PR had a lengthy release note description:
-If you have already modified sub feature for the synthetics/uptime feature to disable user access for using elastic managed location, addition of this feature means, they will also will not be able to manage(add/delete) private locations. Though this will not impact usage of private locations in monitors. If you want those users to have ability to add/delete new private locations, you can enable that by toggle this feature in role ui or via api.
-////
-* Feat(slo): allow configuration of advanced settings from UI ({kibana-pull}200822[#200822]).
-////
-!!TODO!! The above PR had a lengthy release note description:
-Adds **syncField**, **syncDelay** and **frequency** settings in the API and SLO form. Allow customer to fine tune their SLO settings directly from the UI.
-////
+* Adds the ability to handle multiple prompts for the Rule connector ({kibana-pull}209221[#209221]).
+* Adds chat history details to conversation list ({kibana-pull}207426[#207426]).
+* Adds createdBy and updatedBy fields to summary documents ({kibana-pull}205784[#205784]).
+* Adds space aware private locations ({kibana-pull}202634[#202634]).
+* Adds **syncField**, **syncDelay** and **frequency** settings to the API and SLO UI to allow fine-tuning SLO settings directly from the UI. ({kibana-pull}200822[#200822]).
 Elastic Security solution::
 For the Elastic Security 8.18.0 release information, refer to {security-guide}/release-notes.html[_Elastic Security Solution Release Notes_].
 Kibana security::
-* Remove Tech preview badge for GA ({kibana-pull}208523[#208523]).
+* The Automatic Import functionality is now generally available ({kibana-pull}208523[#208523]).
 Machine Learning::
 * Adds new View job detail flyouts for Anomaly detection and Data Frame Analytics ({kibana-pull}207141[#207141]).
-* Adds simple flyout based file upload to Search ({kibana-pull}206864[#206864]).
-* Adds new security module to detect anomalous activity in host-based logs ({kibana-pull}195582[#195582]).
-Platform::
-* Dashboard variables ({kibana-pull}202875[#202875]).
-////
-!!TODO!! The above PR had a lengthy release note description:
-ES|QL charts now allow the creation of controls in dashboards. You can control a part of the query such as a field, an interval or a value.
-////
+* Adds simple flyout-based file upload to Search ({kibana-pull}206864[#206864]).
+* Adds a new security module to detect anomalous activity in host-based logs ({kibana-pull}195582[#195582]).
 
 For more information about the features introduced in 8.18.0, refer to <<whats-new,What's new in 8.18>>.
 
@@ -247,285 +189,155 @@ For more information about the features introduced in 8.18.0, refer to <<whats-n
 For detailed information about the 8.18.0 release, review the enhancements and bug fixes.
 
 [float]
-[[breaking-v8.18.0]]
-=== Breaking
-[discrete]
-[[breaking-201100]]
-* Sub-feature for managing private locations !!.
-[%collapsible]
-====
-*Details* +
-!!TODO!! For more information, refer to ({kibana-pull}201100[#201100]).
-
-*Impact* +
-!!TODO!!
-====
-      
-
-[float]
-[[deprecation-v8.18.0]]
-=== Deprecations
-[discrete]
-[[deprecation-206904]]
-* Adds management deprecated apis to the upgrade assistant.
-[%collapsible]
-====
-*Details* +
-!!TODO!! For more information, refer to ({kibana-pull}206904[#206904]).
-
-*Impact* +
-!!TODO!!
-====
-      
-[discrete]
-[[deprecation-206903]]
-* Adds upgrade notes for management deprecated apis.
-[%collapsible]
-====
-*Details* +
-!!TODO!! For more information, refer to ({kibana-pull}206903[#206903]).
-
-*Impact* +
-!!TODO!!
-====
-      
-[discrete]
-[[deprecation-202775]]
-* Adds deprecation warning for the legacy risk score modules.
-[%collapsible]
-====
-*Details* +
-!!TODO!! For more information, refer to ({kibana-pull}202775[#202775]).
-
-*Impact* +
-!!TODO!!
-====
-      
-[discrete]
-[[deprecation-202662]]
-* Deprecates siem signals migration APIs.
-[%collapsible]
-====
-*Details* +
-!!TODO!! For more information, refer to ({kibana-pull}202662[#202662]).
-
-*Impact* +
-!!TODO!!
-====
-      
-[discrete]
-[[deprecation-201625]]
-* Deprecate configuration settings.
-[%collapsible]
-====
-*Details* +
-!!TODO!! For more information, refer to ({kibana-pull}201625[#201625]).
-
-*Impact* +
-!!TODO!!
-====
-      
-[discrete]
-[[deprecation-199656]]
-* See `docs/upgrade-notes.asciidoc` in file changes.
-[%collapsible]
-====
-*Details* +
-!!TODO!! For more information, refer to ({kibana-pull}199656[#199656]).
-
-*Impact* +
-!!TODO!!
-====
-      
-
-[float]
 [[enhancement-v8.18.0]]
 === Enhancements
 Alerting::
 * Allow pre-configured connectors to opt-in to exposing their config by setting `exposeConfig` ({kibana-pull}207654[#207654]).
 * Adds new flyout to rule form library, responsive design and illustration to rule form page ({kibana-pull}206141[#206141]).
-* Case templates are now GA ({kibana-pull}205940[#205940]).
-* Pass any field to ServiceNow using the ServiceNow SecOps connector with a JSON field called "additional fields" ({kibana-pull}201948[#201948]).
+* Case templates are now generally available ({kibana-pull}205940[#205940]).
+* Ability to pass any field to ServiceNow using the ServiceNow SecOps connector with a JSON field called "additional fields" ({kibana-pull}201948[#201948]).
 Dashboards & Visualizations::
-* Fixes the values control FT ({kibana-pull}211159[#211159]).
-* Allow custom MVT sources to style the map layers and provide custom legend ({kibana-pull}200656[#200656]).
+* Allows custom MVT sources to style the map layers and provide custom legend ({kibana-pull}200656[#200656]).
 Data ingestion and Fleet::
-* Enable subfeature privileges ({kibana-pull}203182[#203182]).
-Discover::
-* Adds "All logs" data view to classic nav ({kibana-pull}209042[#209042]).
-* Sets the KQL/Lucene query on dataview to ES|QL transition ({kibana-pull}206391[#206391]).
-* Remove redundant data fetching when hiding/showing the histogram/chart ({kibana-pull}206389[#206389]).
-* Adds a default "All logs" temporary data view in the Observability Solution view ({kibana-pull}205991[#205991]).
+* Enable sub-feature privileges for Fleet ({kibana-pull}203182[#203182]).
+Discover and ES|QL::
+* Convert the KQL/Lucene query when switching from data view mode to ES|QL mode ({kibana-pull}206391[#206391]).
+* Remove redundant data fetching when hiding/showing the chart ({kibana-pull}206389[#206389]).
+* Adds a default "All logs" temporary data view to the Observability Solution view ({kibana-pull}205991[#205991]).
+* Adds an "All logs" temporary data view to the Classic solution view ({kibana-pull}209042[#209042]).
 * Format JSON messages in Observability Logs profile ({kibana-pull}205666[#205666]).
 * Make Copy action visible on cell hover ({kibana-pull}204744[#204744]).
 * Rename Saved Search to Discover Session ({kibana-pull}202217[#202217]).
-* Supports custom formatters in charts ({kibana-pull}201540[#201540]).
+* Adds support for custom formatters in charts ({kibana-pull}201540[#201540]).
+* Refactors RowHeightSettings component to EUI layout ({kibana-pull}203606[#203606]).
+* Highlight matching field values when performing a KQL search on a keyword field ({kibana-pull}201952[#201952]).
 Elastic Observability solution::
-* Default to "native" function calling if the connector config is not exposed ({kibana-pull}210455[#210455]).
-* Adds selector syntax support to log source profile ({kibana-pull}206937[#206937]).
-* Use rule form to create rules in observability ({kibana-pull}206774[#206774]).
-* Display stacktrace in the logs overview tab ({kibana-pull}204521[#204521]).
+* Default to "native" function calling if the connector configuration is not exposed ({kibana-pull}210455[#210455]).
+* Adds selector syntax support to the log source profile ({kibana-pull}206937[#206937]).
+* Use rule form to create rules in Observability ({kibana-pull}206774[#206774]).
+* Display stacktrace in the Logs overview tab ({kibana-pull}204521[#204521]).
+* Adds ability to install a Knowledge Base from the AI Assistant settings ({kibana-pull}206408[#206408]).
+* Improves tool choice handling in Observability AI Assistant client ({kibana-pull}203928[#203928]).
+* Introduces cursor pagination in Find SLO API ({kibana-pull}203712[#203712]).
+* Adds a flyout to the table view in Infrastructure Inventory ({kibana-pull}202646[#202646]).
 Elastic Security solution::
 For the Elastic Security 8.18.0 release information, refer to {security-guide}/release-notes.html[_Elastic Security Solution Release Notes_].
 Kibana platform::
-* Configure appearance color mode ({kibana-pull}203406[#203406]).
-////
-!!TODO!! The above PR had a lengthy release note description:
-We have improved the UI to set the color mode in Cloud and Serverless. Allowing the "System" value which will sync the dark mode with the system value.
-////
+* Ability to set the color mode of the UI to Dark, Light, or System, where System syncs the color mode to your system settings ({kibana-pull}203406[#203406]).
+* The new space solution view is now available for on-prem users. The space solution views allows solution-centric navigation similar to the serverless offering. ({kibana-pull}203239[#203239]).
 Kibana security::
 * Added support for human readable name attribute for saved objects audit events ({kibana-pull}206644[#206644]).
-* Enable inference connector for Auto Import ({kibana-pull}206111[#206111]).
-* Reindexing the .kibana_security_session_1 index to the 8.x format ({kibana-pull}204097[#204097]).
-////
-!!TODO!! The above PR had a lengthy release note description:
-Creates Kibana Security session index to only if the `kibana_security_session_1` index or the reindexed version do not exist.
-////
-* Enable on-prem ({kibana-pull}203239[#203239]).
-////
-!!TODO!! The above PR had a lengthy release note description:
-The new space solution view is now available for on-prem users. The space solution views allows solution centric navigation similar to our serverless offering.
-////
-* Operator privileges ({kibana-pull}196583[#196583]).
-////
-!!TODO!! The above PR had a lengthy release note description:
-Added support for explicit indication whether endpoint is restricted to operator only users at the route definition level.
-////
+* Enable inference connector for Automatic Import ({kibana-pull}206111[#206111]).
+* Creates Kibana Security session index only if the `kibana_security_session_1` index or the reindexed version does not exist. ({kibana-pull}204097[#204097]).
+* Adds support for explicit indication of whether an endpoint is restricted to operator-only users at the route definition level. ({kibana-pull}196583[#196583]).
 * Enhanced Role management to manage larger number of roles by adding server side filtering, pagination and querying ({kibana-pull}194630[#194630]).
 Machine Learning::
-* Update the `bucket_span` for ML jobs in the security_host module ({kibana-pull}209663[#209663]).
+* Updates the `bucket_span` for ML jobs in the security_host module ({kibana-pull}209663[#209663]).
 * Adds Spaces column to Anomaly Detection, Data Frame Analytics and Trained Models management pages ({kibana-pull}206696[#206696]).
 * Consistent Layout and UI Enhancements for ML Pages ({kibana-pull}203813[#203813]).
-* Sync ML saved objects to all spaces ({kibana-pull}202175[#202175]).
+* Syncs ML saved objects to all spaces ({kibana-pull}202175[#202175]).
 * Adds action to add log rate analysis to a case ({kibana-pull}201549[#201549]).
 Management::
-* Update JSON schemas for code editors ({kibana-pull}207706[#207706]).
-* Update knn search and query template autocomplete ({kibana-pull}207187[#207187]).
+* Updates JSON schemas for code editors ({kibana-pull}207706[#207706]).
+* Updates kNN search and query template autocompletion ({kibana-pull}207187[#207187]).
+* Adds support for rawValue in URL labels ({kibana-pull}204192[#204192]).
+* Allows boolean fields to be colored ({kibana-pull}203498[#203498]).
 * Transforms: Improve messages for recovered alerts ({kibana-pull}205721[#205721]).
-* Adds support for rawValue in url label ({kibana-pull}204192[#204192]).
-* Allow boolean field to be colored ({kibana-pull}203498[#203498]).
 * Transforms: Improve percentiles agg validation ({kibana-pull}197816[#197816]).
 Platform::
-* Log deprecated api usages ({kibana-pull}207904[#207904]).
+* Log deprecated API usage ({kibana-pull}207904[#207904]).
 * Adds a circuit breaker for the HTTP server ({kibana-pull}190684[#190684]).
-Other::
-* Added Entity Store data view refresh task ({kibana-pull}208543[#208543]).
-* Chore: bump kube-stack Helm chart onboarding version ({kibana-pull}208217[#208217]).
 * Adds description to saved object finder table if applicable ({kibana-pull}198816[#198816]).
+* Better privilege checking for component index templates ({kibana-pull}202251[#202251]).
 
 [float]
 [[fixes-v8.18.0]]
 === Bug fixes
 Alerting::
-* Fixes editing alerts filter for multi-consumer rule types on serverless ({kibana-pull}206848[#206848]).
 * Fixes alert mute/unmute action ({kibana-pull}204182[#204182]).
 Dashboards & Visualizations::
-* [Embeddable] Make sure to not serialize searchSessionId in *Lens* ({kibana-pull}210765[#210765]).
-////
-!!TODO!! The above PR had a lengthy release note description:
-It fixes a regression for the serialized state for the Lens embeddable saving attributes who should not be in the serialized state.
-////
+* Fixes a regression for the serialized state for the Lens embeddable saving attributes who should not be in the serialized state. ({kibana-pull}210765[#210765]).
 * Allow panel to extend past viewport on resize ({kibana-pull}208828[#208828]).
-* Disable pointer events on drag + resize ({kibana-pull}208647[#208647]).
+* Disable pointer events on drag and resize ({kibana-pull}208647[#208647]).
 * Remove use of `fr` unit ({kibana-pull}208437[#208437]).
-* [Embeddable] Restore show missing dataView error message in case of missing datasource in *Lens* ({kibana-pull}208363[#208363]).
+* Restores the "Show missing dataView" error message in case of missing data source in *Lens* ({kibana-pull}208363[#208363]).
 * Make drag preview absolute positioned ({kibana-pull}208247[#208247]).
 * Improve help text of creator and view count features on dashboard listing page ({kibana-pull}202488[#202488]).
 * Debounce time slider selections ({kibana-pull}201885[#201885]).
 Data ingestion and Fleet::
 * Support `is_default` on integration deployment modes ({kibana-pull}208284[#208284]).
-* Fixes UI error when agent goes to orphaned state ({kibana-pull}207746[#207746]).
-* Restrict non-local ES output types for agentless integrations and policies ({kibana-pull}207296[#207296]).
-* Fixes bulk actions timing out sometimes ({kibana-pull}205735[#205735]).
-* Fixes generation of dynamic mapping for object with specific subfield ({kibana-pull}204104[#204104]).
-* Fixes stuck in updating logic when agent is scheduled for upgrading ({kibana-pull}202126[#202126]).
-Discover::
+* Fixes a UI error caused when an agent becomes orphan ({kibana-pull}207746[#207746]).
+* Restrict non-local Elasticsearch output types for agentless integrations and policies ({kibana-pull}207296[#207296]).
+* Fixes bulk actions timing out ({kibana-pull}205735[#205735]).
+* Fixes generation of dynamic mapping for objects with specific subfields ({kibana-pull}204104[#204104]).
+* Fixes stuck in updating logic when an agent is scheduled for upgrading ({kibana-pull}202126[#202126]).
+Discover and ES|QL::
 * Fixes WHERE autocomplete with MATCH before LIMIT ({kibana-pull}210607[#210607]).
-* WHERE replacement ranges correctly generated for every case ({kibana-pull}209684[#209684]).
-* Fixes formatting and sorting for custom ES|QL vars ({kibana-pull}209360[#209360]).
-* Apply the timerange to the fields fetch in the editor ({kibana-pull}208490[#208490]).
+* Makes WHERE replacement ranges correctly generated for every case ({kibana-pull}209684[#209684]).
+* Fixes formatting and sorting for custom ES|QL variables ({kibana-pull}209360[#209360]).
+* Apply the time range to the fields fetch in the editor ({kibana-pull}208490[#208490]).
 * Keeps the histogram config on time change ({kibana-pull}208053[#208053]).
-* Fixes CSV export with named params ({kibana-pull}206914[#206914]).
+* Fixes CSV export with named parameters ({kibana-pull}206914[#206914]).
 * Prevent redundant requests when loading Discover sessions and toggling chart visibility ({kibana-pull}206699[#206699]).
-* Query history fixes ({kibana-pull}206418[#206418]).
-* Allows the editor suggestions to be visible when inline docs flyout is open ({kibana-pull}206064[#206064]).
-* QL] Ensure the same time range is being used for documents and histogram ({kibana-pull}204694[#204694]).
+* Fixes several query history issues ({kibana-pull}206418[#206418]).
+* Allows the editor suggestions to be visible when the inline documentation flyout is open ({kibana-pull}206064[#206064]).
+* Ensure the same time range is being used for documents and histogram in ES|QL mode ({kibana-pull}204694[#204694]).
 * Fixes persisting URL state in session storage when in ES|QL mode ({kibana-pull}203865[#203865]).
 * Fixes editor cursor jumpiness ({kibana-pull}202389[#202389]).
-* Highlight matching field values when performing a KQL search on a keyword field ({kibana-pull}201952[#201952]).
 Elastic Observability solution::
 * Pass system message to inferenceCliente.chatComplete ({kibana-pull}211263[#211263]).
 * Fixes connector test in MKI ({kibana-pull}211235[#211235]).
-* Adds KB re-indexing when encountering `semantic_text` bug ({kibana-pull}210386[#210386]).
+* Adds knowledge base re-indexing when encountering `semantic_text` bug ({kibana-pull}210386[#210386]).
 * Update colors in the AI Assistant icon ({kibana-pull}210233[#210233]).
 * Update the simulate function calling setting to support "auto" ({kibana-pull}209628[#209628]).
-* Do not display apm chart without transaction type or svc name ({kibana-pull}209552[#209552]).
-////
-!!TODO!! The above PR had a lengthy release note description:
-Fixes an issue where APM charts were rendered without required transaction type or service name, causing excessive alerts to appear
-////
+* Fixes an issue where APM charts were rendered without required transaction type or service name, causing excessive alerts to appear ({kibana-pull}209552[#209552]).
 * Fixes conversations test in MKI ({kibana-pull}208649[#208649]).
-* Knowledge base install updates ({kibana-pull}208250[#208250]).
+* Knowledge base installation updates ({kibana-pull}208250[#208250]).
 * Return an empty object for tool arguments if empty ({kibana-pull}207943[#207943]).
 * Fixes Open Explore in Discover link in a new tab ({kibana-pull}207346[#207346]).
 * Updating an SLO with non-breaking changes is considered a breaking change when the SLO is running on outdated resources ({kibana-pull}207090[#207090]).
-* Fixes access bug with user instructions ({kibana-pull}207069[#207069]).
-* Error when using ollama model locally ({kibana-pull}206739[#206739]).
+* Fixes and error caused when using the Ollama model locally ({kibana-pull}206739[#206739]).
 * Fixes editing prompt from contextual insights ({kibana-pull}206673[#206673]).
-* Install Knowledge Base from ai assistant settings ({kibana-pull}206408[#206408]).
 * Fixes logger on telemetry ({kibana-pull}204388[#204388]).
-* _count guards against no valid sources ({kibana-pull}204224[#204224]).
+* Fixes _count guards against no valid sources ({kibana-pull}204224[#204224]).
 * Switch to the latest CloudFormation template ({kibana-pull}204185[#204185]).
-* Fix: Improve tool choice handling in Observability AI Assistant client ({kibana-pull}203928[#203928]).
-* Fix(slo): introduce cursor pagination in Find SLO API ({kibana-pull}203712[#203712]).
-////
-!!TODO!! The above PR had a lengthy release note description:
-Enhanced the Find API by introducing cursor-based pagination (`search_after`) to complement the existing offset-based approach. This update addresses issues with large result sets exceeding the Elasticsearch limit and allows seamless navigation through extensive lists of SLOs without manual filtering.
-////
 * Fixes alerts function ({kibana-pull}203695[#203695]).
-* Update required field from 'score' to 'scores' ({kibana-pull}203584[#203584]).
-* Fixes APM rule error msg when KQL filter is invalid ({kibana-pull}203096[#203096]).
-* Fixes service names with spaces are not being URL encoded properly for {{context.viewInAppUrl}} ({kibana-pull}202890[#202890]).
-* Adds Flyout to table view in Infrastructure Inventory ({kibana-pull}202646[#202646]).
+* Updates required field from 'score' to 'scores' ({kibana-pull}203584[#203584]).
+* Fixes the APM rule error message when a KQL filter is invalid ({kibana-pull}203096[#203096]).
+* Fixes an issue where service names with spaces are not being encoded properly for {{context.viewInAppUrl}} ({kibana-pull}202890[#202890]).
 * Fixes Actions on Charts ({kibana-pull}202443[#202443]).
 * Mismatch between preview chart and rule execution regarding wildcards ({kibana-pull}201553[#201553]).
-* Remove flaky test skip for AI assistant chat complete endpoint ({kibana-pull}200871[#200871]).
+* Show all alerts in Infrastructure views for consistency with entity inventory ({kibana-pull}202188[#202188]).
 Elastic Security solution::
 For the Elastic Security 8.18.0 release information, refer to {security-guide}/release-notes.html[_Elastic Security Solution Release Notes_].
 Kibana platform::
-* Fixes Dropdown Label Sync Issue on Sorting by "Type" ({kibana-pull}206424[#206424]).
+* Fixes dropdown label sync issue when sorting by "Type" ({kibana-pull}206424[#206424]).
 * Consistent help dropdown UI ({kibana-pull}206280[#206280]).
-* Listing page papercuts part 1 ({kibana-pull}205914[#205914]).
+* Fixes the error page for Workplace search ({kibana-pull}211011[#211011]).
+* Integration tests for index storage adapter ({kibana-pull}205917[#205917]).
+* Prevent disabled input change by password manager ({kibana-pull}204269[#204269]).
 Kibana security::
-* Fixes missing ecs mappings ({kibana-pull}209057[#209057]).
+* Fixes missing ECS mappings ({kibana-pull}209057[#209057]).
 * Fixes how Automatic Import generates accesses for the field names that are not valid Painless identifiers ({kibana-pull}205220[#205220]).
 * Automatic Import now ensures that the field mapping contains the `@timestamp` field whenever possible ({kibana-pull}204931[#204931]).
-* Fixed privileges display for features/subFeatures that require all spaces ({kibana-pull}204402[#204402]).
+* Fixed privileges display for features/sub-features that require all spaces ({kibana-pull}204402[#204402]).
 * Use provided data stream description in generated README ({kibana-pull}203236[#203236]).
-* Use Data stream name for data_stream.dataset value in input manifests ({kibana-pull}203106[#203106]).
+* Use Data stream name for `data_stream.dataset` value in input manifests ({kibana-pull}203106[#203106]).
 * Removed `panelled` property that was covering the background image for Spaces Selector page ({kibana-pull}199981[#199981]).
-* Fixes the bug where pressing Enter reloaded the Automatic Import ({kibana-pull}199894[#199894]).
+* Fixes an issue where pressing Enter reloaded the Automatic Import ({kibana-pull}199894[#199894]).
 Machine Learning::
-* Fixes Log rate analysis, change point detection, and pattern analysis embeddables not respecting filters from Dashboard's controls ({kibana-pull}210039[#210039]).
-* Notifications: Fix table responsiveness ({kibana-pull}206956[#206956]).
+* Fixes Log rate analysis, change point detection, and pattern analysis embeddables not respecting filters from dashboard controls ({kibana-pull}210039[#210039]).
+* Fixes notification table responsiveness ({kibana-pull}206956[#206956]).
 * Fixes side bar navigation not highlighted for Data Visualizer and Data Drift ({kibana-pull}205170[#205170]).
 * Data frame analytics: Updates Results Explorer flyout footer buttons alignment ({kibana-pull}204735[#204735]).
 * Data frame analytics: Adds missing space between lines in delete job modal ({kibana-pull}204732[#204732]).
 * Fixes inference timeout check in File Upload ({kibana-pull}204722[#204722]).
 * Anomaly Detection: Datafeed counts job messages table responsiveness fix ({kibana-pull}204625[#204625]).
-* Removing ignore_throttled from anomaly detection job results searches ({kibana-pull}203788[#203788]).
+* Removes `ignore_throttled` from anomaly detection job results searches ({kibana-pull}203788[#203788]).
 * Anomaly Explorer: Fixes handling of job group IDs when opening from dashboard panels ({kibana-pull}203224[#203224]).
-* AiOps: Fix Log Rate Analysis Embeddable Error on the Alerts Page ({kibana-pull}203093[#203093]).
-* Initialize saved objects on trained model page load ({kibana-pull}201426[#201426]).
-Management::
-* Better privilege checking for component index templates ({kibana-pull}202251[#202251]).
-Sharing::
-* Update Library Transforms and Duplicate ({kibana-pull}206140[#206140]).
-Other::
-* Fixes error page for workplace search ({kibana-pull}211011[#211011]).
-* Integration tests for index storage adapter ({kibana-pull}205917[#205917]).
-* Prevent disabled input change by password manager ({kibana-pull}204269[#204269]).
-* Show all alerts in Infra views (Host + Containers) for consistency with entity inventory ({kibana-pull}202188[#202188]).
+* AiOps: Fixes Log Rate Analysis embeddable error on the Alerts page ({kibana-pull}203093[#203093]).
+* Initializes saved objects on trained model page load ({kibana-pull}201426[#201426]).
+
 
 [[release-notes-8.17.2]]
 == {kib} 8.17.2
