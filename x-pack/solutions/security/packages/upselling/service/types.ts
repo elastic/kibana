@@ -20,7 +20,12 @@ export type UpsellingSectionId =
   | 'endpoint_custom_notification'
   | 'cloud_security_posture_integration_installation'
   | 'ruleDetailsEndpointExceptions'
+<<<<<<< HEAD
   | 'integration_assistant';
+=======
+  | 'automatic_import'
+  | 'siem_migrations_start';
+>>>>>>> 44a184c701c ([ Siem Migrations ] Upsell Siem Migrations Start (#212607))
 
 export type UpsellingMessageId =
   | 'investigation_guide'
