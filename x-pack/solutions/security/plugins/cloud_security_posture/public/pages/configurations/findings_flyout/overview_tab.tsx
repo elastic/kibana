@@ -21,6 +21,8 @@ import { i18n } from '@kbn/i18n';
 import {
   CDR_MISCONFIGURATIONS_INDEX_PATTERN,
   CDR_MISCONFIGURATIONS_DATA_VIEW_ID_PREFIX,
+  CSP_MOMENT_FORMAT,
+  INTERNAL_FEATURE_FLAGS,
 } from '@kbn/cloud-security-posture-common';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { isEmpty } from 'lodash';
@@ -28,8 +30,6 @@ import type { CspFinding } from '@kbn/cloud-security-posture-common';
 import { useDataView } from '@kbn/cloud-security-posture/src/hooks/use_data_view';
 import { getVendorName } from '../../../common/utils/get_vendor_name';
 import { truthy } from '../../../../common/utils/helpers';
-import { CSP_MOMENT_FORMAT } from '../../../common/constants';
-import { INTERNAL_FEATURE_FLAGS } from '../../../../common/constants';
 import { useKibana } from '../../../common/hooks/use_kibana';
 import {
   BenchmarkIcons,

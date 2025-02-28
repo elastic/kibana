@@ -36,7 +36,7 @@ import {
   getManualCommits,
 } from './utils/git';
 
-const SKIP_RESET = true;
+const SKIP_RESET = false;
 
 const moveModule = async (module: Package, log: ToolingLog) => {
   const destination = calculateModuleTargetFolder(module);

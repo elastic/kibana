@@ -21,7 +21,7 @@ import type {
 import type {
   AggregationsStringTermsBucketKeys,
   AggregationsTermsAggregateBase,
-} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+} from '@elastic/elasticsearch/lib/api/types';
 import { ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE } from '@kbn/actions-plugin/server/constants/saved_objects';
 import type { InvalidateAPIKeyResult } from '../rules_client';
 import type { AlertingConfig } from '../config';

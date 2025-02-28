@@ -54,7 +54,7 @@ const getLifecycleAlertsQueryByExecutionUuid = ({
   excludedAlertInstanceIds,
   alertsFilter,
   maxAlertLimit,
-}: GetLifecycleAlertsQueryByExecutionUuidParams): Array<SearchRequest['body']> => {
+}: GetLifecycleAlertsQueryByExecutionUuidParams): SearchRequest[] => {
   // lifecycle alerts assign a different action to an alert depending
   // on whether it is new/ongoing/recovered. query for each action in order
   // to get the count of each action type as well as up to the maximum number
@@ -94,7 +94,7 @@ const getLifecycleAlertsQueryByTimeRange = ({
   excludedAlertInstanceIds,
   alertsFilter,
   maxAlertLimit,
-}: GetLifecycleAlertsQueryByTimeRangeParams): Array<SearchRequest['body']> => {
+}: GetLifecycleAlertsQueryByTimeRangeParams): SearchRequest[] => {
   return [
     getQueryByTimeRange({
       start,
@@ -133,7 +133,7 @@ const getQueryByExecutionUuid = ({
   action,
   alertsFilter,
   maxAlertLimit,
-}: GetQueryByExecutionUuidParams): SearchRequest['body'] => {
+}: GetQueryByExecutionUuidParams): SearchRequest => {
   const filter: QueryDslQueryContainer[] = [
     {
       term: {
@@ -197,7 +197,7 @@ const getQueryByTimeRange = ({
   type,
   alertsFilter,
   maxAlertLimit,
-}: GetQueryByTimeRangeParams<AlertTypes>): SearchRequest['body'] => {
+}: GetQueryByTimeRangeParams<AlertTypes>): SearchRequest => {
   // base query filters the alert documents for a rule by the given time range
   let filter: QueryDslQueryContainer[] = [
     {
@@ -293,7 +293,7 @@ export const getQueryByScopedQueries = ({
   action,
   maintenanceWindows,
   maxAlertLimit,
-}: GetQueryByScopedQueriesParams): SearchRequest['body'] => {
+}: GetQueryByScopedQueriesParams): SearchRequest => {
   const filters: QueryDslQueryContainer[] = [
     {
       term: {
@@ -472,7 +472,7 @@ const getLifecycleAlertsQueries = ({
   excludedAlertInstanceIds,
   alertsFilter,
   maxAlertLimit,
-}: GetAlertsQueryParams): Array<SearchRequest['body']> => {
+}: GetAlertsQueryParams): SearchRequest[] => {
   let queryBodies;
   if (executionUuid) {
     queryBodies = getLifecycleAlertsQueryByExecutionUuid({
@@ -504,7 +504,7 @@ const getContinualAlertsQuery = ({
   excludedAlertInstanceIds,
   alertsFilter,
   maxAlertLimit,
-}: GetAlertsQueryParams): SearchRequest['body'] => {
+}: GetAlertsQueryParams): SearchRequest => {
   let queryBody;
   if (executionUuid) {
     queryBody = getQueryByExecutionUuid({
@@ -534,7 +534,7 @@ const getMaintenanceWindowAlertsQuery = ({
   action,
   maintenanceWindows,
   maxAlertLimit,
-}: GetMaintenanceWindowAlertsQueryParams): SearchRequest['body'] => {
+}: GetMaintenanceWindowAlertsQueryParams): SearchRequest => {
   return getQueryByScopedQueries({
     executionUuid,
     ruleId,

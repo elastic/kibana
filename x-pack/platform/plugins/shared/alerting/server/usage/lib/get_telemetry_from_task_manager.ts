@@ -43,56 +43,54 @@ export async function getFailedAndUnrecognizedTasksPerDay({
     const query = {
       index: taskManagerIndex,
       size: 0,
-      body: {
-        query: {
-          bool: {
-            must: [
-              {
-                bool: {
-                  should: [
-                    {
-                      term: {
-                        'task.status': 'unrecognized',
-                      },
+      query: {
+        bool: {
+          must: [
+            {
+              bool: {
+                should: [
+                  {
+                    term: {
+                      'task.status': 'unrecognized',
                     },
-                    {
-                      term: {
-                        'task.status': 'failed',
-                      },
+                  },
+                  {
+                    term: {
+                      'task.status': 'failed',
                     },
-                  ],
-                },
-              },
-              {
-                wildcard: {
-                  'task.taskType': {
-                    value: 'alerting:*',
                   },
-                },
+                ],
               },
-              {
-                range: {
-                  'task.runAt': {
-                    gte: 'now-1d',
-                  },
-                },
-              },
-            ],
-          },
-        },
-        aggs: {
-          by_status: {
-            terms: {
-              field: 'task.status',
-              size: 10,
             },
-            aggs: {
-              by_task_type: {
-                terms: {
-                  field: 'task.taskType',
-                  // Use number of alerting rule types because we're filtering by 'alerting:'
-                  size: NUM_ALERTING_RULE_TYPES,
+            {
+              wildcard: {
+                'task.taskType': {
+                  value: 'alerting:*',
                 },
+              },
+            },
+            {
+              range: {
+                'task.runAt': {
+                  gte: 'now-1d',
+                },
+              },
+            },
+          ],
+        },
+      },
+      aggs: {
+        by_status: {
+          terms: {
+            field: 'task.status',
+            size: 10,
+          },
+          aggs: {
+            by_task_type: {
+              terms: {
+                field: 'task.taskType',
+                // Use number of alerting rule types because we're filtering by 'alerting:'
+                size: NUM_ALERTING_RULE_TYPES,
               },
             },
           },

@@ -8,7 +8,6 @@ import type { AggregationsAggregationContainer } from '@elastic/elasticsearch/li
 import type { TypeOf } from '@kbn/config-schema';
 import type { KueryNode } from '@kbn/es-query';
 import type { aggregateOptionsSchema } from '../schemas';
-
 export type AggregateOptions = TypeOf<typeof aggregateOptionsSchema> & {
   // Adding filter as in schema it's defined as any instead of KueryNode
   filter?: string | KueryNode;

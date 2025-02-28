@@ -136,44 +136,42 @@ _meta:
       TRANSFORM: {
         transform_id: `logs-endpoint.metadata_current-default-${transformVersion}`,
         defer_validation: true,
-        body: {
-          description: 'Merges latest endpoint and Agent metadata documents.',
-          dest: {
-            index: '.metrics-endpoint.metadata_united_default',
-            aliases: [],
-          },
-          frequency: '1s',
-          pivot: {
-            aggs: {
-              united: {
-                scripted_metric: {
-                  combine_script: 'return state.docs',
-                  init_script: 'state.docs = []',
-                  map_script: "state.docs.add(new HashMap(params['_source']))",
-                  reduce_script:
-                    "def ret = new HashMap(); for (s in states) { for (d in s) { if (d.containsKey('Endpoint')) { ret.endpoint = d } else { ret.agent = d } }} return ret",
-                },
-              },
-            },
-            group_by: {
-              'agent.id': {
-                terms: {
-                  field: 'agent.id',
-                },
-              },
-            },
-          },
-          source: {
-            index: ['metrics-endpoint.metadata_current_default*', '.fleet-agents*'],
-          },
-          sync: {
-            time: {
-              delay: '4s',
-              field: 'updated_at',
-            },
-          },
-          _meta: { fleet_transform_version: transformVersion, ...meta, run_as_kibana_system: true },
+        description: 'Merges latest endpoint and Agent metadata documents.',
+        dest: {
+          index: '.metrics-endpoint.metadata_united_default',
+          aliases: [],
         },
+        frequency: '1s',
+        pivot: {
+          aggs: {
+            united: {
+              scripted_metric: {
+                combine_script: 'return state.docs',
+                init_script: 'state.docs = []',
+                map_script: "state.docs.add(new HashMap(params['_source']))",
+                reduce_script:
+                  "def ret = new HashMap(); for (s in states) { for (d in s) { if (d.containsKey('Endpoint')) { ret.endpoint = d } else { ret.agent = d } }} return ret",
+              },
+            },
+          },
+          group_by: {
+            'agent.id': {
+              terms: {
+                field: 'agent.id',
+              },
+            },
+          },
+        },
+        source: {
+          index: ['metrics-endpoint.metadata_current_default*', '.fleet-agents*'],
+        },
+        sync: {
+          time: {
+            delay: '4s',
+            field: 'updated_at',
+          },
+        },
+        _meta: { fleet_transform_version: transformVersion, ...meta, run_as_kibana_system: true },
       },
     };
   };
