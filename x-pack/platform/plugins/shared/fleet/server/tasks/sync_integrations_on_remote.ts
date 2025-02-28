@@ -18,6 +18,9 @@ import type { SyncIntegrationsData } from './sync_integrations_task';
 
 const FLEET_SYNCED_INTEGRATIONS_CCR_INDEX_PREFIX = 'fleet-synced-integrations-ccr-*';
 
+const MAX_RETRY_ATTEMPTS = 5;
+const RETRY_BACKOFF_MINUTES = [5, 10, 20, 40, 60];
+
 const getSyncedIntegrationsCCRDoc = async (
   esClient: ElasticsearchClient,
   abortController: AbortController
@@ -86,14 +89,29 @@ async function installPackageIfNotInstalled(
     return;
   }
   if (installation && installation.install_status === 'install_failed') {
-    // TODO retry
-    logger.debug(`Package ${pkg.package_name} install failed on version ${installation.version}`);
+    const attempt = installation.latest_install_failed_attempts?.length ?? 0;
+
+    if (attempt >= MAX_RETRY_ATTEMPTS) {
+      return;
+    }
+    const lastRetryAttemptTime = installation.latest_install_failed_attempts?.[0].created_at;
+    // retry install if backoff time has passed since the last attempt
+    const shouldRetryInstall =
+      attempt > 0 &&
+      lastRetryAttemptTime &&
+      Date.now() - Date.parse(lastRetryAttemptTime) >
+        RETRY_BACKOFF_MINUTES[attempt - 1] * 60 * 1000;
+
+    if (!shouldRetryInstall) {
+      return;
+    }
   }
 
   try {
     const installResult = await packageClient.installPackage({
       pkgName: pkg.package_name,
       pkgVersion: pkg.package_version,
+      keepFailedInstallation: true,
     });
     if (installResult.status === 'installed') {
       logger.info(`Package ${pkg.package_name} installed with version ${pkg.package_version}`);
@@ -104,6 +122,7 @@ async function installPackageIfNotInstalled(
       );
       const installLatestResult = await packageClient.installPackage({
         pkgName: pkg.package_name,
+        keepFailedInstallation: true,
       });
       if (installLatestResult.status === 'installed') {
         logger.info(`Package ${pkg.package_name} installed with version ${pkg.package_version}`);
