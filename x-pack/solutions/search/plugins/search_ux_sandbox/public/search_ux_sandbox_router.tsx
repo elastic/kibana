@@ -7,13 +7,17 @@
 
 import { Route, Routes } from '@kbn/shared-ux-router';
 import React from 'react';
-import { SearchUxSandboxOverview } from './components';
+import { SearchUxSandboxHome } from './pages/search_ux_sandbox_home';
+import { ProjectExample } from './pages/project_example';
 
 export const SearchUxSandboxRouter = () => {
   return (
     <Routes>
       <Route exact path="/">
-        <SearchUxSandboxOverview />
+        <SearchUxSandboxHome />
+      </Route>
+      <Route exact path="/project-example">
+        <ProjectExample />
       </Route>
     </Routes>
   );
