@@ -48,7 +48,7 @@ export function Definition({ slo }: Props) {
   }
 
   return (
-    <EuiPanel paddingSize="none" color="transparent" data-test-subj="overview">
+    <EuiPanel paddingSize="none" color="transparent" data-test-subj="definition">
       <EuiFlexGrid columns={isMobile ? 2 : 4} gutterSize="l" responsive={false}>
         <DefinitionItem
           title={i18n.translate('xpack.slo.sloDetails.overview.indicatorTypeTitle', {
@@ -158,7 +158,7 @@ export function Definition({ slo }: Props) {
   );
 }
 
-export function toTimeWindowLabel(timeWindow: SLOWithSummaryResponse['timeWindow']): string {
+function toTimeWindowLabel(timeWindow: SLOWithSummaryResponse['timeWindow']): string {
   if (rollingTimeWindowTypeSchema.is(timeWindow.type)) {
     return i18n.translate('xpack.slo.sloDetails.overview.rollingTimeWindow', {
       defaultMessage: '{duration} rolling',
