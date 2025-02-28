@@ -13,16 +13,6 @@ import { PublishingSubject } from '@kbn/presentation-publishing';
  * This should all be moved into a package and reorganized into separate files etc
  */
 
-export interface PublishesESQLVariable {
-  esqlVariable$: PublishingSubject<ESQLControlVariable>;
-}
-
-export const apiPublishesESQLVariable = (
-  unknownApi: unknown
-): unknownApi is PublishesESQLVariable => {
-  return Boolean(unknownApi && (unknownApi as PublishesESQLVariable)?.esqlVariable$ !== undefined);
-};
-
 export interface PublishesESQLVariables {
   esqlVariables$: PublishingSubject<ESQLControlVariable[]>;
 }

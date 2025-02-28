@@ -7,4 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { ESQLVariableType, type ESQLControlVariable } from './src/variables_types';
+export {
+  ESQLVariableType,
+  type ESQLControlVariable,
+  type PublishesESQLVariable,
+  type PublishesESQLVariables,
+  apiPublishesESQLVariable,
+  apiPublishesESQLVariables,
+} from './src/variables_types';
