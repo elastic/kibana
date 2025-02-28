@@ -18,7 +18,7 @@ import {
 } from '../../../../lib/ui_metric';
 import { DeprecationTableColumns } from '../../../types';
 import { EsDeprecationsTableCells } from '../../es_deprecations_table_cells';
-import { ReindexResolutionCell } from './resolution_table_cell';
+import { ReindexResolutionCell, canUserReindexRow } from './resolution_table_cell';
 import { IndexFlyout, IndexFlyoutProps } from './flyout';
 import { IndexStatusProvider, useIndexContext } from './context';
 
@@ -37,6 +37,7 @@ const IndexTableRowCells: React.FunctionComponent<TableRowProps> = ({
   selectedDeprecations,
   toggleDeprecation,
 }) => {
+  const { reindexState } = useIndexContext();
   const [showFlyout, setShowFlyout] = useState(false);
   const indexContext = useIndexContext();
 
@@ -90,6 +91,7 @@ const IndexTableRowCells: React.FunctionComponent<TableRowProps> = ({
               resolutionTableCell={<ReindexResolutionCell />}
               selectedDeprecations={selectedDeprecations}
               toggleDeprecation={toggleDeprecation}
+              canUserReindexRow={canUserReindexRow(reindexState)}
             />
           </EuiTableRowCell>
         );

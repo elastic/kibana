@@ -20,6 +20,7 @@ interface Props {
   openFlyout: () => void;
   selectedDeprecations?: Set<string>;
   toggleDeprecation?: (id: string) => void;
+  canUserReindexRow?: boolean;
 }
 
 const i18nTexts = {
@@ -44,11 +45,14 @@ export const EsDeprecationsTableCells: React.FunctionComponent<Props> = ({
   openFlyout,
   selectedDeprecations,
   toggleDeprecation,
+  canUserReindexRow,
 }) => {
   // "Select" column
   if (fieldName === 'select') {
     const index = deprecation.index ?? '';
-    const isDisabled = !deprecation.index || deprecation.correctiveAction?.type !== 'reindex';
+    const isReindex = deprecation.correctiveAction?.type === 'reindex';
+    const isInProgressOrCompleted = canUserReindexRow;
+    const isDisabled = !deprecation.index || !isReindex || isInProgressOrCompleted;
 
     return (
       <EuiCheckbox

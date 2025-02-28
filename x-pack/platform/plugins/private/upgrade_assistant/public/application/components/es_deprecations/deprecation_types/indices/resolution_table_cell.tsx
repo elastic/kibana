@@ -19,6 +19,7 @@ import {
 import { ReindexStatus } from '../../../../../../common/types';
 import { getReindexProgressLabel } from '../../../../lib/utils';
 import { LoadingState } from '../../../types';
+import { ReindexState } from './use_reindex';
 import { useIndexContext } from './context';
 
 const i18nTexts = {
@@ -98,6 +99,14 @@ const i18nTexts = {
       defaultMessage: 'Resolve this issue by unfreezing this index.',
     }
   ),
+};
+
+export const canUserReindexRow = (reindexState: ReindexState) => {
+  return (
+    reindexState.status === ReindexStatus.inProgress ||
+    reindexState.status === ReindexStatus.completed ||
+    reindexState.status === ReindexStatus.paused
+  );
 };
 
 export const ReindexResolutionCell: React.FunctionComponent = () => {
