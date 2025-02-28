@@ -312,7 +312,7 @@ Alerting::
 * Fixes an issue where the popover in the rules page may get stuck when being clicked more than once ({kibana-pull}208996[#208996]).
 Dashboards and Visualizations::
 * Fixes link settings not persisting ({kibana-pull}211041[#211041]).
-* Fixes Save to library action from a by value panel breaks the chart panel ({kibana-pull}210125[#210125]).
+* Fixes the Save to library action that could break the chart panel when triggered from a from a "by value" panel ({kibana-pull}210125[#210125]).
 * Fixes an issue with dynamic coloring being disabled for Last value aggregation types in *Lens* ({kibana-pull}209110[#209110]).
 Data ingestion and Fleet::
 * Updates component templates with deprecated setting ({kibana-pull}210200[#210200]).
