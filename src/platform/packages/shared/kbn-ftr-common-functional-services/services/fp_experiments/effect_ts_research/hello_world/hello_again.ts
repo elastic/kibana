@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+// eslint-disable-next-line max-classes-per-file
 import { Effect, Context } from 'effect';
 import { TimeoutException } from 'effect/Cause';
 
@@ -25,8 +26,6 @@ export const helloAgain = () => {
     TranslateGreeting,
     ITranslateGreeting
   >() {}
-
-  console.log('get to effecting!');
 
   const hello = (name?: string): Effect.Effect<string> =>
     Effect.gen(function* () {
@@ -51,10 +50,10 @@ export const helloAgain = () => {
 
   const program = camelot.pipe(
     Effect.provideService(SendGreetings, {
-      sendGreetings: (x) => Effect.sync(() => console.log(`Sent x: ${x}`)),
+      sendGreetings: (x) => Effect.sync(() => console.log(`Sent: [- ${x} -]`)),
     }),
     Effect.provideService(TranslateGreeting, {
-      translate: (x) => Effect.sync(() => `translated to ${x}`),
+      translate: (x) => Effect.sync(() => `phrase: [${x}], translation: [Hola mundo!]`),
     })
   );
 
