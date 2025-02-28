@@ -11,18 +11,38 @@ paths:
       x-codegen-enabled: true
       x-labels: [serverless, ess]
       parameters:
-        - name: query
+        - name: kuery
           in: query
-          required: true
+          required: false
           schema:
-            $ref: './find_live_query.schema.yaml#/components/schemas/FindLiveQueryRequestQuery'
+            $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/KueryOrUndefined'
+        - name: page
+          in: query
+          required: false
+          schema:
+            $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/PageOrUndefined'
+        - name: pageSize
+          in: query
+          required: false
+          schema:
+            $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/PageSizeOrUndefined'
+        - name: sort
+          in: query
+          required: false
+          schema:
+            $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/SortOrUndefined'
+        - name: sortOrder
+          in: query
+          required: false
+          schema:
+            $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/SortOrderOrUndefined'
       responses:
         '200':
           description: OK
           content:
             application/json:
               schema:
-                $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/DefaultSuccessResponse'
+                $ref: './find_live_query.schema.yaml#/components/schemas/FindLiveQueryResponse'
 
     post:
       summary: Create a live query
@@ -42,7 +62,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/DefaultSuccessResponse'
+                $ref: './create_live_query.schema.yaml#/components/schemas/CreateLiveQueryResponse'
 
   /api/osquery/live_queries/{id}:
     get:
@@ -56,19 +76,16 @@ paths:
           in: path
           required: true
           schema:
-            $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/Id'
-        - name: query
-          in: query
-          schema:
-            type: object
-            additionalProperties: true
+            description: 'The ID of the live query result you want to retrieve.'
+            type: string
+            example: '3c42c847-eb30-4452-80e0-728584042334'
       responses:
         '200':
           description: OK
           content:
             application/json:
               schema:
-                $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/DefaultSuccessResponse'
+                $ref: './find_live_query.schema.yaml#/components/schemas/FindLiveQueryDetailsResponse'
 
   /api/osquery/live_queries/{id}/results/{actionId}:
     get:
@@ -82,21 +99,45 @@ paths:
           in: path
           required: true
           schema:
-            $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/Id'
+            example: '3c42c847-eb30-4452-80e0-728584042334'
+            description: 'The ID of the live query result you want to retrieve.'
+            type: string
         - name: actionId
           in: path
           required: true
           schema:
-            $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/Id'
-        - name: query
+            example: '609c4c66-ba3d-43fa-afdd-53e244577aa0'
+            description: 'The ID of the query action that generated the live query results.'
+            type: string
+        - name: kuery
           in: query
-          required: true
+          required: false
           schema:
-            $ref: './get_live_query_results.schema.yaml#/components/schemas/GetLiveQueryResultsRequestQuery'
+            $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/KueryOrUndefined'
+        - name: page
+          in: query
+          required: false
+          schema:
+            $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/PageOrUndefined'
+        - name: pageSize
+          in: query
+          required: false
+          schema:
+            $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/PageSizeOrUndefined'
+        - name: sort
+          in: query
+          required: false
+          schema:
+            $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/SortOrUndefined'
+        - name: sortOrder
+          in: query
+          required: false
+          schema:
+            $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/SortOrderOrUndefined'
       responses:
         '200':
           description: OK
           content:
             application/json:
               schema:
-                $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/DefaultSuccessResponse'
+                $ref: './get_live_query_results.schema.yaml#/components/schemas/GetLiveQueryResultsResponse'
