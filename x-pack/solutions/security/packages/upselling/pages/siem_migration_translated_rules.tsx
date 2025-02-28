@@ -41,10 +41,14 @@ export const SiemMigrationTranslatedRulesUpsellPage = React.memo(
           <EuiSpacer size="xxl" />
           <EuiSpacer size="xxl" />
           <EuiEmptyPrompt
-            title={<span>{title}</span>}
+            title={<span data-test-subj="siemMigrationTranslatedRulesUpsellTitle">{title}</span>}
             actions={upgradeHref ? CTAButton : null}
             iconType={'logoSecurity'}
-            body={<span>{upgradeMessage}</span>}
+            body={
+              <span data-test-subj="siemMigrationTranslatedRulesUpsellUpgradeMessage">
+                {upgradeMessage}
+              </span>
+            }
           >
             {upgradeMessage}
           </EuiEmptyPrompt>
