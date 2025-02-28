@@ -14,6 +14,7 @@ export {
   setIsChromeVisible,
   setIsLoading,
   workspaceReducer,
+  setIs2030,
 } from './slice';
 
 export {

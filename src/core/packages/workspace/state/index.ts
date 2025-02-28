@@ -13,6 +13,7 @@ export {
   setHasFooter,
   setIsChromeVisible,
   setIsLoading,
+  setIs2030,
   useHasBanner,
   useHasFooter,
   useIsChromeVisible,

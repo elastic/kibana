@@ -92,6 +92,8 @@
     "@kbn/core-elasticsearch-server",
     "@kbn/core-http-server-utils",
     "@kbn/core-user-profile-browser-mocks",
+    "@kbn/core-workspace-browser",
+    "@kbn/core-workspace-state",
   ],
   "exclude": [
     "target/**/*",

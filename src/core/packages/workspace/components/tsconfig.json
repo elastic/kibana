@@ -18,5 +18,12 @@
   "exclude": [
     "target/**/*"
   ],
-  "kbn_references": []
+  "kbn_references": [
+    "@kbn/core-workspace-state",
+    "@kbn/core-chrome-browser",
+    "@kbn/i18n",
+    "@kbn/core-chrome-browser-internal",
+    "@kbn/core-mount-utils-browser",
+    "@kbn/core-workspace-browser",
+  ]
 }

@@ -1,5 +1,5 @@
 {
-  "type": "shared-browser",
+  "type": "shared-common",
   "id": "@kbn/core-workspace-state",
   "owner": "@elastic/appex-sharedux",
   "group": "platform",

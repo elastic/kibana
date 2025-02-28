@@ -16,7 +16,7 @@ import {
   useIsChromeVisible,
   useIsNavigationCollapsed,
 } from '@kbn/core-workspace-state';
-import { useIs2030 } from '@kbn/core-workspace-state/workspace/hooks';
+import { useIs2030 } from '@kbn/core-workspace-state';
 import { WorkspaceGlobalCSSComponent } from './workspace_global_css.component';
 
 export const WorkspaceGlobalCSS = () => {

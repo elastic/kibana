@@ -23,8 +23,7 @@ import {
 import { css } from '@emotion/react';
 import React from 'react';
 
-import { useIs2030, useWorkspaceDispatch } from '@kbn/core-workspace-state';
-import { setIs2030 } from '@kbn/core-workspace-state/workspace/slice';
+import { setIs2030, useIs2030, useWorkspaceDispatch } from '@kbn/core-workspace-state';
 import type { AuthenticatedUser } from '@kbn/security-plugin-types-common';
 import type { GetUserProfileResponse } from '@kbn/security-plugin-types-public';
 import type { UserProfileAvatarData } from '@kbn/user-profile-components';
