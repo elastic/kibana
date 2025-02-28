@@ -16,8 +16,7 @@ import { checkStartMigrationCardComplete } from './start_migration_check_complet
 export const startMigrationCardConfig: OnboardingCardConfig<StartMigrationCardMetadata> = {
   id: OnboardingCardId.siemMigrationsStart,
   title: START_MIGRATION_CARD_TITLE,
-  icon: cardIcon,
-  licenseTypeRequired: 'enterprise',
+  icon: () => getCardIcon(OnboardingCardId.siemMigrationsStart),
   Component: React.lazy(
     () =>
       import(
