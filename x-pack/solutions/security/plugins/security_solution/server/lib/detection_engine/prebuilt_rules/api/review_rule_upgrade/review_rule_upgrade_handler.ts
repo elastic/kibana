@@ -35,7 +35,7 @@ export const reviewRuleUpgradeHandler = async (
   response: KibanaResponseFactory
 ) => {
   const siemResponse = buildSiemResponse(response);
-  const { page = 1, per_page: perPage = 10_000, sort = DEFAULT_SORT, filter } = request.body ?? {};
+  const { page = 1, per_page: perPage = 20, sort = DEFAULT_SORT, filter } = request.body ?? {};
 
   try {
     const ctx = await context.resolve(['core', 'alerting']);
