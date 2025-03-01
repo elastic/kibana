@@ -123,6 +123,7 @@ export class BaseRule {
       ): Promise<any> => this.execute(options),
       category: DEFAULT_APP_CATEGORIES.management.id,
       producer: 'monitoring',
+      solution: 'stack',
       actionVariables: {
         context: actionVariables,
       },

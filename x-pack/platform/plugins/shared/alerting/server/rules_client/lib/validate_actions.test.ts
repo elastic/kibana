@@ -24,6 +24,7 @@ describe('validateActions', () => {
     recoveryActionGroup: RecoveredActionGroup,
     executor: jest.fn(),
     producer: 'alerts',
+    solution: 'stack',
     cancelAlertsOnRuleTimeout: true,
     ruleTaskTimeout: '5m',
     validate: {

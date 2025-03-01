@@ -393,6 +393,7 @@ beforeEach(() => {
     },
     category: 'test',
     producer: 'alerts',
+    solution: 'stack',
     validate: {
       params: { validate: (params) => params },
     },
@@ -412,6 +413,7 @@ beforeEach(() => {
     },
     category: 'test',
     producer: 'alerts',
+    solution: 'stack',
     validate: {
       params: { validate: (params) => params },
     },
