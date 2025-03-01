@@ -79,18 +79,15 @@ const columnsLocalStorageKey = 'assetInventoryColumns';
 const LOCAL_STORAGE_DATA_TABLE_PAGE_SIZE_KEY = 'assetInventory:dataTable:pageSize';
 
 const columnHeaders: Record<string, string> = {
-  'asset.risk': i18n.translate('xpack.securitySolution.assetInventory.allAssets.risk', {
-    defaultMessage: 'Risk',
-  }),
   'asset.name': i18n.translate('xpack.securitySolution.assetInventory.allAssets.name', {
     defaultMessage: 'Name',
   }),
-  'asset.criticality': i18n.translate(
-    'xpack.securitySolution.assetInventory.allAssets.criticality',
-    {
-      defaultMessage: 'Criticality',
-    }
-  ),
+  'asset.id': i18n.translate('xpack.securitySolution.assetInventory.allAssets.id', {
+    defaultMessage: 'ID',
+  }),
+  'asset.type': i18n.translate('xpack.securitySolution.assetInventory.allAssets.type', {
+    defaultMessage: 'Type',
+  }),
   'asset.source': i18n.translate('xpack.securitySolution.assetInventory.allAssets.source', {
     defaultMessage: 'Source',
   }),
@@ -118,9 +115,9 @@ interface AssetInventoryDefaultColumn {
 }
 
 const defaultColumns: AssetInventoryDefaultColumn[] = [
-  { id: 'asset.risk', width: 50 },
   { id: 'asset.name', width: 400 },
-  { id: 'asset.criticality' },
+  { id: 'asset.id' },
+  { id: 'asset.type' },
   { id: 'asset.source' },
   { id: '@timestamp' },
 ];
@@ -301,7 +298,7 @@ export const AllAssets = ({
     onRemoveColumn,
   } = useColumns({
     capabilities,
-    defaultOrder: uiSettings.get(SORT_DEFAULT_ORDER_SETTING),
+    defaultOrder: uiSettings.get(SORT_DEFAULT_ORDER_SETTING), // TODO Create new constant for AI
     dataView,
     dataViews,
     setAppState: (props) => setColumns(props.columns),
@@ -504,8 +501,6 @@ export const AllAssets = ({
                 gridStyleOverride={gridStyle}
                 rowLineHeightOverride="24px"
                 dataGridDensityState={DataGridDensity.EXPANDED}
-                showFullScreenButton
-                // showKeyboardShortcuts
               />
             )}
           </div>
