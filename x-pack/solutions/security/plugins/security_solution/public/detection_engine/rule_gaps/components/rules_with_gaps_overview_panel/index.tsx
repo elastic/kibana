@@ -25,6 +25,8 @@ import { useRulesTableContext } from '../../../rule_management_ui/components/rul
 import * as i18n from './translations';
 import { useGetRuleIdsWithGaps } from '../../api/hooks/use_get_rule_ids_with_gaps';
 import { defaultRangeValue, GapRangeValue } from '../../constants';
+import { ManualRuleRunEventTypes } from '../../../../common/lib/telemetry/events/manual_rule_run/types';
+import { useKibana } from '../../../../common/lib/kibana';
 
 export const RulesWithGapsOverviewPanel = () => {
   const {
@@ -38,6 +40,7 @@ export const RulesWithGapsOverviewPanel = () => {
     statuses: [gapStatus.UNFILLED, gapStatus.PARTIALLY_FILLED],
   });
   const [isPopoverOpen, setPopover] = useState(false);
+  const telemetry = useKibana().services.telemetry;
 
   const rangeValueToLabel = {
     [GapRangeValue.LAST_24_H]: i18n.RULE_GAPS_OVERVIEW_PANEL_LAST_24_HOURS_LABEL,
@@ -65,6 +68,11 @@ export const RulesWithGapsOverviewPanel = () => {
   );
 
   const handleShowRulesWithGapsFilterButtonClick = () => {
+    if (!showRulesWithGaps) {
+      telemetry.reportEvent(ManualRuleRunEventTypes.ShowOnlyRulesWithGaps, {
+        dateRange: gapSearchRange ?? defaultRangeValue,
+      });
+    }
     setFilterOptions({
       showRulesWithGaps: !showRulesWithGaps,
     });
