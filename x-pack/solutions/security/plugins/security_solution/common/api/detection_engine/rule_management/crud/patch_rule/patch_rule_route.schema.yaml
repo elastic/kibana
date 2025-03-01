@@ -9,7 +9,23 @@ paths:
       x-codegen-enabled: true
       operationId: PatchRule
       summary: Patch a detection rule
-      description: Update specific fields of an existing detection rule using the `rule_id` or `id` field.
+      description: |
+        Update a detection rule using the `rule_id` or `id` field. The original rule is replaced, and all unspecified fields are deleted.
+
+        The `id` is a unique identifier for each data item, while `rule_id` is a unique identifier for each rule.
+
+        > warn
+        > When used with  [API key](https://www.elastic.co/guide/en/kibana/current/api-keys.html) authentication, the user's key gets assigned to the affected rules. If the user's key gets deleted or the user becomes inactive, the rules will stop running.
+
+        > If the API key that is used for authorization has different privileges than the key that created or most recently updated the rule, the rule behavior might change.
+
+        You can use `PUT` or `PATCH` methods to update rules, where:
+
+        * `PUT` replaces the original rule and deletes fields that are not specified.
+        * `PATCH` updates the specified fields.
+
+        > info
+        > You cannot modify the `id` or `rule_id` values.
       tags:
         - Rules API
       requestBody:
@@ -18,6 +34,22 @@ paths:
           application/json:
             schema:
               $ref: '../../../model/rule_schema/rule_schemas.schema.yaml#/components/schemas/RulePatchProps'
+            examples:
+              example1:
+                summary: Example using PATCH method
+                description: Example request to update a rule using PATCH method
+                value:
+                  rule_id: 'process_started_by_ms_office_program_possible_payload'
+                  threat:
+                    - framework: 'MITRE ATT&CK'
+                      tactic:
+                        id: 'TA0001'
+                        reference: 'https://attack.mitre.org/tactics/TA0001'
+                        name: 'Initial Access'
+                      technique:
+                        - id: 'T1193'
+                          name: 'Spearphishing Attachment'
+                          reference: 'https://attack.mitre.org/techniques/T1193'
       responses:
         200:
           description: Indicates a successful call.
@@ -25,3 +57,41 @@ paths:
             application/json:
               schema:
                 $ref: '../../../model/rule_schema/rule_schemas.schema.yaml#/components/schemas/RuleResponse'
+              examples:
+                example1:
+                  summary: Example response for an updated rule
+                  value:
+                    created_at: '2020-04-07T14:51:09.755Z'
+                    updated_at: '2020-04-07T14:51:09.970Z'
+                    created_by: 'elastic'
+                    description: 'Updated description for the rule.'
+                    enabled: false
+                    false_positives: []
+                    from: 'now-70m'
+                    id: '6541b99a-dee9-4f6d-a86d-dbd1869d73b1'
+                    immutable: false
+                    interval: '1h'
+                    rule_id: 'process_started_by_ms_office_program'
+                    max_signals: 100
+                    risk_score: 50
+                    name: 'Updated Rule Name'
+                    references: []
+                    severity: 'low'
+                    updated_by: 'elastic'
+                    tags:
+                      - 'child process'
+                      - 'ms office'
+                    to: 'now'
+                    type: 'query'
+                    threat: []
+                    version: 2
+                    actions: []
+                    filters:
+                      - query:
+                    query: 'process.parent.name:EXCEL.EXE or process.parent.name:MSPUB.EXE or process.parent.name:OUTLOOK.EXE or process.parent.name:POWERPNT.EXE or process.parent.name:VISIO.EXE or process.parent.name:WINWORD.EXE'
+                    language: 'kuery'
+                    related_integrations:
+                      - package: 'o365'
+                    required_fields:
+                      - name: 'process.parent.name'
+                    setup: ''
