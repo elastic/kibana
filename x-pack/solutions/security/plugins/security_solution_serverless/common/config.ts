@@ -10,6 +10,7 @@ import { ProductLine, ProductTier } from './product';
 
 export const productLine = schema.oneOf([
   schema.literal(ProductLine.security),
+  schema.literal(ProductLine.ai),
   schema.literal(ProductLine.endpoint),
   schema.literal(ProductLine.cloud),
 ]);
