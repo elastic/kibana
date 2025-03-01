@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect } from 'react';
+import React, { useCallback, useEffect, useRef } from 'react';
 
 import { useActions, useValues } from 'kea';
 
@@ -65,6 +65,28 @@ export const SearchIndexPipelines: React.FC = () => {
   const { makeRequest: revertPipeline } = useActions(RevertConnectorPipelineApilogic);
   const apiIndex = isApiIndex(index);
   const extractionDisabled = getContentExtractionDisabled(index);
+  const buttonRef = useRef<HTMLButtonElement | null>(null);
+  const pipelinesButton = Array.from(document.querySelectorAll('button')).find(
+    (btn) => btn.textContent?.trim() === 'Pipelines'
+  );
+
+  const onCloseDeleteModal = useCallback(() => {
+    closeDeleteModal();
+    setTimeout(() => {
+      if (buttonRef.current) {
+        buttonRef.current.focus();
+      }
+    }, 0);
+  }, [closeDeleteModal, buttonRef]);
+
+  const onDeletePipeline = useCallback(() => {
+    revertPipeline({ indexName });
+    setTimeout(() => {
+      if (pipelinesButton) {
+        pipelinesButton.focus();
+      }
+    }, 200);
+  }, [revertPipeline, pipelinesButton]);
 
   useEffect(() => {
     if (index) {
@@ -193,7 +215,7 @@ export const SearchIndexPipelines: React.FC = () => {
                     </EuiBadge>
                   </EuiFlexItem>
                   <EuiFlexItem grow={false}>
-                    <ManageCustomPipelineActions />
+                    <ManageCustomPipelineActions buttonRef={buttonRef} />
                   </EuiFlexItem>
                 </EuiFlexGroup>
               ) : (
@@ -279,8 +301,8 @@ export const SearchIndexPipelines: React.FC = () => {
             }
           )}
           isLoading={revertStatus === Status.LOADING}
-          onCancel={closeDeleteModal}
-          onConfirm={() => revertPipeline({ indexName })}
+          onCancel={onCloseDeleteModal}
+          onConfirm={onDeletePipeline}
           cancelButtonText={CANCEL_BUTTON_LABEL}
           confirmButtonText={i18n.translate(
             'xpack.enterpriseSearch.content.index.pipelines.deleteModal.confirmButton',
