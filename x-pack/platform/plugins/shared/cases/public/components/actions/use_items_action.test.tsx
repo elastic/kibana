@@ -20,7 +20,7 @@ describe('useItemsAction', () => {
   const onAction = jest.fn();
   const onActionSuccess = jest.fn();
   const successToasterTitle = jest.fn().mockReturnValue('My toaster title');
-  const fieldSelector = jest.fn().mockReturnValue(basicCase.tags);
+  const fieldSelector = jest.fn().mockImplementation((item) => item.tags);
   const itemsTransformer = jest.fn().mockImplementation((items) => items);
 
   const props = {
@@ -254,8 +254,8 @@ describe('useItemsAction', () => {
         expect(result.current.isFlyoutOpen).toBe(false);
       });
 
-      expect(onActionSuccess).not.toHaveBeenCalled();
-      expect(updateSpy).not.toHaveBeenCalled();
+      expect(onActionSuccess).toHaveBeenCalled();
+      expect(updateSpy).toHaveBeenCalledWith({ cases: [] });
     });
 
     it('do not update if the selected items are the same but with different order', async () => {
@@ -280,8 +280,8 @@ describe('useItemsAction', () => {
         expect(result.current.isFlyoutOpen).toBe(false);
       });
 
-      expect(onActionSuccess).not.toHaveBeenCalled();
-      expect(updateSpy).not.toHaveBeenCalled();
+      expect(onActionSuccess).toHaveBeenCalled();
+      expect(updateSpy).toHaveBeenCalledWith({ cases: [] });
     });
 
     it('do not update if the selected items are the same', async () => {
@@ -306,8 +306,8 @@ describe('useItemsAction', () => {
         expect(result.current.isFlyoutOpen).toBe(false);
       });
 
-      expect(onActionSuccess).not.toHaveBeenCalled();
-      expect(updateSpy).not.toHaveBeenCalled();
+      expect(onActionSuccess).toHaveBeenCalled();
+      expect(updateSpy).toHaveBeenCalledWith({ cases: [] });
     });
 
     it('do not update if selecting and unselecting the same item', async () => {
@@ -332,8 +332,8 @@ describe('useItemsAction', () => {
         expect(result.current.isFlyoutOpen).toBe(false);
       });
 
-      expect(onActionSuccess).not.toHaveBeenCalled();
-      expect(updateSpy).not.toHaveBeenCalled();
+      expect(onActionSuccess).toHaveBeenCalled();
+      expect(updateSpy).toHaveBeenCalledWith({ cases: [] });
     });
 
     it('do not update with empty items and no selection', async () => {
@@ -358,8 +358,8 @@ describe('useItemsAction', () => {
         expect(result.current.isFlyoutOpen).toBe(false);
       });
 
-      expect(onActionSuccess).not.toHaveBeenCalled();
-      expect(updateSpy).not.toHaveBeenCalled();
+      expect(onActionSuccess).toHaveBeenCalled();
+      expect(updateSpy).toHaveBeenCalledWith({ cases: [] });
     });
   });
 });

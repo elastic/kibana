@@ -12,7 +12,7 @@ import React from 'react';
 import AllCasesSelectorModal from '.';
 import type { CaseUI } from '../../../../common';
 import { CaseStatuses } from '../../../../common/types/domain';
-import { allCasesPermissions } from '../../../common/mock';
+import { allCasesPermissions, renderWithTestingProviders } from '../../../common/mock';
 import { useCasesToast } from '../../../common/use_cases_toast';
 import { alertComment } from '../../../containers/mock';
 import { useCreateAttachments } from '../../../containers/use_create_attachments';
@@ -144,7 +144,7 @@ describe('use cases add to existing case modal hook', () => {
       return null;
     });
 
-    <TestComponent />;
+    renderWithTestingProviders(<TestComponent />);
     await userEvent.click(screen.getByTestId('open-modal'));
 
     await waitFor(() => {
@@ -167,7 +167,9 @@ describe('use cases add to existing case modal hook', () => {
       showInfoToast: mockedToastInfo,
     });
 
-    <TestComponent noAttachmentsToaster={{ title: 'My title', content: 'My content' }} />;
+    renderWithTestingProviders(
+      <TestComponent noAttachmentsToaster={{ title: 'My title', content: 'My content' }} />
+    );
     await userEvent.click(screen.getByTestId('open-modal'));
 
     await waitFor(() => {
@@ -188,7 +190,7 @@ describe('use cases add to existing case modal hook', () => {
       showInfoToast: mockedToastInfo,
     });
 
-    <TestComponent />;
+    renderWithTestingProviders(<TestComponent />);
     await userEvent.click(screen.getByTestId('open-modal'));
 
     await waitFor(() => {
@@ -212,7 +214,7 @@ describe('use cases add to existing case modal hook', () => {
       return null;
     });
 
-    <TestComponent />;
+    renderWithTestingProviders(<TestComponent />);
     await userEvent.click(screen.getByTestId('open-modal'));
 
     await waitFor(() => {
@@ -244,7 +246,7 @@ describe('use cases add to existing case modal hook', () => {
       return null;
     });
 
-    <TestComponent />;
+    renderWithTestingProviders(<TestComponent />);
     await userEvent.click(screen.getByTestId('open-modal'));
 
     await waitFor(() => {
@@ -267,7 +269,7 @@ describe('use cases add to existing case modal hook', () => {
       return null;
     });
 
-    <TestComponent />;
+    renderWithTestingProviders(<TestComponent />);
 
     await userEvent.click(screen.getByTestId('open-modal'));
     // give a small delay for the reducer to run
@@ -295,7 +297,7 @@ describe('use cases add to existing case modal hook', () => {
       return null;
     });
 
-    <TestComponent />;
+    renderWithTestingProviders(<TestComponent />);
     await userEvent.click(screen.getByTestId('open-modal'));
 
     await waitFor(() => {

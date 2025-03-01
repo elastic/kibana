@@ -10,7 +10,11 @@ import { waitFor, fireEvent, screen } from '@testing-library/react';
 import type { RecentCasesProps } from '.';
 import RecentCases from '.';
 
-import { noCasesCapabilities, renderWithTestingProviders } from '../../common/mock';
+import {
+  allCasesCapabilities,
+  noCasesCapabilities,
+  renderWithTestingProviders,
+} from '../../common/mock';
 import { useGetCasesMockState } from '../../containers/mock';
 import { useCurrentUser } from '../../common/lib/kibana/hooks';
 import { useGetCases } from '../../containers/use_get_cases';
@@ -236,6 +240,7 @@ describe('RecentCases', () => {
      */
     coreStart.application.capabilities = {
       ...coreStart.application.capabilities,
+      generalCasesV3: allCasesCapabilities(),
       securitySolutionCasesV2: noCasesCapabilities(),
     };
 

@@ -378,13 +378,15 @@ describe('EditConnector ', () => {
   it('disable the push button when connector is invalid', async () => {
     usePushToServiceMock.mockReturnValue({ ...usePushToServiceMockRes, needsToBePushed: true });
 
-    <EditConnector
-      {...defaultProps}
-      caseData={{
-        ...defaultProps.caseData,
-        connector: { ...defaultProps.caseData.connector, id: 'not-exist' },
-      }}
-    />;
+    renderWithTestingProviders(
+      <EditConnector
+        {...defaultProps}
+        caseData={{
+          ...defaultProps.caseData,
+          connector: { ...defaultProps.caseData.connector, id: 'not-exist' },
+        }}
+      />
+    );
 
     expect(await screen.findByTestId('push-to-external-service')).toBeDisabled();
   });

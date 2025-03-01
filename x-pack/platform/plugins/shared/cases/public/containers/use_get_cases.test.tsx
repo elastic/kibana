@@ -75,7 +75,7 @@ describe('useGetCases', () => {
 
     const spyOnGetCases = jest.spyOn(api, 'getCases');
     renderHook(() => useGetCases(), {
-      wrapper: (props) => <TestProviders {...props} owner={[]} />,
+      wrapper: (props) => <TestProviders {...props} owner={[]} coreStart={coreStart} />,
     });
 
     await waitFor(() => {
@@ -100,7 +100,7 @@ describe('useGetCases', () => {
     const spyOnGetCases = jest.spyOn(api, 'getCases');
 
     renderHook(() => useGetCases(), {
-      wrapper: (props) => <TestProviders {...props} owner={[]} />,
+      wrapper: (props) => <TestProviders {...props} owner={[]} coreStart={coreStart} />,
     });
 
     await waitFor(() => {

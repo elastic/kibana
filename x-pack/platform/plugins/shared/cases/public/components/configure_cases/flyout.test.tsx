@@ -72,13 +72,17 @@ describe('CommonFlyout ', () => {
   });
 
   it('renders loading state correctly', async () => {
-    <CommonFlyout {...{ ...props, isLoading: true }}>{children}</CommonFlyout>;
+    renderWithTestingProviders(
+      <CommonFlyout {...{ ...props, isLoading: true }}>{children}</CommonFlyout>
+    );
 
     expect(await screen.findAllByRole('progressbar')).toHaveLength(2);
   });
 
   it('renders disable state correctly', async () => {
-    <CommonFlyout {...{ ...props, disabled: true }}>{children}</CommonFlyout>;
+    renderWithTestingProviders(
+      <CommonFlyout {...{ ...props, disabled: true }}>{children}</CommonFlyout>
+    );
 
     expect(await screen.findByTestId('common-flyout-cancel')).toBeDisabled();
     expect(await screen.findByTestId('common-flyout-save')).toBeDisabled();
@@ -447,7 +451,9 @@ describe('CommonFlyout ', () => {
       ).toHaveValue('this is a text field value');
 
       // connector
-      expect(await screen.findByTestId('dropdown-connector-no-connector')).toBeInTheDocument();
+      expect(
+        await screen.findByTestId('dropdown-connector-no-connector-label')
+      ).toBeInTheDocument();
     });
 
     it('calls onSaveField form correctly', async () => {

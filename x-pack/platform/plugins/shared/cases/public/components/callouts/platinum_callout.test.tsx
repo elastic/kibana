@@ -9,6 +9,7 @@ import React from 'react';
 import { screen } from '@testing-library/react';
 
 import { PlatinumLicenseCallout } from './platinum_callout';
+import { renderWithTestingProviders } from '../../common/mock';
 
 describe('PlatinumLicenseCallout ', () => {
   beforeEach(() => {
@@ -16,7 +17,7 @@ describe('PlatinumLicenseCallout ', () => {
   });
 
   it('renders', () => {
-    <PlatinumLicenseCallout />;
+    renderWithTestingProviders(<PlatinumLicenseCallout />);
 
     expect(screen.getByTestId('case-callout-license-info')).toBeInTheDocument();
     expect(screen.getByText('Upgrade to an appropriate license')).toBeInTheDocument();

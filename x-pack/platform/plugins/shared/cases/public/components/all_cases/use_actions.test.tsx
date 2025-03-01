@@ -223,7 +223,7 @@ describe('useActions', () => {
 
       await user.click(screen.getByTestId('confirmModalCancelButton'));
 
-      expect(screen.queryByTestId('confirm-delete-case-modal')).toBeFalsy();
+      expect(screen.queryByTestId('confirm-delete-case-modal')).not.toBeInTheDocument();
     });
   });
 
@@ -259,7 +259,7 @@ describe('useActions', () => {
       });
 
       await waitFor(() => {
-        expect(screen.queryByTestId('cases-edit-tags-flyout')).toBeFalsy();
+        expect(screen.queryByTestId('cases-edit-tags-flyout')).not.toBeInTheDocument();
       });
     });
 
@@ -294,7 +294,7 @@ describe('useActions', () => {
       });
 
       await waitFor(() => {
-        expect(screen.queryByTestId('cases-edit-assignees-flyout')).toBeFalsy();
+        expect(screen.queryByTestId('cases-edit-assignees-flyout')).not.toBeInTheDocument();
       });
     });
   });
@@ -324,7 +324,9 @@ describe('useActions', () => {
       });
 
       const comp = result.current.actions!.render(basicCase) as React.ReactElement;
-      renderWithTestingProviders(comp);
+      renderWithTestingProviders(comp, {
+        wrapperProps: { permissions: noDeleteCasesPermissions() },
+      });
 
       await user.click(screen.getByTestId(`case-action-popover-button-${basicCase.id}`));
       await waitForEuiPopoverOpen();
@@ -332,8 +334,8 @@ describe('useActions', () => {
       expect(screen.getByTestId(`case-action-status-panel-${basicCase.id}`)).toBeInTheDocument();
       expect(screen.getByTestId(`case-action-severity-panel-${basicCase.id}`)).toBeInTheDocument();
       expect(screen.getByTestId('cases-action-copy-id')).toBeInTheDocument();
-      expect(screen.queryByTestId('cases-bulk-action-delete')).toBeFalsy();
-      expect(screen.queryByTestId(`actions-separator-${basicCase.id}`)).toBeFalsy();
+      expect(screen.queryByTestId('cases-bulk-action-delete')).not.toBeInTheDocument();
+      expect(screen.queryByTestId(`actions-separator-${basicCase.id}`)).not.toBeInTheDocument();
     });
 
     it('shows the correct actions with only delete permissions', async () => {
@@ -342,16 +344,22 @@ describe('useActions', () => {
       });
 
       const comp = result.current.actions!.render(basicCase) as React.ReactElement;
-      renderWithTestingProviders(comp);
+      renderWithTestingProviders(comp, {
+        wrapperProps: { permissions: onlyDeleteCasesPermission() },
+      });
 
       await user.click(screen.getByTestId(`case-action-popover-button-${basicCase.id}`));
       await waitForEuiPopoverOpen();
 
-      expect(screen.queryByTestId(`case-action-status-panel-${basicCase.id}`)).toBeFalsy();
-      expect(screen.queryByTestId(`case-action-severity-panel-${basicCase.id}`)).toBeFalsy();
+      expect(
+        screen.queryByTestId(`case-action-status-panel-${basicCase.id}`)
+      ).not.toBeInTheDocument();
+      expect(
+        screen.queryByTestId(`case-action-severity-panel-${basicCase.id}`)
+      ).not.toBeInTheDocument();
       expect(screen.getByTestId('cases-action-copy-id')).toBeInTheDocument();
       expect(screen.getByTestId('cases-bulk-action-delete')).toBeInTheDocument();
-      expect(screen.queryByTestId(`actions-separator-${basicCase.id}`)).toBeFalsy();
+      expect(screen.queryByTestId(`actions-separator-${basicCase.id}`)).not.toBeInTheDocument();
     });
 
     it('returns null if the user does not have update or delete permissions', async () => {
@@ -368,7 +376,9 @@ describe('useActions', () => {
       });
 
       const comp = result.current.actions!.render(basicCase) as React.ReactElement;
-      renderWithTestingProviders(comp);
+      renderWithTestingProviders(comp, {
+        wrapperProps: { permissions: onlyDeleteCasesPermission() },
+      });
 
       await waitFor(() => {
         expect(screen.getByTestId(`case-action-popover-button-${basicCase.id}`)).toBeDisabled();
@@ -397,16 +407,20 @@ describe('useActions', () => {
       expect(result.current.actions).not.toBe(null);
       const caseWithClosedStatus = { ...basicCase, status: CaseStatuses.closed };
       const comp = result.current.actions!.render(caseWithClosedStatus) as React.ReactElement;
-      renderWithTestingProviders(comp);
+      renderWithTestingProviders(comp, {
+        wrapperProps: { permissions },
+      });
 
       await user.click(screen.getByTestId(`case-action-popover-button-${basicCase.id}`));
       await waitForEuiPopoverOpen();
 
       expect(screen.getByTestId(`case-action-status-panel-${basicCase.id}`)).toBeInTheDocument();
-      expect(screen.queryByTestId(`case-action-severity-panel-${basicCase.id}`)).toBeFalsy();
-      expect(screen.queryByTestId('cases-bulk-action-delete')).toBeFalsy();
+      expect(
+        screen.queryByTestId(`case-action-severity-panel-${basicCase.id}`)
+      ).not.toBeInTheDocument();
+      expect(screen.queryByTestId('cases-bulk-action-delete')).not.toBeInTheDocument();
       expect(screen.getByTestId('cases-action-copy-id')).toBeInTheDocument();
-      expect(screen.queryByTestId(`actions-separator-${basicCase.id}`)).toBeFalsy();
+      expect(screen.queryByTestId(`actions-separator-${basicCase.id}`)).not.toBeInTheDocument();
     });
 
     it('shows actions with combination of reopenCase and other permissions', async () => {
@@ -432,13 +446,17 @@ describe('useActions', () => {
       const caseWithClosedStatus = { ...basicCase, status: CaseStatuses.closed };
 
       const comp = result.current.actions!.render(caseWithClosedStatus) as React.ReactElement;
-      renderWithTestingProviders(comp);
+      renderWithTestingProviders(comp, {
+        wrapperProps: { permissions },
+      });
 
       await user.click(screen.getByTestId(`case-action-popover-button-${basicCase.id}`));
       await waitForEuiPopoverOpen();
 
       expect(screen.getByTestId(`case-action-status-panel-${basicCase.id}`)).toBeInTheDocument();
-      expect(screen.queryByTestId(`case-action-severity-panel-${basicCase.id}`)).toBeFalsy();
+      expect(
+        screen.queryByTestId(`case-action-severity-panel-${basicCase.id}`)
+      ).not.toBeInTheDocument();
       expect(screen.getByTestId('cases-bulk-action-delete')).toBeInTheDocument();
       expect(screen.getByTestId('cases-action-copy-id')).toBeInTheDocument();
     });

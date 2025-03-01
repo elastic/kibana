@@ -51,7 +51,7 @@ interface TestProviderProps {
 
 window.scrollTo = jest.fn();
 
-const mockGetFilesClient = (): (() => BaseFilesClient) => {
+const getMockedFilesClient = (): BaseFilesClient => {
   const mockedFilesClient = createMockFilesClient();
   mockedFilesClient.getFileKind.mockImplementation(() => ({
     id: 'test',
@@ -59,7 +59,7 @@ const mockGetFilesClient = (): (() => BaseFilesClient) => {
     http: {},
   }));
 
-  return () => mockedFilesClient;
+  return mockedFilesClient;
 };
 
 export const mockedTestProvidersOwner = [SECURITY_SOLUTION_OWNER];
@@ -108,7 +108,7 @@ const TestProvidersComponent: React.FC<TestProviderProps> = ({
 
   const defaultPermissions = useMemo(() => allCasesPermissions(), []);
   const finalFilesClient = useMemo(
-    () => filesClient ?? mockGetFilesClient(),
+    () => filesClient ?? getMockedFilesClient(),
     [filesClient]
   ) as FilesClient;
 

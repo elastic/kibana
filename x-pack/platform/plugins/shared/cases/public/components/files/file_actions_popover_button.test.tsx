@@ -20,6 +20,7 @@ import { constructFileKindIdByOwner } from '../../../common/files';
 import { basicCaseId, basicFileMock } from '../../containers/mock';
 import { FileActionsPopoverButton } from './file_actions_popover_button';
 import { useDeleteFileAttachment } from '../../containers/use_delete_file_attachment';
+import { createMockFilesClient } from '@kbn/shared-ux-file-mocks';
 
 jest.mock('../../containers/use_delete_file_attachment');
 
@@ -75,7 +76,7 @@ describe('FileActionsPopoverButton', () => {
       await screen.findByTestId(`cases-files-popover-${basicFileMock.id}`)
     ).toBeInTheDocument();
 
-    expect(await screen.findByTestId('cases-files-copy-hash-button')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('cases-files-copy-hash-button')).not.toBeInTheDocument();
   });
 
   it('only renders menu items for the enabled hashes', async () => {
@@ -162,7 +163,7 @@ describe('FileActionsPopoverButton', () => {
     });
 
     it('clicking copy md5 file hash copies the hash to the clipboard', async () => {
-      irenderWithTestingProviders(
+      renderWithTestingProviders(
         <FileActionsPopoverButton caseId={basicCaseId} theFile={basicFileMock} />
       );
 
@@ -292,8 +293,11 @@ describe('FileActionsPopoverButton', () => {
 
   describe('download button', () => {
     it('renders download button with correct href', async () => {
+      const filesClient = createMockFilesClient();
+
       renderWithTestingProviders(
-        <FileActionsPopoverButton caseId={basicCaseId} theFile={basicFileMock} />
+        <FileActionsPopoverButton caseId={basicCaseId} theFile={basicFileMock} />,
+        { wrapperProps: { filesClient } }
       );
 
       await userEvent.click(
@@ -303,10 +307,10 @@ describe('FileActionsPopoverButton', () => {
       expect(await screen.findByTestId('cases-files-download-button')).toBeInTheDocument();
 
       await waitFor(() => {
-        expect(appMockRender.getFilesClient().getDownloadHref).toBeCalled();
+        expect(filesClient.getDownloadHref).toBeCalled();
       });
 
-      expect(appMockRender.getFilesClient().getDownloadHref).toHaveBeenCalledWith({
+      expect(filesClient.getDownloadHref).toHaveBeenCalledWith({
         fileKind: constructFileKindIdByOwner(mockedTestProvidersOwner[0]),
         id: basicFileMock.id,
       });

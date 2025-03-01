@@ -49,13 +49,10 @@ describe('useGetCaseUserActionsStats', () => {
     );
   });
 
-  it('shows a toast error when the API returns an error', async () => {
+  it('calls getCaseUserActionsStats correctly', async () => {
     const spy = jest
       .spyOn(api, 'getCaseUserActionsStats')
       .mockRejectedValue(new Error("C'est la vie"));
-
-    const addError = jest.fn();
-    (useToasts as jest.Mock).mockReturnValue({ addError });
 
     renderHook(() => useGetCaseUserActionsStats(basicCase.id), {
       wrapper: TestProviders,
@@ -64,8 +61,19 @@ describe('useGetCaseUserActionsStats', () => {
     await waitFor(() => {
       expect(spy).toHaveBeenCalledWith(basicCase.id, expect.any(AbortSignal));
     });
+  });
 
-    expect(addError).toHaveBeenCalled();
+  it('shows a toast error when the API returns an error', async () => {
+    const addError = jest.fn();
+    (useToasts as jest.Mock).mockReturnValue({ addError });
+
+    renderHook(() => useGetCaseUserActionsStats(basicCase.id), {
+      wrapper: TestProviders,
+    });
+
+    await waitFor(() => {
+      expect(addError).toHaveBeenCalled();
+    });
   });
 
   it('calls the api when invoked with the correct parameters', async () => {

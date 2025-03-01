@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { act, waitFor, screen, waitForElementToBeRemoved } from '@testing-library/react';
-import userEvent, { type UserEvent } from '@testing-library/user-event';
+import { waitFor, screen, waitForElementToBeRemoved } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import React from 'react';
 
 import { MAX_DOCS_PER_PAGE } from '../../../common/constants';
@@ -20,10 +20,11 @@ import {
 import { casesQueriesKeys } from '../../containers/constants';
 import { basicCase } from '../../containers/mock';
 import { CasesTableUtilityBar } from './utility_bar';
+import { useCasesLocalStorage } from '../../common/use_cases_local_storage';
+
+jest.mock('../../common/use_cases_local_storage');
 
 describe('Severity form field', () => {
-  let user: UserEvent;
-
   const deselectCases = jest.fn();
   const localStorageKey = 'securitySolution.cases.utilityBar.hideMaxLimitWarning';
 
@@ -43,20 +44,15 @@ describe('Severity form field', () => {
   };
 
   beforeAll(() => {
-    jest.useFakeTimers();
+    jest.mocked(useCasesLocalStorage).mockReturnValue([false, jest.fn()]);
   });
 
   afterAll(() => {
-    jest.useRealTimers();
     sessionStorage.removeItem(localStorageKey);
   });
 
   beforeEach(() => {
-    jest.useFakeTimers();
-    // Workaround for timeout via https://github.com/testing-library/user-event/issues/833#issuecomment-1171452841
-    user = userEvent.setup({
-      advanceTimers: jest.advanceTimersByTime,
-    });
+    jest.clearAllMocks();
   });
 
   it('renders', async () => {
@@ -81,7 +77,7 @@ describe('Severity form field', () => {
       },
     };
 
-    <CasesTableUtilityBar {...updatedProps} />;
+    renderWithTestingProviders(<CasesTableUtilityBar {...updatedProps} />);
 
     expect(await screen.findByText('Showing 10 of 20 cases')).toBeInTheDocument();
     expect(await screen.findByText('Selected 1 case')).toBeInTheDocument();
@@ -98,7 +94,7 @@ describe('Severity form field', () => {
       },
     };
 
-    <CasesTableUtilityBar {...updatedProps} />;
+    renderWithTestingProviders(<CasesTableUtilityBar {...updatedProps} />);
 
     expect(await screen.findByText('Showing 10 of 20 cases')).toBeInTheDocument();
     expect(await screen.findByText('Selected 1 case')).toBeInTheDocument();
@@ -117,7 +113,7 @@ describe('Severity form field', () => {
       },
     };
 
-    <CasesTableUtilityBar {...updatedProps} />;
+    renderWithTestingProviders(<CasesTableUtilityBar {...updatedProps} />);
     expect(await screen.findByText('Showing 0 of 0 cases')).toBeInTheDocument();
   });
 
@@ -127,14 +123,14 @@ describe('Severity form field', () => {
   });
 
   it('does not render columns popover button when isSelectorView=True', async () => {
-    <CasesTableUtilityBar {...props} isSelectorView={true} />;
+    renderWithTestingProviders(<CasesTableUtilityBar {...props} isSelectorView={true} />);
     expect(screen.queryByTestId('column-selection-popover-button')).not.toBeInTheDocument();
   });
 
   it('opens the bulk actions correctly', async () => {
     renderWithTestingProviders(<CasesTableUtilityBar {...props} />);
 
-    await user.click(await screen.findByTestId('case-table-bulk-actions-link-icon'));
+    await userEvent.click(await screen.findByTestId('case-table-bulk-actions-link-icon'));
 
     expect(await screen.findByTestId('case-table-bulk-actions-context-menu'));
   });
@@ -142,11 +138,11 @@ describe('Severity form field', () => {
   it('closes the bulk actions correctly', async () => {
     renderWithTestingProviders(<CasesTableUtilityBar {...props} />);
 
-    await user.click(await screen.findByTestId('case-table-bulk-actions-link-icon'));
+    await userEvent.click(await screen.findByTestId('case-table-bulk-actions-link-icon'));
 
     expect(await screen.findByTestId('case-table-bulk-actions-context-menu'));
 
-    await user.click(await screen.findByTestId('case-table-bulk-actions-link-icon'));
+    await userEvent.click(await screen.findByTestId('case-table-bulk-actions-link-icon'));
 
     await waitForElementToBeRemoved(screen.queryByTestId('case-table-bulk-actions-context-menu'));
   });
@@ -159,7 +155,7 @@ describe('Severity form field', () => {
 
     const queryClientSpy = jest.spyOn(queryClient, 'invalidateQueries');
 
-    await user.click(await screen.findByTestId('all-cases-refresh-link-icon'));
+    await userEvent.click(await screen.findByTestId('all-cases-refresh-link-icon'));
 
     await waitFor(() => {
       expect(deselectCases).toHaveBeenCalled();
@@ -210,7 +206,7 @@ describe('Severity form field', () => {
   it('clears the filters correctly', async () => {
     renderWithTestingProviders(<CasesTableUtilityBar {...props} showClearFiltersButton={true} />);
 
-    await user.click(await screen.findByTestId('all-cases-clear-filters-link-icon'));
+    await userEvent.click(await screen.findByTestId('all-cases-clear-filters-link-icon'));
 
     await waitFor(() => {
       expect(props.onClearFilters).toHaveBeenCalled();
@@ -365,30 +361,15 @@ describe('Severity form field', () => {
       expect(await screen.findByTestId('all-cases-maximum-limit-warning')).toBeInTheDocument();
       expect(await screen.findByTestId('dismiss-warning')).toBeInTheDocument();
 
-      await user.click(await screen.findByTestId('dismiss-warning'));
+      await userEvent.click(await screen.findByTestId('dismiss-warning'));
 
       expect(screen.queryByTestId('all-cases-maximum-limit-warning')).not.toBeInTheDocument();
     });
 
     describe('do not show button', () => {
-      beforeAll(() => {
-        jest.useFakeTimers();
-      });
+      it('should show the limit warning', async () => {
+        jest.mocked(useCasesLocalStorage).mockReturnValue([false, jest.fn()]);
 
-      afterEach(() => {
-        jest.clearAllTimers();
-      });
-
-      afterAll(() => {
-        jest.useRealTimers();
-        sessionStorage.removeItem(localStorageKey);
-      });
-
-      beforeEach(() => {
-        jest.clearAllMocks();
-      });
-
-      it('should set storage key correctly', async () => {
         renderWithTestingProviders(
           <CasesTableUtilityBar
             {...{
@@ -400,11 +381,27 @@ describe('Severity form field', () => {
 
         expect(await screen.findByTestId('all-cases-maximum-limit-warning')).toBeInTheDocument();
         expect(await screen.findByTestId('do-not-show-warning')).toBeInTheDocument();
+      });
 
-        expect(localStorage.getItem(localStorageKey)).toBe('false');
+      it('should NOT show the limit warning if it has been dismissed', async () => {
+        jest.mocked(useCasesLocalStorage).mockReturnValue([true, jest.fn()]);
+
+        renderWithTestingProviders(
+          <CasesTableUtilityBar
+            {...{
+              ...newProps,
+              pagination: { ...newProps.pagination, pageSize: 100, pageIndex: 100 },
+            }}
+          />
+        );
+
+        expect(screen.queryByTestId('all-cases-maximum-limit-warning')).not.toBeInTheDocument();
       });
 
       it('should hide warning correctly when do not show button clicked', async () => {
+        const setDoNotShowAgain = jest.fn();
+        jest.mocked(useCasesLocalStorage).mockReturnValue([false, setDoNotShowAgain]);
+
         renderWithTestingProviders(
           <CasesTableUtilityBar
             {...{
@@ -414,17 +411,11 @@ describe('Severity form field', () => {
           />
         );
 
-        expect(await screen.findByTestId('all-cases-maximum-limit-warning')).toBeInTheDocument();
-        expect(await screen.findByTestId('do-not-show-warning')).toBeInTheDocument();
+        await userEvent.click(await screen.findByTestId('do-not-show-warning'));
 
-        await user.click(await screen.findByTestId('do-not-show-warning'));
-
-        act(() => {
-          jest.advanceTimersByTime(1000);
+        await waitFor(() => {
+          expect(setDoNotShowAgain).toHaveBeenCalledWith(true);
         });
-
-        expect(screen.queryByTestId('all-cases-maximum-limit-warning')).not.toBeInTheDocument();
-        expect(localStorage.getItem(localStorageKey)).toBe('true');
       });
     });
   });

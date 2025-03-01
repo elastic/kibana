@@ -89,7 +89,7 @@ describe('AssigneesFilterPopover', () => {
   });
 
   it('does not show the assigned users total if there are no assigned users', async () => {
-    <AssigneesFilterPopover {...defaultProps} />;
+    renderWithTestingProviders(<AssigneesFilterPopover {...defaultProps} />);
 
     await userEvent.click(await screen.findByTestId('options-filter-popover-button-assignees'));
     expect(await screen.findByText('Damaged Raccoon')).toBeInTheDocument();
@@ -131,7 +131,7 @@ describe('AssigneesFilterPopover', () => {
   });
 
   it('shows three users when initially rendered', async () => {
-    <AssigneesFilterPopover {...defaultProps} />;
+    renderWithTestingProviders(<AssigneesFilterPopover {...defaultProps} />);
 
     await userEvent.click(await screen.findByTestId('options-filter-popover-button-assignees'));
     expect(await screen.findByText('Wet Dingo')).toBeInTheDocument();
@@ -163,7 +163,7 @@ describe('AssigneesFilterPopover', () => {
   });
 
   it('does not show the number of filters', async () => {
-    <AssigneesFilterPopover {...defaultProps} />;
+    renderWithTestingProviders(<AssigneesFilterPopover {...defaultProps} />);
 
     await userEvent.click(await screen.findByTestId('options-filter-popover-button-assignees'));
     expect(await screen.findByText('Wet Dingo')).toBeInTheDocument();

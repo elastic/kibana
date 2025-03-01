@@ -1028,7 +1028,10 @@ describe('Create case', () => {
     expect(createAttachments).toHaveBeenCalled();
     expect(afterCaseCreated).toHaveBeenCalled();
     expect(pushCaseToExternalService).toHaveBeenCalled();
-    expect(onFormSubmitSuccess).toHaveBeenCalled();
+
+    await waitFor(() => {
+      expect(onFormSubmitSuccess).toHaveBeenCalled();
+    });
 
     const postCaseOrder = postCase.mock.invocationCallOrder[0];
     const createAttachmentsOrder = createAttachments.mock.invocationCallOrder[0];

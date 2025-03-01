@@ -35,7 +35,9 @@ describe('Markdown', () => {
     });
 
     test('it does NOT render the href if links are disabled', () => {
-      <MarkdownRenderer disableLinks={true}>{markdownWithLink}</MarkdownRenderer>;
+      renderWithTestingProviders(
+        <MarkdownRenderer disableLinks={true}>{markdownWithLink}</MarkdownRenderer>
+      );
 
       expect(screen.getByTestId('markdown-link')).not.toHaveProperty('href');
     });

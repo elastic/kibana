@@ -27,9 +27,7 @@ describe('useConnectors', () => {
   it('fetches connectors', async () => {
     const spy = jest.spyOn(api, 'getSupportedActionConnectors');
     renderHook(() => useGetSupportedActionConnectors(), {
-      wrapper: ({ children }: React.PropsWithChildren<{}>) => (
-        <TestProviders>{children}</TestProviders>
-      ),
+      wrapper: TestProviders,
     });
 
     await waitFor(() => expect(spy).toHaveBeenCalledWith({ signal: expect.any(AbortSignal) }));
@@ -45,9 +43,7 @@ describe('useConnectors', () => {
     });
 
     renderHook(() => useGetSupportedActionConnectors(), {
-      wrapper: ({ children }: React.PropsWithChildren<{}>) => (
-        <TestProviders>{children}</TestProviders>
-      ),
+      wrapper: TestProviders,
     });
 
     await waitFor(() => expect(addError).toHaveBeenCalled());
@@ -58,16 +54,16 @@ describe('useConnectors', () => {
     useApplicationCapabilitiesMock().actions = { crud: false, read: false };
 
     const { result } = renderHook(() => useGetSupportedActionConnectors(), {
-      wrapper: ({ children }: React.PropsWithChildren<{}>) => (
-        <TestProviders>{children}</TestProviders>
-      ),
+      wrapper: TestProviders,
     });
 
     await waitFor(() => {
       expect(spyOnFetchConnectors).not.toHaveBeenCalled();
     });
 
-    expect(result.current.data).toEqual([]);
+    await waitFor(() => {
+      expect(result.current.data).toEqual([]);
+    });
   });
 
   it('does not fetch connectors when the user does not has access to connectors', async () => {
@@ -75,15 +71,15 @@ describe('useConnectors', () => {
     useApplicationCapabilitiesMock().actions = { crud: true, read: true };
 
     const { result } = renderHook(() => useGetSupportedActionConnectors(), {
-      wrapper: ({ children }: React.PropsWithChildren<{}>) => (
-        <TestProviders permissions={noConnectorsCasePermission()}>{children}</TestProviders>
-      ),
+      wrapper: (props) => <TestProviders {...props} permissions={noConnectorsCasePermission()} />,
     });
 
     await waitFor(() => {
       expect(spyOnFetchConnectors).not.toHaveBeenCalled();
     });
 
-    expect(result.current.data).toEqual([]);
+    await waitFor(() => {
+      expect(result.current.data).toEqual([]);
+    });
   });
 });

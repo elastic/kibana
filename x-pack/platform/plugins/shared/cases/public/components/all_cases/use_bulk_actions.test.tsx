@@ -197,10 +197,12 @@ describe('useBulkActions', () => {
       const modals = result.current.modals;
       const panels = result.current.panels;
 
-      <>
-        <EuiContextMenu initialPanelId={0} panels={panels} />
-        {modals}
-      </>;
+      renderWithTestingProviders(
+        <>
+          <EuiContextMenu initialPanelId={0} panels={panels} />
+          {modals}
+        </>
+      );
 
       await userEvent.click(screen.getByTestId('case-bulk-action-status'));
 
@@ -231,10 +233,12 @@ describe('useBulkActions', () => {
       const modals = result.current.modals;
       const panels = result.current.panels;
 
-      <>
-        <EuiContextMenu initialPanelId={0} panels={panels} />
-        {modals}
-      </>;
+      renderWithTestingProviders(
+        <>
+          <EuiContextMenu initialPanelId={0} panels={panels} />
+          {modals}
+        </>
+      );
 
       await userEvent.click(screen.getByTestId('case-bulk-action-severity'));
 
@@ -337,7 +341,7 @@ describe('useBulkActions', () => {
           </>
         );
 
-        expect(screen.queryByTestId('confirm-delete-case-modal')).toBeFalsy();
+        expect(screen.queryByTestId('confirm-delete-case-modal')).not.toBeInTheDocument();
       });
     });
   });
@@ -467,7 +471,7 @@ describe('useBulkActions', () => {
       const { result } = renderHook(
         () => useBulkActions({ onAction, onActionSuccess, selectedCases: [basicCase] }),
         {
-          wrapper: TestProviders,
+          wrapper: (props) => <TestProviders {...props} permissions={noDeleteCasesPermissions()} />,
         }
       );
 
@@ -484,15 +488,17 @@ describe('useBulkActions', () => {
 
       expect(await screen.findByTestId('case-bulk-action-status')).toBeInTheDocument();
 
-      expect(screen.queryByTestId('cases-bulk-action-delete')).toBeFalsy();
-      expect(screen.queryByTestId('bulk-actions-separator')).toBeFalsy();
+      expect(screen.queryByTestId('cases-bulk-action-delete')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('bulk-actions-separator')).not.toBeInTheDocument();
     });
 
     it('shows the correct actions with only delete permissions', async () => {
       const { result } = renderHook(
         () => useBulkActions({ onAction, onActionSuccess, selectedCases: [basicCase] }),
         {
-          wrapper: TestProviders,
+          wrapper: (props) => (
+            <TestProviders {...props} permissions={onlyDeleteCasesPermission()} />
+          ),
         }
       );
 
@@ -507,16 +513,16 @@ describe('useBulkActions', () => {
         { wrapperProps: { permissions: onlyDeleteCasesPermission() } }
       );
 
-      expect(await screen.findByTestId('case-bulk-action-status')).toBeFalsy();
+      expect(screen.queryByTestId('case-bulk-action-status')).not.toBeInTheDocument();
       expect(screen.getByTestId('cases-bulk-action-delete')).toBeInTheDocument();
-      expect(screen.queryByTestId('bulk-actions-separator')).toBeFalsy();
+      expect(screen.queryByTestId('bulk-actions-separator')).not.toBeInTheDocument();
     });
 
     it('shows the correct actions with no reopen permissions', async () => {
       const { result } = renderHook(
         () => useBulkActions({ onAction, onActionSuccess, selectedCases: [basicCaseClosed] }),
         {
-          wrapper: TestProviders,
+          wrapper: (props) => <TestProviders {...props} permissions={noReopenCasesPermissions()} />,
         }
       );
 
@@ -543,7 +549,9 @@ describe('useBulkActions', () => {
       const { result } = renderHook(
         () => useBulkActions({ onAction, onActionSuccess, selectedCases: [basicCaseClosed] }),
         {
-          wrapper: TestProviders,
+          wrapper: (props) => (
+            <TestProviders {...props} permissions={onlyReopenCasesPermission()} />
+          ),
         }
       );
 

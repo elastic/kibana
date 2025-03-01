@@ -49,4 +49,20 @@ describe('Cases metrics', () => {
       within(await screen.findByTestId('mttrStatsHeader')).getByText('2ms')
     ).toBeInTheDocument();
   });
+
+  it('should render the loading spinner when loading stats', async () => {
+    useGetCasesMetricsMock.mockReturnValue({
+      isLoading: true,
+      data: {
+        mttr: 2000,
+        status: { open: 20, inProgress: 40, closed: 130 },
+      },
+    });
+
+    renderWithTestingProviders(<CasesMetrics />);
+
+    expect(screen.getByTestId('openStatsHeader-loading-spinner')).toBeInTheDocument();
+    expect(screen.getByTestId('inProgressStatsHeader-loading-spinner')).toBeInTheDocument();
+    expect(screen.getByTestId('closedStatsHeader-loading-spinner')).toBeInTheDocument();
+  });
 });

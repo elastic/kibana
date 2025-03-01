@@ -14,6 +14,7 @@ import { constructFileKindIdByOwner } from '../../../common/files';
 import { mockedTestProvidersOwner, renderWithTestingProviders } from '../../common/mock';
 import { FilesTable } from './files_table';
 import userEvent from '@testing-library/user-event';
+import { createMockFilesClient } from '@kbn/shared-ux-file-mocks';
 
 describe('FilesTable', () => {
   const onTableChange = jest.fn();
@@ -127,18 +128,19 @@ describe('FilesTable', () => {
   });
 
   it('download button renders correctly', async () => {
-    renderWithTestingProviders(<FilesTable {...defaultProps} />);
+    const filesClient = createMockFilesClient();
+    renderWithTestingProviders(<FilesTable {...defaultProps} />, { wrapperProps: { filesClient } });
 
     await userEvent.click(
       await screen.findByTestId(`cases-files-actions-popover-button-${basicFileMock.id}`)
     );
 
     await waitFor(() => {
-      expect(appMockRender.getFilesClient().getDownloadHref).toBeCalled();
+      expect(filesClient.getDownloadHref).toBeCalled();
     });
 
     await waitFor(() => {
-      expect(appMockRender.getFilesClient().getDownloadHref).toHaveBeenCalledWith({
+      expect(filesClient.getDownloadHref).toHaveBeenCalledWith({
         fileKind: constructFileKindIdByOwner(mockedTestProvidersOwner[0]),
         id: basicFileMock.id,
       });

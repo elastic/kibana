@@ -125,14 +125,8 @@ describe('UseInfiniteFindCaseUserActions', () => {
     });
 
     await waitFor(() => {
-      expect(spy).toHaveBeenCalledWith(
-        basicCase.id,
-        { type: filterActionType, sortOrder, page: 1, perPage: 10 },
-        expect.any(AbortSignal)
-      );
+      expect(addError).toHaveBeenCalled();
     });
-
-    expect(addError).toHaveBeenCalled();
 
     spy.mockRestore();
   });

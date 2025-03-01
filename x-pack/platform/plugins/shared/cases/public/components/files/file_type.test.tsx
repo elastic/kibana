@@ -14,6 +14,7 @@ import { AttachmentActionType } from '../../client/attachment_framework/types';
 import { basicCase, basicFileMock } from '../../containers/mock';
 import { getFileType } from './file_type';
 import { FILE_ATTACHMENT_TYPE } from '../../../common/constants';
+import { renderWithTestingProviders } from '../../common/mock';
 
 describe('getFileType', () => {
   const fileType = getFileType();
@@ -42,8 +43,8 @@ describe('getFileType', () => {
     });
 
     it('event renders a clickable name if the file is an image', async () => {
-      // @ts-expect-error: event is defined
       renderWithTestingProviders(
+        // @ts-expect-error: event is defined
         fileType.getAttachmentViewObject({ ...attachmentViewProps }).event
       );
 
@@ -52,8 +53,8 @@ describe('getFileType', () => {
     });
 
     it('clicking the name rendered in event opens the file preview', async () => {
-      // @ts-expect-error: event is a React element
       renderWithTestingProviders(
+        // @ts-expect-error: event is a React element
         fileType.getAttachmentViewObject({ ...attachmentViewProps }).event
       );
 

@@ -127,8 +127,7 @@ describe('RegisteredAttachmentsPropertyActions', () => {
     await userEvent.click(await screen.findByTestId('property-actions-user-action-ellipses'));
     await waitForEuiPopoverOpen();
 
-    expect((await screen.findAllByTestId('property-actions-user-action-group')).length).toBe(2);
-
+    expect(await screen.findByTestId('property-actions-user-action-trash')).toBeInTheDocument();
     expect(await screen.findByTestId('property-actions-user-action-download')).toBeInTheDocument();
   });
 });

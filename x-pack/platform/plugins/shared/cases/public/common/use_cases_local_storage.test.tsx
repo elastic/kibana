@@ -69,7 +69,9 @@ describe('useCasesLocalStorage', () => {
 
     it('supports multiple owners correctly', async () => {
       const { result } = renderHook(() => useCasesLocalStorage(lsKey, initialValue), {
-        wrapper: (props) => <TestProviders {...props} owner={[]} />,
+        wrapper: (props) => (
+          <TestProviders {...props} owner={['securitySolution', 'observability']} />
+        ),
       });
 
       expect(result.current[0]).toEqual(initialValue);

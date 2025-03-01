@@ -58,7 +58,7 @@ describe('Connectors', () => {
   it('shows the connectors dropdown', () => {
     renderWithTestingProviders(<Connectors {...props} />);
 
-    expect(screen.getByTestId('case-connectors-dropdown')).toBeInTheDocument();
+    expect(screen.getByTestId('dropdown-connectors')).toBeInTheDocument();
   });
 
   it('the connector is changed successfully', async () => {
@@ -109,7 +109,7 @@ describe('Connectors', () => {
       />
     );
 
-    expect(screen.getByTestId('Update My SN connector')).toBeInTheDocument();
+    expect(screen.getByText('Update My SN connector')).toBeInTheDocument();
   });
 
   it('shows the deprecated callout when the connector is deprecated', async () => {
@@ -138,7 +138,7 @@ describe('Connectors', () => {
     expect(
       await screen.findByTestId('configure-case-connector-permissions-error-msg')
     ).toBeInTheDocument();
-    expect(screen.queryByTestId('case-connectors-dropdown')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('dropdown-connectors')).not.toBeInTheDocument();
   });
 
   it('shows the actions permission message if the user does not have access to case connector', async () => {
@@ -149,7 +149,7 @@ describe('Connectors', () => {
     expect(
       screen.getByTestId('configure-case-connector-permissions-error-msg')
     ).toBeInTheDocument();
-    expect(screen.queryByTestId('case-connectors-dropdown')).toBe(null);
+    expect(screen.queryByTestId('dropdown-connectors')).toBe(null);
   });
 
   it('it should hide the "Add Connector" button when the user lacks the capability to add a new connector', () => {

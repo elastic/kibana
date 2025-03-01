@@ -13,6 +13,7 @@ import { constructFileKindIdByOwner } from '../../../common/files';
 import { mockedTestProvidersOwner, renderWithTestingProviders } from '../../common/mock';
 import { basicFileMock } from '../../containers/mock';
 import { FilePreview } from './file_preview';
+import { createMockFilesClient } from '@kbn/shared-ux-file-mocks';
 
 // FLAKY: https://github.com/elastic/kibana/issues/182364
 describe('FilePreview', () => {
@@ -33,12 +34,17 @@ describe('FilePreview', () => {
   });
 
   it('FilePreview rendered correctly', async () => {
+    const filesClient = createMockFilesClient();
+
     renderWithTestingProviders(
-      <FilePreview closePreview={jest.fn()} selectedFile={basicFileMock} />
+      <FilePreview closePreview={jest.fn()} selectedFile={basicFileMock} />,
+      { wrapperProps: { filesClient } }
     );
 
+    jest.runAllTimers();
+
     await waitFor(() =>
-      expect(appMockRender.getFilesClient().getDownloadHref).toHaveBeenCalledWith({
+      expect(filesClient.getDownloadHref).toHaveBeenCalledWith({
         id: basicFileMock.id,
         fileKind: constructFileKindIdByOwner(mockedTestProvidersOwner[0]),
       })
@@ -49,13 +55,15 @@ describe('FilePreview', () => {
 
   it('pressing escape calls closePreview', async () => {
     const closePreview = jest.fn();
+    const filesClient = createMockFilesClient();
 
     renderWithTestingProviders(
-      <FilePreview closePreview={closePreview} selectedFile={basicFileMock} />
+      <FilePreview closePreview={closePreview} selectedFile={basicFileMock} />,
+      { wrapperProps: { filesClient } }
     );
 
     await waitFor(() =>
-      expect(appMockRender.getFilesClient().getDownloadHref).toHaveBeenCalledWith({
+      expect(filesClient.getDownloadHref).toHaveBeenCalledWith({
         id: basicFileMock.id,
         fileKind: constructFileKindIdByOwner(mockedTestProvidersOwner[0]),
       })
@@ -64,7 +72,8 @@ describe('FilePreview', () => {
     expect(await screen.findByTestId('cases-files-image-preview')).toBeInTheDocument();
 
     await user.keyboard('{Escape}');
-    // fireEvent.keyDown(document, { key: 'Escape' });
+
+    jest.runAllTimers();
 
     await waitFor(() => expect(closePreview).toHaveBeenCalled());
   });

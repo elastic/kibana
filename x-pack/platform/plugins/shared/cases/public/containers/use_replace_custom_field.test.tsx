@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import React from 'react';
 import { act, waitFor, renderHook } from '@testing-library/react';
 import { basicCase } from './mock';
 import * as api from './api';
@@ -37,7 +38,7 @@ describe('useReplaceCustomField', () => {
     const queryClientSpy = jest.spyOn(queryClient, 'invalidateQueries');
 
     const { result } = renderHook(() => useReplaceCustomField(), {
-      wrapper: TestProviders,
+      wrapper: (props) => <TestProviders {...props} queryClient={queryClient} />,
     });
 
     act(() => {

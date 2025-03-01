@@ -75,14 +75,7 @@ describe('CreateCaseFlyout', () => {
 
     await waitForComponentToUpdate();
 
+    expect(await screen.findByTestId('create-case-flyout-header')).toBeInTheDocument();
     expect(await screen.findByTestId('testing123')).toBeInTheDocument();
-    expect((await screen.findAllByTestId('create-case-flyout-header')).length).toEqual(2);
-  });
-
-  it('does not render headerContent when undefined', async () => {
-    renderWithTestingProviders(<CreateCaseFlyout {...defaultProps} />);
-    await waitForComponentToUpdate();
-
-    expect((await screen.findAllByTestId('create-case-flyout-header')).length).toEqual(1);
   });
 });

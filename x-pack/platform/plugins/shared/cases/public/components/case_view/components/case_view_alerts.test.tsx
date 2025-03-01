@@ -43,7 +43,8 @@ describe('CaseUI View Page activity tab', () => {
   });
 
   it('should call the alerts table with correct props for security solution', async () => {
-    <CaseViewAlerts caseData={caseData} />;
+    renderWithTestingProviders(<CaseViewAlerts caseData={caseData} />);
+
     await waitFor(async () => {
       expect(mockAlertsTable).toHaveBeenCalledWith(
         expect.objectContaining({

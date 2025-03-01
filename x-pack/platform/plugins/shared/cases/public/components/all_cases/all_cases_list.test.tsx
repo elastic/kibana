@@ -13,6 +13,7 @@ import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 
 import {
   TestProviders,
+  noCreateCasesPermissions,
   noDeleteCasesPermissions,
   readCasesPermissions,
   renderWithTestingProviders,
@@ -366,6 +367,16 @@ describe('AllCasesListGeneric', () => {
     });
 
     expect(onRowClick).toBeCalledWith(undefined, isCreateCase);
+  });
+
+  it('should not render the create new case link when the user does not have create privileges', async () => {
+    renderWithTestingProviders(<AllCasesList />, {
+      wrapperProps: { permissions: noCreateCasesPermissions() },
+    });
+
+    await screen.findByTestId('cases-table');
+
+    expect(screen.queryByTestId('cases-table-add-case')).not.toBeInTheDocument();
   });
 
   it('should call onRowClick when clicking a case with modal=true', async () => {

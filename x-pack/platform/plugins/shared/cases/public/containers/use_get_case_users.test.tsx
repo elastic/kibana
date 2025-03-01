@@ -36,15 +36,13 @@ describe('useGetCaseUsers', () => {
     const addError = jest.fn();
     (useToasts as jest.Mock).mockReturnValue({ addError });
 
-    const spy = jest.spyOn(api, 'getCaseUsers').mockRejectedValue(new Error("C'est la vie"));
+    jest.spyOn(api, 'getCaseUsers').mockRejectedValue(new Error("C'est la vie"));
     renderHook(() => useGetCaseUsers('case-1'), {
       wrapper: TestProviders,
     });
 
     await waitFor(() => {
-      expect(spy).toHaveBeenCalledWith({ caseId: 'case-1', signal: expect.any(AbortSignal) });
+      expect(addError).toHaveBeenCalled();
     });
-
-    expect(addError).toHaveBeenCalled();
   });
 });

@@ -19,17 +19,6 @@ describe('useApplication', () => {
     jest.clearAllMocks();
   });
 
-  const getApp = (props: Partial<PublicAppInfo> = {}): PublicAppInfo => ({
-    id: 'testAppId',
-    title: 'Test title',
-    status: AppStatus.accessible,
-    visibleIn: ['globalSearch'],
-    appRoute: `/app/some-id`,
-    keywords: [],
-    deepLinks: [],
-    ...props,
-  });
-
   it('returns the appId and the appTitle correctly', () => {
     const { result } = renderHook(() => useApplication(), {
       wrapper: TestProviders,
@@ -43,6 +32,8 @@ describe('useApplication', () => {
 
   it('returns undefined appId and appTitle if the currentAppId observable is not defined', () => {
     const coreStart = coreMock.createStart();
+
+    coreStart.application.applications$ = getApplicationObservable();
     coreStart.application.currentAppId$ = new Subject();
 
     const { result } = renderHook(() => useApplication(), {
@@ -52,9 +43,11 @@ describe('useApplication', () => {
     expect(result.current).toEqual({});
   });
 
-  it('returns undefined appTitle if the applications observable is not defined', () => {
+  it('returns undefined appTitle if the applications observable is not defined', async () => {
     const coreStart = coreMock.createStart();
+
     coreStart.application.applications$ = new Subject();
+    coreStart.application.currentAppId$ = getCurrentApplicationObservable();
 
     const { result } = renderHook(() => useApplication(), {
       wrapper: (props) => <TestProviders {...props} coreStart={coreStart} />,
@@ -68,9 +61,10 @@ describe('useApplication', () => {
 
   it('returns the label as appTitle', () => {
     const coreStart = coreMock.createStart();
-    coreStart.application.applications$ = new BehaviorSubject(
-      new Map([['testAppId', getApp({ category: { id: 'test-label-id', label: 'Test label' } })]])
-    );
+    coreStart.application.currentAppId$ = getCurrentApplicationObservable();
+    coreStart.application.applications$ = getApplicationObservable({
+      category: { id: 'test-label-id', label: 'Test label' },
+    });
 
     const { result } = renderHook(() => useApplication(), {
       wrapper: (props) => <TestProviders {...props} coreStart={coreStart} />,
@@ -84,9 +78,11 @@ describe('useApplication', () => {
 
   it('returns the title as appTitle if the categories label is missing', () => {
     const coreStart = coreMock.createStart();
-    coreStart.application.applications$ = new BehaviorSubject(
-      new Map([['testAppId', getApp({ title: 'Test title' })]])
-    );
+    coreStart.application.currentAppId$ = getCurrentApplicationObservable();
+    coreStart.application.applications$ = getApplicationObservable({
+      title: 'Test title',
+      category: undefined,
+    });
 
     const { result } = renderHook(() => useApplication(), {
       wrapper: (props) => <TestProviders {...props} coreStart={coreStart} />,
@@ -109,3 +105,25 @@ describe('useApplication', () => {
     expect(result.current).toEqual({ appId: 'new-test-id' });
   });
 });
+
+const getApplicationObservable = (props: Partial<PublicAppInfo> = {}) =>
+  new BehaviorSubject<Map<string, PublicAppInfo>>(
+    new Map([
+      [
+        'testAppId',
+        {
+          id: 'testAppId',
+          title: 'test-title',
+          category: { id: 'test-label-id', label: 'Test' },
+          status: AppStatus.accessible,
+          visibleIn: ['globalSearch'],
+          appRoute: `/app/some-id`,
+          keywords: [],
+          deepLinks: [],
+          ...props,
+        },
+      ],
+    ])
+  );
+
+const getCurrentApplicationObservable = () => new BehaviorSubject<string>('testAppId');

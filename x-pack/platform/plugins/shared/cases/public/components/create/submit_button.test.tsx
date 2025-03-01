@@ -7,62 +7,44 @@
 
 import React from 'react';
 import { waitFor, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import { useFormContext } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 
 import { SubmitCaseButton } from './submit_button';
+import { renderWithTestingProviders } from '../../common/mock';
 
-import { FormTestComponent } from '../../common/test_utils';
-import userEvent, { type UserEvent } from '@testing-library/user-event';
+jest.mock('@kbn/es-ui-shared-plugin/static/forms/hook_form_lib');
 
 describe('SubmitCaseButton', () => {
-  let user: UserEvent;
-
   const onSubmit = jest.fn();
-
-  beforeAll(() => {
-    jest.useFakeTimers();
-  });
-
-  afterAll(() => {
-    jest.useRealTimers();
-  });
 
   beforeEach(() => {
     jest.clearAllMocks();
-    // Workaround for timeout via https://github.com/testing-library/user-event/issues/833#issuecomment-1171452841
-    user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
+    // @ts-expect-error: not all properties are needed for testing
+    jest.mocked(useFormContext).mockReturnValue({ submit: onSubmit, isSubmitting: false });
   });
 
   it('renders', async () => {
-    <FormTestComponent onSubmit={onSubmit}>
-      <SubmitCaseButton />
-    </FormTestComponent>;
+    renderWithTestingProviders(<SubmitCaseButton />);
 
     expect(await screen.findByTestId('create-case-submit')).toBeInTheDocument();
   });
 
   it('submits', async () => {
-    <FormTestComponent onSubmit={onSubmit}>
-      <SubmitCaseButton />
-    </FormTestComponent>;
+    renderWithTestingProviders(<SubmitCaseButton />);
 
-    await user.click(await screen.findByTestId('create-case-submit'));
+    await userEvent.click(await screen.findByTestId('create-case-submit'));
 
     await waitFor(() => expect(onSubmit).toBeCalled());
   });
 
   it('disables when submitting', async () => {
-    <FormTestComponent
-      // We need to pass in an async variant in here,
-      // otherwise the assertion will fail
-      onSubmit={jest.fn(async () => {
-        await new Promise((resolve) => setTimeout(resolve, 50));
-      })}
-    >
-      <SubmitCaseButton />
-    </FormTestComponent>;
+    // @ts-expect-error: not all properties are needed for testing
+    jest.mocked(useFormContext).mockReturnValue({ submit: onSubmit, isSubmitting: true });
+    renderWithTestingProviders(<SubmitCaseButton />);
 
     const button = await screen.findByTestId('create-case-submit');
-    await user.click(button);
+    await userEvent.click(button);
 
     expect(await screen.findByTestId('create-case-submit')).toBeDisabled();
   });

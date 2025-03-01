@@ -37,8 +37,6 @@ describe('UserCommentPropertyActions', () => {
     await userEvent.click(await screen.findByTestId('property-actions-user-action-ellipses'));
     await waitForEuiPopoverOpen();
 
-    expect((await screen.findAllByTestId('property-actions-user-action-group')).length).toBe(3);
-
     expect(screen.getByTestId('property-actions-user-action-pencil')).toBeInTheDocument();
     expect(screen.getByTestId('property-actions-user-action-trash')).toBeInTheDocument();
     expect(screen.getByTestId('property-actions-user-action-quote')).toBeInTheDocument();

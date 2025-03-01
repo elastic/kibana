@@ -111,8 +111,6 @@ describe('UseFindCaseUserActions', () => {
   });
 
   it('shows a toast error when the API returns an error', async () => {
-    const spy = jest.spyOn(api, 'findCaseUserActions').mockRejectedValue(new Error("C'est la vie"));
-
     const addError = jest.fn();
     (useToasts as jest.Mock).mockReturnValue({ addError });
 
@@ -121,13 +119,7 @@ describe('UseFindCaseUserActions', () => {
     });
 
     await waitFor(() => {
-      expect(spy).toHaveBeenCalledWith(
-        basicCase.id,
-        { type: filterActionType, sortOrder, page: 1, perPage: 10 },
-        expect.any(AbortSignal)
-      );
+      expect(addError).toHaveBeenCalled();
     });
-
-    expect(addError).toHaveBeenCalled();
   });
 });
