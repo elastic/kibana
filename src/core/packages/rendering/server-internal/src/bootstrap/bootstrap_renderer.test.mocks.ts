@@ -13,7 +13,7 @@ jest.doMock('./render_template', () => ({
 }));
 
 export const getThemeTagMock = jest.fn();
-jest.doMock('./get_theme_tag', () => ({
+jest.doMock('../theme', () => ({
   getThemeTag: getThemeTagMock,
 }));
 
