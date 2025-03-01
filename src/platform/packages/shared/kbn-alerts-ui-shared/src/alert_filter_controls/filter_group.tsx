@@ -60,6 +60,7 @@ export const FilterGroup = (props: PropsWithChildren<FilterGroupProps>) => {
     Storage,
     ruleTypeIds,
     storageKey,
+    disableLocalStorageSync = false,
   } = props;
 
   const filterChangedSubscription = useRef<Subscription>();
@@ -105,7 +106,7 @@ export const FilterGroup = (props: PropsWithChildren<FilterGroupProps>) => {
   } = useControlGroupSyncToLocalStorage({
     Storage,
     storageKey: localStoragePageFilterKey,
-    shouldSync: isViewMode,
+    shouldSync: !disableLocalStorageSync && isViewMode,
   });
 
   useEffect(() => {
