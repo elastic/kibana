@@ -1,0 +1,42 @@
+env:
+  GITHUB_PR_TARGET_BRANCH: 'main' # common utils needs this value to be set
+  GITHUB_PR_NUMBER: $GITHUB_ISSUE_NUMBER
+
+steps:
+  - command: |
+      ts-node .buildkite/scripts/lifecycle/comment_on_pr.ts \
+        --message "Linux headless chromium build started at: $BUILDKITE_BUILD_URL" \
+        --context "chromium-linux-build-job" \
+        --clear-previous
+    label: Comment with job URL on issue
+    agents:
+      provider: gcp
+      image: family/kibana-ubuntu-2004
+      imageProject: elastic-images-prod
+      machineType: n2-standard-2
+    timeout_in_minutes: 5
+
+  - command: |
+      .buildkite/scripts/pipelines/chromium_linux_build/chromium_version.sh
+    label: Infer chromium version for puppeteer version
+    key: infer_chromium_version
+    agents:
+      provider: gcp
+      image: family/kibana-ubuntu-2004
+      imageProject: elastic-images-prod
+      machineType: n2-standard-2
+    timeout_in_minutes: 5
+
+  - command: "PLATFORM_VARIANT={{matrix}} .buildkite/scripts/pipelines/chromium_linux_build/build.sh"
+    label: "Build {{matrix}} linux headless chromium"
+    # timeout_in_minutes: 10
+    depends_on: "infer_chromium_version"
+    agents:
+      image: family/kibana-ubuntu-2004
+      imageProject: elastic-images-prod
+      provider: gcp
+      machineType: c2d-highcpu-112
+      diskSizeGb: 275
+    matrix:
+      - "x64"
+      - "arm64"
