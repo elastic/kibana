@@ -32,6 +32,7 @@
     "@kbn/react-kibana-context-render",
     "@kbn/core-rendering-browser",
     "@kbn/palettes",
+    "@kbn/react-dom",
   ],
   "exclude": [
     "target/**/*",
