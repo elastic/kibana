@@ -31,6 +31,21 @@ export const useESQLVariables = ({
     isApiESQLVariablesCompatible(parentApi) ? parentApi?.controlGroupApi$ : undefined
   );
 
+  const controlsPanels = useStateFromPublishingSubject(controlGroupApi?.children$);
+  const dashboardESQLControls = useMemo(() => {
+    const esqlControls = Object.values(controlsPanels || {}).filter(
+      (panel) => panel.type === 'esqlControl'
+    );
+    const esqlControlsState = esqlControls.map((control) => {
+      const serializedState = control.serializeState();
+      return {
+        ...serializedState.rawState,
+        id: serializedState.id,
+      };
+    });
+    return esqlControlsState;
+  }, [controlsPanels]);
+
   const panel = useMemo(() => {
     if (!panelId) {
       return;
@@ -47,14 +62,31 @@ export const useESQLVariables = ({
         return;
       }
 
-      // add a new control
-      controlGroupApi?.addNewPanel({
-        panelType: 'esqlControl',
-        initialState: {
-          ...controlState,
-          id: uuidv4(),
-        },
-      });
+      // control is new
+      if (updatedQuery) {
+        // add a new control
+        controlGroupApi?.addNewPanel({
+          panelType: 'esqlControl',
+          initialState: {
+            ...controlState,
+            id: uuidv4(),
+          },
+        });
+      } else {
+        const associatedControl = dashboardESQLControls.find(
+          (control) =>
+            control.variableName === controlState.variableName &&
+            control.variableType === controlState.variableType
+        );
+
+        if (associatedControl) {
+          // update existing control
+          controlGroupApi?.replacePanel(associatedControl.id, {
+            panelType: 'esqlControl',
+            initialState: controlState,
+          });
+        }
+      }
       if (panel && updatedQuery) {
         panel.updateAttributes({
           ...attributes,
@@ -64,11 +96,11 @@ export const useESQLVariables = ({
             needsRefresh: true,
           },
         });
-        // open the edit flyout to continue editing
-        await panel.onEdit();
       }
+      // open the edit flyout to continue editing
+      await panel?.onEdit();
     },
-    [attributes, controlGroupApi, panel, panelId]
+    [attributes, controlGroupApi, dashboardESQLControls, panel, panelId]
   );
 
   const onCancelControl = useCallback(() => {
@@ -78,5 +110,5 @@ export const useESQLVariables = ({
     }
   }, [closeFlyout, panel]);
 
-  return { onSaveControl, onCancelControl };
+  return { onSaveControl, onCancelControl, dashboardESQLControls };
 };

@@ -101,7 +101,7 @@ export function LensEditConfigurationFlyout({
     isApiESQLVariablesCompatible(parentApi) ? parentApi?.esqlVariables$ : undefined
   );
 
-  const { onSaveControl, onCancelControl } = useESQLVariables({
+  const { onSaveControl, onCancelControl, dashboardESQLControls } = useESQLVariables({
     parentApi,
     panelId,
     attributes,
@@ -522,6 +522,8 @@ export function LensEditConfigurationFlyout({
                 isLoading={isVisualizationLoading}
                 onSaveControl={onSaveControl}
                 onCancelControl={onCancelControl}
+                // maybe I should combine these
+                esqlControls={dashboardESQLControls}
                 esqlVariables={esqlVariables}
               />
             </EuiFlexItem>
