@@ -10,11 +10,19 @@ import { SecurityPageName } from '@kbn/security-solution-plugin/common';
 import { upsellingPages } from './register_upsellings';
 
 describe('upsellingPages', () => {
-  it('registers the Attack discovery page with the expected minimum license for self managed', () => {
+  it('should register the Attack discovery page with the expected minimum license for self managed', () => {
     const attackDiscoveryPage = upsellingPages.find(
       ({ pageName }) => pageName === SecurityPageName.attackDiscovery
     );
 
     expect(attackDiscoveryPage?.minimumLicenseRequired).toEqual('enterprise');
+  });
+
+  it('should register the `Translated rules` page with the expected minimum license for self managed', () => {
+    const translatedRulesPage = upsellingPages.find(
+      ({ pageName }) => pageName === SecurityPageName.siemMigrationsRules
+    );
+
+    expect(translatedRulesPage?.minimumLicenseRequired).toEqual('enterprise');
   });
 });
