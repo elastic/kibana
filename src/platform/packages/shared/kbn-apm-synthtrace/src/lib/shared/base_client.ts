@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Client } from '@elastic/elasticsearch';
+import { Client, errors } from '@elastic/elasticsearch';
 import {
   ESDocumentWithOperation,
   Fields,
@@ -19,8 +19,12 @@ import { Readable, Transform } from 'stream';
 import { isGeneratorObject } from 'util/types';
 import { Logger } from '../utils/create_logger';
 import { sequential } from '../utils/stream_utils';
+import { KibanaClient } from './base_kibana_client';
 
 export interface SynthtraceEsClientOptions {
+  client: Client;
+  kibana?: KibanaClient;
+  logger: Logger;
   concurrency?: number;
   refreshAfterIndex?: boolean;
   pipeline: (base: Readable) => NodeJS.WritableStream;
@@ -30,6 +34,7 @@ type MaybeArray<T> = T | T[];
 
 export class SynthtraceEsClient<TFields extends Fields> {
   protected readonly client: Client;
+  protected readonly kibana?: KibanaClient;
   protected readonly logger: Logger;
 
   private readonly concurrency: number;
@@ -39,8 +44,9 @@ export class SynthtraceEsClient<TFields extends Fields> {
   protected dataStreams: string[] = [];
   protected indices: string[] = [];
 
-  constructor(options: { client: Client; logger: Logger } & SynthtraceEsClientOptions) {
+  constructor(options: SynthtraceEsClientOptions) {
     this.client = options.client;
+    this.kibana = options.kibana;
     this.logger = options.logger;
     this.concurrency = options.concurrency ?? 1;
     this.refreshAfterIndex = options.refreshAfterIndex ?? false;
@@ -67,10 +73,17 @@ export class SynthtraceEsClient<TFields extends Fields> {
     await Promise.all([
       ...(this.dataStreams.length
         ? [
-            this.client.indices.deleteDataStream({
-              name: this.dataStreams.join(','),
-              expand_wildcards: ['open', 'hidden'],
-            }),
+            this.client.indices
+              .deleteDataStream({
+                name: this.dataStreams.join(','),
+                expand_wildcards: ['open', 'hidden'],
+              })
+              .catch((error) => {
+                if (error instanceof errors.ResponseError && error.statusCode === 404) {
+                  return;
+                }
+                throw error;
+              }),
           ]
         : []),
       ...(resolvedIndices.length

@@ -183,7 +183,7 @@ function logCertificateWarningsIfNeeded(parsedTarget: Url, parsedKibanaUrl: Url,
     (parsedTarget.protocol === 'https:' || parsedKibanaUrl.protocol === 'https:') &&
     (parsedTarget.hostname === '127.0.0.1' || parsedKibanaUrl.hostname === '127.0.0.1')
   ) {
-    logger.warn(
+    logger.warning(
       `WARNING: Self-signed certificate may not work with hostname: '127.0.0.1'. Consider using 'localhost' instead.`
     );
   }

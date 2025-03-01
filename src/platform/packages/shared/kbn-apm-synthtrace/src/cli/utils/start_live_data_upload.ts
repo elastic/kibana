@@ -16,6 +16,7 @@ import { awaitStream } from '../../lib/utils/wait_until_stream_finished';
 import { bootstrap } from './bootstrap';
 import { getScenario } from './get_scenario';
 import { RunOptions } from './parse_run_cli_flags';
+import { StreamManager } from './stream_manager';
 
 export async function startLiveDataUpload({
   runOptions,
@@ -26,93 +27,56 @@ export async function startLiveDataUpload({
 }) {
   const file = runOptions.file;
 
-  const {
-    logger,
-    apmEsClient,
-    logsEsClient,
-    infraEsClient,
-    syntheticsEsClient,
-    otelEsClient,
-    entitiesEsClient,
-    entitiesKibanaClient,
-  } = await bootstrap(runOptions);
+  const streamManager = new StreamManager(async () => {
+    if (scenarioTearDown) {
+      try {
+        await scenarioTearDown(clients);
+      } catch (error) {
+        logger.error('Error during scenario teardown');
+        logger.error(error);
+      }
+    }
+  });
+
+  streamManager.init();
+
+  const { logger, clients } = await bootstrap(runOptions);
 
   const scenario = await getScenario({ file, logger });
   const {
     generate,
-    bootstrap: scenarioBootsrap,
+    bootstrap: scenarioBootstrap,
     teardown: scenarioTearDown,
   } = await scenario({ ...runOptions, logger });
 
-  if (scenarioBootsrap) {
-    await scenarioBootsrap({
-      apmEsClient,
-      logsEsClient,
-      infraEsClient,
-      otelEsClient,
-      syntheticsEsClient,
-      entitiesEsClient,
-      entitiesKibanaClient,
-    });
+  if (scenarioBootstrap) {
+    await scenarioBootstrap(clients);
   }
 
   const bucketSizeInMs = runOptions.liveBucketSize;
   let requestedUntil = start;
 
-  let currentStreams: PassThrough[] = [];
   // @ts-expect-error upgrade typescript v4.9.5
   const cachedStreams: WeakMap<SynthtraceEsClient, PassThrough> = new WeakMap();
-
-  process.on('SIGINT', () => closeStreamsAndTeardown());
-  process.on('SIGTERM', () => closeStreamsAndTeardown());
-  process.on('SIGQUIT', () => closeStreamsAndTeardown());
-
-  async function closeStreamsAndTeardown() {
-    if (scenarioTearDown) {
-      try {
-        await scenarioTearDown({
-          apmEsClient,
-          logsEsClient,
-          infraEsClient,
-          otelEsClient,
-          syntheticsEsClient,
-          entitiesEsClient,
-          entitiesKibanaClient,
-        });
-      } catch (error) {
-        logger.error('Error during scenario teardown', error);
-      }
-    }
-
-    currentStreams.forEach((stream) => {
-      stream.end(() => {
-        process.exit(0);
-      });
-    });
-    currentStreams = []; // Reset the stream array
-  }
 
   async function uploadNextBatch() {
     const now = Date.now();
 
     if (now > requestedUntil.getTime()) {
-      const bucketFrom = requestedUntil;
-      const bucketTo = new Date(requestedUntil.getTime() + bucketSizeInMs);
+      const bucketCount = Math.floor((now - requestedUntil.getTime()) / bucketSizeInMs);
+
+      const rangeStart = requestedUntil.getTime();
+      const rangeEnd = rangeStart + bucketCount * bucketSizeInMs;
 
       logger.info(
-        `Requesting ${new Date(bucketFrom).toISOString()} to ${new Date(bucketTo).toISOString()}`
+        `Requesting ${new Date(rangeStart).toISOString()} to ${new Date(
+          rangeEnd
+        ).toISOString()} in ${bucketCount} bucket(s)`
       );
 
       const generatorsAndClients = generate({
-        range: timerange(bucketFrom.getTime(), bucketTo.getTime()),
-        clients: {
-          logsEsClient,
-          apmEsClient,
-          infraEsClient,
-          entitiesEsClient,
-          syntheticsEsClient,
-          otelEsClient,
-        },
+        range: timerange(rangeStart, rangeEnd),
+        clients,
       });
 
       const generatorsAndClientsArray = castArray(generatorsAndClients);
@@ -131,7 +95,7 @@ export async function startLiveDataUpload({
         return stream;
       });
 
-      currentStreams = streams;
+      streams.forEach((stream) => streamManager.trackStream(stream));
 
       const promises = generatorsAndClientsArray.map(({ generator }, i) => {
         const concatenatedStream = castArray(generator)
@@ -155,9 +119,12 @@ export async function startLiveDataUpload({
       });
 
       await Promise.all(refreshPromise);
+
+      streams.forEach((stream) => streamManager.untrackStream(stream));
+
       logger.info('Refreshing completed');
 
-      requestedUntil = bucketTo;
+      requestedUntil = new Date(rangeEnd);
     }
   }
 
