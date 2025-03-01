@@ -40,10 +40,10 @@ describe('MaintenanceWindowScopedQuery', () => {
         },
       },
     });
-    appMockRenderer = createAppMockRenderer();
   });
 
   it('renders correctly', () => {
+    appMockRenderer = createAppMockRenderer();
     appMockRenderer.render(
       <MaintenanceWindowScopedQuery
         ruleTypeIds={['apm', '.es-query', 'siem.esqlRule']}

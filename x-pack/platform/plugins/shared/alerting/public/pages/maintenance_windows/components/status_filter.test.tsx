@@ -18,36 +18,38 @@ describe('StatusFilter', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    appMockRenderer = createAppMockRenderer();
   });
 
   test('it renders', () => {
-    const result = appMockRenderer.render(<StatusFilter selectedStatus={[]} onChange={onChange} />);
+    appMockRenderer = createAppMockRenderer();
+    appMockRenderer.render(<StatusFilter selectedStatus={[]} onChange={onChange} />);
 
-    expect(result.getByTestId('status-filter-button')).toBeInTheDocument();
+    expect(screen.getByTestId('status-filter-button')).toBeInTheDocument();
   });
 
   test('it shows the popover', async () => {
-    const result = appMockRenderer.render(<StatusFilter selectedStatus={[]} onChange={onChange} />);
+    appMockRenderer = createAppMockRenderer();
+    appMockRenderer.render(<StatusFilter selectedStatus={[]} onChange={onChange} />);
 
-    fireEvent.click(result.getByTestId('status-filter-button'));
+    fireEvent.click(screen.getByTestId('status-filter-button'));
 
     await waitForEuiPopoverOpen();
-    expect(result.getByTestId('status-filter-running')).toBeInTheDocument();
-    expect(result.getByTestId('status-filter-upcoming')).toBeInTheDocument();
-    expect(result.getByTestId('status-filter-finished')).toBeInTheDocument();
-    expect(result.getByTestId('status-filter-archived')).toBeInTheDocument();
+    expect(screen.getByTestId('status-filter-running')).toBeInTheDocument();
+    expect(screen.getByTestId('status-filter-upcoming')).toBeInTheDocument();
+    expect(screen.getByTestId('status-filter-finished')).toBeInTheDocument();
+    expect(screen.getByTestId('status-filter-archived')).toBeInTheDocument();
   });
 
   test('should have 2 active filters', async () => {
-    const result = appMockRenderer.render(
+    appMockRenderer = createAppMockRenderer();
+    appMockRenderer.render(
       <StatusFilter
         selectedStatus={[MaintenanceWindowStatus.Running, MaintenanceWindowStatus.Upcoming]}
         onChange={onChange}
       />
     );
 
-    fireEvent.click(result.getByTestId('status-filter-button'));
+    fireEvent.click(screen.getByTestId('status-filter-button'));
     await waitForEuiPopoverOpen();
 
     // Find the span containing the notification badge (with the active filter count)

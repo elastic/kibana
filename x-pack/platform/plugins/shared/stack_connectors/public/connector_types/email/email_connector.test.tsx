@@ -6,8 +6,8 @@
  */
 
 import React, { Suspense } from 'react';
+import { screen } from '@testing-library/react';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
-import { act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { useKibana } from '@kbn/triggers-actions-ui-plugin/public';
 import EmailActionConnectorFields from './email_connector';
@@ -263,11 +263,11 @@ describe('EmailActionConnectorFields', () => {
 
     beforeEach(() => {
       jest.clearAllMocks();
-      appMockRenderer = createAppMockRenderer();
       validateEmailAddresses.mockReturnValue([{ valid: true }]);
     });
 
     it('submits the connector', async () => {
+      appMockRenderer = createAppMockRenderer();
       const actionConnector = {
         secrets: {
           user: 'user',
@@ -288,7 +288,7 @@ describe('EmailActionConnectorFields', () => {
         isDeprecated: false,
       };
 
-      const { getByTestId } = appMockRenderer.render(
+      appMockRenderer.render(
         <ConnectorFormTestProvider
           connector={actionConnector}
           onSubmit={onSubmit}
@@ -304,9 +304,7 @@ describe('EmailActionConnectorFields', () => {
 
       await waitForComponentToUpdate();
 
-      await act(async () => {
-        await userEvent.click(getByTestId('form-test-provide-submit'));
-      });
+      await userEvent.click(screen.getByTestId('form-test-provide-submit'));
 
       expect(onSubmit).toBeCalledWith({
         data: {
@@ -332,6 +330,7 @@ describe('EmailActionConnectorFields', () => {
     });
 
     it('submits the connector with auth false', async () => {
+      appMockRenderer = createAppMockRenderer();
       const actionConnector = {
         secrets: {
           user: null,
@@ -352,7 +351,7 @@ describe('EmailActionConnectorFields', () => {
         isDeprecated: false,
       };
 
-      const { getByTestId } = appMockRenderer.render(
+      appMockRenderer.render(
         <ConnectorFormTestProvider
           connector={actionConnector}
           onSubmit={onSubmit}
@@ -368,9 +367,7 @@ describe('EmailActionConnectorFields', () => {
 
       await waitForComponentToUpdate();
 
-      await act(async () => {
-        await userEvent.click(getByTestId('form-test-provide-submit'));
-      });
+      await userEvent.click(screen.getByTestId('form-test-provide-submit'));
 
       expect(onSubmit).toBeCalledWith({
         data: {
@@ -392,6 +389,7 @@ describe('EmailActionConnectorFields', () => {
     });
 
     it('connector validation fails when connector config is not valid', async () => {
+      appMockRenderer = createAppMockRenderer();
       useKibanaMock().services.actions.validateEmailAddresses = jest
         .fn()
         .mockReturnValue([{ valid: false }]);
@@ -411,7 +409,7 @@ describe('EmailActionConnectorFields', () => {
         isDeprecated: false,
       };
 
-      const { getByTestId } = appMockRenderer.render(
+      appMockRenderer.render(
         <ConnectorFormTestProvider
           connector={actionConnector}
           onSubmit={onSubmit}
@@ -427,9 +425,7 @@ describe('EmailActionConnectorFields', () => {
 
       await waitForComponentToUpdate();
 
-      await act(async () => {
-        await userEvent.click(getByTestId('form-test-provide-submit'));
-      });
+      await userEvent.click(screen.getByTestId('form-test-provide-submit'));
 
       expect(onSubmit).toBeCalledWith({
         data: {},
@@ -438,6 +434,7 @@ describe('EmailActionConnectorFields', () => {
     });
 
     it('connector validation fails when user specified but not password', async () => {
+      appMockRenderer = createAppMockRenderer();
       const actionConnector = {
         secrets: {
           user: 'user',
@@ -459,7 +456,7 @@ describe('EmailActionConnectorFields', () => {
         },
       };
 
-      const { getByTestId } = appMockRenderer.render(
+      appMockRenderer.render(
         <ConnectorFormTestProvider
           connector={actionConnector}
           onSubmit={onSubmit}
@@ -474,10 +471,7 @@ describe('EmailActionConnectorFields', () => {
       );
 
       await waitForComponentToUpdate();
-
-      await act(async () => {
-        await userEvent.click(getByTestId('form-test-provide-submit'));
-      });
+      await userEvent.click(screen.getByTestId('form-test-provide-submit'));
 
       expect(onSubmit).toBeCalledWith({
         data: {},
@@ -486,6 +480,7 @@ describe('EmailActionConnectorFields', () => {
     });
 
     it('connector validation fails when server type is not selected', async () => {
+      appMockRenderer = createAppMockRenderer();
       const actionConnector = {
         secrets: {
           user: 'user',
@@ -505,7 +500,7 @@ describe('EmailActionConnectorFields', () => {
         },
       };
 
-      const { getByTestId } = appMockRenderer.render(
+      appMockRenderer.render(
         <ConnectorFormTestProvider
           connector={actionConnector}
           onSubmit={onSubmit}
@@ -521,9 +516,7 @@ describe('EmailActionConnectorFields', () => {
 
       await waitForComponentToUpdate();
 
-      await act(async () => {
-        await userEvent.click(getByTestId('form-test-provide-submit'));
-      });
+      await userEvent.click(screen.getByTestId('form-test-provide-submit'));
 
       expect(onSubmit).toBeCalledWith({
         data: {},
@@ -532,6 +525,7 @@ describe('EmailActionConnectorFields', () => {
     });
 
     it('connector validation fails when exchange service is selected, but clientId, tenantId and clientSecrets were not defined', async () => {
+      appMockRenderer = createAppMockRenderer();
       const actionConnector = {
         secrets: {
           user: 'user',
@@ -550,7 +544,7 @@ describe('EmailActionConnectorFields', () => {
         },
       };
 
-      const { getByTestId } = appMockRenderer.render(
+      appMockRenderer.render(
         <ConnectorFormTestProvider
           connector={actionConnector}
           onSubmit={onSubmit}
@@ -568,9 +562,7 @@ describe('EmailActionConnectorFields', () => {
 
       await waitForComponentToUpdate();
 
-      await act(async () => {
-        await userEvent.click(getByTestId('form-test-provide-submit'));
-      });
+      await userEvent.click(screen.getByTestId('form-test-provide-submit'));
 
       expect(onSubmit).toBeCalledWith({
         data: {},
@@ -598,8 +590,9 @@ describe('EmailActionConnectorFields', () => {
           },
           isDeprecated: false,
         };
+        appMockRenderer = createAppMockRenderer();
 
-        const { getByTestId } = appMockRenderer.render(
+        appMockRenderer.render(
           <ConnectorFormTestProvider
             connector={actionConnector}
             onSubmit={onSubmit}
@@ -615,9 +608,7 @@ describe('EmailActionConnectorFields', () => {
 
         await waitForComponentToUpdate();
 
-        await act(async () => {
-          await userEvent.click(getByTestId('form-test-provide-submit'));
-        });
+        await userEvent.click(screen.getByTestId('form-test-provide-submit'));
 
         expect(onSubmit).toBeCalledWith({
           data: {},
@@ -644,8 +635,8 @@ describe('EmailActionConnectorFields', () => {
         },
         isDeprecated: false,
       };
-
-      const { getByTestId } = appMockRenderer.render(
+      appMockRenderer = createAppMockRenderer();
+      appMockRenderer.render(
         <ConnectorFormTestProvider
           connector={actionConnector}
           onSubmit={onSubmit}
@@ -661,9 +652,7 @@ describe('EmailActionConnectorFields', () => {
 
       await waitForComponentToUpdate();
 
-      await act(async () => {
-        await userEvent.click(getByTestId('form-test-provide-submit'));
-      });
+      await userEvent.click(screen.getByTestId('form-test-provide-submit'));
 
       expect(onSubmit).toBeCalledWith({
         data: {

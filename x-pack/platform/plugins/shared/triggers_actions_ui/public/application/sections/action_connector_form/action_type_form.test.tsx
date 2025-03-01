@@ -214,9 +214,9 @@ describe('action_type_form', () => {
 
     await waitFor(() => {
       expect(screen.getByTestId('executionModeFieldActionForm')).toBeInTheDocument();
-      expect(screen.queryByTestId('executionModeFieldTest')).not.toBeInTheDocument();
-      expect(screen.queryByTestId('executionModeFieldUndefined')).not.toBeInTheDocument();
     });
+    expect(screen.queryByTestId('executionModeFieldTest')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('executionModeFieldUndefined')).not.toBeInTheDocument();
   });
 
   it('renders the alerts filters with the producerId set to SIEM', async () => {
@@ -266,8 +266,8 @@ describe('action_type_form', () => {
 
     await waitFor(() => {
       expect(screen.getByTestId('alertsFilterQueryToggle')).toBeInTheDocument();
-      expect(screen.getByTestId('alertsFilterTimeframeToggle')).toBeInTheDocument();
     });
+    expect(screen.getByTestId('alertsFilterTimeframeToggle')).toBeInTheDocument();
   });
 
   it('does not call "setActionParamsProperty" because dedupKey is not empty', async () => {
@@ -413,7 +413,7 @@ describe('action_type_form', () => {
       params: {},
       frequency: DEFAULT_FREQUENCY,
     };
-    const wrapper = render(
+    render(
       <IntlProvider locale="en">
         {getActionTypeForm({
           index: 1,
@@ -430,13 +430,13 @@ describe('action_type_form', () => {
       </IntlProvider>
     );
 
-    const summaryOrPerRuleSelect = wrapper.getByTestId('summaryOrPerRuleSelect');
+    const summaryOrPerRuleSelect = screen.getByTestId('summaryOrPerRuleSelect');
     expect(summaryOrPerRuleSelect).toBeTruthy();
 
-    const button = wrapper.getByText('For each alert');
+    const button = screen.getByText('For each alert');
     button.click();
     await act(async () => {
-      wrapper.getByText('Summary of alerts').click();
+      screen.getByText('Summary of alerts').click();
     });
 
     expect(mockTransformActionVariables.mock.calls).toEqual([
@@ -490,7 +490,7 @@ describe('action_type_form', () => {
     });
     actionTypeRegistry.get.mockReturnValue(actionType);
 
-    const wrapper = render(
+    render(
       <IntlProvider locale="en">
         {getActionTypeForm({
           index: 1,
@@ -516,10 +516,10 @@ describe('action_type_form', () => {
       </IntlProvider>
     );
 
-    expect(wrapper.getByTestId('mustacheAutocompleteSwitch')).toBeTruthy();
+    expect(screen.getByTestId('mustacheAutocompleteSwitch')).toBeTruthy();
 
     await act(async () => {
-      wrapper.getByTestId('mustacheAutocompleteSwitch').click();
+      screen.getByTestId('mustacheAutocompleteSwitch').click();
     });
     expect(setActionParamsProperty).toHaveBeenCalledWith('dedupKey', '', 1);
   });
@@ -553,7 +553,7 @@ describe('action_type_form', () => {
           summary: true,
         },
       };
-      const wrapper = render(
+      render(
         <IntlProvider locale="en">
           {getActionTypeForm({
             index: 1,
@@ -564,18 +564,18 @@ describe('action_type_form', () => {
         </IntlProvider>
       );
 
-      wrapper.getByTestId('notifyWhenSelect').click();
+      screen.getByTestId('notifyWhenSelect').click();
       await act(async () => {
-        expect(wrapper.queryByText('On status changes')).not.toBeTruthy();
-        expect(wrapper.queryByText('On check intervals')).not.toBeTruthy();
-        expect(wrapper.queryByText('On custom action intervals')).not.toBeTruthy();
+        expect(screen.queryByText('On status changes')).not.toBeTruthy();
+        expect(screen.queryByText('On check intervals')).not.toBeTruthy();
+        expect(screen.queryByText('On custom action intervals')).not.toBeTruthy();
 
-        expect(wrapper.getAllByText('Per rule run')).toBeTruthy();
-        expect(wrapper.getAllByText('Custom frequency')).toBeTruthy();
+        expect(screen.getAllByText('Per rule run')).toBeTruthy();
+        expect(screen.getAllByText('Custom frequency')).toBeTruthy();
 
-        expect(wrapper.queryByTestId('onActionGroupChange')).not.toBeTruthy();
-        expect(wrapper.getByTestId('onActiveAlert')).toBeTruthy();
-        expect(wrapper.getByTestId('onThrottleInterval')).toBeTruthy();
+        expect(screen.queryByTestId('onActionGroupChange')).not.toBeTruthy();
+        expect(screen.getByTestId('onActiveAlert')).toBeTruthy();
+        expect(screen.getByTestId('onThrottleInterval')).toBeTruthy();
       });
     });
 
@@ -607,7 +607,7 @@ describe('action_type_form', () => {
           summary: false,
         },
       };
-      const wrapper = render(
+      render(
         <IntlProvider locale="en">
           {getActionTypeForm({
             index: 1,
@@ -618,18 +618,18 @@ describe('action_type_form', () => {
         </IntlProvider>
       );
 
-      wrapper.getByTestId('notifyWhenSelect').click();
+      screen.getByTestId('notifyWhenSelect').click();
       await act(async () => {
-        expect(wrapper.queryByText('On status changes')).not.toBeTruthy();
-        expect(wrapper.queryByText('On check intervals')).not.toBeTruthy();
-        expect(wrapper.queryByText('On custom action intervals')).not.toBeTruthy();
+        expect(screen.queryByText('On status changes')).not.toBeTruthy();
+        expect(screen.queryByText('On check intervals')).not.toBeTruthy();
+        expect(screen.queryByText('On custom action intervals')).not.toBeTruthy();
 
-        expect(wrapper.getAllByText('Per rule run')).toBeTruthy();
-        expect(wrapper.queryByText('Custom frequency')).not.toBeTruthy();
+        expect(screen.getAllByText('Per rule run')).toBeTruthy();
+        expect(screen.queryByText('Custom frequency')).not.toBeTruthy();
 
-        expect(wrapper.queryByTestId('onActionGroupChange')).not.toBeTruthy();
-        expect(wrapper.getByTestId('onActiveAlert')).toBeTruthy();
-        expect(wrapper.queryByTestId('onThrottleInterval')).not.toBeTruthy();
+        expect(screen.queryByTestId('onActionGroupChange')).not.toBeTruthy();
+        expect(screen.getByTestId('onActiveAlert')).toBeTruthy();
+        expect(screen.queryByTestId('onThrottleInterval')).not.toBeTruthy();
       });
     });
   });

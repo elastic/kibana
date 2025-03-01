@@ -6,7 +6,7 @@
  */
 
 import React, { FC, PropsWithChildren } from 'react';
-import { fireEvent, waitFor, within } from '@testing-library/react';
+import { fireEvent, within, screen } from '@testing-library/react';
 import { useForm, Form } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { Frequency } from '@kbn/rrule';
 import { AppMockRenderer, createAppMockRenderer } from '../../../../lib/test_utils';
@@ -44,41 +44,43 @@ describe('CustomRecurringSchedule', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    appMockRenderer = createAppMockRenderer();
   });
 
   it('renders all form fields', async () => {
-    const result = appMockRenderer.render(
+    appMockRenderer = createAppMockRenderer();
+    appMockRenderer.render(
       <MockHookWrapperComponent>
         <CustomRecurringSchedule />
       </MockHookWrapperComponent>
     );
 
-    expect(result.getByTestId('interval-field')).toBeInTheDocument();
-    expect(result.getByTestId('custom-frequency-field')).toBeInTheDocument();
-    expect(result.getByTestId('byweekday-field')).toBeInTheDocument();
-    expect(result.queryByTestId('bymonth-field')).not.toBeInTheDocument();
+    expect(screen.getByTestId('interval-field')).toBeInTheDocument();
+    expect(screen.getByTestId('custom-frequency-field')).toBeInTheDocument();
+    expect(screen.getByTestId('byweekday-field')).toBeInTheDocument();
+    expect(screen.queryByTestId('bymonth-field')).not.toBeInTheDocument();
   });
 
   it('renders byweekday field if custom frequency = weekly', async () => {
-    const result = appMockRenderer.render(
+    appMockRenderer = createAppMockRenderer();
+    appMockRenderer.render(
       <MockHookWrapperComponent>
         <CustomRecurringSchedule />
       </MockHookWrapperComponent>
     );
 
     fireEvent.change(
-      within(result.getByTestId('custom-frequency-field')).getByTestId(
+      within(screen.getByTestId('custom-frequency-field')).getByTestId(
         'customRecurringScheduleFrequencySelect'
       ),
       {
         target: { value: Frequency.WEEKLY },
       }
     );
-    await waitFor(() => expect(result.getByTestId('byweekday-field')).toBeInTheDocument());
+    await screen.findByTestId('byweekday-field');
   });
 
   it('renders byweekday field if frequency = daily', async () => {
+    appMockRenderer = createAppMockRenderer();
     const iv: FormProps = {
       ...initialValue,
       recurringSchedule: {
@@ -86,44 +88,46 @@ describe('CustomRecurringSchedule', () => {
         ends: EndsOptions.NEVER,
       },
     };
-    const result = appMockRenderer.render(
+    appMockRenderer.render(
       <MockHookWrapperComponent iv={iv}>
         <CustomRecurringSchedule />
       </MockHookWrapperComponent>
     );
 
-    expect(result.getByTestId('byweekday-field')).toBeInTheDocument();
+    expect(screen.getByTestId('byweekday-field')).toBeInTheDocument();
   });
 
   it('renders bymonth field if custom frequency = monthly', async () => {
-    const result = appMockRenderer.render(
+    appMockRenderer = createAppMockRenderer();
+    appMockRenderer.render(
       <MockHookWrapperComponent>
         <CustomRecurringSchedule />
       </MockHookWrapperComponent>
     );
 
     fireEvent.change(
-      within(result.getByTestId('custom-frequency-field')).getByTestId(
+      within(screen.getByTestId('custom-frequency-field')).getByTestId(
         'customRecurringScheduleFrequencySelect'
       ),
       {
         target: { value: Frequency.MONTHLY },
       }
     );
-    await waitFor(() => expect(result.getByTestId('bymonth-field')).toBeInTheDocument());
+    await screen.findByTestId('bymonth-field');
   });
 
   it('should initialize the form when no initialValue provided', () => {
-    const result = appMockRenderer.render(
+    appMockRenderer = createAppMockRenderer();
+    appMockRenderer.render(
       <MockHookWrapperComponent>
         <CustomRecurringSchedule />
       </MockHookWrapperComponent>
     );
 
-    const frequencyInput = within(result.getByTestId('custom-frequency-field')).getByTestId(
+    const frequencyInput = within(screen.getByTestId('custom-frequency-field')).getByTestId(
       'customRecurringScheduleFrequencySelect'
     );
-    const intervalInput = within(result.getByTestId('interval-field')).getByTestId(
+    const intervalInput = within(screen.getByTestId('interval-field')).getByTestId(
       'customRecurringScheduleIntervalInput'
     );
 
@@ -132,6 +136,7 @@ describe('CustomRecurringSchedule', () => {
   });
 
   it('should prefill the form when provided with initialValue', () => {
+    appMockRenderer = createAppMockRenderer();
     const iv: FormProps = {
       ...initialValue,
       recurringSchedule: {
@@ -142,22 +147,22 @@ describe('CustomRecurringSchedule', () => {
         byweekday: { 1: false, 2: false, 3: true, 4: true, 5: false, 6: false, 7: false },
       },
     };
-    const result = appMockRenderer.render(
+    appMockRenderer.render(
       <MockHookWrapperComponent iv={iv}>
         <CustomRecurringSchedule />
       </MockHookWrapperComponent>
     );
 
-    const frequencyInput = within(result.getByTestId('custom-frequency-field')).getByTestId(
+    const frequencyInput = within(screen.getByTestId('custom-frequency-field')).getByTestId(
       'customRecurringScheduleFrequencySelect'
     );
-    const intervalInput = within(result.getByTestId('interval-field')).getByTestId(
+    const intervalInput = within(screen.getByTestId('interval-field')).getByTestId(
       'customRecurringScheduleIntervalInput'
     );
-    const input3 = within(result.getByTestId('byweekday-field'))
+    const input3 = within(screen.getByTestId('byweekday-field'))
       .getByTestId('isoWeekdays3')
       .getAttribute('aria-pressed');
-    const input4 = within(result.getByTestId('byweekday-field'))
+    const input4 = within(screen.getByTestId('byweekday-field'))
       .getByTestId('isoWeekdays4')
       .getAttribute('aria-pressed');
     expect(frequencyInput).toHaveValue('2');

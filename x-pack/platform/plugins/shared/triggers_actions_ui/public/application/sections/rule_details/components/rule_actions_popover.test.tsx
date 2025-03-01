@@ -232,9 +232,9 @@ describe('rule_actions_popover', () => {
     expect(actionButton).toBeInTheDocument();
     fireEvent.click(actionButton);
 
-    expect(screen.getByText('Delete rule').closest('button')).toBeDisabled();
-    expect(screen.getByText('Update API key').closest('button')).toBeDisabled();
-    expect(screen.getByText('Disable').closest('button')).toBeDisabled();
-    expect(screen.getByText('Run rule').closest('button')).toBeDisabled();
+    expect(screen.getByRole('button', { name: /delete rule/i })).toBeDisabled();
+    expect(screen.getByRole('button', { name: /update api key/i })).toBeDisabled();
+    expect(screen.getByRole('button', { name: /disable/i })).toBeDisabled();
+    expect(screen.getByRole('button', { name: /run rule/i })).toBeDisabled();
   });
 });

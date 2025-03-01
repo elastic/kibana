@@ -81,14 +81,14 @@ describe('useBulkGetCasesQuery', () => {
       wrapper,
     });
 
+    expect(spy).toHaveBeenCalledWith(
+      expect.anything(),
+      {
+        ids: ['case-1'],
+      },
+      expect.any(AbortSignal)
+    );
     await waitFor(() => {
-      expect(spy).toHaveBeenCalledWith(
-        expect.anything(),
-        {
-          ids: ['case-1'],
-        },
-        expect.any(AbortSignal)
-      );
       expect(notifications.toasts.addError).toHaveBeenCalled();
     });
   });

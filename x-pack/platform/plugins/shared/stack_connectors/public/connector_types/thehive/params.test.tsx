@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { fireEvent, render } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import { ActionConnector } from '@kbn/triggers-actions-ui-plugin/public/types';
 import TheHiveParamsFields from './params';
 import { SUB_ACTION } from '../../../common/thehive/constants';
@@ -54,15 +54,15 @@ describe('TheHiveParamsFields renders', () => {
   });
 
   it('all Params fields is rendered', () => {
-    const { getByTestId } = render(<TheHiveParamsFields {...defaultProps} />);
+    render(<TheHiveParamsFields {...defaultProps} />);
 
-    expect(getByTestId('eventActionSelect')).toBeInTheDocument();
-    expect(getByTestId('eventActionSelect')).toHaveValue(SUB_ACTION.PUSH_TO_SERVICE);
+    expect(screen.getByTestId('eventActionSelect')).toBeInTheDocument();
+    expect(screen.getByTestId('eventActionSelect')).toHaveValue(SUB_ACTION.PUSH_TO_SERVICE);
   });
 
   it('calls editAction function with the correct arguments', () => {
-    const { getByTestId } = render(<TheHiveParamsFields {...defaultProps} />);
-    const eventActionEl = getByTestId('eventActionSelect');
+    render(<TheHiveParamsFields {...defaultProps} />);
+    const eventActionEl = screen.getByTestId('eventActionSelect');
 
     fireEvent.change(eventActionEl, { target: { value: SUB_ACTION.CREATE_ALERT } });
     expect(editAction).toHaveBeenCalledWith(

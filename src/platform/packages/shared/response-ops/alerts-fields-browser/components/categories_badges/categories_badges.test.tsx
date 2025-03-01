@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { render } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import React from 'react';
 import { CategoriesBadges, CategoriesBadgesProps } from './categories_badges';
 
@@ -26,26 +26,26 @@ describe('CategoriesBadges', () => {
   });
 
   it('should render empty badges', () => {
-    const result = renderComponent();
+    renderComponent();
 
-    const badges = result.getByTestId('category-badges');
+    const badges = screen.getByTestId('category-badges');
     expect(badges).toBeInTheDocument();
     expect(badges.childNodes.length).toBe(0);
   });
 
   it('should render the selector button with selected categories', () => {
-    const result = renderComponent({ selectedCategoryIds: ['base', 'event'] });
+    renderComponent({ selectedCategoryIds: ['base', 'event'] });
 
-    const badges = result.getByTestId('category-badges');
+    const badges = screen.getByTestId('category-badges');
     expect(badges.childNodes.length).toBe(2);
-    expect(result.getByTestId('category-badge-base')).toBeInTheDocument();
-    expect(result.getByTestId('category-badge-event')).toBeInTheDocument();
+    expect(screen.getByTestId('category-badge-base')).toBeInTheDocument();
+    expect(screen.getByTestId('category-badge-event')).toBeInTheDocument();
   });
 
   it('should call the set selected callback when badge unselect button clicked', () => {
-    const result = renderComponent({ selectedCategoryIds: ['base', 'event'] });
+    renderComponent({ selectedCategoryIds: ['base', 'event'] });
 
-    result.getByTestId('category-badge-unselect-base').click();
+    screen.getByTestId('category-badge-unselect-base').click();
     expect(mockSetSelectedCategoryIds).toHaveBeenCalledWith(['event']);
   });
 });

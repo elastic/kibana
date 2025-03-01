@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import { uiSettingsServiceMock } from '@kbn/core/public/mocks';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { AlertSummaryWidget } from './alert_summary_widget';
@@ -62,26 +62,22 @@ describe('AlertSummaryWidget', () => {
     );
 
   it('should render AlertSummaryWidget compact version', async () => {
-    const alertSummaryWidget = renderComponent();
+    renderComponent();
 
-    expect(alertSummaryWidget.queryByTestId('alertSummaryWidgetCompact')).toBeTruthy();
+    expect(screen.getByTestId('alertSummaryWidgetCompact')).toBeTruthy();
   });
 
   it('should render AlertSummaryWidget full-size version', async () => {
-    const alertSummaryWidget = renderComponent({ fullSize: true });
+    renderComponent({ fullSize: true });
 
-    expect(alertSummaryWidget.queryByTestId('alertSummaryWidgetFullSize')).toBeTruthy();
+    expect(screen.getByTestId('alertSummaryWidgetFullSize')).toBeTruthy();
   });
 
   it('should render counts and title correctly', async () => {
-    const alertSummaryWidget = renderComponent();
-    expect(alertSummaryWidget.queryByTestId(ACTIVE_ALERT_COUNT_DATA_TEST_SUBJ)).toHaveTextContent(
-      '1'
-    );
-    expect(alertSummaryWidget.queryByTestId(TOTAL_ALERT_COUNT_DATA_TEST_SUBJ)).toHaveTextContent(
-      '8'
-    );
-    expect(alertSummaryWidget.queryByTestId(TITLE_DATA_TEST_SUBJ)).toBeTruthy();
+    renderComponent();
+    expect(screen.queryByTestId(ACTIVE_ALERT_COUNT_DATA_TEST_SUBJ)).toHaveTextContent('1');
+    expect(screen.queryByTestId(TOTAL_ALERT_COUNT_DATA_TEST_SUBJ)).toHaveTextContent('8');
+    expect(screen.getByTestId(TITLE_DATA_TEST_SUBJ)).toBeTruthy();
   });
 
   it('should render AlertSummaryWidget when there is only active alerts', async () => {
@@ -93,9 +89,9 @@ describe('AlertSummaryWidget', () => {
       },
       isLoading: false,
     }));
-    const alertSummaryWidget = renderComponent();
+    renderComponent();
 
-    expect(alertSummaryWidget.queryByTestId('alertSummaryWidgetCompact')).toBeTruthy();
+    expect(screen.getByTestId('alertSummaryWidgetCompact')).toBeTruthy();
   });
 
   it('should render AlertSummaryWidget compact version even when there is no active and recovered alerts', async () => {
@@ -107,9 +103,9 @@ describe('AlertSummaryWidget', () => {
       },
       isLoading: false,
     }));
-    const alertSummaryWidget = renderComponent();
+    renderComponent();
 
-    expect(alertSummaryWidget.queryByTestId('alertSummaryWidgetCompact')).toBeTruthy();
+    expect(screen.getByTestId('alertSummaryWidgetCompact')).toBeTruthy();
   });
 
   it('should not render AlertSummaryWidget full-size version when there is no active and recovered alerts', async () => {
@@ -121,9 +117,9 @@ describe('AlertSummaryWidget', () => {
       },
       isLoading: false,
     }));
-    const alertSummaryWidget = renderComponent({ fullSize: true });
+    renderComponent({ fullSize: true });
 
-    expect(alertSummaryWidget.queryByTestId('alertSummaryWidgetFullSzie')).toBeFalsy();
+    expect(screen.queryByTestId('alertSummaryWidgetFullSzie')).toBeFalsy();
   });
 
   it('should render AlertSummaryWidgetError when API call fails', async () => {
@@ -136,9 +132,9 @@ describe('AlertSummaryWidget', () => {
       isLoading: false,
       error: 'Fetch Alert Summary Failed',
     }));
-    const alertSummaryWidget = renderComponent();
+    renderComponent();
 
-    expect(alertSummaryWidget.queryByTestId('alertSummaryWidgetError')).toBeTruthy();
+    expect(screen.getByTestId('alertSummaryWidgetError')).toBeTruthy();
   });
 
   it('should render AlertSummaryWidget loading when API is loading', async () => {
@@ -150,8 +146,8 @@ describe('AlertSummaryWidget', () => {
       },
       isLoading: true,
     }));
-    const alertSummaryWidget = renderComponent();
+    renderComponent();
 
-    expect(alertSummaryWidget.queryByTestId('alertSummaryWidgetLoading')).toBeTruthy();
+    expect(screen.getByTestId('alertSummaryWidgetLoading')).toBeTruthy();
   });
 });

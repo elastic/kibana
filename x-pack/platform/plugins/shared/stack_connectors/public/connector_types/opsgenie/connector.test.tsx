@@ -8,7 +8,7 @@
 import React from 'react';
 import OpsgenieConnectorFields from './connector';
 import { ConnectorFormTestProvider } from '../lib/test_utils';
-import { act, screen, render, waitFor } from '@testing-library/react';
+import { screen, render, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
 jest.mock('@kbn/triggers-actions-ui-plugin/public/common/lib/kibana');
@@ -81,7 +81,7 @@ describe('OpsgenieConnectorFields renders', () => {
     ];
 
     it('connector validation succeeds when connector config is valid', async () => {
-      const { getByTestId } = render(
+      render(
         <ConnectorFormTestProvider connector={actionConnector} onSubmit={onSubmit}>
           <OpsgenieConnectorFields
             readOnly={false}
@@ -91,11 +91,9 @@ describe('OpsgenieConnectorFields renders', () => {
         </ConnectorFormTestProvider>
       );
 
-      await act(async () => {
-        await userEvent.click(getByTestId('form-test-provide-submit'));
-      });
+      await userEvent.click(screen.getByTestId('form-test-provide-submit'));
 
-      waitFor(() => {
+      await waitFor(() => {
         expect(onSubmit).toBeCalledWith({
           data: {
             actionTypeId: '.opsgenie',
@@ -114,7 +112,7 @@ describe('OpsgenieConnectorFields renders', () => {
     });
 
     it.each(tests)('validates correctly %p', async (field, value) => {
-      const res = render(
+      render(
         <ConnectorFormTestProvider connector={actionConnector} onSubmit={onSubmit}>
           <OpsgenieConnectorFields
             readOnly={false}
@@ -124,14 +122,14 @@ describe('OpsgenieConnectorFields renders', () => {
         </ConnectorFormTestProvider>
       );
 
-      await userEvent.clear(res.getByTestId(field));
+      await userEvent.clear(screen.getByTestId(field));
       if (value !== '') {
-        await userEvent.type(res.getByTestId(field), value, {
+        await userEvent.type(screen.getByTestId(field), value, {
           delay: 10,
         });
       }
 
-      await userEvent.click(res.getByTestId('form-test-provide-submit'));
+      await userEvent.click(screen.getByTestId('form-test-provide-submit'));
 
       expect(onSubmit).toHaveBeenCalledWith({ data: {}, isValid: false });
     });

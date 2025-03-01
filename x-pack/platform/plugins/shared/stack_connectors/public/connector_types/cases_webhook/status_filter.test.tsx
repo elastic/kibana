@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { CaseStatuses } from '@kbn/cases-components';
-import { fireEvent, render } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import { caseStatuses, statuses, StatusFilter } from './status_filter';
 const onStatusChanged = jest.fn();
 const defaultProps = {
@@ -19,14 +19,14 @@ describe('StatusFilter', () => {
     jest.clearAllMocks();
   });
   it('should render EuiSuperSelect with correct options and selected value', () => {
-    const { getByTestId, getAllByRole } = render(<StatusFilter {...defaultProps} />);
+    render(<StatusFilter {...defaultProps} />);
 
-    const superSelect = getByTestId('case-status-filter');
+    const superSelect = screen.getByTestId('case-status-filter');
 
     expect(superSelect).toBeInTheDocument();
     expect(superSelect).toHaveTextContent('Open');
     fireEvent.click(superSelect);
-    const options = getAllByRole('option');
+    const options = screen.getAllByRole('option');
     expect(options).toHaveLength(caseStatuses.length);
     options.forEach((option, index) => {
       expect(option).toHaveTextContent(statuses[caseStatuses[index]].label);
@@ -34,11 +34,11 @@ describe('StatusFilter', () => {
   });
 
   it('should call onStatusChanged with selected status when an option is clicked', () => {
-    const { getByTestId } = render(<StatusFilter {...defaultProps} />);
+    render(<StatusFilter {...defaultProps} />);
 
-    const superSelect = getByTestId('case-status-filter');
+    const superSelect = screen.getByTestId('case-status-filter');
     fireEvent.click(superSelect);
-    const option = getByTestId(`case-status-filter-${CaseStatuses.closed}`);
+    const option = screen.getByTestId(`case-status-filter-${CaseStatuses.closed}`);
     fireEvent.click(option);
 
     expect(onStatusChanged).toHaveBeenCalledWith(CaseStatuses.closed);

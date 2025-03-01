@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { I18nProvider } from '@kbn/i18n-react';
-import { render } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import { ReadOnlyConnectorMessage } from './read_only';
 import { ActionTypeModel } from '../../../..';
 
@@ -16,7 +16,7 @@ const ExtraComponent = jest.fn(() => (
 )) as unknown as ActionTypeModel['actionReadOnlyExtraComponent'];
 describe('ReadOnlyConnectorMessage', () => {
   it('should render a readonly message with a link to the provided href', () => {
-    const { getByTestId, getByText, queryByText } = render(
+    render(
       <ReadOnlyConnectorMessage
         connectorId="123"
         connectorName="Test Connector"
@@ -25,13 +25,13 @@ describe('ReadOnlyConnectorMessage', () => {
       { wrapper: I18nProvider }
     );
 
-    expect(getByText('This connector is read-only.')).toBeInTheDocument();
-    expect(getByTestId('read-only-link')).toHaveProperty('href', 'https://example.com/');
-    expect(queryByText('Extra Component')).toBeNull();
+    expect(screen.getByText('This connector is read-only.')).toBeInTheDocument();
+    expect(screen.getByTestId('read-only-link')).toHaveProperty('href', 'https://example.com/');
+    expect(screen.queryByText('Extra Component')).toBeNull();
   });
 
   it('should render an extra component if provided', () => {
-    const { getByText } = render(
+    render(
       <ReadOnlyConnectorMessage
         connectorId="123"
         connectorName="Test Connector"
@@ -41,6 +41,6 @@ describe('ReadOnlyConnectorMessage', () => {
       { wrapper: I18nProvider }
     );
 
-    expect(getByText('Extra Component')).toBeInTheDocument();
+    expect(screen.getByText('Extra Component')).toBeInTheDocument();
   });
 });

@@ -7,7 +7,7 @@
 
 import React, { FC, PropsWithChildren } from 'react';
 import { Frequency } from '@kbn/rrule';
-import { fireEvent, within } from '@testing-library/react';
+import { fireEvent, within, screen } from '@testing-library/react';
 import { useForm, Form } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { AppMockRenderer, createAppMockRenderer } from '../../../../lib/test_utils';
 import { FormProps, schema } from '../schema';
@@ -40,60 +40,63 @@ describe('RecurringSchedule', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    appMockRenderer = createAppMockRenderer();
   });
 
   it('renders all form fields', async () => {
-    const result = appMockRenderer.render(
+    appMockRenderer = createAppMockRenderer();
+    appMockRenderer.render(
       <MockHookWrapperComponent>
         <RecurringSchedule />
       </MockHookWrapperComponent>
     );
 
-    expect(result.getByTestId('frequency-field')).toBeInTheDocument();
-    expect(result.queryByTestId('custom-recurring-form')).not.toBeInTheDocument();
-    expect(result.getByTestId('ends-field')).toBeInTheDocument();
-    expect(result.queryByTestId('until-field')).not.toBeInTheDocument();
-    expect(result.queryByTestId('count-field')).not.toBeInTheDocument();
+    expect(screen.getByTestId('frequency-field')).toBeInTheDocument();
+    expect(screen.queryByTestId('custom-recurring-form')).not.toBeInTheDocument();
+    expect(screen.getByTestId('ends-field')).toBeInTheDocument();
+    expect(screen.queryByTestId('until-field')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('count-field')).not.toBeInTheDocument();
   });
 
   it('renders until field if ends = on_date', async () => {
-    const result = appMockRenderer.render(
+    appMockRenderer = createAppMockRenderer();
+    appMockRenderer.render(
       <MockHookWrapperComponent>
         <RecurringSchedule />
       </MockHookWrapperComponent>
     );
 
-    const btn = within(result.getByTestId('ends-field')).getByTestId('recurrenceEndOptionOnDate');
+    const btn = within(screen.getByTestId('ends-field')).getByTestId('recurrenceEndOptionOnDate');
 
     fireEvent.click(btn);
-    expect(result.getByTestId('until-field')).toBeInTheDocument();
+    expect(screen.getByTestId('until-field')).toBeInTheDocument();
   });
 
   it('renders until field if ends = after_x', async () => {
-    const result = appMockRenderer.render(
+    appMockRenderer = createAppMockRenderer();
+    appMockRenderer.render(
       <MockHookWrapperComponent>
         <RecurringSchedule />
       </MockHookWrapperComponent>
     );
 
-    const btn = within(result.getByTestId('ends-field')).getByTestId('recurrenceEndOptionAfterX');
+    const btn = within(screen.getByTestId('ends-field')).getByTestId('recurrenceEndOptionAfterX');
 
     fireEvent.click(btn);
-    expect(result.getByTestId('count-field')).toBeInTheDocument();
+    expect(screen.getByTestId('count-field')).toBeInTheDocument();
   });
 
   it('should initialize the form when no initialValue provided', () => {
-    const result = appMockRenderer.render(
+    appMockRenderer = createAppMockRenderer();
+    appMockRenderer.render(
       <MockHookWrapperComponent>
         <RecurringSchedule />
       </MockHookWrapperComponent>
     );
 
-    const frequencyInput = within(result.getByTestId('frequency-field')).getByTestId(
+    const frequencyInput = within(screen.getByTestId('frequency-field')).getByTestId(
       'recurringScheduleRepeatSelect'
     );
-    const endsInput = within(result.getByTestId('ends-field')).getByTestId(
+    const endsInput = within(screen.getByTestId('ends-field')).getByTestId(
       'recurrenceEndOptionNever'
     );
 
@@ -102,6 +105,7 @@ describe('RecurringSchedule', () => {
   });
 
   it('should prefill the form when provided with initialValue', () => {
+    appMockRenderer = createAppMockRenderer();
     const iv: FormProps = {
       ...initialValue,
       recurringSchedule: {
@@ -110,19 +114,19 @@ describe('RecurringSchedule', () => {
         until: '2023-03-24',
       },
     };
-    const result = appMockRenderer.render(
+    appMockRenderer.render(
       <MockHookWrapperComponent iv={iv}>
         <RecurringSchedule />
       </MockHookWrapperComponent>
     );
 
-    const frequencyInput = within(result.getByTestId('frequency-field')).getByTestId(
+    const frequencyInput = within(screen.getByTestId('frequency-field')).getByTestId(
       'recurringScheduleRepeatSelect'
     );
-    const endsInput = within(result.getByTestId('ends-field')).getByTestId(
+    const endsInput = within(screen.getByTestId('ends-field')).getByTestId(
       'recurrenceEndOptionOnDate'
     );
-    const untilInput = within(result.getByTestId('until-field')).getByLabelText(
+    const untilInput = within(screen.getByTestId('until-field')).getByLabelText(
       // using the aria-label to query for the date-picker input
       'Press the down key to open a popover containing a calendar.'
     );

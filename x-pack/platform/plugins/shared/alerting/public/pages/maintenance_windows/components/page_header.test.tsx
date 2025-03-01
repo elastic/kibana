@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-
+import { screen } from '@testing-library/react';
 import { PageHeader } from './page_header';
 import { AppMockRenderer, createAppMockRenderer } from '../../../lib/test_utils';
 
@@ -15,33 +15,34 @@ describe('PageHeader', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    appMockRenderer = createAppMockRenderer();
   });
 
   test('it renders', () => {
-    const result = appMockRenderer.render(
-      <PageHeader title="Test title" description="test description" />
-    );
+    appMockRenderer = createAppMockRenderer();
+    appMockRenderer.render(<PageHeader title="Test title" description="test description" />);
 
-    expect(result.getByText('Test title')).toBeInTheDocument();
-    expect(result.getByText('test description')).toBeInTheDocument();
+    expect(screen.getByText('Test title')).toBeInTheDocument();
+    expect(screen.getByText('test description')).toBeInTheDocument();
   });
 
   test('it does not render the description when not provided', () => {
-    const result = appMockRenderer.render(<PageHeader title="Test title" />);
+    appMockRenderer = createAppMockRenderer();
+    appMockRenderer.render(<PageHeader title="Test title" />);
 
-    expect(result.queryByTestId('description')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('description')).not.toBeInTheDocument();
   });
 
   test('it renders the back link when provided', () => {
-    const result = appMockRenderer.render(<PageHeader showBackButton title="Test title" />);
+    appMockRenderer = createAppMockRenderer();
+    appMockRenderer.render(<PageHeader showBackButton title="Test title" />);
 
-    expect(result.getByTestId('link-back')).toBeInTheDocument();
+    expect(screen.getByTestId('link-back')).toBeInTheDocument();
   });
 
   test('it does not render the back link when not provided', () => {
-    const result = appMockRenderer.render(<PageHeader title="Test title" />);
+    appMockRenderer = createAppMockRenderer();
+    appMockRenderer.render(<PageHeader title="Test title" />);
 
-    expect(result.queryByTestId('link-back')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('link-back')).not.toBeInTheDocument();
   });
 });

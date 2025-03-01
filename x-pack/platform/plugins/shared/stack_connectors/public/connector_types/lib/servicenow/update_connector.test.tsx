@@ -11,7 +11,7 @@ import userEvent from '@testing-library/user-event';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { Props, UpdateConnector } from './update_connector';
 import { act } from 'react-dom/test-utils';
-import { render, act as reactAct, waitFor } from '@testing-library/react';
+import { render, act as reactAct, waitFor, screen } from '@testing-library/react';
 
 jest.mock('@kbn/triggers-actions-ui-plugin/public/common/lib/kibana');
 
@@ -219,7 +219,7 @@ describe('UpdateConnector renders', () => {
   it('should confirm the update when submit button clicked', async () => {
     const onConfirm = jest.fn();
 
-    const { getByTestId } = render(
+    render(
       <I18nProvider>
         <UpdateConnector
           actionTypeId=".servicenow"
@@ -236,14 +236,14 @@ describe('UpdateConnector renders', () => {
     expect(onConfirm).not.toHaveBeenCalled();
 
     await reactAct(async () => {
-      const urlInput = getByTestId('credentialsApiUrlFromInput');
-      const usernameInput = getByTestId('connector-servicenow-username-form-input');
-      const passwordInput = getByTestId('connector-servicenow-password-form-input');
+      const urlInput = screen.getByTestId('credentialsApiUrlFromInput');
+      const usernameInput = screen.getByTestId('connector-servicenow-username-form-input');
+      const passwordInput = screen.getByTestId('connector-servicenow-password-form-input');
 
       await userEvent.type(urlInput, 'https://example.com', { delay: 100 });
       await userEvent.type(usernameInput, 'user', { delay: 100 });
       await userEvent.type(passwordInput, 'pass', { delay: 100 });
-      await userEvent.click(getByTestId('snUpdateInstallationSubmit'));
+      await userEvent.click(screen.getByTestId('snUpdateInstallationSubmit'));
     });
 
     // Wait for click event to be processed

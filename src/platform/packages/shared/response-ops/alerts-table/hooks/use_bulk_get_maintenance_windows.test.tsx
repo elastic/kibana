@@ -206,11 +206,11 @@ describe('useBulkGetMaintenanceWindowsQuery', () => {
     );
 
     await waitFor(() => {
-      expect(spy).toHaveBeenCalledWith({
-        http: expect.anything(),
-        ids: ['test-id'],
-      });
       expect(addErrorMock).toHaveBeenCalled();
+    });
+    expect(spy).toHaveBeenCalledWith({
+      http: expect.anything(),
+      ids: ['test-id'],
     });
   });
 });

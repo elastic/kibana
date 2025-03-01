@@ -8,14 +8,7 @@ import * as React from 'react';
 import { IToasts } from '@kbn/core/public';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
-import {
-  render,
-  screen,
-  waitForElementToBeRemoved,
-  fireEvent,
-  act,
-  cleanup,
-} from '@testing-library/react';
+import { render, screen, waitForElementToBeRemoved, fireEvent } from '@testing-library/react';
 import { actionTypeRegistryMock } from '../../../action_type_registry.mock';
 import { ruleTypeRegistryMock } from '../../../rule_type_registry.mock';
 import { RulesList } from './rules_list';
@@ -156,11 +149,9 @@ describe.skip('Rules list Bulk Delete', () => {
   afterEach(() => {
     jest.clearAllMocks();
     queryClient.clear();
-    cleanup();
   });
 
   beforeEach(async () => {
-    renderWithProviders(<RulesList />);
     await waitForElementToBeRemoved(() => screen.queryByTestId('centerJustifiedSpinner'));
 
     fireEvent.click(screen.getByTestId('checkboxSelectRow-1'));
@@ -170,11 +161,10 @@ describe.skip('Rules list Bulk Delete', () => {
   });
 
   it('should Bulk Delete', async () => {
+    renderWithProviders(<RulesList />);
     fireEvent.click(screen.getByTestId('bulkDelete'));
     expect(screen.getByTestId('rulesDeleteConfirmation')).toBeInTheDocument();
-    await act(async () => {
-      fireEvent.click(screen.getByTestId('confirmModalConfirmButton'));
-    });
+    fireEvent.click(screen.getByTestId('confirmModalConfirmButton'));
 
     const filter = bulkDeleteRules.mock.calls[0][0].filter;
 
@@ -192,15 +182,16 @@ describe.skip('Rules list Bulk Delete', () => {
   });
 
   it('should cancel Bulk Delete', async () => {
+    renderWithProviders(<RulesList />);
     fireEvent.click(screen.getByTestId('bulkDelete'));
     expect(screen.getByTestId('rulesDeleteConfirmation')).toBeInTheDocument();
-    await act(async () => {
-      fireEvent.click(screen.getByTestId('confirmModalCancelButton'));
-    });
+    fireEvent.click(screen.getByTestId('confirmModalCancelButton'));
+
     expect(bulkDeleteRules).not.toBeCalled();
   });
 
   it('should have warning toast message after Bulk Delete', async () => {
+    renderWithProviders(<RulesList />);
     bulkDeleteRules.mockResolvedValue({
       errors: [
         {
@@ -216,9 +207,7 @@ describe.skip('Rules list Bulk Delete', () => {
 
     fireEvent.click(screen.getByTestId('bulkDelete'));
     expect(screen.getByTestId('rulesDeleteConfirmation')).toBeInTheDocument();
-    await act(async () => {
-      fireEvent.click(screen.getByTestId('confirmModalConfirmButton'));
-    });
+    fireEvent.click(screen.getByTestId('confirmModalConfirmButton'));
 
     expect(useKibanaMock().services.notifications.toasts.addWarning).toHaveBeenCalledTimes(1);
     expect(useKibanaMock().services.notifications.toasts.addWarning).toHaveBeenCalledWith(
@@ -229,6 +218,7 @@ describe.skip('Rules list Bulk Delete', () => {
   });
 
   it('should have danger toast message after Bulk Delete', async () => {
+    renderWithProviders(<RulesList />);
     bulkDeleteRules.mockResolvedValue({
       errors: [
         {
@@ -244,9 +234,7 @@ describe.skip('Rules list Bulk Delete', () => {
 
     fireEvent.click(screen.getByTestId('bulkDelete'));
     expect(screen.getByTestId('rulesDeleteConfirmation')).toBeInTheDocument();
-    await act(async () => {
-      fireEvent.click(screen.getByTestId('confirmModalConfirmButton'));
-    });
+    fireEvent.click(screen.getByTestId('confirmModalConfirmButton'));
 
     expect(useKibanaMock().services.notifications.toasts.addDanger).toHaveBeenCalledTimes(1);
     expect(useKibanaMock().services.notifications.toasts.addDanger).toHaveBeenCalledWith(

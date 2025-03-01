@@ -6,12 +6,12 @@
  */
 import * as React from 'react';
 import {
-  act,
   render,
   screen,
-  cleanup,
   waitForElementToBeRemoved,
   fireEvent,
+  waitFor,
+  within,
 } from '@testing-library/react';
 import { IToasts } from '@kbn/core/public';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
@@ -164,10 +164,10 @@ describe('Rules list Bulk Enable', () => {
   afterEach(() => {
     jest.clearAllMocks();
     queryClient.clear();
-    cleanup();
   });
 
   beforeEach(async () => {
+    // eslint-disable-next-line testing-library/no-render-in-lifecycle
     renderWithProviders(<RulesList />);
     await waitForElementToBeRemoved(() => screen.queryByTestId('centerJustifiedSpinner'));
 
@@ -178,10 +178,18 @@ describe('Rules list Bulk Enable', () => {
   });
 
   it('can bulk enable', async () => {
-    await act(async () => {
-      fireEvent.click(screen.getByTestId('bulkEnable'));
-    });
+    fireEvent.click(screen.getByTestId('bulkEnable'));
+
     const filter = bulkEnableRules.mock.calls[0][0].filter;
+
+    await waitFor(() => {
+      const rows = screen.getAllByRole('row');
+      const row = rows.find((r) => {
+        const checkbox = within(r).queryByTestId('checkboxSelectRow-1');
+        return checkbox !== null;
+      });
+      expect(row).not.toHaveClass('euiTableRow-isSelected');
+    });
 
     expect(filter.function).toEqual('and');
     expect(filter.arguments[0].function).toEqual('or');
@@ -194,19 +202,18 @@ describe('Rules list Bulk Enable', () => {
         ids: [],
       })
     );
-    expect(screen.getByTestId('checkboxSelectRow-1').closest('tr')).not.toHaveClass(
-      'euiTableRow-isSelected'
-    );
+
     expect(screen.queryByTestId('bulkEnable')).not.toBeInTheDocument();
   });
 
   describe('Toast', () => {
     it('should have success toast message', async () => {
-      await act(async () => {
-        fireEvent.click(screen.getByTestId('bulkEnable'));
+      fireEvent.click(screen.getByTestId('bulkEnable'));
+
+      await waitFor(() => {
+        expect(useKibanaMock().services.notifications.toasts.addSuccess).toHaveBeenCalledTimes(1);
       });
 
-      expect(useKibanaMock().services.notifications.toasts.addSuccess).toHaveBeenCalledTimes(1);
       expect(useKibanaMock().services.notifications.toasts.addSuccess).toHaveBeenCalledWith(
         'Enabled 10 rules'
       );
@@ -226,11 +233,12 @@ describe('Rules list Bulk Enable', () => {
         total: 10,
       });
 
-      await act(async () => {
-        fireEvent.click(screen.getByTestId('bulkEnable'));
+      fireEvent.click(screen.getByTestId('bulkEnable'));
+
+      await waitFor(() => {
+        expect(useKibanaMock().services.notifications.toasts.addWarning).toHaveBeenCalledTimes(1);
       });
 
-      expect(useKibanaMock().services.notifications.toasts.addWarning).toHaveBeenCalledTimes(1);
       expect(useKibanaMock().services.notifications.toasts.addWarning).toHaveBeenCalledWith(
         expect.objectContaining({
           title: 'Enabled 9 rules, 1 rule encountered errors',
@@ -252,11 +260,12 @@ describe('Rules list Bulk Enable', () => {
         total: 1,
       });
 
-      await act(async () => {
-        fireEvent.click(screen.getByTestId('bulkEnable'));
+      fireEvent.click(screen.getByTestId('bulkEnable'));
+
+      await waitFor(() => {
+        expect(useKibanaMock().services.notifications.toasts.addDanger).toHaveBeenCalledTimes(1);
       });
 
-      expect(useKibanaMock().services.notifications.toasts.addDanger).toHaveBeenCalledTimes(1);
       expect(useKibanaMock().services.notifications.toasts.addDanger).toHaveBeenCalledWith(
         expect.objectContaining({
           title: 'Failed to enable 1 rule',

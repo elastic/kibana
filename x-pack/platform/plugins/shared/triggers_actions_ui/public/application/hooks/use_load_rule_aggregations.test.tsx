@@ -86,20 +86,19 @@ describe('useLoadRuleAggregations', () => {
     );
 
     rerender();
-
+    expect(loadRuleAggregationsWithKueryFilter).toBeCalledWith(
+      expect.objectContaining({
+        searchText: '',
+        actionTypesFilter: [],
+        ruleExecutionStatusesFilter: [],
+        ruleLastRunOutcomesFilter: [],
+        ruleStatusesFilter: [],
+        tagsFilter: [],
+        ruleTypeIds: [],
+        consumers: [],
+      })
+    );
     await waitFor(() => {
-      expect(loadRuleAggregationsWithKueryFilter).toBeCalledWith(
-        expect.objectContaining({
-          searchText: '',
-          actionTypesFilter: [],
-          ruleExecutionStatusesFilter: [],
-          ruleLastRunOutcomesFilter: [],
-          ruleStatusesFilter: [],
-          tagsFilter: [],
-          ruleTypeIds: [],
-          consumers: [],
-        })
-      );
       expect(result.current.rulesStatusesTotal).toEqual(MOCK_AGGS.ruleExecutionStatus);
     });
   });
@@ -126,20 +125,19 @@ describe('useLoadRuleAggregations', () => {
     });
 
     rerender();
-
+    expect(loadRuleAggregationsWithKueryFilter).toBeCalledWith(
+      expect.objectContaining({
+        searchText: 'test',
+        actionTypesFilter: ['action1', 'action2'],
+        ruleExecutionStatusesFilter: ['status1', 'status2'],
+        ruleStatusesFilter: ['enabled', 'snoozed'] as RuleStatus[],
+        tagsFilter: ['tag1', 'tag2'],
+        ruleLastRunOutcomesFilter: ['outcome1', 'outcome2'],
+        ruleTypeIds: ['foo'],
+        consumers: ['bar'],
+      })
+    );
     await waitFor(() => {
-      expect(loadRuleAggregationsWithKueryFilter).toBeCalledWith(
-        expect.objectContaining({
-          searchText: 'test',
-          actionTypesFilter: ['action1', 'action2'],
-          ruleExecutionStatusesFilter: ['status1', 'status2'],
-          ruleStatusesFilter: ['enabled', 'snoozed'] as RuleStatus[],
-          tagsFilter: ['tag1', 'tag2'],
-          ruleLastRunOutcomesFilter: ['outcome1', 'outcome2'],
-          ruleTypeIds: ['foo'],
-          consumers: ['bar'],
-        })
-      );
       expect(result.current.rulesStatusesTotal).toEqual(MOCK_AGGS.ruleExecutionStatus);
     });
   });

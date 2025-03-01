@@ -8,7 +8,7 @@
  */
 
 import React from 'react';
-import { render, fireEvent } from '@testing-library/react';
+import { render, fireEvent, screen } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 
 import { Tooltip } from './tooltip';
@@ -40,7 +40,7 @@ const tooltipProps: CaseTooltipProps = {
 
 describe('Tooltip', () => {
   it('renders correctly', async () => {
-    const res = render(
+    render(
       <I18nProvider>
         <Tooltip {...tooltipProps}>
           <TestSpan />
@@ -48,12 +48,12 @@ describe('Tooltip', () => {
       </I18nProvider>
     );
 
-    fireEvent.mouseOver(res.getByTestId('sample-span'));
-    expect(await res.findByTestId('cases-components-tooltip')).toBeInTheDocument();
+    fireEvent.mouseOver(screen.getByTestId('sample-span'));
+    expect(await screen.findByTestId('cases-components-tooltip')).toBeInTheDocument();
   });
 
   it('renders custom test subject correctly', async () => {
-    const res = render(
+    render(
       <I18nProvider>
         <Tooltip {...tooltipProps} dataTestSubj="custom-data-test">
           <TestSpan />
@@ -61,12 +61,12 @@ describe('Tooltip', () => {
       </I18nProvider>
     );
 
-    fireEvent.mouseOver(res.getByTestId('sample-span'));
-    expect(await res.findByTestId('custom-data-test')).toBeInTheDocument();
+    fireEvent.mouseOver(screen.getByTestId('sample-span'));
+    expect(await screen.findByTestId('custom-data-test')).toBeInTheDocument();
   });
 
   it('renders loading state correctly', async () => {
-    const res = render(
+    render(
       <I18nProvider>
         <Tooltip {...tooltipProps} loading={true}>
           <TestSpan />
@@ -74,12 +74,12 @@ describe('Tooltip', () => {
       </I18nProvider>
     );
 
-    fireEvent.mouseOver(res.getByTestId('sample-span'));
-    expect(await res.findByTestId('tooltip-loading-content')).toBeInTheDocument();
+    fireEvent.mouseOver(screen.getByTestId('sample-span'));
+    expect(await screen.findByTestId('tooltip-loading-content')).toBeInTheDocument();
   });
 
   it('renders title correctly', async () => {
-    const res = render(
+    render(
       <I18nProvider>
         <Tooltip {...tooltipProps}>
           <TestSpan />
@@ -87,12 +87,12 @@ describe('Tooltip', () => {
       </I18nProvider>
     );
 
-    fireEvent.mouseOver(res.getByTestId('sample-span'));
-    expect(await res.findByText(tooltipContent.title)).toBeInTheDocument();
+    fireEvent.mouseOver(screen.getByTestId('sample-span'));
+    expect(await screen.findByText(tooltipContent.title)).toBeInTheDocument();
   });
 
   it('renders description correctly', async () => {
-    const res = render(
+    render(
       <I18nProvider>
         <Tooltip {...tooltipProps}>
           <TestSpan />
@@ -100,12 +100,12 @@ describe('Tooltip', () => {
       </I18nProvider>
     );
 
-    fireEvent.mouseOver(res.getByTestId('sample-span'));
-    expect(await res.findByText(tooltipContent.description)).toBeInTheDocument();
+    fireEvent.mouseOver(screen.getByTestId('sample-span'));
+    expect(await screen.findByText(tooltipContent.description)).toBeInTheDocument();
   });
 
   it('renders icon', async () => {
-    const res = render(
+    render(
       <I18nProvider>
         <Tooltip {...tooltipProps}>
           <TestSpan />
@@ -113,12 +113,12 @@ describe('Tooltip', () => {
       </I18nProvider>
     );
 
-    fireEvent.mouseOver(res.getByTestId('sample-span'));
-    expect(await res.findByTestId('comment-count-icon')).toBeInTheDocument();
+    fireEvent.mouseOver(screen.getByTestId('sample-span'));
+    expect(await screen.findByTestId('comment-count-icon')).toBeInTheDocument();
   });
 
   it('renders comment count', async () => {
-    const res = render(
+    render(
       <I18nProvider>
         <Tooltip {...tooltipProps}>
           <TestSpan />
@@ -126,12 +126,12 @@ describe('Tooltip', () => {
       </I18nProvider>
     );
 
-    fireEvent.mouseOver(res.getByTestId('sample-span'));
-    expect(await res.findByText(tooltipContent.totalComments)).toBeInTheDocument();
+    fireEvent.mouseOver(screen.getByTestId('sample-span'));
+    expect(await screen.findByText(tooltipContent.totalComments)).toBeInTheDocument();
   });
 
   it('renders correct status', async () => {
-    const res = render(
+    render(
       <I18nProvider>
         <Tooltip {...tooltipProps} content={{ ...tooltipContent, status: CaseStatuses.closed }}>
           <TestSpan />
@@ -139,8 +139,8 @@ describe('Tooltip', () => {
       </I18nProvider>
     );
 
-    fireEvent.mouseOver(res.getByTestId('sample-span'));
-    expect(await res.findByText('Closed')).toBeInTheDocument();
+    fireEvent.mouseOver(screen.getByTestId('sample-span'));
+    expect(await screen.findByText('Closed')).toBeInTheDocument();
   });
 
   it('renders full name when no username available', async () => {
@@ -148,7 +148,7 @@ describe('Tooltip', () => {
       fullName: 'New User',
     };
 
-    const res = render(
+    render(
       <I18nProvider>
         <Tooltip {...tooltipProps} content={{ ...tooltipContent, createdBy: newUser }}>
           <TestSpan />
@@ -156,13 +156,13 @@ describe('Tooltip', () => {
       </I18nProvider>
     );
 
-    fireEvent.mouseOver(res.getByTestId('sample-span'));
-    expect(await res.findByTestId('tooltip-username')).toBeInTheDocument();
-    expect(await res.findByText(newUser.fullName)).toBeInTheDocument();
+    fireEvent.mouseOver(screen.getByTestId('sample-span'));
+    expect(await screen.findByTestId('tooltip-username')).toBeInTheDocument();
+    expect(await screen.findByText(newUser.fullName)).toBeInTheDocument();
   });
 
   it('does not render username when no username or full name available', () => {
-    const res = render(
+    render(
       <I18nProvider>
         <Tooltip {...tooltipProps} content={{ ...tooltipContent, createdBy: {} }}>
           <TestSpan />
@@ -170,7 +170,7 @@ describe('Tooltip', () => {
       </I18nProvider>
     );
 
-    fireEvent.mouseOver(res.getByTestId('sample-span'));
-    expect(res.queryByTestId('tooltip-username')).not.toBeInTheDocument();
+    fireEvent.mouseOver(screen.getByTestId('sample-span'));
+    expect(screen.queryByTestId('tooltip-username')).not.toBeInTheDocument();
   });
 });

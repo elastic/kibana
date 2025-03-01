@@ -300,21 +300,21 @@ describe('ServiceNowActionConnectorFields renders', () => {
 
       await waitFor(() => {
         expect(getAppInfoMock).toHaveBeenCalledTimes(1);
-        expect(updateActionConnectorMock).toHaveBeenCalledWith(
-          expect.objectContaining({
-            connector: {
-              config: { apiUrl: 'https://example.com', usesTableApi: false },
-              id: 'test',
-              name: 'SN',
-              secrets: { password: 'pass', username: 'user' },
-            },
-          })
-        );
+      });
+      expect(updateActionConnectorMock).toHaveBeenCalledWith(
+        expect.objectContaining({
+          connector: {
+            config: { apiUrl: 'https://example.com', usesTableApi: false },
+            id: 'test',
+            name: 'SN',
+            secrets: { password: 'pass', username: 'user' },
+          },
+        })
+      );
 
-        expect(services.notifications.toasts.addSuccess).toHaveBeenCalledWith({
-          text: 'Connector has been updated.',
-          title: 'SN connector updated',
-        });
+      expect(services.notifications.toasts.addSuccess).toHaveBeenCalledWith({
+        text: 'Connector has been updated.',
+        title: 'SN connector updated',
       });
 
       expect(screen.queryByTestId('updateConnectorForm')).not.toBeInTheDocument();
@@ -360,9 +360,9 @@ describe('ServiceNowActionConnectorFields renders', () => {
 
       await waitFor(() => {
         expect(getAppInfoMock).toHaveBeenCalledTimes(1);
-        expect(updateActionConnectorMock).not.toHaveBeenCalled();
-        expect(services.notifications.toasts.addSuccess).not.toHaveBeenCalled();
       });
+      expect(updateActionConnectorMock).not.toHaveBeenCalled();
+      expect(services.notifications.toasts.addSuccess).not.toHaveBeenCalled();
 
       expect(await screen.findByTestId('updateConnectorForm')).toBeInTheDocument();
       expect(

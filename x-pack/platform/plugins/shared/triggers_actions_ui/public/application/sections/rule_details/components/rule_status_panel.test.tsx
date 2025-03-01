@@ -135,7 +135,7 @@ describe('rule status panel', () => {
 
     fireEvent.click(screen.getByTestId('confirmModalConfirmButton'));
 
-    expect(screen.queryByRole('progressbar')).toBeInTheDocument();
+    expect(screen.getByRole('progressbar')).toBeInTheDocument();
 
     await waitFor(() => expect(bulkDisableRules).toHaveBeenCalledTimes(1));
   });

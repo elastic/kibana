@@ -229,9 +229,9 @@ describe('IndexActionConnectorFields', () => {
 
     await waitFor(() => {
       expect(wrapper.find('[data-test-subj="connectorIndexesComboBox"]').exists()).toBeTruthy();
-      expect(wrapper.find('[data-test-subj="hasTimeFieldCheckbox"]').exists()).toBeTruthy();
-      expect(wrapper.find('[data-test-subj="executionTimeFieldSelect"]').exists()).toBeFalsy();
     });
+    expect(wrapper.find('[data-test-subj="hasTimeFieldCheckbox"]').exists()).toBeTruthy();
+    expect(wrapper.find('[data-test-subj="executionTimeFieldSelect"]').exists()).toBeFalsy();
 
     const indexComboBox = wrapper
       .find(EuiComboBox)
@@ -262,9 +262,9 @@ describe('IndexActionConnectorFields', () => {
     await waitFor(() => {
       wrapper.update();
       expect(wrapper.find('[data-test-subj="connectorIndexesComboBox"]').exists()).toBeTruthy();
-      expect(wrapper.find('[data-test-subj="hasTimeFieldCheckbox"]').exists()).toBeTruthy();
-      expect(wrapper.find('[data-test-subj="executionTimeFieldSelect"]').exists()).toBeTruthy();
     });
+    expect(wrapper.find('[data-test-subj="hasTimeFieldCheckbox"]').exists()).toBeTruthy();
+    expect(wrapper.find('[data-test-subj="executionTimeFieldSelect"]').exists()).toBeTruthy();
 
     const indexComboBox = wrapper
       .find(EuiComboBox)
@@ -309,10 +309,8 @@ describe('IndexActionConnectorFields', () => {
 
     fireEvent.click(indexComboBox);
 
-    await act(async () => {
-      const event = { target: { value: mockIndexName } };
-      fireEvent.change(screen.getByRole('combobox'), event);
-    });
+    const event = { target: { value: mockIndexName } };
+    fireEvent.change(screen.getByRole('combobox'), event);
 
     expect(getIndexOptions).toHaveBeenCalledTimes(1);
     expect(getIndexOptions).toHaveBeenCalledWith(expect.anything(), mockIndexName);
@@ -327,10 +325,10 @@ describe('IndexActionConnectorFields', () => {
 
     beforeEach(() => {
       jest.clearAllMocks();
-      appMockRenderer = createAppMockRenderer();
     });
 
     test('connector validation succeeds when connector config is valid', async () => {
+      appMockRenderer = createAppMockRenderer();
       const actionConnector = {
         secrets: {},
         id: 'test',
@@ -344,7 +342,7 @@ describe('IndexActionConnectorFields', () => {
         isDeprecated: false,
       };
 
-      const { getByTestId } = appMockRenderer.render(
+      appMockRenderer.render(
         <ConnectorFormTestProvider connector={actionConnector} onSubmit={onSubmit}>
           <IndexActionConnectorFields
             readOnly={false}
@@ -354,9 +352,7 @@ describe('IndexActionConnectorFields', () => {
         </ConnectorFormTestProvider>
       );
 
-      await act(async () => {
-        await userEvent.click(getByTestId('form-test-provide-submit'));
-      });
+      await userEvent.click(screen.getByTestId('form-test-provide-submit'));
 
       expect(onSubmit).toBeCalledWith({
         data: {
@@ -378,6 +374,7 @@ describe('IndexActionConnectorFields', () => {
     });
 
     test('connector validation succeeds when connector config is valid with minimal config', async () => {
+      appMockRenderer = createAppMockRenderer();
       const actionConnector = {
         secrets: {},
         id: 'test',
@@ -389,7 +386,7 @@ describe('IndexActionConnectorFields', () => {
         isDeprecated: false,
       };
 
-      const { getByTestId } = appMockRenderer.render(
+      appMockRenderer.render(
         <ConnectorFormTestProvider connector={actionConnector} onSubmit={onSubmit}>
           <IndexActionConnectorFields
             readOnly={false}
@@ -399,9 +396,7 @@ describe('IndexActionConnectorFields', () => {
         </ConnectorFormTestProvider>
       );
 
-      await act(async () => {
-        await userEvent.click(getByTestId('form-test-provide-submit'));
-      });
+      await userEvent.click(screen.getByTestId('form-test-provide-submit'));
 
       expect(onSubmit).toBeCalledWith({
         data: {
@@ -418,6 +413,7 @@ describe('IndexActionConnectorFields', () => {
     });
 
     test('connector validation fails when index is empty', async () => {
+      appMockRenderer = createAppMockRenderer();
       const actionConnector = {
         secrets: {},
         id: 'test',
@@ -429,7 +425,7 @@ describe('IndexActionConnectorFields', () => {
         isDeprecated: false,
       };
 
-      const { getByTestId } = appMockRenderer.render(
+      appMockRenderer.render(
         <ConnectorFormTestProvider connector={actionConnector} onSubmit={onSubmit}>
           <IndexActionConnectorFields
             readOnly={false}
@@ -439,10 +435,7 @@ describe('IndexActionConnectorFields', () => {
         </ConnectorFormTestProvider>
       );
 
-      await act(async () => {
-        await userEvent.click(getByTestId('form-test-provide-submit'));
-      });
-
+      await userEvent.click(screen.getByTestId('form-test-provide-submit'));
       expect(onSubmit).toBeCalledWith({
         data: {},
         isValid: false,

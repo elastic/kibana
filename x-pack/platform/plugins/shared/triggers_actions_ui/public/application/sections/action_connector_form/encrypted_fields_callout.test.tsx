@@ -9,7 +9,7 @@ import React from 'react';
 import { UseField } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { FormTestProvider } from '../../components/test_utils';
 import { EncryptedFieldsCallout } from './encrypted_fields_callout';
-import { render, RenderResult } from '@testing-library/react';
+import { render, RenderResult, screen } from '@testing-library/react';
 
 const renderWithSecretFields = ({
   isEdit,
@@ -88,48 +88,48 @@ describe('EncryptedFieldsCallout', () => {
   it.each(isCreateTests)(
     'shows the create connector callout correctly with number of secrets %d',
     (numberOfSecretFields, label) => {
-      const { getByText } = renderWithSecretFields({
+      renderWithSecretFields({
         isEdit: false,
         isMissingSecrets: false,
         numberOfSecretFields,
       });
 
-      expect(getByText(label)).toBeInTheDocument();
+      expect(screen.getByText(label)).toBeInTheDocument();
     }
   );
 
   it.each(isEditTests)(
     'shows the edit connector callout correctly with number of secrets %d',
     (numberOfSecretFields, label) => {
-      const { getByText } = renderWithSecretFields({
+      renderWithSecretFields({
         isEdit: true,
         isMissingSecrets: false,
         numberOfSecretFields,
       });
 
-      expect(getByText(label)).toBeInTheDocument();
+      expect(screen.getByText(label)).toBeInTheDocument();
     }
   );
 
   it.each(isMissingSecretsTests)(
     'shows the is missing secrets connector callout correctly with number of secrets %d',
     (numberOfSecretFields, label) => {
-      const { getByText } = renderWithSecretFields({
+      renderWithSecretFields({
         isEdit: false,
         isMissingSecrets: true,
         numberOfSecretFields,
       });
 
-      expect(getByText(label)).toBeInTheDocument();
+      expect(screen.getByText(label)).toBeInTheDocument();
     }
   );
 
   it.each(noSecretsTests)('does not shows the callouts without secrets: %p', (props, testId) => {
-    const { queryByTestId } = renderWithSecretFields({
+    renderWithSecretFields({
       ...props,
       numberOfSecretFields: 0,
     });
 
-    expect(queryByTestId(testId)).toBeFalsy();
+    expect(screen.queryByTestId(testId)).toBeFalsy();
   });
 });

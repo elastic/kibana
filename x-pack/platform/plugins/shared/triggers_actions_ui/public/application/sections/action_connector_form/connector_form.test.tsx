@@ -9,7 +9,7 @@ import React, { lazy } from 'react';
 import { ConnectorForm } from './connector_form';
 import { actionTypeRegistryMock } from '../../action_type_registry.mock';
 import userEvent from '@testing-library/user-event';
-import { waitFor } from '@testing-library/react';
+import { waitFor, screen } from '@testing-library/react';
 import { act } from '@testing-library/react';
 import { AppMockRenderer, createAppMockRenderer } from '../test_utils';
 
@@ -28,15 +28,15 @@ describe('ConnectorForm', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    appMockRenderer = createAppMockRenderer();
   });
 
   it('calls on change with correct init state', async () => {
+    appMockRenderer = createAppMockRenderer();
     const actionTypeModel = actionTypeRegistryMock.createMockActionTypeModel({
       actionConnectorFields: lazy(() => import('./connector_mock')),
     });
 
-    const result = appMockRenderer.render(
+    appMockRenderer.render(
       <ConnectorForm
         actionTypeModel={actionTypeModel}
         isEdit={false}
@@ -46,7 +46,7 @@ describe('ConnectorForm', () => {
       />
     );
 
-    expect(result.getByTestId('nameInput')).toBeInTheDocument();
+    expect(screen.getByTestId('nameInput')).toBeInTheDocument();
     expect(onChange).toHaveBeenCalledWith({
       isSubmitted: false,
       isSubmitting: false,
@@ -58,6 +58,7 @@ describe('ConnectorForm', () => {
   });
 
   it('calls onFormModifiedChange when form is modified', async () => {
+    appMockRenderer = createAppMockRenderer();
     appMockRenderer.coreStart.application.capabilities = {
       ...appMockRenderer.coreStart.application.capabilities,
       actions: { save: true, show: true },
@@ -67,7 +68,7 @@ describe('ConnectorForm', () => {
       actionConnectorFields: lazy(() => import('./connector_mock')),
     });
 
-    const result = appMockRenderer.render(
+    appMockRenderer.render(
       <ConnectorForm
         actionTypeModel={actionTypeModel}
         isEdit={false}
@@ -77,10 +78,8 @@ describe('ConnectorForm', () => {
       />
     );
 
-    expect(result.getByTestId('nameInput')).toBeInTheDocument();
-    await act(async () => {
-      await userEvent.type(result.getByRole('textbox'), 'My connector', { delay: 100 });
-    });
+    expect(screen.getByTestId('nameInput')).toBeInTheDocument();
+    await userEvent.type(screen.getByRole('textbox'), 'My connector', { delay: 100 });
 
     await waitFor(() => {
       expect(onFormModifiedChange).toHaveBeenCalledWith(true);
@@ -88,11 +87,12 @@ describe('ConnectorForm', () => {
   });
 
   it('calls onChange when the form is invalid', async () => {
+    appMockRenderer = createAppMockRenderer();
     const actionTypeModel = actionTypeRegistryMock.createMockActionTypeModel({
       actionConnectorFields: lazy(() => import('./connector_mock')),
     });
 
-    const result = appMockRenderer.render(
+    appMockRenderer.render(
       <ConnectorForm
         actionTypeModel={actionTypeModel}
         isEdit={false}
@@ -102,7 +102,7 @@ describe('ConnectorForm', () => {
       />
     );
 
-    expect(await result.findByTestId('nameInput')).toBeInTheDocument();
+    expect(await screen.findByTestId('nameInput')).toBeInTheDocument();
 
     await act(async () => {
       const submit = onChange.mock.calls[0][0].submit;
@@ -121,6 +121,7 @@ describe('ConnectorForm', () => {
   });
 
   it('registers the pre submit validator correctly', async () => {
+    appMockRenderer = createAppMockRenderer();
     const actionTypeModel = actionTypeRegistryMock.createMockActionTypeModel({
       actionConnectorFields: lazy(() => import('./connector_mock')),
     });

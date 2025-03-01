@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render, waitFor } from '@testing-library/react';
+import { render, waitFor, screen } from '@testing-library/react';
 import { AlertsGroupingLevel, type AlertsGroupingLevelProps } from './alerts_grouping_level';
 import { useGetAlertsGroupAggregationsQuery } from '@kbn/alerts-ui-shared';
 import * as buildEsQueryModule from '@kbn/es-query/src/es_query/build_es_query';
@@ -62,12 +62,12 @@ describe('AlertsGroupingLevel', () => {
   });
 
   it('should render', () => {
-    const { getByTestId } = render(
+    render(
       <AlertsGroupingLevel {...mockGroupingLevelProps}>
         {() => <span data-test-subj="grouping-level" />}
       </AlertsGroupingLevel>
     );
-    expect(getByTestId('grouping-level')).toBeInTheDocument();
+    expect(screen.getByTestId('grouping-level')).toBeInTheDocument();
   });
 
   it('should account for global, default and parent filters', async () => {

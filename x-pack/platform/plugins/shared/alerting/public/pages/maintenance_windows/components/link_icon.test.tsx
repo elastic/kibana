@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-
+import { screen } from '@testing-library/react';
 import { LinkIcon } from './link_icon';
 import { AppMockRenderer, createAppMockRenderer } from '../../../lib/test_utils';
 
@@ -15,58 +15,63 @@ describe('LinkIcon', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    appMockRenderer = createAppMockRenderer();
   });
 
   test('it renders', () => {
-    const result = appMockRenderer.render(
+    appMockRenderer = createAppMockRenderer();
+    appMockRenderer.render(
       <LinkIcon iconSide="right" iconSize="xxl" iconType="warning">
         {'Test link'}
       </LinkIcon>
     );
 
-    expect(result.getByText('Test link')).toBeInTheDocument();
+    expect(screen.getByText('Test link')).toBeInTheDocument();
   });
 
   test('it renders an action button when onClick is provided', () => {
-    const result = appMockRenderer.render(
+    appMockRenderer = createAppMockRenderer();
+    appMockRenderer.render(
       <LinkIcon iconType="warning" onClick={() => alert('Test alert')}>
         {'Test link'}
       </LinkIcon>
     );
 
-    expect(result.getByRole('button')).toBeInTheDocument();
+    expect(screen.getByRole('button')).toBeInTheDocument();
   });
 
   test('it renders an icon', () => {
-    const result = appMockRenderer.render(<LinkIcon iconType="warning">{'Test link'}</LinkIcon>);
+    appMockRenderer = createAppMockRenderer();
+    appMockRenderer.render(<LinkIcon iconType="warning">{'Test link'}</LinkIcon>);
 
-    expect(result.getByTestId('link-icon')).toBeInTheDocument();
+    expect(screen.getByTestId('link-icon')).toBeInTheDocument();
   });
 
   test('it positions the icon to the right when iconSide is right', () => {
-    const result = appMockRenderer.render(
+    appMockRenderer = createAppMockRenderer();
+    appMockRenderer.render(
       <LinkIcon iconSide="right" iconType="warning">
         {'Test link'}
       </LinkIcon>
     );
 
-    expect(result.getByRole('button')).toHaveStyle({ 'flex-direction': 'row-reverse' });
+    expect(screen.getByRole('button')).toHaveStyle({ 'flex-direction': 'row-reverse' });
   });
 
   test('it positions the icon to the left when iconSide is left (or not provided)', () => {
-    const result = appMockRenderer.render(
+    appMockRenderer = createAppMockRenderer();
+    appMockRenderer.render(
       <LinkIcon iconSide="left" iconType="warning">
         {'Test link'}
       </LinkIcon>
     );
 
-    expect(result.getByRole('button')).toHaveStyle({ 'flex-direction': 'row' });
+    expect(screen.getByRole('button')).toHaveStyle({ 'flex-direction': 'row' });
   });
 
   test('it renders a label', () => {
-    const result = appMockRenderer.render(<LinkIcon iconType="warning">{'Test link'}</LinkIcon>);
+    appMockRenderer = createAppMockRenderer();
+    appMockRenderer.render(<LinkIcon iconType="warning">{'Test link'}</LinkIcon>);
 
-    expect(result.getByTestId('link-icon-label')).toBeInTheDocument();
+    expect(screen.getByTestId('link-icon-label')).toBeInTheDocument();
   });
 });

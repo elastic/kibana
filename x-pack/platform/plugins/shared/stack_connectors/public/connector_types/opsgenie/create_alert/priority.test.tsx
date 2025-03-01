@@ -31,13 +31,15 @@ describe('Priority', () => {
 
     await userEvent.selectOptions(screen.getByTestId('opsgenie-prioritySelect'), 'P1');
 
-    await waitFor(() =>
-      expect(onChange.mock.calls[0]).toMatchInlineSnapshot(`
-        Array [
-          "priority",
-          "P1",
-        ]
-      `)
-    );
+    await waitFor(() => {
+      expect(onChange.mock.calls[0]).toBeDefined();
+    });
+
+    expect(onChange.mock.calls[0]).toMatchInlineSnapshot(`
+      Array [
+        "priority",
+        "P1",
+      ]
+    `);
   });
 });
