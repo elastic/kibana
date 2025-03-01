@@ -25,7 +25,7 @@ import {
   ESQLControlVariable,
   aggFunctionDefinitions,
 } from '@kbn/esql-validation-autocomplete';
-import { getESQLQueryColumnsRaw } from '@kbn/esql-utils';
+import { getESQLQueryColumnsRaw } from '@kbn/esql-utils/src/utils/run_query';
 import type { ESQLControlState, ControlWidthOptions } from '../types';
 import {
   Header,

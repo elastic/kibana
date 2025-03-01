@@ -16,7 +16,7 @@ import {
   fieldSupportsBreakdown,
 } from '@kbn/field-utils';
 import { css } from '@emotion/react';
-import { isESQLColumnGroupable } from '@kbn/esql-utils';
+import { isESQLColumnGroupable } from '@kbn/esql-utils/src/utils/esql_fields_utils';
 import { type DataView, DataViewField } from '@kbn/data-views-plugin/common';
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 import { convertDatatableColumnToDataViewFieldSpec } from '@kbn/data-view-utils';
