@@ -16,7 +16,7 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/css';
 import { i18n } from '@kbn/i18n';
-import { Message } from '@kbn/observability-ai-assistant-plugin/common';
+import { Conversation, Message } from '@kbn/observability-ai-assistant-plugin/common';
 import React, { useState } from 'react';
 import ReactDOM from 'react-dom';
 import { useConversationKey } from '../hooks/use_conversation_key';
@@ -87,6 +87,11 @@ export function ChatFlyout({
   const conversationList = useConversationList();
 
   const { key: bodyKey, updateConversationIdInPlace } = useConversationKey(conversationId);
+
+  const onConversationDuplicate = (conversation: Conversation) => {
+    conversationList.conversations.refresh();
+    setConversationId(conversation.conversation.id);
+  };
 
   const flyoutClassName = css`
     max-inline-size: 100% !important;
@@ -287,6 +292,7 @@ export function ChatFlyout({
                     }
                   : undefined
               }
+              onConversationDuplicate={onConversationDuplicate}
             />
           </EuiFlexItem>
 
