@@ -12,12 +12,24 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
     require.resolve('../../../../../../config/ess/config.base.basic')
   );
 
-  return {
+  const testConfig = {
     ...functionalConfig.getAll(),
     testFiles: [require.resolve('..')],
     junit: {
       reportName:
-        'Rules Management - Rule Import/Export Integration Tests - ESS Env - Basic License',
+        'Rules Management - Rule Import/Export Integration Tests - Customization enabled - ESS Env',
     },
   };
+
+  testConfig.kbnTestServer.serverArgs = testConfig.kbnTestServer.serverArgs.map((arg: string) => {
+    // Override the default value of `--xpack.securitySolution.enableExperimental` to enable the prebuilt rules customization feature
+    if (arg.includes('--xpack.securitySolution.enableExperimental')) {
+      return `--xpack.securitySolution.enableExperimental=${JSON.stringify([
+        'prebuiltRulesCustomizationEnabled',
+      ])}`;
+    }
+    return arg;
+  });
+
+  return testConfig;
 }
