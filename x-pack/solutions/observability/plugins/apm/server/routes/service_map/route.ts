@@ -7,9 +7,13 @@
 
 import Boom from '@hapi/boom';
 import * as t from 'io-ts';
-import { apmServiceGroupMaxNumberOfServices } from '@kbn/observability-plugin/common';
+import {
+  apmEnableServiceMapV2,
+  apmServiceGroupMaxNumberOfServices,
+} from '@kbn/observability-plugin/common';
+import type { ServiceMapResponse } from '../../../common/service_map';
 import { isActivePlatinumLicense } from '../../../common/license_check';
-import { invalidLicenseMessage } from '../../../common/service_map';
+import { invalidLicenseMessage } from '../../../common/service_map/utils';
 import { notifyFeatureUsage } from '../../feature';
 import { getSearchTransactionsEvents } from '../../lib/helpers/transactions';
 import { getMlClient } from '../../lib/helpers/get_ml_client';
@@ -23,7 +27,6 @@ import { environmentRt, rangeRt, kueryRt } from '../default_api_types';
 import { getServiceGroup } from '../service_groups/get_service_group';
 import { offsetRt } from '../../../common/comparison_rt';
 import { getApmEventClient } from '../../lib/helpers/get_apm_event_client';
-import type { ServiceMapResponse } from './get_service_map';
 
 const serviceMapRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/service-map',
@@ -63,17 +66,20 @@ const serviceMapRoute = createApmServerRoute({
       savedObjects: { client: savedObjectsClient },
       uiSettings: { client: uiSettingsClient },
     } = await context.core;
-    const [mlClient, apmEventClient, serviceGroup, maxNumberOfServices] = await Promise.all([
-      getMlClient(resources),
-      getApmEventClient(resources),
-      serviceGroupId
-        ? getServiceGroup({
-            savedObjectsClient,
-            serviceGroupId,
-          })
-        : Promise.resolve(null),
-      uiSettingsClient.get<number>(apmServiceGroupMaxNumberOfServices),
-    ]);
+
+    const [mlClient, apmEventClient, serviceGroup, maxNumberOfServices, serviceMapV2Enabled] =
+      await Promise.all([
+        getMlClient(resources),
+        getApmEventClient(resources),
+        serviceGroupId
+          ? getServiceGroup({
+              savedObjectsClient,
+              serviceGroupId,
+            })
+          : Promise.resolve(null),
+        uiSettingsClient.get<number>(apmServiceGroupMaxNumberOfServices),
+        uiSettingsClient.get<boolean>(apmEnableServiceMapV2),
+      ]);
 
     const searchAggregatedTransactions = await getSearchTransactionsEvents({
       apmEventClient,
@@ -82,6 +88,7 @@ const serviceMapRoute = createApmServerRoute({
       end,
       kuery,
     });
+
     return getServiceMap({
       mlClient,
       config,
@@ -95,6 +102,7 @@ const serviceMapRoute = createApmServerRoute({
       maxNumberOfServices,
       serviceGroupKuery: serviceGroup?.kuery,
       kuery,
+      serviceMapV2Enabled,
     });
   },
 });

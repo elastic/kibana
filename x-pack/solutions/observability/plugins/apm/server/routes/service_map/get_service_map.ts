@@ -7,16 +7,21 @@
 
 import type { Logger } from '@kbn/core/server';
 import { chunk } from 'lodash';
+import type {
+  Connection,
+  ExitSpanDestination,
+  ServiceMapSpan,
+} from '../../../common/service_map/types';
+import { getServiceMapNodes, type ServiceMapResponse } from '../../../common/service_map';
 import type { APMConfig } from '../..';
 import type { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
 import type { MlClient } from '../../lib/helpers/get_ml_client';
 import { withApmSpan } from '../../utils/with_apm_span';
-import { DEFAULT_ANOMALIES, getServiceAnomalies } from './get_service_anomalies';
-import { getServiceMapFromTraceIds } from './get_service_map_from_trace_ids';
-import { getServiceStats } from './get_service_stats';
 import { getTraceSampleIds } from './get_trace_sample_ids';
-import type { TransformServiceMapResponse } from './transform_service_map_responses';
-import { transformServiceMapResponses } from './transform_service_map_responses';
+import { DEFAULT_ANOMALIES, getServiceAnomalies } from './get_service_anomalies';
+import { getServiceStats } from './get_service_stats';
+import { getServiceMapFromTraceIds } from './get_service_map_from_trace_ids';
+import { fetchExitSpanSamplesFromTraceIds } from './fetch_exit_span_samples';
 
 export interface IEnvOptions {
   mlClient?: MlClient;
@@ -30,11 +35,7 @@ export interface IEnvOptions {
   end: number;
   serviceGroupKuery?: string;
   kuery?: string;
-}
-
-export interface ServiceMapTelemetry {
-  tracesCount: number;
-  nodesCount: number;
+  serviceMapV2Enabled?: boolean;
 }
 
 async function getConnectionData({
@@ -47,7 +48,13 @@ async function getConnectionData({
   serviceGroupKuery,
   kuery,
   logger,
-}: IEnvOptions) {
+  serviceMapV2Enabled = false,
+}: IEnvOptions): Promise<
+  { tracesCount: number } & (
+    | { connections: Connection[]; discoveredServices: ExitSpanDestination[] }
+    | { spans: ServiceMapSpan[] }
+  )
+> {
   return withApmSpan('get_service_map_connections', async () => {
     logger.debug('Getting trace sample IDs');
     const { traceIds } = await getTraceSampleIds({
@@ -63,23 +70,27 @@ async function getConnectionData({
 
     logger.debug(`Found ${traceIds.length} traces to inspect`);
 
-    const chunks = chunk(traceIds, config.serviceMapMaxTracesPerRequest);
+    if (serviceMapV2Enabled) {
+      const spans = await withApmSpan(
+        'get_service_map_exit_spans_and_transactions_from_traces',
+        () =>
+          fetchExitSpanSamplesFromTraceIds({
+            apmEventClient,
+            traceIds,
+            start,
+            end,
+          })
+      );
 
-    const init = {
-      connections: [],
-      discoveredServices: [],
-      tracesCount: 0,
-      servicesCount: 0,
-    };
-
-    if (!traceIds.length) {
-      return init;
+      return {
+        tracesCount: traceIds.length,
+        spans,
+      };
     }
 
-    logger.debug(`Executing scripted metric agg (${chunks.length} chunks)`);
-
-    const chunkedResponses = await withApmSpan('get_service_paths_from_all_trace_ids', () =>
-      Promise.all(
+    const chunkedResponses = await withApmSpan('get_service_paths_from_all_trace_ids', () => {
+      const chunks = chunk(traceIds, config.serviceMapMaxTracesPerRequest);
+      return Promise.all(
         chunks.map((traceIdsChunk) =>
           getServiceMapFromTraceIds({
             apmEventClient,
@@ -92,8 +103,8 @@ async function getConnectionData({
             logger,
           })
         )
-      )
-    );
+      );
+    });
 
     logger.debug('Received chunk responses');
 
@@ -106,13 +117,13 @@ async function getConnectionData({
 
     logger.debug('Merged responses');
 
-    return { ...mergedResponses, tracesCount: traceIds.length };
+    return {
+      connections: mergedResponses.connections,
+      discoveredServices: mergedResponses.discoveredServices,
+      tracesCount: traceIds.length,
+    };
   });
 }
-
-export type ConnectionsResponse = Awaited<ReturnType<typeof getConnectionData>>;
-export type ServicesResponse = Awaited<ReturnType<typeof getServiceStats>>;
-export type ServiceMapResponse = TransformServiceMapResponse & ServiceMapTelemetry;
 
 export function getServiceMap(
   options: IEnvOptions & { maxNumberOfServices: number }
@@ -137,18 +148,26 @@ export function getServiceMap(
 
     logger.debug('Received and parsed all responses');
 
-    const transformedResponse = transformServiceMapResponses({
-      response: {
-        ...connectionData,
-        services: servicesData,
+    if ('spans' in connectionData) {
+      return {
+        spans: connectionData.spans,
+        tracesCount: connectionData.tracesCount,
+        servicesData,
         anomalies,
-      },
+      };
+    }
+
+    const serviceMapNodes = getServiceMapNodes({
+      connections: connectionData.connections,
+      exitSpanDestinations: connectionData.discoveredServices,
+      servicesData,
+      anomalies,
     });
 
     return {
-      ...transformedResponse,
+      ...serviceMapNodes,
       tracesCount: connectionData.tracesCount,
-      nodesCount: transformedResponse.nodesCount,
+      nodesCount: serviceMapNodes.nodesCount,
     };
   });
 }

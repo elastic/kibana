@@ -130,6 +130,7 @@ export const OBSERVABILITY_APM_ENABLE_CONTINUOUS_ROLLUPS_ID =
 export const OBSERVABILITY_APM_ENABLE_PROFILING_INTEGRATION_ID =
   'observability:apmEnableProfilingIntegration';
 export const OBSERVABILITY_APM_ENABLE_TABLE_SEARCH_BAR = 'observability:apmEnableTableSearchBar';
+export const OBSERVABILITY_APM_ENABLE_SERVICE_MAP_V2 = 'observability:apmEnableServiceMapV2';
 export const OBSERVABILITY_APM_ENABLE_SERVICE_INVENTORY_TABLE_SEARCH_BAR =
   'observability:apmEnableServiceInventoryTableSearchBar';
 export const OBSERVABILITY_LOGS_SHARED_NEW_LOGS_OVERVIEW_ID = 'observability:newLogsOverview';
