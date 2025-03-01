@@ -20,7 +20,10 @@ import { buildRouteValidationWithZod } from '@kbn/elastic-assistant-common/impl/
 import { ElasticAssistantPluginRouter } from '../../types';
 import { buildResponse } from '../utils';
 import { EsConversationSchema } from '../../ai_assistant_data_clients/conversations/types';
-import { transformESSearchToConversations } from '../../ai_assistant_data_clients/conversations/transforms';
+import {
+  transformESSearchToConversations,
+  transformFieldNamesToSourceScheme,
+} from '../../ai_assistant_data_clients/conversations/transforms';
 import { performChecks } from '../helpers';
 
 export const findUserConversationsRoute = (router: ElasticAssistantPluginRouter) => {
@@ -78,7 +81,7 @@ export const findUserConversationsRoute = (router: ElasticAssistantPluginRouter)
             sortField: query.sort_field,
             sortOrder: query.sort_order,
             filter: `users:{ ${userFilter} }${additionalFilter} and not is_default: true`,
-            fields: query.fields,
+            fields: query.fields ? transformFieldNamesToSourceScheme(query.fields) : undefined,
             mSearch: {
               filter: `users:{ ${userFilter} }${additionalFilter} and is_default: true`,
               perPage: MAX_DEFAULT_CONVERSATION_TOTAL,
