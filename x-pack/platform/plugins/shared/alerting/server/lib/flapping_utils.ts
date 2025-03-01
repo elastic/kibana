@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { RulesSettingsFlappingProperties } from '../../common/rules_settings';
+import type { RulesSettingsFlappingProperties } from '../../common/rules_settings';
 
 export function updateFlappingHistory(
   flappingSettings: RulesSettingsFlappingProperties,
@@ -24,7 +24,7 @@ export function updateFlappingHistory(
 export function isFlapping(
   flappingSettings: RulesSettingsFlappingProperties,
   flappingHistory: boolean[],
-  isCurrentlyFlapping: boolean = false
+  isCurrentlyFlapping = false
 ): boolean {
   if (flappingSettings.enabled) {
     const numStateChanges = flappingHistory.filter((f) => f).length;

@@ -5,20 +5,22 @@
  * 2.0.
  */
 
-import { Logger } from '@kbn/core/server';
-import { Outcome } from 'elastic-apm-node';
-import { RuleExecutionStatus, RuleLastRun } from '../../../common';
-import { ElasticsearchError } from '../../lib';
-import { ILastRun, lastRunFromError, lastRunFromState } from '../../lib/last_run_status';
-import { map, Result } from '../../lib/result_type';
+import type { Logger } from '@kbn/core/server';
+import type { Outcome } from 'elastic-apm-node';
+import type { RuleExecutionStatus, RuleLastRun } from '../../../common';
+import type { ElasticsearchError } from '../../lib';
+import type { ILastRun } from '../../lib/last_run_status';
+import { lastRunFromError, lastRunFromState } from '../../lib/last_run_status';
+import type { Result } from '../../lib/result_type';
+import { map } from '../../lib/result_type';
+import type { IExecutionStatusAndMetrics } from '../../lib/rule_execution_status';
 import {
   executionStatusFromError,
   executionStatusFromState,
-  IExecutionStatusAndMetrics,
 } from '../../lib/rule_execution_status';
-import { RuleRunMetrics } from '../../lib/rule_run_metrics_store';
-import { RuleResultService } from '../../monitoring/rule_result_service';
-import { RuleTaskStateAndMetrics } from '../types';
+import type { RuleRunMetrics } from '../../lib/rule_run_metrics_store';
+import type { RuleResultService } from '../../monitoring/rule_result_service';
+import type { RuleTaskStateAndMetrics } from '../types';
 
 interface ProcessRuleRunOpts {
   logger?: Logger;

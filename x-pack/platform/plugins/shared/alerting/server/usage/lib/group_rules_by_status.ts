@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { AlertingUsage } from '../types';
+import type { AlertingUsage } from '../types';
 
 export function groupRulesByStatus(
   rulesByStatus: Record<string, number>

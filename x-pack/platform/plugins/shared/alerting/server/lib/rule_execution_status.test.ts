@@ -16,7 +16,8 @@ import {
 } from './rule_execution_status';
 import { ErrorWithReason } from './error_with_reason';
 import { translations } from '../constants/translations';
-import { RuleRunMetrics, RuleRunMetricsStore } from './rule_run_metrics_store';
+import type { RuleRunMetrics } from './rule_run_metrics_store';
+import { RuleRunMetricsStore } from './rule_run_metrics_store';
 import { RuleResultService } from '../monitoring/rule_result_service';
 
 const MockLogger = loggingSystemMock.create().get();

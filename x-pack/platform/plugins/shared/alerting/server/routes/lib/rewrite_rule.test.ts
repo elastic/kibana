@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { rewriteRule } from './rewrite_rule';
-import { RuleTypeParams, SanitizedRule } from '../../types';
+import type { RuleTypeParams, SanitizedRule } from '../../types';
 import { isPlainObject } from 'lodash';
 
 const DATE_2020 = new Date('1/1/2020');
