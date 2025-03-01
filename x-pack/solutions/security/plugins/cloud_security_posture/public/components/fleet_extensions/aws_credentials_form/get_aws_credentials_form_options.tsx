@@ -104,9 +104,10 @@ export type AwsCredentialsTypeOptions = Array<{
 }>;
 
 const getAwsCredentialsTypeSelectorOptions = (
-  filterFn: ({ value }: { value: AwsCredentialsType }) => boolean
+  filterFn: ({ value }: { value: AwsCredentialsType }) => boolean,
+  isAgentless = false
 ): AwsCredentialsTypeOptions => {
-  return Object.entries(getAwsCredentialsFormOptions())
+  return Object.entries(getAwsCredentialsFormOptions(isAgentless))
     .map(([key, value]) => ({
       value: key as AwsCredentialsType,
       text: value.label,
@@ -119,23 +120,31 @@ export const getAwsCredentialsFormManualOptions = (): AwsCredentialsTypeOptions 
     ({ value }) => value !== AWS_CREDENTIALS_TYPE.CLOUD_FORMATION
   );
 
-export const getAwsCredentialsFormAgentlessOptions = (): AwsCredentialsTypeOptions =>
+export const getAwsCredentialsFormAgentlessOptions = (
+  isAgentless: boolean
+): AwsCredentialsTypeOptions =>
   getAwsCredentialsTypeSelectorOptions(
     ({ value }) =>
+      value === AWS_CREDENTIALS_TYPE.ASSUME_ROLE ||
       value === AWS_CREDENTIALS_TYPE.DIRECT_ACCESS_KEYS ||
-      value === AWS_CREDENTIALS_TYPE.TEMPORARY_KEYS
+      value === AWS_CREDENTIALS_TYPE.TEMPORARY_KEYS,
+    isAgentless
   );
 
 export const DEFAULT_AWS_CREDENTIALS_TYPE = AWS_CREDENTIALS_TYPE.CLOUD_FORMATION;
 export const DEFAULT_MANUAL_AWS_CREDENTIALS_TYPE: typeof AWS_CREDENTIALS_TYPE.ASSUME_ROLE =
   AWS_CREDENTIALS_TYPE.ASSUME_ROLE;
-export const DEFAULT_AGENTLESS_AWS_CREDENTIALS_TYPE = AWS_CREDENTIALS_TYPE.DIRECT_ACCESS_KEYS;
+export const DEFAULT_AGENTLESS_AWS_CREDENTIALS_TYPE = AWS_CREDENTIALS_TYPE.ASSUME_ROLE;
 
-export const getAwsCredentialsFormOptions = (): AwsOptions => ({
+export const getAwsCredentialsFormOptions = (isAgentless = false): AwsOptions => ({
   [AWS_CREDENTIALS_TYPE.ASSUME_ROLE]: {
-    label: i18n.translate('xpack.csp.awsIntegration.assumeRoleLabel', {
-      defaultMessage: 'Assume role',
-    }),
+    label: isAgentless
+      ? i18n.translate('xpack.csp.awsIntegration.cloudConnectorsRoleLabel', {
+          defaultMessage: 'Cloud Connectors (recommended)',
+        })
+      : i18n.translate('xpack.csp.awsIntegration.assumeRoleLabel', {
+          defaultMessage: 'Assume role',
+        }),
     info: AssumeRoleDescription,
     fields: {
       role_arn: {
@@ -143,6 +152,13 @@ export const getAwsCredentialsFormOptions = (): AwsOptions => ({
           defaultMessage: 'Role ARN',
         }),
         dataTestSubj: 'awsRoleArnInput',
+      },
+      'aws.credentials.external_id': {
+        label: i18n.translate('xpack.csp.awsIntegration.externalId', {
+          defaultMessage: 'External ID',
+        }),
+        dataTestSubj: 'awsExternalId',
+        isSecret: true,
       },
     },
   },

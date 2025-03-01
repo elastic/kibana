@@ -40,3 +40,5 @@ export const DEFAULT_MAX_AGENT_POLICIES_WITH_INACTIVITY_TIMEOUT = 750;
 
 export const AGENT_LOG_LEVELS = ['error', 'warning', 'info', 'debug'] as const;
 export const DEFAULT_LOG_LEVEL = 'info' as const;
+
+export const CLOUD_CONNECTOR_AGENT_FEATURE = 'supports_cloud_connector';
