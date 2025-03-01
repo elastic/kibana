@@ -1,0 +1,104 @@
+{
+  "attributes": {
+    "author": [
+      "Elastic"
+    ],
+    "building_block_type": "default",
+    "description": "Identifies the ability of a process to be able to create RAW and PACKET socket types for the available network namespaces by a non-root user. A malicious process with this capability may exploit routing between hosts, bypass network access controls, and otherwise tamper with host networking if a firewall is not in place to limit the packet types and contents. The CAP_NET_RAW capability allows the process to bind to any address within the available namespaces, which allows network traffic sniffing by a non root user. The rule identifies previously unknown processes executing with CAP_NET_RAW capabilities through the use of the new terms rule type.",
+    "from": "now-9m",
+    "history_window_start": "now-14d",
+    "index": [
+      "logs-endpoint.events.*"
+    ],
+    "language": "kuery",
+    "license": "Elastic License v2",
+    "name": "Network Traffic Capture via CAP_NET_RAW",
+    "new_terms_fields": [
+      "host.id",
+      "user.id",
+      "process.executable"
+    ],
+    "query": "event.category:\"process\" and host.os.type:\"linux\" and event.type:\"start\" and event.action:\"exec\" and process.name:* and\n(process.thread.capabilities.effective:\"CAP_NET_RAW\" or process.thread.capabilities.permitted:\"CAP_NET_RAW\") and\nnot user.id:\"0\"\n",
+    "related_integrations": [
+      {
+        "package": "endpoint",
+        "version": "^8.2.0"
+      }
+    ],
+    "required_fields": [
+      {
+        "ecs": true,
+        "name": "event.action",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "event.category",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "event.type",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "host.os.type",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "process.name",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "process.thread.capabilities.effective",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "process.thread.capabilities.permitted",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "user.id",
+        "type": "keyword"
+      }
+    ],
+    "risk_score": 21,
+    "rule_id": "e28b8093-833b-4eda-b877-0873d134cf3c",
+    "setup": "## Setup\n\n\nThis rule requires data coming in from Elastic Defend.\n\n### Elastic Defend Integration Setup\nElastic Defend is integrated into the Elastic Agent using Fleet. Upon configuration, the integration allows the Elastic Agent to monitor events on your host and send data to the Elastic Security app.\n\n#### Prerequisite Requirements:\n- Fleet is required for Elastic Defend.\n- To configure Fleet Server refer to the [documentation](https://www.elastic.co/guide/en/fleet/current/fleet-server.html).\n\n#### The following steps should be executed in order to add the Elastic Defend integration on a Linux System:\n- Go to the Kibana home page and click \"Add integrations\".\n- In the query bar, search for \"Elastic Defend\" and select the integration to see more details about it.\n- Click \"Add Elastic Defend\".\n- Configure the integration name and optionally add a description.\n- Select the type of environment you want to protect, either \"Traditional Endpoints\" or \"Cloud Workloads\".\n- Select a configuration preset. Each preset comes with different default settings for Elastic Agent, you can further customize these later by configuring the Elastic Defend integration policy. [Helper guide](https://www.elastic.co/guide/en/security/current/configure-endpoint-integration-policy.html).\n- We suggest selecting \"Complete EDR (Endpoint Detection and Response)\" as a configuration setting, that provides \"All events; all preventions\"\n- Enter a name for the agent policy in \"New agent policy name\". If other agent policies already exist, you can click the \"Existing hosts\" tab and select an existing policy instead.\nFor more details on Elastic Agent configuration settings, refer to the [helper guide](https://www.elastic.co/guide/en/fleet/8.10/agent-policy.html).\n- Click \"Save and Continue\".\n- To complete the integration, select \"Add Elastic Agent to your hosts\" and continue to the next section to install the Elastic Agent on your hosts.\nFor more details on Elastic Defend refer to the [helper guide](https://www.elastic.co/guide/en/security/current/install-endpoint.html).\n",
+    "severity": "low",
+    "tags": [
+      "Domain: Endpoint",
+      "OS: Linux",
+      "Use Case: Threat Detection",
+      "Tactic: Discovery",
+      "Data Source: Elastic Defend"
+    ],
+    "threat": [
+      {
+        "framework": "MITRE ATT&CK",
+        "tactic": {
+          "id": "TA0007",
+          "name": "Discovery",
+          "reference": "https://attack.mitre.org/tactics/TA0007/"
+        },
+        "technique": [
+          {
+            "id": "T1040",
+            "name": "Network Sniffing",
+            "reference": "https://attack.mitre.org/techniques/T1040/"
+          }
+        ]
+      }
+    ],
+    "timestamp_override": "event.ingested",
+    "type": "new_terms",
+    "version": 2
+  },
+  "id": "e28b8093-833b-4eda-b877-0873d134cf3c_2",
+  "type": "security-rule"
+}

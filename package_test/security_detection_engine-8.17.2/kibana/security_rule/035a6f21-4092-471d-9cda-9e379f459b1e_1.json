@@ -1,0 +1,88 @@
+{
+  "attributes": {
+    "author": [
+      "Elastic"
+    ],
+    "building_block_type": "default",
+    "description": "Monitors for the execution of Unix utilities that may be leveraged as memory address seekers. Attackers may leverage built-in utilities to seek specific memory addresses, allowing for potential future manipulation/exploitation.",
+    "from": "now-9m",
+    "index": [
+      "logs-endpoint.events.*",
+      "endgame-*"
+    ],
+    "language": "eql",
+    "license": "Elastic License v2",
+    "name": "Potential Memory Seeking Activity",
+    "query": "process where host.os.type == \"linux\" and event.action in (\"exec\", \"exec_event\") and event.type == \"start\" and (\n  (process.name == \"tail\" and process.args == \"-c\") or\n  (process.name == \"cmp\" and process.args == \"-i\") or\n  (process.name in (\"hexdump\", \"xxd\") and process.args == \"-s\") or\n  (process.name == \"dd\" and process.args : (\"skip*\", \"seek*\"))\n)\n",
+    "references": [
+      "https://github.com/arget13/DDexec"
+    ],
+    "related_integrations": [
+      {
+        "package": "endpoint",
+        "version": "^8.2.0"
+      }
+    ],
+    "required_fields": [
+      {
+        "ecs": true,
+        "name": "event.action",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "event.type",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "host.os.type",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "process.args",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "process.name",
+        "type": "keyword"
+      }
+    ],
+    "risk_score": 21,
+    "rule_id": "035a6f21-4092-471d-9cda-9e379f459b1e",
+    "severity": "low",
+    "tags": [
+      "Domain: Endpoint",
+      "OS: Linux",
+      "Use Case: Threat Detection",
+      "Tactic: Discovery",
+      "Rule Type: BBR",
+      "Data Source: Elastic Defend",
+      "Data Source: Elastic Endgame"
+    ],
+    "threat": [
+      {
+        "framework": "MITRE ATT&CK",
+        "tactic": {
+          "id": "TA0007",
+          "name": "Discovery",
+          "reference": "https://attack.mitre.org/tactics/TA0007/"
+        },
+        "technique": [
+          {
+            "id": "T1057",
+            "name": "Process Discovery",
+            "reference": "https://attack.mitre.org/techniques/T1057/"
+          }
+        ]
+      }
+    ],
+    "timestamp_override": "event.ingested",
+    "type": "eql",
+    "version": 1
+  },
+  "id": "035a6f21-4092-471d-9cda-9e379f459b1e_1",
+  "type": "security-rule"
+}

@@ -1,0 +1,80 @@
+{
+    "attributes": {
+        "author": [
+            "Elastic"
+        ],
+        "description": "Okta ThreatInsight is a feature that provides valuable debug data regarding authentication and authorization processes, which is logged in the system. Within this data, there is a specific field called threat_suspected, which represents Okta's internal evaluation of the authentication or authorization workflow. When this field is set to True, it suggests the presence of potential credential access techniques, such as password-spraying, brute-forcing, replay attacks, and other similar threats.",
+        "index": [
+            "filebeat-*",
+            "logs-okta*"
+        ],
+        "language": "kuery",
+        "license": "Elastic License v2",
+        "name": "Okta ThreatInsight Threat Suspected Promotion",
+        "note": "## Triage and analysis\n\nThis is a promotion rule for Okta ThreatInsight suspected threat events, which are alertable events per the vendor.\nConsult vendor documentation on interpreting specific events.",
+        "query": "event.dataset:okta.system and (event.action:security.threat.detected or okta.debug_context.debug_data.threat_suspected: true)\n",
+        "references": [
+            "https://developer.okta.com/docs/reference/api/system-log/",
+            "https://developer.okta.com/docs/reference/api/event-types/",
+            "https://help.okta.com/en-us/Content/Topics/Security/threat-insight/configure-threatinsight-system-log.html",
+            "https://www.elastic.co/security-labs/testing-okta-visibility-and-detection-dorothy"
+        ],
+        "related_integrations": [
+            {
+                "package": "okta",
+                "version": "^2.0.0"
+            }
+        ],
+        "required_fields": [
+            {
+                "ecs": true,
+                "name": "event.action",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "event.dataset",
+                "type": "keyword"
+            },
+            {
+                "ecs": false,
+                "name": "okta.debug_context.debug_data.threat_suspected",
+                "type": "keyword"
+            }
+        ],
+        "risk_score": 47,
+        "rule_id": "6885d2ae-e008-4762-b98a-e8e1cd3a81e9",
+        "rule_name_override": "okta.display_message",
+        "setup": "",
+        "severity": "medium",
+        "severity_mapping": [
+            {
+                "field": "okta.debug_context.debug_data.risk_level",
+                "operator": "equals",
+                "severity": "low",
+                "value": "LOW"
+            },
+            {
+                "field": "okta.debug_context.debug_data.risk_level",
+                "operator": "equals",
+                "severity": "medium",
+                "value": "MEDIUM"
+            },
+            {
+                "field": "okta.debug_context.debug_data.risk_level",
+                "operator": "equals",
+                "severity": "high",
+                "value": "HIGH"
+            }
+        ],
+        "tags": [
+            "Use Case: Identity and Access Audit",
+            "Data Source: Okta"
+        ],
+        "timestamp_override": "event.ingested",
+        "type": "query",
+        "version": 205
+    },
+    "id": "6885d2ae-e008-4762-b98a-e8e1cd3a81e9_205",
+    "type": "security-rule"
+}

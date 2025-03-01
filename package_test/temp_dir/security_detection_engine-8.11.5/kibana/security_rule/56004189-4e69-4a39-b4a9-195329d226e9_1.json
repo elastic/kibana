@@ -1,0 +1,59 @@
+{
+    "attributes": {
+        "anomaly_threshold": 75,
+        "author": [
+            "Elastic"
+        ],
+        "description": "A machine learning job has detected a suspicious Windows process. This process has been classified as suspicious in two ways. It was predicted to be suspicious by the ProblemChild supervised ML model, and it was found to be an unusual process, on a host that does not commonly manifest malicious activity. Such a process may be an instance of suspicious or malicious activity, possibly involving LOLbins, that may be resistant to detection using conventional search rules.",
+        "from": "now-45m",
+        "interval": "15m",
+        "license": "Elastic License v2",
+        "machine_learning_job_id": "problem_child_rare_process_by_host",
+        "name": "Unusual Process Spawned by a Host",
+        "note": "",
+        "references": [
+            "https://www.elastic.co/guide/en/security/current/prebuilt-ml-jobs.html",
+            "https://docs.elastic.co/en/integrations/problemchild",
+            "https://www.elastic.co/security-labs/detecting-living-off-the-land-attacks-with-new-elastic-integration"
+        ],
+        "related_integrations": [
+            {
+                "package": "problemchild",
+                "version": "^2.0.0"
+            }
+        ],
+        "risk_score": 21,
+        "rule_id": "56004189-4e69-4a39-b4a9-195329d226e9",
+        "setup": "The Living-off-the-Land (LotL) Detection integration must be enabled and related ML jobs configured for this rule to be effective. Please refer to this rule's references for more information.",
+        "severity": "low",
+        "tags": [
+            "Domain: Endpoint",
+            "OS: Windows",
+            "Use Case: Living off the Land Attack Detection",
+            "Rule Type: ML",
+            "Rule Type: Machine Learning",
+            "Tactic: Defense Evasion"
+        ],
+        "threat": [
+            {
+                "framework": "MITRE ATT\u0026CK",
+                "tactic": {
+                    "id": "TA0005",
+                    "name": "Defense Evasion",
+                    "reference": "https://attack.mitre.org/tactics/TA0005/"
+                },
+                "technique": [
+                    {
+                        "id": "T1218",
+                        "name": "System Binary Proxy Execution",
+                        "reference": "https://attack.mitre.org/techniques/T1218/"
+                    }
+                ]
+            }
+        ],
+        "type": "machine_learning",
+        "version": 1
+    },
+    "id": "56004189-4e69-4a39-b4a9-195329d226e9_1",
+    "type": "security-rule"
+}

@@ -1,0 +1,102 @@
+{
+    "attributes": {
+        "author": [
+            "Elastic"
+        ],
+        "description": "This rule monitors for the usage of the built-in Linux DebugFS utility to access a disk device without root permissions. Linux users that are part of the \"disk\" group have sufficient privileges to access all data inside of the machine through DebugFS. Attackers may leverage DebugFS in conjunction with \"disk\" permissions to read sensitive files owned by root, such as the shadow file, root ssh private keys or other sensitive files that may allow them to further escalate privileges.",
+        "from": "now-9m",
+        "index": [
+            "logs-endpoint.events.*",
+            "endgame-*"
+        ],
+        "language": "eql",
+        "license": "Elastic License v2",
+        "name": "Potential Suspicious DebugFS Root Device Access",
+        "query": "process where host.os.type == \"linux\" and event.action in (\"exec\", \"exec_event\") and event.type == \"start\" and \nprocess.name == \"debugfs\" and process.args : \"/dev/sd*\" and not user.Ext.real.id == \"0\" and not group.Ext.real.id == \"0\"\n",
+        "references": [
+            "https://book.hacktricks.xyz/linux-hardening/privilege-escalation/interesting-groups-linux-pe#disk-group"
+        ],
+        "related_integrations": [
+            {
+                "package": "endpoint",
+                "version": "^8.2.0"
+            }
+        ],
+        "required_fields": [
+            {
+                "ecs": true,
+                "name": "event.action",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "event.type",
+                "type": "keyword"
+            },
+            {
+                "ecs": false,
+                "name": "group.Ext.real.id",
+                "type": "unknown"
+            },
+            {
+                "ecs": true,
+                "name": "host.os.type",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "process.args",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "process.name",
+                "type": "keyword"
+            },
+            {
+                "ecs": false,
+                "name": "user.Ext.real.id",
+                "type": "unknown"
+            }
+        ],
+        "risk_score": 21,
+        "rule_id": "2605aa59-29ac-4662-afad-8d86257c7c91",
+        "severity": "low",
+        "tags": [
+            "Domain: Endpoint",
+            "OS: Linux",
+            "Use Case: Threat Detection",
+            "Tactic: Privilege Escalation",
+            "Data Source: Elastic Endgame"
+        ],
+        "threat": [
+            {
+                "framework": "MITRE ATT\u0026CK",
+                "tactic": {
+                    "id": "TA0004",
+                    "name": "Privilege Escalation",
+                    "reference": "https://attack.mitre.org/tactics/TA0004/"
+                },
+                "technique": [
+                    {
+                        "id": "T1078",
+                        "name": "Valid Accounts",
+                        "reference": "https://attack.mitre.org/techniques/T1078/",
+                        "subtechnique": [
+                            {
+                                "id": "T1078.003",
+                                "name": "Local Accounts",
+                                "reference": "https://attack.mitre.org/techniques/T1078/003/"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ],
+        "timestamp_override": "event.ingested",
+        "type": "eql",
+        "version": 1
+    },
+    "id": "2605aa59-29ac-4662-afad-8d86257c7c91_1",
+    "type": "security-rule"
+}

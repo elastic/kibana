@@ -1,0 +1,90 @@
+{
+  "attributes": {
+    "author": [
+      "Elastic"
+    ],
+    "building_block_type": "default",
+    "description": "Identifies when an AWS Lambda function is created or updated. AWS Lambda lets you run code without provisioning or managing servers. Adversaries can create or update Lambda functions to execute malicious code, exfiltrate data, or escalate privileges. This is a [building block rule](https://www.elastic.co/guide/en/security/current/building-block-rule.html) that does not generate alerts, but signals when a Lambda function is created or updated that matches the rule's conditions. To generate alerts, create a rule that uses this signal as a building block.",
+    "false_positives": [
+      "Legitimate changes to Lambda functions can trigger this signal. Ensure that the changes are authorized and align with your organization's policies."
+    ],
+    "from": "now-60m",
+    "index": [
+      "filebeat-*",
+      "logs-aws.cloudtrail-*"
+    ],
+    "interval": "10m",
+    "language": "kuery",
+    "license": "Elastic License v2",
+    "name": "AWS Lambda Function Created or Updated",
+    "query": "event.dataset: \"aws.cloudtrail\"\n    and event.provider: \"lambda.amazonaws.com\"\n    and event.outcome: \"success\"\n    and event.action: (CreateFunction* or UpdateFunctionCode*)\n",
+    "references": [
+      "https://mattslifebytes.com/2023/04/14/from-rebuilds-to-reloads-hacking-aws-lambda-to-enable-instant-code-updates/",
+      "https://stratus-red-team.cloud/attack-techniques/AWS/aws.persistence.lambda-overwrite-code/",
+      "https://docs.aws.amazon.com/lambda/latest/api/API_UpdateFunctionCode.html"
+    ],
+    "related_integrations": [
+      {
+        "integration": "cloudtrail",
+        "package": "aws",
+        "version": "^2.0.0"
+      }
+    ],
+    "required_fields": [
+      {
+        "ecs": true,
+        "name": "event.action",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "event.dataset",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "event.outcome",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "event.provider",
+        "type": "keyword"
+      }
+    ],
+    "risk_score": 21,
+    "rule_id": "1251b98a-ff45-11ee-89a1-f661ea17fbce",
+    "severity": "low",
+    "tags": [
+      "Domain: Cloud",
+      "Data Source: AWS",
+      "Data Source: Amazon Web Services",
+      "Data Source: AWS Lambda",
+      "Use Case: Asset Visibility",
+      "Tactic: Execution",
+      "Rule Type: BBR"
+    ],
+    "threat": [
+      {
+        "framework": "MITRE ATT&CK",
+        "tactic": {
+          "id": "TA0002",
+          "name": "Execution",
+          "reference": "https://attack.mitre.org/tactics/TA0002/"
+        },
+        "technique": [
+          {
+            "id": "T1648",
+            "name": "Serverless Execution",
+            "reference": "https://attack.mitre.org/techniques/T1648/"
+          }
+        ]
+      }
+    ],
+    "timestamp_override": "event.ingested",
+    "type": "query",
+    "version": 2
+  },
+  "id": "1251b98a-ff45-11ee-89a1-f661ea17fbce_2",
+  "type": "security-rule"
+}

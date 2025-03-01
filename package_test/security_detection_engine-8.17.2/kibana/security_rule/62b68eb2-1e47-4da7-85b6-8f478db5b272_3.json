@@ -1,0 +1,110 @@
+{
+  "attributes": {
+    "author": [
+      "Elastic"
+    ],
+    "building_block_type": "default",
+    "description": "Identifies potentially malicious processes communicating via a port paring typically not associated with HTTP/HTTPS. For example, HTTP over port 8443 or port 440 as opposed to the traditional port 80 , 443. Adversaries may make changes to the standard port a protocol uses to bypass filtering or muddle analysis/parsing of network data.",
+    "from": "now-119m",
+    "index": [
+      "logs-endpoint.events.*"
+    ],
+    "interval": "60m",
+    "language": "eql",
+    "license": "Elastic License v2",
+    "name": "Potential Non-Standard Port HTTP/HTTPS connection",
+    "note": "## Triage and analysis\n\n### Investigating Potential Non-Standard Port HTTP/HTTPS connection\n\nAttackers may alter standard protocol ports, like using HTTP on port 8443 instead of 80, to bypass network filtering and complicate network data analysis. \n\nThis rule looks for HTTP/HTTPS processes where the destination port is not any of the default 80/443 HTTP/HTTPS ports. \n\n> **Note**:\n> This investigation guide uses the [Osquery Markdown Plugin](https://www.elastic.co/guide/en/security/master/invest-guide-run-osquery.html) introduced in Elastic Stack version 8.5.0. Older Elastic Stack versions will display unrendered Markdown in this guide.\n> This investigation guide uses [placeholder fields](https://www.elastic.co/guide/en/security/current/osquery-placeholder-fields.html) to dynamically pass alert data into Osquery queries. Placeholder fields were introduced in Elastic Stack version 8.7.0. If you're using Elastic Stack version 8.6.0 or earlier, you'll need to manually adjust this investigation guide's queries to ensure they properly run.\n\n#### Possible investigation steps\n\n- Identify any signs of suspicious network activity or anomalies that may indicate command and control activity or data exfiltration. This could include unexpected traffic patterns or unusual network behavior.\n  - Investigate listening ports and open sockets to look for potential suspicious network traffic, reverse shells or data exfiltration.\n    - !{osquery{\"label\":\"Osquery - Retrieve Listening Ports\",\"query\":\"SELECT pid, address, port, socket, protocol, path FROM listening_ports\"}}\n    - !{osquery{\"label\":\"Osquery - Retrieve Open Sockets\",\"query\":\"SELECT pid, family, remote_address, remote_port, socket, state FROM process_open_sockets\"}}\n- Identify the user account that performed the action, analyze it, and check whether it should perform this kind of action.\n  - !{osquery{\"label\":\"Osquery - Retrieve Information for a Specific User\",\"query\":\"SELECT * FROM users WHERE username = {{user.name}}\"}}\n- Investigate whether the user is currently logged in and active.\n  - !{osquery{\"label\":\"Osquery - Investigate the Account Authentication Status\",\"query\":\"SELECT * FROM logged_in_users WHERE user = {{user.name}}\"}}\n- Investigate the script execution chain (parent process tree) for unknown processes. Examine their executable files for prevalence and whether they are located in expected locations.\n  - !{osquery{\"label\":\"Osquery - Retrieve Running Processes by User\",\"query\":\"SELECT pid, username, name FROM processes p JOIN users u ON u.uid = p.uid ORDER BY username\"}}\n  - !{osquery{\"label\":\"Osquery - Retrieve Process Info\",\"query\":\"SELECT name, cmdline, parent, path, uid FROM processes\"}}\n- Investigate other alerts associated with the user/host during the past 48 hours.\n  - If scripts or executables were dropped, retrieve the files and determine if they are malicious:\n    - Use a private sandboxed malware analysis system to perform analysis.\n      - Observe and collect information about the following activities:\n        - Attempts to contact external domains and addresses.\n          - Check if the domain is newly registered or unexpected.\n          - Check the reputation of the domain or IP address.\n        - File access, modification, and creation activities.\n\n### Related rules\n\n- Suspicious Network Activity to the Internet by Previously Unknown Executable - 53617418-17b4-4e9c-8a2c-8deb8086ca4b\n\n### False positive analysis\n\n- If this activity is related to new benign software installation activity, consider adding exceptions — preferably with a combination of user and command line conditions.\n- Try to understand the context of the execution by thinking about the user, machine, or business purpose. A small number of endpoints, such as servers with unique software, might appear unusual but satisfy a specific business need.\n\n### Response and remediation\n\n- Initiate the incident response process based on the outcome of the triage.\n- Isolate the involved host to prevent further post-compromise behavior.\n- If the triage identified malware, search the environment for additional compromised hosts.\n  - Implement temporary network rules, procedures, and segmentation to contain the malware.\n  - Stop suspicious processes.\n  - Immediately block the identified indicators of compromise (IoCs).\n  - Inspect the affected systems for additional malware backdoors, such as reverse shells, reverse proxies, or droppers, that attackers could use to reinfect the system.\n- Remove and block malicious artifacts identified during triage.\n- Investigate credential exposure on systems compromised or used by the attacker to ensure all compromised accounts are identified. Reset passwords for these accounts and other potentially compromised credentials, such as email, business systems, and web services.\n- Run a full antimalware scan. This may reveal additional artifacts left in the system, persistence mechanisms, and malware components.\n- Determine the initial vector abused by the attacker and take action to prevent reinfection through the same vector.\n- Leverage the incident response data and logging to improve the mean time to detect (MTTD) and the mean time to respond (MTTR).\n",
+    "query": "network where process.name : (\"http\", \"https\")\n  and destination.port not in (80, 443)\n  and event.action in (\"connection_attempted\", \"connection_accepted\")\n  and destination.ip != \"127.0.0.1\"\n",
+    "related_integrations": [
+      {
+        "package": "endpoint",
+        "version": "^8.2.0"
+      }
+    ],
+    "required_fields": [
+      {
+        "ecs": true,
+        "name": "destination.ip",
+        "type": "ip"
+      },
+      {
+        "ecs": true,
+        "name": "destination.port",
+        "type": "long"
+      },
+      {
+        "ecs": true,
+        "name": "event.action",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "process.name",
+        "type": "keyword"
+      }
+    ],
+    "risk_score": 21,
+    "rule_id": "62b68eb2-1e47-4da7-85b6-8f478db5b272",
+    "severity": "low",
+    "tags": [
+      "Domain: Endpoint",
+      "OS: Linux",
+      "OS: macOS",
+      "Use Case: Threat Detection",
+      "Tactic: Command and Control",
+      "Rule Type: BBR",
+      "Data Source: Elastic Defend"
+    ],
+    "threat": [
+      {
+        "framework": "MITRE ATT&CK",
+        "tactic": {
+          "id": "TA0011",
+          "name": "Command and Control",
+          "reference": "https://attack.mitre.org/tactics/TA0011/"
+        },
+        "technique": [
+          {
+            "id": "T1571",
+            "name": "Non-Standard Port",
+            "reference": "https://attack.mitre.org/techniques/T1571/"
+          },
+          {
+            "id": "T1071",
+            "name": "Application Layer Protocol",
+            "reference": "https://attack.mitre.org/techniques/T1071/",
+            "subtechnique": [
+              {
+                "id": "T1071.001",
+                "name": "Web Protocols",
+                "reference": "https://attack.mitre.org/techniques/T1071/001/"
+              }
+            ]
+          },
+          {
+            "id": "T1573",
+            "name": "Encrypted Channel",
+            "reference": "https://attack.mitre.org/techniques/T1573/",
+            "subtechnique": [
+              {
+                "id": "T1573.001",
+                "name": "Symmetric Cryptography",
+                "reference": "https://attack.mitre.org/techniques/T1573/001/"
+              },
+              {
+                "id": "T1573.002",
+                "name": "Asymmetric Cryptography",
+                "reference": "https://attack.mitre.org/techniques/T1573/002/"
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "timestamp_override": "event.ingested",
+    "type": "eql",
+    "version": 3
+  },
+  "id": "62b68eb2-1e47-4da7-85b6-8f478db5b272_3",
+  "type": "security-rule"
+}

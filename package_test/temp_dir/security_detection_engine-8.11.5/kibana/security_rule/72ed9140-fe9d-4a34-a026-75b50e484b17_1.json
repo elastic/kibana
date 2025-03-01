@@ -1,0 +1,65 @@
+{
+    "attributes": {
+        "author": [
+            "Elastic"
+        ],
+        "description": "This rule leverages alert data from various Discovery building block rules to alert on signals with unusual unique host.id, user.id and process.executable entries.",
+        "from": "now-9m",
+        "history_window_start": "now-14d",
+        "index": [
+            ".alerts-security.*"
+        ],
+        "language": "kuery",
+        "license": "Elastic License v2",
+        "name": "Unusual Discovery Signal Alert with Unusual Process Executable",
+        "new_terms_fields": [
+            "host.id",
+            "user.id",
+            "process.executable"
+        ],
+        "query": "host.os.type:windows and event.kind:signal and kibana.alert.rule.rule_id:\"1d72d014-e2ab-4707-b056-9b96abe7b511\"\n",
+        "required_fields": [
+            {
+                "ecs": true,
+                "name": "event.kind",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "host.os.type",
+                "type": "keyword"
+            },
+            {
+                "ecs": false,
+                "name": "kibana.alert.rule.rule_id",
+                "type": "unknown"
+            }
+        ],
+        "risk_score": 21,
+        "rule_id": "72ed9140-fe9d-4a34-a026-75b50e484b17",
+        "severity": "low",
+        "tags": [
+            "Domain: Endpoint",
+            "OS: Windows",
+            "Use Case: Threat Detection",
+            "Tactic: Discovery",
+            "Rule Type: Higher-Order Rule"
+        ],
+        "threat": [
+            {
+                "framework": "MITRE ATT\u0026CK",
+                "tactic": {
+                    "id": "TA0007",
+                    "name": "Discovery",
+                    "reference": "https://attack.mitre.org/tactics/TA0007/"
+                },
+                "technique": []
+            }
+        ],
+        "timestamp_override": "event.ingested",
+        "type": "new_terms",
+        "version": 1
+    },
+    "id": "72ed9140-fe9d-4a34-a026-75b50e484b17_1",
+    "type": "security-rule"
+}

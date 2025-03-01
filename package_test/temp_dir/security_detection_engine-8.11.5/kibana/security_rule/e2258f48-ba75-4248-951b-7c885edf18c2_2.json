@@ -1,0 +1,84 @@
+{
+    "attributes": {
+        "author": [
+            "Elastic"
+        ],
+        "description": "Identifies service creation events of common mining services, possibly indicating the infection of a system with a cryptominer.",
+        "from": "now-9m",
+        "index": [
+            "logs-endpoint.events.*",
+            "endgame-*"
+        ],
+        "language": "eql",
+        "license": "Elastic License v2",
+        "name": "Suspicious Mining Process Creation Event",
+        "query": "file where host.os.type == \"linux\" and event.type == \"creation\" and\nevent.action : (\"creation\", \"file_create_event\") and \nfile.name : (\"aliyun.service\", \"moneroocean_miner.service\", \"c3pool_miner.service\", \"pnsd.service\", \"apache4.service\", \"pastebin.service\", \"xvf.service\")\n",
+        "related_integrations": [
+            {
+                "package": "endpoint",
+                "version": "^8.2.0"
+            }
+        ],
+        "required_fields": [
+            {
+                "ecs": true,
+                "name": "event.action",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "event.type",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "file.name",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "host.os.type",
+                "type": "keyword"
+            }
+        ],
+        "risk_score": 47,
+        "rule_id": "e2258f48-ba75-4248-951b-7c885edf18c2",
+        "severity": "medium",
+        "tags": [
+            "Domain: Endpoint",
+            "OS: Linux",
+            "Use Case: Threat Detection",
+            "Tactic: Execution",
+            "Data Source: Elastic Endgame"
+        ],
+        "threat": [
+            {
+                "framework": "MITRE ATT\u0026CK",
+                "tactic": {
+                    "id": "TA0002",
+                    "name": "Execution",
+                    "reference": "https://attack.mitre.org/tactics/TA0002/"
+                },
+                "technique": [
+                    {
+                        "id": "T1059",
+                        "name": "Command and Scripting Interpreter",
+                        "reference": "https://attack.mitre.org/techniques/T1059/",
+                        "subtechnique": [
+                            {
+                                "id": "T1059.004",
+                                "name": "Unix Shell",
+                                "reference": "https://attack.mitre.org/techniques/T1059/004/"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ],
+        "timestamp_override": "event.ingested",
+        "type": "eql",
+        "version": 2
+    },
+    "id": "e2258f48-ba75-4248-951b-7c885edf18c2_2",
+    "type": "security-rule"
+}

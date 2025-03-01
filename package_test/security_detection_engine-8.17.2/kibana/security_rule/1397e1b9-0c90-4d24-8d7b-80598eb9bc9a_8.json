@@ -1,0 +1,136 @@
+{
+  "attributes": {
+    "author": [
+      "Elastic"
+    ],
+    "description": "This rule identifies a high number (20) of file creation event by the System virtual process from the same host and with same file name containing keywords similar to ransomware note files and all within a short time period.",
+    "from": "now-9m",
+    "index": [
+      "logs-endpoint.events.file-*",
+      "winlogbeat-*",
+      "logs-windows.sysmon_operational-*",
+      "endgame-*",
+      "logs-m365_defender.event-*",
+      "logs-sentinel_one_cloud_funnel.*"
+    ],
+    "language": "kuery",
+    "license": "Elastic License v2",
+    "name": "Potential Ransomware Behavior - High count of Readme files by System",
+    "note": "## Triage and analysis\n\n#### Possible investigation steps\n\n- Investigate the content of the readme files.\n- Investigate any file names with unusual extensions.\n- Investigate any incoming network connection to port 445 on this host.\n- Investigate any network logon events to this host.\n- Identify the total number and type of modified files by pid 4.\n- If the number of files is too high and source.ip connecting over SMB is unusual isolate the host and block the used credentials.\n- Investigate other alerts associated with the user/host during the past 48 hours.\n\n### False positive analysis\n\n- Local file modification from a Kernel mode driver.\n\n### Related rules\n\n- Third-party Backup Files Deleted via Unexpected Process - 11ea6bec-ebde-4d71-a8e9-784948f8e3e9\n- Volume Shadow Copy Deleted or Resized via VssAdmin - b5ea4bfe-a1b2-421f-9d47-22a75a6f2921\n- Volume Shadow Copy Deletion via PowerShell - d99a037b-c8e2-47a5-97b9-170d076827c4\n- Volume Shadow Copy Deletion via WMIC - dc9c1f74-dac3-48e3-b47f-eb79db358f57\n- Potential Ransomware Note File Dropped via SMB - 02bab13d-fb14-4d7c-b6fe-4a28874d37c5\n- Suspicious File Renamed via SMB - 78e9b5d5-7c07-40a7-a591-3dbbf464c386\n\n### Response and remediation\n\n- Initiate the incident response process based on the outcome of the triage.\n- Consider isolating the involved host to prevent destructive behavior, which is commonly associated with this activity.\n- Investigate credential exposure on systems compromised or used by the attacker to ensure all compromised accounts are identified. Reset passwords for these accounts and other potentially compromised credentials, such as email, business systems, and web services.\n- If any other destructive action was identified on the host, it is recommended to prioritize the investigation and look for ransomware preparation and execution activities.\n- If any backups were affected:\n  - Perform data recovery locally or restore the backups from replicated copies (cloud, other servers, etc.).\n- Determine the initial vector abused by the attacker and take action to prevent reinfection through the same vector.\n- Using the incident response data, update logging and audit policies to improve the mean time to detect (MTTD) and the mean time to respond (MTTR).\n",
+    "query": "event.category:file and host.os.type:windows and process.pid:4 and event.action:creation and\n file.name:(*read*me* or *README* or *lock* or *LOCK* or *how*to* or *HOW*TO* or *@* or *recover* or *RECOVER* or *decrypt* or *DECRYPT* or *restore* or *RESTORE* or *FILES_BACK* or *files_back*)\n",
+    "references": [
+      "https://news.sophos.com/en-us/2023/12/21/akira-again-the-ransomware-that-keeps-on-taking/"
+    ],
+    "related_integrations": [
+      {
+        "package": "endpoint",
+        "version": "^8.2.0"
+      },
+      {
+        "package": "windows",
+        "version": "^1.5.0"
+      },
+      {
+        "package": "m365_defender",
+        "version": "^2.0.0"
+      },
+      {
+        "package": "sentinel_one_cloud_funnel",
+        "version": "^0.1.0"
+      }
+    ],
+    "required_fields": [
+      {
+        "ecs": true,
+        "name": "event.action",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "event.category",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "file.name",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "host.os.type",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "process.pid",
+        "type": "long"
+      }
+    ],
+    "risk_score": 73,
+    "rule_id": "1397e1b9-0c90-4d24-8d7b-80598eb9bc9a",
+    "severity": "high",
+    "tags": [
+      "Domain: Endpoint",
+      "OS: Windows",
+      "Use Case: Threat Detection",
+      "Tactic: Impact",
+      "Resources: Investigation Guide",
+      "Data Source: Elastic Defend",
+      "Data Source: Elastic Endgame",
+      "Data Source: Microsoft Defender for Endpoint",
+      "Data Source: Sysmon",
+      "Data Source: SentinelOne"
+    ],
+    "threat": [
+      {
+        "framework": "MITRE ATT&CK",
+        "tactic": {
+          "id": "TA0040",
+          "name": "Impact",
+          "reference": "https://attack.mitre.org/tactics/TA0040/"
+        },
+        "technique": [
+          {
+            "id": "T1485",
+            "name": "Data Destruction",
+            "reference": "https://attack.mitre.org/techniques/T1485/"
+          }
+        ]
+      },
+      {
+        "framework": "MITRE ATT&CK",
+        "tactic": {
+          "id": "TA0008",
+          "name": "Lateral Movement",
+          "reference": "https://attack.mitre.org/tactics/TA0008/"
+        },
+        "technique": [
+          {
+            "id": "T1021",
+            "name": "Remote Services",
+            "reference": "https://attack.mitre.org/techniques/T1021/",
+            "subtechnique": [
+              {
+                "id": "T1021.002",
+                "name": "SMB/Windows Admin Shares",
+                "reference": "https://attack.mitre.org/techniques/T1021/002/"
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "threshold": {
+      "field": [
+        "host.id",
+        "file.name"
+      ],
+      "value": 20
+    },
+    "timestamp_override": "event.ingested",
+    "type": "threshold",
+    "version": 8
+  },
+  "id": "1397e1b9-0c90-4d24-8d7b-80598eb9bc9a_8",
+  "type": "security-rule"
+}

@@ -1,0 +1,95 @@
+{
+    "attributes": {
+        "author": [
+            "Elastic"
+        ],
+        "building_block_type": "default",
+        "description": "Identifies the creation of an archive file with an unusual extension. Attackers may attempt to evade detection by masquerading files using the file extension values used by image, audio, or document file types.",
+        "from": "now-9m",
+        "index": [
+            "logs-endpoint.events.*"
+        ],
+        "language": "eql",
+        "license": "Elastic License v2",
+        "name": "Archive File with Unusual Extension",
+        "query": "file where host.os.type == \"windows\" and event.action != \"deletion\" and\n\n  /* common archive file headers - Rar, 7z, GZIP, MSCF, XZ, ZIP */\n  file.Ext.header_bytes : (\"52617221*\", \"377ABCAF271C*\", \"1F8B*\", \"4d534346*\", \"FD377A585A00*\", \"504B0304*\", \"504B0708*\") and\n\n  (\n    /* common image file extensions */\n    file.extension : (\"jpg\", \"jpeg\", \"emf\", \"tiff\", \"gif\", \"png\", \"bmp\", \"ico\", \"fpx\", \"eps\", \"inf\") or\n\n    /* common audio and video file extensions */\n    file.extension : (\"mp3\", \"wav\", \"avi\", \"mpeg\", \"flv\", \"wma\", \"wmv\", \"mov\", \"mp4\", \"3gp\") or\n\n    /* common document file extensions */\n    (file.extension : (\"doc\", \"docx\", \"rtf\", \"ppt\", \"pptx\", \"xls\", \"xlsx\") and\n\n    /* exclude ZIP file header values for OPENXML documents */\n    not file.Ext.header_bytes : (\"504B0304*\", \"504B0708*\"))\n  ) and\n\n  not (process.executable : \"?:\\\\Windows\\\\System32\\\\inetsrv\\\\w3wp.exe\" and file.path : \"?:\\\\inetpub\\\\temp\\\\IIS Temporary Compressed Files\\\\*\")\n",
+        "related_integrations": [
+            {
+                "package": "endpoint",
+                "version": "^8.2.0"
+            }
+        ],
+        "required_fields": [
+            {
+                "ecs": true,
+                "name": "event.action",
+                "type": "keyword"
+            },
+            {
+                "ecs": false,
+                "name": "file.Ext.header_bytes",
+                "type": "unknown"
+            },
+            {
+                "ecs": true,
+                "name": "file.extension",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "file.path",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "host.os.type",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "process.executable",
+                "type": "keyword"
+            }
+        ],
+        "risk_score": 21,
+        "rule_id": "cffbaf47-9391-4e09-a83c-1f27d7474826",
+        "severity": "low",
+        "tags": [
+            "Domain: Endpoint",
+            "OS: Windows",
+            "Use Case: Threat Detection",
+            "Tactic: Defense Evasion",
+            "Data Source: Elastic Defend",
+            "Rule Type: BBR"
+        ],
+        "threat": [
+            {
+                "framework": "MITRE ATT\u0026CK",
+                "tactic": {
+                    "id": "TA0005",
+                    "name": "Defense Evasion",
+                    "reference": "https://attack.mitre.org/tactics/TA0005/"
+                },
+                "technique": [
+                    {
+                        "id": "T1036",
+                        "name": "Masquerading",
+                        "reference": "https://attack.mitre.org/techniques/T1036/",
+                        "subtechnique": [
+                            {
+                                "id": "T1036.008",
+                                "name": "Masquerade File Type",
+                                "reference": "https://attack.mitre.org/techniques/T1036/008/"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ],
+        "timestamp_override": "event.ingested",
+        "type": "eql",
+        "version": 1
+    },
+    "id": "cffbaf47-9391-4e09-a83c-1f27d7474826_1",
+    "type": "security-rule"
+}

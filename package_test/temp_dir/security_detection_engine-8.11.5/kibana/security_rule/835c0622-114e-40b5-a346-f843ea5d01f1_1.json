@@ -1,0 +1,96 @@
+{
+    "attributes": {
+        "author": [
+            "Elastic"
+        ],
+        "description": "Identifies multiple consecutive login attempts executed by one process targeting a local linux user account within a short time interval. Adversaries might brute force login attempts across different users with a default wordlist or a set of customly crafted passwords in an attempt to gain access to these accounts.",
+        "from": "now-9m",
+        "index": [
+            "logs-endpoint.events.*"
+        ],
+        "language": "eql",
+        "license": "Elastic License v2",
+        "name": "Potential Linux Local Account Brute Force Detected",
+        "query": "sequence by host.id, process.parent.executable, user.name with maxspan=1s\n[ process where host.os.type == \"linux\" and event.type == \"start\" and \n  event.action == \"exec\" and process.name == \"su\" ] with runs=10\n",
+        "related_integrations": [
+            {
+                "package": "endpoint",
+                "version": "^8.2.0"
+            }
+        ],
+        "required_fields": [
+            {
+                "ecs": true,
+                "name": "event.action",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "event.type",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "host.id",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "host.os.type",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "process.name",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "process.parent.executable",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "user.name",
+                "type": "keyword"
+            }
+        ],
+        "risk_score": 47,
+        "rule_id": "835c0622-114e-40b5-a346-f843ea5d01f1",
+        "severity": "medium",
+        "tags": [
+            "Domain: Endpoint",
+            "OS: Linux",
+            "Use Case: Threat Detection",
+            "Tactic: Credential Access"
+        ],
+        "threat": [
+            {
+                "framework": "MITRE ATT\u0026CK",
+                "tactic": {
+                    "id": "TA0006",
+                    "name": "Credential Access",
+                    "reference": "https://attack.mitre.org/tactics/TA0006/"
+                },
+                "technique": [
+                    {
+                        "id": "T1110",
+                        "name": "Brute Force",
+                        "reference": "https://attack.mitre.org/techniques/T1110/",
+                        "subtechnique": [
+                            {
+                                "id": "T1110.001",
+                                "name": "Password Guessing",
+                                "reference": "https://attack.mitre.org/techniques/T1110/001/"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ],
+        "type": "eql",
+        "version": 1
+    },
+    "id": "835c0622-114e-40b5-a346-f843ea5d01f1_1",
+    "type": "security-rule"
+}

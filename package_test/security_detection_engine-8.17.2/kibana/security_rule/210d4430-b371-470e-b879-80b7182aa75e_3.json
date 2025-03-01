@@ -1,0 +1,122 @@
+{
+  "attributes": {
+    "author": [
+      "Elastic"
+    ],
+    "description": "Managed Object Format (MOF) files can be compiled locally or remotely through mofcomp.exe. Attackers may leverage MOF files to build their own namespaces and classes into the Windows Management Instrumentation (WMI) repository, or establish persistence using WMI Event Subscription.",
+    "from": "now-9m",
+    "index": [
+      "logs-endpoint.events.process-*",
+      "logs-m365_defender.event-*",
+      "endgame-*",
+      "logs-system.security-*"
+    ],
+    "language": "eql",
+    "license": "Elastic License v2",
+    "name": "Mofcomp Activity",
+    "query": "process where host.os.type == \"windows\" and event.type == \"start\" and\n  process.name : \"mofcomp.exe\" and process.args : \"*.mof\" and\n  not user.id : \"S-1-5-18\" and\n  not\n  (\n    process.parent.name : \"ScenarioEngine.exe\" and\n    process.args : (\n      \"*\\\\MSSQL\\\\Binn\\\\*.mof\",\n      \"*\\\\Microsoft SQL Server\\\\???\\\\Shared\\\\*.mof\",\n      \"*\\\\OLAP\\\\bin\\\\*.mof\"\n    )\n  )\n",
+    "related_integrations": [
+      {
+        "package": "endpoint",
+        "version": "^8.2.0"
+      },
+      {
+        "package": "m365_defender",
+        "version": "^2.0.0"
+      },
+      {
+        "package": "system",
+        "version": "^1.6.4"
+      }
+    ],
+    "required_fields": [
+      {
+        "ecs": true,
+        "name": "event.type",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "host.os.type",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "process.args",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "process.name",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "process.parent.name",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "user.id",
+        "type": "keyword"
+      }
+    ],
+    "risk_score": 21,
+    "rule_id": "210d4430-b371-470e-b879-80b7182aa75e",
+    "severity": "low",
+    "tags": [
+      "Domain: Endpoint",
+      "OS: Windows",
+      "Use Case: Threat Detection",
+      "Tactic: Execution",
+      "Data Source: Elastic Defend",
+      "Data Source: Microsoft Defender for Endpoint",
+      "Data Source: Elastic Endgame",
+      "Data Source: System"
+    ],
+    "threat": [
+      {
+        "framework": "MITRE ATT&CK",
+        "tactic": {
+          "id": "TA0002",
+          "name": "Execution",
+          "reference": "https://attack.mitre.org/tactics/TA0002/"
+        },
+        "technique": [
+          {
+            "id": "T1047",
+            "name": "Windows Management Instrumentation",
+            "reference": "https://attack.mitre.org/techniques/T1047/"
+          }
+        ]
+      },
+      {
+        "framework": "MITRE ATT&CK",
+        "tactic": {
+          "id": "TA0003",
+          "name": "Persistence",
+          "reference": "https://attack.mitre.org/tactics/TA0003/"
+        },
+        "technique": [
+          {
+            "id": "T1546",
+            "name": "Event Triggered Execution",
+            "reference": "https://attack.mitre.org/techniques/T1546/",
+            "subtechnique": [
+              {
+                "id": "T1546.003",
+                "name": "Windows Management Instrumentation Event Subscription",
+                "reference": "https://attack.mitre.org/techniques/T1546/003/"
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "timestamp_override": "event.ingested",
+    "type": "eql",
+    "version": 3
+  },
+  "id": "210d4430-b371-470e-b879-80b7182aa75e_3",
+  "type": "security-rule"
+}

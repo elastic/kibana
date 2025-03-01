@@ -1,0 +1,121 @@
+{
+    "attributes": {
+        "author": [
+            "Elastic"
+        ],
+        "description": "Systemd service files are configuration files in Linux systems used to define and manage system services. Malicious actors can leverage systemd service files to achieve persistence by creating or modifying service files to execute malicious commands or payloads during system startup. This allows them to maintain unauthorized access, execute additional malicious activities, or evade detection.",
+        "from": "now-9m",
+        "history_window_start": "now-7d",
+        "index": [
+            "logs-endpoint.events.*",
+            "endgame-*"
+        ],
+        "language": "kuery",
+        "license": "Elastic License v2",
+        "name": "New Systemd Service Created by Previously Unknown Process",
+        "new_terms_fields": [
+            "file.path",
+            "process.name"
+        ],
+        "query": "host.os.type : \"linux\" and event.action : (\"creation\" or \"file_create_event\") and\nfile.path : (/etc/systemd/system/* or /usr/local/lib/systemd/system/* or /lib/systemd/system/* or \n/usr/lib/systemd/system/* or /home/*/.config/systemd/user/*) and not \n(process.name : (\"dpkg\" or \"dockerd\" or \"rpm\" or \"snapd\" or \"yum\" or \"exe\" or \"dnf\" or \"dnf-automatic\" or python* or \n \"elastic-agent\" or \"cinc-client\") or file.extension : (\"swp\" or \"swx\"))\n",
+        "references": [
+            "https://opensource.com/article/20/7/systemd-timers",
+            "https://pberba.github.io/security/2022/01/30/linux-threat-hunting-for-persistence-systemd-timers-cron/"
+        ],
+        "related_integrations": [
+            {
+                "package": "endpoint",
+                "version": "^8.2.0"
+            }
+        ],
+        "required_fields": [
+            {
+                "ecs": true,
+                "name": "event.action",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "file.extension",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "file.path",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "host.os.type",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "process.name",
+                "type": "keyword"
+            }
+        ],
+        "risk_score": 47,
+        "rule_id": "17b0a495-4d9f-414c-8ad0-92f018b8e001",
+        "severity": "medium",
+        "tags": [
+            "Domain: Endpoint",
+            "OS: Linux",
+            "Use Case: Threat Detection",
+            "Tactic: Persistence",
+            "Tactic: Privilege Escalation",
+            "Data Source: Elastic Endgame"
+        ],
+        "threat": [
+            {
+                "framework": "MITRE ATT\u0026CK",
+                "tactic": {
+                    "id": "TA0003",
+                    "name": "Persistence",
+                    "reference": "https://attack.mitre.org/tactics/TA0003/"
+                },
+                "technique": [
+                    {
+                        "id": "T1543",
+                        "name": "Create or Modify System Process",
+                        "reference": "https://attack.mitre.org/techniques/T1543/",
+                        "subtechnique": [
+                            {
+                                "id": "T1543.002",
+                                "name": "Systemd Service",
+                                "reference": "https://attack.mitre.org/techniques/T1543/002/"
+                            }
+                        ]
+                    }
+                ]
+            },
+            {
+                "framework": "MITRE ATT\u0026CK",
+                "tactic": {
+                    "id": "TA0004",
+                    "name": "Privilege Escalation",
+                    "reference": "https://attack.mitre.org/tactics/TA0004/"
+                },
+                "technique": [
+                    {
+                        "id": "T1543",
+                        "name": "Create or Modify System Process",
+                        "reference": "https://attack.mitre.org/techniques/T1543/",
+                        "subtechnique": [
+                            {
+                                "id": "T1543.002",
+                                "name": "Systemd Service",
+                                "reference": "https://attack.mitre.org/techniques/T1543/002/"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ],
+        "timestamp_override": "event.ingested",
+        "type": "new_terms",
+        "version": 3
+    },
+    "id": "17b0a495-4d9f-414c-8ad0-92f018b8e001_3",
+    "type": "security-rule"
+}

@@ -1,0 +1,70 @@
+{
+    "attributes": {
+        "author": [
+            "Elastic"
+        ],
+        "building_block_type": "default",
+        "description": "Cross-Site Scripting (XSS) is a type of attack in which malicious scripts are injected into trusted websites. In XSS attacks, an attacker uses a benign web application to send malicious code, generally in the form of a browser-side script. This detection rule identifies the potential malicious executions of such browser-side scripts.",
+        "from": "now-119m",
+        "index": [
+            "apm-*-transaction*",
+            "traces-apm*"
+        ],
+        "interval": "60m",
+        "language": "eql",
+        "license": "Elastic License v2",
+        "name": "Potential Cross Site Scripting (XSS)",
+        "query": "any where processor.name == \"transaction\" and\nurl.fragment : (\"\u003ciframe*\", \"*prompt(*)*\", \"\u003cscript*\u003e\", \"\u003csvg*\u003e\", \"*onerror=*\", \"*javascript*alert*\", \"*eval*(*)*\", \"*onclick=*\",\n\"*alert(document.cookie)*\", \"*alert(document.domain)*\",\"*onresize=*\",\"*onload=*\",\"*onmouseover=*\")\n",
+        "references": [
+            "https://github.com/payloadbox/xss-payload-list"
+        ],
+        "related_integrations": [
+            {
+                "package": "apm",
+                "version": "^8.0.0"
+            }
+        ],
+        "required_fields": [
+            {
+                "ecs": false,
+                "name": "processor.name",
+                "type": "unknown"
+            },
+            {
+                "ecs": true,
+                "name": "url.fragment",
+                "type": "keyword"
+            }
+        ],
+        "risk_score": 21,
+        "rule_id": "4aa58ac6-4dc0-4d18-b713-f58bf8bd015c",
+        "severity": "low",
+        "tags": [
+            "Data Source: APM",
+            "Use Case: Threat Detection",
+            "Tactic: Initial Access"
+        ],
+        "threat": [
+            {
+                "framework": "MITRE ATT\u0026CK",
+                "tactic": {
+                    "id": "TA0001",
+                    "name": "Initial Access",
+                    "reference": "https://attack.mitre.org/tactics/TA0001/"
+                },
+                "technique": [
+                    {
+                        "id": "T1189",
+                        "name": "Drive-by Compromise",
+                        "reference": "https://attack.mitre.org/techniques/T1189/"
+                    }
+                ]
+            }
+        ],
+        "timestamp_override": "event.ingested",
+        "type": "eql",
+        "version": 1
+    },
+    "id": "4aa58ac6-4dc0-4d18-b713-f58bf8bd015c_1",
+    "type": "security-rule"
+}

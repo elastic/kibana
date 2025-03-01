@@ -1,0 +1,97 @@
+{
+  "attributes": {
+    "author": [
+      "Thijs Xhaflaire"
+    ],
+    "description": "Identifies a high volume of `pbpaste` executions, which may indicate a bash loop continuously collecting clipboard contents, potentially allowing an attacker to harvest user credentials or other sensitive information.",
+    "from": "now-9m",
+    "index": [
+      "logs-jamf_protect*",
+      "logs-endpoint.events.process-*"
+    ],
+    "language": "eql",
+    "license": "Elastic License v2",
+    "name": "Suspicious pbpaste High Volume Activity",
+    "note": "## Triage and analysis\n\nTo investigate `pbpaste` activity, focus on determining whether the binary is being used maliciously to collect clipboard data. Follow these steps:\n\n> **Note**:\n> This investigation guide uses the [Investigate Markdown Plugin](https://www.elastic.co/guide/en/security/master/interactive-investigation-guides.html) introduced in Elastic Stack version 8.8.0. Older Elastic Stack versions will display unrendered Markdown in this guide.\n\n1. **Identify Frequency and Pattern of Execution:**\n   - **What to check:** Analyze the frequency and timing of `pbpaste` executions. Look for consistent intervals that might indicate a script or loop is running.\n   - **Why:** A high volume of regular `pbpaste` executions could suggest a bash loop designed to continuously capture clipboard data.\n\n2. **Examine Associated Scripts or Processes:**\n   - **What to check:** Investigate the parent processes or scripts invoking `pbpaste`. Look for any cron jobs, bash scripts, or automated tasks linked to these executions.\n   - **Why:** Understanding what is triggering `pbpaste` can help determine if this activity is legitimate or part of a malicious attempt to gather sensitive information.\n   - !{investigate{\"label\":\"Show events having the same parent process\",\"providers\":[[{\"excluded\":false,\"field\":\"host.hostname\",\"queryType\":\"phrase\",\"value\":\"{{host.hostname}}\",\"valueType\":\"string\"},{\"excluded\":false,\"field\":\"process.entity_id\",\"queryType\":\"phrase\",\"value\":\"{{process.parent.entity_id}}\",\"valueType\":\"string\"}]]}}\n   - $investigate_2\n\n3. **Review Clipboard Contents:**\n   - **What to check:** If possible, capture and review the clipboard contents during `pbpaste` executions to identify if sensitive data, such as user credentials, is being targeted.\n   - **Why:** Attackers may use `pbpaste` to harvest valuable information from the clipboard. Identifying the type of data being collected can indicate the severity of the threat.\n\n4. **Check for Data Exfiltration:**\n   - **What to check:** Investigate any output files or network activity associated with `pbpaste` usage. Look for signs that the collected data is being saved to a file, transmitted over the network, or sent to an external location.\n   - **Why:** If data is being stored or transmitted, it may be part of an exfiltration attempt. Identifying this can help prevent sensitive information from being leaked.\n\n5. **Correlate with User Activity:**\n   - **What to check:** Compare the `pbpaste` activity with the user’s normal behavior and system usage patterns.\n   - **Why:** If the `pbpaste` activity occurs during times when the user is not active, or if the user denies initiating such tasks, it could indicate unauthorized access or a compromised account.\n\nBy thoroughly investigating these aspects of `pbpaste` activity, you can determine whether this is part of a legitimate process or a potential security threat that needs to be addressed.\n",
+    "query": "sequence by host.hostname, host.id with maxspan=1m\n[process where host.os.type == \"macos\" and event.type == \"start\" and event.action == \"exec\" and process.name: \"pbpaste\"] with runs = 5\n",
+    "references": [
+      "https://www.loobins.io/binaries/pbpaste/"
+    ],
+    "related_integrations": [
+      {
+        "package": "endpoint",
+        "version": "^8.2.0"
+      },
+      {
+        "package": "jamf_protect",
+        "version": "^2.0.0"
+      }
+    ],
+    "required_fields": [
+      {
+        "ecs": true,
+        "name": "event.action",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "event.type",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "host.hostname",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "host.id",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "host.os.type",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "process.name",
+        "type": "keyword"
+      }
+    ],
+    "risk_score": 47,
+    "rule_id": "e29599ee-d6ad-46a9-9c6a-dc39f361890d",
+    "setup": "## Setup\n\nThis rule requires data coming in from Jamf Protect.\n\n### Jamf Protect Integration Setup\nJamf Protect is integrated into the Elastic Agent using Fleet. Upon configuration, the integration allows the Elastic Agent to monitor events incoming events and send data to the Elastic.\n\n#### Prerequisite Requirements:\n- Fleet is required for Jamf Protect.\n- To configure Fleet Server refer to the [documentation](https://www.elastic.co/guide/en/fleet/current/fleet-server.html).\n\n#### The following steps should be executed in order to add the Jamf Protect integration:\n- Go to the Kibana home page and click \"Add integrations\".\n- In the query bar, search for \"Jamf Protect\" and select the integration to see more details about it.\n- Click \"Add Jamf Protect\".\n- Configure the integration name.\n- Click \"Save and Continue\".\n",
+    "severity": "medium",
+    "tags": [
+      "Domain: Endpoint",
+      "OS: macOS",
+      "Use Case: Threat Detection",
+      "Tactic: Credential Access",
+      "Data Source: Jamf Protect",
+      "Data Source: Elastic Defend"
+    ],
+    "threat": [
+      {
+        "framework": "MITRE ATT&CK",
+        "tactic": {
+          "id": "TA0006",
+          "name": "Credential Access",
+          "reference": "https://attack.mitre.org/tactics/TA0006/"
+        },
+        "technique": [
+          {
+            "id": "T1056",
+            "name": "Input Capture",
+            "reference": "https://attack.mitre.org/techniques/T1056/"
+          }
+        ]
+      }
+    ],
+    "timestamp_override": "event.ingested",
+    "type": "eql",
+    "version": 1
+  },
+  "id": "e29599ee-d6ad-46a9-9c6a-dc39f361890d_1",
+  "type": "security-rule"
+}

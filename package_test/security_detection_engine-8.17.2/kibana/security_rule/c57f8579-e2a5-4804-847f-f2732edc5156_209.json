@@ -1,0 +1,129 @@
+{
+  "attributes": {
+    "author": [
+      "Elastic"
+    ],
+    "description": "Identifies the modification of the Remote Desktop Protocol (RDP) Shadow registry or the execution of processes indicative of an active RDP shadowing session. An adversary may abuse the RDP Shadowing feature to spy on or control other users active RDP sessions.",
+    "from": "now-9m",
+    "index": [
+      "logs-endpoint.events.process-*",
+      "logs-endpoint.events.registry-*",
+      "winlogbeat-*",
+      "logs-windows.sysmon_operational-*",
+      "endgame-*",
+      "logs-m365_defender.event-*",
+      "logs-sentinel_one_cloud_funnel.*"
+    ],
+    "language": "eql",
+    "license": "Elastic License v2",
+    "name": "Potential Remote Desktop Shadowing Activity",
+    "query": "/* Identifies the modification of RDP Shadow registry or\n  the execution of processes indicative of active shadow RDP session */\n\nany where host.os.type == \"windows\" and\n(\n  (event.category == \"registry\" and\n     registry.path : (\n      \"HKLM\\\\Software\\\\Policies\\\\Microsoft\\\\Windows NT\\\\Terminal Services\\\\Shadow\",\n      \"\\\\REGISTRY\\\\MACHINE\\\\Software\\\\Policies\\\\Microsoft\\\\Windows NT\\\\Terminal Services\\\\Shadow\",\n      \"MACHINE\\\\Software\\\\Policies\\\\Microsoft\\\\Windows NT\\\\Terminal Services\\\\Shadow\"\n    )\n  ) or\n  (event.category == \"process\" and event.type == \"start\" and\n     (process.name : (\"RdpSaUacHelper.exe\", \"RdpSaProxy.exe\") and process.parent.name : \"svchost.exe\") or\n     (?process.pe.original_file_name : \"mstsc.exe\" and process.args : \"/shadow:*\")\n  )\n)\n",
+    "references": [
+      "https://bitsadm.in/blog/spying-on-users-using-rdp-shadowing",
+      "https://swarm.ptsecurity.com/remote-desktop-services-shadowing/"
+    ],
+    "related_integrations": [
+      {
+        "package": "endpoint",
+        "version": "^8.2.0"
+      },
+      {
+        "package": "windows",
+        "version": "^1.5.0"
+      },
+      {
+        "package": "m365_defender",
+        "version": "^2.0.0"
+      },
+      {
+        "package": "sentinel_one_cloud_funnel",
+        "version": "^1.0.0"
+      }
+    ],
+    "required_fields": [
+      {
+        "ecs": true,
+        "name": "event.category",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "event.type",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "host.os.type",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "process.args",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "process.name",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "process.parent.name",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "process.pe.original_file_name",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "registry.path",
+        "type": "keyword"
+      }
+    ],
+    "risk_score": 73,
+    "rule_id": "c57f8579-e2a5-4804-847f-f2732edc5156",
+    "severity": "high",
+    "tags": [
+      "Domain: Endpoint",
+      "OS: Windows",
+      "Use Case: Threat Detection",
+      "Tactic: Lateral Movement",
+      "Data Source: Elastic Endgame",
+      "Data Source: Elastic Defend",
+      "Data Source: Sysmon",
+      "Data Source: Microsoft Defender for Endpoint",
+      "Data Source: SentinelOne"
+    ],
+    "threat": [
+      {
+        "framework": "MITRE ATT&CK",
+        "tactic": {
+          "id": "TA0008",
+          "name": "Lateral Movement",
+          "reference": "https://attack.mitre.org/tactics/TA0008/"
+        },
+        "technique": [
+          {
+            "id": "T1021",
+            "name": "Remote Services",
+            "reference": "https://attack.mitre.org/techniques/T1021/",
+            "subtechnique": [
+              {
+                "id": "T1021.001",
+                "name": "Remote Desktop Protocol",
+                "reference": "https://attack.mitre.org/techniques/T1021/001/"
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "timestamp_override": "event.ingested",
+    "type": "eql",
+    "version": 209
+  },
+  "id": "c57f8579-e2a5-4804-847f-f2732edc5156_209",
+  "type": "security-rule"
+}
