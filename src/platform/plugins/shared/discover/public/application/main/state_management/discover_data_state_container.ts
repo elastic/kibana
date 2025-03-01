@@ -212,7 +212,8 @@ export function getDataStateContainer({
         fetchPrevious: val === 'fetch_previous',
       },
       searchSessionId:
-        (val === 'fetch_more' && searchSessionManager.getCurrentSearchSessionId()) ||
+        ((val === 'fetch_more' || val === 'fetch_previous') &&
+          searchSessionManager.getCurrentSearchSessionId()) ||
         searchSessionManager.getNextSearchSessionId(),
     })),
     share()
