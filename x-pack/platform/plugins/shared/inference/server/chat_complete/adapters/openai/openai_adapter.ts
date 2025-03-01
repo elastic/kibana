@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { from, identity, switchMap, throwError } from 'rxjs';
+import { defer, identity, switchMap, throwError } from 'rxjs';
 import { isReadable, Readable } from 'stream';
 import { createInferenceInternalError } from '@kbn/inference-common';
 import { eventSourceStreamIntoObservable } from '../../../util/event_source_stream_into_observable';
@@ -64,8 +64,8 @@ export const openAIAdapter: InferenceConnectorAdapter = {
       };
     }
 
-    return from(
-      executor.invoke({
+    return defer(() => {
+      return executor.invoke({
         subAction: 'stream',
         subActionParams: {
           body: JSON.stringify(request),
@@ -75,8 +75,8 @@ export const openAIAdapter: InferenceConnectorAdapter = {
             ? { telemetryMetadata: metadata.connectorTelemetry }
             : {}),
         },
-      })
-    ).pipe(
+      });
+    }).pipe(
       switchMap((response) => {
         if (response.status === 'error') {
           return throwError(() =>
