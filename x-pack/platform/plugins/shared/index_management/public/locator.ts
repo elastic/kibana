@@ -9,7 +9,10 @@ import { ManagementAppLocator } from '@kbn/management-plugin/common';
 import { LocatorDefinition } from '@kbn/share-plugin/public';
 import { IndexManagementLocatorParams } from '@kbn/index-management-shared-types';
 import {
+  getComponentTemplateCloneLink,
+  getComponentTemplateCreateLink,
   getComponentTemplateDetailLink,
+  getComponentTemplateEditLink,
   getDataStreamDetailsLink,
   getTemplateDetailsLink,
 } from './application/services/routing';
@@ -51,6 +54,24 @@ export class IndexManagementLocatorDefinition
         return {
           ...location,
           path: location.path + getComponentTemplateDetailLink(params.componentTemplate),
+        };
+      }
+      case 'edit_component_template': {
+        return {
+          ...location,
+          path: location.path + getComponentTemplateEditLink(params.componentTemplate),
+        };
+      }
+      case 'clone_component_template': {
+        return {
+          ...location,
+          path: location.path + getComponentTemplateCloneLink(params.componentTemplate),
+        };
+      }
+      case 'create_component_template': {
+        return {
+          ...location,
+          path: location.path + getComponentTemplateCreateLink(params.componentTemplate),
         };
       }
     }
