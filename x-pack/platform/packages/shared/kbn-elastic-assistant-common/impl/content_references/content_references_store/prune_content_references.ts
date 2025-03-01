@@ -6,7 +6,7 @@
  */
 
 import { ContentReferences, ContentReference } from '../../schemas';
-import { getContentReferenceId } from '../references/utils';
+import { getContentReferenceIds } from '../references/utils';
 import { ContentReferencesStore, ContentReferenceBlock } from '../types';
 
 /**
@@ -21,15 +21,17 @@ export const pruneContentReferences = (
 ): ContentReferences => {
   const fullStore = contentReferencesStore.getStore();
   const prunedStore: Record<string, ContentReference> = {};
-  const matches = content.matchAll(/\{reference\([0-9a-zA-Z]+\)\}/g);
+  const matches = content.matchAll(/\{reference\([0-9a-zA-Z, ]+\)\}/g);
 
   for (const match of matches) {
     const referenceElement = match[0];
-    const referenceId = getContentReferenceId(referenceElement as ContentReferenceBlock);
-    if (!(referenceId in prunedStore)) {
-      const contentReference = fullStore[referenceId];
-      if (contentReference) {
-        prunedStore[referenceId] = contentReference;
+    const referenceIds = getContentReferenceIds(referenceElement as ContentReferenceBlock);
+    for (const referenceId of referenceIds) {
+      if (!(referenceId in prunedStore)) {
+        const contentReference = fullStore[referenceId];
+        if (contentReference) {
+          prunedStore[referenceId] = contentReference;
+        }
       }
     }
   }

@@ -9,14 +9,21 @@ import { ContentReference } from '../../schemas';
 import { ContentReferenceBlock, ContentReferenceId } from '../types';
 
 /**
- * Returns "Arid2" from "{reference(Arid2)}"
+ * Returns ["Arid2"] from "{reference(Arid2)}" or ["Arid2", "Arid3"] from "{reference(Arid2, Arid3)}"
  * @param contentReference A ContentReferenceBlock
- * @returns ContentReferenceId
+ * @returns ContentReferenceId[]
  */
-export const getContentReferenceId = (
+export const getContentReferenceIds = (
   contentReferenceBlock: ContentReferenceBlock
-): ContentReferenceId => {
-  return contentReferenceBlock.replace('{reference(', '').replace(')}', '');
+): ContentReferenceId[] => {
+  if (!(contentReferenceBlock.startsWith('{reference(') && contentReferenceBlock.endsWith(')}'))) {
+    throw new Error(`Invalid contentReferenceBlock: ${contentReferenceBlock}`);
+  }
+  return contentReferenceBlock
+    .replace('{reference(', '')
+    .replace(')}', '')
+    .split(',')
+    .map((contentReferenceId) => contentReferenceId.trim()) as ContentReferenceId[];
 };
 
 /**

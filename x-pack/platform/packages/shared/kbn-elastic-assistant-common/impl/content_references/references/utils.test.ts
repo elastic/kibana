@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { removeContentReferences } from './utils';
+import { ContentReferenceBlock } from '../types';
+import { getContentReferenceIds, removeContentReferences } from './utils';
 
 describe('utils', () => {
   it.each([
@@ -15,7 +16,7 @@ describe('utils', () => {
       'The sky is blue and the grass is green',
     ],
     ['', ''],
-    ['{reference(1234)}', ''],
+    ['{reference(1234,2345)}', ''],
     [' {reference(1234)} ', '  '],
     ['{reference(1234', '{reference(1234'],
     ['{reference(1234)', '{reference(1234)'],
@@ -23,6 +24,17 @@ describe('utils', () => {
     ['{reference(1234)}reference(1234)}{reference(1234)}', 'reference(1234)}'],
   ])('removesContentReferences from "%s"', (input: string, expected: string) => {
     const result = removeContentReferences(input);
+
+    expect(result).toEqual(expected);
+  });
+
+  it.each([
+    ['{reference(1234)}', ['1234']],
+    ['{reference(1234,4567)}', ['1234', '4567']],
+    ['{reference(1234 4567)}', ['1234 4567']],
+    ['{reference( 1234 , 4567 )}', ['1234', '4567']],
+  ])('getContentReferenceIds from "%s"', (input: string, expected: string[]) => {
+    const result = getContentReferenceIds(input as ContentReferenceBlock);
 
     expect(result).toEqual(expected);
   });
