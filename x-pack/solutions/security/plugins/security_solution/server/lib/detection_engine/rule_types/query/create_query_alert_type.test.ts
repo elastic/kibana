@@ -75,7 +75,6 @@ describe('Custom Query Alerts', () => {
         scheduleNotificationResponseActionsService: () => null,
         experimentalFeatures: allowedExperimentalValues,
         logger,
-        version: '1.0.0',
         id: QUERY_RULE_TYPE_ID,
         name: 'Custom Query Rule',
       })
@@ -124,7 +123,6 @@ describe('Custom Query Alerts', () => {
         scheduleNotificationResponseActionsService: () => null,
         experimentalFeatures: allowedExperimentalValues,
         logger,
-        version: '1.0.0',
         id: QUERY_RULE_TYPE_ID,
         name: 'Custom Query Rule',
       })
@@ -177,7 +175,6 @@ describe('Custom Query Alerts', () => {
         scheduleNotificationResponseActionsService: () => null,
         experimentalFeatures: allowedExperimentalValues,
         logger,
-        version: '1.0.0',
         id: QUERY_RULE_TYPE_ID,
         name: 'Custom Query Rule',
       })
@@ -244,7 +241,6 @@ describe('Custom Query Alerts', () => {
         scheduleNotificationResponseActionsService: () => null,
         experimentalFeatures: allowedExperimentalValues,
         logger,
-        version: '1.0.0',
         id: QUERY_RULE_TYPE_ID,
         name: 'Custom Query Rule',
       })

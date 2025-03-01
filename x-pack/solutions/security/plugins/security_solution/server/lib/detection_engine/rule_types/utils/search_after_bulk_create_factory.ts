@@ -60,26 +60,29 @@ export interface SearchAfterAndBulkCreateFactoryParams extends SearchAfterAndBul
 }
 
 export const searchAfterAndBulkCreateFactory = async ({
+  sharedParams,
   enrichment = identity,
   eventsTelemetry,
-  exceptionsList,
   filter,
-  inputIndexPattern,
-  listClient,
-  pageSize,
-  ruleExecutionLogger,
   services,
   sortOrder,
   trackTotalHits,
-  tuple,
-  runtimeMappings,
-  primaryTimestamp,
-  secondaryTimestamp,
   additionalFilters,
   bulkCreateExecutor,
   getWarningMessage,
   isLoggedRequestsEnabled,
 }: SearchAfterAndBulkCreateFactoryParams): Promise<SearchAfterAndBulkCreateReturnType> => {
+  const {
+    inputIndex: inputIndexPattern,
+    runtimeMappings,
+    searchAfterSize: pageSize,
+    primaryTimestamp,
+    secondaryTimestamp,
+    unprocessedExceptions: exceptionsList,
+    tuple,
+    ruleExecutionLogger,
+    listClient,
+  } = sharedParams;
   // eslint-disable-next-line complexity
   return withSecuritySpan('searchAfterAndBulkCreate', async () => {
     let toReturn = createSearchAfterReturnType();
