@@ -24,23 +24,20 @@ export const useIsStillYear2025: () => boolean = () => {
 
 export const AVCResultsBanner: React.FC<{ onDismiss: () => void }> = ({ onDismiss }) => {
   const { docLinks } = useKibana().services;
-  const { euiTheme } = useEuiTheme();
   const bannerTitle = i18n.translate('avcBanner.title', {
     defaultMessage: 'Proven defense with zero false positives',
   });
 
   const calloutStyles = css({
-    paddingLeft: `${euiTheme.size.xl}`,
     backgroundImage: `url(${avcBannerBackground})`,
     backgroundRepeat: 'no-repeat',
-    backgroundPositionX: 'right',
-    backgroundPositionY: 'bottom',
+    backgroundPosition: 'bottom -12px right',
   });
 
   return (
     <EuiCallOut
       title={bannerTitle}
-      color="success"
+      color="accent"
       iconType="cheer"
       onDismiss={onDismiss}
       className={calloutStyles}
@@ -53,7 +50,7 @@ export const AVCResultsBanner: React.FC<{ onDismiss: () => void }> = ({ onDismis
       <EuiSpacer size="s" />
       <EuiButton
         size="s"
-        color="success"
+        color="accent"
         href={docLinks?.links.securitySolution.avcResults}
         target="_blank"
         data-test-subj="avcReadTheBlog"

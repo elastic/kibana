@@ -25,7 +25,8 @@ export const EndpointCallout = React.memo(() => {
 
   return (
     <CardCallOut
-      color="danger"
+      color="accent"
+      size="s"
       text={
         <FormattedMessage
           id="xpack.securitySolution.onboarding.integrationsCard.callout.endpointLabel"
