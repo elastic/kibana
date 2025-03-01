@@ -43,6 +43,7 @@ export const GridPanel = React.memo(({ panelId, rowIndex }: GridPanelProps) => {
       --kbnGridPanelX: ${initialPanel.column};
       --kbnGridPanelY: ${initialPanel.row};
       --kbnGridPanelZ: ${initialPanel.zIndex ?? 1};
+      --kbnGridPanelRotate: ${initialPanel.rotate ?? 0};
     `;
   }, [gridLayoutStateManager, rowIndex, panelId]);
 
@@ -69,7 +70,9 @@ export const GridPanel = React.memo(({ panelId, rowIndex }: GridPanelProps) => {
             const { position: draggingPosition } = activePanel;
             const runtimeSettings = gridLayoutStateManager.runtimeSettings$.getValue();
 
-            if (currentInteractionEvent?.type === 'resize') {
+            if (currentInteractionEvent?.type === 'rotate') {
+              ref.style.setProperty('--kbnGridPanelRotate', `${activePanel.position.rad ?? 0}`);
+            } else if (currentInteractionEvent?.type === 'resize') {
               // if the current panel is being resized, ensure it is not shrunk past the size of a single cell
               ref.classList.add('kbnGridPanel--resize');
               ref.style.setProperty(
@@ -109,6 +112,7 @@ export const GridPanel = React.memo(({ panelId, rowIndex }: GridPanelProps) => {
             ref.style.setProperty('--kbnGridPanelX', `${Math.max(0, panel.column)}`);
             ref.style.setProperty('--kbnGridPanelY', `${Math.max(0, panel.row)}`);
             ref.style.setProperty('--kbnGridPanelZ', `${panel.zIndex ?? 1}`);
+            ref.style.setProperty('--kbnGridPanelRotate', `${panel.rotate ?? 0}`);
           }
         });
 
@@ -191,6 +195,16 @@ const panelStyles = ({ euiTheme }: UseEuiTheme) =>
       top: 'calc(var(--kbnGridPanelY) * 1px)',
       width: `calc(1px * var(--kbnGridPanelWidth)) `,
       height: `calc(1px * var(--kbnGridPanelHeight)) `,
+      transform: `rotate(calc(var(--kbnGridPanelRotate) * 1deg))`,
+      transformOrigin: `50% -16px`,
+      '.kbnGridPanel--rotateHandle': {
+        opacity: '0',
+      },
+      '&:hover': {
+        '.kbnGridPanel--rotateHandle': {
+          opacity: '1',
+        },
+      },
     },
     '&.kbnGridPanel--active': {
       zIndex: euiTheme.levels.modal,

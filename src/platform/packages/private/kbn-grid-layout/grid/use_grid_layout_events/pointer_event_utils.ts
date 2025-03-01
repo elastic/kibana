@@ -50,6 +50,8 @@ export const getDragPreviewRect = ({
 export function getPointerOffsets(e: UserInteractionEvent, panelRect: DOMRect) {
   const { clientX, clientY } = getPointerPosition(e);
   return {
+    clientX,
+    clientY,
     top: clientY - panelRect.top,
     left: clientX - panelRect.left,
     right: clientX - panelRect.right,

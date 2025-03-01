@@ -10,7 +10,7 @@
 import { cloneDeep } from 'lodash';
 import deepEqual from 'fast-deep-equal';
 import { MutableRefObject } from 'react';
-import { GridLayoutStateManager, GridPanelData } from '../types';
+import { GridLayoutStateManager, GridPanelData, PanelInteractionEvent } from '../types';
 import { getDragPreviewRect, getPointerOffsets, getResizePreviewRect } from './pointer_event_utils';
 import { resolveGridRow } from '../utils/resolve_grid_row';
 import { isGridDataEqual } from '../utils/equality_checks';
@@ -19,7 +19,7 @@ import { UserInteractionEvent } from './types';
 export const startAction = (
   e: UserInteractionEvent,
   gridLayoutStateManager: GridLayoutStateManager,
-  type: 'drag' | 'resize',
+  type: PanelInteractionEvent['type'],
   rowIndex: number,
   panelId: string
 ) => {
@@ -95,6 +95,39 @@ export const moveAction = (
         });
   })();
 
+  if (runtimeSettings === 'none' && interactionEvent.type === 'rotate') {
+    const { clientX: x, clientY: y } = interactionEvent.pointerOffsets;
+    const { clientX: mX, clientY: mY } = pointerPixel;
+    const horizontal = mX - x;
+    const vertical = mY - y;
+    let degrees = Math.abs(Math.atan(vertical / horizontal) * (180 / Math.PI));
+    if (isNaN(degrees)) degrees = 90;
+    else {
+      if (vertical > 0 && horizontal > 0) {
+        // do nothing
+      } else if (vertical > 0 && horizontal < 0) {
+        degrees = 180 - degrees;
+      } else if (vertical < 0 && horizontal < 0) {
+        degrees += 180;
+      } else {
+        degrees = 360 - degrees;
+      }
+    }
+
+    activePanel$.next({
+      id: interactionEvent.id,
+      position: {
+        left: 0,
+        top: 0,
+        bottom: 0,
+        right: 0,
+        rad: degrees,
+      },
+    });
+
+    return;
+  }
+
   activePanel$.next({ id: interactionEvent.id, position: previewRect });
   if (runtimeSettings === 'none') {
     const nextLayout = cloneDeep(currentLayout);
@@ -106,6 +139,7 @@ export const moveAction = (
       height: previewRect.bottom - previewRect.top,
       width: previewRect.right - previewRect.left,
     };
+    console.log('next???');
     proposedGridLayout$.next(nextLayout);
 
     return;

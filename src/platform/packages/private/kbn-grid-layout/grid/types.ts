@@ -57,6 +57,7 @@ export interface ActivePanel {
     left: number;
     bottom: number;
     right: number;
+    rad?: number;
   };
 }
 
@@ -83,7 +84,7 @@ export interface PanelInteractionEvent {
   /**
    * The type of interaction being performed.
    */
-  type: 'drag' | 'resize';
+  type: 'drag' | 'resize' | 'rotate';
 
   /**
    * The id of the panel being interacted with.
@@ -109,6 +110,8 @@ export interface PanelInteractionEvent {
     left: number;
     right: number;
     bottom: number;
+    clientX: number;
+    clientY: number;
   };
 }
 
