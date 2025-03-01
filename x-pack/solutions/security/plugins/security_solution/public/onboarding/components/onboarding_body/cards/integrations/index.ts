@@ -10,15 +10,15 @@ import { i18n } from '@kbn/i18n';
 import type { OnboardingCardConfig } from '../../../../types';
 import { checkIntegrationsCardComplete } from './integrations_check_complete';
 import { OnboardingCardId } from '../../../../constants';
-import integrationsIcon from './images/integrations_icon.png';
 import type { IntegrationCardMetadata } from './types';
+import { getCardIcon } from '../common/card_icon';
 
 export const integrationsCardConfig: OnboardingCardConfig<IntegrationCardMetadata> = {
   id: OnboardingCardId.integrations,
   title: i18n.translate('xpack.securitySolution.onboarding.integrationsCard.title', {
     defaultMessage: 'Add data with integrations',
   }),
-  icon: integrationsIcon,
+  icon: () => getCardIcon(OnboardingCardId.integrations),
   Component: React.lazy(
     () =>
       import(
