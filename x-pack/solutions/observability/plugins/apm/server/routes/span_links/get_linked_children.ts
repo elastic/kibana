@@ -8,6 +8,7 @@ import { rangeQuery } from '@kbn/observability-plugin/server';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { isEmpty } from 'lodash';
 import { unflattenKnownApmEventFields } from '@kbn/apm-data-access-plugin/server/utils';
+import type { SpanLink } from '@kbn/apm-types';
 import { asMutableArray } from '../../../common/utils/as_mutable_array';
 import {
   PROCESSOR_EVENT,
@@ -40,7 +41,12 @@ async function fetchLinkedChildrenOfSpan({
   });
 
   const requiredFields = asMutableArray([TRACE_ID, PROCESSOR_EVENT] as const);
-  const optionalFields = asMutableArray([SPAN_ID, TRANSACTION_ID] as const);
+  const optionalFields = asMutableArray([
+    SPAN_ID,
+    TRANSACTION_ID,
+    'links.span_id',
+    'links.trace_id',
+  ] as const);
 
   const response = await apmEventClient.search('fetch_linked_children_of_span', {
     apm: {
@@ -54,8 +60,45 @@ async function fetchLinkedChildrenOfSpan({
       bool: {
         filter: [
           ...rangeQuery(startWithBuffer, endWithBuffer),
-          { term: { [SPAN_LINKS_TRACE_ID]: traceId } },
-          ...(spanId ? [{ term: { [SPAN_LINKS_SPAN_ID]: spanId } }] : []),
+          {
+            bool: {
+              minimum_should_match: 1,
+              should: [
+                {
+                  term: {
+                    [SPAN_LINKS_TRACE_ID]: traceId,
+                  },
+                },
+                {
+                  term: {
+                    ['links.trace_id']: traceId,
+                  },
+                },
+              ],
+            },
+          },
+          // { term: { [SPAN_LINKS_TRACE_ID]: traceId } },
+          ...(spanId
+            ? [
+                {
+                  bool: {
+                    minimum_should_match: 1,
+                    should: [
+                      {
+                        term: {
+                          [SPAN_LINKS_SPAN_ID]: spanId,
+                        },
+                      },
+                      {
+                        term: {
+                          ['links.span_id']: spanId,
+                        },
+                      },
+                    ],
+                  },
+                },
+              ]
+            : []),
         ],
       },
     },
@@ -65,11 +108,21 @@ async function fetchLinkedChildrenOfSpan({
     const source = 'span' in hit._source ? hit._source : undefined;
     const event = unflattenKnownApmEventFields(hit.fields, requiredFields);
 
+    const spanLinks: SpanLink[] =
+      event.links?.span_id && event.links?.trace_id
+        ? [
+            {
+              span: { id: event.links.span_id as string },
+              trace: { id: event.links.trace_id as string },
+            },
+          ]
+        : [];
+
     return {
       ...event,
       span: {
         ...event.span,
-        links: source?.span?.links ?? [],
+        links: source?.span?.links ?? spanLinks ?? [],
       },
     };
   });
