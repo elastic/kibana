@@ -133,7 +133,7 @@ export const ChecklistFlyoutStep: React.FunctionComponent<{
                 ) : (
                   <FormattedMessage
                     id="xpack.upgradeAssistant.dataStream.migration.flyout.checklistStep.migrationFailedCalloutTitle"
-                    defaultMessage="{resolutionType, select, reindex {Reindexing} readonly {Marking as read only} other {Migration}} error"
+                    defaultMessage="{resolutionType, select, reindex {Reindexing} readonly {Marking as read-only} other {Migration}} error"
                     values={{ resolutionType }}
                   />
                 )
@@ -180,7 +180,7 @@ export const ChecklistFlyoutStep: React.FunctionComponent<{
                   >
                     <FormattedMessage
                       id="xpack.upgradeAssistant.dataStream.migration.flyout.checklistStep.cancelMigrationButtonLabel"
-                      defaultMessage="Cancel {resolutionType, select, reindex {reindexing} readonly {marking as read only} other {migration}}"
+                      defaultMessage="Cancel {resolutionType, select, reindex {reindexing} readonly {marking as read-only} other {migration}}"
                       values={{ resolutionType }}
                     />
                   </EuiButton>

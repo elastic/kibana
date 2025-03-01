@@ -94,13 +94,13 @@ export const MigrationProgress: React.FunctionComponent<Props> = (props) => {
             {status === DataStreamMigrationStatus.inProgress ? (
               <FormattedMessage
                 id="xpack.upgradeAssistant.dataStream.migration.flyout.checklistStep.reindexingInProgressTitle"
-                defaultMessage="{resolutionType, select, reindex {Reindexing} readonly {Marking as read only} other {Migration}} in progress…"
+                defaultMessage="{resolutionType, select, reindex {Reindexing} readonly {Marking as read-only} other {Migration}} in progress…"
                 values={{ resolutionType }}
               />
             ) : (
               <FormattedMessage
                 id="xpack.upgradeAssistant.dataStream.migration.flyout.checklistStep.reindexingChecklistTitle"
-                defaultMessage="{resolutionType, select, reindex {Reindex data stream} readonly {Mark data stream as read only} other {Migrate data stream}}"
+                defaultMessage="{resolutionType, select, reindex {Reindex data stream} readonly {Mark data stream as read-only} other {Migrate data stream}}"
                 values={{ resolutionType }}
               />
             )}
@@ -158,7 +158,7 @@ export const MigrationProgress: React.FunctionComponent<Props> = (props) => {
                         'xpack.upgradeAssistant.dataStream.migration.flyout.checklistStep.progressStep.failedTitle',
                         {
                           defaultMessage:
-                            '{count, plural, =1 {# Index} other {# Indices}} failed to get {resolutionType, select, reindex {reindexed} readonly {marked as read only} other {migrated}}.',
+                            '{count, plural, =1 {# Index} other {# Indices}} failed to get {resolutionType, select, reindex {reindexed} readonly {marked as read-only} other {migrated}}.',
                           values: { count: taskStatus.errorsCount, resolutionType },
                         }
                       )}
@@ -173,7 +173,7 @@ export const MigrationProgress: React.FunctionComponent<Props> = (props) => {
                       'xpack.upgradeAssistant.dataStream.migration.flyout.checklistStep.progressStep.completeTitle',
                       {
                         defaultMessage:
-                          '{count, plural, =1 {# Index} other {# Indices}} successfully {resolutionType, select, reindex {reindexed} readonly {marked as read only} other {migrated}}.',
+                          '{count, plural, =1 {# Index} other {# Indices}} successfully {resolutionType, select, reindex {reindexed} readonly {marked as read-only} other {migrated}}.',
                         values: { count: taskStatus.successCount, resolutionType },
                       }
                     )}
@@ -187,7 +187,7 @@ export const MigrationProgress: React.FunctionComponent<Props> = (props) => {
                       'xpack.upgradeAssistant.dataStream.migration.flyout.checklistStep.progressStep.inProgressTitle',
                       {
                         defaultMessage:
-                          '{count, plural, =1 {# Index} other {# Indices}} currently getting {resolutionType, select, reindex {reindexed} readonly {marked as read only} other {migrated}}.',
+                          '{count, plural, =1 {# Index} other {# Indices}} currently getting {resolutionType, select, reindex {reindexed} readonly {marked as read-only} other {migrated}}.',
                         values: { count: taskStatus.inProgressCount, resolutionType },
                       }
                     )}
