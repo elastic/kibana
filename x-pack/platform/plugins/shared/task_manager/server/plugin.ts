@@ -21,8 +21,14 @@ import {
   CoreStart,
   ServiceStatusLevels,
   CoreStatus,
+  KibanaRequest,
 } from '@kbn/core/server';
 import type { CloudSetup, CloudStart } from '@kbn/cloud-plugin/server';
+import {
+  IEventLogger,
+  IEventLogService,
+  IEventLogClientService,
+} from '@kbn/event-log-plugin/server';
 import {
   registerDeleteInactiveNodesTaskDefinition,
   scheduleDeleteInactiveNodesTaskDefinition,
@@ -36,7 +42,7 @@ import { setupSavedObjects, BACKGROUND_TASK_NODE_SO_NAME, TASK_SO_NAME } from '.
 import { TaskDefinitionRegistry, TaskTypeDictionary } from './task_type_dictionary';
 import { AggregationOpts, FetchResult, SearchOpts, TaskStore } from './task_store';
 import { TaskScheduling } from './task_scheduling';
-import { backgroundTaskUtilizationRoute, healthRoute, metricsRoute } from './routes';
+import { backgroundTaskUtilizationRoute, healthRoute, metricsRoute, overviewRoute } from './routes';
 import { createMonitoringStats, MonitoringStats } from './monitoring';
 import { ConcreteTaskInstance } from './task';
 import { registerTaskManagerUsageCollector } from './usage';
@@ -52,7 +58,13 @@ import {
   registerMarkRemovedTasksAsUnrecognizedDefinition,
   scheduleMarkRemovedTasksAsUnrecognizedDefinition,
 } from './removed_tasks/mark_removed_tasks_as_unrecognized';
+import { OverviewService } from './overview/overview_service';
 
+export const EVENT_LOG_PROVIDER = 'taskManager';
+export const EVENT_LOG_ACTIONS = {
+  claim: 'claim',
+  run: 'run',
+};
 export interface TaskManagerSetupContract {
   /**
    * @deprecated
@@ -85,11 +97,13 @@ export type TaskManagerStartContract = Pick<
 
 export interface TaskManagerPluginsStart {
   cloud?: CloudStart;
+  eventLog: IEventLogClientService;
   usageCollection?: UsageCollectionStart;
 }
 
 export interface TaskManagerPluginsSetup {
   cloud?: CloudSetup;
+  eventLog: IEventLogService;
   usageCollection?: UsageCollectionSetup;
 }
 
@@ -123,6 +137,8 @@ export class TaskManagerPlugin
   private kibanaDiscoveryService?: KibanaDiscoveryService;
   private heapSizeLimit: number = 0;
   private numOfKibanaInstances$: Subject<number> = new BehaviorSubject(1);
+  private eventLogger?: IEventLogger;
+  private overviewService: OverviewService;
 
   constructor(private readonly initContext: PluginInitializerContext) {
     this.initContext = initContext;
@@ -133,6 +149,7 @@ export class TaskManagerPlugin
     this.nodeRoles = initContext.node.roles;
     this.shouldRunBackgroundTasks = this.nodeRoles.backgroundTasks;
     this.adHocTaskCounter = new AdHocTaskCounter();
+    this.overviewService = new OverviewService({ logger: this.logger });
   }
 
   isNodeBackgroundTasksOnly() {
@@ -171,6 +188,11 @@ export class TaskManagerPlugin
 
     this.usageCounter = plugins.usageCollection?.createUsageCounter(`taskManager`);
 
+    this.eventLogger = plugins.eventLog.getLogger({
+      event: { provider: EVENT_LOG_PROVIDER },
+    });
+    plugins.eventLog.registerProviderActions(EVENT_LOG_PROVIDER, Object.values(EVENT_LOG_ACTIONS));
+
     // Routes
     const router = core.http.createRouter();
     const { serviceStatus$, monitoredHealth$ } = healthRoute({
@@ -207,6 +229,7 @@ export class TaskManagerPlugin
       resetMetrics$: this.resetMetrics$,
       taskManagerId: this.taskManagerId,
     });
+    overviewRoute({ router, overviewService: this.overviewService });
 
     core.status.derivedStatus$.subscribe((status) =>
       this.logger.debug(`status core.status.derivedStatus now set to ${status.level}`)
@@ -268,8 +291,8 @@ export class TaskManagerPlugin
   }
 
   public start(
-    { savedObjects, elasticsearch, executionContext, docLinks }: CoreStart,
-    { cloud }: TaskManagerPluginsStart
+    { savedObjects, elasticsearch, executionContext }: CoreStart,
+    { cloud, eventLog }: TaskManagerPluginsStart
   ): TaskManagerStartContract {
     const savedObjectsRepository = savedObjects.createInternalRepository([
       TASK_SO_NAME,
@@ -300,6 +323,11 @@ export class TaskManagerPlugin
       allowReadingInvalidState: this.config.allow_reading_invalid_state,
       logger: this.logger,
       requestTimeouts: this.config.request_timeouts,
+    });
+
+    this.overviewService.initialize({
+      esClient: elasticsearch.client.asInternalUser,
+      getEventLogClient: (request: KibanaRequest) => eventLog.getClient(request),
     });
 
     const isServerless = this.initContext.env.packageInfo.buildFlavor === 'serverless';
@@ -354,6 +382,8 @@ export class TaskManagerPlugin
         elasticsearchAndSOAvailability$: this.elasticsearchAndSOAvailability$!,
         taskPartitioner,
         startingCapacity,
+        taskManagerId: this.taskManagerId!,
+        eventLogger: this.eventLogger!,
       });
     }
 

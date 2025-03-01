@@ -103,11 +103,21 @@ export const EventSchema = schema.maybe(
     kibana: schema.maybe(
       schema.object({
         server_uuid: ecsString(),
+        task_claim: schema.maybe(
+          schema.object({
+            conflicts: ecsStringOrNumber(),
+            load: ecsStringOrNumber(),
+          })
+        ),
         task: schema.maybe(
           schema.object({
             id: ecsString(),
+            type: ecsString(),
+            expired: ecsBoolean(),
+            persistence: ecsString(),
             scheduled: ecsDate(),
             schedule_delay: ecsStringOrNumber(),
+            event_loop_blockages: ecsStringOrNumber(),
           })
         ),
         alerting: schema.maybe(

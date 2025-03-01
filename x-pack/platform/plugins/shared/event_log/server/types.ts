@@ -68,6 +68,9 @@ export interface IEventLogClient {
     namespace: string | undefined,
     options?: Partial<FindOptionsType>
   ): Promise<QueryEventsBySavedObjectResult>;
+  aggregateTaskManagerEvents(
+    options?: Partial<AggregateOptionsType>
+  ): Promise<AggregateEventsBySavedObjectResult>;
   aggregateEventsBySavedObjectIds(
     type: string,
     ids: string[],
