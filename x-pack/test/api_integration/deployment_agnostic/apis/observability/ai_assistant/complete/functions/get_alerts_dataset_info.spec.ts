@@ -11,7 +11,7 @@ import { ApmRuleType } from '@kbn/rule-data-utils';
 import { apm, timerange } from '@kbn/apm-synthtrace-client';
 import { ApmSynthtraceEsClient } from '@kbn/apm-synthtrace';
 import { RoleCredentials } from '@kbn/ftr-common-functional-services';
-import { ChatCompletionAssistantMessageParam } from 'openai/resources';
+import { last } from 'lodash';
 import { ApmAlertFields } from '../../../../../../../apm_api_integration/tests/alerts/helpers/alerting_api_helper';
 import {
   LlmProxy,
@@ -20,6 +20,8 @@ import {
 import { getMessageAddedEvents } from './helpers';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../../../ftr_provider_context';
 import { APM_ALERTS_INDEX } from '../../../apm/alerts/helpers/alerting_helper';
+
+const USER_MESSAGE = 'How many alerts do I have for the past 10 days?';
 
 export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderContext) {
   const log = getService('log');
@@ -47,29 +49,17 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         port: llmProxy.getPort(),
       });
 
-      llmProxy.interceptConversation(
-        {
-          content: '',
-          tool_calls: [
-            {
-              function: {
-                name: 'get_alerts_dataset_info',
-                arguments: JSON.stringify({ start: 'now-10d', end: 'now' }),
-              },
-              index: 0,
-              // @ts-expect-error
-              id: 'call_hFHMH5idQKW5qtoGOsmEChGE',
-            },
-          ],
-        },
-        {
-          name: 'Function request: "get_alerts_dataset_info"',
-        }
-      );
+      llmProxy.interceptWithFunctionRequest({
+        name: 'get_alerts_dataset_info',
+        arguments: () => JSON.stringify({ start: 'now-10d', end: 'now' }),
+        when: () => true,
+      });
 
-      llmProxy.interceptToolChoice({
-        toolName: 'select_relevant_fields',
-        toolArguments: (requestBody) => {
+      llmProxy.interceptWithFunctionRequest({
+        name: 'select_relevant_fields',
+        // @ts-expect-error
+        when: (requestBody) => requestBody.tool_choice?.function?.name === 'select_relevant_fields',
+        arguments: (requestBody) => {
           const messageWithFieldIds = requestBody.messages.find((message) => {
             const content = message?.content as string;
             return content.includes('This is the list:') && content.includes('@timestamp');
@@ -90,25 +80,11 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         },
       });
 
-      llmProxy.interceptConversation(
-        {
-          content: '',
-          tool_calls: [
-            {
-              function: {
-                name: 'alerts',
-                arguments: JSON.stringify({ start: 'now-10d', end: 'now' }),
-              },
-              index: 0,
-              // @ts-expect-error
-              id: 'call_asPqcc7PZvH3h645wP34CX5J',
-            },
-          ],
-        },
-        {
-          name: 'Function request: alerts',
-        }
-      );
+      llmProxy.interceptWithFunctionRequest({
+        name: 'alerts',
+        arguments: () => JSON.stringify({ start: 'now-10d', end: 'now' }),
+        when: () => true,
+      });
 
       llmProxy.interceptConversation(`You have active alerts for the past 10 days. Back to work!`);
 
@@ -121,7 +97,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
                 '@timestamp': new Date().toISOString(),
                 message: {
                   role: MessageRole.User,
-                  content: 'How many alerts do I have for the past 10 days?',
+                  content: USER_MESSAGE,
                 },
               },
             ],
@@ -156,274 +132,247 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       await samlAuth.invalidateM2mApiKeyWithRoleScope(roleAuthc);
     });
 
-    it('sends correct ES fields', async () => {
-      const messageWithFields = messageAddedEvents.find(
-        ({ message }) =>
-          message.message.role === MessageRole.User &&
-          message.message.name === 'get_alerts_dataset_info'
-      );
+    describe('LLM requests', () => {
+      it('makes 4 requests to the LLM', () => {
+        expect(llmProxy.interceptedRequests.length).to.be(4);
+      });
 
-      const parsedContent = JSON.parse(messageWithFields?.message.message.content!) as {
-        fields: string[];
-      };
-      const fieldNames = parsedContent.fields.map((field) => field.split(':')[0]);
+      describe('every request to the LLM', () => {
+        it('contains the system message', () => {
+          const everyRequestHasSystemMessage = llmProxy.interceptedRequests.every(
+            ({ requestBody }) =>
+              requestBody.messages.some(
+                (message) =>
+                  message.role === 'system' &&
+                  (message.content as string).includes('You are a helpful assistant')
+              )
+          );
+          expect(everyRequestHasSystemMessage).to.be(true);
+        });
 
-      expect(fieldNames).to.eql(expectedRelevantFieldNames);
-      expect(parsedContent.fields).to.eql([
-        '@timestamp:date',
-        '_id:_id',
-        '_ignored:string',
-        '_index:_index',
-        '_score:number',
-      ]);
+        it('contains the original user message', () => {
+          const everyRequestHasUserMessage = llmProxy.interceptedRequests.every(({ requestBody }) =>
+            requestBody.messages.some(
+              (message) => message.role === 'user' && (message.content as string) === USER_MESSAGE
+            )
+          );
+          expect(everyRequestHasUserMessage).to.be(true);
+        });
+
+        it('contains the context function request and context function response', () => {
+          const everyRequestHasContextFunction = llmProxy.interceptedRequests.every(
+            ({ requestBody }) => {
+              const hasContextFunctionRequest = requestBody.messages.some(
+                (message) =>
+                  message.role === 'assistant' &&
+                  message.tool_calls?.[0]?.function?.name === 'context'
+              );
+
+              const hasContextFunctionResponse = requestBody.messages.some(
+                (message) =>
+                  message.role === 'tool' &&
+                  (message.content as string).includes('screen_description') &&
+                  (message.content as string).includes('learnings')
+              );
+
+              return hasContextFunctionRequest && hasContextFunctionResponse;
+            }
+          );
+
+          expect(everyRequestHasContextFunction).to.be(true);
+        });
+      });
+
+      describe('The first request', () => {
+        it('contains the correct number of messages', () => {
+          expect(llmProxy.interceptedRequests[0].requestBody.messages.length).to.be(4);
+        });
+
+        it('contains the `get_alerts_dataset_info` tool', () => {
+          const hasTool = llmProxy.interceptedRequests[0].requestBody.tools?.some(
+            (tool) => tool.function.name === 'get_alerts_dataset_info'
+          );
+
+          expect(hasTool).to.be(true);
+        });
+
+        it('leaves the function calling decision to the LLM via tool_choice=auto', () => {
+          expect(llmProxy.interceptedRequests[0].requestBody.tool_choice).to.be('auto');
+        });
+      });
+
+      describe('The second request', () => {
+        it('contains the correct number of messages', () => {
+          expect(llmProxy.interceptedRequests[1].requestBody.messages.length).to.be(5);
+        });
+
+        it('contains a system generated user message with a list of field candidates', () => {
+          const hasList = llmProxy.interceptedRequests[1].requestBody.messages.some(
+            (message) =>
+              message.role === 'user' &&
+              (message.content as string).includes('This is the list:') &&
+              (message.content as string).includes('@timestamp')
+          );
+
+          expect(hasList).to.be(true);
+        });
+
+        it('instructs the LLM to call the `select_relevant_fields` tool via `tool_choice`', () => {
+          const hasToolChoice =
+            // @ts-expect-error
+            llmProxy.interceptedRequests[1].requestBody.tool_choice?.function?.name ===
+            'select_relevant_fields';
+
+          expect(hasToolChoice).to.be(true);
+        });
+      });
+
+      describe('The third request', () => {
+        it('contains the correct number of messages', () => {
+          expect(llmProxy.interceptedRequests[2].requestBody.messages.length).to.be(6);
+        });
+
+        it('contains the `get_alerts_dataset_info` request', () => {
+          const hasFunctionRequest = llmProxy.interceptedRequests[2].requestBody.messages.some(
+            (message) =>
+              message.role === 'assistant' &&
+              message.tool_calls?.[0]?.function?.name === 'get_alerts_dataset_info'
+          );
+
+          expect(hasFunctionRequest).to.be(true);
+        });
+
+        it('contains the `get_alerts_dataset_info` response', () => {
+          const functionResponse = last(llmProxy.interceptedRequests[2].requestBody.messages);
+          const parsedContent = JSON.parse(functionResponse?.content as string) as {
+            fields: string[];
+          };
+
+          const fieldNamesWithType = parsedContent.fields;
+          const fieldNamesWithoutType = fieldNamesWithType.map((field) => field.split(':')[0]);
+
+          expect(fieldNamesWithoutType).to.eql(expectedRelevantFieldNames);
+          expect(fieldNamesWithType).to.eql([
+            '@timestamp:date',
+            '_id:_id',
+            '_ignored:string',
+            '_index:_index',
+            '_score:number',
+          ]);
+        });
+
+        it('emits a messageAdded event with the `get_alerts_dataset_info` function response', async () => {
+          const messageWithDatasetInfo = messageAddedEvents.find(
+            ({ message }) =>
+              message.message.role === MessageRole.User &&
+              message.message.name === 'get_alerts_dataset_info'
+          );
+
+          const parsedContent = JSON.parse(messageWithDatasetInfo?.message.message.content!) as {
+            fields: string[];
+          };
+
+          expect(parsedContent.fields).to.eql([
+            '@timestamp:date',
+            '_id:_id',
+            '_ignored:string',
+            '_index:_index',
+            '_score:number',
+          ]);
+        });
+
+        it('contains the `alerts` tool', () => {
+          const hasTool = llmProxy.interceptedRequests[2].requestBody.tools?.some(
+            (tool) => tool.function.name === 'alerts'
+          );
+
+          expect(hasTool).to.be(true);
+        });
+      });
+
+      describe('The fourth request', () => {
+        it('contains the correct number of messages', () => {
+          expect(llmProxy.interceptedRequests[3].requestBody.messages.length).to.be(8);
+        });
+
+        it('contains the `alerts` request', () => {
+          const hasFunctionRequest = llmProxy.interceptedRequests[3].requestBody.messages.some(
+            (message) =>
+              message.role === 'assistant' && message.tool_calls?.[0]?.function?.name === 'alerts'
+          );
+
+          expect(hasFunctionRequest).to.be(true);
+        });
+
+        it('contains the `alerts` response', () => {
+          const functionResponseMessage = last(
+            llmProxy.interceptedRequests[3].requestBody.messages
+          );
+          const parsedContent = JSON.parse(functionResponseMessage?.content as string);
+          expect(Object.keys(parsedContent)).to.eql(['total', 'alerts']);
+        });
+
+        it('emits a messageAdded event with the `alert` function response', async () => {
+          const messageWithAlerts = messageAddedEvents.find(
+            ({ message }) =>
+              message.message.role === MessageRole.User && message.message.name === 'alerts'
+          );
+
+          const parsedContent = JSON.parse(messageWithAlerts?.message.message.content!) as {
+            total: number;
+            alerts: any[];
+          };
+          expect(parsedContent.total).to.be(1);
+          expect(parsedContent.alerts.length).to.be(1);
+        });
+      });
     });
 
-    it('sends alerts for the given period', async () => {
-      const messageWithAlerts = messageAddedEvents.find(
-        ({ message }) =>
-          message.message.role === MessageRole.User && message.message.name === 'alerts'
-      );
+    describe('messageAdded events', () => {
+      it('emits 7 messageAdded events', () => {
+        expect(messageAddedEvents.length).to.be(7);
+      });
 
-      const parsedContent = JSON.parse(messageWithAlerts?.message.message.content!) as {
-        total: number;
-        alerts: any[];
-      };
-      expect(parsedContent.total).to.above(0);
-      // expect(parsedContent.alerts).to.eql();
-    });
-
-    it('sends messageAdded events in the correct order', async () => {
-      expect(
-        messageAddedEvents.map(({ message }) => {
+      it('emits messageAdded events in the correct order', async () => {
+        const formattedMessageAddedEvents = messageAddedEvents.map(({ message }) => {
           const { role, name, function_call: functionCall } = message.message;
           if (functionCall) {
             return { function_call: functionCall, role };
           }
 
           return { name, role };
-        })
-      ).to.eql([
-        {
-          role: 'assistant',
-          function_call: { name: 'context', trigger: 'assistant' },
-        },
-        { name: 'context', role: 'user' },
-        {
-          role: 'assistant',
-          function_call: {
-            name: 'get_alerts_dataset_info',
-            arguments: '{"start":"now-10d","end":"now"}',
-            trigger: 'assistant',
-          },
-        },
-        { name: 'get_alerts_dataset_info', role: 'user' },
-        {
-          role: 'assistant',
-          function_call: {
-            name: 'alerts',
-            arguments: '{"start":"now-10d","end":"now"}',
-            trigger: 'assistant',
-          },
-        },
-        { name: 'alerts', role: 'user' },
-        {
-          role: 'assistant',
-          function_call: { name: '', arguments: '', trigger: 'assistant' },
-        },
-      ]);
-    });
-
-    it('makes the right requests to the LLM proxy', async () => {
-      expect(llmProxy.interceptedRequests.length).to.eql(4);
-
-      const actualRequests = llmProxy.interceptedRequests.map(({ requestBody }) => {
-        const messages = requestBody.messages.map((message) => {
-          const {
-            role,
-            content,
-            tool_calls: toolCalls,
-          } = message as ChatCompletionAssistantMessageParam;
-
-          let formattedContent = '';
-          if (content) {
-            // @ts-expect-error
-            formattedContent = content?.includes('This is the list:')
-              ? 'This is the list:'
-              : content;
-
-            formattedContent =
-              formattedContent.length > 100
-                ? `${formattedContent.slice(0, 100)}...`
-                : formattedContent;
-          }
-
-          return {
-            role,
-            content: formattedContent,
-            ...(toolCalls ? { tool_calls: toolCalls[0].function } : {}),
-          };
         });
 
-        return {
-          messages,
-          toolChoice: requestBody.tool_choice,
-        };
-      });
-
-      expect(actualRequests).to.eql([
-        {
-          messages: [
-            {
-              role: 'system',
-              content:
-                'You are a helpful assistant for Elastic Observability. Your goal is to help the Elastic Observabilit...',
-            },
-            {
-              role: 'user',
-              content: 'How many alerts do I have for the past 10 days?',
-            },
-            {
-              role: 'assistant',
-              content: '',
-              tool_calls: {
-                name: 'context',
-                arguments: '{}',
-              },
-            },
-            {
-              role: 'tool',
-              content: '{"screen_description":"","learnings":[]}',
-            },
-          ],
-          toolChoice: 'auto',
-        },
-        {
-          messages: [
-            {
-              role: 'system',
-              content:
-                'You are a helpful assistant for Elastic Observability. Your goal is to help the Elastic Observabilit...',
-            },
-            {
-              role: 'user',
-              content: 'How many alerts do I have for the past 10 days?',
-            },
-            {
-              role: 'assistant',
-              content: '',
-              tool_calls: {
-                name: 'context',
-                arguments: '{}',
-              },
-            },
-            {
-              role: 'tool',
-              content: '{"screen_description":"","learnings":[]}',
-            },
-            {
-              role: 'user',
-              content: 'This is the list:',
-            },
-          ],
-          toolChoice: {
-            function: {
-              name: 'select_relevant_fields',
-            },
-            type: 'function',
+        expect(formattedMessageAddedEvents).to.eql([
+          {
+            role: 'assistant',
+            function_call: { name: 'context', trigger: 'assistant' },
           },
-        },
-        {
-          messages: [
-            {
-              role: 'system',
-              content:
-                'You are a helpful assistant for Elastic Observability. Your goal is to help the Elastic Observabilit...',
+          { name: 'context', role: 'user' },
+          {
+            role: 'assistant',
+            function_call: {
+              name: 'get_alerts_dataset_info',
+              arguments: '{"start":"now-10d","end":"now"}',
+              trigger: 'assistant',
             },
-            {
-              role: 'user',
-              content: 'How many alerts do I have for the past 10 days?',
+          },
+          { name: 'get_alerts_dataset_info', role: 'user' },
+          {
+            role: 'assistant',
+            function_call: {
+              name: 'alerts',
+              arguments: '{"start":"now-10d","end":"now"}',
+              trigger: 'assistant',
             },
-            {
-              role: 'assistant',
-              content: '',
-              tool_calls: {
-                name: 'context',
-                arguments: '{}',
-              },
-            },
-            {
-              role: 'tool',
-              content: '{"screen_description":"","learnings":[]}',
-            },
-            {
-              role: 'assistant',
-              content: '',
-              tool_calls: {
-                name: 'get_alerts_dataset_info',
-                arguments: '{"start":"now-10d","end":"now"}',
-              },
-            },
-            {
-              role: 'tool',
-              content:
-                '{"fields":["@timestamp:date","_id:_id","_ignored:string","_index:_index","_score:number"]}',
-            },
-          ],
-          toolChoice: 'auto',
-        },
-        {
-          messages: [
-            {
-              role: 'system',
-              content:
-                'You are a helpful assistant for Elastic Observability. Your goal is to help the Elastic Observabilit...',
-            },
-            {
-              role: 'user',
-              content: 'How many alerts do I have for the past 10 days?',
-            },
-            {
-              role: 'assistant',
-              content: '',
-              tool_calls: {
-                name: 'context',
-                arguments: '{}',
-              },
-            },
-            {
-              role: 'tool',
-              content: '{"screen_description":"","learnings":[]}',
-            },
-            {
-              role: 'assistant',
-              content: '',
-              tool_calls: {
-                name: 'get_alerts_dataset_info',
-                arguments: '{"start":"now-10d","end":"now"}',
-              },
-            },
-            {
-              role: 'tool',
-              content:
-                '{"fields":["@timestamp:date","_id:_id","_ignored:string","_index:_index","_score:number"]}',
-            },
-            {
-              role: 'assistant',
-              content: '',
-              tool_calls: {
-                name: 'alerts',
-                arguments: '{"start":"now-10d","end":"now"}',
-              },
-            },
-            {
-              role: 'tool',
-              content:
-                '{"total":1,"alerts":[{"processor.event":"error","kibana.alert.evaluation.value":15,"kibana.alert.eva...',
-            },
-          ],
-          toolChoice: 'auto',
-        },
-      ]);
+          },
+          { name: 'alerts', role: 'user' },
+          {
+            role: 'assistant',
+            function_call: { name: '', arguments: '', trigger: 'assistant' },
+          },
+        ]);
+      });
     });
   });
 }

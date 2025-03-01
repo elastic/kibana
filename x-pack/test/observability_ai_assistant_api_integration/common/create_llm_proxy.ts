@@ -9,10 +9,10 @@ import { ToolingLog } from '@kbn/tooling-log';
 import getPort from 'get-port';
 import http, { type Server } from 'http';
 import { isString, once, pull, isFunction, uniqueId } from 'lodash';
-import OpenAI from 'openai';
 import { TITLE_CONVERSATION_FUNCTION_NAME } from '@kbn/observability-ai-assistant-plugin/server/service/client/operators/get_generated_title';
 import pRetry from 'p-retry';
 import type { ChatCompletionChunkToolCall } from '@kbn/inference-common';
+import { ChatCompletionStreamParams } from 'openai/lib/ChatCompletionStream';
 import { createOpenAiChunk } from './create_openai_chunk';
 
 type Request = http.IncomingMessage;
@@ -23,12 +23,12 @@ type LLMMessage = string[] | ToolMessage | string | undefined;
 type RequestHandler = (
   request: Request,
   response: Response,
-  requestBody: OpenAI.Chat.ChatCompletionCreateParamsNonStreaming
+  requestBody: ChatCompletionStreamParams
 ) => void;
 
 interface RequestInterceptor {
   name: string;
-  when: (body: OpenAI.Chat.ChatCompletionCreateParamsNonStreaming) => boolean;
+  when: (body: ChatCompletionStreamParams) => boolean;
 }
 
 export interface ToolMessage {
@@ -36,7 +36,7 @@ export interface ToolMessage {
   tool_calls?: ChatCompletionChunkToolCall[];
 }
 export interface LlmResponseSimulator {
-  requestBody: OpenAI.Chat.ChatCompletionCreateParamsNonStreaming;
+  requestBody: ChatCompletionStreamParams;
   status: (code: number) => Promise<void>;
   next: (msg: string | ToolMessage) => Promise<void>;
   error: (error: any) => Promise<void>;
@@ -50,7 +50,7 @@ export class LlmProxy {
   interval: NodeJS.Timeout;
   interceptors: Array<RequestInterceptor & { handle: RequestHandler }> = [];
   interceptedRequests: Array<{
-    requestBody: OpenAI.Chat.ChatCompletionCreateParamsNonStreaming;
+    requestBody: ChatCompletionStreamParams;
     matchingInterceptorName: string | undefined;
   }> = [];
 
@@ -146,56 +146,51 @@ export class LlmProxy {
   ) {
     return this.intercept(
       `Conversation interceptor: "${name ?? 'Unnamed'}"`,
-      (body) => {
-        // @ts-expect-error
-        return body.tool_choice?.function?.name === undefined;
-      },
+      // @ts-expect-error
+      (body) => body.tool_choice?.function?.name === undefined,
       msg
     ).completeAfterIntercept();
   }
 
-  interceptToolChoice({
-    toolName,
-    toolArguments,
+  interceptWithFunctionRequest({
+    name: name,
+    arguments: argumentsCallback,
+    when,
   }: {
-    toolName: string;
-    toolArguments: (body: OpenAI.Chat.Completions.ChatCompletionCreateParamsNonStreaming) => string;
+    name: string;
+    arguments: (body: ChatCompletionStreamParams) => string;
+    when: RequestInterceptor['when'];
   }) {
-    return this.intercept(
-      `Tool choice interceptor: "${toolName}"`,
-      // @ts-expect-error
-      (body) => body.tool_choice?.function?.name === toolName,
-      (body) => {
-        return {
-          content: '',
-          tool_calls: [
-            {
-              function: {
-                name: toolName,
-                arguments: toolArguments(body),
-              },
-              index: 0,
-              toolCallId: uniqueId('call_'),
+    return this.intercept(`Function request interceptor: "${name}"`, when, (body) => {
+      return {
+        content: '',
+        tool_calls: [
+          {
+            function: {
+              name,
+              arguments: argumentsCallback(body),
             },
-          ],
-        };
-      }
-    ).completeAfterIntercept();
+            index: 0,
+            toolCallId: uniqueId('call_'),
+          },
+        ],
+      };
+    }).completeAfterIntercept();
   }
 
   interceptTitle(title: string) {
-    return this.interceptToolChoice({
-      toolName: TITLE_CONVERSATION_FUNCTION_NAME,
-      toolArguments: () => JSON.stringify({ title }),
+    return this.interceptWithFunctionRequest({
+      name: TITLE_CONVERSATION_FUNCTION_NAME,
+      arguments: () => JSON.stringify({ title }),
+      // @ts-expect-error
+      when: (body) => body.tool_choice?.function?.name === TITLE_CONVERSATION_FUNCTION_NAME,
     });
   }
 
   intercept(
     name: string,
     when: RequestInterceptor['when'],
-    responseChunks?:
-      | LLMMessage
-      | ((body: OpenAI.Chat.Completions.ChatCompletionCreateParamsNonStreaming) => LLMMessage)
+    responseChunks?: LLMMessage | ((body: ChatCompletionStreamParams) => LLMMessage)
   ): {
     waitForIntercept: () => Promise<LlmResponseSimulator>;
     completeAfterIntercept: () => Promise<LlmResponseSimulator>;
@@ -298,9 +293,7 @@ export async function createLlmProxy(log: ToolingLog) {
   return new LlmProxy(port, log);
 }
 
-async function getRequestBody(
-  request: http.IncomingMessage
-): Promise<OpenAI.Chat.ChatCompletionCreateParamsNonStreaming> {
+async function getRequestBody(request: http.IncomingMessage): Promise<ChatCompletionStreamParams> {
   return new Promise((resolve, reject) => {
     let data = '';
 
@@ -317,15 +310,6 @@ async function getRequestBody(
     });
   });
 }
-
-// function isFunctionTitleRequest(
-//   requestBody: OpenAI.Chat.ChatCompletionCreateParamsNonStreaming
-// ) {
-//   return (
-//     requestBody.tools?.find((fn) => fn.function.name === TITLE_CONVERSATION_FUNCTION_NAME) !==
-//     undefined
-//   );
-// }
 
 function sseEvent(chunk: unknown) {
   return `data: ${JSON.stringify(chunk)}\n\n`;
