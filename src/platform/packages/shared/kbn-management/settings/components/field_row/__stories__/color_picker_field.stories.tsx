@@ -9,5 +9,9 @@
 
 import { getFieldRowStory, getStory } from './common';
 
-export default getStory('Color Row', 'A setting with an base64 image value.');
+const Story = getStory('Color Row', 'A setting with an base64 image value.');
 export const ColorRow = getFieldRowStory('color' as const);
+
+export default {
+  ...Story,
+};

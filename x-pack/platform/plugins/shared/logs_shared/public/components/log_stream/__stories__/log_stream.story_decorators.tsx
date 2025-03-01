@@ -21,13 +21,13 @@ import type {
   IEsSearchResponse,
 } from '@kbn/search-types';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import { getLogViewResponsePayloadRT } from '../../../common/http_api';
-import { defaultLogViewAttributes } from '../../../common/log_views';
+import { getLogViewResponsePayloadRT } from '../../../../common/http_api';
+import { defaultLogViewAttributes } from '../../../../common/log_views';
 import {
   LogEntriesSearchResponsePayload,
   LOG_ENTRIES_SEARCH_STRATEGY,
-} from '../../../common/search_strategies/log_entries/log_entries';
-import { ENTRIES_EMPTY, generateFakeEntries } from '../../test_utils/entries';
+} from '../../../../common/search_strategies/log_entries/log_entries';
+import { ENTRIES_EMPTY, generateFakeEntries } from '../../../test_utils/entries';
 
 export const decorateWithKibanaContext = <StoryFnReactReturnType extends React.ReactNode>(
   wrappedStory: () => StoryFnReactReturnType,
