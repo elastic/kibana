@@ -260,7 +260,12 @@ export const createCustomThresholdExecutor = ({
             [ALERT_GROUP]: groups,
             ...flattenAdditionalContext(additionalContext),
             ...getEcsGroups(groups),
+            ...groups.reduce((acc, curr) => {
+              const newValue = { ...acc, [curr.field]: curr.value };
+              return newValue;
+            }, {}),
           },
+          runtimeFields: groups.map((g) => g.field),
         });
 
         const indexedStartedAt = start ?? startedAt.toISOString();
