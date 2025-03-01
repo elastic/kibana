@@ -76,6 +76,13 @@ export const updateRiskScoreMappings = async ({
         },
       });
 
+      await esClient.cluster.deleteComponentTemplate(
+        {
+          name: '.risk-score-mappings',
+        },
+        { ignore: [404] }
+      );
+
       logger.debug(
         `Risk score mappings updated to version ${newConfig._meta.mappingsVersion} on namespace ${namespace}`
       );

@@ -10,10 +10,7 @@ import type {
   MappingDynamicMapping,
   Metadata,
 } from '@elastic/elasticsearch/lib/api/types';
-import {
-  createOrUpdateComponentTemplate,
-  createOrUpdateIndexTemplate,
-} from '@kbn/alerting-plugin/server';
+import { createOrUpdateComponentTemplate } from '@kbn/alerting-plugin/server';
 import { mappingFromFieldMap } from '@kbn/alerting-plugin/common';
 import type { ElasticsearchClient, Logger, SavedObjectsClientContract } from '@kbn/core/server';
 
@@ -152,49 +149,6 @@ export class RiskScoreDataClient {
         namespace,
       };
 
-      // Check if there are any existing component templates with the namespace in the name
-      const oldComponentTemplateExists = await esClient.cluster.existsComponentTemplate({
-        name: mappingComponentName,
-      });
-      if (oldComponentTemplateExists) {
-        await this.updateComponentTemplateNameWithNamespace(namespace);
-      }
-
-      // Update the new component template with the required data
-      await this.createOrUpdateRiskScoreIndexTemplate();
-
-      // Reference the new component template in the index template
-      await createOrUpdateIndexTemplate({
-        logger: this.options.logger,
-        esClient,
-        template: {
-          name: indexPatterns.template,
-          data_stream: { hidden: true },
-          index_patterns: [indexPatterns.alias],
-          composed_of: [nameSpaceAwareMappingsComponentName(namespace)],
-          template: {
-            lifecycle: {},
-            settings: {
-              'index.mapping.total_fields.limit': totalFieldsLimit,
-              'index.default_pipeline': getIngestPipelineName(namespace),
-            },
-            mappings: {
-              dynamic: false,
-              _meta: indexMetadata,
-            },
-          },
-          _meta: indexMetadata,
-        },
-      });
-
-      // Delete the component template without the namespace in the name
-      await esClient.cluster.deleteComponentTemplate(
-        {
-          name: mappingComponentName,
-        },
-        { ignore: [404] }
-      );
-
       await createDataStream({
         logger: this.options.logger,
         esClient,
@@ -329,23 +283,6 @@ export class RiskScoreDataClient {
         }),
       { logger: this.options.logger }
     );
-  }
-
-  private async updateComponentTemplateNameWithNamespace(namespace: string): Promise<void> {
-    const esClient = this.options.esClient;
-    const oldComponentTemplateResponse = await esClient.cluster.getComponentTemplate(
-      {
-        name: mappingComponentName,
-      },
-      { ignore: [404] }
-    );
-    const oldComponentTemplate = oldComponentTemplateResponse?.component_templates[0];
-    const newComponentTemplateName = nameSpaceAwareMappingsComponentName(namespace);
-    await esClient.cluster.putComponentTemplate({
-      name: newComponentTemplateName,
-      // @ts-expect-error elasticsearch@9.0.0 https://github.com/elastic/elasticsearch-js/issues/2584
-      body: oldComponentTemplate.component_template,
-    });
   }
 
   public copyTimestampToEventIngestedForRiskScore = (abortSignal?: AbortSignal) => {
