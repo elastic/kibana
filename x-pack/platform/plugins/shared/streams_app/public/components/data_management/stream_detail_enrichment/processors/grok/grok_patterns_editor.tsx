@@ -144,7 +144,7 @@ const DraggablePatternInput = ({
                 { defaultMessage: 'Drag Handle' }
               )}
             >
-              <EuiIcon type="grab" />
+              <EuiIcon type="grabOmnidirectional" />
             </EuiPanel>
             <EuiFieldText
               data-test-subj="streamsAppDraggablePatternInputFieldText"

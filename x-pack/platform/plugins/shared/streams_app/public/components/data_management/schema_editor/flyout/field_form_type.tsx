@@ -44,7 +44,7 @@ export const FieldFormType = ({
   }, [field, loading, recommendation, onTypeChange]);
 
   return (
-    <EuiFlexGroup direction="column">
+    <EuiFlexGroup direction="column" gutterSize="s">
       <EuiFlexItem>
         {isEditing ? (
           <FieldTypeSelector value={field.type} onChange={onTypeChange} isLoading={loading} />
@@ -70,6 +70,7 @@ interface FieldTypeSelectorProps {
 const FieldTypeSelector = ({ value, onChange, isLoading = false }: FieldTypeSelectorProps) => {
   return (
     <EuiSelect
+      compressed={true}
       isLoading={isLoading}
       data-test-subj="streamsAppFieldFormTypeSelect"
       hasNoInitialSelection={!value}

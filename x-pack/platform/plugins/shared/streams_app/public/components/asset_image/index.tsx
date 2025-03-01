@@ -25,6 +25,13 @@ const imageSets = {
       defaultMessage: 'No results image for the streams app',
     }),
   },
+  noProcessingForRootStreams: {
+    light: () => import('./no-processing-for-root-streams_light.png'),
+    dark: () => import('./no-processing-for-root-streams_dark.png'),
+    alt: i18n.translate('xpack.streams.streamDetailView.noProcessingForRootStreams', {
+      defaultMessage: 'No results image for the streams app',
+    }),
+  },
 };
 
 interface AssetImageProps extends Omit<EuiImageProps, 'src' | 'url' | 'alt'> {
@@ -43,5 +50,5 @@ export function AssetImage({ type = 'welcome', ...props }: AssetImageProps) {
     dynamicImageImport.then((module) => setImageSrc(module.default));
   }, [colorMode, dark, light]);
 
-  return imageSrc ? <EuiImage size="l" {...props} alt={alt} src={imageSrc} /> : null;
+  return imageSrc ? <EuiImage size="m" {...props} alt={alt} src={imageSrc} /> : null;
 }

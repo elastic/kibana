@@ -14,6 +14,7 @@ import {
   EuiFlyoutFooter,
   EuiTitle,
   EuiButton,
+  EuiPanel,
 } from '@elastic/eui';
 import React, { useReducer } from 'react';
 import { i18n } from '@kbn/i18n';
@@ -68,18 +69,20 @@ export const SchemaEditorFlyout = ({
 
       <EuiFlyoutBody>
         <EuiFlexGroup direction="column">
-          <FieldSummary
-            field={nextField}
-            isEditing={isEditing}
-            toggleEditMode={toggleEditMode}
-            onChange={setNextField}
-            stream={stream}
-          />
-          <AdvancedFieldMappingOptions
-            field={nextField}
-            onChange={setNextField}
-            isEditing={isEditing}
-          />
+          <EuiPanel hasBorder={true}>
+            <FieldSummary
+              field={nextField}
+              isEditing={isEditing}
+              toggleEditMode={toggleEditMode}
+              onChange={setNextField}
+              stream={stream}
+            />
+            <AdvancedFieldMappingOptions
+              field={nextField}
+              onChange={setNextField}
+              isEditing={isEditing}
+            />
+          </EuiPanel>
           {withFieldSimulation && (
             <EuiFlexItem grow={false}>
               <SamplePreviewTable stream={stream} nextField={nextField} />
@@ -101,6 +104,8 @@ export const SchemaEditorFlyout = ({
             })}
           </EuiButtonEmpty>
           <EuiButton
+            color="primary"
+            fill
             data-test-subj="streamsAppSchemaEditorFieldSaveButton"
             isLoading={isSaving}
             onClick={saveChanges}

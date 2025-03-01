@@ -47,7 +47,7 @@ export function ClassicStreamDetailManagement({
         <StreamDetailEnrichment definition={definition} refreshDefinition={refreshDefinition} />
       ),
       label: i18n.translate('xpack.streams.streamDetailView.enrichmentTab', {
-        defaultMessage: 'Extract field',
+        defaultMessage: 'Processors',
       }),
     };
 

@@ -5,7 +5,15 @@
  * 2.0.
  */
 
-import { EuiBreadcrumb, EuiBreadcrumbs, EuiFlexItem, EuiPanel, EuiText } from '@elastic/eui';
+import {
+  EuiBreadcrumb,
+  EuiBreadcrumbs,
+  EuiFlexItem,
+  EuiPanel,
+  EuiText,
+  useEuiTheme,
+} from '@elastic/eui';
+import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { WiredStreamGetResponse, getAncestorsAndSelf, isRoot } from '@kbn/streams-schema';
 import React from 'react';
@@ -32,14 +40,37 @@ export function CurrentStreamEntry({ definition }: { definition: WiredStreamGetR
     }
   );
 
+  const { euiTheme } = useEuiTheme();
+
   return (
     <>
       {!isRoot(definition.stream.name) && (
-        <EuiBreadcrumbs breadcrumbs={breadcrumbs} truncate={false} />
+        <EuiBreadcrumbs
+          max={2}
+          breadcrumbs={breadcrumbs}
+          truncate={false}
+          css={css`
+            padding-bottom: ${euiTheme.size.s};
+          `}
+        />
       )}
       <EuiFlexItem grow={false}>
-        <EuiPanel hasShadow={false} hasBorder paddingSize="s">
-          <EuiText size="s">{definition.stream.name}</EuiText>
+        <EuiPanel
+          hasShadow={false}
+          hasBorder
+          css={css`
+            padding: ${euiTheme.size.s} ${euiTheme.size.s};
+          `}
+        >
+          <EuiText
+            size="s"
+            css={css`
+              font-family: ${euiTheme.font.familyCode};
+              font-weight: ${euiTheme.font.weight.bold};
+            `}
+          >
+            {definition.stream.name}
+          </EuiText>
           <EuiText size="xs" color="subdued">
             {i18n.translate('xpack.streams.streamDetailRouting.currentStream', {
               defaultMessage: 'Current stream',

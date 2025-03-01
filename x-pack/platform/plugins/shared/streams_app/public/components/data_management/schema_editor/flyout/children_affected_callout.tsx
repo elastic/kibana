@@ -31,6 +31,7 @@ export const ChildrenAffectedCallout = ({
   return (
     <EuiCallOut
       color="warning"
+      iconType="warning"
       title={i18n.translate('xpack.streams.childStreamsWarning.title', {
         defaultMessage: 'Field changes',
       })}
