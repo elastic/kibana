@@ -12,7 +12,7 @@ import { i18n } from '@kbn/i18n';
 import { BehaviorSubject } from 'rxjs';
 import { css } from '@emotion/react';
 import { EuiComboBox } from '@elastic/eui';
-import { apiPublishesESQLVariables } from '@kbn/esql-variables-types';
+import { apiPublishesESQLVariables } from '@kbn/esql-types';
 import { useBatchedPublishingSubjects, apiHasParentApi } from '@kbn/presentation-publishing';
 import { tracksOverlays } from '@kbn/presentation-containers';
 import type { ESQLControlState } from '@kbn/esql/public';

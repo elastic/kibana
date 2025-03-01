@@ -1,7 +1,6 @@
 {
-  "name": "@kbn/esql-variables-types",
+  "name": "@kbn/esql-types",
   "private": true,
   "version": "1.0.0",
-  "author": "Kibana ES|QL",
   "license": "Elastic License 2.0 OR AGPL-3.0-only OR SSPL-1.0"
 }
