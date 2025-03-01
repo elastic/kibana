@@ -23,10 +23,6 @@ function isProgressPlugin(plugin: any) {
   return 'handler' in plugin && plugin.showActiveModules && plugin.showModules;
 }
 
-function isHtmlPlugin(plugin: any): plugin is { options: { template: string } } {
-  return !!(typeof plugin.options?.template === 'string');
-}
-
 interface BabelLoaderRule extends webpack.RuleSetRule {
   use: Array<{
     loader: 'babel-loader';
@@ -68,7 +64,7 @@ function isDesiredPreset(preset: Preset) {
 /**
  * @returns {import('webpack').Configuration}
  */
-export default ({ config: storybookConfig }: { config: Configuration }) => {
+export default async ({ config: storybookConfig }: { config: Configuration }) => {
   const config: Configuration = {
     devServer: {
       devMiddleware: {
@@ -143,6 +139,9 @@ export default ({ config: storybookConfig }: { config: Configuration }) => {
         core_styles: resolve(REPO_ROOT, 'src/core/public/index.scss'),
         vega: resolve(REPO_ROOT, 'node_modules/vega/build-es5/vega.js'),
       },
+      fallback: {
+        timers: false,
+      },
     },
     stats: 'errors-only',
   };
@@ -194,13 +193,6 @@ export default ({ config: storybookConfig }: { config: Configuration }) => {
     // Remove the progress plugin
     if (isProgressPlugin(plugin)) {
       continue;
-    }
-
-    // This is the hacky part. We find something that looks like the
-    // HtmlWebpackPlugin and mutate its `options.template` to point at our
-    // revised template.
-    if (isHtmlPlugin(plugin)) {
-      plugin.options.template = require.resolve('../templates/index.ejs');
     }
 
     filteredStorybookPlugins.push(plugin);

@@ -1,4 +1,4 @@
 {
   "private": true,
-  "main": "../preset.js"
+  "main": "../preset.ts"
 }

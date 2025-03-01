@@ -11,7 +11,7 @@ module.exports = {
   preset: '@kbn/test',
   rootDir: path.resolve(__dirname, '../../../../..'),
   roots: ['<rootDir>/x-pack/solutions/observability/plugins/apm'],
-  setupFiles: ['<rootDir>/x-pack/solutions/observability/plugins/apm/.storybook/jest_setup.js'],
+  setupFiles: ['<rootDir>/x-pack/solutions/observability/plugins/apm/.storybook/jest_setup.ts'],
   coverageDirectory:
     '<rootDir>/target/kibana-coverage/jest/x-pack/solutions/observability/plugins/apm',
   coverageReporters: ['text', 'html'],

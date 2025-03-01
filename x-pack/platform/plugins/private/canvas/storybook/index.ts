@@ -11,9 +11,3 @@ export * from './decorators';
 export { ACTIONS_PANEL_ID } from './addon/constants';
 
 export const getAddonPanelParameters = () => ({ options: { selectedPanel: ACTIONS_PANEL_ID } });
-
-export const getDisableStoryshotsParameter = () => ({
-  storyshots: {
-    disable: true,
-  },
-});

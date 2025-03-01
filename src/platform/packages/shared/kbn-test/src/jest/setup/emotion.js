@@ -15,7 +15,6 @@ module.exports = createSerializer({
   includeStyles: false,
 });
 // NOTE: The above `createSerializer` needs to be repeated in canvas'
-// `storyshots.test.tsx` file as well, as they do not use the kbn-test config
 
 const consoleError = console.error;
 console.error = (message, ...rest) => {
