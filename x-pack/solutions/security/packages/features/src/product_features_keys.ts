@@ -6,6 +6,10 @@
  */
 
 export enum ProductFeatureSecurityKey {
+  /** Elastic endpoint detections, includes alerts, rules, investigations */
+  detections = 'detections',
+  /** External detections that don't use Elastic endpoint */
+  externalDetections = 'external_detections',
   /** Enables Advanced Insights (Entity Risk, GenAI) */
   advancedInsights = 'advanced_insights',
   /**

@@ -108,6 +108,7 @@ export class FeatureRegistry {
     for (const [featureId, featureOverride] of Object.entries(overrides)) {
       const feature = this.kibanaFeatures[featureId];
       if (!feature) {
+        continue;
         throw new Error(
           `Cannot override feature "${featureId}" since feature with such ID is not registered.`
         );

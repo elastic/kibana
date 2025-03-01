@@ -12,14 +12,11 @@ import {
   ATTACK_DISCOVERY_FEATURE_ID,
   ATTACK_DISCOVERY_PATH,
   SecurityPageName,
-  SECURITY_FEATURE_ID,
 } from '../../common/constants';
 import type { LinkItem } from '../common/links/types';
 
 export const links: LinkItem = {
-  capabilities: [
-    [`${SECURITY_FEATURE_ID}.show`, `${ATTACK_DISCOVERY_FEATURE_ID}.attack-discovery`],
-  ], // This is an AND condition via the nested array
+  capabilities: `${ATTACK_DISCOVERY_FEATURE_ID}.attack-discovery`,
   globalNavPosition: 4,
   globalSearchKeywords: [
     i18n.translate('xpack.securitySolution.appLinks.attackDiscovery', {
