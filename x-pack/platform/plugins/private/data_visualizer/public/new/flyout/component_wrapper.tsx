@@ -17,6 +17,7 @@ const FileDataVisualizerLiteComponent = React.lazy(() => import('../file_upload_
 export const FileDataVisualizerLiteWrapper: FC<{
   resultLinks?: ResultLinks;
   setUploadResults?: (results: FileUploadResults) => void;
+  existingIndex?: string;
   autoAddInference?: string;
   autoCreateDataView?: boolean;
   indexSettings?: IndicesIndexSettings;
@@ -24,6 +25,7 @@ export const FileDataVisualizerLiteWrapper: FC<{
 }> = ({
   resultLinks,
   setUploadResults,
+  existingIndex,
   autoAddInference,
   autoCreateDataView,
   indexSettings,
@@ -34,6 +36,7 @@ export const FileDataVisualizerLiteWrapper: FC<{
       <FileDataVisualizerLiteComponent
         resultLinks={resultLinks}
         setUploadResults={setUploadResults}
+        existingIndex={existingIndex}
         autoAddInference={autoAddInference}
         autoCreateDataView={autoCreateDataView}
         indexSettings={indexSettings}
@@ -46,6 +49,7 @@ export const FileDataVisualizerLiteWrapper: FC<{
 export function getFileDataVisualizerLiteWrapper(
   resultLinks?: ResultLinks,
   setUploadResults?: (results: FileUploadResults) => void,
+  existingIndex?: string,
   autoAddInference?: string,
   autoCreateDataView?: boolean,
   indexSettings?: IndicesIndexSettings,
@@ -55,6 +59,7 @@ export function getFileDataVisualizerLiteWrapper(
     <FileDataVisualizerLiteWrapper
       resultLinks={resultLinks}
       setUploadResults={setUploadResults}
+      existingIndex={existingIndex}
       autoAddInference={autoAddInference}
       autoCreateDataView={autoCreateDataView}
       indexSettings={indexSettings}

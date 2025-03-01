@@ -38,7 +38,8 @@ export function createFlyout(
   });
 
   let results: FileUploadResults | null = null;
-  const { onUploadComplete, autoAddInference, autoCreateDataView, indexSettings } = props;
+  const { onUploadComplete, existingIndex, autoAddInference, autoCreateDataView, indexSettings } =
+    props;
 
   const onFlyoutClose = () => {
     flyoutSession.close();
@@ -54,7 +55,7 @@ export function createFlyout(
           coreStart={coreStart}
           share={share}
           data={data}
-          props={{ autoAddInference, autoCreateDataView, indexSettings }}
+          props={{ existingIndex, autoAddInference, autoCreateDataView, indexSettings }}
           onFlyoutClose={onFlyoutClose}
           setUploadResults={(res) => {
             if (res) {
