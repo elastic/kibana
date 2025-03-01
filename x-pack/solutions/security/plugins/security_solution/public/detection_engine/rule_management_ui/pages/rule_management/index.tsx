@@ -35,6 +35,7 @@ import { AllRules } from '../../components/rules_table';
 import { RulesTableContextProvider } from '../../components/rules_table/rules_table/rules_table_context';
 import { useInvalidateFetchCoverageOverviewQuery } from '../../../rule_management/api/hooks/use_fetch_coverage_overview_query';
 import { HeaderPage } from '../../../../common/components/header_page';
+import { RuleUpdateCallouts } from '../../components/rule_update_callouts/rule_update_callouts';
 
 const RulesPageComponent: React.FC = () => {
   const [isImportModalVisible, showImportModal, hideImportModal] = useBoolState();
@@ -168,6 +169,7 @@ const RulesPageComponent: React.FC = () => {
               </EuiFlexItem>
             </EuiFlexGroup>
           </HeaderPage>
+          <RuleUpdateCallouts shouldShowUpdateRulesCallout={true} />
           <MaintenanceWindowCallout
             kibanaServices={kibanaServices}
             categories={[DEFAULT_APP_CATEGORIES.security.id]}
