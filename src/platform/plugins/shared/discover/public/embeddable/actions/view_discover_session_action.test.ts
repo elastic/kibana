@@ -16,7 +16,7 @@ import { discoverServiceMock } from '../../__mocks__/services';
 import { createStartContractMock } from '../../__mocks__/start_contract';
 import { SearchEmbeddableApi } from '../types';
 import { getDiscoverLocatorParams } from '../utils/get_discover_locator_params';
-import { ViewSavedSearchAction } from './view_saved_search_action';
+import { getViewDiscoverSessionAction } from './view_discover_session_action';
 
 const applicationMock = createStartContractMock();
 const services = discoverServiceMock;
@@ -37,30 +37,30 @@ jest
 
 describe('view saved search action', () => {
   it('is compatible when embeddable is of type saved search, in view mode && appropriate permissions are set', async () => {
-    const action = new ViewSavedSearchAction(applicationMock, services.locator);
-    expect(await action.isCompatible({ embeddable: compatibleEmbeddableApi })).toBe(true);
+    const action = getViewDiscoverSessionAction(applicationMock, services.locator);
+    expect(await action.isCompatible?.({ embeddable: compatibleEmbeddableApi })).toBe(true);
   });
 
   it('is not compatible when embeddable not of type saved search', async () => {
-    const action = new ViewSavedSearchAction(applicationMock, services.locator);
+    const action = getViewDiscoverSessionAction(applicationMock, services.locator);
     expect(
-      await action.isCompatible({
+      await action.isCompatible?.({
         embeddable: { ...compatibleEmbeddableApi, type: 'CONTACT_CARD_EMBEDDABLE' },
       })
     ).toBe(false);
   });
 
   it('is not visible when in edit mode', async () => {
-    const action = new ViewSavedSearchAction(applicationMock, services.locator);
+    const action = getViewDiscoverSessionAction(applicationMock, services.locator);
     expect(
-      await action.isCompatible({
+      await action.isCompatible?.({
         embeddable: { ...compatibleEmbeddableApi, viewMode$: new BehaviorSubject(ViewMode.EDIT) },
       })
     ).toBe(false);
   });
 
   it('execute navigates to a saved search', async () => {
-    const action = new ViewSavedSearchAction(applicationMock, services.locator);
+    const action = getViewDiscoverSessionAction(applicationMock, services.locator);
     await new Promise((resolve) => setTimeout(resolve, 0));
     await action.execute({ embeddable: compatibleEmbeddableApi });
     expect(discoverServiceMock.locator.navigate).toHaveBeenCalledWith(
