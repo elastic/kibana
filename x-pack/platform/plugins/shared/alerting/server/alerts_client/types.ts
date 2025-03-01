@@ -74,20 +74,20 @@ export interface IAlertsClient<
   initializeExecution(opts: InitializeExecutionOpts): Promise<void>;
   hasReachedAlertLimit(): boolean;
   checkLimitUsage(): void;
-  processAlerts(opts: ProcessAlertsOpts): void;
+  processAlerts(): void;
   logAlerts(opts: LogAlertsOpts): void;
   getProcessedAlerts(
-    type: 'new' | 'active' | 'activeCurrent'
+    type: 'new' | 'active' | 'trackedActiveAlerts'
   ): Record<string, LegacyAlert<State, Context, ActionGroupIds>> | {};
   getProcessedAlerts(
-    type: 'recovered' | 'recoveredCurrent'
+    type: 'recovered' | 'trackedRecoveredAlerts'
   ): Record<string, LegacyAlert<State, Context, RecoveryActionGroupId>> | {};
   persistAlerts(): Promise<{ alertIds: string[]; maintenanceWindowIds: string[] } | null>;
   isTrackedAlert(id: string): boolean;
   getSummarizedAlerts?(params: GetSummarizedAlertsParams): Promise<SummarizedAlerts>;
-  getAlertsToSerialize(): {
-    alertsToReturn: Record<string, RawAlertInstance>;
-    recoveredAlertsToReturn: Record<string, RawAlertInstance>;
+  getRawAlertInstancesForState(): {
+    rawActiveAlerts: Record<string, RawAlertInstance>;
+    rawRecoveredAlerts: Record<string, RawAlertInstance>;
   };
   factory(): PublicAlertFactory<
     State,
@@ -100,6 +100,8 @@ export interface IAlertsClient<
     Context,
     WithoutReservedActionGroups<ActionGroupIds, RecoveryActionGroupId>
   > | null;
+  determineFlappingAlerts(): void;
+  determineDelayedAlerts(opts: DetermineDelayedAlertsOpts): void;
 }
 
 export interface ProcessAndLogAlertsOpts {
@@ -111,12 +113,10 @@ export interface ProcessAndLogAlertsOpts {
   alertDelay: number;
 }
 
-export interface ProcessAlertsOpts {
-  flappingSettings: RulesSettingsFlappingProperties;
+export interface DetermineDelayedAlertsOpts {
   alertDelay: number;
   ruleRunMetricsStore: RuleRunMetricsStore;
 }
-
 export interface LogAlertsOpts {
   shouldLogAlerts: boolean;
   ruleRunMetricsStore: RuleRunMetricsStore;

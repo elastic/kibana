@@ -100,8 +100,8 @@ export class PerAlertActionScheduler<
   }
 
   public async getActionsToSchedule({
-    activeCurrentAlerts,
-    recoveredCurrentAlerts,
+    activeAlerts,
+    recoveredAlerts,
   }: GetActionsToScheduleOpts<State, Context, ActionGroupIds, RecoveryActionGroupId>): Promise<
     ActionsToSchedule[]
   > {
@@ -111,8 +111,8 @@ export class PerAlertActionScheduler<
     }> = [];
     const results: ActionsToSchedule[] = [];
 
-    const activeCurrentAlertsArray = Object.values(activeCurrentAlerts || {});
-    const recoveredCurrentAlertsArray = Object.values(recoveredCurrentAlerts || {});
+    const activeAlertsArray = Object.values(activeAlerts || {});
+    const recoveredAlertsArray = Object.values(recoveredAlerts || {});
 
     for (const action of this.actions) {
       let summarizedAlerts = null;
@@ -140,13 +140,13 @@ export class PerAlertActionScheduler<
 
         logNumberOfFilteredAlerts({
           logger: this.context.logger,
-          numberOfAlerts: activeCurrentAlertsArray.length + recoveredCurrentAlertsArray.length,
+          numberOfAlerts: activeAlertsArray.length + recoveredAlertsArray.length,
           numberOfSummarizedAlerts: summarizedAlerts.all.count,
           action,
         });
       }
 
-      for (const alert of activeCurrentAlertsArray) {
+      for (const alert of activeAlertsArray) {
         if (
           this.isExecutableAlert({ alert, action, summarizedAlerts }) &&
           this.isExecutableActiveAlert({ alert, action })
@@ -157,7 +157,7 @@ export class PerAlertActionScheduler<
       }
 
       if (this.isRecoveredAction(action.group)) {
-        for (const alert of recoveredCurrentAlertsArray) {
+        for (const alert of recoveredAlertsArray) {
           if (this.isExecutableAlert({ alert, action, summarizedAlerts })) {
             this.addSummarizedAlerts({ alert, summarizedAlerts });
             executables.push({ action, alert });
