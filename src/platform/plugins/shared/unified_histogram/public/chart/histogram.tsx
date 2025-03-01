@@ -10,7 +10,9 @@
 import { useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import React from 'react';
+import { BehaviorSubject } from 'rxjs';
 import type { DataView } from '@kbn/data-views-plugin/public';
+import type { ESQLControlVariable } from '@kbn/esql-validation-autocomplete';
 import type { TimeRange } from '@kbn/es-query';
 import type { EmbeddableComponentProps, LensEmbeddableInput } from '@kbn/lens-plugin/public';
 import type {
@@ -38,6 +40,7 @@ export interface HistogramProps {
   onFilter?: LensEmbeddableInput['onFilter'];
   onBrushEnd?: LensEmbeddableInput['onBrushEnd'];
   withDefaultActions: EmbeddableComponentProps['withDefaultActions'];
+  esqlVariables?: ESQLControlVariable[];
 }
 
 export function Histogram({
@@ -56,6 +59,7 @@ export function Histogram({
   onBrushEnd,
   withDefaultActions,
   abortController,
+  esqlVariables,
 }: HistogramProps) {
   const { timeRangeText, timeRangeDisplay } = useTimeRange({
     uiSettings,
@@ -67,6 +71,7 @@ export function Histogram({
   });
   const { attributes } = visContext;
   const { euiTheme } = useEuiTheme();
+  const esqlVariables$ = new BehaviorSubject<ESQLControlVariable[]>(esqlVariables || []);
 
   const boxShadow = `0 2px 2px -1px ${euiTheme.colors.mediumShade},
   0 1px 5px -2px ${euiTheme.colors.mediumShade}`;
@@ -110,6 +115,7 @@ export function Histogram({
       >
         <lens.EmbeddableComponent
           {...lensProps}
+          esqlVariables$={esqlVariables$}
           // forceDSL is set to true to ensure that the Lens always uses DSL to fetch the data
           // as some consumers (discover) rely on the total hits count which is not provided by ESQL
           forceDSL={true}

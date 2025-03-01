@@ -12,6 +12,7 @@ import {
   createStateContainerReactHelpers,
   ReduxLikeStateContainer,
 } from '@kbn/kibana-utils-plugin/common';
+import type { ESQLControlVariable } from '@kbn/esql-validation-autocomplete';
 import {
   AggregateQuery,
   COMPARE_ALL_OPTIONS,
@@ -161,6 +162,8 @@ export interface DiscoverAppState {
    * Density of table
    */
   density?: DataGridDensity;
+
+  esqlVariables?: ESQLControlVariable[];
 }
 
 export interface AppStateUrl extends Omit<DiscoverAppState, 'sort'> {

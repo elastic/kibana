@@ -23,6 +23,7 @@ import type {
   DatatableColumn,
   DefaultInspectorAdapters,
 } from '@kbn/expressions-plugin/common';
+import type { ESQLControlVariable } from '@kbn/esql-validation-autocomplete';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 import type { TimeRange } from '@kbn/es-query';
 import { PublishingSubject } from '@kbn/presentation-publishing';
@@ -91,6 +92,7 @@ export interface ChartProps {
   onBrushEnd?: LensEmbeddableInput['onBrushEnd'];
   withDefaultActions: EmbeddableComponentProps['withDefaultActions'];
   columns?: DatatableColumn[];
+  esqlVariables?: ESQLControlVariable[];
 }
 
 const HistogramMemoized = memo(Histogram);
@@ -126,6 +128,7 @@ export function Chart({
   withDefaultActions,
   abortController,
   columns,
+  esqlVariables,
 }: ChartProps) {
   const lensVisServiceCurrentSuggestionContext = useObservable(
     lensVisService.currentSuggestionContext$
@@ -427,6 +430,7 @@ export function Chart({
                 onBrushEnd={onBrushEnd}
                 withDefaultActions={withDefaultActions}
                 {...lensPropsContext}
+                esqlVariables={esqlVariables}
               />
             )}
           </section>
