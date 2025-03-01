@@ -64,6 +64,7 @@ const enabledActionTypes = [
   '.tines',
   '.webhook',
   '.xmatters',
+  '.xsoar',
   '.torq',
   'test.sub-action-connector',
   'test.sub-action-connector-without-sub-actions',
