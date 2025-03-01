@@ -8,7 +8,8 @@
  */
 
 import { getStatesFromKbnUrl } from '@kbn/kibana-utils-plugin/public';
-import { DiscoverContextAppLocatorDefinition } from './locator';
+import { DISCOVER_CONTEXT_APP_LOCATOR, DiscoverContextAppLocatorParams } from './locator';
+import { contextAppLocatorGetLocation } from './locator_get_location';
 
 const dataViewId: string = 'c367b774-a4c2-11ea-bb37-0242ac130002';
 
@@ -17,7 +18,13 @@ interface SetupParams {
 }
 
 const setup = async ({ useHash = false }: SetupParams = {}) => {
-  const locator = new DiscoverContextAppLocatorDefinition({ useHash });
+  const locator = {
+    id: DISCOVER_CONTEXT_APP_LOCATOR,
+    getLocation: async (params: DiscoverContextAppLocatorParams) => {
+      return contextAppLocatorGetLocation({ useHash }, params);
+    },
+  };
+
   return { locator };
 };
 
