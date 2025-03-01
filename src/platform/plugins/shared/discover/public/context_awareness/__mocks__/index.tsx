@@ -98,6 +98,10 @@ export const createContextAwarenessMocks = ({
           },
         },
       ]),
+      getPaginationConfig: jest.fn((prev) => ({
+        ...prev,
+        paginationMode: 'multiPage',
+      })),
     },
     resolve: jest.fn(() => ({
       isMatch: true,
