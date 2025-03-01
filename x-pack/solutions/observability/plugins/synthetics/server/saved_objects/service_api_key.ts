@@ -47,6 +47,12 @@ export const syntheticsServiceApiKey: SavedObjectsType = {
         defaultMessage: 'Synthetics service api key',
       }),
   },
+  encryption: {
+    definition: {
+      attributesToEncrypt: new Set(['apiKey']),
+      attributesToIncludeInAAD: new Set(['id', 'name']),
+    },
+  },
 };
 
 const getEncryptedSOClient = (server: SyntheticsServerSetup) => {

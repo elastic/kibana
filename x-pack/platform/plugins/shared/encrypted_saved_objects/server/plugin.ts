@@ -8,7 +8,13 @@
 import nodeCrypto from '@elastic/node-crypto';
 import { createHash } from 'crypto';
 
-import type { CoreSetup, Logger, Plugin, PluginInitializerContext } from '@kbn/core/server';
+import type {
+  CoreSetup,
+  Logger,
+  Plugin,
+  PluginInitializerContext,
+  SavedObjectsType,
+} from '@kbn/core/server';
 import type { SecurityPluginSetup } from '@kbn/security-plugin/server';
 
 import type { ConfigType } from './config';
@@ -37,6 +43,7 @@ export interface EncryptedSavedObjectsPluginSetup {
    */
   canEncrypt: boolean;
   registerType: (typeRegistration: EncryptedSavedObjectTypeRegistration) => void;
+  registerType2: (typeRegistration: SavedObjectsType) => void;
   createMigration: CreateEncryptedSavedObjectsMigrationFn;
   createModelVersion: CreateEsoModelVersionFn;
 }
@@ -130,6 +137,8 @@ export class EncryptedSavedObjectsPlugin
       canEncrypt,
       registerType: (typeRegistration: EncryptedSavedObjectTypeRegistration) =>
         service.registerType(typeRegistration),
+      registerType2: (typeRegistration: SavedObjectsType) =>
+        service.registerType2(typeRegistration),
       createMigration: getCreateMigration(
         service,
         (typeRegistration: EncryptedSavedObjectTypeRegistration) => {

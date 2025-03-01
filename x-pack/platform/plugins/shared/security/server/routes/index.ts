@@ -21,6 +21,7 @@ import { defineAuthorizationRoutes } from './authorization';
 import { defineDeprecationsRoutes } from './deprecations';
 import { defineSecurityFeatureRoutes } from './feature_check';
 import { defineIndicesRoutes } from './indices';
+import { defineKeyDerivationRoutes } from './key_derivation/key_derivation';
 import { defineRoleMappingRoutes } from './role_mapping';
 import { defineSecurityCheckupGetStateRoutes } from './security_checkup';
 import { defineSessionManagementRoutes } from './session_management';
@@ -71,6 +72,7 @@ export function defineRoutes(params: RouteDefinitionParams) {
   defineUserProfileRoutes(params);
   defineUsersRoutes(params); // Temporarily allow user APIs (ToDo: move to non-serverless block below)
   defineViewRoutes(params);
+  defineKeyDerivationRoutes(params);
 
   // In the serverless environment...
   if (params.buildFlavor !== 'serverless') {
