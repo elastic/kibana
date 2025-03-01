@@ -16,6 +16,7 @@ import { awaitStream } from '../../lib/utils/wait_until_stream_finished';
 import { bootstrap } from './bootstrap';
 import { getScenario } from './get_scenario';
 import { RunOptions } from './parse_run_cli_flags';
+import { StreamManager } from './stream_manager';
 
 export async function startLiveDataUpload({
   runOptions,
@@ -26,16 +27,7 @@ export async function startLiveDataUpload({
 }) {
   const file = runOptions.file;
 
-  const {
-    logger,
-    apmEsClient,
-    logsEsClient,
-    infraEsClient,
-    syntheticsEsClient,
-    otelEsClient,
-    entitiesEsClient,
-    entitiesKibanaClient,
-  } = await bootstrap(runOptions);
+  const { logger, clients } = await bootstrap(runOptions);
 
   const scenario = await getScenario({ file, logger });
   const {
@@ -45,52 +37,25 @@ export async function startLiveDataUpload({
   } = await scenario({ ...runOptions, logger });
 
   if (scenarioBootsrap) {
-    await scenarioBootsrap({
-      apmEsClient,
-      logsEsClient,
-      infraEsClient,
-      otelEsClient,
-      syntheticsEsClient,
-      entitiesEsClient,
-      entitiesKibanaClient,
-    });
+    await scenarioBootsrap(clients);
   }
 
   const bucketSizeInMs = runOptions.liveBucketSize;
   let requestedUntil = start;
 
-  let currentStreams: PassThrough[] = [];
-  // @ts-expect-error upgrade typescript v4.9.5
-  const cachedStreams: WeakMap<SynthtraceEsClient, PassThrough> = new WeakMap();
-
-  process.on('SIGINT', () => closeStreamsAndTeardown());
-  process.on('SIGTERM', () => closeStreamsAndTeardown());
-  process.on('SIGQUIT', () => closeStreamsAndTeardown());
-
-  async function closeStreamsAndTeardown() {
+  const streamManager = new StreamManager(async () => {
     if (scenarioTearDown) {
       try {
-        await scenarioTearDown({
-          apmEsClient,
-          logsEsClient,
-          infraEsClient,
-          otelEsClient,
-          syntheticsEsClient,
-          entitiesEsClient,
-          entitiesKibanaClient,
-        });
+        await scenarioTearDown(clients);
       } catch (error) {
-        logger.error('Error during scenario teardown', error);
+        logger.error('Error during scenario teardown');
+        logger.error(error);
       }
     }
+  });
 
-    currentStreams.forEach((stream) => {
-      stream.end(() => {
-        process.exit(0);
-      });
-    });
-    currentStreams = []; // Reset the stream array
-  }
+  // @ts-expect-error upgrade typescript v4.9.5
+  const cachedStreams: WeakMap<SynthtraceEsClient, PassThrough> = new WeakMap();
 
   async function uploadNextBatch() {
     const now = Date.now();
@@ -105,14 +70,7 @@ export async function startLiveDataUpload({
 
       const generatorsAndClients = generate({
         range: timerange(bucketFrom.getTime(), bucketTo.getTime()),
-        clients: {
-          logsEsClient,
-          apmEsClient,
-          infraEsClient,
-          entitiesEsClient,
-          syntheticsEsClient,
-          otelEsClient,
-        },
+        clients,
       });
 
       const generatorsAndClientsArray = castArray(generatorsAndClients);
@@ -131,7 +89,7 @@ export async function startLiveDataUpload({
         return stream;
       });
 
-      currentStreams = streams;
+      streams.forEach((stream) => streamManager.trackStream(stream));
 
       const promises = generatorsAndClientsArray.map(({ generator }, i) => {
         const concatenatedStream = castArray(generator)
@@ -155,6 +113,9 @@ export async function startLiveDataUpload({
       });
 
       await Promise.all(refreshPromise);
+
+      streams.forEach((stream) => streamManager.untrackStream(stream));
+
       logger.info('Refreshing completed');
 
       requestedUntil = bucketTo;
