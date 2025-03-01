@@ -14,7 +14,6 @@ import { buildPhraseFilter, Filter } from '@kbn/es-query';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { DashboardRenderer, DashboardCreationOptions } from '@kbn/dashboard-plugin/public';
 import { EuiCode, EuiPanel, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
-import { ViewMode } from '@kbn/embeddable-plugin/public';
 
 export const StaticByReferenceExample = ({
   dashboardId,
@@ -51,7 +50,7 @@ export const StaticByReferenceExample = ({
             const field = dataView.getFieldByName('machine.os.keyword');
             let filter: Filter;
             let creationOptions: DashboardCreationOptions = {
-              getInitialInput: () => ({ viewMode: ViewMode.VIEW }),
+              getInitialInput: () => ({ viewMode: 'view' }),
             };
             if (field) {
               filter = buildPhraseFilter(field, 'win xp', dataView);

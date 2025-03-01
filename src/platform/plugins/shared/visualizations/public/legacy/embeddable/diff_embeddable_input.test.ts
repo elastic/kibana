@@ -8,7 +8,7 @@
  */
 
 import { KibanaExecutionContext } from '@kbn/core/types';
-import { EmbeddableInput, ViewMode } from '@kbn/embeddable-plugin/common';
+import { EmbeddableInput } from '@kbn/embeddable-plugin/common';
 import { omitGenericEmbeddableInput, genericEmbeddableInputIsEqual } from './diff_embeddable_input';
 
 const getGenericEmbeddableState = (state?: Partial<EmbeddableInput>): EmbeddableInput => {
@@ -23,7 +23,7 @@ const getGenericEmbeddableState = (state?: Partial<EmbeddableInput>): Embeddable
     syncColors: false,
     syncTooltips: false,
     syncCursor: true,
-    viewMode: ViewMode.VIEW,
+    viewMode: 'view',
     title: 'So Very Generic',
     id: 'soVeryGeneric',
   };
@@ -98,7 +98,7 @@ describe('Generic embeddable input diff function', () => {
     expect(
       genericEmbeddableInputIsEqual(
         getGenericEmbeddableState(),
-        getGenericEmbeddableState({ viewMode: ViewMode.EDIT })
+        getGenericEmbeddableState({ viewMode: 'edit' })
       )
     ).toBe(true);
   });
