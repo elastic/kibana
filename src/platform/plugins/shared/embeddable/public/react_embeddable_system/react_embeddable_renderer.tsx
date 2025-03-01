@@ -8,6 +8,7 @@
  */
 
 import {
+  apiHasLastSavedChildState,
   apiHasRuntimeChildState,
   apiIsPresentationContainer,
   HasSerializedChildState,
@@ -156,7 +157,16 @@ export const ReactEmbeddableRenderer = <
             const unsavedChanges = initializeUnsavedChanges<RuntimeState>(
               lastSavedRuntimeState,
               parentApi,
-              comparators
+              comparators,
+              async () => {
+                if (!apiHasLastSavedChildState<SerializedState>(parentApi))
+                  return api.snapshotRuntimeState();
+
+                const lastSavedSerializedState = parentApi.getLastSavedStateForChild(uuid);
+                return lastSavedSerializedState
+                  ? await factory.deserializeState(lastSavedSerializedState)
+                  : api.snapshotRuntimeState();
+              }
             );
 
             const fullApi = setApi({

@@ -11,8 +11,10 @@ export { apiCanAddNewPanel, type CanAddNewPanel } from './interfaces/can_add_new
 export {
   apiHasRuntimeChildState,
   apiHasSerializedChildState,
+  apiHasLastSavedChildState,
   type HasRuntimeChildState,
   type HasSerializedChildState,
+  type HasLastSavedChildState,
 } from './interfaces/child_state';
 export { childrenUnsavedChanges$ } from './interfaces/unsaved_changes/children_unsaved_changes';
 export { initializeUnsavedChanges } from './interfaces/unsaved_changes/initialize_unsaved_changes';
