@@ -54,6 +54,7 @@ import {
   type Message,
   KnowledgeBaseType,
   KnowledgeBaseEntryRole,
+  ConversationAccess,
 } from '../../../common/types';
 import { CONTEXT_FUNCTION_NAME } from '../../functions/context';
 import type { ChatFunctionClient } from '../chat_function_client';
@@ -602,6 +603,42 @@ export class ObservabilityAIAssistantClient {
     });
 
     return createdConversation;
+  };
+
+  updateAccess = async ({
+    conversationId,
+    access,
+  }: {
+    conversationId: string;
+    access: ConversationAccess;
+  }) => {
+    const document = await this.getConversationWithMetaFields(conversationId);
+    if (!document) {
+      throw notFound();
+    }
+
+    const conversation = await this.get(conversationId);
+    if (!conversation) {
+      throw notFound();
+    }
+
+    const isPublic = access === ConversationAccess.SHARED;
+
+    const updatedConversation: Conversation = merge({}, conversation, {
+      public: isPublic,
+      conversation: {
+        last_updated: new Date().toISOString(),
+      },
+    });
+
+    await this.dependencies.esClient.asInternalUser.update({
+      id: document._id!,
+      index: document._index,
+      doc: updatedConversation,
+      refresh: true,
+    });
+
+    return updatedConversation;
   };
 
   recall = async ({

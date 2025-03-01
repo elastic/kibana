@@ -7,11 +7,11 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { DATE_CATEGORY_LABELS } from '../i18n';
 import { ConversationList } from './conversation_list';
 import { UseConversationListResult } from '../hooks/use_conversation_list';
-import { useConversationsByDate } from '../hooks/use_conversations_by_date';
+import { useConversationsByDate, useConversationContextMenu } from '../hooks';
 
 jest.mock('../hooks/use_conversations_by_date', () => ({
   useConversationsByDate: jest.fn(),
@@ -21,6 +21,12 @@ jest.mock('../hooks/use_confirm_modal', () => ({
   useConfirmModal: jest.fn().mockReturnValue({
     element: <div data-test-subj="confirmModal" />,
     confirm: jest.fn(() => Promise.resolve(true)),
+  }),
+}));
+
+jest.mock('../hooks/use_conversation_context_menu', () => ({
+  useConversationContextMenu: jest.fn().mockReturnValue({
+    deleteConversation: jest.fn(() => Promise.resolve(true)),
   }),
 }));
 
@@ -93,6 +99,9 @@ const defaultProps = {
   onConversationDeleteClick: jest.fn(),
   newConversationHref: '/conversation/new',
   getConversationHref: (id: string) => `/conversation/${id}`,
+  setIsUpdatingConversationList: jest.fn(),
+  refreshConversations: jest.fn(),
+  updateDisplayedConversation: jest.fn(),
 };
 
 describe('ConversationList', () => {
@@ -173,11 +182,18 @@ describe('ConversationList', () => {
     expect(defaultProps.onConversationSelect).toHaveBeenCalledWith('1');
   });
 
-  it('calls onConversationDeleteClick when delete icon is clicked', async () => {
+  it('calls delete conversation when delete icon is clicked', async () => {
+    const mockDeleteConversation = jest.fn(() => Promise.resolve());
+
+    (useConversationContextMenu as jest.Mock).mockReturnValue({
+      deleteConversation: mockDeleteConversation,
+    });
+
     render(<ConversationList {...defaultProps} />);
-    const deleteButtons = screen.getAllByLabelText('Delete');
-    await fireEvent.click(deleteButtons[0]);
-    expect(defaultProps.onConversationDeleteClick).toHaveBeenCalledWith('1');
+    fireEvent.click(screen.getAllByLabelText('Delete')[0]);
+
+    await waitFor(() => expect(mockDeleteConversation).toHaveBeenCalledTimes(1));
+    expect(mockDeleteConversation).toHaveBeenCalledWith('1');
   });
 
   it('renders a new chat button and triggers onConversationSelect when clicked', () => {
