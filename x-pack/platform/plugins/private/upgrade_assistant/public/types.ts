@@ -7,7 +7,7 @@
 import { ManagementSetup } from '@kbn/management-plugin/public';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { SharePluginSetup } from '@kbn/share-plugin/public';
-import { CoreStart, ScopedHistory } from '@kbn/core/public';
+import { CoreStart, ScopedHistory, ApplicationStart } from '@kbn/core/public';
 
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import { CloudSetup } from '@kbn/cloud-plugin/public';
@@ -44,6 +44,7 @@ export interface ClientConfigType {
 export interface AppDependencies {
   kibanaVersionInfo: KibanaVersionContext;
   featureSet: FeatureSet;
+  application: ApplicationStart;
   plugins: {
     cloud?: CloudSetup;
     share: SharePluginSetup;
