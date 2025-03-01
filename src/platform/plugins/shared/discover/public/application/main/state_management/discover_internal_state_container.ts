@@ -13,7 +13,7 @@ import {
   createStateContainerReactHelpers,
   ReduxLikeStateContainer,
 } from '@kbn/kibana-utils-plugin/common';
-import type { DataView, DataViewListItem } from '@kbn/data-views-plugin/common';
+import type { DataView } from '@kbn/data-views-plugin/common';
 import type { Filter, TimeRange } from '@kbn/es-query';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
 import type { UnifiedHistogramVisContext } from '@kbn/unified-histogram-plugin/public';
@@ -27,7 +27,6 @@ interface InternalStateDataRequestParams {
 export interface InternalState {
   dataView: DataView | undefined;
   isDataViewLoading: boolean;
-  savedDataViews: DataViewListItem[];
   adHocDataViews: DataView[];
   defaultProfileAdHocDataViewIds: string[];
   expandedDoc: DataTableRecord | undefined;
@@ -46,7 +45,6 @@ export interface InternalState {
 export interface InternalStateTransitions {
   setDataView: (state: InternalState) => (dataView: DataView) => InternalState;
   setIsDataViewLoading: (state: InternalState) => (isLoading: boolean) => InternalState;
-  setSavedDataViews: (state: InternalState) => (dataView: DataViewListItem[]) => InternalState;
   setAdHocDataViews: (state: InternalState) => (dataViews: DataView[]) => InternalState;
   setDefaultProfileAdHocDataViews: (
     state: InternalState
@@ -95,7 +93,6 @@ export function getInternalStateContainer() {
       isDataViewLoading: false,
       adHocDataViews: [],
       defaultProfileAdHocDataViewIds: [],
-      savedDataViews: [],
       expandedDoc: undefined,
       customFilters: [],
       overriddenVisContextAfterInvalidation: undefined,
@@ -123,10 +120,6 @@ export function getInternalStateContainer() {
           ...prevState,
           isESQLToDataViewTransitionModalVisible: isVisible,
         }),
-      setSavedDataViews: (prevState: InternalState) => (nextDataViewList: DataViewListItem[]) => ({
-        ...prevState,
-        savedDataViews: nextDataViewList,
-      }),
       setAdHocDataViews: (prevState: InternalState) => (newAdHocDataViewList: DataView[]) => ({
         ...prevState,
         adHocDataViews: newAdHocDataViewList,
@@ -215,7 +208,6 @@ export function getInternalStateContainer() {
 }
 
 export const selectDataViewsForPicker = ({
-  savedDataViews,
   adHocDataViews: originalAdHocDataViews,
   defaultProfileAdHocDataViewIds,
 }: InternalState) => {
@@ -224,5 +216,5 @@ export const selectDataViewsForPicker = ({
   );
   const adHocDataViews = differenceBy(originalAdHocDataViews, managedDataViews, 'id');
 
-  return { savedDataViews, managedDataViews, adHocDataViews };
+  return { managedDataViews, adHocDataViews };
 };

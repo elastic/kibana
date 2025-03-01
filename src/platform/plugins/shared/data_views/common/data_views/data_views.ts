@@ -1320,6 +1320,8 @@ export class DataViewsService {
       .then((response) => {
         indexPattern.id = response.id;
         indexPattern.version = response.version;
+        this.dataViewCache.set(indexPattern.id, Promise.resolve(indexPattern as DataView));
+        this.dataViewLazyCache.set(indexPattern.id, Promise.resolve(indexPattern as DataViewLazy));
       })
       .catch(async (err) => {
         if (err?.response?.status === 409 && saveAttempts++ < MAX_ATTEMPTS_TO_RESOLVE_CONFLICTS) {
