@@ -20,6 +20,7 @@ import {
 import {
   IndexManagementPluginSetup,
   IndexManagementPluginStart,
+  SearchIndicesAppMountParams,
 } from '@kbn/index-management-shared-types';
 import { IndexManagementLocator } from '@kbn/index-management-shared-types';
 import { Subscription } from 'rxjs';
@@ -145,6 +146,20 @@ export class IndexMgmtUIPlugin
       apiService: new PublicApiService(coreSetup.http),
       extensionsService: this.extensionsService.setup(),
       locator: this.locator,
+      indexManagementApp: async (params: SearchIndicesAppMountParams) => {
+        const { mountManagementSection } = await import('./application/mount_management_section');
+        return mountManagementSection({
+          coreSetup,
+          usageCollection,
+          params,
+          extensionsService: this.extensionsService,
+          isFleetEnabled: Boolean(fleet),
+          kibanaVersion: this.kibanaVersion,
+          config: this.config,
+          cloud,
+          canUseSyntheticSource: this.canUseSyntheticSource,
+        });
+      },
     };
   }
 

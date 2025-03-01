@@ -83,7 +83,7 @@ export const SearchIndexDetailsPage = () => {
   const hasDocuments = Boolean(isInitialLoading || indexDocuments?.results?.data.length);
 
   usePageChrome(indexName, [
-    ...IndexManagementBreadcrumbs,
+    ...IndexManagementBreadcrumbs(),
     {
       text: indexName,
     },
