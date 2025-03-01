@@ -168,6 +168,9 @@ export async function upgradeBatch(
       data: {
         upgraded_at: null,
         upgrade_started_at: now,
+        ...(options.isAutomatic
+          ? { upgrade_attempts: [now, ...(agent.upgrade_attempts ?? [])] }
+          : {}),
       },
     })),
     errors
