@@ -1,6 +1,27 @@
 @import './component/grid/index';
 @import './component/viewport/index';
 
+.kbnBody:has(.kbnGrid--freeform) {
+  // overflow: hidden;
+  .dashboardTopNav {
+    z-index: 0;
+  }
+  .kbnAppWrapper {
+    overflow: clip;
+  }
+  .dshDashboardViewportWrapper, .dshDashboardViewport, .dshLayout, .kbnGridWrapper, .kbnGrid  {
+    display: flex;
+    flex: auto;
+    width: 100%;
+    flex-direction: column;
+    background-color: $euiColorBackgroundBasePlain;
+  }
+
+  .embPanel:has(.euiImageWrapper), .embPanel:has(.mkdVis), .embPanel:has(.euiMarkdownFormat)  {
+    background-color: transparent;
+  }
+};
+
 .dashboardContainer, .dashboardViewport {
   flex: auto;
   display: flex;

@@ -19,21 +19,24 @@ import {
   GridAccessMode,
   GridLayoutData,
   GridLayoutStateManager,
+  GridPanelData,
   GridSettings,
   PanelInteractionEvent,
   RuntimeGridSettings,
 } from './types';
 import { shouldShowMobileView } from './utils/mobile_view';
-import { resolveGridRow } from './utils/resolve_grid_row';
+import { getKeysInOrder, resolveGridRow } from './utils/resolve_grid_row';
 
 export const useGridLayoutState = ({
   layout,
+  section,
   layoutRef,
   gridSettings,
   expandedPanelId,
   accessMode,
 }: {
   layout: GridLayoutData;
+  section?: number;
   layoutRef: React.MutableRefObject<HTMLDivElement | null>;
   gridSettings: GridSettings;
   expandedPanelId?: string;
@@ -66,27 +69,25 @@ export const useGridLayoutState = ({
 
   const runtimeSettings$ = useMemo(
     () =>
-      new BehaviorSubject<RuntimeGridSettings>({
-        ...gridSettings,
-        columnPixelWidth: 0,
-      }),
+      new BehaviorSubject<RuntimeGridSettings>(
+        gridSettings === 'none'
+          ? gridSettings
+          : {
+              ...gridSettings,
+              columnPixelWidth: 0,
+            }
+      ),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     []
   );
-  useEffect(() => {
-    const runtimeSettings = runtimeSettings$.getValue();
-    if (!deepEqual(gridSettings, pick(runtimeSettings, ['gutterSize', 'rowHeight', 'columnCount'])))
-      runtimeSettings$.next({
-        ...gridSettings,
-        columnPixelWidth: runtimeSettings.columnPixelWidth,
-      });
-  }, [gridSettings, runtimeSettings$]);
 
   const gridLayoutStateManager = useMemo(() => {
     const resolvedLayout = cloneDeep(layout);
-    resolvedLayout.forEach((row, rowIndex) => {
-      resolvedLayout[rowIndex] = resolveGridRow(row);
-    });
+    if (gridSettings !== 'none') {
+      resolvedLayout.forEach((row, rowIndex) => {
+        resolvedLayout[rowIndex] = resolveGridRow(row);
+      });
+    }
 
     const gridLayout$ = new BehaviorSubject<GridLayoutData>(resolvedLayout);
     const proposedGridLayout$ = new BehaviorSubject<GridLayoutData | undefined>(undefined);
@@ -95,6 +96,9 @@ export const useGridLayoutState = ({
     const activePanel$ = new BehaviorSubject<ActivePanel | undefined>(undefined);
     const panelIds$ = new BehaviorSubject<string[][]>(
       layout.map(({ panels }) => Object.keys(panels))
+    );
+    const activeSection$ = new BehaviorSubject<number | undefined>(
+      gridSettings === 'none' ? section : undefined
     );
 
     return {
@@ -112,9 +116,99 @@ export const useGridLayoutState = ({
       isMobileView$: new BehaviorSubject<boolean>(
         shouldShowMobileView(accessMode, euiTheme.breakpoint.m)
       ),
+      activeSection$,
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  useEffect(() => {
+    const runtimeSettings = runtimeSettings$.getValue();
+    if (runtimeSettings !== 'none' && gridSettings === 'none') {
+      // convert grid lock to freeform
+      const currentLayout = gridLayoutStateManager.gridLayout$.getValue();
+      const newLayout = cloneDeep(currentLayout);
+
+      const dimensions = gridLayoutStateManager.gridDimensions$.getValue();
+      const elementWidth = dimensions.width ?? 0;
+      const columnPixelWidth = elementWidth / runtimeSettings.columnCount;
+
+      newLayout.forEach((row, rowIndex) => {
+        const { panels } = row;
+        const newPanels: {
+          [key: string]: GridPanelData;
+        } = {};
+        const rowOffsets: { [key: number]: number } = {};
+        getKeysInOrder(panels).forEach((panelId, panelIndex) => {
+          const oldPanel = panels[panelId];
+          const width = oldPanel.width * columnPixelWidth;
+          const rowNum = oldPanel.row * runtimeSettings.rowHeight;
+
+          if (rowOffsets[rowNum] === undefined) {
+            rowOffsets[rowNum] = 0;
+          }
+          newPanels[panelId] = {
+            id: panelId,
+            column: rowOffsets[rowNum],
+            width,
+            row: rowNum,
+            height: oldPanel.height * runtimeSettings.rowHeight,
+            zIndex: panelIndex, // 0
+          };
+          rowOffsets[rowNum] += width;
+        });
+        newLayout[rowIndex] = { ...newLayout[rowIndex], panels: newPanels };
+      });
+      runtimeSettings$.next('none');
+      gridLayoutStateManager.gridLayout$.next(newLayout);
+      gridLayoutStateManager.activeSection$.next(0);
+    } else if (runtimeSettings === 'none' && gridSettings !== 'none') {
+      // convert freeform to grid lock
+      const currentLayout = gridLayoutStateManager.gridLayout$.getValue();
+      const newLayout = cloneDeep(currentLayout);
+
+      const dimensions = gridLayoutStateManager.gridDimensions$.getValue();
+      const elementWidth = dimensions.width ?? 0;
+      const columnPixelWidth = elementWidth / gridSettings.columnCount;
+
+      newLayout.forEach((row, rowIndex) => {
+        const { panels } = row;
+        const newPanels: {
+          [key: string]: GridPanelData;
+        } = {};
+        Object.keys(panels).forEach((panelId) => {
+          const oldPanel = panels[panelId];
+          const column = Math.round(oldPanel.column / columnPixelWidth);
+          const width = Math.round(oldPanel.width / columnPixelWidth);
+          const rowNum = Math.round(oldPanel.row / gridSettings.rowHeight);
+          newPanels[panelId] = {
+            id: panelId,
+            column: column + width <= gridSettings.columnCount ? column : 0,
+            width,
+            row: column + width <= gridSettings.columnCount ? rowNum : rowNum + 1,
+            height: Math.round(oldPanel.height / gridSettings.rowHeight),
+          };
+        });
+        newLayout[rowIndex] = resolveGridRow({ ...newLayout[rowIndex], panels: newPanels });
+      });
+      runtimeSettings$.next({
+        ...gridSettings,
+        columnPixelWidth:
+          (elementWidth - gridSettings.gutterSize * (gridSettings.columnCount - 1)) /
+          gridSettings.columnCount,
+      });
+      gridLayoutStateManager.gridLayout$.next(newLayout);
+      gridLayoutStateManager.activeSection$.next(undefined);
+    } else if (
+      runtimeSettings !== 'none' &&
+      gridSettings !== 'none' &&
+      !deepEqual(gridSettings, pick(runtimeSettings, ['gutterSize', 'rowHeight', 'columnCount']))
+    ) {
+      runtimeSettings$.next({
+        ...gridSettings,
+        columnPixelWidth: runtimeSettings?.columnPixelWidth ?? 0,
+      });
+    }
+  }, [gridSettings, runtimeSettings$, gridLayoutStateManager]);
 
   useEffect(() => {
     /**
@@ -124,6 +218,8 @@ export const useGridLayoutState = ({
       .pipe(debounceTime(250))
       .subscribe(([dimensions, currentAccessMode]) => {
         const currentRuntimeSettings = gridLayoutStateManager.runtimeSettings$.getValue();
+        if (currentRuntimeSettings === 'none') return;
+
         const elementWidth = dimensions.width ?? 0;
         const columnPixelWidth =
           (elementWidth -

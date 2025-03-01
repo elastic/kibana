@@ -19,6 +19,7 @@ import { Filter, Query, TimeRange } from '@kbn/es-query';
 import { PublishesESQLVariables } from '@kbn/esql-variables-types';
 import { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import {
+  CanAddNewSection,
   CanExpandPanels,
   HasRuntimeChildState,
   HasSaveNotification,
@@ -57,6 +58,7 @@ import {
   LoadDashboardReturn,
   SaveDashboardReturn,
 } from '../services/dashboard_content_management_service/types';
+import { DashboardSectionMap } from '@kbn/dashboard-plugin/common/dashboard_container/types';
 
 export const DASHBOARD_API_TYPE = 'dashboard';
 
@@ -101,6 +103,7 @@ export interface DashboardState extends DashboardSettings {
   refreshInterval?: RefreshInterval;
   viewMode: ViewMode;
   panels: DashboardPanelMap;
+  sections?: DashboardSectionMap;
 
   /**
    * Temporary. Currently Dashboards are in charge of providing references to all of their children.
@@ -122,6 +125,7 @@ export interface DashboardState extends DashboardSettings {
 }
 
 export type DashboardApi = CanExpandPanels &
+  CanAddNewSection &
   HasAppContext &
   HasExecutionContext &
   HasRuntimeChildState &
@@ -164,6 +168,9 @@ export type DashboardApi = CanExpandPanels &
     isManaged: boolean;
     locator?: Pick<LocatorPublic<DashboardLocatorParams>, 'navigate' | 'getRedirectUrl'>;
     panels$: PublishingSubject<DashboardPanelMap>;
+    sections$: PublishingSubject<DashboardSectionMap>;
+    setActiveSection: (section?: number) => void;
+    activeSection$: PublishingSubject<number | undefined>;
     runInteractiveSave: () => Promise<SaveDashboardReturn | undefined>;
     runQuickSave: () => Promise<void>;
     scrollToPanel: (panelRef: HTMLDivElement) => void;
@@ -173,6 +180,7 @@ export type DashboardApi = CanExpandPanels &
     setFullScreenMode: (fullScreenMode: boolean) => void;
     setHighlightPanelId: (id: string | undefined) => void;
     setPanels: (panels: DashboardPanelMap) => void;
+    setSections: (sections: DashboardSectionMap) => void;
     setQuery: (query?: Query | undefined) => void;
     setScrollToPanelId: (id: string | undefined) => void;
     setSettings: (settings: DashboardSettings) => void;

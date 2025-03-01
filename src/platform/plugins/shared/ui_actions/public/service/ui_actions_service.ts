@@ -97,7 +97,6 @@ export class UiActionsService {
     if (this.actions.has(id)) {
       throw new Error(`Action [action.id = ${id}] already registered.`);
     }
-
     this.actions.set(id, async () => {
       const action = new ActionInternal(await getDefinition());
       return action as unknown as ActionInternal<object>;

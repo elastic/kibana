@@ -121,6 +121,7 @@ function optionsOut(optionsJSON: string): DashboardAttributes['options'] {
     syncColors = DEFAULT_DASHBOARD_OPTIONS.syncColors,
     syncCursor = DEFAULT_DASHBOARD_OPTIONS.syncCursor,
     syncTooltips = DEFAULT_DASHBOARD_OPTIONS.syncTooltips,
+    lockToGrid = DEFAULT_DASHBOARD_OPTIONS.lockToGrid,
   } = JSON.parse(optionsJSON) as DashboardOptions;
   return {
     hidePanelTitles,
@@ -128,13 +129,24 @@ function optionsOut(optionsJSON: string): DashboardAttributes['options'] {
     syncColors,
     syncCursor,
     syncTooltips,
+    lockToGrid,
   };
 }
 
 function panelsOut(panelsJSON: string): DashboardAttributes['panels'] {
   const panels = JSON.parse(panelsJSON) as SavedDashboardPanel[];
   return panels.map(
-    ({ embeddableConfig, gridData, id, panelIndex, panelRefName, title, type, version }) => ({
+    ({
+      embeddableConfig,
+      gridData,
+      id,
+      panelIndex,
+      sectionIndex,
+      panelRefName,
+      title,
+      type,
+      version,
+    }) => ({
       gridData,
       id,
       panelConfig: embeddableConfig,
@@ -143,6 +155,7 @@ function panelsOut(panelsJSON: string): DashboardAttributes['panels'] {
       title,
       type,
       version,
+      sectionIndex,
     })
   );
 }
@@ -156,6 +169,7 @@ export function dashboardAttributesOut(
     kibanaSavedObjectMeta,
     optionsJSON,
     panelsJSON,
+    sections,
     refreshInterval,
     timeFrom,
     timeRestore,
@@ -163,6 +177,7 @@ export function dashboardAttributesOut(
     title,
     version,
   } = attributes;
+
   // try to maintain a consistent (alphabetical) order of keys
   return {
     ...(controlGroupInput && { controlGroupInput: controlGroupInputOut(controlGroupInput) }),
@@ -175,6 +190,7 @@ export function dashboardAttributesOut(
     ...(refreshInterval && {
       refreshInterval: { pause: refreshInterval.pause, value: refreshInterval.value },
     }),
+    sections,
     ...(timeFrom && { timeFrom }),
     timeRestore: timeRestore ?? false,
     ...(timeTo && { timeTo }),
@@ -240,6 +256,7 @@ export const getResultV3ToV2 = (result: DashboardGetOut): DashboardCrudTypesV2['
     kibanaSavedObjectMeta,
     options,
     panels,
+    // sections,
     refreshInterval,
     timeFrom,
     timeRestore,
@@ -258,6 +275,7 @@ export const getResultV3ToV2 = (result: DashboardGetOut): DashboardCrudTypesV2['
     }),
     ...(options && { optionsJSON: JSON.stringify(options) }),
     panelsJSON: panels ? panelsIn(panels) : '[]',
+    // sections,
     refreshInterval,
     ...(timeFrom && { timeFrom }),
     timeRestore,

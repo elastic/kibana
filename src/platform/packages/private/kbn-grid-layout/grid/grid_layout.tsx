@@ -24,8 +24,10 @@ import { resolveGridRow } from './utils/resolve_grid_row';
 
 export type GridLayoutProps = {
   layout: GridLayoutData;
+  section?: number;
   gridSettings: GridSettings;
   onLayoutChange: (newLayout: GridLayoutData) => void;
+  onSectionChange?: (section?: number) => void;
   expandedPanelId?: string;
   accessMode?: GridAccessMode;
   className?: string; // this makes it so that custom CSS can be passed via Emotion
@@ -33,14 +35,17 @@ export type GridLayoutProps = {
 
 export const GridLayout = ({
   layout,
+  section,
   gridSettings,
   renderPanelContents,
   onLayoutChange,
   expandedPanelId,
   accessMode = 'EDIT',
   className,
+  onSectionChange,
   useCustomDragHandle = false,
 }: GridLayoutProps) => {
+  console.log(layout);
   const layoutRef = useRef<HTMLDivElement | null>(null);
   const { gridLayoutStateManager, setDimensionsRef } = useGridLayoutState({
     layout,
@@ -48,6 +53,7 @@ export const GridLayout = ({
     gridSettings,
     expandedPanelId,
     accessMode,
+    section,
   });
 
   const [rowCount, setRowCount] = useState<number>(
@@ -64,9 +70,11 @@ export const GridLayout = ({
        * the layout sent in as a prop is not guaranteed to be valid (i.e it may have floating panels) -
        * so, we need to loop through each row and ensure it is compacted
        */
-      newLayout.forEach((row, rowIndex) => {
-        newLayout[rowIndex] = resolveGridRow(row);
-      });
+      if (gridLayoutStateManager.runtimeSettings$.getValue() !== 'none') {
+        newLayout.forEach((row, rowIndex) => {
+          newLayout[rowIndex] = resolveGridRow(row);
+        });
+      }
       gridLayoutStateManager.gridLayout$.next(newLayout);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -108,8 +116,15 @@ export const GridLayout = ({
     const gridLayoutClassSubscription = combineLatest([
       gridLayoutStateManager.accessMode$,
       gridLayoutStateManager.isMobileView$,
-    ]).subscribe(([currentAccessMode, isMobileView]) => {
+      gridLayoutStateManager.runtimeSettings$,
+    ]).subscribe(([currentAccessMode, isMobileView, runtimeSettings]) => {
       if (!layoutRef) return;
+
+      if (runtimeSettings === 'none') {
+        layoutRef.current?.classList.add('kbnGrid--freeform');
+      } else {
+        layoutRef.current?.classList.remove('kbnGrid--freeform');
+      }
 
       if (isMobileView) {
         layoutRef.current?.classList.add('kbnGrid--mobileView');
@@ -124,10 +139,21 @@ export const GridLayout = ({
       }
     });
 
+    const activeSectionSubscription = gridLayoutStateManager.activeSection$
+      .pipe(skip(1), distinctUntilChanged())
+      .subscribe((activeSection) => {
+        onSectionChange?.(
+          activeSection !== undefined
+            ? Math.min(activeSection, gridLayoutStateManager.gridLayout$.getValue().length - 1)
+            : undefined
+        );
+      });
+
     return () => {
       rowCountSubscription.unsubscribe();
       onLayoutChangeSubscription.unsubscribe();
       gridLayoutClassSubscription.unsubscribe();
+      activeSectionSubscription.unsubscribe();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);

@@ -6,7 +6,7 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { distinctUntilChanged, map } from 'rxjs';
 
 import {
@@ -21,22 +21,20 @@ import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 
 import { useGridLayoutContext } from '../use_grid_layout_context';
-import { deleteRow } from '../utils/row_management';
-import { DeleteGridRowModal } from './delete_grid_row_modal';
 import { GridRowTitle } from './grid_row_title';
 
 export interface GridRowHeaderProps {
   rowIndex: number;
   toggleIsCollapsed: () => void;
   collapseButtonRef: React.MutableRefObject<HTMLButtonElement | null>;
+  confirmDeleteRow: () => void;
 }
 
 export const GridRowHeader = React.memo(
-  ({ rowIndex, toggleIsCollapsed, collapseButtonRef }: GridRowHeaderProps) => {
+  ({ rowIndex, toggleIsCollapsed, collapseButtonRef, confirmDeleteRow }: GridRowHeaderProps) => {
     const { gridLayoutStateManager } = useGridLayoutContext();
 
     const [editTitleOpen, setEditTitleOpen] = useState<boolean>(false);
-    const [deleteModalVisible, setDeleteModalVisible] = useState<boolean>(false);
     const [readOnly, setReadOnly] = useState<boolean>(
       gridLayoutStateManager.accessMode$.getValue() === 'VIEW'
     );
@@ -73,84 +71,67 @@ export const GridRowHeader = React.memo(
       };
     }, [gridLayoutStateManager, rowIndex]);
 
-    const confirmDeleteRow = useCallback(() => {
-      /**
-       * Memoization of this callback does not need to be dependant on the React panel count
-       * state, so just grab the panel count via gridLayoutStateManager instead
-       */
-      const count = Object.keys(
-        gridLayoutStateManager.gridLayout$.getValue()[rowIndex].panels
-      ).length;
-      if (!Boolean(count)) {
-        const newLayout = deleteRow(gridLayoutStateManager.gridLayout$.getValue(), rowIndex);
-        gridLayoutStateManager.gridLayout$.next(newLayout);
-      } else {
-        setDeleteModalVisible(true);
-      }
-    }, [gridLayoutStateManager.gridLayout$, rowIndex]);
-
     return (
-      <>
-        <EuiFlexGroup
-          gutterSize="xs"
-          responsive={false}
-          alignItems="center"
-          css={styles.headerStyles}
-          className="kbnGridRowHeader"
-          data-test-subj={`kbnGridRowHeader-${rowIndex}`}
-        >
-          <GridRowTitle
-            rowIndex={rowIndex}
-            readOnly={readOnly}
-            toggleIsCollapsed={toggleIsCollapsed}
-            editTitleOpen={editTitleOpen}
-            setEditTitleOpen={setEditTitleOpen}
-            collapseButtonRef={collapseButtonRef}
-          />
-          {
-            /**
-             * Add actions at the end of the header section when the layout is editable + the section title
-             * is not in edit mode
-             */
-            !editTitleOpen && (
-              <>
-                <EuiFlexItem grow={false} css={styles.hiddenOnCollapsed}>
-                  <EuiText
-                    color="subdued"
-                    size="s"
-                    data-test-subj={`kbnGridRowHeader-${rowIndex}--panelCount`}
-                    className={'kbnGridLayout--panelCount'}
-                  >
-                    {i18n.translate('kbnGridLayout.rowHeader.panelCount', {
-                      defaultMessage:
-                        '({panelCount} {panelCount, plural, one {panel} other {panels}})',
-                      values: {
-                        panelCount,
-                      },
-                    })}
-                  </EuiText>
-                </EuiFlexItem>
-                {!readOnly && (
-                  <>
-                    <EuiFlexItem grow={false}>
-                      <EuiButtonIcon
-                        iconType="trash"
-                        color="danger"
-                        className="kbnGridLayout--deleteRowIcon"
-                        onClick={confirmDeleteRow}
-                        aria-label={i18n.translate('kbnGridLayout.row.deleteRow', {
-                          defaultMessage: 'Delete section',
-                        })}
-                      />
-                    </EuiFlexItem>
-                    <EuiFlexItem grow={false} css={[styles.hiddenOnCollapsed, styles.floatToRight]}>
-                      {/*
+      <EuiFlexGroup
+        gutterSize="xs"
+        responsive={false}
+        alignItems="center"
+        css={styles.headerStyles}
+        className="kbnGridRowHeader"
+        data-test-subj={`kbnGridRowHeader-${rowIndex}`}
+      >
+        <GridRowTitle
+          rowIndex={rowIndex}
+          readOnly={readOnly}
+          toggleIsCollapsed={toggleIsCollapsed}
+          editTitleOpen={editTitleOpen}
+          setEditTitleOpen={setEditTitleOpen}
+          collapseButtonRef={collapseButtonRef}
+        />
+        {
+          /**
+           * Add actions at the end of the header section when the layout is editable + the section title
+           * is not in edit mode
+           */
+          !editTitleOpen && (
+            <>
+              <EuiFlexItem grow={false} css={styles.hiddenOnCollapsed}>
+                <EuiText
+                  color="subdued"
+                  size="s"
+                  data-test-subj={`kbnGridRowHeader-${rowIndex}--panelCount`}
+                  className={'kbnGridLayout--panelCount'}
+                >
+                  {i18n.translate('kbnGridLayout.rowHeader.panelCount', {
+                    defaultMessage:
+                      '({panelCount} {panelCount, plural, one {panel} other {panels}})',
+                    values: {
+                      panelCount,
+                    },
+                  })}
+                </EuiText>
+              </EuiFlexItem>
+              {!readOnly && (
+                <>
+                  <EuiFlexItem grow={false}>
+                    <EuiButtonIcon
+                      iconType="trash"
+                      color="danger"
+                      className="kbnGridLayout--deleteRowIcon"
+                      onClick={confirmDeleteRow}
+                      aria-label={i18n.translate('kbnGridLayout.row.deleteRow', {
+                        defaultMessage: 'Delete section',
+                      })}
+                    />
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false} css={[styles.hiddenOnCollapsed, styles.floatToRight]}>
+                    {/*
                         This was added as a placeholder to get the desired UI here; however, since the
                         functionality will be implemented in https://github.com/elastic/kibana/issues/190381
                         and this button doesn't do anything yet, I'm choosing to hide it for now. I am keeping
                         the `FlexItem` wrapper so that the UI still looks correct.
                       */}
-                      {/* <EuiButtonIcon
+                    {/* <EuiButtonIcon
                         iconType="move"
                         color="text"
                         className="kbnGridLayout--moveRowIcon"
@@ -158,17 +139,13 @@ export const GridRowHeader = React.memo(
                           defaultMessage: 'Move section',
                         })}
                       /> */}
-                    </EuiFlexItem>
-                  </>
-                )}
-              </>
-            )
-          }
-        </EuiFlexGroup>
-        {deleteModalVisible && (
-          <DeleteGridRowModal rowIndex={rowIndex} setDeleteModalVisible={setDeleteModalVisible} />
-        )}
-      </>
+                  </EuiFlexItem>
+                </>
+              )}
+            </>
+          )
+        }
+      </EuiFlexGroup>
     );
   }
 );

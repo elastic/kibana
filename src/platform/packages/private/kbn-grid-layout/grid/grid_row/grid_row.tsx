@@ -18,6 +18,9 @@ import { DragPreview } from '../drag_preview';
 import { GridPanel } from '../grid_panel';
 import { useGridLayoutContext } from '../use_grid_layout_context';
 import { getKeysInOrder } from '../utils/resolve_grid_row';
+import { deleteRow } from '../utils/row_management';
+import { DeleteGridRowModal } from './delete_grid_row_modal';
+import { GridRowFooter } from './grid_row_footer';
 import { GridRowHeader } from './grid_row_header';
 
 export interface GridRowProps {
@@ -29,8 +32,14 @@ export const GridRow = React.memo(({ rowIndex }: GridRowProps) => {
   const collapseButtonRef = useRef<HTMLButtonElement | null>(null);
   const currentRow = gridLayoutStateManager.gridLayout$.value[rowIndex];
 
+  const [deleteModalVisible, setDeleteModalVisible] = useState<boolean>(false);
+
   const [panelIdsInOrder, setPanelIdsInOrder] = useState<string[]>(() =>
     getKeysInOrder(currentRow.panels)
+  );
+
+  const [activeSectionIndex, setActiveSection] = useState<number | undefined>(
+    gridLayoutStateManager.activeSection$.getValue()
   );
   const [isCollapsed, setIsCollapsed] = useState<boolean>(currentRow.isCollapsed);
 
@@ -50,29 +59,34 @@ export const GridRow = React.memo(({ rowIndex }: GridRowProps) => {
           }
         });
 
+      const sectionSubscription = combineLatest([
+        gridLayoutStateManager.gridLayout$,
+        gridLayoutStateManager.activeSection$,
+      ]).subscribe(([gridLayout, activeSection]) => {
+        const newActiveSection =
+          activeSection !== undefined ? Math.min(activeSection, gridLayout.length - 1) : undefined;
+        setActiveSection(newActiveSection);
+        if (activeSection !== newActiveSection)
+          gridLayoutStateManager.activeSection$.next(newActiveSection);
+        setIsCollapsed(gridLayout[rowIndex]?.isCollapsed ?? false);
+      });
+
       /**
        * This subscription ensures that the row will re-render when one of the following changes:
-       * - Collapsed state
        * - Panel IDs (adding/removing/replacing, but not reordering)
        */
-      const rowStateSubscription = combineLatest([
-        gridLayoutStateManager.proposedGridLayout$,
-        gridLayoutStateManager.gridLayout$,
-      ])
+      const rowStateSubscription = gridLayoutStateManager.proposedGridLayout$
         .pipe(
-          map(([proposedGridLayout, gridLayout]) => {
-            const displayedGridLayout = proposedGridLayout ?? gridLayout;
+          map((proposedGridLayout) => {
             return {
-              isCollapsed: displayedGridLayout[rowIndex]?.isCollapsed ?? false,
-              panelIds: Object.keys(displayedGridLayout[rowIndex]?.panels ?? {}),
+              panelIds: proposedGridLayout
+                ? Object.keys(proposedGridLayout[rowIndex]?.panels ?? {})
+                : [],
             };
           }),
           pairwise()
         )
         .subscribe(([oldRowData, newRowData]) => {
-          if (oldRowData.isCollapsed !== newRowData.isCollapsed) {
-            setIsCollapsed(newRowData.isCollapsed);
-          }
           if (
             oldRowData.panelIds.length !== newRowData.panelIds.length ||
             !(
@@ -94,18 +108,29 @@ export const GridRow = React.memo(({ rowIndex }: GridRowProps) => {
        * the order of rendered panels need to be aligned with how they are displayed in the grid for accessibility
        * reasons (screen readers and focus management).
        */
-      const gridLayoutSubscription = gridLayoutStateManager.gridLayout$.subscribe((gridLayout) => {
-        if (!gridLayout[rowIndex]) return;
-        const newPanelIdsInOrder = getKeysInOrder(gridLayout[rowIndex].panels);
-        if (panelIdsInOrder.join() !== newPanelIdsInOrder.join()) {
-          setPanelIdsInOrder(newPanelIdsInOrder);
-        }
-      });
+      const gridLayoutSubscription = gridLayoutStateManager.gridLayout$
+        .pipe(
+          pairwise(),
+          map(([layoutBefore, layoutAfter]) => {
+            if (!layoutBefore[rowIndex] || !layoutAfter[rowIndex]) return;
+            return {
+              oldKeysInOrder: getKeysInOrder(layoutBefore[rowIndex].panels),
+              newKeysInOrder: getKeysInOrder(layoutAfter[rowIndex].panels),
+            };
+          })
+        )
+        .subscribe((result) => {
+          if (!result) return;
+          const { oldKeysInOrder, newKeysInOrder } = result;
+          if (oldKeysInOrder.join() !== newKeysInOrder.join()) {
+            setPanelIdsInOrder(newKeysInOrder);
+          }
+        });
 
       return () => {
         interactionStyleSubscription.unsubscribe();
         gridLayoutSubscription.unsubscribe();
-        rowStateSubscription.unsubscribe();
+        sectionSubscription.unsubscribe();
       };
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -127,39 +152,67 @@ export const GridRow = React.memo(({ rowIndex }: GridRowProps) => {
     collapseButtonRef.current.ariaExpanded = `${!isCollapsed}`;
   }, [isCollapsed]);
 
+  const confirmDeleteRow = useCallback(() => {
+    /**
+     * Memoization of this callback does not need to be dependant on the React panel count
+     * state, so just grab the panel count via gridLayoutStateManager instead
+     */
+    const count = Object.keys(
+      gridLayoutStateManager.gridLayout$.getValue()[rowIndex].panels
+    ).length;
+    if (!Boolean(count)) {
+      const newLayout = deleteRow(gridLayoutStateManager.gridLayout$.getValue(), rowIndex);
+      gridLayoutStateManager.gridLayout$.next(newLayout);
+    } else {
+      setDeleteModalVisible(true);
+    }
+  }, [gridLayoutStateManager.gridLayout$, rowIndex]);
+
   return (
-    <div
-      css={styles.fullHeight}
-      className={classNames('kbnGridRowContainer', {
-        'kbnGridRowContainer--collapsed': isCollapsed,
-      })}
-    >
-      {rowIndex !== 0 && (
-        <GridRowHeader
-          rowIndex={rowIndex}
-          toggleIsCollapsed={toggleIsCollapsed}
-          collapseButtonRef={collapseButtonRef}
-        />
-      )}
-      {!isCollapsed && (
+    <>
+      {(activeSectionIndex === undefined || activeSectionIndex === rowIndex) && (
         <div
-          id={`kbnGridRow-${rowIndex}`}
-          className={'kbnGridRow'}
-          ref={(element: HTMLDivElement | null) =>
-            (gridLayoutStateManager.rowRefs.current[rowIndex] = element)
-          }
-          css={[styles.fullHeight, styles.grid]}
-          role="region"
-          aria-labelledby={`kbnGridRowTile-${rowIndex}`}
+          css={[styles.fullHeight, styles.freeform]}
+          className={classNames('kbnGridRowContainer', {
+            'kbnGridRowContainer--collapsed': isCollapsed,
+          })}
         >
-          {/* render the panels **in order** for accessibility, using the memoized panel components */}
-          {panelIdsInOrder.map((panelId) => (
-            <GridPanel key={panelId} panelId={panelId} rowIndex={rowIndex} />
-          ))}
-          <DragPreview rowIndex={rowIndex} />
+          {activeSectionIndex !== undefined ? (
+            <GridRowFooter rowIndex={rowIndex} confirmDeleteRow={confirmDeleteRow} />
+          ) : (
+            rowIndex !== 0 && (
+              <GridRowHeader
+                rowIndex={rowIndex}
+                toggleIsCollapsed={toggleIsCollapsed}
+                collapseButtonRef={collapseButtonRef}
+                confirmDeleteRow={confirmDeleteRow}
+              />
+            )
+          )}
+          {!isCollapsed && (
+            <div
+              id={`kbnGridRow-${rowIndex}`}
+              className={'kbnGridRow'}
+              ref={(element: HTMLDivElement | null) =>
+                (gridLayoutStateManager.rowRefs.current[rowIndex] = element)
+              }
+              css={[styles.fullHeight, styles.grid]}
+              role="region"
+              aria-labelledby={`kbnGridRowTile-${rowIndex}`}
+            >
+              {/* render the panels **in order** for accessibility, using the memoized panel components */}
+              {panelIdsInOrder.map((panelId) => (
+                <GridPanel key={panelId} panelId={panelId} rowIndex={rowIndex} />
+              ))}
+              <DragPreview rowIndex={rowIndex} />
+            </div>
+          )}
         </div>
       )}
-    </div>
+      {deleteModalVisible && (
+        <DeleteGridRowModal rowIndex={rowIndex} setDeleteModalVisible={setDeleteModalVisible} />
+      )}
+    </>
   );
 });
 
@@ -167,7 +220,28 @@ const styles = {
   fullHeight: css({
     height: '100%',
   }),
+  freeform: css({
+    '.kbnGrid--freeform &': {
+      display: 'flex',
+      flexDirection: 'column-reverse',
+      '.kbnGridRowHeader': {
+        display: 'flex',
+        justifyContent: 'center',
+        flex: 0,
+        backgroundColor: '#f6f9fc',
+        borderTop: '1px solid #E3E8F2',
+        padding: '12px',
+        zIndex: 10000,
+      },
+      '.kbnGridRow': {
+        flex: 1,
+      },
+    },
+  }),
   grid: css({
+    '.kbnGrid--freeform &': {
+      display: 'block',
+    },
     position: 'relative',
     justifyItems: 'stretch',
     display: 'grid',

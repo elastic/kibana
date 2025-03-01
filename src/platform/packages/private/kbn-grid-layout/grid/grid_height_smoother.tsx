@@ -26,11 +26,16 @@ export const GridHeightSmoother = React.memo(
        * making the panel shrink or grow unpredictably.
        */
       const interactionStyleSubscription = combineLatest([
+        gridLayoutStateManager.activeSection$,
         gridLayoutStateManager.gridDimensions$,
         gridLayoutStateManager.interactionEvent$,
-      ]).subscribe(([dimensions, interactionEvent]) => {
+      ]).subscribe(([activeSection, dimensions, interactionEvent]) => {
         if (!smoothHeightRef.current || gridLayoutStateManager.expandedPanelId$.getValue()) return;
 
+        if (activeSection !== undefined) {
+          smoothHeightRef.current.style.minHeight = 'unset';
+          return;
+        }
         if (!interactionEvent) {
           smoothHeightRef.current.style.minHeight = `${dimensions.height}px`;
           return;
@@ -53,6 +58,20 @@ export const GridHeightSmoother = React.memo(
         css={[styles.heightSmoothing, styles.hasActivePanel]}
       >
         {children}
+        {/* <div
+          css={css({
+            position: 'fixed',
+            height: '100px',
+            width: '100%',
+            bottom: 0,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 100000,
+          })}
+        >
+          <div>test</div>
+        </div> */}
       </div>
     );
   }

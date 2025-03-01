@@ -9,6 +9,7 @@
 
 import classNames from 'classnames';
 import React, { useCallback, useMemo, useRef } from 'react';
+import deepEqual from 'fast-deep-equal';
 
 import { css } from '@emotion/react';
 import { useAppFixedViewport } from '@kbn/core-rendering-browser';
@@ -23,6 +24,7 @@ import { useDashboardApi } from '../../../dashboard_api/use_dashboard_api';
 import { DASHBOARD_GRID_HEIGHT, DASHBOARD_MARGIN_SIZE } from './constants';
 import { DashboardGridItem } from './dashboard_grid_item';
 import { useLayoutStyles } from './use_layout_styles';
+import { DashboardSectionMap } from '../../../../common/dashboard_container/types';
 
 export const DashboardGrid = ({
   dashboardContainerRef,
@@ -34,30 +36,43 @@ export const DashboardGrid = ({
   const panelRefs = useRef<{ [panelId: string]: React.Ref<HTMLDivElement> }>({});
   const { euiTheme } = useEuiTheme();
 
-  const [expandedPanelId, panels, useMargins, viewMode] = useBatchedPublishingSubjects(
-    dashboardApi.expandedPanelId$,
-    dashboardApi.panels$,
-    dashboardApi.settings.useMargins$,
-    dashboardApi.viewMode$
-  );
+  const [expandedPanelId, panels, sections, useMargins, lockToGrid, viewMode, activeSection] =
+    useBatchedPublishingSubjects(
+      dashboardApi.expandedPanelId$,
+      dashboardApi.panels$,
+      dashboardApi.sections$,
+      dashboardApi.settings.useMargins$,
+      dashboardApi.settings.lockToGrid$,
+      dashboardApi.viewMode$,
+      dashboardApi.activeSection$
+    );
 
   const appFixedViewport = useAppFixedViewport();
 
   const currentLayout: GridLayoutData = useMemo(() => {
-    const singleRow: GridLayoutData[number] = {
-      title: '', // we only support a single section currently, and it does not have a title
-      isCollapsed: false,
-      panels: {},
-    };
+    const newLayout: GridLayoutData = [
+      {
+        title: '', // first, non-collapsible section
+        isCollapsed: false,
+        panels: {},
+      },
+      ...(sections ?? []).map((section) => ({
+        title: section.title,
+        isCollapsed: section.collapsed,
+        panels: {},
+      })),
+    ];
 
     Object.keys(panels).forEach((panelId) => {
       const gridData = panels[panelId].gridData;
-      singleRow.panels[panelId] = {
+      const sectionId = panels[panelId].sectionIndex ?? 0;
+      newLayout[sectionId].panels[panelId] = {
         id: panelId,
         row: gridData.y,
         column: gridData.x,
         width: gridData.w,
         height: gridData.h,
+        zIndex: gridData.z,
       };
       // update `data-grid-row` attribute for all panels because it is used for some styling
       const panelRef = panelRefs.current[panelId];
@@ -66,31 +81,46 @@ export const DashboardGrid = ({
       }
     });
 
-    return [singleRow];
-  }, [panels]);
+    return newLayout;
+  }, [panels, sections]);
 
   const onLayoutChange = useCallback(
     (newLayout: GridLayoutData) => {
       if (viewMode !== 'edit') return;
 
       const currentPanels = dashboardApi.panels$.getValue();
-      const updatedPanels: { [key: string]: DashboardPanelState } = Object.values(
-        newLayout[0].panels
-      ).reduce((updatedPanelsAcc, panelLayout) => {
-        updatedPanelsAcc[panelLayout.id] = {
-          ...currentPanels[panelLayout.id],
-          gridData: {
-            i: panelLayout.id,
-            y: panelLayout.row,
-            x: panelLayout.column,
-            w: panelLayout.width,
-            h: panelLayout.height,
-          },
-        };
-        return updatedPanelsAcc;
-      }, {} as { [key: string]: DashboardPanelState });
+      const currentSections = dashboardApi.sections$.getValue();
+      const updatedSections: DashboardSectionMap = [];
+      const updatedPanels: { [key: string]: DashboardPanelState } = {};
+      newLayout.forEach((section, sectionIndex) => {
+        if (sectionIndex !== 0) {
+          updatedSections.push({
+            title: section.title,
+            collapsed: section.isCollapsed,
+          });
+        }
+
+        Object.values(section.panels).forEach((panelLayout) => {
+          updatedPanels[panelLayout.id] = {
+            ...currentPanels[panelLayout.id],
+            sectionIndex,
+            gridData: {
+              i: panelLayout.id,
+              y: panelLayout.row,
+              x: panelLayout.column,
+              w: panelLayout.width,
+              h: panelLayout.height,
+              z: panelLayout.zIndex,
+            },
+          };
+        });
+      });
+
       if (!arePanelLayoutsEqual(currentPanels, updatedPanels)) {
         dashboardApi.setPanels(updatedPanels);
+      }
+      if (!deepEqual(currentSections ?? [], updatedSections ?? [])) {
+        dashboardApi.setSections(updatedSections);
       }
     },
     [dashboardApi, viewMode]
@@ -125,13 +155,19 @@ export const DashboardGrid = ({
     // memoizing this component reduces the number of times it gets re-rendered to a minimum
     return (
       <GridLayout
+        section={activeSection}
+        onSectionChange={dashboardApi.setActiveSection}
         css={layoutStyles}
         layout={currentLayout}
-        gridSettings={{
-          gutterSize: useMargins ? DASHBOARD_MARGIN_SIZE : 0,
-          rowHeight: DASHBOARD_GRID_HEIGHT,
-          columnCount: DASHBOARD_GRID_COLUMN_COUNT,
-        }}
+        gridSettings={
+          lockToGrid
+            ? {
+                gutterSize: useMargins ? DASHBOARD_MARGIN_SIZE : 0,
+                rowHeight: DASHBOARD_GRID_HEIGHT,
+                columnCount: DASHBOARD_GRID_COLUMN_COUNT,
+              }
+            : 'none'
+        }
         useCustomDragHandle={true}
         renderPanelContents={renderPanelContents}
         onLayoutChange={onLayoutChange}
@@ -142,16 +178,19 @@ export const DashboardGrid = ({
   }, [
     layoutStyles,
     currentLayout,
-    useMargins,
     renderPanelContents,
     onLayoutChange,
     expandedPanelId,
     viewMode,
+    useMargins,
+    lockToGrid,
+    activeSection,
+    dashboardApi.setActiveSection,
   ]);
 
   const { dashboardClasses, dashboardStyles } = useMemo(() => {
     return {
-      dashboardClasses: classNames({
+      dashboardClasses: classNames('dshLayout', {
         'dshLayout-withoutMargins': !useMargins,
         'dshLayout--viewing': viewMode === 'view',
         'dshLayout--editing': viewMode !== 'view',
@@ -166,8 +205,6 @@ export const DashboardGrid = ({
           .embPanel__hoverActions {
           z-index: ${euiTheme.levels.toast};
         }
-
-        // when in fullscreen mode, combine all floating actions on first row and nudge them down
       `,
     };
   }, [useMargins, viewMode, expandedPanelId, euiTheme.levels.toast]);

@@ -947,6 +947,20 @@
         "index": false,
         "type": "text"
       },
+      "sections": {
+        "properties": {
+          "title": {
+            "doc_values": false,
+            "type": "keyword",
+            "index": false
+          },
+          "collapsed": {
+            "doc_values": false,
+            "type": "boolean",
+            "index": false
+          }
+        }
+      },
       "refreshInterval": {
         "properties": {
           "display": {

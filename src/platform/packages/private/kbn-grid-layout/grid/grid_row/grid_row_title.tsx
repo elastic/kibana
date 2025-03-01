@@ -51,7 +51,7 @@ export const GridRowTitle = React.memo(
        */
       const titleSubscription = gridLayoutStateManager.gridLayout$
         .pipe(
-          map((gridLayout) => gridLayout[rowIndex]?.title ?? ''),
+          map((gridLayout) => (rowIndex === 0 ? 'Main page' : gridLayout[rowIndex]?.title ?? '')),
           distinctUntilChanged()
         )
         .subscribe((title) => {

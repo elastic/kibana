@@ -33,6 +33,7 @@ export const convertPanelsArrayToPanelMap = (panels?: DashboardPanel[]): Dashboa
         ...(panel.title !== undefined && { title: panel.title }),
         ...panel.panelConfig,
       },
+      ...((panel.sectionIndex ?? 0) > 0 && { sectionIndex: panel.sectionIndex }),
       version: panel.version,
     };
   });
@@ -61,6 +62,7 @@ export const convertPanelMapToPanelsArray = (
       ...(title !== undefined && { title }),
       ...(savedObjectId !== undefined && { id: savedObjectId }),
       ...(panelState.panelRefName !== undefined && { panelRefName: panelState.panelRefName }),
+      ...((panelState.sectionIndex ?? 0) > 0 ? { sectionIndex: panelState.sectionIndex } : {}),
     };
   });
 };

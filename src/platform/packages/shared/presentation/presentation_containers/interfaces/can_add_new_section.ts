@@ -7,19 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export const LATEST_VERSION = 3;
+export interface CanAddNewSection {
+  addNewSection: () => void;
+}
 
-export const CONTENT_ID = 'dashboard';
-
-export const DASHBOARD_GRID_COLUMN_COUNT = 48;
-export const DEFAULT_PANEL_WIDTH = DASHBOARD_GRID_COLUMN_COUNT / 2;
-export const DEFAULT_PANEL_HEIGHT = 15;
-
-export const DEFAULT_DASHBOARD_OPTIONS = {
-  hidePanelTitles: false,
-  useMargins: true,
-  syncColors: true,
-  syncCursor: true,
-  syncTooltips: true,
-  lockToGrid: true,
-} as const;
+export const apiCanAddNewSection = (api: unknown): api is CanAddNewSection => {
+  return typeof (api as CanAddNewSection)?.addNewSection === 'function';
+};

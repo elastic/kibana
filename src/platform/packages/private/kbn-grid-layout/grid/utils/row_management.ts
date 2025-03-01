@@ -18,15 +18,24 @@ import { resolveGridRow } from './resolve_grid_row';
  * @param newRow The destination row for the panels
  * @returns Updated layout with panels moved from `startingRow` to `newRow`
  */
-export const movePanelsToRow = (layout: GridLayoutData, startingRow: number, newRow: number) => {
+export const movePanelsToRow = (
+  layout: GridLayoutData,
+  startingRow: number,
+  newRow: number,
+  resolveConflicts: boolean
+) => {
   const newLayout = cloneDeep(layout);
   const panelsToMove = newLayout[startingRow].panels;
-  const maxRow = Math.max(
-    ...Object.values(newLayout[newRow].panels).map(({ row, height }) => row + height)
-  );
-  Object.keys(panelsToMove).forEach((index) => (panelsToMove[index].row += maxRow));
-  newLayout[newRow].panels = { ...newLayout[newRow].panels, ...panelsToMove };
-  newLayout[newRow] = resolveGridRow(newLayout[newRow]);
+  if (resolveConflicts) {
+    const maxRow = Math.max(
+      ...Object.values(newLayout[newRow].panels).map(({ row, height }) => row + height)
+    );
+    Object.keys(panelsToMove).forEach((index) => (panelsToMove[index].row += maxRow));
+    newLayout[newRow].panels = { ...newLayout[newRow].panels, ...panelsToMove };
+    newLayout[newRow] = resolveGridRow(newLayout[newRow]);
+  } else {
+    newLayout[newRow].panels = { ...newLayout[newRow].panels, ...panelsToMove };
+  }
   newLayout[startingRow] = { ...newLayout[startingRow], panels: {} };
   return newLayout;
 };

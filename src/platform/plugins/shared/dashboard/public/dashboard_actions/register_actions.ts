@@ -8,9 +8,12 @@
  */
 
 import { CONTEXT_MENU_TRIGGER, PANEL_NOTIFICATION_TRIGGER } from '@kbn/embeddable-plugin/public';
+import { ADD_PANEL_TRIGGER } from '@kbn/ui-actions-plugin/public';
 import { DashboardStartDependencies } from '../plugin';
 import {
+  ACTION_ADD_SECTION,
   ACTION_ADD_TO_LIBRARY,
+  ACTION_CHANGE_Z_INDEX,
   ACTION_CLONE_PANEL,
   ACTION_COPY_TO_DASHBOARD,
   ACTION_EXPAND_PANEL,
@@ -40,11 +43,23 @@ export const registerActions = async ({
   });
   uiActions.attachAction(CONTEXT_MENU_TRIGGER, ACTION_EXPAND_PANEL);
 
+  uiActions.registerActionAsync(ACTION_CHANGE_Z_INDEX, async () => {
+    const { ChangeZIndexAction } = await import('./actions_module');
+    return new ChangeZIndexAction();
+  });
+  uiActions.attachAction(CONTEXT_MENU_TRIGGER, ACTION_CHANGE_Z_INDEX);
+
   uiActions.registerActionAsync(BADGE_FILTERS_NOTIFICATION, async () => {
     const { FiltersNotificationAction } = await import('./actions_module');
     return new FiltersNotificationAction();
   });
   uiActions.attachAction(PANEL_NOTIFICATION_TRIGGER, BADGE_FILTERS_NOTIFICATION);
+
+  uiActions.registerActionAsync(ACTION_ADD_SECTION, async () => {
+    const { AddSectionAction } = await import('./actions_module');
+    return new AddSectionAction();
+  });
+  uiActions.attachAction(ADD_PANEL_TRIGGER, ACTION_ADD_SECTION);
 
   if (share) {
     uiActions.registerActionAsync(ACTION_EXPORT_CSV, async () => {

@@ -15,4 +15,6 @@ export const ACTION_COPY_TO_DASHBOARD = 'copyToDashboard';
 export const ACTION_EXPAND_PANEL = 'togglePanel';
 export const ACTION_EXPORT_CSV = 'ACTION_EXPORT_CSV';
 export const ACTION_UNLINK_FROM_LIBRARY = 'unlinkFromLibrary';
+export const ACTION_ADD_SECTION = 'addCollapsibleSection';
 export const BADGE_FILTERS_NOTIFICATION = 'ACTION_FILTERS_NOTIFICATION';
+export const ACTION_CHANGE_Z_INDEX = 'changePanelZIndex';

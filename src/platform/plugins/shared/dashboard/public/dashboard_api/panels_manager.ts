@@ -8,6 +8,7 @@
  */
 
 import { BehaviorSubject, merge } from 'rxjs';
+import fastIsEqual from 'fast-deep-equal';
 import { filter, map, max } from 'lodash';
 import { v4 } from 'uuid';
 import { asyncForEach } from '@kbn/std';
@@ -42,14 +43,30 @@ import { arePanelLayoutsEqual } from './are_panel_layouts_equal';
 import { dashboardClonePanelActionStrings } from '../dashboard_actions/_dashboard_actions_strings';
 import { placeClonePanel } from '../dashboard_container/panel_placement/place_clone_panel_strategy';
 import { PanelPlacementStrategy } from '../plugin_constants';
+import { DashboardSectionMap } from '../../common/dashboard_container/types';
+import { getDashboardBackupService } from '../services/dashboard_backup_service';
 
 export function initializePanelsManager(
+  savedObjectId$: BehaviorSubject<string | undefined>,
   incomingEmbeddable: EmbeddablePackageState | undefined,
   initialPanels: DashboardPanelMap,
+  initialSections: DashboardSectionMap | undefined,
   initialPanelsRuntimeState: UnsavedPanelState,
   trackPanel: ReturnType<typeof initializeTrackPanel>,
   getReferencesForPanelId: (id: string) => Reference[],
-  pushReferences: (references: Reference[]) => void
+  pushReferences: (references: Reference[]) => void,
+  getSettings: () => {
+    syncColors: boolean;
+    syncCursor: boolean;
+    syncTooltips: boolean;
+    tags: string[];
+    lockToGrid: boolean;
+    timeRestore: boolean | undefined;
+    useMargins: boolean;
+    title?: string | undefined;
+    description?: string | undefined;
+    hidePanelTitles?: boolean | undefined;
+  }
 ) {
   const children$ = new BehaviorSubject<{
     [key: string]: unknown;
@@ -58,6 +75,15 @@ export function initializePanelsManager(
   function setPanels(panels: DashboardPanelMap) {
     if (panels !== panels$.value) panels$.next(panels);
   }
+  const sections$ = new BehaviorSubject<DashboardSectionMap | undefined>(initialSections);
+  function setSections(sections?: DashboardSectionMap) {
+    if (!fastIsEqual(sections ?? [], sections$.value ?? [])) sections$.next(sections);
+  }
+  const activeSection$ = new BehaviorSubject<number | undefined>(
+    getSettings().lockToGrid
+      ? undefined
+      : getDashboardBackupService().getSectionIndex(savedObjectId$.value) ?? 0
+  );
   let restoredRuntimeState: UnsavedPanelState = initialPanelsRuntimeState;
 
   function setRuntimeStateForChild(childId: string, state: object) {
@@ -90,14 +116,23 @@ export function initializePanelsManager(
     } else {
       // otherwise this incoming embeddable is brand new.
       setRuntimeStateForChild(incomingPanelId, incomingEmbeddable.input);
-      const { newPanelPlacement } = runPanelPlacementStrategy(
-        PanelPlacementStrategy.findTopLeftMostOpenSpace,
-        {
-          width: incomingEmbeddable.size?.width ?? DEFAULT_PANEL_WIDTH,
-          height: incomingEmbeddable.size?.height ?? DEFAULT_PANEL_HEIGHT,
-          currentPanels: panels$.value,
-        }
-      );
+      const sectionIndex = activeSection$.value ?? 0;
+
+      let newPanelPlacement;
+      const { lockToGrid } = getSettings();
+      if (lockToGrid) {
+        ({ newPanelPlacement } = runPanelPlacementStrategy(
+          PanelPlacementStrategy.findTopLeftMostOpenSpace,
+          {
+            width: incomingEmbeddable.size?.width ?? DEFAULT_PANEL_WIDTH,
+            height: incomingEmbeddable.size?.height ?? DEFAULT_PANEL_HEIGHT,
+            currentPanels: panels$.value,
+          }
+        ));
+      } else {
+        newPanelPlacement = { x: 0, y: 0, w: 400, h: 300 };
+      }
+
       incomingPanelState = {
         explicitInput: {},
         type: incomingEmbeddable.type,
@@ -105,6 +140,7 @@ export function initializePanelsManager(
           ...newPanelPlacement,
           i: incomingPanelId,
         },
+        ...(sectionIndex > 0 ? { sectionIndex } : {}),
       };
     }
 
@@ -120,6 +156,8 @@ export function initializePanelsManager(
     if (!panels$.value[id]) {
       throw new PanelNotFoundError();
     }
+    const sectionIndex = activeSection$.value ?? 0;
+    if ((panels$.value[id].sectionIndex ?? 0) !== sectionIndex) return undefined;
 
     if (children$.value[id]) {
       return children$.value[id] as ApiType;
@@ -150,6 +188,7 @@ export function initializePanelsManager(
       type: panel.type,
       explicitInput: { ...panel.explicitInput, ...serialized.rawState },
       gridData: panel.gridData,
+      sectionIndex: panel.sectionIndex ?? 0,
       references: serialized.references,
     };
   }
@@ -182,18 +221,27 @@ export function initializePanelsManager(
           ? await getCustomPlacementSettingFunc(initialState)
           : undefined;
 
-        const { newPanelPlacement, otherPanels } = runPanelPlacementStrategy(
-          customPlacementSettings?.strategy ?? PanelPlacementStrategy.findTopLeftMostOpenSpace,
-          {
-            currentPanels: panels$.value,
-            height: customPlacementSettings?.height ?? DEFAULT_PANEL_HEIGHT,
-            width: customPlacementSettings?.width ?? DEFAULT_PANEL_WIDTH,
-          }
-        );
+        const { lockToGrid } = getSettings();
+        let newPanelPlacement;
+        let otherPanels;
+        if (lockToGrid) {
+          ({ newPanelPlacement, otherPanels } = runPanelPlacementStrategy(
+            customPlacementSettings?.strategy ?? PanelPlacementStrategy.findTopLeftMostOpenSpace,
+            {
+              currentPanels: panels$.value,
+              height: customPlacementSettings?.height ?? DEFAULT_PANEL_HEIGHT,
+              width: customPlacementSettings?.width ?? DEFAULT_PANEL_WIDTH,
+            }
+          ));
+        } else {
+          newPanelPlacement = { x: 0, y: 0, w: 400, h: 300 };
+          otherPanels = panels$.getValue();
+        }
 
         if (serializedState?.references && serializedState.references.length > 0) {
           pushReferences(prefixReferencesFromPanel(newId, serializedState.references));
         }
+        const sectionIndex = activeSection$.value ?? 0;
         const newPanel: DashboardPanelState = {
           type,
           gridData: {
@@ -203,6 +251,7 @@ export function initializePanelsManager(
           explicitInput: {
             ...serializedState?.rawState,
           },
+          ...(sectionIndex > 0 ? { sectionIndex } : {}),
         };
         if (initialState) setRuntimeStateForChild(newId, initialState);
 
@@ -221,16 +270,18 @@ export function initializePanelsManager(
       children$,
       duplicatePanel: async (idToDuplicate: string) => {
         const panelToClone = getDashboardPanelFromId(idToDuplicate);
+
         const childApi = children$.value[idToDuplicate];
+
         if (!apiHasSerializableState(childApi)) {
           throw new Error('cannot duplicate a non-serializable panel');
         }
 
         const id = v4();
         const allPanelTitles = await getPanelTitles();
+
         const lastTitle = apiPublishesTitle(childApi) ? getTitle(childApi) ?? '' : '';
         const newTitle = getClonedPanelTitle(allPanelTitles, lastTitle);
-
         /**
          * For embeddables that have library transforms, we need to ensure
          * to clone them with by value serialized state.
@@ -266,10 +317,14 @@ export function initializePanelsManager(
             ...newPanelPlacement,
             i: id,
           },
+          ...((panelToClone.sectionIndex ?? 0) > 0
+            ? { sectionIndex: panelToClone.sectionIndex }
+            : {}),
         };
+        const { lockToGrid } = getSettings();
 
         setPanels({
-          ...otherPanels,
+          ...(lockToGrid ? otherPanels : panels$.value),
           [id]: newPanel,
         });
       },
@@ -337,12 +392,94 @@ export function initializePanelsManager(
         await untilEmbeddableLoaded(id);
         return id;
       },
+      sections$,
+      activeSection$,
+      setActiveSection: (section?: number) => {
+        activeSection$.next(section);
+        getDashboardBackupService().storeSectionIndex(savedObjectId$.value, section);
+      },
+      addNewSection: () => {
+        setSections([
+          ...(sections$.getValue() ?? {}),
+          {
+            title: i18n.translate('examples.gridExample.defaultSectionTitle', {
+              defaultMessage: 'New collapsible section',
+            }),
+            collapsed: false,
+          },
+        ]);
+
+        // // scroll to bottom after row is added
+        // layoutUpdated$.pipe(skip(1), take(1)).subscribe(() => {
+        //   window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+        // });
+      },
+      setSections,
       setPanels,
+      bringToFront: (id: string) => {
+        const panelsByZIndex = Object.values(panels$.getValue())
+          .filter((panel) => {
+            return panel.sectionIndex === activeSection$.getValue();
+          })
+          .sort((a, b) => {
+            if (a.gridData.i === id) {
+              return Infinity;
+            }
+            if (b.gridData.i === id) {
+              return -Infinity;
+            }
+            return (a.gridData.z ?? 0) - (b.gridData.z ?? 0);
+          });
+        const newPanels: DashboardPanelMap = {};
+        panelsByZIndex.forEach((panel, index) => {
+          newPanels[panel.gridData.i] = {
+            ...panel,
+            gridData: {
+              ...panel.gridData,
+              z: index,
+            },
+          };
+        });
+        setPanels({ ...panels$.getValue(), ...newPanels });
+      },
+      sendToBack: (id: string) => {
+        const panelsByZIndex = Object.values(panels$.getValue())
+          .filter((panel) => {
+            return panel.sectionIndex === activeSection$.getValue();
+          })
+          .sort((a, b) => {
+            if (a.gridData.i === id) {
+              return -Infinity;
+            }
+            if (b.gridData.i === id) {
+              return Infinity;
+            }
+            return (b.gridData.z ?? 0) - (a.gridData.z ?? 0);
+          });
+        const newPanels: DashboardPanelMap = {};
+        panelsByZIndex.forEach((panel, index) => {
+          newPanels[panel.gridData.i] = {
+            ...panel,
+            gridData: {
+              ...panel.gridData,
+              z: index,
+            },
+          };
+        });
+        setPanels({ ...panels$.getValue(), ...newPanels });
+      },
       setRuntimeStateForChild,
       untilEmbeddableLoaded,
     },
     comparators: {
       panels: [panels$, setPanels, arePanelLayoutsEqual],
+      sections: [
+        sections$,
+        setSections,
+        (a, b) => {
+          return fastIsEqual(a ?? [], b ?? []);
+        },
+      ],
     } as StateComparators<Pick<DashboardState, 'panels'>>,
     internalApi: {
       registerChildApi: (api: DefaultEmbeddableApi) => {
@@ -353,6 +490,7 @@ export function initializePanelsManager(
       },
       reset: (lastSavedState: DashboardState) => {
         setPanels(lastSavedState.panels);
+        setSections(lastSavedState.sections);
         restoredRuntimeState = {};
         let resetChangedPanelCount = false;
         const currentChildren = children$.value;
@@ -379,6 +517,7 @@ export function initializePanelsManager(
       },
       getState: (): {
         panels: DashboardState['panels'];
+        sections: DashboardState['sections'];
         references: Reference[];
       } => {
         const references: Reference[] = [];
@@ -395,7 +534,7 @@ export function initializePanelsManager(
           return acc;
         }, {} as DashboardPanelMap);
 
-        return { panels, references };
+        return { panels, sections: sections$.getValue(), references };
       },
     },
   };
