@@ -111,16 +111,14 @@ export const exportRulesRoute = (
                   request.body.objects.map((obj) => obj.rule_id),
                   actionsExporter,
                   request,
-                  actionsClient,
-                  isRulesCustomizationEnabled
+                  actionsClient
                 )
               : await getExportAll(
                   rulesClient,
                   exceptionsClient,
                   actionsExporter,
                   request,
-                  actionsClient,
-                  isRulesCustomizationEnabled
+                  actionsClient
                 );
 
           const responseBody = request.query.exclude_export_details
