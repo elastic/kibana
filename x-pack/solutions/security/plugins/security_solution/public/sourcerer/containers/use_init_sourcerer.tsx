@@ -24,6 +24,7 @@ import { useInitializeUrlParam, useUpdateUrlParam } from '../../common/utils/glo
 import { URL_PARAM_KEY } from '../../common/hooks/use_url_state';
 import { useKibana } from '../../common/lib/kibana';
 import { useSourcererDataView } from '.';
+import { useSourcererActionListeners } from './use_sourcerer_redux_listeners';
 
 export const useInitSourcerer = (
   scopeId: SourcererScopeName.default | SourcererScopeName.detections = SourcererScopeName.default
@@ -37,6 +38,8 @@ export const useInitSourcerer = (
   const initialDetectionSourcerer = useRef(true);
   const { loading: loadingSignalIndex, isSignalIndexExists, signalIndexName } = useUserInfo();
   const updateUrlParam = useUpdateUrlParam<SourcererUrlState>(URL_PARAM_KEY.sourcerer);
+
+  useSourcererActionListeners();
 
   const signalIndexNameSourcerer = useSelector(sourcererSelectors.signalIndexName);
   const defaultDataView = useSelector(sourcererSelectors.defaultDataView);
