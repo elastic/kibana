@@ -617,8 +617,8 @@ class FilterEditorComponent extends Component<FilterEditorProps, State> {
       );
     }
 
-    this.setState({ localFilter: newFilter });
     this.props.onLocalFilterUpdate?.(newFilter);
+    this.setState({ localFilter: newFilter });
   };
 
   private onSubmit = () => {

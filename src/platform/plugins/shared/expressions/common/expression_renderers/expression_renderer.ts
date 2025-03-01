@@ -17,9 +17,11 @@ export class ExpressionRenderer<Config = unknown> {
   public readonly validate: () => void | Error;
   public readonly reuseDomNode: boolean;
   public readonly render: ExpressionRenderDefinition<Config>['render'];
+  public readonly loadComponent?: ExpressionRenderDefinition<Config>['loadComponent'];
 
   constructor(config: ExpressionRenderDefinition<Config>) {
-    const { name, displayName, help, validate, reuseDomNode, render, namespace } = config;
+    const { name, displayName, help, validate, reuseDomNode, render, namespace, loadComponent } =
+      config;
 
     this.name = name;
     this.namespace = namespace;
@@ -28,5 +30,6 @@ export class ExpressionRenderer<Config = unknown> {
     this.validate = validate || (() => {});
     this.reuseDomNode = Boolean(reuseDomNode);
     this.render = render;
+    this.loadComponent = loadComponent;
   }
 }

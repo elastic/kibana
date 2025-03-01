@@ -53,6 +53,7 @@ export const AppContainer: FC<Props> = ({
   showPlainSpinner,
 }: Props) => {
   const [error, setError] = useState<Error | null>(null);
+  const [AppComponent, setAppComponent] = useState<React.ComponentType | null>(null);
   const [showSpinner, setShowSpinner] = useState(true);
   const [appNotFound, setAppNotFound] = useState(false);
   const elementRef = useRef<HTMLDivElement>(null);
@@ -79,7 +80,7 @@ export const AppContainer: FC<Props> = ({
     const mount = async () => {
       setShowSpinner(true);
       try {
-        unmountRef.current =
+        const mountRes =
           (await mounter.mount({
             appBasePath: mounter.appBasePath,
             history: createScopedHistory(appPath),
@@ -88,6 +89,13 @@ export const AppContainer: FC<Props> = ({
             onAppLeave: (handler) => setAppLeaveHandler(appId, handler),
             setHeaderActionMenu: (menuMount) => setAppActionMenu(appId, menuMount),
           })) || null;
+
+        if (typeof mountRes === 'function') {
+          unmountRef.current = mountRes;
+        } else {
+          unmountRef.current = mountRes.unmount;
+          setAppComponent(() => mountRes.Component);
+        }
       } catch (e) {
         setError(e);
         // eslint-disable-next-line no-console
@@ -116,14 +124,16 @@ export const AppContainer: FC<Props> = ({
   ]);
 
   return (
-    <Fragment>
+    <>
       <ThrowIfError error={error} />
       {appNotFound && <AppNotFound />}
       {showSpinner && !appNotFound && (
         <AppLoadingPlaceholder showPlainSpinner={Boolean(showPlainSpinner)} />
       )}
-      <div className={APP_WRAPPER_CLASS} key={appId} ref={elementRef} aria-busy={showSpinner} />
-    </Fragment>
+      <div className={APP_WRAPPER_CLASS} key={appId} ref={elementRef} aria-busy={showSpinner}>
+        {AppComponent && <AppComponent />}
+      </div>
+    </>
   );
 };
 

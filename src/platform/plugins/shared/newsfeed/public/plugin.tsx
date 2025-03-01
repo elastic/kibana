@@ -9,7 +9,7 @@
 
 import * as Rx from 'rxjs';
 import { catchError, takeUntil } from 'rxjs';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import React from 'react';
 import moment from 'moment';
 import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
@@ -52,6 +52,15 @@ export class NewsfeedPublicPlugin
     core.chrome.navControls.registerRight({
       order: 1000,
       mount: (target) => this.mount(api, target, core),
+      Component: React.memo(() => {
+        return (
+          <NewsfeedNavButton
+            newsfeedApi={api}
+            hasCustomBranding$={core.customBranding.hasCustomBranding$}
+            isServerless={this.isServerless}
+          />
+        );
+      }),
     });
 
     return {
@@ -89,16 +98,16 @@ export class NewsfeedPublicPlugin
 
   private mount(api: NewsfeedApi, targetDomElement: HTMLElement, core: CoreStart) {
     const hasCustomBranding$ = core.customBranding.hasCustomBranding$;
-    ReactDOM.render(
+    const root = createRoot(targetDomElement);
+    root.render(
       <KibanaRenderContextProvider {...core}>
         <NewsfeedNavButton
           newsfeedApi={api}
           hasCustomBranding$={hasCustomBranding$}
           isServerless={this.isServerless}
         />
-      </KibanaRenderContextProvider>,
-      targetDomElement
+      </KibanaRenderContextProvider>
     );
-    return () => ReactDOM.unmountComponentAtNode(targetDomElement);
+    return () => root.unmount();
   }
 }

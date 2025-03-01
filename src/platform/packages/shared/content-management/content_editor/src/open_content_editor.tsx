@@ -49,6 +49,7 @@ export function useOpenContentEditor() {
           size: 'm',
           ownFocus: true,
           hideCloseButton: true,
+          legacyRoot: false /* concurrent mode */,
         }
       );
 
