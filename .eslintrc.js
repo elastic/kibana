@@ -1626,6 +1626,30 @@ module.exports = {
         '@typescript-eslint/no-explicit-any': 'error',
       },
     },
+    /**
+     * ResponseOps overrides
+     */
+    {
+      files: [
+        'x-pack/platform/plugins/shared/event_log/**/*.{ts, tsx}',
+        'x-pack/platform/plugins/shared/rule_registry/**/*.{ts, tsx}',
+        'x-pack/platform/plugins/shared/task_manager/**/*.{ts, tsx}',
+        'x-pack/solutions/observability/packages/kbn-alerts-grouping/**/*.{ts, tsx}',
+        'src/platform/packages/shared/kbn-alerts-ui-shared/**/*.{ts, tsx}',
+        'src/platform/packages/shared/kbn-alerting-types/**/*.{ts, tsx}',
+        'src/platform/packages/shared/kbn-cases-components/**/*.{ts, tsx}',
+        'src/platform/packages/shared/kbn-actions-types/**/*.{ts, tsx}',
+        'src/platform/packages/shared/kbn-alerts-as-data-utils/**/*.{ts, tsx}',
+        'src/platform/packages/shared/kbn-grouping/**/*.{ts, tsx}',
+        'src/platform/packages/shared/kbn-rrule/**/*.{ts, tsx}',
+        'src/platform/packages/shared/kbn-rule-data-utils/**/*.{ts, tsx}',
+        'src/platform/packages/shared/kbn-triggers-actions-ui-types/**/*.{ts, tsx}',
+        'x-pack/platform/packages/shared/kbn-alerting-comparators/**/*.{ts, tsx}',
+      ],
+      rules: {
+        '@typescript-eslint/consistent-type-imports': 'error',
+      },
+    },
 
     /**
      * Lens overrides
