@@ -14,11 +14,7 @@ import type {
   FunctionDefinition,
   FunctionResponse,
 } from '../../common/functions/types';
-import type {
-  Message,
-  ObservabilityAIAssistantScreenContextRequest,
-  AdHocInstruction,
-} from '../../common/types';
+import type { Message, ObservabilityAIAssistantScreenContextRequest } from '../../common/types';
 import type { ObservabilityAIAssistantRouteHandlerResources } from '../routes/types';
 import { ChatFunctionClient } from './chat_function_client';
 import type { ObservabilityAIAssistantClient } from './client';
@@ -75,8 +71,6 @@ export type RegisterInstructionCallback = ({
 }) => string | string[] | undefined;
 
 export type RegisterInstruction = (...instruction: InstructionOrCallback[]) => void;
-
-export type RegisterAdHocInstruction = (...instruction: AdHocInstruction[]) => void;
 
 export type RegisterFunction = <
   TParameters extends CompatibleJSONSchema = any,
