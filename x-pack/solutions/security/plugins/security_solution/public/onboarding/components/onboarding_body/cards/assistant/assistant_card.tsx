@@ -61,8 +61,8 @@ export const AssistantCard: OnboardingCardComponent<AssistantCardMetadata> = ({
   const {
     http,
     assistantAvailability: { isAssistantEnabled },
-    baseConversations,
-    getLastConversationId,
+    getLastConversation,
+    setLastConversation,
   } = useAssistantContext();
   const {
     allSystemPrompts,
@@ -70,18 +70,19 @@ export const AssistantCard: OnboardingCardComponent<AssistantCardMetadata> = ({
     isFetchedCurrentUserConversations,
     isFetchedPrompts,
     refetchCurrentUserConversations,
-  } = useDataStreamApis({ http, baseConversations, isAssistantEnabled });
+  } = useDataStreamApis({ http, isAssistantEnabled });
 
   const { currentConversation, handleOnConversationSelected } = useCurrentConversation({
     allSystemPrompts,
     conversations,
     defaultConnector,
     refetchCurrentUserConversations,
-    conversationId: getLastConversationId(),
+    lastConversation: getLastConversation(),
     mayUpdateConversations:
       isFetchedCurrentUserConversations &&
       isFetchedPrompts &&
       Object.keys(conversations).length > 0,
+    setLastConversation,
   });
 
   const onConversationChange = useCallback(

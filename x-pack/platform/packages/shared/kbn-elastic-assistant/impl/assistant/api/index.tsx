@@ -57,7 +57,6 @@ export const fetchConnectorExecuteAction = async ({
   traceOptions,
   screenContext,
 }: FetchConnectorExecuteAction): Promise<FetchConnectorExecuteResponse> => {
-  // TODO add streaming support for gemini with langchain on
   const isStream = assistantStreamingEnabled;
 
   const optionalRequestParams = getOptionalRequestParams({

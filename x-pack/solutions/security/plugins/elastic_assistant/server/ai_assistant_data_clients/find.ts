@@ -11,6 +11,7 @@ import {
   Sort,
   SearchResponse,
 } from '@elastic/elasticsearch/lib/api/types';
+import { snakeCase } from 'lodash';
 import { ElasticsearchClient, Logger } from '@kbn/core/server';
 
 import type { estypes } from '@elastic/elasticsearch';
@@ -72,7 +73,7 @@ export const findDocuments = async <TSearchSchema>({
         query,
         track_total_hits: true,
         sort,
-        _source: true,
+        _source: fields?.length ? fields.map((f) => snakeCase(f)) : true,
         from: (page - 1) * perPage,
         ignore_unavailable: true,
         index,
