@@ -55,6 +55,7 @@ import {
   AttachmentType,
   ConnectorTypes,
   CustomFieldTypes,
+  type CustomFieldConfiguration,
 } from '../../../common/types/domain';
 import { useAvailableCasesOwners } from '../app/use_available_owners';
 import type { CreateCaseFormFieldsProps } from './form_fields';
@@ -496,7 +497,7 @@ describe('Create case', () => {
               type: CustomFieldTypes.TEXT,
               label: 'my custom field label',
               required: false,
-            },
+            } as CustomFieldConfiguration,
           ],
         },
       ];
@@ -555,6 +556,8 @@ describe('Create case', () => {
             { ...customFieldsMock[3], value: false },
             { ...customFieldsMock[4], value: 678 },
             customFieldsMock[5],
+            customFieldsMock[6],
+            customFieldsMock[7],
             {
               key: 'my_custom_field_key',
               type: CustomFieldTypes.TEXT,

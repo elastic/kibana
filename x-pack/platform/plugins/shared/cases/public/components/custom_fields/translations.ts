@@ -51,6 +51,10 @@ export const TOGGLE_LABEL = i18n.translate('xpack.cases.customFields.toggleLabel
   defaultMessage: 'Toggle',
 });
 
+export const LIST_LABEL = i18n.translate('xpack.cases.customFields.listLabel', {
+  defaultMessage: 'List',
+});
+
 export const NUMBER_LABEL = i18n.translate('xpack.cases.customFields.textLabel', {
   defaultMessage: 'Number',
 });
@@ -83,6 +87,14 @@ export const REQUIRED_FIELD = (fieldName: string): string =>
     values: { fieldName },
     defaultMessage: '{fieldName} is required.',
   });
+
+export const REQUIRED_OPTIONS = i18n.translate('xpack.cases.customFields.requiredOptions', {
+  defaultMessage: 'At least one option is required.',
+});
+
+export const EMPTY_OPTIONS = i18n.translate('xpack.cases.customFields.emptyOptions', {
+  defaultMessage: 'All options must have a value.',
+});
 
 export const EDIT_CUSTOM_FIELDS_ARIA_LABEL = (customFieldLabel: string) =>
   i18n.translate('xpack.cases.caseView.editCustomFieldsAriaLabel', {
@@ -129,5 +141,16 @@ export const POPULATED_WITH_DEFAULT = i18n.translate(
   'xpack.cases.customFields.fieldOptions.populatedWithDefault',
   {
     defaultMessage: 'This field is populated with the default value.',
+  }
+);
+
+export const ADD_LIST_OPTION = i18n.translate('xpack.cases.customFields.addListOption', {
+  defaultMessage: 'Add option',
+});
+
+export const LIST_OPTION_PLACEHOLDER_TEXT = i18n.translate(
+  'xpack.cases.customFields.listOptionPlaceholderText',
+  {
+    defaultMessage: 'Option text',
   }
 );
