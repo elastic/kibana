@@ -19,7 +19,7 @@ import {
 import { EndpointArtifactExceptionValidationError } from './errors';
 import { httpServerMock } from '@kbn/core/server/mocks';
 import type { PackagePolicy } from '@kbn/fleet-plugin/common';
-import { createFleetAuthzMock } from '@kbn/fleet-plugin/common/mocks';
+import { createFleetAuthzMock, createPackagePolicyMock } from '@kbn/fleet-plugin/common/mocks';
 import type { PackagePolicyClient } from '@kbn/fleet-plugin/server';
 import type { ExceptionItemLikeOptions } from '../types';
 import {
@@ -36,6 +36,11 @@ import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import { getEndpointAuthzInitialStateMock } from '../../../../common/endpoint/service/authz/mocks';
 import type { EndpointAuthz } from '../../../../common/endpoint/types/authz';
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
+import type {
+  FindExceptionListItemOptions,
+  FindExceptionListsItemOptions,
+} from '@kbn/lists-plugin/server/services/exception_lists/exception_list_client_types';
+import { ENDPOINT_ARTIFACT_LISTS } from '@kbn/securitysolution-list-constants';
 
 describe('When using Artifacts Exceptions BaseValidator', () => {
   let endpointAppContextServices: EndpointAppContextService;
@@ -227,6 +232,18 @@ describe('When using Artifacts Exceptions BaseValidator', () => {
       (endpointAppContextServices.getEndpointAuthz as jest.Mock).mockResolvedValue(authzMock);
       setArtifactOwnerSpaceId(exceptionLikeItem, DEFAULT_SPACE_ID);
       validator = new BaseValidatorMock(endpointAppContextServices, kibanaRequest);
+      packagePolicyService = endpointAppContextServices.getInternalFleetServices()
+        .packagePolicy as jest.Mocked<PackagePolicyClient>;
+      packagePolicyService.listIds.mockResolvedValue({
+        items: ['policy-1', 'policy-2'],
+        total: 2,
+        page: 1,
+        perPage: 20,
+      });
+      packagePolicyService.getByIDs.mockResolvedValue([
+        Object.assign(createPackagePolicyMock(), { id: 'policy-1' }),
+        Object.assign(createPackagePolicyMock(), { id: 'policy-2' }),
+      ]);
     });
 
     describe('#validateCreateOnwerSpaceIds()', () => {
@@ -450,6 +467,160 @@ describe('When using Artifacts Exceptions BaseValidator', () => {
         await expect(
           validator._validateCanDeleteItemInActiveSpace(savedExceptionItem)
         ).resolves.toBeUndefined();
+      });
+    });
+
+    describe('#setFindFilterScopeToActiveSpace()', () => {
+      let findOptionsMock: FindExceptionListItemOptions | FindExceptionListsItemOptions;
+
+      beforeEach(() => {
+        findOptionsMock = {
+          listId: ENDPOINT_ARTIFACT_LISTS.trustedApps.id,
+          namespaceType: 'agnostic',
+          filter: undefined,
+          perPage: 20,
+          page: 1,
+          sortField: undefined,
+          sortOrder: undefined,
+        };
+      });
+
+      it('should nothing if feature flag is disabled', async () => {
+        setSpaceAwarenessFeatureFlag('disabled');
+        await validator._setFindFilterScopeToActiveSpace(findOptionsMock);
+
+        expect(findOptionsMock.filter).toBeUndefined();
+      });
+
+      it('should inject additional filtering into find request', async () => {
+        await validator._setFindFilterScopeToActiveSpace(findOptionsMock);
+
+        expect(findOptionsMock.filter).toEqual(`
+      (
+        (
+          exception-list-agnostic.attributes.tags:("policy:all" OR "policy:policy-1" OR "policy:policy-2"
+          )
+        )
+        OR
+        (
+          NOT exception-list-agnostic.attributes.tags:"policy:*"
+          AND
+          exception-list-agnostic.attributes.tags:"ownerSpaceId:default"
+        )
+      )`);
+      });
+
+      it('should inject additional filtering into find request when it already has a filter value', async () => {
+        findOptionsMock.filter = 'somevalue:match-this';
+        await validator._setFindFilterScopeToActiveSpace(findOptionsMock);
+
+        expect(findOptionsMock.filter).toEqual(`
+      (
+        (
+          exception-list-agnostic.attributes.tags:("policy:all" OR "policy:policy-1" OR "policy:policy-2"
+          )
+        )
+        OR
+        (
+          NOT exception-list-agnostic.attributes.tags:"policy:*"
+          AND
+          exception-list-agnostic.attributes.tags:"ownerSpaceId:default"
+        )
+      ) AND (somevalue:match-this)`);
+      });
+
+      it('should inject additional filtering when using multi-list search format', async () => {
+        findOptionsMock.listId = [
+          ENDPOINT_ARTIFACT_LISTS.trustedApps.id,
+          ENDPOINT_ARTIFACT_LISTS.eventFilters.id,
+        ];
+        findOptionsMock.filter = ['', 'somevalue:match-this'];
+        await validator._setFindFilterScopeToActiveSpace(findOptionsMock);
+
+        expect(findOptionsMock.filter).toEqual([
+          '\n      (\n        (\n          exception-list-agnostic.attributes.tags:("policy:all" OR "policy:policy-1" OR "policy:policy-2"\n          )\n        )\n        OR\n        (\n          NOT exception-list-agnostic.attributes.tags:"policy:*"\n          AND\n          exception-list-agnostic.attributes.tags:"ownerSpaceId:default"\n        )\n      )',
+          '\n      (\n        (\n          exception-list-agnostic.attributes.tags:("policy:all" OR "policy:policy-1" OR "policy:policy-2"\n          )\n        )\n        OR\n        (\n          NOT exception-list-agnostic.attributes.tags:"policy:*"\n          AND\n          exception-list-agnostic.attributes.tags:"ownerSpaceId:default"\n        )\n      ) AND (somevalue:match-this)',
+        ]);
+      });
+    });
+
+    describe('#validateCanReadItemInActiveSpace()', () => {
+      const itemNotFoundInSpaceErrorMessage =
+        'EndpointExceptionsError: Item not found in space [default]';
+      let savedExceptionItem: ExceptionListItemSchema;
+
+      beforeEach(async () => {
+        authzMock.canManageGlobalArtifacts = false;
+        savedExceptionItem = createExceptionListItemMock({
+          // Saved item is owned by different space id
+          tags: [
+            buildPerPolicyTag('some-other-policy'),
+            buildPerPolicyTag('policy-1'),
+            buildSpaceOwnerIdTag('foo'),
+          ],
+        });
+      });
+
+      it('should do nothing if feature flag is disabled', async () => {
+        setSpaceAwarenessFeatureFlag('disabled');
+        savedExceptionItem.tags = [buildSpaceOwnerIdTag('foo')];
+
+        await expect(
+          validator._validateCanReadItemInActiveSpace(savedExceptionItem)
+        ).resolves.toBeUndefined();
+      });
+
+      it('should allow read if item is global', async () => {
+        savedExceptionItem.tags = [GLOBAL_ARTIFACT_TAG, buildSpaceOwnerIdTag('foo')];
+
+        await expect(
+          validator._validateCanReadItemInActiveSpace(savedExceptionItem)
+        ).resolves.toBeUndefined();
+      });
+
+      it('should allow read if user has global artifact privilege', async () => {
+        authzMock.canManageGlobalArtifacts = true;
+        savedExceptionItem.tags = [
+          buildPerPolicyTag('policy-999-not-visible-in-space'),
+          buildSpaceOwnerIdTag('foo'),
+        ];
+
+        await expect(
+          validator._validateCanReadItemInActiveSpace(savedExceptionItem)
+        ).resolves.toBeUndefined();
+      });
+
+      it('should allow read if item is per-policy with no policies assigned and space owner matches active space', async () => {
+        savedExceptionItem.tags = [buildSpaceOwnerIdTag('default')];
+
+        await expect(
+          validator._validateCanReadItemInActiveSpace(savedExceptionItem)
+        ).resolves.toBeUndefined();
+      });
+
+      it('should error if item is per-policy with no policies assigned but space owner is NOT the active space', async () => {
+        savedExceptionItem.tags = [buildSpaceOwnerIdTag('foo')];
+
+        await expect(
+          validator._validateCanReadItemInActiveSpace(savedExceptionItem)
+        ).rejects.toThrowError(itemNotFoundInSpaceErrorMessage);
+      });
+
+      it('should allow read if per-policy item has at least one policy that is visible in active space', async () => {
+        await expect(
+          validator._validateCanReadItemInActiveSpace(savedExceptionItem)
+        ).resolves.toBeUndefined();
+      });
+
+      it('should error if per-policy item does not have at least 1 policy id that is visible in active space', async () => {
+        savedExceptionItem.tags = [
+          buildPerPolicyTag('some-other-policy'),
+          buildSpaceOwnerIdTag('default'),
+        ];
+
+        await expect(
+          validator._validateCanReadItemInActiveSpace(savedExceptionItem)
+        ).rejects.toThrowError(itemNotFoundInSpaceErrorMessage);
       });
     });
   });
