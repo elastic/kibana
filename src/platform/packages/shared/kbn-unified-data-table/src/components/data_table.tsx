@@ -10,7 +10,7 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import classnames from 'classnames';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { of } from 'rxjs';
+import { map, of } from 'rxjs';
 import useObservable from 'react-use/lib/useObservable';
 import './data_table.scss';
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
@@ -29,6 +29,8 @@ import {
   EuiDataGridStyle,
   EuiDataGridProps,
   EuiDataGridToolBarVisibilityDisplaySelectorOptions,
+  EuiProgress,
+  EuiCallOut,
 } from '@elastic/eui';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import {
@@ -47,10 +49,16 @@ import {
 import type { DataViewFieldEditorStart } from '@kbn/data-view-field-editor-plugin/public';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { ThemeServiceStart } from '@kbn/react-kibana-context-common';
-import { type DataPublicPluginStart } from '@kbn/data-plugin/public';
+import {
+  KBN_FIELD_TYPES,
+  type DataPublicPluginStart,
+  ES_FIELD_TYPES,
+} from '@kbn/data-plugin/public';
 import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import { AdditionalFieldGroups } from '@kbn/unified-field-list';
 import { useDataGridInTableSearch } from '@kbn/data-grid-in-table-search';
+import { throttle } from 'lodash';
+import type { GridOnItemsRenderedProps } from 'react-window';
 import { DATA_GRID_DENSITY_STYLE_MAP, useDataGridDensity } from '../hooks/use_data_grid_density';
 import {
   UnifiedDataTableSettings,
@@ -79,8 +87,8 @@ import {
   ROWS_HEIGHT_OPTIONS,
   toolbarVisibility as toolbarVisibilityDefaults,
   DataGridDensity,
+  MAX_LOADED_GRID_ROWS,
 } from '../constants';
-import { UnifiedDataTableFooter } from './data_table_footer';
 import { UnifiedDataTableAdditionalDisplaySettings } from './data_table_additional_display_settings';
 import { useRowHeight } from '../hooks/use_row_height';
 import { CompareDocuments } from './compare_documents';
@@ -94,6 +102,7 @@ import {
   getAdditionalRowControlColumns,
 } from './custom_control_columns';
 import { useSorting } from '../hooks/use_sorting';
+import { UnifiedDataTableFooter } from './data_table_footer';
 
 const CONTROL_COLUMN_IDS_DEFAULT = [SELECT_ROW, OPEN_DETAILS];
 const THEME_DEFAULT = { darkMode: false };
@@ -334,7 +343,7 @@ export interface UnifiedDataTableProps {
   /**
    * To fetch more
    */
-  onFetchMoreRecords?: () => void;
+  onFetchMoreRecords?: (direction: 'next' | 'previous') => void;
   /**
    * Optional value for providing the additional controls available in the UnifiedDataTable toolbar to manage it's records or state. UnifiedDataTable includes Columns, Sorting and Bulk Actions.
    */
@@ -1137,6 +1146,115 @@ export const UnifiedDataTable = ({
     rowLineHeight: rowLineHeightOverride,
   });
 
+  const timefilter = data.query.timefilter.timefilter;
+  const refreshInterval = useObservable(
+    timefilter.getRefreshIntervalUpdate$().pipe(map(() => timefilter.getRefreshInterval())),
+    timefilter.getRefreshInterval()
+  );
+  const isRefreshIntervalOn = Boolean(
+    refreshInterval && refreshInterval.pause === false && refreshInterval.value > 0
+  );
+  const isInfiniteScrollingEnabled = Boolean(
+    onFetchMoreRecords && !isPaginationEnabled && !isRefreshIntervalOn
+  );
+  const isAtMaxResults = rowCount > MAX_LOADED_GRID_ROWS - sampleSizeState;
+  const loadMoreDirection = useRef<'next' | 'previous'>();
+  const prevCount = useRef<number>();
+  const prevRenderEvent = useRef<GridOnItemsRenderedProps>();
+
+  useEffect(() => {
+    if (!isInfiniteScrollingEnabled) {
+      return;
+    }
+
+    if (!prevCount.current && loadingState === DataLoadingState.loadingMore) {
+      prevCount.current = rowCount;
+    } else if (prevCount.current && loadingState === DataLoadingState.loaded) {
+      if (rowCount > prevCount.current) {
+        const anchorIndex =
+          (loadMoreDirection.current === 'next'
+            ? prevRenderEvent.current?.visibleRowStopIndex
+            : prevRenderEvent.current?.visibleRowStartIndex) ?? 0;
+        const rowCountDifference = rowCount - prevCount.current;
+
+        if (rowCountDifference > 0) {
+          dataGridRef.current?.scrollToItem?.({
+            align: loadMoreDirection.current === 'next' ? 'end' : 'start',
+            rowIndex:
+              loadMoreDirection.current === 'next' ? anchorIndex : anchorIndex + rowCountDifference,
+          });
+        }
+      }
+
+      prevCount.current = undefined;
+    }
+  }, [isInfiniteScrollingEnabled, loadingState, rowCount]);
+
+  const virtualizationOptions = useMemo(() => {
+    const options: EuiDataGridProps['virtualizationOptions'] = {};
+
+    if (isInfiniteScrollingEnabled) {
+      options.onItemsRendered = (event) => {
+        if (!prevCount.current || prevCount.current === rowCount) {
+          prevRenderEvent.current = event;
+        }
+      };
+
+      // Using throttle instead of debounce to ensure it updates while user is still scrolling
+      options.onScroll = throttle(
+        (event) => {
+          if (loadingState === DataLoadingState.loadingMore || isAtMaxResults) {
+            return;
+          }
+
+          // We need to manually query the react-window wrapper since EUI doesn't
+          // expose outerRef in virtualizationOptions, but we should request it
+          const outerRef = dataGridWrapper?.querySelector<HTMLElement>('.euiDataGrid__virtualized');
+
+          if (!outerRef) {
+            return;
+          }
+
+          const isScrollable = outerRef.scrollHeight > outerRef.offsetHeight;
+          const isScrolledToTop =
+            event.verticalScrollDirection === 'backward' && event.scrollTop === 0;
+          const isScrolledToBottom =
+            event.verticalScrollDirection === 'forward' &&
+            event.scrollTop + outerRef.offsetHeight >= outerRef.scrollHeight - 100;
+
+          if (isScrollable && (isScrolledToTop || isScrolledToBottom)) {
+            loadMoreDirection.current = isScrolledToBottom ? 'next' : 'previous';
+            onFetchMoreRecords?.(loadMoreDirection.current);
+          }
+        },
+        50,
+        { trailing: true }
+      );
+    }
+
+    // Don't use row overscan when showing Document column since
+    // rendering so much DOM content in each cell impacts performance
+    if (defaultColumns) {
+      return options;
+    }
+
+    return { ...VIRTUALIZATION_OPTIONS, ...options };
+  }, [
+    dataGridWrapper,
+    defaultColumns,
+    isAtMaxResults,
+    isInfiniteScrollingEnabled,
+    loadingState,
+    onFetchMoreRecords,
+    rowCount,
+  ]);
+
+  const [isMaxResultsCalloutVisible, setIsMaxResultsCalloutVisible] = useState(false);
+
+  useEffect(() => {
+    setIsMaxResultsCalloutVisible(isInfiniteScrollingEnabled && isAtMaxResults);
+  }, [isAtMaxResults, isInfiniteScrollingEnabled]);
+
   const isRenderComplete = loadingState !== DataLoadingState.loading;
 
   if (!rowCount && loadingState === DataLoadingState.loading) {
@@ -1176,6 +1294,27 @@ export const UnifiedDataTable = ({
   return (
     <UnifiedDataTableContext.Provider value={unifiedDataTableContextValue}>
       <span className="unifiedDataTable__inner">
+        {loadingState === DataLoadingState.loadingMore && (
+          <EuiProgress size="xs" color="accent" position="absolute" />
+        )}
+        {isMaxResultsCalloutVisible && (
+          <EuiCallOut
+            iconType="iInCircle"
+            size="s"
+            title={
+              <FormattedMessage
+                id="unifiedDataTable.gridSampleSize.limitDescription"
+                defaultMessage="Search results are limited to {sampleSize} documents. Add more search terms to narrow your search."
+                values={{
+                  sampleSize: fieldFormats
+                    .getDefaultInstance(KBN_FIELD_TYPES.NUMBER, [ES_FIELD_TYPES.INTEGER])
+                    .convert(rowCount),
+                }}
+              />
+            }
+            onDismiss={() => setIsMaxResultsCalloutVisible(false)}
+          />
+        )}
         <div
           ref={setDataGridWrapper}
           key={isCompareActive ? 'comparisonTable' : 'docTable'}
@@ -1233,9 +1372,7 @@ export const UnifiedDataTable = ({
               trailingControlColumns={trailingControlColumns}
               cellContext={cellContextWithInTableSearchSupport}
               renderCellPopover={renderCustomPopover}
-              // Don't use row overscan when showing Document column since
-              // rendering so much DOM content in each cell impacts performance
-              virtualizationOptions={defaultColumns ? undefined : VIRTUALIZATION_OPTIONS}
+              virtualizationOptions={virtualizationOptions}
             />
           )}
         </div>
@@ -1245,13 +1382,13 @@ export const UnifiedDataTable = ({
           !isCompareActive && (
             <UnifiedDataTableFooter
               isLoadingMore={loadingState === DataLoadingState.loadingMore}
+              isRefreshIntervalOn={isRefreshIntervalOn}
               rowCount={rowCount}
               sampleSize={sampleSizeState}
               pageCount={pageCount}
               pageIndex={paginationObj?.pageIndex}
               totalHits={totalHits}
               onFetchMoreRecords={onFetchMoreRecords}
-              data={data}
               fieldFormats={fieldFormats}
             />
           )}

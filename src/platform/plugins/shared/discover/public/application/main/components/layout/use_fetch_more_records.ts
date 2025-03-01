@@ -26,7 +26,7 @@ export interface UseFetchMoreRecordsParams {
 export interface UseFetchMoreRecordsResult {
   isMoreDataLoading: boolean;
   totalHits: number;
-  onFetchMoreRecords: (() => void) | undefined;
+  onFetchMoreRecords: ((direction: 'next' | 'previous') => void) | undefined;
 }
 
 /**
@@ -55,8 +55,8 @@ export const useFetchMoreRecords = ({
   const onFetchMoreRecords = useMemo(
     () =>
       canFetchMoreRecords
-        ? () => {
-            stateContainer.dataState.fetchMore();
+        ? (direction: 'next' | 'previous') => {
+            stateContainer.dataState.fetchMore(direction);
           }
         : undefined,
     [canFetchMoreRecords, stateContainer.dataState]
