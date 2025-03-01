@@ -6759,6 +6759,18 @@
   version "0.0.0"
   uid ""
 
+"@kbn/render-context-browser-internal@link:src/core/packages/context-browser-internal":
+  version "0.0.0"
+  uid ""
+
+"@kbn/render-context-browser-mocks@link:src/core/packages/context-browser-mocks":
+  version "0.0.0"
+  uid ""
+
+"@kbn/render-context-browser@link:src/core/packages/context-browser":
+  version "0.0.0"
+  uid ""
+
 "@kbn/rendering-plugin@link:test/plugin_functional/plugins/rendering_plugin":
   version "0.0.0"
   uid ""
