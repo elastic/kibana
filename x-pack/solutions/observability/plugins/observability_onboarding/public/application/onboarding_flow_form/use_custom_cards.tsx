@@ -378,23 +378,6 @@ export function useCustomCards(
       integration: '',
       isCollectionCard: false,
     },
-    {
-      id: 'custom-logs',
-      type: 'virtual',
-      title: 'Stream log files',
-      description: 'Stream any logs into Elastic in a simple way and explore their data',
-      name: 'custom-logs-virtual',
-      categories: ['observability'],
-      icons: [
-        {
-          type: 'eui',
-          src: 'filebeatApp',
-        },
-      ],
-      url: customLogsUrl,
-      version: '',
-      integration: '',
-    },
     /**
      * The new Firehose card should only be visible on Cloud
      * as Firehose integration requires additional proxy,
