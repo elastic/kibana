@@ -12,7 +12,6 @@ import { scalarFunctionDefinitions } from '../definitions/generated/scalar_funct
 import { timeUnitsToSuggest } from '../definitions/literals';
 import { commandDefinitions as unmodifiedCommandDefinitions } from '../definitions/commands';
 import { getSafeInsertText, TIME_SYSTEM_PARAMS, TRIGGER_SUGGESTION_COMMAND } from './factories';
-import { camelCase } from 'lodash';
 import { getAstAndSyntaxErrors } from '@kbn/esql-ast';
 import {
   policies,
@@ -206,84 +205,6 @@ describe('autocomplete', () => {
     });
   }
 
-  describe('enrich', () => {
-    const modes = ['any', 'coordinator', 'remote'];
-    const expectedPolicyNameSuggestions = policies
-      .map(({ name, suggestedAs }) => suggestedAs || name)
-      .map((name) => `${name} `);
-    for (const prevCommand of [
-      '',
-      // '| enrich other-policy ',
-      // '| enrich other-policy on b ',
-      // '| enrich other-policy with c ',
-    ]) {
-      testSuggestions(`from a ${prevCommand}| enrich /`, expectedPolicyNameSuggestions);
-      testSuggestions(
-        `from a ${prevCommand}| enrich _/`,
-        modes.map((mode) => `_${mode}:$0`),
-        '_'
-      );
-      for (const mode of modes) {
-        testSuggestions(
-          `from a ${prevCommand}| enrich _${mode}:/`,
-          expectedPolicyNameSuggestions,
-          ':'
-        );
-        testSuggestions(
-          `from a ${prevCommand}| enrich _${mode.toUpperCase()}:/`,
-          expectedPolicyNameSuggestions,
-          ':'
-        );
-        testSuggestions(
-          `from a ${prevCommand}| enrich _${camelCase(mode)}:/`,
-          expectedPolicyNameSuggestions,
-          ':'
-        );
-      }
-      testSuggestions(`from a ${prevCommand}| enrich policy /`, ['ON $0', 'WITH $0', '| ']);
-      testSuggestions(
-        `from a ${prevCommand}| enrich policy on /`,
-        getFieldNamesByType('any').map((v) => `${v} `)
-      );
-      testSuggestions(`from a ${prevCommand}| enrich policy on b /`, ['WITH $0', '| ']);
-      testSuggestions(
-        `from a ${prevCommand}| enrich policy on b with /`,
-        ['var0 = ', ...getPolicyFields('policy')],
-        ' '
-      );
-      testSuggestions(`from a ${prevCommand}| enrich policy on b with var0 /`, ['= $0', ',', '| ']);
-      testSuggestions(`from a ${prevCommand}| enrich policy on b with var0 = /`, [
-        ...getPolicyFields('policy'),
-      ]);
-      testSuggestions(`from a ${prevCommand}| enrich policy on b with var0 = keywordField /`, [
-        ',',
-        '| ',
-      ]);
-      testSuggestions(`from a ${prevCommand}| enrich policy on b with var0 = keywordField, /`, [
-        'var1 = ',
-        ...getPolicyFields('policy'),
-      ]);
-      testSuggestions(
-        `from a ${prevCommand}| enrich policy on b with var0 = keywordField, var1 /`,
-        ['= $0', ',', '| ']
-      );
-      testSuggestions(
-        `from a ${prevCommand}| enrich policy on b with var0 = keywordField, var1 = /`,
-        [...getPolicyFields('policy')]
-      );
-      testSuggestions(
-        `from a ${prevCommand}| enrich policy with /`,
-        ['var0 = ', ...getPolicyFields('policy')],
-        ' '
-      );
-      testSuggestions(`from a ${prevCommand}| enrich policy with keywordField /`, [
-        '= $0',
-        ',',
-        '| ',
-      ]);
-    }
-  });
-
   // @TODO: get updated eval block from main
   describe('values suggestions', () => {
     testSuggestions('FROM "i/"', []);
@@ -449,7 +370,7 @@ describe('autocomplete', () => {
     );
 
     // ENRICH policy ON
-    testSuggestions('FROM index1 | ENRICH policy O/', ['ON $0', 'WITH $0', '| ']);
+    testSuggestions('FROM index1 | ENRICH policy O/', ['ON ', 'WITH ', '| ']);
 
     // ENRICH policy ON field
     testSuggestions(
@@ -816,10 +737,7 @@ describe('autocomplete', () => {
           .map(attachTriggerCommand)
           .map((s) => ({ ...s, rangeToReplace: { start: 17, end: 20 } }))
       );
-      testSuggestions(
-        'FROM a | ENRICH policy /',
-        ['ON $0', 'WITH $0', '| '].map(attachTriggerCommand)
-      );
+      testSuggestions('FROM a | ENRICH policy /', ['ON ', 'WITH ', '| '].map(attachTriggerCommand));
 
       testSuggestions(
         'FROM a | ENRICH policy ON /',
@@ -829,12 +747,12 @@ describe('autocomplete', () => {
       );
       testSuggestions(
         'FROM a | ENRICH policy ON @timestamp /',
-        ['WITH $0', '| '].map(attachTriggerCommand)
+        ['WITH ', '| '].map(attachTriggerCommand)
       );
       // nothing fancy with this field list
       testSuggestions('FROM a | ENRICH policy ON @timestamp WITH /', [
         'var0 = ',
-        ...getPolicyFields('policy').map((name) => ({ text: name, command: undefined })),
+        ...getPolicyFields('policy'),
       ]);
       describe('replacement range', () => {
         testSuggestions('FROM a | ENRICH policy ON @timestamp WITH othe/', [
