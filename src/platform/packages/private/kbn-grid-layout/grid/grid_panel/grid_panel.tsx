@@ -71,7 +71,7 @@ export const GridPanel = React.memo(({ panelId, rowIndex }: GridPanelProps) => {
             const runtimeSettings = gridLayoutStateManager.runtimeSettings$.getValue();
 
             if (currentInteractionEvent?.type === 'rotate') {
-              ref.style.setProperty('--kbnGridPanelRotate', `${activePanel.position.rad ?? 0}`);
+              ref.style.setProperty('--kbnGridPanelRotate', `${panel.rotate ?? 0}`);
             } else if (currentInteractionEvent?.type === 'resize') {
               // if the current panel is being resized, ensure it is not shrunk past the size of a single cell
               ref.classList.add('kbnGridPanel--resize');

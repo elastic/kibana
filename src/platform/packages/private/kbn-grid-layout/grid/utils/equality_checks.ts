@@ -16,7 +16,8 @@ export const isGridDataEqual = (a?: GridPanelData, b?: GridPanelData) => {
     a?.row === b?.row &&
     a?.width === b?.width &&
     a?.height === b?.height &&
-    a?.zIndex === b?.zIndex
+    a?.zIndex === b?.zIndex &&
+    a?.rotate === b?.rotate
   );
 };
 

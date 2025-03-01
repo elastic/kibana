@@ -253,6 +253,14 @@ export const gridDataSchema = schema.object({
       meta: { description: 'The z coordinate of the panel - corresponds to z-index' },
     })
   ),
+  rotate: schema.maybe(
+    schema.number({
+      defaultValue: 0,
+      min: 0,
+      max: 360,
+      meta: { description: 'The rotation of the panel' },
+    })
+  ),
 });
 
 export const sectionSchema = schema.arrayOf(

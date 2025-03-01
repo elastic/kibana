@@ -57,7 +57,6 @@ export interface ActivePanel {
     left: number;
     bottom: number;
     right: number;
-    rad?: number;
   };
 }
 

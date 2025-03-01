@@ -45,6 +45,22 @@ export const commitAction = ({
   gridLayout$,
   proposedGridLayout$,
 }: GridLayoutStateManager) => {
+  if (activePanel$.getValue()?.position.rad) {
+    const { rad } = activePanel$.getValue();
+    const interactionEvent = interactionEvent$.getValue();
+    activePanel$.next(undefined);
+    const nextLayout = cloneDeep(gridLayout$.getValue());
+    nextLayout[interactionEvent.targetRowIndex].panels[interactionEvent.id] = {
+      ...currentPanelData,
+      column: previewRect.left,
+      row: previewRect.top - (targetRow?.getBoundingClientRect().top ?? 0),
+      height: previewRect.bottom - previewRect.top,
+      width: previewRect.right - previewRect.left,
+    };
+    interactionEvent$.next(undefined);
+    proposedGridLayout$.next(nextLayout);
+    return;
+  }
   activePanel$.next(undefined);
   interactionEvent$.next(undefined);
   const proposedGridLayoutValue = proposedGridLayout$.getValue();
@@ -95,6 +111,8 @@ export const moveAction = (
         });
   })();
 
+  activePanel$.next({ id: interactionEvent.id, position: previewRect });
+
   if (runtimeSettings === 'none' && interactionEvent.type === 'rotate') {
     const { clientX: x, clientY: y } = interactionEvent.pointerOffsets;
     const { clientX: mX, clientY: mY } = pointerPixel;
@@ -113,22 +131,15 @@ export const moveAction = (
         degrees = 360 - degrees;
       }
     }
-
-    activePanel$.next({
-      id: interactionEvent.id,
-      position: {
-        left: 0,
-        top: 0,
-        bottom: 0,
-        right: 0,
-        rad: degrees,
-      },
-    });
-
+    const nextLayout = cloneDeep(currentLayout);
+    nextLayout[interactionEvent.targetRowIndex].panels[interactionEvent.id] = {
+      ...currentPanelData,
+      rotate: degrees,
+    };
+    proposedGridLayout$.next(nextLayout);
     return;
   }
 
-  activePanel$.next({ id: interactionEvent.id, position: previewRect });
   if (runtimeSettings === 'none') {
     const nextLayout = cloneDeep(currentLayout);
     const targetRow = gridRowElements[interactionEvent.targetRowIndex];
@@ -139,9 +150,7 @@ export const moveAction = (
       height: previewRect.bottom - previewRect.top,
       width: previewRect.right - previewRect.left,
     };
-    console.log('next???');
     proposedGridLayout$.next(nextLayout);
-
     return;
   }
 
