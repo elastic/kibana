@@ -35,17 +35,19 @@ export const sourcererReducer = reducerWithInitialState(initialSourcererState)
       : {}),
     kibanaDataViews: state.kibanaDataViews.map((dv) => (dv.id === id ? { ...dv, loading } : dv)),
   }))
-  .case(setSourcererDataViews, (state, { defaultDataView, kibanaDataViews }) => ({
-    ...state,
-    defaultDataView: {
-      ...state.defaultDataView,
-      ...defaultDataView,
-    },
-    kibanaDataViews: kibanaDataViews.map((dataView) => ({
-      ...(state.kibanaDataViews.find(({ id }) => id === dataView.id) ?? initDataView),
-      ...dataView,
-    })),
-  }))
+  .case(setSourcererDataViews, (state, { defaultDataView, kibanaDataViews }) => {
+    return {
+      ...state,
+      defaultDataView: {
+        ...state.defaultDataView,
+        ...defaultDataView,
+      },
+      kibanaDataViews: kibanaDataViews.map((dataView) => ({
+        ...(state.kibanaDataViews.find(({ id }) => id === dataView.id) ?? initDataView),
+        ...dataView,
+      })),
+    };
+  })
   .case(setSourcererScopeLoading, (state, { id, loading }) => ({
     ...state,
     sourcererScopes: {
