@@ -20,11 +20,13 @@ const { useGlobalFlyout } = GlobalFlyout;
 interface Props {
   deprecation: EnrichedDeprecationInfo;
   rowFieldNames: DeprecationTableColumns[];
+  mustOpenFlyout: boolean;
 }
 
 export const ClusterSettingsTableRow: React.FunctionComponent<Props> = ({
   rowFieldNames,
   deprecation,
+  mustOpenFlyout,
 }) => {
   const [showFlyout, setShowFlyout] = useState(false);
   const [status, setStatus] = useState<{
@@ -86,6 +88,12 @@ export const ClusterSettingsTableRow: React.FunctionComponent<Props> = ({
     closeFlyout,
     status,
   ]);
+
+  useEffect(() => {
+    if (mustOpenFlyout) {
+      setShowFlyout(true);
+    }
+  }, [mustOpenFlyout]);
 
   return (
     <>

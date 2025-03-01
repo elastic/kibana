@@ -20,11 +20,13 @@ const { useGlobalFlyout } = GlobalFlyout;
 interface Props {
   deprecation: EnrichedDeprecationInfo;
   rowFieldNames: DeprecationTableColumns[];
+  mustOpenFlyout: boolean;
 }
 
 export const IndexSettingsTableRow: React.FunctionComponent<Props> = ({
   rowFieldNames,
   deprecation,
+  mustOpenFlyout,
 }) => {
   const [showFlyout, setShowFlyout] = useState(false);
   const [status, setStatus] = useState<{
@@ -79,6 +81,12 @@ export const IndexSettingsTableRow: React.FunctionComponent<Props> = ({
       });
     }
   }, [addContentToGlobalFlyout, deprecation, removeIndexSettings, showFlyout, closeFlyout, status]);
+
+  useEffect(() => {
+    if (mustOpenFlyout) {
+      setShowFlyout(true);
+    }
+  }, [mustOpenFlyout]);
 
   return (
     <>

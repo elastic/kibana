@@ -18,11 +18,13 @@ const { useGlobalFlyout } = GlobalFlyout;
 interface Props {
   rowFieldNames: DeprecationTableColumns[];
   deprecation: EnrichedDeprecationInfo;
+  mustOpenFlyout: boolean;
 }
 
 export const HealthIndicatorTableRow: React.FunctionComponent<Props> = ({
   rowFieldNames,
   deprecation,
+  mustOpenFlyout,
 }) => {
   const [showFlyout, setShowFlyout] = useState(false);
 
@@ -52,6 +54,12 @@ export const HealthIndicatorTableRow: React.FunctionComponent<Props> = ({
       });
     }
   }, [addContentToGlobalFlyout, closeFlyout, deprecation, showFlyout]);
+
+  useEffect(() => {
+    if (mustOpenFlyout) {
+      setShowFlyout(true);
+    }
+  }, [mustOpenFlyout]);
 
   return (
     <>
