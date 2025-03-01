@@ -203,19 +203,21 @@ describe('getESUpgradeStatus', () => {
       node_settings: [
         {
           level: 'critical',
-          message: 'Index created before 7.0',
+          message: 'Old index with a compatibility version < 8.0',
           url: 'https: //www.elastic.co/guide/en/elasticsearch/reference/master/breaking-changes-8.0.html',
-          details: 'This index was created using version: 6.8.13',
+          details: 'This index was created using version: 7.17.25',
           // @ts-ignore
           resolve_during_rolling_upgrade: false,
+          _meta: { reindex_required: true },
         },
         {
           level: 'critical',
-          message: 'Index created before 7.0',
+          message: 'Old index with a compatibility version < 8.0',
           url: 'https: //www.elastic.co/guide/en/elasticsearch/reference/master/breaking-changes-8.0.html',
-          details: 'This index was created using version: 6.8.13',
+          details: 'This index was created using version: 7.17.25',
           // @ts-ignore
           resolve_during_rolling_upgrade: false,
+          _meta: { reindex_required: true },
         },
       ],
       ml_settings: [],
@@ -290,11 +292,12 @@ describe('getESUpgradeStatus', () => {
       node_settings: [
         {
           level: 'critical',
-          message: 'Index created before 7.0',
+          message: 'Old index with a compatibility version < 8.0',
           url: 'https: //www.elastic.co/guide/en/elasticsearch/reference/master/breaking-changes-8.0.html',
-          details: 'This index was created using version: 6.8.13',
+          details: 'This index was created using version: 7.17.25',
           // @ts-ignore
           resolve_during_rolling_upgrade: false,
+          _meta: { reindex_required: true },
         },
       ],
       ml_settings: [],
@@ -352,10 +355,10 @@ describe('getESUpgradeStatus', () => {
           "correctiveAction": Object {
             "type": "reindex",
           },
-          "details": "This index was created using version: 6.8.13",
+          "details": "This index was created using version: 7.17.25",
           "index": undefined,
           "isCritical": true,
-          "message": "Index created before 7.0",
+          "message": "Old index with a compatibility version < 8.0",
           "resolveDuringUpgrade": false,
           "type": "node_settings",
           "url": "https: //www.elastic.co/guide/en/elasticsearch/reference/master/breaking-changes-8.0.html",

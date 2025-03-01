@@ -16,6 +16,10 @@ interface Actions {
   actions?: Action[];
 }
 
+interface IndexMetadata {
+  actions?: Action[];
+  reindex_required?: boolean;
+}
 interface MlActionMetadata {
   actions?: Action[];
   snapshot_id: string;
@@ -35,18 +39,12 @@ interface DataStreamActionMetadata {
   ignored_indices_requiring_upgrade_count?: number;
 }
 
-export type EsMetadata = Actions | MlActionMetadata | DataStreamActionMetadata;
-
-// TODO(jloleysens): Replace these regexes once this issue is addressed https://github.com/elastic/elasticsearch/issues/118062
-const ES_INDEX_MESSAGES_REQIURING_REINDEX = [
-  /Index created before/,
-  /index with a compatibility version \</,
-];
+export type EsMetadata = Actions | MlActionMetadata | DataStreamActionMetadata | IndexMetadata;
 
 export const getCorrectiveAction = (
   deprecationType: EnrichedDeprecationInfo['type'],
   message: string,
-  metadata: EsMetadata,
+  metadata?: EsMetadata,
   indexName?: string
 ): EnrichedDeprecationInfo['correctiveAction'] => {
   const indexSettingDeprecation = metadata?.actions?.find(
@@ -54,9 +52,6 @@ export const getCorrectiveAction = (
   );
   const clusterSettingDeprecation = metadata?.actions?.find(
     (action) => action.action_type === 'remove_settings' && typeof indexName === 'undefined'
-  );
-  const requiresReindexAction = ES_INDEX_MESSAGES_REQIURING_REINDEX.some((regexp) =>
-    regexp.test(message)
   );
   const requiresIndexSettingsAction = Boolean(indexSettingDeprecation);
   const requiresClusterSettingsAction = Boolean(clusterSettingDeprecation);
@@ -96,7 +91,7 @@ export const getCorrectiveAction = (
     };
   }
 
-  if (requiresReindexAction) {
+  if ((metadata as IndexMetadata)?.reindex_required === true) {
     return {
       type: 'reindex',
     };
