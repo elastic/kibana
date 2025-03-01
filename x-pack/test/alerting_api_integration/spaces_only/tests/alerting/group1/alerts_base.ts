@@ -8,13 +8,13 @@
 import expect from '@kbn/expect';
 import { omit } from 'lodash';
 import type { estypes } from '@elastic/elasticsearch';
-import { Response as SupertestResponse } from 'supertest';
+import type { Response as SupertestResponse } from 'supertest';
 import { RecoveredActionGroup } from '@kbn/alerting-plugin/common';
-import { TaskRunning, TaskRunningStage } from '@kbn/task-manager-plugin/server/task_running';
-import { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server';
+import type { TaskRunning, TaskRunningStage } from '@kbn/task-manager-plugin/server/task_running';
+import type { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server';
 import { ESTestIndexTool, ES_TEST_INDEX_NAME } from '@kbn/alerting-api-integration-helpers';
-import { Space } from '../../../../common/types';
-import { FtrProviderContext } from '../../../../common/ftr_provider_context';
+import type { Space } from '../../../../common/types';
+import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import {
   getUrlPrefix,
   getTestRuleData,

@@ -6,8 +6,8 @@
  */
 
 import expect from '@kbn/expect';
-import { Cookie } from 'tough-cookie';
-import { UserProfile } from '@kbn/security-plugin/common';
+import type { Cookie } from 'tough-cookie';
+import type { UserProfile } from '@kbn/security-plugin/common';
 import { GetCaseUsersResponseRt } from '@kbn/cases-plugin/common/types/api';
 import { securitySolutionOnlyAllSpacesRole } from '../../../../common/lib/authentication/roles';
 import { getPostCaseRequest } from '../../../../common/lib/mock';
@@ -21,7 +21,7 @@ import {
   bulkGetUserProfiles,
   updateUserProfileAvatar,
 } from '../../../../common/lib/api';
-import { FtrProviderContext } from '../../../../common/ftr_provider_context';
+import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import { createUsersAndRoles, deleteUsersAndRoles } from '../../../../common/lib/authentication';
 import {
   obsOnly,

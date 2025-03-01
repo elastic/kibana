@@ -5,8 +5,8 @@
  * 2.0.
  */
 import { ALERTS_TARGET_INDICES_URL } from '../../constants';
-import { GetService } from '../../types';
-import { User } from '../authentication/types';
+import type { GetService } from '../../types';
+import type { User } from '../authentication/types';
 import { getSpaceUrlPrefix } from '../authentication/spaces';
 
 export const getAlertsTargetIndices = async (

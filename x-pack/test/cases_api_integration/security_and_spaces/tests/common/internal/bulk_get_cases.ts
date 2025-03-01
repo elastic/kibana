@@ -9,7 +9,7 @@ import expect from '@kbn/expect';
 import { AttachmentType } from '@kbn/cases-plugin/common';
 import { MAX_BULK_GET_CASES } from '@kbn/cases-plugin/common/constants';
 import { getPostCaseRequest, postCaseReq } from '../../../../common/lib/mock';
-import { FtrProviderContext } from '../../../../common/ftr_provider_context';
+import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import {
   deleteAllCaseItems,
   bulkGetCases,

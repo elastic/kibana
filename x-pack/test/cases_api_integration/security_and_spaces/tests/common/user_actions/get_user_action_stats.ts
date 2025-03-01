@@ -6,7 +6,8 @@
  */
 
 import expect from '@kbn/expect';
-import { Case, CaseSeverity, CaseStatuses } from '@kbn/cases-plugin/common/types/domain';
+import type { Case } from '@kbn/cases-plugin/common/types/domain';
+import { CaseSeverity, CaseStatuses } from '@kbn/cases-plugin/common/types/domain';
 
 import { ConnectorTypes } from '@kbn/cases-plugin/common/types/domain';
 import {
@@ -29,7 +30,7 @@ import {
   postCommentUserReq,
   postExternalReferenceESReq,
 } from '../../../../common/lib/mock';
-import { FtrProviderContext } from '../../../../common/ftr_provider_context';
+import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import {
   bulkCreateAttachments,
   createCase,

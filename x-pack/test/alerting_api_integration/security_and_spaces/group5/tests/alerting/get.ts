@@ -6,8 +6,8 @@
  */
 
 import expect from '@kbn/expect';
-import { Agent as SuperTestAgent } from 'supertest';
-import { SupertestWithoutAuthProviderType } from '@kbn/ftr-common-functional-services';
+import type { Agent as SuperTestAgent } from 'supertest';
+import type { SupertestWithoutAuthProviderType } from '@kbn/ftr-common-functional-services';
 import { SuperuserAtSpace1, UserAtSpaceScenarios } from '../../../scenarios';
 import {
   getUrlPrefix,
@@ -15,7 +15,7 @@ import {
   ObjectRemover,
   getUnauthorizedErrorMessage,
 } from '../../../../common/lib';
-import { FtrProviderContext } from '../../../../common/ftr_provider_context';
+import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
 const getTestUtils = (
   describeType: 'internal' | 'public',
