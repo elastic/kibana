@@ -34,6 +34,11 @@ export function generateSummaryTransformForTimeslicesAndRolling(
       index: `${SLI_DESTINATION_INDEX_NAME}*`,
       query: {
         bool: {
+          must_not: {
+            term: {
+              isDuringMaintenanceWindow: true,
+            },
+          },
           filter: [
             {
               range: {

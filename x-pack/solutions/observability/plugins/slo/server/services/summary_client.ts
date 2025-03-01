@@ -74,6 +74,11 @@ export class DefaultSummaryClient implements SummaryClient {
       size: 0,
       query: {
         bool: {
+          must_not: {
+            term: {
+              isDuringMaintenanceWindow: true,
+            },
+          },
           filter: [
             { term: { 'slo.id': slo.id } },
             { term: { 'slo.revision': slo.revision } },
