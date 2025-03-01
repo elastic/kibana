@@ -97,15 +97,7 @@ function createDeepLinks(
     getModelManagementDeepLink: (): AppDeepLink<LinkId> | null => {
       if (!mlCapabilities.isDFAEnabled && !mlCapabilities.isNLPEnabled) return null;
 
-      const deepLinks: Array<AppDeepLink<LinkId>> = [
-        {
-          id: 'nodesOverview',
-          title: i18n.translate('xpack.ml.deepLink.trainedModels', {
-            defaultMessage: 'Trained Models',
-          }),
-          path: `/${ML_PAGES.TRAINED_MODELS_MANAGE}`,
-        },
-      ];
+      const deepLinks: Array<AppDeepLink<LinkId>> = [];
 
       if (!isServerless) {
         deepLinks.push({
@@ -136,34 +128,6 @@ function createDeepLinks(
           defaultMessage: 'Memory Usage',
         }),
         path: `/${ML_PAGES.MEMORY_USAGE}`,
-      };
-    },
-
-    getSettingsDeepLink: (): AppDeepLink<LinkId> | null => {
-      if (!mlCapabilities.isADEnabled) return null;
-
-      return {
-        id: 'settings',
-        title: i18n.translate('xpack.ml.deepLink.settings', {
-          defaultMessage: 'Settings',
-        }),
-        path: `/${ML_PAGES.SETTINGS}`,
-        deepLinks: [
-          {
-            id: 'calendarSettings',
-            title: i18n.translate('xpack.ml.deepLink.calendarSettings', {
-              defaultMessage: 'Calendars',
-            }),
-            path: `/${ML_PAGES.CALENDARS_MANAGE}`,
-          },
-          {
-            id: 'filterListsSettings',
-            title: i18n.translate('xpack.ml.deepLink.filterListsSettings', {
-              defaultMessage: 'Filter Lists',
-            }),
-            path: `/${ML_PAGES.SETTINGS}`, // Link to settings page as read only users cannot view filter lists.
-          },
-        ],
       };
     },
 

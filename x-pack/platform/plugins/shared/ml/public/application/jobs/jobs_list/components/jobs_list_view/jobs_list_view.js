@@ -39,6 +39,7 @@ import { CloseJobsConfirmModal } from '../confirm_modals/close_jobs_confirm_moda
 import { AnomalyDetectionEmptyState } from '../anomaly_detection_empty_state';
 import { removeNodeInfo } from '../../../../../../common/util/job_utils';
 import { jobCloningService } from '../../../../services/job_cloning_service';
+import { ExportJobsFlyout, ImportJobsFlyout } from '../../../../components/import_export_jobs';
 import { ANOMALY_DETECTOR_SAVED_OBJECT_TYPE } from '../../../../../../common/types/saved_objects';
 import { SpaceManagementContextWrapper } from '../../../../components/space_management_context_wrapper';
 
@@ -427,6 +428,10 @@ export class JobsListViewUI extends Component {
     return BLOCKED_JOBS_REFRESH_INTERVAL_MS;
   }
 
+  refreshJobs = () => {
+    this.refreshJobSummaryList();
+  };
+
   renderJobsListComponents() {
     const { isRefreshing, loading, jobsSummaryList, jobsAwaitingNodeCount } = this.state;
     const jobIds = jobsSummaryList.map((j) => j.id);
@@ -459,6 +464,14 @@ export class JobsListViewUI extends Component {
                       showNodeInfo={this.props.showNodeInfo}
                     />
                   </EuiFlexItem>
+                  <EuiFlexGroup grow={false} direction="row" gutterSize="none">
+                    <EuiFlexItem grow={false}>
+                      <ExportJobsFlyout isDisabled={false} currentTab={'anomaly-detector'} />
+                    </EuiFlexItem>
+                    <EuiFlexItem grow={false}>
+                      <ImportJobsFlyout isDisabled={false} onImportComplete={this.refreshJobs} />
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
                   <EuiFlexItem grow={false}>
                     <NewJobButton />
                   </EuiFlexItem>

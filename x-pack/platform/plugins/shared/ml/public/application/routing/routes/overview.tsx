@@ -28,7 +28,7 @@ export const overviewRouteFactory = (
   basePath: string
 ): MlRoute => ({
   id: 'overview',
-  path: createPath(ML_PAGES.OVERVIEW),
+  path: '',
   title: i18n.translate('xpack.ml.overview.overviewLabel', {
     defaultMessage: 'Overview',
   }),
@@ -52,13 +52,13 @@ const PageWrapper: FC<PageProps> = () => {
     initSavedObjects,
   });
 
-  useTimefilter({ timeRangeSelector: false, autoRefreshSelector: false });
+  const timefilter = useTimefilter({ timeRangeSelector: true, autoRefreshSelector: true });
 
   return (
     <PageLoader context={context}>
       {/* No fallback yet, we don't show a loading spinner on an outer level until context is available either. */}
       <Suspense fallback={null}>
-        <OverviewPage />
+        <OverviewPage timefilter={timefilter} />
       </Suspense>
     </PageLoader>
   );

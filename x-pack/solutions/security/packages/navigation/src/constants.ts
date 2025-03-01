@@ -40,6 +40,7 @@ export enum ExternalPageName {
   // Machine Learning
   // Ref: src/platform/packages/private/default-nav/ml/default_navigation.ts
   mlOverview = 'ml:overview',
+  mlDataVisualizer = 'ml:dataVisualizer',
   mlNotifications = 'ml:notifications',
   mlMemoryUsage = 'ml:memoryUsage',
   mlAnomalyDetection = 'ml:anomalyDetection',
@@ -53,7 +54,7 @@ export enum ExternalPageName {
   mlNodesOverview = 'ml:nodesOverview',
   mlNodes = 'ml:nodes',
   mlFileUpload = 'ml:fileUpload',
-  mlIndexDataVisualizer = 'ml:indexDataVisualizer',
+  mlIndexDataVisualizer = 'ml:indexDataVisualizer', // TODO: confirm if this is needed for deep search links before removing
   mlESQLdataVisualizer = 'ml:esqlDataVisualizer',
   mlDataDrift = 'ml:dataDrift',
   mlExplainLogRateSpikes = 'ml:logRateAnalysis',
