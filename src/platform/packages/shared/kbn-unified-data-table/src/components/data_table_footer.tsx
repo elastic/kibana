@@ -7,25 +7,24 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useEffect, useState, FC, PropsWithChildren } from 'react';
+import React, { FC, PropsWithChildren } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiButtonEmpty, EuiToolTip, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { ES_FIELD_TYPES, KBN_FIELD_TYPES } from '@kbn/field-types';
-import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { MAX_LOADED_GRID_ROWS } from '../constants';
 
 export interface UnifiedDataTableFooterProps {
   isLoadingMore?: boolean;
+  isRefreshIntervalOn: boolean;
   rowCount: number;
   sampleSize: number;
   pageIndex?: number; // starts from 0
   pageCount: number;
   totalHits?: number;
-  onFetchMoreRecords?: () => void;
-  data: DataPublicPluginStart;
+  onFetchMoreRecords?: (direction: 'next' | 'previous') => void;
   fieldFormats: FieldFormatsStart;
 }
 
@@ -34,29 +33,14 @@ export const UnifiedDataTableFooter: FC<PropsWithChildren<UnifiedDataTableFooter
 ) => {
   const {
     isLoadingMore,
+    isRefreshIntervalOn,
     rowCount,
     sampleSize,
     pageIndex,
     pageCount,
     totalHits = 0,
     onFetchMoreRecords,
-    data,
   } = props;
-  const timefilter = data.query.timefilter.timefilter;
-  const [refreshInterval, setRefreshInterval] = useState(timefilter.getRefreshInterval());
-
-  useEffect(() => {
-    const subscriber = timefilter.getRefreshIntervalUpdate$().subscribe(() => {
-      setRefreshInterval(timefilter.getRefreshInterval());
-    });
-
-    return () => subscriber.unsubscribe();
-  }, [timefilter, setRefreshInterval]);
-
-  const isRefreshIntervalOn = Boolean(
-    refreshInterval && refreshInterval.pause === false && refreshInterval.value > 0
-  );
-
   const { euiTheme } = useEuiTheme();
   const isOnLastPage = pageIndex === pageCount - 1 && rowCount < totalHits;
 
@@ -83,7 +67,7 @@ export const UnifiedDataTableFooter: FC<PropsWithChildren<UnifiedDataTableFooter
               isLoading={isLoadingMore}
               flush="both"
               data-test-subj="dscGridSampleSizeFetchMoreLink"
-              onClick={onFetchMoreRecords}
+              onClick={() => onFetchMoreRecords('next')}
               css={css`
                 margin-left: ${euiTheme.size.xs};
               `}

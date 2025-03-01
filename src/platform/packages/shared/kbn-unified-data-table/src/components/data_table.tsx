@@ -10,7 +10,7 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import classnames from 'classnames';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { of } from 'rxjs';
+import { map, of } from 'rxjs';
 import useObservable from 'react-use/lib/useObservable';
 import './data_table.scss';
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
@@ -30,6 +30,7 @@ import {
   EuiDataGridProps,
   EuiDataGridToolBarVisibilityDisplaySelectorOptions,
   EuiProgress,
+  EuiCallOut,
 } from '@elastic/eui';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import {
@@ -48,7 +49,11 @@ import {
 import type { DataViewFieldEditorStart } from '@kbn/data-view-field-editor-plugin/public';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { ThemeServiceStart } from '@kbn/react-kibana-context-common';
-import { type DataPublicPluginStart } from '@kbn/data-plugin/public';
+import {
+  KBN_FIELD_TYPES,
+  type DataPublicPluginStart,
+  ES_FIELD_TYPES,
+} from '@kbn/data-plugin/public';
 import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import { AdditionalFieldGroups } from '@kbn/unified-field-list';
 import { useDataGridInTableSearch } from '@kbn/data-grid-in-table-search';
@@ -82,6 +87,7 @@ import {
   ROWS_HEIGHT_OPTIONS,
   toolbarVisibility as toolbarVisibilityDefaults,
   DataGridDensity,
+  MAX_LOADED_GRID_ROWS,
 } from '../constants';
 import { UnifiedDataTableAdditionalDisplaySettings } from './data_table_additional_display_settings';
 import { useRowHeight } from '../hooks/use_row_height';
@@ -96,6 +102,7 @@ import {
   getAdditionalRowControlColumns,
 } from './custom_control_columns';
 import { useSorting } from '../hooks/use_sorting';
+import { UnifiedDataTableFooter } from './data_table_footer';
 
 const CONTROL_COLUMN_IDS_DEFAULT = [SELECT_ROW, OPEN_DETAILS];
 const THEME_DEFAULT = { darkMode: false };
@@ -1139,11 +1146,27 @@ export const UnifiedDataTable = ({
     rowLineHeight: rowLineHeightOverride,
   });
 
+  const timefilter = data.query.timefilter.timefilter;
+  const refreshInterval = useObservable(
+    timefilter.getRefreshIntervalUpdate$().pipe(map(() => timefilter.getRefreshInterval())),
+    timefilter.getRefreshInterval()
+  );
+  const isRefreshIntervalOn = Boolean(
+    refreshInterval && refreshInterval.pause === false && refreshInterval.value > 0
+  );
+  const isInfiniteScrollingEnabled = Boolean(
+    onFetchMoreRecords && !isPaginationEnabled && !isRefreshIntervalOn
+  );
+  const isAtMaxResults = rowCount > MAX_LOADED_GRID_ROWS - sampleSizeState;
   const loadMoreDirection = useRef<'next' | 'previous'>();
   const prevCount = useRef<number>();
   const prevRenderEvent = useRef<GridOnItemsRenderedProps>();
 
   useEffect(() => {
+    if (!isInfiniteScrollingEnabled) {
+      return;
+    }
+
     if (!prevCount.current && loadingState === DataLoadingState.loadingMore) {
       prevCount.current = rowCount;
     } else if (prevCount.current && loadingState === DataLoadingState.loaded) {
@@ -1165,12 +1188,12 @@ export const UnifiedDataTable = ({
 
       prevCount.current = undefined;
     }
-  }, [loadingState, rowCount]);
+  }, [isInfiniteScrollingEnabled, loadingState, rowCount]);
 
   const virtualizationOptions = useMemo(() => {
     const options: EuiDataGridProps['virtualizationOptions'] = {};
 
-    if (onFetchMoreRecords) {
+    if (isInfiniteScrollingEnabled) {
       options.onItemsRendered = (event) => {
         if (!prevCount.current || prevCount.current === rowCount) {
           prevRenderEvent.current = event;
@@ -1180,7 +1203,7 @@ export const UnifiedDataTable = ({
       // Using throttle instead of debounce to ensure it updates while user is still scrolling
       options.onScroll = throttle(
         (event) => {
-          if (loadingState === DataLoadingState.loadingMore) {
+          if (loadingState === DataLoadingState.loadingMore || isAtMaxResults) {
             return;
           }
 
@@ -1201,7 +1224,7 @@ export const UnifiedDataTable = ({
 
           if (isScrollable && (isScrolledToTop || isScrolledToBottom)) {
             loadMoreDirection.current = isScrolledToBottom ? 'next' : 'previous';
-            onFetchMoreRecords(loadMoreDirection.current);
+            onFetchMoreRecords?.(loadMoreDirection.current);
           }
         },
         50,
@@ -1216,7 +1239,21 @@ export const UnifiedDataTable = ({
     }
 
     return { ...VIRTUALIZATION_OPTIONS, ...options };
-  }, [dataGridWrapper, defaultColumns, loadingState, onFetchMoreRecords, rowCount]);
+  }, [
+    dataGridWrapper,
+    defaultColumns,
+    isAtMaxResults,
+    isInfiniteScrollingEnabled,
+    loadingState,
+    onFetchMoreRecords,
+    rowCount,
+  ]);
+
+  const [isMaxResultsCalloutVisible, setIsMaxResultsCalloutVisible] = useState(false);
+
+  useEffect(() => {
+    setIsMaxResultsCalloutVisible(isInfiniteScrollingEnabled && isAtMaxResults);
+  }, [isAtMaxResults, isInfiniteScrollingEnabled]);
 
   const isRenderComplete = loadingState !== DataLoadingState.loading;
 
@@ -1259,6 +1296,24 @@ export const UnifiedDataTable = ({
       <span className="unifiedDataTable__inner">
         {loadingState === DataLoadingState.loadingMore && (
           <EuiProgress size="xs" color="accent" position="absolute" />
+        )}
+        {isMaxResultsCalloutVisible && (
+          <EuiCallOut
+            iconType="iInCircle"
+            size="s"
+            title={
+              <FormattedMessage
+                id="unifiedDataTable.gridSampleSize.limitDescription"
+                defaultMessage="Search results are limited to {sampleSize} documents. Add more search terms to narrow your search."
+                values={{
+                  sampleSize: fieldFormats
+                    .getDefaultInstance(KBN_FIELD_TYPES.NUMBER, [ES_FIELD_TYPES.INTEGER])
+                    .convert(rowCount),
+                }}
+              />
+            }
+            onDismiss={() => setIsMaxResultsCalloutVisible(false)}
+          />
         )}
         <div
           ref={setDataGridWrapper}
@@ -1321,22 +1376,22 @@ export const UnifiedDataTable = ({
             />
           )}
         </div>
-        {/* {loadingState !== DataLoadingState.loading &&
+        {loadingState !== DataLoadingState.loading &&
           isPaginationEnabled && // we hide the footer for Surrounding Documents page
           !isFilterActive && // hide footer when showing selected documents
           !isCompareActive && (
             <UnifiedDataTableFooter
               isLoadingMore={loadingState === DataLoadingState.loadingMore}
+              isRefreshIntervalOn={isRefreshIntervalOn}
               rowCount={rowCount}
               sampleSize={sampleSizeState}
               pageCount={pageCount}
               pageIndex={paginationObj?.pageIndex}
               totalHits={totalHits}
               onFetchMoreRecords={onFetchMoreRecords}
-              data={data}
               fieldFormats={fieldFormats}
             />
-          )} */}
+          )}
         {searchTitle && (
           <EuiScreenReaderOnly>
             <p id={String(randomId)}>
