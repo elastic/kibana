@@ -15,12 +15,15 @@ import {
   MULTI_VALUE_CLICK_TRIGGER,
 } from '@kbn/embeddable-plugin/public';
 
+const ALERT_RULE: "alertRule" = 'alertRule'
+
 export interface VisEventToTrigger {
   ['applyFilter']: typeof APPLY_FILTER_TRIGGER;
   ['brush']: typeof SELECT_RANGE_TRIGGER;
   ['filter']: typeof VALUE_CLICK_TRIGGER;
   ['multiFilter']: typeof MULTI_VALUE_CLICK_TRIGGER;
   ['tableRowContextMenuClick']: typeof ROW_CLICK_TRIGGER;
+  ['alertRule']: typeof ALERT_RULE;
 }
 
 export const VIS_EVENT_TO_TRIGGER: VisEventToTrigger = {
@@ -29,4 +32,5 @@ export const VIS_EVENT_TO_TRIGGER: VisEventToTrigger = {
   filter: VALUE_CLICK_TRIGGER,
   multiFilter: MULTI_VALUE_CLICK_TRIGGER,
   tableRowContextMenuClick: ROW_CLICK_TRIGGER,
+  alertRule: 'alertRule',
 };

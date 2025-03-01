@@ -222,6 +222,9 @@ export const getXyChartRenderer = ({
     const onClickMultiValue = (data: MultiFilterEvent['data']) => {
       handlers.event({ name: 'multiFilter', data });
     };
+    const onCreateAlertRule = (data: MultiFilterEvent['data']) => {
+      handlers.event({ name: 'alertRule', data });
+    };
     const setChartSize = (data: ChartSizeSpec) => {
       const event: ChartSizeEvent = { name: 'chartSize', data };
       handlers.event(event);
@@ -279,6 +282,7 @@ export const getXyChartRenderer = ({
             interactive={handlers.isInteractive()}
             onClickValue={onClickValue}
             onClickMultiValue={onClickMultiValue}
+            onCreateAlertRule={onCreateAlertRule}
             layerCellValueActions={layerCellValueActions}
             onSelectRange={onSelectRange}
             renderMode={handlers.getRenderMode()}
