@@ -10,4 +10,5 @@
 export {
   KibanaRenderContextProvider,
   type KibanaRenderContextProviderProps,
+  type KibanaRenderContextProviderCoreStartProps,
 } from './render_provider';

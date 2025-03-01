@@ -80,20 +80,22 @@ export class GuidedOnboardingPlugin
     application,
     notifications,
   }: {
-    startServices: Pick<CoreStart, 'analytics' | 'i18n' | 'theme' | 'userProfile'>;
+    startServices: Pick<
+      CoreStart,
+      'analytics' | 'executionContext' | 'i18n' | 'theme' | 'userProfile'
+    >;
     targetDomElement: HTMLElement;
     api: ApiService;
     application: ApplicationStart;
     notifications: NotificationsStart;
   }) {
-    const { theme } = startServices;
     ReactDOM.render(
-      <KibanaRenderContextProvider {...startServices}>
+      <KibanaRenderContextProvider coreStart={startServices}>
         <GuidePanel
           api={api}
           application={application}
           notifications={notifications}
-          theme$={theme.theme$}
+          theme$={startServices.theme.theme$}
         />
       </KibanaRenderContextProvider>,
       targetDomElement
