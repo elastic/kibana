@@ -40,7 +40,7 @@ export const useFullScreenWatcher = () => {
     attributeFilter: ['class'],
   });
 
-  return { dataGridId, dataGridWrapper, dataGrid, setDataGridWrapper };
+  return { dataGridId, dataGridWrapper, setDataGridWrapper };
 };
 
 export const EUI_DATA_GRID_FULL_SCREEN_CLASS = 'euiDataGrid--fullScreen';

@@ -244,6 +244,10 @@ export async function fetchMoreDocuments(
 
     // Mark as loading
     sendLoadingMoreMsg(dataSubjects.documents$);
+    dataSubjects.totalHits$.next({
+      ...dataSubjects.totalHits$.getValue(),
+      fetchStatus: FetchStatus.PARTIAL,
+    });
 
     // Update the searchSource
     updateVolatileSearchSource(searchSource, {
@@ -254,12 +258,20 @@ export async function fetchMoreDocuments(
     });
 
     // Fetch more documents
-    const { records, interceptedWarnings } = await fetchDocuments(searchSource, fetchDeps);
+    const { records, totalHits, interceptedWarnings } = await fetchDocuments(searchSource, {
+      ...fetchDeps,
+      trackHits: true,
+    });
 
     // Update the state and finish the loading state
     sendLoadingMoreFinishedMsg(dataSubjects.documents$, {
       moreRecords: records,
       interceptedWarnings,
+    });
+    dataSubjects.totalHits$.next({
+      ...dataSubjects.totalHits$.getValue(),
+      fetchStatus: FetchStatus.COMPLETE,
+      result: totalHits ?? dataSubjects.totalHits$.getValue().result,
     });
   } catch (error) {
     sendLoadingMoreFinishedMsg(dataSubjects.documents$, {

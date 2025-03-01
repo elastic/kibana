@@ -53,7 +53,7 @@ import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import { AdditionalFieldGroups } from '@kbn/unified-field-list';
 import { useDataGridInTableSearch } from '@kbn/data-grid-in-table-search';
 import { throttle } from 'lodash';
-import type { GridOnScrollProps } from 'react-window';
+import type { GridOnItemsRenderedProps } from 'react-window';
 import { DATA_GRID_DENSITY_STYLE_MAP, useDataGridDensity } from '../hooks/use_data_grid_density';
 import {
   UnifiedDataTableSettings,
@@ -751,15 +751,7 @@ export const UnifiedDataTable = ({
     ]
   );
 
-  const { dataGridId, dataGridWrapper, dataGrid, setDataGridWrapper } = useFullScreenWatcher();
-
-  useEffect(() => {
-    if (dataGrid) {
-      requestAnimationFrame(() => {
-        dataGridRef.current?.scrollTo?.({ scrollTop: 2 });
-      });
-    }
-  }, [dataGrid]);
+  const { dataGridId, dataGridWrapper, setDataGridWrapper } = useFullScreenWatcher();
 
   const {
     inTableSearchTermCss,
@@ -1147,13 +1139,47 @@ export const UnifiedDataTable = ({
     rowLineHeight: rowLineHeightOverride,
   });
 
+  const loadMoreDirection = useRef<'next' | 'previous'>();
+  const prevCount = useRef<number>();
+  const prevRenderEvent = useRef<GridOnItemsRenderedProps>();
+
+  useEffect(() => {
+    if (!prevCount.current && loadingState === DataLoadingState.loadingMore) {
+      prevCount.current = rowCount;
+    } else if (prevCount.current && loadingState === DataLoadingState.loaded) {
+      if (rowCount > prevCount.current) {
+        const anchorIndex =
+          (loadMoreDirection.current === 'next'
+            ? prevRenderEvent.current?.visibleRowStopIndex
+            : prevRenderEvent.current?.visibleRowStartIndex) ?? 0;
+        const rowCountDifference = rowCount - prevCount.current;
+
+        if (rowCountDifference > 0) {
+          dataGridRef.current?.scrollToItem?.({
+            align: loadMoreDirection.current === 'next' ? 'end' : 'start',
+            rowIndex:
+              loadMoreDirection.current === 'next' ? anchorIndex : anchorIndex + rowCountDifference,
+          });
+        }
+      }
+
+      prevCount.current = undefined;
+    }
+  }, [loadingState, rowCount]);
+
   const virtualizationOptions = useMemo(() => {
     const options: EuiDataGridProps['virtualizationOptions'] = {};
 
     if (onFetchMoreRecords) {
+      options.onItemsRendered = (event) => {
+        if (!prevCount.current || prevCount.current === rowCount) {
+          prevRenderEvent.current = event;
+        }
+      };
+
       // Using throttle instead of debounce to ensure it updates while user is still scrolling
       options.onScroll = throttle(
-        (event: GridOnScrollProps) => {
+        (event) => {
           if (loadingState === DataLoadingState.loadingMore) {
             return;
           }
@@ -1174,7 +1200,8 @@ export const UnifiedDataTable = ({
             event.scrollTop + outerRef.offsetHeight >= outerRef.scrollHeight - 100;
 
           if (isScrollable && (isScrolledToTop || isScrolledToBottom)) {
-            onFetchMoreRecords(isScrolledToBottom ? 'next' : 'previous');
+            loadMoreDirection.current = isScrolledToBottom ? 'next' : 'previous';
+            onFetchMoreRecords(loadMoreDirection.current);
           }
         },
         50,
@@ -1189,7 +1216,7 @@ export const UnifiedDataTable = ({
     }
 
     return { ...VIRTUALIZATION_OPTIONS, ...options };
-  }, [dataGridWrapper, defaultColumns, loadingState, onFetchMoreRecords]);
+  }, [dataGridWrapper, defaultColumns, loadingState, onFetchMoreRecords, rowCount]);
 
   const isRenderComplete = loadingState !== DataLoadingState.loading;
 
@@ -1290,9 +1317,7 @@ export const UnifiedDataTable = ({
               trailingControlColumns={trailingControlColumns}
               cellContext={cellContextWithInTableSearchSupport}
               renderCellPopover={renderCustomPopover}
-              // Don't use row overscan when showing Document column since
-              // rendering so much DOM content in each cell impacts performance
-              virtualizationOptions={defaultColumns ? undefined : virtualizationOptions}
+              virtualizationOptions={virtualizationOptions}
             />
           )}
         </div>
