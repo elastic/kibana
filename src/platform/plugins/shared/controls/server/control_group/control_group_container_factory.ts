@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EmbeddablePersistableStateService } from '@kbn/embeddable-plugin/common';
-import { EmbeddableRegistryDefinition } from '@kbn/embeddable-plugin/server';
-import { CONTROL_GROUP_TYPE } from '../../common';
+import type { EmbeddableRegistryItem } from '@kbn/embeddable-plugin/server';
+import type { EmbeddableStateWithType } from '@kbn/embeddable-plugin/common';
+import type { PersistableStateService } from '@kbn/kibana-utils-plugin/common';
 import {
   createControlGroupExtract,
   createControlGroupInject,
@@ -18,13 +18,12 @@ import {
 import { controlGroupTelemetry } from './control_group_telemetry';
 
 export const controlGroupContainerPersistableStateServiceFactory = (
-  persistableStateService: EmbeddablePersistableStateService
-): EmbeddableRegistryDefinition => {
+  getControlsFactory: (controlFactoryId: string) => EmbeddableRegistryItem
+): PersistableStateService<EmbeddableStateWithType> => {
   return {
-    id: CONTROL_GROUP_TYPE,
-    extract: createControlGroupExtract(persistableStateService),
-    inject: createControlGroupInject(persistableStateService),
+    extract: createControlGroupExtract(getControlsFactory),
+    inject: createControlGroupInject(getControlsFactory),
     telemetry: controlGroupTelemetry,
-    migrations,
+    getAllMigrations: () => migrations,
   };
 };

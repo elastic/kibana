@@ -14,11 +14,13 @@ import { SavedObjectReference, SavedObjectUnsanitizedDoc } from '@kbn/core/serve
 import { SavedObjectsUtils } from '@kbn/core-saved-objects-utils-server';
 
 import { createExtract, createInject } from '../../../common';
+import { createControlsSetupMock } from '@kbn/controls-plugin/server/mocks';
 import { EmbeddableStateWithType } from '@kbn/embeddable-plugin/common';
 import { createDashboardSavedObjectTypeMigrations } from './dashboard_saved_object_migrations';
 import { DashboardDoc730ToLatest } from './migrate_to_730/types';
 
 const embeddableSetupMock = createEmbeddableSetupMock();
+const controlsSetupMock = createControlsSetupMock();
 const extract = createExtract(embeddableSetupMock);
 const inject = createInject(embeddableSetupMock);
 const extractImplementation = (state: EmbeddableStateWithType) => {
@@ -43,6 +45,7 @@ embeddableSetupMock.getAllMigrations.mockImplementation(() => ({}));
 
 const migrations = createDashboardSavedObjectTypeMigrations({
   embeddable: embeddableSetupMock,
+  controls: controlsSetupMock,
 });
 
 const contextMock = savedObjectsServiceMock.createMigrationContext();
@@ -702,6 +705,7 @@ describe('dashboard', () => {
       }));
       const migrationsList = createDashboardSavedObjectTypeMigrations({
         embeddable: newEmbeddableSetupMock,
+        controls: controlsSetupMock,
       });
       expect(migrationsList['7.13.0']).toBeDefined();
       const migratedDoc = SavedObjectsUtils.getMigrationFunction(migrationsList['7.13.0'])(

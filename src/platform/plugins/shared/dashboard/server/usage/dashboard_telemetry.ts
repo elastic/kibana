@@ -93,10 +93,10 @@ export const collectPanelsByType = (
 };
 
 export const controlsCollectorFactory =
-  (embeddableService: EmbeddablePersistableStateService) =>
+  (controlsService: EmbeddablePersistableStateService) =>
   (attributes: DashboardSavedObjectAttributes, collectorData: DashboardCollectorData) => {
     if (!isEmpty(attributes.controlGroupInput)) {
-      collectorData.controls = embeddableService.telemetry(
+      collectorData.controls = controlsService.telemetry(
         {
           ...attributes.controlGroupInput,
           type: CONTROL_GROUP_TYPE,
