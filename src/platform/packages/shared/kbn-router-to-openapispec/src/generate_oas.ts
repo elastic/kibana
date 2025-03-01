@@ -39,10 +39,10 @@ export interface GenerateOpenApiDocumentOptions {
   filters?: GenerateOpenApiDocumentOptionsFilters;
 }
 
-export const generateOpenApiDocument = (
+export const generateOpenApiDocument = async (
   appRouters: { routers: Router[]; versionedRouters: CoreVersionedRouter[] },
   opts: GenerateOpenApiDocumentOptions
-): OpenAPIV3.Document => {
+): Promise<OpenAPIV3.Document> => {
   let { filters = { access: 'public' } } = opts;
   if (filters.access === 'public' && !filters.version) {
     filters = { ...filters, version: SERVERLESS_VERSION_2023_10_31 };
@@ -51,11 +51,11 @@ export const generateOpenApiDocument = (
   const paths: OpenAPIV3.PathsObject = {};
   const getOpId = createOpIdGenerator();
   for (const router of appRouters.routers) {
-    const result = processRouter(router, converter, getOpId, filters);
+    const result = await processRouter(router, converter, getOpId, filters);
     Object.assign(paths, result.paths);
   }
   for (const router of appRouters.versionedRouters) {
-    const result = processVersionedRouter(router, converter, getOpId, filters);
+    const result = await processVersionedRouter(router, converter, getOpId, filters);
     Object.assign(paths, result.paths);
   }
   const tags = buildGlobalTags(paths, opts.tags);

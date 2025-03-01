@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import path from 'node:path';
 import { RouteOptions } from '../../..';
 import type {
   CreateRuleRequestBodyV1,
@@ -38,6 +39,7 @@ export const createRuleRoute = ({ router, licenseState, usageCounter }: RouteOpt
         access: 'public',
         summary: `Create a rule`,
         tags: ['oas-tag:alerting'],
+        oasFilePath: () => path.join(__dirname, 'create_rule.examples.yaml'),
       },
       validate: {
         request: {
