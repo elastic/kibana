@@ -82,6 +82,7 @@ export const AGENT_POLICY_API_ROUTES = {
   LIST_OUTPUTS_PATTERN: `${AGENT_POLICY_API_ROOT}/outputs`,
   INFO_OUTPUTS_PATTERN: `${AGENT_POLICY_API_ROOT}/{agentPolicyId}/outputs`,
   AUTO_UPGRADE_AGENTS_STATUS_PATTERN: `${AGENT_POLICY_API_ROOT}/{agentPolicyId}/auto_upgrade_agents_status`,
+  CREATE_WITH_PACKAGE_POLICY: `${INTERNAL_ROOT}/agent_and_package_policy`,
 };
 
 // Kubernetes Manifest API routes
