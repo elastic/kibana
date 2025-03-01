@@ -29,6 +29,7 @@ import {
   EuiDataGridStyle,
   EuiDataGridProps,
   EuiDataGridToolBarVisibilityDisplaySelectorOptions,
+  EuiProgress,
 } from '@elastic/eui';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import {
@@ -51,6 +52,8 @@ import { type DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import { AdditionalFieldGroups } from '@kbn/unified-field-list';
 import { useDataGridInTableSearch } from '@kbn/data-grid-in-table-search';
+import { throttle } from 'lodash';
+import type { GridOnScrollProps } from 'react-window';
 import { DATA_GRID_DENSITY_STYLE_MAP, useDataGridDensity } from '../hooks/use_data_grid_density';
 import {
   UnifiedDataTableSettings,
@@ -58,6 +61,7 @@ import {
   DataTableColumnsMeta,
   CustomCellRenderer,
   CustomGridColumnsConfiguration,
+  DataGridPaginationMode,
 } from '../types';
 import { getDisplayedColumns } from '../utils/columns';
 import { convertValueToString } from '../utils/convert_value_to_string';
@@ -79,8 +83,8 @@ import {
   ROWS_HEIGHT_OPTIONS,
   toolbarVisibility as toolbarVisibilityDefaults,
   DataGridDensity,
+  DEFAULT_PAGINATION_MODE,
 } from '../constants';
-import { UnifiedDataTableFooter } from './data_table_footer';
 import { UnifiedDataTableAdditionalDisplaySettings } from './data_table_additional_display_settings';
 import { useRowHeight } from '../hooks/use_row_height';
 import { CompareDocuments } from './compare_documents';
@@ -226,6 +230,14 @@ export interface UnifiedDataTableProps {
    */
   isPaginationEnabled?: boolean;
   /**
+   * Manage pagination mode
+   * @default 'multiPage'
+   * "multiPage" - Regular pagination with numbers and arrows to control the page
+   * "singlePage" - Hides the general pagination bar and shows Load more button at the bottom of the grid
+   * "infinite" - Hides the general pagination bar and loads more data as the user scrolls [Not yet implemented]
+   */
+  paginationMode?: DataGridPaginationMode;
+  /**
    * List of used control columns (available: 'openDetails', 'select')
    */
   controlColumnIds?: string[];
@@ -334,7 +346,7 @@ export interface UnifiedDataTableProps {
   /**
    * To fetch more
    */
-  onFetchMoreRecords?: () => void;
+  onFetchMoreRecords?: (direction: 'next' | 'previous') => void;
   /**
    * Optional value for providing the additional controls available in the UnifiedDataTable toolbar to manage it's records or state. UnifiedDataTable includes Columns, Sorting and Bulk Actions.
    */
@@ -461,6 +473,7 @@ export const UnifiedDataTable = ({
   sort,
   isSortEnabled = true,
   isPaginationEnabled = true,
+  paginationMode = DEFAULT_PAGINATION_MODE,
   cellActionsTriggerId,
   cellActionsMetadata,
   cellActionsHandling = 'replace',
@@ -749,7 +762,15 @@ export const UnifiedDataTable = ({
     ]
   );
 
-  const { dataGridId, dataGridWrapper, setDataGridWrapper } = useFullScreenWatcher();
+  const { dataGridId, dataGridWrapper, dataGrid, setDataGridWrapper } = useFullScreenWatcher();
+
+  useEffect(() => {
+    if (dataGrid) {
+      requestAnimationFrame(() => {
+        dataGridRef.current?.scrollTo?.({ scrollTop: 2 });
+      });
+    }
+  }, [dataGrid]);
 
   const {
     inTableSearchTermCss,
@@ -1137,6 +1158,50 @@ export const UnifiedDataTable = ({
     rowLineHeight: rowLineHeightOverride,
   });
 
+  const virtualizationOptions = useMemo(() => {
+    const options: EuiDataGridProps['virtualizationOptions'] = {};
+
+    if (onFetchMoreRecords) {
+      // Using throttle instead of debounce to ensure it updates while user is still scrolling
+      options.onScroll = throttle(
+        (event: GridOnScrollProps) => {
+          if (loadingState === DataLoadingState.loadingMore) {
+            return;
+          }
+
+          // We need to manually query the react-window wrapper since EUI doesn't
+          // expose outerRef in virtualizationOptions, but we should request it
+          const outerRef = dataGridWrapper?.querySelector<HTMLElement>('.euiDataGrid__virtualized');
+
+          if (!outerRef) {
+            return;
+          }
+
+          const isScrollable = outerRef.scrollHeight > outerRef.offsetHeight;
+          const isScrolledToTop =
+            event.verticalScrollDirection === 'backward' && event.scrollTop === 0;
+          const isScrolledToBottom =
+            event.verticalScrollDirection === 'forward' &&
+            event.scrollTop + outerRef.offsetHeight >= outerRef.scrollHeight - 100;
+
+          if (isScrollable && (isScrolledToTop || isScrolledToBottom)) {
+            onFetchMoreRecords(isScrolledToBottom ? 'next' : 'previous');
+          }
+        },
+        50,
+        { trailing: true }
+      );
+    }
+
+    // Don't use row overscan when showing Document column since
+    // rendering so much DOM content in each cell impacts performance
+    if (defaultColumns) {
+      return options;
+    }
+
+    return { ...VIRTUALIZATION_OPTIONS, ...options };
+  }, [dataGridWrapper, defaultColumns, loadingState, onFetchMoreRecords]);
+
   const isRenderComplete = loadingState !== DataLoadingState.loading;
 
   if (!rowCount && loadingState === DataLoadingState.loading) {
@@ -1176,6 +1241,9 @@ export const UnifiedDataTable = ({
   return (
     <UnifiedDataTableContext.Provider value={unifiedDataTableContextValue}>
       <span className="unifiedDataTable__inner">
+        {loadingState === DataLoadingState.loadingMore && (
+          <EuiProgress size="xs" color="accent" position="absolute" />
+        )}
         <div
           ref={setDataGridWrapper}
           key={isCompareActive ? 'comparisonTable' : 'docTable'}
@@ -1219,7 +1287,7 @@ export const UnifiedDataTable = ({
               data-test-subj="docTable"
               leadingControlColumns={leadingControlColumns}
               onColumnResize={onResize}
-              pagination={paginationObj}
+              pagination={paginationMode === DEFAULT_PAGINATION_MODE ? paginationObj : undefined}
               renderCellValue={renderCellValueWithInTableSearchSupport}
               ref={dataGridRef}
               rowCount={rowCount}
@@ -1233,13 +1301,11 @@ export const UnifiedDataTable = ({
               trailingControlColumns={trailingControlColumns}
               cellContext={cellContextWithInTableSearchSupport}
               renderCellPopover={renderCustomPopover}
-              // Don't use row overscan when showing Document column since
-              // rendering so much DOM content in each cell impacts performance
-              virtualizationOptions={defaultColumns ? undefined : VIRTUALIZATION_OPTIONS}
+              virtualizationOptions={virtualizationOptions}
             />
           )}
         </div>
-        {loadingState !== DataLoadingState.loading &&
+        {/* {loadingState !== DataLoadingState.loading &&
           isPaginationEnabled && // we hide the footer for Surrounding Documents page
           !isFilterActive && // hide footer when showing selected documents
           !isCompareActive && (
@@ -1253,8 +1319,12 @@ export const UnifiedDataTable = ({
               onFetchMoreRecords={onFetchMoreRecords}
               data={data}
               fieldFormats={fieldFormats}
+              paginationMode={paginationMode}
+              hasScrolledToBottom={
+                paginationMode !== DEFAULT_PAGINATION_MODE ? hasScrolledToBottom : true
+              }
             />
-          )}
+          )} */}
         {searchTitle && (
           <EuiScreenReaderOnly>
             <p id={String(randomId)}>

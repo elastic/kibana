@@ -34,6 +34,7 @@ import {
   UseColumnsProps,
   getDataGridDensity,
   getRowHeight,
+  DEFAULT_PAGINATION_MODE,
 } from '@kbn/unified-data-table';
 import {
   DOC_HIDE_TIME_COLUMN_SETTING,
@@ -342,6 +343,13 @@ function DiscoverDocumentsComponent({
 
   const documents = useObservable(stateContainer.dataState.data$.documents$);
 
+  const getPaginationConfigAccessor = useProfileAccessor('getPaginationConfig');
+  const paginationModeConfig = useMemo(() => {
+    return getPaginationConfigAccessor({
+      paginationMode: DEFAULT_PAGINATION_MODE,
+    });
+  }, [getPaginationConfigAccessor]);
+
   const callouts = useMemo(
     () => (
       <>
@@ -437,6 +445,7 @@ function DiscoverDocumentsComponent({
             isSortEnabled={true}
             isPlainRecord={isEsqlMode}
             isPaginationEnabled={!isEsqlMode}
+            paginationMode={paginationModeConfig.paginationMode}
             rowsPerPageState={rowsPerPage ?? getDefaultRowsPerPage(services.uiSettings)}
             onUpdateRowsPerPage={onUpdateRowsPerPage}
             maxAllowedSampleSize={getMaxAllowedSampleSize(services.uiSettings)}

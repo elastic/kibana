@@ -77,9 +77,11 @@ export function sendLoadingMoreFinishedMsg(
   documents$: DataDocuments$,
   {
     moreRecords,
+    prepend,
     interceptedWarnings,
   }: {
     moreRecords: DataTableRecord[];
+    prepend?: boolean;
     interceptedWarnings: SearchResponseWarning[] | undefined;
   }
 ) {
@@ -89,7 +91,9 @@ export function sendLoadingMoreFinishedMsg(
       ...currentValue,
       fetchStatus: FetchStatus.COMPLETE,
       result: moreRecords?.length
-        ? [...(currentValue.result || []), ...moreRecords]
+        ? prepend
+          ? [...moreRecords, ...(currentValue.result || [])]
+          : [...(currentValue.result || []), ...moreRecords]
         : currentValue.result,
       interceptedWarnings,
     });
