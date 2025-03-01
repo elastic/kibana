@@ -10,8 +10,9 @@ import { resolve as pathResolve, join as pathJoin } from 'path';
 import { ByteSizeValue } from '@kbn/config-schema';
 import moment from 'moment';
 
-import { ActionsConfig, DEFAULT_USAGE_API_URL } from '../config';
-import { Logger } from '@kbn/core/server';
+import type { ActionsConfig } from '../config';
+import { DEFAULT_USAGE_API_URL } from '../config';
+import type { Logger } from '@kbn/core/server';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 
 import { resolveCustomHosts, getCanonicalCustomHostUrl } from './custom_host_settings';

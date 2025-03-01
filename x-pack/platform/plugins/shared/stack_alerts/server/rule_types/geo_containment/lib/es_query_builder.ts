@@ -6,8 +6,8 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { ElasticsearchClient } from '@kbn/core/server';
-import type { estypes } from '@elastic/elasticsearch';
+import type { ElasticsearchClient } from '@kbn/core/server';
+import type * as estypes from '@elastic/elasticsearch/lib/api/types';
 import { OTHER_CATEGORY } from '../constants';
 import { getQueryDsl } from './get_query_dsl';
 import type { GeoContainmentRuleParams } from '../types';

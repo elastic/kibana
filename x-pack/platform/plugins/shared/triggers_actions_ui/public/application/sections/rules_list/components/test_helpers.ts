@@ -10,7 +10,7 @@ import {
   RuleExecutionStatusErrorReasons,
   RuleExecutionStatusWarningReasons,
 } from '@kbn/alerting-plugin/common';
-import { ValidationResult } from '../../../../types';
+import type { ValidationResult } from '../../../../types';
 
 export const mockedRulesData = [
   {
@@ -271,7 +271,7 @@ export const ruleTypeFromApi = {
   ruleTaskTimeout: '1m',
 };
 
-export const getDisabledByLicenseRuleTypeFromApi = (authorized: boolean = true) => ({
+export const getDisabledByLicenseRuleTypeFromApi = (authorized = true) => ({
   id: 'test_rule_type_disabled_by_license',
   name: 'some rule type that is not allowed',
   actionGroups: [{ id: 'default', name: 'Default' }],
