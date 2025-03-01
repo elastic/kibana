@@ -335,7 +335,7 @@ export async function fetchPreviousDocuments(
 
     // Update the state and finish the loading state
     sendLoadingMoreFinishedMsg(dataSubjects.documents$, {
-      moreRecords: records,
+      moreRecords: records.reverse(),
       prepend: true,
       interceptedWarnings,
     });
