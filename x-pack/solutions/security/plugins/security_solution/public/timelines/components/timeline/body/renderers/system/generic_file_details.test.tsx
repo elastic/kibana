@@ -45,7 +45,7 @@ describe('SystemGenericFileDetails', () => {
           contextId="[contextid-123]"
           text="[generic-text-123]"
           data={mockTimelineData[29].ecs}
-          timelineId="test"
+          scopeId="test"
         />
       );
       expect(wrapper).toMatchSnapshot();
@@ -58,7 +58,7 @@ describe('SystemGenericFileDetails', () => {
             contextId="[contextid-123]"
             text="[generic-text-123]"
             data={mockTimelineData[29].ecs}
-            timelineId="test"
+            scopeId="test"
           />
         </TestProviders>
       );
@@ -74,7 +74,7 @@ describe('SystemGenericFileDetails', () => {
             contextId="[contextid-123]"
             text="[generic-text-123]"
             data={mockEndgameCreationEvent}
-            timelineId="test"
+            scopeId="test"
           />
         </TestProviders>
       );
