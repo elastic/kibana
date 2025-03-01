@@ -15,9 +15,8 @@ import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { set } from '@kbn/safer-lodash-set';
 
 import { ViewMode } from '@kbn/presentation-publishing';
-import { UnsavedPanelState } from '../dashboard_container/types';
 import { coreServices, spacesService } from './kibana_services';
-import { DashboardState } from '../dashboard_api/types';
+import { DashboardState, UnsavedPanelState } from '../dashboard_api/types';
 import { DEFAULT_DASHBOARD_STATE } from '../dashboard_api/default_dashboard_state';
 
 export const DASHBOARD_PANELS_UNSAVED_ID = 'unsavedDashboard';
