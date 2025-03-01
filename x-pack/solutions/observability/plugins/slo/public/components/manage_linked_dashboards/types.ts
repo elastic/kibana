@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-export * from './slo';
-export * from './routes';
-export * from './indicators';
-export * from './common';
-export * from './asset';
+export interface Dashboard {
+  id: string;
+  title: string;
+}

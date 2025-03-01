@@ -34,6 +34,9 @@ import { SloDisableConfirmationModal } from '../../../components/slo/disable_con
 import { SloEnableConfirmationModal } from '../../../components/slo/enable_confirmation_modal/slo_enable_confirmation_modal';
 import { useDisableSlo } from '../../../hooks/use_disable_slo';
 import { useEnableSlo } from '../../../hooks/use_enable_slo';
+import { ManageLinkedDashboardsFlyout } from '../../../components/manage_linked_dashboards/manage_linked_dashboards_flyout';
+import { Dashboard } from '../../../components/manage_linked_dashboards/types';
+import { useUpdateSlo } from '../../../hooks/use_update_slo';
 
 export interface Props {
   slo: SLOWithSummaryResponse;
@@ -67,10 +70,12 @@ export function HeaderControl({ slo }: Props) {
   const [isResetConfirmationModalOpen, setResetConfirmationModalOpen] = useState(false);
   const [isEnableConfirmationModalOpen, setEnableConfirmationModalOpen] = useState(false);
   const [isDisableConfirmationModalOpen, setDisableConfirmationModalOpen] = useState(false);
+  const [isManageLinkedDashboardsFlyoutOpen, setManageLinkedDashboardsFlyoutOpen] = useState(false);
 
   const { mutate: resetSlo, isLoading: isResetLoading } = useResetSlo();
   const { mutate: enableSlo, isLoading: isEnableLoading } = useEnableSlo();
   const { mutate: disableSlo, isLoading: isDisableLoading } = useDisableSlo();
+  const { mutate: updateSlo, isLoading: isUpdateLoading } = useUpdateSlo();
 
   const { data: rulesBySlo, refetchRules } = useFetchRulesForSlo({
     sloIds: [slo.id],
@@ -185,6 +190,7 @@ export function HeaderControl({ slo }: Props) {
     removeEnableQueryParam();
     setEnableConfirmationModalOpen(false);
   };
+
   const handleEnableConfirm = () => {
     enableSlo({ id: slo.id, name: slo.name });
     removeEnableQueryParam();
@@ -207,6 +213,11 @@ export function HeaderControl({ slo }: Props) {
     disableSlo({ id: slo.id, name: slo.name });
     removeDisableQueryParam();
     setDisableConfirmationModalOpen(false);
+  };
+
+  const handleManageLinkedDashboards = () => {
+    setManageLinkedDashboardsFlyoutOpen(true);
+    setIsPopoverOpen(false);
   };
 
   const navigate = useCallback(
@@ -388,6 +399,21 @@ export function HeaderControl({ slo }: Props) {
                   defaultMessage: 'Reset',
                 })}
                 {showRemoteLinkIcon}
+              </EuiContextMenuItem>,
+              <EuiContextMenuItem
+                key="manageLinkedDashboards"
+                icon="dashboardApp"
+                disabled={!permissions?.hasAllWriteRequested || hasUndefinedRemoteKibanaUrl}
+                onClick={handleManageLinkedDashboards}
+                data-test-subj="sloDetailsHeaderControlPopoverManageLinkedDashboards"
+                toolTipContent={
+                  hasUndefinedRemoteKibanaUrl ? NOT_AVAILABLE_FOR_UNDEFINED_REMOTE_KIBANA_URL : ''
+                }
+              >
+                {i18n.translate('xpack.slo.slo.item.actions.manageLinkedDashboards', {
+                  defaultMessage: 'Manage linked dashboards',
+                })}
+                {showRemoteLinkIcon}
               </EuiContextMenuItem>
             )}
         />
@@ -438,6 +464,28 @@ export function HeaderControl({ slo }: Props) {
           onCancel={handleDisableCancel}
           onConfirm={handleDisableConfirm}
           isLoading={isDisableLoading}
+        />
+      ) : null}
+
+      {isManageLinkedDashboardsFlyoutOpen ? (
+        <ManageLinkedDashboardsFlyout
+          assets={slo.assets}
+          onClose={() => {
+            setManageLinkedDashboardsFlyoutOpen(false);
+          }}
+          onSave={(dashboards: Dashboard[]) => {
+            updateSlo({
+              sloId: slo.id,
+              slo: {
+                assets: dashboards.map((dashboard) => ({
+                  type: 'dashboard',
+                  id: dashboard.id,
+                  label: dashboard.title,
+                })),
+              },
+            });
+            setManageLinkedDashboardsFlyoutOpen(false);
+          }}
         />
       ) : null}
     </>
