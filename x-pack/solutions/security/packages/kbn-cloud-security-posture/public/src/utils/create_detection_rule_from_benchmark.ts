@@ -6,12 +6,12 @@
  */
 
 import { HttpSetup } from '@kbn/core/public';
-import { LATEST_FINDINGS_RETENTION_POLICY } from '@kbn/cloud-security-posture-common';
 import type { CspBenchmarkRule } from '@kbn/cloud-security-posture-common/schema/rules/latest';
 import { i18n } from '@kbn/i18n';
 import {
   createDetectionRule,
   FINDINGS_INDEX_PATTERN,
+  LATEST_FINDINGS_RETENTION_POLICY,
   generateBenchmarkRuleTags,
 } from '@kbn/cloud-security-posture-common';
 
@@ -67,13 +67,16 @@ export const createDetectionRuleFromBenchmarkRule = async (
 ) => {
   if (!benchmarkRule.benchmark?.posture_type) {
     throw new Error(
-      i18n.translate('xpack.csp.createDetectionRuleFromBenchmarkRule.createRuleErrorMessage', {
-        defaultMessage: 'Rule creation is currently only available for Elastic findings',
-      })
+      i18n.translate(
+        'securitySolutionPackages.createDetectionRuleFromBenchmarkRule.createRuleErrorMessage',
+        {
+          defaultMessage: 'Rule creation is currently only available for Elastic findings',
+        }
+      )
     );
   }
 
-  return await createDetectionRule({
+  return createDetectionRule({
     http,
     rule: {
       type: 'query',

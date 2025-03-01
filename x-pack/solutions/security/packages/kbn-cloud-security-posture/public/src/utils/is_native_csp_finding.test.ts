@@ -6,8 +6,7 @@
  */
 import { CSP_VULN_DATASET } from './get_vendor_name';
 import { isNativeCspFinding } from './is_native_csp_finding';
-import { CspFinding } from '@kbn/cloud-security-posture-common';
-import { CSP_MISCONFIGURATIONS_DATASET } from '@kbn/cloud-security-posture-common';
+import { CspFinding, CSP_MISCONFIGURATIONS_DATASET } from '@kbn/cloud-security-posture-common';
 import { CspVulnerabilityFinding } from '@kbn/cloud-security-posture-common/schema/vulnerabilities/csp_vulnerability_finding';
 
 describe('isNativeCspFinding', () => {

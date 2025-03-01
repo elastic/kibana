@@ -41,4 +41,9 @@ export {
   buildVulnerabilityEntityFlyoutPreviewQuery,
 } from './utils/helpers';
 export { getAbbreviatedNumber } from './utils/get_abbreviated_number';
+export { createDetectionRule } from './utils/create_detection_rule';
 export { UiMetricService } from './utils/ui_metrics';
+export {
+  generateBenchmarkRuleTags,
+  getFindingsDetectionRuleSearchTags,
+} from './utils/detection_rules';
