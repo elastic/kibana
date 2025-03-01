@@ -23,13 +23,18 @@ import type { ScopedHistory } from './scoped_history';
  */
 export type AppMount<HistoryLocationState = unknown> = (
   params: AppMountParameters<HistoryLocationState>
-) => AppUnmount | Promise<AppUnmount>;
+) => Mounter | AppUnmount | Promise<AppUnmount | Mounter>;
 
 /**
  * A function called when an application should be unmounted from the page. This function should be synchronous.
  * @public
  */
 export type AppUnmount = () => void;
+
+export type Mounter = {
+  Component: React.ComponentType;
+  unmount: AppUnmount;
+};
 
 /** @public */
 export interface AppMountParameters<HistoryLocationState = unknown> {

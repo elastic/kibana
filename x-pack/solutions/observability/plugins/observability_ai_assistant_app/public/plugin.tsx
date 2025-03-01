@@ -110,6 +110,14 @@ export class ObservabilityAIAssistantAppPlugin
     const isEnabled = appService.isEnabled();
     if (isEnabled) {
       coreStart.chrome.navControls.registerRight({
+        Component: React.memo(() => (
+          <NavControlInitiator
+            appService={appService}
+            coreStart={coreStart}
+            pluginsStart={pluginsStart}
+            isServerless={this.isServerless}
+          />
+        )),
         mount: (element) => {
           ReactDOM.render(
             <NavControlInitiator
