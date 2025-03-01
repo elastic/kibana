@@ -62,6 +62,10 @@ import { PluginStart as DataPluginStart } from '@kbn/data-plugin/server';
 import { MonitoringCollectionSetup } from '@kbn/monitoring-collection-plugin/server';
 import { SharePluginStart } from '@kbn/share-plugin/server';
 
+import {
+  CallbackType,
+  maintenanceWindowRegistry,
+} from './maintenance_window_client/maintenance_windows_registry';
 import { RuleTypeRegistry } from './rule_type_registry';
 import { TaskRunnerFactory } from './task_runner';
 import { RulesClientFactory } from './rules_client_factory';
@@ -179,6 +183,10 @@ export interface AlertingServerStart {
     request: KibanaRequest
   ): Promise<PublicMethodsOf<AlertingAuthorization>>;
   getFrameworkHealth: () => Promise<AlertsHealth>;
+  registerMaintenanceWindowsCallback: (
+    eventType: CallbackType,
+    callback: (event: { type: CallbackType }) => Promise<void>
+  ) => void;
 }
 
 export interface AlertingPluginsSetup {
@@ -658,6 +666,7 @@ export class AlertingPlugin {
       getRulesClientWithRequest,
       getFrameworkHealth: async () =>
         await getHealth(core.savedObjects.createInternalRepository([RULE_SAVED_OBJECT_TYPE])),
+      registerMaintenanceWindowsCallback: maintenanceWindowRegistry.register,
     };
   }
 

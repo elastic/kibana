@@ -22,6 +22,7 @@ import {
 import { getMockMaintenanceWindow } from '../../../../data/maintenance_window/test_helpers';
 import type { MaintenanceWindow } from '../../types';
 import { FilterStateStore } from '@kbn/es-query';
+import { maintenanceWindowRegistry } from '../../../../maintenance_window_client/maintenance_windows_registry';
 
 const savedObjectsClient = savedObjectsClientMock.create();
 const uiSettings = uiSettingsServiceMock.createClient();
@@ -71,6 +72,9 @@ describe('MaintenanceWindowClient - update', () => {
 
   it('should call update with the correct parameters', async () => {
     jest.useFakeTimers().setSystemTime(new Date(firstTimestamp));
+
+    const callback = jest.fn();
+    maintenanceWindowRegistry.register('post_update', callback);
 
     const mockMaintenanceWindow = getMockMaintenanceWindow({
       expirationDate: moment(new Date()).tz('UTC').add(1, 'year').toISOString(),
@@ -151,6 +155,11 @@ describe('MaintenanceWindowClient - update', () => {
         ],
       ]
     `);
+    expect(callback).toHaveBeenCalledWith(
+      expect.objectContaining({
+        type: 'post_update',
+      })
+    );
   });
 
   it('should not regenerate all events if rrule and duration did not change', async () => {
@@ -392,7 +401,7 @@ describe('MaintenanceWindowClient - update', () => {
       });
     }).rejects.toThrowErrorMatchingInlineSnapshot(`
       "Error validating update maintenance window data - invalid scoped query - Expected \\"(\\", \\"{\\", value, whitespace but end of input found.
-      invalid: 
+      invalid:
       ---------^"
     `);
   });

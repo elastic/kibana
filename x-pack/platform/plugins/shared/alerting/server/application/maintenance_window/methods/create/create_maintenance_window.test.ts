@@ -24,6 +24,7 @@ import { getMockMaintenanceWindow } from '../../../../data/maintenance_window/te
 import type { MaintenanceWindow } from '../../types';
 import { createMaintenanceWindow } from './create_maintenance_window';
 import { CreateMaintenanceWindowParams } from './types';
+import { maintenanceWindowRegistry } from '../../../../maintenance_window_client/maintenance_windows_registry';
 
 const savedObjectsClient = savedObjectsClientMock.create();
 const uiSettings = uiSettingsServiceMock.createClient();
@@ -107,6 +108,8 @@ describe('MaintenanceWindowClient - create', () => {
 
   it('should create maintenance window with category ids', async () => {
     jest.useFakeTimers().setSystemTime(new Date('2023-02-26T00:00:00.000Z'));
+    const callback = jest.fn();
+    maintenanceWindowRegistry.register('post_save', callback);
 
     const mockMaintenanceWindow = getMockMaintenanceWindow({
       expirationDate: moment(new Date()).tz('UTC').add(1, 'year').toISOString(),
@@ -146,6 +149,11 @@ describe('MaintenanceWindowClient - create', () => {
     expect(result).toEqual(
       expect.objectContaining({
         id: 'test-id',
+      })
+    );
+    expect(callback).toHaveBeenCalledWith(
+      expect.objectContaining({
+        type: 'post_save',
       })
     );
   });
@@ -278,7 +286,7 @@ describe('MaintenanceWindowClient - create', () => {
       });
     }).rejects.toThrowErrorMatchingInlineSnapshot(`
       "Error validating create maintenance window data - invalid scoped query - Expected \\"(\\", \\"{\\", value, whitespace but end of input found.
-      invalid: 
+      invalid:
       ---------^"
     `);
   });
