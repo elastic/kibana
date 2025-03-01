@@ -20,10 +20,6 @@ export interface AssetsBaseURLQuery {
   query: Query;
   filters: Filter[];
   /**
-   * Filters that are part of the query but not persisted in the URL or in the Filter Manager
-   */
-  nonPersistedFilters?: Filter[];
-  /**
    * Grouping component selection
    */
   groupBy?: string[];
@@ -60,12 +56,10 @@ export const useAssetInventoryDataTable = ({
   defaultQuery = getDefaultQuery,
   paginationLocalStorageKey,
   columnsLocalStorageKey,
-  nonPersistedFilters,
 }: {
   defaultQuery?: (params: AssetsBaseURLQuery) => URLQuery;
   paginationLocalStorageKey: string;
   columnsLocalStorageKey?: string;
-  nonPersistedFilters?: Filter[];
 }): AssetInventoryDataTableResult => {
   const getPersistedDefaultQuery = usePersistedQuery<URLQuery>(defaultQuery);
   const { urlQuery, setUrlQuery } = useUrlQuery<URLQuery>(getPersistedDefaultQuery);
@@ -128,7 +122,6 @@ export const useAssetInventoryDataTable = ({
   const baseEsQuery = useBaseEsQuery({
     filters: urlQuery.filters,
     query: urlQuery.query,
-    ...(nonPersistedFilters ? { nonPersistedFilters } : {}),
   });
 
   const handleUpdateQuery = useCallback(
