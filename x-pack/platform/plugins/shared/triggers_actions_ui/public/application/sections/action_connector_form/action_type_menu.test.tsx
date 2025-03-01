@@ -167,6 +167,134 @@ describe('connector_add_flyout', () => {
     });
   });
 
+  describe('filtering', () => {
+    it('filters connectors by search field correctly', async () => {
+      const onActionTypeChange = jest.fn();
+
+      const actionType1 = actionTypeRegistryMock.createMockActionTypeModel({
+        id: 'action-type-1',
+        iconClass: 'test',
+        selectMessage: 'test',
+        validateParams: (): Promise<GenericValidationResult<unknown>> => {
+          const validationResult = { errors: {} };
+          return Promise.resolve(validationResult);
+        },
+        actionConnectorFields: null,
+      });
+
+      const actionType2 = actionTypeRegistryMock.createMockActionTypeModel({
+        id: 'action-type-2',
+        iconClass: 'test',
+        selectMessage: 'test',
+        validateParams: (): Promise<GenericValidationResult<unknown>> => {
+          const validationResult = { errors: {} };
+          return Promise.resolve(validationResult);
+        },
+        actionConnectorFields: null,
+      });
+
+      loadActionTypes.mockResolvedValue([
+        {
+          id: actionType1.id,
+          enabled: true,
+          name: 'Test1',
+          enabledInConfig: true,
+          enabledInLicense: true,
+          minimumLicenseRequired: 'basic',
+          supportedFeatureIds: ['alerting'],
+        },
+        {
+          id: actionType2.id,
+          enabled: true,
+          name: 'Test2',
+          enabledInConfig: true,
+          enabledInLicense: true,
+          minimumLicenseRequired: 'basic',
+          supportedFeatureIds: ['cases'],
+        },
+      ]);
+      actionTypeRegistry.get.mockReturnValue(actionType1);
+
+      const wrapper = mountWithIntl(
+        <ActionTypeMenu
+          onActionTypeChange={onActionTypeChange}
+          actionTypeRegistry={actionTypeRegistry}
+          searchValue="Test1"
+        />
+      );
+      await act(async () => {
+        await nextTick();
+        wrapper.update();
+      });
+
+      expect(wrapper.find('[data-test-subj="action-type-1-card"]').exists()).toBeTruthy();
+      expect(wrapper.find('[data-test-subj="action-type-2-card"]').exists()).toBeFalsy();
+    });
+
+    it('filters connectors by compatibility', async () => {
+      const onActionTypeChange = jest.fn();
+
+      const actionType1 = actionTypeRegistryMock.createMockActionTypeModel({
+        id: 'action-type-1',
+        iconClass: 'test',
+        selectMessage: 'test',
+        validateParams: (): Promise<GenericValidationResult<unknown>> => {
+          const validationResult = { errors: {} };
+          return Promise.resolve(validationResult);
+        },
+        actionConnectorFields: null,
+      });
+
+      const actionType2 = actionTypeRegistryMock.createMockActionTypeModel({
+        id: 'action-type-2',
+        iconClass: 'test',
+        selectMessage: 'test',
+        validateParams: (): Promise<GenericValidationResult<unknown>> => {
+          const validationResult = { errors: {} };
+          return Promise.resolve(validationResult);
+        },
+        actionConnectorFields: null,
+      });
+
+      loadActionTypes.mockResolvedValue([
+        {
+          id: actionType1.id,
+          enabled: true,
+          name: 'Test1',
+          enabledInConfig: true,
+          enabledInLicense: true,
+          minimumLicenseRequired: 'basic',
+          supportedFeatureIds: ['alerting'],
+        },
+        {
+          id: actionType2.id,
+          enabled: true,
+          name: 'Test2',
+          enabledInConfig: true,
+          enabledInLicense: true,
+          minimumLicenseRequired: 'basic',
+          supportedFeatureIds: ['cases'],
+        },
+      ]);
+      actionTypeRegistry.get.mockReturnValue(actionType2);
+
+      const wrapper = mountWithIntl(
+        <ActionTypeMenu
+          onActionTypeChange={onActionTypeChange}
+          actionTypeRegistry={actionTypeRegistry}
+          selectedOptions={['cases']}
+        />
+      );
+      await act(async () => {
+        await nextTick();
+        wrapper.update();
+      });
+
+      expect(wrapper.find('[data-test-subj="action-type-1-card"]').exists()).toBeFalsy();
+      expect(wrapper.find('[data-test-subj="action-type-2-card"]').exists()).toBeTruthy();
+    });
+  });
+
   describe('beta badge', () => {
     it(`does not render beta badge when isExperimental=undefined`, async () => {
       const onActionTypeChange = jest.fn();
