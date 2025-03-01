@@ -7,11 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, useEffect, useMemo, useRef } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { isEqual } from 'lodash';
 import { DataViewType } from '@kbn/data-views-plugin/public';
 import type { DataViewPickerProps } from '@kbn/unified-search-plugin/public';
 import { ENABLE_ESQL } from '@kbn/esql-utils';
+import { EuiSpacer } from '@elastic/eui';
 import { TextBasedLanguages } from '@kbn/esql-utils';
+import { ControlGroupRenderer, ControlGroupRendererApi } from '@kbn/controls-plugin/public';
 import { DiscoverFlyouts, dismissAllFlyoutsExceptFor } from '@kbn/discover-utils';
 import { useSavedSearchInitial } from '../../state_management/discover_state_provider';
 import { ESQL_TRANSITION_MODAL_KEY } from '../../../../../common/constants';
@@ -19,6 +22,7 @@ import {
   selectDataViewsForPicker,
   useInternalStateSelector,
 } from '../../state_management/discover_internal_state_container';
+import { FetchStatus } from '../../../types';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import type { DiscoverStateContainer } from '../../state_management/discover_state';
 import { onSaveSearch } from './on_save_search';
@@ -27,6 +31,7 @@ import { useAppStateSelector } from '../../state_management/discover_app_state_c
 import { useDiscoverTopNav } from './use_discover_topnav';
 import { useIsEsqlMode } from '../../hooks/use_is_esql_mode';
 import { ESQLToDataViewTransitionModal } from './esql_dataview_transition';
+import { useESQLVariables } from './use_esql_variables';
 import './top_nav.scss';
 
 export interface DiscoverTopNavProps {
@@ -51,15 +56,32 @@ export const DiscoverTopNav = ({
   const services = useDiscoverServices();
   const { dataViewEditor, navigation, dataViewFieldEditor, data, uiSettings, setHeaderActionMenu } =
     services;
+  const documents$ = stateContainer.dataState.data$.documents$;
+  const { timefilter } = data.query.timefilter;
+  const timeRange = timefilter.getTime();
+  const [controlGroupAPI, setControlGroupAPI] = useState<ControlGroupRendererApi | undefined>();
   const query = useAppStateSelector((state) => state.query);
   const { savedDataViews, managedDataViews, adHocDataViews } =
     useInternalStateSelector(selectDataViewsForPicker);
   const dataView = useInternalStateSelector((state) => state.dataView!);
+  const isEsqlMode = useIsEsqlMode();
   const isESQLToDataViewTransitionModalVisible = useInternalStateSelector(
     (state) => state.isESQLToDataViewTransitionModalVisible
   );
+  const stateEsqlVariables = useAppStateSelector((state) => state.esqlVariables);
+
+  controlGroupAPI?.esqlVariables$.subscribe((newESQLVariables) => {
+    if (!isEqual(newESQLVariables, stateEsqlVariables) && isEsqlMode) {
+      stateContainer.appState.update({ esqlVariables: newESQLVariables });
+      documents$.next({ fetchStatus: FetchStatus.PARTIAL });
+    }
+  });
+  const { onSaveControl, onCancelControl, dashboardESQLControls } = useESQLVariables({
+    controlGroupAPI,
+    onTextLangQueryChange: stateContainer.actions.updateESQLQuery,
+  });
+
   const savedSearch = useSavedSearchInitial();
-  const isEsqlMode = useIsEsqlMode();
   const showDatePicker = useMemo(() => {
     // always show the timepicker for ES|QL mode
     return (
@@ -223,6 +245,7 @@ export const DiscoverTopNav = ({
 
   return (
     <>
+      <EuiSpacer />
       <SearchBar
         {...topNavProps}
         appName="discover"
@@ -255,6 +278,15 @@ export const DiscoverTopNav = ({
           ) : undefined
         }
         onESQLDocsFlyoutVisibilityChanged={onESQLDocsFlyoutVisibilityChanged}
+        esqLVariablesConfig={{
+          esqlVariables: stateEsqlVariables ?? [],
+          onSaveControl,
+          onCancelControl,
+          esqlControls: dashboardESQLControls,
+          controlsWrapper: (
+            <ControlGroupRenderer onApiAvailable={setControlGroupAPI} timeRange={timeRange} />
+          ),
+        }}
       />
       {isESQLToDataViewTransitionModalVisible && (
         <ESQLToDataViewTransitionModal onClose={onESQLToDataViewTransitionModalClose} />

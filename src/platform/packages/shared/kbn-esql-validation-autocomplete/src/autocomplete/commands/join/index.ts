@@ -59,11 +59,11 @@ const suggestFields = async (
   ]);
 
   const supportsControls = callbacks?.canSuggestVariables?.() ?? false;
-  const getVariablesByType = callbacks?.getVariablesByType;
+  const getESQLVariables = callbacks?.getESQLVariables;
   const joinFields = buildFieldsDefinitionsWithMetadata(
     lookupIndexFields!,
     { supportsControls },
-    getVariablesByType
+    getESQLVariables
   );
 
   const intersection = suggestionIntersection(joinFields, sourceFields);

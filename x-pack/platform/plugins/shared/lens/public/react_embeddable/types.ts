@@ -14,6 +14,7 @@ import type {
 } from '@kbn/es-query';
 import type { Adapters, InspectorOptions } from '@kbn/inspector-plugin/public';
 import type { ESQLControlVariable } from '@kbn/esql-validation-autocomplete';
+import type { ESQLControlState } from '@kbn/esql/public';
 import type {
   HasEditCapabilities,
   HasLibraryTransforms,
@@ -265,6 +266,7 @@ export interface LensSharedProps {
   noPadding?: boolean;
   viewMode?: ViewMode;
   forceDSL?: boolean;
+  esqlVariables$?: PublishingSubject<ESQLControlVariable[]>;
 }
 
 interface LensRequestHandlersProps {
@@ -526,8 +528,18 @@ export type TypedLensByValueInput = Omit<LensRendererProps, 'savedObjectId'>;
 export type LensEmbeddableInput = LensByValueInput | LensByReferenceInput;
 export type LensEmbeddableOutput = LensApi;
 
+interface ControlGroup {
+  type: string;
+  serializeState: () => { rawState: ESQLControlState; id: string };
+}
+
 export interface ControlGroupApi {
   addNewPanel: (panelState: Record<string, unknown>) => void;
+  replacePanel: (
+    panelId: string,
+    config: { initialState: Record<string, unknown>; panelType: string }
+  ) => void;
+  children$: PublishingSubject<{ [key: string]: ControlGroup }>;
 }
 
 interface ESQLVariablesCompatibleDashboardApi {

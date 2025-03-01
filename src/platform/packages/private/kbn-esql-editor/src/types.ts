@@ -17,7 +17,18 @@ import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import type { ESQLControlVariable } from '@kbn/esql-validation-autocomplete';
+import type { ESQLControlVariable, ESQLVariableType } from '@kbn/esql-validation-autocomplete';
+
+// check how easy it is to move this type to a stateless package
+interface ESQLControlState {
+  grow?: boolean;
+  title: string;
+  availableOptions: string[];
+  selectedOptions: string[];
+  variableName: string;
+  variableType: ESQLVariableType;
+  esqlQuery: string;
+}
 
 export interface ESQLEditorProps {
   /** The aggregate type query */
@@ -84,6 +95,8 @@ export interface ESQLEditorProps {
   onCancelControl?: () => void;
   /** The available ESQL variables from the page context this editor was opened in */
   esqlVariables?: ESQLControlVariable[];
+  /** The associated controls */
+  esqlControls?: ESQLControlState[];
 }
 
 export interface JoinIndicesAutocompleteResult {
