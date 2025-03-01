@@ -24,6 +24,7 @@ export interface RuleMigrationsRetrieverClients {
  * Such as rule integrations, prebuilt rules, and rule resources.
  */
 export class RuleMigrationsRetriever {
+  private static populatePromise: Promise<void> | null = null;
   public readonly resources: RuleResourceRetriever;
   public readonly integrations: IntegrationRetriever;
   public readonly prebuiltRules: PrebuiltRulesRetriever;
@@ -34,13 +35,18 @@ export class RuleMigrationsRetriever {
     this.prebuiltRules = new PrebuiltRulesRetriever(clients);
   }
 
+  private async populateIndices() {
+    await Promise.all([this.prebuiltRules.populateIndex(), this.integrations.populateIndex()]);
+  }
+
   public async initialize() {
-    await Promise.all([
-      this.resources.initialize(),
-      this.prebuiltRules.populateIndex(),
-      this.integrations.populateIndex(),
-    ]).catch((error) => {
-      throw new Error(`Failed to initialize RuleMigrationsRetriever: ${error}`);
-    });
+    this.resources.initialize();
+    // Run only one populateIndices promise at a time, if one is already running, wait for it to finish
+    if (RuleMigrationsRetriever.populatePromise === null) {
+      RuleMigrationsRetriever.populatePromise = this.populateIndices().finally(() => {
+        RuleMigrationsRetriever.populatePromise = null;
+      });
+    }
+    await RuleMigrationsRetriever.populatePromise;
   }
 }
