@@ -14,6 +14,7 @@ import { HttpSetup } from '@kbn/core-http-browser';
 import type { CspVulnerabilityFinding } from '@kbn/cloud-security-posture-common/schema/vulnerabilities/latest';
 import { CVSScoreBadge, SeverityStatusBadge } from '@kbn/cloud-security-posture';
 import { getVendorName } from '@kbn/cloud-security-posture/src/utils/get_vendor_name';
+import type { VulnSeverity } from '@kbn/cloud-security-posture-common';
 import { CloudSecurityDataTable } from '../../components/cloud_security_data_table';
 import { useLatestVulnerabilitiesTable } from './hooks/use_latest_vulnerabilities_table';
 import { LATEST_VULNERABILITIES_TABLE } from './test_subjects';
@@ -73,6 +74,10 @@ const title = i18n.translate('xpack.csp.findings.latestVulnerabilities.tableRowT
   defaultMessage: 'Vulnerabilities',
 });
 
+const normalizeSeverity = (severity?: string): VulnSeverity => {
+  return (severity?.toUpperCase() ?? 'UNKNOWN') as VulnSeverity;
+};
+
 const customCellRenderer = (rows: DataTableRecord[]) => ({
   'vulnerability.score.base': ({ rowIndex }: EuiDataGridCellValueElementProps) => (
     <CspVulnerabilityFindingRenderer row={rows[rowIndex]}>
@@ -86,7 +91,9 @@ const customCellRenderer = (rows: DataTableRecord[]) => ({
   ),
   'vulnerability.severity': ({ rowIndex }: EuiDataGridCellValueElementProps) => (
     <CspVulnerabilityFindingRenderer row={rows[rowIndex]}>
-      {({ finding }) => <SeverityStatusBadge severity={finding.vulnerability.severity} />}
+      {({ finding }) => (
+        <SeverityStatusBadge severity={normalizeSeverity(finding.vulnerability.severity)} />
+      )}
     </CspVulnerabilityFindingRenderer>
   ),
   'observer.vendor': ({ rowIndex }: EuiDataGridCellValueElementProps) => (
