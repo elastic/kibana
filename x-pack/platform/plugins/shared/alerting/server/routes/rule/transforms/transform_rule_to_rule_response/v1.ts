@@ -66,6 +66,9 @@ export const transformRuleActions = (
                 summary: frequency.summary,
                 notify_when: frequency.notifyWhen,
                 throttle: frequency.throttle,
+                ...(frequency.advancedThrottle && {
+                  advanced_throttle: frequency.advancedThrottle,
+                }),
               },
             }
           : {}),

@@ -9,7 +9,7 @@
 
 import { isObject } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { RuleFormData } from '../types';
+import { RuleAction, RuleFormData } from '../types';
 import { parseDuration, formatDuration } from '../utils';
 import {
   NAME_REQUIRED_TEXT,
@@ -27,10 +27,12 @@ import {
   RuleTypeModel,
   RuleUiAction,
 } from '../common';
+import { Frequency } from '@kbn/rrule';
 
 export const validateAction = ({ action }: { action: RuleUiAction }): RuleFormActionsErrors => {
-  const errors = {
+  const errors: RuleFormActionsErrors = {
     filterQuery: new Array<string>(),
+    advancedThrottleBymonthday: new Array<string>(),
   };
 
   if ('alertsFilter' in action) {
@@ -39,9 +41,18 @@ export const validateAction = ({ action }: { action: RuleUiAction }): RuleFormAc
       return errors;
     }
     if (!query.filters.length && !query.kql) {
-      errors.filterQuery.push(
+      errors.filterQuery?.push(
         i18n.translate('responseOpsRuleForm.ruleForm.actionsForm.requiredFilterQuery', {
           defaultMessage: 'A custom query is required.',
+        })
+      );
+    }
+  }
+  if ((action as RuleAction).frequency?.advancedThrottle?.freq === Frequency.MONTHLY) {
+    if (((action as RuleAction).frequency?.advancedThrottle?.bymonthday ?? []).length <= 0) {
+      errors.advancedThrottleBymonthday?.push(
+        i18n.translate('responseOpsRuleForm.ruleForm.actionsForm.advancedThrottle.bymonthday', {
+          defaultMessage: 'At least one day should be selected',
         })
       );
     }
