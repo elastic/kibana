@@ -83,9 +83,12 @@ const createMatchesIndicesValidator = ({
     const rollupIndexMatches = matchedIndices.exactMatchedIndices.filter(
       (matchedIndex) =>
         rollupIndices.includes(matchedIndex.name) ||
-        // alias case
+        // matched item is alias
         (matchedIndex.item.indices?.length === 1 &&
-          rollupIndices.includes(matchedIndex.item.indices[0]))
+          rollupIndices.includes(matchedIndex.item.indices[0])) ||
+          // matched item is an index referenced by an alias
+          (matchedIndex.item.aliases?.length === 1 &&
+            rollupIndices.includes(matchedIndex.item.aliases[0]))
     );
 
     if (!rollupIndexMatches.length) {
