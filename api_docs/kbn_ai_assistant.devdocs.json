@@ -1073,7 +1073,7 @@
         "label": "useConfirmModal",
         "description": [],
         "signature": [
-          "({\n  title,\n  children,\n  confirmButtonText,\n}: { title: React.ReactNode; children: React.ReactNode; confirmButtonText: React.ReactNode; }) => { element: React.ReactNode; confirm: () => Promise<boolean>; }"
+          "({\n  title,\n  children,\n  confirmButtonText,\n}: { title: React.ReactNode; children: React.ReactNode; confirmButtonText: React.ReactNode; }) => { element: React.ReactNode; confirm: (checkBoxLabel: string) => Promise<boolean>; }"
         ],
         "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/hooks/use_confirm_modal.tsx",
         "deprecated": false,
