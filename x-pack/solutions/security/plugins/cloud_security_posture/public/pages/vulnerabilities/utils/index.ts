@@ -5,6 +5,4 @@
  * 2.0.
  */
 
-export type VulnSeverity = 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL' | 'UNKNOWN';
-
-export const VALID_SEVERITIES: VulnSeverity[] = ['LOW', 'MEDIUM', 'HIGH', 'CRITICAL', 'UNKNOWN'];
+export * from './normalize-serveity.util';
