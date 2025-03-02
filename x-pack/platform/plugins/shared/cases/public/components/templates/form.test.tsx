@@ -441,7 +441,7 @@ describe('TemplateForm', () => {
       expect(await screen.findByTestId('caseConnectors')).toBeInTheDocument();
     });
 
-    expect(formState).not.toBeUndefined();
+    expect(formState!).not.toBeUndefined();
 
     const submitSpy = jest.spyOn(formState!, 'submit');
     await user.click(screen.getByText('testSubmit'));
