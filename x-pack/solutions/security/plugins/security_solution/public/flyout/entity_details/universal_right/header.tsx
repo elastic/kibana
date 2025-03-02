@@ -7,8 +7,10 @@
 
 import React, { useMemo } from 'react';
 import { css } from '@emotion/react';
+import type { IconType } from '@elastic/eui';
 import { EuiSpacer, EuiText, EuiFlexItem, EuiFlexGroup, EuiBadge, useEuiTheme } from '@elastic/eui';
 import type { EntityEcs } from '@kbn/securitysolution-ecs/src/entity';
+import type { EntityType } from '../../../../common/entity_analytics/types';
 import { ExpandableBadgeGroup } from './components/expandable_badge_group';
 import { HeaderDataCards } from './header_data_cards';
 import { EntityIconByType } from '../../../entity_analytics/components/entity_store/helpers';
@@ -60,6 +62,16 @@ interface UniversalEntityFlyoutHeaderProps {
   timestamp?: Date;
 }
 
+// TODO: Asset Inventory - move this to a shared location, for now it's here as a mock since we dont have generic entities yet
+enum GenericEntityType {
+  container = 'container',
+}
+
+export const UniversalEntityIconByType: Record<GenericEntityType | EntityType, IconType> = {
+  ...EntityIconByType,
+  container: 'container',
+};
+
 export const UniversalEntityFlyoutHeader = ({
   entity,
   timestamp,
@@ -81,7 +93,7 @@ export const UniversalEntityFlyoutHeader = ({
           <EuiFlexItem grow={false}>
             <FlyoutTitle
               title={entity?.name}
-              iconType={EntityIconByType[entity?.type] || 'globe'}
+              iconType={UniversalEntityIconByType[entity?.type] || 'globe'}
               iconColor="primary"
             />
           </EuiFlexItem>

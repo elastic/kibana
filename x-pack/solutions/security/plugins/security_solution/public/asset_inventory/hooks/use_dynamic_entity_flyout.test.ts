@@ -33,7 +33,7 @@ jest.mock('../../flyout/shared/hooks/use_on_expandable_flyout_close', () => ({
 const entity: EntityEcs = {
   id: '123',
   name: 'test-entity',
-  type: 's3',
+  type: 'container',
   tags: ['tag1', 'tag2'],
   labels: { label1: 'value1', label2: 'value2' },
   criticality: 'high_impact',
@@ -73,7 +73,7 @@ describe('useDynamicEntityFlyout', () => {
 
     act(() => {
       result.current.openDynamicFlyout({
-        entity: { ...entity, type: 's3', name: 'testUniversal' },
+        entity: { ...entity, type: 'container', name: 'testUniversal' },
         source,
         scopeId: 'scope1',
         contextId: 'context1',
@@ -84,7 +84,7 @@ describe('useDynamicEntityFlyout', () => {
     expect(openFlyoutMock).toHaveBeenCalledWith({
       right: {
         id: UniversalEntityPanelKey,
-        params: { entity: { ...entity, type: 's3', name: 'testUniversal' }, source },
+        params: { entity: { ...entity, type: 'container', name: 'testUniversal' }, source },
       },
     });
   });
