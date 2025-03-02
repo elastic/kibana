@@ -14,6 +14,7 @@ import {
 } from '@kbn/cloud-security-posture-common/utils/ui_metrics';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { i18n } from '@kbn/i18n';
+import type { EsHitRecord } from '@kbn/discover-utils';
 import { useKibana } from '../../common/lib/kibana';
 import {
   HostPanelKey,
@@ -25,6 +26,7 @@ import { useOnExpandableFlyoutClose } from '../../flyout/shared/hooks/use_on_exp
 
 interface InventoryFlyoutProps {
   entity: EntityEcs;
+  source: EsHitRecord['_source'];
   scopeId?: string;
   contextId?: string;
 }
@@ -34,7 +36,7 @@ export const useDynamicEntityFlyout = ({ onFlyoutClose }: { onFlyoutClose: () =>
   const { notifications } = useKibana().services;
   useOnExpandableFlyoutClose({ callback: onFlyoutClose });
 
-  const openDynamicFlyout = ({ entity, scopeId, contextId }: InventoryFlyoutProps) => {
+  const openDynamicFlyout = ({ entity, source, scopeId, contextId }: InventoryFlyoutProps) => {
     // User, Host, and Service entity flyouts rely on entity name to fetch required data
     if (['user', 'host', 'service'].includes(entity.type) && !entity.name) {
       notifications.toasts.addDanger({
@@ -71,7 +73,7 @@ export const useDynamicEntityFlyout = ({ onFlyoutClose }: { onFlyoutClose: () =>
         break;
 
       default:
-        openFlyout({ right: { id: UniversalEntityPanelKey, params: { entity } } });
+        openFlyout({ right: { id: UniversalEntityPanelKey, params: { entity, source } } });
         break;
     }
 

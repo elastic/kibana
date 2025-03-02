@@ -29,6 +29,10 @@ export interface FlyoutTitleProps {
    */
   iconType?: EuiButtonEmptyProps['iconType'];
   /**
+   * Optional icon color
+   */
+  iconColor?: EuiButtonEmptyProps['color'];
+  /**
    * Optional boolean to indicate if title is a link. If true, a popout icon is appended
    * and the title text is changed to link color
    */
@@ -43,12 +47,13 @@ export interface FlyoutTitleProps {
  * Title component with optional icon to indicate the type of document, can be used for text or a link
  */
 export const FlyoutTitle: FC<FlyoutTitleProps> = memo(
-  ({ title, iconType, isLink = false, 'data-test-subj': dataTestSubj }) => {
+  ({ title, iconType, iconColor, isLink = false, 'data-test-subj': dataTestSubj }) => {
     const { euiTheme } = useEuiTheme();
 
     const titleIcon = useMemo(() => {
       return iconType ? (
         <EuiIcon
+          color={iconColor}
           type={iconType}
           size="m"
           className="eui-alignBaseline"
@@ -58,7 +63,7 @@ export const FlyoutTitle: FC<FlyoutTitleProps> = memo(
           `}
         />
       ) : null;
-    }, [dataTestSubj, iconType, euiTheme.size.xs]);
+    }, [iconType, iconColor, dataTestSubj, euiTheme.size.xs]);
 
     const titleComponent = useMemo(() => {
       return (

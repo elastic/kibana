@@ -6,42 +6,30 @@
  */
 
 import React from 'react';
-import type { EntityEcs } from '@kbn/securitysolution-ecs/src/entity';
-import { EuiBasicTable } from '@elastic/eui';
+import type { EsHitRecord } from '@kbn/discover-utils';
+import { i18n } from '@kbn/i18n';
+import { FieldsTable } from './components/fields_table';
 import { ExpandableSection } from '../../document_details/right/components/expandable_section';
 import { FlyoutBody } from '../../shared/components/flyout_body';
 
 interface UniversalEntityFlyoutContentProps {
-  entity: EntityEcs;
+  source: EsHitRecord['_source'];
 }
 
-export const UniversalEntityFlyoutContent = ({ entity }: UniversalEntityFlyoutContentProps) => {
-  const columns = [
-    {
-      field: 'field',
-      name: <strong>{'Field'}</strong>,
-      width: '150px',
-    },
-    {
-      field: 'value',
-      name: <strong>{'Value'}</strong>,
-    },
-  ];
-
-  // Extract values from the entity object
-  const items = Object.entries(entity).map(([field, value]) => ({
-    field,
-    value: value?.value || value, // Use optional chaining to handle nested objects
-  }));
-
+export const UniversalEntityFlyoutContent = ({ source }: UniversalEntityFlyoutContentProps) => {
   return (
     <FlyoutBody>
       <ExpandableSection
-        title={'Fields'}
+        title={i18n.translate(
+          'xpack.securitySolution.universalEntityFlyout.flyoutContent.expandableSection.fieldsLabel',
+          {
+            defaultMessage: 'Fields',
+          }
+        )}
         expanded
         localStorageKey={'universal_flyout:overview:fields_table'}
       >
-        <EuiBasicTable columns={columns} items={items} />
+        <FieldsTable data={source} />
       </ExpandableSection>
     </FlyoutBody>
   );

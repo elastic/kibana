@@ -13,13 +13,14 @@ import {
 } from '@kbn/cloud-security-posture-common/utils/ui_metrics';
 import { METRIC_TYPE } from '@kbn/analytics';
 import type { EntityEcs } from '@kbn/securitysolution-ecs/src/entity';
-import { EuiHorizontalRule } from '@elastic/eui';
+import type { EsHitRecord } from '@kbn/discover-utils';
 import { UniversalEntityFlyoutHeader } from './header';
 import { UniversalEntityFlyoutContent } from './content';
 import { FlyoutNavigation } from '../../shared/components/flyout_navigation';
 
 export interface UniversalEntityPanelProps {
   entity: EntityEcs;
+  source: EsHitRecord['_source'];
   /** this is because FlyoutPanelProps defined params as Record<string, unknown> {@link FlyoutPanelProps#params} */
   [key: string]: unknown;
 }
@@ -29,7 +30,7 @@ export interface UniversalEntityPanelExpandableFlyoutProps extends FlyoutPanelPr
   params: UniversalEntityPanelProps;
 }
 
-export const UniversalEntityPanel = ({ entity }: UniversalEntityPanelProps) => {
+export const UniversalEntityPanel = ({ entity, source }: UniversalEntityPanelProps) => {
   useEffect(() => {
     uiMetricService.trackUiMetric(METRIC_TYPE.COUNT, UNIVERSAL_ENTITY_FLYOUT_OPENED);
   }, [entity]);
@@ -37,9 +38,8 @@ export const UniversalEntityPanel = ({ entity }: UniversalEntityPanelProps) => {
   return (
     <>
       <FlyoutNavigation flyoutIsExpandable={false} />
-      <UniversalEntityFlyoutHeader entity={entity} />
-      <EuiHorizontalRule margin="xs" />
-      <UniversalEntityFlyoutContent entity={entity} />
+      <UniversalEntityFlyoutHeader entity={entity} timestamp={source['@timestamp']} />
+      <UniversalEntityFlyoutContent source={source} />
     </>
   );
 };

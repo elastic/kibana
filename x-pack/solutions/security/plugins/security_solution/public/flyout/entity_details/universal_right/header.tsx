@@ -17,22 +17,18 @@ import { PreferenceFormattedDate } from '../../../common/components/formatted_da
 import { FlyoutHeader } from '../../shared/components/flyout_header';
 import { FlyoutTitle } from '../../shared/components/flyout_title';
 
-interface UniversalEntityFlyoutHeaderProps {
-  entity: EntityEcs;
-}
-
-const HeaderTags = ({ entity }) => {
+const HeaderTags = ({ tags, labels }: { tags: EntityEcs['tags']; labels: EntityEcs['labels'] }) => {
   const { euiTheme } = useEuiTheme();
 
   const tagBadges = useMemo(
-    () => entity.tags?.map((tag) => <EuiBadge color="hollow">{tag}</EuiBadge>),
-    [entity.tags]
+    () => tags?.map((tag) => <EuiBadge color="hollow">{tag}</EuiBadge>),
+    [tags]
   );
 
   const labelBadges = useMemo(
     () =>
-      entity.labels &&
-      Object.entries(entity.labels)?.map(([key, value]) => (
+      labels &&
+      Object.entries(labels)?.map(([key, value]) => (
         <EuiBadge color="hollow">
           <span
             css={css`
@@ -52,7 +48,7 @@ const HeaderTags = ({ entity }) => {
           </span>
         </EuiBadge>
       )),
-    [entity.labels, euiTheme.border.thick, euiTheme.colors.disabledText]
+    [labels, euiTheme.border.thick, euiTheme.colors.disabledText]
   );
 
   const allBadges = [...(tagBadges || []), ...(labelBadges || [])];
@@ -60,14 +56,24 @@ const HeaderTags = ({ entity }) => {
   return <ExpandableBadgeGroup badges={allBadges} initialBadgeLimit={3} maxHeight={180} />;
 };
 
-export const UniversalEntityFlyoutHeader = ({ entity }: UniversalEntityFlyoutHeaderProps) => {
+interface UniversalEntityFlyoutHeaderProps {
+  entity: EntityEcs;
+  timestamp: Date;
+}
+
+export const UniversalEntityFlyoutHeader = ({
+  entity,
+  timestamp,
+}: UniversalEntityFlyoutHeaderProps) => {
+  const { euiTheme } = useEuiTheme();
+
   return (
     <>
       <FlyoutHeader data-test-subj="service-panel-header">
         <EuiFlexGroup gutterSize="s" responsive={false} direction="column">
           <EuiFlexItem grow={false}>
             <EuiText size="xs" data-test-subj={'service-panel-header-lastSeen'}>
-              <PreferenceFormattedDate value={entity?.timestamp} />
+              <PreferenceFormattedDate value={timestamp} />
               <EuiSpacer size="xs" />
             </EuiText>
           </EuiFlexItem>
@@ -75,16 +81,32 @@ export const UniversalEntityFlyoutHeader = ({ entity }: UniversalEntityFlyoutHea
             <FlyoutTitle
               title={entity?.name}
               iconType={EntityIconByType[entity?.type] || 'globe'}
+              iconColor="primary"
             />
           </EuiFlexItem>
         </EuiFlexGroup>
       </FlyoutHeader>
-      <div style={{ margin: 8 }}>
-        <HeaderDataCards entity={entity} />
+      <div
+        css={css`
+          margin: ${euiTheme.size.s};
+        `}
+      >
+        <HeaderDataCards
+          id={entity.id}
+          type={entity.type}
+          category={entity.category}
+          criticality={entity.criticality}
+        />
       </div>
-      <div style={{ margin: 8 }}>
-        <HeaderTags entity={entity} />
-      </div>
+      {(entity.tags || entity.labels) && (
+        <div
+          css={css`
+            margin: ${euiTheme.size.s};
+          `}
+        >
+          <HeaderTags tags={entity.tags} labels={entity.labels} />
+        </div>
+      )}
     </>
   );
 };

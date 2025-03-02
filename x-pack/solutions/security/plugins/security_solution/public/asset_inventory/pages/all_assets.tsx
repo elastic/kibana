@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo } from 'react';
 import _ from 'lodash';
 import { type Filter } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
@@ -141,264 +141,19 @@ export interface AllAssetsProps {
 }
 
 // TODO: Asset Inventory - adjust and remove type casting once we have real universal entity data
-const getEntity = (row: DataTableRecord): EntityEcs => {
-  return {
-    '@timestamp': '2025-02-17T06:47:20.921Z',
-    agent: {
-      ephemeral_id: '4b1b37fc-98d6-43f5-942d-d7b6ad81dc22',
-      id: '41b2dce5-f057-4bfb-b57b-f1bc64c1c5eb',
-      name: 'ip-172-31-47-199',
-      type: 'cloudbeat',
-      version: '8.17.1',
-    },
-    flattened: {
-      'asset.risk': 85,
-      'asset.name': 'DNS-controller-azure-sec',
-      'asset.criticality': 'unassigned_impact',
-      'asset.source': 'cloud-sec-dev',
-      '@timestamp': '2025-01-01T00:00:00.000Z',
-    },
-    asset: {
-      sub_type: 'sns-topic',
-      sub_category: 'messaging',
-      name: 'test-aws-topic.fifo',
-      raw: {
-        subscriptions: [
-          {
-            Owner: '704479110758',
-            Endpoint: 'arn:aws:sqs:eu-west-1:704479110758:test-aws.fifo',
-            TopicArn: 'arn:aws:sns:eu-west-1:704479110758:test-aws-topic.fifo',
-            Protocol: 'sqs',
-            SubscriptionArn:
-              'arn:aws:sns:eu-west-1:704479110758:test-aws-topic.fifo:342b284d-f16c-447c-afb8-8080d10c604d',
-          },
-        ],
-        topic: {
-          TopicArn: 'arn:aws:sns:eu-west-1:704479110758:test-aws-topic.fifo',
-        },
-      },
-      id: ['arn:aws:sns:eu-west-1:704479110758:test-aws-topic.fifo'],
-      type: 'notification-service',
-      category: 'infrastructure',
-      tags: null,
-    },
-    cloud: {
-      account: {
-        id: '704479110758',
-        name: 'elastic-security-cloud-security-dev',
-      },
-      organization: {},
-      provider: 'aws',
-      region: 'eu-west-1',
-      service: {
-        name: 'AWS SNS',
-      },
-    },
-    data_stream: {
-      dataset: 'cloud_asset_inventory.asset_inventory',
-      namespace: 'default',
-      type: 'logs',
-    },
-    ecs: {
-      version: '8.0.0',
-    },
-    elastic_agent: {
-      id: '41b2dce5-f057-4bfb-b57b-f1bc64c1c5eb',
-      version: '8.17.1',
-      snapshot: false,
-    },
-    entity: {
-      category: 'infrastructure',
-      name: 'test-aws-topic.fifo',
-      sub_category: 'messaging',
-      sub_type: 'sns-topic',
-      type: 'notification-service',
-      tags: [
-        'infrastructure',
-        'linux',
-        'admin',
-        'active',
-        'linux',
-        'admin',
-        'active',
-        'linux',
-        'admin',
-        'active',
-        'linux',
-        'admin',
-        'active',
-        'linux',
-        'admin',
-        'active',
-        'linux',
-        'admin',
-        'active',
-        'linux',
-        'admin',
-        'active',
-        'linux',
-        'admin',
-        'active',
-        'linux',
-        'admin',
-        'active',
-        'linux',
-        'admin',
-        'active',
-        'linux',
-        'admin',
-        'active',
-        'linux',
-        'admin',
-        'active',
-        'linux',
-        'admin',
-        'active',
-        'linux',
-        'admin',
-        'active',
-        'linux',
-        'admin',
-        'active',
-        'linux',
-        'admin',
-        'active',
-        'linux',
-        'admin',
-        'active',
-        'linux',
-        'admin',
-        'active',
-        'linux',
-        'admin',
-        'active',
-        'linux',
-        'admin',
-        'active',
-        'linux',
-        'admin',
-        'active',
-        'linux',
-        'admin',
-        'active',
-        'linux',
-        'admin',
-        'active',
-        'linux',
-        'admin',
-        'active',
-        'linux',
-        'admin',
-        'active',
-        'linux',
-        'admin',
-        'active',
-        'linux',
-        'admin',
-        'active',
-        'linux',
-        'admin',
-        'active',
-        'linux',
-        'admin',
-        'active',
-        'linux',
-        'admin',
-        'active',
-        'linux',
-        'admin',
-        'active',
-        'linux',
-        'admin',
-        'active',
-        'linux',
-        'admin',
-        'active',
-        'linux',
-        'admin',
-        'active',
-        'linux',
-        'admin',
-        'active',
-        'linux',
-        'admin',
-        'active',
-        'linux',
-        'admin',
-        'active',
-        'linux',
-        'admin',
-        'active',
-        'linux',
-        'admin',
-        'active',
-        'linux',
-        'admin',
-        'active',
-        'linux',
-        'admin',
-        'active',
-        'linux',
-        'admin',
-        'active',
-        'linux',
-        'admin',
-        'active',
-        'linux',
-        'admin',
-        'active',
-        'linux',
-        'admin',
-        'active',
-        'linux',
-        'admin',
-        'active',
-        'linux',
-        'admin',
-        'active',
-        'linux',
-        'admin',
-        'active',
-        'linux',
-        'admin',
-        'active',
-        'linux',
-        'admin',
-        'active',
-        'linux',
-        'admin',
-        'active',
-        'linux',
-        'admin',
-        'active',
-        'linux',
-        'admin',
-        'active',
-        'linux',
-        'admin',
-        'active',
-        'linux',
-        'admin',
-        'active',
-      ],
-      labels: { Group: 'cloud-sec-dev', Environment: 'Production' },
-    },
-    event: {
-      agent_id_status: 'auth_metadata_missing',
-      dataset: 'cloud_asset_inventory.asset_inventory',
-      ingested: '2025-02-17T10:54:51Z',
-    },
-    related: {
-      entity: 'arn:aws:sns:eu-west-1:704479110758:test-aws-topic.fifo',
-    },
-    resource_policies: [],
+const getEntity = (record: DataTableRecord): EntityEcs => {
+  const { _source } = record.raw;
+
+  const entityMock = {
+    tags: ['infrastructure', 'linux', 'admin', 'active'],
+    labels: { Group: 'cloud-sec-dev', Environment: 'Production' },
+    id: 'mock-entity-id',
+    criticality: 'low_impact',
   };
 
   return {
-    id: (row.flattened['asset.name'] as string) || '',
-    name: (row.flattened['asset.name'] as string) || '',
-    timestamp: row.flattened['@timestamp'] as Date,
-    type: 's3',
+    entity: { ..._source.entity, ...entityMock },
+    source: _source,
   };
 };
 
@@ -427,18 +182,13 @@ const AllAssets = ({
     onFlyoutClose: () => setExpandedDoc(undefined),
   });
 
-  useEffect(() => {
-    const entity = getEntity();
-    console.log(entity);
-    openDynamicFlyout({ entity: entity.entity });
-  }, [openDynamicFlyout]);
-
-  const onExpandDocClick = (doc?: DataTableRecord | undefined) => {
-    if (doc) {
-      const entity = getEntity(doc);
-      setExpandedDoc(doc); // Table is expecting the same doc ref to highlight the selected row
+  const onExpandDocClick = (record?: DataTableRecord | undefined) => {
+    if (record) {
+      const { entity, source } = getEntity(record);
+      setExpandedDoc(record); // Table is expecting the same record ref to highlight the selected row
       openDynamicFlyout({
         entity,
+        source,
         scopeId: ASSET_INVENTORY_TABLE_ID,
         contextId: ASSET_INVENTORY_TABLE_ID,
       });

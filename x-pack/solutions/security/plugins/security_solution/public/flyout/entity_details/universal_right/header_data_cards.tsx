@@ -22,10 +22,11 @@ import {
   EuiTextTruncate,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
+import { i18n } from '@kbn/i18n';
 import { AssetCriticalityBadge } from '../../../entity_analytics/components/asset_criticality';
 import { ResponsiveDataCards } from './components/responsive_data_cards';
 
-const getCopyCard = ({ title, description }) => ({
+const getCopyCardProps = ({ title, description }) => ({
   title: (
     <EuiFlexGroup justifyContent={'spaceBetween'} wrap={false} responsive={false}>
       <EuiFlexItem grow={false}>{title}</EuiFlexItem>
@@ -75,13 +76,28 @@ const options = [
   },
 ];
 
-export const HeaderDataCards = ({ entity }) => {
-  const [selectValue, setSelectValue] = useState('low_impact');
+export const HeaderDataCards = ({
+  criticality,
+  id,
+  category,
+  type,
+}: {
+  criticality?: string;
+  id: string;
+  category: string;
+  type: string;
+}) => {
+  const [selectValue, setSelectValue] = useState(criticality);
 
   const cards = useMemo(
     () => [
       {
-        title: 'Criticality',
+        title: i18n.translate(
+          'xpack.securitySolution.universalEntityFlyout.flyoutHeader.headerDataBoxes.criticalityLabel',
+          {
+            defaultMessage: 'Criticality',
+          }
+        ),
         description: (
           <div
             css={css`
@@ -103,11 +119,27 @@ export const HeaderDataCards = ({ entity }) => {
           </div>
         ),
       },
-      getCopyCard({ title: 'ID', description: '123123123123123123123' }),
-      { title: 'Category', description: <EuiTextTruncate text={entity?.category} /> },
-      { title: 'Type', description: <EuiTextTruncate text={entity?.type} /> },
+      getCopyCardProps({ title: 'ID', description: id }),
+      {
+        title: i18n.translate(
+          'xpack.securitySolution.universalEntityFlyout.flyoutHeader.headerDataBoxes.categoryLabel',
+          {
+            defaultMessage: 'Category',
+          }
+        ),
+        description: <EuiTextTruncate text={category || ''} />,
+      },
+      {
+        title: i18n.translate(
+          'xpack.securitySolution.universalEntityFlyout.flyoutHeader.headerDataBoxes.typeLabel',
+          {
+            defaultMessage: 'Type',
+          }
+        ),
+        description: <EuiTextTruncate text={type || ''} />,
+      },
     ],
-    [selectValue, entity?.category, entity?.type]
+    [selectValue, id, category, type]
   );
 
   return <ResponsiveDataCards cards={cards} collapseWidth={750} />;
