@@ -7,8 +7,9 @@
 
 import { ToolingLog } from '@kbn/tooling-log';
 import getPort from 'get-port';
+import { v4 as uuidv4 } from 'uuid';
 import http, { type Server } from 'http';
-import { isString, once, pull, isFunction, uniqueId } from 'lodash';
+import { isString, once, pull, isFunction } from 'lodash';
 import { TITLE_CONVERSATION_FUNCTION_NAME } from '@kbn/observability-ai-assistant-plugin/server/service/client/operators/get_generated_title';
 import pRetry from 'p-retry';
 import type { ChatCompletionChunkToolCall } from '@kbn/inference-common';
@@ -161,6 +162,7 @@ export class LlmProxy {
     arguments: (body: ChatCompletionStreamParams) => string;
     when: RequestInterceptor['when'];
   }) {
+    // @ts-expect-error
     return this.intercept(`Function request interceptor: "${name}"`, when, (body) => {
       return {
         content: '',
@@ -171,7 +173,7 @@ export class LlmProxy {
               arguments: argumentsCallback(body),
             },
             index: 0,
-            toolCallId: uniqueId('call_'),
+            id: `call_${uuidv4()}`,
           },
         ],
       };

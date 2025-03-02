@@ -112,9 +112,10 @@ export function registerAlertsFunction({
           signal,
           chat: (
             operationName,
-            { messages: nextMessages, functionCall, functions: nextFunctions }
+            { messages: nextMessages, functionCall, functions: nextFunctions, systemMessage }
           ) => {
             return chat(operationName, {
+              systemMessage,
               messages: nextMessages,
               functionCall,
               functions: nextFunctions,

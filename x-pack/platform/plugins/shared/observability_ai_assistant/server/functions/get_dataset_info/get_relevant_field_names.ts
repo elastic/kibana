@@ -102,11 +102,10 @@ export async function getRelevantFieldNames({
         await chat('get_relevant_dataset_names', {
           signal,
           stream: true,
-          systemMessage: `You are a helpful assistant for Elastic Observability.
-            Your task is to create a list of field names that are relevant
-            to the conversation, using ONLY the list of fields and
-            types provided in the last user message. DO NOT UNDER ANY
-            CIRCUMSTANCES include fields not mentioned in this list.`,
+          systemMessage: `You are a helpful assistant for Elastic Observability. 
+Your task is to determine which fields are relevant to the conversation by selecting only the field IDs from the provided list. 
+The list in the user message consists of JSON objects that map a human-readable "field" name to its unique "id". 
+You must not output any field names — only the corresponding "id" values. Ensure that your output follows the exact JSON format specified.`,
           messages: [
             // remove the last function request
             ...messages.slice(0, -1),
@@ -114,7 +113,7 @@ export async function getRelevantFieldNames({
               '@timestamp': new Date().toISOString(),
               message: {
                 role: MessageRole.User,
-                content: `This is the list:
+                content: `Below is a list of fields. Each entry is a JSON object that contains a "field" (the field name) and an "id" (the unique identifier). Use only the "id" values from this list when selecting relevant fields:
 
             ${fieldsInChunk
               .map((field) => JSON.stringify({ field, id: shortIdTable.take(field) }))
@@ -125,7 +124,11 @@ export async function getRelevantFieldNames({
           functions: [
             {
               name: SELECT_RELEVANT_FIELDS_NAME,
-              description: 'The IDs of the fields you consider relevant to the conversation',
+              description: `Return only the field IDs (from the provided list) that you consider relevant to the conversation. Do not use any of the field names. Your response must be in the exact JSON format:
+              {
+                "fieldIds": ["id1", "id2", "id3"]
+              }
+              Only include IDs from the list provided in the user message.`,
               parameters: {
                 type: 'object',
                 properties: {

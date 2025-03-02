@@ -62,11 +62,11 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         arguments: (requestBody) => {
           const messageWithFieldIds = requestBody.messages.find((message) => {
             const content = message?.content as string;
-            return content.includes('This is the list:') && content.includes('@timestamp');
+            return content.includes('Below is a list of fields.') && content.includes('@timestamp');
           });
 
           const topFields = (messageWithFieldIds?.content as string)
-            .replace('This is the list:', '')
+            .slice(204) // remove the prefix message and only get the JSON
             .trim()
             .split('\n')
             .map((line) => JSON.parse(line))
@@ -199,6 +199,32 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         it('leaves the function calling decision to the LLM via tool_choice=auto', () => {
           expect(llmProxy.interceptedRequests[0].requestBody.tool_choice).to.be('auto');
         });
+
+        describe('The system message', () => {
+          it('has the correct system message', () => {
+            expect(llmProxy.interceptedRequests[0].requestBody.messages[0].content).to.contain(
+              'You are a helpful assistant for Elastic Observability. Your goal is to help the Elastic Observability users to quickly assess what is happening in their observed systems. You can help them visualise and analyze data, investigate their systems, perform root cause analysis or identify optimisation opportunities.\n\n    It\'s very important to not assume what the user is meaning. Ask them for clarification if needed.\n\n    If you are unsure about which function should be used and with what arguments, ask the user for clarification or confirmation.\n\n    In KQL ("kqlFilter")) escaping happens with double quotes, not single quotes. Some characters that need escaping are: \':()\\    /". Always put a field value in double quotes. Best: service.name:"opbeans-go". Wrong: service.name:opbeans-go. This is very important!\n\n    You can use Github-flavored Markdown in your responses. If a function returns an array, consider using a Markdown table to format the response.\n\n    Note that ES|QL (the Elasticsearch Query Language which is a new piped language) is the preferred query language.\n\n    If you want to call a function or tool, only call it a single time per message. Wait until the function has been executed and its results\n    returned to you, before executing the same tool or another tool again if needed.\n\n    DO NOT UNDER ANY CIRCUMSTANCES USE ES|QL syntax (`service.name == "foo"`) with "kqlFilter" (`service.name:"foo"`).\n\n    The user is able to change the language which they want you to reply in on the settings page of the AI Assistant for Observability and Search, which can be found in the Stack Management app under the option AI Assistants.\n    If the user asks how to change the language, reply in the same language the user asked in.\n\nYou MUST use the "query" function when the user wants to:\n  - visualize data\n  - run any arbitrary query\n  - breakdown or filter ES|QL queries that are displayed on the current page\n  - convert queries from another language to ES|QL\n  - asks general questions about ES|QL\n\n  DO NOT UNDER ANY CIRCUMSTANCES generate ES|QL queries or explain anything about the ES|QL query language yourself.\n  DO NOT UNDER ANY CIRCUMSTANCES try to correct an ES|QL query yourself - always use the "query" function for this.\n\n  If the user asks for a query, and one of the dataset info functions was called and returned no results, you should still call the query function to generate an example query.\n\n  Even if the "query" function was used before that, follow it up with the "query" function. If a query fails, do not attempt to correct it yourself. Again you should call the "query" function,\n  even if it has been called before.\n\n  When the "visualize_query" function has been called, a visualization has been displayed to the user. DO NOT UNDER ANY CIRCUMSTANCES follow up a "visualize_query" function call with your own visualization attempt.\n  If the "execute_query" function has been called, summarize these results for the user.'
+            );
+          });
+
+          it('has a different system message from request 2', () => {
+            expect(llmProxy.interceptedRequests[0].requestBody.messages[0]).not.to.eql(
+              llmProxy.interceptedRequests[1].requestBody.messages[0]
+            );
+          });
+
+          it('has the same system message as request 3', () => {
+            expect(llmProxy.interceptedRequests[0].requestBody.messages[0]).to.eql(
+              llmProxy.interceptedRequests[2].requestBody.messages[0]
+            );
+          });
+
+          it('has the same system message as request 4', () => {
+            expect(llmProxy.interceptedRequests[0].requestBody.messages[0]).to.eql(
+              llmProxy.interceptedRequests[3].requestBody.messages[0]
+            );
+          });
+        });
       });
 
       describe('The second request', () => {
@@ -210,7 +236,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
           const hasList = llmProxy.interceptedRequests[1].requestBody.messages.some(
             (message) =>
               message.role === 'user' &&
-              (message.content as string).includes('This is the list:') &&
+              (message.content as string).includes('Below is a list of fields.') &&
               (message.content as string).includes('@timestamp')
           );
 
@@ -224,6 +250,20 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
             'select_relevant_fields';
 
           expect(hasToolChoice).to.be(true);
+        });
+
+        describe('The system message', () => {
+          it('has a different system message from the other requests', () => {
+            expect(llmProxy.interceptedRequests[1].requestBody.messages[0]).not.to.eql(
+              llmProxy.interceptedRequests[0].requestBody.messages[0]
+            );
+          });
+
+          it('has the correct system message', () => {
+            expect(llmProxy.interceptedRequests[1].requestBody.messages[0].content).to.be(
+              'You are a helpful assistant for Elastic Observability. \nYour task is to determine which fields are relevant to the conversation by selecting only the field IDs from the provided list. \nThe list in the user message consists of JSON objects that map a human-readable "field" name to its unique "id". \nYou must not output any field names — only the corresponding "id" values. Ensure that your output follows the exact JSON format specified.'
+            );
+          });
         });
       });
 
