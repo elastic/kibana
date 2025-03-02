@@ -23,7 +23,7 @@ export type {
   Vulnerability,
 } from './schema/vulnerabilities/csp_vulnerability_finding';
 export type { BenchmarksCisId } from './types/benchmark';
-export type { VulnSeverity } from './types/vulnerabilities';
+export * from './types/vulnerabilities';
 export type { BenchmarkId, BenchmarkName } from './types/types_old';
 export type {
   CspNavigationItem,
