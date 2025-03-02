@@ -11,6 +11,9 @@
 export interface EntityEcs {
   id: string;
   name: string;
-  type: 'universal' | 'user' | 'host' | 'service';
-  timestamp: Date;
+  type: 'user' | 'host' | 'service';
+  tags: string[];
+  labels: Record<string, string>;
+  criticality: string;
+  category: string;
 }

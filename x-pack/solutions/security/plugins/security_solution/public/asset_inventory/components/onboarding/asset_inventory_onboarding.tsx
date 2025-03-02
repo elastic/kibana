@@ -23,6 +23,8 @@ export const AssetInventoryOnboarding: FC<PropsWithChildren> = ({ children }) =>
     return <AssetInventoryLoading />;
   }
 
+  return children;
+
   const { status, privileges } = data;
 
   // Render different screens based on the onboarding status.
