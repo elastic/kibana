@@ -154,7 +154,7 @@ const getEntity = (row: DataTableRecord): EntityEcs => {
 
 const ASSET_INVENTORY_TABLE_ID = 'asset-inventory-table';
 
-const AllAssets = ({
+export const AllAssets = ({
   nonPersistedFilters,
   height,
   hasDistributionBar = true,
@@ -514,6 +514,3 @@ const AllAssets = ({
     </I18nProvider>
   );
 };
-
-// we need to use default exports to import it via React.lazy
-export default AllAssets; // eslint-disable-line import/no-default-export
