@@ -18,6 +18,8 @@ import { overlayServiceMock } from '@kbn/core-overlays-browser-mocks';
 import { userProfileServiceMock } from '@kbn/core-user-profile-browser-mocks';
 import { themeServiceMock } from '@kbn/core-theme-browser-mocks';
 import { i18nServiceMock } from '@kbn/core-i18n-browser-mocks';
+import { httpServiceMock } from '@kbn/core-http-browser-mocks';
+import { customBrandingServiceMock } from '@kbn/core-custom-branding-browser-mocks';
 import { RenderingService } from './rendering_service';
 
 describe('RenderingService#start', () => {
@@ -28,6 +30,8 @@ describe('RenderingService#start', () => {
   let i18n: ReturnType<typeof i18nServiceMock.createStartContract>;
   let theme: ReturnType<typeof themeServiceMock.createStartContract>;
   let userProfile: ReturnType<typeof userProfileServiceMock.createStart>;
+  let http: ReturnType<typeof httpServiceMock.createStartContract>;
+  let customBranding: ReturnType<typeof customBrandingServiceMock.createStartContract>;
   let targetDomElement: HTMLDivElement;
   let rendering: RenderingService;
 
@@ -50,6 +54,7 @@ describe('RenderingService#start', () => {
     targetDomElement = document.createElement('div');
 
     rendering = new RenderingService();
+    http = httpServiceMock.createStartContract();
   });
 
   const startService = () => {
@@ -62,6 +67,8 @@ describe('RenderingService#start', () => {
       theme,
       userProfile,
       targetDomElement,
+      customBranding,
+      http,
     });
   };
 

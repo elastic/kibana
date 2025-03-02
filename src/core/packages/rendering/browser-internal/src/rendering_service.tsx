@@ -20,10 +20,14 @@ import type { ThemeServiceStart } from '@kbn/core-theme-browser';
 import type { UserProfileService } from '@kbn/core-user-profile-browser';
 import { KibanaRootContextProvider } from '@kbn/react-kibana-context-root';
 
-import { KibanaWorkspace } from '@kbn/core-workspace-components';
+import {
+  KibanaWorkspace,
+  FeedbackTool,
+  RecentlyAccessedTool,
+} from '@kbn/core-workspace-components';
 import { InternalHttpStart } from '@kbn/core-http-browser-internal';
 import { CustomBrandingStart } from '@kbn/core-custom-branding-browser';
-import { WorkspaceService } from '@kbn/core-workspace-browser-internal';
+import { WORKSPACE_TOOL_FEEDBACK, WORKSPACE_TOOL_RECENT } from '@kbn/core-chrome-browser';
 
 interface StartServices {
   analytics: AnalyticsServiceStart;
@@ -39,7 +43,6 @@ export interface StartDeps extends StartServices {
   targetDomElement: HTMLDivElement;
   http: InternalHttpStart;
   customBranding: CustomBrandingStart;
-  workspace: WorkspaceService;
 }
 
 /**
@@ -76,6 +79,33 @@ export class RenderingService {
     const { workspace } = chrome;
     const { getActiveNodes$, getProjectSideNavComponent$ } = chrome.projectNavigation;
     const { currentActionMenu$ } = application;
+
+    workspace.toolbox.registerTool({
+      toolId: WORKSPACE_TOOL_RECENT,
+      button: {
+        iconType: 'clock',
+      },
+      tool: {
+        title: 'Recently viewed',
+        children: (
+          <RecentlyAccessedTool
+            recentlyAccessed$={chrome.recentlyAccessed.get$()}
+            navigateToUrl={application.navigateToUrl}
+          />
+        ),
+      },
+    });
+
+    workspace.toolbox.registerTool({
+      toolId: WORKSPACE_TOOL_FEEDBACK,
+      button: {
+        iconType: 'editorComment',
+      },
+      tool: {
+        title: 'Feedback',
+        children: <FeedbackTool />,
+      },
+    });
 
     // TODO: unpack observables here, props changes will handle the rest.
 

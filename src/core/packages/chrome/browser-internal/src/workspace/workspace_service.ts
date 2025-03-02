@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
 import {
   ReplaySubject,
   BehaviorSubject,
@@ -22,11 +21,8 @@ import {
   type WorkspaceTool,
   type WorkspaceStart,
   WORKSPACE_KNOWN_TOOLS,
-  WORKSPACE_TOOL_RECENT,
-  WORKSPACE_TOOL_FEEDBACK,
-} from '@kbn/core-workspace-browser';
+} from '@kbn/core-chrome-browser';
 import type { FeatureFlagsStart } from '@kbn/core-feature-flags-browser';
-import type { InternalChromeStart } from '@kbn/core-chrome-browser-internal';
 import type { HttpStart } from '@kbn/core-http-browser';
 import type { CustomBranding } from '@kbn/core-custom-branding-common';
 import {
@@ -36,8 +32,9 @@ import {
   setHomeHref,
   setIconType,
 } from '@kbn/core-workspace-state';
-import { FeedbackTool, RecentlyAccessedTool } from '@kbn/core-workspace-components';
 import { ApplicationStart } from '@kbn/core-application-browser';
+import { RecentlyAccessed } from '@kbn/recently-accessed';
+import { ProjectNavigationService } from '../project_navigation';
 
 const isKnownTool = (toolId: string): toolId is WorkspaceKnownTool => {
   return WORKSPACE_KNOWN_TOOLS.includes(toolId as WorkspaceKnownTool);
@@ -64,14 +61,6 @@ const sortTools = (tools: ReadonlySet<WorkspaceTool>) => {
 export interface WorkspaceServiceStartDeps {
   featureFlags: FeatureFlagsStart;
   application: Pick<ApplicationStart, 'navigateToUrl'>;
-  chrome: {
-    projectNavigation: Pick<
-      InternalChromeStart['projectNavigation'],
-      'getProjectHome$' | 'getProjectBreadcrumbs$'
-    >;
-    getIsVisible$: InternalChromeStart['getIsVisible$'];
-    recentlyAccessed: InternalChromeStart['recentlyAccessed'];
-  };
   http: {
     basePath: Pick<HttpStart['basePath'], 'prepend'>;
     getLoadingCount$: HttpStart['getLoadingCount$'];
@@ -79,8 +68,13 @@ export interface WorkspaceServiceStartDeps {
   customBranding: {
     customBranding$: Observable<Pick<CustomBranding, 'logo'>>;
   };
+  // This is dumb.
+  projectNavigation: ReturnType<ProjectNavigationService['start']>;
+  isVisible$: Observable<boolean>;
+  recentlyAccessed: RecentlyAccessed;
 }
 
+/** @internal */
 export class WorkspaceService {
   private readonly stop$ = new ReplaySubject<void>(1);
   private isLoading$: Subscription | null = null;
@@ -91,15 +85,15 @@ export class WorkspaceService {
 
   public start({
     featureFlags,
-    chrome,
     http,
     customBranding,
     application: { navigateToUrl },
+    projectNavigation,
+    isVisible$,
+    recentlyAccessed,
   }: WorkspaceServiceStartDeps): WorkspaceStart {
     const tools$ = new BehaviorSubject<ReadonlySet<WorkspaceTool>>(new Set());
-    const breadcrumbs$ = chrome.projectNavigation
-      .getProjectBreadcrumbs$()
-      .pipe(takeUntil(this.stop$));
+    const breadcrumbs$ = projectNavigation.getProjectBreadcrumbs$().pipe(takeUntil(this.stop$));
 
     this.isLoading$ = http
       .getLoadingCount$()
@@ -112,14 +106,13 @@ export class WorkspaceService {
         store.dispatch(setIsLoading(isLoading));
       });
 
-    this.isVisible$ = chrome
-      .getIsVisible$()
+    this.isVisible$ = isVisible$
       .pipe(distinctUntilChanged(), takeUntil(this.stop$))
       .subscribe((isVisible) => {
         store.dispatch(setIsChromeVisible(isVisible));
       });
 
-    this.homeHref$ = chrome.projectNavigation.getProjectHome$().subscribe((href) => {
+    this.homeHref$ = projectNavigation.getProjectHome$().subscribe((href) => {
       store.dispatch(setHomeHref(href || '/app/home'));
     });
 
@@ -137,33 +130,6 @@ export class WorkspaceService {
     const registerTool = (tool: WorkspaceTool) => {
       tools$.next(new Set([...tools$.value.values(), tool]));
     };
-
-    registerTool({
-      toolId: WORKSPACE_TOOL_RECENT,
-      button: {
-        iconType: 'clock',
-      },
-      tool: {
-        title: 'Recently viewed',
-        children: (
-          <RecentlyAccessedTool
-            recentlyAccessed$={chrome.recentlyAccessed.get$()}
-            navigateToUrl={navigateToUrl}
-          />
-        ),
-      },
-    });
-
-    registerTool({
-      toolId: WORKSPACE_TOOL_FEEDBACK,
-      button: {
-        iconType: 'editorComment',
-      },
-      tool: {
-        title: 'Feedback',
-        children: <FeedbackTool />,
-      },
-    });
 
     return {
       isEnabled: () => featureFlags.getBooleanValue('workbench', false),

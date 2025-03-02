@@ -169,7 +169,7 @@ const ExampleApplication = () => (
 );
 
 export const Workspace = () => (
-  <WorkspaceProvider>
+  <WorkspaceProvider tools={[]}>
     <Global styles={styles} />
     <WorkspaceComponent>
       {{
@@ -180,12 +180,12 @@ export const Workspace = () => (
           </WorkspaceComponent.Navigation>
         ),
         application: (
-          <WorkspaceComponent.Application>
+          <WorkspaceComponent.Application colorMode="LIGHT">
             <ExampleApplication />
           </WorkspaceComponent.Application>
         ),
         toolbox: <WorkspaceComponent.Toolbox>Toolbox</WorkspaceComponent.Toolbox>,
-        tool: <WorkspaceComponent.Tool>Tool</WorkspaceComponent.Tool>,
+        tool: <WorkspaceComponent.Tool />,
       }}
     </WorkspaceComponent>
   </WorkspaceProvider>

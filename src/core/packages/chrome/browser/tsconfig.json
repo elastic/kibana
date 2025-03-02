@@ -24,7 +24,6 @@
     "@kbn/deeplinks-security",
     "@kbn/deeplinks-fleet",
     "@kbn/deeplinks-shared",
-    "@kbn/core-workspace-browser"
   ],
   "exclude": [
     "target/**/*",

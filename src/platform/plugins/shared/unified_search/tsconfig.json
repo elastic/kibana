@@ -49,7 +49,7 @@
     "@kbn/react-kibana-mount",
     "@kbn/field-utils",
     "@kbn/language-documentation",
-    "@kbn/core-workspace-browser"
+    "@kbn/core-chrome-browser"
   ],
   "exclude": [
     "target/**/*",

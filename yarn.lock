@@ -5207,14 +5207,6 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-workspace-browser-internal@link:src/core/packages/workspace/browser-internal":
-  version "0.0.0"
-  uid ""
-
-"@kbn/core-workspace-browser@link:src/core/packages/workspace/browser":
-  version "0.0.0"
-  uid ""
-
 "@kbn/core-workspace-components@link:src/core/packages/workspace/components":
   version "0.0.0"
   uid ""

@@ -7,33 +7,23 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import {
-  type WorkspaceToolboxButtonProps,
-  type WorkspaceToolProps,
-} from '@kbn/core-workspace-components';
-import { Observable } from 'rxjs';
-import { ChromeBreadcrumb } from '@kbn/core-chrome-browser';
-
-export const WORKSPACE_TOOL_PROFILE = 'profile';
-export const WORKSPACE_TOOL_RECENT = 'recent';
-export const WORKSPACE_TOOL_FEEDBACK = 'feedback';
-export const WORKSPACE_TOOL_NEWSFEED = 'newsfeed';
-export const WORKSPACE_TOOL_HELP = 'help';
-export const WORKSPACE_TOOL_AI_ASSISTANT = 'aiAssistant';
-
-export const WORKSPACE_KNOWN_TOOLS = [
-  WORKSPACE_TOOL_PROFILE,
-  WORKSPACE_TOOL_RECENT,
-  WORKSPACE_TOOL_NEWSFEED,
-  WORKSPACE_TOOL_FEEDBACK,
-  WORKSPACE_TOOL_HELP,
-  WORKSPACE_TOOL_AI_ASSISTANT,
-] as const;
+import type { Observable } from 'rxjs';
+import type { EuiButtonIconPropsForButton, EuiPanelProps, EuiBreadcrumb } from '@elastic/eui';
+import type { ReactNode } from 'react';
+import { WORKSPACE_KNOWN_TOOLS } from './tools';
 
 export type WorkspaceKnownTool = (typeof WORKSPACE_KNOWN_TOOLS)[number];
 
-type ButtonProps = Omit<WorkspaceToolboxButtonProps, 'toolId'>;
-type ToolProps = Omit<WorkspaceToolProps, 'toolId'>;
+interface ButtonProps extends Pick<EuiButtonIconPropsForButton, 'iconType'> {
+  size?: 'regular' | 'wide' | 'fullWidth';
+  'aria-label'?: string;
+}
+export interface ToolProps extends Pick<EuiPanelProps, 'color' | 'hasShadow' | 'hasBorder'> {
+  title: string;
+  children?: ReactNode;
+  isScrollable?: boolean;
+  containerPadding?: 'none' | 's' | 'm' | 'l';
+}
 
 export interface WorkspaceTool {
   toolId: WorkspaceKnownTool | string;
@@ -44,7 +34,7 @@ export interface WorkspaceTool {
 }
 
 export interface WorkspaceHeaderService {
-  getBreadcrumbs$: () => Observable<ChromeBreadcrumb[]>;
+  getBreadcrumbs$: () => Observable<EuiBreadcrumb[]>;
 }
 
 export interface WorkspaceToolboxService {

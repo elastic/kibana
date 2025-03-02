@@ -14,7 +14,7 @@ import { BehaviorSubject, map, ReplaySubject, takeUntil } from 'rxjs';
 
 import type { BuildFlavor } from '@kbn/config/src/types';
 import type { CoreStart } from '@kbn/core/public';
-import { WORKSPACE_TOOL_PROFILE } from '@kbn/core-workspace-browser';
+import { WORKSPACE_TOOL_PROFILE } from '@kbn/core-chrome-browser';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import type {

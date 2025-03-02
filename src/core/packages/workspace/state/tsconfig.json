@@ -16,6 +16,6 @@
     "target/**/*"
   ],
   "kbn_references": [
-    "@kbn/core-workspace-browser",
+    "@kbn/core-chrome-browser",
   ]
 }

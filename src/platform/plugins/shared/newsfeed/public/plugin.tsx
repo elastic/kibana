@@ -14,7 +14,7 @@ import React from 'react';
 import moment from 'moment';
 import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
-import { WORKSPACE_TOOL_NEWSFEED } from '@kbn/core-workspace-browser';
+import { WORKSPACE_TOOL_NEWSFEED } from '@kbn/core-chrome-browser';
 import { NewsfeedPluginBrowserConfig, NewsfeedPluginStartDependencies } from './types';
 import { NewsfeedNavButton } from './components/newsfeed_header_nav_button';
 import { getApi, NewsfeedApi, NewsfeedApiEndpoint } from './lib/api';
@@ -28,13 +28,13 @@ export class NewsfeedPublicPlugin
   implements Plugin<NewsfeedPublicPluginSetup, NewsfeedPublicPluginStart>
 {
   private readonly isServerless: boolean;
-  private readonly kibanaVersion: string;
+  // private readonly kibanaVersion: string;
   private readonly config: NewsfeedPluginBrowserConfig;
   private readonly stop$ = new Rx.ReplaySubject<void>(1);
 
   constructor(initializerContext: PluginInitializerContext<NewsfeedPluginBrowserConfig>) {
     this.isServerless = initializerContext.env.packageInfo.buildFlavor === 'serverless';
-    this.kibanaVersion = initializerContext.env.packageInfo.version;
+    // this.kibanaVersion = initializerContext.env.packageInfo.version;
     const config = initializerContext.config.get();
     this.config = Object.freeze({
       ...config,

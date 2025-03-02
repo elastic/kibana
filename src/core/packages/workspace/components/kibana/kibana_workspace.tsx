@@ -9,7 +9,7 @@
 
 import React from 'react';
 
-import { WORKSPACE_TOOL_PROFILE, WorkspaceService } from '@kbn/core-workspace-browser';
+import { WORKSPACE_TOOL_PROFILE, type WorkspaceService } from '@kbn/core-chrome-browser';
 import { WorkspaceProvider } from '@kbn/core-workspace-state';
 
 import { useEuiTheme } from '@elastic/eui';

@@ -50,8 +50,8 @@ import type {
 import { RecentlyAccessedService } from '@kbn/recently-accessed';
 
 import { Logger } from '@kbn/logging';
-import { WorkspaceService } from '@kbn/core-workspace-browser-internal';
 import { FeatureFlagsStart } from '@kbn/core-feature-flags-browser';
+import { WorkspaceService } from './workspace';
 import { DocTitleService } from './doc_title';
 import { NavControlsService } from './nav_controls';
 import { NavLinksService } from './nav_links';
@@ -538,7 +538,9 @@ export class ChromeService {
     const workspace = this.workspaceService.start({
       featureFlags,
       application,
-      chrome: { projectNavigation, getIsVisible$: () => this.isVisible$, recentlyAccessed },
+      projectNavigation,
+      isVisible$: this.isVisible$,
+      recentlyAccessed,
       http: { basePath: http.basePath, getLoadingCount$: http.getLoadingCount$ },
       customBranding: { customBranding$ },
     });

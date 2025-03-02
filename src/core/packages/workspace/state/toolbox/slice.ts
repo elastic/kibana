@@ -12,7 +12,7 @@ import type { PayloadAction } from '@reduxjs/toolkit';
 
 import type { ToolboxSize } from '../types';
 
-interface ToolboxState {
+export interface ToolboxState {
   currentToolId: string | null;
   isOpen: boolean;
   size: ToolboxSize;

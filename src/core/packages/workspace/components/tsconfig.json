@@ -24,6 +24,5 @@
     "@kbn/i18n",
     "@kbn/core-chrome-browser-internal",
     "@kbn/core-mount-utils-browser",
-    "@kbn/core-workspace-browser",
   ]
 }

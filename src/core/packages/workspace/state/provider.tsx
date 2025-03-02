@@ -10,7 +10,7 @@
 import React, { createContext } from 'react';
 import { Provider } from 'react-redux';
 
-import type { WorkspaceTool } from '@kbn/core-workspace-browser';
+import type { WorkspaceTool } from '@kbn/core-chrome-browser';
 
 import { store } from './store';
 

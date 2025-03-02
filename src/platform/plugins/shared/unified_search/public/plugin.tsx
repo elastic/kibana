@@ -14,7 +14,7 @@ import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import { APPLY_FILTER_TRIGGER } from '@kbn/data-plugin/public';
 
 import { LanguageDocumentationSections } from '@kbn/language-documentation';
-import { WORKSPACE_TOOL_HELP } from '@kbn/core-workspace-browser';
+import { WORKSPACE_TOOL_HELP } from '@kbn/core-chrome-browser';
 
 import {
   DocumentationMainContent,

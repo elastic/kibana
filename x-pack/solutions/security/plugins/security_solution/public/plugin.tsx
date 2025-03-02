@@ -25,7 +25,7 @@ import type {
   SecuritySolutionAppWrapperFeature,
   SecuritySolutionCellRendererFeature,
 } from '@kbn/discover-shared-plugin/public/services/discover_features';
-import { WORKSPACE_TOOL_AI_ASSISTANT } from '@kbn/core-workspace-browser';
+import { WORKSPACE_TOOL_AI_ASSISTANT } from '@kbn/core-chrome-browser';
 import { AssistantIcon } from '@kbn/ai-assistant-icon';
 import { Assistant } from '@kbn/elastic-assistant';
 import { getLazyCloudSecurityPosturePliAuthBlockExtension } from './cloud_security_posture/lazy_cloud_security_posture_pli_auth_block_extension';
