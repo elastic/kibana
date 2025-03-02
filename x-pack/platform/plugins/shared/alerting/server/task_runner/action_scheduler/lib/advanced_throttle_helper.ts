@@ -30,7 +30,7 @@ export const isAdvancedThrottled = ({
       const nextRun = rrule.after(date);
       return nextRun ? nextRun?.getTime() > Date.now() : false;
     } catch (e) {
-      logger.error(`Next run time of the rule couln't be calculated. error: `, e);
+      logger.error(`Next run time of the action couln't be calculated. error: `, e);
       return false;
     }
   } else {

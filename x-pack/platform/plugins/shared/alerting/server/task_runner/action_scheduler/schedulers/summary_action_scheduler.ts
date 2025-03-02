@@ -30,6 +30,7 @@ import {
 } from '../types';
 import { injectActionParams } from '../../inject_action_params';
 import { transformSummaryActionParams } from '../../transform_action_params';
+import { Frequency } from '@kbn/rrule';
 
 export class SummaryActionScheduler<
   Params extends RuleTypeParams,
@@ -75,6 +76,16 @@ export class SummaryActionScheduler<
         })
     );
   }
+
+  private actionHasFixedThrottleTime = (action: RuleAction) => {
+    return (
+      (action.frequency?.advancedThrottle?.freq === Frequency.MONTHLY ||
+        action.frequency?.advancedThrottle?.freq === Frequency.WEEKLY ||
+        action.frequency?.advancedThrottle?.freq === Frequency.DAILY ||
+        action.frequency?.advancedThrottle?.freq === Frequency.HOURLY) &&
+      action.frequency?.advancedThrottle?.byminute !== undefined
+    );
+  };
 
   public get priority(): number {
     return 0;
@@ -132,6 +143,9 @@ export class SummaryActionScheduler<
 
         if (summarizedAlerts.all.count !== 0) {
           executables.push({ action, summarizedAlerts });
+        }
+        if (this.actionHasFixedThrottleTime(action)) {
+          (throttledSummaryActions || {})[action.uuid!] = { date: new Date().toISOString() };
         }
       }
     }
