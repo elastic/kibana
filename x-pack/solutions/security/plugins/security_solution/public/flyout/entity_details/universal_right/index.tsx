@@ -38,7 +38,7 @@ export const UniversalEntityPanel = ({ entity, source }: UniversalEntityPanelPro
   return (
     <>
       <FlyoutNavigation flyoutIsExpandable={false} />
-      <UniversalEntityFlyoutHeader entity={entity} timestamp={source['@timestamp']} />
+      <UniversalEntityFlyoutHeader entity={entity} timestamp={source?.['@timestamp']} />
       <UniversalEntityFlyoutContent source={source} />
     </>
   );

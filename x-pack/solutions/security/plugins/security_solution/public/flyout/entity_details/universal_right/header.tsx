@@ -70,12 +70,14 @@ export const UniversalEntityFlyoutHeader = ({
     <>
       <FlyoutHeader>
         <EuiFlexGroup gutterSize="s" responsive={false} direction="column">
-          <EuiFlexItem grow={false}>
-            <EuiText size="xs">
-              {timestamp && <PreferenceFormattedDate value={timestamp} />}
-              <EuiSpacer size="xs" />
-            </EuiText>
-          </EuiFlexItem>
+          {timestamp && (
+            <EuiFlexItem grow={false}>
+              <EuiText size="xs">
+                <PreferenceFormattedDate value={timestamp} />
+                <EuiSpacer size="xs" />
+              </EuiText>
+            </EuiFlexItem>
+          )}
           <EuiFlexItem grow={false}>
             <FlyoutTitle
               title={entity?.name}
