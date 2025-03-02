@@ -41,7 +41,7 @@ const entity: EntityEcs = {
 };
 
 const source = {
-  '@timestamp': '2021-10-01T12:00:00.000Z',
+  '@timestamp': '2025-10-01T12:00:00.000Z',
 };
 
 describe('useDynamicEntityFlyout', () => {
