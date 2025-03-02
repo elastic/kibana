@@ -22,9 +22,7 @@ export const UniversalEntityFlyoutContent = ({ source }: UniversalEntityFlyoutCo
       <ExpandableSection
         title={i18n.translate(
           'xpack.securitySolution.universalEntityFlyout.flyoutContent.expandableSection.fieldsLabel',
-          {
-            defaultMessage: 'Fields',
-          }
+          { defaultMessage: 'Fields' }
         )}
         expanded
         localStorageKey={'universal_flyout:overview:fields_table'}

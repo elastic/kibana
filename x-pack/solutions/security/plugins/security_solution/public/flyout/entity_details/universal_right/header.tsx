@@ -34,14 +34,14 @@ const HeaderTags = ({ tags, labels }: { tags: EntityEcs['tags']; labels: EntityE
             css={css`
               color: ${euiTheme.colors.disabledText};
               border-right: ${euiTheme.border.thick};
-              padding-right: 4px;
+              padding-right: ${euiTheme.size.xs};
             `}
           >
             {key}
           </span>
           <span
             css={css`
-              padding-left: 4px;
+              padding-left: ${euiTheme.size.xs};
             `}
           >
             {value}

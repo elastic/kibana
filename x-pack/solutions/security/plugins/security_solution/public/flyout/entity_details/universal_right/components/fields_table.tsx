@@ -54,17 +54,17 @@ const pagination: EuiInMemoryTableProps<FlattenedItem>['pagination'] = {
 const columns: EuiInMemoryTableProps<FlattenedItem>['columns'] = [
   {
     field: 'key',
-    name: i18n.translate('xpack.assetInventory.fieldsTable.fieldColumnLabel', {
+    name: i18n.translate('xpack.securitySolution.fieldsTable.fieldColumnLabel', {
       defaultMessage: 'Field',
     }),
     width: '25%',
   },
   {
     field: 'value',
-    name: i18n.translate('xpack.assetInventory.fieldsTable.valueColumnLabel', {
+    name: i18n.translate('xpack.securitySolution.fieldsTable.valueColumnLabel', {
       defaultMessage: 'Value',
     }),
-    render: (value, record) => <div style={{ width: '100%' }}>{getDescriptionDisplay(value)}</div>,
+    render: (value) => <div style={{ width: '100%' }}>{getDescriptionDisplay(value)}</div>,
   },
 ];
 
