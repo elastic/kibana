@@ -14,7 +14,7 @@ import type {
 } from '@kbn/core/server';
 import type { Filter } from '@kbn/es-query';
 import type { RuleNotifyWhenType, RRuleParams } from '.';
-import { Frequency, WeekdayStr } from '@kbn/rrule';
+import { Frequency, Weekday } from '@kbn/rrule';
 
 export type RuleTypeParams = Record<string, unknown>;
 export type RuleActionParams = SavedObjectAttributes;
@@ -39,7 +39,7 @@ interface AdvancedThrottleMonthly {
 interface AdvancedThrottleWeekly {
   freq: Frequency.WEEKLY;
   interval: number;
-  byweekday: WeekdayStr[];
+  byweekday: Weekday[];
   byhour: number[];
   byminute: number[];
   tzid: string;

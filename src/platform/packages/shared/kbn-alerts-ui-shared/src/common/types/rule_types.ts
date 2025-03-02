@@ -45,6 +45,7 @@ export interface RuleFormBaseErrors {
 
 export interface RuleFormActionsErrors {
   filterQuery?: string[];
+  advancedThrottleBymonthday?: string[];
 }
 
 export interface RuleFormParamsErrors {

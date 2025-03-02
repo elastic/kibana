@@ -12,16 +12,6 @@ import {
 } from './v4';
 import { Frequency } from '@kbn/rrule';
 
-const weekDays = schema.oneOf([
-  schema.literal('MO'),
-  schema.literal('TU'),
-  schema.literal('WE'),
-  schema.literal('TH'),
-  schema.literal('FR'),
-  schema.literal('SA'),
-  schema.literal('SU'),
-]);
-
 const advancedThrottleMonthly = schema.object({
   freq: schema.literal(Frequency.MONTHLY),
   interval: schema.number(),
@@ -35,7 +25,7 @@ const advancedThrottleMonthly = schema.object({
 const advancedThrottleWeekly = schema.object({
   freq: schema.literal(Frequency.WEEKLY),
   interval: schema.number(),
-  byweekday: schema.arrayOf(weekDays),
+  byweekday: schema.arrayOf(schema.number()),
   byhour: schema.arrayOf(schema.number()),
   byminute: schema.arrayOf(schema.number()),
   tzid: schema.string(),

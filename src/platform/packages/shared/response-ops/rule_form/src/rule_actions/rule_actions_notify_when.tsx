@@ -40,6 +40,8 @@ import { pipe } from 'fp-ts/lib/pipeable';
 import { DEFAULT_FREQUENCY } from '../constants';
 import { getTimeOptions } from '../utils';
 import { RuleActionsAdvancedThrottle } from './rule_actions_advanced_throttle';
+import { RuleFormActionsErrors } from '../types';
+import { SettingsStart } from '@kbn/core/packages/ui-settings/browser';
 
 const FOR_EACH_ALERT = i18n.translate('responseOpsRuleForm.actiActionsonNotifyWhen.forEachOption', {
   defaultMessage: 'For each alert',
@@ -164,6 +166,8 @@ export interface RuleActionsNotifyWhenProps {
   showMinimumThrottleWarning?: boolean;
   showMinimumThrottleUnitWarning?: boolean;
   notifyWhenSelectOptions?: NotifyWhenSelectOptions[];
+  actionErrors: RuleFormActionsErrors;
+  settings: SettingsStart;
   onChange: (frequency: RuleActionFrequency) => void;
   onUseDefaultMessage: () => void;
 }
@@ -176,6 +180,8 @@ export const RuleActionsNotifyWhen = ({
   showMinimumThrottleWarning,
   showMinimumThrottleUnitWarning,
   notifyWhenSelectOptions = NOTIFY_WHEN_OPTIONS,
+  actionErrors,
+  settings,
   onChange,
   onUseDefaultMessage,
 }: RuleActionsNotifyWhenProps) => {
@@ -371,14 +377,8 @@ export const RuleActionsNotifyWhen = ({
                 <RuleActionsAdvancedThrottle
                   interval={frequency.advancedThrottle?.interval}
                   freq={frequency.advancedThrottle?.freq}
-                  bymonthday={
-                    frequency.advancedThrottle?.bymonthday &&
-                    frequency.advancedThrottle?.bymonthday[0]
-                  }
-                  byweekday={
-                    frequency.advancedThrottle?.byweekday &&
-                    frequency.advancedThrottle?.byweekday[0]
-                  }
+                  bymonthday={frequency.advancedThrottle?.bymonthday}
+                  byweekday={frequency.advancedThrottle?.byweekday}
                   byhour={
                     frequency.advancedThrottle?.byhour && frequency.advancedThrottle?.byhour[0]
                   }
@@ -386,6 +386,8 @@ export const RuleActionsNotifyWhen = ({
                     frequency.advancedThrottle?.byminute && frequency.advancedThrottle?.byminute[0]
                   }
                   tzid={frequency.advancedThrottle?.tzid}
+                  actionErrors={actionErrors}
+                  settings={settings}
                   onChange={onAdvancedThrottleChange}
                 />
               ) : (

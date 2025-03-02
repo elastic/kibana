@@ -211,6 +211,8 @@ export const RuleActionsSettings = (props: RuleActionsSettingsProps) => {
               onUseDefaultMessage={onUseDefaultMessageChange}
               showMinimumThrottleWarning={showMinimumThrottleWarning}
               showMinimumThrottleUnitWarning={showMinimumThrottleUnitWarning}
+              actionErrors={actionError}
+              settings={settings}
             />
           </EuiFlexItem>
           <EuiFlexItem>

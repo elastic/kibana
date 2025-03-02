@@ -12,36 +12,47 @@ import {
   EuiFlexItem,
   EuiFormRow,
   EuiSuperSelect,
+  EuiComboBox,
+  EuiComboBoxOptionOption,
+  EuiButtonGroup,
 } from '@elastic/eui';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo, useCallback } from 'react';
 import moment, { Moment } from 'moment';
-import { Frequency, WeekdayStr } from '@kbn/rrule';
+import { Frequency, Weekday } from '@kbn/rrule';
 import { useUiSetting } from '@kbn/kibana-react-plugin/public';
 import { some, filter, map } from 'fp-ts/lib/Option';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { TIMEZONE_OPTIONS } from '@kbn/core-ui-settings-common';
-import { AdvancedThrottle } from '@kbn/alerting-types';
+import { AdvancedThrottle, ISO_WEEKDAYS } from '@kbn/alerting-types';
+import { i18n } from '@kbn/i18n';
+import { RuleFormActionsErrors } from '../types';
+import { SettingsStart } from '@kbn/core/packages/ui-settings/browser';
+import { I18N_WEEKDAY_OPTIONS_DDD } from '@kbn/alerts-ui-shared/src/common/constants';
 
 interface RuleActionsAdvancedThrottleProps {
   interval?: number;
   freq?: Frequency;
-  bymonthday?: number;
-  byweekday?: WeekdayStr;
+  bymonthday?: number[];
+  byweekday?: Weekday[];
   byhour?: number;
   byminute?: number;
   tzid?: string;
+  actionErrors: RuleFormActionsErrors;
+  settings: SettingsStart;
   onChange: (advancedThrottle: AdvancedThrottle) => void;
 }
+
+type SelectedMonthdays = Array<EuiComboBoxOptionOption<number>> | undefined;
+type SelectedWeekdays = { [key in Weekday]: boolean } | {};
 
 const useDefaultTimezone = () => {
   const kibanaTz: string = useUiSetting('dateFormat:tz');
   if (!kibanaTz || kibanaTz === 'Browser') return moment.tz?.guess() ?? 'UTC';
   return kibanaTz;
 };
+
 const DEFAULT_INTERVAL = 1;
 const DEFAULT_FREQ = Frequency.HOURLY;
-const DEFAULT_BY_MONTH_DAY = 1;
-const DEFAULT_BY_WEEK_DAY = 'MO';
 const DEFAULT_BY_HOUR = 0;
 const DEFAULT_BY_MINUTE = 0;
 
@@ -53,46 +64,69 @@ export const RuleActionsAdvancedThrottle = ({
   byhour,
   byminute,
   tzid,
+  actionErrors,
+  settings,
   onChange,
 }: RuleActionsAdvancedThrottleProps) => {
   const frequencyOptions: Array<{
     value: number;
     inputDisplay: string;
-  }> = [
-    {
-      value: Frequency.MONTHLY,
-      inputDisplay: 'Month',
-    },
-    {
-      value: Frequency.WEEKLY,
-      inputDisplay: 'Week',
-    },
-    {
-      value: Frequency.DAILY,
-      inputDisplay: 'Day',
-    },
-    {
-      value: Frequency.HOURLY,
-      inputDisplay: 'Hour',
-    },
-    {
-      value: Frequency.MINUTELY,
-      inputDisplay: 'Minute',
-    },
-    {
-      value: Frequency.SECONDLY,
-      inputDisplay: 'Second',
-    },
-  ];
+  }> = useMemo(
+    () => [
+      {
+        value: Frequency.MONTHLY,
+        inputDisplay: i18n.translate('advancedThrottle.freq.month', {
+          defaultMessage: '{interval, plural, one {month} other {months}}',
+          values: { interval },
+        }),
+      },
+      {
+        value: Frequency.WEEKLY,
+        inputDisplay: i18n.translate('advancedThrottle.freq.week', {
+          defaultMessage: '{interval, plural, one {week} other {weeks}}',
+          values: { interval },
+        }),
+      },
+      {
+        value: Frequency.DAILY,
+        inputDisplay: i18n.translate('advancedThrottle.freq.day', {
+          defaultMessage: '{interval, plural, one {day} other {days}}',
+          values: { interval },
+        }),
+      },
+      {
+        value: Frequency.HOURLY,
+        inputDisplay: i18n.translate('advancedThrottle.freq.hour', {
+          defaultMessage: '{interval, plural, one {hour} other {hours}}',
+          values: { interval },
+        }),
+      },
+      {
+        value: Frequency.MINUTELY,
+        inputDisplay: i18n.translate('advancedThrottle.freq.minute', {
+          defaultMessage: '{interval, plural, one {minute} other {minutes}}',
+          values: { interval },
+        }),
+      },
+      {
+        value: Frequency.SECONDLY,
+        inputDisplay: i18n.translate('advancedThrottle.freq.second', {
+          defaultMessage: '{interval, plural, one {second} other {seconds}}',
+          values: { interval },
+        }),
+      },
+    ],
+    [interval]
+  );
 
   const bymonthdayOptions: Array<{
     value: number;
-    inputDisplay: string;
+    label: string;
   }> = Array(31)
     .fill(0)
     .map((_, d) => {
       const value = d + 1;
-      return { value, inputDisplay: `${value}` };
+      return { value, label: `${value}` };
     });
 
   const timezoneOptions: Array<{
@@ -103,61 +137,81 @@ export const RuleActionsAdvancedThrottle = ({
     inputDisplay: tz,
   }));
 
-  const byweekdayOptions: Array<{
-    value: WeekdayStr;
-    inputDisplay: string;
-  }> = [
-    {
-      value: 'MO',
-      inputDisplay: 'Monday',
-    },
-    {
-      value: 'TU',
-      inputDisplay: 'Tuesday',
-    },
-    {
-      value: 'WE',
-      inputDisplay: 'Wednesday',
-    },
-    {
-      value: 'TH',
-      inputDisplay: 'Thusrday',
-    },
-    {
-      value: 'FR',
-      inputDisplay: 'Friday',
-    },
-    {
-      value: 'SA',
-      inputDisplay: 'Saturday',
-    },
-    {
-      value: 'SU',
-      inputDisplay: 'Sunday',
-    },
-  ];
+  const useSortedWeekdayOptions = (settings: SettingsStart) => {
+    const kibanaDow: string = settings.client.get('dateFormat:dow');
+    const startDow = kibanaDow ?? 'Sunday';
+    const startDowIndex = I18N_WEEKDAY_OPTIONS_DDD.findIndex((o) => o.label.startsWith(startDow));
+    return [
+      ...I18N_WEEKDAY_OPTIONS_DDD.slice(startDowIndex),
+      ...I18N_WEEKDAY_OPTIONS_DDD.slice(0, startDowIndex),
+    ];
+  };
 
   const defaultTz = useDefaultTimezone();
+  const byweekdayOptions = useSortedWeekdayOptions(settings);
+  const bymonthdayToOptions = (bymonthday: number[] | undefined) =>
+    bymonthday ? bymonthday.map((day) => ({ label: `${day}`, value: day })) : undefined;
+
+  const byweekdayToOptions = (byweekday: Weekday[] | undefined): SelectedWeekdays =>
+    ISO_WEEKDAYS.reduce((result, day) => ({ ...result, [day]: byweekday?.includes(day) }), {});
+
+  const optionsToByweekday = (options: SelectedWeekdays): Weekday[] => {
+    const days = Object.entries(options).reduce<Weekday[]>((result, [day, isSelected]) => {
+      if (isSelected) {
+        return [...result, Number(day) as Weekday];
+      }
+      return result;
+    }, []);
+    if (days.length <= 0) {
+      return [Weekday.MO];
+    }
+    return days;
+  };
 
   const [intervalValue, setIntervalValue] = useState(interval);
   const [freqValue, setFrequencyValue] = useState(freq);
-  const [bymonthdayValue, setBymonthdayValue] = useState(bymonthday);
-  const [byweekdayValue, setByweekdayValue] = useState(byweekday);
+  const [selectedBymonthdayOptions, setSelectedBymonthdayOptions] = useState<SelectedMonthdays>(
+    bymonthdayToOptions(bymonthday)
+  );
+  const [selectedByWeekdayOptions, setSelectedByWeekdayOptions] = useState<SelectedWeekdays>(
+    byweekdayToOptions(byweekday)
+  );
   const [byhourValue, setByhourValue] = useState(byhour);
   const [byminuteValue, setByminuteValue] = useState(byminute);
   const [tzidValue, setTzidValue] = useState(tzid);
   const [time, setTimeValue] = useState<Moment>();
 
+  const onChangeByWeekday = useCallback(
+    (id: string) => {
+      if (!byweekday) return;
+      const day = Number(id);
+      const previouslyHasDay = byweekday.includes(day);
+      const newDays = previouslyHasDay ? byweekday.filter((d) => d !== day) : [...byweekday, day];
+      if (newDays.length !== 0) {
+        setSelectedByWeekdayOptions(byweekdayToOptions(newDays));
+      }
+    },
+    [byweekday]
+  );
+
   useEffect(() => {
     setIntervalValue(interval);
     setFrequencyValue(freq);
-    setBymonthdayValue(bymonthday);
-    setByweekdayValue(byweekday);
     setByhourValue(byhour);
     setByminuteValue(byminute);
     setTzidValue(tzid);
     setTimeValue(moment().set({ hour: byhour ?? 0, minute: byminute ?? 0, second: 0 }));
-  }, [interval, freq, bymonthday, byweekday, byhour, byminute, tzid]);
+    setSelectedBymonthdayOptions(bymonthdayToOptions(bymonthday));
+    setSelectedByWeekdayOptions(byweekdayToOptions(byweekday));
+  }, [
+    interval,
+    freq,
+    JSON.stringify(bymonthday),
+    JSON.stringify(byweekday),
+    byhour,
+    byminute,
+    tzid,
+  ]);
 
   useEffect(() => {
     if (time) {
@@ -171,7 +225,7 @@ export const RuleActionsAdvancedThrottle = ({
       onChange({
         freq: Frequency.MONTHLY,
         interval: intervalValue,
-        bymonthday: [bymonthdayValue ?? DEFAULT_BY_MONTH_DAY],
+        bymonthday: (selectedBymonthdayOptions ?? [bymonthdayOptions[0]]).map((opt) => opt.value!),
         byhour: [byhourValue ?? DEFAULT_BY_HOUR],
         byminute: [byminuteValue ?? DEFAULT_BY_MINUTE],
         tzid: tzidValue ?? defaultTz,
@@ -180,7 +234,7 @@ export const RuleActionsAdvancedThrottle = ({
       onChange({
         freq: Frequency.WEEKLY,
         interval: intervalValue,
-        byweekday: [byweekdayValue ?? DEFAULT_BY_WEEK_DAY],
+        byweekday: optionsToByweekday(selectedByWeekdayOptions),
         byhour: [byhourValue ?? DEFAULT_BY_MINUTE],
         byminute: [byminuteValue ?? DEFAULT_BY_MINUTE],
         tzid: tzidValue ?? defaultTz,
@@ -216,8 +270,8 @@ export const RuleActionsAdvancedThrottle = ({
   }, [
     intervalValue,
     freqValue,
-    bymonthdayValue,
-    byweekdayValue,
+    selectedBymonthdayOptions,
+    selectedByWeekdayOptions,
     byhourValue,
     byminuteValue,
     tzidValue,
@@ -245,36 +299,59 @@ export const RuleActionsAdvancedThrottle = ({
               }}
             />
           </EuiFlexItem>
-          <EuiFlexItem grow={2}>
+          <EuiFlexItem grow={3}>
             <EuiSuperSelect
               options={frequencyOptions}
               valueOfSelected={freqValue}
               onChange={(value) => setFrequencyValue(value)}
             />
           </EuiFlexItem>
-          {freqValue === Frequency.MONTHLY ? (
-            <EuiFlexItem grow={2}>
-              <EuiSuperSelect
-                prepend="Day"
+        </EuiFlexGroup>
+      </EuiFormRow>
+      {freqValue === Frequency.MONTHLY ? (
+        <EuiFormRow
+          fullWidth
+          label="Days"
+          error={actionErrors.advancedThrottleBymonthday}
+          isInvalid={!!actionErrors.advancedThrottleBymonthday?.length}
+        >
+          <EuiFlexGroup gutterSize="s">
+            <EuiFlexItem>
+              <EuiComboBox
+                fullWidth
                 options={bymonthdayOptions}
-                valueOfSelected={bymonthdayValue}
-                onChange={(value) => setBymonthdayValue(value)}
-              />
+                selectedOptions={selectedBymonthdayOptions}
+                onChange={(value) => setSelectedBymonthdayOptions(value)}
+              ></EuiComboBox>
             </EuiFlexItem>
-          ) : null}
-          {freqValue === Frequency.WEEKLY ? (
-            <EuiFlexItem grow={2}>
-              <EuiSuperSelect
-                prepend="On"
+          </EuiFlexGroup>
+        </EuiFormRow>
+      ) : null}
+      {freqValue === Frequency.WEEKLY ? (
+        <EuiFormRow fullWidth>
+          <EuiFlexGroup gutterSize="s">
+            <EuiFlexItem>
+              <EuiButtonGroup
+                isFullWidth
+                legend={i18n.translate('responseOpsRuleForm.ruleForm.advancedThrottleByweekday', {
+                  defaultMessage: 'Days of week',
+                })}
                 options={byweekdayOptions}
-                valueOfSelected={byweekdayValue}
-                onChange={(value) => setByweekdayValue(value)}
+                idToSelectedMap={selectedByWeekdayOptions}
+                type="multi"
+                onChange={onChangeByWeekday}
+                data-test-subj="advancedThrottleByweekday"
               />
             </EuiFlexItem>
-          ) : null}
-          {freqValue === Frequency.HOURLY ? (
-            <EuiFlexItem grow={2}>
+          </EuiFlexGroup>
+        </EuiFormRow>
+      ) : null}
+      {freqValue === Frequency.HOURLY ? (
+        <EuiFormRow fullWidth>
+          <EuiFlexGroup gutterSize="s">
+            <EuiFlexItem>
               <EuiDatePicker
+                fullWidth
                 timeIntervals={1}
                 prepend="Minute"
                 showTimeSelect
@@ -289,15 +366,15 @@ export const RuleActionsAdvancedThrottle = ({
                 timeFormat="mm"
               />
             </EuiFlexItem>
-          ) : null}
-        </EuiFlexGroup>
-      </EuiFormRow>
+          </EuiFlexGroup>
+        </EuiFormRow>
+      ) : null}
       {freqValue === Frequency.MONTHLY ||
       freqValue === Frequency.WEEKLY ||
       freqValue === Frequency.DAILY ? (
         <EuiFormRow fullWidth>
           <EuiFlexGroup gutterSize="s">
-            <EuiFlexItem grow={1}>
+            <EuiFlexItem grow={2}>
               <EuiDatePicker
                 timeIntervals={5}
                 prepend="At"
@@ -311,7 +388,7 @@ export const RuleActionsAdvancedThrottle = ({
                 timeFormat="HH:mm"
               />
             </EuiFlexItem>
-            <EuiFlexItem grow={1}>
+            <EuiFlexItem grow={3}>
               <EuiSuperSelect
                 prepend="Time zone"
                 options={timezoneOptions}
