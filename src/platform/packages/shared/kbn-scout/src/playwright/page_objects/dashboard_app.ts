@@ -25,6 +25,10 @@ export class DashboardApp {
     await this.page.gotoApp('dashboards');
   }
 
+  async waitForListingTableToLoad() {
+    return this.page.testSubj.waitForSelector('table-is-ready', { state: 'visible' });
+  }
+
   async openNewDashboard() {
     await this.page.testSubj.click('newItemButton');
     await this.page.testSubj.waitForSelector('emptyDashboardWidget', { state: 'visible' });
