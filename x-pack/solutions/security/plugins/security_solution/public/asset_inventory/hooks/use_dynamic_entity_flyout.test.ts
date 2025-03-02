@@ -84,7 +84,7 @@ describe('useDynamicEntityFlyout', () => {
     expect(openFlyoutMock).toHaveBeenCalledWith({
       right: {
         id: UniversalEntityPanelKey,
-        params: { entity: { ...entity, type: 's3', name: 'testUniversal' } },
+        params: { entity: { ...entity, type: 's3', name: 'testUniversal' }, source },
       },
     });
   });
@@ -108,6 +108,7 @@ describe('useDynamicEntityFlyout', () => {
       right: {
         id: UserPanelKey,
         params: { userName: 'testUser', scopeId: 'scope1', contextId: 'context1' },
+        source,
       },
     });
   });
@@ -120,7 +121,6 @@ describe('useDynamicEntityFlyout', () => {
     act(() => {
       result.current.openDynamicFlyout({
         entity: { ...entity, type: 'host', name: 'testHost' },
-        source,
         scopeId: 'scope1',
         contextId: 'context1',
       });
@@ -143,7 +143,6 @@ describe('useDynamicEntityFlyout', () => {
     act(() => {
       result.current.openDynamicFlyout({
         entity: { ...entity, type: 'service', name: 'testService' },
-        source,
         scopeId: 'scope1',
         contextId: 'context1',
       });
