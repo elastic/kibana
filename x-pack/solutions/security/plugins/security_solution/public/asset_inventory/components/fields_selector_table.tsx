@@ -115,7 +115,12 @@ export const FieldsSelectorTable = ({
   };
   const fields = useMemo<Field[]>(
     () =>
-      filterFieldsBySearch(dataView.fields?.getAll(), columns, searchQuery, isFilterSelectedEnabled),
+      filterFieldsBySearch(
+        dataView.fields?.getAll(),
+        columns,
+        searchQuery,
+        isFilterSelectedEnabled
+      ),
     [dataView, columns, searchQuery, isFilterSelectedEnabled]
   );
 
