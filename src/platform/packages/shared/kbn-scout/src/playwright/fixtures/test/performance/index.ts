@@ -10,6 +10,19 @@
 import { CDPSession } from '@playwright/test';
 import { coreWorkerFixtures } from '../../worker';
 
+interface PerformanceMetrics {
+  jsHeapUsedSize?: number;
+  jsHeapTotalSize?: number;
+  cpuTime?: number;
+  scriptTime?: number;
+  layoutTime?: number;
+  fps?: number;
+  nodesCount?: number;
+  documentsCount?: number;
+  layoutCount?: number;
+  styleRecalcCount?: number;
+}
+
 export interface BundleInfo {
   url: string;
   name: string;
@@ -38,7 +51,9 @@ interface PageInfo {
 export interface PerfTrackerFixture {
   trackBundleResponses: (cdp: CDPSession) => Map<string, BundleInfo>;
   waitForJsResourcesToLoad: (cdp: CDPSession, timeout?: number) => Promise<void>;
-  collectStats: (url: string, bundleResponses: Map<string, BundleInfo>) => PageInfo;
+  collectBundleStats: (url: string, bundleResponses: Map<string, BundleInfo>) => PageInfo;
+  getPerformanceDomainMetrics(cdp: CDPSession): Promise<PerformanceMetrics>;
+  collectPerformanceStats(url: string, before: PerformanceMetrics, after: PerformanceMetrics): void;
 }
 
 export const perfTrackerFixture = coreWorkerFixtures.extend<{ perfTracker: PerfTrackerFixture }>({
@@ -46,7 +61,7 @@ export const perfTrackerFixture = coreWorkerFixtures.extend<{ perfTracker: PerfT
     async ({ log }, use, testInfo) => {
       log.serviceLoaded('perfTracker');
 
-      const collectStats = (url: string, bundleResponses: Map<string, BundleInfo>) => {
+      const collectBundleStats = (url: string, bundleResponses: Map<string, BundleInfo>) => {
         const stats = prepareStats(bundleResponses);
 
         testInfo.attach('page-bundles-report', {
@@ -57,7 +72,28 @@ export const perfTrackerFixture = coreWorkerFixtures.extend<{ perfTracker: PerfT
         return stats;
       };
 
-      await use({ trackBundleResponses, waitForJsResourcesToLoad, collectStats });
+      const collectPerformanceStats = (
+        url: string,
+        before: PerformanceMetrics,
+        after: PerformanceMetrics
+      ) => {
+        const stats = getPerformanceDiff(before, after);
+
+        testInfo.attach('perf-metrics-report', {
+          body: JSON.stringify({ url, stats }, null, 2),
+          contentType: 'application/json',
+        });
+
+        return stats;
+      };
+
+      await use({
+        trackBundleResponses,
+        waitForJsResourcesToLoad,
+        collectBundleStats,
+        getPerformanceDomainMetrics,
+        collectPerformanceStats,
+      });
     },
     { scope: 'test' },
   ],
@@ -160,4 +196,46 @@ function prepareStats(bundleResponses: Map<string, BundleInfo>): PageInfo {
       }))
       .sort((pluginA, pluginB) => pluginA.name.localeCompare(pluginB.name)),
   };
+}
+
+async function getPerformanceDomainMetrics(cdp: CDPSession) {
+  await cdp.send('Performance.enable');
+  const { metrics } = await cdp.send('Performance.getMetrics');
+  return {
+    jsHeapUsedSize: metrics.find((m) => m.name === 'JSHeapUsedSize')?.value,
+    jsHeapTotalSize: metrics.find((m) => m.name === 'JSHeapTotalSize')?.value,
+    cpuTime: metrics.find((m) => m.name === 'TaskDuration')?.value,
+    scriptTime: metrics.find((m) => m.name === 'ScriptDuration')?.value,
+    layoutTime: metrics.find((m) => m.name === 'LayoutDuration')?.value,
+    fps: metrics.find((m) => m.name === 'FramesPerSecond')?.value,
+    nodesCount: metrics.find((m) => m.name === 'Nodes')?.value,
+    documentsCount: metrics.find((m) => m.name === 'Documents')?.value,
+    layoutCount: metrics.find((m) => m.name === 'LayoutCount')?.value,
+    styleRecalcCount: metrics.find((m) => m.name === 'RecalcStyleCount')?.value,
+  };
+}
+
+function getPerformanceDiff(before: PerformanceMetrics, after: PerformanceMetrics) {
+  const metrics: Record<
+    string,
+    { before: number; after: number; diff: number; percentage: string }
+  > = {};
+
+  for (const key of Object.keys(after)) {
+    const metricKey = key as keyof PerformanceMetrics;
+    if (after[metricKey] !== undefined && before[metricKey] !== undefined) {
+      const diff = after[metricKey]! - before[metricKey]!;
+      const percentage =
+        before[metricKey] !== 0 ? ((diff / before[metricKey]!) * 100).toFixed(2) + '%' : 'N/A';
+
+      metrics[metricKey] = {
+        before: before[metricKey]!,
+        after: after[metricKey]!,
+        diff,
+        percentage,
+      };
+    }
+  }
+
+  return metrics;
 }

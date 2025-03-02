@@ -46,7 +46,7 @@ test.describe('Discover app performance', { tag: [...tags.DEPLOYMENT_AGNOSTIC, '
     await perfTracker.waitForJsResourcesToLoad(cdp);
 
     // collect stats, attach them to the test and run some validations
-    const stats = perfTracker.collectStats(currentUrl, loadingBundles);
+    const stats = perfTracker.collectBundleStats(currentUrl, loadingBundles);
     expect(stats.totalSize).toBeLessThan(3.5 * 1024 * 1024); // 3.5 MB
     expect(stats.bundleCount).toBeLessThan(90);
     expect(stats.plugins.map((p) => p.name)).toStrictEqual([
@@ -60,5 +60,17 @@ test.describe('Discover app performance', { tag: [...tags.DEPLOYMENT_AGNOSTIC, '
       'unifiedHistogram',
       'unifiedSearch',
     ]);
+  });
+
+  test('collect metrics after page is loaded', async ({ page, pageObjects, perfTracker }) => {
+    const before = await perfTracker.getPerformanceDomainMetrics(cdp);
+    // navigate to Discover app from left menu on Home page
+    await pageObjects.collapsibleNav.clickItem('Discover');
+    await page.waitForLoadingIndicatorHidden();
+    const currentUrl = page.url();
+    expect(currentUrl).toContain('app/discover#/');
+    await pageObjects.discover.waitForHistogramRendered();
+    const after = await perfTracker.getPerformanceDomainMetrics(cdp);
+    perfTracker.collectPerformanceStats(currentUrl, before, after);
   });
 });

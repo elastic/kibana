@@ -5,10 +5,29 @@
  * 2.0.
  */
 
-import { test, tags, expect, CDPSession } from '@kbn/scout';
+import { test, tags, expect, CDPSession, ScoutPage } from '@kbn/scout';
+
+async function waitForDashboardToLoad(
+  page: ScoutPage,
+  selector: string,
+  expectedCount: number,
+  timeout = 20000
+) {
+  const startTime = Date.now();
+
+  while (Date.now() - startTime < timeout) {
+    const count = await page.locator(selector).count();
+    if (count === expectedCount) return;
+    // Short polling interval
+    // eslint-disable-next-line playwright/no-wait-for-timeout
+    await page.waitForTimeout(250);
+  }
+
+  throw new Error(`Timeout waiting for ${expectedCount} elements matching ${selector}`);
+}
 
 test.describe(
-  'Flights dashboard: performance',
+  'Flights dashboard: CDP Performance / Network',
   { tag: [...tags.DEPLOYMENT_AGNOSTIC, '@perf'] },
   () => {
     let cdp: CDPSession;
@@ -32,7 +51,7 @@ test.describe(
       await kbnClient.savedObjects.cleanStandardList();
     });
 
-    test('collect all JS bundles with CDP', async ({ page, pageObjects, perfTracker }) => {
+    test('collect all the JS bundles on page', async ({ page, pageObjects, perfTracker }) => {
       await pageObjects.collapsibleNav.clickItem('Dashboards');
       await pageObjects.dashboard.waitForListingTableToLoad();
       // wait for all the js bundles to load on Dashboard Listing page
@@ -48,7 +67,7 @@ test.describe(
       await perfTracker.waitForJsResourcesToLoad(cdp);
 
       // collect stats, attach them to the test and run some validations
-      const stats = perfTracker.collectStats(currentUrl, loadingBundles);
+      const stats = perfTracker.collectBundleStats(currentUrl, loadingBundles);
       expect(stats.totalSize).toBeLessThan(4 * 1024 * 1024); // 4 MB
       expect(stats.bundleCount).toBeLessThan(110);
       expect(stats.plugins.map((p) => p.name)).toStrictEqual([
@@ -81,6 +100,27 @@ test.describe(
       expect(stats.plugins.find((p) => p.name === 'lens')!.totalSize).toBeLessThan(
         1.6 * 1024 * 1024
       ); // 1.6 MB
+    });
+
+    test('collect metrics after dashboard is loaded', async ({
+      page,
+      pageObjects,
+      perfTracker,
+    }) => {
+      await pageObjects.dashboard.goto();
+      await pageObjects.dashboard.waitForListingTableToLoad();
+      await page.testSubj.click('dashboardListingTitleLink-[Flights]-Global-Flight-Dashboard');
+      const before = await perfTracker.getPerformanceDomainMetrics(cdp);
+      await page.waitForLoadingIndicatorHidden();
+      const currentUrl = page.url();
+      expect(currentUrl).toContain('app/dashboards#/view');
+      await waitForDashboardToLoad(
+        page,
+        '[data-test-subj="embeddablePanel"][data-render-complete="true"]',
+        14
+      );
+      const after = await perfTracker.getPerformanceDomainMetrics(cdp);
+      perfTracker.collectPerformanceStats(currentUrl, before, after);
     });
   }
 );
