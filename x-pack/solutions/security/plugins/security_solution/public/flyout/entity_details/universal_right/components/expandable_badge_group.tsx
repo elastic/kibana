@@ -42,7 +42,6 @@ export const ExpandableBadgeGroup = ({
         max-height: ${maxScrollHeight};
         overflow-y: auto;
       `}
-      responsive={false}
     >
       {
         // Show all badges if 'all' is set, otherwise show the first `badgesToShow` badges

@@ -52,6 +52,7 @@ export const ResponsiveDataCards = ({ cards, collapseWidth = 750 }: HeaderDataCa
           `}
         >
           <EuiCard
+            data-test-subj="responsive-data-card"
             title={card.title}
             description={card.description}
             textAlign="left"
