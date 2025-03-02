@@ -11,7 +11,7 @@
 export interface EntityEcs {
   id: string;
   name: string;
-  type: 's3' | 'user' | 'host' | 'service';
+  type: 'container' | 'user' | 'host' | 'service';
   tags: string[];
   labels: Record<string, string>;
   criticality: string;
