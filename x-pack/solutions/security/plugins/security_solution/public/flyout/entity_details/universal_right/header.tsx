@@ -5,11 +5,10 @@
  * 2.0.
  */
 
-import { EuiSpacer, EuiText, EuiFlexItem, EuiFlexGroup, EuiBadge, useEuiTheme } from '@elastic/eui';
 import React, { useMemo } from 'react';
-
-import type { EntityEcs } from '@kbn/securitysolution-ecs/src/entity';
 import { css } from '@emotion/react';
+import { EuiSpacer, EuiText, EuiFlexItem, EuiFlexGroup, EuiBadge, useEuiTheme } from '@elastic/eui';
+import type { EntityEcs } from '@kbn/securitysolution-ecs/src/entity';
 import { ExpandableBadgeGroup } from './components/expandable_badge_group';
 import { HeaderDataCards } from './header_data_cards';
 import { EntityIconByType } from '../../../entity_analytics/components/entity_store/helpers';
@@ -20,12 +19,12 @@ import { FlyoutTitle } from '../../shared/components/flyout_title';
 const HeaderTags = ({ tags, labels }: { tags: EntityEcs['tags']; labels: EntityEcs['labels'] }) => {
   const { euiTheme } = useEuiTheme();
 
-  const tagBadges = useMemo(
+  const tagBadges: EuiBadge[] | undefined = useMemo(
     () => tags?.map((tag) => <EuiBadge color="hollow">{tag}</EuiBadge>),
     [tags]
   );
 
-  const labelBadges = useMemo(
+  const labelBadges: EuiBadge[] | undefined = useMemo(
     () =>
       labels &&
       Object.entries(labels)?.map(([key, value]) => (
@@ -58,7 +57,7 @@ const HeaderTags = ({ tags, labels }: { tags: EntityEcs['tags']; labels: EntityE
 
 interface UniversalEntityFlyoutHeaderProps {
   entity: EntityEcs;
-  timestamp: Date;
+  timestamp?: Date;
 }
 
 export const UniversalEntityFlyoutHeader = ({
@@ -69,11 +68,11 @@ export const UniversalEntityFlyoutHeader = ({
 
   return (
     <>
-      <FlyoutHeader data-test-subj="service-panel-header">
+      <FlyoutHeader>
         <EuiFlexGroup gutterSize="s" responsive={false} direction="column">
           <EuiFlexItem grow={false}>
-            <EuiText size="xs" data-test-subj={'service-panel-header-lastSeen'}>
-              <PreferenceFormattedDate value={timestamp} />
+            <EuiText size="xs">
+              {timestamp && <PreferenceFormattedDate value={timestamp} />}
               <EuiSpacer size="xs" />
             </EuiText>
           </EuiFlexItem>
@@ -97,16 +96,13 @@ export const UniversalEntityFlyoutHeader = ({
           category={entity.category}
           criticality={entity.criticality}
         />
+        {(entity.tags || entity.labels) && (
+          <>
+            <EuiSpacer size="s" />
+            <HeaderTags tags={entity.tags} labels={entity.labels} />
+          </>
+        )}
       </div>
-      {(entity.tags || entity.labels) && (
-        <div
-          css={css`
-            margin: ${euiTheme.size.s};
-          `}
-        >
-          <HeaderTags tags={entity.tags} labels={entity.labels} />
-        </div>
-      )}
     </>
   );
 };

@@ -7,12 +7,11 @@
 
 import React, { useState } from 'react';
 import { css } from '@emotion/react';
-import type { EuiBadgeProps } from '@elastic/eui';
 import { EuiBadge, EuiBadgeGroup } from '@elastic/eui';
 
 interface ExpandableBadgeGroupProps {
-  /** Array of EuiBadges properties to display */
-  badges: EuiBadgeProps[];
+  /** Array of EuiBadges to display */
+  badges: EuiBadge[];
   /** The initial number of badges to show before expanding. Defaults to 'all' if not set */
   initialBadgeLimit?: number;
   /** The maximum height of the badge group in pixels. If not set the expandable container will not have inner scrolling */

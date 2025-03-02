@@ -151,10 +151,10 @@ const getEntity = (record: DataTableRecord) => {
     labels: { Group: 'cloud-sec-dev', Environment: 'Production' },
     id: 'mock-entity-id',
     criticality: 'low_impact',
-  } as EntityEcs;
+  } as unknown as EntityEcs;
 
   return {
-    entity: { ...(_source.entity || {}), ...entityMock },
+    entity: { ...(_source?.entity || {}), ...entityMock },
     source: _source || {},
   };
 };
