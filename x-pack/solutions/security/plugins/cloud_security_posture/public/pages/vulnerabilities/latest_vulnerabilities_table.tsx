@@ -18,6 +18,7 @@ import {
   getNormalizedSeverity,
 } from '@kbn/cloud-security-posture';
 import { getVendorName } from '@kbn/cloud-security-posture/src/utils/get_vendor_name';
+import type { VulnSeverity } from '@kbn/cloud-security-posture-common';
 import { CloudSecurityDataTable } from '../../components/cloud_security_data_table';
 import { useLatestVulnerabilitiesTable } from './hooks/use_latest_vulnerabilities_table';
 import { LATEST_VULNERABILITIES_TABLE } from './test_subjects';
@@ -78,6 +79,10 @@ const flyoutComponent = (row: DataTableRecord, onCloseFlyout: () => void): JSX.E
 const title = i18n.translate('xpack.csp.findings.latestVulnerabilities.tableRowTypeLabel', {
   defaultMessage: 'Vulnerabilities',
 });
+
+const normalizeSeverity = (severity?: string): VulnSeverity => {
+  return (severity?.toUpperCase() ?? 'UNKNOWN') as VulnSeverity;
+};
 
 const customCellRenderer = (rows: DataTableRecord[]) => ({
   'vulnerability.score.base': ({ rowIndex }: EuiDataGridCellValueElementProps) => (
