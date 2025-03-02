@@ -6,8 +6,8 @@
  */
 
 import React from 'react';
-import type { AppMockRenderer } from '../../common/mock';
-import { createAppMockRenderer } from '../../common/mock';
+
+import { renderWithTestingProviders } from '../../common/mock';
 import { ObservableTypesForm, type ObservableTypesFormProps } from './form';
 import { fireEvent, screen, waitFor } from '@testing-library/react';
 import type { FormState } from '../configure_cases/flyout';
@@ -15,20 +15,17 @@ import type { ObservableTypeConfiguration } from '../../../common/types/domain/c
 import { MAX_CUSTOM_OBSERVABLE_TYPES_LABEL_LENGTH } from '../../../common/constants';
 
 describe('ObservableTypesForm ', () => {
-  let appMock: AppMockRenderer;
-
   const props: ObservableTypesFormProps = {
     onChange: jest.fn(),
     initialValue: null,
   };
 
   beforeEach(() => {
-    appMock = createAppMockRenderer();
     jest.clearAllMocks();
   });
 
   it('renders correctly', async () => {
-    appMock.render(<ObservableTypesForm {...props} />);
+    renderWithTestingProviders(<ObservableTypesForm {...props} />);
     expect(await screen.findByTestId('observable-types-form')).toBeInTheDocument();
   });
 
@@ -37,7 +34,7 @@ describe('ObservableTypesForm ', () => {
     const onChangeState = (state: FormState<ObservableTypeConfiguration>) => (formState = state);
 
     it('should pass initial key to onChange handler', async () => {
-      appMock.render(
+      renderWithTestingProviders(
         <ObservableTypesForm
           onChange={onChangeState}
           initialValue={{ key: 'initial-key', label: 'initial label' }}
@@ -64,7 +61,7 @@ describe('ObservableTypesForm ', () => {
     });
 
     it('should not allow invalid labels', async () => {
-      appMock.render(
+      renderWithTestingProviders(
         <ObservableTypesForm
           onChange={onChangeState}
           initialValue={{ key: 'initial-key', label: 'initial label' }}
@@ -103,7 +100,9 @@ describe('ObservableTypesForm ', () => {
 
       const onChangeState = (state: FormState<ObservableTypeConfiguration>) => (formState = state);
 
-      appMock.render(<ObservableTypesForm initialValue={null} onChange={onChangeState} />);
+      renderWithTestingProviders(
+        <ObservableTypesForm initialValue={null} onChange={onChangeState} />
+      );
 
       await waitFor(() => {
         expect(formState).not.toBeUndefined();

@@ -146,44 +146,44 @@ describe('CaseActionBar', () => {
   });
 
   it('should not show the sync alerts toggle when alerting is disabled', () => {
-    const { queryByText } = render(
+    render(
       <TestProviders features={{ alerts: { sync: false, enabled: true }, metrics: [] }}>
         <CaseActionBar {...defaultProps} />
       </TestProviders>
     );
 
-    expect(queryByText('Sync alerts')).not.toBeInTheDocument();
+    expect(screen.queryByText('Sync alerts')).not.toBeInTheDocument();
   });
 
   it('should show the sync alerts toggle when alerting is enabled', () => {
-    const { queryByText } = render(
+    render(
       <TestProviders>
         <CaseActionBar {...defaultProps} />
       </TestProviders>
     );
 
-    expect(queryByText('Sync alerts')).toBeInTheDocument();
+    expect(screen.getByText('Sync alerts')).toBeInTheDocument();
   });
 
   it('should not show the Case open text when the lifespan feature is enabled', () => {
     const props: CaseActionBarProps = { ...defaultProps };
-    const { queryByText } = render(
+    render(
       <TestProviders features={{ metrics: [CaseMetricsFeature.LIFESPAN] }}>
         <CaseActionBar {...props} />
       </TestProviders>
     );
 
-    expect(queryByText('Case opened')).not.toBeInTheDocument();
+    expect(screen.queryByText('Case opened')).not.toBeInTheDocument();
   });
 
   it('should show the Case open text when the lifespan feature is disabled', () => {
-    const { getByText } = render(
+    render(
       <TestProviders>
         <CaseActionBar {...defaultProps} />
       </TestProviders>
     );
 
-    expect(getByText('Case opened')).toBeInTheDocument();
+    expect(screen.getByText('Case opened')).toBeInTheDocument();
   });
 
   it('should show the change status text when the user has update privileges', () => {
@@ -207,37 +207,37 @@ describe('CaseActionBar', () => {
   });
 
   it('should not show the sync alerts toggle when the user does not have update privileges', () => {
-    const { queryByText } = render(
+    render(
       <TestProviders permissions={noUpdateCasesPermissions()}>
         <CaseActionBar {...defaultProps} />
       </TestProviders>
     );
 
-    expect(queryByText('Sync alerts')).not.toBeInTheDocument();
+    expect(screen.queryByText('Sync alerts')).not.toBeInTheDocument();
   });
 
   it('should not show the delete item in the menu when the user does not have delete privileges', async () => {
-    const { queryByText, queryByTestId } = render(
+    render(
       <TestProviders permissions={noDeleteCasesPermissions()}>
         <CaseActionBar {...defaultProps} />
       </TestProviders>
     );
 
     await userEvent.click(screen.getByTestId('property-actions-case-ellipses'));
-    expect(queryByText('Delete case')).not.toBeInTheDocument();
-    expect(queryByTestId('property-actions-case-trash')).not.toBeInTheDocument();
-    expect(queryByTestId('property-actions-case-copyClipboard')).toBeInTheDocument();
+    expect(screen.queryByText('Delete case')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('property-actions-case-trash')).not.toBeInTheDocument();
+    expect(screen.getByTestId('property-actions-case-copyClipboard')).toBeInTheDocument();
   });
 
   it('should show the the delete item in the menu when the user does have delete privileges', async () => {
-    const { queryByText } = render(
+    render(
       <TestProviders permissions={allCasesPermissions()}>
         <CaseActionBar {...defaultProps} />
       </TestProviders>
     );
 
     await userEvent.click(screen.getByTestId('property-actions-case-ellipses'));
-    expect(queryByText('Delete case')).toBeInTheDocument();
+    expect(screen.getByText('Delete case')).toBeInTheDocument();
   });
 
   it('shows the external incident action', async () => {
