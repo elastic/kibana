@@ -17,7 +17,7 @@ import type {
   Logger,
 } from '@kbn/core/server';
 import { createListStream } from '@kbn/utils';
-import { partition, chunk } from 'lodash';
+import { partition, chunk, once } from 'lodash';
 
 import { getPathParts } from '../../archive';
 import { KibanaAssetType, KibanaSavedObjectType } from '../../../../types';
@@ -116,14 +116,20 @@ export async function installKibanaAssets(options: {
   const { kibanaAssetsArchiveIterator, savedObjectsClient, savedObjectsImporter, logger } = options;
 
   // Todo check if we put this behind a condition
-  await installManagedIndexPattern({
-    savedObjectsClient,
-    savedObjectsImporter,
-  });
 
   let assetsToInstall: ArchiveAsset[] = [];
   let res: SavedObjectsImportSuccess[] = [];
+
+  const installManagedIndexPatternOnce = once(() => {
+    installManagedIndexPattern({
+      savedObjectsClient,
+      savedObjectsImporter,
+    });
+  });
+
   async function flushAssetsToInstall() {
+    await installManagedIndexPatternOnce();
+
     const installedAssets = await installKibanaSavedObjects({
       logger,
       savedObjectsImporter,
