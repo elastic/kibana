@@ -181,6 +181,7 @@ export const FINDINGS_GROUPING_OPTIONS = {
 };
 
 export const VULNERABILITY_FIELDS = {
+  VULNERABILITY_TITLE: 'vulnerability.title',
   VULNERABILITY_ID: 'vulnerability.id',
   SCORE_BASE: 'vulnerability.score.base',
   RESOURCE_NAME: 'resource.name',

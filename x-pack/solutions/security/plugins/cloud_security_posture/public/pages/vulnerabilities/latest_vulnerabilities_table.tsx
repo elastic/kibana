@@ -74,7 +74,6 @@ const title = i18n.translate('xpack.csp.findings.latestVulnerabilities.tableRowT
   defaultMessage: 'Vulnerabilities',
 });
 
-
 const customCellRenderer = (rows: DataTableRecord[]) => ({
   'vulnerability.score.base': ({ rowIndex }: EuiDataGridCellValueElementProps) => (
     <CspVulnerabilityFindingRenderer row={rows[rowIndex]}>
@@ -96,6 +95,16 @@ const customCellRenderer = (rows: DataTableRecord[]) => ({
   'observer.vendor': ({ rowIndex }: EuiDataGridCellValueElementProps) => (
     <CspVulnerabilityFindingRenderer row={rows[rowIndex]}>
       {({ finding }) => <>{getVendorName(finding) || '-'}</>}
+    </CspVulnerabilityFindingRenderer>
+  ),
+  'vulnerability.id': ({ rowIndex }: EuiDataGridCellValueElementProps) => (
+    <CspVulnerabilityFindingRenderer row={rows[rowIndex]}>
+      {({ finding }) => {
+        if (Array.isArray(finding.vulnerability?.id)) {
+          return <>{finding.vulnerability.id.join(', ')}</>;
+        }
+        return <>{finding.vulnerability?.id || '-'}</>;
+      }}
     </CspVulnerabilityFindingRenderer>
   ),
 });

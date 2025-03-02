@@ -41,6 +41,7 @@ export const getDefaultQuery = ({
 });
 
 export const defaultColumns: CloudSecurityDefaultColumn[] = [
+  { id: VULNERABILITY_FIELDS.VULNERABILITY_TITLE, width: 160 },
   { id: VULNERABILITY_FIELDS.VULNERABILITY_ID, width: 130 },
   { id: VULNERABILITY_FIELDS.SCORE_BASE, width: 80 },
   { id: VULNERABILITY_FIELDS.RESOURCE_NAME },
