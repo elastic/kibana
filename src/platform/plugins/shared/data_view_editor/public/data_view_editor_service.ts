@@ -259,7 +259,8 @@ export class DataViewEditorService {
             // if its an alias
             (index.item.indices?.length === 1 && isRollupIndex(index.item.indices[0])) ||
             // if its an index referenced by an alias
-            (index.item.aliases?.length === 1 && isRollupIndex(index.item.aliases[0])));
+            (index.item.aliases?.length === 1 && isRollupIndex(index.item.aliases[0]))
+        );
 
         newRollupIndexName = rollupIndices.length === 1 ? rollupIndices[0].name : null;
         const newRollupCaps = await this.rollupCapsResponse.then((response) => {
