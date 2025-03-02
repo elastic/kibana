@@ -42,14 +42,16 @@ export const AssistantNavLink: FC = () => {
 
   useEffect(() => {
     const registerPortalNode = () => {
-      chrome.navControls.registerRight({
-        mount: (element: HTMLElement) => {
-          ReactDOM.render(<OutPortal node={portalNode} />, element);
-          return () => ReactDOM.unmountComponentAtNode(element);
-        },
-        // right before the user profile
-        order: 1001,
-      });
+      if (!chrome.workspace.isEnabled()) {
+        chrome.navControls.registerRight({
+          mount: (element: HTMLElement) => {
+            ReactDOM.render(<OutPortal node={portalNode} />, element);
+            return () => ReactDOM.unmountComponentAtNode(element);
+          },
+          // right before the user profile
+          order: 1001,
+        });
+      }
     };
 
     if (

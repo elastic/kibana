@@ -1,0 +1,28 @@
+{
+  "extends": "../../../../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "target/types",
+    "types": [
+      "react",
+      "jest",
+      "@elastic/eui",
+      "@kbn/ambient-ui-types",
+      "@emotion/react/types/css-prop",
+      "../../../../../typings/emotion.d.ts"
+    ]
+  },
+  "include": [
+    "**/*.ts",
+    "**/*.tsx",
+  ],
+  "exclude": [
+    "target/**/*"
+  ],
+  "kbn_references": [
+    "@kbn/core-workspace-state",
+    "@kbn/core-chrome-browser",
+    "@kbn/i18n",
+    "@kbn/core-chrome-browser-internal",
+    "@kbn/core-mount-utils-browser",
+  ]
+}

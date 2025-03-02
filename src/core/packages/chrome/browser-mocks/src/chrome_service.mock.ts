@@ -90,6 +90,40 @@ const createStartContractMock = () => {
       changeActiveSolutionNavigation: jest.fn(),
       updateSolutionNavigations: jest.fn(),
     },
+    workspace: {
+      header: {
+        getBreadcrumbs$: jest.fn(),
+      },
+      toolbox: {
+        getSearchControl: jest.fn(),
+        registerSearchControl: jest.fn(),
+        getTool$: jest.fn(),
+        getTools$: jest.fn(),
+        registerTool: jest.fn(),
+      },
+      isEnabled: jest.fn(),
+    },
+    projectNavigation: {
+      changeActiveSolutionNavigation: jest.fn(),
+      getActiveNodes$: jest.fn(),
+      getProjectSideNavComponent$: jest.fn(),
+      getActiveSolutionNavDefinition$: jest.fn(),
+      getActiveSolutionNavId$: jest.fn(),
+      getNavigationTreeUi$: jest.fn(),
+      getPanelSelectedNode$: jest.fn(),
+      setPanelSelectedNode: jest.fn(),
+      getProjectBreadcrumbs$: jest.fn(),
+      setProjectBreadcrumbs: jest.fn(),
+      getProjectHome$: jest.fn(),
+      setProjectHome: jest.fn(),
+      getProjectName$: jest.fn(),
+      setProjectName: jest.fn(),
+      getSolutionsNavDefinitions$: jest.fn(),
+      initNavigation: jest.fn(),
+      setSideNavComponent: jest.fn(),
+      updateSolutionNavigations: jest.fn(),
+      setCloudUrls: jest.fn(),
+    },
   };
   startContract.navLinks.getAll.mockReturnValue([]);
   startContract.getIsVisible$.mockReturnValue(new BehaviorSubject(false));
