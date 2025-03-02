@@ -97,6 +97,16 @@ const customCellRenderer = (rows: DataTableRecord[]) => ({
       {({ finding }) => <>{getVendorName(finding) || '-'}</>}
     </CspVulnerabilityFindingRenderer>
   ),
+  'vulnerability.id': ({ rowIndex }: EuiDataGridCellValueElementProps) => (
+    <CspVulnerabilityFindingRenderer row={rows[rowIndex]}>
+      {({ finding }) => {
+        if (Array.isArray(finding.vulnerability?.id)) {
+          return <>{finding.vulnerability.id.join(', ')}</>;
+        }
+        return <>{finding.vulnerability?.id || '-'}</>;
+      }}
+    </CspVulnerabilityFindingRenderer>
+  ),
 });
 
 export const LatestVulnerabilitiesTable = ({
