@@ -26,20 +26,6 @@ import { i18n } from '@kbn/i18n';
 import { AssetCriticalityBadge } from '../../../entity_analytics/components/asset_criticality';
 import { ResponsiveDataCards } from './components/responsive_data_cards';
 
-const getCopyCardProps = ({ title, description }) => ({
-  title: (
-    <EuiFlexGroup justifyContent={'spaceBetween'} wrap={false} responsive={false}>
-      <EuiFlexItem grow={false}>{title}</EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <EuiCopy textToCopy={description}>
-          {(copy) => <EuiButtonIcon onClick={copy} iconType={'document'} color={'subdued'} />}
-        </EuiCopy>
-      </EuiFlexItem>
-    </EuiFlexGroup>
-  ),
-  description: <EuiTextTruncate text={description} />,
-});
-
 const options = [
   {
     value: 'unassigned',
@@ -119,7 +105,19 @@ export const HeaderDataCards = ({
           </div>
         ),
       },
-      getCopyCardProps({ title: 'ID', description: id }),
+      {
+        title: (
+          <EuiFlexGroup justifyContent={'spaceBetween'} wrap={false} responsive={false}>
+            <EuiFlexItem grow={false}>{'ID'}</EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiCopy textToCopy={id}>
+                {(copy) => <EuiButtonIcon onClick={copy} iconType="document" color="text" />}
+              </EuiCopy>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        ),
+        description: <EuiTextTruncate text={id} />,
+      },
       {
         title: i18n.translate(
           'xpack.securitySolution.universalEntityFlyout.flyoutHeader.headerDataBoxes.categoryLabel',

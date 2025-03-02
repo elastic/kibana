@@ -48,7 +48,7 @@ const HeaderTags = ({ tags, labels }: { tags: EntityEcs['tags']; labels: EntityE
           </span>
         </EuiBadge>
       )),
-    [labels, euiTheme.border.thick, euiTheme.colors.disabledText]
+    [labels, euiTheme.colors.disabledText, euiTheme.border.thick, euiTheme.size.xs]
   );
 
   const allBadges = [...(tagBadges || []), ...(labelBadges || [])];

@@ -143,7 +143,7 @@ export interface AllAssetsProps {
 }
 
 // TODO: Asset Inventory - adjust and remove type casting once we have real universal entity data
-const getEntity = (record: DataTableRecord): EntityEcs => {
+const getEntity = (record: DataTableRecord) => {
   const { _source } = record.raw;
 
   const entityMock = {
@@ -151,11 +151,11 @@ const getEntity = (record: DataTableRecord): EntityEcs => {
     labels: { Group: 'cloud-sec-dev', Environment: 'Production' },
     id: 'mock-entity-id',
     criticality: 'low_impact',
-  };
+  } as EntityEcs;
 
   return {
-    entity: { ..._source.entity, ...entityMock },
-    source: _source,
+    entity: { ...(_source.entity || {}), ...entityMock },
+    source: _source || {},
   };
 };
 
@@ -201,6 +201,7 @@ export const AllAssets = ({
   };
 
   // -----------------------------------------------------------------------------------------
+
   const {
     filters,
     pageSize,

@@ -64,7 +64,7 @@ const columns: EuiInMemoryTableProps<FlattenedItem>['columns'] = [
     name: i18n.translate('xpack.securitySolution.fieldsTable.valueColumnLabel', {
       defaultMessage: 'Value',
     }),
-    render: (value) => <div style={{ width: '100%' }}>{getDescriptionDisplay(value)}</div>,
+    render: (value: unknown) => <div style={{ width: '100%' }}>{getDescriptionDisplay(value)}</div>,
   },
 ];
 
@@ -74,9 +74,9 @@ const getFlattenedItems = (resource: Record<string, unknown>) =>
 /**
  * A component that displays a table of flattened fields and values from a resource object.
  */
-export const FieldsTable = ({ data }: { data: Record<string, unknown> }) => (
+export const FieldsTable = ({ document }: { document: Record<string, unknown> }) => (
   <EuiInMemoryTable
-    items={getFlattenedItems(data)}
+    items={getFlattenedItems(document)}
     columns={columns}
     sorting={sorting}
     search={search}

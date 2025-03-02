@@ -38,9 +38,9 @@ export const ResponsiveDataCards = ({ cards, collapseWidth = 750 }: HeaderDataCa
       responsive={false}
       wrap
     >
-      {cards.map((card) => (
+      {cards.map((card, index) => (
         <EuiFlexItem
-          key={card.title}
+          key={index}
           css={css`
             flex-basis: calc(25% - ${euiTheme.size.s});
             width: calc(25% - ${euiTheme.size.s});

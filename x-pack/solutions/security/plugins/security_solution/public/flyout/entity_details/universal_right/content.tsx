@@ -7,7 +7,7 @@
 
 import React from 'react';
 import type { EsHitRecord } from '@kbn/discover-utils';
-import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { FieldsTable } from './components/fields_table';
 import { ExpandableSection } from '../../document_details/right/components/expandable_section';
 import { FlyoutBody } from '../../shared/components/flyout_body';
@@ -20,14 +20,16 @@ export const UniversalEntityFlyoutContent = ({ source }: UniversalEntityFlyoutCo
   return (
     <FlyoutBody>
       <ExpandableSection
-        title={i18n.translate(
-          'xpack.securitySolution.universalEntityFlyout.flyoutContent.expandableSection.fieldsLabel',
-          { defaultMessage: 'Fields' }
-        )}
+        title={
+          <FormattedMessage
+            id="xpack.securitySolution.universalEntityFlyout.flyoutContent.expandableSection.fieldsLabel"
+            defaultMessage="Fields"
+          />
+        }
         expanded
         localStorageKey={'universal_flyout:overview:fields_table'}
       >
-        <FieldsTable data={source} />
+        <FieldsTable document={source || {}} />
       </ExpandableSection>
     </FlyoutBody>
   );

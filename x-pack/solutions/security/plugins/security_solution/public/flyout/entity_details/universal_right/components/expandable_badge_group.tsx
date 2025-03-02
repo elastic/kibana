@@ -32,7 +32,8 @@ export const ExpandableBadgeGroup = ({
 }: ExpandableBadgeGroupProps) => {
   const [badgesToShow, setBadgesToShow] = useState<number | 'all'>(initialBadgeLimit || 'all');
 
-  const remainingCount = badges.length - badgesToShow;
+  // Calculate the number of remaining badges. If 'all' badges are shown, the remaining count is 0.
+  const remainingCount = badgesToShow === 'all' ? 0 : badges.length - badgesToShow;
   const maxScrollHeight = maxHeight ? `${maxHeight}px` : 'initial';
 
   return (
@@ -44,13 +45,20 @@ export const ExpandableBadgeGroup = ({
       `}
       responsive={false}
     >
-      {badgesToShow === 'all' ? badges : badges.slice(0, badgesToShow)}
-      {remainingCount > 0 && badgesToShow !== 'all' && (
-        <EuiBadge
-          color="hollow"
-          onClick={() => setBadgesToShow('all')}
-        >{`+${remainingCount}`}</EuiBadge>
-      )}
+      {
+        // Show all badges if 'all' is set, otherwise show the first `badgesToShow` badges
+        badgesToShow === 'all' ? badges : badges.slice(0, badgesToShow)
+      }
+      {
+        // Show the expand badge if there are remaining badges to show
+        remainingCount > 0 && badgesToShow !== 'all' && (
+          <EuiBadge
+            color="hollow"
+            onClick={() => setBadgesToShow('all')}
+            onClickAriaLabel="Expand Remaining Badges"
+          >{`+${remainingCount}`}</EuiBadge>
+        )
+      }
     </EuiBadgeGroup>
   );
 };

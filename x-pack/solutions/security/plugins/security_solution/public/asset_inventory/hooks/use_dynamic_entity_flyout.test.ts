@@ -34,7 +34,14 @@ const entity: EntityEcs = {
   id: '123',
   name: 'test-entity',
   type: 's3',
-  timestamp: new Date(),
+  tags: ['tag1', 'tag2'],
+  labels: { label1: 'value1', label2: 'value2' },
+  criticality: 'high_impact',
+  category: 'test',
+};
+
+const source = {
+  '@timestamp': '2021-10-01T12:00:00.000Z',
 };
 
 describe('useDynamicEntityFlyout', () => {
@@ -67,6 +74,7 @@ describe('useDynamicEntityFlyout', () => {
     act(() => {
       result.current.openDynamicFlyout({
         entity: { ...entity, type: 's3', name: 'testUniversal' },
+        source,
         scopeId: 'scope1',
         contextId: 'context1',
       });
@@ -89,6 +97,7 @@ describe('useDynamicEntityFlyout', () => {
     act(() => {
       result.current.openDynamicFlyout({
         entity: { ...entity, type: 'user', name: 'testUser' },
+        source,
         scopeId: 'scope1',
         contextId: 'context1',
       });
@@ -111,6 +120,7 @@ describe('useDynamicEntityFlyout', () => {
     act(() => {
       result.current.openDynamicFlyout({
         entity: { ...entity, type: 'host', name: 'testHost' },
+        source,
         scopeId: 'scope1',
         contextId: 'context1',
       });
@@ -133,6 +143,7 @@ describe('useDynamicEntityFlyout', () => {
     act(() => {
       result.current.openDynamicFlyout({
         entity: { ...entity, type: 'service', name: 'testService' },
+        source,
         scopeId: 'scope1',
         contextId: 'context1',
       });
@@ -153,7 +164,7 @@ describe('useDynamicEntityFlyout', () => {
     );
 
     act(() => {
-      result.current.openDynamicFlyout({ entity: { type: 'user' } as EntityEcs });
+      result.current.openDynamicFlyout({ entity: { type: 'user' } as EntityEcs, source });
     });
 
     expect(toastsMock.addDanger).toHaveBeenCalledWith(
@@ -165,7 +176,7 @@ describe('useDynamicEntityFlyout', () => {
     expect(onFlyoutCloseMock).toHaveBeenCalled();
 
     act(() => {
-      result.current.openDynamicFlyout({ entity: { type: 'host' } as EntityEcs });
+      result.current.openDynamicFlyout({ entity: { type: 'host' } as EntityEcs, source });
     });
 
     expect(toastsMock.addDanger).toHaveBeenCalledWith(
@@ -177,7 +188,7 @@ describe('useDynamicEntityFlyout', () => {
     expect(onFlyoutCloseMock).toHaveBeenCalled();
 
     act(() => {
-      result.current.openDynamicFlyout({ entity: { type: 'service' } as EntityEcs });
+      result.current.openDynamicFlyout({ entity: { type: 'service' } as EntityEcs, source });
     });
 
     expect(toastsMock.addDanger).toHaveBeenCalledWith(
