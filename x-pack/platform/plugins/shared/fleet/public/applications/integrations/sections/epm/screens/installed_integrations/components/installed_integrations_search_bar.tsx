@@ -87,17 +87,6 @@ export const InstalledIntegrationsSearchBar: React.FunctionComponent<{
           />
         ),
       },
-      {
-        iconType: 'checkInCircleFilled',
-        iconColor: theme.euiTheme.colors.textSuccess,
-        status: 'installed',
-        label: (
-          <FormattedMessage
-            id="xpack.fleet.epmInstalledIntegrations.installedFilterLabel"
-            defaultMessage="Installed"
-          />
-        ),
-      },
     ],
     [theme]
   );
