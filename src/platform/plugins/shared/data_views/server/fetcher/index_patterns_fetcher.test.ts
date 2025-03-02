@@ -71,6 +71,19 @@ describe('Index Pattern Fetcher - server', () => {
     expect(esClient.rollup.getRollupIndexCaps).toHaveBeenCalledTimes(1);
   });
 
+  it("works with index aliases - when rollup response doesn't have index as key", async () => {
+    esClient.rollup.getRollupIndexCaps.mockResponse(
+      rollupResponse as unknown as estypes.RollupGetRollupIndexCapsResponse
+    );
+    indexPatterns = new IndexPatternsFetcher(esClient, optionalParams);
+    await indexPatterns.getFieldsForWildcard({
+      pattern: patternList,
+      type: DataViewType.ROLLUP,
+      rollupIndex: 'foo',
+    });
+    expect(esClient.rollup.getRollupIndexCaps).toHaveBeenCalledTimes(1);
+  });
+
   it("doesn't call rollup api when given rollup data view and rollups are disabled", async () => {
     esClient.rollup.getRollupIndexCaps.mockResponse(
       rollupResponse as unknown as estypes.RollupGetRollupIndexCapsResponse

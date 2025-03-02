@@ -119,6 +119,9 @@ export const responseToItemArray = (
     const isFrozen = (index.attributes || []).includes(ResolveIndexResponseItemIndexAttrs.FROZEN);
 
     tags.push(...getTags(index.name));
+    index.aliases?.forEach((alias) => {
+      tags.push(...getTags(alias));
+    });
     if (isFrozen) {
       tags.push({ name: frozenLabel, key: 'frozen', color: 'danger' });
     }
@@ -130,11 +133,15 @@ export const responseToItemArray = (
     });
   });
   (response.aliases || []).forEach((alias) => {
-    source.push({
+    const item = {
       name: alias.name,
       tags: [{ key: 'alias', name: aliasLabel, color: 'default' }],
       item: alias,
-    });
+    };
+    // we only need to check the first index to see if its a rollup since there can only be one alias match
+    item.tags.push(...getTags(alias.indices[0]));
+    item.tags.push(...getTags(alias.name));
+    source.push(item);
   });
   (response.data_streams || []).forEach((dataStream) => {
     source.push({
