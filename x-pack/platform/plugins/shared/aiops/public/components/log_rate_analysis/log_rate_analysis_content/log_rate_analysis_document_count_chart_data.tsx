@@ -8,7 +8,7 @@
 import { type FC, useEffect } from 'react';
 import type { Moment } from 'moment';
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { estypes } from '@elastic/elasticsearch';
 
 import {
   useAppDispatch,
