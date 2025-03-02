@@ -15,9 +15,13 @@ export const vulnerabilitiesTableFieldLabels: Record<string, string> = {
     'xpack.csp.vulnerabilityFindings.vulnerabilityFindingsTable.vulnerabilityFindingsTableColumn.resourceNameColumnLabel',
     { defaultMessage: 'Resource Name' }
   ),
+  'vulnerability.title': i18n.translate(
+    'xpack.csp.vulnerabilityFindings.vulnerabilityFindingsTable.vulnerabilityFindingsTableColumn.vulnerabilityTitleColumnLabel',
+    { defaultMessage: 'Vulnerability Title' }
+  ),
   'vulnerability.id': i18n.translate(
     'xpack.csp.vulnerabilityFindings.vulnerabilityFindingsTable.vulnerabilityFindingsTableColumn.vulnerabilityIdColumnLabel',
-    { defaultMessage: 'Vulnerability' }
+    { defaultMessage: 'CVE ID' }
   ),
   'vulnerability.score.base': i18n.translate(
     'xpack.csp.vulnerabilityFindings.vulnerabilityFindingsTable.vulnerabilityFindingsTableColumn.vulnerabilityScoreColumnLabel',
