@@ -6,7 +6,8 @@
  */
 
 import React, { useCallback, useEffect, useMemo } from 'react';
-import { EuiSpacer } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
+import { useUpsellingComponent } from '../../../../../../common/hooks/use_upselling';
 import { PanelText } from '../../../../../../common/components/panel_text';
 import { RuleMigrationDataInputWrapper } from '../../../../../../siem_migrations/rules/components/data_input_flyout/data_input_wrapper';
 import { SiemMigrationTaskStatus } from '../../../../../../../common/siem_migrations/constants';
@@ -23,6 +24,7 @@ import {
   MissingPrivilegesCallOut,
   MissingPrivilegesDescription,
 } from '../../common/missing_privileges';
+import { UploadRulesSectionPanel } from './upload_rules_panel';
 
 const StartMigrationsBody: OnboardingCardComponent = React.memo(
   ({ setComplete, isCardComplete, setExpandedCardId, checkComplete }) => {
@@ -54,7 +56,7 @@ const StartMigrationsBody: OnboardingCardComponent = React.memo(
 
     return (
       <RuleMigrationDataInputWrapper onFlyoutClosed={onFlyoutClosed}>
-        <OnboardingCardContentPanel className={styles}>
+        <OnboardingCardContentPanel data-test-subj="StartMigrationsCardBody" className={styles}>
           {isLoading ? (
             <CenteredLoadingSpinner />
           ) : (
@@ -77,8 +79,24 @@ StartMigrationsBody.displayName = 'StartMigrationsBody';
 
 export const StartMigrationCard: OnboardingCardComponent<StartMigrationCardMetadata> = React.memo(
   ({ checkCompleteMetadata, ...props }) => {
+    const UpsellSectionComp = useUpsellingComponent('siem_migrations_start');
     if (!checkCompleteMetadata) {
       return <CenteredLoadingSpinner />;
+    }
+
+    if (UpsellSectionComp) {
+      return (
+        <OnboardingCardContentPanel paddingSize="none">
+          <EuiFlexGroup direction="column" gutterSize="l">
+            <EuiFlexItem>
+              <UpsellSectionComp />
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <UploadRulesSectionPanel isUploadMore={false} isDisabled />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </OnboardingCardContentPanel>
+      );
     }
 
     const { missingCapabilities } = checkCompleteMetadata;
