@@ -13,7 +13,7 @@ export enum ProductLine {
 }
 
 export enum ProductTier {
-  searchAILake = 'searchAILake',
+  searchAILake = 'search_ai_lake',
   essentials = 'essentials',
   complete = 'complete',
 }
