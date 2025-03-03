@@ -43,7 +43,7 @@ describe('kqlQueryDiffAlgorithm', () => {
         },
       };
 
-      const result = kqlQueryDiffAlgorithm(mockVersions);
+      const result = kqlQueryDiffAlgorithm(mockVersions, false);
 
       expect(result).toEqual(
         expect.objectContaining({
@@ -71,7 +71,7 @@ describe('kqlQueryDiffAlgorithm', () => {
         },
       };
 
-      const result = kqlQueryDiffAlgorithm(mockVersions);
+      const result = kqlQueryDiffAlgorithm(mockVersions, false);
 
       expect(result).toEqual(
         expect.objectContaining({
@@ -103,7 +103,7 @@ describe('kqlQueryDiffAlgorithm', () => {
         },
       };
 
-      const result = kqlQueryDiffAlgorithm(mockVersions);
+      const result = kqlQueryDiffAlgorithm(mockVersions, false);
 
       expect(result).toEqual(
         expect.objectContaining({
@@ -137,7 +137,7 @@ describe('kqlQueryDiffAlgorithm', () => {
         },
       };
 
-      const result = kqlQueryDiffAlgorithm(mockVersions);
+      const result = kqlQueryDiffAlgorithm(mockVersions, false);
 
       expect(result).toEqual(
         expect.objectContaining({
@@ -171,7 +171,7 @@ describe('kqlQueryDiffAlgorithm', () => {
         },
       };
 
-      const result = kqlQueryDiffAlgorithm(mockVersions);
+      const result = kqlQueryDiffAlgorithm(mockVersions, false);
 
       expect(result).toEqual(
         expect.objectContaining({
@@ -205,7 +205,7 @@ describe('kqlQueryDiffAlgorithm', () => {
         },
       };
 
-      const result = kqlQueryDiffAlgorithm(mockVersions);
+      const result = kqlQueryDiffAlgorithm(mockVersions, false);
 
       expect(result).toEqual(
         expect.objectContaining({
@@ -237,7 +237,7 @@ describe('kqlQueryDiffAlgorithm', () => {
         },
       };
 
-      const result = kqlQueryDiffAlgorithm(mockVersions);
+      const result = kqlQueryDiffAlgorithm(mockVersions, false);
 
       expect(result).toEqual(
         expect.objectContaining({
@@ -271,7 +271,7 @@ describe('kqlQueryDiffAlgorithm', () => {
         },
       };
 
-      const result = kqlQueryDiffAlgorithm(mockVersions);
+      const result = kqlQueryDiffAlgorithm(mockVersions, false);
 
       expect(result).toEqual(
         expect.objectContaining({
@@ -302,7 +302,7 @@ describe('kqlQueryDiffAlgorithm', () => {
           },
         };
 
-        const result = kqlQueryDiffAlgorithm(mockVersions);
+        const result = kqlQueryDiffAlgorithm(mockVersions, false);
 
         expect(result).toEqual(
           expect.objectContaining({
@@ -338,7 +338,7 @@ describe('kqlQueryDiffAlgorithm', () => {
           },
         };
 
-        const result = kqlQueryDiffAlgorithm(mockVersions);
+        const result = kqlQueryDiffAlgorithm(mockVersions, false);
 
         expect(result).toEqual(
           expect.objectContaining({
@@ -372,7 +372,7 @@ describe('kqlQueryDiffAlgorithm', () => {
           },
         };
 
-        const result = kqlQueryDiffAlgorithm(mockVersions);
+        const result = kqlQueryDiffAlgorithm(mockVersions, false);
 
         expect(result).toEqual(
           expect.objectContaining({
@@ -406,7 +406,7 @@ describe('kqlQueryDiffAlgorithm', () => {
           },
         };
 
-        const result = kqlQueryDiffAlgorithm(mockVersions);
+        const result = kqlQueryDiffAlgorithm(mockVersions, false);
 
         expect(result).toEqual(
           expect.objectContaining({
@@ -422,124 +422,250 @@ describe('kqlQueryDiffAlgorithm', () => {
 
   describe('if base_version is missing', () => {
     describe('if current_version and target_version are the same - scenario -AA', () => {
-      it('returns current_version as merged output if all versions are inline query types', () => {
-        const mockVersions: ThreeVersionsOf<RuleKqlQuery> = {
-          base_version: MissingVersion,
-          current_version: {
-            type: KqlQueryType.inline_query,
-            query: 'query string = true',
-            language: KqlQueryLanguageEnum.kuery,
-            filters: [],
-          },
-          target_version: {
-            type: KqlQueryType.inline_query,
-            query: 'query string = true',
-            language: KqlQueryLanguageEnum.kuery,
-            filters: [],
-          },
-        };
+      describe('if rule is NOT customized', () => {
+        it('returns current_version as merged output if all versions are inline query types', () => {
+          const mockVersions: ThreeVersionsOf<RuleKqlQuery> = {
+            base_version: MissingVersion,
+            current_version: {
+              type: KqlQueryType.inline_query,
+              query: 'query string = true',
+              language: KqlQueryLanguageEnum.kuery,
+              filters: [],
+            },
+            target_version: {
+              type: KqlQueryType.inline_query,
+              query: 'query string = true',
+              language: KqlQueryLanguageEnum.kuery,
+              filters: [],
+            },
+          };
 
-        const result = kqlQueryDiffAlgorithm(mockVersions);
+          const result = kqlQueryDiffAlgorithm(mockVersions, false);
 
-        expect(result).toEqual(
-          expect.objectContaining({
-            has_base_version: false,
-            base_version: undefined,
-            merged_version: mockVersions.current_version,
-            diff_outcome: ThreeWayDiffOutcome.MissingBaseNoUpdate,
-            merge_outcome: ThreeWayMergeOutcome.Current,
-            conflict: ThreeWayDiffConflict.NONE,
-          })
-        );
+          expect(result).toEqual(
+            expect.objectContaining({
+              has_base_version: false,
+              base_version: undefined,
+              merged_version: mockVersions.target_version,
+              diff_outcome: ThreeWayDiffOutcome.MissingBaseNoUpdate,
+              merge_outcome: ThreeWayMergeOutcome.Target,
+              conflict: ThreeWayDiffConflict.NONE,
+            })
+          );
+        });
+
+        it('returns current_version as merged output if all versions are saved query types', () => {
+          const mockVersions: ThreeVersionsOf<RuleKqlQuery> = {
+            base_version: MissingVersion,
+            current_version: {
+              type: KqlQueryType.saved_query,
+              saved_query_id: 'saved-query-id',
+            },
+            target_version: {
+              type: KqlQueryType.saved_query,
+              saved_query_id: 'saved-query-id',
+            },
+          };
+
+          const result = kqlQueryDiffAlgorithm(mockVersions, false);
+
+          expect(result).toEqual(
+            expect.objectContaining({
+              has_base_version: false,
+              base_version: undefined,
+              merged_version: mockVersions.target_version,
+              diff_outcome: ThreeWayDiffOutcome.MissingBaseNoUpdate,
+              merge_outcome: ThreeWayMergeOutcome.Target,
+              conflict: ThreeWayDiffConflict.NONE,
+            })
+          );
+        });
       });
 
-      it('returns current_version as merged output if all versions are saved query types', () => {
-        const mockVersions: ThreeVersionsOf<RuleKqlQuery> = {
-          base_version: MissingVersion,
-          current_version: {
-            type: KqlQueryType.saved_query,
-            saved_query_id: 'saved-query-id',
-          },
-          target_version: {
-            type: KqlQueryType.saved_query,
-            saved_query_id: 'saved-query-id',
-          },
-        };
+      describe('if rule is customized', () => {
+        it('returns current_version as merged output if all versions are inline query types', () => {
+          const mockVersions: ThreeVersionsOf<RuleKqlQuery> = {
+            base_version: MissingVersion,
+            current_version: {
+              type: KqlQueryType.inline_query,
+              query: 'query string = true',
+              language: KqlQueryLanguageEnum.kuery,
+              filters: [],
+            },
+            target_version: {
+              type: KqlQueryType.inline_query,
+              query: 'query string = true',
+              language: KqlQueryLanguageEnum.kuery,
+              filters: [],
+            },
+          };
 
-        const result = kqlQueryDiffAlgorithm(mockVersions);
+          const result = kqlQueryDiffAlgorithm(mockVersions, true);
 
-        expect(result).toEqual(
-          expect.objectContaining({
-            has_base_version: false,
-            base_version: undefined,
-            merged_version: mockVersions.current_version,
-            diff_outcome: ThreeWayDiffOutcome.MissingBaseNoUpdate,
-            merge_outcome: ThreeWayMergeOutcome.Current,
-            conflict: ThreeWayDiffConflict.NONE,
-          })
-        );
+          expect(result).toEqual(
+            expect.objectContaining({
+              has_base_version: false,
+              base_version: undefined,
+              merged_version: mockVersions.target_version,
+              diff_outcome: ThreeWayDiffOutcome.MissingBaseNoUpdate,
+              merge_outcome: ThreeWayMergeOutcome.Target,
+              conflict: ThreeWayDiffConflict.NONE,
+            })
+          );
+        });
+
+        it('returns current_version as merged output if all versions are saved query types', () => {
+          const mockVersions: ThreeVersionsOf<RuleKqlQuery> = {
+            base_version: MissingVersion,
+            current_version: {
+              type: KqlQueryType.saved_query,
+              saved_query_id: 'saved-query-id',
+            },
+            target_version: {
+              type: KqlQueryType.saved_query,
+              saved_query_id: 'saved-query-id',
+            },
+          };
+
+          const result = kqlQueryDiffAlgorithm(mockVersions, true);
+
+          expect(result).toEqual(
+            expect.objectContaining({
+              has_base_version: false,
+              base_version: undefined,
+              merged_version: mockVersions.target_version,
+              diff_outcome: ThreeWayDiffOutcome.MissingBaseNoUpdate,
+              merge_outcome: ThreeWayMergeOutcome.Target,
+              conflict: ThreeWayDiffConflict.NONE,
+            })
+          );
+        });
       });
     });
 
     describe('if current_version and target_version are different - scenario -AB', () => {
-      it('returns target_version as merged output if current and target versions have the same types', () => {
-        const mockVersions: ThreeVersionsOf<RuleKqlQuery> = {
-          base_version: MissingVersion,
-          current_version: {
-            type: KqlQueryType.inline_query,
-            query: 'query string = true',
-            language: KqlQueryLanguageEnum.kuery,
-            filters: [],
-          },
-          target_version: {
-            type: KqlQueryType.inline_query,
-            query: 'query string = false',
-            language: KqlQueryLanguageEnum.kuery,
-            filters: [],
-          },
-        };
+      describe('if rule is NOT customized', () => {
+        it('returns NONE conflict if current and target versions have the same types', () => {
+          const mockVersions: ThreeVersionsOf<RuleKqlQuery> = {
+            base_version: MissingVersion,
+            current_version: {
+              type: KqlQueryType.inline_query,
+              query: 'query string = true',
+              language: KqlQueryLanguageEnum.kuery,
+              filters: [],
+            },
+            target_version: {
+              type: KqlQueryType.inline_query,
+              query: 'query string = false',
+              language: KqlQueryLanguageEnum.kuery,
+              filters: [],
+            },
+          };
 
-        const result = kqlQueryDiffAlgorithm(mockVersions);
+          const result = kqlQueryDiffAlgorithm(mockVersions, false);
 
-        expect(result).toEqual(
-          expect.objectContaining({
-            has_base_version: false,
-            base_version: undefined,
-            merged_version: mockVersions.target_version,
-            diff_outcome: ThreeWayDiffOutcome.MissingBaseCanUpdate,
-            merge_outcome: ThreeWayMergeOutcome.Target,
-            conflict: ThreeWayDiffConflict.SOLVABLE,
-          })
-        );
+          expect(result).toEqual(
+            expect.objectContaining({
+              has_base_version: false,
+              base_version: undefined,
+              merged_version: mockVersions.target_version,
+              diff_outcome: ThreeWayDiffOutcome.MissingBaseCanUpdate,
+              merge_outcome: ThreeWayMergeOutcome.Target,
+              conflict: ThreeWayDiffConflict.NONE,
+            })
+          );
+        });
+
+        it('returns NONE conflict if current and target versions have different types', () => {
+          const mockVersions: ThreeVersionsOf<RuleKqlQuery> = {
+            base_version: MissingVersion,
+            current_version: {
+              type: KqlQueryType.saved_query,
+              saved_query_id: 'saved-query-id-2',
+            },
+            target_version: {
+              type: KqlQueryType.inline_query,
+              query: 'query string = false',
+              language: KqlQueryLanguageEnum.kuery,
+              filters: [],
+            },
+          };
+
+          const result = kqlQueryDiffAlgorithm(mockVersions, false);
+
+          expect(result).toEqual(
+            expect.objectContaining({
+              has_base_version: false,
+              base_version: undefined,
+              merged_version: mockVersions.target_version,
+              diff_outcome: ThreeWayDiffOutcome.MissingBaseCanUpdate,
+              merge_outcome: ThreeWayMergeOutcome.Target,
+              conflict: ThreeWayDiffConflict.NONE,
+            })
+          );
+        });
       });
 
-      it('returns target_version as merged output if current and target versions have different types', () => {
-        const mockVersions: ThreeVersionsOf<RuleKqlQuery> = {
-          base_version: MissingVersion,
-          current_version: {
-            type: KqlQueryType.saved_query,
-            saved_query_id: 'saved-query-id-2',
-          },
-          target_version: {
-            type: KqlQueryType.inline_query,
-            query: 'query string = false',
-            language: KqlQueryLanguageEnum.kuery,
-            filters: [],
-          },
-        };
+      describe('if rule is customized', () => {
+        it('returns SOLVABLE conflict if current and target versions have the same types', () => {
+          const mockVersions: ThreeVersionsOf<RuleKqlQuery> = {
+            base_version: MissingVersion,
+            current_version: {
+              type: KqlQueryType.inline_query,
+              query: 'query string = true',
+              language: KqlQueryLanguageEnum.kuery,
+              filters: [],
+            },
+            target_version: {
+              type: KqlQueryType.inline_query,
+              query: 'query string = false',
+              language: KqlQueryLanguageEnum.kuery,
+              filters: [],
+            },
+          };
 
-        const result = kqlQueryDiffAlgorithm(mockVersions);
+          const result = kqlQueryDiffAlgorithm(mockVersions, true);
 
-        expect(result).toEqual(
-          expect.objectContaining({
-            has_base_version: false,
-            base_version: undefined,
-            merged_version: mockVersions.target_version,
-            diff_outcome: ThreeWayDiffOutcome.MissingBaseCanUpdate,
-            merge_outcome: ThreeWayMergeOutcome.Target,
-            conflict: ThreeWayDiffConflict.SOLVABLE,
-          })
-        );
+          expect(result).toEqual(
+            expect.objectContaining({
+              has_base_version: false,
+              base_version: undefined,
+              merged_version: mockVersions.target_version,
+              diff_outcome: ThreeWayDiffOutcome.MissingBaseCanUpdate,
+              merge_outcome: ThreeWayMergeOutcome.Target,
+              conflict: ThreeWayDiffConflict.SOLVABLE,
+            })
+          );
+        });
+
+        it('returns SOLVABLE conflict if current and target versions have different types', () => {
+          const mockVersions: ThreeVersionsOf<RuleKqlQuery> = {
+            base_version: MissingVersion,
+            current_version: {
+              type: KqlQueryType.saved_query,
+              saved_query_id: 'saved-query-id-2',
+            },
+            target_version: {
+              type: KqlQueryType.inline_query,
+              query: 'query string = false',
+              language: KqlQueryLanguageEnum.kuery,
+              filters: [],
+            },
+          };
+
+          const result = kqlQueryDiffAlgorithm(mockVersions, true);
+
+          expect(result).toEqual(
+            expect.objectContaining({
+              has_base_version: false,
+              base_version: undefined,
+              merged_version: mockVersions.target_version,
+              diff_outcome: ThreeWayDiffOutcome.MissingBaseCanUpdate,
+              merge_outcome: ThreeWayMergeOutcome.Target,
+              conflict: ThreeWayDiffConflict.SOLVABLE,
+            })
+          );
+        });
       });
     });
   });
