@@ -18,7 +18,9 @@ import type {
 } from '../../../../common/options_list';
 import type { DataControlApi } from '../types';
 
-export type OptionsListControlApi = DataControlApi;
+export type OptionsListControlApi = DataControlApi & {
+  setSelectedOptions: (options: OptionsListSelection[] | undefined) => void;
+};
 
 export interface OptionsListComponentState
   extends Omit<OptionsListControlState, keyof OptionsListDisplaySettings> {
