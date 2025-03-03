@@ -18,6 +18,8 @@ import { TagsList } from '@kbn/observability-shared-plugin/public';
 import { SloStateBadge, SloStatusBadge, SloValueBadge } from '../../../components/slo/slo_badges';
 import { SloRemoteBadge } from '../../slos/components/badges/slo_remote_badge';
 import { SLOGroupings } from './groupings/slo_groupings';
+import { i18n } from '@kbn/i18n';
+import moment from 'moment';
 
 export interface Props {
   slo?: SLOWithSummaryResponse;
@@ -58,7 +60,22 @@ export function HeaderTitle({ isLoading, slo }: Props) {
           </EuiText>
         </EuiFlexItem>
       )}
+      <EuiFlexItem grow={false}>
+        <EuiMarkdownFormat textSize="xs" color="subdued">
+          {i18n.translate('xpack.slo.sloDetails.headerTitle.lastUpdatedLabel', {
+            defaultMessage: '**Last updated by** {updatedBy} **on** {updatedAt}',
+            values: {
+              updatedBy: slo.updatedBy ?? NOT_AVAILABLE_LABEL,
+              updatedAt: moment(slo.updatedAt).format('ll'),
+            },
+          })}
+        </EuiMarkdownFormat>
+      </EuiFlexItem>
       <SLOGroupings slo={slo} />
     </EuiFlexGroup>
   );
 }
+
+const NOT_AVAILABLE_LABEL = i18n.translate('xpack.slo.sloDetails.headerTitle.notAvailableLabel', {
+  defaultMessage: 'n/a',
+});
