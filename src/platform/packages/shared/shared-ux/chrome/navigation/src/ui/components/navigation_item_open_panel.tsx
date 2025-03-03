@@ -102,18 +102,21 @@ export const NavigationItemOpenPanel: FC<Props> = ({ item, navigateToUrl, active
     [`panelOpener-deepLinkId-${deepLink?.id}`]: !!deepLink,
   });
 
-  const togglePanel = useCallback(() => {
-    if (selectedNode?.id === item.id) {
-      closePanel();
-    } else {
-      openPanel(item);
-    }
-  }, [selectedNode?.id, item, closePanel, openPanel]);
+  const togglePanel = useCallback(
+    (target: EventTarget) => {
+      if (selectedNode?.id === item.id) {
+        closePanel();
+      } else {
+        openPanel(item, target as Element);
+      }
+    },
+    [selectedNode?.id, item, closePanel, openPanel]
+  );
 
   const onLinkClick = useCallback(
     (e: React.MouseEvent) => {
       if (!href) {
-        togglePanel();
+        togglePanel(e.target);
         return;
       }
       e.preventDefault();
@@ -123,9 +126,12 @@ export const NavigationItemOpenPanel: FC<Props> = ({ item, navigateToUrl, active
     [closePanel, href, navigateToUrl, togglePanel]
   );
 
-  const onIconClick = useCallback(() => {
-    togglePanel();
-  }, [togglePanel]);
+  const onIconClick = useCallback(
+    (e: React.MouseEvent) => {
+      togglePanel(e.target);
+    },
+    [togglePanel]
+  );
 
   if (!hasLandingPage) {
     return (

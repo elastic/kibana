@@ -26,7 +26,7 @@ import { ContentProvider } from './types';
 export interface PanelContext {
   isOpen: boolean;
   toggle: () => void;
-  open: (navNode: PanelSelectedNode) => void;
+  open: (navNode: PanelSelectedNode, openerEl: Element | null) => void;
   close: () => void;
   /** The selected node is the node in the main panel that opens the Panel */
   selectedNode: PanelSelectedNode | null;
@@ -72,9 +72,14 @@ export const PanelProvider: FC<PropsWithChildren<Props>> = ({
   }, []);
 
   const open = useCallback(
-    (navNode: PanelSelectedNode) => {
+    (navNode: PanelSelectedNode, openerEl: Element | null) => {
       setActiveNode(navNode);
-      selectedNodeEl.current = getSelectedNodeEl(navNode);
+
+      const navNodeEl = openerEl?.closest(`[data-test-subj~=nav-item]`);
+      if (navNodeEl) {
+        selectedNodeEl.current = navNodeEl;
+      }
+
       setIsOpen(true);
       setSelectedNode?.(navNode);
     },
