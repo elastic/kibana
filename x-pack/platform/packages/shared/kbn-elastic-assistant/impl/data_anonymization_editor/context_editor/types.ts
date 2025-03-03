@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import type { Direction } from '@elastic/eui';
-
 export interface ContextEditorRow {
   /** Is the field is allowed to be included in the context sent to the assistant */
   allowed: boolean;
@@ -29,14 +27,6 @@ export const FIELDS = {
   ID: 'id',
   RAW_VALUES: 'rawValues',
 };
-
-export interface SortConfig {
-  sort: {
-    direction: Direction;
-    field: string;
-  };
-}
-
 /** The `field` in the specified `list` will be added or removed, as specified by the `operation` */
 export interface BatchUpdateListItem {
   field: string;

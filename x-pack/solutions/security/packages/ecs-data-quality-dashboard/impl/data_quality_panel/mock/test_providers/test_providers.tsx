@@ -86,7 +86,6 @@ const TestExternalProvidersComponent: React.FC<TestExternalProvidersProps> = ({ 
               }}
               getComments={mockGetComments}
               http={mockHttp}
-              baseConversations={{}}
               navigateToApp={mockNavigateToApp}
               productDocBase={{
                 installation: { getStatus: jest.fn(), install: jest.fn(), uninstall: jest.fn() },

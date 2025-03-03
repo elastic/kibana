@@ -86,10 +86,16 @@ export const RulesTableToolbar = React.memo(() => {
     () => rules.filter((rule) => selectedRuleIds.includes(rule.id)),
     [rules, selectedRuleIds]
   );
+
+  const selectedRuleNames = useMemo(() => selectedRules.map((rule) => rule.name), [selectedRules]);
   const getPromptContext = useCallback(
     async () => getPromptContextFromDetectionRules(selectedRules),
     [selectedRules]
   );
+
+  const chatTitle = useMemo(() => {
+    return `${i18nAssistant.DETECTION_RULES_CONVERSATION_ID} - ${selectedRuleNames.join(', ')}`;
+  }, [selectedRuleNames]);
 
   return (
     <EuiFlexGroup justifyContent={'spaceBetween'}>
@@ -100,7 +106,7 @@ export const RulesTableToolbar = React.memo(() => {
         {hasAssistantPrivilege && selectedRules.length > 0 && (
           <NewChat
             category="detection-rules"
-            conversationId={i18nAssistant.DETECTION_RULES_CONVERSATION_ID}
+            conversationTitle={chatTitle}
             description={i18nAssistant.RULE_MANAGEMENT_CONTEXT_DESCRIPTION}
             getPromptContext={getPromptContext}
             suggestedUserPrompt={i18nAssistant.EXPLAIN_THEN_SUMMARIZE_RULE_DETAILS}
