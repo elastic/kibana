@@ -109,11 +109,11 @@ describe('Discover documents layout', () => {
     expect(component.find('.dscTable').exists()).toBeTruthy();
   });
 
-  test('render default value for paginationMode as standard', async () => {
+  test('render default value for paginationMode as multiPage', async () => {
     const component = await mountComponent(FetchStatus.COMPLETE, esHitsMock);
     const discoverGridComponent = component.find(DiscoverGrid);
     expect(discoverGridComponent.exists()).toBeTruthy();
-    expect(discoverGridComponent.prop('paginationMode')).toEqual('standard');
+    expect(discoverGridComponent.prop('paginationMode')).toEqual('multiPage');
   });
 
   test('render complete', async () => {
