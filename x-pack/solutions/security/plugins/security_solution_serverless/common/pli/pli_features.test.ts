@@ -4,10 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { getProductProductFeatures } from './pli_features';
+import { getEnabledProductFeatures } from './pli_features';
 import * as pliConfig from './pli_config';
 import { ProductLine, ProductTier } from '../product';
 
+// TODO: FIXME
 describe('getProductProductFeatures', () => {
   it('should return the essentials PLIs features', () => {
     // @ts-ignore reassigning readonly value for testing
@@ -18,7 +19,7 @@ describe('getProductProductFeatures', () => {
       },
     };
 
-    const productFeatureKeys = getProductProductFeatures([
+    const productFeatureKeys = getEnabledProductFeatures([
       { product_line: ProductLine.security, product_tier: ProductTier.essentials },
     ]);
 
@@ -34,7 +35,7 @@ describe('getProductProductFeatures', () => {
       },
     };
 
-    const productFeatureKeys = getProductProductFeatures([
+    const productFeatureKeys = getEnabledProductFeatures([
       { product_line: ProductLine.security, product_tier: ProductTier.complete },
     ]);
 
@@ -42,6 +43,6 @@ describe('getProductProductFeatures', () => {
   });
 
   it('returns an empty object if no PLIs are enabled', () => {
-    expect(getProductProductFeatures([])).toEqual([]);
+    expect(getEnabledProductFeatures([])).toEqual([]);
   });
 });

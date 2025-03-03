@@ -7,11 +7,13 @@
 
 export enum ProductLine {
   security = 'security',
+  aiSoc = 'ai_soc',
   endpoint = 'endpoint',
   cloud = 'cloud',
 }
 
 export enum ProductTier {
+  searchAiLake = 'search_ai_lake',
   essentials = 'essentials',
   complete = 'complete',
 }

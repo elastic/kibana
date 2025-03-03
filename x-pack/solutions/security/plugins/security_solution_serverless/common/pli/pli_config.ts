@@ -8,18 +8,37 @@
 import type { ProductFeatureKeys } from '@kbn/security-solution-features';
 import { ProductFeatureKey } from '@kbn/security-solution-features/keys';
 import type { SecurityProductLine, SecurityProductTier } from '../config';
+import { ProductLine } from '../product';
 
 type PliProductFeatures = Readonly<
   Record<SecurityProductLine, Readonly<Record<SecurityProductTier, Readonly<ProductFeatureKeys>>>>
 >;
 
 export const PLI_PRODUCT_FEATURES: PliProductFeatures = {
-  security: {
+  [ProductLine.aiSoc]: {
+    search_ai_lake: [
+      ProductFeatureKey.attackDiscovery,
+      ProductFeatureKey.assistant,
+      ProductFeatureKey.threatIntelligence,
+    ],
     essentials: [
+      ProductFeatureKey.attackDiscovery,
+      ProductFeatureKey.assistant,
+      ProductFeatureKey.threatIntelligence,
+    ],
+    complete: [],
+  },
+  [ProductLine.security]: {
+    search_ai_lake: [ProductFeatureKey.externalDetections],
+    essentials: [
+      ProductFeatureKey.detections,
       ProductFeatureKey.endpointHostManagement,
       ProductFeatureKey.endpointPolicyManagement,
     ],
     complete: [
+      ProductFeatureKey.detections,
+      ProductFeatureKey.endpointHostManagement,
+      ProductFeatureKey.endpointPolicyManagement,
       ProductFeatureKey.advancedInsights,
       ProductFeatureKey.assistant,
       ProductFeatureKey.attackDiscovery,
@@ -33,13 +52,17 @@ export const PLI_PRODUCT_FEATURES: PliProductFeatures = {
       ProductFeatureKey.siemMigrations,
     ],
   },
-  endpoint: {
+  [ProductLine.endpoint]: {
+    search_ai_lake: [],
     essentials: [
       ProductFeatureKey.endpointPolicyProtections,
       ProductFeatureKey.endpointArtifactManagement,
       ProductFeatureKey.endpointExceptions,
     ],
     complete: [
+      ProductFeatureKey.endpointPolicyProtections,
+      ProductFeatureKey.endpointArtifactManagement,
+      ProductFeatureKey.endpointExceptions,
       ProductFeatureKey.endpointHostIsolationExceptions,
       ProductFeatureKey.endpointResponseActions,
       ProductFeatureKey.osqueryAutomatedResponseActions,
@@ -49,8 +72,9 @@ export const PLI_PRODUCT_FEATURES: PliProductFeatures = {
       ProductFeatureKey.securityWorkflowInsights,
     ],
   },
-  cloud: {
+  [ProductLine.cloud]: {
+    search_ai_lake: [],
     essentials: [ProductFeatureKey.cloudSecurityPosture],
-    complete: [],
+    complete: [ProductFeatureKey.cloudSecurityPosture],
   },
 } as const;
