@@ -167,7 +167,7 @@ export type LinkShareUIConfig = ShareActionUserInputBase<{
    * @description allows a consumer to provide a custom method which when invoked
    * handles providing a share url in the context of said consumer
    */
-  delegatedShareUrlHandler?: () => string;
+  delegatedShareUrlHandler?: () => Promise<string>;
 }>;
 
 export type EmbedShareUIConfig = ShareActionUserInputBase<{

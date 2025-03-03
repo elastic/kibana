@@ -659,7 +659,7 @@ export const LensTopNavMenu = ({
                         />
                       </EuiCallOut>
                     ),
-                    delegatedShareUrlHandler: () => {
+                    delegatedShareUrlHandler: async () => {
                       return isCurrentStateDirty || !currentDoc?.savedObjectId
                         ? shareableUrl!
                         : savedObjectURL.href;
