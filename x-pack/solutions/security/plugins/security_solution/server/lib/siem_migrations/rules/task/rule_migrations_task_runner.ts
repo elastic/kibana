@@ -149,7 +149,7 @@ export class RuleMigrationTaskRunner {
         return;
       } else {
         throw new Error(
-          `Migration initialization failed. Make sure the ELSER model is correctly started: ${error}`
+          `Migration initialization failed. Make sure the ELSER model is deployed and running at Machine Learning > Trained Models. ${error}`
         );
       }
     }
