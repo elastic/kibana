@@ -1465,13 +1465,47 @@ paths:
         - Rules API
   /api/detection_engine/rules/_bulk_action:
     post:
-      description: >-
+      description: >
         Apply a bulk action, such as bulk edit, duplicate, or delete, to
         multiple detection rules. The bulk action is applied to all rules that
         match the query or to the rules listed by their IDs.
+
+
+        > warn
+
+        > When used with  [API
+        key](https://www.elastic.co/guide/en/kibana/current/api-keys.html)
+        authentication, the user's key gets assigned to the affected rules. If
+        the user's key gets deleted or the user becomes inactive, the rules will
+        stop running.
+
+
+        > If the API key that is used for authorization has different privileges
+        than the key that created or most recently updated the rule, the rule
+        behavior might change.
       operationId: PerformRulesBulkAction
       parameters:
-        - description: Enables dry run mode for the request call.
+        - description: >
+            Enables dry run mode for the request call.
+
+
+            Enable dry run mode to verify that bulk actions can be applied to
+            specified rules. Certain rules, such as prebuilt Elastic rules,
+            can’t be edited and will return errors in the request response.
+            Error details will contain an explanation, the rule name and/or ID,
+            and additional troubleshooting information.
+
+
+            To enable dry run mode on a request, add the query parameter
+            dry_run=true to the end of the request URL. Rules specified in the
+            request will be temporarily updated. These updates won’t be written
+            to Elasticsearch.
+
+
+            > info
+
+            > Dry run mode is not supported for the export bulk action. A 400
+            error will be returned in the request response.
           in: query
           name: dry_run
           required: false
@@ -1480,6 +1514,44 @@ paths:
       requestBody:
         content:
           application/json:
+            examples:
+              example1:
+                description: The following request activates all rules with the test tag
+                summary: Activate all rules with the test tag
+                value:
+                  action: enable
+                  query: 'alert.attributes.tags: "test"'
+              example2:
+                description: >-
+                  The following request adds tags tag-1 and tag-2 to the rules
+                  that have the IDs sent in the payload
+                summary: Add tags to rules
+                value:
+                  action: edit
+                  edit:
+                    - type: add_tags
+                      value:
+                        - tag-1
+                        - tag-2
+                  ids:
+                    - 8bc7dad0-9320-11ec-9265-8b772383a08d
+                    - 8e5c1a40-9320-11ec-9265-8b772383a08d
+              example3:
+                description: >-
+                  The following request will validate that the
+                  add_index_patterns bulk action can be successfully applied to
+                  three rules.
+                summary: Dry run - Validate add_index_patterns bulk action
+                value:
+                  action: edit
+                  edit:
+                    - type: add_index_patterns
+                      value:
+                        - test-*
+                  ids:
+                    - 81aa0480-06af-11ed-94fb-dd1a0597d8d2
+                    - dc015d10-0831-11ed-ac8b-05a222bd8d4a
+                    - de8f5af0-0831-11ed-ac8b-05a222bd8d4a
             schema:
               oneOf:
                 - $ref: '#/components/schemas/BulkDeleteRules'
@@ -1493,6 +1565,257 @@ paths:
         '200':
           content:
             application/json:
+              examples:
+                example1:
+                  description: >-
+                    In this response one rule was updated and one was skipped.
+                    Objects returned in attributes.results.skipped will only
+                    include rules' id, name, and skip_reason.
+                  summary: Successful response
+                  value:
+                    attributes:
+                      results:
+                        created: []
+                        deleted: []
+                        skipped:
+                          - id: 51658332-a15e-4c9e-912a-67214e2e2359
+                            name: Skipped rule
+                            skip_reason: RULE_NOT_MODIFIED
+                        updated:
+                          - anomaly_threshold: 50
+                            author:
+                              - Elastic
+                            created_at: '2022-02-21T14:14:13.801Z'
+                            created_by: elastic
+                            description: >-
+                              A machine learning job detected unusually large
+                              numbers of DNS queries for a single top-level DNS
+                              domain, which is often used for DNS tunneling. DNS
+                              tunneling can be used for command-and-control,
+                              persistence, or data exfiltration activity. For
+                              example, dnscat tends to generate many DNS
+                              questions for a top-level domain as it uses the
+                              DNS protocol to tunnel data.
+                            enabled: true
+                            exceptions_list: []
+                            execution_summary:
+                              last_execution:
+                                date: '2022-03-23T16:06:12.787Z'
+                                message: >-
+                                  This rule attempted to query data from
+                                  Elasticsearch indices listed in the "Index
+                                  pattern" section of the rule definition, but
+                                  no matching index was found.
+                                metrics:
+                                  execution_gap_duration_s: 0
+                                  total_indexing_duration_ms: 15
+                                  total_search_duration_ms: 135
+                                status: partial failure
+                                status_order: 20
+                            false_positives:
+                              - >-
+                                DNS domains that use large numbers of child
+                                domains, such as software or content
+                                distribution networks, can trigger this alert
+                                and such parent domains can be excluded.
+                            from: now-45m
+                            id: 8bc7dad0-9320-11ec-9265-8b772383a08d
+                            immutable: false
+                            interval: 15m
+                            license: Elastic License v2
+                            machine_learning_job_id:
+                              - packetbeat_dns_tunneling
+                            max_signals: 100
+                            name: DNS Tunneling [Duplicate]
+                            references:
+                              - >-
+                                https://www.elastic.co/guide/en/security/current/prebuilt-ml-jobs.html
+                            related_integrations: []
+                            required_fields: []
+                            risk_score: 21
+                            risk_score_mapping: []
+                            rule_id: 7289bf08-4e91-4c70-bf01-e04c4c5d7756
+                            setup: ''
+                            severity: low
+                            severity_mapping: []
+                            tags:
+                              - Elastic
+                              - Network
+                              - Threat Detection
+                              - ML
+                            threat: []
+                            to: now
+                            type: machine_learning
+                            updated_at: '2022-02-21T17:05:50.883Z'
+                            updated_by: elastic
+                            version: 6
+                      summary:
+                        failed: 0
+                        skipped: 1
+                        succeeded: 1
+                        total: 2
+                    rules_count: 1
+                    success: true
+                example2:
+                  description: >-
+                    If processing of any rule fails, a partial error outputs the
+                    ID and/or name of the affected rule and the corresponding
+                    error, as well as successfully processed rules (in the same
+                    format as a successful 200 request).
+                  summary: Partial failure
+                  value:
+                    value:
+                      attributes:
+                        errors:
+                          - message: >-
+                              Index patterns can't be added. Machine learning
+                              rule doesn't have index patterns property
+                            rules:
+                              - id: 8bc7dad0-9320-11ec-9265-8b772383a08d
+                                name: DNS Tunneling [Duplicate]
+                            status_code: 500
+                        results:
+                          created: []
+                          deleted: []
+                          skipped: []
+                          updated:
+                            - actions: []
+                              author:
+                                - Elastic
+                              created_at: '2022-02-21T14:14:17.883Z'
+                              created_by: elastic
+                              description: >-
+                                Generates a detection alert for each external
+                                alert written to the configured indices.
+                                Enabling this rule allows you to immediately
+                                begin investigating external alerts in the app.
+                              enabled: true
+                              exceptions_list: []
+                              execution_summary:
+                                last_execution:
+                                  date: '2022-03-23T16:06:12.787Z'
+                                  message: >-
+                                    This rule attempted to query data from
+                                    Elasticsearch indices listed in the "Index
+                                    pattern" section of the rule definition, but
+                                    no matching index was found.
+                                  metrics:
+                                    execution_gap_duration_s: 0
+                                    total_indexing_duration_ms: 15
+                                    total_search_duration_ms: 135
+                                  status: partial failure
+                                  status_order: 20
+                              false_positives: []
+                              from: now-6m
+                              id: 8e5c1a40-9320-11ec-9265-8b772383a08d
+                              immutable: false
+                              index:
+                                - apm-*-transaction*
+                                - traces-apm*
+                                - auditbeat-*
+                                - filebeat-*
+                                - logs-*
+                                - packetbeat-*
+                                - winlogbeat-*
+                                - added-by-id-*
+                              interval: 5m
+                              language: kuery
+                              license: Elastic License v2
+                              max_signals: 10000
+                              name: External Alerts [Duplicate]
+                              query: >
+                                event.kind:alert and not event.module:(endgame
+                                or endpoint)
+                              references: []
+                              related_integrations: []
+                              required_fields: []
+                              risk_score: 47
+                              risk_score_mapping:
+                                - field: event.risk_score
+                                  operator: equals
+                                  value: ''
+                              rule_id: 941faf98-0cdc-4569-b16d-4af962914d61
+                              rule_name_override: message
+                              setup: ''
+                              severity: medium
+                              severity_mapping:
+                                - field: event.severity
+                                  operator: equals
+                                  severity: low
+                                  value: '21'
+                                - field: event.severity
+                                  operator: equals
+                                  severity: medium
+                                  value: '47'
+                                - field: event.severity
+                                  operator: equals
+                                  severity: high
+                                  value: '73'
+                                - field: event.severity
+                                  operator: equals
+                                  severity: critical
+                                  value: '99'
+                              tags:
+                                - Elastic
+                                - Network
+                                - Windows
+                                - APM
+                                - macOS
+                                - Linux
+                              threat: []
+                              timestamp_override: event.ingested
+                              to: now
+                              type: query
+                              updated_at: '2022-02-21T16:56:22.818Z'
+                              updated_by: elastic
+                              version: 5
+                        summary:
+                          failed: 1
+                          skipped: 0
+                          succeeded: 1
+                          total: 2
+                      message: Bulk edit partially failed
+                      rules_count: 2
+                      status_code: 500
+                      success: false
+                example3:
+                  description: >-
+                    The attributes.errors section of the response shows that two
+                    rules failed to update and one succeeded. The same results
+                    would be returned if you ran the request without dry run
+                    mode enabled. Notice that there are no arrays in
+                    attributes.results. In dry run mode, rule updates are not
+                    applied and saved to Elasticsearch, so the endpoint wouldn’t
+                    return results for rules that have been updated, created, or
+                    deleted.
+                  summary: Dry run
+                  value:
+                    attributes:
+                      errors:
+                        - err_code: IMMUTABLE
+                          message: Elastic rule can't be edited
+                          rules:
+                            - id: 81aa0480-06af-11ed-94fb-dd1a0597d8d2
+                              name: Unusual AWS Command for a User
+                          status_code: 500
+                        - err_code: MACHINE_LEARNING_INDEX_PATTERN
+                          message: Machine learning rule doesn't have index patterns
+                          rules:
+                            - id: dc015d10-0831-11ed-ac8b-05a222bd8d4a
+                              name: Suspicious Powershell Script [Duplicate]
+                          status_code: 500
+                      results:
+                        created: []
+                        deleted: []
+                        skipped: []
+                        updated: []
+                      summary:
+                        failed: 2
+                        skipped: 0
+                        succeeded: 1
+                        total: 3
+                    message: Bulk edit partially failed
+                    status_code: 500
               schema:
                 oneOf:
                   - $ref: '#/components/schemas/BulkEditActionResponse'
@@ -3245,13 +3568,15 @@ components:
             - delete
           type: string
         ids:
-          description: Array of rule IDs
+          description: >-
+            Array of rule IDs. Array of rule IDs to which a bulk action will be
+            applied. Only valid when query property is undefined.
           items:
             type: string
           minItems: 1
           type: array
         query:
-          description: Query to filter rules
+          description: Query to filter rules.
           type: string
       required:
         - action
@@ -3263,13 +3588,15 @@ components:
             - disable
           type: string
         ids:
-          description: Array of rule IDs
+          description: >-
+            Array of rule IDs. Array of rule IDs to which a bulk action will be
+            applied. Only valid when query property is undefined.
           items:
             type: string
           minItems: 1
           type: array
         query:
-          description: Query to filter rules
+          description: Query to filter rules.
           type: string
       required:
         - action
@@ -3281,6 +3608,7 @@ components:
             - duplicate
           type: string
         duplicate:
+          description: Duplicate object that describes applying an update action.
           type: object
           properties:
             include_exceptions:
@@ -3293,13 +3621,15 @@ components:
             - include_exceptions
             - include_expired_exceptions
         ids:
-          description: Array of rule IDs
+          description: >-
+            Array of rule IDs. Array of rule IDs to which a bulk action will be
+            applied. Only valid when query property is undefined.
           items:
             type: string
           minItems: 1
           type: array
         query:
-          description: Query to filter rules
+          description: Query to filter rules.
           type: string
       required:
         - action
@@ -3355,6 +3685,13 @@ components:
         - deleted
         - skipped
     BulkEditActionSummary:
+      description: >-
+        A rule can only be skipped when the bulk action to be performed on it
+        results in nothing being done. For example, if the edit action is used
+        to add a tag to a rule that already has that tag, or to delete an index
+        pattern that is not specified in a rule. Objects returned in
+        attributes.results.skipped will only include rules' id, name, and
+        skip_reason.
       type: object
       properties:
         failed:
@@ -3384,13 +3721,15 @@ components:
           minItems: 1
           type: array
         ids:
-          description: Array of rule IDs
+          description: >-
+            Array of rule IDs. Array of rule IDs to which a bulk action will be
+            applied. Only valid when query property is undefined.
           items:
             type: string
           minItems: 1
           type: array
         query:
-          description: Query to filter rules
+          description: Query to filter rules.
           type: string
       required:
         - action
@@ -3407,13 +3746,15 @@ components:
             - enable
           type: string
         ids:
-          description: Array of rule IDs
+          description: >-
+            Array of rule IDs. Array of rule IDs to which a bulk action will be
+            applied. Only valid when query property is undefined.
           items:
             type: string
           minItems: 1
           type: array
         query:
-          description: Query to filter rules
+          description: Query to filter rules.
           type: string
       required:
         - action
@@ -3427,13 +3768,15 @@ components:
             - export
           type: string
         ids:
-          description: Array of rule IDs
+          description: >-
+            Array of rule IDs. Array of rule IDs to which a bulk action will be
+            applied. Only valid when query property is undefined.
           items:
             type: string
           minItems: 1
           type: array
         query:
-          description: Query to filter rules
+          description: Query to filter rules.
           type: string
       required:
         - action
@@ -3445,15 +3788,18 @@ components:
             - run
           type: string
         ids:
-          description: Array of rule IDs
+          description: >-
+            Array of rule IDs. Array of rule IDs to which a bulk action will be
+            applied. Only valid when query property is undefined.
           items:
             type: string
           minItems: 1
           type: array
         query:
-          description: Query to filter rules
+          description: Query to filter rules.
           type: string
         run:
+          description: Object that describes applying a manual rule run action.
           type: object
           properties:
             end_date:
