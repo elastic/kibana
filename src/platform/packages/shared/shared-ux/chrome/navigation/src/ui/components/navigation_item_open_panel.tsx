@@ -10,7 +10,7 @@
 import React, { useCallback, type FC } from 'react';
 import classNames from 'classnames';
 import { css } from '@emotion/react';
-import { transparentize, EuiButton } from '@elastic/eui';
+import { transparentize, EuiButton, useEuiTheme } from '@elastic/eui';
 import type { ChromeProjectNavigationNode } from '@kbn/core-chrome-browser';
 import { SubItemTitle } from './subitem_title';
 import { isActiveFromUrl } from '../../utils';
@@ -24,6 +24,9 @@ interface Props {
 }
 
 export const NavigationItemOpenPanel: FC<Props> = ({ item, activeNodes }: Props) => {
+  const euiThemeContext = useEuiTheme();
+  const isAmsterdam = euiThemeContext.euiTheme.themeName === 'EUI_THEME_AMSTERDAM';
+
   const { open: openPanel, close: closePanel, selectedNode } = usePanel();
   const { title, deepLink, withBadge } = item;
   const { id, path } = item;
@@ -55,8 +58,10 @@ export const NavigationItemOpenPanel: FC<Props> = ({ item, activeNodes }: Props)
     [togglePanel]
   );
 
+  const Button = isAmsterdam ? EuiButton : EuiButtonEmpty;
+
   return (
-    <EuiButton
+    <Button
       onClick={onLinkClick}
       iconSide="right"
       iconType="arrowRight"
@@ -92,6 +97,6 @@ export const NavigationItemOpenPanel: FC<Props> = ({ item, activeNodes }: Props)
       data-test-subj={dataTestSubj}
     >
       {withBadge ? <SubItemTitle item={item} /> : title}
-    </EuiButton>
+    </Button>
   );
 };
