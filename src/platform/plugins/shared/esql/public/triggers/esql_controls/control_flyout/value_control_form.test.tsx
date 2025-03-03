@@ -18,7 +18,7 @@ import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { ValueControlForm } from './value_control_form';
 import { EsqlControlType, ESQLControlState } from '../types';
 
-jest.mock('@kbn/esql-utils', () => {
+jest.mock('@kbn/esql-utils/src/utils/run_query', () => {
   return {
     getESQLResults: jest.fn().mockResolvedValue({
       response: {
@@ -34,9 +34,12 @@ jest.mock('@kbn/esql-utils', () => {
         values: [],
       },
     }),
+  };
+});
+
+jest.mock('@kbn/esql-utils/src/utils/query_parsing_helpers', () => {
+  return {
     getIndexPatternFromESQLQuery: jest.fn().mockReturnValue('index1'),
-    getLimitFromESQLQuery: jest.fn().mockReturnValue(1000),
-    isQueryWrappedByPipes: jest.fn().mockReturnValue(false),
     getValuesFromQueryField: jest.fn().mockReturnValue('field'),
   };
 });
