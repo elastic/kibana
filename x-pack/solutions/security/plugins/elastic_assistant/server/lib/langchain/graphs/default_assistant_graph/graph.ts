@@ -42,6 +42,7 @@ export interface GetDefaultAssistantGraphParams {
   signal?: AbortSignal;
   tools: StructuredTool[];
   replacements: Replacements;
+  getFormattedTime?: () => string;
 }
 
 export type DefaultAssistantGraph = ReturnType<typeof getDefaultAssistantGraph>;
@@ -57,6 +58,7 @@ export const getDefaultAssistantGraph = ({
   signal,
   tools,
   replacements,
+  getFormattedTime,
 }: GetDefaultAssistantGraphParams) => {
   try {
     // Default graph state
@@ -124,6 +126,10 @@ export const getDefaultAssistantGraph = ({
       provider: Annotation<string>({
         reducer: (x: string, y?: string) => y ?? x,
         default: () => '',
+      }),
+      formattedTime: Annotation<string>({
+        reducer: (x: string, y?: string) => y ?? x,
+        default: getFormattedTime ?? (() => ''),
       }),
     });
 
