@@ -22,7 +22,7 @@ That will generate data in
 `logs-*-*,cloud-logs-*-*`
 
 > [!INFO]
-> The above indices will be use later to create the rules' data views. 
+> The above indices will be use later to create the rules' data views.
 
 This section will cover the UI part (not API) for:
 
@@ -36,8 +36,8 @@ This section will cover the UI part (not API) for:
 
 - Login to Kibana
 - Form Kibana side nav click `Alerts` under `Observability`
-- Click `Manage rules` on the right top side. 
-- Click `Create Rule` button on the right top side. 
+- Click `Manage rules` on the right top side.
+- Click `Create Rule` button on the right top side.
 - From the `Select rule type` modal select (Repeat this part for each rule). The above mentioned indices would be used either to create a data view or as index pattern:
   - Custom Threshold
   - Metric Threshold
@@ -55,14 +55,18 @@ This section will cover the UI part (not API) for:
 > - Create rules with and without filers.
 > - Create rules with different type of aggregations (if applicable).
 > - Create rules with check and unchecked Alert on no data.
+> - Create rules with Actions (Log connector), and check if the action variables are logged.
 
 ### Rule details and rules actions
 
 Visit the rule details page, then check and test:
 
-- Alerts table with UI filter, search bar, and time range.
-- Execution history with response filer and time range
-- Alert summery (activity) buy cling on Alert | Active now and how that reflects on the alert table
+- Alerts table
+  - UI filter
+  - Search bar
+  - Time range
+- Execution history with response filter and time range
+- Alert activity by clicking on "Active now" and how that reflects on the alert table
 - Enable/Disable the rule.
 - Snooze the rule
 - Edit the rule
@@ -79,4 +83,43 @@ Visit the alerts page, then check and test:
   - Use `Actions` menu items (Add to exciting and new case, View rule details, etc.)
 - Use the UI filters (Show all, Active, Recovered, and Untracked) and see how it reflect the results in the alert table
 - Use the Search bar and see how it reflect the results in the alert table
-- Click on the Disabled and Snoozed at the top, it should lead to rules page with the right filter
+- Click on the Disabled and Snoozed at the top, it should lead to rules page with the right filters
+
+### Overview page
+
+Visit the overview page under Observability, then check and test:
+
+- The 4 sections (Alerts, Log Events, Hosts, and Services) are visible and they are showing data.
+- Change the time range at the top of the page, it should change the data shown in the 4 sections.
+- Try the links of each section: "Show alerts", "Show logs", "Show inventory", and "Show service inventory".
+
+> [!INFO]
+>
+> If there are not data showing, check if the data generation is working, and the time range is correct.
+
+### Cases
+
+Visit the Cases page under Observability, then check and test:
+
+- Create many case with different types of Severity and description
+- Cases table
+  - Check all cases are visible
+  - Apply filters and check how it reflects on the cases table
+- Cases
+  - Open one case
+  - Add comments, and change the Sort by.
+  - Click on "Mark in progress"
+  - Edit the fields in the right side panel
+  - Change the status from the status drop down menu at top left.
+  - Open the `Files` tab and add a file
+    - Download it
+    - Delete it
+  - Open the `Observables` tab and add an Observable e.g host, IP
+    - Edit it
+    - Delete it
+From Alerts table, go to the Alerts page
+  - On an alert click the more `...` in the alert table, then click `Add to existing case`
+  - On an alert click the more `...` in the alert table, then click `Add to new case`
+  - Click on the toast that appears after each action and verify that the alert was added correctly
+  - Open the `Alerts` tab and checks all the added alert to that case
+  
