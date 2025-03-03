@@ -72,7 +72,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         },
       });
 
-      await proxy.waitForAllInterceptorsSettled();
+      await proxy.waitForAllInterceptorsToHaveBeenCalled();
 
       const titleSimulator = await titleSimulatorPromise;
       const conversationSimulator = await conversationSimulatorPromise;

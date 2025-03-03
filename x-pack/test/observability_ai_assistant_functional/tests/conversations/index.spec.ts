@@ -247,7 +247,7 @@ export default function ApiTest({ getService, getPageObjects }: FtrProviderConte
                 await testSubjects.setValue(ui.pages.conversations.chatInput, 'hello');
                 await testSubjects.pressEnter(ui.pages.conversations.chatInput);
 
-                await proxy.waitForAllInterceptorsSettled();
+                await proxy.waitForAllInterceptorsToHaveBeenCalled();
                 await header.waitUntilLoadingHasFinished();
               });
 
@@ -305,7 +305,7 @@ export default function ApiTest({ getService, getPageObjects }: FtrProviderConte
                   await testSubjects.setValue(ui.pages.conversations.chatInput, 'hello');
                   await testSubjects.pressEnter(ui.pages.conversations.chatInput);
 
-                  await proxy.waitForAllInterceptorsSettled();
+                  await proxy.waitForAllInterceptorsToHaveBeenCalled();
                   await header.waitUntilLoadingHasFinished();
                 });
 
@@ -396,7 +396,7 @@ export default function ApiTest({ getService, getPageObjects }: FtrProviderConte
                   await testSubjects.pressEnter(ui.pages.conversations.chatInput);
                   log.info('SQREN: Waiting for the message to be displayed');
 
-                  await proxy.waitForAllInterceptorsSettled();
+                  await proxy.waitForAllInterceptorsToHaveBeenCalled();
                   await header.waitUntilLoadingHasFinished();
                 });
 

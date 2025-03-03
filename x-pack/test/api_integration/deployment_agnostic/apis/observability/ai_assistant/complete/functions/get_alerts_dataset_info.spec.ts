@@ -49,13 +49,13 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         port: llmProxy.getPort(),
       });
 
-      llmProxy.interceptWithFunctionRequest({
+      void llmProxy.interceptWithFunctionRequest({
         name: 'get_alerts_dataset_info',
         arguments: () => JSON.stringify({ start: 'now-10d', end: 'now' }),
         when: () => true,
       });
 
-      llmProxy.interceptWithFunctionRequest({
+      void llmProxy.interceptWithFunctionRequest({
         name: 'select_relevant_fields',
         // @ts-expect-error
         when: (requestBody) => requestBody.tool_choice?.function?.name === 'select_relevant_fields',
@@ -80,13 +80,15 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         },
       });
 
-      llmProxy.interceptWithFunctionRequest({
+      void llmProxy.interceptWithFunctionRequest({
         name: 'alerts',
         arguments: () => JSON.stringify({ start: 'now-10d', end: 'now' }),
         when: () => true,
       });
 
-      llmProxy.interceptConversation(`You have active alerts for the past 10 days. Back to work!`);
+      void llmProxy.interceptConversation(
+        `You have active alerts for the past 10 days. Back to work!`
+      );
 
       const { status, body } = await observabilityAIAssistantAPIClient.editor({
         endpoint: 'POST /internal/observability_ai_assistant/chat/complete',
@@ -111,7 +113,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
       expect(status).to.be(200);
 
-      await llmProxy.waitForAllInterceptorsSettled();
+      await llmProxy.waitForAllInterceptorsToHaveBeenCalled();
       messageAddedEvents = getMessageAddedEvents(body);
     });
 

@@ -38,7 +38,7 @@ export interface ToolMessage {
 }
 export interface LlmResponseSimulator {
   requestBody: ChatCompletionStreamParams;
-  status: (code: number) => Promise<void>;
+  status: (code: number) => void;
   next: (msg: string | ToolMessage) => Promise<void>;
   error: (error: any) => Promise<void>;
   complete: () => Promise<void>;
@@ -113,7 +113,7 @@ export class LlmProxy {
     this.server.close();
   }
 
-  waitForAllInterceptorsSettled() {
+  waitForAllInterceptorsToHaveBeenCalled() {
     return pRetry(
       async () => {
         if (this.interceptors.length === 0) {
@@ -212,7 +212,7 @@ export class LlmProxy {
 
             const simulator: LlmResponseSimulator = {
               requestBody,
-              status: once(async (status: number) => {
+              status: once((status: number) => {
                 response.writeHead(status, {
                   'Elastic-Interceptor': name,
                   'Content-Type': 'text/event-stream',
