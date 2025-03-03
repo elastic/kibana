@@ -14,7 +14,7 @@ import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 import { createSearchSourceMock } from '@kbn/data-plugin/common/search/search_source/mocks';
 import { ISearchStartSearchSource } from '@kbn/data-plugin/common';
-import { EsQueryRuleParams } from './rule_type_params';
+import { EsQueryRuleParams } from '@kbn/response-ops-rule-params/es_query';
 import { FetchEsQueryOpts } from './lib/fetch_es_query';
 import { FetchSearchSourceQueryOpts } from './lib/fetch_search_source_query';
 import { FetchEsqlQueryOpts } from './lib/fetch_esql_query';

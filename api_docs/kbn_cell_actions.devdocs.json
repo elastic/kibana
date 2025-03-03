@@ -785,7 +785,7 @@
             "signature": [
               "React.MutableRefObject<",
               "EuiDataGridRefProps",
-              " | null>"
+              " | null> | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-cell-actions/src/hooks/use_data_grid_column_cell_actions.tsx",
             "deprecated": false,

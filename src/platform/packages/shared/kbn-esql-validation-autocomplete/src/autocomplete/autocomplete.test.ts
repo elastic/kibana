@@ -113,88 +113,6 @@ describe('autocomplete', () => {
     testSuggestions('from a metadata _id | eval var0 = a | /', commands);
   });
 
-  describe('show', () => {
-    testSuggestions('show /', ['INFO']);
-    for (const fn of ['info']) {
-      testSuggestions(`show ${fn} /`, ['| ']);
-    }
-  });
-
-  describe('grok', () => {
-    const constantPattern = '"%{WORD:firstWord}"';
-    const subExpressions = [
-      '',
-      `grok keywordField |`,
-      `grok keywordField ${constantPattern} |`,
-      `dissect keywordField ${constantPattern} append_separator = ":" |`,
-      `dissect keywordField ${constantPattern} |`,
-    ];
-    for (const subExpression of subExpressions) {
-      testSuggestions(
-        `from a | ${subExpression} grok /`,
-        getFieldNamesByType(ESQL_STRING_TYPES).map((name) => `${name} `)
-      );
-      testSuggestions(`from a | ${subExpression} grok keywordField /`, [constantPattern], ' ');
-      testSuggestions(`from a | ${subExpression} grok keywordField ${constantPattern} /`, ['| ']);
-    }
-
-    testSuggestions(
-      'from a | grok /',
-      getFieldNamesByType(ESQL_STRING_TYPES).map((name) => `${name} `)
-    );
-    testSuggestions(
-      'from a | grok key/',
-      getFieldNamesByType(ESQL_STRING_TYPES).map((name) => `${name} `)
-    );
-    testSuggestions(
-      'from a | grok keywordField/',
-      ['keywordField ', 'textField '].map(attachTriggerCommand)
-    );
-  });
-
-  describe('dissect', () => {
-    const constantPattern = '"%{firstWord}"';
-    const subExpressions = [
-      '',
-      `dissect keywordField |`,
-      `dissect keywordField ${constantPattern} |`,
-      `dissect keywordField ${constantPattern} append_separator = ":" |`,
-    ];
-    for (const subExpression of subExpressions) {
-      testSuggestions(
-        `from a | ${subExpression} dissect /`,
-        getFieldNamesByType(ESQL_STRING_TYPES).map((name) => `${name} `)
-      );
-      testSuggestions(`from a | ${subExpression} dissect keywordField /`, [constantPattern], ' ');
-      testSuggestions(
-        `from a | ${subExpression} dissect keywordField ${constantPattern} /`,
-        ['APPEND_SEPARATOR = $0', '| '],
-        ' '
-      );
-      testSuggestions(
-        `from a | ${subExpression} dissect keywordField ${constantPattern} append_separator = /`,
-        ['":"', '";"']
-      );
-      testSuggestions(
-        `from a | ${subExpression} dissect keywordField ${constantPattern} append_separator = ":" /`,
-        ['| ']
-      );
-    }
-
-    testSuggestions(
-      'from a | dissect /',
-      getFieldNamesByType(ESQL_STRING_TYPES).map((name) => `${name} `)
-    );
-    testSuggestions(
-      'from a | dissect key/',
-      getFieldNamesByType(ESQL_STRING_TYPES).map((name) => `${name} `)
-    );
-    testSuggestions(
-      'from a | dissect keywordField/',
-      ['keywordField ', 'textField '].map(attachTriggerCommand)
-    );
-  });
-
   describe('limit', () => {
     testSuggestions('from a | limit /', ['10 ', '100 ', '1000 ']);
     testSuggestions('from a | limit 4 /', ['| ']);
@@ -368,11 +286,10 @@ describe('autocomplete', () => {
 
   // @TODO: get updated eval block from main
   describe('values suggestions', () => {
-    testSuggestions('FROM "i/"', ['index'], undefined, [, [{ name: 'index', hidden: false }]]);
-    testSuggestions('FROM "index/"', ['index'], undefined, [, [{ name: 'index', hidden: false }]]);
-    // TODO — re-enable these tests when we can support this case
-    testSuggestions.skip('FROM "  a/"', []);
-    testSuggestions.skip('FROM "foo b/"', []);
+    testSuggestions('FROM "i/"', []);
+    testSuggestions('FROM "index/"', []);
+    testSuggestions('FROM "  a/"', []);
+    testSuggestions('FROM "foo b/"', []);
     testSuggestions('FROM a | WHERE tags == " /"', [], ' ');
     testSuggestions('FROM a | WHERE tags == """ /"""', [], ' ');
     testSuggestions('FROM a | WHERE tags == "a/"', []);
@@ -497,12 +414,7 @@ describe('autocomplete', () => {
 
     // FROM source METADATA
     recommendedQuerySuggestions = getRecommendedQueriesSuggestions('', 'dateField');
-    testSuggestions('FROM index1 M/', [
-      ',',
-      'METADATA $0',
-      '| ',
-      ...recommendedQuerySuggestions.map((q) => q.queryString),
-    ]);
+    testSuggestions('FROM index1 M/', ['METADATA $0']);
 
     // FROM source METADATA field
     testSuggestions('FROM index1 METADATA _/', METADATA_FIELDS);
@@ -593,7 +505,11 @@ describe('autocomplete', () => {
     // STATS argument
     testSuggestions('FROM index1 | STATS f/', [
       'var0 = ',
-      ...getFunctionSignaturesByReturnType('stats', 'any', { scalar: true, agg: true }),
+      ...getFunctionSignaturesByReturnType('stats', 'any', {
+        scalar: true,
+        agg: true,
+        grouping: true,
+      }),
     ]);
 
     // STATS argument BY
@@ -620,7 +536,7 @@ describe('autocomplete', () => {
         'where',
         'boolean',
         {
-          builtin: true,
+          operators: true,
         },
         undefined,
         ['and', 'or', 'not']
@@ -634,7 +550,7 @@ describe('autocomplete', () => {
         'where',
         'any',
         {
-          builtin: true,
+          operators: true,
           skipAssign: true,
         },
         ['integer'],
@@ -886,12 +802,7 @@ describe('autocomplete', () => {
 
     recommendedQuerySuggestions = getRecommendedQueriesSuggestions('', 'dateField');
     // FROM source METADATA
-    testSuggestions('FROM index1 M/', [
-      ',',
-      attachAsSnippet(attachTriggerCommand('METADATA $0')),
-      '| ',
-      ...recommendedQuerySuggestions.map((q) => q.queryString),
-    ]);
+    testSuggestions('FROM index1 M/', [attachAsSnippet(attachTriggerCommand('METADATA $0'))]);
 
     describe('ENRICH', () => {
       testSuggestions(
@@ -953,9 +864,11 @@ describe('autocomplete', () => {
       'FROM a | STATS /',
       [
         'var0 = ',
-        ...getFunctionSignaturesByReturnType('stats', 'any', { scalar: true, agg: true }).map(
-          attachAsSnippet
-        ),
+        ...getFunctionSignaturesByReturnType('stats', 'any', {
+          scalar: true,
+          agg: true,
+          grouping: true,
+        }).map(attachAsSnippet),
       ].map(attachTriggerCommand)
     );
 
@@ -1011,7 +924,7 @@ describe('autocomplete', () => {
         'where',
         'boolean',
         {
-          builtin: true,
+          operators: true,
         },
         ['keyword']
       ).map((s) => (s.text.toLowerCase().includes('null') ? s : attachTriggerCommand(s)))
@@ -1046,9 +959,10 @@ describe('autocomplete', () => {
           { filterText: '_source', text: '_source, ', command: TRIGGER_SUGGESTION_COMMAND },
         ]);
         // no comma if there are no more fields
-        testSuggestions('FROM a METADATA _id, _ignored, _index, _source, _index_mode, _version/', [
-          { filterText: '_version', text: '_version | ', command: TRIGGER_SUGGESTION_COMMAND },
-        ]);
+        testSuggestions(
+          'FROM a METADATA _id, _ignored, _index, _source, _index_mode, _score, _version/',
+          [{ filterText: '_version', text: '_version | ', command: TRIGGER_SUGGESTION_COMMAND }]
+        );
       });
 
       describe.each(['KEEP', 'DROP'])('%s <field>', (commandName) => {

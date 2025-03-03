@@ -64,6 +64,7 @@ import {
 } from './preconfiguration/delete_unenrolled_agent_setting';
 import { backfillPackagePolicySupportsAgentless } from './backfill_agentless';
 import { updateDeprecatedComponentTemplates } from './setup/update_deprecated_component_templates';
+import { createOrUpdateFleetSyncedIntegrationsIndex } from './setup/fleet_synced_integrations';
 
 export interface SetupStatus {
   isInitialized: boolean;
@@ -185,7 +186,7 @@ async function createSetupSideEffects(
   let packages = packagesOrUndefined ?? [];
 
   logger.debug('Setting Fleet server config');
-  await migrateSettingsToFleetServerHost(soClient);
+  await migrateSettingsToFleetServerHost(soClient, esClient);
   logger.debug('Setting up Fleet download source');
   const defaultDownloadSource = await downloadSourceService.ensureDefault(soClient);
   // Need to be done before outputs and fleet server hosts as these object can reference a proxy
@@ -312,6 +313,9 @@ async function createSetupSideEffects(
 
   logger.debug('Update deprecated _source.mode in component templates');
   await updateDeprecatedComponentTemplates(esClient);
+
+  logger.debug('Create or update fleet-synced-integrations index');
+  await createOrUpdateFleetSyncedIntegrationsIndex(esClient);
 
   const nonFatalErrors = [
     ...preconfiguredPackagesNonFatalErrors,

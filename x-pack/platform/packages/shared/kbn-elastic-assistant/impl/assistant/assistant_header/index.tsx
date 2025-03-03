@@ -174,7 +174,11 @@ export const AssistantHeader: React.FC<Props> = ({
                 />
               </EuiFlexItem>
               <EuiFlexItem id={AI_ASSISTANT_SETTINGS_MENU_CONTAINER_ID}>
-                <SettingsContextMenu isDisabled={isDisabled} onChatCleared={onChatCleared} />
+                <SettingsContextMenu
+                  isDisabled={isDisabled}
+                  onChatCleared={onChatCleared}
+                  selectedConversation={selectedConversation}
+                />
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiFlexItem>

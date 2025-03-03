@@ -9,9 +9,10 @@
 
 import { i18n } from '@kbn/i18n';
 import { memoize } from 'lodash';
+import { ESQLVariableType, type ESQLControlVariable } from '@kbn/esql-types';
 import { SuggestionRawDefinition } from './types';
-import { groupingFunctionDefinitions } from '../definitions/grouping';
-import { aggregationFunctionDefinitions } from '../definitions/generated/aggregation_functions';
+import { groupingFunctionDefinitions } from '../definitions/generated/grouping_functions';
+import { aggFunctionDefinitions } from '../definitions/generated/aggregation_functions';
 import { scalarFunctionDefinitions } from '../definitions/generated/scalar_functions';
 import { getFunctionSignatures } from '../definitions/helpers';
 import { timeUnitsToSuggest } from '../definitions/literals';
@@ -20,6 +21,7 @@ import {
   CommandOptionsDefinition,
   CommandModeDefinition,
   FunctionParameterType,
+  FunctionDefinitionTypes,
 } from '../definitions/types';
 import { shouldBeQuotedSource, shouldBeQuotedText } from '../shared/helpers';
 import { buildFunctionDocumentation } from './documentation_util';
@@ -27,8 +29,7 @@ import { DOUBLE_BACKTICK, SINGLE_TICK_REGEX } from '../shared/constants';
 import { ESQLRealField } from '../validation/types';
 import { isNumericType } from '../shared/esql_types';
 import { getTestFunctions } from '../shared/test_functions';
-import { builtinFunctions } from '../definitions/builtin';
-import { ESQLVariableType, ESQLControlVariable } from '../shared/types';
+import { operatorsDefinitions } from '../definitions/all_operators';
 
 const techPreviewLabel = i18n.translate(
   'kbn-esql-validation-autocomplete.esql.autocomplete.techPreviewLabel',
@@ -39,7 +40,7 @@ const techPreviewLabel = i18n.translate(
 
 const allFunctions = memoize(
   () =>
-    aggregationFunctionDefinitions
+    aggFunctionDefinitions
       .concat(scalarFunctionDefinitions)
       .concat(groupingFunctionDefinitions)
       .concat(getTestFunctions()),
@@ -72,9 +73,14 @@ export function getFunctionSuggestion(fn: FunctionDefinition): SuggestionRawDefi
     detail = `[${techPreviewLabel}] ${detail}`;
   }
   const fullSignatures = getFunctionSignatures(fn, { capitalize: true, withTypes: true });
+
+  let text = `${fn.name.toUpperCase()}($0)`;
+  if (fn.customParametersSnippet) {
+    text = `${fn.name.toUpperCase()}(${fn.customParametersSnippet})`;
+  }
   return {
     label: fn.name.toUpperCase(),
-    text: `${fn.name.toUpperCase()}($0)`,
+    text,
     asSnippet: true,
     kind: 'Function',
     detail,
@@ -82,7 +88,7 @@ export function getFunctionSuggestion(fn: FunctionDefinition): SuggestionRawDefi
       value: buildFunctionDocumentation(fullSignatures, fn.examples),
     },
     // agg functgions have priority over everything else
-    sortText: fn.type === 'agg' ? '1A' : 'C',
+    sortText: fn.type === FunctionDefinitionTypes.AGG ? '1A' : 'C',
     // trigger a suggestion follow up on selection
     command: TRIGGER_SUGGESTION_COMMAND,
   };
@@ -168,7 +174,9 @@ export const getOperatorSuggestions = (
   predicates?: FunctionFilterPredicates & { leftParamType?: FunctionParameterType }
 ): SuggestionRawDefinition[] => {
   const filteredDefinitions = filterFunctionDefinitions(
-    getTestFunctions().length ? [...builtinFunctions, ...getTestFunctions()] : builtinFunctions,
+    getTestFunctions().length
+      ? [...operatorsDefinitions, ...getTestFunctions()]
+      : operatorsDefinitions,
     predicates
   );
 
@@ -188,7 +196,7 @@ export const getOperatorSuggestions = (
 };
 
 export const getSuggestionsAfterNot = (): SuggestionRawDefinition[] => {
-  return builtinFunctions
+  return operatorsDefinitions
     .filter(({ name }) => name === 'like' || name === 'rlike' || name === 'in')
     .map(getOperatorSuggestion);
 };
@@ -459,7 +467,6 @@ export function getUnitDuration(unit: number = 1) {
 export function getCompatibleLiterals(
   commandName: string,
   types: string[],
-  names?: string[],
   options?: {
     advanceCursorAndOpenSuggestions?: boolean;
     addComma?: boolean;
@@ -504,25 +511,6 @@ export function getCompatibleLiterals(
         options
       )
     ); // i.e. year, month, ...
-  }
-  if (types.includes('string')) {
-    if (names) {
-      const index = types.indexOf('string');
-      if (/pattern/.test(names[index])) {
-        suggestions.push(
-          ...buildConstantsDefinitions(
-            [commandName === 'grok' ? '"%{WORD:firstWord}"' : '"%{firstWord}"'],
-            i18n.translate('kbn-esql-validation-autocomplete.esql.autocomplete.aPatternString', {
-              defaultMessage: 'A pattern string',
-            }),
-            undefined,
-            options
-          )
-        );
-      } else {
-        suggestions.push(...buildConstantsDefinitions(['string'], '', undefined, options));
-      }
-    }
   }
   return suggestions;
 }
@@ -583,6 +571,23 @@ export function getDateLiterals(options?: {
   ];
 }
 
+export function getControlSuggestionIfSupported(
+  supportsControls: boolean,
+  type: ESQLVariableType,
+  getVariablesByType?: (type: ESQLVariableType) => ESQLControlVariable[] | undefined
+) {
+  if (!supportsControls) {
+    return [];
+  }
+  const variableType = type;
+  const variables = getVariablesByType?.(variableType) ?? [];
+  const controlSuggestion = getControlSuggestion(
+    variableType,
+    variables?.map((v) => `?${v.key}`)
+  );
+  return controlSuggestion;
+}
+
 export function getControlSuggestion(
   type: ESQLVariableType,
   variables?: string[]
@@ -603,7 +608,7 @@ export function getControlSuggestion(
           defaultMessage: 'Click to create',
         }
       ),
-      sortText: '1A',
+      sortText: '1',
       command: {
         id: `esql.control.${type}.create`,
         title: i18n.translate(

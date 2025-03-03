@@ -228,7 +228,7 @@ Object {
           "xAccessor": "b41a2958-650b-470a-84c4-c6fd8f0c6d37",
           "yConfig": Array [
             Object {
-              "color": "#54B399",
+              "color": "#16C5C0",
               "forAccessor": "5417777d-d9d9-4268-9cdc-eb29b873bd65",
             },
           ],
@@ -243,7 +243,7 @@ Object {
           "xAccessor": "cded27f7-8ef8-458c-8d9b-70db48ae340d",
           "yConfig": Array [
             Object {
-              "color": "#DA8B45",
+              "color": "#FFC9C2",
               "forAccessor": "a3bf9dc1-c8d2-42d6-9e60-31892a4c509e",
             },
           ],
