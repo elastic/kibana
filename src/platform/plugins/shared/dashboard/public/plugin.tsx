@@ -61,10 +61,7 @@ import type {
 } from '@kbn/usage-collection-plugin/public';
 
 import { CONTENT_ID, LATEST_VERSION } from '../common/content_management';
-import {
-  DashboardAppLocatorDefinition,
-  type DashboardAppLocator,
-} from './dashboard_app/locator/locator';
+import { DashboardAppLocatorDefinition } from './dashboard_app/locator/locator';
 import { DashboardMountContextProps } from './dashboard_app/types';
 import {
   DASHBOARD_APP_ID,
@@ -122,22 +119,10 @@ export interface DashboardStartDependencies {
   observabilityAIAssistant?: ObservabilityAIAssistantPublicStart;
 }
 
-export interface DashboardSetup {
-  /**
-   * @deprecated
-   *
-   * Use `shareStartService.url.locators.get(DASHBOARD_APP_LOCATOR)` instead.
-   */
-  locator?: DashboardAppLocator;
-}
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+interface DashboardSetup {}
 
 export interface DashboardStart {
-  /**
-   * @deprecated
-   *
-   * Use `shareStartService.url.locators.get(DASHBOARD_APP_LOCATOR)` instead.
-   */
-  locator?: DashboardAppLocator;
   findDashboardsService: () => Promise<FindDashboardsService>;
   registerDashboardPanelPlacementSetting: <SerializedState extends object = object>(
     embeddableType: string,
@@ -156,19 +141,18 @@ export class DashboardPlugin
   private appStateUpdater = new BehaviorSubject<AppUpdater>(() => ({}));
   private stopUrlTracking: (() => void) | undefined = undefined;
   private currentHistory: ScopedHistory | undefined = undefined;
-  private locator?: DashboardAppLocator;
 
   public setup(
     core: CoreSetup<DashboardStartDependencies, DashboardStart>,
     { share, embeddable, home, urlForwarding, data, contentManagement }: DashboardSetupDependencies
-  ): DashboardSetup {
+  ) {
     core.analytics.registerEventType({
       eventType: 'dashboard_loaded_with_data',
       schema: {},
     });
 
     if (share) {
-      this.locator = share.url.locators.create(
+      share.url.locators.create(
         new DashboardAppLocatorDefinition({
           useHashedUrl: core.uiSettings.get('state:storeInSessionStorage'),
           getDashboardFilterFields: async (dashboardId: string) => {
@@ -319,9 +303,7 @@ export class DashboardPlugin
       name: dashboardAppTitle,
     });
 
-    return {
-      locator: this.locator,
-    };
+    return {};
   }
 
   public start(core: CoreStart, plugins: DashboardStartDependencies): DashboardStart {
@@ -336,7 +318,6 @@ export class DashboardPlugin
     });
 
     return {
-      locator: this.locator,
       registerDashboardPanelPlacementSetting,
       findDashboardsService: async () => {
         const { getDashboardContentManagementService } = await import(
