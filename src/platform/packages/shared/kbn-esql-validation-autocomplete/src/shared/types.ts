@@ -47,6 +47,13 @@ export enum ESQLVariableType {
   FIELDS = 'fields',
   VALUES = 'values',
   FUNCTIONS = 'functions',
+  // When we can't predict what variable type the user wants to create
+  UNKNOWN = 'unknown',
+}
+
+export enum ESQLVariableESType {
+  IDENTIFIER = 'identifier',
+  VALUE = 'value',
 }
 
 export interface ESQLCallbacks {
