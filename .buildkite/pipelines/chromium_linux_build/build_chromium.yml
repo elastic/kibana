@@ -6,7 +6,7 @@ steps:
   - command: |
       ts-node .buildkite/scripts/lifecycle/comment_on_pr.ts \
         --message "Linux headless chromium build started at: $BUILDKITE_BUILD_URL" \
-        --context "chromium-linux-build-job" \
+        --context "chromium-linux-build-job-start" \
         --clear-previous
     label: Comment with job URL on issue
     agents:
@@ -29,7 +29,6 @@ steps:
 
   - command: "PLATFORM_VARIANT={{matrix}} .buildkite/scripts/pipelines/chromium_linux_build/build.sh"
     label: "Build {{matrix}} linux headless chromium"
-    # timeout_in_minutes: 10
     depends_on: "infer_chromium_version"
     env:
       DEBIAN_FRONTEND: noninteractive
@@ -42,3 +41,16 @@ steps:
     matrix:
       - "x64"
       - "arm64"
+
+  - command: |
+      ts-node .buildkite/scripts/lifecycle/comment_on_pr.ts \
+        --message "Linux headless chromium build completed at: $BUILDKITE_BUILD_URL" \
+        --context "chromium-linux-build-job-completion" \
+        --clear-previous
+    label: Comment with job URL on issue
+    agents:
+      provider: gcp
+      image: family/kibana-ubuntu-2004
+      imageProject: elastic-images-prod
+      machineType: n2-standard-2
+    timeout_in_minutes: 5
