@@ -532,7 +532,9 @@ export const NavigationSectionUI: FC<Props> = React.memo(({ navNode: _navNode })
   }, [topLevelItems, serializeAccordionItems]);
 
   if (!isEuiCollapsibleNavItemProps(props)) {
-    throw new Error(`Invalid EuiCollapsibleNavItem props for node ${props.id}`);
+    throw new Error(
+      `Invalid EuiCollapsibleNavItem props for node ${(props as EuiCollapsibleNavSubItemProps).id}`
+    );
   }
 
   if (!isVisible) {
