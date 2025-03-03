@@ -62,6 +62,8 @@ paths:
                   type: string
                 langSmithApiKey:
                   type: string
+                screenContext:
+                  $ref: '../common_attributes.schema.yaml#/components/schemas/ScreenContext'
       responses:
         '200':
           description: Successful static response
