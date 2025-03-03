@@ -8,16 +8,19 @@
 import { TypeOf } from '@kbn/config-schema';
 import { IRouter } from '@kbn/core/server';
 import {
-  unsnoozeBodySchema,
-  unsnoozeParamsSchema,
-} from '../../../../../common/routes/rule/apis/unsnooze';
-import { ILicenseState, RuleMutedError } from '../../../../lib';
-import { verifyAccessAndContext } from '../../../lib';
-import { AlertingRequestHandlerContext, INTERNAL_BASE_ALERTING_API_PATH } from '../../../../types';
+  unsnoozeBodyInternalSchema,
+  unsnoozeParamsInternalSchema,
+} from '../../../../../../common/routes/rule/apis/unsnooze';
+import { ILicenseState, RuleMutedError } from '../../../../../lib';
+import { verifyAccessAndContext } from '../../../../lib';
+import {
+  AlertingRequestHandlerContext,
+  INTERNAL_BASE_ALERTING_API_PATH,
+} from '../../../../../types';
 import { transformUnsnoozeBodyV1 } from './transforms';
-import { DEFAULT_ALERTING_ROUTE_SECURITY } from '../../../constants';
+import { DEFAULT_ALERTING_ROUTE_SECURITY } from '../../../../constants';
 
-export type UnsnoozeRuleRequestParamsV1 = TypeOf<typeof unsnoozeParamsSchema>;
+export type UnsnoozeRuleRequestParamsV1 = TypeOf<typeof unsnoozeParamsInternalSchema>;
 
 export const unsnoozeRuleRoute = (
   router: IRouter<AlertingRequestHandlerContext>,
@@ -29,8 +32,8 @@ export const unsnoozeRuleRoute = (
       security: DEFAULT_ALERTING_ROUTE_SECURITY,
       options: { access: 'internal' },
       validate: {
-        params: unsnoozeParamsSchema,
-        body: unsnoozeBodySchema,
+        params: unsnoozeParamsInternalSchema,
+        body: unsnoozeBodyInternalSchema,
       },
     },
     router.handleLegacyErrors(
