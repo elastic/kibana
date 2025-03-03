@@ -7,14 +7,14 @@
 
 import type { UiSettingsParams } from '@kbn/core-ui-settings-common';
 import { i18n } from '@kbn/i18n';
-import { OBSERVABILITY_APM_DATA_ACCESS_APM_SOURCES_ID } from '@kbn/management-settings-ids';
+import { OBSERVABILITY_APM_SOURCES_ACCESS_APM_SOURCES_ID } from '@kbn/management-settings-ids';
 import { indicesSchema } from './config_schema';
 
 /**
  * uiSettings definitions for the logs_data_access plugin.
  */
 export const uiSettings: Record<string, UiSettingsParams> = {
-  [OBSERVABILITY_APM_DATA_ACCESS_APM_SOURCES_ID]: {
+  [OBSERVABILITY_APM_SOURCES_ACCESS_APM_SOURCES_ID]: {
     category: ['observability'],
     name: i18n.translate('xpack.apmSourcesAccess.apmSources', {
       defaultMessage: 'APM sources',

@@ -6,7 +6,7 @@
  */
 
 import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
-import { OBSERVABILITY_APM_DATA_ACCESS_APM_SOURCES_ID } from '@kbn/management-settings-ids';
+import { OBSERVABILITY_APM_SOURCES_ACCESS_APM_SOURCES_ID } from '@kbn/management-settings-ids';
 import type { APMIndices } from '../common/config_schema';
 
 export interface RegisterServicesParams {
@@ -23,7 +23,7 @@ export function createApmDataAccessService(params: RegisterServicesParams) {
   const { uiSettings } = params.deps;
 
   const getApmSources = async () => {
-    return uiSettings.get<APMIndices>(OBSERVABILITY_APM_DATA_ACCESS_APM_SOURCES_ID);
+    return uiSettings.get<APMIndices>(OBSERVABILITY_APM_SOURCES_ACCESS_APM_SOURCES_ID);
   };
 
   const apmSourcesService = {

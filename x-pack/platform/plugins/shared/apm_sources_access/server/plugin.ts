@@ -14,9 +14,9 @@ import {
   type Logger,
   SavedObjectsClient,
 } from '@kbn/core/server';
-import { OBSERVABILITY_APM_DATA_ACCESS_APM_SOURCES_ID } from '@kbn/management-settings-ids';
-import type { APMDataAccessConfig } from '../common/config_schema';
-import { migrateLegacyAPMIndicesToSpaceAware } from './saved_objects/migrations/migrate_legacy_apm_indices_to_space_aware';
+import { OBSERVABILITY_APM_SOURCES_ACCESS_APM_SOURCES_ID } from '@kbn/management-settings-ids';
+import type { APMSourcesAccessConfig } from '../common/config_schema';
+
 import {
   apmIndicesSavedObjectDefinition,
   getApmIndicesSavedObject,
@@ -29,11 +29,11 @@ export type ApmSourcesAccessPluginStart = ReturnType<ApmSourcesAccessPlugin['sta
 export class ApmSourcesAccessPlugin
   implements Plugin<ApmSourcesAccessPluginSetup, ApmSourcesAccessPluginStart>
 {
-  public config: APMDataAccessConfig;
+  public config: APMSourcesAccessConfig;
   public logger: Logger;
 
   constructor(initContext: PluginInitializerContext) {
-    this.config = initContext.config.get<APMDataAccessConfig>();
+    this.config = initContext.config.get<APMSourcesAccessConfig>();
     this.logger = initContext.logger.get();
   }
 
@@ -46,8 +46,8 @@ export class ApmSourcesAccessPlugin
     // register saved object
     core.savedObjects.registerType(apmIndicesSavedObjectDefinition);
     core.uiSettings.register({
-      [OBSERVABILITY_APM_DATA_ACCESS_APM_SOURCES_ID]: {
-        ...uiSettings[OBSERVABILITY_APM_DATA_ACCESS_APM_SOURCES_ID],
+      [OBSERVABILITY_APM_SOURCES_ACCESS_APM_SOURCES_ID]: {
+        ...uiSettings[OBSERVABILITY_APM_SOURCES_ACCESS_APM_SOURCES_ID],
         value: JSON.stringify(this.config.indices, null, 2),
       },
     });
@@ -60,20 +60,12 @@ export class ApmSourcesAccessPlugin
   }
 
   public async start(core: CoreStart) {
-    // TODO: remove in 9.0
-    try {
-      await migrateLegacyAPMIndicesToSpaceAware({ coreStart: core, logger: this.logger });
-    } catch (e) {
-      this.logger.error('Failed to run migration making APM indices space aware');
-      this.logger.error(e);
-    }
-
     try {
       const soClient = core.savedObjects.createInternalRepository();
       const indices = await this.getApmIndices(soClient);
       const uiSettingsClient = core.uiSettings.asScopedToClient(new SavedObjectsClient(soClient));
       await uiSettingsClient.set(
-        OBSERVABILITY_APM_DATA_ACCESS_APM_SOURCES_ID,
+        OBSERVABILITY_APM_SOURCES_ACCESS_APM_SOURCES_ID,
         JSON.stringify(indices, null, 2)
       );
     } catch (e) {

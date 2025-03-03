@@ -6,9 +6,9 @@
  */
 
 import type { PluginConfigDescriptor } from '@kbn/core/server';
-import { type APMDataAccessConfig, configSchema } from '../common/config_schema';
+import { type APMSourcesAccessConfig, configSchema } from '../common/config_schema';
 
-export const config: PluginConfigDescriptor<APMDataAccessConfig> = {
+export const config: PluginConfigDescriptor<APMSourcesAccessConfig> = {
   deprecations: ({ renameFromRoot, deprecate }) => [
     // deprecations
     deprecate('indices.sourcemap', 'a future version', {
