@@ -60,7 +60,6 @@
     "@kbn/home-plugin",
     "@kbn/i18n-react",
     "@kbn/i18n",
-    "@kbn/inference_integration_flyout",
     "@kbn/inspector-plugin",
     "@kbn/json-schemas",
     "@kbn/kibana-react-plugin",
@@ -139,6 +138,7 @@
     "@kbn/response-ops-rule-params",
     "@kbn/response-ops-rule-form",
     "@kbn/unsaved-changes-prompt",
-    "@kbn/fields-metadata-plugin"
+    "@kbn/fields-metadata-plugin",
+    "@kbn/core-analytics-browser"
   ]
 }

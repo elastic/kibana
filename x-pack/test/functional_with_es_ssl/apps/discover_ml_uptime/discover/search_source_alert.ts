@@ -66,7 +66,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     try {
       await es.index({
         index,
-        body: {
+        document: {
           settings: { number_of_shards: 1 },
           mappings: { properties },
         },

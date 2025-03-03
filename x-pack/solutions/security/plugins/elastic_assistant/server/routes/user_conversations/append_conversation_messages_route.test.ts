@@ -32,7 +32,7 @@ describe('Append conversation messages route', () => {
     clients.elasticAssistant.getAIAssistantConversationsDataClient.appendConversationMessages.mockResolvedValue(
       getConversationMock(getQueryConversationParams())
     ); // successful append
-    context.elasticAssistant.getCurrentUser.mockReturnValue(mockUser1);
+    context.elasticAssistant.getCurrentUser.mockResolvedValue(mockUser1);
 
     appendConversationMessageRoute(server.router);
   });
