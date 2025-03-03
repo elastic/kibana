@@ -16689,7 +16689,7 @@ paths:
       operationId: ConfigureRiskEngineSavedObject
       requestBody:
         content:
-          application/json; Elastic-Api-Version=2023-10-31:
+          application/json:
             schema:
               type: object
               properties:
@@ -16712,7 +16712,7 @@ paths:
       responses:
         '200':
           content:
-            application/json; Elastic-Api-Version=2023-10-31:
+            application/json:
               schema:
                 type: object
                 properties:
@@ -16721,13 +16721,13 @@ paths:
           description: Successful response
         '400':
           content:
-            application/json; Elastic-Api-Version=2023-10-31:
+            application/json:
               schema:
                 $ref: '#/components/schemas/Security_Entity_Analytics_API_TaskManagerUnavailableResponse'
           description: Task manager is unavailable
         default:
           content:
-            application/json; Elastic-Api-Version=2023-10-31:
+            application/json:
               schema:
                 $ref: '#/components/schemas/Security_Entity_Analytics_API_ConfigureRiskEngineSavedObjectErrorResponse'
           description: Unexpected error
