@@ -222,7 +222,9 @@ export function ShowShareModal({
               }
             >
               {Boolean(unsavedDashboardState?.panels)
-                ? shareModalStrings.getDraftSharePanelChangesWarning()
+                ? allowShortUrl
+                  ? shareModalStrings.getDraftSharePanelChangesWarning()
+                  : shareModalStrings.getSnapshotShareWarning()
                 : shareModalStrings.getDraftShareWarning('link')}
             </EuiCallOut>
           ),
@@ -266,9 +268,6 @@ export function ShowShareModal({
         params: locatorParams,
       },
     },
-    snapshotShareWarning: Boolean(unsavedDashboardState?.panels)
-      ? shareModalStrings.getSnapshotShareWarning()
-      : undefined,
     toasts: coreServices.notifications.toasts,
   });
 }

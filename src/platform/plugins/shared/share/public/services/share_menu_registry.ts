@@ -39,11 +39,23 @@ export class ShareRegistry implements ShareRegistryPublicApi {
     [this.globalMarker]: new Map(),
   };
 
+  setup() {
+    return {
+      /**
+       * @deprecated Use {@link registerShareIntegration} instead.
+       */
+      register: this.register.bind(this),
+      registerShareIntegration: this.registerShareIntegration.bind(this),
+    };
+  }
+
   start({ urlService, anonymousAccessServiceProvider }: ShareRegistryApiStart) {
     this.urlService = urlService;
     this.anonymousAccessServiceProvider = anonymousAccessServiceProvider;
 
-    return this.resolveShareItemsForShareContext.bind(this);
+    return {
+      resolveShareItemsForShareContext: this.resolveShareItemsForShareContext.bind(this),
+    };
   }
 
   private registerShareIntentAction(
@@ -92,7 +104,7 @@ export class ShareRegistry implements ShareRegistryPublicApi {
   /**
    * @description provides an escape hatch to support allowing legacy share menu items to be registered
    */
-  register(value: ShareMenuProviderLegacy) {
+  private register(value: ShareMenuProviderLegacy) {
     // implement backwards compatibility for the share plugin
     this.registerShareIntentAction(this.globalMarker, {
       shareType: 'legacy',
@@ -101,7 +113,7 @@ export class ShareRegistry implements ShareRegistryPublicApi {
     });
   }
 
-  registerShareIntegration<I extends ShareIntegration>(
+  private registerShareIntegration<I extends ShareIntegration>(
     ...args: [string, Omit<I, 'shareType'>] | [Omit<I, 'shareType'>]
   ): void {
     const [shareObject, shareActionIntent] =
@@ -125,7 +137,7 @@ export class ShareRegistry implements ShareRegistryPublicApi {
     return globalOptions.concat(Array.from(shareContextMap.values()));
   }
 
-  resolveShareItemsForShareContext({
+  private resolveShareItemsForShareContext({
     objectType,
     isServerless,
     ...shareContext
@@ -164,3 +176,6 @@ export class ShareRegistry implements ShareRegistryPublicApi {
       });
   }
 }
+
+export type ShareMenuRegistryStart = ReturnType<ShareRegistry['start']>;
+export type ShareMenuRegistrySetup = ReturnType<ShareRegistry['setup']>;
