@@ -6,7 +6,7 @@
  */
 
 import React, { ComponentProps } from 'react';
-import { Story } from '@storybook/react';
+import type { StoryFn } from '@storybook/react';
 import { action } from '@storybook/addon-actions';
 import { RuleTagBadge } from './rule_tag_badge';
 
@@ -58,7 +58,7 @@ export default {
   },
 };
 
-const Template: Story<Args> = (args) => {
+const Template: StoryFn<Args> = (args) => {
   return <RuleTagBadge {...args} />;
 };
 

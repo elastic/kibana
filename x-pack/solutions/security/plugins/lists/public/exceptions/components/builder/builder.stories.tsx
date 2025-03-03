@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Story, addDecorator } from '@storybook/react';
+import type { StoryFn, addDecorator } from '@storybook/react';
 import React from 'react';
 import { HttpStart } from '@kbn/core/public';
 import type { AutocompleteStart } from '@kbn/unified-search-plugin/public';
@@ -208,7 +208,7 @@ export default {
   title: 'ExceptionBuilderComponent',
 };
 
-const BuilderTemplate: Story<ExceptionBuilderProps> = (args) => (
+const BuilderTemplate: StoryFn<ExceptionBuilderProps> = (args) => (
   <ExceptionBuilderComponent {...args} />
 );
 
@@ -261,7 +261,7 @@ const sampleNestedExceptionItem = {
   ],
 };
 
-const BuilderSingleExceptionItem: Story<ExceptionBuilderProps> = (args) => (
+const BuilderSingleExceptionItem: StoryFn<ExceptionBuilderProps> = (args) => (
   <ExceptionBuilderComponent {...args} />
 );
 
@@ -287,7 +287,7 @@ SingleExceptionItem.args = {
   ruleName: 'My awesome rule',
 };
 
-const BuilderMultiExceptionItems: Story<ExceptionBuilderProps> = (args) => (
+const BuilderMultiExceptionItems: StoryFn<ExceptionBuilderProps> = (args) => (
   <ExceptionBuilderComponent {...args} />
 );
 
@@ -313,7 +313,7 @@ MultiExceptionItems.args = {
   ruleName: 'My awesome rule',
 };
 
-const BuilderWithNested: Story<ExceptionBuilderProps> = (args) => (
+const BuilderWithNested: StoryFn<ExceptionBuilderProps> = (args) => (
   <ExceptionBuilderComponent {...args} />
 );
 

@@ -10,7 +10,7 @@
 import React, { FC, useState } from 'react';
 import { getKbnPalettes } from '@kbn/palettes';
 import { EuiFlyout, EuiForm, EuiPage, isColorDark } from '@elastic/eui';
-import { ComponentStory } from '@storybook/react';
+import type { StoryObj } from '@storybook/react';
 import { css } from '@emotion/react';
 import { CategoricalColorMapping, ColorMappingProps } from '../categorical_color_mapping';
 import { DEFAULT_COLOR_MAPPING_CONFIG } from '../config/default_color_mapping';
@@ -25,7 +25,7 @@ export default {
   decorators: [(story: Function) => story()],
 };
 
-const Template: ComponentStory<FC<ColorMappingProps>> = (args) => {
+const Template: StoryObj<FC<ColorMappingProps>> = (args) => {
   const [updatedModel, setUpdateModel] = useState<ColorMapping.Config>(
     DEFAULT_COLOR_MAPPING_CONFIG
   );

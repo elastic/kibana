@@ -6,7 +6,7 @@
  */
 
 import type { CoreStart } from '@kbn/core/public';
-import type { Meta, Story } from '@storybook/react';
+import type { Meta, StoryFn } from '@storybook/react';
 import { noop } from 'lodash';
 import type { ComponentProps } from 'react';
 import React from 'react';
@@ -63,7 +63,7 @@ const stories: Meta<Args> = {
 };
 export default stories;
 
-export const Example: Story<Args> = (args) => {
+export const Example: StoryFn<Args> = (args) => {
   return <SettingsTemplate {...args} />;
 };
 Example.args = {

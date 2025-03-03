@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Story, Decorator } from '@storybook/react';
+import type { StoryFn, Decorator } from '@storybook/react';
 import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
 import { ENVIRONMENT_ALL } from '../../../../../common/environment_filter_values';
@@ -69,7 +69,7 @@ export default {
   ] as Decorator[],
 };
 
-export const Example: Story<Args> = () => {
+export const Example: StoryFn<Args> = () => {
   return <AnalyzeDataButton />;
 };
 Example.args = {

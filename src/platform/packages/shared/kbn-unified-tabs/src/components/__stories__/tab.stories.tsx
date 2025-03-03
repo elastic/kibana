@@ -8,7 +8,7 @@
  */
 
 import React from 'react';
-import type { ComponentStory } from '@storybook/react';
+import type { StoryObj } from '@storybook/react';
 import { action } from '@storybook/addon-actions';
 import { Tab, type TabProps } from '../tab';
 import { STORYBOOK_TITLE } from './storybook_constants';
@@ -23,7 +23,7 @@ export default {
   },
 };
 
-const TabTemplate: ComponentStory<React.FC<TabProps>> = (args) => (
+const TabTemplate: StoryObj<React.FC<TabProps>> = (args) => (
   <Tab {...args} onSelect={action('onSelect')} onClose={action('onClose')} />
 );
 

@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { ComponentStory } from '@storybook/react';
+import type { StoryObj } from '@storybook/react';
 
 import { ChangeListProps, ChangeList as Component, ChangeListItemImpact } from './change_list';
 
@@ -15,7 +15,7 @@ export default {
   title: 'app/Organisms/ChangesList',
 };
 
-const Template: ComponentStory<typeof Component> = (props: ChangeListProps) => (
+const Template: StoryObj<typeof Component> = (props: ChangeListProps) => (
   <div style={{ width: 480 }}>
     <Component {...props} />
   </div>

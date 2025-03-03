@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ComponentStory } from '@storybook/react';
+import type { StoryObj } from '@storybook/react';
 import React from 'react';
 import { TLPBadge, TLPBadgeProps } from './tlp_badge';
 
@@ -14,7 +14,7 @@ export default {
   title: 'TLPBadge',
 };
 
-const Template: ComponentStory<typeof TLPBadge> = (args: TLPBadgeProps) => <TLPBadge {...args} />;
+const Template: StoryObj<typeof TLPBadge> = (args: TLPBadgeProps) => <TLPBadge {...args} />;
 
 export const Red = Template.bind({});
 Red.args = {

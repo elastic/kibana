@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Meta, Story } from '@storybook/react';
+import type { Meta, StoryFn } from '@storybook/react';
 import React, { useState } from 'react';
 import type { CoreStart } from '@kbn/core/public';
 import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
@@ -56,7 +56,7 @@ const stories: Meta<{}> = {
 };
 export default stories;
 
-export const CreatingInApmFromInventory: Story<Args> = ({ ruleParams, metadata }) => {
+export const CreatingInApmFromInventory: StoryFn<Args> = ({ ruleParams, metadata }) => {
   const [params, setParams] = useState<ErrorCountRuleParams>(ruleParams);
 
   function setRuleParams(property: string, value: any) {
@@ -82,7 +82,7 @@ CreatingInApmFromInventory.args = {
   },
 };
 
-export const CreatingInApmFromService: Story<Args> = ({ ruleParams, metadata }) => {
+export const CreatingInApmFromService: StoryFn<Args> = ({ ruleParams, metadata }) => {
   const [params, setParams] = useState<ErrorCountRuleParams>(ruleParams);
 
   function setRuleParams(property: string, value: any) {
@@ -108,7 +108,7 @@ CreatingInApmFromService.args = {
   },
 };
 
-export const EditingInStackManagement: Story<Args> = ({ ruleParams, metadata }) => {
+export const EditingInStackManagement: StoryFn<Args> = ({ ruleParams, metadata }) => {
   const [params, setParams] = useState<ErrorCountRuleParams>(ruleParams);
 
   function setRuleParams(property: string, value: any) {
@@ -135,7 +135,7 @@ EditingInStackManagement.args = {
   metadata: undefined,
 };
 
-export const CreatingInStackManagement: Story<Args> = ({ ruleParams, metadata }) => {
+export const CreatingInStackManagement: StoryFn<Args> = ({ ruleParams, metadata }) => {
   const [params, setParams] = useState<ErrorCountRuleParams>(ruleParams);
 
   function setRuleParams(property: string, value: any) {

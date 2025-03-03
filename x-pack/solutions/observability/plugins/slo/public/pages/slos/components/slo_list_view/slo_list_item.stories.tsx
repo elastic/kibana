@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { ComponentStory } from '@storybook/react';
+import type { StoryObj } from '@storybook/react';
 
 import { KibanaReactStorybookDecorator } from '../../../../utils/kibana_react.storybook_decorator';
 import {
@@ -22,9 +22,7 @@ export default {
   decorators: [KibanaReactStorybookDecorator],
 };
 
-const Template: ComponentStory<typeof Component> = (props: SloListItemProps) => (
-  <Component {...props} />
-);
+const Template: StoryObj<typeof Component> = (props: SloListItemProps) => <Component {...props} />;
 
 const defaultProps = {
   slo: buildSlo(),

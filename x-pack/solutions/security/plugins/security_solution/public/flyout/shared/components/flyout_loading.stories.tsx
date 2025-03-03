@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import type { Story } from '@storybook/react';
+import type { StoryFn } from '@storybook/react';
 import { FlyoutLoading } from './flyout_loading';
 
 export default {
@@ -14,6 +14,6 @@ export default {
   title: 'Flyout/FlyoutLoading',
 };
 
-export const Default: Story<void> = () => {
+export const Default: StoryFn = () => {
   return <FlyoutLoading />;
 };

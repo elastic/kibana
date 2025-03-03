@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Story } from '@storybook/react';
+import type { StoryFn } from '@storybook/react';
 import { addDecorator } from '@storybook/react';
 import React from 'react';
 import { ThemeProvider } from 'styled-components';
@@ -30,7 +30,7 @@ export default {
   title: 'Entity Analytics/AssetCriticalityFileUploader',
 };
 
-export const Default: Story<void> = () => {
+export const Default: StoryFn = () => {
   return (
     <StorybookProviders>
       <TestProvider>
@@ -44,7 +44,7 @@ export const Default: Story<void> = () => {
   );
 };
 
-export const FilePickerStep: Story<void> = () => {
+export const FilePickerStep: StoryFn = () => {
   return (
     <StorybookProviders>
       <TestProvider>
@@ -73,7 +73,7 @@ export const FilePickerStep: Story<void> = () => {
   );
 };
 
-export const ValidationStep: Story<void> = () => {
+export const ValidationStep: StoryFn = () => {
   return (
     <StorybookProviders>
       <TestProvider>
@@ -158,7 +158,7 @@ export const ValidationStep: Story<void> = () => {
   );
 };
 
-export const ResultsStep: Story<void> = () => {
+export const ResultsStep: StoryFn = () => {
   return (
     <StorybookProviders>
       <TestProvider>

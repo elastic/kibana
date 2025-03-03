@@ -6,7 +6,7 @@
  */
 
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
-import type { Meta, Story } from '@storybook/react';
+import type { Meta, StoryFn } from '@storybook/react';
 import React from 'react';
 import type { CoreStart } from '@kbn/core/public';
 import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
@@ -52,7 +52,7 @@ const stories: Meta<Args> = {
 };
 export default stories;
 
-export const Example: Story<Args> = ({ allOption, customOptionText, field, placeholder }) => {
+export const Example: StoryFn<Args> = ({ allOption, customOptionText, field, placeholder }) => {
   return (
     <SuggestionsSelect
       customOptions={[allOption]}

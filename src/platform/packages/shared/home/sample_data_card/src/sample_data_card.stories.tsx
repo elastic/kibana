@@ -8,7 +8,7 @@
  */
 
 import React from 'react';
-import { ComponentMeta } from '@storybook/react';
+import type { Meta } from '@storybook/react';
 import { action } from '@storybook/addon-actions';
 
 import type { SampleDataSet } from '@kbn/home-sample-data-types';
@@ -28,7 +28,7 @@ export default {
     },
   },
   decorators: [(Story) => <div style={{ width: '433px', padding: '25px' }}>{Story()}</div>],
-} as ComponentMeta<typeof SampleDataCard>;
+} as Meta<typeof SampleDataCard>;
 
 const argTypes = getStoryArgTypes();
 

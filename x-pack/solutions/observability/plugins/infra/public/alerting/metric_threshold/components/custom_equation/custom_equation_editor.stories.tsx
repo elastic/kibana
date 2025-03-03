@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Meta, Story } from '@storybook/react/types-6-0';
+import type { Meta, StoryFn } from '@storybook/react';
 import React, { useCallback, useEffect, useState } from 'react';
 import type { TimeUnitChar } from '@kbn/observability-plugin/common';
 import type { IErrorObject } from '@kbn/triggers-actions-ui-plugin/public';
@@ -33,7 +33,7 @@ export default {
   },
 } as Meta;
 
-const CustomEquationEditorTemplate: Story<CustomEquationEditorProps> = (args) => {
+const CustomEquationEditorTemplate: StoryFn<CustomEquationEditorProps> = (args) => {
   const [expression, setExpression] = useState<MetricExpression>(args.expression);
   const [errors, setErrors] = useState<IErrorObject>(args.errors);
 

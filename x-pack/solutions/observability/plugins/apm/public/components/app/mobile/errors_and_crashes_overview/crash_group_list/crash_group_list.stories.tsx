@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Meta, Story } from '@storybook/react';
+import type { Meta, StoryFn } from '@storybook/react';
 import type { ComponentProps } from 'react';
 import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
@@ -39,7 +39,7 @@ const stories: Meta<Args> = {
 };
 export default stories;
 
-export const Example: Story<Args> = (args) => {
+export const Example: StoryFn<Args> = (args) => {
   return <MobileCrashGroupList {...args} />;
 };
 Example.args = {
@@ -93,7 +93,7 @@ Example.args = {
   serviceName: 'test service',
 };
 
-export const EmptyState: Story<Args> = (args) => {
+export const EmptyState: StoryFn<Args> = (args) => {
   return <MobileCrashGroupList {...args} />;
 };
 EmptyState.args = {

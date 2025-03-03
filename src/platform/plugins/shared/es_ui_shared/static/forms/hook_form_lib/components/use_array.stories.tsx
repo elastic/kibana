@@ -8,7 +8,7 @@
  */
 
 import React from 'react';
-import { ComponentMeta } from '@storybook/react';
+import type { Meta } from '@storybook/react';
 
 import { STORYBOOK_SECTION } from '../constants';
 import { UseArray } from './use_array';
@@ -28,6 +28,6 @@ export default {
       );
     },
   ],
-} as ComponentMeta<typeof UseArray>;
+} as Meta<typeof UseArray>;
 
 export { UseArrayBasic, UseArrayReorder, UseArrayComplex, UseArrayDynamicData };

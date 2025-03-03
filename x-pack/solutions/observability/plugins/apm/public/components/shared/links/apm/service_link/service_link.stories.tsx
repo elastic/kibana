@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Story } from '@storybook/react';
+import type { StoryFn } from '@storybook/react';
 import type { ComponentProps, ComponentType } from 'react';
 import React from 'react';
 import { ServiceLink } from '.';
@@ -27,7 +27,7 @@ export default {
   ],
 };
 
-export const Example: Story<Args> = (args) => {
+export const Example: StoryFn<Args> = (args) => {
   return <ServiceLink {...args} />;
 };
 Example.args = {
@@ -43,7 +43,7 @@ Example.args = {
   serviceName: 'opbeans-java',
 };
 
-export const AndroidAgent: Story<Args> = (args) => {
+export const AndroidAgent: StoryFn<Args> = (args) => {
   return <ServiceLink {...args} />;
 };
 AndroidAgent.args = {
@@ -59,7 +59,7 @@ AndroidAgent.args = {
   serviceName: 'opbeans-android',
 };
 
-export const IOSAgent: Story<Args> = (args) => {
+export const IOSAgent: StoryFn<Args> = (args) => {
   return <ServiceLink {...args} />;
 };
 IOSAgent.args = {

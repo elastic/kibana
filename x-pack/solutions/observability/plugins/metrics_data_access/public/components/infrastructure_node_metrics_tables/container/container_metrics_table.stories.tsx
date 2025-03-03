@@ -8,7 +8,7 @@
 import { EuiCard } from '@elastic/eui';
 import { I18nProvider } from '@kbn/i18n-react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import type { Meta, Story } from '@storybook/react/types-6-0';
+import type { Meta, StoryFn } from '@storybook/react';
 import React from 'react';
 import { decorateWithGlobalStorybookThemeProviders } from '../../../test_utils/use_global_storybook_theme';
 import type { ContainerMetricsTableProps } from './container_metrics_table';
@@ -85,7 +85,7 @@ const loadedContainers: ContainerNodeMetricsRow[] = [
   },
 ];
 
-const Template: Story<ContainerMetricsTableProps> = (args) => {
+const Template: StoryFn<ContainerMetricsTableProps> = (args) => {
   return <ContainerMetricsTable {...args} />;
 };
 

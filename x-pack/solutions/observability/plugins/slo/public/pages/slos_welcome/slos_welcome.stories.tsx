@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { ComponentStory } from '@storybook/react';
+import type { StoryObj } from '@storybook/react';
 
 import { SlosWelcomePage as Component } from './slos_welcome';
 import { KibanaReactStorybookDecorator } from '../../utils/kibana_react.storybook_decorator';
@@ -17,6 +17,6 @@ export default {
   decorators: [KibanaReactStorybookDecorator],
 };
 
-const Template: ComponentStory<typeof Component> = () => <Component />;
+const Template: StoryObj<typeof Component> = () => <Component />;
 
 export const SloListWelcomePrompt = Template.bind({});

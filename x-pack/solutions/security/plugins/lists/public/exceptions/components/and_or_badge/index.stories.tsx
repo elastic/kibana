@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Story } from '@storybook/react';
+import type { StoryFn } from '@storybook/react';
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
@@ -58,7 +58,7 @@ export default {
   title: 'AndOrBadge',
 };
 
-const AndOrBadgeTemplate: Story<AndOrBadgeProps> = (args) => (
+const AndOrBadgeTemplate: StoryFn<AndOrBadgeProps> = (args) => (
   <EuiFlexGroup>
     <EuiFlexItem grow={false}>
       <AndOrBadge {...args} />

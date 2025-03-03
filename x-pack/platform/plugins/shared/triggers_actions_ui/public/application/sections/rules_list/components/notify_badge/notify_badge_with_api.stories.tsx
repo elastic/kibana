@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Meta, Story } from '@storybook/react';
+import type { Meta, StoryFn } from '@storybook/react';
 import { action } from '@storybook/addon-actions';
 import React from 'react';
 import { v4 as uuidv4 } from 'uuid';
@@ -60,7 +60,7 @@ export default {
   },
 } as Meta<RulesListNotifyBadgePropsWithApi>;
 
-const Template: Story<RulesListNotifyBadgePropsWithApi> = (args) => {
+const Template: StoryFn<RulesListNotifyBadgePropsWithApi> = (args) => {
   return <RulesListNotifyBadgeWithApi {...args} />;
 };
 
@@ -100,7 +100,7 @@ ActiveSnoozesRuleNotifyBadgeWithApi.args = {
 };
 
 const SnoozeDate = new Date();
-export const ScheduleSnoozesRuleNotifyBadgeWithApi: Story<RulesListNotifyBadgePropsWithApi> = (
+export const ScheduleSnoozesRuleNotifyBadgeWithApi: StoryFn<RulesListNotifyBadgePropsWithApi> = (
   args
 ) => {
   return (

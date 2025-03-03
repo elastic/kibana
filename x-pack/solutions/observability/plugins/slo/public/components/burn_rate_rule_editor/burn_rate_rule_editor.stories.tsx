@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { ComponentStory } from '@storybook/react';
+import type { StoryObj } from '@storybook/react';
 import { BurnRateRuleParams } from '../../typings';
 import { BurnRateRuleEditor as Component } from './burn_rate_rule_editor';
 import { KibanaReactStorybookDecorator } from '../../utils/kibana_react.storybook_decorator';
@@ -17,7 +17,7 @@ export default {
   decorators: [KibanaReactStorybookDecorator],
 };
 
-const Template: ComponentStory<typeof Component> = () => (
+const Template: StoryObj<typeof Component> = () => (
   <Component
     ruleParams={{} as BurnRateRuleParams}
     setRuleParams={() => {}}

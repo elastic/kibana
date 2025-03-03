@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Story } from '@storybook/react';
+import type { StoryFn } from '@storybook/react';
 import type { ComponentProps, ComponentType } from 'react';
 import React from 'react';
 import { ExceptionStacktrace } from './exception_stacktrace';
@@ -17,7 +17,7 @@ export default {
   component: ExceptionStacktrace,
 };
 
-export const JavaWithLongLines: Story<Args> = (args) => <ExceptionStacktrace {...args} />;
+export const JavaWithLongLines: StoryFn<Args> = (args) => <ExceptionStacktrace {...args} />;
 JavaWithLongLines.args = {
   codeLanguage: 'java',
   exceptions: [
@@ -1720,7 +1720,7 @@ JavaWithLongLines.decorators = [
   ),
 ];
 
-export const JavaScriptWithSomeContext: Story<Args> = (args) => <ExceptionStacktrace {...args} />;
+export const JavaScriptWithSomeContext: StoryFn<Args> = (args) => <ExceptionStacktrace {...args} />;
 JavaScriptWithSomeContext.storyName = 'JavaScript With Some Context';
 JavaScriptWithSomeContext.args = {
   codeLanguage: 'javascript',
@@ -1847,7 +1847,7 @@ JavaScriptWithSomeContext.args = {
   ],
 };
 
-export const RubyWithContextAndLibraryFrames: Story<Args> = (args) => (
+export const RubyWithContextAndLibraryFrames: StoryFn<Args> = (args) => (
   <ExceptionStacktrace {...args} />
 );
 RubyWithContextAndLibraryFrames.args = {

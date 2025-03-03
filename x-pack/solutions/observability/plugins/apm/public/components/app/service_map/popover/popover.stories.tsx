@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Meta, Story } from '@storybook/react';
+import type { Meta, StoryFn } from '@storybook/react';
 import cytoscape from 'cytoscape';
 import React from 'react';
 import { Popover } from '.';
@@ -84,7 +84,7 @@ const stories: Meta<Args> = {
 };
 export default stories;
 
-export const Dependency: Story<Args> = () => {
+export const Dependency: StoryFn<Args> = () => {
   return (
     <Popover
       environment={ENVIRONMENT_ALL.value}
@@ -104,7 +104,7 @@ Dependency.args = {
   },
 };
 
-export const DependencyWithLongTitle: Story<Args> = () => {
+export const DependencyWithLongTitle: StoryFn<Args> = () => {
   return (
     <Popover
       environment={ENVIRONMENT_ALL.value}
@@ -125,7 +125,7 @@ DependencyWithLongTitle.args = {
   },
 };
 
-export const ExternalsList: Story<Args> = () => {
+export const ExternalsList: StoryFn<Args> = () => {
   return (
     <Popover
       environment={ENVIRONMENT_ALL.value}
@@ -139,7 +139,7 @@ ExternalsList.args = {
   nodeData: exampleGroupedConnectionsData,
 };
 
-export const Resource: Story<Args> = () => {
+export const Resource: StoryFn<Args> = () => {
   return (
     <Popover
       environment={ENVIRONMENT_ALL.value}
@@ -159,7 +159,7 @@ Resource.args = {
   },
 };
 
-export const Service: Story<Args> = () => {
+export const Service: StoryFn<Args> = () => {
   return (
     <Popover
       environment={ENVIRONMENT_ALL.value}

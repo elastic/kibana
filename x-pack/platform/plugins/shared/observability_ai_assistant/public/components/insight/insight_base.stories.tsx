@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { ComponentStory } from '@storybook/react';
+import type { StoryObj } from '@storybook/react';
 
 import { FindActionResult } from '@kbn/actions-plugin/server';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
@@ -25,9 +25,7 @@ export default {
   decorators: [KibanaReactStorybookDecorator],
 };
 
-const Template: ComponentStory<typeof Component> = (props: InsightBaseProps) => (
-  <Component {...props} />
-);
+const Template: StoryObj<typeof Component> = (props: InsightBaseProps) => <Component {...props} />;
 
 const defaultProps: InsightBaseProps = {
   title: 'What is the root cause of performance degradation in my service?',
@@ -56,13 +54,13 @@ const defaultProps: InsightBaseProps = {
     <MessagePanel
       body={
         <MessageText
-          content={`Lorem ipsum dolor sit amet, consectetur adipiscing elit. 
+          content={`Lorem ipsum dolor sit amet, consectetur adipiscing elit.
 
-Aliquam commodo sollicitudin erat in ultrices. Vestibulum euismod ex ac lectus semper hendrerit. 
+Aliquam commodo sollicitudin erat in ultrices. Vestibulum euismod ex ac lectus semper hendrerit.
 
-Morbi mattis odio justo, in ullamcorper metus aliquet eu. Praesent risus velit, rutrum ac magna non, vehicula vestibulum sapien. Quisque pulvinar eros eu finibus iaculis. 
+Morbi mattis odio justo, in ullamcorper metus aliquet eu. Praesent risus velit, rutrum ac magna non, vehicula vestibulum sapien. Quisque pulvinar eros eu finibus iaculis.
 
-Morbi dapibus sapien lacus, vitae suscipit ex egestas pharetra. In velit eros, fermentum sit amet augue ut, aliquam sodales nulla. Nunc mattis lobortis eros sit amet dapibus. 
+Morbi dapibus sapien lacus, vitae suscipit ex egestas pharetra. In velit eros, fermentum sit amet augue ut, aliquam sodales nulla. Nunc mattis lobortis eros sit amet dapibus.
 
 Morbi non faucibus massa. Aliquam sed augue in eros ornare luctus sit amet cursus dolor. Pellentesque pellentesque lorem eu odio auctor convallis. Sed sodales felis at velit tempus tincidunt. Nulla sed ante cursus nibh mollis blandit. In mattis imperdiet tellus. Vestibulum nisl turpis, efficitur quis sollicitudin id, mollis in arcu. Vestibulum pulvinar tincidunt magna, vitae facilisis massa congue quis. Cras commodo efficitur tellus, et commodo risus rutrum at.`}
           loading={false}

@@ -6,7 +6,7 @@
  */
 
 import type { CoreStart } from '@kbn/core/public';
-import type { Meta, Story } from '@storybook/react';
+import type { Meta, StoryFn } from '@storybook/react';
 import type { ComponentProps } from 'react';
 import React from 'react';
 import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
@@ -49,7 +49,7 @@ const stories: Meta<Args> = {
 };
 export default stories;
 
-export const ServiceListWithItems: Story<Args> = (args) => {
+export const ServiceListWithItems: StoryFn<Args> = (args) => {
   return <ApmServicesTable {...args} />;
 };
 ServiceListWithItems.args = {
@@ -62,7 +62,7 @@ ServiceListWithItems.args = {
   sortFn: (sortItems) => sortItems,
 };
 
-export const ServiceListEmptyState: Story<Args> = (args) => {
+export const ServiceListEmptyState: StoryFn<Args> = (args) => {
   return <ApmServicesTable {...args} />;
 };
 ServiceListEmptyState.args = {
@@ -75,7 +75,7 @@ ServiceListEmptyState.args = {
   sortFn: (sortItems) => sortItems,
 };
 
-export const WithHealthWarnings: Story<Args> = (args) => {
+export const WithHealthWarnings: StoryFn<Args> = (args) => {
   return <ApmServicesTable {...args} />;
 };
 WithHealthWarnings.args = {
@@ -88,7 +88,7 @@ WithHealthWarnings.args = {
   sortFn: (sortItems) => sortItems,
 };
 
-export const ServiceListWithOverflowBucket: Story<Args> = (args) => {
+export const ServiceListWithOverflowBucket: StoryFn<Args> = (args) => {
   return <ApmServicesTable {...args} />;
 };
 

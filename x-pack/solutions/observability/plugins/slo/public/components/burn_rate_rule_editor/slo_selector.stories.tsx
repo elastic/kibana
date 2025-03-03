@@ -6,7 +6,7 @@
  */
 
 import { SLODefinitionResponse } from '@kbn/slo-schema';
-import { ComponentStory } from '@storybook/react';
+import type { StoryObj } from '@storybook/react';
 import React from 'react';
 import { KibanaReactStorybookDecorator } from '../../utils/kibana_react.storybook_decorator';
 import { SloSelector as Component } from './slo_selector';
@@ -17,7 +17,7 @@ export default {
   decorators: [KibanaReactStorybookDecorator],
 };
 
-const Template: ComponentStory<typeof Component> = () => (
+const Template: StoryObj<typeof Component> = () => (
   // eslint-disable-next-line no-console
   <Component onSelected={(slo: SLODefinitionResponse | undefined) => console.log(slo)} />
 );

@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { ComponentStory } from '@storybook/react';
+import type { StoryObj } from '@storybook/react';
 import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
 import { mockUiSettingsService } from '../../../../mocks/mock_kibana_ui_settings_service';
 import { generateMockIndicator, Indicator } from '../../../../../common/types/indicator';
@@ -30,7 +30,7 @@ const mockIndicator: Indicator = generateMockIndicator();
 
 const KibanaReactContext = createKibanaReactContext({ uiSettings: mockUiSettingsService() });
 
-const Template: ComponentStory<typeof OpenIndicatorFlyoutButton> = (args) => {
+const Template: StoryObj<typeof OpenIndicatorFlyoutButton> = (args) => {
   return (
     <KibanaReactContext.Provider>
       <OpenIndicatorFlyoutButton {...args} />

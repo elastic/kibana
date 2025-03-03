@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { ComponentStory } from '@storybook/react';
+import type { StoryObj } from '@storybook/react';
 
 import { EuiFlexGroup } from '@elastic/eui';
 import { Rule } from '@kbn/triggers-actions-ui-plugin/public';
@@ -20,7 +20,7 @@ export default {
   decorators: [KibanaReactStorybookDecorator],
 };
 
-const Template: ComponentStory<typeof Component> = (props: Props) => (
+const Template: StoryObj<typeof Component> = (props: Props) => (
   <EuiFlexGroup gutterSize="s">
     <Component {...props} />
   </EuiFlexGroup>

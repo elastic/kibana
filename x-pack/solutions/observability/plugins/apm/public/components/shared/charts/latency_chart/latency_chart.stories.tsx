@@ -6,7 +6,7 @@
  */
 
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import type { Meta, Story } from '@storybook/react';
+import type { Meta, StoryFn } from '@storybook/react';
 import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
 import { LatencyChart } from '.';
@@ -107,7 +107,7 @@ const stories: Meta<Args> = {
 
 export default stories;
 
-export const Example: Story<Args> = () => {
+export const Example: StoryFn<Args> = () => {
   return <LatencyChart height={300} kuery="" />;
 };
 Example.args = {
@@ -709,7 +709,7 @@ Example.args = {
   },
 };
 
-export const NoData: Story<Args> = () => {
+export const NoData: StoryFn<Args> = () => {
   return <LatencyChart height={300} kuery="" />;
 };
 

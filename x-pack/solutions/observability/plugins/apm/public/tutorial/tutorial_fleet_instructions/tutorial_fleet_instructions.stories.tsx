@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Story } from '@storybook/react';
+import type { StoryFn } from '@storybook/react';
 import React from 'react';
 import type { HttpStart } from '@kbn/core/public';
 import TutorialFleetInstructions from '.';
@@ -38,7 +38,7 @@ export default {
   },
 };
 
-export const Instructions: Story<Args> = (args) => {
+export const Instructions: StoryFn<Args> = (args) => {
   return <Wrapper {...args} />;
 };
 

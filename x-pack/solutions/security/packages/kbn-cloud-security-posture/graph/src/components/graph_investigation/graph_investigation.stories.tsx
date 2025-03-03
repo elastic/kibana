@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { type Meta, Story } from '@storybook/react';
+import type { Meta, StoryFn } from '@storybook/react';
 import { action } from '@storybook/addon-actions';
 import { GraphInvestigation, type GraphInvestigationProps } from './graph_investigation';
 import {
@@ -92,7 +92,7 @@ const defaultProps: GraphInvestigationProps = {
   showInvestigateInTimeline: false,
 };
 
-const Template: Story<Partial<GraphInvestigationProps>> = (props) => {
+const Template: StoryFn<Partial<GraphInvestigationProps>> = (props) => {
   return <GraphInvestigation {...defaultProps} {...props} />;
 };
 

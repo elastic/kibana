@@ -8,7 +8,7 @@
  */
 
 import React from 'react';
-import type { ComponentStory } from '@storybook/react';
+import type { StoryObj } from '@storybook/react';
 import type { FieldSpec } from '@kbn/data-views-plugin/common';
 import { CellActionsProvider } from '../context/cell_actions_context';
 import { makeAction } from '../mocks/helpers';
@@ -50,7 +50,7 @@ export default {
   ],
 };
 
-const CellActionsTemplate: ComponentStory<React.FC<CellActionsProps>> = (args) => (
+const CellActionsTemplate: StoryObj<React.FC<CellActionsProps>> = (args) => (
   <CellActions {...args}>{'Field value'}</CellActions>
 );
 

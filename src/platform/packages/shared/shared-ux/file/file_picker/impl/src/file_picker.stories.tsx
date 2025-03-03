@@ -8,7 +8,7 @@
  */
 
 import React from 'react';
-import { ComponentMeta, ComponentStory } from '@storybook/react';
+import type { Meta, StoryObj } from '@storybook/react';
 import { action } from '@storybook/addon-actions';
 import { base64dLogo } from '@kbn/shared-ux-file-image-mocks';
 import type { FileImageMetadata, FileKindBrowser } from '@kbn/shared-ux-file-types';
@@ -58,9 +58,9 @@ export default {
       </FilesContext>
     ),
   ],
-} as ComponentMeta<typeof FilePicker>;
+} as Meta<typeof FilePicker>;
 
-const Template: ComponentStory<typeof FilePicker> = (props) => <FilePicker {...props} />;
+const Template: StoryObj<typeof FilePicker> = (props) => <FilePicker {...props} />;
 
 export const Empty = Template.bind({});
 

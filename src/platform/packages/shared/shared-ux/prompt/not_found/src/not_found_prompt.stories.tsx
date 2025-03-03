@@ -9,7 +9,7 @@
 
 import { EuiButton, EuiPageTemplate } from '@elastic/eui';
 import React from 'react';
-import { Meta, Story } from '@storybook/react';
+import type { Meta, StoryFn } from '@storybook/react';
 import mdx from '../README.mdx';
 
 import { NotFoundPrompt } from './not_found_prompt';
@@ -28,7 +28,7 @@ export default {
   },
 } as Meta;
 
-export const EmptyPage: Story = () => {
+export const EmptyPage: StoryFn = () => {
   return (
     <EuiPageTemplate>
       <EuiPageTemplate.Section alignment="center">
@@ -38,7 +38,7 @@ export const EmptyPage: Story = () => {
   );
 };
 
-export const PageWithSidebar: Story = () => {
+export const PageWithSidebar: StoryFn = () => {
   return (
     <EuiPageTemplate panelled>
       <EuiPageTemplate.Sidebar>sidebar</EuiPageTemplate.Sidebar>
@@ -47,7 +47,7 @@ export const PageWithSidebar: Story = () => {
   );
 };
 
-export const CustomActions: Story = (args) => {
+export const CustomActions: StoryFn = (args) => {
   return (
     <EuiPageTemplate>
       <EuiPageTemplate.Section alignment="center">

@@ -8,7 +8,7 @@
  */
 
 import React from 'react';
-import { Story } from '@storybook/react';
+import type { StoryFn } from '@storybook/react';
 import { action } from '@storybook/addon-actions';
 import { EuiContextMenu } from '@elastic/eui';
 
@@ -174,7 +174,7 @@ export default {
   },
 };
 
-const Template: Story<{
+const Template: StoryFn<{
   solution: 'Generic' | 'Canvas' | 'Dashboard';
   iconButtonCount: number;
   showAddFromLibraryButton: boolean;

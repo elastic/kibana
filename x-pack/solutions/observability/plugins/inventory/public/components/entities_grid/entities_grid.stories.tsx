@@ -7,7 +7,7 @@
 
 import type { EuiDataGridSorting } from '@elastic/eui';
 import { EuiButton, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import type { Meta, Story } from '@storybook/react';
+import type { Meta, StoryFn } from '@storybook/react';
 import { orderBy } from 'lodash';
 import React, { useMemo, useState } from 'react';
 import { ENTITY_LAST_SEEN } from '@kbn/observability-shared-plugin/common';
@@ -36,7 +36,7 @@ const stories: Meta<EntityGridStoriesArgs> = {
   args: { entityType: undefined },
 };
 
-export const Grid: Story<EntityGridStoriesArgs> = (args) => {
+export const Grid: StoryFn<EntityGridStoriesArgs> = (args) => {
   const [pageIndex, setPageIndex] = useState(0);
   const [{ entityType }, updateArgs] = useArgs();
   const [sort, setSort] = useState<EuiDataGridSorting['columns'][0]>({
@@ -85,7 +85,7 @@ export const Grid: Story<EntityGridStoriesArgs> = (args) => {
   );
 };
 
-export const EmptyGrid: Story<EntityGridStoriesArgs> = (args) => {
+export const EmptyGrid: StoryFn<EntityGridStoriesArgs> = (args) => {
   const [pageIndex, setPageIndex] = useState(0);
   const [sort, setSort] = useState<EuiDataGridSorting['columns'][0]>({
     id: ENTITY_LAST_SEEN,

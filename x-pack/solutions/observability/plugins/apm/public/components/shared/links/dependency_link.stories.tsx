@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Story } from '@storybook/react';
+import type { StoryFn } from '@storybook/react';
 import type { ComponentProps, ComponentType } from 'react';
 import React from 'react';
 import { MockApmPluginStorybook } from '../../../context/apm_plugin/mock_apm_plugin_storybook';
@@ -27,7 +27,7 @@ export default {
   ],
 };
 
-export const Example: Story<Args> = (args) => {
+export const Example: StoryFn<Args> = (args) => {
   return <DependencyLink {...args} />;
 };
 Example.args = {

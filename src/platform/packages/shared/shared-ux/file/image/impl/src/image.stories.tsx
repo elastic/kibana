@@ -8,7 +8,7 @@
  */
 
 import React from 'react';
-import { ComponentStory, ComponentMeta } from '@storybook/react';
+import type { StoryObj, Meta } from '@storybook/react';
 
 import { getImageMetadata } from '@kbn/shared-ux-file-util';
 import { getImageData as getBlob, base64dLogo } from '@kbn/shared-ux-file-image-mocks';
@@ -38,9 +38,9 @@ export default {
       );
     },
   ],
-} as ComponentMeta<typeof Image>;
+} as Meta<typeof Image>;
 
-const Template: ComponentStory<typeof Image> = (props: Props, { loaded: { meta } }) => (
+const Template: StoryObj<typeof Image> = (props: Props, { loaded: { meta } }) => (
   <Image {...props} meta={meta} />
 );
 

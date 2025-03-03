@@ -6,7 +6,7 @@
  */
 
 import React, { ComponentProps } from 'react';
-import { Story } from '@storybook/react';
+import type { StoryFn } from '@storybook/react';
 import { ALERT_STATUS_RECOVERED, ALERT_STATUS_ACTIVE } from '@kbn/rule-data-utils';
 import {
   AlertLifecycleStatusBadge,
@@ -35,7 +35,7 @@ export default {
   },
 };
 
-const Template: Story<Args> = (args: AlertLifecycleStatusBadgeProps) => {
+const Template: StoryFn<Args> = (args: AlertLifecycleStatusBadgeProps) => {
   return <AlertLifecycleStatusBadge {...args} />;
 };
 

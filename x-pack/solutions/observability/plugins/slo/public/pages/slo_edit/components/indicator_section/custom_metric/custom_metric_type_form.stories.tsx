@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { ComponentStory } from '@storybook/react';
+import type { StoryObj } from '@storybook/react';
 import { FormProvider, useForm } from 'react-hook-form';
 
 import { KibanaReactStorybookDecorator } from '../../../../../utils/kibana_react.storybook_decorator';
@@ -19,7 +19,7 @@ export default {
   decorators: [KibanaReactStorybookDecorator],
 };
 
-const Template: ComponentStory<typeof Component> = () => {
+const Template: StoryObj<typeof Component> = () => {
   const methods = useForm({ defaultValues: SLO_EDIT_FORM_DEFAULT_VALUES_CUSTOM_METRIC });
   return (
     <FormProvider {...methods}>

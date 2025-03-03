@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { Story } from '@storybook/react';
+import type { StoryFn } from '@storybook/react';
 import React from 'react';
 import { PermissionDenied } from './permission_denied';
 
@@ -14,6 +14,6 @@ const stories = {
 };
 export default stories;
 
-export const Example: Story = (args) => {
+export const Example: StoryFn = (args) => {
   return <PermissionDenied {...args} />;
 };

@@ -8,7 +8,7 @@
  */
 
 import React from 'react';
-import type { ComponentStory } from '@storybook/react';
+import type { StoryObj } from '@storybook/react';
 import { action } from '@storybook/addon-actions';
 import { TabbedContent, type TabbedContentProps } from '../tabbed_content';
 import { STORYBOOK_TITLE } from './storybook_constants';
@@ -25,7 +25,7 @@ export default {
   },
 };
 
-const TabbedContentTemplate: ComponentStory<React.FC<TabbedContentProps>> = (args) => (
+const TabbedContentTemplate: StoryObj<React.FC<TabbedContentProps>> = (args) => (
   <TabbedContent
     {...args}
     createItem={() => {

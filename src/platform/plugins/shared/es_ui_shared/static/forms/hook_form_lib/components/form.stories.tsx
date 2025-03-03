@@ -8,7 +8,7 @@
  */
 
 import React from 'react';
-import { ComponentMeta } from '@storybook/react';
+import type { Meta } from '@storybook/react';
 import { EuiButton } from '@elastic/eui';
 
 import { action } from '@storybook/addon-actions';
@@ -28,7 +28,7 @@ export default {
   parameters: {
     controls: { hideNoControlsWarning: true },
   },
-} as ComponentMeta<typeof Form>;
+} as Meta<typeof Form>;
 
 type Args = Pick<FormProps, 'children' | 'FormWrapper'>;
 

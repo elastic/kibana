@@ -8,7 +8,7 @@
  */
 
 import React, { useState } from 'react';
-import type { ComponentMeta } from '@storybook/react';
+import type { Meta } from '@storybook/react';
 import { action } from '@storybook/addon-actions';
 
 import { EuiPanel } from '@elastic/eui';
@@ -92,7 +92,7 @@ export const getStory = (title: string, description: string) =>
         </FieldInputProvider>
       ),
     ],
-  } as ComponentMeta<typeof Component>);
+  } as Meta<typeof Component>);
 
 /**
  * Utility function for returning a {@link FieldInput} Storybook story.

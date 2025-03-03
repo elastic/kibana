@@ -5,21 +5,21 @@
  * 2.0.
  */
 import { EuiPanel } from '@elastic/eui';
-import { ComponentMeta, ComponentStoryObj } from '@storybook/react';
+import type { Meta, StoryObj } from '@storybook/react';
 import dedent from 'dedent';
 import React from 'react';
 import { FeedbackButtons } from '../buttons/feedback_buttons';
 import { MessagePanel as Component } from './message_panel';
 import { MessageText } from './message_text';
 
-const meta: ComponentMeta<typeof Component> = {
+const meta: Meta<typeof Component> = {
   component: Component,
   title: 'app/Molecules/MessagePanel',
 };
 
 export default meta;
 
-export const ContentLoading: ComponentStoryObj<typeof Component> = {
+export const ContentLoading: StoryObj<typeof Component> = {
   render: (props, context) => {
     return (
       <EuiPanel>
@@ -31,7 +31,7 @@ export const ContentLoading: ComponentStoryObj<typeof Component> = {
     body: (
       <MessageText
         content={`# This is a piece of text.
-      
+
 And an extra _paragraph_.
 
 \`This is inline code\`
@@ -39,7 +39,7 @@ And an extra _paragraph_.
 \`\`\`
 This is a code block
 \`\`\`
-      
+
 #### With a title
 
 This text is loa`}
@@ -50,7 +50,7 @@ This text is loa`}
   },
 };
 
-export const ContentLoaded: ComponentStoryObj<typeof Component> = {
+export const ContentLoaded: StoryObj<typeof Component> = {
   args: {
     body: (
       <MessageText
@@ -62,7 +62,7 @@ export const ContentLoaded: ComponentStoryObj<typeof Component> = {
   },
 };
 
-export const ContentFailed: ComponentStoryObj<typeof Component> = {
+export const ContentFailed: StoryObj<typeof Component> = {
   args: {
     body: (
       <MessageText
@@ -75,7 +75,7 @@ export const ContentFailed: ComponentStoryObj<typeof Component> = {
   },
 };
 
-export const ContentTable: ComponentStoryObj<typeof Component> = {
+export const ContentTable: StoryObj<typeof Component> = {
   args: {
     body: (
       <MessageText
@@ -93,7 +93,7 @@ export const ContentTable: ComponentStoryObj<typeof Component> = {
     | 7a128aca-940a-4d4f-a4a2-5950467d7866 | opbeans-swift | default | mobile | 373.360 | recovered | 2023-08-22T19:25:43.471Z | 2023-08-22T19:30:58.383Z |
     | 82feefe0-c81b-442f-9700-d1e4d7b1a28c | opbeans-frontend | production | page-load | 2179.071 | recovered | 2023-08-22T19:32:01.114Z | 2023-08-22T19:35:09.638Z |
     | bd716922-8a4d-44b7-ac1a-863ac4d25597 | opbeans-frontend | production | Component | 4030.463 | recovered | 2023-08-22T19:33:04.081Z | 2023-08-22T19:36:12.125Z |
-    
+
     Please note that all times are in UTC.`)}
         loading={false}
         onActionClick={async () => {}}
@@ -102,7 +102,7 @@ export const ContentTable: ComponentStoryObj<typeof Component> = {
   },
 };
 
-export const Controls: ComponentStoryObj<typeof Component> = {
+export const Controls: StoryObj<typeof Component> = {
   args: {
     body: (
       <MessageText

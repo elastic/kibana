@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import type { Story } from '@storybook/react';
+import type { StoryFn } from '@storybook/react';
 import { FieldComparisonSide } from './field_comparison_side';
 import type {
   ThreeWayDiff,
@@ -44,7 +44,7 @@ interface TemplateProps<FieldName extends keyof DiffableAllFields> {
   resolvedValue?: DiffableAllFields[FieldName];
 }
 
-const Template: Story<TemplateProps<keyof DiffableAllFields>> = () => {
+const Template: StoryFn<TemplateProps<keyof DiffableAllFields>> = () => {
   return <FieldComparisonSide />;
 };
 

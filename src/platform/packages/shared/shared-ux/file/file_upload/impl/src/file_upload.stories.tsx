@@ -8,7 +8,7 @@
  */
 
 import React from 'react';
-import { ComponentMeta, ComponentStory } from '@storybook/react';
+import type { Meta, StoryObj } from '@storybook/react';
 import { action } from '@storybook/addon-actions';
 import { FileKindBrowser, BaseFilesClient as FilesClient } from '@kbn/shared-ux-file-types';
 import { FilesContext } from '@kbn/shared-ux-file-context';
@@ -65,9 +65,9 @@ export default {
       </FilesContext>
     ),
   ],
-} as ComponentMeta<typeof FileUpload>;
+} as Meta<typeof FileUpload>;
 
-const Template: ComponentStory<typeof FileUpload> = (props: Props) => <FileUpload {...props} />;
+const Template: StoryObj<typeof FileUpload> = (props: Props) => <FileUpload {...props} />;
 
 export const Basic = Template.bind({});
 

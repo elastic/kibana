@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import type { Meta, Story } from '@storybook/react/types-6-0';
+import type { Meta, StoryFn } from '@storybook/react';
 import {
   DecorateWithKibanaContext,
   DecorateWithAssetDetailsStateContext,
@@ -24,7 +24,7 @@ const stories: Meta = {
   component: Processes,
 };
 
-const Template: Story = () => {
+const Template: StoryFn = () => {
   return <Processes />;
 };
 

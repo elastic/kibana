@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { ComponentStory } from '@storybook/react';
+import type { StoryObj } from '@storybook/react';
 import { KibanaReactStorybookDecorator } from '../../../utils/kibana_react.storybook_decorator';
 import { Cases as Component, CasesProps } from './cases';
 
@@ -16,7 +16,7 @@ export default {
   decorators: [KibanaReactStorybookDecorator],
 };
 
-const Template: ComponentStory<typeof Component> = (props: CasesProps) => <Component {...props} />;
+const Template: StoryObj<typeof Component> = (props: CasesProps) => <Component {...props} />;
 
 const defaultProps: CasesProps = {
   permissions: {

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Meta, Story } from '@storybook/react/types-6-0';
+import type { Meta, StoryFn } from '@storybook/react';
 import React, { useCallback, useEffect, useState } from 'react';
 import { IErrorObject } from '@kbn/triggers-actions-ui-plugin/public';
 import { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
@@ -54,7 +54,7 @@ const fakeDataView = {
   ],
 };
 
-const CustomEquationEditorTemplate: Story<CustomEquationEditorProps> = (args) => {
+const CustomEquationEditorTemplate: StoryFn<CustomEquationEditorProps> = (args) => {
   const [expression, setExpression] = useState<MetricExpression>(args.expression);
   const [errors, setErrors] = useState<IErrorObject>(args.errors);
 

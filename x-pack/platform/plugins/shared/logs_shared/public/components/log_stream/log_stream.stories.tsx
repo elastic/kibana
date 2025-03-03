@@ -6,7 +6,7 @@
  */
 
 import { I18nProvider } from '@kbn/i18n-react';
-import type { Meta, Story } from '@storybook/react';
+import type { Meta, StoryFn } from '@storybook/react';
 import React from 'react';
 import { decorateWithGlobalStorybookThemeProviders } from '../../test_utils/use_global_storybook_theme';
 import { LogStream, LogStreamProps } from './log_stream';
@@ -32,7 +32,7 @@ export default {
   },
 } as Meta;
 
-const LogStreamStoryTemplate: Story<LogStreamProps> = (args) => <LogStream {...args} />;
+const LogStreamStoryTemplate: StoryFn<LogStreamProps> = (args) => <LogStream {...args} />;
 
 export const BasicDateRange = LogStreamStoryTemplate.bind({});
 

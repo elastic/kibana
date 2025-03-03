@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Story } from '@storybook/react';
+import type { StoryFn } from '@storybook/react';
 import { action } from '@storybook/addon-actions';
 import React from 'react';
 import { HttpStart } from '@kbn/core/public';
@@ -167,7 +167,7 @@ export default {
   title: 'BuilderEntryItem',
 };
 
-const BuilderEntryItemTemplate: Story<EntryItemProps> = (args) => <BuilderEntryItem {...args} />;
+const BuilderEntryItemTemplate: StoryFn<EntryItemProps> = (args) => <BuilderEntryItem {...args} />;
 
 export const Default = BuilderEntryItemTemplate.bind({});
 Default.args = {

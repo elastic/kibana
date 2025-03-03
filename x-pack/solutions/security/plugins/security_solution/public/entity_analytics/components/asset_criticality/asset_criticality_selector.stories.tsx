@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Story } from '@storybook/react';
+import type { StoryFn } from '@storybook/react';
 import { addDecorator } from '@storybook/react';
 import React from 'react';
 import { ThemeProvider } from 'styled-components';
@@ -37,7 +37,7 @@ export default {
   title: 'Components/AssetCriticalitySelector',
 };
 
-export const Default: Story<void> = () => {
+export const Default: StoryFn = () => {
   return (
     <StorybookProviders>
       <TestProvider>
@@ -52,7 +52,7 @@ export const Default: Story<void> = () => {
   );
 };
 
-export const Compressed: Story<void> = () => {
+export const Compressed: StoryFn = () => {
   return (
     <StorybookProviders>
       <TestProvider>
@@ -68,7 +68,7 @@ export const Compressed: Story<void> = () => {
   );
 };
 
-export const Loading: Story<void> = () => {
+export const Loading: StoryFn = () => {
   return (
     <StorybookProviders>
       <TestProvider>

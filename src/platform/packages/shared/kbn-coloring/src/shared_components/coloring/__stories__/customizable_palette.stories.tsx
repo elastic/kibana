@@ -9,7 +9,7 @@
 
 import React, { FC, PropsWithChildren } from 'react';
 import { EuiForm } from '@elastic/eui';
-import { ComponentStory } from '@storybook/react';
+import type { StoryObj } from '@storybook/react';
 import { CustomizablePalette, CustomizablePaletteProps } from '../palette_configuration';
 import { getPaletteRegistry } from './palettes';
 
@@ -19,7 +19,7 @@ export default {
   decorators: [(story: Function) => <EuiForm>{story()}</EuiForm>],
 };
 
-const Template: ComponentStory<FC<PropsWithChildren<CustomizablePaletteProps>>> = (args) => (
+const Template: StoryObj<FC<PropsWithChildren<CustomizablePaletteProps>>> = (args) => (
   <CustomizablePalette {...args} />
 );
 

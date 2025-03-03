@@ -9,7 +9,7 @@ import moment from 'moment';
 import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
 import { of } from 'rxjs';
-import { Story } from '@storybook/react';
+import type { StoryFn } from '@storybook/react';
 import { TimeRange } from '@kbn/es-query';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { IUiSettingsClient } from '@kbn/core/public';
@@ -108,7 +108,7 @@ const mockOnFieldChange = function (value: EuiComboBoxOptionOption<string>): voi
   window.alert(value.label);
 };
 
-export const Default: Story<void> = () => {
+export const Default: StoryFn = () => {
   return (
     <StoryProvidersComponent
       kibana={{
@@ -131,7 +131,7 @@ export const Default: Story<void> = () => {
 
 Default.decorators = [(story) => <MemoryRouter>{story()}</MemoryRouter>];
 
-export const InitialLoad: Story<void> = () => {
+export const InitialLoad: StoryFn = () => {
   return (
     <StoryProvidersComponent
       kibana={{
@@ -156,7 +156,7 @@ export const InitialLoad: Story<void> = () => {
 
 InitialLoad.decorators = [(story) => <MemoryRouter>{story()}</MemoryRouter>];
 
-export const UpdatingData: Story<void> = () => {
+export const UpdatingData: StoryFn = () => {
   const mockIndicators: ChartSeries[] = [
     {
       x: '1 Jan 2022 06:00:00 GMT',

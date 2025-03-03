@@ -8,7 +8,7 @@
  */
 
 import React from 'react';
-import type { ComponentMeta } from '@storybook/react';
+import type { Meta } from '@storybook/react';
 import { action } from '@storybook/addon-actions';
 
 import { getSettingsMock } from '@kbn/management-settings-utilities/mocks/settings.mock';
@@ -51,7 +51,7 @@ export default {
       },
     },
   },
-} as ComponentMeta<typeof Component>;
+} as Meta<typeof Component>;
 
 type FieldCategoryParams = Pick<ComponentProps, 'category'> & Params;
 

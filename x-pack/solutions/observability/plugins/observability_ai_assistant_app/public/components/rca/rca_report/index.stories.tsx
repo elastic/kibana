@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Meta, Story } from '@storybook/react';
+import type { Meta, StoryFn } from '@storybook/react';
 import React from 'react';
 import { RootCauseAnalysisReport } from '.';
 
@@ -19,7 +19,7 @@ const stories: Meta<{}> = {
 
 export default stories;
 
-export const Default: Story<{}> = () => {
+export const Default: StoryFn<{}> = () => {
   return (
     <RootCauseAnalysisReport
       report={report}

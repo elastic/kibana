@@ -7,7 +7,7 @@
 
 import React, { useState } from 'react';
 import { EuiButton, EuiCallOut, EuiSelect, EuiSpacer } from '@elastic/eui';
-import type { Meta, Story } from '@storybook/react';
+import type { Meta, StoryFn } from '@storybook/react';
 import { MemoryRouter } from 'react-router-dom';
 import { useArgs } from '@storybook/preview-api';
 import { AssetDetails } from './asset_details';
@@ -42,7 +42,7 @@ const stories: Meta<AssetDetailsStoryArgs> = {
   args: { ...assetDetailsProps },
 };
 
-const PageTabTemplate: Story<AssetDetailsStoryArgs> = (args) => {
+const PageTabTemplate: StoryFn<AssetDetailsStoryArgs> = (args) => {
   return (
     <MemoryRouter initialEntries={[`/infra/metrics/hosts?assetDetails=(tabId:${args.tabId})`]}>
       <AssetDetails {...args} />
@@ -50,7 +50,7 @@ const PageTabTemplate: Story<AssetDetailsStoryArgs> = (args) => {
   );
 };
 
-const FlyoutTemplate: Story<AssetDetailsStoryArgs> = (args) => {
+const FlyoutTemplate: StoryFn<AssetDetailsStoryArgs> = (args) => {
   const [isOpen, setIsOpen] = useState(false);
   const closeFlyout = () => setIsOpen(false);
   const options = assetDetailsProps.tabs.map(({ id }) => id);

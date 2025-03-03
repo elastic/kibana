@@ -8,7 +8,7 @@
  */
 
 import React from 'react';
-import { ComponentMeta } from '@storybook/react';
+import type { Meta } from '@storybook/react';
 import { action } from '@storybook/addon-actions';
 import { EuiButton, EuiSpacer } from '@elastic/eui';
 
@@ -54,6 +54,6 @@ export default {
       );
     },
   ],
-} as ComponentMeta<typeof UseField>;
+} as Meta<typeof UseField>;
 
 export { UseFieldFieldTypes, UseFieldChangeListeners };

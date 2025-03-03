@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Story } from '@storybook/react';
+import type { StoryFn } from '@storybook/react';
 import type { ComponentType } from 'react';
 import React, { useState } from 'react';
 import type { CoreStart } from '@kbn/core/public';
@@ -41,7 +41,7 @@ export default {
   ],
 };
 
-export const CreatingInApmServiceOverview: Story<Args> = ({ ruleParams, metadata }) => {
+export const CreatingInApmServiceOverview: StoryFn<Args> = ({ ruleParams, metadata }) => {
   const [params, setParams] = useState<TransactionDurationRuleParams>(ruleParams);
 
   function setRuleParams(property: string, value: any) {
@@ -75,7 +75,7 @@ CreatingInApmServiceOverview.args = {
   },
 };
 
-export const CreatingInStackManagement: Story<Args> = ({ ruleParams, metadata }) => {
+export const CreatingInStackManagement: StoryFn<Args> = ({ ruleParams, metadata }) => {
   const [params, setParams] = useState<TransactionDurationRuleParams>(ruleParams);
 
   function setRuleParams(property: string, value: any) {

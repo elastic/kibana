@@ -8,7 +8,7 @@
 import { EuiCard } from '@elastic/eui';
 import { I18nProvider } from '@kbn/i18n-react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import type { Meta, Story } from '@storybook/react/types-6-0';
+import type { Meta, StoryFn } from '@storybook/react';
 import React from 'react';
 import { decorateWithGlobalStorybookThemeProviders } from '../../../test_utils/use_global_storybook_theme';
 import type { PodMetricsTableProps } from './pod_metrics_table';
@@ -90,7 +90,7 @@ const loadedPods: PodNodeMetricsRow[] = [
   },
 ];
 
-const Template: Story<PodMetricsTableProps> = (args) => {
+const Template: StoryFn<PodMetricsTableProps> = (args) => {
   return <PodMetricsTable {...args} />;
 };
 

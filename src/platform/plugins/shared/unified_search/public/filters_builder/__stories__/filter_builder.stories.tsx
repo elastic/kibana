@@ -8,7 +8,7 @@
  */
 
 import React, { FC } from 'react';
-import { ComponentStory } from '@storybook/react';
+import type { StoryObj } from '@storybook/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { EuiForm } from '@elastic/eui';
 import type { DataView } from '@kbn/data-views-plugin/common';
@@ -24,7 +24,7 @@ export default {
   decorators: [(story: Function) => <EuiForm>{story()}</EuiForm>],
 };
 
-const Template: ComponentStory<FC<FiltersBuilderProps>> = (args) => <FiltersBuilder {...args} />;
+const Template: StoryObj<FC<FiltersBuilderProps>> = (args) => <FiltersBuilder {...args} />;
 
 export const Default = Template.bind({});
 

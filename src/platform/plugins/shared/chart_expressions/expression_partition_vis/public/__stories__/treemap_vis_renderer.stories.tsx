@@ -8,7 +8,7 @@
  */
 
 import React, { FC, PropsWithChildren } from 'react';
-import { ComponentStory } from '@storybook/react';
+import type { StoryObj } from '@storybook/react';
 import { Render } from '@kbn/presentation-util-plugin/public/__stories__';
 import { getPartitionVisRenderer } from '../expression_renderers';
 import { ChartTypes, PartitionChartProps } from '../../common/types';
@@ -27,7 +27,7 @@ type Props = {
   syncColors: PartitionChartProps['syncColors'];
 } & PartitionChartProps['visConfig'];
 
-const PartitionVis: ComponentStory<FC<PropsWithChildren<Props>>> = ({
+const PartitionVis: StoryObj<FC<PropsWithChildren<Props>>> = ({
   visType,
   syncColors,
   children,

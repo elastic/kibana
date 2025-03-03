@@ -6,7 +6,7 @@
  */
 
 import React, { ComponentProps } from 'react';
-import { Meta, Story } from '@storybook/react';
+import type { Meta, StoryFn } from '@storybook/react';
 import { EuiCallOut, EuiSpacer } from '@elastic/eui';
 import { RulesSettingsLink } from './rules_settings_link';
 import { StorybookContextDecorator } from '../../../../.storybook/decorator';
@@ -19,7 +19,7 @@ export default {
   component: RulesSettingsLink,
 } as Meta<Args>;
 
-const Template: Story<Args> = () => {
+const Template: StoryFn<Args> = () => {
   return <RulesSettingsLink />;
 };
 

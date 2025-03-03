@@ -9,7 +9,7 @@
 
 import React from 'react';
 import { action } from '@storybook/addon-actions';
-import { ComponentMeta } from '@storybook/react';
+import type { Meta } from '@storybook/react';
 import { FieldDefinition } from '@kbn/management-settings-types';
 import { getFieldDefinitions } from '@kbn/management-settings-field-definition';
 import { getSettingsMock } from '@kbn/management-settings-utilities/mocks/settings.mock';
@@ -57,7 +57,7 @@ export default {
       default: 'ghost',
     },
   },
-} as ComponentMeta<typeof Component>;
+} as Meta<typeof Component>;
 
 interface FormStoryProps {
   /** True if saving settings is enabled, false otherwise. */
