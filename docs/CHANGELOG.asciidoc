@@ -10,6 +10,7 @@
 
 Review important information about the {kib} 8.x releases.
 
+* <<release-notes-8.17.3>>
 * <<release-notes-8.17.2>>
 * <<release-notes-8.17.1>>
 * <<release-notes-8.17.0>>
@@ -87,6 +88,28 @@ Review important information about the {kib} 8.x releases.
 
 
 include::upgrade-notes.asciidoc[]
+
+[[release-notes-8.17.3]]
+== {kib} 8.17.3
+
+The 8.17.3 release includes the following bug fixes.
+
+[float]
+[[fixes-v8.17.3]]
+=== Bug fixes
+Elastic Observability solution::
+* Allows editing of non-resolving log views ({kibana-pull}210633[#210633]).
+* Removes `error.id` in `getErrorGroupMainStatistics` queries ({kibana-pull}210613[#210613]).
+Elastic Security solution::
+For the Elastic Security 8.17.3 release information, refer to {security-guide}/release-notes.html[_Elastic Security Solution Release Notes_].
+Kibana security::
+* Fixes the generated name for imported package titles ({kibana-pull}210916[#210916]).
+* Fixes package name validation on the Data streams page ({kibana-pull}210770[#210770]).
+* Handles empty categorization results from LLMs ({kibana-pull}210420[#210420]).
+Platform::
+* Adds versioning to inventory_view_saved_object ({kibana-pull}207007[#207007]).
+Sharing::
+* Reinstates switch to support generating public URLs for Embed when supported ({kibana-pull}207383[#207383]).
 
 [[release-notes-8.17.2]]
 == {kib} 8.17.2
