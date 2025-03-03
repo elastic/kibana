@@ -68,16 +68,22 @@ export const getFieldItemsData = ({
 
   const getFieldItems = () => {
     const fieldItemsAcc: BrowserFieldItem[] = [];
-    const fieldSeen: Map<string, boolean> = new Map();
+    const fieldsSeen: Set<string> = new Set();
 
+    /**
+     * Both categoryIds and the fields in browserFields can be significantly large. Technically speaking,
+     * there is no upper cap on how many fields a customer can have. We are using a for loop here to avoid
+     * the performance issues that can arise from using map/filter/reduce.
+     */
     for (let i = 0; i < categoryIds.length; i += 1) {
       const categoryId = categoryIds[i];
       const categoryBrowserFields = Object.values(browserFields[categoryId]?.fields ?? {});
       if (categoryBrowserFields.length > 0) {
         for (let j = 0; j < categoryBrowserFields.length; j += 1) {
-          const { name = '', ...field } = categoryBrowserFields[j];
-          if (fieldSeen.has(name)) continue;
-          fieldSeen.set(name, true);
+          const field = categoryBrowserFields[j];
+          const name = field.name !== undefined ? field.name : '';
+          if (fieldsSeen.has(name)) continue;
+          fieldsSeen.add(name);
           const categoryFieldItem = {
             name,
             type: field.type,
