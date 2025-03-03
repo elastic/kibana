@@ -112,7 +112,7 @@ export const registerFunctions: RegistrationCallback = async ({
     if (isKnowledgeBaseReady) {
       if (availableFunctionNames.includes(SUMMARIZE_FUNCTION_NAME)) {
         instructions.push(`You can use the "${SUMMARIZE_FUNCTION_NAME}" function to store new information you have learned in a knowledge database.
-          Only use this function when the user asks for it.
+          Only use this function when the user asks to remember or store some information.
           All summaries MUST be created in English, even if the conversation was carried out in a different language.`);
       }
 
