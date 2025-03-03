@@ -38,6 +38,10 @@ interface Props {
   navigation: NavigationPublicPluginStart;
 }
 
+type ControlGroupAPI = DefaultControlApi & {
+  clearSelections: () => void;
+};
+
 const DEST_COUNTRY_CONTROL_ID = 'DEST_COUNTRY_CONTROL_ID';
 
 export const SearchExample = ({ data, dataView, navigation }: Props) => {
@@ -180,7 +184,7 @@ export const SearchExample = ({ data, dataView, navigation }: Props) => {
           onClick={() => {
             if (controlGroupAPI) {
               Object.values(controlGroupAPI.children$.getValue()).forEach((controlApi) => {
-                (controlApi as DefaultControlApi)?.clearSelections();
+                (controlApi as ControlGroupAPI)?.clearSelections();
               });
             }
           }}
