@@ -367,6 +367,10 @@ export interface SearchAfterAndBulkCreateParams {
   sortOrder?: estypes.SortOrder;
   additionalFilters?: estypes.QueryDslQueryContainer[];
   isLoggedRequestsEnabled?: boolean;
+  /**
+   * If defined, will override the value of max_signals found in sharedParams.tuple
+   */
+  maxSignalsOverride?: number;
 }
 
 export interface SearchAfterAndBulkCreateReturnType {

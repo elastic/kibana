@@ -49,6 +49,7 @@ export const bulkCreateUnsuppressedAlerts: BulkCreateUnsuppressedAlerts = async 
     filter,
     buildReasonMessage,
     additionalFilters: buildMissingFieldsFilter(groupByFields),
+    maxSignalsOverride: size,
   });
 
   return bulkCreatedResult;
