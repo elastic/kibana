@@ -84,6 +84,28 @@ describe('useConversation', () => {
     jest.clearAllMocks();
   });
 
+  describe('with initial messages and a conversation id', () => {
+    it('throws an error', () => {
+      expect(() =>
+        renderHook(useConversation, {
+          initialProps: {
+            chatService: mockChatService,
+            connectorId: 'my-connector',
+            initialMessages: [
+              {
+                '@timestamp': new Date().toISOString(),
+                message: { content: '', role: MessageRole.User },
+              },
+            ],
+            initialConversationId: 'foo',
+            onConversationDuplicate: jest.fn(),
+          },
+          wrapper,
+        })
+      ).toThrow(/Cannot set initialMessages if initialConversationId is set/);
+    });
+  });
+
   describe('without initial messages and a conversation id', () => {
     beforeEach(() => {
       hookResult = renderHook(useConversation, {
@@ -388,7 +410,7 @@ describe('useConversation', () => {
           result.current.saveTitle('my-new-title');
         } catch (e) {
           expect(e).toBeInstanceOf(Error);
-          expect(e.message).toBe('Cannot save title if conversation is not stored');
+          expect(e.message).toBe('Cannot set initialMessages if initialConversationId is set');
           done();
         }
       });

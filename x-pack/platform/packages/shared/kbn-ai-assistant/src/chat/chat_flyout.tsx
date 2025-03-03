@@ -42,7 +42,7 @@ export enum FlyoutPositionMode {
 
 export function ChatFlyout({
   initialTitle,
-  initialMessages,
+  initialMessages: initialMessagesFromProps,
   initialFlyoutPositionMode,
   onFlyoutPositionModeChange,
   isOpen,
@@ -69,6 +69,7 @@ export function ChatFlyout({
   const knowledgeBase = useKnowledgeBase();
 
   const [conversationId, setConversationId] = useState<string | undefined>(undefined);
+  const [initialMessages, setInitialMessages] = useState(initialMessagesFromProps);
 
   const [flyoutPositionMode, setFlyoutPositionMode] = useState<FlyoutPositionMode>(
     initialFlyoutPositionMode || FlyoutPositionMode.OVERLAY
@@ -90,6 +91,7 @@ export function ChatFlyout({
 
   const onConversationDuplicate = (conversation: Conversation) => {
     conversationList.conversations.refresh();
+    setInitialMessages([]);
     setConversationId(conversation.conversation.id);
   };
 
