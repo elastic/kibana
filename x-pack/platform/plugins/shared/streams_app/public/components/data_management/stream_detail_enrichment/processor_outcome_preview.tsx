@@ -21,45 +21,6 @@ import { isEmpty } from 'lodash';
 import { StreamsAppSearchBar, StreamsAppSearchBarProps } from '../../streams_app_search_bar';
 import { PreviewTable } from '../preview_table';
 import { AssetImage } from '../../asset_image';
-<<<<<<< HEAD
-
-interface ProcessorOutcomePreviewProps {
-  columns: TableColumn[];
-  isLoading: UseProcessingSimulatorReturn['isLoading'];
-  simulation: UseProcessingSimulatorReturn['simulation'];
-  filteredSamples: UseProcessingSimulatorReturn['samples'];
-  onRefreshSamples: UseProcessingSimulatorReturn['refreshSamples'];
-  selectedDocsFilter: UseProcessingSimulatorReturn['selectedDocsFilter'];
-  setSelectedDocsFilter: UseProcessingSimulatorReturn['setSelectedDocsFilter'];
-}
-
-export const ProcessorOutcomePreview = ({
-  columns,
-  isLoading,
-  simulation,
-  filteredSamples,
-  onRefreshSamples,
-  selectedDocsFilter,
-  setSelectedDocsFilter,
-}: ProcessorOutcomePreviewProps) => {
-  const { dependencies } = useKibana();
-  const { data } = dependencies.start;
-
-  const { timeRange, setTimeRange } = data.query.timefilter.timefilter.useTimefilter();
-
-  const tableColumns = useMemo(() => {
-    switch (selectedDocsFilter) {
-      case 'outcome_filter_unmatched':
-        return columns
-          .filter((column) => column.origin === 'processor')
-          .map((column) => column.name);
-      case 'outcome_filter_matched':
-      case 'outcome_filter_all':
-      default:
-        return columns.map((column) => column.name);
-    }
-  }, [columns, selectedDocsFilter]);
-=======
 import {
   useSimulatorSelector,
   useStreamEnrichmentEvents,
@@ -73,7 +34,6 @@ export const ProcessorOutcomePreview = () => {
       state?.matches('loadingSamples') ||
       state?.matches('runningSimulation')
   );
->>>>>>> 12af41d745a225bd5899e6dbea1552ca8b6dcb2f
 
   return (
     <>
