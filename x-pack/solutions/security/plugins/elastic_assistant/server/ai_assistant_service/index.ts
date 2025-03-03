@@ -106,7 +106,7 @@ export class AIAssistantService {
   private hasInitializedV2KnowledgeBase: boolean = false;
   private productDocManager?: ProductDocBaseStartContract['management'];
   // Temporary 'feature flag' to determine if we should initialize the new knowledge base mappings
-  private assistantDefaultInferenceEndpoint: boolean = false;
+  private assistantDefaultInferenceEndpoint: boolean = true;
 
   constructor(private readonly options: AIAssistantServiceOpts) {
     this.initialized = false;
@@ -283,7 +283,7 @@ export class AIAssistantService {
             resource: 'knowledgeBase',
             kibanaVersion: this.options.kibanaVersion,
             fieldMap: {
-              ...omit(knowledgeBaseFieldMap, 'semantic_text'),
+              ...omit(knowledgeBaseFieldMap, ['semantic_text', 'vector', 'vector.tokens']),
               semantic_text: {
                 type: 'semantic_text',
                 array: false,
@@ -321,7 +321,7 @@ export class AIAssistantService {
             resource: 'knowledgeBase',
             kibanaVersion: this.options.kibanaVersion,
             fieldMap: {
-              ...omit(knowledgeBaseFieldMap, 'semantic_text'),
+              ...omit(knowledgeBaseFieldMap, ['semantic_text', 'vector', 'vector.tokens']),
               semantic_text: {
                 type: 'semantic_text',
                 array: false,
