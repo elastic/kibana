@@ -33,7 +33,7 @@ import {
 
 const TASK_TYPE = 'MetricsDataAccess:IndicesMetadata';
 const TASK_ID = 'metrics-data-access:indices-metadata:1.0.0';
-const INTERVAL = '1m';
+const INTERVAL = '24h';
 
 export class IndicesMetadataService {
   private readonly logger: Logger;
