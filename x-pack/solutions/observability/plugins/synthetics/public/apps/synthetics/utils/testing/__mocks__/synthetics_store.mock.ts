@@ -198,6 +198,9 @@ function getBrowserJourneyMockSlice() {
 
 function getMonitorDetailsMockSlice() {
   return {
+    lastErrorRun: {
+      loading: false,
+    },
     lastRun: {
       loading: false,
       loaded: true,
