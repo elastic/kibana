@@ -26,6 +26,7 @@ import { forceHTMLElementOffsetWidth } from '../../../../components/effected_pol
 import type { PolicyData, TrustedAppConditionEntry } from '../../../../../../common/endpoint/types';
 
 import { EndpointDocGenerator } from '../../../../../../common/endpoint/generate_data';
+import type { IHttpFetchError } from '@kbn/core-http-browser';
 
 jest.mock('../../../../../common/hooks/use_license', () => {
   const licenseServiceInstance = {
@@ -192,6 +193,14 @@ describe('Trusted apps form', () => {
   afterEach(() => {
     resetHTMLElementOffsetWidth();
     cleanup();
+  });
+
+  it('should display form submission errors', () => {
+    const message = 'oh oh - failed';
+    formProps.error = new Error(message) as IHttpFetchError;
+    render();
+
+    expect(renderResult.getByTestId(`${formPrefix}-submitError`).textContent).toMatch(message);
   });
 
   describe('Details and Conditions', () => {
@@ -408,6 +417,22 @@ describe('Trusted apps form', () => {
       formProps.item.tags = [formProps.policies.map((p) => `policy:${p.id}`)[0]];
       render();
       expect(renderResult.queryByTestId('loading-spinner')).not.toBeNull();
+    });
+
+    it('should preserve other tags when policies are updated', async () => {
+      formProps.item.tags = ['some:unknown_tag'];
+      const policyId = formProps.policies[0].id;
+      render();
+      await userEvent.click(renderResult.getByTestId(`${formPrefix}-effectedPolicies-perPolicy`));
+      await userEvent.click(renderResult.getByTestId(`policy-${policyId}`));
+
+      expect(formProps.onChange).toHaveBeenLastCalledWith(
+        expect.objectContaining({
+          item: expect.objectContaining({
+            tags: ['some:unknown_tag', `policy:${policyId}`],
+          }),
+        })
+      );
     });
   });
 

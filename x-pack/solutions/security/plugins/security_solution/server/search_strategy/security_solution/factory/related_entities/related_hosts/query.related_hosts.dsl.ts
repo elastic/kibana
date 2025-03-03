@@ -34,27 +34,25 @@ export const buildRelatedHostsQuery = ({
     index: defaultIndex,
     ignore_unavailable: true,
     track_total_hits: false,
-    body: {
-      aggregations: {
-        host_count: { cardinality: { field: 'host.name' } },
-        host_data: {
-          terms: {
-            field: 'host.name',
-            size: 1000,
-          },
-          aggs: {
-            ip: {
-              terms: {
-                field: 'host.ip',
-                size: 10,
-              },
+    aggregations: {
+      host_count: { cardinality: { field: 'host.name' } },
+      host_data: {
+        terms: {
+          field: 'host.name',
+          size: 1000,
+        },
+        aggs: {
+          ip: {
+            terms: {
+              field: 'host.ip',
+              size: 10,
             },
           },
         },
       },
-      query: { bool: { filter } },
-      size: 0,
     },
+    query: { bool: { filter } },
+    size: 0,
   };
 
   return dslQuery;

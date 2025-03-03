@@ -130,9 +130,9 @@ export async function getElserModelStatus({
     (stats) => stats.deployment_stats?.deployment_id === AI_ASSISTANT_KB_INFERENCE_ID
   );
   const deploymentState = elserModelStats?.deployment_stats?.state;
-  const allocationState = elserModelStats?.deployment_stats?.allocation_status.state;
+  const allocationState = elserModelStats?.deployment_stats?.allocation_status?.state;
   const allocationCount =
-    elserModelStats?.deployment_stats?.allocation_status.allocation_count ?? 0;
+    elserModelStats?.deployment_stats?.allocation_status?.allocation_count ?? 0;
   const ready =
     deploymentState === 'started' && allocationState === 'fully_allocated' && allocationCount > 0;
 

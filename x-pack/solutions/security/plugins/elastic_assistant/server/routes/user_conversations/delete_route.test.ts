@@ -28,7 +28,7 @@ describe('Delete conversation route', () => {
     clients.elasticAssistant.getAIAssistantConversationsDataClient.getConversation.mockResolvedValue(
       getConversationMock(getQueryConversationParams())
     );
-    context.elasticAssistant.getCurrentUser.mockReturnValue(mockUser1);
+    context.elasticAssistant.getCurrentUser.mockResolvedValue(mockUser1);
     deleteConversationRoute(server.router);
   });
 

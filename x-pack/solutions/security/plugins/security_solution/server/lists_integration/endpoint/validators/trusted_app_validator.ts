@@ -15,6 +15,7 @@ import type {
   CreateExceptionListItemOptions,
   UpdateExceptionListItemOptions,
 } from '@kbn/lists-plugin/server';
+import { hasArtifactOwnerSpaceId } from '../../../../common/endpoint/service/artifacts/utils';
 import { BaseValidator } from './base_validator';
 import type { ExceptionItemLikeOptions } from '../types';
 import type { TrustedAppConditionEntry as ConditionEntry } from '../../../../common/endpoint/types';
@@ -206,12 +207,17 @@ export class TrustedAppValidator extends BaseValidator {
     await this.validateTrustedAppData(item);
     await this.validateCanCreateByPolicyArtifacts(item);
     await this.validateByPolicyItem(item);
+    await this.validateCreateOwnerSpaceIds(item);
+    await this.validateCanCreateGlobalArtifacts(item);
+
+    await this.setOwnerSpaceId(item);
 
     return item;
   }
 
-  async validatePreDeleteItem(): Promise<void> {
+  async validatePreDeleteItem(currentItem: ExceptionListItemSchema): Promise<void> {
     await this.validateHasWritePrivilege();
+    await this.validateCanDeleteItemInActiveSpace(currentItem);
   }
 
   async validatePreGetOneItem(): Promise<void> {
@@ -255,6 +261,12 @@ export class TrustedAppValidator extends BaseValidator {
     }
 
     await this.validateByPolicyItem(updatedItem);
+    await this.validateUpdateOwnerSpaceIds(_updatedItem, currentItem);
+    await this.validateCanUpdateItemInActiveSpace(_updatedItem, currentItem);
+
+    if (!hasArtifactOwnerSpaceId(_updatedItem)) {
+      await this.setOwnerSpaceId(_updatedItem);
+    }
 
     return _updatedItem;
   }
