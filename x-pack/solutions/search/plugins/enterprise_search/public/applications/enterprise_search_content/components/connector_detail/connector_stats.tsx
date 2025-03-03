@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { ReactNode } from 'react';
+import React, { ReactNode, useMemo } from 'react';
 
 import { useValues } from 'kea';
 
@@ -126,7 +126,14 @@ export const ConnectorStats: React.FC<ConnectorStatsProps> = ({
     services: { discover },
   } = useKibana<KibanaDeps>();
   const { http } = useValues(HttpLogic);
-  const connectorDefinition = connectorTypes.find((c) => c.serviceType === connector.service_type);
+  // TODO service_type === "" is considered unknown/custom connector multiple places replace all of them with a better solution
+  const CUSTOM_CONNECTOR = useMemo(
+    () => connectorTypes.filter(({ serviceType }) => serviceType === ''),
+    [connectorTypes]
+  );
+  const connectorDefinition =
+    connectorTypes.find((c) => c.serviceType === connector.service_type) || CUSTOM_CONNECTOR[0];
+
   const columns = connector.is_native ? 2 : 3;
 
   const agnetlessPolicyExists = !!agentlessOverview?.policy;
@@ -401,6 +408,7 @@ export const ConnectorStats: React.FC<ConnectorStatsProps> = ({
               <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
                 <EuiFlexItem grow={false}>
                   <EuiButtonEmpty
+                    data-test-subj="enterpriseSearchConnectorStatsElasticConnectorsButton"
                     isDisabled={!connector.service_type}
                     iconType="plugs"
                     color="text"
@@ -410,7 +418,10 @@ export const ConnectorStats: React.FC<ConnectorStatsProps> = ({
                       })
                     )}
                   >
-                    Elastic Connectors
+                    {i18n.translate(
+                      'xpack.enterpriseSearch.connectorStats.elasticConnectorsButtonEmptyLabel',
+                      { defaultMessage: 'Elastic Connectors' }
+                    )}
                   </EuiButtonEmpty>
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
@@ -446,6 +457,7 @@ export const ConnectorStats: React.FC<ConnectorStatsProps> = ({
                 <EuiFlexItem grow={false}>
                   {agentlessAgentExists && (
                     <EuiButtonEmpty
+                      data-test-subj="enterpriseSearchConnectorStatsHostOverviewButton"
                       isDisabled={!agentlessOverview || !agentlessOverview.agent.id}
                       size="s"
                       href={http.basePath.prepend(
@@ -466,6 +478,7 @@ export const ConnectorStats: React.FC<ConnectorStatsProps> = ({
                 <EuiFlexItem grow={false}>
                   {agnetlessPolicyExists ? (
                     <EuiButtonEmpty
+                      data-test-subj="enterpriseSearchConnectorStatsManagePolicyButton"
                       isDisabled={!agentlessOverview || !agentlessOverview.policy.id}
                       size="s"
                       href={http.basePath.prepend(
