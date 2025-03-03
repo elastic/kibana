@@ -17,7 +17,7 @@ import type { AgentPolicy, NewAgentPolicy } from '../../types';
 
 import { appContextService } from '../app_context';
 import { listEnrollmentApiKeys } from '../api_keys';
-import { listFleetServerHosts } from '../fleet_server_host';
+import { fleetServerHostService } from '../fleet_server_host';
 
 import { agentlessAgentService } from './agentless_agent';
 
@@ -48,8 +48,8 @@ mockedAppContextService.getSecuritySetup.mockImplementation(() => ({
 const mockedListEnrollmentApiKeys = listEnrollmentApiKeys as jest.Mock<
   ReturnType<typeof listEnrollmentApiKeys>
 >;
-const mockedListFleetServerHosts = listFleetServerHosts as jest.Mock<
-  ReturnType<typeof listFleetServerHosts>
+const mockedFleetServerHostService = fleetServerHostService as jest.Mocked<
+  typeof fleetServerHostService
 >;
 
 function getAgentPolicyCreateMock() {
@@ -115,7 +115,7 @@ describe('Agentless Agent service', () => {
     jest
       .spyOn(appContextService, 'getKibanaVersion')
       .mockReturnValue('mocked-kibana-version-infinite');
-    mockedListFleetServerHosts.mockResolvedValue({
+    mockedFleetServerHostService.list.mockResolvedValue({
       items: [
         {
           id: 'mocked-fleet-server-id',
@@ -215,7 +215,7 @@ describe('Agentless Agent service', () => {
     jest
       .spyOn(appContextService, 'getKibanaVersion')
       .mockReturnValue('mocked-kibana-version-infinite');
-    mockedListFleetServerHosts.mockResolvedValue({
+    mockedFleetServerHostService.list.mockResolvedValue({
       items: [
         {
           id: 'mocked-fleet-server-id',
@@ -314,7 +314,7 @@ describe('Agentless Agent service', () => {
     jest
       .spyOn(appContextService, 'getKibanaVersion')
       .mockReturnValue('mocked-kibana-version-infinite');
-    mockedListFleetServerHosts.mockResolvedValue({
+    mockedFleetServerHostService.list.mockResolvedValue({
       items: [
         {
           id: 'mocked-fleet-server-id',
@@ -425,7 +425,7 @@ describe('Agentless Agent service', () => {
     jest
       .spyOn(appContextService, 'getKibanaVersion')
       .mockReturnValue('mocked-kibana-version-infinite');
-    mockedListFleetServerHosts.mockResolvedValue({
+    mockedFleetServerHostService.list.mockResolvedValue({
       items: [
         {
           id: 'mocked-fleet-server-id',
@@ -512,6 +512,47 @@ describe('Agentless Agent service', () => {
     );
   });
 
+  it('should upgraded agentless agent for ESS', async () => {
+    const returnValue = {
+      id: 'mocked',
+      regional_id: 'mocked',
+    };
+    (axios as jest.MockedFunction<typeof axios>).mockResolvedValueOnce(returnValue);
+    jest.spyOn(appContextService, 'getConfig').mockReturnValue({
+      agentless: {
+        enabled: true,
+        api: {
+          url: 'http://api.agentless.com',
+          tls: {
+            certificate: '/path/to/cert',
+            key: '/path/to/key',
+            ca: '/path/to/ca',
+          },
+        },
+      },
+    } as any);
+    jest.spyOn(appContextService, 'getCloud').mockReturnValue({ isCloudEnabled: true } as any);
+
+    await agentlessAgentService.upgradeAgentlessDeployment(
+      'mocked-agentless-agent-policy-id',
+      '8.17.0'
+    );
+
+    expect(axios).toHaveBeenCalledTimes(1);
+
+    expect(axios).toHaveBeenCalledWith(
+      expect.objectContaining({
+        headers: expect.anything(),
+        httpsAgent: expect.anything(),
+        method: 'PUT',
+        data: {
+          stack_version: '8.17.0',
+        },
+        url: 'http://api.agentless.com/api/v1/ess/deployments/mocked-agentless-agent-policy-id',
+      })
+    );
+  });
+
   it('should delete agentless agent for serverless', async () => {
     const returnValue = {
       id: 'mocked',
@@ -579,7 +620,7 @@ describe('Agentless Agent service', () => {
       .spyOn(appContextService, 'getKibanaVersion')
       .mockReturnValue('mocked-kibana-version-infinite');
 
-    mockedListFleetServerHosts.mockResolvedValue({
+    mockedFleetServerHostService.list.mockResolvedValue({
       items: [
         {
           id: 'mocked-fleet-server-id',
@@ -640,7 +681,7 @@ describe('Agentless Agent service', () => {
       .spyOn(appContextService, 'getKibanaVersion')
       .mockReturnValue('mocked-kibana-version-infinite');
 
-    mockedListFleetServerHosts.mockResolvedValue({
+    mockedFleetServerHostService.list.mockResolvedValue({
       items: [
         {
           id: 'mocked-fleet-server-id',
@@ -696,7 +737,7 @@ describe('Agentless Agent service', () => {
     } as any);
     jest.spyOn(appContextService, 'getCloud').mockReturnValue({ isCloudEnabled: true } as any);
 
-    mockedListFleetServerHosts.mockResolvedValue({
+    mockedFleetServerHostService.list.mockResolvedValue({
       items: [
         {
           id: 'mocked-fleet-server-id',
@@ -765,7 +806,7 @@ describe('Agentless Agent service', () => {
     jest
       .spyOn(appContextService, 'getKibanaVersion')
       .mockReturnValue('mocked-kibana-version-infinite');
-    mockedListFleetServerHosts.mockResolvedValue({
+    mockedFleetServerHostService.list.mockResolvedValue({
       items: [
         {
           id: 'mocked-fleet-server-id',
@@ -905,7 +946,7 @@ describe('Agentless Agent service', () => {
         },
       } as any);
       jest.spyOn(appContextService, 'getCloud').mockReturnValue({ isCloudEnabled: true } as any);
-      mockedListFleetServerHosts.mockResolvedValue({ items: [] } as any);
+      mockedFleetServerHostService.list.mockResolvedValue({ items: [] } as any);
       mockedListEnrollmentApiKeys.mockResolvedValue({
         items: [
           {
@@ -943,7 +984,7 @@ describe('Agentless Agent service', () => {
         },
       } as any);
       jest.spyOn(appContextService, 'getCloud').mockReturnValue({ isCloudEnabled: true } as any);
-      mockedListFleetServerHosts.mockResolvedValue({
+      mockedFleetServerHostService.list.mockResolvedValue({
         items: [
           {
             id: 'mocked',
@@ -984,7 +1025,7 @@ describe('Agentless Agent service', () => {
         },
       } as any);
       jest.spyOn(appContextService, 'getCloud').mockReturnValue({ isCloudEnabled: true } as any);
-      mockedListFleetServerHosts.mockResolvedValue({
+      mockedFleetServerHostService.list.mockResolvedValue({
         items: [
           {
             id: 'mocked-fleet-server-id',
@@ -1044,7 +1085,7 @@ describe('Agentless Agent service', () => {
         },
       } as any);
       jest.spyOn(appContextService, 'getCloud').mockReturnValue({ isCloudEnabled: true } as any);
-      mockedListFleetServerHosts.mockResolvedValue({
+      mockedFleetServerHostService.list.mockResolvedValue({
         items: [
           {
             id: 'mocked-fleet-server-id',
@@ -1104,7 +1145,7 @@ describe('Agentless Agent service', () => {
         },
       } as any);
       jest.spyOn(appContextService, 'getCloud').mockReturnValue({ isCloudEnabled: true } as any);
-      mockedListFleetServerHosts.mockResolvedValue({
+      mockedFleetServerHostService.list.mockResolvedValue({
         items: [
           {
             id: 'mocked-fleet-server-id',
@@ -1164,7 +1205,7 @@ describe('Agentless Agent service', () => {
         },
       } as any);
       jest.spyOn(appContextService, 'getCloud').mockReturnValue({ isCloudEnabled: true } as any);
-      mockedListFleetServerHosts.mockResolvedValue({
+      mockedFleetServerHostService.list.mockResolvedValue({
         items: [
           {
             id: 'mocked-fleet-server-id',
@@ -1224,7 +1265,7 @@ describe('Agentless Agent service', () => {
         },
       } as any);
       jest.spyOn(appContextService, 'getCloud').mockReturnValue({ isCloudEnabled: true } as any);
-      mockedListFleetServerHosts.mockResolvedValue({
+      mockedFleetServerHostService.list.mockResolvedValue({
         items: [
           {
             id: 'mocked-fleet-server-id',
@@ -1284,7 +1325,7 @@ describe('Agentless Agent service', () => {
         },
       } as any);
       jest.spyOn(appContextService, 'getCloud').mockReturnValue({ isCloudEnabled: true } as any);
-      mockedListFleetServerHosts.mockResolvedValue({
+      mockedFleetServerHostService.list.mockResolvedValue({
         items: [
           {
             id: 'mocked-fleet-server-id',
@@ -1344,7 +1385,7 @@ describe('Agentless Agent service', () => {
         },
       } as any);
       jest.spyOn(appContextService, 'getCloud').mockReturnValue({ isCloudEnabled: true } as any);
-      mockedListFleetServerHosts.mockResolvedValue({
+      mockedFleetServerHostService.list.mockResolvedValue({
         items: [
           {
             id: 'mocked-fleet-server-id',
@@ -1404,7 +1445,7 @@ describe('Agentless Agent service', () => {
         },
       } as any);
       jest.spyOn(appContextService, 'getCloud').mockReturnValue({ isCloudEnabled: true } as any);
-      mockedListFleetServerHosts.mockResolvedValue({
+      mockedFleetServerHostService.list.mockResolvedValue({
         items: [
           {
             id: 'mocked-fleet-server-id',

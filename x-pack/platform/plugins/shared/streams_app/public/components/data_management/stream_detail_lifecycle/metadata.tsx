@@ -25,6 +25,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiHorizontalRule,
+  EuiIconTip,
   EuiLink,
   EuiLoadingSpinner,
   EuiPanel,
@@ -33,6 +34,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { LifecycleEditAction } from './modal';
+import { IlmLink } from './ilm_link';
 import { useStreamsAppRouter } from '../../../hooks/use_streams_app_router';
 import { DataStreamStats } from './hooks/use_data_stream_stats';
 import { formatBytes } from './helpers/format_bytes';
@@ -96,24 +98,12 @@ export function RetentionMetadata({
 
   const ilmLink = isIlmLifecycle(lifecycle) ? (
     <EuiBadge color="hollow">
-      <EuiLink
-        target="_blank"
-        data-test-subj="streamsAppLifecycleBadgeIlmPolicyNameLink"
-        href={ilmLocator?.getRedirectUrl({
-          page: 'policy_edit',
-          policyName: lifecycle.ilm.policy,
-        })}
-      >
-        {i18n.translate('xpack.streams.entityDetailViewWithoutParams.ilmBadgeLabel', {
-          defaultMessage: 'ILM Policy: {name}',
-          values: { name: lifecycle.ilm.policy },
-        })}
-      </EuiLink>
+      <IlmLink lifecycle={lifecycle} ilmLocator={ilmLocator} />
     </EuiBadge>
   ) : null;
 
   const lifecycleOrigin = isInheritLifecycle(definition.stream.ingest.lifecycle) ? (
-    <EuiText>
+    <EuiText size="s">
       {i18n.translate('xpack.streams.streamDetailLifecycle.inheritedFrom', {
         defaultMessage: 'Inherited from',
       })}{' '}
@@ -137,13 +127,15 @@ export function RetentionMetadata({
       )}
     </EuiText>
   ) : (
-    i18n.translate('xpack.streams.streamDetailLifecycle.localOverride', {
-      defaultMessage: 'Local override',
-    })
+    <EuiText size="s">
+      {i18n.translate('xpack.streams.streamDetailLifecycle.localOverride', {
+        defaultMessage: 'Local override',
+      })}
+    </EuiText>
   );
 
   return (
-    <EuiPanel hasBorder={false} hasShadow={false}>
+    <EuiPanel hasBorder={false} hasShadow={false} paddingSize="s">
       <MetadataRow
         metadata={i18n.translate('xpack.streams.streamDetailLifecycle.retentionPeriodLabel', {
           defaultMessage: 'Retention period',
@@ -167,7 +159,7 @@ export function RetentionMetadata({
         }
         button={contextualMenu}
       />
-      <EuiHorizontalRule margin="m" />
+      <EuiHorizontalRule margin="s" />
       <MetadataRow
         metadata={i18n.translate('xpack.streams.streamDetailLifecycle.retentionSourceLabel', {
           defaultMessage: 'Source',
@@ -179,10 +171,14 @@ export function RetentionMetadata({
           </EuiFlexGroup>
         }
       />
-      <EuiHorizontalRule margin="m" />
+      <EuiHorizontalRule margin="s" />
       <MetadataRow
         metadata={i18n.translate('xpack.streams.streamDetailLifecycle.ingestionRate', {
           defaultMessage: 'Ingestion',
+        })}
+        tip={i18n.translate('xpack.streams.streamDetailLifecycle.ingestionRateDetails', {
+          defaultMessage:
+            'Estimated average (stream total size divided by the number of days since creation).',
         })}
         value={
           statsError ? (
@@ -196,7 +192,7 @@ export function RetentionMetadata({
           )
         }
       />
-      <EuiHorizontalRule margin="m" />
+      <EuiHorizontalRule margin="s" />
       <MetadataRow
         metadata={i18n.translate('xpack.streams.streamDetailLifecycle.totalDocs', {
           defaultMessage: 'Total doc count',
@@ -218,19 +214,28 @@ export function RetentionMetadata({
 function MetadataRow({
   metadata,
   value,
+  tip,
   button,
 }: {
   metadata: string;
   value: ReactNode;
-  action?: string;
+  tip?: string;
   button?: ReactNode;
 }) {
   return (
     <EuiFlexGroup alignItems="center" gutterSize="xl" responsive={false}>
       <EuiFlexItem grow={1}>
-        <EuiText>
-          <b>{metadata}</b>
-        </EuiText>
+        <EuiFlexGroup gutterSize="xs" alignItems="center">
+          <EuiFlexItem grow={false}>
+            <b>{metadata}</b>
+          </EuiFlexItem>
+
+          {tip ? (
+            <EuiFlexItem grow={false}>
+              <EuiIconTip content={tip} position="right" />
+            </EuiFlexItem>
+          ) : null}
+        </EuiFlexGroup>
       </EuiFlexItem>
       <EuiFlexItem grow={4}>{value}</EuiFlexItem>
       <EuiFlexItem grow={1}>{button}</EuiFlexItem>
