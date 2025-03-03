@@ -12,7 +12,9 @@ sudo apt-get update && \
 
 BUILD_ROOT_DIR="$HOME/chromium"
 
-BUILD_SCRIPT="$(pwd)/x-pack/build_chromium"
+KIBANA_CHECKOUT_DIR="$(pwd)"
+
+BUILD_SCRIPT="$KIBANA_CHECKOUT_DIR/x-pack/build_chromium"
 
 # Create a dedicated working directory outside of the default buildkite working directory.
 mkdir "$BUILD_ROOT_DIR" && cd "$BUILD_ROOT_DIR"
@@ -30,8 +32,13 @@ python3 "$BUILD_SCRIPT_SYMLINK/init.py"
 
 echo "---Building $PLATFORM_VARIANT Chromium of commit hash: $CHROMIUM_COMMIT_HASH"
 
+## impersonate service account that has access to the bucket
+"$KIBANA_CHECKOUT_DIR/.buildkite/scripts/common/activate_service_account.sh" "kibana-ci-access-chromium-blds"
+
 # Run the build script with the path to the chromium src directory, the git commit hash
 python3 "$BUILD_SCRIPT_SYMLINK/build.py" "$CHROMIUM_COMMIT_HASH" "$PLATFORM_VARIANT"
+
+"$KIBANA_CHECKOUT_DIR/.buildkite/scripts/common/activate_service_account.sh" --unset-impersonation
 
 # TODO: set up output as buildkite artefact
 buildkite-agent artifact upload "$BUILD_ROOT_DIR/src/out/chromium-*"
