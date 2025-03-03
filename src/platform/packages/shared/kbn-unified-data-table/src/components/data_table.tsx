@@ -1165,19 +1165,22 @@ export const UnifiedDataTable = ({
   const { run: throttledHandleItemsRendered } = useThrottleFn(handleItemsRendered, { wait: 500 });
 
   const virtualizationOptions = useMemo(() => {
-    // Don't use row overscan when showing Document column since
+    const options = {
+      onItemsRendered:
+        paginationMode === DEFAULT_PAGINATION_MODE ? undefined : throttledHandleItemsRendered,
+    };
+
+    // Don't use row "overscan" when showing Document/Summary column since
     // rendering so much DOM content in each cell impacts performance
     if (defaultColumns) {
-      return {
-        onItemsRendered: throttledHandleItemsRendered,
-      };
+      return options;
     }
 
     return {
       ...VIRTUALIZATION_OPTIONS,
-      onItemsRendered: throttledHandleItemsRendered,
+      ...options,
     };
-  }, [defaultColumns, throttledHandleItemsRendered]);
+  }, [defaultColumns, paginationMode, throttledHandleItemsRendered]);
 
   const isRenderComplete = loadingState !== DataLoadingState.loading;
 
