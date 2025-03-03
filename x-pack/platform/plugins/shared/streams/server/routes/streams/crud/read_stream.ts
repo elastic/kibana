@@ -12,6 +12,7 @@ import {
   getInheritedFieldsFromAncestors,
   isGroupStreamDefinition,
   isUnwiredStreamDefinition,
+  isWiredStreamDefinition,
 } from '@kbn/streams-schema';
 import { IScopedClusterClient } from '@kbn/core/server';
 import { AssetClient } from '../../../lib/streams/assets/asset_client';
@@ -45,6 +46,15 @@ export async function readStream({
     return {
       stream: streamDefinition,
       dashboards,
+    };
+  }
+
+  if (isWiredStreamDefinition(streamDefinition) && streamDefinition.ingest.wired.virtual) {
+    return {
+      stream: streamDefinition,
+      dashboards,
+      inherited_fields: {},
+      effective_lifecycle: { inherit: {}, from: '<idk>' },
     };
   }
 

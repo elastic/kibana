@@ -10,6 +10,8 @@ import {
   StreamDefinition,
   UnwiredStreamDefinition,
   WiredStreamDefinition,
+  conditionToQueryDsl,
+  isRoot,
 } from '@kbn/streams-schema';
 import { isResponseError } from '@kbn/es-errors';
 import {
@@ -46,10 +48,55 @@ export async function syncWiredStreamDefinitionObjects({
   scopedClusterClient,
   logger,
   isServerless,
+  directChildren,
+  parent,
 }: SyncStreamParamsBase & {
   definition: WiredStreamDefinition;
   isServerless: boolean;
+  directChildren: WiredStreamDefinition[];
+  parent?: WiredStreamDefinition;
 }) {
+  if (definition.ingest.wired.virtual) {
+    if (isRoot(definition.name)) {
+      throw new Error('Root streams cannot be virtual');
+    }
+    const ownRoutingCondition = parent?.ingest.routing.find(
+      (r) => r.destination === definition.name
+    )?.if;
+    const aliasRequest = {
+      name: definition.name,
+      index: parent!.name,
+      body: {
+        filter: conditionToQueryDsl(
+          ownRoutingCondition || {
+            never: {},
+          }
+        ),
+      },
+    };
+    console.log('aliasRequest', JSON.stringify(aliasRequest, null, 2));
+    // virtual streams are reflected in Elasticsearch as a view
+    await scopedClusterClient.asCurrentUser.indices.putAlias(aliasRequest);
+
+    return;
+  }
+  // check for virtual children and update their alias
+  const virtualChildren = directChildren.filter((child) => child.ingest.wired.virtual);
+  for (const child of virtualChildren) {
+    const aliasRequest = {
+      name: child.name,
+      index: definition.name,
+      body: {
+        filter: conditionToQueryDsl(
+          definition.ingest.routing.find((r) => r.destination === child.name)?.if || {
+            never: {},
+          }
+        ),
+      },
+    };
+    console.log('aliasRequest for child', JSON.stringify(aliasRequest, null, 2));
+    await scopedClusterClient.asCurrentUser.indices.putAlias(aliasRequest);
+  }
   const componentTemplate = generateLayer(definition.name, definition, isServerless);
   await upsertComponent({
     esClient: scopedClusterClient.asCurrentUser,
@@ -64,6 +111,7 @@ export async function syncWiredStreamDefinitionObjects({
 
   const reroutePipeline = generateReroutePipeline({
     definition,
+    directChildren,
   });
 
   await upsertIngestPipeline({

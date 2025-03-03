@@ -69,10 +69,15 @@ export interface NeverCondition {
   never: {};
 }
 
+export interface NotCondition {
+  not: Condition;
+}
+
 export type Condition =
   | FilterCondition
   | AndCondition
   | OrCondition
+  | NotCondition
   | NeverCondition
   | AlwaysCondition;
 
@@ -88,6 +93,7 @@ export const conditionSchema: z.Schema<Condition> = z.lazy(() =>
 
 export const andConditionSchema = z.object({ and: z.array(conditionSchema) });
 export const orConditionSchema = z.object({ or: z.array(conditionSchema) });
+export const notConditionSchema = z.object({ not: conditionSchema });
 export const neverConditionSchema = z.object({ never: z.strictObject({}) });
 export const alwaysConditionSchema = z.object({ always: z.strictObject({}) });
 
