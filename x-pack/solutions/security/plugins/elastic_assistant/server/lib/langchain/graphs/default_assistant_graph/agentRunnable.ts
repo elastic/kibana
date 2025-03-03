@@ -35,8 +35,8 @@ export const agentRunableFacotry = async ({
   llmType: string | undefined;
   tools: StructuredToolInterface[] | ToolDefinition[];
   isStream: boolean;
-  prompt: ChatPromptTemplate<any, any>;
-}): Promise<AgentRunnableSequence<any, any>> => {
+  prompt: ChatPromptTemplate;
+}): Promise<AgentRunnableSequence> => {
   const params = {
     llm,
     tools,
