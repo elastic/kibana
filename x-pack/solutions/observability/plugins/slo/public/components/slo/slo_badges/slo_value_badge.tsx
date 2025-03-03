@@ -31,7 +31,7 @@ export function SloValueBadge({ slo, isLoading }: SloStatusProps) {
         objective: numeral(slo.objective.target).format(percentFormat),
       },
     });
-  }, [hasNoData]);
+  }, [slo, percentFormat, hasNoData]);
 
   if (isLoading || !slo) {
     return <EuiSkeletonText lines={2} data-test-subj="loadingTitle" />;
