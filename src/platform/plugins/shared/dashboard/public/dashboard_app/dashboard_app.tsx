@@ -13,7 +13,6 @@ import useObservable from 'react-use/lib/useObservable';
 import { debounceTime } from 'rxjs';
 import { v4 as uuidv4 } from 'uuid';
 
-import { DASHBOARD_APP_LOCATOR } from '@kbn/deeplinks-analytics';
 import { useExecutionContext } from '@kbn/kibana-react-plugin/public';
 import { createKbnUrlStateStorage, withNotifyOnErrors } from '@kbn/kibana-utils-plugin/public';
 import { ViewMode } from '@kbn/presentation-publishing';
@@ -26,7 +25,6 @@ import {
   dataService,
   embeddableService,
   screenshotModeService,
-  shareService,
 } from '../services/kibana_services';
 import { useDashboardMountContext } from './hooks/dashboard_mount_context';
 import { useDashboardOutcomeValidation } from './hooks/use_dashboard_outcome_validation';
@@ -219,8 +217,6 @@ export function DashboardApp({
     return () => appStateSubscription.unsubscribe();
   }, [dashboardApi, kbnUrlStateStorage, savedDashboardId]);
 
-  const locator = useMemo(() => shareService?.url.locators.get(DASHBOARD_APP_LOCATOR), []);
-
   return showNoDataPage ? (
     <DashboardAppNoDataPage onDataViewCreated={() => setShowNoDataPage(false)} />
   ) : (
@@ -239,7 +235,6 @@ export function DashboardApp({
       {getLegacyConflictWarning?.()}
       <DashboardRenderer
         key={regenerateId}
-        locator={locator}
         onApiAvailable={(dashboard) => {
           if (dashboard && !dashboardApi) {
             setDashboardApi(dashboard);

@@ -48,11 +48,9 @@ import {
 } from '@kbn/presentation-publishing';
 import { PublishesReload } from '@kbn/presentation-publishing/interfaces/fetch/publishes_reload';
 import { PublishesSearchSession } from '@kbn/presentation-publishing/interfaces/fetch/publishes_search_session';
-import { LocatorPublic } from '@kbn/share-plugin/common';
 import { Observable, Subject } from 'rxjs';
 import { DashboardPanelMap, DashboardPanelState } from '../../common';
 import type { DashboardAttributes, DashboardOptions } from '../../server/content_management';
-import { DashboardLocatorParams } from '../dashboard_container/types';
 import {
   LoadDashboardReturn,
   SaveDashboardReturn,
@@ -162,7 +160,6 @@ export type DashboardApi = CanExpandPanels &
     highlightPanelId$: PublishingSubject<string | undefined>;
     isEmbeddedExternally: boolean;
     isManaged: boolean;
-    locator?: Pick<LocatorPublic<DashboardLocatorParams>, 'navigate' | 'getRedirectUrl'>;
     panels$: PublishingSubject<DashboardPanelMap>;
     runInteractiveSave: () => Promise<SaveDashboardReturn | undefined>;
     runQuickSave: () => Promise<void>;
