@@ -54,11 +54,11 @@ type ShareImplementationFactory<
       id: string;
       groupId?: string;
       shareType: T;
-      config: (ctx: ShareContext & ShareRegistryApiStart) => C;
+      config: (ctx: ShareContext & ShareRegistryApiStart) => C | null;
     }
   : {
       shareType: T;
-      config: (ctx: ShareContext & ShareRegistryApiStart) => C;
+      config: (ctx: ShareContext & ShareRegistryApiStart) => C | null;
     };
 
 // New type definition to extract the config return type
@@ -120,6 +120,10 @@ export interface ExportShare
      * @deprecated only kept around for legacy reasons
      */
     sortOrder?: number;
+    /**
+     * @deprecated only kept around for legacy reasons
+     */
+    toolTipContent?: string;
     label: string;
     exportType: string;
     /**
@@ -127,13 +131,13 @@ export interface ExportShare
      */
     disabled?: boolean;
     helpText?: ReactElement;
-    renderCopyURLButton?: ReactElement;
     generateExportButton?: ReactElement;
     generateAssetExport: (args: ExportGenerationOpts) => Promise<unknown>;
-    generateValueExport: (args: ExportGenerationOpts) => string | undefined;
+    generateAssetURIValue: (args: ExportGenerationOpts) => string | undefined;
+    renderCopyURIButton?: boolean;
     warnings?: Array<{ title: string; message: string }>;
     requiresSavedState?: boolean;
-    supportedLayoutOptions: ['print'];
+    supportedLayoutOptions?: Array<'print'>;
     renderLayoutOptionSwitch?: boolean;
   }> {
   groupId: 'export';
