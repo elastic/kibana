@@ -39,6 +39,7 @@ import { RuleStatusDropdownSandbox } from './components/rule_status_dropdown_san
 import { RuleStatusFilterSandbox } from './components/rule_status_filter_sandbox';
 import { AlertsTableSandbox } from './components/alerts_table_sandbox';
 import { RulesSettingsLinkSandbox } from './components/rules_settings_link_sandbox';
+import { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
 
 export interface TriggersActionsUiExampleComponentParams {
   http: CoreStart['http'];
@@ -58,6 +59,7 @@ export interface TriggersActionsUiExampleComponentParams {
   unifiedSearch: UnifiedSearchPublicPluginStart;
   fieldFormats: FieldFormatsStart;
   licensing: LicensingPluginStart;
+  fieldsMetadata: FieldsMetadataPublicStart;
 }
 
 const TriggersActionsUiExampleApp = ({
@@ -284,6 +286,7 @@ export const renderApp = (
               unifiedSearch={deps.unifiedSearch}
               fieldFormats={deps.fieldFormats}
               licensing={deps.licensing}
+              fieldsMetadata={deps.fieldsMetadata}
               {...core}
             />
           </IntlProvider>

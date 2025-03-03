@@ -27,6 +27,7 @@ import type { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
 import type { ConfigSchema } from '../server/config';
 import { registerFeature } from './register_feature';
 import { getTransformHealthRuleType } from './alerting';
+import { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
 
 export interface PluginsDependencies {
   charts: ChartsPluginStart;
@@ -44,6 +45,7 @@ export interface PluginsDependencies {
   fieldFormats: FieldFormatsStart;
   savedObjectsManagement: SavedObjectsManagementPluginStart;
   contentManagement: ContentManagementPublicStart;
+  fieldsMetadata: FieldsMetadataPublicStart;
 }
 
 export class TransformUiPlugin {

@@ -11,6 +11,7 @@ import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { sharePluginMock } from '@kbn/share-plugin/public/mocks';
 import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
 import { lensPluginMock } from '@kbn/lens-plugin/public/mocks';
+import { fieldsMetadataPluginPublicMock } from '@kbn/fields-metadata-plugin/public/mocks';
 
 const triggersActionsUiStartMock = {
   createStart() {
@@ -67,6 +68,7 @@ export const sloPublicPluginsStartMock = {
       share: sharePluginMock.createStartContract(),
       triggersActionsUi: triggersActionsUiStartMock.createStart(),
       unifiedSearch: unifiedSearchPluginMock.createStartContract(),
+      fieldsMetadata: fieldsMetadataPluginPublicMock.createStartContract(),
     };
   },
 };
