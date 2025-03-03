@@ -93,7 +93,7 @@ export class PrivilegeMonitoringDataClient {
     });
 
     await this.engineClient.update({ status: 'installing' });
-
+    this.log('debug', `Updated privileged monitoring engine saved object status to installing`);
     return descriptor;
   }
 

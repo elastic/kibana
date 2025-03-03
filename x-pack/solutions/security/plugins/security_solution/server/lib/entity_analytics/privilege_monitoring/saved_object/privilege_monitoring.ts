@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { SavedObjectsClientContract } from '@kbn/core/server';
+import type { SavedObjectsClientContract, SavedObjectsFindResponse } from '@kbn/core/server';
 import { privilegeMonitoringTypeName } from './privilege_monitoring_type';
 import { PRIVILEGE_MONITORING_ENGINE_STATUS } from '../constants';
 
@@ -29,6 +29,10 @@ export class PrivilegeMonitoringEngineDescriptorClient {
   }
 
   async init() {
+    const engineDescriptor = await this.find();
+    if (engineDescriptor.total === 1) {
+      return this.updateExistingDescriptor(engineDescriptor);
+    }
     const { attributes } = await this.deps.soClient.create<PrivilegedMonitoringEngineDescriptor>(
       privilegeMonitoringTypeName,
       {
@@ -38,6 +42,25 @@ export class PrivilegeMonitoringEngineDescriptorClient {
       { id: this.getSavedObjectId() }
     );
     return attributes;
+  }
+
+  private async updateExistingDescriptor(
+    engineDescriptor: SavedObjectsFindResponse<PrivilegedMonitoringEngineDescriptor, unknown>
+  ) {
+    const old = engineDescriptor.saved_objects[0].attributes;
+    const update = {
+      ...old,
+      error: undefined,
+      status: PRIVILEGE_MONITORING_ENGINE_STATUS.INSTALLING,
+      apiKey: '',
+    };
+    await this.deps.soClient.update<PrivilegedMonitoringEngineDescriptor>(
+      privilegeMonitoringTypeName,
+      this.getSavedObjectId(),
+      update,
+      { refresh: 'wait_for' }
+    );
+    return update;
   }
 
   async update(engine: Partial<PrivilegedMonitoringEngineDescriptor>) {
