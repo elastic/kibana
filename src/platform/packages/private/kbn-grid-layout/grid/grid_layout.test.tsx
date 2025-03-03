@@ -21,6 +21,7 @@ import {
   touchMoveTo,
   touchStart,
 } from './test_utils/events';
+import { EuiThemeProvider } from '@elastic/eui';
 
 const onLayoutChange = jest.fn();
 
@@ -34,7 +35,7 @@ const renderGridLayout = (propsOverrides: Partial<GridLayoutProps> = {}) => {
     ...propsOverrides,
   } as GridLayoutProps;
 
-  const { rerender, ...rtlRest } = render(<GridLayout {...props} />);
+  const { rerender, ...rtlRest } = render(<GridLayout {...props} />, { wrapper: EuiThemeProvider });
 
   return {
     ...rtlRest,
