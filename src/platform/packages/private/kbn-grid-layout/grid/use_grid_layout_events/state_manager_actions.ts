@@ -165,7 +165,7 @@ export const moveAction = (
     lastRequestedPanelPosition.current = { ...requestedPanelData };
 
     // remove the panel from the row it's currently in.
-    let nextLayout = cloneDeep(currentLayout);
+    const nextLayout = cloneDeep(currentLayout);
     Object.entries(nextLayout).forEach(([rowId, row]) => {
       const { [interactionEvent.id]: interactingPanel, ...otherPanels } = row.panels;
       nextLayout[rowId] = { ...row, panels: { ...otherPanels } };
