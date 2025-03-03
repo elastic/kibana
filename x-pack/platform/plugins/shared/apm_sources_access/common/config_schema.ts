@@ -19,5 +19,5 @@ export const configSchema = schema.object({
   indices: indicesSchema,
 });
 
-export type APMDataAccessConfig = TypeOf<typeof configSchema>;
-export type APMIndices = APMDataAccessConfig['indices'];
+export type APMSourcesAccessConfig = TypeOf<typeof configSchema>;
+export type APMIndices = APMSourcesAccessConfig['indices'];

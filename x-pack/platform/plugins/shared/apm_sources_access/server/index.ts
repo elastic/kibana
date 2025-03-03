@@ -7,7 +7,11 @@
 import type { PluginInitializerContext } from '@kbn/core/server';
 import type { ApmSourcesAccessPluginSetup, ApmSourcesAccessPluginStart } from './plugin';
 import { config } from './config';
-import { configSchema, type APMDataAccessConfig, type APMIndices } from '../common/config_schema';
+import {
+  configSchema,
+  type APMSourcesAccessConfig,
+  type APMIndices,
+} from '../common/config_schema';
 
 const plugin = async (initContext: PluginInitializerContext) => {
   const { ApmSourcesAccessPlugin } = await import('./plugin');
@@ -16,7 +20,7 @@ const plugin = async (initContext: PluginInitializerContext) => {
 
 export type {
   APMIndices,
-  APMDataAccessConfig,
+  APMSourcesAccessConfig,
   ApmSourcesAccessPluginSetup,
   ApmSourcesAccessPluginStart,
 };
