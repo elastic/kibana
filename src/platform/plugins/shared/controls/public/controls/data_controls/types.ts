@@ -18,6 +18,7 @@ import {
 
 import { DefaultDataControlState } from '../../../common';
 import { ControlGroupApi } from '../../control_group/types';
+import { CanClearSelections } from '../../types';
 import { ControlFactory, DefaultControlApi } from '../types';
 import { PublishesAsyncFilters } from './publishes_async_filters';
 
@@ -30,6 +31,7 @@ export interface PublishesField {
 
 export type DataControlApi = DefaultControlApi &
   Omit<PublishesTitle, 'hideTitle$'> & // control titles cannot be hidden
+  CanClearSelections &
   HasEditCapabilities &
   PublishesDataViews &
   PublishesField &

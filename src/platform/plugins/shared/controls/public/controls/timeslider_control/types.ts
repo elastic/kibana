@@ -9,6 +9,7 @@
 
 import type { PublishesTitle, PublishesTimeslice } from '@kbn/presentation-publishing';
 import type { DefaultControlState } from '../../../common';
+import { CanClearSelections } from '../../types';
 import type { DefaultControlApi } from '../types';
 
 export type Timeslice = [number, number];
@@ -21,5 +22,6 @@ export interface TimesliderControlState extends DefaultControlState {
 }
 
 export type TimesliderControlApi = DefaultControlApi &
+  CanClearSelections &
   Pick<PublishesTitle, 'defaultTitle$'> &
   PublishesTimeslice;
