@@ -18,7 +18,7 @@ export const productLine = schema.oneOf([
 export type SecurityProductLine = TypeOf<typeof productLine>;
 
 export const productTier = schema.oneOf([
-  schema.literal(ProductTier.searchAILake),
+  schema.literal(ProductTier.searchAiLake),
   schema.literal(ProductTier.essentials),
   schema.literal(ProductTier.complete),
 ]);
