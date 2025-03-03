@@ -28,6 +28,8 @@ import {
 import { isDefined } from '@kbn/ml-is-defined';
 import { parseInterval } from '@kbn/ml-parse-interval';
 
+import type { SharePluginStart } from '@kbn/share-plugin/public';
+import { DASHBOARD_APP_LOCATOR } from '@kbn/deeplinks-analytics';
 import type { DashboardItems } from '../../../services/dashboard_service';
 import { categoryFieldTypes } from '../../../../../common/util/fields_utils';
 import { TIME_RANGE_TYPE, URL_TYPE } from './constants';
@@ -221,12 +223,13 @@ export function isValidCustomUrlSettings(
 
 export function buildCustomUrlFromSettings(
   dashboardService: DashboardStart,
+  share: SharePluginStart,
   settings: CustomUrlSettings
 ): Promise<MlUrlConfig> {
   // Dashboard URL returns a Promise as a query is made to obtain the full dashboard config.
   // So wrap the other two return types in a Promise for consistent return type.
   if (settings.type === URL_TYPE.KIBANA_DASHBOARD) {
-    return buildDashboardUrlFromSettings(dashboardService, settings);
+    return buildDashboardUrlFromSettings(dashboardService, share, settings);
   } else if (settings.type === URL_TYPE.KIBANA_DISCOVER) {
     return Promise.resolve(buildDiscoverUrlFromSettings(settings));
   } else {
@@ -256,6 +259,7 @@ function getUrlRangeFromSettings(settings: CustomUrlSettings) {
 
 async function buildDashboardUrlFromSettings(
   dashboardService: DashboardStart,
+  share: SharePluginStart,
   settings: CustomUrlSettings,
   isPartialDFAJob?: boolean
 ): Promise<MlUrlConfig> {
@@ -300,7 +304,7 @@ async function buildDashboardUrlFromSettings(
 
   const { from, to } = getUrlRangeFromSettings(settings);
 
-  const location = await dashboardService.locator?.getLocation({
+  const location = await share.url.locators.get(DASHBOARD_APP_LOCATOR)?.getLocation({
     dashboardId,
     timeRange: {
       from,
