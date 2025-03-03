@@ -484,7 +484,7 @@ export type GetStateType = () => LensRuntimeState;
  */
 
 /** Utility function to build typed version for each chart */
-type TypedLensAttributes<TVisType, TVisState> = Simplify<
+export type TypedLensAttributes<TVisType, TVisState> = Simplify<
   Omit<LensDocument, 'savedObjectId' | 'type' | 'state' | 'visualizationType'> & {
     visualizationType: TVisType;
     state: Simplify<
