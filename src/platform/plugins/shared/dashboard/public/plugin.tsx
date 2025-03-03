@@ -80,10 +80,7 @@ import type { FindDashboardsService } from './services/dashboard_content_managem
 import { setKibanaServices, untilPluginStartServicesReady } from './services/kibana_services';
 import { setLogger } from './services/logger';
 import { registerActions } from './dashboard_actions/register_actions';
-
-export interface DashboardFeatureFlagConfig {
-  allowByValueEmbeddables: boolean;
-}
+import type { ConfigSchema } from '../server/config';
 
 export interface DashboardSetupDependencies {
   data: DataPublicPluginSetup;
@@ -141,15 +138,12 @@ export interface DashboardStart {
    * Use `shareStartService.url.locators.get(DASHBOARD_APP_LOCATOR)` instead.
    */
   locator?: DashboardAppLocator;
-  dashboardFeatureFlagConfig: DashboardFeatureFlagConfig;
   findDashboardsService: () => Promise<FindDashboardsService>;
   registerDashboardPanelPlacementSetting: <SerializedState extends object = object>(
     embeddableType: string,
     getPanelPlacementSettings: GetPanelPlacementSettings<SerializedState>
   ) => void;
 }
-
-export let resolveServicesReady: () => void;
 
 export class DashboardPlugin
   implements
@@ -162,16 +156,12 @@ export class DashboardPlugin
   private appStateUpdater = new BehaviorSubject<AppUpdater>(() => ({}));
   private stopUrlTracking: (() => void) | undefined = undefined;
   private currentHistory: ScopedHistory | undefined = undefined;
-  private dashboardFeatureFlagConfig?: DashboardFeatureFlagConfig;
   private locator?: DashboardAppLocator;
 
   public setup(
     core: CoreSetup<DashboardStartDependencies, DashboardStart>,
     { share, embeddable, home, urlForwarding, data, contentManagement }: DashboardSetupDependencies
   ): DashboardSetup {
-    this.dashboardFeatureFlagConfig =
-      this.initializerContext.config.get<DashboardFeatureFlagConfig>();
-
     core.analytics.registerEventType({
       eventType: 'dashboard_loaded_with_data',
       schema: {},
@@ -340,13 +330,13 @@ export class DashboardPlugin
     untilPluginStartServicesReady().then(() => {
       registerActions({
         plugins,
-        allowByValueEmbeddables: this.dashboardFeatureFlagConfig?.allowByValueEmbeddables,
+        allowByValueEmbeddables:
+          this.initializerContext.config.get<ConfigSchema>()?.allowByValueEmbeddables ?? true,
       });
     });
 
     return {
       locator: this.locator,
-      dashboardFeatureFlagConfig: this.dashboardFeatureFlagConfig!,
       registerDashboardPanelPlacementSetting,
       findDashboardsService: async () => {
         const { getDashboardContentManagementService } = await import(
