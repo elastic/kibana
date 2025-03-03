@@ -61,7 +61,7 @@ export function SearchNavigationProvider({ getService, getPageObjects }: FtrProv
         await common.navigateToApp(`indexManagement`);
         await indexManagement.changeTabs('indicesTab');
         await header.waitUntilLoadingHasFinished();
-        await indexManagement.expectToBeOnIndicesManagement();
+        await indexManagement.expectToBeOnIndexManagement();
       });
     },
   };

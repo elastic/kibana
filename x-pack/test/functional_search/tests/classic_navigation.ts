@@ -125,7 +125,7 @@ export default function searchSolutionNavigation({
 
     it("should redirect to index management when clicking on 'Indices'", async () => {
       await searchClassicNavigation.clickNavItem('Indices');
-      await indexManagement.expectToBeOnIndicesManagement();
+      await indexManagement.expectToBeOnIndexManagement();
     });
   });
 }

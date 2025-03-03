@@ -18,7 +18,7 @@ export function IndexManagementPageProvider({ getService }: FtrProviderContext) 
       return await testSubjects.getVisibleText('appTitle');
     },
 
-    async expectToBeOnIndicesManagement() {
+    async expectToBeOnIndexManagement() {
       const headingText = await testSubjects.getVisibleText('appTitle');
       expect(headingText).to.be('Index Management');
     },

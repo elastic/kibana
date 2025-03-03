@@ -68,6 +68,23 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         it('should have embedded dev console', async () => {
           await testHasEmbeddedConsole(pageObjects);
         });
+        it('should have breadcrumbs', async () => {
+          await pageObjects.searchIndexDetailsPage.expectIndexNametoBeInBreadcrumbs(indexName);
+          await pageObjects.searchIndexDetailsPage.expectBreadcrumbsToBeAvailable('Content');
+          await pageObjects.searchIndexDetailsPage.expectBreadcrumbsToBeAvailable(
+            'Index Management'
+          );
+          await pageObjects.searchIndexDetailsPage.expectBreadcrumbsToBeAvailable('Indices');
+
+          await pageObjects.searchIndexDetailsPage.clickOnBreadcrumb('Indices');
+          await pageObjects.indexManagement.expectToBeOnIndexManagement();
+
+          await pageObjects.searchIndexDetailsPage.clickOnBreadcrumb('Index Management');
+          await pageObjects.indexManagement.expectToBeOnIndexManagement();
+
+          await pageObjects.searchNavigation.navigateToIndexDetailPage(indexName);
+        });
+
         it('should have connection details', async () => {
           await pageObjects.searchIndexDetailsPage.expectConnectionDetails();
         });
@@ -125,10 +142,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           });
           await pageObjects.searchNavigation.navigateToIndexDetailPage(indexName);
           await pageObjects.searchIndexDetailsPage.expectQuickStatsAIMappingsToHaveVectorFields();
-        });
-
-        it('should have breadcrumb navigation', async () => {
-          await pageObjects.searchIndexDetailsPage.expectIndexNametoBeInBreadcrumbs(indexName);
         });
 
         it('should show code examples for adding documents', async () => {

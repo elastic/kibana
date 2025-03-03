@@ -236,7 +236,7 @@ export default function searchSolutionNavigation({
       await solutionNavigation.sidenav.clickLink({
         deepLinkId: 'elasticsearchIndexManagement',
       });
-      await indexManagement.expectToBeOnIndicesManagement();
+      await indexManagement.expectToBeOnIndexManagement();
     });
 
     it('renders only expected items', async () => {
