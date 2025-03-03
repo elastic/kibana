@@ -99,8 +99,9 @@ export const SpaceSelectorComponent: React.FC<SpaceSelectorProps> = ({
       if (existingOption) {
         return existingOption;
       }
-      const color = allSpaces.find((space) => space.id === v)?.color;
-      const label = allSpaces.find((space) => space.id === v)?.name ?? v;
+      const existingSpace = allSpaces.find((space) => space.id === v);
+      const color = existingSpace?.color;
+      const label = existingSpace?.name ?? v;
 
       return existingOption
         ? existingOption
