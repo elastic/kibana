@@ -44,8 +44,8 @@ export interface SearchIndicesAppMountParams {
 export interface IndexManagementPluginSetup {
   apiService: PublicApiServiceSetup;
   extensionsService: ExtensionsSetup;
-  locator?: IndexManagementLocator;
   indexManagementApp: (params: SearchIndicesAppMountParams) => Promise<() => void>;
+  locator?: IndexManagementLocator;
 }
 
 export interface IndexManagementPluginStart {

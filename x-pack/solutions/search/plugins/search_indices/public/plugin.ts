@@ -19,13 +19,13 @@ import type {
   SearchIndicesServicesContextDeps,
 } from './types';
 import { initQueryClient } from './services/query_client';
-import { INDEX_MANAGEMENT_APP_ID, INDICES_APP_ID, START_APP_ID } from '../common';
+import { SEARCH_INDEX_MANAGEMENT_APP_ID, INDICES_APP_ID, START_APP_ID } from '../common';
 import {
   CREATE_INDEX_PATH,
   INDICES_APP_BASE,
   START_APP_BASE,
   SearchIndexDetailsTabValues,
-  INDEX_MANAGEMNT_APP_BASE,
+  SEARCH_INDEX_MANAGEMENT_APP_BASE,
 } from './routes';
 import { registerLocators } from './locators';
 
@@ -90,8 +90,8 @@ export class SearchIndicesPlugin
       visibleIn: [],
     });
     core.application.register({
-      id: INDEX_MANAGEMENT_APP_ID,
-      appRoute: INDEX_MANAGEMNT_APP_BASE,
+      id: SEARCH_INDEX_MANAGEMENT_APP_ID,
+      appRoute: SEARCH_INDEX_MANAGEMENT_APP_BASE,
       title: i18n.translate('xpack.searchIndices.elasticsearchIndices.indexManagementTitle', {
         defaultMessage: 'Index Management',
       }),

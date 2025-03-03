@@ -20,5 +20,5 @@ export const PLUGIN_ID = 'searchIndices';
 export const PLUGIN_NAME = 'searchIndices';
 export const START_APP_ID: SearchStart = SEARCH_INDICES_START;
 export const INDICES_APP_ID: SearchIndices = SEARCH_INDICES;
-export const INDEX_MANAGEMENT_APP_ID: SearchIndexManagement = SEARCH_INDEX_MANAGEMENT;
+export const SEARCH_INDEX_MANAGEMENT_APP_ID: SearchIndexManagement = SEARCH_INDEX_MANAGEMENT;
 export type { IndicesStatusResponse, UserStartPrivilegesResponse } from './types';
