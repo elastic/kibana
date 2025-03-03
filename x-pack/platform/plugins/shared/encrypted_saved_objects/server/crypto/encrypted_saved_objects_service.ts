@@ -6,14 +6,18 @@
  */
 
 import type { Crypto, EncryptOutput } from '@elastic/node-crypto';
+// import { existsSync, mkdirSync, writeFileSync } from 'fs';
 import stringify from 'json-stable-stringify';
+// import { join } from 'path';
 import typeDetect from 'type-detect';
 
-import type { Logger } from '@kbn/core/server';
+import type { Logger, SavedObjectsType } from '@kbn/core/server';
 import type { AuthenticatedUser } from '@kbn/security-plugin/common';
 
 import { EncryptedSavedObjectAttributesDefinition } from './encrypted_saved_object_type_definition';
 import { EncryptionError, EncryptionErrorOperation } from './encryption_error';
+
+const ESO_AAD_V1 = '1';
 
 /**
  * Describes the attributes to encrypt. By default, attribute values won't be exposed to end-users
@@ -95,6 +99,24 @@ interface EncryptedSavedObjectsServiceOptions {
   decryptionOnlyCryptos?: Readonly<Crypto[]>;
 }
 
+export interface EncryptionSchema {
+  readonly id: string; // the ID of the schema
+  readonly keyName: string; // the name of the encryption key to use, legacy key names are simply a key name with a prefix of 'legacy-'. Thus, one same schema will be applicable to both derived and legacy keys speficied by the name here
+  versions: Record<string, EncryptionSchemaVersion>; // For ESO domain, the record key is mapped from the ESO model version
+}
+
+export interface EncryptionSchemaVersion {
+  readonly fieldsToEncrypt: ReadonlySet<string | FieldToEncrypt>;
+  readonly fieldsToIncludeInAAD?: ReadonlySet<string>;
+  readonly excludeDefaultAAD?: boolean;
+  readonly additionalAADVersion?: string; // optional, used with ESOs
+}
+
+export interface FieldToEncrypt {
+  readonly path: string;
+  readonly dangerouslyExposeValue?: boolean;
+}
+
 /**
  * Utility function that gives array representation of the saved object descriptor respecting
  * optional `namespace` property.
@@ -120,6 +142,11 @@ export class EncryptedSavedObjectsService {
   private readonly typeDefinitions: Map<string, EncryptedSavedObjectAttributesDefinition> =
     new Map();
 
+  /**
+   * Map of all registered encryption schemas where the `key` is saved object type
+   */
+  private readonly encryptionSchemas: Map<string, EncryptionSchema> = new Map();
+
   constructor(private readonly options: EncryptedSavedObjectsServiceOptions) {}
 
   /**
@@ -142,6 +169,163 @@ export class EncryptedSavedObjectsService {
       typeRegistration.type,
       new EncryptedSavedObjectAttributesDefinition(typeRegistration)
     );
+  }
+
+  private getFieldsToEncrypt(
+    type: string,
+    attributesToEncrypt: ReadonlySet<string | AttributeToEncrypt>
+  ): Set<string | FieldToEncrypt> {
+    const fieldsToEncrypt = new Set<string | FieldToEncrypt>();
+    for (const attribute of attributesToEncrypt) {
+      if (typeof attribute === 'string') {
+        fieldsToEncrypt.add(`${type}.${attribute}`);
+      } else {
+        fieldsToEncrypt.add({
+          path: `${type}.${attribute.key}`,
+          dangerouslyExposeValue: attribute.dangerouslyExposeValue,
+        });
+      }
+    }
+    return fieldsToEncrypt;
+  }
+
+  private getAADFields(type: string, attributesToIncludeInAAD?: ReadonlySet<string>): Set<string> {
+    const aadFields = new Set<string>();
+    for (const attribute of attributesToIncludeInAAD ?? []) {
+      aadFields.add(`${type}.${attribute}`);
+    }
+    return aadFields;
+  }
+
+  private getAttributesToEncrypt(
+    fieldsToEncrypt: ReadonlySet<string | FieldToEncrypt>
+  ): Set<string | AttributeToEncrypt> {
+    const attributesToEncrypt = new Set<string | AttributeToEncrypt>();
+    for (const field of fieldsToEncrypt) {
+      if (typeof field === 'string') {
+        attributesToEncrypt.add(field.split('.').pop() ?? field);
+      } else {
+        attributesToEncrypt.add({
+          key: field.path.split('.').pop() ?? field.path,
+          dangerouslyExposeValue: field.dangerouslyExposeValue,
+        });
+      }
+    }
+    return attributesToEncrypt;
+  }
+
+  private getAADAttributes(aadFields?: ReadonlySet<string>): Set<string> {
+    const aadAttributes = new Set<string>();
+    for (const field of aadFields ?? []) {
+      aadAttributes.add(field.split('.').pop() ?? field);
+    }
+    return aadAttributes;
+  }
+
+  public registerType2(typeRegistration: SavedObjectsType) {
+    const hasModelVersionEncryptionDefinition = Object.values(
+      typeRegistration.modelVersions ?? {}
+    ).some((modelVersion) => modelVersion.encryptionDefinition !== undefined);
+
+    if (!hasModelVersionEncryptionDefinition && !typeRegistration.encryption?.definition) {
+      throw new Error(
+        `Cannot register the "${typeRegistration.name}" saved object type as an encrypted type. 
+        It does not have any model version encryption definitions or a root encryption definition.`
+      );
+    }
+    const schemaVersions: Record<string, EncryptionSchemaVersion> = {};
+
+    // Handle the root definition if there is one
+    if (typeRegistration.encryption?.definition) {
+      const fieldsToEncrypt = this.getFieldsToEncrypt(
+        typeRegistration.name,
+        typeRegistration.encryption.definition.attributesToEncrypt
+      );
+
+      schemaVersions['0'] = {
+        fieldsToEncrypt,
+        fieldsToIncludeInAAD: this.getAADFields(
+          typeRegistration.name,
+          typeRegistration.encryption.definition.attributesToIncludeInAAD
+        ),
+        excludeDefaultAAD: true,
+        additionalAADVersion: typeRegistration.encryption.definition.esoAADVersion ?? ESO_AAD_V1, // default to V1
+      };
+    }
+
+    // Handle each model version
+    for (const [version, modelVersion] of Object.entries(typeRegistration.modelVersions ?? {})) {
+      if (!modelVersion.encryptionDefinition) {
+        continue;
+      }
+
+      const fieldsToEncrypt = this.getFieldsToEncrypt(
+        typeRegistration.name,
+        modelVersion.encryptionDefinition.attributesToEncrypt
+      );
+
+      schemaVersions[version] = {
+        fieldsToEncrypt,
+        fieldsToIncludeInAAD: this.getAADFields(
+          typeRegistration.name,
+          modelVersion.encryptionDefinition.attributesToIncludeInAAD
+        ),
+        excludeDefaultAAD: true,
+        additionalAADVersion: modelVersion.encryptionDefinition.esoAADVersion ?? ESO_AAD_V1, // default to V1
+      };
+    }
+
+    const encryptionSchema: EncryptionSchema = {
+      id: typeRegistration.name,
+      keyName: 'encryptedsavedObjects',
+      versions: schemaVersions,
+    };
+
+    // Store the encryption schema in memory or output it somewhere
+    this.encryptionSchemas.set(typeRegistration.name, encryptionSchema);
+    // this.options.logger.info(
+    //   `***** Encryption schema for type "${typeRegistration.name}": ${JSON.stringify(
+    //     encryptionSchema,
+    //     (key, value) => (value instanceof Set ? Array.from(value) : value)
+    //   )}`
+    // );
+    // const schemaFolder = join(__dirname, '../../../../../../../encryption_schemas');
+    // if (!existsSync(schemaFolder)) {
+    //   mkdirSync(schemaFolder, { recursive: true });
+    // }
+    // const schemaFilePath = join(
+    //   schemaFolder,
+    //   `${typeRegistration.name}_eso_encryption_schema.json`
+    // );
+    // writeFileSync(
+    //   schemaFilePath,
+    //   JSON.stringify(
+    //     encryptionSchema,
+    //     (key, value) => (value instanceof Set ? Array.from(value) : value),
+    //     2
+    //   )
+    // );
+
+    // Handle actual registration...
+    const lastVersion = Object.keys(encryptionSchema.versions)[
+      Object.keys(encryptionSchema.versions).length - 1
+    ];
+    const lastDef = encryptionSchema.versions[lastVersion];
+
+    const esoRegistration: EncryptedSavedObjectTypeRegistration = {
+      type: encryptionSchema.id,
+      attributesToEncrypt: this.getAttributesToEncrypt(lastDef.fieldsToEncrypt),
+      attributesToIncludeInAAD: this.getAADAttributes(lastDef.fieldsToIncludeInAAD),
+    };
+
+    // this.options.logger.info(
+    //   `***** Current encryption type "${typeRegistration.name}": ${JSON.stringify(
+    //     esoRegistration,
+    //     (key, value) => (value instanceof Set ? Array.from(value) : value)
+    //   )}`
+    // );
+
+    this.registerType(esoRegistration);
   }
 
   /**

@@ -20,20 +20,14 @@ import {
   uptimeSettingsObjectId,
   uptimeSettingsObjectType,
 } from './synthetics_settings';
-import {
-  SYNTHETICS_SECRET_ENCRYPTED_TYPE,
-  syntheticsParamSavedObjectType,
-} from './synthetics_param';
+import { syntheticsParamSavedObjectType } from './synthetics_param';
 import {
   LEGACY_PRIVATE_LOCATIONS_SAVED_OBJECT_TYPE,
   PRIVATE_LOCATION_SAVED_OBJECT_TYPE,
 } from './private_locations';
 import { DYNAMIC_SETTINGS_DEFAULT_ATTRIBUTES } from '../constants/settings';
 import { DynamicSettingsAttributes } from '../runtime_types/settings';
-import {
-  getSyntheticsMonitorSavedObjectType,
-  SYNTHETICS_MONITOR_ENCRYPTED_TYPE,
-} from './synthetics_monitor';
+import { getSyntheticsMonitorSavedObjectType } from './synthetics_monitor';
 import { syntheticsServiceApiKey } from './service_api_key';
 
 export const registerSyntheticsSavedObjects = (
@@ -48,14 +42,27 @@ export const registerSyntheticsSavedObjects = (
   savedObjectsService.registerType(syntheticsParamSavedObjectType);
   savedObjectsService.registerType(syntheticsSettings);
 
-  encryptedSavedObjects.registerType({
-    type: syntheticsServiceApiKey.name,
-    attributesToEncrypt: new Set(['apiKey']),
-    attributesToIncludeInAAD: new Set(['id', 'name']),
-  });
+  // The replacements below are just here to test out how the future ESO service will convert
+  // the augmented SO type definitions into CES encryption schemas.
+  // Note: The parameter to the new encryptedSavedObjects.registerType2 function is the same as
+  // what is passed to the savedObjectsService.registerType function. In the end, only the
+  // savedObjectsService function will be needed.
 
-  encryptedSavedObjects.registerType(SYNTHETICS_MONITOR_ENCRYPTED_TYPE);
-  encryptedSavedObjects.registerType(SYNTHETICS_SECRET_ENCRYPTED_TYPE);
+  // encryptedSavedObjects.registerType({
+  //   type: syntheticsServiceApiKey.name,
+  //   attributesToEncrypt: new Set(['apiKey']),
+  //   attributesToIncludeInAAD: new Set(['id', 'name']),
+  // });
+  encryptedSavedObjects.registerType2(syntheticsServiceApiKey);
+
+  // encryptedSavedObjects.registerType(SYNTHETICS_MONITOR_ENCRYPTED_TYPE);
+  // This one looks a bit silly because the SO type registration defines pre-model
+  // version migrations, which require the ESO plugin setup to be passed in to the
+  // getSyntheticsMonitorSavedObjectType function
+  encryptedSavedObjects.registerType2(getSyntheticsMonitorSavedObjectType(encryptedSavedObjects));
+
+  // encryptedSavedObjects.registerType(SYNTHETICS_SECRET_ENCRYPTED_TYPE);
+  encryptedSavedObjects.registerType2(syntheticsParamSavedObjectType);
 };
 
 export const savedObjectsAdapter = {

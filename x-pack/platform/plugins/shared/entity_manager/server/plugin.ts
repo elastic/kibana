@@ -123,11 +123,12 @@ export class EntityManagerServerPlugin
 
     core.savedObjects.registerType(entityDefinition);
     core.savedObjects.registerType(EntityDiscoveryApiKeyType);
-    plugins.encryptedSavedObjects.registerType({
-      type: EntityDiscoveryApiKeyType.name,
-      attributesToEncrypt: new Set(['apiKey']),
-      attributesToIncludeInAAD: new Set(['id', 'name']),
-    });
+    // plugins.encryptedSavedObjects.registerType({
+    //   type: EntityDiscoveryApiKeyType.name,
+    //   attributesToEncrypt: new Set(['apiKey']),
+    //   attributesToIncludeInAAD: new Set(['id', 'name']),
+    // });
+    plugins.encryptedSavedObjects.registerType2(EntityDiscoveryApiKeyType);
 
     this.server = {
       config: this.config,

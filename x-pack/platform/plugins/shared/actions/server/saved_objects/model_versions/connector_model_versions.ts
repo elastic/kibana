@@ -14,5 +14,11 @@ export const connectorModelVersions: SavedObjectsModelVersionMap = {
     schemas: {
       create: rawConnectorSchemaV1,
     },
+    // As there were previous migrations defined, we will put the first
+    // encrtyption defintion into the first model version.
+    encryptionDefinition: {
+      attributesToEncrypt: new Set(['secrets']),
+      attributesToIncludeInAAD: new Set(['actionTypeId', 'isMissingSecrets', 'config']),
+    },
   },
 };
