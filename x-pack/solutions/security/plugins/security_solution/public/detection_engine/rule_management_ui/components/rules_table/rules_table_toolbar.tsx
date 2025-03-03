@@ -33,7 +33,7 @@ export const RulesTableToolbar = React.memo(() => {
   const installedTotal =
     (ruleManagementFilters?.rules_summary.custom_count ?? 0) +
     (ruleManagementFilters?.rules_summary.prebuilt_installed_count ?? 0);
-  const updateTotal = prebuiltRulesStatus?.num_prebuilt_rules_to_upgrade ?? 0;
+  const updateTotal = prebuiltRulesStatus?.stats.num_prebuilt_rules_to_upgrade ?? 0;
 
   const shouldDisplayRuleUpdatesTab = !loading && canUserCRUD && updateTotal > 0;
 
