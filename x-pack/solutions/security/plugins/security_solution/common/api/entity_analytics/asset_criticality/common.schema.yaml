@@ -29,6 +29,7 @@ components:
         - 'host.name'
         - 'user.name'
         - 'service.name'
+        - 'entity.id'
     AssetCriticalityRecordIdParts:
       type: object
       properties:

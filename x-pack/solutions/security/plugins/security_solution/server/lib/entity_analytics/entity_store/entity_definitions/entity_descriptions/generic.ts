@@ -24,6 +24,6 @@ export const genericEntityEngineDescription: EntityDescription = {
     newestValue({ source: 'entity.category' }),
     newestValue({ source: 'entity.type' }),
     newestValue({ source: 'entity.address' }),
-    ...getCommonFieldDescriptions('generic')
+    ...getCommonFieldDescriptions('generic'),
   ],
 };

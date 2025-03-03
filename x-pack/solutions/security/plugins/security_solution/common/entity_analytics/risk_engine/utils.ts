@@ -6,6 +6,7 @@
  */
 
 import * as t from 'io-ts';
+import { EntityType } from '../types';
 import { getAllEntityTypes, getDisabledEntityTypes } from '../utils';
 import type { ExperimentalFeatures } from '../../experimental_features';
 
@@ -34,5 +35,8 @@ export const getRiskEngineEntityTypes = (experimentalFeatures: ExperimentalFeatu
   const allEntityTypes = getAllEntityTypes();
   const disabledEntityTypes = getDisabledEntityTypes(experimentalFeatures);
 
-  return allEntityTypes.filter((value) => !disabledEntityTypes.includes(value));
+  return allEntityTypes.filter(
+    (value) =>
+      !disabledEntityTypes.includes(value) && !RISK_ENGINE_UNAVAILABLE_TYPES.includes(value)
+  );
 };
