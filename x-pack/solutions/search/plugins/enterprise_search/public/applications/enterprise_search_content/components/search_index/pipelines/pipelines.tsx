@@ -69,7 +69,7 @@ export const SearchIndexPipelines: React.FC = () => {
   const pipelinesButton = Array.from(document.querySelectorAll('button')).find(
     (btn) => btn.textContent?.trim() === 'Pipelines'
   );
-  
+
   useEffect(() => {
     if (!isDeleteModalOpen) {
       if (buttonRef.current) {
