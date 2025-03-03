@@ -140,6 +140,7 @@ Array [
         <button
           aria-controls="generated-id"
           aria-expanded="true"
+          aria-hidden="true"
           aria-labelledby="generated-id"
           class="euiButtonIcon euiAccordion__arrow emotion-euiButtonIcon-xs-empty-text-euiAccordion__arrow-right-isOpen"
           tabindex="-1"
@@ -263,6 +264,7 @@ Array [
           <button
             aria-controls="generated-id"
             aria-expanded="true"
+            aria-hidden="true"
             aria-labelledby="generated-id"
             class="euiButtonIcon euiAccordion__arrow emotion-euiButtonIcon-xs-empty-text-euiAccordion__arrow-right-isOpen"
             tabindex="-1"
@@ -393,6 +395,7 @@ Array [
           <button
             aria-controls="generated-id"
             aria-expanded="true"
+            aria-hidden="true"
             aria-labelledby="generated-id"
             class="euiButtonIcon euiAccordion__arrow emotion-euiButtonIcon-xs-empty-text-euiAccordion__arrow-right-isOpen"
             tabindex="-1"
@@ -506,6 +509,7 @@ Array [
           <button
             aria-controls="generated-id"
             aria-expanded="true"
+            aria-hidden="true"
             aria-labelledby="generated-id"
             class="euiButtonIcon euiAccordion__arrow emotion-euiButtonIcon-xs-empty-text-euiAccordion__arrow-right-isOpen"
             tabindex="-1"
@@ -602,6 +606,7 @@ Array [
           <button
             aria-controls="generated-id"
             aria-expanded="true"
+            aria-hidden="true"
             aria-labelledby="generated-id"
             class="euiButtonIcon euiAccordion__arrow emotion-euiButtonIcon-xs-empty-text-euiAccordion__arrow-right-isOpen"
             tabindex="-1"
