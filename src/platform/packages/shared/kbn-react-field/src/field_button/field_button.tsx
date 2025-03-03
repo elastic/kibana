@@ -9,6 +9,8 @@
 
 import classNames from 'classnames';
 import React, { ReactNode, HTMLAttributes, ButtonHTMLAttributes } from 'react';
+import { css } from '@emotion/react';
+
 import { CommonProps } from '@elastic/eui';
 import './field_button.scss';
 
@@ -102,7 +104,16 @@ export function FieldButton({
 
   const innerContent = (
     <>
-      {fieldIcon && <span className="kbnFieldButton__fieldIcon">{fieldIcon}</span>}
+      {fieldIcon && (
+        <span
+          css={css`
+            flex-shrink: 0;
+            line-height: 0;
+          `}
+        >
+          {fieldIcon}
+        </span>
+      )}
       {fieldName && (
         <span className="kbnFieldButton__name eui-textBreakAll">
           <span className="kbnFieldButton__nameInner">{fieldName}</span>

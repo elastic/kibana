@@ -2,16 +2,13 @@
   "extends": "../../../../../tsconfig.base.json",
   "compilerOptions": {
     "outDir": "target/types",
-    "types": [
-      "jest",
-      "node",
-    ]
+    "types": ["jest", "node", "@emotion/react/types/css-prop"]
   },
   "include": [
     "**/*.ts",
     "**/*.tsx",
+    "../../../../../typings/**/*",
+    "../../../../../typings/emotion.d.ts"
   ],
-  "exclude": [
-    "target/**/*",
-  ],
+  "exclude": ["target/**/*"]
 }
