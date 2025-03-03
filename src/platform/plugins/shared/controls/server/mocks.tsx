@@ -9,6 +9,7 @@
 
 import type { OptionsListControlState } from '../common/options_list';
 import type { DefaultDataControlState } from '../common/types';
+import { ControlsSetup } from './types';
 
 export const mockDataControlState = {
   id: 'id',
@@ -24,3 +25,10 @@ export const mockOptionsListControlState = {
   singleSelect: false,
   exclude: false,
 } as OptionsListControlState;
+
+export const createControlsSetupMock = (): jest.Mocked<ControlsSetup> => ({
+  telemetry: jest.fn((state, collector) => ({})),
+  inject: jest.fn((state, references) => state),
+  extract: jest.fn((state) => ({ state, references: [] })),
+  getAllMigrations: jest.fn().mockReturnValue({}),
+});

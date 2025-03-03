@@ -19,3 +19,4 @@ export {
 export { initializeControlGroupTelemetry } from './control_group/control_group_telemetry';
 
 export type { ControlGroupTelemetry } from './control_group/types';
+export type { ControlsSetup, ControlsStart } from './types';

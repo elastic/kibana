@@ -17,6 +17,7 @@ import { ContentManagementServerSetup } from '@kbn/content-management-plugin/ser
 import { PluginInitializerContext, CoreSetup, CoreStart, Plugin, Logger } from '@kbn/core/server';
 import { registerContentInsights } from '@kbn/content-management-content-insights-server';
 
+import { ControlsSetup } from '@kbn/controls-plugin/server';
 import {
   initializeDashboardTelemetryTask,
   scheduleDashboardTelemetry,
@@ -34,6 +35,7 @@ import { registerAPIRoutes } from './api';
 
 interface SetupDeps {
   embeddable: EmbeddableSetup;
+  controls: ControlsSetup;
   usageCollection?: UsageCollectionSetup;
   taskManager: TaskManagerSetupContract;
   contentManagement: ContentManagementServerSetup;
@@ -61,6 +63,7 @@ export class DashboardPlugin
       createDashboardSavedObjectType({
         migrationDeps: {
           embeddable: plugins.embeddable,
+          controls: plugins.controls,
         },
       })
     );
@@ -80,7 +83,13 @@ export class DashboardPlugin
     plugins.contentManagement.favorites.registerFavoriteType('dashboard');
 
     if (plugins.taskManager) {
-      initializeDashboardTelemetryTask(this.logger, core, plugins.taskManager, plugins.embeddable);
+      initializeDashboardTelemetryTask(
+        this.logger,
+        core,
+        plugins.taskManager,
+        plugins.controls,
+        plugins.embeddable
+      );
     }
     core.capabilities.registerProvider(capabilitiesProvider);
 

@@ -13,6 +13,7 @@ import {
   mergeMigrationFunctionMaps,
   MigrateFunctionsObject,
 } from '@kbn/kibana-utils-plugin/common';
+import { ControlsSetup } from '@kbn/controls-plugin/server';
 import { EmbeddableSetup } from '@kbn/embeddable-plugin/server';
 import { SavedObjectMigrationFn, SavedObjectMigrationMap } from '@kbn/core/server';
 
@@ -25,6 +26,7 @@ import { createExtractPanelReferencesMigration } from './migrate_extract_panel_r
 
 export interface DashboardSavedObjectTypeMigrationsDeps {
   embeddable: EmbeddableSetup;
+  controls: ControlsSetup;
 }
 
 export const createDashboardSavedObjectTypeMigrations = (
@@ -34,6 +36,10 @@ export const createDashboardSavedObjectTypeMigrations = (
     deps.embeddable.getAllMigrations(),
     migrateByValueDashboardPanels
   ) as MigrateFunctionsObject;
+
+  const controlsMigrations = deps.controls.getAllMigrations();
+
+  const dependencyMigrations = mergeMigrationFunctionMaps(embeddableMigrations, controlsMigrations);
 
   const dashboardMigrations = {
     '6.7.2': flow(migrateMatchAllQuery),
@@ -45,5 +51,5 @@ export const createDashboardSavedObjectTypeMigrations = (
     '7.17.3': flow(migrateExplicitlyHiddenTitles),
   };
 
-  return mergeMigrationFunctionMaps(dashboardMigrations, embeddableMigrations);
+  return mergeMigrationFunctionMaps(dashboardMigrations, dependencyMigrations);
 };
