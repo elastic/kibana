@@ -48,7 +48,7 @@ import { getOAuthClientCredentialsAccessToken } from '../lib/get_oauth_client_cr
 import type { OAuthParams } from '../routes/get_oauth_access_token';
 import { eventLogClientMock } from '@kbn/event-log-plugin/server/event_log_client.mock';
 import type { GetGlobalExecutionKPIParams, GetGlobalExecutionLogParams } from '../../common';
-ß;
+
 import type { estypes } from '@elastic/elasticsearch';
 import { DEFAULT_USAGE_API_URL } from '../config';
 
