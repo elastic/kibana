@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { KibanaRequest } from '@kbn/core/server';
+import type { KibanaRequest, Logger } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
 import { isEqual } from 'lodash/fp';
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
@@ -29,13 +29,30 @@ import {
 import { EndpointArtifactExceptionValidationError } from './errors';
 import { EndpointExceptionsValidationError } from './endpoint_exception_errors';
 
-const NO_GLOBAL_ARTIFACT_AUTHZ_MESSAGE = i18n.translate(
+const OWNER_SPACE_ID_TAG_MANAGEMENT_NOT_ALLOWED_MESSAGE = i18n.translate(
   'xpack.securitySolution.baseValidator.noGlobalArtifactAuthzApiMessage',
   {
     defaultMessage:
       'Management of "ownerSpaceId" tag requires global artifact management privilege',
   }
 );
+
+export const GLOBAL_ARTIFACT_MANAGEMENT_NOT_ALLOWED_MESSAGE = i18n.translate(
+  'xpack.securitySolution.baseValidator.noGlobalArtifactManagementMessage',
+  {
+    defaultMessage:
+      'Management of global artifacts requires additional privilege (global artifact management)',
+  }
+);
+
+const ITEM_CANNOT_BE_MANAGED_IN_CURRENT_SPACE_MESSAGE = (spaceIds: string[]): string =>
+  i18n.translate('xpack.securitySolution.baseValidator.cannotManageItemInCurrentSpace', {
+    defaultMessage: `Updates to this shared item can only be done from the following space {numberOfSpaces, plural, one {ID} other {IDs} }: {itemOwnerSpaces} (or by someone having global artifact management privilege)`,
+    values: {
+      numberOfSpaces: spaceIds.length,
+      itemOwnerSpaces: spaceIds.join(', '),
+    },
+  });
 
 export const BasicEndpointExceptionDataSchema = schema.object(
   {
@@ -66,6 +83,7 @@ export const BasicEndpointExceptionDataSchema = schema.object(
  */
 export class BaseValidator {
   private readonly endpointAuthzPromise: ReturnType<EndpointAppContextService['getEndpointAuthz']>;
+  protected readonly logger: Logger;
 
   constructor(
     protected readonly endpointAppContext: EndpointAppContextService,
@@ -74,6 +92,8 @@ export class BaseValidator {
      */
     private readonly request?: KibanaRequest
   ) {
+    this.logger = endpointAppContext.createLogger(this.constructor.name ?? 'artifactBaseValidator');
+
     if (this.request) {
       this.endpointAuthzPromise = this.endpointAppContext.getEndpointAuthz(this.request);
     } else {
@@ -104,8 +124,8 @@ export class BaseValidator {
     }
   }
 
-  protected isItemByPolicy(item: ExceptionItemLikeOptions): boolean {
-    return isArtifactByPolicy(item);
+  protected isItemByPolicy(item: Partial<Pick<ExceptionListItemSchema, 'tags'>>): boolean {
+    return isArtifactByPolicy(item as Pick<ExceptionListItemSchema, 'tags'>);
   }
 
   protected async isAllowedToCreateArtifactsByPolicy(): Promise<boolean> {
@@ -221,7 +241,7 @@ export class BaseValidator {
       !(await this.endpointAuthzPromise).canManageGlobalArtifacts
     ) {
       throw new EndpointArtifactExceptionValidationError(
-        `Endpoint authorization failure. ${NO_GLOBAL_ARTIFACT_AUTHZ_MESSAGE}`,
+        `${ENDPOINT_AUTHZ_ERROR_MESSAGE}. ${OWNER_SPACE_ID_TAG_MANAGEMENT_NOT_ALLOWED_MESSAGE}`,
         403
       );
     }
@@ -245,7 +265,7 @@ export class BaseValidator {
         (ownerSpaceIds.length === 1 && ownerSpaceIds[0] !== activeSpaceId)
       ) {
         throw new EndpointArtifactExceptionValidationError(
-          `Endpoint authorization failure. ${NO_GLOBAL_ARTIFACT_AUTHZ_MESSAGE}`,
+          `${ENDPOINT_AUTHZ_ERROR_MESSAGE}. ${OWNER_SPACE_ID_TAG_MANAGEMENT_NOT_ALLOWED_MESSAGE}`,
           403
         );
       }
@@ -280,6 +300,80 @@ export class BaseValidator {
   ): Promise<void> {
     if (this.endpointAppContext.experimentalFeatures.endpointManagementSpaceAwarenessEnabled) {
       setArtifactOwnerSpaceId(item, await this.getActiveSpaceId());
+    }
+  }
+
+  protected async validateCanCreateGlobalArtifacts(item: ExceptionItemLikeOptions): Promise<void> {
+    if (this.endpointAppContext.experimentalFeatures.endpointManagementSpaceAwarenessEnabled) {
+      if (
+        !this.isItemByPolicy(item) &&
+        !(await this.endpointAuthzPromise).canManageGlobalArtifacts
+      ) {
+        throw new EndpointArtifactExceptionValidationError(
+          `${ENDPOINT_AUTHZ_ERROR_MESSAGE}. ${GLOBAL_ARTIFACT_MANAGEMENT_NOT_ALLOWED_MESSAGE}`,
+          403
+        );
+      }
+    }
+  }
+
+  protected async validateCanUpdateItemInActiveSpace(
+    updatedItem: Partial<Pick<ExceptionListItemSchema, 'tags'>>,
+    currentSavedItem: ExceptionListItemSchema
+  ): Promise<void> {
+    if (this.endpointAppContext.experimentalFeatures.endpointManagementSpaceAwarenessEnabled) {
+      // Those with global artifact management privilege can do it all
+      if ((await this.endpointAuthzPromise).canManageGlobalArtifacts) {
+        return;
+      }
+
+      // If either the updated item or the saved item is a global artifact, then
+      // error out - user needs global artifact management privilege
+      if (!this.isItemByPolicy(updatedItem) || !this.isItemByPolicy(currentSavedItem)) {
+        throw new EndpointArtifactExceptionValidationError(
+          `${ENDPOINT_AUTHZ_ERROR_MESSAGE}. ${GLOBAL_ARTIFACT_MANAGEMENT_NOT_ALLOWED_MESSAGE}`,
+          403
+        );
+      }
+
+      const itemOwnerSpaces = getArtifactOwnerSpaceIds(currentSavedItem);
+
+      // Per-space items can only be managed from one of the `ownerSpaceId`'s
+      if (!itemOwnerSpaces.includes(await this.getActiveSpaceId())) {
+        throw new EndpointArtifactExceptionValidationError(
+          ITEM_CANNOT_BE_MANAGED_IN_CURRENT_SPACE_MESSAGE(itemOwnerSpaces),
+          403
+        );
+      }
+    }
+  }
+
+  protected async validateCanDeleteItemInActiveSpace(
+    currentSavedItem: ExceptionListItemSchema
+  ): Promise<void> {
+    if (this.endpointAppContext.experimentalFeatures.endpointManagementSpaceAwarenessEnabled) {
+      // Those with global artifact management privilege can do it all
+      if ((await this.endpointAuthzPromise).canManageGlobalArtifacts) {
+        return;
+      }
+
+      // If item is a global artifact then error - user must have global artifact management privilege
+      if (!this.isItemByPolicy(currentSavedItem)) {
+        throw new EndpointArtifactExceptionValidationError(
+          `${ENDPOINT_AUTHZ_ERROR_MESSAGE}. ${GLOBAL_ARTIFACT_MANAGEMENT_NOT_ALLOWED_MESSAGE}`,
+          403
+        );
+      }
+
+      const itemOwnerSpaces = getArtifactOwnerSpaceIds(currentSavedItem);
+
+      // Per-space items can only be deleted from one of the `ownerSpaceId`'s
+      if (!itemOwnerSpaces.includes(await this.getActiveSpaceId())) {
+        throw new EndpointArtifactExceptionValidationError(
+          ITEM_CANNOT_BE_MANAGED_IN_CURRENT_SPACE_MESSAGE(itemOwnerSpaces),
+          403
+        );
+      }
     }
   }
 }
