@@ -689,9 +689,8 @@ export class Plugin implements ISecuritySolutionPlugin {
 
       this.telemetryWatcher = new TelemetryConfigWatcher(
         plugins.fleet.packagePolicyService,
-        core.savedObjects,
         core.elasticsearch,
-        this.endpointContext.service
+        this.endpointAppContextService
       );
       this.telemetryWatcher.start(this.telemetryConfigProvider);
     }
@@ -785,6 +784,7 @@ export class Plugin implements ISecuritySolutionPlugin {
     this.telemetryEventsSender.stop();
     this.endpointAppContextService.stop();
     this.policyWatcher?.stop();
+    this.telemetryWatcher?.stop();
     this.completeExternalResponseActionsTask.stop().catch(() => {});
     this.siemMigrationsService.stop();
     securityWorkflowInsightsService.stop();
