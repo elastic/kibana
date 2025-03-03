@@ -233,9 +233,6 @@ export class AIAssistantService {
         })
       )?.data_streams?.length;
 
-      this.options.logger.error(' this.knowledgeBaseDataStream.name');
-      this.options.logger.error(this.knowledgeBaseDataStream.name);
-
       // update component template for semantic_text field
       // rollover
       let mappings: IndicesGetFieldMappingResponse = {};
@@ -250,7 +247,7 @@ export class AIAssistantService {
 
       const isUsingDedicatedInferenceEndpoint =
         (
-          Object.values(mappings)[0]?.mappings?.semantic_text?.mapping?.semantic_text as {
+          Object.values(mappings)[-1]?.mappings?.semantic_text?.mapping?.semantic_text as {
             inference_id: string;
           }
         )?.inference_id === ASSISTANT_ELSER_INFERENCE_ID;
