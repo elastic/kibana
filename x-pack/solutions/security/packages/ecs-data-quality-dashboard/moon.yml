@@ -1,0 +1,37 @@
+$schema: https://moonrepo.dev/schemas/project.json
+id: '@kbn/ecs-data-quality-dashboard'
+type: unknown
+owners:
+  defaultOwner: '@elastic/security-threat-hunting-explore'
+toolchain:
+  default: node
+language: typescript
+project:
+  name: '@kbn/ecs-data-quality-dashboard'
+  description: Moon project for @kbn/ecs-data-quality-dashboard
+  channel: ''
+  owner: '@elastic/security-threat-hunting-explore'
+  metadata:
+    sourceRoot: x-pack/solutions/security/packages/ecs-data-quality-dashboard
+tags:
+  - security
+  - shared-browser
+  - prod
+fileGroups:
+  src:
+    - '**/*.ts'
+    - '**/*.tsx'
+    - '!target/**/*'
+tasks:
+  jest:
+    args:
+      - '--config'
+      - $projectRoot/jest.config.js
+    inputs:
+      - '@group(src)'
+  jestCI:
+    args:
+      - '--config'
+      - $projectRoot/jest.config.js
+    inputs:
+      - '@group(src)'

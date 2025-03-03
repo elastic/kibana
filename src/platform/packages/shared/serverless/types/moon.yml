@@ -1,0 +1,28 @@
+$schema: https://moonrepo.dev/schemas/project.json
+id: '@kbn/serverless-types'
+type: unknown
+owners:
+  defaultOwner: '@elastic/appex-sharedux'
+toolchain:
+  default: node
+language: typescript
+project:
+  name: '@kbn/serverless-types'
+  description: Moon project for @kbn/serverless-types
+  channel: ''
+  owner: '@elastic/appex-sharedux'
+  metadata:
+    sourceRoot: src/platform/packages/shared/serverless/types
+tags:
+  - platform
+  - shared-common
+  - prod
+fileGroups:
+  src:
+    - '**/*.ts'
+    - '!target/**/*'
+tasks:
+  jest:
+    script: echo 'stubbed:noop'
+  jestCI:
+    script: echo 'stubbed:noop'

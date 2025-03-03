@@ -1,0 +1,37 @@
+$schema: https://moonrepo.dev/schemas/project.json
+id: '@kbn/response-ops-alerts-fields-browser'
+type: unknown
+owners:
+  defaultOwner: '@elastic/response-ops'
+toolchain:
+  default: node
+language: typescript
+project:
+  name: '@kbn/response-ops-alerts-fields-browser'
+  description: Moon project for @kbn/response-ops-alerts-fields-browser
+  channel: ''
+  owner: '@elastic/response-ops'
+  metadata:
+    sourceRoot: src/platform/packages/shared/response-ops/alerts-fields-browser
+tags:
+  - platform
+  - shared-browser
+  - prod
+fileGroups:
+  src:
+    - '**/*.ts'
+    - '**/*.tsx'
+    - '!target/**/*'
+tasks:
+  jest:
+    args:
+      - '--config'
+      - $projectRoot/jest.config.js
+    inputs:
+      - '@group(src)'
+  jestCI:
+    args:
+      - '--config'
+      - $projectRoot/jest.config.js
+    inputs:
+      - '@group(src)'

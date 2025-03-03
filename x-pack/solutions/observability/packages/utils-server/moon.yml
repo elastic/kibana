@@ -1,0 +1,37 @@
+$schema: https://moonrepo.dev/schemas/project.json
+id: '@kbn/observability-utils-server'
+type: unknown
+owners:
+  defaultOwner: '@elastic/observability-ui'
+toolchain:
+  default: node
+language: typescript
+project:
+  name: '@kbn/observability-utils-server'
+  description: Moon project for @kbn/observability-utils-server
+  channel: ''
+  owner: '@elastic/observability-ui'
+  metadata:
+    sourceRoot: x-pack/solutions/observability/packages/utils-server
+tags:
+  - observability
+  - shared-server
+  - prod
+fileGroups:
+  src:
+    - '**/*.ts'
+    - '**/*.tsx'
+    - '!target/**/*'
+tasks:
+  jest:
+    args:
+      - '--config'
+      - $projectRoot/jest.config.js
+    inputs:
+      - '@group(src)'
+  jestCI:
+    args:
+      - '--config'
+      - $projectRoot/jest.config.js
+    inputs:
+      - '@group(src)'

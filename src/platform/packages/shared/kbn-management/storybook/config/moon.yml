@@ -1,0 +1,28 @@
+$schema: https://moonrepo.dev/schemas/project.json
+id: '@kbn/management-storybook-config'
+type: unknown
+owners:
+  defaultOwner: '@elastic/kibana-management'
+toolchain:
+  default: node
+language: typescript
+project:
+  name: '@kbn/management-storybook-config'
+  description: Moon project for @kbn/management-storybook-config
+  channel: ''
+  owner: '@elastic/kibana-management'
+  metadata:
+    sourceRoot: src/platform/packages/shared/kbn-management/storybook/config
+tags:
+  - platform
+  - shared-common
+  - dev
+fileGroups:
+  src:
+    - '**/*.ts'
+    - '!target/**/*'
+tasks:
+  jest:
+    script: echo 'stubbed:noop'
+  jestCI:
+    script: echo 'stubbed:noop'

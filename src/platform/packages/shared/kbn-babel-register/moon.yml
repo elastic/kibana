@@ -1,0 +1,37 @@
+$schema: https://moonrepo.dev/schemas/project.json
+id: '@kbn/babel-register'
+type: unknown
+owners:
+  defaultOwner: '@elastic/kibana-operations'
+toolchain:
+  default: node
+language: typescript
+project:
+  name: '@kbn/babel-register'
+  description: Moon project for @kbn/babel-register
+  channel: ''
+  owner: '@elastic/kibana-operations'
+  metadata:
+    sourceRoot: src/platform/packages/shared/kbn-babel-register
+tags:
+  - platform
+  - shared-common
+  - dev
+fileGroups:
+  src:
+    - '**/*.js'
+    - '**/*.ts'
+    - '!target/**/*'
+tasks:
+  jest:
+    args:
+      - '--config'
+      - $projectRoot/jest.config.js
+    inputs:
+      - '@group(src)'
+  jestCI:
+    args:
+      - '--config'
+      - $projectRoot/jest.config.js
+    inputs:
+      - '@group(src)'
