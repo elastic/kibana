@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type {
   GetViewInAppRelativeUrlFnOpts,
   ActionGroupIdsOf,
@@ -179,64 +179,61 @@ export function registerAnomalyRuleType({
 
       const jobIds = mlJobs.map((job) => job.jobId);
       const anomalySearchParams = {
-        body: {
-          track_total_hits: false,
-          size: 0,
-          query: {
-            bool: {
-              filter: [
-                { term: { result_type: 'record' } },
-                { terms: { job_id: jobIds } },
-                { term: { is_interim: false } },
-                {
-                  range: {
-                    timestamp: {
-                      gte: dateStart,
-                    },
+        track_total_hits: false,
+        size: 0,
+        query: {
+          bool: {
+            filter: [
+              { term: { result_type: 'record' } },
+              { terms: { job_id: jobIds } },
+              { term: { is_interim: false } },
+              {
+                range: {
+                  timestamp: {
+                    gte: dateStart,
                   },
                 },
-                ...termQuery('partition_field_value', ruleParams.serviceName, {
-                  queryEmptyString: false,
-                }),
-                ...termQuery('by_field_value', ruleParams.transactionType, {
-                  queryEmptyString: false,
-                }),
-                ...termsQuery(
-                  'detector_index',
-                  ...(ruleParams.anomalyDetectorTypes?.map((type) =>
-                    getAnomalyDetectorIndex(type)
-                  ) ?? [])
-                ),
-              ] as QueryDslQueryContainer[],
-            },
-          },
-          aggs: {
-            anomaly_groups: {
-              multi_terms: {
-                terms: [
-                  { field: 'partition_field_value' },
-                  { field: 'by_field_value' },
-                  { field: 'job_id' },
-                  { field: 'detector_index' },
-                ],
-                size: 1000,
-                order: { 'latest_score.record_score': 'desc' as const },
               },
-              aggs: {
-                latest_score: {
-                  top_metrics: {
-                    metrics: asMutableArray([
-                      { field: 'record_score' },
-                      { field: 'partition_field_value' },
-                      { field: 'by_field_value' },
-                      { field: 'job_id' },
-                      { field: 'timestamp' },
-                      { field: 'bucket_span' },
-                      { field: 'detector_index' },
-                    ] as const),
-                    sort: {
-                      timestamp: 'desc' as const,
-                    },
+              ...termQuery('partition_field_value', ruleParams.serviceName, {
+                queryEmptyString: false,
+              }),
+              ...termQuery('by_field_value', ruleParams.transactionType, {
+                queryEmptyString: false,
+              }),
+              ...termsQuery(
+                'detector_index',
+                ...(ruleParams.anomalyDetectorTypes?.map((type) => getAnomalyDetectorIndex(type)) ??
+                  [])
+              ),
+            ] as QueryDslQueryContainer[],
+          },
+        },
+        aggs: {
+          anomaly_groups: {
+            multi_terms: {
+              terms: [
+                { field: 'partition_field_value' },
+                { field: 'by_field_value' },
+                { field: 'job_id' },
+                { field: 'detector_index' },
+              ],
+              size: 1000,
+              order: { 'latest_score.record_score': 'desc' as const },
+            },
+            aggs: {
+              latest_score: {
+                top_metrics: {
+                  metrics: asMutableArray([
+                    { field: 'record_score' },
+                    { field: 'partition_field_value' },
+                    { field: 'by_field_value' },
+                    { field: 'job_id' },
+                    { field: 'timestamp' },
+                    { field: 'bucket_span' },
+                    { field: 'detector_index' },
+                  ] as const),
+                  sort: {
+                    timestamp: 'desc' as const,
                   },
                 },
               },
