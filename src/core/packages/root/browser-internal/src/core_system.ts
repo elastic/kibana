@@ -319,6 +319,7 @@ export class CoreSystem {
       const i18n = this.i18n.start();
       const fatalErrors = this.fatalErrors.start();
       const theme = this.theme.start();
+      const customBranding = this.customBranding.start();
       await this.integrations.start({ uiSettings });
 
       const coreUiTargetDomElement = document.createElement('div');
@@ -335,15 +336,7 @@ export class CoreSystem {
         userProfile,
         targetDomElement: overlayTargetDomElement,
       });
-      const notifications = this.notifications.start({
-        analytics,
-        i18n,
-        overlays,
-        theme,
-        userProfile,
-        targetDomElement: notificationsTargetDomElement,
-      });
-      const customBranding = this.customBranding.start();
+
       const application = await this.application.start({
         http,
         theme,
@@ -351,9 +344,23 @@ export class CoreSystem {
         customBranding,
         analytics,
       });
-
       const executionContext = this.executionContext.start({
         curApp$: application.currentAppId$,
+      });
+
+      const rendering = this.renderContextService.start({
+        analytics,
+        executionContext,
+        i18n,
+        theme,
+        userProfile,
+      });
+
+      const notifications = this.notifications.start({
+        analytics,
+        overlays,
+        rendering,
+        targetDomElement: notificationsTargetDomElement,
       });
 
       const chrome = await this.chrome.start({
@@ -405,7 +412,7 @@ export class CoreSystem {
         customBranding,
         security,
         userProfile,
-        rendering: this.renderContextService,
+        rendering,
       };
 
       await this.plugins.start(core);
@@ -431,15 +438,6 @@ export class CoreSystem {
         overlays,
         theme,
         targetDomElement: coreUiTargetDomElement,
-        userProfile,
-      });
-
-      // Provide the services needed rendering full-featured React nodes in Kibana
-      this.renderContextService.start({
-        analytics,
-        executionContext,
-        i18n,
-        theme,
         userProfile,
       });
 
