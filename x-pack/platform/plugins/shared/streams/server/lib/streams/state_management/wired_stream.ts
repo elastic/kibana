@@ -15,14 +15,14 @@ import { Logger } from '@kbn/logging';
 import { InternalIStorageClient, ApplicationDocument } from '@kbn/storage-adapter';
 import { cloneDeep } from 'lodash';
 import { isResponseError } from '@kbn/es-errors';
-import { State } from './state';
+import { State, StreamChange } from './state';
 import { StreamActiveRecord, ValidationResult } from './stream_active_record';
 import { syncWiredStreamDefinitionObjects } from '../helpers/sync';
 import { deleteStreamObjects } from '../stream_crud';
 
 export class WiredStream extends StreamActiveRecord<WiredStreamDefinition> {
   constructor(definition: WiredStreamDefinition) {
-    super(definition); // Maybe the subclass should double check here that it was really given the right type of definition?
+    super(definition);
     // What about the assets?
   }
 
@@ -30,20 +30,23 @@ export class WiredStream extends StreamActiveRecord<WiredStreamDefinition> {
     return new WiredStream(cloneDeep(this._definition));
   }
 
-  protected doUpsert(
+  protected async doUpsert(
     definition: StreamDefinition,
     desiredState: State,
     startingState: State
-  ): void {
+  ): Promise<StreamChange[]> {
     if (!isWiredStreamDefinition(definition)) {
       throw new Error('Cannot change stream types');
     }
 
     this._definition = definition;
+
+    return [];
   }
 
-  protected doDelete(desiredState: State, startingState: State): void {
+  protected async doDelete(desiredState: State, startingState: State): Promise<StreamChange[]> {
     // Maybe remove children for example
+    return [];
   }
 
   protected async doValidate(

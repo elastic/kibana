@@ -9,7 +9,7 @@ import { StreamDefinition, isWiredStreamDefinition } from '@kbn/streams-schema';
 import { StreamActiveRecord } from './stream_active_record';
 import { WiredStream } from './wired_stream';
 
-// This should be the only thing that knows about the various stream types (except the types themselves)
+// This should be the only thing that knows about the various stream types
 export function streamFromDefinition(definition: StreamDefinition): StreamActiveRecord {
   if (isWiredStreamDefinition(definition)) {
     return new WiredStream(definition);

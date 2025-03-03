@@ -10,6 +10,15 @@ import { WiredStreamUpsertRequest } from '@kbn/streams-schema';
 import { StreamsStorageClient } from '../service';
 import { StreamActiveRecord, ValidationResult } from './stream_active_record';
 import { streamFromDefinition } from './stream_from_definition';
+import { AssetClient } from '../assets/asset_client';
+
+interface StateDependencies {
+  scopedClusterClient: IScopedClusterClient;
+  assetClient: AssetClient;
+  storageClient: StreamsStorageClient;
+  logger: Logger;
+  isServerless: boolean;
+}
 
 interface WiredStreamUpsertChange {
   target: string;
@@ -36,30 +45,78 @@ export class State {
     streams.forEach((stream) => this.streamsByName.set(stream.definition.name, stream));
   }
 
-  applyChanges(requestedChanges: StreamChange[]): State {
-    // What if multiple changes target the same stream?
+  async applyChanges(requestedChanges: StreamChange[], logger: Logger): Promise<State> {
+    const startingState = this;
+    const desiredState = startingState.clone();
 
-    // Optional: Expand requested changes to include automatic creation of missing streams
-    const newState = this.clone();
-
-    requestedChanges.forEach((change) => {
-      const targetStream = newState.get(change.target);
-
-      if (!targetStream) {
-        if (change.type === 'delete') {
-          throw new Error('Cannot delete non-existing stream');
-        } else {
-          const newStream = streamFromDefinition(change.request.stream);
-          newStream.applyChange(change, newState, this);
-          newState.set(newStream.definition.name, newStream);
-        }
-      } else {
-        targetStream.applyChange(change, newState, this);
-      }
-    });
+    for (const requestedChange of requestedChanges) {
+      // Apply one change and any cascading changes from that change
+      await this.applyRequestedChange(requestedChange, desiredState, startingState, logger);
+    }
 
     // Here we might return { changedSuccessfully: boolean; errors: Error[] }
-    return newState;
+    return desiredState;
+  }
+
+  private async applyRequestedChange(
+    requestedChange: StreamChange,
+    desiredState: State,
+    startingState: State,
+    logger: Logger
+  ) {
+    const cascadingChanges = await this.applyChange(requestedChange, desiredState, startingState);
+
+    const excessiveCascadingChanges = await this.applyCascadingChanges(
+      cascadingChanges,
+      desiredState,
+      startingState
+    );
+
+    // We only allow one round of cascading changes
+    if (excessiveCascadingChanges.length !== 0) {
+      logger.warn(`A requested change lead to multiple levels of cascading changes:`);
+      logger.warn(`Requested change: ${requestedChange}`);
+      logger.warn(`Cascading changes: ${cascadingChanges}`);
+      logger.warn(`Excessive cascading changes: ${excessiveCascadingChanges}`);
+    }
+  }
+
+  private async applyCascadingChanges(
+    cascadingChanges: StreamChange[],
+    desiredState: State,
+    startingState: State
+  ): Promise<StreamChange[]> {
+    const excessiveCascadingChanges: StreamChange[][] = [];
+
+    for (const cascadingChange of cascadingChanges) {
+      const newChanges = await this.applyChange(cascadingChange, desiredState, startingState);
+      excessiveCascadingChanges.push(newChanges);
+    }
+
+    return excessiveCascadingChanges.flat();
+  }
+
+  private async applyChange(
+    change: StreamChange,
+    desiredState: State,
+    startingState: State
+  ): Promise<StreamChange[]> {
+    if (!desiredState.has(change.target)) {
+      if (change.type === 'delete') {
+        // Not sure if throwing or ignoring is better here, the desired state is without this stream which is correct...
+        throw new Error('Cannot delete non-existing stream');
+      }
+
+      const newStream = streamFromDefinition(change.request.stream);
+      desiredState.set(newStream.definition.name, newStream);
+    }
+
+    const cascadingChanges: StreamChange[][] = [];
+    for (const stream of desiredState.all()) {
+      const newChanges = await stream.applyChange(change, desiredState, startingState);
+      cascadingChanges.push(newChanges);
+    }
+    return cascadingChanges.flat();
   }
 
   private clone(): State {
@@ -71,9 +128,9 @@ export class State {
     startingState: State,
     scopedClusterClient: IScopedClusterClient
   ): Promise<ValidationResult> {
-    // Should I use allSettled here?
+    const desiredState = this;
     const validationResults = await Promise.all(
-      this.all().map((stream) => stream.validate(this, startingState, scopedClusterClient))
+      this.all().map((stream) => stream.validate(desiredState, startingState, scopedClusterClient))
     );
 
     const isValid = validationResults.every((validationResult) => validationResult.isValid);
@@ -86,9 +143,6 @@ export class State {
   }
 
   changes() {
-    // Could there be conflicts between changes, like a group being updated with new members before that member is deleted?
-    // I guess the deletion change for that member should catch that and update the group again or validation for the group should catch it
-    // In reverse, the change for the group should check that the member was deleted and throw? And in any case the validation should catch it
     return this.all().filter((stream) => stream.hasChanged());
   }
 
@@ -112,12 +166,13 @@ export class State {
     scopedClusterClient: IScopedClusterClient,
     isServerless: boolean
   ) {
+    const desiredState = this;
     await Promise.all(
       this.changes()
         .filter((stream) => stream.hasCommitted())
         .map((stream) =>
           stream.revert(
-            this,
+            desiredState,
             startingState,
             storageClient,
             logger,
@@ -144,7 +199,50 @@ export class State {
     return this.streamsByName.has(name);
   }
 
-  static async currentState(storageClient: StreamsStorageClient): Promise<State> {
+  // What should this function return?
+  static async attemptChanges(
+    requestedChanges: StreamChange[],
+    dependencies: StateDependencies,
+    dryRun: boolean = false
+  ) {
+    const startingState = await State.currentState(dependencies.storageClient);
+
+    const desiredState = await startingState.applyChanges(requestedChanges, dependencies.logger);
+
+    const validationResult = await desiredState.validate(
+      startingState,
+      dependencies.scopedClusterClient
+    );
+
+    if (!validationResult.isValid) {
+      // How do these translate to HTTP errors?
+      throw new Error(validationResult.errors.join(', '));
+    }
+
+    if (dryRun) {
+      // Perhaps we can/should compute some kind of diff here instead to make it easier for the UI to present what (in more detail) has changed?
+      return desiredState.changes();
+    } else {
+      try {
+        await desiredState.commitChanges(
+          dependencies.storageClient,
+          dependencies.logger,
+          dependencies.scopedClusterClient,
+          dependencies.isServerless
+        );
+      } catch (error) {
+        await desiredState.attemptRollback(
+          startingState,
+          dependencies.storageClient,
+          dependencies.logger,
+          dependencies.scopedClusterClient,
+          dependencies.isServerless
+        );
+      }
+    }
+  }
+
+  private static async currentState(storageClient: StreamsStorageClient): Promise<State> {
     try {
       const streamsSearchResponse = await storageClient.search({
         size: 10000, // Paginate if there are more...

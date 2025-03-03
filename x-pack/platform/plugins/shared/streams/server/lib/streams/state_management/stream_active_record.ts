@@ -27,37 +27,54 @@ export abstract class StreamActiveRecord<TDefinition extends StreamDefinition = 
     this._definition = definition;
   }
 
-  public get definition() {
+  public get definition(): TDefinition {
     return this._definition;
   }
 
-  public applyChange(change: StreamChange, desiredState: State, startingState: State): void {
-    if (change.type === 'delete') {
-      this.delete(desiredState, startingState);
-    } else {
-      this.upsert(change.request.stream, desiredState, startingState);
+  async applyChange(
+    change: StreamChange,
+    desiredState: State,
+    startingState: State
+  ): Promise<StreamChange[]> {
+    // What if this stream is already in a changed state?
+
+    try {
+      if (change.type === 'delete') {
+        return this.delete(desiredState, startingState);
+      } else {
+        return this.upsert(change.request.stream, desiredState, startingState);
+      }
+    } catch (error) {
+      // Here we might return { changedSuccessfully: boolean; errors: Error[] }
+      return [];
     }
   }
 
-  public delete(desiredState: State, startingState: State) {
+  async delete(desiredState: State, startingState: State): Promise<StreamChange[]> {
     try {
-      this.doDelete(desiredState, startingState);
+      return this.doDelete(desiredState, startingState);
       this.changeStatus = 'deleted';
     } catch (error) {
       // Here we might return { changedSuccessfully: boolean; errors: Error[] }
+      return [];
     }
   }
 
-  public upsert(definition: StreamDefinition, desiredState: State, startingState: State) {
+  async upsert(
+    definition: StreamDefinition,
+    desiredState: State,
+    startingState: State
+  ): Promise<StreamChange[]> {
     try {
-      this.doUpsert(definition, desiredState, startingState);
+      return this.doUpsert(definition, desiredState, startingState);
       this.changeStatus = 'upserted';
     } catch (error) {
       // Here we might return { changedSuccessfully: boolean; errors: Error[] }
+      return [];
     }
   }
 
-  public async validate(
+  async validate(
     desiredState: State,
     startingState: State,
     scopedClusterClient: IScopedClusterClient
@@ -69,18 +86,18 @@ export abstract class StreamActiveRecord<TDefinition extends StreamDefinition = 
     }
   }
 
-  public async commit(
+  async commit(
     storageClient: StreamsStorageClient,
     logger: Logger,
     scopedClusterClient: IScopedClusterClient,
     isServerless: boolean
-  ) {
+  ): Promise<void> {
     try {
       this.commitStatus = 'committing';
       if (this.changeStatus === 'upserted') {
-        this.doCommitUpsert(storageClient, logger, scopedClusterClient, isServerless);
+        await this.doCommitUpsert(storageClient, logger, scopedClusterClient, isServerless);
       } else if (this.changeStatus === 'deleted') {
-        this.doCommitDelete(storageClient, logger, scopedClusterClient, isServerless);
+        await this.doCommitDelete(storageClient, logger, scopedClusterClient, isServerless);
       }
       this.commitStatus = 'committed';
     } catch (error) {
@@ -89,43 +106,43 @@ export abstract class StreamActiveRecord<TDefinition extends StreamDefinition = 
     }
   }
 
-  public async revert(
+  async revert(
     desiredState: State,
     startingState: State,
     storageClient: StreamsStorageClient,
     logger: Logger,
     scopedClusterClient: IScopedClusterClient,
     isServerless: boolean
-  ) {
+  ): Promise<void> {
     if (startingState.has(this.definition.name)) {
       // Stream was updated or deleted
       const startingStateDefinition = startingState.get(this.definition.name)?.definition!;
-      this.upsert(startingStateDefinition, startingState, desiredState);
+      await this.upsert(startingStateDefinition, startingState, desiredState);
     } else {
       // Stream was created
-      this.delete(startingState, desiredState);
+      await this.delete(startingState, desiredState);
     }
 
     await this.commit(storageClient, logger, scopedClusterClient, isServerless);
   }
 
-  public hasChanged(): boolean {
+  hasChanged(): boolean {
     return this.changeStatus !== 'unchanged';
   }
 
-  public hasCommitted(): boolean {
+  hasCommitted(): boolean {
     return this.commitStatus !== 'uncommitted';
   }
 
-  public abstract clone(): StreamActiveRecord;
+  abstract clone(): StreamActiveRecord;
 
   protected abstract doUpsert(
     definition: StreamDefinition,
     desiredState: State,
     startingState: State
-  ): void;
+  ): Promise<StreamChange[]>;
 
-  protected abstract doDelete(desiredState: State, startingState: State): void;
+  protected abstract doDelete(desiredState: State, startingState: State): Promise<StreamChange[]>;
 
   protected abstract doValidate(
     desiredState: State,
