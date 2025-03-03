@@ -6,7 +6,6 @@
  */
 
 import React, { useState, useMemo } from 'react';
-import { css } from '@emotion/react';
 import { EuiBadge, EuiBadgeGroup } from '@elastic/eui';
 import type { EuiBadgeProps } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -45,10 +44,10 @@ export const ExpandableBadgeGroup = ({
   return (
     <EuiBadgeGroup
       gutterSize="s"
-      css={css`
-        max-height: ${maxScrollHeight};
-        overflow-y: auto;
-      `}
+      style={{
+        maxHeight: maxScrollHeight,
+        overflowY: 'auto',
+      }}
     >
       {
         // Show all badges if 'all' is set, otherwise show the first `badgesToShow` badges
