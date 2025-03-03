@@ -7,11 +7,6 @@
 
 import { StructuredTool } from '@langchain/core/tools';
 import { getDefaultArguments } from '@kbn/langchain/server';
-import {
-  createOpenAIToolsAgent,
-  createStructuredChatAgent,
-  createToolCallingAgent,
-} from 'langchain/agents';
 import { APMTracer } from '@kbn/langchain/server/tracers/apm';
 import { TelemetryTracer } from '@kbn/langchain/server/tracers/telemetry';
 import { pruneContentReferences, MessageMetadata } from '@kbn/elastic-assistant-common';
@@ -19,17 +14,19 @@ import { getPrompt, resolveProviderAndModel } from '@kbn/security-ai-prompts';
 import { isEmpty } from 'lodash';
 import { localToolPrompts, promptGroupId as toolsGroupId } from '../../../prompt/tool_prompts';
 import { promptGroupId } from '../../../prompt/local_prompt_object';
-import { getModelOrOss } from '../../../prompt/helpers';
+import { getFormattedTime, getModelOrOss } from '../../../prompt/helpers';
 import { getPrompt as localGetPrompt, promptDictionary } from '../../../prompt';
 import { getLlmClass } from '../../../../routes/utils';
 import { EsAnonymizationFieldsSchema } from '../../../../ai_assistant_data_clients/anonymization_fields/types';
 import { AssistantToolParams } from '../../../../types';
 import { AgentExecutor } from '../../executors/types';
-import { formatPrompt, formatPromptStructured } from './prompts';
+import { formatPrompt } from './prompts';
 import { GraphInputs } from './types';
 import { getDefaultAssistantGraph } from './graph';
 import { invokeGraph, streamGraph } from './helpers';
 import { transformESSearchToAnonymizationFields } from '../../../../ai_assistant_data_clients/anonymization_fields/helpers';
+import { DEFAULT_DATE_FORMAT_TZ } from '../../../../../common/constants';
+import { agentRunableFactory } from './agentRunnable';
 
 export const callAssistantGraph: AgentExecutor<true | false> = async ({
   abortSignal,
@@ -39,6 +36,7 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
   connectorId,
   contentReferencesStore,
   conversationId,
+  core,
   dataClients,
   esClient,
   inference,
@@ -53,6 +51,7 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
   replacements,
   request,
   savedObjectsClient,
+  screenContext,
   size,
   systemPrompt,
   telemetry,
@@ -89,6 +88,7 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
       // prevents the agent from retrying on failure
       // failure could be due to bad connector, we should deliver that result to the client asap
       maxRetries: 0,
+      convertSystemMessageToHumanContent: false,
     });
 
   const anonymizationFieldsRes =
@@ -175,28 +175,21 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
     savedObjectsClient,
   });
 
-  const agentRunnable =
-    isOpenAI || llmType === 'inference'
-      ? await createOpenAIToolsAgent({
-          llm: createLlmInstance(),
-          tools,
-          prompt: formatPrompt(defaultSystemPrompt, systemPrompt),
-          streamRunnable: isStream,
-        })
-      : llmType && ['bedrock', 'gemini'].includes(llmType)
-      ? await createToolCallingAgent({
-          llm: createLlmInstance(),
-          tools,
-          prompt: formatPrompt(defaultSystemPrompt, systemPrompt),
-          streamRunnable: isStream,
-        })
-      : // used with OSS models
-        await createStructuredChatAgent({
-          llm: createLlmInstance(),
-          tools,
-          prompt: formatPromptStructured(defaultSystemPrompt, systemPrompt),
-          streamRunnable: isStream,
-        });
+  const chatPromptTemplate = formatPrompt({
+    prompt: defaultSystemPrompt,
+    additionalPrompt: systemPrompt,
+    llmType,
+    isOpenAI,
+  });
+
+  const agentRunnable = await agentRunableFactory({
+    llm: createLlmInstance(),
+    isOpenAI,
+    llmType,
+    tools,
+    isStream,
+    prompt: chatPromptTemplate,
+  });
 
   const apmTracer = new APMTracer({ projectName: traceOptions?.projectName ?? 'default' }, logger);
   const telemetryTracer = telemetryParams
@@ -210,6 +203,7 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
         logger
       )
     : undefined;
+
   const { provider } =
     !llmType || llmType === 'inference'
       ? await resolveProviderAndModel({
@@ -217,6 +211,11 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
           actionsClient,
         })
       : { provider: llmType };
+
+  const uiSettingsDateFormatTimezone = await core.uiSettings.client.get<string>(
+    DEFAULT_DATE_FORMAT_TZ
+  );
+
   const assistantGraph = getDefaultAssistantGraph({
     agentRunnable,
     dataClients,
@@ -229,6 +228,11 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
     replacements,
     // some chat models (bedrock) require a signal to be passed on agent invoke rather than the signal passed to the chat model
     ...(llmType === 'bedrock' ? { signal: abortSignal } : {}),
+    getFormattedTime: () =>
+      getFormattedTime({
+        screenContextTimezone: screenContext?.timeZone,
+        uiSettingsDateFormatTimezone,
+      }),
   });
   const inputs: GraphInputs = {
     responseLanguage,
