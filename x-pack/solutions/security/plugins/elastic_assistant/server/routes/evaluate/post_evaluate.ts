@@ -49,7 +49,7 @@ import {
 import { getLlmClass, getLlmType, isOpenSourceModel } from '../utils';
 import { getGraphsFromNames } from './get_graphs_from_names';
 import { DEFAULT_DATE_FORMAT_TZ } from '../../../common/constants';
-import { agentRunableFacotry } from '../../lib/langchain/graphs/default_assistant_graph/agentRunnable';
+import { agentRunableFactory } from '../../lib/langchain/graphs/default_assistant_graph/agentRunnable';
 
 const DEFAULT_SIZE = 20;
 const ROUTE_HANDLER_TIMEOUT = 10 * 60 * 1000; // 10 * 60 seconds = 10 minutes
@@ -355,7 +355,7 @@ export const postEvaluateRoute = (
                 isOpenAI,
               });
 
-              const agentRunnable = await agentRunableFacotry({
+              const agentRunnable = await agentRunableFactory({
                 llm: createLlmInstance(),
                 isOpenAI,
                 llmType,

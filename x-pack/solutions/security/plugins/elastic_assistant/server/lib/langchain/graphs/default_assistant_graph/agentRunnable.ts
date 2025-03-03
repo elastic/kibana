@@ -22,7 +22,7 @@ import { ChatPromptTemplate } from '@langchain/core/prompts';
 
 export const TOOL_CALLING_LLM_TYPES = new Set(['bedrock', 'gemini']);
 
-export const agentRunableFacotry = async ({
+export const agentRunableFactory = async ({
   llm,
   isOpenAI,
   llmType,

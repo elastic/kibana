@@ -26,7 +26,7 @@ import { getDefaultAssistantGraph } from './graph';
 import { invokeGraph, streamGraph } from './helpers';
 import { transformESSearchToAnonymizationFields } from '../../../../ai_assistant_data_clients/anonymization_fields/helpers';
 import { DEFAULT_DATE_FORMAT_TZ } from '../../../../../common/constants';
-import { agentRunableFacotry } from './agentRunnable';
+import { agentRunableFactory } from './agentRunnable';
 
 export const callAssistantGraph: AgentExecutor<true | false> = async ({
   abortSignal,
@@ -182,7 +182,7 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
     isOpenAI,
   });
 
-  const agentRunnable = await agentRunableFacotry({
+  const agentRunnable = await agentRunableFactory({
     llm: createLlmInstance(),
     isOpenAI,
     llmType,
