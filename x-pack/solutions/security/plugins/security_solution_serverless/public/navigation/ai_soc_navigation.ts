@@ -23,10 +23,10 @@ const shouldUseAINavigation = (productTypes: SecurityProductTypes) => {
   return productTypes.some((productType) => productType.product_line === ProductLine.aiSoc);
 };
 const isAIStandalone = (productTypes: SecurityProductTypes) => {
-  return productTypes.some(
-    (productType) =>
-      productType.product_line === ProductLine.security &&
-      productType.product_tier === ProductTier.minimal
+  return (
+    productTypes.length === 1 &&
+    productTypes[0].product_line === ProductLine.aiSoc &&
+    productTypes[0].product_tier === ProductTier.searchAILake
   );
 };
 

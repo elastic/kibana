@@ -13,7 +13,7 @@ export enum ProductLine {
 }
 
 export enum ProductTier {
-  minimal = 'minimal',
+  searchAILake = 'searchAILake',
   essentials = 'essentials',
   complete = 'complete',
 }
