@@ -13,7 +13,7 @@ import {
 } from '@kbn/esql-utils';
 import { isEqual, cloneDeep } from 'lodash';
 import { type AggregateQuery, buildEsQuery } from '@kbn/es-query';
-import type { ESQLControlVariable } from '@kbn/esql-validation-autocomplete';
+import type { ESQLControlVariable } from '@kbn/esql-types';
 import type { ESQLRow } from '@kbn/es-types';
 import {
   getLensAttributesFromSuggestion,

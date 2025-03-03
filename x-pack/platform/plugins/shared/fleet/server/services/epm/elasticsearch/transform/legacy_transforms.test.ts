@@ -201,7 +201,8 @@ describe('test transform install with legacy schema', () => {
         {
           transform_id: 'endpoint.metadata-default-0.16.0-dev.0',
           defer_validation: true,
-          body: { content: 'data', _meta: meta },
+          content: 'data',
+          _meta: meta,
         },
         { ignore: [409] },
       ],
@@ -209,7 +210,8 @@ describe('test transform install with legacy schema', () => {
         {
           transform_id: 'endpoint.metadata_current-default-0.16.0-dev.0',
           defer_validation: true,
-          body: { content: 'data', _meta: meta },
+          content: 'data',
+          _meta: meta,
         },
         { ignore: [409] },
       ],
@@ -351,7 +353,8 @@ describe('test transform install with legacy schema', () => {
         {
           transform_id: 'endpoint.metadata_current-default-0.16.0-dev.0',
           defer_validation: true,
-          body: { content: 'data', _meta: meta },
+          content: 'data',
+          _meta: meta,
         },
         { ignore: [409] },
       ],
@@ -577,7 +580,8 @@ describe('test transform install with legacy schema', () => {
         {
           transform_id: 'endpoint.metadata_current-default-0.16.0-dev.0',
           defer_validation: true,
-          body: { content: 'data', _meta: meta },
+          content: 'data',
+          _meta: meta,
         },
         { ignore: [409] },
       ],
