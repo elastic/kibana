@@ -136,6 +136,8 @@ export const startPrivilegeMonitoringTask = async ({
       state: { ...defaultState, namespace },
       params: { version: VERSION },
     });
+    // eslint-disable-next-line no-console
+    console.log(`Starting the start GREAT SUCCESS`);
   } catch (e) {
     logger.warn(
       `[Privilege Monitoring]  [task ${taskId}]: error scheduling task, received ${e.message}`

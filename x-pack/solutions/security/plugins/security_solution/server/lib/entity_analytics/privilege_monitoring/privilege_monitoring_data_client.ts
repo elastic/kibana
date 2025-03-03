@@ -33,8 +33,8 @@ interface PrivilegeMonitoringClientOpts {
   apiKeyManager?: ApiKeyManager;
 }
 
- // TODO: update this - need some openAPI generated types here
- interface InitPrivilegedMonitoringEntityEngineResponse {
+// TODO: update this - need some openAPI generated types here
+interface InitPrivilegedMonitoringEntityEngineResponse {
   status: string;
   apiKey: string;
 }
@@ -44,34 +44,31 @@ export class PrivilegeMonitoringDataClient {
   private esClient: ElasticsearchClient;
   private engineClient: PrivilegeMonitoringEngineDescriptorClient;
 
-
   constructor(private readonly opts: PrivilegeMonitoringClientOpts) {
     this.esClient = opts.clusterClient.asCurrentUser;
     this.apiKeyGenerator = opts.apiKeyManager;
-    this.engineClient = new PrivilegeMonitoringEngineDescriptorClient({ 
+    this.engineClient = new PrivilegeMonitoringEngineDescriptorClient({
       soClient: opts.soClient,
       namespace: opts.namespace,
-    })
+    });
   }
 
-
-  private async enable(){ 
-    /** 
+  private async enable() {
+    /**
      * TODO: fill this in
      */
   }
-/**
- * 
- * init the engine, 
- * kibana task created,
- * create save object with engine status and api key of user who enabled engine --
- * ticket does not say enable, but is this implied? Or just ability of saved object when we want to enable engine?
- * indices created 
- * 
- * definition and descriptor -- different things. **
- */
-  async init():Promise<InitPrivilegedMonitoringEntityEngineResponse> {
-
+  /**
+   *
+   * init the engine,
+   * kibana task created,
+   * create save object with engine status and api key of user who enabled engine --
+   * ticket does not say enable, but is this implied? Or just ability of saved object when we want to enable engine?
+   * indices created
+   *
+   * definition and descriptor -- different things. **
+   */
+  async init(): Promise<InitPrivilegedMonitoringEntityEngineResponse> {
     if (!this.opts.taskManager) {
       throw new Error('Task Manager is not available');
     }
@@ -95,7 +92,7 @@ export class PrivilegeMonitoringDataClient {
       taskManager: this.opts.taskManager,
     });
 
-    await this.engineClient.update({ status: 'installing' })
+    await this.engineClient.update({ status: 'installing' });
 
     return descriptor;
   }
@@ -115,10 +112,7 @@ export class PrivilegeMonitoringDataClient {
     return getPrivilegedMonitorUsersIndex(this.opts.namespace);
   }
 
-  private log(
-    level: Exclude<keyof Logger, 'get' | 'log' | 'isLevelEnabled'>,
-    msg: string
-  ) {
+  private log(level: Exclude<keyof Logger, 'get' | 'log' | 'isLevelEnabled'>, msg: string) {
     this.opts.logger[level](
       `[Privileged Monitoring Engine][namespace: ${this.opts.namespace}] ${msg}`
     );
