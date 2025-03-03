@@ -29,11 +29,6 @@ export const DataViewPicker = memo((props: { scope: DataViewPickerScopeName }) =
   const closeDataViewEditor = useRef<() => void | undefined>();
   const closeFieldEditor = useRef<() => void | undefined>();
 
-  // TODO: this should be disabled for the default data views probably, eg. `security-solution-default`
-  // const canEditDataView =
-  // Boolean(dataViewEditor?.userPermissions.editDataView()) || !dataView.isPersisted();
-  const canEditDataView = true;
-
   const { dataView } = useDataView(props.scope);
 
   const dataViewId = dataView?.id;
@@ -50,11 +45,8 @@ export const DataViewPicker = memo((props: { scope: DataViewPickerScopeName }) =
 
   const onFieldEdited = useCallback(() => {}, []);
 
-  const editField = useMemo(() => {
-    if (!canEditDataView) {
-      return;
-    }
-    return async (fieldName?: string, _uiAction: 'edit' | 'add' = 'edit') => {
+  const editField = useCallback(
+    async (fieldName?: string, _uiAction: 'edit' | 'add' = 'edit') => {
       if (!dataViewId) {
         return;
       }
@@ -69,13 +61,11 @@ export const DataViewPicker = memo((props: { scope: DataViewPickerScopeName }) =
           onFieldEdited();
         },
       });
-    };
-  }, [canEditDataView, dataViewId, data.dataViews, dataViewFieldEditor, onFieldEdited]);
-
-  const addField = useMemo(
-    () => (canEditDataView && editField ? () => editField(undefined, 'add') : undefined),
-    [editField, canEditDataView]
+    },
+    [dataViewId, data.dataViews, dataViewFieldEditor, onFieldEdited]
   );
+
+  const handleAddField = useCallback(() => editField(undefined, 'add'), [editField]);
 
   const handleChangeDataView = useCallback(
     (id: string) => {
@@ -120,7 +110,7 @@ export const DataViewPicker = memo((props: { scope: DataViewPickerScopeName }) =
       trigger={triggerConfig}
       onChangeDataView={handleChangeDataView}
       onEditDataView={handleEditDataView}
-      onAddField={addField}
+      onAddField={handleAddField}
       onDataViewCreated={createNewDataView}
       adHocDataViews={adhocDataViews}
       savedDataViews={managedDataViews}
