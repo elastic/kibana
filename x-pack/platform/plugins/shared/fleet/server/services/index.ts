@@ -38,6 +38,7 @@ export { outputService } from './output';
 export { downloadSourceService } from './download_source';
 export { settingsService };
 export { dataStreamService } from './data_streams';
+export { fleetServerHostService } from './fleet_server_host';
 
 // Plugin services
 export { appContextService } from './app_context';
