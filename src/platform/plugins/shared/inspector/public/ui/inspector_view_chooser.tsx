@@ -10,13 +10,7 @@
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import {
-  EuiButtonEmpty,
-  EuiContextMenuItem,
-  EuiContextMenuPanel,
-  EuiPopover,
-  EuiToolTip,
-} from '@elastic/eui';
+import { EuiButtonEmpty, EuiContextMenuItem, EuiTabs, EuiTab } from '@elastic/eui';
 import { InspectorViewDescription } from '../types';
 
 interface Props {
@@ -89,37 +83,37 @@ export class InspectorViewChooser extends Component<Props, State> {
 
   renderSingleView() {
     return (
-      <EuiToolTip position="bottom" content={this.props.selectedView.help}>
-        <FormattedMessage
-          id="inspector.view"
-          defaultMessage="View: {viewName}"
-          values={{ viewName: this.props.selectedView.title }}
-        />
-      </EuiToolTip>
+      <EuiTabs size="s">
+        <EuiTab
+          isSelected={true}
+          data-test-subj={`inspectorViewChooser${this.props.selectedView.title}`}
+        >
+          {this.props.selectedView.title}
+        </EuiTab>
+      </EuiTabs>
     );
   }
 
   render() {
-    const { views } = this.props;
+    const { views, selectedView } = this.props;
 
     if (views.length < 2) {
       return this.renderSingleView();
     }
 
-    const triggerButton = this.renderViewButton();
-
     return (
-      <EuiPopover
-        id="inspectorViewChooser"
-        button={triggerButton}
-        isOpen={this.state.isSelectorOpen}
-        closePopover={this.closeSelector}
-        panelPaddingSize="none"
-        anchorPosition="downRight"
-        repositionOnScroll
-      >
-        <EuiContextMenuPanel items={views.map(this.renderView)} />
-      </EuiPopover>
+      <EuiTabs size="s" data-test-subj="inspectorViewChooser">
+        {views.map((view, index) => (
+          <EuiTab
+            key={index}
+            onClick={() => this.props.onViewSelected(view)}
+            isSelected={selectedView === view}
+            data-test-subj={`inspectorViewChooser${view.title}`}
+          >
+            {view.title}
+          </EuiTab>
+        ))}
+      </EuiTabs>
     );
   }
 }
