@@ -50,7 +50,7 @@ That will generate data in
   - ESQ
   - Logs threshold
 
-> [!INFO]
+> [!NOTE]
 >
 > - Create rules with and without groupBy.
 > - Create rules with and without filers.
@@ -94,7 +94,7 @@ Visit the Overview page under Observability, then check and test:
 - Change the time range at the top of the page, it should change the data shown in the 4 sections.
 - Try the links of each section: "Show alerts", "Show logs", "Show inventory", and "Show service inventory".
 
-> [!INFO]
+> [!NOTE]
 >
 > If there is not data showing, check if the data generation is working, and the time range is correct.
 
