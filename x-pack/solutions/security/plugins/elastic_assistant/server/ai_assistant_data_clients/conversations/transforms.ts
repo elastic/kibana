@@ -46,7 +46,6 @@ export const transformESSearchToConversations = (
           : {}),
         excludeFromLastConversationStorage:
           conversationSchema.exclude_from_last_conversation_storage,
-        isDefault: conversationSchema.is_default,
         messages:
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
           conversationSchema.messages?.map((message: Record<string, any>) => ({
@@ -133,7 +132,6 @@ export const transformESToConversations = (
           }
         : {}),
       excludeFromLastConversationStorage: conversationSchema.exclude_from_last_conversation_storage,
-      isDefault: conversationSchema.is_default,
       messages:
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         conversationSchema.messages?.map((message: Record<string, any>) => ({
