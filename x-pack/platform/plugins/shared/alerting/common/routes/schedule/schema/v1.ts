@@ -21,20 +21,20 @@ export const scheduleRequestSchema = schema.object(
     start: schema.string({
       validate: validateStartDateV1,
       meta: {
-        description: 'Start date and time of the snooze schedule in ISO 8601 format.',
+        description: 'Start date and time of the schedule in ISO 8601 format.',
       },
     }),
     duration: schema.string({
       validate: validateDurationV1,
       meta: {
-        description: 'Duration of the snooze schedule.',
+        description: `Duration of the schedule. It allows values in <integer><unit> format. <unit> is one of h|m|s for hours, minutes, seconds. Examples: '5h', '30m', '5000s'.`,
       },
     }),
     timezone: schema.maybe(
       schema.string({
         validate: validateTimezoneV1,
         meta: {
-          description: 'Timezone of the snooze schedule.',
+          description: 'Timezone of the schedule. The default timezone is UTC.',
         },
       })
     ),
@@ -44,7 +44,7 @@ export const scheduleRequestSchema = schema.object(
           schema.string({
             validate: validateEndDateV1,
             meta: {
-              description: 'End date of recurrence of the snooze schedule in ISO 8601 format.',
+              description: 'End date of recurrence of the schedule in ISO 8601 format.',
             },
           })
         ),
@@ -52,7 +52,8 @@ export const scheduleRequestSchema = schema.object(
           schema.string({
             validate: validateIntervalAndFrequencyV1,
             meta: {
-              description: 'Recurrence interval and frequency of the snooze schedule.',
+              description:
+                'Recurrence interval and frequency of the schedule. It allows values like <integer><unit> format. <unit> is one of d|w|M|y for days, weeks, months, years. Example: 5d, 2w, 3m, 1y.',
             },
           })
         ),
@@ -61,8 +62,7 @@ export const scheduleRequestSchema = schema.object(
             minSize: 1,
             validate: validateOnWeekDayV1,
             meta: {
-              description:
-                'Specific days of the week or nth day of month for recurrence of the snooze schedule.',
+              description: `Specific days of the week ['MO','TU'...] or nth day of month ['+1MO', '-3FR', '+2WE', '-4SA'] for recurrence of the schedule.`,
             },
           })
         ),
@@ -70,7 +70,8 @@ export const scheduleRequestSchema = schema.object(
           schema.arrayOf(schema.number({ min: 1, max: 31 }), {
             minSize: 1,
             meta: {
-              description: 'Specific days of the month for recurrence of the snooze schedule.',
+              description:
+                'Specific days of the month for recurrence of the schedule. Valid values are 1-31.',
             },
           })
         ),
@@ -78,7 +79,7 @@ export const scheduleRequestSchema = schema.object(
           schema.arrayOf(schema.number({ min: 1, max: 12 }), {
             minSize: 1,
             meta: {
-              description: 'Specific months for recurrence of the snooze schedule.',
+              description: 'Specific months for recurrence of the schedule. Valid values are 1-12.',
             },
           })
         ),
@@ -91,7 +92,7 @@ export const scheduleRequestSchema = schema.object(
             },
             min: 1,
             meta: {
-              description: 'Total number of recurrences of the snooze schedule.',
+              description: 'Total number of recurrences of the schedule.',
             },
           })
         ),

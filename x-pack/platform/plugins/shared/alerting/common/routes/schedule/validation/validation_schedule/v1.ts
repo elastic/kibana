@@ -26,12 +26,12 @@ export const validateSchedule = (schedule: {
       .asDays();
 
     if (intervalInDays && interval && durationInDays >= intervalInDays) {
-      return `Recurrence every ${recurring?.every} must be longer than the snooze duration ${duration}`;
+      return `Recurrence every ${recurring?.every} must be longer than the duration ${duration}`;
     }
   }
 
   if (duration === '-1' && recurring) {
-    return `The duration of -1 snoozes the rule indefinitely. Recurring schedules cannot be set when the duration is -1.`;
+    return `The duration of -1 represents indefinite schedule. Recurring schedules cannot be set when the duration is -1.`;
   }
 
   return;

@@ -18,14 +18,14 @@ describe('validateTimezone', () => {
   });
 
   it('throws error for invalid combination', () => {
-    expect(validateTimezone('Europe/India')).toEqual('Invalid snooze timezone: Europe/India');
+    expect(validateTimezone('Europe/India')).toEqual('Invalid schedule timezone: Europe/India');
   });
 
   it('throws error for invalid timezone', () => {
-    expect(validateTimezone('invalid')).toEqual('Invalid snooze timezone: invalid');
+    expect(validateTimezone('invalid')).toEqual('Invalid schedule timezone: invalid');
   });
 
   it('throws error for empty string', () => {
-    expect(validateTimezone(' ')).toEqual('Invalid snooze timezone:  ');
+    expect(validateTimezone(' ')).toEqual('Invalid schedule timezone:  ');
   });
 });

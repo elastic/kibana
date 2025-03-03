@@ -9,7 +9,7 @@ import moment from 'moment-timezone';
 
 export const validateTimezone = (timezone?: string) => {
   if (timezone && moment.tz.zone(timezone) == null) {
-    return `Invalid snooze timezone: ${timezone}`;
+    return `Invalid schedule timezone: ${timezone}`;
   }
   return;
 };

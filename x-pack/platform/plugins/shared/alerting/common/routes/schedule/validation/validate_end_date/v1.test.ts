@@ -24,13 +24,13 @@ describe('validateEndDate', () => {
   });
 
   it('throws error for invalid date', () => {
-    expect(validateEndDate('invalid-date')).toEqual('Invalid snooze end date: invalid-date');
+    expect(validateEndDate('invalid-date')).toEqual('Invalid schedule end date: invalid-date');
   });
 
   it('throws error for past date', () => {
     const pastDate = '2024-12-31T23:59:59.999Z';
     expect(validateEndDate(pastDate)).toBe(
-      `Invalid snooze schedule end date as it is in the past: ${pastDate}`
+      `Invalid schedule end date as it is in the past: ${pastDate}`
     );
   });
 

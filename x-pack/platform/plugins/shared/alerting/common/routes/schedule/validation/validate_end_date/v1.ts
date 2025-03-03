@@ -11,10 +11,10 @@ export const validateEndDate = (date: string) => {
   const parsedValue = Date.parse(date);
 
   if (isNaN(parsedValue)) {
-    return `Invalid snooze end date: ${date}`;
+    return `Invalid schedule end date: ${date}`;
   }
   if (parsedValue <= Date.now()) {
-    return `Invalid snooze schedule end date as it is in the past: ${date}`;
+    return `Invalid schedule end date as it is in the past: ${date}`;
   }
 
   if (!ISO_DATE_REGEX.test(date)) {
