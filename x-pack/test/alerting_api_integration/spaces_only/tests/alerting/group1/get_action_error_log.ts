@@ -21,7 +21,8 @@ export default function createGetActionErrorLogTests({ getService }: FtrProvider
 
   const dateStart = new Date(Date.now() - 600000).toISOString();
 
-  describe('getActionErrorLog', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/209913
+  describe.skip('getActionErrorLog', () => {
     const objectRemover = new ObjectRemover(supertest);
 
     beforeEach(async () => {
