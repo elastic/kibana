@@ -179,7 +179,6 @@ export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
     const axiosOptions = getAxiosOptions(this.provider, this.key, false);
     console.log('requestHeaders', {
       headers: this.headers,
-      configHeaders: this.config.headers,
       axiosHeaders: axiosOptions.headers,
     });
     const response = await this.request(
@@ -193,7 +192,7 @@ export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
         timeout: timeout ?? DEFAULT_TIMEOUT_MS,
         ...axiosOptions,
         headers: {
-          ...this.config.headers,
+          ...this.headers,
           ...axiosOptions.headers,
         },
       },
@@ -233,7 +232,7 @@ export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
         signal,
         ...axiosOptions,
         headers: {
-          ...this.config.headers,
+          ...this.headers,
           ...axiosOptions.headers,
         },
         timeout,
