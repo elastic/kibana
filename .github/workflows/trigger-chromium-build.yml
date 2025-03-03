@@ -125,5 +125,7 @@ jobs:
           token: ${{ secrets.SHAREDUX_BUILDKITE_TOKEN }}
           pipeline: 'kibana-chromium-linux-build'
           env-vars: |
+            GITHUB_PR_BASE_OWNER=${{ github.event.repository.owner.name }}
+            GITHUB_PR_BASE_REPO=${{ github.event.repository.name }}/
             GITHUB_ISSUE_NUMBER=${{ github.event.issue.number }}
             PUPPETEER_VERSION=$(echo ${{ needs.matches_label.outputs.version_bump_config }} | jq -r '.puppeteer_version')
