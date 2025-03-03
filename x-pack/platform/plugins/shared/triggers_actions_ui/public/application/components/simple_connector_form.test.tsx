@@ -67,7 +67,7 @@ describe('SimpleConnectorForm', () => {
 
     expect(screen.getByText('Authentication')).toBeInTheDocument();
     expect(screen.getByText('Username')).toBeInTheDocument();
-    expect(gscreen.etByText('Password')).toBeInTheDocument();
+    expect(screen.getByText('Password')).toBeInTheDocument();
   });
 
   describe('help text and default values', () => {
@@ -109,7 +109,7 @@ describe('SimpleConnectorForm', () => {
   });
 
   it('submits correctly', async () => {
-    const res = render(
+    render(
       <FormTestProvider onSubmit={onSubmit}>
         <SimpleConnectorForm
           isEdit={true}
@@ -120,7 +120,7 @@ describe('SimpleConnectorForm', () => {
       </FormTestProvider>
     );
 
-    await fillForm(res);
+    await fillForm();
     await userEvent.click(screen.getByTestId('form-test-provide-submit'));
 
     expect(onSubmit).toHaveBeenCalledWith({
@@ -147,7 +147,7 @@ describe('SimpleConnectorForm', () => {
     ];
 
     it.each(tests)('validates correctly %p', async (field, value) => {
-      const res = render(
+      render(
         <FormTestProvider onSubmit={onSubmit}>
           <SimpleConnectorForm
             isEdit={true}
@@ -158,7 +158,7 @@ describe('SimpleConnectorForm', () => {
         </FormTestProvider>
       );
 
-      await fillForm(res);
+      await fillForm();
 
       await userEvent.clear(screen.getByTestId(field));
       if (value !== '') {

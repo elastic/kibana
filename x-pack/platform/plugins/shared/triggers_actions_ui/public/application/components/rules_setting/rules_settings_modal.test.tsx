@@ -170,7 +170,7 @@ describe('rules_settings_modal', () => {
 
     expect(screen.getByTestId('rulesSettingsModalCancelButton')).toBeInTheDocument();
     expect(
-      screen.queryByTestId('rulesSettingsModalSaveButton').getAttribute('disabled')
+      screen.queryByTestId('rulesSettingsModalSaveButton')?.getAttribute('disabled')
     ).toBeFalsy();
   });
 
@@ -351,7 +351,7 @@ describe('rules_settings_modal', () => {
 
     expect(screen.getByTestId('rulesSettingsModalCancelButton')).toBeInTheDocument();
     expect(
-      screen.queryByTestId('rulesSettingsModalSaveButton').getAttribute('disabled')
+      screen.queryByTestId('rulesSettingsModalSaveButton')?.getAttribute('disabled')
     ).toBeFalsy();
   });
 

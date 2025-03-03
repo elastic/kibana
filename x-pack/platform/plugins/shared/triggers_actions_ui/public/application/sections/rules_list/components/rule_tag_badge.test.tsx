@@ -33,7 +33,7 @@ describe('RuleTagBadge', () => {
   });
 
   it('can open and close the popover', () => {
-    const { rerender, baseElement } = render(
+    const { rerender } = render(
       <RuleTagBadge isOpen={false} tags={tags} onClick={onClickMock} onClose={onCloseMock} />
     );
 

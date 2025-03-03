@@ -21,7 +21,7 @@ describe('health check', () => {
     useKibanaMock().services.http.get = jest
       .fn()
       .mockImplementationOnce(() => new Promise(() => {}));
-    const { container } = render(
+    render(
       <I18nProvider>
         <HealthContextProvider>
           <HealthCheck waitForCheck={true}>
@@ -40,7 +40,7 @@ describe('health check', () => {
       .fn()
       .mockImplementationOnce(() => new Promise(() => {}));
 
-    const { container } = render(
+    render(
       <I18nProvider>
         <HealthContextProvider>
           <HealthCheck waitForCheck={false}>

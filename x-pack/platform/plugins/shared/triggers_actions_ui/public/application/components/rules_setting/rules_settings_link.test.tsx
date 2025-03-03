@@ -192,7 +192,7 @@ describe('rules_settings_link', () => {
       },
     };
 
-    let result = render(<RulesSettingsLinkWithProviders />);
+    render(<RulesSettingsLinkWithProviders />);
     await waitFor(() => {
       expect(screen.queryByTestId('rulesSettingsLink')).toBe(null);
     });
@@ -209,7 +209,7 @@ describe('rules_settings_link', () => {
       },
     };
 
-    result = render(<RulesSettingsLinkWithProviders />);
+    render(<RulesSettingsLinkWithProviders />);
     await waitFor(() => {
       expect(screen.queryByTestId('rulesSettingsLink')).toBe(null);
     });
