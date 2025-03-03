@@ -5,7 +5,10 @@
  * 2.0.
  */
 import type { UseQueryOptions } from '@tanstack/react-query';
-import type { ReviewRuleUpgradeResponseBody } from '../../../../../common/api/detection_engine/prebuilt_rules';
+import type {
+  ReviewRuleUpgradeRequestBody,
+  ReviewRuleUpgradeResponseBody,
+} from '../../../../../common/api/detection_engine/prebuilt_rules';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 
 import * as i18n from '../translations';
@@ -18,11 +21,12 @@ import { useFetchPrebuiltRulesUpgradeReviewQuery } from '../../api/hooks/prebuil
  * @returns useQuery result
  */
 export const usePrebuiltRulesUpgradeReview = (
+  request: ReviewRuleUpgradeRequestBody,
   options?: UseQueryOptions<ReviewRuleUpgradeResponseBody>
 ) => {
   const { addError } = useAppToasts();
 
-  return useFetchPrebuiltRulesUpgradeReviewQuery({
+  return useFetchPrebuiltRulesUpgradeReviewQuery(request, {
     onError: (error) => addError(error, { title: i18n.RULE_AND_TIMELINE_FETCH_FAILURE }),
     ...options,
   });
