@@ -13,6 +13,7 @@ import { getAlertUrlErrorCount, getAlertUrlTransaction } from '../../../../commo
 import {
   anomalyMessage,
   errorCountMessage,
+  errorCountRecoveryMessage,
   transactionDurationMessage,
   transactionDurationRecoveryMessage,
   transactionErrorRateMessage,
@@ -51,7 +52,7 @@ export function registerApmRuleTypes(observabilityRuleTypeRegistry: Observabilit
     }),
     requiresAppContext: false,
     defaultActionMessage: errorCountMessage,
-    defaultRecoveryMessage: transactionErrorRateRecoveryMessage,
+    defaultRecoveryMessage: errorCountRecoveryMessage,
     priority: 80,
   });
 
