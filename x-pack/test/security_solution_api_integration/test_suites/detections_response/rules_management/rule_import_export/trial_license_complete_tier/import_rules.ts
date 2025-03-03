@@ -1626,6 +1626,7 @@ export default ({ getService }: FtrProviderContext): void => {
     describe('supporting prebuilt rule customization', () => {
       describe('compatibility with prebuilt rule fields', () => {
         it('rejects rules with "immutable: true" when the feature flag is disabled', async () => {
+          // duplicate test
           const rule = getCustomQueryRuleParams({
             rule_id: 'rule-immutable',
             // @ts-expect-error the API supports this param, but we only need it in {@link RuleToImport}

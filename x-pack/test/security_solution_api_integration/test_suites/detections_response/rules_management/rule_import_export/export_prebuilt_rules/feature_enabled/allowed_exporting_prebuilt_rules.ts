@@ -6,15 +6,15 @@
  */
 
 import expect from 'expect';
-import { FtrProviderContext } from '../../../../../ftr_provider_context';
+import { FtrProviderContext } from '../../../../../../ftr_provider_context';
 import {
   binaryToString,
   createPrebuiltRuleAssetSavedObjects,
   createRuleAssetSavedObject,
   deleteAllPrebuiltRuleAssets,
   installPrebuiltRules,
-} from '../../../utils';
-import { deleteAllRules } from '../../../../../../common/utils/security_solution';
+} from '../../../../utils';
+import { deleteAllRules } from '../../../../../../../common/utils/security_solution';
 
 export default ({ getService }: FtrProviderContext): void => {
   const es = getService('es');

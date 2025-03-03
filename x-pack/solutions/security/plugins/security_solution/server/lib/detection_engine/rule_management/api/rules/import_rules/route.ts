@@ -39,6 +39,7 @@ import {
   migrateLegacyActionsIds,
 } from '../../../utils/utils';
 import { RULE_MANAGEMENT_IMPORT_EXPORT_SOCKET_TIMEOUT_MS } from '../../timeouts';
+import { PrebuiltRulesCustomizationDisabledReason } from '../../../../../../../common/detection_engine/prebuilt_rules/prebuilt_rule_customization_status';
 
 const CHUNK_PARSED_OBJECT_SIZE = 50;
 
@@ -86,7 +87,7 @@ export const importRulesRoute = (router: SecuritySolutionPluginRouter, config: C
           ]);
 
           const detectionRulesClient = ctx.securitySolution.getDetectionRulesClient();
-          const { isRulesCustomizationEnabled } = detectionRulesClient.getRuleCustomizationStatus();
+          const ruleCustomizationStatus = detectionRulesClient.getRuleCustomizationStatus();
           const actionsClient = ctx.actions.getActionsClient();
           const actionSOClient = ctx.core.savedObjects.getClient({
             includedHiddenTypes: ['action'],
@@ -166,7 +167,11 @@ export const importRulesRoute = (router: SecuritySolutionPluginRouter, config: C
 
           let importRuleResponse: ImportRuleResponse[] = [];
 
-          if (isRulesCustomizationEnabled) {
+          if (
+            ruleCustomizationStatus.isRulesCustomizationEnabled ||
+            ruleCustomizationStatus.customizationDisabledReason ===
+              PrebuiltRulesCustomizationDisabledReason.License
+          ) {
             importRuleResponse = await importRules({
               ruleChunks,
               overwriteRules: request.query.overwrite,

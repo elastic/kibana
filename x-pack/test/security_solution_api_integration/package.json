@@ -443,15 +443,41 @@
     "rule_import_export:basic:server:ess": "npm run initialize-server:rm:basic_essentials rule_import_export ess",
     "rule_import_export:basic:runner:ess": "npm run run-tests:rm:basic_essentials rule_import_export ess essEnv",
 
-    "rule_export:customization_disabled:server:ess": "node ./scripts/index.js server detections_response/rules_management customization_disabled rule_import_export ess",
-    "rule_export:customization_disabled:runner:ess": "node ./scripts/index.js runner detections_response/rules_management customization_disabled rule_import_export ess essEnv",
-    "rule_export:customization_disabled:server:serverless": "node ./scripts/index.js server detections_response/rules_management customization_disabled rule_bulk_actions/export serverless",
-    "rule_export:customization_disabled:runner:serverless": "node ./scripts/index.js runner detections_response/rules_management customization_disabled rule_bulk_actions/export serverless serverlessEnv",
+    "rule_import:non_customized_prebuilt:enabled:server:ess": "node ./scripts/index.js server detections_response/rules_management import_non_customized_prebuilt_rules/feature_enabled rule_import_export ess_basic_license",
+    "rule_import:non_customized_prebuilt:enabled:runner:ess": "node ./scripts/index.js runner detections_response/rules_management import_non_customized_prebuilt_rules/feature_enabled rule_import_export ess_basic_license essEnv",
 
-    "rule_export:customization_enabled:server:ess": "node ./scripts/index.js server detections_response/rules_management customization_enabled rule_import_export ess",
-    "rule_export:customization_enabled:runner:ess": "node ./scripts/index.js runner detections_response/rules_management customization_enabled rule_import_export ess essEnv",
-    "rule_export:customization_enabled:server:serverless": "node ./scripts/index.js server detections_response/rules_management customization_enabled rule_bulk_actions/export serverless",
-    "rule_export:customization_enabled:runner:serverless": "node ./scripts/index.js runner detections_response/rules_management customization_enabled rule_bulk_actions/export serverless serverlessEnv",
+    "rule_import:non_customized_prebuilt:enabled:server:serverless": "node ./scripts/index.js server detections_response/rules_management import_non_customized_prebuilt_rules/feature_enabled rule_import_export serverless_essentials_tier",
+    "rule_import:non_customized_prebuilt:enabled:runner:serverless": "node ./scripts/index.js runner detections_response/rules_management import_non_customized_prebuilt_rules/feature_enabled rule_import_export serverless_essentials_tier serverlessEnv",
+
+    "rule_import:non_customized_prebuilt:disabled:server:ess": "node ./scripts/index.js server detections_response/rules_management import_non_customized_prebuilt_rules/feature_disabled rule_import_export ess_feature_flag_disabled",
+    "rule_import:non_customized_prebuilt:disabled:runner:ess": "node ./scripts/index.js runner detections_response/rules_management import_non_customized_prebuilt_rules/feature_disabled rule_import_export ess_feature_flag_disabled essEnv",
+
+    "rule_import:non_customized_prebuilt:disabled:server:serverless": "node ./scripts/index.js server detections_response/rules_management import_non_customized_prebuilt_rules/feature_disabled rule_import_export serverless_feature_flag_disabled",
+    "rule_import:non_customized_prebuilt:disabled:runner:serverless": "node ./scripts/index.js runner detections_response/rules_management import_non_customized_prebuilt_rules/feature_disabled rule_import_export serverless_feature_flag_disabled serverlessEnv",
+
+    "rule_import:customized_prebuilt:enabled:server:ess": "node ./scripts/index.js server detections_response/rules_management import_customized_prebuilt_rules/feature_enabled rule_import_export ess_enterprise_license",
+    "rule_import:customized_prebuilt:enabled:runner:ess": "node ./scripts/index.js runner detections_response/rules_management import_customized_prebuilt_rules/feature_enabled rule_import_export ess_enterprise_license essEnv",
+
+    "rule_import:customized_prebuilt:enabled:server:serverless": "node ./scripts/index.js server detections_response/rules_management import_customized_prebuilt_rules/feature_enabled rule_import_export serverless_complete_tier",
+    "rule_import:customized_prebuilt:enabled:runner:serverless": "node ./scripts/index.js runner detections_response/rules_management import_customized_prebuilt_rules/feature_enabled rule_import_export serverless_complete_tier essEnv",
+
+    "rule_import:customized_prebuilt:license_insufficient:server:ess": "node ./scripts/index.js server detections_response/rules_management import_customized_prebuilt_rules/feature_disabled/license_insufficient rule_import_export ess_basic_license",
+    "rule_import:customized_prebuilt:license_insufficient:runner:ess": "node ./scripts/index.js runner detections_response/rules_management import_customized_prebuilt_rules/feature_disabled/license_insufficient rule_import_export ess_basic_license essEnv",
+  
+    "rule_import:customized_prebuilt:license_insufficient:server:serverless": "node ./scripts/index.js server detections_response/rules_management import_customized_prebuilt_rules/feature_disabled/license_insufficient rule_import_export serverless_essentials_tier",
+    "rule_import:customized_prebuilt:license_insufficient:runner:serverless": "node ./scripts/index.js runner detections_response/rules_management import_customized_prebuilt_rules/feature_disabled/license_insufficient rule_import_export serverless_essentials_tier serverlessEnv",
+
+    "rule_import:customized_prebuilt:feature_flag_disabled:server:ess": "node ./scripts/index.js server detections_response/rules_management import_customized_prebuilt_rules/feature_disabled/feature_flag_disabled rule_import_export ess_feature_flag_disabled",
+    "rule_import:customized_prebuilt:feature_flag_disabled:runner:ess": "node ./scripts/index.js runner detections_response/rules_management import_customized_prebuilt_rules/feature_disabled/feature_flag_disabled rule_import_export ess_feature_flag_disabled essEnv",
+
+    "rule_import:customized_prebuilt:feature_flag_disabled:server:serverless": "node ./scripts/index.js server detections_response/rules_management import_customized_prebuilt_rules/feature_disabled/feature_flag_disabled rule_import_export serverless_feature_flag_disabled",
+    "rule_import:customized_prebuilt:feature_flag_disabled:runner:serverless": "node ./scripts/index.js runner detections_response/rules_management import_customized_prebuilt_rules/feature_disabled/feature_flag_disabled rule_import_export serverless_feature_flag_disabled essEnv",
+
+    "rule_export:prebuilt:enabled:server:ess": "node ./scripts/index.js server detections_response/rules_management export_prebuilt_rules/feature_enabled rule_import_export ess_basic_license",
+    "rule_export:prebuilt:enabled:runner:ess": "node ./scripts/index.js runner detections_response/rules_management export_prebuilt_rules/feature_enabled rule_import_export ess_basic_license essEnv",
+
+    "rule_export:prebuilt:enabled:server:serverless": "node ./scripts/index.js server detections_response/rules_management export_prebuilt_rules/feature_enabled rule_import_export serverless_essentials_tier",
+    "rule_export:prebuilt:enabled:runner:serverless": "node ./scripts/index.js runner detections_response/rules_management export_prebuilt_rules/feature_enabled rule_import_export serverless_essentials_tier serverlessEnv",
 
     "rule_management:server:serverless": "npm run initialize-server:rm rule_management serverless",
     "rule_management:runner:serverless": "npm run run-tests:rm rule_management serverless serverlessEnv",
