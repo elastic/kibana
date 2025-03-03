@@ -12,10 +12,12 @@ export type DashboardDrilldownOptions = {
   useCurrentFilters: boolean;
   useCurrentDateRange: boolean;
   openInNewTab: boolean;
+  breakdownField?: string;
 };
 
 export const DEFAULT_DASHBOARD_DRILLDOWN_OPTIONS: DashboardDrilldownOptions = {
   openInNewTab: false,
   useCurrentDateRange: true,
   useCurrentFilters: true,
+  breakdownField: undefined,
 };
