@@ -65,10 +65,10 @@ function getIndicator(summaryDoc: EsSummaryDocument, logger: Logger): Indicator 
 
   if (isLeft(res)) {
     const errors = formatErrors(res.left);
-    logger.info(
+    logger.debug(
       `Invalid indicator from remote summary SLO id [${summaryDoc.slo.id}] - Fallback on dummy indicator`
     );
-    logger.info(errors.join('|'));
+    logger.debug(errors.join('|'));
 
     return getDummyIndicator(summaryDoc);
   }
