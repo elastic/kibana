@@ -10,9 +10,11 @@
 
 Review important information about the {kib} 8.x releases.
 
+* <<release-notes-8.17.3>>
 * <<release-notes-8.17.2>>
 * <<release-notes-8.17.1>>
 * <<release-notes-8.17.0>>
+* <<release-notes-8.16.5>>
 * <<release-notes-8.16.4>>
 * <<release-notes-8.16.3>>
 * <<release-notes-8.16.2>>
@@ -86,6 +88,28 @@ Review important information about the {kib} 8.x releases.
 
 
 include::upgrade-notes.asciidoc[]
+
+[[release-notes-8.17.3]]
+== {kib} 8.17.3
+
+The 8.17.3 release includes the following bug fixes.
+
+[float]
+[[fixes-v8.17.3]]
+=== Bug fixes
+Elastic Observability solution::
+* Allows editing of non-resolving log views ({kibana-pull}210633[#210633]).
+* Removes `error.id` in `getErrorGroupMainStatistics` queries ({kibana-pull}210613[#210613]).
+Elastic Security solution::
+For the Elastic Security 8.17.3 release information, refer to {security-guide}/release-notes.html[_Elastic Security Solution Release Notes_].
+Kibana security::
+* Fixes the generated name for imported package titles ({kibana-pull}210916[#210916]).
+* Fixes package name validation on the Data streams page ({kibana-pull}210770[#210770]).
+* Handles empty categorization results from LLMs ({kibana-pull}210420[#210420]).
+Platform::
+* Adds versioning to inventory_view_saved_object ({kibana-pull}207007[#207007]).
+Sharing::
+* Reinstates switch to support generating public URLs for Embed when supported ({kibana-pull}207383[#207383]).
 
 [[release-notes-8.17.2]]
 == {kib} 8.17.2
@@ -288,6 +312,42 @@ Machine Learning::
 * Adds missing aria labels to button icons ({kibana-pull}199447[#199447]).
 Kibana platform::
 * Fixes an issue with the global search field that could open the wrong page when pressing "Enter" while results were not yet fully loaded ({kibana-pull}197750[#197750]).
+
+[[release-notes-8.16.5]]
+== {kib} 8.16.5
+
+The 8.16.5 release includes the following bug fixes.
+
+[float]
+[[enhancement-v8.16.5]]
+=== Enhancements
+Elastic Observability solution::
+* Improve performance in `dependencies` endpoints to prevent high CPU usage ({kibana-pull}209999[#209999]).
+Management::
+* Increase search timeout toast lifetime to 1 week ({kibana-pull}210576[#210576]).
+
+[float]
+[[fixes-v8.16.5]]
+=== Bug fixes
+Alerting::
+* Fixes error message in cases list if case assignee is an empty string ({kibana-pull}209973[#209973]).
+* Provides a fallback view to recover from Stack Alerts page filters bar errors ({kibana-pull}209559[#209559]).
+* Fixes an issue where the popover in the rules page may get stuck when being clicked more than once ({kibana-pull}208996[#208996]).
+Dashboards and Visualizations::
+* Fixes link settings not persisting ({kibana-pull}211041[#211041]).
+* Fixes the Save to library action that could break the chart panel when triggered from a from a "by value" panel ({kibana-pull}210125[#210125]).
+* Fixes an issue with dynamic coloring being disabled for Last value aggregation types in *Lens* ({kibana-pull}209110[#209110]).
+Data ingestion and Fleet::
+* Updates component templates with deprecated setting ({kibana-pull}210200[#210200]).
+Discover::
+* Fixes Discover session embeddable drilldown ({kibana-pull}211678[#211678]).
+* Fixes "Untitled" export title when exporting CSV on a dashboard ({kibana-pull}210143[#210143]).
+Elastic Observability solution::
+* Missing items in the trace waterfall shouldn't break it entirely ({kibana-pull}210210[#210210]).
+Kibana security::
+* Fixes structured log flow to handle multiple types of structured logs ({kibana-pull}212611[#212611]).
+Machine Learning::
+* Fixes unattended Transforms in integration packages not automatically restarting after reauthorizing ({kibana-pull}210217[#210217]).
 
 [[release-notes-8.16.4]]
 == {kib} 8.16.4
