@@ -168,7 +168,7 @@ export function ObservabilityLogsExplorerPageObject({
     ingestLogEntries(dataStream: string, docs: MockLogDoc[] = []) {
       log.info(`===== Ingesting ${docs.length} docs for "${dataStream}" data stream. =====`);
       return es.bulk({
-        body: docs.flatMap((doc) => [{ create: { _index: dataStream } }, createLogDoc(doc)]),
+        operations: docs.flatMap((doc) => [{ create: { _index: dataStream } }, createLogDoc(doc)]),
         refresh: 'wait_for',
       });
     },

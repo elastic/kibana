@@ -129,7 +129,7 @@ export default function scheduleBackfillTests({ getService }: FtrProviderContext
         // verify that the correct number of actions were executed
         const actions = await es.search({
           index: TEST_ACTIONS_INDEX,
-          body: { query: { match_all: {} } },
+          query: { match_all: {} },
         });
 
         // 3 backfill executions resulted in alerts so 3 notifications should have
@@ -191,7 +191,7 @@ export default function scheduleBackfillTests({ getService }: FtrProviderContext
         // verify that the correct number of actions were executed
         const actions = await es.search({
           index: TEST_ACTIONS_INDEX,
-          body: { query: { match_all: {} } },
+          query: { match_all: {} },
         });
 
         // 3 backfill executions resulted in 9 alerts so 9 notifications should have
@@ -257,7 +257,7 @@ export default function scheduleBackfillTests({ getService }: FtrProviderContext
       // verify that the correct number of actions were executed
       const actions = await es.search({
         index: TEST_ACTIONS_INDEX,
-        body: { query: { match_all: {} } },
+        query: { match_all: {} },
       });
 
       // no actions should be generated
