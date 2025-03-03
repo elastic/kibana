@@ -267,7 +267,9 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
         // it's being used in the mapping so we need to force delete
         force: true,
       });
-      this.options.logger.debug(`Deleted existing inference endpoint for ELSER model '${elserId}'`);
+      this.options.logger.debug(
+        `Deleted existing inference endpoint ${ASSISTANT_ELSER_INFERENCE_ID} for ELSER model '${elserId}'`
+      );
     } catch (error) {
       this.options.logger.error(
         `Error deleting inference endpoint ${ASSISTANT_ELSER_INFERENCE_ID} for ELSER model '${elserId}':\n${error}`
@@ -448,6 +450,16 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
           await loadSecurityLabs(this, this.options.logger);
         } else {
           this.options.logger.debug(`Security Labs Knowledge Base docs already loaded!`);
+        }
+      }
+
+      if (await this.isInferenceEndpointExists(ASSISTANT_ELSER_INFERENCE_ID)) {
+        try {
+          await this.deleteInferenceEndpoint();
+        } catch (error) {
+          this.options.logger.debug(
+            `Error deleting inference endpoint ${ASSISTANT_ELSER_INFERENCE_ID}`
+          );
         }
       }
     } catch (e) {

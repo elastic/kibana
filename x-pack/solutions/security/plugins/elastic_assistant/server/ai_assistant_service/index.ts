@@ -312,6 +312,23 @@ export class AIAssistantService {
         } catch (e) {
           /* empty */
         }
+
+        // Delete the old inference endpoint
+        const elserId = await this.getElserId();
+        try {
+          await esClient.inference.delete({
+            inference_id: ASSISTANT_ELSER_INFERENCE_ID,
+            // it's being used in the mapping so we need to force delete
+            force: true,
+          });
+          this.options.logger.debug(
+            `Deleted existing inference endpoint ${ASSISTANT_ELSER_INFERENCE_ID} for ELSER model '${elserId}'`
+          );
+        } catch (error) {
+          this.options.logger.error(
+            `Error deleting inference endpoint ${ASSISTANT_ELSER_INFERENCE_ID} for ELSER model '${elserId}':\n${error}`
+          );
+        }
       } else {
         // We need to make sure that the data stream is created with the correct mappings
         this.knowledgeBaseDataStream = this.createDataStream({
