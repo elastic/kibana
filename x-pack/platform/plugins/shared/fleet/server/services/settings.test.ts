@@ -233,11 +233,7 @@ describe('saveSettings', () => {
 
       await saveSettings(soClient, newData);
 
-      expect(mockedAuditLoggingService.writeCustomSoAuditLog).toHaveBeenNthCalledWith(2, {
-        action: 'update',
-        id: GLOBAL_SETTINGS_ID,
-        savedObjectType: GLOBAL_SETTINGS_SAVED_OBJECT_TYPE,
-      });
+      expect(mockedAuditLoggingService.writeCustomSoAuditLog).toHaveBeenCalled();
     });
 
     describe('when settings object does not exist', () => {

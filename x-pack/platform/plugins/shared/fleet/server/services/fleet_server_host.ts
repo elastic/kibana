@@ -357,7 +357,6 @@ class FleetServerHostService {
   // /**
   //  * Get the default Fleet server policy hosts or throw if it does not exists
   //  */
-  // export async function getDefaultFleetServerHost(
   public async getDefaultFleetServerHost(
     soClient: SavedObjectsClientContract
   ): Promise<FleetServerHost | null> {
