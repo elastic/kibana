@@ -5,17 +5,19 @@
  * 2.0.
  */
 
-import { useCallback } from 'react';
+import { useCallback, useState } from 'react';
+import type { ChatEvent } from '../../../common/chat_events';
 import { useWorkChatServices } from './use_workchat_service';
 
 export const useChat = () => {
   const { chatService } = useWorkChatServices();
+  const [events, setEvents] = useState<ChatEvent[]>([]);
 
   const send = useCallback(
     async (message: string) => {
       const events$ = await chatService.callAgent();
       events$.subscribe((event) => {
-        // TODO
+        setEvents((prevEvents) => [...prevEvents, event]);
       });
     },
     [chatService]
@@ -23,5 +25,6 @@ export const useChat = () => {
 
   return {
     send,
+    events,
   };
 };

@@ -10,16 +10,21 @@ import { EuiFlexGroup, EuiFlexItem, EuiButton } from '@elastic/eui';
 import { useChat } from '../hooks/use_chat';
 
 export const Chat: React.FC<{}> = () => {
-  const { send } = useChat();
+  const { send, events } = useChat();
 
   const onClick = useCallback(() => {
     send('test');
   }, [send]);
 
   return (
-    <EuiFlexGroup>
+    <EuiFlexGroup direction="column" alignItems="flexStart">
       <EuiFlexItem grow={false}>
         <EuiButton onClick={onClick}>Click to test</EuiButton>
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        {events.map((event) => {
+          return <div>{JSON.stringify(event)}</div>;
+        })}
       </EuiFlexItem>
     </EuiFlexGroup>
   );
