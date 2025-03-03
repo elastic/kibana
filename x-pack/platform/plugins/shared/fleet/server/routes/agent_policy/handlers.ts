@@ -403,90 +403,84 @@ export const createAgentAndPackagePolicyHandler: FleetRequestHandler<
   const coreContext = await context.core;
   const logger = appContextService.getLogger();
 
-  let createdAgentPolicy: CreateAgentPolicyResponse['item'];
-
   // Try to create the agent policy
   logger.debug('Creating agent and package policy');
+  const agentPolicyRequest = {
+    ...request,
+    body: request.body.agentPolicy,
+    query: request.query satisfies CreateAgentPolicyRequest['query'],
+  };
+  const agentPolicyResult = await createAgentPolicyHandler(context, agentPolicyRequest, response);
+  const createdAgentPolicy: CreateAgentPolicyResponse['item'] = agentPolicyResult.options.body.item;
+
+  if (agentPolicyRequest.body.id !== createdAgentPolicy.id) {
+    logger.warn(
+      `Agent policy created with id ${createdAgentPolicy.id} instead of requested id ${agentPolicyRequest.body.id}`
+    );
+  }
+
+  // Try to create the package policy
   try {
-    const agentPolicyRequest = {
-      ...request,
-      body: request.body.agentPolicy,
-      query: request.query satisfies CreateAgentPolicyRequest['query'],
-    };
-    const agentPolicyResult = await createAgentPolicyHandler(context, agentPolicyRequest, response);
-    createdAgentPolicy = agentPolicyResult.payload.body.item;
+    // Extract the original agent policy ID from the request in order to replace it with the created agent policy ID
+    const {
+      policy_id: agentPolicyId,
+      policy_ids: agentPolicyIds,
+      ...restOfPackagePolicy
+    } = request.body.packagePolicy;
 
-    if (agentPolicyRequest.body.id !== createdAgentPolicy.id) {
+    // Warn if the requested agent policy ID does not match the created agent policy ID
+    if (agentPolicyId && agentPolicyId !== createdAgentPolicy.id) {
       logger.warn(
-        `Agent policy created with id ${createdAgentPolicy.id} instead of requested id ${agentPolicyRequest.body.id}`
+        `Creating package policy with agent policy ID ${createdAgentPolicy.id} instead of requested id ${agentPolicyId}`
+      );
+    }
+    if (
+      agentPolicyIds &&
+      agentPolicyIds.length > 0 &&
+      (!agentPolicyIds.includes(createdAgentPolicy.id) || agentPolicyIds.length > 1)
+    ) {
+      logger.warn(
+        `Creating package policy with agent policy ID ${
+          createdAgentPolicy.id
+        } instead of requested id(s) ${agentPolicyIds.join(',')}`
       );
     }
 
-    // Try to create the package policy
-    try {
-      // Extract the original agent policy ID from the request in order to replace it with the created agent policy ID
-      const {
-        policy_id: agentPolicyId,
-        policy_ids: agentPolicyIds,
-        ...restOfPackagePolicy
-      } = request.body.packagePolicy;
+    const packagePolicyRequest = {
+      ...request,
+      body: {
+        ...restOfPackagePolicy,
+        policy_ids: [createdAgentPolicy.id],
+      },
+      query: request.query satisfies CreatePackagePolicyRequest['query'],
+    };
+    await createPackagePolicyHandler(context, packagePolicyRequest, response);
 
-      // Warn if the requested agent policy ID does not match the created agent policy ID
-      if (agentPolicyId && agentPolicyId !== createdAgentPolicy.id) {
-        logger.warn(
-          `Creating package policy with agent policy ID ${createdAgentPolicy.id} instead of requested id ${agentPolicyId}`
-        );
-      }
-      if (
-        agentPolicyIds &&
-        agentPolicyIds.length > 0 &&
-        (!agentPolicyIds.includes(createdAgentPolicy.id) || agentPolicyIds.length > 1)
-      ) {
-        logger.warn(
-          `Creating package policy with agent policy ID ${
-            createdAgentPolicy.id
-          } instead of requested id(s) ${agentPolicyIds.join(',')}`
-        );
-      }
-
-      const packagePolicyRequest = {
+    // Return the created agent policy with full package policy details
+    return getOneAgentPolicyHandler(
+      context,
+      {
         ...request,
-        body: {
-          ...restOfPackagePolicy,
-          policy_ids: [createdAgentPolicy.id],
-        },
-        query: request.query satisfies CreatePackagePolicyRequest['query'],
-      };
-      await createPackagePolicyHandler(context, packagePolicyRequest, response);
-
-      // Return the created agent policy with full package policy details
-      return getOneAgentPolicyHandler(
-        context,
-        {
-          ...request,
-          body: {},
-          params: { agentPolicyId: createdAgentPolicy.id },
-        },
-        response
-      );
-    } catch (e) {
-      // If there is an error creating the package policy, delete the created agent policy
-      if (createdAgentPolicy) {
-        await agentPolicyService.delete(
-          coreContext.savedObjects.client,
-          coreContext.elasticsearch.client.asInternalUser,
-          createdAgentPolicy.id,
-          {
-            force: true,
-          }
-        );
-      }
-
-      // Rethrow
-      throw e;
-    }
+        body: {},
+        params: { agentPolicyId: createdAgentPolicy.id },
+      },
+      response
+    );
   } catch (e) {
-    return e;
+    // If there is an error creating the package policy, delete the created agent policy
+    if (createdAgentPolicy) {
+      await agentPolicyService.delete(
+        coreContext.savedObjects.client,
+        coreContext.elasticsearch.client.asInternalUser,
+        createdAgentPolicy.id,
+        {
+          force: true,
+        }
+      );
+    }
+
+    // Rethrow
+    throw e;
   }
 };
 
