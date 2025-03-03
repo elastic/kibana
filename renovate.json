@@ -3369,7 +3369,8 @@
         "main"
       ],
       "matchDepPatterns": [
-        "^@storybook"
+        "^@storybook",
+        "storybook"
       ],
       "labels": [
         "Team:Operations",
@@ -3378,28 +3379,7 @@
         "backport:skip"
       ],
       "minimumReleaseAge": "7 days",
-      "allowedVersions": "<7.0",
-      "enabled": true
-    },
-    {
-      "groupName": "@storybook/testing-react",
-      "reviewers": [
-        "team:kibana-operations"
-      ],
-      "matchBaseBranches": [
-        "main"
-      ],
-      "matchDepNames": [
-        "@storybook/testing-react"
-      ],
-      "labels": [
-        "Team:Operations",
-        "release_note:skip",
-        "ci:build-storybooks",
-        "backport:skip"
-      ],
-      "minimumReleaseAge": "7 days",
-      "allowedVersions": "<2.0",
+      "allowedVersions": ">8.0",
       "enabled": true
     },
     {
