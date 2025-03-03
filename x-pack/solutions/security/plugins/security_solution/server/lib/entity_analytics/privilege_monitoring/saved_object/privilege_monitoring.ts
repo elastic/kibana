@@ -14,9 +14,11 @@ interface PrivilegeMonitoringEngineDescriptorDependencies {
   namespace: string;
 }
 
+// TODO: will be updated with openAPI generated types
 interface PrivilegedMonitoringEngineDescriptor {
   status: string;
   apiKey: string;
+  error?: Record<string, unknown>;
 }
 
 export type PrivilegeMonitoringEngineStatus = 'installing' | 'started' | 'stopped' | 'error';
