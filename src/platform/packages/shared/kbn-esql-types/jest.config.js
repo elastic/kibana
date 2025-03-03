@@ -6,14 +6,9 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import type { ESQLControlVariable } from '@kbn/esql-types';
-import { Filter, Query, TimeRange } from '../filters';
 
-export interface ExecutionContextSearch {
-  now?: number;
-  filters?: Filter[];
-  query?: Query | Query[];
-  timeRange?: TimeRange;
-  disableWarningToasts?: boolean;
-  esqlVariables?: ESQLControlVariable[];
-}
+module.exports = {
+  preset: '@kbn/test',
+  rootDir: '../../../../..',
+  roots: ['<rootDir>/src/platform/packages/shared/kbn-esql-types'],
+};
