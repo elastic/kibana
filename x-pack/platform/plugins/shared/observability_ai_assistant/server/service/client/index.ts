@@ -631,55 +631,6 @@ export class ObservabilityAIAssistantClient {
     return createdConversation;
   };
 
-  setConversationUser = async ({
-    conversationId,
-    user,
-  }: {
-    conversationId: string;
-    user: { id?: string; name: string };
-  }): Promise<Conversation> => {
-    const response = await this.dependencies.esClient.asInternalUser.search<Conversation>({
-      index: resourceNames.aliases.conversations,
-      query: {
-        bool: {
-          filter: [
-            { term: { 'conversation.id': conversationId } },
-            {
-              bool: {
-                must_not: [{ exists: { field: 'user.id' } }, { exists: { field: 'user.name' } }],
-              },
-            },
-          ],
-        },
-      },
-      size: 1,
-      terminate_after: 1,
-    });
-
-    const persistedConversation = response.hits.hits[0];
-
-    if (!persistedConversation || !persistedConversation?._id) {
-      throw notFound();
-    }
-
-    const updatedConversation: Conversation = merge({}, persistedConversation._source, {
-      conversation: {
-        last_updated: new Date().toISOString(),
-      },
-      user,
-      namespace: this.dependencies.namespace,
-    });
-
-    await this.dependencies.esClient.asInternalUser.update({
-      id: persistedConversation._id,
-      index: persistedConversation._index,
-      doc: updatedConversation,
-      refresh: 'wait_for',
-    });
-
-    return updatedConversation;
-  };
-
   duplicateConversation = async (conversationId: string): Promise<Conversation> => {
     const conversation = await this.getConversationWithMetaFields(conversationId);
 
