@@ -206,7 +206,13 @@ export class BaseValidator {
         () =>
           `Lookup of policy ids:\n[${policyIds.join(
             ' | '
-          )}] for space [${spaceId}] returned:\n${stringify(policiesFromFleet)}`
+          )}] for space [${spaceId}] returned:\n${stringify(
+            (policiesFromFleet ?? []).map((policy) => ({
+              id: policy.id,
+              name: policy.name,
+              spaceIds: policy.spaceIds,
+            }))
+          )}`
       );
 
       if (!policiesFromFleet) {
@@ -489,6 +495,10 @@ export class BaseValidator {
     currentSavedItem: ExceptionListItemSchema
   ): Promise<void> {
     if (this.endpointAppContext.experimentalFeatures.endpointManagementSpaceAwarenessEnabled) {
+      this.logger.debug(
+        () => `Validating if can read single item:\n${stringify(currentSavedItem)}`
+      );
+
       // Everyone can read global artifacts and those with global artifact management privilege can do it all
       if (
         isArtifactGlobal(currentSavedItem) ||
@@ -519,10 +529,14 @@ export class BaseValidator {
           .then((packagePolicies) => {
             this.logger.debug(
               () =>
-                `Lookup of policy ids:\n[${policyIds.join(
+                `Lookup of policy ids:[${policyIds.join(
                   ' | '
                 )}]\nvia fleet for space ID [${activeSpaceId}] returned:\n${stringify(
-                  packagePolicies
+                  (packagePolicies ?? []).map((policy) => ({
+                    id: policy.id,
+                    name: policy.name,
+                    spaceIds: policy.spaceIds,
+                  }))
                 )}`
             );
 
