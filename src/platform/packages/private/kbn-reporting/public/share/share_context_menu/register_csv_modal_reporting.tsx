@@ -29,7 +29,7 @@ export const reportingCsvExportProvider = ({
     objectType,
     sharingData,
     toasts,
-  }: ShareContext): ReturnType<ExportShare['config']> | null => {
+  }: ShareContext): ReturnType<ExportShare['config']> => {
     const licenseCheck = checkLicense(license.check('reporting', 'basic'));
     const licenseToolTipContent = licenseCheck.message;
     const licenseHasCsvReporting = licenseCheck.showLinks;
@@ -126,8 +126,6 @@ export const reportingCsvExportProvider = ({
       defaultMessage: 'Export',
     });
 
-    const reportingUrl = new URL(window.location.origin);
-
     const relativePath = apiClient.getReportingPublicJobPath(reportType, decoratedJobParams);
 
     const absoluteUrl = new URL(relativePath, window.location.href).toString();
@@ -137,10 +135,9 @@ export const reportingCsvExportProvider = ({
       toolTipContent: licenseToolTipContent,
       exportType: reportType,
       label: 'CSV',
-      ['data-test-subj']: 'Export',
       disabled: licenseDisabled,
       generateAssetExport: generateReportingJobCSV,
-      generateValueExport: () => absoluteUrl,
+      generateAssetURIValue: () => absoluteUrl,
       helpText: (
         <FormattedMessage
           id="reporting.share.csv.reporting.helpTextCSV"
@@ -148,11 +145,6 @@ export const reportingCsvExportProvider = ({
           values={{ objectType }}
         />
       ),
-      copyURLButton: {
-        id: 'reporting.share.modalContent.csv.copyUrlButtonLabel',
-        dataTestSubj: 'shareReportingCopyURL',
-        label: 'Post URL',
-      },
       generateExportButton: (
         <FormattedMessage
           id="reporting.share.generateButtonLabelCSV"
@@ -160,12 +152,12 @@ export const reportingCsvExportProvider = ({
           defaultMessage="Generate CSV"
         />
       ),
-      renderCopyURLButton: true,
-      generateCopyUrl: reportingUrl,
+      renderCopyURIButton: true,
     };
   };
 
   return {
+    shareType: 'integration',
     id: 'csvReportsModal',
     groupId: 'export',
     config: getShareMenuItems,
