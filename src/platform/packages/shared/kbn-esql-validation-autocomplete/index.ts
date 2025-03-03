@@ -8,7 +8,6 @@
  */
 
 export type { SuggestionRawDefinition, ItemKind } from './src/autocomplete/types';
-export { ESQLVariableType, type ESQLControlVariable } from './src/shared/types';
 export type { CodeAction } from './src/code_actions/types';
 export type {
   FunctionDefinition,
