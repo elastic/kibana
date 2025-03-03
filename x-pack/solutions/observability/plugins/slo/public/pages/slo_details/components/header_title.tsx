@@ -15,11 +15,11 @@ import {
 import { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import React from 'react';
 import { TagsList } from '@kbn/observability-shared-plugin/public';
+import { i18n } from '@kbn/i18n';
+import moment from 'moment';
 import { SloStateBadge, SloStatusBadge, SloValueBadge } from '../../../components/slo/slo_badges';
 import { SloRemoteBadge } from '../../slos/components/badges/slo_remote_badge';
 import { SLOGroupings } from './groupings/slo_groupings';
-import { i18n } from '@kbn/i18n';
-import moment from 'moment';
 
 export interface Props {
   slo?: SLOWithSummaryResponse;
