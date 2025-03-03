@@ -590,7 +590,7 @@ export async function pickScoutTestGroupRunOrder(scoutConfigsPath: string) {
                 label: `Scout: [ ${group} / ${title} ] plugin`,
                 command: getRequiredEnv('SCOUT_CONFIGS_SCRIPT'),
                 timeout_in_minutes: 60,
-                agents: expandAgentQueue('n2-4-spot'),
+                agents: expandAgentQueue('n2-8-spot'),
                 env: {
                   SCOUT_CONFIG_GROUP_KEY: key,
                   SCOUT_CONFIG_GROUP_TYPE: group,
