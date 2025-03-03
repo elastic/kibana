@@ -141,5 +141,6 @@
     "@kbn/response-ops-rule-params",
     "@kbn/charts-theme",
     "@kbn/unsaved-changes-prompt",
+    "@kbn/core-analytics-browser",
   ]
 }
