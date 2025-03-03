@@ -977,7 +977,7 @@ const sharedEditorStyles = {
         & > * + * {
           border-top: ${euiTheme.border.thin};
         }
-      };
+      }
       .lnsFormulaOverflow {
         // Needs to be higher than the modal and all flyouts
         z-index: ${euiTheme.levels.toast} + 1;
@@ -993,7 +993,7 @@ const sharedEditorStyles = {
     display: flex;
     flex-direction: column;
     // make sure docs are rendered in front of monaco
-    z-index: 1;        
+    z-index: 1;
     background: ${euiTheme.colors.backgroundBasePlain};
   `,
   editorHeader: ({ euiTheme }: UseEuiTheme) => css`
@@ -1001,7 +1001,7 @@ const sharedEditorStyles = {
   `,
   editorFooter: ({ euiTheme }: UseEuiTheme) => css`
     padding: ${euiTheme.size.s};
-      // make sure docs are rendered in front of monaco
+    // make sure docs are rendered in front of monaco
     z-index: 1;
     border-bottom-right-radius: ${euiTheme.border.radius.medium};
     border-bottom-left-radius: ${euiTheme.border.radius.medium};
@@ -1035,9 +1035,9 @@ const sharedEditorStyles = {
 
 const defaultEditorStyles = ({ euiTheme }: UseEuiTheme) => {
   return css`
-   .lnsFormula__editorContent {
-    height: 200px;
-   }
+    .lnsFormula__editorContent {
+      height: 200px;
+    }
   `;
 };
 
@@ -1055,7 +1055,7 @@ const fullscreenEditorStyles = ({ euiTheme }: UseEuiTheme) => {
       & > * + * {
         border-top: ${euiTheme.border.thin};
       }
-    };
+    }
     .lnsFormula__editorContent {
       flex: 1;
     }

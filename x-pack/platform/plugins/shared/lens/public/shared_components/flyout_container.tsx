@@ -106,7 +106,7 @@ export function FlyoutContainer({
           role="dialog"
           aria-labelledby="lnsDimensionContainerTitle"
           css={[
-             css`
+            css`
               box-shadow: ${isInlineEditing ? 'none !important' : 'inherit'};
             `,
             flyoutContainerStyles(euiThemeContext),
