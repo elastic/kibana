@@ -61,7 +61,7 @@ export default function maxAlertsRuleTests({ getService }: FtrProviderContext) {
 
       // check there are no docs written out in the ES_TEST_INDEX
       const results = await es.search(
-        { index: ES_TEST_INDEX_NAME, body: { query: { match_all: {} } } },
+        { index: ES_TEST_INDEX_NAME, query: { match_all: {} } },
         { meta: true }
       );
       // @ts-expect-error doesn't handle total: number
@@ -98,7 +98,7 @@ export default function maxAlertsRuleTests({ getService }: FtrProviderContext) {
 
       // check there are docs written out in the ES_TEST_INDEX
       const results = await es.search(
-        { index: ES_TEST_INDEX_NAME, body: { query: { match_all: {} } } },
+        { index: ES_TEST_INDEX_NAME, query: { match_all: {} } },
         { meta: true }
       );
       // @ts-expect-error doesn't handle total: number
@@ -140,7 +140,7 @@ export default function maxAlertsRuleTests({ getService }: FtrProviderContext) {
 
       // check there are docs written out in the ES_TEST_INDEX
       const results = await es.search(
-        { index: ES_TEST_INDEX_NAME, body: { query: { match_all: {} } } },
+        { index: ES_TEST_INDEX_NAME, query: { match_all: {} } },
         { meta: true }
       );
       // @ts-expect-error doesn't handle total: number

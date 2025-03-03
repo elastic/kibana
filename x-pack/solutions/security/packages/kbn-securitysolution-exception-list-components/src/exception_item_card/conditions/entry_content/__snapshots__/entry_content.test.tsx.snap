@@ -27,7 +27,6 @@ exports[`EntryContent should render a nested value 1`] = `
             class="euiExpression__description emotion-euiExpression__description-subdued-isUppercase"
           />
            
-          
         </span>
         <span
           class="euiExpression emotion-euiExpression-success"

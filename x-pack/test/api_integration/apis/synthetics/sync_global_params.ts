@@ -21,7 +21,16 @@ import { getFixtureJson } from './helper/get_fixture_json';
 import { PrivateLocationTestService } from './services/private_location_test_service';
 import { comparePolicies, getTestSyntheticsPolicy } from './sample_data/test_policy';
 import { addMonitorAPIHelper, omitMonitorKeys } from './add_monitor';
-import { LOCAL_LOCATION } from './get_filters';
+
+export const LOCAL_LOCATION = {
+  id: 'dev',
+  label: 'Dev Service',
+  geo: {
+    lat: 0,
+    lon: 0,
+  },
+  isServiceManaged: true,
+};
 
 export default function ({ getService }: FtrProviderContext) {
   describe('SyncGlobalParams', function () {
