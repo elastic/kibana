@@ -40,6 +40,7 @@ describe('Get Knowledge Base Status Route', () => {
     kbDataClient.getProductDocumentationStatus.mockResolvedValue('installed');
     kbDataClient.isSecurityLabsDocsLoaded.mockResolvedValue(true);
     kbDataClient.isUserDataExists.mockResolvedValue(true);
+    kbDataClient.isSetupInProgress = false;
 
     getKnowledgeBaseStatusRoute(server.router);
   });

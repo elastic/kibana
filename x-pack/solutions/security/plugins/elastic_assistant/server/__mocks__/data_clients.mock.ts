@@ -15,7 +15,9 @@ type ConversationsDataClientContract = PublicMethodsOf<AIAssistantConversationsD
 export type ConversationsDataClientMock = jest.Mocked<ConversationsDataClientContract>;
 type AttackDiscoveryDataClientContract = PublicMethodsOf<AttackDiscoveryDataClient>;
 export type AttackDiscoveryDataClientMock = jest.Mocked<AttackDiscoveryDataClientContract>;
-type KnowledgeBaseDataClientContract = PublicMethodsOf<AIAssistantKnowledgeBaseDataClient>;
+type KnowledgeBaseDataClientContract = PublicMethodsOf<AIAssistantKnowledgeBaseDataClient> & {
+  isSetupInProgress: AIAssistantKnowledgeBaseDataClient['isSetupInProgress'];
+};
 export type KnowledgeBaseDataClientMock = jest.Mocked<KnowledgeBaseDataClientContract>;
 
 const createConversationsDataClientMock = () => {
@@ -73,6 +75,7 @@ const createKnowledgeBaseDataClientMock = () => {
     isModelInstalled: jest.fn(),
     isSecurityLabsDocsLoaded: jest.fn(),
     isSetupAvailable: jest.fn(),
+    isSetupInProgress: jest.fn().mockReturnValue(false)(),
     isUserDataExists: jest.fn(),
     setupKnowledgeBase: jest.fn(),
     getLoadedSecurityLabsDocsCount: jest.fn(),
