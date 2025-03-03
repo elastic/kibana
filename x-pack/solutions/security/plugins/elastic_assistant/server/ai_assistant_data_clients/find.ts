@@ -74,8 +74,9 @@ export const findDocuments = async <TSearchSchema>({
         track_total_hits: true,
         sort,
         _source: fields?.length
-          ? fields.map((f) => (f !== '*' && f !== '@timestamp' ? snakeCase(f) : f))
-          : true,
+          ? {
+          includes: fields,
+        } : true,
         from: (page - 1) * perPage,
         ignore_unavailable: true,
         index,
@@ -104,7 +105,9 @@ export const findDocuments = async <TSearchSchema>({
           seq_no_primary_term: true,
           from: (page - 1) * perPage,
           sort,
-          _source: true,
+          _source: {
+            includes: fields,
+          },
         },
         { index },
         {
@@ -114,7 +117,9 @@ export const findDocuments = async <TSearchSchema>({
           seq_no_primary_term: true,
           from: (page - 1) * mSearch.perPage,
           sort,
-          _source: true,
+          _source: {
+            includes: fields,
+          },
         },
       ],
       ignore_unavailable: true,
