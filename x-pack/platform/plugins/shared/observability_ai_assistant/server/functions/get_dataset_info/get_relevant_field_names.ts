@@ -14,6 +14,10 @@ import { concatenateChatCompletionChunks } from '../../../common/utils/concatena
 import { FunctionCallChatFunction } from '../../service/types';
 
 const SELECT_RELEVANT_FIELDS_NAME = 'select_relevant_fields';
+export const GET_RELEVANT_FIELD_NAMES_SYSTEM_MESSAGE = `You are a helpful assistant for Elastic Observability. 
+Your task is to determine which fields are relevant to the conversation by selecting only the field IDs from the provided list. 
+The list in the user message consists of JSON objects that map a human-readable "field" name to its unique "id". 
+You must not output any field names — only the corresponding "id" values. Ensure that your output follows the exact JSON format specified.`;
 
 export async function getRelevantFieldNames({
   index,
@@ -102,10 +106,7 @@ export async function getRelevantFieldNames({
         await chat('get_relevant_dataset_names', {
           signal,
           stream: true,
-          systemMessage: `You are a helpful assistant for Elastic Observability. 
-Your task is to determine which fields are relevant to the conversation by selecting only the field IDs from the provided list. 
-The list in the user message consists of JSON objects that map a human-readable "field" name to its unique "id". 
-You must not output any field names — only the corresponding "id" values. Ensure that your output follows the exact JSON format specified.`,
+          systemMessage: GET_RELEVANT_FIELD_NAMES_SYSTEM_MESSAGE,
           messages: [
             // remove the last function request
             ...messages.slice(0, -1),

@@ -12,6 +12,7 @@ import { apm, timerange } from '@kbn/apm-synthtrace-client';
 import { ApmSynthtraceEsClient } from '@kbn/apm-synthtrace';
 import { RoleCredentials } from '@kbn/ftr-common-functional-services';
 import { last } from 'lodash';
+import { GET_RELEVANT_FIELD_NAMES_SYSTEM_MESSAGE } from '@kbn/observability-ai-assistant-plugin/server/functions/get_dataset_info/get_relevant_field_names';
 import { ApmAlertFields } from '../../../../../../../apm_api_integration/tests/alerts/helpers/alerting_api_helper';
 import {
   LlmProxy,
@@ -39,6 +40,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
     let roleAuthc: RoleCredentials;
     let createdRuleId: string;
     let expectedRelevantFieldNames: string[];
+    let primarySystemMessage: string;
 
     before(async () => {
       ({ apmSynthtraceEsClient } = await createSyntheticApmData(getService));
@@ -115,6 +117,19 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
       await llmProxy.waitForAllInterceptorsToHaveBeenCalled();
       messageAddedEvents = getMessageAddedEvents(body);
+
+      const {
+        body: { systemMessage },
+      } = await observabilityAIAssistantAPIClient.editor({
+        endpoint: 'GET /internal/observability_ai_assistant/functions',
+        params: {
+          query: {
+            scopes: ['observability'],
+          },
+        },
+      });
+
+      primarySystemMessage = systemMessage;
     });
 
     after(async () => {
@@ -140,14 +155,15 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       });
 
       describe('every request to the LLM', () => {
-        it('contains the system message', () => {
+        it('contains a system message', () => {
           const everyRequestHasSystemMessage = llmProxy.interceptedRequests.every(
-            ({ requestBody }) =>
-              requestBody.messages.some(
-                (message) =>
-                  message.role === 'system' &&
-                  (message.content as string).includes('You are a helpful assistant')
-              )
+            ({ requestBody }) => {
+              const firstMessage = requestBody.messages[0];
+              return (
+                firstMessage.role === 'system' &&
+                (firstMessage.content as string).includes('You are a helpful assistant')
+              );
+            }
           );
           expect(everyRequestHasSystemMessage).to.be(true);
         });
@@ -203,9 +219,9 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         });
 
         describe('The system message', () => {
-          it('has the correct system message', () => {
-            expect(llmProxy.interceptedRequests[0].requestBody.messages[0].content).to.contain(
-              'You are a helpful assistant for Elastic Observability. Your goal is to help the Elastic Observability users to quickly assess what is happening in their observed systems. You can help them visualise and analyze data, investigate their systems, perform root cause analysis or identify optimisation opportunities.\n\n    It\'s very important to not assume what the user is meaning. Ask them for clarification if needed.\n\n    If you are unsure about which function should be used and with what arguments, ask the user for clarification or confirmation.\n\n    In KQL ("kqlFilter")) escaping happens with double quotes, not single quotes. Some characters that need escaping are: \':()\\    /". Always put a field value in double quotes. Best: service.name:"opbeans-go". Wrong: service.name:opbeans-go. This is very important!\n\n    You can use Github-flavored Markdown in your responses. If a function returns an array, consider using a Markdown table to format the response.\n\n    Note that ES|QL (the Elasticsearch Query Language which is a new piped language) is the preferred query language.\n\n    If you want to call a function or tool, only call it a single time per message. Wait until the function has been executed and its results\n    returned to you, before executing the same tool or another tool again if needed.\n\n    DO NOT UNDER ANY CIRCUMSTANCES USE ES|QL syntax (`service.name == "foo"`) with "kqlFilter" (`service.name:"foo"`).\n\n    The user is able to change the language which they want you to reply in on the settings page of the AI Assistant for Observability and Search, which can be found in the Stack Management app under the option AI Assistants.\n    If the user asks how to change the language, reply in the same language the user asked in.\n\nYou MUST use the "query" function when the user wants to:\n  - visualize data\n  - run any arbitrary query\n  - breakdown or filter ES|QL queries that are displayed on the current page\n  - convert queries from another language to ES|QL\n  - asks general questions about ES|QL\n\n  DO NOT UNDER ANY CIRCUMSTANCES generate ES|QL queries or explain anything about the ES|QL query language yourself.\n  DO NOT UNDER ANY CIRCUMSTANCES try to correct an ES|QL query yourself - always use the "query" function for this.\n\n  If the user asks for a query, and one of the dataset info functions was called and returned no results, you should still call the query function to generate an example query.\n\n  Even if the "query" function was used before that, follow it up with the "query" function. If a query fails, do not attempt to correct it yourself. Again you should call the "query" function,\n  even if it has been called before.\n\n  When the "visualize_query" function has been called, a visualization has been displayed to the user. DO NOT UNDER ANY CIRCUMSTANCES follow up a "visualize_query" function call with your own visualization attempt.\n  If the "execute_query" function has been called, summarize these results for the user.'
+          it('has the primary system message', () => {
+            expect(llmProxy.interceptedRequests[0].requestBody.messages[0].content).to.be(
+              primarySystemMessage
             );
           });
 
@@ -254,18 +270,10 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
           expect(hasToolChoice).to.be(true);
         });
 
-        describe('The system message', () => {
-          it('has a different system message from the other requests', () => {
-            expect(llmProxy.interceptedRequests[1].requestBody.messages[0]).not.to.eql(
-              llmProxy.interceptedRequests[0].requestBody.messages[0]
-            );
-          });
-
-          it('has the correct system message', () => {
-            expect(llmProxy.interceptedRequests[1].requestBody.messages[0].content).to.be(
-              'You are a helpful assistant for Elastic Observability. \nYour task is to determine which fields are relevant to the conversation by selecting only the field IDs from the provided list. \nThe list in the user message consists of JSON objects that map a human-readable "field" name to its unique "id". \nYou must not output any field names — only the corresponding "id" values. Ensure that your output follows the exact JSON format specified.'
-            );
-          });
+        it('has a custom, function-specific system message', () => {
+          expect(llmProxy.interceptedRequests[1].requestBody.messages[0].content).to.be(
+            GET_RELEVANT_FIELD_NAMES_SYSTEM_MESSAGE
+          );
         });
       });
 
