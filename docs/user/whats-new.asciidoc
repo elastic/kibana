@@ -32,7 +32,7 @@ The Elastic AI Assistant is now available in the log details flyout in Discover,
 image::images/ai-assistant-for-logs-discover.png[Elastic AI Assistant in the log details flyout, width=100%]
 
 [discrete]
-==== Support for LOOKUP JOINs in the ES|QL editor
+==== Support for LOOKUP JOIN in the ES|QL editor
 
 We’ve introduced support for the LOOKUP JOIN command to enable a smooth autocomplete experience and client-side validation. The editor now suggests lookup mode indices and join condition fields, letting you craft accurate ES|QL queries more quickly and keep your data exploration flowing. 
 
